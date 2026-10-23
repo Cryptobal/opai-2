@@ -2,7 +2,11 @@ import type { Capacidad } from "../types";
 import { invitationsAccept, invitationsPeek, invitationsRequestNew } from "./aceptar";
 import { apikeysCreate, apikeysList, apikeysRevoke } from "./apikeys";
 import { auditList, modulesList, usageSummary } from "./consultas";
-import { bitacoraVerificar, platformBitacoraEstado } from "./bitacora";
+import {
+  bitacoraVerificar,
+  platformBitacoraEstado,
+  trabajosDelNucleo as trabajosServicios,
+} from "./bitacora";
 import { consumosPorAgente, consumosPorRecurso, consumosResumen } from "./consumos";
 import { geoAutocompletar, geoDetalle, geoGeocodificar, iaProbar } from "./geo-ia";
 import { integracionesProbar, platformIntegracionesEstado } from "./integraciones-probar";
@@ -12,6 +16,7 @@ import {
   integracionesList,
   integracionesSetSecreto,
 } from "./integraciones";
+import { capacidadesDocumentos, trabajosDocumentos } from "./documentos";
 import { capacidadesMaestros } from "./maestros";
 import { platformConsumosSummary, platformEventosList } from "./platform-observabilidad";
 import {
@@ -80,6 +85,8 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   iaProbar,
   platformIntegracionesEstado,
   ...capacidadesMaestros,
+  ...capacidadesDocumentos,
 ];
 
-export { trabajosDelNucleo } from "./bitacora";
+/** Trabajos del núcleo que registra el borde (`apps/web/lib/registro.ts`). */
+export const trabajosDelNucleo = [...trabajosServicios, ...trabajosDocumentos];

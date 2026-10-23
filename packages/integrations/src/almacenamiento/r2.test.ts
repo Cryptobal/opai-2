@@ -1,6 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { almacenamientoDelEntorno, almacenamientoR2 } from "./r2";
+import { almacenamientoDelEntorno, almacenamientoR2, base64AHex, hexABase64 } from "./r2";
+
+const HASH = "a".repeat(64);
 
 const config = {
   accountId: "acc",
@@ -14,7 +16,13 @@ describe("almacenamiento R2", () => {
 
   it("firma URLs de subida y descarga con vencimiento y sin exponer la clave secreta", async () => {
     const r2 = almacenamientoR2(config);
-    const subida = new URL(await r2.urlSubida("t/1/d/2/v1/contrato.pdf", "application/pdf"));
+    const firmada = await r2.urlSubida("t/1/d/2/v1/contrato.pdf", "application/pdf", HASH);
+    expect(firmada.cabeceras).toEqual({
+      "content-type": "application/pdf",
+      "x-amz-checksum-sha256": hexABase64(HASH),
+    });
+    const subida = new URL(firmada.url);
+    expect(subida.searchParams.get("X-Amz-SignedHeaders")).toContain("x-amz-checksum-sha256");
     expect(subida.host).toBe("acc.r2.cloudflarestorage.com");
     expect(subida.pathname).toBe("/opai-2-test/t/1/d/2/v1/contrato.pdf");
     expect(subida.searchParams.get("X-Amz-Expires")).toBe("600");
@@ -34,19 +42,28 @@ describe("almacenamiento R2", () => {
         req.url.includes("existe")
           ? new Response(null, {
               status: 200,
-              headers: { "content-length": "1234", "content-type": "application/pdf" },
+              headers: {
+                "content-length": "1234",
+                "content-type": "application/pdf",
+                "x-amz-checksum-sha256": hexABase64(HASH),
+              },
             })
           : new Response(null, { status: 404 }),
       ),
     );
     const r2 = almacenamientoR2(config);
-    expect(await r2.head("existe.pdf")).toEqual({ tamano: 1234, mime: "application/pdf" });
+    expect(await r2.head("existe.pdf")).toEqual({
+      tamano: 1234,
+      mime: "application/pdf",
+      sha256: HASH,
+    });
+    expect(base64AHex(hexABase64(HASH))).toBe(HASH);
     expect(await r2.head("no.pdf")).toBeNull();
   });
 
   it("sin credenciales, falla con un mensaje claro", async () => {
     const a = almacenamientoDelEntorno({});
     expect(a.disponible).toBe(false);
-    await expect(a.urlSubida("x", "y")).rejects.toThrow(/no configurado/);
+    await expect(a.urlSubida("x", "y", HASH)).rejects.toThrow(/no configurado/);
   });
 });
