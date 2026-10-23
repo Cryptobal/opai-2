@@ -82,7 +82,10 @@ describe("paridad: la UI solo invoca capacidades existentes y públicas", () => 
       "app/_components/maestros/acciones-entidad.tsx",
     ]);
     const nuevas = llamadas.filter((l) => l.ids.length === 0 && !conocidas.has(l.archivo));
-    expect(nuevas.map((l) => l.archivo)).toEqual([]);
+    expect(
+      nuevas.map((l) => l.archivo),
+      "id de capacidad dinámico no permitido: pasa el id literal al ejecutor (o agrega el archivo a `conocidas` con motivo)",
+    ).toEqual([]);
   });
 
   it("las internas permitidas siguen usándose en su archivo (sin entradas obsoletas)", () => {
