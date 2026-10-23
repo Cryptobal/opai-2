@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 
 import { Bloque } from "../bloques";
-import { MuestraQaPasada1 } from "./muestra";
+import { MuestraFormulario, MuestraQaPasada1 } from "./muestra";
 
 export const metadata = { title: "Diseño · QA pasada 1" };
 
@@ -12,6 +12,9 @@ export default function PaginaQa() {
     <main className="mx-auto max-w-5xl p-4">
       <Bloque titulo="QA pasada 1 · dirección larga, fecha es-CL y chips activos">
         <MuestraQaPasada1 />
+      </Bloque>
+      <Bloque titulo="QA pasada 2 · formulario con dirección larga sin desborde horizontal">
+        <MuestraFormulario />
       </Bloque>
     </main>
   );

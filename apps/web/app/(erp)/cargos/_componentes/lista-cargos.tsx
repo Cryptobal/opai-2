@@ -74,8 +74,10 @@ export function ListaCargos({ state, items }: { state: EstadoPantalla; items: Ca
           <span className="flex min-w-0 flex-1 flex-col">
             <Nombre c={c} />
             <span className="truncate text-sm text-fg-muted">
-              {clase(c.clase)} · {c.personasVigentes} personas · base {monto(c, "sueldoBase")}
+              {clase(c.clase)} · {c.personasVigentes}{" "}
+              {c.personasVigentes === 1 ? "persona" : "personas"}
             </span>
+            <span className="text-sm text-fg-muted">Base {monto(c, "sueldoBase")}</span>
           </span>
           <Estado activo={c.activo} />
         </>

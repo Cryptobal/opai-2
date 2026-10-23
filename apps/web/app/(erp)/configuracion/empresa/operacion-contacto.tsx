@@ -34,7 +34,12 @@ export function OperacionYContacto({ d, setD, tenant, dis, set, correoMalo }: Pr
     <>
       <SeccionTarjeta titulo="Operación">
         <div className="grid gap-4 md:grid-cols-2">
-          <Campo etiqueta="Zona horaria" htmlFor="e-zona" ayuda="Para presentar horas y turnos">
+          <Campo
+            etiqueta="Zona horaria"
+            htmlFor="e-zona"
+            ayuda="Para presentar horas y turnos"
+            className="md:col-span-2"
+          >
             <Select
               id="e-zona"
               valor={d.timezone}

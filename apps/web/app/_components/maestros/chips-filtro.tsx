@@ -32,7 +32,7 @@ export function ChipsFiltro({ filtros }: { filtros: readonly Filtro[] }) {
             key={f.param}
             etiqueta={`Filtrar por ${f.etiqueta.toLowerCase()}`}
             lado="abajo-izquierda"
-            claseDisparador="h-8 min-h-8 rounded-full border border-dashed border-border-strong bg-surface px-3 text-sm font-medium text-fg-muted"
+            claseDisparador="h-11 min-h-11 rounded-full md:h-8 md:min-h-8 border border-dashed border-border-strong bg-surface px-3 text-sm font-medium text-fg-muted"
             disparador={f.etiqueta}
             items={f.opciones.map((o) => ({
               id: o.valor,

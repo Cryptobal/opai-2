@@ -48,3 +48,31 @@ test.describe("QA pasada 1", () => {
     );
   });
 });
+
+test.describe("QA pasada 2 · sin desborde horizontal", () => {
+  test("el formulario con dirección larga cabe en el ancho de la pantalla", async ({ page }) => {
+    await page.goto("/ds/qa");
+    const form = page.getByTestId("formulario-qa");
+    await form.scrollIntoViewIfNeeded();
+    const m = await page.evaluate(() => ({
+      pagina: document.documentElement.scrollWidth,
+      ventana: document.documentElement.clientWidth,
+    }));
+    expect(m.pagina, "la página no debe tener scroll horizontal").toBeLessThanOrEqual(m.ventana);
+    const derecha = await form
+      .locator("input, button")
+      .evaluateAll((els) => Math.max(...els.map((e) => e.getBoundingClientRect().right)));
+    expect(derecha).toBeLessThanOrEqual(m.ventana);
+  });
+
+  test("chips y botones primarios miden al menos 44 px en teléfono", async ({ page }, info) => {
+    test.skip(info.project.name !== "telefono", "el mínimo táctil aplica al teléfono");
+    await page.goto("/ds/qa");
+    const alto = await page
+      .getByTestId("chips-qa")
+      .getByRole("button")
+      .first()
+      .evaluate((e) => e.getBoundingClientRect().height);
+    expect(alto).toBeGreaterThanOrEqual(44);
+  });
+});

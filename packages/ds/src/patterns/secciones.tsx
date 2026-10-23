@@ -22,9 +22,9 @@ export function SeccionTarjeta({
 }: SeccionTarjetaProps) {
   return (
     <section className={cn("min-w-0 rounded-lg border border-border bg-surface", className)}>
-      <header className="flex min-h-14 items-center justify-between gap-3 border-b border-border px-4 py-2">
+      <header className="flex min-h-14 flex-wrap items-center justify-between gap-x-3 gap-y-2 border-b border-border px-4 py-2">
         <h3 className="text-md font-semibold tracking-[-0.006em] text-fg">{titulo}</h3>
-        {accion ? <div className="flex flex-none items-center gap-2">{accion}</div> : null}
+        {accion ? <div className="flex max-w-full min-w-0 items-center gap-2">{accion}</div> : null}
       </header>
       <div className={sinRelleno ? undefined : "p-4"}>{children}</div>
     </section>

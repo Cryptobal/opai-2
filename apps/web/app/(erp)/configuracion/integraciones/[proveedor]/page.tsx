@@ -3,13 +3,14 @@ import { notFound } from "next/navigation";
 import { Alerta, Badge, Button, SeccionTarjeta } from "@opai/ds";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
+import { haceCuanto } from "@/lib/fechas";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { Credenciales } from "../_componentes/credenciales";
 import { FORM_INTEGRACION } from "../../_centro/formularios";
 import { FormIntegracion } from "../_componentes/form-integracion";
 import { ProbarConexion } from "../_componentes/probar";
-import { CATEGORIA, ESTADO, type Integracion, SUBTITULO } from "../_componentes/tipos";
+import { CATEGORIA, ESTADO, type Integracion } from "../_componentes/tipos";
 
 export const metadata = { title: "Integración" };
 
@@ -45,6 +46,39 @@ const guardar = (
   </Button>
 );
 
+/** Estado y resultado de la última prueba; en teléfono, también «Probar conexión» (la barra solo lleva Guardar). */
+function PruebaIntegracion({ items }: { items: Integracion[] }) {
+  const i = items[0];
+  if (!i) return null;
+  const e = ESTADO[i.estado];
+  const falla = items.find((x) => x.ultimoError);
+  const probada = items.find((x) => x.ultimoTestEn);
+  const disponibles = items.filter((x) => x.estado === "configurada" || x.estado === "error");
+  return (
+    <>
+      <div className="flex flex-wrap items-center gap-2 md:hidden">
+        {e ? <Badge tono={e.tono}>{e.texto}</Badge> : null}
+        <ProbarConexion
+          proveedores={(disponibles.length ? disponibles : items).map((x) => x.proveedor)}
+        />
+      </div>
+      {falla ? (
+        <Alerta
+          tono="danger"
+          titulo={`La última prueba falló${falla.ultimoTestEn ? ` ${haceCuanto(falla.ultimoTestEn)}` : ""}`}
+        >
+          {falla.ultimoError}
+        </Alerta>
+      ) : probada?.ultimoTestEn ? (
+        <Alerta
+          tono="success"
+          titulo={`Última prueba correcta ${haceCuanto(probada.ultimoTestEn)}`}
+        />
+      ) : null}
+    </>
+  );
+}
+
 /** Detalle de una integración (29): modalidad, credenciales cifradas, configuración y prueba. */
 export default function DetalleIntegracion({ params }: { params: Promise<{ proveedor: string }> }) {
   return (
@@ -53,7 +87,7 @@ export default function DetalleIntegracion({ params }: { params: Promise<{ prove
       titulo="Integración"
       ruta="/configuracion"
       cargando="detalle"
-      volver={{ href: "/configuracion/integraciones", etiqueta: "Configuración · Integraciones" }}
+      volver={{ href: "/configuracion/integraciones", etiqueta: "Integraciones" }}
       accionesTelefono={guardar}
       cargar={async () => cargar((await params).proveedor)}
       opciones={({ items }) => {
@@ -61,7 +95,11 @@ export default function DetalleIntegracion({ params }: { params: Promise<{ prove
         const e = ESTADO[i?.estado ?? ""];
         const disponibles = items.filter((x) => x.estado === "configurada" || x.estado === "error");
         return {
-          titulo: i ? (CATEGORIA[i.categoria]?.titulo ?? i.nombre) : "Integración",
+          titulo: i
+            ? items.length === 1
+              ? i.nombre
+              : (CATEGORIA[i.categoria]?.titulo ?? i.nombre)
+            : "Integración",
           ...(e ? { insignia: <Badge tono={e.tono}>{e.texto}</Badge> } : {}),
           acciones: (
             <>
@@ -80,10 +118,7 @@ export default function DetalleIntegracion({ params }: { params: Promise<{ prove
         if (!i || i.estado === "proximamente") notFound();
         return (
           <div className="flex flex-col gap-4">
-            <p className="text-base text-fg-muted md:hidden">
-              {SUBTITULO[i.proveedor] ?? i.nombre}
-            </p>
-            {i.ultimoError ? <Alerta tono="danger" titulo={i.ultimoError} /> : null}
+            <PruebaIntegracion items={items} />
             <FormIntegracion items={items}>
               <Credenciales items={items} conNombre={items.length > 1} />
             </FormIntegracion>

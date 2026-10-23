@@ -76,7 +76,7 @@ export function Cabecera(props: CabeceraProps) {
   return (
     <div
       className={cn(
-        "mb-4 flex flex-wrap items-start justify-between gap-x-3 gap-y-2",
+        "mb-4 flex items-start justify-between gap-x-3 gap-y-2",
         props.soloTelefono && "md:hidden",
       )}
     >

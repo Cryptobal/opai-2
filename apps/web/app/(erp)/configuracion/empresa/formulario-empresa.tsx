@@ -106,7 +106,7 @@ export function FormularioEmpresa({ perfil, tenant, puedeEditar }: Props) {
         </div>
       </SeccionTarjeta>
       <SeccionTarjeta titulo="Representante legal">
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 2xl:grid-cols-3">
           <CampoTexto
             id="e-rep"
             etiqueta="Nombre"
