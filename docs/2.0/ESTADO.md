@@ -40,11 +40,9 @@ Este archivo es la fuente de verdad del avance. Cada brief lo actualiza al termi
 
 ## En curso
 
-- **Carlos (urgente):** rotar la API key "Grokbot" (`opai_gard_heLe…`): se compartió en una captura de chat el 23-oct. Crear una nueva, cambiarla en Grokbot y revocar la anterior en ERP → Configuración → API keys.
-- **Carlos:** agregar en Google Cloud Console el URI de redirección `https://test.opai.cl/api/auth/callback/google` (y `http://localhost:3000/api/auth/callback/google` para desarrollo).
-- **Carlos:** regularizar la facturación de GitHub Actions: el CI no corre desde el 23-oct. El gate se corre local en cada commit.
-- **Carlos:** cambiar la contraseña inicial de `carlos.irigoyen@opai.cl` si no lo hizo. Gard sigue en estado "trial" (Plataforma → Gard Security → Resumen → Estado para activarla).
+- **Carlos (urgente):** rotar la API key "Grokbot" (`opai_gard_heLe…`), compartida en una captura de chat el 23-oct. Verificado el 23-oct: sigue activa y es la única key de Gard. Crear una nueva en ERP → Configuración → API keys, cambiarla en Grokbot y revocar la anterior (tocar su fila → Revocar).
 - **Carlos (cuando quiera):** correr `docs/2.0/design/DESIGN-PROMPT-acceso.md` en Claude Design, dentro del sistema de diseño **OPAI DS 2.0**. Pendientes del sistema: logo definitivo de OPAI; revisar el contraste de `--ds-border-strong` (1,5:1) en el portal Trabajador a pleno sol.
+- Resuelto el 23-oct: URI de redirección de Google configurada (el flujo OAuth de `test.opai.cl` llega a Google sin error), CI de GitHub Actions de vuelta en verde (typecheck, lint, test y test:db), contraseña inicial de `carlos.irigoyen@opai.cl` cambiada, Gard Security en estado `activo`.
 
 ## Pendiente (siguiente)
 
@@ -96,5 +94,4 @@ Node 22 · pnpm 10.28 · Next.js 16.4.2 · React 19.3.0 · Tailwind 4.3.3 · Pri
 - `neonctl` 2.21 no tiene `regions list`; la región se eligió creando directamente en `aws-sa-east-1`.
 - Pendientes de diseño para módulos: patrón de vista dividida (lista + detalle en iPad, como `DetailTablet.html`), paleta de comandos ⌘K, menú de usuario, Combobox con búsqueda. Se diseñan con el módulo que los necesite.
 - Rate limit de `/api/auth` y `/api/mcp` en memoria por instancia: suficiente para el Brief 01; centralizar (base o Redis) antes de tráfico real.
-- CI de GitHub Actions detenido por facturación (ver En curso): hasta regularizarlo, el gate y `test:db` se corren solo en local.
 - `Menu`, `Dialog`, `Switch` y `UserMenu` no tienen diseño en Claude Design todavía (provisionales sobre tokens del DS).
