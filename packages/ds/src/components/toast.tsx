@@ -1,7 +1,7 @@
 "use client";
 
 import { AlertTriangle, CheckCircle2, Info } from "lucide-react";
-import { toast, Toaster as Sonner } from "sonner";
+import { Toaster as Sonner } from "sonner";
 
 /**
  * Contenedor de avisos (una vez, en el layout raíz). Inferior en teléfono sobre la barra de
@@ -34,15 +34,3 @@ export function Toaster() {
     />
   );
 }
-
-type Accion = { etiqueta: string; onClick: () => void };
-
-const conAccion = (accion?: Accion) =>
-  accion ? { action: { label: accion.etiqueta, onClick: accion.onClick } } : {};
-
-/** Avisos de acciones: éxito, error (con "Reintentar") o información. */
-export const avisar = {
-  exito: (texto: string, accion?: Accion) => toast.success(texto, conAccion(accion)),
-  error: (texto: string, accion?: Accion) => toast.error(texto, conAccion(accion)),
-  info: (texto: string, accion?: Accion) => toast.info(texto, conAccion(accion)),
-};

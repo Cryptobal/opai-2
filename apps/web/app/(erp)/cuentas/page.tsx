@@ -7,7 +7,7 @@ import { PaginaPortal } from "@/app/_components/pagina-portal";
 import type { SearchParams } from "@/lib/parametros";
 
 import { cargarCuentas, filtrosDe } from "./_componentes/datos";
-import { HojaCuenta } from "./_componentes/hoja-cuenta";
+import { HojaCuenta } from "./_componentes/diferidas";
 import { ListaCuentas } from "./_componentes/lista-cuentas";
 
 export const metadata = { title: "Cuentas" };

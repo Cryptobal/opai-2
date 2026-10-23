@@ -7,10 +7,9 @@ import { estadoPantalla } from "@/lib/formato";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { EnlaceBoton } from "../maestros/enlace-boton";
-import { HojaSubir } from "./hoja-subir";
+import { HojaSubir, VistaPrevia } from "./diferidas";
 import { MenuDocumento } from "./menu-documento";
 import { diasHasta, type Documento, type EntidadDocumento, type TipoDocumento } from "./tipos";
-import { VistaPrevia } from "./vista-previa";
 
 const CAPA = {
   tenant: "empresa",

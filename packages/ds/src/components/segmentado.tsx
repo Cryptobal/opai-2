@@ -48,8 +48,8 @@ export function Segmentado({
           plano && on
             ? "bg-fill text-fg"
             : on
-            ? "bg-surface text-fg shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
-            : "text-fg-muted hover:text-fg",
+              ? "bg-surface text-fg shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
+              : "text-fg-muted hover:text-fg",
         );
         return o.href ? (
           <Link key={o.id} href={o.href} className={clase} aria-current={on ? "page" : undefined}>

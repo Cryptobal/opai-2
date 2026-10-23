@@ -7,7 +7,7 @@ import { vocabularioActual } from "@/lib/vocabulario";
 
 import { cargarInstalacion } from "./datos";
 import { FichaInstalacion, type TabInstalacion } from "./ficha-instalacion";
-import { HojaInstalacion } from "./hoja-instalacion";
+import { HojaInstalacion } from "./diferidas";
 
 type Props = {
   params: Promise<{ id: string }>;

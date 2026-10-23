@@ -9,7 +9,7 @@ import { vocabularioActual } from "@/lib/vocabulario";
 
 import { cargarInstalacion, cargarInstalaciones } from "../_componentes/datos";
 import { FichaInstalacion } from "../_componentes/ficha-instalacion";
-import { HojaInstalacion } from "../_componentes/hoja-instalacion";
+import { HojaInstalacion } from "../_componentes/diferidas";
 import { ListaInstalaciones } from "../_componentes/lista-instalaciones";
 import { ResumenInstalacion } from "../_componentes/resumen-instalacion";
 

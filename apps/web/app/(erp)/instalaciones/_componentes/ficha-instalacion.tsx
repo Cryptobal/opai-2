@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 import { Badge, DetailScreen, type EstadoPantalla } from "@opai/ds";
 
+import { BandaAprobacion } from "@/app/_components/aprobaciones/banda-aprobacion";
 import { LinkNext } from "@/app/_components/link-next";
 import { type AccionEntidad, AccionesEntidad } from "@/app/_components/maestros/acciones-entidad";
 import { ESTADO_INSTALACION, estadoDe } from "@/app/_components/maestros/estados";
@@ -56,53 +57,56 @@ export function FichaInstalacion(p: {
   const base = `/instalaciones/${i?.id ?? ""}`;
   const activos = i?.puestos.filter((x) => x.estado === "activo").length ?? 0;
   return (
-    <DetailScreen
-      state={i ? p.state : p.state === "ready" ? "error" : p.state}
-      titulo={i?.nombre ?? "Instalación"}
-      {...(i && e
-        ? {
-            estado: (
-              <>
-                <Badge tono={e.tono}>{e.etiqueta}</Badge>
-                {i.vigenteDesde ? (
-                  <span className="t-caption">desde {fecha(i.vigenteDesde)}</span>
-                ) : null}
-              </>
-            ),
-            subtitulo: (
-              <Link
-                href={`/cuentas/${i.cuentaId}`}
-                className="text-accent underline underline-offset-2"
-              >
-                {i.cuenta ?? "Cuenta"}
-              </Link>
-            ),
-            acciones: (
-              <AccionesEntidad etiqueta="Acciones de la instalación" acciones={acciones(i)} />
-            ),
-          }
-        : {})}
-      tabActiva={p.tab}
-      Link={LinkNext}
-      tabs={[
-        { id: "resumen", etiqueta: "Resumen", href: base },
-        { id: "puestos", etiqueta: "Puestos", contador: activos, href: `${base}/puestos` },
-        {
-          id: "personas",
-          etiqueta: p.persona,
-          href: base,
-          deshabilitada: "Disponible con Operaciones",
-        },
-        {
-          id: "documentos",
-          etiqueta: "Documentos",
-          contador: i?.documentos ?? 0,
-          href: `${base}/documentos`,
-        },
-        { id: "actividad", etiqueta: "Actividad", href: `${base}/actividad` },
-      ]}
-    >
-      {p.children}
-    </DetailScreen>
+    <>
+      {i ? <BandaAprobacion entidad={{ tipo: "instalacion", id: i.id }} /> : null}
+      <DetailScreen
+        state={i ? p.state : p.state === "ready" ? "error" : p.state}
+        titulo={i?.nombre ?? "Instalación"}
+        {...(i && e
+          ? {
+              estado: (
+                <>
+                  <Badge tono={e.tono}>{e.etiqueta}</Badge>
+                  {i.vigenteDesde ? (
+                    <span className="t-caption">desde {fecha(i.vigenteDesde)}</span>
+                  ) : null}
+                </>
+              ),
+              subtitulo: (
+                <Link
+                  href={`/cuentas/${i.cuentaId}`}
+                  className="text-accent underline underline-offset-2"
+                >
+                  {i.cuenta ?? "Cuenta"}
+                </Link>
+              ),
+              acciones: (
+                <AccionesEntidad etiqueta="Acciones de la instalación" acciones={acciones(i)} />
+              ),
+            }
+          : {})}
+        tabActiva={p.tab}
+        Link={LinkNext}
+        tabs={[
+          { id: "resumen", etiqueta: "Resumen", href: base },
+          { id: "puestos", etiqueta: "Puestos", contador: activos, href: `${base}/puestos` },
+          {
+            id: "personas",
+            etiqueta: p.persona,
+            href: base,
+            deshabilitada: "Disponible con Operaciones",
+          },
+          {
+            id: "documentos",
+            etiqueta: "Documentos",
+            contador: i?.documentos ?? 0,
+            href: `${base}/documentos`,
+          },
+          { id: "actividad", etiqueta: "Actividad", href: `${base}/actividad` },
+        ]}
+      >
+        {p.children}
+      </DetailScreen>
+    </>
   );
 }

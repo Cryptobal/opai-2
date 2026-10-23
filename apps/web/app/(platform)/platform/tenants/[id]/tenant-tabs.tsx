@@ -7,7 +7,7 @@ import { Alerta, Badge, Button, Campo, Empty, Input, Select, Switch } from "@opa
 import { ETIQUETA_ROL } from "@/app/_components/portales";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-import type { DetalleTenant } from "./tenant-detalle";
+import type { DetalleTenant } from "./tipos";
 
 type P = { detalle: DetalleTenant };
 

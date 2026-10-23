@@ -25,7 +25,11 @@ const itemSchema = z.object({
   accion: z.string().describe('Frase legible: "creó el contacto Paula Riquelme".'),
   cambios: z.array(z.object({ campo: z.string(), valor: z.string() })),
   detalle: z.unknown().describe("Input auditado (sin datos sensibles)."),
+  entidad: z.object({ tipo: z.string(), id: z.string() }).nullable(),
+  extra: z.unknown().describe("Resto del registro: clave de idempotencia, resultado de intentos…"),
 });
+
+const dia = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Formato aaaa-mm-dd.");
 
 async function nombres(ctx: Contexto, usuarios: string[], keys: string[]) {
   const [m, k] = await Promise.all([
@@ -49,6 +53,9 @@ export const actividadList = defineCapability({
       .optional()
       .describe("Sin entidad: toda la empresa (exige auditoría)."),
     actor: z.enum(["persona", "agente"]).optional(),
+    capability: z.string().max(120).optional().describe('Prefijo de capacidad: "core.personas".'),
+    desde: dia.optional().describe("Desde este día (UTC), inclusive."),
+    hasta: dia.optional().describe("Hasta este día (UTC), inclusive."),
     limite: z.number().int().min(1).max(100).default(30),
     cursor: z.uuid().optional(),
   }),
@@ -72,6 +79,17 @@ export const actividadList = defineCapability({
             }
           : {}),
         ...(input.actor ? { actorType: input.actor === "agente" ? "agent" : "user" } : {}),
+        ...(input.capability ? { capability: { startsWith: input.capability } } : {}),
+        ...(input.desde || input.hasta
+          ? {
+              createdAt: {
+                ...(input.desde ? { gte: new Date(`${input.desde}T00:00:00Z`) } : {}),
+                ...(input.hasta
+                  ? { lt: new Date(Date.parse(`${input.hasta}T00:00:00Z`) + 86_400_000) }
+                  : {}),
+              },
+            }
+          : {}),
       },
       orderBy: { id: "desc" },
       take: input.limite + 1,
@@ -87,8 +105,10 @@ export const actividadList = defineCapability({
     );
     return {
       items: pagina.map((f) => {
-        const payload = (f.payload ?? {}) as { input?: Record<string, unknown> };
-        const entrada = payload.input ?? {};
+        const { input: entradaAuditada, ...extra } = (f.payload ?? {}) as {
+          input?: Record<string, unknown>;
+        };
+        const entrada = entradaAuditada ?? {};
         const agente = f.actorType === "agent";
         return {
           id: f.id,
@@ -105,6 +125,8 @@ export const actividadList = defineCapability({
           accion: frase(f.capability, entrada),
           cambios: cambios(entrada),
           detalle: entrada,
+          entidad: f.entityType && f.entityId ? { tipo: f.entityType, id: f.entityId } : null,
+          extra,
         };
       }),
       siguiente: filas.length > input.limite ? (pagina.at(-1)?.id ?? null) : null,

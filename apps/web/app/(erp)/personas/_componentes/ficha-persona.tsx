@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import { Avatar, Badge, DetailScreen, type EstadoPantalla } from "@opai/ds";
 
+import { BandaAprobacion } from "@/app/_components/aprobaciones/banda-aprobacion";
 import { LinkNext } from "@/app/_components/link-next";
 import { type AccionEntidad, AccionesEntidad } from "@/app/_components/maestros/acciones-entidad";
 import { ESTADO_PERSONA, estadoDe } from "@/app/_components/maestros/estados";
@@ -94,46 +95,49 @@ export function FichaPersona(x: {
   const e = p ? estadoDe(ESTADO_PERSONA, p.bloqueada ? "bloqueada" : p.estado) : null;
   const base = `/personas/${p?.id ?? ""}`;
   return (
-    <DetailScreen
-      state={p ? x.state : x.state === "ready" ? "error" : x.state}
-      titulo={p?.nombreCompleto ?? "Persona"}
-      {...(p && e
-        ? {
-            inicio: <Avatar nombre={p.nombreCompleto} size="xl" />,
-            estado: (
-              <>
-                <Badge tono={e.tono} punto>
-                  {e.etiqueta}
-                </Badge>
-                {p.vinculoVigente ? (
-                  <span className="t-caption">desde {fecha(p.vinculoVigente.inicio)}</span>
-                ) : null}
-              </>
-            ),
-            subtitulo: (
-              <>
-                {p.vinculoVigente?.cargo ?? "Sin vínculo vigente"} ·{" "}
-                <span className="t-mono">{rut(p.rut)}</span>
-              </>
-            ),
-            acciones: <AccionesEntidad etiqueta="Más acciones" acciones={accionesPersona(p)} />,
-          }
-        : {})}
-      tabActiva={x.tab}
-      Link={LinkNext}
-      tabs={[
-        { id: "resumen", etiqueta: "Resumen", href: base },
-        { id: "laboral", etiqueta: "Laboral", href: `${base}/laboral` },
-        {
-          id: "documentos",
-          etiqueta: "Documentos",
-          contador: p?.documentos ?? 0,
-          href: `${base}/documentos`,
-        },
-        { id: "actividad", etiqueta: "Actividad", href: `${base}/actividad` },
-      ]}
-    >
-      {x.children}
-    </DetailScreen>
+    <>
+      {p ? <BandaAprobacion entidad={{ tipo: "persona", id: p.id }} /> : null}
+      <DetailScreen
+        state={p ? x.state : x.state === "ready" ? "error" : x.state}
+        titulo={p?.nombreCompleto ?? "Persona"}
+        {...(p && e
+          ? {
+              inicio: <Avatar nombre={p.nombreCompleto} size="xl" />,
+              estado: (
+                <>
+                  <Badge tono={e.tono} punto>
+                    {e.etiqueta}
+                  </Badge>
+                  {p.vinculoVigente ? (
+                    <span className="t-caption">desde {fecha(p.vinculoVigente.inicio)}</span>
+                  ) : null}
+                </>
+              ),
+              subtitulo: (
+                <>
+                  {p.vinculoVigente?.cargo ?? "Sin vínculo vigente"} ·{" "}
+                  <span className="t-mono">{rut(p.rut)}</span>
+                </>
+              ),
+              acciones: <AccionesEntidad etiqueta="Más acciones" acciones={accionesPersona(p)} />,
+            }
+          : {})}
+        tabActiva={x.tab}
+        Link={LinkNext}
+        tabs={[
+          { id: "resumen", etiqueta: "Resumen", href: base },
+          { id: "laboral", etiqueta: "Laboral", href: `${base}/laboral` },
+          {
+            id: "documentos",
+            etiqueta: "Documentos",
+            contador: p?.documentos ?? 0,
+            href: `${base}/documentos`,
+          },
+          { id: "actividad", etiqueta: "Actividad", href: `${base}/actividad` },
+        ]}
+      >
+        {x.children}
+      </DetailScreen>
+    </>
   );
 }

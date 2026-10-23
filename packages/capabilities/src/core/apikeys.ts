@@ -9,7 +9,7 @@ import { iso, tenantActual, usuarioResponsable } from "./comun";
 import { generarApiKey } from "./apikey-formato";
 import { uuidSchema } from "./esquemas";
 
-const keySchema = z.object({
+export const keySchema = z.object({
   id: z.string(),
   nombre: z.string(),
   prefijo: z.string(),
@@ -18,6 +18,7 @@ const keySchema = z.object({
   ultimoUsoEn: z.string().nullable(),
   expiraEn: z.string().nullable(),
   revocadaEn: z.string().nullable(),
+  presupuestoMensualUsd: z.number().nullable().describe("Tope mensual en USD; null = sin límite."),
   /** false si está revocada, vencida o el responsable ya no tiene membresía activa. */
   valida: z.boolean(),
 });
@@ -46,6 +47,9 @@ export const apikeysList = defineCapability({
       ultimoUsoEn: iso(k.ultimoUsoEn),
       expiraEn: iso(k.expiraEn),
       revocadaEn: iso(k.revocadaEn),
+      presupuestoMensualUsd: k.presupuestoMensualMicro
+        ? Number(k.presupuestoMensualMicro) / 1_000_000
+        : null,
       valida:
         !k.revocadaEn && (!k.expiraEn || k.expiraEn.getTime() > ahora) && activas.has(k.userId),
     }));

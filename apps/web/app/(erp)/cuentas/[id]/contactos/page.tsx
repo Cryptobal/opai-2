@@ -9,7 +9,8 @@ import type { SearchParams } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 import type { Contacto } from "@/lib/tipos-maestros";
 
-import { HojaContacto, ROL_CONTACTO } from "../../_componentes/hoja-contacto";
+import { HojaContacto } from "../../_componentes/diferidas";
+import { ROL_CONTACTO } from "../../_componentes/roles-contacto";
 import { PaginaCuenta } from "../../_componentes/pagina-cuenta";
 
 export const metadata = { title: "Contactos de la cuenta" };

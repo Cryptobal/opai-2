@@ -9,7 +9,7 @@ import { leerParametros, type SearchParams } from "@/lib/parametros";
 import { vocabularioActual } from "@/lib/vocabulario";
 
 import { cargarLaboral, cargarPersona } from "../../_componentes/datos";
-import { HojaExcepcion } from "../../_componentes/hoja-excepcion";
+import { HojaExcepcion } from "../../_componentes/diferidas";
 import { SelectorPuesto } from "../../_componentes/selector-puesto";
 import { rotulosDe } from "../../_componentes/sueldo-comun";
 import { TablaSueldo } from "../../_componentes/tabla-sueldo";

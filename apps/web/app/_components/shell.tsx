@@ -12,13 +12,14 @@ import { cambiarTenant } from "@/app/_acciones/capacidad";
 import type { ItemNav } from "@/lib/navegacion";
 
 import { Campana } from "./campana";
-import { CambiarPassword } from "./cambiar-password";
 import { icono } from "./iconos";
 import { LinkNext } from "./link-next";
 
 // La paleta (cmdk) se descarga al primer uso: no pesa en el JS inicial de cada ruta (ADR-037).
 const Paleta = dynamic(() => import("./paleta").then((m) => m.Paleta), { ssr: false });
 // Los avisos (sonner) también: se montan después de hidratar y no bloquean el primer render.
+// El cambio de contraseña (formulario y diálogo) solo se descarga si se abre.
+const CambiarPassword = dynamic(() => import("./cambiar-password").then((m) => m.CambiarPassword));
 const Avisos = dynamic(() => import("./avisos").then((m) => m.Avisos), { ssr: false });
 
 export type DatosShell = {
@@ -122,7 +123,7 @@ export function Shell({
     >
       {children}
       {paleta !== null ? <Paleta abierto={paleta} onCerrar={() => setPaleta(false)} /> : null}
-      <CambiarPassword abierto={password} onCerrar={() => setPassword(false)} />
+      {password ? <CambiarPassword abierto onCerrar={() => setPassword(false)} /> : null}
       <Avisos />
     </AppShell>
   );

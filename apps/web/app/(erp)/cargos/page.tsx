@@ -9,7 +9,7 @@ import { vocabularioActual } from "@/lib/vocabulario";
 
 import { SegmentoPersonas } from "../personas/_componentes/segmento";
 import { cargarCargosLista } from "./_componentes/datos";
-import { HojaCargo } from "./_componentes/hoja-cargo";
+import { HojaCargo } from "./_componentes/diferidas";
 import { ListaCargos } from "./_componentes/lista-cargos";
 
 export const metadata = { title: "Cargos y sueldos" };

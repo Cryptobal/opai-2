@@ -9,7 +9,7 @@ import type { SearchParams } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 import type { Cargo, InstalacionDetalle } from "@/lib/tipos-maestros";
 
-import { HojaPuesto } from "../../_componentes/hoja-puesto";
+import { HojaPuesto } from "../../_componentes/diferidas";
 import { PaginaInstalacion } from "../../_componentes/pagina-instalacion";
 
 export const metadata = { title: "Puestos de la instalación" };

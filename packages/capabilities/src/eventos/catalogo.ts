@@ -39,6 +39,10 @@ export const EVENTOS_CORE: readonly EventoDeDominio[] = [
   { id: "core.documento.vencido", descripcion: "Un documento llegó a su fecha de vencimiento." },
   { id: "core.config.cambiada", descripcion: "Cambió un ajuste de configuración." },
   {
+    id: "core.modulo.solicitado",
+    descripcion: "La empresa pidió a OPAI activar un módulo (lo activa plataforma).",
+  },
+  {
     id: "core.empresa.actualizada",
     descripcion: "Cambió el perfil legal o de contacto de la empresa.",
   },

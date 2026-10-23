@@ -4,7 +4,8 @@ import { Pencil } from "lucide-react";
 import { useState } from "react";
 
 import { Button } from "./button";
-import { Combobox, type OpcionCombobox } from "./combobox";
+import { Combobox } from "./combobox";
+import type { OpcionCombobox } from "./resaltado";
 import { Input } from "./input";
 import { MapaEstatico } from "./mapa-estatico";
 
