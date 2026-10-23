@@ -20,7 +20,7 @@
 | `CrmDealContact` | Contacto en negocio con `role` texto (`primary`, `participant`, `decision_maker`) | `comercial.negocio_contactos` con rol de catálogo cerrado |
 | `CrmDealQuote` | Tabla puente negocio ↔ cotización | No se porta: un solo vínculo `cpq.cotizaciones.negocio_id` |
 | `CrmDealStageHistory` | Cambios de etapa (`from`, `to`, `changedBy`, `changedAt`) | `comercial.negocio_etapas` (append-only, con duración en la etapa anterior) |
-| `CrmTask` + `CrmTaskAssignee` + `CrmTaskActivity` | Tareas con seis vínculos opcionales (`dealId`, `leadId`, `accountId`, `contactId`, `quoteId`, `installationId`; solo `dealId` con FK), multi-responsable con `assignedTo` duplicado, bitácora propia | `core.actividades` (tipo `tarea`) con vínculos polimórficos y responsables; cambios a la auditoría |
+| `CrmTask` + `CrmTaskAssignee` + `CrmTaskActivity` | Tareas con siete vínculos opcionales (`dealId`, `leadId`, `accountId`, `contactId`, `emailThreadId`, `quoteId`, `installationId`; solo `dealId` con FK), multi-responsable con `assignedTo` duplicado, bitácora propia | `core.actividades` (tipo `tarea`) con vínculos polimórficos y responsables; cambios a la auditoría |
 | `CrmNote` | Nota polimórfica (`account`, `contact`, `deal`, `quote`) con hilos, menciones e `interactionType` (`note`, `contact`, `call`, `meeting`, `visit`) | `core.actividades` (tipos de interacción) |
 | `CrmDealMeeting` | Reunión de negocio (asistentes, acuerdos, enlace Notion, nota y tarea de próximo paso "sueltas") | `core.actividades` tipo `reunion` con acuerdos; el próximo paso es una tarea vinculada |
 | `CrmDealContactLog` | "Contacto real con el cliente" (canal, lo que dijo, próximo paso) que además copia `nextStep` a `deals.proximo_paso` | `core.actividades` (interacción con canal); el último contacto se deriva |
@@ -55,9 +55,9 @@
 | P6 | Rol del contacto en el negocio en texto libre | `CrmDealContact.role` default `"participant"` | No se puede filtrar ni reportar por rol de forma confiable |
 | P7 | Destinatarios de la cuenta duplicados | Cinco flags `recibe*` en el contacto **y** `CrmAccount.contactoEstadoPagoId`/`contactoCobranzaId` | Dos reglas para "a quién se manda la cobranza" |
 | P8 | Sin etiquetas | `industry`, `size`, `segment`, `source` en texto; `CrmIndustry` global sin tenant; `CrmCustomFieldValue.entityId` sin FK ni tipo | Clasificación inconsistente ("Retail", "retail", "Comercio"); filtros frágiles |
-| P9 | Historial repartido en ocho tablas | `CrmHistoryLog`, `CrmNote` (con `interactionType`), `CrmDealMeeting`, `CrmDealContactLog`, `CrmTask`/`CrmTaskActivity`, `CrmFollowUpLog`, `CrmDealStageHistory`, `AuditLog` | La ficha arma su línea de tiempo consultando muchas fuentes; el "último contacto" y el "próximo paso" se copian a mano (`deals.proximo_paso`) |
+| P9 | Historial repartido en nueve tablas | `CrmHistoryLog`, `CrmNote` (con `interactionType`), `CrmDealMeeting`, `CrmDealContactLog`, `CrmTask`/`CrmTaskActivity`, `CrmFollowUpLog`, `CrmDealStageHistory`, `AuditLog` | La ficha arma su línea de tiempo consultando muchas fuentes; el "último contacto" y el "próximo paso" se copian a mano (`deals.proximo_paso`) |
 | P10 | Cuenta sin RUT único | `CrmAccount.rut String?` sin índice único | Cuentas duplicadas por RUT (la importación debe deduplicar) |
-| P11 | Tareas con seis vínculos opcionales y responsable duplicado | `CrmTask.dealId/leadId/accountId/contactId/quoteId/installationId`; `assignedTo` = `assignees[0]` | Solo `dealId` tiene FK; el resto puede quedar huérfano |
+| P11 | Tareas con siete vínculos opcionales y responsable duplicado | `CrmTask.dealId/leadId/accountId/contactId/emailThreadId/quoteId/installationId`; `assignedTo` = `assignees[0]` | Solo `dealId` tiene FK; el resto puede quedar huérfano |
 | P12 | Tablas de CPQ sin `tenant_id` | `CpqPosition`, `CpqQuoteParameters`, `CpqQuoteUniformItem`, `CpqQuoteExamItem`, `CpqQuoteCostItem`, `CpqQuoteMeal`, `CpqQuoteVehicle`, `CpqQuoteInfrastructure`, `CpqQuoteAdditionalLine` | No admiten RLS por tenant; el aislamiento depende de la cotización padre |
 | P13 | Catálogos globales mezclados con los del tenant | `CpqCatalogItem.tenantId`, `CpqCostCategory.tenantId`, `CpqProposalTemplate.tenantId` nullable; la consulta usa `OR: [{ tenantId }, { tenantId: null }]` | Un cambio global mueve las cotizaciones en borrador de todos los tenants |
 | P14 | Variables de negocio cableadas a seguridad | Una tabla por tipo de costo con columnas propias; `work_injury_risk: "security_industry"`; feriados en `Setting` key-value (`cpq.holidayAnnualCount` 12, `cpq.holidayCommercialBufferPct` 10) | No sirve para aseo ni facility sin migraciones; parámetros sin tipo ni versión |
@@ -72,7 +72,7 @@
 
 ### 3.1 Embudo
 
-- Etapas configurables por tenant, ordenadas, con color; **una etapa ganada y una perdida** (`isClosedWon`, `isClosedLost`). `isAccepted` marca la etapa en que el cliente aceptó la propuesta antes del cierre formal (uso no verificado: confirmar con Carlos si se conserva como tipo `aceptada` o se elimina).
+- Etapas configurables por tenant, ordenadas, con color; **una etapa ganada y una perdida** (`isClosedWon`, `isClosedLost`). `isAccepted` marca la etapa en que el cliente aceptó la propuesta: al mover un negocio a esa etapa la UI exige la fecha de inicio del servicio (`useDealStageMove.ts`, `CrmDealDetailClient.tsx`). En 2.0 es un requisito de entrada de etapa (`exige: inicio_servicio`), no un tipo aparte.
 - Motivo de pérdida con **categoría cerrada** (`precio`, `cobertura`, `plazo`, `sin_respuesta`, `otro`) y detalle obligatorio cuando es `otro`. Las pérdidas históricas sin categoría no se reescriben.
 - `negotiationIncomplete`: los automatismos que mueven un negocio a Negociación sin monto real o fecha vigente lo marcan; se limpia al completar. En 2.0 es una **validación de transición** (la etapa declara qué exige) en vez de una bandera.
 - Probabilidad (0–100) y fecha de cierre esperada por negocio.
@@ -82,7 +82,7 @@
 - **Ganado:** la cotización ganadora pasa a `approved`; las hermanas abiertas (`draft`, `sent`) a `rejected`; la instalación pasa a activa si estaba en prospecto o inactiva y se registra `activatedByDealId`.
 - **Perdido:** se rechazan las cotizaciones abiertas. **Nunca** se desactiva la instalación automáticamente: se devuelve una candidata que la UI confirma. Es candidata solo si cumple las tres: (1) este negocio la activó, (2) no tiene operación real (pautas, asistencias, marcaciones), (3) ningún otro negocio ganado tiene una cotización aprobada que apunte a ella.
 
-Las tres reglas se conservan en 2.0, ahora como consumidores del evento `comercial.negocio.ganado` / `perdido` (ADR-040).
+En 2.0 se conservan como consumidores de los eventos `comercial.negocio.ganado` / `perdido` (ADR-040 §3), con dos cambios declarados: (a) al perder, la acción propuesta es archivar la instalación prospecto y la condición (3) considera también negocios **abiertos** que la usan; (b) al ganar, se activan las instalaciones vinculadas en prospecto o inactivas, cualquiera sea su tipo.
 
 ### 3.3 Contactos y destinatarios
 
@@ -126,17 +126,17 @@ Primer seguimiento a los 3 días, segundo a los 7, tercero 3 días después; ava
 - **Colación:** comidas por día × días de servicio × precio.
 - **Líneas adicionales** con margen propio (`base / (1 − margen)`) y recurrencia `mensual` o `unico` (el pago único se factura una vez y va en subtotal aparte).
 
-### 3.9 Margen y costo financiero (`financial-policy.ts`) — se conserva el cálculo
+### 3.9 Margen y costo financiero — se conserva el cálculo
 
-Modos de margen sobre la base de costos `C`:
+Modos de margen sobre la base de costos `C` (`compute-quote-costs.ts`, `marginMode`):
 
 | Modo | Base con margen `B` |
 |---|---|
 | `margin_on_sale` (por defecto, 13 %) | `C / (1 − m)` |
-| `margin_on_cost` | `C × (1 + m)` |
+| `markup` | `C × (1 + m)` |
 | `margin_on_labor` | `MO / (1 − m) + (C − MO)` |
 
-Instrumentos sobre la venta `S` (modo `auto`, gross-up cerrado):
+Instrumentos sobre la venta `S` (`financial-policy.ts`, modo `auto`, gross-up cerrado):
 
 - `f` = tasa de costo financiero mensual (por defecto 2,5 %, si está habilitado).
 - Póliza de garantía en modo porcentaje: `pG` = % garantizado del contrato (10 %), `rG` = tasa anual (2 %), `eG` = gasto administrativo (0,2 %), `Mg` = meses del contrato (12). `kG = pG × (Mg × rG / 12 + eG)`.
@@ -165,7 +165,7 @@ Los tests de 1.0 (`costing/__tests__/financial-policy.test.ts`, `cost-lines.test
 | P8 | `core.etiquetas` por tenant con grupos (exclusivos o no) y vínculo polimórfico | Clasificación consistente, filtros y MCP |
 | P9 | Interacciones y tareas en `core.actividades`; cambios en `core.audit_events`; etapas en `comercial.negocio_etapas`; la pestaña Actividad las une | Una línea de tiempo; "último contacto" y "próximo paso" derivados |
 | P10 | `core.cuentas.rut` único por tenant (ya en 2.0) + deduplicación en la importación | — |
-| P11 | Vínculos polimórficos validados (`core.actividad_vinculos`) y tabla de responsables sin duplicado | Integridad sin seis columnas opcionales |
+| P11 | Vínculos polimórficos (`core.actividad_vinculos`) validados por trigger (tipo registrado, existencia y mismo tenant) y limpiados al archivar o fusionar; responsables sin duplicado | Los vínculos polimórficos no tienen FK: la integridad depende del trigger y de la limpieza, igual que en `documento_vinculos` |
 | P12 | Toda tabla con `tenant_id` y RLS | Regla de 2.0 (CLAUDE.md) |
 | P13 | Plantillas por vertical **copiadas** al tenant al activar CPQ; nada global en tiempo de cálculo | Cambios de plataforma no mueven cotizaciones de tenants |
 | P14 | Modelo de costeo declarativo por tenant: ítems, variables y fórmulas (ADR-042) | Multi-vertical sin migraciones |
@@ -184,13 +184,13 @@ Convenciones: toda tabla con `tenant_id`, RLS `tenant_isolation`, `uuid(7)`, `cr
 
 | Tabla | Columnas clave | Restricciones |
 |---|---|---|
-| `contactos` (existe) | + índice único parcial | Un `es_principal` por cuenta: `UNIQUE (tenant_id, cuenta_id) WHERE es_principal AND archivado_en IS NULL` |
+| `contactos` (existe) | + índice único parcial | Un `es_principal` por cuenta: `UNIQUE (tenant_id, cuenta_id) WHERE es_principal AND estado = 'activo' AND archivado_en IS NULL` |
 | `contacto_instalaciones` | `contacto_id`, `instalacion_id`, `roles text[]` (`jefe_sitio`, `recibe_reportes`, `autoriza_visitas`, `emergencia`) | Único por par; trigger: contacto e instalación de la misma cuenta |
 | `etiqueta_grupos` | `nombre`, `exclusivo bool`, `ambitos text[]`, `orden` | Único por nombre |
 | `etiquetas` | `nombre`, `tono` (token del DS, nunca hex), `grupo_id?`, `ambitos text[]` (`cuenta`, `instalacion`, `negocio`, `contacto`, `documento`), `descripcion`, `orden`, `archivada_en` | Único `(tenant, grupo, lower(nombre))` |
-| `etiqueta_vinculos` | `etiqueta_id`, `entidad_tipo`, `entidad_id`, `creado_por_tipo/id` | Único por trío; trigger: ámbito permitido y exclusividad del grupo |
+| `etiqueta_vinculos` | `etiqueta_id`, `entidad_tipo`, `entidad_id`, `creado_por_tipo/id` | Único por trío; trigger: tipo registrado, existencia y mismo tenant, ámbito permitido y exclusividad del grupo |
 | `actividades` | `tipo` (`nota`, `llamada`, `correo`, `whatsapp`, `reunion`, `visita`, `tarea`), `titulo`, `cuerpo`, `ocurrio_en`, `canal`, `vence_en`, `todo_el_dia`, `prioridad`, `estado_tarea` (`pendiente`, `hecha`, `cancelada`), `completada_por/en`, `acuerdos`, `respuesta_a_id`, `creado_por_tipo/id`, `via_user_id` | CHECK: campos de tarea solo en `tarea` |
-| `actividad_vinculos` | `actividad_id`, `entidad_tipo`, `entidad_id` | Igual que `documento_vinculos` |
+| `actividad_vinculos` | `actividad_id`, `entidad_tipo`, `entidad_id` | Igual que `documento_vinculos`, más trigger de existencia y mismo tenant |
 | `actividad_responsables` | `actividad_id`, `usuario_id` | Único por par |
 | `fusiones` | `entidad_tipo`, `perdedora_id`, `ganadora_id`, `snapshot jsonb`, `motivo`, actor | Append-only |
 
@@ -201,8 +201,8 @@ Convenciones: toda tabla con `tenant_id`, RLS `tenant_isolation`, `uuid(7)`, `cr
 | `solicitudes` | Datos crudos de contacto y empresa, canal, UTM, `estado` (`nueva`, `en_revision`, `convertida`, `descartada`), `motivo_descarte`, SLA (`vista_en`, `primer_contacto_en`, `escalada_en`), `cuenta_id?`, `negocio_id?` | Texto de terceros marcado como externo (ADR-034) |
 | `pipelines` | `nombre`, `por_defecto` | Un `por_defecto` por tenant |
 | `etapas` | `pipeline_id`, `nombre`, `orden`, `tipo` (`abierta`, `ganada`, `perdida`), `probabilidad`, `tono`, `exige` (`monto`, `fecha_cierre`, `cotizacion_enviada`…), `activa` | Exactamente una `ganada` y una `perdida` por pipeline |
-| `negocios` | `cuenta_id`, `pipeline_id`, `etapa_id`, `estado` (`abierto`, `ganado`, `perdido`, derivado del tipo de etapa), `titulo`, `tipo_id`, `origen_id`, `responsable_id`, `probabilidad`, `cierre_estimado`, `monto_estimado_mensual` (CLP, solo sin cotización vigente), `inicio_servicio_estimado`, `motivo_perdida` (cerrado), `motivo_perdida_detalle`, `competidor`, `ganado_en`, `perdido_en`, `archivado_en` | `cuenta_id` inmutable una vez que hay instalaciones o cotizaciones |
-| `negocio_instalaciones` | `negocio_id`, `instalacion_id`, `tipo` (`nueva`, `ampliacion`, `renovacion`, `reemplazo`), `aplicada_en` | Único por par; trigger: la instalación es de la cuenta del negocio |
+| `negocios` | `cuenta_id`, `pipeline_id`, `etapa_id`, `estado` (`abierto`, `ganado`, `perdido`, mantenido por trigger desde el tipo de etapa), `valor_mensual` y `cotizacion_enviada_en` (los escribe CPQ por una capacidad de Comercial), `titulo`, `tipo_id`, `origen_id`, `responsable_id`, `probabilidad`, `cierre_estimado`, `monto_estimado_mensual` (CLP, solo sin cotización vigente), `inicio_servicio_estimado`, `motivo_perdida` (cerrado), `motivo_perdida_detalle`, `competidor`, `ganado_en`, `perdido_en`, `archivado_en` | `cuenta_id` inmutable una vez que hay instalaciones o cotizaciones |
+| `negocio_instalaciones` | `negocio_id`, `instalacion_id`, `tipo` (`nueva`, `ampliacion`, `renovacion`, `reemplazo`), `aplicada_en` | Único por par; trigger: la instalación es de la cuenta del negocio; no se quita si una línea de cotización la referencia |
 | `negocio_contactos` | `negocio_id`, `contacto_id`, `rol` (`decisor`, `tecnico`, `compras`, `usuario`), `es_principal` | Único por par; un principal por negocio; trigger: misma cuenta |
 | `negocio_etapas` | `negocio_id`, `de_etapa_id`, `a_etapa_id`, `cuando`, actor, `segundos_en_anterior` | Append-only |
 | `catalogos` | `catalogo` (`tipo_negocio`, `origen`), `clave`, `nombre`, `orden`, `activo` | Único `(tenant, catalogo, clave)` |
@@ -215,7 +215,7 @@ Convenciones: toda tabla con `tenant_id`, RLS `tenant_isolation`, `uuid(7)`, `cr
 | `modelos` | `nombre`, `vertical_base`, `version`, `estado` (`borrador`, `publicado`, `retirado`), `definicion jsonb` (variables, fórmulas, categorías), `publicado_en/por` | Un `publicado` vigente por tenant; publicado inmutable |
 | `items` | `codigo`, `nombre`, `categoria`, `unidad`, `moneda`, `precio` (entero escalado), `modo_calculo`, `formula?`, `visible_cliente`, `por_defecto`, `activo` | Único `(tenant, codigo)` |
 | `cotizaciones` | `negocio_id`, `codigo`, `version`, `reemplaza_a_id`, `estado`, `vigente`, `modelo_id` (versión), `valores jsonb` (variables usadas), `moneda`, `uf_valor` + `uf_fecha`, `valida_hasta`, condiciones comerciales, totales calculados (costo, venta mensual, únicos, margen efectivo), `enviada_en`, `aceptada_en` | Único `(tenant, codigo, version)`; un `vigente` por negocio; una versión editable por código |
-| `cotizacion_lineas` | `cotizacion_id`, `instalacion_id?` (null = común), `tipo` (`puesto`, `item`, `adicional`), `puesto_id?` (core), especificación del puesto (cargo, patrón, horario, dotación, jornada), `item_id?`, cantidad, precio sobrescrito, `margen_propio?`, `recurrencia` (`mensual`, `unico`), `visible_cliente`, `habilitada`, `orden`, resultado calculado | Trigger: la instalación pertenece al negocio de la cotización |
+| `cotizacion_lineas` | `cotizacion_id`, `instalacion_id?` (null = común), `tipo` (`puesto`, `item`, `adicional`), `puesto_id?` (core), especificación del puesto (cargo, patrón, horario, dotación, jornada), `item_id?` + **copia del ítem** (nombre, categoría, unidad, precio, modo de cálculo, fórmula), cantidad, precio sobrescrito, `margen_propio?`, `recurrencia` (`mensual`, `unico`), `visible_cliente`, `habilitada`, `orden`, resultado calculado | Trigger: la instalación pertenece al negocio de la cotización |
 
 ---
 
@@ -228,10 +228,11 @@ Script idempotente con `--dry-run` y reporte (ADR-010), ids mapeados en `core.id
 | `CrmAccount` | `core.cuentas` | Deduplicar por RUT normalizado (P10); sin RUT, por nombre canónico (`canon` de `@opai/domain`) → propuesta de fusión, nunca automática. `industry`/`segment`/`size` → etiquetas en grupos Rubro, Segmento, Tamaño (valores normalizados en el reporte para que Carlos los confirme) |
 | `CrmContact` | `core.contactos` | Correo en minúsculas; teléfono a E.164; `recibe*` → `roles`; si `isPrimary` se repite en una cuenta, gana el más reciente y se reporta |
 | `CrmInstallation` | `core.instalaciones` | Sin cuenta (`leadId`) → se crea o asocia la cuenta prospecto del lead; deduplicar por `place_id` o distancia < 50 m dentro de la misma cuenta |
-| `CrmPipelineStage` | `comercial.etapas` | Mapeo 1:1; `isClosedWon`/`isClosedLost` → `tipo` |
+| `CrmPipelineStage` | `comercial.etapas` | Mapeo 1:1; `isClosedWon`/`isClosedLost` → `tipo`; `isAccepted` → `exige: inicio_servicio` |
 | `CrmDeal` | `comercial.negocios` + `negocio_instalaciones` | Instalación: `activatedByDealId`, luego `CpqQuote.installationId` de sus cotizaciones, luego coincidencia por nombre o dirección dentro de la cuenta; sin coincidencia → reporte (no se crea una instalación desde el texto) |
 | `CrmDealContact` | `comercial.negocio_contactos` | `decision_maker` → `decisor`; `primary` → `es_principal`; `participant` → `usuario` (a revisar) |
 | `CrmDealStageHistory` | `comercial.negocio_etapas` | Tal cual |
+| `CrmDeal.lostReasonCategory` | `motivo_perdida` | Las cinco categorías de 1.0 existen en 2.0 (que agrega `competencia` y `no_califica`); las pérdidas sin categoría quedan nulas |
 | `CrmNote`, `CrmDealMeeting`, `CrmDealContactLog`, `CrmTask` | `core.actividades` | Tipo según `interactionType` o tabla; fechas reales conservadas |
 | `CpqQuote` (+ bundle) | `cpq.cotizaciones` | Solo vigentes (enviadas y no vencidas) e historial de ganadas como registro de solo lectura (PDF en documentos y totales), sin recalcular con el modelo nuevo |
 
@@ -245,6 +246,6 @@ Copia de datos de instalación en el negocio, `CrmDealQuote` y `activeQuotationI
 
 ## 8. Pendiente de verificar
 
-- Uso real de `isAccepted`, campos personalizados y `CrmAccountReviewRequest` en Gard (datos, no código).
+- Uso real de campos personalizados y `CrmAccountReviewRequest` en Gard (datos, no código).
 - Si Operaciones en 1.0 crea los puestos operativos al ganar un negocio o se crean a mano: define qué sincroniza 2.0 hacia 1.0 durante la convivencia (ADR-040, decisión 8).
 - Lógica de `margin_on_labor` cuando hay líneas adicionales con margen propio (no revisada línea a línea).
