@@ -3,7 +3,7 @@ import { invitationsAccept, invitationsPeek, invitationsRequestNew } from "./ace
 import { apikeysCreate, apikeysList, apikeysRevoke } from "./apikeys";
 import { auditList, modulesList, usageSummary } from "./consultas";
 import { bitacoraVerificar, platformBitacoraEstado } from "./bitacora";
-import { consumosPorAgente, consumosResumen } from "./consumos";
+import { consumosPorAgente, consumosPorRecurso, consumosResumen } from "./consumos";
 import { platformConsumosSummary, platformEventosList } from "./platform-observabilidad";
 import {
   platformTrabajosCancelar,
@@ -52,6 +52,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   // Brief 02 · servicios del núcleo
   consumosResumen,
   consumosPorAgente,
+  consumosPorRecurso,
   bitacoraVerificar,
   platformBitacoraEstado,
   platformTrabajosList,

@@ -79,7 +79,7 @@ model ApiKey {
   principalTipo           String    @default("usuario") @map("principal_tipo")
   principalId             String?   @map("principal_id") @db.Uuid
   /// Presupuesto mensual de consumos en micro-USD (ADR-032). Null o 0 = sin límite.
-  presupuestoMensualMicro Int?      @map("presupuesto_mensual_micro")
+  presupuestoMensualMicro BigInt?   @map("presupuesto_mensual_micro")
   ultimoUsoEn             DateTime? @map("ultimo_uso_en") @db.Timestamptz(6)
   expiraEn                DateTime? @map("expira_en") @db.Timestamptz(6)
   revocadaEn              DateTime? @map("revocada_en") @db.Timestamptz(6)

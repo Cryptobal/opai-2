@@ -98,11 +98,16 @@ export const platformTrabajosCancelar = defineCapability({
   async handler(ctx, input, { dryRun }) {
     const t = await trabajoDe(ctx, input.tenantId, input.trabajoId);
     if (t.estado !== "pendiente") throw reglaDeNegocio("Solo se cancelan trabajos pendientes.");
-    const r = dryRun
-      ? { ...t, estado: "cancelado" }
-      : await requierePlataforma(ctx)
-          .paraTenant(input.tenantId)
-          .trabajo.update({ where: { id: t.id }, data: { estado: "cancelado" } });
-    return { ...r, programadoPara: iso(r.programadoPara) };
+    if (!dryRun) {
+      // Condicionado al estado: si un runner lo reclamó entre la lectura y aquí, no se cancela.
+      const { count } = await requierePlataforma(ctx)
+        .paraTenant(input.tenantId)
+        .trabajo.updateMany({
+          where: { id: t.id, estado: "pendiente" },
+          data: { estado: "cancelado" },
+        });
+      if (count === 0) throw reglaDeNegocio("El trabajo ya no está pendiente.");
+    }
+    return { ...t, estado: "cancelado", programadoPara: iso(t.programadoPara) };
   },
 });

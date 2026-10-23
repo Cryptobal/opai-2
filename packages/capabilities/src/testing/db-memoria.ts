@@ -114,5 +114,19 @@ export function dbEnMemoria(semilla: Record<string, Fila[]> = {}) {
     ajustePlataforma: db["ajustePlataforma"],
     precioRecurso: db["precioRecurso"],
   };
-  return { db: db as TenantDb, tx: db as TenantTx, globales: globales as Globales, tabla };
+  /** Copia de todas las tablas; la función devuelta las restaura (rollback de `transaccion`). */
+  function instantanea(): () => void {
+    const copia = new Map([...tablas].map(([k, v]) => [k, v.map((f) => ({ ...f }))]));
+    return () => {
+      tablas.clear();
+      for (const [k, v] of copia) tablas.set(k, v);
+    };
+  }
+  return {
+    db: db as TenantDb,
+    tx: db as TenantTx,
+    globales: globales as Globales,
+    tabla,
+    instantanea,
+  };
 }

@@ -20,25 +20,55 @@ export interface ColaTrabajos {
 export const esperaReintento = (intentos: number, ahora = Date.now()) =>
   new Date(ahora + 2 ** Math.min(intentos, 10) * 60_000);
 
-/** Ejecuta los trabajos vencidos de un tenant. Un fallo reintenta hasta `maxIntentos`. */
-export async function ejecutarTrabajos(ctx: Contexto, cola: ColaTrabajos, limite = 20) {
-  const reclamados = await cola.reclamar(limite);
+export type OpcionesRunner = {
+  /** Trabajos reclamados por vuelta: lotes chicos para no retener bloqueos sin usarlos. */
+  lote?: number;
+  /** Instante (ms) en que el runner deja de reclamar: la función de Vercel dura 60 s. */
+  hasta?: number;
+  /** Tiempo máximo por trabajo; al vencer se registra como fallo y se reintenta. */
+  timeoutMs?: number;
+};
+
+function conTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const limite = new Promise<never>((_, rechazar) => {
+    timer = setTimeout(() => rechazar(new Error(`Excedió ${ms / 1000} s.`)), ms);
+  });
+  return Promise.race([p, limite]).finally(() => clearTimeout(timer));
+}
+
+/**
+ * Ejecuta los trabajos vencidos de un tenant en lotes mientras quede tiempo. Un fallo (o un
+ * timeout) reintenta con espera exponencial hasta `maxIntentos`.
+ */
+export async function ejecutarTrabajos(
+  ctx: Contexto,
+  cola: ColaTrabajos,
+  { lote = 5, hasta = Date.now() + 45_000, timeoutMs = 20_000 }: OpcionesRunner = {},
+) {
+  let reclamados = 0;
   let hechos = 0;
   let fallidos = 0;
-  for (const t of reclamados) {
-    const def = obtenerTrabajo(t.tipo);
-    try {
-      if (!def) throw new Error(`Tipo de trabajo desconocido: "${t.tipo}".`);
-      await cola.completar(t.id, await def.ejecutar(ctx, t.payload));
-      hechos += 1;
-    } catch (e) {
-      fallidos += 1;
-      const mensaje = e instanceof Error ? e.message : String(e);
-      const reintentar = def && t.intentos < t.maxIntentos ? esperaReintento(t.intentos) : null;
-      await cola.fallar(t.id, mensaje.slice(0, 2000), reintentar);
+  // Se reclama solo si el lote alcanza a terminar dentro del presupuesto.
+  while (Date.now() + timeoutMs <= hasta) {
+    const tomados = await cola.reclamar(lote);
+    reclamados += tomados.length;
+    for (const t of tomados) {
+      const def = obtenerTrabajo(t.tipo);
+      try {
+        if (!def) throw new Error(`Tipo de trabajo desconocido: "${t.tipo}".`);
+        await cola.completar(t.id, await conTimeout(def.ejecutar(ctx, t.payload), timeoutMs));
+        hechos += 1;
+      } catch (e) {
+        fallidos += 1;
+        const mensaje = e instanceof Error ? e.message : String(e);
+        const reintentar = def && t.intentos < t.maxIntentos ? esperaReintento(t.intentos) : null;
+        await cola.fallar(t.id, mensaje.slice(0, 2000), reintentar);
+      }
     }
+    if (tomados.length < lote) break;
   }
-  return { reclamados: reclamados.length, hechos, fallidos };
+  return { reclamados, hechos, fallidos };
 }
 
 /** Encola los trabajos diarios del tenant para `hoy` ("aaaa-mm-dd" en la zona del tenant). */

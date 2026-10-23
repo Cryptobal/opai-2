@@ -1190,8 +1190,11 @@ REVOKE UPDATE, DELETE, TRUNCATE ON "core"."bitacora" FROM opai_app;
 -- Zona horaria de la base en UTC (CLAUDE.md: tiempo en UTC). El adaptador de Prisma envía instantes
 -- sin zona y Postgres los interpreta en la zona de la sesión. Neon ya usa UTC; esto lo fija para
 -- cualquier base (local, CI) y aplica a las conexiones nuevas.
+-- Requiere ser dueño de la base (Neon: neondb_owner). Si no, se avisa y se fija por rol abajo.
 DO $$
 BEGIN
   EXECUTE format('ALTER DATABASE %I SET timezone TO %L', current_database(), 'UTC');
+EXCEPTION WHEN insufficient_privilege THEN
+  RAISE NOTICE 'Sin permiso para ALTER DATABASE; la zona UTC se fija por rol.';
 END
 $$;

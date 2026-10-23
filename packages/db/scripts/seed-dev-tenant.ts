@@ -13,7 +13,7 @@ async function main(): Promise<void> {
     update: {},
     create: { slug: "gard", nombre: "Gard Security", vertical: "seguridad" },
   });
-  await sembrarCatalogo(db, tenant.id, tenant.vertical);
+  await sembrarCatalogo(db.$extends({}), tenant.id, tenant.vertical);
   await sembrarPrecios(db);
   console.log(`Tenant ${tenant.slug} listo con catálogo base. DEV_TENANT_ID=${tenant.id}`);
 }

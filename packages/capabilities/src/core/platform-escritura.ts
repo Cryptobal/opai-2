@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { sembrarCatalogo } from "@opai/db";
 import { PERMISOS_PLATAFORMA } from "@opai/domain";
 
 import { defineCapability } from "../define";
@@ -83,6 +84,8 @@ export const platformTenantsCreate = defineCapability({
           estado: "trial",
         },
       }));
+    // Catálogo base de la vertical (cargos con estructura, tipos de documento). Idempotente.
+    await sembrarCatalogo(p.paraTenant(tenant.id), tenant.id, input.vertical);
     await p.paraTenant(tenant.id).tenantModule.upsert({
       where: { tenantId_moduloId: { tenantId: tenant.id, moduloId: "core" } },
       update: { estado: "activo" },

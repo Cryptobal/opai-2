@@ -19,6 +19,26 @@ function ordenar(valor: unknown): unknown {
   return valor;
 }
 
+export type HechoCanonico = {
+  seq: number;
+  tipo: string;
+  entidadTipo?: string | null;
+  entidadId?: string | null;
+  payload: unknown;
+};
+
+/** Texto canónico de un eslabón: lo comparten la bitácora real y la de memoria de los tests. */
+export function canonDeHecho(h: HechoCanonico, en: Date): string {
+  return jsonCanonico({
+    seq: h.seq,
+    tipo: h.tipo,
+    entidadTipo: h.entidadTipo ?? null,
+    entidadId: h.entidadId ?? null,
+    en: en.toISOString(),
+    payload: h.payload,
+  });
+}
+
 /** Hash inicial de la cadena de cada tenant. */
 export const HASH_GENESIS = "0".repeat(64);
 
