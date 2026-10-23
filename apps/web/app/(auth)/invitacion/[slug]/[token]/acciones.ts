@@ -9,7 +9,7 @@ import { globales } from "@opai/db";
 
 import { asegurarRegistro } from "@/lib/registro";
 import { COOKIE_TENANT } from "@/lib/tenant-actual";
-import { telemetriaDiferida } from "@/lib/telemetria";
+import { medidorDiferido } from "@/lib/medidor";
 
 asegurarRegistro();
 
@@ -26,7 +26,7 @@ async function contexto(slug: string, usuario?: Usuario) {
       ? { id: usuario.id, nombre: usuario.name, email: usuario.email, platformRole: null }
       : null,
     portal: "erp",
-    telemetria: telemetriaDiferida,
+    medidor: medidorDiferido,
   });
 }
 

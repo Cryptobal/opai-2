@@ -1,33 +1,21 @@
-// Base en memoria para tests de capacidades: imita el subconjunto de Prisma que usan los
-// handlers del núcleo (where por igualdad, `in`, `not`, claves compuestas, include de relaciones).
+// Base en memoria para tests de capacidades: imita el subconjunto de Prisma que usan los handlers
+// del núcleo (where por igualdad, `in`, `not`, comparaciones, `contains`, `OR`, claves compuestas,
+// include de relaciones, orderBy, take, groupBy con _count y _sum, createMany con skipDuplicates).
 import { randomUUID } from "node:crypto";
 
-import type { Globales, TenantDb } from "@opai/db";
+import type { Globales, TenantDb, TenantTx } from "@opai/db";
 
-type Fila = Record<string, unknown>;
-type Where = Record<string, unknown>;
+import { agrupar, cumple, ordenar, type Fila, type Where } from "./db-memoria-util";
 
 const RELACIONES: Record<string, Record<string, [tabla: string, clave: string]>> = {
   membership: { user: ["user", "userId"], tenant: ["tenant", "tenantId"] },
   apiKey: { user: ["user", "userId"] },
 };
 
-function cumple(fila: Fila, where: Where = {}): boolean {
-  return Object.entries(where).every(([k, v]) => {
-    if (k === "OR" && Array.isArray(v)) return v.some((w: Where) => cumple(fila, w));
-    if (v && typeof v === "object" && !(v instanceof Date)) {
-      const op = v as { in?: unknown[]; not?: unknown };
-      if ("in" in op) return (op.in ?? []).includes(fila[k]);
-      if ("not" in op) return fila[k] !== op.not;
-      return cumple(fila, op as Where); // clave compuesta: tenantId_userId: { … }
-    }
-    return fila[k] === v;
-  });
-}
-
 export function dbEnMemoria(semilla: Record<string, Fila[]> = {}) {
   const tablas = new Map<string, Fila[]>(Object.entries(semilla).map(([k, v]) => [k, [...v]]));
   const tabla = (n: string) => tablas.get(n) ?? (tablas.set(n, []), tablas.get(n) as Fila[]);
+  const unicos: Record<string, string[]> = { trabajo: ["claveUnica"] };
 
   function incluir(modelo: string, fila: Fila, include?: Record<string, boolean>): Fila {
     if (!include) return { ...fila };
@@ -41,24 +29,53 @@ export function dbEnMemoria(semilla: Record<string, Fila[]> = {}) {
 
   function delegado(modelo: string) {
     const filas = () => tabla(modelo);
-    type Args = { where?: Where; data?: Fila; include?: Record<string, boolean>; take?: number };
+    type Args = {
+      where?: Where;
+      data?: Fila;
+      include?: Record<string, boolean>;
+      take?: number;
+      orderBy?: unknown;
+    };
     const crear = (data: Fila) => {
       const fila = { id: randomUUID(), createdAt: new Date(), updatedAt: new Date(), ...data };
       filas().push(fila);
       return fila;
     };
+    const duplicado = (data: Fila) =>
+      (unicos[modelo] ?? []).some(
+        (c) =>
+          data[c] != null &&
+          filas().some((f) => f[c] === data[c] && f["tenantId"] === data["tenantId"]),
+      );
+    const buscar = (a: Args = {}) =>
+      ordenar(
+        filas().filter((x) => cumple(x, a.where)),
+        a.orderBy,
+      ).slice(0, a.take);
     return {
       findUnique: async (a: Args) => {
         const f = filas().find((x) => cumple(x, a.where));
         return f ? incluir(modelo, f, a.include) : null;
       },
-      findMany: async (a: Args = {}) =>
-        filas()
-          .filter((x) => cumple(x, a.where))
-          .slice(0, a.take)
-          .map((f) => incluir(modelo, f, a.include)),
+      findFirst: async (a: Args = {}) => {
+        const f = buscar(a)[0];
+        return f ? incluir(modelo, f, a.include) : null;
+      },
+      findMany: async (a: Args = {}) => buscar(a).map((f) => incluir(modelo, f, a.include)),
       count: async (a: Args = {}) => filas().filter((x) => cumple(x, a.where)).length,
       create: async (a: Args) => crear(a.data ?? {}),
+      createMany: async (a: { data: Fila[]; skipDuplicates?: boolean }) => {
+        let count = 0;
+        for (const d of a.data) {
+          if (duplicado(d)) {
+            if (a.skipDuplicates) continue;
+            throw new Error(`${modelo}: valor único duplicado`);
+          }
+          crear(d);
+          count += 1;
+        }
+        return { count };
+      },
       update: async (a: Args) => {
         const f = filas().find((x) => cumple(x, a.where));
         if (!f) throw new Error(`${modelo} no encontrado`);
@@ -66,31 +83,36 @@ export function dbEnMemoria(semilla: Record<string, Fila[]> = {}) {
       },
       updateMany: async (a: Args) => {
         const lista = filas().filter((x) => cumple(x, a.where));
-        lista.forEach((f) => Object.assign(f, a.data));
+        lista.forEach((f) => Object.assign(f, a.data, { updatedAt: new Date() }));
         return { count: lista.length };
       },
       upsert: async (a: Args & { create: Fila; update: Fila }) => {
         const f = filas().find((x) => cumple(x, a.where));
-        return f ? Object.assign(f, a.update) : crear(a.create);
+        return f ? Object.assign(f, a.update, { updatedAt: new Date() }) : crear(a.create);
       },
       delete: async (a: Args) => {
         const i = filas().findIndex((x) => cumple(x, a.where));
         return filas().splice(i, 1)[0];
       },
+      deleteMany: async (a: Args = {}) => {
+        const quedan = filas().filter((x) => !cumple(x, a.where));
+        const count = filas().length - quedan.length;
+        tablas.set(modelo, quedan);
+        return { count };
+      },
+      groupBy: async (a: Parameters<typeof agrupar>[1]) => agrupar(filas(), a),
     };
   }
 
-  const modelos = [
-    "tenant",
-    "user",
-    "membership",
-    "invitation",
-    "apiKey",
-    "tenantModule",
-    "auditEvent",
-    "usageEvent",
-  ];
-  const db: Record<string, unknown> = Object.fromEntries(modelos.map((m) => [m, delegado(m)]));
-  const globales: Record<string, unknown> = { tenant: db["tenant"], user: db["user"] };
-  return { db: db as TenantDb, globales: globales as Globales, tabla };
+  const db: Record<string, unknown> = new Proxy(
+    {},
+    { get: (cache: Record<string, unknown>, m: string) => (cache[m] ??= delegado(m)) },
+  );
+  const globales: Record<string, unknown> = {
+    tenant: db["tenant"],
+    user: db["user"],
+    ajustePlataforma: db["ajustePlataforma"],
+    precioRecurso: db["precioRecurso"],
+  };
+  return { db: db as TenantDb, tx: db as TenantTx, globales: globales as Globales, tabla };
 }

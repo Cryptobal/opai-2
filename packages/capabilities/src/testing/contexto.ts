@@ -1,7 +1,10 @@
-import { autorizador } from "../contexto";
-import type { Actor, Contexto, Correo, EventoAuditoria, EventoUso, UsuarioContexto } from "./tipos";
 import type { Rol } from "@opai/domain";
+
+import { autorizador } from "../contexto";
+import type { ConsumoNuevo, Principal } from "../types";
 import { dbEnMemoria } from "./db-memoria";
+import { bitacoraEnMemoria, eventosEnMemoria, trabajosEnMemoria } from "./servicios-memoria";
+import type { Actor, Contexto, Correo, EventoAuditoria, UsuarioContexto } from "./tipos";
 
 export const TENANT_DE_PRUEBA = "0192f3a0-0000-7000-8000-000000000001";
 export const USUARIO_DE_PRUEBA: UsuarioContexto = {
@@ -20,18 +23,22 @@ export type OpcionesPrueba = {
   conTenant?: boolean;
   modulosActivos?: readonly string[];
   scopes?: readonly string[] | null;
+  principal?: Principal | null;
   semilla?: Parameters<typeof dbEnMemoria>[0];
 };
 
 /**
- * Contexto falso para tests de capacidades: base en memoria, auditoría, telemetría y correos
- * capturados. Con `plataforma` si el usuario tiene `platformRole` (usa la misma base).
+ * Contexto falso para tests de capacidades: base en memoria, auditoría, consumos, correos, eventos,
+ * trabajos y bitácora capturados. Con `plataforma` si el usuario tiene `platformRole`.
+ * `esperar()` resuelve el trabajo diferido (como `after()` del borde).
  */
 export function contextoDePrueba(o: OpcionesPrueba = {}) {
-  const { db, globales, tabla } = dbEnMemoria(o.semilla);
+  const { db, tx, globales, tabla } = dbEnMemoria(o.semilla);
   const eventos: EventoAuditoria[] = [];
-  const usos: EventoUso[] = [];
+  const usos: ConsumoNuevo[] = [];
   const correos: Correo[] = [];
+  const diferidos: Promise<unknown>[] = [];
+  let despachos = 0;
   const usuario = o.usuario === undefined ? USUARIO_DE_PRUEBA : o.usuario;
   const rol = o.rol === undefined ? "owner" : o.rol;
   const actor: Actor = o.actor ?? (usuario ? { tipo: "user", id: usuario.id } : { tipo: "system" });
@@ -44,9 +51,16 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
     portal: "erp",
     modulosActivos: o.modulosActivos ?? [],
     scopes: o.scopes ?? null,
+    principal: o.principal ?? null,
     db,
+    transaccion: (fn) => fn(tx),
     auditoria: { registrar: async (e) => void eventos.push(e) },
-    telemetria: { registrar: async (e) => void usos.push(e) },
+    medidor: { registrar: async (c) => void usos.push(c) },
+    eventos: eventosEnMemoria(db, TENANT_DE_PRUEBA, actor),
+    trabajos: trabajosEnMemoria(db, TENANT_DE_PRUEBA),
+    bitacora: bitacoraEnMemoria(tabla, TENANT_DE_PRUEBA),
+    diferir: (t) => void diferidos.push(t().catch(() => undefined)),
+    despacharEventos: () => void (despachos += 1),
     servicios: {
       correo: { nombre: "memoria", enviar: async (c) => void correos.push(c) },
       urlBase: "https://test.opai.cl",
@@ -54,5 +68,6 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
     plataforma: usuario?.platformRole ? { globales, paraTenant: () => db } : null,
     autorizar: o.permisos ? (p) => (o.permisos ?? []).includes(p) : autorizador(rol, usuario),
   };
-  return { ctx, eventos, usos, correos, tabla };
+  const esperar = () => Promise.all(diferidos.splice(0));
+  return { ctx, eventos, usos, correos, tabla, esperar, despachos: () => despachos };
 }

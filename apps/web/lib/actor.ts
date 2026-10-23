@@ -6,7 +6,7 @@ import { contextoDeApiKey, keyDeCabecera } from "./api-key";
 import { fuentesReales, type Fuentes, type MembresiaConTenant } from "./fuentes";
 import { noAutenticado } from "./respuestas";
 import { COOKIE_TENANT, elegirMembresia, leerCookie } from "./tenant-actual";
-import { telemetriaDiferida } from "./telemetria";
+import { despacharDiferido, diferirConAfter, medidorDiferido } from "./medidor";
 
 export type UsuarioSesion = {
   id: string;
@@ -50,7 +50,9 @@ export function contextoDeIdentidad(identidad: Identidad, portal: string | null)
     rol: actual && esRol(actual.rol) ? actual.rol : null,
     portal,
     modulosActivos: identidad.modulosActivos,
-    telemetria: telemetriaDiferida,
+    medidor: medidorDiferido,
+    diferir: diferirConAfter,
+    ...(actual ? { despacharEventos: despacharDiferido(actual.tenantId) } : {}),
   });
 }
 

@@ -97,15 +97,15 @@ export const usoSchema = z.object({
   porPortal: z.array(z.object({ portal: z.string(), total: z.number() })),
 });
 
-/** Uso de un tenant en los últimos `dias`, agrupado por módulo y por portal. */
+/** Ejecuciones de capacidades en los últimos `dias` (medidor de consumos, ADR-031). */
 export async function resumenUso(db: TenantDb, dias: number) {
   const desde = new Date(Date.now() - dias * 86_400_000);
-  const where = { createdAt: { gte: desde } };
+  const where = { recurso: "capacidad.ejecucion", createdAt: { gte: desde } };
   const [total, errores, porModulo, porPortal] = await Promise.all([
-    db.usageEvent.count({ where }),
-    db.usageEvent.count({ where: { ...where, ok: false } }),
-    db.usageEvent.groupBy({ by: ["modulo"], where, _count: { _all: true } }),
-    db.usageEvent.groupBy({ by: ["portal"], where, _count: { _all: true } }),
+    db.consumo.count({ where }),
+    db.consumo.count({ where: { ...where, ok: false } }),
+    db.consumo.groupBy({ by: ["modulo"], where, _count: { _all: true } }),
+    db.consumo.groupBy({ by: ["portal"], where, _count: { _all: true } }),
   ]);
   return {
     desde: desde.toISOString(),
@@ -118,7 +118,8 @@ export async function resumenUso(db: TenantDb, dias: number) {
 
 export const usageSummary = defineCapability({
   id: "core.usage.summary",
-  descripcion: "Uso de OPAI en la empresa (ejecuciones por módulo y portal) en los últimos días.",
+  descripcion:
+    "Uso de OPAI en la empresa: ejecuciones de capacidades por módulo y portal en los últimos días. (Reemplazada por core.consumos.resumen; se mantiene por compatibilidad.)",
   permiso: PERMISOS_CORE.tenantRead,
   input: z.object({ dias: z.number().int().min(1).max(365).default(30) }),
   output: usoSchema,
