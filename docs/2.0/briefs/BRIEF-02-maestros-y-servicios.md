@@ -572,7 +572,14 @@ Al cerrar cada sesión se reporta en cuatro líneas y se anota en `ESTADO.md`:
 
 | Sesión | Bloques | Commits | CI | Reporte |
 |---|---|---|---|---|
-| A | 0–4 | — | — | pendiente |
-| B | 5–9 | — | — | pendiente |
+| A | 0–4 | `2c9eb6f`, `7c41289`, `ebdba13`+`1120bff`, `92d5ee5`, `4241a2f`, `6eef282` | PR #2 verde | hecha; integración a `main` espera las migraciones en Neon |
+| B | 5–9 | `9828a1f`, `98fe0d8`, `9d344d4`, `996c243`, `1091967`, `6f841d4`, `169ebbc`, docs | PR sobre A | hecha; misma condición |
 | C | 10–12 | — | — | pendiente (exige export aprobado) |
-| D | 13–15 | — | — | pendiente (STOP en 13 y 14) |
+| D | 13–15 | `169ebbc` (preparación sin secretos) | — | detenida en 13: pasos de Carlos en `ESTADO.md` → En curso |
+
+### Sesiones A y B (23-oct)
+
+1. **Qué se implementó:** bloques 0–9 completos (ver `ESTADO.md` → Hecho). Además de lo pedido: idempotencia real (antes solo se anotaba en auditoría), trigger de mismo tenant para referencias, `soloPersonas` para el gobierno de agentes y rotación de KEK.
+2. **Commits:** tabla de arriba. CI de A (PR #2): typecheck, lint, test, test:db, build y presupuesto en verde.
+3. **Validaciones:** 310 tests en `pnpm test`; `test:db` con 24 tests de base y 6 archivos de capacidades contra Postgres 16 (RLS con rol sin BYPASSRLS, triggers, transacciones, idempotencia, documentos con bitácora, comunicaciones desde el outbox, aprobación de agentes, rotación de KEK); presupuesto de JS sin cambios de peso (`/login` 150,1 KB); Playwright 48/51 local. Dos revisiones independientes: A (7 importantes) y B (1 crítico, 9 importantes), corregidas.
+4. **Pendiente:** sesión C (sin export de diseño); sesión D detenida antes de infraestructura y de la migración en `main`; menores de la revisión B en `ESTADO.md` → Riesgos; verificar con R2 real la huella firmada en el PUT.
