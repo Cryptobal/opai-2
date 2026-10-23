@@ -1,0 +1,33 @@
+{
+  "name": "@opai/auth",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./client": "./src/client.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json",
+    "lint": "eslint .",
+    "seed:platform-owner": "tsx scripts/seed-platform-owner.ts"
+  },
+  "dependencies": {
+    "@better-auth/prisma-adapter": "^1.7.12",
+    "@opai/db": "workspace:*",
+    "better-auth": "^1.7.12",
+    "@opai/integrations": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "next": "16.4.2",
+    "react": "19.3.0",
+    "@types/react": "^19",
+    "tsx": "^4.23.15",
+    "dotenv": "^18.0.9"
+  },
+  "peerDependencies": {
+    "next": "^16",
+    "react": "^19"
+  }
+}
