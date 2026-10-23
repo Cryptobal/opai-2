@@ -78,7 +78,7 @@ export function MuestraCampos() {
             valor={null}
             onCambiar={() => undefined}
             sinMapa
-            error="El servicio de mapas no responde. Puedes escribir la dirección a mano; avisa a un administrador."
+            error="El mapa no responde. Escribe la dirección a mano y avisa a un administrador."
             buscar={async () => []}
             resolver={async () => null}
           />

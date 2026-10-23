@@ -9,8 +9,7 @@ import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
 type Sugerencia = { placeId: string; texto: string; secundario: string | null };
 
 /** El detalle técnico de Google queda en Configuración → Integraciones (Probar) y en el log; no se muestra a cualquier usuario. */
-const SIN_SERVICIO =
-  "El servicio de mapas no responde. Puedes escribir la dirección a mano; avisa a un administrador.";
+const SIN_SERVICIO = "El mapa no responde. Escribe la dirección a mano y avisa a un administrador.";
 
 /** `CampoDireccion` conectado al servicio de geolocalización del núcleo (`core.geo.*`). */
 export function DireccionOpai(props: {
@@ -21,43 +20,32 @@ export function DireccionOpai(props: {
   sinMapa?: boolean;
 }) {
   const [error, setError] = useState<string | null>(null);
-  const buscar = useCallback(async (texto: string) => {
-    if (texto.trim().length < 3) {
-      setError(null);
-      return [];
-    }
-    try {
-      const r = await ejecutarCapacidad("erp", "core.geo.autocompletar", { texto });
-      if (!r.ok) {
-        setError(SIN_SERVICIO);
-        return [];
-      }
-      setError(null);
-      return (r.data as Sugerencia[]).map((s) => ({
+  // Una falla (de la capacidad o de la red) se muestra en el campo; nunca se devuelve un vacío mudo.
+  const llamar = useCallback(async (id: string, input: Record<string, unknown>) => {
+    const r = await ejecutarCapacidad("erp", id, input).catch(() => null);
+    setError(r?.ok ? null : SIN_SERVICIO);
+    return r?.ok ? r.data : null;
+  }, []);
+  const buscar = useCallback(
+    async (texto: string) => {
+      const corto = texto.trim().length < 3;
+      if (corto) setError(null);
+      const d = corto ? null : await llamar("core.geo.autocompletar", { texto });
+      return ((d as Sugerencia[] | null) ?? []).map((s) => ({
         valor: s.placeId,
         etiqueta: s.texto,
         ...(s.secundario ? { detalle: s.secundario } : {}),
       }));
-    } catch {
-      setError(SIN_SERVICIO);
-      return [];
-    }
-  }, []);
-  const resolver = useCallback(async (placeId: string): Promise<Direccion | null> => {
-    try {
-      const r = await ejecutarCapacidad("erp", "core.geo.detalle", { placeId });
-      if (!r.ok) {
-        setError(SIN_SERVICIO);
-        return null;
-      }
-      setError(null);
-      if (!r.data) return null;
-      const d = r.data as Direccion & { direccionFormateada: string };
-      return { ...d, calle: d.calle ?? d.direccionFormateada };
-    } catch {
-      setError(SIN_SERVICIO);
-      return null;
-    }
-  }, []);
+    },
+    [llamar],
+  );
+  const resolver = useCallback(
+    async (placeId: string): Promise<Direccion | null> => {
+      const d = (await llamar("core.geo.detalle", { placeId })) as
+        (Direccion & { direccionFormateada: string }) | null;
+      return d ? { ...d, calle: d.calle ?? d.direccionFormateada } : null;
+    },
+    [llamar],
+  );
   return <CampoDireccion {...props} error={error} buscar={buscar} resolver={resolver} />;
 }

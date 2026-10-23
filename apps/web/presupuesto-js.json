@@ -5,7 +5,7 @@
   "rutas": {
     "/(auth)/*": 152,
     "/(erp)/configuracion*": 175,
-    "/(erp)/instalaciones/nueva": 176,
+    "/(erp)/instalaciones/nueva": 177,
     "/(erp)/personas/vencimientos": 175,
     "/(erp)/cargos/[id]": 167,
     "/(platform)/platform/tenants/[id]/*": 168,
