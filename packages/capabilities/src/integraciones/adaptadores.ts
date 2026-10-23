@@ -10,6 +10,7 @@ import {
   type SolicitudIa,
 } from "@opai/integrations";
 
+import { ajuste } from "../core/config/valores";
 import { reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 import { credencialDe, integracionDe } from "./resolver";
@@ -99,7 +100,17 @@ export async function iaDe(ctx: Contexto, clase: ClaseTarea, modulo = "core") {
     const fila = await integracionDe(ctx, id);
     const propios = ((fila?.config ?? {}) as { modelos?: Partial<Record<ClaseTarea, string>> })
       .modelos;
-    const modelo = propios?.[clase] ?? MODELOS_POR_DEFECTO[id]?.[clase];
+    const plataforma = (
+      await ajuste<Record<ClaseTarea, { proveedor: string; modelo: string }>>(
+        ctx,
+        "core",
+        "ia_modelos",
+      )
+    )[clase];
+    const modelo =
+      propios?.[clase] ??
+      (plataforma?.proveedor === id ? plataforma.modelo : undefined) ??
+      MODELOS_POR_DEFECTO[id]?.[clase];
     if (!modelo) throw reglaDeNegocio(`Falta el modelo de la clase "${clase}" para ${id}.`);
     const proveedor = proveedorIa(id, cred.valor);
     return {

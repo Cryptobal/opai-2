@@ -4,6 +4,7 @@ import { APIError } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
 
 import { clienteAuth } from "@opai/db";
+import { COMUNICABLES_NUCLEO, renderizarCorreo } from "@opai/domain";
 import { mailerDelEntorno } from "@opai/integrations/email";
 
 import { bloqueoDeIngreso, mensajeBloqueo } from "./acceso";
@@ -40,10 +41,20 @@ export const auth = betterAuth({
     resetPasswordTokenExpiresIn: VIGENCIA_RECUPERACION_SEGUNDOS,
     revokeSessionsOnPasswordReset: true,
     async sendResetPassword({ user, url }) {
+      // Plantilla transaccional del núcleo (ADR-020) con la marca de OPAI: no hay tenant aún.
+      const e = COMUNICABLES_NUCLEO.find((x) => x.evento === "core.usuario.recuperacion");
+      if (!e?.plantillas.correo) throw new Error("Falta la plantilla de recuperación.");
+      const r = renderizarCorreo(
+        e,
+        e.plantillas.correo,
+        { usuario: { nombre: user.name }, url },
+        { nombre: "OPAI" },
+      );
       await mailerDelEntorno().enviar({
         para: user.email,
-        asunto: "Recupera tu contraseña de OPAI",
-        texto: `Hola ${user.name}:\n\nPara crear una contraseña nueva abre este enlace (vence en 30 minutos y sirve una sola vez):\n${url}\n\nSi no lo pediste, ignora este correo.`,
+        asunto: r.asunto,
+        texto: r.texto,
+        html: r.html,
       });
     },
   },

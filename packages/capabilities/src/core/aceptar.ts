@@ -4,6 +4,7 @@ import { defineCapability } from "../define";
 import { conflicto, noEncontrado, prohibido, reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 import { tenantActual } from "./comun";
+import { enviarCorreo } from "./comunicaciones/envio";
 import { estadoInvitacion, invitacionPorToken } from "./invitar";
 
 // Flujo de invitación (página /invitacion/<slug>/<token>). Capacidades internas: las usa la UI
@@ -104,11 +105,21 @@ export const invitationsRequestNew = defineCapability({
     if (!admin) return { enviado: false };
     if (!dryRun) {
       const tenant = await tenantActual(ctx);
-      await ctx.servicios.correo.enviar({
-        para: admin.email,
-        asunto: `${i.email} pide una nueva invitación a ${tenant.nombre}`,
-        texto: `La invitación de ${i.email} a ${tenant.nombre} venció o ya se usó. Envía una nueva desde Configuración → Usuarios:\n${ctx.servicios.urlBase}/configuracion/usuarios\n`,
-      });
+      await enviarCorreo(
+        {
+          db: ctx.db,
+          tenantId: ctx.tenantId,
+          correo: ctx.servicios.correo,
+          urlBase: ctx.servicios.urlBase,
+        },
+        "core.usuario.invitacion_solicitada",
+        admin.email,
+        {
+          email: i.email,
+          empresa: { nombre: tenant.nombre },
+          url: `${ctx.servicios.urlBase}/configuracion/usuarios`,
+        },
+      );
     }
     return { enviado: true };
   },

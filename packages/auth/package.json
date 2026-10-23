@@ -16,8 +16,9 @@
   "dependencies": {
     "@better-auth/prisma-adapter": "^1.7.12",
     "@opai/db": "workspace:*",
-    "better-auth": "^1.7.12",
-    "@opai/integrations": "workspace:*"
+    "@opai/domain": "workspace:*",
+    "@opai/integrations": "workspace:*",
+    "better-auth": "^1.7.12"
   },
   "devDependencies": {
     "typescript": "^5.9.3",

@@ -4,6 +4,7 @@ import type { TenantDb } from "@opai/db";
 import { conflicto } from "../errores";
 import type { Servicios } from "../types";
 import { sha256, tokenAleatorio } from "./comun";
+import { enviarCorreo } from "./comunicaciones/envio";
 
 const VIGENCIA_MS = 72 * 60 * 60 * 1000;
 
@@ -62,11 +63,19 @@ export async function crearInvitacion(
     },
   });
   const url = `${servicios.urlBase}/invitacion/${tenant.slug}/${token}`;
-  await servicios.correo.enviar({
-    para: datos.email,
-    asunto: `${datos.invitadoPor.nombre} te invitó a ${tenant.nombre} en OPAI`,
-    texto: `Hola:\n\n${datos.invitadoPor.nombre} te invitó a ${tenant.nombre} en OPAI con el rol ${datos.rol}.\n\nAcepta la invitación aquí (vence en 72 horas y sirve una sola vez):\n${url}\n`,
-  });
+  const enviado = await enviarCorreo(
+    { db, tenantId: tenant.id, correo: servicios.correo, urlBase: servicios.urlBase },
+    "core.usuario.invitado",
+    datos.email,
+    {
+      invitador: { nombre: datos.invitadoPor.nombre },
+      empresa: { nombre: tenant.nombre },
+      rol: datos.rol,
+      url,
+    },
+  );
+  if (!enviado)
+    throw new Error("No pudimos enviar el correo de invitación. Reintenta en unos minutos.");
   return { id: invitacion.id, ...resumen };
 }
 
