@@ -155,7 +155,7 @@ describe("fallas de Google Maps visibles (autocompletar)", () => {
               error: {
                 code: 403,
                 status: "PERMISSION_DENIED",
-                message: "Places API (New) no habilitada.",
+                message: "Places API (New) no habilitada (clave SECRETA).",
               },
             },
             { status: 403 },

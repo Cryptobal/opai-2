@@ -8,7 +8,9 @@ import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
 
 type Sugerencia = { placeId: string; texto: string; secundario: string | null };
 
-const SIN_SERVICIO = "No pudimos consultar el servicio de mapas.";
+/** El detalle técnico de Google queda en Configuración → Integraciones (Probar) y en el log; no se muestra a cualquier usuario. */
+const SIN_SERVICIO =
+  "El servicio de mapas no responde. Puedes escribir la dirección a mano; avisa a un administrador.";
 
 /** `CampoDireccion` conectado al servicio de geolocalización del núcleo (`core.geo.*`). */
 export function DireccionOpai(props: {
@@ -20,11 +22,14 @@ export function DireccionOpai(props: {
 }) {
   const [error, setError] = useState<string | null>(null);
   const buscar = useCallback(async (texto: string) => {
-    if (texto.trim().length < 3) return [];
+    if (texto.trim().length < 3) {
+      setError(null);
+      return [];
+    }
     try {
       const r = await ejecutarCapacidad("erp", "core.geo.autocompletar", { texto });
       if (!r.ok) {
-        setError(`${SIN_SERVICIO} ${r.error.message}`);
+        setError(SIN_SERVICIO);
         return [];
       }
       setError(null);
@@ -34,7 +39,7 @@ export function DireccionOpai(props: {
         ...(s.secundario ? { detalle: s.secundario } : {}),
       }));
     } catch {
-      setError(`${SIN_SERVICIO} Revisa tu conexión e inténtalo de nuevo.`);
+      setError(SIN_SERVICIO);
       return [];
     }
   }, []);
@@ -42,7 +47,7 @@ export function DireccionOpai(props: {
     try {
       const r = await ejecutarCapacidad("erp", "core.geo.detalle", { placeId });
       if (!r.ok) {
-        setError(`No pudimos obtener el detalle de la dirección. ${r.error.message}`);
+        setError(SIN_SERVICIO);
         return null;
       }
       setError(null);
@@ -50,7 +55,7 @@ export function DireccionOpai(props: {
       const d = r.data as Direccion & { direccionFormateada: string };
       return { ...d, calle: d.calle ?? d.direccionFormateada };
     } catch {
-      setError("No pudimos obtener el detalle de la dirección. Inténtalo de nuevo.");
+      setError(SIN_SERVICIO);
       return null;
     }
   }, []);

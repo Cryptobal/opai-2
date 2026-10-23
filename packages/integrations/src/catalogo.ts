@@ -110,5 +110,5 @@ export function credencialDePlataforma(
   env: Record<string, string | undefined> = process.env,
 ) {
   const variable = definicionIntegracion(id)?.envPlataforma;
-  return variable ? (env[variable] ?? null) : null;
+  return variable ? env[variable]?.trim() || null : null;
 }
