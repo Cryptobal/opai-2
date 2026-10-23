@@ -1,6 +1,6 @@
 # ESTADO — OPAI 2.0
 
-**Última actualización:** 23-oct-2026 · **Actualizado por:** Claude (arquitectura) · **Fase en curso:** 1 — Núcleo (Briefs 01 y 01c cerrados; siguiente: Brief 02)
+**Última actualización:** 23-oct-2026 · **Actualizado por:** Claude (arquitectura) · **Fase en curso:** 1 — Núcleo (Briefs 01 y 01c cerrados; Brief 02 en ejecución: sesión A lista en rama, sesión B en curso)
 
 Este archivo es la fuente de verdad del avance. Cada brief lo actualiza al terminar. Si algo no está aquí, no está hecho.
 
@@ -41,8 +41,16 @@ Este archivo es la fuente de verdad del avance. Cada brief lo actualiza al termi
 - **Brief 01c (principios agénticos operativos) ejecutado** (23-oct): ADR-034 en `01-decisiones.md`; `defineCapability` rechaza descripciones de menos de 40 caracteres (`DESCRIPCION_MINIMA`, con `trim()`), test `packages/capabilities/test/define.test.ts` (5 casos, incluye que las 27 capacidades del núcleo cumplen); fixtures de `execute`, `http`, `mcp` y `module` ajustados; `CLAUDE.md`, `CONTEXTO-agentes.md` (norte, una key por agente, mandato vigente) y `agentes/README.md` actualizados. Gate en verde (169 tests).
 - **Forma de trabajo cambiada (ADR-035, 23-oct):** los briefs se ejecutan desde el chat del proyecto Claude, en rama `brief/NN-<nombre>`, con revisión de un subagente independiente e integración a `main` por rebase cuando CI pasa. Actualizados `INSTRUCCIONES-proyecto-claude.md` (sección Ejecución), `CONTEXTO-agentes.md` y `CLAUDE.md`. Carlos debe pegar las instrucciones nuevas en el proyecto de claude.ai.
 
+- **Brief 02 · sesión A (bloques 0–4) implementada** en la rama `brief/02-maestros-y-servicios` (PR #2; commits `2c9eb6f`, `7c41289`, `ebdba13`+`1120bff`, `92d5ee5`), **pendiente de integrar a `main`** hasta aplicar su migración en Neon `main` (ver En curso):
+  - Bloque 1 (ADR-037): acceso por Server Actions sin cliente de Better Auth (se eliminó `@opai/auth/client`), `sideEffects` y `optimizePackageImports`, `ListScreen` con `href`, `Tabs` por ruta, `pnpm presupuesto` + job de CI `build · presupuesto de JS`. Medido (gzip, sin polyfill): `/login` 170,2 → 150,1 KB; `/` 171,3 → 153,2 KB; `/configuracion/usuarios` 174,6 → 159,1 KB; framework 129,6 KB.
+  - Bloque 2: esquemas `maestros.prisma`, `documentos.prisma`, `servicios.prisma`, `agentes.prisma`; migración `20261023160000_nucleo_maestros_servicios` (35 tablas, RLS en las 33 con `tenant_id`, índices únicos parciales, CHECK de estructuras, bitácora append-only por triggers, base en UTC); `enTransaccion`; catálogo base por vertical (cargos con estructura, 17 tipos de documento, precios de recursos) en `seed:dev-tenant`.
+  - Bloque 3: dominio `rut`, `telefono`, `turnos`, `vigencia`, `canon`, `estructuras`, `plantillas`, `presupuesto` y permisos nuevos del núcleo (152 tests en `@opai/domain`).
+  - Bloque 4: outbox de eventos con consumidores, cola de trabajos (SKIP LOCKED, reintentos, programador diario), medidor `core.consumos` (reemplaza `usage_events`), bitácora encadenada y comprobantes con `/verificar/[token]`, principal y `portales` (ADR-033), crons `/api/cron/trabajos` y `/api/cron/programador`, capacidades de consumos, bitácora y observabilidad de plataforma.
+  - Gate en verde: 225 tests + `test:db` 20 (Postgres 16 local); build y presupuesto en verde. ADR-036 a ADR-039 registrados.
+
 ## En curso
 
+- **Antes de integrar la sesión A a `main` (Carlos o Claude por el Mac, con aprobación):** aplicar la migración en Neon `dev` y `main` (`pnpm db:deploy` con la `DATABASE_URL_MIGRATE` de cada rama) y correr `pnpm --filter @opai/db seed:dev-tenant` en ambas. Integrar sin migrar rompe `test.opai.cl` (el medidor y "último acceso" leen `core.consumos`). Crear `CRON_SECRET` en Vercel (production y preview) para activar los crons; sin él responden 503.
 - **Brief 02 escrito y en ejecución** (23-oct, rama `brief/02-maestros-y-servicios`): `docs/2.0/briefs/BRIEF-02-maestros-y-servicios.md` (cuatro sesiones A–D; la C exige el export aprobado de Claude Design en `docs/2.0/design/export-maestros/`; la D se detiene antes de infraestructura y de la migración en `main`). Insumos: `docs/2.0/extraccion/maestros.md` (modelo de cuentas, contactos, instalaciones, personas, cargos, estructuras y documentos de 1.0, verificado en `53bb97d`) y `docs/2.0/design/DESIGN-PROMPT-maestros-y-configuracion.md`. **Carlos:** correr el Design Prompt en Claude Design dentro del sistema OPAI DS 2.0 y guardar el export en `docs/2.0/design/export-maestros/`. Medición base del bundle (gzip, sin el polyfill `noModule`): framework 129,2 KB; `/login` 170,2 KB; ERP 171–175 KB; objetivo del brief: `/login` ≤ 148 KB, ERP ≤ 165 KB.
 - **Carlos, al activar Comercial en Gard:** crear una key por agente con scopes mínimos y revocar la key "Grokbot" con scope `*` (ADR-034).
 
@@ -101,6 +109,7 @@ Node 22 · pnpm 10.28 · Next.js 16.4.2 · React 19.3.0 · Tailwind 4.3.3 · Pri
 - Brief 01: `/ds/acceso` (solo desarrollo) renderiza cada variante de acceso con datos ficticios para capturas; el tema oscuro se prueba con `prefers-color-scheme`.
 - Brief 01: `core.apikeys.create` recibe `expiraEn` como fecha ISO (las herramientas MCP requieren inputs expresables en JSON Schema; hay test).
 
+- Brief 02: los ADR propuestos quedaron como ADR-036 a ADR-039 (034 y 035 ya estaban tomados). El presupuesto de `/login` quedó en 152 KB (no 148): lo que resta es `tailwind-merge` (~7 KB), a revisar con el DS sobre Radix. La migración fija `timezone = UTC` en la base: el adaptador de Prisma envía instantes sin zona y una base local fuera de UTC los corría 3 horas. `usage_events` se conserva sin escribirse hasta una migración de limpieza. Los trabajos periódicos se registran con `periodicidad: "diaria"` y una clave única por día; el despacho del outbox reclama cada evento (pendiente → procesando) para no entregarlo dos veces.
 - Brief 01c: el número ADR-033 ya estaba asignado (acceso agéntico desde portales); los principios operativos quedaron como ADR-034. La línea "Agéntico" de `CLAUDE.md` se amplió en vez de reemplazarse para conservar ADR-033. El test de "todas las capacidades" cubre `capacidadesDelNucleo` y no importa `@opai/modules` (ciclo de dependencias); las capacidades de módulos quedan validadas al declararse.
 
 ## Riesgos y pendientes materiales
