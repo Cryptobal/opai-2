@@ -2,7 +2,16 @@
 
 import type { ReactNode } from "react";
 
-import { Button, Campo, DashboardScreen, type EstadoPantalla, FormScreen, Input, PlanillaScreen, Select } from "@opai/ds";
+import {
+  Button,
+  Campo,
+  DashboardScreen,
+  type EstadoPantalla,
+  FormScreen,
+  Input,
+  PlanillaScreen,
+  Select,
+} from "@opai/ds";
 
 import { celdaPauta, COLUMNAS_PAUTA, FILAS_PAUTA, KPIS } from "./datos";
 
@@ -61,7 +70,12 @@ export function BloqueFormulario({ state }: { state: EstadoPantalla }) {
                   </Select>
                 </Campo>
                 <Campo etiqueta="Monto mensual (CLP)" htmlFor="monto" ayuda="Sin IVA">
-                  <Input id="monto" inputMode="numeric" defaultValue="1.850.000" className="font-mono" />
+                  <Input
+                    id="monto"
+                    inputMode="numeric"
+                    defaultValue="1.850.000"
+                    className="font-mono"
+                  />
                 </Campo>
               </div>
             ),

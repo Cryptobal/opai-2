@@ -1,0 +1,75 @@
+# CLAUDE.md — OPAI 2.0
+
+## Qué es esto
+
+Monorepo de OPAI 2.0: SaaS modular, multi-tenant y agent-first para empresas intensivas en personal (seguridad, aseo, outsourcing, mantenimiento). Antes de cualquier tarea lee `docs/2.0/ESTADO.md` y `docs/2.0/01-decisiones.md`. El brief en curso está en `docs/2.0/briefs/`. OPAI 1.0 (`Cryptobal/opai`) es solo referencia de reglas de negocio: no se porta código.
+
+## Comandos
+
+- `pnpm install` · `pnpm dev` (apps/web en http://localhost:3000) · `pnpm build`
+- Gate obligatorio antes de cada commit: `pnpm typecheck && pnpm lint && pnpm test`
+- `pnpm test:db` corre el test de aislamiento RLS si existe `DATABASE_URL_TEST` (Postgres local o rama `dev` de Neon, rol propietario).
+- `pnpm db:generate` · `pnpm db:migrate` (crea la migración sin aplicarla; usa `DATABASE_URL_MIGRATE`) · `pnpm db:deploy` (aplica; solo con instrucción explícita y contra el entorno indicado)
+- `pnpm --filter @opai/db role:password` fija la contraseña del rol `opai_app` desde `OPAI_APP_DB_PASSWORD`.
+- `pnpm --filter @opai/db seed:dev-tenant` crea el tenant `gard` y muestra `DEV_TENANT_ID`.
+- `pnpm scaffold:module <id> --nombre "<Nombre>"` crea un módulo completo y lo registra.
+- `pnpm --filter @opai/web e2e` captura `/ds` a 375 y 1024 (necesita `pnpm exec playwright install chromium`).
+- Nunca: `prisma migrate reset`, borrar migraciones, commitear `.env*`, correr `db:deploy` contra un entorno no indicado, usar `dbAdmin()` fuera de scripts y migraciones, imprimir secretos.
+
+## Estructura
+
+- `apps/web`: app Next.js (App Router, Turbopack, Cache Components). Route groups por portal: `(erp)`, `(platform)`, `(trabajador)`, `(terreno)`, `(cliente)`, `(supervisor)`. Página `/ds` (solo fuera de producción) con el DS completo.
+- `packages/db`: Prisma 7 con `@prisma/adapter-pg`. Esquemas en `prisma/schema/` (`core.prisma` + uno por módulo). `forTenant(tenantId)` fija `app.tenant_id` por transacción; `dbAdmin()` solo para scripts.
+- `packages/domain`: lógica pura (dinero, tiempo, cálculos) con tests. Sin Next, React ni base de datos.
+- `packages/capabilities`: `defineCapability`, registro, `executeCapability`, handler HTTP, `defineModule`, `registrarModulos`.
+- `packages/ds`: DS 2.0. `tokens.css` (único archivo con colores; PROVISIONAL hasta el Brief 00b), componentes, `AppShell`, patrones y estados.
+- `packages/integrations`: adaptadores (DTE, banco, factoring, mensajería, biometría). Vacío en el Brief 00.
+- `modules/<id>`: módulos vendibles; `modules/registry` (`@opai/modules`) los lista.
+- `scripts/`: generador de módulos y utilidades.
+- `docs/2.0`: memoria del proyecto (arranque, decisiones, estado, briefs, diseño, extracción de 1.0).
+
+## Reglas de código
+
+- TypeScript estricto. Sin `any`, sin `@ts-ignore`, sin `as unknown as`.
+- Archivos de hasta 150 líneas (ESLint lo exige); dividir antes de superar.
+- Dominio puro: `packages/domain` y `modules/*/domain` no importan `next`, `react`, `@opai/db` ni `@prisma/client`.
+- Todo acceso a datos pasa por `db.forTenant(tenantId)`. El cliente Prisma crudo solo existe en `packages/db` (ESLint lo bloquea fuera).
+- Toda tabla de negocio: `tenant_id`, `created_at`, `updated_at`, IDs `uuid(7)`, columnas `snake_case` vía `@map`, `@@schema("<modulo>")`. Toda migración que cree una tabla con `tenant_id` agrega:
+
+  ```sql
+  ALTER TABLE "<schema>"."<tabla>" ENABLE ROW LEVEL SECURITY;
+  CREATE POLICY tenant_isolation ON "<schema>"."<tabla>" AS PERMISSIVE FOR ALL TO opai_app
+    USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
+    WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
+  ```
+
+  y, al crear un schema nuevo: `GRANT USAGE ON SCHEMA "<schema>" TO opai_app` más los `GRANT`/`ALTER DEFAULT PRIVILEGES` de la migración inicial.
+
+- Dinero: CLP en enteros (`clp()`, `redondearCLP()` de `@opai/domain`); UF y porcentajes como enteros escalados (`UF_ESCALA`, `PCT_ESCALA`) o `Decimal` de escala fija en base de datos. Nunca float para dinero.
+- Tiempo: `timestamptz` en UTC; zona del tenant solo para presentar; turnos como intervalos `[inicio, fin)`.
+- Zod en el borde; los tipos se derivan de los esquemas.
+- Toda consulta o mutación de negocio es una capacidad (`defineCapability`). UI, API y MCP solo invocan capacidades. Toda escritura soporta `dryRun` y acepta `idempotencyKey`; las escrituras reales quedan en `core.audit_events`.
+- Módulos: solo importan de `packages/*` y de módulos declarados en `dependencias` de su manifest. Sin imports cruzados. Permisos `<id>:<accion>`, capacidades `<id>.<entidad>.<verbo>`, eventos `<id>.<evento>`.
+- Configuración, notificaciones e integraciones: el módulo declara en el manifest, el núcleo implementa.
+- Vocabulario genérico en código (persona, instalación, puesto, servicio, recorrido, novedad). Los textos visibles pasan por el diccionario de la vertical del tenant (Brief 01).
+
+## UI
+
+- Solo tokens y componentes de `@opai/ds`. Sin hex, sin estilos inline, sin componentes propios por módulo cuando el DS tiene uno. `grep -rn "#[0-9a-fA-F]\{6\}" apps packages modules --include=*.tsx --include=*.ts --include=*.css` debe devolver solo `tokens.css`.
+- Patrones de pantalla: `ListScreen`, `DetailScreen`, `FormScreen`, `PlanillaScreen`, `DashboardScreen`, siempre con `state` y los estados loading, vacío, error y sin permisos.
+- Mobile e iPad first: diseñar y verificar a 375px y 1024px antes que desktop. Touch targets ≥44px. Safe-area iOS. Los nombres de carpeta con `_` no son rutas en App Router.
+- Las pantallas nuevas pasan por Claude Design (Design Prompt → diseño aprobado → brief) antes de implementarse.
+
+## Tests
+
+- Dominio: Vitest obligatorio para todo cálculo.
+- Capacidades: tests de validación, autorización y auditoría con contexto falso (ver `packages/capabilities/test`).
+- Base: `pnpm test:db` contra Postgres real antes de tocar RLS o migraciones.
+- Playwright para flujos críticos por portal (a 375 y 1024).
+
+## Flujo de trabajo
+
+- Un brief = bloques = commits atómicos con prefijo de ámbito (`infra:`, `core:`, `ds:`, `crm:`, `docs:`…), mensaje en español, imperativo.
+- No refactorizar fuera del alcance del brief. Si el brief contradice el repo, conservar el objetivo, adaptar y reportar la diferencia.
+- Al terminar un brief: actualizar `docs/2.0/ESTADO.md` (hecho, pendiente, decisiones del bloque, versiones) y reportar: qué se implementó, archivos, validaciones y resultados, riesgos pendientes.
+- Nada se despliega a producción de Gard ni se toca OPAI 1.0 desde aquí.

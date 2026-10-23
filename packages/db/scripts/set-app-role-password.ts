@@ -16,7 +16,9 @@ async function main(): Promise<void> {
   try {
     const existe = await client.query("SELECT 1 FROM pg_roles WHERE rolname = 'opai_app'");
     if (existe.rowCount === 0) {
-      throw new Error("El rol opai_app no existe. Aplica primero las migraciones (pnpm db:deploy).");
+      throw new Error(
+        "El rol opai_app no existe. Aplica primero las migraciones (pnpm db:deploy).",
+      );
     }
     // ALTER ROLE no acepta parámetros: se escapa como literal con el cliente de pg.
     await client.query(`ALTER ROLE opai_app WITH LOGIN PASSWORD ${client.escapeLiteral(password)}`);

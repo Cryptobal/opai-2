@@ -57,7 +57,9 @@ describe.skipIf(!urlPropietario)("aislamiento por tenant con RLS", () => {
       adapter: new PrismaPg({ connectionString: process.env["DATABASE_URL"] }),
     });
 
-    const a = await admin.tenant.create({ data: { slug: slugA, nombre: "A", vertical: "seguridad" } });
+    const a = await admin.tenant.create({
+      data: { slug: slugA, nombre: "A", vertical: "seguridad" },
+    });
     const b = await admin.tenant.create({ data: { slug: slugB, nombre: "B", vertical: "aseo" } });
     idA = a.id;
     idB = b.id;

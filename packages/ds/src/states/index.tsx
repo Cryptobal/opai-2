@@ -6,13 +6,24 @@ import { Skeleton } from "../components/skeleton";
 
 type EstadoProps = { titulo: string; descripcion?: string; accion?: ReactNode; className?: string };
 
-function Marco({ icono, titulo, descripcion, accion, className }: EstadoProps & { icono: ReactNode }) {
+function Marco({
+  icono,
+  titulo,
+  descripcion,
+  accion,
+  className,
+}: EstadoProps & { icono: ReactNode }) {
   return (
     <div
       role="status"
-      className={cn("flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border px-6 py-12 text-center", className)}
+      className={cn(
+        "flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border px-6 py-12 text-center",
+        className,
+      )}
     >
-      <div className="flex size-12 items-center justify-center rounded-full bg-bg text-fg-muted">{icono}</div>
+      <div className="flex size-12 items-center justify-center rounded-full bg-bg text-fg-muted">
+        {icono}
+      </div>
       <p className="text-md font-medium text-fg">{titulo}</p>
       {descripcion ? <p className="max-w-sm text-base text-fg-muted">{descripcion}</p> : null}
       {accion ? <div className="mt-1">{accion}</div> : null}
@@ -46,7 +57,13 @@ export function Forbidden(props: Partial<EstadoProps>) {
 export type VarianteLoading = "lista" | "detalle" | "formulario" | "planilla" | "dashboard";
 
 /** Skeletons con la forma del contenido. Nunca un spinner de página completa. */
-export function Loading({ variante = "lista", className }: { variante?: VarianteLoading; className?: string }) {
+export function Loading({
+  variante = "lista",
+  className,
+}: {
+  variante?: VarianteLoading;
+  className?: string;
+}) {
   const filas = variante === "dashboard" ? 4 : variante === "formulario" ? 5 : 6;
   return (
     <div aria-busy aria-label="Cargando" className={cn("flex flex-col gap-3", className)}>
@@ -58,7 +75,12 @@ export function Loading({ variante = "lista", className }: { variante?: Variante
         </div>
       ) : (
         Array.from({ length: filas }, (_, i) => (
-          <Skeleton key={i} className={variante === "planilla" ? "h-9" : variante === "formulario" ? "h-11" : "h-16"} />
+          <Skeleton
+            key={i}
+            className={
+              variante === "planilla" ? "h-9" : variante === "formulario" ? "h-11" : "h-16"
+            }
+          />
         ))
       )}
     </div>

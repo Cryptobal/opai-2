@@ -1,9 +1,9 @@
-import { asegurarNucleo } from "@opai/capabilities";
 import { manejarCapacidadHttp } from "@opai/capabilities/http";
 
 import { fabricaContexto } from "@/lib/contexto-http";
+import { asegurarRegistro } from "@/lib/registro";
 
-asegurarNucleo();
+asegurarRegistro();
 
 type Params = { params: Promise<{ capability: string[] }> };
 

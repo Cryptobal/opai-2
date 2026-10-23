@@ -46,7 +46,11 @@ export async function executeCapability(
     if (!salida.success) {
       return {
         ok: false,
-        error: { code: "INVALID_OUTPUT", message: "El handler devolvió un resultado inválido.", issues: salida.error.issues },
+        error: {
+          code: "INVALID_OUTPUT",
+          message: "El handler devolvió un resultado inválido.",
+          issues: salida.error.issues,
+        },
       };
     }
     if (capacidad.efecto !== "lectura" && !dryRun) {

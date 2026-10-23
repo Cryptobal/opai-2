@@ -57,7 +57,9 @@ export function SideNav({ items, rutaActual, Link = LinkPorDefecto }: NavProps) 
                 aria-current={activo ? "page" : undefined}
                 className={cn(
                   "flex min-h-11 flex-col items-center justify-center gap-1 rounded-md px-2 text-[11px] xl:flex-row xl:justify-start xl:gap-3 xl:px-3 xl:text-base",
-                  activo ? "bg-accent-muted text-fg font-medium" : "text-fg-muted hover:bg-bg hover:text-fg",
+                  activo
+                    ? "bg-accent-muted text-fg font-medium"
+                    : "text-fg-muted hover:bg-bg hover:text-fg",
                 )}
               >
                 <item.icono className="size-5" aria-hidden />

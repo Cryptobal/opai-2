@@ -15,7 +15,10 @@ export const fabricaContexto: FabricaContexto = async () => {
   const tenantId = process.env["DEV_TENANT_ID"];
   if (!tenantId) {
     return Response.json(
-      { ok: false, error: { code: "CONFIG", message: "Falta DEV_TENANT_ID en el entorno de desarrollo." } },
+      {
+        ok: false,
+        error: { code: "CONFIG", message: "Falta DEV_TENANT_ID en el entorno de desarrollo." },
+      },
       { status: 503 },
     );
   }

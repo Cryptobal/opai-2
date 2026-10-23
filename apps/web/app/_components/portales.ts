@@ -18,7 +18,8 @@ const esDesarrollo = process.env.NODE_ENV !== "production";
 export function navDe(portal: string): readonly NavItem[] {
   const raiz = PORTALES.find((p) => p.id === portal)?.href ?? "/";
   const items: NavItem[] = [{ href: raiz, etiqueta: "Inicio", icono: Home }];
-  if (portal === "erp") items.push({ href: "/platform", etiqueta: "Plataforma", icono: LayoutGrid });
+  if (portal === "erp")
+    items.push({ href: "/platform", etiqueta: "Plataforma", icono: LayoutGrid });
   if (esDesarrollo) items.push({ href: "/ds", etiqueta: "Diseño", icono: Palette });
   return items;
 }

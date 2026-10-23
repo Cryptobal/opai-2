@@ -16,5 +16,7 @@ export type LinkProps = {
 export type LinkComponent = ComponentType<LinkProps>;
 
 export function esActivo(rutaActual: string, href: string): boolean {
-  return href === "/" ? rutaActual === "/" : rutaActual === href || rutaActual.startsWith(`${href}/`);
+  return href === "/"
+    ? rutaActual === "/"
+    : rutaActual === href || rutaActual.startsWith(`${href}/`);
 }

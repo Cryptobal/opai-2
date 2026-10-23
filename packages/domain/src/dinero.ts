@@ -72,6 +72,8 @@ export function ufACLP(uf: number, valorUfClp: number): CLP {
 
 /** Formato chileno: `$ 1.850.000`, `-$ 12.300`. Sin decimales. */
 export function formatearCLP(monto: CLP): string {
-  const abs = Math.abs(monto).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  const abs = Math.abs(monto)
+    .toString()
+    .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
   return monto < 0 ? `-$ ${abs}` : `$ ${abs}`;
 }

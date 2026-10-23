@@ -7,7 +7,9 @@ export function Card({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
 }
 
 export function CardHeader({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
-  return <div className={cn("flex items-start justify-between gap-3 p-4 pb-2", className)} {...props} />;
+  return (
+    <div className={cn("flex items-start justify-between gap-3 p-4 pb-2", className)} {...props} />
+  );
 }
 
 export function CardTitle({ className, ...props }: HTMLAttributes<HTMLHeadingElement>) {
@@ -27,12 +29,18 @@ type KpiProps = {
 /** Indicador de dashboard: sin color de fondo; el color solo en la variación. */
 export function KpiTile({ etiqueta, valor, variacion }: KpiProps) {
   const tono =
-    variacion?.tono === "success" ? "text-success" : variacion?.tono === "danger" ? "text-danger" : "text-fg-muted";
+    variacion?.tono === "success"
+      ? "text-success"
+      : variacion?.tono === "danger"
+        ? "text-danger"
+        : "text-fg-muted";
   return (
     <Card className="p-4">
       <p className="text-sm text-fg-muted">{etiqueta}</p>
       <p className="mt-1 text-2xl font-semibold tabular-nums tracking-tight text-fg">{valor}</p>
-      {variacion ? <p className={cn("mt-1 text-sm tabular-nums", tono)}>{variacion.texto}</p> : null}
+      {variacion ? (
+        <p className={cn("mt-1 text-sm tabular-nums", tono)}>{variacion.texto}</p>
+      ) : null}
     </Card>
   );
 }

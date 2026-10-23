@@ -14,14 +14,22 @@ export function Th({ className, ...props }: ThHTMLAttributes<HTMLTableCellElemen
   return (
     <th
       scope="col"
-      className={cn("border-b border-border px-3 py-2 text-left text-sm font-medium text-fg-muted", className)}
+      className={cn(
+        "border-b border-border px-3 py-2 text-left text-sm font-medium text-fg-muted",
+        className,
+      )}
       {...props}
     />
   );
 }
 
 export function Td({ className, ...props }: TdHTMLAttributes<HTMLTableCellElement>) {
-  return <td className={cn("border-b border-border px-3 py-2.5 text-fg last:border-b-0", className)} {...props} />;
+  return (
+    <td
+      className={cn("border-b border-border px-3 py-2.5 text-fg last:border-b-0", className)}
+      {...props}
+    />
+  );
 }
 
 export function Tr({ className, ...props }: HTMLAttributes<HTMLTableRowElement>) {

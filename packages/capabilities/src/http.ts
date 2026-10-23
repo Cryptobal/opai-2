@@ -66,7 +66,8 @@ export async function manejarCapacidadHttp(
   let idempotencyKey: string | undefined;
 
   if (req.method === "GET") {
-    if (capacidad.efecto !== "lectura") return json({ ok: false, error: { code: "METHOD", message: "Usa POST." } }, 405);
+    if (capacidad.efecto !== "lectura")
+      return json({ ok: false, error: { code: "METHOD", message: "Usa POST." } }, 405);
     const leido = leerInputDeQuery(req);
     if (leido instanceof Response) return leido;
     input = leido;
@@ -75,7 +76,8 @@ export async function manejarCapacidadHttp(
     if (cuerpo instanceof Response) return cuerpo;
     input = cuerpo.input ?? {};
     dryRun = cuerpo.dry_run === true;
-    idempotencyKey = typeof cuerpo.idempotency_key === "string" ? cuerpo.idempotency_key : undefined;
+    idempotencyKey =
+      typeof cuerpo.idempotency_key === "string" ? cuerpo.idempotency_key : undefined;
   } else {
     return json({ ok: false, error: { code: "METHOD", message: "Método no permitido." } }, 405);
   }

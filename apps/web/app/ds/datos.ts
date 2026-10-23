@@ -18,7 +18,12 @@ const NOMBRES = [
   "Daniela Paz González",
   "Cristian Eduardo Díaz",
 ];
-const INSTALACIONES = ["Edificio Costanera Center", "Planta Quilicura", "Bodega Pudahuel", "Clínica Las Condes"];
+const INSTALACIONES = [
+  "Edificio Costanera Center",
+  "Planta Quilicura",
+  "Bodega Pudahuel",
+  "Clínica Las Condes",
+];
 const CARGOS = ["Guardia", "Supervisor", "Operador CCTV"];
 const ESTADOS: Persona["estado"][] = ["Activa", "Activa", "Activa", "Licencia", "Finiquitada"];
 
@@ -33,10 +38,26 @@ export const PERSONAS: Persona[] = Array.from({ length: 24 }, (_, i) => ({
 }));
 
 export const KPIS: Kpi[] = [
-  { etiqueta: "Saldo banco", valor: "$ 48.300.000", variacion: { texto: "+4,2% vs. septiembre", tono: "success" } },
-  { etiqueta: "Por cobrar", valor: "$ 112.450.000", variacion: { texto: "12 facturas", tono: "neutro" } },
-  { etiqueta: "Por pagar", valor: "$ 63.200.000", variacion: { texto: "-2,1% vs. septiembre", tono: "success" } },
-  { etiqueta: "Flujo 30 días", valor: "+$ 9.100.000", variacion: { texto: "proyección", tono: "neutro" } },
+  {
+    etiqueta: "Saldo banco",
+    valor: "$ 48.300.000",
+    variacion: { texto: "+4,2% vs. septiembre", tono: "success" },
+  },
+  {
+    etiqueta: "Por cobrar",
+    valor: "$ 112.450.000",
+    variacion: { texto: "12 facturas", tono: "neutro" },
+  },
+  {
+    etiqueta: "Por pagar",
+    valor: "$ 63.200.000",
+    variacion: { texto: "-2,1% vs. septiembre", tono: "success" },
+  },
+  {
+    etiqueta: "Flujo 30 días",
+    valor: "+$ 9.100.000",
+    variacion: { texto: "proyección", tono: "neutro" },
+  },
 ];
 
 export const FILAS_PAUTA: FilaPlanilla[] = [
@@ -65,5 +86,11 @@ export function celdaPauta(filaId: string, columnaId: string): Celda | null {
   const d = Number(columnaId.slice(1));
   if (f === 4 && d % 7 === 0) return null;
   const patron = (f * 3 + d) % 8;
-  return patron < 4 ? (CODIGOS[0] as Celda) : patron < 6 ? (CODIGOS[1] as Celda) : patron === 6 ? (CODIGOS[2] as Celda) : (CODIGOS[3] as Celda);
+  return patron < 4
+    ? (CODIGOS[0] as Celda)
+    : patron < 6
+      ? (CODIGOS[1] as Celda)
+      : patron === 6
+        ? (CODIGOS[2] as Celda)
+        : (CODIGOS[3] as Celda);
 }

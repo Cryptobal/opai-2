@@ -10,7 +10,12 @@ export type TextosEstado = {
   error?: { titulo?: string; descripcion?: string; onReintentar?: () => void };
 };
 
-type Props = { state: EstadoPantalla; variante: VarianteLoading; textos?: TextosEstado; children: ReactNode };
+type Props = {
+  state: EstadoPantalla;
+  variante: VarianteLoading;
+  textos?: TextosEstado;
+  children: ReactNode;
+};
 
 /** Resuelve los cuatro estados estándar; en `ready` renderiza el contenido. */
 export function Estado({ state, variante, textos, children }: Props) {
@@ -22,7 +27,15 @@ export function Estado({ state, variante, textos, children }: Props) {
       <ErrorState
         titulo={e?.titulo ?? "No pudimos cargar esta información"}
         descripcion={e?.descripcion ?? "Revisa tu conexión e inténtalo de nuevo."}
-        {...(e?.onReintentar ? { accion: <Button variant="secondary" onClick={e.onReintentar}>Reintentar</Button> } : {})}
+        {...(e?.onReintentar
+          ? {
+              accion: (
+                <Button variant="secondary" onClick={e.onReintentar}>
+                  Reintentar
+                </Button>
+              ),
+            }
+          : {})}
       />
     );
   }
@@ -39,7 +52,15 @@ export function Estado({ state, variante, textos, children }: Props) {
   return <>{children}</>;
 }
 
-export function Cabecera({ titulo, subtitulo, acciones }: { titulo: string; subtitulo?: string; acciones?: ReactNode }) {
+export function Cabecera({
+  titulo,
+  subtitulo,
+  acciones,
+}: {
+  titulo: string;
+  subtitulo?: string;
+  acciones?: ReactNode;
+}) {
   return (
     <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
       <div className="min-w-0">

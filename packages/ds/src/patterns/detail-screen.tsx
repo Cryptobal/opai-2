@@ -17,7 +17,16 @@ export type DetailScreenProps = {
 };
 
 /** Detalle: cabecera con título, estado y acciones; tabs; secciones. */
-export function DetailScreen({ state, titulo, subtitulo, estado, acciones, tabs, children, textos }: DetailScreenProps) {
+export function DetailScreen({
+  state,
+  titulo,
+  subtitulo,
+  estado,
+  acciones,
+  tabs,
+  children,
+  textos,
+}: DetailScreenProps) {
   return (
     <section>
       <Cabecera
@@ -37,7 +46,15 @@ export function DetailScreen({ state, titulo, subtitulo, estado, acciones, tabs,
   );
 }
 
-export function Seccion({ titulo, children, className }: { titulo: string; children: ReactNode; className?: string }) {
+export function Seccion({
+  titulo,
+  children,
+  className,
+}: {
+  titulo: string;
+  children: ReactNode;
+  className?: string;
+}) {
   return (
     <section className={cn("rounded-lg border border-border bg-surface p-4", className)}>
       <h3 className="mb-3 text-sm font-medium uppercase tracking-wide text-fg-muted">{titulo}</h3>

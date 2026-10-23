@@ -56,6 +56,9 @@ importers:
       '@opai/ds':
         specifier: workspace:*
         version: link:../../packages/ds
+      '@opai/modules':
+        specifier: workspace:*
+        version: link:../../modules/registry
       lucide-react:
         specifier: ^1.61.0
         version: 1.61.0(@types/react@19.3.0)(react@19.3.0)
@@ -99,6 +102,16 @@ importers:
       vitest:
         specifier: ^5.0.5
         version: 5.0.5(@types/node@22.20.5)(vite@8.3.5(@types/node@22.20.5)(esbuild@0.28.2)(jiti@2.7.0)(tsx@4.23.15))
+
+  modules/registry:
+    dependencies:
+      '@opai/capabilities':
+        specifier: workspace:*
+        version: link:../../packages/capabilities
+    devDependencies:
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
 
   packages/capabilities:
     dependencies:
@@ -186,6 +199,25 @@ importers:
       tailwindcss:
         specifier: ^4.3.3
         version: 4.3.3
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
+  packages/integrations:
+    devDependencies:
+      typescript:
+        specifier: ^5.9.3
+        version: 5.9.3
+
+  packages/testing:
+    dependencies:
+      '@opai/capabilities':
+        specifier: workspace:*
+        version: link:../capabilities
+      '@opai/db':
+        specifier: workspace:*
+        version: link:../db
+    devDependencies:
       typescript:
         specifier: ^5.9.3
         version: 5.9.3

@@ -5,7 +5,13 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   // Paquetes del monorepo consumidos como fuente TypeScript.
-  transpilePackages: ["@opai/ds", "@opai/capabilities", "@opai/db", "@opai/domain"],
+  transpilePackages: [
+    "@opai/ds",
+    "@opai/capabilities",
+    "@opai/db",
+    "@opai/domain",
+    "@opai/modules",
+  ],
   turbopack: {
     rules: {
       "*.css": {

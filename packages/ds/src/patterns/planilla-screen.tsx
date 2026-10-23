@@ -34,12 +34,29 @@ const TONO: Record<TonoCelda, string> = {
  * Planilla: grilla con cabeceras de fila y columna fijas y scroll interno.
  * En teléfono, tocar una celda la amplía en la barra inferior (zoom de celda).
  */
-export function PlanillaScreen({ state, titulo, subtitulo, acciones, filas, columnas, celda, textos }: PlanillaScreenProps) {
-  const [seleccion, setSeleccion] = useState<{ fila: FilaPlanilla; columna: ColumnaPlanilla; celda: Celda } | null>(null);
+export function PlanillaScreen({
+  state,
+  titulo,
+  subtitulo,
+  acciones,
+  filas,
+  columnas,
+  celda,
+  textos,
+}: PlanillaScreenProps) {
+  const [seleccion, setSeleccion] = useState<{
+    fila: FilaPlanilla;
+    columna: ColumnaPlanilla;
+    celda: Celda;
+  } | null>(null);
   const vacio = state === "ready" && filas.length === 0 ? "empty" : state;
   return (
     <section>
-      <Cabecera titulo={titulo} {...(subtitulo ? { subtitulo } : {})} {...(acciones ? { acciones } : {})} />
+      <Cabecera
+        titulo={titulo}
+        {...(subtitulo ? { subtitulo } : {})}
+        {...(acciones ? { acciones } : {})}
+      />
       <Estado state={vacio} variante="planilla" {...(textos ? { textos } : {})}>
         <div className="max-h-[70dvh] overflow-auto rounded-lg border border-border bg-surface">
           <table className="border-separate border-spacing-0 text-sm">
@@ -66,7 +83,9 @@ export function PlanillaScreen({ state, titulo, subtitulo, acciones, filas, colu
                 <tr key={f.id}>
                   <th className="sticky left-0 z-10 border-b border-r border-border bg-surface px-3 py-1.5 text-left font-medium text-fg">
                     <div className="truncate">{f.etiqueta}</div>
-                    {f.sub ? <div className="text-xs font-normal text-fg-muted">{f.sub}</div> : null}
+                    {f.sub ? (
+                      <div className="text-xs font-normal text-fg-muted">{f.sub}</div>
+                    ) : null}
                   </th>
                   {columnas.map((c) => {
                     const valor = celda(f.id, c.id);
@@ -76,7 +95,10 @@ export function PlanillaScreen({ state, titulo, subtitulo, acciones, filas, colu
                           <button
                             type="button"
                             onClick={() => setSeleccion({ fila: f, columna: c, celda: valor })}
-                            className={cn("flex min-h-9 w-full min-w-9 items-center justify-center rounded-sm text-xs font-medium", TONO[valor.tono ?? "neutro"])}
+                            className={cn(
+                              "flex min-h-9 w-full min-w-9 items-center justify-center rounded-sm text-xs font-medium",
+                              TONO[valor.tono ?? "neutro"],
+                            )}
                           >
                             {valor.texto}
                           </button>
@@ -94,10 +116,23 @@ export function PlanillaScreen({ state, titulo, subtitulo, acciones, filas, colu
             <div>
               <span className="font-medium text-fg">{seleccion.fila.etiqueta}</span>
               <span className="text-fg-muted"> · {seleccion.columna.etiqueta} · </span>
-              <span className={cn("rounded-sm px-1.5 py-0.5 text-sm", TONO[seleccion.celda.tono ?? "neutro"])}>{seleccion.celda.texto}</span>
-              {seleccion.celda.detalle ? <span className="text-fg-muted"> · {seleccion.celda.detalle}</span> : null}
+              <span
+                className={cn(
+                  "rounded-sm px-1.5 py-0.5 text-sm",
+                  TONO[seleccion.celda.tono ?? "neutro"],
+                )}
+              >
+                {seleccion.celda.texto}
+              </span>
+              {seleccion.celda.detalle ? (
+                <span className="text-fg-muted"> · {seleccion.celda.detalle}</span>
+              ) : null}
             </div>
-            <button type="button" className="min-h-11 px-2 text-sm text-fg-muted" onClick={() => setSeleccion(null)}>
+            <button
+              type="button"
+              className="min-h-11 px-2 text-sm text-fg-muted"
+              onClick={() => setSeleccion(null)}
+            >
               Cerrar
             </button>
           </div>

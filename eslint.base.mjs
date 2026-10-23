@@ -18,7 +18,8 @@ export const ignores = [
 /** Import prohibido fuera de `packages/db`: todo acceso a datos pasa por `@opai/db`. */
 export const prismaOnlyInDb = {
   name: "@prisma/client",
-  message: "Usa `db.forTenant(tenantId)` de @opai/db. El cliente Prisma crudo solo vive en packages/db.",
+  message:
+    "Usa `db.forTenant(tenantId)` de @opai/db. El cliente Prisma crudo solo vive en packages/db.",
 };
 
 /** Paquetes que el dominio puro no puede importar. */
@@ -62,6 +63,9 @@ export const baseConfig = tseslint.config(
 export const domainConfig = {
   files: ["**/domain/**/*.ts"],
   rules: {
-    "no-restricted-imports": ["error", { paths: notInDomain, patterns: ["next/*", "react/*", "@prisma/*"] }],
+    "no-restricted-imports": [
+      "error",
+      { paths: notInDomain, patterns: ["next/*", "react/*", "@prisma/*"] },
+    ],
   },
 };

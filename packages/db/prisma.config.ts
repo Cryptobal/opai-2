@@ -9,7 +9,8 @@ import { defineConfig } from "prisma/config";
 const urlMigraciones = process.env["DATABASE_URL_MIGRATE"] ?? "postgresql://sin-configurar/opai";
 
 export default defineConfig({
-  schema: "prisma/schema.prisma",
+  // Carpeta de esquemas: core.prisma (núcleo) y un archivo por módulo (<id>.prisma).
+  schema: "prisma/schema",
   migrations: {
     path: "prisma/migrations",
   },

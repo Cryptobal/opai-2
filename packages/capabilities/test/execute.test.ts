@@ -36,7 +36,10 @@ const crearNota = defineCapability({
   output: z.object({ id: z.string(), texto: z.string() }),
   efecto: "escritura",
   dryRun: true,
-  handler: vi.fn(async (_ctx, input, modo) => ({ id: modo.dryRun ? "preview" : "n1", texto: input.texto })),
+  handler: vi.fn(async (_ctx, input, modo) => ({
+    id: modo.dryRun ? "preview" : "n1",
+    texto: input.texto,
+  })),
 });
 
 beforeEach(() => {
@@ -46,9 +49,19 @@ beforeEach(() => {
 
 describe("defineCapability", () => {
   it("rechaza ids mal formados y escrituras sin dryRun", () => {
-    const base = { descripcion: "", permiso: null, input: z.object({}), output: z.object({}), handler: async () => ({}) };
-    expect(() => defineCapability({ ...base, id: "Mal.Id", efecto: "lectura", dryRun: false })).toThrow(/inválido/);
-    expect(() => defineCapability({ ...base, id: "x.y", efecto: "escritura", dryRun: false })).toThrow(/dryRun/);
+    const base = {
+      descripcion: "",
+      permiso: null,
+      input: z.object({}),
+      output: z.object({}),
+      handler: async () => ({}),
+    };
+    expect(() =>
+      defineCapability({ ...base, id: "Mal.Id", efecto: "lectura", dryRun: false }),
+    ).toThrow(/inválido/);
+    expect(() =>
+      defineCapability({ ...base, id: "x.y", efecto: "escritura", dryRun: false }),
+    ).toThrow(/dryRun/);
   });
 
   it("rechaza duplicados en el registro", () => {
@@ -63,7 +76,9 @@ describe("executeCapability", () => {
   });
 
   it("devuelve INVALID_INPUT con issues de Zod", async () => {
-    const r = await executeCapability(contextoFalso(["test:write"]), "test.nota.create", { texto: "" });
+    const r = await executeCapability(contextoFalso(["test:write"]), "test.nota.create", {
+      texto: "",
+    });
     expect(r).toMatchObject({ ok: false, error: { code: "INVALID_INPUT" } });
     expect(r.ok === false && Array.isArray(r.error.issues)).toBe(true);
   });
@@ -82,7 +97,12 @@ describe("executeCapability", () => {
 
   it("audita escrituras con actor, capacidad y clave de idempotencia", async () => {
     const ctx = contextoFalso(["test:write"]);
-    const r = await executeCapability(ctx, "test.nota.create", { texto: "hola" }, { idempotencyKey: "k1" });
+    const r = await executeCapability(
+      ctx,
+      "test.nota.create",
+      { texto: "hola" },
+      { idempotencyKey: "k1" },
+    );
     expect(r).toMatchObject({ ok: true, data: { id: "n1", texto: "hola" }, dryRun: false });
     expect(ctx.eventos).toHaveLength(1);
     expect(ctx.eventos[0]).toMatchObject({
@@ -111,7 +131,11 @@ describe("manejarCapacidadHttp", () => {
   });
 
   it("GET no se permite para escrituras; POST sí, con dry_run", async () => {
-    const get = await manejarCapacidadHttp(new Request("http://x/api/v1/test/nota/create"), ["test", "nota", "create"], fabrica);
+    const get = await manejarCapacidadHttp(
+      new Request("http://x/api/v1/test/nota/create"),
+      ["test", "nota", "create"],
+      fabrica,
+    );
     expect(get.status).toBe(405);
     const post = new Request("http://x/api/v1/test/nota/create", {
       method: "POST",
@@ -123,8 +147,16 @@ describe("manejarCapacidadHttp", () => {
   });
 
   it("mapea errores a códigos HTTP", async () => {
-    const r404 = await manejarCapacidadHttp(new Request("http://x/api/v1/core/nada"), ["core", "nada"], fabrica);
-    const r400 = await manejarCapacidadHttp(new Request("http://x/api/v1/core/ping?input=%7B%22mensaje%22%3A1%7D"), ["core", "ping"], fabrica);
+    const r404 = await manejarCapacidadHttp(
+      new Request("http://x/api/v1/core/nada"),
+      ["core", "nada"],
+      fabrica,
+    );
+    const r400 = await manejarCapacidadHttp(
+      new Request("http://x/api/v1/core/ping?input=%7B%22mensaje%22%3A1%7D"),
+      ["core", "ping"],
+      fabrica,
+    );
     expect([r404.status, r400.status]).toEqual([404, 400]);
   });
 });

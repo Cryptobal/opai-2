@@ -3,7 +3,12 @@ import type { FormHTMLAttributes, ReactNode } from "react";
 import { cn } from "../cn";
 import { Cabecera, Estado, type EstadoPantalla, type TextosEstado } from "./estado";
 
-export type SeccionFormulario = { id: string; titulo: string; descripcion?: string; contenido: ReactNode };
+export type SeccionFormulario = {
+  id: string;
+  titulo: string;
+  descripcion?: string;
+  contenido: ReactNode;
+};
 
 export type FormScreenProps = {
   state: EstadoPantalla;
@@ -19,7 +24,16 @@ export type FormScreenProps = {
 };
 
 /** Formulario por secciones con barra de acciones fija en teléfono. */
-export function FormScreen({ state, titulo, subtitulo, secciones, acciones, resumen, textos, formProps }: FormScreenProps) {
+export function FormScreen({
+  state,
+  titulo,
+  subtitulo,
+  secciones,
+  acciones,
+  resumen,
+  textos,
+  formProps,
+}: FormScreenProps) {
   return (
     <section>
       <Cabecera titulo={titulo} {...(subtitulo ? { subtitulo } : {})} />
