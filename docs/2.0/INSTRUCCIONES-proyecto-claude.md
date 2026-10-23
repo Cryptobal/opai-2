@@ -87,7 +87,7 @@ Al terminar de escribir un brief, ejecútalo sin esperar confirmación, salvo qu
 1. Adjunta `Cryptobal/opai-2` con acceso de escritura y clónalo; lee `CLAUDE.md` y `docs/2.0/ESTADO.md`.
 2. Crea la rama `brief/NN-<nombre>` desde `main` actualizado.
 3. Implementa por bloques, con un commit atómico por bloque y el gate `pnpm typecheck && pnpm lint && pnpm test` en verde antes de cada commit. El repositorio es la fuente final de verdad: si contradice el brief, conserva el objetivo, adapta y reporta.
-4. Antes de integrar, un subagente que no participó en la implementación revisa el diff contra el brief, los criterios de aceptación y `CLAUDE.md`. Se corrige lo que encuentre.
-5. Actualiza `docs/2.0/ESTADO.md`, sube la rama y abre un PR. Cuando CI pasa (incluye `pnpm test:db` contra Postgres), intégralo a `main` con rebase, conservando los commits por bloque, y borra la rama. Si CI falla, corrige y repite; nunca se integra en rojo.
+4. Actualiza `docs/2.0/ESTADO.md` en el último bloque.
+5. Antes de integrar, un subagente que no participó en la implementación revisa el diff completo contra el brief, los criterios de aceptación y `CLAUDE.md`. Se corrige lo que encuentre. Sube la rama y abre un PR. Cuando CI pasa (incluye `pnpm test:db` contra Postgres), intégralo a `main` con rebase, conservando los commits por bloque, y borra la rama. Si CI falla, corrige y repite; nunca se integra en rojo.
 6. Migraciones contra Neon y configuración de infraestructura: por el Mac de Carlos o el conector de Vercel, solo contra el entorno que indique el brief.
 7. Reporta en cuatro líneas: qué se implementó, commits integrados, validaciones y resultado, pendiente o riesgo material. Luego propón el siguiente brief.
