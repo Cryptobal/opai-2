@@ -1,0 +1,29 @@
+@import "tailwindcss";
+@import "@opai/ds/tokens.css";
+
+/* Tailwind debe ver las clases usadas dentro del paquete de diseño. */
+@source "../../../packages/ds/src";
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    font-size: 16px;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    background: var(--ds-bg);
+    color: var(--ds-fg);
+    min-height: 100dvh;
+    font-size: var(--text-base);
+    line-height: 1.5;
+  }
+  * {
+    border-color: var(--ds-border);
+  }
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+}
