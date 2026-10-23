@@ -21,8 +21,8 @@ export function DireccionOpai(props: {
 }) {
   const [error, setError] = useState<string | null>(null);
   // Una falla (de la capacidad o de la red) se muestra en el campo; nunca se devuelve un vacío mudo.
-  const llamar = useCallback(async (id: string, input: Record<string, unknown>) => {
-    const r = await ejecutarCapacidad("erp", id, input).catch(() => null);
+  const llamar = useCallback(async (correr: () => Promise<{ ok: boolean; data?: unknown }>) => {
+    const r = await correr().catch(() => null);
     setError(r?.ok ? null : SIN_SERVICIO);
     return r?.ok ? r.data : null;
   }, []);
@@ -30,7 +30,9 @@ export function DireccionOpai(props: {
     async (texto: string) => {
       const corto = texto.trim().length < 3;
       if (corto) setError(null);
-      const d = corto ? null : await llamar("core.geo.autocompletar", { texto });
+      const d = corto
+        ? null
+        : await llamar(() => ejecutarCapacidad("erp", "core.geo.autocompletar", { texto }));
       return ((d as Sugerencia[] | null) ?? []).map((s) => ({
         valor: s.placeId,
         etiqueta: s.texto,
@@ -41,7 +43,7 @@ export function DireccionOpai(props: {
   );
   const resolver = useCallback(
     async (placeId: string): Promise<Direccion | null> => {
-      const d = (await llamar("core.geo.detalle", { placeId })) as
+      const d = (await llamar(() => ejecutarCapacidad("erp", "core.geo.detalle", { placeId }))) as
         (Direccion & { direccionFormateada: string }) | null;
       return d ? { ...d, calle: d.calle ?? d.direccionFormateada } : null;
     },
