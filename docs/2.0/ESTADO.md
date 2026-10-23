@@ -97,7 +97,7 @@ Este archivo es la fuente de verdad del avance. Cada brief lo actualiza al termi
 - Evaluar Radix/shadcn para Combobox con búsqueda, Dialog y Menú cuando el primer módulo los necesite (Comercial).
 - Diseñar en Claude Design `Menu`, `Dialog`, `Switch` y `UserMenu` (implementados provisionalmente en el Brief 01 sin diseño propio) y el detalle de tenant en Plataforma.
 - Brief 02 — Maestros y servicios del núcleo (cuentas, contactos, instalaciones, cargos y estructuras de sueldo en tres niveles, documentos y archivos en R2, configuración declarativa, notificaciones). El núcleo mínimo se partió en 01 (identidad y plataforma) y 02 (maestros) para mantener briefs ejecutables en una sesión.
-- Extracción de 1.0 para Comercial y CPQ → `docs/2.0/extraccion/`.
+- **Fase 2 en planificación (23-oct, PR de docs):** extracción de 1.0 en `docs/2.0/extraccion/comercial-y-cpq.md`; ADR-040 (modelo comercial), ADR-041 (fichas con pestañas consistentes) y ADR-042 (CPQ configurable por tenant y vertical) en estado *propuesto*, con decisiones abiertas para Carlos al final de ADR-040. Siguiente: Design Prompt de Comercial y CPQ; el brief se escribe después del diseño aprobado.
 - Modelo de planes y facturación de suscripciones: cuando exista Opai SpA (en creación).
 
 ## Versiones instaladas
