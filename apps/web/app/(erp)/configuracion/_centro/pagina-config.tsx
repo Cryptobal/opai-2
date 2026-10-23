@@ -10,9 +10,9 @@ import { IndiceConfig } from "./indice-config";
 type Cab = { subtitulo?: ReactNode; acciones?: ReactNode };
 
 type Props<T> = {
-  /** Id de la sección (resalta el índice). */
-  seccion: string;
-  titulo: string;
+  /** Id de la sección (resalta el índice); puede depender de los datos (módulo activo). */
+  seccion: string | ((datos: T) => string);
+  titulo: string | ((datos: T) => string);
   cargar?: () => Promise<T>;
   /** Subtítulo y acción principal de la sección (dependen de los datos). */
   cabecera?: (datos: T, indice: Indice) => Cab;
@@ -46,17 +46,19 @@ export function PaginaConfig<T = undefined>({
     >
       {({ indice, datos }) => {
         const c = cabecera?.(datos, indice) ?? {};
+        const t = typeof titulo === "function" ? titulo(datos) : titulo;
+        const sel = typeof seccion === "function" ? seccion(datos) : seccion;
         return (
           <SplitScreen
             angosto
             telefono="detalle"
             etiquetaLista="Índice de configuración"
-            etiquetaDetalle={titulo}
-            lista={<IndiceConfig indice={indice} seleccionada={seccion} />}
+            etiquetaDetalle={t}
+            lista={<IndiceConfig indice={indice} seleccionada={sel} />}
             detalle={
               <div className="flex w-full max-w-[960px] flex-col">
                 <Cabecera
-                  titulo={titulo}
+                  titulo={t}
                   tituloSiempre
                   tituloDetalle
                   {...(c.subtitulo ? { subtitulo: c.subtitulo } : {})}

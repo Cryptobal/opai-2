@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import { Badge, DetailScreen, type EstadoPantalla } from "@opai/ds";
 
+import { BandaAprobacion } from "@/app/_components/aprobaciones/banda-aprobacion";
 import { LinkNext } from "@/app/_components/link-next";
 import { type AccionEntidad, AccionesEntidad } from "@/app/_components/maestros/acciones-entidad";
 import { ESTADO_CUENTA, estadoDe } from "@/app/_components/maestros/estados";
@@ -55,63 +56,66 @@ export function FichaCuenta(p: {
   const e = c ? estadoDe(ESTADO_CUENTA, c.estado) : null;
   const base = `/cuentas/${c?.id ?? ""}`;
   return (
-    <DetailScreen
-      state={c ? p.state : p.state === "ready" ? "error" : p.state}
-      titulo={c?.nombre ?? "Cuenta"}
-      {...(c && e
-        ? {
-            estado: (
-              <>
-                <Badge tono={e.tono}>{e.etiqueta}</Badge>
-                {c.clienteDesde ? (
-                  <span className="t-caption">cliente desde {fecha(c.clienteDesde)}</span>
-                ) : null}
-              </>
-            ),
-            subtitulo: (
-              <>
-                {c.razonSocial ?? c.nombre}
-                {c.rut ? (
-                  <>
-                    {" "}
-                    · <span className="t-mono">{rut(c.rut)}</span>
-                  </>
-                ) : c.giro ? (
-                  ` · ${c.giro}`
-                ) : null}
-              </>
-            ),
-            acciones: (
-              <AccionesEntidad etiqueta="Acciones de la cuenta" acciones={accionesCuenta(c)} />
-            ),
-          }
-        : {})}
-      tabActiva={p.tab}
-      Link={LinkNext}
-      tabs={[
-        { id: "resumen", etiqueta: "Resumen", href: base },
-        {
-          id: "contactos",
-          etiqueta: "Contactos",
-          contador: c?.contactos.length ?? 0,
-          href: `${base}/contactos`,
-        },
-        {
-          id: "instalaciones",
-          etiqueta: "Instalaciones",
-          contador: c?.instalaciones.length ?? 0,
-          href: `${base}/instalaciones`,
-        },
-        {
-          id: "documentos",
-          etiqueta: "Documentos",
-          contador: c?.documentos ?? 0,
-          href: `${base}/documentos`,
-        },
-        { id: "actividad", etiqueta: "Actividad", href: `${base}/actividad` },
-      ]}
-    >
-      {p.children}
-    </DetailScreen>
+    <>
+      {c ? <BandaAprobacion entidad={{ tipo: "cuenta", id: c.id }} /> : null}
+      <DetailScreen
+        state={c ? p.state : p.state === "ready" ? "error" : p.state}
+        titulo={c?.nombre ?? "Cuenta"}
+        {...(c && e
+          ? {
+              estado: (
+                <>
+                  <Badge tono={e.tono}>{e.etiqueta}</Badge>
+                  {c.clienteDesde ? (
+                    <span className="t-caption">cliente desde {fecha(c.clienteDesde)}</span>
+                  ) : null}
+                </>
+              ),
+              subtitulo: (
+                <>
+                  {c.razonSocial ?? c.nombre}
+                  {c.rut ? (
+                    <>
+                      {" "}
+                      · <span className="t-mono">{rut(c.rut)}</span>
+                    </>
+                  ) : c.giro ? (
+                    ` · ${c.giro}`
+                  ) : null}
+                </>
+              ),
+              acciones: (
+                <AccionesEntidad etiqueta="Acciones de la cuenta" acciones={accionesCuenta(c)} />
+              ),
+            }
+          : {})}
+        tabActiva={p.tab}
+        Link={LinkNext}
+        tabs={[
+          { id: "resumen", etiqueta: "Resumen", href: base },
+          {
+            id: "contactos",
+            etiqueta: "Contactos",
+            contador: c?.contactos.length ?? 0,
+            href: `${base}/contactos`,
+          },
+          {
+            id: "instalaciones",
+            etiqueta: "Instalaciones",
+            contador: c?.instalaciones.length ?? 0,
+            href: `${base}/instalaciones`,
+          },
+          {
+            id: "documentos",
+            etiqueta: "Documentos",
+            contador: c?.documentos ?? 0,
+            href: `${base}/documentos`,
+          },
+          { id: "actividad", etiqueta: "Actividad", href: `${base}/actividad` },
+        ]}
+      >
+        {p.children}
+      </DetailScreen>
+    </>
   );
 }

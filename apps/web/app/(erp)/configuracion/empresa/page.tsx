@@ -1,34 +1,55 @@
-import { tienePermiso, type Rol } from "@opai/domain";
+import { Button } from "@opai/ds";
+import { esRol, PERMISOS_CORE, tienePermiso } from "@opai/domain";
 
-import { PaginaPortal } from "@/app/_components/pagina-portal";
-import { estadoPantalla } from "@/lib/formato";
-import { ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
+import { ejecutarComoUsuario } from "@/lib/servidor";
 
-import { type Empresa, EmpresaDetalle, type Uso } from "./empresa-detalle";
+import { PaginaConfig } from "../_centro/pagina-config";
+import type { Perfil, Tenant } from "./datos-empresa";
+import { FormularioEmpresa } from "./formulario-empresa";
 
-export const metadata = { title: "Empresa" };
+export const metadata = { title: "Datos de la empresa" };
 
-async function Contenido() {
-  const [tenant, uso, identidad] = await Promise.all([
-    ejecutarComoUsuario<Empresa>("erp", "core.tenant.get"),
-    ejecutarComoUsuario<Uso>("erp", "core.usage.summary", { dias: 30 }),
-    identidadActual(),
-  ]);
-  const rol = (identidad?.actual?.rol ?? "viewer") as Rol;
+/** Datos de la empresa (21): perfil legal (core.empresa.*) y zona horaria (core.tenant.*). */
+export default function Empresa() {
   return (
-    <EmpresaDetalle
-      state={estadoPantalla(tenant)}
-      empresa={tenant.ok ? tenant.data : null}
-      uso={uso.ok ? uso.data : null}
-      puedeEditar={tienePermiso(rol, "core:tenant.manage")}
-    />
-  );
-}
-
-export default function PaginaEmpresa() {
-  return (
-    <PaginaPortal portal="erp" titulo="Empresa" ruta="/configuracion/empresa">
-      <Contenido />
-    </PaginaPortal>
+    <PaginaConfig
+      seccion="empresa"
+      titulo="Datos de la empresa"
+      cargar={async () => {
+        const [p, t] = await Promise.all([
+          ejecutarComoUsuario<Perfil>("erp", "core.empresa.get", {}),
+          ejecutarComoUsuario<Tenant>("erp", "core.tenant.get"),
+        ]);
+        return { perfil: p.ok ? p.data : null, tenant: t.ok ? t.data : null };
+      }}
+      cabecera={({ tenant }, indice) => {
+        const rol = indice.rol;
+        const puede = Boolean(rol && esRol(rol) && tienePermiso(rol, PERMISOS_CORE.tenantManage));
+        return {
+          subtitulo: tenant
+            ? `${tenant.nombre} · slug ${tenant.slug} · aparecen en documentos, correos y portales`
+            : undefined,
+          acciones: puede ? (
+            <Button type="submit" form="form-empresa">
+              Guardar
+            </Button>
+          ) : undefined,
+        };
+      }}
+    >
+      {({ perfil, tenant }, indice) =>
+        perfil && tenant ? (
+          <FormularioEmpresa
+            perfil={perfil}
+            tenant={tenant}
+            puedeEditar={Boolean(
+              indice.rol &&
+              esRol(indice.rol) &&
+              tienePermiso(indice.rol, PERMISOS_CORE.tenantManage),
+            )}
+          />
+        ) : null
+      }
+    </PaginaConfig>
   );
 }

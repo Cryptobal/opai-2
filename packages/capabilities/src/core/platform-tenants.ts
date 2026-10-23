@@ -9,34 +9,6 @@ import { modulosConEstado, moduloEstadoSchema, resumenUso, usoSchema } from "./c
 import { tenantSchema, uuidSchema } from "./esquemas";
 import { estadoInvitacion } from "./invitar";
 
-const ACTIVOS = ["activo", "trial"];
-
-export const platformTenantsList = defineCapability({
-  id: "platform.tenants.list",
-  descripcion: "Plataforma: todas las empresas con vertical, estado, módulos activos y usuarios.",
-  permiso: PERMISOS_PLATAFORMA.tenantsRead,
-  sinTenant: true,
-  input: z.object({}),
-  output: z.array(tenantSchema.extend({ modulosActivos: z.number(), usuarios: z.number() })),
-  efecto: "lectura",
-  dryRun: false,
-  async handler(ctx) {
-    const p = requierePlataforma(ctx);
-    const tenants = await p.globales.tenant.findMany({ orderBy: { nombre: "asc" } });
-    // Una consulta por tenant: nunca cross-tenant en una sola query.
-    return Promise.all(
-      tenants.map(async (t) => {
-        const db = p.paraTenant(t.id);
-        const [modulosActivos, usuarios] = await Promise.all([
-          db.tenantModule.count({ where: { estado: { in: ACTIVOS }, moduloId: { not: "core" } } }),
-          db.membership.count({ where: { estado: "activa" } }),
-        ]);
-        return { ...t, modulosActivos, usuarios };
-      }),
-    );
-  },
-});
-
 export const platformTenantsGet = defineCapability({
   id: "platform.tenants.get",
   descripcion:

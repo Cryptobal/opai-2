@@ -8,7 +8,7 @@ import type { SearchParams } from "@/lib/parametros";
 
 import { cargarCuenta, cargarCuentas, filtrosDe } from "../_componentes/datos";
 import { FichaCuenta } from "../_componentes/ficha-cuenta";
-import { HojaCuenta } from "../_componentes/hoja-cuenta";
+import { HojaCuenta } from "../_componentes/diferidas";
 import { ListaCuentas } from "../_componentes/lista-cuentas";
 import { ResumenCuenta } from "../_componentes/resumen-cuenta";
 

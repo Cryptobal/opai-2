@@ -2,7 +2,7 @@ import { MessageCircle, Phone, Upload } from "lucide-react";
 
 import { Alerta, Avatar, Badge } from "@opai/ds";
 
-import { HojaSubir } from "@/app/_components/documentos/hoja-subir";
+import { HojaSubir } from "@/app/_components/documentos/diferidas";
 import type { TipoDocumento } from "@/app/_components/documentos/tipos";
 import { ESTADO_PERSONA, estadoDe } from "@/app/_components/maestros/estados";
 import { PaginaPortal } from "@/app/_components/pagina-portal";

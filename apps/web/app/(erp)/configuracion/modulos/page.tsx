@@ -1,0 +1,82 @@
+import { listarModulos } from "@opai/capabilities";
+import { Alerta } from "@opai/ds";
+import { esRol, PERMISOS_CORE, tienePermiso } from "@opai/domain";
+
+import { ejecutarComoUsuario } from "@/lib/servidor";
+
+import { PaginaConfig } from "../_centro/pagina-config";
+import { BotonSolicitar } from "./boton-solicitar";
+import { TarjetaModulo } from "./tarjeta-modulo";
+
+export const metadata = { title: "Módulos" };
+
+type Modulo = {
+  id: string;
+  nombre: string;
+  version: string;
+  dependencias: string[];
+  estado: string | null;
+};
+
+const NUCLEO = ["Cuentas", "Instalaciones", "Personas", "Documentos", "Configuración"];
+
+/** Módulos (42/43): contratados, en trial y disponibles; la empresa los solicita y OPAI los activa. */
+export default function Modulos() {
+  return (
+    <PaginaConfig
+      seccion="modulos"
+      titulo="Módulos"
+      cargar={() => ejecutarComoUsuario<Modulo[]>("erp", "core.modules.list")}
+      cabecera={(r) => {
+        const m = r.ok ? r.data : [];
+        const n = (e: string | null) => m.filter((x) => x.estado === e).length;
+        return {
+          subtitulo: `${n("activo")} activos · ${n("trial")} en trial · ${n(null)} disponibles. Los activa OPAI; tú los solicitas.`,
+        };
+      }}
+    >
+      {(r, indice) => {
+        if (!r.ok) return <Alerta tono="danger" titulo={r.error.message} />;
+        const puede = Boolean(
+          indice.rol && esRol(indice.rol) && tienePermiso(indice.rol, PERMISOS_CORE.tenantManage),
+        );
+        const manifests = new Map(listarModulos().map((m) => [m.id, m]));
+        const nombre = (id: string) => r.data.find((x) => x.id === id)?.nombre ?? id;
+        return (
+          <div className="flex flex-col gap-4">
+            <Alerta
+              tono="info"
+              titulo="Apagar un módulo no rompe otro: sus datos se conservan y los demás solo ocultan lo que venía de él."
+            />
+            <div className="grid gap-3 lg:grid-cols-2">
+              <TarjetaModulo
+                nombre="Núcleo"
+                estado="siempre"
+                funciones={NUCLEO}
+                pie="Base de todos los módulos"
+              />
+              {r.data.map((m) => (
+                <TarjetaModulo
+                  key={m.id}
+                  nombre={m.nombre}
+                  estado={m.estado}
+                  funciones={(manifests.get(m.id)?.navegacion ?? []).map((n) => n.etiqueta)}
+                  pie={`Versión ${m.version} · depende de ${["Núcleo", ...m.dependencias.map(nombre)].join(", ")}`}
+                  {...(puede && m.estado !== "activo"
+                    ? { accion: <BotonSolicitar moduloId={m.id} nombre={m.nombre} /> }
+                    : {})}
+                />
+              ))}
+            </div>
+            {r.data.length === 0 ? (
+              <p className="t-caption">
+                Por ahora solo está el núcleo; los módulos (Comercial, Operaciones…) aparecerán aquí
+                al publicarse.
+              </p>
+            ) : null}
+          </div>
+        );
+      }}
+    </PaginaConfig>
+  );
+}

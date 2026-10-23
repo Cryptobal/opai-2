@@ -8,8 +8,8 @@ import type { SearchParams } from "@/lib/parametros";
 
 import { CascadaSueldo } from "../../_componentes/cascada-sueldo";
 import { cargarCargos, cargarLaboral } from "../../_componentes/datos";
-import { HojaExcepcion } from "../../_componentes/hoja-excepcion";
-import { HojaVinculo } from "../../_componentes/hoja-vinculo";
+import { HojaExcepcion } from "../../_componentes/diferidas";
+import { HojaVinculo } from "../../_componentes/diferidas";
 import { HistorialVinculos, VinculoVigente } from "../../_componentes/laboral";
 import { PaginaPersona } from "../../_componentes/pagina-persona";
 import { SelectorPuesto } from "../../_componentes/selector-puesto";

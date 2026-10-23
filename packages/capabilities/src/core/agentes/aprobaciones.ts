@@ -4,6 +4,7 @@ import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import { conflicto, noEncontrado, prohibido, reglaDeNegocio } from "../../errores";
+import { obtenerCapacidad } from "../../registry";
 import type { Contexto } from "../../types";
 import { iso } from "../comun";
 import { uuidSchema } from "../esquemas";
@@ -12,6 +13,8 @@ const aprobacionSchema = z.object({
   id: z.string(),
   apiKeyId: z.string(),
   agente: z.string(),
+  via: z.string().nullable().describe("Persona responsable de la key (el agente actúa vía ella)."),
+  riesgo: z.enum(["alto", "medio"]).describe("Alto: la capacidad es irreversible."),
   capability: z.string(),
   resumen: z.string(),
   input: z.unknown(),
@@ -32,10 +35,20 @@ async function vista(ctx: Contexto, filas: Fila[]) {
     select: { id: true, nombre: true },
   });
   const nombre = new Map(keys.map((k) => [k.id, k.nombre]));
+  const miembros = await ctx.db.membership.findMany({
+    where: { userId: { in: [...new Set(filas.map((f) => f.viaUserId))] } },
+    include: { user: true },
+  });
+  const via = new Map(miembros.map((m) => [m.userId, m.user.name]));
   return filas.map((a) => ({
     id: a.id,
     apiKeyId: a.apiKeyId,
     agente: nombre.get(a.apiKeyId) ?? "Key eliminada",
+    via: via.get(a.viaUserId) ?? null,
+    riesgo:
+      obtenerCapacidad(a.capability)?.efecto === "irreversible"
+        ? ("alto" as const)
+        : ("medio" as const),
     capability: a.capability,
     resumen: a.resumen,
     input: a.input,
@@ -68,13 +81,27 @@ export const aprobacionesList = defineCapability({
   input: z.object({
     estado: z.enum(["pendiente", "aprobada", "rechazada", "vencida"]).optional(),
     limite: z.number().int().min(1).max(100).default(50),
+    entidad: z
+      .object({ tipo: z.enum(["cuenta", "instalacion", "persona"]), id: uuidSchema })
+      .optional()
+      .describe("Solo las que actúan sobre esta entidad (input.id o input.<tipo>Id)."),
   }),
   output: z.array(aprobacionSchema),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
     const filas = await ctx.db.aprobacion.findMany({
-      where: input.estado ? { estado: input.estado } : {},
+      where: {
+        ...(input.estado ? { estado: input.estado } : {}),
+        ...(input.entidad
+          ? {
+              OR: [
+                { input: { path: ["id"], equals: input.entidad.id } },
+                { input: { path: [`${input.entidad.tipo}Id`], equals: input.entidad.id } },
+              ],
+            }
+          : {}),
+      },
       orderBy: { createdAt: "desc" },
       take: input.limite,
     });

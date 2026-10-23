@@ -40,6 +40,12 @@ function limite(ruta: string, p: Presupuesto): number {
   return comodin ? (p.rutas[comodin] as number) : p.porDefecto;
 }
 
+function propio(ruta: string, p: Presupuesto): boolean {
+  return Object.keys(p.rutas).some(
+    (k) => k === ruta || (k.endsWith("*") && ruta.startsWith(k.slice(0, -1))),
+  );
+}
+
 function manifiestos(): string[] {
   const base = join(NEXT, "server", "app");
   if (!existsSync(base)) return [];
@@ -68,7 +74,11 @@ export function medir(p: Presupuesto) {
       const extra = propios.reduce((t, c) => t + gz(c), 0);
       const total = framework + extra;
       const tope = limite(ruta, p) * KB;
-      const sobre = Math.min(tope - framework, p.maxSobreFramework * KB);
+      // Las rutas con tope propio (formularios y bandejas) usan ese tope completo; el resto, además,
+      // no puede exceder al framework en más de `maxSobreFramework`.
+      const sobre = propio(ruta, p)
+        ? tope - framework
+        : Math.min(tope - framework, p.maxSobreFramework * KB);
       return { ruta, total, extra, tope, ok: total <= tope && extra <= sobre };
     })
     .sort((a, b) => a.ruta.localeCompare(b.ruta));

@@ -4,12 +4,9 @@ import { Alerta, Campo, Checkbox, Input, Switch } from "@opai/ds";
 
 import type { Contacto } from "@/lib/tipos-maestros";
 
-export const ROL_CONTACTO: Record<string, string> = {
-  comercial: "Comercial",
-  operacional: "Operacional",
-  facturacion: "Facturación",
-  cobranza: "Cobranza",
-};
+import { ROL_CONTACTO } from "./roles-contacto";
+
+export { ROL_CONTACTO } from "./roles-contacto";
 
 export const correoMalo = (e: string) =>
   Boolean(e.trim()) && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(e.trim());

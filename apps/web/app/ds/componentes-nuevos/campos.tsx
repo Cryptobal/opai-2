@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import {
+  BarraProgreso,
   CampoDireccion,
   CampoSecreto,
   Campo,
@@ -73,6 +74,11 @@ export function MuestraCampos() {
         </Campo>
         <MapaEstatico lat={-33.36} lng={-70.73} geocercaM={300} pie="Geocerca 300 m" />
         <MapaEstatico lat={null} lng={null} />
+        <div className="flex flex-col gap-2">
+          <BarraProgreso valor={0.34} etiqueta="Presupuesto al 34 %" />
+          <BarraProgreso valor={0.82} tono="warning" etiqueta="Presupuesto al 82 %" />
+          <BarraProgreso valor={1} tono="danger" etiqueta="Presupuesto agotado" />
+        </div>
       </div>
     </div>
   );

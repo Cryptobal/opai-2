@@ -6,7 +6,7 @@ import { Dialog as RadixDialog } from "radix-ui";
 import { useEffect, useState } from "react";
 
 import { iniciales } from "./avatar";
-import { Resaltado } from "./combobox";
+import { Resaltado } from "./resaltado";
 import { PieTeclas } from "./command-palette-pie";
 import { claseScrim } from "./dialog-partes";
 import { Kbd } from "./segmentado";

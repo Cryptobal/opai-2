@@ -16,32 +16,6 @@ const trabajoSchema = z.object({
   ultimoError: z.string().nullable(),
 });
 
-export const platformTrabajosList = defineCapability({
-  id: "platform.trabajos.list",
-  descripcion:
-    "Plataforma: cola de trabajos de una empresa (pendientes, en curso, fallidos), más reciente primero, con su último error.",
-  permiso: PERMISOS_PLATAFORMA.tenantsRead,
-  sinTenant: true,
-  input: z.object({
-    tenantId: uuidSchema,
-    estado: z.enum(["pendiente", "en_curso", "hecho", "fallido", "cancelado"]).optional(),
-    limite: z.number().int().min(1).max(200).default(50),
-  }),
-  output: z.array(trabajoSchema),
-  efecto: "lectura",
-  dryRun: false,
-  tenantObjetivo: (input) => input.tenantId,
-  async handler(ctx, input) {
-    const db = requierePlataforma(ctx).paraTenant(input.tenantId);
-    const filas = await db.trabajo.findMany({
-      where: input.estado ? { estado: input.estado } : {},
-      orderBy: { createdAt: "desc" },
-      take: input.limite,
-    });
-    return filas.map((t) => ({ ...t, programadoPara: iso(t.programadoPara) }));
-  },
-});
-
 async function trabajoDe(
   ctx: Parameters<typeof requierePlataforma>[0],
   tenantId: string,

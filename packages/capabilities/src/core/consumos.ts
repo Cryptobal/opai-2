@@ -29,10 +29,17 @@ const totalUsd = (grupos: GrupoConsumo[]) =>
 export const consumosResumen = defineCapability({
   id: "core.consumos.resumen",
   descripcion:
-    "Consumos de la empresa en un mes (ADR-031): total en USD y, por recurso (IA, correo, mapas, almacenamiento, ejecuciones), cantidad y costo.",
+    "Consumos de la empresa en un mes (ADR-031): total en USD y, por recurso (IA, correo, mapas, almacenamiento, ejecuciones) y por recurso y módulo, cantidad y costo.",
   permiso: PERMISOS_CORE.consumosRead,
   input: z.object({ mes: mesSchema }),
-  output: z.object({ mes: z.string(), totalUsd: z.number(), porRecurso: z.array(filaSchema) }),
+  output: z.object({
+    mes: z.string(),
+    totalUsd: z.number(),
+    porRecurso: z.array(filaSchema),
+    porRecursoModulo: z
+      .array(filaSchema.extend({ recurso: z.string(), modulo: z.string() }))
+      .describe("Cantidad y costo por recurso y módulo que lo usó."),
+  }),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
@@ -41,6 +48,10 @@ export const consumosResumen = defineCapability({
       mes: desde.toISOString().slice(0, 7),
       totalUsd: totalUsd(grupos),
       porRecurso: conUsd(sumarPor(grupos, (g) => g.recurso)),
+      porRecursoModulo: conUsd(sumarPor(grupos, (g) => `${g.recurso}|${g.modulo}`)).map((f) => {
+        const [recurso = "", modulo = ""] = f.clave.split("|");
+        return { ...f, recurso, modulo };
+      }),
     };
   },
 });

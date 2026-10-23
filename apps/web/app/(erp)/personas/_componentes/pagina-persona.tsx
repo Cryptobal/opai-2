@@ -9,7 +9,7 @@ import { vocabularioActual } from "@/lib/vocabulario";
 
 import { cargarPersona } from "./datos";
 import { FichaPersona, type TabPersona } from "./ficha-persona";
-import { HojaPersona } from "./hoja-persona";
+import { HojaPersona } from "./diferidas";
 
 type Props = {
   params: Promise<{ id: string }>;

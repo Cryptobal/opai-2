@@ -1,7 +1,7 @@
 import { hoyIso } from "@/lib/fechas";
 import type { SearchParams } from "@/lib/parametros";
 
-import { HojaVincularUsuario } from "../_componentes/hoja-vincular";
+import { HojaVincularUsuario } from "../_componentes/diferidas";
 import { PaginaPersona } from "../_componentes/pagina-persona";
 import { ResumenPersona } from "../_componentes/resumen-persona";
 

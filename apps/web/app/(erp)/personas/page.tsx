@@ -7,7 +7,7 @@ import { hoyIso } from "@/lib/fechas";
 import { vocabularioActual } from "@/lib/vocabulario";
 
 import { cargarPersonas } from "./_componentes/datos";
-import { HojaPersona } from "./_componentes/hoja-persona";
+import { HojaPersona } from "./_componentes/diferidas";
 import { ListaPersonas } from "./_componentes/lista-personas";
 import { SegmentoPersonas } from "./_componentes/segmento";
 

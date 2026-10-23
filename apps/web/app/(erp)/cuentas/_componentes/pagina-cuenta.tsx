@@ -6,7 +6,7 @@ import type { CuentaDetalle } from "@/lib/tipos-maestros";
 
 import { cargarCuenta } from "./datos";
 import { FichaCuenta, type TabCuenta } from "./ficha-cuenta";
-import { HojaCuenta } from "./hoja-cuenta";
+import { HojaCuenta } from "./diferidas";
 
 type Props = {
   params: Promise<{ id: string }>;

@@ -2,6 +2,7 @@ import type { Capacidad } from "../types";
 import { invitationsAccept, invitationsPeek, invitationsRequestNew } from "./aceptar";
 import { apikeysCreate, apikeysList, apikeysRevoke } from "./apikeys";
 import { auditList, modulesList, usageSummary } from "./consultas";
+import { modulesSolicitar } from "./modulos-solicitar";
 import {
   bitacoraVerificar,
   platformBitacoraEstado,
@@ -24,18 +25,15 @@ import { capacidadesEmpresa } from "./empresa";
 import { capacidadesMaestros } from "./maestros";
 import { capacidadesPanel } from "./panel";
 import { platformConsumosSummary, platformEventosList } from "./platform-observabilidad";
-import {
-  platformTrabajosCancelar,
-  platformTrabajosList,
-  platformTrabajosReintentar,
-} from "./platform-servicios";
+import { platformTrabajosCancelar, platformTrabajosReintentar } from "./platform-servicios";
 import { invitationsList, invitationsRevoke, usersInvite } from "./invitations";
 import { me } from "./me";
 import { ping } from "./ping";
 import { platformTenantsCreate } from "./platform-escritura";
 import { platformTenantsSetEstado, platformTenantsUpdate } from "./platform-estado";
 import { platformAdminsInvite, platformModulesSet } from "./platform-modulos";
-import { platformTenantsGet, platformTenantsList, platformUsageSummary } from "./platform-tenants";
+import { platformTenantsGet, platformUsageSummary } from "./platform-tenants";
+import { capacidadesPlataforma, platformTenantsList, platformTrabajosList } from "./plataforma";
 import { tenantGet, tenantUpdate } from "./tenant";
 import { usersList, usersRemove, usersUpdate } from "./users";
 
@@ -55,6 +53,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   invitationsAccept,
   invitationsRequestNew,
   modulesList,
+  modulesSolicitar,
   apikeysList,
   apikeysCreate,
   apikeysRevoke,
@@ -96,6 +95,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   ...capacidadesEmpresa,
   ...capacidadesComunicaciones,
   ...capacidadesAgentes,
+  ...capacidadesPlataforma,
 ];
 
 /** Consumidores de eventos del núcleo que registra el borde. */
