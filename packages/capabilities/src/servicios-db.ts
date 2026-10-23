@@ -32,8 +32,8 @@ async function precioDe(recurso: string): Promise<number> {
 
 /** Medidor en `core.consumos` (ADR-031). El borde lo envuelve para no retrasar respuestas. */
 export const medidorEnDb: Medidor = {
-  async registrar(c) {
-    const unitario = await precioDe(c.recurso);
+  async registrar({ sinCosto, ...c }) {
+    const unitario = sinCosto ? 0 : await precioDe(c.recurso);
     await forTenant(c.tenantId).consumo.create({
       data: { ...c, costoUnitarioMicro: unitario, costoTotalMicro: unitario * c.cantidad },
     });

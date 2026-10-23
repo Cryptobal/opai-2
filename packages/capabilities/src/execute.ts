@@ -54,6 +54,14 @@ async function correr(
   };
 }
 
+/** Copia del input sin los campos sensibles (secretos): nunca llegan a la auditoría. */
+export function sinSensibles(entrada: unknown, sensibles: readonly string[] = []): unknown {
+  if (!sensibles.length || !entrada || typeof entrada !== "object") return entrada;
+  const copia: Record<string, unknown> = { ...(entrada as Record<string, unknown>) };
+  for (const k of sensibles) if (k in copia) copia[k] = "[oculto]";
+  return copia;
+}
+
 /** Tenant donde auditar y medir: el objetivo (plataforma) o el actual; null si no hay ninguno. */
 function tenantDe(ctx: Contexto, c: Capacidad, entrada: unknown, salida: unknown): string | null {
   const objetivo = entrada !== undefined ? c.tenantObjetivo?.(entrada, salida) : undefined;
@@ -84,7 +92,10 @@ export async function executeCapability(
         tenantId,
         capability: c.id,
         actor: ctx.actor,
-        payload: { input: r.entrada, idempotencyKey: opciones.idempotencyKey ?? null },
+        payload: {
+          input: sinSensibles(r.entrada, c.sensibles),
+          idempotencyKey: opciones.idempotencyKey ?? null,
+        },
       });
     }
   } catch (error) {

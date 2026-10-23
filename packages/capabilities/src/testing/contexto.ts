@@ -2,6 +2,7 @@ import type { Rol } from "@opai/domain";
 
 import { autorizador } from "../contexto";
 import type { ConsumoNuevo, Principal } from "../types";
+import { almacenamientoEnMemoria } from "./almacenamiento-memoria";
 import { dbEnMemoria } from "./db-memoria";
 import { bitacoraEnMemoria, eventosEnMemoria, trabajosEnMemoria } from "./servicios-memoria";
 import type { Actor, Contexto, Correo, EventoAuditoria, UsuarioContexto } from "./tipos";
@@ -38,6 +39,7 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
   const usos: ConsumoNuevo[] = [];
   const correos: Correo[] = [];
   const diferidos: Promise<unknown>[] = [];
+  const almacen = almacenamientoEnMemoria();
   let despachos = 0;
   const usuario = o.usuario === undefined ? USUARIO_DE_PRUEBA : o.usuario;
   const rol = o.rol === undefined ? "owner" : o.rol;
@@ -72,11 +74,12 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
     despacharEventos: () => void (despachos += 1),
     servicios: {
       correo: { nombre: "memoria", enviar: async (c) => void correos.push(c) },
+      almacenamiento: almacen.almacenamiento,
       urlBase: "https://test.opai.cl",
     },
     plataforma: usuario?.platformRole ? { globales, paraTenant: () => db } : null,
     autorizar: o.permisos ? (p) => (o.permisos ?? []).includes(p) : autorizador(rol, usuario),
   };
   const esperar = () => Promise.all(diferidos.splice(0));
-  return { ctx, eventos, usos, correos, tabla, esperar, despachos: () => despachos };
+  return { ctx, eventos, usos, correos, tabla, esperar, almacen, despachos: () => despachos };
 }

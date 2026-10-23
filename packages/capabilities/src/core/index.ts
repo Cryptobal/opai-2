@@ -4,6 +4,14 @@ import { apikeysCreate, apikeysList, apikeysRevoke } from "./apikeys";
 import { auditList, modulesList, usageSummary } from "./consultas";
 import { bitacoraVerificar, platformBitacoraEstado } from "./bitacora";
 import { consumosPorAgente, consumosPorRecurso, consumosResumen } from "./consumos";
+import { geoAutocompletar, geoDetalle, geoGeocodificar, iaProbar } from "./geo-ia";
+import { integracionesProbar, platformIntegracionesEstado } from "./integraciones-probar";
+import {
+  integracionesConfigurar,
+  integracionesGet,
+  integracionesList,
+  integracionesSetSecreto,
+} from "./integraciones";
 import { platformConsumosSummary, platformEventosList } from "./platform-observabilidad";
 import {
   platformTrabajosCancelar,
@@ -60,6 +68,16 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   platformTrabajosCancelar,
   platformEventosList,
   platformConsumosSummary,
+  integracionesList,
+  integracionesGet,
+  integracionesConfigurar,
+  integracionesSetSecreto,
+  integracionesProbar,
+  geoAutocompletar,
+  geoDetalle,
+  geoGeocodificar,
+  iaProbar,
+  platformIntegracionesEstado,
 ];
 
 export { trabajosDelNucleo } from "./bitacora";

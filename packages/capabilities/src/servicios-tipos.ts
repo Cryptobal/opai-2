@@ -21,6 +21,8 @@ export type ConsumoNuevo = {
   duracionMs?: number | null;
   referenciaTipo?: string | null;
   referenciaId?: string | null;
+  /** BYOK (credencial propia del tenant): se mide pero OPAI no lo cobra (ADR-031). */
+  sinCosto?: boolean;
 };
 
 export interface Medidor {
