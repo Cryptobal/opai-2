@@ -1,6 +1,6 @@
 # ESTADO — OPAI 2.0
 
-**Última actualización:** 22-oct-2026 (noche) · **Actualizado por:** Claude (arquitectura) · **Fase en curso:** 0 — Fundación
+**Última actualización:** 23-oct-2026 · **Actualizado por:** Claude (arquitectura, ejecutando el Brief 00) · **Fase en curso:** 0 — Fundación (código listo; falta infraestructura)
 
 Este archivo es la fuente de verdad del avance. Cada brief lo actualiza al terminar. Si algo no está aquí, no está hecho.
 
@@ -8,38 +8,53 @@ Este archivo es la fuente de verdad del avance. Cada brief lo actualiza al termi
 
 - Decisión de construir OPAI 2.0 desde cero (ver `01-decisiones.md`, ADR-001 a ADR-013).
 - Documento de arranque, registro de decisiones, contexto para agentes e instrucciones del proyecto Claude en `docs/2.0/`.
-- Brief 00 (Fundación) escrito en `docs/2.0/briefs/BRIEF-00-fundacion.md` y ajustado a ADR-013 (tokens provisionales; no se porta nada de 1.0).
-- Decisiones de Carlos del 22-oct registradas: dominios (ADR-011), historial financiero completo a migrar (ADR-010), Prisma sin alternativas (ADR-002), sueldo por RUT como excepción por persona (ADR-005), multi-vertical (ADR-006), Comercial primero (ADR-009), DS 2.0 nuevo y minimalista (ADR-013).
-- Design Prompt de fundamentos del DS 2.0 escrito en `docs/2.0/design/DESIGN-PROMPT-ds-2.0-fundamentos.md`.
+- Design Prompt de fundamentos del DS 2.0 en `docs/2.0/design/DESIGN-PROMPT-ds-2.0-fundamentos.md`.
+- **Brief 00 (Fundación) ejecutado, bloques 1 a 8 y 10** (commits `22a630d` → `d08a676`):
+  - Monorepo pnpm + Turborepo, TypeScript estricto, ESLint 10 con reglas del proyecto (150 líneas, Prisma solo en `packages/db`, dominio puro), Prettier, Vitest 5.
+  - `packages/db`: Prisma 7 (`prisma-client` + `@prisma/adapter-pg`), esquemas en `prisma/schema/` (`core.prisma` con `Tenant` y `AuditEvent`), migración inicial con rol `opai_app` (NOBYPASSRLS), grants, RLS y política `tenant_isolation`; `forTenant(tenantId)` fija `app.tenant_id` por transacción; `dbAdmin()` solo para scripts; scripts de contraseña del rol y seed del tenant `gard`. **Test de aislamiento en verde contra Postgres 16 real** (dos tenants, cero fuga, cero filas sin tenant, escritura cruzada rechazada).
+  - `packages/domain`: dinero CLP en enteros, redondeo contable, IVA, UF escalada, formato chileno; 8 tests.
+  - `packages/capabilities`: `defineCapability`, registro, `executeCapability` (valida input y output, autoriza, ejecuta, audita escrituras reales con actor y clave de idempotencia, `dryRun`), handler HTTP para `/api/v1`, `defineModule`/`registrarModulos`; 15 tests.
+  - `packages/ds` (DS 2.0 provisional, ADR-013): `tokens.css` neutro marcado PROVISIONAL, componentes base propios, `AppShell` (bottom nav 375 / riel 1024 / barra lateral 1280, selector de portal, safe-area), cinco patrones con `state` y cuatro estados.
+  - `apps/web`: Next.js 16 (Turbopack, Cache Components), route groups por portal con una página cada uno, `GET /api/health`, `/api/v1/[...capability]` (503 en producción hasta el Brief 01), página `/ds` solo fuera de producción. Build de producción verificado; capturas de `/ds` a 375 y 1024 en `apps/web/e2e/__screenshots__/`.
+  - `modules/registry` (`@opai/modules`) y `pnpm scaffold:module <id> --nombre` (verificado con un módulo de prueba, luego eliminado).
+  - `CLAUDE.md`, `README.md`, `.env.example`, CI (`typecheck`, `lint`, `test`, `test:db` con Postgres 16 como servicio).
+  - Gate completo en verde: `pnpm typecheck && pnpm lint && pnpm test` (27 tests) y `pnpm test:db` (4 tests).
 
 ## En curso
 
-- **Carlos:** preparar la máquina (Node LTS, pnpm, `gh`, `vercel`, `neonctl`, `wrangler` autenticados) y ejecutar el Brief 00 en Claude Code.
+- **Carlos (Mac, 10–15 min):** ejecutar `docs/2.0/briefs/BRIEF-00-infra.md` en Claude Code (Neon, Vercel, `test.opai.cl`, rol y tenant). Alternativa parcial desde el teléfono: importar el repo en Vercel (root `apps/web`), crear la base Neon desde Storage y agregar el dominio; las migraciones y el rol se hacen igual desde el Mac.
 - **Carlos:** correr el Design Prompt en Claude Design y traer el export HTML aprobado.
 
 ## Pendiente (siguiente)
 
-- Brief 00b — Tokens y estilo definitivos del DS 2.0 a partir del diseño aprobado (solo `tokens.css`, fuentes y variantes; sin tocar estructura).
-- Brief 01 — Núcleo mínimo (auth, usuarios, roles y permisos, tenants y Plataforma mínima, módulos y entitlements, cuentas, contactos, instalaciones, cargos y estructuras, archivos y PDF, configuración declarativa, MCP con API keys, telemetría, selector de portal).
+- Brief 00b — Tokens y estilo definitivos del DS 2.0 a partir del diseño aprobado (solo `tokens.css`, fuentes y variantes; sin tocar estructura). Evaluar en ese momento adoptar shadcn/ui (Radix) para Sheet, Select, Combobox y Dialog accesibles.
+- Brief 01 — Núcleo mínimo (auth, usuarios, roles y permisos, tenants y Plataforma mínima, módulos y entitlements, cuentas, contactos, instalaciones, cargos y estructuras, archivos y PDF, configuración declarativa, MCP con API keys, telemetría, selector de portal real, diccionario de vertical).
 - Extracción de 1.0 para Comercial y CPQ → `docs/2.0/extraccion/`.
-- Modelo de planes y facturación de suscripciones: cuando exista Opai SpA (en creación, próximos días).
+- Modelo de planes y facturación de suscripciones: cuando exista Opai SpA (en creación).
 
 ## Versiones instaladas
 
-(se completa en el Brief 00)
+Node 22 · pnpm 10.28 · Next.js 16.4.2 · React 19.3.0 · Tailwind 4.3.3 · Prisma 7.10.1 (estable; 8 está en RC) · TypeScript 5.9.3 (7.0 existe pero se mantiene 5.x por compatibilidad del ecosistema) · ESLint 10.13 + typescript-eslint 8.72 · Vitest 5.0.5 · Playwright 1.64 · Turborepo 2.11 · Zod 4.6 · lucide-react 1.61.
 
 ## Infraestructura
 
-- Repositorio: `Cryptobal/opai-2`, rama `main`.
-- Vercel: (se crea en el Brief 00, bloque 9, desde la máquina de Carlos)
-- Neon: (se crea en el Brief 00, bloque 9, desde la máquina de Carlos)
-- Dominio: `test.opai.cl` (construcción) · `app.opai.cl` (producción, futuro)
-- Tenant de desarrollo: `gard` — id: (se completa en el Brief 00)
+- Repositorio: `Cryptobal/opai-2`, rama `main`. CI en GitHub Actions.
+- Vercel: **pendiente** (el conector de Vercel en Claude no tiene permiso para crear proyectos; se crea desde el Mac con `vercel link` o desde el panel). Región de funciones: `gru1` (`apps/web/vercel.json`).
+- Neon: **pendiente** (BRIEF-00-infra, paso 1). Región sugerida `aws-sa-east-1`.
+- Dominio: `test.opai.cl` (construcción) · `app.opai.cl` (producción, futuro). `opai.cl` está en Cloudflare; el registro debe ser DNS only.
+- Tenant de desarrollo: `gard` — id: (lo imprime `seed:dev-tenant`).
 
 ## Decisiones tomadas durante la ejecución
 
-(ninguna aún)
+- `/ds` en vez de `/_ds`: en App Router las carpetas con `_` son privadas y no generan ruta. Sigue siendo solo fuera de producción (404 en producción, verificado).
+- RLS con `ENABLE` y no `FORCE`: el rol propietario (migraciones, importaciones, seeds) debe poder escribir en todos los tenants; la aplicación solo se conecta como `opai_app`, que no puede saltarse la RLS. El test de aislamiento lo prueba. La política usa `NULLIF(current_setting('app.tenant_id', true), '')::uuid` para que una sesión sin tenant devuelva cero filas en vez de error.
+- Componentes base propios (Button, Input, Select, Badge, Card, Tabs, Sheet, Table, Skeleton) en vez de la CLI de shadcn: el diseño aún no existe y la CLI escribe en la app, no en el paquete. shadcn/Radix se evalúa en el Brief 00b con el diseño aprobado.
+- Registro de módulos como paquete `modules/registry` (`@opai/modules`) en vez de `modules/index.ts`: Next necesita un paquete resoluble. Los módulos se compilan sin listarlos en `transpilePackages` (verificado con build).
+- `prisma generate` en `postinstall` de `@opai/db` para que el build de Vercel tenga el cliente; `prisma.config.ts` usa un placeholder cuando falta `DATABASE_URL_MIGRATE` para que `generate` no falle.
+- Con `cacheComponents` activo no se usa `export const dynamic`; los route handlers ya son dinámicos por defecto.
+- Formato: Prettier en código; `docs/` excluido para no reescribir los documentos.
 
 ## Riesgos y pendientes materiales
 
-- El diseño del DS 2.0 aún no está aprobado; el Brief 00 avanza con tokens provisionales y el reemplazo es el Brief 00b. Ningún módulo de negocio se diseña hasta tener el DS aprobado.
+- El diseño del DS 2.0 no está aprobado: `tokens.css` es provisional. Ningún módulo de negocio se diseña hasta tener el DS aprobado (Brief 00b).
+- Sin infraestructura aún no hay `test.opai.cl`; todo lo demás está verificado localmente y en CI.
