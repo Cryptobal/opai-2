@@ -334,3 +334,32 @@ Una entrada por decisión. Las decisiones no se editan: si cambian, se agrega un
 | 5 | Finanzas con flujo de caja al centro, banca y conciliación, DTE y factoring, rendiciones, contabilidad e informes; migración del historial financiero | 1.0 a solo lectura |
 | 6 | Nómina (sobre asistencia y estructuras), Licitaciones (sobre CPQ), firma electrónica avanzada | Gard 100 % en 2.0 |
 | Backlog | Inventario, cámaras, ATS, gamificación, psicolaboral, chat, Slack, sitio de marketing 2.0, roles personalizados | — |
+
+---
+
+## ADR-031 · Consumos medidos y pagados por tenant; IA configurable y BYOK
+
+**Fecha:** 23-oct-2026 · **Estado:** vigente · Completa ADR-027.
+
+**Decisión.** Todo recurso con costo variable (tokens de IA por proveedor y modelo, geocodificación y mapas, verificaciones biométricas, mensajes de WhatsApp y SMS, correos, firmas, almacenamiento, llamadas de API y MCP, documentos generados) pasa por un **medidor del núcleo** (`core.consumos`: tenant, recurso, unidad, cantidad, costo unitario y total, módulo, capacidad, actor, referencia) en la misma transacción o en el outbox. Ningún módulo llama a un proveedor directamente: usa el adaptador del catálogo de integraciones, que mide. Por integración, el tenant elige **de plataforma** (credencial de OPAI, cuota incluida en el plan, exceso facturado a precio de lista) o **BYOK** (credencial propia, cifrada en el almacén de secretos; OPAI no cobra ese consumo). Configuración de IA por tenant: proveedor y modelo por clase de tarea (`economica`, `estandar`, `potente`), key propia o de plataforma, presupuesto mensual con avisos al 80 % y corte al 100 % (configurable), política de datos (sin entrenamiento, campos excluidos), y registro de cada llamada (prompt y salida resumidos, tokens, costo) para trazabilidad. Estado de cuenta mensual por tenant; el cobro efectivo queda para cuando exista Opai SpA, pero la medición nace con el Brief 02 (sustituye y amplía `core.usage_events`).
+
+**Consecuencias.** El costo variable viaja con el tenant. Plataforma ve consumo y margen por tenant y por recurso. Las cuotas del plan (ADR-029, punto 12) se miden con el mismo medidor.
+
+---
+
+## ADR-032 · OPAI como plataforma agéntica: qué construye y qué no
+
+**Fecha:** 23-oct-2026 · **Estado:** vigente · Completa ADR-004.
+
+**Contexto.** Carlos opera hoy OPAI casi por completo desde agentes (Grokbot) y duda si OPAI debe construir "todo" o ser agéntico y escalable.
+
+**Decisión.** OPAI es el **sistema de registro de la operación** (hechos, reglas no negociables, estados, permisos, auditoría, documentos) y los **portales de terreno**. La inteligencia es intercambiable y pertenece al tenant. OPAI no construye chats, asistentes genéricos ni copilotos propios; tampoco clientes de correo, calendarios ni bases de conocimiento. Lo agéntico se concreta en cuatro mecanismos del núcleo:
+
+1. **Operable**: toda acción es una capacidad expuesta por UI, API y MCP (ADR-004).
+2. **Reactivo**: todo evento de dominio (ADR-029) se publica a webhooks salientes firmados por tenant y a suscripciones MCP cuando el protocolo lo soporte; el agente del tenant decide qué hacer.
+3. **Agentes como principales**: cada agente tiene identidad (API key), scopes, usuario responsable, **presupuesto** mensual de consumos (ADR-031) y **nivel de autonomía** por capacidad: lectura libre; escritura con vista previa; irreversible solo con aprobación humana en una cola de aprobaciones (un ticket dirigido al responsable), salvo autorización explícita del owner por capacidad. Toda acción queda auditada "agente vía usuario" con el `idempotencyKey` del agente.
+4. **Manuales para agentes**: `docs/2.0/agentes/` guarda los flujos operativos escritos para que cualquier modelo los ejecute con las capacidades (qué llamar, en qué orden, qué verificar, cuándo detenerse). Se publican en el MCP como recursos y en la página "Conectar" del tenant. Son contenido versionado, no código.
+
+OPAI puede ofrecer además **automatizaciones alojadas** (por ejemplo, búsqueda de reemplazo ante un turno sin cubrir) implementadas como agentes que corren contra las mismas capacidades, con la IA configurada por el tenant y medidas como cualquier consumo; son opcionales y vendibles.
+
+**Consecuencias.** Nada específico de un proveedor de IA entra en los módulos. El alcance de OPAI se achica (no hay chat, correo, agenda ni copiloto) y se vuelve más profundo (hechos, reglas, eventos, aprobaciones). Un tenant puede operar OPAI entero desde su propio agente sin perder control ni trazabilidad.

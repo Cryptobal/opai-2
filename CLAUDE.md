@@ -61,6 +61,8 @@ Monorepo de OPAI 2.0: SaaS modular, multi-tenant y agent-first para empresas int
 - Eventos y trabajos: toda escritura relevante emite un evento de dominio por outbox en la misma transacción; los crons encolan trabajos, no hacen el trabajo (ADR-029).
 - Integraciones: ningún módulo lee credenciales de `process.env` para servicios de tenant; usa el catálogo de integraciones del núcleo y sus adaptadores; los secretos del tenant viven cifrados en el almacén del núcleo y nunca salen por API ni MCP (ADR-027). Geolocalización y mapas solo por el servicio del núcleo.
 - Marca del tenant: toda salida (PDF, correo, portales) toma logos, colores y datos legales del perfil de marca del núcleo; nunca hardcodear nombres ni logos de Gard (ADR-028).
+- Consumos: toda llamada a un recurso con costo (IA, mapas, biometría, mensajería, firmas, almacenamiento) pasa por el adaptador del núcleo que mide en `core.consumos`; nunca SDKs de proveedores en módulos; la IA se invoca por clase de tarea (`economica`, `estandar`, `potente`), nunca por nombre de modelo (ADR-031).
+- Agéntico: OPAI no construye chats ni copilotos; expone capacidades, publica eventos y controla la autonomía de los agentes (lectura, vista previa, aprobación humana para lo irreversible). Los flujos para agentes se documentan en `docs/2.0/agentes/` (ADR-032).
 - Vocabulario genérico en código (persona, instalación, puesto, servicio, recorrido, novedad). Los textos visibles pasan por el diccionario de la vertical del tenant (Brief 01).
 
 ## UI
