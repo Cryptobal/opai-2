@@ -1,5 +1,6 @@
 export * from "./catalogos";
 export * from "./dinero";
+export * from "./documentos";
 export * from "./permisos";
 export * from "./vocabulario";
 export * from "./canon";
