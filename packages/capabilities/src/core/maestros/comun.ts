@@ -45,7 +45,7 @@ export const textoOpcional = (max = 500) => z.string().trim().max(max).nullable(
 /** Paginación por cursor (id de la última fila) y búsqueda. */
 export const listaSchema = z.object({
   q: z.string().trim().max(120).optional().describe("Texto a buscar (nombre, RUT…)."),
-  cursor: z.string().optional().describe("Id de la última fila de la página anterior."),
+  cursor: z.uuid().optional().describe("Id de la última fila de la página anterior."),
   limite: z.number().int().min(1).max(100).default(50),
   incluirArchivadas: z.boolean().default(false),
 });

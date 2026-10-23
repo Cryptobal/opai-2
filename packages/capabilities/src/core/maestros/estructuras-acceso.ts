@@ -23,7 +23,8 @@ export async function ocultarMontos(
     });
     cargoId = v?.cargoId ?? null;
   }
-  if (!cargoId) return false;
+  // Sin cargo determinable (persona sin vínculo vigente): se oculta por prudencia.
+  if (!cargoId) return true;
   return (await ctx.db.cargo.findUnique({ where: { id: cargoId } }))?.sueldoSensible ?? false;
 }
 

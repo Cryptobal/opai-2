@@ -34,6 +34,8 @@ export const integracionesGet = defineCapability({
 
 export const integracionesConfigurar = defineCapability({
   id: "core.integraciones.configurar",
+  // Credenciales y keys las gestionan personas: un agente no se crea keys ni cambia secretos.
+  soloPersonas: true,
   descripcion:
     "Configura una integración: modalidad (de plataforma o propia del tenant) y configuración no secreta (remitente, modelos de IA por clase…). Los secretos van por core.integraciones.set_secreto.",
   permiso: PERMISOS_CORE.integracionesManage,
@@ -85,6 +87,8 @@ export const integracionesConfigurar = defineCapability({
 
 export const integracionesSetSecreto = defineCapability({
   id: "core.integraciones.set_secreto",
+  // Credenciales y keys las gestionan personas: un agente no se crea keys ni cambia secretos.
+  soloPersonas: true,
   descripcion:
     "Guarda una credencial propia de la empresa para una integración (cifrada; se muestra una sola vez enmascarada). La auditoría nunca guarda el valor.",
   permiso: PERMISOS_CORE.integracionesManage,
@@ -113,7 +117,8 @@ export const integracionesSetSecreto = defineCapability({
         modalidad: "propia",
         estado: "configurada",
       },
-      update: {},
+      // Guardar un secreto propio pasa la integración a modalidad propia (si no, no se usaría).
+      update: { modalidad: "propia", estado: "configurada", ultimoError: null },
     });
     await guardarSecreto(ctx, fila.id, input.nombre, input.valor);
     return { proveedor: def.id, nombre: input.nombre, mascara };

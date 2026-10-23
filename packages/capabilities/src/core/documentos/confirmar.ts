@@ -39,6 +39,12 @@ export const documentosConfirmarSubida = defineCapability({
     if (dryRun)
       return { ...vistaDocumento({ ...d, estado: "disponible" }, tipo, hoy()), bitacoraSeq: null };
     const r = await ctx.transaccion(async (tx) => {
+      // Reclamo condicional: dos confirmaciones simultáneas no duplican el hecho en la bitácora.
+      const { count } = await tx.documento.updateMany({
+        where: { id: d.id, estado: "pendiente" },
+        data: { estado: "confirmando" },
+      });
+      if (count !== 1) throw reglaDeNegocio("El documento ya fue confirmado.");
       const propietario = await tx.documentoVinculo.findFirst({
         where: { documentoId: d.id, rol: "propietario" },
       });

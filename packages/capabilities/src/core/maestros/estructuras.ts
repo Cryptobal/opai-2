@@ -35,8 +35,11 @@ export const estructurasList = defineCapability({
       ctx,
       filas.map((f) => f.id),
     );
-    const ocultar = filas[0] ? await ocultarMontos(ctx, filas[0]) : false;
-    return filas.map((f) => vistaEstructura(f, items.get(f.id) ?? [], ocultar));
+    return Promise.all(
+      filas.map(async (f) =>
+        vistaEstructura(f, items.get(f.id) ?? [], await ocultarMontos(ctx, f)),
+      ),
+    );
   },
 });
 

@@ -42,3 +42,16 @@ export async function tipoParaEntidad(ctx: Contexto, tipoId: string | undefined,
   }
   return t;
 }
+
+/** Solo se versiona un documento disponible cuyo propietario es la misma entidad. */
+export async function documentoAReemplazar(ctx: Contexto, id: string, e: Entidad) {
+  const anterior = await ctx.db.documento.findUnique({ where: { id } });
+  const propietario = anterior
+    ? await ctx.db.documentoVinculo.findFirst({ where: { documentoId: id, rol: "propietario" } })
+    : null;
+  const mismo = propietario?.entidadTipo === e.tipo && propietario.entidadId === e.id;
+  if (!anterior || anterior.estado !== "disponible" || !mismo) {
+    throw noEncontrado("El documento a reemplazar (de esta misma entidad)");
+  }
+  return anterior;
+}

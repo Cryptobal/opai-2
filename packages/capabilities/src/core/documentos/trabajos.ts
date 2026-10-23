@@ -21,7 +21,12 @@ export const trabajoVencimientosDocumentos = defineTrabajo({
   periodicidad: "diaria",
   async handler(ctx, { dia: hoy }) {
     const docs = await ctx.db.documento.findMany({
-      where: { estado: "disponible", venceEn: { not: null } },
+      // Los que ya recibieron el aviso final no se vuelven a revisar (si no, taparían a los nuevos).
+      where: {
+        estado: "disponible",
+        venceEn: { not: null },
+        OR: [{ hitoNotificado: null }, { hitoNotificado: { not: HITO_VENCIDO } }],
+      },
       orderBy: { venceEn: "asc" },
       take: LOTE,
     });

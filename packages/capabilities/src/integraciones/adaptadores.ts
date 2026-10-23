@@ -93,8 +93,13 @@ export async function geoDe(ctx: Contexto, modulo = "core") {
 const ORDEN_IA: readonly ProveedorIaId[] = ["ia_anthropic", "ia_openai", "ia_google"];
 
 /** IA por clase de tarea (ADR-031): proveedor propio configurado, si no el de plataforma. */
-export async function iaDe(ctx: Contexto, clase: ClaseTarea, modulo = "core") {
-  for (const id of ORDEN_IA) {
+export async function iaDe(
+  ctx: Contexto,
+  clase: ClaseTarea,
+  modulo = "core",
+  solo?: ProveedorIaId,
+) {
+  for (const id of solo ? [solo] : ORDEN_IA) {
     const cred = await credencialDe(ctx, id);
     if (!cred) continue;
     const fila = await integracionDe(ctx, id);

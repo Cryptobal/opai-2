@@ -140,12 +140,44 @@ describe("empresa y marca", () => {
       estado: "disponible",
     });
     expect(await codigo(ctx, "core.marca.update", { logoPrincipalId: pdf })).toBe("UNPROCESSABLE");
+    const tipoLogo = "0192f3a0-0000-7000-8000-0000000000f4";
+    tabla("documentoTipo").push({
+      id: tipoLogo,
+      tenantId: ctx.tenantId,
+      codigo: "marca.logo",
+      nombre: "Logo",
+      capa: "empresa",
+    });
+    const foto = "0192f3a0-0000-7000-8000-0000000000f5";
+    tabla("documento").push({
+      id: foto,
+      tenantId: ctx.tenantId,
+      mime: "image/jpeg",
+      estado: "disponible",
+      tipoId: null,
+    });
+    tabla("documentoVinculo").push({
+      tenantId: ctx.tenantId,
+      documentoId: foto,
+      entidadTipo: "persona",
+      entidadId: "p1",
+      rol: "propietario",
+    });
+    expect(await codigo(ctx, "core.marca.update", { logoPrincipalId: foto })).toBe("UNPROCESSABLE");
     const png = "0192f3a0-0000-7000-8000-0000000000f3";
     tabla("documento").push({
       id: png,
       tenantId: ctx.tenantId,
       mime: "image/png",
       estado: "disponible",
+      tipoId: tipoLogo,
+    });
+    tabla("documentoVinculo").push({
+      tenantId: ctx.tenantId,
+      documentoId: png,
+      entidadTipo: "tenant",
+      entidadId: ctx.tenantId,
+      rol: "propietario",
     });
     const m = await dato<{ urls: Record<string, string> }>(ctx, "core.marca.update", {
       logoPrincipalId: png,

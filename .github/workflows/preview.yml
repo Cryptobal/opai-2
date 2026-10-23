@@ -1,0 +1,74 @@
+# Previews por PR con rama Neon efímera (Brief 02, bloque 13). Requiere los secretos del repo
+# NEON_API_KEY, NEON_PROJECT_ID, VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID y
+# OPAI_APP_DB_PASSWORD; sin ellos el
+# job se salta (no falla) para no bloquear PRs mientras se configuran.
+name: preview
+on:
+  pull_request:
+    types: [opened, reopened, synchronize, closed]
+
+concurrency:
+  group: preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  rama-neon:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+      NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      OPAI_APP_DB_PASSWORD: ${{ secrets.OPAI_APP_DB_PASSWORD }}
+      RAMA: preview/pr-${{ github.event.pull_request.number }}
+      RAMA_GIT: ${{ github.head_ref }}
+    steps:
+      - name: ¿Hay secretos?
+        id: listo
+        run: |
+          if [ -n "$NEON_API_KEY" ] && [ -n "$VERCEL_TOKEN" ] && [ -n "$OPAI_APP_DB_PASSWORD" ]; then echo "ok=true" >> "$GITHUB_OUTPUT"; else echo "ok=false" >> "$GITHUB_OUTPUT"; echo "Secretos de preview no configurados: se omite."; fi
+      - uses: actions/checkout@v4
+        if: steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
+      - uses: pnpm/action-setup@v4
+        if: steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
+      - uses: actions/setup-node@v4
+        if: steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - name: Crear o reutilizar la rama Neon
+        if: steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
+        id: neon
+        uses: neondatabase/create-branch-action@v6
+        with:
+          project_id: ${{ secrets.NEON_PROJECT_ID }}
+          branch_name: ${{ env.RAMA }}
+          parent_branch: main
+          api_key: ${{ secrets.NEON_API_KEY }}
+      - name: Migrar la rama
+        if: steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
+        env:
+          DB_URL: ${{ steps.neon.outputs.db_url }}
+        run: |
+          pnpm install --frozen-lockfile
+          DATABASE_URL_MIGRATE="$DB_URL" pnpm db:deploy
+      - name: DATABASE_URL de preview para la rama git
+        if: steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
+        env:
+          DB_URL_POOLED: ${{ steps.neon.outputs.db_url_pooled }}
+        run: |
+          # La app usa opai_app (sin BYPASSRLS): misma contraseña que en main, heredada por la rama.
+          URL_APP=$(echo "$DB_URL_POOLED" | sed -E "s#://[^:]+:[^@]+@#://opai_app:${OPAI_APP_DB_PASSWORD}@#")
+          npx --yes vercel@latest env rm DATABASE_URL preview "$RAMA_GIT" --yes --token "$VERCEL_TOKEN" >/dev/null 2>&1 || true
+          printf '%s' "$URL_APP" | npx --yes vercel@latest env add DATABASE_URL preview "$RAMA_GIT" --token "$VERCEL_TOKEN" >/dev/null
+      - name: Redesplegar la preview con la base de su rama
+        if: steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
+        # El despliegue automático de Vercel pudo partir antes de fijar la variable: se repite.
+        run: npx --yes vercel@latest deploy --yes --token "$VERCEL_TOKEN" >/dev/null
+      - name: Borrar la rama Neon y la variable al cerrar
+        if: steps.listo.outputs.ok == 'true' && github.event.action == 'closed'
+        run: |
+          npx --yes neonctl@latest branches delete "$RAMA" --project-id "$NEON_PROJECT_ID" --api-key "$NEON_API_KEY" || true
+          npx --yes vercel@latest env rm DATABASE_URL preview "$RAMA_GIT" --yes --token "$VERCEL_TOKEN" >/dev/null 2>&1 || true
