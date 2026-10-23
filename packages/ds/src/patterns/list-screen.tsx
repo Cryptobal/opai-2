@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import { cn } from "../cn";
 import { Table, Td, Th, Tr } from "../components/table";
+import { type LinkComponent, LinkPorDefecto } from "../shell/types";
 import { Cabecera, Estado, type EstadoPantalla, type TextosEstado } from "./estado";
 
 export type Columna<T> = {
@@ -26,28 +27,22 @@ export type ListScreenProps<T> = {
   tarjeta: (item: T) => ReactNode;
   /** Columnas de la tabla en md+. */
   columnas: readonly Columna<T>[];
+  /** Fila como enlace (server-first, ADR-037): la fila entera navega sin JavaScript propio. */
+  href?: (item: T) => string;
+  /** Componente de enlace (next/link) cuando se usa `href`. Por defecto, <a>. */
+  Link?: LinkComponent;
+  /** Alternativa de cliente: fila como botón. */
   onSeleccionar?: (item: T) => void;
   textos?: TextosEstado;
 };
 
 /** Lista: cabecera con acción principal, búsqueda, chips de filtro, filas en base y tabla en md+. */
 export function ListScreen<T>(props: ListScreenProps<T>) {
-  const {
-    state,
-    titulo,
-    subtitulo,
-    accionPrincipal,
-    buscador,
-    filtros,
-    paginacion,
-    items,
-    clave,
-    tarjeta,
-    columnas,
-    onSeleccionar,
-    textos,
-  } = props;
+  const { state, titulo, subtitulo, accionPrincipal, buscador, filtros, paginacion, items } = props;
+  const { clave, tarjeta, columnas, href, onSeleccionar, textos } = props;
+  const Link = props.Link ?? LinkPorDefecto;
   const vacio = state === "ready" && items.length === 0 ? "empty" : state;
+  const filaBase = "flex w-full items-start gap-3 px-4 py-3.5 text-left";
   return (
     <section>
       <Cabecera
@@ -69,16 +64,19 @@ export function ListScreen<T>(props: ListScreenProps<T>) {
         <ul className="-mx-4 border-y border-border bg-surface md:hidden">
           {items.map((item) => (
             <li key={clave(item)} className="border-b border-border last:border-b-0">
-              <button
-                type="button"
-                onClick={onSeleccionar ? () => onSeleccionar(item) : undefined}
-                className={cn(
-                  "flex w-full items-start gap-3 px-4 py-3.5 text-left",
-                  onSeleccionar && "active:bg-fill",
-                )}
-              >
-                {tarjeta(item)}
-              </button>
+              {href ? (
+                <Link href={href(item)} className={cn(filaBase, "active:bg-fill")}>
+                  {tarjeta(item)}
+                </Link>
+              ) : (
+                <button
+                  type="button"
+                  onClick={onSeleccionar ? () => onSeleccionar(item) : undefined}
+                  className={cn(filaBase, onSeleccionar && "active:bg-fill")}
+                >
+                  {tarjeta(item)}
+                </button>
+              )}
             </li>
           ))}
         </ul>
@@ -98,11 +96,18 @@ export function ListScreen<T>(props: ListScreenProps<T>) {
                 <Tr
                   key={clave(item)}
                   onClick={onSeleccionar ? () => onSeleccionar(item) : undefined}
-                  className={cn(onSeleccionar && "cursor-pointer")}
+                  className={cn((onSeleccionar || href) && "cursor-pointer", href && "relative")}
                 >
-                  {columnas.map((c) => (
+                  {columnas.map((c, i) => (
                     <Td key={c.id} className={c.className}>
-                      {c.render(item)}
+                      {href && i === 0 ? (
+                        // Enlace "estirado": toda la fila navega y el nombre accesible es la primera celda.
+                        <Link href={href(item)} className="after:absolute after:inset-0">
+                          {c.render(item)}
+                        </Link>
+                      ) : (
+                        c.render(item)
+                      )}
                     </Td>
                   ))}
                 </Tr>

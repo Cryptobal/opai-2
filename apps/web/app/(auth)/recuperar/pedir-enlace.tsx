@@ -1,21 +1,27 @@
 "use client";
 
 import { Inbox } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 
-import { requestPasswordReset } from "@opai/auth/client";
 import { AuthCard, Button, Campo, EstadoIlustrado, estilosBoton, Input } from "@opai/ds";
 
+import { accionPedirRecuperacion } from "@/app/_acciones/auth";
 import { LinkNext } from "@/app/_components/link-next";
 
 const ESPERA = 45;
 
-/** Pide el correo y confirma el envío. Responde igual exista o no la cuenta. */
+/** Pide el correo y confirma el envío. Responde igual exista o no la cuenta (Server Action). */
 export function PedirEnlace({ enviadoA }: { enviadoA?: string } = {}) {
-  const [email, setEmail] = useState(enviadoA ?? "");
-  const [enviado, setEnviado] = useState(Boolean(enviadoA));
+  const [estado, enviar, pendiente] = useActionState(accionPedirRecuperacion, {
+    enviadoA: enviadoA ?? null,
+  });
   const [restante, setRestante] = useState(enviadoA ? ESPERA : 0);
-  const [enviando, setEnviando] = useState(false);
+  // Cada envío (primero o reenvío) reinicia la espera para reenviar.
+  const enviarYContar = (form: FormData) => {
+    if (estado.enviadoA && !form.get("email")) form.set("email", estado.enviadoA);
+    setRestante(ESPERA);
+    enviar(form);
+  };
 
   useEffect(() => {
     if (restante <= 0) return;
@@ -23,15 +29,7 @@ export function PedirEnlace({ enviadoA }: { enviadoA?: string } = {}) {
     return () => clearTimeout(t);
   }, [restante]);
 
-  async function enviar() {
-    setEnviando(true);
-    await requestPasswordReset({ email: email.trim(), redirectTo: "/recuperar" });
-    setEnviando(false);
-    setEnviado(true);
-    setRestante(ESPERA);
-  }
-
-  if (enviado) {
+  if (estado.enviadoA) {
     return (
       <AuthCard
         volver="/login"
@@ -44,17 +42,19 @@ export function PedirEnlace({ enviadoA }: { enviadoA?: string } = {}) {
             >
               Volver a iniciar sesión
             </LinkNext>
-            <Button variant="ghost" size="lg" disabled={restante > 0 || enviando} onClick={enviar}>
-              {restante > 0 ? `Reenviar en 0:${String(restante).padStart(2, "0")}` : "Reenviar"}
-            </Button>
+            <form action={enviarYContar} className="contents">
+              <Button type="submit" variant="ghost" size="lg" disabled={restante > 0 || pendiente}>
+                {restante > 0 ? `Reenviar en 0:${String(restante).padStart(2, "0")}` : "Reenviar"}
+              </Button>
+            </form>
           </>
         }
       >
         <EstadoIlustrado icono={Inbox} tono="info" titulo="Revisa tu correo">
           <p>
             Si existe una cuenta para{" "}
-            <strong className="font-semibold text-fg">{email.trim()}</strong>, te enviamos un enlace
-            para crear una nueva contraseña. Vence en 30 minutos.
+            <strong className="font-semibold text-fg">{estado.enviadoA}</strong>, te enviamos un
+            enlace para crear una nueva contraseña. Vence en 30 minutos.
           </p>
           <p className="t-caption mt-3">Si no llega en unos minutos, revisa la carpeta de spam.</p>
         </EstadoIlustrado>
@@ -69,21 +69,21 @@ export function PedirEnlace({ enviadoA }: { enviadoA?: string } = {}) {
       titulo="Recupera tu contraseña"
       subtitulo="Escribe el correo con que entras a OPAI. Te enviaremos un enlace para crear una nueva."
     >
-      <form onSubmit={(e) => (e.preventDefault(), void enviar())} className="flex flex-col gap-4">
+      <form action={enviarYContar} className="flex flex-col gap-4">
         <Campo etiqueta="Correo" htmlFor="email">
           <Input
             id="email"
+            name="email"
             type="email"
             inputMode="email"
             autoComplete="username"
             placeholder="nombre@empresa.cl"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
             required
+            disabled={pendiente}
           />
         </Campo>
-        <Button type="submit" size="lg" block disabled={enviando}>
-          {enviando ? "Enviando…" : "Enviar enlace"}
+        <Button type="submit" size="lg" block disabled={pendiente}>
+          {pendiente ? "Enviando…" : "Enviar enlace"}
         </Button>
       </form>
     </AuthCard>

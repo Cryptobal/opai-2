@@ -7,6 +7,7 @@ export { UserMenu } from "./user-menu";
 export {
   esActivo,
   type LinkComponent,
+  LinkPorDefecto,
   type LinkProps,
   type NavItem,
   type Portal,

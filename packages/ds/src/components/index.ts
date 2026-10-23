@@ -10,4 +10,5 @@ export { Sheet } from "./sheet";
 export { Skeleton } from "./skeleton";
 export { Switch } from "./switch";
 export { Table, Td, Th, Tr } from "./table";
-export { Tabs, type Tab } from "./tabs";
+export { ContadorTab, estiloTab, Tabs, type Tab } from "./tabs";
+export { TabsEstado } from "./tabs-estado";

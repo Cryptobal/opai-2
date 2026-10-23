@@ -1,6 +1,6 @@
 /**
- * Rate limit básico en memoria por instancia (ventana fija de 60 s). Suficiente para el Brief 01;
- * se centraliza (Redis/Upstash o la base) cuando haya tráfico real.
+ * Rate limit básico en memoria por instancia (ventana fija de 60 s por defecto). Suficiente para
+ * la construcción; se centraliza (Redis/Upstash o la base) cuando haya tráfico real.
  */
 const ventanas = new Map<string, { inicio: number; n: number }>();
 
@@ -20,10 +20,16 @@ export function permitir(
   return v.n <= maximo;
 }
 
+/** IP del cliente a partir de las cabeceras (Vercel pone `x-forwarded-for`). */
+export function ipDeCabeceras(h: Headers): string {
+  return h.get("x-forwarded-for")?.split(",")[0]?.trim() ?? h.get("x-real-ip") ?? "local";
+}
+
 export function ipDe(req: Request): string {
-  return (
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    req.headers.get("x-real-ip") ??
-    "local"
-  );
+  return ipDeCabeceras(req.headers);
+}
+
+/** Solo para tests: vacía las ventanas. */
+export function limpiarVentanas(): void {
+  ventanas.clear();
 }

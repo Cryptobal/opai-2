@@ -1,11 +1,9 @@
 "use client";
 
 import { ChevronRight } from "lucide-react";
-import { useRouter } from "next/navigation";
-
-import { signOut } from "@opai/auth/client";
 import { AuthCard, Badge, Button, Monograma } from "@opai/ds";
 
+import { accionSalir } from "@/app/_acciones/auth";
 import { cambiarTenant } from "@/app/_acciones/capacidad";
 import { LinkNext } from "@/app/_components/link-next";
 import { ETIQUETA_ROL } from "@/app/_components/portales";
@@ -15,7 +13,6 @@ type Empresa = { tenantId: string; nombre: string; rol: string; ultimoAcceso: st
 
 /** Tarjetas de empresa con monograma, rol y último acceso; cerrar sesión al pie. */
 export function SelectorEmpresa({ empresas, destino }: { empresas: Empresa[]; destino: string }) {
-  const router = useRouter();
   return (
     <AuthCard
       Link={LinkNext}
@@ -31,11 +28,7 @@ export function SelectorEmpresa({ empresas, destino }: { empresas: Empresa[]; de
         </>
       }
       acciones={
-        <Button
-          variant="ghost"
-          size="lg"
-          onClick={() => void signOut().then(() => router.push("/login"))}
-        >
+        <Button variant="ghost" size="lg" onClick={() => void accionSalir()}>
           Cerrar sesión
         </Button>
       }
