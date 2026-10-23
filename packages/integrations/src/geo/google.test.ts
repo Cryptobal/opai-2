@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { geoGoogle } from "./google";
+import { ErrorGoogle, geoGoogle } from "./google";
 
 describe("geolocalización Google", () => {
   afterEach(() => vi.unstubAllGlobals());
@@ -55,5 +55,75 @@ describe("geolocalización Google", () => {
     const url = new URL(geoGoogle("CLAVE").urlMapa(-33.36, -70.73));
     expect(url.searchParams.get("key")).toBe("CLAVE");
     expect(url.searchParams.get("markers")).toBe("-33.36,-70.73");
+  });
+});
+
+describe("fallas de Google Maps (estado y mensaje, nunca la clave)", () => {
+  afterEach(() => {
+    vi.unstubAllGlobals();
+    vi.restoreAllMocks();
+  });
+
+  it("Places 403 informa el estado y el mensaje de Google y lo registra sin la clave", async () => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        Response.json(
+          {
+            error: {
+              code: 403,
+              status: "PERMISSION_DENIED",
+              message: "Places API (New) has not been used in project 123 (clave SECRETA-XYZ).",
+            },
+          },
+          { status: 403 },
+        ),
+      ),
+    );
+    const falla = await geoGoogle("SECRETA-XYZ")
+      .autocompletar("Las Industrias")
+      .catch((e: unknown) => e);
+    expect(falla).toBeInstanceOf(ErrorGoogle);
+    const e = falla as ErrorGoogle;
+    expect([e.http, e.estado, e.api]).toEqual([403, "PERMISSION_DENIED", "Places autocompletar"]);
+    expect(e.message).toContain("Places API (New) has not been used");
+    expect(e.message).not.toContain("SECRETA-XYZ");
+    const registrado = String(log.mock.calls[0]?.[0]);
+    expect(registrado).toContain("PERMISSION_DENIED");
+    expect(registrado).not.toContain("SECRETA-XYZ");
+  });
+
+  it("Geocoding con REQUEST_DENIED (HTTP 200) es un error, no «sin resultados»", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        Response.json({
+          status: "REQUEST_DENIED",
+          error_message: "This API project is not authorized to use this API.",
+          results: [],
+        }),
+      ),
+    );
+    await expect(geoGoogle("k").geocodificar("Plaza de Armas")).rejects.toThrow(
+      /REQUEST_DENIED.*not authorized/,
+    );
+  });
+
+  it("una caída de red se informa sin exponer la URL con la clave", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => {
+        throw new TypeError("fetch failed");
+      }),
+    );
+    const e = (await geoGoogle("SECRETA")
+      .geocodificar("Plaza de Armas")
+      .catch((x: unknown) => x)) as Error;
+    expect(e).toBeInstanceOf(ErrorGoogle);
+    expect(e.message).toContain("fetch failed");
+    expect(e.message).not.toContain("SECRETA");
   });
 });

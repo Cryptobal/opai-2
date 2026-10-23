@@ -145,3 +145,67 @@ describe("geolocalización e IA medidas", () => {
     expect(h?.descripcion).toMatch(/Campos externos.*direccionFormateada/);
   });
 });
+
+describe("fallas de Google Maps visibles (autocompletar)", () => {
+  const sinPermiso = () =>
+    vi.fn(async (url: unknown) =>
+      String(url).includes("places.googleapis.com")
+        ? Response.json(
+            {
+              error: {
+                code: 403,
+                status: "PERMISSION_DENIED",
+                message: "Places API (New) no habilitada.",
+              },
+            },
+            { status: 403 },
+          )
+        : Response.json({
+            status: "OK",
+            results: [
+              {
+                place_id: "p",
+                formatted_address: "x",
+                geometry: { location: { lat: 1, lng: 2 } },
+                address_components: [],
+              },
+            ],
+          }),
+    );
+
+  it("core.geo.autocompletar devuelve el mensaje de Google, no un vacío", async () => {
+    process.env["GOOGLE_MAPS_SERVER_KEY"] = "SECRETA";
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    vi.stubGlobal("fetch", sinPermiso());
+    const { ctx } = contextoDePrueba();
+    const r = await executeCapability(ctx, "core.geo.autocompletar", { texto: "Las Industrias" });
+    expect(r.ok).toBe(false);
+    const e = !r.ok ? r.error : null;
+    expect(e?.code).toBe("UNPROCESSABLE");
+    expect(e?.message).toMatch(/PERMISSION_DENIED.*Places API \(New\) no habilitada/);
+    expect(e?.message).not.toContain("SECRETA");
+  });
+
+  it("probar prueba también el autocompletado y deja la integración en error con su ultimo_error", async () => {
+    process.env["GOOGLE_MAPS_SERVER_KEY"] = "SECRETA";
+    vi.spyOn(console, "error").mockImplementation(() => undefined);
+    vi.stubGlobal("fetch", sinPermiso());
+    const { ctx } = contextoDePrueba();
+    const r = await executeCapability(ctx, "core.integraciones.probar", {
+      proveedor: "google_maps",
+    });
+    expect(r).toMatchObject({ ok: true, data: { ok: false } });
+    const mensaje = r.ok ? (r.data as { mensaje: string }).mensaje : "";
+    expect(mensaje).toMatch(/Autocompletado: .*PERMISSION_DENIED/);
+    expect(mensaje).not.toMatch(/Geocodificación/);
+    expect(mensaje).not.toContain("SECRETA");
+    const lista = await executeCapability(ctx, "core.integraciones.list", {});
+    const fila = (
+      lista.ok
+        ? (lista.data as { proveedor: string; estado: string; ultimoError: string | null }[])
+        : []
+    ).find((i) => i.proveedor === "google_maps");
+    expect(fila?.estado).toBe("error");
+    expect(fila?.ultimoError).toMatch(/PERMISSION_DENIED/);
+  });
+});

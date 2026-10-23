@@ -19,6 +19,7 @@ export type Integracion = {
   categoria: string;
   modalidad: string;
   modalidades: string[];
+  plataformaDisponible: boolean;
   estado: "configurada" | "no_configurada" | "no_disponible" | "error" | "proximamente" | string;
   config: unknown;
   secretos: { nombre: string; etiqueta: string; mascara: string | null }[];

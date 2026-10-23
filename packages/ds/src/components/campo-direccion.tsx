@@ -30,6 +30,8 @@ type Props = {
   /** Geocerca a dibujar en el mapa. */
   geocercaM?: number | null;
   sinMapa?: boolean;
+  /** Falla del servicio de mapas (o de la búsqueda): se muestra en el campo, nunca se oculta. */
+  error?: string | null;
 };
 
 /**
@@ -44,6 +46,7 @@ export function CampoDireccion({
   resolver,
   geocercaM,
   sinMapa,
+  error,
 }: Props) {
   const [manual, setManual] = useState(false);
   if (manual) {
@@ -91,12 +94,18 @@ export function CampoDireccion({
         placeholder={valor?.calle || "Busca la dirección"}
         buscarPlaceholder="Calle y número"
         aria-label="Dirección"
+        invalido={Boolean(error)}
         onBuscar={buscar}
         onCambiar={async ([placeId]) => {
           if (!placeId) return;
           onCambiar(await resolver(placeId));
         }}
       />
+      {error ? (
+        <p role="alert" className="text-xs font-medium text-danger-fg">
+          {error}
+        </p>
+      ) : null}
       {valor ? (
         <p className="t-caption">
           {[valor.comuna, valor.region].filter(Boolean).join(", ") || "Sin comuna"}

@@ -9,13 +9,8 @@ import { PERMISOS_CORE, PERMISOS_PLATAFORMA } from "@opai/domain";
 
 import { defineCapability } from "../define";
 import { noEncontrado } from "../errores";
-import { correoDe, geoDe, iaDe } from "../integraciones/adaptadores";
-
-async function geoDisponible(ctx: Parameters<typeof geoDe>[0]) {
-  const geo = await geoDe(ctx);
-  if (!geo) throw new Error("La geolocalización no está disponible en este entorno.");
-  return geo;
-}
+import { correoDe, iaDe } from "../integraciones/adaptadores";
+import { probarGeo } from "./integraciones-probar-geo";
 
 export const integracionesProbar = defineCapability({
   id: "core.integraciones.probar",
@@ -36,8 +31,7 @@ export const integracionesProbar = defineCapability({
     let mensaje = "Conexión correcta.";
     try {
       if (def.categoria === "geo") {
-        if (!(await (await geoDisponible(ctx)).geocodificar("Plaza de Armas, Santiago")))
-          throw new Error("Sin resultados.");
+        await probarGeo(ctx);
       } else if (def.categoria === "ia") {
         // Se prueba exactamente el proveedor pedido, no el primero disponible.
         const ia = await iaDe(ctx, "economica", "core", def.id as ProveedorIaId);

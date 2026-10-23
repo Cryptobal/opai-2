@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { definicionIntegracion, enmascarar } from "@opai/integrations";
+import { credencialDePlataforma, definicionIntegracion, enmascarar } from "@opai/integrations";
 
 import { noEncontrado } from "../errores";
 import { estadoIntegracion, integracionDe } from "../integraciones/resolver";
@@ -13,6 +13,8 @@ export const integracionSchema = z.object({
   categoria: z.string(),
   modalidad: z.string(),
   modalidades: z.array(z.string()),
+  /** false si la modalidad "plataforma" no tiene credencial en este entorno (no se puede elegir). */
+  plataformaDisponible: z.boolean(),
   /** configurada | no_configurada | no_disponible | error | proximamente */
   estado: z.string(),
   config: z.unknown(),
@@ -34,6 +36,8 @@ export async function vistaIntegracion(ctx: Contexto, proveedor: string) {
     categoria: def.categoria,
     modalidad: fila?.modalidad ?? def.modalidades[0] ?? "propia",
     modalidades: [...def.modalidades],
+    plataformaDisponible:
+      def.modalidades.includes("plataforma") && credencialDePlataforma(def.id) !== null,
     estado: estadoIntegracion(
       def,
       fila,
