@@ -150,3 +150,25 @@ Una entrada por decisión. Las decisiones no se editan: si cambian, se agrega un
 - Componentes: Button 40/48/44 (icono), Input 44 con foco acento, Badge píldora con punto, Chip de filtro 32, Tabs 44, Card radio 16, Table (th 12/16, td 48), KPI tile, Skeleton con brillo, Sheet inferior con asa, Avatar de iniciales, Monograma.
 
 **Reglas derivadas.** En iPad y desktop el título de la página vive en la barra superior del shell (`titulo` del `AppShell`); los patrones muestran el título solo en teléfono (salvo `DetailScreen`, que lo muestra siempre porque es un panel). La acción principal pertenece al patrón. Toda pantalla nueva sigue el export como referencia de layout y jerarquía; cualquier patrón o componente nuevo se diseña primero en Claude Design y se agrega al DS, nunca a un módulo.
+
+---
+
+## ADR-015 · Autenticación con Better Auth
+
+**Fecha:** 23-oct-2026 · **Estado:** vigente
+
+**Contexto.** 1.0 usa Auth.js v5, que sigue en beta desde 2023 (beta.32, julio 2026). 2.0 necesita varios mecanismos (correo y contraseña, Google, enlace mágico, RUT y PIN, dispositivos emparejados, API keys para agentes) sobre un modelo multi-tenant propio.
+
+**Decisión.** Better Auth (1.7.x), TypeScript-first, con adaptador Prisma sobre las tablas de identidad en `core` (`users`, `sessions`, `accounts`, `verifications`, sin `tenant_id`). La pertenencia a tenants es un modelo propio (`memberships`, con RLS y política `user_self`), no el plugin `organization`, para que la segregación siga pasando por Postgres. RUT+PIN y emparejamiento de dispositivos se implementan como proveedores propios en la fase de portales. Las API keys son modelo propio (`api_keys`), vinculadas a un usuario responsable.
+
+**Consecuencias.** `packages/auth` encapsula la librería; el resto del código solo usa `getSession()`/`requireSession()` y `resolverActor()`. Cambiar de librería no toca módulos.
+
+---
+
+## ADR-016 · Roles por tenant y bloqueo financiero
+
+**Fecha:** 23-oct-2026 · **Estado:** vigente
+
+**Decisión.** Cinco roles por tenant: `owner` (todo, incluido borrar el tenant y gestionar owners), `admin` (todo salvo lo anterior), `gerente` (lectura y escritura en todos los módulos operativos y comerciales; sin `finanzas:*`, `nomina:*` ni gestión de usuarios y API keys), `supervisor` (operaciones, rondas, asistencia y personas en lectura; sin comercial ni finanzas), `viewer` (solo lectura, sin finanzas ni nómina). Permisos con formato `<modulo>:<accion>` y comodines por rol en `@opai/domain`. Rol de plataforma aparte (`users.platform_role`: `owner` | `support`), que otorga `platform:*` y no implica permisos dentro de ningún tenant. El acceso a portales es explícito por membresía (`memberships.portales`).
+
+**Consecuencias.** Hereda el principio de 1.0 (`applyFinancialRoleLock`): los datos financieros solo los ven owner y admin. Los permisos por usuario (excepciones) quedan para cuando un tenant los pida.

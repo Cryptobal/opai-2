@@ -1,6 +1,6 @@
 # ESTADO — OPAI 2.0
 
-**Última actualización:** 23-oct-2026 · **Actualizado por:** Claude Code (Brief 00-infra, desde el Mac de Carlos) · **Fase en curso:** 0 — Fundación (código, DS e infraestructura listos)
+**Última actualización:** 23-oct-2026 · **Actualizado por:** Claude (arquitectura) · **Fase en curso:** 1 — Núcleo (Brief 01 escrito, pendiente de ejecución)
 
 Este archivo es la fuente de verdad del avance. Cada brief lo actualiza al terminar. Si algo no está aquí, no está hecho.
 
@@ -25,12 +25,14 @@ Este archivo es la fuente de verdad del avance. Cada brief lo actualiza al termi
 
 ## En curso
 
-- Nada. Siguiente: Brief 01.
+- **Carlos:** ejecutar `docs/2.0/briefs/BRIEF-01-identidad-y-plataforma.md` en Claude Code (login, roles y permisos, Plataforma, MCP con API keys, telemetría). Se detiene dos veces (variables en Vercel; primer ingreso).
+- **Carlos (cuando quiera):** correr `docs/2.0/design/DESIGN-PROMPT-acceso.md` en Claude Design para el diseño definitivo de las pantallas de acceso.
 
 ## Pendiente (siguiente)
 
 - Evaluar Radix/shadcn para Combobox con búsqueda, Dialog y Menú cuando el primer módulo los necesite (Comercial).
-- Brief 01 — Núcleo mínimo (auth, usuarios, roles y permisos, tenants y Plataforma mínima, módulos y entitlements, cuentas, contactos, instalaciones, cargos y estructuras, archivos y PDF, configuración declarativa, MCP con API keys, telemetría, selector de portal real, diccionario de vertical).
+- Brief 02 — Maestros y servicios del núcleo (cuentas, contactos, instalaciones, cargos y estructuras de sueldo en tres niveles, documentos y archivos en R2, configuración declarativa, notificaciones). El núcleo mínimo se partió en 01 (identidad y plataforma) y 02 (maestros) para mantener briefs ejecutables en una sesión.
+- Brief 01b — Pantallas de acceso definitivas a partir del diseño aprobado (`DESIGN-PROMPT-acceso.md`).
 - Extracción de 1.0 para Comercial y CPQ → `docs/2.0/extraccion/`.
 - Modelo de planes y facturación de suscripciones: cuando exista Opai SpA (en creación).
 
