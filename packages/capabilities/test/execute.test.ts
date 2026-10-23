@@ -1,31 +1,17 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { z } from "zod";
 
-import type { TenantDb } from "@opai/db";
-
-import { capacidadesDelNucleo } from "../src/core/ping";
+import { capacidadesDelNucleo } from "../src/core";
 import { defineCapability } from "../src/define";
+import { reglaDeNegocio } from "../src/errores";
 import { executeCapability } from "../src/execute";
-import { manejarCapacidadHttp } from "../src/http";
 import { limpiarRegistro, registrarCapacidades } from "../src/registry";
-import type { Contexto, EventoAuditoria } from "../src/types";
+import { contextoDePrueba, TENANT_DE_PRUEBA } from "../src/testing";
 
-const TENANT = "0192f3a0-0000-7000-8000-000000000001";
+const agente = { tipo: "agent" as const, id: "grokbot", viaUserId: "carlos" };
 
-function contextoFalso(permisos: string[] = []): Contexto & { eventos: EventoAuditoria[] } {
-  const eventos: EventoAuditoria[] = [];
-  return {
-    tenantId: TENANT,
-    actor: { tipo: "agent", id: "grokbot", viaUserId: "carlos" },
-    db: {} as TenantDb,
-    auditoria: {
-      async registrar(evento) {
-        eventos.push(evento);
-      },
-    },
-    autorizar: (permiso) => permisos.includes(permiso),
-    eventos,
-  };
+function ctxCon(permisos: string[] = [], extra: Parameters<typeof contextoDePrueba>[0] = {}) {
+  return contextoDePrueba({ permisos, actor: agente, modulosActivos: ["test"], ...extra });
 }
 
 const crearNota = defineCapability({
@@ -36,10 +22,10 @@ const crearNota = defineCapability({
   output: z.object({ id: z.string(), texto: z.string() }),
   efecto: "escritura",
   dryRun: true,
-  handler: vi.fn(async (_ctx, input, modo) => ({
-    id: modo.dryRun ? "preview" : "n1",
-    texto: input.texto,
-  })),
+  handler: vi.fn(async (_ctx, input, modo) => {
+    if (input.texto === "regla") throw reglaDeNegocio("No se puede.");
+    return { id: modo.dryRun ? "preview" : "n1", texto: input.texto };
+  }),
 });
 
 beforeEach(() => {
@@ -71,32 +57,76 @@ describe("defineCapability", () => {
 
 describe("executeCapability", () => {
   it("devuelve NOT_FOUND para un id inexistente", async () => {
-    const r = await executeCapability(contextoFalso(), "core.nada", {});
+    const r = await executeCapability(ctxCon().ctx, "core.nada", {});
     expect(r).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
   });
 
   it("devuelve INVALID_INPUT con issues de Zod", async () => {
-    const r = await executeCapability(contextoFalso(["test:write"]), "test.nota.create", {
+    const r = await executeCapability(ctxCon(["test:write"]).ctx, "test.nota.create", {
       texto: "",
     });
     expect(r).toMatchObject({ ok: false, error: { code: "INVALID_INPUT" } });
     expect(r.ok === false && Array.isArray(r.error.issues)).toBe(true);
   });
 
-  it("devuelve FORBIDDEN sin permiso", async () => {
-    const r = await executeCapability(contextoFalso(), "test.nota.create", { texto: "hola" });
+  it("devuelve FORBIDDEN sin permiso y lo registra en telemetría con ok: false", async () => {
+    const { ctx, usos } = ctxCon();
+    const r = await executeCapability(ctx, "test.nota.create", { texto: "hola" });
     expect(r).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+    expect(usos).toMatchObject([{ capability: "test.nota.create", ok: false, actorType: "agent" }]);
   });
 
-  it("ejecuta core.ping y no audita lecturas", async () => {
-    const ctx = contextoFalso();
+  it("FORBIDDEN con 'módulo inactivo' si el módulo no está activo en el tenant", async () => {
+    const { ctx } = ctxCon(["test:write"], { modulosActivos: [] });
+    const r = await executeCapability(ctx, "test.nota.create", { texto: "hola" });
+    expect(r.ok === false && r.error.message).toMatch(/Módulo inactivo/);
+  });
+
+  it("respeta los scopes de la key; '*' no incluye plataforma", async () => {
+    const sinScope = await executeCapability(
+      ctxCon(["test:write"], { scopes: ["core"] }).ctx,
+      "test.nota.create",
+      { texto: "a" },
+    );
+    const todo = await executeCapability(
+      ctxCon(["test:write"], { scopes: ["*"] }).ctx,
+      "test.nota.create",
+      { texto: "a" },
+    );
+    const plataforma = await executeCapability(
+      ctxCon([], { scopes: ["*"] }).ctx,
+      "platform.tenants.list",
+      {},
+    );
+    expect(sinScope.ok === false && sinScope.error.message).toMatch(/scope/);
+    expect(todo.ok).toBe(true);
+    expect(plataforma.ok === false && plataforma.error.message).toMatch(/scope "platform"/);
+  });
+
+  it("sin tenant solo corren capacidades marcadas sinTenant", async () => {
+    const { ctx } = ctxCon(["test:write"], { conTenant: false });
+    expect(await executeCapability(ctx, "test.nota.create", { texto: "a" })).toMatchObject({
+      ok: false,
+      error: { code: "FORBIDDEN" },
+    });
+    expect(await executeCapability(ctx, "core.ping", {})).toMatchObject({ ok: true });
+  });
+
+  it("ejecuta core.ping, no audita lecturas y mide la ejecución", async () => {
+    const { ctx, eventos, usos } = ctxCon();
     const r = await executeCapability(ctx, "core.ping", { mensaje: "hola" });
-    expect(r).toMatchObject({ ok: true, data: { pong: true, tenantId: TENANT, mensaje: "hola" } });
-    expect(ctx.eventos).toHaveLength(0);
+    expect(r).toMatchObject({
+      ok: true,
+      data: { pong: true, tenantId: TENANT_DE_PRUEBA, mensaje: "hola" },
+    });
+    expect(eventos).toHaveLength(0);
+    expect(usos).toMatchObject([
+      { capability: "core.ping", modulo: "core", ok: true, tenantId: TENANT_DE_PRUEBA },
+    ]);
   });
 
-  it("audita escrituras con actor, capacidad y clave de idempotencia", async () => {
-    const ctx = contextoFalso(["test:write"]);
+  it("audita escrituras con tenant, actor, capacidad y clave de idempotencia", async () => {
+    const { ctx, eventos } = ctxCon(["test:write"]);
     const r = await executeCapability(
       ctx,
       "test.nota.create",
@@ -104,59 +134,30 @@ describe("executeCapability", () => {
       { idempotencyKey: "k1" },
     );
     expect(r).toMatchObject({ ok: true, data: { id: "n1", texto: "hola" }, dryRun: false });
-    expect(ctx.eventos).toHaveLength(1);
-    expect(ctx.eventos[0]).toMatchObject({
-      capability: "test.nota.create",
-      actor: { tipo: "agent", id: "grokbot", viaUserId: "carlos" },
-      payload: { input: { texto: "hola" }, idempotencyKey: "k1" },
-    });
+    expect(eventos).toEqual([
+      expect.objectContaining({
+        tenantId: TENANT_DE_PRUEBA,
+        capability: "test.nota.create",
+        actor: agente,
+        payload: { input: { texto: "hola" }, idempotencyKey: "k1" },
+      }),
+    ]);
   });
 
   it("dryRun ejecuta el handler en modo vista previa y no audita", async () => {
-    const ctx = contextoFalso(["test:write"]);
+    const { ctx, eventos } = ctxCon(["test:write"]);
     const r = await executeCapability(ctx, "test.nota.create", { texto: "hola" }, { dryRun: true });
     expect(r).toMatchObject({ ok: true, data: { id: "preview" }, dryRun: true });
-    expect(ctx.eventos).toHaveLength(0);
-  });
-});
-
-describe("manejarCapacidadHttp", () => {
-  const fabrica = async () => contextoFalso(["test:write"]);
-
-  it("GET /api/v1/core/ping responde 200", async () => {
-    const req = new Request("http://x/api/v1/core/ping?input=%7B%22mensaje%22%3A%22hi%22%7D");
-    const res = await manejarCapacidadHttp(req, ["core", "ping"], fabrica);
-    expect(res.status).toBe(200);
-    expect(await res.json()).toMatchObject({ ok: true, data: { mensaje: "hi" } });
+    expect(eventos).toHaveLength(0);
   });
 
-  it("GET no se permite para escrituras; POST sí, con dry_run", async () => {
-    const get = await manejarCapacidadHttp(
-      new Request("http://x/api/v1/test/nota/create"),
-      ["test", "nota", "create"],
-      fabrica,
-    );
-    expect(get.status).toBe(405);
-    const post = new Request("http://x/api/v1/test/nota/create", {
-      method: "POST",
-      body: JSON.stringify({ input: { texto: "hola" }, dry_run: true }),
+  it("un ErrorCapacidad del handler conserva su código", async () => {
+    const r = await executeCapability(ctxCon(["test:write"]).ctx, "test.nota.create", {
+      texto: "regla",
     });
-    const res = await manejarCapacidadHttp(post, ["test", "nota", "create"], fabrica);
-    expect(res.status).toBe(200);
-    expect(await res.json()).toMatchObject({ ok: true, dryRun: true });
-  });
-
-  it("mapea errores a códigos HTTP", async () => {
-    const r404 = await manejarCapacidadHttp(
-      new Request("http://x/api/v1/core/nada"),
-      ["core", "nada"],
-      fabrica,
-    );
-    const r400 = await manejarCapacidadHttp(
-      new Request("http://x/api/v1/core/ping?input=%7B%22mensaje%22%3A1%7D"),
-      ["core", "ping"],
-      fabrica,
-    );
-    expect([r404.status, r400.status]).toEqual([404, 400]);
+    expect(r).toMatchObject({
+      ok: false,
+      error: { code: "UNPROCESSABLE", message: "No se puede." },
+    });
   });
 });

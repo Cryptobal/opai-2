@@ -8,7 +8,10 @@ export type FabricaContexto = (req: Request) => Promise<Contexto | Response>;
 const ESTADO: Record<CodigoError, number> = {
   NOT_FOUND: 404,
   INVALID_INPUT: 400,
+  UNAUTHENTICATED: 401,
   FORBIDDEN: 403,
+  CONFLICT: 409,
+  UNPROCESSABLE: 422,
   DRY_RUN_NOT_SUPPORTED: 400,
   INVALID_OUTPUT: 500,
   INTERNAL: 500,
@@ -59,7 +62,8 @@ export async function manejarCapacidadHttp(
 ): Promise<Response> {
   const id = segmentos.join(".");
   const capacidad = obtenerCapacidad(id);
-  if (!capacidad) return error("NOT_FOUND", `Capacidad "${id}" no existe.`);
+  // Las internas (flujo de invitación) solo las usa la UI del núcleo.
+  if (!capacidad || capacidad.interna) return error("NOT_FOUND", `Capacidad "${id}" no existe.`);
 
   let input: unknown;
   let dryRun = false;

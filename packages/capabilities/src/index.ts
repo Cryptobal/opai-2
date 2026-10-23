@@ -1,6 +1,16 @@
-export { capacidadesDelNucleo } from "./core/ping";
-export { auditoriaEnDb, crearContexto, type ParametrosContexto } from "./contexto";
+export { capacidadesDelNucleo } from "./core";
+export { generarApiKey, hashApiKey, slugDeApiKey } from "./core/apikey-formato";
+export { catalogoPermisos } from "./core/me";
+export {
+  auditoriaEnDb,
+  autorizador,
+  crearContexto,
+  type ParametrosContexto,
+  SIN_TENANT,
+  telemetriaEnDb,
+} from "./contexto";
 export { defineCapability } from "./define";
+export { conflicto, ErrorCapacidad, noEncontrado, prohibido, reglaDeNegocio } from "./errores";
 export { executeCapability } from "./execute";
 export {
   limpiarRegistro,
@@ -10,19 +20,14 @@ export {
 } from "./registry";
 export type * from "./types";
 
-import { capacidadesDelNucleo } from "./core/ping";
-import { obtenerCapacidad, registrarCapacidades } from "./registry";
-
-/** Registra las capacidades del núcleo una sola vez (seguro ante recargas en desarrollo). */
-export function asegurarNucleo(): void {
-  if (!obtenerCapacidad("core.ping")) registrarCapacidades(capacidadesDelNucleo);
-}
-
 export {
   defineModule,
   type EntradaNavegacion,
   type EventoDeDominio,
+  limpiarModulos,
+  listarModulos,
   type ModuleManifest,
+  obtenerModulo,
   type Permiso,
   registrarModulos,
 } from "./module";

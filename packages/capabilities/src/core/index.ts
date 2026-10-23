@@ -1,0 +1,44 @@
+import type { Capacidad } from "../types";
+import { invitationsAccept, invitationsPeek, invitationsRequestNew } from "./aceptar";
+import { apikeysCreate, apikeysList, apikeysRevoke } from "./apikeys";
+import { auditList, modulesList, usageSummary } from "./consultas";
+import { invitationsList, invitationsRevoke, usersInvite } from "./invitations";
+import { me } from "./me";
+import { ping } from "./ping";
+import { platformTenantsCreate } from "./platform-escritura";
+import { platformTenantsSetEstado, platformTenantsUpdate } from "./platform-estado";
+import { platformAdminsInvite, platformModulesSet } from "./platform-modulos";
+import { platformTenantsGet, platformTenantsList, platformUsageSummary } from "./platform-tenants";
+import { tenantGet, tenantUpdate } from "./tenant";
+import { usersList, usersRemove, usersUpdate } from "./users";
+
+/** Capacidades del núcleo (`core.*`) y de plataforma (`platform.*`), Brief 01 sección 7. */
+export const capacidadesDelNucleo: readonly Capacidad[] = [
+  ping,
+  me,
+  tenantGet,
+  tenantUpdate,
+  usersList,
+  usersInvite,
+  usersUpdate,
+  usersRemove,
+  invitationsList,
+  invitationsRevoke,
+  invitationsPeek,
+  invitationsAccept,
+  invitationsRequestNew,
+  modulesList,
+  apikeysList,
+  apikeysCreate,
+  apikeysRevoke,
+  auditList,
+  usageSummary,
+  platformTenantsList,
+  platformTenantsGet,
+  platformTenantsCreate,
+  platformTenantsUpdate,
+  platformTenantsSetEstado,
+  platformModulesSet,
+  platformAdminsInvite,
+  platformUsageSummary,
+];

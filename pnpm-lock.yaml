@@ -167,6 +167,12 @@ importers:
       '@opai/db':
         specifier: workspace:*
         version: link:../db
+      '@opai/domain':
+        specifier: workspace:*
+        version: link:../domain
+      '@opai/integrations':
+        specifier: workspace:*
+        version: link:../integrations
       zod:
         specifier: ^4.6.7
         version: 4.6.7

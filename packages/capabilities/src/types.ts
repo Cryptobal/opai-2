@@ -1,4 +1,6 @@
-import type { TenantDb } from "@opai/db";
+import type { Rol, RolPlataforma } from "@opai/domain";
+import type { Globales, TenantDb } from "@opai/db";
+import type { Mailer } from "@opai/integrations/email";
 import type { z } from "zod";
 
 /** Efecto de una capacidad sobre los datos. Decide auditoría y confirmación (ADR-004). */
@@ -11,6 +13,8 @@ export type Actor =
   | { tipo: "agent"; id: string; viaUserId: string };
 
 export type EventoAuditoria = {
+  /** Tenant donde queda el evento (el actual o, en plataforma, el tenant objetivo). */
+  tenantId: string;
   capability: string;
   actor: Actor;
   entityType?: string;
@@ -22,14 +26,68 @@ export interface Auditoria {
   registrar(evento: EventoAuditoria): Promise<void>;
 }
 
+/** Una fila de `core.usage_events` por ejecución (lectura y escritura). */
+export type EventoUso = {
+  tenantId: string;
+  userId: string | null;
+  actorType: Actor["tipo"];
+  portal: string | null;
+  modulo: string;
+  capability: string;
+  efecto: Efecto;
+  dryRun: boolean;
+  ok: boolean;
+  duracionMs: number;
+};
+
+export interface Telemetria {
+  registrar(evento: EventoUso): Promise<void>;
+}
+
+/** Usuario humano detrás del actor (el propio usuario o el responsable de la API key). */
+export type UsuarioContexto = {
+  id: string;
+  nombre: string;
+  email: string;
+  platformRole: RolPlataforma | null;
+};
+
+/** Servicios del núcleo disponibles para las capacidades. Los implementa el borde. */
+export type Servicios = {
+  correo: Mailer;
+  /** URL pública de la app, para enlaces en correos ("https://test.opai.cl"). */
+  urlBase: string;
+};
+
+/** Acceso de plataforma: solo existe si el usuario tiene `platformRole` (ADR-016). */
+export type Plataforma = {
+  globales: Globales;
+  /** Cliente acotado al tenant objetivo. Nunca consultas cross-tenant en una sola query. */
+  paraTenant(tenantId: string): TenantDb;
+};
+
 /** Contexto de ejecución. Lo construye el borde (ruta HTTP, acción de UI, MCP), nunca el módulo. */
 export interface Contexto {
+  /** Tenant actual. Si `conTenant` es false (plataforma sin empresa elegida) es un id nulo. */
   tenantId: string;
+  conTenant: boolean;
   actor: Actor;
+  usuario: UsuarioContexto | null;
+  /** Rol de la membresía en el tenant actual. */
+  rol: Rol | null;
+  /** Portal desde el que se ejecuta (telemetría). */
+  portal: string | null;
+  /** Módulos activos (o en trial) del tenant. `core` y `platform` siempre lo están. */
+  modulosActivos: readonly string[];
+  /** Módulos permitidos para un agente (scopes de la key); null = sin restricción. */
+  scopes: readonly string[] | null;
   /** Cliente acotado al tenant. Única vía de acceso a datos para los handlers. */
   db: TenantDb;
   auditoria: Auditoria;
-  /** Decide si el actor tiene el permiso. En el Brief 00 solo las capacidades sin permiso pasan. */
+  telemetria: Telemetria;
+  servicios: Servicios;
+  plataforma: Plataforma | null;
+  /** Decide si el actor tiene el permiso (rol de la membresía y rol de plataforma). */
   autorizar(permiso: string): boolean;
 }
 
@@ -48,20 +106,29 @@ export interface Capacidad<I extends z.ZodType = z.ZodType, O extends z.ZodType 
   /** Derivado del id: el primer segmento. */
   modulo: string;
   descripcion: string;
-  /** `null` = sin permiso (solo capacidades públicas o del Brief 00). */
+  /** `null` = solo requiere actor autenticado (no `system` en producción, salvo internas). */
   permiso: string | null;
   input: I;
   output: O;
   efecto: Efecto;
   /** Si acepta `dryRun`: el handler calcula y describe sin persistir. Obligatorio si efecto ≠ lectura. */
   dryRun: boolean;
+  /** Interna: la usa la UI del núcleo (invitaciones), no se expone por API ni MCP. */
+  interna?: boolean;
+  /** No exige tenant actual (`core.me`, plataforma, flujos de invitación). */
+  sinTenant?: boolean;
+  /** Tenant donde auditar y medir (plataforma: el tenant objetivo). Por defecto, el actual. */
+  tenantObjetivo?: (input: z.output<I>, output: z.output<O> | undefined) => string | undefined;
   handler: (ctx: Contexto, input: z.output<I>, modo: ModoEjecucion) => Promise<z.input<O>>;
 }
 
 export type CodigoError =
   | "NOT_FOUND"
   | "INVALID_INPUT"
+  | "UNAUTHENTICATED"
   | "FORBIDDEN"
+  | "CONFLICT"
+  | "UNPROCESSABLE"
   | "DRY_RUN_NOT_SUPPORTED"
   | "INVALID_OUTPUT"
   | "INTERNAL";

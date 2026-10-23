@@ -7,6 +7,7 @@ export const ping = defineCapability({
   id: "core.ping",
   descripcion: "Responde con el tenant y la hora del servidor.",
   permiso: null,
+  sinTenant: true,
   input: z.object({ mensaje: z.string().max(80).optional() }),
   output: z.object({
     pong: z.literal(true),
@@ -25,5 +26,3 @@ export const ping = defineCapability({
     };
   },
 });
-
-export const capacidadesDelNucleo = [ping];

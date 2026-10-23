@@ -66,6 +66,22 @@ export function defineModule(manifest: ModuleManifest): ModuleManifest {
   return manifest;
 }
 
+const manifests = new Map<string, ModuleManifest>();
+
+/** Manifests registrados (navegación, `core.modules.list`, dependencias en plataforma). */
+export function listarModulos(): readonly ModuleManifest[] {
+  return [...manifests.values()];
+}
+
+export function obtenerModulo(id: string): ModuleManifest | undefined {
+  return manifests.get(id);
+}
+
+/** Solo para tests y para reconstruir el registro. */
+export function limpiarModulos(): void {
+  manifests.clear();
+}
+
 /** Registra módulos verificando dependencias y registrando sus capacidades. */
 export function registrarModulos(modulos: readonly ModuleManifest[]): void {
   const ids = new Set(modulos.map((m) => m.id));
@@ -76,5 +92,6 @@ export function registrarModulos(modulos: readonly ModuleManifest[]): void {
       }
     }
     registrarCapacidades(modulo.capacidades);
+    manifests.set(modulo.id, modulo);
   }
 }
