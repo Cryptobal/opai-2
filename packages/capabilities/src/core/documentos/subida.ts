@@ -13,6 +13,7 @@ import { defineCapability } from "../../define";
 import { noEncontrado, reglaDeNegocio } from "../../errores";
 import { uuidSchema } from "../esquemas";
 import { aFecha, diaSchema, hoy, textoOpcional } from "../maestros/comun";
+import { ajuste } from "../config/valores";
 import { tipoParaEntidad, verificarEntidad } from "./entidad";
 import { uuid7 } from "./uuid7";
 import { documentoSchema, entidadSchema, vistaDocumento } from "./vista";
@@ -22,7 +23,7 @@ const VIGENCIA_SUBIDA_S = 600;
 export const documentosIniciarSubida = defineCapability({
   id: "core.documentos.iniciar_subida",
   descripcion:
-    "Primer paso para subir un documento: valida tipo, tamaño (máx. 25 MB) y formato, crea el documento pendiente y entrega una URL PUT firmada por 10 minutos con las cabeceras a enviar (incluye la huella SHA-256 declarada). Luego llama a core.documentos.confirmar_subida.",
+    "Primer paso para subir un documento: valida tipo, tamaño (ajuste de la empresa, hasta 25 MB) y formato, crea el documento pendiente y entrega una URL PUT firmada por 10 minutos con las cabeceras a enviar (incluye la huella SHA-256 declarada). Luego llama a core.documentos.confirmar_subida.",
   permiso: PERMISOS_CORE.documentosManage,
   input: z.object({
     entidad: entidadSchema,
@@ -66,7 +67,10 @@ export const documentosIniciarSubida = defineCapability({
     );
     if (!mimePermitido(input.mime, tipo?.mimesPermitidos ?? []))
       throw reglaDeNegocio(`Formato no permitido: ${input.mime}.`);
-    if (input.tamano > TAMANO_MAXIMO_DOCUMENTO) throw reglaDeNegocio("El archivo supera 25 MB.");
+    const maximoMb = await ajuste<number>(ctx, "core", "documentos_tamano_maximo_mb");
+    if (input.tamano > Math.min(maximoMb * 1_048_576, TAMANO_MAXIMO_DOCUMENTO)) {
+      throw reglaDeNegocio(`El archivo supera ${maximoMb} MB.`);
+    }
     if (tipo?.tieneVencimiento && !input.venceEn)
       throw reglaDeNegocio(`"${tipo.nombre}" exige fecha de vencimiento.`);
     if (!dryRun && !ctx.servicios.almacenamiento.disponible)

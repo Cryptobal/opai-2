@@ -142,6 +142,9 @@ importers:
       '@opai/db':
         specifier: workspace:*
         version: link:../db
+      '@opai/domain':
+        specifier: workspace:*
+        version: link:../domain
       '@opai/integrations':
         specifier: workspace:*
         version: link:../integrations

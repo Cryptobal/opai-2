@@ -16,7 +16,10 @@ import {
   integracionesList,
   integracionesSetSecreto,
 } from "./integraciones";
+import { capacidadesComunicaciones, consumidorComunicaciones } from "./comunicaciones";
+import { capacidadesConfig } from "./config";
 import { capacidadesDocumentos, trabajosDocumentos } from "./documentos";
+import { capacidadesEmpresa } from "./empresa";
 import { capacidadesMaestros } from "./maestros";
 import { platformConsumosSummary, platformEventosList } from "./platform-observabilidad";
 import {
@@ -86,7 +89,13 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   platformIntegracionesEstado,
   ...capacidadesMaestros,
   ...capacidadesDocumentos,
+  ...capacidadesConfig,
+  ...capacidadesEmpresa,
+  ...capacidadesComunicaciones,
 ];
+
+/** Consumidores de eventos del núcleo que registra el borde. */
+export const consumidoresDelNucleo = [consumidorComunicaciones];
 
 /** Trabajos del núcleo que registra el borde (`apps/web/lib/registro.ts`). */
 export const trabajosDelNucleo = [...trabajosServicios, ...trabajosDocumentos];

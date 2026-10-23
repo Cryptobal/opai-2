@@ -1,10 +1,12 @@
 import {
   capacidadesDelNucleo,
+  consumidoresDelNucleo,
   limpiarConsumidores,
   limpiarModulos,
   limpiarRegistro,
   limpiarTrabajos,
   registrarCapacidades,
+  registrarConsumidores,
   registrarModulos,
   registrarTrabajos,
   trabajosDelNucleo,
@@ -27,5 +29,6 @@ export function asegurarRegistro(): void {
   registrarCapacidades(capacidadesDelNucleo);
   registrarModulos(modulos);
   registrarTrabajos(trabajosDelNucleo);
+  registrarConsumidores(consumidoresDelNucleo);
   hecho = true;
 }

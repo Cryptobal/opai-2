@@ -56,9 +56,15 @@ export const EVENTOS_CORE: readonly EventoDeDominio[] = [
     id: "core.agente.autonomia_cambiada",
     descripcion: "Cambió la autonomía de un agente (API key).",
   },
-  { id: "core.aprobacion.solicitada", descripcion: "Un agente pidió aprobación humana." },
+  { id: "core.aprobacion.pendiente", descripcion: "Un agente pidió aprobación humana." },
   { id: "core.aprobacion.resuelta", descripcion: "Una aprobación se aprobó o rechazó." },
-  { id: "core.consumo.umbral", descripcion: "El consumo cruzó un umbral del presupuesto." },
+  {
+    id: "core.agente.presupuesto_80",
+    descripcion: "Un agente consumió el 80 % de su presupuesto.",
+  },
+  { id: "core.agente.presupuesto_100", descripcion: "Un agente agotó su presupuesto mensual." },
+  { id: "core.usuario.invitado", descripcion: "Se invitó a una persona (correo transaccional)." },
+  { id: "core.usuario.invitacion_solicitada", descripcion: "Alguien pidió una nueva invitación." },
   { id: "core.bitacora.rota", descripcion: "La verificación de la bitácora encontró un quiebre." },
 ];
 
