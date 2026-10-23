@@ -19,6 +19,9 @@ export type ApiKeyFila = {
   revocadaEn: Date | null;
   expiraEn: Date | null;
   ultimoUsoEn: Date | null;
+  nombre: string;
+  presupuestoMensualMicro: bigint | null;
+  autonomia: { capability: string; nivel: string }[];
 };
 
 export type UsuarioFila = { id: string; name: string; email: string; platformRole: string | null };
@@ -50,7 +53,8 @@ export const fuentesReales: Fuentes = {
   },
   usuario: (userId) => globales().user.findUnique({ where: { id: userId } }),
   tenantPorSlug: (slug) => globales().tenant.findUnique({ where: { slug } }),
-  keyPorHash: (tenantId, hash) => forTenant(tenantId).apiKey.findUnique({ where: { hash } }),
+  keyPorHash: (tenantId, hash) =>
+    forTenant(tenantId).apiKey.findUnique({ where: { hash }, include: { autonomia: true } }),
   membresia: (tenantId, userId) =>
     forTenant(tenantId).membership.findUnique({ where: { tenantId_userId: { tenantId, userId } } }),
   async marcarUsoKey(tenantId, id) {

@@ -4,7 +4,14 @@ import type { Almacenamiento, Mailer } from "@opai/integrations";
 import type { z } from "zod";
 
 import type { Idempotencia } from "./idempotencia";
-import type { BitacoraServicio, Eventos, Medidor, Principal, Trabajos } from "./servicios-tipos";
+import type {
+  AgenteContexto,
+  BitacoraServicio,
+  Eventos,
+  Medidor,
+  Principal,
+  Trabajos,
+} from "./servicios-tipos";
 
 export type * from "./servicios-tipos";
 
@@ -72,6 +79,8 @@ export interface Contexto {
   scopes: readonly string[] | null;
   /** Principal de la API key (ADR-033). null en sesiones humanas y procesos del sistema. */
   principal: Principal | null;
+  /** Presupuesto y autonomía de la API key; null en sesiones humanas y procesos del sistema. */
+  agente: AgenteContexto | null;
   /** Cliente acotado al tenant. Única vía de acceso a datos para los handlers. */
   db: TenantDb;
   /** Transacción con el tenant fijado: cambio + evento + bitácora atómicos. Dentro, solo `tx`. */
@@ -100,6 +109,8 @@ export type OpcionesEjecucion = {
    * devuelve el resultado original sin repetir el efecto durante 24 h; con otro input, CONFLICT.
    */
   idempotencyKey?: string;
+  /** Datos extra para la auditoría (p. ej. la aprobación y la key que la originó). */
+  auditoriaExtra?: Record<string, unknown>;
 };
 
 /** Lo que recibe el handler además del input: si es vista previa y la clave de idempotencia. */
@@ -124,6 +135,8 @@ export interface Capacidad<I extends z.ZodType = z.ZodType, O extends z.ZodType 
   sinTenant?: boolean;
   /** Campos del input que nunca se guardan en auditoría ni en aprobaciones (secretos). */
   sensibles?: readonly string[];
+  /** Nunca la ejecuta una API key (aprobaciones, autonomía y presupuesto de agentes). */
+  soloPersonas?: boolean;
   /** Portales donde está disponible (ADR-033). Por defecto ["erp"] (plataforma: ["platform"]). */
   portales?: readonly string[];
   /** Tenant donde auditar y medir (plataforma: el tenant objetivo). Por defecto, el actual. */
@@ -146,4 +159,7 @@ export type CodigoError =
 
 export type Resultado<T = unknown> =
   | { ok: true; data: T; dryRun: boolean; repetida?: true }
-  | { ok: false; error: { code: CodigoError; message: string; issues?: unknown } };
+  | {
+      ok: false;
+      error: { code: CodigoError; message: string; issues?: unknown; aprobacionId?: string };
+    };

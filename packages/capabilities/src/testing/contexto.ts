@@ -2,7 +2,7 @@ import type { Rol } from "@opai/domain";
 
 import { autorizador } from "../contexto";
 import { idempotenciaSobre } from "../idempotencia";
-import type { ConsumoNuevo, Principal } from "../types";
+import type { AgenteContexto, ConsumoNuevo, Principal } from "../types";
 import { almacenamientoEnMemoria } from "./almacenamiento-memoria";
 import { dbEnMemoria } from "./db-memoria";
 import { bitacoraEnMemoria, eventosEnMemoria, trabajosEnMemoria } from "./servicios-memoria";
@@ -26,6 +26,7 @@ export type OpcionesPrueba = {
   modulosActivos?: readonly string[];
   scopes?: readonly string[] | null;
   principal?: Principal | null;
+  agente?: AgenteContexto | null;
   semilla?: Parameters<typeof dbEnMemoria>[0];
 };
 
@@ -55,6 +56,7 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
     modulosActivos: o.modulosActivos ?? [],
     scopes: o.scopes ?? null,
     principal: o.principal ?? null,
+    agente: o.agente ?? null,
     db,
     // Atómica como la real: si `fn` falla, las tablas vuelven al estado previo.
     transaccion: async (fn) => {

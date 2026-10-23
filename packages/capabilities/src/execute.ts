@@ -1,3 +1,4 @@
+import { controlAgente } from "./agentes/control";
 import { denegar, falla } from "./autorizacion";
 import { ErrorCapacidad } from "./errores";
 import { repeticion, sinSensibles, tenantDe } from "./execute-util";
@@ -33,6 +34,8 @@ async function correr(
   const modo = opciones.idempotencyKey
     ? { dryRun, idempotencyKey: opciones.idempotencyKey }
     : { dryRun };
+  const bloqueo = await controlAgente(ctx, c, entrada.data, opciones);
+  if (bloqueo) return { resultado: bloqueo, entrada: entrada.data };
   const clave =
     !dryRun && c.efecto !== "lectura" && ctx.conTenant ? opciones.idempotencyKey : undefined;
   const reserva = clave ? await ctx.idempotencia.reservar(c.id, clave, entrada.data) : null;
@@ -101,6 +104,7 @@ export async function executeCapability(
         payload: {
           input: sinSensibles(r.entrada, c.sensibles),
           idempotencyKey: opciones.idempotencyKey ?? null,
+          ...opciones.auditoriaExtra,
         },
       });
     }

@@ -16,6 +16,7 @@ import {
   integracionesList,
   integracionesSetSecreto,
 } from "./integraciones";
+import { capacidadesAgentes, trabajosAgentes } from "./agentes";
 import { capacidadesComunicaciones, consumidorComunicaciones } from "./comunicaciones";
 import { capacidadesConfig } from "./config";
 import { capacidadesDocumentos, trabajosDocumentos } from "./documentos";
@@ -92,10 +93,11 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   ...capacidadesConfig,
   ...capacidadesEmpresa,
   ...capacidadesComunicaciones,
+  ...capacidadesAgentes,
 ];
 
 /** Consumidores de eventos del núcleo que registra el borde. */
 export const consumidoresDelNucleo = [consumidorComunicaciones];
 
 /** Trabajos del núcleo que registra el borde (`apps/web/lib/registro.ts`). */
-export const trabajosDelNucleo = [...trabajosServicios, ...trabajosDocumentos];
+export const trabajosDelNucleo = [...trabajosServicios, ...trabajosDocumentos, ...trabajosAgentes];
