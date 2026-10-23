@@ -22,7 +22,7 @@ function ordenar(valor: unknown): unknown {
 /** Hash inicial de la cadena de cada tenant. */
 export const HASH_GENESIS = "0".repeat(64);
 
-export async function sha256Hex(texto: string | Uint8Array): Promise<string> {
+export async function sha256Hex(texto: string | Uint8Array<ArrayBuffer>): Promise<string> {
   const datos = typeof texto === "string" ? new TextEncoder().encode(texto) : texto;
   const digest = await globalThis.crypto.subtle.digest("SHA-256", datos);
   return [...new Uint8Array(digest)].map((b) => b.toString(16).padStart(2, "0")).join("");
