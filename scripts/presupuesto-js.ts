@@ -61,7 +61,9 @@ export function medir(p: Presupuesto) {
       const ruta = `/${relative(join(NEXT, "server", "app"), archivo)}`
         .replace(/\/page_client-reference-manifest\.js$/, "")
         .replace(/^\/\//, "/");
-      const chunks = [...new Set(readFileSync(archivo, "utf8").match(/static\/chunks\/[^"']+\.js/g))];
+      const chunks = [
+        ...new Set(readFileSync(archivo, "utf8").match(/static\/chunks\/[^"']+\.js/g)),
+      ];
       const propios = chunks.filter((c) => !raiz.has(c) && !polyfills.has(c));
       const extra = propios.reduce((t, c) => t + gz(c), 0);
       const total = framework + extra;
@@ -87,7 +89,9 @@ function main(): void {
   if (process.argv.includes("--json")) {
     console.log(JSON.stringify(r, null, 2));
   } else {
-    console.log(`framework (compartido): ${kb(r.framework)} / ${p.framework} KB ${r.frameworkOk ? "✓" : "✗"}`);
+    console.log(
+      `framework (compartido): ${kb(r.framework)} / ${p.framework} KB ${r.frameworkOk ? "✓" : "✗"}`,
+    );
     for (const f of r.filas) {
       console.log(
         `${f.ok ? "✓" : "✗"} ${kb(f.total).padStart(9)}  (+${kb(f.extra).padStart(8)})  tope ${kb(f.tope).padStart(9)}  ${f.ruta}`,
@@ -96,7 +100,9 @@ function main(): void {
   }
   const malas = r.filas.filter((f) => !f.ok);
   if (malas.length > 0 || !r.frameworkOk) {
-    console.error(`\nPresupuesto superado en ${malas.length} ruta(s)${r.frameworkOk ? "" : " y en el framework"}.`);
+    console.error(
+      `\nPresupuesto superado en ${malas.length} ruta(s)${r.frameworkOk ? "" : " y en el framework"}.`,
+    );
     process.exit(1);
   }
   console.log("\nPresupuesto de JS: dentro de los límites.");

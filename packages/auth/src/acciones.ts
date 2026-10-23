@@ -64,7 +64,8 @@ export async function cambiarPassword(actual: string, nueva: string): Promise<Re
     });
     return { ok: true };
   } catch (error) {
-    if (error instanceof APIError) return fallo("credenciales", "La contraseña actual no es correcta.");
+    if (error instanceof APIError)
+      return fallo("credenciales", "La contraseña actual no es correcta.");
     throw error;
   }
 }

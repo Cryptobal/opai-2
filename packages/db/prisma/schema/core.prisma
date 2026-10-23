@@ -31,6 +31,41 @@ model Tenant {
   invitations Invitation[]
   usage       UsageEvent[]
 
+  // Brief 02: maestros, documentos y servicios del núcleo.
+  cuentas               Cuenta[]
+  cuentasRepresentantes CuentaRepresentante[]
+  contactos             Contacto[]
+  instalaciones         Instalacion[]
+  cargos                Cargo[]
+  puestos               Puesto[]
+  personas              Persona[]
+  vinculos              VinculoLaboral[]
+  estructuras           EstructuraSueldo[]
+  estructurasItems      EstructuraItem[]
+  idsExternos           IdExterno[]
+  documentoTipos        DocumentoTipo[]
+  documentos            Documento[]
+  documentoVinculos     DocumentoVinculo[]
+  perfil                PerfilEmpresa?
+  ajustes               Ajuste[]
+  eventos               Evento[]
+  eventosEntregas       EventoEntrega[]
+  trabajos              Trabajo[]
+  plantillas            Plantilla[]
+  notificacionReglas    NotificacionRegla[]
+  notificaciones        Notificacion[]
+  envios                Envio[]
+  integraciones         Integracion[]
+  secretos              Secreto[]
+  clave                 ClaveTenant?
+  consumos              Consumo[]
+  consumosDiarios       ConsumoDiario[]
+  aprobaciones          Aprobacion[]
+  apiKeysAutonomia      ApiKeyAutonomia[]
+  bitacora              Bitacora[]
+  bitacoraCabeza        BitacoraCabeza?
+  comprobantes          Comprobante[]
+
   @@map("tenants")
   @@schema("core")
 }

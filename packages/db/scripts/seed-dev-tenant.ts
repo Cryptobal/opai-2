@@ -1,16 +1,21 @@
-// Crea (idempotente) el tenant de desarrollo `gard` con el rol propietario y muestra su id.
+// Crea (idempotente) el tenant de desarrollo `gard` con el rol propietario y siembra su catálogo
+// base (cargos, estructuras de cargo, tipos de documento) y los precios de plataforma.
 // Uso: DATABASE_URL_MIGRATE=<url propietario> pnpm --filter @opai/db seed:dev-tenant
 import "dotenv/config";
 
 import { cerrarClientes, dbAdmin } from "../src/index";
+import { sembrarCatalogo, sembrarPrecios } from "./catalogo-tenant";
 
 async function main(): Promise<void> {
-  const tenant = await dbAdmin().tenant.upsert({
+  const db = dbAdmin();
+  const tenant = await db.tenant.upsert({
     where: { slug: "gard" },
     update: {},
     create: { slug: "gard", nombre: "Gard Security", vertical: "seguridad" },
   });
-  console.log(`Tenant ${tenant.slug} listo. DEV_TENANT_ID=${tenant.id}`);
+  await sembrarCatalogo(db, tenant.id, tenant.vertical);
+  await sembrarPrecios(db);
+  console.log(`Tenant ${tenant.slug} listo con catálogo base. DEV_TENANT_ID=${tenant.id}`);
 }
 
 main()

@@ -1,0 +1,325 @@
+// Maestros del núcleo (Brief 02, ADR-005, ADR-036): cuentas, contactos, instalaciones, puestos,
+// personas, vínculos laborales, cargos y estructuras de sueldo en tres niveles. Todo con tenant_id
+// y RLS `tenant_isolation`. Dinero en CLP enteros; porcentajes en PCT_ESCALA (@opai/domain).
+
+model Cuenta {
+  id               String    @id @default(uuid(7)) @db.Uuid
+  tenantId         String    @map("tenant_id") @db.Uuid
+  nombre           String
+  razonSocial      String?   @map("razon_social")
+  /// RUT canónico "76543210-K" (normalizado en @opai/domain). Único por tenant cuando existe.
+  rut              String?
+  giro             String?
+  /// "prospecto" | "cliente_activo" | "cliente_inactivo"
+  estado           String    @default("prospecto")
+  origen           String?
+  sitioWeb         String?   @map("sitio_web")
+  calle            String?
+  comuna           String?
+  region           String?
+  pais             String    @default("CL")
+  escrituraFecha   DateTime? @map("escritura_fecha") @db.Date
+  escrituraNotaria String?   @map("escritura_notaria")
+  notas            String?
+  clienteDesde     DateTime? @map("cliente_desde") @db.Date
+  clienteHasta     DateTime? @map("cliente_hasta") @db.Date
+  archivadaEn      DateTime? @map("archivada_en") @db.Timestamptz(6)
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant         Tenant                @relation(fields: [tenantId], references: [id])
+  contactos      Contacto[]
+  instalaciones  Instalacion[]
+  representantes CuentaRepresentante[]
+
+  @@index([tenantId, estado])
+  @@index([tenantId, nombre])
+  @@map("cuentas")
+  @@schema("core")
+}
+
+model CuentaRepresentante {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  cuentaId  String   @map("cuenta_id") @db.Uuid
+  nombre    String
+  rut       String
+  email     String?
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  cuenta Cuenta @relation(fields: [cuentaId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, cuentaId])
+  @@map("cuentas_representantes")
+  @@schema("core")
+}
+
+model Contacto {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  tenantId    String    @map("tenant_id") @db.Uuid
+  cuentaId    String    @map("cuenta_id") @db.Uuid
+  nombres     String
+  apellidos   String
+  email       String?
+  /// E.164 ("+56987654321").
+  telefono    String?
+  cargo       String?
+  esPrincipal Boolean   @default(false) @map("es_principal")
+  /// "comercial" | "operacional" | "facturacion" | "cobranza"
+  roles       String[]  @default([])
+  /// "activo" | "inactivo"
+  estado      String    @default("activo")
+  notas       String?
+  archivadoEn DateTime? @map("archivado_en") @db.Timestamptz(6)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  cuenta Cuenta @relation(fields: [cuentaId], references: [id])
+
+  @@index([tenantId, cuentaId])
+  @@map("contactos")
+  @@schema("core")
+}
+
+model Instalacion {
+  id                  String    @id @default(uuid(7)) @db.Uuid
+  tenantId            String    @map("tenant_id") @db.Uuid
+  cuentaId            String    @map("cuenta_id") @db.Uuid
+  nombre              String
+  /// "prospecto" | "activa" | "inactiva"
+  estado              String    @default("prospecto")
+  calle               String?
+  comuna              String?
+  region              String?
+  pais                String    @default("CL")
+  direccionFormateada String?   @map("direccion_formateada")
+  placeId             String?   @map("place_id")
+  lat                 Decimal?  @db.Decimal(10, 7)
+  lng                 Decimal?  @db.Decimal(10, 7)
+  /// Tolerancia de ubicación en metros (evidencia, nunca bloqueante).
+  geocercaM           Int       @default(1000) @map("geocerca_m")
+  vigenteDesde        DateTime? @map("vigente_desde") @db.Date
+  vigenteHasta        DateTime? @map("vigente_hasta") @db.Date
+  notas               String?
+  archivadaEn         DateTime? @map("archivada_en") @db.Timestamptz(6)
+  createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant  Tenant   @relation(fields: [tenantId], references: [id])
+  cuenta  Cuenta   @relation(fields: [cuentaId], references: [id])
+  puestos Puesto[]
+
+  @@unique([tenantId, cuentaId, nombre])
+  @@index([tenantId, estado])
+  @@map("instalaciones")
+  @@schema("core")
+}
+
+model Cargo {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  tenantId       String   @map("tenant_id") @db.Uuid
+  nombre         String
+  descripcion    String?
+  /// "operativo" | "administrativo"
+  clase          String   @default("operativo")
+  /// Si es true, los montos de sueldo solo los ve quien tiene core:estructuras.read_sensible.
+  sueldoSensible Boolean  @default(false) @map("sueldo_sensible")
+  activo         Boolean  @default(true)
+  orden          Int      @default(0)
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant      Tenant             @relation(fields: [tenantId], references: [id])
+  puestos     Puesto[]
+  vinculos    VinculoLaboral[]
+  estructuras EstructuraSueldo[]
+
+  @@unique([tenantId, nombre])
+  @@map("cargos")
+  @@schema("core")
+}
+
+/// Puesto de servicio en una instalación (ADR-036): lo cotizado y lo operado.
+model Puesto {
+  id            String    @id @default(uuid(7)) @db.Uuid
+  tenantId      String    @map("tenant_id") @db.Uuid
+  instalacionId String    @map("instalacion_id") @db.Uuid
+  cargoId       String    @map("cargo_id") @db.Uuid
+  nombre        String
+  diasTrabajo   Int       @map("dias_trabajo")
+  diasDescanso  Int       @map("dias_descanso")
+  /// "HH:mm". Si horaFin <= horaInicio el turno cruza medianoche.
+  horaInicio    String    @map("hora_inicio")
+  horaFin       String    @map("hora_fin")
+  /// "dia" | "noche" | "rotativa"
+  jornada       String    @default("dia")
+  dotacion      Int       @default(1)
+  /// "activo" | "inactivo"
+  estado        String    @default("activo")
+  vigenteDesde  DateTime? @map("vigente_desde") @db.Date
+  vigenteHasta  DateTime? @map("vigente_hasta") @db.Date
+  notas         String?
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant      Tenant             @relation(fields: [tenantId], references: [id])
+  instalacion Instalacion        @relation(fields: [instalacionId], references: [id])
+  cargo       Cargo              @relation(fields: [cargoId], references: [id])
+  estructuras EstructuraSueldo[]
+
+  @@unique([tenantId, instalacionId, nombre])
+  @@map("puestos")
+  @@schema("core")
+}
+
+model Persona {
+  id                  String    @id @default(uuid(7)) @db.Uuid
+  tenantId            String    @map("tenant_id") @db.Uuid
+  nombres             String
+  apellidos           String
+  /// RUT canónico, obligatorio y único por tenant.
+  rut                 String
+  emailPersonal       String?   @map("email_personal")
+  emailLaboral        String?   @map("email_laboral")
+  telefono            String?
+  fechaNacimiento     DateTime? @map("fecha_nacimiento") @db.Date
+  /// "femenino" | "masculino" | "otro" | "no_declara"
+  sexo                String?
+  nacionalidad        String    @default("CL")
+  calle               String?
+  comuna              String?
+  region              String?
+  pais                String    @default("CL")
+  direccionFormateada String?   @map("direccion_formateada")
+  placeId             String?   @map("place_id")
+  lat                 Decimal?  @db.Decimal(10, 7)
+  lng                 Decimal?  @db.Decimal(10, 7)
+  /// "activa" | "inactiva"
+  estado              String    @default("activa")
+  bloqueada           Boolean   @default(false)
+  bloqueoMotivo       String?   @map("bloqueo_motivo")
+  bloqueadaEn         DateTime? @map("bloqueada_en") @db.Timestamptz(6)
+  /// Usuario de OPAI vinculado (1:1), si la persona entra al sistema.
+  usuarioId           String?   @map("usuario_id") @db.Uuid
+  archivadaEn         DateTime? @map("archivada_en") @db.Timestamptz(6)
+  createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant      Tenant             @relation(fields: [tenantId], references: [id])
+  vinculos    VinculoLaboral[]
+  estructuras EstructuraSueldo[]
+
+  @@unique([tenantId, rut])
+  @@index([tenantId, estado])
+  @@index([tenantId, apellidos])
+  @@map("personas")
+  @@schema("core")
+}
+
+model VinculoLaboral {
+  id            String    @id @default(uuid(7)) @db.Uuid
+  tenantId      String    @map("tenant_id") @db.Uuid
+  personaId     String    @map("persona_id") @db.Uuid
+  cargoId       String    @map("cargo_id") @db.Uuid
+  /// "indefinido" | "plazo_fijo" | "por_obra" | "honorarios"
+  tipo          String
+  inicio        DateTime  @db.Date
+  termino       DateTime? @db.Date
+  motivoTermino String?   @map("motivo_termino")
+  /// "vigente" | "terminado". Un solo vigente por persona (índice parcial en la migración).
+  estado        String    @default("vigente")
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [id])
+  persona Persona @relation(fields: [personaId], references: [id])
+  cargo   Cargo   @relation(fields: [cargoId], references: [id])
+
+  @@index([tenantId, personaId])
+  @@map("vinculos_laborales")
+  @@schema("core")
+}
+
+/// Estructura de sueldo versionada por vigencia (ADR-005): nivel cargo, puesto o persona.
+model EstructuraSueldo {
+  id                 String    @id @default(uuid(7)) @db.Uuid
+  tenantId           String    @map("tenant_id") @db.Uuid
+  /// "cargo" | "puesto" | "persona" (CHECK en la migración: exactamente una referencia)
+  nivel              String
+  cargoId            String?   @map("cargo_id") @db.Uuid
+  puestoId           String?   @map("puesto_id") @db.Uuid
+  personaId          String?   @map("persona_id") @db.Uuid
+  sueldoBase         Int       @map("sueldo_base")
+  colacion           Int       @default(0)
+  movilizacion       Int       @default(0)
+  /// "legal_25" | "monto_fijo" | "ninguna"
+  gratificacion      String    @default("legal_25")
+  gratificacionMonto Int?      @map("gratificacion_monto")
+  vigenteDesde       DateTime  @map("vigente_desde") @db.Date
+  vigenteHasta       DateTime? @map("vigente_hasta") @db.Date
+  /// Obligatorio en nivel persona (excepción por RUT).
+  motivo             String?
+  /// "vigente" | "anulada"
+  estado             String    @default("vigente")
+  creadoPor          String?   @map("creado_por") @db.Uuid
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant  Tenant           @relation(fields: [tenantId], references: [id])
+  cargo   Cargo?           @relation(fields: [cargoId], references: [id])
+  puesto  Puesto?          @relation(fields: [puestoId], references: [id])
+  persona Persona?         @relation(fields: [personaId], references: [id])
+  items   EstructuraItem[]
+
+  @@index([tenantId, nivel, cargoId])
+  @@index([tenantId, nivel, puestoId])
+  @@index([tenantId, nivel, personaId])
+  @@map("estructuras_sueldo")
+  @@schema("core")
+}
+
+model EstructuraItem {
+  id           String   @id @default(uuid(7)) @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
+  estructuraId String   @map("estructura_id") @db.Uuid
+  /// "bono_fijo" | "bono_porcentual"
+  tipo         String
+  nombre       String
+  monto        Int?
+  /// En PCT_ESCALA (19% = 190.000).
+  porcentaje   Int?
+  imponible    Boolean  @default(true)
+  tributable   Boolean  @default(true)
+  orden        Int      @default(0)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant     Tenant           @relation(fields: [tenantId], references: [id])
+  estructura EstructuraSueldo @relation(fields: [estructuraId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, estructuraId])
+  @@map("estructuras_items")
+  @@schema("core")
+}
+
+/// Mapeo a ids de otros sistemas (importación desde OPAI 1.0 en la fase 2).
+model IdExterno {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  entidadTipo String   @map("entidad_tipo")
+  entidadId   String   @map("entidad_id") @db.Uuid
+  sistema     String
+  idExterno   String   @map("id_externo")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, sistema, entidadTipo, idExterno])
+  @@index([tenantId, entidadTipo, entidadId])
+  @@map("ids_externos")
+  @@schema("core")
+}
