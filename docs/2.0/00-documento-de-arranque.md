@@ -165,7 +165,7 @@ Las duraciones son juicio profesional para un equipo de una persona más Claude 
 
 ## 7. Forma de trabajo
 
-1. Un bloque a la vez. Cada bloque es un brief autocontenido en `docs/2.0/briefs/`, que Carlos ejecuta en Claude Code sobre este repo.
+1. Un bloque a la vez. Cada bloque es un brief autocontenido en `docs/2.0/briefs/`, que Claude ejecuta desde el proyecto e integra a `main` con CI en verde (ADR-035).
 2. Todo brief termina con gate verde (`pnpm typecheck && pnpm lint && pnpm test`), commits atómicos, `docs/2.0/ESTADO.md` actualizado y reporte.
 3. Claude (proyecto "OPAI 2.0") valida el resultado contra el repo antes del siguiente brief.
 4. Pantallas: flujo Claude Design (Design Prompt → diseño aprobado → brief), siempre a 375px y 1024px.
