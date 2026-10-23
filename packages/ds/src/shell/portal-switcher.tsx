@@ -1,78 +1,70 @@
 "use client";
 
-import { ChevronsUpDown } from "lucide-react";
+import { ChevronDown, LayoutGrid } from "lucide-react";
 
 import { cn } from "../cn";
 import { Monograma } from "../components/avatar";
+import { type ItemMenu, Menu } from "../components/menu";
 import type { Portal, Tenant } from "./types";
 
 type Props = {
   portales: readonly Portal[];
   portalActual: string;
   tenant?: Tenant;
-  /** `compacto`: monograma + portal (teléfono). `riel`: apilado (iPad). `tarjeta`: con nombre del tenant (desktop). */
-  variante?: "compacto" | "riel" | "tarjeta";
+  /** `compacto`: monograma, empresa y portal (teléfono). `monograma`: solo el monograma (barra lateral). */
+  variante?: "compacto" | "monograma";
+  /** Ítems extra al pie (cambiar de empresa). */
+  extra?: readonly ItemMenu[];
   className?: string;
 };
 
-const CAJA = {
-  compacto: "h-11 pr-2 pl-1",
-  riel: "h-14 w-16 flex-col justify-center gap-1 rounded-md border border-border bg-surface",
-  tarjeta: "h-11 border border-border bg-surface px-2.5",
-} as const;
-
-/** Selector de portal: un <select> nativo accesible sobre el botón visual del diseño. */
-export function PortalSwitcher({
-  portales,
-  portalActual,
-  tenant,
-  variante = "compacto",
-  className,
-}: Props) {
+/** Selector de portal sobre `Menu` (Radix): el portal actual marcado; navega al inicio del elegido. */
+export function PortalSwitcher(props: Props) {
+  const { portales, portalActual, tenant, variante = "compacto", extra = [] } = props;
   const actual = portales.find((p) => p.id === portalActual) ?? portales[0];
-  const riel = variante === "riel";
-  // Con un solo portal no hay nada que elegir: queda el monograma y el nombre, sin selector.
-  const elegible = portales.length > 1;
-  return (
-    <div className={cn("relative", className)}>
-      <div
-        aria-hidden
-        className={cn("pointer-events-none flex items-center gap-2 rounded-md", CAJA[variante])}
+  const nombre = tenant?.nombre ?? "OPAI";
+  const items: ItemMenu[] = [
+    ...portales.map((p, i) => ({
+      id: `p-${p.id}`,
+      ...(i === 0 ? { grupo: "Portal" } : {}),
+      etiqueta: p.etiqueta,
+      icono: LayoutGrid,
+      marcado: p.id === actual?.id,
+      onSelect: () => window.location.assign(p.href),
+    })),
+    ...extra,
+  ];
+  const visual =
+    variante === "monograma" ? (
+      <Monograma nombre={nombre} className="size-6" />
+    ) : (
+      <span className="flex min-w-0 items-center gap-2">
+        <Monograma nombre={nombre} />
+        <span className="truncate text-[15px] leading-5 font-semibold text-fg">{nombre}</span>
+        <span className="flex-none text-sm text-fg-muted">{actual?.etiqueta}</span>
+        {items.length > 1 ? (
+          <ChevronDown className="size-4 flex-none text-fg-subtle" aria-hidden />
+        ) : null}
+      </span>
+    );
+  if (items.length <= 1) {
+    return (
+      <span
+        className={cn("flex min-h-11 min-w-0 items-center px-1", props.className)}
+        title={nombre}
       >
-        <Monograma nombre={tenant?.nombre ?? "OPAI"} />
-        <span className={cn("min-w-0", riel ? "flex items-center gap-0.5" : "flex-1")}>
-          <span
-            className={cn(
-              "block truncate font-semibold text-fg",
-              riel ? "text-[11px] leading-[14px]" : "text-[15px] leading-5",
-            )}
-          >
-            {actual?.etiqueta}
-          </span>
-          {variante === "tarjeta" && tenant ? (
-            <span className="block truncate text-xs text-fg-muted">{tenant.nombre}</span>
-          ) : null}
-          {riel && elegible ? <ChevronsUpDown className="size-3 text-fg-subtle" /> : null}
-        </span>
-        {riel || !elegible ? null : <ChevronsUpDown className="size-4 text-fg-subtle" />}
-      </div>
-      {elegible ? (
-        <select
-          aria-label="Cambiar de portal"
-          value={actual?.id ?? portalActual}
-          onChange={(e) => {
-            const destino = portales.find((p) => p.id === e.target.value);
-            if (destino) window.location.assign(destino.href);
-          }}
-          className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-        >
-          {portales.map((p) => (
-            <option key={p.id} value={p.id}>
-              {p.etiqueta}
-            </option>
-          ))}
-        </select>
-      ) : null}
-    </div>
+        {visual}
+      </span>
+    );
+  }
+  return (
+    <Menu
+      etiqueta={`${nombre} · portal ${actual?.etiqueta ?? ""}. Cambiar de portal o empresa`}
+      items={items}
+      lado={variante === "monograma" ? "abajo-derecha" : "abajo-izquierda"}
+      disparador={visual}
+      {...(props.className ? { className: props.className } : {})}
+      claseDisparador={variante === "compacto" ? "min-w-0 justify-start px-1" : "size-11"}
+    />
   );
 }

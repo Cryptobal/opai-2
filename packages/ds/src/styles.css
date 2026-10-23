@@ -132,3 +132,47 @@
 @utility pt-safe {
   padding-top: env(safe-area-inset-top);
 }
+
+/* Entrada de overlays (menú, popover, diálogo, sheet); se anulan con prefers-reduced-motion */
+@keyframes ds-entrar {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+}
+@keyframes ds-aparecer {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes ds-subir {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+}
+@keyframes ds-lateral {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+}
+
+/* MapaEstatico sin imagen: retícula de calles con tokens (sin JS ni proveedor) */
+@utility ds-mapa {
+  background-image:
+    linear-gradient(var(--ds-surface) 2px, transparent 2px),
+    linear-gradient(90deg, var(--ds-surface) 2px, transparent 2px),
+    linear-gradient(var(--ds-border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--ds-border) 1px, transparent 1px);
+  background-size:
+    96px 72px,
+    120px 96px,
+    24px 24px,
+    24px 24px;
+  background-position:
+    30px 10px,
+    8px 40px,
+    0 0,
+    0 0;
+}

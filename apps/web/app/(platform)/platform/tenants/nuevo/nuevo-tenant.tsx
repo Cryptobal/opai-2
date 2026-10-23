@@ -63,13 +63,15 @@ export function NuevoTenant() {
                 />
               </Campo>
               <Campo etiqueta="Vertical" htmlFor="t-vertical">
-                <Select id="t-vertical" {...campo("vertical")}>
-                  {VERTICALES.map((v) => (
-                    <option key={v} value={v}>
-                      {vocabulario(v).vertical}
-                    </option>
-                  ))}
-                </Select>
+                <Select
+                  id="t-vertical"
+                  valor={datos.vertical}
+                  onCambiar={(v) => setDatos((d) => ({ ...d, vertical: v }))}
+                  opciones={VERTICALES.map((v) => ({
+                    valor: v,
+                    etiqueta: vocabulario(v).vertical,
+                  }))}
+                />
               </Campo>
               <Campo etiqueta="Zona horaria" htmlFor="t-tz">
                 <Input id="t-tz" {...campo("timezone")} />

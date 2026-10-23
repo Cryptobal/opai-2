@@ -8,13 +8,12 @@ export default defineConfig([
   ...baseConfig,
   ...nextVitals,
   ...nextTs,
-  // Pantallas de la app: solo componentes del DS (ADR-017). Aviso mientras se migra la fila
-  // seleccionable de elegir-empresa a un componente del DS (Brief 02); después, error.
+  // Pantallas de la app: solo componentes del DS (ADR-017), en error desde el Brief 02.
   {
     files: ["app/**/*.tsx", "components/**/*.tsx"],
     rules: {
       "no-restricted-syntax": [
-        "warn",
+        "error",
         ...soloComponentesDelDs.rules["no-restricted-syntax"].slice(1),
       ],
     },

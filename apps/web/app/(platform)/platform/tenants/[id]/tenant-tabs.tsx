@@ -125,13 +125,14 @@ export function Administradores({ detalle }: P) {
         </Campo>
         <Select
           aria-label="Rol"
-          value={rol}
-          onChange={(e) => setRol(e.target.value)}
+          valor={rol}
+          onCambiar={setRol}
           className="md:w-40"
-        >
-          <option value="owner">Owner</option>
-          <option value="admin">Administrador</option>
-        </Select>
+          opciones={[
+            { valor: "owner", etiqueta: "Owner" },
+            { valor: "admin", etiqueta: "Administrador" },
+          ]}
+        />
         <Button onClick={invitar} disabled={!email} className="h-11">
           Invitar
         </Button>

@@ -1,12 +1,25 @@
 import { cn } from "../cn";
-import { Avatar } from "../components/avatar";
 import type { ItemMenu } from "../components/menu";
-import { type RailProps } from "./nav";
 import { PortalSwitcher } from "./portal-switcher";
-import { esActivo, LinkPorDefecto, type NavItem, type Usuario } from "./types";
-import { UserMenu } from "./user-menu";
+import {
+  esActivo,
+  LinkPorDefecto,
+  type LinkComponent,
+  type NavItem,
+  type Portal,
+  type Tenant,
+} from "./types";
 
-type SidebarProps = RailProps & { usuario?: Usuario; menuUsuario?: readonly ItemMenu[] };
+type SidebarProps = {
+  items: readonly NavItem[];
+  rutaActual: string;
+  Link?: LinkComponent;
+  portales: readonly Portal[];
+  portalActual: string;
+  tenant?: Tenant;
+  /** Cambiar de empresa (ítems del menú del monograma). */
+  empresas?: readonly ItemMenu[];
+};
 
 function agrupar(items: readonly NavItem[]): [string, NavItem[]][] {
   const grupos = new Map<string, NavItem[]>();
@@ -17,78 +30,69 @@ function agrupar(items: readonly NavItem[]): [string, NavItem[]][] {
   return [...grupos.entries()];
 }
 
-/** Desktop: barra lateral de 248px con marca, selector de portal, grupos de navegación y usuario. */
-export function Sidebar({
-  items,
+function Item({
+  item,
   rutaActual,
-  Link = LinkPorDefecto,
-  portales,
-  portalActual,
-  tenant,
-  usuario,
-  menuUsuario,
-}: SidebarProps) {
+  Link,
+}: {
+  item: NavItem;
+  rutaActual: string;
+  Link: LinkComponent;
+}) {
+  const activo = esActivo(rutaActual, item.href);
+  return (
+    <Link
+      href={item.href}
+      aria-current={activo ? "page" : undefined}
+      className={cn(
+        "flex h-[35px] items-center gap-2.5 rounded-md px-2 text-base font-medium",
+        activo ? "bg-fill text-fg" : "text-fg-muted hover:bg-fill hover:text-fg",
+      )}
+    >
+      <item.icono className={cn("size-4", activo && "text-accent")} aria-hidden />
+      <span className="truncate">{item.etiqueta}</span>
+      {item.contador !== undefined ? (
+        <span className="t-numeric ml-auto text-xs text-fg-subtle">{item.contador}</span>
+      ) : null}
+    </Link>
+  );
+}
+
+/** Desktop: barra lateral de 248 px con marca y monograma de la empresa, grupos y Configuración al pie. */
+export function Sidebar(props: SidebarProps) {
+  const { items, rutaActual, Link = LinkPorDefecto } = props;
   return (
     <nav
       aria-label="Principal"
       className="sticky top-0 hidden h-dvh w-[248px] flex-none flex-col border-r border-border bg-surface xl:flex"
     >
-      <div className="flex items-baseline justify-between px-4 pt-4 pb-2">
+      <div className="flex h-[60px] flex-none items-center justify-between border-b border-border pr-2 pl-5">
         <span className="text-[17px] leading-6 font-bold tracking-[-0.02em] text-fg">OPAI</span>
-        <span className="t-caption">2.0</span>
-      </div>
-      <div className="px-3 pb-2">
         <PortalSwitcher
-          portales={portales}
-          portalActual={portalActual}
-          {...(tenant ? { tenant } : {})}
-          variante="tarjeta"
+          portales={props.portales}
+          portalActual={props.portalActual}
+          {...(props.tenant ? { tenant: props.tenant } : {})}
+          {...(props.empresas ? { extra: props.empresas } : {})}
+          variante="monograma"
         />
       </div>
-      <div className="flex-1 overflow-y-auto">
-        {agrupar(items).map(([grupo, lista]) => (
+      <div className="flex-1 overflow-y-auto py-2">
+        {agrupar(items.filter((i) => !i.pie)).map(([grupo, lista]) => (
           <div key={grupo} className="flex flex-col gap-px px-3">
             {grupo ? <p className="t-overline px-2 pt-4 pb-1.5">{grupo}</p> : null}
-            {lista.map((item) => {
-              const activo = esActivo(rutaActual, item.href);
-              return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  aria-current={activo ? "page" : undefined}
-                  className={cn(
-                    "flex h-[34px] items-center gap-2.5 rounded-sm px-2 text-base font-medium",
-                    activo ? "bg-fill text-fg" : "text-fg-muted hover:bg-fill hover:text-fg",
-                  )}
-                >
-                  <item.icono className={cn("size-4", activo && "text-accent")} aria-hidden />
-                  <span className="truncate">{item.etiqueta}</span>
-                  {item.contador !== undefined ? (
-                    <span className="t-numeric ml-auto text-xs text-fg-subtle">
-                      {item.contador}
-                    </span>
-                  ) : null}
-                </Link>
-              );
-            })}
+            {lista.map((item) => (
+              <Item key={item.href} item={item} rutaActual={rutaActual} Link={Link} />
+            ))}
           </div>
         ))}
       </div>
-      {usuario && menuUsuario ? (
-        <div className="border-t border-border px-2 py-2">
-          <UserMenu usuario={usuario} items={menuUsuario} lado="arriba-izquierda" conNombre />
-        </div>
-      ) : usuario ? (
-        <div className="flex items-center gap-2.5 border-t border-border px-4 py-3">
-          <Avatar nombre={usuario.nombre} />
-          <span className="min-w-0">
-            <span className="block truncate text-base font-medium text-fg">{usuario.nombre}</span>
-            {usuario.rol ? (
-              <span className="block truncate text-xs text-fg-muted">{usuario.rol}</span>
-            ) : null}
-          </span>
-        </div>
-      ) : null}
+      <div className="flex flex-col gap-px px-3 py-3">
+        {items
+          .filter((i) => i.pie)
+          .map((item) => (
+            <Item key={item.href} item={item} rutaActual={rutaActual} Link={Link} />
+          ))}
+      </div>
     </nav>
   );
 }

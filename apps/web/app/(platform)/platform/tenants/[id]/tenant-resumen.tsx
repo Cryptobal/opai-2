@@ -31,16 +31,15 @@ export function ResumenTenant({ detalle }: { detalle: DetalleTenant }) {
               valor: (
                 <Select
                   aria-label="Estado de la empresa"
-                  value={tenant.estado}
-                  onChange={(e) =>
-                    e.target.value === "suspendido" ? setSuspender(true) : fijar(e.target.value)
-                  }
+                  valor={tenant.estado}
+                  onCambiar={(v) => (v === "suspendido" ? setSuspender(true) : fijar(v))}
                   className="w-40"
-                >
-                  <option value="trial">Prueba</option>
-                  <option value="activo">Activa</option>
-                  <option value="suspendido">Suspendida</option>
-                </Select>
+                  opciones={[
+                    { valor: "trial", etiqueta: "Prueba" },
+                    { valor: "activo", etiqueta: "Activa" },
+                    { valor: "suspendido", etiqueta: "Suspendida" },
+                  ]}
+                />
               ),
             },
           ]}

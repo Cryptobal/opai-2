@@ -38,6 +38,7 @@ export function DetailScreen({
       <Cabecera
         titulo={titulo}
         tituloSiempre
+        tituloDetalle
         {...(subtitulo ? { subtitulo } : {})}
         {...(estado ? { sobre: estado } : {})}
         {...(acciones ? { acciones } : {})}

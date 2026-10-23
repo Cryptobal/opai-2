@@ -9,7 +9,14 @@ export type NavItem = {
   grupo?: string;
   /** Contador a la derecha (pendientes, alertas). */
   contador?: number;
+  /** Fijo al pie de la barra lateral y del riel (Configuración). */
+  pie?: boolean;
+  /** Etiqueta corta para el riel de iPad y la barra inferior ("Instalac."). */
+  corta?: string;
 };
+
+/** Barra superior en modo detalle: "‹ Cuentas / Logística Andina SpA". */
+export type Volver = { href: string; etiqueta: string };
 
 export type Portal = { id: string; etiqueta: string; href: string };
 

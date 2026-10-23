@@ -1,3 +1,4 @@
+export { AjustesForm, type CampoAjusteVista } from "./ajustes-form";
 export { DashboardScreen, type DashboardScreenProps, type Kpi } from "./dashboard-screen";
 export { DetailScreen, type DetailScreenProps, Pares, type Par, Seccion } from "./detail-screen";
 export { Cabecera, Estado, type EstadoPantalla, type TextosEstado } from "./estado";
@@ -11,3 +12,5 @@ export {
   type PlanillaScreenProps,
   type TonoCelda,
 } from "./planilla-screen";
+export { type ParGrid, ParesGrid, SeccionTarjeta } from "./secciones";
+export { HerramientasLista, MetaLista, SplitScreen } from "./split-screen";
