@@ -81,6 +81,8 @@ Monorepo de OPAI 2.0: SaaS modular, multi-tenant y agent-first para empresas int
 - En iPad y desktop el título de la página va en el `AppShell` (`titulo`); el patrón recibe el mismo título y lo muestra solo en teléfono. La acción principal va en el patrón.
 - Mobile e iPad first: diseñar y verificar a 375px y 1024px antes que desktop. Touch targets ≥44px. Safe-area iOS. Los nombres de carpeta con `_` no son rutas en App Router.
 - Las pantallas nuevas pasan por Claude Design (Design Prompt → diseño aprobado → brief) antes de implementarse.
+- Navegación: respetar `docs/2.0/NAVEGACION.md` (áreas, menú vs. pestañas, barra inferior, nombres); los módulos declararán su entrada con `area` en el manifest (ADR-046, propuesto; obligatorio desde su aprobación y el Brief 05).
+- Rendimiento: el shell persiste entre navegaciones, el skeleton aparece de inmediato, las entradas del menú se precargan; cada brief con pantallas declara sus consultas por navegación (≤ 8) y mide antes y después (ADR-045). PWA: manifest, service worker y sin conexión en terreno según ADR-044 (propuesto; obligatorio desde su aprobación y el Brief 04), con presupuesto de JS por ruta de terreno ≤ 150 KB.
 
 ## Tests
 
@@ -92,7 +94,8 @@ Monorepo de OPAI 2.0: SaaS modular, multi-tenant y agent-first para empresas int
 ## Flujo de trabajo
 
 - Un brief = bloques = commits atómicos con prefijo de ámbito (`infra:`, `core:`, `ds:`, `crm:`, `docs:`…), mensaje en español, imperativo.
-- Cada brief en una rama `brief/NN-<nombre>`; se integra a `main` con rebase solo con CI en verde (incluye `test:db`) y tras la revisión de un subagente independiente (ADR-035). Nunca push directo a `main`, tampoco para documentación.
+- Ciclo de un módulo (ADR-047): extracción de 1.0 → especificación en `docs/2.0/modulos/<modulo>.md` (plantilla `_plantilla.md`) aprobada por Carlos → Design Prompt → diseño aprobado → brief → PR → revisión → QA → merge. Plan y orden en `docs/2.0/ROADMAP.md`.
+- Cada brief en una rama `brief/NN-<nombre>` (documentación: `docs/<tema>`). Claude construye, se autorrevisa con un subagente y **abre el PR; nunca integra**. El bot «Revisor OPAI 2.0» revisa con el modelo contrario e integra con rebase solo con CI en verde (incluye `test:db`); un PR con migración de Neon pendiente queda aprobado sin integrar hasta que Carlos la aplique. El bot «Diseño y QA OPAI 2.0» prueba las pantallas después de cada PR (ADR-043). Nunca push directo a `main`, tampoco para documentación.
 - No refactorizar fuera del alcance del brief. Si el brief contradice el repo, conservar el objetivo, adaptar y reportar la diferencia.
-- Al terminar un brief: actualizar `docs/2.0/ESTADO.md` (hecho, pendiente, decisiones del bloque, versiones) y reportar: qué se implementó, archivos, validaciones y resultados, riesgos pendientes.
+- Al terminar un brief: actualizar `docs/2.0/ESTADO.md` (hecho, pendiente, decisiones del bloque, versiones) y `ROADMAP.md` (estado de la fila), y reportar: qué se implementó, archivos, validaciones y resultados, riesgos pendientes, más un **resumen ejecutivo para Carlos** (≤ 5 líneas: qué se hizo, qué cambia para Gard, qué decide él, qué sigue).
 - Nada se despliega a producción de Gard ni se toca OPAI 1.0 desde aquí.

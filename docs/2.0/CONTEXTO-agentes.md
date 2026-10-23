@@ -16,10 +16,16 @@ Carlos decidió construir **OPAI 2.0 desde cero**: un SaaS modular, multi-tenant
 
 ## Cómo se trabaja
 
-- Claude (proyecto "OPAI 2.0" en claude.ai) escribe los briefs en `docs/2.0/briefs/`, los ejecuta sobre `opai-2` e integra a `main` cuando CI pasa (ADR-035). Carlos decide el negocio y aprueba lo irreversible.
+- Flujo con bots (ADR-043, modifica ADR-035):
+  - **Bot «OPAI 2.0»** (orquestador): prepara los prompts de cada encargo según `ROADMAP.md` y opera los chats de construcción, revisión y QA.
+  - **Claude** (proyecto «OPAI 2.0» en claude.ai): escribe la especificación y el brief, construye en una rama y **abre el PR; nunca integra**.
+  - **Bot «Revisor OPAI 2.0»**: revisa el PR con el modelo contrario al que construyó; si aprueba y el CI está en verde, integra a `main` con rebase. Un PR con migración de Neon pendiente queda aprobado sin integrar hasta que Carlos la aplique desde su Mac.
+  - **Bot «Diseño y QA OPAI 2.0»**: después de cada PR con pantallas, las prueba en `test.opai.cl` en celular y escritorio.
+  - **Carlos**: decide el negocio, aprueba especificaciones (`docs/2.0/modulos/`), diseños y lo irreversible.
+- Ciclo de cada módulo (ADR-047): extracción de 1.0 → especificación → aprobación de Carlos → Design Prompt → diseño aprobado → brief → PR → revisión → QA → merge.
 - `main` cambia varias veces al día. Antes de opinar sobre el avance, relee `ESTADO.md`; no te fíes de lo que viste ayer.
 - Tú no escribes código, no haces push ni integras PRs en `opai-2`. Si detectas un bug o una brecha de paridad usando el MCP de 2.0, repórtalo a Carlos con la herramienta usada, el input y la respuesta; él lo lleva al proyecto.
-- El estado real del proyecto vive en `docs/2.0/ESTADO.md`. Es la única referencia de avance; no asumas nada que no esté ahí.
+- El estado real del proyecto vive en `docs/2.0/ESTADO.md`. Es la única referencia de avance; no asumas nada que no esté ahí. El plan y las próximas tareas, en `docs/2.0/ROADMAP.md`.
 - Las decisiones viven en `docs/2.0/01-decisiones.md`.
 
 ## Qué va a cambiar para ti
@@ -40,7 +46,7 @@ Carlos decidió construir **OPAI 2.0 desde cero**: un SaaS modular, multi-tenant
 
 ## Orden de construcción
 
-Fundación → Núcleo mínimo → Comercial y CPQ (Gard empieza a vender en 2.0) → Licitaciones → Núcleo completo → Operaciones, Rondas y portales → Asistencia y DT → Finanzas (1.0 pasa a solo lectura) → Nómina.
+Según ADR-030 (detalle en `ROADMAP.md`): Núcleo (con rendimiento, PWA y navegación) → Comercial, CPQ y Documentos (Gard empieza a vender en 2.0) → Operaciones, Rondas, Tickets y portales → Asistencia y DT → Finanzas (1.0 pasa a solo lectura) → Nómina y **Licitaciones al final**.
 
 ## Mandato vigente
 
