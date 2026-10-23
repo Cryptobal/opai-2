@@ -1,29 +1,36 @@
 import { Check, Minus } from "lucide-react";
 
-import { SeccionTarjeta, Table, Td, Th, Tr } from "@opai/ds";
-import { PERMISOS_CORE as P, ROLES, tienePermiso } from "@opai/domain";
+import { Badge, SeccionTarjeta, Table, Td, Th, Tr } from "@opai/ds";
+import { ROLES, tienePermiso } from "@opai/domain";
 
 import { ETIQUETA_ROL } from "@/app/_components/portales";
 
-const ACCIONES: { etiqueta: string; permiso: string }[] = [
-  { etiqueta: "Cuentas · ver", permiso: P.cuentasRead },
-  { etiqueta: "Cuentas · editar", permiso: P.cuentasManage },
-  { etiqueta: "Instalaciones · editar", permiso: P.instalacionesManage },
-  { etiqueta: "Personas · ver", permiso: P.personasRead },
-  { etiqueta: "Personas · editar", permiso: P.personasManage },
-  { etiqueta: "Personas · sueldos", permiso: P.estructurasReadSensible },
-  { etiqueta: "Documentos · subir", permiso: P.documentosManage },
-  { etiqueta: "Usuarios · gestionar", permiso: P.usersManage },
-  { etiqueta: "Agentes · aprobar", permiso: P.aprobacionesManage },
-  { etiqueta: "Configuración · editar", permiso: P.configManage },
-];
+import { ACCIONES, permisosPorRol } from "./matriz-datos";
 
 /** Matriz de permisos (23): solo lectura, calculada desde los roles de OPAI (ADR-016). */
 export function MatrizPermisos() {
   return (
     <SeccionTarjeta titulo="Matriz de permisos" sinRelleno>
       <p className="t-caption px-4 pt-3">Solo lectura · los roles los define OPAI</p>
-      <div className="p-2">
+      <ul className="flex flex-col md:hidden">
+        {ROLES.map((r) => {
+          const ok = permisosPorRol(r);
+          return (
+            <li key={r} className="flex flex-col gap-2 border-t border-border px-4 py-3">
+              <span className="flex items-center justify-between gap-2">
+                <strong className="text-base font-semibold">{ETIQUETA_ROL[r] ?? r}</strong>
+                <Badge tono="neutro">
+                  {ok.length} de {ACCIONES.length}
+                </Badge>
+              </span>
+              <span className="text-sm text-fg-muted">
+                {ok.length ? ok.join(" · ") : "Sin permisos de gestión"}
+              </span>
+            </li>
+          );
+        })}
+      </ul>
+      <div className="p-2 max-md:hidden">
         <Table className="text-sm">
           <thead>
             <tr>

@@ -20,10 +20,10 @@ const estilos = cva(
           "bg-danger-fg text-white dark:bg-danger dark:text-inverse-fg hover:brightness-95",
       },
       size: {
-        md: "h-10 px-4 text-base",
+        md: "h-11 px-4 text-base md:h-10",
         lg: "h-12 px-5 text-md",
         icon: "size-11",
-        iconSm: "size-10",
+        iconSm: "size-11 md:size-10",
       },
       block: { true: "flex w-full" },
     },

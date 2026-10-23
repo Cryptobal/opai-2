@@ -15,7 +15,7 @@ export function Chip({ etiqueta, valor, onQuitar, className }: ChipProps) {
   return (
     <span
       className={cn(
-        "inline-flex h-8 items-center gap-1.5 rounded-full border border-border-strong bg-surface pl-3 text-sm font-medium text-fg whitespace-nowrap",
+        "inline-flex h-11 md:h-8 items-center gap-1.5 rounded-full border border-border-strong bg-surface pl-3 text-sm font-medium text-fg whitespace-nowrap",
         onQuitar ? "pr-1.5" : "pr-3",
         className,
       )}
@@ -46,7 +46,7 @@ export function ChipAgregar({
     <button
       type="button"
       className={cn(
-        "inline-flex h-8 items-center gap-1.5 rounded-full border border-dashed border-border-strong bg-surface px-3 text-sm font-medium text-fg-muted hover:bg-fill",
+        "inline-flex h-11 md:h-8 items-center gap-1.5 rounded-full border border-dashed border-border-strong bg-surface px-3 text-sm font-medium text-fg-muted hover:bg-fill",
         className,
       )}
       {...props}
@@ -74,7 +74,7 @@ export function ChipToggle({
       aria-pressed={activo}
       onClick={() => onCambiar(!activo)}
       className={cn(
-        "inline-flex h-8 flex-none items-center gap-1.5 rounded-full border px-3 text-sm font-medium outline-none transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus",
+        "inline-flex h-11 md:h-8 flex-none items-center gap-1.5 rounded-full border px-3 text-sm font-medium outline-none transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus",
         activo
           ? "border-accent bg-accent-muted text-accent"
           : "border-border-strong bg-surface text-fg hover:bg-fill",

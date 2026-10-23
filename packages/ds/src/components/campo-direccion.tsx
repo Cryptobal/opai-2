@@ -97,6 +97,7 @@ export function CampoDireccion({
         valor={valor?.placeId ?? null}
         placeholder={valor?.calle || "Busca la dirección"}
         buscarPlaceholder="Calle y número"
+        textoInicial="Escribe calle y número"
         aria-label="Dirección"
         invalido={Boolean(error)}
         aria-describedby={error ? idError : undefined}

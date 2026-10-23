@@ -3,12 +3,13 @@
 import { Command } from "cmdk";
 import { Check, ChevronsUpDown, Plus, Search } from "lucide-react";
 import { Popover as RadixPopover } from "radix-ui";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 import { cn } from "../cn";
 import { Chip } from "./chip";
 import { claseOverlay } from "./menu";
 import { claseControl } from "./select";
+import { useRemotas } from "./use-remotas";
 
 import { type OpcionCombobox, Resaltado } from "./resaltado";
 
@@ -27,26 +28,14 @@ export type ComboboxProps = {
   onCrear?: (texto: string) => void;
   placeholder?: string;
   buscarPlaceholder?: string;
+  /** Qué mostrar con el buscador vacío y sin opciones («Escribe calle y número»). */
+  textoInicial?: string;
   disabled?: boolean;
   invalido?: boolean;
   "aria-label"?: string;
   /** Abierto al montar (la versión diferida se monta con el primer clic). */
   abiertoInicial?: boolean;
 };
-
-function useRemotas(q: string, onBuscar: ComboboxProps["onBuscar"]) {
-  const [remotas, setRemotas] = useState<readonly OpcionCombobox[] | null>(null);
-  useEffect(() => {
-    if (!onBuscar) return;
-    let vigente = true;
-    const t = setTimeout(() => void onBuscar(q).then((r) => vigente && setRemotas(r)), 220);
-    return () => {
-      vigente = false;
-      clearTimeout(t);
-    };
-  }, [q, onBuscar]);
-  return remotas;
-}
 
 /** Select con búsqueda para listas largas (cmdk sobre Popover de Radix); crear y selección múltiple. */
 export function ComboboxCmdk(props: ComboboxProps) {
@@ -113,19 +102,21 @@ export function ComboboxCmdk(props: ComboboxProps) {
             </div>
             <Command.List className="max-h-72 overflow-y-auto py-1">
               <Command.Empty className="px-3 py-3 text-base text-fg-muted">
-                Sin resultados para “{q}”
+                {q.trim() ? `Sin resultados para “${q}”` : (props.textoInicial ?? "Sin resultados")}
               </Command.Empty>
               {lista.map((o) => (
                 <Command.Item
                   key={o.valor}
                   value={`${o.etiqueta} ${o.detalle ?? ""} ${o.valor}`}
                   onSelect={() => elegir(o.valor)}
-                  className="flex min-h-11 cursor-default items-center gap-2 px-3 text-md text-fg data-[selected=true]:bg-fill"
+                  className="flex min-h-11 cursor-default items-center gap-2 px-3 py-2 text-md text-fg data-[selected=true]:bg-fill"
                 >
-                  <span className="min-w-0 flex-1 truncate">
-                    <Resaltado texto={o.etiqueta} q={q} />
+                  <span className="flex min-w-0 flex-1 flex-col">
+                    <span className="line-clamp-2 break-words">
+                      <Resaltado texto={o.etiqueta} q={q} />
+                    </span>
+                    {o.detalle ? <span className="t-caption line-clamp-1">{o.detalle}</span> : null}
                   </span>
-                  {o.detalle ? <span className="t-caption truncate">{o.detalle}</span> : null}
                   {elegidos.includes(o.valor) ? (
                     <Check className="size-4 flex-none text-accent" aria-label="elegido" />
                   ) : null}

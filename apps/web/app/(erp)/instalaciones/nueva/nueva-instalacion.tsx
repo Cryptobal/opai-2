@@ -57,7 +57,7 @@ export function NuevaInstalacion({ cuentaInicial, cuentas, instalaciones }: Prop
     </>
   );
   return (
-    <div className="flex flex-col gap-4 pb-24 md:pb-0">
+    <div className="flex flex-col gap-4 pb-36 md:pb-0">
       <div className="hidden items-center justify-end gap-3 md:flex">
         {faltan.length ? <p className="text-sm text-fg-muted">Falta {faltan.join(" y ")}</p> : null}
         {acciones}
@@ -104,8 +104,9 @@ export function NuevaInstalacion({ cuentaInicial, cuentas, instalaciones }: Prop
           />
         </section>
       </div>
-      <div className="fixed inset-x-0 bottom-[calc(56px+env(safe-area-inset-bottom))] z-10 flex gap-2 border-t border-border bg-surface-raised px-4 py-3 md:hidden [&>*]:h-12 [&>*]:flex-1">
-        {acciones}
+      <div className="fixed inset-x-0 bottom-0 z-30 flex flex-col gap-2 border-t border-border bg-surface-raised px-4 pt-3 pb-[max(12px,env(safe-area-inset-bottom))] md:hidden">
+        {faltan.length ? <p className="text-sm text-fg-muted">Falta {faltan.join(" y ")}</p> : null}
+        <div className="flex gap-2 [&>*]:h-12 [&>*]:flex-1">{acciones}</div>
       </div>
     </div>
   );

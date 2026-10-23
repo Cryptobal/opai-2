@@ -2,7 +2,15 @@
 
 import { useState } from "react";
 
-import { Campo, CampoDireccion, ChipToggle, type Direccion, InputFecha } from "@opai/ds";
+import {
+  Campo,
+  CampoDireccion,
+  ChipToggle,
+  Combobox,
+  type Direccion,
+  InputFecha,
+  InputFechaRango,
+} from "@opai/ds";
 
 const LARGA = {
   calle: "Avenida Presidente Eduardo Frei Montalva 9950, Parque Industrial Lo Boza, Pudahuel",
@@ -54,6 +62,53 @@ export function MuestraQaPasada1() {
           ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+/** Misma estructura que Nueva instalación (grid de 3 secciones con combobox, dirección larga y vigencia). */
+export function MuestraFormulario() {
+  const [dir, setDir] = useState<Direccion | null>(LARGA);
+  const [vig, setVig] = useState({ desde: "2026-10-01", hasta: "" });
+  return (
+    <div data-testid="formulario-qa" className="grid gap-6 md:grid-cols-3">
+      <section className="flex flex-col gap-3">
+        <Campo
+          etiqueta="Cuenta"
+          htmlFor="q-cuenta"
+          ayuda="Busca por nombre, razón social o RUT. Se muestran primero las cuentas activas."
+        >
+          <Combobox
+            id="q-cuenta"
+            placeholder="Buscar cuenta"
+            opciones={[]}
+            onCambiar={() => undefined}
+          />
+        </Campo>
+      </section>
+      <section className="flex flex-col gap-3">
+        <Campo etiqueta="Dirección" htmlFor="q-dir">
+          <CampoDireccion
+            id="q-dir"
+            valor={dir}
+            onCambiar={setDir}
+            geocercaM={300}
+            buscar={async () => []}
+            resolver={async () => LARGA}
+          />
+        </Campo>
+        <InputFechaRango desde={vig.desde} hasta={vig.hasta} onCambiar={setVig} />
+      </section>
+      <section className="flex flex-col gap-3">
+        <Campo etiqueta="Copiar puestos" htmlFor="q-copia">
+          <Combobox
+            id="q-copia"
+            placeholder="Elegir instalación"
+            opciones={[]}
+            onCambiar={() => undefined}
+          />
+        </Campo>
+      </section>
     </div>
   );
 }
