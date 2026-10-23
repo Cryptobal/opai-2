@@ -1,76 +1,29 @@
 // Test de aislamiento por tenant (ADR-002). Corre solo si existe DATABASE_URL_TEST
-// (rama dev de Neon o Postgres local, con rol propietario). Aplica las migraciones,
-// crea un rol de prueba efímero equivalente a opai_app (miembro de opai_app, sin BYPASSRLS)
-// para no tocar la contraseña real del rol de aplicación, y verifica que:
+// (rama dev de Neon o Postgres local, con rol propietario). Verifica que:
 //   1. forTenant(A) ve solo A y forTenant(B) ve solo B;
 //   2. el rol de aplicación sin tenant fijado ve cero filas;
 //   3. forTenant(A) no puede escribir filas de B.
-import { execFileSync } from "node:child_process";
-import { randomBytes, randomUUID } from "node:crypto";
-import { Client } from "pg";
+import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { PrismaPg } from "@prisma/adapter-pg";
-
-import { type cerrarClientes as CerrarClientes } from "../src/client";
-import { type forTenant as ForTenant } from "../src/for-tenant";
-import { PrismaClient } from "../src/generated/prisma/client";
-
-const urlPropietario = process.env["DATABASE_URL_TEST"];
-
-function urlParaRol(url: string, usuario: string, password: string): string {
-  const u = new URL(url);
-  u.username = usuario;
-  u.password = password;
-  return u.toString();
-}
+import { type Entorno, prepararEntorno, urlPropietario } from "./entorno";
 
 describe.skipIf(!urlPropietario)("aislamiento por tenant con RLS", () => {
-  const password = randomBytes(24).toString("base64url");
-  const rolPrueba = `opai_test_${randomUUID().slice(0, 8).replace(/-/g, "")}`;
-  const slugA = `test-a-${randomUUID().slice(0, 8)}`;
-  const slugB = `test-b-${randomUUID().slice(0, 8)}`;
-  let admin: PrismaClient;
-  let appSinTenant: PrismaClient;
-  let forTenant: typeof ForTenant;
-  let cerrarClientes: typeof CerrarClientes;
+  let e: Entorno;
   let idA = "";
   let idB = "";
 
   beforeAll(async () => {
-    const url = urlPropietario as string;
-    execFileSync("pnpm", ["exec", "prisma", "migrate", "deploy"], {
-      cwd: new URL("..", import.meta.url).pathname,
-      env: { ...process.env, DATABASE_URL_MIGRATE: url },
-      stdio: "pipe",
+    e = await prepararEntorno();
+    const a = await e.admin.tenant.create({
+      data: { slug: `test-a-${randomUUID().slice(0, 8)}`, nombre: "A", vertical: "seguridad" },
     });
-    // Rol efímero con los mismos privilegios que opai_app (hereda sus grants y, al no tener
-    // BYPASSRLS, las políticas lo filtran igual). Las políticas aplican "TO opai_app", que
-    // cubre a sus miembros. Así el test nunca cambia la contraseña real de opai_app.
-    const pg = new Client({ connectionString: url });
-    await pg.connect();
-    await pg.query(
-      `CREATE ROLE ${rolPrueba} LOGIN NOBYPASSRLS NOSUPERUSER NOCREATEDB NOCREATEROLE INHERIT IN ROLE opai_app PASSWORD ${pg.escapeLiteral(password)}`,
-    );
-    await pg.end();
-
-    process.env["DATABASE_URL"] = urlParaRol(url, rolPrueba, password);
-    process.env["DATABASE_URL_MIGRATE"] = url;
-    ({ forTenant } = await import("../src/for-tenant"));
-    ({ cerrarClientes } = await import("../src/client"));
-
-    admin = new PrismaClient({ adapter: new PrismaPg({ connectionString: url }) });
-    appSinTenant = new PrismaClient({
-      adapter: new PrismaPg({ connectionString: process.env["DATABASE_URL"] }),
+    const b = await e.admin.tenant.create({
+      data: { slug: `test-b-${randomUUID().slice(0, 8)}`, nombre: "B", vertical: "aseo" },
     });
-
-    const a = await admin.tenant.create({
-      data: { slug: slugA, nombre: "A", vertical: "seguridad" },
-    });
-    const b = await admin.tenant.create({ data: { slug: slugB, nombre: "B", vertical: "aseo" } });
     idA = a.id;
     idB = b.id;
-    await admin.auditEvent.createMany({
+    await e.admin.auditEvent.createMany({
       data: [
         { tenantId: idA, actorType: "system", capability: "test.a.1" },
         { tenantId: idA, actorType: "system", capability: "test.a.2" },
@@ -80,42 +33,33 @@ describe.skipIf(!urlPropietario)("aislamiento por tenant con RLS", () => {
   });
 
   afterAll(async () => {
-    if (admin) {
-      await admin.auditEvent.deleteMany({ where: { tenantId: { in: [idA, idB] } } });
-      await admin.tenant.deleteMany({ where: { id: { in: [idA, idB] } } });
-      await admin.$disconnect();
-    }
-    await appSinTenant?.$disconnect();
-    await cerrarClientes?.();
-    const pg = new Client({ connectionString: urlPropietario as string });
-    await pg.connect();
-    await pg.query(`DROP ROLE IF EXISTS ${rolPrueba}`);
-    await pg.end();
+    if (!e) return;
+    await e.admin.auditEvent.deleteMany({ where: { tenantId: { in: [idA, idB] } } });
+    await e.admin.tenant.deleteMany({ where: { id: { in: [idA, idB] } } });
+    await e.cerrar();
   });
 
   it("cada tenant ve solo sus filas", async () => {
-    const deA = await forTenant(idA).auditEvent.findMany({ orderBy: { capability: "asc" } });
-    const deB = await forTenant(idB).auditEvent.findMany();
-    expect(deA.map((e) => e.capability)).toEqual(["test.a.1", "test.a.2"]);
-    expect(deB.map((e) => e.capability)).toEqual(["test.b.1"]);
+    const deA = await e.forTenant(idA).auditEvent.findMany({ orderBy: { capability: "asc" } });
+    const deB = await e.forTenant(idB).auditEvent.findMany();
+    expect(deA.map((x) => x.capability)).toEqual(["test.a.1", "test.a.2"]);
+    expect(deB.map((x) => x.capability)).toEqual(["test.b.1"]);
   });
 
   it("el rol de aplicación sin tenant fijado no ve nada", async () => {
-    const filas = await appSinTenant.auditEvent.findMany();
-    expect(filas).toHaveLength(0);
+    expect(await e.appSinTenant.auditEvent.findMany()).toHaveLength(0);
   });
 
   it("un tenant no puede escribir filas de otro", async () => {
     await expect(
-      forTenant(idA).auditEvent.create({
+      e.forTenant(idA).auditEvent.create({
         data: { tenantId: idB, actorType: "system", capability: "test.fuga" },
       }),
     ).rejects.toThrow();
-    const deB = await admin.auditEvent.count({ where: { tenantId: idB } });
-    expect(deB).toBe(1);
+    expect(await e.admin.auditEvent.count({ where: { tenantId: idB } })).toBe(1);
   });
 
   it("rechaza tenantId que no sea UUID", () => {
-    expect(() => forTenant("gard")).toThrow(/UUID/);
+    expect(() => e.forTenant("gard")).toThrow(/UUID/);
   });
 });

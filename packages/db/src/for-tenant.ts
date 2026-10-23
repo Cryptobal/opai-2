@@ -5,7 +5,7 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 /** Lanza si el id no es un UUID. Evita que un valor arbitrario llegue a `set_config`. */
 export function validarTenantId(tenantId: string): string {
   if (!UUID.test(tenantId)) {
-    throw new Error("tenantId inválido: se esperaba un UUID.");
+    throw new Error("Id inválido: se esperaba un UUID.");
   }
   return tenantId;
 }

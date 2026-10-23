@@ -19,10 +19,17 @@ model Tenant {
   /// "seguridad" | "aseo" | "outsourcing" | "mantenimiento" (ADR-006)
   vertical  String
   timezone  String   @default("America/Santiago")
+  /// "trial" | "activo" | "suspendido". Suspendido bloquea el ingreso de sus miembros.
+  estado    String   @default("trial")
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   auditEvents AuditEvent[]
+  memberships Membership[]
+  modules     TenantModule[]
+  apiKeys     ApiKey[]
+  invitations Invitation[]
+  usage       UsageEvent[]
 
   @@map("tenants")
   @@schema("core")

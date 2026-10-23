@@ -1,0 +1,115 @@
+// Pertenencia, invitaciones, API keys, módulos por tenant y telemetría (Brief 01).
+// Todas llevan tenant_id y RLS `tenant_isolation`; `memberships` además `user_self`.
+
+model Membership {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  /// "owner" | "admin" | "gerente" | "supervisor" | "viewer" (ADR-016)
+  rol       String
+  /// Portales a los que accede: "erp" | "supervisor" | "trabajador" | "terreno" | "cliente".
+  portales  String[]
+  /// "activa" | "suspendida"
+  estado    String   @default("activa")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, userId])
+  @@index([userId])
+  @@map("memberships")
+  @@schema("core")
+}
+
+model Invitation {
+  id              String    @id @default(uuid(7)) @db.Uuid
+  tenantId        String    @map("tenant_id") @db.Uuid
+  email           String
+  rol             String
+  portales        String[]
+  /// SHA-256 del token del enlace. El token nunca se guarda.
+  tokenHash       String    @unique @map("token_hash")
+  invitedByUserId String    @map("invited_by_user_id") @db.Uuid
+  expiresAt       DateTime  @map("expires_at") @db.Timestamptz(6)
+  acceptedAt      DateTime? @map("accepted_at") @db.Timestamptz(6)
+  revocadaEn      DateTime? @map("revocada_en") @db.Timestamptz(6)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, email])
+  @@map("invitations")
+  @@schema("core")
+}
+
+model TenantModule {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  tenantId   String   @map("tenant_id") @db.Uuid
+  moduloId   String   @map("modulo_id")
+  /// "trial" | "activo" | "suspendido"
+  estado     String   @default("activo")
+  activadoEn DateTime @default(now()) @map("activado_en") @db.Timestamptz(6)
+  config     Json?
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, moduloId])
+  @@map("tenant_modules")
+  @@schema("core")
+}
+
+model ApiKey {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  tenantId    String    @map("tenant_id") @db.Uuid
+  /// Usuario responsable: el agente actúa "vía" este usuario y hereda sus permisos.
+  userId      String    @map("user_id") @db.Uuid
+  nombre      String
+  /// Inicio visible de la key ("opai_gard_ab12") para reconocerla en la lista.
+  prefijo     String
+  /// SHA-256 de la key completa. El secreto se muestra una sola vez y no se guarda.
+  hash        String    @unique
+  /// Módulos permitidos ("core", "crm", …) o "*".
+  scopes      String[]
+  ultimoUsoEn DateTime? @map("ultimo_uso_en") @db.Timestamptz(6)
+  expiraEn    DateTime? @map("expira_en") @db.Timestamptz(6)
+  revocadaEn  DateTime? @map("revocada_en") @db.Timestamptz(6)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  user   User   @relation(fields: [userId], references: [id])
+
+  @@index([tenantId])
+  @@map("api_keys")
+  @@schema("core")
+}
+
+/// Telemetría de uso: una fila por ejecución de capacidad (lectura y escritura).
+model UsageEvent {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  tenantId   String   @map("tenant_id") @db.Uuid
+  userId     String?  @map("user_id") @db.Uuid
+  /// "user" | "agent" | "system"
+  actorType  String   @map("actor_type")
+  portal     String?
+  modulo     String
+  capability String
+  efecto     String
+  dryRun     Boolean  @map("dry_run")
+  ok         Boolean
+  duracionMs Int      @map("duracion_ms")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, createdAt])
+  @@index([tenantId, modulo])
+  @@map("usage_events")
+  @@schema("core")
+}
