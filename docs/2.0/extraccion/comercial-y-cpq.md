@@ -136,6 +136,8 @@ Modos de margen sobre la base de costos `C` (`compute-quote-costs.ts`, `marginMo
 | `markup` | `C × (1 + m)` |
 | `margin_on_labor` | `MO / (1 − m) + (C − MO)` |
 
+Verificado en `compute-quote-costs.ts` (líneas 653–678): `MO` = costo mensual de puestos + ajuste de feriados; `C` = base de costos sin líneas adicionales; si `m ≥ 100 %` no se aplica margen. Las **líneas adicionales** no pasan por el modo de margen: llevan su propio margen (`base / (1 − margen_línea)`) en todos los modos y se suman después, antes de los instrumentos financieros.
+
 Instrumentos sobre la venta `S` (`financial-policy.ts`, modo `auto`, gross-up cerrado):
 
 - `f` = tasa de costo financiero mensual (por defecto 2,5 %, si está habilitado).
@@ -148,7 +150,7 @@ Instrumentos sobre la venta `S` (`financial-policy.ts`, modo `auto`, gross-up ce
 - Modo `manual`: sin gross-up, equivalencia con el motor histórico sobre un precio base dado.
 - Si falta el valor UF y se necesita, advertencia `falta valor UF` y el instrumento queda en cero.
 
-Los tests de 1.0 (`costing/__tests__/financial-policy.test.ts`, `cost-lines.test.ts`) se usan como **casos dorados** del dominio de 2.0: mismas entradas, resultado igual al peso.
+Los tests de 1.0 (`costing/__tests__/financial-policy.test.ts`, `cost-lines.test.ts`) se usan como **casos dorados** del dominio de 2.0: mismas entradas, resultado igual al peso. 1.0 **no tiene tests de los modos de margen** (`markup`, `margin_on_sale`, `margin_on_labor`) ni de la rama `k ≥ 0,35`: esos casos dorados se construyen en el brief de CPQ desde las fórmulas de esta sección y se validan contra cotizaciones reales de Gard recalculadas en 1.0 (pendiente de validación).
 
 ---
 
@@ -249,4 +251,4 @@ Copia de datos de instalación en el negocio, `CrmDealQuote` y `activeQuotationI
 
 - Uso real de campos personalizados y `CrmAccountReviewRequest` en Gard (datos, no código).
 - Si Operaciones en 1.0 crea los puestos operativos al ganar un negocio o se crean a mano: define qué sincroniza 2.0 hacia 1.0 durante la convivencia (ADR-040, decisión 8).
-- Lógica de `margin_on_labor` cuando hay líneas adicionales con margen propio (no revisada línea a línea).
+- Casos dorados de los modos de margen y de la rama `k ≥ 0,35` contra cotizaciones reales de Gard (no hay tests en 1.0; ver §3.9).
