@@ -60,6 +60,7 @@ model Tenant {
   clave                 ClaveTenant?
   consumos              Consumo[]
   consumosDiarios       ConsumoDiario[]
+  idempotencias         Idempotencia[]
   aprobaciones          Aprobacion[]
   apiKeysAutonomia      ApiKeyAutonomia[]
   bitacora              Bitacora[]

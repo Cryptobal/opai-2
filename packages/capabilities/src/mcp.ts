@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 import { restriccion } from "./autorizacion";
 import { executeCapability } from "./execute";
 import { camposExternos } from "./externo";
@@ -10,7 +12,26 @@ export type HerramientaMcp = {
   descripcion: string;
   capacidad: Capacidad;
   dryRun: boolean;
+  /** Input publicado: el de la capacidad más `idempotency_key` opcional en las escrituras. */
+  input: z.ZodType;
 };
+
+const CLAVE = "idempotency_key";
+
+const claveSchema = z
+  .string()
+  .min(8)
+  .max(200)
+  .optional()
+  .describe(
+    "Clave única de este intento (p. ej. un uuid). Si reintentas con la misma clave y el mismo input, recibes el resultado original sin repetir el efecto (24 h).",
+  );
+
+/** Agrega `idempotency_key` al input de una escritura real (si el input es un objeto). */
+function inputPublicado(c: Capacidad, preview: boolean): z.ZodType {
+  if (preview || c.efecto === "lectura" || !(c.input instanceof z.ZodObject)) return c.input;
+  return c.input.extend({ [CLAVE]: claveSchema });
+}
 
 /** `core.users.invite` → `core_users_invite`. */
 export const nombreHerramienta = (id: string): string => id.replace(/\./g, "_");
@@ -46,6 +67,7 @@ export function herramientasMcp(ctx: Contexto): HerramientaMcp[] {
         descripcion: describir(c, false),
         capacidad: c,
         dryRun: false,
+        input: inputPublicado(c, false),
       };
       if (c.efecto === "lectura") return [real];
       return [
@@ -55,6 +77,7 @@ export function herramientasMcp(ctx: Contexto): HerramientaMcp[] {
           descripcion: describir(c, true),
           capacidad: c,
           dryRun: true,
+          input: c.input,
         },
       ];
     });
@@ -66,5 +89,10 @@ export function ejecutarHerramienta(
   h: HerramientaMcp,
   args: unknown,
 ): Promise<Resultado> {
-  return executeCapability(ctx, h.capacidad.id, args, { dryRun: h.dryRun });
+  if (h.dryRun || !args || typeof args !== "object" || !(CLAVE in args)) {
+    return executeCapability(ctx, h.capacidad.id, args, { dryRun: h.dryRun });
+  }
+  const { [CLAVE]: clave, ...resto } = args as Record<string, unknown>;
+  const opciones = typeof clave === "string" ? { dryRun: false, idempotencyKey: clave } : {};
+  return executeCapability(ctx, h.capacidad.id, resto, opciones);
 }
