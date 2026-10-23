@@ -1,36 +1,7 @@
+import { denegar, falla } from "./autorizacion";
 import { ErrorCapacidad } from "./errores";
 import { obtenerCapacidad } from "./registry";
 import type { Capacidad, Contexto, OpcionesEjecucion, Resultado } from "./types";
-
-const SIEMPRE_ACTIVOS = new Set(["core", "platform"]);
-
-type Error = Extract<Resultado, { ok: false }>;
-const falla = (code: Error["error"]["code"], message: string): Error => ({
-  ok: false,
-  error: { code, message },
-});
-
-/** Reglas previas al handler: tenant, módulo activo, scopes del agente y permiso. */
-function denegar(ctx: Contexto, c: Capacidad): Error | null {
-  if (!ctx.conTenant && !c.sinTenant) {
-    return falla("FORBIDDEN", "Elige una empresa antes de usar esta capacidad.");
-  }
-  if (!SIEMPRE_ACTIVOS.has(c.modulo) && !ctx.modulosActivos.includes(c.modulo)) {
-    return falla("FORBIDDEN", `Módulo inactivo: "${c.modulo}".`);
-  }
-  // Agentes: el módulo debe estar en los scopes. "*" cubre todo salvo plataforma.
-  if (ctx.scopes && !ctx.scopes.includes(c.modulo)) {
-    if (!ctx.scopes.includes("*") || c.modulo === "platform") {
-      return falla("FORBIDDEN", `La API key no tiene el scope "${c.modulo}".`);
-    }
-  }
-  if (c.permiso === null) {
-    const sistemaEnProduccion =
-      ctx.actor.tipo === "system" && process.env.NODE_ENV === "production";
-    return sistemaEnProduccion && !c.interna ? falla("UNAUTHENTICATED", "Requiere sesión.") : null;
-  }
-  return ctx.autorizar(c.permiso) ? null : falla("FORBIDDEN", "Sin permiso para esta capacidad.");
-}
 
 async function correr(
   ctx: Contexto,
@@ -124,21 +95,26 @@ export async function executeCapability(
 
   const tenantId = tenantDe(ctx, c, r.entrada, r.salida);
   if (tenantId) {
-    // La telemetría nunca rompe una ejecución.
-    await ctx.telemetria
-      .registrar({
-        tenantId,
-        userId: ctx.usuario?.id ?? null,
-        actorType: ctx.actor.tipo,
-        portal: ctx.portal,
-        modulo: c.modulo,
-        capability: c.id,
-        efecto: c.efecto,
-        dryRun: opciones.dryRun === true,
-        ok: r.resultado.ok,
-        duracionMs: Date.now() - inicio,
-      })
-      .catch(() => undefined);
+    // La medición nunca rompe una ejecución (ADR-031).
+    const consumo = {
+      tenantId,
+      recurso: "capacidad.ejecucion",
+      unidad: "llamada",
+      cantidad: 1,
+      modulo: c.modulo,
+      capability: c.id,
+      actorTipo: ctx.actor.tipo,
+      actorId: ctx.actor.id ?? null,
+      viaUserId: ctx.actor.viaUserId ?? null,
+      apiKeyId: ctx.actor.tipo === "agent" ? ctx.actor.id : null,
+      portal: ctx.portal,
+      efecto: c.efecto,
+      dryRun: opciones.dryRun === true,
+      ok: r.resultado.ok,
+      duracionMs: Date.now() - inicio,
+    };
+    await ctx.medidor.registrar(consumo).catch(() => undefined);
   }
+  if (r.resultado.ok && !r.resultado.dryRun && c.efecto !== "lectura") ctx.despacharEventos();
   return r.resultado;
 }

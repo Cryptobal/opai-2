@@ -2,16 +2,25 @@ import { type Rol, tienePermiso, tienePermisoPlataforma, moduloDe } from "@opai/
 import { forTenant, globales, type Prisma } from "@opai/db";
 import { mailerDelEntorno } from "@opai/integrations/email";
 
+import {
+  bitacoraEnDb,
+  eventosEnDb,
+  medidorEnDb,
+  trabajosEnDb,
+  transaccionEnDb,
+} from "./servicios-db";
 import type {
   Actor,
   Auditoria,
   Contexto,
   EventoAuditoria,
-  EventoUso,
+  Medidor,
+  Principal,
   Servicios,
-  Telemetria,
   UsuarioContexto,
 } from "./types";
+
+export { medidorEnDb } from "./servicios-db";
 
 /** Id nulo para contextos sin tenant (plataforma sin empresa elegida). RLS no devuelve filas. */
 export const SIN_TENANT = "00000000-0000-0000-0000-000000000000";
@@ -36,13 +45,6 @@ export const auditoriaEnDb: Auditoria = {
   },
 };
 
-/** Telemetría persistida en `core.usage_events`. El borde la envuelve en `after()`. */
-export const telemetriaEnDb: Telemetria = {
-  async registrar(evento: EventoUso): Promise<void> {
-    await forTenant(evento.tenantId).usageEvent.create({ data: evento });
-  },
-};
-
 export type ParametrosContexto = {
   /** null: sin tenant actual (plataforma sin empresa elegida, o usuario sin membresías). */
   tenantId: string | null;
@@ -52,7 +54,12 @@ export type ParametrosContexto = {
   portal?: string | null;
   modulosActivos?: readonly string[];
   scopes?: readonly string[] | null;
-  telemetria?: Telemetria;
+  principal?: Principal | null;
+  medidor?: Medidor;
+  /** Trabajo diferido (el borde usa `after()`). Por defecto, sin esperar y sin romper. */
+  diferir?: (tarea: () => Promise<unknown>) => void;
+  /** Despacho del outbox tras una escritura (lo implementa el borde). */
+  despacharEventos?: () => void;
   servicios?: Partial<Servicios>;
 };
 
@@ -67,7 +74,9 @@ export function autorizador(rol: Rol | null, usuario: UsuarioContexto | null) {
       : rol !== null && tienePermiso(rol, permiso);
 }
 
-/** Construye el contexto de ejecución desde el borde (ruta HTTP, acción de UI, MCP). */
+const diferirPorDefecto = (tarea: () => Promise<unknown>) => void tarea().catch(() => undefined);
+
+/** Construye el contexto de ejecución desde el borde (ruta HTTP, acción de UI, MCP, cron). */
 export function crearContexto(params: ParametrosContexto): Contexto {
   const tenantId = params.tenantId ?? SIN_TENANT;
   const usuario = params.usuario ?? null;
@@ -81,9 +90,16 @@ export function crearContexto(params: ParametrosContexto): Contexto {
     portal: params.portal ?? null,
     modulosActivos: params.modulosActivos ?? [],
     scopes: params.scopes ?? null,
+    principal: params.principal ?? null,
     db: forTenant(tenantId),
+    transaccion: transaccionEnDb(tenantId),
     auditoria: auditoriaEnDb,
-    telemetria: params.telemetria ?? telemetriaEnDb,
+    medidor: params.medidor ?? medidorEnDb,
+    eventos: eventosEnDb(tenantId, params.actor),
+    trabajos: trabajosEnDb(tenantId),
+    bitacora: bitacoraEnDb(tenantId),
+    diferir: params.diferir ?? diferirPorDefecto,
+    despacharEventos: params.despacharEventos ?? (() => undefined),
     servicios: {
       correo: params.servicios?.correo ?? mailerDelEntorno(),
       urlBase:

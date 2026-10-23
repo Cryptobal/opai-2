@@ -1,7 +1,11 @@
 import type { Rol, RolPlataforma } from "@opai/domain";
-import type { Globales, TenantDb } from "@opai/db";
+import type { Globales, TenantDb, TenantTx } from "@opai/db";
 import type { Mailer } from "@opai/integrations/email";
 import type { z } from "zod";
+
+import type { BitacoraServicio, Eventos, Medidor, Principal, Trabajos } from "./servicios-tipos";
+
+export type * from "./servicios-tipos";
 
 /** Efecto de una capacidad sobre los datos. Decide auditoría y confirmación (ADR-004). */
 export type Efecto = "lectura" | "escritura" | "irreversible";
@@ -24,24 +28,6 @@ export type EventoAuditoria = {
 
 export interface Auditoria {
   registrar(evento: EventoAuditoria): Promise<void>;
-}
-
-/** Una fila de `core.usage_events` por ejecución (lectura y escritura). */
-export type EventoUso = {
-  tenantId: string;
-  userId: string | null;
-  actorType: Actor["tipo"];
-  portal: string | null;
-  modulo: string;
-  capability: string;
-  efecto: Efecto;
-  dryRun: boolean;
-  ok: boolean;
-  duracionMs: number;
-};
-
-export interface Telemetria {
-  registrar(evento: EventoUso): Promise<void>;
 }
 
 /** Usuario humano detrás del actor (el propio usuario o el responsable de la API key). */
@@ -81,10 +67,21 @@ export interface Contexto {
   modulosActivos: readonly string[];
   /** Módulos permitidos para un agente (scopes de la key); null = sin restricción. */
   scopes: readonly string[] | null;
+  /** Principal de la API key (ADR-033). null en sesiones humanas y procesos del sistema. */
+  principal: Principal | null;
   /** Cliente acotado al tenant. Única vía de acceso a datos para los handlers. */
   db: TenantDb;
+  /** Transacción con el tenant fijado: cambio + evento + bitácora atómicos. Dentro, solo `tx`. */
+  transaccion<T>(fn: (tx: TenantTx) => Promise<T>): Promise<T>;
   auditoria: Auditoria;
-  telemetria: Telemetria;
+  medidor: Medidor;
+  eventos: Eventos;
+  trabajos: Trabajos;
+  bitacora: BitacoraServicio;
+  /** Trabajo fuera de la respuesta (el borde usa `after()`). Nunca debe romper la ejecución. */
+  diferir(tarea: () => Promise<unknown>): void;
+  /** Pide despachar el outbox tras una escritura (el borde lo difiere). */
+  despacharEventos(): void;
   servicios: Servicios;
   plataforma: Plataforma | null;
   /** Decide si el actor tiene el permiso (rol de la membresía y rol de plataforma). */
@@ -117,6 +114,8 @@ export interface Capacidad<I extends z.ZodType = z.ZodType, O extends z.ZodType 
   interna?: boolean;
   /** No exige tenant actual (`core.me`, plataforma, flujos de invitación). */
   sinTenant?: boolean;
+  /** Portales donde está disponible (ADR-033). Por defecto ["erp"] (plataforma: ["platform"]). */
+  portales?: readonly string[];
   /** Tenant donde auditar y medir (plataforma: el tenant objetivo). Por defecto, el actual. */
   tenantObjetivo?: (input: z.output<I>, output: z.output<O> | undefined) => string | undefined;
   handler: (ctx: Contexto, input: z.output<I>, modo: ModoEjecucion) => Promise<z.input<O>>;
@@ -130,6 +129,8 @@ export type CodigoError =
   | "CONFLICT"
   | "UNPROCESSABLE"
   | "DRY_RUN_NOT_SUPPORTED"
+  | "APPROVAL_REQUIRED"
+  | "BUDGET_EXCEEDED"
   | "INVALID_OUTPUT"
   | "INTERNAL";
 

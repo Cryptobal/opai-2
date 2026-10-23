@@ -1,4 +1,4 @@
-export { capacidadesDelNucleo } from "./core";
+export { capacidadesDelNucleo, trabajosDelNucleo } from "./core";
 export { generarApiKey, hashApiKey, slugDeApiKey } from "./core/apikey-formato";
 export { catalogoPermisos } from "./core/me";
 export {
@@ -7,7 +7,7 @@ export {
   crearContexto,
   type ParametrosContexto,
   SIN_TENANT,
-  telemetriaEnDb,
+  medidorEnDb,
 } from "./contexto";
 export { defineCapability } from "./define";
 export { conflicto, ErrorCapacidad, noEncontrado, prohibido, reglaDeNegocio } from "./errores";
@@ -31,3 +31,29 @@ export {
   type Permiso,
   registrarModulos,
 } from "./module";
+export { portalesDe } from "./autorizacion";
+export {
+  type Consumidor,
+  consumidoresDe,
+  defineConsumidor,
+  type EventoPublicado,
+  limpiarConsumidores,
+  registrarConsumidores,
+} from "./eventos/consumidores";
+export { despacharPendientes, MAX_INTENTOS_EVENTO } from "./eventos/despachar";
+export {
+  defineTrabajo,
+  type DefinicionTrabajo,
+  limpiarTrabajos,
+  listarTrabajos,
+  obtenerTrabajo,
+  registrarTrabajos,
+  type Trabajo,
+} from "./trabajos/registro";
+export {
+  type ColaTrabajos,
+  ejecutarTrabajos,
+  esperaReintento,
+  programarPeriodicos,
+} from "./trabajos/runner";
+export { type ComprobanteNuevo, emitirComprobante, slugDeComprobante } from "./comprobantes";

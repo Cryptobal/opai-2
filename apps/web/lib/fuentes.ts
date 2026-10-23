@@ -14,6 +14,8 @@ export type ApiKeyFila = {
   id: string;
   userId: string;
   scopes: string[];
+  principalTipo: string;
+  principalId: string | null;
   revocadaEn: Date | null;
   expiraEn: Date | null;
   ultimoUsoEn: Date | null;

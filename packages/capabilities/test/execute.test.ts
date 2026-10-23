@@ -69,11 +69,18 @@ describe("executeCapability", () => {
     expect(r.ok === false && Array.isArray(r.error.issues)).toBe(true);
   });
 
-  it("devuelve FORBIDDEN sin permiso y lo registra en telemetría con ok: false", async () => {
+  it("devuelve FORBIDDEN sin permiso y lo mide con ok: false", async () => {
     const { ctx, usos } = ctxCon();
     const r = await executeCapability(ctx, "test.nota.create", { texto: "hola" });
     expect(r).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
-    expect(usos).toMatchObject([{ capability: "test.nota.create", ok: false, actorType: "agent" }]);
+    expect(usos).toMatchObject([
+      {
+        capability: "test.nota.create",
+        ok: false,
+        actorTipo: "agent",
+        recurso: "capacidad.ejecucion",
+      },
+    ]);
   });
 
   it("FORBIDDEN con 'módulo inactivo' si el módulo no está activo en el tenant", async () => {

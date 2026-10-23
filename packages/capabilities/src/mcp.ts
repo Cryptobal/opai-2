@@ -1,8 +1,7 @@
+import { restriccion } from "./autorizacion";
 import { executeCapability } from "./execute";
 import { listarCapacidades } from "./registry";
 import type { Capacidad, Contexto, Resultado } from "./types";
-
-const SIEMPRE_ACTIVOS = new Set(["core", "platform"]);
 
 /** Herramienta MCP derivada de una capacidad (ADR-004). La de vista previa ejecuta con dryRun. */
 export type HerramientaMcp = {
@@ -15,14 +14,10 @@ export type HerramientaMcp = {
 /** `core.users.invite` → `core_users_invite`. */
 export const nombreHerramienta = (id: string): string => id.replace(/\./g, "_");
 
-/** Si la capacidad es visible para el contexto: no interna, módulo activo, scope y permiso. */
+/** Si la capacidad es visible para el contexto: no interna, restricciones (ADR-033) y permiso. */
 export function esVisible(ctx: Contexto, c: Capacidad): boolean {
   if (c.interna) return false;
-  if (!ctx.conTenant && !c.sinTenant) return false;
-  if (!SIEMPRE_ACTIVOS.has(c.modulo) && !ctx.modulosActivos.includes(c.modulo)) return false;
-  if (ctx.scopes && !ctx.scopes.includes(c.modulo)) {
-    if (!ctx.scopes.includes("*") || c.modulo === "platform") return false;
-  }
+  if (restriccion(ctx, c)) return false;
   return c.permiso === null || ctx.autorizar(c.permiso);
 }
 

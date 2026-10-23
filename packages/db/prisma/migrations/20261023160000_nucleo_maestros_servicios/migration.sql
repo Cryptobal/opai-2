@@ -1186,3 +1186,12 @@ REVOKE UPDATE, DELETE, TRUNCATE ON "core"."bitacora" FROM opai_app;
 
 -- Tablas de plataforma sin tenant (ajustes_plataforma, precios_recursos): sin RLS. La aplicación
 -- las lee; solo las capacidades platform.* las escriben (autorización en la capacidad).
+
+-- Zona horaria de la base en UTC (CLAUDE.md: tiempo en UTC). El adaptador de Prisma envía instantes
+-- sin zona y Postgres los interpreta en la zona de la sesión. Neon ya usa UTC; esto lo fija para
+-- cualquier base (local, CI) y aplica a las conexiones nuevas.
+DO $$
+BEGIN
+  EXECUTE format('ALTER DATABASE %I SET timezone TO %L', current_database(), 'UTC');
+END
+$$;

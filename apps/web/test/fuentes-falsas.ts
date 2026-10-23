@@ -33,6 +33,8 @@ export function fuentesFalsas(
     id: "k1",
     userId: USUARIO.id,
     scopes: ["*"],
+    principalTipo: "usuario",
+    principalId: null,
     revocadaEn: null,
     expiraEn: null,
     ultimoUsoEn: null,

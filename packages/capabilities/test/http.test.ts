@@ -71,10 +71,10 @@ describe("manejarCapacidadHttp", () => {
   });
 });
 
-describe("telemetría", () => {
-  it("una telemetría que falla no rompe la ejecución", async () => {
+describe("medidor", () => {
+  it("un medidor que falla no rompe la ejecución", async () => {
     const { ctx } = contextoDePrueba();
-    ctx.telemetria = { registrar: async () => Promise.reject(new Error("caída")) };
+    ctx.medidor = { registrar: async () => Promise.reject(new Error("caída")) };
     expect(await executeCapability(ctx, "core.ping", {})).toMatchObject({ ok: true });
   });
 });

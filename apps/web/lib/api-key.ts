@@ -3,9 +3,11 @@ import { esRol, esRolPlataforma } from "@opai/domain";
 
 import { fuentesReales, type Fuentes } from "./fuentes";
 import { noAutenticado } from "./respuestas";
-import { telemetriaDiferida } from "./telemetria";
+import { despacharDiferido, diferirConAfter, medidorDiferido } from "./medidor";
 
 const MINUTO = 60_000;
+
+const principalTipo = (t: string) => (t === "cuenta" || t === "persona" ? t : "usuario");
 
 /** Extrae la key de `Authorization: Bearer <key>`. */
 export function keyDeCabecera(req: Request): string | null {
@@ -55,6 +57,9 @@ export async function contextoDeApiKey(
     portal: null,
     modulosActivos: await fuentes.modulosActivos(tenant.id),
     scopes: fila.scopes,
-    telemetria: telemetriaDiferida,
+    principal: { tipo: principalTipo(fila.principalTipo), id: fila.principalId ?? usuario.id },
+    medidor: medidorDiferido,
+    diferir: diferirConAfter,
+    despacharEventos: despacharDiferido(tenant.id),
   });
 }

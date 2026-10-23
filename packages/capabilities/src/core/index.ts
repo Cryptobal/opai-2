@@ -2,6 +2,14 @@ import type { Capacidad } from "../types";
 import { invitationsAccept, invitationsPeek, invitationsRequestNew } from "./aceptar";
 import { apikeysCreate, apikeysList, apikeysRevoke } from "./apikeys";
 import { auditList, modulesList, usageSummary } from "./consultas";
+import { bitacoraVerificar, platformBitacoraEstado } from "./bitacora";
+import { consumosPorAgente, consumosResumen } from "./consumos";
+import { platformConsumosSummary, platformEventosList } from "./platform-observabilidad";
+import {
+  platformTrabajosCancelar,
+  platformTrabajosList,
+  platformTrabajosReintentar,
+} from "./platform-servicios";
 import { invitationsList, invitationsRevoke, usersInvite } from "./invitations";
 import { me } from "./me";
 import { ping } from "./ping";
@@ -41,4 +49,16 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   platformModulesSet,
   platformAdminsInvite,
   platformUsageSummary,
+  // Brief 02 · servicios del núcleo
+  consumosResumen,
+  consumosPorAgente,
+  bitacoraVerificar,
+  platformBitacoraEstado,
+  platformTrabajosList,
+  platformTrabajosReintentar,
+  platformTrabajosCancelar,
+  platformEventosList,
+  platformConsumosSummary,
 ];
+
+export { trabajosDelNucleo } from "./bitacora";
