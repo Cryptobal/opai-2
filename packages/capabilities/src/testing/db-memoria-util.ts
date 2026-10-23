@@ -48,6 +48,7 @@ export function cumple(fila: Fila, where: Where = {}): boolean {
       if (Object.keys(op).some((x) => OPERADORES.includes(x))) return comparar(fila[k], op);
       return cumple(fila, op); // clave compuesta: tenantId_userId: { … }
     }
+    if (v === null) return fila[k] === null || fila[k] === undefined; // columna sin valor = NULL
     return fila[k] instanceof Date && v instanceof Date
       ? (fila[k] as Date).getTime() === v.getTime()
       : fila[k] === v;
