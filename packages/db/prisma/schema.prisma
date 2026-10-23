@@ -1,0 +1,52 @@
+// Esquema de OPAI 2.0. Un schema de Postgres por módulo; `core` para el núcleo (ADR-003).
+// Reglas: IDs uuid(7), columnas snake_case, tenant_id en toda tabla de negocio, RLS forzada.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  schemas  = ["core"]
+}
+
+/// Empresa cliente de OPAI. No lleva tenant_id: es el tenant. Se protege por permisos de aplicación.
+model Tenant {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  slug      String   @unique
+  nombre    String
+  /// "seguridad" | "aseo" | "outsourcing" | "mantenimiento" (ADR-006)
+  vertical  String
+  timezone  String   @default("America/Santiago")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  auditEvents AuditEvent[]
+
+  @@map("tenants")
+  @@schema("core")
+}
+
+/// Auditoría append-only. Toda capacidad con efecto distinto de lectura escribe aquí (ADR-004).
+model AuditEvent {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  tenantId   String   @map("tenant_id") @db.Uuid
+  /// "user" | "agent" | "system"
+  actorType  String   @map("actor_type")
+  actorId    String?  @map("actor_id")
+  /// Usuario responsable cuando el actor es un agente ("agente vía usuario").
+  viaUserId  String?  @map("via_user_id")
+  /// Id de la capacidad, por ejemplo "crm.lead.create".
+  capability String
+  entityType String?  @map("entity_type")
+  entityId   String?  @map("entity_id")
+  payload    Json?
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, createdAt])
+  @@map("audit_events")
+  @@schema("core")
+}
