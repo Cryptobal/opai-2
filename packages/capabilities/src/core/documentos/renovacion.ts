@@ -37,6 +37,10 @@ export const documentosPedirRenovacion = defineCapability({
       ctx.db.tenant.findUnique({ where: { id: ctx.tenantId }, select: { nombre: true } }),
     ]);
     if (personas.length !== new Set(ids).size) throw reglaDeNegocio("Alguna persona no existe.");
+    const pedidosTipos = new Set(input.pedidos.flatMap((p) => p.tipoIds));
+    const validos = tipos.filter((t) => t.capa === "persona" && t.activo);
+    if (validos.length !== pedidosTipos.size)
+      throw reglaDeNegocio("Algún tipo de documento no existe, no es de persona o está inactivo.");
     const nombreTipo = new Map(tipos.map((t) => [t.id, t.nombre]));
     const enviados: { personaId: string; para: string }[] = [];
     const sinCorreo: { personaId: string; nombre: string }[] = [];

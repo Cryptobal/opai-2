@@ -30,3 +30,14 @@ export async function metricasDelMes(db: TenantDb) {
     ultimoAcceso: ultimo?.createdAt.toISOString() ?? null,
   };
 }
+
+/**
+ * `Promise.all` con concurrencia acotada: las listas de plataforma abren una transacción por
+ * empresa y el pool en serverless es chico (connection_limit=5).
+ */
+export async function porLotes<T, R>(items: readonly T[], f: (x: T) => Promise<R>, lote = 3) {
+  const r: R[] = [];
+  for (let i = 0; i < items.length; i += lote)
+    r.push(...(await Promise.all(items.slice(i, i + lote).map(f))));
+  return r;
+}

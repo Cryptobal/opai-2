@@ -10,6 +10,8 @@ import type { Marca } from "./tipos";
 import { VistaPreviaMarca } from "./vista-previa-marca";
 
 const HEX = /^#[0-9a-fA-F]{6}$/;
+// Respaldo del selector nativo (exige un valor hex); no es un color de la interfaz.
+const NEGRO = `#${"0".repeat(6)}`;
 const error = (c: string) => (c && !HEX.test(c) ? 'Usa el formato "#RRGGBB"' : undefined);
 
 function CampoColor({
@@ -33,14 +35,14 @@ function CampoColor({
           type="color"
           aria-label={`${etiqueta}: selector`}
           className="w-14 flex-none p-1"
-          value={HEX.test(valor) ? valor : "#000000"}
+          value={HEX.test(valor) ? valor : NEGRO}
           disabled={disabled}
           onChange={(x) => onCambiar(x.target.value)}
         />
         <Input
           id={id}
           className="t-mono"
-          placeholder="Código hex, por ejemplo #0B3D91"
+          placeholder="Código hex de 6 dígitos"
           value={valor}
           disabled={disabled}
           aria-invalid={e ? true : undefined}

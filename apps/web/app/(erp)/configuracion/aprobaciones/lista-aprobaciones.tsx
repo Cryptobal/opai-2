@@ -80,7 +80,7 @@ export function ListaAprobaciones({ items, ver, ahora }: Props) {
                 </span>
                 <span className="text-base font-semibold text-fg">{a.resumen}</span>
                 <span className="t-caption">
-                  {quien(a)} · {haceCuanto(a.creadaEn)}
+                  {quien(a)} · {haceCuanto(a.creadaEn, new Date(ahora))}
                 </span>
               </LinkNext>
               {pend ? (

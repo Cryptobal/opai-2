@@ -8,7 +8,8 @@ import { leerParametros, type SearchParams } from "@/lib/parametros";
 import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
 
 import { EnviarPrueba } from "../_componentes/acciones-plantilla";
-import { EditorPlantilla, FORM_PLANTILLA } from "../_componentes/editor-plantilla";
+import { FORM_PLANTILLA } from "../../_centro/formularios";
+import { EditorPlantilla } from "../_componentes/editor-plantilla";
 import { Historial } from "../_componentes/historial";
 import {
   type EventoComunicable,

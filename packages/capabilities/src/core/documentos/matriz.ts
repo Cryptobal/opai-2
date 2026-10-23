@@ -3,6 +3,7 @@ import { z } from "zod";
 import { diasHasta, estadoVigencia, PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
+import { prohibido } from "../../errores";
 import { dia, hoy } from "../maestros/comun";
 import { vinculosVigentes } from "../maestros/personas-vista";
 
@@ -44,7 +45,7 @@ function celdas(
 export const documentosMatriz = defineCapability({
   id: "core.documentos.matriz",
   descripcion:
-    "Semáforo de vencimientos por persona: para cada persona activa, el estado de cada tipo de documento obligatorio o con vencimiento (vigente, días para vencer, vencido o falta). Sirve para pedir renovaciones en bloque.",
+    "Semáforo de vencimientos por persona: para cada persona activa, el estado de cada tipo de documento obligatorio o con vencimiento (vigente, días para vencer, vencido o falta). Sirve para pedir renovaciones en bloque. Hasta 2.000 personas; exige también leer personas.",
   permiso: PERMISOS_CORE.documentosRead,
   input: z.object({
     soloPendientes: z
@@ -75,6 +76,8 @@ export const documentosMatriz = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
+    // Lista nombres y cargos de las personas: exige también leer personas.
+    if (!ctx.autorizar(PERMISOS_CORE.personasRead)) throw prohibido("No puedes ver personas.");
     const tipos = await ctx.db.documentoTipo.findMany({
       where: {
         capa: "persona",
