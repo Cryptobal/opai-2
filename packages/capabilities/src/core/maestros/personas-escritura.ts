@@ -1,0 +1,143 @@
+import { z } from "zod";
+
+import { PERMISOS_CORE } from "@opai/domain";
+import type { TenantTx } from "@opai/db";
+
+import { defineCapability } from "../../define";
+import { conflicto, noEncontrado, reglaDeNegocio } from "../../errores";
+import type { Contexto } from "../../types";
+import { uuidSchema } from "../esquemas";
+import {
+  aFecha,
+  definidos,
+  escribirConEvento,
+  opcionalAFecha,
+  otroQue,
+  sinDuplicado,
+} from "./comun";
+import {
+  camposPersona,
+  personaDe,
+  personaSchema,
+  vinculosVigentes,
+  vistaPersona,
+} from "./personas-vista";
+import { camposVinculo } from "./vinculos-vista";
+
+const DUPLICADO = "Ya existe una persona con ese RUT.";
+
+async function rutLibre(ctx: Contexto, rut?: string, excepto?: string) {
+  if (!rut) return;
+  const otra = await ctx.db.persona.findFirst({ where: { rut, ...otroQue(excepto) } });
+  if (otra) throw conflicto(`${DUPLICADO} (${otra.nombres} ${otra.apellidos}).`);
+}
+
+export async function cargoParaVinculo(ctx: Contexto, cargoId: string) {
+  const c = await ctx.db.cargo.findUnique({ where: { id: cargoId } });
+  if (!c) throw noEncontrado("El cargo");
+  if (!c.activo) throw reglaDeNegocio(`El cargo "${c.nombre}" está desactivado.`);
+  return c;
+}
+
+type DatosVinculo = z.output<z.ZodObject<typeof camposVinculo>>;
+
+/** Crea el vínculo y su evento dentro de la transacción del llamador. */
+export async function crearVinculo(
+  ctx: Contexto,
+  tx: TenantTx,
+  personaId: string,
+  v: DatosVinculo,
+) {
+  if (v.termino && v.termino < v.inicio) throw reglaDeNegocio("El término es anterior al inicio.");
+  const creado = await tx.vinculoLaboral.create({
+    data: {
+      tenantId: ctx.tenantId,
+      personaId,
+      cargoId: v.cargoId,
+      tipo: v.tipo,
+      inicio: aFecha(v.inicio),
+      termino: v.termino ? aFecha(v.termino) : null,
+      estado: "vigente",
+    },
+  });
+  await ctx.eventos.emitir(tx, {
+    tipo: "core.vinculo.creado",
+    entidadTipo: "vinculo",
+    entidadId: creado.id,
+    payload: { personaId, cargoId: v.cargoId, tipo: v.tipo, inicio: v.inicio },
+  });
+  return creado;
+}
+
+export const personasCreate = defineCapability({
+  id: "core.personas.create",
+  descripcion:
+    "Registra una persona (trabajador) con RUT obligatorio y único. Opcionalmente crea su vínculo laboral inicial (cargo, tipo de contrato e inicio).",
+  permiso: PERMISOS_CORE.personasManage,
+  input: z.object({ ...camposPersona, vinculo: z.object(camposVinculo).optional() }),
+  output: personaSchema,
+  efecto: "escritura",
+  dryRun: true,
+  async handler(ctx, { vinculo, ...input }, { dryRun }) {
+    await rutLibre(ctx, input.rut);
+    const cargo = vinculo ? await cargoParaVinculo(ctx, vinculo.cargoId) : null;
+    const data = definidos({ ...input, fechaNacimiento: opcionalAFecha(input.fechaNacimiento) });
+    const resumen = (id: string) =>
+      vinculo && cargo
+        ? {
+            id,
+            cargoId: cargo.id,
+            cargo: cargo.nombre,
+            tipo: vinculo.tipo,
+            inicio: vinculo.inicio,
+            termino: vinculo.termino ?? null,
+          }
+        : null;
+    if (dryRun) return vistaPersona({ ...data, id: "", estado: "activa" }, resumen(""));
+    let vinculoId = "";
+    const p = await escribirConEvento(
+      ctx,
+      { tipo: "core.persona.creada", entidadTipo: "persona" },
+      async (tx) => {
+        const nueva = await sinDuplicado(
+          tx.persona.create({ data: { ...data, estado: "activa", tenantId: ctx.tenantId } }),
+          DUPLICADO,
+        );
+        if (vinculo) vinculoId = (await crearVinculo(ctx, tx, nueva.id, vinculo)).id;
+        return nueva;
+      },
+    );
+    return vistaPersona(p, resumen(vinculoId));
+  },
+});
+
+export const personasUpdate = defineCapability({
+  id: "core.personas.update",
+  descripcion:
+    "Actualiza los datos de una persona (nombres, RUT, contacto, nacimiento, dirección). Solo cambia lo enviado.",
+  permiso: PERMISOS_CORE.personasManage,
+  input: z.object({ id: uuidSchema, ...z.object(camposPersona).partial().shape }),
+  output: personaSchema,
+  efecto: "escritura",
+  dryRun: true,
+  async handler(ctx, { id, ...cambios }, { dryRun }) {
+    const actual = await personaDe(ctx, id);
+    await rutLibre(ctx, cambios.rut, id);
+    const data = definidos({
+      ...cambios,
+      fechaNacimiento: opcionalAFecha(cambios.fechaNacimiento),
+    });
+    const vinculo = (await vinculosVigentes(ctx, [id])).get(id) ?? null;
+    if (dryRun) return vistaPersona({ ...actual, ...data }, vinculo);
+    const p = await escribirConEvento(
+      ctx,
+      {
+        tipo: "core.persona.actualizada",
+        entidadTipo: "persona",
+        payload: () => ({ campos: Object.keys(data) }),
+      },
+      (tx) => sinDuplicado(tx.persona.update({ where: { id }, data }), DUPLICADO),
+    );
+    return vistaPersona(p, vinculo);
+  },
+});
