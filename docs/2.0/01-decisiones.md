@@ -396,7 +396,7 @@ OPAI puede ofrecer además **automatizaciones alojadas** (por ejemplo, búsqueda
 
 ## ADR-035 · Ejecución de briefs desde el proyecto Claude con integración automática
 
-**Fecha:** 23-oct-2026 · **Estado:** vigente · Completa ADR-011 y ADR-012. Reemplaza la parte de las instrucciones del proyecto que asignaba a Carlos ejecutar los briefs en Claude Code.
+**Fecha:** 23-oct-2026 · **Estado:** vigente, modificado por ADR-043 (Claude ya no integra) · Completa ADR-011 y ADR-012. Reemplaza la parte de las instrucciones del proyecto que asignaba a Carlos ejecutar los briefs en Claude Code.
 
 **Contexto.** Carlos trabaja casi siempre desde el teléfono. Copiar cada brief a Claude Code local y devolver el reporte agrega un paso manual por bloque. Los chats del proyecto "OPAI 2.0" tienen un espacio de trabajo con terminal, Node 22 y pnpm, pueden adjuntar `opai-2` con escritura, y llegan al Mac de Carlos por el puente de la app de escritorio.
 
@@ -532,3 +532,107 @@ OPAI puede ofrecer además **automatizaciones alojadas** (por ejemplo, búsqueda
 10. **Agentes.** Todo es capacidad con `dryRun`: un agente puede simular una cotización completa (`cpq.cotizaciones.simular`) sin escribir, crear la versión, y enviar solo con aprobación humana.
 
 **Consecuencias.** Agregar una vertical es datos, no código. Una cotización se reproduce igual años después. El brief de CPQ incluye el lenguaje de fórmulas y el motor financiero con sus casos dorados antes de cualquier pantalla. Licitaciones (fase 6) reutiliza el mismo motor.
+
+---
+
+## ADR-043 · Flujo de trabajo con bots: construye Claude, revisa e integra el Revisor
+
+**Fecha:** 23-oct-2026 · **Estado:** vigente · **Modifica ADR-035**: Claude ya no integra a `main`; la revisión independiente y la integración pasan al bot «Revisor OPAI 2.0». Lo demás de ADR-035 (brief y ejecución en el mismo chat, rama por brief, commits por bloque, gate local, detenerse ante lo irreversible, infraestructura por el Mac de Carlos o el conector de Vercel) sigue vigente.
+
+**Contexto.** Con ADR-035 el mismo chat que construye revisa (con un subagente del mismo modelo) e integra. Carlos quiere separar construcción, revisión y QA visual en actores distintos, y que la revisión la haga un modelo distinto del que construyó para no repetir sus puntos ciegos.
+
+**Decisión.** Cinco actores con responsabilidades que no se cruzan:
+
+| Actor | Hace | Nunca hace |
+|---|---|---|
+| **Bot «OPAI 2.0»** (orquestador) | Lee `ESTADO.md` y `ROADMAP.md`, prepara el prompt de cada encargo, abre y opera los chats (construcción, revisión, diseño y QA), sigue el avance y le reporta a Carlos | Escribir código, aprobar PRs, integrar |
+| **Claude** (constructor, proyecto «OPAI 2.0») | Escribe el brief, lo implementa en rama `brief/NN-<nombre>` (o `docs/<tema>` para PRs de documentación), commits por bloque con el gate local en verde, autorrevisión con subagente antes de abrir el PR, abre el PR con el reporte y actualiza `ESTADO.md` en la rama | **Integrar a `main`**, aprobar su propio PR, aplicar migraciones sin instrucción |
+| **Bot «Revisor OPAI 2.0»** | Revisa el diff completo contra el brief, sus criterios de aceptación, `CLAUDE.md` y los ADR, **con el modelo contrario al que construyó** (si construyó Claude, revisa otro proveedor o modelo, y viceversa). Pide cambios en el PR o aprueba. Si aprueba y el CI está en verde (`typecheck`, `lint`, `test`, `test:db`, presupuesto), integra con rebase y borra la rama | Integrar en rojo; integrar un PR con migración de Neon pendiente |
+| **Bot «Diseño y QA OPAI 2.0»** | Después de cada PR integrado que toque pantallas, prueba en `test.opai.cl` a 375 px (celular), 1024 px y 1280 px, claro y oscuro: flujos del brief, estados (cargando, vacío, error, sin permisos), contra el export aprobado de Claude Design y `NAVEGACION.md`. Abre un issue o un PR de arreglos con capturas | Cambiar el diseño aprobado sin pasar por Carlos |
+| **Carlos** | Decide el negocio, aprueba los diseños en Claude Design y aprueba lo irreversible (migraciones en Neon `main`, borrados, gasto, producción); aplica las migraciones desde su Mac | — |
+
+Reglas:
+
+1. **PR con migración de Neon pendiente:** el Revisor lo deja **aprobado sin integrar** y lo etiqueta `migracion-pendiente`; Carlos aplica la migración en `dev` y luego en `main` desde su Mac y avisa; recién entonces el Revisor integra (con el CI todavía en verde contra `main` actualizado). Así `main` nunca tiene código que espera una tabla que no existe.
+2. **Correcciones pedidas por el Revisor** las hace Claude en la misma rama (commits nuevos, sin reescribir lo revisado) y vuelve a pedir revisión.
+3. **PRs solo de documentación** siguen el mismo camino (nunca push directo a `main`).
+4. **Bloqueos:** si Revisor y constructor no convergen en dos rondas, decide Carlos.
+5. Los agentes operativos de Gard (Grokbot y los demás) siguen sin escribir en el repositorio (ADR-035).
+
+**Consecuencias.** La autorrevisión con subagente queda como control previo del constructor, no como requisito de integración. `INSTRUCCIONES-proyecto-claude.md`, `CLAUDE.md` y `CONTEXTO-agentes.md` cambian su sección de flujo; Carlos debe pegar las instrucciones nuevas en el proyecto de claude.ai. El cierre de un brief deja de ser «integrado» y pasa a «PR abierto»; `ESTADO.md` lo refleja hasta que el Revisor integra.
+
+---
+
+## ADR-044 · PWA desde el principio y empaquetado nativo posterior
+
+**Fecha:** 23-oct-2026 · **Estado:** propuesto (preguntas de Carlos en `PREGUNTAS-carlos.md`) · Concreta ADR-007 y ADR-029 (puntos 9, 10 y 14).
+
+**Contexto.** Toda la app será instalable y los portales de terreno (Supervisor, Trabajador —portal de la persona—, Terreno, Cliente) se publicarán en App Store y Google Play. Estado verificado en `main` (`fe362cc`): no hay manifest, service worker, íconos ni carpeta `public/`; solo `viewport-fit=cover` y `applicationName`. Existe un proyecto aparte de apps nativas de OPAI 1.0: no se mezcla con 2.0; se reutiliza su aprendizaje (cuentas de desarrollador, D-U-N-S, certificados de push, motivos de rechazo en revisión), no su código.
+
+**Decisión.**
+
+1. **Una app web instalable** con `app/manifest.ts` (nombre, `short_name`, `start_url` por portal, `display: standalone`, `theme_color`/`background_color` desde tokens, íconos 192 y 512 normales y `maskable`, `apple-touch-icon`, pantalla de inicio con la marca), `apple-mobile-web-app-capable` y safe-area. Un manifest por portal de terreno (`/supervisor`, `/trabajador`, `/terreno`, `/cliente`) para que cada uno se instale con su nombre y su inicio; el ERP usa el general. Íconos y colores de marca del tenant en los portales cuando el tenant los tenga (ADR-028); OPAI por defecto.
+2. **Service worker** con Serwist (está en el stack del arranque; su compatibilidad con Turbopack en Next 16 se verifica en el brief y, si no la hay, se escribe un SW mínimo propio sin dependencias): precache del shell de cada portal de terreno, estrategia *network-first* para RSC y datos, *cache-first* para estáticos con hash, página sin conexión. **Actualización controlada:** el SW nuevo queda en espera y la app muestra «Hay una versión nueva · Actualizar»; nunca se activa a mitad de una marca o una ronda; versiones con migraciones de la cola local fuerzan la actualización al terminar la sincronización.
+3. **Sin conexión, donde corresponde.** Solo en terreno y solo para hechos que se capturan en el lugar: **marcación** (Asistencia), **rondas** (puntos, fotos, GPS) y **novedades** (texto, fotos). Cada hecho se guarda en una cola local en IndexedDB con su `idempotencyKey`, hora del dispositivo, GPS y evidencia; se sincroniza al recuperar la red (evento `online`, al abrir la app y, en Android, Background Sync), por las mismas capacidades que usa la UI con conexión. El servidor sella la hora de recepción; los conflictos se resuelven por ese sello (ADR-029.9). La marca diferida queda identificada como tal (`origen_marca = offline_queue`, con hora del dispositivo y sello del servidor al recibirla); no es la «contingencia» de `extraccion/dt-normativa.md`, que es la carga manual con motivo cuando el sistema no estuvo disponible. Que la marca diferida esté permitida es decisión de Carlos. Lo demás (ERP, configuración, cotizador, finanzas) requiere conexión y lo dice con un estado claro.
+4. **Push.** Canal `push` del servicio de Comunicaciones (ADR-020), silencio por defecto, medido en `core.consumos`. Web Push con VAPID en Android y escritorio; en iOS solo funciona con la app instalada en la pantalla de inicio (iOS 16.4 o superior), por eso el portal pide instalar antes de pedir permiso. En el empaquetado nativo, APNs y FCM por el mismo adaptador. Suscripciones por dispositivo en el núcleo, revocables desde Dispositivos (ADR-029.10). El permiso se pide en contexto (al activar un aviso), nunca al abrir.
+5. **Cámara y GPS.** Fotos con captura nativa del navegador (`input capture` o `getUserMedia`), comprimidas en el dispositivo antes de subir por `core.documentos` (ADR-039). La verificación facial de Asistencia usa el adaptador de biometría del núcleo con prueba de vida del proveedor. GPS con la API de geolocalización: precisión y hora quedan como evidencia, nunca bloquean (ADR-023). El seguimiento en segundo plano de rondas solo existe en la app nativa (la web no lo permite).
+6. **Presupuesto por ruta de terreno.** Primera carga ≤ **150 KB** de JS gzip por ruta de terreno (framework 132 + ≤ 18 KB propios; el cotizador y el ERP mantienen los topes de ADR-037), CSS crítico en línea, fuentes autoalojadas con `font-display: swap`, sin mapas ni gráficos en el JS inicial. Con el SW, la segunda carga no descarga JS. Los topes van en `apps/web/presupuesto-js.json`.
+7. **Prueba en CI.** Lighthouse quitó la categoría PWA en su versión 12, así que el gate equivalente es: (a) Playwright verifica que cada manifest es válido (campos, íconos que existen, `start_url` dentro del alcance), que el SW se registra y controla la página, y que el shell del portal de terreno carga con `context.setOffline(true)` y una marca o novedad queda en la cola y se sincroniza al volver la red; (b) Lighthouse CI (`@lhci/cli`) en emulación móvil sobre las rutas de terreno con rendimiento y accesibilidad ≥ 90 (ADR-029.14); (c) el presupuesto de JS de ADR-037.
+8. **Empaquetado para tiendas: Capacitor** para iOS y Android (recomendado), en la fase 3, con el mismo código web y plugins nativos solo donde la web no alcanza: geolocalización en segundo plano (rondas), push (APNs/FCM), biometría del dispositivo, almacenamiento seguro y cámara. Alternativas evaluadas:
+
+| Opción | A favor | En contra |
+|---|---|---|
+| **Capacitor** (recomendado) | Un proyecto para iOS y Android; plugins nativos para lo que la web no hace (GPS en segundo plano, push nativo, biometría); el código web es el mismo de la PWA; Apple acepta mejor una app con capacidades nativas reales (la guía 4.2 rechaza envoltorios sin valor propio) | Dos proyectos nativos que mantener (Xcode y Gradle); actualizaciones del contenedor pasan por revisión de tiendas |
+| **TWA** (Trusted Web Activity) | Android con cero código nativo; la app es la PWA en Chrome; actualizaciones instantáneas | Solo Android; sin GPS en segundo plano ni plugins nativos; requiere Digital Asset Links |
+| **PWABuilder** | Genera paquetes rápido para ambas tiendas | Sin plugins nativos; en iOS es un WebView simple con alto riesgo de rechazo por la guía 4.2 |
+
+**Consecuencias.** Un brief de base PWA (manifest, íconos, SW con página sin conexión, actualización controlada, prueba en CI) entra antes de Comercial y no espera a la fase 3; la cola local y la sincronización nacen con el primer módulo de terreno (Rondas o Asistencia) con su escenario de prueba sin red. Mientras ADR-044 y ADR-046 estén propuestos, sus reglas son la dirección de trabajo y se vuelven obligatorias para los briefs desde que Carlos los aprueba (Briefs 04 y 05). Las capacidades que se usan sin conexión deben aceptar `idempotencyKey` y la hora del dispositivo como dato, no como verdad.
+
+---
+
+## ADR-045 · Velocidad de navegación medida y con gate
+
+**Fecha:** 23-oct-2026 · **Estado:** vigente (prioridad fijada por Carlos el 23-oct; quedan por decidir los contadores de la barra lateral y la caché de sesión) · Completa ADR-037 y ADR-029 (punto 14).
+
+**Contexto.** Carlos nota que al cambiar de módulo la página se queda cargando. Medición del 23-oct en `test.opai.cl` (Chrome de escritorio, red fija, sesión real, tenant Gard sin datos de maestros), navegación cliente por la barra lateral, 8 cambios de módulo: **skeleton visible a los 13–21 ms** (el `Suspense` de `PaginaPortal` funciona y el prefetch parcial está activo); **contenido con datos a los 337–1.350 ms** (Cuentas 1.059 y 1.350 ms; Inicio 901 ms; Instalaciones 337; Personas 423–467; Cargos 526; Configuración 367); respuesta RSC de 4–5 KB con primer byte a 85–116 ms, es decir, el servidor tarda 0,2–1,2 s en terminar de transmitir **sin datos que leer**. Carga completa de `/`: TTFB 59 ms, `DOMContentLoaded` 1,08 s. JS por ruta: dentro de los topes de ADR-037 (CI). Funciones en `gru1` y Neon en `aws-sa-east-1` (ambos São Paulo) con conexión pooled: la región no es la causa. En teléfono con 4G el tiempo con datos será mayor y crecerá con el volumen.
+
+**Diagnóstico (verificado en el código de `main`).**
+
+1. **Cadena serial por navegación:** `getSession` de Better Auth (consulta a la base, sin caché de cookie) → membresías → módulos activos → en paralelo los contadores de la barra lateral (`core.resumen.contadores`) y los datos de la página. Nada de esto se cachea entre navegaciones.
+2. **Cuatro idas y vueltas por consulta:** `forTenant` envuelve cada operación de Prisma en una transacción por lotes (`BEGIN`, `set_config`, consulta, `COMMIT`). Una capacidad con cinco consultas son unas veinte idas y vueltas.
+3. **El shell vive dentro de la página**, no en el layout: cada navegación vuelve a resolver identidad, navegación y contadores para pintar una barra lateral que no cambió.
+4. **Contadores en la barra lateral** en cada navegación (varios `count` con RLS).
+5. Sin instrumentación: no hay `Server-Timing` ni conteo de consultas por request; el cold start de Vercel y la suspensión del cómputo de Neon (*scale to zero*) **no se midieron** y quedan por verificar en el brief.
+
+No se encontró: render estático roto, falta de prefetch, layouts que recarguen el documento ni región cruzada.
+
+**Decisión.**
+
+1. **Estándar (Carlos, 23-oct, prioridad):** la navegación entre módulos se siente **instantánea**, al nivel de las mejores apps SaaS: el shell y la barra lateral **persisten** sin parpadeo ni barra de progreso; el skeleton del contenido aparece de inmediato; las rutas del menú se **precargan** (prefetch al estar visibles y al pasar el cursor, con datos cuando el costo lo permite); volver a un módulo ya visitado muestra **datos en caché** al instante y los revalida en segundo plano; las escrituras invalidan lo que cambian. Cada cambio de rendimiento se **mide antes y después** con el mismo protocolo (navegación Cuentas → Instalaciones → Personas → Cargos y sueldos → Configuración → Inicio, en escritorio y en celular con 4G simulado) y el resultado queda en el PR.
+2. **Metas (p75):** respuesta visible (skeleton con la forma del contenido, shell intacto) **< 100 ms** (tope duro 200 ms); contenido con datos **< 1 s** en 4G y **< 500 ms** en escritorio; módulo ya visitado **< 100 ms** con datos de caché; TTFB del documento < 300 ms; **≤ 8 consultas a Neon por navegación** de lista o ficha; presupuesto de JS de ADR-037 y ADR-044.
+3. **Arreglos (brief de rendimiento, el primero de la lista, antes de Comercial):** `Server-Timing` y contador de consultas por request; shell en el layout de cada portal con su propio `Suspense` y la página solo con su contenido; identidad, membresías y módulos activos cacheados por sesión (caché de cookie de Better Auth de corta duración e invalidación al suspender una membresía o un tenant) y por tenant con etiquetas (`use cache` + `revalidateTag` en las escrituras que los cambian); `forTenant` con una transacción interactiva por capacidad (fija `app.tenant_id` una vez) en vez de una por consulta, sin debilitar la RLS; contadores en una sola consulta y cargados después de pintar (o retirados de la barra lateral, a decidir); verificar cold starts (Fluid compute) y la suspensión de Neon en `main`; prefetch explícito de las entradas del menú y caché del router para segmentos dinámicos ya visitados (revalidación en segundo plano, invalidación por las Server Actions que escriben).
+4. **Gate en CI:** (a) Playwright contra `next start` con Postgres de CI recorre la navegación entre módulos y falla si el skeleton tarda más de 200 ms o el servidor (por `Server-Timing`) más de 500 ms, o si una navegación supera las 8 consultas; (b) Lighthouse CI móvil ≥ 90 en Inicio, una lista y una ficha; (c) presupuesto de JS existente. Además, una medición sintética programada contra `test.opai.cl` después de cada despliegue (informativa, no bloquea) que el bot de Diseño y QA revisa.
+
+**Consecuencias.** Toda pantalla nueva declara en su brief sus consultas por navegación. Ningún arreglo de rendimiento se mezcla con PRs de documentación ni de funcionalidades.
+
+---
+
+## ADR-046 · Arquitectura de navegación por áreas
+
+**Fecha:** 23-oct-2026 · **Estado:** propuesto · Completa ADR-003, ADR-007 y ADR-018. Mapa completo en `docs/2.0/NAVEGACION.md`.
+
+**Decisión.** La barra lateral del ERP se organiza en **áreas** fijas (Comercial, Clientes, Operaciones, Personas, Finanzas, Documentos) más Inicio arriba y Configuración al pie; cada área agrupa entradas que aportan los módulos activos del tenant y que el rol puede leer, con un máximo de siete entradas por área. Lo que es parte de una entidad va como pestaña de su ficha (ADR-041), nunca en el menú. La forma principal de saltar es el buscador ⌘K (entidades, páginas y acciones) con recientes; los fijados del usuario van arriba de la barra. En el celular, barra inferior de cuatro entradas más «Más», según el área principal del rol. Los módulos declaran su entrada con `area` y `orden` en el manifest; un módulo apagado no deja rastro. Término único en el menú: «Personas» (el vocabulario de la vertical se usa en textos operativos, no en el nombre del área). Todo brief con pantallas respeta `NAVEGACION.md` y el bot de Diseño y QA lo verifica.
+
+**Consecuencias.** `ItemNav` y el manifest ganan `area`; la barra lateral pasa a grupos plegables; el rediseño visual pasa por Claude Design (Design Prompt de navegación) antes del brief que lo implementa.
+
+---
+
+## ADR-047 · Especificación funcional aprobada antes de diseñar o construir un módulo
+
+**Fecha:** 23-oct-2026 · **Estado:** vigente (pedido de Carlos, 23-oct) · Completa ADR-012 y ADR-043.
+
+**Decisión.** Antes del Design Prompt de cualquier módulo se escribe `docs/2.0/modulos/<modulo>.md` en lenguaje de negocio, con la plantilla `docs/2.0/modulos/_plantilla.md` (objetivo; entidades y relaciones; pantallas y pestañas; campos y validaciones; reglas numeradas; estados y transiciones; permisos por rol y portal; eventos y notificaciones; herramientas MCP; integraciones; mejoras sobre 1.0 y lo que no se porta; casos borde; criterios de aceptación; preguntas abiertas). Carlos la aprueba antes de cualquier diseño o código. La extracción de 1.0 (`extraccion/`) y los ADR son sus insumos; la especificación es lo que el diseño y el brief citan.
+
+**Ciclo de cada módulo:** extracción de 1.0 (si existe en 1.0) → **especificación** → aprobación de Carlos → Design Prompt → diseño aprobado → brief → PR (Claude) → revisión e integración (Revisor) → QA en pantallas (Diseño y QA). Al cerrar cada brief, el reporte termina con un **resumen ejecutivo para Carlos** (cinco líneas como máximo: qué se hizo, qué cambia para Gard, qué decide él, qué sigue) que también queda en `ESTADO.md`.
+
+**Consecuencias.** Comercial y CPQ ya tienen extracción y ADR-040/042: su especificación se escribe a partir de ellos antes del Design Prompt. El formato del brief agrega la sección 17 «Resumen ejecutivo».
