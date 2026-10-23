@@ -74,8 +74,8 @@ Backlog (no se construye sin demanda real): inventario, cámaras, ATS, alertas y
 10. Casos límite
 11. Plan de implementación numerado por bloques (un commit por bloque)
 12. Tests obligatorios
-13. Validación
-14. Criterios de aceptación (checklist)
+13. Validación (cierra con `tools/list` en `main` y el gate de paridad en verde; una pantalla sin capacidad expuesta no se integra)
+14. Criterios de aceptación (checklist; incluye «`tools/list` en `main` con las herramientas del brief y gate de paridad en verde»)
 15. Riesgos y rollback
 16. Reporte de ejecución
 ```
