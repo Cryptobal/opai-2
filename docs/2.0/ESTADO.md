@@ -1,12 +1,12 @@
 # ESTADO — OPAI 2.0
 
-**Última actualización:** 23-oct-2026 · **Actualizado por:** Claude (arquitectura) · **Fase en curso:** 1 — Núcleo (Brief 01 escrito, pendiente de ejecución)
+**Última actualización:** 23-oct-2026 · **Actualizado por:** Claude (arquitectura) · **Fase en curso:** 1 — Núcleo (Brief 01 ejecutado hasta el bloque 8; falta el primer uso guiado de Carlos)
 
 Este archivo es la fuente de verdad del avance. Cada brief lo actualiza al terminar. Si algo no está aquí, no está hecho.
 
 ## Hecho
 
-- Decisión de construir OPAI 2.0 desde cero (ver `01-decisiones.md`, ADR-001 a ADR-013).
+- Decisión de construir OPAI 2.0 desde cero (ver `01-decisiones.md`, ADR-001 a ADR-016).
 - Documento de arranque, registro de decisiones, contexto para agentes e instrucciones del proyecto Claude en `docs/2.0/`.
 - Design Prompt de fundamentos del DS 2.0 en `docs/2.0/design/DESIGN-PROMPT-ds-2.0-fundamentos.md`.
 - **Diseño de acceso aprobado** (23-oct): export en `docs/2.0/design/export-acceso/` (login con estados, recuperar contraseña, invitación, selector de empresa, login Trabajador con teclado numérico, login Cliente, emparejar Terreno; claro y oscuro). El Brief 01 implementa las cuatro primeras; las de Trabajador, Cliente y Terreno se implementan en la fase 3.
@@ -24,28 +24,41 @@ Este archivo es la fuente de verdad del avance. Cada brief lo actualiza al termi
 
 - **Brief 00-infra ejecutado:** Neon `opai-2` (ramas `main` y `dev`, migración aplicada, `opai_app` con contraseña, tenant `gard` en ambas), `pnpm test:db` en verde contra `dev` (4 tests), Vercel `opai-2` en `gard-security` conectado al repo, **`https://test.opai.cl` en línea** (CNAME en Cloudflare, DNS only; certificado Let's Encrypt emitido por Vercel): `/api/health` → `ok: true` en `gru1`, `/` muestra el shell, `/ds` → 404.
 
+- **Brief 01 (identidad y plataforma) ejecutado, bloques 1 a 8** (commits `a998436` → este):
+  - `@opai/domain`: roles `owner/admin/gerente/supervisor/viewer` con patrones permitir/denegar y bloqueo financiero (gerente, supervisor y viewer sin `finanzas:*` ni `nomina:*`), permisos de plataforma solo por `platformRole` (`owner` todo, `support` lectura), `permisosDe`, `puedeAsignarRol`; vocabulario por vertical. 105 tests.
+  - `packages/db`: modelos de Better Auth (`users`, `sessions`, `accounts`, `verifications`, sin RLS) y `memberships` (RLS `tenant_isolation` + `user_self` de solo lectura), `invitations`, `tenant_modules`, `api_keys`, `usage_events` (RLS), `tenants.estado`. Migración `20261023044757_identidad` aplicada en `dev` y `main`. `forUser`, `globales()`, `clienteAuth()`. Tests de RLS ampliados (8 en verde contra `dev`).
+  - `@opai/auth`: Better Auth 1.7 (correo y contraseña sin registro público, Google opcional, recuperación por enlace de 30 minutos con token hasheado, cookies `opai.*`, rate limit de 5 intentos de login cada 15 minutos, bloqueo de ingreso para miembros de tenants o membresías suspendidas con motivo visible solo tras validar la contraseña). Seed idempotente del usuario plataforma. `@opai/integrations/email`: Resend por HTTP y consola.
+  - `@opai/capabilities`: contexto con usuario, rol, portal, módulos activos, scopes, plataforma y servicios; `executeCapability` verifica tenant, módulo activo, scopes y permiso, audita en el tenant objetivo y mide toda ejecución en `usage_events`. 27 capacidades `core.*` y `platform.*` (sección 7 del brief más `core.invitations.peek/accept/request_new`, internas). Derivación MCP (`herramientasMcp`, `preview_<id>` para escrituras). Contexto de prueba con base en memoria en `@opai/capabilities/testing`. 47 tests.
+  - `apps/web`: `proxy.ts` (Next 16) redirige a `/login` sin sesión; `resolverActor` (sesión o API key), `/api/v1` real, MCP en `/api/mcp` y `/api/mcp/k/<key>` (mcp-handler 2 + SDK MCP 2), cabeceras de seguridad. Shell real (navegación por permisos y módulos, portales de la membresía, menú de usuario con cambio de empresa y de contraseña), ERP (inicio, Usuarios, API keys, Empresa), Plataforma (empresas, nueva con "usar existente", detalle con módulos, administradores, API keys y uso), portales placeholder protegidos. Acceso según `export-acceso`: login con estados, `/recuperar` y `/recuperar/[token]`, invitación (4 variantes), `/elegir-empresa`; Trabajador y Cliente muestran "Disponible pronto". DS: `Menu`, `Dialog`, `Switch`, `UserMenu`, `AuthCard`, `Alerta`, `EstadoIlustrado`, `InputPassword`, `Separador`, `estilosBoton`.
+  - Verificado en local contra `dev`: flujo completo (login, adoptar Gard desde Plataforma, aceptar invitación, ERP, crear API key) y MCP (`tools/list`, `core_me` como agente vía Carlos, `preview_core_users_invite` sin escribir, escritura real auditada con `actor_type = agent` y `via_user_id`). Gate en verde (164 tests), `test:db` en verde, Playwright 51 en verde (capturas en `apps/web/e2e/__screenshots__/` y `__screenshots__/acceso/`), build de producción en verde.
+  - Producción (`test.opai.cl`): variables creadas, migración y seed en `main`, deploy `dpl_8psk5aH21ZR7PpqA4xwZigMqpEx2`. Verificado: `/login` 200, portales redirigen a `/login`, `/ds` y `/ds/acceso` 404, `/api/v1/core/me` sin sesión 401, `/api/mcp` sin key 401, login real de Carlos 200 y `platform.tenants.list` con el tenant `gard` existente.
+
 ## En curso
 
-- **Carlos:** ejecutar `docs/2.0/briefs/BRIEF-01-identidad-y-plataforma.md` en Claude Code (login, roles y permisos, Plataforma, MCP con API keys, telemetría). Se detiene dos veces (variables en Vercel; primer ingreso).
-- **Carlos (cuando quiera):** correr `docs/2.0/design/DESIGN-PROMPT-acceso.md` en Claude Design, dentro del sistema de diseño **OPAI DS 2.0** (creado el 23-oct-2026 desde el export aprobado; es la referencia para todas las pantallas nuevas). Pendientes del sistema: logo definitivo de OPAI; revisar el contraste de `--ds-border-strong` (1,5:1) en el portal Trabajador a pleno sol.
+- **Carlos — Brief 01, bloque 9 (STOP, primer uso guiado):** entrar en `https://test.opai.cl/login` con `carlos.irigoyen@opai.cl` y la contraseña inicial mostrada una sola vez en la sesión; cambiarla desde el menú de usuario; en Plataforma → Nueva empresa crear **Gard Security** (slug `gard`, vertical seguridad) con su correo como administrador: como `gard` ya existe en `main`, usar "Usar la existente"; aceptar la invitación desde el correo (Resend); entrar al ERP y crear la API key "Grokbot" con scope `*`; configurar Grokbot con `https://test.opai.cl/api/mcp` y la cabecera Bearer.
+- **Carlos:** agregar en Google Cloud Console el URI de redirección `https://test.opai.cl/api/auth/callback/google` (y `http://localhost:3000/api/auth/callback/google` para desarrollo); sin eso "Continuar con Google" falla.
+- **Carlos:** regularizar la facturación de GitHub Actions: el CI no corre desde el 23-oct ("recent account payments have failed or your spending limit needs to be increased"). El gate se corrió local en cada commit.
+- **Carlos (cuando quiera):** correr `docs/2.0/design/DESIGN-PROMPT-acceso.md` en Claude Design, dentro del sistema de diseño **OPAI DS 2.0**. Pendientes del sistema: logo definitivo de OPAI; revisar el contraste de `--ds-border-strong` (1,5:1) en el portal Trabajador a pleno sol.
 
 ## Pendiente (siguiente)
 
 - Evaluar Radix/shadcn para Combobox con búsqueda, Dialog y Menú cuando el primer módulo los necesite (Comercial).
+- Diseñar en Claude Design `Menu`, `Dialog`, `Switch` y `UserMenu` (implementados provisionalmente en el Brief 01 sin diseño propio) y el detalle de tenant en Plataforma.
 - Brief 02 — Maestros y servicios del núcleo (cuentas, contactos, instalaciones, cargos y estructuras de sueldo en tres niveles, documentos y archivos en R2, configuración declarativa, notificaciones). El núcleo mínimo se partió en 01 (identidad y plataforma) y 02 (maestros) para mantener briefs ejecutables en una sesión.
 - Extracción de 1.0 para Comercial y CPQ → `docs/2.0/extraccion/`.
 - Modelo de planes y facturación de suscripciones: cuando exista Opai SpA (en creación).
 
 ## Versiones instaladas
 
-Node 22 · pnpm 10.28 · Next.js 16.4.2 · React 19.3.0 · Tailwind 4.3.3 · Prisma 7.10.1 (estable; 8 está en RC) · TypeScript 5.9.3 (7.0 existe pero se mantiene 5.x por compatibilidad del ecosistema) · ESLint 10.13 + typescript-eslint 8.72 · Vitest 5.0.5 · Playwright 1.64 · Turborepo 2.11 · Zod 4.6 · lucide-react 1.61.
+Node 22 · pnpm 10.28 · Next.js 16.4.2 · React 19.3.0 · Tailwind 4.3.3 · Prisma 7.10.1 (estable; 8 está en RC) · TypeScript 5.9.3 (7.0 existe pero se mantiene 5.x por compatibilidad del ecosistema) · ESLint 10.13 + typescript-eslint 8.72 · Vitest 5.0.5 · Playwright 1.64 · Turborepo 2.11 · Zod 4.6 · lucide-react 1.61 · Better Auth 1.7.12 (+ `@better-auth/prisma-adapter` 1.7.12) · mcp-handler 2.3.0 · `@modelcontextprotocol/server` 2.3.1 (SDK MCP v2; protocolo 2026-07-28 con respaldo 2025).
 
 ## Infraestructura
 
 - Repositorio: `Cryptobal/opai-2`, rama `main`. CI en GitHub Actions.
-- Vercel: proyecto `opai-2` (`prj_JcMPHnnA5lVK6P7SIkBx2Gbv5E6r`) en el equipo `gard-security`, conectado a `Cryptobal/opai-2`, Root Directory `apps/web`, Node 22.x, framework Next.js. Enlazado desde la raíz del repo (`.vercel/` ignorado). Región de funciones: `gru1` (`apps/web/vercel.json`). Variables: `DATABASE_URL` (rol `opai_app`, pooled, rama `main`) en production y preview; `DEV_TENANT_ID` (tenant `gard` de `main`) en preview. `DATABASE_URL_MIGRATE` no está en Vercel. Las URLs `*.vercel.app` tienen la protección de despliegue por defecto de Vercel.
+- Vercel: proyecto `opai-2` (`prj_JcMPHnnA5lVK6P7SIkBx2Gbv5E6r`) en el equipo `gard-security`, conectado a `Cryptobal/opai-2`, Root Directory `apps/web`, Node 22.x, framework Next.js. Enlazado desde la raíz del repo (`.vercel/` ignorado). Región de funciones: `gru1` (`apps/web/vercel.json`). Variables: `DATABASE_URL` (rol `opai_app`, pooled, rama `main`), `BETTER_AUTH_SECRET`, `RESEND_API_KEY` y `EMAIL_FROM` (`OPAI <no-reply@opai.cl>`, dominio verificado en Resend) en production y preview; `BETTER_AUTH_URL=https://test.opai.cl`, `GOOGLE_CLIENT_ID` y `GOOGLE_CLIENT_SECRET` solo en production. `DEV_TENANT_ID` eliminada. `DATABASE_URL_MIGRATE` no está en Vercel. Las URLs `*.vercel.app` tienen la protección de despliegue por defecto de Vercel.
 - Neon: proyecto `opai-2` (`steep-wildflower-90764475`), región `aws-sa-east-1` (São Paulo), Postgres 18, organización personal de Carlos. Ramas `main` (producción de `test.opai.cl`) y `dev` (desarrollo local y `test:db`). Base `neondb`, propietario `neondb_owner`; rol de aplicación `opai_app` (sin `BYPASSRLS` ni superusuario, verificado) con la misma contraseña en ambas ramas, guardada solo en `.env.local` de Carlos.
 - Dominio: `test.opai.cl` (construcción) en línea sobre `opai-2`, CNAME `test` → `e61b12f5039e609e.vercel-dns-016.com` en Cloudflare · `app.opai.cl` (producción, futuro). `opai.cl` está en Cloudflare; el registro es DNS only.
+- Usuario plataforma `carlos.irigoyen@opai.cl` (`platformRole = owner`) en `main` y en `dev` (contraseñas distintas; la de `dev` está en `SEED_OWNER_PASSWORD` del `.env.local`).
 - Tenant de desarrollo `gard`: `main` → `01a166f3-ce42-72d8-a664-77755f23606c` · `dev` → `01a166f3-f15c-742c-b197-47ea67524e33`.
 
 ## Decisiones tomadas durante la ejecución
@@ -63,7 +76,19 @@ Node 22 · pnpm 10.28 · Next.js 16.4.2 · React 19.3.0 · Tailwind 4.3.3 · Pri
 - Formato: Prettier en código; `docs/` excluido para no reescribir los documentos.
 - Título de página en iPad y desktop en la barra superior del shell (como en el diseño); el patrón lo muestra solo en teléfono. La acción principal queda en el patrón (una fila bajo la barra en iPad/desktop) para no acoplar shell y patrón.
 
+- Brief 01: el esquema Prisma se dividió en `core.prisma`, `identidad.prisma` y `tenancy.prisma` (todo en el schema `core`); el seed del usuario plataforma vive en `packages/auth/scripts` (necesita el hash de Better Auth y `@opai/auth` ya depende de `@opai/db`).
+- Brief 01: recuperación con el flujo de restablecer contraseña de Better Auth (no enlace mágico); el enlace vence en 30 minutos según el diseño aprobado (las invitaciones, 72 horas). La regla "distinta a las 3 anteriores" del diseño no se implementa: no hay historial de contraseñas.
+- Brief 01: el contexto sin tenant (plataforma sin empresa elegida) usa un id nulo con `conTenant: false`; solo corren capacidades `sinTenant` (`core.me`, `core.ping`, `platform.*`). Auditoría y telemetría de plataforma van al tenant objetivo (`tenantObjetivo`).
+- Brief 01: una API key con scope `*` no expone `platform.*`; hace falta el scope `platform` explícito. Supervisor: `ops:*`, `rondas:*`, `asistencia:*` completos y `personas` solo lectura.
+- Brief 01: la pertenencia y la selección de empresa usan la cookie `opai_tenant`; tras el login, `/elegir-empresa` aparece si hay más de una membresía utilizable.
+- Brief 01: el aviso de cuenta suspendida nombra "a <persona> (administración de <empresa>)" en vez de "administradora", para no suponer género.
+- Brief 01: `/ds/acceso` (solo desarrollo) renderiza cada variante de acceso con datos ficticios para capturas; el tema oscuro se prueba con `prefers-color-scheme`.
+- Brief 01: `core.apikeys.create` recibe `expiraEn` como fecha ISO (las herramientas MCP requieren inputs expresables en JSON Schema; hay test).
+
 ## Riesgos y pendientes materiales
 
 - `neonctl` 2.21 no tiene `regions list`; la región se eligió creando directamente en `aws-sa-east-1`.
 - Pendientes de diseño para módulos: patrón de vista dividida (lista + detalle en iPad, como `DetailTablet.html`), paleta de comandos ⌘K, menú de usuario, Combobox con búsqueda. Se diseñan con el módulo que los necesite.
+- Rate limit de `/api/auth` y `/api/mcp` en memoria por instancia: suficiente para el Brief 01; centralizar (base o Redis) antes de tráfico real.
+- CI de GitHub Actions detenido por facturación (ver En curso): hasta regularizarlo, el gate y `test:db` se corren solo en local.
+- `Menu`, `Dialog`, `Switch` y `UserMenu` no tienen diseño en Claude Design todavía (provisionales sobre tokens del DS).

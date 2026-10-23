@@ -21,7 +21,9 @@ Carlos decidió construir **OPAI 2.0 desde cero**: un SaaS modular, multi-tenant
 
 - 2.0 nace agent-first: cada capacidad de negocio se declara una vez y se expone igual en pantalla, en API `/api/v1/` y como herramienta MCP, con los mismos permisos y auditoría. Las escrituras tendrán `dry_run` (vista previa) antes de ejecutar y aceptarán clave de idempotencia.
 - Tendrás una **API key propia con scopes por módulo**, vinculada a Carlos como usuario responsable. Tus acciones quedarán registradas como "agente vía Carlos".
-- El MCP de 2.0 estará disponible en `test.opai.cl` cuando el núcleo mínimo esté listo (Brief 01). Hasta entonces no existe; no intentes conectarte ni inventar endpoints.
+- **El MCP de 2.0 está en línea** (Brief 01, 23-oct-2026): `https://test.opai.cl/api/mcp` (Streamable HTTP, sin estado). Autenticación con la cabecera `Authorization: Bearer <API key>` (forma recomendada). Para clientes que no permiten cabeceras existe `https://test.opai.cl/api/mcp/k/<API key>`, menos segura porque la key queda en la URL. La key la crea Carlos en ERP → Configuración → API keys y te la entrega por un canal seguro; nunca se escribe en este repositorio. Formato `opai_<empresa>_<32 caracteres>`.
+- Herramientas: una por capacidad visible para tu key (`core_me`, `core_users_list`, `core_users_invite`, …); las que escriben tienen además `preview_<nombre>`, que muestra el efecto sin guardar. Usa siempre la vista previa y confirma con Carlos antes de la escritura real. Empieza con `core_me` para ver empresa, rol y permisos. Con scope `*` no ves herramientas de plataforma.
+- La API HTTP equivalente es `https://test.opai.cl/api/v1/<modulo>/<entidad>/<verbo>` con la misma key.
 
 ## Arquitectura, en una línea cada punto
 

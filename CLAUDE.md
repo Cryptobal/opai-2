@@ -11,9 +11,10 @@ Monorepo de OPAI 2.0: SaaS modular, multi-tenant y agent-first para empresas int
 - `pnpm test:db` corre el test de aislamiento RLS si existe `DATABASE_URL_TEST` (Postgres local o rama `dev` de Neon, rol propietario).
 - `pnpm db:generate` · `pnpm db:migrate` (crea la migración sin aplicarla; usa `DATABASE_URL_MIGRATE`) · `pnpm db:deploy` (aplica; solo con instrucción explícita y contra el entorno indicado)
 - `pnpm --filter @opai/db role:password` fija la contraseña del rol `opai_app` desde `OPAI_APP_DB_PASSWORD`.
-- `pnpm --filter @opai/db seed:dev-tenant` crea el tenant `gard` y muestra `DEV_TENANT_ID`.
+- `pnpm --filter @opai/db seed:dev-tenant` crea el tenant `gard` (solo para desarrollo).
+- `pnpm --filter @opai/auth seed:platform-owner` crea (idempotente) el usuario plataforma desde `SEED_OWNER_PASSWORD`; usa `DATABASE_URL_MIGRATE`.
+- `pnpm --filter @opai/web e2e` corre Playwright: `/ds`, acceso (`/ds/acceso`, variantes del diseño) y el flujo con sesión (usa `SEED_OWNER_PASSWORD` del `.env.local` de la raíz contra `dev`).
 - `pnpm scaffold:module <id> --nombre "<Nombre>"` crea un módulo completo y lo registra.
-- `pnpm --filter @opai/web e2e` captura `/ds` a 375 y 1024 (necesita `pnpm exec playwright install chromium`).
 - Nunca: `prisma migrate reset`, borrar migraciones, commitear `.env*`, correr `db:deploy` contra un entorno no indicado, usar `dbAdmin()` fuera de scripts y migraciones, imprimir secretos.
 
 ## Estructura
@@ -33,7 +34,9 @@ Monorepo de OPAI 2.0: SaaS modular, multi-tenant y agent-first para empresas int
 - TypeScript estricto. Sin `any`, sin `@ts-ignore`, sin `as unknown as`.
 - Archivos de hasta 150 líneas (ESLint lo exige); dividir antes de superar.
 - Dominio puro: `packages/domain` y `modules/*/domain` no importan `next`, `react`, `@opai/db` ni `@prisma/client`.
-- Todo acceso a datos pasa por `db.forTenant(tenantId)`. El cliente Prisma crudo solo existe en `packages/db` (ESLint lo bloquea fuera).
+- Todo acceso a datos pasa por `db.forTenant(tenantId)`. El cliente Prisma crudo solo existe en `packages/db` (ESLint lo bloquea fuera). Excepciones acotadas: `forUser(userId)` solo para leer las membresías propias (política `user_self`) antes de elegir tenant; `globales()` solo para `tenants` y `users` (sin RLS); `clienteAuth()` solo en `packages/auth`.
+- Identidad: el código usa `@opai/auth` (`getSession`, `requireSession`) y `apps/web/lib/actor.ts` (`resolverActor`); nunca Better Auth directo. Toda página de portal verifica sesión y acceso al portal en servidor (`PaginaPortal`).
+- Permisos: `<modulo>:<accion>` con roles y comodines en `@opai/domain` (`tienePermiso`, ADR-016). `executeCapability` verifica tenant, módulo activo, scopes del agente y permiso; `platform:*` solo con `platformRole`. Las capacidades de plataforma reciben `tenantId` en el input y usan `ctx.plataforma.paraTenant`.
 - Toda tabla de negocio: `tenant_id`, `created_at`, `updated_at`, IDs `uuid(7)`, columnas `snake_case` vía `@map`, `@@schema("<modulo>")`. Toda migración que cree una tabla con `tenant_id` agrega:
 
   ```sql
