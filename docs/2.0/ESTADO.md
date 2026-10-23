@@ -1,6 +1,6 @@
 # ESTADO — OPAI 2.0
 
-**Última actualización:** 23-oct-2026 · **Actualizado por:** Claude (arquitectura) · **Fase en curso:** 1 — Núcleo (Brief 01 ejecutado hasta el bloque 8; falta el primer uso guiado de Carlos)
+**Última actualización:** 23-oct-2026 · **Actualizado por:** Claude (arquitectura) · **Fase en curso:** 1 — Núcleo (Brief 01 cerrado; siguiente: Brief 02)
 
 Este archivo es la fuente de verdad del avance. Cada brief lo actualiza al terminar. Si algo no está aquí, no está hecho.
 
@@ -24,7 +24,7 @@ Este archivo es la fuente de verdad del avance. Cada brief lo actualiza al termi
 
 - **Brief 00-infra ejecutado:** Neon `opai-2` (ramas `main` y `dev`, migración aplicada, `opai_app` con contraseña, tenant `gard` en ambas), `pnpm test:db` en verde contra `dev` (4 tests), Vercel `opai-2` en `gard-security` conectado al repo, **`https://test.opai.cl` en línea** (CNAME en Cloudflare, DNS only; certificado Let's Encrypt emitido por Vercel): `/api/health` → `ok: true` en `gru1`, `/` muestra el shell, `/ds` → 404.
 
-- **Brief 01 (identidad y plataforma) ejecutado, bloques 1 a 8** (commits `a998436` → este):
+- **Brief 01 (identidad y plataforma) ejecutado completo, bloques 1 a 10** (commits `a998436` → este):
   - `@opai/domain`: roles `owner/admin/gerente/supervisor/viewer` con patrones permitir/denegar y bloqueo financiero (gerente, supervisor y viewer sin `finanzas:*` ni `nomina:*`), permisos de plataforma solo por `platformRole` (`owner` todo, `support` lectura), `permisosDe`, `puedeAsignarRol`; vocabulario por vertical. 105 tests.
   - `packages/db`: modelos de Better Auth (`users`, `sessions`, `accounts`, `verifications`, sin RLS) y `memberships` (RLS `tenant_isolation` + `user_self` de solo lectura), `invitations`, `tenant_modules`, `api_keys`, `usage_events` (RLS), `tenants.estado`. Migración `20261023044757_identidad` aplicada en `dev` y `main`. `forUser`, `globales()`, `clienteAuth()`. Tests de RLS ampliados (8 en verde contra `dev`).
   - `@opai/auth`: Better Auth 1.7 (correo y contraseña sin registro público, Google opcional, recuperación por enlace de 30 minutos con token hasheado, cookies `opai.*`, rate limit de 5 intentos de login cada 15 minutos, bloqueo de ingreso para miembros de tenants o membresías suspendidas con motivo visible solo tras validar la contraseña). Seed idempotente del usuario plataforma. `@opai/integrations/email`: Resend por HTTP y consola.
@@ -33,11 +33,17 @@ Este archivo es la fuente de verdad del avance. Cada brief lo actualiza al termi
   - Verificado en local contra `dev`: flujo completo (login, adoptar Gard desde Plataforma, aceptar invitación, ERP, crear API key) y MCP (`tools/list`, `core_me` como agente vía Carlos, `preview_core_users_invite` sin escribir, escritura real auditada con `actor_type = agent` y `via_user_id`). Gate en verde (164 tests), `test:db` en verde, Playwright 51 en verde (capturas en `apps/web/e2e/__screenshots__/` y `__screenshots__/acceso/`), build de producción en verde.
   - Producción (`test.opai.cl`): variables creadas, migración y seed en `main`, deploy `dpl_8psk5aH21ZR7PpqA4xwZigMqpEx2`. Verificado: `/login` 200, portales redirigen a `/login`, `/ds` y `/ds/acceso` 404, `/api/v1/core/me` sin sesión 401, `/api/mcp` sin key 401, login real de Carlos 200 y `platform.tenants.list` con el tenant `gard` existente.
 
+  - Primer uso (bloque 9, 23-oct): Carlos entró como usuario plataforma, invitó desde Plataforma a `carlos.irigoyen@gard.cl` como owner de Gard Security (tenant `gard` existente), aceptó la invitación creando esa cuenta, creó la API key "Grokbot" (scope `*`) y conectó Grokbot al MCP. Verificado en `main`: `core_me` responde "agente vía carlos.irigoyen@gard.cl", rol owner; `preview_core_tenant_update` (dryRun) y `core_tenant_update` real, auditado con `actor_type = agent`, key Grokbot y `via_user_id` de `carlos.irigoyen@gard.cl`.
+  - Correcciones tras el primer uso: la invitación abierta con otra sesión vuelve al formulario de cuenta nueva (antes enviaba al login); Plataforma confirma "Invitación enviada".
+  - Criterios de aceptación del brief: cumplidos. Pendientes externos en En curso (rotar la key de Grokbot, Google, CI).
+  - Modelo de cuentas adoptado: `carlos.irigoyen@opai.cl` = operador de la plataforma (Plataforma, sin membresía); `carlos.irigoyen@gard.cl` = owner de Gard (ERP). Las acciones de Grokbot en Gard quedan a nombre de la cuenta de Gard.
+
 ## En curso
 
-- **Carlos — Brief 01, bloque 9 (STOP, primer uso guiado):** entrar en `https://test.opai.cl/login` con `carlos.irigoyen@opai.cl` y la contraseña inicial mostrada una sola vez en la sesión; cambiarla desde el menú de usuario; en Plataforma → Nueva empresa crear **Gard Security** (slug `gard`, vertical seguridad) con su correo como administrador: como `gard` ya existe en `main`, usar "Usar la existente"; aceptar la invitación desde el correo (Resend); entrar al ERP y crear la API key "Grokbot" con scope `*`; configurar Grokbot con `https://test.opai.cl/api/mcp` y la cabecera Bearer.
-- **Carlos:** agregar en Google Cloud Console el URI de redirección `https://test.opai.cl/api/auth/callback/google` (y `http://localhost:3000/api/auth/callback/google` para desarrollo); sin eso "Continuar con Google" falla.
-- **Carlos:** regularizar la facturación de GitHub Actions: el CI no corre desde el 23-oct ("recent account payments have failed or your spending limit needs to be increased"). El gate se corrió local en cada commit.
+- **Carlos (urgente):** rotar la API key "Grokbot" (`opai_gard_heLe…`): se compartió en una captura de chat el 23-oct. Crear una nueva, cambiarla en Grokbot y revocar la anterior en ERP → Configuración → API keys.
+- **Carlos:** agregar en Google Cloud Console el URI de redirección `https://test.opai.cl/api/auth/callback/google` (y `http://localhost:3000/api/auth/callback/google` para desarrollo).
+- **Carlos:** regularizar la facturación de GitHub Actions: el CI no corre desde el 23-oct. El gate se corre local en cada commit.
+- **Carlos:** cambiar la contraseña inicial de `carlos.irigoyen@opai.cl` si no lo hizo. Gard sigue en estado "trial" (Plataforma → Gard Security → Resumen → Estado para activarla).
 - **Carlos (cuando quiera):** correr `docs/2.0/design/DESIGN-PROMPT-acceso.md` en Claude Design, dentro del sistema de diseño **OPAI DS 2.0**. Pendientes del sistema: logo definitivo de OPAI; revisar el contraste de `--ds-border-strong` (1,5:1) en el portal Trabajador a pleno sol.
 
 ## Pendiente (siguiente)
