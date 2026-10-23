@@ -242,3 +242,95 @@ Una entrada por decisión. Las decisiones no se editan: si cambian, se agrega un
 **Decisión.** Dos dimensiones distintas y explícitas: **permisos** (qué acciones puede ejecutar un rol: `<modulo>:<accion>`, ADR-016) y **alcance** (sobre qué filas: un supervisor solo ve las instalaciones a su cargo, un cliente solo sus instalaciones, un trabajador solo lo suyo). El alcance se implementa en las capacidades a partir del contexto (persona vinculada al usuario, instalaciones asignadas, cuenta del portal cliente) con filtros obligatorios en las consultas; nunca en la UI. Los roles base se mantienen; cuando un tenant lo necesite, podrá crear **roles personalizados** (conjunto de permisos sobre el catálogo que generan los manifests) y **excepciones por usuario**, administrados en Configuración → Usuarios y permisos con una matriz módulo × acción y vista "qué puede hacer este usuario". Los agentes heredan permisos y alcance del usuario responsable, acotados por scopes. Todo es capacidad con MCP.
 
 **Consecuencias.** Cada módulo declara sus permisos en el manifest (ya exigido) y, para las entidades con alcance, el criterio de alcance en su capa de capacidades. Roles personalizados y excepciones: backlog hasta que un tenant los pida.
+
+---
+
+## ADR-023 · Cumplimiento DT desde el diseño (Res. Ex. N°38/2024)
+
+**Fecha:** 23-oct-2026 · **Estado:** vigente · Ver `docs/2.0/extraccion/dt-normativa.md`.
+
+**Decisión.** El módulo Asistencia se construye para certificarse ante la Dirección del Trabajo, no se adapta después. Principios obligatorios desde su primer brief: la marca es un hecho inmutable con hora de servidor, snapshot de empleador/establecimiento/mandante/resolución, método, dispositivo y GPS como evidencia (nunca bloqueante); hash de integridad y **bitácora encadenada append-only** protegida con triggers en Postgres y verificada a diario; correcciones como hechos nuevos con 48 horas de oposición del trabajador y vencimiento automático; comprobante al trabajador por cada marca; contingencia manual trazable; incidentes técnicos registrados; acceso de inspector temporal, de solo lectura y auditado; los seis reportes oficiales con las siglas del Art. 28 g generados desde los hechos; respaldos periódicos con manifiesto y hash y retención mínima de 5 años; límites de jornada (Ley 21.561, DS 48/2024) como configuración con vigencia y alertas tempranas; verificación del reloj del servidor contra hora oficial. Todo cálculo de jornada vive en `packages/domain` con tests que fijan los artículos. Las primitivas que otros módulos comparten (bitácora encadenada, comprobantes, oposición) se implementan en el núcleo para que Rondas y Documentos las reutilicen.
+
+**Consecuencias.** Asistencia es el módulo con más reglas no negociables; su brief parte de la extracción y cada regla se traza a un test. La certificación de Gard se hace sobre 2.0.
+
+---
+
+## ADR-024 · Rondas con GPS como módulo vendible independiente
+
+**Fecha:** 23-oct-2026 · **Estado:** vigente · Ver `docs/2.0/extraccion/rondas-y-tickets.md`.
+
+**Decisión.** Rondas depende solo del núcleo (instalaciones, personas, dispositivos, documentos, geolocalización, comunicaciones) y se vende solo. Conserva de 1.0: puntos de control con QR/NFC/GPS y geocerca por punto, plantillas y programación, estados y cierres automáticos, tracking con precisión y batería, trust score con pesos configurables, detección de anomalías, offline-first con cola idempotente, informes con recorrido y heatmap, vista del cliente. Integra el libro de novedades y los incidentes de terreno. El Portal Terreno y el Portal Trabajador ejecutan rondas con la misma lógica (`packages/domain`).
+
+---
+
+## ADR-025 · Tickets transversal y simple; sin chat
+
+**Fecha:** 23-oct-2026 · **Estado:** vigente · Ver `docs/2.0/extraccion/rondas-y-tickets.md`.
+
+**Decisión.** Tickets es un módulo transversal: tipos con responsable por defecto y SLA opcional, estados `abierto → en_curso → resuelto → cerrado` (+ `rechazado`), un responsable obligatorio desde la creación, resolución devuelta al solicitante en su portal y por correo, vínculo a cualquier entidad, adjuntos vía documentos. Las solicitudes de trabajadores son tipos de ticket con aprobación de un paso dirigidos al supervisor. Nada crea tickets sin dueño; los hallazgos de supervisión no crean tickets. El chat interno no se construye.
+
+---
+
+## ADR-026 · Flujo de caja como pieza central de Finanzas
+
+**Fecha:** 23-oct-2026 · **Estado:** vigente
+
+**Decisión.** Finanzas 2.0 se diseña alrededor del flujo de caja: una planilla (patrón `PlanillaScreen`) por semana y mes con filas de ingresos y egresos derivadas de hechos (DTE emitidos y recibidos, nómina, rendiciones, movimientos bancarios conciliados, compromisos) y proyecciones editables, **derivadas al leer** (como el v3 de 1.0) y nunca copiadas; cada celda sabe de qué hechos proviene; saldo acumulado y escenarios; conciliación bancaria y facturación alimentan la misma planilla. La extracción del flujo de caja v3 de 1.0 se hace antes del brief de Finanzas y es insumo obligatorio.
+
+---
+
+## ADR-027 · Integraciones y secretos por tenant
+
+**Fecha:** 23-oct-2026 · **Estado:** vigente · Ver `docs/2.0/extraccion/integraciones-y-configuracion-por-tenant.md`.
+
+**Decisión.** El núcleo tiene un **catálogo de integraciones** (proveedor DTE, banco, factoring, correo, WhatsApp, mapas y geocodificación, biometría, IA, Slack, webhooks propios) con estado por tenant, prueba de conexión y registro de uso. Cada módulo declara en su manifest las integraciones que requiere; el núcleo provee el adaptador configurado. Las credenciales del tenant se guardan en un **almacén de secretos cifrado** (AES-256-GCM con clave de plataforma rotable, envelope encryption), se muestran una sola vez y nunca salen por API ni MCP. Hay dos modalidades por integración: **de plataforma** (OPAI pone la credencial y la cobra en el plan: mapas, biometría, correo, IA) y **propia del tenant** (DTE, banco, factoring, Slack, dominio de correo, Maps con cuota propia). La geolocalización (autocompletado de direcciones, geocodificación, mapas, distancias) es un servicio del núcleo con proveedor Google Maps por defecto y key de plataforma restringida por dominio; el tenant puede aportar la suya.
+
+---
+
+## ADR-028 · Marca del tenant en toda salida y diseño asistido por IA
+
+**Fecha:** 23-oct-2026 · **Estado:** vigente
+
+**Decisión.** El perfil de marca del tenant (logo en cuatro variantes, favicon, colores de marca, nombre comercial, datos legales y de contacto) vive en el núcleo y se aplica automáticamente a **toda salida**: documentos y PDF, correos, portales de cliente y trabajador, propuestas, comprobantes. La UI del ERP mantiene el DS de OPAI (acento opcional del tenant). Las plantillas (documentos y correos) tienen un **editor estructurado** (bloques y variables) y un **asistente de IA** que genera o rediseña una plantilla a partir de una instrucción ("propuesta comercial para licitación pública, formal, con tabla de dotación") dentro del sistema de bloques, para que el resultado sea editable, consistente con la marca y reproducible; la IA propone, el tenant aprueba. Mismo mecanismo para correos y para textos de propuestas en CPQ. Toda generación queda como versión de la plantilla.
+
+---
+
+## ADR-029 · Fundamentos de SaaS de nivel mundial
+
+**Fecha:** 23-oct-2026 · **Estado:** vigente
+
+**Decisión.** Lo que se fija desde el principio para que el crecimiento sea orgánico:
+
+1. **Eventos de dominio y outbox**: toda escritura relevante emite un evento (`<modulo>.<evento>`) persistido en una tabla outbox dentro de la misma transacción; consumidores (notificaciones, webhooks, telemetría, integraciones) lo procesan con reintentos e idempotencia. Los módulos se comunican por eventos, no por imports.
+2. **Jobs y crons**: una sola tabla de trabajos con estado, reintentos y bloqueo; ningún cron hace trabajo directo, encola. Observables en Plataforma.
+3. **Webhooks salientes** por tenant con firma HMAC y reintentos, y **API pública versionada** (`/api/v1`) con OpenAPI generado del registro de capacidades: lo que ve el MCP lo ve la API.
+4. **Feature flags** por tenant y por usuario (lanzamientos graduales, beta por tenant).
+5. **Observabilidad**: trazas y errores con `tenant_id` y `capability` en cada evento; métricas por capacidad (latencia, errores) y por tenant; alertas a plataforma; página de estado pública.
+6. **Datos personales (Ley 21.719)**: inventario de campos personales por tabla, cifrado en reposo de los sensibles, retención y borrado por política, exportación y portabilidad por tenant, registro de consentimientos donde aplique, DPO y DPA en el perfil del tenant.
+7. **Respaldos y recuperación**: PITR de Neon más exportaciones lógicas periódicas a R2 por tenant; prueba de restauración trimestral; borrado de tenant con cuarentena de 30 días.
+8. **Entornos**: previews por PR con rama de Neon efímera; `test.opai.cl` como staging permanente; producción con migraciones explícitas y reversibles.
+9. **Offline-first en terreno**: cola local idempotente para marcas, rondas, novedades y fotos; sincronización con resolución de conflictos por sello de servidor.
+10. **Dispositivos**: inventario de dispositivos emparejados por instalación (modelo, versión de app, última conexión, batería), revocación remota.
+11. **Multi-idioma preparado**: textos de UI en diccionarios desde el inicio (español de Chile por defecto) y vocabulario por vertical; formatos de fecha, moneda y RUT centralizados.
+12. **Límites y cuotas** por plan (usuarios, instalaciones, documentos, llamadas MCP) medidos con la telemetría existente, con avisos antes de bloquear.
+13. **Onboarding autoservicio** de un tenant nuevo (registro, verificación, primer administrador, datos de empresa, módulos en trial) y centro de ayuda in-app por pantalla.
+14. **Accesibilidad y rendimiento medidos**: AA, Lighthouse ≥ 90 en pantallas principales, presupuestos de tamaño de bundle por portal.
+15. **Seguridad operativa**: rate limit centralizado, cabeceras y CSP, rotación de secretos, auditoría de accesos de plataforma e impersonación con consentimiento, pruebas de penetración antes de abrir a terceros tenants.
+
+**Consecuencias.** Los puntos 1, 2, 5 y 8 entran en el Brief 02 (outbox, jobs, telemetría ampliada, previews); 6 y 7 en cuanto exista un segundo tenant; el resto se agenda en `ESTADO.md` por fase.
+
+---
+
+## ADR-030 · Roadmap de módulos actualizado
+
+**Fecha:** 23-oct-2026 · **Estado:** vigente · Reemplaza el orden de ADR-009 a partir de la fase 3.
+
+| Fase | Contenido | Corte de Gard |
+|---|---|---|
+| 1 (en curso) | Núcleo: identidad y plataforma (hecho); maestros, documentos (servicio), configuración, comunicaciones, outbox y jobs (Brief 02) | — |
+| 2 | Comercial, CPQ (motor + modelo), módulo Documentos (explorador, editor, plantillas, firma simple); importación de maestros e historial comercial | Ventas en 2.0 |
+| 3 | Operaciones (puestos, pautas, turnos extra, supervisión), **Rondas**, **Tickets**, portales Trabajador, Terreno, Cliente y Supervisor, libro de novedades, dispositivos | Operación y terreno en 2.0 |
+| 4 | **Asistencia** con cumplimiento DT completo, reportes DT, fiscalización; inicio de certificación | Marcación en 2.0 |
+| 5 | Finanzas con flujo de caja al centro, banca y conciliación, DTE y factoring, rendiciones, contabilidad e informes; migración del historial financiero | 1.0 a solo lectura |
+| 6 | Nómina (sobre asistencia y estructuras), Licitaciones (sobre CPQ), firma electrónica avanzada | Gard 100 % en 2.0 |
+| Backlog | Inventario, cámaras, ATS, gamificación, psicolaboral, chat, Slack, sitio de marketing 2.0, roles personalizados | — |

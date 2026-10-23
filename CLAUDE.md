@@ -27,7 +27,7 @@ Monorepo de OPAI 2.0: SaaS modular, multi-tenant y agent-first para empresas int
 - `packages/integrations`: adaptadores (DTE, banco, factoring, mensajería, biometría). Vacío en el Brief 00.
 - `modules/<id>`: módulos vendibles; `modules/registry` (`@opai/modules`) los lista.
 - `scripts/`: generador de módulos y utilidades.
-- `docs/2.0`: memoria del proyecto (arranque, decisiones, estado, briefs, diseño, extracción de 1.0).
+- `docs/2.0`: memoria del proyecto (arranque, decisiones, estado, briefs, diseño, extracción de 1.0). En `docs/2.0/extraccion/` están las reglas verificadas en el código de 1.0 (normativa DT, integraciones y configuración por tenant, rondas y tickets): leerlas antes del brief del módulo correspondiente.
 
 ## Reglas de código
 
@@ -57,6 +57,10 @@ Monorepo de OPAI 2.0: SaaS modular, multi-tenant y agent-first para empresas int
 - Documentos y archivos: ningún módulo sube archivos por su cuenta ni crea tablas de adjuntos; todo pasa por `core.documentos.*` con vínculos polimórficos a sus entidades (ADR-019).
 - Permisos (acciones) y alcance (filas) son dimensiones distintas: las capacidades de entidades con alcance (instalaciones a cargo, cuenta del cliente, persona propia) aplican el filtro en la consulta, nunca en la UI (ADR-022).
 - Reglas de negocio configurables (modelo de costeo de CPQ, parámetros) se expresan como configuración versionada evaluada en `packages/domain`, no como código por tenant (ADR-021).
+- Hechos regulados (marcas de asistencia, firmas, rondas): inmutables, con hora de servidor, hash y bitácora encadenada append-only; las correcciones son hechos nuevos. Ver `docs/2.0/extraccion/dt-normativa.md` y ADR-023 antes de tocar Asistencia, Rondas o Documentos.
+- Eventos y trabajos: toda escritura relevante emite un evento de dominio por outbox en la misma transacción; los crons encolan trabajos, no hacen el trabajo (ADR-029).
+- Integraciones: ningún módulo lee credenciales de `process.env` para servicios de tenant; usa el catálogo de integraciones del núcleo y sus adaptadores; los secretos del tenant viven cifrados en el almacén del núcleo y nunca salen por API ni MCP (ADR-027). Geolocalización y mapas solo por el servicio del núcleo.
+- Marca del tenant: toda salida (PDF, correo, portales) toma logos, colores y datos legales del perfil de marca del núcleo; nunca hardcodear nombres ni logos de Gard (ADR-028).
 - Vocabulario genérico en código (persona, instalación, puesto, servicio, recorrido, novedad). Los textos visibles pasan por el diccionario de la vertical del tenant (Brief 01).
 
 ## UI
