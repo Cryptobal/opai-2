@@ -1,5 +1,6 @@
 import {
   capacidadesDelNucleo,
+  limpiarModulos,
   limpiarRegistro,
   registrarCapacidades,
   registrarModulos,
@@ -15,6 +16,7 @@ let hecho = false;
 export function asegurarRegistro(): void {
   if (hecho) return;
   limpiarRegistro();
+  limpiarModulos();
   registrarCapacidades(capacidadesDelNucleo);
   registrarModulos(modulos);
   hecho = true;

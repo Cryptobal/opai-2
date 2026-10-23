@@ -3,14 +3,33 @@
   "ui": "stream",
   "globalDependencies": ["tsconfig.base.json", "eslint.base.mjs", "prettier.config.mjs"],
   "tasks": {
-    "dev": { "cache": false, "persistent": true },
+    "dev": {
+      "cache": false,
+      "persistent": true
+    },
     "build": {
       "dependsOn": ["^build", "generate"],
       "outputs": [".next/**", "!.next/cache/**", "dist/**"],
-      "env": ["DATABASE_URL", "DEV_TENANT_ID", "NODE_ENV", "VERCEL_GIT_COMMIT_SHA"]
+      "env": [
+        "DATABASE_URL",
+        "BETTER_AUTH_SECRET",
+        "BETTER_AUTH_URL",
+        "RESEND_API_KEY",
+        "EMAIL_FROM",
+        "GOOGLE_CLIENT_ID",
+        "GOOGLE_CLIENT_SECRET",
+        "NODE_ENV",
+        "VERCEL_GIT_COMMIT_SHA"
+      ]
     },
-    "generate": { "outputs": ["src/generated/**"] },
-    "typecheck": { "dependsOn": ["^typecheck", "generate"] },
-    "lint": { "dependsOn": ["generate"] }
+    "generate": {
+      "outputs": ["src/generated/**"]
+    },
+    "typecheck": {
+      "dependsOn": ["^typecheck", "generate"]
+    },
+    "lint": {
+      "dependsOn": ["generate"]
+    }
   }
 }
