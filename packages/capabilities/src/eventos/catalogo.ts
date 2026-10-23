@@ -23,6 +23,10 @@ export const EVENTOS_CORE: readonly EventoDeDominio[] = [
   { id: "core.aprobacion.solicitada", descripcion: "Un agente pidió aprobación humana." },
   { id: "core.aprobacion.resuelta", descripcion: "Una aprobación se aprobó o rechazó." },
   { id: "core.consumo.umbral", descripcion: "El consumo cruzó un umbral del presupuesto." },
+  {
+    id: "core.integracion.actualizada",
+    descripcion: "Cambió la configuración o un secreto de una integración.",
+  },
   { id: "core.integracion.fallida", descripcion: "Una integración dejó de responder." },
   { id: "core.bitacora.rota", descripcion: "La verificación de la bitácora encontró un quiebre." },
 ];
