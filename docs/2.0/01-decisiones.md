@@ -363,3 +363,13 @@ Una entrada por decisión. Las decisiones no se editan: si cambian, se agrega un
 OPAI puede ofrecer además **automatizaciones alojadas** (por ejemplo, búsqueda de reemplazo ante un turno sin cubrir) implementadas como agentes que corren contra las mismas capacidades, con la IA configurada por el tenant y medidas como cualquier consumo; son opcionales y vendibles.
 
 **Consecuencias.** Nada específico de un proveedor de IA entra en los módulos. El alcance de OPAI se achica (no hay chat, correo, agenda ni copiloto) y se vuelve más profundo (hechos, reglas, eventos, aprobaciones). Un tenant puede operar OPAI entero desde su propio agente sin perder control ni trazabilidad.
+
+---
+
+## ADR-033 · Acceso agéntico para clientes y trabajadores desde sus portales
+
+**Fecha:** 23-oct-2026 · **Estado:** vigente · Completa ADR-032 y ADR-022.
+
+**Decisión.** Las API keys y el MCP no son solo para el tenant: cada portal puede emitir keys para su propio principal. Tres tipos de principal detrás de una key: **usuario del tenant** (hecho en el Brief 01), **cuenta cliente** (emitida por un contacto autorizado desde el Portal Cliente; alcance = su cuenta y sus instalaciones) y **persona trabajadora** (emitida desde el Portal Trabajador; alcance = ella misma; fase posterior). Cada capacidad declara en qué portales está disponible (`portales: ["erp", "cliente", …]`); el MCP de una key de cliente solo expone las capacidades del portal cliente, con el alcance aplicado en la consulta (ADR-022). Lectura amplia de lo que el portal ya muestra (instalaciones, dotación, cobertura, rondas, visitas de supervisión con resumen y firma, novedades, documentos compartidos, cotizaciones, facturas y estados de pago); escrituras limitadas y con vista previa (aprobar o rechazar cotización, crear ticket o solicitud, comentar, firmar lo que le corresponda); nunca datos de otras cuentas ni datos personales de trabajadores más allá de lo que el portal muestra (ADR del Portal Cliente de oct-2026: RUT visible, evaluación psicolaboral no). El tenant decide por cuenta si habilita el acceso agéntico y con qué límites; las llamadas se miden (ADR-031) contra el tenant, que puede trasladarlas al cliente en su contrato. Cada portal tiene una página "Conectar tu IA" con la key, snippets para Claude, ChatGPT, Grokbot y Codex, y el manual de agente de ese portal (`docs/2.0/agentes/`). Toda acción queda auditada "agente vía contacto del cliente" o "vía trabajador".
+
+**Consecuencias.** El modelo de `api_keys` gana `principal_tipo` y `principal_id` (Brief 02 lo deja preparado; Brief 03 lo activa para clientes con los portales). Las capacidades llevan `portales`. Un cliente puede operar con su propia IA sobre los datos de su proveedor: diferenciador comercial y barrera de salida.
