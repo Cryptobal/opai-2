@@ -15,7 +15,7 @@ export type Portal = { id: string; etiqueta: string; href: string };
 
 export type Tenant = { nombre: string };
 
-export type Usuario = { nombre: string; rol?: string };
+export type Usuario = { nombre: string; email?: string; rol?: string };
 
 export type LinkProps = {
   href: string;

@@ -1,10 +1,12 @@
 import { cn } from "../cn";
 import { Avatar } from "../components/avatar";
+import type { ItemMenu } from "../components/menu";
 import { type RailProps } from "./nav";
 import { PortalSwitcher } from "./portal-switcher";
 import { esActivo, LinkPorDefecto, type NavItem, type Usuario } from "./types";
+import { UserMenu } from "./user-menu";
 
-type SidebarProps = RailProps & { usuario?: Usuario };
+type SidebarProps = RailProps & { usuario?: Usuario; menuUsuario?: readonly ItemMenu[] };
 
 function agrupar(items: readonly NavItem[]): [string, NavItem[]][] {
   const grupos = new Map<string, NavItem[]>();
@@ -24,6 +26,7 @@ export function Sidebar({
   portalActual,
   tenant,
   usuario,
+  menuUsuario,
 }: SidebarProps) {
   return (
     <nav
@@ -71,7 +74,11 @@ export function Sidebar({
           </div>
         ))}
       </div>
-      {usuario ? (
+      {usuario && menuUsuario ? (
+        <div className="border-t border-border px-2 py-2">
+          <UserMenu usuario={usuario} items={menuUsuario} lado="arriba-izquierda" conNombre />
+        </div>
+      ) : usuario ? (
         <div className="flex items-center gap-2.5 border-t border-border px-4 py-3">
           <Avatar nombre={usuario.nombre} />
           <span className="min-w-0">

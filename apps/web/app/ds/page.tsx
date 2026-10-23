@@ -1,7 +1,6 @@
 import { notFound } from "next/navigation";
 
-import { Shell } from "@/app/_components/shell";
-
+import { DsShell } from "./ds-shell";
 import { DsShowcase } from "./showcase";
 
 export const metadata = { title: "Diseño" };
@@ -10,8 +9,8 @@ export const metadata = { title: "Diseño" };
 export default function PaginaDs() {
   if (process.env.NODE_ENV === "production") notFound();
   return (
-    <Shell portal="erp" titulo="Diseño · DS 2.0">
+    <DsShell>
       <DsShowcase />
-    </Shell>
+    </DsShell>
   );
 }

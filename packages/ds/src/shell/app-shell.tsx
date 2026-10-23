@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+import type { ItemMenu } from "../components/menu";
+
 import { cn } from "../cn";
 import { BottomNav, Rail } from "./nav";
 import { Sidebar } from "./sidebar";
@@ -16,6 +18,8 @@ export type AppShellProps = {
   rutaActual: string;
   tenant?: Tenant;
   usuario?: Usuario;
+  /** Ítems del menú de usuario (empresas, perfil, cerrar sesión). Sin ítems, solo avatar. */
+  menuUsuario?: readonly ItemMenu[];
   notificaciones?: number;
   Link?: LinkComponent;
   children: ReactNode;
@@ -35,6 +39,7 @@ export function AppShell(props: AppShellProps) {
     rutaActual,
     tenant,
     usuario,
+    menuUsuario,
     notificaciones,
     Link,
     children,
@@ -45,6 +50,7 @@ export function AppShell(props: AppShellProps) {
     portalActual,
     ...(tenant ? { tenant } : {}),
     ...(usuario ? { usuario } : {}),
+    ...(menuUsuario ? { menuUsuario } : {}),
     ...(notificaciones ? { notificaciones } : {}),
   };
   const linkProps = Link ? { Link } : {};

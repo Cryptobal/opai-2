@@ -31,6 +31,8 @@ export function PortalSwitcher({
 }: Props) {
   const actual = portales.find((p) => p.id === portalActual) ?? portales[0];
   const riel = variante === "riel";
+  // Con un solo portal no hay nada que elegir: queda el monograma y el nombre, sin selector.
+  const elegible = portales.length > 1;
   return (
     <div className={cn("relative", className)}>
       <div
@@ -50,25 +52,27 @@ export function PortalSwitcher({
           {variante === "tarjeta" && tenant ? (
             <span className="block truncate text-xs text-fg-muted">{tenant.nombre}</span>
           ) : null}
-          {riel ? <ChevronsUpDown className="size-3 text-fg-subtle" /> : null}
+          {riel && elegible ? <ChevronsUpDown className="size-3 text-fg-subtle" /> : null}
         </span>
-        {riel ? null : <ChevronsUpDown className="size-4 text-fg-subtle" />}
+        {riel || !elegible ? null : <ChevronsUpDown className="size-4 text-fg-subtle" />}
       </div>
-      <select
-        aria-label="Cambiar de portal"
-        value={actual?.id ?? portalActual}
-        onChange={(e) => {
-          const destino = portales.find((p) => p.id === e.target.value);
-          if (destino) window.location.assign(destino.href);
-        }}
-        className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
-      >
-        {portales.map((p) => (
-          <option key={p.id} value={p.id}>
-            {p.etiqueta}
-          </option>
-        ))}
-      </select>
+      {elegible ? (
+        <select
+          aria-label="Cambiar de portal"
+          value={actual?.id ?? portalActual}
+          onChange={(e) => {
+            const destino = portales.find((p) => p.id === e.target.value);
+            if (destino) window.location.assign(destino.href);
+          }}
+          className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+        >
+          {portales.map((p) => (
+            <option key={p.id} value={p.id}>
+              {p.etiqueta}
+            </option>
+          ))}
+        </select>
+      ) : null}
     </div>
   );
 }

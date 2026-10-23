@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { Button, type EstadoPantalla } from "@opai/ds";
 
+import { BloqueComponentes } from "./bloque-componentes";
 import { BloqueDetalle } from "./bloque-detalle";
 import { BloqueLista } from "./bloque-lista";
 import { BloqueFormulario, BloquePlanillaYDashboard } from "./bloques";
@@ -38,6 +39,7 @@ export function DsShowcase() {
       <BloqueDetalle state={state} />
       <BloqueFormulario state={state} />
       <BloquePlanillaYDashboard state={state} />
+      <BloqueComponentes />
     </div>
   );
 }

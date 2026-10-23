@@ -3,14 +3,17 @@ import { Bell, Search } from "lucide-react";
 import { cn } from "../cn";
 import { Avatar } from "../components/avatar";
 import { Button } from "../components/button";
+import type { ItemMenu } from "../components/menu";
 import { PortalSwitcher } from "./portal-switcher";
 import type { Portal, Tenant, Usuario } from "./types";
+import { UserMenu } from "./user-menu";
 
 type Comunes = {
   portales: readonly Portal[];
   portalActual: string;
   tenant?: Tenant;
   usuario?: Usuario;
+  menuUsuario?: readonly ItemMenu[];
   notificaciones?: number;
 };
 
@@ -38,6 +41,7 @@ export function TopBarTelefono({
   portalActual,
   tenant,
   usuario,
+  menuUsuario,
   notificaciones,
 }: Comunes) {
   return (
@@ -53,7 +57,11 @@ export function TopBarTelefono({
             <Search className="size-5" />
           </Button>
           <Campana {...(notificaciones ? { n: notificaciones } : {})} />
-          {usuario ? <Avatar nombre={usuario.nombre} className="ml-1" /> : null}
+          {usuario && menuUsuario ? (
+            <UserMenu usuario={usuario} items={menuUsuario} />
+          ) : usuario ? (
+            <Avatar nombre={usuario.nombre} className="ml-1" />
+          ) : null}
         </div>
       </div>
     </header>
@@ -63,7 +71,7 @@ export function TopBarTelefono({
 type AppBarProps = Comunes & { titulo: string };
 
 /** iPad y desktop: título de la página, búsqueda global, campana y usuario. 60px. */
-export function AppBar({ titulo, usuario, notificaciones }: AppBarProps) {
+export function AppBar({ titulo, usuario, menuUsuario, notificaciones }: AppBarProps) {
   return (
     <header className="sticky top-0 z-20 hidden h-[60px] items-center gap-3 border-b border-border bg-bg/95 px-6 backdrop-blur md:flex xl:px-8">
       <h1 className="t-heading min-w-0 flex-1 truncate text-fg">{titulo}</h1>
@@ -84,7 +92,13 @@ export function AppBar({ titulo, usuario, notificaciones }: AppBarProps) {
         <Search className="size-5" />
       </Button>
       <Campana {...(notificaciones ? { n: notificaciones } : {})} />
-      {usuario ? <Avatar nombre={usuario.nombre} className="xl:hidden" /> : null}
+      {usuario && menuUsuario ? (
+        <div className="xl:hidden">
+          <UserMenu usuario={usuario} items={menuUsuario} />
+        </div>
+      ) : usuario ? (
+        <Avatar nombre={usuario.nombre} className="xl:hidden" />
+      ) : null}
     </header>
   );
 }
