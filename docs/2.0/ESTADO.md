@@ -56,7 +56,7 @@ Node 22 · pnpm 10.28 · Next.js 16.4.2 · React 19.3.0 · Tailwind 4.3.3 · Pri
 - Con `cacheComponents` activo no se usa `export const dynamic`; los route handlers ya son dinámicos por defecto.
 - Infra: `db:deploy` ahora es `pnpm --filter @opai/db run deploy` (sin `run` chocaba con el comando nativo `pnpm deploy`) y `test:db` es `vitest run --root packages/db` (con `--config` desde la raíz no encontraba archivos de test).
 - Infra: Vercel se enlaza desde la raíz del repo con Root Directory `apps/web` (no desde `apps/web`) para que el build tenga el workspace pnpm completo.
-- Infra: el test de aislamiento cambia la contraseña de `opai_app` por una temporal; después de correrlo contra `dev` hay que volver a ejecutar `role:password`.
+- Infra: el test de aislamiento ya no toca la contraseña de `opai_app`: crea un rol efímero miembro de `opai_app` (hereda grants y políticas, sin BYPASSRLS) y lo elimina al terminar. Correr `test:db` contra `dev` no requiere volver a ejecutar `role:password`.
 - Infra: `vercel env add … preview` exige pasar el valor por argumento para aplicarlo a todas las ramas; para no exponer el secreto, las variables de preview se crearon por la API (`vercel api … --input -`, cuerpo por stdin).
 - Formato: Prettier en código; `docs/` excluido para no reescribir los documentos.
 - Título de página en iPad y desktop en la barra superior del shell (como en el diseño); el patrón lo muestra solo en teléfono. La acción principal queda en el patrón (una fila bajo la barra en iPad/desktop) para no acoplar shell y patrón.

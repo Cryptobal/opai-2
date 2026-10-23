@@ -1,6 +1,7 @@
 // Test de aislamiento por tenant (ADR-002). Corre solo si existe DATABASE_URL_TEST
 // (rama dev de Neon o Postgres local, con rol propietario). Aplica las migraciones,
-// fija una contraseña temporal al rol opai_app y verifica que:
+// crea un rol de prueba efímero equivalente a opai_app (miembro de opai_app, sin BYPASSRLS)
+// para no tocar la contraseña real del rol de aplicación, y verifica que:
 //   1. forTenant(A) ve solo A y forTenant(B) ve solo B;
 //   2. el rol de aplicación sin tenant fijado ve cero filas;
 //   3. forTenant(A) no puede escribir filas de B.
@@ -26,6 +27,7 @@ function urlParaRol(url: string, usuario: string, password: string): string {
 
 describe.skipIf(!urlPropietario)("aislamiento por tenant con RLS", () => {
   const password = randomBytes(24).toString("base64url");
+  const rolPrueba = `opai_test_${randomUUID().slice(0, 8).replace(/-/g, "")}`;
   const slugA = `test-a-${randomUUID().slice(0, 8)}`;
   const slugB = `test-b-${randomUUID().slice(0, 8)}`;
   let admin: PrismaClient;
@@ -42,12 +44,17 @@ describe.skipIf(!urlPropietario)("aislamiento por tenant con RLS", () => {
       env: { ...process.env, DATABASE_URL_MIGRATE: url },
       stdio: "pipe",
     });
+    // Rol efímero con los mismos privilegios que opai_app (hereda sus grants y, al no tener
+    // BYPASSRLS, las políticas lo filtran igual). Las políticas aplican "TO opai_app", que
+    // cubre a sus miembros. Así el test nunca cambia la contraseña real de opai_app.
     const pg = new Client({ connectionString: url });
     await pg.connect();
-    await pg.query(`ALTER ROLE opai_app WITH LOGIN PASSWORD ${pg.escapeLiteral(password)}`);
+    await pg.query(
+      `CREATE ROLE ${rolPrueba} LOGIN NOBYPASSRLS NOSUPERUSER NOCREATEDB NOCREATEROLE INHERIT IN ROLE opai_app PASSWORD ${pg.escapeLiteral(password)}`,
+    );
     await pg.end();
 
-    process.env["DATABASE_URL"] = urlParaRol(url, "opai_app", password);
+    process.env["DATABASE_URL"] = urlParaRol(url, rolPrueba, password);
     process.env["DATABASE_URL_MIGRATE"] = url;
     ({ forTenant } = await import("../src/for-tenant"));
     ({ cerrarClientes } = await import("../src/client"));
@@ -80,6 +87,10 @@ describe.skipIf(!urlPropietario)("aislamiento por tenant con RLS", () => {
     }
     await appSinTenant?.$disconnect();
     await cerrarClientes?.();
+    const pg = new Client({ connectionString: urlPropietario as string });
+    await pg.connect();
+    await pg.query(`DROP ROLE IF EXISTS ${rolPrueba}`);
+    await pg.end();
   });
 
   it("cada tenant ve solo sus filas", async () => {
