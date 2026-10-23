@@ -16,6 +16,8 @@ type Props = {
   telefono: "lista" | "detalle";
   /** Ancho de la lista desde 1280: 400 px (por defecto) o 360. */
   anchoXl?: 360 | 400;
+  /** Índice angosto (Configuración): 280 px en iPad y 300 px desde 1280. */
+  angosto?: boolean;
   /** Etiqueta accesible de cada columna. */
   etiquetaLista?: string;
   etiquetaDetalle?: string;
@@ -42,8 +44,9 @@ export function SplitScreen(props: Props) {
       <section
         aria-label={props.etiquetaLista ?? "Lista"}
         className={cn(
-          "min-w-0 flex-col md:flex md:w-[360px] md:flex-none md:overflow-y-auto md:border-r md:border-border md:bg-surface",
-          anchoXl === 400 && "xl:w-[400px]",
+          "min-w-0 flex-col md:flex md:flex-none md:overflow-y-auto md:border-r md:border-border md:bg-surface",
+          props.angosto ? "md:w-[280px] xl:w-[300px]" : "md:w-[360px]",
+          !props.angosto && anchoXl === 400 && "xl:w-[400px]",
           telefono === "lista" ? "flex w-full" : "hidden",
         )}
       >
