@@ -43,6 +43,7 @@ Este archivo es la fuente de verdad del avance. Cada brief lo actualiza al termi
 
 ## En curso
 
+- **Brief 02 escrito y en ejecución** (23-oct, rama `brief/02-maestros-y-servicios`): `docs/2.0/briefs/BRIEF-02-maestros-y-servicios.md` (cuatro sesiones A–D; la C exige el export aprobado de Claude Design en `docs/2.0/design/export-maestros/`; la D se detiene antes de infraestructura y de la migración en `main`). Insumos: `docs/2.0/extraccion/maestros.md` (modelo de cuentas, contactos, instalaciones, personas, cargos, estructuras y documentos de 1.0, verificado en `53bb97d`) y `docs/2.0/design/DESIGN-PROMPT-maestros-y-configuracion.md`. **Carlos:** correr el Design Prompt en Claude Design dentro del sistema OPAI DS 2.0 y guardar el export en `docs/2.0/design/export-maestros/`. Medición base del bundle (gzip, sin el polyfill `noModule`): framework 129,2 KB; `/login` 170,2 KB; ERP 171–175 KB; objetivo del brief: `/login` ≤ 148 KB, ERP ≤ 165 KB.
 - **Carlos, al activar Comercial en Gard:** crear una key por agente con scopes mínimos y revocar la key "Grokbot" con scope `*` (ADR-034).
 
 - Resuelto el 23-oct: key "Grokbot" rotada. La anterior (`opai_gard_heLe…`) quedó revocada a las 14:08 UTC y `/api/mcp` la rechaza con 401; hay una sola key activa.
