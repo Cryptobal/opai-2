@@ -1,6 +1,6 @@
 # ESTADO — OPAI 2.0
 
-**Última actualización:** 23-oct-2026 · **Actualizado por:** Claude (arquitectura) · **Fase en curso:** 1 — Núcleo (Brief 01 cerrado; siguiente: Brief 02)
+**Última actualización:** 23-oct-2026 · **Actualizado por:** Claude (arquitectura) · **Fase en curso:** 1 — Núcleo (Briefs 01 y 01c cerrados; siguiente: Brief 02)
 
 Este archivo es la fuente de verdad del avance. Cada brief lo actualiza al terminar. Si algo no está aquí, no está hecho.
 
@@ -38,7 +38,11 @@ Este archivo es la fuente de verdad del avance. Cada brief lo actualiza al termi
   - Criterios de aceptación del brief: cumplidos. Pendientes externos en En curso (rotar la key de Grokbot, Google, CI).
   - Modelo de cuentas adoptado: `carlos.irigoyen@opai.cl` = operador de la plataforma (Plataforma, sin membresía); `carlos.irigoyen@gard.cl` = owner de Gard (ERP). Las acciones de Grokbot en Gard quedan a nombre de la cuenta de Gard.
 
+- **Brief 01c (principios agénticos operativos) ejecutado** (23-oct): ADR-034 en `01-decisiones.md`; `defineCapability` rechaza descripciones de menos de 40 caracteres (`DESCRIPCION_MINIMA`, con `trim()`), test `packages/capabilities/test/define.test.ts` (5 casos, incluye que las 27 capacidades del núcleo cumplen); fixtures de `execute`, `http`, `mcp` y `module` ajustados; `CLAUDE.md`, `CONTEXTO-agentes.md` (norte, una key por agente, mandato vigente) y `agentes/README.md` actualizados. Gate en verde (169 tests).
+
 ## En curso
+
+- **Carlos, al activar Comercial en Gard:** crear una key por agente con scopes mínimos y revocar la key "Grokbot" con scope `*` (ADR-034).
 
 - Resuelto el 23-oct: key "Grokbot" rotada. La anterior (`opai_gard_heLe…`) quedó revocada a las 14:08 UTC y `/api/mcp` la rechaza con 401; hay una sola key activa.
 - **Carlos (cuando quiera):** correr `docs/2.0/design/DESIGN-PROMPT-acceso.md` en Claude Design, dentro del sistema de diseño **OPAI DS 2.0**. Pendientes del sistema: logo definitivo de OPAI; revisar el contraste de `--ds-border-strong` (1,5:1) en el portal Trabajador a pleno sol.
@@ -47,7 +51,7 @@ Este archivo es la fuente de verdad del avance. Cada brief lo actualiza al termi
 ## Pendiente (siguiente)
 
 - **Decisiones del 23-oct (tarde), ADR-023 a ADR-030:** cumplimiento DT desde el diseño de Asistencia (extracción en `docs/2.0/extraccion/dt-normativa.md`); Rondas como módulo vendible solo; Tickets transversal y sin chat; flujo de caja al centro de Finanzas; catálogo de integraciones y almacén de secretos por tenant con geolocalización como servicio del núcleo; marca del tenant en toda salida y plantillas asistidas por IA; fundamentos de SaaS (outbox de eventos, jobs, webhooks salientes, feature flags, observabilidad, Ley 21.719, respaldos, previews por PR, offline-first, dispositivos, i18n, cuotas, onboarding, accesibilidad, seguridad operativa); roadmap actualizado (ADR-030).
-- **El Brief 02 incorpora además:** outbox de eventos y tabla de trabajos, perfil de marca del tenant, catálogo de integraciones con almacén de secretos (al menos correo, geolocalización e IA con BYOK y clases de tarea), **medidor de consumos `core.consumos`** (ADR-031, reemplaza `usage_events`), presupuesto por API key y nivel de autonomía por capacidad con cola de aprobaciones (ADR-032), previews por PR con rama Neon efímera, y las primitivas reguladas compartidas (bitácora encadenada append-only y comprobantes) en el núcleo. Crear `docs/2.0/agentes/` con el primer manual ("operar el núcleo desde un agente"). Preparar `api_keys.principal_tipo/principal_id` y `portales` en las capacidades (ADR-033); la emisión de keys desde el Portal Cliente se activa en la fase 3.
+- **El Brief 02 incorpora además:** outbox de eventos y tabla de trabajos, perfil de marca del tenant, catálogo de integraciones con almacén de secretos (al menos correo, geolocalización e IA con BYOK y clases de tarea), **medidor de consumos `core.consumos`** (ADR-031, reemplaza `usage_events`), presupuesto por API key y nivel de autonomía por capacidad con cola de aprobaciones (ADR-032), previews por PR con rama Neon efímera, y las primitivas reguladas compartidas (bitácora encadenada append-only y comprobantes) en el núcleo. Crear `docs/2.0/agentes/` con el primer manual ("operar el núcleo desde un agente") y su escenario de prueba determinista en `pnpm test`; convención de campos externos lista para la primera capacidad que devuelva contenido de terceros; presupuesto y autonomía por key (ADR-034). Preparar `api_keys.principal_tipo/principal_id` y `portales` en las capacidades (ADR-033); la emisión de keys desde el Portal Cliente se activa en la fase 3.
 
 - **Decisiones del 23-oct (ADR-017 a ADR-022)** que condicionan el Brief 02 y siguientes: primitivas Radix/shadcn en el DS y pulido obligatorio; centro de Configuración por ámbitos (una sola entrada; Empresa, Usuarios y API keys migran ahí); Documentos como servicio del núcleo (`core.documentos`) con vínculos polimórficos, y módulo Documentos (explorador, editor, plantillas, firma) después de Comercial; Comunicaciones con plantillas por evento y tenant; CPQ como motor + modelo de costeo declarativo por tenant; permisos y alcance de datos como dimensiones separadas. Regla de ESLint que prohíbe elementos interactivos crudos fuera del DS (error en módulos, aviso en la app hasta el Brief 02).
 - Brief 02 debe incluir: primitivas Radix en el DS (reemplazar `Menu`, `Dialog`, `Switch` provisionales y el `<select>` del selector de portal; agregar Select, Combobox/⌘K, Popover, Tooltip, Checkbox, Toast, `FilaSeleccionable`), el centro de Configuración, `core.documentos` (R2, vínculos, descarga segura, ficha de documentos en cuentas/instalaciones/personas) y las primeras plantillas de correo.
@@ -94,6 +98,8 @@ Node 22 · pnpm 10.28 · Next.js 16.4.2 · React 19.3.0 · Tailwind 4.3.3 · Pri
 - Brief 01: el aviso de cuenta suspendida nombra "a <persona> (administración de <empresa>)" en vez de "administradora", para no suponer género.
 - Brief 01: `/ds/acceso` (solo desarrollo) renderiza cada variante de acceso con datos ficticios para capturas; el tema oscuro se prueba con `prefers-color-scheme`.
 - Brief 01: `core.apikeys.create` recibe `expiraEn` como fecha ISO (las herramientas MCP requieren inputs expresables en JSON Schema; hay test).
+
+- Brief 01c: el número ADR-033 ya estaba asignado (acceso agéntico desde portales); los principios operativos quedaron como ADR-034. La línea "Agéntico" de `CLAUDE.md` se amplió en vez de reemplazarse para conservar ADR-033. El test de "todas las capacidades" cubre `capacidadesDelNucleo` y no importa `@opai/modules` (ciclo de dependencias); las capacidades de módulos quedan validadas al declararse.
 
 ## Riesgos y pendientes materiales
 
