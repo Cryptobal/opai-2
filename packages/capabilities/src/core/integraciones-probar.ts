@@ -1,6 +1,10 @@
 import { z } from "zod";
 
-import { credencialDePlataforma, definicionIntegracion } from "@opai/integrations";
+import {
+  credencialDePlataforma,
+  definicionIntegracion,
+  type ProveedorIaId,
+} from "@opai/integrations";
 import { PERMISOS_CORE, PERMISOS_PLATAFORMA } from "@opai/domain";
 
 import { defineCapability } from "../define";
@@ -35,7 +39,8 @@ export const integracionesProbar = defineCapability({
         if (!(await (await geoDisponible(ctx)).geocodificar("Plaza de Armas, Santiago")))
           throw new Error("Sin resultados.");
       } else if (def.categoria === "ia") {
-        const ia = await iaDe(ctx, "economica");
+        // Se prueba exactamente el proveedor pedido, no el primero disponible.
+        const ia = await iaDe(ctx, "economica", "core", def.id as ProveedorIaId);
         if (!ia) throw new Error("Sin credencial de IA disponible.");
         await ia.completar({ prompt: "Responde solo: ok", maxTokens: 5 });
         mensaje = `Conexión correcta (${ia.proveedor}, ${ia.modelo}).`;

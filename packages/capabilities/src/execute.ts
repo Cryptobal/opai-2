@@ -2,6 +2,7 @@ import { controlAgente } from "./agentes/control";
 import { denegar, falla } from "./autorizacion";
 import { ErrorCapacidad } from "./errores";
 import { repeticion, sinSensibles, tenantDe } from "./execute-util";
+import { SALIDA_INVALIDA } from "./idempotencia";
 import { obtenerCapacidad } from "./registry";
 import type { Capacidad, Contexto, OpcionesEjecucion, Resultado } from "./types";
 
@@ -52,10 +53,13 @@ async function correr(
   }
   const salida = c.output.safeParse(crudo);
   if (reservaId) {
-    await (salida.success
-      ? ctx.idempotencia.completar(reservaId, salida.data)
-      : ctx.idempotencia.liberar(reservaId));
+    // El handler terminó: la escritura ya ocurrió. Nunca se libera la clave (duplicaría).
+    await ctx.idempotencia.completar(
+      reservaId,
+      salida.success ? salida.data : { [SALIDA_INVALIDA]: true },
+    );
   }
+
   if (!salida.success) {
     return {
       resultado: {

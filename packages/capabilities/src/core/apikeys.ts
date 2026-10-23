@@ -54,6 +54,8 @@ export const apikeysList = defineCapability({
 
 export const apikeysCreate = defineCapability({
   id: "core.apikeys.create",
+  // Credenciales y keys las gestionan personas: un agente no se crea keys ni cambia secretos.
+  soloPersonas: true,
   descripcion:
     "Crea una API key para un agente, vinculada al usuario que la crea (responsable). Devuelve el secreto UNA sola vez.",
   permiso: PERMISOS_CORE.apikeysManage,
@@ -114,6 +116,8 @@ export const apikeysCreate = defineCapability({
 
 export const apikeysRevoke = defineCapability({
   id: "core.apikeys.revoke",
+  // Credenciales y keys las gestionan personas: un agente no se crea keys ni cambia secretos.
+  soloPersonas: true,
   descripcion: "Revoca una API key. Deja de funcionar de inmediato; no se puede deshacer.",
   permiso: PERMISOS_CORE.apikeysManage,
   input: z.object({ apiKeyId: uuidSchema }),

@@ -49,17 +49,20 @@ export async function crearVinculo(
   v: DatosVinculo,
 ) {
   if (v.termino && v.termino < v.inicio) throw reglaDeNegocio("El término es anterior al inicio.");
-  const creado = await tx.vinculoLaboral.create({
-    data: {
-      tenantId: ctx.tenantId,
-      personaId,
-      cargoId: v.cargoId,
-      tipo: v.tipo,
-      inicio: aFecha(v.inicio),
-      termino: v.termino ? aFecha(v.termino) : null,
-      estado: "vigente",
-    },
-  });
+  const creado = await sinDuplicado(
+    tx.vinculoLaboral.create({
+      data: {
+        tenantId: ctx.tenantId,
+        personaId,
+        cargoId: v.cargoId,
+        tipo: v.tipo,
+        inicio: aFecha(v.inicio),
+        termino: v.termino ? aFecha(v.termino) : null,
+        estado: "vigente",
+      },
+    }),
+    "La persona ya tiene un vínculo vigente: primero termínalo.",
+  );
   await ctx.eventos.emitir(tx, {
     tipo: "core.vinculo.creado",
     entidadTipo: "vinculo",

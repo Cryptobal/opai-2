@@ -5,6 +5,10 @@ import type { Actor } from "./types";
 
 /** Una clave de idempotencia vale 24 horas (lo que dura un reintento razonable de un agente). */
 export const VIGENCIA_IDEMPOTENCIA_MS = 24 * 3_600_000;
+/** Una reserva "en_curso" más vieja que esto quedó huérfana (la función dura 60 s): se libera. */
+const EN_CURSO_MAXIMO_MS = 10 * 60_000;
+/** Marca de una escritura hecha cuyo resultado no validó: la repetición responde lo mismo. */
+export const SALIDA_INVALIDA = "__salidaInvalida";
 
 export type ReservaIdempotencia =
   | { estado: "nueva"; id: string }
@@ -29,7 +33,11 @@ export function idempotenciaSobre(db: TenantDb, tenantId: string, actor: Actor):
       const huella = await sha256Hex(`${capability}\n${jsonCanonico(input)}`);
       const where = { tenantId_actor_clave: { tenantId, actor: actorClave(actor), clave } };
       const previa = await db.idempotencia.findUnique({ where });
-      const vencida = previa && previa.createdAt.getTime() < Date.now() - VIGENCIA_IDEMPOTENCIA_MS;
+      const edad = previa ? Date.now() - previa.createdAt.getTime() : 0;
+      const vencida =
+        previa &&
+        (edad > VIGENCIA_IDEMPOTENCIA_MS ||
+          (previa.estado === "en_curso" && edad > EN_CURSO_MAXIMO_MS));
       if (previa && !vencida) {
         if (previa.huella !== huella || previa.capability !== capability) {
           return { estado: "distinta" };
@@ -44,9 +52,10 @@ export function idempotenciaSobre(db: TenantDb, tenantId: string, actor: Actor):
           data: { tenantId, actor: actorClave(actor), clave, capability, huella },
         });
         return { estado: "nueva", id: fila.id };
-      } catch {
-        // Otro intento con la misma clave ganó la carrera (índice único).
-        return { estado: "en_curso" };
+      } catch (error) {
+        // Otro intento con la misma clave ganó la carrera (índice único). Otro error se propaga.
+        if ((error as { code?: unknown } | null)?.code === "P2002") return { estado: "en_curso" };
+        throw error;
       }
     },
     async completar(id, resultado) {

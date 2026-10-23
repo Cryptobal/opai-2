@@ -29,6 +29,9 @@ export async function GET(_req: Request, { params }: Params): Promise<Response> 
   if (!documentoId) return noEncontrado();
   const doc = await db.documento.findUnique({ where: { id: documentoId } });
   if (!doc || doc.estado !== "disponible" || !doc.mime.startsWith("image/")) return noEncontrado();
+  // Solo documentos de marca de la empresa (mismo control que core.marca.update).
+  const tipo = doc.tipoId ? await db.documentoTipo.findUnique({ where: { id: doc.tipoId } }) : null;
+  if (!tipo?.codigo.startsWith("marca.")) return noEncontrado();
   const almacen = almacenamientoDelEntorno();
   if (!almacen.disponible) return noEncontrado();
   const url = await almacen.urlDescarga(doc.storageKey, doc.nombre, 3600);

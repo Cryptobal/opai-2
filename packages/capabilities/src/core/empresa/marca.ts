@@ -45,13 +45,25 @@ const vista = async (ctx: Contexto, p: Partial<Record<string, unknown>> | null) 
   };
 };
 
-/** El logo debe ser un documento disponible de la empresa del tipo de marca, en imagen. */
+/**
+ * El logo se publica sin sesión: solo se acepta un documento de la empresa (vínculo propietario
+ * "tenant") de un tipo de marca (`marca.*`), en imagen. Nunca un documento de una persona o cuenta.
+ */
 async function validarLogo(ctx: Contexto, id: string) {
   const d = await ctx.db.documento.findUnique({ where: { id } });
   if (!d || d.estado !== "disponible")
     throw reglaDeNegocio("El logo debe ser un documento ya subido y confirmado.");
   if (!d.mime.startsWith("image/"))
     throw reglaDeNegocio("El logo debe ser una imagen (PNG, JPG, WebP o SVG).");
+  const tipo = d.tipoId ? await ctx.db.documentoTipo.findUnique({ where: { id: d.tipoId } }) : null;
+  const propietario = await ctx.db.documentoVinculo.findFirst({
+    where: { documentoId: id, rol: "propietario" },
+  });
+  if (!tipo?.codigo.startsWith("marca.") || propietario?.entidadTipo !== "tenant") {
+    throw reglaDeNegocio(
+      'El logo debe subirse como documento de la empresa del tipo "Logo de la marca".',
+    );
+  }
 }
 
 export const marcaGet = defineCapability({
