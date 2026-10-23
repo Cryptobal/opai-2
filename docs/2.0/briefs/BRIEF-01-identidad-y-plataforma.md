@@ -45,7 +45,7 @@ Cuando termine, Carlos entra a `test.opai.cl`, crea el tenant Gard desde Platafo
 - Plataforma: lista y detalle de tenants, creación, módulos, administradores, API keys, uso.
 - ERP: Configuración → Empresa, Usuarios, API keys. Página de inicio con tarjetas de módulos activos.
 - Shell real; páginas de los otros cuatro portales protegidas por membresía (contenido placeholder).
-- Pantalla de login provisional con el DS (centrada, tarjeta); el diseño definitivo llega con `DESIGN-PROMPT-acceso.md`.
+- Pantallas de acceso según el **diseño aprobado** en `docs/2.0/design/export-acceso/` (login, recuperar contraseña, invitación, selector de empresa). Las de Trabajador, Cliente y Terreno del mismo export se implementan en la fase 3.
 - Telemetría en `core.usage_events`; vocabulario por vertical (`@opai/domain`).
 - Seed del usuario plataforma de Carlos y variables de entorno en Vercel.
 
@@ -215,8 +215,12 @@ Autorización en `executeCapability`: `permiso === null` → requiere actor aute
 
 Componer con los patrones del DS; sin estilos nuevos. Referencia visual: `docs/2.0/design/export-ds-2.0/`.
 
-- **Login** (`/login`): provisional: tarjeta centrada (máx. 400px) con wordmark OPAI, campos correo y contraseña, botón "Entrar" (lg), enlace "¿Olvidaste tu contraseña?" y, si hay credenciales de Google, botón secundario "Continuar con Google". Errores inline. A 375px ocupa el ancho con gutters de 16. Se reemplaza con el diseño de `DESIGN-PROMPT-acceso.md`.
-- **Invitación** (`/invitacion/[slug]/[token]`): muestra tenant y rol, pide nombre y contraseña si el usuario no existe, o pide iniciar sesión si ya existe; al aceptar, crea la membresía y entra al ERP.
+- **Acceso** (diseño aprobado, ver `docs/2.0/design/export-acceso/README.md` con las reglas observadas; abrir los HTML como referencia de layout y jerarquía, nunca copiar su código):
+  - **Login** (`/login`): `01_Login_ERP_375.html` y `02_Login_ERP_1280.html`. Tarjeta de 400px máx. centrada en desktop; pantalla completa en teléfono. Estados: por defecto, error de credenciales (caja `danger-muted` con el texto sobre los 5 intentos), cuenta suspendida (caja `warning-muted` con el nombre de la persona administradora del tenant), cargando ("Entrando…", controles deshabilitados). "Continuar con Google" solo si hay credenciales. Pie: "Entrar como trabajador · Portal cliente" (enlaces a rutas que en este brief muestran "Disponible pronto").
+  - **Recuperar contraseña** (`/recuperar` y `/recuperar/[token]`): `03_Recuperar_contrase_a_375.html`.
+  - **Invitación** (`/invitacion/[slug]/[token]`): `04_Invitaci_n_375.html`, con las cuatro variantes (sin cuenta, con cuenta, expirada, usada).
+  - **Selector de empresa** (`/elegir-empresa`, tras el login cuando hay más de una membresía): `05_Selector_de_empresa.html`.
+  - Crear en `packages/ds` lo que estas pantallas necesiten y no exista: `AuthCard` (tarjeta de acceso con wordmark y sufijo de portal), `Alerta` (caja de estado con icono: `danger`, `warning`, `info`, `success`) y `EstadoIlustrado` (icono en círculo + título + texto, para expirada/usada). El `Keypad` del login de Trabajador queda para la fase 3.
 - **Shell**: `TopBarTelefono` y `Sidebar` reciben `menuUsuario` (avatar → menú con nombre, correo, "Cambiar de empresa" si hay más de una membresía, "Cerrar sesión") y el selector de portal muestra solo `membership.portales` (si hay uno solo, no se muestra el selector; queda el monograma y el nombre del portal). Plataforma aparece en el selector solo con `platformRole`.
 - **ERP · Inicio**: `DashboardScreen` sin KPIs de negocio todavía: tarjetas de los módulos activos (nombre, descripción, enlace) y un mensaje si no hay módulos activos.
 - **ERP · Configuración**: `ListScreen` de usuarios (nombre, correo, rol, portales, estado; acción "Invitar usuario" abre `Sheet` con `FormScreen` compacto), `DetailScreen` de empresa (`Pares` editables en `Sheet`), `ListScreen` de API keys (nombre, prefijo, scopes, último uso; crear muestra el secreto una sola vez en un `Dialog` con botón copiar; revocar con confirmación).
@@ -305,12 +309,13 @@ Pedir a Carlos que entre en `https://test.opai.cl/login` con `carlos.irigoyen@op
 
 - Gate verde local y en CI; `pnpm test:db` verde contra `dev`.
 - Build de producción verde; deploy en `test.opai.cl`.
-- Revisión visual de login, ERP inicio, Configuración → Usuarios, Plataforma → Tenants y detalle a 375, 1024 y 1280 (capturas en `apps/web/e2e/__screenshots__/`).
+- Revisión visual de login (estados por defecto, error, suspendida, cargando; claro y oscuro), invitación (cuatro variantes), selector de empresa, ERP inicio, Configuración → Usuarios, Plataforma → Tenants y detalle a 375, 1024 y 1280 (capturas en `apps/web/e2e/__screenshots__/`), comparadas lado a lado con el export aprobado.
 - Prueba manual del MCP con la key creada por Carlos: `tools/list` muestra `core_me`, `core_users_list`, `preview_core_users_invite`, etc.; `core_me` devuelve el tenant Gard y el actor `agent vía Carlos`; una escritura real queda en `core.audit_events` con `actor_type = "agent"` y `via_user_id` de Carlos.
 - `grep` de hex fuera de `tokens.css` vacío; ningún archivo > 150 líneas; ningún secreto en el repo ni en la consola.
 
 ## 14. Criterios de aceptación
 
+- [ ] Login, recuperación, invitación y selector de empresa implementados según el export aprobado, con todos sus estados, en claro y oscuro.
 - [ ] Login con correo y contraseña en `test.opai.cl`; cierre de sesión; recuperación por enlace.
 - [ ] Usuario sin sesión no puede ver ninguna página de portal (redirige a `/login`); usuario sin membresía en un portal recibe "sin permisos" en servidor.
 - [ ] Selector de portal muestra solo los portales del usuario; Plataforma solo con `platformRole`.

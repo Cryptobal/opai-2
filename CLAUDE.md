@@ -22,7 +22,7 @@ Monorepo de OPAI 2.0: SaaS modular, multi-tenant y agent-first para empresas int
 - `packages/db`: Prisma 7 con `@prisma/adapter-pg`. Esquemas en `prisma/schema/` (`core.prisma` + uno por módulo). `forTenant(tenantId)` fija `app.tenant_id` por transacción; `dbAdmin()` solo para scripts.
 - `packages/domain`: lógica pura (dinero, tiempo, cálculos) con tests. Sin Next, React ni base de datos.
 - `packages/capabilities`: `defineCapability`, registro, `executeCapability`, handler HTTP, `defineModule`, `registrarModulos`.
-- `packages/ds`: DS 2.0 aprobado (ADR-014). `tokens.css` (único archivo con colores), `styles.css` (base y estilos `t-*`), componentes, `AppShell`, patrones y estados. Referencia visual: `docs/2.0/design/export-ds-2.0/`.
+- `packages/ds`: DS 2.0 aprobado (ADR-014). `tokens.css` (único archivo con colores), `styles.css` (base y estilos `t-*`), componentes, `AppShell`, patrones y estados. Referencia visual: `docs/2.0/design/export-ds-2.0/` (sistema y patrones) y `docs/2.0/design/export-acceso/` (pantallas de acceso).
 - `packages/integrations`: adaptadores (DTE, banco, factoring, mensajería, biometría). Vacío en el Brief 00.
 - `modules/<id>`: módulos vendibles; `modules/registry` (`@opai/modules`) los lista.
 - `scripts/`: generador de módulos y utilidades.

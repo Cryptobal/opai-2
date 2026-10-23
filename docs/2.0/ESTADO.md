@@ -9,6 +9,7 @@ Este archivo es la fuente de verdad del avance. Cada brief lo actualiza al termi
 - Decisión de construir OPAI 2.0 desde cero (ver `01-decisiones.md`, ADR-001 a ADR-013).
 - Documento de arranque, registro de decisiones, contexto para agentes e instrucciones del proyecto Claude en `docs/2.0/`.
 - Design Prompt de fundamentos del DS 2.0 en `docs/2.0/design/DESIGN-PROMPT-ds-2.0-fundamentos.md`.
+- **Diseño de acceso aprobado** (23-oct): export en `docs/2.0/design/export-acceso/` (login con estados, recuperar contraseña, invitación, selector de empresa, login Trabajador con teclado numérico, login Cliente, emparejar Terreno; claro y oscuro). El Brief 01 implementa las cuatro primeras; las de Trabajador, Cliente y Terreno se implementan en la fase 3.
 - **Brief 00 (Fundación) ejecutado, bloques 1 a 8 y 10** (commits `22a630d` → `d08a676`):
   - Monorepo pnpm + Turborepo, TypeScript estricto, ESLint 10 con reglas del proyecto (150 líneas, Prisma solo en `packages/db`, dominio puro), Prettier, Vitest 5.
   - `packages/db`: Prisma 7 (`prisma-client` + `@prisma/adapter-pg`), esquemas en `prisma/schema/` (`core.prisma` con `Tenant` y `AuditEvent`), migración inicial con rol `opai_app` (NOBYPASSRLS), grants, RLS y política `tenant_isolation`; `forTenant(tenantId)` fija `app.tenant_id` por transacción; `dbAdmin()` solo para scripts; scripts de contraseña del rol y seed del tenant `gard`. **Test de aislamiento en verde contra Postgres 16 real** (dos tenants, cero fuga, cero filas sin tenant, escritura cruzada rechazada).
@@ -32,7 +33,6 @@ Este archivo es la fuente de verdad del avance. Cada brief lo actualiza al termi
 
 - Evaluar Radix/shadcn para Combobox con búsqueda, Dialog y Menú cuando el primer módulo los necesite (Comercial).
 - Brief 02 — Maestros y servicios del núcleo (cuentas, contactos, instalaciones, cargos y estructuras de sueldo en tres niveles, documentos y archivos en R2, configuración declarativa, notificaciones). El núcleo mínimo se partió en 01 (identidad y plataforma) y 02 (maestros) para mantener briefs ejecutables en una sesión.
-- Brief 01b — Pantallas de acceso definitivas a partir del diseño aprobado (`DESIGN-PROMPT-acceso.md`).
 - Extracción de 1.0 para Comercial y CPQ → `docs/2.0/extraccion/`.
 - Modelo de planes y facturación de suscripciones: cuando exista Opai SpA (en creación).
 
