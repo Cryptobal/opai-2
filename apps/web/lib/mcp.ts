@@ -27,6 +27,10 @@ export async function manejarMcp(req: Request, key: string | null): Promise<Resp
   const ctx = await contextoDeApiKey(key);
   if (ctx instanceof Response) return ctx;
 
+  // Lo que esta key debe ver. Se declara en `instructions` para que un cliente (o `pnpm mcp:verificar`)
+  // detecte una lista de herramientas desactualizada o recortada de su lado.
+  const herramientas = herramientasMcp(ctx);
+  const reales = herramientas.filter((h) => !h.dryRun).length;
   const handler = createMcpHandler(
     (server) => {
       // Recursos (ADR-032): manuales para agentes y el esquema de ajustes visible para la key.
@@ -51,7 +55,7 @@ export async function manejarMcp(req: Request, key: string | null): Promise<Resp
           ],
         }),
       );
-      for (const h of herramientasMcp(ctx)) {
+      for (const h of herramientas) {
         server.registerTool(
           h.nombre,
           { title: h.capacidad.id, description: h.descripcion, inputSchema: h.input },
@@ -67,8 +71,7 @@ export async function manejarMcp(req: Request, key: string | null): Promise<Resp
     },
     {
       serverInfo: { name: "opai", version: pkg.version },
-      instructions:
-        "OPAI 2.0. Cada herramienta es una capacidad de negocio. Las que escriben tienen una versión preview_ que muestra el efecto sin guardar: úsala antes y confirma con el usuario. Lee el recurso opai://manuales/operar-el-nucleo antes de escribir.",
+      instructions: `OPAI 2.0. Cada herramienta es una capacidad de negocio. Las que escriben tienen una versión preview_ que muestra el efecto sin guardar: úsala antes y confirma con el usuario. Lee el recurso opai://manuales/operar-el-nucleo antes de escribir. Esta key ve ${herramientas.length} herramientas (${reales} reales y ${herramientas.length - reales} preview_); si tu cliente lista menos, vuelve a descubrir las herramientas del servidor.`,
     },
   );
   return handler(req);
