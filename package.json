@@ -12,12 +12,12 @@
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",
     "test": "vitest run",
-    "test:db": "vitest run --project db --config packages/db/vitest.config.ts",
+    "test:db": "vitest run --root packages/db",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "db:generate": "pnpm --filter @opai/db generate",
     "db:migrate": "pnpm --filter @opai/db migrate",
-    "db:deploy": "pnpm --filter @opai/db deploy",
+    "db:deploy": "pnpm --filter @opai/db run deploy",
     "scaffold:module": "tsx scripts/scaffold-module.ts"
   },
   "devDependencies": {

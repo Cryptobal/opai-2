@@ -1,6 +1,6 @@
 # ESTADO — OPAI 2.0
 
-**Última actualización:** 23-oct-2026 (madrugada) · **Actualizado por:** Claude (arquitectura) · **Fase en curso:** 0 — Fundación (código y DS listos; falta infraestructura)
+**Última actualización:** 23-oct-2026 · **Actualizado por:** Claude Code (Brief 00-infra, desde el Mac de Carlos) · **Fase en curso:** 0 — Fundación (código, DS e infraestructura listos)
 
 Este archivo es la fuente de verdad del avance. Cada brief lo actualiza al terminar. Si algo no está aquí, no está hecho.
 
@@ -21,9 +21,11 @@ Este archivo es la fuente de verdad del avance. Cada brief lo actualiza al termi
   - Gate completo en verde: `pnpm typecheck && pnpm lint && pnpm test` (27 tests) y `pnpm test:db` (4 tests).
 - **Brief 00b ejecutado: DS 2.0 definitivo** (ADR-014). Diseño aprobado por Carlos en Claude Design; export guardado en `docs/2.0/design/export-ds-2.0/` (40 pantallas). `tokens.css` reemplazado por los valores aprobados (Inter + JetBrains Mono autoalojadas, índigo, neutros, modo oscuro verdadero), `styles.css` con estilos tipográficos; componentes, shell (barra superior con selector de portal, barra inferior, riel, barra lateral con tenant y usuario) y patrones ajustados al diseño; nuevos `Chip`, `ChipAgregar`, `Avatar`, `Monograma`, `PortalSwitcher`. Revisado visualmente a 375, 1024 y 1280 en claro y oscuro; build y gate en verde; capturas actualizadas.
 
+- **Brief 00-infra ejecutado:** Neon `opai-2` (ramas `main` y `dev`, migración aplicada, `opai_app` con contraseña, tenant `gard` en ambas), `pnpm test:db` en verde contra `dev` (4 tests), Vercel `opai-2` en `gard-security` conectado al repo, **`https://test.opai.cl` en línea** (CNAME en Cloudflare, DNS only; certificado Let's Encrypt emitido por Vercel): `/api/health` → `ok: true` en `gru1`, `/` muestra el shell, `/ds` → 404.
+
 ## En curso
 
-- **Carlos (Mac, 10–15 min):** ejecutar `docs/2.0/briefs/BRIEF-00-infra.md` en Claude Code (Neon, Vercel, `test.opai.cl`, rol y tenant). Alternativa parcial desde el teléfono: importar el repo en Vercel (root `apps/web`), crear la base Neon desde Storage y agregar el dominio; las migraciones y el rol se hacen igual desde el Mac.
+- Nada. Siguiente: Brief 01.
 
 ## Pendiente (siguiente)
 
@@ -39,10 +41,10 @@ Node 22 · pnpm 10.28 · Next.js 16.4.2 · React 19.3.0 · Tailwind 4.3.3 · Pri
 ## Infraestructura
 
 - Repositorio: `Cryptobal/opai-2`, rama `main`. CI en GitHub Actions.
-- Vercel: **pendiente** (el conector de Vercel en Claude no tiene permiso para crear proyectos; se crea desde el Mac con `vercel link` o desde el panel). Región de funciones: `gru1` (`apps/web/vercel.json`).
-- Neon: **pendiente** (BRIEF-00-infra, paso 1). Región sugerida `aws-sa-east-1`.
-- Dominio: `test.opai.cl` (construcción) · `app.opai.cl` (producción, futuro). `opai.cl` está en Cloudflare; el registro debe ser DNS only.
-- Tenant de desarrollo: `gard` — id: (lo imprime `seed:dev-tenant`).
+- Vercel: proyecto `opai-2` (`prj_JcMPHnnA5lVK6P7SIkBx2Gbv5E6r`) en el equipo `gard-security`, conectado a `Cryptobal/opai-2`, Root Directory `apps/web`, Node 22.x, framework Next.js. Enlazado desde la raíz del repo (`.vercel/` ignorado). Región de funciones: `gru1` (`apps/web/vercel.json`). Variables: `DATABASE_URL` (rol `opai_app`, pooled, rama `main`) en production y preview; `DEV_TENANT_ID` (tenant `gard` de `main`) en preview. `DATABASE_URL_MIGRATE` no está en Vercel. Las URLs `*.vercel.app` tienen la protección de despliegue por defecto de Vercel.
+- Neon: proyecto `opai-2` (`steep-wildflower-90764475`), región `aws-sa-east-1` (São Paulo), Postgres 18, organización personal de Carlos. Ramas `main` (producción de `test.opai.cl`) y `dev` (desarrollo local y `test:db`). Base `neondb`, propietario `neondb_owner`; rol de aplicación `opai_app` (sin `BYPASSRLS` ni superusuario, verificado) con la misma contraseña en ambas ramas, guardada solo en `.env.local` de Carlos.
+- Dominio: `test.opai.cl` (construcción) en línea sobre `opai-2`, CNAME `test` → `e61b12f5039e609e.vercel-dns-016.com` en Cloudflare · `app.opai.cl` (producción, futuro). `opai.cl` está en Cloudflare; el registro es DNS only.
+- Tenant de desarrollo `gard`: `main` → `01a166f3-ce42-72d8-a664-77755f23606c` · `dev` → `01a166f3-f15c-742c-b197-47ea67524e33`.
 
 ## Decisiones tomadas durante la ejecución
 
@@ -52,10 +54,14 @@ Node 22 · pnpm 10.28 · Next.js 16.4.2 · React 19.3.0 · Tailwind 4.3.3 · Pri
 - Registro de módulos como paquete `modules/registry` (`@opai/modules`) en vez de `modules/index.ts`: Next necesita un paquete resoluble. Los módulos se compilan sin listarlos en `transpilePackages` (verificado con build).
 - `prisma generate` en `postinstall` de `@opai/db` para que el build de Vercel tenga el cliente; `prisma.config.ts` usa un placeholder cuando falta `DATABASE_URL_MIGRATE` para que `generate` no falle.
 - Con `cacheComponents` activo no se usa `export const dynamic`; los route handlers ya son dinámicos por defecto.
+- Infra: `db:deploy` ahora es `pnpm --filter @opai/db run deploy` (sin `run` chocaba con el comando nativo `pnpm deploy`) y `test:db` es `vitest run --root packages/db` (con `--config` desde la raíz no encontraba archivos de test).
+- Infra: Vercel se enlaza desde la raíz del repo con Root Directory `apps/web` (no desde `apps/web`) para que el build tenga el workspace pnpm completo.
+- Infra: el test de aislamiento cambia la contraseña de `opai_app` por una temporal; después de correrlo contra `dev` hay que volver a ejecutar `role:password`.
+- Infra: `vercel env add … preview` exige pasar el valor por argumento para aplicarlo a todas las ramas; para no exponer el secreto, las variables de preview se crearon por la API (`vercel api … --input -`, cuerpo por stdin).
 - Formato: Prettier en código; `docs/` excluido para no reescribir los documentos.
 - Título de página en iPad y desktop en la barra superior del shell (como en el diseño); el patrón lo muestra solo en teléfono. La acción principal queda en el patrón (una fila bajo la barra en iPad/desktop) para no acoplar shell y patrón.
 
 ## Riesgos y pendientes materiales
 
-- Sin infraestructura aún no hay `test.opai.cl`; todo lo demás está verificado localmente y en CI.
+- `neonctl` 2.21 no tiene `regions list`; la región se eligió creando directamente en `aws-sa-east-1`.
 - Pendientes de diseño para módulos: patrón de vista dividida (lista + detalle en iPad, como `DetailTablet.html`), paleta de comandos ⌘K, menú de usuario, Combobox con búsqueda. Se diseñan con el módulo que los necesite.
