@@ -59,6 +59,23 @@ export const baseConfig = tseslint.config(
   prettier,
 );
 
+/**
+ * Elementos interactivos crudos prohibidos fuera de packages/ds (ADR-017): todo control pasa por @opai/ds.
+ * Los enlaces usan next/link; los módulos nunca escriben <button>, <input>, <select>, <textarea> ni <dialog>.
+ */
+export const soloComponentesDelDs = {
+  rules: {
+    "no-restricted-syntax": [
+      "error",
+      {
+        selector: "JSXOpeningElement[name.name=/^(button|input|select|textarea|dialog|a)$/]",
+        message:
+          "Usa los componentes de @opai/ds (Button, Input, Select, Textarea, Dialog, Link). Si falta uno, agrégalo al DS, no al módulo (ADR-017).",
+      },
+    ],
+  },
+};
+
 /** Reglas adicionales para código de dominio puro (packages/domain y modules/*\/domain). */
 export const domainConfig = {
   files: ["**/domain/**/*.ts"],

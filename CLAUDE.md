@@ -53,12 +53,18 @@ Monorepo de OPAI 2.0: SaaS modular, multi-tenant y agent-first para empresas int
 - Zod en el borde; los tipos se derivan de los esquemas.
 - Toda consulta o mutación de negocio es una capacidad (`defineCapability`). UI, API y MCP solo invocan capacidades. Toda escritura soporta `dryRun` y acepta `idempotencyKey`; las escrituras reales quedan en `core.audit_events`.
 - Módulos: solo importan de `packages/*` y de módulos declarados en `dependencias` de su manifest. Sin imports cruzados. Permisos `<id>:<accion>`, capacidades `<id>.<entidad>.<verbo>`, eventos `<id>.<evento>`.
-- Configuración, notificaciones e integraciones: el módulo declara en el manifest, el núcleo implementa.
+- Configuración, notificaciones e integraciones: el módulo declara en el manifest, el núcleo implementa. Nunca una página de configuración ni una entrada de navegación "Configuración" por módulo: el centro de configuración del núcleo renderiza el esquema del manifest por ámbitos (ADR-018). Los eventos comunicables (correo, WhatsApp, push) se declaran en el manifest con plantilla por defecto; el tenant los edita en Configuración → Comunicaciones; silencio por defecto (ADR-020).
+- Documentos y archivos: ningún módulo sube archivos por su cuenta ni crea tablas de adjuntos; todo pasa por `core.documentos.*` con vínculos polimórficos a sus entidades (ADR-019).
+- Permisos (acciones) y alcance (filas) son dimensiones distintas: las capacidades de entidades con alcance (instalaciones a cargo, cuenta del cliente, persona propia) aplican el filtro en la consulta, nunca en la UI (ADR-022).
+- Reglas de negocio configurables (modelo de costeo de CPQ, parámetros) se expresan como configuración versionada evaluada en `packages/domain`, no como código por tenant (ADR-021).
 - Vocabulario genérico en código (persona, instalación, puesto, servicio, recorrido, novedad). Los textos visibles pasan por el diccionario de la vertical del tenant (Brief 01).
 
 ## UI
 
 - Solo tokens y componentes de `@opai/ds`. Sin hex, sin estilos inline, sin componentes propios por módulo cuando el DS tiene uno. `grep -rn "#[0-9a-fA-F]\{6\}" apps packages modules --include=*.tsx --include=*.ts --include=*.css` debe devolver solo `tokens.css`.
+- Sin elementos interactivos crudos fuera de `packages/ds`: ESLint prohíbe `<button>`, `<input>`, `<select>`, `<textarea>`, `<dialog>` y `<a>` en `modules/**/ui` (error) y en `apps/web/app` (aviso hasta el Brief 02; luego error). Si falta un componente, se agrega al DS con diseño en Claude Design, nunca al módulo (ADR-017).
+- Controles complejos (menú, diálogo, select, combobox, popover, tooltip, switch, checkbox, toast, paleta ⌘K) se construyen sobre primitivas Radix/shadcn copiadas a `packages/ds` y re-estilizadas con tokens; nunca sobre `<select>`/`<dialog>` nativos ni desde cero (ADR-017).
+- Pulido obligatorio en toda pantalla: foco visible, skeleton con la forma del contenido, estado vacío con acción, transiciones de 150–200 ms con `prefers-reduced-motion`, contraste AA. Todo componente nuevo aparece en `/ds` con sus estados.
 - Patrones de pantalla: `ListScreen`, `DetailScreen`, `FormScreen`, `PlanillaScreen`, `DashboardScreen`, siempre con `state` y los estados loading, vacío, error y sin permisos. Tipografía solo con los estilos `t-*` o la escala del DS; nunca tamaños arbitrarios.
 - En iPad y desktop el título de la página va en el `AppShell` (`titulo`); el patrón recibe el mismo título y lo muestra solo en teléfono. La acción principal va en el patrón.
 - Mobile e iPad first: diseñar y verificar a 375px y 1024px antes que desktop. Touch targets ≥44px. Safe-area iOS. Los nombres de carpeta con `_` no son rutas en App Router.

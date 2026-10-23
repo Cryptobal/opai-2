@@ -172,3 +172,73 @@ Una entrada por decisión. Las decisiones no se editan: si cambian, se agrega un
 **Decisión.** Cinco roles por tenant: `owner` (todo, incluido borrar el tenant y gestionar owners), `admin` (todo salvo lo anterior), `gerente` (lectura y escritura en todos los módulos operativos y comerciales; sin `finanzas:*`, `nomina:*` ni gestión de usuarios y API keys), `supervisor` (operaciones, rondas, asistencia y personas en lectura; sin comercial ni finanzas), `viewer` (solo lectura, sin finanzas ni nómina). Permisos con formato `<modulo>:<accion>` y comodines por rol en `@opai/domain`. Rol de plataforma aparte (`users.platform_role`: `owner` | `support`), que otorga `platform:*` y no implica permisos dentro de ningún tenant. El acceso a portales es explícito por membresía (`memberships.portales`).
 
 **Consecuencias.** Hereda el principio de 1.0 (`applyFinancialRoleLock`): los datos financieros solo los ven owner y admin. Los permisos por usuario (excepciones) quedan para cuando un tenant los pida.
+
+---
+
+## ADR-017 · Calidad visual: primitivas accesibles, pulido y lint del DS
+
+**Fecha:** 23-oct-2026 · **Estado:** vigente
+
+**Contexto.** Carlos percibe la UI actual como "plana" y pregunta si usaremos componentes nativos o "premium" como los de Vercel, Linear o Claude, y cómo garantizar que todo módulo futuro salga con el mismo diseño.
+
+**Decisión.**
+
+1. La sobriedad (poco color, superficies planas, bordes finos) es la dirección aprobada (ADR-014), no una concesión al rendimiento. Lo que distingue a una interfaz "premium" no es más color sino **pulido**: micro-interacciones, foco visible, skeletons con la forma del contenido, estados vacíos cuidados, overlays accesibles, tipografía afinada y movimiento breve (150–200 ms). Ese pulido es obligatorio en toda pantalla.
+2. Los controles complejos **no** se construyen sobre elementos nativos (`<select>`, `<dialog>`) ni desde cero: `packages/ds` adopta las primitivas accesibles de **Radix** (vía shadcn/ui, copiadas al paquete y re-estilizadas con los tokens del DS): Dialog, Sheet, DropdownMenu, Select, Combobox y paleta de comandos (cmdk), Popover, Tooltip, Switch, Checkbox, Radio, Tabs, Toast (Sonner). Comportamiento idéntico en iOS, Android y desktop; teclado y lectores de pantalla resueltos. Motion para transiciones de overlays y listas, con `prefers-reduced-motion` respetado.
+3. Los módulos **no escriben elementos interactivos crudos**: una regla de ESLint prohíbe `<button>`, `<input>`, `<select>`, `<textarea>`, `<dialog>` y `<a>` (fuera de `next/link`) en `modules/**` y `apps/web/app/**`; todo pasa por `@opai/ds`. Si falta un componente, se agrega al DS (con diseño en Claude Design), nunca al módulo.
+4. Toda pantalla nueva se diseña en Claude Design **dentro del sistema OPAI DS 2.0** y se implementa con los cinco patrones. El generador de módulos produce pantallas desde los patrones. `/ds` es la galería viva: todo componente nuevo aparece ahí con sus estados.
+5. Pulido medible: revisión a 375/1024/1280 en claro y oscuro con capturas comparadas contra el export aprobado; auditoría de accesibilidad (contraste AA, foco, nombres accesibles) en cada brief de pantallas; Lighthouse ≥ 90 en rendimiento y accesibilidad para las pantallas principales de cada portal.
+
+**Consecuencias.** `packages/ds` crece con las primitivas Radix en el Brief 02 (reemplazando `Menu`, `Dialog`, `Switch` provisionales y el `<select>` del selector de portal). El peso extra es marginal frente a la consistencia que compra.
+
+---
+
+## ADR-018 · Configuración unificada por ámbitos
+
+**Fecha:** 23-oct-2026 · **Estado:** vigente · Concreta ADR-008.
+
+**Decisión.** Hay **una sola entrada "Configuración"** en la navegación del ERP, nunca una por módulo. Dentro, un centro de configuración organizado por ámbitos fijos: **Empresa** (datos, vertical, zona horaria, marca), **Usuarios y permisos**, **Módulos** (activos, trial, dependencias), **Integraciones** (DTE, banco, factoring, mensajería, biometría), **Comunicaciones** (plantillas de correo y notificaciones), **Documentos** (plantillas, firma), **Facturación del SaaS** (cuando exista) y una sección por módulo activo. Cada módulo declara su esquema de ajustes en el manifest (`configuracion`, Zod con metadatos de etiqueta, ayuda, grupo y permiso) y el núcleo **renderiza el formulario** desde el esquema: no hay páginas de configuración escritas a mano por módulo. Búsqueda dentro de Configuración y desde la paleta ⌘K ("buscar un ajuste"). Tres niveles de alcance: plataforma (lo fija OPAI), tenant (lo fija el owner/admin) y usuario (preferencias personales). Todo ajuste se lee y escribe por capacidad (`core.config.get/set`), por lo que también se configura por MCP, queda auditado y soporta vista previa.
+
+**Consecuencias.** Apagar un módulo retira su sección. Un módulo nuevo nunca "aparece" en la barra lateral con su propia configuración. El Brief 02 construye el centro de configuración y migra ahí Empresa, Usuarios y API keys del Brief 01.
+
+---
+
+## ADR-019 · Documentos como servicio del núcleo y módulo navegable
+
+**Fecha:** 23-oct-2026 · **Estado:** vigente
+
+**Contexto.** En 1.0 los documentos se cargan en instalaciones, cuentas y personas sin un lugar común; no hay búsqueda transversal; las plantillas y la firma viven aparte.
+
+**Decisión.** Un único servicio del núcleo, **`core.documentos`**: todo archivo o documento generado por cualquier módulo (contrato, liquidación, cotización en PDF, foto de un hallazgo, certificado) se registra ahí con tipo, vínculos polimórficos a una o más entidades (cuenta, instalación, persona, cotización…), carpeta por entidad, etiquetas, vigencia, versión, metadatos y texto extraído para búsqueda (OCR y embeddings después). Los módulos no guardan archivos por su cuenta: llaman a `core.documentos.*`. Sobre el servicio hay un **módulo "Documentos"** vendible y navegable: explorador por entidad y por tipo, búsqueda transversal, bandeja de pendientes de firma, vencimientos (documentos con fecha), y **editor de documentos** con plantillas (editor enriquecido tipo Word, bloques, variables `{{persona.nombre}}`, encabezado y pie por tenant, exportación a PDF idéntica en pantalla e impresión). **Firma**: tres niveles declarados por tipo de documento: firma simple en pantalla (trazo + sello de tiempo), firma con prueba de vida (Face ID/biometría, para trabajadores), y firma electrónica avanzada vía proveedor chileno (para contratos, fase posterior), todas con evidencia (hash del PDF, quién, cuándo, cómo, IP/dispositivo) y bloqueo del documento firmado. Almacenamiento en R2 con URLs firmadas de corta duración, nunca públicas. Toda capacidad de documentos tiene MCP.
+
+**Consecuencias.** El Brief 02 construye el servicio (modelo, subida, vínculos, descarga segura) y la ficha de documentos en cuentas/instalaciones/personas; el módulo Documentos (explorador, editor, plantillas, firma simple) va justo después de Comercial, porque CPQ ya necesita plantillas y PDF.
+
+---
+
+## ADR-020 · Comunicaciones: plantillas de correo y notificaciones por tenant
+
+**Fecha:** 23-oct-2026 · **Estado:** vigente · Concreta ADR-008.
+
+**Decisión.** Cada módulo declara en su manifest los **eventos comunicables** (por ejemplo `cpq.cotizacion.enviada`, `core.usuario.invitado`, `ops.turno.sin_cubrir`) con sus variables y una plantilla por defecto. El núcleo mantiene, por tenant, una **plantilla por evento y canal** (correo, WhatsApp, push, in-app) editable en Configuración → Comunicaciones: editor visual de correo con bloques (encabezado con logo del tenant, texto, botón, tabla, pie), variables validadas contra el evento, vista previa con datos de ejemplo y envío de prueba. Las plantillas se versionan; el envío registra qué versión se usó. Los correos salen por el adaptador de correo del tenant (Resend por defecto; dominio propio verificado cuando el tenant lo configure). El ruteo (quién recibe qué, por qué canal, con qué prioridad, silencios y resúmenes) también es configuración del tenant y del usuario, con **silencio por defecto**: ningún módulo nuevo genera notificaciones hasta que el tenant las activa.
+
+**Consecuencias.** Elimina el ruido de 1.0 (≈1.000 notificaciones diarias). Las primeras plantillas (invitación, recuperación, cotización) nacen con el Brief 02 y CPQ; el editor visual completo en su propio brief.
+
+---
+
+## ADR-021 · CPQ configurable por tenant: modelo de costeo declarativo
+
+**Fecha:** 23-oct-2026 · **Estado:** vigente
+
+**Decisión.** El cotizador no tiene las variables de negocio cableadas. Cada tenant tiene un **modelo de costeo** versionado: parámetros (con tipo, unidad, valor por defecto y ámbito: tenant, cliente, instalación, puesto), reglas de cálculo expresadas en un lenguaje de fórmulas acotado y determinista (sin código arbitrario), y plantillas de salida. OPAI entrega un modelo base por vertical (seguridad: cargo, dotación, turno, horas, cargas sociales, uniformes, movilización, margen, IVA; aseo y outsourcing con sus propias variables) que el tenant extiende o ajusta en Configuración → CPQ. Las fórmulas se evalúan en `packages/domain` con enteros escalados (ADR-007) y cada cotización guarda la versión del modelo y los valores usados: una cotización vieja se recalcula igual años después. La configuración del modelo es una capacidad (MCP incluido) y requiere permiso `cpq:modelo.manage`, reservado a owner y admin.
+
+**Consecuencias.** CPQ se diseña como motor + modelo, no como formulario fijo. El costeo se apoya en el catálogo de cargos y estructuras del núcleo (ADR-005).
+
+---
+
+## ADR-022 · Permisos: acciones, alcance de datos y roles personalizados
+
+**Fecha:** 23-oct-2026 · **Estado:** vigente · Completa ADR-016.
+
+**Decisión.** Dos dimensiones distintas y explícitas: **permisos** (qué acciones puede ejecutar un rol: `<modulo>:<accion>`, ADR-016) y **alcance** (sobre qué filas: un supervisor solo ve las instalaciones a su cargo, un cliente solo sus instalaciones, un trabajador solo lo suyo). El alcance se implementa en las capacidades a partir del contexto (persona vinculada al usuario, instalaciones asignadas, cuenta del portal cliente) con filtros obligatorios en las consultas; nunca en la UI. Los roles base se mantienen; cuando un tenant lo necesite, podrá crear **roles personalizados** (conjunto de permisos sobre el catálogo que generan los manifests) y **excepciones por usuario**, administrados en Configuración → Usuarios y permisos con una matriz módulo × acción y vista "qué puede hacer este usuario". Los agentes heredan permisos y alcance del usuario responsable, acotados por scopes. Todo es capacidad con MCP.
+
+**Consecuencias.** Cada módulo declara sus permisos en el manifest (ya exigido) y, para las entidades con alcance, el criterio de alcance en su capa de capacidades. Roles personalizados y excepciones: backlog hasta que un tenant los pida.

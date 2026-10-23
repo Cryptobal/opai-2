@@ -46,6 +46,9 @@ Este archivo es la fuente de verdad del avance. Cada brief lo actualiza al termi
 
 ## Pendiente (siguiente)
 
+- **Decisiones del 23-oct (ADR-017 a ADR-022)** que condicionan el Brief 02 y siguientes: primitivas Radix/shadcn en el DS y pulido obligatorio; centro de Configuración por ámbitos (una sola entrada; Empresa, Usuarios y API keys migran ahí); Documentos como servicio del núcleo (`core.documentos`) con vínculos polimórficos, y módulo Documentos (explorador, editor, plantillas, firma) después de Comercial; Comunicaciones con plantillas por evento y tenant; CPQ como motor + modelo de costeo declarativo por tenant; permisos y alcance de datos como dimensiones separadas. Regla de ESLint que prohíbe elementos interactivos crudos fuera del DS (error en módulos, aviso en la app hasta el Brief 02).
+- Brief 02 debe incluir: primitivas Radix en el DS (reemplazar `Menu`, `Dialog`, `Switch` provisionales y el `<select>` del selector de portal; agregar Select, Combobox/⌘K, Popover, Tooltip, Checkbox, Toast, `FilaSeleccionable`), el centro de Configuración, `core.documentos` (R2, vínculos, descarga segura, ficha de documentos en cuentas/instalaciones/personas) y las primeras plantillas de correo.
+
 - Evaluar Radix/shadcn para Combobox con búsqueda, Dialog y Menú cuando el primer módulo los necesite (Comercial).
 - Diseñar en Claude Design `Menu`, `Dialog`, `Switch` y `UserMenu` (implementados provisionalmente en el Brief 01 sin diseño propio) y el detalle de tenant en Plataforma.
 - Brief 02 — Maestros y servicios del núcleo (cuentas, contactos, instalaciones, cargos y estructuras de sueldo en tres niveles, documentos y archivos en R2, configuración declarativa, notificaciones). El núcleo mínimo se partió en 01 (identidad y plataforma) y 02 (maestros) para mantener briefs ejecutables en una sesión.
