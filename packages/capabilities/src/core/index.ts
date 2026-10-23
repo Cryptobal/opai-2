@@ -12,6 +12,7 @@ import {
   integracionesList,
   integracionesSetSecreto,
 } from "./integraciones";
+import { capacidadesMaestros } from "./maestros";
 import { platformConsumosSummary, platformEventosList } from "./platform-observabilidad";
 import {
   platformTrabajosCancelar,
@@ -78,6 +79,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   geoGeocodificar,
   iaProbar,
   platformIntegracionesEstado,
+  ...capacidadesMaestros,
 ];
 
 export { trabajosDelNucleo } from "./bitacora";

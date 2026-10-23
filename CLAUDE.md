@@ -8,7 +8,7 @@ Monorepo de OPAI 2.0: SaaS modular, multi-tenant y agent-first para empresas int
 
 - `pnpm install` · `pnpm dev` (apps/web en http://localhost:3000) · `pnpm build`
 - Gate obligatorio antes de cada commit: `pnpm typecheck && pnpm lint && pnpm test`
-- `pnpm test:db` corre el test de aislamiento RLS si existe `DATABASE_URL_TEST` (Postgres local o rama `dev` de Neon, rol propietario).
+- `pnpm test:db` corre, si existe `DATABASE_URL_TEST` (Postgres local o rama `dev` de Neon, rol propietario), los tests de base de `packages/db` (RLS, triggers, servicios) y los `*-db.test.ts` de `packages/capabilities` (capacidades reales contra Postgres con un rol sin BYPASSRLS).
 - `pnpm db:generate` · `pnpm db:migrate` (crea la migración sin aplicarla; usa `DATABASE_URL_MIGRATE`) · `pnpm db:deploy` (aplica; solo con instrucción explícita y contra el entorno indicado)
 - `pnpm --filter @opai/db role:password` fija la contraseña del rol `opai_app` desde `OPAI_APP_DB_PASSWORD`.
 - `pnpm --filter @opai/db seed:dev-tenant` crea el tenant `gard` (solo para desarrollo).

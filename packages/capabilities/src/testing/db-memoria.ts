@@ -34,6 +34,8 @@ export function dbEnMemoria(semilla: Record<string, Fila[]> = {}) {
       data?: Fila;
       include?: Record<string, boolean>;
       take?: number;
+      skip?: number;
+      cursor?: { id: string };
       orderBy?: unknown;
     };
     const crear = (data: Fila) => {
@@ -47,11 +49,20 @@ export function dbEnMemoria(semilla: Record<string, Fila[]> = {}) {
           data[c] != null &&
           filas().some((f) => f[c] === data[c] && f["tenantId"] === data["tenantId"]),
       );
-    const buscar = (a: Args = {}) =>
-      ordenar(
+    const buscar = (a: Args = {}) => {
+      const orden = ordenar(
         filas().filter((x) => cumple(x, a.where)),
         a.orderBy,
-      ).slice(0, a.take);
+      );
+      const desde = a.cursor
+        ? Math.max(
+            orden.findIndex((f) => f["id"] === a.cursor?.id),
+            0,
+          )
+        : 0;
+      const inicio = desde + (a.skip ?? 0);
+      return orden.slice(inicio, a.take === undefined ? undefined : inicio + a.take);
+    };
     return {
       findUnique: async (a: Args) => {
         const f = filas().find((x) => cumple(x, a.where));
