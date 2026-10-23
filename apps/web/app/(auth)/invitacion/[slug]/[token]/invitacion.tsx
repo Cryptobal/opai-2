@@ -55,6 +55,13 @@ export function Invitacion({ slug, token, datos, sesion }: Props) {
     setError(await accion());
     setEnviando(false);
   };
+  // Con otra sesión abierta: si la cuenta invitada existe, se entra con ella (login);
+  // si no existe, se vuelve a esta misma invitación, que muestra el formulario de cuenta nueva.
+  const cambiarDeCuenta = async () => {
+    await signOut();
+    if (datos.usuarioExiste) router.push(login);
+    else router.refresh();
+  };
   const cuenta =
     sesion && !coincide
       ? sesion
@@ -71,8 +78,8 @@ export function Invitacion({ slug, token, datos, sesion }: Props) {
         Aceptar invitación
       </Button>
     ) : (
-      <Button size="lg" block onClick={() => void signOut().then(() => router.push(login))}>
-        Entrar con {datos.email}
+      <Button size="lg" block onClick={() => void cambiarDeCuenta()}>
+        {datos.usuarioExiste ? `Entrar con ${datos.email}` : `Crear cuenta para ${datos.email}`}
       </Button>
     )
   ) : datos.usuarioExiste ? (

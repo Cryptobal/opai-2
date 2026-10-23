@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Badge, Button, Campo, Empty, Input, Select, Switch } from "@opai/ds";
+import { Alerta, Badge, Button, Campo, Empty, Input, Select, Switch } from "@opai/ds";
 
 import { ETIQUETA_ROL } from "@/app/_components/portales";
 import { useCapacidad } from "@/app/_components/use-capacidad";
@@ -61,9 +61,18 @@ export function Administradores({ detalle }: P) {
   const { ejecutar, error } = useCapacidad("platform");
   const [email, setEmail] = useState("");
   const [rol, setRol] = useState("owner");
+  const [enviada, setEnviada] = useState<string | null>(null);
   async function invitar() {
-    if (await ejecutar("platform.admins.invite", { tenantId: detalle.tenant.id, email, rol }))
+    setEnviada(null);
+    const r = await ejecutar<{ email: string }>("platform.admins.invite", {
+      tenantId: detalle.tenant.id,
+      email,
+      rol,
+    });
+    if (r) {
+      setEnviada(r.email);
       setEmail("");
+    }
   }
   return (
     <div className="flex flex-col gap-6">
@@ -93,6 +102,12 @@ export function Administradores({ detalle }: P) {
           </li>
         ))}
       </ul>
+      {enviada ? (
+        <Alerta tono="success" titulo="Invitación enviada">
+          Enviamos el enlace a {enviada}. Vence en 72 horas y aparece arriba como invitación
+          pendiente.
+        </Alerta>
+      ) : null}
       <div className="flex flex-col gap-3 rounded-lg border border-border p-4 md:flex-row md:items-end">
         <Campo
           etiqueta="Invitar administrador"
