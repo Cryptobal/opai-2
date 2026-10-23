@@ -9,7 +9,9 @@ import { useCapacidad } from "@/app/_components/use-capacidad";
 import type { Plantilla, Variable } from "./tipos";
 import { VistaPrevia } from "./vista-previa";
 
-export const FORM_PLANTILLA = "form-plantilla";
+import { FORM_PLANTILLA } from "../../_centro/formularios";
+
+export { FORM_PLANTILLA } from "../../_centro/formularios";
 
 type Props = {
   evento: string;

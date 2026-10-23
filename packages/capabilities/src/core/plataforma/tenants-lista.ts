@@ -5,7 +5,7 @@ import { PERMISOS_PLATAFORMA } from "@opai/domain";
 import { defineCapability } from "../../define";
 import { requierePlataforma } from "../comun";
 import { tenantSchema } from "../esquemas";
-import { metricasDelMes } from "./metricas";
+import { metricasDelMes, porLotes } from "./metricas";
 
 const ACTIVOS = ["activo", "trial"];
 
@@ -31,26 +31,24 @@ export const platformTenantsList = defineCapability({
     const p = requierePlataforma(ctx);
     const tenants = await p.globales.tenant.findMany({ orderBy: { nombre: "asc" } });
     // Una consulta por tenant: nunca cross-tenant en una sola query.
-    return Promise.all(
-      tenants.map(async (t) => {
-        const db = p.paraTenant(t.id);
-        const [modulos, usuarios, m] = await Promise.all([
-          db.tenantModule.findMany({
-            where: { estado: { in: ACTIVOS }, moduloId: { not: "core" } },
-            select: { estado: true },
-          }),
-          db.membership.count({ where: { estado: "activa" } }),
-          metricasDelMes(db),
-        ]);
-        return {
-          ...t,
-          modulosActivos: modulos.length,
-          modulosTrial: modulos.filter((x) => x.estado === "trial").length,
-          usuarios,
-          iaMesUsd: m.iaUsd,
-          ultimoAcceso: m.ultimoAcceso,
-        };
-      }),
-    );
+    return porLotes(tenants, async (t) => {
+      const db = p.paraTenant(t.id);
+      const [modulos, usuarios, m] = await Promise.all([
+        db.tenantModule.findMany({
+          where: { estado: { in: ACTIVOS }, moduloId: { not: "core" } },
+          select: { estado: true },
+        }),
+        db.membership.count({ where: { estado: "activa" } }),
+        metricasDelMes(db),
+      ]);
+      return {
+        ...t,
+        modulosActivos: modulos.length,
+        modulosTrial: modulos.filter((x) => x.estado === "trial").length,
+        usuarios,
+        iaMesUsd: m.iaUsd,
+        ultimoAcceso: m.ultimoAcceso,
+      };
+    });
   },
 });

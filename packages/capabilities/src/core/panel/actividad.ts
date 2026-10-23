@@ -5,6 +5,7 @@ import { PERMISOS_CORE } from "@opai/domain";
 import { defineCapability } from "../../define";
 import { prohibido } from "../../errores";
 import type { Contexto } from "../../types";
+import { redactarSensibles } from "./actividad-sensible";
 import { cambios, frase } from "./actividad-texto";
 
 const TIPOS = ["cuenta", "instalacion", "persona", "cargo", "documento"] as const;
@@ -108,7 +109,7 @@ export const actividadList = defineCapability({
         const { input: entradaAuditada, ...extra } = (f.payload ?? {}) as {
           input?: Record<string, unknown>;
         };
-        const entrada = entradaAuditada ?? {};
+        const entrada = redactarSensibles(ctx, f.capability, entradaAuditada ?? {});
         const agente = f.actorType === "agent";
         return {
           id: f.id,

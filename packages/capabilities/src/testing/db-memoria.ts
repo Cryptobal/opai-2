@@ -8,8 +8,7 @@ import { agrupar, cumple, ordenar, type Fila, type Where } from "./db-memoria-ut
 
 // Ids crecientes como uuid(7): el orden por id es el orden de creación, igual que en Postgres.
 let secuencia = 0;
-const idOrdenado = () =>
-  `00000000-0000-7000-8000-${(++secuencia).toString(16).padStart(12, "0")}`;
+const idOrdenado = () => `00000000-0000-7000-8000-${(++secuencia).toString(16).padStart(12, "0")}`;
 
 const RELACIONES: Record<string, Record<string, [tabla: string, clave: string]>> = {
   membership: { user: ["user", "userId"], tenant: ["tenant", "tenantId"] },

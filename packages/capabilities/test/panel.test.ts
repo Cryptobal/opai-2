@@ -65,3 +65,52 @@ describe("pantallas de la sesión C: actividad, contadores y pendientes", () => 
     expect(ok<unknown[]>(await executeCapability(ctx, "core.inicio.pendientes", {}))).toEqual([]);
   });
 });
+
+describe("la actividad no muestra sueldos sin el permiso sensible", () => {
+  it("una excepción de sueldo aparece en la ficha de la persona con los montos ocultos", async () => {
+    const { ctx } = contextoDePrueba();
+    const cargo = ok<{ id: string }>(
+      await executeCapability(ctx, "core.cargos.create", { nombre: "Guardia" }),
+    );
+    await executeCapability(ctx, "core.estructuras.create", {
+      nivel: "cargo",
+      cargoId: cargo.id,
+      sueldoBase: 560_000,
+      vigenteDesde: "2026-01-01",
+    });
+    const p = ok<{ id: string }>(
+      await executeCapability(ctx, "core.personas.create", {
+        nombres: "María",
+        apellidos: "Soto",
+        rut: "16.234.567-2",
+        vinculo: { cargoId: cargo.id, tipo: "indefinido", inicio: "2026-01-05" },
+      }),
+    );
+    ok(
+      await executeCapability(ctx, "core.estructuras.create", {
+        nivel: "persona",
+        personaId: p.id,
+        sueldoBase: 1_250_000,
+        motivo: "Excepción acordada",
+        vigenteDesde: "2026-02-01",
+      }),
+    );
+    const sinPermiso = { ...ctx, autorizar: (x: string) => x !== "core:estructuras.read_sensible" };
+    const a = ok<{ items: { capability: string; detalle: unknown; cambios: unknown[] }[] }>(
+      await executeCapability(sinPermiso, "core.actividad.list", {
+        entidad: { tipo: "persona", id: p.id },
+      }),
+    );
+    const texto = JSON.stringify(
+      a.items.filter((i) => i.capability.startsWith("core.estructuras")),
+    );
+    expect(texto).toContain("••••");
+    expect(texto).not.toContain("1250000");
+    const owner = ok<{ items: { detalle: unknown }[] }>(
+      await executeCapability(ctx, "core.actividad.list", {
+        entidad: { tipo: "persona", id: p.id },
+      }),
+    );
+    expect(JSON.stringify(owner.items)).toContain("1250000");
+  });
+});

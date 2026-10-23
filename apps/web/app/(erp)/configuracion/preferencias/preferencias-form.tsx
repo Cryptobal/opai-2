@@ -40,7 +40,10 @@ export function PreferenciasForm({ inicial }: { inicial: Valores }) {
     if (k === "tema") aplicarTema(String(valor));
     const r = await ejecutar("core.config.set", { modulo: "core", clave, valor });
     if (r) avisar.exito("Preferencia guardada");
-    else setV(previo);
+    else {
+      setV(previo);
+      if (k === "tema") aplicarTema(previo.tema);
+    }
   }
   return (
     <div className="flex flex-col gap-4">

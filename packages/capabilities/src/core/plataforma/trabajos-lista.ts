@@ -3,6 +3,7 @@ import { z } from "zod";
 import { PERMISOS_PLATAFORMA } from "@opai/domain";
 
 import { defineCapability } from "../../define";
+import { porLotes } from "./metricas";
 import { iso, requierePlataforma } from "../comun";
 import { uuidSchema } from "../esquemas";
 
@@ -55,29 +56,27 @@ export const platformTrabajosList = defineCapability({
       : input.estado
         ? { estado: input.estado }
         : {};
-    const listas = await Promise.all(
-      tenants.map(async (t) => {
-        const filas = await p.paraTenant(t.id).trabajo.findMany({
-          where,
-          orderBy: { updatedAt: "desc" },
-          take: input.limite,
-        });
-        return filas.map((f) => ({
-          id: f.id,
-          tenantId: t.id,
-          empresa: t.nombre,
-          slug: t.slug,
-          tipo: f.tipo,
-          estado: f.estado,
-          intentos: f.intentos,
-          maxIntentos: f.maxIntentos,
-          programadoPara: iso(f.programadoPara),
-          actualizadoEn: iso(f.updatedAt),
-          ultimoError: f.ultimoError,
-          payload: f.payload,
-        }));
-      }),
-    );
+    const listas = await porLotes(tenants, async (t) => {
+      const filas = await p.paraTenant(t.id).trabajo.findMany({
+        where,
+        orderBy: { updatedAt: "desc" },
+        take: input.limite,
+      });
+      return filas.map((f) => ({
+        id: f.id,
+        tenantId: t.id,
+        empresa: t.nombre,
+        slug: t.slug,
+        tipo: f.tipo,
+        estado: f.estado,
+        intentos: f.intentos,
+        maxIntentos: f.maxIntentos,
+        programadoPara: iso(f.programadoPara),
+        actualizadoEn: iso(f.updatedAt),
+        ultimoError: f.ultimoError,
+        payload: f.payload,
+      }));
+    });
     return listas
       .flat()
       .sort((a, b) => (b.actualizadoEn ?? "").localeCompare(a.actualizadoEn ?? ""))

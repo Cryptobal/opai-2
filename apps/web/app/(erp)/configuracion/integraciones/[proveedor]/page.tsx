@@ -6,7 +6,8 @@ import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { Credenciales } from "../_componentes/credenciales";
-import { FORM_INTEGRACION, FormIntegracion } from "../_componentes/form-integracion";
+import { FORM_INTEGRACION } from "../../_centro/formularios";
+import { FormIntegracion } from "../_componentes/form-integracion";
 import { ProbarConexion } from "../_componentes/probar";
 import { CATEGORIA, ESTADO, type Integracion, SUBTITULO } from "../_componentes/tipos";
 

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { PERMISOS_PLATAFORMA } from "@opai/domain";
 
 import { defineCapability } from "../../define";
+import { conflicto, reglaDeNegocio } from "../../errores";
 import { aFecha, dia, hoy } from "../maestros/comun";
 import { requierePlataforma } from "../comun";
 
@@ -52,6 +53,14 @@ export const platformPreciosSet = defineCapability({
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     const desde = input.vigenteDesde ?? hoy();
+    // Versiona sin reescribir historia: nunca hacia atrás, y la versión de hoy no se corrige
+    // (los consumos de hoy ya la usan); una versión futura sí puede ajustarse.
+    if (desde < hoy()) throw reglaDeNegocio("La fecha de vigencia no puede ser pasada.");
+    const existente = await requierePlataforma(ctx).globales.precioRecurso.findUnique({
+      where: { recurso_vigenteDesde: { recurso: input.recurso, vigenteDesde: aFecha(desde) } },
+    });
+    if (existente && desde === hoy())
+      throw conflicto("Ya hay un precio vigente desde hoy: fija el nuevo desde mañana.");
     const fila = {
       recurso: input.recurso,
       unidad: input.unidad,

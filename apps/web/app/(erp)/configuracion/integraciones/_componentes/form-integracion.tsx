@@ -21,7 +21,9 @@ const OPCIONES = {
   propia: { etiqueta: "Propia", descripcion: "Usas tus credenciales y pagas directo al proveedor" },
 } as const;
 
-export const FORM_INTEGRACION = "form-integracion";
+import { FORM_INTEGRACION } from "../../_centro/formularios";
+
+export { FORM_INTEGRACION } from "../../_centro/formularios";
 
 /** Modalidad y configuración no secreta (29); "Guardar" de la barra superior envía este formulario. */
 export function FormIntegracion({
