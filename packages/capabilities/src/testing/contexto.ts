@@ -68,7 +68,24 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
         throw e;
       }
     },
-    auditoria: { registrar: async (e) => void eventos.push(e) },
+    // También en la tabla, para las capacidades que leen la auditoría (actividad de las fichas).
+    auditoria: {
+      registrar: async (e) => {
+        eventos.push(e);
+        await db.auditEvent.create({
+          data: {
+            tenantId: e.tenantId,
+            actorType: e.actor.tipo,
+            actorId: e.actor.id ?? null,
+            viaUserId: e.actor.viaUserId ?? null,
+            capability: e.capability,
+            entityType: e.entityType ?? null,
+            entityId: e.entityId ?? null,
+            payload: JSON.parse(JSON.stringify(e.payload ?? null)),
+          },
+        });
+      },
+    },
     medidor: { registrar: async (c) => void usos.push(c) },
     eventos: eventosEnMemoria(TENANT_DE_PRUEBA, actor),
     trabajos: trabajosEnMemoria(TENANT_DE_PRUEBA),

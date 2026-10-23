@@ -9,6 +9,7 @@ import { uuidSchema } from "../esquemas";
 import { cursorDe, listaSchema, pagina } from "./comun";
 import { ESTADOS_INSTALACION, instalacionSchema, vistaInstalacion } from "./instalaciones-vista";
 import { puestoSchema, vistaPuesto } from "./puestos-vista";
+import { resumenInstalaciones } from "./resumenes";
 
 export async function instalacionDe(ctx: Contexto, id: string) {
   const i = await ctx.db.instalacion.findUnique({ where: { id } });
@@ -35,7 +36,10 @@ export const instalacionesList = defineCapability({
     estado: z.enum(ESTADOS_INSTALACION).optional(),
     region: z.string().max(80).optional(),
   }),
-  output: z.object({ items: z.array(instalacionSchema), siguiente: z.string().nullable() }),
+  output: z.object({
+    items: z.array(instalacionSchema.extend({ puestos: z.number(), dotacion: z.number() })),
+    siguiente: z.string().nullable(),
+  }),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
@@ -64,8 +68,15 @@ export const instalacionesList = defineCapability({
       ctx,
       p.items.map((i) => i.cuentaId),
     );
+    const resumen = await resumenInstalaciones(
+      ctx,
+      p.items.map((i) => i.id),
+    );
     return {
-      items: p.items.map((i) => vistaInstalacion(i, nombres.get(i.cuentaId) ?? null)),
+      items: p.items.map((i) => ({
+        ...vistaInstalacion(i, nombres.get(i.cuentaId) ?? null),
+        ...resumen(i.id),
+      })),
       siguiente: p.siguiente,
     };
   },

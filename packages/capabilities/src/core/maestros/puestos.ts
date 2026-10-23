@@ -39,21 +39,29 @@ const fechas = (d: {
 export const puestosList = defineCapability({
   id: "core.puestos.list",
   descripcion:
-    "Puestos de servicio de una instalación: cargo, patrón de turno (p. ej. 4×4), horario, jornada y dotación.",
+    "Puestos de servicio de una instalación o de un cargo en todas las instalaciones: cargo, patrón de turno (p. ej. 4×4), horario, jornada y dotación.",
   permiso: PERMISOS_CORE.instalacionesRead,
-  input: z.object({ instalacionId: uuidSchema, soloActivos: z.boolean().default(false) }),
-  output: z.array(puestoSchema),
+  input: z
+    .object({
+      instalacionId: uuidSchema.optional(),
+      cargoId: uuidSchema.optional().describe("Puestos de este cargo (p. ej. para elegir puesto)."),
+      soloActivos: z.boolean().default(false),
+    })
+    .refine((i) => i.instalacionId || i.cargoId, "Envía instalacionId o cargoId."),
+  output: z.array(puestoSchema.extend({ instalacion: z.string() })),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
     const filas = await ctx.db.puesto.findMany({
       where: {
-        instalacionId: input.instalacionId,
+        ...(input.instalacionId ? { instalacionId: input.instalacionId } : {}),
+        ...(input.cargoId ? { cargoId: input.cargoId } : {}),
         ...(input.soloActivos ? { estado: "activo" } : {}),
       },
+      include: { instalacion: { select: { nombre: true } } },
       orderBy: { nombre: "asc" },
     });
-    return filas.map(vistaPuesto);
+    return filas.map((f) => ({ ...vistaPuesto(f), instalacion: f.instalacion.nombre }));
   },
 });
 

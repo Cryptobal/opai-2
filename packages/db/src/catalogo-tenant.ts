@@ -35,6 +35,7 @@ export async function sembrarCatalogo(db: ClienteCatalogo, tenantId: string, ver
           sueldoBase: c.sueldoBase,
           colacion: 45_000,
           movilizacion: 40_000,
+          gratificacion: "legal_25",
           vigenteDesde: INICIO,
         },
       });

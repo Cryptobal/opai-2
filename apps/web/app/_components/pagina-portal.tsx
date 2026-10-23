@@ -1,53 +1,42 @@
 import { redirect } from "next/navigation";
 import { type ReactNode, Suspense } from "react";
 
-import { Forbidden, Loading } from "@opai/ds";
+import { Forbidden, Loading, type VarianteLoading } from "@opai/ds";
 
-import { NAV_PLATAFORMA, navegacionErp, navegacionPortal } from "@/lib/navegacion";
+import type { Contadores } from "@/lib/navegacion";
 import { ejecutarComoUsuario, requerirIdentidad, tieneAccesoAPortal } from "@/lib/servidor";
-import type { Identidad } from "@/lib/actor";
-import { esRol } from "@opai/domain";
 
-import { ETIQUETA_ROL, PORTALES, portalesVisibles } from "./portales";
-import { type DatosShell, type OpcionesPagina, Shell } from "./shell";
+import { datosShell } from "./datos-shell";
+import { type OpcionesPagina, Shell } from "./shell";
 
-type Props = OpcionesPagina & { portal: string; ruta: string; children: ReactNode };
+type Props<T> = OpcionesPagina & {
+  portal: string;
+  ruta: string;
+  /** Carga los datos de la página dentro del Suspense (params, searchParams y capacidades). */
+  cargar?: () => Promise<T>;
+  /** Opciones del shell que dependen de los datos (título de la ficha, migas, acciones). */
+  opciones?: (datos: T) => Partial<OpcionesPagina>;
+  cargando?: VarianteLoading;
+  children: ReactNode | ((datos: T) => ReactNode);
+};
 
-function datosShell(identidad: Identidad, portal: string, noLeidas: number): DatosShell {
-  const { usuario, actual, membresias } = identidad;
-  const rol = actual && esRol(actual.rol) ? actual.rol : null;
-  const inicio = PORTALES.find((p) => p.id === portal)?.href ?? "/";
-  const nav =
-    portal === "erp"
-      ? navegacionErp(rol, identidad.modulosActivos)
-      : portal === "platform"
-        ? NAV_PLATAFORMA
-        : navegacionPortal(inicio);
-  const plataforma = usuario.platformRole !== null;
-  return {
-    portal,
-    noLeidas,
-    nav,
-    portales: portalesVisibles(actual?.portales ?? [], plataforma),
-    tenant:
-      portal === "platform" ? { nombre: "OPAI" } : actual ? { nombre: actual.tenant.nombre } : null,
-    usuario: {
-      nombre: usuario.nombre,
-      email: usuario.email,
-      rol:
-        portal === "platform" ? "Plataforma" : (ETIQUETA_ROL[actual?.rol ?? ""] ?? "Sin empresa"),
-    },
-    empresas: membresias
-      .filter((m) => m.estado === "activa" && m.tenant.estado !== "suspendido")
-      .map((m) => ({
-        id: m.tenantId,
-        nombre: m.tenant.nombre,
-        actual: m.tenantId === actual?.tenantId,
-      })),
-  };
-}
+const SIN_CONTADORES: Contadores = {
+  cuentas: null,
+  instalaciones: null,
+  personas: null,
+  aprobacionesPendientes: null,
+  notificacionesNoLeidas: null,
+};
 
-async function Contenido({ portal, ruta, children, ...pagina }: Props) {
+async function Contenido<T>({
+  portal,
+  ruta,
+  cargar,
+  opciones,
+  children,
+  cargando: _c,
+  ...pagina
+}: Props<T>) {
   const identidad = await requerirIdentidad(ruta);
   const acceso = tieneAccesoAPortal(identidad, portal);
   // Usuario de plataforma sin empresa: su inicio es Plataforma.
@@ -55,17 +44,22 @@ async function Contenido({ portal, ruta, children, ...pagina }: Props) {
     redirect("/platform");
   }
   const sinEmpresa = !identidad.actual && portal !== "platform";
-  const avisos =
+  const [conteo, datos] = await Promise.all([
     acceso && identidad.actual
-      ? await ejecutarComoUsuario<{ noLeidas: number }>(portal, "core.notificaciones.list", {
-          limite: 1,
-        })
-      : null;
-  const noLeidas = avisos?.ok ? avisos.data.noLeidas : 0;
+      ? ejecutarComoUsuario<Contadores>(portal, "core.resumen.contadores", {})
+      : null,
+    acceso && cargar ? cargar() : (undefined as T),
+  ]);
+  const contadores = conteo?.ok ? conteo.data : SIN_CONTADORES;
+  const extra = acceso && cargar && opciones ? opciones(datos) : {};
   return (
-    <Shell datos={datosShell(identidad, portal, noLeidas)} {...pagina}>
+    <Shell datos={datosShell(identidad, portal, contadores)} {...pagina} {...extra}>
       {acceso ? (
-        children
+        typeof children === "function" ? (
+          children(datos)
+        ) : (
+          children
+        )
       ) : (
         <Forbidden
           descripcion={
@@ -81,11 +75,11 @@ async function Contenido({ portal, ruta, children, ...pagina }: Props) {
 
 /**
  * Página de un portal: exige sesión y acceso al portal en servidor y monta el shell real.
- * El Suspense permite leer la sesión (cookies) con Cache Components.
+ * El Suspense permite leer la sesión (cookies), params y searchParams con Cache Components.
  */
-export function PaginaPortal(props: Props) {
+export function PaginaPortal<T = undefined>(props: Props<T>) {
   return (
-    <Suspense fallback={<Loading variante="lista" className="p-4 md:p-6" />}>
+    <Suspense fallback={<Loading variante={props.cargando ?? "lista"} className="p-4 md:p-6" />}>
       <Contenido {...props} />
     </Suspense>
   );

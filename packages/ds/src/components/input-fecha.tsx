@@ -1,4 +1,4 @@
-import { Calendar } from "lucide-react";
+import { Calendar, Clock } from "lucide-react";
 import type { InputHTMLAttributes } from "react";
 
 import { cn } from "../cn";
@@ -8,17 +8,27 @@ type Props = Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "value" | "onC
   valor: string;
   onCambiar: (valor: string) => void;
   invalido?: boolean;
+  /** `time`: hora "HH:mm" con el selector del sistema. */
+  tipo?: "date" | "time";
 };
 
 /**
  * Fecha sobre el selector nativo del sistema (iOS, Android y desktop), estilizado como `Input`, con
  * icono de calendario. El valor es ISO; el sistema lo muestra en el formato local (dd-mm-aaaa en es-CL).
  */
-export function InputFecha({ valor, onCambiar, invalido, className, ...props }: Props) {
+export function InputFecha({
+  valor,
+  onCambiar,
+  invalido,
+  tipo = "date",
+  className,
+  ...props
+}: Props) {
+  const Icono = tipo === "time" ? Clock : Calendar;
   return (
     <span className={cn("relative block", className)}>
       <input
-        type="date"
+        type={tipo}
         lang="es-CL"
         value={valor}
         onChange={(e) => onCambiar(e.target.value)}
@@ -30,12 +40,17 @@ export function InputFecha({ valor, onCambiar, invalido, className, ...props }: 
         )}
         {...props}
       />
-      <Calendar
+      <Icono
         aria-hidden
         className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-fg-muted"
       />
     </span>
   );
+}
+
+/** Hora "HH:mm" (24 h) con el selector del sistema e icono de reloj. */
+export function InputHora(props: Omit<Props, "tipo">) {
+  return <InputFecha {...props} tipo="time" />;
 }
 
 type RangoProps = {

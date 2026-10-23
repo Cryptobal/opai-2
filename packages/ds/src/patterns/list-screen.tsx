@@ -15,7 +15,9 @@ export type Columna<T> = {
 export type ListScreenProps<T> = {
   state: EstadoPantalla;
   titulo: string;
-  subtitulo?: string;
+  subtitulo?: ReactNode;
+  /** La cabecera (título, subtítulo y acción) solo en teléfono ("57 personas"). */
+  soloTelefono?: boolean;
   accionPrincipal?: ReactNode;
   /** Buscador y filtros son slots: el módulo decide el control, el patrón decide dónde va. */
   buscador?: ReactNode;
@@ -23,6 +25,8 @@ export type ListScreenProps<T> = {
   paginacion?: ReactNode;
   items: readonly T[];
   clave: (item: T) => string;
+  /** Teléfono: encabezado de grupo pegajoso (inicial del apellido, "M"). */
+  grupo?: (item: T) => string;
   /** Fila-tarjeta por ítem en teléfono (avatar, título, línea secundaria, badge). */
   tarjeta: (item: T) => ReactNode;
   /** Columnas de la tabla en md+. */
@@ -39,7 +43,7 @@ export type ListScreenProps<T> = {
 /** Lista: cabecera con acción principal, búsqueda, chips de filtro, filas en base y tabla en md+. */
 export function ListScreen<T>(props: ListScreenProps<T>) {
   const { state, titulo, subtitulo, accionPrincipal, buscador, filtros, paginacion, items } = props;
-  const { clave, tarjeta, columnas, href, onSeleccionar, textos } = props;
+  const { clave, tarjeta, columnas, href, onSeleccionar, textos, grupo } = props;
   const Link = props.Link ?? LinkPorDefecto;
   const vacio = state === "ready" && items.length === 0 ? "empty" : state;
   const filaBase = "flex w-full items-start gap-3 px-4 py-3.5 text-left";
@@ -48,6 +52,7 @@ export function ListScreen<T>(props: ListScreenProps<T>) {
       <Cabecera
         titulo={titulo}
         {...(subtitulo ? { subtitulo } : {})}
+        {...(props.soloTelefono ? { soloTelefono: true } : {})}
         {...(accionPrincipal ? { acciones: accionPrincipal } : {})}
       />
       {buscador || filtros ? (
@@ -62,8 +67,13 @@ export function ListScreen<T>(props: ListScreenProps<T>) {
       ) : null}
       <Estado state={vacio} variante="lista" {...(textos ? { textos } : {})}>
         <ul className="-mx-4 border-y border-border bg-surface md:hidden">
-          {items.map((item) => (
+          {items.map((item, i) => (
             <li key={clave(item)} className="border-b border-border last:border-b-0">
+              {grupo && grupo(item) !== (i > 0 && items[i - 1] ? grupo(items[i - 1] as T) : null) ? (
+                <p className="sticky top-0 z-10 border-b border-border bg-bg px-4 py-1 text-xs font-semibold text-fg-subtle">
+                  {grupo(item)}
+                </p>
+              ) : null}
               {href ? (
                 <Link href={href(item)} className={cn(filaBase, "active:bg-fill")}>
                   {tarjeta(item)}

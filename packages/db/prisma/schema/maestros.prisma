@@ -252,11 +252,12 @@ model EstructuraSueldo {
   cargoId            String?   @map("cargo_id") @db.Uuid
   puestoId           String?   @map("puesto_id") @db.Uuid
   personaId          String?   @map("persona_id") @db.Uuid
-  sueldoBase         Int       @map("sueldo_base")
-  colacion           Int       @default(0)
-  movilizacion       Int       @default(0)
+  /// Conceptos: NULL = hereda del nivel más general (el nivel cargo los define todos).
+  sueldoBase         Int?      @map("sueldo_base")
+  colacion           Int?
+  movilizacion       Int?
   /// "legal_25" | "monto_fijo" | "ninguna"
-  gratificacion      String    @default("legal_25")
+  gratificacion      String?
   gratificacionMonto Int?      @map("gratificacion_monto")
   vigenteDesde       DateTime  @map("vigente_desde") @db.Date
   vigenteHasta       DateTime? @map("vigente_hasta") @db.Date

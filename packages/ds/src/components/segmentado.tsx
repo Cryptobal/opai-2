@@ -15,6 +15,8 @@ type Props = {
   activa: string;
   etiqueta: string;
   Link?: LinkComponent;
+  /** `plano`: pestañas de la barra superior (Personas · Cargos y sueldos), sin riel. */
+  variante?: "riel" | "plano";
   className?: string;
 };
 
@@ -24,19 +26,28 @@ export function Segmentado({
   activa,
   etiqueta,
   Link = LinkPorDefecto,
+  variante = "riel",
   className,
 }: Props) {
+  const plano = variante === "plano";
   return (
     <div
       role="group"
       aria-label={etiqueta}
-      className={cn("inline-flex h-10 items-center gap-0.5 rounded-md bg-fill p-1", className)}
+      className={cn(
+        "inline-flex items-center gap-0.5",
+        plano ? "h-11 gap-1" : "h-10 rounded-md bg-fill p-1",
+        className,
+      )}
     >
       {opciones.map((o) => {
         const on = o.id === activa;
         const clase = cn(
           "inline-flex h-8 items-center rounded-sm px-3 text-base font-medium whitespace-nowrap outline-none transition-colors focus-visible:outline-2 focus-visible:outline-focus",
-          on
+          plano && "h-9 rounded-md px-4",
+          plano && on
+            ? "bg-fill text-fg"
+            : on
             ? "bg-surface text-fg shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
             : "text-fg-muted hover:text-fg",
         );

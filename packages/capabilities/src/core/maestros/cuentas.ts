@@ -8,6 +8,7 @@ import type { Contexto } from "../../types";
 import { uuidSchema } from "../esquemas";
 import { cursorDe, listaSchema, pagina } from "./comun";
 import { cuentaSchema, ESTADOS_CUENTA, vistaCuenta } from "./cuentas-vista";
+import { resumenCuentas } from "./resumenes";
 
 export async function cuentaDe(ctx: Contexto, id: string) {
   const c = await ctx.db.cuenta.findUnique({ where: { id } });
@@ -21,7 +22,12 @@ export const cuentasList = defineCapability({
     "Lista las cuentas (clientes y prospectos) de la empresa, con búsqueda por nombre, razón social o RUT y filtro por estado. Paginada por cursor.",
   permiso: PERMISOS_CORE.cuentasRead,
   input: listaSchema.extend({ estado: z.enum(ESTADOS_CUENTA).optional() }),
-  output: z.object({ items: z.array(cuentaSchema), siguiente: z.string().nullable() }),
+  output: z.object({
+    items: z.array(
+      cuentaSchema.extend({ instalaciones: z.number(), contactoPrincipal: z.string().nullable() }),
+    ),
+    siguiente: z.string().nullable(),
+  }),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
@@ -45,7 +51,14 @@ export const cuentasList = defineCapability({
       ...cursorDe(input.cursor),
     });
     const p = pagina(filas, input.limite);
-    return { items: p.items.map(vistaCuenta), siguiente: p.siguiente };
+    const resumen = await resumenCuentas(
+      ctx,
+      p.items.map((c) => c.id),
+    );
+    return {
+      items: p.items.map((c) => ({ ...vistaCuenta(c), ...resumen(c.id) })),
+      siguiente: p.siguiente,
+    };
   },
 });
 

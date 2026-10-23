@@ -1,6 +1,12 @@
 import { z } from "zod";
 
-import { haberes, PERMISOS_CORE, resolverEstructura, type Estructura } from "@opai/domain";
+import {
+  combinarPorConcepto,
+  haberes,
+  PERMISOS_CORE,
+  resolverEstructura,
+  type Estructura,
+} from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import { uuidSchema } from "../esquemas";
@@ -12,7 +18,7 @@ import { personaDe } from "./personas-vista";
 export const estructurasEfectiva = defineCapability({
   id: "core.estructuras.efectiva",
   descripcion:
-    "Sueldo efectivo de una persona a una fecha: resuelve persona → puesto → cargo, muestra los tres niveles y cuál aplica. Con el ingreso mínimo (imm) calcula haberes y la gratificación legal con tope.",
+    "Sueldo efectivo de una persona a una fecha, concepto por concepto: cada uno toma el nivel más específico que lo define (persona → puesto → cargo). Devuelve los tres niveles, el origen de cada concepto y, con el ingreso mínimo (imm), los haberes con la gratificación legal con tope.",
   permiso: PERMISOS_CORE.estructurasRead,
   input: z.object({
     personaId: uuidSchema,
@@ -30,6 +36,17 @@ export const estructurasEfectiva = defineCapability({
       puesto: estructuraSchema.nullable(),
       cargo: estructuraSchema.nullable(),
     }),
+    conceptos: z
+      .array(
+        z.object({
+          clave: z.string(),
+          nombre: z.string(),
+          valores: z.object({ persona: z.unknown(), puesto: z.unknown(), cargo: z.unknown() }),
+          final: z.unknown(),
+          origen: z.enum(NIVELES).nullable(),
+        }),
+      )
+      .describe("Concepto a concepto; valores null si no lo define el nivel o si son sensibles."),
     haberes: z.record(z.string(), z.number()).nullable(),
   }),
   efecto: "lectura",
@@ -60,6 +77,7 @@ export const estructurasEfectiva = defineCapability({
       puesto: por("puesto"),
       cargo: por("cargo"),
     });
+    const combinada = combinarPorConcepto(r.niveles);
     // Sensibilidad por fila (cargo, puesto o persona) y, si alguna lo exige, sin haberes.
     const ocultas = new Map(
       await Promise.all(filas.map(async (f) => [f.id, await ocultarMontos(ctx, f)] as const)),
@@ -77,8 +95,17 @@ export const estructurasEfectiva = defineCapability({
         puesto: vista(r.niveles.puesto),
         cargo: vista(r.niveles.cargo),
       },
+      conceptos: ocultar
+        ? combinada.conceptos.map((c) => ({
+            ...c,
+            valores: { persona: null, puesto: null, cargo: null },
+            final: null,
+          }))
+        : combinada.conceptos,
       haberes:
-        r.estructura && input.imm && !ocultar ? { ...haberes(r.estructura, input.imm) } : null,
+        combinada.estructura && input.imm && !ocultar
+          ? { ...haberes(combinada.estructura, input.imm) }
+          : null,
     };
   },
 });

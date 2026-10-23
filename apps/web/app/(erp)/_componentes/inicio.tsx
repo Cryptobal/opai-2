@@ -1,59 +1,81 @@
-import { ArrowRight } from "lucide-react";
-import Link from "next/link";
+import { Building2, MapPin, UserPlus } from "lucide-react";
 
-import { listarModulos } from "@opai/capabilities";
-import { Badge, Card, CardContent, CardHeader, CardTitle, DashboardScreen } from "@opai/ds";
-
-import { estadoPantalla } from "@/lib/formato";
+import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+import { diaLargo } from "@/lib/fechas";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
-type Modulo = { id: string; nombre: string; estado: string | null };
+import { ActividadInicio } from "./actividad-inicio";
+import { type Pendiente, PendientesInicio } from "./pendientes-inicio";
 
-/** Inicio del ERP: tarjetas de los módulos activos (sin KPIs de negocio todavía). */
-export async function InicioErp() {
-  const r = await ejecutarComoUsuario<Modulo[]>("erp", "core.modules.list");
-  const activos = r.ok ? r.data.filter((m) => m.estado === "activo" || m.estado === "trial") : [];
-  const manifests = new Map(listarModulos().map((m) => [m.id, m]));
-  const state = r.ok && activos.length === 0 ? "empty" : estadoPantalla(r);
+const ACCIONES = [
+  { href: "/cuentas?nueva=1", etiqueta: "Nueva cuenta", corta: "Cuenta", icono: Building2 },
+  { href: "/personas?nueva=1", etiqueta: "Nueva persona", corta: "Persona", icono: UserPlus },
+  {
+    href: "/instalaciones/nueva",
+    etiqueta: "Nueva instalación",
+    corta: "Instalación",
+    icono: MapPin,
+  },
+];
+
+function saludo(ahora: Date) {
+  const h = Number(
+    new Intl.DateTimeFormat("es-CL", {
+      hour: "numeric",
+      hourCycle: "h23",
+      timeZone: "America/Santiago",
+    }).format(ahora),
+  );
+  return h < 12 ? "Buenos días" : h < 20 ? "Buenas tardes" : "Buenas noches";
+}
+
+type Props = { nombre: string; empresa: string; actor: string | undefined };
+
+/** Inicio del ERP (46/47): saludo, lo que requiere decisión hoy, accesos rápidos y actividad. */
+export async function InicioErp({ nombre, empresa, actor }: Props) {
+  const r = await ejecutarComoUsuario<Pendiente[]>("erp", "core.inicio.pendientes", {});
+  const ahora = new Date();
+  const pila = nombre.split(" ")[0] ?? nombre;
   return (
-    <DashboardScreen
-      state={state}
-      titulo="Inicio"
-      subtitulo="Módulos activos de tu empresa"
-      kpis={[]}
-      textos={{
-        vacio: {
-          titulo: "Aún no hay módulos activos",
-          descripcion:
-            "Cuando OPAI active módulos para tu empresa (Comercial, CPQ…) aparecerán aquí.",
-        },
-      }}
-    >
-      {activos.map((m) => {
-        const entrada = manifests.get(m.id)?.navegacion.find((n) => n.portal === "erp");
-        return (
-          <Card key={m.id}>
-            <CardHeader>
-              <CardTitle>{m.nombre}</CardTitle>
-              {m.estado === "trial" ? (
-                <Badge tono="info">Prueba</Badge>
-              ) : (
-                <Badge tono="success">Activo</Badge>
-              )}
-            </CardHeader>
-            <CardContent>
-              {entrada ? (
-                <Link
-                  href={entrada.href}
-                  className="inline-flex min-h-11 items-center gap-1.5 font-medium text-accent"
-                >
-                  Abrir {m.nombre} <ArrowRight className="size-4" />
-                </Link>
-              ) : null}
-            </CardContent>
-          </Card>
-        );
-      })}
-    </DashboardScreen>
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <h2 className="t-title text-fg">
+            <span className="md:hidden">Hola, {pila}</span>
+            <span className="hidden md:inline">
+              {saludo(ahora)}, {pila}
+            </span>
+          </h2>
+          <p className="text-base text-fg-muted">
+            {diaLargo(ahora)}
+            <span className="hidden md:inline"> · {empresa}</span>
+          </p>
+        </div>
+        <div className="hidden gap-2 md:flex">
+          {ACCIONES.map((a) => (
+            <EnlaceBoton key={a.href} href={a.href} variante="secondary" icono={a.icono}>
+              {a.etiqueta}
+            </EnlaceBoton>
+          ))}
+        </div>
+      </div>
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,380px)] lg:items-start">
+        <PendientesInicio items={r.ok ? r.data : []} />
+        <div className="grid grid-cols-3 gap-2 md:hidden">
+          {ACCIONES.map((a) => (
+            <EnlaceBoton
+              key={a.href}
+              href={a.href}
+              variante="secondary"
+              className="h-auto flex-col gap-1.5 py-3.5"
+            >
+              <a.icono className="size-5" aria-hidden />
+              {a.corta}
+            </EnlaceBoton>
+          ))}
+        </div>
+        <ActividadInicio actor={actor} />
+      </div>
+    </div>
   );
 }

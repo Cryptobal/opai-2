@@ -37,3 +37,35 @@ export function tenantDe(
   const objetivo = entrada !== undefined ? c.tenantObjetivo?.(entrada, salida) : undefined;
   return objetivo ?? (ctx.conTenant ? ctx.tenantId : null);
 }
+
+const SINGULAR: Record<string, string> = {
+  cuentas: "cuenta",
+  contactos: "contacto",
+  instalaciones: "instalacion",
+  puestos: "puesto",
+  personas: "persona",
+  vinculos: "vinculo",
+  cargos: "cargo",
+  estructuras: "estructura",
+  documentos: "documento",
+  apikeys: "api_key",
+  users: "usuario",
+  aprobaciones: "aprobacion",
+};
+
+const idDe = (v: unknown): string | null =>
+  v && typeof v === "object" && "id" in v && typeof v.id === "string" && v.id ? v.id : null;
+
+/**
+ * Entidad afectada por una escritura, para la actividad de cada ficha: la entidad del id de la
+ * capacidad (`core.cuentas.update` → cuenta) con el id de la salida o de la entrada.
+ */
+export function entidadAuditada(
+  capacidad: string,
+  entrada: unknown,
+  salida: unknown,
+): { entityType?: string; entityId?: string } {
+  const tipo = SINGULAR[capacidad.split(".")[1] ?? ""];
+  const id = idDe(salida) ?? idDe(entrada);
+  return tipo && id ? { entityType: tipo, entityId: id } : {};
+}

@@ -1,0 +1,75 @@
+import type { ReactNode } from "react";
+
+import {
+  Cabecera,
+  Estado,
+  type EstadoPantalla,
+  FilaSeleccionable,
+  HerramientasLista,
+  MetaLista,
+} from "@opai/ds";
+
+import { LinkNext } from "../link-next";
+import { Buscador } from "./buscador";
+import { ChipsFiltro, type Filtro } from "./chips-filtro";
+
+export type FilaLista = {
+  id: string;
+  href: string;
+  titulo: ReactNode;
+  secundario?: ReactNode;
+  terciario?: ReactNode;
+  inicio?: ReactNode;
+  fin?: ReactNode;
+};
+
+type Props = {
+  state: EstadoPantalla;
+  /** Título de la lista en teléfono (en md+ va en la barra superior). */
+  titulo: string;
+  accion?: ReactNode;
+  buscar: string;
+  filtros?: readonly Filtro[];
+  meta?: { izquierda: ReactNode; derecha?: ReactNode };
+  filas: readonly FilaLista[];
+  seleccionada?: string | undefined;
+  vacio: { titulo: string; descripcion?: string; accion?: ReactNode };
+  pie?: ReactNode;
+};
+
+/** Columna de lista de un maestro (búsqueda, chips, metadatos y filas seleccionables). */
+export function ListaMaestro(p: Props) {
+  const estado = p.state === "ready" && p.filas.length === 0 ? "empty" : p.state;
+  return (
+    <>
+      <div className="md:hidden">
+        <Cabecera titulo={p.titulo} {...(p.accion ? { acciones: p.accion } : {})} />
+      </div>
+      <HerramientasLista>
+        <Buscador placeholder={p.buscar} />
+        {p.filtros?.length ? <ChipsFiltro filtros={p.filtros} /> : null}
+      </HerramientasLista>
+      {p.meta ? <MetaLista izquierda={p.meta.izquierda} derecha={p.meta.derecha} /> : null}
+      <div className="-mx-4 border-t border-border md:mx-0 md:border-t-0">
+        <Estado state={estado} variante="lista" textos={{ vacio: p.vacio }}>
+          <div className="flex flex-col bg-surface">
+            {p.filas.map((f) => (
+              <FilaSeleccionable
+                key={f.id}
+                href={f.href}
+                Link={LinkNext}
+                titulo={f.titulo}
+                secundario={f.secundario}
+                terciario={f.terciario}
+                inicio={f.inicio}
+                fin={f.fin}
+                seleccionada={p.seleccionada === f.id}
+              />
+            ))}
+          </div>
+          {p.pie}
+        </Estado>
+      </div>
+    </>
+  );
+}

@@ -6,7 +6,12 @@ const estilos = cva(
   "inline-flex flex-none items-center justify-center rounded-full bg-border text-fg-muted font-semibold tracking-wide select-none",
   {
     variants: {
-      size: { sm: "size-6 text-[10px]", md: "size-8 text-xs", lg: "size-10 text-base" },
+      size: {
+        sm: "size-6 text-[10px]",
+        md: "size-8 text-xs",
+        lg: "size-10 text-base",
+        xl: "size-12 text-lg md:size-16 md:text-xl",
+      },
     },
     defaultVariants: { size: "md" },
   },

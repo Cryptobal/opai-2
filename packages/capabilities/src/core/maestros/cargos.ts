@@ -5,6 +5,7 @@ import { PERMISOS_CORE } from "@opai/domain";
 import { defineCapability } from "../../define";
 import { uuidSchema } from "../esquemas";
 import { definidos, escribirConEvento, sinDuplicado } from "./comun";
+import { resumenSueldoSchema, sueldoVigentePorCargo } from "./cargos-resumen";
 import {
   campos,
   cargoDe,
@@ -18,10 +19,10 @@ import {
 export const cargosList = defineCapability({
   id: "core.cargos.list",
   descripcion:
-    "Cargos de la empresa (guardia, supervisor, operario…) con personas con vínculo vigente y puestos activos de cada uno.",
+    "Cargos de la empresa (guardia, supervisor, operario…) con personas con vínculo vigente, puestos activos y los montos de su estructura de sueldo vigente hoy.",
   permiso: PERMISOS_CORE.estructurasRead,
   input: z.object({ incluirInactivos: z.boolean().default(false) }),
-  output: z.array(cargoSchema),
+  output: z.array(cargoSchema.extend({ sueldoVigente: resumenSueldoSchema })),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
@@ -29,7 +30,16 @@ export const cargosList = defineCapability({
       where: input.incluirInactivos ? {} : { activo: true },
       orderBy: [{ orden: "asc" }, { nombre: "asc" }],
     });
-    return Promise.all(cargos.map(async (c) => vista(c, await conteos(ctx, c.id))));
+    const sueldos = await sueldoVigentePorCargo(
+      ctx,
+      cargos.map((c) => c.id),
+    );
+    return Promise.all(
+      cargos.map(async (c) => ({
+        ...vista(c, await conteos(ctx, c.id)),
+        sueldoVigente: sueldos.get(c.id) ?? null,
+      })),
+    );
   },
 });
 

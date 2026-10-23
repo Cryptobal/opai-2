@@ -34,6 +34,7 @@ export type DatosShell = {
 export type OpcionesPagina = {
   titulo: string;
   volver?: Volver;
+  volverSoloTelefono?: boolean;
   acciones?: ReactNode;
   accionesTelefono?: ReactNode;
   insignia?: ReactNode;

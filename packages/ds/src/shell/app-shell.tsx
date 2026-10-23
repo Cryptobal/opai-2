@@ -52,7 +52,7 @@ export function AppShell(props: AppShellProps) {
         {...linkProps}
       />
       <div className="flex min-w-0 flex-1 flex-col">
-        <TopBarTelefono {...barra} {...(accionesTelefono ? { acciones: accionesTelefono } : {})} />
+        <TopBarTelefono {...barra} acciones={accionesTelefono ?? null} />
         <AppBar
           {...barra}
           titulo={titulo}

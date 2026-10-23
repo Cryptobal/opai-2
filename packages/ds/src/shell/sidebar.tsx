@@ -77,7 +77,7 @@ export function Sidebar(props: SidebarProps) {
         />
       </div>
       <div className="flex-1 overflow-y-auto py-2">
-        {agrupar(items.filter((i) => !i.pie)).map(([grupo, lista]) => (
+        {agrupar(items.filter((i) => !i.pie && !i.soloCompacto)).map(([grupo, lista]) => (
           <div key={grupo} className="flex flex-col gap-px px-3">
             {grupo ? <p className="t-overline px-2 pt-4 pb-1.5">{grupo}</p> : null}
             {lista.map((item) => (

@@ -55,3 +55,33 @@ export function ChipAgregar({
     </button>
   );
 }
+
+/** Chip de filtro rápido que se activa y desactiva ("Vencidos 3"): relleno inverso cuando está activo. */
+export function ChipToggle({
+  etiqueta,
+  contador,
+  activo,
+  onCambiar,
+}: {
+  etiqueta: string;
+  contador?: number;
+  activo: boolean;
+  onCambiar: (activo: boolean) => void;
+}) {
+  return (
+    <button
+      type="button"
+      aria-pressed={activo}
+      onClick={() => onCambiar(!activo)}
+      className={cn(
+        "inline-flex h-8 flex-none items-center gap-1.5 rounded-full border px-3 text-sm font-medium outline-none transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus",
+        activo
+          ? "border-inverse-bg bg-inverse-bg text-inverse-fg"
+          : "border-border-strong bg-surface text-fg hover:bg-fill",
+      )}
+    >
+      {etiqueta}
+      {contador !== undefined ? <span className="t-numeric opacity-75">{contador}</span> : null}
+    </button>
+  );
+}

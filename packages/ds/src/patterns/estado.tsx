@@ -55,7 +55,7 @@ export function Estado({ state, variante, textos, children }: Props) {
 
 export type CabeceraProps = {
   titulo: string;
-  subtitulo?: string;
+  subtitulo?: ReactNode;
   /** Línea sobre el título: badge de estado y texto corto (detalle). */
   sobre?: ReactNode;
   acciones?: ReactNode;
@@ -63,6 +63,8 @@ export type CabeceraProps = {
   tituloSiempre?: boolean;
   /** Título de detalle (22/28) en vez del de página (28/34). */
   tituloDetalle?: boolean;
+  /** Toda la cabecera solo en teléfono (el subtítulo también es solo de teléfono). */
+  soloTelefono?: boolean;
 };
 
 /**
@@ -72,7 +74,12 @@ export type CabeceraProps = {
 export function Cabecera(props: CabeceraProps) {
   const { titulo, subtitulo, sobre, acciones, tituloSiempre, tituloDetalle } = props;
   return (
-    <div className="mb-4 flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
+    <div
+      className={cn(
+        "mb-4 flex flex-wrap items-start justify-between gap-x-3 gap-y-2",
+        props.soloTelefono && "md:hidden",
+      )}
+    >
       <div className="min-w-0">
         {sobre ? (
           <div className="mb-1.5 flex items-center gap-2 text-sm text-fg-muted">{sobre}</div>

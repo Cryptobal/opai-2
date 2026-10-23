@@ -6,6 +6,7 @@ import { defineCapability } from "../../define";
 import { uuidSchema } from "../esquemas";
 import { cursorDe, listaSchema, pagina } from "./comun";
 import { personaDe, personaSchema, vinculosVigentes, vistaPersona } from "./personas-vista";
+import { alertasDocumentos, alertasSchema } from "./resumenes";
 
 export const personasList = defineCapability({
   id: "core.personas.list",
@@ -16,7 +17,10 @@ export const personasList = defineCapability({
     cargoId: uuidSchema.optional(),
     estado: z.enum(["activa", "inactiva", "bloqueada"]).optional(),
   }),
-  output: z.object({ items: z.array(personaSchema), siguiente: z.string().nullable() }),
+  output: z.object({
+    items: z.array(personaSchema.extend({ documentos: alertasSchema })),
+    siguiente: z.string().nullable(),
+  }),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
@@ -58,8 +62,16 @@ export const personasList = defineCapability({
       ctx,
       p.items.map((x) => x.id),
     );
+    const alertas = await alertasDocumentos(
+      ctx,
+      "persona",
+      p.items.map((x) => x.id),
+    );
     return {
-      items: p.items.map((x) => vistaPersona(x, vinculos.get(x.id) ?? null)),
+      items: p.items.map((x) => ({
+        ...vistaPersona(x, vinculos.get(x.id) ?? null),
+        documentos: alertas(x.id),
+      })),
       siguiente: p.siguiente,
     };
   },

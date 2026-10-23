@@ -8,10 +8,12 @@ import { Cabecera, Estado, type EstadoPantalla, type TextosEstado } from "./esta
 export type DetailScreenProps = {
   state: EstadoPantalla;
   titulo: string;
-  subtitulo?: string;
+  subtitulo?: ReactNode;
   /** Badge de estado (va sobre el título, con un texto corto opcional como "desde 01-03-2024"). */
   estado?: ReactNode;
   acciones?: ReactNode;
+  /** Avatar o monograma a la izquierda del título (ficha de persona). */
+  inicio?: ReactNode;
   tabs?: readonly Tab[];
   /** Modo por ruta: id de la pestaña activa y componente de enlace; `children` es la página hija. */
   tabActiva?: string;
@@ -27,22 +29,33 @@ export function DetailScreen({
   subtitulo,
   estado,
   acciones,
+  inicio,
   tabs,
   tabActiva,
   Link,
   children,
   textos,
 }: DetailScreenProps) {
+  const cabecera = (
+    <Cabecera
+      titulo={titulo}
+      tituloSiempre
+      tituloDetalle
+      {...(subtitulo ? { subtitulo } : {})}
+      {...(estado ? { sobre: estado } : {})}
+      {...(acciones ? { acciones } : {})}
+    />
+  );
   return (
     <section>
-      <Cabecera
-        titulo={titulo}
-        tituloSiempre
-        tituloDetalle
-        {...(subtitulo ? { subtitulo } : {})}
-        {...(estado ? { sobre: estado } : {})}
-        {...(acciones ? { acciones } : {})}
-      />
+      {inicio ? (
+        <div className="flex items-start gap-4">
+          <div className="flex-none">{inicio}</div>
+          <div className="min-w-0 flex-1">{cabecera}</div>
+        </div>
+      ) : (
+        cabecera
+      )}
       <Estado state={state} variante="detalle" {...(textos ? { textos } : {})}>
         {tabs && tabs.length > 0 ? (
           <Tabs
