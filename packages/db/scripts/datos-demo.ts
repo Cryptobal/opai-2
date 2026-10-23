@@ -13,7 +13,12 @@ export const CUENTAS = [
     estado: "cliente_activo",
   },
   { nombre: "Minera Cerro Alto SpA", rut: "76987654", giro: "Minería", estado: "prospecto" },
-  { nombre: "Bodegas Pudahuel S.A.", rut: "96555444", giro: "Bodegaje", estado: "cliente_inactivo" },
+  {
+    nombre: "Bodegas Pudahuel S.A.",
+    rut: "96555444",
+    giro: "Bodegaje",
+    estado: "cliente_inactivo",
+  },
 ] as const;
 
 export const INSTALACIONES = [

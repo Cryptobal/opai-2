@@ -48,20 +48,26 @@ export const integracionesProbar = defineCapability({
       ok = false;
       mensaje = e instanceof Error ? e.message : String(e);
     }
-    await ctx.db.integracion.upsert({
-      where: { tenantId_proveedor: { tenantId: ctx.tenantId, proveedor: def.id } },
-      create: {
-        tenantId: ctx.tenantId,
-        proveedor: def.id,
-        estado: ok ? "configurada" : "error",
-        ultimoTestEn: new Date(),
-        ultimoError: ok ? null : mensaje,
-      },
-      update: {
-        estado: ok ? "configurada" : "error",
-        ultimoTestEn: new Date(),
-        ultimoError: ok ? null : mensaje,
-      },
+    const estado = {
+      estado: ok ? "configurada" : "error",
+      ultimoTestEn: new Date(),
+      ultimoError: ok ? null : mensaje,
+    };
+    await ctx.transaccion(async (tx) => {
+      await tx.integracion.upsert({
+        where: { tenantId_proveedor: { tenantId: ctx.tenantId, proveedor: def.id } },
+        create: { tenantId: ctx.tenantId, proveedor: def.id, ...estado },
+        update: estado,
+      });
+      // Comunicaciones avisa a quien tenga la regla de core.integracion.error (ADR-020).
+      if (!ok) {
+        await ctx.eventos.emitir(tx, {
+          tipo: "core.integracion.error",
+          entidadTipo: "integracion",
+          entidadId: def.id,
+          payload: { nombre: def.nombre, error: mensaje.slice(0, 300) },
+        });
+      }
     });
     return { ok, mensaje, latenciaMs: Date.now() - inicio };
   },
