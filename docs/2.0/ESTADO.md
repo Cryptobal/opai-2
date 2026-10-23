@@ -40,7 +40,7 @@ Este archivo es la fuente de verdad del avance. Cada brief lo actualiza al termi
 
 ## En curso
 
-- **Carlos (urgente):** rotar la API key "Grokbot" (`opai_gard_heLe…`), compartida en una captura de chat el 23-oct. Verificado el 23-oct: sigue activa y es la única key de Gard. Crear una nueva en ERP → Configuración → API keys, cambiarla en Grokbot y revocar la anterior (tocar su fila → Revocar).
+- Resuelto el 23-oct: key "Grokbot" rotada. La anterior (`opai_gard_heLe…`) quedó revocada a las 14:08 UTC y `/api/mcp` la rechaza con 401; hay una sola key activa.
 - **Carlos (cuando quiera):** correr `docs/2.0/design/DESIGN-PROMPT-acceso.md` en Claude Design, dentro del sistema de diseño **OPAI DS 2.0**. Pendientes del sistema: logo definitivo de OPAI; revisar el contraste de `--ds-border-strong` (1,5:1) en el portal Trabajador a pleno sol.
 - Resuelto el 23-oct: URI de redirección de Google configurada (el flujo OAuth de `test.opai.cl` llega a Google sin error), CI de GitHub Actions de vuelta en verde (typecheck, lint, test y test:db), contraseña inicial de `carlos.irigoyen@opai.cl` cambiada, Gard Security en estado `activo`.
 
