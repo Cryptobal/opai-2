@@ -10,9 +10,9 @@
 
 ## CPQ (ADR-042)
 
-4. **¿Qué cotizaciones reales de Gard usamos para validar el margen financiero al peso?** — Recomendación: **cinco cotizaciones enviadas en 2026**, elegidas por ti, que incluyan al menos una con póliza de garantía, una con varias instalaciones y una con margen bajo.
+4. **¿Cómo elegimos las cotizaciones reales de Gard para validar el margen financiero al peso?** (a) Tú eliges cinco enviadas en 2026; (b) Claude toma las cinco últimas enviadas en 1.0; (c) Claude toma cinco enviadas en 2026 que cubran póliza de garantía, varias instalaciones y margen bajo, y tú las confirmas. — Recomendación: **(c)**.
 5. **¿Un precio con la guarda `k ≥ 0,35` (precio subvalorado) puede enviarse solo con aprobación de un rol con `cpq:aprobar`?** — Recomendación: **sí**, aprueban owner y admin.
-6. **¿Cuál es el margen mínimo de Gard bajo el cual la cotización pide aprobación?** — Recomendación: **el que Gard usa hoy en la práctica** (indícalo en %); por defecto propondría 15 % sobre venta.
+6. **¿Cuál es el margen mínimo sobre venta bajo el cual la cotización pide aprobación?** (a) 10 %; (b) 15 %; (c) 20 %; (d) otro (indícalo). — Recomendación: **(b) 15 %**, salvo que Gard use hoy otro en la práctica.
 7. **¿El modo de margen por defecto es «margen sobre venta»** (`margin_on_sale`), como en 1.0? — Recomendación: **sí**.
 8. **¿El modelo de costeo y el catálogo de ítems se editan en una pantalla del módulo CPQ («Modelo de costeo»), solo owner y admin?** — Recomendación: **sí**.
 9. **¿La edición completa del cotizador es solo en iPad y escritorio**, y en el celular se ve, compara y aprueba? — Recomendación: **sí**.
