@@ -128,7 +128,7 @@ Las **bases transversales** (rendimiento, PWA, navegación) aplican a todo brief
 
 ### Backlog (sin fecha)
 
-Inventario, cámaras, ATS, gamificación, psicolaboral, chat, Slack como canal, sitio de marketing 2.0, roles personalizados, cadencia de seguimiento comercial, facturación de suscripciones (con Opai SpA).
+No se portan de 1.0 y solo se reconstruyen con demanda real (lista canónica de `CONTEXTO-agentes.md`): inventario, cámaras, ATS, alertas y cobertura, incidentes, conocimiento, onboarding, comunicaciones, gamificación, psicolaboral, chat, Slack como módulo (queda como canal opcional de notificaciones) y Productividad. Además: sitio de marketing 2.0, roles personalizados, cadencia de seguimiento comercial y facturación de suscripciones (con Opai SpA).
 
 ## 3. Mejoras sobre 1.0 por módulo
 
