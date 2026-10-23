@@ -403,3 +403,47 @@ OPAI puede ofrecer además **automatizaciones alojadas** (por ejemplo, búsqueda
 **Decisión.** Claude escribe el brief y lo ejecuta en el mismo chat sin esperar confirmación: rama `brief/NN-<nombre>`, commits atómicos por bloque con gate local, revisión del diff por un subagente independiente, PR, e integración a `main` con rebase cuando CI pasa (`typecheck`, `lint`, `test`, `test:db`). Se detiene antes de cualquier acción irreversible o de alto impacto y pide aprobación. Migraciones contra Neon e infraestructura se ejecutan con las CLIs autenticadas del Mac de Carlos o con el conector de Vercel. Los agentes operativos (Grokbot y los demás) no escriben en el repositorio: reportan bugs y brechas de paridad a Carlos. Claude Code local queda como alternativa para trabajo que requiera la base de datos o herramientas locales de forma intensiva.
 
 **Consecuencias.** Un bloque se cierra sin intervención de Carlos. La validación cruzada que antes daba el paso por Claude Code la cubren la revisión independiente y CI. `main` cambia más seguido: los agentes releen `ESTADO.md` en vez de asumir. Si CI resulta insuficiente para un tipo de cambio (por ejemplo, pantallas), se agrega la verificación faltante al gate en vez de volver a la integración manual.
+
+---
+
+## ADR-036 · Puestos de servicio y vínculos laborales en el núcleo
+
+**Fecha:** 23-oct-2026 · **Estado:** vigente · Completa ADR-005. Brief 02.
+
+**Contexto.** En 1.0 el puesto operativo (instalación + cargo + rol de turno + horario + dotación) vive en Operaciones y el patrón de turno es una entidad de CPQ; la relación laboral está repartida entre `OpsGuardia` (estado de ciclo de vida, contrato) y `OpsPersona`. CPQ cotiza puestos, Operaciones los cubre, Asistencia marca contra ellos y Nómina liquida con su estructura.
+
+**Decisión.** El **puesto de servicio** (`core.puestos`: instalación, cargo, nombre, patrón `dias_trabajo × dias_descanso`, horario `[inicio, fin)` con cruce de medianoche, jornada, dotación, vigencia) y el **vínculo laboral** (`core.vinculos_laborales`: persona, cargo, tipo de contrato, inicio, término, motivo; uno vigente por persona) son del núcleo porque los necesitan dos o más módulos vendibles. El patrón de turno va en el puesto, no en una entidad aparte. Previsión, cuentas bancarias, anticipos y tallas son facetas de Nómina u Operaciones; PIN, Face ID y jornada, de Asistencia y Portales. Las estructuras de sueldo se versionan por vigencia sin solapes en el mismo nivel y referencia; la resolución persona → puesto → cargo vive en `packages/domain`; el nivel persona exige motivo y queda auditado.
+
+**Consecuencias.** CPQ y Operaciones referencian `core.puestos` en vez de crear los suyos. Una persona puede existir sin vínculo vigente (inactiva). Las asignaciones persona ↔ puesto llegan con Operaciones (fase 3).
+
+---
+
+## ADR-037 · Presupuesto de JavaScript por ruta
+
+**Fecha:** 23-oct-2026 · **Estado:** vigente · Completa ADR-017 y ADR-029 (punto 14). Brief 02.
+
+**Contexto.** Carlos midió ~216 KB gzip en `/login`. Medido por manifests del build (gzip, sin el polyfill `noModule` que los navegadores modernos no descargan): framework de Next 16 + React 19 129 KB; `/login` 170 KB, de los cuales 12 KB eran el cliente de Better Auth y 19 KB el barrel completo del DS.
+
+**Decisión.** (1) El acceso (login, Google, cerrar sesión, cambiar y recuperar contraseña) va por **Server Actions** que llaman a `auth.api.*`; no hay cliente de autenticación en el navegador. (2) Los paquetes del monorepo declaran `sideEffects` y `@opai/ds` se resuelve con `optimizePackageImports`. (3) **Server-first**: listas con `href` (fila como enlace), pestañas por ruta, islas cliente solo para formularios, menús, sheets y overlays, los pesados con carga diferida. (4) `scripts/presupuesto-js.ts` mide cada ruta y `apps/web/presupuesto-js.json` fija los topes (framework 132 KB; acceso 152 KB; ERP 165 KB; Configuración 170 KB; exceso por ruta ≤ 35 KB); CI corre build + `pnpm presupuesto` y falla si una ruta se pasa. (5) Toda dependencia de cliente nueva se justifica en el brief con su tamaño.
+
+**Consecuencias.** `/login` bajó a 150 KB y el ERP a 153–161 KB en el primer bloque. El siguiente recorte (~7 KB, `tailwind-merge`) se evalúa al rehacer el DS sobre Radix. Los topes solo bajan.
+
+---
+
+## ADR-038 · Ámbitos del centro de Configuración y ajustes declarativos
+
+**Fecha:** 23-oct-2026 · **Estado:** vigente · Completa ADR-018. Brief 02.
+
+**Decisión.** A los ámbitos de ADR-018 se agregan **Marca**, **Preferencias** (del usuario), **Agentes y API keys** (presupuesto y autonomía), **Aprobaciones**, **Consumos** y **Auditoría**. Los esquemas de ajustes son `z.object` cuyos campos llevan metadatos con Zod `.meta({ etiqueta, ayuda, grupo, ambito, permiso, control })`; `core.config.schema` los entrega como JSON Schema a la UI (`AjustesForm`) y a los agentes, y `core.config.get/set` es la única vía de lectura y escritura (UI, API y MCP). Resolución de valores: defecto del esquema → plataforma → tenant → usuario.
+
+**Consecuencias.** Ninguna pantalla de configuración se escribe a mano por módulo; un agente puede leer y cambiar ajustes con las mismas reglas que una persona.
+
+---
+
+## ADR-039 · Documentos con subida directa, verificación y bitácora
+
+**Fecha:** 23-oct-2026 · **Estado:** vigente · Completa ADR-019 y ADR-023. Brief 02.
+
+**Decisión.** Los archivos suben directo del navegador o del agente a R2 con una URL firmada PUT de 10 minutos (firmada con `aws4fetch`, sin SDK de AWS). El documento nace `pendiente` y pasa a `disponible` con `core.documentos.confirmar_subida`, que verifica existencia, tamaño, tipo MIME permitido por su tipo y SHA-256, y registra el hecho en la bitácora encadenada. La descarga usa URLs firmadas GET de 5 minutos. Las versiones se encadenan con `reemplaza_a_id`; los duplicados por hash se permiten y se informan. Subidas no confirmadas en 24 horas se eliminan por trabajo programado.
+
+**Consecuencias.** Ningún archivo pasa por las funciones de Vercel. Todo documento tiene huella verificable; los comprobantes públicos (`/verificar/<token>`) prueban su integridad sin exponer datos personales.
