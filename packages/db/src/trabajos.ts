@@ -16,22 +16,26 @@ export type TrabajoReclamado = {
 export function colaDeTrabajos(tenantId: string) {
   return {
     reclamar(limite: number): Promise<TrabajoReclamado[]> {
-      return enTransaccion(
-        tenantId,
-        (tx) =>
-          tx.$queryRaw<TrabajoReclamado[]>`
+      return enTransaccion(tenantId, async (tx) => {
+        // Bloqueo vencido sin intentos restantes (el proceso murió en el último): fallido.
+        await tx.$executeRaw`
+          UPDATE "core"."trabajos"
+          SET estado = 'fallido', bloqueado_hasta = NULL, updated_at = now(),
+              ultimo_error = COALESCE(ultimo_error, 'Bloqueo vencido sin intentos restantes.')
+          WHERE estado = 'en_curso' AND bloqueado_hasta < now() AND intentos >= max_intentos`;
+        return tx.$queryRaw<TrabajoReclamado[]>`
           UPDATE "core"."trabajos"
           SET estado = 'en_curso', intentos = intentos + 1,
               bloqueado_hasta = now() + interval '10 minutes', updated_at = now()
           WHERE id IN (
             SELECT id FROM "core"."trabajos"
             WHERE (estado = 'pendiente' AND programado_para <= now())
-               OR (estado = 'en_curso' AND bloqueado_hasta < now())
+               OR (estado = 'en_curso' AND bloqueado_hasta < now() AND intentos < max_intentos)
             ORDER BY programado_para
             LIMIT ${limite}
             FOR UPDATE SKIP LOCKED)
-          RETURNING id, tipo, payload, intentos, max_intentos AS "maxIntentos"`,
-      );
+          RETURNING id, tipo, payload, intentos, max_intentos AS "maxIntentos"`;
+      });
     },
     async completar(id: string, resultado: unknown): Promise<void> {
       await forTenant(tenantId).trabajo.update({

@@ -1,4 +1,4 @@
-import { HASH_GENESIS, hashEncadenado, jsonCanonico } from "@opai/domain";
+import { canonDeHecho, HASH_GENESIS, hashEncadenado } from "@opai/domain";
 
 import { forTenant } from "./for-tenant";
 import type { TenantTx } from "./transaccion";
@@ -30,14 +30,7 @@ export async function agregarABitacora(
   const cabeza = filas[0];
   if (!cabeza) throw new Error("No se pudo bloquear la cabeza de la bitácora.");
   const seq = cabeza.ultimo_seq + 1;
-  const payloadCanon = jsonCanonico({
-    seq,
-    tipo: hecho.tipo,
-    entidadTipo: hecho.entidadTipo ?? null,
-    entidadId: hecho.entidadId ?? null,
-    en: new Date().toISOString(),
-    payload: hecho.payload,
-  });
+  const payloadCanon = canonDeHecho({ seq, ...hecho }, new Date());
   const hash = await hashEncadenado(cabeza.ultimo_hash, payloadCanon);
   await tx.bitacora.create({
     data: {
@@ -91,4 +84,26 @@ export async function verificarBitacora(tenantId: string): Promise<VerificacionB
   const ok = primeraRota === null;
   await db.bitacoraCabeza.updateMany({ data: { verificadaEn: new Date(), verificacionOk: ok } });
   return { ok, ultimoSeq, primeraRota };
+}
+
+/**
+ * Verifica un eslabón puntual: recalcula su hash con su contenido y comprueba que el eslabón
+ * anterior termina en `hashPrevio`. Lo usa `/verificar/<token>`; no recorre la cadena completa.
+ */
+export async function verificarEslabon(
+  tenantId: string,
+  seq: number,
+): Promise<{ hash: string; integro: boolean } | null> {
+  const db = forTenant(tenantId);
+  const e = await db.bitacora.findUnique({ where: { tenantId_seq: { tenantId, seq } } });
+  if (!e) return null;
+  const anterior =
+    seq > 1
+      ? await db.bitacora.findUnique({
+          where: { tenantId_seq: { tenantId, seq: seq - 1 } },
+          select: { hash: true },
+        })
+      : { hash: HASH_GENESIS };
+  const recalculado = await hashEncadenado(e.hashPrevio, e.payloadCanon);
+  return { hash: e.hash, integro: recalculado === e.hash && anterior?.hash === e.hashPrevio };
 }

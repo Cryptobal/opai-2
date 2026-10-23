@@ -2,7 +2,7 @@ import { headers } from "next/headers";
 import { Suspense } from "react";
 
 import { slugDeComprobante } from "@opai/capabilities";
-import { forTenant, globales } from "@opai/db";
+import { forTenant, globales, verificarEslabon } from "@opai/db";
 import { Alerta, AuthCard, Loading, Pares } from "@opai/ds";
 
 import { ipDeCabeceras, permitir } from "@/lib/rate-limit";
@@ -16,21 +16,27 @@ async function buscar(token: string) {
   if (!slug) return null;
   const tenant = await globales().tenant.findUnique({ where: { slug }, select: { id: true } });
   if (!tenant) return null;
-  const db = forTenant(tenant.id);
-  const c = await db.comprobante.findUnique({ where: { token } });
+  const c = await forTenant(tenant.id).comprobante.findUnique({ where: { token } });
   if (!c) return null;
-  const eslabon = c.bitacoraSeq
-    ? await db.bitacora.findUnique({
-        where: { tenantId_seq: { tenantId: tenant.id, seq: c.bitacoraSeq } },
-      })
-    : null;
-  return { ...c, integro: c.bitacoraSeq ? eslabon?.hash === c.hash : true };
+  if (!c.bitacoraSeq) return { ...c, integro: true };
+  // Se recalcula el eslabón (contenido y enlace con el anterior), no solo se compara la huella.
+  const eslabon = await verificarEslabon(tenant.id, c.bitacoraSeq);
+  return { ...c, integro: !!eslabon?.integro && eslabon.hash === c.hash };
+}
+
+/** Los tokens son base64url: un `%` mal formado no debe romper la página. */
+function decodificar(token: string): string {
+  try {
+    return decodeURIComponent(token);
+  } catch {
+    return "";
+  }
 }
 
 async function Contenido({ params }: Props) {
   const { token } = await params;
   const permitido = permitir(`verificar:${ipDeCabeceras(await headers())}`, 30);
-  const c = permitido ? await buscar(decodeURIComponent(token)) : null;
+  const c = permitido ? await buscar(decodificar(token)) : null;
   return (
     <AuthCard titulo="Verificar comprobante" subtitulo="Comprobante emitido por OPAI">
       {!permitido ? (

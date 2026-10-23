@@ -97,6 +97,7 @@ model Consumo {
   @@index([tenantId, createdAt])
   @@index([tenantId, recurso, createdAt])
   @@index([tenantId, apiKeyId, createdAt])
+  @@index([tenantId, actorTipo, actorId, createdAt])
   @@map("consumos")
   @@schema("core")
 }
@@ -110,7 +111,8 @@ model ConsumoDiario {
   /// "" = sin API key.
   apiKeyId        String   @default("") @map("api_key_id")
   cantidad        Int
-  costoTotalMicro Int      @map("costo_total_micro")
+  /// Micro-USD acumulados del día: BigInt (Int se desborda sobre ~2.147 USD).
+  costoTotalMicro BigInt   @map("costo_total_micro")
   createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 

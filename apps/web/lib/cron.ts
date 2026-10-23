@@ -1,3 +1,5 @@
+import { createHash, timingSafeEqual } from "node:crypto";
+
 import { tenantsOperables } from "@opai/db";
 
 /**
@@ -8,10 +10,16 @@ export function autorizarCron(req: Request): Response | null {
   const secreto = process.env["CRON_SECRET"];
   if (!secreto)
     return Response.json({ ok: false, error: "CRON_SECRET no configurado." }, { status: 503 });
-  if (req.headers.get("authorization") !== `Bearer ${secreto}`) {
+  if (!igualSeguro(req.headers.get("authorization") ?? "", `Bearer ${secreto}`)) {
     return Response.json({ ok: false, error: "No autorizado." }, { status: 401 });
   }
   return null;
+}
+
+/** Comparación en tiempo constante (sobre hashes, así el largo no filtra información). */
+function igualSeguro(a: string, b: string): boolean {
+  const h = (x: string) => createHash("sha256").update(x).digest();
+  return timingSafeEqual(h(a), h(b));
 }
 
 /** "aaaa-mm-dd" de hoy en la zona del tenant. */

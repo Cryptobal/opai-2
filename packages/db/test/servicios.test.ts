@@ -35,7 +35,11 @@ describe.skipIf(!urlPropietario)("servicios del núcleo en base real", () => {
     );
     const seqs = (await Promise.all(hechos)).map((r) => r.seq).sort((a, b) => a - b);
     expect(seqs).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
-    expect(await db.verificarBitacora(tenantId)).toEqual({ ok: true, ultimoSeq: 8, primeraRota: null });
+    expect(await db.verificarBitacora(tenantId)).toEqual({
+      ok: true,
+      ultimoSeq: 8,
+      primeraRota: null,
+    });
   });
 
   it("dos runners concurrentes no reclaman el mismo trabajo y los fallos se reintentan", async () => {
@@ -62,7 +66,13 @@ describe.skipIf(!urlPropietario)("servicios del núcleo en base real", () => {
     const t = db.forTenant(tenantId);
     const ayer = new Date(Date.now() - 86_400_000);
     const dia = ayer.toISOString().slice(0, 10);
-    const base = { tenantId, modulo: "core", actorTipo: "user", unidad: "llamada", createdAt: ayer };
+    const base = {
+      tenantId,
+      modulo: "core",
+      actorTipo: "user",
+      unidad: "llamada",
+      createdAt: ayer,
+    };
     await t.consumo.createMany({
       data: [
         { ...base, recurso: "capacidad.ejecucion", cantidad: 1, costoTotalMicro: 0 },
@@ -75,8 +85,33 @@ describe.skipIf(!urlPropietario)("servicios del núcleo en base real", () => {
     expect(r.grupos).toBe(2);
     const filas = await t.consumoDiario.findMany({ orderBy: { recurso: "asc" } });
     expect(filas.map((f) => [f.recurso, f.cantidad, f.costoTotalMicro])).toEqual([
-      ["capacidad.ejecucion", 2, 0],
-      ["correo.enviado", 3, 1200],
+      ["capacidad.ejecucion", 2, 0n],
+      ["correo.enviado", 3, 1200n],
     ]);
+  });
+
+  it("antes de purgar consolida los días vencidos que el cron no alcanzó", async () => {
+    const t = db.forTenant(tenantId);
+    const viejo = new Date(Date.now() - 120 * 86_400_000);
+    const dia = viejo.toISOString().slice(0, 10);
+    await t.consumo.create({
+      data: {
+        tenantId,
+        modulo: "core",
+        actorTipo: "system",
+        unidad: "correo",
+        recurso: "correo.enviado",
+        cantidad: 7,
+        costoTotalMicro: 2800,
+        createdAt: viejo,
+      },
+    });
+    const r = await db.consolidarConsumos(tenantId, new Date().toISOString().slice(0, 10));
+    expect(r.purgadas).toBeGreaterThanOrEqual(1);
+    expect(await t.consumo.count({ where: { createdAt: { lte: viejo } } })).toBe(0);
+    const fila = await t.consumoDiario.findFirst({
+      where: { dia: new Date(`${dia}T00:00:00.000Z`), recurso: "correo.enviado" },
+    });
+    expect([fila?.cantidad, fila?.costoTotalMicro]).toEqual([7, 2800n]);
   });
 });

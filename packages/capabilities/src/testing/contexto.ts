@@ -33,7 +33,7 @@ export type OpcionesPrueba = {
  * `esperar()` resuelve el trabajo diferido (como `after()` del borde).
  */
 export function contextoDePrueba(o: OpcionesPrueba = {}) {
-  const { db, tx, globales, tabla } = dbEnMemoria(o.semilla);
+  const { db, tx, globales, tabla, instantanea } = dbEnMemoria(o.semilla);
   const eventos: EventoAuditoria[] = [];
   const usos: ConsumoNuevo[] = [];
   const correos: Correo[] = [];
@@ -53,11 +53,20 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
     scopes: o.scopes ?? null,
     principal: o.principal ?? null,
     db,
-    transaccion: (fn) => fn(tx),
+    // Atómica como la real: si `fn` falla, las tablas vuelven al estado previo.
+    transaccion: async (fn) => {
+      const restaurar = instantanea();
+      try {
+        return await fn(tx);
+      } catch (e) {
+        restaurar();
+        throw e;
+      }
+    },
     auditoria: { registrar: async (e) => void eventos.push(e) },
     medidor: { registrar: async (c) => void usos.push(c) },
-    eventos: eventosEnMemoria(db, TENANT_DE_PRUEBA, actor),
-    trabajos: trabajosEnMemoria(db, TENANT_DE_PRUEBA),
+    eventos: eventosEnMemoria(TENANT_DE_PRUEBA, actor),
+    trabajos: trabajosEnMemoria(TENANT_DE_PRUEBA),
     bitacora: bitacoraEnMemoria(tabla, TENANT_DE_PRUEBA),
     diferir: (t) => void diferidos.push(t().catch(() => undefined)),
     despacharEventos: () => void (despachos += 1),

@@ -7,8 +7,10 @@ export {
   agregarABitacora,
   type HechoBitacora,
   verificarBitacora,
+  verificarEslabon,
   type VerificacionBitacora,
 } from "./bitacora";
+export { type ClienteCatalogo, sembrarCatalogo } from "./catalogo-tenant";
 export { consolidarConsumos, RETENCION_CONSUMOS_DIAS } from "./consumos";
 export { colaDeTrabajos, type ColaDeTrabajos, type TrabajoReclamado } from "./trabajos";
 export { enTransaccion, type OpcionesTransaccion, type TenantTx } from "./transaccion";

@@ -1,14 +1,14 @@
 // Servicios del núcleo en memoria para tests: outbox, trabajos y bitácora sobre la base falsa.
-import { HASH_GENESIS, hashEncadenado, jsonCanonico, primeraRotura } from "@opai/domain";
-import type { TenantDb } from "@opai/db";
+import { canonDeHecho, HASH_GENESIS, hashEncadenado, primeraRotura } from "@opai/domain";
 
 import type { Actor, BitacoraServicio, Eventos, Trabajos } from "../types";
 import type { Fila } from "./db-memoria-util";
 
-export function eventosEnMemoria(db: TenantDb, tenantId: string, actor: Actor): Eventos {
+/** Como en la real, el evento se escribe con la `tx` del hecho (y se revierte con ella). */
+export function eventosEnMemoria(tenantId: string, actor: Actor): Eventos {
   return {
-    async emitir(_tx, e) {
-      const fila = await db.evento.create({
+    async emitir(tx, e) {
+      const fila = await tx.evento.create({
         data: {
           tenantId,
           tipo: e.tipo,
@@ -27,10 +27,10 @@ export function eventosEnMemoria(db: TenantDb, tenantId: string, actor: Actor): 
   };
 }
 
-export function trabajosEnMemoria(db: TenantDb, tenantId: string): Trabajos {
+export function trabajosEnMemoria(tenantId: string): Trabajos {
   return {
-    async encolar(_tx, t) {
-      const r = await db.trabajo.createMany({
+    async encolar(tx, t) {
+      const r = await tx.trabajo.createMany({
         data: [
           {
             tenantId,
@@ -61,9 +61,18 @@ export function bitacoraEnMemoria(
       const ultimo = cadena.at(-1);
       const previo = (ultimo?.["hash"] as string | undefined) ?? HASH_GENESIS;
       const seq = cadena.length + 1;
-      const payloadCanon = jsonCanonico({ seq, ...hecho, en: new Date().toISOString() });
+      const payloadCanon = canonDeHecho({ seq, ...hecho }, new Date());
       const hash = await hashEncadenado(previo, payloadCanon);
-      cadena.push({ tenantId, seq, ...hecho, payloadCanon, hashPrevio: previo, hash });
+      cadena.push({
+        tenantId,
+        seq,
+        tipo: hecho.tipo,
+        entidadTipo: hecho.entidadTipo ?? null,
+        entidadId: hecho.entidadId ?? null,
+        payloadCanon,
+        hashPrevio: previo,
+        hash,
+      });
       return { seq, hash };
     },
     async verificar() {

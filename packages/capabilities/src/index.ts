@@ -41,6 +41,7 @@ export {
   registrarConsumidores,
 } from "./eventos/consumidores";
 export { despacharPendientes, MAX_INTENTOS_EVENTO } from "./eventos/despachar";
+export { catalogoDeEventos, EVENTOS_CORE, eventoDeclarado } from "./eventos/catalogo";
 export {
   defineTrabajo,
   type DefinicionTrabajo,

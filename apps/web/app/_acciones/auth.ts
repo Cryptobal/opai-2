@@ -14,10 +14,14 @@ import {
 } from "@opai/auth";
 
 import { destinoSeguro } from "@/app/(auth)/destino";
-import { ipDeCabeceras, permitir } from "@/lib/rate-limit";
+import { bloqueado, ipDeCabeceras, olvidar, permitir, registrarFallo } from "@/lib/rate-limit";
 
-/** "Tras 5 intentos pausaremos el acceso por 15 minutos" (diseño de acceso aprobado). */
+/**
+ * "Tras 5 intentos pausaremos el acceso por 15 minutos" (diseño de acceso aprobado). Solo cuentan
+ * los fallos: 5 por correo y 30 por IP (una oficina comparte IP y no debe bloquearse por éxitos).
+ */
 const INTENTOS = 5;
+const INTENTOS_IP = 30;
 const PAUSA_MS = 15 * 60_000;
 
 export type EstadoLogin =
@@ -46,13 +50,17 @@ export async function accionEntrar(
   const email = texto(form, "email").toLowerCase();
   const password = String(form.get("password") ?? "");
   const origen = await ip();
-  if (
-    !permitir(`login-ip:${origen}`, INTENTOS, PAUSA_MS) ||
-    !permitir(`login-email:${email}`, INTENTOS, PAUSA_MS)
-  ) {
+  const claveIp = `login-ip:${origen}`;
+  const claveEmail = `login-email:${email}`;
+  if (bloqueado(claveIp, INTENTOS_IP, PAUSA_MS) || bloqueado(claveEmail, INTENTOS, PAUSA_MS)) {
     return PAUSADO;
   }
   const r = await entrarConPassword(email, password);
+  if (r.ok) olvidar(claveEmail);
+  else if (r.fallo === "credenciales") {
+    registrarFallo(claveIp, PAUSA_MS);
+    registrarFallo(claveEmail, PAUSA_MS);
+  }
   if (!r.ok) {
     if (r.fallo === "suspendida") return { tipo: "suspendida", texto: r.mensaje };
     return {

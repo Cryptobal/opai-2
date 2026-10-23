@@ -3,15 +3,9 @@ import { z } from "zod";
 import { microAUsd, PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../define";
+import { consumosDelMes, sumarPor, type GrupoConsumo } from "./consumos-fuente";
 
-/** "aaaa-mm" → [inicio, fin) del mes en UTC; por defecto el mes actual. */
-export function rangoMes(mes?: string) {
-  const ahora = new Date();
-  const [a, m] = mes
-    ? (mes.split("-").map(Number) as [number, number])
-    : [ahora.getUTCFullYear(), ahora.getUTCMonth() + 1];
-  return { desde: new Date(Date.UTC(a, m - 1, 1)), hasta: new Date(Date.UTC(a, m, 1)) };
-}
+export { rangoMes } from "./consumos-fuente";
 
 const mesSchema = z
   .string()
@@ -26,11 +20,11 @@ const filaSchema = z.object({
   costoUsd: z.number(),
 });
 
-function filas(grupos: { clave: string; cantidad: number; costoMicro: number }[]) {
-  return grupos
-    .map((g) => ({ ...g, costoUsd: microAUsd(g.costoMicro) }))
-    .sort((a, b) => b.costoMicro - a.costoMicro || b.cantidad - a.cantidad);
-}
+const conUsd = (filas: ReturnType<typeof sumarPor>) =>
+  filas.map((f) => ({ ...f, costoUsd: microAUsd(f.costoMicro) }));
+
+const totalUsd = (grupos: GrupoConsumo[]) =>
+  microAUsd(grupos.reduce((t, g) => t + g.costoMicro, 0));
 
 export const consumosResumen = defineCapability({
   id: "core.consumos.resumen",
@@ -42,21 +36,44 @@ export const consumosResumen = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
-    const { desde, hasta } = rangoMes(input.mes);
-    const grupos = await ctx.db.consumo.groupBy({
-      by: ["recurso"],
-      where: { createdAt: { gte: desde, lt: hasta } },
-      _sum: { cantidad: true, costoTotalMicro: true },
-    });
-    const porRecurso = filas(
-      grupos.map((g) => ({
-        clave: g.recurso,
-        cantidad: g._sum.cantidad ?? 0,
-        costoMicro: g._sum.costoTotalMicro ?? 0,
-      })),
-    );
-    const total = porRecurso.reduce((t, f) => t + f.costoMicro, 0);
-    return { mes: desde.toISOString().slice(0, 7), totalUsd: microAUsd(total), porRecurso };
+    const { desde, grupos } = await consumosDelMes(ctx, input.mes);
+    return {
+      mes: desde.toISOString().slice(0, 7),
+      totalUsd: totalUsd(grupos),
+      porRecurso: conUsd(sumarPor(grupos, (g) => g.recurso)),
+    };
+  },
+});
+
+export const consumosPorRecurso = defineCapability({
+  id: "core.consumos.por_recurso",
+  descripcion:
+    "Detalle del consumo de un recurso en un mes (por ejemplo IA estándar o correo): cantidad y costo por módulo y por agente que lo usó.",
+  permiso: PERMISOS_CORE.consumosRead,
+  input: z.object({
+    mes: mesSchema,
+    recurso: z.string().min(1).max(80).describe('Recurso medido, p. ej. "correo.enviado".'),
+  }),
+  output: z.object({
+    mes: z.string(),
+    recurso: z.string(),
+    totalUsd: z.number(),
+    cantidad: z.number(),
+    porModulo: z.array(filaSchema),
+    porAgente: z.array(filaSchema),
+  }),
+  efecto: "lectura",
+  dryRun: false,
+  async handler(ctx, input) {
+    const { desde, grupos } = await consumosDelMes(ctx, input.mes, { recurso: input.recurso });
+    return {
+      mes: desde.toISOString().slice(0, 7),
+      recurso: input.recurso,
+      totalUsd: totalUsd(grupos),
+      cantidad: grupos.reduce((t, g) => t + g.cantidad, 0),
+      porModulo: conUsd(sumarPor(grupos, (g) => g.modulo)),
+      porAgente: conUsd(sumarPor(grupos, (g) => g.apiKeyId ?? "personas")),
+    };
   },
 });
 
@@ -77,30 +94,22 @@ export const consumosPorAgente = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
-    const { desde, hasta } = rangoMes(input.mes);
-    const where = { createdAt: { gte: desde, lt: hasta }, apiKeyId: { not: null } };
-    const [grupos, keys] = await Promise.all([
-      ctx.db.consumo.groupBy({
-        by: ["apiKeyId", "recurso"],
-        where,
-        _sum: { cantidad: true, costoTotalMicro: true },
-      }),
+    const [{ grupos }, keys] = await Promise.all([
+      consumosDelMes(ctx, input.mes),
       ctx.db.apiKey.findMany({ select: { id: true, nombre: true } }),
     ]);
     const nombres = new Map(keys.map((k) => [k.id, k.nombre]));
-    const porKey = new Map<string, { ejecuciones: number; costo: number }>();
-    for (const g of grupos) {
-      const id = g.apiKeyId ?? "";
-      const acc = porKey.get(id) ?? { ejecuciones: 0, costo: 0 };
-      if (g.recurso === "capacidad.ejecucion") acc.ejecuciones += g._sum.cantidad ?? 0;
-      acc.costo += g._sum.costoTotalMicro ?? 0;
-      porKey.set(id, acc);
-    }
-    return [...porKey.entries()].map(([apiKeyId, v]) => ({
-      apiKeyId,
-      nombre: nombres.get(apiKeyId) ?? "Key eliminada",
-      ejecuciones: v.ejecuciones,
-      costoUsd: microAUsd(v.costo),
+    const conKey = grupos.filter((g) => g.apiKeyId !== null);
+    const costos = sumarPor(conKey, (g) => g.apiKeyId ?? "");
+    const ejecuciones = sumarPor(
+      conKey.filter((g) => g.recurso === "capacidad.ejecucion"),
+      (g) => g.apiKeyId ?? "",
+    );
+    return costos.map((c) => ({
+      apiKeyId: c.clave,
+      nombre: nombres.get(c.clave) ?? "Key eliminada",
+      ejecuciones: ejecuciones.find((e) => e.clave === c.clave)?.cantidad ?? 0,
+      costoUsd: microAUsd(c.costoMicro),
     }));
   },
 });
