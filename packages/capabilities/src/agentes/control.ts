@@ -1,3 +1,5 @@
+import { jsonCanonico } from "@opai/domain";
+
 import { falla } from "../autorizacion";
 import { sinSensibles } from "../execute-util";
 import type { Capacidad, Contexto, OpcionesEjecucion, Resultado } from "../types";
@@ -60,14 +62,22 @@ async function aprobacion(
   opciones: OpcionesEjecucion,
 ): Promise<Resultado | null> {
   const a = ctx.agente;
-  if (!a || c.efecto !== "irreversible" || a.autonomia[c.id] === "directo") return null;
+  const nivel = a?.autonomia[c.id];
+  const exige = nivel === "aprobacion" || (c.efecto === "irreversible" && nivel !== "directo");
+  if (!a || !exige) return null;
   if (ctx.actor.tipo !== "agent") return null;
   const repetida = opciones.idempotencyKey
     ? await ctx.db.aprobacion.findFirst({
         where: { apiKeyId: a.apiKeyId, capability: c.id, idempotencyKey: opciones.idempotencyKey },
       })
     : null;
-  if (repetida) return requerida(repetida.id);
+  if (repetida) {
+    // Misma clave con otro input: conflicto. Si la anterior venció, se pide de nuevo.
+    if (jsonCanonico(repetida.input) !== jsonCanonico(JSON.parse(JSON.stringify(entrada ?? {})))) {
+      return falla("CONFLICT", "La clave de idempotencia ya se usó con otro input.");
+    }
+    if (repetida.estado !== "vencida") return requerida(repetida.id);
+  }
   const venceEn = new Date(Date.now() + VIGENCIA_APROBACION_MS);
   const resumen = resumir(c, entrada);
   const id = await ctx.transaccion(async (tx) => {

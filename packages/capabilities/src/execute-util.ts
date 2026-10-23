@@ -1,10 +1,16 @@
 import { falla } from "./autorizacion";
-import type { ReservaIdempotencia } from "./idempotencia";
+import { type ReservaIdempotencia, SALIDA_INVALIDA } from "./idempotencia";
 import type { Capacidad, Contexto, Resultado } from "./types";
 
 /** Respuesta a una clave de idempotencia ya usada: el resultado original o un conflicto. */
 export function repeticion(r: Exclude<ReservaIdempotencia, { estado: "nueva" }>): Resultado {
-  if (r.estado === "hecha") return { ok: true, data: r.resultado, dryRun: false, repetida: true };
+  if (r.estado === "hecha") {
+    const invalida =
+      !!r.resultado && typeof r.resultado === "object" && SALIDA_INVALIDA in r.resultado;
+    if (invalida)
+      return falla("INVALID_OUTPUT", "La escritura se hizo, pero su resultado no validó.");
+    return { ok: true, data: r.resultado, dryRun: false, repetida: true };
+  }
   return falla(
     "CONFLICT",
     r.estado === "en_curso"

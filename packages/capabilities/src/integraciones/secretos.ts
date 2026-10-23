@@ -6,18 +6,26 @@ import type { Contexto } from "../types";
 const bytes = (b: Uint8Array) => Uint8Array.from(b);
 
 /** KEK de plataforma o error claro (sin la variable no se guardan secretos en este entorno). */
-function kek(): { clave: Buffer; version: number } {
+function kek(): { clave: Buffer; version: number; anterior: Buffer | null } {
   const k = kekDelEntorno();
   if (!k.actual)
     throw reglaDeNegocio("El almacén de secretos no está configurado (OPAI_SECRETS_KEY).");
-  return { clave: k.actual, version: k.version };
+  return { clave: k.actual, version: k.version, anterior: k.anterior };
 }
 
 /** DEK del tenant: la crea la primera vez, cifrada con la KEK vigente (envelope, ADR-027). */
 async function dekDe(ctx: Contexto): Promise<Buffer> {
-  const { clave, version } = kek();
+  const { clave, version, anterior } = kek();
   const fila = await ctx.db.claveTenant.findUnique({ where: { tenantId: ctx.tenantId } });
-  if (fila) return descifrar(clave, { cifrado: fila.dekCifrada, iv: fila.iv, tag: fila.tag });
+  if (fila) {
+    // Durante una rotación (scripts/rotar-kek.ts) una DEK aún puede estar con la KEK anterior.
+    const conAnterior = fila.kekVersion < version && anterior;
+    return descifrar(conAnterior ? anterior : clave, {
+      cifrado: fila.dekCifrada,
+      iv: fila.iv,
+      tag: fila.tag,
+    });
+  }
   const dek = generarDek();
   const c = cifrar(clave, dek);
   await ctx.db.claveTenant.create({

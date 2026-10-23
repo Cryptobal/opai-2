@@ -70,7 +70,8 @@ export function almacenamientoR2(config: ConfigR2): Almacenamiento {
       url.searchParams.set("X-Amz-Expires", String(segundos));
       url.searchParams.set(
         "response-content-disposition",
-        `inline; filename*=UTF-8''${encodeURIComponent(nombre)}`,
+        // Un SVG puede traer scripts: se descarga, nunca se abre en línea.
+        `${/\.svg$/i.test(nombre) ? "attachment" : "inline"}; filename*=UTF-8''${encodeURIComponent(nombre)}`,
       );
       return firmar(url, "GET");
     },

@@ -60,13 +60,14 @@ export const estructurasEfectiva = defineCapability({
       puesto: por("puesto"),
       cargo: por("cargo"),
     });
-    const ocultar = await ocultarMontos(ctx, {
-      personaId: input.personaId,
-      cargoId: vinculo?.cargoId ?? null,
-    });
+    // Sensibilidad por fila (cargo, puesto o persona) y, si alguna lo exige, sin haberes.
+    const ocultas = new Map(
+      await Promise.all(filas.map(async (f) => [f.id, await ocultarMontos(ctx, f)] as const)),
+    );
+    const ocultar = [...ocultas.values()].some(Boolean);
     const vista = (e: Estructura | null) => {
       const f = e ? filas.find((x) => x.id === e.id) : undefined;
-      return f ? vistaEstructura(f, items.get(f.id) ?? [], ocultar) : null;
+      return f ? vistaEstructura(f, items.get(f.id) ?? [], ocultas.get(f.id) ?? true) : null;
     };
     return {
       fecha,

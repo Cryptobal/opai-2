@@ -10,11 +10,11 @@ import {
 } from "@opai/domain";
 
 import { defineCapability } from "../../define";
-import { noEncontrado, reglaDeNegocio } from "../../errores";
+import { reglaDeNegocio } from "../../errores";
 import { uuidSchema } from "../esquemas";
 import { aFecha, diaSchema, hoy, textoOpcional } from "../maestros/comun";
 import { ajuste } from "../config/valores";
-import { tipoParaEntidad, verificarEntidad } from "./entidad";
+import { documentoAReemplazar, tipoParaEntidad, verificarEntidad } from "./entidad";
 import { uuid7 } from "./uuid7";
 import { documentoSchema, entidadSchema, vistaDocumento } from "./vista";
 
@@ -56,10 +56,8 @@ export const documentosIniciarSubida = defineCapability({
   async handler(ctx, input, { dryRun }) {
     await verificarEntidad(ctx, input.entidad);
     const anterior = input.reemplazaAId
-      ? await ctx.db.documento.findUnique({ where: { id: input.reemplazaAId } })
+      ? await documentoAReemplazar(ctx, input.reemplazaAId, input.entidad)
       : null;
-    if (input.reemplazaAId && (!anterior || anterior.estado !== "disponible"))
-      throw noEncontrado("El documento a reemplazar");
     const tipo = await tipoParaEntidad(
       ctx,
       input.tipoId ?? anterior?.tipoId ?? undefined,
