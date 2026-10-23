@@ -1,6 +1,6 @@
 import type { Rol, RolPlataforma } from "@opai/domain";
 import type { Globales, TenantDb, TenantTx } from "@opai/db";
-import type { Mailer } from "@opai/integrations/email";
+import type { Almacenamiento, Mailer } from "@opai/integrations";
 import type { z } from "zod";
 
 import type { BitacoraServicio, Eventos, Medidor, Principal, Trabajos } from "./servicios-tipos";
@@ -41,6 +41,8 @@ export type UsuarioContexto = {
 /** Servicios del núcleo disponibles para las capacidades. Los implementa el borde. */
 export type Servicios = {
   correo: Mailer;
+  /** Almacenamiento de archivos (R2) con URLs firmadas. */
+  almacenamiento: Almacenamiento;
   /** URL pública de la app, para enlaces en correos ("https://test.opai.cl"). */
   urlBase: string;
 };
@@ -114,6 +116,8 @@ export interface Capacidad<I extends z.ZodType = z.ZodType, O extends z.ZodType 
   interna?: boolean;
   /** No exige tenant actual (`core.me`, plataforma, flujos de invitación). */
   sinTenant?: boolean;
+  /** Campos del input que nunca se guardan en auditoría ni en aprobaciones (secretos). */
+  sensibles?: readonly string[];
   /** Portales donde está disponible (ADR-033). Por defecto ["erp"] (plataforma: ["platform"]). */
   portales?: readonly string[];
   /** Tenant donde auditar y medir (plataforma: el tenant objetivo). Por defecto, el actual. */

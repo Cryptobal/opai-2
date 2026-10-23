@@ -1,6 +1,6 @@
 import { type Rol, tienePermiso, tienePermisoPlataforma, moduloDe } from "@opai/domain";
 import { forTenant, globales, type Prisma } from "@opai/db";
-import { mailerDelEntorno } from "@opai/integrations/email";
+import { almacenamientoDelEntorno, mailerDelEntorno } from "@opai/integrations";
 
 import {
   bitacoraEnDb,
@@ -102,6 +102,7 @@ export function crearContexto(params: ParametrosContexto): Contexto {
     despacharEventos: params.despacharEventos ?? (() => undefined),
     servicios: {
       correo: params.servicios?.correo ?? mailerDelEntorno(),
+      almacenamiento: params.servicios?.almacenamiento ?? almacenamientoDelEntorno(),
       urlBase:
         params.servicios?.urlBase ?? process.env["BETTER_AUTH_URL"] ?? "http://localhost:3000",
     },

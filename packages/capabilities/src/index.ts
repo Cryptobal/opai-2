@@ -58,3 +58,6 @@ export {
   programarPeriodicos,
 } from "./trabajos/runner";
 export { type ComprobanteNuevo, emitirComprobante, slugDeComprobante } from "./comprobantes";
+export { camposExternos, externo } from "./externo";
+export { correoDe, geoDe, iaDe } from "./integraciones/adaptadores";
+export { credencialDe } from "./integraciones/resolver";
