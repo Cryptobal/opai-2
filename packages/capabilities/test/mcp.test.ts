@@ -29,6 +29,12 @@ beforeEach(() => {
 });
 
 describe("herramientasMcp", () => {
+  it("todo input expuesto se puede expresar en JSON Schema (tools/list)", () => {
+    for (const c of capacidadesDelNucleo.filter((x) => !x.interna)) {
+      expect(() => z.toJSONSchema(c.input, { io: "input" }), c.id).not.toThrow();
+    }
+  });
+
   it("deriva herramientas del registro con preview_ solo para escrituras y sin internas", () => {
     const { ctx } = contextoDePrueba({ rol: "owner", actor: agente, scopes: ["*"] });
     const n = nombres(ctx);

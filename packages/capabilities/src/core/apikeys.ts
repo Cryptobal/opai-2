@@ -60,7 +60,8 @@ export const apikeysCreate = defineCapability({
   input: z.object({
     nombre: z.string().trim().min(2).max(60),
     scopes: z.array(z.string().min(1)).min(1),
-    expiraEn: z.coerce.date().optional(),
+    /** Fecha ISO 8601 (las herramientas MCP necesitan un input expresable en JSON Schema). */
+    expiraEn: z.iso.datetime({ offset: true }).optional(),
   }),
   output: z.object({
     id: z.string().nullable(),
@@ -76,7 +77,8 @@ export const apikeysCreate = defineCapability({
     const validos = new Set(["*", "core", ...listarModulos().map((m) => m.id)]);
     const invalidos = input.scopes.filter((s) => !validos.has(s));
     if (invalidos.length) throw reglaDeNegocio(`Scopes desconocidos: ${invalidos.join(", ")}.`);
-    if (input.expiraEn && input.expiraEn.getTime() <= Date.now()) {
+    const expiraEn = input.expiraEn ? new Date(input.expiraEn) : null;
+    if (expiraEn && expiraEn.getTime() <= Date.now()) {
       throw reglaDeNegocio("La fecha de expiración debe ser futura.");
     }
     const tenant = await tenantActual(ctx);
@@ -90,7 +92,7 @@ export const apikeysCreate = defineCapability({
         userId: usuarioResponsable(ctx),
         prefijo,
         hash,
-        expiraEn: input.expiraEn ?? null,
+        expiraEn,
       },
     });
     return { id: key.id, ...base, prefijo, secreto };

@@ -1,31 +1,29 @@
-import { Home, LayoutGrid, Palette } from "lucide-react";
+import type { Portal } from "@opai/ds";
 
-import type { NavItem, Portal } from "@opai/ds";
-
-/** Portales de OPAI 2.0. Cada uno tiene su route group y, más adelante, su propia navegación. */
+/** Portales de OPAI 2.0. Cada uno tiene su route group; el acceso es por membresía (ADR-016). */
 export const PORTALES: readonly Portal[] = [
   { id: "erp", etiqueta: "ERP", href: "/" },
-  { id: "platform", etiqueta: "Plataforma", href: "/platform" },
+  { id: "supervisor", etiqueta: "Supervisor", href: "/supervisor" },
   { id: "trabajador", etiqueta: "Trabajador", href: "/trabajador" },
   { id: "terreno", etiqueta: "Terreno", href: "/terreno" },
   { id: "cliente", etiqueta: "Cliente", href: "/cliente" },
-  { id: "supervisor", etiqueta: "Supervisor", href: "/supervisor" },
+  { id: "platform", etiqueta: "Plataforma", href: "/platform" },
 ];
 
-const esDesarrollo = process.env.NODE_ENV !== "production";
+export const ETIQUETA_ROL: Record<string, string> = {
+  owner: "Owner",
+  admin: "Administrador",
+  gerente: "Gerente",
+  supervisor: "Supervisor",
+  viewer: "Solo lectura",
+};
 
-/** Navegación del Brief 00: solo rutas que existen. Los módulos agregan las suyas desde su manifest. */
-export function navDe(portal: string): readonly NavItem[] {
-  const raiz = PORTALES.find((p) => p.id === portal)?.href ?? "/";
-  const items: NavItem[] = [{ href: raiz, etiqueta: "Inicio", icono: Home }];
-  if (portal === "erp")
-    items.push({
-      href: "/platform",
-      etiqueta: "Plataforma",
-      icono: LayoutGrid,
-      grupo: "Plataforma",
-    });
-  if (esDesarrollo)
-    items.push({ href: "/ds", etiqueta: "Diseño", icono: Palette, grupo: "Desarrollo" });
-  return items;
+/** Portales visibles: los de la membresía actual y Plataforma solo con `platformRole`. */
+export function portalesVisibles(
+  portalesMembresia: readonly string[],
+  plataforma: boolean,
+): Portal[] {
+  return PORTALES.filter((p) =>
+    p.id === "platform" ? plataforma : portalesMembresia.includes(p.id),
+  );
 }

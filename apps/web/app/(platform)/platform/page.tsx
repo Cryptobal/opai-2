@@ -1,12 +1,20 @@
-import { Shell } from "@/app/_components/shell";
+import { PaginaPortal } from "@/app/_components/pagina-portal";
+import { estadoPantalla } from "@/lib/formato";
+import { ejecutarComoUsuario } from "@/lib/servidor";
 
-export default function Pagina() {
+import { type TenantFila, TenantsLista } from "./tenants-lista";
+
+export const metadata = { title: "Plataforma" };
+
+async function Contenido() {
+  const r = await ejecutarComoUsuario<TenantFila[]>("platform", "platform.tenants.list");
+  return <TenantsLista state={estadoPantalla(r)} tenants={r.ok ? r.data : []} />;
+}
+
+export default function Plataforma() {
   return (
-    <Shell portal="platform" titulo="Plataforma">
-      <div className="rounded-lg border border-border bg-surface p-6">
-        <p className="text-sm uppercase tracking-wide text-fg-muted">Plataforma</p>
-        <p className="mt-2 text-base text-fg-muted">Se construye en los siguientes briefs.</p>
-      </div>
-    </Shell>
+    <PaginaPortal portal="platform" titulo="Empresas" ruta="/platform">
+      <Contenido />
+    </PaginaPortal>
   );
 }

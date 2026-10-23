@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 
-// Route group del portal "cliente". Cada portal tendrá su propio shell y navegación (Brief 01+).
+// Route group del portal "cliente". Sesión y membresía con el portal se verifican en cada página.
 export default function Layout({ children }: { children: ReactNode }) {
   return children;
 }

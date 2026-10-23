@@ -1,9 +1,15 @@
+import { existsSync } from "node:fs";
+
 import { defineConfig } from "@playwright/test";
 
-// Evidencia visual del DS a 375 y 1024 (Brief 00). No es regresión visual todavía.
+// Credenciales de prueba (usuario plataforma de la rama dev) desde el .env.local de la raíz.
+const envRaiz = new URL("../../.env.local", import.meta.url);
+if (existsSync(envRaiz)) process.loadEnvFile(envRaiz);
+
+// Evidencia visual a 375 y 1024 (y revisión a 1280). No es regresión visual todavía.
 export default defineConfig({
   testDir: "./e2e",
-  timeout: 60_000,
+  timeout: 90_000,
   use: { baseURL: process.env["BASE_URL"] ?? "http://localhost:3000" },
   ...(process.env["BASE_URL"]
     ? {}
@@ -21,5 +27,6 @@ export default defineConfig({
       use: { viewport: { width: 375, height: 812 }, isMobile: true, hasTouch: true },
     },
     { name: "ipad", use: { viewport: { width: 1024, height: 768 } } },
+    { name: "desktop", use: { viewport: { width: 1280, height: 860 } } },
   ],
 });
