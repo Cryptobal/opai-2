@@ -1,0 +1,31 @@
+# dependencias
+node_modules/
+.pnp
+.pnp.*
+
+# builds
+.next/
+out/
+dist/
+.turbo/
+*.tsbuildinfo
+next-env.d.ts
+
+# prisma (cliente generado)
+packages/db/src/generated/
+
+# tests
+coverage/
+apps/web/test-results/
+apps/web/playwright-report/
+
+# entornos: nunca se commitean
+.env
+.env.*
+!.env.example
+
+# plataformas
+.vercel
+.DS_Store
+*.pem
+*.log
