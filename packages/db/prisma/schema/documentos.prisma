@@ -1,0 +1,101 @@
+// Documentos como servicio del núcleo (ADR-019, ADR-039): archivo en R2, tipo por capa, vigencia,
+// versión y vínculos polimórficos. Ningún módulo guarda archivos por su cuenta.
+
+model DocumentoTipo {
+  id                   String   @id @default(uuid(7)) @db.Uuid
+  tenantId             String   @map("tenant_id") @db.Uuid
+  codigo               String
+  nombre               String
+  descripcion          String?
+  /// "empresa" | "cuenta" | "instalacion" | "persona" | "puesto"
+  capa                 String
+  obligatorio          Boolean  @default(false)
+  tieneVencimiento     Boolean  @default(false) @map("tiene_vencimiento")
+  diasAlerta           Int      @default(30) @map("dias_alerta")
+  /// Escalera de avisos en días antes del vencimiento.
+  hitos                Int[]    @default([30, 14, 7, 3, 1, 0])
+  normativa            String?
+  /// Vacío = los MIME permitidos por el núcleo.
+  mimesPermitidos      String[] @default([]) @map("mimes_permitidos")
+  /// Portales donde el documento se ve por defecto ("cliente", "trabajador").
+  visiblePortalDefault String[] @default([]) @map("visible_portal_default")
+  activo               Boolean  @default(true)
+  orden                Int      @default(0)
+  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant     Tenant      @relation(fields: [tenantId], references: [id])
+  documentos Documento[]
+
+  @@unique([tenantId, codigo])
+  @@index([tenantId, capa])
+  @@map("documento_tipos")
+  @@schema("core")
+}
+
+model Documento {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  tenantId       String    @map("tenant_id") @db.Uuid
+  tipoId         String?   @map("tipo_id") @db.Uuid
+  /// Nombre de archivo saneado (dato externo).
+  nombre         String
+  titulo         String?
+  mime           String
+  /// Bytes.
+  tamano         Int
+  storageKey     String    @unique @map("storage_key")
+  sha256         String?
+  /// "pendiente" | "disponible" | "archivado"
+  estado         String    @default("pendiente")
+  version        Int       @default(1)
+  reemplazaAId   String?   @map("reemplaza_a_id") @db.Uuid
+  emitidoEn      DateTime? @map("emitido_en") @db.Date
+  venceEn        DateTime? @map("vence_en") @db.Date
+  etiquetas      String[]  @default([])
+  visibleEn      String[]  @default([]) @map("visible_en")
+  /// "subida" | "generado"
+  origen         String    @default("subida")
+  moduloOrigen   String?   @map("modulo_origen")
+  creadoPorTipo  String    @map("creado_por_tipo")
+  creadoPorId    String?   @map("creado_por_id")
+  viaUserId      String?   @map("via_user_id")
+  confirmadoEn   DateTime? @map("confirmado_en") @db.Timestamptz(6)
+  archivadoEn    DateTime? @map("archivado_en") @db.Timestamptz(6)
+  bitacoraSeq    Int?      @map("bitacora_seq")
+  /// Último hito de vencimiento notificado (días); evita avisos repetidos.
+  hitoNotificado Int?      @map("hito_notificado")
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant   Tenant             @relation(fields: [tenantId], references: [id])
+  tipo     DocumentoTipo?     @relation(fields: [tipoId], references: [id])
+  vinculos DocumentoVinculo[]
+
+  @@index([tenantId, venceEn])
+  @@index([tenantId, tipoId])
+  @@index([tenantId, estado])
+  @@index([tenantId, sha256])
+  @@map("documentos")
+  @@schema("core")
+}
+
+model DocumentoVinculo {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  documentoId String   @map("documento_id") @db.Uuid
+  /// "tenant" | "cuenta" | "instalacion" | "persona" | "puesto" | entidades de módulos
+  entidadTipo String   @map("entidad_tipo")
+  entidadId   String   @map("entidad_id") @db.Uuid
+  /// "propietario" | "referencia"
+  rol         String   @default("propietario")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant    Tenant    @relation(fields: [tenantId], references: [id])
+  documento Documento @relation(fields: [documentoId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, documentoId, entidadTipo, entidadId])
+  @@index([tenantId, entidadTipo, entidadId])
+  @@map("documento_vinculos")
+  @@schema("core")
+}

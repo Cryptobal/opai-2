@@ -1,0 +1,238 @@
+// Integraciones y secretos (ADR-027), consumos (ADR-031), agentes (ADR-032, ADR-033),
+// bitácora encadenada y comprobantes (ADR-023). Brief 02.
+
+model Integracion {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  tenantId       String    @map("tenant_id") @db.Uuid
+  /// "resend" | "google_maps" | "ia_anthropic" | "ia_openai" | "ia_google" | …
+  proveedor      String
+  /// "plataforma" | "propia"
+  modalidad      String    @default("plataforma")
+  /// "no_configurada" | "configurada" | "error"
+  estado         String    @default("no_configurada")
+  /// Configuración no secreta (remitente, dominio, modelos por clase…). Nunca credenciales.
+  config         Json      @default("{}")
+  ultimoTestEn   DateTime? @map("ultimo_test_en") @db.Timestamptz(6)
+  ultimoError    String?   @map("ultimo_error")
+  actualizadoPor String?   @map("actualizado_por") @db.Uuid
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant   Tenant    @relation(fields: [tenantId], references: [id])
+  secretos Secreto[]
+
+  @@unique([tenantId, proveedor])
+  @@map("integraciones")
+  @@schema("core")
+}
+
+/// Credencial del tenant cifrada con su DEK (AES-256-GCM). Nunca sale por API ni MCP.
+model Secreto {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  integracionId String   @map("integracion_id") @db.Uuid
+  nombre        String
+  cifrado       Bytes
+  iv            Bytes
+  tag           Bytes
+  /// Últimos 4 caracteres para mostrar enmascarado.
+  sufijo        String
+  creadoPor     String?  @map("creado_por") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant      Tenant      @relation(fields: [tenantId], references: [id])
+  integracion Integracion @relation(fields: [integracionId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, integracionId, nombre])
+  @@map("secretos")
+  @@schema("core")
+}
+
+/// DEK del tenant cifrada con la KEK de plataforma (envelope encryption, rotable).
+model ClaveTenant {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  tenantId   String   @unique @map("tenant_id") @db.Uuid
+  dekCifrada Bytes    @map("dek_cifrada")
+  iv         Bytes
+  tag        Bytes
+  kekVersion Int      @map("kek_version")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@map("claves_tenant")
+  @@schema("core")
+}
+
+/// Medidor de consumos (ADR-031). Reemplaza a usage_events: una fila por ejecución o recurso.
+model Consumo {
+  id                 String   @id @default(uuid(7)) @db.Uuid
+  tenantId           String   @map("tenant_id") @db.Uuid
+  /// "capacidad.ejecucion" | "ia.tokens_entrada" | "geo.autocompletado" | "correo.enviado" | …
+  recurso            String
+  unidad             String
+  cantidad           Int
+  /// Micro-USD (1 USD = 1.000.000).
+  costoUnitarioMicro Int      @default(0) @map("costo_unitario_micro")
+  costoTotalMicro    Int      @default(0) @map("costo_total_micro")
+  modulo             String
+  capability         String?
+  actorTipo          String   @map("actor_tipo")
+  actorId            String?  @map("actor_id")
+  viaUserId          String?  @map("via_user_id")
+  apiKeyId           String?  @map("api_key_id") @db.Uuid
+  portal             String?
+  efecto             String?
+  dryRun             Boolean? @map("dry_run")
+  ok                 Boolean?
+  duracionMs         Int?     @map("duracion_ms")
+  referenciaTipo     String?  @map("referencia_tipo")
+  referenciaId       String?  @map("referencia_id")
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, createdAt])
+  @@index([tenantId, recurso, createdAt])
+  @@index([tenantId, apiKeyId, createdAt])
+  @@map("consumos")
+  @@schema("core")
+}
+
+model ConsumoDiario {
+  id              String   @id @default(uuid(7)) @db.Uuid
+  tenantId        String   @map("tenant_id") @db.Uuid
+  dia             DateTime @db.Date
+  recurso         String
+  modulo          String
+  /// "" = sin API key.
+  apiKeyId        String   @default("") @map("api_key_id")
+  cantidad        Int
+  costoTotalMicro Int      @map("costo_total_micro")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, dia, recurso, modulo, apiKeyId])
+  @@map("consumos_diarios")
+  @@schema("core")
+}
+
+/// Lista de precios de plataforma por recurso (micro-USD por unidad), vigente desde una fecha.
+model PrecioRecurso {
+  id                 String   @id @default(uuid(7)) @db.Uuid
+  recurso            String
+  unidad             String
+  costoUnitarioMicro Int      @map("costo_unitario_micro")
+  vigenteDesde       DateTime @map("vigente_desde") @db.Date
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([recurso, vigenteDesde])
+  @@map("precios_recursos")
+  @@schema("core")
+}
+
+/// Cola de aprobaciones de agentes (ADR-032): lo irreversible espera a un humano.
+model Aprobacion {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  tenantId       String    @map("tenant_id") @db.Uuid
+  apiKeyId       String    @map("api_key_id") @db.Uuid
+  viaUserId      String    @map("via_user_id") @db.Uuid
+  capability     String
+  input          Json
+  idempotencyKey String?   @map("idempotency_key")
+  resumen        String
+  /// "pendiente" | "aprobada" | "rechazada" | "vencida"
+  estado         String    @default("pendiente")
+  venceEn        DateTime  @map("vence_en") @db.Timestamptz(6)
+  resueltaPor    String?   @map("resuelta_por") @db.Uuid
+  resueltaEn     DateTime? @map("resuelta_en") @db.Timestamptz(6)
+  motivo         String?
+  resultado      Json?
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, estado, createdAt])
+  @@map("aprobaciones")
+  @@schema("core")
+}
+
+model ApiKeyAutonomia {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  tenantId   String   @map("tenant_id") @db.Uuid
+  apiKeyId   String   @map("api_key_id") @db.Uuid
+  capability String
+  /// "directo" | "aprobacion"
+  nivel      String
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  apiKey ApiKey @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, apiKeyId, capability])
+  @@map("api_keys_autonomia")
+  @@schema("core")
+}
+
+/// Bitácora encadenada append-only por tenant (ADR-023). Triggers impiden UPDATE/DELETE/TRUNCATE.
+model Bitacora {
+  id           String   @id @default(uuid(7)) @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
+  seq          Int
+  tipo         String
+  entidadTipo  String?  @map("entidad_tipo")
+  entidadId    String?  @map("entidad_id")
+  payloadCanon String   @map("payload_canon")
+  hashPrevio   String   @map("hash_previo")
+  hash         String
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, seq])
+  @@map("bitacora")
+  @@schema("core")
+}
+
+model BitacoraCabeza {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  tenantId       String    @unique @map("tenant_id") @db.Uuid
+  ultimoSeq      Int       @default(0) @map("ultimo_seq")
+  ultimoHash     String    @map("ultimo_hash")
+  verificadaEn   DateTime? @map("verificada_en") @db.Timestamptz(6)
+  verificacionOk Boolean?  @map("verificacion_ok")
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@map("bitacora_cabezas")
+  @@schema("core")
+}
+
+/// Comprobante verificable públicamente en /verificar/<token> (sin datos personales).
+model Comprobante {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  tipo        String
+  entidadTipo String   @map("entidad_tipo")
+  entidadId   String   @map("entidad_id")
+  hash        String
+  token       String   @unique
+  emitidoA    String?  @map("emitido_a")
+  bitacoraSeq Int?     @map("bitacora_seq")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, entidadTipo, entidadId])
+  @@map("comprobantes")
+  @@schema("core")
+}

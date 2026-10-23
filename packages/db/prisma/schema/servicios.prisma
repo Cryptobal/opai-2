@@ -1,0 +1,235 @@
+// Servicios del núcleo (Brief 02): perfil de empresa y marca, ajustes, outbox de eventos, trabajos,
+// comunicaciones, integraciones y secretos, consumos, aprobaciones de agentes, bitácora encadenada
+// y comprobantes. Las tablas append-only (consumos, envíos, bitácora, comprobantes) no llevan
+// updated_at, igual que audit_events.
+
+model PerfilEmpresa {
+  id                  String   @id @default(uuid(7)) @db.Uuid
+  tenantId            String   @unique @map("tenant_id") @db.Uuid
+  razonSocial         String?  @map("razon_social")
+  rut                 String?
+  giro                String?
+  calle               String?
+  comuna              String?
+  region              String?
+  pais                String   @default("CL")
+  representanteNombre String?  @map("representante_nombre")
+  representanteRut    String?  @map("representante_rut")
+  representanteEmail  String?  @map("representante_email")
+  correoComercial     String?  @map("correo_comercial")
+  correoOperaciones   String?  @map("correo_operaciones")
+  correoFinanzas      String?  @map("correo_finanzas")
+  correoContacto      String?  @map("correo_contacto")
+  telefono            String?
+  whatsapp            String?
+  sitioWeb            String?  @map("sitio_web")
+  nombreComercial     String?  @map("nombre_comercial")
+  eslogan             String?
+  /// Color de marca como dato ("#RRGGBB"): se aplica a documentos, correos y portales, no a la UI.
+  colorPrimario       String?  @map("color_primario")
+  colorSecundario     String?  @map("color_secundario")
+  logoPrincipalId     String?  @map("logo_principal_id") @db.Uuid
+  logoClaroId         String?  @map("logo_claro_id") @db.Uuid
+  logoOscuroId        String?  @map("logo_oscuro_id") @db.Uuid
+  isotipoId           String?  @map("isotipo_id") @db.Uuid
+  faviconId           String?  @map("favicon_id") @db.Uuid
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@map("perfil_empresa")
+  @@schema("core")
+}
+
+model Ajuste {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  tenantId       String   @map("tenant_id") @db.Uuid
+  /// "tenant" | "usuario"
+  ambito         String
+  /// tenantId (ámbito tenant) o userId (ámbito usuario).
+  sujetoId       String   @map("sujeto_id") @db.Uuid
+  modulo         String
+  clave          String
+  valor          Json
+  version        Int      @default(1)
+  actualizadoPor String?  @map("actualizado_por") @db.Uuid
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, ambito, sujetoId, modulo, clave])
+  @@map("ajustes")
+  @@schema("core")
+}
+
+/// Ajustes que fija OPAI (precios de recursos, modelos de IA por clase, IMM). Sin tenant ni RLS.
+model AjustePlataforma {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  modulo         String
+  clave          String
+  valor          Json
+  version        Int      @default(1)
+  actualizadoPor String?  @map("actualizado_por") @db.Uuid
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([modulo, clave])
+  @@map("ajustes_plataforma")
+  @@schema("core")
+}
+
+/// Outbox de eventos de dominio (ADR-029): se escribe en la misma transacción que el cambio.
+model Evento {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  tenantId       String    @map("tenant_id") @db.Uuid
+  tipo           String
+  entidadTipo    String?   @map("entidad_tipo")
+  entidadId      String?   @map("entidad_id")
+  payload        Json
+  actorTipo      String    @map("actor_tipo")
+  actorId        String?   @map("actor_id")
+  viaUserId      String?   @map("via_user_id")
+  idempotencyKey String?   @map("idempotency_key")
+  /// "pendiente" | "publicado" | "error"
+  estado         String    @default("pendiente")
+  intentos       Int       @default(0)
+  publicadoEn    DateTime? @map("publicado_en") @db.Timestamptz(6)
+  error          String?
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant   Tenant          @relation(fields: [tenantId], references: [id])
+  entregas EventoEntrega[]
+
+  @@index([tenantId, estado, createdAt])
+  @@index([tenantId, tipo, createdAt])
+  @@map("eventos")
+  @@schema("core")
+}
+
+model EventoEntrega {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  tenantId   String   @map("tenant_id") @db.Uuid
+  eventoId   String   @map("evento_id") @db.Uuid
+  consumidor String
+  /// "ok" | "error"
+  estado     String
+  intentos   Int      @default(1)
+  error      String?
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  evento Evento @relation(fields: [eventoId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, eventoId, consumidor])
+  @@map("eventos_entregas")
+  @@schema("core")
+}
+
+/// Cola de trabajos (ADR-029): los crons encolan; el runner reclama con FOR UPDATE SKIP LOCKED.
+model Trabajo {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  tenantId       String    @map("tenant_id") @db.Uuid
+  tipo           String
+  payload        Json      @default("{}")
+  /// "pendiente" | "en_curso" | "hecho" | "fallido" | "cancelado"
+  estado         String    @default("pendiente")
+  programadoPara DateTime  @default(now()) @map("programado_para") @db.Timestamptz(6)
+  intentos       Int       @default(0)
+  maxIntentos    Int       @default(5) @map("max_intentos")
+  bloqueadoHasta DateTime? @map("bloqueado_hasta") @db.Timestamptz(6)
+  ultimoError    String?   @map("ultimo_error")
+  resultado      Json?
+  claveUnica     String?   @map("clave_unica")
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, estado, programadoPara])
+  @@map("trabajos")
+  @@schema("core")
+}
+
+model Plantilla {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  evento    String
+  /// "correo" | "whatsapp" | "push" | "inapp"
+  canal     String
+  version   Int
+  asunto    String?
+  cuerpo    String
+  activa    Boolean  @default(true)
+  creadoPor String?  @map("creado_por") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, evento, canal, version])
+  @@map("plantillas")
+  @@schema("core")
+}
+
+/// Ruteo de notificaciones (ADR-020): sin regla activa no se envía nada (silencio por defecto).
+model NotificacionRegla {
+  id                    String   @id @default(uuid(7)) @db.Uuid
+  tenantId              String   @map("tenant_id") @db.Uuid
+  evento                String
+  canal                 String
+  destinatariosRoles    String[] @default([]) @map("destinatarios_roles")
+  destinatariosUsuarios String[] @default([]) @map("destinatarios_usuarios")
+  activa                Boolean  @default(false)
+  createdAt             DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, evento, canal])
+  @@map("notificacion_reglas")
+  @@schema("core")
+}
+
+model Notificacion {
+  id        String    @id @default(uuid(7)) @db.Uuid
+  tenantId  String    @map("tenant_id") @db.Uuid
+  usuarioId String    @map("usuario_id") @db.Uuid
+  eventoId  String?   @map("evento_id") @db.Uuid
+  titulo    String
+  cuerpo    String?
+  enlace    String?
+  leidaEn   DateTime? @map("leida_en") @db.Timestamptz(6)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, usuarioId, leidaEn])
+  @@map("notificaciones")
+  @@schema("core")
+}
+
+model Envio {
+  id               String   @id @default(uuid(7)) @db.Uuid
+  tenantId         String   @map("tenant_id") @db.Uuid
+  eventoId         String?  @map("evento_id") @db.Uuid
+  canal            String
+  destinatario     String
+  plantillaEvento  String?  @map("plantilla_evento")
+  plantillaVersion Int?     @map("plantilla_version")
+  /// "enviado" | "fallido" | "omitido"
+  estado           String
+  proveedorId      String?  @map("proveedor_id")
+  error            String?
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, createdAt])
+  @@map("envios")
+  @@schema("core")
+}

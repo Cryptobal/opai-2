@@ -117,7 +117,8 @@ export async function accionRestablecer(
   form: FormData,
 ): Promise<EstadoRestablecer> {
   const nueva = String(form.get("nueva") ?? "");
-  if (!passwordValida(nueva)) return { listo: false, error: "La contraseña no cumple los requisitos." };
+  if (!passwordValida(nueva))
+    return { listo: false, error: "La contraseña no cumple los requisitos." };
   if (nueva !== String(form.get("repetir") ?? "")) {
     return { listo: false, error: "Las contraseñas no coinciden." };
   }

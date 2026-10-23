@@ -64,25 +64,31 @@ model TenantModule {
 }
 
 model ApiKey {
-  id          String    @id @default(uuid(7)) @db.Uuid
-  tenantId    String    @map("tenant_id") @db.Uuid
+  id                      String    @id @default(uuid(7)) @db.Uuid
+  tenantId                String    @map("tenant_id") @db.Uuid
   /// Usuario responsable: el agente actúa "vía" este usuario y hereda sus permisos.
-  userId      String    @map("user_id") @db.Uuid
-  nombre      String
+  userId                  String    @map("user_id") @db.Uuid
+  nombre                  String
   /// Inicio visible de la key ("opai_gard_ab12") para reconocerla en la lista.
-  prefijo     String
+  prefijo                 String
   /// SHA-256 de la key completa. El secreto se muestra una sola vez y no se guarda.
-  hash        String    @unique
+  hash                    String    @unique
   /// Módulos permitidos ("core", "crm", …) o "*".
-  scopes      String[]
-  ultimoUsoEn DateTime? @map("ultimo_uso_en") @db.Timestamptz(6)
-  expiraEn    DateTime? @map("expira_en") @db.Timestamptz(6)
-  revocadaEn  DateTime? @map("revocada_en") @db.Timestamptz(6)
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  scopes                  String[]
+  /// Principal detrás de la key (ADR-033): "usuario" (Brief 01) | "cuenta" | "persona" (fase 3).
+  principalTipo           String    @default("usuario") @map("principal_tipo")
+  principalId             String?   @map("principal_id") @db.Uuid
+  /// Presupuesto mensual de consumos en micro-USD (ADR-032). Null o 0 = sin límite.
+  presupuestoMensualMicro Int?      @map("presupuesto_mensual_micro")
+  ultimoUsoEn             DateTime? @map("ultimo_uso_en") @db.Timestamptz(6)
+  expiraEn                DateTime? @map("expira_en") @db.Timestamptz(6)
+  revocadaEn              DateTime? @map("revocada_en") @db.Timestamptz(6)
+  createdAt               DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt               DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  tenant Tenant @relation(fields: [tenantId], references: [id])
-  user   User   @relation(fields: [userId], references: [id])
+  tenant    Tenant            @relation(fields: [tenantId], references: [id])
+  user      User              @relation(fields: [userId], references: [id])
+  autonomia ApiKeyAutonomia[]
 
   @@index([tenantId])
   @@map("api_keys")
