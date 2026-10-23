@@ -14,7 +14,7 @@ import { reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 import { credencialDe, integracionDe } from "./resolver";
 
-const base = (ctx: Contexto, modulo: string) => ({
+export const consumoBase = (ctx: Contexto, modulo: string) => ({
   tenantId: ctx.tenantId,
   modulo,
   actorTipo: ctx.actor.tipo,
@@ -42,7 +42,7 @@ export async function correoDe(
     async enviar(c) {
       await mailer.enviar(c);
       const consumo = {
-        ...base(ctx, modulo),
+        ...consumoBase(ctx, modulo),
         recurso: "correo.enviado",
         unidad: "correo",
         cantidad: 1,
@@ -62,7 +62,7 @@ export async function geoDe(ctx: Contexto, modulo = "core") {
   const medir = (recurso: string) =>
     ctx.medidor
       .registrar({
-        ...base(ctx, modulo),
+        ...consumoBase(ctx, modulo),
         recurso,
         unidad: "consulta",
         cantidad: 1,
@@ -108,7 +108,7 @@ export async function iaDe(ctx: Contexto, clase: ClaseTarea, modulo = "core") {
       async completar(s: SolicitudIa) {
         const r = await proveedor.completar(modelo, s);
         const comun = {
-          ...base(ctx, modulo),
+          ...consumoBase(ctx, modulo),
           unidad: "token",
           sinCosto: cred.modalidad === "propia",
         };
