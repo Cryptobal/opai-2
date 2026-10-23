@@ -10,7 +10,7 @@ import { contextoDePrueba } from "../src/testing";
 
 const crearNota = defineCapability({
   id: "test.nota.create",
-  descripcion: "Crea una nota (prueba).",
+  descripcion: "Crea una nota de prueba y devuelve su id y su texto.",
   permiso: "test:write",
   input: z.object({ texto: z.string().min(1) }),
   output: z.object({ texto: z.string() }),

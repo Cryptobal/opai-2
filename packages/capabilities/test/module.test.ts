@@ -7,7 +7,7 @@ import { limpiarRegistro, obtenerCapacidad } from "../src/registry";
 
 const cap = defineCapability({
   id: "demo.ping",
-  descripcion: "",
+  descripcion: "Responde un ping del módulo demo (capacidad de prueba).",
   permiso: "demo:read",
   input: z.object({}),
   output: z.object({}),

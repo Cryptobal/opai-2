@@ -16,7 +16,7 @@ function ctxCon(permisos: string[] = [], extra: Parameters<typeof contextoDePrue
 
 const crearNota = defineCapability({
   id: "test.nota.create",
-  descripcion: "Crea una nota (prueba).",
+  descripcion: "Crea una nota de prueba y devuelve su id y su texto.",
   permiso: "test:write",
   input: z.object({ texto: z.string().min(1) }),
   output: z.object({ id: z.string(), texto: z.string() }),
@@ -36,7 +36,7 @@ beforeEach(() => {
 describe("defineCapability", () => {
   it("rechaza ids mal formados y escrituras sin dryRun", () => {
     const base = {
-      descripcion: "",
+      descripcion: "Capacidad de prueba para validar la declaración.",
       permiso: null,
       input: z.object({}),
       output: z.object({}),

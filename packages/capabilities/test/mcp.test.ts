@@ -10,7 +10,7 @@ import { semillaTenant } from "./semilla";
 
 const leerCrm = defineCapability({
   id: "crm.lead.list",
-  descripcion: "Leads.",
+  descripcion: "Lista los leads del CRM con su estado (prueba).",
   permiso: "crm:read",
   input: z.object({}),
   output: z.array(z.string()),
