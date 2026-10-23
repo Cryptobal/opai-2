@@ -41,3 +41,24 @@ jobs:
       - run: pnpm test:db
         env:
           DATABASE_URL_TEST: postgresql://postgres:postgres@localhost:5432/opai_test
+
+  presupuesto:
+    name: build · presupuesto de JS
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # Variables ficticias: el build no se conecta a la base ni envía correos (ADR-037).
+      - run: pnpm --filter @opai/web build
+        env:
+          DATABASE_URL: postgresql://opai_app:ficticia@localhost:5432/opai
+          BETTER_AUTH_SECRET: ficticio-solo-para-build-de-ci-000000000000
+          BETTER_AUTH_URL: http://localhost:3000
+          NEXT_TELEMETRY_DISABLED: "1"
+      - run: pnpm presupuesto

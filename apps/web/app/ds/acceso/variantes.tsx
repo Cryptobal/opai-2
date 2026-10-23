@@ -49,7 +49,7 @@ export const VARIANTES: Record<string, () => React.ReactNode> = {
       }}
     />
   ),
-  "login-cargando": () => <FormularioLogin destino="/" google inicial={{ tipo: "cargando" }} />,
+  "login-cargando": () => <FormularioLogin destino="/" google cargando />,
   recuperar: () => <PedirEnlace />,
   "recuperar-enviado": () => <PedirEnlace enviadoA="carlos@gard.cl" />,
   "recuperar-nueva": () => <NuevaPassword token="muestra" correo="carlos@gard.cl" />,

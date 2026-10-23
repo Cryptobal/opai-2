@@ -2,12 +2,12 @@
 
 import { Building2, LogOut, UserRound } from "lucide-react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { type ReactNode, useState } from "react";
 
-import { signOut } from "@opai/auth/client";
 import { AppShell, type ItemMenu, type LinkComponent, type Portal } from "@opai/ds";
 
+import { accionSalir } from "@/app/_acciones/auth";
 import { cambiarTenant } from "@/app/_acciones/capacidad";
 import type { ItemNav } from "@/lib/navegacion";
 
@@ -40,7 +40,6 @@ export function Shell({
   children: ReactNode;
 }) {
   const rutaActual = usePathname();
-  const router = useRouter();
   const [password, setPassword] = useState(false);
   const empresas: ItemMenu[] =
     datos.empresas.length > 1
@@ -67,7 +66,7 @@ export function Shell({
       etiqueta: "Cerrar sesión",
       icono: LogOut,
       peligro: true,
-      onSelect: () => void signOut().then(() => router.push("/login")),
+      onSelect: () => void accionSalir(),
     },
   ];
   return (

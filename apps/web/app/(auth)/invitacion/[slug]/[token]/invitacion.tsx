@@ -3,8 +3,9 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { signOut } from "@opai/auth/client";
 import { AuthCard, Button, Monograma } from "@opai/ds";
+
+import { accionSalir } from "@/app/_acciones/auth";
 
 import { LinkNext } from "@/app/_components/link-next";
 import { ETIQUETA_ROL } from "@/app/_components/portales";
@@ -57,11 +58,8 @@ export function Invitacion({ slug, token, datos, sesion }: Props) {
   };
   // Con otra sesión abierta: si la cuenta invitada existe, se entra con ella (login);
   // si no existe, se vuelve a esta misma invitación, que muestra el formulario de cuenta nueva.
-  const cambiarDeCuenta = async () => {
-    await signOut();
-    if (datos.usuarioExiste) router.push(login);
-    else router.refresh();
-  };
+  const cambiarDeCuenta = () =>
+    accionSalir(datos.usuarioExiste ? login : `/invitacion/${slug}/${token}`);
   const cuenta =
     sesion && !coincide
       ? sesion

@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import { cn } from "../cn";
 import { Tabs, type Tab } from "../components/tabs";
+import type { LinkComponent } from "../shell/types";
 import { Cabecera, Estado, type EstadoPantalla, type TextosEstado } from "./estado";
 
 export type DetailScreenProps = {
@@ -12,6 +13,9 @@ export type DetailScreenProps = {
   estado?: ReactNode;
   acciones?: ReactNode;
   tabs?: readonly Tab[];
+  /** Modo por ruta: id de la pestaña activa y componente de enlace; `children` es la página hija. */
+  tabActiva?: string;
+  Link?: LinkComponent;
   children?: ReactNode;
   textos?: TextosEstado;
 };
@@ -24,6 +28,8 @@ export function DetailScreen({
   estado,
   acciones,
   tabs,
+  tabActiva,
+  Link,
   children,
   textos,
 }: DetailScreenProps) {
@@ -37,7 +43,17 @@ export function DetailScreen({
         {...(acciones ? { acciones } : {})}
       />
       <Estado state={state} variante="detalle" {...(textos ? { textos } : {})}>
-        {tabs && tabs.length > 0 ? <Tabs tabs={tabs} /> : children}
+        {tabs && tabs.length > 0 ? (
+          <Tabs
+            tabs={tabs}
+            {...(tabActiva ? { activa: tabActiva } : {})}
+            {...(Link ? { Link } : {})}
+          >
+            {children}
+          </Tabs>
+        ) : (
+          children
+        )}
       </Estado>
     </section>
   );

@@ -15,6 +15,7 @@ Monorepo de OPAI 2.0: SaaS modular, multi-tenant y agent-first para empresas int
 - `pnpm --filter @opai/auth seed:platform-owner` crea (idempotente) el usuario plataforma desde `SEED_OWNER_PASSWORD`; usa `DATABASE_URL_MIGRATE`.
 - `pnpm --filter @opai/web e2e` corre Playwright: `/ds`, acceso (`/ds/acceso`, variantes del diseño) y el flujo con sesión (usa `SEED_OWNER_PASSWORD` del `.env.local` de la raíz contra `dev`).
 - `pnpm scaffold:module <id> --nombre "<Nombre>"` crea un módulo completo y lo registra.
+- `pnpm presupuesto` (tras `pnpm --filter @opai/web build`) mide el JS por ruta (gzip, sin polyfills) contra `apps/web/presupuesto-js.json`; CI falla si una ruta lo supera (ADR-037). El acceso (login, Google, salir, contraseñas) va por Server Actions de `@opai/auth`; no hay cliente de auth en el navegador. Listas con `href` y pestañas por ruta: server-first.
 - Nunca: `prisma migrate reset`, borrar migraciones, commitear `.env*`, correr `db:deploy` contra un entorno no indicado, usar `dbAdmin()` fuera de scripts y migraciones, imprimir secretos.
 
 ## Estructura

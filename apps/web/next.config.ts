@@ -18,6 +18,9 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   cacheComponents: true,
   partialPrefetching: true,
+  // Presupuesto de JS (ADR-037): el barrel del DS se resuelve a sus módulos para que cada ruta
+  // cargue solo los componentes que usa.
+  experimental: { optimizePackageImports: ["@opai/ds"] },
   // Paquetes del monorepo consumidos como fuente TypeScript.
   transpilePackages: [
     "@opai/ds",
