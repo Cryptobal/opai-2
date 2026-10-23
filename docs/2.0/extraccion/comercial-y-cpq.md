@@ -10,10 +10,10 @@
 
 | Modelo 1.0 | Qué es | Destino en 2.0 |
 |---|---|---|
-| `CrmLead` | Solicitud entrante (formulario web, correo, WhatsApp) con UTM, SLA de respuesta, acuse, datos de empresa y servicio en texto, instalaciones propias (`leadId`) y conversión a cuenta/contacto/negocio | `comercial.solicitudes`: bandeja de entrada liviana; al calificarla nace o se reutiliza una **cuenta prospecto** (ADR-040) |
+| `CrmLead` | Solicitud entrante (formulario web, correo, WhatsApp) con UTM, SLA de respuesta, acuse, datos de empresa y servicio en texto, instalaciones propias (`leadId`) y conversión a cuenta/contacto/negocio | `comercial.solicitudes`: bandeja de entrada (carpeta de solicitudes) desde la que se deriva y se crea el negocio; al calificarla nace o se reutiliza una **cuenta prospecto** (ADR-040 §1) |
 | `CrmIndustry` | Catálogo de rubros **sin `tenant_id`** (global) | Grupo de etiquetas "Rubro" por tenant (ADR-040) |
 | `CrmAccount` | Cuenta (ver `maestros.md`); comercial: `industry`, `size`, `segment`, `source`, `ownerId` en texto libre | Núcleo (`core.cuentas`, hecho). Rubro, tamaño y segmento → etiquetas con grupo; ejecutivo → faceta Comercial |
-| `CrmContact` | Contacto de una cuenta con `isPrimary`, `roleTitle` y cinco flags `recibe*` | Núcleo (`core.contactos`, hecho, con `roles[]`). Roles por instalación (núcleo) y por negocio (Comercial) |
+| `CrmContact` | Contacto de una cuenta con `isPrimary`, `roleTitle` y cinco flags `recibe*` | Núcleo: `core.contactos` pasa a ser la **persona única por tenant** (correo único) y `core.contacto_cuentas` el vínculo con N cuentas, con cargo, roles y principal por cuenta (ADR-040 §5). Roles por instalación (núcleo) y por negocio (Comercial) |
 | `CrmInstallation` | Instalación con `accountId` **o** `leadId`, `activatedByDealId` | Núcleo (`core.instalaciones`, hecho). Vínculo al negocio por tabla puente |
 | `CrmPipelineStage` | Etapas por tenant con `order`, `color`, flags `isClosedWon`, `isClosedLost`, `isAccepted` | `comercial.pipelines` + `comercial.etapas` con `tipo` cerrado |
 | `CrmDeal` | Negocio. Además de lo comercial, copia de la instalación (`installationName`, `street`, `address`, `city`, `commune`, `lat`/`lng` Float, `installationWebsite`), `totalPuestos`, `amount` manual, `activeQuotationId`, campos de licitación, `proposalLink` (PandaDoc), `driveFolderLink`, `grokAgentId` | `comercial.negocios` sin copias; instalaciones por puente; monto derivado de la cotización vigente; licitación como faceta (fase 6) |
@@ -87,7 +87,7 @@ En 2.0 se conservan como consumidores de los eventos `comercial.negocio.ganado` 
 ### 3.3 Contactos y destinatarios
 
 - Uno principal por cuenta (`isPrimary`; en 1.0 no está garantizado en base).
-- Destinatarios por tipo de comunicación: facturación, notas de crédito, cobranza, operacional y **cesión** (Ley 19.983, falla segura: sin marcado no se notifica a nadie). En 2.0 son `roles` del contacto en la cuenta (`maestros.md` §2); `recibeNotasCredito` se funde en `facturacion`.
+- Destinatarios por tipo de comunicación: facturación, notas de crédito, cobranza, operacional y **cesión** (Ley 19.983, falla segura: sin marcado no se notifica a nadie). En 2.0 son `roles` del vínculo contacto–cuenta (`core.contacto_cuentas`, ADR-040 §5), así la misma persona tiene roles distintos en cada cuenta; `recibeNotasCredito` se funde en `facturacion`. En 1.0 un contacto pertenece a una sola cuenta (`CrmContact.accountId` obligatorio): la misma persona aparece duplicada por cuenta.
 
 ### 3.4 Solicitudes entrantes (`CrmLead`)
 
@@ -161,7 +161,7 @@ Los tests de 1.0 (`costing/__tests__/financial-policy.test.ts`, `cost-lines.test
 | P4 | Una cotización con líneas por instalación y subtotales por sección | El caso multi-instalación es el normal en clientes grandes |
 | P5 | Un solo estado (`borrador` → `en_aprobacion` → `lista` → `enviada` → `aceptada`/`rechazada`/`vencida`/`reemplazada`) | Máquina de estados declarada (arranque §3.8) |
 | P6 | Rol de catálogo cerrado en el negocio (`decisor`, `tecnico`, `compras`, `usuario`) | Reportes y agentes confiables |
-| P7 | Solo `roles[]` del contacto; sin punteros desde la cuenta | Una regla |
+| P7 | Solo `roles[]` del vínculo contacto–cuenta; sin punteros desde la cuenta | Una regla, por cuenta |
 | P8 | `core.etiquetas` por tenant con grupos (exclusivos o no) y vínculo polimórfico | Clasificación consistente, filtros y MCP |
 | P9 | Interacciones y tareas en `core.actividades`; cambios en `core.audit_events`; etapas en `comercial.negocio_etapas`; la pestaña Actividad las une | Una línea de tiempo; "último contacto" y "próximo paso" derivados |
 | P10 | `core.cuentas.rut` único por tenant (ya en 2.0) + deduplicación en la importación | — |
@@ -184,8 +184,9 @@ Convenciones: toda tabla con `tenant_id`, RLS `tenant_isolation`, `uuid(7)`, `cr
 
 | Tabla | Columnas clave | Restricciones |
 |---|---|---|
-| `contactos` (existe) | + índice único parcial | Un `es_principal` por cuenta: `UNIQUE (tenant_id, cuenta_id) WHERE es_principal AND estado = 'activo' AND archivado_en IS NULL` |
-| `contacto_instalaciones` | `contacto_id`, `instalacion_id`, `roles text[]` (`jefe_sitio`, `recibe_reportes`, `autoriza_visitas`, `emergencia`) | Único por par; trigger: contacto e instalación de la misma cuenta |
+| `contactos` (existe; cambia) | Persona: nombres, apellidos, `email` normalizado, `telefono`, notas, estado, archivado. `cuenta_id`, `cargo`, `roles`, `es_principal` quedan opcionales y en desuso | `UNIQUE (tenant_id, lower(email)) WHERE email IS NOT NULL` (reemplaza el único por cuenta) |
+| `contacto_cuentas` | `contacto_id`, `cuenta_id`, `cargo`, `roles text[]` (`comercial`, `operacional`, `facturacion`, `cobranza`, `cesion`), `es_principal`, `estado`, `archivado_en` | Único por par; un principal por cuenta: `UNIQUE (tenant_id, cuenta_id) WHERE es_principal AND estado = 'activo' AND archivado_en IS NULL`; no se desvincula con roles de instalación o negocios abiertos en esa cuenta |
+| `contacto_instalaciones` | `contacto_id`, `instalacion_id`, `roles text[]` (`jefe_sitio`, `recibe_reportes`, `autoriza_visitas`, `emergencia`) | Único por par; trigger: existe un vínculo activo `contacto_cuentas` con la cuenta de la instalación |
 | `etiqueta_grupos` | `nombre`, `exclusivo bool`, `ambitos text[]`, `orden` | Único por nombre |
 | `etiquetas` | `nombre`, `tono` (token del DS, nunca hex), `grupo_id?`, `ambitos text[]` (`cuenta`, `instalacion`, `negocio`, `contacto`, `documento`), `descripcion`, `orden`, `archivada_en` | Único `(tenant, grupo, lower(nombre))` |
 | `etiqueta_vinculos` | `etiqueta_id`, `entidad_tipo`, `entidad_id`, `creado_por_tipo/id` | Único por trío; trigger: tipo registrado, existencia y mismo tenant, ámbito permitido y exclusividad del grupo |
@@ -200,10 +201,10 @@ Convenciones: toda tabla con `tenant_id`, RLS `tenant_isolation`, `uuid(7)`, `cr
 |---|---|---|
 | `solicitudes` | Datos crudos de contacto y empresa, canal, UTM, `estado` (`nueva`, `en_revision`, `convertida`, `descartada`), `motivo_descarte`, SLA (`vista_en`, `primer_contacto_en`, `escalada_en`), `cuenta_id?`, `negocio_id?` | Texto de terceros marcado como externo (ADR-034) |
 | `pipelines` | `nombre`, `por_defecto` | Un `por_defecto` por tenant |
-| `etapas` | `pipeline_id`, `nombre`, `orden`, `tipo` (`abierta`, `ganada`, `perdida`), `probabilidad`, `tono`, `exige` (`monto`, `fecha_cierre`, `cotizacion_enviada`…), `activa` | Exactamente una `ganada` y una `perdida` por pipeline |
+| `etapas` | `pipeline_id`, `nombre`, `orden`, `tipo` (`abierta`, `ganada`, `perdida`), `probabilidad`, `tono`, `exige` (`monto`, `fecha_cierre`, `cotizacion_enviada`, `inicio_servicio`, `motivo_perdida`), `activa` | Exactamente una `ganada` y una `perdida` por pipeline (única regla fija); editable en Configuración → Comercial → Embudo |
 | `negocios` | `cuenta_id`, `pipeline_id`, `etapa_id`, `estado` (`abierto`, `ganado`, `perdido`, mantenido por trigger desde el tipo de etapa), `valor_mensual` y `cotizacion_enviada_en` (los escribe CPQ por una capacidad de Comercial), `titulo`, `tipo_id`, `origen_id`, `responsable_id`, `probabilidad`, `cierre_estimado`, `monto_estimado_mensual` (CLP, solo sin cotización vigente), `inicio_servicio_estimado`, `motivo_perdida` (cerrado), `motivo_perdida_detalle`, `competidor`, `ganado_en`, `perdido_en`, `archivado_en` | `cuenta_id` inmutable una vez que hay instalaciones o cotizaciones |
 | `negocio_instalaciones` | `negocio_id`, `instalacion_id`, `tipo` (`nueva`, `ampliacion`, `renovacion`, `reemplazo`), `aplicada_en` | Único por par; trigger: la instalación es de la cuenta del negocio; no se quita si una línea de cotización la referencia |
-| `negocio_contactos` | `negocio_id`, `contacto_id`, `rol` (`decisor`, `tecnico`, `compras`, `usuario`), `es_principal` | Único por par; un principal por negocio; trigger: misma cuenta |
+| `negocio_contactos` | `negocio_id`, `contacto_id`, `rol` (`decisor`, `tecnico`, `compras`, `usuario`), `es_principal` | Único por par; un principal por negocio; trigger: existe un vínculo activo `contacto_cuentas` con la cuenta del negocio |
 | `negocio_etapas` | `negocio_id`, `de_etapa_id`, `a_etapa_id`, `cuando`, actor, `segundos_en_anterior` | Append-only |
 | `catalogos` | `catalogo` (`tipo_negocio`, `origen`), `clave`, `nombre`, `orden`, `activo` | Único `(tenant, catalogo, clave)` |
 | `cuentas_comercial` | `cuenta_id` (PK), `responsable_id`, `es_referencia` | Faceta de la cuenta |
@@ -226,7 +227,7 @@ Script idempotente con `--dry-run` y reporte (ADR-010), ids mapeados en `core.id
 | 1.0 | 2.0 | Reglas |
 |---|---|---|
 | `CrmAccount` | `core.cuentas` | Deduplicar por RUT normalizado (P10); sin RUT, por nombre canónico (`canon` de `@opai/domain`) → propuesta de fusión, nunca automática. `industry`/`segment`/`size` → etiquetas en grupos Rubro, Segmento, Tamaño (valores normalizados en el reporte para que Carlos los confirme) |
-| `CrmContact` | `core.contactos` | Correo en minúsculas; teléfono a E.164; `recibe*` → `roles`; si `isPrimary` se repite en una cuenta, gana el más reciente y se reporta |
+| `CrmContact` | `core.contactos` + `core.contacto_cuentas` | Correo en minúsculas; teléfono a E.164. Los `CrmContact` con el mismo correo normalizado en cuentas distintas son **una persona** con un vínculo por cuenta (determinista, se reporta); duplicados en la misma cuenta se fusionan. `roleTitle` → `cargo` del vínculo; `recibe*` → `roles` del vínculo; si `isPrimary` se repite en una cuenta, gana el más reciente y se reporta. Sin correo: una persona por fila, con sugerencias de fusión por teléfono y nombre |
 | `CrmInstallation` | `core.instalaciones` | Sin cuenta (`leadId`) → se crea o asocia la cuenta prospecto del lead; deduplicar por `place_id` o distancia < 50 m dentro de la misma cuenta |
 | `CrmPipelineStage` | `comercial.etapas` | Mapeo 1:1; `isClosedWon`/`isClosedLost` → `tipo`; `isAccepted` → `exige: inicio_servicio` |
 | `CrmDeal` | `comercial.negocios` + `negocio_instalaciones` | Instalación: `activatedByDealId`, luego `CpqQuote.installationId` de sus cotizaciones, luego coincidencia por nombre o dirección dentro de la cuenta; sin coincidencia → reporte (no se crea una instalación desde el texto) |
