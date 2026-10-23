@@ -7,23 +7,8 @@ export type Rol = (typeof ROLES)[number];
 export const ROLES_PLATAFORMA = ["owner", "support"] as const;
 export type RolPlataforma = (typeof ROLES_PLATAFORMA)[number];
 
-/** Permisos del núcleo. Los módulos declaran los suyos en su manifest. */
-export const PERMISOS_CORE = {
-  tenantRead: "core:tenant.read",
-  tenantManage: "core:tenant.manage",
-  tenantDelete: "core:tenant.delete",
-  usersRead: "core:users.read",
-  usersManage: "core:users.manage",
-  ownersManage: "core:owners.manage",
-  apikeysManage: "core:apikeys.manage",
-  auditRead: "core:audit.read",
-} as const;
-
-export const PERMISOS_PLATAFORMA = {
-  tenantsRead: "platform:tenants.read",
-  tenantsManage: "platform:tenants.manage",
-  modulesManage: "platform:modules.manage",
-} as const;
+export { PERMISOS_CORE, PERMISOS_PLATAFORMA } from "./permisos-catalogo";
+import { PERMISOS_CORE } from "./permisos-catalogo";
 
 type Patrones = { permitir: readonly string[]; denegar: readonly string[] };
 
@@ -45,6 +30,15 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
       PERMISOS_CORE.usersManage,
       PERMISOS_CORE.ownersManage,
       PERMISOS_CORE.apikeysManage,
+      // Sueldos, configuración del tenant, integraciones y control de agentes: owner y admin.
+      PERMISOS_CORE.estructurasManage,
+      PERMISOS_CORE.estructurasReadSensible,
+      PERMISOS_CORE.configManage,
+      PERMISOS_CORE.marcaManage,
+      PERMISOS_CORE.integracionesManage,
+      PERMISOS_CORE.comunicacionesManage,
+      PERMISOS_CORE.aprobacionesManage,
+      PERMISOS_CORE.agentesManage,
     ],
   },
   supervisor: {
@@ -55,10 +49,18 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
       "personas:read",
       "personas:*.read",
       PERMISOS_CORE.tenantRead,
+      PERMISOS_CORE.cuentasRead,
+      PERMISOS_CORE.instalacionesRead,
+      PERMISOS_CORE.personasRead,
+      PERMISOS_CORE.documentosRead,
+      PERMISOS_CORE.configRead,
     ],
     denegar: [...FINANCIERO, "crm:*", "cpq:*"],
   },
-  viewer: { permitir: ["*:read", "*:*.read"], denegar: [...FINANCIERO] },
+  viewer: {
+    permitir: ["*:read", "*:*.read"],
+    denegar: [...FINANCIERO, PERMISOS_CORE.consumosRead, PERMISOS_CORE.auditRead],
+  },
 };
 
 const PATRONES_PLATAFORMA: Readonly<Record<RolPlataforma, readonly string[]>> = {
