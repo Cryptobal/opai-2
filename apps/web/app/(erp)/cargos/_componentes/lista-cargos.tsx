@@ -1,0 +1,137 @@
+import { Briefcase, Lock, Plus } from "lucide-react";
+
+import { Badge, type EstadoPantalla, ListScreen } from "@opai/ds";
+
+import { LinkNext } from "@/app/_components/link-next";
+import { Buscador } from "@/app/_components/maestros/buscador";
+import { ChipsFiltro } from "@/app/_components/maestros/chips-filtro";
+import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+import { pesos } from "@/lib/fechas";
+import { GRATIFICACION } from "@/lib/tipos-sueldo";
+
+import { CLASES, type CargoFila } from "./datos";
+
+const OCULTO = "••••";
+const monto = (c: CargoFila, k: "sueldoBase" | "colacion" | "movilizacion") =>
+  !c.sueldoVigente ? "—" : c.sueldoVigente.sensible ? OCULTO : pesos(c.sueldoVigente[k]);
+const clase = (v: string) => CLASES.find((c) => c.valor === v)?.etiqueta ?? v;
+const conteo = (n: number) => (n ? String(n) : "—");
+
+function Nombre({ c }: { c: CargoFila }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 font-medium">
+      {c.nombre}
+      {c.sueldoSensible ? (
+        <Lock className="size-3.5 text-fg-subtle" aria-label="Sueldo sensible" />
+      ) : null}
+    </span>
+  );
+}
+
+function Estado({ activo }: { activo: boolean }) {
+  return <Badge tono={activo ? "success" : "neutro"}>{activo ? "Activo" : "Inactivo"}</Badge>;
+}
+
+const num = "text-right t-numeric";
+
+/** Cargos y sueldos (14): tabla con los montos de la versión vigente; filas en teléfono. */
+export function ListaCargos({ state, items }: { state: EstadoPantalla; items: CargoFila[] }) {
+  const nuevo = (
+    <EnlaceBoton href="?nuevo=1" icono={Plus}>
+      Nuevo
+    </EnlaceBoton>
+  );
+  return (
+    <ListScreen<CargoFila>
+      state={state}
+      titulo="Cargos y sueldos"
+      accionPrincipal={nuevo}
+      buscador={<Buscador placeholder="Buscar cargo" />}
+      filtros={
+        <ChipsFiltro
+          filtros={[
+            { param: "clase", etiqueta: "Clase", opciones: CLASES },
+            {
+              param: "estado",
+              etiqueta: "Estado",
+              opciones: [
+                { valor: "activo", etiqueta: "Activo" },
+                { valor: "inactivo", etiqueta: "Inactivo" },
+              ],
+            },
+          ]}
+        />
+      }
+      items={items}
+      clave={(c) => c.id}
+      href={(c) => `/cargos/${c.id}`}
+      Link={LinkNext}
+      tarjeta={(c) => (
+        <>
+          <span className="flex size-10 flex-none items-center justify-center rounded-sm bg-fill text-fg-muted">
+            <Briefcase className="size-4" aria-hidden />
+          </span>
+          <span className="flex min-w-0 flex-1 flex-col">
+            <Nombre c={c} />
+            <span className="truncate text-sm text-fg-muted">
+              {clase(c.clase)} · {c.personasVigentes} personas · base {monto(c, "sueldoBase")}
+            </span>
+          </span>
+          <Estado activo={c.activo} />
+        </>
+      )}
+      columnas={[
+        { id: "cargo", etiqueta: "Cargo", render: (c) => <Nombre c={c} /> },
+        { id: "clase", etiqueta: "Clase", render: (c) => clase(c.clase) },
+        {
+          id: "personas",
+          etiqueta: "Personas",
+          className: num,
+          render: (c) => conteo(c.personasVigentes),
+        },
+        {
+          id: "puestos",
+          etiqueta: "Puestos",
+          className: num,
+          render: (c) => conteo(c.puestosActivos),
+        },
+        {
+          id: "base",
+          etiqueta: "Sueldo base",
+          className: num,
+          render: (c) => monto(c, "sueldoBase"),
+        },
+        {
+          id: "colacion",
+          etiqueta: "Colación",
+          className: num,
+          render: (c) => monto(c, "colacion"),
+        },
+        {
+          id: "movilizacion",
+          etiqueta: "Movilización",
+          className: num,
+          render: (c) => monto(c, "movilizacion"),
+        },
+        {
+          id: "gratificacion",
+          etiqueta: "Gratificación",
+          render: (c) =>
+            !c.sueldoVigente
+              ? "—"
+              : c.sueldoVigente.sensible
+                ? OCULTO
+                : (GRATIFICACION[c.sueldoVigente.gratificacion ?? ""] ?? "—"),
+        },
+        { id: "estado", etiqueta: "Estado", render: (c) => <Estado activo={c.activo} /> },
+      ]}
+      textos={{
+        vacio: {
+          titulo: "Sin cargos",
+          descripcion: "Crea el primero o ajusta los filtros.",
+          accion: nuevo,
+        },
+      }}
+    />
+  );
+}

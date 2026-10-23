@@ -35,10 +35,13 @@ export function BottomNav({
   extras = [],
   onNavegar,
 }: InferiorProps) {
-  const principales = items.filter((i) => !i.pie);
-  const conMas = principales.length > 5 || extras.length > 0;
+  const principales = items.filter((i) => !i.pie && !i.soloAmplio);
+  const conMas = principales.length > 5 || extras.length > 0 || items.some((i) => i.soloAmplio);
   const visibles = conMas ? principales.slice(0, 4) : principales;
-  const resto = [...principales.slice(visibles.length), ...items.filter((i) => i.pie)];
+  const resto = [
+    ...principales.slice(visibles.length),
+    ...items.filter((i) => i.pie || i.soloAmplio),
+  ];
   const enResto = resto.some((i) => esActivo(rutaActual, i.href));
   return (
     <nav
@@ -57,7 +60,7 @@ export function BottomNav({
               >
                 <span className="relative">
                   <item.icono className={cn("size-5", activo && "text-accent")} aria-hidden />
-                  <Contador n={item.contador} />
+                  <Contador n={item.alerta ? item.contador : undefined} />
                 </span>
                 <span className="max-w-full truncate px-0.5">{item.corta ?? item.etiqueta}</span>
               </Link>
@@ -108,7 +111,7 @@ function ItemRiel({
       >
         <span className="relative">
           <item.icono className={cn("size-5", activo && "text-accent")} aria-hidden />
-          {sinContador ? null : <Contador n={item.contador} />}
+          {sinContador ? null : <Contador n={item.alerta ? item.contador : undefined} />}
         </span>
         <span className="max-w-full truncate">{item.corta ?? item.etiqueta}</span>
       </Link>
@@ -131,7 +134,7 @@ export function Rail({ items, rutaActual, Link = LinkPorDefecto, subtitulo }: Ra
       </span>
       <ul className="flex flex-col gap-1">
         {items
-          .filter((i) => !i.pie)
+          .filter((i) => !i.pie && !i.soloAmplio)
           .map((item) => (
             <ItemRiel key={item.href} item={item} rutaActual={rutaActual} Link={Link} />
           ))}

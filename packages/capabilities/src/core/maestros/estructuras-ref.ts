@@ -13,10 +13,26 @@ export const entrada = z.object({
   cargoId: uuidSchema.optional(),
   puestoId: uuidSchema.optional(),
   personaId: uuidSchema.optional(),
-  sueldoBase: z.number().int().min(0).describe("CLP entero."),
-  colacion: z.number().int().min(0).default(0),
-  movilizacion: z.number().int().min(0).default(0),
-  gratificacion: z.enum(["legal_25", "monto_fijo", "ninguna"]).default("legal_25"),
+  sueldoBase: z
+    .number()
+    .int()
+    .min(0)
+    .nullable()
+    .optional()
+    .describe("CLP entero. Obligatorio en nivel cargo; en puesto o persona, omitir = hereda."),
+  colacion: z.number().int().min(0).nullable().optional().describe("Omitir = hereda (cargo: 0)."),
+  movilizacion: z
+    .number()
+    .int()
+    .min(0)
+    .nullable()
+    .optional()
+    .describe("Omitir = hereda (cargo: 0)."),
+  gratificacion: z
+    .enum(["legal_25", "monto_fijo", "ninguna"])
+    .nullable()
+    .optional()
+    .describe("Omitir = hereda (cargo: legal_25)."),
   gratificacionMonto: z.number().int().min(0).nullable().optional(),
   vigenteDesde: diaSchema,
   motivo: z.string().trim().min(5).max(500).optional().describe("Obligatorio en nivel persona."),
@@ -40,16 +56,34 @@ export async function referencia(ctx: Contexto, e: Entrada) {
   if (!existe) throw noEncontrado(`La referencia de nivel ${e.nivel}`);
   if (e.nivel === "persona" && !e.motivo)
     throw reglaDeNegocio("Una excepción por persona exige motivo.");
+  if (e.nivel === "cargo" && e.sueldoBase == null)
+    throw reglaDeNegocio("La estructura de un cargo exige sueldo base.");
+  const define =
+    [e.sueldoBase, e.colacion, e.movilizacion, e.gratificacion].some((v) => v != null) ||
+    e.items.length > 0;
+  if (!define) throw reglaDeNegocio("La estructura no define ningún concepto.");
   if (e.gratificacion === "monto_fijo" && e.gratificacionMonto == null) {
     throw reglaDeNegocio("Gratificación de monto fijo: falta el monto.");
   }
   return {
     id,
+    conceptos: conceptosDe(e),
     campo: `${e.nivel}Id` as const,
     refs: {
       cargoId: e.nivel === "cargo" ? id : null,
       puestoId: e.nivel === "puesto" ? id : null,
       personaId: e.nivel === "persona" ? id : null,
     },
+  };
+}
+
+/** Conceptos a guardar: el cargo define todos (con valores por defecto); los demás, solo los enviados. */
+export function conceptosDe(e: Entrada) {
+  const cargo = e.nivel === "cargo";
+  return {
+    sueldoBase: e.sueldoBase ?? null,
+    colacion: e.colacion ?? (cargo ? 0 : null),
+    movilizacion: e.movilizacion ?? (cargo ? 0 : null),
+    gratificacion: e.gratificacion ?? (cargo ? ("legal_25" as const) : null),
   };
 }

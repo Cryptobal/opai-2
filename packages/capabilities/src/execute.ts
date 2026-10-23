@@ -1,7 +1,7 @@
 import { controlAgente } from "./agentes/control";
 import { denegar, falla } from "./autorizacion";
 import { ErrorCapacidad } from "./errores";
-import { repeticion, sinSensibles, tenantDe } from "./execute-util";
+import { entidadAuditada, repeticion, sinSensibles, tenantDe } from "./execute-util";
 import { SALIDA_INVALIDA } from "./idempotencia";
 import { obtenerCapacidad } from "./registry";
 import type { Capacidad, Contexto, OpcionesEjecucion, Resultado } from "./types";
@@ -105,6 +105,7 @@ export async function executeCapability(
         tenantId,
         capability: c.id,
         actor: ctx.actor,
+        ...entidadAuditada(c.id, r.entrada, r.salida),
         payload: {
           input: sinSensibles(r.entrada, c.sensibles),
           idempotencyKey: opciones.idempotencyKey ?? null,

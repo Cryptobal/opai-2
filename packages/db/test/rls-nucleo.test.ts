@@ -88,11 +88,21 @@ describe.skipIf(!urlPropietario)("RLS del núcleo (Brief 02)", () => {
     const a = e.forTenant(idA);
     const cargo = await a.cargo.create({ data: { tenantId: idA, nombre: `Supervisor ${sufijo}` } });
     const comun = { tenantId: idA, sueldoBase: 850_000, vigenteDesde: new Date("2026-01-01") };
+    const completo = {
+      ...comun,
+      colacion: 45_000,
+      movilizacion: 60_000,
+      gratificacion: "legal_25",
+    };
     await expect(
-      a.estructuraSueldo.create({ data: { ...comun, nivel: "puesto", cargoId: cargo.id } }),
+      a.estructuraSueldo.create({ data: { ...completo, nivel: "puesto", cargoId: cargo.id } }),
+    ).rejects.toThrow();
+    // El nivel cargo define todos los conceptos (CHECK); puesto y persona heredan lo que omiten.
+    await expect(
+      a.estructuraSueldo.create({ data: { ...comun, nivel: "cargo", cargoId: cargo.id } }),
     ).rejects.toThrow();
     const ok = await a.estructuraSueldo.create({
-      data: { ...comun, nivel: "cargo", cargoId: cargo.id },
+      data: { ...completo, nivel: "cargo", cargoId: cargo.id },
     });
     expect(ok.nivel).toBe("cargo");
   });

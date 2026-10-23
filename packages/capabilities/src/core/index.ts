@@ -22,6 +22,7 @@ import { capacidadesConfig } from "./config";
 import { capacidadesDocumentos, trabajosDocumentos } from "./documentos";
 import { capacidadesEmpresa } from "./empresa";
 import { capacidadesMaestros } from "./maestros";
+import { capacidadesPanel } from "./panel";
 import { platformConsumosSummary, platformEventosList } from "./platform-observabilidad";
 import {
   platformTrabajosCancelar,
@@ -89,6 +90,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   iaProbar,
   platformIntegracionesEstado,
   ...capacidadesMaestros,
+  ...capacidadesPanel,
   ...capacidadesDocumentos,
   ...capacidadesConfig,
   ...capacidadesEmpresa,

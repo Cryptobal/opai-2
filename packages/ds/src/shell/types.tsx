@@ -13,6 +13,12 @@ export type NavItem = {
   pie?: boolean;
   /** Etiqueta corta para el riel de iPad y la barra inferior ("Instalac."). */
   corta?: string;
+  /** Solo en el riel y la barra inferior (en desktop su contador va en otro ítem). */
+  soloCompacto?: boolean;
+  /** Solo en la barra lateral de desktop: en el riel no aparece y en teléfono va en "Más". */
+  soloAmplio?: boolean;
+  /** El contador es una alerta (globo rojo también en el riel y la barra inferior). */
+  alerta?: boolean;
 };
 
 /** Barra superior en modo detalle: "‹ Cuentas / Logística Andina SpA". */

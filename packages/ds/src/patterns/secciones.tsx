@@ -54,3 +54,12 @@ export function ParesGrid({
     </dl>
   );
 }
+
+/** Teléfono: acción principal fija sobre la barra inferior ("Crear versión"); en md+ va en la barra superior. */
+export function AccionFijaTelefono({ children }: { children: ReactNode }) {
+  return (
+    <div className="sticky bottom-[calc(56px+env(safe-area-inset-bottom))] z-10 -mx-4 mt-4 border-t border-border bg-bg/95 px-4 py-3 backdrop-blur md:hidden [&>*]:h-12 [&>*]:w-full">
+      {children}
+    </div>
+  );
+}

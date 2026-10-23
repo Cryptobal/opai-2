@@ -36,10 +36,7 @@ export const estructurasCreate = defineCapability({
     const data = {
       nivel: input.nivel,
       ...ref.refs,
-      sueldoBase: input.sueldoBase,
-      colacion: input.colacion,
-      movilizacion: input.movilizacion,
-      gratificacion: input.gratificacion,
+      ...ref.conceptos,
       gratificacionMonto: input.gratificacionMonto ?? null,
       motivo: input.motivo ?? null,
       vigenteDesde: desde,

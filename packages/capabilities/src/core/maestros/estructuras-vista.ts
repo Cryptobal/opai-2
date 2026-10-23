@@ -31,10 +31,13 @@ export const estructuraSchema = z.object({
   sensible: z
     .boolean()
     .describe("true: montos ocultos por falta del permiso de sueldos sensibles."),
-  sueldoBase: z.number().nullable(),
+  sueldoBase: z
+    .number()
+    .nullable()
+    .describe("null: hereda del nivel más general (o oculto si sensible)."),
   colacion: z.number().nullable(),
   movilizacion: z.number().nullable(),
-  gratificacion: z.string(),
+  gratificacion: z.string().nullable().describe("null: hereda del nivel más general."),
   gratificacionMonto: z.number().nullable(),
   vigenteDesde: z.string(),
   vigenteHasta: z.string().nullable(),
@@ -51,7 +54,7 @@ export type FilaEstructura = {
   cargoId?: string | null;
   puestoId?: string | null;
   personaId?: string | null;
-  sueldoBase: number;
+  sueldoBase?: number | null;
   colacion?: number | null;
   movilizacion?: number | null;
   gratificacion?: string | null;
@@ -71,7 +74,7 @@ export type FilaItem = {
 };
 
 export function vistaEstructura(e: FilaEstructura, items: FilaItem[], ocultar: boolean) {
-  const m = (v: number | null | undefined) => (ocultar ? null : (v ?? 0));
+  const m = (v: number | null | undefined) => (ocultar ? null : (v ?? null));
   return {
     id: e.id,
     nivel: e.nivel as (typeof NIVELES)[number],
@@ -82,7 +85,7 @@ export function vistaEstructura(e: FilaEstructura, items: FilaItem[], ocultar: b
     sueldoBase: m(e.sueldoBase),
     colacion: m(e.colacion),
     movilizacion: m(e.movilizacion),
-    gratificacion: e.gratificacion ?? "legal_25",
+    gratificacion: e.gratificacion ?? null,
     gratificacionMonto: ocultar ? null : (e.gratificacionMonto ?? null),
     vigenteDesde: dia(e.vigenteDesde) ?? "",
     vigenteHasta: dia(e.vigenteHasta),
@@ -104,10 +107,10 @@ export function aDominio(e: FilaEstructura, items: FilaItem[]): Estructura {
   return {
     id: e.id,
     nivel: e.nivel as Estructura["nivel"],
-    sueldoBase: e.sueldoBase,
-    colacion: e.colacion ?? 0,
-    movilizacion: e.movilizacion ?? 0,
-    gratificacion: (e.gratificacion ?? "legal_25") as Estructura["gratificacion"],
+    sueldoBase: e.sueldoBase ?? null,
+    colacion: e.colacion ?? null,
+    movilizacion: e.movilizacion ?? null,
+    gratificacion: (e.gratificacion ?? null) as Estructura["gratificacion"],
     gratificacionMonto: e.gratificacionMonto ?? null,
     vigenteDesde: dia(e.vigenteDesde) ?? "",
     vigenteHasta: dia(e.vigenteHasta),

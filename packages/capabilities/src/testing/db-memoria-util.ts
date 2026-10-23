@@ -3,6 +3,7 @@ export type Fila = Record<string, unknown>;
 export type Where = Record<string, unknown>;
 
 const OPERADORES = [
+  "equals",
   "in",
   "notIn",
   "not",
@@ -13,6 +14,7 @@ const OPERADORES = [
   "contains",
   "startsWith",
   "has",
+  "path",
 ];
 
 function comparar(valor: unknown, op: Record<string, unknown>): boolean {
@@ -33,6 +35,13 @@ function comparar(valor: unknown, op: Record<string, unknown>): boolean {
         .includes(String(x).toLowerCase());
     if (k === "startsWith") return String(valor ?? "").startsWith(String(x));
     if (k === "has") return Array.isArray(valor) && valor.includes(x);
+    if (k === "path") {
+      // Filtro JSON de Prisma: { path: ["input", "cuentaId"], equals: valor }.
+      let nodo: unknown = valor;
+      for (const p of x as string[]) nodo = (nodo as Record<string, unknown> | null)?.[p];
+      return nodo === op["equals"];
+    }
+    if (k === "equals") return "path" in op ? true : valor === x;
     return false;
   });
 }

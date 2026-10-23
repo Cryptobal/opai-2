@@ -1,6 +1,8 @@
 import type { Capacidad } from "../../types";
 import { documentosConfirmarSubida } from "./confirmar";
 import { documentosGet, documentosList } from "./consulta";
+import { documentosMatriz } from "./matriz";
+import { documentosPedirRenovacion } from "./renovacion";
 import { documentosArchive, documentosUpdate, documentosUrlDescarga } from "./gestion";
 import { documentosIniciarSubida } from "./subida";
 import { documentoTiposCreate, documentoTiposList, documentoTiposUpdate } from "./tipos";
@@ -24,4 +26,6 @@ export const capacidadesDocumentos: readonly Capacidad[] = [
   documentosArchive,
   documentosUrlDescarga,
   documentosVencimientos,
+  documentosMatriz,
+  documentosPedirRenovacion,
 ];

@@ -3,6 +3,7 @@
 import { ChevronLeft, Search } from "lucide-react";
 import type { ReactNode } from "react";
 
+import { cn } from "../cn";
 import { Avatar } from "../components/avatar";
 import { Button } from "../components/button";
 import type { ItemMenu } from "../components/menu";
@@ -30,6 +31,8 @@ export type ComunesBarra = {
   /** Abre la búsqueda global (⌘K). Sin ella, no hay búsqueda. */
   onBuscar?: () => void;
   volver?: Volver;
+  /** El "Atrás" solo en teléfono (detalle dentro de una vista dividida en md+). */
+  volverSoloTelefono?: boolean;
   Link?: LinkComponent;
 };
 
@@ -85,7 +88,8 @@ type AppBarProps = ComunesBarra & {
 
 /** iPad y desktop: título (o migas "‹ Cuentas / Logística Andina"), búsqueda ⌘K, campana, usuario y acción principal. 60 px. */
 export function AppBar(props: AppBarProps) {
-  const { titulo, insignia, acciones, usuario, menuUsuario, campana, onBuscar, volver } = props;
+  const { titulo, insignia, acciones, usuario, menuUsuario, campana, onBuscar } = props;
+  const volver = props.volverSoloTelefono ? undefined : props.volver;
   const Link = props.Link ?? LinkPorDefecto;
   return (
     <header className="sticky top-0 z-20 hidden h-[60px] flex-none items-center gap-3 border-b border-border bg-bg/95 px-6 backdrop-blur md:flex xl:px-8">
@@ -105,7 +109,9 @@ export function AppBar(props: AppBarProps) {
             <h1 className="truncate text-md leading-6 font-semibold text-fg">{titulo}</h1>
           </div>
         ) : (
-          <h1 className="t-heading min-w-0 truncate text-fg">{titulo}</h1>
+          <h1 className={cn("t-heading min-w-0 truncate text-fg", insignia && "flex-none")}>
+            {titulo}
+          </h1>
         )}
         {insignia}
       </div>
@@ -115,7 +121,7 @@ export function AppBar(props: AppBarProps) {
             type="button"
             onClick={onBuscar}
             aria-label="Buscar o ir a (⌘K)"
-            className="hidden h-9 w-64 items-center gap-2 rounded-md border border-border bg-surface pr-2 pl-3 text-base text-fg-subtle outline-none hover:border-border-strong focus-visible:outline-2 focus-visible:outline-focus lg:flex"
+            className="hidden h-9 w-64 items-center gap-2 rounded-md border border-border bg-surface pr-2 pl-3 text-base text-fg-subtle outline-none hover:border-border-strong focus-visible:outline-2 focus-visible:outline-focus xl:flex"
           >
             <Search className="size-4" aria-hidden />
             <span className="flex-1 text-left">Buscar o ir a…</span>
@@ -125,7 +131,7 @@ export function AppBar(props: AppBarProps) {
             variant="ghost"
             size="icon"
             aria-label="Buscar"
-            className="lg:hidden"
+            className="xl:hidden"
             onClick={onBuscar}
           >
             <Search className="size-5" />

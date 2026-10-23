@@ -12,5 +12,5 @@ export {
   type PlanillaScreenProps,
   type TonoCelda,
 } from "./planilla-screen";
-export { type ParGrid, ParesGrid, SeccionTarjeta } from "./secciones";
+export { AccionFijaTelefono, type ParGrid, ParesGrid, SeccionTarjeta } from "./secciones";
 export { HerramientasLista, MetaLista, SplitScreen } from "./split-screen";

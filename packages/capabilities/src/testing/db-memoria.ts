@@ -1,11 +1,15 @@
 // Base en memoria para tests de capacidades: imita el subconjunto de Prisma que usan los handlers
 // del núcleo (where por igualdad, `in`, `not`, comparaciones, `contains`, `OR`, claves compuestas,
 // include de relaciones, orderBy, take, groupBy con _count y _sum, createMany con skipDuplicates).
-import { randomUUID } from "node:crypto";
 
 import type { Globales, TenantDb, TenantTx } from "@opai/db";
 
 import { agrupar, cumple, ordenar, type Fila, type Where } from "./db-memoria-util";
+
+// Ids crecientes como uuid(7): el orden por id es el orden de creación, igual que en Postgres.
+let secuencia = 0;
+const idOrdenado = () =>
+  `00000000-0000-7000-8000-${(++secuencia).toString(16).padStart(12, "0")}`;
 
 const RELACIONES: Record<string, Record<string, [tabla: string, clave: string]>> = {
   membership: { user: ["user", "userId"], tenant: ["tenant", "tenantId"] },
@@ -39,7 +43,7 @@ export function dbEnMemoria(semilla: Record<string, Fila[]> = {}) {
       orderBy?: unknown;
     };
     const crear = (data: Fila) => {
-      const fila = { id: randomUUID(), createdAt: new Date(), updatedAt: new Date(), ...data };
+      const fila = { id: idOrdenado(), createdAt: new Date(), updatedAt: new Date(), ...data };
       filas().push(fila);
       return fila;
     };

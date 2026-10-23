@@ -1,4 +1,5 @@
 export * from "./catalogos";
+export * from "./precios-base";
 export * from "./dinero";
 export * from "./documentos";
 export * from "./comunicaciones";
@@ -6,6 +7,7 @@ export * from "./permisos";
 export * from "./vocabulario";
 export * from "./canon";
 export * from "./estructuras";
+export * from "./estructuras-conceptos";
 export * from "./plantillas";
 export * from "./presupuesto";
 export * from "./rut";

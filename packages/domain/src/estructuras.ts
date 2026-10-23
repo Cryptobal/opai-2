@@ -13,13 +13,17 @@ export type ItemEstructura = {
   imponible: boolean;
 };
 
+/**
+ * Un nivel define solo los conceptos que cambia: `null` = hereda del nivel más general
+ * (ADR-005 y diseño "sueldo en tres niveles"). El nivel cargo define todos.
+ */
 export type Estructura = {
   id: string;
   nivel: NivelEstructura;
-  sueldoBase: number;
-  colacion: number;
-  movilizacion: number;
-  gratificacion: Gratificacion;
+  sueldoBase: number | null;
+  colacion: number | null;
+  movilizacion: number | null;
+  gratificacion: Gratificacion | null;
   gratificacionMonto?: number | null;
   vigenteDesde: string;
   vigenteHasta?: string | null;
@@ -84,9 +88,9 @@ export type Haberes = {
   total: CLP;
 };
 
-/** Haberes mensuales de una estructura. Colación y movilización no son imponibles. */
+/** Haberes mensuales de una estructura (sin definir = 0). Colación y movilización no son imponibles. */
 export function haberes(e: Estructura, imm: number): Haberes {
-  const base = clp(e.sueldoBase);
+  const base = clp(e.sueldoBase ?? 0);
   const gratificacion =
     e.gratificacion === "legal_25"
       ? gratificacionLegal(base, imm)
@@ -102,14 +106,16 @@ export function haberes(e: Estructura, imm: number): Haberes {
     else bonosNoImponibles += monto;
   }
   const imponible = clp(base + gratificacion + bonosImponibles);
-  const noImponible = clp(e.colacion + e.movilizacion + bonosNoImponibles);
+  const colacion = e.colacion ?? 0;
+  const movilizacion = e.movilizacion ?? 0;
+  const noImponible = clp(colacion + movilizacion + bonosNoImponibles);
   return {
     sueldoBase: base,
     gratificacion,
     bonosImponibles: clp(bonosImponibles),
     bonosNoImponibles: clp(bonosNoImponibles),
-    colacion: clp(e.colacion),
-    movilizacion: clp(e.movilizacion),
+    colacion: clp(colacion),
+    movilizacion: clp(movilizacion),
     imponible,
     noImponible,
     total: clp(imponible + noImponible),

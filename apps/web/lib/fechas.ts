@@ -67,3 +67,6 @@ export const pesos = (n: number | null | undefined) =>
   n == null ? "—" : formatearCLP(clp(Math.round(n)));
 export const rut = (r: string | null | undefined) => (r ? formatearRut(r) : "—");
 export const telefono = (t: string | null | undefined) => (t ? formatearTelefono(t) : "—");
+
+/** Instante de hace `n` días (ms), para ventanas como "últimos 30 días". */
+export const haceDias = (n: number) => Date.now() - n * 86_400_000;
