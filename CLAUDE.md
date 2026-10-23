@@ -86,6 +86,7 @@ Monorepo de OPAI 2.0: SaaS modular, multi-tenant y agent-first para empresas int
 ## Flujo de trabajo
 
 - Un brief = bloques = commits atómicos con prefijo de ámbito (`infra:`, `core:`, `ds:`, `crm:`, `docs:`…), mensaje en español, imperativo.
+- Cada brief en una rama `brief/NN-<nombre>`; se integra a `main` con rebase solo con CI en verde (incluye `test:db`) y tras la revisión de un subagente independiente (ADR-035). Nunca push directo a `main` con código.
 - No refactorizar fuera del alcance del brief. Si el brief contradice el repo, conservar el objetivo, adaptar y reportar la diferencia.
 - Al terminar un brief: actualizar `docs/2.0/ESTADO.md` (hecho, pendiente, decisiones del bloque, versiones) y reportar: qué se implementó, archivos, validaciones y resultados, riesgos pendientes.
 - Nada se despliega a producción de Gard ni se toca OPAI 1.0 desde aquí.

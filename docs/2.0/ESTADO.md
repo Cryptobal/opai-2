@@ -39,6 +39,7 @@ Este archivo es la fuente de verdad del avance. Cada brief lo actualiza al termi
   - Modelo de cuentas adoptado: `carlos.irigoyen@opai.cl` = operador de la plataforma (Plataforma, sin membresía); `carlos.irigoyen@gard.cl` = owner de Gard (ERP). Las acciones de Grokbot en Gard quedan a nombre de la cuenta de Gard.
 
 - **Brief 01c (principios agénticos operativos) ejecutado** (23-oct): ADR-034 en `01-decisiones.md`; `defineCapability` rechaza descripciones de menos de 40 caracteres (`DESCRIPCION_MINIMA`, con `trim()`), test `packages/capabilities/test/define.test.ts` (5 casos, incluye que las 27 capacidades del núcleo cumplen); fixtures de `execute`, `http`, `mcp` y `module` ajustados; `CLAUDE.md`, `CONTEXTO-agentes.md` (norte, una key por agente, mandato vigente) y `agentes/README.md` actualizados. Gate en verde (169 tests).
+- **Forma de trabajo cambiada (ADR-035, 23-oct):** los briefs se ejecutan desde el chat del proyecto Claude, en rama `brief/NN-<nombre>`, con revisión de un subagente independiente e integración a `main` por rebase cuando CI pasa. Actualizados `INSTRUCCIONES-proyecto-claude.md` (sección Ejecución), `CONTEXTO-agentes.md` y `CLAUDE.md`. Carlos debe pegar las instrucciones nuevas en el proyecto de claude.ai.
 
 ## En curso
 
