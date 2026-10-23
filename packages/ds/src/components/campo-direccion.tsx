@@ -49,6 +49,7 @@ export function CampoDireccion({
   error,
 }: Props) {
   const [manual, setManual] = useState(false);
+  const idError = `${id ?? "direccion"}-error`;
   if (manual) {
     const cambiar = (k: keyof Direccion, v: string) =>
       onCambiar({ ...(valor ?? { calle: "" }), [k]: v, placeId: null, lat: null, lng: null });
@@ -95,7 +96,7 @@ export function CampoDireccion({
         buscarPlaceholder="Calle y número"
         aria-label="Dirección"
         invalido={Boolean(error)}
-        {...(error ? { "aria-describedby": `${id ?? "direccion"}-error` } : {})}
+        aria-describedby={error ? idError : undefined}
         onBuscar={buscar}
         onCambiar={async ([placeId]) => {
           if (!placeId) return;
@@ -103,7 +104,7 @@ export function CampoDireccion({
         }}
       />
       {error ? (
-        <p id={`${id ?? "direccion"}-error`} role="alert" className="t-caption text-danger-fg">
+        <p id={idError} role="alert" className="t-caption text-danger-fg">
           {error}
         </p>
       ) : null}
