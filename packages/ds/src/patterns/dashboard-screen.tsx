@@ -6,7 +6,7 @@ import { Cabecera, Estado, type EstadoPantalla, type TextosEstado } from "./esta
 export type Kpi = {
   etiqueta: string;
   valor: string;
-  variacion?: { texto: string; tono: "success" | "danger" | "neutro" };
+  variacion?: { texto: string; tono: "success" | "danger" | "warning" | "neutro" };
 };
 
 export type DashboardScreenProps = {

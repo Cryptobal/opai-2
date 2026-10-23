@@ -1,54 +1,70 @@
 import type { ReactNode } from "react";
 
 import { cn } from "../cn";
-import { BottomNav, SideNav } from "./nav";
-import { TopBar } from "./top-bar";
-import type { LinkComponent, NavItem, Portal } from "./types";
+import { BottomNav, Rail } from "./nav";
+import { Sidebar } from "./sidebar";
+import { AppBar, TopBarTelefono } from "./top-bar";
+import type { LinkComponent, NavItem, Portal, Tenant, Usuario } from "./types";
 
 export type AppShellProps = {
+  /** Título de la página: va en la barra superior de iPad y desktop. En teléfono lo muestra el patrón
+   *  (que recibe el mismo título y lo oculta en md+). */
   titulo: string;
   nav: readonly NavItem[];
   portales: readonly Portal[];
   portalActual: string;
   rutaActual: string;
-  usuario?: { nombre: string; iniciales: string };
-  accionesTopBar?: ReactNode;
+  tenant?: Tenant;
+  usuario?: Usuario;
+  notificaciones?: number;
   Link?: LinkComponent;
   children: ReactNode;
   className?: string;
 };
 
 /**
- * Shell de OPAI 2.0 (ADR-007): barra superior, navegación inferior en teléfono,
- * riel en iPad, barra lateral en desktop. Desktop es el mismo diseño con más espacio.
+ * Shell de OPAI 2.0 (ADR-007, diseño aprobado): barra superior con selector de portal y navegación
+ * inferior en teléfono; riel en iPad; barra lateral en desktop. Desktop es el mismo diseño con más espacio.
  */
-export function AppShell({
-  titulo,
-  nav,
-  portales,
-  portalActual,
-  rutaActual,
-  usuario,
-  accionesTopBar,
-  Link,
-  children,
-  className,
-}: AppShellProps) {
+export function AppShell(props: AppShellProps) {
+  const {
+    titulo,
+    nav,
+    portales,
+    portalActual,
+    rutaActual,
+    tenant,
+    usuario,
+    notificaciones,
+    Link,
+    children,
+    className,
+  } = props;
+  const comunes = {
+    portales,
+    portalActual,
+    ...(tenant ? { tenant } : {}),
+    ...(usuario ? { usuario } : {}),
+    ...(notificaciones ? { notificaciones } : {}),
+  };
   const linkProps = Link ? { Link } : {};
   return (
-    <div className="min-h-dvh bg-bg text-fg antialiased">
-      <TopBar
-        titulo={titulo}
+    <div className="flex min-h-dvh bg-bg text-fg">
+      <Rail
+        items={nav}
+        rutaActual={rutaActual}
         portales={portales}
         portalActual={portalActual}
-        {...(usuario ? { usuario } : {})}
-        {...(accionesTopBar ? { acciones: accionesTopBar } : {})}
+        {...(tenant ? { tenant } : {})}
+        {...linkProps}
       />
-      <div className="mx-auto flex w-full max-w-[1280px]">
-        <SideNav items={nav} rutaActual={rutaActual} {...linkProps} />
+      <Sidebar items={nav} rutaActual={rutaActual} {...comunes} {...linkProps} />
+      <div className="flex min-w-0 flex-1 flex-col">
+        <TopBarTelefono {...comunes} />
+        <AppBar titulo={titulo} {...comunes} />
         <main
           className={cn(
-            "min-w-0 flex-1 px-4 py-4 pb-[calc(4rem+16px+env(safe-area-inset-bottom))] md:px-6 md:pb-8 xl:px-8",
+            "mx-auto w-full max-w-[1280px] flex-1 px-4 pt-1 pb-[calc(56px+16px+env(safe-area-inset-bottom))] md:px-6 md:pt-5 md:pb-8 xl:px-8",
             className,
           )}
         >

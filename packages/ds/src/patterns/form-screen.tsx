@@ -15,7 +15,7 @@ export type FormScreenProps = {
   titulo: string;
   subtitulo?: string;
   secciones: readonly SeccionFormulario[];
-  /** Botones: fijos abajo en teléfono, a la derecha en md+. */
+  /** Botones: fijos abajo en teléfono (48px), a la derecha en md+. */
   acciones: ReactNode;
   /** Resumen (totales) visible junto a las acciones. */
   resumen?: ReactNode;
@@ -41,19 +41,23 @@ export function FormScreen({
         <form {...formProps} className={cn("flex flex-col gap-4", formProps?.className)}>
           {secciones.map((s) => (
             <fieldset key={s.id} className="rounded-lg border border-border bg-surface p-4">
-              <legend className="px-1 text-md font-semibold text-fg">{s.titulo}</legend>
-              {s.descripcion ? <p className="mb-3 text-sm text-fg-muted">{s.descripcion}</p> : null}
+              <legend className="t-subheading px-1 text-fg">{s.titulo}</legend>
+              {s.descripcion ? <p className="t-caption mb-3">{s.descripcion}</p> : null}
               <div className="flex flex-col gap-4">{s.contenido}</div>
             </fieldset>
           ))}
           <div
             className={cn(
-              "sticky bottom-[calc(4rem+env(safe-area-inset-bottom))] z-10 -mx-4 flex flex-col gap-3 border-t border-border bg-surface/95 px-4 py-3 backdrop-blur",
-              "md:static md:mx-0 md:flex-row md:items-center md:justify-end md:rounded-lg md:border",
+              "sticky bottom-[calc(56px+env(safe-area-inset-bottom))] z-10 -mx-4 flex flex-col gap-3 border-t border-border bg-bg/95 px-4 py-3 backdrop-blur",
+              "md:static md:mx-0 md:flex-row md:items-center md:justify-end md:rounded-lg md:border md:bg-surface md:py-3",
             )}
           >
-            {resumen ? <div className="text-base text-fg md:mr-auto">{resumen}</div> : null}
-            <div className="flex gap-2 [&>*]:flex-1 md:[&>*]:flex-none">{acciones}</div>
+            {resumen ? (
+              <div className="t-numeric text-base font-normal text-fg md:mr-auto">{resumen}</div>
+            ) : null}
+            <div className="flex gap-2 [&>*]:h-12 [&>*]:flex-1 md:[&>*]:h-10 md:[&>*]:flex-none">
+              {acciones}
+            </div>
           </div>
         </form>
       </Estado>

@@ -1,105 +1,146 @@
-/* PROVISIONAL — reemplazar con los tokens aprobados en Claude Design (Brief 00b).
-   No agregar colores aquí ni en ningún otro lugar. Este es el ÚNICO archivo del repo
-   con valores de color (ADR-013). Los componentes usan solo los nombres semánticos. */
+/* DS 2.0 — Fundamentos aprobados en Claude Design el 23-oct-2026 (ADR-013, ADR-014).
+   Este es el ÚNICO archivo del repo con valores de color. Los componentes usan solo
+   los nombres semánticos. Referencia visual: docs/2.0/design/export-ds-2.0/. */
 
 :root {
-  /* Escala de neutros, 10 pasos (provisional, oklch sin tinte) */
-  --ds-gris-0: oklch(99.5% 0 0);
-  --ds-gris-1: oklch(97.5% 0 0);
-  --ds-gris-2: oklch(94% 0 0);
-  --ds-gris-3: oklch(89% 0 0);
-  --ds-gris-4: oklch(80% 0 0);
-  --ds-gris-5: oklch(65% 0 0);
-  --ds-gris-6: oklch(50% 0 0);
-  --ds-gris-7: oklch(38% 0 0);
-  --ds-gris-8: oklch(27% 0 0);
-  --ds-gris-9: oklch(18% 0 0);
-  --ds-gris-10: oklch(12% 0 0);
+  /* Escala neutra, 10 pasos + anclas 0 / 950 */
+  --ds-n-0: #ffffff;
+  --ds-n-50: #fafafa;
+  --ds-n-100: #f4f4f5;
+  --ds-n-200: #e7e7ea;
+  --ds-n-300: #d4d4d8;
+  --ds-n-400: #a1a1aa;
+  --ds-n-500: #71717a;
+  --ds-n-600: #52525b;
+  --ds-n-700: #3f3f46;
+  --ds-n-800: #27272a;
+  --ds-n-900: #18181b;
+  --ds-n-950: #0b0b0c;
 
   /* Semánticos — modo claro */
-  --ds-bg: var(--ds-gris-1);
-  --ds-surface: var(--ds-gris-0);
-  --ds-surface-raised: var(--ds-gris-0);
-  --ds-border: var(--ds-gris-3);
-  --ds-border-strong: var(--ds-gris-4);
-  --ds-fg: var(--ds-gris-10);
-  --ds-fg-muted: var(--ds-gris-6);
-  --ds-fg-subtle: var(--ds-gris-5);
+  --ds-bg: #fafafa;
+  --ds-surface: #ffffff;
+  --ds-surface-raised: #ffffff;
+  --ds-fill: #f4f4f5; /* relleno suave: ítem activo, segmentado, badge neutro, skeleton */
+  --ds-border: #e7e7ea;
+  --ds-border-strong: #d4d4d8;
+  --ds-fg: #111113; /* 18.9:1 sobre surface · AAA */
+  --ds-fg-muted: #52525b; /* 7.7:1 · AAA */
+  --ds-fg-subtle: #6b6b74; /* 5.3:1 · AA (captions) */
+  --ds-inverse-bg: #18181b; /* toast, monograma de tenant */
+  --ds-inverse-fg: #fafafa;
 
-  /* Acento temporal: solo acción principal y foco */
-  --ds-accent: oklch(52% 0.16 255);
-  --ds-accent-fg: oklch(99.5% 0 0);
-  --ds-accent-muted: oklch(94% 0.03 255);
-  --ds-focus: oklch(62% 0.18 255);
+  --ds-accent: #4a3fd8; /* Índigo OPAI · blanco encima 7.0:1 */
+  --ds-accent-fg: #ffffff;
+  --ds-accent-muted: #eeedfc;
+  --ds-focus: #4a3fd8;
 
-  --ds-success: oklch(55% 0.14 150);
-  --ds-success-fg: oklch(99.5% 0 0);
-  --ds-success-muted: oklch(95% 0.04 150);
-  --ds-warning: oklch(70% 0.15 75);
-  --ds-warning-fg: oklch(20% 0.03 75);
-  --ds-warning-muted: oklch(96% 0.05 85);
-  --ds-danger: oklch(55% 0.19 25);
-  --ds-danger-fg: oklch(99.5% 0 0);
-  --ds-danger-muted: oklch(95% 0.04 25);
-  --ds-info: oklch(55% 0.12 240);
-  --ds-info-fg: oklch(99.5% 0 0);
-  --ds-info-muted: oklch(95% 0.03 240);
+  --ds-success: #16a34a;
+  --ds-success-fg: #166534;
+  --ds-success-muted: #ebf7ef;
+  --ds-warning: #d97706;
+  --ds-warning-fg: #92400e;
+  --ds-warning-muted: #fdf4e3;
+  --ds-danger: #dc2626;
+  --ds-danger-fg: #b42318;
+  --ds-danger-muted: #fdecec;
+  --ds-info: #0284c7;
+  --ds-info-fg: #075985;
+  --ds-info-muted: #e8f4fa;
+
+  /* Forma y superficie */
+  --ds-shadow-overlay: 0 12px 32px -8px rgba(17, 17, 19, 0.18), 0 2px 6px rgba(17, 17, 19, 0.06);
+  --ds-scrim: rgba(11, 11, 12, 0.32);
+
+  /* Movimiento */
+  --ds-ease: cubic-bezier(0.2, 0, 0, 1);
+  --ds-dur-fast: 150ms;
+  --ds-dur: 200ms;
 
   color-scheme: light;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --ds-bg: var(--ds-gris-10);
-    --ds-surface: var(--ds-gris-9);
-    --ds-surface-raised: var(--ds-gris-8);
-    --ds-border: var(--ds-gris-8);
-    --ds-border-strong: var(--ds-gris-7);
-    --ds-fg: var(--ds-gris-0);
-    --ds-fg-muted: var(--ds-gris-4);
-    --ds-fg-subtle: var(--ds-gris-5);
-    --ds-accent: oklch(72% 0.14 255);
-    --ds-accent-fg: oklch(15% 0.03 255);
-    --ds-accent-muted: oklch(30% 0.05 255);
-    --ds-focus: oklch(75% 0.16 255);
-    --ds-success-muted: oklch(28% 0.05 150);
-    --ds-warning-muted: oklch(30% 0.06 80);
-    --ds-danger-muted: oklch(28% 0.06 25);
-    --ds-info-muted: oklch(28% 0.05 240);
+    --ds-bg: #0b0b0c;
+    --ds-surface: #141416;
+    --ds-surface-raised: #1b1b1e;
+    --ds-fill: #202024;
+    --ds-border: #26262a;
+    --ds-border-strong: #34343a;
+    --ds-fg: #f4f4f5; /* 16.7:1 · AAA */
+    --ds-fg-muted: #a1a1aa; /* 7.2:1 · AAA */
+    --ds-fg-subtle: #8a8a93; /* 5.4:1 · AA */
+    --ds-inverse-bg: #f4f4f5;
+    --ds-inverse-fg: #0b0b0c;
+    --ds-accent: #8e88ff; /* texto oscuro encima 6.7:1 */
+    --ds-accent-fg: #0b0b0c;
+    --ds-accent-muted: #1d1b3a;
+    --ds-focus: #ada8ff;
+    --ds-success: #22c55e;
+    --ds-success-fg: #4ade80;
+    --ds-success-muted: #10261a;
+    --ds-warning: #f59e0b;
+    --ds-warning-fg: #fbbf24;
+    --ds-warning-muted: #2a2009;
+    --ds-danger: #ef4444;
+    --ds-danger-fg: #f87171;
+    --ds-danger-muted: #2c1313;
+    --ds-info: #38bdf8;
+    --ds-info-fg: #7dd3fc;
+    --ds-info-muted: #0c2230;
+    --ds-shadow-overlay: 0 16px 40px -8px rgba(0, 0, 0, 0.6), 0 0 0 1px #26262a;
+    --ds-scrim: rgba(0, 0, 0, 0.56);
     color-scheme: dark;
   }
 }
 
 :root[data-theme="dark"] {
-  --ds-bg: var(--ds-gris-10);
-  --ds-surface: var(--ds-gris-9);
-  --ds-surface-raised: var(--ds-gris-8);
-  --ds-border: var(--ds-gris-8);
-  --ds-border-strong: var(--ds-gris-7);
-  --ds-fg: var(--ds-gris-0);
-  --ds-fg-muted: var(--ds-gris-4);
-  --ds-fg-subtle: var(--ds-gris-5);
-  --ds-accent: oklch(72% 0.14 255);
-  --ds-accent-fg: oklch(15% 0.03 255);
-  --ds-accent-muted: oklch(30% 0.05 255);
-  --ds-focus: oklch(75% 0.16 255);
-  --ds-success-muted: oklch(28% 0.05 150);
-  --ds-warning-muted: oklch(30% 0.06 80);
-  --ds-danger-muted: oklch(28% 0.06 25);
-  --ds-info-muted: oklch(28% 0.05 240);
+  --ds-bg: #0b0b0c;
+  --ds-surface: #141416;
+  --ds-surface-raised: #1b1b1e;
+  --ds-fill: #202024;
+  --ds-border: #26262a;
+  --ds-border-strong: #34343a;
+  --ds-fg: #f4f4f5;
+  --ds-fg-muted: #a1a1aa;
+  --ds-fg-subtle: #8a8a93;
+  --ds-inverse-bg: #f4f4f5;
+  --ds-inverse-fg: #0b0b0c;
+  --ds-accent: #8e88ff;
+  --ds-accent-fg: #0b0b0c;
+  --ds-accent-muted: #1d1b3a;
+  --ds-focus: #ada8ff;
+  --ds-success: #22c55e;
+  --ds-success-fg: #4ade80;
+  --ds-success-muted: #10261a;
+  --ds-warning: #f59e0b;
+  --ds-warning-fg: #fbbf24;
+  --ds-warning-muted: #2a2009;
+  --ds-danger: #ef4444;
+  --ds-danger-fg: #f87171;
+  --ds-danger-muted: #2c1313;
+  --ds-info: #38bdf8;
+  --ds-info-fg: #7dd3fc;
+  --ds-info-muted: #0c2230;
+  --ds-shadow-overlay: 0 16px 40px -8px rgba(0, 0, 0, 0.6), 0 0 0 1px #26262a;
+  --ds-scrim: rgba(0, 0, 0, 0.56);
   color-scheme: dark;
 }
 
-/* Tailwind v4: utilidades `bg-surface`, `text-fg-muted`, `border-border`, `bg-accent`… */
+/* Tailwind v4: utilidades `bg-surface`, `text-fg-muted`, `border-border`, `bg-accent`, `rounded-md`… */
 @theme inline {
   --color-bg: var(--ds-bg);
   --color-surface: var(--ds-surface);
   --color-surface-raised: var(--ds-surface-raised);
+  --color-fill: var(--ds-fill);
   --color-border: var(--ds-border);
   --color-border-strong: var(--ds-border-strong);
   --color-fg: var(--ds-fg);
   --color-fg-muted: var(--ds-fg-muted);
   --color-fg-subtle: var(--ds-fg-subtle);
+  --color-inverse-bg: var(--ds-inverse-bg);
+  --color-inverse-fg: var(--ds-inverse-fg);
   --color-accent: var(--ds-accent);
   --color-accent-fg: var(--ds-accent-fg);
   --color-accent-muted: var(--ds-accent-muted);
@@ -116,23 +157,40 @@
   --color-info: var(--ds-info);
   --color-info-fg: var(--ds-info-fg);
   --color-info-muted: var(--ds-info-muted);
+  --color-scrim: var(--ds-scrim);
 
-  /* Tipografía provisional: fuente del sistema hasta que el diseño defina la familia */
-  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  /* Tipografía: Inter (texto) y JetBrains Mono (RUT, folios, montos en planillas) */
+  --font-sans:
+    "Inter Variable", "Inter", ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono:
+    "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* Escala: tamaño / interlínea */
   --text-xs: 12px;
+  --text-xs--line-height: 16px;
   --text-sm: 13px;
+  --text-sm--line-height: 18px;
   --text-base: 14px;
+  --text-base--line-height: 20px;
   --text-md: 16px;
+  --text-md--line-height: 24px;
   --text-lg: 18px;
+  --text-lg--line-height: 26px;
   --text-xl: 22px;
+  --text-xl--line-height: 28px;
   --text-2xl: 28px;
+  --text-2xl--line-height: 34px;
   --text-3xl: 36px;
+  --text-3xl--line-height: 40px;
 
   --radius-sm: 6px;
   --radius-md: 10px;
   --radius-lg: 16px;
+  --radius-xl: 20px;
 
-  /* Sin sombras en reposo; una sola para overlays */
-  --shadow-overlay: 0 12px 32px -8px oklch(0% 0 0 / 0.25);
+  --shadow-overlay: var(--ds-shadow-overlay);
+
+  --ease-ds: var(--ds-ease);
+  --default-transition-duration: 150ms;
+  --default-transition-timing-function: var(--ds-ease);
 }

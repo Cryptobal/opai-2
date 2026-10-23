@@ -21,12 +21,13 @@ export type PlanillaScreenProps = {
   textos?: TextosEstado;
 };
 
+/* Códigos de turno del diseño: D info, N acento, L libre (sin fondo), V success, X danger (sin cubrir). */
 const TONO: Record<TonoCelda, string> = {
-  neutro: "bg-surface text-fg",
-  success: "bg-success-muted text-success",
+  neutro: "bg-transparent text-fg-subtle font-normal",
+  success: "bg-success-muted text-success-fg",
   warning: "bg-warning-muted text-warning-fg",
-  danger: "bg-danger-muted text-danger",
-  info: "bg-info-muted text-info",
+  danger: "bg-danger-muted text-danger-fg shadow-[inset_0_0_0_1px_var(--ds-danger)]",
+  info: "bg-info-muted text-info-fg",
   accent: "bg-accent-muted text-accent",
 };
 
@@ -62,15 +63,15 @@ export function PlanillaScreen({
           <table className="border-separate border-spacing-0 text-sm">
             <thead>
               <tr>
-                <th className="sticky top-0 left-0 z-20 min-w-40 border-b border-r border-border bg-surface px-3 py-2 text-left font-medium text-fg-muted">
+                <th className="sticky top-0 left-0 z-20 min-w-40 border-r border-b border-border bg-surface px-3 py-2 text-left text-xs font-medium text-fg-subtle">
                   &nbsp;
                 </th>
                 {columnas.map((c) => (
                   <th
                     key={c.id}
                     className={cn(
-                      "sticky top-0 z-10 min-w-10 border-b border-border bg-surface px-1 py-2 text-center font-medium tabular-nums",
-                      c.destacada ? "text-accent" : "text-fg-muted",
+                      "t-numeric sticky top-0 z-10 min-w-10 border-b border-border bg-surface px-1 py-2 text-center text-xs",
+                      c.destacada ? "text-accent" : "text-fg-subtle",
                     )}
                   >
                     {c.etiqueta}
@@ -81,7 +82,7 @@ export function PlanillaScreen({
             <tbody>
               {filas.map((f) => (
                 <tr key={f.id}>
-                  <th className="sticky left-0 z-10 border-b border-r border-border bg-surface px-3 py-1.5 text-left font-medium text-fg">
+                  <th className="sticky left-0 z-10 border-r border-b border-border bg-surface px-3 py-1.5 text-left text-base font-medium text-fg">
                     <div className="truncate">{f.etiqueta}</div>
                     {f.sub ? (
                       <div className="text-xs font-normal text-fg-muted">{f.sub}</div>

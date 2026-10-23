@@ -22,7 +22,7 @@ Monorepo de OPAI 2.0: SaaS modular, multi-tenant y agent-first para empresas int
 - `packages/db`: Prisma 7 con `@prisma/adapter-pg`. Esquemas en `prisma/schema/` (`core.prisma` + uno por módulo). `forTenant(tenantId)` fija `app.tenant_id` por transacción; `dbAdmin()` solo para scripts.
 - `packages/domain`: lógica pura (dinero, tiempo, cálculos) con tests. Sin Next, React ni base de datos.
 - `packages/capabilities`: `defineCapability`, registro, `executeCapability`, handler HTTP, `defineModule`, `registrarModulos`.
-- `packages/ds`: DS 2.0. `tokens.css` (único archivo con colores; PROVISIONAL hasta el Brief 00b), componentes, `AppShell`, patrones y estados.
+- `packages/ds`: DS 2.0 aprobado (ADR-014). `tokens.css` (único archivo con colores), `styles.css` (base y estilos `t-*`), componentes, `AppShell`, patrones y estados. Referencia visual: `docs/2.0/design/export-ds-2.0/`.
 - `packages/integrations`: adaptadores (DTE, banco, factoring, mensajería, biometría). Vacío en el Brief 00.
 - `modules/<id>`: módulos vendibles; `modules/registry` (`@opai/modules`) los lista.
 - `scripts/`: generador de módulos y utilidades.
@@ -56,7 +56,8 @@ Monorepo de OPAI 2.0: SaaS modular, multi-tenant y agent-first para empresas int
 ## UI
 
 - Solo tokens y componentes de `@opai/ds`. Sin hex, sin estilos inline, sin componentes propios por módulo cuando el DS tiene uno. `grep -rn "#[0-9a-fA-F]\{6\}" apps packages modules --include=*.tsx --include=*.ts --include=*.css` debe devolver solo `tokens.css`.
-- Patrones de pantalla: `ListScreen`, `DetailScreen`, `FormScreen`, `PlanillaScreen`, `DashboardScreen`, siempre con `state` y los estados loading, vacío, error y sin permisos.
+- Patrones de pantalla: `ListScreen`, `DetailScreen`, `FormScreen`, `PlanillaScreen`, `DashboardScreen`, siempre con `state` y los estados loading, vacío, error y sin permisos. Tipografía solo con los estilos `t-*` o la escala del DS; nunca tamaños arbitrarios.
+- En iPad y desktop el título de la página va en el `AppShell` (`titulo`); el patrón recibe el mismo título y lo muestra solo en teléfono. La acción principal va en el patrón.
 - Mobile e iPad first: diseñar y verificar a 375px y 1024px antes que desktop. Touch targets ≥44px. Safe-area iOS. Los nombres de carpeta con `_` no son rutas en App Router.
 - Las pantallas nuevas pasan por Claude Design (Design Prompt → diseño aprobado → brief) antes de implementarse.
 

@@ -11,24 +11,26 @@ export function BloqueDetalle({ state }: { state: EstadoPantalla }) {
         state={state}
         titulo="Planta Quilicura"
         subtitulo="Logística Andina SpA · Av. Eduardo Frei Montalva 9400, Quilicura"
-        estado={<Badge tono="success">Activa</Badge>}
+        estado={
+          <>
+            <Badge tono="success">Operativa</Badge>
+            <span className="text-sm text-fg-subtle">desde 01-03-2024</span>
+          </>
+        }
         acciones={<Button variant="secondary">Editar</Button>}
         tabs={[
           {
             id: "resumen",
             etiqueta: "Resumen",
             contenido: (
-              <div className="grid gap-4 lg:grid-cols-2">
+              <div className="grid gap-6 lg:grid-cols-2">
                 <Seccion titulo="Contrato">
                   <Pares
                     items={[
                       { etiqueta: "Cliente", valor: "Logística Andina SpA" },
                       { etiqueta: "Inicio", valor: "01-03-2025" },
                       { etiqueta: "Puestos", valor: "5" },
-                      {
-                        etiqueta: "Valor mensual",
-                        valor: <span className="tabular-nums">$ 18.450.000</span>,
-                      },
+                      { etiqueta: "Valor mensual", valor: "$ 18.450.000", numerico: true },
                     ]}
                   />
                 </Seccion>

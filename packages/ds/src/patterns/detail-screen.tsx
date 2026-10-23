@@ -8,7 +8,7 @@ export type DetailScreenProps = {
   state: EstadoPantalla;
   titulo: string;
   subtitulo?: string;
-  /** Badge de estado de la entidad. */
+  /** Badge de estado (va sobre el título, con un texto corto opcional como "desde 01-03-2024"). */
   estado?: ReactNode;
   acciones?: ReactNode;
   tabs?: readonly Tab[];
@@ -16,7 +16,7 @@ export type DetailScreenProps = {
   textos?: TextosEstado;
 };
 
-/** Detalle: cabecera con título, estado y acciones; tabs; secciones. */
+/** Detalle: estado y título, subtítulo, acciones; tabs; secciones de pares etiqueta–valor. */
 export function DetailScreen({
   state,
   titulo,
@@ -31,13 +31,10 @@ export function DetailScreen({
     <section>
       <Cabecera
         titulo={titulo}
+        tituloSiempre
         {...(subtitulo ? { subtitulo } : {})}
-        acciones={
-          <>
-            {estado}
-            {acciones}
-          </>
-        }
+        {...(estado ? { sobre: estado } : {})}
+        {...(acciones ? { acciones } : {})}
       />
       <Estado state={state} variante="detalle" {...(textos ? { textos } : {})}>
         {tabs && tabs.length > 0 ? <Tabs tabs={tabs} /> : children}
@@ -56,23 +53,25 @@ export function Seccion({
   className?: string;
 }) {
   return (
-    <section className={cn("rounded-lg border border-border bg-surface p-4", className)}>
-      <h3 className="mb-3 text-sm font-medium uppercase tracking-wide text-fg-muted">{titulo}</h3>
+    <section className={cn("min-w-0", className)}>
+      <h3 className="t-label mb-1 text-fg">{titulo}</h3>
       {children}
     </section>
   );
 }
 
-export type Par = { etiqueta: string; valor: ReactNode };
+export type Par = { etiqueta: string; valor: ReactNode; numerico?: boolean };
 
-/** Pares etiqueta–valor: una columna en teléfono, dos en md+. */
+/** Filas etiqueta–valor con divisor: etiqueta a la izquierda (muted), valor a la derecha. */
 export function Pares({ items }: { items: readonly Par[] }) {
   return (
-    <dl className="grid grid-cols-1 gap-x-6 gap-y-3 md:grid-cols-2">
+    <dl className="divide-y divide-border">
       {items.map((p) => (
-        <div key={p.etiqueta} className="flex flex-col gap-0.5">
-          <dt className="text-sm text-fg-muted">{p.etiqueta}</dt>
-          <dd className="text-base text-fg">{p.valor}</dd>
+        <div key={p.etiqueta} className="flex min-h-10 items-center justify-between gap-4 py-2">
+          <dt className="shrink-0 text-base text-fg-muted">{p.etiqueta}</dt>
+          <dd className={cn("min-w-0 text-right text-base text-fg", p.numerico && "t-numeric")}>
+            {p.valor}
+          </dd>
         </div>
       ))}
     </dl>

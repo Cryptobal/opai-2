@@ -1,6 +1,8 @@
+export { Avatar, type AvatarProps, iniciales, Monograma } from "./avatar";
 export { Badge, type BadgeProps } from "./badge";
 export { Button, type ButtonProps } from "./button";
 export { Card, CardContent, CardHeader, CardTitle, KpiTile } from "./card";
+export { Chip, ChipAgregar } from "./chip";
 export { Campo, Input, Select, Textarea } from "./input";
 export { Sheet } from "./sheet";
 export { Skeleton } from "./skeleton";

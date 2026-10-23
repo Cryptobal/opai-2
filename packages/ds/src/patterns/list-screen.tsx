@@ -22,7 +22,7 @@ export type ListScreenProps<T> = {
   paginacion?: ReactNode;
   items: readonly T[];
   clave: (item: T) => string;
-  /** Tarjeta por ítem en teléfono. */
+  /** Fila-tarjeta por ítem en teléfono (avatar, título, línea secundaria, badge). */
   tarjeta: (item: T) => ReactNode;
   /** Columnas de la tabla en md+. */
   columnas: readonly Columna<T>[];
@@ -30,7 +30,7 @@ export type ListScreenProps<T> = {
   textos?: TextosEstado;
 };
 
-/** Lista: cabecera con acción principal, búsqueda, filtros, tarjetas en base y tabla en md+. */
+/** Lista: cabecera con acción principal, búsqueda, chips de filtro, filas en base y tabla en md+. */
 export function ListScreen<T>(props: ListScreenProps<T>) {
   const {
     state,
@@ -56,21 +56,25 @@ export function ListScreen<T>(props: ListScreenProps<T>) {
         {...(accionPrincipal ? { acciones: accionPrincipal } : {})}
       />
       {buscador || filtros ? (
-        <div className="mb-4 flex flex-col gap-3 md:flex-row md:items-center">
-          {buscador ? <div className="md:max-w-sm md:flex-1">{buscador}</div> : null}
-          {filtros ? <div className="flex flex-wrap gap-2">{filtros}</div> : null}
+        <div className="mb-3 flex flex-col gap-3 md:flex-row md:items-center">
+          {buscador ? <div className="md:w-72">{buscador}</div> : null}
+          {filtros ? (
+            <div className="-mx-4 flex gap-2 overflow-x-auto px-4 md:mx-0 md:flex-wrap md:px-0">
+              {filtros}
+            </div>
+          ) : null}
         </div>
       ) : null}
       <Estado state={vacio} variante="lista" {...(textos ? { textos } : {})}>
-        <ul className="flex flex-col gap-2 md:hidden">
+        <ul className="-mx-4 border-y border-border bg-surface md:hidden">
           {items.map((item) => (
-            <li key={clave(item)}>
+            <li key={clave(item)} className="border-b border-border last:border-b-0">
               <button
                 type="button"
                 onClick={onSeleccionar ? () => onSeleccionar(item) : undefined}
                 className={cn(
-                  "w-full rounded-lg border border-border bg-surface p-4 text-left",
-                  onSeleccionar && "active:bg-bg",
+                  "flex w-full items-start gap-3 px-4 py-3.5 text-left",
+                  onSeleccionar && "active:bg-fill",
                 )}
               >
                 {tarjeta(item)}
@@ -106,7 +110,11 @@ export function ListScreen<T>(props: ListScreenProps<T>) {
             </tbody>
           </Table>
         </div>
-        {paginacion ? <div className="mt-4 flex justify-end">{paginacion}</div> : null}
+        {paginacion ? (
+          <div className="mt-3 flex items-center justify-between text-base text-fg-muted">
+            {paginacion}
+          </div>
+        ) : null}
       </Estado>
     </section>
   );

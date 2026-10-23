@@ -78,13 +78,15 @@ const CODIGOS: Celda[] = [
   { texto: "D", tono: "info", detalle: "Turno día 08:00–20:00" },
   { texto: "N", tono: "accent", detalle: "Turno noche 20:00–08:00" },
   { texto: "L", tono: "neutro", detalle: "Libre" },
-  { texto: "V", tono: "warning", detalle: "Vacaciones" },
+  { texto: "V", tono: "success", detalle: "Vacaciones" },
+  { texto: "X", tono: "danger", detalle: "Sin cubrir" },
 ];
 
 export function celdaPauta(filaId: string, columnaId: string): Celda | null {
   const f = Number(filaId.slice(1));
   const d = Number(columnaId.slice(1));
   if (f === 4 && d % 7 === 0) return null;
+  if (f === 2 && d === 12) return CODIGOS[4] as Celda;
   const patron = (f * 3 + d) % 8;
   return patron < 4
     ? (CODIGOS[0] as Celda)

@@ -133,3 +133,20 @@ Una entrada por decisión. Las decisiones no se editan: si cambian, se agrega un
 **Decisión.** DS 2.0 no hereda tokens, colores ni tipografía de 1.0. Sus fundamentos (color, tipografía, espaciado, radios, elevación, densidad, modo claro y oscuro) se definen en Claude Design a partir de `docs/2.0/design/DESIGN-PROMPT-ds-2.0-fundamentos.md`, se aprueban por Carlos y se traducen a `packages/ds/src/tokens.css` con nombres semánticos. Mientras el diseño no esté aprobado, el Brief 00 construye la estructura del DS sobre un set de tokens provisional neutro en escala de grises, marcado como provisional. El cambio a los tokens definitivos se hace en un brief corto (00b) sin tocar la estructura: `tokens.css`, fuentes y los ajustes de variantes que el diseño aprobado exija. Se mantienen: nombres semánticos, prohibición de hex fuera de `tokens.css`, los cinco patrones y los cuatro estados.
 
 **Consecuencias.** El diseño se decide una vez para todos los módulos; ningún módulo define colores ni tipografía. El Brief 00 no depende de la aprobación del diseño y puede ejecutarse en paralelo. La estética de 1.0 (paleta slate con acento teal, tono "industrial") queda descartada como referencia.
+
+---
+
+## ADR-014 · Fundamentos del DS 2.0 aprobados
+
+**Fecha:** 23-oct-2026 · **Estado:** vigente · **Completa** ADR-013.
+
+**Decisión.** Carlos aprobó en Claude Design los fundamentos del DS 2.0 (export en `docs/2.0/design/export-ds-2.0/`). Valores fijados en `packages/ds/src/tokens.css`:
+
+- Tipografía: Inter (texto, con `cv11` y `ss01`) y JetBrains Mono (RUT, folios, montos en planillas), autoalojadas vía fontsource. Escala 12/13/14/16/18/22/28/36 con interlíneas definidas y estilos `t-display`, `t-title`, `t-heading`, `t-subheading`, `t-body`, `t-body-sm`, `t-label`, `t-label-sm`, `t-caption`, `t-overline`, `t-numeric`, `t-mono`.
+- Color: neutros de 12 pasos; acento índigo `#4A3FD8` (claro) / `#8E88FF` (oscuro); semánticos success/warning/danger/info con variantes `-fg` y `-muted`; `fill` para ítem activo, segmentado, badge neutro y skeleton; `inverse-bg/fg` para toast y monograma. Modo oscuro verdadero. Contraste AA en todo texto, AAA en cuerpo.
+- Forma: radios 6/10/16 (20 en sheet inferior), bordes 1px, sin sombra en reposo, una sombra para overlays, scrim.
+- Movimiento: 150/200 ms, `cubic-bezier(.2,0,0,1)`.
+- Shell: teléfono con selector de portal (monograma + portal + chevrones), búsqueda, campana y avatar en la barra superior (52px) y barra inferior de hasta 5 ítems (56px + safe-area); iPad con riel de 80px; desktop con barra lateral de 248px (marca, tarjeta de tenant/portal, grupos de navegación, usuario) y barra superior de 60px con título, búsqueda ⌘K y campana.
+- Componentes: Button 40/48/44 (icono), Input 44 con foco acento, Badge píldora con punto, Chip de filtro 32, Tabs 44, Card radio 16, Table (th 12/16, td 48), KPI tile, Skeleton con brillo, Sheet inferior con asa, Avatar de iniciales, Monograma.
+
+**Reglas derivadas.** En iPad y desktop el título de la página vive en la barra superior del shell (`titulo` del `AppShell`); los patrones muestran el título solo en teléfono (salvo `DetailScreen`, que lo muestra siempre porque es un panel). La acción principal pertenece al patrón. Toda pantalla nueva sigue el export como referencia de layout y jerarquía; cualquier patrón o componente nuevo se diseña primero en Claude Design y se agrega al DS, nunca a un módulo.

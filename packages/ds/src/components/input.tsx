@@ -1,16 +1,21 @@
-import type { InputHTMLAttributes, SelectHTMLAttributes, TextareaHTMLAttributes } from "react";
+import type {
+  InputHTMLAttributes,
+  ReactNode,
+  SelectHTMLAttributes,
+  TextareaHTMLAttributes,
+} from "react";
 
 import { cn } from "../cn";
 
 const base =
-  "w-full min-h-11 rounded-md border border-border bg-surface px-3 text-base text-fg placeholder:text-fg-subtle outline-none focus-visible:border-focus focus-visible:ring-2 focus-visible:ring-focus/30 disabled:opacity-50";
+  "w-full h-11 rounded-md border border-border-strong bg-surface px-3 text-md text-fg placeholder:text-fg-subtle outline-none transition-[border-color,box-shadow] duration-150 focus-visible:border-accent focus-visible:shadow-[0_0_0_3px_var(--ds-accent-muted)] focus-visible:outline-none aria-invalid:border-danger-fg aria-invalid:shadow-[0_0_0_3px_var(--ds-danger-muted)] disabled:opacity-45";
 
 export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElement>) {
   return <input className={cn(base, className)} {...props} />;
 }
 
 export function Textarea({ className, ...props }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return <textarea className={cn(base, "min-h-24 py-2", className)} {...props} />;
+  return <textarea className={cn(base, "h-auto min-h-24 py-2.5", className)} {...props} />;
 }
 
 export function Select({ className, children, ...props }: SelectHTMLAttributes<HTMLSelectElement>) {
@@ -26,22 +31,22 @@ type CampoProps = {
   htmlFor?: string;
   ayuda?: string;
   error?: string;
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
 };
 
-/** Etiqueta + control + ayuda o error. */
+/** Etiqueta (14/20 500) + control + ayuda (12/16 subtle) o error (12/16 danger). */
 export function Campo({ etiqueta, htmlFor, ayuda, error, children, className }: CampoProps) {
   return (
     <div className={cn("flex flex-col gap-1.5", className)}>
-      <label htmlFor={htmlFor} className="text-sm font-medium text-fg">
+      <label htmlFor={htmlFor} className="t-label text-fg">
         {etiqueta}
       </label>
       {children}
       {error ? (
-        <p className="text-sm text-danger">{error}</p>
+        <p className="text-xs font-medium text-danger-fg">{error}</p>
       ) : ayuda ? (
-        <p className="text-sm text-fg-muted">{ayuda}</p>
+        <p className="t-caption">{ayuda}</p>
       ) : null}
     </div>
   );

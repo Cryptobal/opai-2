@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import { cn } from "../cn";
 import { Button } from "../components/button";
 import { Empty, ErrorState, Forbidden, Loading, type VarianteLoading } from "../states";
 
@@ -52,19 +53,28 @@ export function Estado({ state, variante, textos, children }: Props) {
   return <>{children}</>;
 }
 
-export function Cabecera({
-  titulo,
-  subtitulo,
-  acciones,
-}: {
+export type CabeceraProps = {
   titulo: string;
   subtitulo?: string;
+  /** Línea sobre el título: badge de estado y texto corto (detalle). */
+  sobre?: ReactNode;
   acciones?: ReactNode;
-}) {
+  /** Mostrar el título también en md+ (pantallas sin barra superior propia, como paneles de detalle). */
+  tituloSiempre?: boolean;
+};
+
+/**
+ * Cabecera de página. En teléfono muestra el título (28/34); en iPad y desktop el título vive en
+ * la barra superior del shell, así que aquí quedan sobre-línea, subtítulo y acciones.
+ */
+export function Cabecera({ titulo, subtitulo, sobre, acciones, tituloSiempre }: CabeceraProps) {
   return (
-    <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+    <div className="mb-4 flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
       <div className="min-w-0">
-        <h2 className="text-xl font-semibold tracking-tight text-fg md:text-2xl">{titulo}</h2>
+        {sobre ? (
+          <div className="mb-1.5 flex items-center gap-2 text-sm text-fg-muted">{sobre}</div>
+        ) : null}
+        <h2 className={cn("t-title text-fg", !tituloSiempre && "md:hidden")}>{titulo}</h2>
         {subtitulo ? <p className="mt-0.5 text-base text-fg-muted">{subtitulo}</p> : null}
       </div>
       {acciones ? <div className="flex shrink-0 items-center gap-2">{acciones}</div> : null}

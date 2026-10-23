@@ -1,35 +1,41 @@
 import { cn } from "../cn";
-import { esActivo, type LinkComponent, type NavItem } from "./types";
-
-const LinkPorDefecto: LinkComponent = ({ href, className, children, ...rest }) => (
-  <a href={href} className={className} {...rest}>
-    {children}
-  </a>
-);
+import { PortalSwitcher } from "./portal-switcher";
+import {
+  esActivo,
+  LinkPorDefecto,
+  type LinkComponent,
+  type NavItem,
+  type Portal,
+  type Tenant,
+} from "./types";
 
 type NavProps = { items: readonly NavItem[]; rutaActual: string; Link?: LinkComponent };
 
-/** Navegación inferior en teléfono: hasta 5 ítems con etiqueta, ≥44px, safe-area. */
+/** Teléfono: barra inferior de hasta 5 ítems, 56px + safe-area. Activo: texto fg e icono acento. */
 export function BottomNav({ items, rutaActual, Link = LinkPorDefecto }: NavProps) {
+  const visibles = items.slice(0, 5);
   return (
     <nav
       aria-label="Principal"
-      className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur md:hidden"
+      className="pb-safe fixed inset-x-0 bottom-0 z-20 border-t border-border bg-surface md:hidden"
     >
-      <ul className="flex">
-        {items.slice(0, 5).map((item) => {
+      <ul
+        className="grid px-1"
+        style={{ gridTemplateColumns: `repeat(${visibles.length}, minmax(0, 1fr))` }}
+      >
+        {visibles.map((item) => {
           const activo = esActivo(rutaActual, item.href);
           return (
-            <li key={item.href} className="flex-1">
+            <li key={item.href}>
               <Link
                 href={item.href}
                 aria-current={activo ? "page" : undefined}
                 className={cn(
-                  "flex min-h-16 flex-col items-center justify-center gap-1 text-xs",
-                  activo ? "text-fg font-medium" : "text-fg-muted",
+                  "flex h-14 flex-col items-center justify-center gap-0.5 text-[11px] leading-[14px] font-medium tracking-[0.01em]",
+                  activo ? "text-fg" : "text-fg-subtle",
                 )}
               >
-                <item.icono className="size-5" aria-hidden />
+                <item.icono className={cn("size-5", activo && "text-accent")} aria-hidden />
                 {item.etiqueta}
               </Link>
             </li>
@@ -40,14 +46,34 @@ export function BottomNav({ items, rutaActual, Link = LinkPorDefecto }: NavProps
   );
 }
 
-/** Riel compacto en iPad (md), barra lateral expandida en desktop (xl). */
-export function SideNav({ items, rutaActual, Link = LinkPorDefecto }: NavProps) {
+export type RailProps = NavProps & {
+  portales: readonly Portal[];
+  portalActual: string;
+  tenant?: Tenant;
+};
+
+/** iPad: riel de 80px con selector de portal arriba e ítems de 64×56. */
+export function Rail({
+  items,
+  rutaActual,
+  Link = LinkPorDefecto,
+  portales,
+  portalActual,
+  tenant,
+}: RailProps) {
   return (
     <nav
       aria-label="Principal"
-      className="sticky top-14 hidden h-[calc(100dvh-3.5rem)] shrink-0 border-r border-border bg-surface md:block md:w-[72px] xl:w-64"
+      className="sticky top-0 hidden h-dvh w-20 flex-none flex-col items-center gap-1 border-r border-border bg-surface py-3 md:flex xl:hidden"
     >
-      <ul className="flex flex-col gap-1 p-2">
+      <PortalSwitcher
+        portales={portales}
+        portalActual={portalActual}
+        {...(tenant ? { tenant } : {})}
+        variante="riel"
+        className="mb-2"
+      />
+      <ul className="flex flex-col gap-1">
         {items.map((item) => {
           const activo = esActivo(rutaActual, item.href);
           return (
@@ -56,13 +82,11 @@ export function SideNav({ items, rutaActual, Link = LinkPorDefecto }: NavProps) 
                 href={item.href}
                 aria-current={activo ? "page" : undefined}
                 className={cn(
-                  "flex min-h-11 flex-col items-center justify-center gap-1 rounded-md px-2 text-[11px] xl:flex-row xl:justify-start xl:gap-3 xl:px-3 xl:text-base",
-                  activo
-                    ? "bg-accent-muted text-fg font-medium"
-                    : "text-fg-muted hover:bg-bg hover:text-fg",
+                  "flex h-14 w-16 flex-col items-center justify-center gap-1 rounded-md text-[11px] leading-[14px] font-medium",
+                  activo ? "bg-fill text-fg" : "text-fg-muted hover:bg-fill",
                 )}
               >
-                <item.icono className="size-5" aria-hidden />
+                <item.icono className={cn("size-5", activo && "text-accent")} aria-hidden />
                 <span className="truncate">{item.etiqueta}</span>
               </Link>
             </li>

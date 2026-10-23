@@ -5,23 +5,27 @@ import { cn } from "../cn";
 
 const estilos = cva(
   [
-    "inline-flex items-center justify-center gap-2 rounded-md font-medium select-none",
-    "transition-colors duration-150 outline-none focus-visible:ring-2 focus-visible:ring-focus focus-visible:ring-offset-2 focus-visible:ring-offset-bg",
-    "disabled:opacity-50 disabled:pointer-events-none",
+    "inline-flex items-center justify-center gap-2 rounded-md border border-transparent font-medium select-none",
+    "whitespace-nowrap transition-colors duration-150 outline-none",
+    "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus",
+    "disabled:pointer-events-none disabled:opacity-45",
   ],
   {
     variants: {
       variant: {
-        primary: "bg-accent text-accent-fg hover:opacity-90",
-        secondary: "bg-surface text-fg border border-border hover:bg-bg",
-        ghost: "text-fg hover:bg-accent-muted",
-        destructive: "bg-danger text-danger-fg hover:opacity-90",
+        primary: "bg-accent text-accent-fg hover:brightness-95 active:brightness-90",
+        secondary: "border-border-strong bg-surface text-fg hover:bg-fill",
+        ghost: "text-fg hover:bg-fill",
+        destructive:
+          "bg-danger-fg text-white dark:bg-danger dark:text-inverse-fg hover:brightness-95",
       },
       size: {
-        md: "min-h-11 px-4 text-base",
-        lg: "min-h-12 px-5 text-md",
+        md: "h-10 px-4 text-base",
+        lg: "h-12 px-5 text-md",
         icon: "size-11",
+        iconSm: "size-10",
       },
+      block: { true: "flex w-full" },
     },
     defaultVariants: { variant: "primary", size: "md" },
   },
@@ -29,6 +33,16 @@ const estilos = cva(
 
 export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<typeof estilos>;
 
-export function Button({ className, variant, size, type = "button", ...props }: ButtonProps) {
-  return <button type={type} className={cn(estilos({ variant, size }), className)} {...props} />;
+/** Botón del DS: md 40px, lg 48px (acciones principales en teléfono), icon 44px. */
+export function Button({
+  className,
+  variant,
+  size,
+  block,
+  type = "button",
+  ...props
+}: ButtonProps) {
+  return (
+    <button type={type} className={cn(estilos({ variant, size, block }), className)} {...props} />
+  );
 }

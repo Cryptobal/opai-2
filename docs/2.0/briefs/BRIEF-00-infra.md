@@ -1,8 +1,12 @@
 # BRIEF 00-INFRA — INFRAESTRUCTURA DE test.opai.cl
 
-**Repositorio:** `Cryptobal/opai-2` · **Rama:** `main` · **Fecha:** 23-oct-2026 · **Duración estimada:** 10–15 minutos
+**Repositorio:** `Cryptobal/opai-2` · **Rama:** `main` · **Fecha:** 23-oct-2026 · **Duración estimada:** 20–30 minutos la primera vez (instalaciones y logins), 10 después
 
-> **Cómo ejecutarlo (Carlos, desde el Mac):** abre Claude Code en la carpeta del repo y dile: *"Lee y ejecuta `docs/2.0/briefs/BRIEF-00-infra.md` completo."* Se detiene solo en los puntos marcados **STOP**.
+> **Cómo ejecutarlo (Carlos, desde el Mac, sin saber nada de terminales):** la opción más simple es la app de escritorio de Claude, que ya incluye Claude Code: ábrela, entra a la pestaña **Code**, elige una carpeta (por ejemplo `Code` dentro de tu usuario; créala si no existe) y pega el texto de abajo. La alternativa es la Terminal: escribe `claude` y Enter (si no está instalado, antes `curl -fsSL https://claude.ai/install.sh | bash`). En cualquiera de las dos, pega esto tal cual:
+>
+> *"Prepara mi Mac para OPAI 2.0: instala lo que falte (Homebrew, Node 22, pnpm, gh, vercel, neonctl), haz login en gh, vercel y neonctl deteniéndote para que yo apruebe en el navegador, clona el repo privado Cryptobal/opai-2 en ~/Code/opai-2 y luego lee y ejecuta completo docs/2.0/briefs/BRIEF-00-infra.md."*
+>
+> Claude Code se detiene en cada login para que apruebes en el navegador (tres veces) y una vez más para el registro DNS en Cloudflare. No tienes que escribir ningún comando.
 
 ## 1. Objetivo
 
@@ -12,14 +16,15 @@ Dejar `test.opai.cl` en línea sobre un proyecto Vercel y un proyecto Neon propi
 
 El Brief 00 (Fundación) está ejecutado: monorepo, `apps/web` con `/api/health`, `/api/v1` y `/ds`, `packages/db` con migración inicial (rol `opai_app`, RLS), CI en verde. Falta únicamente el bloque de infraestructura, que requiere las cuentas de Carlos.
 
-## 3. Prerrequisitos
+## 3. Paso 0 · Herramientas y logins (lo hace Claude Code; Carlos solo aprueba en el navegador)
 
-Verificar y **STOP** si falta alguno, indicando a Carlos exactamente qué correr:
-
-```
-node --version   (22 o superior)      pnpm --version
-gh auth status   vercel whoami   neonctl me
-```
+1. Homebrew: `brew --version`. Si falta, **STOP**: pedir a Carlos que pegue en Terminal el comando de instalación de https://brew.sh (pide su contraseña del Mac) y avise cuando termine.
+2. Node 22 y pnpm: `brew install node@22 pnpm`; agregar `node@22` al PATH del shell (`~/.zshrc`) y verificar `node --version` (22.x) y `pnpm --version`.
+3. CLIs: `brew install gh` y `npm install -g vercel neonctl`. Verificar `gh --version`, `vercel --version`, `neonctl --version`.
+4. Login GitHub: `gh auth login --web --git-protocol https`. **STOP:** mostrar a Carlos el código de un solo uso que imprime el comando; él lo ingresa en la página que se abre y autoriza. Confirmar con `gh auth status`.
+5. Login Vercel: `vercel login`. Se abre el navegador. **STOP** hasta que Carlos confirme; verificar con `vercel whoami` y `vercel teams ls` (debe aparecer `gard-security`).
+6. Login Neon: `neonctl auth`. Se abre el navegador. **STOP** hasta que Carlos confirme; verificar con `neonctl me`.
+7. Repo: `mkdir -p ~/Code && gh repo clone Cryptobal/opai-2 ~/Code/opai-2 && cd ~/Code/opai-2 && pnpm install`. Verificar que `pnpm typecheck` pasa.
 
 `wrangler` no se usa en este brief (R2 llega con el Brief 01).
 

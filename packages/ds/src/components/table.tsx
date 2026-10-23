@@ -5,7 +5,10 @@ import { cn } from "../cn";
 export function Table({ className, ...props }: HTMLAttributes<HTMLTableElement>) {
   return (
     <div className="w-full overflow-x-auto rounded-lg border border-border bg-surface">
-      <table className={cn("w-full border-collapse text-base", className)} {...props} />
+      <table
+        className={cn("w-full border-separate border-spacing-0 text-base", className)}
+        {...props}
+      />
     </div>
   );
 }
@@ -15,7 +18,7 @@ export function Th({ className, ...props }: ThHTMLAttributes<HTMLTableCellElemen
     <th
       scope="col"
       className={cn(
-        "border-b border-border px-3 py-2 text-left text-sm font-medium text-fg-muted",
+        "sticky top-0 border-b border-border bg-surface px-3 py-2.5 text-left text-xs font-medium whitespace-nowrap text-fg-subtle",
         className,
       )}
       {...props}
@@ -26,12 +29,15 @@ export function Th({ className, ...props }: ThHTMLAttributes<HTMLTableCellElemen
 export function Td({ className, ...props }: TdHTMLAttributes<HTMLTableCellElement>) {
   return (
     <td
-      className={cn("border-b border-border px-3 py-2.5 text-fg last:border-b-0", className)}
+      className={cn(
+        "h-12 border-b border-border px-3 whitespace-nowrap text-fg [tr:last-child_&]:border-b-0",
+        className,
+      )}
       {...props}
     />
   );
 }
 
 export function Tr({ className, ...props }: HTMLAttributes<HTMLTableRowElement>) {
-  return <tr className={cn("hover:bg-bg", className)} {...props} />;
+  return <tr className={cn("transition-colors hover:bg-bg", className)} {...props} />;
 }

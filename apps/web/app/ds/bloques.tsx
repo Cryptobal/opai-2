@@ -74,7 +74,7 @@ export function BloqueFormulario({ state }: { state: EstadoPantalla }) {
                     id="monto"
                     inputMode="numeric"
                     defaultValue="1.850.000"
-                    className="font-mono"
+                    className="t-mono text-md"
                   />
                 </Campo>
               </div>

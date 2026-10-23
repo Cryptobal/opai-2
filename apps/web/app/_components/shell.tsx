@@ -16,7 +16,7 @@ const LinkNext: LinkComponent = ({ href, className, children, ...rest }) => (
 
 type Props = { portal: string; titulo: string; children: ReactNode };
 
-/** Shell de la app: inyecta next/link, la ruta actual y la navegación del portal. */
+/** Shell de la app: inyecta next/link, la ruta actual y la navegación del portal. Tenant y usuario llegan con el Brief 01. */
 export function Shell({ portal, titulo, children }: Props) {
   const rutaActual = usePathname();
   return (
@@ -26,7 +26,8 @@ export function Shell({ portal, titulo, children }: Props) {
       portales={PORTALES}
       portalActual={portal}
       rutaActual={rutaActual}
-      usuario={{ nombre: "Sin sesión (Brief 01)", iniciales: "—" }}
+      tenant={{ nombre: "Gard Security" }}
+      usuario={{ nombre: "Carlos Irigoyen", rol: "Sin sesión (Brief 01)" }}
       Link={LinkNext}
     >
       {children}

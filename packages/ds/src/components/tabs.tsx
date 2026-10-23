@@ -8,7 +8,7 @@ export type Tab = { id: string; etiqueta: string; contenido: ReactNode; contador
 
 type TabsProps = { tabs: readonly Tab[]; inicial?: string; className?: string };
 
-/** Pestañas accesibles (role=tablist) con scroll horizontal en teléfono. */
+/** Pestañas accesibles (role=tablist), 44px, subrayado en el color de texto. Scroll horizontal en teléfono. */
 export function Tabs({ tabs, inicial, className }: TabsProps) {
   const [activa, setActiva] = useState(inicial ?? tabs[0]?.id ?? "");
   const base = useId();
@@ -17,7 +17,7 @@ export function Tabs({ tabs, inicial, className }: TabsProps) {
     <div className={cn("flex flex-col gap-4", className)}>
       <div
         role="tablist"
-        className="flex gap-1 overflow-x-auto border-b border-border -mx-4 px-4 md:mx-0 md:px-0"
+        className="-mx-4 flex gap-1 overflow-x-auto border-b border-border px-4 md:mx-0 md:px-0"
       >
         {tabs.map((tab) => {
           const seleccionada = tab.id === actual?.id;
@@ -31,15 +31,15 @@ export function Tabs({ tabs, inicial, className }: TabsProps) {
               aria-controls={`${base}-panel-${tab.id}`}
               onClick={() => setActiva(tab.id)}
               className={cn(
-                "min-h-11 shrink-0 border-b-2 px-3 text-base transition-colors",
+                "-mb-px inline-flex h-11 shrink-0 items-center gap-1.5 border-b-2 px-3 text-base font-medium whitespace-nowrap transition-colors",
                 seleccionada
-                  ? "border-fg font-medium text-fg"
+                  ? "border-fg text-fg"
                   : "border-transparent text-fg-muted hover:text-fg",
               )}
             >
               {tab.etiqueta}
               {tab.contador !== undefined ? (
-                <span className="ml-1.5 text-xs text-fg-subtle tabular-nums">{tab.contador}</span>
+                <span className="t-numeric text-xs text-fg-subtle">{tab.contador}</span>
               ) : null}
             </button>
           );

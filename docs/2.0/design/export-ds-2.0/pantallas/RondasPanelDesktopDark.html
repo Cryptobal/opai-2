@@ -1,0 +1,647 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Control de rondas · desktop · oscuro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* =====================================================================
+   OPAI DS 2.0 — Fundamentos (referencia de diseño → packages/ds)
+   Tokens en modo claro (.ds) y oscuro (.ds.dark). Componentes base.
+   ===================================================================== */
+
+/* ---------- 1. Tokens: modo claro ---------- */
+.ds{
+  /* Escala neutra (10 pasos + anclas 0 / 950) */
+  --n-0:#FFFFFF; --n-50:#FAFAFA; --n-100:#F4F4F5; --n-200:#E7E7EA; --n-300:#D4D4D8;
+  --n-400:#A1A1AA; --n-500:#71717A; --n-600:#52525B; --n-700:#3F3F46; --n-800:#27272A;
+  --n-900:#18181B; --n-950:#0B0B0C;
+
+  --ds-bg:#FAFAFA;
+  --ds-surface:#FFFFFF;
+  --ds-surface-raised:#FFFFFF;
+  --ds-border:#E7E7EA;
+  --ds-border-strong:#D4D4D8;
+  --ds-fg:#111113;          /* 18.9:1 sobre surface · AAA */
+  --ds-fg-muted:#52525B;    /*  7.7:1 · AAA */
+  --ds-fg-subtle:#6B6B74;   /*  5.3:1 · AA (captions) */
+
+  --ds-accent:#4A3FD8;      /* Índigo OPAI · blanco encima 7.0:1 */
+  --ds-accent-fg:#FFFFFF;
+  --ds-accent-muted:#EEEDFC;
+
+  --ds-success:#16A34A; --ds-success-fg:#166534; --ds-success-muted:#EBF7EF;
+  --ds-warning:#D97706; --ds-warning-fg:#92400E; --ds-warning-muted:#FDF4E3;
+  --ds-danger:#DC2626;  --ds-danger-fg:#B42318;  --ds-danger-muted:#FDECEC;
+  --ds-info:#0284C7;    --ds-info-fg:#075985;    --ds-info-muted:#E8F4FA;
+  --ds-focus:#4A3FD8;
+
+  /* Forma */
+  --ds-radius-sm:6px; --ds-radius-md:10px; --ds-radius-lg:16px; --ds-radius-full:999px;
+  --ds-shadow-overlay:0 12px 32px -8px rgba(17,17,19,.18), 0 2px 6px rgba(17,17,19,.06);
+  --ds-scrim:rgba(11,11,12,.32);
+
+  /* Espaciado (base 4) */
+  --s-1:4px; --s-2:8px; --s-3:12px; --s-4:16px; --s-6:24px; --s-8:32px; --s-12:48px; --s-16:64px;
+
+  /* Movimiento */
+  --ds-ease:cubic-bezier(.2,0,0,1); --ds-dur-fast:150ms; --ds-dur:200ms;
+
+  /* Tipografía */
+  --ds-font:"Inter", ui-sans-serif, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --ds-mono:"JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  font-family:var(--ds-font);
+  color:var(--ds-fg);
+  background:var(--ds-bg);
+  font-size:16px; line-height:24px;
+  -webkit-font-smoothing:antialiased;
+  font-feature-settings:"cv11","ss01";
+}
+
+/* ---------- 2. Tokens: modo oscuro (verdadero, no gris lavado) ---------- */
+.ds.dark{
+  --ds-bg:#0B0B0C;
+  --ds-surface:#141416;
+  --ds-surface-raised:#1B1B1E;
+  --ds-border:#26262A;
+  --ds-border-strong:#34343A;
+  --ds-fg:#F4F4F5;          /* 16.7:1 · AAA */
+  --ds-fg-muted:#A1A1AA;    /*  7.2:1 · AAA */
+  --ds-fg-subtle:#8A8A93;   /*  5.4:1 · AA */
+
+  --ds-accent:#8E88FF;      /* texto oscuro encima 6.7:1 */
+  --ds-accent-fg:#0B0B0C;
+  --ds-accent-muted:#1D1B3A;
+
+  --ds-success:#22C55E; --ds-success-fg:#4ADE80; --ds-success-muted:#10261A;
+  --ds-warning:#F59E0B; --ds-warning-fg:#FBBF24; --ds-warning-muted:#2A2009;
+  --ds-danger:#EF4444;  --ds-danger-fg:#F87171;  --ds-danger-muted:#2C1313;
+  --ds-info:#38BDF8;    --ds-info-fg:#7DD3FC;    --ds-info-muted:#0C2230;
+  --ds-focus:#ADA8FF;
+
+  --ds-shadow-overlay:0 16px 40px -8px rgba(0,0,0,.6), 0 0 0 1px #26262A;
+  --ds-scrim:rgba(0,0,0,.56);
+  color-scheme:dark;
+}
+
+.ds *{box-sizing:border-box}
+.ds :focus-visible{outline:2px solid var(--ds-focus); outline-offset:2px}
+
+/* ---------- 3. Estilos tipográficos ---------- */
+.t-display{font-size:36px; line-height:40px; font-weight:600; letter-spacing:-.022em}
+.t-title{font-size:28px; line-height:34px; font-weight:600; letter-spacing:-.018em}
+.t-heading{font-size:22px; line-height:28px; font-weight:600; letter-spacing:-.012em}
+.t-subheading{font-size:18px; line-height:26px; font-weight:600; letter-spacing:-.008em}
+.t-body{font-size:16px; line-height:24px; font-weight:400}
+.t-body-sm{font-size:14px; line-height:20px; font-weight:400}
+.t-label{font-size:14px; line-height:20px; font-weight:500}
+.t-label-sm{font-size:13px; line-height:18px; font-weight:500}
+.t-caption{font-size:12px; line-height:16px; font-weight:400; color:var(--ds-fg-subtle)}
+.t-overline{font-size:12px; line-height:16px; font-weight:500; color:var(--ds-fg-subtle); letter-spacing:.02em}
+.t-numeric{font-variant-numeric:tabular-nums; font-feature-settings:"tnum","cv11"; font-weight:500}
+.t-mono{font-family:var(--ds-mono); font-size:13px; line-height:20px; font-variant-numeric:tabular-nums}
+.muted{color:var(--ds-fg-muted)} .subtle{color:var(--ds-fg-subtle)}
+.m0{margin:0}
+
+/* ---------- 4. Iconos (Lucide, lineal monocromo, currentColor) ---------- */
+.ic{display:inline-block; flex:none; width:20px; height:20px; background-color:currentColor;
+  -webkit-mask:var(--i) center/contain no-repeat; mask:var(--i) center/contain no-repeat}
+.ic.sm{width:16px; height:16px}
+.ic.lg{width:24px; height:24px}
+.i-home{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>')}
+.i-users{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>')}
+.i-user{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>')}
+.i-building{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/><path d="M10 18h4"/></svg>')}
+.i-calendar{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/><path d="M8 14h.01"/><path d="M12 14h.01"/><path d="M16 14h.01"/><path d="M8 18h.01"/><path d="M12 18h.01"/><path d="M16 18h.01"/></svg>')}
+.i-file{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>')}
+.i-wallet{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M19 7V4a1 1 0 0 0-1-1H5a2 2 0 0 0 0 4h15a1 1 0 0 1 1 1v4h-3a2 2 0 0 0 0 4h3a1 1 0 0 0 1-1v-2a1 1 0 0 0-1-1"/><path d="M3 5v14a2 2 0 0 0 2 2h15a1 1 0 0 0 1-1v-4"/></svg>')}
+.i-bell{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>')}
+.i-search{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>')}
+.i-plus{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>')}
+.i-chevron-down{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>')}
+.i-chevron-right{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>')}
+.i-chevron-left{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>')}
+.i-updown{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m7 15 5 5 5-5"/><path d="m7 9 5-5 5 5"/></svg>')}
+.i-more{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>')}
+.i-filter{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4h-7"/><path d="M10 4H3"/><path d="M21 12h-9"/><path d="M8 12H3"/><path d="M21 20h-5"/><path d="M12 20H3"/><path d="M14 2v4"/><path d="M8 10v4"/><path d="M16 18v4"/></svg>')}
+.i-x{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>')}
+.i-wifi-off{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h.01"/><path d="M8.5 16.429a5 5 0 0 1 7 0"/><path d="M5 12.859a10 10 0 0 1 5.17-2.69"/><path d="M19 12.859a10 10 0 0 0-2.007-1.523"/><path d="M2 8.82a15 15 0 0 1 4.177-2.643"/><path d="M22 8.82a15 15 0 0 0-11.288-3.764"/><path d="m2 2 20 20"/></svg>')}
+.i-check{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>')}
+.i-alert{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>')}
+.i-lock{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>')}
+.i-refresh{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>')}
+.i-pin{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>')}
+.i-clock{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>')}
+.i-briefcase{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M16 20V4a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/><rect width="20" height="14" x="2" y="6" rx="2"/></svg>')}
+.i-clipboard{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></svg>')}
+.i-grid{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>')}
+.i-inbox{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-6l-2 3h-4l-2-3H2"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>')}
+.i-up{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h10v10"/><path d="M7 17 17 7"/></svg>')}
+.i-down{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 7 10 10"/><path d="M17 7v10H7"/></svg>')}
+.i-download{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>')}
+.i-swap{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/></svg>')}
+.i-info{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>')}
+.i-check-circle{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>')}
+.i-landmark{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 22h18"/><path d="M6 18v-7"/><path d="M10 18v-7"/><path d="M14 18v-7"/><path d="M18 18v-7"/><path d="M12 2 20 7H4z"/></svg>')}
+.i-chart{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="m19 9-5 5-4-4-3 3"/></svg>')}
+.i-menu{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16"/><path d="M4 6h16"/><path d="M4 18h16"/></svg>')}
+.i-trash{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>')}
+.i-command{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M15 6v12a3 3 0 1 0 3-3H6a3 3 0 1 0 3 3V6a3 3 0 1 0-3 3h12a3 3 0 1 0-3-3"/></svg>')}
+.i-sun{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>')}
+.i-moon{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>')}
+.i-camera{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>')}
+.i-route{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg>')}
+.i-eye{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>')}
+
+.i-ticket{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/><path d="M13 5v2"/><path d="M13 17v2"/><path d="M13 11v2"/></svg>')}
+.i-scan{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><path d="M7 12h10"/></svg>')}
+.i-message{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>')}
+.i-user-check{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="m16 11 2 2 4-4"/></svg>')}
+.i-flag{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><path d="M4 22v-7"/></svg>')}
+.i-paperclip{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57A4 4 0 1 1 18 8.84l-8.59 8.57a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>')}
+.i-phone{--i:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>')}
+
+/* ---------- 5. Componentes base ---------- */
+/* Progreso y línea de tiempo */
+.progress{height:6px; border-radius:999px; background:var(--n-100); overflow:hidden; flex:none}
+.ds.dark .progress{background:#26262A}
+.progress > span{display:block; height:100%; border-radius:999px; background:var(--ds-fg)}
+.tl{display:flex; flex-direction:column}
+.tl-item{display:grid; grid-template-columns:24px minmax(0,1fr); gap:12px; position:relative; padding-bottom:16px}
+.tl-item::before{content:""; position:absolute; left:11px; top:24px; bottom:0; width:2px; background:var(--ds-border)}
+.tl-item:last-child::before{display:none}
+.tl-dot{width:24px; height:24px; border-radius:999px; display:flex; align-items:center; justify-content:center; border:2px solid var(--ds-border-strong); background:var(--ds-surface); color:var(--ds-fg-subtle); flex:none; position:relative; z-index:1}
+.tl-dot.done{background:var(--ds-fg); border-color:var(--ds-fg); color:var(--ds-bg)}
+.tl-dot.next{border-color:var(--ds-accent); color:var(--ds-accent); box-shadow:0 0 0 4px var(--ds-accent-muted)}
+.tl-dot.late{background:var(--ds-danger-muted); border-color:var(--ds-danger); color:var(--ds-danger-fg)}
+.live{display:inline-flex; align-items:center; gap:6px; font:500 12px/16px var(--ds-font); color:var(--ds-success-fg)}
+.live::before{content:""; width:8px; height:8px; border-radius:99px; background:var(--ds-success); box-shadow:0 0 0 3px var(--ds-success-muted)}
+/* Button */
+.btn{display:inline-flex; align-items:center; justify-content:center; gap:8px; height:40px; padding:0 16px;
+  border-radius:var(--ds-radius-md); border:1px solid transparent; font:500 14px/20px var(--ds-font);
+  cursor:pointer; white-space:nowrap; text-decoration:none; transition:background var(--ds-dur-fast) var(--ds-ease)}
+.btn.lg{height:48px; padding:0 20px; font-size:16px; line-height:24px}
+.btn.block{display:flex; width:100%}
+.btn.icon{width:40px; padding:0} .btn.lg.icon{width:48px}
+.btn-primary{background:var(--ds-accent); color:var(--ds-accent-fg)}
+.btn-secondary{background:var(--ds-surface); color:var(--ds-fg); border-color:var(--ds-border-strong)}
+.btn-ghost{background:transparent; color:var(--ds-fg)}
+.btn-destructive{background:var(--ds-danger-fg); color:#FFFFFF}
+.ds.dark .btn-destructive{background:var(--ds-danger); color:#0B0B0C}
+.btn[disabled]{opacity:.45; cursor:not-allowed}
+.icon-btn{display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; border-radius:var(--ds-radius-md);
+  border:0; background:transparent; color:var(--ds-fg); position:relative; cursor:pointer}
+.dot-count{position:absolute; top:7px; right:6px; min-width:18px; height:18px; padding:0 5px; border-radius:999px;
+  background:var(--ds-danger-fg); color:#fff; font:600 11px/18px var(--ds-font); text-align:center; font-variant-numeric:tabular-nums;
+  box-shadow:0 0 0 2px var(--ds-surface)}
+.ds.dark .dot-count{background:var(--ds-danger); color:#0B0B0C}
+.kbd{display:inline-flex; align-items:center; height:20px; padding:0 6px; border:1px solid var(--ds-border); border-radius:4px;
+  font:500 12px/16px var(--ds-font); color:var(--ds-fg-subtle); background:var(--ds-bg)}
+
+/* Field / Input / Select */
+.field{display:flex; flex-direction:column; gap:6px}
+.field label,.field .lbl{font:500 14px/20px var(--ds-font); color:var(--ds-fg)}
+.field .hint{font:400 12px/16px var(--ds-font); color:var(--ds-fg-subtle)}
+.field .err{font:500 12px/16px var(--ds-font); color:var(--ds-danger-fg); display:flex; gap:6px; align-items:center}
+.input{display:flex; align-items:center; gap:8px; height:44px; padding:0 12px; width:100%;
+  background:var(--ds-surface); border:1px solid var(--ds-border-strong); border-radius:var(--ds-radius-md);
+  font:400 16px/24px var(--ds-font); color:var(--ds-fg)}
+.input::placeholder{color:var(--ds-fg-subtle)}
+.input.compact{height:36px; font-size:14px; line-height:20px}
+.input.invalid{border-color:var(--ds-danger-fg); box-shadow:0 0 0 3px var(--ds-danger-muted)}
+.input.focus{border-color:var(--ds-accent); box-shadow:0 0 0 3px var(--ds-accent-muted)}
+.input .ph{color:var(--ds-fg-subtle)}
+.input .grow{flex:1; min-width:0}
+input.input{outline:none}
+
+/* Checkbox / Switch */
+.check{width:20px; height:20px; border-radius:6px; border:1.5px solid var(--ds-border-strong); background:var(--ds-surface);
+  display:inline-flex; align-items:center; justify-content:center; color:var(--ds-accent-fg); flex:none}
+.check.on{background:var(--ds-accent); border-color:var(--ds-accent)}
+.switch{width:44px; height:26px; border-radius:999px; background:var(--ds-border-strong); position:relative; flex:none; border:0; padding:0}
+.switch::after{content:""; position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:999px; background:#fff;
+  box-shadow:0 1px 2px rgba(0,0,0,.2); transition:left var(--ds-dur) var(--ds-ease)}
+.switch.on{background:var(--ds-accent)} .switch.on::after{left:21px}
+.ds.dark .switch.on::after{background:#0B0B0C}
+
+/* Chip de filtro */
+.chip{display:inline-flex; align-items:center; gap:6px; height:32px; padding:0 6px 0 12px; border-radius:999px;
+  border:1px solid var(--ds-border-strong); background:var(--ds-surface); font:500 13px/18px var(--ds-font); color:var(--ds-fg); white-space:nowrap}
+.chip .k{color:var(--ds-fg-subtle); font-weight:400}
+.chip .x{display:inline-flex; width:22px; height:22px; align-items:center; justify-content:center; border-radius:999px; color:var(--ds-fg-muted); border:0; background:transparent; padding:0}
+.chip.add{padding:0 12px; border-style:dashed; color:var(--ds-fg-muted)}
+
+/* Badge de estado */
+.badge{display:inline-flex; align-items:center; gap:6px; height:22px; padding:0 8px; border-radius:999px;
+  font:500 12px/16px var(--ds-font); white-space:nowrap}
+.badge::before{content:""; width:6px; height:6px; border-radius:999px; background:currentColor}
+.badge.nodot::before{display:none}
+.b-success{background:var(--ds-success-muted); color:var(--ds-success-fg)}
+.b-warning{background:var(--ds-warning-muted); color:var(--ds-warning-fg)}
+.b-danger{background:var(--ds-danger-muted); color:var(--ds-danger-fg)}
+.b-info{background:var(--ds-info-muted); color:var(--ds-info-fg)}
+.b-neutral{background:var(--n-100); color:var(--ds-fg-muted)}
+.ds.dark .b-neutral{background:#202024}
+.b-accent{background:var(--ds-accent-muted); color:var(--ds-accent)}
+
+/* Tabs */
+.tabs{display:flex; gap:4px; border-bottom:1px solid var(--ds-border); overflow-x:auto}
+.tab{height:44px; padding:0 12px; display:inline-flex; align-items:center; gap:6px; border:0; background:transparent;
+  font:500 14px/20px var(--ds-font); color:var(--ds-fg-muted); border-bottom:2px solid transparent; margin-bottom:-1px; white-space:nowrap}
+.tab.on{color:var(--ds-fg); border-bottom-color:var(--ds-fg)}
+.tab .n{font:500 12px/16px var(--ds-font); color:var(--ds-fg-subtle); font-variant-numeric:tabular-nums}
+
+/* Segmented */
+.seg{display:inline-flex; padding:2px; gap:2px; border-radius:var(--ds-radius-md); background:var(--n-100)}
+.ds.dark .seg{background:#1B1B1E}
+.seg button{height:32px; padding:0 12px; border:0; border-radius:8px; background:transparent; font:500 13px/18px var(--ds-font); color:var(--ds-fg-muted)}
+.seg button.on{background:var(--ds-surface); color:var(--ds-fg); box-shadow:0 0 0 1px var(--ds-border)}
+.ds.dark .seg button.on{background:#2A2A2F; box-shadow:none}
+
+/* Card / Surface */
+.card{background:var(--ds-surface); border:1px solid var(--ds-border); border-radius:var(--ds-radius-lg)}
+.card.pad{padding:16px}
+.divider{height:1px; background:var(--ds-border); border:0; margin:0}
+
+/* Lista (tarjeta de fila en teléfono) */
+.rows{background:var(--ds-surface); border-top:1px solid var(--ds-border); border-bottom:1px solid var(--ds-border)}
+.rowcard{display:flex; gap:12px; align-items:flex-start; padding:14px 16px; border-bottom:1px solid var(--ds-border); text-decoration:none; color:inherit}
+.rowcard:last-child{border-bottom:0}
+
+/* Tabla */
+.tbl{width:100%; border-collapse:separate; border-spacing:0; font:400 14px/20px var(--ds-font)}
+.tbl th{position:sticky; top:0; text-align:left; font:500 12px/16px var(--ds-font); color:var(--ds-fg-subtle); padding:10px 12px;
+  background:var(--ds-surface); border-bottom:1px solid var(--ds-border); white-space:nowrap}
+.tbl td{padding:0 12px; height:48px; border-bottom:1px solid var(--ds-border); white-space:nowrap; color:var(--ds-fg)}
+.tbl.compact td{height:40px}
+.tbl tr.sel td{background:var(--ds-accent-muted)}
+.tbl .num{text-align:right; font-variant-numeric:tabular-nums}
+
+/* Avatar */
+.avatar{width:32px; height:32px; border-radius:999px; background:var(--n-200); color:var(--ds-fg-muted);
+  display:inline-flex; align-items:center; justify-content:center; font:600 12px/16px var(--ds-font); flex:none; letter-spacing:.02em}
+.ds.dark .avatar{background:#2A2A2F; color:#D4D4D8}
+.avatar.lg{width:40px; height:40px; font-size:14px}
+.avatar.sm{width:24px; height:24px; font-size:10px}
+.tenant{width:24px; height:24px; border-radius:6px; background:var(--n-900); color:#fff; display:inline-flex; align-items:center; justify-content:center;
+  font:700 10px/1 var(--ds-font); letter-spacing:.02em; flex:none}
+.ds.dark .tenant{background:#F4F4F5; color:#0B0B0C}
+.wordmark{font:700 17px/24px var(--ds-font); letter-spacing:-.02em; color:var(--ds-fg)}
+
+/* KPI tile */
+.kpi{background:var(--ds-surface); border:1px solid var(--ds-border); border-radius:var(--ds-radius-lg); padding:16px; display:flex; flex-direction:column; gap:6px; min-width:0}
+.kpi .k{font:500 13px/18px var(--ds-font); color:var(--ds-fg-muted)}
+.kpi .v{font:600 22px/28px var(--ds-font); letter-spacing:-.015em; font-variant-numeric:tabular-nums; white-space:nowrap}
+.kpi .d{display:inline-flex; align-items:center; gap:4px; font:500 12px/16px var(--ds-font); font-variant-numeric:tabular-nums}
+.up{color:var(--ds-success-fg)} .down{color:var(--ds-danger-fg)} .warn{color:var(--ds-warning-fg)}
+
+/* Skeleton */
+.skel{background:var(--n-100); border-radius:6px; position:relative; overflow:hidden}
+.ds.dark .skel{background:#1F1F23}
+.skel::after{content:""; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);
+  transform:translateX(-100%); animation:ds-shimmer 1.4s infinite}
+.ds.dark .skel::after{background:linear-gradient(90deg,transparent,rgba(255,255,255,.05),transparent)}
+@keyframes ds-shimmer{to{transform:translateX(100%)}}
+
+/* Overlays: Sheet, Dialog, Toast, Menu */
+.scrim{position:absolute; inset:0; background:var(--ds-scrim)}
+.sheet{position:absolute; left:0; right:0; bottom:0; background:var(--ds-surface-raised); border-radius:20px 20px 0 0; box-shadow:var(--ds-shadow-overlay)}
+.grabber{width:36px; height:5px; border-radius:999px; background:var(--ds-border-strong); margin:8px auto 0}
+.overlay{background:var(--ds-surface-raised); border:1px solid var(--ds-border); border-radius:var(--ds-radius-lg); box-shadow:var(--ds-shadow-overlay)}
+.toast{display:flex; align-items:center; gap:12px; padding:12px 12px 12px 16px; border-radius:var(--ds-radius-md);
+  background:var(--n-900); color:#FAFAFA; font:500 14px/20px var(--ds-font); box-shadow:var(--ds-shadow-overlay)}
+.ds.dark .toast{background:#F4F4F5; color:#0B0B0C}
+.menu-item{display:flex; align-items:center; gap:12px; height:44px; padding:0 12px; border-radius:8px; font:400 14px/20px var(--ds-font); color:var(--ds-fg); border:0; background:transparent; width:100%; text-align:left}
+.menu-item.on{background:var(--n-100)} .ds.dark .menu-item.on{background:#26262A}
+
+/* Banner offline */
+.banner{display:flex; align-items:center; gap:8px; padding:8px 16px; font:500 13px/18px var(--ds-font);
+  background:var(--ds-warning-muted); color:var(--ds-warning-fg); border-bottom:1px solid var(--ds-border)}
+
+/* ---------- 6. AppShell ---------- */
+.screen{position:relative; overflow:hidden; display:flex; flex-direction:column; background:var(--ds-bg)}
+/* Teléfono */
+.topbar{display:flex; align-items:center; gap:4px; height:52px; padding:0 8px 0 12px; background:var(--ds-bg)}
+.portal-btn{display:inline-flex; align-items:center; gap:8px; height:44px; padding:0 8px 0 4px; border:0; background:transparent;
+  font:600 15px/20px var(--ds-font); color:var(--ds-fg); border-radius:var(--ds-radius-md)}
+.portal-btn .p{font:500 13px/18px var(--ds-font); color:var(--ds-fg-muted)}
+.pagehead{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:4px 16px 12px}
+.tabbar{display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); background:var(--ds-surface); border-top:1px solid var(--ds-border); padding:0 4px 34px; flex:none}
+.tabbar a{display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; height:56px; color:var(--ds-fg-subtle);
+  text-decoration:none; font:500 11px/14px var(--ds-font); letter-spacing:.01em}
+.tabbar a.on{color:var(--ds-fg)}
+.tabbar a.on .ic{color:var(--ds-accent)}
+.safe-top{height:44px; flex:none; background:var(--ds-bg)}
+.scroll{flex:1; min-height:0; overflow:hidden}
+/* iPad: riel */
+.rail{width:80px; flex:none; display:flex; flex-direction:column; align-items:center; gap:4px; padding:16px 0; background:var(--ds-surface); border-right:1px solid var(--ds-border)}
+.rail a{width:64px; height:56px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; border-radius:var(--ds-radius-md);
+  color:var(--ds-fg-muted); text-decoration:none; font:500 11px/14px var(--ds-font)}
+.rail a.on{background:var(--n-100); color:var(--ds-fg)}
+.ds.dark .rail a.on{background:#222226}
+.rail a.on .ic{color:var(--ds-accent)}
+/* Desktop: sidebar */
+.sidebar{width:248px; flex:none; display:flex; flex-direction:column; background:var(--ds-surface); border-right:1px solid var(--ds-border)}
+.nav-group{display:flex; flex-direction:column; gap:1px; padding:0 12px}
+.nav-group .h{font:500 12px/16px var(--ds-font); color:var(--ds-fg-subtle); padding:16px 8px 6px}
+.nav-item{display:flex; align-items:center; gap:10px; height:34px; padding:0 8px; border-radius:8px; color:var(--ds-fg-muted);
+  text-decoration:none; font:500 14px/20px var(--ds-font)}
+.nav-item .ic{width:16px; height:16px}
+.nav-item.on{background:var(--n-100); color:var(--ds-fg)}
+.ds.dark .nav-item.on{background:#222226}
+.nav-item.on .ic{color:var(--ds-accent)}
+.nav-item .n{margin-left:auto; font:500 12px/16px var(--ds-font); color:var(--ds-fg-subtle); font-variant-numeric:tabular-nums}
+.appbar{display:flex; align-items:center; gap:12px; height:60px; padding:0 24px; border-bottom:1px solid var(--ds-border); background:var(--ds-bg); flex:none}
+.searchbox{display:flex; align-items:center; gap:8px; height:36px; padding:0 8px 0 12px; border:1px solid var(--ds-border); border-radius:var(--ds-radius-md);
+  background:var(--ds-surface); color:var(--ds-fg-subtle); font:400 14px/20px var(--ds-font); min-width:0}
+
+/* ---------- 7. Planilla ---------- */
+.shift{display:flex; align-items:center; justify-content:center; height:28px; border-radius:6px; font:600 12px/16px var(--ds-font)}
+.sh-D{background:var(--ds-info-muted); color:var(--ds-info-fg)}
+.sh-N{background:var(--ds-accent-muted); color:var(--ds-accent)}
+.sh-L{background:transparent; color:var(--ds-fg-subtle); font-weight:400}
+.sh-V{background:var(--ds-success-muted); color:var(--ds-success-fg)}
+.sh-X{background:var(--ds-danger-muted); color:var(--ds-danger-fg); box-shadow:inset 0 0 0 1px var(--ds-danger)}
+
+</style>
+<style>body{margin:0;background:#E7E7EA}
+body{margin:0}
+</style>
+</head>
+<body>
+<!-- Control de rondas · 1280 · oscuro (turno noche) · 1280×800 -->
+
+
+
+
+<div class="ds screen dark" style="width: 1280px; height: 800px; flex-direction: row">
+  <nav class="sidebar" aria-label="Módulos">
+    <div style="padding: 14px 12px 4px; display: flex; flex-direction: column; gap: 12px">
+      <div style="display: flex; align-items: center; justify-content: space-between; padding: 0 8px"><span class="wordmark">OPAI</span><span class="t-caption">2.0</span></div>
+      <button aria-label="Portal ERP de Atlas Seguridad · cambiar" style="display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 10px; border: 1px solid var(--ds-border); border-radius: 10px; background: var(--ds-bg); color: var(--ds-fg); text-align: left">
+        <span class="tenant">AS</span>
+        <span style="flex: 1; min-width: 0; display: flex; flex-direction: column"><span class="t-label-sm">ERP</span><span class="t-caption" style="font-size: 11px; line-height: 14px">Atlas Seguridad SpA</span></span>
+        <span class="ic sm i-updown subtle" aria-hidden="true"></span>
+      </button>
+    </div>
+    <div style="flex: 1; min-height: 0; overflow: hidden">
+      
+        <div class="nav-group">
+          
+          
+            <a class="nav-item " href="#"><span class="ic i-home" aria-hidden="true"></span>Inicio</a>
+          
+            <a class="nav-item " href="#"><span class="ic i-inbox" aria-hidden="true"></span>Bandeja<span class="n">5</span></a>
+          
+            <a class="nav-item " href="#"><span class="ic i-ticket" aria-hidden="true"></span>Tickets<span class="n">7</span></a>
+          
+        </div>
+      
+        <div class="nav-group">
+          <span class="h">Comercial</span>
+          
+            <a class="nav-item " href="#"><span class="ic i-briefcase" aria-hidden="true"></span>Clientes</a>
+          
+            <a class="nav-item " href="#"><span class="ic i-file" aria-hidden="true"></span>Cotizaciones<span class="n">3</span></a>
+          
+        </div>
+      
+        <div class="nav-group">
+          <span class="h">Operaciones</span>
+          
+            <a class="nav-item " href="#"><span class="ic i-building" aria-hidden="true"></span>Instalaciones</a>
+          
+            <a class="nav-item " href="#"><span class="ic i-user-check" aria-hidden="true"></span>Pauta diaria</a>
+          
+            <a class="nav-item " href="#"><span class="ic i-calendar" aria-hidden="true"></span>Pauta mensual</a>
+          
+            <a class="nav-item on" href="#"><span class="ic i-route" aria-hidden="true"></span>Rondas<span class="n">5</span></a>
+          
+        </div>
+      
+        <div class="nav-group">
+          <span class="h">Personas</span>
+          
+            <a class="nav-item " href="#"><span class="ic i-users" aria-hidden="true"></span>Personas</a>
+          
+        </div>
+      
+        <div class="nav-group">
+          <span class="h">Finanzas</span>
+          
+            <a class="nav-item " href="#"><span class="ic i-chart" aria-hidden="true"></span>Resumen</a>
+          
+            <a class="nav-item " href="#"><span class="ic i-wallet" aria-hidden="true"></span>Facturación</a>
+          
+            <a class="nav-item " href="#"><span class="ic i-landmark" aria-hidden="true"></span>Bancos</a>
+          
+        </div>
+      
+    </div>
+    <div style="display: flex; align-items: center; gap: 10px; padding: 12px 20px; border-top: 1px solid var(--ds-border)">
+      <span class="avatar">CI</span>
+      <span style="flex: 1; display: flex; flex-direction: column"><span class="t-label-sm">Carlos Irigoyen</span><span class="t-caption" style="font-size: 11px; line-height: 14px">Administrador</span></span>
+    </div>
+  </nav>
+
+  <div style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+    <header class="appbar" style="padding: 0 32px">
+      <div style="flex: 1; display: flex; align-items: center; gap: 12px">
+        <h1 class="t-heading m0">Control de rondas</h1>
+        <span class="live">En vivo · 10:24</span>
+      </div>
+      <button class="btn btn-secondary" style="height: 36px; padding: 0 10px; font-weight: 400"><span class="t-numeric">Hoy · 23-10-2026</span><span class="ic sm i-chevron-down muted" aria-hidden="true"></span></button>
+      <button class="searchbox" style="width: 200px; cursor: pointer"><span class="ic sm i-search" aria-hidden="true"></span><span style="flex: 1; text-align: left">Buscar</span><span class="kbd">⌘K</span></button>
+      <button class="btn btn-primary"><span class="ic sm i-plus" aria-hidden="true"></span>Programar ronda</button>
+    </header>
+
+    <div style="flex: 1; min-height: 0; padding: 24px 32px; display: flex; flex-direction: column; gap: 16px">
+      <div style="display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); border: 1px solid var(--ds-border); border-radius: 12px; background: var(--ds-surface)">
+        
+          <div style="padding: 14px 16px; display: flex; flex-direction: column; gap: 2px; border-right: 1px solid var(--ds-border)">
+            <span class="t-caption">Programadas hoy</span>
+            <span class="t-numeric" style="font: 600 22px/28px var(--ds-font); ">48</span>
+            <span class="t-caption" style="font-size: 11px; line-height: 14px">6 por iniciar</span>
+          </div>
+        
+          <div style="padding: 14px 16px; display: flex; flex-direction: column; gap: 2px; border-right: 1px solid var(--ds-border)">
+            <span class="t-caption">Completadas</span>
+            <span class="t-numeric" style="font: 600 22px/28px var(--ds-font); ">31</span>
+            <span class="t-caption" style="font-size: 11px; line-height: 14px">a tiempo</span>
+          </div>
+        
+          <div style="padding: 14px 16px; display: flex; flex-direction: column; gap: 2px; border-right: 1px solid var(--ds-border)">
+            <span class="t-caption">En curso</span>
+            <span class="t-numeric" style="font: 600 22px/28px var(--ds-font); ">6</span>
+            <span class="t-caption" style="font-size: 11px; line-height: 14px">todas en plazo</span>
+          </div>
+        
+          <div style="padding: 14px 16px; display: flex; flex-direction: column; gap: 2px; border-right: 1px solid var(--ds-border)">
+            <span class="t-caption">Atrasadas</span>
+            <span class="t-numeric" style="font: 600 22px/28px var(--ds-font); color: var(--ds-warning-fg)">3</span>
+            <span class="t-caption" style="font-size: 11px; line-height: 14px">en curso fuera de plazo</span>
+          </div>
+        
+          <div style="padding: 14px 16px; display: flex; flex-direction: column; gap: 2px; border-right: 1px solid var(--ds-border)">
+            <span class="t-caption">Omitidas</span>
+            <span class="t-numeric" style="font: 600 22px/28px var(--ds-font); color: var(--ds-danger-fg)">2</span>
+            <span class="t-caption" style="font-size: 11px; line-height: 14px">sin iniciar en ventana</span>
+          </div>
+        
+          <div style="padding: 14px 16px; display: flex; flex-direction: column; gap: 2px; ">
+            <span class="t-caption">Cumplimiento</span>
+            <span class="t-numeric" style="font: 600 22px/28px var(--ds-font); ">86,1 %</span>
+            <span class="t-caption" style="font-size: 11px; line-height: 14px">31 de 36 vencidas</span>
+          </div>
+        
+      </div>
+
+      <div style="flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px">
+        <section style="border: 1px solid var(--ds-border); border-radius: 12px; background: var(--ds-surface); overflow: hidden; display: flex; flex-direction: column">
+          <div style="display: flex; align-items: center; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--ds-border)">
+            <div class="seg" role="group" aria-label="Estado"><button class="on">Con alerta · 5</button><button>En curso · 6</button><button>Todas · 48</button></div>
+            <span style="flex: 1"></span>
+            <span class="chip add"><span class="ic sm i-plus" aria-hidden="true"></span>Instalación</span>
+          </div>
+          <table class="tbl compact">
+            <thead><tr><th style="padding-left: 16px">Estado</th><th>Instalación · ronda · responsable</th><th>Avance</th><th class="num" style="padding-right: 16px">Inicio</th></tr></thead>
+            <tbody>
+              
+                <tr class="sel">
+                  <td style="padding-left: 16px"><span class="badge b-warning">Atrasada</span></td>
+                  <td><span style="display: flex; flex-direction: column; line-height: 18px"><span style="font-weight: 500">Bodega Lampa</span><span class="t-caption">Patio de contenedores · Matías Contreras</span></span></td>
+                  <td><span style="display: flex; align-items: center; gap: 10px"><span class="progress" style="width: 88px"><span style="width: 40%; background: var(--ds-warning)"></span></span><span class="t-caption t-numeric">2/5</span></span></td>
+                  <td class="num muted" style="padding-right: 16px">09:30</td>
+                </tr>
+              
+                <tr class>
+                  <td style="padding-left: 16px"><span class="badge b-danger">Omitida</span></td>
+                  <td><span style="display: flex; flex-direction: column; line-height: 18px"><span style="font-weight: 500">Torre Apoquindo</span><span class="t-caption">Pisos 10 a 20 · Daniela Reyes</span></span></td>
+                  <td><span style="display: flex; align-items: center; gap: 10px"><span class="progress" style="width: 88px"><span style="width: 0%; background: var(--ds-danger)"></span></span><span class="t-caption t-numeric">0/8</span></span></td>
+                  <td class="num muted" style="padding-right: 16px">09:00</td>
+                </tr>
+              
+                <tr class>
+                  <td style="padding-left: 16px"><span class="badge b-danger">Omitida</span></td>
+                  <td><span style="display: flex; flex-direction: column; line-height: 18px"><span style="font-weight: 500">Colegio San Andrés</span><span class="t-caption">Perímetro y accesos · Ricardo Navarro</span></span></td>
+                  <td><span style="display: flex; align-items: center; gap: 10px"><span class="progress" style="width: 88px"><span style="width: 0%; background: var(--ds-danger)"></span></span><span class="t-caption t-numeric">0/6</span></span></td>
+                  <td class="num muted" style="padding-right: 16px">08:00</td>
+                </tr>
+              
+                <tr class>
+                  <td style="padding-left: 16px"><span class="badge b-warning">Atrasada</span></td>
+                  <td><span style="display: flex; flex-direction: column; line-height: 18px"><span style="font-weight: 500">Edificio Costanera Center</span><span class="t-caption">Estacionamientos −1 a −4 · Cristián Bravo</span></span></td>
+                  <td><span style="display: flex; align-items: center; gap: 10px"><span class="progress" style="width: 88px"><span style="width: 57%; background: var(--ds-warning)"></span></span><span class="t-caption t-numeric">4/7</span></span></td>
+                  <td class="num muted" style="padding-right: 16px">09:45</td>
+                </tr>
+              
+                <tr class>
+                  <td style="padding-left: 16px"><span class="badge b-warning">Atrasada</span></td>
+                  <td><span style="display: flex; flex-direction: column; line-height: 18px"><span style="font-weight: 500">Condominio Los Robles</span><span class="t-caption">Calles interiores · Francisca Vera</span></span></td>
+                  <td><span style="display: flex; align-items: center; gap: 10px"><span class="progress" style="width: 88px"><span style="width: 50%; background: var(--ds-warning)"></span></span><span class="t-caption t-numeric">3/6</span></span></td>
+                  <td class="num muted" style="padding-right: 16px">09:40</td>
+                </tr>
+              
+                <tr class>
+                  <td style="padding-left: 16px"><span class="badge b-accent">En curso</span></td>
+                  <td><span style="display: flex; flex-direction: column; line-height: 18px"><span style="font-weight: 500">Planta Quilicura</span><span class="t-caption">Ronda perimetral · María Fernanda Soto</span></span></td>
+                  <td><span style="display: flex; align-items: center; gap: 10px"><span class="progress" style="width: 88px"><span style="width: 50%; background: var(--ds-fg)"></span></span><span class="t-caption t-numeric">3/6</span></span></td>
+                  <td class="num muted" style="padding-right: 16px">10:02</td>
+                </tr>
+              
+                <tr class>
+                  <td style="padding-left: 16px"><span class="badge b-accent">En curso</span></td>
+                  <td><span style="display: flex; flex-direction: column; line-height: 18px"><span style="font-weight: 500">Centro de distribución Pudahuel</span><span class="t-caption">Andenes · Sebastián Vargas</span></span></td>
+                  <td><span style="display: flex; align-items: center; gap: 10px"><span class="progress" style="width: 88px"><span style="width: 20%; background: var(--ds-fg)"></span></span><span class="t-caption t-numeric">1/5</span></span></td>
+                  <td class="num muted" style="padding-right: 16px">10:15</td>
+                </tr>
+              
+                <tr class>
+                  <td style="padding-left: 16px"><span class="badge b-success">Completa</span></td>
+                  <td><span style="display: flex; flex-direction: column; line-height: 18px"><span style="font-weight: 500">Planta Quilicura</span><span class="t-caption">Apertura de bodegas · Camila Herrera</span></span></td>
+                  <td><span style="display: flex; align-items: center; gap: 10px"><span class="progress" style="width: 88px"><span style="width: 100%; background: var(--ds-success)"></span></span><span class="t-caption t-numeric">4/4</span></span></td>
+                  <td class="num muted" style="padding-right: 16px">08:10</td>
+                </tr>
+              
+                <tr class>
+                  <td style="padding-left: 16px"><span class="badge b-success">Completa</span></td>
+                  <td><span style="display: flex; flex-direction: column; line-height: 18px"><span style="font-weight: 500">Bodega Lampa</span><span class="t-caption">Ronda de apertura · Felipe Cortés</span></span></td>
+                  <td><span style="display: flex; align-items: center; gap: 10px"><span class="progress" style="width: 88px"><span style="width: 100%; background: var(--ds-success)"></span></span><span class="t-caption t-numeric">5/5</span></span></td>
+                  <td class="num muted" style="padding-right: 16px">08:05</td>
+                </tr>
+              
+            </tbody>
+          </table>
+        </section>
+
+        <aside class="card" aria-label="Detalle de la ronda" style="display: flex; flex-direction: column; overflow: hidden">
+          <div style="padding: 16px; display: flex; flex-direction: column; gap: 6px; border-bottom: 1px solid var(--ds-border)">
+            <span class="badge b-danger" style="align-self: flex-start">Atrasada 12 min</span>
+            <span class="t-subheading">Patio de contenedores</span>
+            <span class="t-body-sm muted">Bodega Lampa · Matías Contreras</span>
+            <div style="display: flex; flex-direction: column; gap: 6px; padding-top: 6px">
+              <div style="display: flex; justify-content: space-between" class="t-caption t-numeric"><span>2 de 5 puntos</span><span>Inició 09:30 · límite 45 min</span></div>
+              <div class="progress"><span style="width: 40%; background: var(--ds-danger)"></span></div>
+            </div>
+          </div>
+          <div style="flex: 1; min-height: 0; overflow: hidden; padding: 16px">
+            <div class="tl">
+              
+                <div class="tl-item" style="padding-bottom: 14px">
+                  <span class="tl-dot done"><span style="font: 600 11px/1 var(--ds-font)">1</span></span>
+                  <div style="display: flex; justify-content: space-between; gap: 8px; padding-top: 2px">
+                    <span style="display: flex; flex-direction: column"><span class="t-label-sm" style>Portón de acceso</span><span class="t-caption" style="color: var(--ds-fg-subtle)">Sin novedad</span></span>
+                    <span class="t-caption t-numeric">09:31</span>
+                  </div>
+                </div>
+              
+                <div class="tl-item" style="padding-bottom: 14px">
+                  <span class="tl-dot done"><span style="font: 600 11px/1 var(--ds-font)">2</span></span>
+                  <div style="display: flex; justify-content: space-between; gap: 8px; padding-top: 2px">
+                    <span style="display: flex; flex-direction: column"><span class="t-label-sm" style>Fila A de contenedores</span><span class="t-caption" style="color: var(--ds-fg-subtle)">Sin novedad</span></span>
+                    <span class="t-caption t-numeric">09:40</span>
+                  </div>
+                </div>
+              
+                <div class="tl-item" style="padding-bottom: 14px">
+                  <span class="tl-dot late"><span style="font: 600 11px/1 var(--ds-font)">3</span></span>
+                  <div style="display: flex; justify-content: space-between; gap: 8px; padding-top: 2px">
+                    <span style="display: flex; flex-direction: column"><span class="t-label-sm" style>Fila B de contenedores</span><span class="t-caption" style="color: var(--ds-danger-fg)">Esperado 09:52 · sin lectura</span></span>
+                    <span class="t-caption t-numeric">—</span>
+                  </div>
+                </div>
+              
+                <div class="tl-item" style="padding-bottom: 14px">
+                  <span class="tl-dot "><span style="font: 600 11px/1 var(--ds-font)">4</span></span>
+                  <div style="display: flex; justify-content: space-between; gap: 8px; padding-top: 2px">
+                    <span style="display: flex; flex-direction: column"><span class="t-label-sm" style="color: var(--ds-fg-muted); font-weight: 400">Taller de mantención</span><span class="t-caption" style="color: var(--ds-fg-subtle)">Pendiente</span></span>
+                    <span class="t-caption t-numeric"></span>
+                  </div>
+                </div>
+              
+                <div class="tl-item" style="padding-bottom: 14px">
+                  <span class="tl-dot "><span style="font: 600 11px/1 var(--ds-font)">5</span></span>
+                  <div style="display: flex; justify-content: space-between; gap: 8px; padding-top: 2px">
+                    <span style="display: flex; flex-direction: column"><span class="t-label-sm" style="color: var(--ds-fg-muted); font-weight: 400">Cerco oriente</span><span class="t-caption" style="color: var(--ds-fg-subtle)">Pendiente</span></span>
+                    <span class="t-caption t-numeric"></span>
+                  </div>
+                </div>
+              
+            </div>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 12px 16px 16px; border-top: 1px solid var(--ds-border)">
+            <button class="btn btn-secondary"><span class="ic sm i-phone" aria-hidden="true"></span>Llamar</button>
+            <button class="btn btn-secondary"><span class="ic sm i-ticket" aria-hidden="true"></span>Crear ticket</button>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+</body>
+</html>

@@ -1,6 +1,6 @@
 # ESTADO — OPAI 2.0
 
-**Última actualización:** 23-oct-2026 · **Actualizado por:** Claude (arquitectura, ejecutando el Brief 00) · **Fase en curso:** 0 — Fundación (código listo; falta infraestructura)
+**Última actualización:** 23-oct-2026 (madrugada) · **Actualizado por:** Claude (arquitectura) · **Fase en curso:** 0 — Fundación (código y DS listos; falta infraestructura)
 
 Este archivo es la fuente de verdad del avance. Cada brief lo actualiza al terminar. Si algo no está aquí, no está hecho.
 
@@ -19,15 +19,15 @@ Este archivo es la fuente de verdad del avance. Cada brief lo actualiza al termi
   - `modules/registry` (`@opai/modules`) y `pnpm scaffold:module <id> --nombre` (verificado con un módulo de prueba, luego eliminado).
   - `CLAUDE.md`, `README.md`, `.env.example`, CI (`typecheck`, `lint`, `test`, `test:db` con Postgres 16 como servicio).
   - Gate completo en verde: `pnpm typecheck && pnpm lint && pnpm test` (27 tests) y `pnpm test:db` (4 tests).
+- **Brief 00b ejecutado: DS 2.0 definitivo** (ADR-014). Diseño aprobado por Carlos en Claude Design; export guardado en `docs/2.0/design/export-ds-2.0/` (40 pantallas). `tokens.css` reemplazado por los valores aprobados (Inter + JetBrains Mono autoalojadas, índigo, neutros, modo oscuro verdadero), `styles.css` con estilos tipográficos; componentes, shell (barra superior con selector de portal, barra inferior, riel, barra lateral con tenant y usuario) y patrones ajustados al diseño; nuevos `Chip`, `ChipAgregar`, `Avatar`, `Monograma`, `PortalSwitcher`. Revisado visualmente a 375, 1024 y 1280 en claro y oscuro; build y gate en verde; capturas actualizadas.
 
 ## En curso
 
 - **Carlos (Mac, 10–15 min):** ejecutar `docs/2.0/briefs/BRIEF-00-infra.md` en Claude Code (Neon, Vercel, `test.opai.cl`, rol y tenant). Alternativa parcial desde el teléfono: importar el repo en Vercel (root `apps/web`), crear la base Neon desde Storage y agregar el dominio; las migraciones y el rol se hacen igual desde el Mac.
-- **Carlos:** correr el Design Prompt en Claude Design y traer el export HTML aprobado.
 
 ## Pendiente (siguiente)
 
-- Brief 00b — Tokens y estilo definitivos del DS 2.0 a partir del diseño aprobado (solo `tokens.css`, fuentes y variantes; sin tocar estructura). Evaluar en ese momento adoptar shadcn/ui (Radix) para Sheet, Select, Combobox y Dialog accesibles.
+- Evaluar Radix/shadcn para Combobox con búsqueda, Dialog y Menú cuando el primer módulo los necesite (Comercial).
 - Brief 01 — Núcleo mínimo (auth, usuarios, roles y permisos, tenants y Plataforma mínima, módulos y entitlements, cuentas, contactos, instalaciones, cargos y estructuras, archivos y PDF, configuración declarativa, MCP con API keys, telemetría, selector de portal real, diccionario de vertical).
 - Extracción de 1.0 para Comercial y CPQ → `docs/2.0/extraccion/`.
 - Modelo de planes y facturación de suscripciones: cuando exista Opai SpA (en creación).
@@ -53,8 +53,9 @@ Node 22 · pnpm 10.28 · Next.js 16.4.2 · React 19.3.0 · Tailwind 4.3.3 · Pri
 - `prisma generate` en `postinstall` de `@opai/db` para que el build de Vercel tenga el cliente; `prisma.config.ts` usa un placeholder cuando falta `DATABASE_URL_MIGRATE` para que `generate` no falle.
 - Con `cacheComponents` activo no se usa `export const dynamic`; los route handlers ya son dinámicos por defecto.
 - Formato: Prettier en código; `docs/` excluido para no reescribir los documentos.
+- Título de página en iPad y desktop en la barra superior del shell (como en el diseño); el patrón lo muestra solo en teléfono. La acción principal queda en el patrón (una fila bajo la barra en iPad/desktop) para no acoplar shell y patrón.
 
 ## Riesgos y pendientes materiales
 
-- El diseño del DS 2.0 no está aprobado: `tokens.css` es provisional. Ningún módulo de negocio se diseña hasta tener el DS aprobado (Brief 00b).
 - Sin infraestructura aún no hay `test.opai.cl`; todo lo demás está verificado localmente y en CI.
+- Pendientes de diseño para módulos: patrón de vista dividida (lista + detalle en iPad, como `DetailTablet.html`), paleta de comandos ⌘K, menú de usuario, Combobox con búsqueda. Se diseñan con el módulo que los necesite.

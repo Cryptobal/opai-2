@@ -38,7 +38,7 @@ export function Empty(props: EstadoProps) {
 
 /** Error: qué pasó, qué hacer, reintentar. */
 export function ErrorState(props: EstadoProps) {
-  return <Marco icono={<AlertTriangle className="size-6 text-danger" />} {...props} />;
+  return <Marco icono={<AlertTriangle className="size-6 text-danger-fg" />} {...props} />;
 }
 
 /** Sin permisos: explicación breve y a quién pedir acceso. */

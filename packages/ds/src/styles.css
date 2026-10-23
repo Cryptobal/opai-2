@@ -1,0 +1,134 @@
+/* DS 2.0 — estilos base y utilidades tipográficas. Se importa desde apps/web (globals.css)
+   dentro del pipeline de Tailwind, después de @import "tailwindcss". */
+@import "./tokens.css";
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    font-feature-settings: "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    background: var(--ds-bg);
+    color: var(--ds-fg);
+    min-height: 100dvh;
+    font-size: var(--text-md);
+    line-height: var(--text-md--line-height);
+  }
+  * {
+    border-color: var(--ds-border);
+  }
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+  :focus-visible {
+    outline: 2px solid var(--ds-focus);
+    outline-offset: 2px;
+  }
+}
+
+/* Estilos tipográficos del DS (uso: className="t-title") */
+@utility t-display {
+  font-size: 36px;
+  line-height: 40px;
+  font-weight: 600;
+  letter-spacing: -0.022em;
+}
+@utility t-title {
+  font-size: 28px;
+  line-height: 34px;
+  font-weight: 600;
+  letter-spacing: -0.018em;
+}
+@utility t-heading {
+  font-size: 22px;
+  line-height: 28px;
+  font-weight: 600;
+  letter-spacing: -0.012em;
+}
+@utility t-subheading {
+  font-size: 18px;
+  line-height: 26px;
+  font-weight: 600;
+  letter-spacing: -0.008em;
+}
+@utility t-body {
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+}
+@utility t-body-sm {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+}
+@utility t-label {
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 500;
+}
+@utility t-label-sm {
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 500;
+}
+@utility t-caption {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 400;
+  color: var(--ds-fg-subtle);
+}
+@utility t-overline {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--ds-fg-subtle);
+}
+@utility t-numeric {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum", "cv11";
+  font-weight: 500;
+}
+@utility t-mono {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 20px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Skeleton con brillo (modo claro y oscuro) */
+@utility ds-shimmer {
+  position: relative;
+  overflow: hidden;
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+    animation: ds-shimmer 1.4s infinite;
+  }
+  @media (prefers-color-scheme: dark) {
+    &::after {
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
+    }
+  }
+}
+@keyframes ds-shimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* Safe-area iOS */
+@utility pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+@utility pt-safe {
+  padding-top: env(safe-area-inset-top);
+}

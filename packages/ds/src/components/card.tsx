@@ -13,7 +13,7 @@ export function CardHeader({ className, ...props }: HTMLAttributes<HTMLDivElemen
 }
 
 export function CardTitle({ className, ...props }: HTMLAttributes<HTMLHeadingElement>) {
-  return <h3 className={cn("text-md font-semibold text-fg", className)} {...props} />;
+  return <h3 className={cn("t-subheading text-fg", className)} {...props} />;
 }
 
 export function CardContent({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
@@ -23,23 +23,26 @@ export function CardContent({ className, ...props }: HTMLAttributes<HTMLDivEleme
 type KpiProps = {
   etiqueta: string;
   valor: string;
-  variacion?: { texto: string; tono: "success" | "danger" | "neutro" };
+  variacion?: { texto: string; tono: "success" | "danger" | "warning" | "neutro" };
 };
+
+const TONO_VARIACION = {
+  success: "text-success-fg",
+  danger: "text-danger-fg",
+  warning: "text-warning-fg",
+  neutro: "text-fg-subtle",
+} as const;
 
 /** Indicador de dashboard: sin color de fondo; el color solo en la variación. */
 export function KpiTile({ etiqueta, valor, variacion }: KpiProps) {
-  const tono =
-    variacion?.tono === "success"
-      ? "text-success"
-      : variacion?.tono === "danger"
-        ? "text-danger"
-        : "text-fg-muted";
   return (
-    <Card className="p-4">
-      <p className="text-sm text-fg-muted">{etiqueta}</p>
-      <p className="mt-1 text-2xl font-semibold tabular-nums tracking-tight text-fg">{valor}</p>
+    <Card className="flex min-w-0 flex-col gap-1.5 p-4">
+      <p className="t-label-sm text-fg-muted">{etiqueta}</p>
+      <p className="t-numeric text-xl font-semibold tracking-[-0.015em] whitespace-nowrap text-fg">
+        {valor}
+      </p>
       {variacion ? (
-        <p className={cn("mt-1 text-sm tabular-nums", tono)}>{variacion.texto}</p>
+        <p className={cn("t-numeric text-xs", TONO_VARIACION[variacion.tono])}>{variacion.texto}</p>
       ) : null}
     </Card>
   );
