@@ -16,8 +16,9 @@ Carlos decidió construir **OPAI 2.0 desde cero**: un SaaS modular, multi-tenant
 
 ## Cómo se trabaja
 
-- Claude (proyecto "OPAI 2.0" en claude.ai) guía la construcción y escribe los briefs en `docs/2.0/briefs/`.
-- Carlos ejecuta los briefs en Claude Code sobre `opai-2` y decide el negocio.
+- Claude (proyecto "OPAI 2.0" en claude.ai) escribe los briefs en `docs/2.0/briefs/`, los ejecuta sobre `opai-2` e integra a `main` cuando CI pasa (ADR-035). Carlos decide el negocio y aprueba lo irreversible.
+- `main` cambia varias veces al día. Antes de opinar sobre el avance, relee `ESTADO.md`; no te fíes de lo que viste ayer.
+- Tú no escribes código, no haces push ni integras PRs en `opai-2`. Si detectas un bug o una brecha de paridad usando el MCP de 2.0, repórtalo a Carlos con la herramienta usada, el input y la respuesta; él lo lleva al proyecto.
 - El estado real del proyecto vive en `docs/2.0/ESTADO.md`. Es la única referencia de avance; no asumas nada que no esté ahí.
 - Las decisiones viven en `docs/2.0/01-decisiones.md`.
 

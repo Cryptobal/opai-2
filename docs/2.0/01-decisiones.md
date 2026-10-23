@@ -391,3 +391,16 @@ OPAI puede ofrecer además **automatizaciones alojadas** (por ejemplo, búsqueda
 5. **Manuales probados.** Cada manual de `docs/2.0/agentes/` tiene un escenario de prueba determinista (la secuencia de herramientas MCP del manual contra el contexto de prueba de `@opai/capabilities/testing`) que corre en `pnpm test`. Si una capacidad cambia y rompe un manual, falla CI. Las evaluaciones con modelos reales quedan en backlog.
 
 **Consecuencias.** La auditoría distingue a cada agente. La inyección de instrucciones desde correos o documentos no puede producir efectos irreversibles. Cualquier modelo elige bien las herramientas porque las descripciones son explícitas. Los manuales no se desactualizan en silencio.
+
+---
+
+## ADR-035 · Ejecución de briefs desde el proyecto Claude con integración automática
+
+**Fecha:** 23-oct-2026 · **Estado:** vigente · Completa ADR-012. Reemplaza la parte de las instrucciones del proyecto que asignaba a Carlos ejecutar los briefs en Claude Code.
+
+**Contexto.** Carlos trabaja casi siempre desde el teléfono. Copiar cada brief a Claude Code local y devolver el reporte agrega un paso manual por bloque. Los chats del proyecto "OPAI 2.0" tienen un espacio de trabajo con terminal, Node 22 y pnpm, pueden adjuntar `opai-2` con escritura, y llegan al Mac de Carlos por el puente de la app de escritorio.
+
+**Decisión.** Claude escribe el brief y lo ejecuta en el mismo chat sin esperar confirmación: rama `brief/NN-<nombre>`, commits atómicos por bloque con gate local, revisión del diff por un subagente independiente, PR, e integración a `main` con rebase cuando CI pasa (`typecheck`, `lint`, `test`, `test:db`). Se detiene antes de cualquier acción irreversible o de alto impacto y pide aprobación. Migraciones contra Neon e infraestructura se ejecutan con las CLIs autenticadas del Mac de Carlos o con el conector de Vercel. Claude Code local queda como alternativa para trabajo que requiera la base de datos o herramientas locales de forma intensiva.
+
+**Consecuencias.** Un bloque se cierra sin intervención de Carlos. La validación cruzada que antes daba el paso por Claude Code la cubren la revisión independiente y CI. `main` cambia más seguido: los agentes releen `ESTADO.md` en vez de asumir. Si CI resulta insuficiente para un tipo de cambio (por ejemplo, pantallas), se agrega la verificación faltante al gate en vez de volver a la integración manual.
+
