@@ -16,7 +16,9 @@ import {
   registrarCapacidades,
   registrarTrabajos,
 } from "../src";
+import { ejecutarHerramienta, herramientasMcp } from "../src/mcp";
 import { contextoDePrueba } from "../src/testing";
+import { semillaTenant } from "./semilla";
 
 beforeEach(() => {
   limpiarRegistro();
@@ -168,5 +170,55 @@ describe("platform.trabajos.cancelar", () => {
     });
     expect(r).toMatchObject({ ok: false });
     expect(tabla("trabajo")[0]?.["estado"]).toBe("en_curso");
+  });
+});
+
+describe("idempotencia de escrituras", () => {
+  it("la misma clave devuelve el resultado original sin repetir el efecto ni la auditoría", async () => {
+    const { ctx, tabla, eventos } = contextoDePrueba({ semilla: semillaTenant() });
+    const opciones = { idempotencyKey: "crear-key-1" };
+    const datos = { nombre: "Agente cobranza", scopes: ["*"] };
+    const a = await executeCapability(ctx, "core.apikeys.create", datos, opciones);
+    const b = await executeCapability(ctx, "core.apikeys.create", datos, opciones);
+    expect(a.ok && b.ok).toBe(true);
+    expect(b).toMatchObject({ repetida: true, data: a.ok ? a.data : null });
+    expect(tabla("apiKey")).toHaveLength(1);
+    expect(eventos.filter((e) => e.capability === "core.apikeys.create")).toHaveLength(1);
+    const otra = await executeCapability(
+      ctx,
+      "core.apikeys.create",
+      { ...datos, nombre: "Otro" },
+      opciones,
+    );
+    expect(otra).toMatchObject({ ok: false, error: { code: "CONFLICT" } });
+  });
+
+  it("si la escritura falla, la clave queda libre para reintentar", async () => {
+    const { ctx, tabla } = contextoDePrueba();
+    const opciones = { idempotencyKey: "k-falla" };
+    const r = await executeCapability(
+      ctx,
+      "core.apikeys.revoke",
+      { id: "0192f3a0-0000-7000-8000-0000000000ff" },
+      opciones,
+    );
+    expect(r.ok).toBe(false);
+    expect(tabla("idempotencia")).toHaveLength(0);
+  });
+
+  it("por MCP, las escrituras aceptan idempotency_key y las vistas previas no", async () => {
+    const { ctx, tabla } = contextoDePrueba({ semilla: semillaTenant() });
+    const hs = herramientasMcp(ctx);
+    const real = hs.find((h) => h.nombre === "core_apikeys_create");
+    const previa = hs.find((h) => h.nombre === "preview_core_apikeys_create");
+    if (!real || !previa) throw new Error("faltan herramientas");
+    const props = (h: typeof real) =>
+      Object.keys((z.toJSONSchema(h.input, { io: "input" }) as { properties: object }).properties);
+    expect(props(real)).toContain("idempotency_key");
+    expect(props(previa)).not.toContain("idempotency_key");
+    const args = { nombre: "Agente MCP", scopes: ["*"], idempotency_key: "mcp-intento-001" };
+    await ejecutarHerramienta(ctx, real, args);
+    expect(await ejecutarHerramienta(ctx, real, args)).toMatchObject({ ok: true, repetida: true });
+    expect(tabla("apiKey")).toHaveLength(1);
   });
 });

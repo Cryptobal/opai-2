@@ -238,3 +238,27 @@ model Comprobante {
   @@map("comprobantes")
   @@schema("core")
 }
+
+/// Idempotencia de escrituras (ADR-034): una clave por actor devuelve el mismo resultado al reintentar.
+model Idempotencia {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  tenantId   String   @map("tenant_id") @db.Uuid
+  /// "user:<id>" | "agent:<id>" | "system"
+  actor      String
+  clave      String
+  capability String
+  /// SHA-256 del input canónico: la misma clave con otro input es un conflicto.
+  huella     String
+  /// "en_curso" | "hecha"
+  estado     String   @default("en_curso")
+  resultado  Json?
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@unique([tenantId, actor, clave])
+  @@index([tenantId, createdAt])
+  @@map("idempotencias")
+  @@schema("core")
+}

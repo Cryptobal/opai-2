@@ -4,16 +4,16 @@ export const CUENTAS = [
     nombre: "Logística Andina SpA",
     rut: "76543210",
     giro: "Transporte y logística",
-    estado: "activa",
+    estado: "cliente_activo",
   },
   {
     nombre: "Inmobiliaria Costanera Ltda.",
     rut: "77123456",
     giro: "Inmobiliaria",
-    estado: "activa",
+    estado: "cliente_activo",
   },
   { nombre: "Minera Cerro Alto SpA", rut: "76987654", giro: "Minería", estado: "prospecto" },
-  { nombre: "Bodegas Pudahuel S.A.", rut: "96555444", giro: "Bodegaje", estado: "inactiva" },
+  { nombre: "Bodegas Pudahuel S.A.", rut: "96555444", giro: "Bodegaje", estado: "cliente_inactivo" },
 ] as const;
 
 export const INSTALACIONES = [

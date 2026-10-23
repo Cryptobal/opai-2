@@ -40,6 +40,8 @@ async function main(): Promise<void> {
           rut: rut(c.rut),
           giro: c.giro,
           estado: c.estado,
+          clienteDesde: c.estado === "prospecto" ? null : dia("2024-03-01"),
+          clienteHasta: c.estado === "cliente_inactivo" ? dia("2026-06-30") : null,
           region: "Región Metropolitana",
         },
       }),
