@@ -1,6 +1,6 @@
 # DESIGN PROMPT — ACCESO (OPAI 2.0)
 
-Para pegar en Claude Design junto con el export aprobado del DS 2.0 (`docs/2.0/design/export-ds-2.0/index.html`) como referencia de tokens y componentes. Diseña las pantallas de acceso de OPAI 2.0 usando exclusivamente ese sistema.
+Para pegar en Claude Design en un diseño nuevo que use el sistema de diseño **OPAI DS 2.0** (creado el 23-oct-2026 a partir de `docs/2.0/design/export-ds-2.0/index.html`). No crees colores, tipografías ni componentes nuevos, salvo el teclado numérico indicado en la pantalla 4, que queda definido como componente nuevo del sistema.
 
 ## Pantallas
 
@@ -14,7 +14,6 @@ Para pegar en Claude Design junto con el export aprobado del DS 2.0 (`docs/2.0/d
 
 ## Reglas
 
-- Tokens, tipografía y componentes del DS 2.0 por nombre; nada nuevo salvo el teclado numérico del login de Trabajador, que se define aquí como componente nuevo del DS.
 - Modo claro y oscuro para el login principal y el de Trabajador.
 - Textos en español de Chile; formatos chilenos de RUT.
 - Entregar export HTML standalone, una pantalla por archivo, como el export anterior.

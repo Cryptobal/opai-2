@@ -26,7 +26,7 @@ Este archivo es la fuente de verdad del avance. Cada brief lo actualiza al termi
 ## En curso
 
 - **Carlos:** ejecutar `docs/2.0/briefs/BRIEF-01-identidad-y-plataforma.md` en Claude Code (login, roles y permisos, Plataforma, MCP con API keys, telemetría). Se detiene dos veces (variables en Vercel; primer ingreso).
-- **Carlos (cuando quiera):** correr `docs/2.0/design/DESIGN-PROMPT-acceso.md` en Claude Design para el diseño definitivo de las pantallas de acceso.
+- **Carlos (cuando quiera):** correr `docs/2.0/design/DESIGN-PROMPT-acceso.md` en Claude Design, dentro del sistema de diseño **OPAI DS 2.0** (creado el 23-oct-2026 desde el export aprobado; es la referencia para todas las pantallas nuevas). Pendientes del sistema: logo definitivo de OPAI; revisar el contraste de `--ds-border-strong` (1,5:1) en el portal Trabajador a pleno sol.
 
 ## Pendiente (siguiente)
 
