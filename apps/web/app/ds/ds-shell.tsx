@@ -6,6 +6,8 @@ import type { ReactNode } from "react";
 
 import { AppShell, type LinkComponent } from "@opai/ds";
 
+import { Campana } from "./componentes-nuevos/campana-muestra";
+
 const LinkNext: LinkComponent = ({ href, className, children, ...rest }) => (
   <Link href={href} className={className} {...rest}>
     {children}
@@ -50,7 +52,8 @@ export function DsShell({ children }: { children: ReactNode }) {
         },
         { id: "salir", etiqueta: "Cerrar sesión", icono: LogOut, peligro: true, onSelect: nada },
       ]}
-      notificaciones={3}
+      campana={<Campana n={3} />}
+      onBuscar={nada}
       Link={LinkNext}
     >
       {children}

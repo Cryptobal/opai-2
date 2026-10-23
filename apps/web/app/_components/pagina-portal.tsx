@@ -4,16 +4,16 @@ import { type ReactNode, Suspense } from "react";
 import { Forbidden, Loading } from "@opai/ds";
 
 import { NAV_PLATAFORMA, navegacionErp, navegacionPortal } from "@/lib/navegacion";
-import { requerirIdentidad, tieneAccesoAPortal } from "@/lib/servidor";
+import { ejecutarComoUsuario, requerirIdentidad, tieneAccesoAPortal } from "@/lib/servidor";
 import type { Identidad } from "@/lib/actor";
 import { esRol } from "@opai/domain";
 
 import { ETIQUETA_ROL, PORTALES, portalesVisibles } from "./portales";
-import { type DatosShell, Shell } from "./shell";
+import { type DatosShell, type OpcionesPagina, Shell } from "./shell";
 
-type Props = { portal: string; titulo: string; ruta: string; children: ReactNode };
+type Props = OpcionesPagina & { portal: string; ruta: string; children: ReactNode };
 
-function datosShell(identidad: Identidad, portal: string): DatosShell {
+function datosShell(identidad: Identidad, portal: string, noLeidas: number): DatosShell {
   const { usuario, actual, membresias } = identidad;
   const rol = actual && esRol(actual.rol) ? actual.rol : null;
   const inicio = PORTALES.find((p) => p.id === portal)?.href ?? "/";
@@ -26,6 +26,7 @@ function datosShell(identidad: Identidad, portal: string): DatosShell {
   const plataforma = usuario.platformRole !== null;
   return {
     portal,
+    noLeidas,
     nav,
     portales: portalesVisibles(actual?.portales ?? [], plataforma),
     tenant:
@@ -46,7 +47,7 @@ function datosShell(identidad: Identidad, portal: string): DatosShell {
   };
 }
 
-async function Contenido({ portal, titulo, ruta, children }: Props) {
+async function Contenido({ portal, ruta, children, ...pagina }: Props) {
   const identidad = await requerirIdentidad(ruta);
   const acceso = tieneAccesoAPortal(identidad, portal);
   // Usuario de plataforma sin empresa: su inicio es Plataforma.
@@ -54,8 +55,15 @@ async function Contenido({ portal, titulo, ruta, children }: Props) {
     redirect("/platform");
   }
   const sinEmpresa = !identidad.actual && portal !== "platform";
+  const avisos =
+    acceso && identidad.actual
+      ? await ejecutarComoUsuario<{ noLeidas: number }>(portal, "core.notificaciones.list", {
+          limite: 1,
+        })
+      : null;
+  const noLeidas = avisos?.ok ? avisos.data.noLeidas : 0;
   return (
-    <Shell datos={datosShell(identidad, portal)} titulo={titulo}>
+    <Shell datos={datosShell(identidad, portal, noLeidas)} {...pagina}>
       {acceso ? (
         children
       ) : (

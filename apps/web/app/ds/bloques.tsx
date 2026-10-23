@@ -10,9 +10,9 @@ import {
   FormScreen,
   Input,
   PlanillaScreen,
-  Select,
 } from "@opai/ds";
 
+import { SelectMuestra } from "./componentes-nuevos/select-muestra";
 import { celdaPauta, COLUMNAS_PAUTA, FILAS_PAUTA, KPIS } from "./datos";
 
 export function Bloque({ titulo, children }: { titulo: string; children: ReactNode }) {
@@ -37,15 +37,10 @@ export function BloqueFormulario({ state }: { state: EstadoPantalla }) {
             contenido: (
               <div className="grid gap-4 md:grid-cols-2">
                 <Campo etiqueta="Cliente" htmlFor="c">
-                  <Select id="c" defaultValue="la">
-                    <option value="la">Logística Andina SpA</option>
-                    <option>Clínica Las Condes</option>
-                  </Select>
+                  <SelectMuestra id="c" opciones={["Logística Andina SpA", "Clínica Las Condes"]} />
                 </Campo>
                 <Campo etiqueta="Instalación" htmlFor="i">
-                  <Select id="i">
-                    <option>Planta Quilicura</option>
-                  </Select>
+                  <SelectMuestra id="i" opciones={["Planta Quilicura"]} />
                 </Campo>
               </div>
             ),
@@ -57,17 +52,13 @@ export function BloqueFormulario({ state }: { state: EstadoPantalla }) {
             contenido: (
               <div className="grid gap-4 md:grid-cols-4">
                 <Campo etiqueta="Cargo" htmlFor="cargo">
-                  <Select id="cargo">
-                    <option>Guardia</option>
-                  </Select>
+                  <SelectMuestra id="cargo" opciones={["Guardia"]} />
                 </Campo>
                 <Campo etiqueta="Cantidad" htmlFor="cant">
                   <Input id="cant" type="number" inputMode="numeric" defaultValue={3} />
                 </Campo>
                 <Campo etiqueta="Turno" htmlFor="turno">
-                  <Select id="turno">
-                    <option>4x4 día y noche</option>
-                  </Select>
+                  <SelectMuestra id="turno" opciones={["4x4 día y noche"]} />
                 </Campo>
                 <Campo etiqueta="Monto mensual (CLP)" htmlFor="monto" ayuda="Sin IVA">
                   <Input

@@ -20,13 +20,15 @@ export function CampoRol(props: {
 }) {
   return (
     <Campo etiqueta="Rol" htmlFor={props.id}>
-      <Select id={props.id} value={props.valor} onChange={(e) => props.onCambiar(e.target.value)}>
-        {rolesAsignables(props.miRol).map((r) => (
-          <option key={r} value={r}>
-            {ETIQUETA_ROL[r]}
-          </option>
-        ))}
-      </Select>
+      <Select
+        id={props.id}
+        valor={props.valor}
+        onCambiar={props.onCambiar}
+        opciones={rolesAsignables(props.miRol).map((r) => ({
+          valor: r,
+          etiqueta: ETIQUETA_ROL[r] ?? r,
+        }))}
+      />
     </Campo>
   );
 }

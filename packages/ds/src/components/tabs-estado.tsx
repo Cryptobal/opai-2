@@ -3,16 +3,11 @@
 import { useId, useState, type ReactNode } from "react";
 
 import { cn } from "../cn";
+import { ContadorTab, estiloTab } from "./tab-estilo";
 
 type TabEstado = { id: string; etiqueta: string; contenido?: ReactNode; contador?: number };
 
 type Props = { tabs: readonly TabEstado[]; inicial?: string; className?: string };
-
-const estilo = (seleccionada: boolean) =>
-  cn(
-    "-mb-px inline-flex h-11 shrink-0 items-center gap-1.5 border-b-2 px-3 text-base font-medium whitespace-nowrap transition-colors",
-    seleccionada ? "border-fg text-fg" : "border-transparent text-fg-muted hover:text-fg",
-  );
 
 /** Pestañas con estado local (contenido en memoria). La versión por ruta vive en `Tabs`. */
 export function TabsEstado({ tabs, inicial, className }: Props) {
@@ -36,12 +31,10 @@ export function TabsEstado({ tabs, inicial, className }: Props) {
               aria-selected={seleccionada}
               aria-controls={`${base}-panel-${tab.id}`}
               onClick={() => setActiva(tab.id)}
-              className={estilo(seleccionada)}
+              className={estiloTab(seleccionada)}
             >
               {tab.etiqueta}
-              {tab.contador !== undefined ? (
-                <span className="t-numeric text-xs text-fg-subtle">{tab.contador}</span>
-              ) : null}
+              <ContadorTab n={tab.contador} activa={seleccionada} />
             </button>
           );
         })}

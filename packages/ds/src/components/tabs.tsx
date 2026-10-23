@@ -1,8 +1,12 @@
+import { Lock } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { cn } from "../cn";
 import { type LinkComponent, LinkPorDefecto } from "../shell/types";
+import { ContadorTab, estiloTab } from "./tab-estilo";
 import { TabsEstado } from "./tabs-estado";
+
+export { ContadorTab, estiloTab } from "./tab-estilo";
 
 export type Tab = {
   id: string;
@@ -11,6 +15,8 @@ export type Tab = {
   contador?: number;
   /** Pestaña como ruta real (`/cuentas/<id>/contactos`): server-first y enlazable (ADR-037). */
   href?: string;
+  /** Pestaña visible pero no disponible (p. ej. "Personas" hasta Operaciones), con el motivo. */
+  deshabilitada?: string;
 };
 
 type TabsProps = {
@@ -25,16 +31,6 @@ type TabsProps = {
   children?: ReactNode;
   className?: string;
 };
-
-export const estiloTab = (seleccionada: boolean) =>
-  cn(
-    "-mb-px inline-flex h-11 shrink-0 items-center gap-1.5 border-b-2 px-3 text-base font-medium whitespace-nowrap transition-colors",
-    seleccionada ? "border-fg text-fg" : "border-transparent text-fg-muted hover:text-fg",
-  );
-
-export function ContadorTab({ n }: { n: number | undefined }) {
-  return n !== undefined ? <span className="t-numeric text-xs text-fg-subtle">{n}</span> : null;
-}
 
 /**
  * Pestañas accesibles (role=tablist), 44px, subrayado en el color de texto. Dos modos: por ruta
@@ -53,6 +49,22 @@ export function Tabs(props: TabsProps) {
       >
         {tabs.map((tab) => {
           const seleccionada = tab.id === actual?.id;
+          if (tab.deshabilitada)
+            return (
+              <span
+                key={tab.id}
+                title={tab.deshabilitada}
+                aria-disabled
+                className={cn(
+                  estiloTab(false),
+                  "cursor-not-allowed text-fg-subtle hover:text-fg-subtle",
+                )}
+              >
+                <Lock className="size-3.5" aria-hidden />
+                {tab.etiqueta}
+                <span className="sr-only"> ({tab.deshabilitada})</span>
+              </span>
+            );
           return (
             <Link
               key={tab.id}
@@ -61,7 +73,7 @@ export function Tabs(props: TabsProps) {
               aria-current={seleccionada ? "page" : undefined}
             >
               {tab.etiqueta}
-              <ContadorTab n={tab.contador} />
+              <ContadorTab n={tab.contador} activa={seleccionada} />
             </Link>
           );
         })}

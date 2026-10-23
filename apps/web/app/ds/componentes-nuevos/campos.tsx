@@ -1,0 +1,79 @@
+"use client";
+
+import { useState } from "react";
+
+import {
+  CampoDireccion,
+  CampoSecreto,
+  Campo,
+  type Direccion,
+  InputFecha,
+  InputFechaRango,
+  MapaEstatico,
+  Uploader,
+} from "@opai/ds";
+
+const SUGERENCIAS = [
+  { valor: "p1", etiqueta: "Av. Las Industrias 4520", detalle: "Quilicura, Región Metropolitana" },
+  { valor: "p2", etiqueta: "Av. Las Industrias 450", detalle: "Maipú, Región Metropolitana" },
+];
+
+/** Simula una subida con progreso y un error por tamaño. */
+async function subidaFicticia(archivo: File, progreso: (f: number) => void) {
+  for (let i = 1; i <= 10; i++) {
+    await new Promise((r) => setTimeout(r, 120));
+    progreso(i / 10);
+  }
+  await new Promise((r) => setTimeout(r, 400));
+  if (archivo.name.includes("error")) throw new Error("El archivo no coincide con su huella");
+}
+
+/** InputFecha, CampoSecreto, Uploader, CampoDireccion y MapaEstatico. */
+export function MuestraCampos() {
+  const [fecha, setFecha] = useState("2025-03-03");
+  const [rango, setRango] = useState({ desde: "2026-10-01", hasta: "2026-09-01" });
+  const [dir, setDir] = useState<Direccion | null>(null);
+  return (
+    <div className="grid gap-6 md:grid-cols-2">
+      <div className="flex flex-col gap-4">
+        <Campo etiqueta="Fecha" htmlFor="f1">
+          <InputFecha id="f1" valor={fecha} onCambiar={setFecha} />
+        </Campo>
+        <div className="flex flex-col gap-1.5">
+          <span className="t-label">Rango desde / hasta</span>
+          <InputFechaRango desde={rango.desde} hasta={rango.hasta} onCambiar={setRango} />
+        </div>
+        <Campo etiqueta="Clave propia · ingresando" htmlFor="sec1">
+          <CampoSecreto id="sec1" onGuardar={() => undefined} />
+        </Campo>
+        <Campo etiqueta="Clave propia · guardada" htmlFor="sec2">
+          <CampoSecreto id="sec2" guardado="1234" onGuardar={() => undefined} />
+        </Campo>
+        <Uploader procesar={subidaFicticia} tipos="PDF, JPG o PNG" tamanoMaximoMb={50} multiple />
+      </div>
+      <div className="flex flex-col gap-4">
+        <Campo etiqueta="Dirección" htmlFor="dir">
+          <CampoDireccion
+            id="dir"
+            valor={dir}
+            onCambiar={setDir}
+            geocercaM={300}
+            buscar={async (q) =>
+              SUGERENCIAS.filter((s) => s.etiqueta.toLowerCase().includes(q.toLowerCase()))
+            }
+            resolver={async (id) => ({
+              calle: id === "p1" ? "Av. Las Industrias 4520" : "Av. Las Industrias 450",
+              comuna: id === "p1" ? "Quilicura" : "Maipú",
+              region: "Región Metropolitana",
+              placeId: id,
+              lat: -33.36,
+              lng: -70.73,
+            })}
+          />
+        </Campo>
+        <MapaEstatico lat={-33.36} lng={-70.73} geocercaM={300} pie="Geocerca 300 m" />
+        <MapaEstatico lat={null} lng={null} />
+      </div>
+    </div>
+  );
+}

@@ -1,83 +1,81 @@
 import type { ReactNode } from "react";
 
-import type { ItemMenu } from "../components/menu";
-
 import { cn } from "../cn";
 import { BottomNav, Rail } from "./nav";
 import { Sidebar } from "./sidebar";
-import { AppBar, TopBarTelefono } from "./top-bar";
-import type { LinkComponent, NavItem, Portal, Tenant, Usuario } from "./types";
+import { AppBar, type ComunesBarra, TopBarTelefono } from "./top-bar";
+import type { NavItem } from "./types";
 
-export type AppShellProps = {
+export type AppShellProps = ComunesBarra & {
   /** Título de la página: va en la barra superior de iPad y desktop. En teléfono lo muestra el patrón
    *  (que recibe el mismo título y lo oculta en md+). */
   titulo: string;
   nav: readonly NavItem[];
-  portales: readonly Portal[];
-  portalActual: string;
   rutaActual: string;
-  tenant?: Tenant;
-  usuario?: Usuario;
-  /** Ítems del menú de usuario (empresas, perfil, cerrar sesión). Sin ítems, solo avatar. */
-  menuUsuario?: readonly ItemMenu[];
-  notificaciones?: number;
-  Link?: LinkComponent;
+  /** Acción principal de la página en la barra superior (md+); en teléfono va en el patrón. */
+  acciones?: ReactNode;
+  /** Acciones en la barra del teléfono cuando hay "Atrás" (menú ⋯ del detalle). */
+  accionesTelefono?: ReactNode;
+  insignia?: ReactNode;
+  /** Subtítulo bajo la marca en el riel ("Plataforma"). */
+  subtituloMarca?: string;
+  onNavegar?: (href: string) => void;
+  /** Contenido a alto completo (vistas divididas): sin márgenes del contenedor en md+. */
+  completo?: boolean;
   children: ReactNode;
   className?: string;
 };
 
 /**
  * Shell de OPAI 2.0 (ADR-007, diseño aprobado): barra superior con selector de portal y navegación
- * inferior en teléfono; riel en iPad; barra lateral en desktop. Desktop es el mismo diseño con más espacio.
+ * inferior en teléfono; riel en iPad; barra lateral en desktop. Configuración, fija al pie.
  */
 export function AppShell(props: AppShellProps) {
-  const {
-    titulo,
-    nav,
-    portales,
-    portalActual,
-    rutaActual,
-    tenant,
-    usuario,
-    menuUsuario,
-    notificaciones,
-    Link,
-    children,
-    className,
-  } = props;
-  const comunes = {
-    portales,
-    portalActual,
-    ...(tenant ? { tenant } : {}),
-    ...(usuario ? { usuario } : {}),
-    ...(menuUsuario ? { menuUsuario } : {}),
-    ...(notificaciones ? { notificaciones } : {}),
-  };
+  const { titulo, nav, rutaActual, acciones, insignia, children, className, Link } = props;
   const linkProps = Link ? { Link } : {};
+  const { accionesTelefono, subtituloMarca, onNavegar, completo, ...barra } = props;
   return (
     <div className="flex min-h-dvh bg-bg text-fg">
       <Rail
         items={nav}
         rutaActual={rutaActual}
-        portales={portales}
-        portalActual={portalActual}
-        {...(tenant ? { tenant } : {})}
+        {...(subtituloMarca ? { subtitulo: subtituloMarca } : {})}
         {...linkProps}
       />
-      <Sidebar items={nav} rutaActual={rutaActual} {...comunes} {...linkProps} />
+      <Sidebar
+        items={nav}
+        rutaActual={rutaActual}
+        portales={props.portales}
+        portalActual={props.portalActual}
+        {...(props.tenant ? { tenant: props.tenant } : {})}
+        {...(props.empresas ? { empresas: props.empresas } : {})}
+        {...linkProps}
+      />
       <div className="flex min-w-0 flex-1 flex-col">
-        <TopBarTelefono {...comunes} />
-        <AppBar titulo={titulo} {...comunes} />
+        <TopBarTelefono {...barra} {...(accionesTelefono ? { acciones: accionesTelefono } : {})} />
+        <AppBar
+          {...barra}
+          titulo={titulo}
+          {...(insignia ? { insignia } : {})}
+          {...(acciones ? { acciones } : {})}
+        />
         <main
           className={cn(
-            "mx-auto w-full max-w-[1280px] flex-1 px-4 pt-1 pb-[calc(56px+16px+env(safe-area-inset-bottom))] md:px-6 md:pt-5 md:pb-8 xl:px-8",
+            "mx-auto flex w-full flex-1 flex-col px-4 pt-1 pb-[calc(56px+16px+env(safe-area-inset-bottom))] md:px-6 md:pt-5 md:pb-8 xl:px-8",
+            !completo && "max-w-[1280px]",
             className,
           )}
         >
           {children}
         </main>
       </div>
-      <BottomNav items={nav} rutaActual={rutaActual} {...linkProps} />
+      <BottomNav
+        items={nav}
+        rutaActual={rutaActual}
+        {...(props.menuUsuario ? { extras: props.menuUsuario } : {})}
+        {...(onNavegar ? { onNavegar } : {})}
+        {...linkProps}
+      />
     </div>
   );
 }

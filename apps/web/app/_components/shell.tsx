@@ -1,24 +1,25 @@
 "use client";
 
-import { Building2, LogOut, UserRound } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { type ReactNode, useState } from "react";
+import { Building2, LogOut, Settings2, UserRound } from "lucide-react";
+import dynamic from "next/dynamic";
+import { usePathname, useRouter } from "next/navigation";
+import { type ReactNode, useEffect, useState } from "react";
 
-import { AppShell, type ItemMenu, type LinkComponent, type Portal } from "@opai/ds";
+import { AppShell, type ItemMenu, type Portal, type Volver } from "@opai/ds";
 
 import { accionSalir } from "@/app/_acciones/auth";
 import { cambiarTenant } from "@/app/_acciones/capacidad";
 import type { ItemNav } from "@/lib/navegacion";
 
+import { Campana } from "./campana";
 import { CambiarPassword } from "./cambiar-password";
 import { icono } from "./iconos";
+import { LinkNext } from "./link-next";
 
-const LinkNext: LinkComponent = ({ href, className, children, ...rest }) => (
-  <Link href={href} className={className} {...rest}>
-    {children}
-  </Link>
-);
+// La paleta (cmdk) se descarga al primer uso: no pesa en el JS inicial de cada ruta (ADR-037).
+const Paleta = dynamic(() => import("./paleta").then((m) => m.Paleta), { ssr: false });
+// Los avisos (sonner) también: se montan después de hidratar y no bloquean el primer render.
+const Avisos = dynamic(() => import("./avisos").then((m) => m.Avisos), { ssr: false });
 
 export type DatosShell = {
   portal: string;
@@ -27,20 +28,40 @@ export type DatosShell = {
   tenant: { nombre: string } | null;
   usuario: { nombre: string; email: string; rol?: string };
   empresas: { id: string; nombre: string; actual: boolean }[];
+  noLeidas: number;
 };
 
-/** Shell real: navegación, portales y menú de usuario a partir de la sesión (Brief 01). */
+export type OpcionesPagina = {
+  titulo: string;
+  volver?: Volver;
+  acciones?: ReactNode;
+  accionesTelefono?: ReactNode;
+  insignia?: ReactNode;
+  completo?: boolean;
+};
+
+/** Shell real: navegación, portales, campana, ⌘K y menú de usuario a partir de la sesión. */
 export function Shell({
   datos,
-  titulo,
   children,
-}: {
-  datos: DatosShell;
-  titulo: string;
-  children: ReactNode;
-}) {
+  ...pagina
+}: OpcionesPagina & { datos: DatosShell; children: ReactNode }) {
   const rutaActual = usePathname();
+  const router = useRouter();
   const [password, setPassword] = useState(false);
+  const [paleta, setPaleta] = useState<boolean | null>(null);
+  const buscable = datos.portal === "erp" && datos.tenant !== null;
+  useEffect(() => {
+    if (!buscable) return;
+    const tecla = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setPaleta(true);
+      }
+    };
+    window.addEventListener("keydown", tecla);
+    return () => window.removeEventListener("keydown", tecla);
+  }, [buscable]);
   const empresas: ItemMenu[] =
     datos.empresas.length > 1
       ? datos.empresas.map((e, i) => ({
@@ -53,10 +74,20 @@ export function Shell({
         }))
       : [];
   const menu: ItemMenu[] = [
-    ...empresas,
+    ...(datos.portal === "erp" && datos.tenant
+      ? [
+          {
+            id: "pref",
+            grupo: "Cuenta",
+            etiqueta: "Preferencias",
+            icono: Settings2,
+            onSelect: () => router.push("/configuracion/preferencias"),
+          },
+        ]
+      : []),
     {
       id: "password",
-      grupo: "Cuenta",
+      ...(datos.portal === "erp" && datos.tenant ? {} : { grupo: "Cuenta" }),
       etiqueta: "Cambiar contraseña",
       icono: UserRound,
       onSelect: () => setPassword(true),
@@ -71,18 +102,27 @@ export function Shell({
   ];
   return (
     <AppShell
-      titulo={titulo}
+      {...pagina}
       nav={datos.nav.map((n) => ({ ...n, icono: icono(n.icono) }))}
       portales={datos.portales}
       portalActual={datos.portal}
       rutaActual={rutaActual}
       {...(datos.tenant ? { tenant: datos.tenant } : {})}
+      {...(empresas.length ? { empresas } : {})}
       usuario={datos.usuario}
       menuUsuario={menu}
+      campana={
+        datos.tenant ? <Campana noLeidas={datos.noLeidas} portal={datos.portal} /> : undefined
+      }
+      {...(buscable ? { onBuscar: () => setPaleta(true) } : {})}
+      {...(datos.portal === "platform" ? { subtituloMarca: "Plataforma" } : {})}
+      onNavegar={(href) => router.push(href)}
       Link={LinkNext}
     >
       {children}
+      {paleta !== null ? <Paleta abierto={paleta} onCerrar={() => setPaleta(false)} /> : null}
       <CambiarPassword abierto={password} onCerrar={() => setPassword(false)} />
+      <Avisos />
     </AppShell>
   );
 }

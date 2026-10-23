@@ -61,23 +61,38 @@ export type CabeceraProps = {
   acciones?: ReactNode;
   /** Mostrar el título también en md+ (pantallas sin barra superior propia, como paneles de detalle). */
   tituloSiempre?: boolean;
+  /** Título de detalle (22/28) en vez del de página (28/34). */
+  tituloDetalle?: boolean;
 };
 
 /**
  * Cabecera de página. En teléfono muestra el título (28/34); en iPad y desktop el título vive en
  * la barra superior del shell, así que aquí quedan sobre-línea, subtítulo y acciones.
  */
-export function Cabecera({ titulo, subtitulo, sobre, acciones, tituloSiempre }: CabeceraProps) {
+export function Cabecera(props: CabeceraProps) {
+  const { titulo, subtitulo, sobre, acciones, tituloSiempre, tituloDetalle } = props;
   return (
     <div className="mb-4 flex flex-wrap items-start justify-between gap-x-3 gap-y-2">
       <div className="min-w-0">
         {sobre ? (
           <div className="mb-1.5 flex items-center gap-2 text-sm text-fg-muted">{sobre}</div>
         ) : null}
-        <h2 className={cn("t-title text-fg", !tituloSiempre && "md:hidden")}>{titulo}</h2>
+        <h2
+          className={cn(
+            tituloDetalle ? "t-heading" : "t-title",
+            "text-fg",
+            !tituloSiempre && "md:hidden",
+          )}
+        >
+          {titulo}
+        </h2>
         {subtitulo ? <p className="mt-0.5 text-base text-fg-muted">{subtitulo}</p> : null}
       </div>
-      {acciones ? <div className="flex shrink-0 items-center gap-2">{acciones}</div> : null}
+      {acciones ? (
+        <div className={cn("flex shrink-0 items-center gap-2", !tituloSiempre && "md:hidden")}>
+          {acciones}
+        </div>
+      ) : null}
     </div>
   );
 }

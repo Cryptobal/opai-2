@@ -1,7 +1,6 @@
 "use client";
 
-import { ChevronRight } from "lucide-react";
-import { AuthCard, Badge, Button, Monograma } from "@opai/ds";
+import { AuthCard, Badge, Button, FilaSeleccionable, Monograma } from "@opai/ds";
 
 import { accionSalir } from "@/app/_acciones/auth";
 import { cambiarTenant } from "@/app/_acciones/capacidad";
@@ -36,14 +35,12 @@ export function SelectorEmpresa({ empresas, destino }: { empresas: Empresa[]; de
       <ul className="flex flex-col gap-2">
         {empresas.map((e) => (
           <li key={e.tenantId}>
-            <button
-              type="button"
+            <FilaSeleccionable
               onClick={() => void cambiarTenant(e.tenantId, destino)}
-              className="flex w-full items-center gap-3 rounded-lg border border-border bg-surface p-4 text-left hover:bg-fill"
-            >
-              <Monograma nombre={e.nombre} className="size-10 rounded-md text-sm" />
-              <span className="min-w-0 flex-1">
-                <span className="block truncate text-md font-medium text-fg">{e.nombre}</span>
+              className="rounded-lg border border-border bg-surface p-4"
+              inicio={<Monograma nombre={e.nombre} className="size-10 rounded-md text-sm" />}
+              titulo={e.nombre}
+              secundario={
                 <span className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
                   <Badge
                     punto={false}
@@ -55,9 +52,8 @@ export function SelectorEmpresa({ empresas, destino }: { empresas: Empresa[]; de
                     {e.ultimoAcceso ? `Último acceso ${fechaCorta(e.ultimoAcceso)}` : "Sin accesos"}
                   </span>
                 </span>
-              </span>
-              <ChevronRight className="size-5 flex-none text-fg-subtle" aria-hidden />
-            </button>
+              }
+            />
           </li>
         ))}
       </ul>
