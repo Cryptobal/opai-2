@@ -3,6 +3,7 @@ import type { Globales, TenantDb, TenantTx } from "@opai/db";
 import type { Almacenamiento, Mailer } from "@opai/integrations";
 import type { z } from "zod";
 
+import type { Idempotencia } from "./idempotencia";
 import type { BitacoraServicio, Eventos, Medidor, Principal, Trabajos } from "./servicios-tipos";
 
 export type * from "./servicios-tipos";
@@ -80,6 +81,8 @@ export interface Contexto {
   eventos: Eventos;
   trabajos: Trabajos;
   bitacora: BitacoraServicio;
+  /** Claves de idempotencia de escrituras (ADR-034). */
+  idempotencia: Idempotencia;
   /** Trabajo fuera de la respuesta (el borde usa `after()`). Nunca debe romper la ejecución. */
   diferir(tarea: () => Promise<unknown>): void;
   /** Pide despachar el outbox tras una escritura (el borde lo difiere). */
@@ -92,7 +95,10 @@ export interface Contexto {
 
 export type OpcionesEjecucion = {
   dryRun?: boolean;
-  /** Clave de idempotencia aportada por el cliente (agentes). Se registra en auditoría. */
+  /**
+   * Clave de idempotencia (agentes): en escrituras reales, la misma clave con el mismo input
+   * devuelve el resultado original sin repetir el efecto durante 24 h; con otro input, CONFLICT.
+   */
   idempotencyKey?: string;
 };
 
@@ -139,5 +145,5 @@ export type CodigoError =
   | "INTERNAL";
 
 export type Resultado<T = unknown> =
-  | { ok: true; data: T; dryRun: boolean }
+  | { ok: true; data: T; dryRun: boolean; repetida?: true }
   | { ok: false; error: { code: CodigoError; message: string; issues?: unknown } };

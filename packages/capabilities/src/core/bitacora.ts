@@ -4,6 +4,7 @@ import { PERMISOS_CORE, PERMISOS_PLATAFORMA } from "@opai/domain";
 import { consolidarConsumos } from "@opai/db";
 
 import { defineCapability } from "../define";
+import { VIGENCIA_IDEMPOTENCIA_MS } from "../idempotencia";
 import { defineTrabajo } from "../trabajos/registro";
 import { iso, requierePlataforma } from "./comun";
 import { uuidSchema } from "./esquemas";
@@ -83,4 +84,19 @@ export const trabajoConsolidarConsumos = defineTrabajo({
   },
 });
 
-export const trabajosDelNucleo = [trabajoVerificarBitacora, trabajoConsolidarConsumos];
+export const trabajoPurgarIdempotencia = defineTrabajo({
+  tipo: "core.idempotencia.purgar",
+  descripcion: "Borra a diario las claves de idempotencia vencidas (más de 24 horas).",
+  payload: dia,
+  periodicidad: "diaria",
+  async handler(ctx) {
+    const limite = new Date(Date.now() - VIGENCIA_IDEMPOTENCIA_MS);
+    return ctx.db.idempotencia.deleteMany({ where: { createdAt: { lt: limite } } });
+  },
+});
+
+export const trabajosDelNucleo = [
+  trabajoVerificarBitacora,
+  trabajoConsolidarConsumos,
+  trabajoPurgarIdempotencia,
+];

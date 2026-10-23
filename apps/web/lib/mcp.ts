@@ -31,7 +31,7 @@ export async function manejarMcp(req: Request, key: string | null): Promise<Resp
       for (const h of herramientasMcp(ctx)) {
         server.registerTool(
           h.nombre,
-          { title: h.capacidad.id, description: h.descripcion, inputSchema: h.capacidad.input },
+          { title: h.capacidad.id, description: h.descripcion, inputSchema: h.input },
           async (args) => {
             const resultado = await ejecutarHerramienta(ctx, h, args);
             return {

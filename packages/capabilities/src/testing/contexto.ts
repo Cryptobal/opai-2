@@ -1,6 +1,7 @@
 import type { Rol } from "@opai/domain";
 
 import { autorizador } from "../contexto";
+import { idempotenciaSobre } from "../idempotencia";
 import type { ConsumoNuevo, Principal } from "../types";
 import { almacenamientoEnMemoria } from "./almacenamiento-memoria";
 import { dbEnMemoria } from "./db-memoria";
@@ -70,6 +71,7 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
     eventos: eventosEnMemoria(TENANT_DE_PRUEBA, actor),
     trabajos: trabajosEnMemoria(TENANT_DE_PRUEBA),
     bitacora: bitacoraEnMemoria(tabla, TENANT_DE_PRUEBA),
+    idempotencia: idempotenciaSobre(db, TENANT_DE_PRUEBA, actor),
     diferir: (t) => void diferidos.push(t().catch(() => undefined)),
     despacharEventos: () => void (despachos += 1),
     servicios: {

@@ -2,6 +2,7 @@ import { type Rol, tienePermiso, tienePermisoPlataforma, moduloDe } from "@opai/
 import { forTenant, globales, type Prisma } from "@opai/db";
 import { almacenamientoDelEntorno, mailerDelEntorno } from "@opai/integrations";
 
+import { idempotenciaSobre } from "./idempotencia";
 import {
   bitacoraEnDb,
   eventosEnDb,
@@ -98,6 +99,7 @@ export function crearContexto(params: ParametrosContexto): Contexto {
     eventos: eventosEnDb(tenantId, params.actor),
     trabajos: trabajosEnDb(tenantId),
     bitacora: bitacoraEnDb(tenantId),
+    idempotencia: idempotenciaSobre(forTenant(tenantId), tenantId, params.actor),
     diferir: params.diferir ?? diferirPorDefecto,
     despacharEventos: params.despacharEventos ?? (() => undefined),
     servicios: {
