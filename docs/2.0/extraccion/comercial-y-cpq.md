@@ -152,6 +152,13 @@ Instrumentos sobre la venta `S` (`financial-policy.ts`, modo `auto`, gross-up ce
 
 Los tests de 1.0 (`costing/__tests__/financial-policy.test.ts`, `cost-lines.test.ts`) se usan como **casos dorados** del dominio de 2.0: mismas entradas, resultado igual al peso. 1.0 **no tiene tests de los modos de margen** (`markup`, `margin_on_sale`, `margin_on_labor`) ni de la rama `k ≥ 0,35`: esos casos dorados se construyen en el brief de CPQ desde las fórmulas de esta sección y se validan contra cotizaciones reales de Gard recalculadas en 1.0 (pendiente de validación).
 
+Casos dorados mínimos, obtenidos ejecutando `computeFinancialAndPolicy` de 1.0 (`09ab4fe`) con base con margen `B` = $10.000.000, modo `auto`, sin RC ni líneas adicionales:
+
+| Caso | Entradas | Resultado de 1.0 |
+|---|---|---|
+| CD-1 · gross-up cerrado | `f` = 2,5 %; póliza % con `pG` = 10 %, `rG` = 2 %, `eG` = 0,2 %, `Mg` = 12 | `k` = 0,0272; gross-up aplicado; `S` = **$10.279.605**; sin advertencias |
+| CD-2 · rama `k ≥ 0,35` | `f` = 35 %; póliza apagada | `k` = 0,35; gross-up no aplicado; `S` = $10.000.000 × 1,35 = **$13.500.000**; advertencia "Las tasas suman 35.0% del precio… el resultado queda subvalorado" |
+
 ---
 
 ## 4. Qué se corrige y por qué
