@@ -58,6 +58,12 @@ export async function contextoDeApiKey(
     modulosActivos: await fuentes.modulosActivos(tenant.id),
     scopes: fila.scopes,
     principal: { tipo: principalTipo(fila.principalTipo), id: fila.principalId ?? usuario.id },
+    agente: {
+      apiKeyId: fila.id,
+      nombre: fila.nombre,
+      presupuestoMensualMicro: fila.presupuestoMensualMicro,
+      autonomia: Object.fromEntries(fila.autonomia.map((a) => [a.capability, a.nivel])),
+    },
     medidor: medidorDiferido,
     diferir: diferirConAfter,
     despacharEventos: despacharDiferido(tenant.id),

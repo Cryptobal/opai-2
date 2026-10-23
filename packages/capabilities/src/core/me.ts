@@ -5,6 +5,7 @@ import {
   PERMISOS_PLATAFORMA,
   permisosDe,
   tienePermisoPlataforma,
+  vocabulario,
 } from "@opai/domain";
 
 import { defineCapability } from "../define";
@@ -45,6 +46,16 @@ export const me = defineCapability({
     portales: z.array(z.string()),
     permisos: z.array(z.string()),
     modulosActivos: z.array(z.string()),
+    principal: z.object({ tipo: z.string(), id: z.string() }).nullable(),
+    agente: z
+      .object({ nombre: z.string(), presupuestoMensualUsd: z.number().nullable() })
+      .nullable()
+      .describe("Si ejecuta una API key: su nombre y presupuesto mensual."),
+    notificacionesNoLeidas: z.number(),
+    vocabulario: z
+      .record(z.string(), z.unknown())
+      .nullable()
+      .describe("Términos de la vertical (p. ej. persona → guardia) para los textos visibles."),
   }),
   efecto: "lectura",
   dryRun: false,
@@ -74,6 +85,21 @@ export const me = defineCapability({
       portales: membresia?.portales ?? [],
       permisos: [...deTenant, ...dePlataforma],
       modulosActivos: [...ctx.modulosActivos],
+      principal: ctx.principal,
+      agente: ctx.agente
+        ? {
+            nombre: ctx.agente.nombre,
+            presupuestoMensualUsd:
+              ctx.agente.presupuestoMensualMicro === null
+                ? null
+                : Number(ctx.agente.presupuestoMensualMicro) / 1_000_000,
+          }
+        : null,
+      notificacionesNoLeidas:
+        tenant && ctx.actor.tipo === "user"
+          ? await ctx.db.notificacion.count({ where: { usuarioId: ctx.actor.id, leidaEn: null } })
+          : 0,
+      vocabulario: tenant ? { ...vocabulario(tenant.vertical) } : null,
     };
   },
 });

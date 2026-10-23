@@ -3,7 +3,7 @@ import { z } from "zod";
 import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../define";
-import { noEncontrado, reglaDeNegocio } from "../errores";
+import { noEncontrado, prohibido, reglaDeNegocio } from "../errores";
 import { listarModulos } from "../module";
 import { iso, tenantActual, usuarioResponsable } from "./comun";
 import { generarApiKey } from "./apikey-formato";
@@ -62,6 +62,12 @@ export const apikeysCreate = defineCapability({
     scopes: z.array(z.string().min(1)).min(1),
     /** Fecha ISO 8601 (las herramientas MCP necesitan un input expresable en JSON Schema). */
     expiraEn: z.iso.datetime({ offset: true }).optional(),
+    presupuestoMensualUsd: z
+      .number()
+      .min(0)
+      .max(100_000)
+      .optional()
+      .describe("Tope de gasto mensual en USD (IA, mapas, correo…). Requiere permiso de agentes."),
   }),
   output: z.object({
     id: z.string().nullable(),
@@ -81,6 +87,9 @@ export const apikeysCreate = defineCapability({
     if (expiraEn && expiraEn.getTime() <= Date.now()) {
       throw reglaDeNegocio("La fecha de expiración debe ser futura.");
     }
+    if (input.presupuestoMensualUsd !== undefined && !ctx.autorizar(PERMISOS_CORE.agentesManage)) {
+      throw prohibido("Fijar el presupuesto de un agente requiere el permiso de agentes.");
+    }
     const tenant = await tenantActual(ctx);
     const { secreto, prefijo, hash } = generarApiKey(tenant.slug);
     const base = { nombre: input.nombre, scopes: input.scopes };
@@ -93,6 +102,10 @@ export const apikeysCreate = defineCapability({
         prefijo,
         hash,
         expiraEn,
+        presupuestoMensualMicro:
+          input.presupuestoMensualUsd === undefined
+            ? null
+            : BigInt(Math.round(input.presupuestoMensualUsd * 1_000_000)),
       },
     });
     return { id: key.id, ...base, prefijo, secreto };

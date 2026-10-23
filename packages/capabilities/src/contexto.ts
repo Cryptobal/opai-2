@@ -12,6 +12,7 @@ import {
 } from "./servicios-db";
 import type {
   Actor,
+  AgenteContexto,
   Auditoria,
   Contexto,
   EventoAuditoria,
@@ -56,6 +57,7 @@ export type ParametrosContexto = {
   modulosActivos?: readonly string[];
   scopes?: readonly string[] | null;
   principal?: Principal | null;
+  agente?: AgenteContexto | null;
   medidor?: Medidor;
   /** Trabajo diferido (el borde usa `after()`). Por defecto, sin esperar y sin romper. */
   diferir?: (tarea: () => Promise<unknown>) => void;
@@ -92,6 +94,7 @@ export function crearContexto(params: ParametrosContexto): Contexto {
     modulosActivos: params.modulosActivos ?? [],
     scopes: params.scopes ?? null,
     principal: params.principal ?? null,
+    agente: params.agente ?? null,
     db: forTenant(tenantId),
     transaccion: transaccionEnDb(tenantId),
     auditoria: auditoriaEnDb,

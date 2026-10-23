@@ -1,5 +1,6 @@
 import { createMcpHandler } from "mcp-handler";
 
+import { executeCapability, MANUALES } from "@opai/capabilities";
 import { ejecutarHerramienta, herramientasMcp } from "@opai/capabilities/mcp";
 
 import pkg from "../package.json" with { type: "json" };
@@ -28,6 +29,28 @@ export async function manejarMcp(req: Request, key: string | null): Promise<Resp
 
   const handler = createMcpHandler(
     (server) => {
+      // Recursos (ADR-032): manuales para agentes y el esquema de ajustes visible para la key.
+      for (const m of MANUALES) {
+        server.registerResource(
+          `manual-${m.id}`,
+          `opai://manuales/${m.id}`,
+          { title: m.titulo, mimeType: "text/markdown" },
+          async (uri) => ({ contents: [{ uri: uri.href, text: m.texto }] }),
+        );
+      }
+      server.registerResource(
+        "ajustes-schema",
+        "opai://ajustes/schema",
+        { title: "Esquema de ajustes de la empresa", mimeType: "application/json" },
+        async (uri) => ({
+          contents: [
+            {
+              uri: uri.href,
+              text: JSON.stringify(await executeCapability(ctx, "core.config.schema", {})),
+            },
+          ],
+        }),
+      );
       for (const h of herramientasMcp(ctx)) {
         server.registerTool(
           h.nombre,
@@ -45,7 +68,7 @@ export async function manejarMcp(req: Request, key: string | null): Promise<Resp
     {
       serverInfo: { name: "opai", version: pkg.version },
       instructions:
-        "OPAI 2.0. Cada herramienta es una capacidad de negocio. Las que escriben tienen una versión preview_ que muestra el efecto sin guardar: úsala antes y confirma con el usuario.",
+        "OPAI 2.0. Cada herramienta es una capacidad de negocio. Las que escriben tienen una versión preview_ que muestra el efecto sin guardar: úsala antes y confirma con el usuario. Lee el recurso opai://manuales/operar-el-nucleo antes de escribir.",
     },
   );
   return handler(req);

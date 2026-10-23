@@ -38,6 +38,9 @@ export function fuentesFalsas(
     revocadaEn: null,
     expiraEn: null,
     ultimoUsoEn: null,
+    nombre: "Agente",
+    presupuestoMensualMicro: null,
+    autonomia: [],
     ...o.key,
   };
   const fuentes: Fuentes = {

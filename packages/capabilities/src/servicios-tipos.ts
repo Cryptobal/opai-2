@@ -61,5 +61,15 @@ export interface BitacoraServicio {
   verificar(): Promise<VerificacionBitacora>;
 }
 
+/** Datos de la API key que ejecuta (ADR-032): presupuesto mensual y autonomía por capacidad. */
+export type AgenteContexto = {
+  apiKeyId: string;
+  nombre: string;
+  /** Micro-USD; null = sin presupuesto. */
+  presupuestoMensualMicro: bigint | null;
+  /** capability → "directo" | "aprobacion". Sin entrada, lo irreversible pide aprobación. */
+  autonomia: Record<string, string>;
+};
+
 /** Principal detrás de una API key (ADR-033). Sesiones humanas: "usuario". */
 export type Principal = { tipo: "usuario" | "cuenta" | "persona"; id: string };
