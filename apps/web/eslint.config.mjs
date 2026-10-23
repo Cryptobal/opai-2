@@ -24,7 +24,7 @@ export default defineConfig([
   },
   // Paridad UI↔MCP (ADR-004, ADR-034 §4): las pantallas no leen la base; todo pasa por capacidades.
   {
-    files: ["app/**/*.ts", "app/**/*.tsx"],
+    files: ["app/**/*.ts", "app/**/*.tsx", "lib/**/*.ts", "lib/**/*.tsx"],
     rules: {
       "no-restricted-imports": [
         "error",
@@ -42,7 +42,9 @@ export default defineConfig([
     },
   },
   {
-    files: permitidos.infraestructuraConDb.map((a) => literal(a.archivo)),
+    files: [...permitidos.infraestructuraConDb, ...permitidos.infraestructuraLibConDb].map((a) =>
+      literal(a.archivo),
+    ),
     rules: { "no-restricted-imports": "off" },
   },
   globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts", "e2e/__screenshots__/**"]),

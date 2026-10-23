@@ -95,6 +95,7 @@ export function CampoDireccion({
         buscarPlaceholder="Calle y número"
         aria-label="Dirección"
         invalido={Boolean(error)}
+        {...(error ? { "aria-describedby": `${id ?? "direccion"}-error` } : {})}
         onBuscar={buscar}
         onCambiar={async ([placeId]) => {
           if (!placeId) return;
@@ -102,7 +103,7 @@ export function CampoDireccion({
         }}
       />
       {error ? (
-        <p role="alert" className="text-xs font-medium text-danger-fg">
+        <p id={`${id ?? "direccion"}-error`} role="alert" className="t-caption text-danger-fg">
           {error}
         </p>
       ) : null}

@@ -23,5 +23,19 @@
       "archivo": "app/(auth)/invitacion/[slug]/[token]/acciones.ts",
       "motivo": "Flujo de invitación pre-sesión: peek, accept y request_new son internas por diseño."
     }
+  ],
+  "infraestructuraLibConDb": [
+    {
+      "archivo": "lib/fuentes.ts",
+      "motivo": "Borde de ejecución: construye el contexto de capacidades (base por tenant, auditoría, eventos); es el cableado, no una pantalla."
+    },
+    {
+      "archivo": "lib/cron.ts",
+      "motivo": "Autenticación y despacho de los crons de Vercel (ADR-029)."
+    },
+    {
+      "archivo": "lib/ultimo-acceso.ts",
+      "motivo": "Marca técnica de último acceso de la sesión, sin lógica de negocio."
+    }
   ]
 }

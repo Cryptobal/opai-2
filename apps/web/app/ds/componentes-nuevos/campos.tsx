@@ -78,7 +78,7 @@ export function MuestraCampos() {
             valor={null}
             onCambiar={() => undefined}
             sinMapa
-            error="No pudimos consultar el servicio de mapas. PERMISSION_DENIED: Places API (New) no habilitada."
+            error="El servicio de mapas no responde. Puedes escribir la dirección a mano; avisa a un administrador."
             buscar={async () => []}
             resolver={async () => null}
           />
