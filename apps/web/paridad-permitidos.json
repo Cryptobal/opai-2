@@ -1,0 +1,27 @@
+{
+  "_doc": "Paridad UI↔MCP (ADR-004). `infraestructuraConDb`: archivos de app/ que pueden importar @opai/db (no son pantallas de negocio). `internasPermitidas`: archivos donde se ejecuta una capacidad interna a propósito. packages/capabilities/test/paridad.test.ts verifica que ninguna entrada esté obsoleta.",
+  "infraestructuraConDb": [
+    {
+      "archivo": "app/api/cron/trabajos/route.ts",
+      "motivo": "Cron de Vercel: despacha y ejecuta la cola de trabajos (ADR-029); no es una pantalla."
+    },
+    {
+      "archivo": "app/api/marca/[slug]/[asset]/route.ts",
+      "motivo": "Sirve los logos del perfil de marca como imagen pública por slug (sin sesión); es un recurso estático, no una operación de negocio."
+    },
+    {
+      "archivo": "app/(auth)/invitacion/[slug]/[token]/acciones.ts",
+      "motivo": "Aceptar una invitación ocurre antes de existir sesión ni membresía: resuelve el tenant por slug con globales() y luego ejecuta capacidades internas."
+    },
+    {
+      "archivo": "app/verificar/[token]/page.tsx",
+      "motivo": "Verificación pública de un documento por su token (sin sesión). DEUDA: debería ser una capacidad pública de lectura; queda permitida hasta ese brief."
+    }
+  ],
+  "internasPermitidas": [
+    {
+      "archivo": "app/(auth)/invitacion/[slug]/[token]/acciones.ts",
+      "motivo": "Flujo de invitación pre-sesión: peek, accept y request_new son internas por diseño."
+    }
+  ]
+}

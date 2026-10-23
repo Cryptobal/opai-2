@@ -22,6 +22,7 @@ export const invitationsPeek = defineCapability({
   id: "core.invitations.peek",
   descripcion: "Muestra empresa, rol y estado de una invitación a partir del token del enlace.",
   permiso: null,
+  // Interna: la invitación se mira antes de existir sesión (el token del enlace es la credencial), así que no puede llevar permiso ni exponerse como herramienta MCP.
   interna: true,
   input: token,
   output: z.object({
@@ -64,6 +65,7 @@ export const invitationsAccept = defineCapability({
   descripcion:
     "Acepta una invitación: crea la membresía del usuario autenticado con el rol invitado.",
   permiso: null,
+  // Interna: se ejecuta al aceptar el enlace, antes de que exista la membresía; un agente no acepta invitaciones por nadie.
   interna: true,
   input: token,
   output: z.object({ tenantId: z.string(), membershipId: z.string().nullable(), rol: z.string() }),
@@ -94,6 +96,7 @@ export const invitationsRequestNew = defineCapability({
   descripcion:
     "Pide una invitación nueva al administrador que envió una invitación vencida o usada.",
   permiso: null,
+  // Interna: la pide quien aún no tiene sesión (token vencido o usado); no tiene permiso que verificar ni sentido para un agente.
   interna: true,
   input: token,
   output: z.object({ enviado: z.boolean() }),

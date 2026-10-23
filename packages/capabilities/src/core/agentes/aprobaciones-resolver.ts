@@ -11,6 +11,7 @@ import { pendiente } from "./aprobaciones";
 
 export const aprobacionesAprobar = defineCapability({
   id: "core.aprobaciones.aprobar",
+  // Solo personas: lo irreversible lo aprueba un humano (ADR-032); un agente no aprueba lo que otro pidió ni lo propio.
   soloPersonas: true,
   descripcion:
     "IRREVERSIBLE: aprueba la acción pedida por un agente y la ejecuta en el acto como la persona que aprueba (con sus permisos). Solo personas, nunca API keys.",
@@ -53,6 +54,7 @@ export const aprobacionesAprobar = defineCapability({
 
 export const aprobacionesRechazar = defineCapability({
   id: "core.aprobaciones.rechazar",
+  // Solo personas: la decisión sobre lo irreversible es humana (ADR-032); un agente no resuelve aprobaciones.
   soloPersonas: true,
   descripcion:
     "Rechaza la acción pedida por un agente, con motivo. No se ejecuta nada y el agente lo ve al consultar la aprobación.",

@@ -19,6 +19,7 @@ async function keyDe(ctx: Contexto, id: string) {
 
 export const apikeysUpdate = defineCapability({
   id: "core.apikeys.update",
+  // Solo personas: renombrar o cambiar los alcances de una key es gobernar agentes (ADR-032); una key no se modifica a sí misma ni a otra.
   soloPersonas: true,
   descripcion:
     "Cambia el nombre, la expiración o el presupuesto mensual en USD de una API key (el presupuesto exige permiso de agentes; null lo quita).",
@@ -72,6 +73,7 @@ export const apikeysUpdate = defineCapability({
 
 export const apikeysSetAutonomia = defineCapability({
   id: "core.apikeys.set_autonomia",
+  // Solo personas: la autonomía define qué puede hacer un agente sin aprobación (ADR-032); no puede otorgársela él mismo.
   soloPersonas: true,
   descripcion:
     "Fija la autonomía de un agente para una capacidad que escribe: 'directo' (ejecuta sin pedir) o 'aprobacion' (pide aprobación humana); null vuelve al defecto (lo irreversible se aprueba). 'directo' solo lo da owner o admin.",
