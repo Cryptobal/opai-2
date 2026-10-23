@@ -19,7 +19,8 @@
     "db:migrate": "pnpm --filter @opai/db migrate",
     "db:deploy": "pnpm --filter @opai/db run deploy",
     "scaffold:module": "tsx scripts/scaffold-module.ts",
-    "presupuesto": "tsx scripts/presupuesto-js.ts"
+    "presupuesto": "tsx scripts/presupuesto-js.ts",
+    "mcp:verificar": "tsx scripts/mcp-verificar.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
