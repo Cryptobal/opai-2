@@ -63,3 +63,4 @@ export { type ComprobanteNuevo, emitirComprobante, slugDeComprobante } from "./c
 export { camposExternos, externo } from "./externo";
 export { correoDe, geoDe, iaDe } from "./integraciones/adaptadores";
 export { credencialDe } from "./integraciones/resolver";
+export { MANUALES } from "./manuales";

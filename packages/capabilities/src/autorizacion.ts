@@ -30,6 +30,10 @@ export function restriccion(ctx: Contexto, c: Capacidad): Falla | null {
       return falla("FORBIDDEN", `La API key no tiene el scope "${c.modulo}".`);
     }
   }
+  // Gobierno de agentes (ADR-032): aprobar, rechazar y dar autonomía o presupuesto son de personas.
+  if (c.soloPersonas && ctx.actor.tipo === "agent") {
+    return falla("FORBIDDEN", "Solo una persona puede hacer esto, no una API key.");
+  }
   if (ctx.principal && ctx.principal.tipo !== "usuario") {
     const portal = PORTAL_DEL_PRINCIPAL[ctx.principal.tipo];
     if (!portalesDe(c).includes(portal)) {
