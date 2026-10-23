@@ -1,0 +1,138 @@
+/* PROVISIONAL — reemplazar con los tokens aprobados en Claude Design (Brief 00b).
+   No agregar colores aquí ni en ningún otro lugar. Este es el ÚNICO archivo del repo
+   con valores de color (ADR-013). Los componentes usan solo los nombres semánticos. */
+
+:root {
+  /* Escala de neutros, 10 pasos (provisional, oklch sin tinte) */
+  --ds-gris-0: oklch(99.5% 0 0);
+  --ds-gris-1: oklch(97.5% 0 0);
+  --ds-gris-2: oklch(94% 0 0);
+  --ds-gris-3: oklch(89% 0 0);
+  --ds-gris-4: oklch(80% 0 0);
+  --ds-gris-5: oklch(65% 0 0);
+  --ds-gris-6: oklch(50% 0 0);
+  --ds-gris-7: oklch(38% 0 0);
+  --ds-gris-8: oklch(27% 0 0);
+  --ds-gris-9: oklch(18% 0 0);
+  --ds-gris-10: oklch(12% 0 0);
+
+  /* Semánticos — modo claro */
+  --ds-bg: var(--ds-gris-1);
+  --ds-surface: var(--ds-gris-0);
+  --ds-surface-raised: var(--ds-gris-0);
+  --ds-border: var(--ds-gris-3);
+  --ds-border-strong: var(--ds-gris-4);
+  --ds-fg: var(--ds-gris-10);
+  --ds-fg-muted: var(--ds-gris-6);
+  --ds-fg-subtle: var(--ds-gris-5);
+
+  /* Acento temporal: solo acción principal y foco */
+  --ds-accent: oklch(52% 0.16 255);
+  --ds-accent-fg: oklch(99.5% 0 0);
+  --ds-accent-muted: oklch(94% 0.03 255);
+  --ds-focus: oklch(62% 0.18 255);
+
+  --ds-success: oklch(55% 0.14 150);
+  --ds-success-fg: oklch(99.5% 0 0);
+  --ds-success-muted: oklch(95% 0.04 150);
+  --ds-warning: oklch(70% 0.15 75);
+  --ds-warning-fg: oklch(20% 0.03 75);
+  --ds-warning-muted: oklch(96% 0.05 85);
+  --ds-danger: oklch(55% 0.19 25);
+  --ds-danger-fg: oklch(99.5% 0 0);
+  --ds-danger-muted: oklch(95% 0.04 25);
+  --ds-info: oklch(55% 0.12 240);
+  --ds-info-fg: oklch(99.5% 0 0);
+  --ds-info-muted: oklch(95% 0.03 240);
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --ds-bg: var(--ds-gris-10);
+    --ds-surface: var(--ds-gris-9);
+    --ds-surface-raised: var(--ds-gris-8);
+    --ds-border: var(--ds-gris-8);
+    --ds-border-strong: var(--ds-gris-7);
+    --ds-fg: var(--ds-gris-0);
+    --ds-fg-muted: var(--ds-gris-4);
+    --ds-fg-subtle: var(--ds-gris-5);
+    --ds-accent: oklch(72% 0.14 255);
+    --ds-accent-fg: oklch(15% 0.03 255);
+    --ds-accent-muted: oklch(30% 0.05 255);
+    --ds-focus: oklch(75% 0.16 255);
+    --ds-success-muted: oklch(28% 0.05 150);
+    --ds-warning-muted: oklch(30% 0.06 80);
+    --ds-danger-muted: oklch(28% 0.06 25);
+    --ds-info-muted: oklch(28% 0.05 240);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --ds-bg: var(--ds-gris-10);
+  --ds-surface: var(--ds-gris-9);
+  --ds-surface-raised: var(--ds-gris-8);
+  --ds-border: var(--ds-gris-8);
+  --ds-border-strong: var(--ds-gris-7);
+  --ds-fg: var(--ds-gris-0);
+  --ds-fg-muted: var(--ds-gris-4);
+  --ds-fg-subtle: var(--ds-gris-5);
+  --ds-accent: oklch(72% 0.14 255);
+  --ds-accent-fg: oklch(15% 0.03 255);
+  --ds-accent-muted: oklch(30% 0.05 255);
+  --ds-focus: oklch(75% 0.16 255);
+  --ds-success-muted: oklch(28% 0.05 150);
+  --ds-warning-muted: oklch(30% 0.06 80);
+  --ds-danger-muted: oklch(28% 0.06 25);
+  --ds-info-muted: oklch(28% 0.05 240);
+  color-scheme: dark;
+}
+
+/* Tailwind v4: utilidades `bg-surface`, `text-fg-muted`, `border-border`, `bg-accent`… */
+@theme inline {
+  --color-bg: var(--ds-bg);
+  --color-surface: var(--ds-surface);
+  --color-surface-raised: var(--ds-surface-raised);
+  --color-border: var(--ds-border);
+  --color-border-strong: var(--ds-border-strong);
+  --color-fg: var(--ds-fg);
+  --color-fg-muted: var(--ds-fg-muted);
+  --color-fg-subtle: var(--ds-fg-subtle);
+  --color-accent: var(--ds-accent);
+  --color-accent-fg: var(--ds-accent-fg);
+  --color-accent-muted: var(--ds-accent-muted);
+  --color-focus: var(--ds-focus);
+  --color-success: var(--ds-success);
+  --color-success-fg: var(--ds-success-fg);
+  --color-success-muted: var(--ds-success-muted);
+  --color-warning: var(--ds-warning);
+  --color-warning-fg: var(--ds-warning-fg);
+  --color-warning-muted: var(--ds-warning-muted);
+  --color-danger: var(--ds-danger);
+  --color-danger-fg: var(--ds-danger-fg);
+  --color-danger-muted: var(--ds-danger-muted);
+  --color-info: var(--ds-info);
+  --color-info-fg: var(--ds-info-fg);
+  --color-info-muted: var(--ds-info-muted);
+
+  /* Tipografía provisional: fuente del sistema hasta que el diseño defina la familia */
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --text-xs: 12px;
+  --text-sm: 13px;
+  --text-base: 14px;
+  --text-md: 16px;
+  --text-lg: 18px;
+  --text-xl: 22px;
+  --text-2xl: 28px;
+  --text-3xl: 36px;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+
+  /* Sin sombras en reposo; una sola para overlays */
+  --shadow-overlay: 0 12px 32px -8px oklch(0% 0 0 / 0.25);
+}
