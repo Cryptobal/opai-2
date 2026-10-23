@@ -121,3 +121,15 @@ Una entrada por decisión. Las decisiones no se editan: si cambian, se agrega un
 **Fecha:** 22-oct-2026 · **Estado:** vigente
 
 **Decisión.** Todo el contexto vive en `docs/2.0/`: arranque, decisiones, `ESTADO.md`, briefs, especificaciones extraídas de 1.0 y contexto para agentes. Cada brief actualiza `ESTADO.md`. Lo que no está en el repo no existe para Claude, Claude Code ni Grokbot.
+
+---
+
+## ADR-013 · DS 2.0 es un sistema de diseño nuevo, no una evolución de DS v3
+
+**Fecha:** 22-oct-2026 · **Estado:** vigente · **Reemplaza** la parte de tokens de ADR-007. La estructura de ADR-007 (shell, cinco patrones, cuatro estados, mobile e iPad first) sigue vigente.
+
+**Contexto.** Carlos pidió un diseño nuevo: moderno, muy minimalista, de nivel mundial, con una paleta distinta a la de OPAI 1.0. El plan anterior portaba los tokens DS v3.
+
+**Decisión.** DS 2.0 no hereda tokens, colores ni tipografía de 1.0. Sus fundamentos (color, tipografía, espaciado, radios, elevación, densidad, modo claro y oscuro) se definen en Claude Design a partir de `docs/2.0/design/DESIGN-PROMPT-ds-2.0-fundamentos.md`, se aprueban por Carlos y se traducen a `packages/ds/src/tokens.css` con nombres semánticos. Mientras el diseño no esté aprobado, el Brief 00 construye la estructura del DS sobre un set de tokens provisional neutro en escala de grises, marcado como provisional. El cambio a los tokens definitivos se hace en un brief corto (00b) sin tocar la estructura: `tokens.css`, fuentes y los ajustes de variantes que el diseño aprobado exija. Se mantienen: nombres semánticos, prohibición de hex fuera de `tokens.css`, los cinco patrones y los cuatro estados.
+
+**Consecuencias.** El diseño se decide una vez para todos los módulos; ningún módulo define colores ni tipografía. El Brief 00 no depende de la aprobación del diseño y puede ejecutarse en paralelo. La estética de 1.0 (paleta slate con acento teal, tono "industrial") queda descartada como referencia.

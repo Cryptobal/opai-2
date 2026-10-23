@@ -14,7 +14,7 @@ Dejar el monorepo listo para construir módulos sin volver a discutir estructura
 - `CLAUDE.md` con las reglas del proyecto.
 - `packages/db` con Prisma, schema `core`, aislamiento por tenant con RLS y test que lo pruebe.
 - `packages/capabilities` con el registro de capacidades y la API `/api/v1/`.
-- `packages/ds` (DS 2.0) con tokens portados de 1.0, shell mobile e iPad first y los cinco patrones de pantalla con sus estados.
+- `packages/ds` (DS 2.0) con tokens provisionales neutros (ADR-013; los definitivos llegan del diseño aprobado en Claude Design, Brief 00b), shell mobile e iPad first y los cinco patrones de pantalla con sus estados.
 - Scaffold de módulo que genera un módulo vacío correcto.
 - `apps/web` desplegada en `test.opai.cl` sobre un proyecto Neon propio.
 - `docs/2.0/ESTADO.md` actualizado.
@@ -41,7 +41,7 @@ El repo contiene solo `README.md` y `docs/2.0/` (arranque, decisiones, este brie
 
 ## 4. Arquitectura relevante
 
-Ver `docs/2.0/00-documento-de-arranque.md` secciones 3, 4 y 5, y `docs/2.0/01-decisiones.md` ADR-002, 003, 004, 007, 011. Este brief implementa la base de cada uno.
+Ver `docs/2.0/00-documento-de-arranque.md` secciones 3, 4 y 5, y `docs/2.0/01-decisiones.md` ADR-002, 003, 004, 007, 011 y 013. Este brief implementa la base de cada uno.
 
 Versiones: usar la **última versión estable** de Next.js, React, Tailwind, Prisma, Vitest, Playwright, Turborepo y pnpm al momento de ejecutar; Node LTS vigente. Registrar las versiones elegidas en `ESTADO.md`. Si una versión estable cambia una API respecto de lo descrito aquí (por ejemplo, Tailwind o Prisma), conservar el objetivo y adaptar.
 
@@ -59,7 +59,7 @@ Todos son **Archivo nuevo propuesto** salvo `README.md` (modificar).
 | `packages/db/` | Prisma schema (`core`), extensión `forTenant`, SQL de roles y RLS, migración inicial, test de aislamiento |
 | `packages/domain/` | Paquete vacío con estructura y un test de ejemplo (dinero: redondeo CLP) |
 | `packages/capabilities/` | `defineCapability`, registro, handler HTTP, capacidad de ejemplo `core.ping` |
-| `packages/ds/` | `tokens.css` (`@theme`), fuentes, componentes base (shadcn), `AppShell`, patrones `ListScreen`, `DetailScreen`, `FormScreen`, `PlanillaScreen`, `DashboardScreen`, estados `Loading`, `Empty`, `ErrorState`, `Forbidden` |
+| `packages/ds/` | `tokens.css` (`@theme`, set provisional neutro según ADR-013), fuente del sistema, componentes base (shadcn), `AppShell`, patrones `ListScreen`, `DetailScreen`, `FormScreen`, `PlanillaScreen`, `DashboardScreen`, estados `Loading`, `Empty`, `ErrorState`, `Forbidden` |
 | `packages/integrations/`, `packages/testing/` | Paquetes vacíos con README y estructura |
 | `modules/README.md`, `modules/index.ts` | Registro de módulos (vacío) |
 | `scripts/scaffold-module.ts`, `scripts/templates/module/` | Generador de módulo |
@@ -125,7 +125,7 @@ Reglas:
 
 No hay pantallas de negocio. Sí hay DS 2.0:
 
-- **Tokens.** Portar de 1.0 (`src/styles/globals.css`, variables `--ds-*`) y las reglas de `AGENTS.md`. Portar nombres, valores y tipografía; no portar componentes. Expresarlos como `@theme` de Tailwind en `packages/ds/src/tokens.css`. Mantener modo oscuro y claro si 1.0 los tiene. Prohibido inventar colores.
+- **Tokens (provisionales, ADR-013).** No portar nada de 1.0. Crear `packages/ds/src/tokens.css` como `@theme` de Tailwind con un set neutro: escala de grises de 10 pasos para fondo, superficie, borde y texto; un único acento temporal (azul neutro) usado solo para acción principal y foco; semánticos de estado `success`, `warning`, `danger`, `info`. Nombres semánticos obligatorios: `--ds-bg`, `--ds-surface`, `--ds-surface-raised`, `--ds-border`, `--ds-border-strong`, `--ds-fg`, `--ds-fg-muted`, `--ds-fg-subtle`, `--ds-accent`, `--ds-accent-fg`, `--ds-accent-muted`, `--ds-success`, `--ds-warning`, `--ds-danger`, `--ds-info` (con variantes `-fg` y `-muted` donde aplique) y `--ds-focus`. Modo claro y oscuro vía `prefers-color-scheme` y `[data-theme]`. Tipografía: `system-ui` hasta que el diseño aprobado defina la familia; escala tipográfica 12/13/14/16/18/22/28/36 y espaciado en base 4px. Encabezar el archivo con `/* PROVISIONAL — reemplazar con los tokens aprobados en Claude Design (Brief 00b). No agregar colores aquí ni en ningún otro lugar. */`. Los componentes solo usan nombres semánticos, de modo que el reemplazo posterior no los toque.
 - **Breakpoints.** Base = teléfono (375px), `md` = 768 (iPad vertical), `lg` = 1024 (iPad apaisado), `xl` = 1280 (desktop). Toda pantalla debe ser plenamente usable en base y `lg`; `xl` solo agrega espacio.
 - **AppShell.** Barra superior (título, selector de portal, usuario placeholder); navegación inferior con hasta 5 ítems en base; riel lateral compacto en `md`/`lg`; barra lateral expandida en `xl`. Padding con `env(safe-area-inset-*)`. Contenido con `max-width` y gutters de 16px en base.
 - **Patrones** (en `packages/ds/src/patterns/`), cada uno con prop `state: "loading" | "empty" | "error" | "forbidden" | "ready"` y render estándar de los cuatro primeros:
@@ -166,7 +166,7 @@ node --version   (LTS vigente)   pnpm --version
 gh auth status   vercel whoami   neonctl me   wrangler whoami
 ```
 
-`wrangler` no se usa en este brief (R2 va en Brief 01) pero se verifica ahora. Preguntar a Carlos la ruta local del repo de 1.0; si no la tiene, clonar con `gh repo clone Cryptobal/opai /tmp/opai-1 -- --depth 1` para leer `src/styles/globals.css`, `AGENTS.md` y `src/components/opai-ds/`.
+`wrangler` no se usa en este brief (R2 va en Brief 01) pero se verifica ahora. En este brief no se lee nada del repo de 1.0 (ADR-013: el DS no hereda de 1.0).
 
 ### Bloque 1 · Monorepo y tooling (`infra:`)
 
@@ -183,7 +183,7 @@ Next.js App Router con TypeScript, Tailwind y shadcn/ui inicializado contra `pac
 
 ### Bloque 3 · `packages/ds` (`ds:`)
 
-Tokens portados (sección 8), fuentes, componentes base vía shadcn (button, input, select, card, sheet, dialog, tabs, table, badge, skeleton, toast), `AppShell`, los cinco patrones, los cuatro estados, página `/_ds`. Revisión visual obligatoria a 375 y 1024 con Playwright (screenshot de `/_ds` en ambos viewports guardada en `apps/web/e2e/__screenshots__/`, solo como evidencia; no test de regresión visual aún).
+Tokens provisionales (sección 8), fuente del sistema, componentes base vía shadcn (button, input, select, card, sheet, dialog, tabs, table, badge, skeleton, toast), `AppShell`, los cinco patrones, los cuatro estados, página `/_ds`. Revisión visual obligatoria a 375 y 1024 con Playwright (screenshot de `/_ds` en ambos viewports guardada en `apps/web/e2e/__screenshots__/`, solo como evidencia; no test de regresión visual aún).
 
 ### Bloque 4 · `packages/db` (`core:`)
 
@@ -291,7 +291,7 @@ Actualizar `docs/2.0/ESTADO.md` con: qué existe, versiones instaladas, región 
 - [ ] `CLAUDE.md` con el contenido del bloque 7.
 - [ ] `packages/db` con schema `core`, `forTenant`, RLS forzada y test de aislamiento en verde.
 - [ ] `packages/capabilities` con registro, handler `/api/v1/` y `core.ping` probados.
-- [ ] `packages/ds` con tokens portados de 1.0, `AppShell`, cinco patrones y cuatro estados; `/_ds` revisado a 375 y 1024.
+- [ ] `packages/ds` con tokens provisionales neutros marcados como tales (ADR-013), `AppShell`, cinco patrones y cuatro estados; `/_ds` revisado a 375 y 1024.
 - [ ] `pnpm scaffold:module` genera un módulo que pasa el gate.
 - [ ] CI en verde en `main`.
 - [ ] Neon `opai-2` con ramas `main` y `dev`, migración aplicada, rol `opai_app` sin `BYPASSRLS`.
