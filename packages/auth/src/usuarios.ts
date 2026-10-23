@@ -1,4 +1,5 @@
 import { auth } from "./auth";
+import { passwordValida } from "./opciones";
 
 /**
  * Crea un usuario con contraseña desde el servidor (aceptar invitación, seed). El registro
@@ -17,6 +18,9 @@ export async function crearUsuarioConPassword(datos: {
     throw new Error(
       `La contraseña debe tener entre ${minPasswordLength} y ${maxPasswordLength} caracteres.`,
     );
+  }
+  if (!passwordValida(datos.password)) {
+    throw new Error("La contraseña debe tener al menos 10 caracteres, con una letra y un número.");
   }
   const email = datos.email.trim().toLowerCase();
   if (await ctx.internalAdapter.findUserByEmail(email)) {

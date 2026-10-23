@@ -1,8 +1,10 @@
+import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
 import { Loading } from "@opai/ds";
 
-import { NuevaPassword, PedirEnlace } from "./formularios";
+import { EnlaceVencido } from "./enlace-vencido";
+import { PedirEnlace } from "./pedir-enlace";
 
 export const metadata = { title: "Recuperar contraseña" };
 
@@ -10,14 +12,16 @@ type Props = { searchParams: Promise<Record<string, string | string[] | undefine
 
 async function Contenido({ searchParams }: Props) {
   const { token, error } = await searchParams;
-  if (typeof token === "string" && token) return <NuevaPassword token={token} />;
-  return <PedirEnlace enlaceInvalido={typeof error === "string"} />;
+  // Better Auth vuelve del enlace con ?token=… (o ?error=INVALID_TOKEN).
+  if (typeof token === "string" && token) redirect(`/recuperar/${encodeURIComponent(token)}`);
+  if (typeof error === "string") return <EnlaceVencido />;
+  return <PedirEnlace />;
 }
 
-/** Recuperación por enlace: pedir el correo o, desde el enlace, fijar la contraseña nueva. */
+/** Recuperar contraseña: pedir enlace (export-acceso 03). */
 export default function Recuperar(props: Props) {
   return (
-    <Suspense fallback={<Loading variante="formulario" />}>
+    <Suspense fallback={<Loading variante="formulario" className="p-4" />}>
       <Contenido {...props} />
     </Suspense>
   );

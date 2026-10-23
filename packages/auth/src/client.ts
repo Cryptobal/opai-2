@@ -5,6 +5,8 @@ import { createAuthClient } from "better-auth/react";
 
 import { camposUsuario } from "./opciones";
 
+export { passwordValida, reglasPassword } from "./opciones";
+
 /** Cliente de Better Auth para componentes de React. Mismo origen, base `/api/auth`. */
 export const authClient = createAuthClient({
   basePath: "/api/auth",

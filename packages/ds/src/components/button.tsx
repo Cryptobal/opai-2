@@ -31,6 +31,10 @@ const estilos = cva(
   },
 );
 
+/** Clases del botón para enlaces que se ven como botón (navegación, no acción). */
+export const estilosBoton = (variantes: VariantProps<typeof estilos> = {}): string =>
+  cn(estilos(variantes));
+
 export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<typeof estilos>;
 
 /** Botón del DS: md 40px, lg 48px (acciones principales en teléfono), icon 44px. */

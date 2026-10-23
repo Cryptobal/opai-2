@@ -25,8 +25,8 @@ export async function ejecutarCapacidad(
   return ejecutarComoUsuario(portal, id, input, dryRun);
 }
 
-/** Cambia la empresa actual (solo entre membresías utilizables) y vuelve al inicio del ERP. */
-export async function cambiarTenant(tenantId: string): Promise<void> {
+/** Cambia la empresa actual (solo entre membresías utilizables) y va al destino (interno). */
+export async function cambiarTenant(tenantId: string, destino = "/"): Promise<void> {
   const identidad = await identidadActual();
   if (!identidad) redirect("/login");
   if (!membresiasUsables(identidad.membresias).some((m) => m.tenantId === tenantId)) return;
@@ -37,5 +37,5 @@ export async function cambiarTenant(tenantId: string): Promise<void> {
     path: "/",
     maxAge: 60 * 60 * 24 * 365,
   });
-  redirect("/");
+  redirect(destino.startsWith("/") && !destino.startsWith("//") ? destino : "/");
 }

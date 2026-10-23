@@ -12,15 +12,15 @@ async function captura(page: Page, nombre: string, proyecto: string) {
 test("sin sesión, un portal redirige a /login", async ({ page }) => {
   await page.goto("/configuracion/usuarios");
   await expect(page).toHaveURL(/\/login\?next=%2Fconfiguracion%2Fusuarios/);
-  await expect(page.getByRole("heading", { name: "Entrar" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Inicia sesión" })).toBeVisible();
 });
 
 test("credenciales incorrectas muestran el error en línea", async ({ page }) => {
   await page.goto("/login");
   await page.getByLabel("Correo").fill(email);
-  await page.getByLabel("Contraseña").fill("incorrecta-123");
+  await page.getByLabel("Contraseña", { exact: true }).fill("incorrecta-123");
   await page.getByRole("button", { name: "Entrar" }).click();
-  await expect(page.getByText("Correo o contraseña incorrectos.")).toBeVisible();
+  await expect(page.getByText("El correo o la contraseña no coinciden")).toBeVisible();
 });
 
 test.describe("con sesión", () => {
@@ -31,7 +31,7 @@ test.describe("con sesión", () => {
     await page.goto("/login");
     await captura(page, "login", p);
     await page.getByLabel("Correo").fill(email);
-    await page.getByLabel("Contraseña").fill(password ?? "");
+    await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
     await page.getByRole("button", { name: "Entrar" }).click();
     await page.waitForURL((url) => url.pathname === "/" || url.pathname === "/platform");
 

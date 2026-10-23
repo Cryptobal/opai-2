@@ -1,82 +1,128 @@
 "use client";
 
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { signIn } from "@opai/auth/client";
-import { Button, Campo, Input } from "@opai/ds";
+import { Alerta, AuthCard, Button, Campo, Input, InputPassword, Separador } from "@opai/ds";
 
-const MENSAJES: Record<string, string> = {
-  INVALID_EMAIL_OR_PASSWORD: "Correo o contraseña incorrectos.",
-  TOO_MANY_REQUESTS: "Demasiados intentos. Espera un minuto.",
-};
+import { LinkNext } from "@/app/_components/link-next";
 
-/** Login con correo y contraseña; Google si hay credenciales. Errores en línea. */
-export function FormularioLogin({ destino, google }: { destino: string; google: boolean }) {
-  const [error, setError] = useState<string | null>(null);
-  const [enviando, setEnviando] = useState(false);
+import { PiePortales } from "../pie-portales";
+
+export type EstadoLogin =
+  | { tipo: "inicial" }
+  | { tipo: "cargando" }
+  | { tipo: "error"; titulo: string; texto: string }
+  | { tipo: "suspendida"; texto: string };
+
+const OLVIDO = "¿Olvidaste tu contraseña?";
+
+/** Login ERP / Plataforma / Supervisor según el diseño aprobado (export-acceso 01 y 02). */
+type Props = { destino: string; google: boolean; inicial?: EstadoLogin };
+
+export function FormularioLogin({ destino, google, inicial = { tipo: "inicial" } }: Props) {
+  const router = useRouter();
+  const [estado, setEstado] = useState<EstadoLogin>(inicial);
+  const cargando = estado.tipo === "cargando";
 
   async function entrar(form: FormData) {
-    setError(null);
-    setEnviando(true);
+    setEstado({ tipo: "cargando" });
     const r = await signIn.email({
       email: String(form.get("email") ?? "").trim(),
       password: String(form.get("password") ?? ""),
     });
-    if (r.error) {
-      setEnviando(false);
-      const code = r.error.code ?? (r.error.status === 429 ? "TOO_MANY_REQUESTS" : "");
-      setError(
-        MENSAJES[code] ??
-          "No pudimos iniciar sesión. Si tu empresa está suspendida, contacta a tu administrador.",
-      );
-      return;
+    if (!r.error) return router.push(`/elegir-empresa?next=${encodeURIComponent(destino)}`);
+    if (r.error.code === "ACCOUNT_SUSPENDED")
+      return setEstado({ tipo: "suspendida", texto: r.error.message ?? "" });
+    if (r.error.status === 429) {
+      return setEstado({
+        tipo: "error",
+        titulo: "Pausamos el acceso",
+        texto: "Hubo demasiados intentos. Vuelve a intentarlo en 15 minutos.",
+      });
     }
-    window.location.assign(destino);
+    setEstado({
+      tipo: "error",
+      titulo: "El correo o la contraseña no coinciden",
+      texto:
+        "Revisa los datos y vuelve a intentarlo. Tras 5 intentos pausaremos el acceso por 15 minutos.",
+    });
   }
 
   return (
-    <form action={entrar} className="flex flex-col gap-4">
-      <h1 className="t-heading text-fg">Entrar</h1>
-      <Campo etiqueta="Correo" htmlFor="email">
-        <Input
-          id="email"
-          name="email"
-          type="email"
-          inputMode="email"
-          autoComplete="username"
-          required
-        />
-      </Campo>
-      <Campo etiqueta="Contraseña" htmlFor="password" {...(error ? { error } : {})}>
-        <Input
-          id="password"
-          name="password"
-          type="password"
-          autoComplete="current-password"
-          required
-          {...(error ? { "aria-invalid": true } : {})}
-        />
-      </Campo>
-      <Button type="submit" size="lg" block disabled={enviando}>
-        {enviando ? "Entrando…" : "Entrar"}
-      </Button>
-      {google ? (
-        <Button
-          variant="secondary"
-          size="lg"
-          block
-          onClick={() => void signIn.social({ provider: "google", callbackURL: destino })}
-        >
-          Continuar con Google
-        </Button>
+    <AuthCard
+      titulo="Inicia sesión"
+      subtitulo="ERP, Plataforma y Supervisor"
+      pie={<PiePortales />}
+      Link={LinkNext}
+    >
+      {estado.tipo === "error" ? (
+        <Alerta tono="danger" titulo={estado.titulo}>
+          {estado.texto}
+        </Alerta>
       ) : null}
-      <Link
-        href="/recuperar"
-        className="flex min-h-11 items-center justify-center text-base text-fg-muted hover:text-fg"
-      >
-        ¿Olvidaste tu contraseña?
-      </Link>
-    </form>
+      {estado.tipo === "suspendida" ? (
+        <Alerta tono="warning" titulo="Tu cuenta está suspendida">
+          {estado.texto}
+        </Alerta>
+      ) : null}
+      <form action={entrar} className="flex flex-col gap-4">
+        <Campo etiqueta="Correo" htmlFor="email">
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            inputMode="email"
+            autoComplete="username"
+            placeholder="nombre@empresa.cl"
+            required
+            disabled={cargando}
+          />
+        </Campo>
+        <div className="flex flex-col gap-1.5">
+          <div className="flex items-center justify-between">
+            <label htmlFor="password" className="t-label text-fg">
+              Contraseña
+            </label>
+            <LinkNext href="/recuperar" className="hidden text-sm text-accent md:inline">
+              {OLVIDO}
+            </LinkNext>
+          </div>
+          <InputPassword
+            id="password"
+            name="password"
+            autoComplete="current-password"
+            placeholder="Tu contraseña"
+            required
+            disabled={cargando}
+            {...(estado.tipo === "error" ? { "aria-invalid": true } : {})}
+          />
+        </div>
+        <Button type="submit" size="lg" block disabled={cargando}>
+          {cargando ? "Entrando…" : "Entrar"}
+        </Button>
+        <LinkNext
+          href="/recuperar"
+          className="flex min-h-11 items-center justify-center text-sm text-accent md:hidden"
+        >
+          {OLVIDO}
+        </LinkNext>
+      </form>
+      {google ? (
+        <>
+          <Separador />
+          <Button
+            variant="secondary"
+            size="lg"
+            block
+            disabled={cargando}
+            onClick={() => void signIn.social({ provider: "google", callbackURL: destino })}
+          >
+            Continuar con Google
+          </Button>
+        </>
+      ) : null}
+    </AuthCard>
   );
 }

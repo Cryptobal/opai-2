@@ -4,8 +4,25 @@
 /** Mínimo de 10 caracteres (Brief 01, sección 9). */
 export const LARGO_MINIMO_PASSWORD = 10;
 
-/** Enlaces de recuperación e invitación: 72 horas, un solo uso, solo hash en base. */
+/** Invitaciones: 72 horas, un solo uso, solo hash en base. */
 export const VIGENCIA_ENLACE_SEGUNDOS = 72 * 60 * 60;
+
+/** Recuperación de contraseña: 30 minutos (diseño de acceso aprobado), un solo uso, solo hash. */
+export const VIGENCIA_RECUPERACION_SEGUNDOS = 30 * 60;
+
+/** Reglas de contraseña visibles en las pantallas de acceso. */
+export function reglasPassword(p: string) {
+  return [
+    {
+      id: "largo",
+      texto: `Al menos ${LARGO_MINIMO_PASSWORD} caracteres`,
+      ok: p.length >= LARGO_MINIMO_PASSWORD,
+    },
+    { id: "mezcla", texto: "Una letra y un número", ok: /\p{L}/u.test(p) && /\d/.test(p) },
+  ];
+}
+
+export const passwordValida = (p: string): boolean => reglasPassword(p).every((r) => r.ok);
 
 /** Campos propios en `users`. `platformRole` nunca se acepta desde el cliente. */
 export const camposUsuario = {

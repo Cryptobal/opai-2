@@ -29,19 +29,31 @@ export const invitationsPeek = defineCapability({
     rol: z.string(),
     estado: z.string(),
     usuarioExiste: z.boolean(),
+    /** Nombre de la cuenta existente con ese correo (variante "correo con cuenta"). */
+    nombreUsuario: z.string().nullable(),
+    invitadoPor: z.string().nullable(),
+    expiresAt: z.string(),
+    acceptedAt: z.string().nullable(),
   }),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
     const i = await cargar(ctx, input.token);
     const tenant = await tenantActual(ctx);
-    const usuario = await ctx.db.user.findUnique({ where: { email: i.email } });
+    const [usuario, invita] = await Promise.all([
+      ctx.db.user.findUnique({ where: { email: i.email } }),
+      ctx.db.user.findUnique({ where: { id: i.invitedByUserId } }),
+    ]);
     return {
       tenant: tenant.nombre,
       email: i.email,
       rol: i.rol,
       estado: estadoInvitacion(i),
       usuarioExiste: Boolean(usuario),
+      nombreUsuario: usuario?.name ?? null,
+      invitadoPor: invita?.name ?? null,
+      expiresAt: i.expiresAt.toISOString(),
+      acceptedAt: i.acceptedAt?.toISOString() ?? null,
     };
   },
 });

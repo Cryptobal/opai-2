@@ -1,17 +1,18 @@
 import { prismaAdapter } from "@better-auth/prisma-adapter";
 import { betterAuth } from "better-auth";
+import { APIError } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
 
 import { clienteAuth } from "@opai/db";
 import { mailerDelEntorno } from "@opai/integrations/email";
 
-import { puedeIniciarSesion } from "./acceso";
+import { bloqueoDeIngreso, mensajeBloqueo } from "./acceso";
 import {
   camposUsuario,
   LARGO_MINIMO_PASSWORD,
   origenesConfiables,
   proveedoresSociales,
-  VIGENCIA_ENLACE_SEGUNDOS,
+  VIGENCIA_RECUPERACION_SEGUNDOS,
 } from "./opciones";
 
 const env = process.env;
@@ -36,13 +37,13 @@ export const auth = betterAuth({
     enabled: true,
     disableSignUp: true,
     minPasswordLength: LARGO_MINIMO_PASSWORD,
-    resetPasswordTokenExpiresIn: VIGENCIA_ENLACE_SEGUNDOS,
+    resetPasswordTokenExpiresIn: VIGENCIA_RECUPERACION_SEGUNDOS,
     revokeSessionsOnPasswordReset: true,
     async sendResetPassword({ user, url }) {
       await mailerDelEntorno().enviar({
         para: user.email,
         asunto: "Recupera tu contraseña de OPAI",
-        texto: `Hola ${user.name}:\n\nPara crear una contraseña nueva abre este enlace (vence en 72 horas y sirve una sola vez):\n${url}\n\nSi no lo pediste, ignora este correo.`,
+        texto: `Hola ${user.name}:\n\nPara crear una contraseña nueva abre este enlace (vence en 30 minutos y sirve una sola vez):\n${url}\n\nSi no lo pediste, ignora este correo.`,
       });
     },
   },
@@ -53,14 +54,22 @@ export const auth = betterAuth({
     enabled: env["NODE_ENV"] === "production",
     window: 60,
     max: 100,
-    customRules: { "/sign-in/email": { window: 60, max: 10 } },
+    // "Tras 5 intentos pausaremos el acceso por 15 minutos" (diseño de acceso aprobado).
+    customRules: { "/sign-in/email": { window: 15 * 60, max: 5 } },
   },
   databaseHooks: {
     session: {
       create: {
         // Un tenant suspendido rechaza el ingreso de sus miembros; plataforma sigue entrando.
+        // Corre después de validar la contraseña: el motivo solo lo ve quien la conoce.
         async before(session) {
-          return (await puedeIniciarSesion(session.userId)) ? undefined : false;
+          const bloqueo = await bloqueoDeIngreso(session.userId);
+          if (bloqueo) {
+            throw new APIError("FORBIDDEN", {
+              message: mensajeBloqueo(bloqueo),
+              code: "ACCOUNT_SUSPENDED",
+            });
+          }
         },
       },
     },

@@ -4,139 +4,122 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { signOut } from "@opai/auth/client";
-import { Button, Campo, Input } from "@opai/ds";
+import { AuthCard, Button, Monograma } from "@opai/ds";
 
+import { LinkNext } from "@/app/_components/link-next";
 import { ETIQUETA_ROL } from "@/app/_components/portales";
+import { fechaCorta } from "@/lib/formato";
 
-import { aceptarInvitacion, pedirNuevaInvitacion, registrarYAceptar } from "./acciones";
+import { aceptarInvitacion, registrarYAceptar } from "./acciones";
+import { InvitacionNoVigente } from "./invitacion-estados";
+import { FormularioCuenta, Tarjeta } from "./invitacion-partes";
 
-type Datos = { tenant: string; email: string; rol: string; estado: string; usuarioExiste: boolean };
-type Props = { slug: string; token: string; datos: Datos; sesion: string | null };
+export type DatosInvitacion = {
+  tenant: string;
+  email: string;
+  rol: string;
+  estado: string;
+  usuarioExiste: boolean;
+  nombreUsuario: string | null;
+  invitadoPor: string | null;
+  expiresAt: string;
+  acceptedAt: string | null;
+};
 
-export function InvitacionInvalida() {
-  return (
-    <div className="flex flex-col gap-3">
-      <h1 className="t-heading text-fg">Invitación no encontrada</h1>
-      <p className="text-base text-fg-muted">
-        Revisa el enlace o pide una invitación nueva a tu administrador.
-      </p>
-    </div>
-  );
+type Sesion = { nombre: string; email: string };
+type Props = { slug: string; token: string; datos: DatosInvitacion; sesion: Sesion | null };
+
+/** Texto bajo la tarjeta de cuenta según haya sesión y coincida el correo. */
+function explicacion(datos: DatosInvitacion, sesion: Sesion | null, coincide: boolean): string {
+  if (!sesion) {
+    return `Ya tienes una cuenta en OPAI con este correo. Inicia sesión y sumaremos ${datos.tenant} a tus empresas.`;
+  }
+  return coincide
+    ? `Acepta para sumar ${datos.tenant} a tus empresas.`
+    : `Entraste con otra cuenta. La invitación es para ${datos.email}.`;
 }
 
+/** Invitación: sin cuenta, con cuenta (o sesión abierta), y estados no vigentes (export-acceso 04). */
 export function Invitacion({ slug, token, datos, sesion }: Props) {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
-  const [pedida, setPedida] = useState(false);
-  const rol = ETIQUETA_ROL[datos.rol] ?? datos.rol;
-  const titulo = (
-    <h1 className="t-heading text-fg">
-      {datos.tenant} te invitó como {rol}
-    </h1>
-  );
-  const volverAEntrar = `/login?next=${encodeURIComponent(`/invitacion/${slug}/${token}`)}`;
-
+  const [enviando, setEnviando] = useState(false);
   if (datos.estado !== "pendiente") {
-    return (
-      <div className="flex flex-col gap-4">
-        {titulo}
-        <p className="text-base text-fg-muted">
-          Esta invitación{" "}
-          {datos.estado === "aceptada"
-            ? "ya se usó"
-            : datos.estado === "vencida"
-              ? "venció"
-              : "fue revocada"}
-          .
-        </p>
-        {pedida ? (
-          <p className="text-base text-fg">
-            Avisamos al administrador para que te envíe una nueva.
-          </p>
-        ) : (
-          <Button
-            size="lg"
-            block
-            onClick={async () => setPedida(await pedirNuevaInvitacion(slug, token))}
-          >
-            Pedir nueva invitación
-          </Button>
-        )}
-      </div>
-    );
+    return <InvitacionNoVigente slug={slug} token={token} datos={datos} />;
   }
 
-  if (sesion) {
-    const coincide = sesion.toLowerCase() === datos.email;
-    return (
-      <div className="flex flex-col gap-4">
-        {titulo}
-        <p className="text-base text-fg-muted">
-          {coincide
-            ? `Entraste como ${sesion}.`
-            : `Entraste como ${sesion}, pero la invitación es para ${datos.email}.`}
-        </p>
-        {error ? <p className="text-sm font-medium text-danger-fg">{error}</p> : null}
-        {coincide ? (
-          <Button
-            size="lg"
-            block
-            onClick={async () => setError(await aceptarInvitacion(slug, token))}
-          >
-            Aceptar invitación
-          </Button>
-        ) : (
-          <Button
-            size="lg"
-            block
-            variant="secondary"
-            onClick={() => void signOut().then(() => router.push(volverAEntrar))}
-          >
-            Entrar con {datos.email}
-          </Button>
-        )}
-      </div>
-    );
-  }
+  const login = `/login?next=${encodeURIComponent(`/invitacion/${slug}/${token}`)}`;
+  const coincide = sesion?.email.toLowerCase() === datos.email;
+  const ejecutar = async (accion: () => Promise<string>) => {
+    setEnviando(true);
+    setError(await accion());
+    setEnviando(false);
+  };
+  const cuenta =
+    sesion && !coincide
+      ? sesion
+      : { nombre: datos.nombreUsuario ?? datos.email, email: datos.email };
 
-  if (datos.usuarioExiste) {
-    return (
-      <div className="flex flex-col gap-4">
-        {titulo}
-        <p className="text-base text-fg-muted">
-          Ya tienes cuenta con {datos.email}. Inicia sesión para aceptar.
-        </p>
-        <Button size="lg" block onClick={() => router.push(volverAEntrar)}>
-          Iniciar sesión para aceptar
-        </Button>
-      </div>
-    );
-  }
-
-  async function crear(form: FormData) {
-    const nueva = String(form.get("password") ?? "");
-    if (nueva.length < 10) return setError("La contraseña debe tener al menos 10 caracteres.");
-    setError(await registrarYAceptar(slug, token, String(form.get("nombre") ?? ""), nueva));
-  }
+  const acciones = sesion ? (
+    coincide ? (
+      <Button
+        size="lg"
+        block
+        disabled={enviando}
+        onClick={() => void ejecutar(() => aceptarInvitacion(slug, token))}
+      >
+        Aceptar invitación
+      </Button>
+    ) : (
+      <Button size="lg" block onClick={() => void signOut().then(() => router.push(login))}>
+        Entrar con {datos.email}
+      </Button>
+    )
+  ) : datos.usuarioExiste ? (
+    <>
+      <Button size="lg" block onClick={() => router.push(login)}>
+        Iniciar sesión para aceptar
+      </Button>
+      <Button
+        variant="ghost"
+        size="lg"
+        className="text-accent"
+        onClick={() => router.push("/login")}
+      >
+        No soy yo
+      </Button>
+    </>
+  ) : (
+    <Button type="submit" form="crear-cuenta" size="lg" block disabled={enviando}>
+      {enviando ? "Creando cuenta…" : "Crear cuenta y aceptar"}
+    </Button>
+  );
 
   return (
-    <form action={crear} className="flex flex-col gap-4">
-      {titulo}
-      <p className="text-base text-fg-muted">Crea tu cuenta para {datos.email}.</p>
-      <Campo etiqueta="Nombre y apellido" htmlFor="nombre">
-        <Input id="nombre" name="nombre" autoComplete="name" required minLength={2} />
-      </Campo>
-      <Campo
-        etiqueta="Contraseña"
-        htmlFor="password"
-        ayuda="Mínimo 10 caracteres."
-        {...(error ? { error } : {})}
-      >
-        <Input id="password" name="password" type="password" autoComplete="new-password" required />
-      </Campo>
-      <Button type="submit" size="lg" block>
-        Crear cuenta y aceptar
-      </Button>
-    </form>
+    <AuthCard
+      Link={LinkNext}
+      insignia={<Monograma nombre={datos.tenant} className="size-12 rounded-md text-base" />}
+      titulo={`${datos.tenant} te invitó como ${ETIQUETA_ROL[datos.rol] ?? datos.rol}`}
+      subtitulo={`${datos.invitadoPor ? `Invitación de ${datos.invitadoPor} · ` : ""}vence el ${fechaCorta(datos.expiresAt)}`}
+      acciones={acciones}
+    >
+      {sesion || datos.usuarioExiste ? (
+        <>
+          <Tarjeta nombre={cuenta.nombre} email={cuenta.email} />
+          <p className="text-md text-fg-muted md:text-base">
+            {explicacion(datos, sesion, coincide)}
+          </p>
+          {error ? <p className="text-sm font-medium text-danger-fg">{error}</p> : null}
+        </>
+      ) : (
+        <FormularioCuenta
+          email={datos.email}
+          error={error}
+          onEnviar={(nombre, password) =>
+            void ejecutar(() => registrarYAceptar(slug, token, nombre, password))
+          }
+        />
+      )}
+    </AuthCard>
   );
 }

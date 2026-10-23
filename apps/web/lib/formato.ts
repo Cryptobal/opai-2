@@ -23,3 +23,19 @@ export function estadoPantalla(r: { ok: boolean; error?: { code: string } }) {
   if (r.ok) return "ready" as const;
   return r.error?.code === "FORBIDDEN" ? ("forbidden" as const) : ("error" as const);
 }
+
+/** dd-mm-aaaa (formato chileno de las pantallas de acceso). */
+export function fechaCorta(
+  valor: string | Date | null | undefined,
+  zona = "America/Santiago",
+): string {
+  if (!valor) return "—";
+  return new Intl.DateTimeFormat("es-CL", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    timeZone: zona,
+  })
+    .format(new Date(valor))
+    .replace(/\//g, "-");
+}
