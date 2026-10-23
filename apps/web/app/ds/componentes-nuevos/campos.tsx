@@ -72,6 +72,17 @@ export function MuestraCampos() {
             })}
           />
         </Campo>
+        <Campo etiqueta="Dirección · servicio de mapas con falla" htmlFor="dir-error">
+          <CampoDireccion
+            id="dir-error"
+            valor={null}
+            onCambiar={() => undefined}
+            sinMapa
+            error="No pudimos consultar el servicio de mapas. PERMISSION_DENIED: Places API (New) no habilitada."
+            buscar={async () => []}
+            resolver={async () => null}
+          />
+        </Campo>
         <MapaEstatico lat={-33.36} lng={-70.73} geocercaM={300} pie="Geocerca 300 m" />
         <MapaEstatico lat={null} lng={null} />
         <div className="flex flex-col gap-2">

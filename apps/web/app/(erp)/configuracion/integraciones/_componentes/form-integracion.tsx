@@ -35,7 +35,11 @@ export function FormIntegracion({
 }) {
   const principal = items[0];
   const { ejecutar, error } = useCapacidad("erp");
-  const [modalidad, setModalidad] = useState(principal?.modalidad ?? "propia");
+  const [modalidad, setModalidad] = useState(
+    principal?.modalidad === "plataforma" && !principal.plataformaDisponible
+      ? "propia"
+      : (principal?.modalidad ?? "propia"),
+  );
   const [configs, setConfigs] = useState<Record<string, Config>>(() =>
     Object.fromEntries(items.map((i) => [i.proveedor, configDe(i)])),
   );
@@ -79,7 +83,13 @@ export function FormIntegracion({
               opciones={principal.modalidades.map((m) => ({
                 valor: m,
                 etiqueta: OPCIONES[m as keyof typeof OPCIONES]?.etiqueta ?? m,
-                descripcion: OPCIONES[m as keyof typeof OPCIONES]?.descripcion ?? "",
+                descripcion:
+                  m === "plataforma" && !principal.plataformaDisponible
+                    ? "No disponible en este entorno: usa tus propias credenciales."
+                    : (OPCIONES[m as keyof typeof OPCIONES]?.descripcion ?? ""),
+                ...(m === "plataforma" && !principal.plataformaDisponible
+                  ? { disabled: true }
+                  : {}),
               }))}
             />
           </SeccionTarjeta>

@@ -1,6 +1,10 @@
 import { z } from "zod";
 
-import { CATALOGO_INTEGRACIONES, definicionIntegracion } from "@opai/integrations";
+import {
+  CATALOGO_INTEGRACIONES,
+  credencialDePlataforma,
+  definicionIntegracion,
+} from "@opai/integrations";
 import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../define";
@@ -53,6 +57,11 @@ export const integracionesConfigurar = defineCapability({
     if (!def.disponible) throw reglaDeNegocio(`${def.nombre} estará disponible próximamente.`);
     if (!def.modalidades.includes(input.modalidad)) {
       throw reglaDeNegocio(`${def.nombre} no admite la modalidad "${input.modalidad}".`);
+    }
+    if (input.modalidad === "plataforma" && credencialDePlataforma(def.id) === null) {
+      throw reglaDeNegocio(
+        `${def.nombre} de plataforma no está disponible en este entorno: usa tus propias credenciales.`,
+      );
     }
     const config = def.config.safeParse(input.config);
     if (!config.success)

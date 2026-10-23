@@ -1,5 +1,6 @@
 import {
   type ClaseTarea,
+  ErrorGoogle,
   geoGoogle,
   type Mailer,
   mailerConsola,
@@ -70,19 +71,27 @@ export async function geoDe(ctx: Contexto, modulo = "core") {
         sinCosto: cred.modalidad === "propia",
       })
       .catch(() => undefined);
+  // La falla de Google llega a la pantalla y a los agentes con su estado y mensaje (nunca la clave).
+  const conMensaje = async <T>(llamada: () => Promise<T>): Promise<T> => {
+    try {
+      return await llamada();
+    } catch (e) {
+      throw e instanceof ErrorGoogle ? reglaDeNegocio(e.message) : e;
+    }
+  };
   return {
     async autocompletar(texto: string, sesion?: string) {
-      const r = await geo.autocompletar(texto, sesion);
+      const r = await conMensaje(() => geo.autocompletar(texto, sesion));
       await medir("geo.autocompletado");
       return r;
     },
     async detalle(placeId: string, sesion?: string) {
-      const r = await geo.detalle(placeId, sesion);
+      const r = await conMensaje(() => geo.detalle(placeId, sesion));
       await medir("geo.geocodificacion");
       return r;
     },
     async geocodificar(direccion: string) {
-      const r = await geo.geocodificar(direccion);
+      const r = await conMensaje(() => geo.geocodificar(direccion));
       await medir("geo.geocodificacion");
       return r;
     },
