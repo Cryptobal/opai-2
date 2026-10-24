@@ -88,7 +88,7 @@ Todo brief con pantallas cita la especificación aprobada (`modulos/<modulo>.md`
 Al terminar de escribir un brief, ejecútalo sin esperar confirmación, salvo que incluya una acción irreversible o de alto impacto (migración destructiva, borrado de datos, cambio en producción, gasto): en ese caso, prepara todo y detente antes de esa acción.
 
 1. Adjunta `Cryptobal/opai-2` con acceso de escritura y clónalo; lee `AGENTS.md`, `docs/2.0/REGLAS-codigo.md` y `docs/2.0/ESTADO.md`.
-2. Crea la rama `brief/NN-<nombre>` desde `main` actualizado.
+2. Crea la rama con el ID de la tarea según `AGENTS.md`, «Tareas (Linear)» (por ejemplo `brief/opai-123-<nombre>`), desde `main` actualizado.
 3. Implementa por bloques, con un commit atómico por bloque y el gate `pnpm typecheck && pnpm lint && pnpm test` en verde antes de cada commit. El repositorio es la fuente final de verdad: si contradice el brief, conserva el objetivo, adapta y reporta.
 4. Vincula el PR a la tarea de Linear (`Fixes OPAI-123`; rama con el ID según `AGENTS.md`). `ESTADO.md` solo se toca si cambia la foto técnica.
 5. Antes de abrir el PR, un subagente que no participó en la implementación revisa el diff completo contra el brief, los criterios de aceptación, `AGENTS.md` y `docs/2.0/checklists/revision.md` (autorrevisión); se corrige lo que encuentre. Sube la rama y abre el PR con el reporte y el resumen ejecutivo. **No integres:** el bot «Revisor OPAI 2.0» revisa con el modelo contrario al que construyó y aprueba o pide cambios; durante los primeros módulos el merge lo hace solo Carlos. Si el PR tiene una migración de Neon pendiente, Carlos la aplica desde su Mac antes de integrar. Si el Revisor pide cambios, corrígelos en la misma rama. Si CI falla, corrige; nunca se integra en rojo (ADR-043).

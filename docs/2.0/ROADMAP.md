@@ -1,6 +1,6 @@
 # ROADMAP — OPAI 2.0 hasta terminar
 
-**Actualizado:** 23-oct-2026 · **Orden:** ADR-030 · **Estado real:** `ESTADO.md` manda; este archivo planifica. Cada brief que cierra actualiza su fila aquí y en `ESTADO.md`.
+**Actualizado:** 23-oct-2026 · **Orden:** ADR-030 · **Estado real:** desde el 24-oct-2026 el estado de las tareas vive en Linear (`AGENTS.md`, «Tareas (Linear)») y `ESTADO.md` es la foto técnica; este archivo planifica y se actualiza si cambia el plan.
 
 > **Las semanas son estimaciones**, contadas desde hoy (viernes 23-oct-2026; semana 1 = lunes 26-oct), para un constructor (Claude) con revisión y QA por bots y decisiones de Carlos a tiempo. Sirven para ordenar y detectar atrasos, no son compromisos. Las fases 1 y 2 se estiman con el ritmo real observado (Briefs 00 a 02 en dos días); de la fase 3 en adelante, con el juicio del documento de arranque, porque dependen de extracciones que aún no existen.
 

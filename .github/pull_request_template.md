@@ -22,12 +22,12 @@
 - [ ] `lint`
 - [ ] `test`
 - [ ] `test:db`
-- [ ] `build · presupuesto de JS` (sin subir topes, o con excepción aprobada por Carlos en `ESTADO.md`)
+- [ ] `build · presupuesto de JS`
 
 ## Definición de terminado
 
 - [ ] Cumple el brief o el encargo; las diferencias están reportadas arriba.
-- [ ] CI en verde en el último commit, incluido `secretos`.
+- [ ] `secretos` en verde y todos los checks de arriba en verde en el último commit; los topes de JS no suben (regla en `AGENTS.md`).
 - [ ] Gate local corrido antes de cada commit (`pnpm typecheck && pnpm lint && pnpm test`) y `pnpm test:db` si toca base o RLS.
 - [ ] Multi-tenant: toda tabla nueva con `tenant_id` tiene RLS y la política `tenant_isolation`; todo acceso pasa por `forTenant` o `enTransaccion`; no hay `$queryRaw` fuera de `enTransaccion`; `dbAdmin` solo en migraciones y seeds.
 - [ ] Paridad: lo que hace la pantalla existe como capacidad en `/api/v1` y en MCP; las escrituras tienen `dryRun`.
