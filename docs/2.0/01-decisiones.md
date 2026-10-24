@@ -543,7 +543,7 @@ OPAI puede ofrecer además **automatizaciones alojadas** (por ejemplo, búsqueda
 
 ## ADR-043 · Flujo de trabajo con bots: construye Claude, revisa el Revisor, integra el bot «OPAI 2.0» (v3)
 
-**Fecha:** 23-oct-2026 · **Estado:** vigente en su **v3 (24-oct-2026)**: la regla de integración vigente es «v3 · Merge automático por el bot «OPAI 2.0»», al final de este ADR, que reemplaza la integración por el Revisor de la v1 y la «Modificación de Carlos» (v2, solo Carlos integra) · **Modifica ADR-035**: Claude ya no integra a `main`; la revisión independiente y la integración pasan al bot «Revisor OPAI 2.0». Lo demás de ADR-035 (brief y ejecución en el mismo chat, rama por brief, commits por bloque, gate local, detenerse ante lo irreversible, infraestructura por el Mac de Carlos o el conector de Vercel) sigue vigente.
+**Fecha:** 23-oct-2026 · **Estado:** vigente en su **v3 (24-oct-2026)**: la regla de integración vigente es «v3 · Merge automático por el bot «OPAI 2.0»», al final de este ADR, que reemplaza la integración por el Revisor de la v1 y la «Modificación de Carlos» (v2, solo Carlos integra) · **Modifica ADR-035**: Claude ya no integra a `main`; la revisión independiente pasa al bot «Revisor OPAI 2.0» y la integración, desde la v3, al bot «OPAI 2.0». Lo demás de ADR-035 (brief y ejecución en el mismo chat, rama por brief, commits por bloque, gate local, detenerse ante lo irreversible, infraestructura por el Mac de Carlos o el conector de Vercel) sigue vigente.
 
 **Contexto.** Con ADR-035 el mismo chat que construye revisa (con un subagente del mismo modelo) e integra. Carlos quiere separar construcción, revisión y QA visual en actores distintos, y que la revisión la haga un modelo distinto del que construyó para no repetir sus puntos ciegos.
 

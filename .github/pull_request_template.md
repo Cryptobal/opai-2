@@ -1,4 +1,4 @@
-<!-- Contrato: AGENTS.md. Un PR por encargo, desde `main` actualizado. Integra solo el bot «OPAI 2.0», con squash, cuando el Revisor escribió APROBAR sobre el head actual, los checks obligatorios están en verde y Diseño y QA no tiene un BLOQUEANTE abierto (ADR-043 v3). Carlos puede vetar. Sin force-push ni rebase. -->
+<!-- Contrato: AGENTS.md. Un PR por encargo, desde `main` actualizado. Integra solo el bot «OPAI 2.0», con squash, cuando el Revisor escribió APROBAR sin condiciones sobre el head actual, los checks obligatorios están en verde y Diseño y QA no tiene un BLOQUEANTE abierto (ADR-043 v3). Carlos puede vetar. Sin force-push ni rebase. -->
 
 ## Qué cambia
 

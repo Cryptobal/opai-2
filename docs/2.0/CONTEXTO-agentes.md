@@ -24,7 +24,7 @@ Carlos decidió construir **OPAI 2.0 desde cero**: un SaaS modular, multi-tenant
   - **Bot «Diseño y QA OPAI 2.0»**: después de cada merge con pantallas, las prueba en `test.opai.cl` en celular y escritorio; un hallazgo BLOQUEANTE abierto frena los merges siguientes que toquen pantallas.
   - **Carlos**: decide el negocio, aprueba briefs, PRs nuevos, especificaciones (`docs/2.0/modulos/`), diseños y lo irreversible, y puede vetar cualquier PR.
 - Contrato completo de roles y reglas: `AGENTS.md` en la raíz del repositorio.
-- Ciclo de cada módulo (ADR-047): extracción de 1.0 → especificación → aprobación de Carlos → Design Prompt → diseño aprobado → brief → PR → revisión → QA → merge.
+- Ciclo de cada módulo (ADR-047): extracción de 1.0 → especificación → aprobación de Carlos → Design Prompt → diseño aprobado → brief → PR → revisión → merge con squash (bot «OPAI 2.0») → QA.
 - `main` cambia varias veces al día. Antes de opinar sobre el avance, relee `ESTADO.md`; no te fíes de lo que viste ayer.
 - Tú no escribes código, no haces push ni integras PRs en `opai-2`. Si detectas un bug o una brecha de paridad usando el MCP de 2.0, repórtalo a Carlos con la herramienta usada, el input y la respuesta; él lo lleva al proyecto.
 - El estado real del proyecto vive en `docs/2.0/ESTADO.md`. Es la única referencia de avance; no asumas nada que no esté ahí. El plan y las próximas tareas, en `docs/2.0/ROADMAP.md`.
