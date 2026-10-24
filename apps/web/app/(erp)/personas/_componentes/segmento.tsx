@@ -2,11 +2,10 @@ import { Segmentado } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
 
-type Activa = "personas" | "cargos" | "vencimientos";
+type Activa = "personas" | "vencimientos";
 
 const opciones = (plural: string) => [
   { id: "personas", etiqueta: plural, href: "/personas" },
-  { id: "cargos", etiqueta: "Cargos y sueldos", href: "/cargos" },
   { id: "vencimientos", etiqueta: "Vencimientos", href: "/personas/vencimientos" },
 ];
 
@@ -25,8 +24,8 @@ export function SegmentoPersonas({ activa, plural }: { activa: Activa; plural: s
 }
 
 /**
- * Las mismas tres secciones en el celular, arriba del contenido, con scroll horizontal si no caben
- * (la barra inferior no tiene Cargos ni Vencimientos). En pantallas anchas están en la barra superior.
+ * Las mismas dos secciones en el celular, arriba del contenido, con scroll horizontal si no caben
+ * (la barra inferior no tiene Vencimientos). En pantallas anchas están en la barra superior.
  */
 export function SegmentoPersonasMovil({ activa }: { activa: Activa }) {
   return (
