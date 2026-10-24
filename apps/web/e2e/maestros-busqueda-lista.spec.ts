@@ -30,14 +30,26 @@ test.describe("Personas · la búsqueda de la lista no se pierde", () => {
     await page.waitForURL(/\/personas\/[0-9a-f-]{36}\?q=a/);
     const id = new URL(page.url()).pathname.split("/")[2];
     const ficha = page.getByRole("region", { name: "Detalle" });
+    const buscador = lista.getByRole("searchbox");
+    const filas = lista.locator('a[href^="/personas/"]:not([href*="vencimientos"])');
+    /** En pantalla: el campo de búsqueda sigue con «a» y la lista sigue filtrada por ella. */
+    const busquedaVisible = async (donde: string) => {
+      await page.reload();
+      await expect(buscador, `${donde}: el campo conserva la búsqueda`).toHaveValue("a");
+      const total = await filas.count();
+      expect(total, `${donde}: la lista tiene filas`).toBeGreaterThan(0);
+      for (let i = 0; i < total; i++) await expect(filas.nth(i)).toContainText(/a/i);
+    };
 
     await page.goto(`/personas/${id}/actividad?q=a`);
     await ficha.getByRole("link", { name: "Agentes" }).click();
     await expect(page).toHaveURL(/actor=agente/);
     expect(new URL(page.url()).searchParams.get("q")).toBe("a");
+    await busquedaVisible("Actividad · Agentes");
     await ficha.getByRole("link", { name: "Todo" }).click();
     await expect.poll(() => new URL(page.url()).searchParams.get("actor")).toBeNull();
     expect(new URL(page.url()).searchParams.get("q")).toBe("a");
+    await busquedaVisible("Actividad · Todo");
 
     for (const [tab, enlace, param] of [
       ["documentos", "Subir documento", "subir"],
@@ -47,6 +59,7 @@ test.describe("Personas · la búsqueda de la lista no se pierde", () => {
       await page.getByRole("link", { name: enlace }).first().click();
       await expect.poll(() => new URL(page.url()).searchParams.get(param)).toBe("1");
       expect(new URL(page.url()).searchParams.get("q"), `${param} conserva q`).toBe("a");
+      await busquedaVisible(`?${param}`);
     }
   });
 });

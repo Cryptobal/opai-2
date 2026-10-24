@@ -36,8 +36,8 @@ test.describe("Personas · fila de la lista", () => {
       const rut = fila.locator(".t-mono").first();
       await expect(rut, `fila ${i + 1} muestra el RUT`).toBeVisible();
       expect((await rut.innerText()).trim()).toMatch(RUT);
-      // El RUT cabe entero dentro de la línea secundaria (el cargo cede antes).
-      const celda = await fila.locator("span.truncate").nth(1).boundingBox();
+      // El RUT cabe entero dentro de la fila (el cargo cede antes).
+      const celda = await fila.boundingBox();
       const caja = await rut.boundingBox();
       expect(caja && celda && caja.x + caja.width <= celda.x + celda.width + 0.5).toBe(true);
       expect(await rut.evaluate((el) => el.scrollWidth <= el.clientWidth + 1)).toBe(true);

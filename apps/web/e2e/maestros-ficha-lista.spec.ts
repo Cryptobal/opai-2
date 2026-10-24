@@ -23,13 +23,20 @@ async function retenerAuditoria() {
   const psql: ChildProcessWithoutNullStreams = spawn("psql", [baseDatos, "-q", "-X", "-A", "-t"]);
   let salida = "";
   psql.stdout.on("data", (d: Buffer) => (salida += d.toString()));
+  psql.on("error", () => undefined); // sin psql, la espera de abajo vence y el test falla con su mensaje
   psql.stdin.write(
     "BEGIN;\nLOCK TABLE core.audit_events IN ACCESS EXCLUSIVE MODE;\nSELECT 'retenida';\n",
   );
-  await expect.poll(() => salida, { timeout: 15_000 }).toContain("retenida");
-  return () => {
+  const liberar = () => {
     psql.stdin.end("ROLLBACK;\n");
   };
+  try {
+    await expect.poll(() => salida, { timeout: 15_000 }).toContain("retenida");
+  } catch (error) {
+    liberar(); // si vence la espera, no deja la tabla retenida
+    throw error;
+  }
+  return liberar;
 }
 
 const MODULOS = [
