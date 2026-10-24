@@ -1,6 +1,6 @@
 # Checklist de QA — «Diseño y QA OPAI 2.0»
 
-Se corre en `test.opai.cl`, o en la preview del PR, después de cada PR con pantallas. Referencias: el diseño aprobado en `docs/2.0/design/`, `docs/2.0/DISENO.md` y `docs/2.0/NAVEGACION.md`. Los hallazgos van en un issue con capturas (viewport y tema) o se reportan al bot «OPAI 2.0». Este bot no escribe código.
+Se corre en `test.opai.cl`, o en la preview del PR, después de cada PR con pantallas. Referencias: el diseño aprobado en `docs/2.0/design/`, `docs/2.0/DISENO.md` y `docs/2.0/NAVEGACION.md`. Los hallazgos se registran como tareas en Linear, en el estado Triage, con capturas (viewport y tema) y sin copiar datos personales (ver `AGENTS.md`, «Tareas (Linear)»). Este bot no escribe código.
 
 ## 1. Viewports y temas
 - [ ] **375 px (celular):** no hay scroll horizontal de página. La barra inferior no tapa contenido ni acciones y la safe-area de iOS se respeta.
