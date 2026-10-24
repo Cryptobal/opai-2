@@ -1,7 +1,7 @@
 import { Plus } from "lucide-react";
-import type { ReactNode } from "react";
+import { type ReactNode, Suspense } from "react";
 
-import { SplitScreen } from "@opai/ds";
+import { Loading, SplitScreen } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
@@ -9,9 +9,9 @@ import { leerParametros, type Parametros, type SearchParams } from "@/lib/parame
 import type { InstalacionDetalle } from "@/lib/tipos-maestros";
 import { vocabularioActual } from "@/lib/vocabulario";
 
-import { cargarInstalacion, cargarInstalaciones } from "./datos";
-import { HojaInstalacion } from "./diferidas";
-import { FichaInstalacion, type TabInstalacion } from "./ficha-instalacion";
+import { cargarInstalaciones } from "./datos";
+import { DetalleInstalacion } from "./detalle-instalacion";
+import type { TabInstalacion } from "./ficha-instalacion";
 import { ListaInstalaciones } from "./lista-instalaciones";
 
 type Props = {
@@ -46,15 +46,15 @@ export function PaginaInstalacion({ params, searchParams, tab, acciones, childre
           leerParametros(searchParams),
           vocabularioActual(),
         ]);
-        const [lista, ficha] = await Promise.all([cargarInstalaciones(p), cargarInstalacion(id)]);
-        return { id, p, lista, ficha, voc };
+        // Solo la lista: la ficha carga dentro de su propio Suspense.
+        return { id, p, lista: await cargarInstalaciones(p), voc };
       }}
       opciones={(d) => ({
         titulo: d.voc.titulo("instalacion"),
         volver: { href: "/instalaciones", etiqueta: d.voc.titulo("instalacion") },
       })}
     >
-      {({ id, p, lista, ficha, voc }) => (
+      {({ id, p, lista, voc }) => (
         <>
           <SplitScreen
             telefono="detalle"
@@ -70,17 +70,13 @@ export function PaginaInstalacion({ params, searchParams, tab, acciones, childre
               />
             }
             detalle={
-              <FichaInstalacion
-                state={ficha.state}
-                instalacion={ficha.instalacion}
-                tab={tab}
-                persona={voc.titulo("persona")}
-              >
-                {ficha.instalacion ? children(ficha.instalacion, p) : null}
-              </FichaInstalacion>
+              <Suspense fallback={<Loading variante="detalle" />}>
+                <DetalleInstalacion id={id} p={p} tab={tab} persona={voc.titulo("persona")}>
+                  {children}
+                </DetalleInstalacion>
+              </Suspense>
             }
           />
-          {ficha.instalacion ? <HojaInstalacion instalacion={ficha.instalacion} /> : null}
         </>
       )}
     </PaginaPortal>
