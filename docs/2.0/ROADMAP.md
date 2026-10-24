@@ -31,7 +31,7 @@ Las **bases transversales** (rendimiento, PWA, navegación) aplican a todo brief
 | — | Paridad MCP del núcleo | En curso (otro chat) |
 | — | Arreglos de QA del núcleo | En curso (otro chat) |
 | **03** | **Rendimiento de navegación** (ADR-045): instrumentación, shell en el layout, caché de identidad, `forTenant` por capacidad, prefetch y caché del router, gate en CI | Pendiente · **prioridad 1** |
-| **04** | **Base PWA** (ADR-044): manifest por portal, íconos, service worker, página sin conexión, actualización controlada, prueba en CI | Pendiente (ADR-044 vigente) |
+| **04** | **Base PWA** (ADR-044): un solo manifest de OPAI con entrada al portal de cada persona, íconos, service worker, página sin conexión, actualización controlada, prueba en CI | Pendiente (ADR-044 vigente) |
 | **05** | **Navegación por áreas** (ADR-046, `NAVEGACION.md`): áreas, fijados, ⌘K con acciones y recientes, barra inferior por rol, nombres únicos | Pendiente (Design Prompt de navegación antes) |
 
 - **Criterio de término:** Carlos completa la verificación guiada del Brief 02 en `test.opai.cl` sin bloqueantes; toda capacidad que la UI usa existe en MCP; QA sin hallazgos críticos; la navegación entre Cuentas, Instalaciones, Personas, Cargos y Configuración cumple las metas de ADR-045 medidas antes y después; la app se instala desde el celular y el CI prueba manifest, service worker y modo sin conexión; ADR-044 y 046 aprobados (cumplido el 24-oct).
@@ -153,7 +153,7 @@ No se portan de 1.0 y solo se reconstruyen con demanda real (lista canónica de 
 | Base | Decisión | Documento | Implementación | Estado |
 |---|---|---|---|---|
 | Rendimiento | Navegación instantánea: shell persistente, skeleton inmediato, prefetch, caché de datos, ≤ 8 consultas por navegación, gate en CI | ADR-045 | Brief 03 | ADR vigente; brief pendiente (prioridad 1) |
-| PWA | Instalable, manifest por portal, service worker con actualización controlada, sin conexión en terreno, push, cámara y GPS, presupuesto de terreno, prueba en CI; Capacitor para tiendas | ADR-044 | Brief 04 (base); cola sin conexión con el primer módulo de terreno; Brief 17 (tiendas) | ADR vigente; brief pendiente |
+| PWA | Una sola app «OPAI» instalable (un manifest; abre el portal según la membresía), service worker con actualización controlada, sin conexión en terreno, push, cámara y GPS, presupuesto de terreno, prueba en CI; Capacitor para tiendas | ADR-044 | Brief 04 (base); cola sin conexión con el primer módulo de terreno; Brief 17 (tiendas) | ADR vigente; brief pendiente |
 | Navegación | Áreas, menú vs. pestañas, ⌘K, fijados, barra inferior por rol, portales, activación por módulo, nombres únicos | ADR-046, `NAVEGACION.md` | Design Prompt de navegación → Brief 05 | ADR vigente; Design Prompt pendiente |
 
 ## 5. Próximas 10 tareas, en orden
