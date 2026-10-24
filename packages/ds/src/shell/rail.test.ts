@@ -80,6 +80,17 @@ describe("Rail con selector de portal y empresa", () => {
     );
     expect(selector(html)).toBeUndefined();
     expect(html).toContain(">GS<");
+    expect(html).not.toContain("lucide-chevron-down");
+  });
+
+  it("con varios portales muestra la flecha y la etiqueta sin recortarla por la flecha", () => {
+    const html = renderToStaticMarkup(
+      createElement(Rail, { ...base, portales, portalActual: "erp", tenant: { nombre: "Gard" } }),
+    );
+    expect(html).toContain("lucide-chevron-down");
+    expect(html).toMatch(
+      /<svg[^>]*absolute[^>]*lucide-chevron-down|lucide-chevron-down[^>]*absolute/,
+    );
   });
 
   it("conserva los ítems y la marca del portal", () => {
@@ -91,7 +102,7 @@ describe("Rail con selector de portal y empresa", () => {
         portalActual: "platform",
       }),
     );
-    expect(html).toContain("Plataforma");
+    expect(html).toContain('t-caption">Plataforma');
     expect(html).toContain('aria-current="page"');
     expect(html).toContain("Configuración");
   });

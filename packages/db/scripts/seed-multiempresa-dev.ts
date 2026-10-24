@@ -14,6 +14,9 @@ import { sembrarCatalogo } from "./catalogo-tenant";
 const CORREO = process.env["E2E_SELECTOR_EMAIL"] ?? "e2e-selector@opai.cl";
 
 async function main(): Promise<void> {
+  if (!CORREO.startsWith("e2e-") || !CORREO.endsWith("@opai.cl")) {
+    throw new Error("E2E_SELECTOR_EMAIL debe ser un usuario de pruebas (e2e-…@opai.cl).");
+  }
   if (process.env["VERCEL_ENV"] === "production") throw new Error("Solo para desarrollo.");
   const url = process.env["DATABASE_URL_MIGRATE"] ?? "";
   if (!/@(localhost|127\.0\.0\.1)[:/]/.test(url) && process.env["E2E_SEED_REMOTO"] !== "1") {

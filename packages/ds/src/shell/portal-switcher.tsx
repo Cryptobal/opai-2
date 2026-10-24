@@ -41,10 +41,12 @@ export function PortalSwitcher(props: Props) {
     ) : variante === "riel" ? (
       <>
         <Monograma nombre={nombre} />
-        <span className="flex max-w-full items-center gap-0.5 text-[11px] leading-[14px] font-semibold text-fg">
-          <span className="truncate">{actual?.etiqueta}</span>
-          <ChevronDown className="size-3 flex-none text-fg-subtle" aria-hidden />
+        <span className="max-w-full truncate text-[11px] leading-[14px] font-semibold text-fg">
+          {actual?.etiqueta}
         </span>
+        {items.length > 1 ? (
+          <ChevronDown className="absolute top-1 right-1 size-3 text-fg-subtle" aria-hidden />
+        ) : null}
       </>
     ) : (
       <span className="flex min-w-0 items-center gap-2">
@@ -83,7 +85,7 @@ export function PortalSwitcher(props: Props) {
         variante === "monograma"
           ? "size-11"
           : variante === "riel"
-            ? "h-16 w-16 flex-col gap-1 border border-border bg-bg px-1"
+            ? "relative h-16 w-16 flex-col gap-1 border border-border bg-bg px-0.5"
             : "min-w-0 justify-start px-1"
       }
     />
