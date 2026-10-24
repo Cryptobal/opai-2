@@ -557,7 +557,7 @@ Reglas:
 2. **Correcciones pedidas por el Revisor** las hace Claude en la misma rama (commits nuevos, sin reescribir lo revisado) y vuelve a pedir revisión.
 3. **PRs solo de documentación** siguen el mismo camino (nunca push directo a `main`).
 4. **Bloqueos** (*propuesto, por confirmar con Carlos*): si Revisor y constructor no convergen en dos rondas, decide Carlos.
-5. Los agentes operativos de Gard (Grokbot y los demás) y los bots del flujo siguen sin escribir en el repositorio (ADR-035). La única excepción es el bot Revisor: puede integrar (merge) bajo las condiciones de la regla 1 y comentar en las revisiones; nada más.
+5. Los agentes operativos de Gard (Grokbot y los demás) y los bots del flujo siguen sin escribir en el repositorio (ADR-035). El merge del bot Revisor (un bot de Grok), bajo las condiciones de la regla 1, es la **única escritura de un bot de Grok en el repositorio**; además solo deja comentarios de revisión.
 
 **Consecuencias.** La autorrevisión con subagente queda como control previo del constructor, no como requisito de integración. `INSTRUCCIONES-proyecto-claude.md`, `CLAUDE.md` y `CONTEXTO-agentes.md` cambian su sección de flujo; Carlos debe pegar las instrucciones nuevas en el proyecto de claude.ai. El cierre de un brief deja de ser «integrado» y pasa a «PR abierto»; `ESTADO.md` lo refleja hasta que el Revisor integra.
 
