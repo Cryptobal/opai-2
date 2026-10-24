@@ -29,7 +29,7 @@ export function hoyIso(ahora: Date = new Date()): string {
 
 /** Mes visible para un ISO (o para hoy si el valor está vacío o no es una fecha). */
 export function vistaDe(iso: string, ahora: Date = new Date()): { anio: number; mes: number } {
-  const m = /^(\d{4})-(\d{2})-\d{2}$/.exec(iso);
+  const m = /^(\d{4})-(0[1-9]|1[0-2])-\d{2}$/.exec(iso);
   if (m) return { anio: Number(m[1]), mes: Number(m[2]) - 1 };
   return { anio: ahora.getFullYear(), mes: ahora.getMonth() };
 }

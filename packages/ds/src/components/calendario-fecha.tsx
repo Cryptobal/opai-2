@@ -150,7 +150,10 @@ export default function CalendarioFecha(props: CalendarioProps) {
           sideOffset={6}
           collisionPadding={8}
           aria-label="Calendario"
-          onOpenAutoFocus={(e) => e.preventDefault()}
+          onOpenAutoFocus={(e) => {
+            // Abierto desde el campo: el foco se queda para seguir escribiendo; desde el botón, entra al calendario.
+            if (!(document.activeElement instanceof HTMLButtonElement)) e.preventDefault();
+          }}
           onInteractOutside={(e) => {
             if (e.target instanceof Node && ancla.current?.contains(e.target)) e.preventDefault();
           }}

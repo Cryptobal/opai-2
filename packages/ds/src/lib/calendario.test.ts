@@ -26,3 +26,9 @@ describe("calendario es-CL", () => {
     expect(nombreDia("2026-03-02")).toBe("lunes 2 de marzo de 2026");
   });
 });
+
+describe("vista con valores raros", () => {
+  it("un mes fuera de rango cae a hoy en vez de un encabezado roto", () => {
+    expect(vistaDe("2026-13-01", new Date(2026, 9, 24))).toEqual({ anio: 2026, mes: 9 });
+  });
+});

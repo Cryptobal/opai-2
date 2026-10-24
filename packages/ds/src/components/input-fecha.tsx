@@ -100,7 +100,7 @@ function CampoFecha({ valor, onCambiar, invalido, className, ...props }: Omit<Pr
         type="button"
         aria-label="Abrir calendario"
         disabled={props.disabled}
-        onClick={abrir}
+        onClick={() => !props.disabled && setAbierto(!abierto)}
         className="ds-btn-calendario"
       >
         <Calendar aria-hidden className="size-4" />
