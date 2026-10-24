@@ -602,7 +602,8 @@ Reglas:
 2. **Cuatro idas y vueltas por consulta:** `forTenant` envuelve cada operación de Prisma en una transacción por lotes (`BEGIN`, `set_config`, consulta, `COMMIT`). Una capacidad con cinco consultas son unas veinte idas y vueltas.
 3. **El shell vive dentro de la página**, no en el layout: cada navegación vuelve a resolver identidad, navegación y contadores para pintar una barra lateral que no cambió.
 4. **Contadores en la barra lateral** en cada navegación (varios `count` con RLS).
-5. Sin instrumentación: no hay `Server-Timing` ni conteo de consultas por request; el cold start de Vercel y la suspensión del cómputo de Neon (*scale to zero*) **no se midieron** y quedan por verificar en el brief.
+5. **Errores de conexión a Neon en producción:** los logs de Vercel muestran `P2039` («Authentication timed out») y `P1017` frecuentes en las consultas de sesión de Better Auth (observado en la rama de paridad MCP, 23-oct): reconexiones lentas o fallidas que se suman a la latencia. Hay que revisar el pooling, el tamaño del pool del adaptador `pg` por instancia y el cold start del cómputo de Neon.
+6. Sin instrumentación: no hay `Server-Timing` ni conteo de consultas por request; el cold start de Vercel y la suspensión del cómputo de Neon (*scale to zero*) **no se midieron** y quedan por verificar en el brief.
 
 No se encontró: render estático roto, falta de prefetch, layouts que recarguen el documento ni región cruzada.
 
