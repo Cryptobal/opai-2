@@ -543,7 +543,7 @@ OPAI puede ofrecer además **automatizaciones alojadas** (por ejemplo, búsqueda
 
 ## ADR-043 · Flujo de trabajo con bots: construye Claude, revisa e integra el Revisor
 
-**Fecha:** 23-oct-2026 · **Estado:** vigente · **Modifica ADR-035**: Claude ya no integra a `main`; la revisión independiente y la integración pasan al bot «Revisor OPAI 2.0». Lo demás de ADR-035 (brief y ejecución en el mismo chat, rama por brief, commits por bloque, gate local, detenerse ante lo irreversible, infraestructura por el Mac de Carlos o el conector de Vercel) sigue vigente.
+**Fecha:** 23-oct-2026 · **Estado:** vigente, **modificado el 24-oct** (ver «Modificación de Carlos» al final: por ahora el merge lo hace solo Carlos) · **Modifica ADR-035**: Claude ya no integra a `main`; la revisión independiente y la integración pasan al bot «Revisor OPAI 2.0». Lo demás de ADR-035 (brief y ejecución en el mismo chat, rama por brief, commits por bloque, gate local, detenerse ante lo irreversible, infraestructura por el Mac de Carlos o el conector de Vercel) sigue vigente.
 
 **Contexto.** Con ADR-035 el mismo chat que construye revisa (con un subagente del mismo modelo) e integra. Carlos quiere separar construcción, revisión y QA visual en actores distintos, y que la revisión la haga un modelo distinto del que construyó para no repetir sus puntos ciegos.
 
@@ -567,6 +567,8 @@ Reglas:
 
 **Consecuencias.** La autorrevisión con subagente queda como control previo del constructor, no como requisito de integración. `INSTRUCCIONES-proyecto-claude.md`, `CLAUDE.md` y `CONTEXTO-agentes.md` cambian su sección de flujo; Carlos debe pegar las instrucciones nuevas en el proyecto de claude.ai. El cierre de un brief deja de ser «integrado» y pasa a «PR abierto»; `ESTADO.md` lo refleja hasta que el Revisor integra.
 
+
+**Modificación de Carlos (24-oct).** Durante los primeros módulos **el merge a `main` lo hace solo Carlos**, después de revisar el PR. El bot «Revisor OPAI 2.0» revisa con el modelo contrario y **aprueba o pide cambios, pero no integra**. Cuando Carlos lo decida, el Revisor recupera la integración por rebase con CI en verde, según la regla 1. También se suma un **bot de Paridad**, que compara 1.0 y 2.0 en solo lectura y reporta brechas. El contrato vigente de roles, ramas, prohibiciones y definición de terminado está en `AGENTS.md` (raíz), y los checklists de cada rol están en `docs/2.0/checklists/`. CI agrega el escaneo de secretos (`secretos`). Los checks obligatorios de `main` serán `typecheck · lint · test · test:db` y `build · presupuesto de JS`; la protección de rama la configura Carlos en GitHub.
 ---
 
 ## ADR-044 · PWA desde el principio y empaquetado nativo posterior

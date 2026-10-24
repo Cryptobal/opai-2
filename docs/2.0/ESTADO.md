@@ -39,7 +39,7 @@ Este archivo es la fuente de verdad del avance. Cada brief lo actualiza al termi
   - Modelo de cuentas adoptado: `carlos.irigoyen@opai.cl` = operador de la plataforma (Plataforma, sin membresía); `carlos.irigoyen@gard.cl` = owner de Gard (ERP). Las acciones de Grokbot en Gard quedan a nombre de la cuenta de Gard.
 
 - **Brief 01c (principios agénticos operativos) ejecutado** (23-oct): ADR-034 en `01-decisiones.md`; `defineCapability` rechaza descripciones de menos de 40 caracteres (`DESCRIPCION_MINIMA`, con `trim()`), test `packages/capabilities/test/define.test.ts` (5 casos, incluye que las 27 capacidades del núcleo cumplen); fixtures de `execute`, `http`, `mcp` y `module` ajustados; `CLAUDE.md`, `CONTEXTO-agentes.md` (norte, una key por agente, mandato vigente) y `agentes/README.md` actualizados. Gate en verde (169 tests).
-- **Forma de trabajo cambiada (ADR-035, 23-oct; modificado por ADR-043: Claude abre el PR y el bot Revisor integra):** los briefs se ejecutan desde el chat del proyecto Claude, en rama `brief/NN-<nombre>`, con revisión de un subagente independiente e integración a `main` por rebase cuando CI pasa. Actualizados `INSTRUCCIONES-proyecto-claude.md` (sección Ejecución), `CONTEXTO-agentes.md` y `CLAUDE.md`. Carlos debe pegar las instrucciones nuevas en el proyecto de claude.ai.
+- **Forma de trabajo cambiada (ADR-035, 23-oct; modificado por ADR-043: Claude abre el PR, el bot Revisor aprueba o pide cambios y, desde el 24-oct y durante los primeros módulos, el merge lo hace solo Carlos):** los briefs se ejecutan desde el chat del proyecto Claude, en rama `brief/NN-<nombre>`, con revisión de un subagente independiente e integración a `main` por rebase cuando CI pasa. Actualizados `INSTRUCCIONES-proyecto-claude.md` (sección Ejecución), `CONTEXTO-agentes.md` y `CLAUDE.md`. Carlos debe pegar las instrucciones nuevas en el proyecto de claude.ai.
 
 - **Brief 02 · sesión A (bloques 0–4) implementada** en la rama `brief/02-maestros-y-servicios` (PR #2; commits `2c9eb6f`, `7c41289`, `ebdba13`+`1120bff`, `92d5ee5`), **integrada a `main`** (PR #2) tras aplicar su migración en Neon:
   - Bloque 1 (ADR-037): acceso por Server Actions sin cliente de Better Auth (se eliminó `@opai/auth/client`), `sideEffects` y `optimizePackageImports`, `ListScreen` con `href`, `Tabs` por ruta, `pnpm presupuesto` + job de CI `build · presupuesto de JS`. Medido (gzip, sin polyfill): `/login` 170,2 → 150,1 KB; `/` 171,3 → 153,2 KB; `/configuracion/usuarios` 174,6 → 159,1 KB; framework 129,6 KB.
@@ -90,6 +90,14 @@ Este archivo es la fuente de verdad del avance. Cada brief lo actualiza al termi
   - NAVEGACION.md §8: Personas pasa a tener las pestañas indicadas.
 - **QA pasada 2 en celular** (23-oct, misma rama y PR #8): causa raíz del desborde horizontal a 375 px en Nueva instalación y en el drawer de Nueva persona: un `grid` sin columnas explícitas tiene una columna `auto` que crece hasta la dirección más larga; el DS fija ahora `.grid { grid-template-columns: minmax(0, 1fr) }` en la capa base (las utilidades `grid-cols-*` siguen mandando). Test e2e en `/ds/qa` que falla si hay scroll horizontal (probado: sin el arreglo mide 751 px en un viewport de 375). Además: barra Cancelar/Crear de Nueva instalación sobre la navegación inferior y con «Falta…»; sugerencias de dirección con el texto en dos líneas y «Escribe calle y número» con el campo vacío; botones y chips de 44 px en teléfono (`Button` md y `ChipToggle`); matriz de permisos en teléfono como lista por rol; cargos con el sueldo base en su propia línea; «Nuevo» junto al título; encabezado de tarjeta que envuelve («Agentes» en Actividad); Representante legal en 2 columnas hasta 2xl y zona horaria a ancho completo; detalle de integración con el resultado de la última prueba, «Probar conexión» y estado en teléfono, y el nombre de la integración como título.
 
+- **Contrato del repositorio (24-oct, PR `docs/contrato-agentes`; lo integra Carlos):**
+  - `AGENTS.md` en la raíz como contrato único de bots y agentes: stack verificado, reglas multi-tenant, paridad y `dry_run`, convenciones, definición de terminado, prohibiciones y roles. Suma el bot de Paridad. **El merge a `main` lo hace solo Carlos.**
+  - `CLAUDE.md` solo apunta a `AGENTS.md` y a `docs/2.0/REGLAS-codigo.md`, que guarda sin cambios las reglas finas que antes estaban en `CLAUDE.md`.
+  - `docs/2.0/DISENO.md`; checklists de revisión, QA y paridad en `docs/2.0/checklists/`; plantilla de PR.
+  - CI suma el escaneo de secretos con gitleaks (job `secretos`, sin secretos de CI).
+  - El test de RLS ahora cubre toda tabla con `tenant_id` en cualquier schema, no solo en `core`.
+  - ADR-043 modificado: el Revisor aprueba o pide cambios y no integra.
+
 ## En curso
 
 **Cierre del Núcleo (fase 1).** Pendientes, en orden:
@@ -107,7 +115,7 @@ Este archivo es la fuente de verdad del avance. Cada brief lo actualiza al termi
 
 **Carlos, al activar Comercial en Gard:** crear una key por agente con scopes mínimos y revocar la key «Grokbot» con scope `*` (ADR-034).
 
-**Carlos, pendiente:** pegar en el proyecto de claude.ai las instrucciones actualizadas de `INSTRUCCIONES-proyecto-claude.md` (flujo con bots, ADR-043).
+**Carlos, pendiente:** pegar en el proyecto de claude.ai las instrucciones actualizadas de `INSTRUCCIONES-proyecto-claude.md` (flujo con bots, ADR-043; el merge lo hace Carlos). Configurar en GitHub la protección de `main` (Settings → Branches): checks obligatorios `typecheck · lint · test · test:db` y `build · presupuesto de JS` (y opcional `secretos`), sin push directo y sin force-push.
 
 - Resuelto el 23-oct: key «Grokbot» rotada (la anterior, `opai_gard_heLe…`, revocada; `/api/mcp` la rechaza con 401); URI de redirección de Google configurada; CI en verde; contraseña inicial de `carlos.irigoyen@opai.cl` cambiada; Gard Security en estado `activo`.
 - Pendientes de diseño del sistema: logo definitivo de OPAI; contraste de `--ds-border-strong` (1,5:1) en el portal Trabajador a pleno sol.
