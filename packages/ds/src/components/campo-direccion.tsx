@@ -1,7 +1,7 @@
 "use client";
 
 import { Pencil } from "lucide-react";
-import { type ComponentProps, useState } from "react";
+import { type ComponentProps, useRef, useState } from "react";
 
 import { Button } from "./button";
 import { Combobox } from "./combobox";
@@ -52,6 +52,15 @@ export function CampoDireccion({
   error,
 }: Props) {
   const [manual, setManual] = useState(false);
+  // Elegida la sugerencia y hasta que llega su detalle (2–4 s), el campo conserva su texto y el
+  // mapa muestra un esqueleto, en vez de volver a «Busca la dirección» / «Sin ubicación».
+  const [pendiente, setPendiente] = useState<{ placeId: string; texto: string } | null>(null);
+  const textos = useRef(new Map<string, string>());
+  const buscarConTextos = async (q: string) => {
+    const r = await buscar(q);
+    for (const o of r) textos.current.set(o.valor, o.etiqueta);
+    return r;
+  };
   const idError = `${id ?? "direccion"}-error`;
   if (manual) {
     const cambiar = (k: keyof Direccion, v: string) =>
@@ -90,21 +99,28 @@ export function CampoDireccion({
       <Combobox
         {...(id ? { id } : {})}
         opciones={
-          valor?.placeId
-            ? [{ valor: valor.placeId, etiqueta: valor.direccionFormateada ?? valor.calle }]
-            : []
+          pendiente
+            ? [{ valor: pendiente.placeId, etiqueta: pendiente.texto }]
+            : valor?.placeId
+              ? [{ valor: valor.placeId, etiqueta: valor.direccionFormateada ?? valor.calle }]
+              : []
         }
-        valor={valor?.placeId ?? null}
+        valor={pendiente?.placeId ?? valor?.placeId ?? null}
         placeholder={valor?.calle || "Busca la dirección"}
         buscarPlaceholder="Calle y número"
         textoInicial="Escribe calle y número"
         aria-label="Dirección"
         invalido={Boolean(error)}
         aria-describedby={error ? idError : undefined}
-        onBuscar={buscar}
+        onBuscar={buscarConTextos}
         onCambiar={async ([placeId]) => {
           if (!placeId) return;
-          onCambiar(await resolver(placeId));
+          setPendiente({ placeId, texto: textos.current.get(placeId) ?? placeId });
+          try {
+            onCambiar(await resolver(placeId));
+          } finally {
+            setPendiente(null);
+          }
         }}
       />
       {error ? (
@@ -112,7 +128,7 @@ export function CampoDireccion({
           {error}
         </p>
       ) : null}
-      {valor ? (
+      {valor && !pendiente ? (
         <p className="t-caption min-w-0 break-words">
           {[valor.comuna, valor.region].filter(Boolean).join(", ") || "Sin comuna"}
         </p>
@@ -122,6 +138,7 @@ export function CampoDireccion({
           lat={valor?.lat ?? null}
           lng={valor?.lng ?? null}
           geocercaM={geocercaM ?? null}
+          cargando={pendiente !== null}
           {...(fuenteMapa ? { fuente: fuenteMapa } : {})}
           {...(valor?.comuna ? { pie: valor.comuna } : {})}
         />
