@@ -37,4 +37,4 @@ Lo usan el Revisor (con el modelo contrario al que construyó) y la autorrevisi�
 - [ ] `ESTADO.md` y `ROADMAP.md` están actualizados, y el PR trae el resumen ejecutivo para Carlos.
 
 ## Veredicto
-**APROBAR** o **PEDIR CAMBIOS**, con archivo:línea y la corrección propuesta, siempre sobre el head actual del PR. El Revisor **no integra**: solo un APROBAR sin condiciones sobre el head actual habilita el merge con squash del bot «OPAI 2.0», junto con los checks obligatorios en verde y sin BLOQUEANTE abierto de Diseño y QA (ADR-043 v3). Un APROBAR con condiciones no habilita el merge.
+**APROBAR** o **PEDIR CAMBIOS**, con archivo:línea y la corrección propuesta, citando siempre el SHA completo del head revisado. El Revisor **no integra**: solo un APROBAR sin condiciones sobre el SHA del head actual habilita el merge con squash del bot «OPAI 2.0», junto con los checks obligatorios en verde sobre ese SHA, la rama sin quedar «behind» y, si toca pantallas, nada con la etiqueta `qa-bloqueante` (ADR-043 v3). Un APROBAR con condiciones no habilita el merge, y cualquier push posterior (incluido traer `main`) exige revisar de nuevo.

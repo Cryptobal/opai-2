@@ -17,16 +17,16 @@ Carlos decidió construir **OPAI 2.0 desde cero**: un SaaS modular, multi-tenant
 ## Cómo se trabaja
 
 - Flujo con bots (ADR-043, modifica ADR-035):
-  - **Bot «OPAI 2.0»** (orquestador): prepara los prompts de cada encargo según `ROADMAP.md`, opera los chats de construcción, revisión y QA, e **integra a `main` con squash** cuando el Revisor escribió APROBAR sobre el head actual, los checks obligatorios están en verde y Diseño y QA no tiene un BLOQUEANTE abierto; le avisa a Carlos después de cada merge (ADR-043 v3, 24-oct).
+  - **Bot «OPAI 2.0»** (orquestador): prepara los prompts de cada encargo según `ROADMAP.md`, opera los chats de construcción, revisión y QA, e **integra a `main` con squash** cuando el Revisor escribió APROBAR sin condiciones citando el SHA del head actual, los checks obligatorios están en verde sobre ese SHA, la rama no está «behind» y, si el PR toca pantallas, no hay nada con la etiqueta `qa-bloqueante`; no integra si hay un «VETO» o la etiqueta `veto` de Carlos; le avisa a Carlos después de cada merge (ADR-043 v3, 24-oct).
   - **Claude** (proyecto «OPAI 2.0» en claude.ai): escribe la especificación y el brief, construye en una rama y **abre el PR; nunca integra**.
   - **Bot «Revisor OPAI 2.0»**: revisa el PR con el modelo contrario al que construyó; aprueba o pide cambios; **no integra** (ADR-043 v3).
   - **Bot de Paridad**: compara 1.0 y 2.0 en solo lectura y reporta brechas (`docs/2.0/checklists/paridad.md`).
   - **Bot «Diseño y QA OPAI 2.0»**: después de cada merge con pantallas, las prueba en `test.opai.cl` en celular y escritorio; un hallazgo BLOQUEANTE abierto frena los merges siguientes que toquen pantallas.
-  - **Carlos**: decide el negocio, aprueba briefs, PRs nuevos, especificaciones (`docs/2.0/modulos/`), diseños y lo irreversible, y puede vetar cualquier PR.
+  - **Carlos**: decide el negocio; aprueba el brief o encargo antes de que se abra cada PR, las especificaciones (`docs/2.0/modulos/`), los diseños y lo irreversible; puede vetar cualquier PR (comentario «VETO» o etiqueta `veto`).
 - Contrato completo de roles y reglas: `AGENTS.md` en la raíz del repositorio.
 - Ciclo de cada módulo (ADR-047): extracción de 1.0 → especificación → aprobación de Carlos → Design Prompt → diseño aprobado → brief → PR → revisión → merge con squash (bot «OPAI 2.0») → QA.
 - `main` cambia varias veces al día. Antes de opinar sobre el avance, relee `ESTADO.md`; no te fíes de lo que viste ayer.
-- Tú no escribes código, no haces push ni integras PRs en `opai-2`. Si detectas un bug o una brecha de paridad usando el MCP de 2.0, repórtalo a Carlos con la herramienta usada, el input y la respuesta; él lo lleva al proyecto.
+- Tú no escribes código, no haces push ni integras PRs en `opai-2` (la única excepción es el bot «OPAI 2.0», que integra según ADR-043 v3). Si detectas un bug o una brecha de paridad usando el MCP de 2.0, repórtalo a Carlos con la herramienta usada, el input y la respuesta; él lo lleva al proyecto.
 - El estado real del proyecto vive en `docs/2.0/ESTADO.md`. Es la única referencia de avance; no asumas nada que no esté ahí. El plan y las próximas tareas, en `docs/2.0/ROADMAP.md`.
 - Las decisiones viven en `docs/2.0/01-decisiones.md`.
 
