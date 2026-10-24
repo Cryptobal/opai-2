@@ -27,3 +27,17 @@ export function portalesVisibles(
     p.id === "platform" ? plataforma : portalesMembresia.includes(p.id),
   );
 }
+
+/** Título del 404 de un portal: nombra el portal para no confundir «No encontrado» entre portales. */
+export function tituloNoEncontrado(portal: string): string {
+  const etiqueta = PORTALES.find((x) => x.id === portal)?.etiqueta;
+  if (portal === "erp" || !etiqueta) return "No encontrado";
+  return portal === "platform"
+    ? `${etiqueta} · No encontrado`
+    : `Portal ${etiqueta} · No encontrado`;
+}
+
+/** Subtítulo de la marca en el lateral: el nombre del portal (el ERP no lleva subtítulo). */
+export function subtituloMarcaPortal(portal: string): string | undefined {
+  return portal === "erp" ? undefined : PORTALES.find((x) => x.id === portal)?.etiqueta;
+}
