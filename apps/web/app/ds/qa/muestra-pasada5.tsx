@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Button, Campo, InputFecha, Sheet, Tabs } from "@opai/ds";
+import { Button, Campo, InputFecha, Sheet } from "@opai/ds";
 
 /** Hoja con un campo de fecha (QA pasada 5): el calendario abre sobre la hoja y la oscurece. */
 export function MuestraHojaConFecha() {
@@ -31,28 +31,5 @@ export function MuestraHojaConFecha() {
         </Campo>
       </Sheet>
     </>
-  );
-}
-
-const PESTANAS = [
-  "Resumen",
-  "Contactos",
-  "Instalaciones",
-  "Personas",
-  "Documentos",
-  "Actividad",
-  "Contratos",
-  "Facturas",
-];
-
-/** Pestañas que no caben en 375 px, con la última activa (QA pasada 5): degradado y pestaña a la vista. */
-export function MuestraPestanas() {
-  return (
-    <div data-testid="pestanas-qa" className="w-0 min-w-full max-w-md">
-      <Tabs
-        inicial="facturas"
-        tabs={PESTANAS.map((e) => ({ id: e.toLowerCase(), etiqueta: e, contenido: <p>{e}</p> }))}
-      />
-    </div>
   );
 }
