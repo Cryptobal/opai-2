@@ -3,7 +3,7 @@
 import { Inbox, Lock, Mail } from "lucide-react";
 import { useState } from "react";
 
-import { avisar, Badge, Button, cn, Select, Switch, Td, Tr } from "@opai/ds";
+import { avisar, Badge, Button, cn, Enlace, Select, Switch, Td, Tr } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
 import { useCapacidad } from "@/app/_components/use-capacidad";
@@ -51,12 +51,9 @@ export function FilaEvento({ e, reglas: iniciales }: { e: EventoComunicable; reg
         <span className="flex flex-col">
           <span className="font-medium">{e.nombre}</span>
           {canales.includes("correo") ? (
-            <LinkNext
-              href={rutaEvento(e.evento)}
-              className="text-sm text-accent underline-offset-2 hover:underline"
-            >
+            <Enlace Link={LinkNext} href={rutaEvento(e.evento)} className="text-sm">
               Editar plantilla
-            </LinkNext>
+            </Enlace>
           ) : null}
         </span>
       </Td>
@@ -75,7 +72,7 @@ export function FilaEvento({ e, reglas: iniciales }: { e: EventoComunicable; reg
                 disabled={e.transaccional || pendiente}
                 onClick={() => void fijar([{ canal: c, activa: !on }])}
                 className={cn(
-                  "size-9 rounded-md border",
+                  "rounded-md border",
                   on
                     ? "border-border-strong text-fg"
                     : "border-dashed border-border text-fg-subtle",

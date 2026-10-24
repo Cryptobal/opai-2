@@ -66,7 +66,10 @@ export function UsuariosLista({ state, usuarios, invitaciones, puedeGestionar }:
             <Tr key={m.id} className={puedeGestionar ? "relative cursor-pointer" : undefined}>
               <Td>
                 {puedeGestionar ? (
-                  <LinkNext href={`?editar=${m.id}`} className="after:absolute after:inset-0">
+                  <LinkNext
+                    href={`?editar=${m.id}`}
+                    className="flex min-h-11 items-center after:absolute after:inset-0"
+                  >
                     <Persona nombre={m.nombre} detalle={m.nombre === m.email ? "" : m.email} />
                   </LinkNext>
                 ) : (

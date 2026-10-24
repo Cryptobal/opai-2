@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 
-import { Sheet } from "@opai/ds";
+import { Enlace, Sheet } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
 import { useHojaUrl } from "@/app/_components/maestros/use-url";
@@ -44,9 +44,9 @@ export function HojaEvento({ e, cuando, entidad }: Props) {
           {e.entidad ? (
             <Par etiqueta="Entidad">
               {entidad ? (
-                <LinkNext href={entidad} className="text-accent underline underline-offset-2">
+                <Enlace Link={LinkNext} href={entidad} className="underline">
                   Abrir la ficha ({e.entidad.tipo})
-                </LinkNext>
+                </Enlace>
               ) : (
                 <span className="t-mono text-sm">{`${e.entidad.tipo} · ${e.entidad.id}`}</span>
               )}

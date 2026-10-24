@@ -18,11 +18,12 @@ type CheckboxProps = {
   className?: string;
 };
 
-const caja =
-  "flex size-5 flex-none items-center justify-center rounded-[5px] border border-border-strong bg-surface outline-none transition-colors duration-150 data-[state=checked]:border-accent data-[state=checked]:bg-accent data-[state=checked]:text-accent-fg aria-invalid:border-danger-fg";
+// El control mide 44×44 (área tocable); el cuadro visible sigue de 20 px. Los márgenes negativos
+// devuelven al diseño su ancho de 20 px, así que no cambia la composición de la fila.
+const area = "group ds-area-44 disabled:opacity-45";
+const caja = "ds-caja-20 rounded-[5px]";
+const circulo = "ds-caja-20 rounded-full";
 const fila = "flex min-h-11 items-start gap-3 py-2.5";
-const foco =
-  "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus disabled:opacity-45";
 
 /** Casilla de 20 px sobre Radix con fila tocable de 44 px, etiqueta y descripción. */
 export function Checkbox(props: CheckboxProps) {
@@ -36,11 +37,13 @@ export function Checkbox(props: CheckboxProps) {
       disabled={disabled}
       aria-invalid={error ? true : undefined}
       {...(soloControl ? { "aria-label": etiqueta } : {})}
-      className={cn(caja, foco, !soloControl && "mt-0.5")}
+      className={cn(area, soloControl ? "-m-3" : "-mx-3 -mt-2.5 -mb-3")}
     >
-      <RadixCheckbox.Indicator>
-        <Check className="size-3.5" strokeWidth={3} aria-hidden />
-      </RadixCheckbox.Indicator>
+      <span className={caja}>
+        <RadixCheckbox.Indicator>
+          <Check className="size-3.5" strokeWidth={3} aria-hidden />
+        </RadixCheckbox.Indicator>
+      </span>
     </RadixCheckbox.Root>
   );
   if (soloControl) return control;
@@ -94,12 +97,11 @@ export function RadioGroup(props: RadioGroupProps) {
             id={`${base}-${o.valor}`}
             value={o.valor}
             {...(o.disabled ? { disabled: true } : {})}
-            className={cn(
-              "mt-0.5 flex size-5 flex-none items-center justify-center rounded-full border border-border-strong bg-surface data-[state=checked]:border-accent",
-              foco,
-            )}
+            className={cn(area, "-mx-3 -mt-2.5 -mb-3")}
           >
-            <RadixRadio.Indicator className="size-2.5 rounded-full bg-accent" />
+            <span className={circulo}>
+              <RadixRadio.Indicator className="size-2.5 rounded-full bg-accent" />
+            </span>
           </RadixRadio.Item>
           <label
             htmlFor={`${base}-${o.valor}`}

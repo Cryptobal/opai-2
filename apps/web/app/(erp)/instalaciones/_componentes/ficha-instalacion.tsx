@@ -1,7 +1,6 @@
-import Link from "next/link";
 import type { ReactNode } from "react";
 
-import { Badge, DetailScreen, type EstadoPantalla } from "@opai/ds";
+import { Badge, DetailScreen, Enlace, type EstadoPantalla } from "@opai/ds";
 
 import { BandaAprobacion } from "@/app/_components/aprobaciones/banda-aprobacion";
 import { LinkNext } from "@/app/_components/link-next";
@@ -73,12 +72,9 @@ export function FichaInstalacion(p: {
                 </>
               ),
               subtitulo: (
-                <Link
-                  href={`/cuentas/${i.cuentaId}`}
-                  className="text-accent underline underline-offset-2"
-                >
+                <Enlace Link={LinkNext} href={`/cuentas/${i.cuentaId}`} className="underline">
                   {i.cuenta ?? "Cuenta"}
-                </Link>
+                </Enlace>
               ),
               acciones: (
                 <AccionesEntidad etiqueta="Acciones de la instalación" acciones={acciones(i)} />
