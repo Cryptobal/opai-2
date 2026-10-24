@@ -5,8 +5,11 @@ import { expect, test } from "@playwright/test";
 test.describe("Checkbox y RadioGroup del DS", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/ds");
-    // Los controles responden cuando la página terminó de hidratarse.
-    await page.waitForLoadState("networkidle");
+    // Los controles responden cuando React hidrató el grupo (deja sus props en el nodo).
+    await page.waitForFunction(() => {
+      const nodo = document.querySelector('[role="radiogroup"][aria-label="Jornada"]');
+      return nodo !== null && Object.keys(nodo).some((k) => k.startsWith("__reactProps"));
+    });
     await page.getByRole("radiogroup", { name: "Jornada" }).scrollIntoViewIfNeeded();
   });
 

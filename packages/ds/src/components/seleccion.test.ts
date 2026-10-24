@@ -20,6 +20,7 @@ describe("Checkbox", () => {
     expect(id).toBeTruthy();
     expect(html).toContain(`for="${id}"`);
     expect(html).toContain(">Imponible<");
+    expect(html).toContain("<svg");
   });
 
   it("sin marcar no pinta el indicador", () => {
@@ -76,6 +77,7 @@ describe("RadioGroup", () => {
     expect(html).toMatch(/<button[^>]*role="radio"[^>]*aria-checked="true"[^>]*>/);
     expect(html).toMatch(/<button[^>]*role="radio"[^>]*aria-checked="false"[^>]*disabled=""/);
     const id = /<button[^>]*id="([^"]+-dia)"/.exec(html)?.[1];
+    expect(id).toBeTruthy();
     expect(html).toContain(`for="${id}"`);
   });
 });
