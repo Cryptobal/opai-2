@@ -34,7 +34,7 @@ Lo usan el Revisor (con el modelo contrario al que construyó) y la autorrevisi�
 - [ ] Trae los tests de la regla nueva: dominio, autorización y auditoría de capacidades, y RLS si toca base.
 - [ ] El presupuesto de JS no sube, salvo una excepción aprobada por Carlos.
 - [ ] El diff no trae refactorizaciones fuera del alcance ni archivos generados o temporales.
-- [ ] `ESTADO.md` y `ROADMAP.md` están actualizados, y el PR trae el resumen ejecutivo para Carlos.
+- [ ] El PR está vinculado a su tarea de Linear (`Fixes OPAI-123`), `ROADMAP.md` está actualizado si cambia el plan, y el PR trae el resumen ejecutivo para Carlos.
 
 ## Veredicto
 **APROBAR** o **PEDIR CAMBIOS**, con archivo:línea y la corrección propuesta. Durante los primeros módulos, el Revisor **no integra**: el merge lo hace Carlos (ADR-043).

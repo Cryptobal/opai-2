@@ -1,8 +1,10 @@
 # ESTADO — OPAI 2.0
 
+> **Desde el 24-oct-2026, el estado de las tareas vive en Linear (enlace por definir). Este archivo queda como foto técnica: versiones, infraestructura, riesgos aceptados y decisiones.** Las listas de pendientes de abajo se migran a Linear en la fecha que fije Carlos; hasta entonces no se borran.
+
 **Última actualización:** 24-oct-2026 · **Actualizado por:** Claude (arquitectura) · **Fase en curso:** 1 — Núcleo, en cierre (Briefs 01, 01c y 02 A–C integrados a `main`; quedan la sesión D del Brief 02, la paridad MCP, los arreglos de QA y las bases transversales). Plan completo y próximas tareas en `ROADMAP.md`.
 
-Este archivo es la fuente de verdad del avance. Cada brief lo actualiza al terminar. Si algo no está aquí, no está hecho. El plan hasta terminar 2.0 está en `ROADMAP.md`; la navegación final en `NAVEGACION.md`.
+Hasta el 24-oct-2026 este archivo fue la fuente de verdad del avance; desde entonces lo es Linear (ver la nota de arriba y `AGENTS.md`, «Tareas (Linear)»). El plan hasta terminar 2.0 está en `ROADMAP.md`; la navegación final en `NAVEGACION.md`.
 
 ## Hecho
 
