@@ -6,7 +6,7 @@ import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { ESTADO_PERSONA, estadoDe, TIPO_CONTRATO } from "@/app/_components/maestros/estados";
 import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
-import { rut } from "@/lib/fechas";
+import { fecha, rut } from "@/lib/fechas";
 import type { Parametros } from "@/lib/parametros";
 import type { PersonaFila } from "@/lib/tipos-maestros";
 
@@ -25,7 +25,7 @@ type Props = {
 };
 
 /** Conserva búsqueda, filtros y página al abrir una ficha (la lista no se pierde al elegir). */
-const conParametros = (p: Parametros) => {
+export const conParametros = (p: Parametros) => {
   const q = new URLSearchParams();
   for (const k of ["q", "cargo", "estado", "cursor", "prev"]) if (p[k]) q.set(k, p[k]);
   const t = q.toString();
@@ -99,7 +99,11 @@ export function ListaPersonas(x: Props) {
             <>
               {i.vinculoVigente?.cargo ?? "Sin vínculo vigente"}
               {i.vinculoVigente ? (
-                <span> · {TIPO_CONTRATO[i.vinculoVigente.tipo] ?? i.vinculoVigente.tipo}</span>
+                <span>
+                  {" "}
+                  · {TIPO_CONTRATO[i.vinculoVigente.tipo] ?? i.vinculoVigente.tipo}
+                  {i.vinculoVigente.termino ? ` hasta ${fecha(i.vinculoVigente.termino)}` : ""}
+                </span>
               ) : null}
               <span className="t-mono hidden text-[13px] md:inline"> · {rut(i.rut)}</span>
             </>

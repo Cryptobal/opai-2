@@ -12,7 +12,7 @@ import { hoyIso } from "@/lib/fechas";
 import { cargarPersona, cargarPersonas } from "./datos";
 import { HojaPersona } from "./diferidas";
 import { FichaPersona, type TabPersona } from "./ficha-persona";
-import { ListaPersonas } from "./lista-personas";
+import { conParametros, ListaPersonas } from "./lista-personas";
 import { SegmentoPersonas } from "./segmento";
 
 type Props = {
@@ -70,7 +70,12 @@ export function PaginaPersona({ params, searchParams, tab, acciones, children }:
               />
             }
             detalle={
-              <FichaPersona state={d.state} persona={d.persona} tab={tab}>
+              <FichaPersona
+                state={d.state}
+                persona={d.persona}
+                tab={tab}
+                consulta={conParametros(d.p)}
+              >
                 {d.contenido}
               </FichaPersona>
             }

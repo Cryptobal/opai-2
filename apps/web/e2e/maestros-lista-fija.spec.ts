@@ -49,10 +49,12 @@ test.describe("la lista queda fija al cambiar de pestaña (1280 px)", () => {
       const ficha = page.getByRole("region", { name: "Detalle" });
       await expect(ficha).toBeVisible();
       for (const tab of m.tabs) {
-        await ficha
-          .getByRole("link", { name: new RegExp(`^${tab}`) })
-          .first()
-          .click();
+        const enlace = ficha.getByRole("link", { name: new RegExp(`^${tab}`) }).first();
+        const destino = new URL((await enlace.getAttribute("href")) ?? "", page.url()).pathname;
+        await enlace.click();
+        // En CI corre `pnpm dev`: cada pestaña tarda 4–6 s en responder (compilación y `generate-params`).
+        // Se espera el cambio de ruta (acotado solo por el tiempo del test) y recién entonces se afirma.
+        await page.waitForURL((url) => url.pathname === destino);
         await expect(
           ficha
             .locator('[aria-current="page"], [aria-selected="true"]')
@@ -65,6 +67,22 @@ test.describe("la lista queda fija al cambiar de pestaña (1280 px)", () => {
       }
     });
   }
+
+  test("Personas: las pestañas de la ficha conservan búsqueda y página de la lista", async ({
+    page,
+  }, info) => {
+    test.skip(info.project.name !== "desktop", "Se prueba a 1280 px");
+    await entrar(page);
+    await page.goto("/personas?q=a");
+    const lista = page.getByRole("region", { name: "Lista de personas" });
+    await lista.getByRole("link", { name: /\w/ }).first().click();
+    await page.waitForURL(/\/personas\/[0-9a-f-]{36}\?q=a/);
+    const ficha = page.getByRole("region", { name: "Detalle" });
+    for (const tab of ["Laboral", "Documentos", "Actividad", "Resumen"]) {
+      const enlace = ficha.getByRole("link", { name: new RegExp(`^${tab}`) }).first();
+      await expect(enlace).toHaveAttribute("href", /\?q=a/);
+    }
+  });
 
   test("Personas sin pestaña de Cargos; Cargos sin pestañas de Personas", async ({
     page,
