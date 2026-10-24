@@ -34,19 +34,28 @@ describe.skipIf(!urlPropietario)("RLS del núcleo (Brief 02)", () => {
     await e?.cerrar();
   });
 
-  it("toda tabla de core con tenant_id tiene RLS y la política tenant_isolation", async () => {
-    const filas = await e.admin.$queryRaw<{ tabla: string; rls: boolean; politicas: bigint }[]>`
-      SELECT c.relname AS tabla, c.relrowsecurity AS rls,
+  // Contrato multi-tenant (AGENTS.md): en cualquier schema de la aplicación, toda tabla con
+  // tenant_id tiene RLS activa y exactamente una política tenant_isolation. Cubre los schemas de
+  // módulos futuros sin tocar este test.
+  it("toda tabla con tenant_id, en cualquier schema, tiene RLS y la política tenant_isolation", async () => {
+    const filas = await e.admin.$queryRaw<
+      { esquema: string; tabla: string; rls: boolean; politicas: bigint }[]
+    >`
+      SELECT n.nspname AS esquema, c.relname AS tabla, c.relrowsecurity AS rls,
         (SELECT count(*) FROM pg_policies p
-          WHERE p.schemaname = 'core' AND p.tablename = c.relname
+          WHERE p.schemaname = n.nspname AND p.tablename = c.relname
             AND p.policyname = 'tenant_isolation') AS politicas
       FROM pg_class c JOIN pg_namespace n ON n.oid = c.relnamespace
-      WHERE n.nspname = 'core' AND c.relkind = 'r'
+      WHERE c.relkind IN ('r', 'p')
+        AND n.nspname NOT IN ('pg_catalog', 'information_schema')
+        AND n.nspname !~ '^pg_'
         AND EXISTS (SELECT 1 FROM information_schema.columns col
-          WHERE col.table_schema = 'core' AND col.table_name = c.relname
+          WHERE col.table_schema = n.nspname AND col.table_name = c.relname
             AND col.column_name = 'tenant_id')`;
     expect(filas.length).toBeGreaterThanOrEqual(38);
-    const sinRls = filas.filter((f) => !f.rls || Number(f.politicas) !== 1).map((f) => f.tabla);
+    const sinRls = filas
+      .filter((f) => !f.rls || Number(f.politicas) !== 1)
+      .map((f) => `${f.esquema}.${f.tabla}`);
     expect(sinRls).toEqual([]);
   });
 

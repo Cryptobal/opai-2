@@ -1,0 +1,13 @@
+# Escaneo de secretos (job `secretos` de CI). Usa las reglas por defecto de gitleaks y excluye solo
+# valores ficticios de tests y del build de CI, que no son secretos reales.
+title = "OPAI 2.0"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Valores ficticios de tests y del build de CI"
+regexes = [
+  '''secreto-de-prueba-de-al-menos-32-caracteres''',
+  '''ficticio-solo-para-build-de-ci-0+''',
+]
