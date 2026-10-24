@@ -367,7 +367,9 @@ Cerradas, con recomendación.
 
    Recomendación: **(b)**.
 7. **¿Ganar un negocio exige una cotización enviada en la etapa ganada de Gard?** Recomendación: **sí**, además del inicio de servicio; los negocios sin cotización se cierran desde una cotización rápida.
-8. **¿Durante la convivencia, 2.0 también envía a 1.0 los puestos de un negocio ganado?** Recomendación: **verificar primero** cómo los crea Operaciones de 1.0 (`extraccion/comercial-y-cpq.md` §8). Si los crea a mano, no se sincronizan.
+8. **¿Durante la convivencia, al ganar un negocio en 2.0 se crean también sus puestos en 1.0?** Verificado en 1.0 (`09ab4fe`, `extraccion/comercial-y-cpq.md` §8): ganar un negocio **no** crea puestos. Hoy los crea una persona con «Enviar dotación a la instalación» desde la cotización, o a mano en Operaciones con `createOpsPuestos`, que también es la herramienta MCP `create_ops_puesto`.
+   - **Recomendación: sí, automático.** Al ganar, el sincronizador 2.0 → 1.0 crea en 1.0 los puestos de la cotización aceptada con `create_ops_puesto`, una vez por puesto (id externo guardado) y con reporte si 1.0 rechaza alguno.
+   - **Razón:** Operaciones sigue en 1.0 hasta la fase 3, y sin esos puestos Gard no puede armar la pauta del servicio que acaba de ganar.
 9. **¿Qué reportes trae la v1?**
    - conversión y días por etapa;
    - pérdidas por motivo y competidor;
