@@ -6,6 +6,7 @@ import { vocabularioActual } from "@/lib/vocabulario";
 import { Estado } from "@opai/ds";
 
 import { MatrizVencimientos } from "../_componentes/matriz-vencimientos";
+import { SegmentoPersonas } from "../_componentes/segmento";
 import type { Matriz } from "../_componentes/tipos-matriz";
 
 export const metadata = { title: "Vencimientos" };
@@ -26,6 +27,7 @@ export default function Vencimientos() {
       }}
       opciones={(d) => ({
         titulo: "Vencimientos",
+        insignia: <SegmentoPersonas activa="vencimientos" plural="Personas" />,
         volver: { href: "/personas", etiqueta: d.voc.titulo("persona") },
         volverSoloTelefono: true,
       })}
@@ -34,7 +36,7 @@ export default function Vencimientos() {
         <div className="flex flex-col gap-3">
           <div className="md:hidden">
             <h2 className="t-title text-fg">Vencimientos</h2>
-            {m ? (
+            {m && m.resumen.personas > 0 ? (
               <p className="text-base text-fg-muted">
                 {m.resumen.conPendientes} con algo pendiente
               </p>

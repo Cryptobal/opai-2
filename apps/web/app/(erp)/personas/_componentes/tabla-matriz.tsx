@@ -11,7 +11,7 @@ type Props = {
   onMarcar: (ids: string[], marcado: boolean) => void;
 };
 
-const chip = (estado: string) =>
+export const chip = (estado: string) =>
   cn(
     "inline-flex h-6 items-center rounded-sm px-1.5 text-xs font-medium",
     estado === "vencido" && "border border-danger-fg bg-danger-muted text-danger-fg",
