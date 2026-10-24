@@ -47,7 +47,7 @@ export function PaginaPersona({ params, searchParams, tab, acciones, children }:
       }}
       opciones={(d) => ({
         titulo: d.persona?.nombreCompleto ?? "Persona",
-        volver: { href: "/personas", etiqueta: d.voc.titulo("persona") },
+        volver: { href: "/personas", etiqueta: "Personas" },
       })}
     >
       {(d) => (

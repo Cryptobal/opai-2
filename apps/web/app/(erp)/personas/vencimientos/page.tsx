@@ -1,12 +1,11 @@
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { estadoPantalla } from "@/lib/formato";
 import { ejecutarComoUsuario } from "@/lib/servidor";
-import { vocabularioActual } from "@/lib/vocabulario";
 
 import { Estado } from "@opai/ds";
 
 import { MatrizVencimientos } from "../_componentes/matriz-vencimientos";
-import { SegmentoPersonas } from "../_componentes/segmento";
+import { SegmentoPersonas, SegmentoPersonasMovil } from "../_componentes/segmento";
 import type { Matriz } from "../_componentes/tipos-matriz";
 
 export const metadata = { title: "Vencimientos" };
@@ -19,21 +18,19 @@ export default function Vencimientos() {
       titulo="Vencimientos"
       ruta="/personas"
       cargar={async () => {
-        const [r, voc] = await Promise.all([
-          ejecutarComoUsuario<Matriz>("erp", "core.documentos.matriz", {}),
-          vocabularioActual(),
-        ]);
-        return { state: estadoPantalla(r), m: r.ok ? r.data : null, voc };
+        const r = await ejecutarComoUsuario<Matriz>("erp", "core.documentos.matriz", {});
+        return { state: estadoPantalla(r), m: r.ok ? r.data : null };
       }}
-      opciones={(d) => ({
+      opciones={() => ({
         titulo: "Vencimientos",
         insignia: <SegmentoPersonas activa="vencimientos" plural="Personas" />,
-        volver: { href: "/personas", etiqueta: d.voc.titulo("persona") },
+        volver: { href: "/personas", etiqueta: "Personas" },
         volverSoloTelefono: true,
       })}
     >
       {({ state, m }) => (
         <div className="flex flex-col gap-3">
+          <SegmentoPersonasMovil activa="vencimientos" />
           <div className="md:hidden">
             <h2 className="t-title text-fg">Vencimientos</h2>
             {m && m.resumen.personas > 0 ? (

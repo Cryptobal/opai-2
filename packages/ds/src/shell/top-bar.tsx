@@ -60,7 +60,7 @@ export function TopBarTelefono(props: ComunesBarra & { acciones?: ReactNode }) {
             className="min-w-0"
           />
         )}
-        <div className="ml-auto flex flex-none items-center gap-0.5">
+        <div className={cn("ml-auto flex flex-none items-center gap-0.5", volver && acciones && "pr-2")}>
           {volver ? (
             acciones
           ) : (

@@ -13,3 +13,11 @@ export function requerirUuid(id: string): string {
   if (!esUuid(id)) notFound();
   return id;
 }
+
+/**
+ * Un UUID válido que no existe (o que el alcance no deja ver) responde NOT_FOUND: es un 404 de la
+ * ficha, no un fallo de red ("No pudimos cargar esta información") ni una ficha con «Editar».
+ */
+export function requerirEncontrado(r: { ok: boolean; error?: { code: string } }): void {
+  if (!r.ok && r.error?.code === "NOT_FOUND") notFound();
+}

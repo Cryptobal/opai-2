@@ -101,13 +101,7 @@ export function ComboboxCmdk(props: ComboboxProps) {
                 className="h-full min-w-0 flex-1 bg-transparent text-md text-fg outline-none placeholder:text-fg-subtle"
               />
             </div>
-            <Command.List
-              aria-busy={buscando}
-              className={cn(
-                "max-h-72 overflow-y-auto py-1 transition-opacity duration-150",
-                buscando && lista.length > 0 && "opacity-60",
-              )}
-            >
+            <Command.List aria-busy={buscando} className="max-h-72 overflow-y-auto py-1">
               {buscando ? (
                 <div
                   role="status"
@@ -123,7 +117,7 @@ export function ComboboxCmdk(props: ComboboxProps) {
                     : (props.textoInicial ?? "Sin resultados")}
                 </Command.Empty>
               )}
-              {lista.map((o) => (
+              {(buscando ? [] : lista).map((o) => (
                 <Command.Item
                   key={o.valor}
                   value={`${o.etiqueta} ${o.detalle ?? ""} ${o.valor}`}
@@ -141,7 +135,7 @@ export function ComboboxCmdk(props: ComboboxProps) {
                   ) : null}
                 </Command.Item>
               ))}
-              {onCrear && q.trim() && !exacta ? (
+              {onCrear && q.trim() && !exacta && !buscando ? (
                 <Command.Item
                   value={`__crear ${q}`}
                   onSelect={() => {

@@ -30,4 +30,11 @@ describe("mapa estático: estado de carga", () => {
   it("sin coordenadas dice «Sin ubicación»", () => {
     expect(html({ lat: null, lng: null, fuente: urlMapaOpai })).toContain("Sin ubicación");
   });
+
+  it("mientras se resuelve la dirección elegida (cargando) no dice «Sin ubicación»", () => {
+    const h = html({ lat: null, lng: null, fuente: urlMapaOpai, cargando: true });
+    expect(h).toContain("ds-shimmer");
+    expect(h).toContain("Cargando ubicación");
+    expect(h).not.toContain("Sin ubicación");
+  });
 });
