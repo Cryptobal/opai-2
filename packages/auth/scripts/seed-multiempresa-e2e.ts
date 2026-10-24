@@ -39,6 +39,10 @@ async function main(): Promise<void> {
   if (!gard) throw new Error("Primero corre seed:dev-tenant.");
 
   let usuario = await db.user.findUnique({ where: { email: CORREO } });
+  // Si ya existía (p. ej. elevado a owner por el flujo anterior), vuelve a ser un usuario corriente.
+  if (usuario && usuario.platformRole !== null) {
+    usuario = await db.user.update({ where: { id: usuario.id }, data: { platformRole: null } });
+  }
   if (!usuario) {
     if (!password || password.length < LARGO_MINIMO_PASSWORD) {
       throw new Error(`Falta SEED_OWNER_PASSWORD (mínimo ${LARGO_MINIMO_PASSWORD} caracteres).`);
