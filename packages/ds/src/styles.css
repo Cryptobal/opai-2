@@ -227,7 +227,7 @@
   }
 }
 
-/* Botón del calendario dentro de InputFecha: 44 px táctil en teléfono, 32 px desde md */
+/* Botón del calendario dentro de InputFecha: 44 px táctil en todos los anchos */
 @utility ds-btn-calendario {
   position: absolute;
   top: 50%;
@@ -248,11 +248,6 @@
   }
   &:disabled {
     opacity: 0.45;
-  }
-  @media (min-width: 48rem) {
-    right: 0.375rem;
-    width: 2rem;
-    height: 2rem;
   }
 }
 

@@ -1,8 +1,10 @@
 import { Calendar, Clock } from "lucide-react";
-import { type InputHTMLAttributes, useEffect, useRef, useState } from "react";
+import { type InputHTMLAttributes, lazy, Suspense, useEffect, useRef, useState } from "react";
 
 import { cn } from "../cn";
 import { aplicarMascara, isoAMascara, mascaraAIso } from "../lib/fecha";
+
+const CalendarioFecha = lazy(() => import("./calendario-fecha"));
 
 /** `min`, `max`, `name`, `required` y `form` no aplican: el valor visible es dd-mm-aaaa, no ISO. */
 type Props = Omit<
@@ -24,7 +26,7 @@ const CAMPO = cn(
 
 /**
  * Fecha en es-CL independiente del idioma del sistema: se escribe y se ve como dd-mm-aaaa y el valor
- * es ISO. El icono y el campo abren el calendario nativo (útil en móvil). `tipo="time"` usa la hora del sistema.
+ * es ISO. El icono y el campo abren el calendario del DS (es-CL, lunes primero). `tipo="time"` usa la hora del sistema.
  */
 export function InputFecha({
   valor,
@@ -66,54 +68,59 @@ export function InputFecha({
 
 function CampoFecha({ valor, onCambiar, invalido, className, ...props }: Omit<Props, "tipo">) {
   const [texto, setTexto] = useState(isoAMascara(valor));
-  const nativo = useRef<HTMLInputElement>(null);
+  const [abierto, setAbierto] = useState(false);
+  const ancla = useRef<HTMLSpanElement>(null);
   // Si el valor cambia desde fuera (reset, calendario) el texto lo sigue.
   useEffect(() => {
     setTexto((t) => (mascaraAIso(t) === valor ? t : isoAMascara(valor)));
   }, [valor]);
   const incompleto = texto.length === 10 && !mascaraAIso(texto);
-  const abrir = () => {
-    try {
-      nativo.current?.showPicker();
-    } catch {
-      /* sin permiso para abrir el calendario (iframe): se escribe a mano */
-    }
+  const escribir = (crudo: string) => {
+    const t = aplicarMascara(crudo);
+    setTexto(t);
+    onCambiar(mascaraAIso(t));
   };
+  const abrir = () => !props.disabled && setAbierto(true);
   return (
-    <span className={cn("relative block", className)}>
+    <span ref={ancla} className={cn("relative block", className)}>
       <input
         type="text"
         inputMode="numeric"
         autoComplete="off"
-        lang="es-CL"
         placeholder="dd-mm-aaaa"
         maxLength={10}
         value={texto}
-        onChange={(e) => {
-          const t = aplicarMascara(e.target.value);
-          setTexto(t);
-          onCambiar(mascaraAIso(t));
-        }}
+        onChange={(e) => escribir(e.target.value)}
         onClick={abrir}
         aria-invalid={invalido || incompleto || undefined}
         className={CAMPO}
         {...props}
       />
-      {/* El selector nativo cubre el icono: tocarlo lo abre en cualquier navegador (también iOS). */}
-      <span className="ds-btn-calendario">
+      <button
+        type="button"
+        aria-label="Abrir calendario"
+        disabled={props.disabled}
+        onClick={abrir}
+        className="ds-btn-calendario"
+      >
         <Calendar aria-hidden className="size-4" />
-        <input
-          ref={nativo}
-          type="date"
-          tabIndex={-1}
-          aria-label="Abrir calendario"
-          value={valor}
-          disabled={props.disabled}
-          onChange={(e) => onCambiar(e.target.value)}
-          onClick={abrir}
-          className="ds-selector-total absolute inset-0 size-full opacity-0"
-        />
-      </span>
+      </button>
+      {abierto ? (
+        <Suspense fallback={null}>
+          <CalendarioFecha
+            valor={valor}
+            ancla={ancla}
+            texto={texto}
+            onTexto={escribir}
+            onCerrar={() => setAbierto(false)}
+            onElegir={(iso) => {
+              setTexto(isoAMascara(iso));
+              onCambiar(iso);
+              setAbierto(false);
+            }}
+          />
+        </Suspense>
+      ) : null}
     </span>
   );
 }
