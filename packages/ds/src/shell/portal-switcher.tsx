@@ -32,7 +32,7 @@ const VARIANTES = {
     estatica: "flex min-h-11 min-w-0 items-center px-1",
   },
   riel: {
-    lado: "derecha-inicio",
+    lado: "derecha",
     clase: "relative h-16 w-16 flex-col gap-1 border border-border bg-bg px-0.5",
     estatica: "flex h-16 w-16 flex-col items-center justify-center gap-1 px-0.5",
   },
@@ -54,6 +54,7 @@ export function PortalSwitcher(props: Props) {
     })),
     ...extra,
   ];
+  const conMenu = items.length > 1;
   const visual =
     variante === "monograma" ? (
       <Monograma nombre={nombre} className="size-6" />
@@ -63,7 +64,7 @@ export function PortalSwitcher(props: Props) {
         <span className="max-w-full truncate text-[11px] leading-[14px] font-semibold text-fg">
           {actual?.etiqueta}
         </span>
-        {items.length > 1 ? (
+        {conMenu ? (
           <ChevronDown className="absolute top-1 right-1 size-3 text-fg-subtle" aria-hidden />
         ) : null}
       </>
@@ -72,13 +73,11 @@ export function PortalSwitcher(props: Props) {
         <Monograma nombre={nombre} />
         <span className="truncate text-[15px] leading-5 font-semibold text-fg">{nombre}</span>
         <span className="flex-none text-sm text-fg-muted">{actual?.etiqueta}</span>
-        {items.length > 1 ? (
-          <ChevronDown className="size-4 flex-none text-fg-subtle" aria-hidden />
-        ) : null}
+        {conMenu ? <ChevronDown className="size-4 flex-none text-fg-subtle" aria-hidden /> : null}
       </span>
     );
   const v = VARIANTES[variante];
-  if (items.length <= 1) {
+  if (!conMenu) {
     return (
       <span className={cn(v.estatica, props.className)} title={nombre}>
         {visual}

@@ -25,7 +25,7 @@ export const LADO = {
   "arriba-izquierda": { side: "top", align: "start" },
   "arriba-derecha": { side: "top", align: "end" },
   /** Junto al riel de iPad: se abre hacia la derecha, alineado con el disparador. */
-  "derecha-inicio": { side: "right", align: "start" },
+  derecha: { side: "right", align: "start" },
 } as const;
 
 export const claseOverlay =
