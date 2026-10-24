@@ -27,7 +27,7 @@ test.describe("portales en escritorio", () => {
       const riel = page.getByRole("navigation", { name: "Principal" }).filter({ visible: true });
       await expect(riel.getByText("OPAI", { exact: true })).toBeVisible();
       await expect(riel.getByText(p.subtitulo, { exact: true })).toBeVisible();
-      await expect(page).toHaveTitle(new RegExp(`^${p.titulo}`));
+      await expect(page).toHaveTitle(new RegExp(`^${p.titulo}( · OPAI)?$`));
     }
   });
 });
