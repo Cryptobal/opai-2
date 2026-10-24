@@ -11,6 +11,7 @@ import { cargarCargos, cargarLaboral } from "../../_componentes/datos";
 import { HojaExcepcion } from "../../_componentes/diferidas";
 import { HojaVinculo } from "../../_componentes/diferidas";
 import { HistorialVinculos, VinculoVigente } from "../../_componentes/laboral";
+import { consultaExtra } from "../../_componentes/lista-personas";
 import { PaginaPersona } from "../../_componentes/pagina-persona";
 import { SelectorPuesto } from "../../_componentes/selector-puesto";
 import { rotulosDe } from "../../_componentes/sueldo-comun";
@@ -25,9 +26,11 @@ export default function Laboral(props: Props) {
     <PaginaPersona
       {...props}
       tab="laboral"
-      acciones={
-        <EnlaceBotonHoja href="?excepcion=1">Definir excepción para esta persona</EnlaceBotonHoja>
-      }
+      acciones={(q) => (
+        <EnlaceBotonHoja href={`?excepcion=1${consultaExtra(q)}`}>
+          Definir excepción para esta persona
+        </EnlaceBotonHoja>
+      )}
     >
       {async (p, q) => {
         const [l, cargos] = await Promise.all([cargarLaboral(p, q["puesto"]), cargarCargos(true)]);
@@ -38,7 +41,7 @@ export default function Laboral(props: Props) {
             <div className="flex flex-col gap-4">
               <VinculoVigente p={p} />
               {p.vinculoVigente ? null : (
-                <EnlaceBotonHoja href="?vinculo=1" variante="secondary" className="self-start">
+                <EnlaceBotonHoja href={`?vinculo=1${consultaExtra(q)}`} variante="secondary" className="self-start">
                   Nuevo vínculo
                 </EnlaceBotonHoja>
               )}
