@@ -2,6 +2,8 @@
 
 El bot de Paridad compara OPAI 1.0 (`opai.gard.cl`) con 2.0 (`test.opai.cl`) **solo leyendo**, por MCP o por la API de cada sistema. Nunca escribe en ninguno de los dos. Se usa antes de cada corte de Gard (ver «Deja de usarse en 1.0» en `ROADMAP.md`) y cuando un brief porta algo de 1.0. Insumos: `docs/2.0/extraccion/<modulo>.md` y `docs/2.0/modulos/<modulo>.md`.
 
+**Informes de paridad:** van en `docs/2.0/paridad/`, uno por fase (por ejemplo `paridad/nucleo.md`), junto con la línea base de 1.0 (`paridad/linea-base-1.0.md`). Son insumo, no especificación aprobada.
+
 ## 1. Brechas: lo que Gard usa en 1.0 y debe existir en 2.0
 - [ ] Cada flujo que Gard usa hoy en el módulo tiene su equivalente en 2.0: pantalla, capacidad y herramienta MCP.
 - [ ] Cada regla de negocio de la extracción está en la especificación o en un ADR, o figura como descartada con motivo.
