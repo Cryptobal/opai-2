@@ -48,6 +48,12 @@ const nextConfig: NextConfig = {
       { source: "/cargos/nueva", destination: "/cargos?nuevo=1", permanent: false },
       // Vencimientos es una pestaña de Personas (NAVEGACION.md); la ruta corta lleva allí.
       { source: "/vencimientos", destination: "/personas/vencimientos", permanent: false },
+      // "Cargos y sueldos" ya no es pestaña de Personas: vive solo en el menú lateral (Maestros).
+      // Las rutas que alguna vez apuntaron a esas pestañas llevan a su sitio en vez de leerse como un id.
+      { source: "/personas/cargos", destination: "/cargos", permanent: false },
+      { source: "/personas/cargos-y-sueldos", destination: "/cargos", permanent: false },
+      { source: "/cargos/personas", destination: "/personas", permanent: false },
+      { source: "/cargos/vencimientos", destination: "/personas/vencimientos", permanent: false },
     ];
   },
   async headers() {

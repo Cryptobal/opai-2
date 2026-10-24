@@ -1,34 +1,31 @@
-import { CalendarClock, Plus } from "lucide-react";
+import { Plus, Users } from "lucide-react";
 
-import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+import { SplitScreen } from "@opai/ds";
+
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
-import { leerParametros, type SearchParams } from "@/lib/parametros";
 import { hoyIso } from "@/lib/fechas";
+import { leerParametros, type SearchParams } from "@/lib/parametros";
 
 import { cargarPersonas } from "./_componentes/datos";
 import { HojaPersona } from "./_componentes/diferidas";
 import { ListaPersonas } from "./_componentes/lista-personas";
-import { SegmentoPersonas, SegmentoPersonasMovil } from "./_componentes/segmento";
+import { SegmentoPersonas } from "./_componentes/segmento";
 
 export const metadata = { title: "Personas" };
 
-/** Personas (10, 53, 54): tabla con búsqueda instantánea y filtros; lista por letra en teléfono. */
+/** Personas (10, 53): vista dividida con lista a la izquierda y "Elige una persona"; lista en teléfono. */
 export default function Personas({ searchParams }: { searchParams: SearchParams }) {
   return (
     <PaginaPortal
       portal="erp"
       titulo="Personas"
       ruta="/personas"
-      accionesTelefono={
-        <EnlaceBoton
-          href="/personas/vencimientos"
-          variante="ghost"
-          icono={CalendarClock}
-          etiqueta="Vencimientos"
-        >
-          {null}
-        </EnlaceBoton>
+      completo
+      acciones={
+        <EnlaceBotonHoja href="?nueva=1" icono={Plus}>
+          Agregar persona
+        </EnlaceBotonHoja>
       }
       cargar={async () => {
         const p = await leerParametros(searchParams);
@@ -37,26 +34,25 @@ export default function Personas({ searchParams }: { searchParams: SearchParams 
       opciones={() => ({
         titulo: "Personas",
         insignia: <SegmentoPersonas activa="personas" plural="Personas" />,
-        acciones: (
-          <>
-            <EnlaceBotonHoja href="?nueva=1" icono={Plus}>
-              Agregar persona
-            </EnlaceBotonHoja>
-          </>
-        ),
       })}
     >
       {(d) => (
         <>
-          <SegmentoPersonasMovil activa="personas" />
-          <ListaPersonas
-            state={d.state}
-            items={d.items}
-            cargos={d.cargos}
-            siguiente={d.siguiente}
-            total={d.total}
-            p={d.p}
-            titulo="Personas"
+          <SplitScreen
+            telefono="lista"
+            etiquetaLista="Lista de personas"
+            vacio={{ texto: "Elige una persona", icono: Users }}
+            lista={
+              <ListaPersonas
+                state={d.state}
+                items={d.items}
+                cargos={d.cargos}
+                siguiente={d.siguiente}
+                total={d.total}
+                p={d.p}
+                titulo="Personas"
+              />
+            }
           />
           <HojaPersona cargos={d.cargos} hoy={hoyIso()} />
         </>

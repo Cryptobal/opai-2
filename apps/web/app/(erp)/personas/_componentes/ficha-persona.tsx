@@ -89,11 +89,14 @@ export function FichaPersona(x: {
   state: EstadoPantalla;
   persona: PersonaDetalle | null;
   tab: TabPersona;
+  /** Búsqueda, filtros y página de la lista (`?q=…`), para que las pestañas no la reinicien. */
+  consulta?: string;
   children: ReactNode;
 }) {
   const p = x.persona;
   const e = p ? estadoDe(ESTADO_PERSONA, p.bloqueada ? "bloqueada" : p.estado) : null;
   const base = `/personas/${p?.id ?? ""}`;
+  const q = x.consulta ?? "";
   return (
     <>
       {p ? <BandaAprobacion entidad={{ tipo: "persona", id: p.id }} /> : null}
@@ -125,15 +128,15 @@ export function FichaPersona(x: {
         tabActiva={x.tab}
         Link={LinkNext}
         tabs={[
-          { id: "resumen", etiqueta: "Resumen", href: base },
-          { id: "laboral", etiqueta: "Laboral", href: `${base}/laboral` },
+          { id: "resumen", etiqueta: "Resumen", href: `${base}${q}` },
+          { id: "laboral", etiqueta: "Laboral", href: `${base}/laboral${q}` },
           {
             id: "documentos",
             etiqueta: "Documentos",
             contador: p?.documentos ?? 0,
-            href: `${base}/documentos`,
+            href: `${base}/documentos${q}`,
           },
-          { id: "actividad", etiqueta: "Actividad", href: `${base}/actividad` },
+          { id: "actividad", etiqueta: "Actividad", href: `${base}/actividad${q}` },
         ]}
       >
         {x.children}
