@@ -1,5 +1,5 @@
 import { PaginaTenant } from "../pagina-tenant";
-import { Administradores } from "../tenant-tabs";
+import { Administradores } from "../administradores-tab";
 
 export const metadata = { title: "Usuarios de la empresa" };
 
