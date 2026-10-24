@@ -1,4 +1,4 @@
-import { Badge, Empty, Table, Td, Th, Tr } from "@opai/ds";
+import { Badge, Empty, Enlace, Table, Td, Th, Tr } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
 
@@ -30,9 +30,9 @@ export function TablaTipos({ tipos, puede }: { tipos: TipoDoc[]; puede: boolean 
             </Td>
             <Td className="font-medium">
               {puede ? (
-                <LinkNext href={`?editar=${t.id}`} className="underline-offset-2 hover:underline">
+                <Enlace Link={LinkNext} variante="fila" href={`?editar=${t.id}`}>
                   {t.nombre}
-                </LinkNext>
+                </Enlace>
               ) : (
                 t.nombre
               )}

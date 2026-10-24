@@ -1,6 +1,6 @@
 import { Plus } from "lucide-react";
 
-import { Estado } from "@opai/ds";
+import { Enlace, Estado } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
@@ -21,12 +21,9 @@ export default function Agentes() {
       cargar={cargarKeys}
       cabecera={() => ({
         subtitulo: (
-          <LinkNext
-            href="/configuracion/agentes/conectar"
-            className="text-accent underline underline-offset-2"
-          >
+          <Enlace Link={LinkNext} href="/configuracion/agentes/conectar" className="underline">
             Conectar tu IA
-          </LinkNext>
+          </Enlace>
         ),
         acciones: (
           <EnlaceBoton href="?crear=1" icono={Plus}>

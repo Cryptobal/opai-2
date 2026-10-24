@@ -20,7 +20,7 @@ type Props = {
   className?: string;
 };
 
-/** Control segmentado (Todo · Personas · Agentes): enlaces por ruta o botones; 36 px en un riel de 44. */
+/** Control segmentado (Todo · Personas · Agentes): enlaces por ruta o botones; caja tocable de 44 px con la píldora visible de 32 o 36. */
 export function Segmentado({
   opciones,
   activa,
@@ -36,28 +36,30 @@ export function Segmentado({
       aria-label={etiqueta}
       className={cn(
         "inline-flex items-center gap-0.5",
-        plano ? "h-11 gap-1" : "h-10 rounded-md bg-fill p-1",
+        plano ? "h-11 gap-1" : "h-11 rounded-md bg-fill px-1",
         className,
       )}
     >
       {opciones.map((o) => {
         const on = o.id === activa;
-        const clase = cn(
-          "inline-flex h-8 items-center rounded-sm px-3 text-base font-medium whitespace-nowrap outline-none transition-colors focus-visible:outline-2 focus-visible:outline-focus",
+        // La caja tocable mide 44 px; el relleno visible (la «píldora») queda en 32 o 36 px.
+        const caja = "group inline-flex h-11 items-center outline-none";
+        const pildora = cn(
+          "inline-flex h-8 items-center rounded-sm px-3 text-base font-medium whitespace-nowrap transition-colors group-focus-visible:outline-2 group-focus-visible:outline-focus",
           plano && "h-9 rounded-md px-4",
           plano && on
             ? "bg-fill text-fg"
             : on
               ? "bg-surface text-fg shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
-              : "text-fg-muted hover:text-fg",
+              : "text-fg-muted group-hover:text-fg",
         );
         return o.href ? (
-          <Link key={o.id} href={o.href} className={clase} aria-current={on ? "page" : undefined}>
-            {o.etiqueta}
+          <Link key={o.id} href={o.href} className={caja} aria-current={on ? "page" : undefined}>
+            <span className={pildora}>{o.etiqueta}</span>
           </Link>
         ) : (
-          <button key={o.id} type="button" onClick={o.onClick} aria-pressed={on} className={clase}>
-            {o.etiqueta}
+          <button key={o.id} type="button" onClick={o.onClick} aria-pressed={on} className={caja}>
+            <span className={pildora}>{o.etiqueta}</span>
           </button>
         );
       })}

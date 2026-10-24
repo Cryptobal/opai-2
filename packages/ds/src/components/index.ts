@@ -12,6 +12,7 @@ export { type OpcionCombobox, Resaltado } from "./resaltado";
 export { CommandPalette, type GrupoPaleta, type ItemPaleta } from "./command-palette";
 export { Dialog, Sheet } from "./dialog";
 export { Cerrar } from "./dialog-partes";
+export { claseEnlace, Enlace } from "./enlace";
 export { claseFila, FilaSeleccionable, MonoAv } from "./fila-seleccionable";
 export { Campo, Input, Textarea } from "./input";
 export { InputBusqueda } from "./input-busqueda";
