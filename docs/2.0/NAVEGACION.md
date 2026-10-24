@@ -95,9 +95,10 @@ El bloqueo financiero (ADR-016) oculta el área completa. Los roles personalizad
 
 ## 8. Estado de hoy (`main`, `fe362cc`)
 
-- **Barra lateral (escritorio):** Inicio · grupo «Maestros» (Cuentas, Instalaciones, **Guardias**, Cargos y sueldos solo en pantallas amplias) · grupo «Módulos» (vacío; los módulos activos se agregan planos) · «Diseño» solo en desarrollo · Configuración al pie, con el contador de aprobaciones.
-- **Barra inferior (celular):** Inicio · Cuentas · **Instalac.** · Guardias · **Ajustes**; «Aprobaciones» aparece solo en celular cuando hay pendientes.
-- **Personas (pestañas, 24-oct):** Personas | Cargos y sueldos | Vencimientos (`SegmentoPersonas` en la barra superior de escritorio y `SegmentoPersonasMovil`, control segmentado con scroll, arriba del contenido en celular; el botón de icono de Vencimientos en Personas se mantiene).
+- **Barra lateral (escritorio):** Inicio · grupo «Maestros» (Cuentas, Instalaciones, **Personas**, Cargos y sueldos solo en pantallas amplias) · grupo «Módulos» (vacío; los módulos activos se agregan planos) · «Diseño» solo en desarrollo · Configuración al pie, con el contador de aprobaciones.
+- **Barra inferior (celular):** Inicio · Cuentas · **Instalac.** · Personas · **Ajustes**; «Aprobaciones» aparece solo en celular cuando hay pendientes.
+- **Personas (pestañas, 24-oct):** Personas | Cargos y sueldos | Vencimientos (`SegmentoPersonas` en la barra superior de escritorio y `SegmentoPersonasMovil`, control segmentado con scroll, arriba del contenido en celular; el botón de icono de Vencimientos en Personas se mantiene). El nombre de la entrada y del título es siempre «Personas» (ADR-046); el vocabulario de la vertical solo aparece en textos operativos.
+- **404 (24-oct):** cada portal tiene un catch-all `[...ruta]` con su propio «No encontrado» dentro de su shell y estado HTTP 404; las fichas `[id]` y los slugs de configuración consultan `/api/existe` desde el proxy antes de enviar el HTML.
 - **Portales:** Supervisor con Hoy e Instalaciones; Trabajador, Terreno y Cliente con solo Inicio (placeholders); Plataforma con Empresas, Trabajos, Consumos y Ajustes.
 - **⌘K:** existe en el ERP (búsqueda de entidades); sin acciones ni recientes. Sin fijados.
 - **Implementación:** `apps/web/lib/navegacion.ts` (`navegacionErp`, `NAV_PLATAFORMA`, `navegacionPortal`); el shell se monta dentro de cada página (`PaginaPortal`), no en el layout.
