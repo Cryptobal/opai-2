@@ -1,6 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { obtenerCapacidad, type Resultado } from "@opai/capabilities";
@@ -22,7 +23,12 @@ export async function ejecutarCapacidad(
   if (!capacidad || capacidad.interna) {
     return { ok: false, error: { code: "NOT_FOUND", message: `Capacidad "${id}" no existe.` } };
   }
-  return ejecutarComoUsuario(portal, id, input, dryRun);
+  const r = await ejecutarComoUsuario(portal, id, input, dryRun);
+  // Una escritura real vacía la caché del navegador (staleTimes de 5 min, ADR-045): en la
+  // pestaña que escribe, lo visitado después no muestra datos anteriores. Otras pestañas y las
+  // escrituras por API/MCP se ven al vencer el tiempo o al refresco silencioso.
+  if (r.ok && !dryRun && capacidad.efecto !== "lectura") revalidatePath("/", "layout");
+  return r;
 }
 
 /** Cambia la empresa actual (solo entre membresías utilizables) y va al destino (interno). */

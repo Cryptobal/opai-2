@@ -3,6 +3,9 @@ import { Suspense } from "react";
 import { googleHabilitado } from "@opai/auth";
 import { Loading } from "@opai/ds";
 
+import { epocaDeIdentidad } from "@/lib/epoca-sesion";
+import { identidadActual } from "@/lib/servidor";
+
 import { destinoSeguro } from "../destino";
 import { FormularioLogin } from "./formulario-login";
 
@@ -12,7 +15,10 @@ type Props = { searchParams: Promise<Record<string, string | string[] | undefine
 
 async function Contenido({ searchParams }: Props) {
   const { next } = await searchParams;
-  return <FormularioLogin destino={destinoSeguro(next)} google={googleHabilitado()} />;
+  const epoca = epocaDeIdentidad(await identidadActual());
+  return (
+    <FormularioLogin destino={destinoSeguro(next)} google={googleHabilitado()} epoca={epoca} />
+  );
 }
 
 export default function Login(props: Props) {
