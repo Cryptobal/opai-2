@@ -1,6 +1,6 @@
 # Checklist de QA — «Diseño y QA OPAI 2.0»
 
-Se corre en `test.opai.cl`, o en la preview del PR, después de cada PR con pantallas. Referencias: el diseño aprobado en `docs/2.0/design/`, `docs/2.0/DISENO.md` y `docs/2.0/NAVEGACION.md`. Los hallazgos se registran como tareas en Linear, en el estado Triage, con capturas (viewport y tema) y sin copiar datos personales (ver `AGENTS.md`, «Tareas (Linear)»). Este bot no escribe código.
+Se corre en `test.opai.cl`, o en la preview del PR, después de cada PR con pantallas. Referencias: el diseño aprobado en `docs/2.0/design/`, `docs/2.0/DISENO.md` y `docs/2.0/NAVEGACION.md`. Los hallazgos se registran como tareas en Linear, en el estado Triage, con capturas (viewport y tema) y sin copiar datos personales (ver `AGENTS.md`, «Tareas (Linear)»). Además, cada BLOQUEANTE se marca en el PR integrado donde se encontró, con la etiqueta `qa-bloqueante` y un comentario que empieza con «QA: BLOQUEANTE» que enlaza la tarea de Linear. Este bot no escribe código.
 
 ## 1. Viewports y temas
 - [ ] **375 px (celular):** no hay scroll horizontal de página. La barra inferior no tapa contenido ni acciones y la safe-area de iOS se respeta.
@@ -32,4 +32,4 @@ Se corre en `test.opai.cl`, o en la preview del PR, después de cada PR con pant
 - [ ] El texto se puede leer al 200 % de zoom sin cortes.
 
 ## Reporte
-Por cada hallazgo: pantalla, viewport, tema, pasos, resultado esperado y obtenido, captura y gravedad (alta: bloquea un flujo; media: se ve mal o confunde; baja: pulido).
+Por cada hallazgo: pantalla, viewport, tema, pasos, resultado esperado y obtenido, captura y gravedad (alta: bloquea un flujo; media: se ve mal o confunde; baja: pulido). Un hallazgo que debe corregirse antes de seguir integrando es **BLOQUEANTE**: etiqueta `qa-bloqueante` y comentario «QA: BLOQUEANTE» en el PR integrado (lo que consulta el bot «OPAI 2.0» antes de cada merge). Mientras la etiqueta esté puesta, no se integran PRs que toquen pantallas. Se quita cuando la corrección está integrada y verificada (ADR-043 v3).
