@@ -159,7 +159,7 @@ No se portan de 1.0 y solo se reconstruyen con demanda real (lista canónica de 
 
 ## 5. Próximas 10 tareas, en orden
 
-1. **Revisor:** revisar y aprobar este PR de documentación; integra Carlos (ROADMAP, NAVEGACION, ADR-043 a 047, plantilla de especificación, flujo de trabajo).
+1. **Revisor:** revisar y aprobar; integra Carlos. Es el PR de documentación (ROADMAP, NAVEGACION, ADR-043 a 047, plantilla de especificación, flujo de trabajo).
 2. **Carlos (Mac):** correr los seeds en Neon `dev` (`seed:dev-tenant` y `seed:maestros-demo`) y `main` (`seed:dev-tenant`), y cargar los secretos de GitHub para los previews por PR.
 3. **Carlos con Claude:** verificación guiada del Brief 02 (bloque 14) en `test.opai.cl`; cerrar paridad MCP y arreglos de QA (otros chats) e integrarlos.
 4. **Claude: Brief 03 · Rendimiento de navegación** (prioridad 1): medir línea base con el protocolo de ADR-045, aplicar los arreglos, medir después y dejar el gate en CI.
