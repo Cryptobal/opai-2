@@ -22,6 +22,12 @@ export function MuestraPestanas() {
       <div data-testid="pestanas-ruta" className="w-0 max-w-md min-w-full">
         <Tabs activa="resumen" tabs={tabs.map((t) => ({ ...t, href: `#${t.id}` }))} />
       </div>
+      <div data-testid="pestanas-activa-lejos" className="w-0 max-w-md min-w-full">
+        <Tabs activa="facturas" tabs={tabs.map((t) => ({ ...t, href: `#${t.id}` }))} />
+      </div>
+      <div data-testid="pestanas-estado-lejos" className="w-0 max-w-md min-w-full">
+        <Tabs inicial="facturas" tabs={tabs} />
+      </div>
       <div data-testid="pestanas-estado" className="w-0 max-w-md min-w-full">
         <Tabs inicial="resumen" tabs={tabs} />
       </div>
