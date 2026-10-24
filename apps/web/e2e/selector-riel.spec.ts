@@ -1,12 +1,14 @@
 import { expect, type Page, test } from "@playwright/test";
 
 // Selector de portal y de empresa en el riel de iPad (768–1279 px), QA del PR #27. Usa un usuario de
-// prueba con dos empresas (Gard Security y Atlas Seguridad SpA) y los portales ERP, Supervisor y
-// Plataforma. Datos (local o rama dev):
-//   SEED_OWNER_EMAIL=e2e-selector@opai.cl pnpm --filter @opai/auth seed:platform-owner
-//   pnpm --filter @opai/db seed:multiempresa-dev
+// prueba CORRIENTE (sin rol de plataforma, rol «admin») con dos empresas (Gard Security y Atlas
+// Seguridad SpA) y los portales ERP y Supervisor. Datos, solo en una base local (tras seed:dev-tenant
+// y seed:maestros-demo; el job de e2e del CI lo hace):
+//   SEED_OWNER_PASSWORD=<…> pnpm --filter @opai/auth seed:multiempresa-e2e
 const email = process.env["E2E_SELECTOR_EMAIL"] ?? "e2e-selector@opai.cl";
 const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
+const CUENTA_GARD = "Logística Andina SpA"; // sembrada solo en Gard (seed:maestros-demo)
+const CUENTA_ATLAS = "Cliente Atlas E2E"; // sembrada solo en Atlas (seed:multiempresa-e2e)
 const SELECTOR = /Cambiar de portal o empresa/;
 
 // El servidor de desarrollo compila cada ruta en su primera visita.
@@ -27,7 +29,12 @@ const principal = (page: Page) => page.getByRole("navigation", { name: "Principa
 const titulo = (page: Page) => page.getByRole("heading", { level: 1 }).filter({ visible: true });
 
 test.describe("selector de portal y empresa", () => {
-  test.skip(!password, "Falta SEED_OWNER_PASSWORD o E2E_PASSWORD");
+  // En CI la falta de contraseña es un error (no un skip silencioso); en local se omite la suite.
+  test.beforeEach(() => {
+    if (password) return;
+    if (process.env["CI"]) throw new Error("Falta SEED_OWNER_PASSWORD o E2E_PASSWORD en CI.");
+    test.skip(true, "Falta SEED_OWNER_PASSWORD o E2E_PASSWORD");
+  });
 
   test("iPad: desde el riel se cambia de portal y de empresa", async ({ page }, info) => {
     test.skip(info.project.name !== "ipad", "El riel es solo de iPad.");
@@ -49,15 +56,11 @@ test.describe("selector de portal y empresa", () => {
     await selector.click();
     const menu = page.getByRole("menu");
     await expect(menu).toBeVisible();
-    for (const nombre of [
-      /^ERP/,
-      /^Supervisor/,
-      /^Plataforma/,
-      /^Gard Security/,
-      /^Atlas Seguridad/,
-    ]) {
+    for (const nombre of [/^ERP/, /^Supervisor/, /^Gard Security/, /^Atlas Seguridad/]) {
       await expect(menu.getByRole("menuitem", { name: nombre })).toBeVisible();
     }
+    // Usuario corriente: sin portal de Plataforma.
+    await expect(menu.getByRole("menuitem", { name: /^Plataforma/ })).toHaveCount(0);
     // La captura se toma con la animación de entrada ya terminada.
     await expect(menu).toHaveCSS("opacity", "1");
     await page.screenshot({
@@ -79,15 +82,29 @@ test.describe("selector de portal y empresa", () => {
     await page.waitForURL((url) => url.pathname === "/");
     await expect(titulo(page)).toHaveText("Inicio");
 
-    // Empresa: el selector, el monograma y los datos pasan a Atlas.
+    // Datos de Gard antes de cambiar: la cuenta de Gard está y se anota su dirección.
+    await page.goto("/cuentas");
+    const enlaceGard = page.getByRole("link", { name: new RegExp(CUENTA_GARD) }).first();
+    await expect(enlaceGard).toBeVisible();
+    const rutaGard = await enlaceGard.getAttribute("href");
+    expect(rutaGard).toMatch(/^\/cuentas\/[0-9a-f-]{36}/);
+    await expect(page.getByText(CUENTA_ATLAS)).toHaveCount(0);
+
+    // Empresa: el selector y el monograma pasan a Atlas.
     await riel.getByRole("button", { name: SELECTOR }).click();
     await page.getByRole("menuitem", { name: /^Atlas Seguridad/ }).click();
     const nuevo = riel.getByRole("button", { name: SELECTOR });
     await expect(nuevo).toHaveAccessibleName(/^Atlas Seguridad SpA · portal ERP\./);
     await expect(nuevo.getByText("AS", { exact: true })).toBeVisible();
-    await expect(
-      page.getByText("Atlas Seguridad SpA").filter({ visible: true }).first(),
-    ).toBeVisible();
+
+    // Aislamiento: la lista ya es la de Atlas (aparece su cuenta, desaparece la de Gard) y la
+    // ficha de Gard, por su dirección directa, ya no se abre.
+    await page.goto("/cuentas");
+    await expect(page.getByRole("link", { name: new RegExp(CUENTA_ATLAS) }).first()).toBeVisible();
+    await expect(page.getByText(CUENTA_GARD)).toHaveCount(0);
+    await page.goto(rutaGard ?? "/cuentas/sin-ruta");
+    await expect(page.getByText("No encontramos lo que buscas")).toBeVisible();
+    await expect(page.getByText(CUENTA_GARD)).toHaveCount(0);
   });
 
   test("iPad: el selector está en el riel entre 768 y 1279 px y en su lugar fuera de ese rango", async ({
