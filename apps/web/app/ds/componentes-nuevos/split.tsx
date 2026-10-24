@@ -25,7 +25,7 @@ export function MuestraSplit({ state }: { state: EstadoPantalla }) {
       lista={
         <>
           <HerramientasLista>
-            <Input placeholder="Buscar por nombre o RUT" aria-label="Buscar" />
+            <Input id="buscar-split" placeholder="Buscar por nombre o RUT" aria-label="Buscar" />
           </HerramientasLista>
           <MetaLista izquierda="3 cuentas · 2 clientes activos" derecha="Nombre A–Z" />
           <div className="p-3 md:p-0">
