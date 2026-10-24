@@ -83,3 +83,85 @@ jobs:
           tar xzf gitleaks.tgz gitleaks
       - name: Escanear la historia del repositorio
         run: ./gitleaks git --config .gitleaks.toml --redact --no-banner --exit-code 1 .
+
+  e2e:
+    name: e2e (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: opai_e2e
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      # Base efímera del propio job (servicio de Postgres): no hay secretos del repositorio ni de Neon.
+      # La URL del rol propietario (DATABASE_URL_MIGRATE) solo existe en el paso de migrar y sembrar:
+      # la app y los e2e corren únicamente con `opai_app`, como en producción.
+      BETTER_AUTH_URL: http://localhost:3000
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      # Credenciales inventadas para esta ejecución; viven solo en el job y se enmascaran en el log.
+      - name: Generar credenciales efímeras
+        run: |
+          for var in OPAI_APP_DB_PASSWORD BETTER_AUTH_SECRET CRON_SECRET; do
+            valor=$(openssl rand -hex 24)
+            echo "::add-mask::$valor"
+            echo "$var=$valor" >> "$GITHUB_ENV"
+          done
+          clave="$(openssl rand -hex 12)Aa1"
+          echo "::add-mask::$clave"
+          echo "SEED_OWNER_PASSWORD=$clave" >> "$GITHUB_ENV"
+      - name: Migrar y sembrar la base
+        env:
+          DATABASE_URL_MIGRATE: postgresql://postgres:postgres@localhost:5432/opai_e2e
+        run: |
+          pnpm db:deploy
+          pnpm --filter @opai/db role:password
+          echo "DATABASE_URL=postgresql://opai_app:${OPAI_APP_DB_PASSWORD}@localhost:5432/opai_e2e" >> "$GITHUB_ENV"
+          pnpm --filter @opai/db seed:dev-tenant
+          pnpm --filter @opai/auth seed:platform-owner
+          pnpm --filter @opai/db seed:e2e
+          pnpm --filter @opai/db seed:maestros-demo
+          # Usuario con dos empresas para selector-riel.spec.ts (selector de portal y empresa en iPad).
+          SEED_OWNER_EMAIL=e2e-selector@opai.cl pnpm --filter @opai/auth seed:platform-owner
+          pnpm --filter @opai/db seed:multiempresa-dev
+      - name: Instalar Chromium de Playwright
+        run: pnpm --filter @opai/web exec playwright install --with-deps chromium
+      # Las páginas /ds solo existen fuera de producción: se levanta `pnpm dev`. La primera visita de
+      # cada ruta la compila, así que se calientan antes de que corran los e2e (sin tocar las pruebas).
+      - name: Levantar la app y calentar las rutas
+        run: |
+          nohup pnpm --filter @opai/web dev > "$RUNNER_TEMP/app.log" 2>&1 &
+          for i in $(seq 1 60); do curl -sf -m 10 http://localhost:3000/api/health > /dev/null && break; sleep 2; done
+          curl -sf -m 10 http://localhost:3000/api/health
+          for ruta in /login /ds /ds/qa /ds/acceso / /platform /cuentas /instalaciones /personas /configuracion/usuarios; do
+            curl -s -o /dev/null -m 120 "http://localhost:3000$ruta" || true
+          done
+      - name: Correr los e2e
+        run: pnpm --filter @opai/web e2e --reporter=list
+        env:
+          BASE_URL: http://localhost:3000
+      - name: Guardar resultados si fallan
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-resultados
+          path: |
+            apps/web/test-results
+            ${{ runner.temp }}/app.log
+          retention-days: 7

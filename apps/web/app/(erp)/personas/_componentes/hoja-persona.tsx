@@ -50,7 +50,7 @@ const camposDe = (d: DatosPersona) => ({
   lng: d.direccion?.lng ?? null,
 });
 
-/** Nueva persona (con su vínculo) o editar sus datos: Sheet en md+, pantalla completa en teléfono. */
+/** Agregar persona (con su vínculo) o editar sus datos: Sheet en md+, pantalla completa en teléfono. */
 export function HojaPersona({ persona, cargos, hoy }: Props) {
   const hoja = useHojaUrl(persona ? "editar" : "nueva");
   const router = useRouter();

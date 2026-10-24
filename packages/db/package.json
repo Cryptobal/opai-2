@@ -17,6 +17,7 @@
     "lint": "eslint .",
     "test": "vitest run",
     "seed:maestros-demo": "tsx scripts/seed-maestros-demo.ts",
+    "seed:e2e": "tsx scripts/seed-e2e.ts",
     "seed:multiempresa-dev": "tsx scripts/seed-multiempresa-dev.ts"
   },
   "dependencies": {
