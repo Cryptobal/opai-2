@@ -72,6 +72,7 @@ Un PR está terminado cuando:
 - Ningún otro bot hace merge. Sin force-push ni rebase; `main` se trae a la rama con merge.
 - **Veto:** Carlos veta con un comentario «VETO» en el PR o con la etiqueta `veto`. Antes de integrar, el bot revisa que no haya ninguno de los dos; si no puede verificarlo, no integra. Después de cada merge, el bot le avisa a Carlos.
 - Un PR con migración de Neon pendiente espera a que Carlos la aplique.
+- **Sin excepciones; decisión de Carlos del 24-oct-2026.** Todo PR se integra con las mismas tres condiciones, también los que cambian esta regla (incluido el PR #28), suben topes de JS o tocan seguridad, autenticación, RLS, migraciones, CI, workflows, el ruleset, la infraestructura o el despliegue. No hace falta que Carlos integre ni un OK adicional suyo; solo se mantienen su veto y la espera por una migración de Neon pendiente.
 - **BLOQUEANTE:** Diseño y QA revisa en `test.opai.cl` después del merge; un BLOQUEANTE se registra con la etiqueta `qa-bloqueante` y un comentario «QA: BLOQUEANTE» en el PR integrado donde se encontró, y frena los merges de PRs que tocan pantallas hasta que la corrección esté integrada y verificada y se quite la etiqueta.
 - El e2e de Playwright no es check obligatorio por ahora.
 
