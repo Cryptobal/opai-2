@@ -9,7 +9,7 @@ import { vocabularioActual } from "@/lib/vocabulario";
 import { cargarPersonas } from "./_componentes/datos";
 import { HojaPersona } from "./_componentes/diferidas";
 import { ListaPersonas } from "./_componentes/lista-personas";
-import { SegmentoPersonas } from "./_componentes/segmento";
+import { SegmentoPersonas, SegmentoPersonasMovil } from "./_componentes/segmento";
 
 export const metadata = { title: "Personas" };
 
@@ -35,7 +35,7 @@ export default function Personas({ searchParams }: { searchParams: SearchParams 
         return { ...(await cargarPersonas(p)), p, voc };
       }}
       opciones={(d) => ({
-        titulo: d.voc.titulo("persona"),
+        titulo: "Personas",
         insignia: <SegmentoPersonas activa="personas" plural="Personas" />,
         acciones: (
           <>
@@ -48,6 +48,7 @@ export default function Personas({ searchParams }: { searchParams: SearchParams 
     >
       {(d) => (
         <>
+          <SegmentoPersonasMovil activa="personas" />
           <ListaPersonas
             state={d.state}
             items={d.items}
@@ -55,7 +56,7 @@ export default function Personas({ searchParams }: { searchParams: SearchParams 
             siguiente={d.siguiente}
             total={d.total}
             p={d.p}
-            titulo={d.voc.titulo("persona")}
+            titulo="Personas"
           />
           <HojaPersona cargos={d.cargos} hoy={hoyIso()} termino={d.voc.persona.singular} />
         </>

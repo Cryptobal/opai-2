@@ -62,7 +62,7 @@ export function navegacionErp(
   if (puede(PERMISOS_CORE.personasRead))
     items.push({
       href: "/personas",
-      etiqueta: mayuscula(voc.persona.plural),
+      etiqueta: "Personas",
       icono: "Users",
       grupo,
       ...conContador(n.personas),

@@ -7,7 +7,7 @@ import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { leerParametros, type SearchParams } from "@/lib/parametros";
 import { vocabularioActual } from "@/lib/vocabulario";
 
-import { SegmentoPersonas } from "../personas/_componentes/segmento";
+import { SegmentoPersonas, SegmentoPersonasMovil } from "../personas/_componentes/segmento";
 import { cargarCargosLista } from "./_componentes/datos";
 import { HojaCargo } from "./_componentes/diferidas";
 import { ListaCargos } from "./_componentes/lista-cargos";
@@ -37,6 +37,7 @@ export default function Cargos({ searchParams }: { searchParams: SearchParams })
     >
       {(d) => (
         <div className="flex flex-col gap-4">
+          <SegmentoPersonasMovil activa="cargos" />
           <ListaCargos state={d.state} items={d.items} />
           {d.items.some((c) => c.sueldoSensible) ? (
             <Alerta
