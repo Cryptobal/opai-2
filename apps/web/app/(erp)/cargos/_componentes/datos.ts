@@ -1,5 +1,5 @@
 import { estadoPantalla } from "@/lib/formato";
-import { requerirUuid } from "@/lib/ids";
+import { requerirEncontrado, requerirUuid } from "@/lib/ids";
 import type { Parametros } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 import type { Cargo } from "@/lib/tipos-maestros";
@@ -38,6 +38,7 @@ export async function cargarCargo(id: string) {
       refId: id,
     }),
   ]);
+  requerirEncontrado(c);
   return { state: estadoPantalla(c), cargo: c.ok ? c.data : null, versiones: v.ok ? v.data : [] };
 }
 

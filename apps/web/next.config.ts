@@ -39,6 +39,8 @@ const nextConfig: NextConfig = {
       { source: "/cuentas/nueva", destination: "/cuentas?nueva=1", permanent: false },
       { source: "/cargos/nuevo", destination: "/cargos?nuevo=1", permanent: false },
       { source: "/cargos/nueva", destination: "/cargos?nuevo=1", permanent: false },
+      // Vencimientos es una pestaña de Personas (NAVEGACION.md); la ruta corta lleva allí.
+      { source: "/vencimientos", destination: "/personas/vencimientos", permanent: false },
     ];
   },
   async headers() {

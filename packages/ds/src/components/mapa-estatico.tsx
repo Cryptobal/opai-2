@@ -3,6 +3,7 @@ import { MapPin } from "lucide-react";
 import { cn } from "../cn";
 import { diametroGeocercaPct, zoomParaGeocerca } from "../lib/mapa";
 import { MapaImagen } from "./mapa-imagen";
+import { Skeleton } from "./skeleton";
 
 type Fuente = (punto: { lat: number; lng: number; zoom: number }) => string;
 
@@ -19,6 +20,8 @@ type Props = {
   fuente?: Fuente;
   /** Texto de la esquina (comuna o "Geocerca 300 m"). */
   pie?: string;
+  /** Se está resolviendo la ubicación (p. ej. el detalle de la dirección elegida): esqueleto. */
+  cargando?: boolean;
   className?: string;
 };
 
@@ -26,8 +29,15 @@ type Props = {
  * Mapa embebido: 16:9, borde 1 px, radio 10; imagen real (con esqueleto mientras carga), marcador
  * y círculo de geocerca. Sin `fuente` es la retícula del DS y no lleva JS.
  */
-export function MapaEstatico({ lat, lng, geocercaM, fuente, pie, className }: Props) {
+export function MapaEstatico({ lat, lng, geocercaM, fuente, pie, cargando, className }: Props) {
   const base = "relative aspect-video overflow-hidden rounded-md border border-border";
+  if (cargando) {
+    return (
+      <div role="img" aria-label="Cargando ubicación" aria-busy className={cn(base, className)}>
+        <Skeleton className="absolute inset-0 rounded-none" />
+      </div>
+    );
+  }
   if (lat == null || lng == null) {
     return (
       <div
