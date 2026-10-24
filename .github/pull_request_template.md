@@ -1,4 +1,4 @@
-<!-- Contrato: AGENTS.md. Un PR por encargo, desde `main` actualizado. Integra solo el bot «OPAI 2.0», con squash, cuando el Revisor escribió APROBAR sin condiciones citando el SHA del head actual, los checks obligatorios están en verde sobre ese SHA, la rama no está «behind» y, si toca pantallas, no hay nada con la etiqueta `qa-bloqueante` (ADR-043 v3). Cualquier push, incluido traer `main`, invalida la aprobación y exige re-revisión. Carlos puede vetar con «VETO» o la etiqueta `veto`. Sin force-push ni rebase. -->
+<!-- Contrato: AGENTS.md. Un PR por encargo, desde `main` actualizado. Integra solo el bot «OPAI 2.0», con squash, cuando el Revisor escribió APROBAR sin condiciones citando el SHA del head actual, los checks obligatorios están en verde sobre ese SHA, la rama no está «behind» y, si toca pantallas, no hay nada con la etiqueta `qa-bloqueante` (ADR-043 v3). Cualquier push, incluido traer `main`, invalida la aprobación y exige re-revisión. Sin `migracion-pendiente` ni veto vigente: el veto («VETO» o etiqueta `veto`) y el retiro de esas etiquetas solo cuentan si los hace Carlos en persona (cuenta `Cryptobal` sin app de por medio). Sin force-push ni rebase. -->
 
 **Tarea:** Fixes OPAI-\_\_\_
 
@@ -35,5 +35,5 @@
 - [ ] Autorrevisión con subagente hecha con `docs/2.0/checklists/revision.md`.
 - [ ] Con pantallas: probadas a 375, 1024 y 1280 px, en claro y oscuro, con `docs/2.0/checklists/qa.md`.
 - [ ] Si porta algo de 1.0: revisado con `docs/2.0/checklists/paridad.md`. OPAI 1.0 no se tocó.
-- [ ] PR vinculado a su tarea de Linear (campo «Tarea» arriba); `docs/2.0/ESTADO.md` y `docs/2.0/ROADMAP.md` actualizados.
-- [ ] Migraciones: ninguna / aditivas y listas para que Carlos las aplique en Neon `dev` y `main`. Con migración nueva, quien abre el PR le pone la etiqueta `migracion-pendiente`; solo Carlos la quita tras aplicarla, y el bot no integra mientras esté puesta.
+- [ ] PR vinculado a su tarea de Linear (campo «Tarea» arriba); `docs/2.0/ROADMAP.md` actualizado si cambia el plan.
+- [ ] Migraciones: ninguna / aditivas y listas para que Carlos las aplique en Neon `dev` y `main`. Con migración nueva, quien abre el PR le pone la etiqueta `migracion-pendiente`; solo Carlos en persona la quita tras aplicarla, y el bot no integra mientras esté puesta o si su retiro no es verificable.
