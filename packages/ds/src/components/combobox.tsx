@@ -34,6 +34,7 @@ function Disparador(props: ComboboxProps & { onActivar?: () => void }) {
         disabled={props.disabled}
         aria-label={props["aria-label"]}
         aria-invalid={props.invalido || undefined}
+        aria-describedby={props["aria-describedby"]}
         aria-haspopup="dialog"
         aria-expanded={false}
         onClick={props.onActivar}

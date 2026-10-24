@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-import { Button, Campo, InputFecha, Sheet } from "@opai/ds";
+import { Button, Campo, CampoDireccion, type Direccion, InputFecha, Sheet } from "@opai/ds";
 
 /** Hoja con un campo de fecha (QA pasada 5): el calendario abre sobre la hoja y la oscurece. */
 export function MuestraHojaConFecha() {
@@ -31,5 +31,18 @@ export function MuestraHojaConFecha() {
         </Campo>
       </Sheet>
     </>
+  );
+}
+
+/** Dos direcciones sin `id` en la misma página (QA pasada 5): ninguna debe repetir el id de la otra. */
+export function MuestraDireccionesSinId() {
+  const [a, setA] = useState<Direccion | null>(null);
+  const [b, setB] = useState<Direccion | null>(null);
+  const comun = { buscar: async () => [], resolver: async () => null, sinMapa: true };
+  return (
+    <div data-testid="direcciones-sin-id" className="flex flex-col gap-4">
+      <CampoDireccion valor={a} onCambiar={setA} error="Error de la primera" {...comun} />
+      <CampoDireccion valor={b} onCambiar={setB} error="Error de la segunda" {...comun} />
+    </div>
   );
 }

@@ -79,14 +79,14 @@ export function CampoDireccion({
         />
         <div className="grid grid-cols-2 gap-2">
           <Input
-            name="comuna"
+            id={`${base}-comuna`}
             value={valor?.comuna ?? ""}
             onChange={(e) => cambiar("comuna", e.target.value)}
             placeholder="Comuna"
             aria-label="Comuna"
           />
           <Input
-            name="region"
+            id={`${base}-region`}
             value={valor?.region ?? ""}
             onChange={(e) => cambiar("region", e.target.value)}
             placeholder="Región"

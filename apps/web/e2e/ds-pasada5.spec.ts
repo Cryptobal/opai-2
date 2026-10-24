@@ -61,4 +61,26 @@ test.describe("QA pasada 5 · campos con id o name", () => {
     await page.goto("/ds");
     expect(await page.evaluate(sinIdNiName), "/ds").toEqual([]);
   });
+
+  test("dos direcciones sin id no repiten ids y cada error es el suyo", async ({ page }) => {
+    await page.goto("/ds/qa");
+    const bloque = page.getByTestId("direcciones-sin-id");
+    await bloque.scrollIntoViewIfNeeded();
+    const errores = await bloque.evaluate((el) =>
+      [...el.querySelectorAll("[aria-describedby]")].map((c) => {
+        const id = c.getAttribute("aria-describedby") ?? "";
+        return { id, texto: document.getElementById(id)?.textContent ?? null };
+      }),
+    );
+    expect(errores.map((e) => e.texto)).toEqual(["Error de la primera", "Error de la segunda"]);
+    expect(new Set(errores.map((e) => e.id)).size, "ids de error distintos").toBe(2);
+    // A mano: dos veces el primer botón, porque al pulsarlo desaparece.
+    for (let i = 0; i < 2; i++) {
+      await bloque.getByRole("button", { name: "Escribir a mano" }).first().click();
+    }
+    const ids = await bloque.evaluate((el) => [...el.querySelectorAll("[id]")].map((e) => e.id));
+    expect(ids.length, "los campos a mano tienen id").toBeGreaterThanOrEqual(6);
+    expect(new Set(ids).size, "ids únicos").toBe(ids.length);
+    expect(await page.evaluate(sinIdNiName), "con las direcciones a mano").toEqual([]);
+  });
 });
