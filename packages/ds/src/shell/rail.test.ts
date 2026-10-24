@@ -81,6 +81,9 @@ describe("Rail con selector de portal y empresa", () => {
     expect(selector(html)).toBeUndefined();
     expect(html).toContain(">GS<");
     expect(html).not.toContain("lucide-chevron-down");
+    // Mismo apilado vertical de 64 × 64 que el botón con menú: monograma sobre el portal.
+    const clase = /<span class="([^"]*)" title="Gard Security"/.exec(html)?.[1] ?? "";
+    for (const c of ["flex-col", "h-16", "w-16"]) expect(clase.split(" ")).toContain(c);
   });
 
   it("con varios portales muestra la flecha y la etiqueta sin recortarla por la flecha", () => {

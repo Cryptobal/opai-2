@@ -85,7 +85,7 @@ export function Rail({
         variante="riel"
         className="mb-3 w-16"
       />
-      <ul className="flex min-h-0 flex-col gap-1 overflow-y-auto px-1">
+      <ul className="flex min-h-0 flex-col gap-1 overflow-y-auto px-1 py-1">
         {items
           .filter((i) => !i.pie && !i.soloAmplio)
           .map((item) => (

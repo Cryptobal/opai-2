@@ -40,7 +40,10 @@ export function MenuRadix(props: MenuProps) {
           {...LADO[lado]}
           sideOffset={4}
           aria-label={etiqueta}
-          className={cn(claseOverlay, "w-64 py-1")}
+          className={cn(
+            claseOverlay,
+            "max-h-(--radix-dropdown-menu-content-available-height) w-64 overflow-y-auto py-1",
+          )}
         >
           {cabecera ? <div className="border-b border-border px-3 py-2.5">{cabecera}</div> : null}
           {items.map((item, i) => (

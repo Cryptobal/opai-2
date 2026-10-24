@@ -19,6 +19,25 @@ type Props = {
   className?: string;
 };
 
+/** Por variante: dónde abre el menú, la clase del disparador y la del bloque sin menú. */
+const VARIANTES = {
+  compacto: {
+    lado: "abajo-izquierda",
+    clase: "min-w-0 justify-start px-1",
+    estatica: "flex min-h-11 min-w-0 items-center px-1",
+  },
+  monograma: {
+    lado: "abajo-derecha",
+    clase: "size-11",
+    estatica: "flex min-h-11 min-w-0 items-center px-1",
+  },
+  riel: {
+    lado: "derecha-inicio",
+    clase: "relative h-16 w-16 flex-col gap-1 border border-border bg-bg px-0.5",
+    estatica: "flex h-16 w-16 flex-col items-center justify-center gap-1 px-0.5",
+  },
+} as const;
+
 /** Selector de portal sobre `Menu` (Radix): el portal actual marcado; navega al inicio del elegido. */
 export function PortalSwitcher(props: Props) {
   const { portales, portalActual, tenant, variante = "compacto", extra = [] } = props;
@@ -58,12 +77,10 @@ export function PortalSwitcher(props: Props) {
         ) : null}
       </span>
     );
+  const v = VARIANTES[variante];
   if (items.length <= 1) {
     return (
-      <span
-        className={cn("flex min-h-11 min-w-0 items-center px-1", props.className)}
-        title={nombre}
-      >
+      <span className={cn(v.estatica, props.className)} title={nombre}>
         {visual}
       </span>
     );
@@ -72,22 +89,10 @@ export function PortalSwitcher(props: Props) {
     <Menu
       etiqueta={`${nombre} · portal ${actual?.etiqueta ?? ""}. Cambiar de portal o empresa`}
       items={items}
-      lado={
-        variante === "monograma"
-          ? "abajo-derecha"
-          : variante === "riel"
-            ? "derecha-inicio"
-            : "abajo-izquierda"
-      }
+      lado={v.lado}
       disparador={visual}
       {...(props.className ? { className: props.className } : {})}
-      claseDisparador={
-        variante === "monograma"
-          ? "size-11"
-          : variante === "riel"
-            ? "relative h-16 w-16 flex-col gap-1 border border-border bg-bg px-0.5"
-            : "min-w-0 justify-start px-1"
-      }
+      claseDisparador={v.clase}
     />
   );
 }
