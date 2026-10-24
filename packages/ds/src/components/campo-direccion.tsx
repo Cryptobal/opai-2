@@ -56,6 +56,7 @@ export function CampoDireccion({
   // mapa muestra un esqueleto, en vez de volver a «Busca la dirección» / «Sin ubicación».
   const [pendiente, setPendiente] = useState<{ placeId: string; texto: string } | null>(null);
   const textos = useRef(new Map<string, string>());
+  const ultima = useRef(0);
   const buscarConTextos = async (q: string) => {
     const r = await buscar(q);
     for (const o of r) textos.current.set(o.valor, o.etiqueta);
@@ -115,12 +116,12 @@ export function CampoDireccion({
         onBuscar={buscarConTextos}
         onCambiar={async ([placeId]) => {
           if (!placeId) return;
+          const n = ++ultima.current; // solo la última elección aplica su detalle
           setPendiente({ placeId, texto: textos.current.get(placeId) ?? placeId });
-          try {
-            onCambiar(await resolver(placeId));
-          } finally {
-            setPendiente(null);
-          }
+          const d = await resolver(placeId).catch(() => null);
+          if (n !== ultima.current) return;
+          setPendiente(null);
+          onCambiar(d);
         }}
       />
       {error ? (
