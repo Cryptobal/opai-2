@@ -10,9 +10,7 @@ import type { SearchParams } from "@/lib/parametros";
 
 import { cargarCargo, CLASES } from "../_componentes/datos";
 import { EstructuraBase, Versiones } from "../_componentes/estructura-cargo";
-import { HojaCargo } from "../_componentes/diferidas";
-import { HojaVersion } from "../_componentes/diferidas";
-import { SwitchSensible } from "../_componentes/switch-sensible";
+import { HojaCargo, HojaVersion, SwitchSensible } from "../_componentes/diferidas";
 
 export const metadata = { title: "Cargo" };
 

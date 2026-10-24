@@ -138,6 +138,8 @@ jobs:
           SEED_PLATFORM_ROLE=ninguno SEED_OWNER_EMAIL=e2e-multiempresa@opai.cl pnpm --filter @opai/auth seed:platform-owner
           pnpm --filter @opai/db seed:e2e
           pnpm --filter @opai/db seed:maestros-demo
+          # Usuario con dos empresas para selector-riel.spec.ts (selector de portal y empresa en iPad).
+          pnpm --filter @opai/auth seed:multiempresa-e2e
       - name: Instalar Chromium de Playwright
         run: pnpm --filter @opai/web exec playwright install --with-deps chromium
       # Las páginas /ds solo existen fuera de producción: se levanta `pnpm dev`. La primera visita de

@@ -1,5 +1,6 @@
 export { AppShell, type AppShellProps } from "./app-shell";
-export { BottomNav, Rail } from "./nav";
+export { BottomNav } from "./nav";
+export { Rail, type RailProps } from "./rail";
 export { Sidebar } from "./sidebar";
 export { PortalSwitcher } from "./portal-switcher";
 export { AppBar, type ComunesBarra, TopBarTelefono } from "./top-bar";
