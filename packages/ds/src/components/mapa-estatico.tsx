@@ -2,6 +2,7 @@ import { MapPin } from "lucide-react";
 
 import { cn } from "../cn";
 import { diametroGeocercaPct, zoomParaGeocerca } from "../lib/mapa";
+import { MapaImagen } from "./mapa-imagen";
 
 type Fuente = (punto: { lat: number; lng: number; zoom: number }) => string;
 
@@ -13,7 +14,7 @@ type Props = {
   geocercaM?: number | null;
   /**
    * URL de la imagen para un punto y zoom (el proxy del servicio de mapas del núcleo, con caché).
-   * Sin ella o si la imagen falla, queda la retícula del DS.
+   * Sin ella o si la imagen falla, queda la retícula del DS; mientras carga se muestra un esqueleto.
    */
   fuente?: Fuente;
   /** Texto de la esquina (comuna o "Geocerca 300 m"). */
@@ -21,7 +22,10 @@ type Props = {
   className?: string;
 };
 
-/** Mapa embebido sin JS: 16:9, borde 1 px, radio 10; imagen real, marcador y círculo de geocerca. */
+/**
+ * Mapa embebido: 16:9, borde 1 px, radio 10; imagen real (con esqueleto mientras carga), marcador
+ * y círculo de geocerca. Sin `fuente` es la retícula del DS y no lleva JS.
+ */
 export function MapaEstatico({ lat, lng, geocercaM, fuente, pie, className }: Props) {
   const base = "relative aspect-video overflow-hidden rounded-md border border-border";
   if (lat == null || lng == null) {
@@ -37,21 +41,9 @@ export function MapaEstatico({ lat, lng, geocercaM, fuente, pie, className }: Pr
     );
   }
   const zoom = zoomParaGeocerca(lat, geocercaM);
-  return (
-    <div
-      role="img"
-      aria-label={`Ubicación ${lat.toFixed(5)}, ${lng.toFixed(5)}${geocercaM ? `, geocerca de ${geocercaM} m` : ""}`}
-      className={cn(base, "ds-mapa bg-fill", className)}
-    >
-      {fuente ? (
-        <img
-          src={fuente({ lat, lng, zoom })}
-          alt=""
-          loading="lazy"
-          decoding="async"
-          className="absolute inset-0 size-full object-cover"
-        />
-      ) : null}
+  const etiqueta = `Ubicación ${lat.toFixed(5)}, ${lng.toFixed(5)}${geocercaM ? `, geocerca de ${geocercaM} m` : ""}`;
+  const marcas = (
+    <>
       {geocercaM ? (
         <span
           aria-hidden
@@ -68,6 +60,20 @@ export function MapaEstatico({ lat, lng, geocercaM, fuente, pie, className }: Pr
           {pie}
         </span>
       ) : null}
+    </>
+  );
+  // Con imagen real: esqueleto hasta que carga. Sin ella (demo del DS): la retícula.
+  if (fuente) {
+    const src = fuente({ lat, lng, zoom });
+    return (
+      <MapaImagen key={src} src={src} marco={cn(base, className)} etiqueta={etiqueta}>
+        {marcas}
+      </MapaImagen>
+    );
+  }
+  return (
+    <div role="img" aria-label={etiqueta} className={cn(base, "ds-mapa bg-fill", className)}>
+      {marcas}
     </div>
   );
 }
