@@ -47,7 +47,12 @@ export function BloqueLista({
         buscador={
           <div className="relative">
             <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-fg-subtle" />
-            <Input placeholder="Nombre o RUT" className="pl-9" aria-label="Buscar" />
+            <Input
+              id="buscar-lista"
+              placeholder="Nombre o RUT"
+              className="pl-9"
+              aria-label="Buscar"
+            />
           </div>
         }
         filtros={

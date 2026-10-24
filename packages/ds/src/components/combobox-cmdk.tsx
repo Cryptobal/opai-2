@@ -33,6 +33,7 @@ export type ComboboxProps = {
   disabled?: boolean;
   invalido?: boolean;
   "aria-label"?: string;
+  "aria-describedby"?: string | undefined;
   /** Abierto al montar (la versión diferida se monta con el primer clic). */
   abiertoInicial?: boolean;
 };
@@ -72,6 +73,7 @@ export function ComboboxCmdk(props: ComboboxProps) {
         disabled={props.disabled}
         aria-label={props["aria-label"]}
         aria-invalid={props.invalido || undefined}
+        aria-describedby={props["aria-describedby"]}
         className={cn(claseControl, "text-left")}
       >
         <Search className="size-4 flex-none text-fg-subtle" aria-hidden />
