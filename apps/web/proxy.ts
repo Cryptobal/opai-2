@@ -30,11 +30,11 @@ async function noExiste(request: NextRequest): Promise<boolean> {
  */
 export async function proxy(request: NextRequest) {
   if (getSessionCookie(request, { cookiePrefix: "opai" })) {
-    // Id que no es UUID: 404 real (con el shell) en vez de un 200 que luego dice «no encontrado».
+    // Ficha que no existe: se reescribe a la página de 404 del portal (catch-all con `notFound()` sin
+    // leer `params`, que ya responde HTTP 404 y con el shell). No se fuerza `status` aquí: un 404
+    // puesto por el proxy puede terminar en la página genérica de Next, sin menú y en inglés.
     if (esIdInvalido(request.nextUrl.pathname) || (await noExiste(request))) {
-      return NextResponse.rewrite(new URL(destino404(request.nextUrl.pathname), request.url), {
-        status: 404,
-      });
+      return NextResponse.rewrite(new URL(destino404(request.nextUrl.pathname), request.url));
     }
     return NextResponse.next();
   }

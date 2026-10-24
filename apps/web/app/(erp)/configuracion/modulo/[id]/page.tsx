@@ -1,3 +1,5 @@
+import { notFound } from "next/navigation";
+
 import { listarModulos } from "@opai/capabilities";
 import { Alerta, Empty } from "@opai/ds";
 
@@ -18,6 +20,7 @@ export default function AjustesModulo({ params }: Props) {
       cargar={async () => {
         const { id } = await params;
         const manifest = listarModulos().find((m) => m.id === id) ?? null;
+        if (!manifest) notFound();
         return { id, manifest, ajustes: await cargarAjustes(id) };
       }}
       cabecera={(d) => ({
