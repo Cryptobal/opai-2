@@ -32,8 +32,9 @@ function EstadoEnlace() {
 }
 
 /**
- * Enlaces del menú: precargan la página completa al pasar el cursor o tocar (visita inmediata,
- * ADR-045; no al verse, para no contar como uso lecturas que nadie pidió) y avisan si tardan.
+ * Enlaces del menú: al verse siguen con el prefetch parcial de Next (sin ejecutar capacidades); la
+ * página completa se precarga al pasar el cursor, tocar o enfocar (visita inmediata, ADR-045; no
+ * antes, para no contar como uso lecturas que nadie pidió en `core.consumos`) y avisan si tardan.
  */
 export const LinkMenu: LinkComponent = ({ href, className, children, ...rest }) => {
   const [intencion, setIntencion] = useState(false);

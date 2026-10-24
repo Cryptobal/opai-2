@@ -24,8 +24,9 @@ export async function ejecutarCapacidad(
     return { ok: false, error: { code: "NOT_FOUND", message: `Capacidad "${id}" no existe.` } };
   }
   const r = await ejecutarComoUsuario(portal, id, input, dryRun);
-  // Una escritura real vacía la caché del navegador (staleTimes, ADR-045 decisión 16): lo que se
-  // volvió a visitar después de escribir nunca muestra datos anteriores.
+  // Una escritura real vacía la caché del navegador (staleTimes de 5 min, ADR-045): en la
+  // pestaña que escribe, lo visitado después no muestra datos anteriores. Otras pestañas y las
+  // escrituras por API/MCP se ven al vencer el tiempo o al refresco silencioso.
   if (r.ok && !dryRun && capacidad.efecto !== "lectura") revalidatePath("/", "layout");
   return r;
 }

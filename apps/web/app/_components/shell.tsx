@@ -3,7 +3,7 @@
 import { Building2, LogOut, Settings2, UserRound } from "lucide-react";
 import dynamic from "next/dynamic";
 import { usePathname, useRouter } from "next/navigation";
-import { type ReactNode, startTransition, useEffect, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 
 import { AppShell, type ItemMenu, type Portal, type Volver } from "@opai/ds";
 
@@ -14,6 +14,11 @@ import type { ItemNav } from "@/lib/navegacion";
 import { Campana } from "./campana";
 import { icono } from "./iconos";
 import { LinkMenu } from "./link-menu";
+import {
+  avisarCambioSesion,
+  useCambioSesionExterno,
+  useRefrescoSilencioso,
+} from "./refresco-navegador";
 
 // La paleta (cmdk) se descarga al primer uso: no pesa en el JS inicial de cada ruta (ADR-037).
 const Paleta = dynamic(() => import("./paleta").then((m) => m.Paleta), { ssr: false });
@@ -21,12 +26,6 @@ const Paleta = dynamic(() => import("./paleta").then((m) => m.Paleta), { ssr: fa
 // El cambio de contraseña (formulario y diálogo) solo se descarga si se abre.
 const CambiarPassword = dynamic(() => import("./cambiar-password").then((m) => m.CambiarPassword));
 const Avisos = dynamic(() => import("./avisos").then((m) => m.Avisos), { ssr: false });
-
-// Refresco silencioso: una página que vino de la caché del navegador (generada hace más de 15 s) se
-// vuelve a pedir en segundo plano, sin esqueleto. El tope por ruta evita bucles si el reloj está
-// desfasado (ADR-045 decisión 16).
-const EDAD_MAXIMA_MS = 15_000;
-const ultimoRefresco = new Map<string, number>();
 
 export type DatosShell = {
   portal: string;
@@ -36,7 +35,7 @@ export type DatosShell = {
   usuario: { nombre: string; email: string; rol?: string };
   empresas: { id: string; nombre: string; actual: boolean }[];
   noLeidas: number;
-  /** Hora (ms) en que el servidor generó esta página; si es vieja, vino de la caché del navegador. */
+  /** Identifica la versión de la página (ms del servidor); el navegador mide la edad desde que la vio. */
   generado: number;
 };
 
@@ -64,13 +63,8 @@ export function Shell({
   const [password, setPassword] = useState(false);
   const [paleta, setPaleta] = useState<boolean | null>(null);
   const buscable = datos.portal === "erp" && datos.tenant !== null;
-  useEffect(() => {
-    const ahora = Date.now();
-    if (ahora - datos.generado < EDAD_MAXIMA_MS) return;
-    if (ahora - (ultimoRefresco.get(rutaActual) ?? 0) < EDAD_MAXIMA_MS) return;
-    ultimoRefresco.set(rutaActual, ahora);
-    startTransition(() => router.refresh());
-  }, [datos.generado, rutaActual, router]);
+  useRefrescoSilencioso(datos.generado, rutaActual);
+  useCambioSesionExterno();
   useEffect(() => {
     if (!buscable) return;
     const tecla = (e: KeyboardEvent) => {
@@ -90,7 +84,10 @@ export function Shell({
           etiqueta: e.nombre,
           icono: Building2,
           marcado: e.actual,
-          onSelect: () => void cambiarTenant(e.id),
+          onSelect: () => {
+            avisarCambioSesion();
+            void cambiarTenant(e.id);
+          },
         }))
       : [];
   const menu: ItemMenu[] = [
@@ -117,7 +114,10 @@ export function Shell({
       etiqueta: "Cerrar sesión",
       icono: LogOut,
       peligro: true,
-      onSelect: () => void accionSalir(),
+      onSelect: () => {
+        avisarCambioSesion();
+        void accionSalir();
+      },
     },
   ];
   return (

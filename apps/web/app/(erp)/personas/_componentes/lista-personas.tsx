@@ -24,6 +24,14 @@ type Props = {
   seleccionada?: string;
 };
 
+/** Conserva búsqueda, filtros y página al abrir una ficha (la lista no se pierde al elegir). */
+const conParametros = (p: Parametros) => {
+  const q = new URLSearchParams();
+  for (const k of ["q", "cargo", "estado", "cursor", "prev"]) if (p[k]) q.set(k, p[k]);
+  const t = q.toString();
+  return t ? `?${t}` : "";
+};
+
 const estadoVisible = (x: PersonaFila) =>
   estadoDe(ESTADO_PERSONA, x.bloqueada ? "bloqueada" : x.estado);
 
@@ -84,7 +92,7 @@ export function ListaPersonas(x: Props) {
         const e = estadoVisible(i);
         return {
           id: i.id,
-          href: `/personas/${i.id}`,
+          href: `/personas/${i.id}${conParametros(x.p)}`,
           inicio: <Avatar nombre={i.nombreCompleto} size="lg" />,
           titulo: i.nombreCompleto,
           secundario: (
