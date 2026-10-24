@@ -3,6 +3,7 @@ import { Mail, MessageSquare, Phone, UserPlus } from "lucide-react";
 import { ParesGrid, SeccionTarjeta } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { MapaOpai } from "@/app/_components/maestros/mapa";
 import { fecha, rut, telefono } from "@/lib/fechas";
 import type { PersonaDetalle } from "@/lib/tipos-maestros";
@@ -107,9 +108,9 @@ export function ResumenPersona({ p, hoy }: Props) {
         />
         {p.usuarioId ? null : (
           <div className="mt-3 flex flex-wrap items-center gap-3">
-            <EnlaceBoton href="?vincular=1" variante="secondary" icono={UserPlus}>
+            <EnlaceBotonHoja href="?vincular=1" variante="secondary" icono={UserPlus}>
               Vincular usuario
-            </EnlaceBoton>
+            </EnlaceBotonHoja>
             <span className="t-caption">Le permite entrar al portal Trabajador</span>
           </div>
         )}

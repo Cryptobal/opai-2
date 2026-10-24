@@ -3,7 +3,7 @@ import { Plus } from "lucide-react";
 import { Avatar, Badge, Empty, FilaSeleccionable } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
-import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { telefono } from "@/lib/fechas";
 import type { SearchParams } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
@@ -21,9 +21,9 @@ async function Contactos({ cuentaId }: { cuentaId: string }) {
   const r = await ejecutarComoUsuario<Contacto[]>("erp", "core.contactos.list", { cuentaId });
   const contactos = r.ok ? r.data : [];
   const nuevo = (
-    <EnlaceBoton href="?contacto=nuevo" icono={Plus}>
+    <EnlaceBotonHoja href="?contacto=nuevo" icono={Plus}>
       Nuevo contacto
-    </EnlaceBoton>
+    </EnlaceBotonHoja>
   );
   return (
     <>

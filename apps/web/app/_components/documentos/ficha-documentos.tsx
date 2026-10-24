@@ -6,7 +6,7 @@ import { fecha } from "@/lib/fechas";
 import { estadoPantalla } from "@/lib/formato";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
-import { EnlaceBoton } from "../maestros/enlace-boton";
+import { EnlaceBotonHoja } from "../maestros/enlace-boton-hoja";
 import { HojaSubir, VistaPrevia } from "./diferidas";
 import { MenuDocumento } from "./menu-documento";
 import { diasHasta, type Documento, type EntidadDocumento, type TipoDocumento } from "./tipos";
@@ -49,9 +49,9 @@ export async function FichaDocumentos({ entidad }: { entidad: EntidadDocumento }
             {faltantes.map((f) => f.nombre).join(", ")}
           </span>
         ) : null}
-        <EnlaceBoton href="?subir=1" icono={Upload} className="ml-auto max-md:w-full">
+        <EnlaceBotonHoja href="?subir=1" icono={Upload} className="ml-auto max-md:w-full">
           Subir documento
-        </EnlaceBoton>
+        </EnlaceBotonHoja>
       </div>
       <Estado
         state={r.ok && docs.length === 0 && faltantes.length === 0 ? "empty" : estadoPantalla(r)}
@@ -60,7 +60,7 @@ export async function FichaDocumentos({ entidad }: { entidad: EntidadDocumento }
           vacio: {
             titulo: "Sin documentos",
             descripcion: "Sube contratos, certificados y acreditaciones con su vencimiento.",
-            accion: <EnlaceBoton href="?subir=1">Subir documento</EnlaceBoton>,
+            accion: <EnlaceBotonHoja href="?subir=1">Subir documento</EnlaceBotonHoja>,
           },
         }}
       >
@@ -117,9 +117,9 @@ export async function FichaDocumentos({ entidad }: { entidad: EntidadDocumento }
                 Obligatorio · nunca se subió. Un documento vencido se renueva en su fila.
               </span>
             </span>
-            <EnlaceBoton href={`?subir=1&tipo=${f.tipoId}`} variante="secondary" icono={Upload}>
+            <EnlaceBotonHoja href={`?subir=1&tipo=${f.tipoId}`} variante="secondary" icono={Upload}>
               Subir
-            </EnlaceBoton>
+            </EnlaceBotonHoja>
           </div>
         ))}
       </Estado>

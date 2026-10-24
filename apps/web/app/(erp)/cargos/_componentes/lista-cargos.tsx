@@ -5,7 +5,7 @@ import { Badge, type EstadoPantalla, ListScreen } from "@opai/ds";
 import { LinkNext } from "@/app/_components/link-next";
 import { Buscador } from "@/app/_components/maestros/buscador";
 import { ChipsFiltro } from "@/app/_components/maestros/chips-filtro";
-import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { pesos } from "@/lib/fechas";
 import { GRATIFICACION } from "@/lib/tipos-sueldo";
 
@@ -37,9 +37,9 @@ const num = "text-right t-numeric";
 /** Cargos y sueldos (14): tabla con los montos de la versión vigente; filas en teléfono. */
 export function ListaCargos({ state, items }: { state: EstadoPantalla; items: CargoFila[] }) {
   const nuevo = (
-    <EnlaceBoton href="?nuevo=1" icono={Plus}>
+    <EnlaceBotonHoja href="?nuevo=1" icono={Plus}>
       Nuevo
-    </EnlaceBoton>
+    </EnlaceBotonHoja>
   );
   return (
     <ListScreen<CargoFila>

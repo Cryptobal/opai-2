@@ -2,7 +2,7 @@ import { Lock } from "lucide-react";
 
 import { Alerta } from "@opai/ds";
 
-import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { hoyIso } from "@/lib/fechas";
 import type { SearchParams } from "@/lib/parametros";
 
@@ -25,7 +25,7 @@ export default function Laboral(props: Props) {
     <PaginaPersona
       {...props}
       tab="laboral"
-      acciones={<EnlaceBoton href="?excepcion=1">Definir excepción para esta persona</EnlaceBoton>}
+      acciones={<EnlaceBotonHoja href="?excepcion=1">Definir excepción para esta persona</EnlaceBotonHoja>}
     >
       {async (p, q) => {
         const [l, cargos] = await Promise.all([cargarLaboral(p, q["puesto"]), cargarCargos(true)]);
@@ -36,9 +36,9 @@ export default function Laboral(props: Props) {
             <div className="flex flex-col gap-4">
               <VinculoVigente p={p} />
               {p.vinculoVigente ? null : (
-                <EnlaceBoton href="?vinculo=1" variante="secondary" className="self-start">
+                <EnlaceBotonHoja href="?vinculo=1" variante="secondary" className="self-start">
                   Nuevo vínculo
-                </EnlaceBoton>
+                </EnlaceBotonHoja>
               )}
               <HistorialVinculos vinculos={l.vinculos} cargos={cargos} />
             </div>

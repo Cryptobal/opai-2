@@ -3,7 +3,7 @@ import { Plus } from "lucide-react";
 import { Enlace, Estado } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
-import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 
 import { PaginaConfig } from "../_centro/pagina-config";
 import { cargarKeys } from "./datos";
@@ -26,9 +26,9 @@ export default function Agentes() {
           </Enlace>
         ),
         acciones: (
-          <EnlaceBoton href="?crear=1" icono={Plus}>
+          <EnlaceBotonHoja href="?crear=1" icono={Plus}>
             Crear key
-          </EnlaceBoton>
+          </EnlaceBotonHoja>
         ),
       })}
     >

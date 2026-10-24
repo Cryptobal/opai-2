@@ -10,6 +10,10 @@ const LEER = {
   cuentas: (id: string) => ejecutarComoUsuario("erp", "core.cuentas.get", { id }),
   instalaciones: (id: string) => ejecutarComoUsuario("erp", "core.instalaciones.get", { id }),
   cargos: (id: string) => ejecutarComoUsuario("erp", "core.cargos.get", { id }),
+  agentes: (id: string) => ejecutarComoUsuario("erp", "core.apikeys.get", { id }),
+  "terreno-instalaciones": (id: string) =>
+    ejecutarComoUsuario("supervisor", "core.instalaciones.get", { id }),
+  "terreno-personas": (id: string) => ejecutarComoUsuario("supervisor", "core.personas.get", { id }),
 } satisfies Record<Coleccion, (id: string) => Promise<{ ok: boolean; error?: { code: string } }>>;
 
 /**

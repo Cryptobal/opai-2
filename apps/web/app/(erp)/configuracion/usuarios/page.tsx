@@ -1,6 +1,6 @@
 import { Plus } from "lucide-react";
 
-import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { estadoPantalla } from "@/lib/formato";
 import { ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
 
@@ -35,9 +35,9 @@ export default function Usuarios() {
           ...(invitaciones.ok
             ? {
                 acciones: (
-                  <EnlaceBoton href="?invitar=1" icono={Plus}>
+                  <EnlaceBotonHoja href="?invitar=1" icono={Plus}>
                     Invitar
-                  </EnlaceBoton>
+                  </EnlaceBotonHoja>
                 ),
               }
             : {}),
