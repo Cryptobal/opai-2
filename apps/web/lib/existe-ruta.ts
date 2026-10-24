@@ -16,8 +16,11 @@ const LEER = {
   "terreno-personas": (id: string) => ejecutarComoUsuario("supervisor", "core.personas.get", { id }),
 } satisfies Record<Coleccion, (id: string) => Promise<{ ok: boolean; error?: { code: string } }>>;
 
+// «Sin alcance» se responde igual que «no existe» (ADR-022): el 404 no revela que la ficha existe.
+const OCULTA = new Set(["NOT_FOUND", "FORBIDDEN"]);
+
 /**
- * ¿Existe lo que la ruta pide? Solo responde `false` cuando la base dice que no (NOT_FOUND, evento
+ * ¿Existe lo que la ruta pide? Solo responde `false` cuando la base dice que no (NOT_FOUND o FORBIDDEN por alcance, evento
  * fuera del catálogo, integración «próximamente»); sin sesión o ante un fallo, `true`: la página
  * decide y el proxy no esconde nada por un error pasajero.
  */
@@ -26,7 +29,7 @@ export async function existeRuta(pathname: string): Promise<boolean> {
   if (!q) return true;
   if (q.tipo === "ficha") {
     const r = await LEER[q.coleccion](q.id);
-    return r.ok || r.error?.code !== "NOT_FOUND";
+    return r.ok || !OCULTA.has(r.error?.code ?? "");
   }
   if (q.tipo === "evento") {
     const r = await ejecutarComoUsuario<Evento[]>("erp", "core.comunicaciones.eventos", {});
