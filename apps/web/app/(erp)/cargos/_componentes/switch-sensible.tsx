@@ -16,7 +16,7 @@ export function SwitchSensible({ id, activo }: { id: string; activo: boolean }) 
       onCambiar={async (v) => {
         if (await ejecutar("core.cargos.update", { id, sueldoSensible: v }))
           avisar.exito(
-            v ? "Sueldo marcado como sensible" : "Sueldo visible para todos los roles con acceso",
+            v ? "Sueldo marcado como sensible" : "Sueldo visible para los roles con acceso",
           );
       }}
     />
