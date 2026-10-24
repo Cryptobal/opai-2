@@ -24,7 +24,7 @@ test.describe("caché y sesión", () => {
     await otra.goto("/cuentas");
     await expect(otra.getByRole("region", { name: /lista/i })).toBeVisible();
 
-    await page.locator("header button, aside button").filter({ has: page.locator("[data-slot=avatar], span") }).last().click();
+    await page.getByRole("button", { name: "Menú de usuario" }).click();
     await page.getByRole("menuitem", { name: /Cerrar sesión|Salir/i }).click();
     await page.waitForURL(/\/login/);
 
