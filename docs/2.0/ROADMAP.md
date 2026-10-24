@@ -12,7 +12,7 @@
 4. **Design Prompt** → Claude Design → **diseño aprobado** por Carlos (export en `docs/2.0/design/`).
 5. **Brief** → `docs/2.0/briefs/BRIEF-NN-<nombre>.md`.
 6. **PR** (Claude construye; nunca integra).
-7. **Revisión e integración** (bot «Revisor OPAI 2.0», modelo contrario; si hay migración de Neon, espera a que Carlos la aplique).
+7. **Revisión** (bot «Revisor OPAI 2.0», modelo contrario: aprueba o pide cambios) e **integración por Carlos**, mientras rija la modificación de ADR-043 del 24-oct. Si hay migración de Neon, Carlos la aplica antes de integrar.
 8. **QA** de pantallas en celular y escritorio (bot «Diseño y QA OPAI 2.0»).
 9. **Resumen ejecutivo** para Carlos al cerrar (qué se hizo, qué cambia para Gard, qué decide él, qué sigue).
 

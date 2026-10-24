@@ -5,6 +5,10 @@ on:
     branches: [main]
   pull_request:
 
+# Mínimo privilegio: ningún job necesita escribir en el repositorio.
+permissions:
+  contents: read
+
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
