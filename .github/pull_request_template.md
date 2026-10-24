@@ -27,7 +27,7 @@
 ## Definición de terminado
 
 - [ ] Cumple el brief o el encargo; las diferencias están reportadas arriba.
-- [ ] `secretos` en verde y todos los checks de arriba en verde en el último commit; los topes de JS no suben (regla en `AGENTS.md`).
+- [ ] `secretos` en verde y todos los checks de arriba en verde en el último commit; los topes de JS no suben, salvo excepción aprobada por Carlos y registrada en `ESTADO.md` (regla en `AGENTS.md`).
 - [ ] Gate local corrido antes de cada commit (`pnpm typecheck && pnpm lint && pnpm test`) y `pnpm test:db` si toca base o RLS.
 - [ ] Multi-tenant: toda tabla nueva con `tenant_id` tiene RLS y la política `tenant_isolation`; todo acceso pasa por `forTenant` o `enTransaccion`; no hay `$queryRaw` fuera de `enTransaccion`; `dbAdmin` solo en migraciones y seeds.
 - [ ] Paridad: lo que hace la pantalla existe como capacidad en `/api/v1` y en MCP; las escrituras tienen `dryRun`.
