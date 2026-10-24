@@ -14,11 +14,7 @@ import type { ItemNav } from "@/lib/navegacion";
 import { Campana } from "./campana";
 import { icono } from "./iconos";
 import { LinkMenu } from "./link-menu";
-import {
-  avisarCambioSesion,
-  useCambioSesionExterno,
-  useRefrescoSilencioso,
-} from "./refresco-navegador";
+import { useEpocaSesion, useRefrescoSilencioso } from "./refresco-navegador";
 
 // La paleta (cmdk) se descarga al primer uso: no pesa en el JS inicial de cada ruta (ADR-037).
 const Paleta = dynamic(() => import("./paleta").then((m) => m.Paleta), { ssr: false });
@@ -39,6 +35,8 @@ export type DatosShell = {
   subtituloMarca?: string | undefined;
   /** Identifica la versión de la página (ms del servidor); el navegador mide la edad desde que la vio. */
   generado: number;
+  /** Quién y en qué empresa ve la página (`lib/epoca-sesion.ts`); las pestañas la comparan. */
+  epoca: string;
 };
 
 export type OpcionesPagina = {
@@ -65,8 +63,8 @@ export function Shell({
   const [password, setPassword] = useState(false);
   const [paleta, setPaleta] = useState<boolean | null>(null);
   const buscable = datos.portal === "erp" && datos.tenant !== null;
-  useRefrescoSilencioso(datos.generado, rutaActual);
-  useCambioSesionExterno();
+  useRefrescoSilencioso(datos.generado, rutaActual, datos.epoca);
+  useEpocaSesion(datos.epoca);
   useEffect(() => {
     if (!buscable) return;
     const tecla = (e: KeyboardEvent) => {
@@ -87,7 +85,6 @@ export function Shell({
           icono: Building2,
           marcado: e.actual,
           onSelect: () => {
-            avisarCambioSesion();
             void cambiarTenant(e.id);
           },
         }))
@@ -117,7 +114,6 @@ export function Shell({
       icono: LogOut,
       peligro: true,
       onSelect: () => {
-        avisarCambioSesion();
         void accionSalir();
       },
     },

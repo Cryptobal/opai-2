@@ -2,6 +2,8 @@ import { existsSync } from "node:fs";
 
 import type { NextConfig } from "next";
 
+import { CACHE_DINAMICA_S } from "./lib/cache-navegador";
+
 // En desarrollo las variables viven en `.env.local` de la raíz del monorepo (una sola copia).
 // No reemplaza variables ya definidas; en Vercel el archivo no existe.
 const envRaiz = new URL("../../.env.local", import.meta.url);
@@ -20,11 +22,11 @@ const nextConfig: NextConfig = {
   partialPrefetching: true,
   // Presupuesto de JS (ADR-037): el barrel del DS se resuelve a sus módulos para que cada ruta
   // cargue solo los componentes que usa. staleTimes (ADR-045): lo ya visitado se muestra al instante
-  // durante 5 min y se refresca en segundo plano (`useRefrescoSilencioso`); las escrituras desde la
+  // durante CACHE_DINAMICA_S (30 s, `lib/cache-navegador.ts`) y se refresca en segundo plano (`useRefrescoSilencioso`); las escrituras desde la
   // UI, el cambio de empresa y la sesión vacían la caché.
   experimental: {
     optimizePackageImports: ["@opai/ds"],
-    staleTimes: { dynamic: 300, static: 300 },
+    staleTimes: { dynamic: CACHE_DINAMICA_S, static: CACHE_DINAMICA_S },
   },
   // Paquetes del monorepo consumidos como fuente TypeScript.
   transpilePackages: [

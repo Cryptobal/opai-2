@@ -6,6 +6,7 @@ import { Alerta, AuthCard, Button, Campo, Input, InputPassword, Separador } from
 
 import { accionEntrar, accionGoogle, type EstadoLogin } from "@/app/_acciones/auth";
 import { LinkNext } from "@/app/_components/link-next";
+import { EPOCA_ANONIMA, useEpocaSesion } from "@/app/_components/refresco-navegador";
 
 import { PiePortales } from "../pie-portales";
 
@@ -24,6 +25,7 @@ export function FormularioLogin({ destino, google, inicial, cargando: forzado }:
     accionEntrar.bind(null, destino),
     inicial ?? ({ tipo: "inicial" } as EstadoLogin),
   );
+  useEpocaSesion(EPOCA_ANONIMA); // si otra pestaña entra, esta recarga
   const cargando = pendiente || forzado === true;
   const google_ = accionGoogle.bind(null, destino);
 
