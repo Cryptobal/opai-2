@@ -68,7 +68,8 @@ test.describe("la lista queda a la vista mientras la ficha carga", () => {
         await expect(lista, "la lista no desaparece").toBeVisible();
         await expect(lista.getByRole("link").first()).toBeVisible();
         await expect(ficha.getByLabel("Cargando"), "la carga es solo del panel").toBeVisible();
-        await expect(page.getByLabel("Cargando")).toHaveCount(1);
+        // Desde #29 el layout deja un esqueleto de página en el DOM, oculto por CSS: solo cuenta lo visible.
+        await expect(page.getByLabel("Cargando").locator("visible=true")).toHaveCount(1);
       } finally {
         liberar();
       }
