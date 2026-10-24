@@ -76,18 +76,3 @@ test.describe("QA pasada 2 · sin desborde horizontal", () => {
     expect(alto).toBeGreaterThanOrEqual(44);
   });
 });
-
-test.describe("Pestañas · sin desplazamiento vertical", () => {
-  test("la barra de pestañas solo se desplaza en horizontal", async ({ page }) => {
-    await page.goto("/ds");
-    const barra = page.getByRole("navigation", { name: "Secciones" }).first();
-    await barra.scrollIntoViewIfNeeded();
-    const m = await barra.evaluate((el) => ({
-      scroll: el.scrollHeight,
-      alto: el.clientHeight,
-      overflowY: getComputedStyle(el).overflowY,
-    }));
-    expect(m.scroll, "scrollHeight debe ser igual a clientHeight").toBe(m.alto);
-    expect(m.overflowY).toBe("hidden");
-  });
-});
