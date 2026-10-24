@@ -19,9 +19,11 @@ Carlos decidió construir **OPAI 2.0 desde cero**: un SaaS modular, multi-tenant
 - Flujo con bots (ADR-043, modifica ADR-035):
   - **Bot «OPAI 2.0»** (orquestador): prepara los prompts de cada encargo según `ROADMAP.md` y opera los chats de construcción, revisión y QA.
   - **Claude** (proyecto «OPAI 2.0» en claude.ai): escribe la especificación y el brief, construye en una rama y **abre el PR; nunca integra**.
-  - **Bot «Revisor OPAI 2.0»**: revisa el PR con el modelo contrario al que construyó; si aprueba y el CI está en verde, integra a `main` con rebase. Un PR con migración de Neon pendiente queda aprobado sin integrar hasta que Carlos la aplique desde su Mac.
+  - **Bot «Revisor OPAI 2.0»**: revisa el PR con el modelo contrario al que construyó; aprueba o pide cambios. Durante los primeros módulos **no integra: el merge a `main` lo hace solo Carlos** (ADR-043, 24-oct).
+  - **Bot de Paridad**: compara 1.0 y 2.0 en solo lectura y reporta brechas (`docs/2.0/checklists/paridad.md`).
   - **Bot «Diseño y QA OPAI 2.0»**: después de cada PR con pantallas, las prueba en `test.opai.cl` en celular y escritorio.
   - **Carlos**: decide el negocio, aprueba especificaciones (`docs/2.0/modulos/`), diseños y lo irreversible.
+- Contrato completo de roles y reglas: `AGENTS.md` en la raíz del repositorio.
 - Ciclo de cada módulo (ADR-047): extracción de 1.0 → especificación → aprobación de Carlos → Design Prompt → diseño aprobado → brief → PR → revisión → QA → merge.
 - `main` cambia varias veces al día. Antes de opinar sobre el avance, relee `ESTADO.md`; no te fíes de lo que viste ayer.
 - Tú no escribes código, no haces push ni integras PRs en `opai-2`. Si detectas un bug o una brecha de paridad usando el MCP de 2.0, repórtalo a Carlos con la herramienta usada, el input y la respuesta; él lo lleva al proyecto.

@@ -5,6 +5,10 @@ on:
     branches: [main]
   pull_request:
 
+# Mínimo privilegio: ningún job necesita escribir en el repositorio.
+permissions:
+  contents: read
+
 concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
@@ -62,3 +66,20 @@ jobs:
           BETTER_AUTH_URL: http://localhost:3000
           NEXT_TELEMETRY_DISABLED: "1"
       - run: pnpm presupuesto
+
+  secretos:
+    name: secretos
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      # Gitleaks con versión y suma fijas; no necesita secretos de CI (AGENTS.md: sin secretos en el código).
+      - name: Instalar gitleaks 8.24.0
+        run: |
+          curl -sSfL -o gitleaks.tgz https://github.com/gitleaks/gitleaks/releases/download/v8.24.0/gitleaks_8.24.0_linux_x64.tar.gz
+          echo "cb49b7de5ee986510fe8666ca0273a6cc15eb82571f2f14832c9e8920751f3a4  gitleaks.tgz" | sha256sum -c -
+          tar xzf gitleaks.tgz gitleaks
+      - name: Escanear la historia del repositorio
+        run: ./gitleaks git --config .gitleaks.toml --redact --no-banner --exit-code 1 .

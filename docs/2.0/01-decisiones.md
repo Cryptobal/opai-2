@@ -541,9 +541,9 @@ OPAI puede ofrecer además **automatizaciones alojadas** (por ejemplo, búsqueda
 
 ---
 
-## ADR-043 · Flujo de trabajo con bots: construye Claude, revisa e integra el Revisor
+## ADR-043 · Flujo de trabajo con bots: construye Claude, revisa el Revisor, integra Carlos (por ahora)
 
-**Fecha:** 23-oct-2026 · **Estado:** vigente · **Modifica ADR-035**: Claude ya no integra a `main`; la revisión independiente y la integración pasan al bot «Revisor OPAI 2.0». Lo demás de ADR-035 (brief y ejecución en el mismo chat, rama por brief, commits por bloque, gate local, detenerse ante lo irreversible, infraestructura por el Mac de Carlos o el conector de Vercel) sigue vigente.
+**Fecha:** 23-oct-2026 · **Estado:** vigente, **modificado el 24-oct** (ver «Modificación de Carlos» al final: por ahora el merge lo hace solo Carlos) · **Modifica ADR-035**: Claude ya no integra a `main`; la revisión independiente y la integración pasan al bot «Revisor OPAI 2.0». Lo demás de ADR-035 (brief y ejecución en el mismo chat, rama por brief, commits por bloque, gate local, detenerse ante lo irreversible, infraestructura por el Mac de Carlos o el conector de Vercel) sigue vigente.
 
 **Contexto.** Con ADR-035 el mismo chat que construye revisa (con un subagente del mismo modelo) e integra. Carlos quiere separar construcción, revisión y QA visual en actores distintos, y que la revisión la haga un modelo distinto del que construyó para no repetir sus puntos ciegos.
 
@@ -566,6 +566,8 @@ Reglas:
 5. Los agentes operativos de Gard (Grokbot y los demás) y los bots del flujo siguen sin escribir en el repositorio (ADR-035). El merge del bot Revisor (un bot de Grok), bajo las condiciones de la regla 1, es la **única escritura de un bot de Grok en el repositorio**; además solo deja comentarios de revisión.
 
 **Consecuencias.** La autorrevisión con subagente queda como control previo del constructor, no como requisito de integración. `INSTRUCCIONES-proyecto-claude.md`, `CLAUDE.md` y `CONTEXTO-agentes.md` cambian su sección de flujo; Carlos debe pegar las instrucciones nuevas en el proyecto de claude.ai. El cierre de un brief deja de ser «integrado» y pasa a «PR abierto»; `ESTADO.md` lo refleja hasta que el Revisor integra.
+
+**Modificación de Carlos (24-oct).** Durante los primeros módulos **el merge a `main` lo hace solo Carlos**, después de revisar el PR. El bot «Revisor OPAI 2.0» revisa con el modelo contrario y **aprueba o pide cambios, pero no integra**. Cuando Carlos lo decida, el Revisor recupera la integración por rebase con CI en verde, según la regla 1. También se suma un **bot de Paridad**, que compara 1.0 y 2.0 en solo lectura y reporta brechas. El contrato vigente de roles, ramas, prohibiciones y definición de terminado está en `AGENTS.md` (raíz), y los checklists de cada rol están en `docs/2.0/checklists/`. CI agrega el escaneo de secretos (job `secretos`), que forma parte de la definición de terminado. Los checks obligatorios de la protección de `main` serán `typecheck · lint · test · test:db`, `build · presupuesto de JS` y `secretos`; la protección la configura Carlos en GitHub. Mientras rija esta modificación, las partes de la tabla, de la regla 1 y de la regla 5 que dan la integración al Revisor quedan **suspendidas**.
 
 ---
 
@@ -649,6 +651,6 @@ No se encontró: render estático roto, falta de prefetch, layouts que recarguen
 
 **Decisión.** Antes del Design Prompt de cualquier módulo se escribe `docs/2.0/modulos/<modulo>.md` en lenguaje de negocio, con la plantilla `docs/2.0/modulos/_plantilla.md` (objetivo; entidades y relaciones; pantallas y pestañas; campos y validaciones; reglas numeradas; estados y transiciones; permisos por rol y portal; eventos y notificaciones; herramientas MCP; integraciones; mejoras sobre 1.0 y lo que no se porta; casos borde; criterios de aceptación; preguntas abiertas). Carlos la aprueba antes de cualquier diseño o código. La extracción de 1.0 (`extraccion/`) y los ADR son sus insumos; la especificación es lo que el diseño y el brief citan.
 
-**Ciclo de cada módulo:** extracción de 1.0 (si existe en 1.0) → **especificación** → aprobación de Carlos → Design Prompt → diseño aprobado → brief → PR (Claude) → revisión e integración (Revisor) → QA en pantallas (Diseño y QA). Al cerrar cada brief, el reporte termina con un **resumen ejecutivo para Carlos** (cinco líneas como máximo: qué se hizo, qué cambia para Gard, qué decide él, qué sigue) que también queda en `ESTADO.md`.
+**Ciclo de cada módulo:** extracción de 1.0 (si existe en 1.0) → **especificación** → aprobación de Carlos → Design Prompt → diseño aprobado → brief → PR (Claude) → revisión (Revisor); integración: Carlos, mientras rija la modificación de ADR-043 del 24-oct → QA en pantallas (Diseño y QA). Al cerrar cada brief, el reporte termina con un **resumen ejecutivo para Carlos** (cinco líneas como máximo: qué se hizo, qué cambia para Gard, qué decide él, qué sigue) que también queda en `ESTADO.md`.
 
 **Consecuencias.** Comercial y CPQ ya tienen extracción y ADR-040/042: su especificación se escribe a partir de ellos antes del Design Prompt. El formato del brief agrega la sección 17 «Resumen ejecutivo».

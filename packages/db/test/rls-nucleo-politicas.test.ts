@@ -41,9 +41,9 @@ describe.skipIf(!urlPropietario)("políticas y referencias del núcleo", () => {
     const filas = await e.admin.$queryRaw<Politica[]>`
       SELECT p.tablename AS tabla, p.cmd, p.roles::text[] AS roles, p.permissive, p.qual, p.with_check
       FROM pg_policies p
-      WHERE p.schemaname = 'core'
+      WHERE p.schemaname NOT IN ('pg_catalog', 'information_schema')
         AND EXISTS (SELECT 1 FROM information_schema.columns col
-          WHERE col.table_schema = 'core' AND col.table_name = p.tablename
+          WHERE col.table_schema = p.schemaname AND col.table_name = p.tablename
             AND col.column_name = 'tenant_id')
         AND p.policyname = 'tenant_isolation'`;
     expect(filas.length).toBeGreaterThanOrEqual(38);
@@ -62,10 +62,13 @@ describe.skipIf(!urlPropietario)("políticas y referencias del núcleo", () => {
     expect(malas).toEqual([]);
     const extra = await e.admin.$queryRaw<{ n: bigint }[]>`
       SELECT count(*) AS n FROM pg_policies
-      WHERE schemaname = 'core' AND policyname <> 'tenant_isolation' AND policyname <> 'user_self'`;
+      WHERE schemaname NOT IN ('pg_catalog', 'information_schema')
+        AND policyname <> 'tenant_isolation' AND policyname <> 'user_self'`;
     expect(Number(extra[0]?.n)).toBe(0);
   });
 
+  // Pendiente: cuando existan schemas de módulos, extender esta prueba de fugas más allá de `core`
+  // (la de RLS y política ya cubre todos los schemas).
   it("con el tenant A fijado, ninguna tabla devuelve filas de otro tenant", async () => {
     const tablas = await e.admin.$queryRaw<{ tabla: string }[]>`
       SELECT table_name AS tabla FROM information_schema.columns
