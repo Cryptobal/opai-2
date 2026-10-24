@@ -15,7 +15,7 @@ export type MenuProps = {
   /** Cabecera informativa (nombre y correo del usuario). */
   cabecera?: ReactNode;
   /** Dónde se abre respecto del disparador. */
-  lado?: "abajo-derecha" | "arriba-izquierda" | "abajo-izquierda" | "arriba-derecha";
+  lado?: keyof typeof LADO;
   className?: string;
   claseDisparador?: string;
   /** Abierto al montar (la versión diferida lo monta con el primer clic). */

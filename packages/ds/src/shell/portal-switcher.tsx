@@ -10,11 +10,12 @@ import type { Portal, Tenant } from "./types";
 type Props = {
   portales: readonly Portal[];
   portalActual: string;
-  tenant?: Tenant;
-  /** `compacto`: monograma, empresa y portal (teléfono). `monograma`: solo el monograma (barra lateral). */
-  variante?: "compacto" | "monograma";
+  tenant?: Tenant | undefined;
+  /** `compacto`: monograma, empresa y portal (teléfono). `monograma`: solo el monograma (barra
+   *  lateral). `riel`: monograma sobre el portal, en un botón de 64 px (riel de iPad). */
+  variante?: "compacto" | "monograma" | "riel";
   /** Ítems extra al pie (cambiar de empresa). */
-  extra?: readonly ItemMenu[];
+  extra?: readonly ItemMenu[] | undefined;
   className?: string;
 };
 
@@ -37,6 +38,14 @@ export function PortalSwitcher(props: Props) {
   const visual =
     variante === "monograma" ? (
       <Monograma nombre={nombre} className="size-6" />
+    ) : variante === "riel" ? (
+      <>
+        <Monograma nombre={nombre} />
+        <span className="flex max-w-full items-center gap-0.5 text-[11px] leading-[14px] font-semibold text-fg">
+          <span className="truncate">{actual?.etiqueta}</span>
+          <ChevronDown className="size-3 flex-none text-fg-subtle" aria-hidden />
+        </span>
+      </>
     ) : (
       <span className="flex min-w-0 items-center gap-2">
         <Monograma nombre={nombre} />
@@ -61,10 +70,22 @@ export function PortalSwitcher(props: Props) {
     <Menu
       etiqueta={`${nombre} · portal ${actual?.etiqueta ?? ""}. Cambiar de portal o empresa`}
       items={items}
-      lado={variante === "monograma" ? "abajo-derecha" : "abajo-izquierda"}
+      lado={
+        variante === "monograma"
+          ? "abajo-derecha"
+          : variante === "riel"
+            ? "derecha-inicio"
+            : "abajo-izquierda"
+      }
       disparador={visual}
       {...(props.className ? { className: props.className } : {})}
-      claseDisparador={variante === "compacto" ? "min-w-0 justify-start px-1" : "size-11"}
+      claseDisparador={
+        variante === "monograma"
+          ? "size-11"
+          : variante === "riel"
+            ? "h-16 w-16 flex-col gap-1 border border-border bg-bg px-1"
+            : "min-w-0 justify-start px-1"
+      }
     />
   );
 }
