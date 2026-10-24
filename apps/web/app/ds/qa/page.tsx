@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 
 import { Bloque } from "../bloques";
-import { MuestraFormulario, MuestraHojaConFecha, MuestraQaPasada1 } from "./muestra";
+import { MuestraFormulario, MuestraQaPasada1 } from "./muestra";
+import { MuestraHojaConFecha, MuestraPestanas } from "./muestra-pasada5";
 
 export const metadata = { title: "Diseño · QA pasada 1" };
 
@@ -18,6 +19,9 @@ export default function PaginaQa() {
       </Bloque>
       <Bloque titulo="QA pasada 5 · calendario sobre una hoja">
         <MuestraHojaConFecha />
+      </Bloque>
+      <Bloque titulo="QA pasada 5 · pestañas que no caben en el celular">
+        <MuestraPestanas />
       </Bloque>
     </main>
   );
