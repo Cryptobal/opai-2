@@ -3,13 +3,14 @@ import type { ReactNode } from "react";
 import type { Parametros } from "@/lib/parametros";
 import type { PersonaDetalle } from "@/lib/tipos-maestros";
 
-import { cargarPersona } from "./datos";
+import type { cargarPersona } from "./datos";
 import { HojaPersona } from "./diferidas";
 import { FichaPersona, type TabPersona } from "./ficha-persona";
 import { conParametros } from "./lista-personas";
 
 type Props = {
-  id: string;
+  /** Carga de la ficha, iniciada en paralelo con la de la lista. */
+  datos: ReturnType<typeof cargarPersona>;
   p: Parametros;
   tab: TabPersona;
   children: (persona: PersonaDetalle, p: Parametros) => ReactNode | Promise<ReactNode>;
@@ -20,8 +21,8 @@ type Props = {
  * `PaginaPersona` lo envuelva en un Suspense: mientras llegan, solo este panel muestra el esqueleto
  * y la lista de la izquierda ya está en pantalla.
  */
-export async function DetallePersona({ id, p, tab, children }: Props) {
-  const d = await cargarPersona(id);
+export async function DetallePersona({ datos, p, tab, children }: Props) {
+  const d = await datos;
   const contenido = d.persona ? await children(d.persona, p) : null;
   return (
     <>

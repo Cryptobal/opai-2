@@ -3,12 +3,13 @@ import type { ReactNode } from "react";
 import type { Parametros } from "@/lib/parametros";
 import type { InstalacionDetalle } from "@/lib/tipos-maestros";
 
-import { cargarInstalacion } from "./datos";
+import type { cargarInstalacion } from "./datos";
 import { HojaInstalacion } from "./diferidas";
 import { FichaInstalacion, type TabInstalacion } from "./ficha-instalacion";
 
 type Props = {
-  id: string;
+  /** Carga de la ficha, iniciada en paralelo con la de la lista. */
+  datos: ReturnType<typeof cargarInstalacion>;
   p: Parametros;
   tab: TabInstalacion;
   /** Nombre en plural de las personas según la vertical (vocabulario del tenant). */
@@ -17,8 +18,8 @@ type Props = {
 };
 
 /** Panel derecho de una instalación: carga sus datos dentro de su Suspense (la lista no espera por él). */
-export async function DetalleInstalacion({ id, p, tab, persona, children }: Props) {
-  const ficha = await cargarInstalacion(id);
+export async function DetalleInstalacion({ datos, p, tab, persona, children }: Props) {
+  const ficha = await datos;
   return (
     <>
       <FichaInstalacion

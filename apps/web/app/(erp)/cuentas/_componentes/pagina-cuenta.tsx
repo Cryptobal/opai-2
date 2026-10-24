@@ -8,7 +8,7 @@ import { PaginaPortal } from "@/app/_components/pagina-portal";
 import type { Parametros, SearchParams } from "@/lib/parametros";
 import type { CuentaDetalle } from "@/lib/tipos-maestros";
 
-import { cargarCuentas, filtrosDe } from "./datos";
+import { cargarCuenta, cargarCuentas, filtrosDe } from "./datos";
 import { DetalleCuenta } from "./detalle-cuenta";
 import { HojaCuenta } from "./diferidas";
 import type { TabCuenta } from "./ficha-cuenta";
@@ -43,11 +43,13 @@ export function PaginaCuenta({ params, searchParams, tab, acciones, children }: 
       }
       cargar={async () => {
         const [{ id }, p] = await Promise.all([params, filtrosDe(searchParams)]);
-        // Solo la lista: la ficha carga dentro de su propio Suspense.
-        return { id, p, lista: await cargarCuentas(p) };
+        // Solo la lista se espera aquí: la ficha arranca en paralelo y se espera dentro de su propio Suspense.
+        const datos = cargarCuenta(id);
+        datos.catch(() => undefined); // si la lista falla, la promesa no queda sin manejar
+        return { id, p, datos, lista: await cargarCuentas(p) };
       }}
     >
-      {({ id, p, lista }) => (
+      {({ id, p, datos, lista }) => (
         <>
           <SplitScreen
             telefono="detalle"
@@ -55,7 +57,7 @@ export function PaginaCuenta({ params, searchParams, tab, acciones, children }: 
             lista={<ListaCuentas state={lista.state} items={lista.items} seleccionada={id} />}
             detalle={
               <Suspense fallback={<Loading variante="detalle" />}>
-                <DetalleCuenta id={id} p={p} tab={tab}>
+                <DetalleCuenta datos={datos} p={p} tab={tab}>
                   {children}
                 </DetalleCuenta>
               </Suspense>

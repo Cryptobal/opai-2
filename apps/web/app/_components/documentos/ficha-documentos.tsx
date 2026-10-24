@@ -56,7 +56,11 @@ export async function FichaDocumentos({
             {faltantes.map((f) => f.nombre).join(", ")}
           </span>
         ) : null}
-        <EnlaceBotonHoja href={`?subir=1${consulta}`} icono={Upload} className="ml-auto max-md:w-full">
+        <EnlaceBotonHoja
+          href={`?subir=1${consulta}`}
+          icono={Upload}
+          className="ml-auto max-md:w-full"
+        >
           Subir documento
         </EnlaceBotonHoja>
       </div>
@@ -67,9 +71,7 @@ export async function FichaDocumentos({
           vacio: {
             titulo: "Sin documentos",
             descripcion: "Sube contratos, certificados y acreditaciones con su vencimiento.",
-            accion: (
-              <EnlaceBotonHoja href={`?subir=1${consulta}`}>Subir documento</EnlaceBotonHoja>
-            ),
+            accion: <EnlaceBotonHoja href={`?subir=1${consulta}`}>Subir documento</EnlaceBotonHoja>,
           },
         }}
       >
@@ -126,7 +128,11 @@ export async function FichaDocumentos({
                 Obligatorio · nunca se subió. Un documento vencido se renueva en su fila.
               </span>
             </span>
-            <EnlaceBotonHoja href={`?subir=1&tipo=${f.tipoId}${consulta}`} variante="secondary" icono={Upload}>
+            <EnlaceBotonHoja
+              href={`?subir=1&tipo=${f.tipoId}${consulta}`}
+              variante="secondary"
+              icono={Upload}
+            >
               Subir
             </EnlaceBotonHoja>
           </div>

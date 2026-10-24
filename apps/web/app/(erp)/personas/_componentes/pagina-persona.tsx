@@ -9,7 +9,7 @@ import { leerParametros, type Parametros, type SearchParams } from "@/lib/parame
 import type { PersonaDetalle } from "@/lib/tipos-maestros";
 import { hoyIso } from "@/lib/fechas";
 
-import { cargarPersonas } from "./datos";
+import { cargarPersona, cargarPersonas } from "./datos";
 import { DetallePersona } from "./detalle-persona";
 import { HojaPersona } from "./diferidas";
 import type { TabPersona } from "./ficha-persona";
@@ -39,17 +39,18 @@ export function PaginaPersona({ params, searchParams, tab, acciones, children }:
       opciones={(d) => ({
         titulo: "Personas",
         insignia: <SegmentoPersonas activa="personas" plural="Personas" />,
-        acciones:
-          (typeof acciones === "function" ? acciones(d.p) : acciones) ?? (
-            <EnlaceBotonHoja href={conHoja("editar=1", d.p)} icono={Pencil}>
-              Editar
-            </EnlaceBotonHoja>
-          ),
+        acciones: (typeof acciones === "function" ? acciones(d.p) : acciones) ?? (
+          <EnlaceBotonHoja href={conHoja("editar=1", d.p)} icono={Pencil}>
+            Editar
+          </EnlaceBotonHoja>
+        ),
       })}
       cargar={async () => {
         const [{ id }, p] = await Promise.all([params, leerParametros(searchParams)]);
-        // Solo la lista: la ficha y el contenido de la pestaña cargan dentro de su propio Suspense.
-        return { id, p, lista: await cargarPersonas(p) };
+        // Solo la lista se espera aquí: la ficha arranca en paralelo y se espera dentro de su propio Suspense.
+        const datos = cargarPersona(id);
+        datos.catch(() => undefined); // si la lista falla, la promesa no queda sin manejar
+        return { id, p, datos, lista: await cargarPersonas(p) };
       }}
     >
       {(d) => (
@@ -71,7 +72,7 @@ export function PaginaPersona({ params, searchParams, tab, acciones, children }:
             }
             detalle={
               <Suspense fallback={<Loading variante="detalle" />}>
-                <DetallePersona id={d.id} p={d.p} tab={tab}>
+                <DetallePersona datos={d.datos} p={d.p} tab={tab}>
                   {children}
                 </DetallePersona>
               </Suspense>

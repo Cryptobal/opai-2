@@ -9,7 +9,7 @@ import { leerParametros, type Parametros, type SearchParams } from "@/lib/parame
 import type { InstalacionDetalle } from "@/lib/tipos-maestros";
 import { vocabularioActual } from "@/lib/vocabulario";
 
-import { cargarInstalaciones } from "./datos";
+import { cargarInstalacion, cargarInstalaciones } from "./datos";
 import { DetalleInstalacion } from "./detalle-instalacion";
 import type { TabInstalacion } from "./ficha-instalacion";
 import { ListaInstalaciones } from "./lista-instalaciones";
@@ -46,15 +46,17 @@ export function PaginaInstalacion({ params, searchParams, tab, acciones, childre
           leerParametros(searchParams),
           vocabularioActual(),
         ]);
-        // Solo la lista: la ficha carga dentro de su propio Suspense.
-        return { id, p, lista: await cargarInstalaciones(p), voc };
+        // Solo la lista se espera aquí: la ficha arranca en paralelo y se espera dentro de su propio Suspense.
+        const datos = cargarInstalacion(id);
+        datos.catch(() => undefined); // si la lista falla, la promesa no queda sin manejar
+        return { id, p, datos, lista: await cargarInstalaciones(p), voc };
       }}
       opciones={(d) => ({
         titulo: d.voc.titulo("instalacion"),
         volver: { href: "/instalaciones", etiqueta: d.voc.titulo("instalacion") },
       })}
     >
-      {({ id, p, lista, voc }) => (
+      {({ id, p, datos, lista, voc }) => (
         <>
           <SplitScreen
             telefono="detalle"
@@ -71,7 +73,7 @@ export function PaginaInstalacion({ params, searchParams, tab, acciones, childre
             }
             detalle={
               <Suspense fallback={<Loading variante="detalle" />}>
-                <DetalleInstalacion id={id} p={p} tab={tab} persona={voc.titulo("persona")}>
+                <DetalleInstalacion datos={datos} p={p} tab={tab} persona={voc.titulo("persona")}>
                   {children}
                 </DetalleInstalacion>
               </Suspense>

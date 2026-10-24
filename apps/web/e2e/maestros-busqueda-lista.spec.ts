@@ -26,7 +26,7 @@ test.describe("Personas · la búsqueda de la lista no se pierde", () => {
     await entrar(page);
     await page.goto("/personas?q=a");
     const lista = page.getByRole("region", { name: "Lista de personas" });
-    await lista.getByRole("link", { name: /\w/ }).first().click();
+    await lista.locator('a[href^="/personas/"]:not([href*="vencimientos"])').first().click();
     await page.waitForURL(/\/personas\/[0-9a-f-]{36}\?q=a/);
     const id = new URL(page.url()).pathname.split("/")[2];
     const ficha = page.getByRole("region", { name: "Detalle" });

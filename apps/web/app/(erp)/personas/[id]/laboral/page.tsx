@@ -41,7 +41,11 @@ export default function Laboral(props: Props) {
             <div className="flex flex-col gap-4">
               <VinculoVigente p={p} />
               {p.vinculoVigente ? null : (
-                <EnlaceBotonHoja href={`?vinculo=1${consultaExtra(q)}`} variante="secondary" className="self-start">
+                <EnlaceBotonHoja
+                  href={`?vinculo=1${consultaExtra(q)}`}
+                  variante="secondary"
+                  className="self-start"
+                >
                   Nuevo vínculo
                 </EnlaceBotonHoja>
               )}
