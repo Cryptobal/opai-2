@@ -1,6 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { obtenerCapacidad, type Resultado } from "@opai/capabilities";
@@ -22,7 +23,11 @@ export async function ejecutarCapacidad(
   if (!capacidad || capacidad.interna) {
     return { ok: false, error: { code: "NOT_FOUND", message: `Capacidad "${id}" no existe.` } };
   }
-  return ejecutarComoUsuario(portal, id, input, dryRun);
+  const r = await ejecutarComoUsuario(portal, id, input, dryRun);
+  // Una escritura real vacía la caché del navegador (staleTimes, ADR-045 decisión 16): lo que se
+  // volvió a visitar después de escribir nunca muestra datos anteriores.
+  if (r.ok && !dryRun && capacidad.efecto !== "lectura") revalidatePath("/", "layout");
+  return r;
 }
 
 /** Cambia la empresa actual (solo entre membresías utilizables) y va al destino (interno). */

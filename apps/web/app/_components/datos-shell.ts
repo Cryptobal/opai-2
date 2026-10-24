@@ -31,6 +31,7 @@ export function datosShell(
   return {
     portal,
     noLeidas: contadores.notificacionesNoLeidas ?? 0,
+    generado: Date.now(),
     nav,
     portales: portalesVisibles(actual?.portales ?? [], plataforma),
     tenant:

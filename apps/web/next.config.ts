@@ -19,8 +19,13 @@ const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
   // Presupuesto de JS (ADR-037): el barrel del DS se resuelve a sus módulos para que cada ruta
-  // cargue solo los componentes que usa.
-  experimental: { optimizePackageImports: ["@opai/ds"] },
+  // cargue solo los componentes que usa. staleTimes: lo ya visitado se muestra al instante durante
+  // 5 min y se refresca en segundo plano (`RefrescoSilencioso`); las escrituras desde la UI y los
+  // cambios de empresa o sesión vacían la caché.
+  experimental: {
+    optimizePackageImports: ["@opai/ds"],
+    staleTimes: { dynamic: 300, static: 300 },
+  },
   // Paquetes del monorepo consumidos como fuente TypeScript.
   transpilePackages: [
     "@opai/ds",
