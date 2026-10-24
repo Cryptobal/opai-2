@@ -1,7 +1,7 @@
 "use client";
 
 import { Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
+import { useId, useState } from "react";
 
 import { cn } from "../cn";
 import { Button } from "./button";
@@ -21,6 +21,7 @@ type Props = {
  * (`••••••••1234`) y solo admite "Reemplazar". Nunca vuelve a mostrar el valor.
  */
 export function CampoSecreto({ id, guardado, onGuardar, placeholder, pendiente, ...a }: Props) {
+  const auto = useId();
   const [editando, setEditando] = useState(!guardado);
   const [valor, setValor] = useState("");
   const [visible, setVisible] = useState(false);
@@ -48,7 +49,7 @@ export function CampoSecreto({ id, guardado, onGuardar, placeholder, pendiente, 
       <div className="flex gap-2">
         <span className="relative min-w-0 flex-1">
           <input
-            id={id}
+            id={id ?? auto}
             type={visible ? "text" : "password"}
             value={valor}
             autoComplete="off"
