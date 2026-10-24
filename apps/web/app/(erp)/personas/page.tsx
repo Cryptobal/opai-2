@@ -5,7 +5,6 @@ import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { leerParametros, type SearchParams } from "@/lib/parametros";
 import { hoyIso } from "@/lib/fechas";
-import { vocabularioActual } from "@/lib/vocabulario";
 
 import { cargarPersonas } from "./_componentes/datos";
 import { HojaPersona } from "./_componentes/diferidas";
@@ -32,16 +31,16 @@ export default function Personas({ searchParams }: { searchParams: SearchParams 
         </EnlaceBoton>
       }
       cargar={async () => {
-        const [p, voc] = await Promise.all([leerParametros(searchParams), vocabularioActual()]);
-        return { ...(await cargarPersonas(p)), p, voc };
+        const p = await leerParametros(searchParams);
+        return { ...(await cargarPersonas(p)), p };
       }}
-      opciones={(d) => ({
+      opciones={() => ({
         titulo: "Personas",
         insignia: <SegmentoPersonas activa="personas" plural="Personas" />,
         acciones: (
           <>
             <EnlaceBotonHoja href="?nueva=1" icono={Plus}>
-              Agregar {d.voc.persona.singular}
+              Agregar persona
             </EnlaceBotonHoja>
           </>
         ),
@@ -59,7 +58,7 @@ export default function Personas({ searchParams }: { searchParams: SearchParams 
             p={d.p}
             titulo="Personas"
           />
-          <HojaPersona cargos={d.cargos} hoy={hoyIso()} termino={d.voc.persona.singular} />
+          <HojaPersona cargos={d.cargos} hoy={hoyIso()} />
         </>
       )}
     </PaginaPortal>
