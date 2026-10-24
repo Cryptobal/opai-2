@@ -45,7 +45,8 @@ Las **bases transversales** (rendimiento, PWA, navegación) aplican a todo brief
 |---|---|---|
 | Extracción | `extraccion/comercial-y-cpq.md` | Hecho |
 | ADR | 040, 041 y 042 | Vigentes (041 y 042 aprobados el 23 y 24-oct) |
-| Especificación | `modulos/comercial.md` y `modulos/cpq.md` | Pendiente |
+| Especificación | `modulos/comercial.md` | Borrador para aprobación de Carlos (24-oct) |
+| Especificación | `modulos/cpq.md` | Pendiente |
 | Especificación | `modulos/documentos.md` (explorador, editor, plantillas, firma simple) | Pendiente |
 | Design Prompt | Comercial y CPQ; Documentos | Pendiente |
 | **06** | **Núcleo comercial**: contactos por persona con vínculos a N cuentas (migración aditiva), etiquetas (incluye migrar `documentos.etiquetas`), actividades, ficha declarativa (ADR-041), catálogos declarativos en Configuración, fusión y transferencia | Pendiente |
