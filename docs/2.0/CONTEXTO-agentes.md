@@ -17,7 +17,7 @@ Carlos decidió construir **OPAI 2.0 desde cero**: un SaaS modular, multi-tenant
 ## Cómo se trabaja
 
 - Flujo con bots (ADR-043, modifica ADR-035):
-  - **Bot «OPAI 2.0»** (orquestador): prepara los prompts de cada encargo según `ROADMAP.md`, opera los chats de construcción, revisión y QA, e **integra a `main` con squash** cuando el Revisor escribió APROBAR sin condiciones citando el SHA del head actual, los checks obligatorios están en verde sobre ese SHA, la rama no está «behind» y, si el PR toca pantallas, no hay nada con la etiqueta `qa-bloqueante`; no integra si hay un «VETO» o la etiqueta `veto` de Carlos; le avisa a Carlos después de cada merge (ADR-043 v3, 24-oct).
+  - **Bot «OPAI 2.0»** (orquestador): prepara los prompts de cada encargo según `ROADMAP.md`, opera los chats de construcción, revisión y QA, e **integra a `main` con squash** cuando el Revisor escribió APROBAR sin condiciones citando el SHA del head actual, los checks obligatorios están en verde sobre ese SHA, la rama no está «behind» y, si el PR toca pantallas, no hay nada con la etiqueta `qa-bloqueante`; no integra si hay un veto vigente o la etiqueta `migracion-pendiente`, con la regla de autoría de `AGENTS.md` («Veto y migración pendiente»); le avisa a Carlos después de cada merge (ADR-043 v3, 24-oct).
   - **Claude** (proyecto «OPAI 2.0» en claude.ai): escribe la especificación y el brief, construye en una rama y **abre el PR; nunca integra**.
   - **Bot «Revisor OPAI 2.0»**: revisa el PR con el modelo contrario al que construyó; aprueba o pide cambios; **no integra** (ADR-043 v3).
   - **Bot de Paridad**: compara 1.0 y 2.0 en solo lectura y reporta brechas (`docs/2.0/checklists/paridad.md`).

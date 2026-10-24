@@ -65,7 +65,7 @@ Un PR está terminado cuando:
 - Aplicar migraciones fuera de un PR, o contra un entorno que el brief no indique. Las migraciones de Neon las aplica Carlos desde su Mac.
 - Force-push, rebase, reescribir historia o borrar ramas ajenas sin el OK explícito de Carlos. Para traer `main` a una rama se usa merge. Nunca push directo a `main`.
 - `prisma migrate reset`, borrar migraciones, desactivar o saltar tests para lograr el verde, y `--no-verify`.
-- Que un bot o agente escriba comentarios `VETO` o `VETO LEVANTADO`, o ponga o quite las etiquetas `veto` y `migracion-pendiente`. Única excepción: quien abre un PR con migración pone `migracion-pendiente` (ver «Integración a `main`»).
+- Que un bot o agente escriba comentarios `VETO` o `VETO LEVANTADO`, o ponga o quite las etiquetas `veto` y `migracion-pendiente`, por ningún medio (app, `gh`, la API o un PAT de `Cryptobal`). Única excepción: quien abre un PR con migración pone `migracion-pendiente` (ver «Integración a `main`»).
 
 ## Roles
 
@@ -89,9 +89,9 @@ Un PR está terminado cuando:
 
 1. Carlos veta un PR con un comentario cuya primera línea es exactamente `VETO`, o con la etiqueta `veto`. Lo levanta quitando la etiqueta o con un comentario posterior cuya primera línea es exactamente `VETO LEVANTADO`.
 2. Un PR con migraciones nuevas en `packages/db/prisma/migrations/` lleva la etiqueta `migracion-pendiente`, que pone quien abre el PR. Solo Carlos la quita, después de aplicar la migración en Neon `dev` y `main`.
-3. Solo cuentan los comentarios y cambios de etiqueta sin `performed_via_github_app`, es decir, hechos a mano desde la web o la app de GitHub y no a través de una app o integración. La cuenta `Cryptobal` la usan Carlos y los bots, así que la cuenta sola no basta. Un evento que no cumple la regla no levanta un veto ni retira una migración pendiente.
-4. Ningún bot ni agente escribe comentarios `VETO` o `VETO LEVANTADO` ni pone o quita las etiquetas `veto` y `migracion-pendiente`. Única excepción: quien abre un PR con migración pone `migracion-pendiente`.
-5. Antes de integrar, el bot «OPAI 2.0» revisa con esta regla los comentarios del PR y el historial de sus etiquetas. No integra si hay un veto vigente, si `migracion-pendiente` está puesta, si el PR trae migraciones nuevas y la etiqueta falta o no la quitó un evento válido, o si no puede verificarlo.
+3. Lo que bloquea cuenta siempre, venga de donde venga: un comentario `VETO`, la etiqueta `veto` o la etiqueta `migracion-pendiente`. Para levantar (quitar `veto`, comentar `VETO LEVANTADO` o quitar `migracion-pendiente`) solo cuentan los eventos sin `performed_via_github_app`. Ese campo excluye lo hecho por apps como «claude»; lo hecho con `gh`, la API o un PAT de la cuenta `Cryptobal` no se distingue de un clic de Carlos, y por eso lo prohíbe la regla 4. La cuenta `Cryptobal` la usan Carlos y los bots, así que la cuenta sola no basta. Un evento que no cumple la regla no levanta un veto ni retira una migración pendiente.
+4. Ningún bot ni agente escribe comentarios `VETO` o `VETO LEVANTADO` ni pone o quita las etiquetas `veto` y `migracion-pendiente`, por ningún medio (app, `gh`, la API o un PAT de `Cryptobal`). Única excepción: quien abre un PR con migración pone `migracion-pendiente`.
+5. Antes de integrar, el bot «OPAI 2.0» revisa con esta regla los comentarios del PR y el historial de sus etiquetas. No integra si hay un veto vigente, si `migracion-pendiente` está puesta, si el PR trae migraciones nuevas y la etiqueta no está sin que su última retirada sea un evento válido (incluido el caso en que nunca se puso), o si no puede verificarlo.
 
 - **Sin excepciones; decisión de Carlos del 24-oct-2026.** Todo PR se integra con las mismas tres condiciones, también los que cambian esta regla (incluido el PR #28), suben topes de JS o tocan seguridad, autenticación, RLS, migraciones, CI, workflows, el ruleset, la infraestructura o el despliegue. No hace falta que Carlos integre ni un OK adicional suyo; solo se mantienen su veto y la espera por una migración de Neon pendiente.
 - **BLOQUEANTE:** Diseño y QA revisa en `test.opai.cl` después del merge; un BLOQUEANTE se registra con la etiqueta `qa-bloqueante` y un comentario «QA: BLOQUEANTE» en el PR integrado donde se encontró, y frena los merges de PRs que tocan pantallas hasta que la corrección esté integrada y verificada y se quite la etiqueta.
