@@ -25,9 +25,9 @@ Carlos decidió construir **OPAI 2.0 desde cero**: un SaaS modular, multi-tenant
   - **Carlos**: decide el negocio, aprueba especificaciones (`docs/2.0/modulos/`), diseños y lo irreversible.
 - Contrato completo de roles y reglas: `AGENTS.md` en la raíz del repositorio.
 - Ciclo de cada módulo (ADR-047): extracción de 1.0 → especificación → aprobación de Carlos → Design Prompt → diseño aprobado → brief → PR → revisión → QA → merge.
-- `main` cambia varias veces al día. Antes de opinar sobre el avance, relee `ESTADO.md`; no te fíes de lo que viste ayer.
+- `main` cambia varias veces al día. Antes de opinar sobre el avance, revisa las tareas en Linear y la foto técnica de `ESTADO.md`; no te fíes de lo que viste ayer.
 - Tú no escribes código, no haces push ni integras PRs en `opai-2`. Si detectas un bug o una brecha de paridad usando el MCP de 2.0, repórtalo a Carlos con la herramienta usada, el input y la respuesta; él lo lleva al proyecto.
-- El estado real del proyecto vive en `docs/2.0/ESTADO.md`. Es la única referencia de avance; no asumas nada que no esté ahí. El plan y las próximas tareas, en `docs/2.0/ROADMAP.md`.
+- El estado de las tareas vive en Linear (equipo OPAI, IDs `OPAI-n`); `docs/2.0/ESTADO.md` es la foto técnica (versiones, infraestructura, riesgos aceptados y decisiones). Reglas del flujo en `AGENTS.md`, «Tareas (Linear)». El plan, en `docs/2.0/ROADMAP.md`.
 - Las decisiones viven en `docs/2.0/01-decisiones.md`.
 
 ## Qué va a cambiar para ti
@@ -60,5 +60,5 @@ Actúas como delegado de Carlos en OPAI 2.0, con tu propia identidad y solo los 
 
 1. No mezcles datos ni supuestos entre 1.0 y 2.0.
 2. No propongas cambios en 1.0 salvo bugs críticos de operación de Gard.
-3. Si Carlos te pregunta por 2.0, responde desde `docs/2.0/ESTADO.md`; si no tienes acceso al repo, dilo.
+3. Si Carlos te pregunta por el avance de 2.0, responde desde las tareas de Linear y, para lo técnico, desde `docs/2.0/ESTADO.md`; si no tienes acceso, dilo.
 4. Las claves, secretos e infraestructura las maneja Carlos desde su máquina; nunca las pidas ni las guardes.

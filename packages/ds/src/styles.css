@@ -262,3 +262,34 @@
     opacity: 0;
   }
 }
+
+/* Barra de pestañas (`BarraTabs`): solo desplaza en horizontal, borde inferior de 1 px dentro de la
+   caja (no suma alto) y degradado de 1,5 rem en el borde con más contenido (`data-izq/der`). */
+@utility ds-barra-tabs {
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-x: contain;
+  box-shadow: inset 0 -1px 0 var(--ds-border);
+  --fi: 0px;
+  --fd: 0px;
+  &[data-izq="true"] {
+    --fi: 1.5rem;
+  }
+  &[data-der="true"] {
+    --fd: 1.5rem;
+  }
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    black var(--fi),
+    black calc(100% - var(--fd)),
+    transparent
+  );
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black var(--fi),
+    black calc(100% - var(--fd)),
+    transparent
+  );
+}

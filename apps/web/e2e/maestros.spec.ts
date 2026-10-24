@@ -55,7 +55,7 @@ test.describe("maestros con sesión", () => {
     test.skip(info.project.name !== "ipad", "La escritura se prueba una vez (iPad)");
     await entrar(page);
     await page.goto("/personas?nueva=1");
-    const dialogo = page.getByRole("dialog", { name: "Nueva persona" });
+    const dialogo = page.getByRole("dialog", { name: "Agregar persona" });
     await expect(dialogo).toBeVisible();
     await dialogo.getByLabel("Nombres").fill("Prueba");
     await dialogo.getByLabel("Apellidos").fill(`E2E ${Date.now()}`);
