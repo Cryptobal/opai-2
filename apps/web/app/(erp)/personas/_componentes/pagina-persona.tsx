@@ -13,6 +13,7 @@ import { cargarPersona, cargarPersonas } from "./datos";
 import { HojaPersona } from "./diferidas";
 import { FichaPersona, type TabPersona } from "./ficha-persona";
 import { ListaPersonas } from "./lista-personas";
+import { SegmentoPersonas } from "./segmento";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -32,7 +33,12 @@ export function PaginaPersona({ params, searchParams, tab, acciones, children }:
       ruta="/personas"
       completo
       cargando="detalle"
+      volver={{ href: "/personas", etiqueta: "Personas" }}
       volverSoloTelefono
+      opciones={() => ({
+        titulo: "Personas",
+        insignia: <SegmentoPersonas activa="personas" plural="Personas" />,
+      })}
       acciones={
         acciones ?? (
           <EnlaceBotonHoja href="?editar=1" icono={Pencil}>
