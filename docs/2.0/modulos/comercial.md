@@ -62,11 +62,13 @@ Las notas no son pestaña: se escriben en el compositor sobre Actividad (nota, l
 - En el celular: bandeja de solicitudes, derivar, convertir y descartar; mover un negocio de etapa; registrar llamada, nota o tarea; ver fichas.
 - En iPad y escritorio: el embudo con arrastre, la importación, la configuración del embudo y los reportes.
 
-El embudo en el celular se muestra como lista agrupada por etapa con un selector de etapa.
+El embudo en el celular se muestra como lista agrupada por etapa con un selector de etapa. Barra inferior para quien tiene «Comercial» como área principal (`NAVEGACION.md` §3): Inicio · Negocios · Cuentas · Buscar · Más.
 
 ## 4. Campos y validaciones
 
 **Solicitud**
+
+Ningún campo de esta sección es visible para el cliente ni para el trabajador en la v1 (el Portal Cliente, fase 3, mostrará solo cuenta, instalaciones y documentos propios).
 
 | Campo | Tipo | Oblig. | Validación | Quién lo edita |
 |---|---|---|---|---|
@@ -95,7 +97,7 @@ El embudo en el celular se muestra como lista agrupada por etapa con un selector
 | Inicio de servicio estimado | Fecha | Según la etapa | ≥ hoy | Comercial |
 | Instalaciones | 1..N con tipo | Al menos una para pasar de la primera etapa (R10) | Todas de la cuenta del negocio | Comercial |
 | Contactos | N con rol (`decisor`, `tecnico`, `compras`, `usuario`) y un principal | Uno para enviar cotización | Vinculados a la cuenta (R16) | Comercial |
-| Motivo de pérdida | Catálogo cerrado + detalle | Al perder | Detalle obligatorio en `otro`; competidor opcional | Comercial |
+| Motivo de pérdida | Catálogo cerrado: `precio`, `cobertura`, `plazo`, `sin_respuesta`, `competencia`, `no_califica`, `otro` | Al perder | Detalle obligatorio en `otro`; competidor opcional | Comercial |
 
 **Contacto (persona) y vínculo con la cuenta**
 
@@ -103,7 +105,7 @@ El embudo en el celular se muestra como lista agrupada por etapa con un selector
 |---|---|---|---|
 | Nombres, apellidos | Texto | Nombres sí | — |
 | Correo | Correo | No | Minúsculas, sin espacios; **único en la empresa** (R14) |
-| Teléfono | Teléfono | No | Normalizado a formato internacional |
+| Teléfono | Teléfono | No | Normalizado a E.164 |
 | Cargo en la cuenta | Texto | No | Por vínculo |
 | Roles en la cuenta | Varios de `comercial`, `operacional`, `facturacion`, `cobranza`, `cesion` | No | Por vínculo |
 | Principal de la cuenta | Sí/no | — | Uno por cuenta (R15) |
@@ -134,7 +136,7 @@ El embudo en el celular se muestra como lista agrupada por etapa con un selector
   - cotización enviada;
   - inicio del servicio;
   - motivo de pérdida.
-  Mover un negocio a una etapa cuyos requisitos no se cumplen se rechaza con el detalle de lo que falta (persona o agente). Retroceder de etapa siempre se permite, salvo desde ganada (R20).
+  Mover un negocio a una etapa cuyos requisitos no se cumplen se rechaza con el detalle de lo que falta (persona o agente). Retroceder entre etapas abiertas siempre se permite. Desde la etapa perdida solo se sale reabriendo con motivo, y desde la ganada no se sale (R20). Perder un negocio es siempre la acción «Perder» con motivo; mover a la etapa perdida por arrastre abre esa misma acción.
 - **R10.** Para salir de la primera etapa el negocio debe tener al menos una instalación vinculada.
 - **R11.** Cada cambio de etapa queda en el historial con quién, cuándo y cuántos días estuvo en la etapa anterior.
 - **R12.** El monto del negocio es el valor mensual de la cotización vigente, que escribe CPQ. Mientras no haya cotización vigente se usa el monto estimado manual, que deja de ser editable cuando aparece una vigente.
@@ -163,7 +165,7 @@ El embudo en el celular se muestra como lista agrupada por etapa con un selector
 - **R22.** OPAI sugiere duplicados al crear:
   - cuentas, por RUT o nombre canónico;
   - contactos, por correo, o por teléfono y nombre si no hay correo;
-  - instalaciones de una cuenta, por la misma dirección o a menos de 50 m.
+  - instalaciones de una cuenta, por el mismo lugar de Google (`place_id`) o a menos de 50 m.
   Las sugerencias avisan, no bloquean (salvo el correo duplicado, que vincula).
 - **R23.** Fusionar dos cuentas o dos contactos mueve todo a la ganadora: vínculos, instalaciones, documentos, etiquetas y actividades. La perdedora queda archivada y la fusión registrada. Es irreversible: un agente necesita aprobación humana.
 - **R24.** Transferir una instalación a otra cuenta, por cambio de razón social o de mandante, conserva la instalación, sus puestos y sus documentos. Exige motivo. Los negocios anteriores se quedan en la cuenta original. Un agente necesita aprobación humana.
@@ -192,7 +194,7 @@ El embudo en el celular se muestra como lista agrupada por etapa con un selector
 | Abierta | Otra abierta | Comercial o agente | Requisitos de la etapa (R9, R10) | Historial (R11) | Sí |
 | Abierta | Ganada | Comercial; agente con aprobación humana | Requisitos de la etapa (Gard: inicio de servicio y cotización enviada) | R18 | No (R20) |
 | Abierta | Perdida | Comercial o agente | Motivo de pérdida | R19 | Sí, reabriendo |
-| Perdida | Abierta | Comercial; agente con aprobación humana | Motivo de reapertura | Historial | Sí |
+| Perdida | Abierta | Comercial o agente | Motivo de reapertura | Historial | Sí |
 | Cualquiera | Archivado | owner o admin | Sin cotizaciones abiertas | Desaparece de listas por defecto | Sí |
 
 ## 7. Permisos por rol y portal
@@ -203,18 +205,21 @@ El embudo en el celular se muestra como lista agrupada por etapa con un selector
 | Crear, derivar, convertir, descartar solicitudes | ✓ | ✓ | ✓ | — | — | — | — | ✓ con vista previa |
 | Crear y editar negocios; mover de etapa | ✓ | ✓ | ✓ | — | — | — | — | ✓ con vista previa |
 | Ganar un negocio | ✓ | ✓ | ✓ | — | — | — | — | Aprobación humana |
-| Reabrir, archivar | ✓ | ✓ | reabrir sí, archivar no | — | — | — | — | Aprobación humana |
+| Reabrir | ✓ | ✓ | ✓ | — | — | — | — | ✓ con vista previa |
+| Archivar negocio | ✓ | ✓ | ✓ | — | — | — | — | ✓ con vista previa |
 | Crear y editar cuentas, contactos e instalaciones | ✓ | ✓ | ✓ | lectura de lo suyo (alcance) | lectura | lectura de su cuenta (fase 3) | — | ✓ con vista previa |
-| Fusionar cuentas o contactos; transferir instalación | ✓ | ✓ | — | — | — | — | — | Aprobación humana |
+| Fusionar cuentas o contactos; transferir instalación | ✓ | ✓ | ✓ (ver §14, pregunta 11) | — | — | — | — | Aprobación humana |
 | Configurar embudo, catálogos y etiquetas | ✓ | ✓ | — | — | — | — | — | — |
 | Importar desde 1.0 | ✓ | ✓ | — | — | — | — | — | — |
 | Reportes comerciales | ✓ | ✓ | ✓ | — | ✓ | — | — | ✓ lectura |
 
 Alcance de filas en la v1: quien tiene Comercial ve **todos** los negocios de la empresa. «Solo mis negocios» queda como pregunta abierta (§14). Ver montos de negocios no está sujeto al bloqueo financiero de ADR-016: es información comercial, no contable.
 
+Nota para el brief: hoy `packages/domain/src/permisos.ts` niega al supervisor `crm:*` y `cpq:*`; el módulo se llamará `comercial`, así que el brief alinea esa denegación (`comercial:*`) y sus tests (`permisos.test.ts` usa `crm:read`).
+
 ## 8. Eventos y notificaciones
 
-Silencio por defecto (ADR-020): ninguno se envía hasta que el tenant lo activa en Configuración → Comunicaciones. Los marcados «recomendado» se proponen activos para Gard en la configuración inicial.
+Silencio por defecto (ADR-020): ninguno se envía hasta que el tenant lo activa en Configuración → Comunicaciones. Los marcados «recomendado» son la propuesta para Gard: no se activan solos; Carlos o el tenant los activa en Configuración → Comunicaciones.
 
 | Evento | Cuándo ocurre | Quién se entera (recomendado) | Canal | Plantilla |
 |---|---|---|---|---|
@@ -235,17 +240,21 @@ Silencio por defecto (ADR-020): ninguno se envía hasta que el tenant lo activa 
 | Herramienta | Qué hace | Efecto | Vista previa | Aprobación humana |
 |---|---|---|---|---|
 | `comercial_solicitudes_list` / `get` | Ver la bandeja y una solicitud (texto marcado externo) | Lectura | — | — |
-| `comercial_solicitudes_crear` | Registrar una solicitud que llegó por otro canal | Escritura | ✓ | — |
-| `comercial_solicitudes_derivar` / `descartar` | Asignar responsable o descartar con motivo | Escritura | ✓ | — |
+| `comercial_solicitudes_create` | Registrar una solicitud que llegó por otro canal | Escritura | ✓ | — |
+| `comercial_solicitudes_derivar` / `descartar` / `reabrir` | Asignar responsable, descartar con motivo (uno o varios a la vez) o devolver a revisión | Escritura | ✓ | — |
+| `comercial_solicitudes_enlazar_duplicada` | Marcar una solicitud como duplicada de otra | Escritura | ✓ | — |
 | `comercial_solicitudes_convertir` | Crear cuenta, contacto y negocio desde la solicitud | Escritura | ✓ (muestra qué reutiliza y qué crea) | — |
 | `comercial_negocios_list` / `get` / `embudo` | Lista con filtros, ficha y resumen del embudo | Lectura | — | — |
-| `comercial_negocios_crear` / `actualizar` | Crear y editar un negocio | Escritura | ✓ | — |
-| `comercial_negocios_mover` | Cambiar de etapa (valida requisitos) | Escritura | ✓ | Solo hacia ganada |
-| `comercial_negocios_perder` / `reabrir` | Perder con motivo; reabrir | Escritura | ✓ | Reabrir sí |
+| `comercial_negocios_create` / `update` | Crear y editar un negocio | Escritura | ✓ | — |
+| `comercial_negocios_mover` | Cambiar entre etapas abiertas o a la ganada (valida requisitos) | Escritura | ✓ | Solo hacia ganada |
+| `comercial_negocios_perder` / `reabrir` / `archivar` | Perder con motivo; reabrir con motivo; archivar | Escritura | ✓ | — |
 | `comercial_negocios_vincular_instalacion` / `desvincular_instalacion` | Instalaciones del negocio con su tipo | Escritura | ✓ | — |
 | `comercial_negocios_set_contactos` | Contactos del negocio con rol | Escritura | ✓ | — |
+| `core_instalaciones_archivar` | Confirmar el archivo propuesto de una instalación prospecto (R19) | Escritura | ✓ | — |
+| `core_cuentas_set_estado` | Pasar una cuenta a cliente inactivo (R21) | Escritura | ✓ | — |
+| `core_config_*` (catálogos declarativos) | Leer y editar el embudo, tipos de negocio y orígenes | Escritura | ✓ | — |
 | `comercial_reportes_*` | Embudo, pérdidas por motivo, ventas por mes y origen | Lectura | — | — |
-| `core_contactos_*` (incl. `vincular`, `desvincular`, `set_roles`, `fusionar`) | Personas y sus vínculos con cuentas | Escritura | ✓ | Fusionar sí |
+| `core_contactos_*` (incl. `vincular`, `desvincular`, `set_roles`, `fusionar`; verbos `create`/`update` como el resto del núcleo) | Personas y sus vínculos con cuentas | Escritura | ✓ | Fusionar sí |
 | `core_cuentas_fusionar`, `core_instalaciones_transferir` | Fusión y transferencia | Irreversible | ✓ | Sí |
 | `core_actividades_*` | Registrar notas, llamadas, reuniones y tareas; completar tareas | Escritura | ✓ | — |
 | `core_etiquetas_*` | Crear, asignar y quitar etiquetas (en lote) | Escritura | ✓ | — |
@@ -258,13 +267,15 @@ Silencio por defecto (ADR-020): ninguno se envía hasta que el tenant lo activa 
 4. Registrar la primera respuesta como actividad.
 5. Crear la tarea de seguimiento.
 
+La importación desde 1.0 no tiene herramienta MCP: es una operación única de owner o admin con credenciales de 1.0, y se declara en `paridad-excepciones.ts` como `soloPersonas` con ese motivo.
+
 El agente se detiene antes de ganar, fusionar o transferir. Se documenta en `docs/2.0/agentes/operar-comercial.md`, con su escenario de prueba.
 
 ## 10. Integraciones
 
 - **Formulario web y correo de entrada.** Un endpoint por tenant con clave propia recibe solicitudes del sitio web (gard.cl u otro), y una dirección de correo de entrada las crea desde mensajes. Modalidad: propia del tenant, con el dominio y la clave configurados en Integraciones.
 - **WhatsApp.** En la v1 se registra como actividad o se convierte en solicitud por un agente; no hay lectura automática de WhatsApp.
-- **Geolocalización.** Para direcciones de instalaciones prospecto, por el servicio del núcleo con la clave del tenant (ADR-027). Se mide en consumos.
+- **Geolocalización.** Para direcciones de instalaciones prospecto, por el servicio del núcleo (ADR-027): con la clave propia del tenant (hoy Gard usa la suya; no hay clave de plataforma por diseño). Se mide en consumos.
 - **OPAI 1.0.** La importación inicial y la sincronización 2.0 → 1.0 usan la API existente de 1.0, con una key dedicada que pone Carlos. La conciliación es diaria y de solo lectura.
 - **Correo saliente.** Avisos y plantillas por el adaptador de correo del tenant (Resend por defecto).
 
@@ -307,7 +318,7 @@ El agente se detiene antes de ganar, fusionar o transferir. Se documenta en `doc
 - Una etapa con negocios se quiere eliminar: se ofrece mover los negocios a otra etapa y archivarla.
 - Dos personas mueven el mismo negocio a la vez: gana la primera y la segunda recibe el cambio con aviso, sin pisar datos.
 - Un agente intenta ganar un negocio: queda en la cola de aprobaciones con la vista previa del efecto.
-- Alguien edita una cuenta en 1.0 después del corte: la sincronización siguiente sobrescribe ese cambio y el control diario lo reporta.
+- Alguien edita una cuenta en 1.0 después del corte: la conciliación diaria detecta y reporta la diferencia; el cambio en 1.0 se sobrescribe cuando ese registro vuelve a sincronizarse desde 2.0.
 - La importación encuentra un negocio de 1.0 sin instalación identificable: se importa sin instalación (queda en la primera etapa) y va al reporte.
 - Un contacto sin correo aparece dos veces: OPAI sugiere fusionar por teléfono y nombre, sin fusionar solo.
 - Una solicitud es spam masivo: se descarta en lote con motivo `spam`.
@@ -326,6 +337,9 @@ El agente se detiene antes de ganar, fusionar o transferir. Se documenta en `doc
 - **CA10.** La importación desde 1.0 en simulación entrega un reporte con cuentas, contactos unificados, instalaciones, negocios, historial de etapas y actividades, más la lista de lo que no pudo resolver. La importación real deja los mismos números.
 - **CA11.** Después de la importación, un cambio en una cuenta de 2.0 aparece en 1.0. La conciliación diaria no reporta diferencias durante dos semanas.
 - **CA12.** La navegación entre Negocios, Cuentas y Contactos cumple las metas de ADR-045 (respuesta visible < 100 ms; datos < 1 s en 4G). El embudo y las fichas se ven bien a 375, 1024 y 1280 px.
+- **CA13.** Perder un negocio exige un motivo del catálogo (y detalle en «otro»). Reabrirlo exige motivo y deja ambos cambios en el historial.
+- **CA14.** Una persona con permiso fusiona dos cuentas duplicadas y transfiere una instalación a otra cuenta. Todo lo vinculado queda en la ganadora o en la cuenta nueva, y la auditoría registra quién, cuándo y por qué.
+- **CA15.** La configuración del embudo no permite guardar un embudo sin exactamente una etapa ganada y una perdida, ni eliminar una etapa con negocios.
 
 ## 14. Preguntas abiertas
 
@@ -362,6 +376,8 @@ Cerradas, con recomendación.
 
    Recomendación: **esos tres más la exportación**.
 10. **¿Los correos con clientes se registran solos?** Recomendación: **no en la v1**. OPAI no es cliente de correo (ADR-032): una persona o un agente registra el correo como actividad.
+
+11. **¿El gerente puede fusionar cuentas o contactos y transferir instalaciones?** Ningún ADR lo restringe hoy (ADR-016 le da escritura comercial). Recomendación: **sí**, porque son tareas de mantenimiento comercial y quedan en la auditoría. Si prefieres reservarlas a owner y admin, se agrega la denegación al rol.
 
 ## Historial
 
