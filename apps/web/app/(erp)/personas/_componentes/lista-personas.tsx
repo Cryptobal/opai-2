@@ -1,13 +1,11 @@
 import { Plus } from "lucide-react";
 
-import { Avatar, Badge, type EstadoPantalla, ListScreen } from "@opai/ds";
+import { Avatar, Badge, type EstadoPantalla } from "@opai/ds";
 
-import { LinkNext } from "@/app/_components/link-next";
-import { Buscador } from "@/app/_components/maestros/buscador";
-import { ChipsFiltro } from "@/app/_components/maestros/chips-filtro";
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
-import { ESTADO_PERSONA, estadoDe, TIPO_CONTRATO } from "@/app/_components/maestros/estados";
-import { fecha, rut } from "@/lib/fechas";
+import { ESTADO_PERSONA, estadoDe } from "@/app/_components/maestros/estados";
+import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
+import { rut } from "@/lib/fechas";
 import type { Parametros } from "@/lib/parametros";
 import type { PersonaFila } from "@/lib/tipos-maestros";
 
@@ -22,119 +20,81 @@ type Props = {
   total: number | null;
   p: Parametros;
   titulo: string;
+  seleccionada?: string;
 };
 
 const estadoVisible = (x: PersonaFila) =>
   estadoDe(ESTADO_PERSONA, x.bloqueada ? "bloqueada" : x.estado);
 
-export const contrato = (x: PersonaFila) => {
-  const v = x.vinculoVigente;
-  if (!v) return "—";
-  const tipo = TIPO_CONTRATO[v.tipo] ?? v.tipo;
-  return v.termino ? `${tipo} hasta ${fecha(v.termino)}` : tipo;
-};
-
-/** Personas (10, 53, 54): tabla en md+, lista agrupada por letra en teléfono. */
+/** Columna de personas (10, 53): avatar, nombre, "cargo · RUT" y estado o semáforo de documentos. */
 export function ListaPersonas(x: Props) {
   const nueva = (
-    <EnlaceBotonHoja href="?nueva=1" icono={Plus}>
+    <EnlaceBotonHoja href="?nueva=1" icono={Plus} className="md:hidden">
       Nueva
     </EnlaceBotonHoja>
   );
   const filtrando = Boolean(x.p["q"] || x.p["cargo"] || x.p["estado"]);
+  const total = x.total ?? x.items.length;
   return (
-    <ListScreen<PersonaFila>
+    <ListaMaestro
       state={x.state}
       titulo={x.titulo}
-      soloTelefono
-      subtitulo={`${x.total ?? x.items.length} ${x.total === 1 ? "persona" : "personas"}`}
-      accionPrincipal={nueva}
-      buscador={<Buscador placeholder="Nombre o RUT" />}
-      filtros={
-        <ChipsFiltro
-          filtros={[
-            { param: "cargo", etiqueta: "Cargo", opciones: x.cargos },
-            {
-              param: "estado",
-              etiqueta: "Estado",
-              opciones: Object.entries(ESTADO_PERSONA).map(([valor, e]) => ({
-                valor,
-                etiqueta: e.etiqueta,
-              })),
-            },
-          ]}
-        />
-      }
-      items={x.items}
-      clave={(i) => i.id}
-      href={(i) => `/personas/${i.id}`}
-      Link={LinkNext}
-      grupo={(i) => (i.apellidos[0] ?? "#").toUpperCase()}
-      tarjeta={(i) => {
-        const e = estadoVisible(i);
-        return (
-          <>
-            <Avatar nombre={i.nombreCompleto} size="lg" />
-            <span className="flex min-w-0 flex-1 flex-col">
-              <span className="truncate text-base font-medium text-fg">{i.nombreCompleto}</span>
-              <span className="truncate text-sm text-fg-muted">
-                {i.vinculoVigente?.cargo ?? "Sin vínculo vigente"}
-              </span>
-            </span>
-            {e.tono === "success" ? (
-              <SemaforoDocs d={i.documentos} />
-            ) : (
-              <Badge tono={e.tono} punto>
-                {e.etiqueta}
-              </Badge>
-            )}
-          </>
-        );
-      }}
-      columnas={[
+      accion={nueva}
+      buscar="Buscar por nombre o RUT"
+      filtros={[
+        { param: "cargo", etiqueta: "Cargo", opciones: x.cargos },
         {
-          id: "persona",
-          etiqueta: "Persona",
-          render: (i) => (
-            <span className="flex items-center gap-2.5">
-              <Avatar nombre={i.nombreCompleto} size="sm" />
-              {i.nombreCompleto}
-            </span>
-          ),
-        },
-        { id: "rut", etiqueta: "RUT", render: (i) => rut(i.rut), className: "t-mono" },
-        { id: "cargo", etiqueta: "Cargo", render: (i) => i.vinculoVigente?.cargo ?? "—" },
-        { id: "contrato", etiqueta: "Contrato", render: contrato },
-        {
-          id: "estado",
+          param: "estado",
           etiqueta: "Estado",
-          render: (i) => {
-            const e = estadoVisible(i);
-            return (
-              <Badge tono={e.tono} punto>
-                {e.etiqueta}
-              </Badge>
-            );
-          },
+          opciones: Object.entries(ESTADO_PERSONA).map(([valor, e]) => ({
+            valor,
+            etiqueta: e.etiqueta,
+          })),
         },
-        { id: "docs", etiqueta: "Documentos", render: (i) => <SemaforoDocs d={i.documentos} /> },
       ]}
-      textos={{
-        vacio: filtrando
+      meta={{ izquierda: `${total} ${total === 1 ? "persona" : "personas"}`, derecha: "Apellido A–Z" }}
+      seleccionada={x.seleccionada}
+      vacio={
+        filtrando
           ? { titulo: "Sin resultados", descripcion: "Revisa la ortografía o busca por RUT." }
           : {
               titulo: `Aún no hay ${x.titulo.toLowerCase()}`,
               descripcion: "Agrega la primera persona con su vínculo laboral.",
               accion: nueva,
-            },
-      }}
-      paginacion={
-        <Paginacion
-          p={x.p}
-          mostrados={x.items.length}
-          siguiente={x.siguiente}
-          total={filtrando ? null : x.total}
-        />
+            }
+      }
+      filas={x.items.map((i) => {
+        const e = estadoVisible(i);
+        return {
+          id: i.id,
+          href: `/personas/${i.id}`,
+          inicio: <Avatar nombre={i.nombreCompleto} size="lg" />,
+          titulo: i.nombreCompleto,
+          secundario: (
+            <>
+              {i.vinculoVigente?.cargo ?? "Sin vínculo vigente"}
+              <span className="t-mono hidden text-[13px] md:inline"> · {rut(i.rut)}</span>
+            </>
+          ),
+          fin:
+            e.tono === "success" ? (
+              <SemaforoDocs d={i.documentos} />
+            ) : (
+              <Badge tono={e.tono} punto>
+                {e.etiqueta}
+              </Badge>
+            ),
+        };
+      })}
+      pie={
+        <div className="flex items-center justify-between gap-2 border-t border-border px-4 py-3">
+          <Paginacion
+            p={x.p}
+            mostrados={x.items.length}
+            siguiente={x.siguiente}
+            total={filtrando ? null : x.total}
+          />
+        </div>
       }
     />
   );

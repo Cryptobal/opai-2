@@ -1,15 +1,18 @@
 import { Pencil } from "lucide-react";
 import type { ReactNode } from "react";
 
+import { SplitScreen } from "@opai/ds";
+
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { leerParametros, type Parametros, type SearchParams } from "@/lib/parametros";
 import type { PersonaDetalle } from "@/lib/tipos-maestros";
-import { vocabularioActual } from "@/lib/vocabulario";
+import { hoyIso } from "@/lib/fechas";
 
-import { cargarPersona } from "./datos";
-import { FichaPersona, type TabPersona } from "./ficha-persona";
+import { cargarPersona, cargarPersonas } from "./datos";
 import { HojaPersona } from "./diferidas";
+import { FichaPersona, type TabPersona } from "./ficha-persona";
+import { ListaPersonas } from "./lista-personas";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -20,15 +23,16 @@ type Props = {
   children: (persona: PersonaDetalle, p: Parametros) => ReactNode | Promise<ReactNode>;
 };
 
-/** Pestañas de una persona a ancho completo: migas "<Personas> / <nombre>" y la ficha. */
+/** Toda pestaña de una persona (11-18): la lista a la izquierda y la ficha a la derecha; en teléfono, el detalle con "Atrás". */
 export function PaginaPersona({ params, searchParams, tab, acciones, children }: Props) {
   return (
     <PaginaPortal
       portal="erp"
-      titulo="Persona"
+      titulo="Personas"
       ruta="/personas"
+      completo
       cargando="detalle"
-      volver={{ href: "/personas", etiqueta: "Personas" }}
+      volverSoloTelefono
       acciones={
         acciones ?? (
           <EnlaceBotonHoja href="?editar=1" icono={Pencil}>
@@ -37,25 +41,36 @@ export function PaginaPersona({ params, searchParams, tab, acciones, children }:
         )
       }
       cargar={async () => {
-        const [{ id }, p, voc] = await Promise.all([
-          params,
-          leerParametros(searchParams),
-          vocabularioActual(),
-        ]);
-        const d = await cargarPersona(id);
-        return { ...d, p, voc, contenido: d.persona ? await children(d.persona, p) : null };
+        const [{ id }, p] = await Promise.all([params, leerParametros(searchParams)]);
+        const [lista, d] = await Promise.all([cargarPersonas(p), cargarPersona(id)]);
+        return { id, p, lista, ...d, contenido: d.persona ? await children(d.persona, p) : null };
       }}
-      opciones={(d) => ({
-        titulo: d.persona?.nombreCompleto ?? "Persona",
-        volver: { href: "/personas", etiqueta: "Personas" },
-      })}
     >
       {(d) => (
         <>
-          <FichaPersona state={d.state} persona={d.persona} tab={tab}>
-            {d.contenido}
-          </FichaPersona>
+          <SplitScreen
+            telefono="detalle"
+            etiquetaLista="Lista de personas"
+            lista={
+              <ListaPersonas
+                state={d.lista.state}
+                items={d.lista.items}
+                cargos={d.lista.cargos}
+                siguiente={d.lista.siguiente}
+                total={d.lista.total}
+                p={d.p}
+                titulo="Personas"
+                seleccionada={d.id}
+              />
+            }
+            detalle={
+              <FichaPersona state={d.state} persona={d.persona} tab={tab}>
+                {d.contenido}
+              </FichaPersona>
+            }
+          />
           {d.persona ? <HojaPersona persona={d.persona} /> : null}
+          <HojaPersona cargos={d.lista.cargos} hoy={hoyIso()} />
         </>
       )}
     </PaginaPortal>
