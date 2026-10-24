@@ -115,7 +115,7 @@ function CampoFecha({ valor, onCambiar, invalido, className, ...props }: Omit<Pr
             /* sin permiso para abrir el calendario (iframe): se escribe a mano */
           }
         }}
-        className="absolute top-1/2 right-1.5 grid size-8 -translate-y-1/2 place-items-center rounded-sm text-fg-muted hover:text-fg focus-visible:shadow-[0_0_0_3px_var(--ds-accent-muted)] focus-visible:outline-none disabled:opacity-45"
+        className="ds-btn-calendario"
       >
         <Calendar aria-hidden className="size-4" />
       </button>
