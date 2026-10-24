@@ -1,7 +1,11 @@
 // Pertenencia del usuario plataforma al tenant `gard` (owner, todos los portales) para los e2e de CI.
+// Además, una segunda empresa («Empresa E2E», con una persona propia) y un usuario con acceso a las
+// dos (`e2e-multiempresa@opai.cl`, si existe) para el e2e de caché entre empresas.
 // Uso: DATABASE_URL_MIGRATE=<url propietario> pnpm --filter @opai/db seed:e2e
 // Corre después de seed:dev-tenant y seed:platform-owner. Idempotente. No toca contraseñas.
 import "dotenv/config";
+
+import { digitoVerificador } from "@opai/domain";
 
 import { cerrarClientes, dbAdmin } from "../src/index";
 
@@ -27,6 +31,33 @@ async function main(): Promise<void> {
     create: { tenantId: tenant.id, userId: user.id, rol: "owner", portales, estado: "activa" },
   });
   console.log(`${email} es owner de ${tenant.slug} con todos los portales.`);
+
+  const otra = await db.tenant.upsert({
+    where: { slug: "otra-e2e" },
+    update: {},
+    create: { slug: "otra-e2e", nombre: "Empresa E2E", vertical: "seguridad" },
+  });
+  if (!(await db.persona.findFirst({ where: { tenantId: otra.id } }))) {
+    await db.persona.create({
+      data: {
+        tenantId: otra.id,
+        nombres: "Zoe",
+        apellidos: "Otraempresa",
+        rut: `31000000-${digitoVerificador("31000000")}`,
+      },
+    });
+  }
+  const multi = await db.user.findUnique({ where: { email: "e2e-multiempresa@opai.cl" } });
+  if (multi) {
+    for (const t of [tenant, otra]) {
+      await db.membership.upsert({
+        where: { tenantId_userId: { tenantId: t.id, userId: multi.id } },
+        update: { rol: "owner", portales, estado: "activa" },
+        create: { tenantId: t.id, userId: multi.id, rol: "owner", portales, estado: "activa" },
+      });
+    }
+    console.log(`e2e-multiempresa@opai.cl es owner de ${tenant.slug} y ${otra.slug}.`);
+  }
 }
 
 main()

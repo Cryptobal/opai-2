@@ -6,6 +6,7 @@ import { Alerta, AuthCard, Button, Campo, Input, InputPassword, Separador } from
 
 import { accionEntrar, accionGoogle, type EstadoLogin } from "@/app/_acciones/auth";
 import { LinkNext } from "@/app/_components/link-next";
+import { useEpocaSesion } from "@/app/_components/refresco-navegador";
 
 import { PiePortales } from "../pie-portales";
 
@@ -13,17 +14,25 @@ export type { EstadoLogin };
 
 const OLVIDO = "¿Olvidaste tu contraseña?";
 
-type Props = { destino: string; google: boolean; inicial?: EstadoLogin; cargando?: boolean };
+type Props = {
+  destino: string;
+  google: boolean;
+  inicial?: EstadoLogin;
+  cargando?: boolean;
+  /** Época de la sesión del request; sin ella (p. ej. en /ds) la página no participa. */
+  epoca?: string;
+};
 
 /**
  * Login ERP / Plataforma / Supervisor según el diseño aprobado (export-acceso 01 y 02).
  * Sin cliente de auth en el navegador: el formulario llama a la Server Action (ADR-037).
  */
-export function FormularioLogin({ destino, google, inicial, cargando: forzado }: Props) {
+export function FormularioLogin({ destino, google, inicial, cargando: forzado, epoca }: Props) {
   const [estado, entrar, pendiente] = useActionState(
     accionEntrar.bind(null, destino),
     inicial ?? ({ tipo: "inicial" } as EstadoLogin),
   );
+  useEpocaSesion(epoca ?? null); // si otra pestaña entra o sale, esta recarga
   const cargando = pendiente || forzado === true;
   const google_ = accionGoogle.bind(null, destino);
 

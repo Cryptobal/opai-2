@@ -12,8 +12,8 @@
 4. **Design Prompt** → Claude Design → **diseño aprobado** por Carlos (export en `docs/2.0/design/`).
 5. **Brief** → `docs/2.0/briefs/BRIEF-NN-<nombre>.md`.
 6. **PR** (Claude construye; nunca integra).
-7. **Revisión** (bot «Revisor OPAI 2.0», modelo contrario: aprueba o pide cambios) e **integración por Carlos**, mientras rija la modificación de ADR-043 del 24-oct. Si hay migración de Neon, Carlos la aplica antes de integrar.
-8. **QA** de pantallas en celular y escritorio (bot «Diseño y QA OPAI 2.0»).
+7. **Revisión** (bot «Revisor OPAI 2.0», modelo contrario: APROBAR o PEDIR CAMBIOS sobre el head actual) e **integración con squash por el bot «OPAI 2.0»** cuando se cumplen las tres condiciones de ADR-043 v3 (APROBAR sin condiciones citando el SHA del head actual, checks obligatorios en verde sobre ese SHA, rama no «behind» y, si toca pantallas, nada con la etiqueta `qa-bloqueante`; sin «VETO» ni etiqueta `veto` de Carlos). Carlos puede vetar cualquier PR y recibe aviso después de cada merge. Si hay migración de Neon, Carlos la aplica antes de integrar.
+8. **QA** de pantallas en celular y escritorio después del merge (bot «Diseño y QA OPAI 2.0»); un BLOQUEANTE abierto frena los merges siguientes que toquen pantallas.
 9. **Resumen ejecutivo** para Carlos al cerrar (qué se hizo, qué cambia para Gard, qué decide él, qué sigue).
 
 Las **bases transversales** (rendimiento, PWA, navegación) aplican a todo brief con pantallas: `NAVEGACION.md`, ADR-044 y ADR-045.
@@ -153,7 +153,7 @@ No se portan de 1.0 y solo se reconstruyen con demanda real (lista canónica de 
 
 | Base | Decisión | Documento | Implementación | Estado |
 |---|---|---|---|---|
-| Rendimiento | Navegación instantánea: shell persistente, skeleton inmediato, prefetch, caché de datos, ≤ 8 consultas por navegación, gate en CI | ADR-045 | Brief 03 | ADR vigente; brief pendiente (prioridad 1) |
+| Rendimiento | Navegación instantánea: shell persistente, esqueleto a más tardar a los 200 ms, prefetch, caché de datos, ≤ 8 consultas por navegación, gate en CI | ADR-045 | Brief 03 | ADR vigente; brief pendiente (prioridad 1). Avance parcial (24-oct, PR #29, `qa/navegacion-adr-045`): sin «rayas» al navegar, caché de 30 s con refresco en segundo plano y prefetch del menú; faltan shell en layout, contadores, `forTenant` y gate en CI |
 | PWA | Una sola app «OPAI» instalable (un manifest; abre el portal según la membresía), service worker con actualización controlada, sin conexión en terreno, push, cámara y GPS, presupuesto de terreno, prueba en CI; Capacitor para tiendas | ADR-044 | Brief 04 (base); cola sin conexión con el primer módulo de terreno; Brief 17 (tiendas) | ADR vigente; brief pendiente |
 | Navegación | Áreas, menú vs. pestañas, ⌘K, fijados, barra inferior por rol, portales, activación por módulo, nombres únicos | ADR-046, `NAVEGACION.md` | Design Prompt de navegación → Brief 05 | ADR vigente; Design Prompt pendiente |
 

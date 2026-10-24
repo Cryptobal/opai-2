@@ -1,6 +1,7 @@
 import { esRol, esVertical, vocabulario } from "@opai/domain";
 
 import type { Identidad } from "@/lib/actor";
+import { epocaDe } from "@/lib/epoca-sesion";
 import { type Contadores, NAV_PLATAFORMA, navegacionErp, navegacionPortal } from "@/lib/navegacion";
 
 import { ETIQUETA_ROL, PORTALES, portalesVisibles, subtituloMarcaPortal } from "./portales";
@@ -32,6 +33,8 @@ export function datosShell(
     portal,
     subtituloMarca: subtituloMarcaPortal(portal),
     noLeidas: contadores.notificacionesNoLeidas ?? 0,
+    generado: Date.now(),
+    epoca: epocaDe(usuario.id, actual?.tenantId ?? null),
     nav,
     portales: portalesVisibles(actual?.portales ?? [], plataforma),
     tenant:
