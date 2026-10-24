@@ -16,6 +16,8 @@ Generado: 24-10-2026, 10:45 (hora de Chile, UTC-3). Solo lectura: se comparan re
 > - Google no permite autorregistro. 1.0: `src/lib/auth.ts` busca un Admin existente. 2.0: `disableSignUp` en `packages/auth/src/opciones.ts`.
 > - Hay invitación revocable de un solo uso en ambos.
 
+> **Nota posterior (24-oct, al subirlo al repo).** `docs/2.0/checklists/paridad.md` ya existe: lo crea el PR #15 del contrato. Desde ahora, los informes de paridad siguen ese checklist. Las «Decisiones de Carlos (24-oct-2026)» del final están registradas en `ESTADO.md`. No cierran las 11 preguntas de `modulos/comercial.md`, que son otro tema.
+
 ---
 
 ## 1. Brechas (2.0 todavía no tiene una regla o flujo que existe en 1.0)

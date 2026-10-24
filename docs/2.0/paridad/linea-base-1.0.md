@@ -6,6 +6,10 @@ Generado: 24-10-2026, 10:40 (hora de Chile, UTC-3). Trabajo de solo lectura.
 - Fuentes: conector GitHub de solo lectura. Copias locales en `/workspace/paridad/src1` (1.0) y `/workspace/paridad/src2` (2.0).
 - No se usaron el MCP de 1.0 (user-opai), el de 2.0 (user-opai2) ni Neon. No se leyeron datos reales: solo código, documentación y esquemas.
 
+> **Nota posterior (24-oct, al subirlo al repo).** El texto de abajo es la línea base tal como se generó. Desde entonces cambiaron dos cosas:
+> - **`portal/acceso`:** dejó de estar «sin mapear». Carlos decidió el 24-oct portarlo, mejorado y con registro completo, dentro del portal de terreno (fase 3). Ver `paridad/nucleo.md`, «Decisiones de Carlos», y `ESTADO.md`.
+> - **`docs/2.0/checklists/paridad.md`:** ya existe; lo crea el PR #15 del contrato del repositorio.
+
 ---
 
 ## 1. Estado de 2.0 según `docs/2.0/ESTADO.md` (24-oct-2026)
@@ -99,7 +103,7 @@ Leyenda: **[NC]** = no copiar (excluido de 2.0: está en el backlog del ROADMAP 
   - `ops/ats`;
   - `ops/alertas-cobertura`;
   - `ops/incidentes-terreno` (`portal/incidentes`);
-  - `portal/acceso` (control de acceso físico, schema `access_control` con 14 modelos): **sin mapear, hay que consultar a Carlos** si es Operaciones o queda excluido.
+  - `portal/acceso` (control de acceso físico, schema `access_control` con 14 modelos): **sin mapear, hay que consultar a Carlos** si es Operaciones o queda excluido. *(Resuelto el 24-oct: se porta en el portal de terreno, fase 3; ver la nota del inicio.)*
 
 ### 3.5 Asistencia y DT (fase 4)
 

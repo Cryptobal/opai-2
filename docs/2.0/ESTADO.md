@@ -100,6 +100,13 @@ Este archivo es la fuente de verdad del avance. Cada brief lo actualiza al termi
 - **QA pasada 2 en celular** (23-oct, misma rama y PR #8): causa raíz del desborde horizontal a 375 px en Nueva instalación y en el drawer de Nueva persona: un `grid` sin columnas explícitas tiene una columna `auto` que crece hasta la dirección más larga; el DS fija ahora `.grid { grid-template-columns: minmax(0, 1fr) }` en la capa base (las utilidades `grid-cols-*` siguen mandando). Test e2e en `/ds/qa` que falla si hay scroll horizontal (probado: sin el arreglo mide 751 px en un viewport de 375). Además: barra Cancelar/Crear de Nueva instalación sobre la navegación inferior y con «Falta…»; sugerencias de dirección con el texto en dos líneas y «Escribe calle y número» con el campo vacío; botones y chips de 44 px en teléfono (`Button` md y `ChipToggle`); matriz de permisos en teléfono como lista por rol; cargos con el sueldo base en su propia línea; «Nuevo» junto al título; encabezado de tarjeta que envuelve («Agentes» en Actividad); Representante legal en 2 columnas hasta 2xl y zona horaria a ancho completo; detalle de integración con el resultado de la última prueba, «Probar conexión» y estado en teléfono, y el nombre de la integración como título.
 
 - **Informe preliminar de paridad del Núcleo (24-oct, PR `docs/paridad-nucleo`):** `docs/2.0/paridad/nucleo.md` (brechas, mejoras y qué no copiar) y `docs/2.0/paridad/linea-base-1.0.md` (inventario de 1.0 según el orden de 2.0) están en el repo como **insumo, no como especificación aprobada**. Las brechas de prioridad Alta quedan como pendientes del Núcleo al final de este archivo.
+- **Decisiones de Carlos sobre paridad (24-oct), entregadas con el informe:**
+  1. **Usuarios:** no se migran desde 1.0; Carlos los crea a mano. Aun así, 2.0 debe manejar roles y permisos al menos tan bien como 1.0: roles personalizados, permisos finos y alcance del supervisor por instalación. Es brecha Alta.
+  2. **Ley 21.719:** 2.0 la cubre siempre y por diseño (DPA, consentimiento, ARCO y DPO). Es brecha Alta del Núcleo.
+  3. **Control de acceso físico (`portal/acceso` de 1.0):** se porta, mejorado y con registro completo, dentro del portal de terreno (fase 3). Ya no es una pregunta abierta.
+  4. **Migración desde 1.0:** solo cuentas, instalaciones, contactos, negocios, licitaciones y guardias. El mapeo se define por módulo durante el desarrollo, se prueba con una copia anonimizada y la carga real se hace al final.
+
+  Estas decisiones **no responden** las 11 preguntas de la especificación de Comercial (`modulos/comercial.md` §14), que siguen esperando a Carlos. La de cuánto historial importar (pregunta 6) queda acotada por la decisión 4, pero no cerrada.
 
 ## En curso
 
