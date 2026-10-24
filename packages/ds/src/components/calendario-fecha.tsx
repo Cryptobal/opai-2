@@ -122,7 +122,7 @@ export default function CalendarioFecha(props: CalendarioProps) {
   );
   if (!escritorio)
     return (
-      <SheetRadix abierto onCerrar={onCerrar} titulo="Elegir fecha">
+      <SheetRadix abierto onCerrar={onCerrar} titulo="Elegir fecha" superior>
         <div className="flex flex-col gap-3">
           <input
             type="text"

@@ -91,3 +91,31 @@ test.describe("Pestañas · sin desplazamiento vertical", () => {
     expect(m.overflowY).toBe("hidden");
   });
 });
+
+test.describe("QA pasada 5 · calendario sobre una hoja", () => {
+  test("en teléfono el calendario oscurece también la hoja de abajo", async ({ page }, info) => {
+    test.skip(info.project.name !== "telefono", "la hoja inferior del calendario es de teléfono");
+    await page.goto("/ds/qa");
+    await page.getByRole("button", { name: "Abrir hoja con fecha" }).click();
+    const hoja = page.getByRole("dialog", { name: "Agregar persona" });
+    await hoja.getByRole("button", { name: "Abrir calendario" }).click();
+    await expect(page.getByRole("dialog", { name: "Elegir fecha" })).toBeVisible();
+    // Radix oculta la hoja de abajo del árbol de accesibilidad: se mide por DOM.
+    const z = await page.evaluate(() => {
+      const nivel = (el: Element) => Number(getComputedStyle(el).zIndex);
+      const paneles = [...document.querySelectorAll('[role="dialog"]')];
+      const abajo = paneles.find((d) => d.textContent?.includes("Agregar persona"));
+      const arriba = paneles.find((d) => d.textContent?.includes("Elegir fecha"));
+      const fondos = [...document.querySelectorAll('[data-state="open"].bg-scrim')];
+      return {
+        abajo: abajo ? nivel(abajo) : NaN,
+        arriba: arriba ? nivel(arriba) : NaN,
+        fondoSuperior: Math.max(...fondos.map(nivel)),
+      };
+    });
+    expect(z.fondoSuperior, "el fondo del calendario va sobre la hoja de abajo").toBeGreaterThan(
+      z.abajo,
+    );
+    expect(z.arriba, "el calendario va sobre su propio fondo").toBeGreaterThan(z.fondoSuperior);
+  });
+});

@@ -16,6 +16,8 @@ export type SheetProps = {
   acciones?: ReactNode;
   /** `completo`: pantalla completa en teléfono (formularios de creación) en vez de hoja inferior. */
   telefono?: "hoja" | "completo";
+  /** Hoja abierta desde otra hoja o diálogo: su fondo y su panel van por encima de los de abajo. */
+  superior?: boolean;
 };
 
 /**
@@ -23,16 +25,26 @@ export type SheetProps = {
  * 420 px en md+. Cabecera con título y cerrar; pie con acciones. Única superficie con sombra.
  */
 export function SheetRadix(props: SheetProps) {
-  const { abierto, onCerrar, titulo, descripcion, children, acciones, telefono = "hoja" } = props;
+  const {
+    abierto,
+    onCerrar,
+    titulo,
+    descripcion,
+    children,
+    acciones,
+    telefono = "hoja",
+    superior = false,
+  } = props;
   const completo = telefono === "completo";
   return (
     <RadixDialog.Root open={abierto} onOpenChange={(a) => !a && onCerrar()}>
       <RadixDialog.Portal>
-        <RadixDialog.Overlay className={claseScrim} />
+        <RadixDialog.Overlay className={cn(claseScrim, superior && "z-[60]")} />
         <RadixDialog.Content
           {...(descripcion ? {} : { "aria-describedby": undefined })}
           className={cn(
-            "fixed inset-x-0 bottom-0 z-50 flex flex-col bg-surface-raised text-fg shadow-overlay outline-none",
+            "fixed inset-x-0 bottom-0 flex flex-col bg-surface-raised text-fg shadow-overlay outline-none",
+            superior ? "z-[70]" : "z-50",
             "data-[state=open]:animate-[ds-subir_200ms_var(--ds-ease)] md:data-[state=open]:animate-[ds-lateral_200ms_var(--ds-ease)] motion-reduce:animate-none",
             completo ? "top-0 max-md:pt-[env(safe-area-inset-top)]" : "max-h-[90dvh] rounded-t-xl",
             "md:inset-y-0 md:right-0 md:left-auto md:max-h-none md:w-[420px] md:rounded-none md:rounded-l-lg",
