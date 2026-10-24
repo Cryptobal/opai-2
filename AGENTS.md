@@ -15,7 +15,7 @@ Contrato único para todo bot o agente que trabaje en `Cryptobal/opai-2`: Claude
 ## Multi-tenant (no negociable)
 
 1. Toda tabla con `tenant_id` tiene RLS activa y una sola política `tenant_isolation` para el rol `opai_app`, que es `NOBYPASSRLS`. CI falla si una tabla queda sin RLS o sin política, en cualquier schema (`packages/db/test/rls-nucleo*.test.ts`).
-2. Todo acceso a datos de negocio pasa por `forTenant(tenantId)` o `enTransaccion(tenantId, …)`. Ambos fijan `app.tenant_id` antes de consultar.
+2. Todo acceso a datos de negocio pasa por `forTenant(tenantId)` o `enTransaccion(tenantId, …)`. Ambos fijan `app.tenant_id` antes de consultar. Las únicas excepciones acotadas son `forUser(userId)` (leer las membresías propias antes de elegir empresa), `globales()` (solo `tenants` y `users`, sin RLS) y `clienteAuth()` (solo dentro de `packages/auth`).
 3. **Nunca** `$queryRaw`, `$executeRaw` ni sus variantes `Unsafe` fuera de `enTransaccion`. Sobre `forTenant` no fijan el tenant y se saltan el aislamiento.
 4. `dbAdmin()`, el rol propietario que se salta la RLS, solo se usa en migraciones, seeds y scripts manuales; nunca en `apps/web`, `modules/*` ni capacidades.
 5. El tenant sale de la sesión o de la API key, nunca del body. Las referencias entre tablas se validan del mismo tenant. El alcance de filas (supervisor, cliente, persona) se aplica en la consulta, nunca en la UI (ADR-022).
@@ -43,12 +43,13 @@ Un PR está terminado cuando:
 4. Pasó la autorrevisión de un subagente y la revisión del «Revisor OPAI 2.0» con `docs/2.0/checklists/revision.md`.
 5. Si tiene pantallas: probado a 375, 1024 y 1280 px con `docs/2.0/checklists/qa.md`.
 6. Si porta algo de 1.0: revisado con `docs/2.0/checklists/paridad.md`.
-7. `ESTADO.md` y `ROADMAP.md` quedan actualizados y el PR trae un resumen ejecutivo para Carlos: qué se hizo, qué cambia para Gard, qué decide él y qué sigue.
+7. No trae refactorizaciones fuera del alcance. Si el brief contradice el repositorio, conserva el objetivo, adapta y reporta la diferencia.
+8. `ESTADO.md` y `ROADMAP.md` quedan actualizados y el PR trae un resumen ejecutivo para Carlos: qué se hizo, qué cambia para Gard, qué decide él y qué sigue.
 
 ## Prohibido
 
 - Secretos en el código, en los commits, en los logs, en los PR o en la memoria de los bots. Las claves las maneja Carlos (Vercel, GitHub o el almacén cifrado del tenant). CI escanea secretos en cada PR.
-- Tocar OPAI 1.0 (`Cryptobal/opai`, opai.gard.cl). Es solo referencia de lectura, salvo una corrección crítica pedida por Carlos.
+- Desplegar a la producción de Gard. Tocar OPAI 1.0 (`Cryptobal/opai`, opai.gard.cl). Es solo referencia de lectura, salvo una corrección crítica pedida por Carlos.
 - Aplicar migraciones fuera de un PR, o contra un entorno que el brief no indique. Las migraciones de Neon las aplica Carlos desde su Mac.
 - Force-push, reescribir historia o borrar ramas ajenas sin el OK explícito de Carlos. Nunca push directo a `main`.
 - `prisma migrate reset`, borrar migraciones, desactivar o saltar tests para lograr el verde, y `--no-verify`.

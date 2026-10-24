@@ -55,7 +55,7 @@ Toda pantalla compone un patrón del DS. Los patrones reciben `state` y resuelve
 |---|---|---|
 | **Lista** (`ListScreen`, `SplitScreen`) | Colecciones: cuentas, personas, negocios | Fila como enlace (server-first), búsqueda y filtros con chips, `MetaLista` con conteos. En iPad y escritorio, `SplitScreen` (lista + «Elige un…»); en el celular, solo la lista |
 | **Ficha** (`DetailScreen`, `Seccion`, `Pares`) | Detalle de una entidad | Pestañas por ruta en el orden de ADR-041: Resumen → propias → de módulos → Documentos → Actividad. Las etiquetas van como chips bajo el título y no hay pestañas deshabilitadas |
-| **Drawer** (`Sheet`) | Crear o editar sin perder el contexto de la lista | Se carga al abrirse (`hojaDiferida`). En el celular ocupa toda la pantalla; la acción principal queda fija abajo (`AccionFijaTelefono`) |
+| **Drawer** (`Sheet`) | Crear o editar sin perder el contexto de la lista | Se carga al abrirse (`hojaDiferida`, en `apps/web/app/_components/`). En el celular ocupa toda la pantalla; la acción principal queda fija abajo (`AccionFijaTelefono`) |
 | **Formulario** (`FormScreen`, `AjustesForm`) | Altas largas y configuración | Secciones con título; errores junto al campo; «Guardar» deshabilitado sin cambios; aviso al salir con cambios sin guardar |
 | **Planilla** (`PlanillaScreen`) | Pautas, flujo de caja, cotizador | Columnas clave fijas; scroll dentro del contenedor, nunca de la página; números con `t-numeric` |
 | **Tablero** (`DashboardScreen`, `KpiTile`) | Inicio y reportes | Cifras con su período; cada tarjeta lleva a su lista |
@@ -68,7 +68,7 @@ Toda pantalla compone un patrón del DS. Los patrones reciben `state` y resuelve
 | Vacío | `Empty` | Dice qué falta y ofrece la acción para crearlo |
 | Error | `ErrorState` | Mensaje en lenguaje de usuario, sin detalles técnicos, con «Reintentar» |
 | Sin permisos | `Forbidden` | Explica que no tiene acceso; nunca muestra datos parciales |
-| No encontrado (404) | `NoEncontrado` (`not-found.tsx` en cada ruta con `[id]`) | Dentro del shell, con «Ir al inicio». Un id inválido o de otro tenant da 404, nunca un error |
+| No encontrado (404) | `NoEncontrado` (`apps/web/app/_components/no-encontrado.tsx`, usado por el `not-found.tsx` de cada ruta con `[id]`) | Dentro del shell, con «Ir al inicio». Un id inválido o de otro tenant da 404, nunca un error |
 
 ## 4. Celular primero
 
