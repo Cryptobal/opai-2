@@ -20,7 +20,12 @@ export function consultaDeRuta(pathname: string): Consulta | null {
   if (!a || !b) return null;
   if (esColeccion(a)) return esUuid(b) ? { tipo: "ficha", coleccion: a, id: b } : null;
   if (a !== "configuracion" || !c) return null;
-  const slug = decodeURIComponent(c);
+  let slug: string;
+  try {
+    slug = decodeURIComponent(c);
+  } catch {
+    return null; // %-encoding malformado: no es un slug válido; la página responde por su cuenta
+  }
   if (b === "comunicaciones") return { tipo: "evento", evento: slug };
   if (b === "integraciones") return { tipo: "integracion", proveedor: slug };
   return null;

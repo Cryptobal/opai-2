@@ -26,6 +26,11 @@ describe("qué rutas dependen de la base para ser 404", () => {
     });
   });
 
+  it("un % malformado en el slug no lanza (el proxy no puede dar 500)", () => {
+    expect(consultaDeRuta("/configuracion/integraciones/%E0%A4%A")).toBeNull();
+    expect(consultaDeRuta("/configuracion/comunicaciones/%zz")).toBeNull();
+  });
+
   it("ignora listas, rutas fijas y ids que no son UUID (esos van por esIdInvalido)", () => {
     for (const r of ["/personas", "/personas/vencimientos", "/configuracion/usuarios", "/"])
       expect(consultaDeRuta(r), r).toBeNull();

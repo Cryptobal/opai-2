@@ -44,4 +44,16 @@ describe("proxy: 404 real antes de enviar el HTML", () => {
     expect((await proxy(pedir("/personas/abc"))).status).toBe(404);
     expect(f).not.toHaveBeenCalled();
   });
+
+  it("la consulta responde 401/HTML (preview protegido): sigue a la página", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(new Response("<html>", { status: 401 })));
+    const r = await proxy(pedir(`/personas/${CERO}`));
+    expect(r.headers.get("x-middleware-next")).toBe("1");
+  });
+
+  it("slug con % malformado no rompe el proxy", async () => {
+    vi.stubGlobal("fetch", vi.fn());
+    const r = await proxy(pedir("/configuracion/integraciones/%E0%A4%A"));
+    expect(r.headers.get("x-middleware-next")).toBe("1");
+  });
 });
