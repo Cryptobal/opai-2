@@ -1,13 +1,14 @@
 import { expect, test } from "@playwright/test";
 
 // Riel y título de pestaña de los portales Trabajador y Cliente en escritorio (1280 px, QA del #21).
-// Requiere un usuario con membresía en ambos portales (E2E_PORTALES_EMAIL / E2E_PORTALES_PASSWORD).
-const email = process.env["E2E_PORTALES_EMAIL"] ?? process.env["E2E_EMAIL"];
-const password = process.env["E2E_PORTALES_PASSWORD"] ?? process.env["E2E_PASSWORD"];
+// Requiere E2E_PORTALES_EMAIL y E2E_PORTALES_PASSWORD (sin ellas se omite). Basta un usuario con
+// sesión: sin acceso al portal, el shell se monta igual (con «Sin permisos»).
+const email = process.env["E2E_PORTALES_EMAIL"];
+const password = process.env["E2E_PORTALES_PASSWORD"];
 
 const PORTALES = [
-  { id: "trabajador", subtitulo: "Trabajador", titulo: "No encontrado · Portal Trabajador" },
-  { id: "cliente", subtitulo: "Cliente", titulo: "No encontrado · Portal Cliente" },
+  { id: "trabajador", nombre: "Trabajador" },
+  { id: "cliente", nombre: "Cliente" },
 ] as const;
 
 test.describe("portales en escritorio", () => {
@@ -23,11 +24,17 @@ test.describe("portales en escritorio", () => {
     await page.waitForURL((url) => !url.pathname.startsWith("/login"));
 
     for (const p of PORTALES) {
-      await page.goto(`/${p.id}/esto-no-existe`);
-      const riel = page.getByRole("navigation", { name: "Principal" }).filter({ visible: true });
-      await expect(riel.getByText("OPAI", { exact: true })).toBeVisible();
-      await expect(riel.getByText(p.subtitulo, { exact: true })).toBeVisible();
-      await expect(page).toHaveTitle(new RegExp(`^${p.titulo}( · OPAI)?$`));
+      const paginas = [
+        { ruta: `/${p.id}`, titulo: `Inicio · Portal ${p.nombre} · OPAI` },
+        { ruta: `/${p.id}/esto-no-existe`, titulo: `No encontrado · Portal ${p.nombre} · OPAI` },
+      ];
+      for (const { ruta, titulo } of paginas) {
+        await page.goto(ruta);
+        const riel = page.getByRole("navigation", { name: "Principal" });
+        await expect(riel.getByText("OPAI", { exact: true })).toBeVisible();
+        await expect(riel.getByText(p.nombre, { exact: true })).toBeVisible();
+        await expect(page).toHaveTitle(titulo);
+      }
     }
   });
 });
