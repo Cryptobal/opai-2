@@ -9,6 +9,6 @@
     "/(erp)/personas/vencimientos": 175,
     "/(erp)/cargos/[id]": 167,
     "/(platform)/platform/tenants/[id]/*": 168,
-    "/ds*": 222
+    "/ds*": 220
   }
 }
