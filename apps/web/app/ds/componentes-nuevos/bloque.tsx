@@ -1,11 +1,14 @@
 import type { EstadoPantalla } from "@opai/ds";
+import dynamic from "next/dynamic";
 
 import { Bloque } from "../bloques";
 import { MuestraActividad } from "./actividad";
-import { MuestraCampos } from "./campos";
 import { MuestraOverlays } from "./overlays";
 import { MuestraSeleccion } from "./seleccion";
 import { MuestraSplit } from "./split";
+
+// Fechas, direcciones y mapa se cargan aparte: no pesan en el primer JS de /ds (ADR-037).
+const MuestraCampos = dynamic(() => import("./campos").then((m) => m.MuestraCampos));
 
 /** Componentes nuevos del Brief 02 (export de diseño 37 y 38) con sus estados. */
 export function BloqueNuevos({ state }: { state: EstadoPantalla }) {
