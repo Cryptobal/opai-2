@@ -71,8 +71,8 @@ Generado: 24-10-2026, 10:45 (hora de Chile, UTC-3). Solo lectura: se comparan re
 ## 4. Preguntas abiertas para Carlos
 
 1. Equivalencias de roles (B2): ¿a qué rol de 2.0 pasa cada uno de jefe_operaciones, central_monitoreo, editor, rrhh, finanzas e inspector_dt? ¿O se adelantan los roles personalizados?
-2. `portal/acceso` (control de acceso físico, schema `access_control`): ¿entra en Operaciones o queda excluido?
-3. Ley 21.719 (B4): ¿se implementa en 2.0 antes de migrar a Gard, o 1.0 la cubre mientras siga en producción?
+2. `portal/acceso` (control de acceso físico, schema `access_control`): ¿entra en Operaciones o queda excluido? **Resuelta el 24-oct:** se porta en el portal de terreno (ver Decisiones).
+3. Ley 21.719 (B4): ¿se implementa en 2.0 antes de migrar a Gard, o 1.0 la cubre mientras siga en producción? **Resuelta el 24-oct:** 2.0 la cubre siempre y por diseño (ver Decisiones).
 
 ## Decisiones de Carlos (24-oct-2026)
 - Usuarios: no se migran; Carlos los crea a mano. Pero 2.0 debe manejar roles y permisos al menos tan bien como 1.0 (roles personalizados, permisos finos, alcance del supervisor por instalación). Brecha Alta.

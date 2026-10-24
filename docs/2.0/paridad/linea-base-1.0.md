@@ -103,7 +103,7 @@ Leyenda: **[NC]** = no copiar (excluido de 2.0: está en el backlog del ROADMAP 
   - `ops/ats`;
   - `ops/alertas-cobertura`;
   - `ops/incidentes-terreno` (`portal/incidentes`);
-  - `portal/acceso` (control de acceso físico, schema `access_control` con 14 modelos): **sin mapear, hay que consultar a Carlos** si es Operaciones o queda excluido. *(Resuelto el 24-oct: se porta en el portal de terreno, fase 3; ver la nota del inicio.)*
+- **Se porta (decisión de Carlos, 24-oct):** `portal/acceso` (control de acceso físico, schema `access_control` con 14 modelos), mejorado y con registro completo, dentro del portal de terreno (fase 3, Brief 16).
 
 ### 3.5 Asistencia y DT (fase 4)
 
