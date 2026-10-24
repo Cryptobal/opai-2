@@ -11,7 +11,8 @@ import {
 
 import { LinkNext } from "../link-next";
 import { Buscador } from "./buscador";
-import { ChipsFiltro, type Filtro } from "./chips-filtro";
+import type { Filtro } from "./chips-filtro";
+import { ChipsFiltroDiferido } from "./chips-filtro-diferido";
 
 export type FilaLista = {
   id: string;
@@ -47,7 +48,7 @@ export function ListaMaestro(p: Props) {
       </div>
       <HerramientasLista>
         <Buscador placeholder={p.buscar} />
-        {p.filtros?.length ? <ChipsFiltro filtros={p.filtros} /> : null}
+        {p.filtros?.length ? <ChipsFiltroDiferido filtros={p.filtros} /> : null}
       </HerramientasLista>
       {p.meta ? <MetaLista izquierda={p.meta.izquierda} derecha={p.meta.derecha} /> : null}
       <div className="-mx-4 border-t border-border md:mx-0 md:border-t-0">

@@ -25,7 +25,9 @@ export default function Laboral(props: Props) {
     <PaginaPersona
       {...props}
       tab="laboral"
-      acciones={<EnlaceBotonHoja href="?excepcion=1">Definir excepción para esta persona</EnlaceBotonHoja>}
+      acciones={
+        <EnlaceBotonHoja href="?excepcion=1">Definir excepción para esta persona</EnlaceBotonHoja>
+      }
     >
       {async (p, q) => {
         const [l, cargos] = await Promise.all([cargarLaboral(p, q["puesto"]), cargarCargos(true)]);

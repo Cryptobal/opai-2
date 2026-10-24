@@ -1,43 +1,65 @@
+import { Plus } from "lucide-react";
 import type { ReactNode } from "react";
 
+import { SplitScreen } from "@opai/ds";
+
+import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
-import { leerParametros, type Parametros, type SearchParams } from "@/lib/parametros";
+import type { Parametros, SearchParams } from "@/lib/parametros";
 import type { CuentaDetalle } from "@/lib/tipos-maestros";
 
-import { cargarCuenta } from "./datos";
-import { FichaCuenta, type TabCuenta } from "./ficha-cuenta";
+import { cargarCuenta, cargarCuentas, filtrosDe } from "./datos";
 import { HojaCuenta } from "./diferidas";
+import { FichaCuenta, type TabCuenta } from "./ficha-cuenta";
+import { ListaCuentas } from "./lista-cuentas";
 
 type Props = {
   params: Promise<{ id: string }>;
   searchParams: SearchParams;
   tab: TabCuenta;
+  /** Acción principal de la pestaña; por defecto, "Nueva cuenta". */
   acciones?: ReactNode;
   children: (cuenta: CuentaDetalle, p: Parametros) => ReactNode;
 };
 
-/** Tabs de una cuenta a ancho completo (03): migas "Cuentas / <nombre>" y la ficha. */
+/** Toda pestaña de una cuenta (01-05): la lista a la izquierda y la ficha a la derecha; en teléfono, el detalle con "Atrás". */
 export function PaginaCuenta({ params, searchParams, tab, acciones, children }: Props) {
   return (
     <PaginaPortal
       portal="erp"
-      titulo="Cuenta"
+      titulo="Cuentas"
       ruta="/cuentas"
+      completo
       cargando="detalle"
       volver={{ href: "/cuentas", etiqueta: "Cuentas" }}
-      {...(acciones ? { acciones } : {})}
+      volverSoloTelefono
+      acciones={
+        acciones ?? (
+          <EnlaceBoton href="/cuentas?nueva=1" icono={Plus}>
+            Nueva cuenta
+          </EnlaceBoton>
+        )
+      }
       cargar={async () => {
-        const [{ id }, p] = await Promise.all([params, leerParametros(searchParams)]);
-        return { ...(await cargarCuenta(id)), p };
+        const [{ id }, p] = await Promise.all([params, filtrosDe(searchParams)]);
+        const [lista, ficha] = await Promise.all([cargarCuentas(p), cargarCuenta(id)]);
+        return { id, p, lista, ficha };
       }}
-      opciones={(d) => ({ titulo: d.cuenta?.nombre ?? "Cuenta" })}
     >
-      {(d) => (
+      {({ id, p, lista, ficha }) => (
         <>
-          <FichaCuenta state={d.state} cuenta={d.cuenta} tab={tab}>
-            {d.cuenta ? children(d.cuenta, d.p) : null}
-          </FichaCuenta>
-          {d.cuenta ? <HojaCuenta cuenta={d.cuenta} /> : null}
+          <SplitScreen
+            telefono="detalle"
+            etiquetaLista="Lista de cuentas"
+            lista={<ListaCuentas state={lista.state} items={lista.items} seleccionada={id} />}
+            detalle={
+              <FichaCuenta state={ficha.state} cuenta={ficha.cuenta} tab={tab}>
+                {ficha.cuenta ? children(ficha.cuenta, p) : null}
+              </FichaCuenta>
+            }
+          />
+          {ficha.cuenta ? <HojaCuenta cuenta={ficha.cuenta} /> : null}
+          <HojaCuenta />
         </>
       )}
     </PaginaPortal>
