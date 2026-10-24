@@ -1,4 +1,12 @@
-<!-- Contrato: AGENTS.md. Un PR por encargo, desde `main` actualizado. Integra solo el bot «OPAI 2.0», con squash, cuando el Revisor escribió APROBAR sin condiciones citando el SHA del head actual, los checks obligatorios están en verde sobre ese SHA, la rama no está «behind» y, si toca pantallas, no hay nada con la etiqueta `qa-bloqueante` (ADR-043 v3). Cualquier push, incluido traer `main`, invalida la aprobación y exige re-revisión. Sin `migracion-pendiente` ni veto vigente: el veto («VETO» o etiqueta `veto`) y el retiro de esas etiquetas solo cuentan si los hace Carlos en persona (cuenta `Cryptobal` sin app de por medio). Sin force-push ni rebase. -->
+<!-- Contrato: AGENTS.md. Un PR por encargo, desde `main` actualizado. Integra solo el bot «OPAI 2.0», con squash, cuando el Revisor escribió APROBAR sin condiciones citando el SHA del head actual, los checks obligatorios están en verde sobre ese SHA, la rama no está «behind», no hay veto vigente ni etiqueta `migracion-pendiente` y, si toca pantallas, no hay nada con la etiqueta `qa-bloqueante` (ADR-043 v3). Cualquier push, incluido traer `main`, invalida la aprobación. Sin force-push ni rebase.
+
+**Veto y migración pendiente (autoría humana; ADR-043 v3).**
+1. Carlos veta un PR con un comentario cuya primera línea es exactamente `VETO`, o con la etiqueta `veto`. Lo levanta quitando la etiqueta o con un comentario posterior cuya primera línea es exactamente `VETO LEVANTADO`.
+2. Un PR con migraciones nuevas en `packages/db/prisma/migrations/` lleva la etiqueta `migracion-pendiente`, que pone quien abre el PR. Solo Carlos la quita, después de aplicar la migración en Neon `dev` y `main`.
+3. Solo cuentan los comentarios y cambios de etiqueta sin `performed_via_github_app`, es decir, hechos a mano desde la web o la app de GitHub y no a través de una app o integración. La cuenta `Cryptobal` la usan Carlos y los bots, así que la cuenta sola no basta. Un evento que no cumple la regla no levanta un veto ni retira una migración pendiente.
+4. Ningún bot ni agente escribe comentarios `VETO` o `VETO LEVANTADO` ni pone o quita las etiquetas `veto` y `migracion-pendiente`. Única excepción: quien abre un PR con migración pone `migracion-pendiente`.
+5. Antes de integrar, el bot «OPAI 2.0» revisa con esta regla los comentarios del PR y el historial de sus etiquetas. No integra si hay un veto vigente, si `migracion-pendiente` está puesta, si el PR trae migraciones nuevas y la etiqueta falta o no la quitó un evento válido, o si no puede verificarlo.
+-->
 
 **Tarea:** Fixes OPAI-\_\_\_
 
@@ -36,4 +44,4 @@
 - [ ] Con pantallas: probadas a 375, 1024 y 1280 px, en claro y oscuro, con `docs/2.0/checklists/qa.md`.
 - [ ] Si porta algo de 1.0: revisado con `docs/2.0/checklists/paridad.md`. OPAI 1.0 no se tocó.
 - [ ] PR vinculado a su tarea de Linear (campo «Tarea» arriba); `docs/2.0/ROADMAP.md` actualizado si cambia el plan.
-- [ ] Migraciones: ninguna / aditivas y listas para que Carlos las aplique en Neon `dev` y `main`. Con migración nueva, quien abre el PR le pone la etiqueta `migracion-pendiente`; solo Carlos en persona la quita tras aplicarla, y el bot no integra mientras esté puesta o si su retiro no es verificable.
+- [ ] Migraciones: ninguna / aditivas, con la etiqueta `migracion-pendiente` puesta por quien abre el PR; Carlos las aplica en Neon `dev` y `main` y quita la etiqueta.

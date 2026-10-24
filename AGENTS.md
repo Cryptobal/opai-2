@@ -65,7 +65,7 @@ Un PR está terminado cuando:
 - Aplicar migraciones fuera de un PR, o contra un entorno que el brief no indique. Las migraciones de Neon las aplica Carlos desde su Mac.
 - Force-push, rebase, reescribir historia o borrar ramas ajenas sin el OK explícito de Carlos. Para traer `main` a una rama se usa merge. Nunca push directo a `main`.
 - `prisma migrate reset`, borrar migraciones, desactivar o saltar tests para lograr el verde, y `--no-verify`.
-- Que un bot o agente escriba comentarios «VETO» o «VETO LEVANTADO», o quite las etiquetas `veto` o `migracion-pendiente` (son de Carlos en persona; ver «Integración a `main`»).
+- Que un bot o agente escriba comentarios `VETO` o `VETO LEVANTADO`, o ponga o quite las etiquetas `veto` y `migracion-pendiente`. Única excepción: quien abre un PR con migración pone `migracion-pendiente` (ver «Integración a `main`»).
 
 ## Roles
 
@@ -83,9 +83,16 @@ Un PR está terminado cuando:
 - Solo el bot «OPAI 2.0» integra, **con squash**, y solo cuando se cumplen las tres condiciones: (a) el «Revisor OPAI 2.0» escribió **APROBAR** sin condiciones citando el SHA completo del head actual; (b) los checks obligatorios del ruleset «Proteger main» están en verde sobre ese mismo SHA (`typecheck · lint · test · test:db`, `build · presupuesto de JS`, `secretos`); (c) si el PR toca pantallas, no hay ningún issue ni PR con la etiqueta `qa-bloqueante`.
 - **Justo antes del squash** el bot comprueba que el SHA aprobado sea el head, que los checks obligatorios estén en verde sobre ese SHA y que la rama no esté «behind» `main`, e integra pasando ese SHA como esperado. **Cualquier push, incluido traer `main` con merge, invalida la aprobación** y hace falta una re-revisión.
 - Ningún otro bot hace merge. Sin force-push ni rebase; `main` se trae a la rama con merge.
-- **Veto:** Carlos veta con un comentario «VETO» en el PR o con la etiqueta `veto`. Solo cuentan los que pone la cuenta de Carlos (`Cryptobal`). Solo Carlos lo levanta: quitando la etiqueta o, si fue un comentario «VETO», con un comentario posterior suyo «VETO LEVANTADO». Antes de integrar, el bot revisa que no haya un veto vigente; si no puede verificarlo, no integra. Después de cada merge, el bot le avisa a Carlos.
-- **Autoría humana verificable.** El veto, «VETO LEVANTADO» y el retiro de las etiquetas `veto` y `migracion-pendiente` solo cuentan si son de Carlos en persona: un comentario de issue del PR o un evento de etiqueta hecho por la cuenta `Cryptobal` **sin** `performed_via_github_app` (los bots y agentes que publican con esa cuenta lo hacen a través de una app). El comentario cuenta solo si su cuerpo **empieza** con `VETO` o con `VETO LEVANTADO`; no cuentan las citas dentro de reviews ni de otros comentarios. Ante una autoría dudosa, el veto sigue vigente y la migración se considera pendiente: no se integra.
-- **Migración pendiente:** quien abre un PR con migraciones nuevas (`packages/db/prisma/migrations/`) le pone la etiqueta `migracion-pendiente`, y el Revisor la pone si falta. Solo Carlos la quita, después de aplicar la migración en Neon `dev` y `main`. Antes de integrar, el bot comprueba que no esté y, si el diff trae archivos nuevos en `packages/db/prisma/migrations/`, que su retiro sea un evento humano verificable de Carlos; si no puede verificarlo, no integra.
+- Después de cada merge, el bot le avisa a Carlos.
+
+**Veto y migración pendiente (autoría humana; ADR-043 v3).**
+
+1. Carlos veta un PR con un comentario cuya primera línea es exactamente `VETO`, o con la etiqueta `veto`. Lo levanta quitando la etiqueta o con un comentario posterior cuya primera línea es exactamente `VETO LEVANTADO`.
+2. Un PR con migraciones nuevas en `packages/db/prisma/migrations/` lleva la etiqueta `migracion-pendiente`, que pone quien abre el PR. Solo Carlos la quita, después de aplicar la migración en Neon `dev` y `main`.
+3. Solo cuentan los comentarios y cambios de etiqueta sin `performed_via_github_app`, es decir, hechos a mano desde la web o la app de GitHub y no a través de una app o integración. La cuenta `Cryptobal` la usan Carlos y los bots, así que la cuenta sola no basta. Un evento que no cumple la regla no levanta un veto ni retira una migración pendiente.
+4. Ningún bot ni agente escribe comentarios `VETO` o `VETO LEVANTADO` ni pone o quita las etiquetas `veto` y `migracion-pendiente`. Única excepción: quien abre un PR con migración pone `migracion-pendiente`.
+5. Antes de integrar, el bot «OPAI 2.0» revisa con esta regla los comentarios del PR y el historial de sus etiquetas. No integra si hay un veto vigente, si `migracion-pendiente` está puesta, si el PR trae migraciones nuevas y la etiqueta falta o no la quitó un evento válido, o si no puede verificarlo.
+
 - **Sin excepciones; decisión de Carlos del 24-oct-2026.** Todo PR se integra con las mismas tres condiciones, también los que cambian esta regla (incluido el PR #28), suben topes de JS o tocan seguridad, autenticación, RLS, migraciones, CI, workflows, el ruleset, la infraestructura o el despliegue. No hace falta que Carlos integre ni un OK adicional suyo; solo se mantienen su veto y la espera por una migración de Neon pendiente.
 - **BLOQUEANTE:** Diseño y QA revisa en `test.opai.cl` después del merge; un BLOQUEANTE se registra con la etiqueta `qa-bloqueante` y un comentario «QA: BLOQUEANTE» en el PR integrado donde se encontró, y frena los merges de PRs que tocan pantallas hasta que la corrección esté integrada y verificada y se quite la etiqueta.
 - El e2e de Playwright no es check obligatorio por ahora.
