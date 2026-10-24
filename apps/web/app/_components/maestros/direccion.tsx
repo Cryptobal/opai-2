@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 
 import { CampoDireccion, type Direccion } from "@opai/ds";
 
@@ -21,16 +21,22 @@ export function DireccionOpai(props: {
   sinMapa?: boolean;
 }) {
   const [error, setError] = useState<string | null>(null);
+  const ultima = useRef(0);
   // Una falla (de la capacidad o de la red) se muestra en el campo; nunca se devuelve un vacío mudo.
+  // Solo la última llamada actualiza el aviso: una respuesta vieja no puede pisar a la vigente.
   const llamar = useCallback(async (correr: () => Promise<{ ok: boolean; data?: unknown }>) => {
+    const n = ++ultima.current;
     const r = await correr().catch(() => null);
-    setError(r?.ok ? null : SIN_SERVICIO);
+    if (n === ultima.current) setError(r?.ok ? null : SIN_SERVICIO);
     return r?.ok ? r.data : null;
   }, []);
   const buscar = useCallback(
     async (texto: string) => {
       const corto = texto.trim().length < 3;
-      if (corto) setError(null);
+      if (corto) {
+        ultima.current++;
+        setError(null);
+      }
       const d = corto
         ? null
         : await llamar(() => ejecutarCapacidad("erp", "core.geo.autocompletar", { texto }));

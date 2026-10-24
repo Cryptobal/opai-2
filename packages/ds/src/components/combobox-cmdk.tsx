@@ -1,7 +1,7 @@
 "use client";
 
 import { Command } from "cmdk";
-import { Check, ChevronsUpDown, Plus, Search } from "lucide-react";
+import { Check, ChevronsUpDown, Loader2, Plus, Search } from "lucide-react";
 import { Popover as RadixPopover } from "radix-ui";
 import { useState } from "react";
 
@@ -45,7 +45,8 @@ export function ComboboxCmdk(props: ComboboxProps) {
   const [abierto, setAbierto] = useState(props.abiertoInicial ?? false);
   const [q, setQ] = useState("");
   const remotas = useRemotas(q, onBuscar);
-  const lista = onBuscar ? (remotas ?? []) : opciones;
+  const buscando = remotas.buscando;
+  const lista = onBuscar ? remotas.opciones : opciones;
   const etiquetaDe = (v: string) =>
     [...opciones, ...lista].find((o) => o.valor === v)?.etiqueta ?? v;
   const elegir = (v: string) => {
@@ -100,10 +101,28 @@ export function ComboboxCmdk(props: ComboboxProps) {
                 className="h-full min-w-0 flex-1 bg-transparent text-md text-fg outline-none placeholder:text-fg-subtle"
               />
             </div>
-            <Command.List className="max-h-72 overflow-y-auto py-1">
-              <Command.Empty className="px-3 py-3 text-base text-fg-muted">
-                {q.trim() ? `Sin resultados para “${q}”` : (props.textoInicial ?? "Sin resultados")}
-              </Command.Empty>
+            <Command.List
+              aria-busy={buscando}
+              className={cn(
+                "max-h-72 overflow-y-auto py-1 transition-opacity duration-150",
+                buscando && lista.length > 0 && "opacity-60",
+              )}
+            >
+              {buscando ? (
+                <div
+                  role="status"
+                  className="flex items-center gap-2 px-3 py-3 text-base text-fg-muted"
+                >
+                  <Loader2 className="size-4 motion-safe:animate-spin" aria-hidden />
+                  Buscando…
+                </div>
+              ) : (
+                <Command.Empty className="px-3 py-3 text-base text-fg-muted">
+                  {q.trim()
+                    ? `Sin resultados para “${q}”`
+                    : (props.textoInicial ?? "Sin resultados")}
+                </Command.Empty>
+              )}
               {lista.map((o) => (
                 <Command.Item
                   key={o.valor}

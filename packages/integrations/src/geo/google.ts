@@ -10,6 +10,7 @@ import { type Componente, componentes, type Geo } from "./tipos";
 export { ErrorGoogle } from "./error-google";
 export type { ImagenMapa, OpcionesMapa } from "./mapa";
 export type { DireccionGeo, Geo, Sugerencia } from "./tipos";
+export { variantesDeBusqueda } from "./variantes";
 
 export function geoGoogle(apiKey: string): Geo {
   const cabeceras = { "X-Goog-Api-Key": apiKey, "Content-Type": "application/json" };
