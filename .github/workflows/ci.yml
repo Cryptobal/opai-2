@@ -103,7 +103,8 @@ jobs:
           --health-retries 10
     env:
       # Base efímera del propio job (servicio de Postgres): no hay secretos del repositorio ni de Neon.
-      DATABASE_URL_MIGRATE: postgresql://postgres:postgres@localhost:5432/opai_e2e
+      # La URL del rol propietario (DATABASE_URL_MIGRATE) solo existe en el paso de migrar y sembrar:
+      # la app y los e2e corren únicamente con `opai_app`, como en producción.
       BETTER_AUTH_URL: http://localhost:3000
       NEXT_TELEMETRY_DISABLED: "1"
     steps:
@@ -126,6 +127,8 @@ jobs:
           echo "::add-mask::$clave"
           echo "SEED_OWNER_PASSWORD=$clave" >> "$GITHUB_ENV"
       - name: Migrar y sembrar la base
+        env:
+          DATABASE_URL_MIGRATE: postgresql://postgres:postgres@localhost:5432/opai_e2e
         run: |
           pnpm db:deploy
           pnpm --filter @opai/db role:password
@@ -141,8 +144,8 @@ jobs:
       - name: Levantar la app y calentar las rutas
         run: |
           nohup pnpm --filter @opai/web dev > "$RUNNER_TEMP/app.log" 2>&1 &
-          for i in $(seq 1 60); do curl -sf http://localhost:3000/api/health > /dev/null && break; sleep 2; done
-          curl -sf http://localhost:3000/api/health
+          for i in $(seq 1 60); do curl -sf -m 10 http://localhost:3000/api/health > /dev/null && break; sleep 2; done
+          curl -sf -m 10 http://localhost:3000/api/health
           for ruta in /login /ds /ds/qa /ds/acceso / /platform /cuentas /instalaciones /personas /configuracion/usuarios; do
             curl -s -o /dev/null -m 120 "http://localhost:3000$ruta" || true
           done

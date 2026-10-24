@@ -6,7 +6,15 @@ import "dotenv/config";
 import { cerrarClientes, dbAdmin } from "../src/index";
 
 async function main(): Promise<void> {
-  if (process.env["VERCEL_ENV"] === "production") throw new Error("Solo para desarrollo y CI.");
+  if (process.env["VERCEL_ENV"] === "production" || process.env["NODE_ENV"] === "production") {
+    throw new Error("Solo para desarrollo y CI.");
+  }
+  // Solo contra una base local (Postgres de servicio de CI o de desarrollo), nunca contra Neon.
+  const host = new URL(process.env["DATABASE_URL_MIGRATE"] ?? "postgresql://sin-configurar/")
+    .hostname;
+  if (host !== "localhost" && host !== "127.0.0.1") {
+    throw new Error(`seed:e2e solo corre contra una base local (host recibido: ${host}).`);
+  }
   const email = (process.env["SEED_OWNER_EMAIL"] ?? "carlos.irigoyen@opai.cl").toLowerCase();
   const db = dbAdmin();
   const tenant = await db.tenant.findUnique({ where: { slug: "gard" } });
