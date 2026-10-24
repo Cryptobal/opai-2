@@ -26,6 +26,17 @@ describe("qué rutas dependen de la base para ser 404", () => {
     });
   });
 
+  it("reconoce las fichas de agentes y de supervisor", () => {
+    expect(consultaDeRuta(`/configuracion/agentes/${CERO}`)).toEqual({
+      tipo: "ficha",
+      coleccion: "agentes",
+      id: CERO,
+    });
+    expect(consultaDeRuta(`/supervisor/instalaciones/${CERO}`)?.tipo).toBe("ficha");
+    expect(consultaDeRuta(`/supervisor/personas/${CERO}`)?.tipo).toBe("ficha");
+    expect(consultaDeRuta("/configuracion/agentes/conectar")).toBeNull();
+  });
+
   it("un % malformado en el slug no lanza (el proxy no puede dar 500)", () => {
     expect(consultaDeRuta("/configuracion/integraciones/%E0%A4%A")).toBeNull();
     expect(consultaDeRuta("/configuracion/comunicaciones/%zz")).toBeNull();
@@ -45,6 +56,17 @@ describe("existeRuta", () => {
     const { existeRuta } = await import("@/lib/existe-ruta");
     expect(await existeRuta(`/personas/${CERO}`)).toBe(false);
     expect(ejecutar).toHaveBeenCalledWith("erp", "core.personas.get", { id: CERO });
+  });
+
+  it("las fichas de agentes y de supervisor se leen con su portal y responden false si no existen", async () => {
+    ejecutar.mockResolvedValue(noEncontrado);
+    const { existeRuta } = await import("@/lib/existe-ruta");
+    expect(await existeRuta(`/configuracion/agentes/${CERO}`)).toBe(false);
+    expect(ejecutar).toHaveBeenCalledWith("erp", "core.apikeys.get", { id: CERO });
+    expect(await existeRuta(`/supervisor/instalaciones/${CERO}`)).toBe(false);
+    expect(ejecutar).toHaveBeenCalledWith("supervisor", "core.instalaciones.get", { id: CERO });
+    expect(await existeRuta(`/supervisor/personas/${CERO}`)).toBe(false);
+    expect(ejecutar).toHaveBeenCalledWith("supervisor", "core.personas.get", { id: CERO });
   });
 
   it("existente, sin sesión o con otro error: true (decide la página)", async () => {

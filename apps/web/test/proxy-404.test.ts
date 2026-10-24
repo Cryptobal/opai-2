@@ -19,6 +19,19 @@ describe("proxy: 404 real antes de enviar el HTML", () => {
     expect(r.headers.get("x-middleware-rewrite")).toContain("/no-encontrado");
   });
 
+  it("ficha de supervisor inexistente: 404 con la página del portal, no la del ERP", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn().mockImplementation(async () => Response.json({ existe: false })),
+    );
+    const r = await proxy(pedir(`/supervisor/personas/${CERO}`));
+    expect(r.status).toBe(404);
+    expect(r.headers.get("x-middleware-rewrite")).toContain("/supervisor/no-encontrado");
+    const a = await proxy(pedir(`/configuracion/agentes/${CERO}`));
+    expect(a.status).toBe(404);
+    expect(a.headers.get("x-middleware-rewrite")).toContain("/no-encontrado");
+  });
+
   it("slug inexistente de integraciones: 404", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({ existe: false })));
     expect((await proxy(pedir("/configuracion/integraciones/zzz"))).status).toBe(404);

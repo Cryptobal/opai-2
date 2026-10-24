@@ -2,7 +2,7 @@ import { getSessionCookie } from "better-auth/cookies";
 import { NextResponse, type NextRequest } from "next/server";
 
 import { consultaDeRuta } from "./lib/existencia-ruta";
-import { esIdInvalido } from "./lib/rutas-invalidas";
+import { destino404, esIdInvalido } from "./lib/rutas-invalidas";
 
 /** Pregunta a `/api/existe` si la ficha o el slug existen; ante cualquier falla, que decida la página. */
 async function noExiste(request: NextRequest): Promise<boolean> {
@@ -32,7 +32,9 @@ export async function proxy(request: NextRequest) {
   if (getSessionCookie(request, { cookiePrefix: "opai" })) {
     // Id que no es UUID: 404 real (con el shell) en vez de un 200 que luego dice «no encontrado».
     if (esIdInvalido(request.nextUrl.pathname) || (await noExiste(request))) {
-      return NextResponse.rewrite(new URL("/no-encontrado", request.url), { status: 404 });
+      return NextResponse.rewrite(new URL(destino404(request.nextUrl.pathname), request.url), {
+        status: 404,
+      });
     }
     return NextResponse.next();
   }
