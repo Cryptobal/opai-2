@@ -1,7 +1,7 @@
 "use client";
 
 import { Pencil } from "lucide-react";
-import { type ComponentProps, useRef, useState } from "react";
+import { type ComponentProps, useId, useRef, useState } from "react";
 
 import { Button } from "./button";
 import { Combobox } from "./combobox";
@@ -62,7 +62,8 @@ export function CampoDireccion({
     for (const o of r) textos.current.set(o.valor, o.etiqueta);
     return r;
   };
-  const base = id ?? "direccion";
+  const auto = useId();
+  const base = id ?? auto;
   const idError = `${base}-error`;
   if (manual) {
     const cambiar = (k: keyof Direccion, v: string) =>

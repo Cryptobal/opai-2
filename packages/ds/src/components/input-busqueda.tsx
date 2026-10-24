@@ -1,7 +1,7 @@
 "use client";
 
 import { Search, X } from "lucide-react";
-import { type InputHTMLAttributes, useRef } from "react";
+import { type InputHTMLAttributes, useId, useRef } from "react";
 
 import { cn } from "../cn";
 import { Kbd } from "./segmentado";
@@ -16,6 +16,7 @@ type Props = Omit<InputHTMLAttributes<HTMLInputElement>, "value" | "onChange" | 
 /** Búsqueda: lupa a la izquierda, limpiar a la derecha y, en md+, la tecla de atajo. 44 px. */
 export function InputBusqueda({ valor, onCambiar, atajo, className, ...props }: Props) {
   const ref = useRef<HTMLInputElement>(null);
+  const auto = useId();
   return (
     <span className={cn("relative block", className)}>
       <Search
@@ -34,7 +35,7 @@ export function InputBusqueda({ valor, onCambiar, atajo, className, ...props }: 
           "[&::-webkit-search-cancel-button]:hidden",
         )}
         {...props}
-        name={props.name ?? "buscar"}
+        id={props.id ?? auto}
       />
       {valor ? (
         <button
