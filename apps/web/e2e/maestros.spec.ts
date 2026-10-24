@@ -98,6 +98,7 @@ test.describe("maestros con sesión", () => {
     await expect(page.getByRole("link", { name: new RegExp(apellido) }).first()).toBeVisible();
     await page.goBack();
     await page.goBack();
+    await expect(page).toHaveURL(/\/personas\/[0-9a-f-]{36}$/);
 
     await page.getByRole("link", { name: "Laboral" }).first().click();
     await expect(page.getByText("Estructura de sueldo efectiva")).toBeVisible({ timeout: 30_000 });
