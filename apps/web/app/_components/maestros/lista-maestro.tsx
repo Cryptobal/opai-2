@@ -22,6 +22,8 @@ export type FilaLista = {
   terciario?: ReactNode;
   inicio?: ReactNode;
   fin?: ReactNode;
+  /** Ajuste de la fila (por ejemplo, menos relleno vertical cuando el contenido de la derecha es más alto). */
+  className?: string;
 };
 
 type Props = {
@@ -64,6 +66,7 @@ export function ListaMaestro(p: Props) {
                 terciario={f.terciario}
                 inicio={f.inicio}
                 fin={f.fin}
+                {...(f.className ? { className: f.className } : {})}
                 seleccionada={p.seleccionada === f.id}
               />
             ))}

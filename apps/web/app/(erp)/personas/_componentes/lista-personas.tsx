@@ -4,9 +4,9 @@ import { Avatar, Badge, type EstadoPantalla } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
-import { ESTADO_PERSONA, estadoDe, TIPO_CONTRATO } from "@/app/_components/maestros/estados";
+import { ESTADO_PERSONA, estadoDe } from "@/app/_components/maestros/estados";
 import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
-import { fecha, rut } from "@/lib/fechas";
+import { rut } from "@/lib/fechas";
 import type { Parametros } from "@/lib/parametros";
 import type { PersonaFila } from "@/lib/tipos-maestros";
 
@@ -32,10 +32,19 @@ export const conParametros = (p: Parametros) => {
   return t ? `?${t}` : "";
 };
 
+/** Los mismos parámetros como continuación de otra consulta (`&q=…`), para los enlaces que abren una hoja. */
+export const consultaExtra = (p: Parametros) => conParametros(p).replace("?", "&");
+
+/** `?subir=1&q=…`: abre una hoja de la ficha sin perder la búsqueda, los filtros ni la página de la lista. */
+export const conHoja = (hoja: string, p: Parametros) => `?${hoja}${consultaExtra(p)}`;
+
 const estadoVisible = (x: PersonaFila) =>
   estadoDe(ESTADO_PERSONA, x.bloqueada ? "bloqueada" : x.estado);
 
-/** Columna de personas (10, 53): avatar, nombre, "cargo · RUT" y estado o semáforo de documentos. */
+/**
+ * Columna de personas (10, 53): avatar, nombre, "cargo · RUT" y estado o semáforo de documentos. El tipo
+ * de contrato va solo en la ficha. El RUT nunca se corta: si falta ancho, se acorta el cargo.
+ */
 export function ListaPersonas(x: Props) {
   const nueva = (
     <EnlaceBotonHoja href="?nueva=1" icono={Plus} className="md:hidden">
@@ -96,20 +105,17 @@ export function ListaPersonas(x: Props) {
           inicio: <Avatar nombre={i.nombreCompleto} size="lg" />,
           titulo: i.nombreCompleto,
           secundario: (
-            <>
-              {i.vinculoVigente?.cargo ?? "Sin vínculo vigente"}
-              {i.vinculoVigente ? (
-                <span>
-                  {" "}
-                  · {TIPO_CONTRATO[i.vinculoVigente.tipo] ?? i.vinculoVigente.tipo}
-                  {i.vinculoVigente.termino ? ` hasta ${fecha(i.vinculoVigente.termino)}` : ""}
-                </span>
-              ) : null}
-              <span className="t-mono hidden text-[13px] md:inline"> · {rut(i.rut)}</span>
-            </>
+            <span className="flex min-w-0 items-baseline gap-1">
+              <span className="min-w-0 truncate">
+                {i.vinculoVigente?.cargo ?? "Sin vínculo vigente"}
+              </span>
+              <span className="t-mono flex-none whitespace-nowrap text-[13px]">· {rut(i.rut)}</span>
+            </span>
           ),
+          // Estado y documentos en vertical: a lo ancho le quitaban el sitio al RUT en celular y iPad.
+          className: "py-2",
           fin: (
-            <span className="flex items-center gap-1.5">
+            <span className="flex flex-col items-end gap-0.5">
               {e.tono === "success" ? null : (
                 <Badge tono={e.tono} punto>
                   {e.etiqueta}
