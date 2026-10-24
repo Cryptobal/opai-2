@@ -18,7 +18,7 @@ export type AppShellProps = ComunesBarra & {
   /** Acciones en la barra del teléfono cuando hay "Atrás" (menú ⋯ del detalle). */
   accionesTelefono?: ReactNode;
   insignia?: ReactNode;
-  /** Subtítulo bajo la marca en el riel ("Plataforma"). */
+  /** Subtítulo bajo la marca, en el riel de iPad y en la barra lateral de desktop ("Plataforma"). */
   subtituloMarca?: string;
   onNavegar?: (href: string) => void;
   /** Contenido a alto completo (vistas divididas): sin márgenes del contenedor en md+. */
@@ -33,28 +33,28 @@ export type AppShellProps = ComunesBarra & {
  */
 export function AppShell(props: AppShellProps) {
   const { titulo, nav, rutaActual, acciones, insignia, children, className, Link } = props;
-  const linkProps = Link ? { Link } : {};
   const { accionesTelefono, subtituloMarca, onNavegar, completo, ...barra } = props;
   return (
     <div className="flex min-h-dvh bg-bg text-fg">
       <Rail
         items={nav}
         rutaActual={rutaActual}
-        {...(subtituloMarca ? { subtitulo: subtituloMarca } : {})}
+        subtitulo={subtituloMarca}
         portales={props.portales}
         portalActual={props.portalActual}
         tenant={props.tenant}
         empresas={props.empresas}
-        {...linkProps}
+        Link={Link}
       />
       <Sidebar
         items={nav}
         rutaActual={rutaActual}
         portales={props.portales}
         portalActual={props.portalActual}
-        {...(props.tenant ? { tenant: props.tenant } : {})}
-        {...(props.empresas ? { empresas: props.empresas } : {})}
-        {...linkProps}
+        tenant={props.tenant}
+        empresas={props.empresas}
+        subtitulo={subtituloMarca}
+        Link={Link}
       />
       <div className="flex min-w-0 flex-1 flex-col">
         <TopBarTelefono {...barra} acciones={accionesTelefono ?? null} />
@@ -79,7 +79,7 @@ export function AppShell(props: AppShellProps) {
         rutaActual={rutaActual}
         {...(props.menuUsuario ? { extras: props.menuUsuario } : {})}
         {...(onNavegar ? { onNavegar } : {})}
-        {...linkProps}
+        Link={Link}
       />
     </div>
   );
