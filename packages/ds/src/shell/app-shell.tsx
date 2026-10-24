@@ -17,7 +17,7 @@ export type AppShellProps = ComunesBarra & {
   /** Acciones en la barra del teléfono cuando hay "Atrás" (menú ⋯ del detalle). */
   accionesTelefono?: ReactNode;
   insignia?: ReactNode;
-  /** Subtítulo bajo la marca en el riel ("Plataforma"). */
+  /** Subtítulo bajo la marca, en el riel de iPad y en la barra lateral de desktop ("Plataforma"). */
   subtituloMarca?: string;
   onNavegar?: (href: string) => void;
   /** Contenido a alto completo (vistas divididas): sin márgenes del contenedor en md+. */
@@ -49,6 +49,7 @@ export function AppShell(props: AppShellProps) {
         portalActual={props.portalActual}
         {...(props.tenant ? { tenant: props.tenant } : {})}
         {...(props.empresas ? { empresas: props.empresas } : {})}
+        {...(subtituloMarca ? { subtitulo: subtituloMarca } : {})}
         {...linkProps}
       />
       <div className="flex min-w-0 flex-1 flex-col">
