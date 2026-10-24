@@ -32,9 +32,9 @@ Lo usan el Revisor (con el modelo contrario al que construyó) y la autorrevisi�
 - [ ] Cumple el brief y sus criterios de aceptación. Las diferencias están reportadas.
 - [ ] Respeta `docs/2.0/REGLAS-codigo.md`: TypeScript estricto sin `any`, archivos de hasta 150 líneas, dominio puro, dinero en enteros y tiempo en UTC.
 - [ ] Trae los tests de la regla nueva: dominio, autorización y auditoría de capacidades, y RLS si toca base.
-- [ ] Los topes de JS no suben, salvo una excepción aprobada por Carlos y registrada en `ESTADO.md`.
+- [ ] El check `build · presupuesto de JS` está en verde. Si el PR sube un tope, la justificación está en el PR (sin excepción de Carlos: ADR-043 v3).
 - [ ] El diff no trae refactorizaciones fuera del alcance ni archivos generados o temporales.
 - [ ] El PR está vinculado a su tarea de Linear (`Fixes OPAI-123`), `ROADMAP.md` está actualizado si cambia el plan, y el PR trae el resumen ejecutivo para Carlos.
 
 ## Veredicto
-**APROBAR** o **PEDIR CAMBIOS**, con archivo:línea y la corrección propuesta. Durante los primeros módulos, el Revisor **no integra**: el merge lo hace Carlos (ADR-043).
+**APROBAR** o **PEDIR CAMBIOS**, con archivo:línea y la corrección propuesta, citando siempre el SHA completo del head revisado. El Revisor **no integra**: solo un APROBAR sin condiciones sobre el SHA del head actual habilita el merge con squash del bot «OPAI 2.0», junto con los checks obligatorios en verde sobre ese SHA, la rama sin quedar «behind» y, si toca pantallas, nada con la etiqueta `qa-bloqueante` (ADR-043 v3). Si el PR trae migraciones nuevas en `packages/db/prisma/migrations/` y la etiqueta `migracion-pendiente` no está sin que su última retirada sea un evento válido de Carlos (incluido el caso en que nunca se puso), **PEDIR CAMBIOS** (la pone quien abre el PR). El Revisor no escribe `VETO` ni `VETO LEVANTADO` y no pone ni quita las etiquetas `veto` y `migracion-pendiente` (`AGENTS.md`, «Integración a `main`»). Un APROBAR con condiciones no habilita el merge, y cualquier push posterior (incluido traer `main`) exige revisar de nuevo.

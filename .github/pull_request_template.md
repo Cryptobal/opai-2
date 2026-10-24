@@ -1,4 +1,12 @@
-<!-- Contrato: AGENTS.md. Un PR por encargo, desde `main` actualizado. No se integra desde aquí: el merge lo hace Carlos. -->
+<!-- Contrato: AGENTS.md. Un PR por encargo, desde `main` actualizado. Integra solo el bot «OPAI 2.0», con squash, cuando el Revisor escribió APROBAR sin condiciones citando el SHA del head actual, los checks obligatorios están en verde sobre ese SHA, la rama no está «behind», no hay veto vigente ni etiqueta `migracion-pendiente` y, si toca pantallas, no hay nada con la etiqueta `qa-bloqueante` (ADR-043 v3). Cualquier push, incluido traer `main`, invalida la aprobación. Sin force-push ni rebase.
+
+**Veto y migración pendiente (autoría humana; ADR-043 v3).**
+1. Carlos veta un PR con un comentario cuya primera línea es exactamente `VETO`, o con la etiqueta `veto`. Cada forma se levanta por su lado: la etiqueta, quitándola; el comentario, con un comentario posterior cuya primera línea es exactamente `VETO LEVANTADO`. Si hay ambos, hay que levantar los dos.
+2. Un PR con migraciones nuevas en `packages/db/prisma/migrations/` lleva la etiqueta `migracion-pendiente`, que pone quien abre el PR. Solo Carlos la quita, después de aplicar la migración en Neon `dev` y `main`.
+3. Lo que bloquea (la etiqueta `veto`, un comentario `VETO` o la etiqueta `migracion-pendiente`) cuenta siempre, venga de donde venga, incluida la app «claude». Para levantar (quitar `veto`, comentar `VETO LEVANTADO` o quitar `migracion-pendiente`) solo cuentan los eventos sin `performed_via_github_app` (excluye lo hecho por apps como «claude»; lo hecho con `gh` o un PAT de `Cryptobal` no se distingue, por eso lo prohíbe la regla 4). La cuenta `Cryptobal` la usan Carlos y los bots, así que la cuenta sola no basta. Un evento que no cumple la regla no levanta un veto ni retira una migración pendiente.
+4. Ningún bot ni agente escribe comentarios `VETO` o `VETO LEVANTADO` ni pone o quita las etiquetas `veto` y `migracion-pendiente`, y ningún agente usa `gh`, un PAT ni la API con la cuenta `Cryptobal` para esos comentarios o etiquetas. Única excepción: quien abre un PR con migración pone `migracion-pendiente`.
+5. Antes de integrar, el bot «OPAI 2.0» revisa con esta regla los comentarios del PR y el historial de sus etiquetas. No integra si hay un veto vigente, si `migracion-pendiente` está puesta, si el PR trae migraciones nuevas y la etiqueta no está sin que su última retirada sea un evento válido (incluido el caso en que nunca se puso), o si no puede verificarlo.
+-->
 
 **Tarea:** Fixes OPAI-\_\_\_
 
@@ -27,7 +35,7 @@
 ## Definición de terminado
 
 - [ ] Cumple el brief o el encargo; las diferencias están reportadas arriba.
-- [ ] `secretos` en verde y todos los checks de arriba en verde en el último commit; los topes de JS no suben, salvo una excepción aprobada por Carlos y registrada en `ESTADO.md`.
+- [ ] `secretos` en verde y todos los checks de arriba en verde en el último commit; si sube un tope de JS, la justificación está en este PR (manda el check de presupuesto; ADR-043 v3).
 - [ ] Gate local corrido antes de cada commit (`pnpm typecheck && pnpm lint && pnpm test`) y `pnpm test:db` si toca base o RLS.
 - [ ] Multi-tenant: toda tabla nueva con `tenant_id` tiene RLS y la política `tenant_isolation`; todo acceso pasa por `forTenant` o `enTransaccion`; no hay `$queryRaw` fuera de `enTransaccion`; `dbAdmin` solo en migraciones y seeds.
 - [ ] Paridad: lo que hace la pantalla existe como capacidad en `/api/v1` y en MCP; las escrituras tienen `dryRun`.
@@ -36,4 +44,4 @@
 - [ ] Con pantallas: probadas a 375, 1024 y 1280 px, en claro y oscuro, con `docs/2.0/checklists/qa.md`.
 - [ ] Si porta algo de 1.0: revisado con `docs/2.0/checklists/paridad.md`. OPAI 1.0 no se tocó.
 - [ ] PR vinculado a su tarea de Linear (campo «Tarea» arriba); `docs/2.0/ROADMAP.md` actualizado si cambia el plan.
-- [ ] Migraciones: ninguna / aditivas y listas para que Carlos las aplique en Neon `dev` y `main` antes del merge.
+- [ ] Migraciones: ninguna / aditivas, con la etiqueta `migracion-pendiente` puesta por quien abre el PR; Carlos las aplica en Neon `dev` y `main` y quita la etiqueta.
