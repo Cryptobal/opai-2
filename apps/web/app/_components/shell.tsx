@@ -14,7 +14,6 @@ import type { ItemNav } from "@/lib/navegacion";
 import { Campana } from "./campana";
 import { icono } from "./iconos";
 import { LinkNext } from "./link-next";
-import { subtituloMarcaPortal } from "./portales";
 
 // La paleta (cmdk) se descarga al primer uso: no pesa en el JS inicial de cada ruta (ADR-037).
 const Paleta = dynamic(() => import("./paleta").then((m) => m.Paleta), { ssr: false });
@@ -31,6 +30,8 @@ export type DatosShell = {
   usuario: { nombre: string; email: string; rol?: string };
   empresas: { id: string; nombre: string; actual: boolean }[];
   noLeidas: number;
+  /** Nombre del portal bajo la marca del riel (el ERP no lleva). */
+  subtituloMarca?: string | undefined;
 };
 
 export type OpcionesPagina = {
@@ -103,7 +104,6 @@ export function Shell({
       onSelect: () => void accionSalir(),
     },
   ];
-  const subtitulo = subtituloMarcaPortal(datos.portal);
   return (
     <AppShell
       {...pagina}
@@ -119,7 +119,7 @@ export function Shell({
         datos.tenant ? <Campana noLeidas={datos.noLeidas} portal={datos.portal} /> : undefined
       }
       {...(buscable ? { onBuscar: () => setPaleta(true) } : {})}
-      {...(subtitulo ? { subtituloMarca: subtitulo } : {})}
+      {...(datos.subtituloMarca ? { subtituloMarca: datos.subtituloMarca } : {})}
       onNavegar={(href) => router.push(href)}
       Link={LinkNext}
     >
