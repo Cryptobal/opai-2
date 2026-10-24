@@ -95,4 +95,4 @@ Monorepo de OPAI 2.0: SaaS modular, multi-tenant y agent-first para empresas int
 
 ## Flujo de trabajo
 
-Roles, ramas, commits, definición de terminado y lo prohibido están en `AGENTS.md`. El ciclo de cada módulo (extracción → especificación → diseño → brief → PR → revisión → QA → merge) está en `docs/2.0/ROADMAP.md` (ADR-047).
+Roles, ramas, commits, definición de terminado y lo prohibido están en `AGENTS.md`. El ciclo de cada módulo (extracción → especificación → diseño → brief → PR → revisión → merge con squash → QA) está en `docs/2.0/ROADMAP.md` (ADR-047).
