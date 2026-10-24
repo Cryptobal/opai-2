@@ -31,11 +31,11 @@ Las **bases transversales** (rendimiento, PWA, navegación) aplican a todo brief
 | — | Paridad MCP del núcleo | En curso (otro chat) |
 | — | Arreglos de QA del núcleo | En curso (otro chat) |
 | **03** | **Rendimiento de navegación** (ADR-045): instrumentación, shell en el layout, caché de identidad, `forTenant` por capacidad, prefetch y caché del router, gate en CI | Pendiente · **prioridad 1** |
-| **04** | **Base PWA** (ADR-044): manifest por portal, íconos, service worker, página sin conexión, actualización controlada, prueba en CI | Pendiente (ADR por aprobar) |
+| **04** | **Base PWA** (ADR-044): manifest por portal, íconos, service worker, página sin conexión, actualización controlada, prueba en CI | Pendiente (ADR-044 vigente) |
 | **05** | **Navegación por áreas** (ADR-046, `NAVEGACION.md`): áreas, fijados, ⌘K con acciones y recientes, barra inferior por rol, nombres únicos | Pendiente (Design Prompt de navegación antes) |
 
-- **Criterio de término:** Carlos completa la verificación guiada del Brief 02 en `test.opai.cl` sin bloqueantes; toda capacidad que la UI usa existe en MCP; QA sin hallazgos críticos; la navegación entre Cuentas, Instalaciones, Personas, Cargos y Configuración cumple las metas de ADR-045 medidas antes y después; la app se instala desde el celular y el CI prueba manifest, service worker y modo sin conexión; ADR-044 y 046 aprobados.
-- **Dependencias:** seeds y secretos (Carlos desde el Mac); respuestas de `PREGUNTAS-carlos.md`; Design Prompt de navegación aprobado (para el 05).
+- **Criterio de término:** Carlos completa la verificación guiada del Brief 02 en `test.opai.cl` sin bloqueantes; toda capacidad que la UI usa existe en MCP; QA sin hallazgos críticos; la navegación entre Cuentas, Instalaciones, Personas, Cargos y Configuración cumple las metas de ADR-045 medidas antes y después; la app se instala desde el celular y el CI prueba manifest, service worker y modo sin conexión; ADR-044 y 046 aprobados (cumplido el 24-oct).
+- **Dependencias:** seeds y secretos (Carlos desde el Mac); Design Prompt de navegación aprobado (para el 05).
 - **Riesgo de plazo:** dos semanas para cerrar la sesión D, tres briefs y un diseño es optimista; si el diseño de navegación se atrasa, el Brief 05 puede ir junto al Brief 06 y la fase 2 empieza igual con los Briefs 03 y 04 integrados.
 - **Deja de usarse en 1.0:** nada (2.0 todavía no opera para Gard).
 
@@ -44,7 +44,7 @@ Las **bases transversales** (rendimiento, PWA, navegación) aplican a todo brief
 | Paso | Nombre | Estado |
 |---|---|---|
 | Extracción | `extraccion/comercial-y-cpq.md` | Hecho |
-| ADR | 040 (vigente), 041 y 042 (propuestos) | Esperan preguntas 1–12 |
+| ADR | 040, 041 y 042 | Vigentes (041 y 042 aprobados el 23 y 24-oct) |
 | Especificación | `modulos/comercial.md` y `modulos/cpq.md` | Pendiente |
 | Especificación | `modulos/documentos.md` (explorador, editor, plantillas, firma simple) | Pendiente |
 | Design Prompt | Comercial y CPQ; Documentos | Pendiente |
@@ -153,8 +153,8 @@ No se portan de 1.0 y solo se reconstruyen con demanda real (lista canónica de 
 | Base | Decisión | Documento | Implementación | Estado |
 |---|---|---|---|---|
 | Rendimiento | Navegación instantánea: shell persistente, skeleton inmediato, prefetch, caché de datos, ≤ 8 consultas por navegación, gate en CI | ADR-045 | Brief 03 | ADR vigente; brief pendiente (prioridad 1) |
-| PWA | Instalable, manifest por portal, service worker con actualización controlada, sin conexión en terreno, push, cámara y GPS, presupuesto de terreno, prueba en CI; Capacitor para tiendas | ADR-044 | Brief 04 (base); cola sin conexión con el primer módulo de terreno; Brief 17 (tiendas) | ADR propuesto |
-| Navegación | Áreas, menú vs. pestañas, ⌘K, fijados, barra inferior por rol, portales, activación por módulo, nombres únicos | ADR-046, `NAVEGACION.md` | Design Prompt de navegación → Brief 05 | ADR propuesto |
+| PWA | Instalable, manifest por portal, service worker con actualización controlada, sin conexión en terreno, push, cámara y GPS, presupuesto de terreno, prueba en CI; Capacitor para tiendas | ADR-044 | Brief 04 (base); cola sin conexión con el primer módulo de terreno; Brief 17 (tiendas) | ADR vigente; brief pendiente |
+| Navegación | Áreas, menú vs. pestañas, ⌘K, fijados, barra inferior por rol, portales, activación por módulo, nombres únicos | ADR-046, `NAVEGACION.md` | Design Prompt de navegación → Brief 05 | ADR vigente; Design Prompt pendiente |
 
 ## 5. Próximas 10 tareas, en orden
 
@@ -162,7 +162,7 @@ No se portan de 1.0 y solo se reconstruyen con demanda real (lista canónica de 
 2. **Carlos (Mac):** correr los seeds en Neon `dev` (`seed:dev-tenant` y `seed:maestros-demo`) y `main` (`seed:dev-tenant`), y cargar los secretos de GitHub para los previews por PR.
 3. **Carlos con Claude:** verificación guiada del Brief 02 (bloque 14) en `test.opai.cl`; cerrar paridad MCP y arreglos de QA (otros chats) e integrarlos.
 4. **Claude: Brief 03 · Rendimiento de navegación** (prioridad 1): medir línea base con el protocolo de ADR-045, aplicar los arreglos, medir después y dejar el gate en CI.
-5. **Carlos:** responder `PREGUNTAS-carlos.md` para aprobar ADR-041, 042, 044 y 046.
+5. **Hecho (24-oct):** Carlos respondió `PREGUNTAS-carlos.md`; ADR-041, 042, 044, 045 y 046 vigentes. **Siguiente:** especificación `modulos/comercial.md` (tarea 8), que puede adelantarse mientras corren los Briefs 03 y 04.
 6. **Claude: Brief 04 · Base PWA** (manifest, íconos, service worker, sin conexión mínimo, prueba en CI).
 7. **Claude → Carlos:** Design Prompt de navegación; con el diseño aprobado, **Brief 05 · Navegación por áreas**.
 8. **Claude:** especificaciones `modulos/comercial.md` y `modulos/cpq.md` desde ADR-040/042 y la extracción; **Carlos** las aprueba.

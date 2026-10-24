@@ -81,8 +81,8 @@ Monorepo de OPAI 2.0: SaaS modular, multi-tenant y agent-first para empresas int
 - En iPad y desktop el título de la página va en el `AppShell` (`titulo`); el patrón recibe el mismo título y lo muestra solo en teléfono. La acción principal va en el patrón.
 - Mobile e iPad first: diseñar y verificar a 375px y 1024px antes que desktop. Touch targets ≥44px. Safe-area iOS. Los nombres de carpeta con `_` no son rutas en App Router.
 - Las pantallas nuevas pasan por Claude Design (Design Prompt → diseño aprobado → brief) antes de implementarse.
-- Navegación: respetar `docs/2.0/NAVEGACION.md` (áreas, menú vs. pestañas, barra inferior, nombres); los módulos declararán su entrada con `area` en el manifest (ADR-046, propuesto; obligatorio desde su aprobación y el Brief 05).
-- Rendimiento: el shell persiste entre navegaciones, el skeleton aparece de inmediato, las entradas del menú se precargan; cada brief con pantallas declara sus consultas por navegación (≤ 8) y mide antes y después (ADR-045). PWA: manifest, service worker y sin conexión en terreno según ADR-044 (propuesto; obligatorio desde su aprobación y el Brief 04), con presupuesto de JS por ruta de terreno ≤ 150 KB.
+- Navegación: respetar `docs/2.0/NAVEGACION.md` (áreas, menú vs. pestañas, barra inferior, nombres); los módulos declaran su entrada con `area` en el manifest desde el Brief 05 (ADR-046).
+- Rendimiento: el shell persiste entre navegaciones, el skeleton aparece de inmediato, las entradas del menú se precargan; cada brief con pantallas declara sus consultas por navegación (≤ 8) y mide antes y después (ADR-045). PWA: manifest, service worker y sin conexión en terreno según ADR-044 (base desde el Brief 04), con presupuesto de JS por ruta de terreno ≤ 150 KB.
 
 ## Tests
 

@@ -1,6 +1,6 @@
 # Navegación de OPAI 2.0 — mapa final y estado de hoy
 
-**Estado:** propuesto (ADR-046; obligatorio para los briefs desde su aprobación) · **Fecha:** 23-oct-2026 · Todo brief con pantallas lo respeta una vez aprobado; el bot «Diseño y QA OPAI 2.0» lo verifica. El diseño visual pasa por Claude Design (Design Prompt de navegación) antes de implementarse.
+**Estado:** vigente (ADR-046, aprobado por Carlos el 24-oct) · **Fecha:** 23-oct-2026 · Todo brief con pantallas lo respeta; el bot «Diseño y QA OPAI 2.0» lo verifica. El diseño visual pasa por Claude Design (Design Prompt de navegación) antes de implementarse.
 
 ## 1. Principios
 
@@ -78,9 +78,9 @@ El bloqueo financiero (ADR-016) oculta el área completa. Los roles personalizad
 
 ## 6. Nombres
 
-| Hoy | Término único propuesto | Regla |
+| Hoy | Término único | Regla |
 |---|---|---|
-| «Guardias» (menú), «Personas» (ruta `/personas`, código, extracción) | **Personas** | El área y la entrada se llaman Personas en toda vertical: incluye guardias, supervisores y administrativos. El vocabulario de la vertical (guardia, operario, colaborador, técnico) se usa en textos operativos («guardias en turno», «asignar guardia»), no en el nombre del área. Pendiente de confirmación de Carlos |
+| «Guardias» (menú), «Personas» (ruta `/personas`, código, extracción) | **Personas** | El área y la entrada se llaman Personas en toda vertical: incluye guardias, supervisores y administrativos. El vocabulario de la vertical (guardia, operario, colaborador, técnico) se usa en textos operativos («guardias en turno», «asignar guardia»), no en el nombre del área. Aprobado por Carlos el 24-oct |
 | «Maestros» (grupo) | **Clientes** y **Personas** | «Maestros» es lenguaje de sistemas |
 | «Ajustes» (barra inferior) y «Configuración» (barra lateral) | **Configuración** | Un solo nombre; en la barra inferior va dentro de «Más» |
 | «Instalac.», «Aprob.» (abreviaturas) | Sin abreviar | La barra inferior usa íconos con etiquetas cortas reales (Inicio, Negocios, Pauta, Buscar, Más) |

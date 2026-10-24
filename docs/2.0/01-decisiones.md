@@ -493,7 +493,7 @@ OPAI puede ofrecer además **automatizaciones alojadas** (por ejemplo, búsqueda
 
 ## ADR-041 · Fichas con pestañas consistentes
 
-**Fecha:** 23-oct-2026 · **Estado:** propuesto · Aplica ADR-007 (misma UX) y ADR-003 (módulos independientes).
+**Fecha:** 23-oct-2026 · **Estado:** vigente (aprobado por Carlos el 23-oct; respuestas en `PREGUNTAS-carlos.md`) · Aplica ADR-007 (misma UX) y ADR-003 (módulos independientes).
 
 **Contexto.** Cada ficha (cuenta, instalación, persona) arma sus pestañas a mano en su componente: contadores calculados de formas distintas (`contactos.length` en una, conteo del servidor en otra), una pestaña deshabilitada "Disponible con Operaciones" en instalación, y las piezas transversales aceptan solo enumeraciones fijas del núcleo: `ActividadFicha` (`cuenta`, `instalacion`, `persona`, `cargo`), `core.actividad.list` (los mismos más `documento`) y `FichaDocumentos`/`core.documentos` (`tenant`, `cuenta`, `instalacion`, `persona`, `puesto`). Comercial agrega negocio y cotización y pestañas "Negocios" en cuenta e instalación.
 
@@ -512,11 +512,14 @@ OPAI puede ofrecer además **automatizaciones alojadas** (por ejemplo, búsqueda
 
 **Consecuencias.** Las fichas de cuenta, instalación y persona se migran al componente en el brief de Comercial (sin cambio visual salvo las pestañas deshabilitadas y los contadores). Negocio y cotización nacen con la misma estructura. Agregar una entidad nueva no toca Actividad ni Documentos.
 
+
+**Decisiones de Carlos (23-oct).** (1) Las notas son actividades y las etiquetas van como chips, sin pestañas propias. (2) El contacto tiene ficha propia. (3) Las pestañas de módulos no contratados se ocultan por completo.
+
 ---
 
 ## ADR-042 · CPQ configurable por tenant y vertical, con el margen financiero de 1.0
 
-**Fecha:** 23-oct-2026 · **Estado:** propuesto · Concreta y **modifica** ADR-021: los ámbitos de variable pasan a `tenant`, `cuenta` (antes "cliente"), `instalacion`, `cotizacion` y `linea` (antes "puesto": la línea de puesto); y el modelo se edita en la pantalla "Modelo de costeo" del módulo CPQ, no en Configuración → CPQ (punto 8). Requisito de Carlos: no copiar el CPQ de 1.0; mucho mejor visualmente; ítems y variables de costo definidos por cada tenant y vertical; se mantiene el cálculo del margen financiero.
+**Fecha:** 23-oct-2026 · **Estado:** vigente (aprobado por Carlos el 23 y 24-oct; respuestas en `PREGUNTAS-carlos.md`) · Concreta y **modifica** ADR-021: los ámbitos de variable pasan a `tenant`, `cuenta` (antes "cliente"), `instalacion`, `cotizacion` y `linea` (antes "puesto": la línea de puesto); y el modelo se edita en la pantalla "Modelo de costeo" del módulo CPQ, no en Configuración → CPQ (punto 8). Requisito de Carlos: no copiar el CPQ de 1.0; mucho mejor visualmente; ítems y variables de costo definidos por cada tenant y vertical; se mantiene el cálculo del margen financiero.
 
 **Decisión.**
 
@@ -532,6 +535,9 @@ OPAI puede ofrecer además **automatizaciones alojadas** (por ejemplo, búsqueda
 10. **Agentes.** Todo es capacidad con `dryRun`: un agente puede simular una cotización completa (`cpq.cotizaciones.simular`) sin escribir, crear la versión, y enviar solo con aprobación humana.
 
 **Consecuencias.** Agregar una vertical es datos, no código. Una cotización se reproduce igual años después. El brief de CPQ incluye el lenguaje de fórmulas y el motor financiero con sus casos dorados antes de cualquier pantalla. Licitaciones (fase 6) reutiliza el mismo motor.
+
+
+**Decisiones de Carlos (23 y 24-oct).** (4) Validación del margen: Claude elige cinco cotizaciones reales y variadas de Gard enviadas en 2026 (con póliza de garantía, con varias instalaciones y con margen bajo) y Carlos las confirma antes de dar por preservado el cálculo. (5) Una cotización subvalorada (`k ≥ 0,35`) solo se envía con aprobación de un owner o admin con `cpq:aprobar`. (6) **Margen mínimo de Gard: 10 % sobre venta** (no el 15 % recomendado): bajo ese margen la cotización pasa a `en_aprobacion`; es el valor del ajuste declarativo del tenant Gard, no una constante. (7) Modo de margen por defecto: `margin_on_sale`. (8) El modelo de costeo y el catálogo de ítems se editan en la pantalla «Modelo de costeo» de CPQ, solo owner y admin. (9) Edición completa de cotizaciones solo en iPad y escritorio; en el celular se ven, comparan y aprueban. (10) La v1 sale solo con el modelo base `seguridad`; `aseo` y `facility` quedan en backlog hasta que haya un tenant real de esos rubros. (11) El correlativo `CPQ-AAAA-NNN` continúa desde el último número de 1.0 (la importación fija el siguiente número por tenant).
 
 ---
 
@@ -565,7 +571,7 @@ Reglas:
 
 ## ADR-044 · PWA desde el principio y empaquetado nativo posterior
 
-**Fecha:** 23-oct-2026 · **Estado:** propuesto (preguntas de Carlos en `PREGUNTAS-carlos.md`) · Concreta ADR-007 y ADR-029 (puntos 9, 10 y 14).
+**Fecha:** 23-oct-2026 · **Estado:** vigente (aprobado por Carlos el 24-oct; respuestas en `PREGUNTAS-carlos.md`) · Concreta ADR-007 y ADR-029 (puntos 9, 10 y 14).
 
 **Contexto.** Toda la app será instalable y los portales de terreno (Supervisor, Trabajador —portal de la persona—, Terreno, Cliente) se publicarán en App Store y Google Play. Estado verificado en `main` (`fe362cc`): no hay manifest, service worker, íconos ni carpeta `public/`; solo `viewport-fit=cover` y `applicationName`. Existe un proyecto aparte de apps nativas de OPAI 1.0: no se mezcla con 2.0; se reutiliza su aprendizaje (cuentas de desarrollador, D-U-N-S, certificados de push, motivos de rechazo en revisión), no su código.
 
@@ -573,7 +579,7 @@ Reglas:
 
 1. **Una app web instalable** con `app/manifest.ts` (nombre, `short_name`, `start_url` por portal, `display: standalone`, `theme_color`/`background_color` desde tokens, íconos 192 y 512 normales y `maskable`, `apple-touch-icon`, pantalla de inicio con la marca), `apple-mobile-web-app-capable` y safe-area. Un manifest por portal de terreno (`/supervisor`, `/trabajador`, `/terreno`, `/cliente`) para que cada uno se instale con su nombre y su inicio; el ERP usa el general. Íconos y colores de marca del tenant en los portales cuando el tenant los tenga (ADR-028); OPAI por defecto.
 2. **Service worker** con Serwist (está en el stack del arranque; su compatibilidad con Turbopack en Next 16 se verifica en el brief y, si no la hay, se escribe un SW mínimo propio sin dependencias): precache del shell de cada portal de terreno, estrategia *network-first* para RSC y datos, *cache-first* para estáticos con hash, página sin conexión. **Actualización controlada:** el SW nuevo queda en espera y la app muestra «Hay una versión nueva · Actualizar»; nunca se activa a mitad de una marca o una ronda; versiones con migraciones de la cola local fuerzan la actualización al terminar la sincronización.
-3. **Sin conexión, donde corresponde.** Solo en terreno y solo para hechos que se capturan en el lugar: **marcación** (Asistencia), **rondas** (puntos, fotos, GPS) y **novedades** (texto, fotos). Cada hecho se guarda en una cola local en IndexedDB con su `idempotencyKey`, hora del dispositivo, GPS y evidencia; se sincroniza al recuperar la red (evento `online`, al abrir la app y, en Android, Background Sync), por las mismas capacidades que usa la UI con conexión. El servidor sella la hora de recepción; los conflictos se resuelven por ese sello (ADR-029.9). La marca diferida queda identificada como tal (`origen_marca = offline_queue`, con hora del dispositivo y sello del servidor al recibirla); no es la «contingencia» de `extraccion/dt-normativa.md`, que es la carga manual con motivo cuando el sistema no estuvo disponible. Que la marca diferida esté permitida es decisión de Carlos. Lo demás (ERP, configuración, cotizador, finanzas) requiere conexión y lo dice con un estado claro.
+3. **Sin conexión, donde corresponde.** Solo en terreno y solo para hechos que se capturan en el lugar: **marcación** (Asistencia), **rondas** (puntos, fotos, GPS) y **novedades** (texto, fotos). Cada hecho se guarda en una cola local en IndexedDB con su `idempotencyKey`, hora del dispositivo, GPS y evidencia; se sincroniza al recuperar la red (evento `online`, al abrir la app y, en Android, Background Sync), por las mismas capacidades que usa la UI con conexión. El servidor sella la hora de recepción; los conflictos se resuelven por ese sello (ADR-029.9). La marca diferida queda identificada como tal (`origen_marca = offline_queue`, con hora del dispositivo y sello del servidor al recibirla); no es la «contingencia» de `extraccion/dt-normativa.md`, que es la carga manual con motivo cuando el sistema no estuvo disponible. Carlos la aprobó el 24-oct: queda informada a la DT y visible para el trabajador y su supervisor. Lo demás (ERP, configuración, cotizador, finanzas) requiere conexión y lo dice con un estado claro.
 4. **Push.** Canal `push` del servicio de Comunicaciones (ADR-020), silencio por defecto, medido en `core.consumos`. Web Push con VAPID en Android y escritorio; en iOS solo funciona con la app instalada en la pantalla de inicio (iOS 16.4 o superior), por eso el portal pide instalar antes de pedir permiso. En el empaquetado nativo, APNs y FCM por el mismo adaptador. Suscripciones por dispositivo en el núcleo, revocables desde Dispositivos (ADR-029.10). El permiso se pide en contexto (al activar un aviso), nunca al abrir.
 5. **Cámara y GPS.** Fotos con captura nativa del navegador (`input capture` o `getUserMedia`), comprimidas en el dispositivo antes de subir por `core.documentos` (ADR-039). La verificación facial de Asistencia usa el adaptador de biometría del núcleo con prueba de vida del proveedor. GPS con la API de geolocalización: precisión y hora quedan como evidencia, nunca bloquean (ADR-023). El seguimiento en segundo plano de rondas solo existe en la app nativa (la web no lo permite).
 6. **Presupuesto por ruta de terreno.** Primera carga ≤ **150 KB** de JS gzip por ruta de terreno (framework 132 + ≤ 18 KB propios; el cotizador y el ERP mantienen los topes de ADR-037), CSS crítico en línea, fuentes autoalojadas con `font-display: swap`, sin mapas ni gráficos en el JS inicial. Con el SW, la segunda carga no descarga JS. Los topes van en `apps/web/presupuesto-js.json`.
@@ -586,13 +592,16 @@ Reglas:
 | **TWA** (Trusted Web Activity) | Android con cero código nativo; la app es la PWA en Chrome; actualizaciones instantáneas | Solo Android; sin GPS en segundo plano ni plugins nativos; requiere Digital Asset Links |
 | **PWABuilder** | Genera paquetes rápido para ambas tiendas | Sin plugins nativos; en iOS es un WebView simple con alto riesgo de rechazo por la guía 4.2 |
 
-**Consecuencias.** Un brief de base PWA (manifest, íconos, SW con página sin conexión, actualización controlada, prueba en CI) entra antes de Comercial y no espera a la fase 3; la cola local y la sincronización nacen con el primer módulo de terreno (Rondas o Asistencia) con su escenario de prueba sin red. Mientras ADR-044 y ADR-046 estén propuestos, sus reglas son la dirección de trabajo y se vuelven obligatorias para los briefs desde que Carlos los aprueba (Briefs 04 y 05). Las capacidades que se usan sin conexión deben aceptar `idempotencyKey` y la hora del dispositivo como dato, no como verdad.
+**Consecuencias.** Un brief de base PWA (manifest, íconos, SW con página sin conexión, actualización controlada, prueba en CI) entra antes de Comercial y no espera a la fase 3; la cola local y la sincronización nacen con el primer módulo de terreno (Rondas o Asistencia) con su escenario de prueba sin red. Las capacidades que se usan sin conexión deben aceptar `idempotencyKey` y la hora del dispositivo como dato, no como verdad.
+
+
+**Decisiones de Carlos (24-oct).** (12) Empaquetado para tiendas con **Capacitor**. (13) **Una sola app «OPAI»** en App Store y Google Play para todos: personal de la empresa (ERP y Supervisor), trabajadores, dispositivos de terreno emparejados con código y clientes; al ingresar, la app abre a cada persona su portal según su membresía (con selector si tiene varios). La marca del tenant dentro de la app sigue ADR-028; apps con marca propia por tenant quedan en backlog. (14) **Se puede marcar sin señal** como marca diferida (`origen_marca = offline_queue`): queda identificada como tal en los reportes a la DT y es visible para el trabajador (en su comprobante) y para su supervisor; no es la carga manual de contingencia.
 
 ---
 
 ## ADR-045 · Velocidad de navegación medida y con gate
 
-**Fecha:** 23-oct-2026 · **Estado:** vigente (prioridad fijada por Carlos el 23-oct; quedan por decidir los contadores de la barra lateral y la caché de sesión) · Completa ADR-037 y ADR-029 (punto 14).
+**Fecha:** 23-oct-2026 · **Estado:** vigente (prioridad fijada por Carlos el 23-oct; contadores y caché de sesión decididos el 24-oct) · Completa ADR-037 y ADR-029 (punto 14).
 
 **Contexto.** Carlos nota que al cambiar de módulo la página se queda cargando. Medición del 23-oct en `test.opai.cl` (Chrome de escritorio, red fija, sesión real, tenant Gard sin datos de maestros), navegación cliente por la barra lateral, 8 cambios de módulo: **skeleton visible a los 13–21 ms** (el `Suspense` de `PaginaPortal` funciona y el prefetch parcial está activo); **contenido con datos a los 337–1.350 ms** (Cuentas 1.059 y 1.350 ms; Inicio 901 ms; Instalaciones 337; Personas 423–467; Cargos 526; Configuración 367); respuesta RSC de 4–5 KB con primer byte a 85–116 ms, es decir, el servidor tarda 0,2–1,2 s en terminar de transmitir **sin datos que leer**. Carga completa de `/`: TTFB 59 ms, `DOMContentLoaded` 1,08 s. JS por ruta: dentro de los topes de ADR-037 (CI). Funciones en `gru1` y Neon en `aws-sa-east-1` (ambos São Paulo) con conexión pooled: la región no es la causa. En teléfono con 4G el tiempo con datos será mayor y crecerá con el volumen.
 
@@ -616,15 +625,21 @@ No se encontró: render estático roto, falta de prefetch, layouts que recarguen
 
 **Consecuencias.** Toda pantalla nueva declara en su brief sus consultas por navegación. Ningún arreglo de rendimiento se mezcla con PRs de documentación ni de funcionalidades.
 
+
+**Decisiones de Carlos (24-oct).** (15) Se **quitan los contadores de la barra lateral**; los conteos quedan en Inicio y en las listas. (16) La sesión se valida contra la base como máximo cada **5 minutos** (caché de sesión), con invalidación inmediata al suspender una membresía o un tenant o al cambiar un rol.
+
 ---
 
 ## ADR-046 · Arquitectura de navegación por áreas
 
-**Fecha:** 23-oct-2026 · **Estado:** propuesto · Completa ADR-003, ADR-007 y ADR-018. Mapa completo en `docs/2.0/NAVEGACION.md`.
+**Fecha:** 23-oct-2026 · **Estado:** vigente (aprobado por Carlos el 24-oct; respuestas en `PREGUNTAS-carlos.md`) · Completa ADR-003, ADR-007 y ADR-018. Mapa completo en `docs/2.0/NAVEGACION.md`.
 
 **Decisión.** La barra lateral del ERP se organiza en **áreas** fijas (Comercial, Clientes, Operaciones, Personas, Finanzas, Documentos) más Inicio arriba y Configuración al pie; cada área agrupa entradas que aportan los módulos activos del tenant y que el rol puede leer, con un máximo de siete entradas por área. Lo que es parte de una entidad va como pestaña de su ficha (ADR-041), nunca en el menú. La forma principal de saltar es el buscador ⌘K (entidades, páginas y acciones) con recientes; los fijados del usuario van arriba de la barra. En el celular, barra inferior de cuatro entradas más «Más», según el área principal del rol. Los módulos declaran su entrada con `area` y `orden` en el manifest; un módulo apagado no deja rastro. Término único en el menú: «Personas» (el vocabulario de la vertical se usa en textos operativos, no en el nombre del área). Todo brief con pantallas respeta `NAVEGACION.md` y el bot de Diseño y QA lo verifica.
 
 **Consecuencias.** `ItemNav` y el manifest ganan `area`; la barra lateral pasa a grupos plegables; el rediseño visual pasa por Claude Design (Design Prompt de navegación) antes del brief que lo implementa.
+
+
+**Decisiones de Carlos (24-oct).** (17) **«Personas»** es el único término del área y la entrada (el vocabulario de la vertical queda para textos operativos). (18) Áreas aprobadas: Inicio, Comercial, Clientes, Operaciones, Personas, Finanzas y Documentos, con Configuración al pie. (19) La barra inferior del celular se adapta al área principal del usuario, con Inicio y Buscar fijos. `NAVEGACION.md` pasa a ser obligatorio para todo brief con pantallas.
 
 ---
 
