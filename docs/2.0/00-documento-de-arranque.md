@@ -165,7 +165,7 @@ Las duraciones son juicio profesional para un equipo de una persona más Claude 
 
 ## 7. Forma de trabajo
 
-1. Un bloque a la vez. Cada bloque es un brief autocontenido en `docs/2.0/briefs/`, que Claude ejecuta desde el proyecto y entrega como PR; lo integra a `main` con squash el bot «OPAI 2.0» cuando el Revisor escribió APROBAR sin condiciones citando el SHA del head actual, los checks obligatorios están en verde para ese SHA y, si toca pantallas, no hay nada con la etiqueta `qa-bloqueante` (ADR-035, modificado por ADR-043 v3).
+1. Un bloque a la vez. Cada bloque es un brief autocontenido en `docs/2.0/briefs/`, que Claude ejecuta desde el proyecto y entrega como PR; lo integra a `main` con squash el bot «OPAI 2.0» cuando el Revisor escribió APROBAR sin condiciones citando el SHA del head actual, los checks obligatorios están en verde para ese SHA con la rama al día con `main`, sin veto de Carlos ni migración pendiente y, si toca pantallas, sin nada con la etiqueta `qa-bloqueante` (ADR-035, modificado por ADR-043 v3).
 2. Todo brief termina con gate verde (`pnpm typecheck && pnpm lint && pnpm test`), commits atómicos, `docs/2.0/ESTADO.md` actualizado y reporte.
 3. Claude (proyecto "OPAI 2.0") valida el resultado contra el repo antes del siguiente brief.
 4. Pantallas: flujo Claude Design (Design Prompt → diseño aprobado → brief), siempre a 375px y 1024px.

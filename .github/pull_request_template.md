@@ -21,7 +21,7 @@
 - [ ] Con pantallas: probadas a 375, 1024 y 1280 px, en claro y oscuro, con `docs/2.0/checklists/qa.md`.
 - [ ] Si porta algo de 1.0: revisado con `docs/2.0/checklists/paridad.md`. OPAI 1.0 no se tocó.
 - [ ] `docs/2.0/ESTADO.md` y `docs/2.0/ROADMAP.md` actualizados.
-- [ ] Migraciones: ninguna / aditivas y listas para que Carlos las aplique en Neon `dev` y `main` antes del merge (el bot «OPAI 2.0» no integra mientras estén pendientes).
+- [ ] Migraciones: ninguna / aditivas y listas para que Carlos las aplique en Neon `dev` y `main` antes del merge (con migraciones nuevas, el Revisor pone `migracion-pendiente`; el bot no integra hasta que Carlos la aplica y quita la etiqueta).
 
 ## Validación
 
