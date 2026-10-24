@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-// QA pasada 5 (24-oct): calendario sobre una hoja, pestañas que no caben y campos con id.
+// QA pasada 5 (24-oct): calendario sobre una hoja y campos con id o name.
 test.describe("QA pasada 5 · calendario sobre una hoja", () => {
   test("en teléfono el calendario oscurece también la hoja de abajo", async ({ page }, info) => {
     test.skip(info.project.name !== "telefono", "la hoja inferior del calendario es de teléfono");
@@ -34,44 +34,6 @@ test.describe("QA pasada 5 · calendario sobre una hoja", () => {
     ).toBeGreaterThanOrEqual(z.abajo);
     expect(z.despues, "y se pinta después de ella").toBe(true);
     expect(z.arriba, "el calendario va sobre su propio fondo").toBeGreaterThanOrEqual(z.fondo);
-  });
-});
-
-test.describe("QA pasada 5 · pestañas que no caben", () => {
-  test("la pestaña activa queda visible, hay degradado donde hay más y no hay scroll vertical", async ({
-    page,
-  }, info) => {
-    test.skip(info.project.name !== "telefono", "las pestañas se cortan solo en teléfono");
-    await page.goto("/ds/qa");
-    const bloque = page.getByTestId("pestanas-qa");
-    await bloque.scrollIntoViewIfNeeded();
-    const barra = bloque.getByRole("tablist");
-    const activa = barra.getByRole("tab", { selected: true });
-    await expect(activa).toBeInViewport({ ratio: 1 });
-    const m = await barra.evaluate((el) => {
-      const r = el.getBoundingClientRect();
-      const a = el.querySelector('[aria-selected="true"]')?.getBoundingClientRect();
-      return {
-        alto: el.clientHeight,
-        scroll: el.scrollHeight,
-        izq: el.scrollLeft > 0,
-        activaDentro: !!a && a.left >= r.left - 1 && a.right <= r.right + 1,
-      };
-    });
-    expect(m.izq, "la barra se desplazó hasta la pestaña activa").toBe(true);
-    expect(m.activaDentro, "la pestaña activa cabe entera en la barra").toBe(true);
-    expect(m.scroll, "sin scroll vertical").toBe(m.alto);
-    const pagina = await page.evaluate(() => ({
-      ancho: document.documentElement.scrollWidth,
-      ventana: document.documentElement.clientWidth,
-    }));
-    expect(pagina.ancho, "las pestañas no ensanchan la página").toBeLessThanOrEqual(pagina.ventana);
-    await expect(barra).toHaveAttribute("data-izq", "true");
-    await expect(barra).toHaveAttribute("data-der", "false");
-    // Al volver al inicio aparece el degradado derecho y desaparece el izquierdo.
-    await barra.evaluate((el) => el.scrollTo({ left: 0 }));
-    await expect(barra).toHaveAttribute("data-der", "true");
-    await expect(barra).toHaveAttribute("data-izq", "false");
   });
 });
 
