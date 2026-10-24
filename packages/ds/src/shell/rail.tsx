@@ -45,7 +45,7 @@ function ItemRiel({
 }
 
 export type RailProps = NavProps & {
-  subtitulo?: string;
+  subtitulo?: string | undefined;
   /** Selector de portal y de empresa bajo la marca (iPad, 768–1279 px). */
   portales: readonly Portal[];
   portalActual: string;

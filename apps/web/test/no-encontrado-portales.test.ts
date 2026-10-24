@@ -2,7 +2,7 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { subtituloMarcaPortal, tituloNoEncontrado } from "@/app/_components/portales";
+import { subtituloMarcaPortal, tituloNoEncontrado, tituloPagina } from "@/app/_components/portales";
 import { RutaInexistente } from "@/app/_components/ruta-inexistente";
 
 const APP = join(import.meta.dirname, "..", "app");
@@ -49,9 +49,18 @@ describe("el 404 nombra el portal", () => {
     const ids = ["erp", "supervisor", "trabajador", "terreno", "cliente", "platform"];
     const titulos = ids.map(tituloNoEncontrado);
     expect(new Set(titulos).size).toBe(ids.length);
-    expect(tituloNoEncontrado("trabajador")).toBe("Portal Trabajador · No encontrado");
-    expect(tituloNoEncontrado("cliente")).toBe("Portal Cliente · No encontrado");
+    expect(tituloNoEncontrado("trabajador")).toBe("No encontrado · Portal Trabajador");
+    expect(tituloNoEncontrado("cliente")).toBe("No encontrado · Portal Cliente");
     expect(tituloNoEncontrado("erp")).toBe("No encontrado");
+    expect(tituloPagina("trabajador", "Inicio")).toBe("Inicio · Portal Trabajador");
+    expect(tituloPagina("cliente", "Inicio")).toBe("Inicio · Portal Cliente");
+  });
+
+  it("el catch-all de Trabajador y Cliente fija el título del 404 en la propia página", () => {
+    for (const p of ["(cliente)/cliente", "(trabajador)/trabajador"]) {
+      const src = readFileSync(join(APP, p, "[...ruta]", "page.tsx"), "utf8");
+      expect(src, p).toContain("tituloNoEncontrado(");
+    }
   });
 
   it("el lateral lleva el nombre del portal como subtítulo de la marca (salvo el ERP)", () => {

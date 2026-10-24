@@ -6,7 +6,11 @@ import { Contador } from "./contador";
 import { MenuMas } from "./menu-mas";
 import { esActivo, LinkPorDefecto, type LinkComponent, type NavItem } from "./types";
 
-export type NavProps = { items: readonly NavItem[]; rutaActual: string; Link?: LinkComponent };
+export type NavProps = {
+  items: readonly NavItem[];
+  rutaActual: string;
+  Link?: LinkComponent | undefined;
+};
 
 const claseItemInferior = (activo: boolean) =>
   cn(

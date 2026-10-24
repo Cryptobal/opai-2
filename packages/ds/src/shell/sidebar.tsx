@@ -13,12 +13,14 @@ import {
 type SidebarProps = {
   items: readonly NavItem[];
   rutaActual: string;
-  Link?: LinkComponent;
+  Link?: LinkComponent | undefined;
   portales: readonly Portal[];
   portalActual: string;
-  tenant?: Tenant;
+  tenant?: Tenant | undefined;
   /** Cambiar de empresa (ítems del menú del monograma). */
-  empresas?: readonly ItemMenu[];
+  empresas?: readonly ItemMenu[] | undefined;
+  /** Nombre del portal bajo la marca (el ERP no lleva), igual que en el riel de iPad. */
+  subtitulo?: string | undefined;
 };
 
 function agrupar(items: readonly NavItem[]): [string, NavItem[]][] {
@@ -67,7 +69,10 @@ export function Sidebar(props: SidebarProps) {
       className="sticky top-0 hidden h-dvh w-[248px] flex-none flex-col border-r border-border bg-surface xl:flex"
     >
       <div className="flex h-[60px] flex-none items-center justify-between border-b border-border pr-2 pl-5">
-        <span className="text-[17px] leading-6 font-bold tracking-[-0.02em] text-fg">OPAI</span>
+        <span className="grid">
+          <span className="text-[17px] leading-6 font-bold tracking-[-0.02em] text-fg">OPAI</span>
+          {props.subtitulo ? <span className="t-caption">{props.subtitulo}</span> : null}
+        </span>
         <PortalSwitcher
           portales={props.portales}
           portalActual={props.portalActual}
