@@ -69,6 +69,21 @@ describe("existeRuta", () => {
     expect(ejecutar).toHaveBeenCalledWith("supervisor", "core.personas.get", { id: CERO });
   });
 
+  it("un supervisor sin alcance sobre la ficha (FORBIDDEN) recibe lo mismo que si no existiera", async () => {
+    ejecutar.mockResolvedValue({ ok: false, error: { code: "FORBIDDEN", message: "sin alcance" } });
+    const { existeRuta } = await import("@/lib/existe-ruta");
+    expect(await existeRuta(`/supervisor/instalaciones/${CERO}`)).toBe(false);
+    expect(await existeRuta(`/supervisor/personas/${CERO}`)).toBe(false);
+    expect(await existeRuta(`/personas/${CERO}`)).toBe(false);
+  });
+
+  it("una ficha de otro tenant (la RLS la oculta: NOT_FOUND) recibe 404", async () => {
+    ejecutar.mockResolvedValue(noEncontrado);
+    const { existeRuta } = await import("@/lib/existe-ruta");
+    for (const r of ["personas", "cuentas", "instalaciones", "cargos"])
+      expect(await existeRuta(`/${r}/${CERO}`), r).toBe(false);
+  });
+
   it("existente, sin sesión o con otro error: true (decide la página)", async () => {
     const { existeRuta } = await import("@/lib/existe-ruta");
     ejecutar.mockResolvedValue({ ok: true, data: {} });
