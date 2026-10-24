@@ -49,6 +49,7 @@ export function CampoSecreto({ id, guardado, onGuardar, placeholder, pendiente, 
         <span className="relative min-w-0 flex-1">
           <input
             id={id}
+            name="secreto"
             type={visible ? "text" : "password"}
             value={valor}
             autoComplete="off"

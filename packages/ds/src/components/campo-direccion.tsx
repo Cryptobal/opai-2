@@ -62,14 +62,15 @@ export function CampoDireccion({
     for (const o of r) textos.current.set(o.valor, o.etiqueta);
     return r;
   };
-  const idError = `${id ?? "direccion"}-error`;
+  const base = id ?? "direccion";
+  const idError = `${base}-error`;
   if (manual) {
     const cambiar = (k: keyof Direccion, v: string) =>
       onCambiar({ ...(valor ?? { calle: "" }), [k]: v, placeId: null, lat: null, lng: null });
     return (
       <div className="flex min-w-0 flex-col gap-2">
         <Input
-          id={id}
+          id={base}
           value={valor?.calle ?? ""}
           onChange={(e) => cambiar("calle", e.target.value)}
           placeholder="Calle y número"
@@ -77,12 +78,14 @@ export function CampoDireccion({
         />
         <div className="grid grid-cols-2 gap-2">
           <Input
+            name="comuna"
             value={valor?.comuna ?? ""}
             onChange={(e) => cambiar("comuna", e.target.value)}
             placeholder="Comuna"
             aria-label="Comuna"
           />
           <Input
+            name="region"
             value={valor?.region ?? ""}
             onChange={(e) => cambiar("region", e.target.value)}
             placeholder="Región"

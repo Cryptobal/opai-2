@@ -34,6 +34,7 @@ export function InputBusqueda({ valor, onCambiar, atajo, className, ...props }: 
           "[&::-webkit-search-cancel-button]:hidden",
         )}
         {...props}
+        name={props.name ?? "buscar"}
       />
       {valor ? (
         <button

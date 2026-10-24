@@ -28,7 +28,7 @@ export function SheetRadix(props: SheetProps) {
   return (
     <RadixDialog.Root open={abierto} onOpenChange={(a) => !a && onCerrar()}>
       <RadixDialog.Portal>
-        <RadixDialog.Overlay className={claseScrim} />
+        <RadixDialog.Overlay className={cn(claseScrim, "z-50")} />
         <RadixDialog.Content
           {...(descripcion ? {} : { "aria-describedby": undefined })}
           className={cn(
