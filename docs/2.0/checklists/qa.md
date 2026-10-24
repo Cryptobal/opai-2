@@ -32,4 +32,4 @@ Se corre en `test.opai.cl`, o en la preview del PR, después de cada PR con pant
 - [ ] El texto se puede leer al 200 % de zoom sin cortes.
 
 ## Reporte
-Por cada hallazgo: pantalla, viewport, tema, pasos, resultado esperado y obtenido, captura y gravedad (alta: bloquea un flujo; media: se ve mal o confunde; baja: pulido).
+Por cada hallazgo: pantalla, viewport, tema, pasos, resultado esperado y obtenido, captura y gravedad (alta: bloquea un flujo; media: se ve mal o confunde; baja: pulido). Un hallazgo que debe corregirse antes de seguir integrando se marca **BLOQUEANTE**: mientras esté abierto, el bot «OPAI 2.0» no integra PRs que toquen pantallas (ADR-043 v3).

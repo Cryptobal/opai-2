@@ -1,4 +1,4 @@
-<!-- Contrato: AGENTS.md. Un PR por encargo, desde `main` actualizado. No se integra desde aquí: el merge lo hace Carlos. -->
+<!-- Contrato: AGENTS.md. Un PR por encargo, desde `main` actualizado. Integra solo el bot «OPAI 2.0», con squash, cuando el Revisor escribió APROBAR sobre el head actual, los checks obligatorios están en verde y Diseño y QA no tiene un BLOQUEANTE abierto (ADR-043 v3). Carlos puede vetar. Sin force-push ni rebase. -->
 
 ## Qué cambia
 
@@ -21,7 +21,7 @@
 - [ ] Con pantallas: probadas a 375, 1024 y 1280 px, en claro y oscuro, con `docs/2.0/checklists/qa.md`.
 - [ ] Si porta algo de 1.0: revisado con `docs/2.0/checklists/paridad.md`. OPAI 1.0 no se tocó.
 - [ ] `docs/2.0/ESTADO.md` y `docs/2.0/ROADMAP.md` actualizados.
-- [ ] Migraciones: ninguna / aditivas y listas para que Carlos las aplique en Neon `dev` y `main` antes del merge.
+- [ ] Migraciones: ninguna / aditivas y listas para que Carlos las aplique en Neon `dev` y `main` antes del merge (el bot «OPAI 2.0» no integra mientras estén pendientes).
 
 ## Validación
 

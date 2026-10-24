@@ -12,8 +12,8 @@
 4. **Design Prompt** → Claude Design → **diseño aprobado** por Carlos (export en `docs/2.0/design/`).
 5. **Brief** → `docs/2.0/briefs/BRIEF-NN-<nombre>.md`.
 6. **PR** (Claude construye; nunca integra).
-7. **Revisión** (bot «Revisor OPAI 2.0», modelo contrario: aprueba o pide cambios) e **integración por Carlos**, mientras rija la modificación de ADR-043 del 24-oct. Si hay migración de Neon, Carlos la aplica antes de integrar.
-8. **QA** de pantallas en celular y escritorio (bot «Diseño y QA OPAI 2.0»).
+7. **Revisión** (bot «Revisor OPAI 2.0», modelo contrario: APROBAR o PEDIR CAMBIOS sobre el head actual) e **integración con squash por el bot «OPAI 2.0»** cuando se cumplen las tres condiciones de ADR-043 v3 (APROBAR sin condiciones, checks obligatorios en verde y sin BLOQUEANTE abierto de Diseño y QA). Carlos puede vetar cualquier PR y recibe aviso después de cada merge. Si hay migración de Neon, Carlos la aplica antes de integrar.
+8. **QA** de pantallas en celular y escritorio después del merge (bot «Diseño y QA OPAI 2.0»); un BLOQUEANTE abierto frena los merges siguientes que toquen pantallas.
 9. **Resumen ejecutivo** para Carlos al cerrar (qué se hizo, qué cambia para Gard, qué decide él, qué sigue).
 
 Las **bases transversales** (rendimiento, PWA, navegación) aplican a todo brief con pantallas: `NAVEGACION.md`, ADR-044 y ADR-045.
@@ -159,7 +159,7 @@ No se portan de 1.0 y solo se reconstruyen con demanda real (lista canónica de 
 
 ## 5. Próximas 10 tareas, en orden
 
-1. **Revisor:** revisar e integrar este PR de documentación (ROADMAP, NAVEGACION, ADR-043 a 047, plantilla de especificación, flujo de trabajo).
+1. **Revisor:** revisar este PR de documentación (ROADMAP, NAVEGACION, ADR-043 a 047, plantilla de especificación, flujo de trabajo).
 2. **Carlos (Mac):** correr los seeds en Neon `dev` (`seed:dev-tenant` y `seed:maestros-demo`) y `main` (`seed:dev-tenant`), y cargar los secretos de GitHub para los previews por PR.
 3. **Carlos con Claude:** verificación guiada del Brief 02 (bloque 14) en `test.opai.cl`; cerrar paridad MCP y arreglos de QA (otros chats) e integrarlos.
 4. **Claude: Brief 03 · Rendimiento de navegación** (prioridad 1): medir línea base con el protocolo de ADR-045, aplicar los arreglos, medir después y dejar el gate en CI.
