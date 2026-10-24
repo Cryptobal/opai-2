@@ -1,8 +1,7 @@
-import { CalendarClock, Plus, Users } from "lucide-react";
+import { Plus, Users } from "lucide-react";
 
 import { SplitScreen } from "@opai/ds";
 
-import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { hoyIso } from "@/lib/fechas";
@@ -27,16 +26,6 @@ export default function Personas({ searchParams }: { searchParams: SearchParams 
         <EnlaceBotonHoja href="?nueva=1" icono={Plus}>
           Agregar persona
         </EnlaceBotonHoja>
-      }
-      accionesTelefono={
-        <EnlaceBoton
-          href="/personas/vencimientos"
-          variante="ghost"
-          icono={CalendarClock}
-          etiqueta="Vencimientos"
-        >
-          {null}
-        </EnlaceBoton>
       }
       cargar={async () => {
         const p = await leerParametros(searchParams);

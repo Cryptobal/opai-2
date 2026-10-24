@@ -1,7 +1,8 @@
-import { Plus } from "lucide-react";
+import { CalendarClock, Plus } from "lucide-react";
 
 import { Avatar, Badge, type EstadoPantalla } from "@opai/ds";
 
+import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { ESTADO_PERSONA, estadoDe } from "@/app/_components/maestros/estados";
 import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
@@ -39,7 +40,20 @@ export function ListaPersonas(x: Props) {
     <ListaMaestro
       state={x.state}
       titulo={x.titulo}
-      accion={nueva}
+      accion={
+        <>
+          <EnlaceBoton
+            href="/personas/vencimientos"
+            variante="ghost"
+            icono={CalendarClock}
+            etiqueta="Vencimientos"
+            className="md:hidden"
+          >
+            {null}
+          </EnlaceBoton>
+          {nueva}
+        </>
+      }
       buscar="Buscar por nombre o RUT"
       filtros={[
         { param: "cargo", etiqueta: "Cargo", opciones: x.cargos },
@@ -52,7 +66,10 @@ export function ListaPersonas(x: Props) {
           })),
         },
       ]}
-      meta={{ izquierda: `${total} ${total === 1 ? "persona" : "personas"}`, derecha: "Apellido A–Z" }}
+      meta={{
+        izquierda: `${total} ${total === 1 ? "persona" : "personas"}`,
+        derecha: "Apellido A–Z",
+      }}
       seleccionada={x.seleccionada}
       vacio={
         filtrando
