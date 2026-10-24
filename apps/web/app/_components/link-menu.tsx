@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 
 import type { LinkComponent } from "@opai/ds";
 
+import { ESPERA_ESQUELETO_MS } from "@/lib/cache-navegador";
+
 /**
  * Hijo invisible de un <Link> del menú: si la navegación sigue pendiente pasado el retraso, marca
  * <html> y el CSS cambia el contenido por el esqueleto (`data-contenido` / `data-esqueleto`, ver
@@ -22,7 +24,7 @@ function EstadoEnlace() {
       marcado = true;
       pendientes++;
       raiz.setAttribute("data-navegando", "");
-    }, 200);
+    }, ESPERA_ESQUELETO_MS);
     return () => {
       clearTimeout(t);
       if (marcado && --pendientes === 0) raiz.removeAttribute("data-navegando");

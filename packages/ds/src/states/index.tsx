@@ -64,7 +64,7 @@ export function Loading({
 }: {
   variante?: VarianteLoading;
   className?: string;
-  /** Aparece solo si la carga pasa de ~200 ms: una carga rápida no deja ni un destello. */
+  /** Aparece solo si la carga pasa de ~150 ms: una carga rápida no deja ni un destello. */
   diferido?: boolean;
 }) {
   const filas = variante === "dashboard" ? 4 : variante === "formulario" ? 5 : 6;
@@ -74,7 +74,7 @@ export function Loading({
       aria-label="Cargando"
       className={cn(
         "flex flex-col gap-3",
-        diferido && "animate-[ds-aparecer_150ms_ease-out_200ms_backwards]",
+        diferido && "animate-[ds-aparecer_150ms_ease-out_150ms_backwards]",
         className,
       )}
     >

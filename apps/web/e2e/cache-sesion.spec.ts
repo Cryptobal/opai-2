@@ -77,7 +77,7 @@ test.describe("caché y sesión", () => {
     await page.waitForURL("**/cuentas");
     await menu(page, /^Personas/).click(); // Personas queda en la caché del navegador
     await page.waitForURL("**/personas");
-    await page.locator('a[href="?nueva=1"]').first().click();
+    await page.locator('a[href="?nueva=1"]').filter({ visible: true }).first().click();
     const dialogo = page.getByRole("dialog", { name: /persona/i });
     await dialogo.getByLabel("Nombres").fill("Prueba");
     await dialogo.getByLabel("Apellidos").fill(apellido);
@@ -121,6 +121,30 @@ test.describe("caché y sesión", () => {
         timeout: 15_000,
       },
     );
+    // Se recarga UNA sola vez: ya con la sesión, su época coincide con la de la otra y se queda quieta.
+    await espera.evaluate(() => Reflect.set(window, "marcaSinRecargar", true));
+    await espera.waitForTimeout(3000);
+    expect(await espera.evaluate(() => Reflect.get(window, "marcaSinRecargar"))).toBe(true);
+  });
+
+  test("con la misma sesión, el ERP, el login y el selector de empresa no se recargan entre sí", async ({
+    context,
+    page,
+  }) => {
+    await entrar(page, emailMulti);
+    await page.goto("/personas");
+    const login = await context.newPage();
+    await login.goto("/login"); // /login no redirige con sesión
+    const selector = await context.newPage();
+    await selector.goto("/elegir-empresa?next=/"); // con dos empresas tampoco redirige
+    await expect(selector.getByRole("button", { name: /Gard Security/ })).toBeVisible();
+    await expect(login.getByLabel("Correo")).toBeVisible();
+    const paginas = [page, login, selector];
+    for (const p of paginas) await p.evaluate(() => Reflect.set(window, "marcaSinRecargar", true));
+    await page.waitForTimeout(3000);
+    for (const p of paginas) {
+      expect(await p.evaluate(() => Reflect.get(window, "marcaSinRecargar"))).toBe(true);
+    }
   });
 
   test("cambiar de empresa muestra lo de la nueva en ambas pestañas y nada de la anterior", async ({

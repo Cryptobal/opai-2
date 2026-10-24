@@ -35,8 +35,6 @@ export function useRefrescoSilencioso(generado: number, ruta: string, epoca: str
 
 // --- Época de sesión entre pestañas --------------------------------------------------------
 const CANAL = "opai-sesion";
-/** Época de una página sin sesión (login, invitación sin sesión). */
-export const EPOCA_ANONIMA = "anonimo";
 
 /** Publica la época de ESTA página (ya renderizada tras el cambio de sesión o de empresa). */
 function publicar(epoca: string) {
