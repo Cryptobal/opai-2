@@ -36,7 +36,9 @@ test.describe("con sesión", () => {
     await page.waitForURL((url) => url.pathname === "/" || url.pathname === "/platform");
 
     await page.goto("/");
-    await expect(page.getByRole("heading", { name: "Inicio" }).first()).toBeAttached();
+    // En teléfono la barra no lleva título: el encabezado de la pantalla es el saludo.
+    const titulo = p === "telefono" ? /^Hola, / : "Inicio";
+    await expect(page.getByRole("heading", { name: titulo }).first()).toBeAttached();
     await captura(page, "erp-inicio", p);
 
     await page.goto("/configuracion/usuarios");
@@ -47,7 +49,9 @@ test.describe("con sesión", () => {
     await expect(page.getByText("Gard Security").filter({ visible: true }).first()).toBeVisible();
     await captura(page, "platform-tenants", p);
     await page.getByText("Gard Security").filter({ visible: true }).first().click();
-    await expect(page.getByRole("tab", { name: /Módulos/ })).toBeVisible();
+    // Las pestañas de la ficha son rutas: enlaces dentro de la navegación «Secciones».
+    const secciones = page.getByRole("navigation", { name: "Secciones" });
+    await expect(secciones.getByRole("link", { name: /Módulos/ })).toBeVisible();
     await captura(page, "platform-tenant", p);
   });
 });
