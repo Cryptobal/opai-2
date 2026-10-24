@@ -27,7 +27,7 @@ Contrato único para todo bot o agente que trabaje en `Cryptobal/opai-2`: Claude
 
 ## Convenciones
 
-- **Ramas:** prefijos `brief/` (implementación), `qa/` (arreglos de QA), `docs/` (solo documentación), `fix/`, `perf/` y `ci/`, con el ID de la tarea según «Tareas (Linear)». Siempre desde `main` actualizado. Un PR por encargo.
+- **Ramas:** prefijos `brief/` (implementación), `qa/` (arreglos de QA), `docs/` (solo documentación), `fix/`, `perf/` y `ci/`, con el ID `CAR-n` de la tarea según «Tareas (Linear)» (recomendado en la rama, obligatorio en el PR). Siempre desde `main` actualizado. Un PR por encargo.
 - **Commits:** atómicos, en español, en imperativo, con prefijo de ámbito (`core:`, `ds:`, `infra:`, `docs:`, `comercial:`…). Un commit por bloque del brief.
 - **Gate local** antes de cada commit: `pnpm typecheck && pnpm lint && pnpm test`. También `pnpm test:db` si tocas base, RLS o capacidades con base.
 - **Presupuesto de JS (ADR-037):** `pnpm presupuesto` tras el build. Manda el check obligatorio `build · presupuesto de JS`. Si un PR sube un tope de `apps/web/presupuesto-js.json`, deja la justificación en el PR y se integra igual con las tres condiciones de «Integración a `main`» (ADR-043 v3, sin excepciones).
@@ -35,10 +35,10 @@ Contrato único para todo bot o agente que trabaje en `Cryptobal/opai-2`: Claude
 
 ## Tareas (Linear)
 
-GitHub es la fuente de verdad del código y los archivos del repositorio (este contrato, `CLAUDE.md`, los ADR y los checklists) lo son de las reglas técnicas. **El estado de cada tarea vive en Linear**, en el equipo **OPAI**, con IDs `OPAI-n` (desde el 24-oct-2026, plan Free durante el piloto).
+GitHub es la fuente de verdad del código y los archivos del repositorio (este contrato, `CLAUDE.md`, los ADR y los checklists) lo son de las reglas técnicas. **El estado de cada tarea vive en Linear**, en el equipo **CAR** («Carlos Irigoyen», el que ya existe en Linear; no hay un equipo «OPAI»), con IDs `CAR-n` (desde el 24-oct-2026, plan Free durante el piloto).
 
-1. **Rama con el ID:** `tipo/opai-123-slug`, con los prefijos de «Convenciones» (por ejemplo `fix/opai-123-maestros-consistencia`).
-2. **PR vinculado:** el título o la descripción incluye `Fixes OPAI-123` (la plantilla del PR trae el campo).
+1. **Rama con el ID (recomendado):** `tipo/car-123-slug`, con los prefijos de «Convenciones» (por ejemplo `fix/car-123-maestros-consistencia`). El ID en el nombre de la rama es recomendado; el que es obligatorio es el de la descripción del PR (regla 2). Las ramas anteriores a esta regla quedan como están: no se renombran, porque renombrar una rama cierra su PR.
+2. **PR vinculado (obligatorio):** la descripción del PR incluye `Fixes CAR-123` (la plantilla del PR trae el campo).
 3. **Cierre con evidencia:** ningún agente cierra una tarea sin el link al PR, CI en verde y, si tiene pantalla, capturas a 375 y 1280 px. Un PR con CI fallando no está terminado (ver «Definición de terminado»).
 4. **Integración:** integra solo el bot «OPAI 2.0», con squash y con las tres condiciones de «Integración a `main`» (ADR-043 v3). Cerrar la tarea no autoriza a integrar.
 5. **Diseño ambiguo:** una observación de diseño ambigua se convierte en una propuesta y la tarea pasa al estado «Propuesta para Carlos». No se toca código hasta que él la apruebe.
@@ -56,7 +56,7 @@ Un PR está terminado cuando:
 5. Si tiene pantallas: el constructor las probó a 375, 1024 y 1280 px con `docs/2.0/checklists/qa.md` antes de abrir el PR. La QA de «Diseño y QA OPAI 2.0» viene después del merge.
 6. Si porta algo de 1.0: revisado con `docs/2.0/checklists/paridad.md`.
 7. No trae refactorizaciones fuera del alcance. Si el brief contradice el repositorio, conserva el objetivo, adapta y reporta la diferencia.
-8. El PR queda vinculado a su tarea de Linear (`Fixes OPAI-123`), `ROADMAP.md` queda actualizado si cambia el plan, y el PR trae un resumen ejecutivo para Carlos: qué se hizo, qué cambia para Gard, qué decide él y qué sigue.
+8. El PR queda vinculado a su tarea de Linear (`Fixes CAR-123`), `ROADMAP.md` queda actualizado si cambia el plan, y el PR trae un resumen ejecutivo para Carlos: qué se hizo, qué cambia para Gard, qué decide él y qué sigue.
 
 ## Prohibido
 

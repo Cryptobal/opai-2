@@ -8,7 +8,7 @@
 5. Antes de integrar, el bot «OPAI 2.0» revisa con esta regla los comentarios del PR y el historial de sus etiquetas. No integra si hay un veto vigente, si `migracion-pendiente` está puesta, si el PR trae migraciones nuevas y la etiqueta no está sin que su última retirada sea un evento válido (incluido el caso en que nunca se puso), o si no puede verificarlo.
 -->
 
-**Tarea:** Fixes OPAI-\_\_\_
+**Tarea:** Fixes CAR-\_\_\_
 
 ## Qué cambia
 
