@@ -5,7 +5,11 @@ import type { ItemMenu } from "../components/menu";
 import { MenuMas } from "./menu-mas";
 import { esActivo, LinkPorDefecto, type LinkComponent, type NavItem } from "./types";
 
-type NavProps = { items: readonly NavItem[]; rutaActual: string; Link?: LinkComponent };
+type NavProps = {
+  items: readonly NavItem[];
+  rutaActual: string;
+  Link?: LinkComponent | undefined;
+};
 
 function Contador({ n }: { n?: number | undefined }) {
   return n ? (
@@ -119,7 +123,7 @@ function ItemRiel({
   );
 }
 
-export type RailProps = NavProps & { subtitulo?: string };
+export type RailProps = NavProps & { subtitulo?: string | undefined };
 
 /** iPad: riel de 80 px con la marca arriba, ítems de 64×56 y los ítems fijos (Configuración) al pie. */
 export function Rail({ items, rutaActual, Link = LinkPorDefecto, subtitulo }: RailProps) {
