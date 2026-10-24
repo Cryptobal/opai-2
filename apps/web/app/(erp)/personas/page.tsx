@@ -39,9 +39,6 @@ export default function Personas({ searchParams }: { searchParams: SearchParams 
         insignia: <SegmentoPersonas activa="personas" plural="Personas" />,
         acciones: (
           <>
-            <EnlaceBoton href="/personas/vencimientos" variante="secondary" icono={CalendarClock}>
-              Vencimientos
-            </EnlaceBoton>
             <EnlaceBoton href="?nueva=1" icono={Plus}>
               Agregar {d.voc.persona.singular}
             </EnlaceBoton>

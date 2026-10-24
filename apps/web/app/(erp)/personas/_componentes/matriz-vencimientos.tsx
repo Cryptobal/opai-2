@@ -3,10 +3,11 @@
 import { Mail } from "lucide-react";
 import { useMemo, useState } from "react";
 
-import { avisar, BarraSeleccion, Button, CeldaVigencia, ChipToggle, Empty } from "@opai/ds";
+import { avisar, BarraSeleccion, Button, ChipToggle, Empty } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
+import { LeyendaVencimientos } from "./leyenda-vencimientos";
 import { TablaMatriz } from "./tabla-matriz";
 import { type EstadoCelda, type Matriz, pendientes } from "./tipos-matriz";
 
@@ -73,12 +74,19 @@ export function MatrizVencimientos({ m }: { m: Matriz }) {
             }
           />
         ))}
-        <span className="t-caption ml-auto hidden md:block">
-          {m.resumen.conPendientes} con algo pendiente de {m.resumen.personas}
-        </span>
+        {m.resumen.personas > 0 ? (
+          <span className="t-caption ml-auto hidden md:block">
+            {m.resumen.conPendientes} con algo pendiente de {m.resumen.personas}
+          </span>
+        ) : null}
       </div>
       {filas.length ? (
         <TablaMatriz tipos={m.tipos} filas={filas} seleccion={seleccion} onMarcar={marcar} />
+      ) : m.resumen.personas === 0 ? (
+        <Empty
+          titulo="Aún no hay personas"
+          descripcion="Cuando agregues personas, aquí verás el estado de sus documentos."
+        />
       ) : (
         <Empty
           titulo="Nada pendiente con estos filtros"
@@ -89,21 +97,7 @@ export function MatrizVencimientos({ m }: { m: Matriz }) {
           }
         />
       )}
-      <div className="hidden flex-wrap items-center gap-4 text-sm text-fg-muted md:flex">
-        <span className="flex items-center gap-1.5">
-          <CeldaVigencia estado="vigente" /> Vigente
-        </span>
-        <span className="flex items-center gap-1.5">
-          <CeldaVigencia estado="por_vencer" dias={9} /> Por vencer (el número son los días que
-          faltan)
-        </span>
-        <span className="flex items-center gap-1.5">
-          <CeldaVigencia estado="vencido" /> Vencido
-        </span>
-        <span className="flex items-center gap-1.5">
-          <CeldaVigencia estado="falta" /> Falta
-        </span>
-      </div>
+      <LeyendaVencimientos />
       {elegidas.length ? (
         <BarraSeleccion
           texto={`${elegidas.length} ${elegidas.length === 1 ? "persona" : "personas"} · ${documentos} documentos`}
