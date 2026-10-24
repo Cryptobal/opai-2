@@ -5,6 +5,7 @@ import { obtenerCapacidad } from "@opai/capabilities";
 import { EXCEPCIONES_PARIDAD } from "../../../packages/capabilities/test/paridad-excepciones";
 import {
   capacidadesSinHerramienta,
+  INTERNAS_PERMITIDAS,
   llamadasAEjecutores,
 } from "../../../packages/capabilities/test/paridad-util";
 import { asegurarRegistro } from "../lib/registro";
@@ -18,14 +19,13 @@ describe("paridad con el registro completo (núcleo + módulos)", () => {
     expect(capacidadesSinHerramienta()).toEqual(Object.keys(EXCEPCIONES_PARIDAD).sort());
   });
 
-  it("todo id literal que invoca la UI existe y no es interno (salvo el flujo de invitación)", () => {
+  it("todo id literal que invoca la UI existe y no es interno (salvo las internas permitidas)", () => {
+    const permitidas = new Set(INTERNAS_PERMITIDAS.map((p) => p.archivo));
     const problemas = llamadasAEjecutores().flatMap(({ archivo, ids }) =>
       ids.flatMap((id) => {
         const c = obtenerCapacidad(id);
         if (!c) return [`${archivo}: "${id}" no existe`];
-        return c.interna && !archivo.startsWith("app/(auth)/invitacion/")
-          ? [`${archivo}: "${id}" es interna`]
-          : [];
+        return c.interna && !permitidas.has(archivo) ? [`${archivo}: "${id}" es interna`] : [];
       }),
     );
     expect(problemas).toEqual([]);

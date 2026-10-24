@@ -94,7 +94,8 @@ export function MatrizVencimientos({ m }: { m: Matriz }) {
           <CeldaVigencia estado="vigente" /> Vigente
         </span>
         <span className="flex items-center gap-1.5">
-          <CeldaVigencia estado="por_vencer" dias={9} /> Días para vencer
+          <CeldaVigencia estado="por_vencer" dias={9} /> Por vencer (el número son los días que
+          faltan)
         </span>
         <span className="flex items-center gap-1.5">
           <CeldaVigencia estado="vencido" /> Vencido

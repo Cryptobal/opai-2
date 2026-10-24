@@ -1,8 +1,9 @@
 import { Mail, MessageSquare, Phone, UserPlus } from "lucide-react";
 
-import { MapaEstatico, ParesGrid, SeccionTarjeta } from "@opai/ds";
+import { ParesGrid, SeccionTarjeta } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+import { MapaOpai } from "@/app/_components/maestros/mapa";
 import { fecha, rut, telefono } from "@/lib/fechas";
 import type { PersonaDetalle } from "@/lib/tipos-maestros";
 
@@ -96,7 +97,7 @@ export function ResumenPersona({ p, hoy }: Props) {
               },
             ]}
           />
-          <MapaEstatico lat={p.lat} lng={p.lng} {...(p.comuna ? { pie: p.comuna } : {})} />
+          <MapaOpai lat={p.lat} lng={p.lng} {...(p.comuna ? { pie: p.comuna } : {})} />
         </div>
       </SeccionTarjeta>
       <SeccionTarjeta titulo="Acceso">

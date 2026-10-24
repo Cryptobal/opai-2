@@ -1,4 +1,5 @@
 import { estadoPantalla } from "@/lib/formato";
+import { requerirUuid } from "@/lib/ids";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 import { leerParametros, type Parametros } from "@/lib/parametros";
 import type { CuentaDetalle, CuentaFila, Pagina } from "@/lib/tipos-maestros";
@@ -17,7 +18,9 @@ export async function cargarCuentas(f: Filtros) {
 }
 
 export async function cargarCuenta(id: string) {
-  const r = await ejecutarComoUsuario<CuentaDetalle>("erp", "core.cuentas.get", { id });
+  const r = await ejecutarComoUsuario<CuentaDetalle>("erp", "core.cuentas.get", {
+    id: requerirUuid(id),
+  });
   return { state: estadoPantalla(r), cuenta: r.ok ? r.data : null };
 }
 

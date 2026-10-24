@@ -1,4 +1,5 @@
 import { estadoPantalla } from "@/lib/formato";
+import { requerirUuid } from "@/lib/ids";
 import type { Parametros } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 import type { Cargo } from "@/lib/tipos-maestros";
@@ -29,6 +30,7 @@ export async function cargarCargosLista(p: Parametros) {
 
 /** Ficha del cargo y sus versiones de estructura (de la más reciente a la más antigua). */
 export async function cargarCargo(id: string) {
+  requerirUuid(id);
   const [c, v] = await Promise.all([
     ejecutarComoUsuario<Cargo>("erp", "core.cargos.get", { id }),
     ejecutarComoUsuario<EstructuraVista[]>("erp", "core.estructuras.list", {

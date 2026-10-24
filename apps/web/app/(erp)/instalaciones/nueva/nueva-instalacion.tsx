@@ -12,8 +12,8 @@ import {
   CamposInstalacion,
   camposAInput,
   inicialInstalacion,
-  invalidaInstalacion,
 } from "../_componentes/campos-instalacion";
+import { faltantesInstalacion } from "../_componentes/faltantes";
 import { CopiarPuestos } from "./copiar-puestos";
 
 type Props = {
@@ -45,22 +45,23 @@ export function NuevaInstalacion({ cuentaInicial, cuentas, instalaciones }: Prop
     );
     router.push(`/instalaciones/${i.id}`);
   }
+  const faltan = faltantesInstalacion(d, cuentaId || null);
   const acciones = (
     <>
       <Button variant="secondary" onClick={() => router.back()}>
         Cancelar
       </Button>
-      <Button
-        disabled={pendiente || !cuentaId || invalidaInstalacion(d)}
-        onClick={() => void crear()}
-      >
+      <Button disabled={pendiente || faltan.length > 0} onClick={() => void crear()}>
         {pendiente ? "Creando…" : "Crear instalación"}
       </Button>
     </>
   );
   return (
     <div className="flex flex-col gap-4 pb-24 md:pb-0">
-      <div className="hidden justify-end gap-2 md:flex">{acciones}</div>
+      <div className="hidden items-center justify-end gap-3 md:flex">
+        {faltan.length ? <p className="text-sm text-fg-muted">Falta {faltan.join(" y ")}</p> : null}
+        {acciones}
+      </div>
       {error ? <Alerta tono="danger" titulo={error} /> : null}
       <div className="grid gap-6 md:grid-cols-3">
         <section className="flex flex-col gap-3">

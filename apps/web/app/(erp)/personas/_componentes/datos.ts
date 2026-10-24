@@ -1,4 +1,5 @@
 import { estadoPantalla } from "@/lib/formato";
+import { requerirUuid } from "@/lib/ids";
 import type { Parametros } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 import type { Cargo, Pagina, PersonaDetalle, PersonaFila } from "@/lib/tipos-maestros";
@@ -37,7 +38,9 @@ export async function cargarCargos(incluirInactivos = false) {
 }
 
 export async function cargarPersona(id: string) {
-  const r = await ejecutarComoUsuario<PersonaDetalle>("erp", "core.personas.get", { id });
+  const r = await ejecutarComoUsuario<PersonaDetalle>("erp", "core.personas.get", {
+    id: requerirUuid(id),
+  });
   return { state: estadoPantalla(r), persona: r.ok ? r.data : null };
 }
 

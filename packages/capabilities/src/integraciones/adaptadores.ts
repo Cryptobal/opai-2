@@ -1,7 +1,5 @@
 import {
   type ClaseTarea,
-  ErrorGoogle,
-  geoGoogle,
   type Mailer,
   mailerConsola,
   mailerResend,
@@ -14,17 +12,11 @@ import {
 import { ajuste } from "../core/config/valores";
 import { reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
+import { consumoBase } from "./consumo-base";
 import { credencialDe, integracionDe } from "./resolver";
 
-export const consumoBase = (ctx: Contexto, modulo: string) => ({
-  tenantId: ctx.tenantId,
-  modulo,
-  actorTipo: ctx.actor.tipo,
-  actorId: ctx.actor.id ?? null,
-  viaUserId: ctx.actor.viaUserId ?? null,
-  apiKeyId: ctx.actor.tipo === "agent" ? ctx.actor.id : null,
-  portal: ctx.portal,
-});
+export { consumoBase } from "./consumo-base";
+export { geoDe } from "./geo";
 
 /** Correo del tenant: Resend propio o de plataforma; en desarrollo, consola. Mide cada envío. */
 export async function correoDe(
@@ -53,49 +45,6 @@ export async function correoDe(
         .registrar({ ...consumo, sinCosto: cred?.modalidad === "propia" })
         .catch(() => undefined);
     },
-  };
-}
-
-/** Geolocalización medida (ADR-027, ADR-031), o null si no hay credencial en este entorno. */
-export async function geoDe(ctx: Contexto, modulo = "core") {
-  const cred = await credencialDe(ctx, "google_maps");
-  if (!cred) return null;
-  const geo = geoGoogle(cred.valor);
-  const medir = (recurso: string) =>
-    ctx.medidor
-      .registrar({
-        ...consumoBase(ctx, modulo),
-        recurso,
-        unidad: "consulta",
-        cantidad: 1,
-        sinCosto: cred.modalidad === "propia",
-      })
-      .catch(() => undefined);
-  // La falla de Google llega a la pantalla y a los agentes con su estado y mensaje (nunca la clave).
-  const conMensaje = async <T>(llamada: () => Promise<T>): Promise<T> => {
-    try {
-      return await llamada();
-    } catch (e) {
-      throw e instanceof ErrorGoogle ? reglaDeNegocio(e.message) : e;
-    }
-  };
-  return {
-    async autocompletar(texto: string, sesion?: string) {
-      const r = await conMensaje(() => geo.autocompletar(texto, sesion));
-      await medir("geo.autocompletado");
-      return r;
-    },
-    async detalle(placeId: string, sesion?: string) {
-      const r = await conMensaje(() => geo.detalle(placeId, sesion));
-      await medir("geo.geocodificacion");
-      return r;
-    },
-    async geocodificar(direccion: string) {
-      const r = await conMensaje(() => geo.geocodificar(direccion));
-      await medir("geo.geocodificacion");
-      return r;
-    },
-    urlMapa: geo.urlMapa,
   };
 }
 

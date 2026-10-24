@@ -57,7 +57,9 @@ export function SheetRadix(props: SheetProps) {
             </div>
             <Cerrar />
           </header>
-          <div className="flex-1 overflow-y-auto px-4 py-4">{children}</div>
+          <div className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto px-4 py-4">
+            {children}
+          </div>
           {acciones ? (
             <footer className="flex gap-2 border-t border-border px-4 py-3 pb-[calc(12px+env(safe-area-inset-bottom))] [&>*]:h-12 [&>*]:flex-1 md:justify-end md:[&>*]:h-10 md:[&>*]:flex-none">
               {acciones}

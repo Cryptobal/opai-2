@@ -1,7 +1,7 @@
 "use client";
 
 import { Pencil } from "lucide-react";
-import { useState } from "react";
+import { type ComponentProps, useState } from "react";
 
 import { Button } from "./button";
 import { Combobox } from "./combobox";
@@ -29,6 +29,8 @@ type Props = {
   resolver: (placeId: string) => Promise<Direccion | null>;
   /** Geocerca a dibujar en el mapa. */
   geocercaM?: number | null;
+  /** URL de la imagen del mapa (el proxy del núcleo); sin ella, la retícula del DS. */
+  fuenteMapa?: ComponentProps<typeof MapaEstatico>["fuente"];
   sinMapa?: boolean;
   /** Falla del servicio de mapas (o de la búsqueda): se muestra en el campo, nunca se oculta. */
   error?: string | null;
@@ -45,6 +47,7 @@ export function CampoDireccion({
   buscar,
   resolver,
   geocercaM,
+  fuenteMapa,
   sinMapa,
   error,
 }: Props) {
@@ -54,7 +57,7 @@ export function CampoDireccion({
     const cambiar = (k: keyof Direccion, v: string) =>
       onCambiar({ ...(valor ?? { calle: "" }), [k]: v, placeId: null, lat: null, lng: null });
     return (
-      <div className="flex flex-col gap-2">
+      <div className="flex min-w-0 flex-col gap-2">
         <Input
           id={id}
           value={valor?.calle ?? ""}
@@ -83,7 +86,7 @@ export function CampoDireccion({
     );
   }
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex min-w-0 flex-col gap-2">
       <Combobox
         {...(id ? { id } : {})}
         opciones={
@@ -109,7 +112,7 @@ export function CampoDireccion({
         </p>
       ) : null}
       {valor ? (
-        <p className="t-caption">
+        <p className="t-caption min-w-0 break-words">
           {[valor.comuna, valor.region].filter(Boolean).join(", ") || "Sin comuna"}
         </p>
       ) : null}
@@ -118,6 +121,7 @@ export function CampoDireccion({
           lat={valor?.lat ?? null}
           lng={valor?.lng ?? null}
           geocercaM={geocercaM ?? null}
+          {...(fuenteMapa ? { fuente: fuenteMapa } : {})}
           {...(valor?.comuna ? { pie: valor.comuna } : {})}
         />
       )}

@@ -1,5 +1,7 @@
 // Tipos y normalización de direcciones de la geolocalización del núcleo (ADR-027).
 
+import type { ImagenMapa, OpcionesMapa } from "./mapa";
+
 export type DireccionGeo = {
   placeId: string | null;
   direccionFormateada: string;
@@ -18,11 +20,9 @@ export interface Geo {
   detalle(placeId: string, sesion?: string): Promise<DireccionGeo | null>;
   geocodificar(direccion: string): Promise<DireccionGeo | null>;
   /** URL de Static Maps con la clave: solo para el proxy del servidor, nunca para el cliente. */
-  urlMapa(
-    lat: number,
-    lng: number,
-    opciones?: { ancho?: number; alto?: number; zoom?: number },
-  ): string;
+  urlMapa(lat: number, lng: number, opciones?: OpcionesMapa): string;
+  /** Imagen del mapa descargada en el servidor (la usa el proxy `/api/geo/mapa`). */
+  mapa(lat: number, lng: number, opciones?: OpcionesMapa): Promise<ImagenMapa>;
 }
 
 export type Componente = { longText?: string; long_name?: string; types: string[] };

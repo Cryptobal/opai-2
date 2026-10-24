@@ -15,7 +15,7 @@ const OCULTO = "••••";
 const monto = (c: CargoFila, k: "sueldoBase" | "colacion" | "movilizacion") =>
   !c.sueldoVigente ? "—" : c.sueldoVigente.sensible ? OCULTO : pesos(c.sueldoVigente[k]);
 const clase = (v: string) => CLASES.find((c) => c.valor === v)?.etiqueta ?? v;
-const conteo = (n: number) => (n ? String(n) : "—");
+const conteo = (n: number) => String(n);
 
 function Nombre({ c }: { c: CargoFila }) {
   return (

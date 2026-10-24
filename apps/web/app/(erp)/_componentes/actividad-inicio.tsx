@@ -61,7 +61,7 @@ export async function ActividadInicio({ actor }: { actor: string | undefined }) 
                   <strong className="font-semibold">{i.actor.nombre}</strong> {i.accion}
                 </span>
                 <span className="t-caption">
-                  {i.actor.agente ? `Agente${i.via ? ` vía ${i.via}` : ""}` : "Persona"} ·{" "}
+                  {i.actor.agente ? `Agente${i.via ? ` vía ${i.via}` : ""} · ` : ""}
                   {cuando(i.cuando)}
                 </span>
               </span>

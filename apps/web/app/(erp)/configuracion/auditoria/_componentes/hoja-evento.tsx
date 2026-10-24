@@ -7,6 +7,7 @@ import { Sheet } from "@opai/ds";
 import { LinkNext } from "@/app/_components/link-next";
 import { useHojaUrl } from "@/app/_components/maestros/use-url";
 
+import { etiquetaCapacidad } from "./capacidad";
 import type { Evento } from "./datos";
 
 type Props = { e: Evento | null; cuando: string; entidad: string | null };
@@ -29,7 +30,7 @@ export function HojaEvento({ e, cuando, entidad }: Props) {
     <Sheet
       abierto={hoja.abierta && Boolean(e)}
       onCerrar={hoja.cerrar}
-      titulo={e?.capability ?? "Evento"}
+      titulo={e ? etiquetaCapacidad(e.capability) : "Evento"}
       descripcion={cuando}
     >
       {e ? (

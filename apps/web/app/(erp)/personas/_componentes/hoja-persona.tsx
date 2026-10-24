@@ -24,8 +24,14 @@ import {
 } from "./campos-vinculo";
 
 type Props =
-  | { persona: PersonaDetalle; cargos?: undefined; hoy?: undefined }
-  | { persona?: undefined; cargos: { valor: string; etiqueta: string }[]; hoy: string };
+  | { persona: PersonaDetalle; cargos?: undefined; hoy?: undefined; termino?: undefined }
+  | {
+      persona?: undefined;
+      cargos: { valor: string; etiqueta: string }[];
+      hoy: string;
+      /** Cómo llama la vertical a la persona («guardia»): «Agregar guardia». */
+      termino?: string;
+    };
 
 const camposDe = (d: DatosPersona) => ({
   nombres: d.nombres.trim(),
@@ -47,7 +53,7 @@ const camposDe = (d: DatosPersona) => ({
 });
 
 /** Nueva persona (con su vínculo) o editar sus datos: Sheet en md+, pantalla completa en teléfono. */
-export function HojaPersona({ persona, cargos, hoy }: Props) {
+export function HojaPersona({ persona, cargos, hoy, termino }: Props) {
   const hoja = useHojaUrl(persona ? "editar" : "nueva");
   const router = useRouter();
   const { ejecutar, pendiente, error } = useCapacidad("erp");
@@ -74,7 +80,7 @@ export function HojaPersona({ persona, cargos, hoy }: Props) {
     <Sheet
       abierto={hoja.abierta}
       onCerrar={hoja.cerrar}
-      titulo={persona ? "Editar datos" : "Nueva persona"}
+      titulo={persona ? "Editar datos" : `Agregar ${termino ?? "persona"}`}
       telefono="completo"
       acciones={
         <>
