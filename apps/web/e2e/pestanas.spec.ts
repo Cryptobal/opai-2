@@ -31,4 +31,28 @@ test.describe("Pestañas · solo se desplazan en horizontal", () => {
       expect(m.despues, "el scroll horizontal sigue funcionando").toBeGreaterThan(0);
     });
   }
+
+  test("degradado en el borde con más pestañas y pestaña activa visible", async ({ page }) => {
+    await page.goto("/ds/qa");
+    const barra = page.getByTestId("pestanas-ruta").getByRole("navigation");
+    await barra.scrollIntoViewIfNeeded();
+    await expect(barra).toHaveAttribute("data-der", "true");
+    await expect(barra).toHaveAttribute("data-izq", "false");
+    await barra.evaluate((el) => (el.scrollLeft = el.scrollWidth));
+    await expect(barra).toHaveAttribute("data-izq", "true");
+    await expect(barra).toHaveAttribute("data-der", "false");
+
+    const lejos = page.getByTestId("pestanas-activa-lejos").getByRole("navigation");
+    await lejos.scrollIntoViewIfNeeded();
+    const activa = lejos.locator('[aria-current="page"]');
+    await expect
+      .poll(async () => {
+        const [b, a] = await Promise.all([lejos.boundingBox(), activa.boundingBox()]);
+        return b && a ? a.x >= b.x && a.x + a.width <= b.x + b.width : false;
+      })
+      .toBe(true);
+    const y0 = await page.evaluate(() => scrollY);
+    await page.waitForTimeout(300);
+    expect(await page.evaluate(() => scrollY), "la página no se mueve en vertical").toBe(y0);
+  });
 });
