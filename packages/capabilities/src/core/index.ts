@@ -9,7 +9,7 @@ import {
   trabajosDelNucleo as trabajosServicios,
 } from "./bitacora";
 import { consumosPorAgente, consumosPorRecurso, consumosResumen } from "./consumos";
-import { geoAutocompletar, geoDetalle, geoGeocodificar, iaProbar } from "./geo-ia";
+import { geoAutocompletar, geoDetalle, geoGeocodificar, geoMapa, iaProbar } from "./geo-ia";
 import { integracionesProbar, platformIntegracionesEstado } from "./integraciones-probar";
 import {
   integracionesConfigurar,
@@ -86,6 +86,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   geoAutocompletar,
   geoDetalle,
   geoGeocodificar,
+  geoMapa,
   iaProbar,
   platformIntegracionesEstado,
   ...capacidadesMaestros,

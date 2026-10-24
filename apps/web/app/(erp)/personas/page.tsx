@@ -20,16 +20,6 @@ export default function Personas({ searchParams }: { searchParams: SearchParams 
       portal="erp"
       titulo="Personas"
       ruta="/personas"
-      acciones={
-        <>
-          <EnlaceBoton href="/personas/vencimientos" variante="secondary" icono={CalendarClock}>
-            Vencimientos
-          </EnlaceBoton>
-          <EnlaceBoton href="?nueva=1" icono={Plus}>
-            Nueva persona
-          </EnlaceBoton>
-        </>
-      }
       accionesTelefono={
         <EnlaceBoton
           href="/personas/vencimientos"
@@ -47,6 +37,16 @@ export default function Personas({ searchParams }: { searchParams: SearchParams 
       opciones={(d) => ({
         titulo: d.voc.titulo("persona"),
         insignia: <SegmentoPersonas activa="personas" plural="Personas" />,
+        acciones: (
+          <>
+            <EnlaceBoton href="/personas/vencimientos" variante="secondary" icono={CalendarClock}>
+              Vencimientos
+            </EnlaceBoton>
+            <EnlaceBoton href="?nueva=1" icono={Plus}>
+              Agregar {d.voc.persona.singular}
+            </EnlaceBoton>
+          </>
+        ),
       })}
     >
       {(d) => (
@@ -60,7 +60,7 @@ export default function Personas({ searchParams }: { searchParams: SearchParams 
             p={d.p}
             titulo={d.voc.titulo("persona")}
           />
-          <HojaPersona cargos={d.cargos} hoy={hoyIso()} />
+          <HojaPersona cargos={d.cargos} hoy={hoyIso()} termino={d.voc.persona.singular} />
         </>
       )}
     </PaginaPortal>

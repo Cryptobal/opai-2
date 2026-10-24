@@ -18,6 +18,8 @@ export type ListScreenProps<T> = {
   subtitulo?: ReactNode;
   /** La cabecera (título, subtítulo y acción) solo en teléfono ("57 personas"). */
   soloTelefono?: boolean;
+  /** Sin cabecera propia: la página que lo contiene (p. ej. una sección de Configuración) ya la pone. */
+  sinCabecera?: boolean;
   accionPrincipal?: ReactNode;
   /** Buscador y filtros son slots: el módulo decide el control, el patrón decide dónde va. */
   buscador?: ReactNode;
@@ -49,12 +51,14 @@ export function ListScreen<T>(props: ListScreenProps<T>) {
   const filaBase = "flex w-full items-start gap-3 px-4 py-3.5 text-left";
   return (
     <section>
-      <Cabecera
-        titulo={titulo}
-        {...(subtitulo ? { subtitulo } : {})}
-        {...(props.soloTelefono ? { soloTelefono: true } : {})}
-        {...(accionPrincipal ? { acciones: accionPrincipal } : {})}
-      />
+      {props.sinCabecera ? null : (
+        <Cabecera
+          titulo={titulo}
+          {...(subtitulo ? { subtitulo } : {})}
+          {...(props.soloTelefono ? { soloTelefono: true } : {})}
+          {...(accionPrincipal ? { acciones: accionPrincipal } : {})}
+        />
+      )}
       {buscador || filtros ? (
         <div className="mb-3 flex flex-col gap-3 md:flex-row md:items-center">
           {buscador ? <div className="md:w-72">{buscador}</div> : null}
@@ -69,7 +73,8 @@ export function ListScreen<T>(props: ListScreenProps<T>) {
         <ul className="-mx-4 border-y border-border bg-surface md:hidden">
           {items.map((item, i) => (
             <li key={clave(item)} className="border-b border-border last:border-b-0">
-              {grupo && grupo(item) !== (i > 0 && items[i - 1] ? grupo(items[i - 1] as T) : null) ? (
+              {grupo &&
+              grupo(item) !== (i > 0 && items[i - 1] ? grupo(items[i - 1] as T) : null) ? (
                 <p className="sticky top-0 z-10 border-b border-border bg-bg px-4 py-1 text-xs font-semibold text-fg-subtle">
                   {grupo(item)}
                 </p>

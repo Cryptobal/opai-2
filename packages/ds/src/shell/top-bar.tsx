@@ -7,7 +7,7 @@ import { cn } from "../cn";
 import { Avatar } from "../components/avatar";
 import { Button } from "../components/button";
 import type { ItemMenu } from "../components/menu";
-import { Kbd } from "../components/segmentado";
+import { AtajoBusqueda } from "../components/atajo-busqueda";
 import { PortalSwitcher } from "./portal-switcher";
 import {
   LinkPorDefecto,
@@ -120,12 +120,12 @@ export function AppBar(props: AppBarProps) {
           <button
             type="button"
             onClick={onBuscar}
-            aria-label="Buscar o ir a (⌘K)"
+            aria-label="Buscar o ir a"
             className="hidden h-9 w-64 items-center gap-2 rounded-md border border-border bg-surface pr-2 pl-3 text-base text-fg-subtle outline-none hover:border-border-strong focus-visible:outline-2 focus-visible:outline-focus xl:flex"
           >
             <Search className="size-4" aria-hidden />
             <span className="flex-1 text-left">Buscar o ir a…</span>
-            <Kbd>⌘K</Kbd>
+            <AtajoBusqueda />
           </button>
           <Button
             variant="ghost"

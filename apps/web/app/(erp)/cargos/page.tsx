@@ -31,7 +31,7 @@ export default function Cargos({ searchParams }: { searchParams: SearchParams })
         return { ...(await cargarCargosLista(p)), voc };
       }}
       opciones={(d) => ({
-        titulo: d.voc.titulo("persona"),
+        titulo: "Cargos",
         insignia: <SegmentoPersonas activa="cargos" plural="Personas" />,
       })}
     >

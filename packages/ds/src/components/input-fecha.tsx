@@ -1,20 +1,30 @@
 import { Calendar, Clock } from "lucide-react";
-import type { InputHTMLAttributes } from "react";
+import { type InputHTMLAttributes, useEffect, useRef, useState } from "react";
 
 import { cn } from "../cn";
+import { aplicarMascara, isoAMascara, mascaraAIso } from "../lib/fecha";
 
-type Props = Omit<InputHTMLAttributes<HTMLInputElement>, "type" | "value" | "onChange"> & {
+/** `min`, `max`, `name`, `required` y `form` no aplican: el valor visible es dd-mm-aaaa, no ISO. */
+type Props = Omit<
+  InputHTMLAttributes<HTMLInputElement>,
+  "type" | "value" | "onChange" | "min" | "max" | "name" | "required" | "form"
+> & {
   /** Fecha ISO `aaaa-mm-dd` o vacío. */
   valor: string;
   onCambiar: (valor: string) => void;
-  invalido?: boolean;
+  invalido?: boolean | undefined;
   /** `time`: hora "HH:mm" con el selector del sistema. */
   tipo?: "date" | "time";
 };
 
+const CAMPO = cn(
+  "h-11 w-full appearance-none rounded-md border border-border-strong bg-surface pr-10 pl-3 text-md text-fg outline-none transition-[border-color,box-shadow] duration-150",
+  "focus-visible:border-accent focus-visible:shadow-[0_0_0_3px_var(--ds-accent-muted)] aria-invalid:border-danger-fg aria-invalid:shadow-[0_0_0_3px_var(--ds-danger-muted)] disabled:opacity-45",
+);
+
 /**
- * Fecha sobre el selector nativo del sistema (iOS, Android y desktop), estilizado como `Input`, con
- * icono de calendario. El valor es ISO; el sistema lo muestra en el formato local (dd-mm-aaaa en es-CL).
+ * Fecha en es-CL independiente del idioma del sistema: se escribe y se ve como dd-mm-aaaa y el valor
+ * es ISO. El icono abre el calendario nativo (útil en móvil). `tipo="time"` usa la hora del sistema.
  */
 export function InputFecha({
   valor,
@@ -25,25 +35,90 @@ export function InputFecha({
   ...props
 }: Props) {
   const Icono = tipo === "time" ? Clock : Calendar;
+  if (tipo === "time") {
+    return (
+      <span className={cn("relative block", className)}>
+        <input
+          type="time"
+          value={valor}
+          onChange={(e) => onCambiar(e.target.value)}
+          aria-invalid={invalido || undefined}
+          className={cn(
+            CAMPO,
+            "[&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0",
+          )}
+          {...props}
+        />
+        <Icono
+          aria-hidden
+          className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-fg-muted"
+        />
+      </span>
+    );
+  }
+  return (
+    <CampoFecha
+      valor={valor}
+      onCambiar={onCambiar}
+      invalido={invalido}
+      className={className}
+      {...props}
+    />
+  );
+}
+
+function CampoFecha({ valor, onCambiar, invalido, className, ...props }: Omit<Props, "tipo">) {
+  const [texto, setTexto] = useState(isoAMascara(valor));
+  const nativo = useRef<HTMLInputElement>(null);
+  // Si el valor cambia desde fuera (reset, calendario) el texto lo sigue.
+  useEffect(() => {
+    setTexto((t) => (mascaraAIso(t) === valor ? t : isoAMascara(valor)));
+  }, [valor]);
+  const incompleto = texto.length === 10 && !mascaraAIso(texto);
   return (
     <span className={cn("relative block", className)}>
       <input
-        type={tipo}
+        type="text"
+        inputMode="numeric"
+        autoComplete="off"
         lang="es-CL"
-        value={valor}
-        onChange={(e) => onCambiar(e.target.value)}
-        aria-invalid={invalido || undefined}
-        className={cn(
-          "h-11 w-full appearance-none rounded-md border border-border-strong bg-surface pr-10 pl-3 text-md text-fg outline-none transition-[border-color,box-shadow] duration-150",
-          "focus-visible:border-accent focus-visible:shadow-[0_0_0_3px_var(--ds-accent-muted)] aria-invalid:border-danger-fg aria-invalid:shadow-[0_0_0_3px_var(--ds-danger-muted)] disabled:opacity-45",
-          "[&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:inset-0 [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:opacity-0",
-        )}
+        placeholder="dd-mm-aaaa"
+        maxLength={10}
+        value={texto}
+        onChange={(e) => {
+          const t = aplicarMascara(e.target.value);
+          setTexto(t);
+          onCambiar(mascaraAIso(t));
+        }}
+        aria-invalid={invalido || incompleto || undefined}
+        className={CAMPO}
         {...props}
       />
-      <Icono
+      <input
+        ref={nativo}
+        type="date"
+        tabIndex={-1}
         aria-hidden
-        className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-fg-muted"
+        value={valor}
+        disabled={props.disabled}
+        onChange={(e) => onCambiar(e.target.value)}
+        className="pointer-events-none absolute right-0 bottom-0 size-px opacity-0"
       />
+      <button
+        type="button"
+        aria-label="Abrir calendario"
+        disabled={props.disabled}
+        onClick={() => {
+          try {
+            nativo.current?.showPicker?.();
+          } catch {
+            /* sin permiso para abrir el calendario (iframe): se escribe a mano */
+          }
+        }}
+        className="absolute top-1/2 right-1.5 grid size-8 -translate-y-1/2 place-items-center rounded-sm text-fg-muted hover:text-fg focus-visible:shadow-[0_0_0_3px_var(--ds-accent-muted)] focus-visible:outline-none disabled:opacity-45"
+      >
+        <Calendar aria-hidden className="size-4" />
+      </button>
     </span>
   );
 }
@@ -51,42 +126,4 @@ export function InputFecha({
 /** Hora "HH:mm" (24 h) con el selector del sistema e icono de reloj. */
 export function InputHora(props: Omit<Props, "tipo">) {
   return <InputFecha {...props} tipo="time" />;
-}
-
-type RangoProps = {
-  desde: string;
-  hasta: string;
-  onCambiar: (rango: { desde: string; hasta: string }) => void;
-  etiquetaDesde?: string;
-  etiquetaHasta?: string;
-};
-
-/** Rango desde–hasta; marca error si el término es anterior al inicio. */
-export function InputFechaRango({ desde, hasta, onCambiar, ...e }: RangoProps) {
-  const invalido = Boolean(desde && hasta && hasta < desde);
-  return (
-    <div className="flex flex-col gap-1.5">
-      <div className="flex items-center gap-2">
-        <InputFecha
-          valor={desde}
-          onCambiar={(v) => onCambiar({ desde: v, hasta })}
-          aria-label={e.etiquetaDesde ?? "Desde"}
-          className="flex-1"
-        />
-        <span aria-hidden className="text-fg-subtle">
-          –
-        </span>
-        <InputFecha
-          valor={hasta}
-          onCambiar={(v) => onCambiar({ desde, hasta: v })}
-          aria-label={e.etiquetaHasta ?? "Hasta"}
-          invalido={invalido}
-          className="flex-1"
-        />
-      </div>
-      {invalido ? (
-        <p className="text-xs font-medium text-danger-fg">El término es anterior al inicio</p>
-      ) : null}
-    </div>
-  );
 }

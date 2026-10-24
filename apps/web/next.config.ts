@@ -31,6 +31,16 @@ const nextConfig: NextConfig = {
     "@opai/integrations",
     "@opai/modules",
   ],
+  // `/personas/nueva` abierto a mano se leía como el id "nueva": las altas viven en la lista
+  // (`?nueva=1`, `?nuevo=1`), así que estas rutas llevan al formulario.
+  async redirects() {
+    return [
+      { source: "/personas/nueva", destination: "/personas?nueva=1", permanent: false },
+      { source: "/cuentas/nueva", destination: "/cuentas?nueva=1", permanent: false },
+      { source: "/cargos/nuevo", destination: "/cargos?nuevo=1", permanent: false },
+      { source: "/cargos/nueva", destination: "/cargos?nuevo=1", permanent: false },
+    ];
+  },
   async headers() {
     return [{ source: "/:path*", headers: cabeceras }];
   },

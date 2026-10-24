@@ -2,14 +2,21 @@ import { Building2, MapPin, UserPlus } from "lucide-react";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { diaLargo } from "@/lib/fechas";
+import { nombreDePila } from "@/lib/nombre";
 import { ejecutarComoUsuario } from "@/lib/servidor";
+import { vocabularioActual } from "@/lib/vocabulario";
 
 import { ActividadInicio } from "./actividad-inicio";
 import { type Pendiente, PendientesInicio } from "./pendientes-inicio";
 
-const ACCIONES = [
+const acciones = (persona: string) => [
   { href: "/cuentas?nueva=1", etiqueta: "Nueva cuenta", corta: "Cuenta", icono: Building2 },
-  { href: "/personas?nueva=1", etiqueta: "Nueva persona", corta: "Persona", icono: UserPlus },
+  {
+    href: "/personas?nueva=1",
+    etiqueta: `Agregar ${persona}`,
+    corta: persona.charAt(0).toUpperCase() + persona.slice(1),
+    icono: UserPlus,
+  },
   {
     href: "/instalaciones/nueva",
     etiqueta: "Nueva instalación",
@@ -35,7 +42,8 @@ type Props = { nombre: string; empresa: string; actor: string | undefined };
 export async function InicioErp({ nombre, empresa, actor }: Props) {
   const r = await ejecutarComoUsuario<Pendiente[]>("erp", "core.inicio.pendientes", {});
   const ahora = new Date();
-  const pila = nombre.split(" ")[0] ?? nombre;
+  const ACCIONES = acciones((await vocabularioActual()).persona.singular);
+  const pila = nombreDePila(nombre);
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-end justify-between gap-3">

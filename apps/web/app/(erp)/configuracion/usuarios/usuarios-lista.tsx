@@ -67,10 +67,13 @@ export function UsuariosLista({ state, usuarios, invitaciones, puedeGestionar }:
               <Td>
                 {puedeGestionar ? (
                   <LinkNext href={`?editar=${m.id}`} className="after:absolute after:inset-0">
-                    <Persona nombre={m.nombre} detalle={m.email} />
+                    <Persona
+                      nombre={m.nombre}
+                      detalle={m.nombre === m.email ? "" : m.email}
+                    />
                   </LinkNext>
                 ) : (
-                  <Persona nombre={m.nombre} detalle={m.email} />
+                  <Persona nombre={m.nombre} detalle={m.nombre === m.email ? "" : m.email} />
                 )}
               </Td>
               <Td className="max-md:hidden">{ETIQUETA_ROL[m.rol] ?? m.rol}</Td>

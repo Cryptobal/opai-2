@@ -20,6 +20,10 @@
   ],
   "internasPermitidas": [
     {
+      "archivo": "app/api/geo/mapa/route.ts",
+      "motivo": "Proxy de la imagen del mapa: ejecuta core.geo.mapa (interna) para que la clave de Google del tenant no llegue al navegador."
+    },
+    {
       "archivo": "app/(auth)/invitacion/[slug]/[token]/acciones.ts",
       "motivo": "Flujo de invitación pre-sesión: peek, accept y request_new son internas por diseño."
     }

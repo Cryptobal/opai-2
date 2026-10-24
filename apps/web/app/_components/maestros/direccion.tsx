@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 
 import { CampoDireccion, type Direccion } from "@opai/ds";
 
+import { urlMapaOpai } from "@/lib/mapa";
 import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
 
 type Sugerencia = { placeId: string; texto: string; secundario: string | null };
@@ -49,5 +50,13 @@ export function DireccionOpai(props: {
     },
     [llamar],
   );
-  return <CampoDireccion {...props} error={error} buscar={buscar} resolver={resolver} />;
+  return (
+    <CampoDireccion
+      {...props}
+      error={error}
+      buscar={buscar}
+      resolver={resolver}
+      fuenteMapa={urlMapaOpai}
+    />
+  );
 }

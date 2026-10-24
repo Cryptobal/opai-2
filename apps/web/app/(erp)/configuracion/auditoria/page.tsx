@@ -3,7 +3,6 @@ import { ListScreen } from "@opai/ds";
 import { LinkNext } from "@/app/_components/link-next";
 import { ChipsFiltro } from "@/app/_components/maestros/chips-filtro";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
-import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { estadoPantalla } from "@/lib/formato";
 import { leerParametros, type SearchParams } from "@/lib/parametros";
 
@@ -15,7 +14,9 @@ import {
   RANGOS,
   rutaEntidad,
 } from "./_componentes/datos";
+import { PaginaConfig } from "../_centro/pagina-config";
 import { Actor, cuando, resultado } from "./_componentes/actor";
+import { etiquetaCapacidad } from "./_componentes/capacidad";
 import { HojaEvento } from "./_componentes/diferidas";
 
 export const metadata = { title: "Auditoría" };
@@ -23,15 +24,14 @@ export const metadata = { title: "Auditoría" };
 /** Auditoría (34): cada escritura, humana o de agente, con filtros y detalle en hoja lateral. */
 export default function Auditoria({ searchParams }: { searchParams: SearchParams }) {
   return (
-    <PaginaPortal
-      portal="erp"
+    <PaginaConfig
+      seccion="auditoria"
       titulo="Auditoría"
-      ruta="/configuracion"
-      volver={{ href: "/configuracion", etiqueta: "Configuración" }}
       cargar={async () => {
         const p = await leerParametros(searchParams);
         return { p, r: await cargarAuditoria(p) };
       }}
+      cabecera={() => ({ subtitulo: "Cada escritura, de una persona o de un agente." })}
     >
       {({ p, r }) => {
         const items = r.ok ? r.data.items : [];
@@ -41,6 +41,7 @@ export default function Auditoria({ searchParams }: { searchParams: SearchParams
             <ListScreen<Evento>
               state={estadoPantalla(r)}
               titulo="Auditoría"
+              sinCabecera
               filtros={
                 <ChipsFiltro
                   filtros={[
@@ -85,8 +86,7 @@ export default function Auditoria({ searchParams }: { searchParams: SearchParams
                 {
                   id: "capacidad",
                   etiqueta: "Capacidad",
-                  render: (e) => e.capability,
-                  className: "t-mono text-sm",
+                  render: (e) => etiquetaCapacidad(e.capability),
                 },
               ]}
               textos={{
@@ -117,6 +117,6 @@ export default function Auditoria({ searchParams }: { searchParams: SearchParams
           </>
         );
       }}
-    </PaginaPortal>
+    </PaginaConfig>
   );
 }

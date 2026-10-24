@@ -1,4 +1,5 @@
 import { estadoPantalla } from "@/lib/formato";
+import { requerirUuid } from "@/lib/ids";
 import type { Parametros } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 import type { CuentaFila, InstalacionDetalle, InstalacionFila, Pagina } from "@/lib/tipos-maestros";
@@ -23,7 +24,9 @@ export async function cargarInstalaciones(p: Parametros) {
 }
 
 export async function cargarInstalacion(id: string) {
-  const r = await ejecutarComoUsuario<InstalacionDetalle>("erp", "core.instalaciones.get", { id });
+  const r = await ejecutarComoUsuario<InstalacionDetalle>("erp", "core.instalaciones.get", {
+    id: requerirUuid(id),
+  });
   return { state: estadoPantalla(r), instalacion: r.ok ? r.data : null };
 }
 

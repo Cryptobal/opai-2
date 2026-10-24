@@ -4,9 +4,11 @@
 // clave) en `ErrorGoogle` y en el log del servidor.
 
 import { errorDeRespuesta, fallaDeGoogle } from "./error-google";
+import { imagenDeRespuesta, urlMapaGoogle } from "./mapa";
 import { type Componente, componentes, type Geo } from "./tipos";
 
 export { ErrorGoogle } from "./error-google";
+export type { ImagenMapa, OpcionesMapa } from "./mapa";
 export type { DireccionGeo, Geo, Sugerencia } from "./tipos";
 
 export function geoGoogle(apiKey: string): Geo {
@@ -120,17 +122,11 @@ export function geoGoogle(apiKey: string): Geo {
         lng: p.geometry.location.lng,
       };
     },
-    urlMapa(lat, lng, o = {}) {
-      const url = new URL("https://maps.googleapis.com/maps/api/staticmap");
-      url.search = new URLSearchParams({
-        center: `${lat},${lng}`,
-        zoom: String(o.zoom ?? 16),
-        size: `${o.ancho ?? 640}x${o.alto ?? 360}`,
-        scale: "2",
-        markers: `${lat},${lng}`,
-        key: apiKey,
-      }).toString();
-      return url.toString();
+    urlMapa: (lat, lng, o) => urlMapaGoogle(apiKey, lat, lng, o),
+    async mapa(lat, lng, o) {
+      const r = await llamar("Static Maps", urlMapaGoogle(apiKey, lat, lng, o));
+      if (!r.ok) throw await errorDeRespuesta(r, "Static Maps", apiKey);
+      return imagenDeRespuesta(r);
     },
   };
 }

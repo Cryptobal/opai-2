@@ -7,6 +7,8 @@
 export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
   "core.invitations.peek":
     "Interna: se ejecuta antes de existir sesión (el token del enlace es la credencial).",
+  "core.geo.mapa":
+    "Interna: entrega la imagen del mapa al proxy `/api/geo/mapa` con la clave del tenant; una imagen no sirve a un agente y la clave nunca sale.",
   "core.invitations.accept":
     "Interna: crea la membresía de quien acepta el enlace; un agente no acepta invitaciones por nadie.",
   "core.invitations.request_new":

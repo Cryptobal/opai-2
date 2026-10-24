@@ -70,6 +70,33 @@ export const geoGeocodificar = defineCapability({
   handler: async (ctx, input) => (await geoRequerido(ctx)).geocodificar(input.direccion),
 });
 
+/**
+ * Interna: la imagen viaja en base64 solo hacia el proxy `/api/geo/mapa` del navegador (las <img>
+ * de las fichas); un agente no tiene qué hacer con ella, y lo suyo son las coordenadas de
+ * `core.geo.detalle`. Mide `geo.mapa` (ADR-031).
+ */
+export const geoMapa = defineCapability({
+  id: "core.geo.mapa",
+  descripcion:
+    "Imagen del mapa (PNG) centrada en unas coordenadas con su marcador, para las fichas y formularios; se mide como geo.mapa.",
+  permiso: null,
+  interna: true,
+  portales: ["erp", "supervisor"],
+  input: z.object({
+    lat: z.number().min(-90).max(90),
+    lng: z.number().min(-180).max(180),
+    zoom: z.number().int().min(10).max(18).default(16),
+  }),
+  output: z.object({ mime: z.string(), base64: z.string() }),
+  efecto: "lectura",
+  dryRun: false,
+  async handler(ctx, input) {
+    const geo = await geoRequerido(ctx);
+    const img = await geo.mapa(input.lat, input.lng, { zoom: input.zoom });
+    return { mime: img.mime, base64: Buffer.from(img.bytes).toString("base64") };
+  },
+});
+
 export const iaProbar = defineCapability({
   id: "core.ia.probar",
   descripcion:

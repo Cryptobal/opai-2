@@ -1,8 +1,9 @@
 import { Navigation, Phone } from "lucide-react";
 
-import { Alerta, MapaEstatico, SeccionTarjeta } from "@opai/ds";
+import { Alerta, SeccionTarjeta } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+import { MapaOpai } from "@/app/_components/maestros/mapa";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 
 import { AccionTile, marcable } from "../../_componentes/accion-tile";
@@ -31,7 +32,7 @@ export default function InstalacionTerreno({ params }: { params: Promise<{ id: s
         const activos = i.puestos.filter((p) => p.estado === "activo");
         return (
           <div className="flex flex-col gap-4">
-            <MapaEstatico
+            <MapaOpai
               lat={i.lat}
               lng={i.lng}
               geocercaM={i.geocercaM}

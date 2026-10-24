@@ -1,6 +1,7 @@
-import { MapaEstatico, ParesGrid, SeccionTarjeta, Table, Td, Th, Tr } from "@opai/ds";
+import { ParesGrid, SeccionTarjeta, Table, Td, Th, Tr } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+import { MapaOpai } from "@/app/_components/maestros/mapa";
 import { fecha } from "@/lib/fechas";
 import type { InstalacionDetalle } from "@/lib/tipos-maestros";
 
@@ -8,12 +9,7 @@ import type { InstalacionDetalle } from "@/lib/tipos-maestros";
 export function ResumenInstalacion({ i }: { i: InstalacionDetalle }) {
   const activos = i.puestos.filter((p) => p.estado === "activo");
   const mapa = (
-    <MapaEstatico
-      lat={i.lat}
-      lng={i.lng}
-      geocercaM={i.geocercaM}
-      pie={`Geocerca ${i.geocercaM} m`}
-    />
+    <MapaOpai lat={i.lat} lng={i.lng} geocercaM={i.geocercaM} pie={`Geocerca ${i.geocercaM} m`} />
   );
   return (
     <div className="flex flex-col gap-4">
