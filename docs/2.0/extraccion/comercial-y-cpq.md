@@ -257,5 +257,5 @@ Copia de datos de instalación en el negocio, `CrmDealQuote` y `activeQuotationI
 ## 8. Pendiente de verificar
 
 - Uso real de campos personalizados y `CrmAccountReviewRequest` en Gard (datos, no código).
-- Si Operaciones en 1.0 crea los puestos operativos al ganar un negocio o se crean a mano: define qué sincroniza 2.0 hacia 1.0 durante la convivencia (ADR-040, decisión 8).
+- ~~Si Operaciones en 1.0 crea los puestos operativos al ganar un negocio o se crean a mano~~ **Verificado (24-oct, `09ab4fe`):** ganar no crea puestos. Se crean a mano, con «Enviar dotación a la instalación» desde la cotización (`src/app/api/cpq/quotes/[id]/send-to-installation/route.ts`, crea `OpsPuestoOperativo` con estructura de sueldo y sincroniza el flujo de caja) o en Operaciones (`src/lib/ops/create-puestos.ts`, también por `POST /api/ops/puestos` y la herramienta MCP `create_ops_puesto`). Recomendación para la convivencia en `modulos/comercial.md` §14, pregunta 8.
 - Casos dorados de los modos de margen y de la rama `k ≥ 0,35` contra cotizaciones reales de Gard (no hay tests en 1.0; ver §3.9).
