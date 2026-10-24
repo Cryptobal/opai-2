@@ -36,9 +36,9 @@ Generado: 24-10-2026, 10:40 (hora de Chile, UTC-3). Trabajo de solo lectura.
 
 Regla de este informe: no se da por hecho ningún avance de 2.0 que no aparezca en ESTADO.md. El código de 2.0 solo se cita como evidencia de cómo está implementado lo que ESTADO declara.
 
-## 2. `docs/2.0/checklists/paridad.md`: no existe
+## 2. `docs/2.0/checklists/paridad.md`: en la captura original no existía
 
-- La ruta da 404. Tampoco aparece en el árbol de main, en la carpeta `docs/2.0/checklists/` (que no existe) ni en el PR #14.
+- Al generar esta línea base, la ruta daba 404 (hoy ya existe; ver la nota posterior). Tampoco aparece en el árbol de main, en la carpeta `docs/2.0/checklists/` (que no existe) ni en el PR #14.
 - Por eso no hay un formato oficial que seguir. Se usa el que pidió el padre: por módulo, tres secciones (**Brechas**, **Mejoras**, **No copiar**); cada punto con evidencia en 1.0 y en 2.0 y prioridad Alta, Media o Baja.
 - Lo que sí existe en 2.0 sobre "paridad" es la **paridad UI↔MCP**, que es otra cosa: comprueba que cada pantalla tenga su capacidad MCP. Está en `packages/capabilities/test/paridad*.ts` y `apps/web/test/paridad-registro.test.ts`.
 
