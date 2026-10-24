@@ -13,13 +13,15 @@ async function main(): Promise<void> {
   const email = (process.env["SEED_OWNER_EMAIL"] ?? "carlos.irigoyen@opai.cl").toLowerCase();
   const nombre = process.env["SEED_OWNER_NAME"] ?? "Carlos Irigoyen";
   const password = process.env["SEED_OWNER_PASSWORD"];
+  // `SEED_PLATFORM_ROLE=ninguno` crea un usuario normal (sin rol de plataforma), p. ej. para los e2e.
+  const rol = process.env["SEED_PLATFORM_ROLE"] === "ninguno" ? null : "owner";
   const db = dbAdmin();
 
   const existente = await db.user.findUnique({ where: { email } });
   if (existente) {
-    await db.user.update({ where: { id: existente.id }, data: { platformRole: "owner" } });
+    await db.user.update({ where: { id: existente.id }, data: { platformRole: rol } });
     console.log(
-      `Usuario ${email} ya existía: platformRole=owner asegurado; contraseña sin cambios.`,
+      `Usuario ${email} ya existía: platformRole=${rol ?? "ninguno"} asegurado; contraseña sin cambios.`,
     );
     return;
   }
@@ -29,13 +31,13 @@ async function main(): Promise<void> {
   const hash = await hashPassword(password);
   await db.$transaction(async (tx) => {
     const user = await tx.user.create({
-      data: { email, name: nombre, emailVerified: true, platformRole: "owner" },
+      data: { email, name: nombre, emailVerified: true, platformRole: rol },
     });
     await tx.account.create({
       data: { userId: user.id, providerId: "credential", accountId: user.id, password: hash },
     });
   });
-  console.log(`Usuario ${email} creado con platformRole=owner.`);
+  console.log(`Usuario ${email} creado con platformRole=${rol ?? "ninguno"}.`);
 }
 
 main()

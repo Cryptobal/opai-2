@@ -5,3 +5,14 @@
 
 /* Tailwind debe ver las clases usadas dentro del paquete de diseño. */
 @source "../../../packages/ds/src";
+
+/* Navegación lenta (> ~200 ms): el shell cambia el contenido por el esqueleto, ver `EstadoEnlace`. */
+[data-esqueleto] {
+  display: none;
+}
+html[data-navegando] [data-esqueleto] {
+  display: block;
+}
+html[data-navegando] [data-contenido] {
+  display: none;
+}
