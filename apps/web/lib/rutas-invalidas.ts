@@ -11,7 +11,8 @@ const FIJOS: Readonly<Record<string, readonly string[]>> = {
 /**
  * `/personas/abc`: el id no tiene forma de UUID, así que no puede existir. Se detecta en el proxy
  * para responder HTTP 404; dentro de la página el `notFound()` llega con el HTML ya en camino (el
- * shell se envía antes de leer `params`) y el estado quedaría en 200.
+ * shell se envía antes de leer `params`) y el estado quedaría en 200. Lo que depende de la base
+ * (UUID válido, slugs) lo consulta el proxy a `/api/existe` (`existencia-ruta.ts`).
  */
 export function esIdInvalido(pathname: string): boolean {
   const [coleccion, id] = pathname.split("/").filter(Boolean);
