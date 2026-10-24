@@ -28,13 +28,22 @@ export function portalesVisibles(
   );
 }
 
+/** Nombre del portal para el título de la pestaña: «Portal Trabajador», «Plataforma» (el ERP no lleva). */
+function nombreParaTitulo(portal: string): string | undefined {
+  const etiqueta = PORTALES.find((x) => x.id === portal)?.etiqueta;
+  if (portal === "erp" || !etiqueta) return undefined;
+  return portal === "platform" ? etiqueta : `Portal ${etiqueta}`;
+}
+
+/** Título de pestaña de una página de portal: «Inicio · Portal Trabajador» (el ERP: solo la página). */
+export function tituloPagina(portal: string, pagina: string): string {
+  const nombre = nombreParaTitulo(portal);
+  return nombre ? `${pagina} · ${nombre}` : pagina;
+}
+
 /** Título del 404 de un portal: nombra el portal para no confundir «No encontrado» entre portales. */
 export function tituloNoEncontrado(portal: string): string {
-  const etiqueta = PORTALES.find((x) => x.id === portal)?.etiqueta;
-  if (portal === "erp" || !etiqueta) return "No encontrado";
-  return portal === "platform"
-    ? `${etiqueta} · No encontrado`
-    : `Portal ${etiqueta} · No encontrado`;
+  return tituloPagina(portal, "No encontrado");
 }
 
 /** Subtítulo de la marca en el lateral: el nombre del portal (el ERP no lleva subtítulo). */
