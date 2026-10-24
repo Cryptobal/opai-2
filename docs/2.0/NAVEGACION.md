@@ -97,7 +97,7 @@ El bloqueo financiero (ADR-016) oculta el área completa. Los roles personalizad
 
 - **Barra lateral (escritorio):** Inicio · grupo «Maestros» (Cuentas, Instalaciones, **Guardias**, Cargos y sueldos solo en pantallas amplias) · grupo «Módulos» (vacío; los módulos activos se agregan planos) · «Diseño» solo en desarrollo · Configuración al pie, con el contador de aprobaciones.
 - **Barra inferior (celular):** Inicio · Cuentas · **Instalac.** · Guardias · **Ajustes**; «Aprobaciones» aparece solo en celular cuando hay pendientes.
-- **Personas (pestañas, 24-oct):** Personas | Cargos y sueldos | Vencimientos (`SegmentoPersonas`, solo escritorio; en celular Vencimientos es el botón de icono).
+- **Personas (pestañas, 24-oct):** Personas | Cargos y sueldos | Vencimientos (`SegmentoPersonas` en la barra superior de escritorio y `SegmentoPersonasMovil`, control segmentado con scroll, arriba del contenido en celular; el botón de icono de Vencimientos en Personas se mantiene).
 - **Portales:** Supervisor con Hoy e Instalaciones; Trabajador, Terreno y Cliente con solo Inicio (placeholders); Plataforma con Empresas, Trabajos, Consumos y Ajustes.
 - **⌘K:** existe en el ERP (búsqueda de entidades); sin acciones ni recientes. Sin fijados.
 - **Implementación:** `apps/web/lib/navegacion.ts` (`navegacionErp`, `NAV_PLATAFORMA`, `navegacionPortal`); el shell se monta dentro de cada página (`PaginaPortal`), no en el layout.
