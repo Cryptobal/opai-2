@@ -1,6 +1,6 @@
 # ROADMAP — OPAI 2.0 hasta terminar
 
-**Actualizado:** 23-oct-2026 · **Orden:** ADR-030 · **Estado real:** desde el 24-oct-2026 el estado de las tareas vive en Linear (`AGENTS.md`, «Tareas (Linear)») y `ESTADO.md` es la foto técnica; este archivo planifica y se actualiza si cambia el plan.
+**Actualizado:** 24-oct-2026 · **Orden:** ADR-030 · **Estado real:** desde el 24-oct-2026 el estado de las tareas vive en Linear (`AGENTS.md`, «Tareas (Linear)») y `ESTADO.md` es la foto técnica; este archivo planifica y se actualiza si cambia el plan.
 
 > **Las semanas son estimaciones**, contadas desde hoy (viernes 23-oct-2026; semana 1 = lunes 26-oct), para un constructor (Claude) con revisión y QA por bots y decisiones de Carlos a tiempo. Sirven para ordenar y detectar atrasos, no son compromisos. Las fases 1 y 2 se estiman con el ritmo real observado (Briefs 00 a 02 en dos días); de la fase 3 en adelante, con el juicio del documento de arranque, porque dependen de extracciones que aún no existen.
 
@@ -159,7 +159,7 @@ No se portan de 1.0 y solo se reconstruyen con demanda real (lista canónica de 
 
 ## 5. Próximas 10 tareas, en orden
 
-1. **Revisor:** revisar e integrar este PR de documentación (ROADMAP, NAVEGACION, ADR-043 a 047, plantilla de especificación, flujo de trabajo).
+1. **Revisor:** revisar y aprobar este PR de documentación; integra Carlos (ROADMAP, NAVEGACION, ADR-043 a 047, plantilla de especificación, flujo de trabajo).
 2. **Carlos (Mac):** correr los seeds en Neon `dev` (`seed:dev-tenant` y `seed:maestros-demo`) y `main` (`seed:dev-tenant`), y cargar los secretos de GitHub para los previews por PR.
 3. **Carlos con Claude:** verificación guiada del Brief 02 (bloque 14) en `test.opai.cl`; cerrar paridad MCP y arreglos de QA (otros chats) e integrarlos.
 4. **Claude: Brief 03 · Rendimiento de navegación** (prioridad 1): medir línea base con el protocolo de ADR-045, aplicar los arreglos, medir después y dejar el gate en CI.
