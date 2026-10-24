@@ -26,7 +26,12 @@ export default function RealceBarraEfecto({ activa }: { activa: string }) {
     medir();
     el.addEventListener("scroll", medir, { passive: true });
     addEventListener("resize", medir);
+    // Cambios que no son scroll ni resize de ventana: ancho del contenedor, etiquetas, fuentes.
+    const observador = new ResizeObserver(medir);
+    observador.observe(el);
+    for (const hijo of el.children) observador.observe(hijo);
     return () => {
+      observador.disconnect();
       el.removeEventListener("scroll", medir);
       removeEventListener("resize", medir);
     };
