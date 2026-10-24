@@ -3,7 +3,7 @@ import { Plus } from "lucide-react";
 import { Badge, Empty, FilaSeleccionable } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
-import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { ESTADO_PUESTO, estadoDe } from "@/app/_components/maestros/estados";
 import type { SearchParams } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
@@ -21,9 +21,9 @@ async function Puestos({ i }: { i: InstalacionDetalle }) {
   const cargos = r.ok ? r.data.filter((c) => c.activo) : [];
   const nombreCargo = new Map(cargos.map((c) => [c.id, c.nombre]));
   const nuevo = (
-    <EnlaceBoton href="?puesto=nuevo" icono={Plus}>
+    <EnlaceBotonHoja href="?puesto=nuevo" icono={Plus}>
       Nuevo puesto
-    </EnlaceBoton>
+    </EnlaceBotonHoja>
   );
   return (
     <>

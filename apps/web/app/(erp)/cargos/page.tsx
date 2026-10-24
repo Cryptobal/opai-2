@@ -2,7 +2,7 @@ import { Lock, Plus } from "lucide-react";
 
 import { Alerta } from "@opai/ds";
 
-import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { leerParametros, type SearchParams } from "@/lib/parametros";
 import { vocabularioActual } from "@/lib/vocabulario";
@@ -22,9 +22,9 @@ export default function Cargos({ searchParams }: { searchParams: SearchParams })
       titulo="Cargos y sueldos"
       ruta="/cargos"
       acciones={
-        <EnlaceBoton href="?nuevo=1" icono={Plus}>
+        <EnlaceBotonHoja href="?nuevo=1" icono={Plus}>
           Nuevo cargo
-        </EnlaceBoton>
+        </EnlaceBotonHoja>
       }
       cargar={async () => {
         const [p, voc] = await Promise.all([leerParametros(searchParams), vocabularioActual()]);

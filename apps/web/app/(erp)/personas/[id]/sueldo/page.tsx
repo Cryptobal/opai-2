@@ -3,6 +3,7 @@ import { ChevronRight } from "lucide-react";
 import { Alerta, Badge, SeccionTarjeta } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { fecha, hoyIso } from "@/lib/fechas";
 import { leerParametros, type SearchParams } from "@/lib/parametros";
@@ -27,9 +28,9 @@ export default function Sueldo({ params, searchParams }: Props) {
       ruta="/personas"
       cargando="detalle"
       acciones={
-        <EnlaceBoton href="?excepcion=1" variante="secondary">
+        <EnlaceBotonHoja href="?excepcion=1" variante="secondary">
           Editar excepción
-        </EnlaceBoton>
+        </EnlaceBotonHoja>
       }
       cargar={async () => {
         const [{ id }, q, voc] = await Promise.all([

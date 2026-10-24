@@ -2,7 +2,7 @@ import { Building2, Plus } from "lucide-react";
 
 import { SplitScreen } from "@opai/ds";
 
-import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import type { SearchParams } from "@/lib/parametros";
 
@@ -23,9 +23,9 @@ export default function Cuentas({ searchParams }: Props) {
       ruta="/cuentas"
       completo
       acciones={
-        <EnlaceBoton href="/cuentas?nueva=1" icono={Plus}>
+        <EnlaceBotonHoja href="/cuentas?nueva=1" icono={Plus}>
           Nueva cuenta
-        </EnlaceBoton>
+        </EnlaceBotonHoja>
       }
       cargar={async () => cargarCuentas(await filtrosDe(searchParams))}
     >

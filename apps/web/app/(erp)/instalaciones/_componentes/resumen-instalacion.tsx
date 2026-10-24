@@ -1,6 +1,7 @@
 import { ParesGrid, SeccionTarjeta, Table, Td, Th, Tr } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { MapaOpai } from "@/app/_components/maestros/mapa";
 import { fecha } from "@/lib/fechas";
 import type { InstalacionDetalle } from "@/lib/tipos-maestros";
@@ -16,9 +17,9 @@ export function ResumenInstalacion({ i }: { i: InstalacionDetalle }) {
       <SeccionTarjeta
         titulo="Ubicación y vigencia"
         accion={
-          <EnlaceBoton href="?editar=1" variante="ghost">
+          <EnlaceBotonHoja href="?editar=1" variante="ghost">
             Editar
-          </EnlaceBoton>
+          </EnlaceBotonHoja>
         }
       >
         <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,280px)] md:items-start">

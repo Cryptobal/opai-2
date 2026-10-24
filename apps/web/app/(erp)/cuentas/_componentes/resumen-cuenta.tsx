@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import { ParesGrid, SeccionTarjeta } from "@opai/ds";
 
-import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { fecha, rut } from "@/lib/fechas";
 import type { CuentaDetalle } from "@/lib/tipos-maestros";
 
@@ -11,9 +11,9 @@ export function ResumenCuenta({ c }: { c: CuentaDetalle }) {
   const principal = c.contactos.find((k) => k.esPrincipal)?.nombre ?? null;
   const direccion = [c.calle, c.comuna, c.region].filter(Boolean).join(", ") || null;
   const editar = (
-    <EnlaceBoton href="?editar=1" variante="ghost">
+    <EnlaceBotonHoja href="?editar=1" variante="ghost">
       Editar
-    </EnlaceBoton>
+    </EnlaceBotonHoja>
   );
   return (
     <div className="flex flex-col gap-4">

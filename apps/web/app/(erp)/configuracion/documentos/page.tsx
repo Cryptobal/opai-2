@@ -4,7 +4,7 @@ import { Alerta, Segmentado } from "@opai/ds";
 import { esRol, PERMISOS_CORE, tienePermiso } from "@opai/domain";
 
 import { LinkNext } from "@/app/_components/link-next";
-import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { leerParametros, type SearchParams } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
@@ -36,9 +36,9 @@ export default function Documentos({ searchParams }: { searchParams: SearchParam
           indice.rol &&
           esRol(indice.rol) &&
           tienePermiso(indice.rol, PERMISOS_CORE.documentosManage) ? (
-            <EnlaceBoton href="?nuevo=1" icono={Plus}>
+            <EnlaceBotonHoja href="?nuevo=1" icono={Plus}>
               Nuevo tipo
-            </EnlaceBoton>
+            </EnlaceBotonHoja>
           ) : undefined,
       })}
     >

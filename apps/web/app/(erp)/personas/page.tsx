@@ -1,6 +1,7 @@
 import { CalendarClock, Plus } from "lucide-react";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { leerParametros, type SearchParams } from "@/lib/parametros";
 import { hoyIso } from "@/lib/fechas";
@@ -39,9 +40,9 @@ export default function Personas({ searchParams }: { searchParams: SearchParams 
         insignia: <SegmentoPersonas activa="personas" plural="Personas" />,
         acciones: (
           <>
-            <EnlaceBoton href="?nueva=1" icono={Plus}>
+            <EnlaceBotonHoja href="?nueva=1" icono={Plus}>
               Agregar {d.voc.persona.singular}
-            </EnlaceBoton>
+            </EnlaceBotonHoja>
           </>
         ),
       })}
