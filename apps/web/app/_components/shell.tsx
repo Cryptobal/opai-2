@@ -13,12 +13,7 @@ import type { ItemNav } from "@/lib/navegacion";
 
 import { Campana } from "./campana";
 import { icono } from "./iconos";
-import { LinkMenu } from "./link-menu";
-import {
-  avisarCambioSesion,
-  useCambioSesionExterno,
-  useRefrescoSilencioso,
-} from "./refresco-navegador";
+import { LinkNext } from "./link-next";
 
 // La paleta (cmdk) se descarga al primer uso: no pesa en el JS inicial de cada ruta (ADR-037).
 const Paleta = dynamic(() => import("./paleta").then((m) => m.Paleta), { ssr: false });
@@ -35,8 +30,6 @@ export type DatosShell = {
   usuario: { nombre: string; email: string; rol?: string };
   empresas: { id: string; nombre: string; actual: boolean }[];
   noLeidas: number;
-  /** Identifica la versión de la página (ms del servidor); el navegador mide la edad desde que la vio. */
-  generado: number;
 };
 
 export type OpcionesPagina = {
@@ -47,15 +40,12 @@ export type OpcionesPagina = {
   accionesTelefono?: ReactNode;
   insignia?: ReactNode;
   completo?: boolean;
-  /** Esqueleto (de servidor, sin JS) que reemplaza el contenido si la navegación pasa de ~200 ms. */
-  esqueleto?: ReactNode;
 };
 
 /** Shell real: navegación, portales, campana, ⌘K y menú de usuario a partir de la sesión. */
 export function Shell({
   datos,
   children,
-  esqueleto,
   ...pagina
 }: OpcionesPagina & { datos: DatosShell; children: ReactNode }) {
   const rutaActual = usePathname();
@@ -63,8 +53,6 @@ export function Shell({
   const [password, setPassword] = useState(false);
   const [paleta, setPaleta] = useState<boolean | null>(null);
   const buscable = datos.portal === "erp" && datos.tenant !== null;
-  useRefrescoSilencioso(datos.generado, rutaActual);
-  useCambioSesionExterno();
   useEffect(() => {
     if (!buscable) return;
     const tecla = (e: KeyboardEvent) => {
@@ -84,10 +72,7 @@ export function Shell({
           etiqueta: e.nombre,
           icono: Building2,
           marcado: e.actual,
-          onSelect: () => {
-            avisarCambioSesion();
-            void cambiarTenant(e.id);
-          },
+          onSelect: () => void cambiarTenant(e.id),
         }))
       : [];
   const menu: ItemMenu[] = [
@@ -114,10 +99,7 @@ export function Shell({
       etiqueta: "Cerrar sesión",
       icono: LogOut,
       peligro: true,
-      onSelect: () => {
-        avisarCambioSesion();
-        void accionSalir();
-      },
+      onSelect: () => void accionSalir(),
     },
   ];
   return (
@@ -137,12 +119,9 @@ export function Shell({
       {...(buscable ? { onBuscar: () => setPaleta(true) } : {})}
       {...(datos.portal === "platform" ? { subtituloMarca: "Plataforma" } : {})}
       onNavegar={(href) => router.push(href)}
-      Link={LinkMenu}
+      Link={LinkNext}
     >
-      <div data-contenido className="contents">
-        {children}
-      </div>
-      {esqueleto ? <div data-esqueleto>{esqueleto}</div> : null}
+      {children}
       {paleta !== null ? <Paleta abierto={paleta} onCerrar={() => setPaleta(false)} /> : null}
       {password ? <CambiarPassword abierto onCerrar={() => setPassword(false)} /> : null}
       <Avisos />

@@ -1,17 +1,15 @@
 "use client";
 
 import { Bell } from "lucide-react";
-import dynamic from "next/dynamic";
+import Link from "next/link";
 import { useState } from "react";
 
 import { Button, Popover, Skeleton } from "@opai/ds";
 
 import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { haceCuanto } from "@/lib/fechas";
 
-// La lista de avisos solo se descarga al abrir la campana (ADR-037).
-const ListaAvisos = dynamic(() => import("./lista-avisos").then((m) => m.ListaAvisos));
-
-export type Aviso = {
+type Aviso = {
   id: string;
   titulo: string;
   cuerpo: string | null;
@@ -76,7 +74,46 @@ export function Campana({ noLeidas, portal }: { noLeidas: number; portal: string
         ) : avisos.length === 0 ? (
           <p className="px-4 py-8 text-center text-base text-fg-muted">Sin avisos por ahora</p>
         ) : (
-          <ListaAvisos avisos={avisos} portal={portal} />
+          <ul className="divide-y divide-border">
+            {avisos.map((a) => {
+              const cuerpo = (
+                <>
+                  <span className="flex items-start gap-2">
+                    {a.leidaEn ? null : (
+                      <span
+                        aria-label="sin leer"
+                        className="mt-1.5 size-2 flex-none rounded-full bg-accent"
+                      />
+                    )}
+                    <span className="min-w-0 flex-1 text-base font-medium text-fg">{a.titulo}</span>
+                  </span>
+                  {a.cuerpo ? (
+                    <span className="block text-sm text-fg-muted">{a.cuerpo}</span>
+                  ) : null}
+                  <span className="t-caption block">{haceCuanto(a.creadaEn)}</span>
+                </>
+              );
+              return (
+                <li key={a.id}>
+                  {a.enlace ? (
+                    <Link
+                      href={a.enlace}
+                      className="block px-4 py-3 hover:bg-bg"
+                      onClick={() =>
+                        void ejecutarCapacidad(portal, "core.notificaciones.marcar_leida", {
+                          id: a.id,
+                        })
+                      }
+                    >
+                      {cuerpo}
+                    </Link>
+                  ) : (
+                    <div className="px-4 py-3">{cuerpo}</div>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
         )}
       </div>
     </Popover>

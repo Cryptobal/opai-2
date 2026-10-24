@@ -4,7 +4,6 @@ import { AuthCard, Badge, Button, FilaSeleccionable, Monograma } from "@opai/ds"
 
 import { accionSalir } from "@/app/_acciones/auth";
 import { cambiarTenant } from "@/app/_acciones/capacidad";
-import { avisarCambioSesion } from "@/app/_components/refresco-navegador";
 import { LinkNext } from "@/app/_components/link-next";
 import { ETIQUETA_ROL } from "@/app/_components/portales";
 import { fechaCorta } from "@/lib/formato";
@@ -37,10 +36,7 @@ export function SelectorEmpresa({ empresas, destino }: { empresas: Empresa[]; de
         {empresas.map((e) => (
           <li key={e.tenantId}>
             <FilaSeleccionable
-              onClick={() => {
-                avisarCambioSesion();
-                void cambiarTenant(e.tenantId, destino);
-              }}
+              onClick={() => void cambiarTenant(e.tenantId, destino)}
               className="rounded-lg border border-border bg-surface p-4"
               inicio={<Monograma nombre={e.nombre} className="size-10 rounded-md text-sm" />}
               titulo={e.nombre}

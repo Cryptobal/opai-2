@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import type { ReactNode } from "react";
+import { type ReactNode, Suspense } from "react";
 
 import { Forbidden, Loading, type VarianteLoading } from "@opai/ds";
 
@@ -34,7 +34,7 @@ async function Contenido<T>({
   cargar,
   opciones,
   children,
-  cargando = "lista",
+  cargando: _c,
   ...pagina
 }: Props<T>) {
   const identidad = await requerirIdentidad(ruta);
@@ -53,12 +53,7 @@ async function Contenido<T>({
   const contadores = conteo?.ok ? conteo.data : SIN_CONTADORES;
   const extra = acceso && cargar && opciones ? opciones(datos) : {};
   return (
-    <Shell
-      datos={datosShell(identidad, portal, contadores)}
-      esqueleto={<Loading variante={cargando} />}
-      {...pagina}
-      {...extra}
-    >
+    <Shell datos={datosShell(identidad, portal, contadores)} {...pagina} {...extra}>
       {acceso ? (
         typeof children === "function" ? (
           children(datos)
@@ -80,9 +75,12 @@ async function Contenido<T>({
 
 /**
  * Página de un portal: exige sesión y acceso al portal en servidor y monta el shell real.
- * El Suspense vive en el layout del portal (`CargaPortal`): al navegar, React conserva la
- * página anterior hasta que la nueva está lista, en vez de reemplazarla por un esqueleto.
+ * El Suspense permite leer la sesión (cookies), params y searchParams con Cache Components.
  */
 export function PaginaPortal<T = undefined>(props: Props<T>) {
-  return <Contenido {...props} />;
+  return (
+    <Suspense fallback={<Loading variante={props.cargando ?? "lista"} className="p-4 md:p-6" />}>
+      <Contenido {...props} />
+    </Suspense>
+  );
 }
