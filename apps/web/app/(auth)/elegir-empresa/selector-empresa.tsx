@@ -4,7 +4,6 @@ import { AuthCard, Badge, Button, FilaSeleccionable, Monograma } from "@opai/ds"
 
 import { accionSalir } from "@/app/_acciones/auth";
 import { cambiarTenant } from "@/app/_acciones/capacidad";
-import { useEpocaSesion } from "@/app/_components/refresco-navegador";
 import { LinkNext } from "@/app/_components/link-next";
 import { ETIQUETA_ROL } from "@/app/_components/portales";
 import { fechaCorta } from "@/lib/formato";
@@ -12,16 +11,7 @@ import { fechaCorta } from "@/lib/formato";
 type Empresa = { tenantId: string; nombre: string; rol: string; ultimoAcceso: string | null };
 
 /** Tarjetas de empresa con monograma, rol y último acceso; cerrar sesión al pie. */
-export function SelectorEmpresa({
-  empresas,
-  destino,
-  epoca,
-}: {
-  empresas: Empresa[];
-  destino: string;
-  epoca?: string;
-}) {
-  useEpocaSesion(epoca ?? null);
+export function SelectorEmpresa({ empresas, destino }: { empresas: Empresa[]; destino: string }) {
   return (
     <AuthCard
       Link={LinkNext}

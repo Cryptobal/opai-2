@@ -3,7 +3,6 @@ import { Suspense } from "react";
 
 import { Loading } from "@opai/ds";
 
-import { epocaDe } from "@/lib/epoca-sesion";
 import { requerirIdentidad } from "@/lib/servidor";
 import { membresiasUsables } from "@/lib/tenant-actual";
 import { ultimosAccesos } from "@/lib/ultimo-acceso";
@@ -31,13 +30,7 @@ async function Contenido({ searchParams }: Props) {
     rol: m.rol,
     ultimoAcceso: accesos.get(m.tenantId)?.toISOString() ?? null,
   }));
-  return (
-    <SelectorEmpresa
-      empresas={empresas}
-      destino={destino}
-      epoca={epocaDe(identidad.usuario.id, null)}
-    />
-  );
+  return <SelectorEmpresa empresas={empresas} destino={destino} />;
 }
 
 /** Selector de empresa tras el login (export-acceso 05). */
