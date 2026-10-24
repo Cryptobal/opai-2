@@ -115,6 +115,14 @@ Este archivo es la fuente de verdad del avance. Cada brief lo actualiza al termi
   - CI suma el escaneo de secretos con gitleaks (job `secretos`, sin secretos de CI).
   - El test de RLS ahora cubre toda tabla con `tenant_id` en cualquier schema, no solo en `core`.
   - ADR-043 modificado: el Revisor aprueba o pide cambios y no integra.
+- **Informe preliminar de paridad del Núcleo (24-oct, PR `docs/paridad-nucleo`):** `docs/2.0/paridad/nucleo.md` (brechas, mejoras y qué no copiar) y `docs/2.0/paridad/linea-base-1.0.md` (inventario de 1.0 según el orden de 2.0) están en el repo como **insumo, no como especificación aprobada**. Las brechas de prioridad Alta quedan como pendientes del Núcleo al final de este archivo.
+- **Decisiones de Carlos sobre paridad (24-oct), entregadas con el informe:**
+  1. **Usuarios:** no se migran desde 1.0; Carlos los crea a mano. Aun así, 2.0 debe manejar roles y permisos al menos tan bien como 1.0: roles personalizados, permisos finos y alcance del supervisor por instalación. Es brecha Alta.
+  2. **Ley 21.719:** 2.0 la cubre siempre y por diseño (DPA, consentimiento, ARCO y DPO). Es brecha Alta del Núcleo.
+  3. **Control de acceso físico (`portal/acceso` de 1.0):** se porta, mejorado y con registro completo, dentro del portal de terreno (fase 3). Ya no es una pregunta abierta.
+  4. **Migración desde 1.0:** solo cuentas, instalaciones, contactos, negocios, licitaciones y guardias. El mapeo se define por módulo durante el desarrollo, se prueba con una copia anonimizada y la carga real se hace al final.
+
+  Estas decisiones **no responden** las 11 preguntas de la especificación de Comercial (`modulos/comercial.md` §14), que siguen esperando a Carlos. La de cuánto historial importar (pregunta 6) queda acotada por la decisión 4, pero no cerrada.
 - **JS de `/configuracion/aprobaciones` (24-oct, PR #20, rama `perf/js-aprobaciones`, ADR-037):** baja de 175,0 a 168,9 KB, con tope de 175. `RadioGroup` pasa a su propio archivo, así `Checkbox` ya no arrastra RadioGroup ni RovingFocus, y viceversa. Vecinas: vencimientos 174,4 → 168,8; nueva instalación 178,0 → 171,9; preferencias 174,9 → 172,9; integraciones/[proveedor] 174,3 → 173,1. Aspecto y comportamiento idénticos: mismo DOM y misma captura a 375, 1024 y 1280 px. Para llegar a 165 KB habría que sacar Radix de `Checkbox`, lo que ADR-017 no permite; con un `<input>` nativo se midió 163,3 KB. Lo decide Carlos.
 
 ## En curso
@@ -209,3 +217,12 @@ Node 22 · pnpm 10.28 · Next.js 16.4.2 · React 19.3.0 · Tailwind 4.3.3 · Pri
 - Sesión C, pendientes de diseño o modelo: asignaciones persona↔instalación (Operaciones); WhatsApp y push como canales; presupuesto y política de datos de IA; "Descargar estado de cuenta"; "Entrar como soporte" (impersonación) en Plataforma; fecha de fin de trial de módulos; historial de intentos de trabajos; la banda de aprobación no aparece en la persona para `core.vinculos.terminar` (su input trae el id del vínculo); el supervisor no ve "Pedir" ni "Subir documento" sin `documentos.manage`.
 - QA pasada 1, pulido sin resolver: posición/ancho de «Buscar o ir a…» entre pantallas; en Empresa (dirección vacía con empresa cargada, representante legal cortado, «Guardar» activo sin cambios, contenido corrido) y Marca (ayuda pequeña, vista previa a media tarjeta, «Guardar» vs «Reemplazar»); texto pequeño de la matriz de permisos; los filtros de Auditoría no muestran su valor; fichas y pestañas de Personas sin revisar por falta de datos en el tenant.
 - QA pasada 1, topes de JS (ADR-037): primero se recortó. `/ds*` vuelve a 220 KB (la muestra de campos —fechas, dirección, mapa— se carga aparte con `dynamic`; mide 217,8). **Excepción a ADR-037 APROBADA por Carlos el 23-oct-2026, solo para nueva instalación:** 176 → 177 (PR #7, +1 KB por el aviso de error de la dirección) → 178 (este PR, `InputFecha` dd-mm-aaaa; medido 177,1–177,5 KB según el build, hasta +0,5 KB sobre el tope de 177). Se probó sin éxito: calendario nativo bajo demanda, separar `InputHora` y cargar el mapa con `lazy` (sin ganancia medible; cambiaba ±0,3 KB entre builds).
+
+## Pendientes del Núcleo por paridad con 1.0 (prioridad Alta)
+
+Salen del informe preliminar `docs/2.0/paridad/nucleo.md` y de las decisiones de Carlos del 24-oct. **No están implementados.** Cada uno necesita su especificación o brief antes de construirse:
+
+1. **Bloqueo de login guardado en la base (B1):** contador de intentos fallidos y bloqueo por cuenta persistentes y compartidos entre instancias, con registro de cada intento. Hoy el límite vive en memoria por instancia.
+2. **Roles y permisos finos (B2):** roles personalizados por tenant, permisos finos por módulo y capacidad, al menos tan completos como en 1.0. Los usuarios no se migran: Carlos los crea a mano.
+3. **Alcance del supervisor por instalación (B3, ADR-022):** asignaciones supervisor ↔ instalación y filtro en las consultas de las capacidades. Hoy el supervisor lee todo el tenant.
+4. **Ley 21.719 de datos personales (B4):** DPA, contacto del DPO, consentimiento y atención de solicitudes ARCO, por diseño y siempre en 2.0. La ley entra en vigor el 1-dic-2026.
