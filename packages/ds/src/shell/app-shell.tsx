@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 
 import { cn } from "../cn";
-import { BottomNav, Rail } from "./nav";
+import { BottomNav } from "./nav";
+import { Rail } from "./rail";
 import { Sidebar } from "./sidebar";
 import { AppBar, type ComunesBarra, TopBarTelefono } from "./top-bar";
 import type { NavItem } from "./types";
@@ -35,7 +36,16 @@ export function AppShell(props: AppShellProps) {
   const { accionesTelefono, subtituloMarca, onNavegar, completo, ...barra } = props;
   return (
     <div className="flex min-h-dvh bg-bg text-fg">
-      <Rail items={nav} rutaActual={rutaActual} subtitulo={subtituloMarca} Link={Link} />
+      <Rail
+        items={nav}
+        rutaActual={rutaActual}
+        subtitulo={subtituloMarca}
+        portales={props.portales}
+        portalActual={props.portalActual}
+        tenant={props.tenant}
+        empresas={props.empresas}
+        Link={Link}
+      />
       <Sidebar
         items={nav}
         rutaActual={rutaActual}
