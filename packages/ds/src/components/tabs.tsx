@@ -3,7 +3,6 @@ import type { ReactNode } from "react";
 
 import { cn } from "../cn";
 import { type LinkComponent, LinkPorDefecto } from "../shell/types";
-import { BarraTabs } from "./barra-tabs";
 import { ContadorTab, estiloTab } from "./tab-estilo";
 import { TabsEstado } from "./tabs-estado";
 
@@ -44,7 +43,10 @@ export function Tabs(props: TabsProps) {
   const actual = tabs.find((t) => t.id === activa) ?? tabs[0];
   return (
     <div className={cn("flex flex-col gap-4", className)}>
-      <BarraTabs como="nav" etiqueta="Secciones" activa={actual?.id ?? ""}>
+      <nav
+        aria-label="Secciones"
+        className="-mx-4 flex gap-1 overflow-x-auto overflow-y-hidden overscroll-x-contain px-4 shadow-[inset_0_-1px_0_var(--ds-border)] md:mx-0 md:px-0"
+      >
         {tabs.map((tab) => {
           const seleccionada = tab.id === actual?.id;
           if (tab.deshabilitada)
@@ -75,7 +77,7 @@ export function Tabs(props: TabsProps) {
             </Link>
           );
         })}
-      </BarraTabs>
+      </nav>
       <div>{children ?? actual?.contenido}</div>
     </div>
   );

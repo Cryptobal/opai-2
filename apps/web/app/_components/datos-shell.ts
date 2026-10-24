@@ -3,7 +3,7 @@ import { esRol, esVertical, vocabulario } from "@opai/domain";
 import type { Identidad } from "@/lib/actor";
 import { type Contadores, NAV_PLATAFORMA, navegacionErp, navegacionPortal } from "@/lib/navegacion";
 
-import { ETIQUETA_ROL, PORTALES, portalesVisibles, subtituloMarcaPortal } from "./portales";
+import { ETIQUETA_ROL, PORTALES, portalesVisibles } from "./portales";
 import type { DatosShell } from "./shell";
 
 /** Datos del shell (navegación con contadores, portales, empresa y usuario) de una identidad. */
@@ -30,7 +30,6 @@ export function datosShell(
   const plataforma = usuario.platformRole !== null;
   return {
     portal,
-    subtituloMarca: subtituloMarcaPortal(portal),
     noLeidas: contadores.notificacionesNoLeidas ?? 0,
     nav,
     portales: portalesVisibles(actual?.portales ?? [], plataforma),

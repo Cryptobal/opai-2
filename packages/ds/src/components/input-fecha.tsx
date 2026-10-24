@@ -1,13 +1,5 @@
 import { Calendar, Clock } from "lucide-react";
-import {
-  type InputHTMLAttributes,
-  lazy,
-  Suspense,
-  useEffect,
-  useId,
-  useRef,
-  useState,
-} from "react";
+import { type InputHTMLAttributes, lazy, Suspense, useEffect, useRef, useState } from "react";
 
 import { cn } from "../cn";
 import { aplicarMascara, isoAMascara, mascaraAIso } from "../lib/fecha";
@@ -45,7 +37,6 @@ export function InputFecha({
   ...props
 }: Props) {
   const Icono = tipo === "time" ? Clock : Calendar;
-  const auto = useId();
   if (tipo === "time") {
     return (
       <span className={cn("relative block", className)}>
@@ -56,7 +47,6 @@ export function InputFecha({
           aria-invalid={invalido || undefined}
           className={cn(CAMPO, "ds-selector-total")}
           {...props}
-          id={props.id ?? auto}
         />
         <Icono
           aria-hidden
@@ -72,7 +62,6 @@ export function InputFecha({
       invalido={invalido}
       className={className}
       {...props}
-      id={props.id ?? auto}
     />
   );
 }

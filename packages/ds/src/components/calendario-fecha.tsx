@@ -15,7 +15,6 @@ import {
   vistaDe,
 } from "../lib/calendario";
 import { Button } from "./button";
-import { CampoFechaEscrita } from "./campo-fecha-escrita";
 import { claseOverlay } from "./menu";
 import { SheetRadix } from "./sheet-radix";
 
@@ -125,7 +124,18 @@ export default function CalendarioFecha(props: CalendarioProps) {
     return (
       <SheetRadix abierto onCerrar={onCerrar} titulo="Elegir fecha">
         <div className="flex flex-col gap-3">
-          <CampoFechaEscrita texto={texto} onTexto={onTexto} />
+          <input
+            type="text"
+            inputMode="numeric"
+            autoComplete="off"
+            lang="es-CL"
+            placeholder="dd-mm-aaaa"
+            aria-label="Escribir la fecha"
+            maxLength={10}
+            value={texto}
+            onChange={(e) => onTexto(e.target.value)}
+            className="h-11 w-full rounded-md border border-border-strong bg-surface px-3 text-md text-fg outline-none focus-visible:border-accent"
+          />
           <Cuadricula valor={valor} onElegir={onElegir} onCerrar={onCerrar} />
         </div>
       </SheetRadix>

@@ -4,7 +4,6 @@ import { Empty } from "@opai/ds";
 
 import { EnlaceBoton } from "./maestros/enlace-boton";
 import { PaginaPortal } from "./pagina-portal";
-import { tituloNoEncontrado } from "./portales";
 
 /**
  * 404 dentro del shell del portal (menú, búsqueda y salida de siempre) en vez de la página genérica
@@ -14,10 +13,9 @@ import { tituloNoEncontrado } from "./portales";
  */
 export function NoEncontrado({ portal = "erp" }: { portal?: string }) {
   const inicio = portal === "erp" ? "/" : `/${portal}`;
-  const titulo = tituloNoEncontrado(portal);
   return (
-    <PaginaPortal portal={portal} titulo={titulo} ruta={inicio}>
-      <h2 className="t-title mb-4 text-fg md:hidden">{titulo}</h2>
+    <PaginaPortal portal={portal} titulo="No encontrado" ruta={inicio}>
+      <h2 className="t-title mb-4 text-fg md:hidden">No encontrado</h2>
       <Empty
         titulo="No encontramos lo que buscas"
         descripcion="El enlace puede estar mal escrito o lo que buscas ya no existe."
