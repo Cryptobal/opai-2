@@ -1,4 +1,9 @@
-import { ErrorGoogle, geoGoogle, type OpcionesMapa } from "@opai/integrations";
+import {
+  ErrorGoogle,
+  geoGoogle,
+  type OpcionesMapa,
+  variantesDeBusqueda,
+} from "@opai/integrations";
 
 import { reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
@@ -33,10 +38,14 @@ export async function geoDe(ctx: Contexto, modulo = "core") {
     }
   };
   return {
+    /** Si la dirección completa no devuelve nada, reintenta sin región y luego solo con la calle. */
     async autocompletar(texto: string, sesion?: string) {
-      const r = await conMensaje(() => geo.autocompletar(texto, sesion));
-      await medir("geo.autocompletado");
-      return r;
+      for (const variante of variantesDeBusqueda(texto)) {
+        const r = await conMensaje(() => geo.autocompletar(variante, sesion));
+        await medir("geo.autocompletado");
+        if (r.length > 0) return r;
+      }
+      return [];
     },
     async detalle(placeId: string, sesion?: string) {
       const r = await conMensaje(() => geo.detalle(placeId, sesion));
