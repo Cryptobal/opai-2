@@ -32,7 +32,7 @@ Lo usan el Revisor (con el modelo contrario al que construyó) y la autorrevisi�
 - [ ] Cumple el brief y sus criterios de aceptación. Las diferencias están reportadas.
 - [ ] Respeta `docs/2.0/REGLAS-codigo.md`: TypeScript estricto sin `any`, archivos de hasta 150 líneas, dominio puro, dinero en enteros y tiempo en UTC.
 - [ ] Trae los tests de la regla nueva: dominio, autorización y auditoría de capacidades, y RLS si toca base.
-- [ ] El presupuesto de JS no sube, salvo una excepción aprobada por Carlos.
+- [ ] Los topes de JS no suben, salvo una excepción aprobada por Carlos y registrada en `ESTADO.md`.
 - [ ] El diff no trae refactorizaciones fuera del alcance ni archivos generados o temporales.
 - [ ] El PR está vinculado a su tarea de Linear (`Fixes OPAI-123`), `ROADMAP.md` está actualizado si cambia el plan, y el PR trae el resumen ejecutivo para Carlos.
 

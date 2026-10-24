@@ -30,14 +30,14 @@ Contrato único para todo bot o agente que trabaje en `Cryptobal/opai-2`: Claude
 - **Ramas:** prefijos `brief/` (implementación), `qa/` (arreglos de QA), `docs/` (solo documentación), `fix/`, `perf/` y `ci/`, con el ID de la tarea según «Tareas (Linear)». Siempre desde `main` actualizado. Un PR por encargo.
 - **Commits:** atómicos, en español, en imperativo, con prefijo de ámbito (`core:`, `ds:`, `infra:`, `docs:`, `comercial:`…). Un commit por bloque del brief.
 - **Gate local** antes de cada commit: `pnpm typecheck && pnpm lint && pnpm test`. También `pnpm test:db` si tocas base, RLS o capacidades con base.
-- **Presupuesto de JS (ADR-037):** `pnpm presupuesto` tras el build. Los topes de `apps/web/presupuesto-js.json` solo bajan. Subir uno exige una excepción aprobada por Carlos y registrada en `ESTADO.md`.
+- **Presupuesto de JS (ADR-037):** `pnpm presupuesto` tras el build. Los topes de `apps/web/presupuesto-js.json` solo bajan, salvo una excepción aprobada por Carlos y registrada en `ESTADO.md`.
 - **Pantallas:** especificación aprobada (`docs/2.0/modulos/`), luego diseño aprobado en Claude Design, y después código. Respetan `docs/2.0/DISENO.md` y `docs/2.0/NAVEGACION.md`.
 
 ## Tareas (Linear)
 
 GitHub es la fuente de verdad del código y los archivos del repositorio (este contrato, `CLAUDE.md`, los ADR y los checklists) lo son de las reglas técnicas. **El estado de cada tarea vive en Linear**, en el equipo **OPAI**, con IDs `OPAI-n` (desde el 24-oct-2026, plan Free durante el piloto).
 
-1. **Rama con el ID:** `tipo/opai-123-slug`, con los prefijos de «Convenciones» (por ejemplo `fix/opai-1-maestros-consistencia`).
+1. **Rama con el ID:** `tipo/opai-123-slug`, con los prefijos de «Convenciones» (por ejemplo `fix/opai-123-maestros-consistencia`).
 2. **PR vinculado:** el título o la descripción incluye `Fixes OPAI-123` (la plantilla del PR trae el campo).
 3. **Cierre con evidencia:** ningún agente cierra una tarea sin el link al PR, CI en verde y, si tiene pantalla, capturas a 375 y 1280 px. Un PR con CI fallando no está terminado (ver «Definición de terminado»).
 4. **Integración:** solo Carlos integra a `main` (ver «Roles»). Cerrar la tarea no autoriza a integrar.
