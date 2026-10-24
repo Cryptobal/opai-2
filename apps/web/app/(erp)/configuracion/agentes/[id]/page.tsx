@@ -2,6 +2,7 @@ import { Badge, BarraProgreso, Button, tonoUso } from "@opai/ds";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { estadoPantalla } from "@/lib/formato";
+import { requerirEncontrado } from "@/lib/ids";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { type ApiKeyDetalle, gastoDelMes, usd } from "../datos";
@@ -33,6 +34,7 @@ export default function Agente({ params }: { params: Promise<{ id: string }> }) 
           ejecutarComoUsuario<ApiKeyDetalle>("erp", "core.apikeys.get", { id }),
           gastoDelMes(),
         ]);
+        requerirEncontrado(r);
         return {
           state: estadoPantalla(r),
           k: r.ok ? r.data : null,

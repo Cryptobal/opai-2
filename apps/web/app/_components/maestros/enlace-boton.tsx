@@ -4,7 +4,7 @@ import type { ReactNode } from "react";
 
 import { cn, estilosBoton } from "@opai/ds";
 
-type Props = {
+export type PropsEnlaceBoton = {
   href: string;
   children: ReactNode;
   variante?: "primary" | "secondary" | "ghost";
@@ -22,7 +22,7 @@ export function EnlaceBoton({
   icono: Icono,
   etiqueta,
   className,
-}: Props) {
+}: PropsEnlaceBoton) {
   return (
     <Link
       href={href}

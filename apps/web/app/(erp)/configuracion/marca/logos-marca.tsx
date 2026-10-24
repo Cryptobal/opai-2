@@ -2,7 +2,7 @@ import { Upload } from "lucide-react";
 
 import { cn, SeccionTarjeta } from "@opai/ds";
 
-import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 
 import { type Marca, SLOTS } from "./tipos";
 
@@ -47,9 +47,9 @@ export function LogosMarca({ marca, puede }: { marca: Marca; puede: boolean }) {
                 )}
               </div>
               {puede ? (
-                <EnlaceBoton href={`?logo=${s.param}`} variante="secondary" className="w-full">
+                <EnlaceBotonHoja href={`?logo=${s.param}`} variante="secondary" className="w-full">
                   {url ? "Reemplazar" : "Subir"}
-                </EnlaceBoton>
+                </EnlaceBotonHoja>
               ) : null}
               {s.ayuda ? <span className="t-caption">{s.ayuda}</span> : null}
             </div>

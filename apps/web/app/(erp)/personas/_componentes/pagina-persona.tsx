@@ -1,7 +1,7 @@
 import { Pencil } from "lucide-react";
 import type { ReactNode } from "react";
 
-import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { leerParametros, type Parametros, type SearchParams } from "@/lib/parametros";
 import type { PersonaDetalle } from "@/lib/tipos-maestros";
@@ -31,9 +31,9 @@ export function PaginaPersona({ params, searchParams, tab, acciones, children }:
       volver={{ href: "/personas", etiqueta: "Personas" }}
       acciones={
         acciones ?? (
-          <EnlaceBoton href="?editar=1" icono={Pencil}>
+          <EnlaceBotonHoja href="?editar=1" icono={Pencil}>
             Editar
-          </EnlaceBoton>
+          </EnlaceBotonHoja>
         )
       }
       cargar={async () => {

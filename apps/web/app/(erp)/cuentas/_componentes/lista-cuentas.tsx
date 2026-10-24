@@ -2,7 +2,7 @@ import { Plus } from "lucide-react";
 
 import { Badge, type EstadoPantalla, MonoAv } from "@opai/ds";
 
-import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { ESTADO_CUENTA, estadoDe, monograma } from "@/app/_components/maestros/estados";
 import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
 import { rut } from "@/lib/fechas";
@@ -19,9 +19,9 @@ export function ListaCuentas(p: {
 }) {
   const activas = p.items.filter((c) => c.estado === "cliente_activo").length;
   const nueva = (
-    <EnlaceBoton href="/cuentas?nueva=1" icono={Plus} className="md:hidden">
+    <EnlaceBotonHoja href="/cuentas?nueva=1" icono={Plus} className="md:hidden">
       Nueva
-    </EnlaceBoton>
+    </EnlaceBotonHoja>
   );
   return (
     <ListaMaestro

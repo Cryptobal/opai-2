@@ -10,10 +10,10 @@ export function useParametros() {
   const params = useSearchParams();
   const fijar = useCallback(
     (cambios: Record<string, string | null>) => {
-      const p = new URLSearchParams(params.toString());
+      const p = new URLSearchParams(params);
       for (const [k, v] of Object.entries(cambios)) {
-        if (v === null || v === "") p.delete(k);
-        else p.set(k, v);
+        if (v) p.set(k, v);
+        else p.delete(k);
       }
       const q = p.toString();
       router.replace(q ? `${ruta}?${q}` : ruta, { scroll: false });
@@ -25,10 +25,15 @@ export function useParametros() {
 
 /** Hoja (Sheet) abierta por un parámetro de la URL (`?nueva=1`): enlazable y con "Atrás" natural. */
 export function useHojaUrl(param: string) {
-  const { valor, fijar } = useParametros();
+  const v = useParametros().valor(param);
   return {
-    abierta: valor(param) !== null,
-    valor: valor(param),
-    cerrar: () => fijar({ [param]: null }),
+    abierta: v !== null,
+    valor: v,
+    // Cierra al instante (historial del navegador) sin esperar el viaje al servidor.
+    cerrar: () => {
+      const u = new URL(location.href);
+      u.searchParams.delete(param);
+      history.replaceState(null, "", u);
+    },
   };
 }

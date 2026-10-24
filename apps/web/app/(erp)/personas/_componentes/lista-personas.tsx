@@ -5,7 +5,7 @@ import { Avatar, Badge, type EstadoPantalla, ListScreen } from "@opai/ds";
 import { LinkNext } from "@/app/_components/link-next";
 import { Buscador } from "@/app/_components/maestros/buscador";
 import { ChipsFiltro } from "@/app/_components/maestros/chips-filtro";
-import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { ESTADO_PERSONA, estadoDe, TIPO_CONTRATO } from "@/app/_components/maestros/estados";
 import { fecha, rut } from "@/lib/fechas";
 import type { Parametros } from "@/lib/parametros";
@@ -37,9 +37,9 @@ export const contrato = (x: PersonaFila) => {
 /** Personas (10, 53, 54): tabla en md+, lista agrupada por letra en teléfono. */
 export function ListaPersonas(x: Props) {
   const nueva = (
-    <EnlaceBoton href="?nueva=1" icono={Plus}>
+    <EnlaceBotonHoja href="?nueva=1" icono={Plus}>
       Nueva
-    </EnlaceBoton>
+    </EnlaceBotonHoja>
   );
   const filtrando = Boolean(x.p["q"] || x.p["cargo"] || x.p["estado"]);
   return (

@@ -1,7 +1,7 @@
 import { Upload } from "lucide-react";
 
 import { FichaDocumentos } from "@/app/_components/documentos/ficha-documentos";
-import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import type { SearchParams } from "@/lib/parametros";
 
 import { PaginaPersona } from "../../_componentes/pagina-persona";
@@ -17,9 +17,9 @@ export default function DocumentosPersona(props: Props) {
       {...props}
       tab="documentos"
       acciones={
-        <EnlaceBoton href="?subir=1" icono={Upload}>
+        <EnlaceBotonHoja href="?subir=1" icono={Upload}>
           Subir documento
-        </EnlaceBoton>
+        </EnlaceBotonHoja>
       }
     >
       {(p) => <FichaDocumentos entidad={{ tipo: "persona", id: p.id }} />}

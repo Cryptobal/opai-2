@@ -3,7 +3,7 @@ import { Plus } from "lucide-react";
 import { AccionFijaTelefono, Badge, DetailScreen, SeccionTarjeta } from "@opai/ds";
 
 import { AccionesEntidad } from "@/app/_components/maestros/acciones-entidad";
-import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { hoyIso } from "@/lib/fechas";
 import type { SearchParams } from "@/lib/parametros";
@@ -28,9 +28,9 @@ export default function CargoDetalle({ params }: Props) {
       cargando="detalle"
       volver={{ href: "/cargos", etiqueta: "Cargos" }}
       acciones={
-        <EnlaceBoton href="?version=1" icono={Plus}>
+        <EnlaceBotonHoja href="?version=1" icono={Plus}>
           Crear versión
-        </EnlaceBoton>
+        </EnlaceBotonHoja>
       }
       cargar={async () => cargarCargo((await params).id)}
       opciones={(d) => ({ titulo: d.cargo?.nombre ?? "Cargo" })}
@@ -90,7 +90,7 @@ export default function CargoDetalle({ params }: Props) {
                 </div>
                 <Versiones versiones={versiones} />
                 <AccionFijaTelefono>
-                  <EnlaceBoton href="?version=1">Crear versión</EnlaceBoton>
+                  <EnlaceBotonHoja href="?version=1">Crear versión</EnlaceBotonHoja>
                 </AccionFijaTelefono>
                 <HojaCargo cargo={c} />
                 <HojaVersion cargoId={c.id} base={vigente ?? versiones[0]} hoy={hoy} />
