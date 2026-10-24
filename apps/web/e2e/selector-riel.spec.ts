@@ -107,6 +107,35 @@ test.describe("selector de portal y empresa", () => {
     await expect(page.getByText(CUENTA_GARD)).toHaveCount(0);
   });
 
+  test("iPad: el selector se maneja con el teclado desde el primer uso", async ({ page }, info) => {
+    test.skip(info.project.name !== "ipad", "El riel es solo de iPad.");
+    await entrar(page);
+    const selector = principal(page).getByRole("button", { name: SELECTOR });
+    const menu = page.getByRole("menu");
+    // Primer uso de la página: Radix se carga en diferido y el Enter debe abrir el menú igual.
+    await selector.focus();
+    await page.keyboard.press("Enter");
+    await expect(menu).toBeVisible();
+    const items = menu.getByRole("menuitem");
+    // El foco entra al menú; las flechas lo llevan por los ítems y de vuelta.
+    await expect(menu).toBeFocused();
+    await page.keyboard.press("ArrowDown");
+    await expect(items.first()).toBeFocused();
+    await page.keyboard.press("ArrowDown");
+    await expect(items.nth(1)).toBeFocused();
+    await page.keyboard.press("ArrowUp");
+    await expect(items.first()).toBeFocused();
+    // Escape cierra el menú y el foco vuelve al botón del riel.
+    await page.keyboard.press("Escape");
+    await expect(menu).toBeHidden();
+    await expect(selector).toBeFocused();
+    // Con Espacio se abre otra vez.
+    await page.keyboard.press("Space");
+    await expect(menu).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(selector).toBeFocused();
+  });
+
   test("iPad: el selector está en el riel entre 768 y 1279 px y en su lugar fuera de ese rango", async ({
     page,
   }, info) => {
