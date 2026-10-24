@@ -628,7 +628,7 @@ No se encontró: render estático roto, falta de prefetch, layouts que recarguen
 **Consecuencias.** Toda pantalla nueva declara en su brief sus consultas por navegación. Ningún arreglo de rendimiento se mezcla con PRs de documentación ni de funcionalidades.
 
 
-**Decisiones de Carlos (24-oct).** (15) Se **quitan los contadores de la barra lateral**; los conteos quedan en Inicio y en las listas. (16) La sesión se valida contra la base como máximo cada **5 minutos** (caché de sesión), con invalidación inmediata al suspender una membresía o un tenant o al cambiar un rol.
+**Decisiones de Carlos (24-oct).** (15) Se **quitan los contadores de la barra lateral**; los conteos quedan en Inicio y en las listas. (16) La sesión se valida contra la base como máximo cada **5 minutos** (caché de sesión), con invalidación inmediata al suspender una membresía o un tenant o al cambiar un rol. (17) La caché del navegador (Router Cache, `staleTimes`) es de **30 s** (24-oct, 17:39; antes 5 min en el PR #29); puede subirse cuando la época de sesión entre pestañas y la edad de la caché estén dadas por buenas. Es una sola constante: `apps/web/lib/cache-navegador.ts`.
 
 ---
 

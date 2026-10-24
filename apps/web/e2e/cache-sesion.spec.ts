@@ -2,25 +2,29 @@ import { expect, type Page, test } from "@playwright/test";
 
 import { digitoVerificador } from "@opai/domain";
 
-// Caché del navegador (staleTimes de 5 min, ADR-045): lo escrito desde la pantalla se ve al volver a
-// una lista ya visitada, y cambiar de sesión o de empresa no deja pestañas con datos de la anterior.
+// Caché del navegador (staleTimes, ADR-045): lo escrito desde la pantalla se ve al volver a una lista
+// ya visitada, y entrar, salir o cambiar de empresa en una pestaña pone al día a las demás.
+// No dependen de la tabla de Personas: buscan filas por el enlace a cada persona (tabla o lista).
 const email = process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl";
+const emailMulti = "e2e-multiempresa@opai.cl"; // dueño de Gard y de «Empresa E2E» (seed:e2e)
 const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
 
 test.use({ actionTimeout: 30_000 });
 test.setTimeout(180_000);
 
-async function entrar(page: Page) {
+async function entrar(page: Page, correo = email) {
   await page.goto("/login");
-  await page.getByLabel("Correo").fill(email);
+  await page.getByLabel("Correo").fill(correo);
   await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
   await page.getByRole("button", { name: "Entrar" }).click();
-  await page.waitForURL((u) => ["/", "/platform", "/elegir-empresa"].includes(u.pathname));
-  // Con más de una empresa el acceso pide elegir; las pruebas parten de Gard.
-  if (new URL(page.url()).pathname === "/elegir-empresa") {
-    await page.getByText("Gard Security").first().click();
-    await page.waitForURL((u) => u.pathname === "/");
-  }
+  // Con más de una empresa el acceso pide elegir (las pruebas parten de Gard); con una, pasa de largo.
+  const gard = page.getByRole("button", { name: /Gard Security/ });
+  await Promise.race([
+    gard.waitFor({ state: "visible" }),
+    page.waitForURL((u) => u.pathname === "/" || u.pathname === "/platform"),
+  ]).catch(() => undefined);
+  if (await gard.isVisible()) await gard.click();
+  await page.waitForURL((u) => u.pathname === "/" || u.pathname === "/platform");
 }
 
 /** RUT válido y único por corrida (cuerpo de 8 dígitos desde la hora). */
@@ -32,12 +36,39 @@ function rutNuevo() {
 const menu = (page: Page, nombre: RegExp) =>
   page.getByRole("navigation", { name: "Principal" }).getByRole("link", { name: nombre });
 
+/**
+ * Escritorio: selector del riel. En iPad el shell no ofrece cambiar de empresa (ni en el riel ni en
+ * el menú de usuario): se usa el selector de empresa del acceso, que ejecuta la misma acción.
+ */
+async function cambiarDeEmpresa(page: Page, nombre: string) {
+  const selector = page.getByRole("button", { name: /Cambiar de portal o empresa/ });
+  if (await selector.isVisible()) {
+    await selector.click();
+    await page.getByRole("menuitem", { name: nombre }).click();
+  } else {
+    await page.goto("/elegir-empresa?next=/");
+    await page.getByRole("button", { name: new RegExp(nombre) }).click();
+  }
+}
+
+/** Filas de personas (tabla o lista): enlaces a una ficha, no a las pestañas de Personas. */
+const filas = (page: Page, texto: string) =>
+  page
+    .locator('main a[href^="/personas/"]:not([href*="vencimientos"])')
+    .filter({ hasText: texto })
+    .filter({ visible: true });
+
 test.describe("caché y sesión", () => {
   test.skip(!password, "Falta SEED_OWNER_PASSWORD o E2E_PASSWORD");
+  // El riel lateral (menú) existe desde iPad; la barra inferior del teléfono tiene otro DOM.
+  test.skip(({ viewport }) => (viewport?.width ?? 0) < 768, "Se prueba en iPad y escritorio");
 
   test("una persona creada aparece en la lista ya visitada (sin recarga)", async ({ page }) => {
     const apellido = `Cache ${Date.now()}`;
     await entrar(page);
+    // Reloj fijo: la caché (30 s) no vence ni corre el refresco silencioso (15 s) durante la prueba,
+    // así que solo la invalidación al escribir puede mostrar a la persona nueva.
+    await page.clock.setFixedTime(new Date());
     await page.goto("/");
     // Todo con navegación del lado del cliente: una recarga completa vaciaría la caché y taparía el fallo.
     await menu(page, /^Personas/).click();
@@ -59,9 +90,7 @@ test.describe("caché y sesión", () => {
     await page.waitForURL("**/cuentas");
     await menu(page, /^Personas/).click();
     await page.waitForURL("**/personas");
-    await expect(
-      page.locator('main table a[href^="/personas/"]').filter({ hasText: apellido }).first(),
-    ).toBeVisible();
+    await expect(filas(page, apellido).first()).toBeVisible();
   });
 
   test("salir en una pestaña recarga la otra", async ({ context, page }) => {
@@ -78,38 +107,44 @@ test.describe("caché y sesión", () => {
     await otra.waitForURL(/\/login/, { timeout: 15_000 });
   });
 
-  test("cambiar de empresa no deja datos de la anterior en la caché ni en otra pestaña", async ({
+  test("entrar en una pestaña recarga la que esperaba en el login", async ({ context, page }) => {
+    const espera = await context.newPage();
+    await espera.goto("/login");
+    await expect(espera.getByLabel("Correo")).toBeVisible();
+    await espera.evaluate(() => Reflect.set(window, "marcaSinRecargar", true));
+    await entrar(page);
+    // La marca desaparece solo si la pestaña se recargó.
+    await espera.waitForFunction(
+      () => Reflect.get(window, "marcaSinRecargar") !== true,
+      undefined,
+      {
+        timeout: 15_000,
+      },
+    );
+  });
+
+  test("cambiar de empresa muestra lo de la nueva en ambas pestañas y nada de la anterior", async ({
     context,
     page,
   }) => {
-    await page.goto("/login");
-    await page.getByLabel("Correo").fill(email);
-    await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
-    await page.getByRole("button", { name: "Entrar" }).click();
-    await page.waitForURL((u) => ["/", "/platform", "/elegir-empresa"].includes(u.pathname));
-    test.skip(new URL(page.url()).pathname !== "/elegir-empresa", "El usuario tiene una sola empresa");
-    await page.getByText("Gard Security").first().click();
-    await page.waitForURL((u) => u.pathname === "/");
-
+    await entrar(page, emailMulti);
     await menu(page, /^Personas/).click();
     await page.waitForURL("**/personas");
-    const titulo = await page.locator('main table a[href^="/personas/"] [title]').first().getAttribute("title");
-    const nombre = (titulo ?? "").split(" ").pop() ?? ""; // el apellido del e2e termina en un número único
-    expect(nombre.length).toBeGreaterThan(3);
+    await expect(filas(page, "Lagos").first()).toBeVisible(); // persona de la demo de Gard
     const otra = await context.newPage();
     await otra.goto("/personas");
-    const fila = (p: Page) => p.locator('main table a[href^="/personas/"]').filter({ hasText: nombre });
-    await expect(fila(otra).first()).toBeVisible();
+    await expect(filas(otra, "Lagos").first()).toBeVisible();
 
-    await page.getByRole("button", { name: /Cambiar de portal o empresa/ }).click();
-    await page.getByRole("menuitem", { name: "Empresa E2E" }).click();
+    await cambiarDeEmpresa(page, "Empresa E2E");
     await page.waitForURL((u) => u.pathname === "/");
     await menu(page, /^Cuentas/).click();
     await page.waitForURL("**/cuentas");
-    await menu(page, /^Personas/).click(); // visita Personas en la otra empresa: no sale de la caché de Gard
+    await menu(page, /^Personas/).click(); // Personas de la otra empresa: no sale de la caché de Gard
     await page.waitForURL("**/personas");
-    await expect(fila(page)).toHaveCount(0);
-    // La otra pestaña se recarga sola y tampoco muestra a las personas de la empresa anterior.
-    await expect(fila(otra)).toHaveCount(0, { timeout: 15_000 });
+    await expect(filas(page, "Otraempresa").first()).toBeVisible();
+    await expect(filas(page, "Lagos")).toHaveCount(0);
+    // La otra pestaña se recarga sola: ve lo de la empresa nueva y nada de la anterior.
+    await expect(filas(otra, "Otraempresa").first()).toBeVisible({ timeout: 15_000 });
+    await expect(filas(otra, "Lagos")).toHaveCount(0);
   });
 });
