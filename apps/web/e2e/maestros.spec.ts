@@ -54,24 +54,11 @@ test.describe("maestros con sesión", () => {
   test("alta de persona con vínculo, laboral y sueldo", async ({ page }, info) => {
     test.skip(info.project.name !== "ipad", "La escritura se prueba una vez (iPad)");
     await entrar(page);
-    // Visita Personas y Cuentas con enlaces del menú para que queden en la caché del navegador.
-    const apellido = `E2E ${Date.now()}`;
-    await page.goto("/personas");
-    await page
-      .getByRole("link", { name: /^Cuentas/ })
-      .first()
-      .click();
-    await page.waitForURL("**/cuentas");
-    await page
-      .getByRole("link", { name: /^Personas/ })
-      .first()
-      .click();
-    await page.waitForURL("**/personas");
-    await page.getByRole("link", { name: "Agregar persona" }).first().click();
-    const dialogo = page.getByRole("dialog", { name: "Agregar persona" });
+    await page.goto("/personas?nueva=1");
+    const dialogo = page.getByRole("dialog", { name: "Nueva persona" });
     await expect(dialogo).toBeVisible();
     await dialogo.getByLabel("Nombres").fill("Prueba");
-    await dialogo.getByLabel("Apellidos").fill(apellido);
+    await dialogo.getByLabel("Apellidos").fill(`E2E ${Date.now()}`);
     await dialogo.getByLabel("RUT").fill(rutNuevo());
     await dialogo.getByLabel("Cargo").click();
     await page.getByRole("option").first().click();
@@ -84,21 +71,6 @@ test.describe("maestros con sesión", () => {
         .first(),
     ).toBeVisible();
     await captura(page, "maestros-persona", "ipad");
-    // La escritura vació la caché: Personas, ya visitada, muestra a la persona nueva.
-    await page
-      .getByRole("link", { name: /^Cuentas/ })
-      .first()
-      .click();
-    await page.waitForURL("**/cuentas");
-    await page
-      .getByRole("link", { name: /^Personas/ })
-      .first()
-      .click();
-    await page.waitForURL("**/personas");
-    await expect(page.getByRole("link", { name: new RegExp(apellido) }).first()).toBeVisible();
-    await page.goBack();
-    await page.goBack();
-    await expect(page).toHaveURL(/\/personas\/[0-9a-f-]{36}$/);
 
     await page.getByRole("link", { name: "Laboral" }).first().click();
     await expect(page.getByText("Estructura de sueldo efectiva")).toBeVisible({ timeout: 30_000 });

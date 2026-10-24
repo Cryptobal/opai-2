@@ -4,7 +4,7 @@ import { Avatar, Badge, type EstadoPantalla } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
-import { ESTADO_PERSONA, estadoDe } from "@/app/_components/maestros/estados";
+import { ESTADO_PERSONA, estadoDe, TIPO_CONTRATO } from "@/app/_components/maestros/estados";
 import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
 import { rut } from "@/lib/fechas";
 import type { Parametros } from "@/lib/parametros";
@@ -98,17 +98,22 @@ export function ListaPersonas(x: Props) {
           secundario: (
             <>
               {i.vinculoVigente?.cargo ?? "Sin vínculo vigente"}
+              {i.vinculoVigente ? (
+                <span> · {TIPO_CONTRATO[i.vinculoVigente.tipo] ?? i.vinculoVigente.tipo}</span>
+              ) : null}
               <span className="t-mono hidden text-[13px] md:inline"> · {rut(i.rut)}</span>
             </>
           ),
-          fin:
-            e.tono === "success" ? (
+          fin: (
+            <span className="flex items-center gap-1.5">
+              {e.tono === "success" ? null : (
+                <Badge tono={e.tono} punto>
+                  {e.etiqueta}
+                </Badge>
+              )}
               <SemaforoDocs d={i.documentos} />
-            ) : (
-              <Badge tono={e.tono} punto>
-                {e.etiqueta}
-              </Badge>
-            ),
+            </span>
+          ),
         };
       })}
       pie={

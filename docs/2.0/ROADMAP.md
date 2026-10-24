@@ -153,7 +153,7 @@ No se portan de 1.0 y solo se reconstruyen con demanda real (lista canónica de 
 
 | Base | Decisión | Documento | Implementación | Estado |
 |---|---|---|---|---|
-| Rendimiento | Navegación instantánea: shell persistente, skeleton inmediato, prefetch, caché de datos, ≤ 8 consultas por navegación, gate en CI | ADR-045 | Brief 03 | ADR vigente; brief pendiente (prioridad 1). Avance parcial (24-oct, `fix/maestros-consistencia`): sin «rayas» al navegar, caché de 5 min con refresco en segundo plano y prefetch del menú; faltan shell en layout, contadores, `forTenant` y gate en CI |
+| Rendimiento | Navegación instantánea: shell persistente, skeleton inmediato, prefetch, caché de datos, ≤ 8 consultas por navegación, gate en CI | ADR-045 | Brief 03 | ADR vigente; brief pendiente (prioridad 1) |
 | PWA | Una sola app «OPAI» instalable (un manifest; abre el portal según la membresía), service worker con actualización controlada, sin conexión en terreno, push, cámara y GPS, presupuesto de terreno, prueba en CI; Capacitor para tiendas | ADR-044 | Brief 04 (base); cola sin conexión con el primer módulo de terreno; Brief 17 (tiendas) | ADR vigente; brief pendiente |
 | Navegación | Áreas, menú vs. pestañas, ⌘K, fijados, barra inferior por rol, portales, activación por módulo, nombres únicos | ADR-046, `NAVEGACION.md` | Design Prompt de navegación → Brief 05 | ADR vigente; Design Prompt pendiente |
 
