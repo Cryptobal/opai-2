@@ -45,7 +45,7 @@ export function Tabs(props: TabsProps) {
     <div className={cn("flex flex-col gap-4", className)}>
       <nav
         aria-label="Secciones"
-        className="-mx-4 flex gap-1 overflow-x-auto border-b border-border px-4 md:mx-0 md:px-0"
+        className="-mx-4 flex gap-1 overflow-x-auto overflow-y-hidden overscroll-x-contain px-4 shadow-[inset_0_-1px_0_var(--ds-border)] md:mx-0 md:px-0"
       >
         {tabs.map((tab) => {
           const seleccionada = tab.id === actual?.id;
