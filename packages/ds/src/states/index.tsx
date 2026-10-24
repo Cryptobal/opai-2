@@ -60,13 +60,24 @@ export type VarianteLoading = "lista" | "detalle" | "formulario" | "planilla" | 
 export function Loading({
   variante = "lista",
   className,
+  diferido = false,
 }: {
   variante?: VarianteLoading;
   className?: string;
+  /** Aparece solo si la carga pasa de ~200 ms: una carga rápida no deja ni un destello. */
+  diferido?: boolean;
 }) {
   const filas = variante === "dashboard" ? 4 : variante === "formulario" ? 5 : 6;
   return (
-    <div aria-busy aria-label="Cargando" className={cn("flex flex-col gap-3", className)}>
+    <div
+      aria-busy
+      aria-label="Cargando"
+      className={cn(
+        "flex flex-col gap-3",
+        diferido && "animate-[ds-aparecer_150ms_ease-out_200ms_backwards]",
+        className,
+      )}
+    >
       {variante === "dashboard" ? (
         <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
           {Array.from({ length: filas }, (_, i) => (
