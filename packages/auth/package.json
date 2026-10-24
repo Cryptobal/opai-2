@@ -11,7 +11,8 @@
   "scripts": {
     "typecheck": "tsc -p tsconfig.json",
     "lint": "eslint .",
-    "seed:platform-owner": "tsx scripts/seed-platform-owner.ts"
+    "seed:platform-owner": "tsx scripts/seed-platform-owner.ts",
+    "seed:multiempresa-e2e": "tsx scripts/seed-multiempresa-e2e.ts"
   },
   "dependencies": {
     "@better-auth/prisma-adapter": "^1.7.12",

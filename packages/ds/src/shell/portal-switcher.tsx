@@ -10,13 +10,33 @@ import type { Portal, Tenant } from "./types";
 type Props = {
   portales: readonly Portal[];
   portalActual: string;
-  tenant?: Tenant;
-  /** `compacto`: monograma, empresa y portal (teléfono). `monograma`: solo el monograma (barra lateral). */
-  variante?: "compacto" | "monograma";
+  tenant?: Tenant | undefined;
+  /** `compacto`: monograma, empresa y portal (teléfono). `monograma`: solo el monograma (barra
+   *  lateral). `riel`: monograma sobre el portal, en un botón de 64 px (riel de iPad). */
+  variante?: "compacto" | "monograma" | "riel";
   /** Ítems extra al pie (cambiar de empresa). */
-  extra?: readonly ItemMenu[];
+  extra?: readonly ItemMenu[] | undefined;
   className?: string;
 };
+
+/** Por variante: dónde abre el menú, la clase del disparador y la del bloque sin menú. */
+const VARIANTES = {
+  compacto: {
+    lado: "abajo-izquierda",
+    clase: "min-w-0 justify-start px-1",
+    estatica: "flex min-h-11 min-w-0 items-center px-1",
+  },
+  monograma: {
+    lado: "abajo-derecha",
+    clase: "size-11",
+    estatica: "flex min-h-11 min-w-0 items-center px-1",
+  },
+  riel: {
+    lado: "derecha",
+    clase: "relative h-16 w-16 flex-col gap-1 border border-border bg-bg px-0.5",
+    estatica: "flex h-16 w-16 flex-col items-center justify-center gap-1 px-0.5",
+  },
+} as const;
 
 /** Selector de portal sobre `Menu` (Radix): el portal actual marcado; navega al inicio del elegido. */
 export function PortalSwitcher(props: Props) {
@@ -34,25 +54,32 @@ export function PortalSwitcher(props: Props) {
     })),
     ...extra,
   ];
+  const conMenu = items.length > 1;
   const visual =
     variante === "monograma" ? (
       <Monograma nombre={nombre} className="size-6" />
+    ) : variante === "riel" ? (
+      <>
+        <Monograma nombre={nombre} />
+        <span className="max-w-full truncate text-[11px] leading-[14px] font-semibold text-fg">
+          {actual?.etiqueta}
+        </span>
+        {conMenu ? (
+          <ChevronDown className="absolute top-1 right-1 size-3 text-fg-subtle" aria-hidden />
+        ) : null}
+      </>
     ) : (
       <span className="flex min-w-0 items-center gap-2">
         <Monograma nombre={nombre} />
         <span className="truncate text-[15px] leading-5 font-semibold text-fg">{nombre}</span>
         <span className="flex-none text-sm text-fg-muted">{actual?.etiqueta}</span>
-        {items.length > 1 ? (
-          <ChevronDown className="size-4 flex-none text-fg-subtle" aria-hidden />
-        ) : null}
+        {conMenu ? <ChevronDown className="size-4 flex-none text-fg-subtle" aria-hidden /> : null}
       </span>
     );
-  if (items.length <= 1) {
+  const v = VARIANTES[variante];
+  if (!conMenu) {
     return (
-      <span
-        className={cn("flex min-h-11 min-w-0 items-center px-1", props.className)}
-        title={nombre}
-      >
+      <span className={cn(v.estatica, props.className)} title={nombre}>
         {visual}
       </span>
     );
@@ -61,10 +88,10 @@ export function PortalSwitcher(props: Props) {
     <Menu
       etiqueta={`${nombre} · portal ${actual?.etiqueta ?? ""}. Cambiar de portal o empresa`}
       items={items}
-      lado={variante === "monograma" ? "abajo-derecha" : "abajo-izquierda"}
+      lado={v.lado}
       disparador={visual}
       {...(props.className ? { className: props.className } : {})}
-      claseDisparador={variante === "compacto" ? "min-w-0 justify-start px-1" : "size-11"}
+      claseDisparador={v.clase}
     />
   );
 }

@@ -1,7 +1,8 @@
 import type { ReactNode } from "react";
 
 import { cn } from "../cn";
-import { BottomNav, Rail } from "./nav";
+import { BottomNav } from "./nav";
+import { Rail } from "./rail";
 import { Sidebar } from "./sidebar";
 import { AppBar, type ComunesBarra, TopBarTelefono } from "./top-bar";
 import type { NavItem } from "./types";
@@ -40,6 +41,10 @@ export function AppShell(props: AppShellProps) {
         items={nav}
         rutaActual={rutaActual}
         {...(subtituloMarca ? { subtitulo: subtituloMarca } : {})}
+        portales={props.portales}
+        portalActual={props.portalActual}
+        tenant={props.tenant}
+        empresas={props.empresas}
         {...linkProps}
       />
       <Sidebar

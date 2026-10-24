@@ -15,7 +15,7 @@ export type MenuProps = {
   /** Cabecera informativa (nombre y correo del usuario). */
   cabecera?: ReactNode;
   /** Dónde se abre respecto del disparador. */
-  lado?: "abajo-derecha" | "arriba-izquierda" | "abajo-izquierda" | "arriba-derecha";
+  lado?: keyof typeof LADO;
   className?: string;
   claseDisparador?: string;
   /** Abierto al montar (la versión diferida lo monta con el primer clic). */
@@ -40,7 +40,10 @@ export function MenuRadix(props: MenuProps) {
           {...LADO[lado]}
           sideOffset={4}
           aria-label={etiqueta}
-          className={cn(claseOverlay, "w-64 py-1")}
+          className={cn(
+            claseOverlay,
+            "max-h-(--radix-dropdown-menu-content-available-height) w-64 overflow-y-auto py-1",
+          )}
         >
           {cabecera ? <div className="border-b border-border px-3 py-2.5">{cabecera}</div> : null}
           {items.map((item, i) => (

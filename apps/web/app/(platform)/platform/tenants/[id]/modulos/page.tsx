@@ -1,5 +1,5 @@
 import { PaginaTenant } from "../pagina-tenant";
-import { Modulos } from "../tenant-tabs";
+import { Modulos } from "../modulos-tab";
 
 export const metadata = { title: "Módulos de la empresa" };
 
