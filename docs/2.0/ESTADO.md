@@ -115,7 +115,7 @@ Este archivo es la fuente de verdad del avance. Cada brief lo actualiza al termi
   - CI suma el escaneo de secretos con gitleaks (job `secretos`, sin secretos de CI).
   - El test de RLS ahora cubre toda tabla con `tenant_id` en cualquier schema, no solo en `core`.
   - ADR-043 modificado: el Revisor aprueba o pide cambios y no integra.
-- **JS de `/configuracion/aprobaciones` (24-oct, PR `perf/js-aprobaciones`, ADR-037):** baja de 175,0 a 168,9 KB, con tope de 175. `RadioGroup` pasa a su propio archivo, así `Checkbox` ya no arrastra RadioGroup ni RovingFocus, y viceversa. Vecinas: vencimientos 174,4 → 168,8; nueva instalación 178,0 → 171,9; preferencias 174,9 → 172,9; integraciones/[proveedor] 174,3 → 173,1. Aspecto y comportamiento idénticos: mismo DOM y misma captura a 375 y 1280 px. Para llegar a 165 KB habría que sacar Radix de `Checkbox`, lo que ADR-017 no permite; con un `<input>` nativo se midió 163,3 KB. Lo decide Carlos.
+- **JS de `/configuracion/aprobaciones` (24-oct, PR #20, rama `perf/js-aprobaciones`, ADR-037):** baja de 175,0 a 168,9 KB, con tope de 175. `RadioGroup` pasa a su propio archivo, así `Checkbox` ya no arrastra RadioGroup ni RovingFocus, y viceversa. Vecinas: vencimientos 174,4 → 168,8; nueva instalación 178,0 → 171,9; preferencias 174,9 → 172,9; integraciones/[proveedor] 174,3 → 173,1. Aspecto y comportamiento idénticos: mismo DOM y misma captura a 375, 1024 y 1280 px. Para llegar a 165 KB habría que sacar Radix de `Checkbox`, lo que ADR-017 no permite; con un `<input>` nativo se midió 163,3 KB. Lo decide Carlos.
 
 ## En curso
 
