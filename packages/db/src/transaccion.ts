@@ -1,9 +1,15 @@
-import { clienteApp } from "./client";
+import { type ClienteApp, clienteApp } from "./client";
 import { validarTenantId } from "./for-tenant";
-import type { Prisma } from "./generated/prisma/client";
 
-/** Cliente dentro de una transacción con el tenant fijado: toda consulta pasa por la RLS. */
-export type TenantTx = Prisma.TransactionClient;
+/**
+ * Cliente dentro de una transacción con el tenant fijado: toda consulta pasa por la RLS.
+ * Se deriva del cliente con el contador de consultas (ADR-045), así que cada operación de modelo
+ * dentro de la transacción también se cuenta por request.
+ */
+export type TenantTx = Omit<
+  ClienteApp,
+  "$connect" | "$disconnect" | "$on" | "$transaction" | "$extends" | "$use"
+>;
 
 export type OpcionesTransaccion = { timeoutMs?: number };
 

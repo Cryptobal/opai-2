@@ -6,6 +6,7 @@ import { executeCapability, type Contexto, type Resultado } from "@opai/capabili
 import { getSession } from "@opai/auth";
 
 import { contextoDeIdentidad, identidadDe, type Identidad } from "./actor";
+import { medirFase } from "./metricas-navegacion";
 import { asegurarRegistro } from "./registro";
 import { COOKIE_TENANT } from "./tenant-actual";
 
@@ -13,10 +14,12 @@ asegurarRegistro();
 
 /** Identidad del request (una vez por render gracias a `cache`), o null sin sesión. */
 export const identidadActual = cache(async (): Promise<Identidad | null> => {
-  const sesion = await getSession();
+  // Fases medidas para `Server-Timing` (ADR-045): `sesion` es la validación de Better Auth contra la
+  // base; `identidad` son las membresías y los módulos activos del tenant elegido.
+  const sesion = await medirFase("sesion", () => getSession());
   if (!sesion) return null;
   const tenant = (await cookies()).get(COOKIE_TENANT)?.value;
-  return identidadDe(sesion.user, tenant);
+  return medirFase("identidad", () => identidadDe(sesion.user, tenant));
 });
 
 /** Identidad o redirección a /login. */

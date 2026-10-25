@@ -29,14 +29,25 @@ async function noExiste(request: NextRequest): Promise<boolean> {
  * cada capacidad. API, acceso, assets y /ds (solo desarrollo) quedan fuera del matcher.
  */
 export async function proxy(request: NextRequest) {
+  // Marca de inicio del request para el `total` de `Server-Timing` (ADR-045): la página la lee en
+  // `MarcadorMetricas`. Se toma en la primera línea —antes del posible lookup a `/api/existe`, que
+  // en la carga de una ficha hace otra petición— para que el `total` incluya ese trabajo. Date.now()
+  // (época) es comparable entre el proxy y el render.
+  const t0 = Date.now();
   if (getSessionCookie(request, { cookiePrefix: "opai" })) {
+    // La cabecera se fija en el servidor y sobrescribe cualquier `x-opai-t0` del cliente: en ninguna
+    // rama (ni en el 404) se deja pasar la que mande el navegador.
+    const headers = new Headers(request.headers);
+    headers.set("x-opai-t0", String(t0));
     // Ficha que no existe: se reescribe a la página de 404 del portal (catch-all con `notFound()` sin
     // leer `params`, que ya responde HTTP 404 y con el shell). No se fuerza `status` aquí: un 404
     // puesto por el proxy puede terminar en la página genérica de Next, sin menú y en inglés.
     if (esIdInvalido(request.nextUrl.pathname) || (await noExiste(request))) {
-      return NextResponse.rewrite(new URL(destino404(request.nextUrl.pathname), request.url));
+      return NextResponse.rewrite(new URL(destino404(request.nextUrl.pathname), request.url), {
+        request: { headers },
+      });
     }
-    return NextResponse.next();
+    return NextResponse.next({ request: { headers } });
   }
   const login = new URL("/login", request.url);
   const destino = request.nextUrl.pathname + request.nextUrl.search;

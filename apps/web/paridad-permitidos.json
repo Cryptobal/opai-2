@@ -40,6 +40,10 @@
     {
       "archivo": "lib/ultimo-acceso.ts",
       "motivo": "Marca técnica de último acceso de la sesión, sin lógica de negocio."
+    },
+    {
+      "archivo": "lib/metricas-navegacion.ts",
+      "motivo": "Instrumentación de rendimiento (ADR-045): registra en @opai/db el observador que cuenta las consultas a Neon por request; no es una pantalla."
     }
   ]
 }
