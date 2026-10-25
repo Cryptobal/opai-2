@@ -23,8 +23,9 @@ export type MetricasNavegacion = {
   fases: Partial<Record<FaseNavegacion, number>>;
 };
 
-// Un objeto por request. Fuera de un render (cron, script) `cache()` no tiene contexto y lanza; por
-// eso todo acceso va envuelto en try/catch y la medición simplemente se descarta.
+// Un objeto por request. Fuera de un render (cron, script) `cache()` ejecuta la función sin
+// memoizar (React 19) y devuelve un objeto nuevo y descartable en cada llamada; por eso la medición
+// simplemente no se acumula en ningún lado. El try/catch cubre cualquier error del contexto.
 const almacen = cache((): MetricasNavegacion => ({ consultas: 0, fases: {} }));
 
 /** Métricas del request actual. Devuelve un objeto nuevo y descartable fuera de un render. */
@@ -40,10 +41,12 @@ const unDecimal = (ms: number) => Math.round(ms * 10) / 10;
 
 /**
  * `total` del request en ms: desde la marca de inicio del proxy (`x-opai-t0`, época) hasta ahora.
- * Vive aquí (no en el componente) porque `Date.now()` no puede llamarse durante el render.
+ * Vive aquí (no en el componente) porque `Date.now()` no puede llamarse durante el render. Devuelve
+ * `null` —no 0— cuando falta la marca: así el marcador omite `total` y el gate distingue «no medido»
+ * de «0 ms», en vez de dar por bueno un total inexistente.
  */
-export function totalDesdeInicio(t0Epoca: number): number {
-  if (!Number.isFinite(t0Epoca) || t0Epoca <= 0) return 0;
+export function totalDesdeInicio(t0Epoca: number): number | null {
+  if (!Number.isFinite(t0Epoca) || t0Epoca <= 0) return null;
   return Math.max(0, Date.now() - t0Epoca);
 }
 
@@ -70,14 +73,17 @@ registrarObservadorConsultas(() => {
  * Valor en la gramática de `Server-Timing`, p. ej.
  * `sesion;dur=12.3, identidad;dur=4, datos;dur=180, consultas;dur=6, total;dur=210`.
  * `consultas;dur` lleva el número de consultas (no ms): es la convención del contador del brief.
+ * `consultas;dur` cuenta operaciones de modelo Prisma (una «consulta» lógica), no idas y vueltas a
+ * Neon: cada operación de `forTenant` son unas cuatro (BEGIN, set_config, la consulta, COMMIT).
+ * Si falta la marca del proxy, `total` es `null` y se omite (no se emite `total;dur=0`).
  */
-export function serverTiming(m: MetricasNavegacion, totalMs: number): string {
+export function serverTiming(m: MetricasNavegacion, totalMs: number | null): string {
   const partes: string[] = [];
   for (const fase of ["sesion", "identidad", "datos"] as const) {
     const ms = m.fases[fase];
     if (ms !== undefined) partes.push(`${fase};dur=${ms}`);
   }
   partes.push(`consultas;dur=${m.consultas}`);
-  partes.push(`total;dur=${unDecimal(totalMs)}`);
+  if (totalMs !== null) partes.push(`total;dur=${unDecimal(totalMs)}`);
   return partes.join(", ");
 }

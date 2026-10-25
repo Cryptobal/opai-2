@@ -7,6 +7,7 @@ import {
   metricasActuales,
   type MetricasNavegacion,
   serverTiming,
+  totalDesdeInicio,
 } from "@/lib/metricas-navegacion";
 
 describe("Server-Timing de navegación", () => {
@@ -17,8 +18,26 @@ describe("Server-Timing de navegación", () => {
     );
   });
 
-  it("omite las fases ausentes pero siempre lleva consultas y total", () => {
+  it("omite las fases ausentes pero lleva consultas y el total medido (incluido 0)", () => {
     expect(serverTiming({ consultas: 0, fases: {} }, 0)).toBe("consultas;dur=0, total;dur=0");
+  });
+
+  it("sin marca del proxy el total es null y el marcador no emite `total`", () => {
+    // `x-opai-t0` ausente o inválida: época no finita o ≤ 0.
+    expect(totalDesdeInicio(Number.NaN)).toBeNull();
+    expect(totalDesdeInicio(0)).toBeNull();
+    expect(totalDesdeInicio(-1)).toBeNull();
+    // Con el total en null, el valor Server-Timing no incluye `total;dur`: el gate lo lee como
+    // instrumentación desconectada (`totalMs: null`) y falla, en vez de dar por bueno un 0.
+    expect(serverTiming({ consultas: 6, fases: { sesion: 1, identidad: 1, datos: 1 } }, null)).toBe(
+      "sesion;dur=1, identidad;dur=1, datos;dur=1, consultas;dur=6",
+    );
+  });
+
+  it("con marca del proxy el total es un número ≥ 0", () => {
+    const total = totalDesdeInicio(Date.now() - 50);
+    expect(total).not.toBeNull();
+    expect(total).toBeGreaterThanOrEqual(0);
   });
 
   it("fuera de un render, las métricas son un objeto descartable y no lanza", () => {
