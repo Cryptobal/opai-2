@@ -425,6 +425,8 @@ OPAI puede ofrecer además **automatizaciones alojadas** (por ejemplo, búsqueda
 5. **Anexo de contrato.** Un cambio de rol, de capa, de monto o de instalación de una persona genera el borrador del anexo de contrato del núcleo (ADR-048, punto 5), que aprueba RRHH; en particular, todo cambio de la capa vigente o del monto.
 6. Las estructuras siguen versionadas por vigencia, sin solapes en la misma capa y referencia; la resolución vive en `packages/domain` y devuelve la capa que rigió, para que la liquidación y el costeo la guarden.
 
+**Jornada pactada (ADR-048, 25-oct).** La jornada pactada deja de ser faceta de Asistencia y Portales y pasa a ser dato del vínculo laboral en el núcleo (`core.vinculos_laborales`), porque es parte del contrato y Asistencia la necesita para marcar sin Operaciones. PIN y Face ID siguen siendo de Asistencia.
+
 **Consecuencias de la actualización.** El código del Brief 02 (`packages/domain/src/estructuras.ts`, `core.estructuras_sueldo.nivel` con `cargo | puesto | persona` y conceptos `NULL` que heredan) no cumple esta regla. Se corrige en un brief propio, con migración aditiva: nueva capa `instalacion`, resolución sin herencia y retiro del nivel `cargo` (sin borrar datos; las filas `cargo` existentes se convierten o se archivan con la decisión de Carlos sobre los datos de `dev`). Este PR no toca código. CPQ (ADR-042, punto 4) costea con la capa puesto o instalación cuando existe (ampliaciones y renovaciones); cómo se cotiza el sueldo de una instalación nueva queda como pregunta abierta en ADR-048 (con recomendación).
 
 ---
@@ -722,13 +724,17 @@ No se encontró: render estático roto, falta de prefetch, layouts que recarguen
 
 5. **Anexo de contrato en el núcleo.** Vive junto a `core.vinculos_laborales` y `core.documentos`, para que funcione aunque el tenant no tenga Nómina. Un cambio de rol, de capa de sueldo, de monto o de instalación (ADR-036, actualización del 25-oct) **genera solo el borrador** del anexo, con la marca del perfil del tenant (ADR-028): hasta el Brief 09 se usa una plantilla base del sistema, y desde el editor de plantillas del Brief 09 el tenant la puede reemplazar por la suya; **RRHH lo aprueba** y el documento queda en `core.documentos` con su bitácora (ADR-039).
 6. **Pauta por series y excepciones.** La pauta guarda solo las **series** (el patrón con su fecha de inicio de ciclo) y las **excepciones** (ausencias, reemplazos, PPC, turnos extra), y **calcula el resto**. Nunca guarda una fila por trabajador por día. Al repintar (cambiar una serie o su inicio de ciclo) **no se modifican los días pasados ni los días que ya tienen marca**. Esta regla pasa a `extraccion/operaciones.md` y a `modulos/operaciones.md` cuando se escriban (hoy no existen; ver `ROADMAP.md`, fase 3).
+7. **Capacidades, paridad, auditoría y aislamiento.** Todo lo que este ADR agrega se expone como capacidad (`defineCapability`), igual que el resto de OPAI (ADR-004, ADR-034):
+   - **Resumen del periodo:** la entrada manual y la importación son capacidades de escritura con `dry_run` (la importación devuelve una vista previa de filas válidas y errores antes de escribir) e `idempotencyKey`; su lectura también es una capacidad.
+   - **Anexo de contrato:** generar el borrador, aprobarlo y rechazarlo son capacidades con `dry_run` e `idempotencyKey`; la aprobación es una acción humana de RRHH y, para agentes, pide aprobación (`APPROVAL_REQUIRED`).
+   - **Paridad:** las tres (resumen, importación y anexo) están disponibles con los mismos permisos en la UI, en la API v1 y en el MCP, y toda escritura real queda en `core.audit_events`.
+   - **Aislamiento:** las tablas nuevas o ampliadas del núcleo (anexos de contrato, resumen del periodo si se persiste, y los campos nuevos de `core.vinculos_laborales`: instalación, puesto y jornada pactada) llevan `tenant_id` con RLS y la política `tenant_isolation` (ADR-002), en migraciones aditivas.
 
 **Consecuencias.**
 
 - Nómina I deja de depender de la fase 4: liquida sobre el resumen del periodo y **se puede adelantar** si hay un cliente que la quiera comprar sola (`ROADMAP.md`).
 - `core.vinculos_laborales` necesita la instalación (y el puesto, opcional) para resolver la capa de sueldo sin Operaciones; se define en el brief que implemente las capas (pregunta abierta 1).
 - La **jornada pactada** pasa a ser dato del vínculo laboral en el núcleo (es parte del contrato y la necesita Asistencia sin Operaciones). Modifica la asignación de ADR-036, que la dejaba como faceta de Asistencia y Portales; PIN y Face ID siguen siendo de Asistencia.
-- La entrada manual y la importación del resumen del periodo, y la generación y aprobación del anexo, son capacidades (`defineCapability`) con `dry_run` (la importación, con vista previa) e `idempotencyKey`, con paridad UI, API v1 y MCP y registro en la auditoría (ADR-004, ADR-034). Las tablas nuevas del núcleo (anexos y los campos nuevos del vínculo laboral) llevan `tenant_id` con RLS (ADR-002).
 - El manifest (`defineModule`) gana la declaración de fuentes opcionales; se implementa en el primer brief que tenga una (Operaciones o Nómina).
 - Cada especificación de módulo (ADR-047) incluye la sección «Sin la fuente X» con lo que muestra y lo que pide cuando falta cada fuente.
 - Este ADR no agrega código ni migraciones.
