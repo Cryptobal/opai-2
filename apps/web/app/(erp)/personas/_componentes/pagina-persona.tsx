@@ -13,7 +13,7 @@ import { cargarPersona, cargarPersonas } from "./datos";
 import { DetallePersona } from "./detalle-persona";
 import { HojaPersona } from "./diferidas";
 import type { TabPersona } from "./ficha-persona";
-import { conHoja, ListaPersonas } from "./lista-personas";
+import { conHoja, conParametros, ListaPersonas } from "./lista-personas";
 import { SegmentoPersonas } from "./segmento";
 
 type Props = {
@@ -34,10 +34,11 @@ export function PaginaPersona({ params, searchParams, tab, acciones, children }:
       ruta="/personas"
       completo
       cargando="detalle"
-      volver={{ href: "/personas", etiqueta: "Personas" }}
       volverSoloTelefono
+      volverBajoLg
       opciones={(d) => ({
         titulo: "Personas",
+        volver: { href: `/personas${conParametros(d.p)}`, etiqueta: "Personas" },
         insignia: <SegmentoPersonas activa="personas" plural="Personas" />,
         acciones: (typeof acciones === "function" ? acciones(d.p) : acciones) ?? (
           <EnlaceBotonHoja href={conHoja("editar=1", d.p)} icono={Pencil}>
@@ -57,6 +58,7 @@ export function PaginaPersona({ params, searchParams, tab, acciones, children }:
         <>
           <SplitScreen
             telefono="detalle"
+            unPanelHastaLg
             etiquetaLista="Lista de personas"
             lista={
               <ListaPersonas

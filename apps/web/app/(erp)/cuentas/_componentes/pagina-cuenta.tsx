@@ -5,7 +5,7 @@ import { Loading, SplitScreen } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
-import type { Parametros, SearchParams } from "@/lib/parametros";
+import { conBusqueda, type Parametros, type SearchParams } from "@/lib/parametros";
 import type { CuentaDetalle } from "@/lib/tipos-maestros";
 
 import { cargarCuenta, cargarCuentas, filtrosDe } from "./datos";
@@ -32,8 +32,8 @@ export function PaginaCuenta({ params, searchParams, tab, acciones, children }: 
       ruta="/cuentas"
       completo
       cargando="detalle"
-      volver={{ href: "/cuentas", etiqueta: "Cuentas" }}
       volverSoloTelefono
+      volverBajoLg
       acciones={
         acciones ?? (
           <EnlaceBoton href="/cuentas?nueva=1" icono={Plus}>
@@ -41,6 +41,7 @@ export function PaginaCuenta({ params, searchParams, tab, acciones, children }: 
           </EnlaceBoton>
         )
       }
+      opciones={(d) => ({ volver: { href: conBusqueda("/cuentas", d.p.q), etiqueta: "Cuentas" } })}
       cargar={async () => {
         const [{ id }, p] = await Promise.all([params, filtrosDe(searchParams)]);
         // Solo la lista se espera aquí: la ficha arranca en paralelo y se espera dentro de su propio Suspense.
@@ -53,8 +54,11 @@ export function PaginaCuenta({ params, searchParams, tab, acciones, children }: 
         <>
           <SplitScreen
             telefono="detalle"
+            unPanelHastaLg
             etiquetaLista="Lista de cuentas"
-            lista={<ListaCuentas state={lista.state} items={lista.items} seleccionada={id} />}
+            lista={
+              <ListaCuentas state={lista.state} items={lista.items} seleccionada={id} q={p.q} />
+            }
             detalle={
               <Suspense fallback={<Loading variante="detalle" />}>
                 <DetalleCuenta datos={datos} p={p} tab={tab}>

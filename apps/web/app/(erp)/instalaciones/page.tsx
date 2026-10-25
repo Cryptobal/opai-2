@@ -26,17 +26,16 @@ export default function Instalaciones({ searchParams }: { searchParams: SearchPa
         </EnlaceBoton>
       }
       cargar={async () => {
-        const [l, voc] = await Promise.all([
-          leerParametros(searchParams).then(cargarInstalaciones),
-          vocabularioActual(),
-        ]);
-        return { ...l, voc };
+        const p = await leerParametros(searchParams);
+        const [l, voc] = await Promise.all([cargarInstalaciones(p), vocabularioActual()]);
+        return { ...l, voc, q: p.q };
       }}
       opciones={(d) => ({ titulo: d.voc.titulo("instalacion") })}
     >
       {(d) => (
         <SplitScreen
           telefono="lista"
+          unPanelHastaLg
           etiquetaLista="Lista de instalaciones"
           vacio={{ texto: `Elige una ${d.voc.instalacion.singular}`, icono: MapPin }}
           lista={
@@ -46,6 +45,7 @@ export default function Instalaciones({ searchParams }: { searchParams: SearchPa
               cuentas={d.cuentas}
               titulo={d.voc.titulo("instalacion")}
               singular={d.voc.instalacion.singular}
+              q={d.q}
             />
           }
         />

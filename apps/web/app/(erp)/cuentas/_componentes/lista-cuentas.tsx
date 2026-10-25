@@ -6,6 +6,7 @@ import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { ESTADO_CUENTA, estadoDe, monograma } from "@/app/_components/maestros/estados";
 import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
 import { rut } from "@/lib/fechas";
+import { conBusqueda } from "@/lib/parametros";
 import type { CuentaFila } from "@/lib/tipos-maestros";
 
 const plural = (n: number) =>
@@ -16,6 +17,8 @@ export function ListaCuentas(p: {
   state: EstadoPantalla;
   items: CuentaFila[];
   seleccionada?: string;
+  /** Búsqueda vigente: se conserva al abrir una ficha y al volver. */
+  q?: string | undefined;
 }) {
   const activas = p.items.filter((c) => c.estado === "cliente_activo").length;
   const nueva = (
@@ -58,7 +61,7 @@ export function ListaCuentas(p: {
         const e = estadoDe(ESTADO_CUENTA, c.estado);
         return {
           id: c.id,
-          href: `/cuentas/${c.id}`,
+          href: conBusqueda(`/cuentas/${c.id}`, p.q),
           inicio: <MonoAv texto={monograma(c.nombre)} seleccionada={p.seleccionada === c.id} />,
           titulo: c.nombre,
           secundario: (

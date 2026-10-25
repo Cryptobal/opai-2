@@ -18,6 +18,11 @@ type Props = {
   anchoXl?: 360 | 400;
   /** Índice angosto (Configuración): 280 px en iPad y 300 px desde 1280. */
   angosto?: boolean;
+  /**
+   * Fichas con lista + detalle: de 768 a 1023 px se ve un solo panel a todo el ancho (la lista en
+   * su ruta, el detalle en la suya, con "Volver a la lista") y la vista dividida empieza en 1024.
+   */
+  unPanelHastaLg?: boolean;
   /** Etiqueta accesible de cada columna. */
   etiquetaLista?: string;
   etiquetaDetalle?: string;
@@ -32,20 +37,26 @@ type Props = {
 export function SplitScreen(props: Props) {
   const { lista, detalle, vacio, telefono, anchoXl = 400 } = props;
   const Icono = vacio?.icono;
+  const uno = props.unPanelHastaLg === true;
   return (
     <div
       className={cn(
         "flex min-h-0 flex-1",
         props.incrustado
           ? "overflow-hidden rounded-lg border border-border md:h-[440px]"
-          : "md:-mx-6 md:-mt-5 md:-mb-8 md:h-[calc(100dvh-60px)] xl:-mx-8",
+          : uno
+            ? "lg:-mx-6 lg:-mt-5 lg:-mb-8 lg:h-[calc(100dvh-60px)] xl:-mx-8"
+            : "md:-mx-6 md:-mt-5 md:-mb-8 md:h-[calc(100dvh-60px)] xl:-mx-8",
       )}
     >
       <section
         aria-label={props.etiquetaLista ?? "Lista"}
         className={cn(
-          "min-w-0 flex-col md:flex md:flex-none md:overflow-y-auto md:border-r md:border-border md:bg-surface",
-          props.angosto ? "md:w-[280px] xl:w-[300px]" : "md:w-[360px]",
+          "min-w-0 flex-col",
+          uno
+            ? "lg:flex lg:flex-none lg:overflow-y-auto lg:border-r lg:border-border lg:bg-surface lg:w-[360px]"
+            : "md:flex md:flex-none md:overflow-y-auto md:border-r md:border-border md:bg-surface",
+          !uno && (props.angosto ? "md:w-[280px] xl:w-[300px]" : "md:w-[360px]"),
           !props.angosto && anchoXl === 400 && "xl:w-[400px]",
           telefono === "lista" ? "flex w-full" : "hidden",
         )}
@@ -55,8 +66,11 @@ export function SplitScreen(props: Props) {
       <section
         aria-label={props.etiquetaDetalle ?? "Detalle"}
         className={cn(
-          "min-w-0 flex-1 flex-col md:flex md:overflow-y-auto md:px-6 md:py-5",
-          telefono === "detalle" ? "flex" : "hidden",
+          "min-w-0 flex-1 flex-col",
+          uno
+            ? "lg:flex lg:overflow-y-auto lg:px-6 lg:py-5"
+            : "md:flex md:overflow-y-auto md:px-6 md:py-5",
+          telefono === "detalle" ? "flex" : uno ? "hidden lg:flex" : "hidden",
         )}
       >
         {detalle ?? (
