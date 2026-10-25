@@ -22,28 +22,31 @@ export function ResumenInstalacion({ i }: { i: InstalacionDetalle }) {
           </EnlaceBotonHoja>
         }
       >
-        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,280px)] md:items-start">
-          <div className="md:order-2">{mapa}</div>
-          <ParesGrid
-            unaColumna
-            items={[
-              {
-                etiqueta: "Dirección",
-                valor:
-                  i.direccionFormateada ??
-                  ([i.calle, i.comuna].filter(Boolean).join(", ") || "Sin dirección"),
-              },
-              { etiqueta: "Región", valor: i.region },
-              { etiqueta: "Geocerca", valor: `${i.geocercaM} m` },
-              {
-                etiqueta: "Vigencia",
-                valor: i.vigenteDesde
-                  ? `${fecha(i.vigenteDesde)} – ${i.vigenteHasta ? fecha(i.vigenteHasta) : "sin término"}`
-                  : null,
-              },
-              ...(i.notas ? [{ etiqueta: "Notas", valor: i.notas }] : []),
-            ]}
-          />
+        {/* Consulta de contenedor: el mapa y el texto se apilan si la tarjeta mide menos de 640 px. */}
+        <div className="@container">
+          <div className="grid gap-4 @min-[640px]:grid-cols-[minmax(0,1fr)_minmax(0,280px)] @min-[640px]:items-start">
+            <div className="@min-[640px]:order-2">{mapa}</div>
+            <ParesGrid
+              unaColumna
+              items={[
+                {
+                  etiqueta: "Dirección",
+                  valor:
+                    i.direccionFormateada ??
+                    ([i.calle, i.comuna].filter(Boolean).join(", ") || "Sin dirección"),
+                },
+                { etiqueta: "Región", valor: i.region },
+                { etiqueta: "Geocerca", valor: `${i.geocercaM} m` },
+                {
+                  etiqueta: "Vigencia",
+                  valor: i.vigenteDesde
+                    ? `${fecha(i.vigenteDesde)} – ${i.vigenteHasta ? fecha(i.vigenteHasta) : "sin término"}`
+                    : null,
+                },
+                ...(i.notas ? [{ etiqueta: "Notas", valor: i.notas }] : []),
+              ]}
+            />
+          </div>
         </div>
       </SeccionTarjeta>
       <SeccionTarjeta

@@ -29,7 +29,9 @@ function ItemRiel({
       <Link
         href={item.href}
         aria-current={activo ? "page" : undefined}
-        {...(item.corta && item.corta !== item.etiqueta ? { title: item.etiqueta } : {})}
+        {...(item.corta && item.corta !== item.etiqueta
+          ? { title: item.etiqueta, "aria-label": item.etiqueta }
+          : {})}
         className={cn(
           "flex h-14 w-16 flex-col items-center justify-center gap-1 rounded-md text-[11px] leading-[14px] font-medium",
           activo ? "bg-fill text-fg" : "text-fg-muted hover:bg-fill",

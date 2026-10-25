@@ -72,8 +72,10 @@ const fueraDeVentana = (page: Page) =>
   });
 
 test.describe("fichas en un solo panel bajo 1024 px", () => {
-  test.beforeEach(({}, info) => {
+  test.beforeEach(({ browserName: _navegador }, info) => {
     test.skip(info.project.name !== "ipad", "Recorre los anchos con el proyecto iPad.");
+    if (!password && process.env["CI"])
+      throw new Error("Falta SEED_OWNER_PASSWORD o E2E_PASSWORD en CI.");
     test.skip(!password, "Falta SEED_OWNER_PASSWORD o E2E_PASSWORD");
   });
 

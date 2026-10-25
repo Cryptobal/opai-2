@@ -23,7 +23,7 @@ async function entrar(page: Page) {
 const principal = (page: Page) => page.getByRole("navigation", { name: "Principal" });
 
 test.describe("selector del riel de iPad según el diseño", () => {
-  test.beforeEach(({}, info) => {
+  test.beforeEach(({ browserName: _navegador }, info) => {
     test.skip(info.project.name !== "ipad", "El riel es solo de iPad.");
     if (password) return;
     if (process.env["CI"]) throw new Error("Falta SEED_OWNER_PASSWORD o E2E_PASSWORD en CI.");
