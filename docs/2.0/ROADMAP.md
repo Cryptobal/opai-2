@@ -1,6 +1,6 @@
 # ROADMAP — OPAI 2.0 hasta terminar
 
-**Actualizado:** 24-oct-2026 · **Orden:** ADR-030 · **Estado real:** desde el 24-oct-2026 el estado de las tareas vive en Linear (`AGENTS.md`, «Tareas (Linear)») y `ESTADO.md` es la foto técnica; este archivo planifica y se actualiza si cambia el plan.
+**Actualizado:** 25-oct-2026 · **Orden:** ADR-030 y ADR-048 (módulos vendibles por separado) · **Estado real:** desde el 24-oct-2026 el estado de las tareas vive en Linear (`AGENTS.md`, «Tareas (Linear)») y `ESTADO.md` es la foto técnica; este archivo planifica y se actualiza si cambia el plan.
 
 > **Las semanas son estimaciones**, contadas desde hoy (viernes 23-oct-2026; semana 1 = lunes 26-oct), para un constructor (Claude) con revisión y QA por bots y decisiones de Carlos a tiempo. Sirven para ordenar y detectar atrasos, no son compromisos. Las fases 1 y 2 se estiman con el ritmo real observado (Briefs 00 a 02 en dos días); de la fase 3 en adelante, con el juicio del documento de arranque, porque dependen de extracciones que aún no existen.
 
@@ -67,7 +67,7 @@ Las **bases transversales** (rendimiento, PWA, navegación) aplican a todo brief
 | Extracción | `extraccion/portales.md`: Portal Guardia, Terreno, Cliente y Supervisor de 1.0, flujos, emparejamiento de dispositivos, uso real | **Extracción pendiente**, antes del Brief 15 |
 | Extracción | `extraccion/rondas-y-tickets.md` | Hecho |
 | Especificación | `modulos/operaciones.md`, `modulos/rondas.md`, `modulos/tickets.md`, `modulos/portales.md` | Pendiente |
-| **11** | **Operaciones I**: asignaciones persona ↔ puesto, pauta (planilla), turnos y cobertura | Pendiente |
+| **11** | **Operaciones I**: asignaciones persona ↔ puesto, pauta (planilla) guardada como series y excepciones (ADR-048 §6), turnos y cobertura («confirmar cobertura» sin Asistencia) | Pendiente |
 | **12** | **Operaciones II**: turnos extra, supervisión y visitas, libro de novedades, alcance del supervisor (ADR-022) | Pendiente |
 | **13** | **Tickets** transversal (ADR-025) | Pendiente |
 | **14** | **Rondas** (ADR-024): puntos, plantillas, ejecución sin conexión con cola local, trust score, informes | Pendiente |
@@ -90,7 +90,7 @@ Las **bases transversales** (rendimiento, PWA, navegación) aplican a todo brief
 | **19** | **Reportes DT y fiscalización**: seis reportes, acceso del inspector, respaldos con manifiesto, límites de jornada; inicio de certificación | Pendiente |
 
 - **Criterio de término:** «Todas las instalaciones de Gard marcan en 2.0 durante un mes, los seis reportes DT salen de 2.0 y se presenta la solicitud de certificación»; cada regla de `dt-normativa.md` tiene su test.
-- **Dependencias:** fase 3 (puestos, asignaciones, portales y dispositivos); adaptador de biometría; decisión sobre la marca sin conexión.
+- **Dependencias:** portales y dispositivos (fase 3); adaptador de biometría; decisión sobre la marca sin conexión. Operaciones es **fuente opcional** (ADR-048): sin ella, se marca contra la jornada pactada del vínculo laboral.
 - **Deja de usarse en 1.0:** asistencia y reportes DT (en 1.0 no hay marcación en vivo; deja de ser el lugar de referencia).
 
 ### Fase 5 — Finanzas · pendiente · semanas 22–29 (22-mar → 14-may)
@@ -117,25 +117,26 @@ Las **bases transversales** (rendimiento, PWA, navegación) aplican a todo brief
 | Extracción | `extraccion/nomina.md`: estructuras de sueldo, liquidación, previsión, anticipos, libro de remuneraciones y Previred en 1.0 | **Extracción pendiente**, antes del Brief 25 |
 | Extracción | `extraccion/licitaciones.md`: Mercado Público, secciones generadas, propuesta (en 1.0 requiere rediseño) | **Extracción pendiente**, antes del Brief 27 |
 | Especificación | `modulos/nomina.md`, `modulos/licitaciones.md` | Pendiente |
-| **25** | **Nómina I**: liquidación sobre asistencia y estructuras | Pendiente |
+| **25** | **Nómina I**: liquidación sobre un resumen de periodo (manual o importado; pauta y asistencia como fuentes opcionales, ADR-048) y las capas de sueldo de ADR-036 | Pendiente |
 | **26** | **Nómina II**: previsión, libro, archivos de pago y Previred | Pendiente |
 | **27** | **Licitaciones** sobre el motor CPQ | Pendiente |
 | **28** | **Firma electrónica avanzada** (proveedor chileno) | Pendiente |
 | **29** | **Apagado de 1.0**: archivo de datos, redirección de `opai.gard.cl`, `app.opai.cl` en producción | Pendiente |
 
 - **Criterio de término:** «Una nómina mensual completa de Gard se liquida en 2.0 y cuadra al peso con la anterior; una licitación se presenta desde 2.0; **Gard opera 100 % en 2.0** y `opai.gard.cl` queda archivado».
-- **Dependencias:** fase 4 (asistencia) y fase 5 (pagos); Opai SpA para facturar suscripciones a otros tenants.
+- **Dependencias:** núcleo (personas, vínculo laboral, cargos, capas de sueldo y anexos de contrato) y fase 5 (pagos); Opai SpA para facturar suscripciones a otros tenants. **Asistencia (fase 4) y Operaciones (fase 3) son fuentes opcionales**, no dependencias (ADR-048): sin ellas, el resumen del periodo se ingresa a mano o se importa desde Excel.
+- **Nómina se puede adelantar** (Briefs 25 y 26 antes de las fases 3 a 5) si hay un cliente que la quiera comprar sola; los archivos de pago y el cruce con Finanzas se suman cuando esa fase exista.
 - **Deja de usarse en 1.0:** Payroll y Licitaciones; 1.0 se apaga.
 
 ### Backlog (sin fecha)
 
-No se portan de 1.0 y solo se reconstruyen con demanda real (lista canónica de `CONTEXTO-agentes.md`): inventario, cámaras, ATS, alertas y cobertura, incidentes, conocimiento, onboarding, comunicaciones, gamificación, psicolaboral, chat, Slack como módulo (queda como canal opcional de notificaciones) y Productividad. Además: sitio de marketing 2.0, roles personalizados, cadencia de seguimiento comercial y facturación de suscripciones (con Opai SpA).
+No se portan de 1.0 y solo se reconstruyen con demanda real (lista canónica de `CONTEXTO-agentes.md`): inventario, cámaras, ATS, alertas y cobertura, incidentes, conocimiento, onboarding, comunicaciones, gamificación, psicolaboral, chat, Slack como módulo (queda como canal opcional de notificaciones) y Productividad. Además: sitio de marketing 2.0, roles personalizados, «grupo de sueldo» (solo si un cliente lo pide; ADR-036, 25-oct), cadencia de seguimiento comercial y facturación de suscripciones (con Opai SpA).
 
 ## 3. Mejoras sobre 1.0 por módulo
 
 | Módulo | Mejoras documentadas | Fuente |
 |---|---|---|
-| Núcleo · maestros | Cuenta con RUT único y nombre canónico; una sola instalación (no una por módulo); persona única con vínculo laboral; puesto de servicio en el núcleo; estructuras de sueldo en tres niveles versionadas por vigencia y por concepto; contacto único por tenant con roles por cuenta (reemplaza los flags `recibe*`) | `extraccion/maestros.md`, ADR-005, ADR-036, ADR-040 §5 |
+| Núcleo · maestros | Cuenta con RUT único y nombre canónico; una sola instalación (no una por módulo); persona única con vínculo laboral; puesto de servicio en el núcleo; estructuras de sueldo en tres capas que no se combinan (instalación, puesto y sueldo por RUT; rige la más específica) versionadas por vigencia, con anexo de contrato en el núcleo; contacto único por tenant con roles por cuenta (reemplaza los flags `recibe*`) | `extraccion/maestros.md`, ADR-005, ADR-036 (actualizado el 25-oct), ADR-040 §5, ADR-048 |
 | Núcleo · configuración, notificaciones, integraciones | Un centro de Configuración por ámbitos (no una página por función); silencio por defecto en vez de ~1.000 avisos diarios; plantillas por evento con marca; secretos cifrados por tenant; consumos medidos | ADR-018, 020, 027, 031, 038 |
 | Documentos | Un solo servicio con vínculos polimórficos, huella SHA-256 y bitácora, vencimientos, explorador transversal, editor de plantillas y firma en tres niveles | ADR-019, ADR-039 |
 | Comercial | Negocio con instalaciones por tabla puente (no texto copiado, P1); bandeja de solicitudes separada del maestro; roles de contacto de catálogo (P6); etiquetas transversales (P8); actividad unificada en vez de nueve tablas (P9); embudo configurable con requisitos por etapa; dedupe, fusión y transferencia; agentes con vista previa | `extraccion/comercial-y-cpq.md` §2 y §4, ADR-040 |

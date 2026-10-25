@@ -70,6 +70,8 @@ En 1.0 la persona está partida en dos modelos: `OpsPersona` (identidad y datos 
 
 **Para 2.0 (ADR-005):** tres niveles `cargo` → `puesto` → `persona`, resolución `persona → puesto → cargo` en `packages/domain`; CLP en enteros; gratificación `legal_25` (con tope 4,75 IMM/12, parámetro) \| `monto_fijo` \| `ninguna`; ítems de bono `fijo` \| `porcentual` con imponible/tributable; vigencia obligatoria sin solapes; el nivel persona exige motivo y queda auditado. El bono condicional (asistencia perfecta, rondas) es de Nómina.
 
+> **Actualizado el 25-oct-2026 (ADR-036, decisión de Carlos):** las capas pasan a ser instalación (por defecto), puesto y sueldo por RUT; cada asignación usa una sola capa, la más específica que exista, sin combinar conceptos entre capas. El cargo deja de ser capa de sueldo y el «grupo de sueldo» queda fuera de la v1.
+
 ## 7. Documentos
 
 Tres sistemas conviven en 1.0:

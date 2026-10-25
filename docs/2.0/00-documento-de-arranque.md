@@ -77,7 +77,7 @@ Son las decisiones caras de cambiar después. Se fijan ahora.
 
 6. **Regla núcleo vs módulo.** Si lo necesitan dos o más módulos vendibles, es núcleo; si lo necesita uno, es del módulo. Un módulo solo referencia tablas del núcleo o de módulos declarados como dependencia. Las integraciones opcionales entre módulos se declaran como tales y funcionan con cualquiera de los dos apagado.
 
-7. **Catálogo compartido de cargos y estructuras de sueldo, en tres niveles.** (a) Cargo: estructura base del tenant. (b) Puesto en instalación: lo que se cotiza y se contrata para ese sitio. (c) Persona: excepción por RUT con vigencia, motivo y auditoría ("sueldo por RUT" de 1.0). CPQ cotiza con los niveles (a) y (b); Nómina liquida con la resolución efectiva persona → puesto → cargo. Una sola fuente de verdad para lo que se cotiza y lo que se paga.
+7. **Catálogo compartido de cargos y estructuras de sueldo, en tres niveles.** (a) Cargo: estructura base del tenant. (b) Puesto en instalación: lo que se cotiza y se contrata para ese sitio. (c) Persona: excepción por RUT con vigencia, motivo y auditoría ("sueldo por RUT" de 1.0). CPQ cotiza con los niveles (a) y (b); Nómina liquida con la resolución efectiva persona → puesto → cargo. Una sola fuente de verdad para lo que se cotiza y lo que se paga. *(Actualizado el 25-oct-2026 por ADR-036: capas instalación, puesto y RUT, sin combinarse; el cargo deja de ser capa.)*
 
 8. **Dinero y tiempo.** CLP en enteros; UF y porcentajes en decimal con escala fija; redondeos definidos por regla y documentados. Fechas en UTC con zona horaria del tenant; turnos como intervalos reales `[inicio, fin)` para cubrir cruces de medianoche sin casos especiales.
 
