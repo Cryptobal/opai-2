@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import type { ReactNode } from "react";
+import { type ReactNode, Suspense } from "react";
 
 import { Forbidden, Loading, type VarianteLoading } from "@opai/ds";
 
@@ -79,7 +79,13 @@ async function Contenido<T>({
           }
         />
       )}
-      <MarcadorMetricas />
+      {/* En su propio Suspense: `MarcadorMetricas` lee `headers()` (async), y sin un límite propio su
+          suspensión sube hasta el Suspense del portal (`CargaPortal`) y arrastra todo el contenido —la
+          lista incluida— fuera del primer flush del HTML. Aislado, la lista se envía de inmediato y el
+          marcador llega aparte (es un `<script>` invisible, no afecta a lo que ve el usuario). */}
+      <Suspense fallback={null}>
+        <MarcadorMetricas />
+      </Suspense>
     </Shell>
   );
 }
