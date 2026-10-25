@@ -1,0 +1,25 @@
+{
+  "_doc": "Lighthouse CI móvil (ADR-045, CA7). PR 1: INFORME sobre la página pública de acceso (sin sesión); las assertions son `warn` y el job es continue-on-error. En el PR 2, con el shell en el layout, se agregan Inicio, una lista y una ficha (requieren cookie de sesión) y el mínimo de rendimiento (≥ 0,90) pasa a `error`.",
+  "ci": {
+    "collect": {
+      "url": ["http://localhost:3000/login"],
+      "numberOfRuns": 3,
+      "settings": {
+        "formFactor": "mobile",
+        "screenEmulation": {
+          "mobile": true,
+          "width": 375,
+          "height": 812,
+          "deviceScaleFactor": 2
+        }
+      }
+    },
+    "assert": {
+      "assertions": {
+        "categories:performance": ["warn", { "minScore": 0.9 }],
+        "categories:accessibility": ["warn", { "minScore": 0.9 }]
+      }
+    },
+    "upload": { "target": "temporary-public-storage" }
+  }
+}
