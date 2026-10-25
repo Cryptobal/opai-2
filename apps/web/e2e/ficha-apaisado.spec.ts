@@ -1,6 +1,8 @@
 import { expect, type Locator, type Page, test } from "@playwright/test";
 
-// Celular apaisado (CAR-6): el detalle de Instalaciones usa el ancho de la pantalla, no el de «tablet».
+// Celular apaisado (CAR-6): las fichas usan el ancho de la pantalla, no el de «tablet», y las tarjetas
+// de dos columnas se apilan: en «Ubicación y vigencia» (Instalaciones) el texto queda bajo el mapa y en
+// Laboral (Personas) la segunda columna queda bajo la primera, con el texto de 200 px o más.
 const email = process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl";
 const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
 
@@ -83,6 +85,11 @@ test.describe("fichas con el celular en horizontal", () => {
       await page.waitForLoadState("networkidle");
       await expectApiladas(rejilla, `Laboral ${ancho}×${alto}`);
       expect(await sinDesborde(page), `Laboral ${ancho}×${alto}`).toBe(true);
+      // El texto de las dos columnas (pares del vínculo y del puesto) mide 200 px o más.
+      for (const [n, columna] of ["izquierda", "derecha"].entries()) {
+        const caja = await rejilla.locator("> *").nth(n).boundingBox();
+        expect(caja?.width ?? 0, `Laboral ${columna} ${ancho}×${alto}`).toBeGreaterThanOrEqual(200);
+      }
     }
   });
 });
