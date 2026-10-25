@@ -51,6 +51,7 @@ Las **bases transversales** (rendimiento, PWA, navegación) aplican a todo brief
 | Design Prompt | Comercial y CPQ; Documentos | Pendiente |
 | **06** | **Núcleo comercial**: contactos por persona con vínculos a N cuentas (migración aditiva), etiquetas (incluye migrar `documentos.etiquetas`), actividades, ficha declarativa (ADR-041), catálogos declarativos en Configuración, fusión y transferencia | Pendiente |
 | **07** | **Comercial**: bandeja de solicitudes, negocios, embudo configurable, negocio ↔ instalaciones, importación desde 1.0, sincronización 2.0 → 1.0 y conciliación diaria | Pendiente |
+| **07b** | **Capas de sueldo** (corrección del núcleo, ADR-036 actualizado el 25-oct): capa `instalacion`, resolución sin herencia entre capas, retiro del nivel `cargo` sin borrar datos, vínculo laboral con instalación y jornada pactada (ADR-048), anexo de contrato en borrador; migración aditiva. Va antes del Brief 08 o de Nómina, lo que llegue primero | Pendiente |
 | **08** | **Motor CPQ** (sin pantallas): lenguaje de fórmulas, modelo de costeo versionado, costo laboral desde estructuras, margen financiero con casos dorados CD-1, CD-2 y cotizaciones reales de Gard | Pendiente |
 | **09** | **Documentos**: explorador, editor de plantillas con marca, PDF, firma simple | Pendiente |
 | **10** | **Cotizador CPQ y propuesta**: planilla viva, versiones, aprobación por margen, envío con plantilla de Documentos, cotización rápida | Pendiente |
@@ -107,7 +108,7 @@ Las **bases transversales** (rendimiento, PWA, navegación) aplican a todo brief
 | **24** | **Contabilidad, informes y migración del historial financiero** | Pendiente |
 
 - **Criterio de término:** «Gard cierra un mes completo en 2.0 (flujo de caja, conciliación, facturación DTE, compras, rendiciones) con cifras cuadradas contra 1.0, y **1.0 pasa a solo lectura**».
-- **Dependencias:** fases 2 y 3 (cuentas, instalaciones, puestos); credenciales de DTE, banco y factoring por tenant (ADR-027); extracciones de Finanzas y flujo de caja.
+- **Dependencias:** núcleo (cuentas, instalaciones, puestos); Comercial, CPQ, Operaciones y Nómina son fuentes opcionales (ADR-048), y para el corte de Gard se mantiene el orden de las fases 2 y 3; credenciales de DTE, banco y factoring por tenant (ADR-027); extracciones de Finanzas y flujo de caja.
 - **Deja de usarse en 1.0:** todo Finanzas; 1.0 queda en solo lectura.
 
 ### Fase 6 — Nómina y Licitaciones · pendiente · semanas 30–35 (17-may → 25-jun)
@@ -124,8 +125,8 @@ Las **bases transversales** (rendimiento, PWA, navegación) aplican a todo brief
 | **29** | **Apagado de 1.0**: archivo de datos, redirección de `opai.gard.cl`, `app.opai.cl` en producción | Pendiente |
 
 - **Criterio de término:** «Una nómina mensual completa de Gard se liquida en 2.0 y cuadra al peso con la anterior; una licitación se presenta desde 2.0; **Gard opera 100 % en 2.0** y `opai.gard.cl` queda archivado».
-- **Dependencias:** núcleo (personas, vínculo laboral, cargos, capas de sueldo y anexos de contrato) y fase 5 (pagos); Opai SpA para facturar suscripciones a otros tenants. **Asistencia (fase 4) y Operaciones (fase 3) son fuentes opcionales**, no dependencias (ADR-048): sin ellas, el resumen del periodo se ingresa a mano o se importa desde Excel.
-- **Nómina se puede adelantar** (Briefs 25 y 26 antes de las fases 3 a 5) si hay un cliente que la quiera comprar sola; los archivos de pago y el cruce con Finanzas se suman cuando esa fase exista.
+- **Dependencias:** núcleo (personas, vínculo laboral, cargos, capas de sueldo y anexos de contrato); Opai SpA para facturar suscripciones a otros tenants. **Asistencia (fase 4), Operaciones (fase 3) y Finanzas (fase 5, pagos y flujo de caja) son fuentes o destinos opcionales**, no dependencias (ADR-048): sin ellas, el resumen del periodo se ingresa a mano o se importa desde Excel.
+- **Nómina se puede adelantar** (Briefs 25 y 26 antes de las fases 3 a 5) si hay un cliente que la quiera comprar sola; los archivos de pago los genera Nómina, y el cruce con el flujo de caja se suma cuando Finanzas exista.
 - **Deja de usarse en 1.0:** Payroll y Licitaciones; 1.0 se apaga.
 
 ### Backlog (sin fecha)
