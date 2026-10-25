@@ -408,7 +408,7 @@ OPAI puede ofrecer además **automatizaciones alojadas** (por ejemplo, búsqueda
 
 ## ADR-036 · Puestos de servicio y vínculos laborales en el núcleo
 
-**Fecha:** 23-oct-2026 · **Estado:** vigente (capas de sueldo actualizadas por Carlos el 25-oct-2026, al final) · Completa ADR-005. Brief 02.
+**Fecha:** 23-oct-2026 · **Estado:** vigente (capas de sueldo actualizadas por Carlos el 25-oct-2026, al final; la jornada pactada pasa al vínculo laboral por ADR-048) · Completa ADR-005. Brief 02.
 
 **Contexto.** En 1.0 el puesto operativo (instalación + cargo + rol de turno + horario + dotación) vive en Operaciones y el patrón de turno es una entidad de CPQ; la relación laboral está repartida entre `OpsGuardia` (estado de ciclo de vida, contrato) y `OpsPersona`. CPQ cotiza puestos, Operaciones los cubre, Asistencia marca contra ellos y Nómina liquida con su estructura.
 
@@ -720,7 +720,7 @@ No se encontró: render estático roto, falta de prefetch, layouts que recarguen
 | **Tickets** (ADR-025) | Cuentas, instalaciones, personas | Todos | Funciona solo; los vínculos a entidades de otros módulos aparecen cuando esos módulos están activos. |
 | **Finanzas** | Cuentas, instalaciones, documentos | Comercial y CPQ (facturación desde lo vendido), Nómina (remuneraciones al flujo de caja) | Sin ellos: facturación y egresos por entrada manual o importación. |
 
-5. **Anexo de contrato en el núcleo.** Vive junto a `core.vinculos_laborales` y `core.documentos`, para que funcione aunque el tenant no tenga Nómina. Un cambio de rol, de capa de sueldo, de monto o de instalación (ADR-036, actualización del 25-oct) **genera solo el borrador** del anexo, con la plantilla del tenant y su marca (ADR-028); **RRHH lo aprueba** y el documento queda en `core.documentos` con su bitácora (ADR-039).
+5. **Anexo de contrato en el núcleo.** Vive junto a `core.vinculos_laborales` y `core.documentos`, para que funcione aunque el tenant no tenga Nómina. Un cambio de rol, de capa de sueldo, de monto o de instalación (ADR-036, actualización del 25-oct) **genera solo el borrador** del anexo, con la marca del perfil del tenant (ADR-028): hasta el Brief 09 se usa una plantilla base del sistema, y desde el editor de plantillas del Brief 09 el tenant la puede reemplazar por la suya; **RRHH lo aprueba** y el documento queda en `core.documentos` con su bitácora (ADR-039).
 6. **Pauta por series y excepciones.** La pauta guarda solo las **series** (el patrón con su fecha de inicio de ciclo) y las **excepciones** (ausencias, reemplazos, PPC, turnos extra), y **calcula el resto**. Nunca guarda una fila por trabajador por día. Al repintar (cambiar una serie o su inicio de ciclo) **no se modifican los días pasados ni los días que ya tienen marca**. Esta regla pasa a `extraccion/operaciones.md` y a `modulos/operaciones.md` cuando se escriban (hoy no existen; ver `ROADMAP.md`, fase 3).
 
 **Consecuencias.**
@@ -728,6 +728,7 @@ No se encontró: render estático roto, falta de prefetch, layouts que recarguen
 - Nómina I deja de depender de la fase 4: liquida sobre el resumen del periodo y **se puede adelantar** si hay un cliente que la quiera comprar sola (`ROADMAP.md`).
 - `core.vinculos_laborales` necesita la instalación (y el puesto, opcional) para resolver la capa de sueldo sin Operaciones; se define en el brief que implemente las capas (pregunta abierta 1).
 - La **jornada pactada** pasa a ser dato del vínculo laboral en el núcleo (es parte del contrato y la necesita Asistencia sin Operaciones). Modifica la asignación de ADR-036, que la dejaba como faceta de Asistencia y Portales; PIN y Face ID siguen siendo de Asistencia.
+- La entrada manual y la importación del resumen del periodo, y la generación y aprobación del anexo, son capacidades (`defineCapability`) con `dry_run` (la importación, con vista previa) e `idempotencyKey`, con paridad UI, API v1 y MCP y registro en la auditoría (ADR-004, ADR-034). Las tablas nuevas del núcleo (anexos y los campos nuevos del vínculo laboral) llevan `tenant_id` con RLS (ADR-002).
 - El manifest (`defineModule`) gana la declaración de fuentes opcionales; se implementa en el primer brief que tenga una (Operaciones o Nómina).
 - Cada especificación de módulo (ADR-047) incluye la sección «Sin la fuente X» con lo que muestra y lo que pide cuando falta cada fuente.
 - Este ADR no agrega código ni migraciones.
