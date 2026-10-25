@@ -30,8 +30,10 @@ test.describe("Personas · la búsqueda de la lista no se pierde", () => {
     await page.waitForURL(/\/personas\/[0-9a-f-]{36}\?q=a/);
     const id = new URL(page.url()).pathname.split("/")[2];
     const ficha = page.getByRole("region", { name: "Detalle" });
-    const buscador = lista.getByRole("searchbox");
-    const filas = lista.locator('a[href^="/personas/"]:not([href*="vencimientos"])');
+    // Con la hoja abierta (?subir, ?excepcion) Radix oculta el resto de la página a los roles: se usa CSS.
+    const columna = page.locator('section[aria-label="Lista de personas"]');
+    const buscador = columna.locator("input").first();
+    const filas = columna.locator('a[href^="/personas/"]:not([href*="vencimientos"])');
     /** Espera al enlace visible y habilitado, lo pulsa y espera la URL esperada; reintenta si la página aún se hidrataba. */
     const pulsar = (enlace: Locator, url: (u: URL) => boolean) =>
       expect(async () => {
@@ -44,9 +46,16 @@ test.describe("Personas · la búsqueda de la lista no se pierde", () => {
     const busquedaVisible = async (donde: string) => {
       await page.reload();
       await expect(buscador, `${donde}: el campo conserva la búsqueda`).toHaveValue("a");
-      const total = await filas.count();
-      expect(total, `${donde}: la lista tiene filas`).toBeGreaterThan(0);
-      for (let i = 0; i < total; i++) await expect(filas.nth(i)).toContainText(/a/i);
+      // La lista se re-renderiza al terminar de filtrar: se espera a que TODAS las filas coincidan.
+      await expect
+        .poll(
+          async () => {
+            const textos = await filas.allInnerTexts();
+            return textos.length > 0 && textos.every((t) => /a/i.test(t));
+          },
+          { message: `${donde}: la lista tiene filas y todas coinciden con la búsqueda` },
+        )
+        .toBe(true);
     };
 
     await page.goto(`/personas/${id}/actividad?q=a`);
