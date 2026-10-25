@@ -15,8 +15,8 @@ const nav: NavItem[] = [
   { href: "/configuracion", etiqueta: "Configuración", icono: Settings2, pie: true },
 ];
 const portales: Portal[] = [
-  { id: "erp", etiqueta: "ERP", href: "/" },
-  { id: "platform", etiqueta: "Plataforma", href: "/platform" },
+  { id: "erp", etiqueta: "ERP", corta: "ERP", href: "/" },
+  { id: "platform", etiqueta: "Plataforma", corta: "Plataf.", href: "/platform" },
 ];
 const empresas = [
   { id: "t-1", etiqueta: "Atlas Seguridad SpA", marcado: true, onSelect: () => undefined },
@@ -80,32 +80,48 @@ describe("Rail con selector de portal y empresa", () => {
     );
     expect(selector(html)).toBeUndefined();
     expect(html).toContain(">GS<");
-    expect(html).not.toContain("lucide-chevron-down");
+    expect(html).not.toContain("lucide-chevrons-up-down");
     // Mismo apilado vertical de 64 × 64 que el botón con menú: monograma sobre el portal.
-    const clase = /<span class="([^"]*)" title="Gard Security"/.exec(html)?.[1] ?? "";
+    const clase = /<span class="([^"]*)" title="Gard Security · ERP"/.exec(html)?.[1] ?? "";
     for (const c of ["flex-col", "h-16", "w-16"]) expect(clase.split(" ")).toContain(c);
   });
 
-  it("con varios portales muestra la flecha y la etiqueta sin recortarla por la flecha", () => {
+  it("con varios portales pone ⇅ junto al nombre del portal (como ShellTablet), radio 12 px", () => {
     const html = renderToStaticMarkup(
       createElement(Rail, { ...base, portales, portalActual: "erp", tenant: { nombre: "Gard" } }),
     );
-    expect(html).toContain("lucide-chevron-down");
-    expect(html).toMatch(
-      /<svg[^>]*absolute[^>]*lucide-chevron-down|lucide-chevron-down[^>]*absolute/,
+    expect(html).toContain("lucide-chevrons-up-down");
+    expect(html).not.toContain("lucide-chevron-down");
+    expect(selector(html)).toContain("rounded-[12px]");
+    // El ícono va dentro de la misma línea que el nombre, no flotando en la esquina.
+    expect(html).not.toMatch(/<svg[^>]*absolute/);
+  });
+
+  it("muestra el nombre del portal una sola vez y abreviado, con el nombre completo en title", () => {
+    const html = renderToStaticMarkup(
+      createElement(Rail, {
+        ...base,
+        portales,
+        portalActual: "platform",
+        tenant: { nombre: "Gard" },
+      }),
     );
+    expect(html.match(/>Plataf\.</g)).toHaveLength(1);
+    expect(html).not.toContain(">Plataforma<");
+    expect(selector(html)).toContain('title="Gard · Plataforma"');
+    expect(selector(html)).toContain("portal Plataforma");
   });
 
   it("conserva los ítems y la marca del portal", () => {
     const html = renderToStaticMarkup(
       createElement(Rail, {
         ...base,
-        subtitulo: "Plataforma",
         portales,
         portalActual: "platform",
       }),
     );
-    expect(html).toContain('t-caption">Plataforma');
+    expect(html).toContain("OPAI");
+    expect(html).not.toContain("t-caption");
     expect(html).toContain('aria-current="page"');
     expect(html).toContain("Configuración");
   });

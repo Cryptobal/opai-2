@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, LayoutGrid } from "lucide-react";
+import { ChevronDown, ChevronsUpDown, LayoutGrid } from "lucide-react";
 
 import { cn } from "../cn";
 import { Monograma } from "../components/avatar";
@@ -12,7 +12,7 @@ type Props = {
   portalActual: string;
   tenant?: Tenant | undefined;
   /** `compacto`: monograma, empresa y portal (teléfono). `monograma`: solo el monograma (barra
-   *  lateral). `riel`: monograma sobre el portal, en un botón de 64 px (riel de iPad). */
+   *  lateral). `riel`: monograma sobre el portal (abreviado) y ⇅, en un botón de 64 px (riel de iPad, ShellTablet). */
   variante?: "compacto" | "monograma" | "riel";
   /** Ítems extra al pie (cambiar de empresa). */
   extra?: readonly ItemMenu[] | undefined;
@@ -33,7 +33,7 @@ const VARIANTES = {
   },
   riel: {
     lado: "derecha",
-    clase: "relative h-16 w-16 flex-col gap-1 border border-border bg-bg px-0.5",
+    clase: "h-16 w-16 flex-col gap-1 rounded-[12px] border border-border bg-bg px-0.5",
     estatica: "flex h-16 w-16 flex-col items-center justify-center gap-1 px-0.5",
   },
 } as const;
@@ -61,12 +61,10 @@ export function PortalSwitcher(props: Props) {
     ) : variante === "riel" ? (
       <>
         <Monograma nombre={nombre} />
-        <span className="max-w-full truncate text-[11px] leading-[14px] font-semibold text-fg">
-          {actual?.etiqueta}
+        <span className="flex max-w-full items-center gap-0.5 text-[11px] leading-[14px] font-semibold text-fg">
+          <span className="truncate">{actual?.corta ?? actual?.etiqueta}</span>
+          {conMenu ? <ChevronsUpDown className="size-3 flex-none" aria-hidden /> : null}
         </span>
-        {conMenu ? (
-          <ChevronDown className="absolute top-1 right-1 size-3 text-fg-subtle" aria-hidden />
-        ) : null}
       </>
     ) : (
       <span className="flex min-w-0 items-center gap-2">
@@ -79,7 +77,10 @@ export function PortalSwitcher(props: Props) {
   const v = VARIANTES[variante];
   if (!conMenu) {
     return (
-      <span className={cn(v.estatica, props.className)} title={nombre}>
+      <span
+        className={cn(v.estatica, props.className)}
+        title={`${nombre} · ${actual?.etiqueta ?? ""}`}
+      >
         {visual}
       </span>
     );
@@ -87,6 +88,7 @@ export function PortalSwitcher(props: Props) {
   return (
     <Menu
       etiqueta={`${nombre} · portal ${actual?.etiqueta ?? ""}. Cambiar de portal o empresa`}
+      {...(variante === "riel" ? { titulo: `${nombre} · ${actual?.etiqueta ?? ""}` } : {})}
       items={items}
       lado={v.lado}
       disparador={visual}
