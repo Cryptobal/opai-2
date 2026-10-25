@@ -40,61 +40,57 @@ export default function Laboral(props: Props) {
         const puesto = l.puestos.find((x) => x.id === q["puesto"]);
         const hoy = hoyIso();
         return (
-          <div className="@container">
-            <div className="grid gap-4 @min-[900px]:grid-cols-[minmax(0,5fr)_minmax(0,8fr)] @min-[900px]:items-start">
-              <div className="flex flex-col gap-4">
-                <VinculoVigente p={p} />
-                {p.vinculoVigente ? null : (
-                  <EnlaceBotonHoja
-                    href={`?vinculo=1${consultaExtra(q)}`}
-                    variante="secondary"
-                    className="self-start"
-                  >
-                    Nuevo vínculo
-                  </EnlaceBotonHoja>
-                )}
-                <HistorialVinculos vinculos={l.vinculos} cargos={cargos} />
-              </div>
-              <div className="flex flex-col gap-3">
-                <SelectorPuesto puestos={l.puestos} />
-                {l.sueldo ? (
-                  <CascadaSueldo
-                    s={l.sueldo}
-                    rotulos={rotulosDe(p, puesto)}
-                    enlace={`/personas/${p.id}/sueldo${puesto ? `?puesto=${puesto.id}` : ""}`}
-                  />
-                ) : (
-                  <Alerta
-                    tono="neutral"
-                    {...(l.sueldoBloqueado ? { icono: Lock } : {})}
-                    titulo={
-                      l.sueldoBloqueado
-                        ? "Sin permiso para ver sueldos"
-                        : "Sin estructura de sueldo"
-                    }
-                  >
-                    {l.sueldoBloqueado
-                      ? "Tu rol no permite ver las estructuras de sueldo."
-                      : "Define la estructura del cargo en Cargos y sueldos."}
-                  </Alerta>
-                )}
-              </div>
-              <HojaExcepcion
-                personaId={p.id}
-                actual={l.sueldo?.niveles.persona ?? null}
-                hoy={hoy}
-                nombre={p.nombreCompleto}
-              />
+          <div className="grid gap-4 md:[@media(min-height:501px)]:grid-cols-[minmax(0,5fr)_minmax(0,8fr)] md:[@media(min-height:501px)]:items-start lg:grid-cols-[minmax(0,5fr)_minmax(0,8fr)] lg:items-start">
+            <div className="flex flex-col gap-4">
+              <VinculoVigente p={p} />
               {p.vinculoVigente ? null : (
-                <HojaVinculo
-                  personaId={p.id}
-                  hoy={hoy}
-                  cargos={cargos
-                    .filter((c) => c.activo)
-                    .map((c) => ({ valor: c.id, etiqueta: c.nombre }))}
+                <EnlaceBotonHoja
+                  href={`?vinculo=1${consultaExtra(q)}`}
+                  variante="secondary"
+                  className="self-start"
+                >
+                  Nuevo vínculo
+                </EnlaceBotonHoja>
+              )}
+              <HistorialVinculos vinculos={l.vinculos} cargos={cargos} />
+            </div>
+            <div className="flex flex-col gap-3">
+              <SelectorPuesto puestos={l.puestos} />
+              {l.sueldo ? (
+                <CascadaSueldo
+                  s={l.sueldo}
+                  rotulos={rotulosDe(p, puesto)}
+                  enlace={`/personas/${p.id}/sueldo${puesto ? `?puesto=${puesto.id}` : ""}`}
                 />
+              ) : (
+                <Alerta
+                  tono="neutral"
+                  {...(l.sueldoBloqueado ? { icono: Lock } : {})}
+                  titulo={
+                    l.sueldoBloqueado ? "Sin permiso para ver sueldos" : "Sin estructura de sueldo"
+                  }
+                >
+                  {l.sueldoBloqueado
+                    ? "Tu rol no permite ver las estructuras de sueldo."
+                    : "Define la estructura del cargo en Cargos y sueldos."}
+                </Alerta>
               )}
             </div>
+            <HojaExcepcion
+              personaId={p.id}
+              actual={l.sueldo?.niveles.persona ?? null}
+              hoy={hoy}
+              nombre={p.nombreCompleto}
+            />
+            {p.vinculoVigente ? null : (
+              <HojaVinculo
+                personaId={p.id}
+                hoy={hoy}
+                cargos={cargos
+                  .filter((c) => c.activo)
+                  .map((c) => ({ valor: c.id, etiqueta: c.nombre }))}
+              />
+            )}
           </div>
         );
       }}

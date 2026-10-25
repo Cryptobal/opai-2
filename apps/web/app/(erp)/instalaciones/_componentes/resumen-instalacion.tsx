@@ -22,31 +22,30 @@ export function ResumenInstalacion({ i }: { i: InstalacionDetalle }) {
           </EnlaceBotonHoja>
         }
       >
-        {/* Consulta de contenedor: el mapa y el texto se apilan si la tarjeta mide menos de 800 px (celular apaisado de hasta 932 px). */}
-        <div className="@container">
-          <div className="grid gap-4 @min-[800px]:grid-cols-[minmax(0,1fr)_minmax(0,280px)] @min-[800px]:items-start">
-            <div className="@min-[800px]:order-2">{mapa}</div>
-            <ParesGrid
-              unaColumna
-              items={[
-                {
-                  etiqueta: "Dirección",
-                  valor:
-                    i.direccionFormateada ??
-                    ([i.calle, i.comuna].filter(Boolean).join(", ") || "Sin dirección"),
-                },
-                { etiqueta: "Región", valor: i.region },
-                { etiqueta: "Geocerca", valor: `${i.geocercaM} m` },
-                {
-                  etiqueta: "Vigencia",
-                  valor: i.vigenteDesde
-                    ? `${fecha(i.vigenteDesde)} – ${i.vigenteHasta ? fecha(i.vigenteHasta) : "sin término"}`
-                    : null,
-                },
-                ...(i.notas ? [{ etiqueta: "Notas", valor: i.notas }] : []),
-              ]}
-            />
-          </div>
+        {/* Como en main (lado a lado desde 768 px), salvo en celular apaisado (menos de 1024 px de ancho y hasta
+            500 px de alto), donde el mapa queda sobre el texto para que no se parta por letras (CAR-6). */}
+        <div className="grid gap-4 md:[@media(min-height:501px)]:grid-cols-[minmax(0,1fr)_minmax(0,280px)] md:[@media(min-height:501px)]:items-start lg:grid-cols-[minmax(0,1fr)_minmax(0,280px)] lg:items-start">
+          <div className="md:[@media(min-height:501px)]:order-2 lg:order-2">{mapa}</div>
+          <ParesGrid
+            unaColumna
+            items={[
+              {
+                etiqueta: "Dirección",
+                valor:
+                  i.direccionFormateada ??
+                  ([i.calle, i.comuna].filter(Boolean).join(", ") || "Sin dirección"),
+              },
+              { etiqueta: "Región", valor: i.region },
+              { etiqueta: "Geocerca", valor: `${i.geocercaM} m` },
+              {
+                etiqueta: "Vigencia",
+                valor: i.vigenteDesde
+                  ? `${fecha(i.vigenteDesde)} – ${i.vigenteHasta ? fecha(i.vigenteHasta) : "sin término"}`
+                  : null,
+              },
+              ...(i.notas ? [{ etiqueta: "Notas", valor: i.notas }] : []),
+            ]}
+          />
         </div>
       </SeccionTarjeta>
       <SeccionTarjeta
