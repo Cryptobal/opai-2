@@ -39,7 +39,12 @@ export function PaginaPersona({ params, searchParams, tab, acciones, children }:
       opciones={(d) => ({
         titulo: "Personas",
         volver: { href: `/personas${conParametros(d.p)}`, etiqueta: "Personas" },
-        insignia: <SegmentoPersonas activa="personas" plural="Personas" />,
+        // Bajo 1024 px la ficha ocupa todo el ancho y la barra no tiene sitio para las dos secciones.
+        insignia: (
+          <div className="hidden lg:block">
+            <SegmentoPersonas activa="personas" plural="Personas" />
+          </div>
+        ),
         acciones: (typeof acciones === "function" ? acciones(d.p) : acciones) ?? (
           <EnlaceBotonHoja href={conHoja("editar=1", d.p)} icono={Pencil}>
             Editar

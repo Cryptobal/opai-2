@@ -28,7 +28,8 @@ export default function Laboral(props: Props) {
       tab="laboral"
       acciones={(q) => (
         <EnlaceBotonHoja href={`?excepcion=1${consultaExtra(q)}`}>
-          Definir excepción para esta persona
+          <span className="lg:hidden">Excepción</span>
+          <span className="hidden lg:inline">Definir excepción para esta persona</span>
         </EnlaceBotonHoja>
       )}
     >
