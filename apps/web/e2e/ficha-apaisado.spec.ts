@@ -1,4 +1,4 @@
-import { expect, type Page, test } from "@playwright/test";
+import { expect, type Locator, type Page, test } from "@playwright/test";
 
 // Celular apaisado (CAR-6): el detalle de Instalaciones usa el ancho de la pantalla, no el de «tablet».
 const email = process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl";
@@ -18,6 +18,17 @@ async function entrar(page: Page) {
 const sinDesborde = (page: Page) =>
   page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth);
 
+/** Las dos columnas de una rejilla quedan una sobre otra: misma x, la segunda empieza bajo la primera. */
+async function expectApiladas(rejilla: Locator, donde: string) {
+  const primera = await rejilla.locator("> *").nth(0).boundingBox();
+  const segunda = await rejilla.locator("> *").nth(1).boundingBox();
+  expect(primera && segunda, `${donde}: hay dos columnas`).toBeTruthy();
+  expect(Math.abs((primera?.x ?? 0) - (segunda?.x ?? 99)), `${donde}: misma x`).toBeLessThan(2);
+  expect(segunda?.y ?? 0, `${donde}: la segunda va debajo`).toBeGreaterThanOrEqual(
+    (primera?.y ?? 0) + (primera?.height ?? 0) - 1,
+  );
+}
+
 test.describe("fichas con el celular en horizontal", () => {
   test.beforeEach(({ browserName: _navegador }, info) => {
     test.skip(info.project.name !== "ipad", "Recorre los anchos con el proyecto iPad.");
@@ -28,7 +39,7 @@ test.describe("fichas con el celular en horizontal", () => {
 
   test("celular apaisado (844×390 y 932×430): Instalaciones no desborda y «Ubicación y vigencia» deja el texto legible", async ({
     page,
-  }) => {
+  }, info) => {
     await entrar(page);
     for (const [ancho, alto] of [
       [844, 390],
@@ -52,8 +63,26 @@ test.describe("fichas con el celular en horizontal", () => {
         const caja = await par.boundingBox();
         expect(caja?.width, `${etiqueta} a ${ancho}×${alto}`).toBeGreaterThanOrEqual(200);
       }
+      // Apiladas: el mapa queda arriba del texto, en la misma columna.
+      await expectApiladas(
+        tarjeta.locator("div.\\@container > div").first(),
+        `Ubicación ${ancho}×${alto}`,
+      );
       if (ancho === 844)
-        await page.screenshot({ path: "e2e/__screenshots__/instalacion-844x390.png" });
+        await page.screenshot({ path: info.outputPath("instalacion-844x390.png") });
+
+      // Laboral de Personas: sus dos columnas también quedan una sobre otra.
+      await page.goto("/personas");
+      const persona = await page
+        .locator('a[href^="/personas/"][href*="-"]')
+        .first()
+        .getAttribute("href");
+      await page.goto(`${persona}/laboral`);
+      const rejilla = page.locator("div.\\@container > div").first();
+      await expect(rejilla).toBeVisible({ timeout: 30_000 });
+      await page.waitForLoadState("networkidle");
+      await expectApiladas(rejilla, `Laboral ${ancho}×${alto}`);
+      expect(await sinDesborde(page), `Laboral ${ancho}×${alto}`).toBe(true);
     }
   });
 });

@@ -32,7 +32,7 @@ test.describe("selector del riel de iPad según el diseño", () => {
 
   test("⇅ junto al portal, radio 12, nombre una vez y sin recortes a 768, 1024 y 1279 (ERP y Supervisor)", async ({
     page,
-  }) => {
+  }, info) => {
     await entrar(page);
     const riel = principal(page);
     for (const portal of ["ERP", "Supervisor"] as const) {
@@ -62,7 +62,7 @@ test.describe("selector del riel de iPad según el diseño", () => {
         expect(texto).not.toContain("Supervisor");
         if (ancho === 1024) {
           await page.screenshot({
-            path: `e2e/__screenshots__/riel-selector-${portal.toLowerCase()}-ipad.png`,
+            path: info.outputPath(`riel-selector-${portal.toLowerCase()}-ipad.png`),
           });
         }
       }

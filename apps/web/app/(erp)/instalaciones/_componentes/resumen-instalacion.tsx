@@ -22,10 +22,10 @@ export function ResumenInstalacion({ i }: { i: InstalacionDetalle }) {
           </EnlaceBotonHoja>
         }
       >
-        {/* Consulta de contenedor: el mapa y el texto se apilan si la tarjeta mide menos de 640 px. */}
+        {/* Consulta de contenedor: el mapa y el texto se apilan si la tarjeta mide menos de 800 px (celular apaisado de hasta 932 px). */}
         <div className="@container">
-          <div className="grid gap-4 @min-[640px]:grid-cols-[minmax(0,1fr)_minmax(0,280px)] @min-[640px]:items-start">
-            <div className="@min-[640px]:order-2">{mapa}</div>
+          <div className="grid gap-4 @min-[800px]:grid-cols-[minmax(0,1fr)_minmax(0,280px)] @min-[800px]:items-start">
+            <div className="@min-[800px]:order-2">{mapa}</div>
             <ParesGrid
               unaColumna
               items={[

@@ -87,18 +87,20 @@ export function ResumenPersona({ p, hoy }: Props) {
         />
       </SeccionTarjeta>
       <SeccionTarjeta titulo="Dirección">
-        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_160px] md:items-start">
-          <ParesGrid
-            unaColumna
-            items={[
-              { etiqueta: "Dirección", valor: p.calle ?? p.direccionFormateada },
-              {
-                etiqueta: "Comuna",
-                valor: [p.comuna, p.region].filter(Boolean).join(" · ") || null,
-              },
-            ]}
-          />
-          <MapaOpai lat={p.lat} lng={p.lng} {...(p.comuna ? { pie: p.comuna } : {})} />
+        <div className="@container">
+          <div className="grid gap-4 @min-[800px]:grid-cols-[minmax(0,1fr)_160px] @min-[800px]:items-start">
+            <ParesGrid
+              unaColumna
+              items={[
+                { etiqueta: "Dirección", valor: p.calle ?? p.direccionFormateada },
+                {
+                  etiqueta: "Comuna",
+                  valor: [p.comuna, p.region].filter(Boolean).join(" · ") || null,
+                },
+              ]}
+            />
+            <MapaOpai lat={p.lat} lng={p.lng} {...(p.comuna ? { pie: p.comuna } : {})} />
+          </div>
         </div>
       </SeccionTarjeta>
       <SeccionTarjeta titulo="Acceso">

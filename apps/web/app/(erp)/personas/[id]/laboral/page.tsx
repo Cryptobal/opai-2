@@ -28,8 +28,10 @@ export default function Laboral(props: Props) {
       tab="laboral"
       acciones={(q) => (
         <EnlaceBotonHoja href={`?excepcion=1${consultaExtra(q)}`}>
-          <span className="hidden md:inline lg:hidden">Excepción</span>
-          <span className="md:hidden lg:inline">Definir excepción para esta persona</span>
+          <span aria-hidden className="hidden md:inline lg:hidden">
+            Excepción
+          </span>
+          <span className="md:sr-only lg:not-sr-only">Definir excepción para esta persona</span>
         </EnlaceBotonHoja>
       )}
     >
@@ -39,7 +41,7 @@ export default function Laboral(props: Props) {
         const hoy = hoyIso();
         return (
           <div className="@container">
-            <div className="grid gap-4 @min-[640px]:grid-cols-[minmax(0,5fr)_minmax(0,8fr)] @min-[640px]:items-start">
+            <div className="grid gap-4 @min-[900px]:grid-cols-[minmax(0,5fr)_minmax(0,8fr)] @min-[900px]:items-start">
               <div className="flex flex-col gap-4">
                 <VinculoVigente p={p} />
                 {p.vinculoVigente ? null : (
