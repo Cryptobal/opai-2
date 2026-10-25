@@ -27,7 +27,7 @@ Contrato único para todo bot o agente que trabaje en `Cryptobal/opai-2`: Claude
 
 ## Convenciones
 
-- **Ramas:** prefijos `brief/` (implementación), `qa/` (arreglos de QA), `docs/` (solo documentación), `fix/`, `perf/` y `ci/`, con el ID `CAR-n` de la tarea según «Tareas (Linear)» (recomendado en la rama, obligatorio en el PR). Siempre desde `main` actualizado. Un PR por encargo.
+- **Ramas:** prefijos `brief/` (implementación), `qa/` (arreglos de QA), `docs/` (solo documentación), `fix/`, `perf/` y `ci/`, con el ID `CAR-n` de la tarea según «Tareas (Linear)» (recomendado en el nombre de la rama; obligatorio en la descripción del PR). Siempre desde `main` actualizado. Un PR por encargo.
 - **Commits:** atómicos, en español, en imperativo, con prefijo de ámbito (`core:`, `ds:`, `infra:`, `docs:`, `comercial:`…). Un commit por bloque del brief.
 - **Gate local** antes de cada commit: `pnpm typecheck && pnpm lint && pnpm test`. También `pnpm test:db` si tocas base, RLS o capacidades con base.
 - **Presupuesto de JS (ADR-037):** `pnpm presupuesto` tras el build. Manda el check obligatorio `build · presupuesto de JS`. Si un PR sube un tope de `apps/web/presupuesto-js.json`, deja la justificación en el PR y se integra igual con las tres condiciones de «Integración a `main`» (ADR-043 v3, sin excepciones).

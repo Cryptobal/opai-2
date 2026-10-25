@@ -594,6 +594,8 @@ Reglas:
 
 **Segunda modificación de Carlos (24-oct): tareas en Linear.** El estado de las tareas pasa a Linear (equipo OPAI, IDs `OPAI-n`, plan Free durante el piloto); GitHub sigue siendo la fuente de verdad del código y los archivos del repositorio, de las reglas técnicas. `ESTADO.md` queda como foto técnica (versiones, infraestructura, riesgos aceptados y decisiones). Quedan sin efecto las menciones a actualizar `ESTADO.md` al cerrar un brief o un PR (en este ADR y en ADR-012 y ADR-047): ahora el PR se vincula a su tarea de Linear. Los hallazgos de QA se registran como tareas en Linear (Triage), no como issues. Las reglas del flujo están en `AGENTS.md`, «Tareas (Linear)».
 
+> Nota del 24-oct-2026 (decisión de Carlos, 20:52 CLT): el equipo de Linear que se usa es el que ya existe, **CAR** («Carlos Irigoyen»); no hay equipo «OPAI». Los IDs pasan a `CAR-n`, obligatorios en la descripción del PR (`Fixes CAR-n`) y recomendados en el nombre de la rama. Donde este párrafo dice «equipo OPAI, IDs `OPAI-n`», léase CAR y `CAR-n`.
+
 ---
 
 ## ADR-044 · PWA desde el principio y empaquetado nativo posterior

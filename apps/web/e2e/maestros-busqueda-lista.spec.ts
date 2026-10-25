@@ -1,4 +1,4 @@
-import { expect, type Page, test } from "@playwright/test";
+import { expect, type Locator, type Page, test } from "@playwright/test";
 
 // Pulido post-#25 (QA 24-oct): el filtro de Actividad y las hojas (`?subir`, `?excepcion`) de la ficha de
 // Personas conservan la búsqueda de la lista (`?q=`).
@@ -32,6 +32,14 @@ test.describe("Personas · la búsqueda de la lista no se pierde", () => {
     const ficha = page.getByRole("region", { name: "Detalle" });
     const buscador = lista.getByRole("searchbox");
     const filas = lista.locator('a[href^="/personas/"]:not([href*="vencimientos"])');
+    /** Espera al enlace visible y habilitado, lo pulsa y espera la URL esperada; reintenta si la página aún se hidrataba. */
+    const pulsar = (enlace: Locator, url: (u: URL) => boolean) =>
+      expect(async () => {
+        await expect(enlace).toBeVisible();
+        await expect(enlace).toBeEnabled();
+        await enlace.click();
+        await page.waitForURL((u) => url(u), { timeout: 5_000 });
+      }).toPass({ timeout: 30_000 });
     /** En pantalla: el campo de búsqueda sigue con «a» y la lista sigue filtrada por ella. */
     const busquedaVisible = async (donde: string) => {
       await page.reload();
@@ -42,12 +50,13 @@ test.describe("Personas · la búsqueda de la lista no se pierde", () => {
     };
 
     await page.goto(`/personas/${id}/actividad?q=a`);
-    await ficha.getByRole("link", { name: "Agentes" }).click();
-    await expect(page).toHaveURL(/actor=agente/);
+    await pulsar(
+      ficha.getByRole("link", { name: "Agentes" }),
+      (u) => u.searchParams.get("actor") === "agente",
+    );
     expect(new URL(page.url()).searchParams.get("q")).toBe("a");
     await busquedaVisible("Actividad · Agentes");
-    await ficha.getByRole("link", { name: "Todo" }).click();
-    await expect.poll(() => new URL(page.url()).searchParams.get("actor")).toBeNull();
+    await pulsar(ficha.getByRole("link", { name: "Todo" }), (u) => !u.searchParams.has("actor"));
     expect(new URL(page.url()).searchParams.get("q")).toBe("a");
     await busquedaVisible("Actividad · Todo");
 
@@ -56,8 +65,10 @@ test.describe("Personas · la búsqueda de la lista no se pierde", () => {
       ["laboral", "Definir excepción para esta persona", "excepcion"],
     ] as const) {
       await page.goto(`/personas/${id}/${tab}?q=a`);
-      await page.getByRole("link", { name: enlace }).first().click();
-      await expect.poll(() => new URL(page.url()).searchParams.get(param)).toBe("1");
+      await pulsar(
+        page.getByRole("link", { name: enlace }).first(),
+        (u) => u.searchParams.get(param) === "1",
+      );
       expect(new URL(page.url()).searchParams.get("q"), `${param} conserva q`).toBe("a");
       await busquedaVisible(`?${param}`);
     }
