@@ -24,7 +24,13 @@ export type NavItem = {
 /** Barra superior en modo detalle: "‹ Cuentas / Logística Andina SpA". */
 export type Volver = { href: string; etiqueta: string };
 
-export type Portal = { id: string; etiqueta: string; href: string };
+export type Portal = {
+  id: string;
+  etiqueta: string;
+  href: string;
+  /** Abreviatura para el selector del riel de iPad (64 px); el nombre completo va en title y aria-label. */
+  corta?: string;
+};
 
 export type Tenant = { nombre: string };
 

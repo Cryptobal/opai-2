@@ -43,6 +43,8 @@ export type OpcionesPagina = {
   titulo: string;
   volver?: Volver;
   volverSoloTelefono?: boolean;
+  /** Con `volverSoloTelefono`: el "Atrás" también en iPad vertical (768–1023), donde la ficha ocupa todo el ancho. */
+  volverBajoLg?: boolean;
   acciones?: ReactNode;
   accionesTelefono?: ReactNode;
   insignia?: ReactNode;

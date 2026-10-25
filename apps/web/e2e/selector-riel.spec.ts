@@ -74,7 +74,7 @@ test.describe("selector de portal y empresa", () => {
     await expect(riel.getByRole("button", { name: SELECTOR })).toHaveAccessibleName(
       /portal Supervisor\./,
     );
-    await expect(riel.getByText("Supervisor", { exact: true }).first()).toBeVisible();
+    await expect(riel.getByText("Superv.", { exact: true })).toBeVisible();
 
     // Vuelve al ERP desde el mismo selector.
     await riel.getByRole("button", { name: SELECTOR }).click();

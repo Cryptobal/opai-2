@@ -40,6 +40,7 @@ export default function Personas({ searchParams }: { searchParams: SearchParams 
         <>
           <SplitScreen
             telefono="lista"
+            unPanelHastaLg
             etiquetaLista="Lista de personas"
             vacio={{ texto: "Elige una persona", icono: Users }}
             lista={

@@ -42,6 +42,7 @@ function Disparador(props: MenuProps & { onActivar?: () => void }) {
       <button
         type="button"
         aria-label={props.etiqueta}
+        {...(props.titulo ? { title: props.titulo } : {})}
         aria-haspopup="menu"
         aria-expanded={false}
         onClick={props.onActivar}

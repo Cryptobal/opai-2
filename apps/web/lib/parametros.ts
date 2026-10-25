@@ -6,3 +6,7 @@ export async function leerParametros(sp: SearchParams): Promise<Parametros> {
   const p = await sp;
   return Object.fromEntries(Object.entries(p).map(([k, v]) => [k, Array.isArray(v) ? v[0] : v]));
 }
+
+/** Ruta con la búsqueda de la lista (`?q=`): abrir una ficha y volver no la pierde. */
+export const conBusqueda = (ruta: string, q?: string) =>
+  q ? `${ruta}?q=${encodeURIComponent(q)}` : ruta;

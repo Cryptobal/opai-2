@@ -22,8 +22,10 @@ export function ResumenInstalacion({ i }: { i: InstalacionDetalle }) {
           </EnlaceBotonHoja>
         }
       >
-        <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_minmax(0,280px)] md:items-start">
-          <div className="md:order-2">{mapa}</div>
+        {/* Como en main (lado a lado desde 768 px), salvo en celular apaisado (menos de 1024 px de ancho y hasta
+            500 px de alto), donde el mapa queda sobre el texto para que no se parta por letras (CAR-6). */}
+        <div className="grid gap-4 md:[@media(min-height:501px)]:grid-cols-[minmax(0,1fr)_minmax(0,280px)] md:[@media(min-height:501px)]:items-start lg:grid-cols-[minmax(0,1fr)_minmax(0,280px)] lg:items-start">
+          <div className="md:[@media(min-height:501px)]:order-2 lg:order-2">{mapa}</div>
           <ParesGrid
             unaColumna
             items={[

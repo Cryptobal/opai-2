@@ -11,6 +11,8 @@ export type MenuProps = {
   /** Contenido del botón disparador (avatar, icono…). */
   disparador: ReactNode;
   etiqueta: string;
+  /** Nombre completo en el tooltip nativo cuando el disparador lo abrevia. */
+  titulo?: string;
   items: readonly ItemMenu[];
   /** Cabecera informativa (nombre y correo del usuario). */
   cabecera?: ReactNode;
@@ -30,6 +32,7 @@ export function MenuRadix(props: MenuProps) {
       <div className={cn("relative", props.className)}>
         <DropdownMenu.Trigger
           aria-label={etiqueta}
+          {...(props.titulo ? { title: props.titulo } : {})}
           className={cn(claseDisparadorMenu, props.claseDisparador)}
         >
           {disparador}

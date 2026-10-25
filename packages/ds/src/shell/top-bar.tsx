@@ -9,6 +9,7 @@ import { Button } from "../components/button";
 import type { ItemMenu } from "../components/menu";
 import { AtajoBusqueda } from "../components/atajo-busqueda";
 import { PortalSwitcher } from "./portal-switcher";
+import { AtrasBarra, MigasBarra } from "./volver-barra";
 import {
   LinkPorDefecto,
   type LinkComponent,
@@ -33,6 +34,8 @@ export type ComunesBarra = {
   volver?: Volver;
   /** El "Atrás" solo en teléfono (detalle dentro de una vista dividida en md+). */
   volverSoloTelefono?: boolean;
+  /** Con `volverSoloTelefono`: el "Atrás" sigue en la barra de 768 a 1023 px (ficha de un solo panel). */
+  volverBajoLg?: boolean;
   Link?: LinkComponent;
 };
 
@@ -60,7 +63,12 @@ export function TopBarTelefono(props: ComunesBarra & { acciones?: ReactNode }) {
             className="min-w-0"
           />
         )}
-        <div className={cn("ml-auto flex flex-none items-center gap-0.5", volver && acciones && "pr-2")}>
+        <div
+          className={cn(
+            "ml-auto flex flex-none items-center gap-0.5",
+            volver && acciones && "pr-2",
+          )}
+        >
           {volver ? (
             acciones
           ) : (
@@ -89,25 +97,15 @@ type AppBarProps = ComunesBarra & {
 /** iPad y desktop: título (o migas "‹ Cuentas / Logística Andina"), búsqueda ⌘K, campana, usuario y acción principal. 60 px. */
 export function AppBar(props: AppBarProps) {
   const { titulo, insignia, acciones, usuario, menuUsuario, campana, onBuscar } = props;
-  const volver = props.volverSoloTelefono ? undefined : props.volver;
+  const bajoLg = Boolean(props.volverSoloTelefono && props.volverBajoLg);
+  const volver = props.volverSoloTelefono && !bajoLg ? undefined : props.volver;
   const Link = props.Link ?? LinkPorDefecto;
   return (
     <header className="sticky top-0 z-20 hidden h-[60px] flex-none items-center gap-3 border-b border-border bg-bg/95 px-6 backdrop-blur md:flex xl:px-8">
-      {volver ? (
-        <Link
-          href={volver.href}
-          className="-ml-2 flex size-11 flex-none items-center justify-center rounded-md text-fg hover:bg-fill"
-          aria-label={`Volver a ${volver.etiqueta}`}
-        >
-          <ChevronLeft className="size-5" />
-        </Link>
-      ) : null}
+      {volver ? <AtrasBarra volver={volver} bajoLg={bajoLg} Link={Link} /> : null}
       <div className="flex min-w-0 flex-1 items-center gap-3">
         {volver ? (
-          <div className="min-w-0">
-            <p className="t-caption truncate">{volver.etiqueta}</p>
-            <h1 className="truncate text-md leading-6 font-semibold text-fg">{titulo}</h1>
-          </div>
+          <MigasBarra volver={volver} titulo={titulo} bajoLg={bajoLg} />
         ) : (
           <h1 className={cn("t-heading min-w-0 truncate text-fg", insignia && "flex-none")}>
             {titulo}

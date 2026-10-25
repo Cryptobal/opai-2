@@ -39,7 +39,6 @@ export function AppShell(props: AppShellProps) {
       <Rail
         items={nav}
         rutaActual={rutaActual}
-        subtitulo={subtituloMarca}
         portales={props.portales}
         portalActual={props.portalActual}
         tenant={props.tenant}

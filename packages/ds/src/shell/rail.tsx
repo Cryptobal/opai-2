@@ -29,6 +29,9 @@ function ItemRiel({
       <Link
         href={item.href}
         aria-current={activo ? "page" : undefined}
+        {...(item.corta && item.corta !== item.etiqueta
+          ? { title: item.etiqueta, "aria-label": item.etiqueta }
+          : {})}
         className={cn(
           "flex h-14 w-16 flex-col items-center justify-center gap-1 rounded-md text-[11px] leading-[14px] font-medium",
           activo ? "bg-fill text-fg" : "text-fg-muted hover:bg-fill",
@@ -45,7 +48,6 @@ function ItemRiel({
 }
 
 export type RailProps = NavProps & {
-  subtitulo?: string | undefined;
   /** Selector de portal y de empresa bajo la marca (iPad, 768–1279 px). */
   portales: readonly Portal[];
   portalActual: string;
@@ -62,7 +64,6 @@ export function Rail({
   items,
   rutaActual,
   Link = LinkPorDefecto,
-  subtitulo,
   portales,
   portalActual,
   tenant,
@@ -73,9 +74,8 @@ export function Rail({
       aria-label="Principal"
       className="sticky top-0 hidden h-dvh w-20 flex-none flex-col items-center border-r border-border bg-surface py-3 md:flex xl:hidden"
     >
-      <span className="mt-2 mb-3 flex flex-col items-center gap-0.5">
-        <span className="text-[13px] leading-4 font-bold tracking-[-0.02em] text-fg">OPAI</span>
-        {subtitulo ? <span className="t-caption">{subtitulo}</span> : null}
+      <span className="mt-2 mb-3 text-[13px] leading-4 font-bold tracking-[-0.02em] text-fg">
+        OPAI
       </span>
       <PortalSwitcher
         portales={portales}

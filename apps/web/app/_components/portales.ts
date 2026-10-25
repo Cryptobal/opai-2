@@ -2,12 +2,12 @@ import type { Portal } from "@opai/ds";
 
 /** Portales de OPAI 2.0. Cada uno tiene su route group; el acceso es por membresía (ADR-016). */
 export const PORTALES: readonly Portal[] = [
-  { id: "erp", etiqueta: "ERP", href: "/" },
-  { id: "supervisor", etiqueta: "Supervisor", href: "/supervisor" },
-  { id: "trabajador", etiqueta: "Trabajador", href: "/trabajador" },
-  { id: "terreno", etiqueta: "Terreno", href: "/terreno" },
-  { id: "cliente", etiqueta: "Cliente", href: "/cliente" },
-  { id: "platform", etiqueta: "Plataforma", href: "/platform" },
+  { id: "erp", etiqueta: "ERP", corta: "ERP", href: "/" },
+  { id: "supervisor", etiqueta: "Supervisor", corta: "Superv.", href: "/supervisor" },
+  { id: "trabajador", etiqueta: "Trabajador", corta: "Trabaj.", href: "/trabajador" },
+  { id: "terreno", etiqueta: "Terreno", corta: "Terreno", href: "/terreno" },
+  { id: "cliente", etiqueta: "Cliente", corta: "Cliente", href: "/cliente" },
+  { id: "platform", etiqueta: "Plataforma", corta: "Plataf.", href: "/platform" },
 ];
 
 export const ETIQUETA_ROL: Record<string, string> = {

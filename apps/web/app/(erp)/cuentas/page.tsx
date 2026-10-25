@@ -27,15 +27,19 @@ export default function Cuentas({ searchParams }: Props) {
           Nueva cuenta
         </EnlaceBotonHoja>
       }
-      cargar={async () => cargarCuentas(await filtrosDe(searchParams))}
+      cargar={async () => {
+        const p = await filtrosDe(searchParams);
+        return { ...(await cargarCuentas(p)), q: p.q };
+      }}
     >
       {(l) => (
         <>
           <SplitScreen
             telefono="lista"
+            unPanelHastaLg
             etiquetaLista="Lista de cuentas"
             vacio={{ texto: "Elige una cuenta", icono: Building2 }}
-            lista={<ListaCuentas state={l.state} items={l.items} />}
+            lista={<ListaCuentas state={l.state} items={l.items} q={l.q} />}
           />
           <HojaCuenta />
         </>

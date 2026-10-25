@@ -5,7 +5,7 @@ import { Loading, SplitScreen } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
-import { leerParametros, type Parametros, type SearchParams } from "@/lib/parametros";
+import { conBusqueda, leerParametros, type Parametros, type SearchParams } from "@/lib/parametros";
 import type { InstalacionDetalle } from "@/lib/tipos-maestros";
 import { vocabularioActual } from "@/lib/vocabulario";
 
@@ -33,6 +33,7 @@ export function PaginaInstalacion({ params, searchParams, tab, acciones, childre
       completo
       cargando="detalle"
       volverSoloTelefono
+      volverBajoLg
       acciones={
         acciones ?? (
           <EnlaceBoton href="/instalaciones/nueva" icono={Plus}>
@@ -53,13 +54,17 @@ export function PaginaInstalacion({ params, searchParams, tab, acciones, childre
       }}
       opciones={(d) => ({
         titulo: d.voc.titulo("instalacion"),
-        volver: { href: "/instalaciones", etiqueta: d.voc.titulo("instalacion") },
+        volver: {
+          href: conBusqueda("/instalaciones", d.p.q),
+          etiqueta: d.voc.titulo("instalacion"),
+        },
       })}
     >
       {({ id, p, datos, lista, voc }) => (
         <>
           <SplitScreen
             telefono="detalle"
+            unPanelHastaLg
             etiquetaLista={`Lista de ${voc.titulo("instalacion").toLowerCase()}`}
             lista={
               <ListaInstalaciones
@@ -69,6 +74,7 @@ export function PaginaInstalacion({ params, searchParams, tab, acciones, childre
                 titulo={voc.titulo("instalacion")}
                 singular={voc.instalacion.singular}
                 seleccionada={id}
+                q={p.q}
               />
             }
             detalle={
