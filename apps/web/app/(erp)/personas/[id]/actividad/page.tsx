@@ -1,6 +1,7 @@
 import { ActividadFicha } from "@/app/_components/maestros/actividad-ficha";
 import type { SearchParams } from "@/lib/parametros";
 
+import { conParametros } from "../../_componentes/lista-personas";
 import { PaginaPersona } from "../../_componentes/pagina-persona";
 
 export const metadata = { title: "Actividad de la persona" };
@@ -16,6 +17,7 @@ export default function ActividadPersona(props: Props) {
           entidad={{ tipo: "persona", id: p.id }}
           actor={q["actor"]}
           base={`/personas/${p.id}/actividad`}
+          consulta={conParametros(q)}
         />
       )}
     </PaginaPersona>

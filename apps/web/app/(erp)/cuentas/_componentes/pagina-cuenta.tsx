@@ -1,7 +1,7 @@
 import { Plus } from "lucide-react";
-import type { ReactNode } from "react";
+import { type ReactNode, Suspense } from "react";
 
-import { SplitScreen } from "@opai/ds";
+import { Loading, SplitScreen } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
@@ -9,8 +9,9 @@ import type { Parametros, SearchParams } from "@/lib/parametros";
 import type { CuentaDetalle } from "@/lib/tipos-maestros";
 
 import { cargarCuenta, cargarCuentas, filtrosDe } from "./datos";
+import { DetalleCuenta } from "./detalle-cuenta";
 import { HojaCuenta } from "./diferidas";
-import { FichaCuenta, type TabCuenta } from "./ficha-cuenta";
+import type { TabCuenta } from "./ficha-cuenta";
 import { ListaCuentas } from "./lista-cuentas";
 
 type Props = {
@@ -42,23 +43,26 @@ export function PaginaCuenta({ params, searchParams, tab, acciones, children }: 
       }
       cargar={async () => {
         const [{ id }, p] = await Promise.all([params, filtrosDe(searchParams)]);
-        const [lista, ficha] = await Promise.all([cargarCuentas(p), cargarCuenta(id)]);
-        return { id, p, lista, ficha };
+        // Solo la lista se espera aquí: la ficha arranca en paralelo y se espera dentro de su propio Suspense.
+        const datos = cargarCuenta(id);
+        datos.catch(() => undefined); // si la lista falla, la promesa no queda sin manejar
+        return { id, p, datos, lista: await cargarCuentas(p) };
       }}
     >
-      {({ id, p, lista, ficha }) => (
+      {({ id, p, datos, lista }) => (
         <>
           <SplitScreen
             telefono="detalle"
             etiquetaLista="Lista de cuentas"
             lista={<ListaCuentas state={lista.state} items={lista.items} seleccionada={id} />}
             detalle={
-              <FichaCuenta state={ficha.state} cuenta={ficha.cuenta} tab={tab}>
-                {ficha.cuenta ? children(ficha.cuenta, p) : null}
-              </FichaCuenta>
+              <Suspense fallback={<Loading variante="detalle" />}>
+                <DetalleCuenta datos={datos} p={p} tab={tab}>
+                  {children}
+                </DetalleCuenta>
+              </Suspense>
             }
           />
-          {ficha.cuenta ? <HojaCuenta cuenta={ficha.cuenta} /> : null}
           <HojaCuenta />
         </>
       )}

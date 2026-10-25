@@ -4,6 +4,7 @@ import { FichaDocumentos } from "@/app/_components/documentos/ficha-documentos";
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import type { SearchParams } from "@/lib/parametros";
 
+import { consultaExtra } from "../../_componentes/lista-personas";
 import { PaginaPersona } from "../../_componentes/pagina-persona";
 
 export const metadata = { title: "Documentos de la persona" };
@@ -16,13 +17,15 @@ export default function DocumentosPersona(props: Props) {
     <PaginaPersona
       {...props}
       tab="documentos"
-      acciones={
-        <EnlaceBotonHoja href="?subir=1" icono={Upload}>
+      acciones={(q) => (
+        <EnlaceBotonHoja href={`?subir=1${consultaExtra(q)}`} icono={Upload}>
           Subir documento
         </EnlaceBotonHoja>
-      }
+      )}
     >
-      {(p) => <FichaDocumentos entidad={{ tipo: "persona", id: p.id }} />}
+      {(p, q) => (
+        <FichaDocumentos entidad={{ tipo: "persona", id: p.id }} consulta={consultaExtra(q)} />
+      )}
     </PaginaPersona>
   );
 }

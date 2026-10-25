@@ -20,7 +20,14 @@ const CAPA = {
 } as const;
 
 /** Tab Documentos de una ficha (16): resumen de vigencias, faltantes punteados y lista por tipo. */
-export async function FichaDocumentos({ entidad }: { entidad: EntidadDocumento }) {
+export async function FichaDocumentos({
+  entidad,
+  consulta = "",
+}: {
+  entidad: EntidadDocumento;
+  /** Continuación de la URL de la lista (`&q=…`) para que subir un documento no pierda la búsqueda. */
+  consulta?: string;
+}) {
   const [r, t] = await Promise.all([
     ejecutarComoUsuario<{ items: Documento[]; faltantes: { tipoId: string; nombre: string }[] }>(
       "erp",
@@ -49,7 +56,11 @@ export async function FichaDocumentos({ entidad }: { entidad: EntidadDocumento }
             {faltantes.map((f) => f.nombre).join(", ")}
           </span>
         ) : null}
-        <EnlaceBotonHoja href="?subir=1" icono={Upload} className="ml-auto max-md:w-full">
+        <EnlaceBotonHoja
+          href={`?subir=1${consulta}`}
+          icono={Upload}
+          className="ml-auto max-md:w-full"
+        >
           Subir documento
         </EnlaceBotonHoja>
       </div>
@@ -60,7 +71,7 @@ export async function FichaDocumentos({ entidad }: { entidad: EntidadDocumento }
           vacio: {
             titulo: "Sin documentos",
             descripcion: "Sube contratos, certificados y acreditaciones con su vencimiento.",
-            accion: <EnlaceBotonHoja href="?subir=1">Subir documento</EnlaceBotonHoja>,
+            accion: <EnlaceBotonHoja href={`?subir=1${consulta}`}>Subir documento</EnlaceBotonHoja>,
           },
         }}
       >
@@ -117,7 +128,11 @@ export async function FichaDocumentos({ entidad }: { entidad: EntidadDocumento }
                 Obligatorio · nunca se subió. Un documento vencido se renueva en su fila.
               </span>
             </span>
-            <EnlaceBotonHoja href={`?subir=1&tipo=${f.tipoId}`} variante="secondary" icono={Upload}>
+            <EnlaceBotonHoja
+              href={`?subir=1&tipo=${f.tipoId}${consulta}`}
+              variante="secondary"
+              icono={Upload}
+            >
               Subir
             </EnlaceBotonHoja>
           </div>

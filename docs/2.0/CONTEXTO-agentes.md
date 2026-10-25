@@ -27,7 +27,7 @@ Carlos decidió construir **OPAI 2.0 desde cero**: un SaaS modular, multi-tenant
 - Ciclo de cada módulo (ADR-047): extracción de 1.0 → especificación → aprobación de Carlos → Design Prompt → diseño aprobado → brief → PR → revisión → merge con squash (bot «OPAI 2.0») → QA.
 - `main` cambia varias veces al día. Antes de opinar sobre el avance, revisa las tareas en Linear y la foto técnica de `ESTADO.md`; no te fíes de lo que viste ayer.
 - Tú no escribes código, no haces push ni integras PRs en `opai-2` (la única excepción es el bot «OPAI 2.0», que integra según ADR-043 v3). Si detectas un bug o una brecha de paridad usando el MCP de 2.0, repórtalo a Carlos con la herramienta usada, el input y la respuesta; él lo lleva al proyecto.
-- El estado de las tareas vive en Linear (equipo OPAI, IDs `OPAI-n`); `docs/2.0/ESTADO.md` es la foto técnica (versiones, infraestructura, riesgos aceptados y decisiones). Reglas del flujo en `AGENTS.md`, «Tareas (Linear)». El plan, en `docs/2.0/ROADMAP.md`.
+- El estado de las tareas vive en Linear (equipo CAR, IDs `CAR-n`); `docs/2.0/ESTADO.md` es la foto técnica (versiones, infraestructura, riesgos aceptados y decisiones). Reglas del flujo en `AGENTS.md`, «Tareas (Linear)». El plan, en `docs/2.0/ROADMAP.md`.
 - Las decisiones viven en `docs/2.0/01-decisiones.md`.
 
 ## Qué va a cambiar para ti

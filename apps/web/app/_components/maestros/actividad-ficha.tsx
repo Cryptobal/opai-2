@@ -20,11 +20,20 @@ export async function ActividadFicha({
   entidad,
   actor,
   base,
+  consulta = "",
 }: {
   entidad: Entidad;
   actor?: string | undefined;
   base: string;
+  /** Parámetros de la lista (`?q=…`) que el filtro conserva al cambiar de "Todo" a "Personas" o "Agentes". */
+  consulta?: string;
 }) {
+  const enlace = (a?: "persona" | "agente") => {
+    const q = new URLSearchParams(consulta);
+    if (a) q.set("actor", a);
+    const t = q.toString();
+    return t ? `${base}?${t}` : base;
+  };
   const filtro = actor === "persona" || actor === "agente" ? actor : undefined;
   const r = await ejecutarComoUsuario<Actividad>("erp", "core.actividad.list", {
     entidad,
@@ -43,9 +52,9 @@ export async function ActividadFicha({
           activa={filtro ?? "todo"}
           Link={LinkNext}
           opciones={[
-            { id: "todo", etiqueta: "Todo", href: base },
-            { id: "persona", etiqueta: "Personas", href: `${base}?actor=persona` },
-            { id: "agente", etiqueta: "Agentes", href: `${base}?actor=agente` },
+            { id: "todo", etiqueta: "Todo", href: enlace() },
+            { id: "persona", etiqueta: "Personas", href: enlace("persona") },
+            { id: "agente", etiqueta: "Agentes", href: enlace("agente") },
           ]}
           className="self-start"
         />
