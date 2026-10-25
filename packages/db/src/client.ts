@@ -1,9 +1,32 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 
 import { PrismaClient } from "./generated/prisma/client";
+import { notificarConsulta } from "./metricas";
+
+/**
+ * Cliente de la app con el contador de consultas por request (ADR-045): cada operación de modelo
+ * avisa a `notificarConsulta` antes de ejecutarse. El hook es transparente (devuelve `query(args)`
+ * sin tocar el resultado) y no cubre `$executeRaw`/`$queryRaw`, así que el `set_config` de
+ * `forTenant`/`forUser`/`enTransaccion` no se cuenta.
+ */
+function conContador(cliente: PrismaClient) {
+  return cliente.$extends({
+    name: "contadorConsultas",
+    query: {
+      $allModels: {
+        $allOperations({ args, query }) {
+          notificarConsulta();
+          return query(args);
+        },
+      },
+    },
+  });
+}
+
+export type ClienteApp = ReturnType<typeof conContador>;
 
 type Registro = {
-  __opaiDbApp?: PrismaClient;
+  __opaiDbApp?: ClienteApp;
   __opaiDbAdmin?: PrismaClient;
 };
 
@@ -23,8 +46,8 @@ function crearCliente(variable: "DATABASE_URL" | "DATABASE_URL_MIGRATE"): Prisma
  * Es interno al paquete: el código de negocio usa `forTenant(tenantId)`, nunca este cliente,
  * porque sin `app.tenant_id` fijado toda consulta devuelve cero filas.
  */
-export function clienteApp(): PrismaClient {
-  registro.__opaiDbApp ??= crearCliente("DATABASE_URL");
+export function clienteApp(): ClienteApp {
+  registro.__opaiDbApp ??= conContador(crearCliente("DATABASE_URL"));
   return registro.__opaiDbApp;
 }
 
