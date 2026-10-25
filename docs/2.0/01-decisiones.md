@@ -50,7 +50,7 @@ Una entrada por decisión. Las decisiones no se editan: si cambian, se agrega un
 
 ## ADR-005 · Estructuras de sueldo en tres niveles
 
-**Fecha:** 22-oct-2026 · **Estado:** vigente
+**Fecha:** 22-oct-2026 · **Estado:** reemplazado en sus niveles y su resolución por la actualización de ADR-036 (25-oct-2026: capas instalación, puesto y RUT, sin combinarse)
 
 **Contexto.** En 1.0, los sueldos se definen por instalación y existe "sueldo por RUT": una persona con sueldo distinto al de su instalación. CPQ necesita las estructuras para costear y Nómina para liquidar.
 
@@ -323,7 +323,7 @@ Una entrada por decisión. Las decisiones no se editan: si cambian, se agrega un
 
 ## ADR-030 · Roadmap de módulos actualizado
 
-**Fecha:** 23-oct-2026 · **Estado:** vigente · Reemplaza el orden de ADR-009 a partir de la fase 3.
+**Fecha:** 23-oct-2026 · **Estado:** vigente, modificado por ADR-048 (25-oct-2026: Nómina ya no depende de Asistencia; los módulos operativos solo dependen del núcleo) · Reemplaza el orden de ADR-009 a partir de la fase 3.
 
 | Fase | Contenido | Corte de Gard |
 |---|---|---|
@@ -408,13 +408,26 @@ OPAI puede ofrecer además **automatizaciones alojadas** (por ejemplo, búsqueda
 
 ## ADR-036 · Puestos de servicio y vínculos laborales en el núcleo
 
-**Fecha:** 23-oct-2026 · **Estado:** vigente · Completa ADR-005. Brief 02.
+**Fecha:** 23-oct-2026 · **Estado:** vigente (capas de sueldo actualizadas por Carlos el 25-oct-2026, al final; la jornada pactada pasa al vínculo laboral por ADR-048) · Completa ADR-005. Brief 02.
 
 **Contexto.** En 1.0 el puesto operativo (instalación + cargo + rol de turno + horario + dotación) vive en Operaciones y el patrón de turno es una entidad de CPQ; la relación laboral está repartida entre `OpsGuardia` (estado de ciclo de vida, contrato) y `OpsPersona`. CPQ cotiza puestos, Operaciones los cubre, Asistencia marca contra ellos y Nómina liquida con su estructura.
 
 **Decisión.** El **puesto de servicio** (`core.puestos`: instalación, cargo, nombre, patrón `dias_trabajo × dias_descanso`, horario `[inicio, fin)` con cruce de medianoche, jornada, dotación, vigencia) y el **vínculo laboral** (`core.vinculos_laborales`: persona, cargo, tipo de contrato, inicio, término, motivo; uno vigente por persona) son del núcleo porque los necesitan dos o más módulos vendibles. El patrón de turno va en el puesto, no en una entidad aparte. Previsión, cuentas bancarias, anticipos y tallas son facetas de Nómina u Operaciones; PIN, Face ID y jornada, de Asistencia y Portales. Las estructuras de sueldo se versionan por vigencia sin solapes en el mismo nivel y referencia; la resolución persona → puesto → cargo vive en `packages/domain`; el nivel persona exige motivo y queda auditado.
 
 **Consecuencias.** CPQ y Operaciones referencian `core.puestos` en vez de crear los suyos. Una persona puede existir sin vínculo vigente (inactiva). Las asignaciones persona ↔ puesto llegan con Operaciones (fase 3).
+
+**Actualización de Carlos (25-oct-2026): capas de sueldo.** Reemplaza los tres niveles de ADR-005 (cargo → puesto → persona) y la resolución con herencia por concepto que implementó el Brief 02.
+
+1. **Tres capas de sueldo:** (a) **instalación**, la capa por defecto; (b) **puesto**, cuando el puesto tiene su propio sueldo; (c) **sueldo por RUT** (persona), la excepción, con motivo obligatorio y auditoría.
+2. **Una sola capa por asignación.** Las capas no se combinan: rige la más específica que exista (RUT, después puesto, después instalación) y su estructura se aplica completa. No hay herencia de conceptos entre capas.
+3. **El cargo deja de ser una capa de sueldo.** Sigue siendo catálogo (nombre, descripción, sensibilidad del sueldo) y atributo del puesto y del vínculo laboral, pero no define montos.
+4. **«Grupo de sueldo» fuera de la v1.** Pasa al backlog; se reconsidera solo si un cliente lo pide.
+5. **Anexo de contrato.** Un cambio de rol, de capa, de monto o de instalación de una persona genera el borrador del anexo de contrato del núcleo (ADR-048, punto 5), que aprueba RRHH; en particular, todo cambio de la capa vigente o del monto.
+6. Las estructuras siguen versionadas por vigencia, sin solapes en la misma capa y referencia; la resolución vive en `packages/domain` y devuelve la capa que rigió, para que la liquidación y el costeo la guarden.
+
+**Jornada pactada (ADR-048, 25-oct).** La jornada pactada deja de ser faceta de Asistencia y Portales y pasa a ser dato del vínculo laboral en el núcleo (`core.vinculos_laborales`), porque es parte del contrato y Asistencia la necesita para marcar sin Operaciones. PIN y Face ID siguen siendo de Asistencia.
+
+**Consecuencias de la actualización.** El código del Brief 02 (`packages/domain/src/estructuras.ts`, `core.estructuras_sueldo.nivel` con `cargo | puesto | persona` y conceptos `NULL` que heredan) no cumple esta regla. Se corrige en un brief propio, con migración aditiva: nueva capa `instalacion`, resolución sin herencia y retiro del nivel `cargo` (sin borrar datos; las filas `cargo` existentes se convierten o se archivan con la decisión de Carlos sobre los datos de `dev`). Este PR no toca código. CPQ (ADR-042, punto 4) costea con la capa puesto o instalación cuando existe (ampliaciones y renovaciones); cómo se cotiza el sueldo de una instalación nueva queda como pregunta abierta en ADR-048 (con recomendación).
 
 ---
 
@@ -519,7 +532,7 @@ OPAI puede ofrecer además **automatizaciones alojadas** (por ejemplo, búsqueda
 
 ## ADR-042 · CPQ configurable por tenant y vertical, con el margen financiero de 1.0
 
-**Fecha:** 23-oct-2026 · **Estado:** vigente (aprobado por Carlos el 23 y 24-oct; respuestas en `PREGUNTAS-carlos.md`) · Concreta y **modifica** ADR-021: los ámbitos de variable pasan a `tenant`, `cuenta` (antes "cliente"), `instalacion`, `cotizacion` y `linea` (antes "puesto": la línea de puesto); y el modelo se edita en la pantalla "Modelo de costeo" del módulo CPQ, no en Configuración → CPQ (punto 8). Requisito de Carlos: no copiar el CPQ de 1.0; mucho mejor visualmente; ítems y variables de costo definidos por cada tenant y vertical; se mantiene el cálculo del margen financiero.
+**Fecha:** 23-oct-2026 · **Estado:** vigente (aprobado por Carlos el 23 y 24-oct; respuestas en `PREGUNTAS-carlos.md`; el sueldo del punto 4 sale de las capas de ADR-036 actualizado el 25-oct, no de los niveles de ADR-005) · Concreta y **modifica** ADR-021: los ámbitos de variable pasan a `tenant`, `cuenta` (antes "cliente"), `instalacion`, `cotizacion` y `linea` (antes "puesto": la línea de puesto); y el modelo se edita en la pantalla "Modelo de costeo" del módulo CPQ, no en Configuración → CPQ (punto 8). Requisito de Carlos: no copiar el CPQ de 1.0; mucho mejor visualmente; ítems y variables de costo definidos por cada tenant y vertical; se mantiene el cálculo del margen financiero.
 
 **Decisión.**
 
@@ -681,3 +694,54 @@ No se encontró: render estático roto, falta de prefetch, layouts que recarguen
 **Ciclo de cada módulo:** extracción de 1.0 (si existe en 1.0) → **especificación** → aprobación de Carlos → Design Prompt → diseño aprobado → brief → PR (Claude) → revisión (Revisor) → integración con squash por el bot «OPAI 2.0» cuando se cumplen las condiciones de ADR-043 v3 (Carlos puede vetar) → QA en pantallas (Diseño y QA) *(ciclo actualizado por ADR-043 v3, 24-oct)*. Al cerrar cada brief, el reporte termina con un **resumen ejecutivo para Carlos** (cinco líneas como máximo: qué se hizo, qué cambia para Gard, qué decide él, qué sigue) que también queda en `ESTADO.md`.
 
 **Consecuencias.** Comercial y CPQ ya tienen extracción y ADR-040/042: su especificación se escribe a partir de ellos antes del Design Prompt. El formato del brief agrega la sección 17 «Resumen ejecutivo».
+
+---
+
+## ADR-048 · Módulos vendibles por separado: dependencias duras y fuentes opcionales
+
+**Fecha:** 25-oct-2026 · **Estado:** vigente (decisión de Carlos, 25-oct-2026) · Completa ADR-003 y ADR-036; **modifica** ADR-030. Modifica el orden de dependencias de `ROADMAP.md` (Nómina ya no depende de la fase 4).
+
+**Contexto.** ADR-003 exige que un módulo apagado no rompa a otro, pero el plan encadenaba módulos operativos: Nómina «sobre asistencia», la pauta con «asistencia de hoy» y Asistencia contra puestos de Operaciones. Así, un cliente que solo quiere Nómina o solo Asistencia tendría que comprar la cadena entera.
+
+**Decisión.**
+
+1. **Regla.** Cada módulo vendible depende **solo del núcleo**. Los demás módulos son **fuentes opcionales**: si el tenant los tiene activos, el módulo los usa; si no, ofrece **entrada manual o importación**. Nunca hay una dependencia dura entre módulos operativos. Las únicas dependencias duras son las ya decididas: **CPQ → Comercial** (ADR-040: no hay cotización sin negocio) y **Licitaciones → CPQ** (ADR-030 y documento de arranque: Licitaciones se construye sobre el motor CPQ).
+2. **Cómo se usa una fuente.** El manifest declara `dependencias` (solo núcleo, más las dos dependencias duras del punto 1) y, aparte, sus **fuentes opcionales**. Un módulo no importa código de su fuente: lee lo que la fuente publica a través de un contrato del núcleo (tipo en `packages/domain`, entregado por capacidad o evento). Con la fuente apagada, la pantalla y las capacidades siguen funcionando con la entrada manual o la importación, sin errores ni pestañas vacías.
+3. **Contrato de la fuente para el tiempo trabajado: «resumen del periodo por persona».** Tipo puro en `packages/domain`, por persona y periodo: días trabajados, horas ordinarias, horas extra, ausencias por tipo (según un catálogo de tipos de ausencia que se fija en la especificación de Nómina) y **origen** (`manual`, `importacion`, `pauta` o `asistencia`). Horas en minutos enteros; fechas de calendario en la zona del tenant. Lo producen la entrada manual, la importación Excel, Operaciones (desde la pauta) y Asistencia (desde las marcas); lo consume Nómina y puede consumirlo cualquier módulo futuro.
+4. **Tabla por módulo.** Las filas de Nómina, Operaciones y Asistencia y el anexo de contrato son decisión de Carlos; las demás filas y lo marcado como *(propuesta)* se confirman en la especificación de cada módulo (ADR-047).
+
+| Módulo | Necesita del núcleo | Fuentes opcionales | Qué pasa cuando falta cada fuente |
+|---|---|---|---|
+| **Nómina / Payroll** | Personas, vínculo laboral, cargos, estructuras de sueldo (capas de ADR-036), anexos de contrato, documentos | Operaciones (pauta), Asistencia (marcas) | Sin ninguna: días, horas y ausencias del periodo por **entrada manual o importación Excel** del resumen del periodo. Sin Asistencia: el resumen sale de la pauta. Sin Operaciones: sale de las marcas. **La liquidación es la misma en los tres casos** y guarda el origen de los días. |
+| **Operaciones** (puestos, asignaciones y pauta) | Instalaciones, puestos, personas, vínculo laboral | Asistencia | Sin Asistencia: la pauta diaria muestra **«confirmar cobertura»**, un registro operativo que **no es la marca legal** para la DT. La pestaña **«Asistencia de hoy»** aparece solo con Asistencia activa. |
+| **Asistencia** | Personas, vínculo laboral (jornada pactada), instalaciones, documentos | Operaciones (puestos, asignaciones y pauta) | Sin Operaciones: se marca contra la **jornada pactada del vínculo laboral**, sin necesidad de un puesto. *(Propuesta: con Operaciones, se marca contra el turno de la pauta, y los reportes DT salen en ambos casos.)* |
+| **CPQ** | Cuentas, instalaciones, cargos, puestos, estructuras de sueldo | — (depende de **Comercial**, ADR-040) | No se vende sin Comercial. |
+| **Licitaciones** | Cuentas, instalaciones, documentos | — (depende de **CPQ**, ADR-030) | No se vende sin CPQ (y, por lo tanto, sin Comercial). |
+| **Comercial** | Cuentas, contactos, instalaciones, etiquetas, actividad | CPQ | Sin CPQ: el negocio lleva valor mensual manual y no tiene pestaña de cotizaciones. |
+| **Rondas** (ADR-024) | Instalaciones, personas, documentos | Operaciones | Sin Operaciones: la ronda se asigna a la instalación y a personas, no a un turno de la pauta. |
+| **Tickets** (ADR-025) | Cuentas, instalaciones, personas | Todos | Funciona solo; los vínculos a entidades de otros módulos aparecen cuando esos módulos están activos. |
+| **Finanzas** | Cuentas, instalaciones, documentos | Comercial y CPQ (facturación desde lo vendido), Nómina (remuneraciones al flujo de caja) | Sin ellos: facturación y egresos por entrada manual o importación. |
+
+5. **Anexo de contrato en el núcleo.** Vive junto a `core.vinculos_laborales` y `core.documentos`, para que funcione aunque el tenant no tenga Nómina. Un cambio de rol, de capa de sueldo, de monto o de instalación (ADR-036, actualización del 25-oct) **genera solo el borrador** del anexo, con la marca del perfil del tenant (ADR-028): hasta el Brief 09 se usa una plantilla base del sistema, y desde el editor de plantillas del Brief 09 el tenant la puede reemplazar por la suya; **RRHH lo aprueba** y el documento queda en `core.documentos` con su bitácora (ADR-039).
+6. **Pauta por series y excepciones.** La pauta guarda solo las **series** (el patrón con su fecha de inicio de ciclo) y las **excepciones** (ausencias, reemplazos, PPC, turnos extra), y **calcula el resto**. Nunca guarda una fila por trabajador por día. Al repintar (cambiar una serie o su inicio de ciclo) **no se modifican los días pasados ni los días que ya tienen marca**. Esta regla pasa a `extraccion/operaciones.md` y a `modulos/operaciones.md` cuando se escriban (hoy no existen; ver `ROADMAP.md`, fase 3).
+7. **Capacidades, paridad, auditoría y aislamiento.** Todo lo que este ADR agrega se expone como capacidad (`defineCapability`), igual que el resto de OPAI (ADR-004, ADR-034):
+   - **Resumen del periodo:** la entrada manual y la importación son capacidades de escritura con `dry_run` (la importación devuelve una vista previa de filas válidas y errores antes de escribir) e `idempotencyKey`; su lectura también es una capacidad.
+   - **Anexo de contrato:** generar el borrador, aprobarlo y rechazarlo son capacidades con `dry_run` e `idempotencyKey`; la aprobación es una acción humana de RRHH y, para agentes, pide aprobación (`APPROVAL_REQUIRED`).
+   - **Paridad:** las tres (resumen, importación y anexo) están disponibles con los mismos permisos en la UI, en la API v1 y en el MCP, y toda escritura real queda en `core.audit_events`.
+   - **Aislamiento:** las tablas nuevas o ampliadas del núcleo (anexos de contrato, resumen del periodo si se persiste, y los campos nuevos de `core.vinculos_laborales`: instalación, puesto y jornada pactada) llevan `tenant_id` con RLS y la política `tenant_isolation` (ADR-002), en migraciones aditivas.
+
+**Consecuencias.**
+
+- Nómina I deja de depender de la fase 4: liquida sobre el resumen del periodo y **se puede adelantar** si hay un cliente que la quiera comprar sola (`ROADMAP.md`).
+- `core.vinculos_laborales` necesita la instalación (y el puesto, opcional) para resolver la capa de sueldo sin Operaciones; se define en el brief que implemente las capas (pregunta abierta 1).
+- La **jornada pactada** pasa a ser dato del vínculo laboral en el núcleo (es parte del contrato y la necesita Asistencia sin Operaciones). Modifica la asignación de ADR-036, que la dejaba como faceta de Asistencia y Portales; PIN y Face ID siguen siendo de Asistencia.
+- El manifest (`defineModule`) gana la declaración de fuentes opcionales; se implementa en el primer brief que tenga una (Operaciones o Nómina).
+- Cada especificación de módulo (ADR-047) incluye la sección «Sin la fuente X» con lo que muestra y lo que pide cuando falta cada fuente.
+- Este ADR no agrega código ni migraciones.
+
+**Preguntas abiertas para Carlos** (con recomendación; no bloquean este ADR):
+
+1. **Capa de sueldo sin Operaciones.** Recomendación: el vínculo laboral guarda la instalación (obligatoria) y el puesto (opcional); con Operaciones activa, el puesto de la asignación vigente manda.
+2. **Dos fuentes activas a la vez** (pauta y asistencia). Recomendación: un ajuste de Nómina por tenant (ADR-038) elige la fuente del resumen, con asistencia por defecto cuando está activa; las diferencias entre pauta y marcas se muestran antes de cerrar el periodo.
+3. **CPQ con instalación nueva.** Recomendación: el sueldo se define en la línea cotizada y, al ganar el negocio, se ofrece crearlo como capa de instalación o de puesto.
+4. **Repintar la pauta el día de hoy.** Recomendación: hoy se trata como pasado si ya tiene una marca o una cobertura confirmada en la serie; si no, el cambio rige desde hoy.

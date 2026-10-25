@@ -48,7 +48,7 @@ Clasificación según uso real en Gard, declarado por Carlos el 22-oct-2026.
 | Reportes DT, cumplimiento, solicitudes ARCO | Estratégico (certificación) | Reportes DT dentro de **Asistencia**; cumplimiento y ARCO en el núcleo | 4 |
 | Asistencia / marcación Face ID | No en vivo | Módulo **Asistencia**, construido para certificarse | 4 |
 | Finanzas: banca, flujo de caja, compras y ventas, rendiciones, contabilidad, informes; factoring y cesión de DTE; sincronización con proveedores externos | Diario, requiere rediseño | Módulo **Finanzas** con sub-módulos activables y adaptadores por proveedor (DTE, banco, factoring) | 5 |
-| Payroll / estructuras de sueldo (incluye "sueldo por RUT") | Pendiente de Face ID; CPQ depende de las estructuras | Catálogo de cargos y estructuras de sueldo en el **núcleo** (tres niveles: cargo, puesto en instalación, persona); módulo **Nómina** después de Asistencia | 1a (catálogo) / 6 (nómina) |
+| Payroll / estructuras de sueldo (incluye "sueldo por RUT") *(capas y dependencia de Nómina actualizadas el 25-oct-2026 por ADR-036 y ADR-048)* | Pendiente de Face ID; CPQ depende de las estructuras | Catálogo de cargos y estructuras de sueldo en el **núcleo** (tres niveles: cargo, puesto en instalación, persona); módulo **Nómina** después de Asistencia | 1a (catálogo) / 6 (nómina) |
 | Plataforma (admin de tenants) y sitio opai.cl | No optimizado | **Plataforma 2.0** en el núcleo: ciclo de vida de tenant, módulos activos, planes, API keys, vertical; facturación del SaaS cuando Opai SpA exista y haya un tenant externo. Sitio de marketing: app aparte, backlog | 1a (mínima) / 1b |
 | MCP / integración con agentes | Uso diario (100% desde Grokbot) | **Superficie de agentes** del núcleo, generada desde el registro de capacidades | 1a |
 | Notificaciones y alertas (dispersas por módulo) | Exceso de ruido | **Servicio de notificaciones del núcleo**: los módulos emiten eventos, el núcleo decide quién recibe qué, por qué canal y con qué prioridad, según preferencias por rol y usuario. Silencio por defecto | 1b |
@@ -77,7 +77,7 @@ Son las decisiones caras de cambiar después. Se fijan ahora.
 
 6. **Regla núcleo vs módulo.** Si lo necesitan dos o más módulos vendibles, es núcleo; si lo necesita uno, es del módulo. Un módulo solo referencia tablas del núcleo o de módulos declarados como dependencia. Las integraciones opcionales entre módulos se declaran como tales y funcionan con cualquiera de los dos apagado.
 
-7. **Catálogo compartido de cargos y estructuras de sueldo, en tres niveles.** (a) Cargo: estructura base del tenant. (b) Puesto en instalación: lo que se cotiza y se contrata para ese sitio. (c) Persona: excepción por RUT con vigencia, motivo y auditoría ("sueldo por RUT" de 1.0). CPQ cotiza con los niveles (a) y (b); Nómina liquida con la resolución efectiva persona → puesto → cargo. Una sola fuente de verdad para lo que se cotiza y lo que se paga.
+7. **Catálogo compartido de cargos y estructuras de sueldo, en tres niveles.** (a) Cargo: estructura base del tenant. (b) Puesto en instalación: lo que se cotiza y se contrata para ese sitio. (c) Persona: excepción por RUT con vigencia, motivo y auditoría ("sueldo por RUT" de 1.0). CPQ cotiza con los niveles (a) y (b); Nómina liquida con la resolución efectiva persona → puesto → cargo. Una sola fuente de verdad para lo que se cotiza y lo que se paga. *(Actualizado el 25-oct-2026 por ADR-036: capas instalación, puesto y RUT, sin combinarse; el cargo deja de ser capa.)*
 
 8. **Dinero y tiempo.** CLP en enteros; UF y porcentajes en decimal con escala fija; redondeos definidos por regla y documentados. Fechas en UTC con zona horaria del tenant; turnos como intervalos reales `[inicio, fin)` para cubrir cruces de medianoche sin casos especiales.
 
@@ -157,7 +157,7 @@ Prioridad explícita: **Gard vende desde 2.0 lo antes posible.** Por eso el núc
 | **3. Operaciones, Rondas y Portales** | Puestos, pautas, turnos, turnos extra, supervisión, rondas; portales Trabajador, Terreno, Cliente y Supervisor con libro de novedades | **Segundo corte de Gard: operaciones y terreno en 2.0** | 6–8 semanas |
 | **4. Asistencia y DT** | Marcación Face ID, GPS, reportes DT, cumplimiento y ARCO; inicio de certificación sobre 2.0 | Módulo listo para certificar | 4 semanas |
 | **5. Finanzas** | Banca y conciliación, flujo de caja, compras y ventas (DTE), factoring y cesiones, rendiciones, contabilidad, informes; importación del historial financiero | **Tercer corte de Gard: finanzas en 2.0; 1.0 pasa a solo lectura** | 6–8 semanas |
-| **6. Nómina** | Sobre asistencia y estructuras de sueldo | Gard 100% en 2.0 | 4 semanas |
+| **6. Nómina** | Sobre asistencia y estructuras de sueldo *(desde ADR-048, 25-oct: sobre un resumen de periodo; asistencia y pauta son fuentes opcionales)* | Gard 100% en 2.0 | 4 semanas |
 
 Las duraciones son juicio profesional para un equipo de una persona más Claude Code a dedicación alta. Sirven para ordenar, no para comprometer fechas.
 
@@ -180,7 +180,7 @@ Las duraciones son juicio profesional para un equipo de una persona más Claude 
 - Datos a migrar: maestros comerciales y su historial; personas, documentos, cargos y estructuras; historial financiero completo (DTE, facturación, ventas, notas de crédito y débito, cesiones). Cada uno en la fase de su módulo.
 - ORM: Prisma con extensión RLS. Sin evaluación de alternativas.
 - Facturación del SaaS: Opai SpA se constituye en los próximos días; el modelo de planes y módulos activos entra en el núcleo mínimo, el cobro cuando exista el primer tenant externo.
-- "Sueldo por RUT": excepción por persona sobre el sueldo del puesto en la instalación. Tercer nivel del catálogo de estructuras.
+- "Sueldo por RUT": excepción por persona sobre el sueldo del puesto en la instalación. Tercer nivel del catálogo de estructuras. *(Desde ADR-036 actualizado el 25-oct: capa más específica sobre puesto e instalación, sin combinarse.)*
 - Vertical: el producto es multi-vertical (seguridad, aseo, outsourcing, mantenimiento). Vocabulario por tenant.
 - Orden: Comercial y CPQ inmediatamente después del núcleo mínimo. Licitaciones después del primer corte.
 - UX: mobile e iPad first en todo; misma UX en todos los módulos vía DS 2.0 y patrones de pantalla.
