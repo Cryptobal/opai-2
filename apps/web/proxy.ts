@@ -36,7 +36,11 @@ export async function proxy(request: NextRequest) {
     if (esIdInvalido(request.nextUrl.pathname) || (await noExiste(request))) {
       return NextResponse.rewrite(new URL(destino404(request.nextUrl.pathname), request.url));
     }
-    return NextResponse.next();
+    // Marca de inicio del request para el `total` de `Server-Timing` (ADR-045): la página la lee en
+    // `MarcadorMetricas`. Date.now() (época) es comparable entre el proxy y el render.
+    const headers = new Headers(request.headers);
+    headers.set("x-opai-t0", String(Date.now()));
+    return NextResponse.next({ request: { headers } });
   }
   const login = new URL("/login", request.url);
   const destino = request.nextUrl.pathname + request.nextUrl.search;
