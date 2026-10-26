@@ -1,3 +1,4 @@
+import type { DatoPersonalDeclarado } from "@opai/domain";
 import type { z } from "zod";
 
 import { registrarCapacidades } from "./registry";
@@ -35,6 +36,8 @@ export type ModuleManifest = {
   /** Eventos que emite. El núcleo enruta notificaciones a partir de ellos (ADR-008). */
   eventos: readonly EventoDeDominio[];
   capacidades: readonly Capacidad[];
+  /** Inventario de datos personales (RAT, Ley 21.719). `defineDatosPersonales(id, [...])`. */
+  datosPersonales?: readonly DatoPersonalDeclarado[];
 };
 
 /** Declara un módulo validando que ids, permisos y capacidades le pertenezcan. */
@@ -61,6 +64,13 @@ export function defineModule(manifest: ModuleManifest): ModuleManifest {
   for (const evento of manifest.eventos) {
     if (!evento.id.startsWith(`${id}.`)) {
       throw new Error(`El evento "${evento.id}" del módulo "${id}" debe empezar con "${id}.".`);
+    }
+  }
+  for (const dato of manifest.datosPersonales ?? []) {
+    if (dato.modulo !== id) {
+      throw new Error(
+        `El inventario de datos personales "${dato.tabla}" no pertenece al módulo "${id}".`,
+      );
     }
   }
   return manifest;

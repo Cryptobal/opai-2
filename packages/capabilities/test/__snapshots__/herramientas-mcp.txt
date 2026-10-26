@@ -32,6 +32,7 @@ core_cuentas_set_estado
 core_cuentas_set_representantes
 core_cuentas_update
 core_cumplimiento_estado
+core_cumplimiento_rat
 core_documento_tipos_create
 core_documento_tipos_list
 core_documento_tipos_update

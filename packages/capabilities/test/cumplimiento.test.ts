@@ -71,6 +71,21 @@ describe("core.cumplimiento.* · DPA y DPO (Brief 07d, PR 1)", () => {
     expect(e.dpo.telefono).toBe("+56911112222");
   });
 
+  it("el RAT lista las actividades de tratamiento del Núcleo (bases propuestas)", async () => {
+    const { ctx } = contextoDePrueba();
+    const rat = await dato<{
+      basesPropuestas: boolean;
+      actividades: { tabla: string; modulo: string; reguladoNoBorrable: boolean }[];
+    }>(ctx, "core.cumplimiento.rat", {});
+    expect(rat.basesPropuestas).toBe(true);
+    const tablas = rat.actividades.map((a) => a.tabla);
+    expect(tablas).toContain("personas");
+    expect(rat.actividades.every((a) => a.modulo === "core")).toBe(true);
+    expect(rat.actividades.find((a) => a.tabla === "vinculos_laborales")?.reguladoNoBorrable).toBe(
+      true,
+    );
+  });
+
   it("un agente (API key) no puede aceptar el DPA ni fijar el DPO (soloPersonas)", async () => {
     const { ctx, tabla } = contextoDePrueba({
       usuario: USUARIO_DE_PRUEBA,
