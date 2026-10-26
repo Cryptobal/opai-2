@@ -108,7 +108,7 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
   ];
   return (
     <AppShell
-      titulo={cabecera.titulo}
+      titulo={cabecera.titulo || "Inicio"}
       {...(cabecera.volver ? { volver: cabecera.volver } : {})}
       {...(cabecera.volverSoloTelefono ? { volverSoloTelefono: true } : {})}
       {...(cabecera.volverBajoLg ? { volverBajoLg: true } : {})}
@@ -124,7 +124,7 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
       {...(empresas.length ? { empresas } : {})}
       usuario={datos.usuario}
       menuUsuario={menu}
-      campana={datos.tenant ? <Campana portal={datos.portal} /> : undefined}
+      campana={datos.tenant ? <Campana key={datos.epoca} portal={datos.portal} /> : undefined}
       {...(buscable ? { onBuscar: () => setPaleta(true) } : {})}
       {...(datos.subtituloMarca ? { subtituloMarca: datos.subtituloMarca } : {})}
       onNavegar={(href) => router.push(href)}
