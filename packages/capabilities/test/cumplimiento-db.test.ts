@@ -79,6 +79,11 @@ describe.skipIf(!urlPropietario)("cumplimiento (DPA/DPO) en base real", () => {
     expect(fila.documentoTexto).toBe(TEXTO_DPA);
     expect(fila.documentoRef).toBe(`2026-10:sha256:${await sha256Hex(TEXTO_DPA)}`);
     expect(fila.documentoRef).toBe(`2026-10:sha256:${await sha256Hex(fila.documentoTexto ?? "")}`);
+    // El lector (C06): el owner lee el texto y su hash, y el hash calza con el documento_ref guardado.
+    const hash = await sha256Hex(TEXTO_DPA);
+    const lectura = await mod.executeCapability(ctx(), "core.cumplimiento.dpa_texto", {});
+    expect(lectura.ok && lectura.data).toMatchObject({ versionVigente: "2026-10", texto: TEXTO_DPA, sha256: hash });
+    expect(fila.documentoRef).toBe(`2026-10:sha256:${hash}`);
   });
 
   it("no acepta el DPA si OPAI aún no publica el texto de la versión vigente", async () => {
