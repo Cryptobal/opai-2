@@ -25,4 +25,14 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
   "core.aprobaciones.aprobar": "Solo personas: lo irreversible lo aprueba un humano (ADR-032).",
   "core.aprobaciones.rechazar":
     "Solo personas: la decisión sobre lo irreversible es humana (ADR-032).",
+  "core.roles.create":
+    "Solo personas: gobierna el acceso; un agente no se crea roles ni se concede permisos (ADR-034).",
+  "core.roles.update":
+    "Solo personas: cambiar los permisos de un rol es gobernar el acceso (ADR-034).",
+  "core.roles.archive":
+    "Solo personas: archivar un rol es gobierno de acceso; un agente no lo hace (ADR-034).",
+  "core.roles.assign":
+    "Solo personas: asignar un rol a un usuario gobierna su acceso (ADR-034).",
+  "core.excepciones.set":
+    "Solo personas: conceder o denegar permisos puntuales es gobierno de acceso (ADR-034).",
 };
