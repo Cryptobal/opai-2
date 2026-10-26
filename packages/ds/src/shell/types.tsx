@@ -3,6 +3,7 @@ import type { ComponentType, ReactNode } from "react";
 
 export type NavItem = {
   href: string;
+  exacta?: boolean;
   etiqueta: string;
   icono: LucideIcon;
   /** Grupo en la barra lateral de desktop (Comercial, Operaciones…). Sin grupo = nivel superior. */
@@ -54,8 +55,8 @@ export const LinkPorDefecto: LinkComponent = ({ href, className, children, ...re
   </a>
 );
 
-export function esActivo(rutaActual: string, href: string): boolean {
-  return href === "/"
-    ? rutaActual === "/"
+export function esActivo(rutaActual: string, href: string, exacta = false): boolean {
+  return exacta || href === "/"
+    ? rutaActual === href
     : rutaActual === href || rutaActual.startsWith(`${href}/`);
 }

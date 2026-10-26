@@ -8,7 +8,8 @@ export type ItemNav = {
   icono: string;
   grupo?: string;
   corta?: string;
-  contador?: number;
+  /** Activo solo en la ruta exacta. */
+  exacta?: boolean;
   pie?: boolean;
   soloCompacto?: boolean;
   soloAmplio?: boolean;
@@ -97,7 +98,7 @@ export const NAV_PLATAFORMA: ItemNav[] = [
 export function navegacionPortal(href: string, portal?: string): ItemNav[] {
   if (portal === "supervisor")
     return [
-      { href, etiqueta: "Hoy", icono: "Home" },
+      { href, etiqueta: "Hoy", icono: "Home", exacta: true },
       {
         href: "/supervisor/instalaciones",
         etiqueta: "Instalaciones",
