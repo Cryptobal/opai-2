@@ -60,6 +60,13 @@ export const AJUSTES_NUCLEO = defineAjustes(
       ambito: "plataforma",
       control: "texto",
     }),
+    cumplimiento_dpa_texto: z.string().default("").meta({
+      etiqueta: "Texto del DPA",
+      ayuda: "Texto del acuerdo de tratamiento de datos (DPA) de esa versión. La aceptación guarda su hash (SHA-256) como prueba de a qué texto aceptó el tenant. El texto legal lo fija Carlos.",
+      grupo: "Cumplimiento",
+      ambito: "plataforma",
+      control: "texto",
+    }),
     preferencias_tema: z
       .enum(["sistema", "claro", "oscuro"])
       .default("sistema")

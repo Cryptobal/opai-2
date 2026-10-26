@@ -25,6 +25,8 @@ const TABLA: Record<string, readonly [boolean, boolean, boolean, boolean, boolea
   [P.auditRead]: [true, true, true, false, false],
   [P.cumplimientoRead]: [true, true, true, false, true],
   [P.cumplimientoManage]: [true, true, false, false, false],
+  // Aceptar el DPA: solo el owner (§16.1, t331u); ni admin ni gerente.
+  [P.cumplimientoDpaAceptar]: [true, false, false, false, false],
 };
 
 describe("permisos del núcleo (Brief 02)", () => {

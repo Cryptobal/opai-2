@@ -2,6 +2,8 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import { sha256Hex } from "@opai/domain";
+
 import { type Entorno, prepararEntorno, urlPropietario } from "../../db/test/entorno";
 
 import type * as ModuloCapacidades from "../src";
@@ -12,6 +14,7 @@ describe.skipIf(!urlPropietario)("cumplimiento (DPA/DPO) en base real", () => {
   let tenantId = "";
   let otroId = "";
   let userId = "";
+  const TEXTO_DPA = "Acuerdo de tratamiento de datos (DPA) OPAI ↔ tenant, versión 2026-10.";
 
   beforeAll(async () => {
     e = await prepararEntorno();
@@ -29,17 +32,24 @@ describe.skipIf(!urlPropietario)("cumplimiento (DPA/DPO) en base real", () => {
       })
     ).id;
     await e.admin.membership.create({ data: { tenantId, userId, rol: "owner", portales: ["erp"] } });
-    // Ajuste de plataforma (global, sin tenant): la versión vigente del DPA la publica OPAI.
+    // Ajustes de plataforma (globales, sin tenant): versión y texto vigentes del DPA los publica OPAI.
     await e.admin.ajustePlataforma.upsert({
       where: { modulo_clave: { modulo: "core", clave: "cumplimiento_dpa_version" } },
       create: { modulo: "core", clave: "cumplimiento_dpa_version", valor: "2026-10" },
       update: { valor: "2026-10" },
     });
+    await e.admin.ajustePlataforma.upsert({
+      where: { modulo_clave: { modulo: "core", clave: "cumplimiento_dpa_texto" } },
+      create: { modulo: "core", clave: "cumplimiento_dpa_texto", valor: TEXTO_DPA },
+      update: { valor: TEXTO_DPA },
+    });
   });
 
   afterAll(async () => {
     await e?.admin.ajustePlataforma
-      .deleteMany({ where: { modulo: "core", clave: "cumplimiento_dpa_version" } })
+      .deleteMany({
+        where: { modulo: "core", clave: { in: ["cumplimiento_dpa_version", "cumplimiento_dpa_texto"] } },
+      })
       .catch(() => undefined);
     await e?.cerrar();
   });
@@ -62,6 +72,19 @@ describe.skipIf(!urlPropietario)("cumplimiento (DPA/DPO) en base real", () => {
       where: { tenantId, capability: "core.cumplimiento.dpa_aceptar" },
     });
     expect(audit.length).toBe(1);
+    // documento_ref guarda a qué texto se aceptó: versión + hash SHA-256 del texto vigente.
+    const fila = await e.admin.dpaAceptacion.findFirstOrThrow({ where: { tenantId } });
+    expect(fila.documentoRef).toBe(`2026-10:sha256:${await sha256Hex(TEXTO_DPA)}`);
+  });
+
+  it("RLS: un tenant no puede insertar una aceptación de otro (WITH CHECK)", async () => {
+    await expect(
+      e
+        .forTenant(tenantId)
+        .dpaAceptacion.create({ data: { tenantId: otroId, version: "2026-10" } }),
+    ).rejects.toThrow();
+    // Y no quedó rastro en el otro tenant.
+    expect(await e.forTenant(otroId).dpaAceptacion.count()).toBe(0);
   });
 
   it("DPA y audit_events son append-only para opai_app: UPDATE y DELETE fallan", async () => {
@@ -93,5 +116,15 @@ describe.skipIf(!urlPropietario)("cumplimiento (DPA/DPO) en base real", () => {
     const perfil = await e.admin.perfilEmpresa.findUniqueOrThrow({ where: { tenantId } });
     expect(perfil.dpoNombre).toBe("Paula Díaz");
     expect(perfil.dpoCorreo).toBe("dpo@empresa.cl");
+  });
+
+  it("RLS: el DPO de un tenant no se ve desde otro", async () => {
+    // El primero tiene DPO (test anterior); el otro no ve esa fila de perfil_empresa.
+    expect(
+      (await e.forTenant(tenantId).perfilEmpresa.findUniqueOrThrow({ where: { tenantId } }))
+        .dpoNombre,
+    ).toBe("Paula Díaz");
+    expect(await e.forTenant(otroId).perfilEmpresa.findUnique({ where: { tenantId } })).toBeNull();
+    expect(await e.forTenant(otroId).perfilEmpresa.count()).toBe(0);
   });
 });

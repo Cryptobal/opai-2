@@ -58,27 +58,71 @@ function modelos(): Modelo[] {
 
 /**
  * Columnas que delatan un dato personal de una persona natural: identificadores y contacto, datos
- * de acceso (IP, agente, destinatario) y credenciales (contraseña, tokens). Es un heurístico por
- * nombre de columna: no sustituye el criterio, pero obliga a declarar las tablas evidentes del
- * Núcleo (§16.6). Una columna con nombre genérico (p. ej. `value` en verifications) no se detecta.
+ * de acceso (IP, agente, destinatario), credenciales (contraseña, tokens) y la identidad del
+ * aceptante del DPA (`aceptado_por`/`aceptado_por_id`). Es un heurístico por nombre de columna: no
+ * sustituye el criterio, pero obliga a declarar las columnas evidentes del Núcleo (§16.6). Una
+ * columna con nombre genérico (p. ej. `value` en verifications, `payload`) no se detecta.
  */
+// Columnas meta (banderas, vencimientos) que contienen una palabra personal pero no son el dato en
+// sí: `email_verified` es un booleano, `access_token_expires_at` es una fecha. No se inventarían.
+const esMetaNoPersonal = (c: string) => /(_verified|_expires_at)$/.test(c);
+
 const esColumnaPersonal = (c: string) =>
-  /(^|_)(rut|email|correo|telefono|whatsapp|nombres|apellidos|nacimiento|ip_address|user_agent|destinatario|password|access_token|refresh_token|id_token)(_|$)/.test(
+  !esMetaNoPersonal(c) &&
+  /(^|_)(rut|email|correo|telefono|whatsapp|nombres|apellidos|nacimiento|ip_address|user_agent|destinatario|password|access_token|refresh_token|id_token|aceptado_por)(_|$)/.test(
     c,
   );
 
+type Declarada = { campos: readonly string[]; camposSensibles?: readonly string[] };
+
+/**
+ * Gate duro columna por columna (§16.6): por cada tabla del esquema, toda columna que el heurístico
+ * marca como personal tiene que estar inventariada en esa tabla (en `campos` o `camposSensibles`).
+ * Devuelve "tabla.columna" por cada falta. Una tabla con datos personales sin declarar, o una
+ * columna personal nueva en una tabla ya declarada, caen aquí: no basta con declarar la tabla.
+ */
+function columnasSinInventariar(modelos: Modelo[], declaradas: Map<string, Declarada>): string[] {
+  const faltan: string[] = [];
+  for (const m of modelos) {
+    const d = declaradas.get(m.tabla);
+    const inventariadas = new Set([...(d?.campos ?? []), ...(d?.camposSensibles ?? [])]);
+    for (const columna of m.columnas)
+      if (esColumnaPersonal(columna) && !inventariadas.has(columna))
+        faltan.push(`${m.tabla}.${columna}`);
+  }
+  return faltan;
+}
+
 describe("inventario de datos personales (RAT, Ley 21.719)", () => {
   const core = modelos().filter((m) => m.esquema === "core");
-  const declaradas = new Map(INVENTARIO_NUCLEO.map((d) => [d.tabla, d]));
+  const declaradas = new Map(INVENTARIO_NUCLEO.map((d) => [d.tabla, d as Declarada]));
 
-  it("toda tabla del Núcleo con un identificador personal está declarada en el inventario", () => {
-    const conPersonales = core
-      .filter((m) => [...m.columnas].some(esColumnaPersonal))
-      .map((m) => m.tabla);
-    const sinDeclarar = conPersonales.filter((t) => !declaradas.has(t));
-    expect(sinDeclarar, `tablas del Núcleo con datos personales sin declarar: ${sinDeclarar}`).toEqual(
+  it("toda columna del Núcleo con datos personales está inventariada (columna por columna)", () => {
+    const faltan = columnasSinInventariar(core, declaradas);
+    expect(faltan, `columnas del Núcleo con datos personales sin inventariar: ${faltan}`).toEqual(
       [],
     );
+  });
+
+  it("test negativo: una columna personal sin inventariar hace fallar el gate", () => {
+    // (a) una tabla con datos personales que no está declarada en absoluto.
+    const fantasma: Modelo = {
+      tabla: "tabla_fantasma",
+      esquema: "core",
+      columnas: new Set(["id", "aceptado_por", "rut"]),
+    };
+    const faltanTabla = columnasSinInventariar([fantasma], declaradas);
+    expect(faltanTabla).toContain("tabla_fantasma.aceptado_por"); // el heurístico ya detecta aceptado_por
+    expect(faltanTabla).toContain("tabla_fantasma.rut");
+    // (b) una tabla declarada a la que le aparece una columna personal nueva sin inventariar.
+    const conColumnaNueva: Modelo = {
+      tabla: "dpa_aceptaciones",
+      esquema: "core",
+      columnas: new Set(["aceptado_por", "telefono_responsable"]),
+    };
+    expect(columnasSinInventariar([conColumnaNueva], declaradas)).toEqual([
+      "dpa_aceptaciones.telefono_responsable",
+    ]);
   });
 
   it("lo declarado corresponde a tablas y columnas reales del esquema (sin derivar)", () => {
@@ -99,5 +143,6 @@ describe("inventario de datos personales (RAT, Ley 21.719)", () => {
   it("el parser encontró el esquema del Núcleo (no corre en vacío)", () => {
     expect(core.length).toBeGreaterThanOrEqual(30);
     expect(declaradas.has("personas")).toBe(true);
+    expect(esColumnaPersonal("aceptado_por")).toBe(true);
   });
 });

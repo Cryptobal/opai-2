@@ -30,9 +30,11 @@ export const PERMISOS_CORE = {
   consumosRead: "core:consumos.read",
   aprobacionesManage: "core:aprobaciones.manage",
   agentesManage: "core:agentes.manage",
-  // Brief 07d · Ley 21.719 (DPA/DPO, RAT). Gestionar es de owner/admin.
+  // Brief 07d · Ley 21.719 (DPA/DPO, RAT). Gestionar (DPO, pie legal) es de owner/admin;
+  // aceptar el DPA es acto del owner del tenant (responsable del tratamiento, §16.1), solo owner.
   cumplimientoRead: "core:cumplimiento.read",
   cumplimientoManage: "core:cumplimiento.manage",
+  cumplimientoDpaAceptar: "core:cumplimiento.dpa_aceptar",
 } as const;
 
 export const PERMISOS_PLATAFORMA = {

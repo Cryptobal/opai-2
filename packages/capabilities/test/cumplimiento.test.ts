@@ -86,6 +86,21 @@ describe("core.cumplimiento.* · DPA y DPO (Brief 07d, PR 1)", () => {
     );
   });
 
+  it("aceptar el DPA es solo del owner: un admin es rechazado aunque fije el DPO (§16.1)", async () => {
+    const { ctx, tabla } = contextoDePrueba({ rol: "admin" });
+    publicar(tabla, "2026-10");
+    // Admin no acepta el DPA (es acto del owner, responsable del tratamiento)…
+    expect(await codigo(ctx, "core.cumplimiento.dpa_aceptar", {})).toBe("FORBIDDEN");
+    // …pero sí fija el DPO (owner/admin).
+    expect(await codigo(ctx, "core.cumplimiento.dpo_set", { nombre: "Paula" })).toBe("OK");
+  });
+
+  it("el owner sí acepta el DPA (contraparte del rechazo del admin)", async () => {
+    const { ctx, tabla } = contextoDePrueba({ rol: "owner" });
+    publicar(tabla, "2026-10");
+    expect(await codigo(ctx, "core.cumplimiento.dpa_aceptar", {})).toBe("OK");
+  });
+
   it("un agente (API key) no puede aceptar el DPA ni fijar el DPO (soloPersonas)", async () => {
     const { ctx, tabla } = contextoDePrueba({
       usuario: USUARIO_DE_PRUEBA,

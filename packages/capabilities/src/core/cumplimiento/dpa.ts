@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { PERMISOS_CORE } from "@opai/domain";
+import { PERMISOS_CORE, sha256Hex } from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import { reglaDeNegocio } from "../../errores";
@@ -10,6 +10,15 @@ import { ajuste } from "../config";
 /** Versión vigente del DPA que publica OPAI (ajuste de plataforma). "" = aún no publicada. */
 export async function versionVigenteDpa(ctx: Contexto): Promise<string> {
   return (await ajuste<string>(ctx, "core", "cumplimiento_dpa_version")) || "";
+}
+
+/**
+ * Referencia al texto aceptado: versión y hash SHA-256 del texto del DPA vigente. Prueba a qué
+ * texto exacto aceptó el tenant; si OPAI cambia el texto de una versión, el hash deja de calzar.
+ */
+async function refDocumento(ctx: Contexto, version: string): Promise<string> {
+  const texto = (await ajuste<string>(ctx, "core", "cumplimiento_dpa_texto")) || "";
+  return `${version}:sha256:${await sha256Hex(texto)}`;
 }
 
 const aceptacionSchema = z.object({
@@ -76,7 +85,7 @@ export const cumplimientoDpaAceptar = defineCapability({
   id: "core.cumplimiento.dpa_aceptar",
   descripcion:
     "Registra que la empresa (responsable del tratamiento) acepta la versión vigente del acuerdo de tratamiento de datos (DPA) con OPAI. Queda append-only con quién y cuándo; volver a aceptar agrega una fila al historial.",
-  permiso: PERMISOS_CORE.cumplimientoManage,
+  permiso: PERMISOS_CORE.cumplimientoDpaAceptar,
   soloPersonas: true,
   input: z.object({
     version: z
@@ -97,6 +106,7 @@ export const cumplimientoDpaAceptar = defineCapability({
       throw reglaDeNegocio(`La versión vigente del DPA es "${vigente}".`);
     const aceptadoPor = ctx.usuario ? `${ctx.usuario.nombre} <${ctx.usuario.email}>` : null;
     if (dryRun) return { version: vigente, aceptadoEn: new Date().toISOString() };
+    const documentoRef = await refDocumento(ctx, vigente);
     const fila = await ctx.transaccion(async (tx) => {
       const f = await tx.dpaAceptacion.create({
         data: {
@@ -104,6 +114,7 @@ export const cumplimientoDpaAceptar = defineCapability({
           version: vigente,
           aceptadoPorId: ctx.actor.tipo === "user" ? ctx.actor.id : null,
           aceptadoPor,
+          documentoRef,
         },
       });
       await ctx.eventos.emitir(tx, {

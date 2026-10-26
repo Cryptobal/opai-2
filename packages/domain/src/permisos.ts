@@ -19,7 +19,12 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
   owner: { permitir: ["*"], denegar: [] },
   admin: {
     permitir: ["*"],
-    denegar: [PERMISOS_CORE.tenantDelete, PERMISOS_CORE.ownersManage],
+    denegar: [
+      PERMISOS_CORE.tenantDelete,
+      PERMISOS_CORE.ownersManage,
+      // Aceptar el DPA es acto del owner (responsable del tratamiento, §16.1): admin no puede.
+      PERMISOS_CORE.cumplimientoDpaAceptar,
+    ],
   },
   gerente: {
     permitir: ["*"],
@@ -39,8 +44,9 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
       PERMISOS_CORE.comunicacionesManage,
       PERMISOS_CORE.aprobacionesManage,
       PERMISOS_CORE.agentesManage,
-      // Cumplimiento (DPA/DPO, Ley 21.719): aceptar el DPA y fijar el DPO es de owner/admin.
+      // Cumplimiento (DPA/DPO, Ley 21.719): fijar el DPO es de owner/admin; aceptar el DPA, solo owner.
       PERMISOS_CORE.cumplimientoManage,
+      PERMISOS_CORE.cumplimientoDpaAceptar,
     ],
   },
   supervisor: {
