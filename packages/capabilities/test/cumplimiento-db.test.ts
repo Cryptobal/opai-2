@@ -72,9 +72,33 @@ describe.skipIf(!urlPropietario)("cumplimiento (DPA/DPO) en base real", () => {
       where: { tenantId, capability: "core.cumplimiento.dpa_aceptar" },
     });
     expect(audit.length).toBe(1);
-    // documento_ref guarda a qué texto se aceptó: versión + hash SHA-256 del texto vigente.
+    // documento_texto guarda el texto exacto aceptado (recuperable, en una fila append-only); y
+    // documento_ref referencia esa misma versión + hash SHA-256. Ambos se leen y escriben en la
+    // misma transacción, así que el hash de la referencia calza con el texto guardado (sin TOCTOU).
     const fila = await e.admin.dpaAceptacion.findFirstOrThrow({ where: { tenantId } });
+    expect(fila.documentoTexto).toBe(TEXTO_DPA);
     expect(fila.documentoRef).toBe(`2026-10:sha256:${await sha256Hex(TEXTO_DPA)}`);
+    expect(fila.documentoRef).toBe(`2026-10:sha256:${await sha256Hex(fila.documentoTexto ?? "")}`);
+  });
+
+  it("no acepta el DPA si OPAI aún no publica el texto de la versión vigente", async () => {
+    // Deja la versión vigente pero sin texto; la aceptación debe rechazarse (UNPROCESSABLE).
+    await e.admin.ajustePlataforma.update({
+      where: { modulo_clave: { modulo: "core", clave: "cumplimiento_dpa_texto" } },
+      data: { valor: "" },
+    });
+    try {
+      const r = await mod.executeCapability(ctx(), "core.cumplimiento.dpa_aceptar", {});
+      expect(r.ok).toBe(false);
+      expect(r.ok === false && r.error.code).toBe("UNPROCESSABLE");
+      // No se agregó ninguna fila mientras el texto estuvo vacío (sigue solo la del primer test).
+      expect(await e.admin.dpaAceptacion.count({ where: { tenantId } })).toBe(1);
+    } finally {
+      await e.admin.ajustePlataforma.update({
+        where: { modulo_clave: { modulo: "core", clave: "cumplimiento_dpa_texto" } },
+        data: { valor: TEXTO_DPA },
+      });
+    }
   });
 
   it("RLS: un tenant no puede insertar una aceptación de otro (WITH CHECK)", async () => {
@@ -126,5 +150,28 @@ describe.skipIf(!urlPropietario)("cumplimiento (DPA/DPO) en base real", () => {
     ).toBe("Paula Díaz");
     expect(await e.forTenant(otroId).perfilEmpresa.findUnique({ where: { tenantId } })).toBeNull();
     expect(await e.forTenant(otroId).perfilEmpresa.count()).toBe(0);
+  });
+
+  it("RLS: un tenant no puede escribir ni modificar el DPO de otro (WITH CHECK y USING)", async () => {
+    // El otro tenant tiene su propio perfil con DPO.
+    await e.admin.perfilEmpresa.upsert({
+      where: { tenantId: otroId },
+      create: { tenantId: otroId, dpoNombre: "DPO del otro", dpoCorreo: "dpo-otro@empresa.cl" },
+      update: { dpoNombre: "DPO del otro", dpoCorreo: "dpo-otro@empresa.cl" },
+    });
+    const app = e.forTenant(tenantId); // sesión fija app.tenant_id = tenantId
+    // No puede CREAR el perfil de otro tenant: la política WITH CHECK rechaza el tenant_id ajeno.
+    await expect(
+      app.perfilEmpresa.create({ data: { tenantId: otroId, dpoNombre: "intruso" } }),
+    ).rejects.toThrow();
+    // No puede MODIFICAR el DPO ajeno: la fila del otro no es visible (USING), el update no alcanza.
+    expect(
+      (await app.perfilEmpresa.updateMany({ where: { tenantId: otroId }, data: { dpoNombre: "intruso" } }))
+        .count,
+    ).toBe(0);
+    // El DPO del otro tenant quedó intacto.
+    expect(
+      (await e.admin.perfilEmpresa.findUniqueOrThrow({ where: { tenantId: otroId } })).dpoNombre,
+    ).toBe("DPO del otro");
   });
 });

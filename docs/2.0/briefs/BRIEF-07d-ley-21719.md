@@ -280,7 +280,19 @@ Ninguna la decide Claude. Las de fondo son **legales** y conviene revisarlas con
 
 Al cerrar: commits integrados por PR, capturas a 375 y 1280 de las pantallas nuevas (DPA/DPO, RAT, bandeja de solicitudes, consentimientos), resultado de los tests y de `pnpm test:db`, estado del gate de paridad y del presupuesto de JS, `tools/list` en `main`, brecha B4 marcada en `paridad/nucleo.md` y `ESTADO.md`, y resumen ejecutivo para Carlos: qué se hizo, qué cambia para Gard (cumplimiento de la Ley 21.719 por diseño), qué decide él (las de §16, con criterio legal) y qué sigue (con B1–B4 en `main`, el Núcleo cierra; sigue Puestos y guardias, Brief 11).
 
-## 18. Notas de ejecución (PR 2 — bloques 4, 5, 6 y 7; Claude, 26-oct-2026)
+## 18. Correcciones del PR 1 tras revisión
+
+**Revisión 5658417110 (PEDIR CAMBIOS).** Resuelta en los commits previos del PR (resumen en `PR-BODY.md`).
+
+**Revisión 5659458420 (PEDIR CAMBIOS, sobre `d6c2778`).** Sin decisiones de negocio nuevas; implementa lo que ya manda el brief (§6 append-only, §7.1 «texto o referencia del documento», §16.1 owner). Bloqueantes:
+
+1. **Texto del DPA aceptado recuperable e inmutable (§7.1).** El texto vivía solo en el ajuste de plataforma `cumplimiento_dpa_texto` (mutable). Ahora, además del `documento_ref` (`<version>:sha256:<hash>`), la aceptación guarda el texto exacto en `dpa_aceptaciones.documento_texto`, en una tabla que ya es append-only (sin UPDATE/DELETE para `opai_app`): recuperable e inmutable por fila. La aceptación **rechaza si el texto está vacío** y **lee versión y texto dentro de la misma transacción** del INSERT (sin TOCTOU). `packages/capabilities/src/core/cumplimiento/dpa.ts` y migración `20261027010000_dpa_texto_aceptado`.
+2. **Test de escritura cruzada del DPO.** Test negativo: un tenant no puede crear (WITH CHECK) ni modificar (USING) el DPO de otro tenant. `packages/capabilities/test/cumplimiento-db.test.ts`.
+3. **El e2e del lock de `audit_events` corre en CI.** El paso e2e de `.github/workflows/ci.yml` ahora recibe `DATABASE_URL_MIGRATE` (rol propietario, mismo valor efímero del paso de migrar) y `maestros-ficha-lista.spec.ts` deja de saltarse en silencio cuando falta en CI (falla explícito).
+
+**Recomendado.** `dpa_aceptar` exige `ctx.rol === "owner"` además del permiso propio (defensa frente a roles personalizados del #47 que pudieran otorgar el permiso sin ser owner).
+
+## 19. Notas de ejecución (PR 2 — bloques 4, 5, 6 y 7; Claude, 26-oct-2026)
 
 Decisiones de **implementación** (mecanismo, no materia legal; las tomó Claude como constructor, no Carlos) que no estaban explícitas en el brief y quedan registradas aquí y en `ESTADO.md`:
 

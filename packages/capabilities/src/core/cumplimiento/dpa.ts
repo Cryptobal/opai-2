@@ -1,24 +1,33 @@
 import { z } from "zod";
 
+import type { TenantTx } from "@opai/db";
 import { PERMISOS_CORE, sha256Hex } from "@opai/domain";
 
 import { defineCapability } from "../../define";
-import { reglaDeNegocio } from "../../errores";
+import { prohibido, reglaDeNegocio } from "../../errores";
 import type { Contexto } from "../../types";
 import { ajuste } from "../config";
 
 /** Versión vigente del DPA que publica OPAI (ajuste de plataforma). "" = aún no publicada. */
-export async function versionVigenteDpa(ctx: Contexto): Promise<string> {
-  return (await ajuste<string>(ctx, "core", "cumplimiento_dpa_version")) || "";
+export async function versionVigenteDpa(ctx: Contexto, db: TenantTx = ctx.db): Promise<string> {
+  return (await ajuste<string>(ctx, "core", "cumplimiento_dpa_version", db)) || "";
 }
 
 /**
- * Referencia al texto aceptado: versión y hash SHA-256 del texto del DPA vigente. Prueba a qué
- * texto exacto aceptó el tenant; si OPAI cambia el texto de una versión, el hash deja de calzar.
+ * Lee la versión vigente y su texto (ambos ajustes de plataforma que publica OPAI) usando `db`, para
+ * poder hacerlo dentro de la transacción del INSERT de la aceptación (sin TOCTOU). Rechaza si no hay
+ * versión publicada, si no es la versión pedida, o si el texto está vacío: no se acepta un DPA sin
+ * texto. Devuelve la versión, el texto exacto y su referencia estable (`<version>:sha256:<hash>`).
  */
-async function refDocumento(ctx: Contexto, version: string): Promise<string> {
-  const texto = (await ajuste<string>(ctx, "core", "cumplimiento_dpa_texto")) || "";
-  return `${version}:sha256:${await sha256Hex(texto)}`;
+async function leerDpaVigente(ctx: Contexto, db: TenantTx, versionPedida: string | undefined) {
+  const version = await versionVigenteDpa(ctx, db);
+  if (!version) throw reglaDeNegocio("OPAI aún no publica una versión vigente del DPA.");
+  if (versionPedida && versionPedida !== version)
+    throw reglaDeNegocio(`La versión vigente del DPA es "${version}".`);
+  const texto = (await ajuste<string>(ctx, "core", "cumplimiento_dpa_texto", db)) || "";
+  if (!texto.trim())
+    throw reglaDeNegocio("OPAI aún no publica el texto de la versión vigente del DPA.");
+  return { version, texto, documentoRef: `${version}:sha256:${await sha256Hex(texto)}` };
 }
 
 const aceptacionSchema = z.object({
@@ -100,21 +109,28 @@ export const cumplimientoDpaAceptar = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    const vigente = await versionVigenteDpa(ctx);
-    if (!vigente) throw reglaDeNegocio("OPAI aún no publica una versión vigente del DPA.");
-    if (input.version && input.version !== vigente)
-      throw reglaDeNegocio(`La versión vigente del DPA es "${vigente}".`);
+    // Aceptar el DPA es acto exclusivo del owner (§16.1). El permiso `cumplimientoDpaAceptar` ya lo
+    // acota, pero un rol personalizado (#47) podría otorgarlo sin ser owner: se exige el rol además
+    // del permiso, defensa en profundidad.
+    if (ctx.rol !== "owner")
+      throw prohibido("Aceptar el DPA es un acto exclusivo del propietario (owner) de la empresa.");
     const aceptadoPor = ctx.usuario ? `${ctx.usuario.nombre} <${ctx.usuario.email}>` : null;
-    if (dryRun) return { version: vigente, aceptadoEn: new Date().toISOString() };
-    const documentoRef = await refDocumento(ctx, vigente);
+    if (dryRun) {
+      const { version } = await leerDpaVigente(ctx, ctx.db, input.version);
+      return { version, aceptadoEn: new Date().toISOString() };
+    }
     const fila = await ctx.transaccion(async (tx) => {
+      // Lee versión y texto DENTRO de la transacción del INSERT: lo que se guarda es exactamente lo
+      // vigente al escribir, sin ventana TOCTOU con una edición del ajuste de plataforma.
+      const { version, texto, documentoRef } = await leerDpaVigente(ctx, tx, input.version);
       const f = await tx.dpaAceptacion.create({
         data: {
           tenantId: ctx.tenantId,
-          version: vigente,
+          version,
           aceptadoPorId: ctx.actor.tipo === "user" ? ctx.actor.id : null,
           aceptadoPor,
           documentoRef,
+          documentoTexto: texto,
         },
       });
       await ctx.eventos.emitir(tx, {

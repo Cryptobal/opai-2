@@ -12,6 +12,9 @@ const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD
 const baseLock = process.env["DATABASE_URL_MIGRATE"] ?? "";
 // El bloqueo de la tabla solo se hace contra una base local o efímera, nunca contra Neon.
 const baseLocal = /@(localhost|127\.0\.0\.1)[:/]/.test(baseLock);
+// En CI la base es efímera (localhost) y la variable del rol propietario tiene que llegar: un skip
+// silencioso dejaría este spec sin cubrir y escondería la regresión. Fuera de CI sí puede faltar.
+const enCI = !!process.env["CI"];
 
 async function entrar(page: Page) {
   await page.goto("/login");
@@ -53,7 +56,14 @@ test.setTimeout(180_000);
 
 test.describe("la lista queda a la vista mientras la ficha carga", () => {
   test.skip(!password, "Falta SEED_OWNER_PASSWORD o E2E_PASSWORD");
-  test.skip(!baseLocal, "Necesita DATABASE_URL_MIGRATE (rol propietario) de una base local o efímera");
+  // Solo se salta fuera de CI: en CI la ausencia de la variable es un error, no un skip (abajo).
+  test.skip(!baseLocal && !enCI, "Necesita DATABASE_URL_MIGRATE (rol propietario) de una base local o efímera");
+  test.beforeAll(() => {
+    if (!baseLocal && enCI)
+      throw new Error(
+        "En CI falta DATABASE_URL_MIGRATE (rol propietario) de una base local/efímera: el paso e2e de ci.yml debe pasarla para que este spec se cubra de verdad.",
+      );
+  });
 
   for (const m of MODULOS) {
     test(`${m.ruta}: Actividad en carga, la lista sigue visible y solo el panel muestra el esqueleto`, async ({
@@ -68,6 +78,14 @@ test.describe("la lista queda a la vista mientras la ficha carga", () => {
       // el esqueleto de página que el layout deja en el DOM (oculto por CSS, ver más abajo).
       await lista.locator(`a[href^="${m.ruta}/"]:not([href$="/nueva"]):visible`).first().click();
       await page.waitForURL(new RegExp(`${m.ruta}/[0-9a-f-]{36}`));
+      const urlFicha = page.url();
+      // Pre-compila la pestaña Actividad fuera del lock: en dev la primera visita de una ruta la
+      // compila, y si esa compilación cae mientras se sostiene el LOCK ACCESS EXCLUSIVE, dos
+      // viewports en paralelo (iPad y escritorio) chocan y uno vence su espera. Al calentarla antes,
+      // el lock solo se sostiene durante la consulta (lo que la prueba sí quiere medir), no la build.
+      await page.goto(`${urlFicha}/actividad`);
+      await expect(page.getByText("Últimos 30 días").first()).toBeVisible();
+      await page.goto(urlFicha);
       const ficha = page.getByRole("region", { name: "Detalle" });
       await expect(ficha.getByRole("link", { name: /^Actividad/ }).first()).toBeVisible();
       const liberar = await retenerAuditoria();
