@@ -93,7 +93,7 @@ D10. **El rol viewer (Visualizador) no ve Nómina.** No es una decisión nueva: 
 
 ### 4.4 Punto de entrada del agente interno (reservado, se construye en el brief del agente interno)
 
-Decisión de Carlos, 26-oct-2026 10:08 CLT, chat con OPAI 2.0; ADR-049, propuesto en PR #38, pendiente de merge. El agente interno se construye en un brief propio después del Brief 11. Aquí solo se reserva dónde vive, para que ese brief lo agregue sin rediseñar la navegación:
+Decisión de Carlos, 26-oct-2026 10:08 CLT, chat con OPAI 2.0; ADR-049, propuesto en PR #38, pendiente de merge. El agente interno se construye en un brief propio después de CPQ («Ok, después del CPQ» — Carlos, 26-oct-2026 10:53 CLT, chat con el Revisor OPAI 2.0). Aquí solo se reserva dónde vive, para que ese brief lo agregue sin rediseñar la navegación:
 
 - **Escritorio y iPad (⌘K):** la acción **«Preguntar a OPAI»** ocupa el primer lugar de la paleta, antes de recientes y acciones, y usa como pregunta el texto escrito en el buscador.
 - **Celular:** el mismo lugar, arriba de todo dentro de **«Buscar»** (la paleta a pantalla completa, pantallas 19–22), bajo el campo de búsqueda. No suma un ítem a la barra inferior ni a la barra superior (D7).
