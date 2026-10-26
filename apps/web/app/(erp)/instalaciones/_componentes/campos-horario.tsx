@@ -24,10 +24,9 @@ export function CamposHorario({ d, setD }: { d: DatosPuesto; setD: Set }) {
         </Campo>
       </div>
       {cruza ? (
-        <Alerta
-          tono="info"
-          titulo={`El cruce de medianoche se calcula solo: termina el día siguiente a las ${d.fin}.`}
-        />
+        <Alerta tono="info" titulo="Cruza medianoche">
+          El cruce de medianoche se calcula solo: termina el día siguiente a las {d.fin}.
+        </Alerta>
       ) : null}
       <Switch
         etiqueta="Rotación día y noche"
