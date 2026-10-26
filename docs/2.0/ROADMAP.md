@@ -67,7 +67,7 @@ Las **bases transversales** (rendimiento, PWA, navegación) aplican a todo brief
 - **Dependencias:** fase 1 cerrada; ADR-041 y 042 aprobados; key dedicada para la API de 1.0 (sincronización); plantillas de propuesta aprobadas.
 - **Deja de usarse en 1.0:** CRM (leads, cuentas, contactos, negocios, tareas, notas) y CPQ. Finanzas de 1.0 sigue leyendo cuentas y contactos sincronizados desde 2.0.
 
-### Fase 3 — Operación y terreno · pendiente · semanas por recalcular (antes 9–17; se corre unas 4 semanas)
+### Fase 3 — Operación y terreno · pendiente · semanas por recalcular: empieza después de la fase 2 (desde la semana 13; antes 9–17), sin cruce con ella
 
 | Paso | Nombre | Estado |
 |---|---|---|
@@ -133,7 +133,7 @@ Las **bases transversales** (rendimiento, PWA, navegación) aplican a todo brief
 
 - **Criterio de término:** «Una nómina mensual completa de Gard se liquida en 2.0 y cuadra al peso con la anterior; una licitación se presenta desde 2.0; **Gard opera 100 % en 2.0** y `opai.gard.cl` queda archivado».
 - **Dependencias:** núcleo (personas, vínculo laboral, cargos, capas de sueldo y anexos de contrato) y **Puestos (Operaciones I)**, que Nómina exige porque el sueldo sale de la capa de instalación o de puesto (Decisión de Carlos, 25-oct-2026 23:10, chat con OPAI 2.0 (registrada por el bot OPAI 2.0); ADR-048, respuesta 1; antes Operaciones era fuente opcional). **Asistencia** es la fuente de los días trabajados (Face ID o marca manual); sin ella, entrada manual o importación Excel (ADR-048). La pauta no alimenta la nómina. Finanzas (pagos y flujo de caja) es destino opcional. Opai SpA para facturar suscripciones a otros tenants.
-- **Nómina se puede adelantar** (Briefs 25 y 26 antes de las fases 3 a 5), **siempre después de Puestos (Brief 11)**, si hay un cliente que la quiera comprar sin el resto; los archivos de pago los genera Nómina, y el cruce con el flujo de caja se suma cuando Finanzas exista. **Propuesta pendiente de confirmar (25-oct):** dejar Nómina en la fase 6, sin adelantarla, mientras no haya clientes que compren Payroll solo.
+- **Nómina se puede adelantar** (Briefs 25 y 26 antes de las fases 3 a 5), **siempre después de Puestos (Brief 11)**, si hay un cliente que la quiera comprar sin el resto; los archivos de pago los genera Nómina, y el cruce con el flujo de caja se suma cuando Finanzas exista. **Actualización (25-oct):** Carlos, 25-oct-2026 ~21:20, chat con OPAI 2.0: «no tengo clientes que comprarían solo payroll». Como el ROADMAP solo permitía adelantar Nómina si un cliente la compraba sola, Nómina queda en la fase 6. Además, desde las 23:10 Nómina exige Puestos (respuesta 1 de ADR-048), lo que también impide venderla sola.
 - **Deja de usarse en 1.0:** Payroll y Licitaciones; 1.0 se apaga.
 
 ### Backlog (sin fecha)
