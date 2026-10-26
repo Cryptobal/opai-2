@@ -52,7 +52,7 @@ Según ADR-030 con la nota del 25-oct-2026 (Decisión de Carlos, 25-oct-2026, ch
 
 1. **Primero se cierra el Núcleo, antes de abrir los módulos:** Brief 05 (navegación por áreas) → Brief 04 (PWA) → Brief 07b (capas de sueldo), con el PR 2 del Brief 03 (rendimiento) y la sesión D del Brief 02 en paralelo.
 2. **Después, los módulos:** Puestos y guardias (Operaciones I, Brief 11) primero; luego CPQ por vertical y Comercial (CRM), con Documentos (Brief 09) dentro de la misma fase 2. Hacer CPQ antes que Comercial en reglas y diseño es propuesta pendiente de confirmar. En construcción, CPQ depende de Comercial (no hay cotización sin negocio): los negocios (Briefs 06 y 07) van antes del cotizador (Brief 10).
-3. **Luego:** Operaciones II, Rondas, Tickets y portales → Asistencia y DT → Finanzas (1.0 pasa a solo lectura) → Nómina (fase 6: Carlos dijo ~21:20 que no tiene clientes que comprarían solo payroll, y desde las 23:10 Nómina exige Puestos) y **Licitaciones al final**.
+3. **Luego:** Operaciones II, Rondas, Tickets y portales → Asistencia y DT → Finanzas (1.0 pasa a solo lectura) → Nómina (fase 6: según el registro del bot OPAI 2.0, Carlos dijo ~21:20 que no tiene clientes que comprarían solo payroll, y desde las 23:10 Nómina exige Puestos) y **Licitaciones al final**.
 
 ## Mandato vigente
 

@@ -373,6 +373,7 @@ Cerradas, con recomendación.
    - **Recomendación: sí, automático.** Al ganar, el sincronizador 2.0 → 1.0 crea en 1.0 los puestos de la cotización aceptada con `create_ops_puesto`, una vez por puesto (id externo guardado) y con reporte si 1.0 rechaza alguno.
    - **Razón:** Operaciones sigue en 1.0 hasta la fase 3, y sin esos puestos Gard no puede armar la pauta del servicio que acaba de ganar.
    - *Nota del 25-oct-2026 (reglas de Puestos definidas por Carlos): en 2.0 los puestos ya no se crean al ganar, sino desde la instalación o con el botón opcional de la cotización aceptada. La recomendación de arriba queda superada en su disparador («al ganar»). Falta que Carlos decida si la sincronización 2.0 → 1.0 replica en 1.0 los puestos cuando se crean en 2.0.*
+   - *Actualización (Decisión de Carlos, 25-oct-2026 23:10, chat con OPAI 2.0 (registrada por el bot OPAI 2.0)): el disparador vuelve a ser **ganar el negocio**, pero no automático: cada línea de guardias se ofrece para crear su puesto y RRHH lo confirma (`modulos/cpq.md`). La duda pendiente para Carlos queda así: si la sincronización 2.0 → 1.0 replica en 1.0 los puestos **confirmados por RRHH al ganar**.*
 9. **¿Qué reportes trae la v1?**
    - conversión y días por etapa;
    - pérdidas por motivo y competidor;
@@ -390,3 +391,4 @@ Cerradas, con recomendación.
 |---|---|---|
 | 24-oct-2026 | Borrador inicial | — |
 | 25-oct-2026 | R18 y pregunta 8: los puestos no se crean al ganar (decisión de Carlos sobre Puestos; CAR-10) | — (nota; reglas definidas por Carlos) |
+| 25-oct-2026 23:10 | R18 y pregunta 8: al ganar se ofrecen los puestos de las líneas de guardias y RRHH los confirma (respuesta 3 de ADR-048; CAR-10) | — (nota; decisión de Carlos 23:08–23:10) |

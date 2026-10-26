@@ -21,7 +21,7 @@ Cada dato lleva su fuente. **Sin verificar** = no se comprobó en el código de 
 ## 3. Reglas que 2.0 ya decidió (para contrastar con 1.0)
 
 - Pauta por **series y excepciones**; nunca una fila por trabajador por día; repintar no toca días pasados ni días con marca (ADR-048, punto 6).
-- 1 puesto = 1 posición; catálogo de patrones por tenant; PPC con motivo; los puestos no se crean al ganar (reglas definidas por Carlos el 25-oct, notas en ADR-036 y ADR-040; `modulos/operaciones.md`, borrador).
+- 1 puesto = 1 posición; catálogo de patrones por tenant; PPC con motivo; los puestos no se crean solos: al ganar el negocio se ofrecen y RRHH los confirma (reglas definidas por Carlos el 25-oct y respuesta 3 de ADR-048, 23:08–23:10; notas en ADR-036 y ADR-040; `modulos/operaciones.md`, borrador).
 
 ## 4. Pendiente para completar esta extracción
 
