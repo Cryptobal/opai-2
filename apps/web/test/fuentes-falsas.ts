@@ -50,6 +50,7 @@ export function fuentesFalsas(
     tenantPorSlug: async (slug) => (slug === "gard" ? { id: TENANT, estado: "activo" } : null),
     keyPorHash: async (_t, h) => (h === hash ? fila : null),
     membresia: async (t, u) => membresias.find((m) => m.tenantId === t && u === USUARIO.id) ?? null,
+    acceso: async () => ({ permisosRol: null, excepciones: [] }),
     marcarUsoKey: async (_t, id) => void usos.push(id),
   };
   return { fuentes, secreto, usos };

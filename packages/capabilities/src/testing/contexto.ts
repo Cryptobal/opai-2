@@ -1,4 +1,4 @@
-import type { Rol } from "@opai/domain";
+import type { Excepcion, Rol } from "@opai/domain";
 
 import { autorizador } from "../contexto";
 import { idempotenciaSobre } from "../idempotencia";
@@ -20,6 +20,10 @@ export type OpcionesPrueba = {
   /** Permisos explícitos (ignora rol). Si se omite, se usa la autorización real por `rol`. */
   permisos?: readonly string[];
   rol?: Rol | null;
+  /** Rol personalizado del tenant (null = rol base). ADR-022. */
+  permisosRol?: readonly string[] | null;
+  /** Excepciones de permiso por usuario. ADR-022. */
+  excepciones?: readonly Excepcion[] | null;
   usuario?: UsuarioContexto | null;
   actor?: Actor;
   conTenant?: boolean;
@@ -99,7 +103,16 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
       urlBase: "https://test.opai.cl",
     },
     plataforma: usuario?.platformRole ? { globales, paraTenant: () => db } : null,
-    autorizar: o.permisos ? (p) => (o.permisos ?? []).includes(p) : autorizador(rol, usuario),
+    autorizar: o.permisos
+      ? (p) => (o.permisos ?? []).includes(p)
+      : autorizador(
+          {
+            rol: o.permisosRol != null ? null : rol,
+            permisosRol: o.permisosRol ?? null,
+            excepciones: o.excepciones ?? null,
+          },
+          usuario,
+        ),
   };
   const esperar = () => Promise.all(diferidos.splice(0));
   return { ctx, eventos, usos, correos, tabla, esperar, almacen, despachos: () => despachos };

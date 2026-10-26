@@ -1,9 +1,11 @@
+import { permisosDe } from "@opai/domain";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { capacidadesDelNucleo } from "../src/core";
+import { catalogoPermisos } from "../src/core/me";
 import { executeCapability } from "../src/execute";
 import { limpiarRegistro, registrarCapacidades } from "../src/registry";
-import { contextoDePrueba } from "../src/testing";
+import { contextoDePrueba, TENANT_DE_PRUEBA } from "../src/testing";
 import { M1, M2, semillaTenant } from "./semilla";
 
 beforeEach(() => {
@@ -44,6 +46,62 @@ describe("core.users.*", () => {
     const r = await executeCapability(ctx, "core.users.update", { membershipId: M1, rol: "admin" });
     expect(r).toMatchObject({ ok: true, data: { rol: "admin" } });
     expect(eventos).toHaveLength(1);
+  });
+
+  it("un gerente con rol a medida equivalente a admin no sube a admin base ni invita admin (§16.2)", async () => {
+    // El rol personalizado concede TODO el acceso efectivo de admin: `validarConcedeRol` pasaría; lo
+    // que frena la escalada es `puedeAsignarRol` sobre el rol base (gerente), no el acceso efectivo.
+    const permisosRol = permisosDe("admin", catalogoPermisos(), []);
+    const { ctx } = contextoDePrueba({ rol: "gerente", permisosRol, semilla: semillaTenant("viewer") });
+    const sube = await executeCapability(ctx, "core.users.update", { membershipId: M2, rol: "admin" });
+    expect(sube).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+    expect(sube.ok === false && sube.error.message).toMatch(/por encima/);
+    const invita = await executeCapability(ctx, "core.users.invite", {
+      email: "nuevo@prueba.cl",
+      rol: "admin",
+    });
+    expect(invita).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+    expect(invita.ok === false && invita.error.message).toMatch(/por encima/);
+  });
+
+  it("promover a owner deja roleId nulo y borra sus denegaciones en la misma transacción (§16.2)", async () => {
+    const ROL_ID = "0192f3a0-0000-7000-8000-0000000000d1";
+    const base = semillaTenant("gerente");
+    const semilla = {
+      ...base,
+      membership: base.membership.map((m) => (m.id === M2 ? { ...m, roleId: ROL_ID } : m)),
+      rol: [
+        {
+          id: ROL_ID,
+          tenantId: TENANT_DE_PRUEBA,
+          nombre: "Gerente a medida",
+          permisos: ["core:users.read"],
+          sistema: false,
+          archivadoEn: null,
+        },
+      ],
+      permisoExcepcion: [
+        {
+          id: "0192f3a0-0000-7000-8000-0000000000e1",
+          tenantId: TENANT_DE_PRUEBA,
+          membershipId: M2,
+          permiso: "finanzas:ver",
+          conceder: false,
+        },
+      ],
+    };
+    const { ctx, tabla } = contextoDePrueba({ rol: "owner", semilla });
+    const r = await executeCapability(ctx, "core.users.update", { membershipId: M2, rol: "owner" });
+    expect(r).toMatchObject({ ok: true, data: { rol: "owner" } });
+    expect(tabla("membership").find((m) => m["id"] === M2)?.["roleId"]).toBeNull();
+    expect(tabla("permisoExcepcion")).toHaveLength(0);
+  });
+
+  it("quitar al último owner con acceso total se rechaza (un viewer no cuenta como owner)", async () => {
+    const { ctx } = contextoDePrueba({ rol: "owner", semilla: semillaTenant("viewer") });
+    const r = await executeCapability(ctx, "core.users.remove", { membershipId: M1 });
+    expect(r).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+    expect(r.ok === false && r.error.message).toMatch(/último owner/);
   });
 
   it("un admin no toca owners ni asigna owner", async () => {

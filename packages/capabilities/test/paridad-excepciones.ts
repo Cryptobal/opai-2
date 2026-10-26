@@ -47,4 +47,14 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: avanzar la atención de un incidente gobierna el cumplimiento (Ley 21.719).",
   "core.cumplimiento.incidente_notificar":
     "Solo personas: dejar constancia del aviso de una brecha a la Agencia o a los titulares es un acto humano responsable (Ley 21.719, §16.5).",
+  "core.roles.create":
+    "Solo personas: gobierna el acceso; un agente no se crea roles ni se concede permisos (ADR-034).",
+  "core.roles.update":
+    "Solo personas: cambiar los permisos de un rol es gobernar el acceso (ADR-034).",
+  "core.roles.archive":
+    "Solo personas: archivar un rol es gobierno de acceso; un agente no lo hace (ADR-034).",
+  "core.roles.assign":
+    "Solo personas: asignar un rol a un usuario gobierna su acceso (ADR-034).",
+  "core.excepciones.set":
+    "Solo personas: conceder o denegar permisos puntuales es gobierno de acceso (ADR-034).",
 };
