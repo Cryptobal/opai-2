@@ -59,8 +59,29 @@ test.describe("DS V2 (ADR-050)", () => {
     await expect(boton).toBeDisabled();
     // El texto sigue siendo el nombre accesible mientras carga.
     await expect(page.getByRole("button", { name: "Guardar cambios" }).first()).toBeAttached();
+    // Pero no se ve: su caja queda con opacidad efectiva 0 (el bug era `display:contents`, que no
+    // acepta `opacity`, así que el texto quedaba bajo el spinner).
+    const opacidad = await boton.evaluate((b) => {
+      const span = b.querySelector("span");
+      return span ? getComputedStyle(span).opacity : null;
+    });
+    expect(opacidad).toBe("0");
     const despues = await boton.boundingBox();
     expect(Math.round(despues?.width ?? 0)).toBe(Math.round(antes?.width ?? -1));
+  });
+
+  test("el número del KPI no se desborda con un monto de 9 dígitos (375, 1024, 1280)", async ({
+    page,
+  }) => {
+    await page.goto("/ds");
+    const numeros = page.locator('[data-muestra="kpi-v2"] p.t-numeric');
+    const total = await numeros.count();
+    expect(total).toBeGreaterThan(0);
+    for (let i = 0; i < total; i++) {
+      // scrollWidth > clientWidth significaría que el texto (whitespace-nowrap) rebasa su tarjeta.
+      const cabe = await numeros.nth(i).evaluate((el) => el.scrollWidth <= el.clientWidth + 1);
+      expect(cabe, `el KPI ${i} no debe desbordar`).toBe(true);
+    }
   });
 
   test("el estado de error se anuncia con role=alert", async ({ page }) => {

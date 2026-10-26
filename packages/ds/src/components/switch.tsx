@@ -34,7 +34,7 @@ export function Switch(props: SwitchProps) {
       )}
     >
       <span className="flex h-[26px] w-11 items-center rounded-full bg-border-control p-[3px] transition-colors duration-150 group-data-[state=checked]:bg-accent">
-        <RadixSwitch.Thumb className="size-5 rounded-full bg-surface shadow-[0_1px_2px_rgba(0,0,0,0.2)] transition-transform duration-150 ease-ds data-[state=checked]:translate-x-[18px] motion-reduce:transition-none" />
+        <RadixSwitch.Thumb className="size-5 rounded-full bg-surface shadow-thumb transition-transform duration-150 ease-ds data-[state=checked]:translate-x-[18px] motion-reduce:transition-none" />
       </span>
     </RadixSwitch.Root>
   );

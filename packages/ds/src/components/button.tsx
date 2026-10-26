@@ -36,7 +36,9 @@ export const estilosBoton = (variantes: VariantProps<typeof estilos> = {}): stri
 
 export type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> &
   VariantProps<typeof estilos> & {
-    /** En curso: spinner, `aria-busy` y deshabilitado, con el mismo ancho (el texto queda invisible). */
+    /** En curso: spinner, `aria-busy` y deshabilitado, con el mismo ancho. El texto se oculta con
+     * opacidad 0 (no con `display:contents`, que no acepta `opacity`), así conserva su caja y sigue
+     * siendo el nombre accesible del botón para el lector de pantalla. */
     cargando?: boolean;
   };
 
@@ -64,7 +66,7 @@ export function Button({
         "aria-busy": true,
         children: (
           <>
-            <span className="contents opacity-0">{props.children}</span>
+            <span className="inline-flex items-center gap-2 opacity-0">{props.children}</span>
             <span aria-hidden className="ds-spinner" />
           </>
         ),
