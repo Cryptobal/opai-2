@@ -60,6 +60,22 @@ export const AJUSTES_NUCLEO = defineAjustes(
       ambito: "plataforma",
       control: "texto",
     }),
+    cumplimiento_solicitud_dias_plazo: z.number().int().min(0).max(365).default(0).meta({
+      etiqueta: "Plazo de atención de solicitudes del titular (días corridos)",
+      ayuda: "Días para atender una solicitud ARCO (Ley 21.719). Lo fija el abogado; 0 = sin plazo definido todavía (se calcula al recibir una vez configurado, §16.3).",
+      grupo: "Cumplimiento",
+      ambito: "tenant",
+      permiso: "core:cumplimiento.manage",
+      control: "numero",
+    }),
+    cumplimiento_brecha_dias_plazo: z.number().int().min(0).max(365).default(0).meta({
+      etiqueta: "Plazo para avisar una brecha (días corridos)",
+      ayuda: "Días para notificar una brecha a la Agencia y a los titulares (Ley 21.719). Lo fija el abogado; 0 = sin plazo definido todavía (§16.5).",
+      grupo: "Cumplimiento",
+      ambito: "tenant",
+      permiso: "core:cumplimiento.manage",
+      control: "numero",
+    }),
     cumplimiento_dpa_texto: z.string().default("").meta({
       etiqueta: "Texto del DPA",
       ayuda: "Texto del acuerdo de tratamiento de datos (DPA) de esa versión. La aceptación guarda su hash (SHA-256) como prueba de a qué texto aceptó el tenant. El texto legal lo fija Carlos.",

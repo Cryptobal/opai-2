@@ -2,30 +2,15 @@ import { type DatoPersonalDeclarado, defineDatosPersonales } from "@opai/domain"
 
 import { listarModulos } from "../../module";
 
-/**
- * Inventario de datos personales del Núcleo (RAT, Ley 21.719 §4.3). Es la pieza «por diseño»: un
- * gate verifica que no quede una tabla del Núcleo con datos personales sin declarar (§16.6). La
- * base de licitud de cada tratamiento es PROPUESTA; la confirma asesoría legal (§16.2). La
- * retención se afina en el PR 3 (§16.4). Los hechos regulados (ADR-023) van como no borrables.
- */
+// Inventario de datos personales del Núcleo (RAT, Ley 21.719 §4.3). Pieza «por diseño»: un gate
+// exige declarar toda tabla del Núcleo con datos personales (§16.6). La base de licitud es PROPUESTA
+// (la confirma legal, §16.2); la retención se afina en el PR 3. Hechos regulados (ADR-023): no borrables.
 export const INVENTARIO_NUCLEO = defineDatosPersonales("core", [
   {
     tabla: "personas",
     finalidad: "Gestión del personal: identificación, contacto y domicilio de las personas trabajadoras.",
     categorias: ["identificacion", "contacto", "laboral"],
-    campos: [
-      "nombres",
-      "apellidos",
-      "rut",
-      "email_personal",
-      "email_laboral",
-      "telefono",
-      "fecha_nacimiento",
-      "calle",
-      "comuna",
-      "region",
-      "direccion_formateada",
-    ],
+    campos: ["nombres", "apellidos", "rut", "email_personal", "email_laboral", "telefono", "fecha_nacimiento", "calle", "comuna", "region", "direccion_formateada"],
     baseLicitud: "relacion_laboral",
     reguladoNoBorrable: true,
     destinatarios: ["Cloudflare R2 (documentos de la persona)"],
@@ -131,21 +116,7 @@ export const INVENTARIO_NUCLEO = defineDatosPersonales("core", [
     tabla: "perfil_empresa",
     finalidad: "Representante legal y delegado de protección de datos (DPO) del tenant, y correos de contacto.",
     categorias: ["identificacion", "contacto"],
-    campos: [
-      "rut",
-      "representante_nombre",
-      "representante_rut",
-      "representante_email",
-      "correo_comercial",
-      "correo_operaciones",
-      "correo_finanzas",
-      "correo_contacto",
-      "telefono",
-      "whatsapp",
-      "dpo_nombre",
-      "dpo_correo",
-      "dpo_telefono",
-    ],
+    campos: ["rut", "representante_nombre", "representante_rut", "representante_email", "correo_comercial", "correo_operaciones", "correo_finanzas", "correo_contacto", "telefono", "whatsapp", "dpo_nombre", "dpo_correo", "dpo_telefono"],
     baseLicitud: "obligacion_legal",
   },
   {
@@ -175,7 +146,7 @@ export const INVENTARIO_NUCLEO = defineDatosPersonales("core", [
 ]);
 
 /** Inventario consolidado: el Núcleo más lo que declara cada módulo en su manifest. */
-export function listarInventario(): DatoPersonalDeclarado[] {
-  const modulos = listarModulos().flatMap((m) => m.datosPersonales ?? []);
-  return [...INVENTARIO_NUCLEO, ...modulos];
-}
+export const listarInventario = (): DatoPersonalDeclarado[] => [
+  ...INVENTARIO_NUCLEO,
+  ...listarModulos().flatMap((m) => m.datosPersonales ?? []),
+];

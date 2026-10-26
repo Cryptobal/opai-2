@@ -29,4 +29,22 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: aceptar el DPA por la empresa es un acto humano responsable (Ley 21.719, ADR-034).",
   "core.cumplimiento.dpo_set":
     "Solo personas: designar al delegado de protección de datos (DPO) gobierna el cumplimiento (Ley 21.719).",
+  "core.cumplimiento.consentimiento_registrar":
+    "Solo personas: registrar el consentimiento de un titular es un acto responsable del tenant (Ley 21.719, §16.2).",
+  "core.cumplimiento.consentimiento_revocar":
+    "Solo personas: dejar constancia de la revocación de un consentimiento es un acto responsable (Ley 21.719).",
+  "core.cumplimiento.solicitud_crear":
+    "Solo personas: atender una solicitud del titular (ARCO+) es un acto humano responsable (Ley 21.719, ADR-034).",
+  "core.cumplimiento.solicitud_avanzar":
+    "Solo personas: avanzar una solicitud del titular gobierna el cumplimiento y prueba la atención en plazo (Ley 21.719).",
+  "core.cumplimiento.solicitud_resolver":
+    "Solo personas: resolver o rechazar una solicitud del titular es una decisión humana responsable (Ley 21.719).",
+  "core.cumplimiento.solicitud_exportar":
+    "Solo personas: generar la exportación de datos de un titular (acceso/portabilidad) es un acto humano responsable (Ley 21.719).",
+  "core.cumplimiento.incidente_registrar":
+    "Solo personas: registrar un incidente o brecha es un acto humano responsable, no un detector automático (Ley 21.719, §16.5).",
+  "core.cumplimiento.incidente_avanzar":
+    "Solo personas: avanzar la atención de un incidente gobierna el cumplimiento (Ley 21.719).",
+  "core.cumplimiento.incidente_notificar":
+    "Solo personas: dejar constancia del aviso de una brecha a la Agencia o a los titulares es un acto humano responsable (Ley 21.719, §16.5).",
 };
