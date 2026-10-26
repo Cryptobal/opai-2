@@ -7,7 +7,7 @@ import { noEncontrado } from "../errores";
 import { tenantActual, usuarioResponsable } from "./comun";
 import { emailSchema, portalSchema, rolSchema, uuidSchema } from "./esquemas";
 import { crearInvitacion, estadoInvitacion } from "./invitar";
-import { validarConcedeRol } from "./permisos/comun";
+import { exigeAsignarRol } from "./permisos/comun";
 
 export const invitacionCreadaSchema = z.object({
   id: z.string().nullable(),
@@ -32,9 +32,10 @@ export const usersInvite = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    // Qué rol puede invitar se mide por su acceso REAL (§16.2, ADR-022), no por el rol base: nadie
-    // invita con un rol que concede permisos que él mismo no tiene (owner solo lo invita un owner).
-    validarConcedeRol(ctx, input.rol);
+    // §16.2 (ADR-022): nadie invita con un rol base por encima del suyo (`puedeAsignarRol` sobre el rol
+    // base) ni con uno que conceda permisos que él mismo no tiene (acceso REAL). La jerarquía del rol
+    // base manda aunque un rol a medida iguale el acceso de uno más alto; owner solo lo invita un owner.
+    exigeAsignarRol(ctx, input.rol);
     const tenant = await tenantActual(ctx);
     const invitadoPor = { id: usuarioResponsable(ctx), nombre: ctx.usuario?.nombre ?? "OPAI" };
     return crearInvitacion(ctx.db, tenant, { ...input, invitadoPor }, ctx.servicios, dryRun);

@@ -1,4 +1,11 @@
-import { coincide, moduloDe, permisosDe, permisosNoConcedibles, type Rol } from "@opai/domain";
+import {
+  coincide,
+  moduloDe,
+  permisosDe,
+  permisosNoConcedibles,
+  puedeAsignarRol,
+  type Rol,
+} from "@opai/domain";
 
 import { prohibido, reglaDeNegocio } from "../../errores";
 import type { Contexto } from "../../types";
@@ -86,4 +93,17 @@ export function normalizarPermisosRol(ctx: Contexto, permisos: readonly string[]
  */
 export function validarConcedeRol(ctx: Contexto, rol: Rol): void {
   validarConcedibles(ctx, permisosDe(rol, catalogoPermisos(), ctx.modulosActivos));
+}
+
+/**
+ * Asignar o invitar con un rol base (§16.2, ADR-022) exige dos cosas distintas: poder conceder todo lo
+ * que el rol otorga (`validarConcedeRol`, por acceso efectivo) y no superar la jerarquía del rol base
+ * (`puedeAsignarRol` sobre `ctx.rol`). La jerarquía manda aunque un rol personalizado iguale el acceso:
+ * un gerente con un rol a medida equivalente a admin no se promueve a admin base ni invita con él.
+ */
+export function exigeAsignarRol(ctx: Contexto, rol: Rol): void {
+  if (ctx.rol && !puedeAsignarRol(ctx.rol, rol)) {
+    throw prohibido(`No puedes asignar un rol por encima del tuyo: ${rol}.`);
+  }
+  validarConcedeRol(ctx, rol);
 }
