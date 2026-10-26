@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0;background:var(--ds-n-200)} a{color:var(--ds-accent)} a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<div style="padding:64px;display:flex;flex-direction:column;gap:64px;font-family:var(--font-sans);color:var(--ds-fg);width:max-content">
+<header id="indice" style="display:flex;flex-direction:column;gap:24px;max-width:1280px;background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:16px;padding:40px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<span class="t-overline" style="color:var(--ds-fg-subtle)">OPAI 2.0 · Núcleo · Briefs 07c y 07d</span>
+<span class="t-display" style="color:var(--ds-fg)">Acceso, permisos y Ley 21.719</span>
+<span class="t-body" style="color:var(--ds-fg-muted);max-width:760px">Configuración → Usuarios y permisos, Instalaciones a cargo, Privacidad y datos personales, Solicitudes de titulares, Incidentes y Consentimientos. Cada estado a 375, 1024 y 1280. Datos ficticios de Gard Seguridad SpA · RUT 77.341.208-5 · Av. Apoquindo 4501, Las Condes.</span>
+</div>
+<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:24px">
+<sc-for list="{{ parts }}" as="p" hint-placeholder-count="4">
+<nav style="display:flex;flex-direction:column;gap:6px">
+<a href="#{{ p.id }}" class="t-subheading" style="text-decoration:none;color:var(--ds-fg)">{{ p.title }}</a>
+<sc-for list="{{ p.states }}" as="s" hint-placeholder-count="8">
+<a href="#{{ s.id }}" class="t-body-sm" style="text-decoration:none;display:flex;gap:8px"><span class="t-mono" style="color:var(--ds-fg-subtle);min-width:28px">{{ s.code }}</span><span>{{ s.label }}</span></a>
+</sc-for>
+</nav>
+</sc-for>
+</div>
+</header>
+
+<section id="parte-a" style="display:flex;flex-direction:column;gap:48px">
+<span class="t-display" style="color:var(--ds-fg)">{{ pa.title }}</span>
+<sc-for list="{{ pa.states }}" as="s" hint-placeholder-count="2">
+<div id="{{ s.id }}" data-row="{{ s.id }}" data-screen-label="{{ s.code }} {{ s.label }}" style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;gap:12px;align-items:baseline"><span class="t-mono t-subheading" style="color:var(--ds-fg-subtle)">{{ s.code }}</span><span class="t-heading">{{ s.label }}</span><a href="#indice" class="t-body-sm">Índice</a></div>
+<div style="display:flex;gap:48px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:8px"><span class="t-label-sm" style="color:var(--ds-fg-muted)">375</span><div style="width:375px;height:812px;border-radius:16px;overflow:hidden;border:1px solid var(--ds-border-strong);background:var(--ds-bg)"><sc-if value="{{ s.show }}" hint-placeholder-val="{{ false }}"><dc-import name="ParteA" device="phone" state="{{ s.id }}" style="width:375px;height:812px" hint-size="375px,812px"></dc-import></sc-if></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span class="t-label-sm" style="color:var(--ds-fg-muted)">1024</span><div style="width:1024px;height:768px;border-radius:16px;overflow:hidden;border:1px solid var(--ds-border-strong);background:var(--ds-bg)"><sc-if value="{{ s.show }}" hint-placeholder-val="{{ false }}"><dc-import name="ParteA" device="tablet" state="{{ s.id }}" style="width:1024px;height:768px" hint-size="1024px,768px"></dc-import></sc-if></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span class="t-label-sm" style="color:var(--ds-fg-muted)">1280</span><div style="width:1280px;height:800px;border-radius:16px;overflow:hidden;border:1px solid var(--ds-border-strong);background:var(--ds-bg)"><sc-if value="{{ s.show }}" hint-placeholder-val="{{ false }}"><dc-import name="ParteA" device="desktop" state="{{ s.id }}" style="width:1280px;height:800px" hint-size="1280px,800px"></dc-import></sc-if></div></div>
+</div>
+</div>
+</sc-for>
+</section>
+
+<section id="parte-b" style="display:flex;flex-direction:column;gap:48px">
+<span class="t-display" style="color:var(--ds-fg)">{{ pb.title }}</span>
+<sc-for list="{{ pb.states }}" as="s" hint-placeholder-count="2">
+<div id="{{ s.id }}" data-row="{{ s.id }}" data-screen-label="{{ s.code }} {{ s.label }}" style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;gap:12px;align-items:baseline"><span class="t-mono t-subheading" style="color:var(--ds-fg-subtle)">{{ s.code }}</span><span class="t-heading">{{ s.label }}</span><a href="#indice" class="t-body-sm">Índice</a></div>
+<div style="display:flex;gap:48px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:8px"><span class="t-label-sm" style="color:var(--ds-fg-muted)">375</span><div style="width:375px;height:812px;border-radius:16px;overflow:hidden;border:1px solid var(--ds-border-strong);background:var(--ds-bg)"><sc-if value="{{ s.show }}" hint-placeholder-val="{{ false }}"><dc-import name="ParteB" device="phone" state="{{ s.id }}" style="width:375px;height:812px" hint-size="375px,812px"></dc-import></sc-if></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span class="t-label-sm" style="color:var(--ds-fg-muted)">1024</span><div style="width:1024px;height:768px;border-radius:16px;overflow:hidden;border:1px solid var(--ds-border-strong);background:var(--ds-bg)"><sc-if value="{{ s.show }}" hint-placeholder-val="{{ false }}"><dc-import name="ParteB" device="tablet" state="{{ s.id }}" style="width:1024px;height:768px" hint-size="1024px,768px"></dc-import></sc-if></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span class="t-label-sm" style="color:var(--ds-fg-muted)">1280</span><div style="width:1280px;height:800px;border-radius:16px;overflow:hidden;border:1px solid var(--ds-border-strong);background:var(--ds-bg)"><sc-if value="{{ s.show }}" hint-placeholder-val="{{ false }}"><dc-import name="ParteB" device="desktop" state="{{ s.id }}" style="width:1280px;height:800px" hint-size="1280px,800px"></dc-import></sc-if></div></div>
+</div>
+</div>
+</sc-for>
+</section>
+
+<section id="parte-c" style="display:flex;flex-direction:column;gap:48px">
+<span class="t-display" style="color:var(--ds-fg)">{{ pc.title }}</span>
+<sc-for list="{{ pc.states }}" as="s" hint-placeholder-count="2">
+<div id="{{ s.id }}" data-row="{{ s.id }}" data-screen-label="{{ s.code }} {{ s.label }}" style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;gap:12px;align-items:baseline"><span class="t-mono t-subheading" style="color:var(--ds-fg-subtle)">{{ s.code }}</span><span class="t-heading">{{ s.label }}</span><a href="#indice" class="t-body-sm">Índice</a></div>
+<div style="display:flex;gap:48px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:8px"><span class="t-label-sm" style="color:var(--ds-fg-muted)">375</span><div style="width:375px;height:812px;border-radius:16px;overflow:hidden;border:1px solid var(--ds-border-strong);background:var(--ds-bg)"><sc-if value="{{ s.show }}" hint-placeholder-val="{{ false }}"><dc-import name="ParteC" device="phone" state="{{ s.id }}" style="width:375px;height:812px" hint-size="375px,812px"></dc-import></sc-if></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span class="t-label-sm" style="color:var(--ds-fg-muted)">1024</span><div style="width:1024px;height:768px;border-radius:16px;overflow:hidden;border:1px solid var(--ds-border-strong);background:var(--ds-bg)"><sc-if value="{{ s.show }}" hint-placeholder-val="{{ false }}"><dc-import name="ParteC" device="tablet" state="{{ s.id }}" style="width:1024px;height:768px" hint-size="1024px,768px"></dc-import></sc-if></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span class="t-label-sm" style="color:var(--ds-fg-muted)">1280</span><div style="width:1280px;height:800px;border-radius:16px;overflow:hidden;border:1px solid var(--ds-border-strong);background:var(--ds-bg)"><sc-if value="{{ s.show }}" hint-placeholder-val="{{ false }}"><dc-import name="ParteC" device="desktop" state="{{ s.id }}" style="width:1280px;height:800px" hint-size="1280px,800px"></dc-import></sc-if></div></div>
+</div>
+</div>
+</sc-for>
+</section>
+
+<section id="parte-d" style="display:flex;flex-direction:column;gap:48px">
+<span class="t-display" style="color:var(--ds-fg)">{{ pd.title }}</span>
+<sc-for list="{{ pd.states }}" as="s" hint-placeholder-count="2">
+<div id="{{ s.id }}" data-row="{{ s.id }}" data-screen-label="{{ s.code }} {{ s.label }}" style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;gap:12px;align-items:baseline"><span class="t-mono t-subheading" style="color:var(--ds-fg-subtle)">{{ s.code }}</span><span class="t-heading">{{ s.label }}</span><a href="#indice" class="t-body-sm">Índice</a></div>
+<div style="display:flex;gap:48px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:8px"><span class="t-label-sm" style="color:var(--ds-fg-muted)">375</span><div style="width:375px;height:812px;border-radius:16px;overflow:hidden;border:1px solid var(--ds-border-strong);background:var(--ds-bg)"><sc-if value="{{ s.show }}" hint-placeholder-val="{{ false }}"><dc-import name="ParteD" device="phone" state="{{ s.id }}" style="width:375px;height:812px" hint-size="375px,812px"></dc-import></sc-if></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span class="t-label-sm" style="color:var(--ds-fg-muted)">1024</span><div style="width:1024px;height:768px;border-radius:16px;overflow:hidden;border:1px solid var(--ds-border-strong);background:var(--ds-bg)"><sc-if value="{{ s.show }}" hint-placeholder-val="{{ false }}"><dc-import name="ParteD" device="tablet" state="{{ s.id }}" style="width:1024px;height:768px" hint-size="1024px,768px"></dc-import></sc-if></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span class="t-label-sm" style="color:var(--ds-fg-muted)">1280</span><div style="width:1280px;height:800px;border-radius:16px;overflow:hidden;border:1px solid var(--ds-border-strong);background:var(--ds-bg)"><sc-if value="{{ s.show }}" hint-placeholder-val="{{ false }}"><dc-import name="ParteD" device="desktop" state="{{ s.id }}" style="width:1280px;height:800px" hint-size="1280px,800px"></dc-import></sc-if></div></div>
+</div>
+</div>
+</sc-for>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { n: 2 };
+  componentDidMount() {
+    const step = () => { if (this.state.n >= 70) return; this.setState({ n: this.state.n + 1 }); this.t = setTimeout(step, 120); };
+    this.t = setTimeout(step, 600);
+  }
+  componentWillUnmount() { clearTimeout(this.t); }
+  renderVals() {
+    let k = 0; const lim = this.state.n;
+    const mk = (prefix, list) => list.map(([id, label], i) => ({ id, label, code: prefix + String(i + 1).padStart(2, "0"), show: k++ < lim }));
+    const pa = { id: "parte-a", title: "A · Usuarios y permisos", states: mk("A", [
+      ["a-idx", "Configuración: índice con «Usuarios y permisos» activo"],
+      ["a-users", "Lista de usuarios con datos"],
+      ["a-roles", "Lista de roles con datos y equivalencia OPAI 1.0"],
+      ["a-roles-empty", "Roles personalizados vacío"],
+      ["a-loading", "Carga"],
+      ["a-error", "Error"],
+      ["a-forbidden", "Sin permiso (entrada por URL)"],
+      ["a-read", "Matriz en lectura · Central de monitoreo"],
+      ["a-system", "Rol del sistema · Supervisor"],
+      ["a-edit", "Matriz en edición: 4 cambios y permiso no concedible"],
+      ["a-fin", "Finanzas bloqueado: Dialog de concesión"],
+      ["a-saving", "Guardando"],
+      ["a-saved", "Guardado: Toast «Rol actualizado»"],
+      ["a-save-error", "Error al guardar"],
+      ["a-blank", "Rol vacío"],
+      ["a-dup", "Nuevo rol: nombre duplicado"],
+      ["a-archive", "Archivar rol en uso"],
+      ["a-exc", "Ficha de usuario con excepciones"],
+      ["a-exc-dialog", "Agregar excepción"],
+      ["a-noexc", "Ficha sin excepciones"],
+      ["a-owner", "Último owner protegido"],
+      ["a-owner-admin", "Admin frente a un owner"],
+      ["a-readonly", "Vista de solo lectura (gerente)"],
+    ]) };
+    const pb = { id: "parte-b", title: "B · Instalaciones a cargo", states: mk("B", [
+      ["b-with", "Supervisor con instalaciones"],
+      ["b-empty", "Sin instalaciones a cargo"],
+      ["b-quitar", "Dialog de quitar"],
+      ["b-loading", "Carga"],
+      ["b-error", "Error"],
+      ["b-assign", "Asignar con 3 seleccionadas"],
+      ["b-noresults", "Búsqueda sin resultados"],
+      ["b-toast", "Asignación guardada"],
+      ["b-portal", "Portal Supervisor con datos"],
+      ["b-portal-empty", "Portal Supervisor vacío"],
+    ]) };
+    const pc = { id: "parte-c", title: "C · Privacidad y datos personales", states: mk("C", [
+      ["c-idx", "Configuración: índice con la entrada nueva"],
+      ["c-ok", "DPA aceptado y DPO con datos"],
+      ["c-pend-owner", "DPA pendiente · vista owner"],
+      ["c-pend-admin", "DPA pendiente · vista admin y DPO vacío"],
+      ["c-new", "Versión nueva del acuerdo"],
+      ["c-reader", "Lector de aceptación"],
+      ["c-toast", "Acuerdo aceptado"],
+      ["c-dpo-edit", "Editar DPO con error de correo"],
+      ["c-home", "Alerta en Inicio"],
+      ["c-rat", "Registro de tratamientos"],
+      ["c-rat-filter", "Registro filtrado por Contacto"],
+      ["c-rat-loading", "Registro cargando"],
+    ]) };
+    const pd = { id: "parte-d", title: "D · Solicitudes, incidentes y consentimientos", states: mk("D", [
+      ["d-inbox", "Bandeja con datos"],
+      ["d-empty", "Bandeja vacía"],
+      ["d-empty-filter", "Vacío por filtro"],
+      ["d-new", "Registrar solicitud"],
+      ["d-registered", "Solicitud registrada"],
+      ["d-recibida", "Detalle · Recibida (Rectificación)"],
+      ["d-proceso", "Detalle · En proceso (Acceso)"],
+      ["d-export", "Exportación generada"],
+      ["d-resolve", "Resolver"],
+      ["d-reject", "Rechazar"],
+      ["d-cancel", "Cancelación con datos que se conservan"],
+      ["d-resuelta", "Detalle · Resuelta"],
+      ["d-forbidden", "Sin permiso por alcance (supervisor)"],
+      ["d-inc", "Incidentes con datos"],
+      ["d-inc-empty", "Incidentes vacío"],
+      ["d-priv", "Ficha de contacto · Privacidad"],
+      ["d-priv-empty", "Ficha de persona · Privacidad vacía"],
+      ["d-priv-dialog", "Registrar consentimiento"],
+    ]) };
+    return { pa, pb, pc, pd, parts: [pa, pb, pc, pd] };
+  }
+}
+</script>
+</body>
+</html>

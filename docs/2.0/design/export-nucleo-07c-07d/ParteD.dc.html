@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="opai-nucleo.js"></script>
+</helmet>
+<div style="position:relative;width:100%;height:100%;overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" tabs="{{ navTabs }}" rail-footer="{{ railFooter }}" groups="{{ groups }}" active="{{ active }}" user="{{ shellUser }}" tenant="Gard Seguridad SpA" tenant-initials="GS" notifications="{{ 3 }}" title="{{ title }}" top-bar="{{ topBar }}" app-bar="{{ appBar }}" hide-tab-bar="{{ hideTab }}" width="100%" height="100%" hint-size="100%,100%">
+<div style="flex:1;min-height:0;display:flex;flex-direction:column;background:var(--ds-bg)">
+
+<sc-if value="{{ showTabs }}" hint-placeholder-val="{{ true }}">
+<div style="padding:8px {{ pad }} 0;background:var(--ds-surface);border-bottom:1px solid var(--ds-border);flex:none">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ tabs }}" value="{{ tab }}" fade-color="var(--ds-surface)" hint-size="100%,44px"></x-import>
+</div>
+</sc-if>
+
+<sc-if value="{{ isFicha }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;overflow:auto">
+<div style="padding:{{ pad }};display:flex;flex-direction:column;gap:16px;max-width:880px">
+<div style="display:flex;gap:16px;align-items:center">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Avatar" initials="{{ fp.initials }}" size="xl" hint-size="48px,48px"></x-import>
+<div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}"><span class="t-heading" style="color:var(--ds-fg)">{{ fp.name }}</span></sc-if>
+<span class="t-body-sm" style="color:var(--ds-fg-muted)">{{ fp.sub }}</span>
+<span class="t-caption t-mono" style="color:var(--ds-fg-subtle)">{{ fp.meta }}</span>
+</div>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ fichaTabs }}" value="priv" hint-size="100%,44px"></x-import>
+
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Consentimientos" actions="{{ consBtn }}" hint-size="100%,220px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<sc-if value="{{ fp.hasCons }}" hint-placeholder-val="{{ true }}">
+<sc-for list="{{ fp.cons }}" as="cs" hint-placeholder-count="2">
+<div style="display:flex;flex-direction:column;gap:8px;padding-top:12px;border-top:1px solid var(--ds-border)">
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="t-label" style="color:var(--ds-fg)">{{ cs.purpose }}</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ cs.tone }}" dot="{{ true }}" hint-size="90px,22px">{{ cs.state }}</x-import></div>
+<span class="t-body-sm" style="color:var(--ds-fg-muted)">{{ cs.line }}</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Timeline" items="{{ cs.hist }}" hint-size="100%,120px"></x-import>
+</div>
+</sc-for>
+</sc-if>
+<sc-if value="{{ fp.noCons }}" hint-placeholder-val="{{ false }}"><span class="t-body-sm" style="color:var(--ds-fg-muted)">Sin consentimientos registrados</span></sc-if>
+<span class="t-caption" style="color:var(--ds-fg-subtle);text-wrap:pretty">Los datos de la relación laboral no dependen del consentimiento: se tratan por el contrato y las obligaciones legales. Otorgar y revocar quedan como hechos nuevos; nunca se edita uno anterior.</span>
+</div>
+</x-import>
+
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Solicitudes de esta persona" hint-size="100%,120px">
+<sc-if value="{{ fp.hasSol }}" hint-placeholder-val="{{ true }}">
+<sc-for list="{{ fp.sols }}" as="so" hint-placeholder-count="1">
+<a href="#" style="display:flex;gap:12px;align-items:center;min-height:44px;color:var(--ds-fg);text-decoration:none">
+<span class="t-mono t-body-sm" style="color:var(--ds-accent)">{{ so.n }}</span><span class="t-body-sm" style="flex:1">{{ so.t }}</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ so.tone }}" hint-size="80px,22px">{{ so.st }}</x-import><span class="ic sm i-chevron-right" style="color:var(--ds-fg-subtle)"></span>
+</a>
+</sc-for>
+</sc-if>
+<sc-if value="{{ fp.noSol }}" hint-placeholder-val="{{ false }}"><span class="t-body-sm" style="color:var(--ds-fg-muted)">Sin solicitudes</span></sc-if>
+</x-import>
+
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Bases de tratamiento" description="Tomado del registro de tratamientos" hint-size="100%,160px">
+<div style="display:flex;flex-direction:column">
+<sc-for list="{{ fp.bases }}" as="b" hint-placeholder-count="2">
+<div style="display:flex;gap:12px;justify-content:space-between;flex-wrap:wrap;padding:10px 0;border-top:1px solid var(--ds-border)"><span class="t-body-sm" style="color:var(--ds-fg)">{{ b.a }}</span><span class="t-body-sm" style="color:var(--ds-fg-muted)">{{ b.b }}</span></div>
+</sc-for>
+</div>
+</x-import>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isInc }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;overflow:auto">
+<div style="padding:{{ pad }};display:flex;flex-direction:column;gap:16px;max-width:1040px">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+<span class="t-body-sm" style="color:var(--ds-fg-muted)">{{ incCount }}</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="plus" hint-size="180px,40px">Registrar incidente</x-import>
+</div>
+<sc-if value="{{ incHas }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="margin:0 -16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ incCols }}" rows="{{ incRows }}" cards="{{ true }}" to-card="{{ incCard }}" hint-size="100%,200px"></x-import></div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ incCols }}" rows="{{ incRows }}" hint-size="100%,200px"></x-import>
+</sc-if>
+</sc-if>
+<sc-if value="{{ incEmpty }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.EmptyState" icon="flag" title="No hay incidentes registrados" description="Registra aquí cualquier hecho que pueda haber expuesto datos personales." hint-size="100%,240px"></x-import>
+</sc-if>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isSol }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1;min-height:0;display:flex">
+<sc-if value="{{ showList }}" hint-placeholder-val="{{ true }}">
+<div style="width:{{ listW }};flex:{{ listFlex }};min-width:0;overflow:auto;border-right:{{ listBorder }};background:var(--ds-surface);display:flex;flex-direction:column">
+<div style="padding:16px;display:flex;flex-direction:column;gap:12px;border-bottom:1px solid var(--ds-border)">
+<div style="display:flex;gap:12px;align-items:center">
+<div style="flex:1;min-width:0"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" icon="search" placeholder="Buscar por titular o número" hint-size="100%,44px"></x-import></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="plus" icon-only="{{ isPhone }}" aria-label="Registrar solicitud" hint-size="44px,44px">{{ regLabel }}</x-import>
+</div>
+<div class="chip-row" style="flex-wrap:wrap">
+<sc-for list="{{ stChips }}" as="ch" hint-placeholder-count="4">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FilterChip" variant="toggle" value="{{ ch.label }}" count="{{ ch.n }}" selected="{{ ch.on }}" hint-size="110px,32px"></x-import>
+</sc-for>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" value="{{ typeVal }}" placeholder="Todos los tipos" options="{{ typeOpts }}" hint-size="100%,44px"></x-import>
+
+</div>
+<sc-if value="{{ listHas }}" hint-placeholder-val="{{ true }}">
+<sc-for list="{{ sols }}" as="s" hint-placeholder-count="5">
+<div style="display:flex;flex-direction:column;gap:6px;padding:12px 16px;border-bottom:1px solid var(--ds-border);background:{{ s.bg }};box-shadow:{{ s.bar }}">
+<div style="display:flex;gap:8px;align-items:center"><span class="t-mono t-caption" style="color:var(--ds-fg-muted)">{{ s.n }}</span><span style="flex:1"></span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ s.stTone }}" hint-size="80px,22px">{{ s.st }}</x-import></div>
+<span class="t-label" style="color:var(--ds-fg)">{{ s.who }}</span>
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" hint-size="90px,22px">{{ s.type }}</x-import>
+<sc-if value="{{ s.hasVig }}" hint-placeholder-val="{{ true }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ s.vigTone }}" dot="{{ true }}" hint-size="120px,22px">{{ s.vig }}</x-import></sc-if>
+<span class="t-caption" style="color:var(--ds-fg-subtle)">{{ s.rec }}</span>
+</div>
+</div>
+</sc-for>
+</sc-if>
+<sc-if value="{{ listEmpty }}" hint-placeholder-val="{{ false }}">
+<div style="padding:24px 16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.EmptyState" size="sm" icon="inbox" title="No hay solicitudes de titulares" description="Cuando una persona pida acceder, corregir, eliminar u oponerse al uso de sus datos, regístrala aquí para atenderla dentro del plazo legal." action="{{ regBtn }}" hint-size="100%,260px"></x-import></div>
+</sc-if>
+<sc-if value="{{ listEmptyFilter }}" hint-placeholder-val="{{ false }}">
+<div style="padding:24px 16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.EmptyState" size="sm" icon="filter" title="No hay solicitudes con estos filtros" action="{{ clearBtn }}" hint-size="100%,200px"></x-import></div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ showDetail }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1;min-width:0;overflow:auto">
+<div style="padding:{{ pad }};display:flex;flex-direction:column;gap:16px;max-width:880px">
+<sc-if value="{{ detForbidden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.StatePanel" kind="forbidden" icon="lock" title="Esta solicitud no está a tu cargo" description="Solo ves las solicitudes de personas con contrato vigente en tus instalaciones a cargo." hint-size="100%,220px"></x-import>
+</sc-if>
+<sc-if value="{{ detNone }}" hint-placeholder-val="{{ false }}"><div style="min-height:320px"></div></sc-if>
+<sc-if value="{{ detShow }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ regAlert }}" hint-placeholder-val="{{ false }}">
+<div role="status" style="display:flex;gap:12px;align-items:flex-start;padding:12px 16px;border-radius:10px;background:var(--ds-info-muted)"><span class="ic i-info" style="flex:none;color:var(--ds-info-fg);margin-top:2px"></span><span class="t-body-sm" style="color:var(--ds-fg)">Se envió el acuse de recibo a marisol.diaz@gmail.com</span></div>
+</sc-if>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}"><span class="t-heading t-mono" style="color:var(--ds-fg)">{{ d.n }}</span></sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" hint-size="90px,22px">{{ d.typeFull }}</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ d.stTone }}" hint-size="90px,22px">{{ d.st }}</x-import>
+<sc-if value="{{ d.hasVig }}" hint-placeholder-val="{{ true }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ d.vigTone }}" dot="{{ true }}" hint-size="120px,22px">{{ d.vig }}</x-import></sc-if>
+</div>
+</div>
+<div style="border:1px solid var(--ds-border);border-radius:16px;background:var(--ds-surface);padding:4px 16px">
+<sc-for list="{{ d.kv }}" as="kv" hint-placeholder-count="5">
+<div style="display:grid;grid-template-columns:minmax(110px,160px) minmax(0,1fr);gap:12px;padding:10px 0;border-bottom:1px solid var(--ds-border);align-items:baseline">
+<span class="t-body-sm" style="color:var(--ds-fg-muted)">{{ kv.k }}</span>
+<sc-if value="{{ kv.link }}" hint-placeholder-val="{{ false }}"><a href="#" class="t-body-sm" style="color:var(--ds-accent);font-weight:500">{{ kv.v }}</a></sc-if>
+<sc-if value="{{ kv.plain }}" hint-placeholder-val="{{ true }}"><span class="t-body-sm" style="color:var(--ds-fg);text-wrap:pretty">{{ kv.v }}</span></sc-if>
+</div>
+</sc-for>
+</div>
+<sc-if value="{{ d.cancel }}" hint-placeholder-val="{{ false }}">
+<div role="status" style="display:flex;gap:12px;align-items:flex-start;padding:12px 16px;border-radius:10px;background:var(--ds-warning-muted)"><span class="ic i-alert" style="flex:none;color:var(--ds-warning-fg);margin-top:2px"></span><span class="t-body-sm" style="color:var(--ds-fg);text-wrap:pretty">Hay registros que la ley obliga a conservar (marcas de asistencia, firmas y bitácora). No se eliminan: los datos del titular se anonimizan o bloquean y se deja constancia del motivo.</span></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmented" options="{{ anonOpts }}" value="Anonimizar" label="Qué hacer con los registros que se conservan" hint-size="100%,44px"></x-import>
+</sc-if>
+<sc-if value="{{ d.rect }}" hint-placeholder-val="{{ false }}">
+<a href="#" style="display:inline-flex;gap:6px;align-items:center;min-height:44px;color:var(--ds-accent);font-weight:500;align-self:flex-start"><span class="ic sm i-user"></span>Corregir en la ficha de Héctor Leiva</a>
+</sc-if>
+<sc-if value="{{ d.exportDoc }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:12px 16px;border:1px solid var(--ds-border);border-radius:16px;background:var(--ds-surface)">
+<span class="ic i-file" style="color:var(--ds-fg-muted)"></span>
+<div style="flex:1;min-width:180px;display:flex;flex-direction:column;gap:2px"><span class="t-label" style="color:var(--ds-fg)">Exportación de datos · Marisol Díaz Ancalao</span><span class="t-caption t-mono" style="color:var(--ds-fg-subtle)">JSON + PDF · SHA-256 4b7e…c90d</span></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="download" hint-size="120px,40px">Descargar</x-import>
+</div>
+</sc-if>
+<sc-if value="{{ d.hasActs }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<sc-for list="{{ d.acts }}" as="ac" hint-placeholder-count="2">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="{{ ac.v }}" icon="{{ ac.i }}" hint-size="150px,40px">{{ ac.t }}</x-import>
+</sc-for>
+</div>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Bitácora" hint-size="100%,220px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Timeline" items="{{ d.log }}" hint-size="100%,200px"></x-import>
+</x-import>
+<span class="t-caption" style="color:var(--ds-fg-subtle)">Tomar, resolver y rechazar lo hace siempre una persona del equipo de Gard.</span>
+</sc-if>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ formPhone }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:16px;background:var(--ds-surface)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Combobox" label="Titular" value="mda" options="{{ titOpts }}" create-label="No está registrado: usar correo" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Tipo" value="por" options="{{ typeFull }}" hint="Quiere sus datos en un formato para llevarlos a otro lado." hint-size="100%,96px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Canal de recepción" value="Correo" options="{{ canalOpts }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DateInput" label="Fecha de recepción" value="26-10-2026" hint="Plazo legal: hasta el 25-nov-2026" hint-size="100%,96px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Detalle de lo pedido" value="Pide una copia de sus datos personales y de sus marcas de asistencia de 2026 para presentarla en su nuevo empleador." hint-size="100%,140px"></x-import>
+<div style="display:flex;flex-direction:column;gap:6px"><span class="t-label" style="color:var(--ds-fg)">Adjunto (opcional)</span><div style="display:flex;gap:12px;align-items:center;justify-content:center;min-height:72px;border:1px dashed var(--ds-border-control);border-radius:10px;color:var(--ds-fg-muted)"><span class="ic i-paperclip"></span><span class="t-body-sm">Sube la carta o el correo escaneado</span></div></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Responsable" value="Marcelo Tapia Contreras" options="{{ respOpts }}" hint-size="100%,72px"></x-import>
+</div>
+</sc-if>
+</div>
+</sc-if>
+</div>
+</x-import>
+
+<sc-if value="{{ sheetNew }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Sheet" side="right" contained="{{ true }}" title="Registrar solicitud" description="Recibida por correo, carta o en persona" actions="{{ newActs }}" on-close="{{ noop }}" hint-size="420px,100%">
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Combobox" label="Titular" value="mda" options="{{ titOpts }}" create-label="No está registrado: usar correo" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Tipo" value="por" options="{{ typeFull }}" hint="Quiere sus datos en un formato para llevarlos a otro lado." hint-size="100%,96px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Canal de recepción" value="Correo" options="{{ canalOpts }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DateInput" label="Fecha de recepción" value="26-10-2026" hint="Plazo legal: hasta el 25-nov-2026" hint-size="100%,96px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Detalle de lo pedido" value="Pide una copia de sus datos personales y de sus marcas de asistencia de 2026 para presentarla en su nuevo empleador." hint-size="100%,140px"></x-import>
+<div style="display:flex;flex-direction:column;gap:6px"><span class="t-label" style="color:var(--ds-fg)">Adjunto (opcional)</span><div style="display:flex;gap:12px;align-items:center;justify-content:center;min-height:72px;border:1px dashed var(--ds-border-control);border-radius:10px;color:var(--ds-fg-muted)"><span class="ic i-paperclip"></span><span class="t-body-sm">Arrastra o elige la carta o el correo escaneado</span></div></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Responsable" value="Marcelo Tapia Contreras" options="{{ respOpts }}" hint-size="100%,72px"></x-import>
+</div>
+</x-import>
+</sc-if>
+
+<sc-if value="{{ sheetResolve }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Sheet" side="{{ sheetSide }}" contained="{{ true }}" title="Resolver solicitud" description="SOL-2026-0007 · Acceso · Marisol Díaz Ancalao" actions="{{ resolveActs }}" on-close="{{ noop }}" hint-size="420px,100%">
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Resultado" value="Se entregó a la titular una copia de sus datos personales y de sus marcas de asistencia de 2026." hint-size="100%,140px"></x-import>
+<div style="display:flex;flex-direction:column;gap:6px"><span class="t-label" style="color:var(--ds-fg)">Evidencia</span><div style="display:flex;gap:12px;align-items:center;padding:12px;border:1px solid var(--ds-border);border-radius:10px"><span class="ic i-file" style="color:var(--ds-fg-muted)"></span><span class="t-body-sm" style="flex:1;color:var(--ds-fg)">Exportación de datos · 28-oct-2026, 16:40</span><span class="ic i-check" style="color:var(--ds-success-fg)"></span></div></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ true }}" label="Enviar respuesta al titular por correo" description="marisol.diaz@gmail.com" hint-size="100%,44px"></x-import>
+</div>
+</x-import>
+</sc-if>
+
+<sc-if value="{{ dlgExport }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Dialog" contained="{{ true }}" title="Exportación generada" description="JSON (para otro sistema) + PDF (para la persona)" actions="{{ exportActs }}" hint-size="440px,280px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;gap:12px;align-items:center;padding:12px;border:1px solid var(--ds-border);border-radius:10px"><span class="ic i-file" style="color:var(--ds-fg-muted)"></span><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span class="t-label" style="color:var(--ds-fg)">Exportación de datos · Marisol Díaz Ancalao</span><span class="t-caption t-mono" style="color:var(--ds-fg-subtle);overflow-wrap:anywhere">SHA-256 4b7e91d2…f05ac90d</span></div></div>
+<span class="t-body-sm" style="display:flex;gap:6px;align-items:center;color:var(--ds-fg-muted)"><span class="ic sm i-clock"></span>El enlace vence en 15 minutos</span>
+</div>
+</x-import>
+</sc-if>
+<sc-if value="{{ dlgReject }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Dialog" contained="{{ true }}" title="Rechazar solicitud" description="SOL-2026-0007 · Se le avisará a la titular con el motivo." actions="{{ rejectActs }}" hint-size="440px,300px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Motivo" value="" error="Ingresa el motivo del rechazo" hint-size="100%,140px"></x-import>
+</x-import>
+</sc-if>
+<sc-if value="{{ dlgCons }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Dialog" contained="{{ true }}" title="Registrar consentimiento" description="Tomás Errázuriz" actions="{{ consActs }}" hint-size="440px,460px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Propósito" value="Comunicaciones comerciales" options="{{ purpOpts }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmented" options="{{ otorgaOpts }}" value="Otorga" label="Qué registra" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Versión del aviso" value="v1.1" options="{{ verOpts }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Origen" value="Correo" options="{{ origOpts }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DateInput" label="Fecha" value="26-10-2026" hint-size="100%,72px"></x-import>
+</div>
+</x-import>
+</sc-if>
+<sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:0;right:0;bottom:{{ toastBottom }};display:flex;justify-content:center;padding:0 16px;z-index:60">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Toast" icon="check-circle" tone="success" message="{{ toast }}" duration="{{ 0 }}" hint-size="320px,48px"></x-import>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;\&quot;phone\&quot; | \&quot;tablet\&quot; | \&quot;desktop\&quot;&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;d-inbox&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const O = window.OPAINucleo;
+    const N = (O && O.NS()) || {};
+    const h = React.createElement;
+    const device = this.props.device ?? "desktop";
+    const S = this.props.state ?? "d-inbox";
+    const phone = device === "phone";
+    const cfgs = {
+      "d-inbox": { sel: "7", phoneList: true },
+      "d-empty": { list: "empty", phoneList: true },
+      "d-empty-filter": { list: "filter", phoneList: true },
+      "d-new": { sel: "7", form: true },
+      "d-registered": { sel: "8", toast: "Registraste la solicitud SOL-2026-0008", regAlert: true },
+      "d-proceso": { sel: "7" },
+      "d-recibida": { sel: "6" },
+      "d-export": { sel: "7", exportDoc: true, dialog: "export" },
+      "d-resolve": { sel: "7", exportDoc: true, sheet: "resolve" },
+      "d-reject": { sel: "7", dialog: "reject" },
+      "d-cancel": { sel: "4" },
+      "d-resuelta": { sel: "7r" },
+      "d-forbidden": { sel: "3", forbidden: true, user: "pv" },
+      "d-inc": { inc: true }, "d-inc-empty": { inc: true, incEmpty: true },
+      "d-priv": { ficha: "te" }, "d-priv-empty": { ficha: "cn" }, "d-priv-dialog": { ficha: "te", dialog: "cons" },
+    };
+    const c = cfgs[S] || cfgs["d-inbox"];
+    const SOL = {
+      "8": { n: "SOL-2026-0008", who: "Marisol Díaz Ancalao", type: "Portabilidad", typeFull: "Portabilidad", st: "Recibida", stTone: "neutral", vig: "Vence en 30 días", vigTone: "success", rec: "Recibida 26-oct-2026", due: "25-nov-2026", canal: "Correo", resp: "Marcelo Tapia Contreras", detail: "Pide una copia de sus datos personales y de sus marcas de asistencia de 2026 para presentarla en su nuevo empleador." },
+      "7": { n: "SOL-2026-0007", who: "Marisol Díaz Ancalao", type: "Acceso", typeFull: "Acceso", st: "En proceso", stTone: "info", vig: "Vence en 21 días", vigTone: "success", rec: "Recibida 27-oct-2026", due: "25-nov-2026", canal: "Correo", resp: "Marcelo Tapia Contreras", detail: "Quiere saber qué datos suyos tiene Gard y con quién se comparten." },
+      "6": { n: "SOL-2026-0006", who: "Héctor Leiva Morales", type: "Rectificación", typeFull: "Rectificación (dirección)", st: "Recibida", stTone: "neutral", vig: "Vence en 4 días", vigTone: "warning", rec: "Recibida 21-oct-2026", due: "20-nov-2026", canal: "Presencial", resp: "Daniela Rojas Fuentes", detail: "Su dirección cambió a Pasaje Los Aromos 1180, Puente Alto." },
+      "5": { n: "SOL-2026-0005", who: "Tomás Errázuriz", type: "Oposición", typeFull: "Oposición (comunicaciones comerciales)", st: "Resuelta", stTone: "success", rec: "Resuelta 23-oct-2026", canal: "Correo", resp: "Daniela Rojas Fuentes", detail: "No quiere recibir comunicaciones comerciales de Gard." },
+      "4": { n: "SOL-2026-0004", who: "juan.perez.r@gmail.com", type: "Cancelación", typeFull: "Cancelación", st: "Recibida", stTone: "neutral", vig: "Vencida hace 2 días", vigTone: "danger", rec: "Recibida 24-sep-2026", due: "24-oct-2026", canal: "Correo", resp: "Daniela Rojas Fuentes", detail: "Extrabajador. Pide que eliminemos todos sus datos.", noFicha: true },
+      "3": { n: "SOL-2026-0003", who: "Juan Pablo Cárcamo Reyes", type: "Acceso", typeFull: "Acceso", st: "En proceso", stTone: "info", vig: "Vence en 12 días", vigTone: "success", rec: "Recibida 07-oct-2026", due: "06-nov-2026", canal: "Carta", resp: "Marcelo Tapia Contreras", detail: "Pide copia de su contrato y anexos." },
+    };
+    const selKey = c.sel === "7r" ? "7" : c.sel;
+    const order = c.sel === "8" ? ["8", "7", "6", "5", "4"] : ["7", "6", "5", "4"];
+    const sols = order.map((k) => { const s = SOL[k]; const on = !phone && k === selKey; return { ...s, hasVig: !!s.vig, bg: on ? "var(--ds-accent-muted)" : "transparent", bar: on ? "inset 3px 0 0 var(--ds-accent)" : "none" }; });
+    let d = SOL[selKey] || SOL["7"];
+    if (c.sel === "7r") d = { ...d, st: "Resuelta", stTone: "success", vig: null };
+    const titLink = !d.noFicha;
+    const kv = [
+      { k: "Titular", v: d.noFicha ? d.who + " (titular sin ficha)" : d.who, link: titLink, plain: !titLink },
+      { k: "Responsable", v: d.resp, plain: true },
+      { k: "Canal", v: d.canal, plain: true },
+      { k: "Recepción", v: d.rec.replace("Recibida ", "").replace("Resuelta ", ""), plain: true },
+      { k: "Plazo legal", v: d.due ? "Hasta el " + d.due : "Cumplido", plain: true },
+      { k: "Lo pedido", v: d.detail, plain: true },
+    ];
+    let acts = [];
+    if (c.sel === "7r") acts = [{ t: "Ver respuesta enviada", v: "secondary", i: "file" }];
+    else if (d.st === "Recibida") acts = [{ t: "Tomar solicitud", v: "primary", i: "user-check" }];
+    else if (d.st === "En proceso") acts = [{ t: "Resolver", v: "primary", i: "check" }, { t: "Rechazar", v: "secondary" }].concat(d.type === "Acceso" || d.type === "Portabilidad" ? [{ t: "Generar exportación", v: "secondary", i: "download" }] : []);
+    const logBase = [
+      { initials: "DR", who: "Daniela Rojas", action: "registró la solicitud", when: "27-oct 09:10" },
+      { agent: true, who: "OPAI", action: "envió el acuse de recibo", when: "27-oct 09:11" },
+      { initials: "MT", who: "Marcelo Tapia", action: "tomó la solicitud", when: "27-oct 10:02" },
+    ];
+    let log = logBase;
+    if (c.exportDoc || c.sel === "7r") log = log.concat([{ initials: "MT", who: "Marcelo Tapia", action: "generó la exportación", when: "28-oct 16:40" }]);
+    if (c.sel === "7r") log = log.concat([{ initials: "MT", who: "Marcelo Tapia", action: "resolvió la solicitud", when: "28-oct 16:45" }]);
+    if (selKey !== "7") log = [{ initials: "DR", who: "Daniela Rojas", action: "registró la solicitud", when: d.rec.replace("Recibida ", "").slice(0, 6) + " 09:30" }, { agent: true, who: "OPAI", action: d.noFicha ? "envió el acuse de recibo a juan.perez.r@gmail.com" : "envió el acuse de recibo", when: d.rec.replace("Recibida ", "").slice(0, 6) + " 09:31" }];
+    // Ficha
+    const fichas = {
+      te: { name: "Tomás Errázuriz", initials: "TE", sub: "Administrador · Torre Costanera Norte – Las Condes", meta: "tomas.errazuriz@costaneranorte.cl", kind: "Contactos",
+        cons: [
+          { purpose: "Comunicaciones comerciales", state: "Revocado", tone: "danger", line: "Revocado 23-oct-2026 (por solicitud SOL-2026-0005)", hist: [{ initials: "DR", who: "Daniela Rojas", action: "registró la revocación · por solicitud SOL-2026-0005", when: "23-oct-2026" }, { initials: "DR", who: "Daniela Rojas", action: "registró el otorgamiento · aviso v1.0 · correo", when: "02-mar-2026" }] },
+          { purpose: "Encuestas de satisfacción", state: "Otorgado", tone: "success", line: "Otorgado 02-mar-2026 · aviso v1.0 · correo", hist: [{ initials: "DR", who: "Daniela Rojas", action: "registró el otorgamiento · aviso v1.0 · correo", when: "02-mar-2026" }] },
+        ],
+        sols: [{ n: "SOL-2026-0005", t: "Oposición (comunicaciones comerciales)", st: "Resuelta", tone: "success" }],
+        bases: [{ a: "Contactos de clientes", b: "Interés legítimo" }, { a: "Comunicaciones comerciales a contactos", b: "Consentimiento" }] },
+      cn: { name: "Camila Núñez Riquelme", initials: "CN", sub: "Guardia · Clínica San Ignacio – Providencia", meta: "19.661.032-4", kind: "Personas", cons: [], sols: [],
+        bases: [{ a: "Gestión de personal de seguridad", b: "Relación laboral" }, { a: "Sueldos y estructuras", b: "Relación laboral" }, { a: "Documentos de personas", b: "Obligación legal" }] },
+    };
+    const f = fichas[c.ficha] || fichas.te;
+    const fp = { ...f, hasCons: f.cons.length > 0, noCons: f.cons.length === 0, hasSol: f.sols.length > 0, noSol: f.sols.length === 0 };
+    const isSol = !c.inc && !c.ficha;
+    const phoneDetail = phone && isSol && !c.phoneList && !c.form;
+    const phoneForm = phone && c.form;
+    const title = c.ficha ? (phone ? f.name : f.kind) : phoneForm ? "Registrar solicitud" : phoneDetail ? d.n : "Privacidad y datos personales";
+    const sh = O ? O.shell(device, title, { user: c.user || "dr", cancel: phoneForm, action: phoneForm ? "Registrar" : null }) : { device, isPhone: phone, notPhone: !phone, pad: "24px", listW: "360px" };
+    if (c.ficha && sh) sh.active = phone ? "cue" : "cue";
+    const typeNames = ["Acceso", "Rectificación", "Cancelación", "Oposición", "Portabilidad", "Bloqueo"];
+    const typeDesc = ["Quiere saber qué datos suyos tenemos.", "Quiere corregir un dato.", "Quiere que eliminemos sus datos.", "No quiere que usemos sus datos para un fin.", "Quiere sus datos en un formato para llevarlos a otro lado.", "Quiere que suspendamos el uso de sus datos mientras se revisa."];
+    const btn = (t, v, i) => (N.Button ? h(N.Button, { variant: v, icon: i }, t) : null);
+    const filt = c.list === "filter";
+    return {
+      ...sh,
+      showTabs: isSol ? !(phoneDetail || phoneForm) : !!c.inc,
+      tabs: [{ id: "res", label: "Resumen" }, { id: "rat", label: "Registro de tratamientos" }, { id: "sol", label: "Solicitudes", count: c.list === "empty" ? undefined : 3 }, { id: "inc", label: "Incidentes" }],
+      tab: c.inc ? "inc" : "sol",
+      isFicha: !!c.ficha, isInc: !!c.inc, isSol,
+      fp, fichaTabs: c.ficha === "cn" ? [{ id: "res", label: "Resumen" }, { id: "con", label: "Contratos" }, { id: "doc", label: "Documentos" }, { id: "priv", label: "Privacidad" }] : [{ id: "res", label: "Resumen" }, { id: "act", label: "Actividad" }, { id: "priv", label: "Privacidad" }],
+      consBtn: btn("Registrar consentimiento", "secondary", "plus"),
+      incHas: !c.incEmpty, incEmpty: !!c.incEmpty, incCount: c.incEmpty ? "Sin incidentes" : "2 incidentes registrados",
+      incCols: [{ key: "fecha", label: "Fecha", mono: true }, { key: "titulo", label: "Título" }, { key: "alc", label: "Alcance", muted: true }, { key: "datos", label: "Datos afectados", muted: true }, { key: "st", label: "Estado", render: (r) => (N.Badge ? h(N.Badge, { tone: r.tone }, r.st) : r.st) }],
+      incRows: [
+        { id: 1, fecha: "21-oct-2026", titulo: "Planilla de turnos enviada a un destinatario equivocado", alc: "38 titulares", datos: "Contacto, Laboral", st: "En revisión", tone: "warning" },
+        { id: 2, fecha: "14-oct-2026", titulo: "Notebook de central extraviado", alc: "0 titulares afectados (disco cifrado)", datos: "Laboral", st: "Cerrado", tone: "neutral" },
+      ],
+      incCard: (r) => ({ icon: "flag", title: r.titulo, subtitle: r.fecha + " · " + r.alc, meta: r.datos, badge: { tone: r.tone, label: r.st } }),
+      showList: isSol && (phone ? !!c.phoneList : true),
+      listW: phone ? "100%" : sh.listW, listFlex: phone ? "1" : "none", listBorder: phone ? "0" : "1px solid var(--ds-border)",
+      regLabel: phone ? "" : "Registrar solicitud",
+      stChips: [{ label: "Recibidas", n: 2 }, { label: "En proceso", n: 1 }, { label: "Resueltas", n: 1 }, { label: "Rechazadas", n: filt ? 0 : 0, on: filt }].map((x) => ({ ...x, n: c.list === "empty" ? 0 : x.n })),
+      typeVal: filt ? "Bloqueo" : undefined, typeOpts: typeNames,
+      sols, listHas: !c.list, listEmpty: c.list === "empty", listEmptyFilter: filt,
+      regBtn: btn("Registrar solicitud", "primary", "plus"), clearBtn: btn("Limpiar filtros", "secondary"),
+      showDetail: isSol && (phone ? phoneDetail : true),
+      detForbidden: !!c.forbidden, detNone: !c.forbidden && !!c.list, detShow: !c.forbidden && !c.list,
+      regAlert: !!c.regAlert,
+      d: { ...d, hasVig: !!d.vig, kv, cancel: d.type === "Cancelación", rect: d.type === "Rectificación", exportDoc: !!c.exportDoc || c.sel === "7r", acts, hasActs: acts.length > 0, log },
+      anonOpts: ["Anonimizar", "Bloquear"],
+      formPhone: phoneForm, sheetNew: !phone && !!c.form,
+      titOpts: [{ value: "mda", label: "Marisol Díaz Ancalao", description: "Persona · 18.205.774-K" }, { value: "jpc", label: "Juan Pablo Cárcamo Reyes", description: "Persona · 16.482.903-1" }, { value: "as", label: "Andrea Saldías", description: "Contacto · Mall Plaza Poniente" }],
+      typeFull: typeNames.map((t, i) => ({ value: t.slice(0, 3).toLowerCase(), label: t, description: typeDesc[i] })),
+      canalOpts: ["Correo", "Carta", "Presencial"],
+      respOpts: ["Daniela Rojas Fuentes", "Marcelo Tapia Contreras", "Andrés Fuenzalida Rivas"],
+      newActs: O ? O.acts({ t: "Cancelar" }, { t: "Registrar", v: "primary" }) : null,
+      sheetResolve: c.sheet === "resolve", sheetSide: phone ? "bottom" : "right",
+      resolveActs: O ? O.acts({ t: "Cancelar" }, { t: "Resolver solicitud", v: "primary" }) : null,
+      dlgExport: c.dialog === "export", exportActs: O ? O.acts({ t: "Cerrar" }, { t: "Descargar PDF y JSON", v: "primary", icon: "download" }) : null,
+      dlgReject: c.dialog === "reject", rejectActs: O ? O.acts({ t: "Cancelar" }, { t: "Rechazar solicitud", v: "destructive" }) : null,
+      dlgCons: c.dialog === "cons", consActs: O ? O.acts({ t: "Cancelar" }, { t: "Registrar", v: "primary" }) : null,
+      purpOpts: ["Comunicaciones comerciales", "Encuestas de satisfacción"], otorgaOpts: ["Otorga", "Revoca"], verOpts: ["v1.0", "v1.1"], origOpts: ["Correo", "Papel", "Presencial"],
+      toast: c.toast || null, toastBottom: phone ? "80px" : "24px",
+      noop: () => {},
+    };
+  }
+}
+</script>
+</body>
+</html>

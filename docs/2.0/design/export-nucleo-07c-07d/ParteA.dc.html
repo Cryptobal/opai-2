@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="opai-nucleo.js"></script>
+</helmet>
+<div style="position:relative;width:100%;height:100%;overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" tabs="{{ navTabs }}" rail-footer="{{ railFooter }}" groups="{{ groups }}" active="{{ active }}" user="{{ shellUser }}" tenant="Gard Seguridad SpA" tenant-initials="GS" notifications="{{ 3 }}" title="{{ title }}" top-bar="{{ topBar }}" app-bar="{{ appBar }}" hide-tab-bar="{{ hideTab }}" width="100%" height="100%" hint-size="100%,100%">
+
+<sc-if value="{{ forbidden }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;align-items:center;justify-content:center;padding:24px">
+<div style="max-width:440px;width:100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.StatePanel" kind="forbidden" icon="lock" title="No tienes acceso a Usuarios y permisos" description="Para ver quién entra a OPAI y con qué rol, pídele acceso a Daniela Rojas Fuentes, administradora de Gard Seguridad SpA." action="{{ askAccess }}" hint-size="100%,240px"></x-import>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ notForbidden }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1;min-height:0;display:flex">
+
+<sc-if value="{{ showIndex }}" hint-placeholder-val="{{ false }}">
+<div style="width:{{ listW }};flex:none;overflow:auto;border-right:1px solid var(--ds-border);padding:16px 12px;display:flex;flex-direction:column;gap:16px;background:var(--ds-surface)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" icon="search" placeholder="Buscar en Configuración" hint-size="100%,44px"></x-import>
+<sc-for list="{{ index }}" as="g" hint-placeholder-count="3">
+<div style="display:flex;flex-direction:column;gap:2px">
+<span class="t-overline" style="color:var(--ds-fg-subtle);padding:0 8px 6px">{{ g.title }}</span>
+<sc-for list="{{ g.items }}" as="it" hint-placeholder-count="3">
+<div style="display:flex;gap:12px;align-items:flex-start;padding:10px 8px;border-radius:var(--ds-r-md,10px);background:{{ it.bg }};min-height:44px">
+<sc-if value="{{ it.notShield }}" hint-placeholder-val="{{ true }}"><span class="ic i-{{ it.icon }}" style="flex:none;margin-top:2px;color:var(--ds-fg-muted)"></span></sc-if>
+<sc-if value="{{ it.shield }}" hint-placeholder-val="{{ false }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:2px;color:var(--ds-fg-muted)" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="m9 12 2 2 4-4"></path></svg></sc-if>
+<div style="display:flex;flex-direction:column;gap:2px;min-width:0;flex:1">
+<span class="t-label" style="color:var(--ds-fg)">{{ it.title }}</span>
+<span class="t-body-sm" style="color:var(--ds-fg-muted)">{{ it.descShown }}</span>
+</div>
+<sc-if value="{{ isPhoneIdx }}" hint-placeholder-val="{{ false }}"><span class="ic i-chevron-right" style="flex:none;margin-top:2px;color:var(--ds-fg-subtle)"></span></sc-if>
+</div>
+</sc-for>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ showList }}" hint-placeholder-val="{{ true }}">
+<div style="width:{{ listColW }};flex:{{ listFlex }};min-width:0;overflow:auto;border-right:{{ listBorder }};display:flex;flex-direction:column;background:var(--ds-surface)">
+<div style="padding:16px;display:flex;flex-direction:column;gap:12px;border-bottom:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" icon="search" placeholder="Buscar por nombre o correo" hint-size="100%,44px"></x-import>
+<div style="display:flex;gap:12px;align-items:center">
+<div style="flex:1;min-width:0">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmented" options="{{ segOpts }}" value="{{ tab }}" label="Ver usuarios o roles" hint-size="100%,44px"></x-import>
+</div>
+<sc-if value="{{ canManage }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="plus" hint-size="140px,44px">{{ listCta }}</x-import>
+</sc-if>
+</div>
+</div>
+
+<sc-if value="{{ listLoading }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column">
+<sc-for list="{{ skel6 }}" as="s" hint-placeholder-count="6">
+<div style="display:flex;gap:12px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" circle="{{ true }}" width="32" height="32" hint-size="32px,32px"></x-import>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ s.w }}" height="14" hint-size="60%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="40%" height="12" hint-size="40%,12px"></x-import>
+</div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ listError }}" hint-placeholder-val="{{ false }}">
+<div style="padding:24px 16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.StatePanel" kind="error" icon="alert" title="No pudimos cargar los usuarios" description="Revisa tu conexión e inténtalo de nuevo." action="{{ retryBtn }}" hint-size="100%,220px"></x-import>
+</div>
+</sc-if>
+
+<sc-if value="{{ listUsers }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column">
+<sc-for list="{{ userRows }}" as="u" hint-placeholder-count="8">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.SelectableRow" selected="{{ u.selected }}" initials="{{ u.initials }}" title="{{ u.name }}" subtitle="{{ u.email }}" meta="{{ u.meta }}" badge="{{ u.badge }}" hint-size="100%,72px"></x-import>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ listRoles }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column">
+<span class="t-overline" style="color:var(--ds-fg-subtle);padding:16px 16px 6px">Personalizados</span>
+<sc-if value="{{ hasCustom }}" hint-placeholder-val="{{ true }}">
+<sc-for list="{{ customRoles }}" as="r" hint-placeholder-count="2">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.SelectableRow" selected="{{ r.selected }}" title="{{ r.name }}" subtitle="{{ r.desc }}" meta="{{ r.meta }}" badge="{{ r.badge }}" hint-size="100%,72px"></x-import>
+</sc-for>
+</sc-if>
+<sc-if value="{{ noCustom }}" hint-placeholder-val="{{ false }}">
+<div style="padding:8px 16px 16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.EmptyState" size="sm" icon="users" title="Aún no hay roles personalizados" description="Crea un rol con los permisos exactos que necesita tu equipo. Los cinco roles del sistema siguen disponibles." action="{{ newRoleBtn }}" hint-size="100%,220px"></x-import>
+</div>
+</sc-if>
+<span class="t-overline" style="color:var(--ds-fg-subtle);padding:16px 16px 6px">Del sistema</span>
+<sc-for list="{{ systemRoles }}" as="r" hint-placeholder-count="5">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.SelectableRow" selected="{{ r.selected }}" title="{{ r.name }}" subtitle="{{ r.desc }}" meta="{{ r.meta }}" badge="{{ r.badge }}" hint-size="100%,72px"></x-import>
+</sc-for>
+<div style="padding:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Si vienes de OPAI 1.0" description="Así quedan los roles que tenías" actions="{{ chevUp }}" hint-size="100%,420px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ eqCols }}" rows="{{ eqRows }}" hint-size="100%,360px"></x-import>
+<span class="t-body-sm" style="color:var(--ds-fg-muted)">Los roles antiguos que ya no se usan no se recrean.</span>
+</div>
+</x-import>
+</div>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ showDetail }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;min-width:0;overflow:auto;display:flex;flex-direction:column;background:var(--ds-bg)">
+<div style="padding:{{ pad }};display:flex;flex-direction:column;gap:20px;flex:1;max-width:960px;width:100%">
+
+<sc-if value="{{ detailNone }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;align-items:center;justify-content:center;min-height:320px">
+<span class="t-body" style="color:var(--ds-fg-muted)">{{ noneText }}</span>
+</div>
+</sc-if>
+
+<sc-if value="{{ detailRole }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;gap:12px;align-items:flex-start">
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}"><span class="t-heading" style="color:var(--ds-fg)">{{ role.name }}</span></sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ role.tone }}" hint-size="100px,22px">{{ role.type }}</x-import>
+</div>
+<span class="t-body" style="color:var(--ds-fg-muted);text-wrap:pretty">{{ role.desc }}</span>
+<a href="#" style="color:var(--ds-accent);font-weight:500;display:inline-flex;min-height:44px;align-items:center;align-self:flex-start">{{ role.usersLink }}</a>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="more" label="Acciones del rol" hint-size="44px,44px"></x-import>
+</div>
+<sc-if value="{{ role.system }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:8px;align-items:center;color:var(--ds-fg-muted)"><span class="ic sm i-lock"></span><span class="t-body-sm">Los roles del sistema no se editan. Puedes duplicarlo como nuevo rol.</span></div>
+</sc-if>
+</div>
+
+<sc-if value="{{ alertEmpty }}" hint-placeholder-val="{{ false }}">
+<div role="status" style="display:flex;gap:12px;align-items:flex-start;padding:12px 16px;border-radius:10px;background:var(--ds-info-muted);color:var(--ds-info-fg)"><span class="ic i-info" style="flex:none"></span><span class="t-body-sm" style="color:var(--ds-fg)">Este rol no da acceso a nada todavía</span></div>
+</sc-if>
+<sc-if value="{{ alertSaveError }}" hint-placeholder-val="{{ false }}">
+<div role="alert" style="display:flex;gap:12px;align-items:flex-start;padding:12px 16px;border-radius:10px;background:var(--ds-danger-muted);color:var(--ds-danger-fg)"><span class="ic i-alert" style="flex:none"></span><span class="t-body-sm" style="color:var(--ds-fg)">No se guardaron los cambios. Inténtalo de nuevo.</span></div>
+</sc-if>
+
+<sc-if value="{{ matrixWide }}" hint-placeholder-val="{{ false }}">
+<div style="border:1px solid var(--ds-border);border-radius:16px;background:var(--ds-surface);overflow:hidden">
+<div style="display:grid;grid-template-columns:minmax(0,1fr) 88px 104px 112px;align-items:center;min-height:44px;padding:0 16px;background:var(--ds-fill)">
+<span class="t-label-sm" style="color:var(--ds-fg-muted)">Permiso</span>
+<span class="t-label-sm" style="color:var(--ds-fg-muted);text-align:center">Ver</span>
+<span class="t-label-sm" style="color:var(--ds-fg-muted);text-align:center">Gestionar</span>
+<span class="t-label-sm" style="color:var(--ds-fg-muted);text-align:center">Ver sensible</span>
+</div>
+<sc-for list="{{ matrix }}" as="grp" hint-placeholder-count="2">
+<div style="padding:12px 16px 6px;border-top:1px solid var(--ds-border)"><span class="t-overline" style="color:var(--ds-fg-subtle)">{{ grp.title }}</span></div>
+<sc-for list="{{ grp.rows }}" as="r" hint-placeholder-count="6">
+<div style="display:grid;grid-template-columns:minmax(0,1fr) 88px 104px 112px;align-items:center;min-height:48px;padding:2px 16px;border-top:1px solid var(--ds-border);opacity:{{ r.op }}">
+<div style="display:flex;flex-direction:column;gap:2px;min-width:0;padding:6px 0">
+<span style="display:flex;gap:6px;align-items:center" class="t-body-sm"><sc-if value="{{ r.locked }}" hint-placeholder-val="{{ false }}"><span class="ic sm i-lock" style="color:var(--ds-fg-muted)"></span></sc-if><span style="color:var(--ds-fg);font-weight:500">{{ r.label }}</span></span>
+<sc-if value="{{ r.hasSub }}" hint-placeholder-val="{{ false }}"><span class="t-caption" style="color:var(--ds-fg-muted)">{{ r.sub }}</span></sc-if>
+</div>
+<sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="3">
+<div style="display:flex;justify-content:center;align-items:center;position:relative;min-height:44px">
+<sc-if value="{{ c.edit }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ c.checked }}" disabled="{{ c.disabled }}" label="{{ c.lbl }}" hint-size="44px,44px"></x-import></sc-if>
+<sc-if value="{{ c.readOn }}" hint-placeholder-val="{{ false }}"><span class="ic i-check" role="img" aria-label="{{ c.aria }}" style="color:var(--ds-fg)"></span></sc-if>
+<sc-if value="{{ c.readOff }}" hint-placeholder-val="{{ false }}"><span class="t-body-sm" style="color:var(--ds-fg-subtle)" aria-label="{{ c.aria }}">—</span></sc-if>
+<sc-if value="{{ c.tip }}" hint-placeholder-val="{{ false }}"><span role="tooltip" class="t-caption" style="position:absolute;bottom:calc(100% - 2px);right:0;width:200px;padding:8px 10px;border-radius:6px;background:var(--ds-inverse-bg);color:var(--ds-inverse-fg);box-shadow:var(--ds-shadow-overlay);z-index:2;text-align:left">No puedes conceder un permiso que tú no tienes</span></sc-if>
+</div>
+</sc-for>
+</div>
+</sc-for>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ matrixPhone }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:12px">
+<sc-for list="{{ phoneGroups }}" as="pg" hint-placeholder-count="4">
+<div style="border:1px solid var(--ds-border);border-radius:16px;background:var(--ds-surface);overflow:hidden;opacity:{{ pg.op }}">
+<div style="display:flex;gap:12px;align-items:center;min-height:56px;padding:8px 16px">
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+<span style="display:flex;gap:6px;align-items:center"><sc-if value="{{ pg.locked }}" hint-placeholder-val="{{ false }}"><span class="ic sm i-lock" style="color:var(--ds-fg-muted)"></span></sc-if><span class="t-label" style="color:var(--ds-fg)">{{ pg.title }}</span></span>
+<span class="t-caption" style="color:var(--ds-fg-muted)">{{ pg.sub }}</span>
+</div>
+<span class="ic i-{{ pg.chev }}" style="color:var(--ds-fg-subtle)"></span>
+</div>
+<sc-if value="{{ pg.open }}" hint-placeholder-val="{{ false }}">
+<div style="border-top:1px solid var(--ds-border);padding:4px 16px">
+<sc-for list="{{ pg.items }}" as="pi" hint-placeholder-count="6">
+<sc-if value="{{ pi.sw }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" label="{{ pi.label }}" description="{{ pi.desc }}" checked="{{ pi.checked }}" disabled="{{ pi.disabled }}" hint-size="100%,44px"></x-import>
+</sc-if>
+<sc-if value="{{ pi.ro }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;justify-content:space-between;gap:12px;align-items:center;min-height:44px;border-bottom:1px solid var(--ds-border)">
+<span class="t-body-sm" style="color:var(--ds-fg)">{{ pi.label }}</span>
+<span class="t-body-sm" style="color:var(--ds-fg-muted)">{{ pi.value }}</span>
+</div>
+</sc-if>
+</sc-for>
+</div>
+</sc-if>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<span class="t-caption" style="color:var(--ds-fg-subtle);text-wrap:pretty">Crear roles y conceder permisos lo hace siempre una persona: un agente con API key no puede hacerlo.</span>
+</sc-if>
+
+<sc-if value="{{ detailUser }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:16px;align-items:center">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Avatar" initials="{{ usr.initials }}" size="xl" hint-size="48px,48px"></x-import>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}"><span class="t-heading" style="color:var(--ds-fg)">{{ usr.name }}</span></sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ usr.stTone }}" dot="{{ true }}" hint-size="80px,22px">{{ usr.status }}</x-import>
+</div>
+<span class="t-body-sm" style="color:var(--ds-fg-muted)">{{ usr.email }}</span>
+<span class="t-caption" style="color:var(--ds-fg-subtle)">{{ usr.last }}</span>
+</div>
+</div>
+
+<div style="border:1px solid var(--ds-border);border-radius:16px;background:var(--ds-surface);padding:16px;display:flex;flex-direction:column;gap:16px">
+<span class="t-subheading" style="color:var(--ds-fg)">Rol</span>
+<sc-if value="{{ usr.canEdit }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Rol en Gard Seguridad SpA" value="{{ usr.role }}" options="{{ roleOpts }}" disabled="{{ usr.roleLocked }}" hint="{{ usr.roleHint }}" hint-size="100%,72px"></x-import>
+</sc-if>
+<sc-if value="{{ usr.readOnly }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:2px"><span class="t-label-sm" style="color:var(--ds-fg-muted)">Rol</span><span class="t-body" style="color:var(--ds-fg)">{{ usr.role }}</span></div>
+</sc-if>
+<div style="display:flex;flex-direction:column;gap:8px">
+<span class="t-label-sm" style="color:var(--ds-fg-muted)">Qué puede hacer</span>
+<sc-for list="{{ usr.can }}" as="cn" hint-placeholder-count="2">
+<div style="display:flex;flex-direction:column;gap:2px;padding:8px 0;border-top:1px solid var(--ds-border)">
+<span class="t-label-sm" style="color:var(--ds-fg)">{{ cn.mod }}</span>
+<span class="t-body-sm" style="color:var(--ds-fg-muted);text-wrap:pretty">{{ cn.text }}</span>
+</div>
+</sc-for>
+</div>
+</div>
+
+<div style="border:1px solid var(--ds-border);border-radius:16px;background:var(--ds-surface);padding:16px;display:flex;flex-direction:column;gap:12px">
+<span class="t-subheading" style="color:var(--ds-fg)">Portales</span>
+<div class="chip-row">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FilterChip" variant="toggle" value="ERP" selected="{{ usr.erp }}" disabled="{{ usr.readOnly }}" hint-size="80px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FilterChip" variant="toggle" value="Supervisor" selected="{{ usr.sup }}" disabled="{{ usr.readOnly }}" hint-size="120px,32px"></x-import>
+</div>
+</div>
+
+<div style="border:1px solid var(--ds-border);border-radius:16px;background:var(--ds-surface);padding:16px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap">
+<span class="t-subheading" style="color:var(--ds-fg)">Excepciones de este usuario</span>
+<sc-if value="{{ usr.canEdit }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="plus" hint-size="180px,40px">Agregar excepción</x-import>
+</sc-if>
+</div>
+<sc-if value="{{ usr.hasExc }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column">
+<sc-for list="{{ usr.exc }}" as="ex" hint-placeholder-count="2">
+<div style="display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-top:1px solid var(--ds-border)">
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="t-label" style="color:var(--ds-fg)">{{ ex.perm }}</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ ex.tone }}" hint-size="80px,22px">{{ ex.kind }}</x-import></div>
+<span class="t-body-sm" style="color:var(--ds-fg-muted);text-wrap:pretty">«{{ ex.reason }}»</span>
+<span class="t-caption" style="color:var(--ds-fg-subtle)">{{ ex.by }}</span>
+</div>
+<sc-if value="{{ usr.canEdit }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" hint-size="80px,40px">Quitar</x-import>
+</sc-if>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ usr.noExc }}" hint-placeholder-val="{{ false }}">
+<span class="t-body-sm" style="color:var(--ds-fg-muted);padding:12px 0;border-top:1px solid var(--ds-border)">Sin excepciones. Este usuario tiene exactamente los permisos de su rol.</span>
+</sc-if>
+<span class="t-caption" style="color:var(--ds-fg-subtle)">Si una excepción deniega algo que el rol concede, gana la denegación.</span>
+</div>
+
+<sc-if value="{{ usr.canEdit }}" hint-placeholder-val="{{ true }}">
+<div style="border:1px solid var(--ds-border);border-radius:16px;background:var(--ds-surface);padding:16px;display:flex;flex-direction:column;gap:12px">
+<span class="t-subheading" style="color:var(--ds-fg)">Acceso</span>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<sc-if value="{{ usr.pending }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="refresh" hint-size="190px,40px">Reenviar invitación</x-import></sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="destructive" disabled="{{ usr.roleLocked }}" hint-size="170px,40px">Suspender acceso</x-import>
+</div>
+</div>
+</sc-if>
+</sc-if>
+
+</div>
+<sc-if value="{{ editBar }}" hint-placeholder-val="{{ false }}">
+<div style="position:sticky;bottom:0;display:flex;gap:12px;align-items:center;justify-content:flex-end;flex-wrap:wrap;padding:12px {{ pad }};border-top:1px solid var(--ds-border);background:var(--ds-surface)">
+<span class="t-body-sm" style="color:var(--ds-fg-muted);margin-right:auto">{{ changesLabel }}</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" disabled="{{ saving }}" hint-size="110px,40px">Descartar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" loading="{{ saving }}" loading-label="Guardando" hint-size="150px,40px">Guardar cambios</x-import>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ showFormPhone }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;min-width:0;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:16px;background:var(--ds-bg)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Nombre del rol" value="Central de monitoreo" error="Ya existe un rol con ese nombre" hint-size="100%,96px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Descripción (opcional)" value="Turno noche de la central, sin acceso a cuentas" hint="48 de 140 caracteres" hint-size="100%,140px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Partir de" value="Viewer" options="{{ fromOpts }}" hint-size="100%,72px"></x-import>
+<span class="t-subheading" style="color:var(--ds-fg);padding-top:8px">Permisos</span>
+<sc-for list="{{ formGroups }}" as="pg" hint-placeholder-count="4">
+<div style="border:1px solid var(--ds-border);border-radius:16px;background:var(--ds-surface);display:flex;gap:12px;align-items:center;min-height:56px;padding:8px 16px">
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+<span style="display:flex;gap:6px;align-items:center"><sc-if value="{{ pg.locked }}" hint-placeholder-val="{{ false }}"><span class="ic sm i-lock" style="color:var(--ds-fg-muted)"></span></sc-if><span class="t-label" style="color:var(--ds-fg)">{{ pg.title }}</span></span>
+<span class="t-caption" style="color:var(--ds-fg-muted)">{{ pg.sub }}</span>
+</div>
+<span class="ic i-chevron-down" style="color:var(--ds-fg-subtle)"></span>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+</div>
+</sc-if>
+</x-import>
+
+<sc-if value="{{ sheetForm }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Sheet" side="right" contained="{{ true }}" title="Nuevo rol" description="Parte de un rol existente y ajusta sus permisos." actions="{{ sheetActs }}" on-close="{{ noop }}" hint-size="420px,100%">
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Nombre del rol" value="Central de monitoreo" error="Ya existe un rol con ese nombre" hint-size="100%,96px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Descripción (opcional)" value="Turno noche de la central, sin acceso a cuentas" hint="48 de 140 caracteres" hint-size="100%,140px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Partir de" value="Viewer" options="{{ fromOpts }}" hint-size="100%,72px"></x-import>
+<span class="t-subheading" style="color:var(--ds-fg);padding-top:8px">Permisos</span>
+<sc-for list="{{ formGroups }}" as="pg" hint-placeholder-count="4">
+<div style="border:1px solid var(--ds-border);border-radius:16px;display:flex;gap:12px;align-items:center;min-height:56px;padding:8px 16px">
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+<span style="display:flex;gap:6px;align-items:center"><sc-if value="{{ pg.locked }}" hint-placeholder-val="{{ false }}"><span class="ic sm i-lock" style="color:var(--ds-fg-muted)"></span></sc-if><span class="t-label" style="color:var(--ds-fg)">{{ pg.title }}</span></span>
+<span class="t-caption" style="color:var(--ds-fg-muted)">{{ pg.sub }}</span>
+</div>
+<span class="ic i-chevron-down" style="color:var(--ds-fg-subtle)"></span>
+</div>
+</sc-for>
+</div>
+</x-import>
+</sc-if>
+
+<sc-if value="{{ dlgFin }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Dialog" contained="{{ true }}" title="¿Dar acceso a Finanzas?" description="Vas a dar acceso a Finanzas a este rol. Las personas con este rol verán información financiera de la empresa." actions="{{ finActs }}" hint-size="440px,200px"></x-import>
+</sc-if>
+<sc-if value="{{ dlgArchive }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Dialog" contained="{{ true }}" title="Este rol está en uso" description="No puedes archivar “Central de monitoreo”: lo tienen 3 usuarios. Reasígnalos a otro rol primero." actions="{{ archActs }}" hint-size="440px,200px"></x-import>
+</sc-if>
+<sc-if value="{{ dlgExc }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Dialog" contained="{{ true }}" title="Agregar excepción" description="Para Javiera Henríquez Pino" actions="{{ excActs }}" hint-size="440px,420px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Combobox" label="Permiso" value="doc-ges" options="{{ permOpts }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmented" options="{{ grantOpts }}" value="Conceder" label="Tipo de excepción" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Motivo" value="Carga de certificados OS-10 de la central" hint="41 de 200 caracteres" hint-size="100%,140px"></x-import>
+</div>
+</x-import>
+</sc-if>
+<sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:0;right:0;bottom:{{ toastBottom }};display:flex;justify-content:center;padding:0 16px;z-index:60">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Toast" icon="check-circle" tone="success" message="{{ toast }}" duration="{{ 0 }}" hint-size="320px,48px"></x-import>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;\&quot;phone\&quot; | \&quot;tablet\&quot; | \&quot;desktop\&quot;&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;a-users&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const O = window.OPAINucleo;
+    const N = (O && O.NS()) || {};
+    const h = React.createElement;
+    const device = this.props.device ?? "desktop";
+    const S = this.props.state ?? "a-users";
+    const phone = device === "phone";
+    const cfgs = {
+      "a-idx": { view: "index" },
+      "a-users": { view: "user", sel: "jh", phoneList: true },
+      "a-roles": { view: "role", tab: "roles", role: "cm", phoneList: true },
+      "a-roles-empty": { view: "none", tab: "roles", noCustom: true, phoneList: true },
+      "a-loading": { view: "none", list: "loading", phoneList: true },
+      "a-error": { view: "none", list: "error", phoneList: true },
+      "a-forbidden": { forbidden: true, user: "pv" },
+      "a-read": { view: "role", tab: "roles", role: "cm" },
+      "a-system": { view: "role", tab: "roles", role: "sup" },
+      "a-edit": { view: "role", tab: "roles", role: "cm", edit: true, tip: true },
+      "a-saving": { view: "role", tab: "roles", role: "cm", edit: true, saving: true },
+      "a-saved": { view: "role", tab: "roles", role: "cm", toast: "Rol actualizado" },
+      "a-save-error": { view: "role", tab: "roles", role: "cm", edit: true, saveError: true },
+      "a-fin": { view: "role", tab: "roles", role: "cm", edit: true, fin: true, dialog: "fin" },
+      "a-blank": { view: "role", tab: "roles", role: "aud" },
+      "a-dup": { view: "role", tab: "roles", role: "cm", form: true },
+      "a-archive": { view: "role", tab: "roles", role: "cm", dialog: "archive" },
+      "a-exc": { view: "user", sel: "jh" },
+      "a-exc-dialog": { view: "user", sel: "jh", dialog: "exc" },
+      "a-noexc": { view: "user", sel: "mt" },
+      "a-owner": { view: "user", sel: "af", user: "af" },
+      "a-owner-admin": { view: "user", sel: "af" },
+      "a-readonly": { view: "user", sel: "jh", user: "mt", ro: true },
+    };
+    const c = cfgs[S] || cfgs["a-users"];
+    const tab = c.tab || "users";
+    const canManage = !c.ro;
+    const onPhoneList = phone && (c.phoneList || c.list);
+    const phoneForm = phone && c.form;
+    const showIndex = c.view === "index";
+    const showList = !phoneForm && (phone ? (c.phoneList || c.list) : !showIndex || true) && !(phone && showIndex);
+    const showDetail = !phoneForm && (phone ? !(c.phoneList || c.list) && !showIndex : !showIndex);
+    // Datos
+    const usersData = [
+      { id: "af", name: "Andrés Fuenzalida Rivas", email: "andres.fuenzalida@gard.cl", role: "Owner", erp: true, sup: false, st: "Activo", last: "Último acceso: 26-oct-2026, 08:31" },
+      { id: "dr", name: "Daniela Rojas Fuentes", email: "daniela.rojas@gard.cl", role: "Admin", erp: true, sup: false, st: "Activo" },
+      { id: "mt", name: "Marcelo Tapia Contreras", email: "marcelo.tapia@gard.cl", role: "Gerente", erp: true, sup: true, st: "Activo", last: "Último acceso: 25-oct-2026, 19:02" },
+      { id: "pv", name: "Patricio Venegas Soto", email: "patricio.venegas@gard.cl", role: "Supervisor", erp: false, sup: true, st: "Activo" },
+      { id: "km", name: "Karen Muñoz Lagos", email: "karen.munoz@gard.cl", role: "Supervisor", erp: false, sup: true, st: "Activo" },
+      { id: "jh", name: "Javiera Henríquez Pino", email: "javiera.henriquez@gard.cl", role: "Central de monitoreo", erp: true, sup: false, st: "Activo", exc: 2, last: "Último acceso: 26-oct-2026, 09:14" },
+      { id: "ra", name: "Rodrigo Alarcón Vera", email: "rodrigo.alarcon@gard.cl", role: "Inspector DT", erp: true, sup: false, st: "Activo" },
+      { id: "fo", name: "Felipe Ortiz Saavedra", email: "felipe.ortiz@gard.cl", role: "Viewer", erp: true, sup: false, st: "Invitación pendiente" },
+    ];
+    const ini = (n) => n.split(" ").slice(0, 2).map((p) => p[0]).join("");
+    const stTone = (s) => (s === "Activo" ? "success" : s === "Suspendido" ? "danger" : "warning");
+    const badges = (u) => N.Badge ? h("span", { style: { display: "flex", gap: 6, flexWrap: "wrap", marginTop: 4 } },
+      u.erp ? h(N.Badge, { key: "e" }, "ERP") : null, u.sup ? h(N.Badge, { key: "s" }, "Supervisor") : null,
+      u.exc ? h(N.Badge, { key: "x" }, "Con excepciones · " + u.exc) : null,
+      u.st !== "Activo" ? h(N.Badge, { key: "t", tone: stTone(u.st), dot: true }, u.st) : null) : null;
+    const userRows = usersData.map((u) => ({ ...u, initials: ini(u.name), selected: !phone && c.sel === u.id, meta: badges(u), badge: { tone: u.role === "Owner" || u.role === "Admin" ? "accent" : "neutral", label: u.role } }));
+    const roles = {
+      cm: { name: "Central de monitoreo", type: "Personalizado", tone: "accent", n: 3, desc: "Ve instalaciones, personas y cuentas para el monitoreo en línea." },
+      idt: { name: "Inspector DT", type: "Personalizado", tone: "accent", n: 1, desc: "Revisa personas, documentos y sueldos ante una fiscalización." },
+      aud: { name: "Auditor externo", type: "Personalizado", tone: "accent", n: 0, desc: "Revisión anual de procesos, sin permisos asignados aún." },
+      own: { name: "Owner", type: "Del sistema", tone: "neutral", n: 1, desc: "Dueño de la empresa en OPAI. Puede hacer todo.", system: true },
+      adm: { name: "Admin", type: "Del sistema", tone: "neutral", n: 1, desc: "Administra usuarios, configuración y todos los módulos.", system: true },
+      ger: { name: "Gerente", type: "Del sistema", tone: "neutral", n: 1, desc: "Gestiona la operación y lo comercial, sin configuración.", system: true },
+      sup: { name: "Supervisor", type: "Del sistema", tone: "neutral", n: 2, desc: "Opera las instalaciones que tiene a cargo.", system: true },
+      vie: { name: "Viewer", type: "Del sistema", tone: "neutral", n: 1, desc: "Ve la información sin modificarla.", system: true },
+    };
+    const rr = (id) => { const r = roles[id]; return { ...r, id, selected: !phone && c.role === id, meta: r.n === 1 ? "1 usuario" : r.n + " usuarios", badge: { tone: r.tone, label: r.type } }; };
+    const customRoles = ["cm", "idt"].map(rr);
+    const systemRoles = ["own", "adm", "ger", "sup", "vie"].map(rr);
+    const role = roles[c.role] || roles.cm;
+    const roleV = { ...role, system: !!role.system, usersLink: role.n === 0 ? "Nadie tiene este rol" : role.n === 1 ? "Lo tiene 1 usuario" : "Lo tienen " + role.n + " usuarios" };
+    // Matriz
+    const nucleo = ["Empresa", "Usuarios", "Agentes y API keys", "Auditoría", "Cuentas", "Instalaciones", "Personas", "Estructuras y sueldos", "Documentos", "Configuración", "Marca", "Integraciones", "Comunicaciones", "Consumos", "Aprobaciones"];
+    const mods = ["CRM", "Operaciones", "Finanzas", "Nómina"];
+    const permsBy = {
+      cm: ["Instalaciones:ver", "Personas:ver", "Cuentas:ver", "Documentos:ver", "Operaciones:ver"],
+      idt: ["Personas:ver", "Documentos:ver", "Estructuras y sueldos:ver", "Auditoría:ver"],
+      sup: ["Cuentas:ver", "Instalaciones:ver", "Personas:ver", "Documentos:ver", "Operaciones:ver", "Operaciones:ges"],
+      aud: [],
+    };
+    const P = new Set(permsBy[c.role] || []);
+    if (c.edit) ["Auditoría:ver", "Comunicaciones:ver", "Documentos:ges", "Integraciones:ver"].forEach((k) => P.add(k));
+    if (c.fin) P.add("Finanzas:ver");
+    const edit = !!c.edit;
+    const lockedMods = { Finanzas: 1, "Nómina": 1 };
+    const inactive = { CRM: 1 };
+    const mkRow = (m) => {
+      const locked = !!lockedMods[m] && !P.has(m + ":ver") && !P.has(m + ":ges");
+      const off = !!inactive[m];
+      const acts = [["ver", "Ver"], ["ges", "Gestionar"], ["sen", "Ver sensible"]];
+      const cells = acts.map(([k, lbl]) => {
+        const na = k === "sen" && m !== "Estructuras y sueldos";
+        const has = P.has(m + ":" + k);
+        const notMine = k === "sen" && m === "Estructuras y sueldos";
+        const name = lbl + " " + m;
+        if (na) return { edit: false, readOn: false, readOff: false, tip: false };
+        return { edit, readOn: !edit && has, readOff: !edit && !has, checked: has, disabled: off || (edit && notMine) || c.saving, lbl: O ? O.sr(name) : name, aria: name + (has ? ": sí" : ": no"), tip: edit && notMine && !!c.tip };
+      });
+      return { label: m, locked: !!lockedMods[m], hasSub: locked || off, sub: off ? "Módulo no activo: sus permisos no aplican" : "Bloqueado por defecto. Solo owner o admin pueden concederlo", op: off ? 0.45 : 1, cells };
+    };
+    const matrix = [{ title: "Núcleo", rows: nucleo.map(mkRow) }, { title: "Módulos", rows: mods.map(mkRow) }];
+    const cnt = (list) => list.reduce((a, m) => a + ["ver", "ges", "sen"].filter((k) => P.has(m + ":" + k)).length, 0);
+    const pgItems = (list) => {
+      const out = [];
+      list.forEach((m) => {
+        if (edit) {
+          out.push({ sw: true, ro: false, label: "Ver " + m, checked: P.has(m + ":ver"), disabled: !!inactive[m] || c.saving });
+          out.push({ sw: true, ro: false, label: "Gestionar " + m, checked: P.has(m + ":ges"), disabled: !!inactive[m] || c.saving });
+          if (m === "Estructuras y sueldos") out.push({ sw: true, ro: false, label: "Ver sensible " + m, desc: "No puedes conceder un permiso que tú no tienes", checked: false, disabled: true });
+        } else {
+          const v = P.has(m + ":ges") ? "Ver y gestionar" : P.has(m + ":ver") ? "Ver" : "Sin acceso";
+          out.push({ sw: false, ro: true, label: m, value: v });
+        }
+      });
+      return out;
+    };
+    const phoneGroups = [
+      { title: "Núcleo", list: nucleo, open: !c.fin },
+      { title: "CRM", list: ["CRM"], open: false },
+      { title: "Operaciones", list: ["Operaciones"], open: false },
+      { title: "Finanzas", list: ["Finanzas"], open: !!c.fin },
+      { title: "Nómina", list: ["Nómina"], open: false },
+    ].map((g) => {
+      const n = cnt(g.list);
+      const lk = !!lockedMods[g.title] && n === 0;
+      const off = !!inactive[g.title];
+      return { title: g.title, open: g.open, chev: g.open ? "chevron-down" : "chevron-right", locked: !!lockedMods[g.title], op: off ? 0.45 : 1,
+        sub: off ? "Módulo no activo: sus permisos no aplican" : lk ? "Bloqueado por defecto. Solo owner o admin pueden concederlo" : n === 0 ? "Sin permisos" : n === 1 ? "1 permiso" : n + " permisos",
+        items: pgItems(g.list) };
+    });
+    const formGroups = [
+      { title: "Núcleo", sub: "Ver: Empresa, Cuentas, Instalaciones, Personas y 3 más", locked: false },
+      { title: "Operaciones", sub: "Ver", locked: false },
+      { title: "Finanzas", sub: "Bloqueado por defecto. Solo owner o admin pueden concederlo", locked: true },
+      { title: "Nómina", sub: "Bloqueado por defecto. Solo owner o admin pueden concederlo", locked: true },
+    ];
+    // Ficha de usuario
+    const viewer = c.user || "dr";
+    const su = usersData.find((u) => u.id === c.sel) || usersData[5];
+    const isOwnerTarget = su.id === "af";
+    const roleLocked = isOwnerTarget;
+    const roleHint = isOwnerTarget ? (viewer === "af" ? "Es el único owner de la empresa. Asigna otro owner antes de cambiar su rol." : "Solo un owner puede cambiar a otro owner") : undefined;
+    const canTxt = {
+      jh: [{ mod: "Núcleo", text: "Cuentas: ver · Instalaciones: ver · Personas: ver · Documentos: ver y gestionar" }, { mod: "Operaciones", text: "Operaciones: ver" }],
+      mt: [{ mod: "Núcleo", text: "Cuentas, Instalaciones, Personas y Documentos: ver y gestionar · Auditoría: ver" }, { mod: "Módulos", text: "CRM y Operaciones: ver y gestionar · Finanzas: ver" }],
+      af: [{ mod: "Todo", text: "Owner puede hacer todo en Gard Seguridad SpA, incluido aceptar el acuerdo de datos." }],
+    };
+    const excBy = {
+      jh: [
+        { perm: "Gestionar Documentos", kind: "Concedido", tone: "success", reason: "Carga de certificados OS-10 de la central", by: "Fijado por Daniela Rojas Fuentes · 21-oct-2026, 11:20" },
+        { perm: "Ver Cuentas", kind: "Denegado", tone: "danger", reason: "Monitorea instalaciones, no necesita los datos comerciales de las cuentas", by: "Fijado por Daniela Rojas Fuentes · 22-oct-2026, 16:05" },
+      ],
+    };
+    const exc = excBy[su.id] || [];
+    const usr = { ...su, initials: ini(su.name), status: su.st, stTone: stTone(su.st), last: su.last || "Último acceso: 24-oct-2026, 17:48",
+      canEdit: !c.ro, readOnly: !!c.ro, roleLocked, roleHint, can: canTxt[su.id] || canTxt.jh, exc, hasExc: exc.length > 0, noExc: exc.length === 0, pending: su.st !== "Activo" };
+    const titlePhone = showIndex ? "Configuración" : phoneForm ? "Nuevo rol" : onPhoneList ? "Usuarios y permisos" : c.view === "role" ? role.name : su.name;
+    const sh = O ? O.shell(device, phone ? titlePhone : showIndex ? "Configuración" : "Usuarios y permisos", {
+      user: viewer, back: phone ? !showIndex : !showIndex, cancel: phoneForm, action: phoneForm ? "Crear rol" : null, actionDisabled: true,
+    }) : { device, isPhone: phone, notPhone: !phone, listW: "360px", pad: "24px" };
+    const idx = O ? O.indexFor("usr", { hide: c.ro ? [] : [] }).map((g) => ({ ...g, items: g.items.map((i) => ({ ...i, descShown: phone ? i.short : i.desc })) })) : [];
+    const btn = (t, v, icon) => (N.Button ? h(N.Button, { variant: v, icon }, t) : null);
+    const changes = c.fin ? 5 : 4;
+    return {
+      ...sh,
+      forbidden: !!c.forbidden, notForbidden: !c.forbidden,
+      askAccess: btn("Pedir acceso", "primary"),
+      showIndex: showIndex && true, isPhoneIdx: phone,
+      index: idx,
+      listW: phone ? "100%" : sh.listW,
+      showList: showList && !(phone && !(c.phoneList || c.list)),
+      listColW: showIndex && !phone ? "auto" : sh.listW,
+      listFlex: (showIndex && !phone) || phone ? "1" : "none",
+      listBorder: phone || showIndex ? "0" : "1px solid var(--ds-border)",
+      segOpts: [{ value: "users", label: "Usuarios" }, { value: "roles", label: "Roles" }],
+      tab, canManage, listCta: tab === "roles" ? "Nuevo rol" : phone ? "Invitar" : "Invitar usuario",
+      listLoading: c.list === "loading", listError: c.list === "error",
+      listUsers: !c.list && tab === "users", listRoles: !c.list && tab === "roles",
+      skel6: [{ w: "70%" }, { w: "55%" }, { w: "65%" }, { w: "50%" }, { w: "60%" }, { w: "45%" }],
+      retryBtn: btn("Reintentar", "secondary", "refresh"),
+      newRoleBtn: btn("Nuevo rol", "primary", "plus"),
+      userRows, customRoles, systemRoles, hasCustom: !c.noCustom, noCustom: !!c.noCustom,
+      chevUp: N.IconButton ? h(N.IconButton, { icon: "chevron-down", label: "Ocultar equivalencias" }) : null,
+      eqCols: [{ key: "a", label: "Rol en 1.0", mono: true }, { key: "b", label: "Rol en 2.0" }],
+      eqRows: [["owner", "Owner"], ["admin", "Admin"], ["editor", "Gerente"], ["jefe_operaciones", "Gerente"], ["supervisor", "Supervisor"], ["viewer", "Viewer"], ["central_monitoreo", "Central de monitoreo (personalizado)"], ["inspector_dt", "Inspector DT (personalizado)"]].map(([a, b], i) => ({ id: i, a, b: "→ " + b })),
+      showDetail, detailNone: c.view === "none", noneText: c.list ? "" : "Elige un rol para ver sus permisos",
+      detailRole: c.view === "role", detailUser: c.view === "user",
+      role: roleV, alertEmpty: c.role === "aud", alertSaveError: !!c.saveError,
+      matrixWide: c.view === "role" && !phone, matrixPhone: c.view === "role" && phone,
+      matrix, phoneGroups, formGroups,
+      usr, roleOpts: ["Owner", "Admin", "Gerente", "Supervisor", "Viewer", "Central de monitoreo", "Inspector DT"],
+      editBar: edit && c.view === "role", saving: !!c.saving, changesLabel: changes + " cambios sin guardar",
+      showFormPhone: phoneForm, sheetForm: !!c.form && !phone,
+      fromOpts: ["En blanco", "Gerente", "Supervisor", "Viewer", "Central de monitoreo", "Inspector DT"],
+      sheetActs: O ? O.acts({ t: "Cancelar" }, { t: "Crear rol", v: "primary", disabled: true }) : null,
+      dlgFin: c.dialog === "fin", dlgArchive: c.dialog === "archive", dlgExc: c.dialog === "exc",
+      finActs: O ? O.acts({ t: "Cancelar" }, { t: "Dar acceso", v: "primary" }) : null,
+      archActs: O ? O.acts({ t: "Cerrar" }, { t: "Ver usuarios", v: "primary" }) : null,
+      excActs: O ? O.acts({ t: "Cancelar" }, { t: "Agregar excepción", v: "primary" }) : null,
+      permOpts: [{ value: "doc-ver", label: "Ver Documentos", meta: "Núcleo" }, { value: "doc-ges", label: "Gestionar Documentos", meta: "Núcleo" }, { value: "ins-ges", label: "Gestionar Instalaciones", meta: "Núcleo" }, { value: "ope-ges", label: "Gestionar Operaciones", meta: "Operaciones" }],
+      grantOpts: ["Conceder", "Denegar"],
+      toast: c.toast || null, toastBottom: phone ? "80px" : "24px",
+      noop: () => {},
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="opai-nucleo.js"></script>
+</helmet>
+<div style="position:relative;width:100%;height:100%;overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" portal="{{ portal }}" tabs="{{ navTabs }}" rail-footer="{{ railFooter }}" groups="{{ groups }}" active="{{ active }}" user="{{ shellUser }}" tenant="Gard Seguridad SpA" tenant-initials="GS" notifications="{{ 3 }}" title="{{ title }}" top-bar="{{ topBar }}" app-bar="{{ appBar }}" hide-tab-bar="{{ hideTab }}" width="100%" height="100%" hint-size="100%,100%">
+
+<sc-if value="{{ isPortal }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;overflow:auto;padding:{{ pad }};display:flex;flex-direction:column;gap:16px;background:var(--ds-bg)">
+<sc-if value="{{ portalHas }}" hint-placeholder-val="{{ true }}">
+<span class="t-body-sm" style="color:var(--ds-fg-muted)">4 instalaciones a tu cargo · Hoy, 26-oct-2026</span>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:8px">
+<sc-for list="{{ mine }}" as="m" hint-placeholder-count="4">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" icon="building" title="{{ m.name }}" subtitle="{{ m.acct }}" meta="{{ m.dot }}" badge="{{ m.badge }}" chevron="{{ true }}" hint-size="100%,76px"></x-import>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ portalCols }}" rows="{{ mine }}" hint-size="100%,260px"></x-import>
+</sc-if>
+</sc-if>
+<sc-if value="{{ portalEmpty }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;align-items:center;justify-content:center">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.EmptyState" icon="pin" title="Aún no tienes instalaciones a cargo" description="Pídele a tu administrador que te las asigne." hint-size="100%,240px"></x-import>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isErp }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1;min-height:0;display:flex">
+<sc-if value="{{ showList }}" hint-placeholder-val="{{ true }}">
+<div style="width:{{ listW }};flex:none;overflow:auto;border-right:1px solid var(--ds-border);background:var(--ds-surface)">
+<div style="padding:16px;display:flex;flex-direction:column;gap:12px;border-bottom:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" icon="search" placeholder="Buscar por nombre o correo" hint-size="100%,44px"></x-import>
+<div style="display:flex;gap:12px;align-items:center">
+<div style="flex:1;min-width:0"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmented" options="{{ segOpts }}" value="users" label="Ver usuarios o roles" hint-size="100%,44px"></x-import></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="plus" hint-size="140px,44px">Invitar usuario</x-import>
+</div>
+</div>
+<sc-for list="{{ userRows }}" as="u" hint-placeholder-count="8">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.SelectableRow" selected="{{ u.selected }}" initials="{{ u.initials }}" title="{{ u.name }}" subtitle="{{ u.email }}" badge="{{ u.badge }}" hint-size="100%,64px"></x-import>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ showDetail }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1;min-width:0;overflow:auto;background:var(--ds-bg)">
+<div style="padding:{{ pad }};display:flex;flex-direction:column;gap:20px;max-width:960px">
+<div style="display:flex;gap:16px;align-items:center">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Avatar" initials="{{ sup.initials }}" size="xl" hint-size="48px,48px"></x-import>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}"><span class="t-heading" style="color:var(--ds-fg)">{{ sup.name }}</span></sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="success" dot="{{ true }}" hint-size="80px,22px">Activo</x-import>
+</div>
+<span class="t-body-sm" style="color:var(--ds-fg-muted)">{{ sup.email }}</span>
+<span class="t-caption" style="color:var(--ds-fg-subtle)">{{ sup.last }}</span>
+</div>
+</div>
+<div style="border:1px solid var(--ds-border);border-radius:16px;background:var(--ds-surface);padding:16px;display:flex;flex-direction:column;gap:12px">
+<span class="t-subheading" style="color:var(--ds-fg)">Rol</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Rol en Gard Seguridad SpA" value="Supervisor" options="{{ roleOpts }}" hint-size="100%,72px"></x-import>
+<span class="t-body-sm" style="color:var(--ds-fg-muted)">Qué puede hacer: Cuentas, Instalaciones, Personas y Documentos: ver · Operaciones: ver y gestionar. Solo en las instalaciones a su cargo.</span>
+</div>
+<div style="border:1px solid var(--ds-border);border-radius:16px;background:var(--ds-surface);padding:16px;display:flex;flex-direction:column;gap:12px">
+<span class="t-subheading" style="color:var(--ds-fg)">Portales</span>
+<div class="chip-row">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FilterChip" variant="toggle" value="ERP" selected="{{ false }}" hint-size="80px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FilterChip" variant="toggle" value="Supervisor" selected="{{ true }}" hint-size="120px,32px"></x-import>
+</div>
+</div>
+<div style="border:1px solid var(--ds-border);border-radius:16px;background:var(--ds-surface);padding:16px;display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap"><span class="t-subheading" style="color:var(--ds-fg)">Excepciones de este usuario</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="plus" hint-size="180px,40px">Agregar excepción</x-import></div>
+<span class="t-body-sm" style="color:var(--ds-fg-muted)">Sin excepciones. Este usuario tiene exactamente los permisos de su rol.</span>
+</div>
+
+<div style="border:1px solid var(--ds-border);border-radius:16px;background:var(--ds-surface);padding:16px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap">
+<div style="display:flex;flex-direction:column;gap:2px"><span class="t-subheading" style="color:var(--ds-fg)">Instalaciones a cargo</span><sc-if value="{{ hasInst }}" hint-placeholder-val="{{ true }}"><span class="t-body-sm" style="color:var(--ds-fg-muted)">{{ instCount }}</span></sc-if></div>
+<sc-if value="{{ notEmpty }}" hint-placeholder-val="{{ true }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="plus" hint-size="200px,40px">Asignar instalaciones</x-import></sc-if>
+</div>
+<sc-if value="{{ instLoading }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:12px">
+<sc-for list="{{ skel4 }}" as="s" hint-placeholder-count="4">
+<div style="display:flex;flex-direction:column;gap:6px;padding:8px 0;border-top:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ s.w }}" height="14" hint-size="60%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="45%" height="12" hint-size="45%,12px"></x-import>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ instError }}" hint-placeholder-val="{{ false }}">
+<div role="alert" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;padding:12px 16px;border-radius:10px;background:var(--ds-danger-muted);color:var(--ds-danger-fg)"><span class="ic i-alert" style="flex:none"></span><span class="t-body-sm" style="color:var(--ds-fg);flex:1;min-width:160px">No pudimos cargar las instalaciones a cargo</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="refresh" hint-size="120px,40px">Reintentar</x-import></div>
+</sc-if>
+<sc-if value="{{ hasInst }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column">
+<sc-for list="{{ inst }}" as="i" hint-placeholder-count="4">
+<div style="display:flex;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--ds-border)">
+<span class="ic i-building" style="flex:none;color:var(--ds-fg-muted)"></span>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+<span class="t-label" style="color:var(--ds-fg)">{{ i.name }}</span>
+<span class="t-body-sm" style="color:var(--ds-fg-muted)">{{ i.acct }} · {{ i.comuna }}</span>
+<span class="t-caption" style="color:var(--ds-fg-subtle)">{{ i.dot }}</span>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="x" label="{{ i.quitar }}" hint-size="44px,44px"></x-import>
+</div>
+</sc-for>
+</div>
+<span class="t-caption" style="color:var(--ds-fg-subtle);text-wrap:pretty">Patricio solo verá estas instalaciones, sus cuentas y las personas con contrato vigente en ellas, en la app, en la API y en los agentes con su key.</span>
+</sc-if>
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.EmptyState" size="sm" icon="pin" title="Sin instalaciones a cargo" description="Mientras no tenga instalaciones asignadas, Karen no verá ninguna cuenta, instalación ni persona." action="{{ assignBtn }}" hint-size="100%,220px"></x-import>
+</sc-if>
+<span class="t-caption" style="color:var(--ds-fg-subtle)">Solo owner y admin asignan o quitan instalaciones. Un agente no puede hacerlo.</span>
+</div>
+
+<div style="border:1px solid var(--ds-border);border-radius:16px;background:var(--ds-surface);padding:16px;display:flex;flex-direction:column;gap:12px">
+<span class="t-subheading" style="color:var(--ds-fg)">Acceso</span>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="destructive" hint-size="170px,40px">Suspender acceso</x-import></div>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ showAssignPhone }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;background:var(--ds-surface)">
+<div style="padding:16px;display:flex;flex-direction:column;gap:12px;border-bottom:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" icon="search" placeholder="Buscar instalación, cuenta o comuna" value="{{ query }}" hint-size="100%,44px"></x-import>
+<div class="chip-row"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FilterChip" variant="toggle" value="Sin supervisor" count="{{ 2 }}" selected="{{ false }}" hint-size="150px,32px"></x-import></div>
+</div>
+<div style="flex:1;overflow:auto;padding:0 16px">
+<sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}"><div style="padding:24px 0"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.EmptyState" size="sm" icon="search" title="No hay instalaciones que coincidan con “ñuñoa”" description="Prueba con el nombre de la cuenta o de otra comuna." hint-size="100%,200px"></x-import></div></sc-if>
+<sc-for list="{{ pick }}" as="p" hint-placeholder-count="4">
+<div style="padding:4px 0;border-bottom:1px solid var(--ds-border)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ p.checked }}" label="{{ p.name }}" description="{{ p.desc }}" hint-size="100%,64px"></x-import></div>
+</sc-for>
+</div>
+<div style="display:flex;gap:12px;align-items:center;padding:12px 16px;border-top:1px solid var(--ds-border)"><span class="t-label" style="color:var(--ds-fg)">{{ selLabel }}</span></div>
+</div>
+</sc-if>
+</div>
+</sc-if>
+</x-import>
+
+<sc-if value="{{ sheetAssign }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Sheet" side="right" contained="{{ true }}" title="Asignar instalaciones" description="A Patricio Venegas Soto" actions="{{ assignActs }}" on-close="{{ noop }}" hint-size="420px,100%">
+<div style="display:flex;flex-direction:column;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" icon="search" placeholder="Buscar instalación, cuenta o comuna" value="{{ query }}" hint-size="100%,44px"></x-import>
+<div class="chip-row"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FilterChip" variant="toggle" value="Sin supervisor" count="{{ 2 }}" selected="{{ false }}" hint-size="150px,32px"></x-import></div>
+<sc-if value="{{ noResults }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.EmptyState" size="sm" icon="search" title="No hay instalaciones que coincidan con “ñuñoa”" description="Prueba con el nombre de la cuenta o de otra comuna." hint-size="100%,200px"></x-import></sc-if>
+<div style="display:flex;flex-direction:column">
+<sc-for list="{{ pick }}" as="p" hint-placeholder-count="4">
+<div style="padding:4px 0;border-bottom:1px solid var(--ds-border)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ p.checked }}" label="{{ p.name }}" description="{{ p.desc }}" hint-size="100%,64px"></x-import></div>
+</sc-for>
+</div>
+</div>
+</x-import>
+</sc-if>
+<sc-if value="{{ dlgQuitar }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Dialog" contained="{{ true }}" title="¿Quitar Mall Plaza Poniente – Maipú a Patricio Venegas?" description="Dejará de verla de inmediato." actions="{{ quitActs }}" hint-size="440px,200px"></x-import>
+</sc-if>
+<sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:0;right:0;bottom:{{ toastBottom }};display:flex;justify-content:center;padding:0 16px;z-index:60">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Toast" icon="check-circle" tone="success" message="{{ toast }}" duration="{{ 0 }}" hint-size="320px,48px"></x-import>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;\&quot;phone\&quot; | \&quot;tablet\&quot; | \&quot;desktop\&quot;&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;b-with&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const O = window.OPAINucleo;
+    const N = (O && O.NS()) || {};
+    const h = React.createElement;
+    const device = this.props.device ?? "desktop";
+    const S = this.props.state ?? "b-with";
+    const phone = device === "phone";
+    const cfgs = {
+      "b-with": {}, "b-empty": { empty: true }, "b-quitar": { dialog: true }, "b-loading": { loading: true }, "b-error": { error: true },
+      "b-assign": { assign: true }, "b-noresults": { assign: true, nores: true }, "b-toast": { added: true },
+      "b-portal": { portal: true }, "b-portal-empty": { portal: true, portalEmpty: true },
+    };
+    const c = cfgs[S] || {};
+    const all = [
+      { id: 1, name: "Mall Plaza Poniente – Maipú", acct: "Mall Plaza Poniente S.A.", comuna: "Maipú", n: 12 },
+      { id: 2, name: "Centro de Distribución Andes – Pudahuel", acct: "Distribuidora Andes Ltda.", comuna: "Pudahuel", n: 9 },
+      { id: 3, name: "Bodega Logística Lo Espejo – Lo Espejo", acct: "Logística Lo Espejo SpA", comuna: "Lo Espejo", n: 6 },
+      { id: 4, name: "Planta Envases del Sur – Quilicura", acct: "Envases del Sur S.A.", comuna: "Quilicura", n: 8 },
+    ];
+    const extra = [
+      { id: 5, name: "Clínica San Ignacio – Providencia", acct: "Clínica San Ignacio S.A.", comuna: "Providencia", n: 14, who: "Karen Muñoz", checked: true },
+      { id: 6, name: "Torre Costanera Norte – Las Condes", acct: "Inmobiliaria Costanera Norte SpA", comuna: "Las Condes", n: 10, who: "Karen Muñoz", checked: false },
+      { id: 7, name: "Edificio Corporativo Alameda 1450 – Santiago", acct: "Inversiones Alameda S.A.", comuna: "Santiago", n: 5, checked: true },
+      { id: 8, name: "Colegio Los Robles – La Reina", acct: "Fundación Educacional Los Robles", comuna: "La Reina", n: 4, checked: true },
+    ];
+    const fmt = (i) => ({ ...i, dot: i.n + " guardias con contrato vigente", quitar: "Quitar " + i.name, badge: { tone: "success", label: "En turno" } });
+    let inst = all.map(fmt);
+    if (c.added) inst = inst.concat(extra.filter((e) => e.checked).map(fmt));
+    const karen = c.empty;
+    const supU = karen ? { name: "Karen Muñoz Lagos", initials: "KM", email: "karen.munoz@gard.cl", last: "Último acceso: 26-oct-2026, 07:55" } : { name: "Patricio Venegas Soto", initials: "PV", email: "patricio.venegas@gard.cl", last: "Último acceso: 26-oct-2026, 08:12" };
+    const usersData = [
+      ["af", "Andrés Fuenzalida Rivas", "Owner"], ["dr", "Daniela Rojas Fuentes", "Admin"], ["mt", "Marcelo Tapia Contreras", "Gerente"],
+      ["pv", "Patricio Venegas Soto", "Supervisor"], ["km", "Karen Muñoz Lagos", "Supervisor"], ["jh", "Javiera Henríquez Pino", "Central de monitoreo"],
+      ["ra", "Rodrigo Alarcón Vera", "Inspector DT"], ["fo", "Felipe Ortiz Saavedra", "Viewer"],
+    ];
+    const sel = karen ? "km" : "pv";
+    const userRows = usersData.map(([id, name, role]) => ({ id, name, initials: name.split(" ").slice(0, 2).map((p) => p[0]).join(""), email: name.split(" ")[0].toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") + "." + name.split(" ")[1].toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") + "@gard.cl", selected: id === sel, badge: { tone: role === "Owner" || role === "Admin" ? "accent" : "neutral", label: role } }));
+    const portal = !!c.portal;
+    let sh;
+    if (portal && O) {
+      const pTabs = [{ id: "hoy", label: "Hoy", icon: "home" }, { id: "ins", label: "Instalaciones", icon: "building" }, { id: "ron", label: "Rondas", icon: "route" }, { id: "per", label: "Personas", icon: "users" }, { id: "mas", label: "Más", icon: "more" }];
+      sh = O.shell(device, "Instalaciones", { user: "pv", back: false });
+      sh.navTabs = phone ? pTabs : pTabs.slice(0, 4);
+      sh.groups = [{ items: [{ id: "hoy", label: "Hoy", icon: "home" }, { id: "ins", label: "Instalaciones", icon: "building" }, { id: "ron", label: "Rondas", icon: "route" }, { id: "per", label: "Personas", icon: "users" }, { id: "tic", label: "Tickets", icon: "ticket" }] }];
+      sh.railFooter = [];
+      sh.active = "ins";
+      if (phone) { sh.navTabs = pTabs; sh.active = "ins"; }
+    } else {
+      const phoneAssign = phone && c.assign;
+      sh = O ? O.shell(device, phone ? (phoneAssign ? "Asignar instalaciones" : supU.name) : "Usuarios y permisos", { cancel: phoneAssign, action: phoneAssign ? "Asignar" : null, actionDisabled: !!c.nores }) : { device, isPhone: phone, notPhone: !phone, pad: "24px", listW: "360px" };
+    }
+    const query = c.nores ? "ñuñoa" : "";
+    const pick = c.nores ? [] : extra.map((e) => ({ ...e, desc: e.acct + " · " + e.comuna + (e.who ? " · Hoy a cargo de " + e.who : " · Sin supervisor") }));
+    const nSel = c.nores ? 0 : 3;
+    return {
+      ...sh,
+      portal: portal ? "Supervisor" : "ERP",
+      isPortal: portal, isErp: !portal, portalHas: portal && !c.portalEmpty, portalEmpty: !!c.portalEmpty,
+      mine: all.map(fmt),
+      portalCols: [{ key: "name", label: "Instalación" }, { key: "acct", label: "Cuenta" }, { key: "comuna", label: "Comuna" }, { key: "dot", label: "Dotación vigente", muted: true }],
+      showList: !phone, showDetail: !(phone && c.assign), showAssignPhone: phone && !!c.assign,
+      segOpts: [{ value: "users", label: "Usuarios" }, { value: "roles", label: "Roles" }],
+      userRows, sup: supU, roleOpts: ["Owner", "Admin", "Gerente", "Supervisor", "Viewer", "Central de monitoreo", "Inspector DT"],
+      inst, hasInst: !c.empty && !c.loading && !c.error, isEmpty: !!c.empty, notEmpty: !c.empty,
+      instCount: inst.length + " instalaciones a cargo",
+      instLoading: !!c.loading, instError: !!c.error,
+      skel4: [{ w: "70%" }, { w: "55%" }, { w: "65%" }, { w: "50%" }],
+      assignBtn: N.Button ? h(N.Button, { variant: "primary", icon: "plus" }, "Asignar instalaciones") : null,
+      sheetAssign: !phone && !!c.assign, query, pick, noResults: !!c.nores,
+      selLabel: nSel === 0 ? "Ninguna seleccionada" : nSel + " seleccionadas",
+      assignActs: O ? h(React.Fragment, null, h("span", { className: "t-label", style: { marginRight: "auto", alignSelf: "center" } }, nSel === 0 ? "Ninguna seleccionada" : nSel + " seleccionadas"), O.acts({ t: "Cancelar" }, { t: "Asignar", v: "primary", disabled: nSel === 0 })) : null,
+      dlgQuitar: !!c.dialog,
+      quitActs: O ? O.acts({ t: "Cancelar" }, { t: "Quitar", v: "destructive" }) : null,
+      toast: c.added ? "Asignaste 3 instalaciones a Patricio Venegas" : null, toastBottom: phone ? "80px" : "24px",
+      noop: () => {},
+    };
+  }
+}
+</script>
+</body>
+</html>

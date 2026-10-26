@@ -1,0 +1,345 @@
+Proyecto: OPAI 2.0 · Núcleo · Acceso, permisos y Ley 21.719 (Briefs 07c y 07d)
+Design System vinculado: «OPAI 2.0 Design System V2».
+
+REGLA DE CARLOS, TEXTUAL: «SIEMPRE todos los diseños de OPAI 2.0 deben ser con el Design System de OPAI 2.0».
+Todo lo de este proyecto usa solo tokens, tipografía, iconos (lucide) y componentes del Design System V2. No se inventan colores, sombras, radios ni componentes nuevos. Si algo no existe en el DS, se arma con piezas que sí existen: Card, Table, Badge, Chip, Button, Input, Select, Combobox, Checkbox, Switch, Segmentado, Tabs, BarraTabs, Dialog, Sheet, Menu, Tooltip, Alerta, Toast, Timeline, Vigencia, Avatar, Skeleton, Uploader, InputBusqueda, FilaSeleccionable, y los patrones ListScreen, DetailScreen, FormScreen, SplitScreen, Secciones, AjustesForm y Estado.
+
+REGLA DEL SHELL: EL SHELL NO SE TOCA. Se usan los componentes reales, tal como están en el DS:
+- AppBar (top-bar) de 52 px + safe-area, con Buscar, la campana y el avatar del usuario. El título de la pantalla va SOLO en la AppBar; no se repite como encabezado grande dentro del contenido.
+- Teléfono (375): BottomNav de nav.tsx: Inicio · Cuentas · Personas · Buscar · Más, 56 px + safe-area. Configuración se abre desde «Más».
+- iPad (1024): Rail de 80 px con los ítems del ERP.
+- Desktop (1280): Sidebar de 248 px con la marca «OPAI» arriba, los grupos del ERP y Configuración al pie.
+- SplitScreen desde 1024: lista de 360 px a la izquierda (400 px desde 1280) y detalle a la derecha. En el teléfono se ve la lista y el detalle abre como pantalla aparte, con la flecha de volver en la AppBar.
+- Áreas táctiles de 44 px o más en todo lo que se toca. El foco es visible y el contraste cumple AA.
+- Las altas y ediciones (crear rol, asignar instalaciones, registrar solicitud, registrar incidente, registrar consentimiento) son en el teléfono una pantalla completa (FormScreen) con «Cancelar» a la izquierda y la acción principal a la derecha de la AppBar. Desde 1024 son un Sheet lateral o un Dialog del DS.
+- No hay pantallas sueltas. Todo vive en el ERP, dentro de Configuración o en la ficha de una persona o un contacto.
+
+CONFIGURACIÓN ES EL ÍNDICE REAL. La pantalla /configuracion es un SplitScreen con el índice agrupado y el buscador arriba. Los grupos y entradas existentes son, en este orden:
+- Empresa: Datos de la empresa · Marca · Preferencias
+- Acceso: Usuarios y permisos · Agentes y API keys · Aprobaciones pendientes
+- Plataforma: Módulos · Integraciones · Comunicaciones · Documentos · Consumos · Auditoría
+- Módulos activos: los que tienen ajustes propios.
+Cada entrada lleva icono, título y descripción; la descripción corta se usa en el teléfono. En este proyecto:
+- Se rediseña por dentro la entrada existente «Usuarios y permisos» (grupo Acceso; descripción «Quién entra, con qué rol y a qué portales»; corta «Roles y portales»).
+- Se agrega UNA entrada nueva en el grupo Empresa, después de «Datos de la empresa»: «Privacidad y datos personales», icono ShieldCheck, descripción «Acuerdo de datos, delegado, registro de tratamientos y solicitudes de titulares», corta «Ley 21.719: DPA, DPO y solicitudes».
+En el índice solo aparece lo que el rol del usuario puede ver (sin permiso, la entrada no se muestra). A 1024 y 1280, con el índice a la izquierda, la entrada activa queda marcada y el detalle a la derecha.
+
+ENTREGA: una sola sábana con índice al inicio (enlaces a cada pantalla y estado). Cada pantalla se muestra a 375, 1024 y 1280, una al lado de la otra, con los estados de cada una. Los datos de ejemplo son realistas de Gard Seguridad SpA, empresa chilena de seguridad privada, y son ficticios: nombres chilenos, RUT con formato 12.345.678-9, instalaciones de clientes reales del rubro con nombres inventados y fechas de octubre y noviembre de 2026. No quedan notas, TODO, «por definir» ni lorem ipsum.
+
+Datos de ejemplo que se usan en todas las pantallas:
+- Tenant: Gard Seguridad SpA · RUT 77.341.208-5 · Av. Apoquindo 4501, Las Condes.
+- Usuarios:
+  - Andrés Fuenzalida Rivas (owner)
+  - Daniela Rojas Fuentes (admin)
+  - Marcelo Tapia Contreras (gerente de operaciones)
+  - Patricio Venegas Soto (supervisor zona poniente)
+  - Karen Muñoz Lagos (supervisora zona oriente)
+  - Javiera Henríquez Pino (rol personalizado «Central de monitoreo»)
+  - Rodrigo Alarcón Vera (rol personalizado «Inspector DT»)
+  - Felipe Ortiz Saavedra (viewer, invitación pendiente)
+- Instalaciones:
+  - Mall Plaza Poniente – Maipú
+  - Centro de Distribución Andes – Pudahuel
+  - Clínica San Ignacio – Providencia
+  - Torre Costanera Norte – Las Condes
+  - Planta Envases del Sur – Quilicura
+  - Edificio Corporativo Alameda 1450 – Santiago
+  - Bodega Logística Lo Espejo – Lo Espejo
+  - Colegio Los Robles – La Reina
+- Personas (guardias):
+  - Juan Pablo Cárcamo Reyes, RUT 16.482.903-1
+  - Marisol Díaz Ancalao, RUT 18.205.774-K
+  - Héctor Leiva Morales, RUT 12.903.551-6
+  - Camila Núñez Riquelme, RUT 19.661.032-4
+- Contactos de cuentas: Andrea Saldías (jefa de seguridad, Mall Plaza Poniente) y Tomás Errázuriz (administrador, Torre Costanera Norte).
+
+────────────────────────────────────────
+PARTE A · 07c bloque 6 · Configuración → Usuarios y permisos (roles, matriz de permisos y excepciones)
+────────────────────────────────────────
+Quién la ve y quién edita:
+- La ve quien tiene core:users.read.
+- Crean y editan roles y excepciones solo owner y admin (core:users.manage).
+- El resto la ve en solo lectura, sin botones de edición.
+- Sin core:users.read, la entrada no está en el índice. Si se entra por URL, se muestra el estado «Sin permiso».
+- Son actos humanos: un agente con API key nunca crea roles ni concede permisos. Esto se refleja en el texto de ayuda, no en un control.
+
+A1. Lista «Usuarios y permisos» (columna de 360/400 px; pantalla completa en el teléfono)
+- Barra superior de la lista:
+  - InputBusqueda «Buscar por nombre o correo».
+  - Segmentado «Usuarios | Roles».
+  - Botón primario «Invitar usuario» (solo owner y admin).
+  - En la pestaña Roles, el botón es «Nuevo rol».
+- Fila de usuario: Avatar, nombre, correo, Badge con el rol y Chips con los portales (ERP, Supervisor). Si corresponde, una marca «Con excepciones» (Badge neutral con el número) y estado (Activo, Invitación pendiente o Suspendido).
+- Fila de rol:
+  - nombre, tipo (Badge «Del sistema» o «Personalizado»), número de usuarios que lo tienen y una descripción de una línea;
+  - roles del sistema, no editables: Owner, Admin, Gerente, Supervisor y Viewer;
+  - roles personalizados de ejemplo: «Central de monitoreo» (3 usuarios) e «Inspector DT» (1 usuario).
+- Estado vacío de Roles personalizados: icono Users, «Aún no hay roles personalizados», «Crea un rol con los permisos exactos que necesita tu equipo. Los cinco roles del sistema siguen disponibles.» y el botón «Nuevo rol».
+- Estado de carga: Skeleton de 6 filas.
+- Estado de error: Estado con tono error, «No pudimos cargar los usuarios», «Revisa tu conexión e inténtalo de nuevo.» y el botón «Reintentar».
+
+A2. Detalle de un rol (panel derecho; pantalla aparte en el teléfono)
+- Encabezado del contenido (sin repetir el título de la AppBar):
+  - nombre del rol, Badge de tipo, descripción y «Lo tienen 3 usuarios» con enlace que filtra la lista;
+  - acciones (Menu de tres puntos): «Editar», «Duplicar como nuevo rol» y «Archivar rol»;
+  - en los roles del sistema solo «Duplicar como nuevo rol», con la nota «Los roles del sistema no se editan».
+- Matriz de permisos módulo × acción:
+  - Una tabla con filas agrupadas por módulo: Núcleo (Empresa, Usuarios, Agentes y API keys, Auditoría, Cuentas, Instalaciones, Personas, Estructuras y sueldos, Documentos, Configuración, Marca, Integraciones, Comunicaciones, Consumos, Aprobaciones) y los módulos activos (CRM, Operaciones, Finanzas, Nómina).
+  - Columnas de acción: «Ver» y «Gestionar», y «Ver sensible» solo en Estructuras y sueldos.
+  - En cada celda, Checkbox con etiqueta accesible «Gestionar Instalaciones».
+  - En el teléfono, la matriz pasa a una lista por módulo: cada módulo es un bloque desplegable y cada acción una fila con Switch.
+  - Filas de Finanzas y Nómina:
+    - nacen bloqueadas, con candado y el texto «Bloqueado por defecto. Solo owner o admin pueden concederlo»;
+    - un owner o admin puede activarlas, y al hacerlo aparece un Dialog de confirmación: «Vas a dar acceso a Finanzas a este rol. Las personas con este rol verán información financiera de la empresa.» con los botones «Cancelar» y «Dar acceso».
+  - Los permisos de plataforma no aparecen nunca en la matriz.
+  - Un permiso que el usuario actual no tiene se muestra deshabilitado, con Tooltip «No puedes conceder un permiso que tú no tienes».
+  - Los módulos apagados se muestran atenuados, con «Módulo no activo: sus permisos no aplican».
+- Ejemplo «Central de monitoreo»:
+  - Ver: Instalaciones, Personas, Cuentas y Documentos.
+  - Gestionar: nada.
+  - Operaciones Ver.
+  - Sin Finanzas ni Nómina.
+- Ejemplo «Inspector DT»: Ver Personas, Documentos y Estructuras y sueldos (sin «Ver sensible»), y Auditoría Ver.
+- Pie fijo al editar: «Descartar» y «Guardar cambios», con un contador «4 cambios sin guardar».
+- Estados:
+  - Guardando: el botón con spinner y los controles deshabilitados.
+  - Guardado: Toast «Rol actualizado».
+  - Error: Alerta error «No se guardaron los cambios. Inténtalo de nuevo.».
+  - Vacío: si el rol no tiene permisos, Alerta info «Este rol no da acceso a nada todavía».
+
+A3. Nuevo rol / Editar rol (FormScreen a pantalla completa en el teléfono; Sheet desde 1024)
+- Campos:
+  - Nombre del rol (obligatorio, único en la empresa; error «Ya existe un rol con ese nombre»).
+  - Descripción (opcional, 140 caracteres).
+  - «Partir de» (Select: En blanco, Gerente, Supervisor, Viewer, o un rol personalizado existente).
+- La matriz de permisos es la misma de A2.
+- Acciones: «Cancelar» y «Crear rol».
+- Archivar rol:
+  - Si tiene usuarios, Dialog bloqueante: «No puedes archivar “Central de monitoreo”: lo tienen 3 usuarios. Reasígnalos a otro rol primero.» con el botón «Ver usuarios».
+  - Si no tiene usuarios, Dialog de confirmación con los botones «Cancelar» y «Archivar».
+
+A4. Ficha de un usuario (panel derecho)
+- Encabezado: Avatar, nombre, correo, estado y fecha de último acceso («Último acceso: 26-oct-2026, 09:14»).
+- Secciones (patrón Secciones):
+  1. «Rol»: Select con los roles del sistema y los personalizados. Abajo, «Qué puede hacer» como resumen legible por módulo (p. ej. «Instalaciones: ver · Personas: ver · Documentos: ver»).
+     - Último owner: Select deshabilitado con «Es el único owner de la empresa. Asigna otro owner antes de cambiar su rol.».
+     - Admin intentando tocar a un owner: deshabilitado con «Solo un owner puede cambiar a otro owner».
+  2. «Portales»: Chips seleccionables ERP y Supervisor.
+  3. «Excepciones de este usuario»:
+     - Lista de permisos concedidos o denegados puntualmente. Cada fila muestra el permiso, Badge «Concedido» (success) o «Denegado» (error), quién lo fijó y cuándo, y el botón «Quitar».
+     - Botón «Agregar excepción», que abre un Dialog con: Combobox del permiso del catálogo agrupado por módulo, Segmentado «Conceder | Denegar» y motivo (obligatorio, 200 caracteres).
+     - Texto de ayuda: «Si una excepción deniega algo que el rol concede, gana la denegación.».
+     - Vacío: «Sin excepciones. Este usuario tiene exactamente los permisos de su rol.».
+     - Ejemplo: Javiera Henríquez tiene «Gestionar Documentos» concedido, con el motivo «Carga de certificados OS-10 de la central».
+  4. «Instalaciones a cargo»: solo si el rol es Supervisor; es la PARTE B.
+  5. «Acceso»: botones «Suspender acceso» y «Reenviar invitación» (si está pendiente).
+- Un usuario con rol de solo lectura ve todo esto sin controles de edición.
+
+A5. Equivalencia de roles de OPAI 1.0 (Card informativa al pie de la pestaña Roles, desplegable)
+- Título «Si vienes de OPAI 1.0» y una Table de dos columnas «Rol en 1.0 → Rol en 2.0»:
+  - owner → Owner
+  - admin → Admin
+  - editor → Gerente
+  - jefe_operaciones → Gerente
+  - supervisor → Supervisor
+  - viewer → Viewer
+  - central_monitoreo → Central de monitoreo (personalizado)
+  - inspector_dt → Inspector DT (personalizado)
+- Nota: «Los roles antiguos que ya no se usan no se recrean.».
+
+────────────────────────────────────────
+PARTE B · 07c bloque 9 · Instalaciones a cargo de un supervisor
+────────────────────────────────────────
+Dónde vive: en la ficha del usuario supervisor, dentro de Configuración → Usuarios y permisos (A4, sección «Instalaciones a cargo»). No hay pantalla en la ficha de la instalación. Solo owner y admin asignan o quitan. Es un acto humano; un agente no puede hacerlo.
+
+B1. Sección «Instalaciones a cargo»
+- Cabecera: «8 instalaciones a cargo» y el botón «Asignar instalaciones».
+- Fila: nombre de la instalación, cuenta cliente y comuna, la dotación vigente («12 guardias con contrato vigente») y el botón «Quitar» (icono con etiqueta accesible «Quitar Mall Plaza Poniente – Maipú»).
+- Ejemplo Patricio Venegas: Mall Plaza Poniente – Maipú, Centro de Distribución Andes – Pudahuel, Bodega Logística Lo Espejo – Lo Espejo y Planta Envases del Sur – Quilicura.
+- Texto de ayuda: «Patricio solo verá estas instalaciones, sus cuentas y las personas con contrato vigente en ellas, en la app, en la API y en los agentes con su key.».
+- Vacío (un supervisor sin asignaciones):
+  - Estado con icono MapPin, «Sin instalaciones a cargo» y «Mientras no tenga instalaciones asignadas, Karen no verá ninguna cuenta, instalación ni persona.»;
+  - botón «Asignar instalaciones».
+- Quitar: Dialog «¿Quitar Mall Plaza Poniente – Maipú a Patricio Venegas? Dejará de verla de inmediato.» con «Cancelar» y «Quitar».
+- Carga: Skeleton de 4 filas. Error: Alerta «No pudimos cargar las instalaciones a cargo» con «Reintentar».
+
+B2. Asignar instalaciones (FormScreen a pantalla completa en el teléfono; Sheet desde 1024)
+- InputBusqueda «Buscar instalación, cuenta o comuna».
+- Lista con FilaSeleccionable y Checkbox de 44 px. Cada fila muestra instalación, cuenta y comuna, y si ya tiene supervisor: «Hoy a cargo de Karen Muñoz» (se puede asignar igual; una instalación puede tener más de un supervisor).
+- Filtro Chip «Sin supervisor».
+- Pie: «3 seleccionadas», «Cancelar» y «Asignar».
+- Búsqueda sin resultados: «No hay instalaciones que coincidan con “ñuñoa”».
+- Al guardar: Toast «Asignaste 3 instalaciones a Patricio Venegas».
+
+B3. Portal Supervisor (solo verificación visual)
+- Una vista de referencia del portal Supervisor (Hoy → Instalaciones) con las 4 instalaciones de Patricio, usando las pantallas existentes del portal sin cambios de diseño.
+- Una variante vacía con «Aún no tienes instalaciones a cargo. Pídele a tu administrador que te las asigne.».
+
+────────────────────────────────────────
+PARTE C · 07d bloque 3 · Configuración → Privacidad y datos personales (DPA, DPO y registro de tratamientos)
+────────────────────────────────────────
+Contexto legal que se muestra (textos listos):
+- Gard Seguridad SpA es el responsable del tratamiento de los datos personales que gestiona en OPAI.
+- OPAI es el encargado del tratamiento y trata esos datos por cuenta de Gard.
+- El DPA (acuerdo de tratamiento de datos) es el contrato entre ambos y es un documento de plataforma, igual para todas las empresas, versionado por OPAI.
+- Ley 21.719, vigente desde el 1 de diciembre de 2026.
+Quién: ven owner, admin y gerente. Solo owner acepta el DPA. Owner y admin editan el DPO. Aceptar el DPA y fijar el DPO son actos humanos; un agente no los hace.
+
+C1. Pantalla con Tabs: «Resumen | Registro de tratamientos | Solicitudes | Incidentes». Las pestañas Solicitudes e Incidentes son la PARTE D. En el teléfono, las pestañas van en BarraTabs con scroll horizontal.
+
+C2. Pestaña Resumen
+- Card «Acuerdo de tratamiento de datos (DPA)», con tres estados:
+  1. Aceptado vigente:
+     - Badge success «Aceptado · versión 1.0»;
+     - «Aceptado por Andrés Fuenzalida Rivas el 27-oct-2026, 10:42»;
+     - botones «Ver acuerdo» (abre el documento con su huella SHA-256 y descarga en PDF) y «Historial».
+  2. Pendiente:
+     - Alerta warning persistente: «Falta aceptar el acuerdo de tratamiento de datos (versión 1.0). OPAI sigue funcionando con normalidad, pero la Ley 21.719 exige este acuerdo desde el 1 de diciembre de 2026.»;
+     - para el owner, botón primario «Revisar y aceptar»;
+     - para los demás, «Solo el owner de la empresa puede aceptarlo».
+  3. Versión nueva:
+     - Alerta info «Hay una versión nueva del acuerdo (1.1). La versión 1.0 que aceptaste sigue registrada.» con el botón «Revisar versión 1.1».
+- Revisar y aceptar (pantalla completa en el teléfono; Dialog grande desde 1024):
+  - lector del texto del DPA con índice lateral desde 1024: 1. Objeto · 2. Datos tratados · 3. Obligaciones del encargado · 4. Subencargados · 5. Seguridad · 6. Derechos de los titulares · 7. Incidentes · 8. Término y devolución de datos;
+  - Checkbox obligatorio «Leí el acuerdo y lo acepto en nombre de Gard Seguridad SpA»;
+  - botones «Cancelar» y «Aceptar acuerdo», deshabilitado hasta marcar el checkbox;
+  - al aceptar, Toast «Aceptaste el acuerdo de tratamiento de datos, versión 1.0».
+- Aviso persistente al owner fuera de esta pantalla: si el DPA está pendiente, en Inicio se muestra una Alerta warning con el mismo texto y el botón «Revisar y aceptar». No es un banner por usuario y no bloquea nada.
+- Historial (Timeline): «v1.0 aceptada por Andrés Fuenzalida Rivas · 27-oct-2026 10:42».
+- Card «Delegado de protección de datos (DPO)»:
+  - campos Nombre, Correo y Teléfono (+56 9 …); ejemplo: María José Castillo Bravo, dpo@gard.cl, +56 9 8765 4321;
+  - botón «Editar», que abre un FormScreen o Sheet con validación de correo («Ingresa un correo válido») y de teléfono chileno;
+  - vacío: «Aún no declaras un delegado de protección de datos» con el botón «Declarar DPO».
+- Card «Contacto de OPAI para protección de datos»: dato de plataforma en solo lectura, «Delegado de OPAI: privacidad@opai.cl».
+
+C3. Pestaña Registro de tratamientos (RAT), solo lectura
+- Texto introductorio: «Este registro se arma solo, a partir de lo que cada módulo declara sobre los datos personales que guarda. Si un dato no está declarado, OPAI no lo deja pasar a producción.».
+- Filtros: Chips por categoría (Identificación, Contacto, Laboral, Económica, Sensible).
+- Table, que en el teléfono pasa a tarjetas, con las columnas:
+  - Actividad (p. ej. «Gestión de personal de seguridad»)
+  - Datos (RUT, nombre, fecha de nacimiento, dirección, teléfono)
+  - Categoría (Badge)
+  - Base de licitud («Relación laboral», «Obligación legal», «Consentimiento»)
+  - Retención («Mientras dure el contrato + plazo legal de conservación»)
+  - Destinatarios (Cloudflare R2 almacenamiento, Resend correo, proveedor de IA)
+- Filas de ejemplo:
+  - Personas / guardias: Laboral, Relación laboral.
+  - Sueldos y estructuras: Económica, Relación laboral.
+  - Contactos de clientes: Contacto, Interés legítimo.
+  - Comunicaciones comerciales a contactos: Contacto, Consentimiento.
+  - Intentos de ingreso: Identificación, con IP y navegador, correo en hash; Interés legítimo (seguridad); 6 meses.
+  - Documentos de personas: Laboral, Obligación legal.
+- Botón «Descargar registro (PDF)».
+- Estados de carga y error iguales a A1.
+
+────────────────────────────────────────
+PARTE D · 07d bloque 7 · Solicitudes de titulares (derechos ARCO+), incidentes y consentimientos en la ficha
+────────────────────────────────────────
+Quién:
+- Ven las solicitudes owner, admin y gerente. El supervisor ve solo las de personas de sus instalaciones a cargo.
+- Crear, avanzar y resolver son actos humanos (un agente no lo hace).
+- Las solicitudes las registra el equipo de Gard al recibirlas por correo, carta o en persona. No hay formulario público en esta etapa.
+
+D1. Pestaña Solicitudes: bandeja (SplitScreen de lista 360/400 px y detalle)
+- Barra de la lista:
+  - InputBusqueda «Buscar por titular o número»;
+  - Chips de estado: Recibidas · En proceso · Resueltas · Rechazadas;
+  - Select de tipo: Acceso, Rectificación, Cancelación, Oposición, Portabilidad, Bloqueo;
+  - botón primario «Registrar solicitud».
+- Fila: número (SOL-2026-0007), titular, tipo (Badge), estado y semáforo del plazo con Vigencia («Vence en 21 días» en verde, «Vence en 4 días» en ámbar, «Vencida hace 2 días» en rojo) y la fecha de recepción.
+- Ejemplos:
+  - SOL-2026-0007 · Marisol Díaz Ancalao · Acceso · En proceso · vence 25-nov-2026.
+  - SOL-2026-0006 · Héctor Leiva Morales · Rectificación (dirección) · Recibida · vence 20-nov-2026.
+  - SOL-2026-0005 · Tomás Errázuriz · Oposición (comunicaciones comerciales) · Resuelta 23-oct-2026.
+  - SOL-2026-0004 · juan.perez.r@gmail.com (titular sin ficha) · Cancelación · Recibida.
+- Vacío:
+  - icono Inbox, «No hay solicitudes de titulares»;
+  - «Cuando una persona pida acceder, corregir, eliminar u oponerse al uso de sus datos, regístrala aquí para atenderla dentro del plazo legal.»;
+  - botón «Registrar solicitud».
+- Vacío por filtro: «No hay solicitudes con estos filtros» con el botón «Limpiar filtros».
+- Carga y error iguales a A1.
+
+D2. Registrar solicitud (FormScreen a pantalla completa en el teléfono; Sheet desde 1024)
+- Titular: Combobox que busca Personas y Contactos. Si no está, la opción «No está registrado: usar correo», con un campo de correo y otro de nombre.
+- Tipo: RadioGroup con descripción de cada uno:
+  - Acceso: quiere saber qué datos suyos tenemos.
+  - Rectificación: quiere corregir un dato.
+  - Cancelación: quiere que eliminemos sus datos.
+  - Oposición: no quiere que usemos sus datos para un fin.
+  - Portabilidad: quiere sus datos en un formato para llevarlos a otro lado.
+  - Bloqueo: quiere que suspendamos el uso de sus datos mientras se revisa.
+- Canal de recepción: Select (Correo, Carta, Presencial).
+- Fecha de recepción (CalendarioFecha, por defecto hoy).
+- Detalle de lo pedido (texto, obligatorio).
+- Adjunto opcional (Uploader: carta o correo escaneado).
+- Responsable (Select de usuarios).
+- Debajo de la fecha se muestra el plazo calculado: «Plazo legal: hasta el 25-nov-2026».
+- Acciones: «Cancelar» y «Registrar».
+- Al registrar:
+  - Toast «Registraste la solicitud SOL-2026-0008»;
+  - Alerta info «Se envió el acuse de recibo a marisol.diaz@gmail.com» (si hay correo).
+
+D3. Detalle de una solicitud
+- Encabezado del contenido: número, tipo, estado (Badge), Vigencia del plazo, titular con enlace a su ficha, responsable y canal.
+- Acciones según estado:
+  - Recibida: «Tomar solicitud», que la pasa a En proceso.
+  - En proceso: «Resolver» y «Rechazar».
+  - Acceso y Portabilidad: además «Generar exportación».
+- Generar exportación:
+  - Dialog con la elección «JSON (para otro sistema) + PDF (para la persona)»;
+  - resultado: documento del Núcleo con su huella SHA-256 y descarga por enlace temporal («El enlace vence en 15 minutos»).
+- Resolver: FormScreen o Sheet con resultado (texto obligatorio), evidencia (documento generado o adjunto, obligatoria) y Checkbox «Enviar respuesta al titular por correo». Acciones «Cancelar» y «Resolver solicitud».
+- Rechazar: motivo obligatorio («Ingresa el motivo del rechazo»).
+- Rectificación: enlace «Corregir en la ficha de Héctor Leiva»; la corrección se enlaza como evidencia.
+- Cancelación que choca con datos que la ley obliga a conservar:
+  - Alerta warning: «Hay registros que la ley obliga a conservar (marcas de asistencia, firmas y bitácora). No se eliminan: los datos del titular se anonimizan o bloquean y se deja constancia del motivo.»;
+  - Segmentado «Anonimizar | Bloquear».
+- Bitácora (Timeline): Recibida 27-oct 09:10 por Daniela Rojas · Acuse enviado 09:11 · Tomada por Marcelo Tapia 10:02 · Exportación generada 28-oct 16:40 · Resuelta 28-oct 16:45.
+- Sin permiso (supervisor fuera de alcance): Estado «Esta solicitud no está a tu cargo».
+
+D4. Pestaña Incidentes (registro mínimo)
+- Lista: fecha, título, alcance, datos afectados, estado (Abierto, En revisión o Cerrado) y el botón «Registrar incidente».
+- Formulario (pantalla completa en el teléfono): fecha y hora de detección, descripción, alcance (número aproximado de titulares), datos afectados (Chips por categoría), medidas tomadas y estado.
+- Ejemplo: «Notebook de central extraviado · 14-oct-2026 · 0 titulares afectados (disco cifrado) · Cerrado».
+- Vacío: «No hay incidentes registrados. Registra aquí cualquier hecho que pueda haber expuesto datos personales.».
+
+D5. Consentimientos en la ficha de la persona y del contacto
+- Una pestaña «Privacidad» dentro de la ficha existente de Persona y de Contacto (DetailScreen actual, sin pantalla nueva).
+- Contenido:
+  1. «Consentimientos»: lista por propósito, con estado (Badge «Otorgado» o «Revocado»), versión del aviso, origen y fecha. Ejemplo en Tomás Errázuriz: «Comunicaciones comerciales · Revocado 23-oct-2026 (por solicitud SOL-2026-0005) · Otorgado 02-mar-2026 v1.0».
+     - Botón «Registrar consentimiento», que abre un Dialog con propósito (Select), Segmentado «Otorga | Revoca», versión del aviso, origen (Correo, Papel, Presencial) y fecha.
+     - Nota fija: «Los datos de la relación laboral no dependen del consentimiento: se tratan por el contrato y las obligaciones legales.».
+     - Vacío: «Sin consentimientos registrados».
+  2. «Solicitudes de esta persona»: lista breve con enlace a cada una.
+  3. «Bases de tratamiento»: resumen de solo lectura tomado del registro de tratamientos.
+- Historial: otorgar y revocar son hechos nuevos y nunca se edita uno anterior. La lista lo muestra como Timeline.
+
+────────────────────────────────────────
+ESTADOS QUE TIENEN QUE APARECER EN LA SÁBANA (en 375, 1024 y 1280)
+────────────────────────────────────────
+- A1: lista de usuarios con datos, lista de roles con datos, roles personalizados vacío, carga, error y sin permiso.
+- A2 y A3:
+  - matriz en lectura;
+  - matriz en edición con cambios sin guardar;
+  - Finanzas bloqueado y su Dialog de concesión;
+  - permiso no concedible deshabilitado;
+  - rol vacío;
+  - error de nombre duplicado;
+  - Dialog de archivar rol en uso.
+- A4: ficha de usuario con excepciones, sin excepciones, último owner protegido y vista de solo lectura.
+- B1 y B2: con instalaciones, vacío, Dialog de quitar, asignar con selección, búsqueda sin resultados y Toast de éxito; más la referencia del portal Supervisor con datos y vacío.
+- C2: DPA aceptado, pendiente (vista owner y vista admin), versión nueva, lector de aceptación, DPO con datos, DPO vacío y la Alerta en Inicio.
+- C3: registro de tratamientos con datos, filtrado y carga.
+- D1 a D3:
+  - bandeja con datos, vacío y vacío por filtro;
+  - registrar solicitud;
+  - detalle en cada estado;
+  - exportación generada;
+  - resolver;
+  - rechazar;
+  - cancelación con datos que se conservan;
+  - sin permiso por alcance.
+- D4: incidentes con datos y vacío.
+- D5: pestaña Privacidad con consentimientos, vacía y el Dialog de registro.
+
+Los textos van en español de Chile, con tuteo y sin tecnicismos: nada de «tenant», «RLS», «capacidad», «membresía» ni nombres de permisos internos en pantalla. Los nombres de permisos se muestran como «Ver Instalaciones» o «Gestionar Documentos». Las fechas van en formato 27-oct-2026 y las horas en 24 h.

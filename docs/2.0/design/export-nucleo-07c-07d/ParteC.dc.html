@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="opai-nucleo.js"></script>
+</helmet>
+<div style="position:relative;width:100%;height:100%;overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" tabs="{{ navTabs }}" rail-footer="{{ railFooter }}" groups="{{ groups }}" active="{{ active }}" user="{{ shellUser }}" tenant="Gard Seguridad SpA" tenant-initials="GS" notifications="{{ 3 }}" title="{{ title }}" top-bar="{{ topBar }}" app-bar="{{ appBar }}" hide-tab-bar="{{ hideTab }}" width="100%" height="100%" hint-size="100%,100%">
+<div style="flex:1;min-height:0;display:flex">
+
+<sc-if value="{{ showIndex }}" hint-placeholder-val="{{ false }}">
+<div style="width:{{ idxW }};flex:{{ idxFlex }};overflow:auto;border-right:1px solid var(--ds-border);padding:16px 12px;display:flex;flex-direction:column;gap:16px;background:var(--ds-surface)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" icon="search" placeholder="Buscar en Configuración" hint-size="100%,44px"></x-import>
+<sc-for list="{{ index }}" as="g" hint-placeholder-count="3">
+<div style="display:flex;flex-direction:column;gap:2px">
+<span class="t-overline" style="color:var(--ds-fg-subtle);padding:0 8px 6px">{{ g.title }}</span>
+<sc-for list="{{ g.items }}" as="it" hint-placeholder-count="3">
+<div style="display:flex;gap:12px;align-items:flex-start;padding:10px 8px;border-radius:10px;background:{{ it.bg }};min-height:44px">
+<sc-if value="{{ it.notShield }}" hint-placeholder-val="{{ true }}"><span class="ic i-{{ it.icon }}" style="flex:none;margin-top:2px;color:var(--ds-fg-muted)"></span></sc-if>
+<sc-if value="{{ it.shield }}" hint-placeholder-val="{{ false }}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="flex:none;margin-top:2px;color:var(--ds-fg-muted)" aria-hidden="true"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"></path><path d="m9 12 2 2 4-4"></path></svg></sc-if>
+<div style="display:flex;flex-direction:column;gap:2px;min-width:0;flex:1">
+<span class="t-label" style="color:var(--ds-fg)">{{ it.title }}</span>
+<span class="t-body-sm" style="color:var(--ds-fg-muted)">{{ it.descShown }}</span>
+</div>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}"><span class="ic i-chevron-right" style="flex:none;margin-top:2px;color:var(--ds-fg-subtle)"></span></sc-if>
+</div>
+</sc-for>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ showMain }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1;min-width:0;overflow:auto;display:flex;flex-direction:column;background:var(--ds-bg)">
+
+<sc-if value="{{ isHome }}" hint-placeholder-val="{{ false }}">
+<div style="padding:{{ pad }};display:flex;flex-direction:column;gap:16px;max-width:1040px">
+<div role="status" style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;padding:12px 16px;border-radius:10px;background:var(--ds-warning-muted)">
+<span class="ic i-alert" style="flex:none;color:var(--ds-warning-fg);margin-top:2px"></span>
+<span class="t-body-sm" style="color:var(--ds-fg);flex:1;min-width:200px;text-wrap:pretty">Falta aceptar el acuerdo de tratamiento de datos (versión 1.0). OPAI sigue funcionando con normalidad, pero la Ley 21.719 exige este acuerdo desde el 1 de diciembre de 2026.</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" hint-size="160px,40px">Revisar y aceptar</x-import>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+<sc-for list="{{ kpis }}" as="k" hint-placeholder-count="3">
+<div style="border:1px solid var(--ds-border);border-radius:16px;background:var(--ds-surface);padding:16px;display:flex;flex-direction:column;gap:4px">
+<span class="t-body-sm" style="color:var(--ds-fg-muted)">{{ k.label }}</span>
+<span class="t-title t-numeric" style="color:var(--ds-fg)">{{ k.value }}</span>
+<span class="t-caption" style="color:var(--ds-fg-subtle)">{{ k.sub }}</span>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isPriv }}" hint-placeholder-val="{{ true }}">
+<div style="padding:8px {{ pad }} 0;background:var(--ds-surface);border-bottom:1px solid var(--ds-border);position:sticky;top:0;z-index:1">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ tabs }}" value="{{ tab }}" fade-color="var(--ds-surface)" hint-size="100%,44px"></x-import>
+</div>
+<div style="padding:{{ pad }};display:flex;flex-direction:column;gap:16px;max-width:{{ mainMax }};width:100%">
+
+<sc-if value="{{ tResumen }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Acuerdo de tratamiento de datos (DPA)" description="Gard Seguridad SpA es el responsable del tratamiento de los datos personales que gestiona en OPAI. OPAI es el encargado y los trata por cuenta de Gard." hint-size="100%,220px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<sc-if value="{{ dpaOk }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:8px">
+<div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="success" dot="{{ true }}" hint-size="160px,22px">Aceptado · versión 1.0</x-import></div>
+<span class="t-body-sm" style="color:var(--ds-fg-muted)">Aceptado por Andrés Fuenzalida Rivas el 27-oct-2026, 10:42</span>
+</div>
+</sc-if>
+<sc-if value="{{ dpaPend }}" hint-placeholder-val="{{ false }}">
+<div role="status" style="display:flex;gap:12px;align-items:flex-start;padding:12px 16px;border-radius:10px;background:var(--ds-warning-muted)"><span class="ic i-alert" style="flex:none;color:var(--ds-warning-fg);margin-top:2px"></span><span class="t-body-sm" style="color:var(--ds-fg);text-wrap:pretty">Falta aceptar el acuerdo de tratamiento de datos (versión 1.0). OPAI sigue funcionando con normalidad, pero la Ley 21.719 exige este acuerdo desde el 1 de diciembre de 2026.</span></div>
+</sc-if>
+<sc-if value="{{ dpaNew }}" hint-placeholder-val="{{ false }}">
+<div role="status" style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap;padding:12px 16px;border-radius:10px;background:var(--ds-info-muted)"><span class="ic i-info" style="flex:none;color:var(--ds-info-fg);margin-top:2px"></span><span class="t-body-sm" style="color:var(--ds-fg);flex:1;min-width:180px">Hay una versión nueva del acuerdo (1.1). La versión 1.0 que aceptaste sigue registrada.</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" hint-size="170px,40px">Revisar versión 1.1</x-import></div>
+<div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="success" dot="{{ true }}" hint-size="160px,22px">Aceptado · versión 1.0</x-import></div>
+</sc-if>
+<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+<sc-if value="{{ ownerAccept }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" hint-size="160px,40px">Revisar y aceptar</x-import></sc-if>
+<sc-if value="{{ notOwnerPend }}" hint-placeholder-val="{{ false }}"><span class="t-body-sm" style="display:flex;gap:6px;align-items:center;color:var(--ds-fg-muted)"><span class="ic sm i-lock"></span>Solo el owner de la empresa puede aceptarlo</span></sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="file" hint-size="130px,40px">Ver acuerdo</x-import>
+<sc-if value="{{ hasHist }}" hint-placeholder-val="{{ true }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="clock" hint-size="110px,40px">Historial</x-import></sc-if>
+</div>
+<sc-if value="{{ showHist }}" hint-placeholder-val="{{ false }}">
+<div style="border-top:1px solid var(--ds-border);padding-top:12px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Timeline" items="{{ hist }}" hint-size="100%,120px"></x-import></div>
+</sc-if>
+<span class="t-caption" style="color:var(--ds-fg-subtle);text-wrap:pretty">El acuerdo es un documento de OPAI, igual para todas las empresas y versionado. Ley 21.719, vigente desde el 1 de diciembre de 2026. Aceptarlo lo hace una persona: un agente no puede hacerlo.</span>
+</div>
+</x-import>
+
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Delegado de protección de datos (DPO)" actions="{{ dpoAction }}" hint-size="100%,200px">
+<sc-if value="{{ dpoHas }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
+<div style="display:flex;flex-direction:column;gap:2px"><span class="t-label-sm" style="color:var(--ds-fg-muted)">Nombre</span><span class="t-body" style="color:var(--ds-fg)">María José Castillo Bravo</span></div>
+<div style="display:flex;flex-direction:column;gap:2px"><span class="t-label-sm" style="color:var(--ds-fg-muted)">Correo</span><span class="t-body" style="color:var(--ds-fg)">dpo@gard.cl</span></div>
+<div style="display:flex;flex-direction:column;gap:2px"><span class="t-label-sm" style="color:var(--ds-fg-muted)">Teléfono</span><span class="t-body t-numeric" style="color:var(--ds-fg)">+56 9 8765 4321</span></div>
+</div>
+</sc-if>
+<sc-if value="{{ dpoEmpty }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap"><span class="t-body-sm" style="color:var(--ds-fg-muted);flex:1;min-width:180px">Aún no declaras un delegado de protección de datos</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="plus" hint-size="140px,40px">Declarar DPO</x-import></div>
+</sc-if>
+</x-import>
+
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Contacto de OPAI para protección de datos" hint-size="100%,100px">
+<span class="t-body-sm" style="color:var(--ds-fg-muted)">Delegado de OPAI: privacidad@opai.cl</span>
+</x-import>
+</sc-if>
+
+<sc-if value="{{ tRat }}" hint-placeholder-val="{{ false }}">
+<span class="t-body" style="color:var(--ds-fg-muted);text-wrap:pretty;max-width:720px">Este registro se arma solo, a partir de lo que cada módulo declara sobre los datos personales que guarda. Si un dato no está declarado, OPAI no lo deja pasar a producción.</span>
+<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:space-between">
+<div class="chip-row">
+<sc-for list="{{ ratChips }}" as="ch" hint-placeholder-count="5">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FilterChip" variant="toggle" value="{{ ch.label }}" count="{{ ch.n }}" selected="{{ ch.on }}" hint-size="120px,32px"></x-import>
+</sc-for>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="download" hint-size="220px,40px">Descargar registro (PDF)</x-import>
+</div>
+<sc-if value="{{ ratLoading }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:0;border:1px solid var(--ds-border);border-radius:16px;background:var(--ds-surface);overflow:hidden">
+<sc-for list="{{ skel6 }}" as="s" hint-placeholder-count="6">
+<div style="display:flex;gap:16px;align-items:center;padding:16px;border-bottom:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ s.w }}" height="14" hint-size="30%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="20%" height="14" hint-size="20%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="72" height="22" radius="{{ 999 }}" hint-size="72px,22px"></x-import>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ ratData }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="margin:0 -16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ ratCols }}" rows="{{ ratRows }}" cards="{{ true }}" to-card="{{ ratCard }}" hint-size="100%,400px"></x-import></div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ ratCols }}" rows="{{ ratRows }}" hint-size="100%,400px"></x-import>
+</sc-if>
+</sc-if>
+</sc-if>
+
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ readerPhone }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;background:var(--ds-surface)">
+<div style="flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:16px">
+<span class="t-caption" style="color:var(--ds-fg-subtle)">Versión 1.0 · Huella SHA-256 9f2c…a41e</span>
+<sc-for list="{{ dpaText }}" as="d" hint-placeholder-count="8">
+<div style="display:flex;flex-direction:column;gap:4px"><span class="t-label" style="color:var(--ds-fg)">{{ d.t }}</span><span class="t-body-sm" style="color:var(--ds-fg-muted);text-wrap:pretty">{{ d.p }}</span></div>
+</sc-for>
+</div>
+<div style="padding:8px 16px 12px;border-top:1px solid var(--ds-border)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ false }}" label="Leí el acuerdo y lo acepto en nombre de Gard Seguridad SpA" hint-size="100%,44px"></x-import></div>
+</div>
+</sc-if>
+</div>
+</x-import>
+
+<sc-if value="{{ readerWide }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Dialog" size="lg" contained="{{ true }}" title="Acuerdo de tratamiento de datos · versión 1.0" description="Huella SHA-256 9f2c…a41e · Gard Seguridad SpA (responsable) y OPAI (encargado)" actions="{{ readerActs }}" hint-size="900px,640px">
+<div style="display:grid;grid-template-columns:220px minmax(0,1fr);gap:24px">
+<nav aria-label="Índice del acuerdo" style="display:flex;flex-direction:column;gap:2px;position:sticky;top:0;align-self:start">
+<sc-for list="{{ dpaText }}" as="d" hint-placeholder-count="8">
+<span class="t-body-sm" style="padding:10px 12px;border-radius:10px;color:var(--ds-fg);background:{{ d.bg }}">{{ d.t }}</span>
+</sc-for>
+</nav>
+<div style="display:flex;flex-direction:column;gap:16px;max-width:620px">
+<sc-for list="{{ dpaText }}" as="d" hint-placeholder-count="8">
+<div style="display:flex;flex-direction:column;gap:4px"><span class="t-label" style="color:var(--ds-fg)">{{ d.t }}</span><span class="t-body-sm" style="color:var(--ds-fg-muted);text-wrap:pretty">{{ d.p }}</span></div>
+</sc-for>
+<div style="border-top:1px solid var(--ds-border);padding-top:8px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ false }}" label="Leí el acuerdo y lo acepto en nombre de Gard Seguridad SpA" hint-size="100%,44px"></x-import></div>
+</div>
+</div>
+</x-import>
+</sc-if>
+
+<sc-if value="{{ dpoSheet }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Sheet" side="{{ sheetSide }}" contained="{{ true }}" title="Delegado de protección de datos" actions="{{ dpoActs }}" on-close="{{ noop }}" hint-size="420px,100%">
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Nombre" value="María José Castillo Bravo" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Correo" type="email" value="dpo@gard" error="Ingresa un correo válido" hint-size="100%,96px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Teléfono" type="tel" prefix="+56" value="9 8765 4321" hint="Celular o fijo de Chile" hint-size="100%,96px"></x-import>
+</div>
+</x-import>
+</sc-if>
+<sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:0;right:0;bottom:{{ toastBottom }};display:flex;justify-content:center;padding:0 16px;z-index:60">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Toast" icon="check-circle" tone="success" message="{{ toast }}" duration="{{ 0 }}" hint-size="320px,48px"></x-import>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;\&quot;phone\&quot; | \&quot;tablet\&quot; | \&quot;desktop\&quot;&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;c-ok&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const O = window.OPAINucleo;
+    const N = (O && O.NS()) || {};
+    const h = React.createElement;
+    const device = this.props.device ?? "desktop";
+    const S = this.props.state ?? "c-ok";
+    const phone = device === "phone";
+    const cfgs = {
+      "c-idx": { idx: true, dpa: "ok", dpo: true },
+      "c-ok": { dpa: "ok", dpo: true, hist: true },
+      "c-toast": { dpa: "ok", dpo: true, toast: "Aceptaste el acuerdo de tratamiento de datos, versión 1.0", user: "af" },
+      "c-pend-owner": { dpa: "pend", dpo: true, user: "af" },
+      "c-pend-admin": { dpa: "pend", dpo: false },
+      "c-new": { dpa: "new", dpo: true, hist: true, user: "af" },
+      "c-reader": { dpa: "pend", dpo: true, user: "af", reader: true },
+      "c-dpo-edit": { dpa: "ok", dpo: true, sheet: true },
+      "c-home": { home: true, user: "af" },
+      "c-rat": { tab: "rat" }, "c-rat-filter": { tab: "rat", filter: "Contacto" }, "c-rat-loading": { tab: "rat", loading: true },
+    };
+    const c = cfgs[S] || cfgs["c-ok"];
+    const readerPhone = phone && c.reader;
+    const title = c.home ? "Inicio" : c.idx ? "Configuración" : readerPhone ? "Acuerdo de datos" : "Privacidad y datos personales";
+    const sh = O ? O.shell(device, title, { user: c.user || "dr", back: !c.home && !c.idx, cancel: readerPhone, action: readerPhone ? "Aceptar acuerdo" : null, actionDisabled: true }) : { device, isPhone: phone, notPhone: !phone, pad: "24px", listW: "360px" };
+    if (c.home && sh) { sh.active = "ini"; }
+    const idx = O ? O.indexFor("priv").map((g) => ({ ...g, items: g.items.map((i) => ({ ...i, descShown: phone ? i.short : i.desc })) })) : [];
+    const cat = ["Identificación", "Contacto", "Laboral", "Económica", "Sensible"];
+    const rat = [
+      { id: 1, act: "Gestión de personal de seguridad", datos: "RUT, nombre, fecha de nacimiento, dirección, teléfono", cat: "Laboral", base: "Relación laboral", ret: "Mientras dure el contrato + plazo legal de conservación", dest: "Cloudflare R2 (almacenamiento), Resend (correo)" },
+      { id: 2, act: "Sueldos y estructuras", datos: "RUT, sueldo base, haberes, descuentos, cuenta bancaria", cat: "Económica", base: "Relación laboral", ret: "Mientras dure el contrato + plazo legal de conservación", dest: "Cloudflare R2 (almacenamiento)" },
+      { id: 3, act: "Contactos de clientes", datos: "Nombre, cargo, correo, teléfono", cat: "Contacto", base: "Interés legítimo", ret: "Mientras dure la relación comercial", dest: "Resend (correo)" },
+      { id: 4, act: "Comunicaciones comerciales a contactos", datos: "Nombre, correo", cat: "Contacto", base: "Consentimiento", ret: "Hasta que se revoque el consentimiento", dest: "Resend (correo)" },
+      { id: 5, act: "Intentos de ingreso", datos: "IP, navegador, correo en hash", cat: "Identificación", base: "Interés legítimo (seguridad)", ret: "6 meses", dest: "Cloudflare R2 (almacenamiento)" },
+      { id: 6, act: "Documentos de personas", datos: "Contrato, cédula de identidad, certificado OS-10", cat: "Laboral", base: "Obligación legal", ret: "Plazo legal de conservación", dest: "Cloudflare R2 (almacenamiento), proveedor de IA (lectura de documentos)" },
+    ];
+    const ratRows = c.filter ? rat.filter((r) => r.cat === c.filter) : rat;
+    const badge = (r) => (N.Badge ? h(N.Badge, null, r.cat) : r.cat);
+    const dpaText = [
+      ["1. Objeto", "Este acuerdo regula cómo OPAI trata, por cuenta de Gard Seguridad SpA, los datos personales que la empresa registra en la plataforma, conforme a la Ley 21.719."],
+      ["2. Datos tratados", "Datos de identificación, contacto, laborales y económicos de trabajadores, contactos de clientes y usuarios, según el registro de tratamientos de la empresa."],
+      ["3. Obligaciones del encargado", "OPAI trata los datos solo según las instrucciones de Gard, guarda confidencialidad y no los usa para fines propios."],
+      ["4. Subencargados", "OPAI usa Cloudflare R2 para almacenamiento, Resend para correo y un proveedor de IA para lectura de documentos. Avisará antes de sumar uno nuevo."],
+      ["5. Seguridad", "Los datos viajan y se guardan cifrados. El acceso se limita por rol y por instalación, y queda registrado en la auditoría."],
+      ["6. Derechos de los titulares", "OPAI ayuda a Gard a responder solicitudes de acceso, rectificación, cancelación, oposición, portabilidad y bloqueo dentro del plazo legal."],
+      ["7. Incidentes", "Si ocurre un incidente que afecte datos personales, OPAI avisará a Gard sin demora indebida, con lo que sepa del alcance y de las medidas tomadas."],
+      ["8. Término y devolución de datos", "Al terminar el servicio, OPAI entrega los datos a Gard en un formato legible y los elimina, salvo los que la ley obligue a conservar."],
+    ].map(([t, p], i) => ({ t, p, bg: i === 0 ? "var(--ds-fill)" : "transparent" }));
+    const owner = (c.user || "dr") === "af";
+    return {
+      ...sh,
+      showIndex: !!c.idx, idxW: phone ? "100%" : sh.listW, idxFlex: phone ? "1" : "none",
+      showMain: !(phone && c.idx) && !readerPhone, readerPhone,
+      index: idx,
+      isHome: !!c.home, isPriv: !c.home,
+      kpis: [{ label: "Dotación hoy", value: "148 de 152", sub: "4 turnos sin cubrir" }, { label: "Rondas completadas", value: "37 de 40", sub: "Turno día" }, { label: "Tickets abiertos", value: "6", sub: "2 con prioridad alta" }],
+      tabs: [{ id: "res", label: "Resumen" }, { id: "rat", label: "Registro de tratamientos" }, { id: "sol", label: "Solicitudes", count: 3 }, { id: "inc", label: "Incidentes" }],
+      tab: c.tab || "res", tResumen: !c.tab, tRat: c.tab === "rat",
+      mainMax: c.tab === "rat" ? "1200px" : "880px",
+      dpaOk: c.dpa === "ok", dpaPend: c.dpa === "pend", dpaNew: c.dpa === "new",
+      ownerAccept: c.dpa === "pend" && owner, notOwnerPend: c.dpa === "pend" && !owner,
+      hasHist: c.dpa !== "pend", showHist: !!c.hist,
+      hist: [{ initials: "AF", who: "Andrés Fuenzalida Rivas", action: "aceptó la versión 1.0", when: "27-oct-2026 10:42" }],
+      dpoHas: !!c.dpo, dpoEmpty: !c.dpo,
+      dpoAction: c.dpo && N.Button ? h(N.Button, { variant: "secondary" }, "Editar") : null,
+      ratChips: cat.map((k) => ({ label: k, n: rat.filter((r) => r.cat === k).length, on: c.filter === k })),
+      ratLoading: !!c.loading, ratData: !c.loading,
+      skel6: [{ w: "30%" }, { w: "25%" }, { w: "28%" }, { w: "22%" }, { w: "26%" }, { w: "24%" }],
+      ratCols: [{ key: "act", label: "Actividad" }, { key: "datos", label: "Datos", muted: true }, { key: "cat", label: "Categoría", render: badge }, { key: "base", label: "Base de licitud" }, { key: "ret", label: "Retención", muted: true }, { key: "dest", label: "Destinatarios", muted: true }],
+      ratRows,
+      ratCard: (r) => ({ icon: "file", title: r.act, subtitle: r.datos, meta: r.base + " · " + r.ret, badge: { tone: "neutral", label: r.cat } }),
+      dpaText,
+      readerWide: !phone && !!c.reader,
+      readerActs: O ? O.acts({ t: "Cancelar" }, { t: "Aceptar acuerdo", v: "primary", disabled: true }) : null,
+      dpoSheet: !!c.sheet, sheetSide: phone ? "bottom" : "right",
+      dpoActs: O ? O.acts({ t: "Cancelar" }, { t: "Guardar", v: "primary" }) : null,
+      toast: c.toast || null, toastBottom: phone ? "80px" : "24px",
+      noop: () => {},
+    };
+  }
+}
+</script>
+</body>
+</html>
