@@ -1,4 +1,4 @@
-import { AlertTriangle, Inbox, Lock } from "lucide-react";
+import { AlertTriangle, Inbox, Lock, WifiOff } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { cn } from "../cn";
@@ -48,6 +48,22 @@ export function Forbidden(props: Partial<EstadoProps>) {
       icono={<Lock className="size-6" />}
       titulo={props.titulo ?? "No tienes acceso a esta sección"}
       descripcion={props.descripcion ?? "Pide acceso al administrador de tu empresa."}
+      {...(props.accion ? { accion: props.accion } : {})}
+      {...(props.className ? { className: props.className } : {})}
+    />
+  );
+}
+
+/** Sin conexión (PWA, ADR-044): no hay red; el contenido vuelve al reconectar. */
+export function SinConexion(props: Partial<EstadoProps>) {
+  return (
+    <Marco
+      icono={<WifiOff className="size-6" />}
+      titulo={props.titulo ?? "Sin conexión"}
+      descripcion={
+        props.descripcion ??
+        "No hay red en este momento. Revisa tu conexión; el contenido vuelve al reconectar."
+      }
       {...(props.accion ? { accion: props.accion } : {})}
       {...(props.className ? { className: props.className } : {})}
     />

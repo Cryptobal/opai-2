@@ -3,6 +3,8 @@ import type { ReactNode } from "react";
 
 import "./globals.css";
 
+import { ClientePwa } from "./_components/pwa/cliente-pwa";
+
 export const metadata: Metadata = {
   title: { default: "OPAI", template: "%s · OPAI" },
   description: "Plataforma operacional para empresas intensivas en personal.",
@@ -11,8 +13,9 @@ export const metadata: Metadata = {
   appleWebApp: { capable: true, title: "OPAI", statusBarStyle: "default" },
   // apple-touch-icon (iOS) e ícono general; el manifest lleva el resto de los íconos (PWA).
   icons: { apple: "/apple-touch-icon.png" },
-  // mobile-web-app-capable es el estándar actual; Next ya emite el apple-* desde appleWebApp.
-  other: { "mobile-web-app-capable": "yes" },
+  // `appleWebApp.capable` emite `mobile-web-app-capable` (estándar actual); añadimos el legado de
+  // iOS para el modo standalone en Safari antiguo.
+  other: { "apple-mobile-web-app-capable": "yes" },
 };
 
 // viewport-fit=cover: habilita env(safe-area-inset-*) en iOS. theme-color por tema para la barra de
@@ -36,7 +39,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <head>
         <script dangerouslySetInnerHTML={{ __html: TEMA }} />
       </head>
-      <body className="flex min-h-full flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">
+        {children}
+        <ClientePwa />
+      </body>
     </html>
   );
 }
