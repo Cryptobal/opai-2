@@ -1,20 +1,25 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 
 import { AuthCard, Button, Monograma } from "@opai/ds";
 
 import { accionSalir } from "@/app/_acciones/auth";
-import { trasLimpiarCaches } from "@/app/_components/pwa/limpiar-cache";
 
 import { LinkNext } from "@/app/_components/link-next";
 import { ETIQUETA_ROL } from "@/app/_components/portales";
 import { fechaCorta } from "@/lib/formato";
 
 import { aceptarInvitacion, registrarYAceptar } from "./acciones";
-import { InvitacionNoVigente } from "./invitacion-estados";
 import { FormularioCuenta, Tarjeta } from "./invitacion-partes";
+
+// Estados no vigentes (vencida, revocada, ya usada): rama terminal poco frecuente, con sus propios
+// íconos. Se carga en un chunk aparte (fuera de la primera carga de /(auth)/*) para no gastar
+// presupuesto de JS en algo que casi nunca se muestra (ADR-037). `lazy` usa React, sin runtime extra.
+const InvitacionNoVigente = lazy(() =>
+  import("./invitacion-no-vigente").then((m) => ({ default: m.InvitacionNoVigente })),
+);
 
 export type DatosInvitacion = {
   tenant: string;
@@ -47,7 +52,11 @@ export function Invitacion({ slug, token, datos, sesion }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
   if (datos.estado !== "pendiente") {
-    return <InvitacionNoVigente slug={slug} token={token} datos={datos} />;
+    return (
+      <Suspense fallback={null}>
+        <InvitacionNoVigente slug={slug} token={token} datos={datos} />
+      </Suspense>
+    );
   }
 
   const login = `/login?next=${encodeURIComponent(`/invitacion/${slug}/${token}`)}`;
@@ -59,10 +68,13 @@ export function Invitacion({ slug, token, datos, sesion }: Props) {
   };
   // Con otra sesión abierta: si la cuenta invitada existe, se entra con ella (login);
   // si no existe, se vuelve a esta misma invitación, que muestra el formulario de cuenta nueva.
-  const cambiarDeCuenta = () =>
-    trasLimpiarCaches(() =>
-      accionSalir(datos.usuarioExiste ? login : `/invitacion/${slug}/${token}`),
-    );
+  // La limpieza de cachés se carga de forma dinámica para no sumar su peso a la primera carga de
+  // /(auth)/* (presupuesto de JS, ADR-037): solo se necesita al cambiar de cuenta.
+  const cambiarDeCuenta = async () => {
+    const destino = datos.usuarioExiste ? login : `/invitacion/${slug}/${token}`;
+    const { trasLimpiarCaches } = await import("@/app/_components/pwa/limpiar-cache");
+    trasLimpiarCaches(() => accionSalir(destino));
+  };
   const cuenta =
     sesion && !coincide
       ? sesion

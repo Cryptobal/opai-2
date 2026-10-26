@@ -2,7 +2,7 @@
 
 **Tarea:** CAR-18 · **Rama:** `brief/04-pwa` · **Fecha:** 26-oct-2026 · **Herramienta:** Lighthouse 11.7.1 (emulación móvil, Moto G por defecto), ejecutado contra el **build de producción local** (`pnpm --filter @opai/web build` + `next start -p 3144`) sobre el head de la rama.
 
-Cumple **D3 (b)** del Brief 04 (resuelta por Carlos el 26-oct-2026 13:45 CLT, t332u) como **informe, no como gate**, por decisión de OPAI 2.0 bajo la delegación de Carlos del 26-oct-2026 (16:54/16:59 CLT) a decidir todo el Núcleo. El gate equivalente de CI lo cubre Playwright (`e2e/pwa.spec.ts`: manifest, registro/control del service worker, cascarón sin red) más el presupuesto de JS (ADR-037). Lighthouse pasa a **gate** (≥ 90 rendimiento y accesibilidad) cuando el primer módulo de terreno tenga pantallas reales (ADR-044.7 enmendado).
+Cumple **D3 (b)** del Brief 04 (resuelta por Carlos el 26-oct-2026 13:45 CLT, t332u) como **informe, no como gate**, por decisión de OPAI 2.0 bajo la delegación de Carlos del 26-oct-2026 (16:54/16:59 CLT, t365u y t366u) a decidir todo el Núcleo. El gate equivalente de CI lo cubre Playwright (`e2e/pwa.spec.ts`: manifest, registro/control del service worker, cascarón sin red) más el presupuesto de JS (ADR-037). Lighthouse pasa a **gate** (≥ 90 rendimiento y accesibilidad) cuando el primer módulo de terreno tenga pantallas reales (ADR-044.7 enmendado).
 
 ## Alcance de la medición
 
