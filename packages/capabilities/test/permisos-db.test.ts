@@ -58,7 +58,8 @@ describe.skipIf(!urlPropietario)("roles y excepciones en base real", () => {
       actor: { tipo: "user", id: userId },
       usuario: { id: userId, nombre: "Vic", email: "vic@prueba.cl", platformRole: null },
       rol: "viewer",
-      permisosRol: m?.rolTenant && !m.rolTenant.archivadoEn ? m.rolTenant.permisos : null,
+      // Igual que el borde (fuentes.ts): rol archivado deniega por defecto; sin rol, el rol base.
+      permisosRol: m?.rolTenant ? (m.rolTenant.archivadoEn ? [] : m.rolTenant.permisos) : null,
       excepciones: (m?.excepciones ?? []).map((x) => ({ permiso: x.permiso, conceder: x.conceder })),
       medidor: { registrar: async () => undefined },
     });
@@ -121,5 +122,15 @@ describe.skipIf(!urlPropietario)("roles y excepciones en base real", () => {
     expect(caps).toContain("core.roles.create");
     expect(caps).toContain("core.roles.assign");
     expect(caps).toContain("core.excepciones.set");
+  });
+
+  it("un rol archivado deniega por defecto; no devuelve al usuario a su rol base", async () => {
+    // El usuario tiene rol base viewer (que lee instalaciones) y un rol personalizado asignado. Al
+    // archivar ese rol, el borde cae a deny-by-default (lista vacía), nunca al rol base: no lee.
+    const [rol] = await dato<{ id: string }[]>("core.roles.list", {});
+    await e.admin.rol.update({ where: { id: rol!.id }, data: { archivadoEn: new Date() } });
+    expect(
+      await mod.executeCapability(await ctxUsuario(), "core.instalaciones.list", {}),
+    ).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
   });
 });

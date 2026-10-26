@@ -3,10 +3,11 @@ import { z } from "zod";
 import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../define";
-import { noEncontrado, prohibido } from "../errores";
+import { noEncontrado } from "../errores";
 import { tenantActual, usuarioResponsable } from "./comun";
 import { emailSchema, portalSchema, rolSchema, uuidSchema } from "./esquemas";
 import { crearInvitacion, estadoInvitacion } from "./invitar";
+import { validarConcedeRol } from "./permisos/comun";
 
 export const invitacionCreadaSchema = z.object({
   id: z.string().nullable(),
@@ -31,12 +32,9 @@ export const usersInvite = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    if (input.rol === "owner" && !ctx.autorizar(PERMISOS_CORE.ownersManage)) {
-      throw prohibido("Solo un owner puede invitar a otro owner.");
-    }
-    if (input.rol === "admin" && ctx.rol !== "owner" && ctx.rol !== "admin") {
-      throw prohibido("No puedes invitar administradores.");
-    }
+    // Qué rol puede invitar se mide por su acceso REAL (§16.2, ADR-022), no por el rol base: nadie
+    // invita con un rol que concede permisos que él mismo no tiene (owner solo lo invita un owner).
+    validarConcedeRol(ctx, input.rol);
     const tenant = await tenantActual(ctx);
     const invitadoPor = { id: usuarioResponsable(ctx), nombre: ctx.usuario?.nombre ?? "OPAI" };
     return crearInvitacion(ctx.db, tenant, { ...input, invitadoPor }, ctx.servicios, dryRun);

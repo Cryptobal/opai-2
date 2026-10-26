@@ -70,8 +70,9 @@ export const fuentesReales: Fuentes = {
     });
     const rol = m?.rolTenant;
     return {
-      // Un rol archivado deja de aplicar: la membresía cae a su rol base.
-      permisosRol: rol && !rol.archivadoEn ? rol.permisos : null,
+      // Sin rol personalizado (roleId null) manda el rol base. Con un rol personalizado archivado se
+      // deniega por defecto (lista vacía): nunca se vuelve al rol base, que daría más acceso (§16.2).
+      permisosRol: rol ? (rol.archivadoEn ? [] : rol.permisos) : null,
       excepciones: (m?.excepciones ?? []).map((e) => ({ permiso: e.permiso, conceder: e.conceder })),
     };
   },

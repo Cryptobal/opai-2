@@ -6,7 +6,7 @@ import { defineCapability } from "../../define";
 import { reglaDeNegocio } from "../../errores";
 import { uuidSchema } from "../esquemas";
 import { escribirConEvento, sinDuplicado } from "../maestros/comun";
-import { validarPermisos } from "./comun";
+import { exigeGestionDeRoles, normalizarPermisosRol } from "./comun";
 import {
   descripcionSchema,
   nombreSchema,
@@ -33,13 +33,14 @@ export const rolesUpdate = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
+    exigeGestionDeRoles(ctx);
     const actual = await rolDe(ctx, input.id);
     if (actual.sistema) throw reglaDeNegocio("Un rol del sistema no se edita.");
-    if (input.permisos) validarPermisos(ctx, input.permisos);
+    const permisos = input.permisos ? normalizarPermisosRol(ctx, input.permisos) : undefined;
     const data = {
       ...(input.nombre !== undefined ? { nombre: input.nombre } : {}),
       ...(input.descripcion !== undefined ? { descripcion: input.descripcion } : {}),
-      ...(input.permisos !== undefined ? { permisos: input.permisos } : {}),
+      ...(permisos !== undefined ? { permisos } : {}),
     };
     if (dryRun) return vista({ ...actual, ...data });
     const r = await sinDuplicado(
@@ -65,6 +66,7 @@ export const rolesArchive = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
+    exigeGestionDeRoles(ctx);
     const actual = await rolDe(ctx, input.id);
     if (actual.sistema) throw reglaDeNegocio("Un rol del sistema no se archiva.");
     if (actual.archivadoEn) return vista(actual);

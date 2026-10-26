@@ -1,13 +1,18 @@
 import { z } from "zod";
 
-import { PERMISOS_CORE } from "@opai/domain";
+import { esRol, PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import { noEncontrado, reglaDeNegocio } from "../../errores";
 import type { Contexto } from "../../types";
 import { uuidSchema } from "../esquemas";
 import { escribirConEvento } from "../maestros/comun";
-import { validarConcedibles, validarEnCatalogo } from "./comun";
+import {
+  exigeGestionDeRoles,
+  validarConcedeRol,
+  validarConcedibles,
+  validarEnCatalogo,
+} from "./comun";
 
 async function membresiaDe(ctx: Contexto, id: string) {
   const m = await ctx.db.membership.findUnique({ where: { id } });
@@ -31,6 +36,7 @@ export const rolesAssign = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
+    exigeGestionDeRoles(ctx);
     const m = await membresiaDe(ctx, input.membershipId);
     if (m.rol === "owner" && input.roleId !== null) {
       throw reglaDeNegocio("El rol owner no admite un rol personalizado.");
@@ -41,6 +47,10 @@ export const rolesAssign = defineCapability({
       if (rol.archivadoEn) throw reglaDeNegocio("Ese rol está archivado.");
       // Nadie asigna un rol con permisos que el asignador no tiene (§16.2).
       validarConcedibles(ctx, rol.permisos);
+    } else if (esRol(m.rol)) {
+      // Devolver a alguien a su rol base (roleId null) también concede permisos: exige poder
+      // concederlos, si no se escala quitando el rol personalizado que lo limitaba (§16.2).
+      validarConcedeRol(ctx, m.rol);
     }
     if (!dryRun) {
       await escribirConEvento(
@@ -92,12 +102,25 @@ export const excepcionesSet = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
+    exigeGestionDeRoles(ctx);
     const m = await membresiaDe(ctx, input.membershipId);
     const quitar = input.efecto === "ninguna";
+    // El owner tiene acceso total por definición: no se le recorta con una excepción (ni al último
+    // owner). Para reducir a alguien, cámbiale el rol.
+    if (m.rol === "owner" && input.efecto === "denegar") {
+      throw reglaDeNegocio("A un owner no se le niega un permiso con una excepción; cámbiale el rol.");
+    }
     if (!quitar) {
       validarEnCatalogo([input.permiso]);
       // Conceder exige tenerlo; denegar es restrictivo y no escala.
       if (input.efecto === "conceder") validarConcedibles(ctx, [input.permiso]);
+    } else {
+      // Quitar una denegación restituye el permiso del rol: exige poder concederlo. Nadie escala
+      // quitando una denegación, propia o ajena; quitar una concesión solo quita acceso y no la pide.
+      const previa = await ctx.db.permisoExcepcion.findFirst({
+        where: { membershipId: m.id, permiso: input.permiso },
+      });
+      if (previa && !previa.conceder) validarConcedibles(ctx, [input.permiso]);
     }
     const conceder = input.efecto === "conceder";
     if (dryRun) return quitar ? null : { permiso: input.permiso, conceder };

@@ -53,13 +53,29 @@ describe("core.roles.* (crear, editar, asignar)", () => {
   it("un admin concede permisos de gestión que un rol base no incluiría (los tiene, §16.2)", async () => {
     // El bloqueo financiero vive en el dominio (permisos-efectivos.test.ts): finanzas/nómina las
     // declara el módulo y aquí no están registradas. A nivel de capacidad se comprueba la regla
-    // general "nadie concede más de lo que tiene": el admin sí tiene gestión de usuarios y keys.
+    // general "nadie concede más de lo que tiene": el admin sí tiene gestión de usuarios y keys. Pero
+    // que el rol creado contenga `core:users.manage` NO habilita a quien lo lleve a gestionar roles
+    // (eso es owner/admin, §16.2; se comprueba en el escalamiento de más abajo).
     const { ctx } = contextoDePrueba({ rol: "admin", semilla: semillaTenant() });
     const r = await executeCapability(ctx, "core.roles.create", {
       nombre: "Gestor de accesos",
       permisos: ["core:users.manage", "core:apikeys.manage"],
     });
     expect(r).toMatchObject({ ok: true });
+  });
+
+  it("los comodines se expanden al guardar: el rol no hereda permisos futuros (§16.2)", async () => {
+    const { ctx, tabla } = contextoDePrueba({ rol: "owner", semilla: semillaTenant() });
+    const r = await executeCapability(ctx, "core.roles.create", {
+      nombre: "Todo core",
+      permisos: ["core:*"],
+    });
+    expect(r).toMatchObject({ ok: true });
+    const guardado = tabla("rol")[0]?.["permisos"] as string[];
+    expect(guardado).toContain("core:tenant.read");
+    expect(guardado).toContain("core:users.manage");
+    // Se guarda la lista concreta, nunca el comodín que regalaría permisos agregados después.
+    expect(guardado).not.toContain("core:*");
   });
 
   it("un rol del tenant nunca concede platform:*", async () => {
@@ -181,5 +197,113 @@ describe("core.excepciones.set", () => {
       efecto: "conceder",
     });
     expect(r).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+  });
+});
+
+// Cada caso es un intento de escalar privilegios y el rechazo esperado (revisión 5658269602).
+describe("escalamiento rechazado (§16.2, ADR-022)", () => {
+  // (1) El actor tiene el rol base alto pero un rol personalizado que lo limita a users.manage.
+  // Devolver a alguien a su rol base (roleId null) le daría a ese otro más de lo que el actor puede.
+  it("(1) no se escala volviendo al rol base con roleId null", async () => {
+    const { ctx } = contextoDePrueba({
+      rol: "admin",
+      permisosRol: ["core:users.manage"],
+      semilla: semillaTenant("admin"),
+    });
+    const r = await executeCapability(ctx, "core.roles.assign", { membershipId: M2, roleId: null });
+    expect(r).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+  });
+
+  // (2) Quitar una denegación restituye el permiso del rol: si el actor no puede concederlo, no se
+  // quita (nadie escala quitando una denegación, propia o ajena).
+  it("(2) no se escala quitando una denegación de un permiso que el actor no tiene", async () => {
+    const semilla = {
+      ...semillaTenant("admin"),
+      permisoExcepcion: [
+        {
+          id: "0192f3a0-0000-7000-8000-0000000000f1",
+          tenantId: "0192f3a0-0000-7000-8000-000000000001",
+          membershipId: M2,
+          permiso: "core:cuentas.read",
+          conceder: false,
+        },
+      ],
+    };
+    const { ctx } = contextoDePrueba({
+      rol: "admin",
+      permisosRol: ["core:users.manage"],
+      semilla,
+    });
+    const r = await executeCapability(ctx, "core.excepciones.set", {
+      membershipId: M2,
+      permiso: "core:cuentas.read",
+      efecto: "ninguna",
+    });
+    expect(r).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+  });
+
+  // (3) Al owner no se le recorta con excepciones, ni siquiera al último owner.
+  it("(3) no se puede negar un permiso a un owner con una excepción", async () => {
+    const { ctx } = contextoDePrueba({ rol: "owner", semilla: semillaTenant() });
+    const r = await executeCapability(ctx, "core.excepciones.set", {
+      membershipId: M1,
+      permiso: "core:tenant.read",
+      efecto: "denegar",
+    });
+    expect(r).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+  });
+
+  // (4) Tener core:users.manage dentro de un rol personalizado no habilita a gestionar roles:
+  // crear roles y anotar excepciones es solo de owner/admin (rol base).
+  it("(4) un rol con core:users.manage no habilita a gestionar roles si no es owner/admin", async () => {
+    const con = () =>
+      contextoDePrueba({
+        rol: "gerente",
+        permisosRol: ["core:users.manage"],
+        semilla: semillaTenant(),
+      });
+    const crear = await executeCapability(con().ctx, "core.roles.create", {
+      nombre: "Rol prohibido",
+      permisos: [],
+    });
+    expect(crear).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+    const excep = await executeCapability(con().ctx, "core.excepciones.set", {
+      membershipId: M2,
+      permiso: "core:users.read",
+      efecto: "conceder",
+    });
+    expect(excep).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+  });
+
+  // (5) users.update e invite miran el acceso REAL: un admin con un rol personalizado restringido no
+  // asigna ni invita admin aunque su rol base sea admin.
+  it("(5) users.update e invite no asignan un rol por encima del acceso real del actor", async () => {
+    const con = () =>
+      contextoDePrueba({
+        rol: "admin",
+        permisosRol: ["core:users.manage", "core:users.read"],
+        semilla: semillaTenant("viewer"),
+      });
+    const update = await executeCapability(con().ctx, "core.users.update", {
+      membershipId: M2,
+      rol: "admin",
+    });
+    expect(update).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+    const invite = await executeCapability(con().ctx, "core.users.invite", {
+      email: "nuevo@prueba.cl",
+      rol: "admin",
+    });
+    expect(invite).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+  });
+
+  // (7) Un comodín no se guarda como excepción (regalaría permisos agregados después).
+  it("(7) una excepción con comodín se rechaza", async () => {
+    const { ctx } = contextoDePrueba({ rol: "owner", semilla: semillaTenant() });
+    const r = await executeCapability(ctx, "core.excepciones.set", {
+      membershipId: M2,
+      permiso: "core:*",
+      efecto: "conceder",
+    });
+    expect(r).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
   });
 });

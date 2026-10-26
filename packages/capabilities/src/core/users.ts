@@ -1,11 +1,12 @@
 import { z } from "zod";
 
-import { esRol, PERMISOS_CORE, puedeAsignarRol, type Rol } from "@opai/domain";
+import { esRol, PERMISOS_CORE, type Rol } from "@opai/domain";
 
 import { defineCapability } from "../define";
 import { noEncontrado, prohibido, reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 import { portalSchema, rolSchema, uuidSchema } from "./esquemas";
+import { validarConcedeRol } from "./permisos/comun";
 
 export const miembroSchema = z.object({
   id: z.string(),
@@ -33,16 +34,15 @@ async function quedanOtrosOwners(ctx: Contexto, excepto: string): Promise<boolea
   return n > 0;
 }
 
-/** Quien no es owner no puede tocar owners ni asignar un rol superior al suyo. */
+/** Quien no es owner no puede tocar owners ni asignar un rol con permisos que él no tenga de hecho. */
 function verificarJerarquia(ctx: Contexto, objetivo: Miembro, nuevoRol?: Rol): void {
-  const propio = ctx.rol;
-  if (!propio) throw prohibido("Sin rol en esta empresa.");
+  if (!ctx.rol) throw prohibido("Sin rol en esta empresa.");
   if (objetivo.rol === "owner" && !ctx.autorizar(PERMISOS_CORE.ownersManage)) {
     throw prohibido("Solo un owner puede modificar a otro owner.");
   }
-  if (nuevoRol && !puedeAsignarRol(propio, nuevoRol)) {
-    throw prohibido(`No puedes asignar el rol "${nuevoRol}".`);
-  }
+  // Qué rol puede asignar se mide por su acceso REAL (rol personalizado + excepciones), no por el rol
+  // base: un rol base alto con un rol personalizado restringido no asigna por encima de su acceso.
+  if (nuevoRol) validarConcedeRol(ctx, nuevoRol);
 }
 
 export const usersList = defineCapability({
