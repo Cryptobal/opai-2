@@ -29,6 +29,9 @@ Traer de 1.0 a 2.0 la gestión de **negocios** (oportunidades de venta) y de **c
 ### Excluido (va en otros PR; `alcance-crm.md` §2)
 Solicitudes y su bandeja (PR 2), CPQ y cotizaciones, el N–N contacto↔cuenta (PR 2, cambia el núcleo), actividad unificada y etiquetas (PR 2), reportes y exportación (PR 3), campos personalizados, fusión y transferencia (PR 3), importación y sincronización con 1.0 (PR propio). «Ganar exige cotización enviada» queda **configurado pero apagado** hasta que exista CPQ.
 
+### Ganar sin cotización (decisión de Carlos, 26-oct-2026 15:12 CLT)
+Mientras CPQ no exista en 2.0, **se puede ganar un negocio sin una cotización enviada**, pero **solo en el ambiente de prueba (`test.opai.cl`)** y **con un aviso «sin cotización»** en la vista previa y al confirmar. Es la opción recomendada del recuadro «Decide Carlos» punto 1 de `alcance-crm.md`, aprobada por Carlos el 26-oct-2026 15:12 CLT. Esta decisión se mantiene **aunque choque con la Q7 de `comercial.md` §14** (que recomienda exigir cotización en la etapa ganada de Gard): el requisito `cotizacion_enviada` de la etapa ganada queda **configurado pero apagado** hasta que llegue CPQ, de modo que ganar queda habilitado con el aviso. Cuando CPQ exista, el tenant activa el requisito y la exigencia vuelve.
+
 ## 3. Modelo de datos y migración
 
 **Una sola migración:** `packages/db/prisma/migrations/20261027100000_comercial_negocios`, schema de Postgres **`comercial`**, toda tabla con `tenant_id`, `created_at`, `updated_at`, IDs `uuid(7)`, columnas `snake_case` por `@map`, RLS `tenant_isolation` para `opai_app` y los `GRANT`/`ALTER DEFAULT PRIVILEGES` del schema nuevo (REGLAS-codigo.md). El `tenant_id` de los modelos nuevos va **sin** `@relation` a `Tenant` (no se toca `core.prisma`): la FK a `core.tenants` se declara en el SQL.
