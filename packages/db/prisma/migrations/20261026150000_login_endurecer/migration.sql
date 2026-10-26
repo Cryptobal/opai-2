@@ -18,7 +18,9 @@ CREATE INDEX IF NOT EXISTS "login_intentos_correo_hash_created_at_exito_idx"
 -- provisionales del mismo correo e IP en vuelo. Solo resuelve un provisional (motivo 'pendiente'):
 -- una segunda llamada, o un id ajeno ya resuelto, devuelve false. FOR UPDATE SKIP LOCKED evita
 -- esperar o pisar una resolución simultánea del mismo id.
-DROP FUNCTION IF EXISTS "core"."marcar_login_intento"(text, text, boolean, text);
+-- La versión de 4 argumentos (correo e IP) de 20261026140000 se CONSERVA a propósito: mientras se
+-- despliega el código nuevo, las instancias viejas siguen resolviendo con ella y no quedan
+-- provisionales colgados. Se borra en una migración posterior, cuando ya nadie la llame.
 
 CREATE OR REPLACE FUNCTION "core"."marcar_login_intento"(
   intento_id uuid, es_exito boolean, nuevo_motivo text)
@@ -64,4 +66,3 @@ GRANT EXECUTE ON FUNCTION "core"."purgar_login_intentos"(integer) TO opai_app;
 --   DROP INDEX "core"."login_intentos_ip_created_at_idx";
 --   DROP INDEX "core"."login_intentos_correo_hash_created_at_exito_idx";
 --   DROP FUNCTION "core"."marcar_login_intento"(uuid, boolean, text);
---   -- y recrear la versión de 4 argumentos de 20261026140000.
