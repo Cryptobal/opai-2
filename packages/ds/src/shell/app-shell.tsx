@@ -53,6 +53,8 @@ export function AppShell(props: AppShellProps) {
         tenant={props.tenant}
         empresas={props.empresas}
         subtitulo={subtituloMarca}
+        usuario={props.usuario}
+        menuUsuario={props.menuUsuario}
         Link={Link}
       />
       <div className="flex min-w-0 flex-1 flex-col">
@@ -78,7 +80,6 @@ export function AppShell(props: AppShellProps) {
         rutaActual={rutaActual}
         {...(props.menuUsuario ? { extras: props.menuUsuario } : {})}
         {...(onNavegar ? { onNavegar } : {})}
-        {...(props.onBuscar ? { onBuscar: props.onBuscar } : {})}
         Link={Link}
       />
     </div>

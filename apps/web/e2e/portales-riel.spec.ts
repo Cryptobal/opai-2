@@ -36,7 +36,8 @@ test.describe("portales en escritorio", () => {
       for (const { ruta, titulo } of paginas) {
         await page.goto(ruta);
         const riel = page.getByRole("navigation", { name: "Principal" });
-        await expect(riel.getByText("OPAI", { exact: true })).toBeVisible();
+        // ShellTablet.html: el riel abre con el bloque de portal, sin el wordmark «OPAI».
+        await expect(riel.getByText("OPAI", { exact: true })).toHaveCount(0);
         await expect(riel.getByText(p.nombre, { exact: true })).toBeVisible();
         await expect(page).toHaveTitle(titulo);
       }

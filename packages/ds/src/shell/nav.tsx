@@ -1,4 +1,4 @@
-import { Menu as IconoMenu, Search } from "lucide-react";
+import { Menu as IconoMenu } from "lucide-react";
 
 import { cn } from "../cn";
 import type { ItemMenu } from "../components/menu";
@@ -22,8 +22,6 @@ type InferiorProps = NavProps & {
   /** Ítems de cuenta al final del menú "Más" (contraseña, cerrar sesión). */
   extras?: readonly ItemMenu[];
   onNavegar?: (href: string) => void;
-  /** Abre la búsqueda global (⌘K): con ella, "Buscar" es un ítem fijo de la barra (Brief 05, D7). */
-  onBuscar?: (() => void) | undefined;
 };
 
 /** Teléfono: barra inferior de hasta 5 ítems; si hay más, 4 y "Más". 56 px + safe-area. */
@@ -33,15 +31,14 @@ export function BottomNav({
   Link = LinkPorDefecto,
   extras = [],
   onNavegar,
-  onBuscar,
 }: InferiorProps) {
-  // Con búsqueda (ERP), "Buscar" y "Más" ocupan dos de los cinco espacios: quedan tres para la
-  // navegación (Brief 05, respaldo del escenario A: Inicio · Cuentas · Personas · Buscar · Más).
-  // "Instalaciones" (fueraInferior) pasa a "Más" sin desaparecer del riel ni de la barra lateral.
+  // Buscar vive en la barra superior (ShellPhone.html): la inferior solo navega. Si hay más de
+  // cinco ítems, cuatro y "Más". "Instalaciones" (fueraInferior) pasa a "Más" sin desaparecer del
+  // riel ni de la barra lateral.
   const principales = items.filter((i) => !i.pie && !i.soloAmplio && !i.fueraInferior);
-  const cupoNav = onBuscar ? 3 : 4;
+  const cupoNav = 4;
   const conMas =
-    principales.length > (onBuscar ? 4 : 5) ||
+    principales.length > 5 ||
     extras.length > 0 ||
     items.some((i) => i.soloAmplio || i.fueraInferior);
   const visibles = conMas ? principales.slice(0, cupoNav) : principales;
@@ -74,19 +71,6 @@ export function BottomNav({
             </li>
           );
         })}
-        {onBuscar ? (
-          <li className="min-w-0 flex-1">
-            <button
-              type="button"
-              onClick={onBuscar}
-              aria-label="Buscar"
-              className={claseItemInferior(false)}
-            >
-              <Search className="size-5" aria-hidden />
-              Buscar
-            </button>
-          </li>
-        ) : null}
         {conMas ? (
           <li className="min-w-0 flex-1">
             <MenuMas

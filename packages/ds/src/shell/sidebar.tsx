@@ -1,6 +1,7 @@
 import { cn } from "../cn";
 import type { ItemMenu } from "../components/menu";
 import { PortalSwitcher } from "./portal-switcher";
+import { UserMenu } from "./user-menu";
 import {
   esActivo,
   LinkPorDefecto,
@@ -8,6 +9,7 @@ import {
   type NavItem,
   type Portal,
   type Tenant,
+  type Usuario,
 } from "./types";
 
 type SidebarProps = {
@@ -19,8 +21,11 @@ type SidebarProps = {
   tenant?: Tenant | undefined;
   /** Cambiar de empresa (ítems del menú del monograma). */
   empresas?: readonly ItemMenu[] | undefined;
-  /** Nombre del portal bajo la marca (el ERP no lleva), igual que en el riel de iPad. */
+  /** Texto junto a la marca (ShellDesktop.html trae «2.0»); un portal con nombre propio lo reemplaza. */
   subtitulo?: string | undefined;
+  /** Usuario al pie de la barra, con su menú (cuenta, empresas, cerrar sesión). */
+  usuario?: Usuario | undefined;
+  menuUsuario?: readonly ItemMenu[] | undefined;
 };
 
 function agrupar(items: readonly NavItem[]): [string, NavItem[]][] {
@@ -60,7 +65,8 @@ function Item({
   );
 }
 
-/** Desktop: barra lateral de 248 px con marca y monograma de la empresa, grupos y Configuración al pie. */
+/** Desktop (ShellDesktop.html): barra lateral de 248 px con marca, selector de portal en bloque, grupos,
+ * Configuración y el usuario al pie. */
 export function Sidebar(props: SidebarProps) {
   const { items, rutaActual, Link = LinkPorDefecto } = props;
   return (
@@ -68,17 +74,17 @@ export function Sidebar(props: SidebarProps) {
       aria-label="Principal"
       className="sticky top-0 hidden h-dvh w-[248px] flex-none flex-col border-r border-border bg-surface xl:flex"
     >
-      <div className="flex h-[60px] flex-none items-center justify-between border-b border-border pr-2 pl-5">
-        <span className="grid">
+      <div className="flex flex-none flex-col gap-3 px-3 pt-3.5 pb-1">
+        <div className="flex items-center justify-between px-2">
           <span className="text-[17px] leading-6 font-bold tracking-[-0.02em] text-fg">OPAI</span>
-          {props.subtitulo ? <span className="t-caption">{props.subtitulo}</span> : null}
-        </span>
+          <span className="t-caption">{props.subtitulo ?? "2.0"}</span>
+        </div>
         <PortalSwitcher
           portales={props.portales}
           portalActual={props.portalActual}
           {...(props.tenant ? { tenant: props.tenant } : {})}
           {...(props.empresas ? { extra: props.empresas } : {})}
-          variante="monograma"
+          variante="bloque"
         />
       </div>
       <div className="flex-1 overflow-y-auto py-2">
@@ -98,6 +104,16 @@ export function Sidebar(props: SidebarProps) {
             <Item key={item.href} item={item} rutaActual={rutaActual} Link={Link} />
           ))}
       </div>
+      {props.usuario && props.menuUsuario ? (
+        <div className="flex-none border-t border-border px-3 py-2">
+          <UserMenu
+            usuario={props.usuario}
+            items={props.menuUsuario}
+            lado="arriba-izquierda"
+            conNombre
+          />
+        </div>
+      ) : null}
     </nav>
   );
 }

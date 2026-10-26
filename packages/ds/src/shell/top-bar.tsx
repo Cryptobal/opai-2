@@ -40,13 +40,15 @@ export type ComunesBarra = {
 };
 
 /**
- * Teléfono: selector de portal (o "‹ Atrás") a la izquierda y un grupo fijo a la derecha con la
- * campana y el avatar del usuario (52 px + safe-area). La búsqueda vive en la barra inferior
- * ("Buscar"), no aquí (Brief 05, D7). Si una ficha trae acciones (menú ⋯), van a la izquierda del
- * grupo fijo, que mantiene tamaño y posición constantes entre vistas, también con "Atrás" (CAR-12).
+ * Teléfono (ShellPhone.html): selector de portal (o "‹ Atrás") a la izquierda y un grupo fijo a la
+ * derecha con Buscar, la campana y el avatar del usuario (52 px + safe-area). Buscar vuelve a la
+ * barra superior y sale de la inferior (decisión de Carlos del 26-oct-2026; reemplaza a la D7 del
+ * Brief 05). Si una ficha trae acciones (menú ⋯), van a la izquierda del grupo fijo, que mantiene
+ * tamaño y posición constantes entre vistas, también con "Atrás" (CAR-12).
  */
 export function TopBarTelefono(props: ComunesBarra & { acciones?: ReactNode }) {
   const { portales, portalActual, tenant, campana, volver, acciones, usuario, menuUsuario } = props;
+  const { onBuscar } = props;
   const Link = props.Link ?? LinkPorDefecto;
   return (
     <header className="pt-safe sticky top-0 z-20 bg-bg/95 backdrop-blur md:hidden">
@@ -72,6 +74,11 @@ export function TopBarTelefono(props: ComunesBarra & { acciones?: ReactNode }) {
           {volver && acciones ? (
             <div className="flex flex-none items-center gap-0.5 pr-1">{acciones}</div>
           ) : null}
+          {onBuscar ? (
+            <Button variant="ghost" size="icon" aria-label="Buscar" onClick={onBuscar}>
+              <Search className="size-5" />
+            </Button>
+          ) : null}
           {campana}
           {usuario && menuUsuario ? (
             <UserMenu usuario={usuario} items={menuUsuario} lado="abajo-derecha" />
@@ -93,7 +100,8 @@ type AppBarProps = ComunesBarra & {
 
 /**
  * iPad y desktop: título (o migas "‹ Cuentas / Logística Andina") a la izquierda y un grupo fijo al
- * final con búsqueda ⌘K, campana y usuario. 60 px. El grupo fijo mantiene tamaño y posición idénticos
+ * final con búsqueda, campana y (hasta 1279 px) usuario; a 1280 px el usuario va al pie de la barra
+ * lateral. 60 px. El grupo fijo mantiene tamaño y posición idénticos
  * entre vistas (CAR-12): la acción principal de la página vive en el patrón; si una ficha o un
  * formulario necesita acciones en la cabecera, van a la izquierda del grupo fijo, nunca a su derecha.
  */
@@ -118,34 +126,30 @@ export function AppBar(props: AppBarProps) {
       {acciones ? <div className="flex flex-none items-center gap-2">{acciones}</div> : null}
       <div className="flex flex-none items-center gap-3">
         {onBuscar ? (
-          <>
-            <button
-              type="button"
-              onClick={onBuscar}
-              aria-label="Buscar o ir a"
-              className="hidden h-9 w-64 items-center gap-2 rounded-md border border-border bg-surface pr-2 pl-3 text-base text-fg-subtle outline-none hover:border-border-strong focus-visible:outline-2 focus-visible:outline-focus xl:flex"
-            >
-              <Search className="size-4" aria-hidden />
-              <span className="flex-1 text-left">Buscar o ir a…</span>
+          <button
+            type="button"
+            onClick={onBuscar}
+            aria-label="Buscar o ir a"
+            className="flex h-9 w-[280px] items-center gap-2 rounded-md border border-border bg-surface pr-2 pl-3 text-base text-fg-subtle outline-none hover:border-border-strong focus-visible:outline-2 focus-visible:outline-focus xl:w-80"
+          >
+            <Search className="size-4 flex-none" aria-hidden />
+            <span className="flex-1 truncate text-left xl:hidden">
+              Buscar personas, clientes, folios
+            </span>
+            <span className="hidden flex-1 text-left xl:inline">Buscar</span>
+            <span className="hidden xl:inline-flex">
               <AtajoBusqueda />
-            </button>
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Buscar"
-              className="xl:hidden"
-              onClick={onBuscar}
-            >
-              <Search className="size-5" />
-            </Button>
-          </>
+            </span>
+          </button>
         ) : null}
         {campana}
-        {usuario && menuUsuario ? (
-          <UserMenu usuario={usuario} items={menuUsuario} />
-        ) : usuario ? (
-          <Avatar nombre={usuario.nombre} />
-        ) : null}
+        <div className="flex flex-none items-center xl:hidden">
+          {usuario && menuUsuario ? (
+            <UserMenu usuario={usuario} items={menuUsuario} />
+          ) : usuario ? (
+            <Avatar nombre={usuario.nombre} />
+          ) : null}
+        </div>
       </div>
     </header>
   );

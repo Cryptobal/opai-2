@@ -57,7 +57,7 @@ export type RailProps = NavProps & {
 };
 
 /**
- * iPad: riel de 80 px con la marca y el selector de portal y empresa arriba, ítems de 64×56 y los
+ * iPad (ShellTablet.html): riel de 80 px con el selector de portal y empresa arriba, sin marca, ítems de 64×56 y los
  * ítems fijos (Configuración) al pie.
  */
 export function Rail({
@@ -74,9 +74,6 @@ export function Rail({
       aria-label="Principal"
       className="sticky top-0 hidden h-dvh w-20 flex-none flex-col items-center border-r border-border bg-surface py-3 md:flex xl:hidden"
     >
-      <span className="mt-2 mb-3 text-[13px] leading-4 font-bold tracking-[-0.02em] text-fg">
-        OPAI
-      </span>
       <PortalSwitcher
         portales={portales}
         portalActual={portalActual}

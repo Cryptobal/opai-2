@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 
 import { Sidebar } from "./sidebar";
 
-// Marcado del servidor de la barra lateral de escritorio: el subtítulo del portal va bajo la marca.
+// Marcado del servidor de la barra lateral de escritorio (ShellDesktop.html): marca con su texto al lado.
 const base = {
   items: [],
   rutaActual: "/trabajador",
@@ -13,14 +13,25 @@ const base = {
 };
 
 describe("Sidebar", () => {
-  it("muestra el nombre del portal bajo «OPAI»", () => {
+  it("muestra el subtítulo del portal junto a «OPAI»", () => {
     const html = renderToStaticMarkup(createElement(Sidebar, { ...base, subtitulo: "Trabajador" }));
     expect(html).toMatch(/>OPAI<\/span><span class="t-caption[^"]*">Trabajador<\/span>/);
   });
 
-  it("sin subtítulo (ERP) solo lleva la marca", () => {
+  it("sin subtítulo (ERP) lleva «2.0», como el diseño", () => {
     const html = renderToStaticMarkup(createElement(Sidebar, base));
-    expect(html).toContain(">OPAI</span>");
-    expect(html).not.toContain("t-caption");
+    expect(html).toMatch(/>OPAI<\/span><span class="t-caption[^"]*">2\.0<\/span>/);
+  });
+
+  it("lleva al usuario al pie, con su menú", () => {
+    const html = renderToStaticMarkup(
+      createElement(Sidebar, {
+        ...base,
+        usuario: { nombre: "Carlos Irigoyen", rol: "Administrador" },
+        menuUsuario: [{ id: "salir", etiqueta: "Salir", onSelect: () => undefined }],
+      }),
+    );
+    expect(html).toContain("Carlos Irigoyen");
+    expect(html).toContain("Administrador");
   });
 });

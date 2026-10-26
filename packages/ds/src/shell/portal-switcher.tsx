@@ -11,9 +11,9 @@ type Props = {
   portales: readonly Portal[];
   portalActual: string;
   tenant?: Tenant | undefined;
-  /** `compacto`: monograma, empresa y portal (teléfono). `monograma`: solo el monograma (barra
-   *  lateral). `riel`: monograma sobre el portal (abreviado) y ⇅, en un botón de 64 px (riel de iPad, ShellTablet). */
-  variante?: "compacto" | "monograma" | "riel";
+  /** `compacto`: monograma, empresa y portal (teléfono). `bloque`: botón de ancho completo con monograma, portal y empresa (barra
+   *  lateral de desktop, ShellDesktop.html). `riel`: monograma sobre el portal (abreviado) y ⇅, en un botón de 64 px (riel de iPad, ShellTablet). */
+  variante?: "compacto" | "bloque" | "riel";
   /** Ítems extra al pie (cambiar de empresa). */
   extra?: readonly ItemMenu[] | undefined;
   className?: string;
@@ -26,10 +26,11 @@ const VARIANTES = {
     clase: "min-w-0 justify-start px-1",
     estatica: "flex min-h-11 min-w-0 items-center px-1",
   },
-  monograma: {
+  bloque: {
     lado: "abajo-derecha",
-    clase: "size-11",
-    estatica: "flex min-h-11 min-w-0 items-center px-1",
+    clase: "h-11 w-full justify-start gap-2.5 rounded-[10px] border border-border bg-bg px-2.5",
+    estatica:
+      "flex h-11 w-full items-center gap-2.5 rounded-[10px] border border-border bg-bg px-2.5",
   },
   riel: {
     lado: "derecha",
@@ -56,8 +57,17 @@ export function PortalSwitcher(props: Props) {
   ];
   const conMenu = items.length > 1;
   const visual =
-    variante === "monograma" ? (
-      <Monograma nombre={nombre} className="size-6" />
+    variante === "bloque" ? (
+      <>
+        <Monograma nombre={nombre} />
+        <span className="flex min-w-0 flex-1 flex-col text-left">
+          <span className="t-label-sm truncate text-fg">{actual?.etiqueta}</span>
+          <span className="t-caption truncate text-[11px] leading-[14px]">{nombre}</span>
+        </span>
+        {conMenu ? (
+          <ChevronsUpDown className="size-4 flex-none text-fg-subtle" aria-hidden />
+        ) : null}
+      </>
     ) : variante === "riel" ? (
       <>
         <Monograma nombre={nombre} />
