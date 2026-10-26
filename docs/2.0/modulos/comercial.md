@@ -346,7 +346,7 @@ El agente se detiene antes de ganar, fusionar o transferir. Se documenta en `doc
 
 ## 14. Preguntas abiertas
 
-Cerradas, con recomendación.
+**Cerradas.** Resueltas con la opción recomendada por la aprobación de Carlos del 26-oct-2026 15:12 CLT («Sí, aprueba las dos hojas con las recomendaciones y lanza», transmitido por el Chief of Staff). Donde `comercial.md` chocaba con la Page «Comercial OPAI 2.0: decisiones» del 25-oct-2026, **manda la Page** (`alcance-crm.md`, «Decide Carlos» punto 3): **el SLA de primera respuesta queda fuera** de este alcance y de Comercial (se define con Solicitudes, PR 2); **la etapa ganada es «Adjudicado»** («ganado = adjudicado»); **el acuse automático al solicitante es configurable** (apagado por defecto, ADR-020); y **los campos personalizados quedan en el backlog** (PR 3). Las demás recomendaciones de abajo quedan adoptadas.
 
 1. **¿Quién recibe las solicitudes nuevas?**
    - (a) un responsable por defecto que deriva;
@@ -354,13 +354,8 @@ Cerradas, con recomendación.
    - (c) sin responsable hasta que alguien la toma.
 
    Recomendación: **(a)**, configurable; el reparto rotativo, al backlog.
-2. **¿Cuál es el plazo de primera respuesta de Gard?**
-   - (a) 1 hora hábil;
-   - (b) 2 horas hábiles;
-   - (c) 4 horas hábiles.
-
-   Recomendación: **(b)**, con aviso al owner a las 4 horas.
-3. **¿Se activa el acuse automático al solicitante** («recibimos tu solicitud»)? Recomendación: **no por ahora**, como en 1.0; se activa cuando la plantilla esté aprobada.
+2. **¿Cuál es el plazo de primera respuesta (SLA) de Gard?** **Decidido (Page del 25-oct): el SLA queda fuera** de Comercial y de este alcance; se define con Solicitudes en el PR 2. La recomendación original era 2 horas hábiles con aviso al owner a las 4 horas; queda registrada para ese PR, no se implementa aquí.
+3. **¿Se activa el acuse automático al solicitante** («recibimos tu solicitud»)? **Decidido (Page del 25-oct): acuse configurable**, apagado por defecto (ADR-020); el tenant lo activa en Configuración → Comunicaciones cuando la plantilla esté aprobada.
 4. **¿Se importan las etapas de 1.0 tal cual y se ajustan después en Configuración?** Recomendación: **sí**. «Aceptada» queda como etapa abierta que exige inicio de servicio; las etapas de negociación exigen monto y fecha de cierre.
 5. **¿Cada vendedor ve todos los negocios** o solo los suyos? Recomendación: **todos** en la v1 (equipo chico); «solo los míos» como alcance opcional del rol en el backlog.
 6. **¿Cuánto historial se importa de 1.0?**
@@ -394,3 +389,4 @@ Cerradas, con recomendación.
 | 25-oct-2026 | R18 y pregunta 8: los puestos no se crean al ganar (decisión de Carlos sobre Puestos; CAR-10; superada a las 23:08–23:10, fila siguiente) | — (nota; reglas definidas por Carlos) |
 | 25-oct-2026 23:10 | R18 y pregunta 8: al ganar se ofrecen los puestos de las líneas de guardias y RRHH los confirma (respuesta 3 de ADR-048; CAR-10) | — (nota; decisión de Carlos 23:08–23:10) |
 | 26-oct-2026 | R29: cadencia de seguimiento configurable por paso, fuera del backlog (chat con Paridad del 24-oct-2026 12:37, confirmado el 26-oct-2026 9:20 CLT) | Carlos |
+| 26-oct-2026 | §14 cerrada según la Page «Comercial OPAI 2.0: decisiones» del 25-oct (SLA fuera, ganado = adjudicado, acuse configurable, campos personalizados al backlog) y la aprobación de Carlos del 26-oct 15:12 CLT (Brief 07 · PR 1, CAR-20) | Carlos |
