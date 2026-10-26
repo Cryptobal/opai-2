@@ -325,7 +325,7 @@ Una entrada por decisión. Las decisiones no se editan: si cambian, se agrega un
 
 ## ADR-030 · Roadmap de módulos actualizado
 
-**Fecha:** 23-oct-2026 · **Estado:** vigente, modificado por ADR-048 (25-oct-2026: Nómina ya no depende de Asistencia; los módulos operativos solo dependen del núcleo) y por la nota del 25-oct-2026 al final (orden de trabajo: Núcleo primero, luego Puestos → Comercial → CPQ) · Reemplaza el orden de ADR-009 a partir de la fase 3.
+**Fecha:** 23-oct-2026 · **Estado:** vigente, modificado por ADR-048 (25-oct-2026: Nómina ya no depende de Asistencia; los módulos operativos solo dependen del núcleo) y por la nota del 25-oct-2026 al final (orden de trabajo: Núcleo primero, luego Puestos → Comercial → CPQ); y por ADR-049, propuesto en PR #38 (26-oct-2026: el «chat» del backlog, entendido como asistente IA, sale del backlog y pasa a un brief propio después de CPQ) · Reemplaza el orden de ADR-009 a partir de la fase 3.
 
 | Fase | Contenido | Corte de Gard |
 |---|---|---|
@@ -367,6 +367,8 @@ Una entrada por decisión. Las decisiones no se editan: si cambian, se agrega un
 OPAI puede ofrecer además **automatizaciones alojadas** (por ejemplo, búsqueda de reemplazo ante un turno sin cubrir) implementadas como agentes que corren contra las mismas capacidades, con la IA configurada por el tenant y medidas como cualquier consumo; son opcionales y vendibles.
 
 **Consecuencias.** Nada específico de un proveedor de IA entra en los módulos. El alcance de OPAI se achica (no hay chat, correo, agenda ni copiloto) y se vuelve más profundo (hechos, reglas, eventos, aprobaciones). Un tenant puede operar OPAI entero desde su propio agente sin perder control ni trazabilidad.
+
+**Nota del 26-oct-2026 (ADR-049, propuesto en PR #38).** Decisión de Carlos, 26-oct-2026 10:08 CLT, chat con OPAI 2.0 (registrada por el bot OPAI 2.0): «ok» a la recomendación del bot de las 10:07: OPAI sí tendrá un **agente interno** propio, en el celular y en el escritorio, que convive con los agentes externos. No contradice el fondo de este ADR: es un cliente más de las mismas capacidades y del MCP, sin lógica ni herramientas propias, actúa como «agente vía usuario» con los permisos del usuario conectado y pide confirmación antes de escribir y su consumo se mide como cualquier otro (ADR-031). Lo demás sigue igual: sin copilotos por módulo, sin clientes de correo, calendarios ni bases de conocimiento.
 
 ---
 
@@ -773,3 +775,40 @@ No se encontró: render estático roto, falta de prefetch, layouts que recarguen
 4. **Repintar la pauta el día de hoy.** Si el día en curso ya tiene una marca de asistencia o una cobertura confirmada, se trata como pasado y no se cambia; si no tiene ninguna, el cambio rige desde hoy.
 
 **Nota del 25-oct-2026 sobre el punto 6 (CAR-10).** La regla de la pauta por series y excepciones ya está en `extraccion/operaciones.md` (§3, esqueleto, solo la regla general) y en `modulos/operaciones.md` (R11, borrador), donde además está el trato del día de hoy que respondió Carlos (respuesta 4 de arriba).
+
+---
+
+## ADR-049 · Agente interno de OPAI
+
+**Fecha:** 26-oct-2026 · **Estado:** Propuesto (PR #38). Fuentes: Decisión de Carlos, 26-oct-2026 10:08 CLT, chat con OPAI 2.0 (registrada por el bot OPAI 2.0): «ok» a la recomendación del bot de las 10:07; «El agente interno debe pedir confirmación y debe tener niveles de confirmación, que apruebe todo o que confirme, como lo hacen los agentes de IA. […] cada tenant pone sus key para poder usar el modelo de lenguaje que ellos quieran. Entonces, en el agente ellos pueden cambiar el modelo de lenguaje según los que tengan conectado. […] se vende como un módulo aparte, por supuesto. Sí o sí es un módulo aparte del agente interno.» — Carlos, 26-oct-2026 10:51 CLT, chat con el Revisor OPAI 2.0 (t117u; dictado por voz); «Ok, después del CPQ» — Carlos, 26-oct-2026 10:53 CLT, chat con el Revisor OPAI 2.0 (t120u); «o el consumo por IA lo cobro yo como opai? no sera mejor asi? / sin tope y a mano» — Carlos, 26-oct-2026 11:12 CLT, chat con el Revisor OPAI 2.0 (t122u); «ok, así» — Carlos, 26-oct-2026 11:17 CLT, chat con el Revisor OPAI 2.0, aprobando la propuesta de cobros del bot OPAI 2.0. · Modifica ADR-032 (nota del 26-oct-2026) y ADR-030 (el asistente IA sale del backlog) · Completa ADR-004, ADR-031, ADR-033 y ADR-048.
+
+**Contexto.** ADR-032 dejaba fuera los chats y copilotos propios, y el «chat o asistente IA» de 1.0 quedó en el backlog (ADR-030; brecha N8 de `paridad/nucleo.md`). A las 10:07 Carlos pidió incorporar un agente dentro de OPAI, en el celular y en el escritorio, que conviva con los agentes externos conectados por MCP; el bot recomendó cómo hacerlo y Carlos respondió «ok» a las 10:08. A las 10:51 y 10:53 precisó la confirmación, las keys de IA, la venta y el orden.
+
+**Decisión.** Lo aceptado con el «ok» de las 10:08: (a) un ADR que deja al agente interno como cliente del MCP, con los permisos del usuario, auditoría y el costo de IA medido por tenant para poder venderlo como módulo; (b) reservar la entrada en ⌘K y en el celular, dentro del Brief 05; (c) un brief propio. Lo precisado a las 10:51, 10:53, 11:12 y 11:17 va en los puntos 4, 6, 7, 8 y 9.
+
+1. **Agente propio** en el celular (PWA, ADR-044) y en el escritorio, que convive con los agentes externos.
+2. **Cliente del mismo registro.** Es un cliente más del registro de capacidades (ADR-004) y del MCP. No tiene lógica de negocio ni herramientas propias: cada capacidad nueva queda disponible para él sin trabajo adicional.
+3. **Identidad del usuario («agente vía usuario»).** Actúa con la identidad y los permisos del usuario conectado y ve solo lo que ese usuario puede ver, con el mismo alcance de filas (ADR-022).
+4. **Confirmación obligatoria, con niveles que elige el usuario (10:51).** El agente siempre pide confirmación antes de escribir, mostrando la vista previa (`dryRun`; en MCP, `preview_…`). El usuario elige el nivel: **«aprobar todo»** (aprueba el plan completo de una vez) o **«confirmar paso a paso»** (confirma cada escritura). Sin confirmación no escribe. En cualquiera de los dos niveles, lo irreversible sigue con vista previa, auditoría y la aprobación humana de ADR-032 punto 3 (`APPROVAL_REQUIRED`), y cada escritura lleva clave de idempotencia. Reemplaza el criterio «según riesgo».
+5. **Auditoría.** Toda acción queda en la auditoría como «agente interno vía <usuario>».
+6. **Key de IA propia por tenant y elección del modelo (10:51).** Cada tenant conecta su propia key de modelo de lenguaje y, dentro del agente, el usuario elige el modelo entre los que su tenant tenga conectados. OPAI mide el uso por tenant (tokens y llamadas en `core.consumos`, ADR-031). El cobro sigue el punto 9. Las keys del tenant:
+   - se guardan cifradas en el almacén de secretos del núcleo, aisladas por `tenant_id` con RLS (ADR-002, ADR-027), con una prueba `test:db` entre dos tenants;
+   - nunca quedan en texto plano, logs, auditoría, respuestas de la API ni en el cliente; una vez guardadas solo se reemplazan o revocan, no se leen;
+   - solo las usa el adaptador de IA del núcleo en el servidor, así que nada específico del proveedor entra en los módulos (ADR-031, ADR-032). Los módulos siguen pidiendo IA por clase de tarea; la elección de modelo es del usuario dentro del agente.
+7. **Módulo vendible aparte (10:51; ADR-048).** El agente es un módulo propio, que se vende aparte. Depende del Núcleo y del MCP; los demás módulos son fuentes opcionales: opera únicamente las capacidades de los módulos activos en el tenant y permitidas al usuario.
+8. **Cuándo (10:53).** Se construye en un brief propio **después de CPQ**. Orden: Puestos → Comercial → CPQ → agente interno. Antes solo se reserva su punto de entrada: la acción «Preguntar a OPAI» en ⌘K y un lugar dentro de «Buscar» en el celular (integrada en `main` (PR #37, `7e526eb`)).
+
+**Lo que aplica de ADR ya vigentes.**
+
+- **Conversaciones y memoria aisladas por tenant (ADR-002):** si el brief guarda conversaciones, mensajes, historial o memoria del agente, cada tabla lleva `tenant_id` con RLS y la política `tenant_isolation`, y una prueba `test:db` demuestra el aislamiento entre dos tenants, incluido el mismo usuario en dos empresas. Si no se guardan, el brief lo dice.
+- **Texto de terceros (REGLAS-codigo, «Agéntico»):** lo que el agente lea de terceros vuelve en campos externos y nunca habilita escrituras irreversibles. Sin keys compartidas entre agentes (ADR-034; rige para las keys de OPAI, no para las keys de IA del tenant del punto 6).
+
+9. **Cobro (11:17; «ok, así» — Carlos, 26-oct-2026 11:17 CLT, chat con el Revisor OPAI 2.0, aprobando la propuesta de cobros del bot OPAI 2.0).**
+   - El agente interno es un módulo con **licencia mensual propia** (ADR-048).
+   - **Con la key del tenant:** se cobra solo la licencia. El consumo igual se mide en `core.consumos`, para auditoría y reportes, pero no se cobra.
+   - **Con el modelo de OPAI:** se cobra la licencia más el consumo a costo con margen, a mes vencido. El margen no está decidido.
+   - **Sin tope de consumo por defecto** («sin tope y a mano» — Carlos, 26-oct-2026 11:12 CLT, chat con el Revisor OPAI 2.0, t122u). El tenant puede fijar un presupuesto opcional, con aviso al 80 %, sobre el presupuesto de ADR-031 (0 o nulo = sin límite), controlado en el servidor.
+   - **Los demás consumos variables** (WhatsApp, SMS, biometría, firmas, mapas) se cobran a costo más margen sobre lo medido.
+   - **Las licencias por módulo y todos los montos** (incluido el margen) van a un ADR futuro de planes y precios, cuando exista Opai SpA; no se fijan aquí.
+
+**Consecuencias.** El agente interno no crea un segundo camino a los datos: si una acción no existe como capacidad, tampoco existe para él. Sigue sin haber copilotos por módulo ni chats entre personas (Tickets sigue sin chat, ADR-025). El número del brief y el mecanismo de la identidad delegada se fijan al planificarlo.
