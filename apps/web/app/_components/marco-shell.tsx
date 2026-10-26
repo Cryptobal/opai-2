@@ -65,9 +65,9 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
   }, [buscable]);
   // La navegación no cambia al fijar la cabecera: se recalcula solo cuando cambia `datos.nav`.
   const nav = useMemo(() => datos.nav.map((n) => ({ ...n, icono: icono(n.icono) })), [datos.nav]);
-  // Navegación en curso (ADR-045): el riel marca el destino y la cabecera pone su título de inmediato
-  // (sin esperar al contenido nuevo), y se muestra la barra de progreso. Al terminar, `pendiente` se
-  // limpia y la página fija su propia cabecera.
+  // Navegación en curso (ADR-045): el riel marca el destino y la cabecera pone su título de inmediato,
+  // sin esperar al contenido nuevo (sin parpadeo ni barra de progreso, decisión 1 de ADR-045). Al
+  // terminar, `pendiente` se limpia y la página fija su propia cabecera.
   const pendiente = usePendiente();
   const rutaEfectiva = pendiente ?? rutaActual;
   const navPendiente = pendiente ? nav.find((n) => n.href === pendiente) : undefined;
@@ -117,7 +117,6 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
   return (
     <AppShell
       titulo={tituloEfectivo}
-      navegando={pendiente !== null}
       {...(cabecera.volver ? { volver: cabecera.volver } : {})}
       {...(cabecera.volverSoloTelefono ? { volverSoloTelefono: true } : {})}
       {...(cabecera.volverBajoLg ? { volverBajoLg: true } : {})}

@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 
 import { cn } from "../cn";
-import { BarraNavegacion } from "./barra-navegacion";
 import { BottomNav } from "./nav";
 import { Rail } from "./rail";
 import { Sidebar } from "./sidebar";
@@ -24,8 +23,6 @@ export type AppShellProps = ComunesBarra & {
   onNavegar?: (href: string) => void;
   /** Contenido a alto completo (vistas divididas): sin márgenes del contenedor en md+. */
   completo?: boolean;
-  /** Navegación en curso: muestra la barra de progreso en la cabecera (ADR-045). */
-  navegando?: boolean;
   children: ReactNode;
   className?: string;
 };
@@ -58,8 +55,7 @@ export function AppShell(props: AppShellProps) {
         subtitulo={subtituloMarca}
         Link={Link}
       />
-      <div className="relative flex min-w-0 flex-1 flex-col">
-        <BarraNavegacion activa={props.navegando ?? false} className="z-30" />
+      <div className="flex min-w-0 flex-1 flex-col">
         <TopBarTelefono {...barra} acciones={accionesTelefono ?? null} />
         <AppBar
           {...barra}

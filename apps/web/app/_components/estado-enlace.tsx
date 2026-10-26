@@ -11,10 +11,10 @@ let pendientes = 0;
 
 /**
  * Hijo invisible de un <Link>: mientras su navegación está pendiente reporta el destino al almacén de
- * navegación pendiente (el shell marca el riel, pone el título de destino y muestra la barra de
- * progreso de la cabecera, ADR-045). Con `conEsqueleto`, además marca <html data-navegando> pasado el
+ * navegación pendiente (el shell marca el riel y pone el título de destino de inmediato, ADR-045; sin
+ * barra de progreso, decisión 1). Con `conEsqueleto`, además marca <html data-navegando> pasado el
  * retraso para que el CSS cambie el contenido por el esqueleto (solo en los enlaces del menú, donde
- * cambia toda la página; en filas y pestañas basta la barra de la cabecera, sin tocar la lista).
+ * cambia toda la página; en filas y pestañas la ficha ya pone su propio esqueleto, sin tocar la lista).
  */
 export function EstadoEnlace({ href, conEsqueleto = false }: { href: string; conEsqueleto?: boolean }) {
   const { pending } = useLinkStatus();

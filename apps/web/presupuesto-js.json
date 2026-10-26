@@ -3,12 +3,12 @@
   "porDefecto": 165,
   "maxSobreFramework": 35,
   "rutas": {
-    "/(auth)/*": 155,
-    "/(erp)/configuracion*": 178,
+    "/(auth)/*": 153,
+    "/(erp)/configuracion*": 175,
     "/(erp)/instalaciones/nueva": 178,
     "/(erp)/personas/vencimientos": 175,
-    "/(erp)/personas/[id]": 168,
-    "/(erp)/personas/[id]/laboral": 168,
+    "/(erp)/personas/[id]": 166,
+    "/(erp)/personas/[id]/laboral": 166,
     "/(erp)/cargos/[id]": 167,
     "/(platform)/platform/tenants/[id]/*": 168,
     "/ds*": 220

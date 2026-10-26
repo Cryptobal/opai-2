@@ -136,26 +136,6 @@
   }
 }
 
-/* Indicador de navegación en curso (barra indeterminada en la cabecera, ADR-045). */
-@utility ds-nav-progreso {
-  animation: ds-nav-progreso 1.1s ease-in-out infinite;
-  @media (prefers-reduced-motion: reduce) {
-    animation: none;
-    transform: translateX(0) scaleX(0.3);
-  }
-}
-@keyframes ds-nav-progreso {
-  0% {
-    transform: translateX(-100%) scaleX(0.4);
-  }
-  50% {
-    transform: translateX(10%) scaleX(0.6);
-  }
-  100% {
-    transform: translateX(100%) scaleX(0.4);
-  }
-}
-
 /* Safe-area iOS */
 @utility pb-safe {
   padding-bottom: env(safe-area-inset-bottom);
