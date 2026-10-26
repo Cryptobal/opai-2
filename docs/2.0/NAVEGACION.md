@@ -91,7 +91,7 @@ El bloqueo financiero (ADR-016) oculta el área completa. Los roles personalizad
 - `navegacion` del manifest: `{ portal, area, href, etiqueta, icono, orden, permiso }`, con `area` de una lista cerrada (`inicio`, `comercial`, `clientes`, `operaciones`, `personas`, `finanzas`, `documentos`). Configuración no es un área: es la entrada fija al pie que arma el núcleo, y ningún módulo la declara (ADR-018). El núcleo arma los grupos, aplica el máximo por área y ordena por `orden`.
 - Las pestañas de fichas se declaran en `fichas` (ADR-041.5), no en `navegacion`.
 - Las acciones para ⌘K se declaran en `acciones` (etiqueta, capacidad, permiso), y las búsquedas por entidad en el registro de entidades (ADR-041.7).
-- **Agente interno (ADR-049, nota del 26-oct-2026):** el primer lugar de ⌘K, y en el celular el primero dentro de «Buscar», queda reservado para «Preguntar a OPAI». Reservado, se construye en el brief del agente interno; mientras no exista, no se muestra (Brief 05, §4.4).
+- **Agente interno (ADR-049, propuesto en PR #38, pendiente de merge; nota del 26-oct-2026):** el primer lugar de ⌘K, y en el celular el primero dentro de «Buscar», queda reservado para «Preguntar a OPAI». Reservado, se construye en el brief del agente interno; mientras no exista, no se muestra (Brief 05, §4.4).
 - Un brief que agrega pantallas indica en su sección 8 el área, la entrada o la pestaña que usa, y si cambia la barra inferior de algún rol.
 
 ## 8. Estado de hoy (`main`, `fe362cc`)
@@ -107,12 +107,12 @@ El bloqueo financiero (ADR-016) oculta el área completa. Los roles personalizad
 ## 9. Brecha y orden de implementación
 
 1. **Brief de rendimiento (ADR-045):** shell en el layout y precarga de las entradas del menú. No cambia el mapa.
-2. **Design Prompt de navegación** (Claude Design): barra lateral con áreas plegables, fijados, ⌘K con acciones y recientes, barra inferior por rol, hoja «Más». **Hecho:** diseño aprobado (fuente: Diseño 53e9b74b aprobado por Carlos, 26-oct-2026 9:45 CLT, chat con OPAI 2.0 (registrada por el bot OPAI 2.0); 28 pantallas).
+2. **Design Prompt de navegación** (Claude Design): barra lateral con áreas plegables, fijados, ⌘K con acciones y recientes, barra inferior por rol, hoja «Más». **Hecho, con la fuente pendiente de confirmar (§10):** diseño aprobado (fuente: Diseño 53e9b74b aprobado por Carlos, 26-oct-2026 9:45 CLT, chat con OPAI 2.0 (registrada por el bot OPAI 2.0); 28 pantallas).
 3. **Brief de navegación:** `area` en `ItemNav` y en el manifest, grupos, fijados, recientes, barra inferior por rol, renombre a Personas y Configuración. Es el Brief 05, paso 1 del cierre del Núcleo: `briefs/BRIEF-05-navegacion.md`, propuesto el 26-oct-2026 y pendiente de la aprobación de Carlos.
 
 ## 10. Decisiones de diseño del 26-oct-2026
 
-Aprobación del diseño: Diseño 53e9b74b aprobado por Carlos, 26-oct-2026 9:45 CLT, chat con OPAI 2.0 (registrada por el bot OPAI 2.0). D1–D9, los puntos que el diseño marcaba «Propuesta: decide Carlos», fueron decididas por el bot OPAI 2.0 el 26-oct-2026 a las 9:47 CLT, por delegación expresa de Carlos (9:45: «decide tú los puntos, bajo tu criterio»); Carlos respondió con 👍 (registrada por el bot OPAI 2.0). D10 no es nueva: es regla de ADR-016. D1–D10 quedan como reglas del Brief 05 sujetas a la aprobación del brief por Carlos (PR #37).
+Aprobación del diseño: Diseño 53e9b74b aprobado por Carlos, 26-oct-2026 9:45 CLT, chat con OPAI 2.0 (registrada por el bot OPAI 2.0). D1–D9, los puntos que el diseño marcaba «Propuesta: decide Carlos», fueron decididas por el bot OPAI 2.0 el 26-oct-2026 a las 9:47 CLT, por delegación expresa de Carlos (9:45: «decide tú los puntos, bajo tu criterio»); Carlos respondió con 👍 (registrada por el bot OPAI 2.0). D10 no es nueva: es regla de ADR-016. D1–D10 quedan como reglas del Brief 05 sujetas a la aprobación del brief por Carlos (PR #37). Fuente del texto citado: el encargo de corrección del PR #37 del 26-oct-2026 a las 10:30 CLT; el turno de las 9:45 no quedó guardado como texto en el chat con OPAI 2.0 (allí están el registro del bot de las 9:45 y el 👍 de las 9:46), así que la confirmación escrita de Carlos en ese chat queda pendiente y se verifica al aprobar el brief.
 
 | # | Tema | Decisión |
 |---|---|---|
