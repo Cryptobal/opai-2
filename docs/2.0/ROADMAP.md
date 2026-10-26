@@ -40,7 +40,7 @@ Las **bases transversales** (rendimiento, PWA, navegación) aplican a todo brief
 - **Orden (Carlos, 25-oct):** 05 → 04 → 07b, con el PR 2 del 03 y la sesión D del 02 en paralelo. Al cerrar el Núcleo se abre **Puestos y guardias (Brief 11)**, adelantado desde la fase 3, y después CPQ y Comercial.
 - **Criterio de término:** Carlos completa la verificación guiada del Brief 02 en `test.opai.cl` sin bloqueantes; toda capacidad que la UI usa existe en MCP; QA sin hallazgos críticos; la navegación entre Cuentas, Instalaciones, Personas, Cargos y Configuración cumple las metas de ADR-045 medidas antes y después; la app se instala desde el celular y el CI prueba manifest, service worker y modo sin conexión; ADR-044 y 046 aprobados (cumplido el 24-oct).
 - **Dependencias:** seeds y secretos (Carlos desde el Mac); DS 2.0 cargado en Claude Design y diseño de navegación aprobado (para el 05); diseño de capas de sueldo y anexo aprobado (para el 07b).
-- **Riesgo de plazo:** dos semanas para cerrar la sesión D, tres briefs y un diseño es optimista; si el diseño de navegación se atrasa, el Brief 05 puede ir junto al Brief 06 y la fase 2 empieza igual con los Briefs 03 y 04 integrados.
+- **Riesgo de plazo:** dos semanas para cerrar la sesión D, tres briefs y un diseño es optimista; si el diseño de navegación se atrasa, se adelantan el Brief 04 (no necesita diseño) y el 07b, y el 05 se integra cuando su diseño esté aprobado; Puestos (Brief 11) empieza cuando cierre el Núcleo (orden del 25-oct).
 - **Deja de usarse en 1.0:** nada (2.0 todavía no opera para Gard).
 
 ### Fase 2 — Comercial, CPQ y Documentos · pendiente · semanas 3–8 (9-nov → 18-dic)
@@ -82,7 +82,7 @@ Las **bases transversales** (rendimiento, PWA, navegación) aplican a todo brief
 | **17** | **Empaquetado nativo** con Capacitor (iOS y Android), GPS en segundo plano, push nativo, publicación en tiendas | Pendiente |
 
 - **Criterio de término:** «Las pautas, turnos extra, supervisión, rondas y novedades de Gard se operan en 2.0 durante un mes completo; supervisores y guardias usan los portales de 2.0 instalados en su celular, y **1.0 deja de usarse para Operaciones, Supervisión, Rondas y portales**»; las apps están publicadas en App Store y Google Play.
-- **Dependencias:** fase 2 cerrada; extracciones de Operaciones y Portales; cuentas de desarrollador y D-U-N-S (en curso); base PWA (Brief 04).
+- **Dependencias:** fase 2 cerrada, salvo el Brief 11 (Operaciones I · Puestos), adelantado para después del cierre del Núcleo (nota del 25-oct en ADR-030); extracciones de Operaciones y Portales; cuentas de desarrollador y D-U-N-S (en curso); base PWA (Brief 04).
 - **Deja de usarse en 1.0:** Operaciones (puestos, pautas, turnos extra), Supervisión, Rondas, Portal Guardia, Portal Terreno, Portal Cliente y Portal Supervisor.
 
 ### Fase 4 — Asistencia y DT · pendiente · semanas 18–21 (22-feb → 19-mar)
@@ -151,9 +151,9 @@ No se portan de 1.0 y solo se reconstruyen con demanda real (lista canónica de 
 | Tickets | Responsable obligatorio desde la creación, SLA opcional, solicitudes de trabajadores como tipos con aprobación, sin chat | `extraccion/rondas-y-tickets.md`, ADR-025 |
 | Asistencia y DT | Certificable desde el diseño: hecho inmutable, bitácora encadenada, comprobante, correcciones con oposición, reportes oficiales, acceso de inspector | `extraccion/dt-normativa.md`, ADR-023 |
 | Operaciones (puestos, pautas, turnos extra, supervisión) | 1 puesto = 1 posición; catálogo de patrones por tenant; PPC con motivo; puestos creados desde la instalación o con botón con vista previa (no al ganar); pauta por series. Extracción en esqueleto → `extraccion/operaciones.md`, se completa antes del Brief 11 | `modulos/operaciones.md`, ADR-036 y ADR-040 (25-oct), ADR-048 |
-| Portales | **Extracción pendiente** → `extraccion/portales.md` antes del Brief 15 (base ya decidida: PWA instalable, sin conexión en terreno, ADR-044) | — |
-| Finanzas y flujo de caja | **Extracción pendiente** → `extraccion/flujo-de-caja.md` (ADR-026) antes del Brief 20 y `extraccion/finanzas.md` antes del Brief 21 | ADR-026 |
-| Nómina | **Extracción pendiente** → `extraccion/nomina.md` antes del Brief 25 | — |
+| Portales | Extracción hecha fuera del repo (Page para Carlos); se sube a `extraccion/portales.md` tras sus respuestas, antes del Brief 15 (base ya decidida: PWA instalable, sin conexión en terreno, ADR-044) | — |
+| Finanzas y flujo de caja | Flujo de caja: extracción hecha fuera del repo (Page para Carlos); se sube a `extraccion/flujo-de-caja.md` (ADR-026) tras sus respuestas, antes del Brief 20. **Extracción pendiente** → `extraccion/finanzas.md` antes del Brief 21 | ADR-026 |
+| Nómina | Extracción hecha fuera del repo (Page para Carlos); se sube a `extraccion/nomina.md` tras sus respuestas, antes del Brief 25 | — |
 | Licitaciones | **Extracción pendiente** → `extraccion/licitaciones.md` antes del Brief 27 | — |
 
 ## 4. Bases transversales (antes del brief de Comercial)
