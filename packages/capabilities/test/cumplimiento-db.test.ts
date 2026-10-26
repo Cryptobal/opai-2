@@ -158,17 +158,20 @@ describe.skipIf(!urlPropietario)("cumplimiento (DPA/DPO) en base real", () => {
   });
 
   it("RLS: un tenant no puede escribir ni modificar el DPO de otro (WITH CHECK y USING)", async () => {
-    // El otro tenant tiene su propio perfil con DPO.
+    const app = e.forTenant(tenantId); // sesión fija app.tenant_id = tenantId
+    // No puede CREAR el perfil de otro tenant: la política WITH CHECK rechaza el tenant_id ajeno.
+    // El otro tenant aún no tiene perfil (perfil_empresa es único por tenant), así que el único
+    // motivo posible del fallo es la RLS y no la restricción de unicidad.
+    expect(await e.admin.perfilEmpresa.count({ where: { tenantId: otroId } })).toBe(0);
+    await expect(
+      app.perfilEmpresa.create({ data: { tenantId: otroId, dpoNombre: "intruso" } }),
+    ).rejects.toThrow();
+    // Ya probada la RLS en el create, el otro tenant crea su propio perfil (rol propietario, sin RLS).
     await e.admin.perfilEmpresa.upsert({
       where: { tenantId: otroId },
       create: { tenantId: otroId, dpoNombre: "DPO del otro", dpoCorreo: "dpo-otro@empresa.cl" },
       update: { dpoNombre: "DPO del otro", dpoCorreo: "dpo-otro@empresa.cl" },
     });
-    const app = e.forTenant(tenantId); // sesión fija app.tenant_id = tenantId
-    // No puede CREAR el perfil de otro tenant: la política WITH CHECK rechaza el tenant_id ajeno.
-    await expect(
-      app.perfilEmpresa.create({ data: { tenantId: otroId, dpoNombre: "intruso" } }),
-    ).rejects.toThrow();
     // No puede MODIFICAR el DPO ajeno: la fila del otro no es visible (USING), el update no alcanza.
     expect(
       (await app.perfilEmpresa.updateMany({ where: { tenantId: otroId }, data: { dpoNombre: "intruso" } }))

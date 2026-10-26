@@ -51,6 +51,19 @@ describe("resolverActor", () => {
     expect(esContexto(await actor.resolverActor(ajeno, fuentes, conSesion)).tenantId).toBe(TENANT);
   });
 
+  it("con rol personalizado (#47): ctx.rol sigue siendo el rol base; la autorización usa el rol personalizado", async () => {
+    // El miembro es "viewer" en la jerarquía, pero su rol personalizado del tenant le concede
+    // justo `core:cuentas.read`. `ctx.rol` conserva el rol base; `autorizar` usa la lista del rol.
+    const { fuentes } = fuentesFalsas({
+      membresias: [membresia({ rol: "viewer" })],
+      acceso: { permisosRol: ["core:cuentas.read"], excepciones: [] },
+    });
+    const ctx = esContexto(await actor.resolverActor(new Request("http://x"), fuentes, conSesion));
+    expect(ctx.rol).toBe("viewer");
+    expect(ctx.autorizar("core:cuentas.read")).toBe(true);
+    expect(ctx.autorizar("core:cuentas.manage")).toBe(false);
+  });
+
   it("ignora tenants suspendidos y membresías suspendidas", async () => {
     const suspendido = membresia({
       tenant: {
