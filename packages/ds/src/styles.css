@@ -2,6 +2,19 @@
    dentro del pipeline de Tailwind, después de @import "tailwindcss". */
 @import "./tokens.css";
 
+/* `dark:` sigue la preferencia del usuario (data-theme en <html>) y, sin ella, al sistema. Sin esta
+   variante Tailwind usa solo prefers-color-scheme y el oscuro forzado no cambiaba las utilidades. */
+@custom-variant dark {
+  &:where([data-theme="dark"], [data-theme="dark"] *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:root:not([data-theme="light"]), :root:not([data-theme="light"]) *) {
+      @slot;
+    }
+  }
+}
+
 @layer base {
   html {
     font-family: var(--font-sans);
@@ -121,13 +134,8 @@
     position: absolute;
     inset: 0;
     transform: translateX(-100%);
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+    background: linear-gradient(90deg, transparent, var(--ds-shimmer), transparent);
     animation: ds-shimmer 1.4s infinite;
-  }
-  @media (prefers-color-scheme: dark) {
-    &::after {
-      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
-    }
   }
 }
 @keyframes ds-shimmer {
@@ -208,7 +216,7 @@
   justify-content: center;
   width: 1.25rem;
   height: 1.25rem;
-  border: 1px solid var(--ds-border-strong);
+  border: 1px solid var(--ds-border-control);
   background: var(--ds-surface);
   transition: background-color 150ms, border-color 150ms;
   :where(.group[data-state="checked"]) > & {
