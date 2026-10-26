@@ -24,3 +24,12 @@ export function epocaDe(usuarioId: string, tenantId: string | null): string {
 export function epocaDeIdentidad(identidad: Identidad | null): string {
   return identidad ? epocaDe(identidad.usuario.id, identidad.actual?.tenantId ?? null) : ANONIMA;
 }
+
+/**
+ * Marca de servidor (ms) de cuándo se generó esta vista. El navegador mide su edad para el refresco
+ * silencioso (`useRefrescoSilencioso`): tiene que ser hora de servidor, no del cliente. Envuelta en
+ * una función para no llamar a `Date.now()` dentro del render de un componente (regla de pureza).
+ */
+export function marcaGenerado(): number {
+  return Date.now();
+}

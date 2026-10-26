@@ -1,8 +1,8 @@
 import type { ReactNode } from "react";
 
-import { CargaPortal } from "@/app/_components/carga-portal";
+import { PortalLayout } from "@/app/_components/portal-layout";
 
-// Route group del ERP (back-office). Su shell y navegación se completan con los módulos activos.
+// Route group del ERP (back-office): el shell persiste en el layout (ADR-045); la página solo trae su contenido.
 export default function Layout({ children }: { children: ReactNode }) {
-  return <CargaPortal>{children}</CargaPortal>;
+  return <PortalLayout portal="erp">{children}</PortalLayout>;
 }
