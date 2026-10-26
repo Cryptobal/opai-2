@@ -47,6 +47,15 @@ async function main(): Promise<void> {
       },
     });
   }
+  // Usuario dedicado al e2e de bloqueo de login (B1): sin contraseña ni membresía, solo recibe
+  // intentos fallidos. Bloquearlo por fuerza bruta no afecta a los demás specs, que no lo usan.
+  await db.user.upsert({
+    where: { email: "bloqueo-e2e@opai.cl" },
+    update: {},
+    create: { name: "Bloqueo E2E", email: "bloqueo-e2e@opai.cl" },
+  });
+  console.log("bloqueo-e2e@opai.cl listo para el e2e de bloqueo de login.");
+
   const multi = await db.user.findUnique({ where: { email: "e2e-multiempresa@opai.cl" } });
   if (multi) {
     for (const t of [tenant, otra]) {
