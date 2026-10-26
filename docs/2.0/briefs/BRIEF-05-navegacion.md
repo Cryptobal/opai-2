@@ -50,7 +50,7 @@ Se nota que funciona cuando una persona encuentra cualquier colección en un cli
 - Pantallas propias de los portales Supervisor, Trabajador, Terreno, Cliente y Plataforma (se diseñan con su fase). Este brief solo deja su navegación declarada como hoy.
 - El contenido de las pantallas de cada módulo y las entradas de módulos que no existen todavía (aparecen solas cuando el módulo se active, sin código nuevo en el shell).
 - Tareas en la Bandeja (llegan con Comercial, fase 2).
-- PWA (Brief 04), shell en el layout (Brief 03, PR 2: requisito del PR B, no se hace aquí) y roles personalizados (Brief 07c, propuesto en PR #36, pendiente de merge).
+- PWA (Brief 04), shell en el layout (Brief 03, PR 2: requisito del PR B, no se hace aquí) y roles personalizados (Brief 07c, integrado en #36).
 - El panel de riel para iPad que aparece en la pantalla 28: queda descartado por la decisión 9.
 - **El agente interno de OPAI (ADR-049): reservado, se construye en el brief del agente interno.** Este brief solo reserva su punto de entrada (§4.4); no construye componente, acción, ajuste ni capacidad para él.
 
@@ -171,7 +171,7 @@ Se agregan a `packages/ds` sobre los componentes existentes, solo con tokens, y 
 - La navegación nunca es la barrera de seguridad: las capacidades siguen verificando permiso, módulo activo y alcance (ADR-022). El menú solo oculta.
 - Fijados y recientes guardan `href` y etiqueta; al mostrarlos se vuelve a verificar permiso y existencia. Un fijado o reciente sin permiso, de un módulo apagado o de una entidad borrada no se muestra (y se limpia en la siguiente escritura).
 - Los ajustes de usuario son por usuario **y** tenant: cambiar de empresa cambia los fijados, los recientes y el área principal.
-- Sin datos personales en los recientes más allá de la etiqueta visible (Ley 21.719; Brief 07d, propuesto en PR #36, pendiente de merge).
+- Sin datos personales en los recientes más allá de la etiqueta visible (Ley 21.719; Brief 07d, integrado en #36).
 
 ## 10. Casos límite
 
