@@ -20,7 +20,7 @@ Depende de #56 (PR 2 del 07d, rama `brief/07d-pr2-consentimientos-arco`) y, por 
 | Bloque | Contenido |
 | --- | --- |
 | B9 `domain:` | Catálogo de retención por tabla del inventario (periodos **propuestos**), evaluación pura (vigente / vencido / se conserva por ley), elegibilidad de la persona frente a hechos regulados, ajustes de tenant (`cumplimiento_retencion_activa` y los días de cada regla). |
-| B10 `core:` | Migración, trabajo diario `core.cumplimiento.retencion`, lectura `core.cumplimiento.retencion_politica` (herramienta MCP `core_cumplimiento_retencion_politica`) y la purga forzada `core.cumplimiento.titular_anonimizar` (`soloPersonas`, `dryRun`, idempotencia, auditoría, evento). El RAT ahora muestra la retención efectiva de cada tabla; `login_intentos` (07c) entra al inventario. |
+| B10 `core:` | Migración, trabajo diario `core.cumplimiento.retencion`, lectura `core.cumplimiento.retencion_politica` (herramienta MCP `core_cumplimiento_retencion_politica`) y la purga forzada `core.cumplimiento.titular_anonimizar` (`soloPersonas`, `dryRun`, idempotencia, auditoría, evento). El RAT ahora muestra la retención efectiva de cada tabla. |
 | B11 `core:` | `cifradoDeCampos`: cifra solo los campos que el inventario declara sensibles, con la DEK del tenant y la KEK existente. El RUT no se cifra. |
 | B12 `docs:` | Brief §19, `ESTADO.md`, `ROADMAP.md`, `paridad/nucleo.md`. |
 
