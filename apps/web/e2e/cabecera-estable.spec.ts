@@ -19,11 +19,14 @@ async function entrar(page: Page) {
 }
 
 // Vistas del recorrido de CA1: lista, vista dentro de la lista, otra lista, hoja sobre la lista e Inicio.
+// «Nueva cuenta» abre una hoja (Sheet) modal: Radix deja la cabecera inerte (aria-hidden) mientras la
+// hoja está abierta, así que esa vista se mide tras abrir y cerrar la hoja (la cabecera no debe moverse
+// al abrir una hoja sobre la lista), no con la hoja encima.
 const VISTAS = [
   { nombre: "Personas", ruta: "/personas" },
   { nombre: "Vencimientos", ruta: "/personas/vencimientos" },
   { nombre: "Cuentas", ruta: "/cuentas" },
-  { nombre: "Nueva cuenta", ruta: "/cuentas?nueva=1" },
+  { nombre: "Nueva cuenta", ruta: "/cuentas?nueva=1", hoja: "Nueva cuenta" },
   { nombre: "Inicio", ruta: "/" },
 ] as const;
 
@@ -61,6 +64,14 @@ test.describe("cabecera estable (CAR-12, CA1)", () => {
     const refs: Record<string, { x: number; y: number; w: number; h: number }> = {};
     for (const vista of VISTAS) {
       await page.goto(vista.ruta);
+      if ("hoja" in vista) {
+        // La hoja modal deja la cabecera inerte: se comprueba que abra sobre la lista y se cierra
+        // antes de medir, para verificar que abrir y cerrar una hoja no mueve la cabecera.
+        const hoja = page.getByRole("dialog", { name: vista.hoja });
+        await expect(hoja).toBeVisible();
+        await page.keyboard.press("Escape");
+        await expect(hoja).toBeHidden();
+      }
       await expect(campanaDe(page)).toBeVisible();
       await page.waitForLoadState("networkidle");
       const actual = {
