@@ -32,3 +32,7 @@ Fuentes verificadas el 26-oct-2026: código de 1.0 (copia del 24-sep, e3f267e0a)
 > 2. **El 07b dice ir antes que Puestos.** Recomiendo **Puestos PR 1 primero**, porque no lleva sueldo. Después va el 07b PR 1, con su brief dentro del PR y su bloque Sueldo encima de la hoja nueva.
 > 3. **¿El puesto conserva el cargo?** Recomiendo **sí**: el cargo (contractual, que ya existe) queda junto a la función nueva (operativa).
 > 4. **Una migración a la vez.** Puestos se construye en paralelo, pero su migración se aplica y se integra **después de la del CRM**.
+
+---
+
+> **Nota del 26-oct-2026 (después de la aprobación; no cambia la hoja de arriba).** Configuración de Patrones y Funciones: aplazada hasta su diseño en DS V2 (pendiente de que Carlos lo confirme). Origen: revisión 5658390255 del «Revisor OPAI 2.0» y la regla de Carlos del 26-oct-2026 17:18 CLT («nunca copiar el diselo de 1.0, se debe usar el design system aprobado»). El nombre del patrón sí se ve en cada puesto. Seguimiento en el brief (§6 y §7).
