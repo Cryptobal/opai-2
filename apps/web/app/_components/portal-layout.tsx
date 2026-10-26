@@ -2,7 +2,7 @@ import { type ReactNode, Suspense } from "react";
 
 import { Loading } from "@opai/ds";
 
-import { identidadActual } from "@/lib/servidor";
+import { identidadActual, tieneAccesoAPortal } from "@/lib/servidor";
 
 import { CargaPortal } from "./carga-portal";
 import { datosShell } from "./datos-shell";
@@ -13,7 +13,7 @@ import { MarcoShell } from "./marco-shell";
 async function ShellResuelto({ portal, children }: { portal: string; children: ReactNode }) {
   const identidad = await identidadActual();
   // Sin sesión no se monta shell: la página redirige a `/login` con el `next` correcto.
-  if (!identidad) return children;
+  if (!identidad || !tieneAccesoAPortal(identidad, portal)) return children;
   return (
     <MarcoShell datos={datosShell(identidad, portal)}>
       <CargaPortal>{children}</CargaPortal>

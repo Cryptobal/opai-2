@@ -14,8 +14,10 @@ export function datosShell(identidad: Identidad, portal: string): DatosShell {
   const rol = actual && esRol(actual.rol) ? actual.rol : null;
   const vertical = actual?.tenant.vertical ?? "";
   const inicio = PORTALES.find((p) => p.id === portal)?.href ?? "/";
-  const nav =
-    portal === "erp"
+  const visibles = portalesVisibles(actual?.portales ?? [], usuario.platformRole !== null);
+  const nav = !visibles.some((p) => p.id === portal)
+    ? []
+    : portal === "erp"
       ? navegacionErp(
           rol,
           identidad.modulosActivos,
@@ -24,13 +26,12 @@ export function datosShell(identidad: Identidad, portal: string): DatosShell {
       : portal === "platform"
         ? NAV_PLATAFORMA
         : navegacionPortal(inicio, portal);
-  const plataforma = usuario.platformRole !== null;
   return {
     portal,
     subtituloMarca: subtituloMarcaPortal(portal),
     epoca: epocaDe(usuario.id, actual?.tenantId ?? null),
     nav,
-    portales: portalesVisibles(actual?.portales ?? [], plataforma),
+    portales: visibles,
     tenant:
       portal === "platform" ? { nombre: "OPAI" } : actual ? { nombre: actual.tenant.nombre } : null,
     usuario: {
