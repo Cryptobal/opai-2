@@ -5,7 +5,7 @@
 ## 1. Principios
 
 1. **Áreas, no módulos.** El menú se ordena por lo que la persona hace (vender, operar, pagar), no por cómo está dividido el código. Cada módulo aporta entradas a un área.
-2. **Pocas entradas.** Inicio arriba como entrada suelta, **seis áreas** como máximo, Configuración al pie. Máximo **siete entradas por área**; si un área pasa de siete, se divide en dos áreas, sin scroll interno (§10, D2). Un área con una sola entrada visible se muestra como entrada suelta, sin grupo. Los grupos funcionan en acordeón: solo queda abierta el área activa y las demás se pliegan; el estado se recuerda por usuario (§10, D1).
+2. **Pocas entradas.** Inicio arriba como entrada suelta, **seis áreas** como máximo, Configuración al pie. Máximo **siete entradas por área**; si un área pasa de siete, se divide en dos áreas, sin scroll interno (§10, D2). Un área con una sola entrada visible se muestra como entrada suelta, sin grupo. Los grupos funcionan en acordeón: solo queda abierta el área activa y las demás se pliegan; el estado se recuerda por usuario y empresa (§10, D1).
 3. **Menú para colecciones, pestañas para partes.** Va al menú lo que se busca por sí mismo (cuentas, negocios, pauta). Lo que pertenece a una entidad (contactos de una cuenta, puestos de una instalación, cotizaciones de un negocio, documentos, actividad) es una pestaña de su ficha (ADR-041), nunca una entrada del menú.
 4. **Saltar con ⌘K.** El buscador (Ctrl/⌘K, y el botón de búsqueda en el celular) es la forma principal de moverse: busca entidades (`core.buscar`), páginas y acciones («Nueva cotización», «Agregar persona»), muestra recientes y respeta permisos y alcance.
 5. **Fijados y recientes.** Cada usuario fija hasta cinco entradas o fichas, que aparecen arriba de la barra lateral. Se fijan y desfijan con un ícono de pin (en hover sobre la entrada y en la cabecera de la ficha) y se ordenan por la fecha en que se fijaron (§10, D3). Los recientes viven en ⌘K (los últimos diez lugares visitados).
@@ -116,7 +116,7 @@ Aprobación del diseño: «Confirmo que apruebo el diseño 53e9b74b» — Carlos
 
 | # | Tema | Decisión |
 |---|---|---|
-| D1 | Grupos de área | Acordeón: solo queda abierta el área activa y las demás se pliegan. El estado se recuerda por usuario |
+| D1 | Grupos de área | Acordeón: solo queda abierta el área activa y las demás se pliegan. El estado se recuerda por usuario y empresa |
 | D2 | Más de siete entradas | Máximo 7 por área. Si un área pasa de 7, se divide en dos áreas; no hay scroll interno |
 | D3 | Fijados | Se fija y desfija con un ícono de pin que aparece al pasar el mouse por la entrada y en la cabecera de la ficha. Se ordenan por la fecha en que se fijaron |
 | D4 | Inicio y Bandeja | Inicio es una entrada suelta arriba; la Bandeja vive dentro de Inicio |

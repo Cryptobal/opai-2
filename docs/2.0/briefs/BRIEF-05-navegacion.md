@@ -71,7 +71,7 @@ R8. **Toda la navegación usa la paleta y los tokens del diseño aprobado** (DS 
 
 Fuente de D1–D10: decididas por el bot OPAI 2.0 bajo la delegación de Carlos: «Sí, que OPAI 2.0 decida los criterios de navegación. […] Pero todos tienen que ser con la paleta de diseño» — Carlos, 26-oct-2026 10:53 CLT, chat con el Revisor OPAI 2.0 (t120u; dictado por voz). D10 además ya es regla de ADR-016. Carlos confirmó que el bot OPAI 2.0 decidió D1–D10 por delegación suya (Carlos, 26-oct-2026 11:03 CLT, chat con el bot OPAI 2.0 (t295u; dictado por voz)). D1–D10 quedan como reglas del Brief 05 sujetas a la aprobación del brief por Carlos.
 
-D1. **Grupos en acordeón:** solo queda abierta el área activa y las demás se pliegan. El estado se recuerda por usuario. `NAVEGACION.md` §10 dice lo mismo.
+D1. **Grupos en acordeón:** solo queda abierta el área activa y las demás se pliegan. El estado se recuerda por usuario y empresa. `NAVEGACION.md` §10 dice lo mismo.
 D2. **Máximo 7 entradas por área.** Si un área pasa de siete, se divide en dos áreas; no hay scroll interno en un grupo. El núcleo falla en desarrollo y en `pnpm test` si un área declara más de siete entradas. Dividir un área crea un área nueva fuera de la lista cerrada de R1 y del máximo de seis de CA3, así que exige cambiar `NAVEGACION.md` §2 y §7 con una decisión de Carlos; mientras no exista, el test sigue fallando y el módulo no se integra. Hoy ningún área pasa de siete (Finanzas tiene justo siete).
 D3. **Fijados:** se fija y desfija con un ícono de pin que aparece al pasar el mouse por la entrada y en la cabecera de la ficha. Se ordenan por la fecha en que se fijaron (el más antiguo arriba). Máximo cinco; al intentar el sexto, aviso y no se fija.
 D4. **Inicio** es una entrada suelta arriba; la **Bandeja** vive dentro de Inicio (sección, no entrada del menú).
@@ -226,7 +226,7 @@ Conviene dividirlo en **dos PRs** para que la cabecera de CAR-12 (urgente) llegu
 - **CA4.** Nada deshabilitado en ningún escenario ni rol.
 - **CA5.** Roles: gerente, supervisor y viewer sin Finanzas; gerente, supervisor y viewer sin Nómina (D10); supervisor sin Comercial.
 - **CA6.** Sin contadores en la barra lateral; Inicio muestra un punto en la barra inferior y el número dentro de la pantalla; la campana muestra un punto y abre la Bandeja.
-- **CA7.** Acordeón: solo queda abierta el área activa; el estado se recuerda por usuario.
+- **CA7.** Acordeón: solo queda abierta el área activa; el estado se recuerda por usuario y empresa.
 - **CA8.** Fijar y desfijar con el pin en hover y en la cabecera de la ficha; orden por fecha de fijado; los fijados persisten al recargar y en otro dispositivo (los recientes, solo en el mismo navegador).
 - **CA9.** ⌘K muestra el atajo en la cabecera de escritorio, recientes (10) y acciones, funciona entero con teclado y respeta permisos y alcance (viewer sin acciones de escritura).
 - **CA10.** Celular: cinco ítems con Inicio y Buscar fijos, variantes según el área principal y respaldo; sin búsqueda en la barra superior; ≥ 44 px y safe-area.
@@ -240,7 +240,7 @@ Conviene dividirlo en **dos PRs** para que la cabecera de CAR-12 (urgente) llegu
 - **Dependencia del PR 2 del Brief 03** (shell en el layout y quitar contadores, ADR-045 decisión 15; lo implementa Claude): R7 y CA12 exigen que el shell persista entre páginas, y hoy se monta por página. Por eso el PR B empieza cuando el PR 2 esté integrado y no mueve el shell por su cuenta. El PR A no depende de él.
 - **Presupuesto de JS:** acordeón, fijados y ⌘K suman JS de cliente; ⌘K y la hoja «Más» se cargan diferidos.
 - **e2e no obligatorio en CI:** CA1 depende de un e2e que por ahora **no** es check obligatorio. Mitigación: correrlo antes de abrir el PR y adjuntar el resultado.
-- **Decidido (Carlos, 26-oct-2026 11:03 CLT, chat con el bot OPAI 2.0 (t295u; dictado por voz)):** el e2e de la cabecera (CA1) **no** es check obligatorio por ahora: corre en CI pero no bloquea el merge, y el 2-nov-2026 se revisa: pasa a obligatorio cuando lleve una semana estable y Carlos lo confirme (pidió que se lo recuerden). El iPad desde 1024 px usa la barra lateral completa y plegable, sin plegarse a solo íconos. El celular muestra arriba la foto o el avatar del usuario.
+- **Decidido (Carlos, 26-oct-2026 11:03 CLT, chat con el bot OPAI 2.0 (t295u; dictado por voz)):** el e2e de la cabecera (CA1) **no** es check obligatorio por ahora: no bloquea el merge: corre en el CI y se corre a mano antes de abrir el PR. Pasa a obligatorio más adelante solo si Carlos lo confirma, cuando lleve una semana estable (revisión el 2-nov-2026; pidió que se lo recuerden; Carlos 11:03 y 11:12). El iPad desde 1024 px usa la barra lateral completa y plegable, sin plegarse a solo íconos. El celular muestra arriba la foto o el avatar del usuario.
 - **Export pendiente:** sin export en el repo, el bloque 0 del PR B se detiene; el PR A no lo necesita.
 - **Acción principal al patrón:** cambia de lugar el botón principal en Personas, Cuentas e Instalaciones; el QA de «Diseño y QA OPAI 2.0» lo compara con el diseño.
 - **Rollback:** los cambios son de UI y ajustes de usuario sin migración; se revierte el PR. Los ajustes `navegacion_*` que queden guardados se ignoran.
