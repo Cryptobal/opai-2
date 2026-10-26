@@ -1,6 +1,6 @@
 # Navegación de OPAI 2.0 — mapa final y estado de hoy
 
-**Estado:** vigente (ADR-046, aprobado por Carlos el 24-oct; decisiones de diseño del 26-oct en §10, que rigen cuando Carlos apruebe el Brief 05) · **Fecha:** 23-oct-2026, actualizado el 26-oct-2026 · Todo brief con pantallas lo respeta; el bot «Diseño y QA OPAI 2.0» lo verifica. **Diseño aprobado:** [Navegación OPAI 2.0 (Brief 05)](https://claude.ai/design/p/53e9b74b-3cbf-4ad4-858f-271dfc2ef465), 28 pantallas, aprobado (Decisión de Carlos, 26-oct-2026 ~9:45 CLT, chat con OPAI 2.0 (registrada por el bot OPAI 2.0)); se implementa con `briefs/BRIEF-05-navegacion.md`.
+**Estado:** vigente (ADR-046, aprobado por Carlos el 24-oct; decisiones de diseño del 26-oct en §10, que quedan como reglas del Brief 05 sujetas a la aprobación del brief por Carlos) · **Fecha:** 23-oct-2026, actualizado el 26-oct-2026 · Todo brief con pantallas lo respeta; el bot «Diseño y QA OPAI 2.0» lo verifica. **Diseño aprobado:** [Navegación OPAI 2.0 (Brief 05)](https://claude.ai/design/p/53e9b74b-3cbf-4ad4-858f-271dfc2ef465), 28 pantallas, aprobado (fuente: Diseño 53e9b74b aprobado por Carlos, 26-oct-2026 9:45 CLT, chat con OPAI 2.0 (registrada por el bot OPAI 2.0)); se implementa con `briefs/BRIEF-05-navegacion.md`.
 
 ## 1. Principios
 
@@ -107,12 +107,12 @@ El bloqueo financiero (ADR-016) oculta el área completa. Los roles personalizad
 ## 9. Brecha y orden de implementación
 
 1. **Brief de rendimiento (ADR-045):** shell en el layout y precarga de las entradas del menú. No cambia el mapa.
-2. **Design Prompt de navegación** (Claude Design): barra lateral con áreas plegables, fijados, ⌘K con acciones y recientes, barra inferior por rol, hoja «Más». **Hecho:** diseño aprobado (Decisión de Carlos, 26-oct-2026 ~9:45 CLT, chat con OPAI 2.0 (registrada por el bot OPAI 2.0); 28 pantallas).
+2. **Design Prompt de navegación** (Claude Design): barra lateral con áreas plegables, fijados, ⌘K con acciones y recientes, barra inferior por rol, hoja «Más». **Hecho:** diseño aprobado (fuente: Diseño 53e9b74b aprobado por Carlos, 26-oct-2026 9:45 CLT, chat con OPAI 2.0 (registrada por el bot OPAI 2.0); 28 pantallas).
 3. **Brief de navegación:** `area` en `ItemNav` y en el manifest, grupos, fijados, recientes, barra inferior por rol, renombre a Personas y Configuración. Es el Brief 05, paso 1 del cierre del Núcleo: `briefs/BRIEF-05-navegacion.md`, propuesto el 26-oct-2026 y pendiente de la aprobación de Carlos.
 
 ## 10. Decisiones de diseño del 26-oct-2026
 
-Aprobación del diseño: Decisión de Carlos, 26-oct-2026 ~9:45 CLT, chat con OPAI 2.0 (registrada por el bot OPAI 2.0). D1–D9, los puntos que el diseño marcaba «Propuesta: decide Carlos», fueron decididos por el bot OPAI 2.0 por delegación, según el registro del bot (26-oct-2026 9:47 CLT); 👍 de Carlos 9:46. D10 no es nueva: es regla de ADR-016. Rigen como reglas cuando Carlos apruebe el Brief 05 (PR #37).
+Aprobación del diseño: Diseño 53e9b74b aprobado por Carlos, 26-oct-2026 9:45 CLT, chat con OPAI 2.0 (registrada por el bot OPAI 2.0). D1–D9, los puntos que el diseño marcaba «Propuesta: decide Carlos», fueron decididas por el bot OPAI 2.0 el 26-oct-2026 a las 9:47 CLT, por delegación expresa de Carlos (9:45: «decide tú los puntos, bajo tu criterio»); Carlos respondió con 👍 (registrada por el bot OPAI 2.0). D10 no es nueva: es regla de ADR-016. D1–D10 quedan como reglas del Brief 05 sujetas a la aprobación del brief por Carlos (PR #37).
 
 | # | Tema | Decisión |
 |---|---|---|
