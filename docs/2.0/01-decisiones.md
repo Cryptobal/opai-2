@@ -245,6 +245,8 @@ Una entrada por decisión. Las decisiones no se editan: si cambian, se agrega un
 
 **Nota del 26-oct-2026.** Los roles personalizados salen del backlog: van en el Brief 07c «Acceso y permisos», con permisos finos al menos tan completos como en 1.0 (Decisión de Carlos del 24-oct-2026, confirmada el 26-oct-2026 9:20 CLT). El alcance del supervisor por instalación y de los portales (brecha B3) también va en el Brief 07c, movido desde el Brief 12 (Decisión de Carlos, 26-oct-2026 9:36 CLT, chat con OPAI 2.0 (registrada por el bot OPAI 2.0)), y es condición para cerrar el Núcleo.
 
+**Precisión del 26-oct-2026 11:57 CLT (Carlos, t310u, chat del bot OPAI 2.0).** Al decidir las opciones del Brief 07c §16 («ok a todo» a las recomendaciones), Carlos acotó la brecha B3 en el Brief 07c **solo al alcance del supervisor** (la brecha Alta y el criterio de cierre del Núcleo). El alcance de los portales Cliente y Trabajador se construye con sus portales en la fase 3 y queda **pendiente para sus briefs**, reusando el mismo mecanismo (el vínculo trabajador ↔ persona ya existe: `Persona.usuarioId`, `core.personas.vincular_usuario`). Es decir, 07c entrega el mecanismo de alcance y lo aplica al supervisor, pero **no cierra B3 entero**. Esto precisa la frase de las 9:36 CLT («el alcance del supervisor por instalación y de los portales … también va en el Brief 07c»): de los portales queda solo el mecanismo preparado.
+
 ---
 
 ## ADR-023 · Cumplimiento DT desde el diseño (Res. Ex. N°38/2024)
