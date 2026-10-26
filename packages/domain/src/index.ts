@@ -1,3 +1,4 @@
+export * from "./bloqueo-login";
 export * from "./catalogos";
 export * from "./precios-base";
 export * from "./dinero";
