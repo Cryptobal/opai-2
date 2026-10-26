@@ -40,7 +40,8 @@ describe.skipIf(!urlPropietario)("bloqueo de login por conteo (B1)", () => {
   afterAll(async () => {
     await instanciaB?.$disconnect();
     if (e) {
-      if (hashes.length) await e.admin.loginIntento.deleteMany({ where: { correoHash: { in: hashes } } });
+      if (hashes.length)
+        await e.admin.loginIntento.deleteMany({ where: { correoHash: { in: hashes } } });
       await e.cerrar();
     }
   });
@@ -63,7 +64,9 @@ describe.skipIf(!urlPropietario)("bloqueo de login por conteo (B1)", () => {
         data: { ...fallo(correoHash, "198.51.100.7"), userId: null },
       });
     }
-    const n = await instanciaB.loginIntento.count({ where: { correoHash, motivo: "credenciales" } });
+    const n = await instanciaB.loginIntento.count({
+      where: { correoHash, motivo: "credenciales" },
+    });
     expect(n).toBe(4);
   });
 
@@ -79,7 +82,9 @@ describe.skipIf(!urlPropietario)("bloqueo de login por conteo (B1)", () => {
     );
     // Cada fallo es un INSERT independiente: con un upsert `fallos = fallos + 1` leído-modificado
     // dos escrituras simultáneas se pisarían; anexando y contando no se pierde ninguno.
-    const n = await instanciaB.loginIntento.count({ where: { correoHash, motivo: "credenciales" } });
+    const n = await instanciaB.loginIntento.count({
+      where: { correoHash, motivo: "credenciales" },
+    });
     expect(n).toBe(N);
   });
 
@@ -94,7 +99,13 @@ describe.skipIf(!urlPropietario)("bloqueo de login por conteo (B1)", () => {
       });
     }
     await e.appSinTenant.loginIntento.create({
-      data: { correoHash, exito: true, motivo: "reset", ip: null, createdAt: new Date(base - 60_000) },
+      data: {
+        correoHash,
+        exito: true,
+        motivo: "reset",
+        ip: null,
+        createdAt: new Date(base - 60_000),
+      },
     });
     const ultimo = await instanciaB.loginIntento.findFirst({
       where: { correoHash, exito: true },
@@ -102,7 +113,11 @@ describe.skipIf(!urlPropietario)("bloqueo de login por conteo (B1)", () => {
       select: { createdAt: true },
     });
     const n = await instanciaB.loginIntento.count({
-      where: { correoHash, motivo: { in: ["pendiente", "credenciales"] }, createdAt: { gt: ultimo!.createdAt } },
+      where: {
+        correoHash,
+        motivo: { in: ["pendiente", "credenciales"] },
+        createdAt: { gt: ultimo!.createdAt },
+      },
     });
     expect(n).toBe(0);
   });
@@ -112,59 +127,96 @@ describe.skipIf(!urlPropietario)("bloqueo de login por conteo (B1)", () => {
     // ese correo dentro de la retención (30 días). Otra IP, sin ese éxito, no queda exenta.
     const correoHash = nuevoHash();
     const ipBuena = "203.0.113.50";
-    await e.appSinTenant.loginIntento.create({ data: { correoHash, exito: true, motivo: "ok", ip: ipBuena } });
+    await e.appSinTenant.loginIntento.create({
+      data: { correoHash, exito: true, motivo: "ok", ip: ipBuena },
+    });
     const exencion = new Date(Date.now() - 30 * 24 * 60 * 60_000);
     const exenta = await instanciaB.loginIntento.findFirst({
-      where: { correoHash, ip: ipBuena, exito: true, createdAt: { gt: exencion } },
+      where: { correoHash, ip: ipBuena, exito: true, motivo: "ok", createdAt: { gt: exencion } },
       select: { id: true },
     });
     expect(exenta).not.toBeNull();
     const otra = await instanciaB.loginIntento.findFirst({
-      where: { correoHash, ip: "203.0.113.51", exito: true, createdAt: { gt: exencion } },
+      where: {
+        correoHash,
+        ip: "203.0.113.51",
+        exito: true,
+        motivo: "ok",
+        createdAt: { gt: exencion },
+      },
       select: { id: true },
     });
     expect(otra).toBeNull();
+    // Un éxito que no es ingreso (restablecimiento, sin IP) no exime a quien llega sin IP.
+    await e.appSinTenant.loginIntento.create({
+      data: { correoHash, exito: true, motivo: "reset", ip: null },
+    });
+    const sinIp = await instanciaB.loginIntento.findFirst({
+      where: { correoHash, ip: null, exito: true, motivo: "ok", createdAt: { gt: exencion } },
+      select: { id: true },
+    });
+    expect(sinIp).toBeNull();
   });
 
-  it("marcar_login_intento resuelve UN provisional del mismo correo e IP (SKIP LOCKED)", async () => {
-    // La resolución del provisional va por la función SECURITY DEFINER: opai_app no puede UPDATE, pero
-    // sí ejecutarla; marca un solo provisional por llamada y devuelve false si ya no quedan.
+  it("marcar_login_intento resuelve el provisional por su UUID, una sola vez", async () => {
+    // La resolución va por la función SECURITY DEFINER (opai_app no puede UPDATE) y por el id que
+    // devolvió la reserva: no toca otros provisionales del mismo correo e IP.
     const correoHash = nuevoHash();
     const ip = "203.0.113.60";
-    for (let i = 0; i < 2; i++) {
-      await e.appSinTenant.loginIntento.create({ data: { correoHash, ip, exito: false, motivo: "pendiente" } });
-    }
-    await e.appSinTenant.$queryRaw`SELECT "core"."marcar_login_intento"(${correoHash}::text, ${ip}::text, true, 'ok')`;
-    await e.appSinTenant.$queryRaw`SELECT "core"."marcar_login_intento"(${correoHash}::text, ${ip}::text, false, 'credenciales')`;
-    expect(await instanciaB.loginIntento.count({ where: { correoHash, motivo: "pendiente" } })).toBe(0);
-    expect(await instanciaB.loginIntento.count({ where: { correoHash, exito: true, motivo: "ok" } })).toBe(1);
-    expect(await instanciaB.loginIntento.count({ where: { correoHash, motivo: "credenciales" } })).toBe(1);
-    const sinProvisional = await e.appSinTenant.$queryRaw<{ marcar_login_intento: boolean }[]>`
-      SELECT "core"."marcar_login_intento"(${correoHash}::text, ${ip}::text, false, 'credenciales')`;
-    expect(sinProvisional[0]?.marcar_login_intento).toBe(false);
+    const [a, b] = await Promise.all(
+      [0, 1].map(() =>
+        e.appSinTenant.loginIntento.create({
+          data: { correoHash, ip, exito: false, motivo: "pendiente" },
+          select: { id: true },
+        }),
+      ),
+    );
+    const marcar = async (id: string, exito: boolean, motivo: string) =>
+      (
+        await e.appSinTenant.$queryRaw<{ marcar_login_intento: boolean }[]>`
+          SELECT "core"."marcar_login_intento"(${id}::uuid, ${exito}::boolean, ${motivo}::text)`
+      )[0]?.marcar_login_intento;
+    expect(await marcar(b!.id, true, "ok")).toBe(true);
+    // El hermano pendiente sigue intacto: se resolvió el de b, no el "más viejo" del correo e IP.
+    expect(await instanciaB.loginIntento.findUnique({ where: { id: a!.id } })).toMatchObject({
+      motivo: "pendiente",
+      exito: false,
+    });
+    expect(await instanciaB.loginIntento.findUnique({ where: { id: b!.id } })).toMatchObject({
+      motivo: "ok",
+      exito: true,
+    });
+    // Ya resuelto, o un id inexistente, no se vuelve a marcar.
+    expect(await marcar(b!.id, false, "credenciales")).toBe(false);
+    expect(await marcar(randomUUID(), false, "credenciales")).toBe(false);
+    expect(await marcar(a!.id, false, "credenciales")).toBe(true);
+    expect(
+      await instanciaB.loginIntento.count({ where: { correoHash, motivo: "pendiente" } }),
+    ).toBe(0);
   });
 
-  it("ráfaga concurrente del mismo correo e IP: validan como máximo 5 (advisory lock)", async () => {
-    // Bloqueante 3 (revisión PR #46): cuenta e inserta el provisional en una transacción bajo
-    // pg_advisory_xact_lock por correo (espejo de `reservarIntento` de @opai/auth). Aunque 10 intentos
-    // lleguen a la vez por dos conexiones, se serializan y solo 5 llegan a validar (el resto se pausa).
+  it("los índices del bloqueo existen (ip y éxitos parcial)", async () => {
+    const r = await e.admin.$queryRaw<{ indexname: string; indexdef: string }[]>`
+      SELECT indexname, indexdef FROM pg_indexes
+      WHERE schemaname = 'core' AND tablename = 'login_intentos'`;
+    const por = new Map(r.map((x) => [x.indexname, x.indexdef]));
+    expect(por.get("login_intentos_ip_created_at_idx")).toContain("(ip, created_at)");
+    const parcial = por.get("login_intentos_correo_hash_created_at_exito_idx");
+    expect(parcial).toContain("(correo_hash, created_at)");
+    expect(parcial).toContain("WHERE exito");
+  });
+
+  it("la purga nunca baja de 30 días: 0, negativo o NULL no borran lo reciente", async () => {
     const correoHash = nuevoHash();
-    const ip = "203.0.113.70";
-    const reservar = (db: PrismaClient): Promise<boolean> =>
-      db.$transaction(async (tx) => {
-        await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${correoHash}, 0))`;
-        const n = await tx.loginIntento.count({
-          where: { correoHash, ip, motivo: { in: ["pendiente", "credenciales"] } },
-        });
-        if (n >= 5) return true;
-        await tx.loginIntento.create({ data: { correoHash, ip, exito: false, motivo: "pendiente" } });
-        return false;
-      });
-    const resultados = await Promise.all(
-      Array.from({ length: 10 }, (_, i) => reservar(i % 2 === 0 ? e.appSinTenant : instanciaB)),
-    );
-    expect(resultados.filter((pausado) => pausado === false).length).toBe(5);
-    expect(await instanciaB.loginIntento.count({ where: { correoHash, motivo: "pendiente" } })).toBe(5);
+    const reciente = new Date(Date.now() - 10 * 24 * 60 * 60_000);
+    await e.appSinTenant.loginIntento.create({ data: fallo(correoHash, "192.0.2.10", reciente) });
+    for (const dias of [0, -5, null]) {
+      await e.appSinTenant.$queryRaw`SELECT "core"."purgar_login_intentos"(${dias}::int)`;
+      expect(
+        await instanciaB.loginIntento.count({ where: { correoHash } }),
+        `retención ${dias}`,
+      ).toBe(1);
+    }
   });
 
   it("la purga SECURITY DEFINER borra lo viejo aunque opai_app no pueda borrar", async () => {

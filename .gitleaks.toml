@@ -10,4 +10,5 @@ description = "Valores ficticios de tests y del build de CI"
 regexes = [
   '''secreto-de-prueba-de-al-menos-32-caracteres''',
   '''ficticio-solo-para-build-de-ci-0+''',
+  '''Clave-de-prueba-123''',
 ]
