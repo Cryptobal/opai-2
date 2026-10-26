@@ -1,8 +1,5 @@
-import { Plus } from "lucide-react";
-
 import { VERTICALES } from "@opai/domain";
 
-import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { estadoPantalla } from "@/lib/formato";
 import { leerParametros, type SearchParams } from "@/lib/parametros";
@@ -27,11 +24,6 @@ export default function Plataforma({ searchParams }: { searchParams: SearchParam
       titulo="Empresas"
       ruta="/platform"
       insignia={<Superadmin />}
-      acciones={
-        <EnlaceBoton href="/platform/tenants/nuevo" icono={Plus}>
-          Nueva empresa
-        </EnlaceBoton>
-      }
       cargar={async () => {
         const [r, p] = await Promise.all([
           ejecutarComoUsuario<TenantFila[]>("platform", "platform.tenants.list"),

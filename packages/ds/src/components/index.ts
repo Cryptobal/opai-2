@@ -35,5 +35,5 @@ export { type ItemTimeline, Timeline } from "./timeline";
 export { avisar } from "./avisar";
 export { Toaster } from "./toast";
 export { subirConProgreso, Uploader } from "./uploader";
-export { TipoArchivo } from "./uploader-fila";
+export { TipoArchivo } from "./tipo-archivo";
 export { CeldaVigencia, type EstadoVigencia, textoVigencia, Vigencia } from "./vigencia";

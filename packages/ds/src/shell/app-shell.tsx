@@ -78,6 +78,7 @@ export function AppShell(props: AppShellProps) {
         rutaActual={rutaActual}
         {...(props.menuUsuario ? { extras: props.menuUsuario } : {})}
         {...(onNavegar ? { onNavegar } : {})}
+        {...(props.onBuscar ? { onBuscar: props.onBuscar } : {})}
         Link={Link}
       />
     </div>

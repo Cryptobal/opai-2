@@ -3,19 +3,20 @@
 import { Building2, LogOut, Settings2, UserRound } from "lucide-react";
 import dynamic from "next/dynamic";
 import { usePathname, useRouter } from "next/navigation";
-import { type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
 
-import { AppShell, type ItemMenu, type Portal, type Volver } from "@opai/ds";
+import { AppShell, type ItemMenu, type Portal } from "@opai/ds";
 
 import { accionSalir } from "@/app/_acciones/auth";
 import { cambiarTenant } from "@/app/_acciones/capacidad";
 import type { ItemNav } from "@/lib/navegacion";
 
+import { useCabecera } from "./cabecera-contexto";
 import { Campana } from "./campana";
 import { icono } from "./iconos";
 import { LinkMenu } from "./link-menu";
 import { trasLimpiarCaches } from "./pwa/limpiar-cache";
-import { useEpocaSesion, useRefrescoSilencioso } from "./refresco-navegador";
+import { useEpocaSesion } from "./refresco-navegador";
 
 // La paleta (cmdk) se descarga al primer uso: no pesa en el JS inicial de cada ruta (ADR-037).
 const Paleta = dynamic(() => import("./paleta").then((m) => m.Paleta), { ssr: false });
@@ -31,42 +32,25 @@ export type DatosShell = {
   tenant: { nombre: string } | null;
   usuario: { nombre: string; email: string; rol?: string };
   empresas: { id: string; nombre: string; actual: boolean }[];
-  noLeidas: number;
   /** Nombre del portal bajo la marca del riel (el ERP no lleva). */
   subtituloMarca?: string | undefined;
-  /** Identifica la versión de la página (ms del servidor); el navegador mide la edad desde que la vio. */
-  generado: number;
   /** Quién y en qué empresa ve la página (`lib/epoca-sesion.ts`); las pestañas la comparan. */
   epoca: string;
 };
 
-export type OpcionesPagina = {
-  titulo: string;
-  volver?: Volver;
-  volverSoloTelefono?: boolean;
-  /** Con `volverSoloTelefono`: el "Atrás" también en iPad vertical (768–1023), donde la ficha ocupa todo el ancho. */
-  volverBajoLg?: boolean;
-  acciones?: ReactNode;
-  accionesTelefono?: ReactNode;
-  insignia?: ReactNode;
-  completo?: boolean;
-  /** Esqueleto (de servidor, sin JS) que reemplaza el contenido si la navegación pasa de ~200 ms. */
-  esqueleto?: ReactNode;
-};
-
-/** Shell real: navegación, portales, campana, ⌘K y menú de usuario a partir de la sesión. */
-export function Shell({
-  datos,
-  children,
-  esqueleto,
-  ...pagina
-}: OpcionesPagina & { datos: DatosShell; children: ReactNode }) {
+/**
+ * Shell persistente del portal (ADR-045): vive en el layout de cada portal, así que la navegación,
+ * los portales, la campana, ⌘K y el menú de usuario no se vuelven a montar al cambiar de página; solo
+ * se reemplaza el contenido. El título y las acciones de la página llegan por el almacén de cabecera
+ * (`cabecera-contexto`), que la página fija al renderizarse.
+ */
+export function MarcoShell({ datos, children }: { datos: DatosShell; children: ReactNode }) {
   const rutaActual = usePathname();
   const router = useRouter();
+  const cabecera = useCabecera();
   const [password, setPassword] = useState(false);
   const [paleta, setPaleta] = useState<boolean | null>(null);
   const buscable = datos.portal === "erp" && datos.tenant !== null;
-  useRefrescoSilencioso(datos.generado, rutaActual, datos.epoca);
   useEpocaSesion(datos.epoca);
   useEffect(() => {
     if (!buscable) return;
@@ -79,6 +63,8 @@ export function Shell({
     window.addEventListener("keydown", tecla);
     return () => window.removeEventListener("keydown", tecla);
   }, [buscable]);
+  // La navegación no cambia al fijar la cabecera: se recalcula solo cuando cambia `datos.nav`.
+  const nav = useMemo(() => datos.nav.map((n) => ({ ...n, icono: icono(n.icono) })), [datos.nav]);
   const empresas: ItemMenu[] =
     datos.empresas.length > 1
       ? datos.empresas.map((e, i) => ({
@@ -121,8 +107,15 @@ export function Shell({
   ];
   return (
     <AppShell
-      {...pagina}
-      nav={datos.nav.map((n) => ({ ...n, icono: icono(n.icono) }))}
+      titulo={cabecera.titulo}
+      {...(cabecera.volver ? { volver: cabecera.volver } : {})}
+      {...(cabecera.volverSoloTelefono ? { volverSoloTelefono: true } : {})}
+      {...(cabecera.volverBajoLg ? { volverBajoLg: true } : {})}
+      {...(cabecera.acciones ? { acciones: cabecera.acciones } : {})}
+      {...(cabecera.accionesTelefono ? { accionesTelefono: cabecera.accionesTelefono } : {})}
+      {...(cabecera.insignia ? { insignia: cabecera.insignia } : {})}
+      {...(cabecera.completo ? { completo: true } : {})}
+      nav={nav}
       portales={datos.portales}
       portalActual={datos.portal}
       rutaActual={rutaActual}
@@ -130,18 +123,13 @@ export function Shell({
       {...(empresas.length ? { empresas } : {})}
       usuario={datos.usuario}
       menuUsuario={menu}
-      campana={
-        datos.tenant ? <Campana noLeidas={datos.noLeidas} portal={datos.portal} /> : undefined
-      }
+      campana={datos.tenant ? <Campana portal={datos.portal} /> : undefined}
       {...(buscable ? { onBuscar: () => setPaleta(true) } : {})}
       {...(datos.subtituloMarca ? { subtituloMarca: datos.subtituloMarca } : {})}
       onNavegar={(href) => router.push(href)}
       Link={LinkMenu}
     >
-      <div data-contenido className="contents">
-        {children}
-      </div>
-      {esqueleto ? <div data-esqueleto>{esqueleto}</div> : null}
+      {children}
       {paleta !== null ? <Paleta abierto={paleta} onCerrar={() => setPaleta(false)} /> : null}
       {password ? <CambiarPassword abierto onCerrar={() => setPassword(false)} /> : null}
       <Avisos />

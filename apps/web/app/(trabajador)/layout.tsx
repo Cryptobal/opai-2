@@ -1,19 +1,20 @@
 import dynamic from "next/dynamic";
 import type { ReactNode } from "react";
 
-import { CargaPortal } from "@/app/_components/carga-portal";
+import { PortalLayout } from "@/app/_components/portal-layout";
 
-// Aparte (next/dynamic): el aviso de instalar no pesa en el primer JS de la ruta de terreno (ADR-037).
+// Aparte (next/dynamic): el aviso de instalar no pesa en el primer JS de la ruta de trabajador (ADR-037).
 const AvisoInstalar = dynamic(() =>
   import("@/app/_components/pwa/aviso-instalar").then((m) => m.AvisoInstalar),
 );
 
-// Route group del portal "trabajador". Sesión y membresía con el portal se verifican en cada página.
+// Route group del portal "trabajador": el shell persiste en el layout (ADR-045); la página solo trae su
+// contenido. El aviso de instalar (PWA) acompaña al contenido del portal.
 export default function Layout({ children }: { children: ReactNode }) {
   return (
-    <CargaPortal>
+    <PortalLayout portal="trabajador">
       {children}
       <AvisoInstalar />
-    </CargaPortal>
+    </PortalLayout>
   );
 }

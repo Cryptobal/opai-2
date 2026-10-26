@@ -1,8 +1,7 @@
-import { Plus, Users } from "lucide-react";
+import { Users } from "lucide-react";
 
 import { SplitScreen } from "@opai/ds";
 
-import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { hoyIso } from "@/lib/fechas";
 import { leerParametros, type SearchParams } from "@/lib/parametros";
@@ -22,11 +21,6 @@ export default function Personas({ searchParams }: { searchParams: SearchParams 
       titulo="Personas"
       ruta="/personas"
       completo
-      acciones={
-        <EnlaceBotonHoja href="?nueva=1" icono={Plus}>
-          Agregar persona
-        </EnlaceBotonHoja>
-      }
       cargar={async () => {
         const p = await leerParametros(searchParams);
         return { ...(await cargarPersonas(p)), p };

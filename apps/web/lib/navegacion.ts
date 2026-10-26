@@ -12,10 +12,12 @@ export type ItemNav = {
   pie?: boolean;
   soloCompacto?: boolean;
   soloAmplio?: boolean;
+  /** Fuera de la barra inferior del teléfono: va a "Más" (sigue en el riel y en la barra lateral). */
+  fueraInferior?: boolean;
   alerta?: boolean;
 };
 
-/** Conteos de `core.resumen.contadores` (null sin permiso). */
+/** Conteos de `core.resumen.contadores` (null sin permiso). Los usan Inicio y las listas, no la barra lateral. */
 export type Contadores = {
   cuentas: number | null;
   instalaciones: number | null;
@@ -26,16 +28,16 @@ export type Contadores = {
 
 const esDesarrollo = process.env.NODE_ENV !== "production";
 const mayuscula = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-const conContador = (n: number | null) => (n === null ? {} : { contador: n });
 
 /**
- * Navegación del ERP (diseño de maestros): Inicio, maestros con sus conteos, módulos activos y una
- * sola entrada "Configuración" fija al pie (ADR-018). Los nombres pasan por el vocabulario.
+ * Navegación del ERP (diseño de maestros): Inicio, maestros, módulos activos y una sola entrada
+ * "Configuración" fija al pie (ADR-018). Los nombres pasan por el vocabulario. Sin contadores en la
+ * barra lateral (ADR-045, decisión 15 de Carlos del 24-oct): los conteos quedan en Inicio y en las
+ * listas, no se cargan por navegación.
  */
 export function navegacionErp(
   rol: Rol | null,
   modulosActivos: readonly string[],
-  n: Contadores,
   voc: Vocabulario,
 ): ItemNav[] {
   const items: ItemNav[] = [{ href: "/", etiqueta: "Inicio", icono: "Home" }];
@@ -43,13 +45,7 @@ export function navegacionErp(
   const puede = (p: string) => tienePermiso(rol, p);
   const grupo = "Maestros";
   if (puede(PERMISOS_CORE.cuentasRead))
-    items.push({
-      href: "/cuentas",
-      etiqueta: "Cuentas",
-      icono: "Building2",
-      grupo,
-      ...conContador(n.cuentas),
-    });
+    items.push({ href: "/cuentas", etiqueta: "Cuentas", icono: "Building2", grupo });
   if (puede(PERMISOS_CORE.instalacionesRead))
     items.push({
       href: "/instalaciones",
@@ -57,16 +53,11 @@ export function navegacionErp(
       corta: "Instalac.",
       icono: "MapPin",
       grupo,
-      ...conContador(n.instalaciones),
+      // Respaldo de la barra inferior (Brief 05): en el teléfono va a "Más"; sigue en el riel y en la lateral.
+      fueraInferior: true,
     });
   if (puede(PERMISOS_CORE.personasRead))
-    items.push({
-      href: "/personas",
-      etiqueta: "Personas",
-      icono: "Users",
-      grupo,
-      ...conContador(n.personas),
-    });
+    items.push({ href: "/personas", etiqueta: "Personas", icono: "Users", grupo });
   if (puede(PERMISOS_CORE.estructurasRead))
     items.push({
       href: "/cargos",
@@ -75,16 +66,6 @@ export function navegacionErp(
       icono: "Briefcase",
       grupo,
       soloAmplio: true,
-    });
-  if (n.aprobacionesPendientes)
-    items.push({
-      href: "/configuracion/aprobaciones",
-      etiqueta: "Aprobaciones",
-      corta: "Aprob.",
-      icono: "UserCheck",
-      contador: n.aprobacionesPendientes,
-      soloCompacto: true,
-      alerta: true,
     });
   for (const m of listarModulos()) {
     if (!modulosActivos.includes(m.id)) continue;
@@ -101,7 +82,6 @@ export function navegacionErp(
     corta: "Ajustes",
     icono: "Settings",
     pie: true,
-    ...conContador(n.aprobacionesPendientes || null),
   });
   return items;
 }
