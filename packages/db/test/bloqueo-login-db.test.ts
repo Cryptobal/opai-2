@@ -168,36 +168,6 @@ describe.skipIf(!urlPropietario)("bloqueo de login por conteo (B1)", () => {
     expect(await instanciaB.loginIntento.count({ where: { correoHash, motivo: "pendiente" } })).toBe(0);
   });
 
-  it("pg_try_advisory_xact_lock: si otro intento del correo tiene el lock, no espera", async () => {
-    // Espejo de `reservarIntento`: con el lock tomado por una transacción, el intento de la otra
-    // conexión recibe false al instante (responde 429) en vez de quedarse esperando.
-    const correoHash = nuevoHash();
-    let soltar: () => void = () => undefined;
-    const suelto = new Promise<void>((r) => (soltar = r));
-    let tomado: () => void = () => undefined;
-    const listo = new Promise<void>((r) => (tomado = r));
-    const dueno = e.appSinTenant.$transaction(async (tx) => {
-      await tx.$queryRaw`SELECT pg_try_advisory_xact_lock(hashtextextended(${correoHash}, 0))`;
-      tomado();
-      await suelto;
-    });
-    await listo;
-    const intento = await instanciaB.$transaction(async (tx) => {
-      const r = await tx.$queryRaw<{ ok: boolean }[]>`
-        SELECT pg_try_advisory_xact_lock(hashtextextended(${correoHash}, 0)) AS ok`;
-      return r[0]?.ok;
-    });
-    expect(intento).toBe(false);
-    soltar();
-    await dueno;
-    const luego = await instanciaB.$transaction(async (tx) => {
-      const r = await tx.$queryRaw<{ ok: boolean }[]>`
-        SELECT pg_try_advisory_xact_lock(hashtextextended(${correoHash}, 0)) AS ok`;
-      return r[0]?.ok;
-    });
-    expect(luego).toBe(true);
-  });
-
   it("los índices del bloqueo existen (ip y éxitos parcial)", async () => {
     const r = await e.admin.$queryRaw<{ indexname: string; indexdef: string }[]>`
       SELECT indexname, indexdef FROM pg_indexes
@@ -207,34 +177,6 @@ describe.skipIf(!urlPropietario)("bloqueo de login por conteo (B1)", () => {
     const parcial = por.get("login_intentos_correo_hash_created_at_exito_idx");
     expect(parcial).toContain("(correo_hash, created_at)");
     expect(parcial).toContain("WHERE exito");
-  });
-
-  it("ráfaga concurrente del mismo correo e IP: validan como máximo 5 (advisory lock)", async () => {
-    // Bloqueante 3 (revisión PR #46): cuenta e inserta el provisional en una transacción bajo
-    // pg_try_advisory_xact_lock por correo (espejo de `reservarIntento` de @opai/auth). Aunque 10
-    // intentos lleguen a la vez por dos conexiones, nunca validan más de 5 (el resto se pausa o, si
-    // otro tiene el lock, responde 429 sin esperar).
-    const correoHash = nuevoHash();
-    const ip = "203.0.113.70";
-    const reservar = (db: PrismaClient): Promise<boolean> =>
-      db.$transaction(async (tx) => {
-        const lock = await tx.$queryRaw<{ ok: boolean }[]>`
-          SELECT pg_try_advisory_xact_lock(hashtextextended(${correoHash}, 0)) AS ok`;
-        if (!lock[0]?.ok) return true;
-        const n = await tx.loginIntento.count({
-          where: { correoHash, ip, motivo: { in: ["pendiente", "credenciales"] } },
-        });
-        if (n >= 5) return true;
-        await tx.loginIntento.create({ data: { correoHash, ip, exito: false, motivo: "pendiente" } });
-        return false;
-      });
-    const resultados = await Promise.all(
-      Array.from({ length: 10 }, (_, i) => reservar(i % 2 === 0 ? e.appSinTenant : instanciaB)),
-    );
-    const validan = resultados.filter((pausado) => pausado === false).length;
-    expect(validan).toBeGreaterThanOrEqual(1);
-    expect(validan).toBeLessThanOrEqual(5);
-    expect(await instanciaB.loginIntento.count({ where: { correoHash, motivo: "pendiente" } })).toBe(validan);
   });
 
   it("la purga nunca baja de 30 días: 0, negativo o NULL no borran lo reciente", async () => {

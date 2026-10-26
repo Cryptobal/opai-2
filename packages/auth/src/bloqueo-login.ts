@@ -29,9 +29,7 @@ export const MENSAJE_PAUSA = "Hubo demasiados intentos. Vuelve a intentarlo en u
  * responde 429 en vez de esperar). Para quien llama, `pausa` y `ocupado` se ven igual.
  */
 export type ReservaIntento =
-  | { estado: "ok"; intentoId: string }
-  | { estado: "pausa" }
-  | { estado: "ocupado" };
+  { estado: "ok"; intentoId: string } | { estado: "pausa" } | { estado: "ocupado" };
 
 /** Retención de los intentos (días). Los purga el cron; acota el crecimiento y minimiza datos. */
 export const LOGIN_RETENCION_DIAS = 30;
@@ -64,6 +62,16 @@ export function hashCorreo(correo: string): string {
   return createHmac("sha256", claveHash()).update(correo.trim().toLowerCase()).digest("hex");
 }
 
+/** Espera máxima del lock por correo (ms) antes de responder 429; la sección crítica dura milisegundos. */
+export const LOCK_ESPERA_MS = 400;
+
+/** ¿El error es el `lock_timeout` de Postgres (SQLSTATE 55P03), también envuelto por Prisma? */
+function esTimeoutDeLock(e: unknown): boolean {
+  return /55P03|lock timeout/i.test(
+    e instanceof Error ? `${e.message} ${JSON.stringify(Reflect.get(e, "meta") ?? "")}` : "",
+  );
+}
+
 /** Clave del contexto de Better Auth donde el `before` deja el UUID del provisional para el `after`. */
 export const CLAVE_INTENTO = "opaiIntentoId";
 
@@ -94,9 +102,11 @@ export function datosDeContexto(ctx: {
 
 /**
  * Antes de validar la credencial, en UNA transacción: toma el advisory lock por correo (serializa los
- * intentos del mismo correo) con `pg_try_advisory_xact_lock`, cuenta los fallos de la ventana por
- * dimensión e inserta el intento provisional. Si el lock lo tiene otro intento del mismo correo no
- * espera: devuelve `ocupado` (el hook responde 429), así una ráfaga no acumula conexiones colgadas.
+ * intentos del mismo correo), cuenta los fallos de la ventana por dimensión e inserta el intento
+ * provisional. La espera del lock es acotada (`LOCK_ESPERA_MS`, `lock_timeout` local): la sección
+ * crítica dura milisegundos, así que un intento legítimo (p. ej. la IP habitual con la contraseña
+ * correcta) espera su turno aunque un tercero mande ráfagas al mismo correo; si el lock no se libera
+ * dentro del presupuesto devuelve `ocupado` (el hook responde 429) y una ráfaga no acumula conexiones.
  * Devuelve `pausa` si ya superó el límite (sin insertar: la pausa no gasta un provisional) y, si no,
  * `ok` con el UUID del provisional para que el `after` lo resuelva por ese id.
  *
@@ -115,33 +125,50 @@ export async function reservarIntento(datos: DatosIntento): Promise<ReservaInten
   const ventana = new Date(ahora.getTime() - LOGIN_VENTANA_MS);
   const exencion = new Date(ahora.getTime() - LOGIN_EXENCION_MS);
   const fallo = { motivo: { in: MOTIVOS_FALLO } };
-  return clienteAuth().$transaction(async (tx) => {
-    const lock = await tx.$queryRaw<{ ok: boolean }[]>`
-      SELECT pg_try_advisory_xact_lock(hashtextextended(${correoHash}, 0)) AS ok`;
-    if (!lock[0]?.ok) return { estado: "ocupado" };
-    const ultimoExito = await tx.loginIntento.findFirst({
-      where: { correoHash, exito: true },
-      orderBy: { createdAt: "desc" },
-      select: { createdAt: true },
-    });
-    const desde = ultimoExito && ultimoExito.createdAt > ventana ? ultimoExito.createdAt : ventana;
-    const [correoIp, correo, ipc, exenta] = await Promise.all([
-      tx.loginIntento.count({ where: { ...fallo, correoHash, ip, createdAt: { gt: desde } } }),
-      tx.loginIntento.count({ where: { ...fallo, correoHash, createdAt: { gt: desde } } }),
-      tx.loginIntento.count({ where: { ...fallo, ip, createdAt: { gte: ventana } } }),
-      tx.loginIntento.findFirst({
-        where: { correoHash, ip, exito: true, motivo: MOTIVO_INGRESO_OK, createdAt: { gt: exencion } },
+  return clienteAuth()
+    .$transaction(async (tx): Promise<ReservaIntento> => {
+      await tx.$executeRaw`SELECT set_config('lock_timeout', ${`${LOCK_ESPERA_MS}ms`}, true)`;
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${correoHash}, 0))`;
+      const ultimoExito = await tx.loginIntento.findFirst({
+        where: { correoHash, exito: true },
+        orderBy: { createdAt: "desc" },
+        select: { createdAt: true },
+      });
+      const desde =
+        ultimoExito && ultimoExito.createdAt > ventana ? ultimoExito.createdAt : ventana;
+      const [correoIp, correo, ipc, exenta] = await Promise.all([
+        tx.loginIntento.count({ where: { ...fallo, correoHash, ip, createdAt: { gt: desde } } }),
+        tx.loginIntento.count({ where: { ...fallo, correoHash, createdAt: { gt: desde } } }),
+        tx.loginIntento.count({ where: { ...fallo, ip, createdAt: { gte: ventana } } }),
+        tx.loginIntento.findFirst({
+          where: {
+            correoHash,
+            ip,
+            exito: true,
+            motivo: MOTIVO_INGRESO_OK,
+            createdAt: { gt: exencion },
+          },
+          select: { id: true },
+        }),
+      ]);
+      const conteos: ConteosLogin = { correoIp, correo, ip: ipc, exentaGlobal: exenta !== null };
+      if (superaLimiteLogin(conteos)) return { estado: "pausa" };
+      const { id } = await tx.loginIntento.create({
+        data: {
+          correoHash,
+          exito: false,
+          motivo: MOTIVO_PENDIENTE,
+          ip,
+          userAgent: datos.userAgent,
+        },
         select: { id: true },
-      }),
-    ]);
-    const conteos: ConteosLogin = { correoIp, correo, ip: ipc, exentaGlobal: exenta !== null };
-    if (superaLimiteLogin(conteos)) return { estado: "pausa" };
-    const { id } = await tx.loginIntento.create({
-      data: { correoHash, exito: false, motivo: MOTIVO_PENDIENTE, ip, userAgent: datos.userAgent },
-      select: { id: true },
+      });
+      return { estado: "ok", intentoId: id };
+    })
+    .catch((e: unknown): ReservaIntento => {
+      if (esTimeoutDeLock(e)) return { estado: "ocupado" };
+      throw e;
     });
-    return { estado: "ok", intentoId: id };
-  });
 }
 
 /**
@@ -175,7 +202,13 @@ export async function resolverIntento(intentoId: string, codigo: string | null):
  */
 export async function registrarRestablecimiento(correo: string): Promise<void> {
   await clienteAuth().loginIntento.create({
-    data: { correoHash: hashCorreo(correo), exito: true, motivo: "reset", ip: null, userAgent: null },
+    data: {
+      correoHash: hashCorreo(correo),
+      exito: true,
+      motivo: "reset",
+      ip: null,
+      userAgent: null,
+    },
   });
 }
 
