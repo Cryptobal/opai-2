@@ -1,0 +1,342 @@
+/* ============================================================
+   OPAI Design System — colors_and_type.css
+   Synced from Cryptobal/opai@main (src/styles/globals.css v2-v4,
+   tailwind.config.js, src/app/(marketing)/marketing.css).
+   Scopes:
+     1. APP — ERP shell. Dark default here (slate-blue, hue 218),
+        light available via .light. Includes DS v3 surfaces/text/
+        status/tints + DS v4 semantic type + Liquid Glass v1.
+     2. MK  — marketing site. Editorial, flat teal, grid bg.
+   Keep scopes isolated — never mix.
+   ============================================================ */
+
+/* -----  Webfonts (variable, latin subset, in ./fonts) ----- */
+@font-face { font-family: 'Inter Variable'; font-style: normal; font-weight: 100 900; font-display: swap; src: url('fonts/Inter-Variable.woff2') format('woff2'); }
+@font-face { font-family: 'Outfit Variable'; font-style: normal; font-weight: 100 900; font-display: swap; src: url('fonts/Outfit-Variable.woff2') format('woff2'); }
+@font-face { font-family: 'Geist Mono Variable'; font-style: normal; font-weight: 100 900; font-display: swap; src: url('fonts/GeistMono-Variable.woff2') format('woff2'); }
+@font-face { font-family: 'Exo 2'; font-style: normal; font-weight: 300 900; font-display: swap; src: url('fonts/Exo2-Variable.woff2') format('woff2'); }
+@font-face { font-family: 'DM Sans'; font-style: normal; font-weight: 400 700; font-display: swap; src: url('fonts/DMSans-Variable.woff2') format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-style: normal; font-weight: 100 800; font-display: swap; src: url('fonts/JetBrainsMono-Variable.woff2') format('woff2'); }
+
+/* -----  Webfonts  ----- */
+/* App body: Inter Variable. App display: Outfit Variable.
+   App mono (data: precios, stock, SKU, fechas, IDs): Geist Mono
+   Variable, fallback JetBrains Mono. Instrument Sans 400-700 also
+   ships. Marketing: Exo 2 (display) / DM Sans (body) / JetBrains
+   Mono. All loaded from Google Fonts in static HTML previews. */
+
+/* ============================================================
+   1. APP SCOPE — dark default (azul pizarra, NO negro),
+   light via .light. Source: globals.css ":root" + ".dark".
+   ============================================================ */
+:root,
+.opai-app {
+  /* --- Semantic (shadcn) — dark theme v2 --- */
+  --app-background: 218 36% 12%;           /* @kind color */ /* #142033 slate-blue */
+  --app-foreground: 210 40% 98%;           /* @kind color */ /* #f8fafc */
+  --app-card:        218 32% 15%;          /* @kind color */ /* #1a2940 */
+  --app-card-fg:     210 40% 98%;          /* @kind color */
+  --app-popover:     218 30% 17%;          /* @kind color */ /* #1f304a */
+  --app-border:      218 24% 26%;          /* @kind color */ /* #334861 */
+  --app-input:       218 24% 28%;          /* @kind color */ /* #384d68 */
+  --app-muted:       218 26% 18%;          /* @kind color */ /* #223048 */
+  --app-muted-fg:    214 22% 68%;          /* @kind color */ /* #9aadc4 */
+  --app-accent:      218 26% 20%;          /* @kind color */ /* #263652 */
+  --app-secondary:   218 24% 26%;          /* @kind color */
+
+  /* --- Brand primary (teal, menos neón que antes) --- */
+  --app-primary:     168 78% 38%;          /* @kind color */ /* #14a88a */
+  --app-primary-fg:  218 36% 10%;          /* @kind color */
+
+  /* --- Status (shadcn-level) --- */
+  --app-destructive: 0 72% 51%;            /* @kind color */ /* #dc2626 */
+
+  /* --- Chart palette --- */
+  --app-chart-1: 168 78% 42%;              /* @kind color */ /* teal */
+  --app-chart-2: 217 91% 60%;              /* @kind color */ /* blue */
+  --app-chart-3: 142 71% 45%;              /* @kind color */ /* green */
+  --app-chart-4: 38 92% 50%;               /* @kind color */ /* amber */
+  --app-chart-5: 340 82% 52%;              /* @kind color */ /* pink */
+
+  --app-radius: 0.5rem;                    /* @kind radius */
+  --app-ring: var(--app-primary);          /* @kind color */
+
+  /* --- DS v3 — surfaces (5 elevation levels) --- */
+  --ds-surface-0: 218 36% 12%;             /* @kind color */ /* page bg */
+  --ds-surface-1: 218 32% 14%;             /* @kind color */ /* card primary */
+  --ds-surface-2: 218 30% 17%;             /* @kind color */ /* elevated */
+  --ds-surface-3: 218 28% 20%;             /* @kind color */ /* dialog top */
+  --ds-surface-4: 218 26% 23%;             /* @kind color */ /* tooltip/menu */
+
+  /* --- DS v3 — text scale (4 levels) --- */
+  --ds-text-1: 210 40% 98%;                /* @kind color */ /* primary */
+  --ds-text-2: 214 24% 84%;                /* @kind color */ /* body/labels */
+  --ds-text-3: 214 18% 66%;                /* @kind color */ /* secondary */
+  --ds-text-4: 214 14% 48%;                /* @kind color */ /* placeholder */
+
+  /* --- DS v3 — border weights --- */
+  --ds-border-subtle: 218 24% 20%;         /* @kind color */
+  --ds-border-default: 218 24% 26%;        /* @kind color */
+  --ds-border-strong: 218 24% 34%;         /* @kind color */
+
+  /* --- DS v3 — semantic status (fg / soft / border) --- */
+  --ds-ok: 160 76% 42%;                    /* @kind color */
+  --ds-ok-fg: 160 76% 60%;                 /* @kind color */
+  --ds-ok-soft: 160 76% 14%;               /* @kind color */
+  --ds-ok-border: 160 60% 28%;             /* @kind color */
+  --ds-warn: 35 92% 55%;                   /* @kind color */
+  --ds-warn-fg: 38 92% 65%;                /* @kind color */
+  --ds-warn-soft: 35 60% 14%;              /* @kind color */
+  --ds-warn-border: 35 60% 28%;            /* @kind color */
+  --ds-danger: 0 76% 58%;                  /* @kind color */
+  --ds-danger-fg: 0 80% 70%;               /* @kind color */
+  --ds-danger-soft: 0 60% 14%;             /* @kind color */
+  --ds-danger-border: 0 60% 28%;           /* @kind color */
+  --ds-info: 217 90% 60%;                  /* @kind color */
+  --ds-info-fg: 217 90% 72%;               /* @kind color */
+  --ds-info-soft: 217 60% 14%;             /* @kind color */
+  --ds-info-border: 217 60% 28%;           /* @kind color */
+
+  /* --- Refined Industrial — categorical tints (IconTile,
+     agrupaciones NO semánticas; container + fg pairs) --- */
+  --tint-violet: 268 60% 22%;              /* @kind color */
+  --tint-violet-fg: 251 92% 84%;           /* @kind color */
+  --tint-rose: 343 65% 22%;                /* @kind color */
+  --tint-rose-fg: 0 96% 84%;               /* @kind color */
+  --tint-amber: 28 70% 20%;                /* @kind color */
+  --tint-amber-fg: 49 95% 70%;             /* @kind color */
+  --tint-emerald: 164 60% 18%;             /* @kind color */
+  --tint-emerald-fg: 152 76% 67%;          /* @kind color */
+  --tint-sky: 200 65% 22%;                 /* @kind color */
+  --tint-sky-fg: 199 94% 78%;              /* @kind color */
+  --tint-teal: 172 75% 18%;                /* @kind color */
+  --tint-teal-fg: 169 76% 70%;             /* @kind color */
+  --tint-indigo: 231 55% 22%;              /* @kind color */
+  --tint-indigo-fg: 226 100% 84%;          /* @kind color */
+  --tint-cyan: 192 60% 18%;                /* @kind color */
+  --tint-cyan-fg: 187 85% 70%;             /* @kind color */
+  --tint-lime: 90 50% 18%;                 /* @kind color */
+  --tint-lime-fg: 84 75% 68%;              /* @kind color */
+  --tint-orange: 22 65% 20%;               /* @kind color */
+  --tint-orange-fg: 30 95% 70%;            /* @kind color */
+  --tint-fuchsia: 293 55% 22%;             /* @kind color */
+  --tint-fuchsia-fg: 292 90% 82%;          /* @kind color */
+  --tint-slate: 215 25% 22%;               /* @kind color */
+  --tint-slate-fg: 214 20% 78%;            /* @kind color */
+
+  /* --- DS v4 — semantic type scale (roles, not pixels).
+     data-density="compact" shrinks title/heading/display/metric
+     to 14/15/18/22; eyebrow/caption/body never change. --- */
+  --t-eyebrow: 11px;                       /* @kind font */
+  --t-caption: 12px;                       /* @kind font */
+  --t-body: 13px;                          /* @kind font */
+  --t-title: 15px;                         /* @kind font */
+  --t-heading: 17px;                       /* @kind font */
+  --t-display: 21px;                       /* @kind font */
+  --t-metric: 26px;                        /* @kind font */
+
+  --app-font-sans: 'Inter Variable', 'Inter', system-ui, -apple-system, sans-serif;
+  --app-font-display: 'Outfit Variable', 'Outfit', system-ui, sans-serif;
+  --app-font-mono: 'Geist Mono Variable', 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace;
+
+  /* --- Motion tokens --- */
+  --motion-duration-fast: 150ms;           /* @kind other */ /* focus, color */
+  --motion-duration-base: 200ms;           /* @kind other */ /* sidebar, padding */
+  --motion-duration-slow: 300ms;           /* @kind other */ /* modals, page */
+  --motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);   /* @kind other */
+  --motion-easing-emphasized: cubic-bezier(0.3, 0, 0, 1); /* @kind other */
+
+  /* --- Liquid Glass v1 (mobile <1024px material) — dark --- */
+  --glass-fill: linear-gradient(to bottom, rgba(255,255,255,0.09), rgba(255,255,255,0.035)); /* @kind other */
+  --glass-fill-strong: linear-gradient(to bottom, rgba(255,255,255,0.13), rgba(255,255,255,0.05)); /* @kind other */
+  --glass-fill-soft: rgba(255,255,255,0.05); /* @kind color */ /* no blur */
+  --glass-border: rgba(255,255,255,0.11);  /* @kind color */
+  --glass-specular: inset 0 1px 0 rgba(255,255,255,0.20), inset 0 -1px 0 rgba(0,0,0,0.22); /* @kind shadow */
+  --glass-shadow: 0 12px 40px rgba(0,0,0,0.45); /* @kind shadow */
+  --glass-blur-1: blur(16px) saturate(160%);   /* @kind other */
+  --glass-blur-2: blur(24px) saturate(180%);   /* @kind other */
+  --glass-blur-3: blur(32px) saturate(200%);   /* @kind other */
+}
+
+.opai-app.light,
+.opai-app-light {
+  --app-background: 0 0% 99%;              /* @kind color */ /* #fcfcfc */
+  --app-foreground: 220 20% 10%;           /* @kind color */
+  --app-card:        0 0% 100%;            /* @kind color */
+  --app-card-fg:     220 20% 10%;          /* @kind color */
+  --app-popover:     0 0% 100%;            /* @kind color */
+  --app-border:      220 13% 87%;          /* @kind color */
+  --app-input:       220 13% 85%;          /* @kind color */
+  --app-muted:       220 14% 96%;          /* @kind color */
+  --app-muted-fg:    215 16% 43%;          /* @kind color */
+  --app-accent:      220 14% 93%;          /* @kind color */
+  --app-primary:     166 76% 40%;          /* @kind color */ /* #189a79 */
+  --app-primary-fg:  0 0% 100%;            /* @kind color */
+  --ds-surface-0: 0 0% 99%;                /* @kind color */
+  --ds-surface-1: 220 14% 97%;             /* @kind color */
+  --ds-surface-2: 0 0% 100%;               /* @kind color */
+  --ds-surface-3: 220 14% 99%;             /* @kind color */
+  --ds-surface-4: 0 0% 100%;               /* @kind color */
+  --ds-text-1: 220 20% 10%;                /* @kind color */
+  --ds-text-2: 215 16% 30%;                /* @kind color */
+  --ds-text-3: 215 16% 50%;                /* @kind color */
+  --ds-text-4: 215 12% 65%;                /* @kind color */
+  --ds-border-subtle: 220 13% 92%;         /* @kind color */
+  --ds-border-default: 220 13% 87%;        /* @kind color */
+  --ds-border-strong: 220 13% 78%;         /* @kind color */
+  --ds-ok: 160 84% 32%;                    /* @kind color */
+  --ds-ok-fg: 160 84% 22%;                 /* @kind color */
+  --ds-ok-soft: 160 84% 95%;               /* @kind color */
+  --ds-ok-border: 160 70% 75%;             /* @kind color */
+  --ds-warn: 35 95% 45%;                   /* @kind color */
+  --ds-warn-fg: 30 90% 30%;                /* @kind color */
+  --ds-warn-soft: 40 95% 95%;              /* @kind color */
+  --ds-warn-border: 35 85% 75%;            /* @kind color */
+  --ds-danger: 0 72% 48%;                  /* @kind color */
+  --ds-danger-fg: 0 72% 38%;               /* @kind color */
+  --ds-danger-soft: 0 90% 96%;             /* @kind color */
+  --ds-danger-border: 0 80% 82%;           /* @kind color */
+  --ds-info: 217 90% 50%;                  /* @kind color */
+  --ds-info-fg: 217 80% 38%;               /* @kind color */
+  --ds-info-soft: 217 90% 96%;             /* @kind color */
+  --ds-info-border: 217 80% 80%;           /* @kind color */
+  --glass-fill: linear-gradient(to bottom, rgba(255,255,255,0.7), rgba(255,255,255,0.55)); /* @kind other */
+  --glass-fill-strong: linear-gradient(to bottom, rgba(255,255,255,0.82), rgba(255,255,255,0.7)); /* @kind other */
+  --glass-fill-soft: rgba(255,255,255,0.55); /* @kind color */
+  --glass-border: rgba(0,0,0,0.08);        /* @kind color */
+  --glass-specular: inset 0 1px 0 rgba(255,255,255,0.8), inset 0 -1px 0 rgba(0,0,0,0.05); /* @kind shadow */
+  --glass-shadow: 0 12px 40px rgba(0,0,0,0.10); /* @kind shadow */
+}
+
+.opai-app {
+  color: hsl(var(--app-foreground));
+  background: hsl(var(--app-background));
+  font-family: var(--app-font-sans);
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  -webkit-font-smoothing: antialiased;
+}
+
+/* App semantic type — DS v4 roles */
+.opai-app h1, .opai-app .h1, .opai-app .t-display { font-size: var(--t-display); font-weight: 600; letter-spacing: -0.01em; line-height: 1.2; }
+.opai-app h2, .opai-app .h2, .opai-app .t-heading { font-size: var(--t-heading); font-weight: 600; line-height: 1.25; }
+.opai-app h3, .opai-app .h3, .opai-app .t-title { font-size: var(--t-title); font-weight: 500; line-height: 1.3; }
+.opai-app p,  .opai-app .body, .opai-app .t-body { font-size: var(--t-body); line-height: 1.45; }
+.opai-app .t-caption { font-size: var(--t-caption); line-height: 1.45; color: hsl(var(--ds-text-3)); }
+.opai-app .t-eyebrow { font-size: var(--t-eyebrow); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; }
+.opai-app .t-metric { font-size: var(--t-metric); font-weight: 600; line-height: 1; font-family: var(--app-font-mono); }
+.opai-app .mono { font-family: var(--app-font-mono); }
+.opai-app .display { font-family: var(--app-font-display); }
+
+/* Liquid Glass v1 material recipes (containers only; inner rows
+   use glass-soft with NO blur; max ~10 blurs per viewport) */
+.opai-app .glass { position: relative; background: var(--glass-fill); border: 1px solid var(--glass-border); box-shadow: var(--glass-specular), var(--glass-shadow); border-radius: 22px; backdrop-filter: var(--glass-blur-2); -webkit-backdrop-filter: var(--glass-blur-2); }
+.opai-app .glass-strong { position: relative; background: var(--glass-fill-strong), hsl(var(--app-card) / 0.72); border: 1px solid var(--glass-border); box-shadow: var(--glass-specular), var(--glass-shadow); border-radius: 26px; backdrop-filter: var(--glass-blur-3); -webkit-backdrop-filter: var(--glass-blur-3); }
+.opai-app .glass-soft { position: relative; background: var(--glass-fill-soft); box-shadow: var(--glass-specular); border-radius: 16px; border: 1px solid var(--glass-border); }
+.opai-app .glass-pill { position: relative; background: var(--glass-fill); border: 1px solid var(--glass-border); box-shadow: var(--glass-specular), var(--glass-shadow); border-radius: 999px; backdrop-filter: var(--glass-blur-2); -webkit-backdrop-filter: var(--glass-blur-2); }
+
+/* ============================================================
+   2. MARKETING SCOPE — unchanged upstream. Editorial, flat teal.
+   Source: src/app/(marketing)/marketing.css
+   ============================================================ */
+.opai-mk,
+:root {
+  --mk-bg:           #050A12;              /* @kind color */
+  --mk-bg-card:      #0C1523;              /* @kind color */
+  --mk-bg-card-h:    #101D2E;              /* @kind color */
+  --mk-teal:         #00D4B0;              /* @kind color */
+  --mk-teal-dim:     rgba(0,212,176,0.10); /* @kind color */
+  --mk-teal-mid:     rgba(0,212,176,0.22); /* @kind color */
+  --mk-teal-glow:    rgba(0,212,176,0.28); /* @kind color */
+  --mk-orange:       #FF5A35;              /* @kind color */
+  --mk-orange-dim:   rgba(255,90,53,0.10); /* @kind color */
+  --mk-text:         #E8EDF5;              /* @kind color */
+  --mk-muted:        #657BA0;              /* @kind color */
+  --mk-border:       #182438;              /* @kind color */
+  --mk-border-h:     #243650;              /* @kind color */
+  --mk-nav-bg:       rgba(5,10,18,0.92);   /* @kind color */
+  --mk-grid-line:    rgba(0,212,176,0.025);/* @kind color */
+
+  --mk-font-h: 'Exo 2', 'Barlow', system-ui, sans-serif;
+  --mk-font-b: 'DM Sans', system-ui, sans-serif;
+  --mk-font-m: 'JetBrains Mono', ui-monospace, monospace;
+
+  --mk-max: 1200px;                        /* @kind spacing */
+  --mk-section: clamp(64px, 10vw, 120px);  /* @kind spacing */
+}
+
+.opai-mk[data-mk-theme="light"] {
+  --mk-bg:          #F8F9FC;               /* @kind color */
+  --mk-bg-card:     #FFFFFF;               /* @kind color */
+  --mk-bg-card-h:   #F0F2F7;               /* @kind color */
+  --mk-teal:        #00A88A;               /* @kind color */
+  --mk-teal-dim:    rgba(0,168,138,0.08);  /* @kind color */
+  --mk-teal-mid:    rgba(0,168,138,0.16);  /* @kind color */
+  --mk-teal-glow:   rgba(0,168,138,0.22);  /* @kind color */
+  --mk-orange:      #E04420;               /* @kind color */
+  --mk-text:        #1A202C;               /* @kind color */
+  --mk-muted:       #5A6578;               /* @kind color */
+  --mk-border:      #E2E6EE;               /* @kind color */
+  --mk-border-h:    #CBD2DE;               /* @kind color */
+  --mk-nav-bg:      rgba(248,249,252,0.92);/* @kind color */
+  --mk-grid-line:   rgba(0,168,138,0.04);  /* @kind color */
+}
+
+.opai-mk {
+  background: var(--mk-bg);
+  color: var(--mk-text);
+  font-family: var(--mk-font-b);
+  font-size: 16px;
+  line-height: 1.6;
+}
+
+.opai-mk .mk-h1 { font-family: var(--mk-font-h); font-weight: 800; font-size: clamp(2.2rem, 5.5vw, 4rem); line-height: 1.08; letter-spacing: -0.02em; color: var(--mk-text); }
+.opai-mk .mk-h2 { font-family: var(--mk-font-h); font-weight: 800; font-size: clamp(1.8rem, 4vw, 2.8rem); line-height: 1.1; color: var(--mk-text); }
+.opai-mk .mk-h3 { font-family: var(--mk-font-h); font-weight: 700; font-size: 1.2rem; color: var(--mk-text); }
+.opai-mk .mk-lede { color: var(--mk-muted); font-size: clamp(1rem, 1.8vw, 1.15rem); line-height: 1.75; }
+.opai-mk .mk-body { font-size: 0.95rem; line-height: 1.75; color: var(--mk-muted); }
+
+.opai-mk .mk-label { display: inline-flex; align-items: center; gap: 8px; font-family: var(--mk-font-m); font-size: 11px; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--mk-teal); border: 1px solid var(--mk-teal-glow); background: var(--mk-teal-dim); padding: 5px 12px; border-radius: 2px; }
+.opai-mk .mk-pulse { width: 6px; height: 6px; background: var(--mk-teal); border-radius: 50%; animation: mk-pulse 2s infinite; }
+@keyframes mk-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+.opai-mk .mk-btn-primary { display: inline-flex; align-items: center; gap: 10px; background: var(--mk-teal); color: #020A0E; font-family: var(--mk-font-h); font-weight: 700; font-size: 0.92rem; letter-spacing: 0.04em; padding: 14px 28px; border-radius: 3px; border: none; cursor: pointer; transition: all 0.2s; }
+.opai-mk .mk-btn-primary:hover { background: #00EDCA; transform: translateY(-1px); }
+.opai-mk .mk-btn-ghost { display: inline-flex; align-items: center; gap: 8px; background: transparent; color: var(--mk-text); font-family: var(--mk-font-h); font-weight: 600; font-size: 0.92rem; padding: 13px 24px; border-radius: 3px; border: 1px solid var(--mk-border-h); cursor: pointer; transition: all 0.2s; }
+.opai-mk .mk-btn-ghost:hover { border-color: var(--mk-teal); color: var(--mk-teal); }
+
+.opai-mk .mk-card { background: var(--mk-bg-card); border: 1px solid var(--mk-border); border-radius: 4px; transition: all 0.25s; }
+.opai-mk .mk-card:hover { border-color: var(--mk-border-h); transform: translateY(-2px); }
+
+.opai-mk .mk-grid-bg { position: relative; }
+.opai-mk .mk-grid-bg::before { content: ''; position: absolute; inset: 0; background-image: linear-gradient(var(--mk-grid-line) 1px, transparent 1px), linear-gradient(90deg, var(--mk-grid-line) 1px, transparent 1px); background-size: 48px 48px; pointer-events: none; z-index: 0; }
+
+/* ============================================================
+   3. SPACING + RADII + ELEVATION — DS v3
+   ============================================================ */
+:root {
+  --space-1: 0.25rem;   /* @kind spacing */
+  --space-2: 0.5rem;    /* @kind spacing */
+  --space-3: 0.75rem;   /* @kind spacing */
+  --space-4: 1rem;      /* @kind spacing */
+  --space-5: 1.25rem;   /* @kind spacing */
+  --space-6: 1.5rem;    /* @kind spacing */
+  --space-8: 2rem;      /* @kind spacing */
+  --space-10: 2.5rem;   /* @kind spacing */
+  --space-12: 3rem;     /* @kind spacing */
+  --space-16: 4rem;     /* @kind spacing */
+
+  /* DS v3 radii */
+  --ds-radius-sm: 6px;      /* @kind radius */
+  --ds-radius-md: 10px;     /* @kind radius */
+  --ds-radius-lg: 14px;     /* @kind radius */
+  --ds-radius-xl: 20px;     /* @kind radius */
+  --ds-radius-pill: 999px;  /* @kind radius */
+  /* Glass radii: soft 16 / base 22 / strong 26 / pill */
+
+  /* DS v3 shadows — dark values (light theme is softer) */
+  --ds-shadow-xs: 0 1px 2px 0 hsl(220 60% 2% / 0.4);   /* @kind shadow */
+  --ds-shadow-sm: 0 1px 3px 0 hsl(220 60% 2% / 0.5), 0 1px 2px -1px hsl(220 60% 2% / 0.4); /* @kind shadow */
+  --ds-shadow-md: 0 4px 12px -2px hsl(220 60% 2% / 0.55), 0 2px 4px -2px hsl(220 60% 2% / 0.45); /* @kind shadow */
+  --ds-shadow-lg: 0 12px 24px -8px hsl(220 60% 2% / 0.6), 0 4px 8px -4px hsl(220 60% 2% / 0.45); /* @kind shadow */
+  --ds-shadow-glow-brand: 0 0 0 1px hsl(168 78% 38% / 0.28), 0 6px 24px -8px hsl(168 78% 38% / 0.45); /* @kind shadow */
+}

@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-design-system-00ba34e0-dc81-4559-9ac3-3ae7b680284c/colors_and_type.css">
+<script src="_ds/opai-design-system-00ba34e0-dc81-4559-9ac3-3ae7b680284c/_ds_bundle.js"></script>
+<script src="pg-data.js"></script>
+<script src="pg-icons.js"></script>
+</helmet>
+<div style="display:flex;flex-direction:column;min-height:100%;">
+  <div style="position:sticky;top:0;z-index:15;background:hsl(var(--ds-surface-0));border-bottom:1px solid hsl(var(--ds-border-subtle));padding:{{ hPad }};display:flex;flex-direction:column;gap:12px;">
+    <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;min-height:40px;">
+      <h1 style="margin:0;font-size:21px;line-height:28px;font-weight:600;letter-spacing:-.01em;">Pauta</h1>
+      <div style="display:flex;padding:3px;border-radius:10px;background:hsl(var(--app-muted));order:{{ segOrder }};width:{{ segW }};">
+        <sc-for list="{{ views }}" as="v" hint-placeholder-count="3">
+          <button onClick="{{ v.onClick }}" style="flex:1;height:36px;padding:0 12px;border:0;border-radius:8px;background:{{ v.bg }};color:{{ v.fg }};font-size:13px;font-weight:{{ v.fw }};box-shadow:{{ v.sh }};cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;white-space:nowrap;">{{ v.l }}<sc-if value="{{ v.n }}"><span style="font-family:var(--app-font-mono);font-size:11px;min-width:18px;padding:0 5px;border-radius:999px;background:{{ v.nbg }};color:{{ v.nfg }};">{{ v.n }}</span></sc-if></button>
+        </sc-for>
+      </div>
+      <span style="flex:1;"></span>
+      <span style="font-size:12px;color:hsl(var(--ds-text-3));white-space:nowrap;">Hoy vie 06-11-2026 · 12:40</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;height:44px;">
+      <div style="width:{{ perW }};flex:none;display:flex;align-items:center;border:1px solid hsl(var(--ds-border-default));border-radius:10px;height:44px;background:hsl(var(--app-card));">
+        <button onClick="{{ prev }}" aria-label="Anterior" style="width:40px;height:42px;border:0;background:transparent;color:{{ prevFg }};display:grid;place-items:center;cursor:pointer;"><pg-i name="chevron-left" size="16"></pg-i></button>
+        <span style="flex:1;text-align:center;font-weight:600;font-size:13px;white-space:nowrap;">{{ periodLabel }}</span>
+        <button onClick="{{ next }}" aria-label="Siguiente" style="width:40px;height:42px;border:0;background:transparent;color:{{ nextFg }};display:grid;place-items:center;cursor:pointer;"><pg-i name="chevron-right" size="16"></pg-i></button>
+      </div>
+      <select value="{{ instVal }}" onChange="{{ onInst }}" style="width:{{ instW }};flex:{{ instFlex }};min-width:0;height:44px;padding:0 10px;border:1px solid hsl(var(--ds-border-default));border-radius:10px;background:hsl(var(--app-card));color:hsl(var(--ds-text-1));font-size:{{ fs }};font-family:inherit;">
+        <sc-for list="{{ instOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o.id }}">{{ o.nombre }}</option></sc-for>
+      </select>
+      <sc-if value="{{ md }}">
+        <div style="flex:1;min-width:0;display:flex;align-items:center;gap:8px;overflow-x:auto;scrollbar-width:none;height:44px;">
+          <sc-if value="{{ isMes }}">
+            <select value="{{ fn }}" onChange="{{ onFn }}" style="height:36px;padding:0 10px;border:1px solid hsl(var(--ds-border-default));border-radius:999px;background:hsl(var(--app-card));color:hsl(var(--ds-text-2));font-size:13px;font-family:inherit;flex:none;">
+              <sc-for list="{{ fnOpts }}" as="o" hint-placeholder-count="3"><option value="{{ o }}">{{ o }}</option></sc-for>
+            </select>
+          </sc-if>
+          <sc-for list="{{ chips }}" as="f" hint-placeholder-count="3">
+            <button onClick="{{ f.onClick }}" style="flex:none;height:36px;padding:0 12px;border-radius:999px;border:1px solid {{ f.bd }};background:{{ f.bg }};color:{{ f.fg }};font-size:13px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:6px;white-space:nowrap;">{{ f.l }}<sc-if value="{{ f.n }}"><span style="font-family:var(--app-font-mono);font-size:11px;opacity:.75;">{{ f.n }}</span></sc-if><sc-if value="{{ f.dd }}"><pg-i name="chevron-down" size="14"></pg-i></sc-if></button>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+  </div>
+
+  <div style="flex:1;padding:{{ bPad }};display:flex;flex-direction:column;gap:12px;">
+    <sc-if value="{{ isMes }}" hint-placeholder-val="{{ true }}">
+      <sc-if value="{{ isLoading }}">
+        <div style="border:1px solid hsl(var(--ds-border-default));border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:6px;">
+          <sc-for list="{{ sk }}" as="k" hint-placeholder-count="8"><div style="display:flex;gap:4px;"><div style="width:200px;height:32px;border-radius:6px;background:hsl(var(--app-muted));animation:pgPulse 1.4s infinite;"></div><div style="flex:1;height:32px;border-radius:6px;background:hsl(var(--app-muted));animation:pgPulse 1.4s infinite;"></div></div></sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ isMsg }}">
+        <div style="border:1px dashed hsl(var(--ds-border-strong));border-radius:14px;padding:48px 20px;display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;">
+          <span style="font-weight:600;">{{ msgTitle }}</span>
+          <button onClick="{{ msgAction }}" style="height:44px;padding:0 16px;border:1px solid hsl(var(--ds-border-strong));border-radius:10px;background:hsl(var(--app-card));color:hsl(var(--ds-text-1));font-weight:500;cursor:pointer;">{{ msgBtn }}</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ resultNote }}">
+        <div style="display:flex;gap:8px;align-items:center;padding:10px 12px;border-radius:10px;background:hsl(var(--ds-info-soft));color:hsl(var(--ds-info-fg));font-size:13px;flex-wrap:wrap;"><pg-i name="info" size="16"></pg-i><span style="flex:1;min-width:200px;text-wrap:pretty;">{{ resultNote }}</span><button onClick="{{ undoPaint }}" style="height:32px;padding:0 10px;border:1px solid currentColor;border-radius:8px;background:transparent;color:inherit;font-size:12px;font-weight:600;cursor:pointer;">Deshacer</button></div>
+      </sc-if>
+      <sc-if value="{{ showGrid }}" hint-placeholder-val="{{ true }}">
+        <div ref="{{ gridRef }}" style="border:1px solid hsl(var(--ds-border-default));border-radius:14px;background:hsl(var(--app-card));overflow:auto;height:{{ gridH }};min-height:320px;overscroll-behavior:contain;">
+          <table style="border-collapse:separate;border-spacing:0;font-size:12px;">
+            <thead><tr>
+              <th style="position:sticky;left:0;top:0;z-index:4;width:220px;min-width:220px;background:hsl(var(--app-card));border-bottom:1px solid hsl(var(--ds-border-default));border-right:1px solid hsl(var(--ds-border-default));text-align:left;padding:8px 12px;font-weight:500;color:hsl(var(--ds-text-3));">Puesto · {{ ws }}</th>
+              <sc-for list="{{ days }}" as="d" hint-placeholder-count="30"><th title="{{ d.title }}" style="position:sticky;top:0;z-index:3;min-width:34px;padding:4px 1px 6px;background:{{ d.hbg }};border-bottom:{{ d.hbd }};font-weight:500;color:{{ d.hfg }};line-height:14px;"><div style="font-size:10px;font-weight:600;color:hsl(var(--app-primary));height:12px;">{{ d.tag }}</div><div>{{ d.wd }}</div><div style="font-family:var(--app-font-mono);color:{{ d.nfg }};font-weight:{{ d.nfw }};">{{ d.dd }}</div></th></sc-for>
+            </tr></thead>
+            <tbody>
+              <sc-for list="{{ blocks }}" as="b" hint-placeholder-count="6">
+                <tr><td colspan="{{ colspan }}" data-block="{{ b.id }}" style="padding:0;border-top:1px solid hsl(var(--ds-border-default));background:{{ b.hbg }};"><div style="position:sticky;left:0;display:inline-flex;gap:8px;align-items:baseline;padding:8px 12px;"><span style="font-weight:600;font-size:13px;color:hsl(var(--ds-text-1));white-space:nowrap;">{{ b.nombre }}</span><span style="color:hsl(var(--ds-text-3));white-space:nowrap;">{{ b.meta }}</span><sc-if value="{{ b.focus }}"><span style="font-size:11px;font-weight:600;color:hsl(var(--app-primary));">desde la instalación</span></sc-if></div></td></tr>
+                <sc-for list="{{ b.rows }}" as="r" hint-placeholder-count="2">
+                  <tr>
+                    <td style="position:sticky;left:0;z-index:2;background:hsl(var(--app-card));border-right:1px solid hsl(var(--ds-border-default));padding:2px 12px;height:40px;">
+                      <div style="display:flex;flex-direction:column;align-items:flex-start;">
+                        <sc-if value="{{ r.link }}"><button onClick="{{ r.onName }}" title="Abrir ficha de {{ r.n }} en Personas" style="border:0;background:transparent;padding:0;font-family:inherit;font-size:13px;color:hsl(var(--ds-text-1));cursor:pointer;max-width:196px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-decoration:underline;text-decoration-color:hsl(var(--ds-border-strong));text-underline-offset:3px;" style-hover="color:hsl(var(--app-primary));text-decoration-color:hsl(var(--app-primary));">{{ r.n }}</button></sc-if>
+                        <sc-if value="{{ r.empty }}"><span style="font-size:13px;color:hsl(var(--ds-danger-fg));font-weight:500;">Sin asignar</span></sc-if>
+                        <span style="font-size:11px;color:hsl(var(--ds-text-3));">{{ r.rol }}</span>
+                      </div>
+                    </td>
+                    <sc-for list="{{ r.cells }}" as="x" hint-placeholder-count="30">
+                      <td style="padding:2px 1px;background:{{ x.col }};"><button data-cell="{{ x.key }}" onClick="{{ x.onClick }}" onContextMenu="{{ x.onCtx }}" title="{{ x.title }}" style="width:32px;height:36px;border-radius:6px;border:1px solid {{ x.bd }};background:{{ x.bg }};color:{{ x.fg }};font-family:var(--app-font-mono);font-size:{{ x.fs }};font-weight:600;cursor:{{ x.cur }};padding:0;opacity:{{ x.op }};box-shadow:{{ x.ring }};transition:box-shadow .2s cubic-bezier(0.2,0,0,1);">{{ x.t }}</button></td>
+                    </sc-for>
+                  </tr>
+                </sc-for>
+                <tr>
+                  <td style="position:sticky;left:0;z-index:2;background:hsl(var(--app-card));border-right:1px solid hsl(var(--ds-border-default));padding:2px 12px 8px;font-size:11px;color:hsl(var(--ds-text-3));">Cobertura del puesto</td>
+                  <sc-for list="{{ b.cov }}" as="x" hint-placeholder-count="30"><td style="text-align:center;padding:2px 1px 8px;background:{{ x.col }};"><span title="{{ x.title }}" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:{{ x.c }};opacity:{{ x.op }};"></span></td></sc-for>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+      </sc-if>
+      <sc-if value="{{ showCal }}">
+        <label style="display:flex;flex-direction:column;gap:6px;"><span style="font-size:13px;font-weight:500;">Puesto</span>
+          <select value="{{ pid }}" onChange="{{ onP }}" style="height:44px;padding:0 10px;border:1px solid hsl(var(--ds-border-default));border-radius:10px;background:hsl(var(--app-card));color:hsl(var(--ds-text-1));font-size:16px;font-family:inherit;">
+            <sc-for list="{{ pOpts }}" as="o" hint-placeholder-count="6"><option value="{{ o.id }}">{{ o.nombre }}</option></sc-for>
+          </select></label>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;font-size:12px;color:hsl(var(--ds-text-3));align-items:center;">
+          <span>{{ calMeta }}</span>
+          <sc-for list="{{ calPeople }}" as="cp" hint-placeholder-count="2"><button onClick="{{ cp.onClick }}" style="height:32px;padding:0 10px;border:1px solid hsl(var(--ds-border-default));border-radius:999px;background:transparent;color:hsl(var(--ds-text-1));font-size:12px;cursor:pointer;display:flex;align-items:center;gap:6px;"><span style="font-weight:600;font-family:var(--app-font-mono);">{{ cp.ini }}</span>{{ cp.n }}<pg-i name="chevron-right" size="12"></pg-i></button></sc-for>
+        </div>
+        <div style="display:grid;grid-template-columns:{{ calLayout }};gap:16px;align-items:start;">
+          <div style="border:1px solid hsl(var(--ds-border-default));border-radius:14px;background:hsl(var(--app-card));padding:8px;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;">
+            <sc-for list="{{ wdh }}" as="h" hint-placeholder-count="7"><span style="text-align:center;font-size:11px;color:hsl(var(--ds-text-3));padding:4px 0;">{{ h }}</span></sc-for>
+            <sc-for list="{{ cal }}" as="x" hint-placeholder-count="35">
+              <button onClick="{{ x.onClick }}" title="{{ x.title }}" style="height:{{ calH }};border-radius:8px;border:1px solid {{ x.bd }};background:{{ x.bg }};color:{{ x.fg }};display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:0;visibility:{{ x.vis }};cursor:pointer;opacity:{{ x.op }};box-shadow:{{ x.ring }};">
+                <span style="font-size:10px;color:{{ x.ddfg }};font-family:var(--app-font-mono);font-weight:{{ x.ddfw }};">{{ x.dd }}</span>
+                <span style="font-size:13px;font-weight:700;font-family:var(--app-font-mono);line-height:16px;">{{ x.t }}</span>
+                <span style="font-size:10px;line-height:12px;">{{ x.who }}</span>
+              </button>
+            </sc-for>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:8px;">
+            <span style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:hsl(var(--ds-text-3));">PPC de este mes · {{ ppcList.length }}</span>
+            <div style="border:1px solid hsl(var(--ds-border-default));border-radius:10px;background:hsl(var(--app-card));max-height:{{ listMax }};overflow:auto;">
+              <sc-for list="{{ ppcList }}" as="x" hint-placeholder-count="4">
+                <div style="min-height:56px;display:flex;align-items:center;gap:10px;padding:6px 8px 6px 12px;border-bottom:1px solid hsl(var(--ds-border-subtle));">
+                  <span style="flex:1;display:flex;flex-direction:column;"><span style="font-weight:500;font-size:13px;">{{ x.date }}</span><span style="font-size:12px;color:hsl(var(--ds-danger-fg));">{{ x.motivo }}</span></span>
+                  <sc-if value="{{ canAssign }}"><button onClick="{{ x.onAssign }}" style="height:44px;padding:0 12px;border:1px solid hsl(var(--ds-border-strong));border-radius:10px;background:transparent;color:hsl(var(--ds-text-1));font-size:13px;font-weight:500;cursor:pointer;">Asignar</button></sc-if>
+                </div>
+              </sc-for>
+              <sc-if value="{{ noPPC }}"><div style="padding:16px 12px;font-size:13px;color:hsl(var(--ds-text-3));">Este puesto está cubierto todo el mes.</div></sc-if>
+            </div>
+            <span style="font-size:12px;color:hsl(var(--ds-text-3));text-wrap:pretty;">Pintar series es de iPad y computador. En el celular se ve la pauta y se asigna.</span>
+          </div>
+        </div>
+      </sc-if>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;align-items:center;font-size:12px;color:hsl(var(--ds-text-3));">
+        <span style="display:flex;gap:6px;align-items:center;"><span style="width:20px;height:20px;border-radius:4px;border:1px solid hsl(var(--ds-border-strong));background:hsl(var(--app-muted));display:grid;place-items:center;font-family:var(--app-font-mono);font-weight:600;color:hsl(var(--ds-text-1));font-size:11px;">D</span>Día</span>
+        <span style="display:flex;gap:6px;align-items:center;"><span style="width:20px;height:20px;border-radius:4px;border:1px solid hsl(var(--ds-border-strong));background:hsl(var(--app-muted));display:grid;place-items:center;font-family:var(--app-font-mono);font-weight:600;color:hsl(var(--ds-text-1));font-size:11px;">N</span>Noche</span>
+        <span style="display:flex;gap:6px;align-items:center;"><span style="width:20px;height:20px;border-radius:4px;background:hsl(var(--app-muted));display:grid;place-items:center;font-family:var(--app-font-mono);color:hsl(var(--ds-text-4));font-size:11px;">–</span>Libre</span>
+        <span style="display:flex;gap:6px;align-items:center;"><span style="width:20px;height:20px;border-radius:4px;border:1px solid hsl(var(--ds-danger-border));background:hsl(var(--ds-danger-soft));display:grid;place-items:center;font-family:var(--app-font-mono);font-weight:600;color:hsl(var(--ds-danger-fg));font-size:8px;">PPC</span>Por cubrir</span>
+        <span style="display:flex;gap:6px;align-items:center;"><span style="width:20px;height:20px;border-radius:4px;border:1px solid hsl(var(--ds-border-strong));background:hsl(var(--app-muted));opacity:.4;display:grid;place-items:center;font-family:var(--app-font-mono);font-weight:600;font-size:11px;">D</span>Pasado o asistido: no se repinta</span>
+        <span style="flex:1;"></span>
+        <sc-if value="{{ md }}"><span>Clic derecho en una celda para pintar la serie desde ese día.</span></sc-if>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isPPC }}"><dc-import name="PG-PPC" ctx="{{ ctx }}" hint-size="100%,480px"></dc-import></sc-if>
+    <sc-if value="{{ isAsis }}"><dc-import name="PG-Asistencia" ctx="{{ ctxA }}" hint-size="100%,480px"></dc-import></sc-if>
+  </div>
+
+  <sc-if value="{{ menu }}">
+    <div onClick="{{ closeMenu }}" onContextMenu="{{ closeMenu }}" style="position:fixed;inset:0;z-index:40;background:{{ menu.scrim }};"></div>
+    <div style="position:fixed;left:{{ menu.x }};top:{{ menu.y }};right:{{ menu.r }};bottom:{{ menu.b }};z-index:41;width:{{ menu.w }};max-height:{{ menu.mh }};overflow:auto;background:hsl(var(--app-popover));border:1px solid hsl(var(--ds-border-default));border-radius:{{ menu.rad }};box-shadow:0 12px 32px -8px rgba(17,17,19,.18),0 2px 6px rgba(17,17,19,.06);display:flex;flex-direction:column;animation:pgUp .15s cubic-bezier(0.2,0,0,1);">
+      <div style="padding:10px 12px 8px;border-bottom:1px solid hsl(var(--ds-border-subtle));display:flex;flex-direction:column;gap:2px;">
+        <span style="font-size:12px;color:hsl(var(--ds-text-3));">{{ menu.date }}</span>
+        <span style="font-size:13px;font-weight:600;">{{ menu.puesto }}</span>
+        <span style="font-size:12px;color:hsl(var(--ds-text-2));">{{ menu.who }}</span>
+      </div>
+      <sc-if value="{{ menu.ppcTip }}"><div style="margin:8px 12px 0;padding:8px 10px;border-radius:8px;background:hsl(var(--ds-danger-soft));color:hsl(var(--ds-danger-fg));font-size:12px;font-weight:500;text-wrap:pretty;">{{ menu.ppcTip }}</div></sc-if>
+      <sc-if value="{{ menu.lockNote }}"><div style="margin:8px 12px 0;padding:8px 10px;border-radius:8px;background:hsl(var(--app-muted));color:hsl(var(--ds-text-2));font-size:12px;display:flex;gap:8px;text-wrap:pretty;"><pg-i name="clock" size="14"></pg-i><span>{{ menu.lockNote }}</span></div></sc-if>
+      <sc-if value="{{ menu.showItems }}">
+        <div style="padding:4px;display:flex;flex-direction:column;">
+          <sc-for list="{{ menu.items }}" as="mi" hint-placeholder-count="3">
+            <button onClick="{{ mi.onClick }}" style="min-height:40px;display:flex;align-items:center;gap:10px;padding:0 10px;border:0;border-radius:6px;background:transparent;color:hsl(var(--ds-text-1));font-size:13px;font-weight:{{ mi.fw }};text-align:left;cursor:pointer;" style-hover="background:hsl(var(--app-muted));"><pg-i name="{{ mi.icon }}" size="16" style="color:hsl(var(--ds-text-3));"></pg-i><span style="flex:1;">{{ mi.l }}</span></button>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ menu.showForm }}">
+        <div style="padding:12px;display:flex;flex-direction:column;gap:12px;">
+          <span style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:hsl(var(--ds-text-3));">Pintar serie desde aquí</span>
+          <label style="display:flex;flex-direction:column;gap:6px;"><span style="font-size:12px;font-weight:500;">Patrón</span>
+            <select value="{{ form.pat }}" onChange="{{ onPat }}" style="height:40px;padding:0 10px;border:1px solid hsl(var(--ds-border-default));border-radius:10px;background:hsl(var(--app-card));color:hsl(var(--ds-text-1));font-size:13px;font-family:inherit;">
+              <sc-for list="{{ patOpts }}" as="o" hint-placeholder-count="7"><option value="{{ o.v }}">{{ o.l }}</option></sc-for>
+            </select></label>
+          <sc-if value="{{ form.cyc }}">
+            <div style="display:flex;flex-direction:column;gap:6px;"><span style="font-size:12px;font-weight:500;">Inicio del ciclo</span>
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;"><span style="font-size:13px;color:hsl(var(--ds-text-2));">{{ menu.dShort }} es el día</span>
+                <div style="display:flex;align-items:center;height:40px;border:1px solid hsl(var(--ds-border-default));border-radius:10px;"><button onClick="{{ dayDec }}" aria-label="Menos" style="width:36px;height:38px;border:0;background:transparent;color:hsl(var(--ds-text-1));font-size:16px;cursor:pointer;">−</button><span style="min-width:24px;text-align:center;font-family:var(--app-font-mono);font-weight:600;">{{ form.day }}</span><button onClick="{{ dayInc }}" aria-label="Más" style="width:36px;height:38px;border:0;background:transparent;color:hsl(var(--ds-text-1));font-size:16px;cursor:pointer;">+</button></div>
+                <span style="font-size:13px;color:hsl(var(--ds-text-2));">de {{ form.len }}</span></div>
+              <span style="font-size:12px;color:hsl(var(--ds-text-3));">{{ form.dayHelp }}</span></div>
+          </sc-if>
+          <sc-if value="{{ form.sem }}"><span style="font-size:12px;color:hsl(var(--ds-text-3));">Semanal: pinta {{ form.semDays }} de cada semana.</span></sc-if>
+          <div style="display:flex;flex-direction:column;gap:6px;"><span style="font-size:12px;font-weight:500;">Turno</span>
+            <div style="display:flex;padding:3px;border-radius:10px;background:hsl(var(--app-muted));">
+              <sc-for list="{{ turnos }}" as="t" hint-placeholder-count="3"><button onClick="{{ t.onClick }}" style="flex:1;height:32px;border:0;border-radius:8px;background:{{ t.bg }};color:{{ t.fg }};font-size:12px;font-weight:{{ t.fw }};box-shadow:{{ t.sh }};cursor:pointer;">{{ t.l }}</button></sc-for>
+            </div>
+            <sc-if value="{{ form.rot }}"><div style="display:flex;gap:6px;align-items:center;font-size:12px;color:hsl(var(--ds-text-2));">Este ciclo es de
+              <sc-for list="{{ firsts }}" as="t" hint-placeholder-count="2"><button onClick="{{ t.onClick }}" style="height:28px;padding:0 10px;border-radius:999px;border:1px solid {{ t.bd }};background:{{ t.bg }};color:{{ t.fg }};font-size:12px;font-weight:600;cursor:pointer;">{{ t.l }}</button></sc-for></div></sc-if>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:4px;padding:8px;border-radius:10px;background:hsl(var(--ds-surface-0));border:1px solid hsl(var(--ds-border-subtle));">
+            <span style="font-size:11px;color:hsl(var(--ds-text-3));">Vista previa · 14 días desde {{ menu.dShort }}</span>
+            <div style="display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:2px;">
+              <sc-for list="{{ preview }}" as="x" hint-placeholder-count="14"><span title="{{ x.title }}" style="height:24px;border-radius:4px;background:{{ x.bg }};color:{{ x.fg }};border:1px solid {{ x.bd }};opacity:{{ x.op }};display:grid;place-items:center;font-size:10px;font-weight:600;font-family:var(--app-font-mono);">{{ x.t }}</span></sc-for>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:2px;"><sc-for list="{{ preview }}" as="x" hint-placeholder-count="14"><span style="text-align:center;font-size:9px;color:hsl(var(--ds-text-3));font-family:var(--app-font-mono);">{{ x.dd }}</span></sc-for></div>
+          </div>
+          <span style="font-size:12px;color:hsl(var(--ds-text-2));text-wrap:pretty;">{{ form.note }}</span>
+          <div style="display:flex;gap:8px;justify-content:flex-end;">
+            <button onClick="{{ closeMenu }}" style="height:40px;padding:0 14px;border:1px solid hsl(var(--ds-border-strong));border-radius:10px;background:transparent;color:hsl(var(--ds-text-1));font-weight:500;font-size:13px;cursor:pointer;">Cancelar</button>
+            <button onClick="{{ doPaint }}" style="height:40px;padding:0 14px;border:0;border-radius:10px;background:hsl(var(--app-primary));color:hsl(var(--app-primary-fg));font-weight:600;font-size:13px;cursor:pointer;">Pintar</button>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  gridRef = React.createRef();
+  PATS = { '4×4': { c: 8, w: 4 }, '7×7': { c: 14, w: 7 }, '14×14': { c: 28, w: 14 }, '3×4': { c: 7, w: 3 }, '5×2 lun–vie': { d: [1, 2, 3, 4, 5], l: 'lun a vie' }, '2×5 sáb–dom': { d: [6, 0], l: 'sáb y dom' }, '6×1 lun–sáb': { d: [1, 2, 3, 4, 5, 6], l: 'lun a sáb' } };
+  constructor(p) {
+    super(p);
+    const c = p.ctx || {};
+    const st = { month: 'nov', fn: 'Todas las funciones', onlyPPC: false, pid: null, menu: null, form: null, paints: {}, flash: {}, note: '', asisF: 'todos' };
+    if (c.variant === 'paint-result') { st.paints = { 'ca-rot-R': { from: 5, pat: '4×4', day: 2, turno: 'R', first: 'D' } }; st.flashAll = 'ca-rot-R'; st.note = 'Serie de Andrés Castillo pintada desde vie 06-11 (4×4 rotativo, este ciclo de día). Del 01 al 05 no cambió nada: son días pasados. Sigue sola en diciembre.'; }
+    this.state = st;
+  }
+  componentDidMount() {
+    if (!window.PG) this.iv = setInterval(() => { if (window.PG) { clearInterval(this.iv); this.forceUpdate(); this.afterData(); } }, 50); else this.afterData();
+  }
+  componentDidUpdate(pp) { const a = (pp.ctx || {}), b = (this.props.ctx || {}); if (a.focus !== b.focus || a.inst !== b.inst) this.afterData(); }
+  componentWillUnmount() { clearInterval(this.iv); clearTimeout(this.ft); }
+  afterData() {
+    const c = this.props.ctx || {};
+    setTimeout(() => {
+      const g = this.gridRef.current;
+      if (g && c.focus) { const td = g.querySelector('[data-block="' + c.focus + '"]'); if (td) g.scrollTop = Math.max(0, td.offsetTop - 44); }
+      if (c.variant === 'paint-menu' && !this.state.menu && c.md) { const el = document.querySelector('[data-cell="ca-rot-R-5"]'); if (el) this.openMenu('ca-rot', 'R', 5, el.getBoundingClientRect(), true); }
+    }, 120);
+  }
+  rowInfo(pid, R) {
+    const D = window.PG, c = this.props.ctx || {};
+    const all = D.puestos[c.inst] || D.puestos.quilicura;
+    const p = all.find(x => x.id === pid);
+    return { p, key: R === 'R' ? p.sR : p.sT, name: R === 'R' ? p.relevo : p.titular, rk: pid + '-' + R };
+  }
+  locked(rk, o) { const D = window.PG; return o < D.TODAY ? 'past' : (o === D.TODAY && D.marcasHoy[rk]) ? 'mark' : null; }
+  paintVal(pt, o, name) {
+    const D = window.PG, P = this.PATS[pt.pat], i = o - pt.from;
+    let v;
+    if (P.c) { const pos = D.md(i + pt.day - 1, P.c); if (pos >= P.w) v = '-'; else if (pt.turno === 'R') { const k = Math.floor((i + pt.day - 1) / P.c); v = (k % 2 === 0) === (pt.first === 'D') ? 'D' : 'N'; } else v = pt.turno; }
+    else v = P.d.includes(D.wd(o)) ? (pt.turno === 'N' ? 'N' : 'D') : '-';
+    if (!name && (v === 'D' || v === 'N')) return { ppc: 'Sin asignar', tip: 'PPC · Sin asignar' };
+    return v;
+  }
+  val(rk, key, name, o, paints) {
+    const D = window.PG, pt = (paints || this.state.paints)[rk];
+    if (pt && o >= pt.from && !this.locked(rk, o)) return this.paintVal(pt, o, name);
+    const f = D.S[key]; return f ? f(o) : '-';
+  }
+  defaultForm(p, R, rk, key, name, o) {
+    const D = window.PG, rol = p.rol;
+    const pat = /^5x2/.test(rol) ? '5×2 lun–vie' : /^2x5/.test(rol) ? '2×5 sáb–dom' : /^6x1/.test(rol) ? '6×1 lun–sáb' : '4×4';
+    const isWork = v => v === 'D' || v === 'N' || (v && typeof v === 'object');
+    const base = x => this.val(rk, key, name, x);
+    let day = 1;
+    if (this.PATS[pat].c) { const w = this.PATS[pat].w; let k = 0; if (isWork(base(o))) { while (k < 20 && isWork(base(o - k - 1))) k++; day = k + 1; } else { while (k < 20 && !isWork(base(o - k - 1))) k++; day = w + k + 1; } day = Math.min(day, this.PATS[pat].c); }
+    const cur = base(o);
+    const turno = /rotativo/.test(rol) ? 'R' : p.mid ? 'N' : 'D';
+    let first = 'D';
+    if (turno === 'R') { let k = 0; while (k < 20 && !(base(o - k) === 'D' || base(o - k) === 'N')) k++; first = base(o - k) === 'N' ? 'N' : 'D'; }
+    return { pat, day, turno, first };
+  }
+  openMenu(pid, R, o, rect, form) {
+    const D = window.PG, c = this.props.ctx || {};
+    const { p, key, name, rk } = this.rowInfo(pid, R);
+    const f = this.defaultForm(p, R, rk, key, name, o);
+    if (c.variant === 'paint-menu' && form) Object.assign(f, { pat: '4×4', day: 2, turno: 'R', first: 'D' });
+    const W = window.innerWidth, H = window.innerHeight, w = form ? 340 : 280;
+    const x = Math.max(8, Math.min(rect.left, W - w - 8));
+    const hh = form ? 520 : 240;
+    const y = rect.bottom + 6 + hh > H ? Math.max(8, rect.top - hh - 6) : rect.bottom + 6;
+    this.setState({ menu: { pid, R, o, x, y, w, mode: form ? 'form' : 'items' }, form: f });
+  }
+  renderVals() {
+    const D = window.PG, c = this.props.ctx || {}, st = this.state;
+    if (!D) return { views: [], chips: [], instOpts: [], fnOpts: [], days: [], blocks: [], cal: [], ppcList: [], pOpts: [], wdh: [], sk: [], turnos: [], firsts: [], patOpts: [], preview: [], calPeople: [], form: {} };
+    const view = c.view || 'mes';
+    const isMes = view === 'mes', T = D.TODAY;
+    const inst = D.instalaciones.find(i => i.id === c.inst) || D.instalaciones[0];
+    const all = D.puestos[inst.id] || D.puestos.quilicura.slice(0, 4);
+    const M = D.MONTHS[st.month], days = D.days(st.month);
+    const off = M.off;
+    const canPaint = c.md && c.assign;
+    const colOf = (d, o) => o === T ? 'hsl(var(--app-primary) / .07)' : d.we ? 'hsl(var(--app-muted) / .5)' : 'transparent';
+    const assign = p => { this.setState({ menu: null }); c.open('P03', { puesto: p.id }); };
+    const goPerson = n => c.go({ s: 'P06', persona: n });
+    const flashSet = st.flashAll;
+    const lockTip = (rk, o) => { const l = this.locked(rk, o); return l === 'past' ? 'Día pasado: no se modifica al repintar' : l === 'mark' ? 'Asistido (' + D.marcasHoy[rk] + '): no se modifica al repintar' : ''; };
+    const mkCell = (p, R, name, key, o, d) => {
+      const rk = p.id + '-' + R, v = this.val(rk, key, name, o), u = D.cellUI(v), lk = this.locked(rk, o);
+      const pt = st.paints[rk], painted = pt && o >= pt.from && !lk;
+      const ring = (flashSet === rk && painted) || st.flash[rk + '-' + o] ? '0 0 0 2px hsl(var(--app-primary))' : 'none';
+      const tip = d.wd + ' ' + d.date + ' · ' + u.tip + (lk ? ' · ' + lockTip(rk, o) : canPaint ? ' · Clic derecho: pintar serie desde aquí' : '');
+      const open = (e, form) => { e.preventDefault(); this.openMenu(p.id, R, o, e.currentTarget.getBoundingClientRect(), form); };
+      return { key: rk + '-' + o, t: u.t, bg: u.bg, fg: u.fg, bd: u.bd, fs: u.ppc ? '9px' : '12px', col: colOf(d, o), op: lk ? 0.4 : 1, ring, title: tip,
+        cur: 'pointer', onClick: e => open(e, false), onCtx: e => open(e, canPaint && !lk) };
+    };
+    const vis = all.filter(p => (st.fn === 'Todas las funciones' || p.funcion === st.fn)).filter(p => D.cellsFor(p.sT, st.month).some(v => v !== null) || st.paints[p.id + '-T']);
+    const blocks = vis.map(p => {
+      const rows = [], vals = [];
+      const subs = [['T', p.titular, p.sT, 'Titular']].concat(p.semanal ? [] : [['R', p.relevo, p.sR, 'Relevo']]);
+      subs.forEach(([R, name, key, rol]) => {
+        const cells = days.map((d, i) => mkCell(p, R, name, key, off + i, d));
+        vals.push(days.map((d, i) => this.val(p.id + '-' + R, key, name, off + i)));
+        rows.push({ n: name || 'Sin asignar', link: !!name, empty: !name, rol, onName: () => goPerson(name), cells });
+      });
+      const cov = days.map((d, i) => { const vs = vals.map(a => a[i]); const work = vs.some(v => v === 'D' || v === 'N'), ppc = vs.some(v => v && typeof v === 'object'); return { col: colOf(d, off + i), op: off + i < T ? 0.4 : 1, c: work ? 'hsl(var(--ds-ok))' : ppc ? 'hsl(var(--ds-danger))' : 'hsl(var(--ds-border-default))', title: work ? 'Cubierto' : ppc ? 'PPC' : 'Sin turno' }; });
+      const hasPPC = vals.some(a => a.some(v => v && typeof v === 'object'));
+      const focus = c.focus === p.id;
+      return { id: p.id, nombre: p.nombre, meta: p.rol + ' · ' + p.horario + (p.mid ? ' +1' : '') + (p.temporal ? ' · Temporal 15-12-2026 → 05-01-2027' : ''), rows, cov, hasPPC, focus, hbg: focus ? 'hsl(var(--app-primary) / .1)' : 'hsl(var(--ds-surface-0))' };
+    }).filter(b => !st.onlyPPC || b.hasPPC);
+    // menú contextual
+    let menu = null, form = { }, preview = [], turnos = [], firsts = [];
+    if (st.menu) {
+      const { pid, R, o } = st.menu, { p, key, name, rk } = this.rowInfo(pid, R);
+      const d = D.dateOf(o), v = this.val(rk, key, name, o), u = D.cellUI(v), lk = this.locked(rk, o);
+      const nextFree = (lk === 'mark' ? T + 1 : T);
+      const nd = D.dateOf(nextFree);
+      const items = [];
+      if (u.ppc && c.assign) items.push({ l: 'Asignar a este puesto', icon: 'user-plus', fw: 600, onClick: () => assign(p) });
+      if (u.ppc && c.contact && (o === T || o === T + 1)) items.push({ l: 'Búsqueda de urgencia', icon: 'search', fw: 500, onClick: () => { this.setState({ menu: null }); c.go({ s: 'P05' }); c.open('P05b'); } });
+      if (canPaint && !lk) items.push({ l: 'Pintar serie desde aquí…', icon: 'calendar', fw: 600, onClick: () => this.setState({ menu: Object.assign({}, st.menu, { mode: 'form', w: 340 }) }) });
+      if (canPaint && lk) items.push({ l: 'Pintar serie desde ' + D.WD[D.wd(nextFree)] + ' ' + nd.dd + '-' + nd.mm + '…', icon: 'calendar', fw: 600, onClick: () => { const f = this.defaultForm(p, R, rk, key, name, nextFree); this.setState({ menu: Object.assign({}, st.menu, { o: nextFree, mode: 'form', w: 340 }), form: f }); } });
+      if (name) items.push({ l: 'Ver ficha de ' + name, icon: 'user', fw: 500, onClick: () => goPerson(name) });
+      items.push({ l: 'Ver detalle del puesto', icon: 'layers', fw: 500, onClick: () => { this.setState({ menu: null }); c.go({ s: 'P01', inst: inst.id }); c.open('P02', { puesto: p.id }); } });
+      const f = st.form, P = this.PATS[f.pat];
+      const lockNote = lk === 'past' ? 'Este día ya pasó: no se modifica al repintar. La serie se puede pintar desde hoy, vie 06-11.' : lk === 'mark' ? 'Este día ya tiene marca (' + D.marcasHoy[rk] + '): no se modifica al repintar. Se puede pintar desde mañana.' : '';
+      const mob = c.m;
+      menu = { date: d.wd + ' ' + d.s + (o === T ? ' · hoy' : ''), dShort: d.wd + ' ' + d.dd, puesto: p.nombre, who: (R === 'R' ? 'Relevo' : 'Titular') + ' · ' + (name || 'Sin asignar'), ppcTip: u.ppc ? u.tip : '', lockNote: st.menu.mode === 'form' ? '' : lockNote,
+        items, showItems: st.menu.mode !== 'form', showForm: st.menu.mode === 'form',
+        x: mob ? '0' : st.menu.x + 'px', y: mob ? 'auto' : st.menu.y + 'px', r: mob ? '0' : 'auto', b: mob ? '0' : 'auto', w: mob ? 'auto' : st.menu.w + 'px', mh: mob ? '80vh' : 'calc(100vh - 16px)', rad: mob ? '16px 16px 0 0' : '10px', scrim: mob ? 'rgba(11,11,12,.32)' : 'transparent' };
+      if (st.menu.mode === 'form') {
+        const pt = { from: o, pat: f.pat, day: f.day, turno: f.turno, first: f.first };
+        const paints2 = Object.assign({}, st.paints, { [rk]: pt });
+        preview = Array.from({ length: 14 }, (_, i) => { const oo = o + i, vv = this.val(rk, key, name, oo, paints2), uu = D.cellUI(vv), dd = D.dateOf(oo); return { t: uu.t, bg: uu.bg, fg: uu.fg, bd: uu.bd, op: this.locked(rk, oo) ? 0.4 : 1, dd: dd.dd, title: dd.wd + ' ' + dd.dd + '-' + dd.mm + ' · ' + uu.tip }; });
+        const setF = patch => this.setState({ form: Object.assign({}, f, patch) });
+        const seg = (k, l) => { const on = f.turno === k; return { l, onClick: () => setF({ turno: k }), bg: on ? 'hsl(var(--app-card))' : 'transparent', fg: on ? 'hsl(var(--ds-text-1))' : 'hsl(var(--ds-text-3))', fw: on ? 600 : 500, sh: on ? '0 1px 2px rgba(0,0,0,.08)' : 'none' }; };
+        turnos = [seg('D', 'Día'), seg('N', 'Noche')].concat(P.c ? [seg('R', 'Rotativo')] : []);
+        const fs = (k, l) => { const on = f.first === k; return { l, onClick: () => setF({ first: k }), bd: on ? 'hsl(var(--app-primary))' : 'hsl(var(--ds-border-default))', bg: on ? 'hsl(var(--app-primary) / .1)' : 'transparent', fg: on ? 'hsl(var(--app-primary))' : 'hsl(var(--ds-text-2))' }; };
+        firsts = [fs('D', 'día'), fs('N', 'noche')];
+        form = { pat: f.pat, day: f.day, cyc: !!P.c, sem: !P.c, len: P.c || 0, semDays: P.l, rot: P.c && f.turno === 'R',
+          dayHelp: P.c ? (f.day <= P.w ? 'Trabaja ' + (P.w - f.day + 1) + ' día(s) más y luego ' + (P.c - P.w) + ' libres.' : 'Está libre; vuelve a trabajar en ' + (P.c - f.day + 1) + ' día(s).') : '',
+          note: 'Pinta desde ' + d.wd + ' ' + d.dd + '-' + d.mm + ' hacia adelante y sigue sola cada mes. Los días pasados y los ya asistidos no cambian.' };
+      }
+    }
+    const curForm = st.form || {};
+    const doPaint = () => {
+      const { pid, R, o } = st.menu, rk = pid + '-' + R, dd = D.dateOf(o);
+      const prev = st.paints;
+      const fl = {}; for (let i = 0; i < 60; i++) fl[rk + '-' + (o + i)] = true;
+      this.setState({ paints: Object.assign({}, st.paints, { [rk]: Object.assign({ from: o }, curForm) }), menu: null, flash: fl, flashAll: null, note: '' });
+      clearTimeout(this.ft); this.ft = setTimeout(() => this.setState({ flash: {} }), 1600);
+      c.toast('Serie pintada desde ' + dd.wd + ' ' + dd.dd + '-' + dd.mm + '. Los días anteriores no cambiaron', 'Deshacer', () => this.setState({ paints: prev }));
+    };
+    // celular: calendario de un puesto
+    const p = all.find(x => x.id === st.pid) || all.find(x => x.id === (c.focus || 'ca-d2')) || all[0];
+    const Tv = days.map((d, i) => this.val(p.id + '-T', p.sT, p.titular, off + i));
+    const Rv = p.semanal ? null : days.map((d, i) => this.val(p.id + '-R', p.sR, p.relevo, off + i));
+    const ini = n => n ? n.split(' ').map(x => x[0]).slice(0, 2).join('') : '';
+    const lead = (D.wd(off) + 6) % 7, cal = [], ppcList = [];
+    for (let i = 0; i < lead; i++) cal.push({ vis: 'hidden', dd: '', t: '', who: '', bd: 'transparent', bg: 'transparent', fg: 'inherit', op: 1, ring: 'none' });
+    days.forEach((d, i) => {
+      const o = off + i, a = Tv[i], b = Rv ? Rv[i] : '-';
+      const tw = a === 'D' || a === 'N', rw = b === 'D' || b === 'N', ap = a && typeof a === 'object', bp = b && typeof b === 'object';
+      const v = a === null ? null : ap ? a : bp ? b : tw ? a : rw ? b : '-';
+      const u = D.cellUI(v);
+      const R = (ap || tw) ? 'T' : (bp || rw) ? 'R' : 'T';
+      if ((ap || bp) && o >= T) ppcList.push({ date: d.wd + ' ' + d.date, motivo: u.tip, onAssign: () => assign(p) });
+      cal.push({ vis: 'visible', dd: d.dd, ddfg: o === T ? 'hsl(var(--app-primary))' : 'hsl(var(--ds-text-3))', ddfw: o === T ? 700 : 400, t: u.ppc ? 'PPC' : u.t, who: tw ? ini(p.titular) : rw ? ini(p.relevo) : '', bd: u.bd, bg: u.bg, fg: u.fg, op: o < T ? 0.4 : 1, ring: o === T ? '0 0 0 2px hsl(var(--app-primary))' : 'none', title: d.date + ' · ' + u.tip + (o < T ? ' · Día pasado' : ''),
+        onClick: () => this.setState({ menu: { pid: p.id, R, o, x: 0, y: 0, w: 0, mode: 'items' }, form: this.defaultForm(p, R, p.id + '-' + R, R === 'R' ? p.sR : p.sT, R === 'R' ? p.relevo : p.titular, o) }) });
+    });
+    const S = c.st, empty = S === 'empty';
+    const supOnly = c.role === 'supervisor';
+    const instOpts = (view === 'ppc' ? [{ id: 'all', nombre: 'Todas las instalaciones' }] : []).concat(D.instalaciones.filter(i => !supOnly || i.id !== 'costanera'));
+    const vw = (k, l, n, tone) => { const on = view === k; return { l, n, onClick: () => { if (!on) c.go({ s: k === 'mes' ? 'P04' : k === 'ppc' ? 'P05' : 'P08', inst: inst.id, focus: null }); }, bg: on ? 'hsl(var(--app-card))' : 'transparent', fg: on ? 'hsl(var(--ds-text-1))' : 'hsl(var(--ds-text-3))', fw: on ? 600 : 500, sh: on ? '0 1px 2px rgba(0,0,0,.08)' : 'none', nbg: tone === 'danger' ? 'hsl(var(--ds-danger-soft))' : 'hsl(var(--ds-warn-soft))', nfg: tone === 'danger' ? 'hsl(var(--ds-danger-fg))' : 'hsl(var(--ds-warn-fg))' }; };
+    const views = [vw('mes', 'Mes'), vw('ppc', c.m ? 'PPC hoy' : 'PPC de hoy', String(D.ppcHoy.length), 'danger'), vw('asis', c.m ? 'Asistencia' : 'Asistencia de hoy', '2', 'warn')];
+    const chip = (l, on, onClick, n, dd) => ({ l, n, dd, onClick, bg: on ? 'hsl(var(--ds-text-1))' : 'transparent', fg: on ? 'hsl(var(--ds-surface-0))' : 'hsl(var(--ds-text-2))', bd: on ? 'hsl(var(--ds-text-1))' : 'hsl(var(--ds-border-default))' });
+    const af = st.asisF, setAf = k => () => this.setState({ asisF: k });
+    const chips = isMes ? [chip('Solo PPC', st.onlyPPC, () => this.setState({ onlyPPC: !st.onlyPPC }))]
+      : view === 'ppc' ? ['Vertical', 'Motivo', 'Turno'].map(l => chip(l, false, () => c.toast('Filtro: ' + l), '', true))
+      : [chip('Todos', af === 'todos', setAf('todos'), '8'), chip('Atrasados', af === 'atrasado', setAf('atrasado'), '1'), chip('Ausentes', af === 'ausente', setAf('ausente'), '1'), chip('PPC', af === 'ppc', setAf('ppc'), '2'), chip('Marcas manuales', af === 'manual', setAf('manual'), '1')];
+    const fnOpts = ['Todas las funciones'].concat([...new Set(all.map(x => x.funcion))]);
+    return {
+      hPad: c.m ? '12px 16px' : '16px 24px 12px', bPad: c.m ? '12px 16px 32px' : '12px 24px 24px', md: c.md, fs: c.m ? '16px' : '13px',
+      segOrder: c.m ? '5' : '0', segW: c.m ? '100%' : 'auto', views, chips, isMes, isPPC: view === 'ppc', isAsis: view === 'asis',
+      perW: c.m ? '170px' : '220px', instW: c.m ? 'auto' : '240px', instFlex: c.m ? '1' : 'none',
+      periodLabel: isMes ? M.label : 'Hoy, vie 06-11',
+      prev: isMes ? () => this.setState({ month: 'nov' }) : () => c.toast('En este mockup se ve el día de hoy'), next: isMes ? () => this.setState({ month: 'dic' }) : () => c.toast('En este mockup se ve el día de hoy'),
+      prevFg: isMes && st.month === 'nov' ? 'hsl(var(--ds-text-4))' : 'hsl(var(--ds-text-1))', nextFg: isMes && st.month === 'dic' ? 'hsl(var(--ds-text-4))' : 'hsl(var(--ds-text-1))',
+      instVal: view === 'ppc' ? 'all' : inst.id, instOpts, onInst: e => { if (e.target.value === 'all') return; this.setState({ pid: null }); c.go({ s: view === 'mes' ? 'P04' : view === 'ppc' ? 'P05' : 'P08', inst: e.target.value, focus: null }); },
+      fn: st.fn, fnOpts, onFn: e => this.setState({ fn: e.target.value }),
+      isLoading: S === 'loading', sk: [1, 2, 3, 4, 5, 6, 7, 8],
+      isMsg: empty || S === 'error', msgTitle: empty ? 'No hay puestos que planificar en ' + inst.nombre : 'No pudimos cargar la pauta', msgBtn: empty ? 'Ir a Puestos' : 'Reintentar', msgAction: empty ? () => c.go({ s: 'P01', inst: inst.id }) : () => c.toast('Reintentando…'),
+      showGrid: c.md && !S, showCal: c.m && !S, gridRef: this.gridRef, gridH: 'calc(100dvh - ' + (st.note ? 330 : 276) + 'px)', ws: inst.ws.charAt(0).toUpperCase() + inst.ws.slice(1),
+      days: days.map((d, i) => { const o = off + i, t = o === T; return { wd: d.wd, dd: D.pad(d.d), tag: t ? 'HOY' : '', title: t ? 'Hoy · vie 06-11-2026' : o < T ? 'Día pasado' : '', hbg: t ? 'hsl(var(--app-primary) / .12)' : d.we ? 'hsl(var(--app-muted))' : 'hsl(var(--app-card))', hbd: t ? '2px solid hsl(var(--app-primary))' : '1px solid hsl(var(--ds-border-default))', hfg: o < T ? 'hsl(var(--ds-text-4))' : 'hsl(var(--ds-text-3))', nfg: t ? 'hsl(var(--app-primary))' : o < T ? 'hsl(var(--ds-text-4))' : 'hsl(var(--ds-text-1))', nfw: t ? 700 : 500 }; }),
+      colspan: String(days.length + 1), blocks,
+      resultNote: st.note, undoPaint: () => this.setState({ paints: {}, note: '', flashAll: null }),
+      pid: p.id, pOpts: all, onP: e => this.setState({ pid: e.target.value }), calMeta: p.rol + ' · ' + p.horario + (p.mid ? ' +1' : ''),
+      calPeople: [p.titular, p.semanal ? null : p.relevo].filter(Boolean).map(n => ({ n, ini: ini(n), onClick: () => goPerson(n) })),
+      wdh: ['lun', 'mar', 'mié', 'jue', 'vie', 'sáb', 'dom'], cal, calH: c.landscape ? '40px' : '52px', calLayout: c.landscape ? 'minmax(0,1.3fr) minmax(0,1fr)' : '1fr', listMax: c.landscape ? '220px' : 'none',
+      ppcList, noPPC: !ppcList.length, canAssign: c.assign,
+      menu, form, preview, turnos, firsts, closeMenu: e => { e && e.preventDefault && e.preventDefault(); this.setState({ menu: null }); },
+      patOpts: Object.keys(this.PATS).map(k => ({ v: k, l: k + (this.PATS[k].c ? ' · cíclico' : ' · semanal') })),
+      onPat: e => { const k = e.target.value, P = this.PATS[k]; this.setState({ form: Object.assign({}, st.form, { pat: k, day: Math.min(st.form.day, P.c || 1), turno: !P.c && st.form.turno === 'R' ? 'D' : st.form.turno }) }); },
+      dayDec: () => { const P = this.PATS[curForm.pat]; this.setState({ form: Object.assign({}, curForm, { day: curForm.day <= 1 ? P.c : curForm.day - 1 }) }); },
+      dayInc: () => { const P = this.PATS[curForm.pat]; this.setState({ form: Object.assign({}, curForm, { day: curForm.day >= P.c ? 1 : curForm.day + 1 }) }); },
+      doPaint,
+      ctx: c, ctxA: Object.assign({}, c, { asisF: st.asisF })
+    };
+  }
+}
+</script>
+</body>
+</html>

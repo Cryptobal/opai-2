@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/opai-design-system-00ba34e0-dc81-4559-9ac3-3ae7b680284c/colors_and_type.css">
+<script src="_ds/opai-design-system-00ba34e0-dc81-4559-9ac3-3ae7b680284c/_ds_bundle.js"></script>
+<style>body{margin:0;background:#ececee;font-family:var(--app-font-sans);} a{color:hsl(166 76% 32%);} a:hover{color:hsl(166 76% 24%);}</style>
+</helmet>
+<div class="opai-app light" style="background:#ececee;padding:48px;display:flex;flex-direction:column;gap:64px;min-width:max-content;">
+  <header style="display:flex;flex-direction:column;gap:8px;max-width:960px;">
+    <span style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:hsl(var(--ds-text-3));">OPAI 2.0 · Puestos y guardias v1</span>
+    <h1 style="margin:0;font-size:28px;line-height:34px;font-weight:600;letter-spacing:-.01em;color:hsl(var(--ds-text-1));">Artboards por dispositivo · v2</h1>
+    <p style="margin:0;font-size:14px;line-height:20px;color:hsl(var(--ds-text-2));text-wrap:pretty;">Cada artboard es el prototipo vivo abierto en su pantalla y ancho: se puede tocar y navegar. Para el Play completo abre <a href="Prototipo Puestos.dc.html">Prototipo Puestos</a> (cambia rol y tema en Tweaks). Fecha de referencia: domingo 25-10-2026, 12:40.</p>
+  </header>
+  <sc-for list="{{ groups }}" as="g" hint-placeholder-count="5">
+    <section id="{{ g.id }}" style="display:flex;flex-direction:column;gap:20px;">
+      <div style="display:flex;align-items:baseline;gap:12px;"><h2 style="margin:0;font-size:22px;font-weight:600;color:hsl(var(--ds-text-1));">{{ g.title }}</h2><span style="font-size:13px;color:hsl(var(--ds-text-3));">{{ g.sub }}</span></div>
+      <div style="display:flex;flex-wrap:wrap;gap:32px;max-width:{{ g.maxW }};">
+        <sc-for list="{{ g.boards }}" as="b" hint-placeholder-count="6">
+          <div id="{{ b.name }}" style="display:flex;flex-direction:column;gap:8px;width:{{ b.w }};">
+            <div style="display:flex;align-items:center;gap:8px;"><span style="font-family:var(--app-font-mono);font-size:12px;font-weight:600;padding:2px 8px;border-radius:6px;background:hsl(var(--ds-text-1));color:#fff;">{{ b.code }}</span><span style="font-family:var(--app-font-mono);font-size:12px;color:hsl(var(--ds-text-2));">{{ b.name }}</span></div>
+            <iframe src="{{ b.src }}" loading="lazy" title="{{ b.name }}" style="width:{{ b.w }};height:{{ b.h }};border:1px solid hsl(var(--ds-border-strong));border-radius:{{ b.rad }};background:#fff;display:block;"></iframe>
+            <div style="font-size:12px;line-height:17px;color:hsl(var(--ds-text-2));background:#fffbe8;border:1px solid #efe3a6;border-radius:8px;padding:8px 10px;text-wrap:pretty;">{{ b.note }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+  </sc-for>
+  <section id="notas" style="display:flex;flex-direction:column;gap:16px;max-width:1100px;">
+    <h2 style="margin:0;font-size:22px;font-weight:600;color:hsl(var(--ds-text-1));">Notas</h2>
+    <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;">
+      <div style="background:#fff;border:1px solid hsl(var(--ds-border-default));border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:8px;"><span style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:hsl(var(--ds-text-3));">Reglas de Carlos (25-oct) · resumen</span>
+        <sc-for list="{{ rules }}" as="r" hint-placeholder-count="16"><span style="font-size:13px;line-height:19px;color:hsl(var(--ds-text-1));text-wrap:pretty;"><span style="font-family:var(--app-font-mono);color:hsl(var(--ds-text-3));">{{ r.n }}</span> {{ r.t }}</span></sc-for></div>
+      <div style="background:#fff;border:1px solid hsl(var(--ds-border-default));border-radius:14px;padding:20px;display:flex;flex-direction:column;gap:8px;"><span style="font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:hsl(var(--ds-text-3));">Supuestos y decisiones de diseño</span>
+        <sc-for list="{{ assumptions }}" as="r" hint-placeholder-count="12"><span style="font-size:13px;line-height:19px;color:hsl(var(--ds-text-1));text-wrap:pretty;"><span style="font-family:var(--app-font-mono);color:hsl(var(--ds-text-3));">{{ r.n }}</span> {{ r.t }}</span></sc-for></div>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const F = 'Prototipo%20Puestos.dc.html';
+    const S = [
+      ['P01', 'Instalacion_puestos', 'R1 un puesto = una posición; R3 nace PPC; R10 capa única. Sin campo Dotación.'],
+      ['P01b', 'Instalacion_puestos_aseo', 'Mismo modelo, otra vertical: cambian la palabra, las funciones y el patrón 6x1 creado por el tenant.'],
+      ['P02', 'Detalle_puesto', 'R5 titular y relevo desfasados; si falta uno, PPC sus días. Chip Origen CPQ (R2) solo informativo.'],
+      ['P02b', 'Nuevo_puesto', 'R7 rol, horario y horas separados; S4 horas: avisa, no bloquea. Serie en vivo.'],
+      ['P02c', 'Refuerzo_temporal', 'R13 refuerzo = puesto temporal con fechas, cobrado al cliente. «Programado» hasta su inicio.'],
+      ['P03', 'Asignar', 'R5 desfase calculado y ajustable. R14 seleccionado sin contrato: planifica, no marca ni cobra.'],
+      ['P03b', 'Traslado_anexo', 'R11 cambia instalación, rol, capa y monto → anexo, borrador automático, aprueba RRHH. Origen queda PPC.'],
+      ['P03c', 'Traslado_sin_cambios', 'R11 sin cambios de contrato: solo se mueve la asignación. S6 cambio de horario solo no pide anexo.'],
+      ['P04', 'Pauta_mensual', 'R8 series pintadas, siguen solas cada mes. Hoy = vie 06-11: días pasados atenuados. Cabecera, pestañas y filtros fijos; cabecera de días sticky. Clic en un nombre abre su ficha.'],
+      ['P04c', 'Pauta_pintar_menu', 'v2 · Clic derecho en una celda: «Pintar serie desde aquí» con patrón, día del ciclo y turno D/N. Solo iPad y computador.'],
+      ['P04d', 'Pauta_pintar_resultado', 'v2 · Regla 1.0: al repintar, los días pasados y los asistidos (con marca) no cambian; solo desde el día elegido hacia adelante.'],
+      ['P05', 'PPC_hoy', 'R4 un solo concepto: PPC con motivo. Misma cabecera y filtros que Mes y Asistencia: no se corre al cambiar de pestaña.'],
+      ['P08', 'Asistencia_hoy', 'v2 · Pauta diaria dentro de Pauta: planificado, marca real (facial o manual), estado y marca manual.'],
+      ['P08b', 'Marca_manual', 'v2 · La marca manual queda a nombre de quien la registra y se ve distinta de la facial.'],
+      ['P05b', 'Busqueda_urgencia', 'R15 sin formulario: 30 km, libres, descanso, OS10, misma función. Llamar y WhatsApp; Operaciones asigna.'],
+      ['P05c', 'Cubrir', 'S10 reemplazo vs. turno extra, editable. R13 el pago de turnos extra va aparte: sin montos.'],
+      ['P06', 'Ficha_laboral', 'R10 la ficha dice qué capa le toca y su monto; sin cascada. Montos •••• para quien no puede verlos.'],
+      ['P06b', 'Laboral_traslado', 'S7 el traslado rige en su fecha solo si RRHH aprobó el anexo. Aprobar / Rechazar con motivo.'],
+      ['P07', 'Patrones', 'R6 6 patrones de fábrica + propios del tenant. En uso: no se elimina, se desactiva.'],
+      ['P07b', 'Editor_patron_ciclico', 'v2 · Nombre arriba, armado solo («4×4 Día 07:00–19:00») y editable. Cíclico: se marcan los días del ciclo.'],
+      ['P07e', 'Editor_patron_semanal', 'v2 · Semanal: se marcan los días de la semana (lun–vie) y la pauta los pinta así. Nombre «5×2 · 42 h».'],
+      ['P07c', 'Verticales_funciones', 'R16 recurso, funciones, requisitos, radio y descanso por vertical (S9).'],
+      ['P07d', 'Grupos_sueldo', 'R10 grupo = puestos que pagan lo mismo. Cambiar un monto en uso genera anexos (S8).']
+    ];
+    const mobOnly = { P04: 'P04b' };
+    const mob = { P04: 'S15 en celular se ve un puesto a la vez en calendario de 7 columnas.', P07: 'S15 en celular, Configuración en solo lectura.', P07b: 'S15 en celular no se crean patrones: se muestra la lista en solo lectura.', P07d: 'S15 en celular, solo lectura.' };
+    const devs = [
+      { id: 'escritorio', title: 'Escritorio 1280', sub: 'Barra lateral 248 px', w: 1280, h: 800, rad: '10px', maxW: '2700px' },
+      { id: 'ipad-1024', title: 'iPad 1024', sub: 'Riel 80 px · horizontal', w: 1024, h: 768, rad: '18px', maxW: '2200px' },
+      { id: 'ipad-768', title: 'iPad 768', sub: 'Riel 80 px · vertical', w: 768, h: 1024, rad: '18px', maxW: '2500px' },
+      { id: 'celular-375', title: 'Celular 375', sub: 'Barra inferior · 375×812', w: 375, h: 812, rad: '28px', maxW: '2400px' },
+      { id: 'celular-844', title: 'Celular 844', sub: 'Horizontal · 844×390 · riel', w: 844, h: 390, rad: '24px', maxW: '2700px' }
+    ];
+    const board = (d, code, slug, note, extra, suffix) => {
+      const c2 = (d.w < 768 || d.id === 'celular-844') && mobOnly[code] ? mobOnly[code] : code;
+      const mnote = (d.w < 768 || d.id === 'celular-844') && mob[code] ? mob[code] + ' ' : '';
+      return { code: c2, name: c2 + '_' + slug + '_' + d.w + (suffix || ''), w: d.w + 'px', h: d.h + 'px', rad: d.rad, src: F + '?s=' + code + (extra || ''), note: mnote + note };
+    };
+    const mdOnly = ['P04c', 'P04d', 'P07e'];
+    const groups = devs.map(d => ({ id: d.id, title: d.title, sub: d.sub, maxW: d.maxW, boards: S.filter(([c]) => !(mdOnly.includes(c) && (d.w < 768 || d.id === 'celular-844'))).map(([c, s, n]) => board(d, c, s, n)) }));
+    const E = [
+      ['P01', 'Cargando', '&st=loading', 'Skeleton con la forma real (KpiTile y filas).'], ['P01', 'Vacio', '&st=empty', 'Vacío con una acción: Nuevo puesto.'], ['P01', 'No_encontrado', '&st=notfound', 'Este puesto no existe o fue desactivado.'],
+      ['P04', 'Cargando', '&st=loading', 'Skeleton de grilla.'], ['P04', 'Vacio', '&st=empty', 'Pauta sin puestos · Ir a Puestos.'], ['P04', 'Error', '&st=error', 'ErrorState humano con Reintentar.'],
+      ['P05', 'Sin_PPC', '&st=empty', 'Todos los puestos cubiertos, con el KPI de próximos 7 días.'], ['P05b', 'Sin_resultados', '&st=noresults', 'Nadie cumple dentro de 30 km.'], ['P05b', 'Agente', '&agent=1', 'Grokbot muestra la búsqueda; no tiene botón Asignar.'],
+      ['P03b', 'Agente', '&agent=1', 'Grokbot preparó el borrador; lo aprueba RRHH.'],
+      ['P01', 'Supervisor', '&role=supervisor', 'Solo sus instalaciones; sin montos ni Nuevo puesto ni Configuración.'], ['P01', 'Viewer', '&role=viewer', 'Mismo contenido sin acciones de escritura.'],
+      ['P05b', 'Viewer', '&role=viewer', 'Sin Llamar, WhatsApp ni Asignar.'], ['P06', 'Supervisor', '&role=supervisor', 'Capa: Grupo · ••••.'],
+      ['P01', 'Oscuro', '&theme=dark', 'Modo oscuro.'], ['P04', 'Oscuro', '&theme=dark', 'Modo oscuro.'], ['P08', 'Oscuro', '&theme=dark', 'Modo oscuro.'], ['P08', 'Supervisor', '&role=supervisor', 'Supervisor registra marcas manuales en sus instalaciones.'], ['P05b', 'Oscuro', '&theme=dark', 'Modo oscuro.'], ['P06', 'Oscuro', '&theme=dark', 'Modo oscuro.']
+    ];
+    const est = (d) => E.map(([c, s, x, n]) => board(d, c, s, n, x, '_' + s.toLowerCase()));
+    groups.push({ id: 'estados-1280', title: 'Estados · 1280', sub: '§5 · roles · agente · oscuro', maxW: '2700px', boards: est(devs[0]) });
+    groups.push({ id: 'estados-375', title: 'Estados · 375', sub: '§5 · roles · agente · oscuro', maxW: '2400px', boards: est(devs[3]) });
+    const rules = ['Un puesto = una posición cubierta a la vez. Sin campo Dotación.', 'Los puestos se crean desde la instalación; ganar un negocio no crea puestos.', 'El puesto nace como PPC «Sin asignar».', 'Un solo concepto: PPC con motivo (Sin asignar · Licencia · Permiso · Falta · Finiquito).', 'Titular y relevo desfasados en patrones corridos.', 'Patrones configurables por tenant y vertical.', 'Rol, horario y horas semanales van separados; colación aparte.', 'Patrón + inicio generan la serie; la pauta sigue sola y solo planifica.', 'Rotativo día/noche en el mismo puesto; la noche cruza medianoche.', 'Capa de sueldo única por puesto: Instalación, Puesto o Grupo.', 'Traslado: si cambia rol, capa, monto o instalación → anexo; origen queda PPC.', 'Ampliar o renovar con el cliente no mueve a nadie.', 'Refuerzo = puesto temporal; turno extra sin montos aquí.', 'Seleccionado sin contrato: planifica y cubre, no marca ni cobra.', 'Búsqueda de urgencia sin formulario; Operaciones asigna.', 'Todo multi-vertical y configurable.'].map((t, i) => ({ n: 'R' + (i + 1), t }));
+    const assumptions = [
+      ['D1', 'v2: acento índigo del §2.1 (#4a3fd8 claro, #8e88ff oscuro) sobre el OPAI Design System; el resto de tokens es del sistema.'],
+      ['D5', 'v2: la Pauta (Mes, PPC de hoy y Asistencia de hoy) usa hoy = vie 06-11-2026 12:40 para mostrar la regla de repintado. El resto conserva dom 25-10.'],
+      ['D2', 'Artboards = el prototipo vivo en un iframe por pantalla y ancho; el código y la nota van en cada uno. El Play es el mismo archivo.'],
+      ['D3', 'v2: la grilla de la pauta es su propio contenedor con scroll en ambos ejes, para que la cabecera de días y la columna de puestos queden fijas.'],
+      ['D4', 'Inter dibuja «4x4» como «4×4» por sus alternativas tipográficas; el texto fuente sigue siendo «4x4».'],
+      ['S1', 'Pauta y PPC viven en Operaciones › Pauta con el segmentado Mes · PPC de hoy.'], ['S2', 'La función sale del catálogo de la vertical, no de Cargos y sueldos.'],
+      ['S5', 'Rotativo: titular y relevo alternan día y noche en ciclos opuestos.'], ['S7', 'El traslado rige solo si RRHH aprobó a esa fecha.'],
+      ['S10', 'Reemplazo por defecto; Operaciones lo cambia a Turno extra.'], ['S11', 'Llamar y WhatsApp abren las apps del dispositivo; nada se envía solo.'],
+      ['S15', 'En celular: un puesto a la vez en la pauta; Configuración en solo lectura.'], ['S17', 'Datos ficticios. Si algo choca con el celular, gana el celular.']
+    ].map(([n, t]) => ({ n, t }));
+    return { groups, rules, assumptions };
+  }
+}
+</script>
+</body>
+</html>
