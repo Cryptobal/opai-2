@@ -56,9 +56,16 @@ function modelos(): Modelo[] {
   return out;
 }
 
-/** Columnas que delatan un dato personal de una persona natural (identificadores y contacto). */
+/**
+ * Columnas que delatan un dato personal de una persona natural: identificadores y contacto, datos
+ * de acceso (IP, agente, destinatario) y credenciales (contraseña, tokens). Es un heurístico por
+ * nombre de columna: no sustituye el criterio, pero obliga a declarar las tablas evidentes del
+ * Núcleo (§16.6). Una columna con nombre genérico (p. ej. `value` en verifications) no se detecta.
+ */
 const esColumnaPersonal = (c: string) =>
-  /(^|_)(rut|email|correo|telefono|whatsapp|nombres|apellidos|nacimiento)(_|$)/.test(c);
+  /(^|_)(rut|email|correo|telefono|whatsapp|nombres|apellidos|nacimiento|ip_address|user_agent|destinatario|password|access_token|refresh_token|id_token)(_|$)/.test(
+    c,
+  );
 
 describe("inventario de datos personales (RAT, Ley 21.719)", () => {
   const core = modelos().filter((m) => m.esquema === "core");

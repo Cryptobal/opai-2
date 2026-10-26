@@ -75,6 +75,28 @@ export const INVENTARIO_NUCLEO = defineDatosPersonales("core", [
     baseLicitud: "contrato",
   },
   {
+    tabla: "sessions",
+    finalidad: "Sesiones de acceso: IP y agente del navegador para la seguridad y la trazabilidad del ingreso.",
+    categorias: ["identificacion"],
+    campos: ["ip_address", "user_agent"],
+    baseLicitud: "interes_legitimo",
+    retencion: "Pendiente: coordina con la retención del registro de acceso de 07c/B4 (§4.5).",
+  },
+  {
+    tabla: "accounts",
+    finalidad: "Credenciales de acceso del usuario: contraseña con hash y tokens del proveedor de identidad.",
+    categorias: ["credenciales"],
+    campos: ["password", "access_token", "refresh_token", "id_token"],
+    baseLicitud: "contrato",
+  },
+  {
+    tabla: "envios",
+    finalidad: "Bitácora de envíos de notificaciones: el destinatario (correo o teléfono) de cada envío.",
+    categorias: ["contacto"],
+    campos: ["destinatario"],
+    baseLicitud: "interes_legitimo",
+  },
+  {
     tabla: "invitations",
     finalidad: "Invitaciones a usuarios por correo, antes de que exista la cuenta.",
     categorias: ["contacto"],
