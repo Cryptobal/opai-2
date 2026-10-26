@@ -9,7 +9,7 @@ import { auth } from "./auth";
  * `auth.api.*` dentro de Server Actions, con las cookies fijadas por el plugin `nextCookies`.
  * Así el cliente de Better Auth no viaja al navegador.
  */
-export type FalloAcceso = "credenciales" | "suspendida" | "invalido" | "error";
+export type FalloAcceso = "credenciales" | "suspendida" | "bloqueada" | "invalido" | "error";
 
 export type ResultadoAcceso = { ok: true } | { ok: false; fallo: FalloAcceso; mensaje: string };
 
@@ -31,6 +31,10 @@ export async function entrarConPassword(email: string, password: string): Promis
   } catch (error) {
     if (codigoDe(error) === "ACCOUNT_SUSPENDED") {
       return fallo("suspendida", error instanceof Error ? error.message : "Cuenta suspendida.");
+    }
+    // Bloqueo por fuerza bruta persistido (B1): mensaje genérico, no revela si el correo existe.
+    if (codigoDe(error) === "ACCOUNT_LOCKED") {
+      return fallo("bloqueada", error instanceof Error ? error.message : "Acceso pausado.");
     }
     if (error instanceof APIError) return fallo("credenciales", "Credenciales inválidas.");
     throw error;
