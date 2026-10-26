@@ -9,7 +9,7 @@ import { ESTADO_INSTALACION, estadoDe } from "@/app/_components/maestros/estados
 import { fecha } from "@/lib/fechas";
 import type { InstalacionDetalle } from "@/lib/tipos-maestros";
 
-export type TabInstalacion = "resumen" | "puestos" | "documentos" | "actividad";
+export type TabInstalacion = "resumen" | "puestos" | "negocios" | "documentos" | "actividad";
 
 function acciones(i: InstalacionDetalle): AccionEntidad[] {
   const otro = i.estado === "activa" ? "inactiva" : "activa";
@@ -86,6 +86,7 @@ export function FichaInstalacion(p: {
         tabs={[
           { id: "resumen", etiqueta: "Resumen", href: base },
           { id: "puestos", etiqueta: "Puestos", contador: activos, href: `${base}/puestos` },
+          { id: "negocios", etiqueta: "Negocios", href: `${base}/negocios` },
           {
             id: "personas",
             etiqueta: p.persona,

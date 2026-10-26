@@ -6,6 +6,8 @@ import type { Contexto } from "../types";
 import { PERMISO_READ, embudoPorDefecto, negocioSchema, vistaNegocio } from "./comun";
 
 const filtros = listaSchema.extend({
+  cuentaId: z.uuid().optional().describe("Filtra por cuenta (ficha de cuenta)."),
+  instalacionId: z.uuid().optional().describe("Filtra por instalación vinculada (ficha de instalación)."),
   etapaId: z.uuid().optional().describe("Filtra por etapa del embudo."),
   responsableId: z.uuid().optional().describe("Filtra por responsable."),
   origenId: z.uuid().optional().describe("Filtra por origen."),
@@ -44,9 +46,17 @@ export const negociosList = defineCapability({
   dryRun: false,
   async handler(ctx, input) {
     const q = input.q;
+    // Filtro por instalación vinculada: resuelve los negocios de esa instalación (ficha de instalación).
+    const porInstalacion = input.instalacionId
+      ? (await ctx.db.negocioInstalacion.findMany({ where: { instalacionId: input.instalacionId } })).map(
+          (v) => v.negocioId,
+        )
+      : null;
     const filas = await ctx.db.negocio.findMany({
       where: {
         ...(input.incluirArchivadas ? {} : { archivadoEn: null }),
+        ...(input.cuentaId ? { cuentaId: input.cuentaId } : {}),
+        ...(porInstalacion ? { id: { in: porInstalacion } } : {}),
         ...(input.etapaId ? { etapaId: input.etapaId } : {}),
         ...(input.responsableId ? { responsableId: input.responsableId } : {}),
         ...(input.origenId ? { origenId: input.origenId } : {}),

@@ -3,6 +3,7 @@
 import type { Capacidad } from "../types";
 import { configActualizarEtapa, configGuardarCatalogo } from "./config-escritura";
 import { configGet } from "./config";
+import { contactosList } from "./contactos";
 import { negociosArchivar, negociosPerder, negociosReabrir } from "./negocios-cierre";
 import { negociosCreate, negociosUpdate } from "./negocios-escritura";
 import { negociosGet } from "./negocios-ficha";
@@ -18,6 +19,7 @@ export const capacidadesComercial: readonly Capacidad[] = [
   negociosList,
   negociosGet,
   negociosEmbudo,
+  contactosList,
   negociosCreate,
   negociosUpdate,
   negociosMover,
