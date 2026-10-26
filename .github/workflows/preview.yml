@@ -78,7 +78,15 @@ jobs:
             estado=$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${n}" --jq .state) || { echo "No se pudo leer el PR $n; se conserva $nombre."; continue; }
             if [ "$estado" = "closed" ]; then
               echo "Borrando rama huérfana $nombre (PR $n cerrado)."
-              npx --yes "$NEONCTL" branches delete "$nombre" --project-id "$NEON_PROJECT_ID"
+              # Limpieza oportunista: otro PR pudo borrarla antes (404) o Neon fallar un momento.
+              # Nada de esto debe poner en rojo este PR; si de verdad no hay cupo, falla la creación.
+              if ! salida=$(npx --yes "$NEONCTL" branches delete "$nombre" --project-id "$NEON_PROJECT_ID" 2>&1); then
+                if echo "$salida" | grep -qiE 'not found|404'; then
+                  echo "La rama $nombre ya no existe."
+                else
+                  echo "::warning::No se pudo borrar la rama huérfana $nombre: $salida"
+                fi
+              fi
             fi
           done
       - name: Crear o reutilizar la rama Neon
