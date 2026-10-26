@@ -77,7 +77,7 @@ D3. **Fijados:** se fija y desfija con un ícono de pin que aparece al pasar el 
 D4. **Inicio** es una entrada suelta arriba; la **Bandeja** vive dentro de Inicio (sección, no entrada del menú).
 D5. **Contador de la Bandeja:** en la barra inferior del celular, Inicio muestra un **punto**; el número aparece dentro de la pantalla. No hay contadores en la barra lateral.
 D6. **Campana (ADR-014):** muestra un punto de no leído y abre la misma Bandeja; no hay una segunda lista de avisos.
-D7. **Celular:** la búsqueda sale de la barra superior; solo queda «Buscar» en la barra inferior.
+D7. **Celular:** la búsqueda sale de la barra superior; solo queda «Buscar» en la barra inferior. *(Reemplazada el 26-oct-2026 17:57 por ADR-050: decisión de Carlos, «El shell sigue el diseño de Claude; que el repo se ajuste». «Buscar» vuelve a la barra superior del teléfono y sale de la barra inferior.)*
 D8. **Vencimientos** sigue como vista dentro de Personas; no es entrada del menú.
 D9. **iPad:** desde 1024 px se usa la barra lateral completa de escritorio, con sus grupos plegables, sin riel nuevo. De 768 a 1023 sigue el riel actual. No se pliega a solo íconos (Carlos, 26-oct-2026 11:03 CLT, chat con el bot OPAI 2.0 (t295u; dictado por voz)).
 D10. **El rol viewer (Visualizador) no ve Nómina.** No es una decisión nueva: es regla de ADR-016 (viewer «solo lectura, sin finanzas ni nómina»). Corrige la pantalla 05 del diseño, que se la mostraba.
@@ -96,7 +96,7 @@ D10. **El rol viewer (Visualizador) no ve Nómina.** No es una decisión nueva: 
 Decisión de Carlos, 26-oct-2026 10:08 CLT, chat con OPAI 2.0; ADR-049, propuesto en PR #38, pendiente de merge. El agente interno se construye en un brief propio después de CPQ («Ok, después del CPQ» — Carlos, 26-oct-2026 10:53 CLT, chat con el Revisor OPAI 2.0 (t120u); confirmado por Carlos, 26-oct-2026 11:03 CLT, chat con el bot OPAI 2.0 (t295u; dictado por voz)). Aquí solo se reserva dónde vive, para que ese brief lo agregue sin rediseñar la navegación:
 
 - **Escritorio y iPad (⌘K):** la acción **«Preguntar a OPAI»** ocupa el primer lugar de la paleta, antes de recientes y acciones, y usa como pregunta el texto escrito en el buscador.
-- **Celular:** el mismo lugar, arriba de todo dentro de **«Buscar»** (la paleta a pantalla completa, pantallas 19–22), bajo el campo de búsqueda. No suma un ítem a la barra inferior ni a la barra superior (D7).
+- **Celular:** el mismo lugar, arriba de todo dentro de **«Buscar»** (la paleta a pantalla completa, pantallas 19–22), bajo el campo de búsqueda. No suma un ítem propio: «Buscar» vive en la barra superior del teléfono (ADR-050, §10).
 - **Mientras no exista el agente, la entrada no se muestra:** ni deshabilitada ni con «próximamente». Aparecerá cuando el módulo del agente esté activo en el tenant, igual que las entradas de cualquier módulo (R2). En este brief no hay código para ella; los CA9 y CA10 se cumplen sin esa entrada.
 
 ## 5. Archivos (previstos)
@@ -137,7 +137,7 @@ Decisión de Carlos, 26-oct-2026 10:08 CLT, chat con OPAI 2.0; ADR-049, propuest
 | 07 | `Fijados_1280` | Sin fijados, cinco fijados y acción de fijar (D3) |
 | 08–12 | `CmdK_*_1280` | Inicial (recientes y acciones), resultados «quili», sin resultados, viewer, oscuro. El primer lugar queda reservado para «Preguntar a OPAI» (§4.4); no se construye aquí |
 | 13 | `Menu_usuario_portal_1280` | Menú de usuario y selector de portal (Plataforma solo para operadores) |
-| 14 | `BarraInferior_variantes_375` | Cinco variantes por área principal y respaldo del escenario A. **Ajuste D7:** vale la versión sin búsqueda en la barra superior |
+| 14 | `BarraInferior_variantes_375` | Cinco variantes por área principal y respaldo del escenario A. **Ajuste ADR-050:** la barra inferior no lleva «Buscar»; la búsqueda vuelve a la barra superior del teléfono (§10, D7 reemplazada) |
 | 15 | `Inicio_bandeja_375` | Bandeja en Inicio y punto en la barra inferior (D4, D5) |
 | 16–18 | `Mas_*_375` | Hoja «Más» en escenarios C y A, y oscuro |
 | 19–22 | `Buscar_*_375` | ⌘K a pantalla completa en el celular. El primer lugar, bajo el campo, queda reservado para «Preguntar a OPAI» (§4.4); no se construye aquí |
@@ -161,11 +161,11 @@ Se agregan a `packages/ds` sobre los componentes existentes, solo con tokens, y 
 
 ### 8.3 Responsive
 
-- **< 768:** barra superior de 52 px con selector de portal, campana y la foto o el avatar del usuario (Carlos, 26-oct-2026 11:03 CLT, chat con el bot OPAI 2.0 (t295u; dictado por voz); sin búsqueda desde el PR A, D7); barra inferior de 56 px + safe-area con cinco ítems (Inicio, 2, 3, Buscar, Más).
+- **< 768:** barra superior de 52 px con selector de portal, **buscar**, campana y la foto o el avatar del usuario (la búsqueda vuelve a la barra superior por ADR-050, 26-oct-2026 17:57; el avatar arriba por Carlos, 26-oct-2026 11:03 CLT, chat con el bot OPAI 2.0 (t295u; dictado por voz)); barra inferior de 56 px + safe-area con hasta cuatro ítems de navegación más «Más» (Inicio fijo; «Buscar» ya no va en la barra inferior, §10).
 - **768–1023:** riel actual, sin cambios de comportamiento (D9).
-- **≥ 1024:** barra lateral de 248 px con áreas (D9); cabecera de 60 px con título, buscador ⌘K, campana y usuario.
+- **≥ 1024:** barra lateral de 248 px con áreas (D9) y el usuario al pie de la barra lateral (ADR-050); cabecera de 60 px con título, buscador ⌘K y campana.
 - Touch targets ≥ 44 px, foco visible, contraste AA en claro y oscuro, sin scroll horizontal a 375; etiquetas largas con elipsis.
-- **Cabecera estable (CAR-12):** la acción principal de la página sale de la cabecera y va en el patrón (`REGLAS-codigo.md`, UI). La cabecera queda con título (o migas) a la izquierda y un **grupo fijo** al final (buscar, campana y usuario en escritorio; campana y avatar en el teléfono), con ancho y posición constantes en todas las vistas, también con «Atrás». El buscador no cambia de forma dentro del mismo breakpoint. Si una ficha o un formulario necesita acciones en la cabecera, van a la izquierda del grupo fijo, nunca a su derecha.
+- **Cabecera estable (CAR-12):** la acción principal de la página sale de la cabecera y va en el patrón (`REGLAS-codigo.md`, UI). La cabecera queda con título (o migas) a la izquierda y un **grupo fijo** al final (buscar y campana en escritorio, con el usuario al pie de la barra lateral por ADR-050; buscar, campana y avatar en el teléfono), con ancho y posición constantes en todas las vistas, también con «Atrás». El buscador no cambia de forma dentro del mismo breakpoint. Si una ficha o un formulario necesita acciones en la cabecera, van a la izquierda del grupo fijo, nunca a su derecha.
 
 ## 9. Seguridad y tenant
 
@@ -176,7 +176,7 @@ Se agregan a `packages/ds` sobre los componentes existentes, solo con tokens, y 
 
 ## 10. Casos límite
 
-- Tenant con solo el núcleo (escenario A): Inicio, Clientes, Personas y Configuración; barra inferior de respaldo Inicio · Cuentas · Personas · Buscar · Más.
+- Tenant con solo el núcleo (escenario A): Inicio, Clientes, Personas y Configuración; barra inferior de respaldo Inicio · Cuentas · Personas · Más (ADR-050: «Buscar» vuelve a la barra superior; §10).
 - Tenant con Puestos y Nómina (escenario D; Nómina exige Puestos, nota de ADR-048 del 25-oct 23:10): Operaciones con Puestos y Personas con Nómina; nada de Comercial ni Finanzas.
 - Área principal elegida que deja de estar disponible (módulo apagado o rol cambiado): cae a la de por defecto del rol, sin error.
 - Fijado de una ficha borrada o fuera de alcance: no aparece.
@@ -193,14 +193,14 @@ Conviene dividirlo en **dos PRs** para que la cabecera de CAR-12 (urgente) llegu
 
 **PR A — Cabecera estable (CAR-12).**
 - Bloque 0 · Lectura y verificación. El PR A puede avanzar mirando las pantallas 01, 14 y 24 directo en Claude Design; el bloqueo por el export aplica solo al PR B (ver abajo).
-- Bloque 1 · `ds:`/`core:` cabecera estable en `AppBar` y `TopBarTelefono` (grupo fijo, con la foto o el avatar del usuario en el teléfono; Carlos, 26-oct-2026 11:03 CLT, chat con el bot OPAI 2.0 (t295u; dictado por voz)), acción principal al patrón en las páginas que hoy la pasan a la cabecera y buscador sin cambio de forma. **Búsqueda en el celular (D7) en este PR:** sale de la barra superior y entra «Buscar» a la barra inferior en el mismo commit, para que el celular nunca quede sin búsqueda. Hasta el PR B, la barra inferior es la de respaldo del escenario A del diseño (pantalla 14): Inicio · Cuentas · Personas · Buscar · Más; Instalaciones, Cargos y sueldos, Aprobaciones y Configuración pasan a la hoja «Más» actual (`menu-mas.tsx`), sin abreviaturas. «Buscar» abre la ⌘K actual a pantalla completa. e2e `cabecera-estable.spec.ts`.
+- Bloque 1 · `ds:`/`core:` cabecera estable en `AppBar` y `TopBarTelefono` (grupo fijo, con la foto o el avatar del usuario en el teléfono; Carlos, 26-oct-2026 11:03 CLT, chat con el bot OPAI 2.0 (t295u; dictado por voz)), acción principal al patrón en las páginas que hoy la pasan a la cabecera y buscador sin cambio de forma. **Búsqueda en el celular (ADR-050) en este PR:** se queda en la barra superior del teléfono; no pasa a la barra inferior. Hasta el PR B, la barra inferior es la de respaldo del escenario A del diseño (pantalla 14): Inicio · Cuentas · Personas · Más; Instalaciones, Cargos y sueldos, Aprobaciones y Configuración pasan a la hoja «Más» actual (`menu-mas.tsx`), sin abreviaturas. La búsqueda de la barra superior abre la ⌘K actual a pantalla completa. e2e `cabecera-estable.spec.ts`.
 
 **PR B — Navegación por áreas.** Empieza cuando el PR 2 del Brief 03 (shell en el layout) esté integrado. El bloque 0 del PR B se **detiene** si falta el export en `docs/2.0/design/export-navegacion/` (Carlos lo exporta desde Claude Design).
 - Bloque 2 · `core:` modelo `area`, manifest `navegacion`/`acciones`, `armarNavegacion` puro con tests, ajustes `navegacion_*`.
 - Bloque 3 · `ds:` componentes nuevos (§8.2) en `/ds`.
 - Bloque 4 · `ds:` barra lateral por áreas (acordeón D1, fijados D3, Inicio suelto D4, sin contadores D5) y breakpoint `lg` (D9).
 - Bloque 5 · `ds:`/`core:` ⌘K con recientes y acciones.
-- Bloque 6 · `core:` barra inferior por área principal (Inicio y Buscar fijos, que ya dejó el PR A), hoja «Más» por áreas, Preferencias → Área principal.
+- Bloque 6 · `core:` barra inferior por área principal (Inicio fijo; «Buscar» ya no va en la barra inferior, ADR-050, §10), hoja «Más» por áreas, Preferencias → Área principal.
 - Bloque 7 · `core:` Bandeja en Inicio, punto en Inicio y campana (D5, D6).
 - Bloque 8 · `docs:` `NAVEGACION.md` §8 (estado de hoy), `ESTADO.md` y reporte.
 
@@ -220,7 +220,7 @@ Conviene dividirlo en **dos PRs** para que la cabecera de CAR-12 (urgente) llegu
 
 ## 14. Criterios de aceptación
 
-- **CA1 (CAR-12, obligatorio).** Campana, buscador y botón de usuario mantienen **tamaño y posición idénticos** al cambiar de vista (Personas → Vencimientos → Cuentas → Nueva cuenta → Inicio) y al cambiar de vencimiento. Lo verifica `cabecera-estable.spec.ts` a **375 y 1280 px** (y también a 1024, proyecto `ipad`): compara el `boundingBox` de cada ícono entre vistas con tolerancia de 0 px en posición y tamaño. A 1280 se comparan buscador, campana y usuario. A 375 se comparan campana y avatar en **todas** las vistas, también las que tienen «Atrás» (Nueva cuenta, ficha); desde el PR A el buscador del teléfono es el ítem «Buscar» de la barra inferior, que también debe quedar fijo.
+- **CA1 (CAR-12, obligatorio).** Campana y buscador (y el avatar del usuario en el teléfono) mantienen **tamaño y posición idénticos** al cambiar de vista (Personas → Vencimientos → Cuentas → Nueva cuenta → Inicio) y al cambiar de vencimiento. Lo verifica `cabecera-estable.spec.ts` a **375 y 1280 px** (y también a 1024, proyecto `ipad`): compara el `boundingBox` de cada ícono entre vistas con tolerancia de 0 px en posición y tamaño. A 1280 se comparan buscador y campana (el usuario va al pie de la barra lateral, ADR-050). A 375 se comparan buscador, campana y avatar en **todas** las vistas, también las que tienen «Atrás» (Nueva cuenta, ficha); desde el PR A el buscador del teléfono vive en la barra superior (ADR-050, §10), que también debe quedar fijo.
 - **CA2.** El mapa coincide con `NAVEGACION.md` §2 (con D8): áreas, entradas, orden y nombres; Configuración al pie; no aparecen «Maestros», «Módulos», «Guardias», «Ajustes» (en el ERP) ni abreviaturas.
 - **CA3.** Límites: seis áreas, siete entradas por área, cinco fijados; un área de una entrada aparece suelta.
 - **CA4.** Nada deshabilitado en ningún escenario ni rol.
@@ -229,7 +229,7 @@ Conviene dividirlo en **dos PRs** para que la cabecera de CAR-12 (urgente) llegu
 - **CA7.** Acordeón: solo queda abierta el área activa; el estado se recuerda por usuario y empresa.
 - **CA8.** Fijar y desfijar con el pin en hover y en la cabecera de la ficha; orden por fecha de fijado; los fijados persisten al recargar y en otro dispositivo (los recientes, solo en el mismo navegador).
 - **CA9.** ⌘K muestra el atajo en la cabecera de escritorio, recientes (10) y acciones, funciona entero con teclado y respeta permisos y alcance (viewer sin acciones de escritura).
-- **CA10.** Celular: cinco ítems con Inicio y Buscar fijos, variantes según el área principal y respaldo; sin búsqueda en la barra superior; ≥ 44 px y safe-area.
+- **CA10.** Celular: Inicio fijo y hasta cuatro ítems de navegación más «Más», variantes según el área principal y respaldo; la búsqueda va en la barra superior (ADR-050, §10), no en la inferior; ≥ 44 px y safe-area.
 - **CA11.** Desde 1024 px, barra lateral completa con áreas; de 768 a 1023, el riel actual sin cambios.
 - **CA12.** Shell estable al cambiar de página: solo cambia el contenido, con su skeleton.
 - **CA13.** Claro y oscuro con contraste AA y foco visible; sin scroll horizontal a 375.

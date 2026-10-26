@@ -48,7 +48,7 @@ function ItemRiel({
 }
 
 export type RailProps = NavProps & {
-  /** Selector de portal y de empresa bajo la marca (iPad, 768–1279 px). */
+  /** Selector de portal y de empresa arriba del riel (iPad, 768–1279 px). */
   portales: readonly Portal[];
   portalActual: string;
   tenant?: Tenant | undefined;
@@ -57,8 +57,8 @@ export type RailProps = NavProps & {
 };
 
 /**
- * iPad: riel de 80 px con la marca y el selector de portal y empresa arriba, ítems de 64×56 y los
- * ítems fijos (Configuración) al pie.
+ * iPad (ShellTablet): riel de 80 px con el selector de portal y empresa arriba (sin la marca), ítems
+ * de 64×56 y los ítems fijos (Configuración) al pie.
  */
 export function Rail({
   items,
@@ -72,11 +72,8 @@ export function Rail({
   return (
     <nav
       aria-label="Principal"
-      className="sticky top-0 hidden h-dvh w-20 flex-none flex-col items-center border-r border-border bg-surface py-3 md:flex xl:hidden"
+      className="sticky top-0 hidden h-dvh w-20 flex-none flex-col items-center border-r border-border bg-surface py-4 md:flex xl:hidden"
     >
-      <span className="mt-2 mb-3 text-[13px] leading-4 font-bold tracking-[-0.02em] text-fg">
-        OPAI
-      </span>
       <PortalSwitcher
         portales={portales}
         portalActual={portalActual}

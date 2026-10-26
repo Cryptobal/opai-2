@@ -30,8 +30,8 @@ export function InputBusqueda({ valor, onCambiar, atajo, className, ...props }: 
         onChange={(e) => onCambiar(e.target.value)}
         onKeyDown={(e) => e.key === "Escape" && valor && onCambiar("")}
         className={cn(
-          "h-11 w-full rounded-md border border-border-strong bg-surface pr-10 pl-9 text-md text-fg outline-none placeholder:text-fg-subtle",
-          "transition-[border-color,box-shadow] duration-150 focus-visible:border-accent focus-visible:shadow-[0_0_0_3px_var(--ds-accent-muted)]",
+          "h-11 w-full rounded-md border border-border-control bg-surface pr-10 pl-9 text-md text-fg outline-none placeholder:text-fg-subtle",
+          "transition-[border-color,box-shadow] duration-150 hover:border-fg-subtle focus-visible:border-accent focus-visible:shadow-[0_0_0_3px_var(--ds-accent-muted)]",
           "[&::-webkit-search-cancel-button]:hidden",
         )}
         {...props}
