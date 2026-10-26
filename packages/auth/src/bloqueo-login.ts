@@ -4,18 +4,36 @@ import { clienteAuth } from "@opai/db";
 import { type ConteosLogin, LOGIN_VENTANA_MS, superaLimiteLogin } from "@opai/domain";
 
 /**
- * Bloqueo de login persistido (B1, Brief 07c). Decide la pausa por fuerza bruta **contando los
- * intentos de contraseña fallidos** que viven en `core.login_intentos` (append-only, sin RLS como
- * `users`): por correo+IP, por correo (global) y por IP. Contar en vez de mutar un contador evita la
- * carrera de lectura-escritura (cada fallo es un `INSERT`) y cubre los correos que no existen sin
- * revelar si existen: se cuenta por el hash del correo, no por el usuario. Se engancha en Better Auth
+ * Bloqueo de login persistido (B1, Brief 07c; política completa en BRIEF-07c §16.3 y §4.1, delegada
+ * por Carlos en t365u y t366u). Decide la pausa por fuerza bruta **contando los intentos de
+ * contraseña fallidos** que viven en `core.login_intentos` (append-only, sin RLS como `users`): por
+ * correo+IP (5), por correo global (20) y por IP (30), en una ventana de 15 minutos. Contar en vez de
+ * mutar un contador cubre los correos que no existen sin revelar si existen (se cuenta por el hash del
+ * correo, no por el usuario) y permite medir varias dimensiones a la vez. Se engancha en Better Auth
  * (ver `auth.ts`), así cubre la Server Action y el POST directo a `/api/auth/.../sign-in/email`.
- * Sin datos personales en claro: el correo se guarda como HMAC con clave derivada del secreto de auth.
+ *
+ * Para cerrar la carrera (varios intentos simultáneos que contarían antes de que el fallo del otro se
+ * grabe) el conteo y el alta van en UNA transacción bajo `pg_advisory_xact_lock` por correo: cada
+ * intento serializado ve los provisionales de los anteriores. El intento se inserta provisional
+ * (motivo `pendiente`, que cuenta como fallo) y el `after` lo resuelve a éxito o fallo con una función
+ * `SECURITY DEFINER` (opai_app no actualiza ni borra: solo-anexar). Un ingreso correcto reinicia el
+ * contador del correo y, como `exito=true` por esa IP, la exime del tope global; un restablecimiento
+ * de contraseña exitoso también reinicia el contador. Sin datos personales en claro: el correo se
+ * guarda como HMAC con clave derivada del secreto de auth.
  */
 export const MENSAJE_PAUSA = "Hubo demasiados intentos. Vuelve a intentarlo en unos minutos.";
 
 /** Retención de los intentos (días). Los purga el cron; acota el crecimiento y minimiza datos. */
 export const LOGIN_RETENCION_DIAS = 30;
+
+/** Ventana de la exención del tope global: una IP que entró bien al correo dentro de la retención. */
+const LOGIN_EXENCION_MS = LOGIN_RETENCION_DIAS * 24 * 60 * 60_000;
+
+/** Motivo del intento provisional mientras se valida; cuenta como fallo hasta que el `after` lo resuelva. */
+const MOTIVO_PENDIENTE = "pendiente";
+
+/** Motivos que suman al bloqueo: el fallo de credenciales y el provisional aún sin resolver. */
+const MOTIVOS_FALLO = [MOTIVO_PENDIENTE, "credenciales"];
 
 let claveHashCache: Buffer | null = null;
 
@@ -53,45 +71,60 @@ export function datosDeContexto(ctx: {
 }
 
 /**
- * Conteos de fallos de contraseña en la ventana, por dimensión. Nunca busca al usuario: cuenta por
- * `correoHash`, así hace exactamente las mismas lecturas exista o no el correo (ni siquiera por
- * tiempo revela si existe). Un ingreso correcto del correo reinicia su contador: solo se cuentan los
- * fallos posteriores al último éxito. Una IP ausente (`null`) no desactiva los límites: sus intentos
- * se agrupan por `ip IS NULL`. El contador por IP no se reinicia con el éxito de un correo (la IP es
- * compartida).
+ * Antes de validar la credencial, en UNA transacción: toma el advisory lock por correo (serializa los
+ * intentos del mismo correo), cuenta los fallos de la ventana por dimensión e inserta el intento
+ * provisional. Devuelve `true` si ya superó el límite (sin insertar: la pausa no gasta un provisional).
+ *
+ * El conteo nunca busca al usuario: cuenta por `correoHash`, así hace las mismas lecturas exista o no
+ * el correo (ni por tiempo revela si existe). Solo cuentan los fallos posteriores al último éxito del
+ * correo (un ingreso correcto reinicia). El tope por IP no se reinicia con el éxito de un correo (la IP
+ * es compartida). Una IP ausente (`null`) no desactiva los límites: se agrupa por `ip IS NULL`, tanto
+ * para contar como para la exención. `exentaGlobal` = esa IP entró bien a este correo dentro de la
+ * retención, por lo que no le aplica el tope global (solo su tope correo+IP).
  */
-async function conteosDe(correoHash: string, ip: string | null, ahora: Date): Promise<ConteosLogin> {
+export async function reservarIntento(datos: DatosIntento): Promise<boolean> {
+  const correoHash = hashCorreo(datos.correo);
+  const ip = datos.ip;
+  const ahora = new Date();
   const ventana = new Date(ahora.getTime() - LOGIN_VENTANA_MS);
-  const db = clienteAuth();
-  const ultimoExito = await db.loginIntento.findFirst({
-    where: { correoHash, exito: true },
-    orderBy: { createdAt: "desc" },
-    select: { createdAt: true },
+  const exencion = new Date(ahora.getTime() - LOGIN_EXENCION_MS);
+  const fallo = { motivo: { in: MOTIVOS_FALLO } };
+  return clienteAuth().$transaction(async (tx) => {
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${correoHash}, 0))`;
+    const ultimoExito = await tx.loginIntento.findFirst({
+      where: { correoHash, exito: true },
+      orderBy: { createdAt: "desc" },
+      select: { createdAt: true },
+    });
+    const desde = ultimoExito && ultimoExito.createdAt > ventana ? ultimoExito.createdAt : ventana;
+    const [correoIp, correo, ipc, exenta] = await Promise.all([
+      tx.loginIntento.count({ where: { ...fallo, correoHash, ip, createdAt: { gt: desde } } }),
+      tx.loginIntento.count({ where: { ...fallo, correoHash, createdAt: { gt: desde } } }),
+      tx.loginIntento.count({ where: { ...fallo, ip, createdAt: { gte: ventana } } }),
+      tx.loginIntento.findFirst({
+        where: { correoHash, ip, exito: true, createdAt: { gt: exencion } },
+        select: { id: true },
+      }),
+    ]);
+    const conteos: ConteosLogin = { correoIp, correo, ip: ipc, exentaGlobal: exenta !== null };
+    if (superaLimiteLogin(conteos)) return true;
+    await tx.loginIntento.create({
+      data: { correoHash, exito: false, motivo: MOTIVO_PENDIENTE, ip, userAgent: datos.userAgent },
+    });
+    return false;
   });
-  const desdeCorreo = ultimoExito && ultimoExito.createdAt > ventana ? ultimoExito.createdAt : ventana;
-  const fallo = { motivo: "credenciales" } as const;
-  const [correoIp, correo, ipc] = await Promise.all([
-    db.loginIntento.count({ where: { ...fallo, correoHash, ip, createdAt: { gt: desdeCorreo } } }),
-    db.loginIntento.count({ where: { ...fallo, correoHash, createdAt: { gt: desdeCorreo } } }),
-    db.loginIntento.count({ where: { ...fallo, ip, createdAt: { gte: ventana } } }),
-  ]);
-  return { correoIp, correo, ip: ipc };
 }
 
 /**
- * Antes de validar la credencial: ¿el correo (o su IP) superó el límite de fallos en la ventana? Solo
- * lee; no escribe ni depende de que el usuario exista, para no revelar si el correo existe.
+ * Después del intento: resuelve el provisional a éxito o fallo. `codigo === null` es ingreso correcto
+ * (motivo `ok`, `exito=true`: reinicia el conteo del correo y exime a la IP del tope global);
+ * `INVALID_EMAIL_OR_PASSWORD` es fallo de contraseña (motivo `credenciales`, el único que suma al
+ * bloqueo); otros desenlaces (p. ej. `ACCOUNT_SUSPENDED`, con contraseña correcta) solo se anotan y
+ * dejan de contar. La marca va por `core.marcar_login_intento` (SECURITY DEFINER) porque opai_app no
+ * actualiza; resuelve UN provisional del mismo correo e IP con `FOR UPDATE SKIP LOCKED`, así dos
+ * `after` simultáneos no pisan el mismo. No se resuelve el usuario aquí (sería un oráculo por tiempo).
  */
-export async function loginPausado(datos: DatosIntento): Promise<boolean> {
-  return superaLimiteLogin(await conteosDe(hashCorreo(datos.correo), datos.ip, new Date()));
-}
-
-/**
- * Después del intento: registra el resultado como un hecho append-only. `codigo === null` es ingreso
- * correcto (reinicia el conteo del correo); `INVALID_EMAIL_OR_PASSWORD` cuenta como fallo de
- * contraseña (motivo `credenciales`, el único que suma al bloqueo); otros desenlaces solo se anotan.
- */
-export async function registrarResultado(datos: DatosIntento, codigo: string | null): Promise<void> {
+export async function resolverIntento(datos: DatosIntento, codigo: string | null): Promise<void> {
   const exito = codigo === null;
   const motivo = exito
     ? "ok"
@@ -102,17 +135,19 @@ export async function registrarResultado(datos: DatosIntento, codigo: string | n
         : codigo === "ACCOUNT_LOCKED"
           ? "bloqueada"
           : codigo.toLowerCase();
-  // No se resuelve el usuario aquí: buscarlo por correo (case-insensitive) en cada intento sería un
-  // oráculo de enumeración por tiempo. El intento se indexa por `correoHash` (HMAC), que basta para
-  // el bloqueo y para la auditoría de acceso (los intentos de un usuario conocido se hallan por hash).
+  await clienteAuth().$queryRaw`
+    SELECT "core"."marcar_login_intento"(
+      ${hashCorreo(datos.correo)}::text, ${datos.ip}::text, ${exito}::boolean, ${motivo}::text)`;
+}
+
+/**
+ * Un restablecimiento de contraseña exitoso reinicia el contador del correo: se anota como un éxito
+ * (sin IP ni contraseña) para que la ventana de conteo empiece de nuevo. Lo llama el `onPasswordReset`
+ * de Better Auth, que ya validó el enlace; best-effort (ver `auth.ts`).
+ */
+export async function registrarRestablecimiento(correo: string): Promise<void> {
   await clienteAuth().loginIntento.create({
-    data: {
-      correoHash: hashCorreo(datos.correo),
-      exito,
-      motivo,
-      ip: datos.ip,
-      userAgent: datos.userAgent,
-    },
+    data: { correoHash: hashCorreo(correo), exito: true, motivo: "reset", ip: null, userAgent: null },
   });
 }
 

@@ -39,4 +39,31 @@ test.describe("bloqueo de login por acceso directo (B1)", () => {
     const cuerpo = await bloqueado.json().catch(() => ({}));
     expect(cuerpo.code).toBe("ACCOUNT_LOCKED");
   });
+
+  test("el 6º intento es idéntico para un correo existente y uno inexistente (sin oráculo)", async (
+    { request },
+    info,
+  ) => {
+    test.skip(info.project.name !== "desktop", "Prueba de backend, un solo proyecto");
+    // El bloqueo cuenta por el hash del correo, no por el usuario: un correo inexistente hace las
+    // mismas lecturas que uno existente. Al 6º intento (umbral correo+IP) ambos deben pausar con el
+    // mismo status, code y cuerpo, para no revelar si el correo existe (§4.1). Cada correo usa su IP.
+    const sexto = async (email: string, ip: string) => {
+      const intentar = (password: string) =>
+        request.post(RUTA, {
+          data: { email, password },
+          headers: { "x-forwarded-for": ip },
+          failOnStatusCode: false,
+        });
+      for (let i = 1; i <= 5; i++) await intentar(`mala-${i}`);
+      const res = await intentar("mala-6");
+      return { status: res.status(), body: await res.text() };
+    };
+    const existente = await sexto(EMAIL, "203.0.113.201");
+    const inexistente = await sexto("no-existe-bloqueo@opai.cl", "203.0.113.202");
+    expect(existente.status).toBe(429);
+    expect(inexistente.status).toBe(existente.status);
+    expect(inexistente.body).toBe(existente.body);
+    expect(JSON.parse(existente.body).code).toBe("ACCOUNT_LOCKED");
+  });
 });
