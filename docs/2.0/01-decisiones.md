@@ -814,3 +814,22 @@ No se encontró: render estático roto, falta de prefetch, layouts que recarguen
    - **Las licencias por módulo y todos los montos** (incluido el margen) van a un ADR futuro de planes y precios, cuando exista Opai SpA; no se fijan aquí.
 
 **Consecuencias.** El agente interno no crea un segundo camino a los datos: si una acción no existe como capacidad, tampoco existe para él. Sigue sin haber copilotos por módulo ni chats entre personas (Tickets sigue sin chat, ADR-025). El número del brief y el mecanismo de la identidad delegada se fijan al planificarlo.
+
+## ADR-050 · El shell sigue el diseño de Claude y los bordes de control cumplen 3:1 (26-oct-2026)
+
+**Estado:** vigente. **Reemplaza** la D7 del Brief 05 («la búsqueda sale de la barra superior; solo queda “Buscar” en la barra inferior») y lo que CAR-12 fijó sobre la cabecera del teléfono y la ubicación del usuario.
+
+**Decisiones de Carlos del 26-oct-2026 a las 17:57**, en sus palabras (Diseño y QA OPAI 2.0, informe del 26-oct-2026 17:53):
+
+- «El shell sigue el diseño de Claude; que el repo se ajuste.» El referente es «OPAI 2.0 Design System V2» (Claude Design 44e4d7b9): `docs/2.0/design/export-ds-2.0/pantallas/ShellPhone.html`, `ShellTablet.html` y `ShellDesktop.html`.
+- «Sí, oscurecer los bordes para cumplir accesibilidad.» Se aplica WCAG 1.4.11 (3:1) a los controles de formulario.
+
+**Consecuencias.**
+
+1. **Teléfono:** Buscar vuelve a la barra superior de 52 px (portal, Buscar, campana, avatar) y sale de la inferior. En la barra inferior activa, ícono en acento y etiqueta en `fg`.
+2. **iPad (1024):** el riel abre con el bloque de portal, sin el wordmark «OPAI», y la búsqueda de la cabecera es una caja con texto, no solo el ícono.
+3. **Escritorio (1280):** el usuario va al pie de la barra lateral (ya no en la cabecera) y el selector de portal es un bloque de ancho completo bajo la marca.
+4. **Token `--ds-border-control`** (`#8a8a93` claro, `#6b6b74` oscuro) para Input, Select, Combobox, Textarea, Checkbox, Radio y la pista apagada del Switch. `border` y `border-strong` quedan para separadores y tarjetas. El hover de filas y tablas pasa a `fill`. Un test de contraste de los tokens lo protege.
+5. Se agregan `--ds-destructive-bg`, `--ds-destructive-fg` y `--ds-shimmer`, y `dark:` sigue la preferencia del usuario (`data-theme`) y no solo el sistema.
+
+Los valores de los tokens existentes no cambian.

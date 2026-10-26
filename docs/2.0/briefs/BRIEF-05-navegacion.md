@@ -77,7 +77,7 @@ D3. **Fijados:** se fija y desfija con un ícono de pin que aparece al pasar el 
 D4. **Inicio** es una entrada suelta arriba; la **Bandeja** vive dentro de Inicio (sección, no entrada del menú).
 D5. **Contador de la Bandeja:** en la barra inferior del celular, Inicio muestra un **punto**; el número aparece dentro de la pantalla. No hay contadores en la barra lateral.
 D6. **Campana (ADR-014):** muestra un punto de no leído y abre la misma Bandeja; no hay una segunda lista de avisos.
-D7. **Celular:** la búsqueda sale de la barra superior; solo queda «Buscar» en la barra inferior.
+D7. **Celular:** la búsqueda sale de la barra superior; solo queda «Buscar» en la barra inferior. **Reemplazada el 26-oct-2026 por ADR-050:** Buscar vuelve a la barra superior y sale de la inferior (decisión de Carlos, 17:57).
 D8. **Vencimientos** sigue como vista dentro de Personas; no es entrada del menú.
 D9. **iPad:** desde 1024 px se usa la barra lateral completa de escritorio, con sus grupos plegables, sin riel nuevo. De 768 a 1023 sigue el riel actual. No se pliega a solo íconos (Carlos, 26-oct-2026 11:03 CLT, chat con el bot OPAI 2.0 (t295u; dictado por voz)).
 D10. **El rol viewer (Visualizador) no ve Nómina.** No es una decisión nueva: es regla de ADR-016 (viewer «solo lectura, sin finanzas ni nómina»). Corrige la pantalla 05 del diseño, que se la mostraba.

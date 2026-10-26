@@ -256,10 +256,10 @@ input.input{outline:none}
 
 /* Segmented */
 .seg{display:inline-flex; padding:2px; gap:2px; border-radius:var(--ds-radius-md); background:var(--n-100)}
-.ds.dark .seg{background:#1B1B1E}
+.ds.dark .seg{background:var(--ds-surface-raised)}
 .seg button{height:32px; padding:0 12px; border:0; border-radius:8px; background:transparent; font:500 13px/18px var(--ds-font); color:var(--ds-fg-muted)}
 .seg button.on{background:var(--ds-surface); color:var(--ds-fg); box-shadow:0 0 0 1px var(--ds-border)}
-.ds.dark .seg button.on{background:#2A2A2F; box-shadow:none}
+.ds.dark .seg button.on{background:var(--ds-fill); box-shadow:none}
 
 /* Card / Surface */
 .card{background:var(--ds-surface); border:1px solid var(--ds-border); border-radius:var(--ds-radius-lg)}
@@ -283,7 +283,7 @@ input.input{outline:none}
 /* Avatar */
 .avatar{width:32px; height:32px; border-radius:999px; background:var(--n-200); color:var(--ds-fg-muted);
   display:inline-flex; align-items:center; justify-content:center; font:600 12px/16px var(--ds-font); flex:none; letter-spacing:.02em}
-.ds.dark .avatar{background:#2A2A2F; color:#D4D4D8}
+.ds.dark .avatar{background:var(--ds-fill); color:#D4D4D8}
 .avatar.lg{width:40px; height:40px; font-size:14px}
 .avatar.sm{width:24px; height:24px; font-size:10px}
 .tenant{width:24px; height:24px; border-radius:6px; background:var(--n-900); color:#fff; display:inline-flex; align-items:center; justify-content:center;
@@ -300,7 +300,7 @@ input.input{outline:none}
 
 /* Skeleton */
 .skel{background:var(--n-100); border-radius:6px; position:relative; overflow:hidden}
-.ds.dark .skel{background:#1F1F23}
+.ds.dark .skel{background:var(--ds-fill)}
 .skel::after{content:""; position:absolute; inset:0; background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);
   transform:translateX(-100%); animation:ds-shimmer 1.4s infinite}
 .ds.dark .skel::after{background:linear-gradient(90deg,transparent,rgba(255,255,255,.05),transparent)}
@@ -341,7 +341,7 @@ input.input{outline:none}
 .rail a{width:64px; height:56px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; border-radius:var(--ds-radius-md);
   color:var(--ds-fg-muted); text-decoration:none; font:500 11px/14px var(--ds-font)}
 .rail a.on{background:var(--n-100); color:var(--ds-fg)}
-.ds.dark .rail a.on{background:#222226}
+.ds.dark .rail a.on{background:var(--ds-fill)}
 .rail a.on .ic{color:var(--ds-accent)}
 /* Desktop: sidebar */
 .sidebar{width:248px; flex:none; display:flex; flex-direction:column; background:var(--ds-surface); border-right:1px solid var(--ds-border)}
@@ -351,7 +351,7 @@ input.input{outline:none}
   text-decoration:none; font:500 14px/20px var(--ds-font)}
 .nav-item .ic{width:16px; height:16px}
 .nav-item.on{background:var(--n-100); color:var(--ds-fg)}
-.ds.dark .nav-item.on{background:#222226}
+.ds.dark .nav-item.on{background:var(--ds-fill)}
 .nav-item.on .ic{color:var(--ds-accent)}
 .nav-item .n{margin-left:auto; font:500 12px/16px var(--ds-font); color:var(--ds-fg-subtle); font-variant-numeric:tabular-nums}
 .appbar{display:flex; align-items:center; gap:12px; height:60px; padding:0 24px; border-bottom:1px solid var(--ds-border); background:var(--ds-bg); flex:none}
@@ -557,7 +557,7 @@ muted #E8F4FA</span>
             <div style="display: flex; align-items: center; gap: 12px; height: 44px; border-bottom: 1px solid var(--ds-border)">
               <span style="width: 28px; height: 28px; border-radius: 6px; flex: none; box-shadow: inset 0 0 0 1px rgba(255,255,255,.1); background: var(--ds-surface-raised)"></span>
               <span class="t-mono" style="font-size: 12px; flex: 1; min-width: 0">--ds-surface-raised</span>
-              <span class="t-mono subtle" style="font-size: 12px">#1B1B1E</span>
+              <span class="t-mono subtle" style="font-size: 12px">var(--ds-surface-raised)</span>
             </div>
           
             <div style="display: flex; align-items: center; gap: 12px; height: 44px; border-bottom: 1px solid var(--ds-border)">
