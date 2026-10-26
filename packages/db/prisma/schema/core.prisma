@@ -26,6 +26,8 @@ model Tenant {
 
   auditEvents AuditEvent[]
   memberships Membership[]
+  roles       Rol[]
+  permisoExcepciones PermisoExcepcion[]
   modules     TenantModule[]
   apiKeys     ApiKey[]
   invitations Invitation[]
