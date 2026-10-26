@@ -5,41 +5,31 @@
 import type { Globales, TenantDb, TenantTx } from "@opai/db";
 
 import { agrupar, cumple, ordenar, type Fila, type Where } from "./db-memoria-util";
+import { incluir, resolverWhereRelaciones } from "./db-memoria-rel";
 
 // Ids crecientes como uuid(7): el orden por id es el orden de creación, igual que en Postgres.
 let secuencia = 0;
 const idOrdenado = () => `00000000-0000-7000-8000-${(++secuencia).toString(16).padStart(12, "0")}`;
-
-const RELACIONES: Record<string, Record<string, [tabla: string, clave: string]>> = {
-  membership: { user: ["user", "userId"], tenant: ["tenant", "tenantId"] },
-  apiKey: { user: ["user", "userId"] },
-};
 
 export function dbEnMemoria(semilla: Record<string, Fila[]> = {}) {
   const tablas = new Map<string, Fila[]>(Object.entries(semilla).map(([k, v]) => [k, [...v]]));
   const tabla = (n: string) => tablas.get(n) ?? (tablas.set(n, []), tablas.get(n) as Fila[]);
   const unicos: Record<string, string[]> = { trabajo: ["claveUnica"] };
 
-  function incluir(modelo: string, fila: Fila, include?: Record<string, boolean>): Fila {
-    if (!include) return { ...fila };
-    const extra: Fila = {};
-    for (const rel of Object.keys(include)) {
-      const [t, clave] = RELACIONES[modelo]?.[rel] ?? [rel, `${rel}Id`];
-      extra[rel] = tabla(t).find((f) => f["id"] === fila[clave]);
-    }
-    return { ...fila, ...extra };
-  }
-
   function delegado(modelo: string) {
     const filas = () => tabla(modelo);
     type Args = {
       where?: Where;
       data?: Fila;
-      include?: Record<string, boolean>;
+      include?: Parameters<typeof incluir>[3];
       take?: number;
       skip?: number;
       cursor?: { id: string };
       orderBy?: unknown;
+    };
+    const filtrar = (where?: Where) => {
+      const w = resolverWhereRelaciones(tabla, modelo, where);
+      return filas().filter((x) => cumple(x, w));
     };
     const crear = (data: Fila) => {
       const fila = { id: idOrdenado(), createdAt: new Date(), updatedAt: new Date(), ...data };
@@ -53,10 +43,7 @@ export function dbEnMemoria(semilla: Record<string, Fila[]> = {}) {
           filas().some((f) => f[c] === data[c] && f["tenantId"] === data["tenantId"]),
       );
     const buscar = (a: Args = {}) => {
-      const orden = ordenar(
-        filas().filter((x) => cumple(x, a.where)),
-        a.orderBy,
-      );
+      const orden = ordenar(filtrar(a.where), a.orderBy);
       const desde = a.cursor
         ? Math.max(
             orden.findIndex((f) => f["id"] === a.cursor?.id),
@@ -69,14 +56,14 @@ export function dbEnMemoria(semilla: Record<string, Fila[]> = {}) {
     return {
       findUnique: async (a: Args) => {
         const f = filas().find((x) => cumple(x, a.where));
-        return f ? incluir(modelo, f, a.include) : null;
+        return f ? incluir(tabla, modelo, f, a.include) : null;
       },
       findFirst: async (a: Args = {}) => {
         const f = buscar(a)[0];
-        return f ? incluir(modelo, f, a.include) : null;
+        return f ? incluir(tabla, modelo, f, a.include) : null;
       },
-      findMany: async (a: Args = {}) => buscar(a).map((f) => incluir(modelo, f, a.include)),
-      count: async (a: Args = {}) => filas().filter((x) => cumple(x, a.where)).length,
+      findMany: async (a: Args = {}) => buscar(a).map((f) => incluir(tabla, modelo, f, a.include)),
+      count: async (a: Args = {}) => filtrar(a.where).length,
       create: async (a: Args) => crear(a.data ?? {}),
       createMany: async (a: { data: Fila[]; skipDuplicates?: boolean }) => {
         let count = 0;

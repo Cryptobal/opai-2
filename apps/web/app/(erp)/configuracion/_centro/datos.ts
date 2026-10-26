@@ -17,7 +17,9 @@ export async function cargarIndice() {
   const [mods, esquema, n] = await Promise.all([
     ejecutarComoUsuario<Modulo[]>("erp", "core.modules.list"),
     ejecutarComoUsuario<{ modulo: string }[]>("erp", "core.config.schema", {}),
-    ejecutarComoUsuario<Contadores>("erp", "core.resumen.contadores", {}),
+    ejecutarComoUsuario<Contadores>("erp", "core.resumen.contadores", {
+      campos: ["aprobacionesPendientes"],
+    }),
   ]);
   const conAjustes = new Set(esquema.ok ? esquema.data.map((c) => c.modulo) : []);
   const modulos = (mods.ok ? mods.data : [])

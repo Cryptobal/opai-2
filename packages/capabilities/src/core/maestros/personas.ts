@@ -5,63 +5,89 @@ import { PERMISOS_CORE } from "@opai/domain";
 import { defineCapability } from "../../define";
 import { uuidSchema } from "../esquemas";
 import { cursorDe, listaSchema, pagina } from "./comun";
-import { personaDe, personaSchema, vinculosVigentes, vistaPersona } from "./personas-vista";
+import {
+  personaDe,
+  personaSchema,
+  vinculosVigentes,
+  vinculoVista,
+  vistaPersona,
+} from "./personas-vista";
 import { alertasDocumentos, alertasSchema } from "./resumenes";
 
 export const personasList = defineCapability({
   id: "core.personas.list",
   descripcion:
-    "Lista las personas (trabajadores) con búsqueda por nombre o RUT y filtros por cargo y estado (activa, inactiva, bloqueada). Incluye el vínculo laboral vigente. Paginada por cursor.",
+    "Lista las personas (trabajadores) con búsqueda por nombre o RUT y filtros por cargo y estado (activa, inactiva, bloqueada). Incluye el vínculo laboral vigente, el total de la consulta y, con incluirFiltros, los cargos para el filtro. Paginada por cursor.",
   permiso: PERMISOS_CORE.personasRead,
   input: listaSchema.extend({
     cargoId: uuidSchema.optional(),
     estado: z.enum(["activa", "inactiva", "bloqueada"]).optional(),
+    incluirFiltros: z
+      .boolean()
+      .default(false)
+      .describe("Devuelve también los cargos (id y nombre) para el filtro de la pantalla."),
   }),
   output: z.object({
     items: z.array(personaSchema.extend({ documentos: alertasSchema })),
     siguiente: z.string().nullable(),
+    total: z.number().describe("Total de personas que cumplen la consulta (sin paginar)."),
+    cargos: z
+      .array(z.object({ id: z.string(), nombre: z.string() }))
+      .optional()
+      .describe("Cargos activos para el filtro (solo con incluirFiltros)."),
   }),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
     const q = input.q;
-    const porCargo = input.cargoId
-      ? (
-          await ctx.db.vinculoLaboral.findMany({
-            where: { cargoId: input.cargoId, estado: "vigente" },
-            select: { personaId: true },
-          })
-        ).map((v) => v.personaId)
-      : null;
     const rut = (q ?? "").replace(/[.\s]/g, "").toUpperCase();
-    const filas = await ctx.db.persona.findMany({
-      where: {
-        ...(input.incluirArchivadas ? {} : { archivadaEn: null }),
-        ...(porCargo ? { id: { in: porCargo } } : {}),
-        ...(input.estado === "bloqueada"
-          ? { bloqueada: true }
-          : input.estado
-            ? { estado: input.estado }
-            : {}),
-        ...(q
-          ? {
-              OR: [
-                { nombres: { contains: q, mode: "insensitive" as const } },
-                { apellidos: { contains: q, mode: "insensitive" as const } },
-                { rut: { startsWith: rut } },
-              ],
-            }
+    // El filtro por cargo se resuelve con una relación (`some`), no con una consulta de ids aparte.
+    const where = {
+      ...(input.incluirArchivadas ? {} : { archivadaEn: null }),
+      ...(input.cargoId
+        ? { vinculos: { some: { cargoId: input.cargoId, estado: "vigente" } } }
+        : {}),
+      ...(input.estado === "bloqueada"
+        ? { bloqueada: true }
+        : input.estado
+          ? { estado: input.estado }
           : {}),
-      },
-      orderBy: [{ apellidos: "asc" }, { nombres: "asc" }, { id: "asc" }],
-      take: input.limite + 1,
-      ...cursorDe(input.cursor),
-    });
+      ...(q
+        ? {
+            OR: [
+              { nombres: { contains: q, mode: "insensitive" as const } },
+              { apellidos: { contains: q, mode: "insensitive" as const } },
+              { rut: { startsWith: rut } },
+            ],
+          }
+        : {}),
+    };
+    // Página (con el vínculo vigente y su cargo por include), total de la consulta y, si se pide,
+    // los cargos del filtro: todo en la misma transacción de lectura (ADR-045).
+    const [filas, total, cargos] = await Promise.all([
+      ctx.db.persona.findMany({
+        where,
+        orderBy: [{ apellidos: "asc" }, { nombres: "asc" }, { id: "asc" }],
+        take: input.limite + 1,
+        ...cursorDe(input.cursor),
+        include: {
+          vinculos: {
+            where: { estado: "vigente" },
+            include: { cargo: { select: { nombre: true } } },
+            take: 1,
+          },
+        },
+      }),
+      ctx.db.persona.count({ where }),
+      input.incluirFiltros
+        ? ctx.db.cargo.findMany({
+            where: { activo: true },
+            orderBy: [{ orden: "asc" }, { nombre: "asc" }],
+            select: { id: true, nombre: true },
+          })
+        : Promise.resolve(null),
+    ]);
     const p = pagina(filas, input.limite);
-    const vinculos = await vinculosVigentes(
-      ctx,
-      p.items.map((x) => x.id),
-    );
     const alertas = await alertasDocumentos(
       ctx,
       "persona",
@@ -69,10 +95,12 @@ export const personasList = defineCapability({
     );
     return {
       items: p.items.map((x) => ({
-        ...vistaPersona(x, vinculos.get(x.id) ?? null),
+        ...vistaPersona(x, x.vinculos[0] ? vinculoVista(x.vinculos[0]) : null),
         documentos: alertas(x.id),
       })),
       siguiente: p.siguiente,
+      total,
+      ...(cargos ? { cargos } : {}),
     };
   },
 });
