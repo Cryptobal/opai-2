@@ -3,12 +3,13 @@ import { type ReactNode, Suspense } from "react";
 
 import { Forbidden, Loading, type VarianteLoading } from "@opai/ds";
 
+import { epocaDeIdentidad, marcaGenerado } from "@/lib/epoca-sesion";
 import { medirFase } from "@/lib/metricas-navegacion";
 import { requerirIdentidad, tieneAccesoAPortal } from "@/lib/servidor";
 
-import { datosShell } from "./datos-shell";
+import { type OpcionesPagina } from "./cabecera-contexto";
+import { CabeceraPagina } from "./cabecera-pagina";
 import { MarcadorMetricas } from "./marcador-metricas";
-import { type OpcionesPagina, Shell } from "./shell";
 
 type Props<T> = OpcionesPagina & {
   portal: string;
@@ -37,34 +38,36 @@ async function Contenido<T>({
     redirect("/platform");
   }
   const sinEmpresa = !identidad.actual && portal !== "platform";
-  // Fase `datos` del `Server-Timing` (ADR-045): datos de la página. La barra lateral ya no carga
-  // contadores (decisión 15 de Carlos del 24-oct); la navegación sale solo de la identidad.
+  // Fase `datos` del `Server-Timing` (ADR-045): solo los datos de la página; el shell y su navegación
+  // viven en el layout del portal (`PortalLayout`) y no se recargan por navegación.
   const datos = await medirFase("datos", () =>
     acceso && cargar ? cargar() : Promise.resolve(undefined as T),
   );
   const extra = acceso && cargar && opciones ? opciones(datos) : {};
+  // El esqueleto acompaña al contenido (lo intercambia el CSS en navegaciones lentas, ver `EstadoEnlace`);
+  // el resto de las opciones son la cabecera que la página fija en el shell persistente del layout.
+  const { esqueleto, ...cabecera } = { ...pagina, ...extra };
   return (
-    <Shell
-      datos={datosShell(identidad, portal)}
-      esqueleto={<Loading variante={cargando} />}
-      {...pagina}
-      {...extra}
-    >
-      {acceso ? (
-        typeof children === "function" ? (
-          children(datos)
+    <>
+      <CabeceraPagina {...cabecera} generado={marcaGenerado()} epoca={epocaDeIdentidad(identidad)} />
+      <div data-contenido className="contents">
+        {acceso ? (
+          typeof children === "function" ? (
+            children(datos)
+          ) : (
+            children
+          )
         ) : (
-          children
-        )
-      ) : (
-        <Forbidden
-          descripcion={
-            sinEmpresa
-              ? "Aún no perteneces a ninguna empresa activa. Pide una invitación a su administrador."
-              : "No tienes acceso a este portal en la empresa actual."
-          }
-        />
-      )}
+          <Forbidden
+            descripcion={
+              sinEmpresa
+                ? "Aún no perteneces a ninguna empresa activa. Pide una invitación a su administrador."
+                : "No tienes acceso a este portal en la empresa actual."
+            }
+          />
+        )}
+      </div>
+      <div data-esqueleto>{esqueleto ?? <Loading variante={cargando} />}</div>
       {/* En su propio Suspense: `MarcadorMetricas` lee `headers()` (async), y sin un límite propio su
           suspensión sube hasta el Suspense del portal (`CargaPortal`) y arrastra todo el contenido —la
           lista incluida— fuera del primer flush del HTML. Aislado, la lista se envía de inmediato y el
@@ -72,14 +75,15 @@ async function Contenido<T>({
       <Suspense fallback={null}>
         <MarcadorMetricas />
       </Suspense>
-    </Shell>
+    </>
   );
 }
 
 /**
- * Página de un portal: exige sesión y acceso al portal en servidor y monta el shell real.
- * El Suspense vive en el layout del portal (`CargaPortal`): al navegar, React conserva la
- * página anterior hasta que la nueva está lista, en vez de reemplazarla por un esqueleto.
+ * Página de un portal: exige sesión y acceso al portal en servidor, carga sus datos y fija su
+ * cabecera (título, acciones, "Atrás") en el shell persistente del layout (ADR-045). El shell y el
+ * Suspense viven en el layout del portal (`PortalLayout`): al navegar, React conserva el shell y la
+ * página anterior hasta que la nueva está lista, en vez de volver a montar la barra lateral.
  */
 export function PaginaPortal<T = undefined>(props: Props<T>) {
   return <Contenido {...props} />;
