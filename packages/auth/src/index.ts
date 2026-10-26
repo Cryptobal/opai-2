@@ -13,6 +13,7 @@ export {
   urlDeGoogle,
 } from "./acciones";
 export { auth, type Auth } from "./auth";
+export { LOGIN_RETENCION_DIAS, purgarIntentosLogin } from "./bloqueo-login";
 export {
   googleHabilitado,
   LARGO_MINIMO_PASSWORD,

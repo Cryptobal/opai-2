@@ -43,13 +43,19 @@ export function FormularioLogin({ destino, google, inicial, cargando: forzado, e
       pie={<PiePortales />}
       Link={LinkNext}
     >
+      {/* `key` por intento: remonta el aviso para que el lector de pantalla lo reanuncie (H3). */}
       {estado.tipo === "error" ? (
-        <Alerta tono="danger" titulo={estado.titulo}>
+        <Alerta key={estado.n} tono="danger" titulo={estado.titulo}>
+          {estado.texto}
+        </Alerta>
+      ) : null}
+      {estado.tipo === "pausado" ? (
+        <Alerta key={estado.n} tono="warning" titulo={estado.titulo}>
           {estado.texto}
         </Alerta>
       ) : null}
       {estado.tipo === "suspendida" ? (
-        <Alerta tono="warning" titulo="Tu cuenta está suspendida">
+        <Alerta key={estado.n} tono="warning" titulo="Tu cuenta está suspendida">
           {estado.texto}
         </Alerta>
       ) : null}

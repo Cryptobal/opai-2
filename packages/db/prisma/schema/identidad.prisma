@@ -22,6 +22,35 @@ model User {
   @@schema("core")
 }
 
+// Registro append-only de cada intento de login (B1, Brief 07c). Es la única fuente del bloqueo por
+// fuerza bruta: `@opai/auth` cuenta los fallos de contraseña en una ventana (por correo+IP, correo e
+// IP) en vez de mutar un contador, así no hay carrera y cubre los correos que no existen. Para cerrar
+// la carrera entre intentos simultáneos, el conteo y el alta van en una transacción bajo
+// `pg_advisory_xact_lock`: el intento se inserta provisional (motivo `pendiente`, que cuenta como
+// fallo) y el `after` lo resuelve con `core.marcar_login_intento` (SECURITY DEFINER). Sin datos
+// personales en claro: el correo va como HMAC, nunca RUT ni PIN (Ley 21.719). IP y user agent quedan
+// para la auditoría de acceso (B8). Sin tenant_id ni RLS (la identidad es global). `user_id` queda
+// reservado (lo poblará B8); el flujo de login NO lo resuelve, para no abrir un oráculo de
+// enumeración por tiempo —el intento se indexa por `correo_hash` (HMAC)—. Solo-anexar: `opai_app` no
+// actualiza ni borra (REVOKE en la migración); la resolución del provisional y la purga las hacen
+// funciones `SECURITY DEFINER`.
+model LoginIntento {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  correoHash String   @map("correo_hash")
+  userId     String?  @map("user_id") @db.Uuid
+  exito      Boolean
+  /// "pendiente" (provisional) | "ok" | "reset" | "credenciales" | "bloqueada" | "suspendida" | otro código.
+  motivo     String?
+  ip         String?
+  userAgent  String?  @map("user_agent")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([correoHash, createdAt])
+  @@index([userId, createdAt])
+  @@map("login_intentos")
+  @@schema("core")
+}
+
 model Session {
   id        String   @id @default(uuid(7)) @db.Uuid
   expiresAt DateTime @map("expires_at") @db.Timestamptz(6)
