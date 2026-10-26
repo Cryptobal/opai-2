@@ -1,8 +1,7 @@
-import { Lock, Plus } from "lucide-react";
+import { Lock } from "lucide-react";
 
 import { Alerta } from "@opai/ds";
 
-import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { leerParametros, type SearchParams } from "@/lib/parametros";
 import { vocabularioActual } from "@/lib/vocabulario";
@@ -20,11 +19,6 @@ export default function Cargos({ searchParams }: { searchParams: SearchParams })
       portal="erp"
       titulo="Cargos y sueldos"
       ruta="/cargos"
-      acciones={
-        <EnlaceBotonHoja href="?nuevo=1" icono={Plus}>
-          Nuevo cargo
-        </EnlaceBotonHoja>
-      }
       cargar={async () => {
         const [p, voc] = await Promise.all([leerParametros(searchParams), vocabularioActual()]);
         return { ...(await cargarCargosLista(p)), voc };

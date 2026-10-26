@@ -5,7 +5,7 @@ import {
   type MarcaCorreo,
   type PlantillaBase,
 } from "@opai/domain";
-import type { TenantDb } from "@opai/db";
+import type { TenantTx } from "@opai/db";
 
 /** Catálogo comunicable: núcleo (los módulos declararán los suyos en su manifest, ADR-020). */
 export function comunicables(): readonly EventoComunicable[] {
@@ -18,7 +18,7 @@ export type PlantillaVigente = PlantillaBase & { version: number | null };
 
 /** Versión activa editada por el tenant o, si no hay, la plantilla por defecto (version null). */
 export async function plantillaVigente(
-  db: TenantDb,
+  db: TenantTx,
   e: EventoComunicable,
   canal: Canal,
 ): Promise<PlantillaVigente | null> {
@@ -34,7 +34,7 @@ export async function plantillaVigente(
 
 /** Marca para correos desde el perfil del tenant (ADR-028); el remitente, del ajuste de comunicaciones. */
 export async function marcaDe(
-  db: TenantDb,
+  db: TenantTx,
   tenantId: string,
   urlBase: string,
 ): Promise<MarcaCorreo> {

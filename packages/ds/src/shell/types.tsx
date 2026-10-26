@@ -17,6 +17,8 @@ export type NavItem = {
   soloCompacto?: boolean;
   /** Solo en la barra lateral de desktop: en el riel no aparece y en teléfono va en "Más". */
   soloAmplio?: boolean;
+  /** Fuera de la barra inferior del teléfono: va a "Más" (sigue en el riel y en la barra lateral). */
+  fueraInferior?: boolean;
   /** El contador es una alerta (globo rojo también en el riel y la barra inferior). */
   alerta?: boolean;
 };

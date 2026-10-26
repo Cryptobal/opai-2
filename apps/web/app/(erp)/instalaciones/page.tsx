@@ -1,8 +1,7 @@
-import { MapPin, Plus } from "lucide-react";
+import { MapPin } from "lucide-react";
 
 import { SplitScreen } from "@opai/ds";
 
-import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { leerParametros, type SearchParams } from "@/lib/parametros";
 import { vocabularioActual } from "@/lib/vocabulario";
@@ -20,11 +19,6 @@ export default function Instalaciones({ searchParams }: { searchParams: SearchPa
       titulo="Instalaciones"
       ruta="/instalaciones"
       completo
-      acciones={
-        <EnlaceBoton href="/instalaciones/nueva" icono={Plus}>
-          Nueva instalación
-        </EnlaceBoton>
-      }
       cargar={async () => {
         const p = await leerParametros(searchParams);
         const [l, voc] = await Promise.all([cargarInstalaciones(p), vocabularioActual()]);
