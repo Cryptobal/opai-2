@@ -30,7 +30,6 @@ export type DatosShell = {
   tenant: { nombre: string } | null;
   usuario: { nombre: string; email: string; rol?: string };
   empresas: { id: string; nombre: string; actual: boolean }[];
-  noLeidas: number;
   /** Nombre del portal bajo la marca del riel (el ERP no lleva). */
   subtituloMarca?: string | undefined;
   /** Identifica la versión de la página (ms del servidor); el navegador mide la edad desde que la vio. */
@@ -131,9 +130,7 @@ export function Shell({
       {...(empresas.length ? { empresas } : {})}
       usuario={datos.usuario}
       menuUsuario={menu}
-      campana={
-        datos.tenant ? <Campana noLeidas={datos.noLeidas} portal={datos.portal} /> : undefined
-      }
+      campana={datos.tenant ? <Campana portal={datos.portal} /> : undefined}
       {...(buscable ? { onBuscar: () => setPaleta(true) } : {})}
       {...(datos.subtituloMarca ? { subtituloMarca: datos.subtituloMarca } : {})}
       onNavegar={(href) => router.push(href)}

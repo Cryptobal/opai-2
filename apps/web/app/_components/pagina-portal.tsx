@@ -3,9 +3,8 @@ import { type ReactNode, Suspense } from "react";
 
 import { Forbidden, Loading, type VarianteLoading } from "@opai/ds";
 
-import type { Contadores } from "@/lib/navegacion";
 import { medirFase } from "@/lib/metricas-navegacion";
-import { ejecutarComoUsuario, requerirIdentidad, tieneAccesoAPortal } from "@/lib/servidor";
+import { requerirIdentidad, tieneAccesoAPortal } from "@/lib/servidor";
 
 import { datosShell } from "./datos-shell";
 import { MarcadorMetricas } from "./marcador-metricas";
@@ -20,14 +19,6 @@ type Props<T> = OpcionesPagina & {
   opciones?: (datos: T) => Partial<OpcionesPagina>;
   cargando?: VarianteLoading;
   children: ReactNode | ((datos: T) => ReactNode);
-};
-
-const SIN_CONTADORES: Contadores = {
-  cuentas: null,
-  instalaciones: null,
-  personas: null,
-  aprobacionesPendientes: null,
-  notificacionesNoLeidas: null,
 };
 
 async function Contenido<T>({
@@ -46,20 +37,15 @@ async function Contenido<T>({
     redirect("/platform");
   }
   const sinEmpresa = !identidad.actual && portal !== "platform";
-  // Fase `datos` del `Server-Timing` (ADR-045): contadores de la barra lateral + datos de la página.
-  const [conteo, datos] = await medirFase("datos", () =>
-    Promise.all([
-      acceso && identidad.actual
-        ? ejecutarComoUsuario<Contadores>(portal, "core.resumen.contadores", {})
-        : null,
-      acceso && cargar ? cargar() : (undefined as T),
-    ]),
+  // Fase `datos` del `Server-Timing` (ADR-045): datos de la página. La barra lateral ya no carga
+  // contadores (decisión 15 de Carlos del 24-oct); la navegación sale solo de la identidad.
+  const datos = await medirFase("datos", () =>
+    acceso && cargar ? cargar() : Promise.resolve(undefined as T),
   );
-  const contadores = conteo?.ok ? conteo.data : SIN_CONTADORES;
   const extra = acceso && cargar && opciones ? opciones(datos) : {};
   return (
     <Shell
-      datos={datosShell(identidad, portal, contadores)}
+      datos={datosShell(identidad, portal)}
       esqueleto={<Loading variante={cargando} />}
       {...pagina}
       {...extra}
