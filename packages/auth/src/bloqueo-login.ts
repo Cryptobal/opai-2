@@ -23,6 +23,16 @@ import { type ConteosLogin, LOGIN_VENTANA_MS, superaLimiteLogin } from "@opai/do
  */
 export const MENSAJE_PAUSA = "Hubo demasiados intentos. Vuelve a intentarlo en unos minutos.";
 
+/**
+ * Resultado de reservar un intento: `ok` trae el UUID del provisional (el `after` lo resuelve por ese
+ * id); `pausa` es un tope superado; `ocupado` es que otro intento del mismo correo tiene el lock (se
+ * responde 429 en vez de esperar). Para quien llama, `pausa` y `ocupado` se ven igual.
+ */
+export type ReservaIntento =
+  | { estado: "ok"; intentoId: string }
+  | { estado: "pausa" }
+  | { estado: "ocupado" };
+
 /** Retención de los intentos (días). Los purga el cron; acota el crecimiento y minimiza datos. */
 export const LOGIN_RETENCION_DIAS = 30;
 
@@ -31,6 +41,9 @@ const LOGIN_EXENCION_MS = LOGIN_RETENCION_DIAS * 24 * 60 * 60_000;
 
 /** Motivo del intento provisional mientras se valida; cuenta como fallo hasta que el `after` lo resuelva. */
 const MOTIVO_PENDIENTE = "pendiente";
+
+/** Motivo de un ingreso correcto: el único éxito que exime del tope global (no `reset`, que no trae IP). */
+const MOTIVO_INGRESO_OK = "ok";
 
 /** Motivos que suman al bloqueo: el fallo de credenciales y el provisional aún sin resolver. */
 const MOTIVOS_FALLO = [MOTIVO_PENDIENTE, "credenciales"];
@@ -49,6 +62,15 @@ function claveHash(): Buffer {
 /** Correo normalizado a HMAC-SHA256 con clave derivada (nunca en claro ni en logs, Ley 21.719). */
 export function hashCorreo(correo: string): string {
   return createHmac("sha256", claveHash()).update(correo.trim().toLowerCase()).digest("hex");
+}
+
+/** Clave del contexto de Better Auth donde el `before` deja el UUID del provisional para el `after`. */
+export const CLAVE_INTENTO = "opaiIntentoId";
+
+/** UUID del provisional que el `before` dejó en el contexto de la petición, o `null` si no hay. */
+export function intentoDeContexto(contexto: object): string | null {
+  const id: unknown = Reflect.get(contexto, CLAVE_INTENTO);
+  return typeof id === "string" && id ? id : null;
 }
 
 export type DatosIntento = { correo: string; ip: string | null; userAgent: string | null };
@@ -72,17 +94,21 @@ export function datosDeContexto(ctx: {
 
 /**
  * Antes de validar la credencial, en UNA transacción: toma el advisory lock por correo (serializa los
- * intentos del mismo correo), cuenta los fallos de la ventana por dimensión e inserta el intento
- * provisional. Devuelve `true` si ya superó el límite (sin insertar: la pausa no gasta un provisional).
+ * intentos del mismo correo) con `pg_try_advisory_xact_lock`, cuenta los fallos de la ventana por
+ * dimensión e inserta el intento provisional. Si el lock lo tiene otro intento del mismo correo no
+ * espera: devuelve `ocupado` (el hook responde 429), así una ráfaga no acumula conexiones colgadas.
+ * Devuelve `pausa` si ya superó el límite (sin insertar: la pausa no gasta un provisional) y, si no,
+ * `ok` con el UUID del provisional para que el `after` lo resuelva por ese id.
  *
  * El conteo nunca busca al usuario: cuenta por `correoHash`, así hace las mismas lecturas exista o no
  * el correo (ni por tiempo revela si existe). Solo cuentan los fallos posteriores al último éxito del
  * correo (un ingreso correcto reinicia). El tope por IP no se reinicia con el éxito de un correo (la IP
  * es compartida). Una IP ausente (`null`) no desactiva los límites: se agrupa por `ip IS NULL`, tanto
- * para contar como para la exención. `exentaGlobal` = esa IP entró bien a este correo dentro de la
- * retención, por lo que no le aplica el tope global (solo su tope correo+IP).
+ * para contar como para la exención. `exentaGlobal` = esa IP tiene un ingreso correcto (motivo `ok`,
+ * no un `reset`) a este correo dentro de la retención, por lo que no le aplica el tope global (solo su
+ * tope correo+IP).
  */
-export async function reservarIntento(datos: DatosIntento): Promise<boolean> {
+export async function reservarIntento(datos: DatosIntento): Promise<ReservaIntento> {
   const correoHash = hashCorreo(datos.correo);
   const ip = datos.ip;
   const ahora = new Date();
@@ -90,7 +116,9 @@ export async function reservarIntento(datos: DatosIntento): Promise<boolean> {
   const exencion = new Date(ahora.getTime() - LOGIN_EXENCION_MS);
   const fallo = { motivo: { in: MOTIVOS_FALLO } };
   return clienteAuth().$transaction(async (tx) => {
-    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${correoHash}, 0))`;
+    const lock = await tx.$queryRaw<{ ok: boolean }[]>`
+      SELECT pg_try_advisory_xact_lock(hashtextextended(${correoHash}, 0)) AS ok`;
+    if (!lock[0]?.ok) return { estado: "ocupado" };
     const ultimoExito = await tx.loginIntento.findFirst({
       where: { correoHash, exito: true },
       orderBy: { createdAt: "desc" },
@@ -102,16 +130,17 @@ export async function reservarIntento(datos: DatosIntento): Promise<boolean> {
       tx.loginIntento.count({ where: { ...fallo, correoHash, createdAt: { gt: desde } } }),
       tx.loginIntento.count({ where: { ...fallo, ip, createdAt: { gte: ventana } } }),
       tx.loginIntento.findFirst({
-        where: { correoHash, ip, exito: true, createdAt: { gt: exencion } },
+        where: { correoHash, ip, exito: true, motivo: MOTIVO_INGRESO_OK, createdAt: { gt: exencion } },
         select: { id: true },
       }),
     ]);
     const conteos: ConteosLogin = { correoIp, correo, ip: ipc, exentaGlobal: exenta !== null };
-    if (superaLimiteLogin(conteos)) return true;
-    await tx.loginIntento.create({
+    if (superaLimiteLogin(conteos)) return { estado: "pausa" };
+    const { id } = await tx.loginIntento.create({
       data: { correoHash, exito: false, motivo: MOTIVO_PENDIENTE, ip, userAgent: datos.userAgent },
+      select: { id: true },
     });
-    return false;
+    return { estado: "ok", intentoId: id };
   });
 }
 
@@ -121,13 +150,13 @@ export async function reservarIntento(datos: DatosIntento): Promise<boolean> {
  * `INVALID_EMAIL_OR_PASSWORD` es fallo de contraseña (motivo `credenciales`, el único que suma al
  * bloqueo); otros desenlaces (p. ej. `ACCOUNT_SUSPENDED`, con contraseña correcta) solo se anotan y
  * dejan de contar. La marca va por `core.marcar_login_intento` (SECURITY DEFINER) porque opai_app no
- * actualiza; resuelve UN provisional del mismo correo e IP con `FOR UPDATE SKIP LOCKED`, así dos
- * `after` simultáneos no pisan el mismo. No se resuelve el usuario aquí (sería un oráculo por tiempo).
+ * actualiza; resuelve el provisional por el UUID que devolvió `reservarIntento` (no por correo e IP),
+ * así el `after` marca exactamente el intento de su `before`. No se resuelve el usuario aquí (sería un oráculo por tiempo).
  */
-export async function resolverIntento(datos: DatosIntento, codigo: string | null): Promise<void> {
+export async function resolverIntento(intentoId: string, codigo: string | null): Promise<void> {
   const exito = codigo === null;
   const motivo = exito
-    ? "ok"
+    ? MOTIVO_INGRESO_OK
     : codigo === "INVALID_EMAIL_OR_PASSWORD"
       ? "credenciales"
       : codigo === "ACCOUNT_SUSPENDED"
@@ -136,8 +165,7 @@ export async function resolverIntento(datos: DatosIntento, codigo: string | null
           ? "bloqueada"
           : codigo.toLowerCase();
   await clienteAuth().$queryRaw`
-    SELECT "core"."marcar_login_intento"(
-      ${hashCorreo(datos.correo)}::text, ${datos.ip}::text, ${exito}::boolean, ${motivo}::text)`;
+    SELECT "core"."marcar_login_intento"(${intentoId}::uuid, ${exito}::boolean, ${motivo}::text)`;
 }
 
 /**
