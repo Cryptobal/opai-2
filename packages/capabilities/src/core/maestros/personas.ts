@@ -4,6 +4,7 @@ import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import { uuidSchema } from "../esquemas";
+import { dondePersona } from "./alcance";
 import { cursorDe, listaSchema, pagina } from "./comun";
 import { personaDe, personaSchema, vinculosVigentes, vistaPersona } from "./personas-vista";
 import { alertasDocumentos, alertasSchema } from "./resumenes";
@@ -36,6 +37,7 @@ export const personasList = defineCapability({
     const rut = (q ?? "").replace(/[.\s]/g, "").toUpperCase();
     const filas = await ctx.db.persona.findMany({
       where: {
+        AND: [dondePersona(ctx)],
         ...(input.incluirArchivadas ? {} : { archivadaEn: null }),
         ...(porCargo ? { id: { in: porCargo } } : {}),
         ...(input.estado === "bloqueada"
