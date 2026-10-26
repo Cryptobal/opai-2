@@ -148,6 +148,30 @@ export const INVENTARIO_NUCLEO = defineDatosPersonales("core", [
     ],
     baseLicitud: "obligacion_legal",
   },
+  {
+    tabla: "consentimientos",
+    finalidad: "Consentimientos del titular para fines accesorios (p. ej. comunicaciones comerciales): a quién, para qué fin y si está otorgado o revocado.",
+    categorias: ["identificacion"],
+    campos: ["titular_id", "registrado_por"],
+    baseLicitud: "consentimiento",
+    reguladoNoBorrable: true,
+  },
+  {
+    tabla: "solicitudes_arco",
+    finalidad: "Solicitudes del titular (ARCO+): quién pide acceso, rectificación, cancelación, oposición, portabilidad o bloqueo, con su plazo, responsable y evidencia.",
+    categorias: ["identificacion", "contacto"],
+    campos: ["titular_id", "titular_email", "titular_nombre", "responsable_id"],
+    baseLicitud: "obligacion_legal",
+    reguladoNoBorrable: true,
+  },
+  {
+    tabla: "incidentes",
+    finalidad: "Registro de incidentes de seguridad y avisos de brecha (Ley 21.719): alcance, categorías de datos afectados y destinatario del aviso (Agencia y titulares). Sin datos personales en claro.",
+    categorias: ["contacto"],
+    campos: ["destinatario", "registrado_por"],
+    baseLicitud: "obligacion_legal",
+    reguladoNoBorrable: true,
+  },
 ]);
 
 /** Inventario consolidado: el Núcleo más lo que declara cada módulo en su manifest. */

@@ -69,6 +69,9 @@ model Tenant {
 
   // Brief 07d · Ley 21.719 (cumplimiento por diseño).
   dpaAceptaciones       DpaAceptacion[]
+  consentimientos       Consentimiento[]
+  solicitudesArco       SolicitudArco[]
+  incidentes            Incidente[]
 
   @@map("tenants")
   @@schema("core")
@@ -118,5 +121,100 @@ model DpaAceptacion {
 
   @@index([tenantId, createdAt])
   @@map("dpa_aceptaciones")
+  @@schema("core")
+}
+
+/// Consentimiento del titular para un fin accesorio (§16.2). Append-only: otorgar y revocar son
+/// filas nuevas; el estado vigente por (titular, propósito) es la última fila. No se apoya en
+/// consentimiento la relación laboral ni las obligaciones con la DT (t331u).
+model Consentimiento {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  /// "persona" | "contacto": tipo de titular.
+  titularTipo   String   @map("titular_tipo")
+  titularId     String   @map("titular_id") @db.Uuid
+  /// Fin accesorio (p. ej. "comunicaciones_comerciales"); base de licitud = consentimiento.
+  proposito     String
+  /// Versión del aviso de privacidad vigente al otorgar.
+  versionAviso  String   @map("version_aviso")
+  /// "otorgado" | "revocado". Revocar es una fila nueva (append-only).
+  estado        String
+  /// "interno" | "portal": de dónde vino. En 07d solo el registro interno.
+  origen        String   @default("interno")
+  nota          String?
+  /// Nombre y correo de quien lo registró, como prueba legible (sin FK, igual que audit_events).
+  registradoPor String?  @map("registrado_por")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, titularTipo, titularId, proposito, createdAt])
+  @@map("consentimientos")
+  @@schema("core")
+}
+
+/// Solicitud del titular (ARCO+, §4.4). Mutable: el estado avanza y las transiciones quedan en la
+/// auditoría. El acceso y la portabilidad producen una exportación como documento del Núcleo.
+model SolicitudArco {
+  id                   String    @id @default(uuid(7)) @db.Uuid
+  tenantId             String    @map("tenant_id") @db.Uuid
+  /// Titular interno, si existe: "persona" | "contacto".
+  titularTipo          String?   @map("titular_tipo")
+  titularId            String?   @map("titular_id") @db.Uuid
+  /// Correo y nombre del titular si aún no es un registro interno (§10).
+  titularEmail         String?   @map("titular_email")
+  titularNombre        String?   @map("titular_nombre")
+  /// "acceso"|"rectificacion"|"cancelacion"|"oposicion"|"portabilidad"|"bloqueo"
+  tipo                 String
+  /// "recibida"|"en_proceso"|"resuelta"|"rechazada"
+  estado               String    @default("recibida")
+  /// Plazo legal calculado al recibir; null si los días aún no están configurados (§16.3).
+  plazoEn              DateTime? @map("plazo_en") @db.Timestamptz(6)
+  recibidaEn           DateTime  @default(now()) @map("recibida_en") @db.Timestamptz(6)
+  /// Usuario responsable de atenderla (id del actor, sin FK).
+  responsableId        String?   @map("responsable_id") @db.Uuid
+  resultado            String?
+  /// Documento de evidencia (p. ej. la exportación de acceso/portabilidad), mismo tenant.
+  documentoEvidenciaId String?   @map("documento_evidencia_id") @db.Uuid
+  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, estado, plazoEn])
+  @@map("solicitudes_arco")
+  @@schema("core")
+}
+
+/// Incidente de seguridad y aviso de brecha (§16.5), manual. Append-only event-sourced: cada fila es
+/// un hecho inmutable de un caso (`caso_id`); el estado vigente del caso es la última fila. "avanzar"
+/// y "marcar notificado" agregan filas, no editan. Sin datos personales en claro (AGENTS.md).
+model Incidente {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  tenantId       String    @map("tenant_id") @db.Uuid
+  /// Agrupa los hechos de un mismo incidente (= id del hecho "registro").
+  casoId         String    @map("caso_id") @db.Uuid
+  /// "registro" | "avance" | "aviso"
+  evento         String
+  /// Estado del caso tras este hecho: "abierto"|"en_evaluacion"|"notificado"|"cerrado"
+  estado         String
+  /// Registro: cuándo ocurrió y descripción, alcance y categorías de datos afectados.
+  ocurridoEn     DateTime? @map("ocurrido_en") @db.Timestamptz(6)
+  descripcion    String?
+  alcance        String?
+  datosAfectados String?   @map("datos_afectados")
+  /// Aviso: a quién ("agencia"|"titulares"|texto), por qué canal, con qué plazo y evidencia.
+  destinatario   String?
+  canal          String?
+  plazoEn        DateTime? @map("plazo_en") @db.Timestamptz(6)
+  evidenciaDocId String?   @map("evidencia_doc_id") @db.Uuid
+  nota           String?
+  registradoPor  String?   @map("registrado_por")
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, casoId, createdAt])
+  @@map("incidentes")
   @@schema("core")
 }
