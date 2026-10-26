@@ -4,9 +4,12 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import { PERMISOS_CORE } from "@opai/domain";
+
 import { type Entorno, prepararEntorno, urlPropietario } from "../../db/test/entorno";
 
 import type * as ModuloCapacidades from "../src";
+import { almacenamientoEnMemoria } from "../src/testing/almacenamiento-memoria";
 import type { Alcance } from "../src/types";
 
 type Capacidades = typeof ModuloCapacidades;
@@ -21,9 +24,14 @@ describe.skipIf(!urlPropietario)("alcance del supervisor en base real (B3)", () 
   let instB = "";
   let instA2 = "";
   let membershipSup = "";
+  let docA = "";
+  let docFuera = "";
+  let docEmpresa = "";
+  let personaId = "";
   const userSupId = randomUUID();
 
   const medidor = { registrar: async () => undefined };
+  const servicios = { almacenamiento: almacenamientoEnMemoria().almacenamiento };
   const ctxOwner = () =>
     mod.crearContexto({ tenantId, actor: { tipo: "system" }, rol: "owner", medidor });
   const ctxSup = (alcance: Alcance | null) =>
@@ -33,6 +41,7 @@ describe.skipIf(!urlPropietario)("alcance del supervisor en base real (B3)", () 
       rol: "supervisor",
       alcance,
       medidor,
+      servicios,
     });
   const ctxKeySup = (alcance: Alcance | null) =>
     mod.crearContexto({
@@ -91,6 +100,47 @@ describe.skipIf(!urlPropietario)("alcance del supervisor en base real (B3)", () 
     membershipSup = (
       await e.admin.membership.create({
         data: { tenantId, userId: u.id, rol: "supervisor", portales: ["supervisor"] },
+      })
+    ).id;
+    // Documentos para probar que la lectura no se fuga por id (url_descarga/disponible/actividad):
+    // uno de la instalación a cargo, uno de una instalación ajena y uno de empresa (nivel tenant).
+    const doc = async (nombre: string) =>
+      (
+        await e.admin.documento.create({
+          data: {
+            tenantId,
+            nombre,
+            mime: "application/pdf",
+            tamano: 1_000,
+            storageKey: `k-${randomUUID()}`,
+            estado: "disponible",
+            creadoPorTipo: "user",
+          },
+        })
+      ).id;
+    docA = await doc("docA.pdf");
+    docFuera = await doc("docFuera.pdf");
+    docEmpresa = await doc("docEmpresa.pdf");
+    await e.admin.documentoVinculo.createMany({
+      data: [
+        { tenantId, documentoId: docA, entidadTipo: "instalacion", entidadId: instA, rol: "propietario" },
+        { tenantId, documentoId: docFuera, entidadTipo: "instalacion", entidadId: instB, rol: "propietario" },
+        { tenantId, documentoId: docEmpresa, entidadTipo: "tenant", entidadId: tenantId, rol: "propietario" },
+      ],
+    });
+    // Un evento de actividad por documento, para distinguir "sin acceso" de "sin actividad".
+    await e.admin.auditEvent.createMany({
+      data: [
+        { tenantId, actorType: "user", actorId: userSupId, capability: "core.documentos.update", entityType: "documento", entityId: docA },
+        { tenantId, actorType: "user", actorId: userSupId, capability: "core.documentos.update", entityType: "documento", entityId: docFuera },
+      ],
+    });
+    // Una persona del tenant: sin relación real persona ↔ instalación, el supervisor no la ve (CA-B3 parcial).
+    personaId = (
+      await dato<{ id: string }>(o, "core.personas.create", {
+        nombres: "Pedro",
+        apellidos: "Soto",
+        rut: "19.876.543-0",
       })
     ).id;
   });
@@ -182,6 +232,88 @@ describe.skipIf(!urlPropietario)("alcance del supervisor en base real (B3)", () 
     const r = await mod.executeCapability(ctxKeySup(await alcanceDesdeDb()), "core.supervisores.asignar", {
       membershipId: membershipSup,
       instalacionIds: [instA],
+    });
+    expect(r).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+  });
+
+  it("la lectura de un documento no se fuga por id: solo los de su alcance (url y actividad)", async () => {
+    const ctx = ctxSup({ instalaciones: [instA] });
+    // Dentro de alcance: URL firmada y actividad visibles.
+    const url = await dato<{ url: string }>(ctx, "core.documentos.url_descarga", { id: docA });
+    expect(url.url).toBeTruthy();
+    const actA = await dato<{ items: unknown[] }>(ctxSup({ instalaciones: [instA] }), "core.actividad.list", {
+      entidad: { tipo: "documento", id: docA },
+    });
+    expect(actA.items).toHaveLength(1);
+    // Documento de una instalación ajena: NOT_FOUND en la URL y actividad vacía (no la del otro doc).
+    const urlFuera = await mod.executeCapability(ctxSup({ instalaciones: [instA] }), "core.documentos.url_descarga", { id: docFuera });
+    expect(urlFuera).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+    const actFuera = await dato<{ items: unknown[] }>(ctxSup({ instalaciones: [instA] }), "core.actividad.list", {
+      entidad: { tipo: "documento", id: docFuera },
+    });
+    expect(actFuera.items).toHaveLength(0);
+    // Documento de empresa (nivel tenant, sin instalación ni persona): el supervisor no lo ve.
+    const urlEmpresa = await mod.executeCapability(ctxSup({ instalaciones: [instA] }), "core.documentos.url_descarga", { id: docEmpresa });
+    expect(urlEmpresa).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+    const actEmpresa = await dato<{ items: unknown[] }>(ctxSup({ instalaciones: [instA] }), "core.actividad.list", {
+      entidad: { tipo: "documento", id: docEmpresa },
+    });
+    expect(actEmpresa.items).toHaveLength(0);
+  });
+
+  it("CA-B3 parcial: el supervisor no ve personas (sin relación real persona ↔ instalación)", async () => {
+    const ctx = ctxSup({ instalaciones: [instA] });
+    const personas = await dato<{ items: unknown[] }>(ctx, "core.personas.list", {});
+    expect(personas.items).toHaveLength(0);
+    const ficha = await mod.executeCapability(ctxSup({ instalaciones: [instA] }), "core.personas.get", { id: personaId });
+    expect(ficha).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+    const act = await dato<{ items: unknown[] }>(ctxSup({ instalaciones: [instA] }), "core.actividad.list", {
+      entidad: { tipo: "persona", id: personaId },
+    });
+    expect(act.items).toHaveLength(0);
+  });
+
+  it("solo owner o admin fijan el alcance: un gerente con users.manage no puede (escalada)", async () => {
+    const ctxGerente = mod.crearContexto({
+      tenantId,
+      actor: { tipo: "user", id: randomUUID() },
+      rol: "gerente",
+      excepciones: [{ permiso: PERMISOS_CORE.usersManage, conceder: true }],
+      medidor,
+    });
+    const r = await mod.executeCapability(ctxGerente, "core.supervisores.asignar", {
+      membershipId: membershipSup,
+      instalacionIds: [instA],
+    });
+    expect(r).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+  });
+
+  it("nadie se asigna alcance a sí mismo", async () => {
+    const ctxSelf = mod.crearContexto({
+      tenantId,
+      actor: { tipo: "user", id: userSupId },
+      usuario: { id: userSupId, nombre: "Supervisor", email: "sup@prueba.cl", platformRole: null },
+      rol: "admin",
+      medidor,
+    });
+    const r = await mod.executeCapability(ctxSelf, "core.supervisores.asignar", {
+      membershipId: membershipSup,
+      instalacionIds: [instA],
+    });
+    expect(r).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+  });
+
+  it("nadie da más alcance que el propio", async () => {
+    const ctxAcotado = mod.crearContexto({
+      tenantId,
+      actor: { tipo: "user", id: randomUUID() },
+      rol: "admin",
+      alcance: { instalaciones: [instA] },
+      medidor,
+    });
+    const r = await mod.executeCapability(ctxAcotado, "core.supervisores.asignar", {
+      membershipId: membershipSup,
+      instalacionIds: [instB],
     });
     expect(r).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
   });

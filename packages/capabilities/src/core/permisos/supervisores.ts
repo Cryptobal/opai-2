@@ -3,7 +3,7 @@ import { z } from "zod";
 import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
-import { noEncontrado, reglaDeNegocio } from "../../errores";
+import { noEncontrado, prohibido, reglaDeNegocio } from "../../errores";
 import type { Contexto } from "../../types";
 import { uuidSchema } from "../esquemas";
 import { escribirConEvento } from "../maestros/comun";
@@ -16,6 +16,24 @@ async function supervisorDe(ctx: Contexto, membershipId: string) {
   // acotan por instalación; cliente y trabajador se suman con sus portales (fase 3).
   if (m.rol !== "supervisor") throw reglaDeNegocio("El alcance por instalación es solo del supervisor.");
   return m;
+}
+
+/**
+ * Gobierno del alcance (§16.4): quién puede fijar el alcance de un supervisor. Además del permiso
+ * `users.manage` de la capacidad, exige ser owner o admin; nadie cambia su propio alcance ni asigna
+ * instalaciones fuera del suyo (owner/admin tienen `alcance` null = todo). Evita la escalada.
+ */
+function exigirGobiernoDeAlcance(
+  ctx: Contexto,
+  membership: { userId: string },
+  instalacionIds: readonly string[],
+) {
+  if (ctx.rol !== "owner" && ctx.rol !== "admin")
+    throw prohibido("Solo un owner o admin cambia el alcance de un supervisor.");
+  if (ctx.usuario && membership.userId === ctx.usuario.id)
+    throw prohibido("No puedes cambiar tu propio alcance.");
+  if (ctx.alcance && instalacionIds.some((id) => !ctx.alcance?.instalaciones.includes(id)))
+    throw prohibido("No puedes dar más alcance que el propio.");
 }
 
 /** Ids de instalaciones a cargo de una membresía. */
@@ -76,6 +94,7 @@ export const supervisoresAsignar = defineCapability({
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     const m = await supervisorDe(ctx, input.membershipId);
+    exigirGobiernoDeAlcance(ctx, m, input.instalacionIds);
     const existen = await ctx.db.instalacion.count({ where: { id: { in: input.instalacionIds } } });
     if (existen !== new Set(input.instalacionIds).size) throw noEncontrado("Alguna instalación");
     const actuales = await idsDe(ctx, m.id);
@@ -116,6 +135,7 @@ export const supervisoresQuitar = defineCapability({
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     const m = await supervisorDe(ctx, input.membershipId);
+    exigirGobiernoDeAlcance(ctx, m, input.instalacionIds);
     const quitar = new Set(input.instalacionIds);
     const resultado = (await idsDe(ctx, m.id)).filter((id) => !quitar.has(id));
     if (dryRun) return { membershipId: m.id, instalaciones: await nombresDe(ctx, resultado) };
