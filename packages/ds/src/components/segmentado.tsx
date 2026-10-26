@@ -45,12 +45,12 @@ export function Segmentado({
         // La caja tocable mide 44 px; el relleno visible (la «píldora») queda en 32 o 36 px.
         const caja = "group/seg inline-flex h-11 items-center outline-none";
         const pildora = cn(
-          "inline-flex h-8 items-center rounded-sm px-3 text-base font-medium whitespace-nowrap transition-colors group-focus-visible/seg:outline-2 group-focus-visible/seg:outline-focus",
-          plano && "h-9 rounded-md px-4",
+          "inline-flex h-8 items-center rounded-[8px] px-3 text-base font-medium whitespace-nowrap transition-colors group-focus-visible/seg:outline-2 group-focus-visible/seg:outline-focus",
+          plano && "h-9 px-4",
           plano && on
             ? "bg-fill text-fg"
             : on
-              ? "bg-surface text-fg shadow-[0_1px_2px_rgba(0,0,0,0.06)]"
+              ? "bg-surface text-fg shadow-seg"
               : "text-fg-muted group-hover/seg:text-fg",
         );
         return o.href ? (
