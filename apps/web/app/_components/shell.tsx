@@ -14,6 +14,7 @@ import type { ItemNav } from "@/lib/navegacion";
 import { Campana } from "./campana";
 import { icono } from "./iconos";
 import { LinkMenu } from "./link-menu";
+import { trasLimpiarCaches } from "./pwa/limpiar-cache";
 import { useEpocaSesion, useRefrescoSilencioso } from "./refresco-navegador";
 
 // La paleta (cmdk) se descarga al primer uso: no pesa en el JS inicial de cada ruta (ADR-037).
@@ -86,9 +87,8 @@ export function Shell({
           etiqueta: e.nombre,
           icono: Building2,
           marcado: e.actual,
-          onSelect: () => {
-            void cambiarTenant(e.id);
-          },
+          // Cambiar de empresa limpia las cachés del service worker antes de redirigir (§4.4, CA8).
+          onSelect: () => trasLimpiarCaches(() => cambiarTenant(e.id)),
         }))
       : [];
   const menu: ItemMenu[] = [
@@ -115,9 +115,8 @@ export function Shell({
       etiqueta: "Cerrar sesión",
       icono: LogOut,
       peligro: true,
-      onSelect: () => {
-        void accionSalir();
-      },
+      // Cerrar sesión limpia las cachés del service worker antes de redirigir (§4.4, §9, CA8).
+      onSelect: () => trasLimpiarCaches(accionSalir),
     },
   ];
   return (

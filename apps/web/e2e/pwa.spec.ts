@@ -2,9 +2,10 @@ import { expect, type Page, test } from "@playwright/test";
 
 /**
  * Base PWA (ADR-044, Brief 04): manifest válido con íconos que existen, service worker que controla
- * la página, y cascarón sin red que cae a la página offline del DS sin servir datos de `/api` desde
- * la caché. No necesita sesión: usa el manifest y rutas públicas (/login, /sin-conexion). Corre en
- * el job e2e (no obligatorio aún, ADR-043 v3); se corre antes de abrir el PR.
+ * la página, cascarón sin red que cae a la página offline del DS sin servir datos de `/api` desde la
+ * caché, y la regla de caché bloqueante (§4.4, §9, CA8): nunca HTML ni RSC con sesión en `caches`,
+ * solo la lista explícita de activos públicos; al cerrar sesión la app limpia las cachés. Corre en el
+ * job e2e (no obligatorio aún, ADR-043 v3); se corre antes de abrir el PR.
  */
 
 const ICONOS = [
@@ -16,6 +17,46 @@ const ICONOS = [
 ];
 
 type IconoManifest = { sizes: string; purpose?: string };
+
+// Lo único que puede quedar en `caches`: la página offline neutra, los íconos y los estáticos con
+// hash (JS/CSS/fuentes). Cualquier HTML o RSC con sesión (query `_rsc`) o `/api/*` sería una fuga.
+const PUBLICOS = new Set(["/sin-conexion", ...ICONOS]);
+function esActivoPublico(u: string): boolean {
+  const { pathname, search } = new URL(u);
+  if (search.includes("_rsc")) return false;
+  return PUBLICOS.has(pathname) || pathname.startsWith("/_next/static/");
+}
+
+/** URLs de todas las peticiones guardadas en cualquier caché del service worker. */
+async function urlsEnCache(page: Page): Promise<string[]> {
+  return page.evaluate(async () => {
+    const urls: string[] = [];
+    for (const n of await caches.keys()) {
+      const c = await caches.open(n);
+      for (const req of await c.keys()) urls.push(req.url);
+    }
+    return urls;
+  });
+}
+
+/** ¿Algún cuerpo guardado en caché contiene este texto? (p. ej. el correo del usuario anterior). */
+async function cacheContieneTexto(page: Page, texto: string): Promise<boolean> {
+  return page.evaluate(async (t) => {
+    for (const n of await caches.keys()) {
+      const c = await caches.open(n);
+      for (const req of await c.keys()) {
+        const r = await c.match(req);
+        const cuerpo = r ? await r.clone().text().catch(() => "") : "";
+        if (cuerpo.includes(t)) return true;
+      }
+    }
+    return false;
+  }, texto);
+}
+
+async function soloActivosPublicos(page: Page): Promise<void> {
+  for (const u of await urlsEnCache(page)) expect(esActivoPublico(u), u).toBe(true);
+}
 
 test("el manifest es válido y sus íconos existen", async ({ request }) => {
   const res = await request.get("/manifest.webmanifest");
@@ -42,18 +83,22 @@ test("el manifest es válido y sus íconos existen", async ({ request }) => {
 });
 
 async function esperarControl(page: Page) {
-  await page.goto("/login");
   await page.waitForFunction(() => navigator.serviceWorker?.controller != null, null, {
     timeout: 40_000,
   });
 }
 
 test("el service worker se registra y controla la página", async ({ page }) => {
+  await page.goto("/login");
   await esperarControl(page);
   expect(await page.evaluate(() => navigator.serviceWorker.controller != null)).toBe(true);
 });
 
-test("sin red aparece la página offline y /api no se sirve de caché", async ({ page, context }) => {
+test("sin red aparece la página offline y en caché solo hay activos públicos", async ({
+  page,
+  context,
+}) => {
+  await page.goto("/login");
   await esperarControl(page);
   // La página offline está precacheada en install.
   await expect
@@ -78,5 +123,80 @@ test("sin red aparece la página offline y /api no se sirve de caché", async ({
   });
   expect(apiVivo).toBe(false);
 
+  // Tras navegar, en `caches` solo hay la lista explícita de activos públicos (CA8): nada de HTML
+  // ni RSC con sesión, ni `/api/*`.
+  await soloActivosPublicos(page);
   await context.setOffline(false);
+});
+
+// --- Dos usuarios de dos empresas en el mismo navegador (CA8, §12) --------------------------------
+const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
+const emailA = process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl"; // usuario A, empresa 1 (Gard)
+const emailB = "e2e-multiempresa@opai.cl"; // usuario B, elige la empresa 2 (Empresa E2E)
+
+async function entrar(page: Page, correo: string, empresa: RegExp) {
+  await page.goto("/login");
+  await page.getByLabel("Correo").fill(correo);
+  await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
+  await page.getByRole("button", { name: "Entrar" }).click();
+  // Con más de una membresía el acceso pide elegir; se elige la empresa indicada.
+  const boton = page.getByRole("button", { name: empresa });
+  await Promise.race([
+    boton.waitFor({ state: "visible" }),
+    page.waitForURL((u) => u.pathname === "/" || u.pathname === "/platform"),
+  ]).catch(() => undefined);
+  if (await boton.isVisible().catch(() => false)) await boton.click();
+  await page.waitForURL((u) => u.pathname === "/" || u.pathname === "/platform");
+}
+
+test.describe("dos usuarios, dos empresas", () => {
+  test.skip(!password, "Falta SEED_OWNER_PASSWORD o E2E_PASSWORD");
+  // Igual que caché-sesión: el menú de usuario (salir) y el riel existen desde iPad; el teléfono tiene
+  // otro DOM. La propiedad de seguridad no depende del tamaño de pantalla.
+  test.skip(({ viewport }) => (viewport?.width ?? 0) < 768, "Se prueba en iPad y escritorio");
+  test.setTimeout(180_000);
+
+  test("tras salir A y entrar B, B nunca ve los datos de A y las cachés se limpiaron", async ({
+    page,
+    context,
+  }) => {
+    // A entra en la empresa 1, navega y deja el service worker controlando.
+    await entrar(page, emailA, /Gard Security/);
+    await esperarControl(page);
+    // Sentinela: una entrada en caché con el correo de A. Si cerrar sesión limpia las cachés (§4.4),
+    // desaparece; el service worker nunca la recrea, así que la prueba es determinista.
+    await page.evaluate(
+      (e) => caches.open("prueba-sesion").then((c) => c.put("/__a", new Response(e))),
+      emailA,
+    );
+    expect(await page.evaluate(() => caches.has("prueba-sesion"))).toBe(true);
+
+    // A cierra sesión: la app limpia las cachés del service worker antes de redirigir.
+    await page.getByRole("button", { name: "Menú de usuario" }).click();
+    await page.getByRole("menuitem", { name: /Cerrar sesión|Salir/i }).click();
+    await page.waitForURL(/\/login/);
+    await expect.poll(() => page.evaluate(() => caches.has("prueba-sesion"))).toBe(false);
+
+    // B entra en la empresa 2.
+    await entrar(page, emailB, /Empresa E2E/);
+    await esperarControl(page);
+
+    // B es B, no A: el menú de usuario muestra el correo de B y nunca el de A.
+    await page.getByRole("button", { name: "Menú de usuario" }).click();
+    await expect(page.getByText(emailB)).toBeVisible();
+    await expect(page.getByText(emailA)).toHaveCount(0);
+    await page.keyboard.press("Escape");
+    // La empresa activa es la 2 (Empresa E2E), no la 1.
+    await expect(page.getByRole("button", { name: /Empresa E2E/ })).toBeVisible();
+    // Con red, nada de A quedó en caché.
+    expect(await cacheContieneTexto(page, emailA)).toBe(false);
+
+    // Sin red: cascarón offline neutro y, en caché, solo activos públicos; nada de A.
+    await context.setOffline(true);
+    await page.goto("/terreno");
+    await expect(page.getByText("Sin conexión")).toBeVisible();
+    await soloActivosPublicos(page);
+    expect(await cacheContieneTexto(page, emailA)).toBe(false);
+    await context.setOffline(false);
+  });
 });
