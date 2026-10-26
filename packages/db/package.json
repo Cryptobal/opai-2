@@ -17,6 +17,7 @@
     "lint": "eslint .",
     "test": "vitest run",
     "seed:maestros-demo": "tsx scripts/seed-maestros-demo.ts",
+    "seed:roles-base": "tsx scripts/seed-roles-base.ts",
     "seed:e2e": "tsx scripts/seed-e2e.ts"
   },
   "dependencies": {

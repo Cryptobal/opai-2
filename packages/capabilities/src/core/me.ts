@@ -1,9 +1,9 @@
 import { z } from "zod";
 
 import {
+  moduloDe,
   PERMISOS_CORE,
   PERMISOS_PLATAFORMA,
-  permisosDe,
   tienePermisoPlataforma,
   vocabulario,
 } from "@opai/domain";
@@ -69,7 +69,11 @@ export const me = defineCapability({
             where: { tenantId_userId: { tenantId: tenant.id, userId: ctx.usuario.id } },
           })
         : null;
-    const deTenant = ctx.rol ? permisosDe(ctx.rol, catalogoPermisos(), ctx.modulosActivos) : [];
+    // Permisos efectivos (ADR-022): rol base o personalizado + excepciones, por `ctx.autorizar`.
+    const activos = new Set(["core", ...ctx.modulosActivos]);
+    const deTenant = catalogoPermisos().filter(
+      (p) => activos.has(moduloDe(p)) && ctx.autorizar(p),
+    );
     const dePlataforma = Object.values(PERMISOS_PLATAFORMA).filter(
       (p) => ctx.actor.tipo === "user" && tienePermisoPlataforma(ctx.usuario?.platformRole, p),
     );
