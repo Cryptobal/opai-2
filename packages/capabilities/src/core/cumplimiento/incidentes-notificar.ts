@@ -26,14 +26,19 @@ export const incidenteNotificar = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    const actual = await ultimoHecho(ctx, input.casoId);
-    if (!puedeAvanzarIncidente(actual.estado as EstadoIncidente, "notificado"))
-      throw reglaDeNegocio(`No se puede notificar un caso "${actual.estado}".`);
     const dias = await ajuste<number>(ctx, "core", "cumplimiento_brecha_dias_plazo");
     const plazoEn = calcularPlazo(new Date(), dias);
-    if (dryRun)
+    if (dryRun) {
+      const actual = await ultimoHecho(ctx.db, input.casoId);
+      if (!puedeAvanzarIncidente(actual.estado as EstadoIncidente, "notificado"))
+        throw reglaDeNegocio(`No se puede notificar un caso "${actual.estado}".`);
       return { casoId: input.casoId, estado: "notificado", ultimoEvento: "aviso", registradoEn: new Date().toISOString(), plazoEn: plazoEn?.toISOString() ?? null };
+    }
+    // Lee el estado vigente y anota el aviso en la misma transacción (sin TOCTOU).
     const fila = await ctx.transaccion(async (tx) => {
+      const actual = await ultimoHecho(tx, input.casoId);
+      if (!puedeAvanzarIncidente(actual.estado as EstadoIncidente, "notificado"))
+        throw reglaDeNegocio(`No se puede notificar un caso "${actual.estado}".`);
       const f = await tx.incidente.create({
         data: {
           tenantId: ctx.tenantId,

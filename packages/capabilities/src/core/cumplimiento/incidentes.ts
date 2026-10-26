@@ -77,12 +77,17 @@ export const incidenteAvanzar = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    const actual = await ultimoHecho(ctx, input.casoId);
-    if (!puedeAvanzarIncidente(actual.estado as EstadoIncidente, input.estado))
-      throw reglaDeNegocio(`No se puede pasar de "${actual.estado}" a "${input.estado}".`);
-    if (dryRun)
+    if (dryRun) {
+      const actual = await ultimoHecho(ctx.db, input.casoId);
+      if (!puedeAvanzarIncidente(actual.estado as EstadoIncidente, input.estado))
+        throw reglaDeNegocio(`No se puede pasar de "${actual.estado}" a "${input.estado}".`);
       return { casoId: input.casoId, estado: input.estado, ultimoEvento: "avance", registradoEn: new Date().toISOString() };
+    }
+    // Lee el estado vigente y anota el avance en la misma transacción (sin TOCTOU).
     const fila = await ctx.transaccion(async (tx) => {
+      const actual = await ultimoHecho(tx, input.casoId);
+      if (!puedeAvanzarIncidente(actual.estado as EstadoIncidente, input.estado))
+        throw reglaDeNegocio(`No se puede pasar de "${actual.estado}" a "${input.estado}".`);
       const f = await tx.incidente.create({
         data: {
           tenantId: ctx.tenantId,

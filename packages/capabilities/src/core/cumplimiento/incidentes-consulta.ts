@@ -82,10 +82,10 @@ export const incidentesListar = defineCapability({
   dryRun: false,
   async handler(ctx, input) {
     // Flujo manual: pocos casos. Se traen los hechos recientes y se agrupan por caso en memoria.
-    const hechos = (await ctx.db.incidente.findMany({
+    const hechos: Hecho[] = await ctx.db.incidente.findMany({
       orderBy: { createdAt: "desc" },
       take: 1000,
-    })) as unknown as Hecho[];
+    });
     const porCaso = new Map<string, Hecho[]>();
     for (const h of hechos) porCaso.set(h.casoId, [...(porCaso.get(h.casoId) ?? []), h]);
     const items = [...porCaso.values()]
