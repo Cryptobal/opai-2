@@ -2,7 +2,7 @@
 
 > **Desde el 24-oct-2026, el estado de las tareas vive en Linear (enlace por definir). Este archivo queda como foto técnica: versiones, infraestructura, riesgos aceptados y decisiones.** (PR #22). Las listas de pendientes de abajo se migran a Linear en la fecha que fije Carlos; hasta entonces no se borran, y si no coinciden con Linear, manda Linear.
 
-**Última actualización:** 25-oct-2026 · **Actualizado por:** Claude (arquitectura) · **Fase en curso:** 1 — Núcleo, en cierre (Briefs 01, 01c y 02 A–C integrados a `main`; quedan la sesión D del Brief 02, la paridad MCP, los arreglos de QA y las bases transversales). Plan completo y próximas tareas en `ROADMAP.md`.
+**Última actualización:** 25-oct-2026 · **Actualizado por:** Claude (arquitectura) · **Fase en curso:** 1 — Núcleo, en cierre (Briefs 01, 01c y 02 A–C integrados a `main`; quedan la sesión D del Brief 02, la paridad MCP, los arreglos de QA y las bases transversales). Plan completo y próximas tareas en `ROADMAP.md`; etapa de cada módulo en `PLAN-desarrollo.md`.
 
 Hasta el 24-oct-2026 este archivo fue la fuente de verdad del avance; desde entonces lo es Linear (ver la nota de arriba y `AGENTS.md`, «Tareas (Linear)»). El plan hasta terminar 2.0 está en `ROADMAP.md`; la navegación final en `NAVEGACION.md`.
 
@@ -164,6 +164,8 @@ Hasta el 24-oct-2026 este archivo fue la fuente de verdad del avance; desde ento
   - **ADR-036 actualizado:** tres capas de sueldo (instalación por defecto, puesto, sueldo por RUT con motivo y auditoría), una sola por asignación, rige la más específica; el cargo deja de ser capa; «grupo de sueldo» al backlog. ADR-005 queda reemplazado en sus niveles; notas en `00-documento-de-arranque.md` y `extraccion/maestros.md`.
   - **ROADMAP:** Nómina I liquida sobre el resumen del periodo, Asistencia y Operaciones pasan a fuentes opcionales y Nómina se puede adelantar si un cliente la quiere sola; Asistencia ya no depende de Operaciones; Brief 11 con la pauta por series.
 
+- **Plan de desarrollo por módulo (25-oct, PR solo de documentación, rama `docs/car-10-plan-desarrollo`, tarea CAR-10; se integra según «Roles» de `AGENTS.md`):** nuevo [`PLAN-desarrollo.md`](PLAN-desarrollo.md) con la etapa de cada módulo (reglas, diseño en Claude Design con su link, aprobación, brief, en `main`) y su evidencia; orden de Carlos: Núcleo primero (05 → 04 → 07b; 03 PR 2 y sesión D del 02 en paralelo) y después Puestos → CPQ → Comercial. `ROADMAP.md` (07b pasa a la fase 1; Brief 11 adelantado; §5 reescrita), `CONTEXTO-agentes.md` y nota de ADR-030. ADR-048: las cuatro preguntas abiertas quedan como decisión por omisión de Carlos, confirmable. Reglas de Puestos del 25-oct anotadas con fecha en ADR-036, ADR-040 §3 y `modulos/comercial.md` (R18 y pregunta 8): los puestos no se crean al ganar. Nuevos `modulos/operaciones.md` (Puestos y guardias, aprobado en Page; mockup pendiente) y `extraccion/operaciones.md` (esqueleto, con partes sin verificar). `modulos/cpq.md` sigue pendiente (8 preguntas de Carlos). Sin código ni migraciones.
+
 ## En curso
 
 **Cierre del Núcleo (fase 1).** Pendientes, en orden:
@@ -173,7 +175,7 @@ Hasta el 24-oct-2026 este archivo fue la fuente de verdad del avance; desde ento
 3. **Verificación guiada del Brief 02 (bloque 14)** en `test.opai.cl`, con Carlos; incluye verificar con R2 real la huella firmada en el PUT.
 4. **Paridad MCP del núcleo:** integrada a `main` (rama `brief/paridad-mcp-geo`, ver Hecho). **Pendiente de Carlos:** correr `OPAI_MCP_KEY=<key> pnpm mcp:verificar` desde el Mac y, si da 164 herramientas y Grok muestra 23, volver a crear el conector en Grok.
 5. **Arreglos de QA del núcleo:** en curso en otro chat.
-6. **Bases transversales antes de Comercial:** Brief 03 (rendimiento, prioridad 1; **PR 1 abierto** — medición e instrumentación con `Server-Timing`, contador de consultas y gate en CI como informe, ver Hecho; el PR 2 trae los arreglos, incluidos los errores de conexión a Neon `P2039`/`P1017` de las consultas de sesión que muestran los logs de Vercel), Brief 04 (base PWA), Design Prompt y Brief 05 (navegación). Ver `ROADMAP.md`.
+6. **Cierre del Núcleo, en el orden de Carlos del 25-oct** (`PLAN-desarrollo.md`): Design Prompt y Brief 05 (navegación) → Brief 04 (base PWA) → Brief 07b (capas de sueldo, antes de Puestos). En paralelo, Brief 03 (rendimiento): **PR 1 integrado** (#33, `f96317a`: medición e instrumentación con `Server-Timing`, contador de consultas y gate en CI como informe, ver Hecho); **falta el PR 2** con los arreglos, incluidos los errores de conexión a Neon `P2039`/`P1017` de las consultas de sesión que muestran los logs de Vercel. CAR-7 figura en Done en Linear aunque falta el PR 2, y el texto del Brief 03 no está en `docs/2.0/briefs/`. Ver `ROADMAP.md`.
 
 **Mapas:** no hay `GOOGLE_MAPS_SERVER_KEY` de plataforma, **por diseño**: las llaves de Google Maps son por tenant y se cargan en Configuración → Integraciones (ADR-027); la de Gard ya funciona. La variable de `.env.example` queda como opcional para desarrollo local.
 
