@@ -1,6 +1,6 @@
 # BRIEF DE IMPLEMENTACIÓN — 04 BASE PWA (Núcleo, paso 2)
 
-**Repositorio:** `Cryptobal/opai-2` · **Rama de ejecución:** `brief/04-pwa` (desde `main` actualizado) · **Fecha:** 26-oct-2026 · **Estado:** **aprobado para ejecución** (Carlos, 26-oct-2026 13:45 CLT, t332u: «ok a las 5 del Brief 04, lánzalo») · **Tarea:** CAR-18 · **Depende de:** Brief 02 (sesiones A–C integradas) y el shell de portales de hoy. **No depende** del PR 2 del Brief 03 ni del Brief 05: la base PWA no mueve el shell. **Pedido por Carlos:** «escribe el Brief 04» (26-oct-2026 13:06 CLT, t328u, chat con el bot OPAI 2.0). **Reglas:** ADR-044 (PWA), ADR-045 (rendimiento y presupuesto), ADR-037 (presupuesto de JS), ADR-028 (marca del tenant), ADR-033 (portales), `NAVEGACION.md` (§4 portales, §8 estado de hoy) y `CONTEXTO-agentes.md` · **Diseño:** **no necesita diseño propio** (decisión de Carlos, 25-oct-2026; `ROADMAP.md`, `PLAN-desarrollo.md` N2). Reutiliza el DS 2.0 aprobado (`packages/ds`, ADR-014): íconos, colores y pantalla de carga salen de los tokens; el shell sin conexión del teléfono de Terreno ya está dibujado en el export del DS (`design/export-ds-2.0/pantallas/ShellPhone.html`, `ShellPhoneDark.html`, `PLAN-desarrollo.md` M6).
+**Repositorio:** `Cryptobal/opai-2` · **Rama de ejecución:** `brief/04-pwa` (desde `main` actualizado) · **Fecha:** 26-oct-2026 · **Estado:** **aprobado para ejecución** (Carlos, 26-oct-2026 13:45 CLT, t332u: «ok a las 5 del Brief 04, lánzalo») · **Tarea:** CAR-18 · **Depende de:** Brief 02 (sesiones A–C integradas) y el shell de portales de hoy. **No depende** del PR 2 del Brief 03 ni del Brief 05: la base PWA no mueve el shell. **Pedido por Carlos:** «escribe el Brief 04» (26-oct-2026 13:06 CLT, t328u, respuesta a t328s1689, chat con el bot OPAI 2.0). **Reglas:** ADR-044 (PWA), ADR-045 (rendimiento y presupuesto), ADR-037 (presupuesto de JS), ADR-028 (marca del tenant), ADR-033 (portales), `NAVEGACION.md` (§4 portales, §8 estado de hoy) y `CONTEXTO-agentes.md` · **Diseño:** **no necesita diseño propio** (decisión de Carlos, 25-oct-2026; `ROADMAP.md`, `PLAN-desarrollo.md` N2). Reutiliza el DS 2.0 aprobado (`packages/ds`, ADR-014): íconos, colores y pantalla de carga salen de los tokens; el shell sin conexión del teléfono de Terreno ya está dibujado en el export del DS (`design/export-ds-2.0/pantallas/ShellPhone.html`, `ShellPhoneDark.html`, `PLAN-desarrollo.md` M6).
 
 > **Ejecución.** Claude ejecuta este brief cuando Carlos lo apruebe, en la rama `brief/04-pwa`, con un commit por bloque y el gate en verde, autorrevisión con un subagente, PR y revisión del «Revisor OPAI 2.0»; integra el bot «OPAI 2.0» con squash (ADR-043 v3). Es un brief **de código** (manifest, íconos, service worker, página sin conexión, aviso de actualización y prueba en CI); no toca base de datos ni agrega capacidades (§6 y §7). Antes de empezar, el bloque 0 confirma el estado del repo y resuelve las «Decisiones para Carlos» (§17): **la elección del service worker (D2) y de la ruta de entrada (D1) condiciona los bloques 1 y 2.**
 
@@ -34,8 +34,8 @@ Se nota que funciona cuando:
 
 - **Un solo manifest de OPAI** (`app/manifest.ts`): nombre «OPAI», `short_name`, `start_url` único, `display: standalone`, `theme_color`/`background_color` desde tokens, `id`, `scope`, `lang: es-CL`, íconos 192 y 512 normales y `maskable`, `apple-touch-icon` y orientación. Marca del tenant cuando exista (ADR-028); OPAI por defecto.
 - **Ruta de entrada** a la que apunta `start_url`, que abre el portal de la persona según su membresía (el último usado o un selector si tiene varios), reutilizando lo que ya resuelve la identidad (D1).
-- **Íconos y meta de instalación:** íconos en `public/` (o generados), `apple-touch-icon`, `theme-color` (claro y oscuro), `apple-mobile-web-app-capable`/`mobile-web-app-capable`, título de la app, safe-area.
-- **Service worker** (D2): registro, precache del **cascarón de los portales de terreno** (Terreno, Trabajador, Supervisor) y de la página sin conexión; *network-first* para documentos, RSC y datos; *cache-first* para estáticos con hash; **nunca** cachea respuestas de `/api/v1`, `/api/mcp` ni datos de negocio (§9).
+- **Íconos y meta de instalación:** íconos en `public/` (o generados), `apple-touch-icon`, favicon, `theme-color` (claro y oscuro), `apple-mobile-web-app-capable`/`mobile-web-app-capable`, título de la app, safe-area.
+- **Service worker** (D2): registro, precache de una **lista explícita de activos públicos** (JS/CSS con hash, íconos, fuentes y la página offline neutra); el **HTML y el RSC con sesión, `/api/*` y los datos van solo por red, nunca a la caché**; si la red falla en una navegación, se muestra la página offline neutra; *cache-first* solo para estáticos con hash; al cerrar sesión se limpia la caché (§4.4 y §9).
 - **Página sin conexión** por portal, con el DS: dice que no hay red, qué se puede hacer y reintenta al volver la conexión.
 - **Actualización controlada:** el service worker nuevo queda **en espera**; la app muestra «Hay una versión nueva · Actualizar» y solo al aceptar activa el nuevo y recarga. Nunca se activa solo.
 - **Aviso de instalación en contexto:** en los portales de terreno, un aviso discreto y descartable para instalar; en iOS, instrucciones de «Agregar a pantalla de inicio» (iOS no expone `beforeinstallprompt`).
@@ -78,6 +78,8 @@ Dos caminos posibles (D2), con el mismo comportamiento observable (R2–R4):
 - **(a) Serwist** (lo nombra ADR-044): precache y estrategias declarativas, actualización con `skipWaiting` controlado. Exige agregar la dependencia y **verificar su compatibilidad con Next 16.4 + Turbopack + Cache Components**; si no la hay, ADR-044 ya autoriza el camino (b).
 - **(b) Service worker propio mínimo, sin dependencias:** un `public/sw.js` (o generado) que en `install` precachea el cascarón de terreno y la página offline, en `fetch` aplica *network-first* para navegación/documentos/RSC con respaldo a la página offline y *cache-first* para estáticos con hash, y en `message` hace `skipWaiting` solo cuando la app lo pide. Registro desde un componente cliente pequeño en los layouts de los portales de terreno (y, si se decide, en todos).
 
+**Regla de caché (bloqueante de seguridad y datos).** El HTML y el RSC de cualquier página con sesión llevan datos de la persona y del tenant (nombre, correo, empresa y membresías del shell, `datos-shell.ts`), así que **nunca se cachean**: van solo por red, igual que `/api/*` y cualquier dato. El precache es una **lista explícita de activos públicos** (JS/CSS con hash, íconos, fuentes y la página offline), nunca un patrón amplio ni el HTML de una ruta con sesión. Si la red falla en una navegación, se responde con la **página offline neutra**, que no lleva datos de nadie. Al **cerrar sesión** (y al cambiar de empresa), la app pide al service worker borrar sus cachés (`caches.delete`) antes de redirigir. El «cascarón de terreno» sin red es esa página offline neutra más los activos públicos; el contenido real con datos se pinta solo con red.
+
 Sea cual sea, **el registro es explícito** (no lo inyecta un plugin a ciegas) y el service worker **no intercepta `/api/*`** salvo para devolver la página offline en una navegación.
 
 ### 4.5 Actualización controlada
@@ -118,10 +120,10 @@ El registrador detecta un service worker `waiting` (`registration.waiting`) y mu
 
 ## 9. Seguridad y tenant
 
-- **El service worker nunca es la barrera de seguridad.** No cachea respuestas de `/api/v1`, `/api/mcp`, documentos firmados de R2 ni ningún dato de negocio (R4); solo el cascarón (HTML/JS/CSS con hash) y la página offline, que no llevan datos de un tenant. La sesión y el acceso se siguen verificando en el servidor en cada navegación.
+- **El service worker nunca es la barrera de seguridad.** No cachea respuestas de `/api/v1`, `/api/mcp`, documentos firmados de R2 ni ningún dato de negocio (R4); solo la lista explícita de activos públicos (JS/CSS con hash, íconos, fuentes) y la página offline neutra, que no llevan datos de un tenant. El **HTML y el RSC con sesión no se cachean nunca** (el shell lleva nombre, correo, empresa y membresías; §4.4). La sesión y el acceso se siguen verificando en el servidor en cada navegación.
 - **`scope` acotado** a `/` bajo el mismo origen (`test.opai.cl`); el service worker no controla otros orígenes.
 - **Sin datos personales en caché** (Ley 21.719; Brief 07d): la página offline y el cascarón no muestran datos de personas. Cuando llegue la cola local (otro brief), los hechos en IndexedDB llevarán su propio cuidado de datos y se limpiarán al cerrar sesión.
-- **Cierre de sesión / cambio de empresa:** al salir, el service worker no debe servir contenido de una sesión anterior; el cascarón es común y los datos van siempre por red. Se verifica que cerrar sesión y volver a entrar no muestre nada cacheado con datos.
+- **Cierre de sesión / cambio de empresa:** al salir o cambiar de empresa, la app limpia las cachés del service worker antes de redirigir; los activos públicos son comunes y todo lo que tiene sesión va siempre por red. Se verifica con dos usuarios de dos empresas en el mismo navegador (CA8, §12).
 - **Marca del tenant:** íconos y colores del tenant solo desde el perfil de marca del núcleo (ADR-028); nunca se hardcodea la marca de Gard.
 
 ## 10. Casos límite
@@ -136,7 +138,7 @@ El registrador detecta un service worker `waiting` (`registration.waiting`) y mu
 
 ## 11. Plan por bloques (un commit por bloque)
 
-Un **solo PR** (`brief/04-pwa`), con `Fixes CAR-?`. Orden pensado para que cada bloque deje algo verificable.
+Un **solo PR** (`brief/04-pwa`), con `Refs CAR-18`. Orden pensado para que cada bloque deje algo verificable.
 
 - **Bloque 0 · Lectura, decisiones y verificación.** Confirmar §2 sobre `main`; resolver con Carlos D1 (ruta de entrada) y D2 (service worker), que condicionan los bloques 1 y 2; si D2 usa una dependencia, un *spike* de compatibilidad con Next 16.4 + Turbopack + Cache Components antes de comprometerla. Sin este cierre, el bloque 2 se **detiene**.
 - **Bloque 1 · `core:` manifest, íconos y meta.** `app/manifest.ts`, íconos provisionales en `public/` (D4), `theme-color`/`apple-touch-icon`/`apple-mobile-web-app-capable` en `layout.tsx`, y la **ruta de entrada** del `start_url` (D1). Verificable: la app se puede instalar y abre el portal correcto; manifest válido.
@@ -150,7 +152,8 @@ Un **solo PR** (`brief/04-pwa`), con `Fixes CAR-?`. Orden pensado para que cada 
 - **e2e (`pwa.spec.ts`, 375 y 1024; también 1280):**
   - **Manifest:** se sirve, es JSON válido, tiene los campos obligatorios, los íconos declarados existen (200) y el `start_url` está dentro del `scope`.
   - **Service worker:** se registra y **controla** la página (`navigator.serviceWorker.controller` no nulo tras la primera carga).
-  - **Sin conexión:** con `context.setOffline(true)`, el cascarón del portal de terreno carga y aparece la página offline; al volver `online`, el contenido vuelve. Una respuesta de `/api/v1` **no** se sirve desde la caché.
+  - **Sin conexión:** con `context.setOffline(true)`, el cascarón del portal de terreno carga y aparece la página offline; al volver `online`, el contenido vuelve. Una respuesta de `/api/v1` **no** se sirve desde la caché, y tras navegar no hay HTML ni RSC con sesión en `caches`.
+  - **Dos usuarios, dos empresas, mismo navegador:** entra el usuario A (empresa 1), navega, cierra sesión; entra el usuario B (empresa 2), con red y luego sin red: nunca aparecen datos de A ni de la empresa 1, y las cachés se limpiaron al cerrar sesión.
   - **Actualización:** con un service worker `waiting` simulado, aparece la banda y, al aceptar, se activa (no antes).
 - **Presupuesto de JS (ADR-037):** `/terreno`, `/trabajador` y `/supervisor` ≤ 150 KB gzip; cualquier subida de tope se justifica en el PR.
 - **Lighthouse CI (D3):** en emulación móvil sobre las rutas de terreno, rendimiento y accesibilidad ≥ 90, como informe o gate según la decisión. Nota: hoy los portales de terreno son placeholders, así que la medición es sobre el cascarón.
@@ -169,7 +172,7 @@ Un **solo PR** (`brief/04-pwa`), con `Fixes CAR-?`. Orden pensado para que cada 
 - **CA5.** **Actualización controlada:** con una versión nueva, la app avisa y solo actualiza al aceptar; nunca se recarga sola.
 - **CA6.** **Presupuesto de terreno** ≤ 150 KB gzip por ruta (`/terreno`, `/trabajador`, `/supervisor`); la segunda carga no descarga JS.
 - **CA7.** **CI:** el job de PWA falla si el manifest es inválido, si el service worker no controla la página o si el shell de terreno no carga sin red; el presupuesto de JS falla si una ruta de terreno supera su tope.
-- **CA8.** **Seguridad:** cerrar sesión y volver a entrar no muestra contenido cacheado con datos; el `scope` es del propio origen.
+- **CA8.** **Seguridad:** ninguna respuesta HTML o RSC con sesión, ni de `/api/*`, queda en la caché del service worker (se inspecciona `caches` tras navegar); el precache es solo la lista de activos públicos; con dos usuarios de dos empresas en el mismo navegador, tras cerrar sesión el primero y entrar el segundo (con y sin red), el segundo nunca ve nombre, correo, empresa ni membresías del primero; el `scope` es del propio origen.
 - **CA9.** Claro y oscuro con contraste AA y foco visible; touch targets ≥ 44 px; safe-area; sin scroll horizontal a 375; componentes nuevos del DS en `/ds` con sus estados y sin hex fuera de `tokens.css`.
 
 ## 15. Riesgos y rollback
@@ -215,4 +218,4 @@ Cada una con opciones y recomendación; no bloquean la aprobación del brief, pe
 
 ---
 
-**Resumen para quien revise:** documento de implementación sin código, estado «propuesto, pendiente de la aprobación de Carlos». Deja lista la base PWA de ADR-044 (un manifest de OPAI, íconos, service worker con página sin conexión, actualización controlada y prueba en CI), **sin** la cola sin conexión ni el push (que nacen con el primer módulo de terreno). Las decisiones abiertas están en §17, con recomendación.
+**Resumen para quien revise:** documento de implementación sin código, aprobado para ejecución (t332u). Propone dejar lista la base PWA de ADR-044 (un manifest de OPAI, íconos, service worker con página sin conexión, actualización controlada y prueba en CI), **sin** la cola sin conexión ni el push (que nacen con el primer módulo de terreno). Las decisiones abiertas están en §17, con recomendación.
