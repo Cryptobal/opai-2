@@ -1,6 +1,6 @@
 # BRIEF DE IMPLEMENTACIÓN — 07d LEY 21.719 POR DISEÑO (Núcleo, paso 5)
 
-**Repositorio:** `Cryptobal/opai-2` · **Rama de ejecución:** `brief/07d-ley-21719` (desde `main` actualizado) · **Fecha:** 26-oct-2026 · **Estado:** **propuesto, pendiente de la aprobación de Carlos** · **Tarea de Linear:** por asignar en el equipo CAR; el PR la vincula con `Fixes CAR-n` (obligatorio, `AGENTS.md` «Tareas (Linear)») · **Fecha límite: 30-nov-2026** (la Ley 21.719 rige el 1-dic-2026; B4 tiene que estar en `main` antes de esa fecha, `ROADMAP.md` fase 1) · **Depende de:** Brief 02 A–C (documentos con bitácora y comprobante, Configuración por ámbitos, auditoría, outbox y trabajos, comunicaciones, `PerfilEmpresa`) integrados; **coordina con el Brief 07c** (acceso y permisos, PR #39, rama `docs/brief-07c-acceso-permisos`): el 07c deja el registro de intentos de login «con la retención que fije B4/B5» (07c §4.1 y §9), y este brief fija esa política; conviene ir **después del 07c** para apoyarse en sus capacidades de gobierno (`soloPersonas`) y en el alcance del supervisor (B3) · **Reglas:** ADR-029 §6 (datos personales) y §7 (respaldos y borrado con cuarentena), ADR-027 (secretos y cifrado por tenant), ADR-019 y ADR-039 (documentos, bitácora, comprobante de integridad), ADR-023 (hechos regulados inmutables), ADR-018 y ADR-038 (Configuración por ámbitos y ajustes declarativos), ADR-020 (comunicaciones), ADR-004 y ADR-034 (paridad UI↔MCP, gobierno de agentes), ADR-022 (permisos y alcance), ADR-028 (marca del tenant en toda salida) · **Diseño:** las pantallas de cumplimiento (DPA/DPO en Configuración, bandeja de solicitudes ARCO, consentimientos) son UI nueva y **pasan por Claude Design** antes de implementarse.
+**Repositorio:** `Cryptobal/opai-2` · **Rama de ejecución:** `brief/07d-ley-21719` (desde `main` actualizado) · **Fecha:** 26-oct-2026 · **Estado:** **aprobado para ejecución** (Carlos, 26-oct-2026 13:40 CLT, t331u: «ok pero avancemos rapido», sobre la recomendación de las seis decisiones de §16 en t329s1698 y t330s1702; alcance de B4 ya decidido el 26-oct-2026 12:28 CLT, t320u, §16.7) · **Tarea de Linear:** por asignar en el equipo CAR; el PR la vincula con `Fixes CAR-n` (obligatorio, `AGENTS.md` «Tareas (Linear)») · **Fecha límite: 30-nov-2026** (la Ley 21.719 rige el 1-dic-2026; B4 tiene que estar en `main` antes de esa fecha, `ROADMAP.md` fase 1) · **Depende de:** Brief 02 A–C (documentos con bitácora y comprobante, Configuración por ámbitos, auditoría, outbox y trabajos, comunicaciones, `PerfilEmpresa`) integrados; **coordina con el Brief 07c** (acceso y permisos, PR #39, rama `docs/brief-07c-acceso-permisos`): el 07c deja el registro de intentos de login «con la retención que fije B4/B5» (07c §4.1 y §9), y este brief fija esa política; conviene ir **después del 07c** para apoyarse en sus capacidades de gobierno (`soloPersonas`) y en el alcance del supervisor (B3) · **Reglas:** ADR-029 §6 (datos personales) y §7 (respaldos y borrado con cuarentena), ADR-027 (secretos y cifrado por tenant), ADR-019 y ADR-039 (documentos, bitácora, comprobante de integridad), ADR-023 (hechos regulados inmutables), ADR-018 y ADR-038 (Configuración por ámbitos y ajustes declarativos), ADR-020 (comunicaciones), ADR-004 y ADR-034 (paridad UI↔MCP, gobierno de agentes), ADR-022 (permisos y alcance), ADR-028 (marca del tenant en toda salida) · **Diseño:** las pantallas de cumplimiento (DPA/DPO en Configuración, bandeja de solicitudes ARCO, consentimientos) son UI nueva y **pasan por Claude Design** antes de implementarse.
 
 > **Encargo de Carlos.** «avanzamos con esto entonves? […] las brechas de paridad con 1.0 (Briefs 07c y 07d)» — Carlos, 26-oct-2026 11:36 CLT, chat con el bot OPAI 2.0 (t303u). La decisión de cubrir la Ley 21.719 siempre y por diseño es del 24-oct-2026: «Ley 21.719: 2.0 la cubre siempre y por diseño (DPA, consentimiento, ARCO y DPO). Es brecha Alta del Núcleo» (`ESTADO.md`, «Decisiones de Carlos sobre paridad (24-oct)», punto 2; `paridad/nucleo.md`, Decisiones de Carlos del 24-oct). Este documento es **solo el brief** (sin código). Lo aprueba Carlos; recién entonces Claude lo ejecuta en la rama `brief/07d-ley-21719`, con un commit por bloque, el gate en verde, autorrevisión con un subagente, PR y revisión del «Revisor OPAI 2.0»; integra el bot «OPAI 2.0» con squash (ADR-043 v3). **Trae migraciones:** quien abre el PR pone la etiqueta `migracion-pendiente`; Carlos la aplica en Neon `dev` y `main` y la quita.
 
@@ -59,7 +59,7 @@ Se nota que funciona cuando: un tenant registra la aceptación del DPA y su DPO;
 - **B10 · Borrado y exportación del *tenant* completo** (cuarentena de 30 días, exportación a R2; ADR-029 §7): prioridad Baja, es el borrado de la empresa entera, distinto del derecho de un **titular**. Fuera de alcance; 07d deja el mecanismo de exportación por titular, que B10 podrá reutilizar.
 - **B5 · Política de seguridad configurable por tenant** (MFA, expiración e historial de contraseñas, inactividad): Media, fuera de la fase 1. 07d solo define la retención; hacerla configurable con el resto de la política de seguridad es de B5.
 - **Biometría (Face ID) y asistencia:** el dato biométrico es sensible y llega con Asistencia (fase 4, Briefs 18–19). 07d deja el mecanismo de inventario, consentimiento y cifrado listo; no modela biometría.
-- **Notificación de brechas a la Agencia y a los titulares:** es un proceso operativo además de técnico. Entra o se difiere según §16.5; por defecto, recomendación de incluir solo un **registro de incidentes** mínimo y dejar el flujo completo para un brief operativo.
+- ~~**Notificación de brechas a la Agencia y a los titulares:**~~ **Entra en 07d (PR 2), decisión del 26-oct-2026 (§16.5):** registro de incidentes y aviso de brechas a la Agencia y a los titulares, **manual y con plazo** (el plazo lo confirma el abogado). No es un detector automático de brechas.
 - **Textos legales del DPA, bases de licitud y periodos de retención concretos:** los fija Carlos con criterio legal (§16); el brief deja el mecanismo y valores por defecto propuestos.
 
 ## 4. Arquitectura
@@ -175,23 +175,24 @@ Toda tabla con `tenant_id` lleva `ENABLE ROW LEVEL SECURITY` y la política `ten
 
 Conviene **tres PR** por tema, para revisar y mergear por partes (cada PR lleva su encargo y su tarea de Linear, `AGENTS.md`). Orden de ejecución, revisión y merge: PR 1 (DPA/DPO + RAT, independiente de las decisiones legales de fondo) → PR 2 (consentimientos + solicitudes + exportación) → PR 3 (retención + cifrado). Si Carlos prefiere un solo PR, se hace en bloques dentro de uno. **Los tres PR —incluido PR 3— entran a `main` antes del 30-nov-2026** (la ley rige el 1-dic-2026); el orden es solo de secuencia de revisión y merge, no una postergación de PR 3 para después del plazo. PR 3 no depende de los textos legales finos para su mecanismo: Claude propone los periodos de retención y el conjunto de campos sensibles por defecto (§16.3, §16.4) y Carlos los confirma, sin que eso retrase la implementación. **Carlos decidió el 26-oct-2026 (12:28 CLT, t320u: «ok a las dos», en respuesta a la recomendación del bot en t319s1656) que B4 entra completo —los tres PR, incluido PR 3 de retención y cifrado— en `main` antes del 30-nov-2026; no se deja ninguna parte de B4 para después del plazo (§16.7).**
 
-**PR 1 — DPA, DPO e inventario (RAT)** *(no depende de §16.2/§16.3/§16.4; depende de §16.1 y §16.6).*
+**PR 1 — DPA, DPO e inventario (RAT)** *(no depende de §16.2/§16.3/§16.4; depende de §16.1 y §16.6, ambas DECIDIDAS el 26-oct-2026, t331u).*
 - Bloque 1 · `core:` migración de DPA (append-only) y DPO; RLS; **append-only de verdad** (`REVOKE UPDATE, DELETE` para `opai_app` o trigger que rechaza la mutación) sobre el DPA y sobre `core.audit_events` —hoy mutable por el grant inicial (§2.2 punto 3, §6)—, con su test:db; capacidades de leer/aceptar DPA y fijar DPO (`soloPersonas`), con auditoría; paridad.
 - Bloque 2 · `core:`/`domain:` declaración de datos personales en el manifest y en el Núcleo; capacidad y vista del RAT; gate del inventario (alcance según §16.6); tests.
 - Bloque 3 · `core:`/`ds:` Configuración → Empresa/Cumplimiento (DPA/DPO y RAT en solo lectura), tras diseño aprobado.
 
-**PR 2 — Consentimientos y solicitudes del titular (ARCO+)** *(depende de §16.2 y §16.3).*
+**PR 2 — Consentimientos, solicitudes del titular (ARCO+) e incidentes/brechas** *(depende de §16.2, §16.3 y §16.5).*
 - Bloque 4 · `core:` migración de consentimientos y solicitudes (RLS); los consentimientos son append-only de verdad (`REVOKE UPDATE, DELETE` o trigger, §6), con su test:db.
 - Bloque 5 · `domain:` cálculo del plazo de la solicitud y reglas de estado; tests.
 - Bloque 6 · `core:` capacidades de consentimientos y de solicitudes (crear, avanzar, resolver; `soloPersonas`), exportación del titular como documento (ADR-039), eventos comunicables del acuse (ADR-020); paridad, snapshot y gate.
-- Bloque 7 · `core:`/`ds:` bandeja de solicitudes y consentimientos en la ficha, tras diseño aprobado.
+- Bloque 7 · `core:` **registro de incidentes y aviso de brechas** a la Agencia y a los titulares, **manual y con plazo** (§16.5, decisión del 26-oct-2026): migración del registro de incidentes (RLS), capacidades para registrar un incidente y para dejar constancia del aviso con su destinatario, plazo (ajuste sin valor por defecto legal, confirma el abogado) y evidencia; eventos comunicables; `soloPersonas`; paridad, snapshot y gate. Es un flujo manual, no un detector automático.
+- Bloque 8 · `core:`/`ds:` bandeja de solicitudes y consentimientos en la ficha, tras diseño aprobado.
 
 **PR 3 — Retención y cifrado** *(depende de §16.3 y §16.4; coordina con 07c la categoría de intentos de login).*
 - El mecanismo de PR 3 no depende de los textos legales finos: Claude propone los periodos de retención y el conjunto de campos sensibles por defecto (§16.3, §16.4) y Carlos los confirma, sin que eso retrase la implementación.
-- Bloque 8 · `core:`/`domain:` política de retención por categoría (ajuste de tenant) y evaluación pura; tests.
-- Bloque 9 · `core:` trabajo diario de anonimización/bloqueo respetando hechos regulados (ADR-023), registro de lo hecho; cron que solo despacha.
-- Bloque 10 · `core:` cifrado de aplicación de los campos sensibles del inventario con el almacén del tenant (ADR-027).
-- Bloque 11 · `docs:` `paridad/nucleo.md`, `ESTADO.md`, `ROADMAP.md`, manual de agentes si cambió, y reporte.
+- Bloque 9 · `core:`/`domain:` política de retención por categoría (ajuste de tenant) y evaluación pura; tests.
+- Bloque 10 · `core:` trabajo diario de anonimización/bloqueo respetando hechos regulados (ADR-023), registro de lo hecho; cron que solo despacha.
+- Bloque 11 · `core:` cifrado de aplicación de los campos sensibles del inventario con el almacén del tenant (ADR-027).
+- Bloque 12 · `docs:` `paridad/nucleo.md`, `ESTADO.md`, `ROADMAP.md`, manual de agentes si cambió, y reporte.
 
 ## 12. Tests
 
@@ -231,36 +232,44 @@ Conviene **tres PR** por tema, para revisar y mergear por partes (cada PR lleva 
 
 Ninguna la decide Claude. Las de fondo son **legales** y conviene revisarlas con asesoría; el brief deja el mecanismo y una recomendación. Cada una trae opciones.
 
+> **DECIDIDO (26-oct-2026 13:40 CLT, t331u).** Carlos respondió «ok pero avancemos rapido» a la recomendación de las seis decisiones de esta sección (presentada por el bot OPAI 2.0 en t329s1698 y t330s1702). Se adopta la recomendación de cada punto con las precisiones que siguen; **la única que cambia respecto del texto propuesto es §16.5** (la notificación de brechas entra en 07d, antes del 30-nov-2026). Los valores que son materia legal (plazos de atención, periodos de retención, textos del DPA, bases de licitud) **los confirma Carlos con el abogado**; Claude no los inventa (deja el mecanismo, el ajuste sin valor por defecto legal o la nota de pendiente). El alcance de B4 frente al plazo estaba decidido desde las 12:28 CLT (t320u, §16.7).
+
 ### 16.1 DPA: texto, versión y forma de aceptación
 
 - **¿Dónde vive el texto del DPA y quién lo versiona?** Opción A: documento de plataforma (uno para todos los tenants), versionado por OPAI. Opción B: documento del Núcleo por tenant (permite ajustes por cliente). **Recomendación: A** (el DPA OPAI↔tenant es el mismo contrato base; un anexo por tenant si hace falta), con revisión legal del texto.
 - **¿La aceptación bloquea algo?** Opción A: avisar al owner de forma persistente pero no bloquear la operación. Opción B: bloquear ciertas acciones hasta aceptar. **Recomendación: A** (no dejar a Gard sin sistema; la aceptación es acción de owner, no banner por usuario como en 1.0).
 - **¿Dónde vive el DPO?** Recomendación: contacto en `perfil_empresa` (`dpo_nombre`, `dpo_correo`, `dpo_telefono`), editable por owner/admin. El DPO de **OPAI** es dato de plataforma para el pie legal.
+- **DECIDIDO (t331u).** Un **solo DPA de plataforma, versionado por OPAI** (opción A); la **aceptación avisa al owner pero no bloquea** la operación (opción A); el **DPO va en `perfil_empresa`**. La versión vigente del DPA es un dato de plataforma (ajuste de ámbito `plataforma`); el texto legal lo fija Carlos con el abogado.
 
 ### 16.2 Bases de licitud y consentimiento
 
 - **¿Qué tratamientos se apoyan en consentimiento y cuáles en otra base** (relación laboral, obligación legal, interés legítimo)? Esto define **dónde** se pide y registra consentimiento. **Recomendación (a confirmar con asesoría legal):** el tratamiento de datos del trabajador para la relación laboral y las obligaciones DT **no** se apoya en consentimiento; el consentimiento se reserva para fines accesorios (p. ej. comunicaciones comerciales a contactos). Claude deja el mecanismo general y marca por categoría la base propuesta en el inventario; Carlos/legal confirman.
 - **¿El consentimiento se otorga también desde el portal del titular?** Recomendación: en 07d solo el registro interno; la captura desde el portal del trabajador/cliente llega con esos portales (fase 3), reusando el mismo modelo.
+- **DECIDIDO (t331u).** **No** se pide consentimiento para la relación laboral ni las obligaciones con la DT; el consentimiento se reserva para **fines accesorios** (p. ej. comunicaciones comerciales a contactos). La **base de licitud de cada caso se confirma con asesoría legal**; en el inventario queda marcada como propuesta. En el 07d se hace **solo el registro interno** (la captura desde el portal del titular llega en fase 3).
 
 ### 16.3 Solicitudes del titular: canal, plazo y formato
 
 - **¿Por dónde entra una solicitud?** Opción A: solo interna (el equipo del tenant la registra al recibirla por correo/papel). Opción B: además un canal del titular (formulario/portal). **Recomendación: A** en 07d (cubre el criterio de aceptación); el canal del titular con los portales de fase 3.
 - **¿Plazo legal de atención?** Lo fija la ley/su reglamento; **Carlos/legal confirman los días** y 07d los calcula al recibir. Claude no inventa el número.
 - **¿Formato de exportación (acceso/portabilidad)?** Recomendación: JSON legible por máquina más un PDF legible por persona (reusando documentos y marca del tenant, ADR-028). Confirmar si basta JSON/CSV.
+- **DECIDIDO (t331u).** Las solicitudes se **registran internamente** (opción A). La **exportación sale en JSON y PDF**. Los **días de plazo los confirma Carlos con el abogado**: Claude no inventa el número; lo deja como un **ajuste de tenant sin valor por defecto legal** (o marcado pendiente) y lo calcula al recibir una vez fijado.
 
 ### 16.4 Retención, anonimización y supresión
 
 - **¿Periodos de retención por categoría?** Los fija Carlos con criterio legal (p. ej. datos laborales mientras dure el vínculo + el plazo legal de conservación; intentos de login, pocos meses). Claude propone valores por defecto al implementar para que Carlos los confirme.
 - **¿Qué se cifra a nivel de aplicación (sensibles)?** Recomendación: datos de salud y biometría (cuando lleguen en fase 4); evaluar caso a caso en el inventario. El RUT se mantiene como hoy (necesario para operar y buscar).
 - **¿Existe una purga forzada por soporte?** Recomendación: no por defecto; si se necesita, una capacidad `soloPersonas` separada, auditada, que respete los hechos regulados.
+- **DECIDIDO (t331u).** **Claude propone los periodos de retención por defecto y Carlos los confirma** con criterio legal. Se **cifran salud y biometría** (a nivel de aplicación, ADR-027). El **RUT queda como está** (necesario para operar y buscar). **No hay purga forzada** salvo una **capacidad `soloPersonas` auditada aparte**.
 
 ### 16.5 Notificación de brechas
 
-- **¿Entra en 07d un registro de incidentes/brechas y el flujo de notificación a la Agencia y a los titulares, o se difiere a un brief operativo?** **Recomendación:** incluir en 07d solo un **registro de incidentes** mínimo (fecha, alcance, datos afectados, estado) y dejar el flujo de notificación con plazos para un brief operativo posterior, para no poner en riesgo la fecha límite. Confirmar.
+- **¿Entra en 07d un registro de incidentes/brechas y el flujo de notificación a la Agencia y a los titulares, o se difiere a un brief operativo?** La recomendación propuesta era incluir solo un registro mínimo y diferir el flujo de notificación.
+- **DECIDIDO (t331u) — CAMBIA respecto del brief propuesto.** Entran en el 07d, **antes del 30-nov-2026**, el **registro de incidentes** y el **aviso de brechas a la Agencia y a los titulares**, **manual y con plazo** (fecha, alcance, datos afectados, estado, destinatarios y evidencia del aviso). El **plazo también lo confirma el abogado** (Claude no lo inventa: ajuste sin valor por defecto legal o pendiente). Es un flujo manual por capacidad con auditoría, no un detector automático de brechas. Por secuencia de revisión y merge va en el **PR 2** (§11), sin postergarse del plazo.
 
 ### 16.6 Alcance del gate del inventario (por diseño)
 
 - **¿El gate que exige declarar los datos personales de cada tabla es duro desde ya o informe primero?** Opción A: duro (CI falla si falta una declaración), como el gate de RLS. Opción B: informe en 07d y duro en el siguiente brief, para no frenar la fecha límite. **Recomendación: A** para las tablas que ya existen en el Núcleo (acotado y conocido) y **B** para los módulos futuros hasta que cada uno declare lo suyo. Confirmar.
+- **DECIDIDO (t331u).** El gate del inventario es **duro para las tablas actuales del Núcleo** (CI falla si falta una declaración) e **informativo para los módulos futuros** hasta que cada uno declare lo suyo.
 
 ### 16.7 Alcance de B4 frente al plazo del 30-nov-2026 — **DECIDIDO**
 
