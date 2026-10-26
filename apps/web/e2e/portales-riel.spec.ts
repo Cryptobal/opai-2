@@ -1,10 +1,8 @@
 import { expect, test } from "@playwright/test";
 
-// Riel y título de pestaña de los portales Trabajador y Cliente en escritorio (1280 px, QA del #21).
-// Usa el usuario plataforma que el job e2e ya siembra, con SEED_OWNER_PASSWORD (como plataforma.spec).
-// Basta un usuario con sesión: sin acceso al portal, el shell se monta igual (con «Sin permisos»).
+// Usuario selector (ERP/Supervisor): sin acceso a Trabajador ni Cliente.
 // En CI falla si falta la contraseña; en local se omite.
-const email = process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl";
+const email = process.env["E2E_SELECTOR_EMAIL"] ?? "e2e-selector@opai.cl";
 const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
 
 const PORTALES = [
@@ -12,34 +10,47 @@ const PORTALES = [
   { id: "cliente", nombre: "Cliente" },
 ] as const;
 
-test.describe("portales en escritorio", () => {
-  test.skip(({ viewport }) => (viewport?.width ?? 0) < 1280, "Solo escritorio (1280 px)");
+test.describe("acceso a portales", () => {
   test.beforeEach(() => {
     if (password) return;
     if (process.env["CI"]) throw new Error("Falta SEED_OWNER_PASSWORD o E2E_PASSWORD en CI");
     test.skip(true, "Falta SEED_OWNER_PASSWORD o E2E_PASSWORD");
   });
 
-  test("el riel nombra el portal y el 404 lleva su título", async ({ page }) => {
-    test.setTimeout(180_000);
-    await page.goto("/login");
-    await page.getByLabel("Correo").fill(email);
-    await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
-    await page.getByRole("button", { name: "Entrar" }).click();
-    await page.waitForURL((url) => !url.pathname.startsWith("/login"));
-
-    for (const p of PORTALES) {
-      const paginas = [
-        { ruta: `/${p.id}`, titulo: `Inicio · Portal ${p.nombre} · OPAI` },
-        { ruta: `/${p.id}/esto-no-existe`, titulo: `No encontrado · Portal ${p.nombre} · OPAI` },
-      ];
-      for (const { ruta, titulo } of paginas) {
-        await page.goto(ruta);
-        const riel = page.getByRole("navigation", { name: "Principal" });
-        await expect(riel.getByText("OPAI", { exact: true })).toBeVisible();
-        await expect(riel.getByText(p.nombre, { exact: true })).toBeVisible();
-        await expect(page).toHaveTitle(titulo);
+  for (const autorizado of [false, true]) {
+    test(`${autorizado ? "con" : "sin"} acceso: navegación y título del 404`, async ({ page }) => {
+      test.setTimeout(180_000);
+      await page.goto("/login");
+      await page
+        .getByLabel("Correo")
+        .fill(autorizado ? (process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl") : email);
+      await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
+      await page.getByRole("button", { name: "Entrar" }).click();
+      await page.waitForURL((url) => !url.pathname.startsWith("/login"));
+      if (new URL(page.url()).pathname === "/elegir-empresa") {
+        await page.getByRole("button", { name: /Gard Security/ }).click();
       }
-    }
-  });
+      await page.waitForURL((url) => url.pathname === "/" || url.pathname === "/platform");
+
+      for (const p of PORTALES) {
+        const paginas = [
+          { ruta: `/${p.id}`, titulo: `Inicio · Portal ${p.nombre} · OPAI` },
+          { ruta: `/${p.id}/esto-no-existe`, titulo: `No encontrado · Portal ${p.nombre} · OPAI` },
+        ];
+        for (const { ruta, titulo } of paginas) {
+          await page.goto(ruta);
+          const riel = page.getByRole("navigation", { name: "Principal" });
+          if (autorizado) {
+            await expect(riel).toHaveCount(1);
+          } else {
+            await expect(riel).toHaveCount(0);
+            await expect(
+              page.getByText("No tienes acceso a este portal en la empresa actual."),
+            ).toBeVisible();
+          }
+          await expect(page).toHaveTitle(titulo);
+        }
+      }
+    });
+  }
 });
