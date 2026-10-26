@@ -4,6 +4,7 @@ export * from "./dinero";
 export * from "./documentos";
 export * from "./comunicaciones";
 export * from "./permisos";
+export * from "./permisos-efectivos";
 export * from "./vocabulario";
 export * from "./canon";
 export * from "./estructuras";
