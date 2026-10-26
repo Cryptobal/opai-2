@@ -5,9 +5,10 @@ export type Destinatario = { id: string; email: string };
 /**
  * Usuarios activos del tenant con alguno de los roles o listados explícitamente en la regla. Si el
  * evento es de un documento, el aviso llega solo a los supervisores que lo tienen en su alcance
- * (ADR-022): `supervisoresPermitidos` es el conjunto de supervisores con el documento a cargo; una
- * membresía de supervisor que no esté ahí se descarta, salvo que el usuario figure explícito en la
- * regla o tenga además otro rol que sí lo incluya. Si es null, no se acota (evento no documental).
+ * (ADR-022): `supervisoresPermitidos` es el conjunto de supervisores con el documento a cargo; toda
+ * membresía de supervisor que no esté ahí se descarta, venga del rol o de los usuarios explícitos de
+ * la regla. Los demás destinatarios no se tocan: los otros roles y los usuarios explícitos que no
+ * sean supervisores siguen recibiendo. Si `supervisoresPermitidos` es null, no se acota (no documental).
  */
 export async function destinatarios(
   ctx: Contexto,
@@ -19,7 +20,6 @@ export async function destinatarios(
     where: { estado: "activa", OR: [{ rol: { in: roles } }, { userId: { in: usuarios } }] },
     select: { userId: true, rol: true },
   });
-  const explicitos = new Set(usuarios);
   const ids = [
     ...new Set(
       m
@@ -27,7 +27,6 @@ export async function destinatarios(
           (x) =>
             !supervisoresPermitidos ||
             x.rol !== "supervisor" ||
-            explicitos.has(x.userId) ||
             supervisoresPermitidos.has(x.userId),
         )
         .map((x) => x.userId),

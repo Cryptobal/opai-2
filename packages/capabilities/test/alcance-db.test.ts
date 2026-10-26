@@ -332,6 +332,26 @@ describe.skipIf(!urlPropietario)("alcance del supervisor en base real (B3)", () 
     expect(url).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
   });
 
+  it("B-A: la lista por entidad de una instalación a cargo no incluye documentos ajenos vinculados por referencia", async () => {
+    // La lista filtrada por {entidad: instA} cruza por dueño (ADR-022): los documentos de persona o
+    // de empresa que solo tienen un vínculo de referencia con instA no aparecen; los propios sí.
+    const lista = await dato<{ items: { id: string }[] }>(ctxSup({ instalaciones: [instA] }), "core.documentos.list", {
+      entidad: { tipo: "instalacion", id: instA },
+    });
+    const ids = lista.items.map((d) => d.id);
+    expect(ids).toContain(docA); // dueño instA: visible
+    expect(ids).toContain(docConAjeno); // dueño instA (con vínculo de referencia a una persona): visible
+    expect(ids).not.toContain(docPersonaExtra); // dueño persona, solo referencia a instA: no
+    expect(ids).not.toContain(docEmpresaExtra); // dueño empresa, solo referencia a instA: no
+    // El owner (sin alcance acotado) sí ve los vinculados por referencia a la instalación.
+    const listaOwner = await dato<{ items: { id: string }[] }>(ctxOwner(), "core.documentos.list", {
+      entidad: { tipo: "instalacion", id: instA },
+    });
+    const idsOwner = listaOwner.items.map((d) => d.id);
+    expect(idsOwner).toContain(docPersonaExtra);
+    expect(idsOwner).toContain(docEmpresaExtra);
+  });
+
   it("B-A: la ficha de un documento a cargo no expone vínculos ajenos y no filtra sus versiones", async () => {
     const conAjeno = await dato<{ vinculos: { entidadTipo: string; entidadId: string; rol: string }[] }>(
       ctxSup({ instalaciones: [instA] }),
@@ -401,6 +421,35 @@ describe.skipIf(!urlPropietario)("alcance del supervisor en base real (B3)", () 
     });
     expect(delSup).not.toBeNull(); // supervisor con docA en su alcance: recibe el aviso
     expect(delOtro).toBeNull(); // supervisor sin instA: no lo recibe
+
+    // B-B: un supervisor fuera de alcance no se cuela por estar en los usuarios explícitos de la
+    // regla. Se aplica `supervisoresPermitidos` a todo supervisor, venga del rol o de los usuarios.
+    await dato(o, "core.notificacion_reglas.set", {
+      evento: "core.documento.por_vencer",
+      canal: "inapp",
+      roles: [],
+      usuarios: [user2.id, userSupId],
+      activa: true,
+    });
+    const ev2 = await e.admin.evento.create({
+      data: {
+        tenantId,
+        tipo: "core.documento.por_vencer",
+        entidadTipo: "documento",
+        entidadId: docA,
+        actorTipo: "system",
+        payload: { venceEn: "2026-12-31", dias: 7, tipoId: null },
+      },
+    });
+    await mod.despacharPendientes(ctxOwner());
+    const explicitoEnAlcance = await e.admin.notificacion.findFirst({
+      where: { eventoId: ev2.id, usuarioId: userSupId },
+    });
+    const explicitoFuera = await e.admin.notificacion.findFirst({
+      where: { eventoId: ev2.id, usuarioId: user2.id },
+    });
+    expect(explicitoEnAlcance).not.toBeNull(); // supervisor explícito con docA a cargo: recibe
+    expect(explicitoFuera).toBeNull(); // supervisor explícito pero sin instA: no se cuela
   });
 
   it("solo owner o admin fijan el alcance: un gerente con users.manage no puede (escalada)", async () => {

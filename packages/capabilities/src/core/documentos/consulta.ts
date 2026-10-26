@@ -43,14 +43,23 @@ export const documentosList = defineCapability({
     // documentos de las entidades a cargo (null = sin alcance acotado, ve todo el tenant).
     if (input.entidad && !(await entidadEnAlcance(ctx, input.entidad.tipo, input.entidad.id)))
       return { items: [], faltantes: [] };
-    const ids = input.entidad
-      ? (
-          await ctx.db.documentoVinculo.findMany({
-            where: { entidadTipo: input.entidad.tipo, entidadId: input.entidad.id },
-            select: { documentoId: true },
-          })
-        ).map((v) => v.documentoId)
-      : await documentosEnAlcance(ctx);
+    let ids: readonly string[] | null;
+    if (input.entidad) {
+      const vinculados = (
+        await ctx.db.documentoVinculo.findMany({
+          where: { entidadTipo: input.entidad.tipo, entidadId: input.entidad.id },
+          select: { documentoId: true },
+        })
+      ).map((v) => v.documentoId);
+      // Alcance por dueño (ADR-022): un actor acotado solo ve los vinculados cuyo DUEÑO está a cargo,
+      // igual que el resto de las consultas; un vínculo de referencia a una instalación a cargo no
+      // debe exponer un documento de persona o de empresa. Sin alcance acotado (null), ve todos.
+      const permitidos = await documentosEnAlcance(ctx);
+      const enAlcance = permitidos && new Set(permitidos);
+      ids = enAlcance ? vinculados.filter((id) => enAlcance.has(id)) : vinculados;
+    } else {
+      ids = await documentosEnAlcance(ctx);
+    }
     const estados = input.incluirArchivados ? ["disponible", "archivado"] : ["disponible"];
     const docs = await ctx.db.documento.findMany({
       where: {
