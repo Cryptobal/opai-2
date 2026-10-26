@@ -5,7 +5,10 @@ import { INVENTARIO_CUMPLIMIENTO } from "./inventario-cumplimiento";
 
 // Inventario de datos personales del Núcleo (RAT, Ley 21.719 §4.3). Pieza «por diseño»: un gate
 // exige declarar toda tabla del Núcleo con datos personales (§16.6). La base de licitud es PROPUESTA
-// (la confirma legal, §16.2); la retención sale del catálogo de @opai/domain (PR 3). Hechos regulados (ADR-023): no borrables.
+// (la confirma legal, §16.2); la retención sale del catálogo de @opai/domain (PR 3).
+// Salud y biometría (los campos que se cifran, §16.4) aún no existen en el Núcleo: llegan con Asistencia
+// (fase 4). Quien las declare con `camposSensibles` queda cifrado por `cifradoDeCampos` (cifrado-campos.ts).
+// Hechos regulados (ADR-023): no borrables.
 const INVENTARIO_BASE = defineDatosPersonales("core", [
   {
     tabla: "personas",
