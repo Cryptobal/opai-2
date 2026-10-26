@@ -18,3 +18,4 @@ export * from "./turnos";
 export * from "./vigencia";
 export * from "./datos-personales";
 export * from "./cumplimiento";
+export * from "./retencion";
