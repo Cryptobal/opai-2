@@ -72,12 +72,62 @@ describe.skipIf(!urlPropietario)("cumplimiento PR2: RLS y append-only en base re
       "en_proceso",
     );
     expect(await e.forTenant(b).solicitudArco.count()).toBe(0);
-    // El documento de evidencia debe ser del mismo tenant (trigger mismo_tenant).
+  });
+
+  it("escritura cruzada: ni INSERT ni UPDATE de solicitudes de otro tenant; INSERT de incidente ajeno", async () => {
+    // INSERT: el tenant B no puede crear una solicitud marcada del tenant A (WITH CHECK).
+    await expect(
+      e.forTenant(b).solicitudArco.create({
+        data: { tenantId: a, tipo: "acceso", titularEmail: "cruzado@ejemplo.cl" },
+      }),
+    ).rejects.toThrow();
+    // UPDATE: una solicitud real del tenant A no la toca el tenant B (USING: no la ve → 0 filas).
+    const s = await e.forTenant(a).solicitudArco.create({
+      data: { tenantId: a, tipo: "rectificacion", titularEmail: "propio@ejemplo.cl" },
+    });
+    const upd = await e
+      .forTenant(b)
+      .solicitudArco.updateMany({ where: { id: s.id }, data: { estado: "en_proceso" } });
+    expect(upd.count).toBe(0);
+    expect((await e.admin.solicitudArco.findUniqueOrThrow({ where: { id: s.id } })).estado).toBe(
+      "recibida",
+    );
+    // INSERT: el tenant B no puede crear un incidente marcado del tenant A (WITH CHECK).
+    await expect(
+      e.forTenant(b).incidente.create({
+        data: { tenantId: a, casoId: randomUUID(), evento: "registro", estado: "abierto" },
+      }),
+    ).rejects.toThrow();
+  });
+
+  it("mismo_tenant: una solicitud no referencia un documento REAL de otro tenant", async () => {
+    // Documento real del tenant B (existe, pero es ajeno a A).
+    const docAjeno = await e.admin.documento.create({
+      data: {
+        tenantId: b,
+        nombre: "ajeno.json",
+        mime: "application/json",
+        tamano: 1,
+        storageKey: `k-${randomUUID()}`,
+        creadoPorTipo: "system",
+        estado: "disponible",
+      },
+    });
+    const s = await e.forTenant(a).solicitudArco.create({
+      data: { tenantId: a, tipo: "acceso", titularEmail: "evidencia@ejemplo.cl" },
+    });
+    // El trigger mismo_tenant rechaza: para A, ese documento no existe (RLS lo oculta), aunque el
+    // UUID sea real en B. Antes esto se probaba con un UUID inexistente; ahora con un documento real.
     await expect(
       e.forTenant(a).solicitudArco.update({
         where: { id: s.id },
-        data: { documentoEvidenciaId: randomUUID() },
+        data: { documentoEvidenciaId: docAjeno.id },
       }),
     ).rejects.toThrow();
+    // El documento ajeno sigue siendo invisible y sin usar desde A.
+    expect(await e.forTenant(a).documento.count({ where: { id: docAjeno.id } })).toBe(0);
+    expect(
+      (await e.admin.solicitudArco.findUniqueOrThrow({ where: { id: s.id } })).documentoEvidenciaId,
+    ).toBeNull();
   });
 });

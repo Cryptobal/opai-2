@@ -23,7 +23,8 @@ const TABLA: Record<string, readonly [boolean, boolean, boolean, boolean, boolea
   [P.aprobacionesManage]: [true, true, false, false, false],
   [P.agentesManage]: [true, true, false, false, false],
   [P.auditRead]: [true, true, true, false, false],
-  [P.cumplimientoRead]: [true, true, true, false, true],
+  // Cumplimiento (Ley 21.719) trae datos personales sensibles: viewer NO lo lee (solo owner/admin/gerente).
+  [P.cumplimientoRead]: [true, true, true, false, false],
   [P.cumplimientoManage]: [true, true, false, false, false],
   // Aceptar el DPA: solo el owner (§16.1, t331u); ni admin ni gerente.
   [P.cumplimientoDpaAceptar]: [true, false, false, false, false],

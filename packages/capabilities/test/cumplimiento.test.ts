@@ -16,8 +16,14 @@ type Estado = {
   dpo: { nombre: string | null; correo: string | null; telefono: string | null };
 };
 
-const publicar = (tabla: (n: string) => Fila[], version: string) =>
+const publicarVersion = (tabla: (n: string) => Fila[], version: string) =>
   tabla("ajustePlataforma").push({ modulo: "core", clave: "cumplimiento_dpa_version", valor: version, version: 1 });
+
+// OPAI publica versión y texto del DPA. La aceptación exige ambos: sin texto no hay a qué aceptar.
+const publicar = (tabla: (n: string) => Fila[], version: string, texto = `Texto del DPA ${version}`) => {
+  publicarVersion(tabla, version);
+  tabla("ajustePlataforma").push({ modulo: "core", clave: "cumplimiento_dpa_texto", valor: texto, version: 1 });
+};
 
 describe("core.cumplimiento.* · DPA y DPO (Brief 07d, PR 1)", () => {
   it("sin DPA publicado: no aparece pendiente y aceptar falla", async () => {
@@ -42,6 +48,14 @@ describe("core.cumplimiento.* · DPA y DPO (Brief 07d, PR 1)", () => {
     expect(e).toMatchObject({ aceptadaVigente: true, pendiente: false });
     expect(e.ultima?.aceptadoPor).toContain(USUARIO_DE_PRUEBA.email);
     expect(e.historial.map((h) => h.version)).toEqual(["2026-10"]);
+  });
+
+  it("con versión pero sin texto publicado, aceptar falla: no se acepta un DPA sin texto", async () => {
+    const { ctx, tabla } = contextoDePrueba();
+    publicarVersion(tabla, "2026-10"); // solo la versión, sin el texto
+    expect(await codigo(ctx, "core.cumplimiento.dpa_aceptar", {})).toBe("UNPROCESSABLE");
+    // Tampoco el dryRun: el preview también valida.
+    expect(await codigo(ctx, "core.cumplimiento.dpa_aceptar", {})).toBe("UNPROCESSABLE");
   });
 
   it("aceptar una versión distinta de la vigente falla", async () => {

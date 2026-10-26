@@ -23,6 +23,14 @@ export function produceExportacion(tipo: TipoSolicitud): boolean {
   return tipo === "acceso" || tipo === "portabilidad";
 }
 
+/**
+ * Entidades de cumplimiento (Ley 21.719) cuyos documentos vinculados —hoy la exportación del titular,
+ * con RUT, domicilio y contacto— solo se listan y descargan con `cumplimiento.read`, nunca con el
+ * `documentos.read` general (que tienen supervisor y viewer). La exportación se vincula a su solicitud
+ * (§4.4); quien no puede ver cumplimiento recibe «no encontrado», sin revelar que el documento existe.
+ */
+export const ENTIDADES_DOC_CUMPLIMIENTO = ["solicitud_arco"] as const;
+
 export const ESTADOS_SOLICITUD = ["recibida", "en_proceso", "resuelta", "rechazada"] as const;
 export type EstadoSolicitud = (typeof ESTADOS_SOLICITUD)[number];
 
@@ -43,6 +51,26 @@ export function puedeAvanzarSolicitud(desde: EstadoSolicitud, hacia: EstadoSolic
 
 export const ESTADOS_INCIDENTE = ["abierto", "en_evaluacion", "notificado", "cerrado"] as const;
 export type EstadoIncidente = (typeof ESTADOS_INCIDENTE)[number];
+
+/**
+ * Destinatarios del aviso de una brecha de datos personales (Ley 21.719 §16.5): la Agencia de
+ * Protección de Datos y los titulares afectados. Una brecha solo queda «notificada» cuando constan
+ * los avisos a todos: un aviso suelto (p. ej. solo a la Agencia) no cierra la obligación.
+ */
+export const DESTINATARIOS_BRECHA = ["agencia", "titulares"] as const;
+export type DestinatarioBrecha = (typeof DESTINATARIOS_BRECHA)[number];
+
+/** True si ya constan los avisos a TODOS los destinatarios que corresponden (Agencia y titulares). */
+export function brechaNotificada(destinatariosAvisados: Iterable<string>): boolean {
+  const set = new Set(destinatariosAvisados);
+  return DESTINATARIOS_BRECHA.every((d) => set.has(d));
+}
+
+/** Destinatarios que aún faltan por avisar, dado lo ya avisado (vacío = brecha notificada). */
+export function avisosPendientes(destinatariosAvisados: Iterable<string>): DestinatarioBrecha[] {
+  const set = new Set(destinatariosAvisados);
+  return DESTINATARIOS_BRECHA.filter((d) => !set.has(d));
+}
 
 /** Transiciones válidas de un incidente. Se puede cerrar desde cualquier estado; `cerrado` es final. */
 const TRANSICIONES_INCIDENTE: Readonly<Record<EstadoIncidente, readonly EstadoIncidente[]>> = {

@@ -93,6 +93,15 @@ export const solicitudAvanzar = defineCapability({
     if (!s) throw noEncontrado("La solicitud");
     if (!puedeAvanzarSolicitud(s.estado as EstadoSolicitud, "en_proceso"))
       throw reglaDeNegocio(`No se puede tomar en proceso una solicitud "${s.estado}".`);
+    // El responsable tiene que ser miembro activo de la empresa: la consulta va por `forTenant`
+    // (solo ve membresías de este tenant), así nadie asigna a un usuario de otro tenant ni a un id
+    // inventado. El alcance se valida en la consulta, nunca por el id a secas (ADR-022).
+    if (input.responsableId) {
+      const miembro = await ctx.db.membership.findFirst({
+        where: { userId: input.responsableId, estado: "activa" },
+      });
+      if (!miembro) throw reglaDeNegocio("El responsable no tiene una membresía activa en la empresa.");
+    }
     if (dryRun)
       return vistaSolicitud({ ...s, estado: "en_proceso", responsableId: input.responsableId ?? s.responsableId });
     const fila = await transicionarSolicitud(

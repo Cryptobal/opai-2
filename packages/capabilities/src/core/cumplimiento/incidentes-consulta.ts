@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { PERMISOS_CORE } from "@opai/domain";
+import { brechaNotificada, PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
 
@@ -28,7 +28,13 @@ function resumirCaso(hechos: Hecho[]) {
   });
   const registro = orden.find((h) => h.evento === "registro") ?? orden[0];
   const ultimo = orden[orden.length - 1];
-  const aviso = [...orden].reverse().find((h) => h.evento === "aviso");
+  const avisos = orden
+    .filter((h) => h.evento === "aviso")
+    .map((h) => ({
+      destinatario: h.destinatario,
+      canal: h.canal,
+      plazoEn: h.plazoEn ? h.plazoEn.toISOString() : null,
+    }));
   if (!registro || !ultimo) return null;
   return {
     casoId: registro.casoId,
@@ -39,13 +45,11 @@ function resumirCaso(hechos: Hecho[]) {
     ocurridoEn: registro.ocurridoEn ? registro.ocurridoEn.toISOString() : null,
     registradoEn: registro.createdAt.toISOString(),
     actualizadoEn: ultimo.createdAt.toISOString(),
-    aviso: aviso
-      ? {
-          destinatario: aviso.destinatario,
-          canal: aviso.canal,
-          plazoEn: aviso.plazoEn ? aviso.plazoEn.toISOString() : null,
-        }
-      : null,
+    // Avisos por destinatario (Agencia y titulares) y si la brecha ya está notificada a todos.
+    avisos,
+    notificada: brechaNotificada(
+      avisos.map((a) => a.destinatario).filter((d): d is string => d !== null),
+    ),
   };
 }
 
@@ -68,13 +72,14 @@ export const incidentesListar = defineCapability({
         ocurridoEn: z.string().nullable(),
         registradoEn: z.string(),
         actualizadoEn: z.string(),
-        aviso: z
-          .object({
+        avisos: z.array(
+          z.object({
             destinatario: z.string().nullable(),
             canal: z.string().nullable(),
             plazoEn: z.string().nullable(),
-          })
-          .nullable(),
+          }),
+        ),
+        notificada: z.boolean(),
       }),
     ),
   }),

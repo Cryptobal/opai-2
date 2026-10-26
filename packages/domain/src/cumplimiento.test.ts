@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  avisosPendientes,
+  brechaNotificada,
   calcularPlazo,
+  DESTINATARIOS_BRECHA,
   esTerminalIncidente,
   esTerminalSolicitud,
   produceExportacion,
@@ -72,5 +75,24 @@ describe("máquina de estado del incidente", () => {
   it("no retrocede ni sale de cerrado", () => {
     expect(puedeAvanzarIncidente("notificado", "abierto")).toBe(false);
     expect(puedeAvanzarIncidente("cerrado", "notificado")).toBe(false);
+  });
+});
+
+describe("aviso de brecha por destinatario (§16.5)", () => {
+  it("una brecha queda notificada solo con los avisos a Agencia y titulares", () => {
+    expect(DESTINATARIOS_BRECHA).toEqual(["agencia", "titulares"]);
+    expect(brechaNotificada([])).toBe(false);
+    expect(brechaNotificada(["agencia"])).toBe(false);
+    expect(brechaNotificada(["titulares"])).toBe(false);
+    expect(brechaNotificada(["agencia", "titulares"])).toBe(true);
+    // Ignora duplicados y destinatarios ajenos.
+    expect(brechaNotificada(["agencia", "agencia", "otro"])).toBe(false);
+    expect(brechaNotificada(["titulares", "agencia", "otro"])).toBe(true);
+  });
+
+  it("lista los destinatarios pendientes de avisar", () => {
+    expect(avisosPendientes([])).toEqual(["agencia", "titulares"]);
+    expect(avisosPendientes(["agencia"])).toEqual(["titulares"]);
+    expect(avisosPendientes(["agencia", "titulares"])).toEqual([]);
   });
 });

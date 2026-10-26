@@ -25,6 +25,32 @@ export async function ultimoHecho(db: TenantTx, casoId: string) {
   return f;
 }
 
+/**
+ * Todos los hechos de un caso en orden de creación (registro primero); NOT_FOUND si no existe. Para
+ * el aviso de brecha, que necesita el registro (fecha de detección, para el plazo) y el conjunto de
+ * destinatarios ya avisados a la vez. Dentro de una transacción con advisory lock, sin TOCTOU.
+ */
+export async function hechosDeCaso(db: TenantTx, casoId: string) {
+  const hechos = await db.incidente.findMany({
+    where: { casoId },
+    orderBy: [{ createdAt: "asc" }, { id: "asc" }],
+  });
+  if (!hechos.length) throw noEncontrado("El incidente");
+  return hechos;
+}
+
+/**
+ * Bloqueo por caso dentro de la transacción: serializa los avisos y avances del mismo incidente, para
+ * que dos avisos concurrentes (Agencia y titulares) no dejen el caso sin marcar como «notificado»
+ * (sin TOCTOU en la completitud de los avisos). En las bases en memoria de prueba (`$executeRaw` no es
+ * una función) es un no-op: las pruebas corren en serie.
+ */
+export async function bloquearCaso(tx: TenantTx, casoId: string): Promise<void> {
+  const ejecutar = (tx as { $executeRaw?: unknown }).$executeRaw;
+  if (typeof ejecutar === "function")
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${casoId}, 0))`;
+}
+
 export const salidaIncidente = (f: {
   casoId: string;
   estado: string;

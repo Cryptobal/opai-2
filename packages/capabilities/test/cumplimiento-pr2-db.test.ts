@@ -94,6 +94,28 @@ describe.skipIf(!urlPropietario)("cumplimiento PR2 (capacidades) en base real", 
     expect(bandejaB.ok && (bandejaB.data as { items: unknown[] }).items.length).toBe(0);
   });
 
+  it("el responsable de una solicitud debe ser miembro del tenant (otro tenant se rechaza)", async () => {
+    const creada = await mod.executeCapability(ctx(tenantA, userA, "ana"), "core.cumplimiento.solicitud_crear", {
+      tipo: "rectificacion",
+      titular: { tipo: "persona", id: personaA },
+    });
+    const id = creada.ok ? (creada.data as { id: string }).id : "";
+    // userB es miembro de tenantB, no de tenantA: no puede ser responsable (alcance por `forTenant`).
+    const ajeno = await mod.executeCapability(ctx(tenantA, userA, "ana"), "core.cumplimiento.solicitud_avanzar", {
+      id,
+      responsableId: userB,
+    });
+    expect(!ajeno.ok && ajeno.error.code).toBe("UNPROCESSABLE");
+    // La solicitud sigue "recibida" (no se asignó ni avanzó).
+    expect((await e.admin.solicitudArco.findUniqueOrThrow({ where: { id } })).estado).toBe("recibida");
+    // userA sí es miembro de tenantA: el avance procede.
+    const propio = await mod.executeCapability(ctx(tenantA, userA, "ana"), "core.cumplimiento.solicitud_avanzar", {
+      id,
+      responsableId: userA,
+    });
+    expect(propio.ok).toBe(true);
+  });
+
   it("un agente no crea solicitudes ni registra incidentes (soloPersonas)", async () => {
     const s = await mod.executeCapability(agenteCtx(), "core.cumplimiento.solicitud_crear", {
       tipo: "acceso",

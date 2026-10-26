@@ -1,18 +1,13 @@
 import { z } from "zod";
 
-import {
-  type EstadoIncidente,
-  ESTADOS_INCIDENTE,
-  PERMISOS_CORE,
-  puedeAvanzarIncidente,
-} from "@opai/domain";
+import { type EstadoIncidente, PERMISOS_CORE, puedeAvanzarIncidente } from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import { reglaDeNegocio } from "../../errores";
 import { uuidSchema } from "../esquemas";
 import { uuid7 } from "../documentos/uuid7";
 import { actorLegible } from "./comunes";
-import { incidenteVista, salidaIncidente, ultimoHecho } from "./incidentes-comun";
+import { bloquearCaso, incidenteVista, salidaIncidente, ultimoHecho } from "./incidentes-comun";
 
 export const incidenteRegistrar = defineCapability({
   id: "core.cumplimiento.incidente_registrar",
@@ -65,12 +60,13 @@ export const incidenteRegistrar = defineCapability({
 export const incidenteAvanzar = defineCapability({
   id: "core.cumplimiento.incidente_avanzar",
   descripcion:
-    "Avanza el estado de un incidente de seguridad en su atención (en evaluación, cerrado…) agregando un hecho nuevo, sin editar los anteriores (Ley 21.719). La transición queda auditada.",
+    "Avanza el estado de un incidente de seguridad en su atención (en evaluación o cerrado) agregando un hecho nuevo, sin editar los anteriores (Ley 21.719). A «notificado» solo se llega registrando los avisos de brecha, nunca por aquí. La transición queda auditada.",
   permiso: PERMISOS_CORE.cumplimientoManage,
   soloPersonas: true,
   input: z.object({
     casoId: uuidSchema,
-    estado: z.enum(ESTADOS_INCIDENTE),
+    // "notificado" se alcanza solo cuando constan todos los avisos (incidente_notificar), no a mano.
+    estado: z.enum(["en_evaluacion", "cerrado"]),
     nota: z.string().trim().max(2000).optional(),
   }),
   output: incidenteVista,
@@ -83,8 +79,10 @@ export const incidenteAvanzar = defineCapability({
         throw reglaDeNegocio(`No se puede pasar de "${actual.estado}" a "${input.estado}".`);
       return { casoId: input.casoId, estado: input.estado, ultimoEvento: "avance", registradoEn: new Date().toISOString() };
     }
-    // Lee el estado vigente y anota el avance en la misma transacción (sin TOCTOU).
+    // Lee el estado vigente y anota el avance en la misma transacción, bajo advisory lock por caso
+    // (serializa avances concurrentes del mismo incidente; sin TOCTOU).
     const fila = await ctx.transaccion(async (tx) => {
+      await bloquearCaso(tx, input.casoId);
       const actual = await ultimoHecho(tx, input.casoId);
       if (!puedeAvanzarIncidente(actual.estado as EstadoIncidente, input.estado))
         throw reglaDeNegocio(`No se puede pasar de "${actual.estado}" a "${input.estado}".`);

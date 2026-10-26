@@ -67,7 +67,15 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
   },
   viewer: {
     permitir: ["*:read", "*:*.read"],
-    denegar: [...FINANCIERO, PERMISOS_CORE.consumosRead, PERMISOS_CORE.auditRead],
+    // Cumplimiento (Ley 21.719): consentimientos, solicitudes ARCO, incidentes/brechas y la
+    // exportación del titular traen datos personales sensibles (RUT, domicilio, contacto). No son
+    // para el rol de solo lectura más amplio: leerlos exige `cumplimiento.read`, que viewer no tiene.
+    denegar: [
+      ...FINANCIERO,
+      PERMISOS_CORE.consumosRead,
+      PERMISOS_CORE.auditRead,
+      PERMISOS_CORE.cumplimientoRead,
+    ],
   },
 };
 
