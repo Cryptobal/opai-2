@@ -45,9 +45,17 @@ export function ListaMaestro(p: Props) {
   const estado = p.state === "ready" && p.filas.length === 0 ? "empty" : p.state;
   return (
     <>
-      <div className="md:hidden">
-        <Cabecera titulo={p.titulo} {...(p.accion ? { acciones: p.accion } : {})} />
-      </div>
+      {/* En teléfono, título + acción; en md+ el título vive en la barra superior, pero la acción
+          principal se queda en el patrón (Brief 05 §8.3, REGLAS-codigo UI), arriba de la lista. */}
+      {p.accion ? (
+        <div className="md:px-4 md:pt-3">
+          <Cabecera titulo={p.titulo} acciones={p.accion} accionesSiempre />
+        </div>
+      ) : (
+        <div className="md:hidden">
+          <Cabecera titulo={p.titulo} />
+        </div>
+      )}
       <HerramientasLista>
         <Buscador placeholder={p.buscar} />
         {p.filtros?.length ? <ChipsFiltroDiferido filtros={p.filtros} /> : null}
