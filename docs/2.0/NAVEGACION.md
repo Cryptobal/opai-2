@@ -1,6 +1,6 @@
 # Navegación de OPAI 2.0 — mapa final y estado de hoy
 
-**Estado:** vigente (ADR-046, aprobado por Carlos el 24-oct; decisiones de diseño del 26-oct en §10) · **Fecha:** 23-oct-2026, actualizado el 26-oct-2026 · Todo brief con pantallas lo respeta; el bot «Diseño y QA OPAI 2.0» lo verifica. **Diseño aprobado:** [Navegación OPAI 2.0 (Brief 05)](https://claude.ai/design/p/53e9b74b-3cbf-4ad4-858f-271dfc2ef465), 28 pantallas, aprobado por Carlos el 26-oct-2026 a las 9:45 CLT; se implementa con `briefs/BRIEF-05-navegacion.md`.
+**Estado:** vigente (ADR-046, aprobado por Carlos el 24-oct; decisiones de diseño del 26-oct en §10, que rigen cuando Carlos apruebe el Brief 05) · **Fecha:** 23-oct-2026, actualizado el 26-oct-2026 · Todo brief con pantallas lo respeta; el bot «Diseño y QA OPAI 2.0» lo verifica. **Diseño aprobado:** [Navegación OPAI 2.0 (Brief 05)](https://claude.ai/design/p/53e9b74b-3cbf-4ad4-858f-271dfc2ef465), 28 pantallas, aprobado (Decisión de Carlos, 26-oct-2026 ~9:45 CLT, chat con OPAI 2.0 (registrada por el bot OPAI 2.0)); se implementa con `briefs/BRIEF-05-navegacion.md`.
 
 ## 1. Principios
 
@@ -69,7 +69,7 @@ Cada portal muestra solo lo que su módulo contratado habilita (sin Asistencia, 
 | Comercial | sí | sí | sí | no | lectura |
 | Clientes | sí | sí | sí | lectura (alcance) | lectura |
 | Operaciones | sí | sí | sí | sí (alcance) | lectura |
-| Personas | sí | sí | sí, sin Nómina ni montos de sueldo | lectura (alcance); Nómina no | lectura sin montos; Nómina no (§10, D10) |
+| Personas | sí | sí | sí, sin Nómina ni montos de sueldo | lectura (alcance); Nómina no | lectura sin montos; Nómina no (ADR-016; §10, D10) |
 | Finanzas | sí | sí | **no** | **no** | **no** |
 | Documentos | sí | sí | sí | según tipo | lectura |
 | Configuración | todo | todo menos eliminar la empresa y gestionar owners | lo que no es empresa, marca, usuarios, keys, integraciones, comunicaciones, aprobaciones, agentes ni sueldos (consulta y preferencias) | sus preferencias | sus preferencias |
@@ -88,7 +88,7 @@ El bloqueo financiero (ADR-016) oculta el área completa. Los roles personalizad
 
 ## 7. Cómo lo declaran los módulos
 
-- `navegacion` del manifest: `{ portal, area, href, etiqueta, icono, orden, permiso }`, con `area` de una lista cerrada (`inicio`, `comercial`, `clientes`, `operaciones`, `personas`, `finanzas`, `documentos`). El núcleo arma los grupos, aplica el máximo por área y ordena por `orden`.
+- `navegacion` del manifest: `{ portal, area, href, etiqueta, icono, orden, permiso }`, con `area` de una lista cerrada (`inicio`, `comercial`, `clientes`, `operaciones`, `personas`, `finanzas`, `documentos`). Configuración no es un área: es la entrada fija al pie que arma el núcleo, y ningún módulo la declara (ADR-018). El núcleo arma los grupos, aplica el máximo por área y ordena por `orden`.
 - Las pestañas de fichas se declaran en `fichas` (ADR-041.5), no en `navegacion`.
 - Las acciones para ⌘K se declaran en `acciones` (etiqueta, capacidad, permiso), y las búsquedas por entidad en el registro de entidades (ADR-041.7).
 - **Agente interno (ADR-049, nota del 26-oct-2026):** el primer lugar de ⌘K, y en el celular el primero dentro de «Buscar», queda reservado para «Preguntar a OPAI». Reservado, se construye en el brief del agente interno; mientras no exista, no se muestra (Brief 05, §4.4).
@@ -107,16 +107,16 @@ El bloqueo financiero (ADR-016) oculta el área completa. Los roles personalizad
 ## 9. Brecha y orden de implementación
 
 1. **Brief de rendimiento (ADR-045):** shell en el layout y precarga de las entradas del menú. No cambia el mapa.
-2. **Design Prompt de navegación** (Claude Design): barra lateral con áreas plegables, fijados, ⌘K con acciones y recientes, barra inferior por rol, hoja «Más». **Hecho:** aprobado por Carlos el 26-oct-2026 a las 9:45 CLT (28 pantallas).
+2. **Design Prompt de navegación** (Claude Design): barra lateral con áreas plegables, fijados, ⌘K con acciones y recientes, barra inferior por rol, hoja «Más». **Hecho:** diseño aprobado (Decisión de Carlos, 26-oct-2026 ~9:45 CLT, chat con OPAI 2.0 (registrada por el bot OPAI 2.0); 28 pantallas).
 3. **Brief de navegación:** `area` en `ItemNav` y en el manifest, grupos, fijados, recientes, barra inferior por rol, renombre a Personas y Configuración. Es el Brief 05, paso 1 del cierre del Núcleo: `briefs/BRIEF-05-navegacion.md`, propuesto el 26-oct-2026 y pendiente de la aprobación de Carlos.
 
 ## 10. Decisiones de diseño del 26-oct-2026
 
-Fuente: «Decidido por el bot OPAI 2.0 por delegación de Carlos, 26-oct-2026 9:47 CLT». Carlos aprobó el diseño (26-oct-2026 9:45 CLT) y delegó en el bot OPAI 2.0 los puntos que el diseño marcaba «Propuesta: decide Carlos». Desde ahora son reglas.
+Aprobación del diseño: Decisión de Carlos, 26-oct-2026 ~9:45 CLT, chat con OPAI 2.0 (registrada por el bot OPAI 2.0). D1–D9, los puntos que el diseño marcaba «Propuesta: decide Carlos», fueron decididos por el bot OPAI 2.0 por delegación, según el registro del bot (26-oct-2026 9:47 CLT); 👍 de Carlos 9:46. D10 no es nueva: es regla de ADR-016. Rigen como reglas cuando Carlos apruebe el Brief 05 (PR #37).
 
 | # | Tema | Decisión |
 |---|---|---|
-| D1 | Grupos de área | Acordeón: solo queda abierta el área activa y las demás se pliegan. El estado se recuerda por usuario |
+| D1 | Grupos de área | Acordeón: a lo más un área abierta a la vez. Al navegar se abre la del área activa y las demás se pliegan; si el usuario abre otra, se cierra la anterior. El área abierta se recuerda por usuario y empresa y se restaura en las páginas sin área (Inicio, Configuración) |
 | D2 | Más de siete entradas | Máximo 7 por área. Si un área pasa de 7, se divide en dos áreas; no hay scroll interno |
 | D3 | Fijados | Se fija y desfija con un ícono de pin que aparece al pasar el mouse por la entrada y en la cabecera de la ficha. Se ordenan por la fecha en que se fijaron |
 | D4 | Inicio y Bandeja | Inicio es una entrada suelta arriba; la Bandeja vive dentro de Inicio |
@@ -125,5 +125,5 @@ Fuente: «Decidido por el bot OPAI 2.0 por delegación de Carlos, 26-oct-2026 9:
 | D7 | Búsqueda en el celular | Sale de la barra superior; solo queda «Buscar» en la barra inferior |
 | D8 | Vencimientos | Vista dentro de Personas, como está construido hoy (corrige el mapa de §2) |
 | D9 | iPad | Desde 1024 px se usa la barra lateral completa y plegable del escritorio, sin un riel nuevo. De 768 a 1023 sigue el riel actual |
-| D10 | Visualizador (viewer) | No ve Nómina |
+| D10 | Visualizador (viewer) | No ve Nómina (ya es regla de ADR-016: «solo lectura, sin finanzas ni nómina»; corrige la pantalla 05) |
 

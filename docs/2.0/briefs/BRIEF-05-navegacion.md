@@ -1,8 +1,8 @@
 # BRIEF DE IMPLEMENTACIÓN — 05 NAVEGACIÓN POR ÁREAS (Núcleo, paso 1)
 
-**Repositorio:** `Cryptobal/opai-2` · **Rama de ejecución:** `brief/05-navegacion` (desde `main` actualizado) · **Fecha:** 26-oct-2026 · **Estado:** **propuesto, pendiente de la aprobación de Carlos** · **Tareas:** CAR-12 (criterio obligatorio, §14; `Fixes CAR-12` en el PR A de la ejecución) · **Depende de:** Brief 02 (sesiones A–C integradas); se coordina con el PR 2 del Brief 03 (shell en el layout, §15) · **Reglas:** ADR-046, `NAVEGACION.md` (con las decisiones del 26-oct, §10 de ese archivo), ADR-014, ADR-016, ADR-017, ADR-018/038, ADR-041, ADR-045, ADR-048 · **Diseño aprobado:** [Navegación OPAI 2.0 (Brief 05)](https://claude.ai/design/p/53e9b74b-3cbf-4ad4-858f-271dfc2ef465), 28 pantallas, aprobado por Carlos el 26-oct-2026 a las 9:45 CLT. Los puntos marcados «Propuesta: decide Carlos» los decidió el bot OPAI 2.0 por delegación de Carlos (26-oct-2026 9:47 CLT); van en §4.2 y en `NAVEGACION.md` §10.
+**Repositorio:** `Cryptobal/opai-2` · **Rama de ejecución:** `brief/05-navegacion` (desde `main` actualizado) · **Fecha:** 26-oct-2026 · **Estado:** **propuesto, pendiente de la aprobación de Carlos** · **Tareas:** CAR-15 (este documento) · CAR-12 (criterio obligatorio, §14; `Fixes CAR-12` en el PR A de la ejecución) · **Depende de:** Brief 02 (sesiones A–C integradas); **el PR B depende del PR 2 del Brief 03** (shell en el layout, §2 y §15) · **Reglas:** ADR-046, `NAVEGACION.md` (con las decisiones del 26-oct, §10 de ese archivo), ADR-014, ADR-016, ADR-017, ADR-018/038, ADR-041, ADR-045, ADR-048 · **Diseño aprobado:** [Navegación OPAI 2.0 (Brief 05)](https://claude.ai/design/p/53e9b74b-3cbf-4ad4-858f-271dfc2ef465), 28 pantallas, aprobado (Decisión de Carlos, 26-oct-2026 ~9:45 CLT, chat con OPAI 2.0 (registrada por el bot OPAI 2.0)). Los puntos que el diseño marcaba «Propuesta: decide Carlos» (D1–D9) fueron decididos por el bot OPAI 2.0 por delegación, según el registro del bot (26-oct-2026 9:47 CLT); 👍 de Carlos 9:46; van en §4.2 y en `NAVEGACION.md` §10. D10 no es nueva: ya es regla de ADR-016. Todo esto rige como regla cuando Carlos apruebe este brief.
 
-> **Ejecución.** Claude ejecuta este brief cuando Carlos lo apruebe, en la rama `brief/05-navegacion`, con un commit por bloque y el gate en verde, autorrevisión con un subagente, PR y revisión del «Revisor OPAI 2.0»; integra el bot «OPAI 2.0» con squash (ADR-043 v3). **Bloque 0 se detiene** si el export del diseño no está en el repo (§2, punto 7).
+> **Ejecución.** Claude ejecuta este brief cuando Carlos lo apruebe, en la rama `brief/05-navegacion`, con un commit por bloque y el gate en verde, autorrevisión con un subagente, PR y revisión del «Revisor OPAI 2.0»; integra el bot «OPAI 2.0» con squash (ADR-043 v3). **El bloque 0 del PR B se detiene** si el export del diseño no está en el repo (§2, punto 7); el PR A puede avanzar mirando las pantallas en Claude Design (§11).
 
 ---
 
@@ -22,12 +22,12 @@ Se nota que funciona cuando una persona encuentra cualquier colección en un cli
 ## 2. Estado actual del repo (verificado el 26-oct-2026 sobre `main` `f1c4064`)
 
 1. **Navegación:** `apps/web/lib/navegacion.ts` (`navegacionErp`, `NAV_PLATAFORMA`, `navegacionPortal`) arma `ItemNav` con `grupo` «Maestros», `contador` por entrada, `corta` («Instalac.», «Cargos»), `soloAmplio`/`soloCompacto` y una entrada de aprobaciones que aparece solo con pendientes. No hay `area`, fijados ni recientes.
-2. **Shell:** `packages/ds/src/shell/` (`app-shell.tsx`, `sidebar.tsx`, `rail.tsx`, `nav.tsx`, `menu-mas.tsx`, `top-bar.tsx`, `user-menu.tsx`, `portal-switcher.tsx`, `contador.tsx`). Barra lateral desde `xl` (1280), riel de 768 a 1279, barra inferior bajo 768. El shell se monta dentro de cada página (`PaginaPortal`), no en el layout; moverlo al layout es del PR 2 del Brief 03.
+2. **Shell:** `packages/ds/src/shell/` (`app-shell.tsx`, `sidebar.tsx`, `rail.tsx`, `nav.tsx`, `menu-mas.tsx`, `top-bar.tsx`, `user-menu.tsx`, `portal-switcher.tsx`, `contador.tsx`). Barra lateral desde `xl` (1280), riel de 768 a 1279, barra inferior bajo 768. El shell se monta dentro de cada página (`PaginaPortal`), no en el layout; moverlo al layout es del PR 2 del Brief 03 (Claude, pendiente). Sin eso no se cumplen R7 ni CA12, así que **el PR B no empieza hasta que el PR 2 del Brief 03 esté integrado** (§15).
 3. **Causa de CAR-12:** `AppBar` (`top-bar.tsx`) pinta, de izquierda a derecha, título e insignia, buscar, campana, usuario y **al final** `acciones` de la página. Como las acciones cambian de ancho entre vistas («Agregar persona» en Personas, «Nueva cuenta» en Cuentas, otra en Vencimientos), los íconos fijos se corren. Además, el buscador cambia entre caja de 256 px e ícono según el ancho, y en el teléfono `TopBarTelefono` reemplaza búsqueda y campana por las acciones cuando hay «Atrás». Hoy la barra superior del teléfono no tiene avatar (selector de portal, búsqueda y campana); el avatar a 375 es nuevo y viene del diseño (pantalla 14). Además, `REGLAS-codigo.md` (UI) dice que «la acción principal va en el patrón», pero hoy `PaginaPortal` la pasa a `AppBar`: este brief la mueve al patrón, lo que resuelve CAR-12 de raíz.
 4. **⌘K:** `CommandPalette` (`packages/ds/src/components/command-palette.tsx`) busca entidades con `core.buscar`; sin acciones ni recientes.
 5. **Capacidades que ya existen y usa este brief:** `core.buscar`, `core.notificaciones.list/marcar_leida/marcar_todas`, `core.aprobaciones.list/get/aprobar/rechazar`, `core.config.get/set/schema` con ajustes de ámbito `usuario` (`defineAjustes`, ADR-038; hoy `preferencias_tema`, `preferencias_silencio`).
 6. **Personas:** «Vencimientos» es una vista dentro de Personas (`SegmentoPersonas` en la barra superior de escritorio; ícono en la cabecera de la lista en el celular). Se mantiene (decisión 8).
-7. **Diseño:** las 28 pantallas están en Claude Design; **todavía no hay export en el repo** (el diseñador dejó anotado «Nothing exported yet»). El bloque 0 lo exige en `docs/2.0/design/export-navegacion/`.
+7. **Diseño:** las 28 pantallas están en Claude Design; **todavía no hay export en el repo** (el diseñador dejó anotado «Nothing exported yet»). El bloque 0 del PR B lo exige en `docs/2.0/design/export-navegacion/`.
 8. **e2e:** Playwright con proyectos `telefono` (375), `ipad` (1024) y `desktop` (1280) en `apps/web/playwright.config.ts`; corre en el job `e2e` de CI, que **no es check obligatorio**.
 
 ## 3. Alcance
@@ -50,7 +50,7 @@ Se nota que funciona cuando una persona encuentra cualquier colección en un cli
 - Pantallas propias de los portales Supervisor, Trabajador, Terreno, Cliente y Plataforma (se diseñan con su fase). Este brief solo deja su navegación declarada como hoy.
 - El contenido de las pantallas de cada módulo y las entradas de módulos que no existen todavía (aparecen solas cuando el módulo se active, sin código nuevo en el shell).
 - Tareas en la Bandeja (llegan con Comercial, fase 2).
-- PWA (Brief 04), shell en el layout (Brief 03, PR 2) y roles personalizados (Brief 07c).
+- PWA (Brief 04), shell en el layout (Brief 03, PR 2: requisito del PR B, no se hace aquí) y roles personalizados (Brief 07c, propuesto en PR #36, pendiente de merge).
 - El panel de riel para iPad que aparece en la pantalla 28: queda descartado por la decisión 9.
 - **El agente interno de OPAI (ADR-049): reservado, se construye en el brief del agente interno.** Este brief solo reserva su punto de entrada (§4.4); no construye componente, acción, ajuste ni capacidad para él.
 
@@ -66,9 +66,11 @@ R5. Un nombre por cosa (`NAVEGACION.md` §6); las etiquetas pasan por el vocabul
 R6. ⌘K respeta permisos y alcance: un viewer no ve acciones de escritura ni entidades fuera de su alcance.
 R7. El shell no se vuelve a pintar al navegar y sus entradas se precargan (ADR-045).
 
-### 4.2 Decisiones del 26-oct (fuente: «Decidido por el bot OPAI 2.0 por delegación de Carlos, 26-oct-2026 9:47 CLT»)
+### 4.2 Decisiones del 26-oct
 
-D1. **Grupos en acordeón:** a lo más un área abierta a la vez. Al navegar se abre el área de la entrada activa y se pliegan las demás; si el usuario abre otra, se cierra la anterior. El área abierta se recuerda por usuario y se restaura en las páginas sin área (Inicio, Configuración).
+Fuente de D1–D9: decididos por el bot OPAI 2.0 por delegación, según el registro del bot (26-oct-2026 9:47 CLT); 👍 de Carlos 9:46. Fuente de D10: ADR-016. Rigen como regla cuando Carlos apruebe este brief.
+
+D1. **Grupos en acordeón:** a lo más un área abierta a la vez. Al navegar se abre el área de la entrada activa y se pliegan las demás; si el usuario abre otra, se cierra la anterior. El área abierta se recuerda por usuario y empresa y se restaura en las páginas sin área (Inicio, Configuración). `NAVEGACION.md` §10 dice lo mismo.
 D2. **Máximo 7 entradas por área.** Si un área pasa de siete, se divide en dos áreas; no hay scroll interno en un grupo. El núcleo falla en desarrollo y en `pnpm test` si un área declara más de siete entradas. Dividir un área crea un área nueva fuera de la lista cerrada de R1 y del máximo de seis de CA3, así que exige cambiar `NAVEGACION.md` §2 y §7 con una decisión de Carlos; mientras no exista, el test sigue fallando y el módulo no se integra. Hoy ningún área pasa de siete (Finanzas tiene justo siete).
 D3. **Fijados:** se fija y desfija con un ícono de pin que aparece al pasar el mouse por la entrada y en la cabecera de la ficha. Se ordenan por la fecha en que se fijaron (el más antiguo arriba). Máximo cinco; al intentar el sexto, aviso y no se fija.
 D4. **Inicio** es una entrada suelta arriba; la **Bandeja** vive dentro de Inicio (sección, no entrada del menú).
@@ -77,11 +79,11 @@ D6. **Campana (ADR-014):** muestra un punto de no leído y abre la misma Bandeja
 D7. **Celular:** la búsqueda sale de la barra superior; solo queda «Buscar» en la barra inferior.
 D8. **Vencimientos** sigue como vista dentro de Personas; no es entrada del menú.
 D9. **iPad:** desde 1024 px se usa la barra lateral completa de escritorio, con sus grupos plegables, sin riel nuevo. De 768 a 1023 sigue el riel actual.
-D10. **El rol viewer (Visualizador) no ve Nómina.** Corrige la pantalla 05 del diseño, que se la mostraba.
+D10. **El rol viewer (Visualizador) no ve Nómina.** No es una decisión nueva: es regla de ADR-016 (viewer «solo lectura, sin finanzas ni nómina»). Corrige la pantalla 05 del diseño, que se la mostraba.
 
 ### 4.3 Modelo
 
-- `ItemNav` gana `area: AreaNav` (`inicio` | `comercial` | `clientes` | `operaciones` | `personas` | `finanzas` | `documentos` | `configuracion`) y pierde `grupo`, `contador`, `corta`, `soloAmplio` y `soloCompacto`. Las etiquetas cortas de la barra inferior son palabras completas (§6 de `NAVEGACION.md`).
+- `ItemNav` gana `area: AreaNav` (`inicio` | `comercial` | `clientes` | `operaciones` | `personas` | `finanzas` | `documentos`, la lista cerrada de `NAVEGACION.md` §7) y pierde `grupo`, `contador`, `corta`, `soloAmplio` y `soloCompacto`. Las etiquetas cortas de la barra inferior son palabras completas (§6 de `NAVEGACION.md`). **Configuración no es un área:** es la entrada fija al pie que arma el núcleo; ningún módulo la declara (ADR-018).
 - `defineModule` acepta `navegacion: [{ portal, area, href, etiqueta, icono, orden, permiso }]` y `acciones: [{ etiqueta, capacidad, permiso, href? }]` para ⌘K. El núcleo declara las suyas igual (Cuentas, Instalaciones, Personas, Cargos y sueldos, Configuración; acciones «Nueva cuenta», «Agregar persona»).
 - Función pura `armarNavegacion(items, { rol, modulosActivos, vocabulario })` en `packages/domain` o junto a `navegacion.ts`: filtra por permiso y módulo activo, agrupa por área en el orden de R1, aplica R3 y D2. Sin acceso a datos.
 - **Preferencias por usuario** como ajustes de ámbito `usuario` (ADR-038), sin migración: `navegacion_area_principal`, `navegacion_area_abierta` y `navegacion_fijados` (lista de hasta 5: `{ tipo: "entrada" | "ficha", href, etiqueta, fijadoEn }`). Se leen y escriben solo por `core.config.get/set`, así UI, API y MCP comparten la misma regla. Son escrituras escasas (cuando la persona fija, cambia el área principal o abre otra área).
@@ -115,7 +117,8 @@ Decisión de Carlos, 26-oct-2026 10:08 CLT, chat con OPAI 2.0; ADR-049. El agent
 
 ## 7. Capacidades
 
-- **Sin capacidades nuevas.** Fijar, desfijar, área principal, área abierta y recientes van por `core.config.set` con ajustes de ámbito `usuario`, con `dryRun` e `idempotencyKey` como toda escritura; un agente con key de usuario puede leerlos y cambiarlos igual que la persona.
+- **Sin capacidades nuevas.** Fijar, desfijar, área principal y área abierta van por `core.config.set` con ajustes de ámbito `usuario`, con `dryRun` e `idempotencyKey` como toda escritura; un agente con key de usuario puede leerlos y cambiarlos igual que la persona.
+- **Recientes, solo en el navegador** (§4.3): no pasan por `core.config` ni por el servidor y no generan auditoría ni eventos. No son dato de negocio sino una comodidad de la pantalla, así que no tienen capacidad ni herramienta MCP; un agente obtiene lo mismo con `core.buscar`.
 - Las acciones de ⌘K **solo navegan** al formulario o a la pantalla de la acción; ninguna ejecuta una escritura directa. Una acción aparece solo si el rol tiene el permiso de su capacidad.
 - El gate de paridad sigue en verde: ninguna pantalla nueva sin capacidad.
 
@@ -127,7 +130,7 @@ Decisión de Carlos, 26-oct-2026 10:08 CLT, chat con OPAI 2.0; ADR-049. El agent
 |---|---|---|
 | 01 · 02 | `Shell_C_owner_1280` (claro y oscuro) | Shell completo, todo contratado: fijados arriba, Inicio, áreas plegables, Configuración al pie; Comercial abierto con Negocios activo |
 | 03 | `Shell_A_owner_1280` | Tenant de hoy (solo núcleo), nada deshabilitado |
-| 04 | `Shell_D_nomina_1280` | Tenant que solo compró Nómina, sin rastro de lo no contratado |
+| 04 | `Shell_D_nomina_1280` | Tenant sin Comercial ni Finanzas, sin rastro de lo no contratado. **Ajuste:** el escenario D es Puestos + Nómina, porque Nómina exige Puestos (nota de ADR-048, 25-oct 23:10); la pantalla mostraba solo Nómina |
 | 05 | `Roles_comparacion_1280` | Barra por rol (gerente, supervisor, viewer, admin). **Ajuste D10:** viewer sin Nómina |
 | 06 | `Grupos_plegables_1280` | Plegado, abierto y área de una entrada como suelta (D1, R3) |
 | 07 | `Fijados_1280` | Sin fijados, cinco fijados y acción de fijar (D3) |
@@ -157,7 +160,7 @@ Se agregan a `packages/ds` sobre los componentes existentes, solo con tokens, y 
 
 ### 8.3 Responsive
 
-- **< 768:** barra superior de 52 px con selector de portal, campana y avatar (sin búsqueda, D7); barra inferior de 56 px + safe-area con cinco ítems (Inicio, 2, 3, Buscar, Más).
+- **< 768:** barra superior de 52 px con selector de portal, campana y avatar (sin búsqueda desde el PR B, D7; en el PR A sigue en el grupo fijo); barra inferior de 56 px + safe-area con cinco ítems (Inicio, 2, 3, Buscar, Más).
 - **768–1023:** riel actual, sin cambios de comportamiento (D9).
 - **≥ 1024:** barra lateral de 248 px con áreas (D9); cabecera de 60 px con título, buscador ⌘K, campana y usuario.
 - Touch targets ≥ 44 px, foco visible, contraste AA en claro y oscuro, sin scroll horizontal a 375; etiquetas largas con elipsis.
@@ -168,12 +171,12 @@ Se agregan a `packages/ds` sobre los componentes existentes, solo con tokens, y 
 - La navegación nunca es la barrera de seguridad: las capacidades siguen verificando permiso, módulo activo y alcance (ADR-022). El menú solo oculta.
 - Fijados y recientes guardan `href` y etiqueta; al mostrarlos se vuelve a verificar permiso y existencia. Un fijado o reciente sin permiso, de un módulo apagado o de una entidad borrada no se muestra (y se limpia en la siguiente escritura).
 - Los ajustes de usuario son por usuario **y** tenant: cambiar de empresa cambia los fijados, los recientes y el área principal.
-- Sin datos personales en los recientes más allá de la etiqueta visible (Ley 21.719, Brief 07d).
+- Sin datos personales en los recientes más allá de la etiqueta visible (Ley 21.719; Brief 07d, propuesto en PR #36, pendiente de merge).
 
 ## 10. Casos límite
 
 - Tenant con solo el núcleo (escenario A): Inicio, Clientes, Personas y Configuración; barra inferior de respaldo Inicio · Cuentas · Personas · Buscar · Más.
-- Tenant con solo Nómina (escenario D): Personas suma Nómina; nada de Comercial, Operaciones ni Finanzas.
+- Tenant con Puestos y Nómina (escenario D; Nómina exige Puestos, nota de ADR-048 del 25-oct 23:10): Operaciones con Puestos y Personas con Nómina; nada de Comercial ni Finanzas.
 - Área principal elegida que deja de estar disponible (módulo apagado o rol cambiado): cae a la de por defecto del rol, sin error.
 - Fijado de una ficha borrada o fuera de alcance: no aparece.
 - Sexto fijado: aviso y no se fija.
@@ -188,15 +191,15 @@ Se agregan a `packages/ds` sobre los componentes existentes, solo con tokens, y 
 Conviene dividirlo en **dos PRs** para que la cabecera de CAR-12 (urgente) llegue antes. Como `AGENTS.md` pide un PR por encargo, cada PR lleva su propio encargo y su tarea de Linear: el PR A, `Fixes CAR-12`; el PR B, la tarea que Carlos cree para la navegación.
 
 **PR A — Cabecera estable (CAR-12).**
-- Bloque 0 · Lectura y verificación. El PR A puede avanzar mirando las pantallas 01, 14 y 24 directo en Claude Design. El PR B se **detiene** si falta el export en `docs/2.0/design/export-navegacion/` (Carlos lo exporta desde Claude Design).
-- Bloque 1 · `ds:`/`core:` cabecera estable en `AppBar` y `TopBarTelefono` (grupo fijo, avatar en el teléfono), acción principal al patrón en las páginas que hoy la pasan a la cabecera, buscador sin cambio de forma y búsqueda fuera de la barra superior del teléfono (D7). e2e `cabecera-estable.spec.ts`.
+- Bloque 0 · Lectura y verificación. El PR A puede avanzar mirando las pantallas 01, 14 y 24 directo en Claude Design; el bloqueo por el export aplica solo al PR B (ver abajo).
+- Bloque 1 · `ds:`/`core:` cabecera estable en `AppBar` y `TopBarTelefono` (grupo fijo, avatar en el teléfono), acción principal al patrón en las páginas que hoy la pasan a la cabecera y buscador sin cambio de forma. **El PR A no quita la búsqueda de la barra superior del teléfono**: queda dentro del grupo fijo (búsqueda, campana y avatar) hasta que el PR B agregue «Buscar» a la barra inferior, para no dejar el celular sin búsqueda. e2e `cabecera-estable.spec.ts`.
 
-**PR B — Navegación por áreas.**
+**PR B — Navegación por áreas.** Empieza cuando el PR 2 del Brief 03 (shell en el layout) esté integrado. El bloque 0 del PR B se **detiene** si falta el export en `docs/2.0/design/export-navegacion/` (Carlos lo exporta desde Claude Design).
 - Bloque 2 · `core:` modelo `area`, manifest `navegacion`/`acciones`, `armarNavegacion` puro con tests, ajustes `navegacion_*`.
 - Bloque 3 · `ds:` componentes nuevos (§8.2) en `/ds`.
 - Bloque 4 · `ds:` barra lateral por áreas (acordeón D1, fijados D3, Inicio suelto D4, sin contadores D5) y breakpoint `lg` (D9).
 - Bloque 5 · `ds:`/`core:` ⌘K con recientes y acciones.
-- Bloque 6 · `core:` barra inferior por área principal, hoja «Más», Preferencias → Área principal.
+- Bloque 6 · `core:` barra inferior por área principal con «Buscar», hoja «Más», Preferencias → Área principal; recién aquí la búsqueda sale de la barra superior del teléfono (D7).
 - Bloque 7 · `core:` Bandeja en Inicio, punto en Inicio y campana (D5, D6).
 - Bloque 8 · `docs:` `NAVEGACION.md` §8 (estado de hoy), `ESTADO.md` y reporte.
 
@@ -204,6 +207,7 @@ Conviene dividirlo en **dos PRs** para que la cabecera de CAR-12 (urgente) llegu
 
 - **Dominio:** `armarNavegacion` por escenario (A, B, C, D) y por rol (owner, admin, gerente, supervisor, viewer): áreas y entradas exactas, orden, R3, D2 (falla con ocho entradas), viewer sin Finanzas ni Nómina, gerente sin Finanzas ni Nómina, supervisor sin Comercial ni Finanzas.
 - **Ajustes:** fijados (máximo 5, orden por fecha), área principal con respaldo; limpieza de fijados sin permiso. **Recientes:** 10, sin duplicados, separados por usuario y empresa.
+- **Base (`pnpm test:db`, rol `opai_app` sin BYPASSRLS):** lectura y escritura de `navegacion_area_principal`, `navegacion_area_abierta` y `navegacion_fijados` por `core.config.get/set` aisladas por tenant: el mismo usuario en dos empresas tiene preferencias separadas y no lee ni escribe las de la otra; un usuario no lee las de otro. Las escrituras conservan `dryRun` (no persisten), idempotencia (la misma clave no duplica) y auditoría en `core.audit_events`.
 - **Bandeja por rol:** owner ve avisos y aprobaciones; viewer y supervisor solo avisos.
 - **Componentes:** acordeón (una abierta), `aria-expanded`, punto sin número, botón fijar con teclado.
 - **e2e (375, 1024 y 1280):** `navegacion-areas.spec.ts` (barra por escenario, acordeón, fijar y desfijar, ⌘K con recientes, hoja «Más», cambio de área principal) y `cabecera-estable.spec.ts` (§14, CA1).
@@ -215,7 +219,7 @@ Conviene dividirlo en **dos PRs** para que la cabecera de CAR-12 (urgente) llegu
 
 ## 14. Criterios de aceptación
 
-- **CA1 (CAR-12, obligatorio).** Campana, buscador y botón de usuario mantienen **tamaño y posición idénticos** al cambiar de vista (Personas → Vencimientos → Cuentas → Nueva cuenta → Inicio) y al cambiar de vencimiento. Lo verifica `cabecera-estable.spec.ts` a **375 y 1280 px** (y también a 1024, proyecto `ipad`): compara el `boundingBox` de cada ícono entre vistas con tolerancia de 0 px en posición y tamaño. A 1280 se comparan buscador, campana y usuario. A 375 se comparan campana y avatar en **todas** las vistas, también las que tienen «Atrás» (Nueva cuenta, ficha); el buscador del teléfono es el ítem «Buscar» de la barra inferior, que también debe quedar fijo.
+- **CA1 (CAR-12, obligatorio).** Campana, buscador y botón de usuario mantienen **tamaño y posición idénticos** al cambiar de vista (Personas → Vencimientos → Cuentas → Nueva cuenta → Inicio) y al cambiar de vencimiento. Lo verifica `cabecera-estable.spec.ts` a **375 y 1280 px** (y también a 1024, proyecto `ipad`): compara el `boundingBox` de cada ícono entre vistas con tolerancia de 0 px en posición y tamaño. A 1280 se comparan buscador, campana y usuario. A 375 se comparan campana y avatar en **todas** las vistas, también las que tienen «Atrás» (Nueva cuenta, ficha); en el PR A también el ícono de búsqueda de la barra superior, y desde el PR B el ítem «Buscar» de la barra inferior, que también debe quedar fijo.
 - **CA2.** El mapa coincide con `NAVEGACION.md` §2 (con D8): áreas, entradas, orden y nombres; Configuración al pie; no aparecen «Maestros», «Módulos», «Guardias», «Ajustes» (en el ERP) ni abreviaturas.
 - **CA3.** Límites: seis áreas, siete entradas por área, cinco fijados; un área de una entrada aparece suelta.
 - **CA4.** Nada deshabilitado en ningún escenario ni rol.
@@ -232,10 +236,10 @@ Conviene dividirlo en **dos PRs** para que la cabecera de CAR-12 (urgente) llegu
 
 ## 15. Riesgos y rollback
 
-- **Choque con el PR 2 del Brief 03** (shell en el layout y quitar contadores, ADR-045 decisión 15): tocan los mismos archivos del shell. Se ejecuta después del PR 2 o en coordinación; si el PR 2 no ha entrado, el PR B no mueve el shell al layout.
+- **Dependencia del PR 2 del Brief 03** (shell en el layout y quitar contadores, ADR-045 decisión 15; lo implementa Claude): R7 y CA12 exigen que el shell persista entre páginas, y hoy se monta por página. Por eso el PR B empieza cuando el PR 2 esté integrado y no mueve el shell por su cuenta. El PR A no depende de él.
 - **Presupuesto de JS:** acordeón, fijados y ⌘K suman JS de cliente; ⌘K y la hoja «Más» se cargan diferidos.
-- **e2e no obligatorio en CI:** CA1 depende de un e2e que no bloquea el merge. Mitigación: correrlo antes de abrir el PR y adjuntar el resultado; ver la pregunta para Carlos en el PR.
-- **Export pendiente:** sin export en el repo, el bloque 0 se detiene.
+- **e2e no obligatorio en CI:** CA1 depende de un e2e que no bloquea el merge. Mitigación: correrlo antes de abrir el PR y adjuntar el resultado. Pregunta para Carlos (también en el cuerpo del PR #37): ¿el e2e de CA1 pasa a ser check obligatorio o se corre a mano?
+- **Export pendiente:** sin export en el repo, el bloque 0 del PR B se detiene; el PR A no lo necesita.
 - **Acción principal al patrón:** cambia de lugar el botón principal en Personas, Cuentas e Instalaciones; el QA de «Diseño y QA OPAI 2.0» lo compara con el diseño.
 - **Rollback:** los cambios son de UI y ajustes de usuario sin migración; se revierte el PR. Los ajustes `navegacion_*` que queden guardados se ignoran.
 
