@@ -2,7 +2,7 @@
 
 **Actualizado:** 25-oct-2026 · **Tarea:** CAR-10 · **Base verificada:** `main` en `6b2b662`
 
-**Fuentes.** Las decisiones del 25-oct citadas aquí como «Decisión de Carlos, 25-oct-2026, chat con OPAI 2.0 (registrada por el bot OPAI 2.0)» son: el Núcleo primero (05 → 04 → 07b) y las fases en orden; Nómina en la fase 6; el DS oficial V2 en Claude Design; el proceso por módulo y el orden Puestos → CPQ → Comercial. Las reglas de Puestos son reglas definidas por Carlos el 25-oct-2026 (Page «Puestos y guardias OPAI 2.0: propuesta»); mockup pendiente de aprobación. Lo demás que no tiene fuente en el repo dice **propuesta pendiente de confirmar**; las extracciones de 1.0 en Pages privadas de Carlos dicen **extracción hecha fuera del repo, sin verificar; se sube en un PR aparte**.
+**Fuentes.** Las decisiones del 25-oct citadas aquí como «Decisión de Carlos, 25-oct-2026, chat con OPAI 2.0 (registrada por el bot OPAI 2.0)» son, con la hora (CLT) de sus mensajes: el Núcleo primero (05 → 04 → 07b) y las fases en orden (19:09, 19:17, 22:04 y 22:10); el DS oficial V2 en Claude Design (20:08); en los 7 choques entre el export y el código manda el código (21:24); el proceso por módulo y **Puestos primero** (12:42). Las reglas de Puestos son reglas definidas por Carlos el 25-oct-2026 (12:30 y 16:53; Page «Puestos y guardias OPAI 2.0: propuesta»); mockup pendiente de aprobación. **No son decisiones de Carlos todavía** (propuestas del bot, pendientes de confirmar): el orden CPQ antes que Comercial y dejar Nómina en la fase 6. Lo demás que no tiene fuente en el repo dice **propuesta pendiente de confirmar**; las extracciones de 1.0 en Pages privadas de Carlos dicen **extracción hecha fuera del repo, sin verificar; se sube en un PR aparte**.
 
 Esta es la vista que revisa Carlos: **cada módulo y en qué etapa está**. No reemplaza a `ROADMAP.md` (plan por fases con semanas y criterios de corte de Gard) ni a `ESTADO.md` (foto técnica). El estado de cada tarea vive en Linear (equipo CAR). Si este archivo no coincide con el repositorio, manda el repositorio y se corrige este archivo.
 
@@ -20,7 +20,7 @@ Valores de cada etapa: **hecho**, **en curso**, **falta**, **no aplica**. Cada c
 
 ## 2. Tabla por módulo, en orden de trabajo
 
-Primero se cierra el Núcleo; después Puestos → CPQ → Comercial; después el resto en el orden de `ROADMAP.md`.
+Primero se cierra el Núcleo; después Puestos; luego CPQ y Comercial (su orden es propuesta pendiente de confirmar); después el resto en el orden de `ROADMAP.md`.
 
 | # | Módulo (briefs) | 1 · Reglas | 2 · Diseño en Claude Design | 3 · Aprobación de Carlos | 4 · Brief | 5 · En `main` |
 |---|---|---|---|---|---|---|
@@ -42,16 +42,16 @@ Primero se cierra el Núcleo; después Puestos → CPQ → Comercial; después e
 | M10 | **Asistencia y DT** (Briefs 18 y 19) | Parcial: `extraccion/dt-normativa.md`, ADR-023; faltan `extraccion/asistencia.md` y `modulos/asistencia.md` | Sin diseño todavía | Falta | Falta | Falta |
 | M11 | **Finanzas · Flujo de caja al centro** (Brief 20) | Reglas base en ADR-026. **Extracción hecha fuera del repo, sin verificar; se sube en un PR aparte** (`extraccion/flujo-de-caja.md`, desde el flujo v3 de 1.0). Falta `modulos/finanzas.md` | Sin diseño todavía. Sin Design Prompt: «Finanzas · octubre 2026» del export DS 2.0 es solo un ejemplo del patrón Dashboard, no el diseño del módulo | Falta | Falta | Falta. Es el flujo de caja de 2.0, no el bot «Flujo de caja» de 1.0 |
 | M12 | **Finanzas · Banca y conciliación, DTE y factoring, rendiciones, contabilidad** (Briefs 21–24) | Falta: `extraccion/finanzas.md` y `modulos/finanzas.md`. Según ADR-048 depende solo del núcleo; Comercial, CPQ y Nómina son fuentes opcionales | Sin diseño todavía | Falta | Falta | Falta (en el núcleo solo está el bloqueo de `finanzas:*` por rol) |
-| M13 | **Nómina / Payroll I y II** (Briefs 25–26; **fase 6, no se adelanta**) | Reglas base en ADR-048 (se vende sola; liquida sobre el resumen del periodo, manual o importado) y ADR-036 (capas). **Extracción hecha fuera del repo, sin verificar; se sube en un PR aparte**. Falta `modulos/nomina.md` | Sin diseño todavía | Falta | Falta | Falta. Las estructuras de sueldo del núcleo usan el modelo viejo, que corrige el 07b |
+| M13 | **Nómina / Payroll I y II** (Briefs 25–26; fase 6; no adelantarla es propuesta pendiente de confirmar) | Reglas base en ADR-048 (se vende sola; liquida sobre el resumen del periodo, manual o importado) y ADR-036 (capas). **Extracción hecha fuera del repo, sin verificar; se sube en un PR aparte**. Falta `modulos/nomina.md` | Sin diseño todavía | Falta | Falta | Falta. Las estructuras de sueldo del núcleo usan el modelo viejo, que corrige el 07b |
 | M14 | **Licitaciones** (Brief 27) | Falta: `extraccion/licitaciones.md` y `modulos/licitaciones.md` | Sin diseño todavía | Falta | Falta | Falta |
 | M15 | **Firma electrónica avanzada** (Brief 28) | Falta | No aplica | Falta | Falta | Falta |
 | M16 | **Apagado de 1.0** (Brief 29) | Falta | No aplica | Falta | Falta | Falta |
 | — | **Empaquetado nativo Capacitor** (Brief 17) | Parcial: ADR-044 | No aplica | Falta | Falta | Falta |
 
-## 3. Orden vigente (Decisión de Carlos, 25-oct-2026, chat con OPAI 2.0 (registrada por el bot OPAI 2.0))
+## 3. Orden vigente
 
-1. **Cerrar el Núcleo antes de abrir los módulos:** 05 Navegación por áreas → 04 PWA → 07b Capas de sueldo (bloqueado por las 4 preguntas abiertas de ADR-048). En paralelo: PR 2 del Brief 03 y sesión D del Brief 02.
-2. **Después, los módulos.** Orden de **reglas y diseño:** Puestos y guardias (Operaciones I) → CPQ por vertical → Comercial (CRM). Orden de **construcción:** Puestos (Brief 11) → Comercial (Briefs 06 y 07) → CPQ (Briefs 08 y 10), porque el cotizador necesita los negocios.
+1. **Cerrar el Núcleo antes de abrir los módulos** (Decisión de Carlos, 25-oct-2026, chat con OPAI 2.0 (registrada por el bot OPAI 2.0), 19:09–22:10 CLT): 05 Navegación por áreas → 04 PWA → 07b Capas de sueldo (bloqueado por las 4 preguntas abiertas de ADR-048). En paralelo: PR 2 del Brief 03 y sesión D del Brief 02.
+2. **Después, los módulos.** **Puestos y guardias (Operaciones I) primero** (Decisión de Carlos, 25-oct-2026, chat con OPAI 2.0 (registrada por el bot OPAI 2.0), 12:42 CLT). Después CPQ por vertical y Comercial (CRM) en reglas y diseño, en ese orden como **propuesta pendiente de confirmar**. Orden de **construcción:** Puestos (Brief 11) → Comercial (Briefs 06 y 07) → CPQ (Briefs 08 y 10), porque el cotizador necesita los negocios.
 3. **Después**, el resto en el orden de fases de `ROADMAP.md` (Operaciones II, Tickets, Rondas, Portales, Asistencia, Finanzas, Nómina y Licitaciones).
 
 **Por qué el 07b va antes de Puestos.** El 07b es parte del Núcleo y va antes del brief de Puestos (Operaciones I), porque el puesto usa la capa «sueldo propio del puesto» (ADR-036, actualización del 25-oct).
@@ -61,6 +61,8 @@ Primero se cierra el Núcleo; después Puestos → CPQ → Comercial; después e
 **Orden de diseño (propuesta pendiente de confirmar):** (1) cargar el DS 2.0 en Claude Design desde el repo (`tokens.css` y `design/export-ds-2.0/`), en curso; (2) navegación del Brief 05 con ese sistema; (3) capas de sueldo y anexo del Brief 07b; (4) ajustar el mockup de Puestos al sistema si difiere. La PWA (Brief 04) no necesita diseño propio. CPQ y Comercial se diseñan cuando cierren sus reglas.
 
 ## 4. Próximos pasos, en orden
+
+El orden de los pasos 6 (CPQ) y 7 (Comercial) es **propuesta pendiente de confirmar**; la construcción respeta el requisito de §3 (los Briefs 06 y 07 antes del 10).
 
 | Paso | Qué | Responsable |
 |---|---|---|
@@ -87,7 +89,7 @@ Primero se cierra el Núcleo; después Puestos → CPQ → Comercial; después e
 - Subir la extracción de portales al repo (en un PR aparte) durante la fase 2 y diseñar los portales en Claude Design con el DS V2 antes del Brief 15.
 - Hacer una **pasada de pulido de terreno antes del Brief 17**: prueba en el celular a pleno sol y sin conexión, contraste del Trabajador, Lighthouse y bundle por portal.
 - Subir en paralelo las extracciones de flujo de caja y de nómina durante las fases 2 y 3.
-- Nómina se queda en la fase 6, sin adelantarla, porque no hay clientes que compren Payroll solo (Decisión de Carlos, 25-oct-2026, chat con OPAI 2.0 (registrada por el bot OPAI 2.0)). Esto es decisión, no propuesta.
+- Dejar Nómina en la fase 6, sin adelantarla, mientras no haya clientes que compren Payroll solo (propuesta pendiente de confirmar; hoy ADR-048 permite adelantarla).
 
 ## 6. Diferencias abiertas entre el plan y el repositorio
 

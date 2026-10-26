@@ -57,6 +57,7 @@ Del puesto (el modelo de datos exacto se define en el Brief 11):
 
 - **R11.** Un cambio de rol, de capa de sueldo, de monto o de instalación de una persona genera el borrador del anexo de contrato (ADR-036 y ADR-048, punto 5).
 - **R12.** El supervisor ve y opera solo las instalaciones a su cargo; el filtro va en la consulta (ADR-022).
+- **R13.** La pauta guarda solo las series (patrón con su fecha de inicio de ciclo) y las excepciones (ausencias, reemplazos, PPC, turnos extra), y calcula el resto; nunca una fila por trabajador por día. Repintar no modifica días pasados ni días con marca (ADR-048, punto 6). El trato del día de hoy queda fuera de esta regla: es la pregunta abierta 4 de ADR-048.
 
 ## 6. Estados y transiciones
 

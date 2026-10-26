@@ -1,6 +1,6 @@
 # ROADMAP — OPAI 2.0 hasta terminar
 
-**Actualizado:** 25-oct-2026 (CAR-10) · **Orden:** ADR-030 (nota del 25-oct: Núcleo primero, luego Puestos → CPQ → Comercial) y ADR-048 (módulos vendibles por separado) · **Vista por módulo y etapa:** [`PLAN-desarrollo.md`](PLAN-desarrollo.md) · **Estado real:** desde el 24-oct-2026 el estado de las tareas vive en Linear (`AGENTS.md`, «Tareas (Linear)») y `ESTADO.md` es la foto técnica; este archivo planifica y se actualiza si cambia el plan.
+**Actualizado:** 25-oct-2026 (CAR-10) · **Orden:** ADR-030 (nota del 25-oct: Núcleo primero, luego Puestos) y ADR-048 (módulos vendibles por separado) · **Vista por módulo y etapa:** [`PLAN-desarrollo.md`](PLAN-desarrollo.md) · **Estado real:** desde el 24-oct-2026 el estado de las tareas vive en Linear (`AGENTS.md`, «Tareas (Linear)») y `ESTADO.md` es la foto técnica; este archivo planifica y se actualiza si cambia el plan.
 
 > **Las semanas son estimaciones** (25-oct: la fase 1 suma el 07b y el Brief 11 va antes de la fase 2, así que las fases 2 a 6 se corren unas 4 semanas; la fase 2 ya está ajustada y las fechas de las fases 3 a 6 se recalculan al cerrar el Núcleo), contadas desde el viernes 23-oct-2026 ( semana 1 = lunes 26-oct), para un constructor (Claude) con revisión y QA por bots y decisiones de Carlos a tiempo. Sirven para ordenar y detectar atrasos, no son compromisos. Las fases 1 y 2 se estiman con el ritmo real observado (Briefs 00 a 02 en dos días); de la fase 3 en adelante, con el juicio del documento de arranque, porque dependen de extracciones que aún no existen.
 
@@ -37,17 +37,17 @@ Las **bases transversales** (rendimiento, PWA, navegación) aplican a todo brief
 | **07b** | **Paso 3 · Capas de sueldo** (corrección del núcleo, ADR-036 actualizado el 25-oct): capa `instalacion`, resolución sin herencia entre capas, retiro del nivel `cargo` sin borrar datos, vínculo laboral con instalación y jornada pactada (ADR-048), anexo de contrato en borrador con plantilla base del sistema y la marca del tenant (la plantilla editable llega con el Brief 09); migración aditiva. **Va antes del brief de Puestos (Operaciones I)**, porque el puesto usa la capa «sueldo propio del puesto» | Pendiente: diseño de capas de sueldo y anexo → aprobación → brief. Movido desde la fase 2 (25-oct) |
 | **03** | **En paralelo · Rendimiento de navegación** (ADR-045): instrumentación, shell en el layout, caché de identidad, `forTenant` por capacidad, prefetch y caché del router, gate en CI | PR 1 integrado (#33: medición, `Server-Timing`, contador de consultas y gate como informe). **PR 2 pendiente** (arreglos y gate obligatorio). El texto del brief no está en `docs/2.0/briefs/` |
 
-- **Orden (Decisión de Carlos, 25-oct-2026, chat con OPAI 2.0 (registrada por el bot OPAI 2.0)):** el Núcleo se cierra antes de abrir los módulos: 05 → 04 → 07b, con el PR 2 del 03 y la sesión D del 02 en paralelo. Al cerrar el Núcleo se abre **Puestos y guardias (Brief 11)**, adelantado desde la fase 3, y después CPQ y Comercial.
+- **Orden (Decisión de Carlos, 25-oct-2026, chat con OPAI 2.0 (registrada por el bot OPAI 2.0), 19:09–22:10 CLT):** el Núcleo se cierra antes de abrir los módulos: 05 → 04 → 07b, con el PR 2 del 03 y la sesión D del 02 en paralelo. Al cerrar el Núcleo se abre **Puestos y guardias (Brief 11)**, adelantado desde la fase 3, y después CPQ y Comercial.
 - **Criterio de término:** el Brief 07b integrado (capas de sueldo y anexo en borrador); Carlos completa la verificación guiada del Brief 02 en `test.opai.cl` sin bloqueantes; toda capacidad que la UI usa existe en MCP; QA sin hallazgos críticos; la navegación entre Cuentas, Instalaciones, Personas, Cargos y Configuración cumple las metas de ADR-045 medidas antes y después; la app se instala desde el celular y el CI prueba manifest, service worker y modo sin conexión; ADR-044 y 046 aprobados (cumplido el 24-oct).
 - **Dependencias:** seeds y secretos (Carlos desde el Mac); DS 2.0 cargado en Claude Design y diseño de navegación aprobado (para el 05); diseño de capas de sueldo y anexo aprobado y respuestas de Carlos a las 4 preguntas abiertas de ADR-048, que **bloquean el 07b**.
-- **Riesgo de plazo:** dos semanas para cerrar la sesión D, tres briefs y un diseño es optimista; si el diseño de navegación se atrasa, se adelantan el Brief 04 (no necesita diseño) y el 07b, y el 05 se integra cuando su diseño esté aprobado; Puestos (Brief 11) empieza cuando cierre el Núcleo (orden del 25-oct).
+- **Riesgo de plazo:** tres semanas para cerrar la sesión D, tres briefs y un diseño es optimista; si el diseño de navegación se atrasa, se adelantan el Brief 04 (no necesita diseño) y el 07b, y el 05 se integra cuando su diseño esté aprobado; Puestos (Brief 11) empieza cuando cierre el Núcleo (orden del 25-oct).
 - **Deja de usarse en 1.0:** nada (2.0 todavía no opera para Gard).
 
 > **Puestos y guardias (Brief 11), adelantado:** semanas 4–6 (16-nov → 4-dic), estimación del 25-oct. Su detalle sigue en la tabla de la fase 3.
 
 ### Fase 2 — Comercial, CPQ y Documentos · pendiente · semanas 7–12 (7-dic → 15-ene, con fiestas de fin de año; corrida unas 4 semanas por el 07b y el Brief 11)
 
-> **Orden de trabajo (Decisión de Carlos, 25-oct-2026, chat con OPAI 2.0 (registrada por el bot OPAI 2.0)):** esta fase empieza después de Puestos y guardias (Brief 11). Primero CPQ y después Comercial en reglas y diseño; **requisito de construcción:** los negocios (Briefs 06 y 07) existen antes del cotizador (Brief 10), porque CPQ depende de Comercial (ADR-040, ADR-048). **Recomendación para que Carlos confirme** (solo orden de diseño): diseñar CPQ antes que Comercial. El 07b pasó a la fase 1.
+> **Orden de trabajo:** esta fase empieza después de Puestos y guardias (Brief 11; Decisión de Carlos, 25-oct-2026, chat con OPAI 2.0 (registrada por el bot OPAI 2.0), 12:42 CLT). Hacer CPQ antes que Comercial en reglas y diseño es **propuesta pendiente de confirmar**. **Requisito de construcción:** los negocios (Briefs 06 y 07) existen antes del cotizador (Brief 10), porque CPQ depende de Comercial (ADR-040, ADR-048). El 07b pasó a la fase 1.
 
 | Paso | Nombre | Estado |
 |---|---|---|
@@ -67,7 +67,7 @@ Las **bases transversales** (rendimiento, PWA, navegación) aplican a todo brief
 - **Dependencias:** fase 1 cerrada; ADR-041 y 042 aprobados; key dedicada para la API de 1.0 (sincronización); plantillas de propuesta aprobadas.
 - **Deja de usarse en 1.0:** CRM (leads, cuentas, contactos, negocios, tareas, notas) y CPQ. Finanzas de 1.0 sigue leyendo cuentas y contactos sincronizados desde 2.0.
 
-### Fase 3 — Operación y terreno · pendiente · semanas 9–17 (21-dic → 19-feb, con fiestas de fin de año)
+### Fase 3 — Operación y terreno · pendiente · semanas por recalcular (antes 9–17; se corre unas 4 semanas)
 
 | Paso | Nombre | Estado |
 |---|---|---|
@@ -87,7 +87,7 @@ Las **bases transversales** (rendimiento, PWA, navegación) aplican a todo brief
 - **Dependencias:** fase 2 cerrada, salvo el Brief 11 (Operaciones I · Puestos), adelantado para después del cierre del Núcleo (nota del 25-oct en ADR-030); extracciones de Operaciones y Portales; cuentas de desarrollador y D-U-N-S (en curso); base PWA (Brief 04).
 - **Deja de usarse en 1.0:** Operaciones (puestos, pautas, turnos extra), Supervisión, Rondas, Portal Guardia, Portal Terreno, Portal Cliente y Portal Supervisor.
 
-### Fase 4 — Asistencia y DT · pendiente · semanas 18–21 (22-feb → 19-mar)
+### Fase 4 — Asistencia y DT · pendiente · semanas por recalcular (antes 18–21)
 
 | Paso | Nombre | Estado |
 |---|---|---|
@@ -101,7 +101,7 @@ Las **bases transversales** (rendimiento, PWA, navegación) aplican a todo brief
 - **Dependencias:** portales y dispositivos (fase 3); adaptador de biometría; decisión sobre la marca sin conexión. Operaciones es **fuente opcional** (ADR-048): sin ella, se marca contra la jornada pactada del vínculo laboral.
 - **Deja de usarse en 1.0:** asistencia y reportes DT (en 1.0 no hay marcación en vivo; deja de ser el lugar de referencia).
 
-### Fase 5 — Finanzas · pendiente · semanas 22–29 (22-mar → 14-may)
+### Fase 5 — Finanzas · pendiente · semanas por recalcular (antes 22–29)
 
 | Paso | Nombre | Estado |
 |---|---|---|
@@ -118,7 +118,7 @@ Las **bases transversales** (rendimiento, PWA, navegación) aplican a todo brief
 - **Dependencias:** núcleo (cuentas, instalaciones, puestos); Comercial, CPQ, Operaciones y Nómina son fuentes opcionales (ADR-048), y para el corte de Gard se mantiene el orden de las fases 2 y 3; credenciales de DTE, banco y factoring por tenant (ADR-027); extracciones de Finanzas y flujo de caja.
 - **Deja de usarse en 1.0:** todo Finanzas; 1.0 queda en solo lectura.
 
-### Fase 6 — Nómina y Licitaciones · pendiente · semanas 30–35 (17-may → 25-jun)
+### Fase 6 — Nómina y Licitaciones · pendiente · semanas por recalcular (antes 30–35)
 
 | Paso | Nombre | Estado |
 |---|---|---|
@@ -133,7 +133,7 @@ Las **bases transversales** (rendimiento, PWA, navegación) aplican a todo brief
 
 - **Criterio de término:** «Una nómina mensual completa de Gard se liquida en 2.0 y cuadra al peso con la anterior; una licitación se presenta desde 2.0; **Gard opera 100 % en 2.0** y `opai.gard.cl` queda archivado».
 - **Dependencias:** núcleo (personas, vínculo laboral, cargos, capas de sueldo y anexos de contrato); Opai SpA para facturar suscripciones a otros tenants. **Asistencia (fase 4), Operaciones (fase 3) y Finanzas (fase 5, pagos y flujo de caja) son fuentes o destinos opcionales**, no dependencias (ADR-048): sin ellas, el resumen del periodo se ingresa a mano o se importa desde Excel.
-- **Nómina se puede adelantar** (Briefs 25 y 26 antes de las fases 3 a 5) si hay un cliente que la quiera comprar sola; los archivos de pago los genera Nómina, y el cruce con el flujo de caja se suma cuando Finanzas exista. **Actualización (Decisión de Carlos, 25-oct-2026, chat con OPAI 2.0 (registrada por el bot OPAI 2.0)):** Nómina se queda en la fase 6, sin adelantarla, porque no hay clientes que compren Payroll solo.
+- **Nómina se puede adelantar** (Briefs 25 y 26 antes de las fases 3 a 5) si hay un cliente que la quiera comprar sola; los archivos de pago los genera Nómina, y el cruce con el flujo de caja se suma cuando Finanzas exista. **Propuesta pendiente de confirmar (25-oct):** dejar Nómina en la fase 6, sin adelantarla, mientras no haya clientes que compren Payroll solo.
 - **Deja de usarse en 1.0:** Payroll y Licitaciones; 1.0 se apaga.
 
 ### Backlog (sin fecha)
@@ -168,7 +168,7 @@ No se portan de 1.0 y solo se reconstruyen con demanda real (lista canónica de 
 
 ## 5. Próximas tareas, en orden
 
-Orden (Decisión de Carlos, 25-oct-2026, chat con OPAI 2.0 (registrada por el bot OPAI 2.0)): **primero se cierra el Núcleo, después Puestos → CPQ → Comercial**. Responsable y etapa de cada módulo en [`PLAN-desarrollo.md`](PLAN-desarrollo.md).
+Orden (Decisión de Carlos, 25-oct-2026, chat con OPAI 2.0 (registrada por el bot OPAI 2.0)): **primero se cierra el Núcleo, después Puestos**. Que CPQ vaya antes que Comercial en reglas y diseño es propuesta pendiente de confirmar. Responsable y etapa de cada módulo en [`PLAN-desarrollo.md`](PLAN-desarrollo.md).
 
 0. **Diseño 1 · DS 2.0 en Claude Design:** cargarlo desde el repo (`tokens.css`, `design/export-ds-2.0/`) en «OPAI 2.0 Design System V2» (en curso: completando componentes). **Carlos** lo revisa y lo publica.
 1. **Brief 05 · Navegación por áreas:** Design Prompt (**Claude**) → diseño en Claude Design con el sistema cargado → **Carlos** aprueba y prueba → brief (**Claude**) → PR, Revisor, QA y merge (bot «OPAI 2.0»).
