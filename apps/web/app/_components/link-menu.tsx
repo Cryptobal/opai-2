@@ -1,7 +1,7 @@
 "use client";
 
 import Link, { useLinkStatus } from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 import type { LinkComponent } from "@opai/ds";
 
@@ -34,22 +34,19 @@ function EstadoEnlace() {
 }
 
 /**
- * Enlaces del menú: al verse siguen con el prefetch parcial de Next (sin ejecutar capacidades); la
- * página completa se precarga al pasar el cursor, tocar o enfocar (visita inmediata, ADR-045; no
- * antes, para no contar como uso lecturas que nadie pidió en `core.consumos`) y avisan si tardan.
+ * Enlaces del menú. El prefetch automático de Next queda desactivado (`prefetch={false}`).
+ *
+ * Por qué (cuelgue de #44): con Cache Components, un `prefetch` en vuelo en el instante del clic entra
+ * en carrera con la navegación —el router pide el RSC del destino una y otra vez y nunca lo aplica, y
+ * la página se queda en la anterior hasta el timeout—. La ventana de carrera es la hidratación de la
+ * página recién cargada (su prefetch de enlaces aún en vuelo) y, en móvil, el toque y el clic como un
+ * solo gesto. Sin prefetch en vuelo la navegación va bajo demanda (medido < 100 ms de servidor) y el
+ * esqueleto cubre cualquier espera (`EstadoEnlace`). Se mantiene el objetivo de ADR-045 (shell
+ * persistente, esqueleto inmediato, ≤ 8 consultas y ≤ 500 ms), adaptando el medio (ver PR).
  */
 export const LinkMenu: LinkComponent = ({ href, className, children, ...rest }) => {
-  const [intencion, setIntencion] = useState(false);
   return (
-    <Link
-      href={href}
-      className={className}
-      {...(intencion ? { prefetch: true } : {})}
-      onMouseEnter={() => setIntencion(true)}
-      onTouchStart={() => setIntencion(true)}
-      onFocus={() => setIntencion(true)}
-      {...rest}
-    >
+    <Link href={href} className={className} prefetch={false} {...rest}>
       {children}
       <EstadoEnlace />
     </Link>
