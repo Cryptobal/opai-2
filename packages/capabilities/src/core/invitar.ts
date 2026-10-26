@@ -1,5 +1,5 @@
 import type { Rol } from "@opai/domain";
-import type { TenantDb } from "@opai/db";
+import type { TenantTx } from "@opai/db";
 
 import { conflicto } from "../errores";
 import type { Servicios } from "../types";
@@ -23,7 +23,7 @@ type TenantInvita = { id: string; slug: string; nombre: string };
  * En vista previa no escribe ni envía.
  */
 export async function crearInvitacion(
-  db: TenantDb,
+  db: TenantTx,
   tenant: TenantInvita,
   datos: DatosInvitacion,
   servicios: Servicios,
@@ -80,7 +80,7 @@ export async function crearInvitacion(
 }
 
 /** Busca una invitación por su token (hash) dentro del tenant. */
-export async function invitacionPorToken(db: TenantDb, token: string) {
+export async function invitacionPorToken(db: TenantTx, token: string) {
   return db.invitation.findUnique({ where: { tokenHash: sha256(token) } });
 }
 
