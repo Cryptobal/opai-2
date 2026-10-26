@@ -1,6 +1,6 @@
 import { prismaAdapter } from "@better-auth/prisma-adapter";
 import { betterAuth } from "better-auth";
-import { APIError } from "better-auth/api";
+import { APIError, createAuthMiddleware } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
 
 import { clienteAuth } from "@opai/db";
@@ -8,6 +8,13 @@ import { COMUNICABLES_NUCLEO, renderizarCorreo } from "@opai/domain";
 import { mailerDelEntorno } from "@opai/integrations/email";
 
 import { bloqueoDeIngreso, mensajeBloqueo } from "./acceso";
+import {
+  datosDeContexto,
+  MENSAJE_PAUSA,
+  registrarRestablecimiento,
+  reservarIntento,
+  resolverIntento,
+} from "./bloqueo-login";
 import {
   camposUsuario,
   LARGO_MINIMO_PASSWORD,
@@ -40,6 +47,15 @@ export const auth = betterAuth({
     minPasswordLength: LARGO_MINIMO_PASSWORD,
     resetPasswordTokenExpiresIn: VIGENCIA_RECUPERACION_SEGUNDOS,
     revokeSessionsOnPasswordReset: true,
+    // Un restablecimiento exitoso reinicia el contador de bloqueo del correo (B1, §16.3): Better Auth
+    // ya validó el enlace. Best-effort: anotar no debe romper el flujo ni filtrar datos (Ley 21.719).
+    async onPasswordReset({ user }: { user: { email: string } }) {
+      try {
+        await registrarRestablecimiento(user.email);
+      } catch {
+        console.warn("[bloqueo-login] no se pudo reiniciar el contador tras el restablecimiento");
+      }
+    },
     async sendResetPassword({ user, url }) {
       // Plantilla transaccional del núcleo (ADR-020) con la marca de OPAI: no hay tenant aún.
       const e = COMUNICABLES_NUCLEO.find((x) => x.evento === "core.usuario.recuperacion");
@@ -84,6 +100,36 @@ export const auth = betterAuth({
         },
       },
     },
+  },
+  // Bloqueo de login persistido por cuenta (B1, Brief 07c). Se engancha en `sign-in/email` sobre la
+  // capa de Better Auth, no solo en la Server Action, para que cubra también el POST directo a
+  // `/api/auth/.../sign-in/email` y no sea evitable saltándose la UI. El límite en memoria de la
+  // librería y el de `apps/web/lib/rate-limit.ts` siguen como primera barrera barata.
+  hooks: {
+    before: createAuthMiddleware(async (ctx) => {
+      if (ctx.path !== "/sign-in/email") return;
+      const datos = datosDeContexto(ctx);
+      // Cuenta e inserta el provisional bajo el advisory lock; si ya superó el límite, pausa. Al
+      // lanzar aquí, Better Auth no corre el `after`, así que la pausa no deja un provisional colgado.
+      if (datos && (await reservarIntento(datos))) {
+        throw new APIError("TOO_MANY_REQUESTS", { code: "ACCOUNT_LOCKED", message: MENSAJE_PAUSA });
+      }
+    }),
+    after: createAuthMiddleware(async (ctx) => {
+      if (ctx.path !== "/sign-in/email") return;
+      const datos = datosDeContexto(ctx);
+      if (!datos) return;
+      const r = ctx.context.returned;
+      const codigo =
+        r instanceof APIError ? ((r.body as { code?: string } | undefined)?.code ?? "ERROR") : null;
+      try {
+        await resolverIntento(datos, codigo);
+      } catch {
+        // Resolver el provisional es best-effort: un fallo al marcarlo no debe romper el login ni
+        // filtrar datos (sin imprimir valores, Ley 21.719); el provisional caduca con la ventana.
+        console.warn("[bloqueo-login] no se pudo resolver el intento de login");
+      }
+    }),
   },
   plugins: [nextCookies()],
 });
