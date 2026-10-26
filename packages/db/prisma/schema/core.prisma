@@ -110,8 +110,11 @@ model DpaAceptacion {
   aceptadoPorId String?  @map("aceptado_por_id") @db.Uuid
   /// Nombre y correo del aceptante al momento de aceptar, como prueba legible.
   aceptadoPor   String?  @map("aceptado_por")
-  /// Referencia opcional al documento del texto de esa versión del DPA.
+  /// Referencia estable al texto aceptado: `<version>:sha256:<hash>` del texto vigente al aceptar.
   documentoRef  String?  @map("documento_ref")
+  /// Texto exacto del DPA aceptado, guardado por fila. Como la tabla es append-only (sin UPDATE ni
+  /// DELETE para opai_app), queda recuperable e inmutable: prueba a qué texto aceptó el tenant.
+  documentoTexto String? @map("documento_texto")
   createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
 
   tenant Tenant @relation(fields: [tenantId], references: [id])
