@@ -12,10 +12,11 @@ function Marco({
   descripcion,
   accion,
   className,
-}: EstadoProps & { icono: ReactNode }) {
+  rol = "status",
+}: EstadoProps & { icono: ReactNode; rol?: "status" | "alert" }) {
   return (
     <div
-      role="status"
+      role={rol}
       className={cn(
         "flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border px-6 py-12 text-center",
         className,
@@ -38,7 +39,9 @@ export function Empty(props: EstadoProps) {
 
 /** Error: qué pasó, qué hacer, reintentar. */
 export function ErrorState(props: EstadoProps) {
-  return <Marco icono={<AlertTriangle className="size-6 text-danger-fg" />} {...props} />;
+  return (
+    <Marco rol="alert" icono={<AlertTriangle className="size-6 text-danger-fg" />} {...props} />
+  );
 }
 
 /** Sin permisos: explicación breve y a quién pedir acceso. */
