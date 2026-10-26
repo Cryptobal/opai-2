@@ -13,7 +13,9 @@ export async function GET(req: Request): Promise<Response> {
   let resultados: Record<string, unknown> = {};
   let errorTenants = false;
   try {
-    resultados = await porTenant((t) => programarPeriodicos(contextoSistema(t.id), hoyEn(t.timezone)));
+    resultados = await porTenant((t) =>
+      programarPeriodicos(contextoSistema(t.id), hoyEn(t.timezone)),
+    );
   } catch {
     errorTenants = true;
     console.error("[cron programador] falló la programación por tenant");

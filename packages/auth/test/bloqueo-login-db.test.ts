@@ -4,14 +4,15 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import type { Auth } from "../src/auth";
 import { type Entorno, prepararEntorno, urlPropietario } from "../../db/test/entorno";
 
 const PASSWORD = "Clave-de-prueba-123";
 
 describe.skipIf(!urlPropietario)("bloqueo de login con Better Auth real (B1)", () => {
   let e: Entorno;
-  let auth: typeof import("../src/auth").auth;
-  let hashCorreo: typeof import("../src/bloqueo-login").hashCorreo;
+  let auth: Auth;
+  let hashCorreo: (correo: string) => string;
   const correos: string[] = [];
 
   async function crearUsuario(): Promise<string> {

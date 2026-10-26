@@ -40,7 +40,8 @@ describe.skipIf(!urlPropietario)("bloqueo de login por conteo (B1)", () => {
   afterAll(async () => {
     await instanciaB?.$disconnect();
     if (e) {
-      if (hashes.length) await e.admin.loginIntento.deleteMany({ where: { correoHash: { in: hashes } } });
+      if (hashes.length)
+        await e.admin.loginIntento.deleteMany({ where: { correoHash: { in: hashes } } });
       await e.cerrar();
     }
   });
@@ -63,7 +64,9 @@ describe.skipIf(!urlPropietario)("bloqueo de login por conteo (B1)", () => {
         data: { ...fallo(correoHash, "198.51.100.7"), userId: null },
       });
     }
-    const n = await instanciaB.loginIntento.count({ where: { correoHash, motivo: "credenciales" } });
+    const n = await instanciaB.loginIntento.count({
+      where: { correoHash, motivo: "credenciales" },
+    });
     expect(n).toBe(4);
   });
 
@@ -79,7 +82,9 @@ describe.skipIf(!urlPropietario)("bloqueo de login por conteo (B1)", () => {
     );
     // Cada fallo es un INSERT independiente: con un upsert `fallos = fallos + 1` leído-modificado
     // dos escrituras simultáneas se pisarían; anexando y contando no se pierde ninguno.
-    const n = await instanciaB.loginIntento.count({ where: { correoHash, motivo: "credenciales" } });
+    const n = await instanciaB.loginIntento.count({
+      where: { correoHash, motivo: "credenciales" },
+    });
     expect(n).toBe(N);
   });
 
@@ -94,7 +99,13 @@ describe.skipIf(!urlPropietario)("bloqueo de login por conteo (B1)", () => {
       });
     }
     await e.appSinTenant.loginIntento.create({
-      data: { correoHash, exito: true, motivo: "reset", ip: null, createdAt: new Date(base - 60_000) },
+      data: {
+        correoHash,
+        exito: true,
+        motivo: "reset",
+        ip: null,
+        createdAt: new Date(base - 60_000),
+      },
     });
     const ultimo = await instanciaB.loginIntento.findFirst({
       where: { correoHash, exito: true },
@@ -102,7 +113,11 @@ describe.skipIf(!urlPropietario)("bloqueo de login por conteo (B1)", () => {
       select: { createdAt: true },
     });
     const n = await instanciaB.loginIntento.count({
-      where: { correoHash, motivo: { in: ["pendiente", "credenciales"] }, createdAt: { gt: ultimo!.createdAt } },
+      where: {
+        correoHash,
+        motivo: { in: ["pendiente", "credenciales"] },
+        createdAt: { gt: ultimo!.createdAt },
+      },
     });
     expect(n).toBe(0);
   });
@@ -112,7 +127,9 @@ describe.skipIf(!urlPropietario)("bloqueo de login por conteo (B1)", () => {
     // ese correo dentro de la retención (30 días). Otra IP, sin ese éxito, no queda exenta.
     const correoHash = nuevoHash();
     const ipBuena = "203.0.113.50";
-    await e.appSinTenant.loginIntento.create({ data: { correoHash, exito: true, motivo: "ok", ip: ipBuena } });
+    await e.appSinTenant.loginIntento.create({
+      data: { correoHash, exito: true, motivo: "ok", ip: ipBuena },
+    });
     const exencion = new Date(Date.now() - 30 * 24 * 60 * 60_000);
     const exenta = await instanciaB.loginIntento.findFirst({
       where: { correoHash, ip: ipBuena, exito: true, motivo: "ok", createdAt: { gt: exencion } },
@@ -120,12 +137,20 @@ describe.skipIf(!urlPropietario)("bloqueo de login por conteo (B1)", () => {
     });
     expect(exenta).not.toBeNull();
     const otra = await instanciaB.loginIntento.findFirst({
-      where: { correoHash, ip: "203.0.113.51", exito: true, motivo: "ok", createdAt: { gt: exencion } },
+      where: {
+        correoHash,
+        ip: "203.0.113.51",
+        exito: true,
+        motivo: "ok",
+        createdAt: { gt: exencion },
+      },
       select: { id: true },
     });
     expect(otra).toBeNull();
     // Un éxito que no es ingreso (restablecimiento, sin IP) no exime a quien llega sin IP.
-    await e.appSinTenant.loginIntento.create({ data: { correoHash, exito: true, motivo: "reset", ip: null } });
+    await e.appSinTenant.loginIntento.create({
+      data: { correoHash, exito: true, motivo: "reset", ip: null },
+    });
     const sinIp = await instanciaB.loginIntento.findFirst({
       where: { correoHash, ip: null, exito: true, motivo: "ok", createdAt: { gt: exencion } },
       select: { id: true },
@@ -165,7 +190,9 @@ describe.skipIf(!urlPropietario)("bloqueo de login por conteo (B1)", () => {
     expect(await marcar(b!.id, false, "credenciales")).toBe(false);
     expect(await marcar(randomUUID(), false, "credenciales")).toBe(false);
     expect(await marcar(a!.id, false, "credenciales")).toBe(true);
-    expect(await instanciaB.loginIntento.count({ where: { correoHash, motivo: "pendiente" } })).toBe(0);
+    expect(
+      await instanciaB.loginIntento.count({ where: { correoHash, motivo: "pendiente" } }),
+    ).toBe(0);
   });
 
   it("los índices del bloqueo existen (ip y éxitos parcial)", async () => {
@@ -185,7 +212,10 @@ describe.skipIf(!urlPropietario)("bloqueo de login por conteo (B1)", () => {
     await e.appSinTenant.loginIntento.create({ data: fallo(correoHash, "192.0.2.10", reciente) });
     for (const dias of [0, -5, null]) {
       await e.appSinTenant.$queryRaw`SELECT "core"."purgar_login_intentos"(${dias}::int)`;
-      expect(await instanciaB.loginIntento.count({ where: { correoHash } }), `retención ${dias}`).toBe(1);
+      expect(
+        await instanciaB.loginIntento.count({ where: { correoHash } }),
+        `retención ${dias}`,
+      ).toBe(1);
     }
   });
 
