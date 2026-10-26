@@ -218,7 +218,9 @@
   height: 1.25rem;
   border: 1px solid var(--ds-border-control);
   background: var(--ds-surface);
-  transition: background-color 150ms, border-color 150ms;
+  transition:
+    background-color 150ms,
+    border-color 150ms;
   :where(.group[data-state="checked"]) > & {
     border-color: var(--ds-accent);
   }

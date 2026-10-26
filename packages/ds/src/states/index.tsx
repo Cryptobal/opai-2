@@ -40,7 +40,9 @@ export function Empty(props: EstadoProps) {
 /** Error: qué pasó, qué hacer, reintentar. */
 export function ErrorState(props: EstadoProps) {
   // role="alert": el lector de pantalla anuncia el error al aparecer (vacío y sin permisos son status).
-  return <Marco rol="alert" icono={<AlertTriangle className="size-6 text-danger-fg" />} {...props} />;
+  return (
+    <Marco rol="alert" icono={<AlertTriangle className="size-6 text-danger-fg" />} {...props} />
+  );
 }
 
 /** Sin permisos: explicación breve y a quién pedir acceso. */

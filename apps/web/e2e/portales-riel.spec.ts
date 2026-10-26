@@ -35,9 +35,10 @@ test.describe("portales en escritorio", () => {
       ];
       for (const { ruta, titulo } of paginas) {
         await page.goto(ruta);
-        const riel = page.getByRole("navigation", { name: "Principal" });
+        // ADR-050: la barra lateral nombra el portal en la tarjeta del selector, bajo «OPAI».
+        const riel = page.getByRole("navigation", { name: "Principal" }).filter({ visible: true });
         await expect(riel.getByText("OPAI", { exact: true })).toBeVisible();
-        await expect(riel.getByText(p.nombre, { exact: true })).toBeVisible();
+        await expect(riel.getByText(p.nombre, { exact: true }).first()).toBeVisible();
         await expect(page).toHaveTitle(titulo);
       }
     }

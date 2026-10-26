@@ -45,7 +45,12 @@ function contraste(a: string, b: string): number {
 }
 
 const MODOS = { claro: raiz, oscuro: oscuroForzado } as const;
-const NUEVOS = ["--ds-border-control", "--ds-destructive-bg", "--ds-destructive-fg", "--ds-shimmer"];
+const NUEVOS = [
+  "--ds-border-control",
+  "--ds-destructive-bg",
+  "--ds-destructive-fg",
+  "--ds-shimmer",
+];
 
 describe("tokens del DS", () => {
   it("el oscuro del sistema y el oscuro forzado definen los mismos valores", () => {
