@@ -1,6 +1,9 @@
-// B1 (Brief 07c): el estado de bloqueo de login y el registro de intentos viven en `core`, sin
-// tenant_id ni RLS (como `users`), así que sobreviven a un reinicio y se comparten entre instancias.
-// Esta prueba usa dos conexiones `opai_app` distintas contra la misma base (dos «instancias»).
+// B1 (Brief 07c): el bloqueo de login se decide contando los intentos de contraseña fallidos de
+// `core.login_intentos` (append-only, sin RLS como `users`), no con un contador mutable. Esta prueba
+// usa dos conexiones `opai_app` distintas contra la misma base (dos «instancias») para comprobar que
+// anexar y contar no pierde intentos bajo concurrencia, que la tabla es solo-anexar para la
+// aplicación, que el conteo no depende de que el usuario exista, y que la purga `SECURITY DEFINER`
+// borra lo viejo aunque `opai_app` no pueda borrar.
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
@@ -9,11 +12,22 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/generated/prisma/client";
 import { type Entorno, prepararEntorno, urlPropietario } from "./entorno";
 
-describe.skipIf(!urlPropietario)("bloqueo de login persistido (B1)", () => {
+describe.skipIf(!urlPropietario)("bloqueo de login por conteo (B1)", () => {
   let e: Entorno;
   let instanciaB: PrismaClient;
-  let userId = "";
-  const sufijo = randomUUID().slice(0, 8);
+  const hashes: string[] = [];
+  const nuevoHash = (): string => {
+    const h = randomUUID().replace(/-/g, "");
+    hashes.push(h);
+    return h;
+  };
+  const fallo = (correoHash: string, ip: string, createdAt?: Date) => ({
+    correoHash,
+    exito: false,
+    motivo: "credenciales",
+    ip,
+    ...(createdAt ? { createdAt } : {}),
+  });
 
   beforeAll(async () => {
     e = await prepararEntorno();
@@ -21,52 +35,62 @@ describe.skipIf(!urlPropietario)("bloqueo de login persistido (B1)", () => {
     instanciaB = new PrismaClient({
       adapter: new PrismaPg({ connectionString: process.env["DATABASE_URL"] as string }),
     });
-    userId = (await e.admin.user.create({ data: { name: "Fulano", email: `fb-${sufijo}@test.opai.cl` } }))
-      .id;
   });
 
   afterAll(async () => {
     await instanciaB?.$disconnect();
     if (e) {
-      await e.admin.loginIntento.deleteMany({ where: { userId } });
-      await e.admin.user.deleteMany({ where: { id: userId } });
+      if (hashes.length) await e.admin.loginIntento.deleteMany({ where: { correoHash: { in: hashes } } });
       await e.cerrar();
     }
   });
 
-  it("sin RLS: la aplicación lee y escribe el bloqueo aunque no haya tenant fijado", async () => {
-    const hasta = new Date(Date.now() + 15 * 60_000);
-    // Instancia A escribe el bloqueo (como lo haría el hook de `@opai/auth`).
-    await e.appSinTenant.loginBloqueo.create({
-      data: { userId, fallos: 5, bloqueadoHasta: hasta, ultimoIntento: new Date() },
-    });
-    // Instancia B, conexión aparte, ve exactamente el mismo estado persistido.
-    const visto = await instanciaB.loginBloqueo.findUnique({ where: { userId } });
-    expect(visto?.fallos).toBe(5);
-    expect(visto?.bloqueadoHasta?.getTime()).toBe(hasta.getTime());
+  it("solo-anexar: opai_app inserta y lee, pero no actualiza ni borra", async () => {
+    const correoHash = nuevoHash();
+    await e.appSinTenant.loginIntento.create({ data: fallo(correoHash, "203.0.113.1") });
+    await expect(
+      e.appSinTenant.loginIntento.updateMany({ where: { correoHash }, data: { motivo: "x" } }),
+    ).rejects.toThrow();
+    await expect(
+      e.appSinTenant.loginIntento.deleteMany({ where: { correoHash } }),
+    ).rejects.toThrow();
   });
 
-  it("una actualización en una instancia la ve la otra (estado compartido, no en memoria)", async () => {
-    await e.appSinTenant.loginBloqueo.update({
-      where: { userId },
-      data: { fallos: 0, bloqueadoHasta: null },
-    });
-    const visto = await instanciaB.loginBloqueo.findUnique({ where: { userId } });
-    expect(visto?.fallos).toBe(0);
-    expect(visto?.bloqueadoHasta).toBeNull();
-  });
-
-  it("los intentos son append-only y se consultan por hash del correo, sin dato personal en claro", async () => {
-    const correoHash = randomUUID().replace(/-/g, "");
-    for (const exito of [false, false, true]) {
+  it("cuenta por el hash del correo aunque no exista el usuario (user_id null)", async () => {
+    const correoHash = nuevoHash();
+    for (let i = 0; i < 4; i++) {
       await e.appSinTenant.loginIntento.create({
-        data: { correoHash, userId, exito, motivo: exito ? "ok" : "credenciales", ip: "203.0.113.1" },
+        data: { ...fallo(correoHash, "198.51.100.7"), userId: null },
       });
     }
-    const filas = await instanciaB.loginIntento.findMany({ where: { correoHash } });
-    expect(filas).toHaveLength(3);
-    expect(filas.filter((f) => f.exito)).toHaveLength(1);
-    // Nunca se guarda el correo en claro: solo su hash.
-    expect(filas.every((f) => f.correoHash === correoHash)).toBe(true);
+    const n = await instanciaB.loginIntento.count({ where: { correoHash, motivo: "credenciales" } });
+    expect(n).toBe(4);
+  });
+
+  it("dos conexiones anexan fallos en paralelo sin perder ninguno (sin carrera de contador)", async () => {
+    const correoHash = nuevoHash();
+    const N = 10;
+    await Promise.all(
+      Array.from({ length: N }, (_, i) =>
+        (i % 2 === 0 ? e.appSinTenant : instanciaB).loginIntento.create({
+          data: fallo(correoHash, `203.0.113.${i}`),
+        }),
+      ),
+    );
+    // Cada fallo es un INSERT independiente: con un upsert `fallos = fallos + 1` leído-modificado
+    // dos escrituras simultáneas se pisarían; anexando y contando no se pierde ninguno.
+    const n = await instanciaB.loginIntento.count({ where: { correoHash, motivo: "credenciales" } });
+    expect(n).toBe(N);
+  });
+
+  it("la purga SECURITY DEFINER borra lo viejo aunque opai_app no pueda borrar", async () => {
+    const correoHash = nuevoHash();
+    const viejo = new Date(Date.now() - 40 * 24 * 60 * 60_000);
+    await e.appSinTenant.loginIntento.create({ data: fallo(correoHash, "192.0.2.9", viejo) });
+    expect(await instanciaB.loginIntento.count({ where: { correoHash } })).toBe(1);
+    const r = await e.appSinTenant.$queryRaw<{ purgados: number }[]>`
+      SELECT "core"."purgar_login_intentos"(30::int) AS purgados`;
+    expect(Number(r[0]?.purgados ?? 0)).toBeGreaterThanOrEqual(1);
+    expect(await instanciaB.loginIntento.count({ where: { correoHash } })).toBe(0);
   });
 });

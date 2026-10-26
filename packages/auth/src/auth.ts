@@ -105,7 +105,12 @@ export const auth = betterAuth({
       const r = ctx.context.returned;
       const codigo =
         r instanceof APIError ? ((r.body as { code?: string } | undefined)?.code ?? "ERROR") : null;
-      await registrarResultado(datos, codigo);
+      try {
+        await registrarResultado(datos, codigo);
+      } catch {
+        // El registro del intento es auditoría best-effort: un fallo al anotarlo no debe romper el
+        // login ni filtrar datos, así que se traga (sin imprimir valores, Ley 21.719).
+      }
     }),
   },
   plugins: [nextCookies()],

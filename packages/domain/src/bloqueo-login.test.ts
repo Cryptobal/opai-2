@@ -1,60 +1,42 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  cuentaBloqueada,
-  esperaBloqueoMs,
-  type EstadoBloqueoLogin,
-  LOGIN_MAX_FALLOS,
-  LOGIN_PAUSA_MINUTOS,
-  trasExitoLogin,
-  trasFalloLogin,
+  type ConteosLogin,
+  LOGIN_LIMITE_CORREO,
+  LOGIN_LIMITE_CORREO_IP,
+  LOGIN_LIMITE_IP,
+  LOGIN_VENTANA_MINUTOS,
+  LOGIN_VENTANA_MS,
+  superaLimiteLogin,
 } from "./bloqueo-login";
 
-const T0 = new Date("2026-10-26T12:00:00.000Z");
-const PAUSA_MS = LOGIN_PAUSA_MINUTOS * 60_000;
+const sin: ConteosLogin = { correoIp: 0, correo: 0, ip: 0 };
 
-describe("bloqueo de login (B1)", () => {
-  it("un fallo bajo el umbral solo suma, no bloquea", () => {
-    const e = trasFalloLogin(null, T0);
-    expect(e.fallos).toBe(1);
-    expect(e.bloqueadoHasta).toBeNull();
-    expect(cuentaBloqueada(e, T0)).toBe(false);
+describe("bloqueo de login por conteo de fallos (B1)", () => {
+  it("la ventana en ms deriva de los minutos", () => {
+    expect(LOGIN_VENTANA_MS).toBe(LOGIN_VENTANA_MINUTOS * 60_000);
   });
 
-  it("al llegar al umbral fija la pausa desde ese instante", () => {
-    let e: EstadoBloqueoLogin | null = null;
-    for (let i = 0; i < LOGIN_MAX_FALLOS; i++) e = trasFalloLogin(e, T0);
-    expect(e?.fallos).toBe(LOGIN_MAX_FALLOS);
-    expect(e?.bloqueadoHasta?.getTime()).toBe(T0.getTime() + PAUSA_MS);
-    expect(cuentaBloqueada(e, T0)).toBe(true);
+  it("sin fallos no pausa", () => {
+    expect(superaLimiteLogin(sin)).toBe(false);
   });
 
-  it("la pausa se levanta sola al vencer", () => {
-    const e: EstadoBloqueoLogin = { fallos: LOGIN_MAX_FALLOS, bloqueadoHasta: new Date(T0.getTime() + PAUSA_MS) };
-    const justoAntes = new Date(T0.getTime() + PAUSA_MS - 1);
-    const justoDespues = new Date(T0.getTime() + PAUSA_MS + 1);
-    expect(cuentaBloqueada(e, justoAntes)).toBe(true);
-    expect(cuentaBloqueada(e, justoDespues)).toBe(false);
+  it("pausa al alcanzar el límite de correo+IP, no antes", () => {
+    expect(superaLimiteLogin({ ...sin, correoIp: LOGIN_LIMITE_CORREO_IP - 1 })).toBe(false);
+    expect(superaLimiteLogin({ ...sin, correoIp: LOGIN_LIMITE_CORREO_IP })).toBe(true);
   });
 
-  it("espera restante en milisegundos (0 si no está pausada)", () => {
-    const e: EstadoBloqueoLogin = { fallos: LOGIN_MAX_FALLOS, bloqueadoHasta: new Date(T0.getTime() + PAUSA_MS) };
-    expect(esperaBloqueoMs(e, T0)).toBe(PAUSA_MS);
-    expect(esperaBloqueoMs(null, T0)).toBe(0);
-    expect(esperaBloqueoMs(e, new Date(T0.getTime() + PAUSA_MS + 1))).toBe(0);
+  it("pausa al alcanzar el tope global por correo aunque cada IP esté por debajo", () => {
+    expect(superaLimiteLogin({ ...sin, correo: LOGIN_LIMITE_CORREO - 1 })).toBe(false);
+    expect(superaLimiteLogin({ ...sin, correo: LOGIN_LIMITE_CORREO })).toBe(true);
   });
 
-  it("tras vencer la pausa, un fallo reinicia la ventana (cuenta como el primero)", () => {
-    const vencido: EstadoBloqueoLogin = { fallos: LOGIN_MAX_FALLOS, bloqueadoHasta: new Date(T0.getTime() - 1) };
-    const e = trasFalloLogin(vencido, T0);
-    expect(e.fallos).toBe(1);
-    expect(e.bloqueadoHasta).toBeNull();
+  it("pausa al alcanzar el tope compartido por IP", () => {
+    expect(superaLimiteLogin({ ...sin, ip: LOGIN_LIMITE_IP - 1 })).toBe(false);
+    expect(superaLimiteLogin({ ...sin, ip: LOGIN_LIMITE_IP })).toBe(true);
   });
 
-  it("un ingreso correcto limpia el contador y la pausa", () => {
-    const e = trasExitoLogin();
-    expect(e.fallos).toBe(0);
-    expect(e.bloqueadoHasta).toBeNull();
-    expect(cuentaBloqueada(e, T0)).toBe(false);
+  it("el tope global por correo es más alto que el de correo+IP", () => {
+    expect(LOGIN_LIMITE_CORREO).toBeGreaterThan(LOGIN_LIMITE_CORREO_IP);
   });
 });

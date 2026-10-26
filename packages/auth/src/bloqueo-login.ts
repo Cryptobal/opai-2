@@ -1,24 +1,36 @@
-import { createHash } from "node:crypto";
+import { createHmac, hkdfSync } from "node:crypto";
 
 import { clienteAuth } from "@opai/db";
-import {
-  cuentaBloqueada,
-  type EstadoBloqueoLogin,
-  trasExitoLogin,
-  trasFalloLogin,
-} from "@opai/domain";
+import { type ConteosLogin, LOGIN_VENTANA_MS, superaLimiteLogin } from "@opai/domain";
 
 /**
- * Bloqueo de login persistido (B1, Brief 07c). Lee y actualiza el estado por identidad y registra
- * cada intento en `core` (sin RLS, como `users`); el cálculo del umbral vive en `@opai/domain`. Se
- * engancha en Better Auth (ver `auth.ts`), así cubre tanto la Server Action como el POST directo a
- * `/api/auth/.../sign-in/email`. Sin datos personales en claro: el correo se guarda en hash.
+ * Bloqueo de login persistido (B1, Brief 07c). Decide la pausa por fuerza bruta **contando los
+ * intentos de contraseña fallidos** que viven en `core.login_intentos` (append-only, sin RLS como
+ * `users`): por correo+IP, por correo (global) y por IP. Contar en vez de mutar un contador evita la
+ * carrera de lectura-escritura (cada fallo es un `INSERT`) y cubre los correos que no existen sin
+ * revelar si existen: se cuenta por el hash del correo, no por el usuario. Se engancha en Better Auth
+ * (ver `auth.ts`), así cubre la Server Action y el POST directo a `/api/auth/.../sign-in/email`.
+ * Sin datos personales en claro: el correo se guarda como HMAC con clave derivada del secreto de auth.
  */
-export const MENSAJE_PAUSA = "Hubo demasiados intentos. Vuelve a intentarlo en 15 minutos.";
+export const MENSAJE_PAUSA = "Hubo demasiados intentos. Vuelve a intentarlo en unos minutos.";
 
-/** Correo normalizado a hash SHA-256 (nunca se guarda ni se registra en claro, Ley 21.719). */
+/** Retención de los intentos (días). Los purga el cron; acota el crecimiento y minimiza datos. */
+export const LOGIN_RETENCION_DIAS = 30;
+
+let claveHashCache: Buffer | null = null;
+
+/** Clave del HMAC derivada (HKDF-SHA256) del secreto de auth ya presente en el entorno. */
+function claveHash(): Buffer {
+  if (claveHashCache) return claveHashCache;
+  const secreto = process.env["BETTER_AUTH_SECRET"];
+  if (!secreto) throw new Error("Falta BETTER_AUTH_SECRET para el hash del correo del bloqueo.");
+  claveHashCache = Buffer.from(hkdfSync("sha256", secreto, "", "opai:bloqueo-login:correo", 32));
+  return claveHashCache;
+}
+
+/** Correo normalizado a HMAC-SHA256 con clave derivada (nunca en claro ni en logs, Ley 21.719). */
 export function hashCorreo(correo: string): string {
-  return createHash("sha256").update(correo.trim().toLowerCase()).digest("hex");
+  return createHmac("sha256", claveHash()).update(correo.trim().toLowerCase()).digest("hex");
 }
 
 export type DatosIntento = { correo: string; ip: string | null; userAgent: string | null };
@@ -31,6 +43,7 @@ export function datosDeContexto(ctx: {
   const correo = typeof ctx.body?.email === "string" ? ctx.body.email : "";
   if (!correo) return null;
   const h = ctx.headers ?? null;
+  // Vercel pone el IP real del cliente como primer valor de `x-forwarded-for`; es el que confiamos.
   const reenviada = h?.get("x-forwarded-for")?.split(",")[0]?.trim();
   return {
     correo,
@@ -39,61 +52,74 @@ export function datosDeContexto(ctx: {
   };
 }
 
-async function usuarioPorCorreo(correo: string): Promise<{ id: string } | null> {
-  return clienteAuth().user.findFirst({
-    where: { email: { equals: correo.trim().toLowerCase(), mode: "insensitive" } },
-    select: { id: true },
+/**
+ * Conteos de fallos de contraseña en la ventana, por dimensión. Nunca busca al usuario: cuenta por
+ * `correoHash`, así hace exactamente las mismas lecturas exista o no el correo (ni siquiera por
+ * tiempo revela si existe). Un ingreso correcto del correo reinicia su contador: solo se cuentan los
+ * fallos posteriores al último éxito. Una IP ausente (`null`) no desactiva los límites: sus intentos
+ * se agrupan por `ip IS NULL`. El contador por IP no se reinicia con el éxito de un correo (la IP es
+ * compartida).
+ */
+async function conteosDe(correoHash: string, ip: string | null, ahora: Date): Promise<ConteosLogin> {
+  const ventana = new Date(ahora.getTime() - LOGIN_VENTANA_MS);
+  const db = clienteAuth();
+  const ultimoExito = await db.loginIntento.findFirst({
+    where: { correoHash, exito: true },
+    orderBy: { createdAt: "desc" },
+    select: { createdAt: true },
   });
-}
-
-async function estadoDe(userId: string): Promise<EstadoBloqueoLogin | null> {
-  const b = await clienteAuth().loginBloqueo.findUnique({ where: { userId } });
-  return b ? { fallos: b.fallos, bloqueadoHasta: b.bloqueadoHasta } : null;
-}
-
-async function guardarEstado(userId: string, estado: EstadoBloqueoLogin, ahora: Date): Promise<void> {
-  const datos = { fallos: estado.fallos, bloqueadoHasta: estado.bloqueadoHasta, ultimoIntento: ahora };
-  await clienteAuth().loginBloqueo.upsert({
-    where: { userId },
-    create: { userId, ...datos },
-    update: datos,
-  });
-}
-
-async function registrar(datos: DatosIntento, userId: string | null, exito: boolean, motivo: string) {
-  await clienteAuth().loginIntento.create({
-    data: { correoHash: hashCorreo(datos.correo), userId, exito, motivo, ip: datos.ip, userAgent: datos.userAgent },
-  });
+  const desdeCorreo = ultimoExito && ultimoExito.createdAt > ventana ? ultimoExito.createdAt : ventana;
+  const fallo = { motivo: "credenciales" } as const;
+  const [correoIp, correo, ipc] = await Promise.all([
+    db.loginIntento.count({ where: { ...fallo, correoHash, ip, createdAt: { gt: desdeCorreo } } }),
+    db.loginIntento.count({ where: { ...fallo, correoHash, createdAt: { gt: desdeCorreo } } }),
+    db.loginIntento.count({ where: { ...fallo, ip, createdAt: { gte: ventana } } }),
+  ]);
+  return { correoIp, correo, ip: ipc };
 }
 
 /**
- * Antes de validar la credencial: ¿la cuenta está pausada ahora? Si lo está, registra el intento y
- * devuelve `true` para que el hook rechace el ingreso (aunque la contraseña sea correcta).
+ * Antes de validar la credencial: ¿el correo (o su IP) superó el límite de fallos en la ventana? Solo
+ * lee; no escribe ni depende de que el usuario exista, para no revelar si el correo existe.
  */
 export async function loginPausado(datos: DatosIntento): Promise<boolean> {
-  const usuario = await usuarioPorCorreo(datos.correo);
-  if (!usuario) return false;
-  if (!cuentaBloqueada(await estadoDe(usuario.id), new Date())) return false;
-  await registrar(datos, usuario.id, false, "bloqueada");
-  return true;
+  return superaLimiteLogin(await conteosDe(hashCorreo(datos.correo), datos.ip, new Date()));
 }
 
 /**
- * Después del intento: `codigo === null` es ingreso correcto (limpia el contador); el código de
- * credenciales inválidas suma un fallo y, al umbral, fija la pausa; otros desenlaces solo se registran.
+ * Después del intento: registra el resultado como un hecho append-only. `codigo === null` es ingreso
+ * correcto (reinicia el conteo del correo); `INVALID_EMAIL_OR_PASSWORD` cuenta como fallo de
+ * contraseña (motivo `credenciales`, el único que suma al bloqueo); otros desenlaces solo se anotan.
  */
 export async function registrarResultado(datos: DatosIntento, codigo: string | null): Promise<void> {
-  const usuario = await usuarioPorCorreo(datos.correo);
-  const ahora = new Date();
-  if (codigo === null) {
-    if (usuario) await guardarEstado(usuario.id, trasExitoLogin(), ahora);
-    await registrar(datos, usuario?.id ?? null, true, "ok");
-    return;
-  }
-  if (codigo === "INVALID_EMAIL_OR_PASSWORD") {
-    if (usuario) await guardarEstado(usuario.id, trasFalloLogin(await estadoDe(usuario.id), ahora), ahora);
-    await registrar(datos, usuario?.id ?? null, false, "credenciales");
-    return;
-  }
-  await registrar(datos, usuario?.id ?? null, false, codigo === "ACCOUNT_SUSPENDED" ? "suspendida" : codigo.toLowerCase());
+  const exito = codigo === null;
+  const motivo = exito
+    ? "ok"
+    : codigo === "INVALID_EMAIL_OR_PASSWORD"
+      ? "credenciales"
+      : codigo === "ACCOUNT_SUSPENDED"
+        ? "suspendida"
+        : codigo === "ACCOUNT_LOCKED"
+          ? "bloqueada"
+          : codigo.toLowerCase();
+  // No se resuelve el usuario aquí: buscarlo por correo (case-insensitive) en cada intento sería un
+  // oráculo de enumeración por tiempo. El intento se indexa por `correoHash` (HMAC), que basta para
+  // el bloqueo y para la auditoría de acceso (los intentos de un usuario conocido se hallan por hash).
+  await clienteAuth().loginIntento.create({
+    data: {
+      correoHash: hashCorreo(datos.correo),
+      exito,
+      motivo,
+      ip: datos.ip,
+      userAgent: datos.userAgent,
+    },
+  });
+}
+
+/** Purga los intentos más viejos que la retención. La hace una función `SECURITY DEFINER` porque
+ * `opai_app` solo puede anexar (REVOKE UPDATE/DELETE). La llama el cron diario. */
+export async function purgarIntentosLogin(retencionDias = LOGIN_RETENCION_DIAS): Promise<number> {
+  const filas = await clienteAuth().$queryRaw<{ purgados: number }[]>`
+    SELECT "core"."purgar_login_intentos"(${retencionDias}::int) AS purgados`;
+  return Number(filas[0]?.purgados ?? 0);
 }

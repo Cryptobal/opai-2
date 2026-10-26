@@ -13,38 +13,23 @@ model User {
   createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  sessions     Session[]
-  accounts     Account[]
-  memberships  Membership[]
-  apiKeys      ApiKey[]
-  loginBloqueo LoginBloqueo?
+  sessions    Session[]
+  accounts    Account[]
+  memberships Membership[]
+  apiKeys     ApiKey[]
 
   @@map("users")
   @@schema("core")
 }
 
-// Protección contra fuerza bruta persistida por identidad (B1, Brief 07c; ADR-015). Cuelga de la
-// identidad global `users`: sin tenant_id ni RLS, como `users`/`sessions`. Solo la gestiona
-// `@opai/auth` en el flujo de login; no es una tabla de negocio. Umbrales fijos en código (§16.3).
-model LoginBloqueo {
-  userId         String    @id @map("user_id") @db.Uuid
-  /// Fallos de contraseña consecutivos desde el último ingreso correcto o desde que venció la pausa.
-  fallos         Int       @default(0)
-  /// Mientras sea futura, el ingreso está pausado aunque la contraseña sea correcta.
-  bloqueadoHasta DateTime? @map("bloqueado_hasta") @db.Timestamptz(6)
-  ultimoIntento  DateTime? @map("ultimo_intento") @db.Timestamptz(6)
-  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("login_bloqueos")
-  @@schema("core")
-}
-
-// Registro append-only de cada intento de login (B1, Brief 07c). Sin datos personales en claro: el
-// correo va en hash, nunca RUT ni PIN (Ley 21.719). IP y user agent quedan para la auditoría de
-// acceso (B8). Sin tenant_id ni RLS (la identidad es global); `user_id` es null si no hay cuenta.
+// Registro append-only de cada intento de login (B1, Brief 07c). Es la única fuente del bloqueo por
+// fuerza bruta: `@opai/auth` cuenta los fallos de contraseña en una ventana (por correo+IP, correo e
+// IP) en vez de mutar un contador, así no hay carrera y cubre los correos que no existen. Sin datos
+// personales en claro: el correo va como HMAC, nunca RUT ni PIN (Ley 21.719). IP y user agent quedan
+// para la auditoría de acceso (B8). Sin tenant_id ni RLS (la identidad es global). `user_id` queda
+// reservado (lo poblará B8); el flujo de login NO lo resuelve, para no abrir un oráculo de
+// enumeración por tiempo —el intento se indexa por `correo_hash` (HMAC)—. Solo-anexar: `opai_app` no
+// actualiza ni borra (REVOKE en la migración); la purga la hace una función `SECURITY DEFINER`.
 model LoginIntento {
   id         String   @id @default(uuid(7)) @db.Uuid
   correoHash String   @map("correo_hash")
