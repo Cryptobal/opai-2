@@ -1,6 +1,6 @@
 # Operaciones — Especificación funcional
 
-**Estado:** **aprobado en Page el 25-oct-2026; mockup pendiente de aprobación** (sección Puestos y guardias / Operaciones I). El resto del módulo (pauta, Operaciones II) está en borrador. · **Fase:** 3, con Operaciones I adelantada para después del cierre del Núcleo (`PLAN-desarrollo.md`) · **Insumos:** Page de Carlos «Puestos y guardias» del 25-oct (fuera del repo), `extraccion/operaciones.md` (esqueleto), `extraccion/maestros.md` §5, ADR-022, ADR-036 (actualización del 25-oct), ADR-048 · **Autor:** Claude · **Tarea:** CAR-10
+**Estado:** **reglas de Puestos y guardias aprobadas en Page el 25-oct-2026 (Page sin enlace en el repo); mockup pendiente de aprobación.** La especificación está en **borrador, pendiente de aprobación de Carlos** (ADR-047): transiciones (§6), permisos (§7) y criterios de aceptación (§13) se completan con el diseño aprobado. El resto del módulo (pauta, Operaciones II) también está en borrador. · **Fase:** 3, con Operaciones I adelantada para después del cierre del Núcleo (`PLAN-desarrollo.md`) · **Insumos:** Page de Carlos «Puestos y guardias» del 25-oct (fuera del repo), `extraccion/operaciones.md` (esqueleto), `extraccion/maestros.md` §5, ADR-022, ADR-036 (actualización del 25-oct), ADR-048 · **Autor:** Claude · **Tarea:** CAR-10
 
 > Lenguaje de negocio, sin código (ADR-047). Este archivo resume las reglas que Carlos cerró en su Page; si difieren, manda la Page y se corrige aquí. El diseño y el brief citan las reglas por número (R1, R2…). Lo que todavía no está cerrado va en §14.
 
@@ -55,7 +55,7 @@ Del puesto (el modelo de datos exacto se define en el Brief 11):
 
 **Reglas ya decididas en ADR que este módulo aplica**
 
-- **R11.** La pauta guarda solo las series (patrón con su fecha de inicio de ciclo) y las excepciones (ausencias, reemplazos, PPC, turnos extra), y calcula el resto; nunca una fila por trabajador por día. Repintar no modifica días pasados ni días con marca (ADR-048, punto 6). El día de hoy se trata como pasado si ya tiene marca o cobertura confirmada (ADR-048, pregunta 4, decisión por omisión del 25-oct).
+- **R11.** La pauta guarda solo las series (patrón con su fecha de inicio de ciclo) y las excepciones (ausencias, reemplazos, PPC, turnos extra), y calcula el resto; nunca una fila por trabajador por día. Repintar no modifica días pasados ni días con marca (ADR-048, punto 6). El día de hoy se trata como pasado si ya tiene marca o cobertura confirmada (ADR-048, pregunta 4: decisión por omisión del 25-oct, **pendiente de que Carlos la confirme antes del Brief 11**).
 - **R12.** Un cambio de rol, de capa de sueldo, de monto o de instalación de una persona genera el borrador del anexo de contrato (ADR-036 y ADR-048, punto 5).
 - **R13.** El supervisor ve y opera solo las instalaciones a su cargo; el filtro va en la consulta (ADR-022).
 
