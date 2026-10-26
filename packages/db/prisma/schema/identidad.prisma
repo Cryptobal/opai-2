@@ -13,12 +13,52 @@ model User {
   createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  sessions    Session[]
-  accounts    Account[]
-  memberships Membership[]
-  apiKeys     ApiKey[]
+  sessions     Session[]
+  accounts     Account[]
+  memberships  Membership[]
+  apiKeys      ApiKey[]
+  loginBloqueo LoginBloqueo?
 
   @@map("users")
+  @@schema("core")
+}
+
+// Protección contra fuerza bruta persistida por identidad (B1, Brief 07c; ADR-015). Cuelga de la
+// identidad global `users`: sin tenant_id ni RLS, como `users`/`sessions`. Solo la gestiona
+// `@opai/auth` en el flujo de login; no es una tabla de negocio. Umbrales fijos en código (§16.3).
+model LoginBloqueo {
+  userId         String    @id @map("user_id") @db.Uuid
+  /// Fallos de contraseña consecutivos desde el último ingreso correcto o desde que venció la pausa.
+  fallos         Int       @default(0)
+  /// Mientras sea futura, el ingreso está pausado aunque la contraseña sea correcta.
+  bloqueadoHasta DateTime? @map("bloqueado_hasta") @db.Timestamptz(6)
+  ultimoIntento  DateTime? @map("ultimo_intento") @db.Timestamptz(6)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("login_bloqueos")
+  @@schema("core")
+}
+
+// Registro append-only de cada intento de login (B1, Brief 07c). Sin datos personales en claro: el
+// correo va en hash, nunca RUT ni PIN (Ley 21.719). IP y user agent quedan para la auditoría de
+// acceso (B8). Sin tenant_id ni RLS (la identidad es global); `user_id` es null si no hay cuenta.
+model LoginIntento {
+  id         String   @id @default(uuid(7)) @db.Uuid
+  correoHash String   @map("correo_hash")
+  userId     String?  @map("user_id") @db.Uuid
+  exito      Boolean
+  /// "ok" | "credenciales" | "bloqueada" | "suspendida" | otro código de Better Auth.
+  motivo     String?
+  ip         String?
+  userAgent  String?  @map("user_agent")
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([correoHash, createdAt])
+  @@index([userId, createdAt])
+  @@map("login_intentos")
   @@schema("core")
 }
 
