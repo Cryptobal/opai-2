@@ -58,7 +58,7 @@ export function CampoSecreto({ id, guardado, onGuardar, placeholder, pendiente, 
             placeholder={placeholder ?? "Pega la clave"}
             aria-label={a["aria-label"]}
             className={cn(
-              "t-mono h-11 w-full rounded-md border border-border-strong bg-surface pr-11 pl-3 text-fg outline-none",
+              "t-mono h-11 w-full rounded-md border border-border-control bg-surface pr-11 pl-3 text-fg outline-none",
               "focus-visible:border-accent focus-visible:shadow-[0_0_0_3px_var(--ds-accent-muted)]",
             )}
           />

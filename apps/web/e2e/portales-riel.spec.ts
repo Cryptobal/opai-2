@@ -1,7 +1,7 @@
 import { expect, test } from "@playwright/test";
 
-// Usuario selector (ERP/Supervisor): sin acceso a Trabajador ni Cliente.
-// En CI falla si falta la contraseña; en local se omite.
+// Usuario selector (ERP/Supervisor): sin acceso a Trabajador ni Cliente. El usuario «con acceso» es
+// el de plataforma que el job e2e siembra con SEED_OWNER_PASSWORD. En CI falla si falta la contraseña.
 const email = process.env["E2E_SELECTOR_EMAIL"] ?? "e2e-selector@opai.cl";
 const sinEmpresaEmail = process.env["E2E_SIN_EMPRESA_EMAIL"] ?? "e2e-sin-empresa@opai.cl";
 const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
@@ -19,7 +19,9 @@ test.describe("acceso a portales", () => {
   });
 
   for (const autorizado of [false, true]) {
-    test(`${autorizado ? "con" : "sin"} acceso: navegación y título del 404`, async ({ page }) => {
+    test(`${autorizado ? "con" : "sin"} acceso: shell, nombre del portal y título del 404`, async ({
+      page,
+    }) => {
       test.setTimeout(180_000);
       await page.goto("/login");
       await page
@@ -41,12 +43,16 @@ test.describe("acceso a portales", () => {
         for (const { ruta, titulo } of paginas) {
           await page.goto(ruta);
           const nav = page.getByRole("navigation", { name: "Principal" });
+          await expect(nav.first()).toBeVisible();
+          // El selector nombra el portal actual, también sin acceso (ADR-050 + `conPortalActual`, #54).
+          await expect(
+            page.getByRole("button", { name: new RegExp(`portal ${p.nombre}`) }).first(),
+          ).toBeVisible();
           if (autorizado) {
-            await expect(nav).toHaveCount(1);
+            await expect(nav.getByRole("link").first()).toBeVisible();
           } else {
-            // H1: sin acceso el shell se monta igual (una barra de navegación visible), con el aviso
-            // dentro del marco pero sin ningún ítem de navegación del portal ajeno.
-            await expect(nav.first()).toBeVisible();
+            // H1: sin acceso el shell se monta igual, con el aviso dentro del marco y sin ningún ítem
+            // de navegación del portal ajeno.
             await expect(
               page.getByText("No tienes acceso a este portal en la empresa actual."),
             ).toBeVisible();

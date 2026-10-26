@@ -55,6 +55,16 @@ export type Servicios = {
   urlBase: string;
 };
 
+/**
+ * Alcance por filas del actor (ADR-022, Brief 07c B3). Presente solo cuando su rol acota por filas
+ * (supervisor); `null` = ve todo el tenant (owner, admin, gerente). El filtro se aplica en la
+ * consulta de cada capacidad, nunca en la UI. Una API key hereda el alcance de su usuario (ADR-033).
+ */
+export type Alcance = {
+  /** Instalaciones a cargo. Vacío = no ve ninguna entidad (denegar por defecto). */
+  instalaciones: readonly string[];
+};
+
 /** Acceso de plataforma: solo existe si el usuario tiene `platformRole` (ADR-016). */
 export type Plataforma = {
   globales: Globales;
@@ -79,6 +89,8 @@ export interface Contexto {
   scopes: readonly string[] | null;
   /** Principal de la API key (ADR-033). null en sesiones humanas y procesos del sistema. */
   principal: Principal | null;
+  /** Alcance por filas (ADR-022); null = ve todo el tenant. Se resuelve una vez por contexto. */
+  alcance: Alcance | null;
   /** Presupuesto y autonomía de la API key; null en sesiones humanas y procesos del sistema. */
   agente: AgenteContexto | null;
   /** Cliente acotado al tenant. Única vía de acceso a datos para los handlers. */

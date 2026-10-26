@@ -5,7 +5,7 @@ import { epocaDe } from "@/lib/epoca-sesion";
 import { NAV_PLATAFORMA, navegacionErp, navegacionPortal } from "@/lib/navegacion";
 
 import type { DatosShell } from "./marco-shell";
-import { ETIQUETA_ROL, PORTALES, portalesVisibles, subtituloMarcaPortal } from "./portales";
+import { conPortalActual, ETIQUETA_ROL, PORTALES, portalesVisibles } from "./portales";
 
 /** Datos del shell (navegación, portales, empresa y usuario) de una identidad. Sin contadores: la
  * barra lateral ya no los lleva (ADR-045). El contador de la campana lo carga la propia campana. */
@@ -30,10 +30,11 @@ export function datosShell(identidad: Identidad, portal: string): DatosShell {
         : navegacionPortal(inicio, portal);
   return {
     portal,
-    subtituloMarca: subtituloMarcaPortal(portal),
     epoca: epocaDe(usuario.id, actual?.tenantId ?? null),
     nav,
-    portales: visibles,
+    // Sin acceso, el portal actual no está en `visibles`; `conPortalActual` lo antepone para que el
+    // selector lo nombre (ADR-050, #54), aunque la navegación vaya vacía (H1).
+    portales: conPortalActual(visibles, portal),
     tenant:
       portal === "platform" ? { nombre: "OPAI" } : actual ? { nombre: actual.tenant.nombre } : null,
     usuario: {

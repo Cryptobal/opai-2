@@ -36,19 +36,19 @@ Notas:
 
 ## 3. Celular: barra inferior
 
-Cuatro entradas más «Más». La segunda y la tercera dependen del **área principal del rol** (o de la preferencia del usuario); Inicio y Buscar son fijas.
+Hasta cuatro entradas de navegación más «Más». Inicio es fija; las demás dependen del **área principal del rol** (o de la preferencia del usuario). Desde ADR-050 «Buscar» ya no va en la barra inferior —vuelve a la barra superior del teléfono (§10, D7)— y qué entrada toma el lugar que dejó (col. 4) lo decide Carlos; hoy ese lugar queda libre.
 
-| Área principal (por defecto según rol; el usuario la cambia en Preferencias) | 1 | 2 | 3 | 4 | 5 |
+| Área principal (por defecto según rol; el usuario la cambia en Preferencias) | 1 | 2 | 3 | 4 (libre) | 5 |
 |---|---|---|---|---|---|
-| General (owner, admin, gerente) | Inicio | Negocios | Pauta | Buscar | Más |
-| Comercial | Inicio | Negocios | Cuentas | Buscar | Más |
-| Operaciones (supervisor) | Inicio | Pauta | Personas | Buscar | Más |
-| Finanzas (fase 5; solo owner y admin) | Inicio | Flujo de caja | Banca | Buscar | Más |
-| Consulta (viewer) | Inicio | Cuentas | Personas | Buscar | Más |
+| General (owner, admin, gerente) | Inicio | Negocios | Pauta | — | Más |
+| Comercial | Inicio | Negocios | Cuentas | — | Más |
+| Operaciones (supervisor) | Inicio | Pauta | Personas | — | Más |
+| Finanzas (fase 5; solo owner y admin) | Inicio | Flujo de caja | Banca | — | Más |
+| Consulta (viewer) | Inicio | Cuentas | Personas | — | Más |
 
 Los roles base son owner, admin, gerente, supervisor y viewer (ADR-016); «Comercial» y «Finanzas» son áreas principales que el usuario elige, no roles nuevos.
 
-Mientras un área no esté activa, su entrada cae a la siguiente disponible (hoy: Inicio · Cuentas · Personas · Buscar · Más). «Más» abre una hoja con todas las áreas como en la barra lateral, los fijados y Configuración. Cuando la Bandeja tiene algo pendiente, Inicio muestra un **punto** en la barra inferior; el número aparece dentro de la pantalla (§10, D5). En el celular la búsqueda no va en la barra superior: solo está «Buscar» en la barra inferior (§10, D7).
+Mientras un área no esté activa, su entrada cae a la siguiente disponible (hoy: Inicio · Cuentas · Personas · Más; desde ADR-050 «Buscar» ya no ocupa un lugar de la barra inferior, y qué entrada toma el lugar libre lo decide Carlos). «Más» abre una hoja con todas las áreas como en la barra lateral, los fijados y Configuración. Cuando la Bandeja tiene algo pendiente, Inicio muestra un **punto** en la barra inferior; el número aparece dentro de la pantalla (§10, D5). En el celular la búsqueda va en la barra superior (portal, Buscar, campana y avatar), como en el export del DS V2; la D7 quedó reemplazada por ADR-050 (§10).
 
 ## 4. Portales
 
@@ -83,7 +83,7 @@ El bloqueo financiero (ADR-016) oculta el área completa. Los roles personalizad
 | «Guardias» (menú), «Personas» (ruta `/personas`, código, extracción) | **Personas** | El área y la entrada se llaman Personas en toda vertical: incluye guardias, supervisores y administrativos. El vocabulario de la vertical (guardia, operario, colaborador, técnico) se usa en textos operativos («guardias en turno», «asignar guardia»), no en el nombre del área. Aprobado por Carlos el 24-oct |
 | «Maestros» (grupo) | **Clientes** y **Personas** | «Maestros» es lenguaje de sistemas |
 | «Ajustes» (barra inferior) y «Configuración» (barra lateral) | **Configuración** | Un solo nombre; en la barra inferior va dentro de «Más» |
-| «Instalac.», «Aprob.» (abreviaturas) | Sin abreviar | La barra inferior usa íconos con etiquetas cortas reales (Inicio, Negocios, Pauta, Buscar, Más) |
+| «Instalac.», «Aprob.» (abreviaturas) | Sin abreviar | La barra inferior usa íconos con etiquetas cortas reales (Inicio, Negocios, Pauta, Más); «Buscar» ya no va en la barra inferior (ADR-050, §10) |
 | «Instalaciones» | Instalaciones (vocabulario de la vertical: «sitios» en facility si el tenant lo elige) | El vocabulario sí aplica a entidades que cambian de nombre por rubro |
 
 ## 7. Cómo lo declaran los módulos
@@ -122,7 +122,7 @@ Aprobación del diseño: «Confirmo que apruebo el diseño 53e9b74b» — Carlos
 | D4 | Inicio y Bandeja | Inicio es una entrada suelta arriba; la Bandeja vive dentro de Inicio |
 | D5 | Contador de la Bandeja | En la barra inferior del celular, Inicio muestra un punto y el número aparece dentro de la pantalla. No hay contadores en la barra lateral |
 | D6 | Campana (ADR-014) | Muestra un punto de no leído y abre la misma Bandeja. No hay una segunda lista de avisos |
-| D7 | Búsqueda en el celular | Sale de la barra superior; solo queda «Buscar» en la barra inferior |
+| D7 | Búsqueda en el celular | ~~Sale de la barra superior; solo queda «Buscar» en la barra inferior~~. **Reemplazada por ADR-050** (Carlos, 26-oct-2026 17:57): «Buscar» va en la barra superior y no en la inferior |
 | D8 | Vencimientos | Vista dentro de Personas, como está construido hoy (corrige el mapa de §2) |
 | D9 | iPad | Desde 1024 px se usa la barra lateral completa y plegable del escritorio, sin un riel nuevo y sin plegarse a solo íconos (Carlos, 26-oct-2026 11:03 CLT, chat con el bot OPAI 2.0 (t295u; dictado por voz)). De 768 a 1023 sigue el riel actual |
 | D10 | Visualizador (viewer) | No ve Nómina (ya es regla de ADR-016: «solo lectura, sin finanzas ni nómina»; corrige la pantalla 05) |
