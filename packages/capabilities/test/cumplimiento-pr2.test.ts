@@ -136,6 +136,35 @@ describe("solicitudes del titular (ARCO+)", () => {
     expect(s.plazoEn).not.toBeNull();
   });
 
+  it("avanzar valida que el responsable sea miembro activo de la empresa (test negativo)", async () => {
+    const { ctx, tabla } = contextoDePrueba({ semilla: semilla() });
+    const s = await dato<{ id: string }>(ctx, "core.cumplimiento.solicitud_crear", {
+      tipo: "acceso",
+      titular: { tipo: "persona", id: PERSONA },
+    });
+    // Un responsable que no es miembro de la empresa se rechaza (no se confía en el id).
+    expect(
+      await codigo(ctx, "core.cumplimiento.solicitud_avanzar", {
+        id: s.id,
+        responsableId: "0192f3a0-0000-7000-8000-00000000aaaa",
+      }),
+    ).toBe("UNPROCESSABLE");
+    // Con una membresía activa, sí se asigna.
+    tabla("membership").push({
+      tenantId: TENANT_DE_PRUEBA,
+      userId: USUARIO_DE_PRUEBA.id,
+      rol: "admin",
+      estado: "activa",
+      portales: ["erp"],
+    });
+    const av = await dato<{ responsableId: string | null }>(
+      ctx,
+      "core.cumplimiento.solicitud_avanzar",
+      { id: s.id, responsableId: USUARIO_DE_PRUEBA.id },
+    );
+    expect(av.responsableId).toBe(USUARIO_DE_PRUEBA.id);
+  });
+
   it("no se puede resolver dos veces (estado terminal)", async () => {
     const { ctx } = contextoDePrueba({ semilla: semilla() });
     const s = await dato<{ id: string }>(ctx, "core.cumplimiento.solicitud_crear", {
@@ -191,31 +220,113 @@ describe("solicitudes del titular (ARCO+)", () => {
       "UNPROCESSABLE",
     );
   });
+
+  it("la exportación (RUT, domicilio, contacto) solo la ve cumplimiento.read: supervisor y viewer no", async () => {
+    const owner = contextoDePrueba({ semilla: semilla() });
+    const s = await dato<{ id: string }>(owner.ctx, "core.cumplimiento.solicitud_crear", {
+      tipo: "acceso",
+      titular: { tipo: "persona", id: PERSONA },
+    });
+    const exp = await dato<{ documentoId: string }>(
+      owner.ctx,
+      "core.cumplimiento.solicitud_exportar",
+      { solicitudId: s.id },
+    );
+    // Se vincula a la solicitud ARCO (entidad de cumplimiento), no al tenant.
+    expect(owner.tabla("documentoVinculo").find((v) => v["documentoId"] === exp.documentoId)).toMatchObject({
+      entidadTipo: "solicitud_arco",
+      entidadId: s.id,
+    });
+
+    // Mismos datos, otro rol: base nueva sembrada con lo ya creado.
+    const comoRol = (rol: "supervisor" | "viewer" | "gerente") =>
+      contextoDePrueba({
+        rol,
+        semilla: {
+          persona: owner.tabla("persona"),
+          solicitudArco: owner.tabla("solicitudArco"),
+          documento: owner.tabla("documento"),
+          documentoVinculo: owner.tabla("documentoVinculo"),
+        },
+      }).ctx;
+
+    for (const rol of ["supervisor", "viewer"] as const) {
+      const ctx = comoRol(rol);
+      // Tienen documentos.read, pero la exportación no aparece en la lista…
+      const lista = await dato<{ items: { id: string }[] }>(ctx, "core.documentos.list", {});
+      expect(lista.items.some((d) => d.id === exp.documentoId)).toBe(false);
+      // …ni se obtiene ni se descarga: «no encontrado», sin revelar que existe (sin enumeración).
+      expect(await codigo(ctx, "core.documentos.get", { id: exp.documentoId })).toBe("NOT_FOUND");
+      expect(await codigo(ctx, "core.documentos.url_descarga", { id: exp.documentoId })).toBe(
+        "NOT_FOUND",
+      );
+    }
+
+    // Un rol con cumplimiento.read (gerente) sí la ve, la obtiene y la descarga.
+    const gerente = comoRol("gerente");
+    const vistos = await dato<{ items: { id: string }[] }>(gerente, "core.documentos.list", {});
+    expect(vistos.items.some((d) => d.id === exp.documentoId)).toBe(true);
+    expect(await codigo(gerente, "core.documentos.get", { id: exp.documentoId })).toBe("OK");
+    expect(await codigo(gerente, "core.documentos.url_descarga", { id: exp.documentoId })).toBe("OK");
+  });
 });
 
 describe("incidentes y avisos de brecha (§16.5)", () => {
-  it("registra, avanza, notifica y lista con su estado vigente", async () => {
-    const { ctx } = contextoDePrueba({ semilla: semilla() });
+  it("notifica por destinatario: notificado solo con Agencia y titulares; plazo desde la detección", async () => {
+    const { ctx, tabla } = contextoDePrueba({ semilla: semilla() });
+    // Días de plazo configurados por el tenant (el valor legal lo fija el abogado, §16.5).
+    tabla("ajuste").push({
+      tenantId: TENANT_DE_PRUEBA,
+      sujetoId: TENANT_DE_PRUEBA,
+      modulo: "core",
+      clave: "cumplimiento_brecha_dias_plazo",
+      ambito: "tenant",
+      valor: 5,
+    });
+    const ocurridoEn = "2026-10-01T00:00:00.000Z";
     const i = await dato<{ casoId: string; estado: string }>(ctx, "core.cumplimiento.incidente_registrar", {
       descripcion: "Acceso no autorizado a la bandeja de documentos.",
       datosAfectados: "contacto, identificación",
+      ocurridoEn,
     });
     expect(i.estado).toBe("abierto");
     await dato(ctx, "core.cumplimiento.incidente_avanzar", { casoId: i.casoId, estado: "en_evaluacion" });
-    const n = await dato<{ estado: string; plazoEn: string | null }>(ctx, "core.cumplimiento.incidente_notificar", {
-      casoId: i.casoId,
-      destinatario: "agencia",
-      canal: "correo",
-    });
-    expect(n.estado).toBe("notificado");
-    const lista = await dato<{ items: { casoId: string; estado: string; aviso: unknown }[] }>(
+
+    // Primer aviso (Agencia): aún NO está notificada; falta titulares.
+    const n1 = await dato<{ estado: string; plazoEn: string | null; notificada: boolean; pendientes: string[] }>(
       ctx,
-      "core.cumplimiento.incidentes_listar",
-      {},
+      "core.cumplimiento.incidente_notificar",
+      { casoId: i.casoId, destinatario: "agencia", canal: "correo" },
     );
+    expect(n1.notificada).toBe(false);
+    expect(n1.estado).toBe("en_evaluacion"); // no se marca notificado con un solo aviso
+    expect(n1.pendientes).toEqual(["titulares"]);
+    // El plazo corre desde la detección (ocurridoEn + 5 días), no desde el aviso.
+    expect(n1.plazoEn).toBe("2026-10-06T00:00:00.000Z");
+
+    // Avisar de nuevo a la Agencia se rechaza (ya consta).
+    expect(
+      await codigo(ctx, "core.cumplimiento.incidente_notificar", { casoId: i.casoId, destinatario: "agencia" }),
+    ).toBe("UNPROCESSABLE");
+
+    // Segundo aviso (titulares): ahora sí queda notificada, con el mismo plazo desde la detección.
+    const n2 = await dato<{ estado: string; plazoEn: string | null; notificada: boolean; pendientes: string[] }>(
+      ctx,
+      "core.cumplimiento.incidente_notificar",
+      { casoId: i.casoId, destinatario: "titulares", canal: "correo" },
+    );
+    expect(n2.notificada).toBe(true);
+    expect(n2.estado).toBe("notificado");
+    expect(n2.pendientes).toEqual([]);
+    expect(n2.plazoEn).toBe("2026-10-06T00:00:00.000Z");
+
+    const lista = await dato<{
+      items: { casoId: string; estado: string; avisos: unknown[]; notificada: boolean }[];
+    }>(ctx, "core.cumplimiento.incidentes_listar", {});
     const caso = lista.items.find((x) => x.casoId === i.casoId);
     expect(caso?.estado).toBe("notificado");
-    expect(caso?.aviso).not.toBeNull();
+    expect(caso?.notificada).toBe(true);
+    expect(caso?.avisos).toHaveLength(2);
   });
 
   it("no se puede retroceder el estado de un incidente", async () => {

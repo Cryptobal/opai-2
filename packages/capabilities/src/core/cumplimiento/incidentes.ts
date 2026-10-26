@@ -12,7 +12,7 @@ import { reglaDeNegocio } from "../../errores";
 import { uuidSchema } from "../esquemas";
 import { uuid7 } from "../documentos/uuid7";
 import { actorLegible } from "./comunes";
-import { incidenteVista, salidaIncidente, ultimoHecho } from "./incidentes-comun";
+import { bloquearCaso, incidenteVista, salidaIncidente, ultimoHecho } from "./incidentes-comun";
 
 export const incidenteRegistrar = defineCapability({
   id: "core.cumplimiento.incidente_registrar",
@@ -83,8 +83,10 @@ export const incidenteAvanzar = defineCapability({
         throw reglaDeNegocio(`No se puede pasar de "${actual.estado}" a "${input.estado}".`);
       return { casoId: input.casoId, estado: input.estado, ultimoEvento: "avance", registradoEn: new Date().toISOString() };
     }
-    // Lee el estado vigente y anota el avance en la misma transacción (sin TOCTOU).
+    // Lee el estado vigente y anota el avance en la misma transacción, bajo advisory lock por caso
+    // (serializa avances concurrentes del mismo incidente; sin TOCTOU).
     const fila = await ctx.transaccion(async (tx) => {
+      await bloquearCaso(tx, input.casoId);
       const actual = await ultimoHecho(tx, input.casoId);
       if (!puedeAvanzarIncidente(actual.estado as EstadoIncidente, input.estado))
         throw reglaDeNegocio(`No se puede pasar de "${actual.estado}" a "${input.estado}".`);

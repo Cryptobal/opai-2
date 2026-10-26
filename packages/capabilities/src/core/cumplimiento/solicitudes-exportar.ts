@@ -10,8 +10,19 @@ import { uuid7 } from "../documentos/uuid7";
 import { cargarTitular, type TitularVista } from "./comunes";
 import { armarExportacion } from "./exportacion-datos";
 
-/** Sube el JSON y lo deja como documento del Núcleo (origen generado), con bitácora y vínculo. */
-async function materializar(ctx: Contexto, contenido: string, sha256: string, nombre: string) {
+/**
+ * Sube el JSON y lo deja como documento del Núcleo (origen generado), con bitácora y vínculo a su
+ * solicitud ARCO. El vínculo a `solicitud_arco` (no al tenant) hace que el documento sea de
+ * cumplimiento: solo lo listan y descargan los permisos `cumplimiento.read` (§4.4), nunca el
+ * `documentos.read` general (supervisor, viewer).
+ */
+async function materializar(
+  ctx: Contexto,
+  contenido: string,
+  sha256: string,
+  nombre: string,
+  solicitudId: string,
+) {
   const id = uuid7();
   const storageKey = claveDocumento(ctx.tenantId, id, 1, nombre);
   await ctx.servicios.almacenamiento.subir(storageKey, contenido, "application/json", sha256);
@@ -36,7 +47,7 @@ async function materializar(ctx: Contexto, contenido: string, sha256: string, no
       },
     });
     await tx.documentoVinculo.create({
-      data: { tenantId: ctx.tenantId, documentoId: doc.id, entidadTipo: "tenant", entidadId: ctx.tenantId, rol: "propietario" },
+      data: { tenantId: ctx.tenantId, documentoId: doc.id, entidadTipo: "solicitud_arco", entidadId: solicitudId, rol: "propietario" },
     });
     const hecho = await ctx.bitacora.registrar(tx, {
       tipo: "core.documento.registrado",
@@ -88,7 +99,7 @@ export const solicitudExportar = defineCapability({
     if (!ctx.servicios.almacenamiento.disponible)
       throw reglaDeNegocio("El almacenamiento no está configurado en este entorno.");
     const nombre = `exportacion-${titular.tipo}-${s.id}.json`;
-    const doc = await materializar(ctx, contenido, sha256, nombre);
+    const doc = await materializar(ctx, contenido, sha256, nombre, s.id);
     await ctx.transaccion(async (tx) => {
       await tx.solicitudArco.update({ where: { id: s.id }, data: { documentoEvidenciaId: doc.id } });
       await ctx.eventos.emitir(tx, {

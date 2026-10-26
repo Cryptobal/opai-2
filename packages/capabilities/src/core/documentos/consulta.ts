@@ -8,6 +8,7 @@ import type { Contexto } from "../../types";
 import { uuidSchema } from "../esquemas";
 import { hoy } from "../maestros/comun";
 import { CAPA_DE } from "./entidad";
+import { docsDeCumplimiento, esDocCumplimiento, puedeVerCumplimiento } from "./sensibles";
 import { documentoSchema, entidadSchema, vistaDocumento } from "./vista";
 
 /** Tipos por id (nombre y días de alerta) para una página de documentos. */
@@ -55,11 +56,19 @@ export const documentosList = defineCapability({
       orderBy: [{ venceEn: "asc" }, { createdAt: "desc" }],
       take: 500,
     });
+    // Documentos de cumplimiento (Ley 21.719): la exportación del titular solo la lista
+    // `cumplimiento.read`; con el `documentos.read` general (supervisor, viewer) no aparecen.
+    const visibles = puedeVerCumplimiento(ctx)
+      ? docs
+      : await docsDeCumplimiento(
+          ctx,
+          docs.map((d) => d.id),
+        ).then((ocultos) => docs.filter((d) => !ocultos.has(d.id)));
     const tipos = await tiposPorId(
       ctx,
-      docs.map((d) => d.tipoId),
+      visibles.map((d) => d.tipoId),
     );
-    const items = docs
+    const items = visibles
       .map((d) => vistaDocumento(d, d.tipoId ? tipos.get(d.tipoId) : null, hoy()))
       .filter((d) => !input.vigencia || d.vigencia === input.vigencia);
     let faltantes: { tipoId: string; nombre: string }[] = [];
@@ -94,6 +103,10 @@ export const documentosGet = defineCapability({
   async handler(ctx, input) {
     const d = await ctx.db.documento.findUnique({ where: { id: input.id } });
     if (!d) throw noEncontrado("El documento");
+    // Documento de cumplimiento (p. ej. la exportación del titular): sin `cumplimiento.read` se
+    // responde «no encontrado», sin revelar que existe (sin enumeración).
+    if (!puedeVerCumplimiento(ctx) && (await esDocCumplimiento(ctx, d.id)))
+      throw noEncontrado("El documento");
     const vinculos = await ctx.db.documentoVinculo.findMany({ where: { documentoId: d.id } });
     const versiones = [];
     for (let previo = d.reemplazaAId, n = 0; previo && n < 50; n++) {

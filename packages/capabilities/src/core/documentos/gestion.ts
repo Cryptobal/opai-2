@@ -15,6 +15,7 @@ import {
   opcionalAFecha,
   textoOpcional,
 } from "../maestros/comun";
+import { esDocCumplimiento, puedeVerCumplimiento } from "./sensibles";
 import { documentoSchema, vistaDocumento } from "./vista";
 
 export async function disponible(ctx: Contexto, id: string) {
@@ -99,6 +100,10 @@ export const documentosUrlDescarga = defineCapability({
   dryRun: false,
   async handler(ctx, { id }) {
     const { d } = await disponible(ctx, id);
+    // La exportación del titular (Ley 21.719) solo la descarga `cumplimiento.read`; con el
+    // `documentos.read` general se responde «no encontrado», sin revelar que existe (sin enumeración).
+    if (!puedeVerCumplimiento(ctx) && (await esDocCumplimiento(ctx, d.id)))
+      throw noEncontrado("El documento");
     const url = await ctx.servicios.almacenamiento.urlDescarga(d.storageKey, d.nombre, 300);
     await ctx.medidor
       .registrar({
