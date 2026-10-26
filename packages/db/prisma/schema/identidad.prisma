@@ -47,6 +47,7 @@ model LoginIntento {
 
   @@index([correoHash, createdAt])
   @@index([userId, createdAt])
+  @@index([ip, createdAt])
   @@map("login_intentos")
   @@schema("core")
 }
