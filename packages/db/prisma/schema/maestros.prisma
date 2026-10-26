@@ -142,35 +142,59 @@ model Cargo {
   @@schema("core")
 }
 
-/// Puesto de servicio en una instalación (ADR-036): lo cotizado y lo operado.
+/// Puesto de servicio en una instalación (ADR-036, Brief 11 PR 1): 1 puesto = 1 posición cubierta.
+/// La dotación se arma con N puestos; la columna `dotacion` queda DEPRECADA (sin borrar). El rol y el
+/// ciclo salen del catálogo de patrones (`patronId`) y la función operativa de `funcionId`. El horario
+/// va por tramos (día y, si rota, noche), con horas semanales y colación en el puesto, y nace en PPC.
 model Puesto {
-  id            String    @id @default(uuid(7)) @db.Uuid
-  tenantId      String    @map("tenant_id") @db.Uuid
-  instalacionId String    @map("instalacion_id") @db.Uuid
-  cargoId       String    @map("cargo_id") @db.Uuid
-  nombre        String
-  diasTrabajo   Int       @map("dias_trabajo")
-  diasDescanso  Int       @map("dias_descanso")
+  id              String    @id @default(uuid(7)) @db.Uuid
+  tenantId        String    @map("tenant_id") @db.Uuid
+  instalacionId   String    @map("instalacion_id") @db.Uuid
+  cargoId         String    @map("cargo_id") @db.Uuid
+  /// Función operativa del catálogo del tenant (guardia, supervisor…); null hasta que se elige.
+  funcionId       String?   @map("funcion_id") @db.Uuid
+  /// Patrón de turno del catálogo del tenant (4×4, 5×2…); null hasta que se elige.
+  patronId        String?   @map("patron_id") @db.Uuid
+  nombre          String
+  diasTrabajo     Int       @map("dias_trabajo")
+  diasDescanso    Int       @map("dias_descanso")
   /// "HH:mm". Si horaFin <= horaInicio el turno cruza medianoche.
-  horaInicio    String    @map("hora_inicio")
-  horaFin       String    @map("hora_fin")
+  horaInicio      String    @map("hora_inicio")
+  horaFin         String    @map("hora_fin")
+  /// Tramo de noche de la rotación día/noche (opcional), "HH:mm".
+  horaInicioNoche String?   @map("hora_inicio_noche")
+  horaFinNoche    String?   @map("hora_fin_noche")
   /// "dia" | "noche" | "rotativa"
-  jornada       String    @default("dia")
-  dotacion      Int       @default(1)
+  jornada         String    @default("dia")
+  /// Horas semanales del puesto (sugeridas por el patrón y el horario, editables).
+  horasSemanales  Decimal?  @map("horas_semanales") @db.Decimal(5, 2)
+  /// Colación en minutos y si va fuera de la jornada (no se descuenta del tiempo trabajado).
+  colacionMin     Int       @default(0) @map("colacion_min")
+  colacionFuera   Boolean   @default(false) @map("colacion_fuera")
+  /// DEPRECADA (Brief 11 PR 1): la dotación se arma con N puestos. Se conserva por compatibilidad.
+  dotacion        Int       @default(1)
+  /// Cobertura de la posición: "ppc" (sin asignar) | "cubierto". Nace en PPC.
+  cobertura       String    @default("ppc")
+  /// Motivo del PPC: por ahora solo "sin_asignar" (más motivos en PR 3).
+  coberturaMotivo String?   @default("sin_asignar") @map("cobertura_motivo")
   /// "activo" | "inactivo"
-  estado        String    @default("activo")
-  vigenteDesde  DateTime? @map("vigente_desde") @db.Date
-  vigenteHasta  DateTime? @map("vigente_hasta") @db.Date
-  notas         String?
-  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  estado          String    @default("activo")
+  vigenteDesde    DateTime? @map("vigente_desde") @db.Date
+  vigenteHasta    DateTime? @map("vigente_hasta") @db.Date
+  notas           String?
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   tenant      Tenant             @relation(fields: [tenantId], references: [id])
   instalacion Instalacion        @relation(fields: [instalacionId], references: [id])
   cargo       Cargo              @relation(fields: [cargoId], references: [id])
+  funcion     FuncionPuesto?     @relation(fields: [funcionId], references: [id])
+  patron      PatronTurno?       @relation(fields: [patronId], references: [id])
   estructuras EstructuraSueldo[]
 
   @@unique([tenantId, instalacionId, nombre])
+  @@index([tenantId, patronId])
+  @@index([tenantId, funcionId])
   @@map("puestos")
   @@schema("core")
 }

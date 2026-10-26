@@ -1,0 +1,54 @@
+// Catálogos del puesto como posición (ADR-036, Brief 11 PR 1): patrones de turno y funciones por
+// tenant, en el schema `core`. El puesto (maestros.prisma) referencia uno de cada catálogo. Ambos
+// llevan tenant_id con RLS `tenant_isolation`; la FK a tenants va en el SQL de la migración, sin
+// @relation (no se toca core.prisma). Un patrón es la forma del ciclo (4×4, 5×2…), no el horario:
+// el horario, las horas y la colación viven en el puesto.
+
+/// Catálogo de patrones de turno por tenant. Los 6 de fábrica (4×4, 7×7, 14×14, 5×2, 2×5, 3×4) se
+/// siembran y no se eliminan: se desactivan si quedan sin uso. El nombre se ve claro en la lista y la
+/// ficha de cada puesto (CAR-8).
+model PatronTurno {
+  id           String   @id @default(uuid(7)) @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
+  nombre       String
+  /// "ciclico" (se repite cada N días) | "semanal" (días fijos de la semana).
+  clase        String   @default("ciclico")
+  diasTrabajo  Int      @map("dias_trabajo")
+  diasDescanso Int      @map("dias_descanso")
+  /// Días de la semana (1 = lunes … 7 = domingo) de los patrones semanales; vacío en los cíclicos.
+  diasSemana   Int[]    @default([]) @map("dias_semana")
+  deFabrica    Boolean  @default(false) @map("de_fabrica")
+  activo       Boolean  @default(true)
+  orden        Int      @default(0)
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  puestos Puesto[]
+
+  @@unique([tenantId, nombre])
+  @@index([tenantId, activo])
+  @@map("patrones_turno")
+  @@schema("core")
+}
+
+/// Catálogo de funciones operativas por tenant (guardia, supervisor, nochero…). El supervisor es una
+/// función más. Es la función operativa del puesto, distinta del cargo contractual, que se conserva
+/// (decisión 3 de Carlos).
+model FuncionPuesto {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  nombre    String
+  /// Vertical a la que aplica (seguridad, aseo…); null = sirve a todas.
+  vertical  String?
+  activo    Boolean  @default(true)
+  orden     Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  puestos Puesto[]
+
+  @@unique([tenantId, nombre])
+  @@index([tenantId, activo])
+  @@map("funciones_puesto")
+  @@schema("core")
+}
