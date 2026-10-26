@@ -18,7 +18,7 @@ Pendiente.
 
 ## 5. Reglas de negocio
 
-**Puestos y sueldos al ganar el negocio** — Decisión de Carlos, 25-oct-2026 23:10, chat con OPAI 2.0 (registrada por el bot OPAI 2.0); ADR-048, respuesta 3; ADR-040, nota del punto 3.
+**Puestos y sueldos al ganar el negocio** — Decisión de Carlos, 25-oct-2026 23:08–23:10 (t263u–t265u), chat con OPAI 2.0 (registrada por el bot OPAI 2.0); ADR-048, respuesta 3; ADR-040, nota del punto 3.
 
 - **R1.** El disparador es **ganar el negocio**, no la cotización.
 - **R2.** Al ganar, cada **línea de guardias** de la cotización vigente aceptada se **ofrece** para crear su puesto (un puesto por posición, en PPC; `modulos/operaciones.md`, R1 y R10) con el **sueldo bruto cotizado** en esa línea. **RRHH confirma** cada puesto; nada se crea sin esa confirmación.

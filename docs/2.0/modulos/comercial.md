@@ -153,8 +153,8 @@ Ningún campo de esta sección es visible para el cliente ni para el trabajador 
   - las instalaciones vinculadas que estén en prospecto o inactivas se activan;
   - la cuenta pasa a `cliente_activo` si era prospecto;
   - CPQ acepta la cotización vigente, rechaza las demás abiertas y crea los puestos de servicio desde la cotización aceptada (ver `modulos/cpq.md`).
-  - *Nota del 25-oct-2026 (reglas definidas por Carlos en la Page «Puestos y guardias OPAI 2.0: propuesta»; mockup pendiente de aprobación): ganar **no crea puestos**. CPQ solo acepta la vigente y rechaza las abiertas. Los puestos se crean desde la instalación o con un botón opcional, con vista previa, en la cotización aceptada (solo líneas de tipo puesto): un puesto por posición, en PPC, sin duplicar los ya creados. Ver ADR-040, punto 3, y `modulos/operaciones.md`.*
-  - *Actualización (Decisión de Carlos, 25-oct-2026 23:10, chat con OPAI 2.0 (registrada por el bot OPAI 2.0)): el disparador es **ganar el negocio**. Al ganarlo, cada línea de guardias de la cotización aceptada se **ofrece** para crear su puesto con el sueldo bruto cotizado y RRHH lo confirma; una cotización sin guardias no crea puestos. Ver `modulos/cpq.md`.*
+  - *Nota del 25-oct-2026, superada por la actualización de las 23:08–23:10 que sigue (reglas definidas por Carlos en la Page «Puestos y guardias OPAI 2.0: propuesta»; mockup pendiente de aprobación): ganar **no crea puestos**. CPQ solo acepta la vigente y rechaza las abiertas. Los puestos se crean desde la instalación o con un botón opcional, con vista previa, en la cotización aceptada (solo líneas de tipo puesto): un puesto por posición, en PPC, sin duplicar los ya creados. Ver ADR-040, punto 3, y `modulos/operaciones.md`.*
+  - *Actualización (Decisión de Carlos, 25-oct-2026 23:08–23:10 (t263u–t265u), chat con OPAI 2.0 (registrada por el bot OPAI 2.0)): el disparador es **ganar el negocio**. Al ganarlo, cada línea de guardias de la cotización aceptada se **ofrece** para crear su puesto con el sueldo bruto cotizado y RRHH lo confirma; una cotización sin guardias no crea puestos. Ver `modulos/cpq.md`.*
 - **R19.** Al perder:
   - se exige el motivo;
   - CPQ rechaza las cotizaciones abiertas;
@@ -372,8 +372,8 @@ Cerradas, con recomendación.
 8. **¿Durante la convivencia, al ganar un negocio en 2.0 se crean también sus puestos en 1.0?** Verificado en 1.0 (`09ab4fe`, `extraccion/comercial-y-cpq.md` §8): ganar un negocio **no** crea puestos. Hoy los crea una persona con «Enviar dotación a la instalación» desde la cotización, o a mano en Operaciones con `createOpsPuestos`, que también es la herramienta MCP `create_ops_puesto`.
    - **Recomendación: sí, automático.** Al ganar, el sincronizador 2.0 → 1.0 crea en 1.0 los puestos de la cotización aceptada con `create_ops_puesto`, una vez por puesto (id externo guardado) y con reporte si 1.0 rechaza alguno.
    - **Razón:** Operaciones sigue en 1.0 hasta la fase 3, y sin esos puestos Gard no puede armar la pauta del servicio que acaba de ganar.
-   - *Nota del 25-oct-2026 (reglas de Puestos definidas por Carlos): en 2.0 los puestos ya no se crean al ganar, sino desde la instalación o con el botón opcional de la cotización aceptada. La recomendación de arriba queda superada en su disparador («al ganar»). Falta que Carlos decida si la sincronización 2.0 → 1.0 replica en 1.0 los puestos cuando se crean en 2.0.*
-   - *Actualización (Decisión de Carlos, 25-oct-2026 23:10, chat con OPAI 2.0 (registrada por el bot OPAI 2.0)): el disparador vuelve a ser **ganar el negocio**, pero no automático: cada línea de guardias se ofrece para crear su puesto y RRHH lo confirma (`modulos/cpq.md`). La duda pendiente para Carlos queda así: si la sincronización 2.0 → 1.0 replica en 1.0 los puestos **confirmados por RRHH al ganar**.*
+   - *Nota del 25-oct-2026, superada por la actualización de las 23:08–23:10 que sigue (reglas de Puestos definidas por Carlos): en 2.0 los puestos ya no se crean al ganar, sino desde la instalación o con el botón opcional de la cotización aceptada. La recomendación de arriba queda superada en su disparador («al ganar»). Falta que Carlos decida si la sincronización 2.0 → 1.0 replica en 1.0 los puestos cuando se crean en 2.0.*
+   - *Actualización (Decisión de Carlos, 25-oct-2026 23:08–23:10 (t263u–t265u), chat con OPAI 2.0 (registrada por el bot OPAI 2.0)): el disparador vuelve a ser **ganar el negocio**, pero no automático: cada línea de guardias se ofrece para crear su puesto y RRHH lo confirma (`modulos/cpq.md`). La duda pendiente para Carlos queda así: si la sincronización 2.0 → 1.0 replica en 1.0 los puestos **confirmados por RRHH al ganar**.*
 9. **¿Qué reportes trae la v1?**
    - conversión y días por etapa;
    - pérdidas por motivo y competidor;
@@ -390,5 +390,5 @@ Cerradas, con recomendación.
 | Fecha | Cambio | Aprobó |
 |---|---|---|
 | 24-oct-2026 | Borrador inicial | — |
-| 25-oct-2026 | R18 y pregunta 8: los puestos no se crean al ganar (decisión de Carlos sobre Puestos; CAR-10) | — (nota; reglas definidas por Carlos) |
+| 25-oct-2026 | R18 y pregunta 8: los puestos no se crean al ganar (decisión de Carlos sobre Puestos; CAR-10; superada a las 23:08–23:10, fila siguiente) | — (nota; reglas definidas por Carlos) |
 | 25-oct-2026 23:10 | R18 y pregunta 8: al ganar se ofrecen los puestos de las líneas de guardias y RRHH los confirma (respuesta 3 de ADR-048; CAR-10) | — (nota; decisión de Carlos 23:08–23:10) |
