@@ -1,6 +1,6 @@
 {
   "framework": 132,
-  "porDefecto": 166,
+  "porDefecto": 165,
   "maxSobreFramework": 35,
   "rutas": {
     "/(auth)/*": 152,
