@@ -4,6 +4,7 @@ import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import { listarInventario } from "./inventario";
+import { politicaEfectiva } from "./retencion-politica";
 
 const actividadSchema = z.object({
   modulo: z.string(),
@@ -33,7 +34,9 @@ export const cumplimientoRat = defineCapability({
   }),
   efecto: "lectura",
   dryRun: false,
-  async handler(_ctx, input) {
+  async handler(ctx, input) {
+    const { reglas } = await politicaEfectiva(ctx);
+    const porTabla = new Map(reglas.map((r) => [r.tabla, r.descripcion]));
     const actividades = listarInventario()
       .filter((d) => !input.modulo || d.modulo === input.modulo)
       .map((d) => ({
@@ -46,7 +49,7 @@ export const cumplimientoRat = defineCapability({
         baseLicitud: d.baseLicitud,
         reguladoNoBorrable: d.reguladoNoBorrable ?? false,
         destinatarios: [...(d.destinatarios ?? [])],
-        retencion: d.retencion ?? null,
+        retencion: porTabla.get(d.tabla) ?? d.retencion ?? null,
       }));
     return { basesPropuestas: true, actividades };
   },

@@ -1,11 +1,12 @@
 import { type DatoPersonalDeclarado, defineDatosPersonales } from "@opai/domain";
 
 import { listarModulos } from "../../module";
+import { INVENTARIO_CUMPLIMIENTO } from "./inventario-cumplimiento";
 
 // Inventario de datos personales del Núcleo (RAT, Ley 21.719 §4.3). Pieza «por diseño»: un gate
 // exige declarar toda tabla del Núcleo con datos personales (§16.6). La base de licitud es PROPUESTA
-// (la confirma legal, §16.2); la retención se afina en el PR 3. Hechos regulados (ADR-023): no borrables.
-export const INVENTARIO_NUCLEO = defineDatosPersonales("core", [
+// (la confirma legal, §16.2); la retención sale del catálogo de @opai/domain (PR 3). Hechos regulados (ADR-023): no borrables.
+const INVENTARIO_BASE = defineDatosPersonales("core", [
   {
     tabla: "personas",
     finalidad: "Gestión del personal: identificación, contacto y domicilio de las personas trabajadoras.",
@@ -65,7 +66,13 @@ export const INVENTARIO_NUCLEO = defineDatosPersonales("core", [
     categorias: ["identificacion"],
     campos: ["ip_address", "user_agent"],
     baseLicitud: "interes_legitimo",
-    retencion: "Pendiente: coordina con la retención del registro de acceso de 07c/B4 (§4.5).",
+  },
+  {
+    tabla: "login_intentos",
+    finalidad: "Registro de intentos de acceso para frenar la fuerza bruta: correo en hash, IP y agente del navegador (07c, B1). Sin tenant.",
+    categorias: ["identificacion"],
+    campos: ["correo_hash", "ip", "user_agent"],
+    baseLicitud: "interes_legitimo",
   },
   {
     tabla: "accounts",
@@ -87,14 +94,6 @@ export const INVENTARIO_NUCLEO = defineDatosPersonales("core", [
     categorias: ["contacto"],
     campos: ["email"],
     baseLicitud: "interes_legitimo",
-  },
-  {
-    tabla: "dpa_aceptaciones",
-    finalidad: "Prueba de aceptación del acuerdo de tratamiento de datos (DPA): quién aceptó cada versión, cuándo y el hash del texto aceptado.",
-    categorias: ["identificacion", "contacto"],
-    campos: ["aceptado_por_id", "aceptado_por"],
-    baseLicitud: "obligacion_legal",
-    reguladoNoBorrable: true,
   },
   {
     tabla: "audit_events",
@@ -119,31 +118,10 @@ export const INVENTARIO_NUCLEO = defineDatosPersonales("core", [
     campos: ["rut", "representante_nombre", "representante_rut", "representante_email", "correo_comercial", "correo_operaciones", "correo_finanzas", "correo_contacto", "telefono", "whatsapp", "dpo_nombre", "dpo_correo", "dpo_telefono"],
     baseLicitud: "obligacion_legal",
   },
-  {
-    tabla: "consentimientos",
-    finalidad: "Consentimientos del titular para fines accesorios (p. ej. comunicaciones comerciales): a quién, para qué fin y si está otorgado o revocado.",
-    categorias: ["identificacion"],
-    campos: ["titular_id", "registrado_por"],
-    baseLicitud: "consentimiento",
-    reguladoNoBorrable: true,
-  },
-  {
-    tabla: "solicitudes_arco",
-    finalidad: "Solicitudes del titular (ARCO+): quién pide acceso, rectificación, cancelación, oposición, portabilidad o bloqueo, con su plazo, responsable y evidencia.",
-    categorias: ["identificacion", "contacto"],
-    campos: ["titular_id", "titular_email", "titular_nombre", "responsable_id"],
-    baseLicitud: "obligacion_legal",
-    reguladoNoBorrable: true,
-  },
-  {
-    tabla: "incidentes",
-    finalidad: "Registro de incidentes de seguridad y avisos de brecha (Ley 21.719): alcance, categorías de datos afectados y destinatario del aviso (Agencia y titulares). Sin datos personales en claro.",
-    categorias: ["contacto"],
-    campos: ["destinatario", "registrado_por"],
-    baseLicitud: "obligacion_legal",
-    reguladoNoBorrable: true,
-  },
 ]);
+
+/** Inventario del Núcleo: identidad, maestros y servicios, más las tablas de cumplimiento. */
+export const INVENTARIO_NUCLEO: DatoPersonalDeclarado[] = [...INVENTARIO_BASE, ...INVENTARIO_CUMPLIMIENTO];
 
 /** Inventario consolidado: el Núcleo más lo que declara cada módulo en su manifest. */
 export const listarInventario = (): DatoPersonalDeclarado[] => [

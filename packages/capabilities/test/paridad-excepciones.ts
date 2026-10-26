@@ -45,6 +45,8 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: registrar un incidente o brecha es un acto humano responsable, no un detector automático (Ley 21.719, §16.5).",
   "core.cumplimiento.incidente_avanzar":
     "Solo personas: avanzar la atención de un incidente gobierna el cumplimiento (Ley 21.719).",
+  "core.cumplimiento.titular_anonimizar":
+    "Solo personas: anonimizar a un titular es irreversible y es la única purga forzada; la decide una persona responsable (Ley 21.719, §16.4).",
   "core.cumplimiento.incidente_notificar":
     "Solo personas: dejar constancia del aviso de una brecha a la Agencia o a los titulares es un acto humano responsable (Ley 21.719, §16.5).",
   "core.roles.create":
