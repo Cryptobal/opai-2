@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><script src="./crm-data.js"></script><style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style></helmet>
+<div class="ds" data-theme="{{ theme }}" data-device="{{ device }}" style="position:relative;width:100%;height:100%;overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="{{ navActive }}" title="Configuración" tenant="Atlas Seguridad SpA" tenant-initials="AS" notifications="{{ 3 }}" hide-top-bar="{{ isPhone }}" width="100%" height="100%" hint-size="100%,100%">
+<div style="display:flex;flex:1;min-height:0">
+<sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+<nav style="width:220px;flex:none;border-right:1px solid var(--ds-border);padding:24px 12px;display:flex;flex-direction:column;gap:2px;overflow:auto" aria-label="Secciones de configuración">
+<span class="t-caption" style="padding:0 8px 8px">Configuración</span>
+<sc-for list="{{ cfgNav }}" as="n" hint-placeholder-count="7">
+<a href="#" class="{{ n.cls }}"><span class="ic {{ n.icon }}" aria-hidden="true"></span>{{ n.label }}</a>
+</sc-for>
+</nav>
+</sc-if>
+<div style="flex:1;min-width:0;overflow:auto;display:flex;flex-direction:column">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div class="topbar" style="padding-left:4px;position:sticky;top:0">
+<a href="#" class="btn btn-ghost" style="height:44px;padding:0 8px 0 4px;gap:2px;color:var(--ds-fg-muted)"><span class="ic i-chevron-left" aria-hidden="true"></span>Configuración</a>
+</div>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<sc-if value="{{ isTablet }}" hint-placeholder-val="{{ false }}">
+<a href="#" class="btn btn-ghost" style="align-self:flex-start;height:32px;padding:0 8px 0 4px;margin:0 0 8px -4px;gap:2px;color:var(--ds-fg-muted)"><span class="ic sm i-chevron-left" aria-hidden="true"></span>Configuración</a>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" size="heading" eyebrow="Configuración" title="Comercial" subtitle="Embudo y catálogos que usan Negocios y Contactos en todo Atlas Seguridad SpA." hint-size="100%,80px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" size="{{ btnSize }}" disabled="{{ clean }}" on-click="{{ save }}" hint-size="150px,40px">Guardar cambios</x-import>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ tabItems }}" value="{{ tab }}" on-change="{{ setTab }}" hint-size="100%,44px"></x-import>
+<div style="display:flex;flex-direction:column;gap:28px;margin-top:20px">
+<sc-if value="{{ tabEmb }}" hint-placeholder-val="{{ true }}">
+<section style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between">
+<div style="display:flex;flex-direction:column;gap:2px">
+<h2 class="t-label m0">Etapas del embudo</h2>
+<span class="t-caption">8 etapas por defecto · 6 abiertas y 2 de cierre</span>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="plus" hint-size="150px,40px">Agregar etapa</x-import>
+</div>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div class="card" style="overflow:hidden"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ stageCols }}" rows="{{ stageRows }}" cards="{{ true }}" to-card="{{ stageCard }}" hint-size="100%,560px"></x-import></div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ stageCols }}" rows="{{ stageRows }}" hint-size="100%,440px"></x-import>
+</sc-if>
+</section>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Reglas del embudo" rows="{{ rules }}" hint-size="100%,200px"></x-import>
+</sc-if>
+<sc-if value="{{ tabCat }}" hint-placeholder-val="{{ false }}">
+<sc-for list="{{ catalogs }}" as="cat" hint-placeholder-count="3">
+<section style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between">
+<div style="display:flex;flex-direction:column;gap:2px">
+<h2 class="t-label m0">{{ cat.title }}</h2>
+<span class="t-caption">{{ cat.desc }}</span>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="plus" hint-size="110px,40px">Agregar</x-import>
+</div>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div class="card" style="overflow:hidden"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cat.cols }}" rows="{{ cat.rows }}" cards="{{ true }}" to-card="{{ cat.toCard }}" hint-size="100%,300px"></x-import></div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cat.cols }}" rows="{{ cat.rows }}" compact="{{ true }}" hint-size="100%,300px"></x-import>
+</sc-if>
+</section>
+</sc-for>
+<p class="t-caption" style="margin:0;text-wrap:pretty">Un valor en uso no se elimina: se desactiva y deja de ofrecerse en negocios nuevos. Los negocios que ya lo tienen lo conservan.</p>
+</sc-if>
+</div>
+</x-import>
+</div>
+</div>
+</x-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;screen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;embudo&quot;,&quot;catalogos&quot;],&quot;default&quot;:&quot;embudo&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { tab: null, off: { "o8": true }, dirty: false };
+  componentDidMount() { this._t = setInterval(() => { if (window.CRM && window.OPAI20DesignSystem_44e4d7) { clearInterval(this._t); this.forceUpdate(); } }, 80); }
+  componentWillUnmount() { clearInterval(this._t); }
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const C = window.CRM;
+    const device = this.props.device ?? "desktop";
+    const theme = this.props.theme ?? "light";
+    const screen = this.props.screen ?? "embudo";
+    const isPhone = device === "phone";
+    const base = { device, theme, isPhone, notPhone: !isPhone, isTablet: device === "tablet", isDesktop: device === "desktop" };
+    if (!C || !NS.Badge) return base;
+    const tab = this.state.tab ?? (screen === "catalogos" ? "cat" : "emb");
+    const off = this.state.off;
+    const toggle = (id) => this.setState((s) => ({ off: { ...s.off, [id]: !s.off[id] }, dirty: true }));
+    const sw = (id, fixed) => h(NS.Switch, { checked: fixed ? true : !off[id], disabled: !!fixed, onChange: () => toggle(id) });
+    const counts = { s1: 3, s2: 2, s3: 2, s4: 3, s5: 2, s6: 1, s7: 14, s8: 9 };
+    const stageRows = C.stages.map((s, i) => ({ ...s, n: i + 1, deals: counts[s.id], fixed: s.id === "s7" || s.id === "s8" }));
+    const claseTone = (c) => (c === "Ganada" ? "success" : c === "Perdida" ? "danger" : "neutral");
+    const cat = (key, title, desc, items, extra) => ({
+      title, desc,
+      rows: items.map((it, i) => ({ id: key + (i + 1), name: it[0], uso: it[1], detalle: it[2] })),
+      cols: [
+        { key: "name", label: "Nombre", strong: true },
+        ...(extra ? [{ key: "detalle", label: "Pide detalle", render: (r) => (r.detalle ? "Sí" : "No") }] : []),
+        { key: "uso", label: "Negocios", align: "right", render: (r) => h("span", { className: "t-numeric" }, String(r.uso)) },
+        { key: "act", label: "Activo", align: "right", width: 88, render: (r) => sw(r.id) },
+      ],
+      toCard: (r) => ({ title: r.name, subtitle: r.uso + " negocios" + (r.detalle ? " · pide detalle" : ""), trailing: sw(r.id) }),
+    });
+    return {
+      ...base,
+      tabs: C.tabs, groups: C.groups,
+      navActive: isPhone || device === "tablet" ? "mas" : "cfg",
+      btnSize: isPhone ? "lg" : "md",
+      clean: !this.state.dirty, save: () => this.setState({ dirty: false }),
+      cfgNav: [["General", "i-grid"], ["Empresa", "i-landmark"], ["Usuarios y permisos", "i-user-check"], ["Operaciones", "i-building"], ["Comercial", "i-briefcase"], ["Facturación", "i-wallet"], ["Integraciones", "i-swap"]].map(([label, icon]) => ({ label, icon, cls: label === "Comercial" ? "nav-item on" : "nav-item" })),
+      tabItems: [{ id: "emb", label: "Embudo de etapas", count: 8 }, { id: "cat", label: "Catálogos", count: 3 }],
+      tab, setTab: (t) => this.setState({ tab: t }), tabEmb: tab === "emb", tabCat: tab === "cat",
+      stageCols: [
+        { key: "n", label: "Orden", width: 64, render: (r) => h("span", { className: "t-mono subtle" }, String(r.n).padStart(2, "0")) },
+        { key: "name", label: "Etapa", strong: true },
+        { key: "clase", label: "Clase", render: (r) => h(NS.Badge, { tone: claseTone(r.clase) }, r.clase) },
+        { key: "prob", label: "Probabilidad", align: "right", render: (r) => h("span", { className: "t-numeric" }, r.prob + " %") },
+        { key: "dias", label: "Días esperados", align: "right", render: (r) => h("span", { className: "t-numeric" }, r.dias ? r.dias + " d" : "—") },
+        { key: "deals", label: "Negocios", align: "right", render: (r) => h("span", { className: "t-numeric" }, String(r.deals)) },
+        { key: "act", label: "Activa", align: "right", width: 88, render: (r) => sw(r.id, r.fixed) },
+      ],
+      stageRows,
+      stageCard: (r) => ({ title: String(r.n).padStart(2, "0") + " · " + r.name, subtitle: r.clase + " · " + r.prob + " %" + (r.dias ? " · " + r.dias + " d esperados" : ""), meta: r.deals + " negocios", trailing: sw(r.id, r.fixed) }),
+      rules: [
+        { label: "Ganado y Perdido", value: "Fijas: no se renombran, reordenan ni desactivan" },
+        { label: "Etapa con negocios", value: "No se elimina; se desactiva tras mover sus negocios" },
+        { label: "Probabilidad", value: "Calcula el valor ponderado de cada negocio" },
+        { label: "Días esperados", value: "Sobre ese plazo, el tablero marca el negocio" },
+        { label: "Perder", value: "Exige motivo de pérdida" },
+        { label: "Ganar sin cotización", value: "Solo en ambiente de prueba hasta que exista CPQ" },
+      ],
+      catalogs: [
+        cat("m", "Motivos de pérdida", "Obligatorio al perder un negocio", [["Precio", 14], ["Eligió a la competencia", 9], ["Sin presupuesto", 6], ["Cliente postergó la decisión", 5], ["Sin respuesta del cliente", 4], ["No cumplimos requisitos técnicos", 2], ["Otro", 3, true]], true),
+        cat("t", "Tipos de negocio", "Qué se vende: cliente, instalación o cambio de dotación", [["Nuevo cliente", 21], ["Nueva instalación", 8], ["Ampliación de dotación", 6], ["Renovación de contrato", 5], ["Servicio temporal", 3]]),
+        cat("o", "Orígenes", "Cómo llegó el negocio", [["Referido", 12], ["Sitio web", 9], ["Licitación", 7], ["Cliente actual", 8], ["Prospección en frío", 5], ["LinkedIn", 2], ["Feria o evento", 1], ["Guía telefónica", 0]]),
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><script src="./crm-data.js"></script><style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style></helmet>
+<div class="ds" data-theme="{{ theme }}" data-device="{{ device }}" style="position:relative;width:100%;height:100%;overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="con" title="Contactos" count="{{ 86 }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" notifications="{{ 3 }}" hide-top-bar="{{ hideTop }}" width="100%" height="100%" hint-size="100%,100%">
+<sc-if value="{{ isList }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Comercial" title="Contactos" subtitle="86 contactos · 24 cuentas" hint-size="100%,80px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="plus" size="{{ btnSize }}" hint-size="160px,40px">Nuevo contacto</x-import>
+</x-import>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:16px">
+<div style="width:{{ searchW }};max-width:100%;flex:none"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" icon="search" placeholder="Buscar por nombre, cuenta o correo" value="{{ q }}" on-change="{{ setQ }}" style="width:100%" hint-size="100%,44px"></x-import></div>
+<div class="chip-row" style="max-width:100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FilterChip" variant="toggle" value="Con negocios abiertos" count="{{ 9 }}" selected="{{ onlyOpen }}" on-click="{{ toggleOpen }}" hint-size="200px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FilterChip" variant="add" hint-size="140px,32px"></x-import>
+</div>
+</div>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="margin:0 -16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" cards="{{ true }}" to-card="{{ toCard }}" on-row-click="{{ noop }}" hint-size="100%,400px"></x-import></div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" on-row-click="{{ noop }}" hint-size="100%,400px"></x-import>
+</sc-if>
+<div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;font:400 14px/20px var(--font-sans);color:var(--ds-fg-muted)">
+<span class="t-numeric">{{ pageLabel }}</span>
+<div style="display:flex;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" disabled="{{ true }}" hint-size="90px,40px">Anterior</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="90px,40px">Siguiente</x-import>
+</div>
+</div>
+</x-import>
+</sc-if>
+<sc-if value="{{ isFicha }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex:1;min-height:0">
+<sc-if value="{{ isTablet }}" hint-placeholder-val="{{ false }}">
+<div style="width:320px;flex:none;border-right:1px solid var(--ds-border);background:var(--ds-surface);overflow:auto">
+<sc-for list="{{ side }}" as="s" hint-placeholder-count="8">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.SelectableRow" selected="{{ s.selected }}" initials="{{ s.ini }}" title="{{ s.name }}" subtitle="{{ s.acc }}" hint-size="100%,64px"></x-import>
+</sc-for>
+</div>
+</sc-if>
+<div style="flex:1;min-width:0;overflow:auto;display:flex;flex-direction:column">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div class="topbar" style="padding-left:4px;position:sticky;top:0">
+<a href="#" class="btn btn-ghost" style="height:44px;padding:0 8px 0 4px;gap:2px;color:var(--ds-fg-muted)"><span class="ic i-chevron-left" aria-hidden="true"></span>Contactos</a>
+<span style="flex:1"></span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="more" label="Más acciones" hint-size="44px,44px"></x-import>
+</div>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<a href="#" class="btn btn-ghost" style="align-self:flex-start;height:32px;padding:0 8px 0 4px;margin:0 0 8px -4px;gap:2px;color:var(--ds-fg-muted)"><span class="ic sm i-chevron-left" aria-hidden="true"></span>Contactos</a>
+</sc-if>
+<div style="display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap;margin-bottom:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Avatar" initials="PV" size="{{ 64 }}" hint-size="64px,64px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" size="heading" eyebrow="Contacto · Frigorífico del Maipo S.A." title="Patricia Valdés" subtitle="Gerenta de operaciones" style="flex:1;min-width:240px;margin-bottom:0" hint-size="100%,80px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="phone" size="{{ btnSize }}" hint-size="100px,40px">Llamar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="file" size="{{ btnSize }}" hint-size="100px,40px">Editar</x-import>
+</x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ fichaTabs }}" value="res" hint-size="100%,44px"></x-import>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px 32px;margin-top:20px;align-items:start">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Datos de contacto" rows="{{ datos }}" hint-size="100%,240px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Rol en negocios" rows="{{ roles }}" hint-size="100%,200px">
+<p class="t-caption" style="margin:8px 0 0">El rol se define en cada negocio: Decisor, Firmante, Técnico, Compras o Usuario.</p>
+</x-import>
+</div>
+</x-import>
+</div>
+</div>
+</sc-if>
+</x-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;screen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;lista&quot;,&quot;ficha&quot;],&quot;default&quot;:&quot;lista&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { q: "", onlyOpen: false };
+  componentDidMount() { this._t = setInterval(() => { if (window.CRM && window.OPAI20DesignSystem_44e4d7) { clearInterval(this._t); this.forceUpdate(); } }, 80); }
+  componentWillUnmount() { clearInterval(this._t); }
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const C = window.CRM;
+    const device = this.props.device ?? "desktop";
+    const theme = this.props.theme ?? "light";
+    const screen = this.props.screen ?? "lista";
+    const isPhone = device === "phone";
+    const isFicha = screen === "ficha";
+    const base = { device, theme, isPhone, notPhone: !isPhone, isTablet: device === "tablet", isList: !isFicha, isFicha, hideTop: isPhone && isFicha };
+    if (!C || !NS.Badge) return base;
+    const q = this.state.q.toLowerCase();
+    let rows = C.contacts.filter((c) => !q || (c.name + c.acc + c.mail).toLowerCase().includes(q));
+    if (this.state.onlyOpen) rows = rows.filter((c) => c.open > 0);
+    return {
+      ...base,
+      tabs: C.tabs, groups: C.groups,
+      btnSize: isPhone ? "lg" : "md", searchW: isPhone ? "100%" : "288px",
+      q: this.state.q, setQ: (v) => this.setState({ q: v }),
+      onlyOpen: this.state.onlyOpen, toggleOpen: () => this.setState((s) => ({ onlyOpen: !s.onlyOpen })),
+      noop: () => {},
+      cols: [
+        { key: "name", label: "Nombre", render: (r) => h("span", { style: { display: "flex", gap: 10, alignItems: "center" } }, h(NS.Avatar, { initials: r.ini, size: 24 }), h("span", { style: { fontWeight: 500 } }, r.name)) },
+        { key: "cargo", label: "Cargo", muted: true },
+        { key: "acc", label: "Cuenta" },
+        { key: "tel", label: "Teléfono", render: (r) => h("span", { className: "t-numeric" }, r.tel) },
+        { key: "mail", label: "Correo", muted: true },
+        { key: "open", label: "Negocios abiertos", align: "right", render: (r) => h("span", { className: "t-numeric" }, r.open ? String(r.open) : "—") },
+      ],
+      rows,
+      toCard: (r) => ({ initials: r.ini, title: r.name, subtitle: r.cargo + " · " + r.acc, meta: r.tel, badge: r.open ? { tone: "neutral", label: r.open + (r.open === 1 ? " abierto" : " abiertos") } : null }),
+      pageLabel: "1–" + rows.length + " de 86",
+      side: C.contacts.slice(0, 9).map((c) => ({ ...c, selected: c.id === "c1" })),
+      fichaTabs: [{ id: "res", label: "Resumen" }, { id: "neg", label: "Negocios", count: 3 }, { id: "his", label: "Historial" }],
+      datos: [
+        { label: "Correo", value: "pvaldes@frigomaipo.cl" }, { label: "Móvil", value: "+56 9 8123 4417", numeric: true },
+        { label: "Teléfono", value: "+56 2 2948 3122", numeric: true }, { label: "Cuenta", value: "Frigorífico del Maipo S.A." },
+        { label: "Instalación", value: "Planta San Bernardo" }, { label: "Agregado", value: "11-09-2026 · Valentina Rojas", numeric: true },
+      ],
+      roles: [
+        { label: "NEG-0142 · Seguridad 24/7 · CD Lampa", value: "Decisora · Negociación" },
+        { label: "NEG-0156 · Guardia adicional", value: "Decisora · Propuesta enviada" },
+        { label: "NEG-0119 · Seguridad · Planta San Bernardo", value: "Firmante · Ganado" },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

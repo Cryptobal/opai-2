@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><script src="./crm-data.js"></script><style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style></helmet>
+<div class="ds" data-theme="{{ theme }}" data-device="{{ device }}" style="position:relative;width:100%;height:100%;overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="neg" title="Negocios" count="{{ openCount }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" notifications="{{ 3 }}" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Comercial" title="Negocios" subtitle="{{ subtitle }}" hint-size="100%,80px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="plus" size="{{ btnSize }}" on-click="{{ openNew }}" hint-size="160px,40px">Nuevo negocio</x-import>
+</x-import>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:16px">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="width:100%;flex:none"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" icon="search" placeholder="Buscar negocio, cuenta o folio" value="{{ q }}" on-change="{{ setQ }}" style="width:100%" hint-size="100%,44px"></x-import></div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<div style="width:288px;max-width:100%;flex:none"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" icon="search" placeholder="Buscar negocio, cuenta o folio" value="{{ q }}" on-change="{{ setQ }}" style="width:100%" hint-size="100%,44px"></x-import></div>
+</sc-if>
+<div class="chip-row" style="max-width:100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FilterChip" variant="toggle" value="Mis negocios" count="{{ 6 }}" selected="{{ mine }}" on-click="{{ toggleMine }}" hint-size="130px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FilterChip" variant="applied" label="Cierre" value="Nov 2026" on-remove="{{ noop }}" hint-size="150px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FilterChip" variant="add" hint-size="140px,32px"></x-import>
+</div>
+<div style="display:flex;gap:8px;align-items:center;position:relative;margin-left:auto">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmented" options="{{ viewOpts }}" value="{{ view }}" on-change="{{ setView }}" label="Vista de negocios" hint-size="160px,36px"></x-import>
+<sc-if value="{{ showColBtn }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon-right="chevron-down" on-click="{{ toggleCols }}" hint-size="130px,40px">{{ colBtnLabel }}</x-import>
+</sc-if>
+<sc-if value="{{ colsOpen }}" hint-placeholder-val="{{ false }}">
+<div class="overlay" style="position:absolute;top:calc(100% + 6px);right:0;width:264px;z-index:20;padding:8px 12px 4px;display:flex;flex-direction:column">
+<span class="t-caption" style="padding:4px 0 2px">Columnas visibles</span>
+<sc-for list="{{ colOpts }}" as="c" hint-placeholder-count="10">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ c.on }}" disabled="{{ c.locked }}" label="{{ c.label }}" on-change="{{ c.toggle }}" hint-size="100%,44px"></x-import>
+</sc-for>
+<div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--ds-border);margin-top:4px;padding:4px 0">
+<span class="t-caption">Se guarda para tu usuario</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" on-click="{{ resetCols }}" hint-size="100px,40px">Restablecer</x-import>
+</div>
+</div>
+</sc-if>
+</div>
+</div>
+<sc-if value="{{ isBoard }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;gap:12px;overflow-x:auto;padding-bottom:12px;align-items:flex-start;scroll-snap-type:x mandatory">
+<sc-for list="{{ columns }}" as="col" hint-placeholder-count="8">
+<div style="flex:none;width:{{ colWidth }};display:flex;flex-direction:column;gap:8px;scroll-snap-align:start">
+<div style="display:flex;flex-direction:column;gap:2px;padding:4px 4px 8px;border-bottom:2px solid {{ col.bar }}">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+<span style="font:600 14px/20px var(--font-sans)">{{ col.name }}</span>
+<span class="t-body-sm subtle t-numeric">{{ col.count }}</span>
+</div>
+<span class="t-caption t-numeric">{{ col.meta }}</span>
+</div>
+<sc-for list="{{ col.deals }}" as="d" hint-placeholder-count="2">
+<div class="card" style="padding:16px;display:flex;flex-direction:column;gap:6px;cursor:pointer">
+<span class="t-mono subtle" style="font-size:12px;line-height:16px">{{ d.folio }}</span>
+<span style="font:500 14px/20px var(--font-sans);text-wrap:pretty">{{ d.name }}</span>
+<span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">{{ d.acc }}</span>
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-top:4px">
+<span class="t-numeric" style="font:600 15px/20px var(--font-sans)">{{ d.valFmt }}</span>
+<span class="t-caption t-numeric">{{ d.dateLabel }}</span>
+</div>
+<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:4px">
+<span style="display:flex;align-items:center;gap:8px;min-width:0">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Avatar" initials="{{ d.own }}" size="{{ 24 }}" hint-size="24px,24px"></x-import>
+<span class="t-caption" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ d.ownName }}</span>
+</span>
+<sc-if value="{{ d.stale }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="warning" hint-size="90px,22px">{{ d.staleLabel }}</x-import>
+</sc-if>
+<sc-if value="{{ d.lostReason }}" hint-placeholder-val="{{ false }}">
+<span class="t-caption" style="color:var(--ds-danger-fg)">{{ d.lostReason }}</span>
+</sc-if>
+</div>
+</div>
+</sc-for>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isList }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="margin:0 -16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ tableCols }}" rows="{{ rows }}" cards="{{ true }}" to-card="{{ toCard }}" on-row-click="{{ noop }}" hint-size="100%,400px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ tableCols }}" rows="{{ rows }}" on-row-click="{{ noop }}" hint-size="100%,400px"></x-import>
+</sc-if>
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:12px;font:400 14px/20px var(--font-sans);color:var(--ds-fg-muted)">
+<span class="t-numeric">{{ pageLabel }}</span>
+<span class="t-numeric">{{ listTotal }}</span>
+</div>
+</sc-if>
+</x-import>
+</x-import>
+<sc-if value="{{ newOpen }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Dialog" contained="{{ true }}" title="Nuevo negocio" description="Se crea en la etapa que elijas y queda a tu nombre." actions="{{ newActions }}" on-close="{{ closeNew }}" hint-size="440px,560px">
+<div style="display:flex;flex-direction:column;gap:16px;padding-bottom:4px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Nombre del negocio" value="{{ newName }}" on-change="{{ setNewName }}" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Cuenta" value="{{ newAcc }}" options="{{ accOpts }}" on-change="{{ setNewAcc }}" hint="Si la cuenta no existe, créala desde Cuentas." hint-size="100%,90px"></x-import>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Tipo" value="Nueva instalación" options="{{ tipoOpts }}" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Origen" value="Referido" options="{{ origenOpts }}" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Etapa inicial" value="s1" options="{{ stageOpts }}" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Cierre estimado" value="30-11-2026" icon="calendar" hint-size="100%,70px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Valor mensual estimado" prefix="$" value="6.480.000" hint="Se reemplaza por el total de la cotización cuando exista." hint-size="100%,90px"></x-import>
+</div>
+</x-import>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;screen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;tablero&quot;,&quot;lista&quot;,&quot;nuevo&quot;],&quot;default&quot;:&quot;tablero&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { q: "", mine: false, view: null, colsOpen: null, newOpen: null, newName: "Guardias 24/7 · Bodega Pudahuel", newAcc: "Distribuidora Pacífico Sur Ltda.", cols: ["neg", "cuenta", "etapa", "valor", "cierre", "resp"] };
+  componentDidMount() { this._t = setInterval(() => { if (window.CRM && window.OPAI20DesignSystem_44e4d7) { clearInterval(this._t); this.forceUpdate(); } }, 80); }
+  componentWillUnmount() { clearInterval(this._t); }
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const C = window.CRM;
+    const device = this.props.device ?? "desktop";
+    const theme = this.props.theme ?? "light";
+    const screen = this.props.screen ?? "tablero";
+    const isPhone = device === "phone";
+    if (!C) return { device, theme, isPhone, notPhone: !isPhone };
+    const view = this.state.view ?? (screen === "lista" ? "lista" : "tablero");
+    const colsOpen = this.state.colsOpen ?? (screen === "lista" && !isPhone);
+    const newOpen = this.state.newOpen ?? (screen === "nuevo");
+    const q = this.state.q.toLowerCase();
+    let deals = C.deals.filter((d) => !q || (d.name + d.acc + d.folio).toLowerCase().includes(q));
+    if (this.state.mine) deals = deals.filter((d) => d.own === "VR");
+    const open = C.deals.filter((d) => d.stage !== "s7" && d.stage !== "s8");
+    const openSum = open.reduce((a, d) => a + d.val, 0);
+    const columns = C.stages.map((s) => {
+      const ds = deals.filter((d) => d.stage === s.id);
+      const sum = ds.reduce((a, d) => a + d.val, 0);
+      const closed = s.id === "s7" || s.id === "s8";
+      return {
+        id: s.id, name: s.name, count: ds.length,
+        bar: s.id === "s7" ? "var(--ds-success)" : s.id === "s8" ? "var(--ds-danger)" : "var(--ds-border-strong)",
+        meta: closed ? C.fmt(sum) + " · octubre" : C.fmt(sum) + " · " + s.prob + " %",
+        deals: ds.map((d) => ({
+          ...d, valFmt: C.fmt(d.val),
+          dateLabel: closed ? (s.id === "s7" ? "Ganado " : "Perdido ") + d.close.slice(0, 5) : "Cierre " + d.close.slice(0, 5),
+          stale: !closed && s.dias && d.days > s.dias, staleLabel: d.days + " d en etapa",
+          lostReason: s.id === "s8" ? C.motivos[d.folio] : null,
+        })),
+      };
+    });
+    const ALL = [
+      { key: "neg", label: "Negocio", locked: true, render: (r) => h("span", { style: { display: "flex", flexDirection: "column" } }, h("span", { style: { fontWeight: 500 } }, r.name), h("span", { className: "t-mono subtle", style: { fontSize: 12 } }, r.folio)) },
+      { key: "cuenta", label: "Cuenta", render: (r) => r.acc },
+      { key: "etapa", label: "Etapa", render: (r) => h(NS.Badge, { tone: C.stageTone(r.stage) }, C.stageName(r.stage)) },
+      { key: "valor", label: "Valor mensual", align: "right", render: (r) => h("span", { className: "t-numeric" }, C.fmt(r.val)) },
+      { key: "prob", label: "Probabilidad", align: "right", render: (r) => C.stages.find((s) => s.id === r.stage).prob + " %" },
+      { key: "cierre", label: "Cierre estimado", render: (r) => h("span", { className: "t-numeric" }, r.close) },
+      { key: "resp", label: "Responsable", render: (r) => h("span", { style: { display: "flex", gap: 8, alignItems: "center" } }, h(NS.Avatar, { initials: r.own, size: 24 }), r.ownName) },
+      { key: "origen", label: "Origen", render: (r) => r.origen },
+      { key: "tipo", label: "Tipo", render: (r) => r.tipo },
+      { key: "dias", label: "Días en etapa", align: "right", render: (r) => (r.stage === "s7" || r.stage === "s8" ? "—" : r.days + " d") },
+    ];
+    const cols = this.state.cols;
+    const colOpts = ALL.map((c) => ({ label: c.label, on: cols.includes(c.key), locked: !!c.locked, toggle: () => this.setState((s) => ({ cols: s.cols.includes(c.key) ? s.cols.filter((k) => k !== c.key) : ALL.map((a) => a.key).filter((k) => s.cols.includes(k) || k === c.key) })) }));
+    const rows = deals.filter((d) => d.stage !== "s8");
+    const opts = (a) => a.map((x) => ({ value: x, label: x }));
+    return {
+      device, theme, isPhone, notPhone: !isPhone,
+      tabs: C.tabs, groups: C.groups, openCount: open.length,
+      subtitle: open.length + " abiertos · " + C.fmt(openSum) + " mensuales en curso",
+      btnSize: isPhone ? "lg" : "md",
+      q: this.state.q, setQ: (v) => this.setState({ q: v }),
+      mine: this.state.mine, toggleMine: () => this.setState((s) => ({ mine: !s.mine })),
+      noop: () => {},
+      viewOpts: [{ value: "tablero", label: "Tablero" }, { value: "lista", label: "Lista" }],
+      view, setView: (v) => this.setState({ view: v, colsOpen: false }),
+      isBoard: view === "tablero", isList: view === "lista",
+      showColBtn: view === "lista" && !isPhone,
+      colBtnLabel: "Columnas · " + cols.length,
+      colsOpen: colsOpen && view === "lista" && !isPhone,
+      toggleCols: () => this.setState({ colsOpen: !colsOpen }),
+      colOpts, resetCols: () => this.setState({ cols: ["neg", "cuenta", "etapa", "valor", "cierre", "resp"] }),
+      columns, colWidth: isPhone ? "296px" : "272px",
+      tableCols: ALL.filter((c) => cols.includes(c.key)),
+      rows,
+      toCard: (r) => ({ title: r.name, subtitle: r.acc + " · " + C.fmt(r.val), meta: r.folio, badge: { tone: C.stageTone(r.stage), label: C.stageName(r.stage) }, chevron: true }),
+      pageLabel: "1–" + rows.length + " de " + rows.length + " · sin perdidos",
+      listTotal: "Total " + C.fmt(rows.reduce((a, d) => a + d.val, 0)) + " mensuales",
+      newOpen, openNew: () => this.setState({ newOpen: true }), closeNew: () => this.setState({ newOpen: false }),
+      newName: this.state.newName, setNewName: (v) => this.setState({ newName: v }),
+      newAcc: this.state.newAcc, setNewAcc: (v) => this.setState({ newAcc: v }),
+      accOpts: opts(["Distribuidora Pacífico Sur Ltda.", "Frigorífico del Maipo S.A.", "Logística Andina SpA", "Retail Austral SpA", "Clínica Los Leones S.A."]),
+      tipoOpts: opts(["Nuevo cliente", "Nueva instalación", "Ampliación de dotación", "Renovación de contrato", "Servicio temporal"]),
+      origenOpts: opts(["Referido", "Sitio web", "Licitación", "Prospección en frío", "Cliente actual", "LinkedIn", "Feria o evento"]),
+      stageOpts: C.stages.slice(0, 6).map((s) => ({ value: s.id, label: s.name })),
+      newActions: NS.Button ? [h(NS.Button, { key: "c", variant: "secondary", onClick: () => this.setState({ newOpen: false }) }, "Cancelar"), h(NS.Button, { key: "o", onClick: () => this.setState({ newOpen: false }) }, "Crear negocio")] : null,
+    };
+  }
+}
+</script>
+</body>
+</html>
