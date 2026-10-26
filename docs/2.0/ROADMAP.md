@@ -1,6 +1,6 @@
 # ROADMAP — OPAI 2.0 hasta terminar
 
-**Actualizado:** 25-oct-2026 (CAR-10) · **Orden:** ADR-030 (nota del 25-oct: Núcleo primero, luego Puestos) y ADR-048 (módulos vendibles por separado) · **Vista por módulo y etapa:** [`PLAN-desarrollo.md`](PLAN-desarrollo.md) · **Estado real:** desde el 24-oct-2026 el estado de las tareas vive en Linear (`AGENTS.md`, «Tareas (Linear)») y `ESTADO.md` es la foto técnica; este archivo planifica y se actualiza si cambia el plan.
+**Actualizado:** 25-oct-2026 (CAR-10) · **Orden:** ADR-030 (nota del 25-oct: Núcleo primero, luego Puestos → Comercial → CPQ) y ADR-048 (módulos vendibles por separado) · **Vista por módulo y etapa:** [`PLAN-desarrollo.md`](PLAN-desarrollo.md) · **Estado real:** desde el 24-oct-2026 el estado de las tareas vive en Linear (`AGENTS.md`, «Tareas (Linear)») y `ESTADO.md` es la foto técnica; este archivo planifica y se actualiza si cambia el plan.
 
 > **Las semanas son estimaciones** (25-oct: la fase 1 suma el 07b y el Brief 11 va antes de la fase 2, así que las fases 2 a 6 se corren unas 4 semanas; la fase 2 ya está ajustada y las fechas de las fases 3 a 6 se recalculan al cerrar el Núcleo), contadas desde el viernes 23-oct-2026 ( semana 1 = lunes 26-oct), para un constructor (Claude) con revisión y QA por bots y decisiones de Carlos a tiempo. Sirven para ordenar y detectar atrasos, no son compromisos. Las fases 1 y 2 se estiman con el ritmo real observado (Briefs 00 a 02 en dos días); de la fase 3 en adelante, con el juicio del documento de arranque, porque dependen de extracciones que aún no existen.
 
@@ -47,7 +47,7 @@ Las **bases transversales** (rendimiento, PWA, navegación) aplican a todo brief
 
 ### Fase 2 — Comercial, CPQ y Documentos · pendiente · semanas 7–12 (7-dic → 15-ene, con fiestas de fin de año; corrida unas 4 semanas por el 07b y el Brief 11)
 
-> **Orden de trabajo:** esta fase empieza después de Puestos y guardias (Brief 11; Decisión de Carlos, 25-oct-2026, chat con OPAI 2.0 (registrada por el bot OPAI 2.0), 12:42 CLT). Hacer CPQ antes que Comercial en reglas y diseño es **propuesta pendiente de confirmar**. **Requisito de construcción:** los negocios (Briefs 06 y 07) existen antes del cotizador (Brief 10), porque CPQ depende de Comercial (ADR-040, ADR-048). El 07b pasó a la fase 1.
+> **Orden de trabajo:** esta fase empieza después de Puestos y guardias (Brief 11; Decisión de Carlos, 25-oct-2026, chat con OPAI 2.0 (registrada por el bot OPAI 2.0), 12:42 CLT). Después va **Comercial (CRM) y luego CPQ**, en reglas, diseño y construcción (Decisión de Carlos, 25-oct-2026 23:29, chat con OPAI 2.0 (registrada por el bot OPAI 2.0)), porque la cotización cuelga del negocio y los puestos se crean al ganarlo (ADR-040, ADR-048 y su respuesta 3 de las 23:10). **Requisito de construcción:** los negocios (Briefs 06 y 07) existen antes del cotizador (Brief 10), porque CPQ depende de Comercial (ADR-040, ADR-048). El 07b pasó a la fase 1.
 
 | Paso | Nombre | Estado |
 |---|---|---|
@@ -75,7 +75,7 @@ Las **bases transversales** (rendimiento, PWA, navegación) aplican a todo brief
 | Extracción | `extraccion/portales.md`: Portal Guardia, Terreno, Cliente y Supervisor de 1.0, flujos, emparejamiento de dispositivos, uso real | Extracción hecha fuera del repo, sin verificar; se sube en un PR aparte, antes del Brief 15 |
 | Extracción | `extraccion/rondas-y-tickets.md` | Hecho |
 | Especificación | `modulos/operaciones.md` (borrador: Puestos y guardias con reglas definidas por Carlos el 25-oct-2026 (Page «Puestos y guardias OPAI 2.0: propuesta»); mockup pendiente de aprobación) · `modulos/rondas.md`, `modulos/tickets.md`, `modulos/portales.md` | Operaciones I escrita (25-oct); el resto pendiente |
-| **11** | **Operaciones I · Puestos y guardias** (**adelantado**: va justo después del cierre del Núcleo, antes de CPQ y Comercial): puestos (1 puesto = 1 posición, PPC con motivo), asignaciones persona ↔ puesto, pauta (planilla) guardada como series y excepciones (ADR-048 §6), turnos y cobertura («confirmar cobertura» sin Asistencia) | Pendiente: aprobación del mockup y ajuste al DS V2 → brief |
+| **11** | **Operaciones I · Puestos y guardias** (**adelantado**: va justo después del cierre del Núcleo, antes de Comercial y CPQ): puestos (1 puesto = 1 posición, PPC con motivo), asignaciones persona ↔ puesto, pauta (planilla) guardada como series y excepciones (ADR-048 §6), turnos y cobertura («confirmar cobertura» sin Asistencia) | Pendiente: aprobación del mockup y ajuste al DS V2 → brief |
 | **12** | **Operaciones II**: turnos extra, supervisión y visitas, libro de novedades, alcance del supervisor (ADR-022) | Pendiente |
 | **13** | **Tickets** transversal (ADR-025) | Pendiente |
 | **14** | **Rondas** (ADR-024): puntos, plantillas, ejecución sin conexión con cola local, trust score, informes | Pendiente |
@@ -168,7 +168,7 @@ No se portan de 1.0 y solo se reconstruyen con demanda real (lista canónica de 
 
 ## 5. Próximas tareas, en orden
 
-Orden (Decisión de Carlos, 25-oct-2026, chat con OPAI 2.0 (registrada por el bot OPAI 2.0)): **primero se cierra el Núcleo, después Puestos**. Que CPQ vaya antes que Comercial en reglas y diseño es propuesta pendiente de confirmar. Responsable y etapa de cada módulo en [`PLAN-desarrollo.md`](PLAN-desarrollo.md).
+Orden (Decisión de Carlos, 25-oct-2026, chat con OPAI 2.0 (registrada por el bot OPAI 2.0)): **primero se cierra el Núcleo, después Puestos → Comercial → CPQ** (el orden de Comercial y CPQ: Decisión de Carlos, 25-oct-2026 23:29, chat con OPAI 2.0 (registrada por el bot OPAI 2.0)). Responsable y etapa de cada módulo en [`PLAN-desarrollo.md`](PLAN-desarrollo.md).
 
 0. **Diseño 1 · DS 2.0 en Claude Design:** cargarlo desde el repo (`tokens.css`, `design/export-ds-2.0/`) en «OPAI 2.0 Design System V2» (en curso: completando componentes). **Carlos** lo revisa y lo publica.
 1. **Brief 05 · Navegación por áreas:** Design Prompt (**Claude**) → diseño en Claude Design con el sistema cargado → **Carlos** aprueba y prueba → brief (**Claude**) → PR, Revisor, QA y merge (bot «OPAI 2.0»).
@@ -176,6 +176,6 @@ Orden (Decisión de Carlos, 25-oct-2026, chat con OPAI 2.0 (registrada por el bo
 3. **Brief 07b · Capas de sueldo:** (preguntas de ADR-048 respondidas) diseño de capas de sueldo y anexo → aprobación de **Carlos** → brief y PR (**Claude**).
 4. **En paralelo:** PR de documentación del plan (CAR-10); PR 2 del Brief 03 (**Claude**); sesión D del Brief 02 (**Carlos**, en su Mac: seeds, secretos de previews, verificación guiada); aprobación del mockup de Puestos (**Carlos**).
 5. **Brief 11 · Puestos y guardias (Operaciones I):** ajustar el mockup al sistema si difiere → completar `extraccion/operaciones.md` → brief (**Claude**).
-6. **CPQ** (se diseña cuando cierren sus reglas): 8 respuestas de **Carlos** → `modulos/cpq.md` → diseño → brief.
-7. **Comercial** (ídem): v2 del mockup → `modulos/comercial.md` aprobado → Briefs 06 y 07. **Requisito:** los Briefs 06 y 07 se construyen antes del Brief 10 (cotizador), porque CPQ depende de Comercial.
+6. **Comercial:** v2 del mockup → `modulos/comercial.md` aprobado → Briefs 06 y 07. **Requisito:** los Briefs 06 y 07 se construyen antes del Brief 10 (cotizador), porque CPQ depende de Comercial.
+7. **CPQ** (se diseña cuando cierren sus reglas): 8 respuestas de **Carlos** → `modulos/cpq.md` → diseño → Briefs 08 y 10.
 8. **QA y merge por PR** de cada brief (Revisor, «Diseño y QA OPAI 2.0», bot «OPAI 2.0»).
