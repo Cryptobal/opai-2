@@ -17,6 +17,11 @@ export function fijarPendiente(href: string | null): void {
   for (const avisar of oyentes) avisar();
 }
 
+/** Limpia solo si el destino vigente es `href`: un reclic rápido a otro destino no se pisa. */
+export function limpiarPendiente(href: string): void {
+  if (pendiente === href) fijarPendiente(null);
+}
+
 /** Ruta de destino de la navegación en curso, o null si no hay ninguna. */
 export function usePendiente(): string | null {
   return useSyncExternalStore(

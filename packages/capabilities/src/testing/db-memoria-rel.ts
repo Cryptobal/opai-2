@@ -24,8 +24,9 @@ export const RELACIONES: Record<string, Record<string, Rel>> = {
 };
 
 type Tabla = (nombre: string) => Fila[];
-type IncludeArg = { where?: Where; orderBy?: unknown; take?: number; include?: Include; select?: unknown };
-type Include = Record<string, boolean | IncludeArg | { select?: Record<string, boolean | IncludeArg> }>;
+type IncludeArg = { where?: Where; orderBy?: unknown; take?: number; include?: Include; select?: Include };
+export type Include = Record<string, boolean | IncludeArg | { select?: Record<string, unknown> }>;
+export type IncluirArgs = { include?: Include; select?: Include };
 
 function contar(tabla: Tabla, modelo: string, fila: Fila, select: Record<string, unknown> = {}): Fila {
   const c: Fila = {};
@@ -39,29 +40,39 @@ function contar(tabla: Tabla, modelo: string, fila: Fila, select: Record<string,
   return c;
 }
 
-/** Resuelve `include` (uno/muchos, anidado y `_count`) sobre una fila. */
-export function incluir(tabla: Tabla, modelo: string, fila: Fila, include?: Include): Fila {
-  if (!include) return { ...fila };
+/** Resuelve relaciones de `include` y `select` (uno/muchos, anidado y `_count`) sobre una fila. */
+export function incluir(tabla: Tabla, modelo: string, fila: Fila, args?: IncluirArgs): Fila {
+  if (!args?.include && !args?.select) return { ...fila };
   const out: Fila = { ...fila };
-  for (const [rel, arg] of Object.entries(include)) {
-    if (!arg) continue;
-    if (rel === "_count") {
-      out["_count"] = contar(tabla, modelo, fila, (arg as { select?: Record<string, unknown> }).select);
-      continue;
+  // `select` solo resuelve relaciones conocidas (los campos escalares ya están en la fila cruda);
+  // `include` además admite un belongs-to no registrado por `${rel}Id` (como la versión anterior).
+  const procesar = (spec: Include, soloConocidas: boolean) => {
+    for (const [rel, arg] of Object.entries(spec)) {
+      if (!arg) continue;
+      // `true` en un include resuelve la relación sin sub-args; en un select es un campo escalar.
+      if (arg === true && soloConocidas) continue;
+      if (rel === "_count") {
+        const sel = (arg as { select?: Record<string, unknown> }).select;
+        out["_count"] = contar(tabla, modelo, fila, sel);
+        continue;
+      }
+      const reg = RELACIONES[modelo]?.[rel];
+      if (!reg && soloConocidas) continue;
+      const def = reg ?? { tabla: rel, clave: `${rel}Id` };
+      const a: IncludeArg = arg === true ? {} : (arg as IncludeArg);
+      if (def.muchos) {
+        let hijos = tabla(def.tabla).filter((f) => f[def.clave] === fila["id"] && cumple(f, a.where));
+        hijos = ordenar(hijos, a.orderBy);
+        if (a.take != null) hijos = hijos.slice(0, a.take);
+        out[rel] = hijos.map((h) => incluir(tabla, def.tabla, h, a));
+      } else {
+        const padre = tabla(def.tabla).find((f) => f["id"] === fila[def.clave]);
+        out[rel] = padre ? incluir(tabla, def.tabla, padre, a) : null;
+      }
     }
-    // Relaciones no registradas: belongs-to por `${rel}Id` (como hacía la versión anterior).
-    const def = RELACIONES[modelo]?.[rel] ?? { tabla: rel, clave: `${rel}Id` };
-    const a: IncludeArg = arg === true ? {} : (arg as IncludeArg);
-    if (def.muchos) {
-      let hijos = tabla(def.tabla).filter((f) => f[def.clave] === fila["id"] && cumple(f, a.where));
-      hijos = ordenar(hijos, a.orderBy);
-      if (a.take != null) hijos = hijos.slice(0, a.take);
-      out[rel] = hijos.map((h) => incluir(tabla, def.tabla, h, a.include));
-    } else {
-      const padre = tabla(def.tabla).find((f) => f["id"] === fila[def.clave]);
-      out[rel] = padre ? incluir(tabla, def.tabla, padre, a.include) : null;
-    }
-  }
+  };
+  if (args.include) procesar(args.include, false);
+  if (args.select) procesar(args.select, true);
   return out;
 }
 

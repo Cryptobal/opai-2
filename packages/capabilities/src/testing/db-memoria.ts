@@ -5,7 +5,7 @@
 import type { Globales, TenantDb, TenantTx } from "@opai/db";
 
 import { agrupar, cumple, ordenar, type Fila, type Where } from "./db-memoria-util";
-import { incluir, resolverWhereRelaciones } from "./db-memoria-rel";
+import { type Include, incluir, resolverWhereRelaciones } from "./db-memoria-rel";
 
 // Ids crecientes como uuid(7): el orden por id es el orden de creación, igual que en Postgres.
 let secuencia = 0;
@@ -21,7 +21,8 @@ export function dbEnMemoria(semilla: Record<string, Fila[]> = {}) {
     type Args = {
       where?: Where;
       data?: Fila;
-      include?: Parameters<typeof incluir>[3];
+      include?: Include;
+      select?: Include;
       take?: number;
       skip?: number;
       cursor?: { id: string };
@@ -56,13 +57,13 @@ export function dbEnMemoria(semilla: Record<string, Fila[]> = {}) {
     return {
       findUnique: async (a: Args) => {
         const f = filas().find((x) => cumple(x, a.where));
-        return f ? incluir(tabla, modelo, f, a.include) : null;
+        return f ? incluir(tabla, modelo, f, a) : null;
       },
       findFirst: async (a: Args = {}) => {
         const f = buscar(a)[0];
-        return f ? incluir(tabla, modelo, f, a.include) : null;
+        return f ? incluir(tabla, modelo, f, a) : null;
       },
-      findMany: async (a: Args = {}) => buscar(a).map((f) => incluir(tabla, modelo, f, a.include)),
+      findMany: async (a: Args = {}) => buscar(a).map((f) => incluir(tabla, modelo, f, a)),
       count: async (a: Args = {}) => filtrar(a.where).length,
       create: async (a: Args) => crear(a.data ?? {}),
       createMany: async (a: { data: Fila[]; skipDuplicates?: boolean }) => {

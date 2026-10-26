@@ -5,7 +5,7 @@ import { useEffect } from "react";
 
 import { ESPERA_ESQUELETO_MS } from "@/lib/cache-navegador";
 
-import { fijarPendiente } from "./navegacion-pendiente";
+import { fijarPendiente, limpiarPendiente } from "./navegacion-pendiente";
 
 let pendientes = 0;
 
@@ -32,7 +32,7 @@ export function EstadoEnlace({ href, conEsqueleto = false }: { href: string; con
       : undefined;
     return () => {
       if (t) clearTimeout(t);
-      fijarPendiente(null);
+      limpiarPendiente(href);
       if (marcado && --pendientes === 0) raiz.removeAttribute("data-navegando");
     };
   }, [pending, href, conEsqueleto]);
