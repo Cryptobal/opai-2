@@ -32,8 +32,6 @@ export type DatosShell = {
   tenant: { nombre: string } | null;
   usuario: { nombre: string; email: string; rol?: string };
   empresas: { id: string; nombre: string; actual: boolean }[];
-  /** Nombre del portal bajo la marca del riel (el ERP no lleva). */
-  subtituloMarca?: string | undefined;
   /** Quién y en qué empresa ve la página (`lib/epoca-sesion.ts`); las pestañas la comparan. */
   epoca: string;
 };
@@ -125,7 +123,6 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
       menuUsuario={menu}
       campana={datos.tenant ? <Campana portal={datos.portal} /> : undefined}
       {...(buscable ? { onBuscar: () => setPaleta(true) } : {})}
-      {...(datos.subtituloMarca ? { subtituloMarca: datos.subtituloMarca } : {})}
       onNavegar={(href) => router.push(href)}
       Link={LinkMenu}
     >

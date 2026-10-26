@@ -3,7 +3,7 @@
   "porDefecto": 165,
   "maxSobreFramework": 35,
   "rutas": {
-    "/(auth)/*": 152,
+    "/(auth)/*": 153,
     "/(erp)/configuracion*": 175,
     "/(erp)/instalaciones/nueva": 178,
     "/(erp)/personas/vencimientos": 175,

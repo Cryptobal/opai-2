@@ -18,7 +18,7 @@ import { celdaPauta, COLUMNAS_PAUTA, FILAS_PAUTA, KPIS } from "./datos";
 export function Bloque({ titulo, children }: { titulo: string; children: ReactNode }) {
   return (
     <section className="flex flex-col gap-4 border-t border-border pt-8 first:border-t-0 first:pt-0">
-      <h2 className="text-sm font-medium uppercase tracking-wide text-fg-muted">{titulo}</h2>
+      <h2 className="t-overline">{titulo}</h2>
       {children}
     </section>
   );

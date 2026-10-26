@@ -2,7 +2,12 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
-import { subtituloMarcaPortal, tituloNoEncontrado, tituloPagina } from "@/app/_components/portales";
+import {
+  conPortalActual,
+  PORTALES,
+  tituloNoEncontrado,
+  tituloPagina,
+} from "@/app/_components/portales";
 import { RutaInexistente } from "@/app/_components/ruta-inexistente";
 
 const APP = join(import.meta.dirname, "..", "app");
@@ -63,11 +68,10 @@ describe("el 404 nombra el portal", () => {
     }
   });
 
-  it("el lateral lleva el nombre del portal como subtítulo de la marca (salvo el ERP)", () => {
-    expect(subtituloMarcaPortal("trabajador")).toBe("Trabajador");
-    expect(subtituloMarcaPortal("cliente")).toBe("Cliente");
-    expect(subtituloMarcaPortal("platform")).toBe("Plataforma");
-    expect(subtituloMarcaPortal("erp")).toBeUndefined();
+  it("el selector de portal nombra el portal actual aunque no esté entre los visibles", () => {
+    const erp = PORTALES.filter((p) => p.id === "erp");
+    expect(conPortalActual(erp, "trabajador").map((p) => p.id)).toEqual(["trabajador", "erp"]);
+    expect(conPortalActual(erp, "erp").map((p) => p.id)).toEqual(["erp"]);
   });
 
   it("el not-found de cada portal usa el título con el nombre del portal", () => {

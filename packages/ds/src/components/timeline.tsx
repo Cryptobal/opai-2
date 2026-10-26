@@ -49,9 +49,9 @@ export function Timeline({
   return (
     <ol className={cn("flex flex-col", className)}>
       {items.map((it, i) => (
-        <li key={it.id} className="relative flex gap-3 pb-5 last:pb-0">
+        <li key={it.id} className="relative flex gap-3 pb-4 last:pb-0">
           {i < items.length - 1 ? (
-            <span aria-hidden className="absolute top-6 bottom-0 left-3 w-px bg-border-strong" />
+            <span aria-hidden className="absolute top-6 bottom-0 left-[11px] w-0.5 bg-border" />
           ) : null}
           <Marca actor={it.actor} />
           <div className="flex min-w-0 flex-1 flex-col gap-1">

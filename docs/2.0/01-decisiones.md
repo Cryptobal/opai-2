@@ -818,3 +818,20 @@ No se encontró: render estático roto, falta de prefetch, layouts que recarguen
    - **Las licencias por módulo y todos los montos** (incluido el margen) van a un ADR futuro de planes y precios, cuando exista Opai SpA; no se fijan aquí.
 
 **Consecuencias.** El agente interno no crea un segundo camino a los datos: si una acción no existe como capacidad, tampoco existe para él. Sigue sin haber copilotos por módulo ni chats entre personas (Tickets sigue sin chat, ADR-025). El número del brief y el mecanismo de la identidad delegada se fijan al planificarlo.
+
+---
+
+## ADR-050 · Paridad del repo con el DS V2 de Claude Design: shell y bordes de controles
+
+**Fecha:** 26-oct-2026 · **Estado:** vigente · **Reemplaza** la D7 del Brief 05 (`briefs/BRIEF-05-navegacion.md` §4.2 y `NAVEGACION.md` §10) y lo que decía CAR-12 sobre la búsqueda en la barra superior del teléfono · **Completa** ADR-014.
+
+**Contexto.** El informe de Diseño y QA del 26-oct-2026 17:53 comparó el repo (`packages/ds` y `apps/web`) con el design system aprobado «OPAI 2.0 Design System V2» (Claude Design 44e4d7b9). Los tokens coinciden, pero el shell se había apartado del diseño (la búsqueda del teléfono pasó a la barra inferior por la D7) y los bordes de los controles (`border-strong`, `#d4d4d8` sobre blanco, 1,5:1) no cumplen el contraste de 3:1 de WCAG 1.4.11.
+
+**Decisión** (Carlos, 26-oct-2026 17:57, en sus palabras: «El shell sigue el diseño de Claude; que el repo se ajuste» y «Sí, oscurecer los bordes para cumplir accesibilidad»):
+
+1. **Shell como en el export** (`docs/2.0/design/export-ds-2.0/pantallas/ShellPhone.html`, `ShellTablet.html` y `ShellDesktop.html`): en el teléfono «Buscar» vuelve a la barra superior de 52 px (portal, Buscar, campana y avatar) y sale de la barra inferior; en el riel no va el wordmark «OPAI» sobre el selector y la búsqueda se ve como en el export; en escritorio el usuario va al pie de la barra lateral y el selector de portal es la tarjeta del export.
+2. **Borde de controles:** token `--ds-border-control` (`#8a8a93` en claro, `#6b6b74` en oscuro, ≥ 3:1 sobre `surface` y `bg`) en Input, Select, Combobox, Textarea, Checkbox, Radio y la pista apagada del Switch. `border` y `border-strong` quedan para separadores y tarjetas.
+
+**Alcance y límites.** ADR-050 invierte, solo para el shell y los bordes de controles, la regla «en los choques entre el export y el código manda el código» de `PLAN-desarrollo.md`. No toca la D9 (barra lateral de escritorio desde 1024 px), que Carlos ya aprobó (`briefs/BRIEF-05-navegacion.md` D9, línea 84; Carlos, 26-oct-2026 11:03 CLT): el repo mantiene hoy el riel hasta 1279 px, como en el DS V2 de Claude Design, y ShellTablet queda como referencia del riel; implementar la D9 (bajar el corte a 1024 px) es un encargo de código aparte, no una decisión pendiente. Fuente de la cita: chat Diseño y QA OPAI 2.0, tarjeta t58s257, 26-oct-2026 17:57 CLT. El informe de Diseño y QA (17:53) no está en el repo. En el export de `pantallas/`, `#2A2A2F` pasó a `--ds-border` (`#26262A`) y `#1F1F23` a `--ds-fill` (`#202024`): diferencias de un tono, aceptadas para no tener grises fuera de tokens.
+
+**Consecuencias.** La D7 deja de regir: el teléfono no tiene «Buscar» en la barra inferior, que vuelve a tener hasta cuatro ítems de navegación más «Más». Un test de `packages/ds` verifica el contraste de los tokens en claro y oscuro.
