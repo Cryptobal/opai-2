@@ -20,8 +20,9 @@ type Props<T> = {
 };
 
 /**
- * Sección del centro de Configuración: índice angosto a la izquierda (iPad y desktop) y la sección
- * a la derecha con su título y acción; en teléfono, la sección con "‹ Configuración".
+ * Sección del centro de Configuración: el mismo índice de `/configuracion` a la izquierda (iPad y
+ * desktop: ancho, búsqueda y descripciones) y la sección a la derecha con su título y acción; en
+ * teléfono, la sección con "‹ Configuración".
  */
 export function PaginaConfig<T = undefined>({
   seccion,
@@ -50,7 +51,6 @@ export function PaginaConfig<T = undefined>({
         const sel = typeof seccion === "function" ? seccion(datos) : seccion;
         return (
           <SplitScreen
-            angosto
             telefono="detalle"
             etiquetaLista="Índice de configuración"
             etiquetaDetalle={t}
