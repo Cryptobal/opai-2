@@ -1,4 +1,5 @@
 import { forTenant, forUser, globales } from "@opai/db";
+import type { Excepcion } from "@opai/domain";
 
 /** Membresía con su tenant, tal como se lista para elegir empresa. */
 export type MembresiaConTenant = {
@@ -26,6 +27,9 @@ export type ApiKeyFila = {
 
 export type UsuarioFila = { id: string; name: string; email: string; platformRole: string | null };
 
+/** Acceso efectivo de una membresía: rol personalizado (null = rol base) y excepciones (ADR-022). */
+export type AccesoFila = { permisosRol: string[] | null; excepciones: Excepcion[] };
+
 /** Lecturas que necesita el borde para resolver al actor. Inyectables en tests. */
 export type Fuentes = {
   membresiasDe(userId: string): Promise<MembresiaConTenant[]>;
@@ -34,6 +38,8 @@ export type Fuentes = {
   tenantPorSlug(slug: string): Promise<{ id: string; estado: string } | null>;
   keyPorHash(tenantId: string, hash: string): Promise<ApiKeyFila | null>;
   membresia(tenantId: string, userId: string): Promise<{ rol: string; estado: string } | null>;
+  /** Rol personalizado y excepciones de la membresía del usuario en el tenant (ADR-022). */
+  acceso(tenantId: string, userId: string): Promise<AccesoFila>;
   marcarUsoKey(tenantId: string, id: string): Promise<void>;
 };
 
@@ -57,6 +63,18 @@ export const fuentesReales: Fuentes = {
     forTenant(tenantId).apiKey.findUnique({ where: { hash }, include: { autonomia: true } }),
   membresia: (tenantId, userId) =>
     forTenant(tenantId).membership.findUnique({ where: { tenantId_userId: { tenantId, userId } } }),
+  async acceso(tenantId, userId) {
+    const m = await forTenant(tenantId).membership.findUnique({
+      where: { tenantId_userId: { tenantId, userId } },
+      include: { rolTenant: true, excepciones: true },
+    });
+    const rol = m?.rolTenant;
+    return {
+      // Un rol archivado deja de aplicar: la membresía cae a su rol base.
+      permisosRol: rol && !rol.archivadoEn ? rol.permisos : null,
+      excepciones: (m?.excepciones ?? []).map((e) => ({ permiso: e.permiso, conceder: e.conceder })),
+    };
+  },
   async marcarUsoKey(tenantId, id) {
     await forTenant(tenantId).apiKey.update({ where: { id }, data: { ultimoUsoEn: new Date() } });
   },
