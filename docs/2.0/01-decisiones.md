@@ -442,7 +442,7 @@ OPAI puede ofrecer además **automatizaciones alojadas** (por ejemplo, búsqueda
 7. **Al trasladar a una persona,** el puesto de origen queda en PPC «Sin asignar».
 8. **El anexo de contrato lo aprueba RRHH** (el rol que aprueba es configurable); **un agente no lo aprueba** (ADR-048, punto 7, ya lo dejaba sujeto a aprobación humana).
 9. **El supervisor es un puesto más.**
-10. Los puestos no se crean al ganar un negocio (ver la modificación del punto 3 en ADR-040, 25-oct).
+10. Los puestos no se crean solos al ganar un negocio: al ganarlo se **ofrecen** por línea de guardias y RRHH los confirma (Decisión de Carlos, 25-oct-2026 23:10, chat con OPAI 2.0 (registrada por el bot OPAI 2.0); nota del punto 3 en ADR-040 y ADR-048, respuesta 3).
 
 ---
 
@@ -517,7 +517,7 @@ OPAI puede ofrecer además **automatizaciones alojadas** (por ejemplo, búsqueda
 6. Embudo: etapas configurables por tenant en Configuración, con la única regla fija de una ganada y una perdida; para Gard "Aceptada" es abierta con `exige: inicio_servicio` (punto 7).
 7. Migrar `documentos.etiquetas` al catálogo: **sí, ahora** (punto 6).
 
-**Nota del 25-oct-2026 sobre el punto 3 — reglas definidas por Carlos el 25-oct-2026 (Page «Puestos y guardias OPAI 2.0: propuesta»); mockup pendiente de aprobación.** El consumidor (c) de `comercial.negocio.ganado` queda **sin efecto**: los puestos **no se crean al ganar**. Se crean desde la instalación o con un **botón opcional, con vista previa, en la cotización aceptada**, solo para las líneas de tipo puesto; el botón crea **un puesto por posición**, en PPC, y no duplica los ya creados. Los consumidores (a) y (b) no cambian. Reglas del puesto en ADR-036, actualización del 25-oct.
+**Nota del 25-oct-2026 sobre el punto 3 — reglas definidas por Carlos el 25-oct-2026 (Page «Puestos y guardias OPAI 2.0: propuesta»); mockup pendiente de aprobación.** El consumidor (c) de `comercial.negocio.ganado` queda **sin efecto**: los puestos **no se crean al ganar**. Se crean desde la instalación o con un **botón opcional, con vista previa, en la cotización aceptada**, solo para las líneas de tipo puesto; el botón crea **un puesto por posición**, en PPC, y no duplica los ya creados. Los consumidores (a) y (b) no cambian. Reglas del puesto en ADR-036, actualización del 25-oct. **Actualización (Decisión de Carlos, 25-oct-2026 23:10, chat con OPAI 2.0 (registrada por el bot OPAI 2.0)):** el disparador para ofrecer los puestos es **ganar el negocio**, no la cotización. Al ganarlo, cada línea de guardias de la cotización se ofrece para crear su puesto (un puesto por posición, en PPC) con el sueldo bruto cotizado, y **RRHH lo confirma**; nada se crea sin esa confirmación. Si la línea no tiene sueldo, el puesto se crea y toma el sueldo de la instalación, que RRHH completa. Una cotización sin guardias (por ejemplo, de cámaras) no crea puestos ni sueldos. Los puestos también se pueden crear desde la instalación. Detalle en `modulos/cpq.md` (ADR-048, respuesta 3).
 
 ---
 
@@ -716,7 +716,7 @@ No se encontró: render estático roto, falta de prefetch, layouts que recarguen
 
 ## ADR-048 · Módulos vendibles por separado: dependencias duras y fuentes opcionales
 
-**Fecha:** 25-oct-2026 · **Estado:** vigente (decisión de Carlos, 25-oct-2026) · Completa ADR-003 y ADR-036; **modifica** ADR-030. Modifica el orden de dependencias de `ROADMAP.md` (Nómina ya no depende de la fase 4).
+**Fecha:** 25-oct-2026 · **Estado:** vigente (decisión de Carlos, 25-oct-2026; preguntas respondidas por Carlos el 25-oct-2026 23:10, nota al final: Nómina exige Puestos) · Completa ADR-003 y ADR-036; **modifica** ADR-030. Modifica el orden de dependencias de `ROADMAP.md` (Nómina ya no depende de la fase 4).
 
 **Contexto.** ADR-003 exige que un módulo apagado no rompa a otro, pero el plan encadenaba módulos operativos: Nómina «sobre asistencia», la pauta con «asistencia de hoy» y Asistencia contra puestos de Operaciones. Así, un cliente que solo quiere Nómina o solo Asistencia tendría que comprar la cadena entera.
 
@@ -763,6 +763,11 @@ No se encontró: render estático roto, falta de prefetch, layouts que recarguen
 3. **CPQ con instalación nueva.** Recomendación: el sueldo se define en la línea cotizada y, al ganar el negocio, se ofrece crearlo como capa de instalación o de puesto.
 4. **Repintar la pauta el día de hoy.** Recomendación: hoy se trata como pasado si ya tiene una marca o una cobertura confirmada en la serie; si no, el cambio rige desde hoy.
 
-**Estado de las preguntas (25-oct-2026, CAR-10): siguen abiertas.** Carlos no las ha respondido. Cada una conserva arriba la recomendación de OPAI 2.0, que no es una decisión. **Bloquean el Brief 07b:** no se escribe hasta que Carlos las responda y su respuesta quede registrada con su fuente. *Nota:* la recomendación 3 se escribió antes de las reglas de Puestos del 25-oct (los puestos no se crean al ganar; nota del punto 3 en ADR-040); si Carlos la acepta, su momento exacto (al ganar o con el botón de la cotización aceptada) se fija en `modulos/cpq.md`.
+**Respuestas de Carlos (nota del 25-oct-2026; Decisión de Carlos, 25-oct-2026 23:10, chat con OPAI 2.0 (registrada por el bot OPAI 2.0)).** Las cuatro preguntas quedan **respondidas**; el texto de arriba (preguntas y recomendaciones) se conserva como historia. El Brief 07b ya no está bloqueado por este ADR.
 
-**Nota del 25-oct-2026 sobre el punto 6 (CAR-10).** La regla de la pauta por series y excepciones ya está en `extraccion/operaciones.md` (§3, esqueleto) y en `modulos/operaciones.md` (R13, borrador). El trato del día de hoy al repintar sigue siendo la pregunta abierta 4.
+1. **Capa de sueldo sin Operaciones → Nómina exige Puestos.** Payroll (Nómina) **exige el módulo Puestos (Operaciones I)**: el sueldo sale de la capa de instalación o de puesto (ADR-036). **Modifica el punto 1 y la tabla del punto 4:** Nómina ya no se vende solo con el núcleo; depende del núcleo y de Puestos. Las dependencias duras pasan a ser tres: CPQ → Comercial, Licitaciones → CPQ y **Nómina → Puestos (Operaciones I)**.
+2. **Fuente de los días trabajados.** Los días trabajados salen de **Asistencia**, por Face ID o por la marca manual en la asistencia diaria. **La pauta solo define los turnos de cada guardia y no alimenta la nómina.** No hay ajuste para elegir la fuente. **Modifica la fila de Nómina de la tabla del punto 4 y el punto 3:** la pauta deja de ser origen del resumen del periodo para Nómina. Sin Asistencia, sigue lo ya definido en este ADR: entrada manual o importación Excel del resumen del periodo; el detalle de ese caso queda como pregunta abierta para la especificación de Nómina.
+3. **CPQ con instalación nueva.** El disparador es **ganar el negocio**, no la cotización. Al ganarlo, cada línea de guardias de la cotización se **ofrece** para crear su puesto con el **sueldo bruto cotizado**, y **RRHH lo confirma**. Si la línea no tiene sueldo, el puesto se crea y toma el sueldo de la instalación, que RRHH completa. Una cotización sin guardias (por ejemplo, de cámaras) no crea puestos ni sueldos. Detalle en `modulos/cpq.md` y en la nota del punto 3 de ADR-040.
+4. **Repintar la pauta el día de hoy.** Si el día en curso ya tiene una marca de asistencia o una cobertura confirmada, se trata como pasado y no se cambia; si no tiene ninguna, el cambio rige desde hoy.
+
+**Nota del 25-oct-2026 sobre el punto 6 (CAR-10).** La regla de la pauta por series y excepciones ya está en `extraccion/operaciones.md` (§3, esqueleto) y en `modulos/operaciones.md` (R11, borrador), con el trato del día de hoy que respondió Carlos (respuesta 4 de arriba).

@@ -154,6 +154,7 @@ Ningún campo de esta sección es visible para el cliente ni para el trabajador 
   - la cuenta pasa a `cliente_activo` si era prospecto;
   - CPQ acepta la cotización vigente, rechaza las demás abiertas y crea los puestos de servicio desde la cotización aceptada (ver `modulos/cpq.md`).
   - *Nota del 25-oct-2026 (reglas definidas por Carlos en la Page «Puestos y guardias OPAI 2.0: propuesta»; mockup pendiente de aprobación): ganar **no crea puestos**. CPQ solo acepta la vigente y rechaza las abiertas. Los puestos se crean desde la instalación o con un botón opcional, con vista previa, en la cotización aceptada (solo líneas de tipo puesto): un puesto por posición, en PPC, sin duplicar los ya creados. Ver ADR-040, punto 3, y `modulos/operaciones.md`.*
+  - *Actualización (Decisión de Carlos, 25-oct-2026 23:10, chat con OPAI 2.0 (registrada por el bot OPAI 2.0)): el disparador es **ganar el negocio**. Al ganarlo, cada línea de guardias de la cotización aceptada se **ofrece** para crear su puesto con el sueldo bruto cotizado y RRHH lo confirma; una cotización sin guardias no crea puestos. Ver `modulos/cpq.md`.*
 - **R19.** Al perder:
   - se exige el motivo;
   - CPQ rechaza las cotizaciones abiertas;

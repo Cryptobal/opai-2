@@ -51,13 +51,13 @@ Del puesto (el modelo de datos exacto se define en el Brief 11):
 - **R7.** Al trasladar a una persona, el puesto de origen queda en PPC «Sin asignar».
 - **R8.** El anexo de contrato lo aprueba RRHH (el rol aprobador es configurable). Un agente no lo aprueba.
 - **R9.** El supervisor es un puesto más.
-- **R10.** Los puestos no se crean al ganar un negocio. Se crean desde la instalación o con un botón opcional, con vista previa, en la cotización aceptada, solo para las líneas de tipo puesto. El botón crea un puesto por posición, en PPC, y no duplica los ya creados (ADR-040, punto 3, actualización del 25-oct).
+- **R10.** Los puestos no se crean solos al ganar un negocio. Al **ganarlo**, cada línea de guardias de la cotización se **ofrece** para crear su puesto (un puesto por posición, en PPC) con el sueldo bruto cotizado, y **RRHH lo confirma**; sin sueldo en la línea, el puesto toma el de la instalación y RRHH lo completa. Ofrecerlo dos veces no duplica los puestos ya creados. Los puestos también se crean desde la instalación. Una cotización sin guardias no crea puestos (Decisión de Carlos, 25-oct-2026 23:10, chat con OPAI 2.0 (registrada por el bot OPAI 2.0); ADR-048, respuesta 3; ADR-040, nota del punto 3).
 
 **Reglas ya decididas en ADR que este módulo aplica**
 
-- **R11.** Un cambio de rol, de capa de sueldo, de monto o de instalación de una persona genera el borrador del anexo de contrato (ADR-036 y ADR-048, punto 5).
-- **R12.** El supervisor ve y opera solo las instalaciones a su cargo; el filtro va en la consulta (ADR-022).
-- **R13.** La pauta guarda solo las series (patrón con su fecha de inicio de ciclo) y las excepciones (ausencias, reemplazos, PPC, turnos extra), y calcula el resto; nunca una fila por trabajador por día. Repintar no modifica días pasados ni días con marca (ADR-048, punto 6). El trato del día de hoy queda fuera de esta regla: es la pregunta abierta 4 de ADR-048.
+- **R11.** La pauta guarda solo las series (patrón con su fecha de inicio de ciclo) y las excepciones (ausencias, reemplazos, PPC, turnos extra), y calcula el resto; nunca una fila por trabajador por día. Repintar no modifica días pasados ni días con marca (ADR-048, punto 6). **El día de hoy:** si ya tiene una marca de asistencia o una cobertura confirmada, se trata como pasado y no se cambia; si no tiene ninguna, el cambio rige desde hoy (Decisión de Carlos, 25-oct-2026 23:10, chat con OPAI 2.0 (registrada por el bot OPAI 2.0); ADR-048, respuesta 4). La pauta solo define los turnos de cada guardia y **no alimenta la nómina**: los días trabajados salen de Asistencia (ADR-048, respuesta 2).
+- **R12.** Un cambio de rol, de capa de sueldo, de monto o de instalación de una persona genera el borrador del anexo de contrato (ADR-036 y ADR-048, punto 5).
+- **R13.** El supervisor ve y opera solo las instalaciones a su cargo; el filtro va en la consulta (ADR-022).
 
 ## 6. Estados y transiciones
 
@@ -65,7 +65,7 @@ Estado de cobertura del puesto: **cubierto** ↔ **PPC (con motivo)**. El detall
 
 ## 7. Permisos por rol y portal
 
-Pendiente del diseño aprobado. Fijo: aprobar el anexo de contrato es de RRHH (rol configurable) y nunca de un agente (R8); el supervisor opera con alcance de sus instalaciones (R12).
+Pendiente del diseño aprobado. Fijo: aprobar el anexo de contrato es de RRHH (rol configurable) y nunca de un agente (R8); el supervisor opera con alcance de sus instalaciones (R13).
 
 ## 8. Eventos y notificaciones
 
@@ -85,14 +85,14 @@ Pendiente (geolocalización por el servicio del núcleo si se usa; ADR-027).
 |---|---|---|
 | Puesto con `requiredGuards` (dotación) | 1 puesto = 1 posición (R1) | Cada posición tiene su cobertura y su PPC |
 | Patrón de turno como entidad de CPQ (`CpqRol`) | Catálogo de patrones del tenant (R2) | Un solo catálogo para CPQ y Operaciones |
-| Puestos creados con «Enviar dotación a la instalación» o a mano | Desde la instalación o botón opcional con vista previa (R10) | Sin duplicados y con revisión antes de crear |
+| Puestos creados con «Enviar dotación a la instalación» o a mano | Desde la instalación, o se ofrecen al ganar el negocio y RRHH los confirma (R10) | Sin duplicados y con revisión antes de crear |
 
 Detalle de 1.0 en `extraccion/operaciones.md` (esqueleto; partes sin verificar).
 
 ## 12. Casos borde
 
 - Traslado de una persona: el origen queda en PPC «Sin asignar» (R7).
-- Botón de la cotización aceptada pulsado dos veces: no duplica (R10).
+- Puestos ofrecidos de nuevo para un negocio ya ganado: no se duplican (R10).
 
 ## 13. Criterios de aceptación
 
@@ -111,3 +111,4 @@ Sin Asistencia, la pauta diaria muestra «confirmar cobertura», un registro ope
 | Fecha | Cambio | Aprobó |
 |---|---|---|
 | 25-oct-2026 | Primera versión (borrador) con las reglas de Puestos y guardias definidas por Carlos | — (pendiente de aprobación) |
+| 25-oct-2026 23:10 | R10 (puestos ofrecidos al ganar, RRHH confirma) y R11 (día de hoy; la pauta no alimenta la nómina), con las respuestas de Carlos a ADR-048 | — (pendiente de aprobación) |
