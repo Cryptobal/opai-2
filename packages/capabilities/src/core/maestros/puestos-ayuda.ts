@@ -18,21 +18,24 @@ export async function cargoActivo(ctx: Contexto, cargoId?: string) {
   if (!c.activo) throw reglaDeNegocio(`El cargo "${c.nombre}" está desactivado.`);
 }
 
-/** Función del catálogo (activa). Devuelve la fila para mostrar su nombre sin otra consulta. */
-async function funcionActiva(ctx: Contexto, funcionId?: string | null) {
+/**
+ * Función del catálogo (bajo RLS: la de otro tenant no existe). Se exige activa solo si se está
+ * eligiendo: un puesto que ya la tenía se sigue editando aunque la función se haya desactivado.
+ */
+async function funcionDe(ctx: Contexto, funcionId: string | null | undefined, exigirActiva: boolean) {
   if (!funcionId) return null;
   const f = await ctx.db.funcionPuesto.findUnique({ where: { id: funcionId } });
   if (!f) throw noEncontrado("La función");
-  if (!f.activo) throw reglaDeNegocio(`La función "${f.nombre}" está desactivada.`);
+  if (exigirActiva && !f.activo) throw reglaDeNegocio(`La función "${f.nombre}" está desactivada.`);
   return f;
 }
 
-/** Patrón del catálogo (activo). Fija el ciclo (días de trabajo × descanso) del puesto. */
-async function patronActivo(ctx: Contexto, patronId?: string | null) {
+/** Patrón del catálogo; fija el ciclo (días de trabajo × descanso). Activo solo si se elige. */
+async function patronDe(ctx: Contexto, patronId: string | null | undefined, exigirActivo: boolean) {
   if (!patronId) return null;
   const p = await ctx.db.patronTurno.findUnique({ where: { id: patronId } });
   if (!p) throw noEncontrado("El patrón de turno");
-  if (!p.activo) throw reglaDeNegocio(`El patrón "${p.nombre}" está desactivado.`);
+  if (exigirActivo && !p.activo) throw reglaDeNegocio(`El patrón "${p.nombre}" está desactivado.`);
   return p;
 }
 
@@ -64,9 +67,10 @@ export async function componer(
     colacionMin?: number | null | undefined;
     colacionFuera?: boolean | null | undefined;
   },
+  eligiendo: { funcion: boolean; patron: boolean } = { funcion: true, patron: true },
 ) {
-  const funcion = await funcionActiva(ctx, input.funcionId);
-  const patron = await patronActivo(ctx, input.patronId);
+  const funcion = await funcionDe(ctx, input.funcionId, eligiendo.funcion);
+  const patron = await patronDe(ctx, input.patronId, eligiendo.patron);
   const diasTrabajo = patron?.diasTrabajo ?? input.diasTrabajo;
   const diasDescanso = patron?.diasDescanso ?? input.diasDescanso;
   validarPatron(diasTrabajo, diasDescanso);
@@ -127,3 +131,17 @@ export const CLAVES_HORAS = [
   "colacionMin",
   "colacionFuera",
 ] as const;
+
+/**
+ * Horas semanales de un update: un número explícito manda y null pide recalcular; si no se envían
+ * y cambia el patrón, el horario o la colación, se recalculan; si no, se conservan (undefined).
+ */
+export function horasDelCambio(
+  cambios: { horasSemanales?: number | null | undefined } & {
+    [K in (typeof CLAVES_HORAS)[number]]?: unknown;
+  },
+  sugerencia: number | null,
+) {
+  if (cambios.horasSemanales !== undefined) return cambios.horasSemanales ?? sugerencia;
+  return CLAVES_HORAS.some((k) => cambios[k] !== undefined) ? sugerencia : undefined;
+}

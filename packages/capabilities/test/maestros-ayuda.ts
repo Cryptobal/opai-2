@@ -23,7 +23,12 @@ export async function dato<T = Record<string, unknown>>(
   return r.data as T;
 }
 
-export const codigo = async (ctx: Contexto, id: string, input: unknown) => {
-  const r = await executeCapability(ctx, id, input);
+export const codigo = async (
+  ctx: Contexto,
+  id: string,
+  input: unknown,
+  opciones: { dryRun?: boolean } = {},
+) => {
+  const r = await executeCapability(ctx, id, input, opciones);
   return r.ok ? "OK" : r.error.code;
 };

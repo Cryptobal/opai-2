@@ -33,7 +33,6 @@ export const camposPuesto = {
     .describe("Horas semanales del puesto; si se omite, se sugiere desde el patrón y el horario."),
   colacionMin: z.number().int().min(0).max(240).optional().describe("Minutos de colación."),
   colacionFuera: z.boolean().optional().describe("true si la colación va fuera de la jornada."),
-  dotacion: z.number().int().min(1).max(500).optional(),
   vigenteDesde: diaSchema.nullable().optional(),
   vigenteHasta: diaSchema.nullable().optional(),
   notas: textoOpcional(2000),

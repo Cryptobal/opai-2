@@ -57,7 +57,6 @@ describe("cargos.list con el sueldo vigente (diseño 14)", () => {
       diasDescanso: 4,
       horaInicio: "20:00",
       horaFin: "08:00",
-      dotacion: 2,
     });
     const p = await dato<{ instalacion: string }[]>(ctx, "core.puestos.list", {
       cargoId: cargo.id,

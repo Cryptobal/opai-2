@@ -9,10 +9,10 @@ import { definidos, escribirConEvento } from "./comun";
 import { instalacionDe } from "./instalaciones";
 import { camposPuesto } from "./puestos-campos";
 import {
-  CLAVES_HORAS,
   cargoActivo,
   componer,
   fechas,
+  horasDelCambio,
   incluir,
   mezclarPuesto,
   puestoDe,
@@ -81,6 +81,7 @@ export const puestosCreate = defineCapability({
       diasTrabajo,
       diasDescanso,
       horasSemanales,
+      dotacion: 1,
       estado: "activo",
       cobertura: "ppc",
       coberturaMotivo: "sin_asignar",
@@ -107,14 +108,17 @@ export const puestosUpdate = defineCapability({
   async handler(ctx, { id, ...cambios }, { dryRun }) {
     const actual = await puestoDe(ctx, id);
     await cargoActivo(ctx, cambios.cargoId);
+    // La función o el patrón se exigen activos solo si cambian (si no, desactivar un catálogo
+    // bloquearía editar el nombre o las notas de los puestos que ya lo usan).
     const { funcion, patron, diasTrabajo, diasDescanso, sugerencia } = await componer(
       ctx,
       mezclarPuesto(actual, cambios),
+      {
+        funcion: cambios.funcionId !== undefined && cambios.funcionId !== actual.funcionId,
+        patron: cambios.patronId !== undefined && cambios.patronId !== actual.patronId,
+      },
     );
-    // Horas: número explícito manda; si cambia patrón/horario/colación se recalcula; si no, se conserva.
-    const tocaHoras = CLAVES_HORAS.some((k) => cambios[k] !== undefined);
-    const horasSemanales =
-      cambios.horasSemanales != null ? cambios.horasSemanales : tocaHoras ? sugerencia : undefined;
+    const horasSemanales = horasDelCambio(cambios, sugerencia);
     const data = definidos({ ...cambios, ...fechas(cambios), diasTrabajo, diasDescanso, horasSemanales });
     if (dryRun)
       return vistaPuesto({

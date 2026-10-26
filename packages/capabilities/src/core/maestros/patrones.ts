@@ -3,16 +3,20 @@ import { z } from "zod";
 import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
+import { reglaDeNegocio } from "../../errores";
 import { uuidSchema } from "../esquemas";
 import { definidos, escribirConEvento, sinDuplicado } from "./comun";
 import {
+  cambiaEstructura,
   camposPatron,
   conteoPuestosPatron,
   DUPLICADO_PATRON,
+  EN_USO,
+  estructuraPatron,
   nombrePatronLibre,
   patronDe,
   patronSchema,
-  validarDiasSemana,
+  puestosConPatron,
   vistaPatron,
 } from "./patrones-vista";
 
@@ -63,8 +67,7 @@ export const patronesCreate = defineCapability({
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     await nombrePatronLibre(ctx, input.nombre);
-    validarDiasSemana(input.clase, input.diasSemana);
-    const data = definidos(input);
+    const data = definidos({ ...input, ...estructuraPatron(input) });
     if (dryRun) return vistaPatron({ ...data, id: "" });
     const p = await escribirConEvento(
       ctx,
@@ -84,7 +87,7 @@ export const patronesCreate = defineCapability({
 export const patronesUpdate = defineCapability({
   id: "core.patrones.update",
   descripcion:
-    "Actualiza un patrón de turno (nombre, clase, ciclo, días de la semana, orden). Solo cambia lo enviado; los de fábrica también se pueden ajustar.",
+    "Actualiza un patrón de turno (nombre, clase, ciclo, días de la semana, orden). Solo cambia lo enviado; los de fábrica también se pueden ajustar. Si el patrón ya tiene puestos, su clase, ciclo y días no cambian.",
   permiso: PERMISOS_CORE.instalacionesManage,
   input: z.object({ id: uuidSchema, ...z.object(camposPatron).partial().shape }),
   output: patronSchema,
@@ -93,14 +96,28 @@ export const patronesUpdate = defineCapability({
   async handler(ctx, { id, ...cambios }, { dryRun }) {
     const actual = await patronDe(ctx, id);
     await nombrePatronLibre(ctx, cambios.nombre, id);
-    validarDiasSemana(cambios.clase ?? actual.clase, cambios.diasSemana ?? actual.diasSemana);
-    const data = definidos(cambios);
+    const clase = cambios.clase ?? actual.clase;
+    const mismaClase = clase === actual.clase;
+    const estructura = estructuraPatron({
+      clase,
+      diasTrabajo: cambios.diasTrabajo ?? (clase === "semanal" ? undefined : actual.diasTrabajo),
+      diasDescanso: cambios.diasDescanso ?? (clase === "semanal" ? undefined : actual.diasDescanso),
+      diasSemana: cambios.diasSemana ?? (mismaClase ? actual.diasSemana : []),
+    });
+    const toca = cambiaEstructura(actual, estructura);
+    const data = definidos({ ...cambios, ...estructura });
+    // Un patrón con puestos no cambia su forma: los puestos guardan el ciclo y las horas calculadas
+    // con ella. Se revisa también dentro de la transacción (y la base lo impide con un trigger).
+    if (toca && (await puestosConPatron(ctx.db, id)) > 0) throw reglaDeNegocio(EN_USO);
     const n = await conteoPuestosPatron(ctx, id);
     if (dryRun) return vistaPatron({ ...actual, ...data }, n);
     const p = await escribirConEvento(
       ctx,
       { tipo: "core.patron.actualizado", entidadTipo: "patron_turno", payload: () => data },
-      (tx) => sinDuplicado(tx.patronTurno.update({ where: { id }, data }), DUPLICADO_PATRON),
+      async (tx) => {
+        if (toca && (await puestosConPatron(tx, id)) > 0) throw reglaDeNegocio(EN_USO);
+        return sinDuplicado(tx.patronTurno.update({ where: { id }, data }), DUPLICADO_PATRON);
+      },
     );
     return vistaPatron(p, n);
   },
