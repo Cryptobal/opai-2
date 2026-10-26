@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { defineCapability } from "../define";
+import { ajuste } from "../core/config";
 import { reglaDeNegocio } from "../errores";
 import { uuidSchema } from "../core/esquemas";
 import { etiquetaRequisito, requisitosFaltantes } from "./dominio";
@@ -74,7 +75,9 @@ export const negociosGanar = defineCapability({
       throw reglaDeNegocio(`Faltan requisitos para ganar: ${faltan.map(etiquetaRequisito).join(", ")}.`);
     }
     // «Ganar sin cotización» habilitado solo en test hasta que exista CPQ (decisión de Carlos 26-oct).
-    const aviso = negocio.cotizacionEnviadaEn ? null : "Se gana sin cotización enviada.";
+    // El aviso se puede silenciar con el ajuste comercial.avisar_ganar_sin_cotizacion (por defecto sí).
+    const avisar = await ajuste<boolean>(ctx, "comercial", "avisar_ganar_sin_cotizacion").catch(() => true);
+    const aviso = negocio.cotizacionEnviadaEn || !avisar ? null : "Se gana sin cotización enviada.";
     if (dryRun) return { ...vistaNegocio({ ...negocio, etapaId: ganada.id, estado: "ganado" }), aviso };
     const r = await ctx.transaccion((tx) =>
       aplicarEtapa(ctx, tx, negocio, ganada, { evento: "comercial.negocio.ganado", datos: { ganadoEn: new Date() } }),
