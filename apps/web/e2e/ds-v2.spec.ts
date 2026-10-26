@@ -57,6 +57,8 @@ test.describe("DS V2 (ADR-050)", () => {
       await expect(boton).toHaveAttribute("aria-busy", "true", { timeout: 1_000 });
     }).toPass();
     await expect(boton).toBeDisabled();
+    // El texto sigue siendo el nombre accesible mientras carga.
+    await expect(page.getByRole("button", { name: "Guardar cambios" }).first()).toBeAttached();
     const despues = await boton.boundingBox();
     expect(Math.round(despues?.width ?? 0)).toBe(Math.round(antes?.width ?? -1));
   });
@@ -84,7 +86,9 @@ test.describe("DS V2 (ADR-050)", () => {
     const ancho = page.viewportSize()?.width ?? 0;
     if (ancho < 768) {
       await expect(page.locator("header").getByRole("button", { name: "Buscar" })).toBeVisible();
-      const inferior = page.locator("nav").filter({ visible: true }).last();
+      const inferior = page
+        .getByRole("navigation", { name: "Principal" })
+        .filter({ visible: true });
       await expect(inferior.getByRole("button", { name: "Buscar" })).toHaveCount(0);
     } else {
       await expect(

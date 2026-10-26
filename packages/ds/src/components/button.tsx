@@ -64,7 +64,7 @@ export function Button({
         "aria-busy": true,
         children: (
           <>
-            <span className="invisible contents">{props.children}</span>
+            <span className="contents opacity-0">{props.children}</span>
             <span aria-hidden className="ds-spinner" />
           </>
         ),

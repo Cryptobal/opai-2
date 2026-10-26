@@ -87,7 +87,9 @@ test.describe("cabecera estable (CAR-12, CA1)", () => {
       };
       if (telefono) {
         // «Buscar» ya no está en la barra inferior (ADR-050).
-        const inferior = page.locator("nav").filter({ visible: true }).last();
+        const inferior = page
+          .getByRole("navigation", { name: "Principal" })
+          .filter({ visible: true });
         await expect(inferior.getByRole("button", { name: "Buscar" })).toHaveCount(0);
       }
       for (const [clave, valor] of Object.entries(actual)) {

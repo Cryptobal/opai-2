@@ -128,7 +128,7 @@ export function AppBar(props: AppBarProps) {
             type="button"
             onClick={onBuscar}
             aria-label="Buscar o ir a"
-            className="flex h-9 w-[280px] min-w-0 items-center gap-2 rounded-md border border-border bg-surface pr-2 pl-3 text-base text-fg-subtle outline-none hover:border-border-strong focus-visible:outline-2 focus-visible:outline-focus xl:w-80"
+            className="flex h-11 w-[280px] min-w-0 items-center gap-2 rounded-md border border-border bg-surface pr-2 pl-3 text-base text-fg-subtle outline-none hover:border-border-strong focus-visible:outline-2 focus-visible:outline-focus xl:h-9 xl:w-80"
           >
             <Search className="size-4 flex-none" aria-hidden />
             <span className="flex-1 truncate text-left xl:hidden">
@@ -139,13 +139,15 @@ export function AppBar(props: AppBarProps) {
           </button>
         ) : null}
         {campana}
-        <div className="xl:hidden">
-          {usuario && menuUsuario ? (
-            <UserMenu usuario={usuario} items={menuUsuario} />
-          ) : usuario ? (
-            <Avatar nombre={usuario.nombre} />
-          ) : null}
-        </div>
+        {usuario ? (
+          <div className="xl:hidden">
+            {menuUsuario ? (
+              <UserMenu usuario={usuario} items={menuUsuario} />
+            ) : (
+              <Avatar nombre={usuario.nombre} />
+            )}
+          </div>
+        ) : null}
       </div>
     </header>
   );

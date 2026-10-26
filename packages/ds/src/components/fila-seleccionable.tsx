@@ -27,7 +27,7 @@ export const claseFila = (seleccionada?: boolean) =>
     "relative flex min-h-16 w-full items-center gap-3 border-b border-border py-2.5 pr-3 pl-4 text-left text-fg outline-none transition-colors duration-150",
     "hover:bg-fill active:bg-fill dark:hover:bg-bg focus-visible:rounded-md focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-focus",
     seleccionada &&
-      "bg-accent-muted hover:bg-accent-muted dark:hover:bg-accent-muted before:absolute before:top-2.5 before:bottom-2.5 before:left-0 before:w-[3px] before:rounded-r-[3px] before:bg-accent before:content-['']",
+      "bg-accent-muted hover:bg-accent-muted active:bg-accent-muted dark:hover:bg-accent-muted before:absolute before:top-2.5 before:bottom-2.5 before:left-0 before:w-[3px] before:rounded-r-[3px] before:bg-accent before:content-['']",
   );
 
 /** Monograma cuadrado de 36 px para filas (cuentas, instalaciones). */
