@@ -12,6 +12,8 @@ export type ItemNav = {
   pie?: boolean;
   soloCompacto?: boolean;
   soloAmplio?: boolean;
+  /** Fuera de la barra inferior del teléfono: va a "Más" (sigue en el riel y en la barra lateral). */
+  fueraInferior?: boolean;
   alerta?: boolean;
 };
 
@@ -51,6 +53,8 @@ export function navegacionErp(
       corta: "Instalac.",
       icono: "MapPin",
       grupo,
+      // Respaldo de la barra inferior (Brief 05): en el teléfono va a "Más"; sigue en el riel y en la lateral.
+      fueraInferior: true,
     });
   if (puede(PERMISOS_CORE.personasRead))
     items.push({ href: "/personas", etiqueta: "Personas", icono: "Users", grupo });
