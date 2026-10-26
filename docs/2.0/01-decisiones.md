@@ -335,7 +335,7 @@ Una entrada por decisión. Las decisiones no se editan: si cambian, se agrega un
 | 6 | Nómina (sobre asistencia y estructuras), Licitaciones (sobre CPQ), firma electrónica avanzada | Gard 100 % en 2.0 |
 | Backlog | Inventario, cámaras, ATS, gamificación, psicolaboral, chat, Slack, sitio de marketing 2.0, roles personalizados | — |
 
-**Modificación (25-oct-2026, decisión de Carlos en su encargo para CAR-10, fuera del repo; resumen en la tarea CAR-10 de Linear).** Cambia el **orden de trabajo**, no los cortes de Gard. Primero se cierra el Núcleo: Brief 05 (navegación por áreas) → Brief 04 (PWA) → Brief 07b (capas de sueldo, que pasa a la fase 1 y va antes del brief de Puestos). Después se abren los módulos en este orden: **Puestos y guardias (Operaciones I, Brief 11, adelantado desde la fase 3)** → CPQ por vertical → Comercial (CRM), en reglas y diseño; en construcción, los negocios de Comercial (Briefs 06 y 07) van antes del cotizador (Brief 10), porque CPQ depende de Comercial (ADR-040, ADR-048). El resto sigue el orden de fases de esta tabla. Nómina se queda en la fase 6 (no hay clientes que la compren sola, Carlos, 25-oct). Detalle por módulo y etapa en `PLAN-desarrollo.md`; fases y semanas en `ROADMAP.md`.
+**Modificación del 25-oct-2026.** Decisión de Carlos, 25-oct-2026, chat con OPAI 2.0 (registrada por el bot OPAI 2.0). Cambia el **orden de trabajo**, no los cortes de Gard. Primero se cierra el Núcleo: Brief 05 (navegación por áreas) → Brief 04 (PWA) → Brief 07b (capas de sueldo, que pasa a la fase 1 y va antes del brief de Puestos). Después se abren los módulos en este orden: **Puestos y guardias (Operaciones I, Brief 11, adelantado desde la fase 3)** → CPQ por vertical → Comercial (CRM), en reglas y diseño; en construcción, los negocios de Comercial (Briefs 06 y 07) van antes del cotizador (Brief 10), porque CPQ depende de Comercial (ADR-040, ADR-048). El resto sigue el orden de fases de esta tabla. Nómina se queda en la fase 6, sin adelantarla, porque no hay clientes que compren Payroll solo (Decisión de Carlos, 25-oct-2026, chat con OPAI 2.0 (registrada por el bot OPAI 2.0)). Detalle por módulo y etapa en `PLAN-desarrollo.md`; fases y semanas en `ROADMAP.md`.
 
 ---
 
@@ -410,7 +410,7 @@ OPAI puede ofrecer además **automatizaciones alojadas** (por ejemplo, búsqueda
 
 ## ADR-036 · Puestos de servicio y vínculos laborales en el núcleo
 
-**Fecha:** 23-oct-2026 · **Estado:** vigente (capas de sueldo y reglas del puesto actualizadas por Carlos el 25-oct-2026, al final; la jornada pactada pasa al vínculo laboral por ADR-048) · Completa ADR-005. Brief 02.
+**Fecha:** 23-oct-2026 · **Estado:** vigente (capas de sueldo actualizadas por Carlos el 25-oct-2026 y reglas del puesto definidas por Carlos el 25-oct-2026 (mockup pendiente de aprobación), al final; la jornada pactada pasa al vínculo laboral por ADR-048) · Completa ADR-005. Brief 02.
 
 **Contexto.** En 1.0 el puesto operativo (instalación + cargo + rol de turno + horario + dotación) vive en Operaciones y el patrón de turno es una entidad de CPQ; la relación laboral está repartida entre `OpsGuardia` (estado de ciclo de vida, contrato) y `OpsPersona`. CPQ cotiza puestos, Operaciones los cubre, Asistencia marca contra ellos y Nómina liquida con su estructura.
 
@@ -431,7 +431,7 @@ OPAI puede ofrecer además **automatizaciones alojadas** (por ejemplo, búsqueda
 
 **Consecuencias de la actualización.** El código del Brief 02 (`packages/domain/src/estructuras.ts`, `core.estructuras_sueldo.nivel` con `cargo | puesto | persona` y conceptos `NULL` que heredan) no cumple esta regla. Se corrige en un brief propio, con migración aditiva: nueva capa `instalacion`, resolución sin herencia y retiro del nivel `cargo` (sin borrar datos; las filas `cargo` existentes se convierten o se archivan con la decisión de Carlos sobre los datos de `dev`). Este PR no toca código. CPQ (ADR-042, punto 4) costea con la capa puesto o instalación cuando existe (ampliaciones y renovaciones); cómo se cotiza el sueldo de una instalación nueva queda como pregunta abierta en ADR-048 (con recomendación).
 
-**Actualización de Carlos (25-oct-2026, CLT; Page de Puestos y guardias, sin enlace en el repo; fuente: encargo de Carlos para CAR-10): reglas del puesto.** Precisa el modelo del puesto de la decisión original (que hablaba de «dotación» y de una jornada `dia | noche | rotativa`), sin borrarla; el modelo de datos se fija en el brief de Puestos (Operaciones I, Brief 11). Especificación en `modulos/operaciones.md`.
+**Actualización (25-oct-2026, CLT): reglas del puesto — reglas definidas por Carlos el 25-oct-2026 (Page «Puestos y guardias OPAI 2.0: propuesta»); mockup pendiente de aprobación.** Precisa el modelo del puesto de la decisión original (que hablaba de «dotación» y de una jornada `dia | noche | rotativa`), sin borrarla; el modelo de datos se fija en el brief de Puestos (Operaciones I, Brief 11). Especificación en `modulos/operaciones.md`.
 
 1. **1 puesto = 1 posición cubierta.** En los patrones corridos, el titular y el relevo cubren el puesto uno a la vez. Tres 5x2 son tres puestos. La dotación deja de ser un número dentro del puesto.
 2. **Catálogo de patrones por tenant**, con 4x4, 7x7, 14x14, 5x2, 2x5 y 3x4 de fábrica.
@@ -517,7 +517,7 @@ OPAI puede ofrecer además **automatizaciones alojadas** (por ejemplo, búsqueda
 6. Embudo: etapas configurables por tenant en Configuración, con la única regla fija de una ganada y una perdida; para Gard "Aceptada" es abierta con `exige: inicio_servicio` (punto 7).
 7. Migrar `documentos.etiquetas` al catálogo: **sí, ahora** (punto 6).
 
-**Modificación del punto 3 (25-oct-2026, decisión de Carlos sobre Puestos y guardias; fuente: encargo de Carlos para CAR-10).** El consumidor (c) de `comercial.negocio.ganado` queda **sin efecto**: los puestos **no se crean al ganar**. Se crean desde la instalación o con un **botón opcional, con vista previa, en la cotización aceptada**, solo para las líneas de tipo puesto; el botón crea **un puesto por posición**, en PPC, y no duplica los ya creados. Los consumidores (a) y (b) no cambian. Reglas del puesto en ADR-036, actualización del 25-oct.
+**Nota del 25-oct-2026 sobre el punto 3 — reglas definidas por Carlos el 25-oct-2026 (Page «Puestos y guardias OPAI 2.0: propuesta»); mockup pendiente de aprobación.** El consumidor (c) de `comercial.negocio.ganado` queda **sin efecto**: los puestos **no se crean al ganar**. Se crean desde la instalación o con un **botón opcional, con vista previa, en la cotización aceptada**, solo para las líneas de tipo puesto; el botón crea **un puesto por posición**, en PPC, y no duplica los ya creados. Los consumidores (a) y (b) no cambian. Reglas del puesto en ADR-036, actualización del 25-oct.
 
 ---
 
@@ -763,11 +763,4 @@ No se encontró: render estático roto, falta de prefetch, layouts que recarguen
 3. **CPQ con instalación nueva.** Recomendación: el sueldo se define en la línea cotizada y, al ganar el negocio, se ofrece crearlo como capa de instalación o de puesto.
 4. **Repintar la pauta el día de hoy.** Recomendación: hoy se trata como pasado si ya tiene una marca o una cobertura confirmada en la serie; si no, el cambio rige desde hoy.
 
-**Decisión tomada por omisión de Carlos el 25-oct-2026, confirmable (CAR-10).** Las cuatro preguntas quedan resueltas con su recomendación, tal como está escrita arriba, por indicación del encargo de Carlos para CAR-10. Carlos puede cambiar cualquiera. **Ningún brief que dependa de una de ellas se escribe sin que Carlos la confirme antes** (en particular, la 1 antes del Brief 07b y la 4 antes del Brief 11):
-
-1. Capa de sueldo sin Operaciones: el vínculo laboral guarda la instalación (obligatoria) y el puesto (opcional); con Operaciones activa, el puesto de la asignación vigente manda.
-2. Dos fuentes activas a la vez: un ajuste de Nómina por tenant (ADR-038) elige la fuente del resumen, con asistencia por defecto cuando está activa; las diferencias entre pauta y marcas se muestran antes de cerrar el periodo.
-3. CPQ con instalación nueva: el sueldo se define en la línea cotizada y, al ganar el negocio, se ofrece crearlo como capa de instalación o de puesto.
-4. Repintar la pauta el día de hoy: hoy se trata como pasado si ya tiene una marca o una cobertura confirmada en la serie; si no, el cambio rige desde hoy.
-
-*Nota:* la 3 se escribió antes de la regla del 25-oct sobre puestos (no se crean al ganar; ADR-040, punto 3). El ofrecimiento de crear la capa se mantiene tal cual; su momento exacto (al ganar o con el botón de la cotización aceptada) se confirma en `modulos/cpq.md`.
+**Estado de las preguntas (25-oct-2026, CAR-10): siguen abiertas.** Carlos no las ha respondido. Cada una conserva arriba la recomendación de OPAI 2.0, que no es una decisión. **Bloquean el Brief 07b:** no se escribe hasta que Carlos las responda y su respuesta quede registrada con su fuente. *Nota:* la recomendación 3 se escribió antes de las reglas de Puestos del 25-oct (los puestos no se crean al ganar; nota del punto 3 en ADR-040); si Carlos la acepta, su momento exacto (al ganar o con el botón de la cotización aceptada) se fija en `modulos/cpq.md`.

@@ -48,9 +48,9 @@ Carlos decidió construir **OPAI 2.0 desde cero**: un SaaS modular, multi-tenant
 
 ## Orden de construcción
 
-Según ADR-030 con la nota del 25-oct-2026 (decisión de Carlos en su encargo para CAR-10; fases en `ROADMAP.md`, etapa de cada módulo en `PLAN-desarrollo.md`):
+Según ADR-030 con la nota del 25-oct-2026 (Decisión de Carlos, 25-oct-2026, chat con OPAI 2.0 (registrada por el bot OPAI 2.0); fases en `ROADMAP.md`, etapa de cada módulo en `PLAN-desarrollo.md`):
 
-1. **Primero se cierra el Núcleo:** Brief 05 (navegación por áreas) → Brief 04 (PWA) → Brief 07b (capas de sueldo), con el PR 2 del Brief 03 (rendimiento) y la sesión D del Brief 02 en paralelo.
+1. **Primero se cierra el Núcleo, antes de abrir los módulos:** Brief 05 (navegación por áreas) → Brief 04 (PWA) → Brief 07b (capas de sueldo; bloqueado hasta que Carlos responda las 4 preguntas abiertas de ADR-048), con el PR 2 del Brief 03 (rendimiento) y la sesión D del Brief 02 en paralelo.
 2. **Después, los módulos:** Puestos y guardias (Operaciones I, Brief 11) → CPQ por vertical → Comercial (CRM), con Documentos (Brief 09) dentro de la misma fase 2. Ese es el orden de reglas y diseño. En construcción, CPQ depende de Comercial (no hay cotización sin negocio): los negocios (Briefs 06 y 07) van antes del cotizador (Brief 10).
 3. **Luego:** Operaciones II, Rondas, Tickets y portales → Asistencia y DT → Finanzas (1.0 pasa a solo lectura) → Nómina (fase 6; hoy no hay clientes de Payroll solo) y **Licitaciones al final**.
 

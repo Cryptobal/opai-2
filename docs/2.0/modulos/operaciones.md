@@ -1,8 +1,8 @@
 # Operaciones — Especificación funcional
 
-**Estado:** **reglas de Puestos y guardias aprobadas en Page el 25-oct-2026 (Page sin enlace en el repo); mockup pendiente de aprobación.** La especificación está en **borrador, pendiente de aprobación de Carlos** (ADR-047): transiciones (§6), permisos (§7) y criterios de aceptación (§13) se completan con el diseño aprobado. El resto del módulo (pauta, Operaciones II) también está en borrador. · **Fase:** 3, con Operaciones I adelantada para después del cierre del Núcleo (`PLAN-desarrollo.md`) · **Insumos:** Page de Carlos «Puestos y guardias» del 25-oct (fuera del repo), `extraccion/operaciones.md` (esqueleto), `extraccion/maestros.md` §5, ADR-022, ADR-036 (actualización del 25-oct), ADR-048 · **Autor:** Claude · **Tarea:** CAR-10
+**Estado:** **borrador**, pendiente de aprobación de Carlos (ADR-047). Puestos y guardias (Operaciones I): reglas definidas por Carlos el 25-oct-2026 (Page «Puestos y guardias OPAI 2.0: propuesta»); mockup pendiente de aprobación. Transiciones (§6), permisos (§7) y criterios de aceptación (§13) se completan con el diseño aprobado; el resto del módulo (pauta, Operaciones II) también está en borrador. · **Fase:** 3, con Operaciones I adelantada para después del cierre del Núcleo (`PLAN-desarrollo.md`) · **Insumos:** Page «Puestos y guardias OPAI 2.0: propuesta» con las reglas definidas por Carlos el 25-oct (fuera del repo), `extraccion/operaciones.md` (esqueleto), `extraccion/maestros.md` §5, ADR-022, ADR-036 (actualización del 25-oct), ADR-048 · **Autor:** Claude · **Tarea:** CAR-10
 
-> Lenguaje de negocio, sin código (ADR-047). Este archivo resume las reglas que Carlos cerró en su Page; si difieren, manda la Page y se corrige aquí. El diseño y el brief citan las reglas por número (R1, R2…). Lo que todavía no está cerrado va en §14.
+> Lenguaje de negocio, sin código (ADR-047). Este archivo resume las reglas que Carlos definió en su Page; si difieren, manda la Page y se corrige aquí. El diseño y el brief citan las reglas por número (R1, R2…). Lo que todavía no está cerrado va en §14.
 
 ## 1. Objetivo
 
@@ -40,7 +40,7 @@ Del puesto (el modelo de datos exacto se define en el Brief 11):
 
 ## 5. Reglas de negocio
 
-**Puestos y guardias (Operaciones I) — aprobadas en la Page de Carlos del 25-oct-2026**
+**Puestos y guardias (Operaciones I) — reglas definidas por Carlos el 25-oct-2026**
 
 - **R1.** 1 puesto = 1 posición cubierta. En los patrones corridos, el titular y el relevo cubren el mismo puesto, uno a la vez. Tres 5x2 son tres puestos.
 - **R2.** Catálogo de patrones por tenant, con 4x4, 7x7, 14x14, 5x2, 2x5 y 3x4 de fábrica.
@@ -55,9 +55,8 @@ Del puesto (el modelo de datos exacto se define en el Brief 11):
 
 **Reglas ya decididas en ADR que este módulo aplica**
 
-- **R11.** La pauta guarda solo las series (patrón con su fecha de inicio de ciclo) y las excepciones (ausencias, reemplazos, PPC, turnos extra), y calcula el resto; nunca una fila por trabajador por día. Repintar no modifica días pasados ni días con marca (ADR-048, punto 6). El día de hoy se trata como pasado si ya tiene marca o cobertura confirmada (ADR-048, pregunta 4: decisión por omisión del 25-oct, **pendiente de que Carlos la confirme antes del Brief 11**).
-- **R12.** Un cambio de rol, de capa de sueldo, de monto o de instalación de una persona genera el borrador del anexo de contrato (ADR-036 y ADR-048, punto 5).
-- **R13.** El supervisor ve y opera solo las instalaciones a su cargo; el filtro va en la consulta (ADR-022).
+- **R11.** Un cambio de rol, de capa de sueldo, de monto o de instalación de una persona genera el borrador del anexo de contrato (ADR-036 y ADR-048, punto 5).
+- **R12.** El supervisor ve y opera solo las instalaciones a su cargo; el filtro va en la consulta (ADR-022).
 
 ## 6. Estados y transiciones
 
@@ -65,7 +64,7 @@ Estado de cobertura del puesto: **cubierto** ↔ **PPC (con motivo)**. El detall
 
 ## 7. Permisos por rol y portal
 
-Pendiente del diseño aprobado. Fijo: aprobar el anexo de contrato es de RRHH (rol configurable) y nunca de un agente (R8); el supervisor opera con alcance de sus instalaciones (R13).
+Pendiente del diseño aprobado. Fijo: aprobar el anexo de contrato es de RRHH (rol configurable) y nunca de un agente (R8); el supervisor opera con alcance de sus instalaciones (R12).
 
 ## 8. Eventos y notificaciones
 
@@ -110,4 +109,4 @@ Sin Asistencia, la pauta diaria muestra «confirmar cobertura», un registro ope
 
 | Fecha | Cambio | Aprobó |
 |---|---|---|
-| 25-oct-2026 | Primera versión con las reglas de Puestos y guardias (Operaciones I) de la Page de Carlos | Carlos (Page del 25-oct) |
+| 25-oct-2026 | Primera versión (borrador) con las reglas de Puestos y guardias definidas por Carlos | — (pendiente de aprobación) |

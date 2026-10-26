@@ -37,9 +37,9 @@ Las **bases transversales** (rendimiento, PWA, navegación) aplican a todo brief
 | **07b** | **Paso 3 · Capas de sueldo** (corrección del núcleo, ADR-036 actualizado el 25-oct): capa `instalacion`, resolución sin herencia entre capas, retiro del nivel `cargo` sin borrar datos, vínculo laboral con instalación y jornada pactada (ADR-048), anexo de contrato en borrador con plantilla base del sistema y la marca del tenant (la plantilla editable llega con el Brief 09); migración aditiva. **Va antes del brief de Puestos (Operaciones I)**, porque el puesto usa la capa «sueldo propio del puesto» | Pendiente: diseño de capas de sueldo y anexo → aprobación → brief. Movido desde la fase 2 (25-oct) |
 | **03** | **En paralelo · Rendimiento de navegación** (ADR-045): instrumentación, shell en el layout, caché de identidad, `forTenant` por capacidad, prefetch y caché del router, gate en CI | PR 1 integrado (#33: medición, `Server-Timing`, contador de consultas y gate como informe). **PR 2 pendiente** (arreglos y gate obligatorio). El texto del brief no está en `docs/2.0/briefs/` |
 
-- **Orden (Carlos, 25-oct; fuente: encargo de Carlos para CAR-10, 25-oct, entregado en el proyecto OPAI 2.0 de claude.ai (fuera del repo)):** 05 → 04 → 07b, con el PR 2 del 03 y la sesión D del 02 en paralelo. Al cerrar el Núcleo se abre **Puestos y guardias (Brief 11)**, adelantado desde la fase 3, y después CPQ y Comercial.
+- **Orden (Decisión de Carlos, 25-oct-2026, chat con OPAI 2.0 (registrada por el bot OPAI 2.0)):** el Núcleo se cierra antes de abrir los módulos: 05 → 04 → 07b, con el PR 2 del 03 y la sesión D del 02 en paralelo. Al cerrar el Núcleo se abre **Puestos y guardias (Brief 11)**, adelantado desde la fase 3, y después CPQ y Comercial.
 - **Criterio de término:** el Brief 07b integrado (capas de sueldo y anexo en borrador); Carlos completa la verificación guiada del Brief 02 en `test.opai.cl` sin bloqueantes; toda capacidad que la UI usa existe en MCP; QA sin hallazgos críticos; la navegación entre Cuentas, Instalaciones, Personas, Cargos y Configuración cumple las metas de ADR-045 medidas antes y después; la app se instala desde el celular y el CI prueba manifest, service worker y modo sin conexión; ADR-044 y 046 aprobados (cumplido el 24-oct).
-- **Dependencias:** seeds y secretos (Carlos desde el Mac); DS 2.0 cargado en Claude Design y diseño de navegación aprobado (para el 05); diseño de capas de sueldo y anexo aprobado y confirmación de Carlos de la pregunta 1 de ADR-048 (capa de sueldo sin Operaciones), ambos para el 07b.
+- **Dependencias:** seeds y secretos (Carlos desde el Mac); DS 2.0 cargado en Claude Design y diseño de navegación aprobado (para el 05); diseño de capas de sueldo y anexo aprobado y respuestas de Carlos a las 4 preguntas abiertas de ADR-048, que **bloquean el 07b**.
 - **Riesgo de plazo:** dos semanas para cerrar la sesión D, tres briefs y un diseño es optimista; si el diseño de navegación se atrasa, se adelantan el Brief 04 (no necesita diseño) y el 07b, y el 05 se integra cuando su diseño esté aprobado; Puestos (Brief 11) empieza cuando cierre el Núcleo (orden del 25-oct).
 - **Deja de usarse en 1.0:** nada (2.0 todavía no opera para Gard).
 
@@ -47,7 +47,7 @@ Las **bases transversales** (rendimiento, PWA, navegación) aplican a todo brief
 
 ### Fase 2 — Comercial, CPQ y Documentos · pendiente · semanas 7–12 (7-dic → 15-ene, con fiestas de fin de año; corrida unas 4 semanas por el 07b y el Brief 11)
 
-> **Orden de trabajo (Carlos, 25-oct):** esta fase empieza después de Puestos y guardias (Brief 11). Primero CPQ y después Comercial en reglas y diseño; **requisito de construcción:** los negocios (Briefs 06 y 07) existen antes del cotizador (Brief 10), porque CPQ depende de Comercial (ADR-040, ADR-048). **Recomendación para que Carlos confirme** (solo orden de diseño): diseñar CPQ antes que Comercial. El 07b pasó a la fase 1.
+> **Orden de trabajo (Decisión de Carlos, 25-oct-2026, chat con OPAI 2.0 (registrada por el bot OPAI 2.0)):** esta fase empieza después de Puestos y guardias (Brief 11). Primero CPQ y después Comercial en reglas y diseño; **requisito de construcción:** los negocios (Briefs 06 y 07) existen antes del cotizador (Brief 10), porque CPQ depende de Comercial (ADR-040, ADR-048). **Recomendación para que Carlos confirme** (solo orden de diseño): diseñar CPQ antes que Comercial. El 07b pasó a la fase 1.
 
 | Paso | Nombre | Estado |
 |---|---|---|
@@ -72,9 +72,9 @@ Las **bases transversales** (rendimiento, PWA, navegación) aplican a todo brief
 | Paso | Nombre | Estado |
 |---|---|---|
 | Extracción | `extraccion/operaciones.md`: puestos y asignaciones, pautas, turnos extra, supervisión y visitas, libro de novedades | **Esqueleto** (25-oct, CAR-10); se completa contra 1.0 antes del Brief 11 |
-| Extracción | `extraccion/portales.md`: Portal Guardia, Terreno, Cliente y Supervisor de 1.0, flujos, emparejamiento de dispositivos, uso real | Extracción hecha fuera del repo (Page para Carlos, sin enlace en el repo: sin verificar); se sube tras sus respuestas, antes del Brief 15 |
+| Extracción | `extraccion/portales.md`: Portal Guardia, Terreno, Cliente y Supervisor de 1.0, flujos, emparejamiento de dispositivos, uso real | Extracción hecha fuera del repo, sin verificar; se sube en un PR aparte, antes del Brief 15 |
 | Extracción | `extraccion/rondas-y-tickets.md` | Hecho |
-| Especificación | `modulos/operaciones.md` (Puestos y guardias aprobado en Page el 25-oct; mockup pendiente de aprobación) · `modulos/rondas.md`, `modulos/tickets.md`, `modulos/portales.md` | Operaciones I escrita (25-oct); el resto pendiente |
+| Especificación | `modulos/operaciones.md` (borrador: Puestos y guardias con reglas definidas por Carlos el 25-oct-2026 (Page «Puestos y guardias OPAI 2.0: propuesta»); mockup pendiente de aprobación) · `modulos/rondas.md`, `modulos/tickets.md`, `modulos/portales.md` | Operaciones I escrita (25-oct); el resto pendiente |
 | **11** | **Operaciones I · Puestos y guardias** (**adelantado**: va justo después del cierre del Núcleo, antes de CPQ y Comercial): puestos (1 puesto = 1 posición, PPC con motivo), asignaciones persona ↔ puesto, pauta (planilla) guardada como series y excepciones (ADR-048 §6), turnos y cobertura («confirmar cobertura» sin Asistencia) | Pendiente: aprobación del mockup y ajuste al DS V2 → brief |
 | **12** | **Operaciones II**: turnos extra, supervisión y visitas, libro de novedades, alcance del supervisor (ADR-022) | Pendiente |
 | **13** | **Tickets** transversal (ADR-025) | Pendiente |
@@ -105,7 +105,7 @@ Las **bases transversales** (rendimiento, PWA, navegación) aplican a todo brief
 
 | Paso | Nombre | Estado |
 |---|---|---|
-| Extracción | `extraccion/flujo-de-caja.md`: flujo de caja v3 de 1.0, filas, derivación al leer, proyecciones (ADR-026, insumo obligatorio) | Extracción hecha fuera del repo (Page para Carlos, sin enlace en el repo: sin verificar); se sube tras sus respuestas, antes del Brief 20 |
+| Extracción | `extraccion/flujo-de-caja.md`: flujo de caja v3 de 1.0, filas, derivación al leer, proyecciones (ADR-026, insumo obligatorio) | Extracción hecha fuera del repo, sin verificar; se sube en un PR aparte, antes del Brief 20 |
 | Extracción | `extraccion/finanzas.md`: banca y conciliación (Fintoc), DTE emitidos y recibidos (SimpleAPI), factoring y cesión, rendiciones, contabilidad e informes | **Extracción pendiente**, antes del Brief 21 |
 | Especificación | `modulos/finanzas.md` (con sub-módulos activables) | Pendiente |
 | **20** | **Flujo de caja** al centro (planilla por semana y mes, derivada de hechos, escenarios) | Pendiente |
@@ -122,7 +122,7 @@ Las **bases transversales** (rendimiento, PWA, navegación) aplican a todo brief
 
 | Paso | Nombre | Estado |
 |---|---|---|
-| Extracción | `extraccion/nomina.md`: estructuras de sueldo, liquidación, previsión, anticipos, libro de remuneraciones y Previred en 1.0 | Extracción hecha fuera del repo (Page para Carlos, sin enlace en el repo: sin verificar); se sube tras sus respuestas, antes del Brief 25 |
+| Extracción | `extraccion/nomina.md`: estructuras de sueldo, liquidación, previsión, anticipos, libro de remuneraciones y Previred en 1.0 | Extracción hecha fuera del repo, sin verificar; se sube en un PR aparte, antes del Brief 25 |
 | Extracción | `extraccion/licitaciones.md`: Mercado Público, secciones generadas, propuesta (en 1.0 requiere rediseño) | **Extracción pendiente**, antes del Brief 27 |
 | Especificación | `modulos/nomina.md`, `modulos/licitaciones.md` | Pendiente |
 | **25** | **Nómina I**: liquidación sobre un resumen de periodo (manual o importado; pauta y asistencia como fuentes opcionales, ADR-048) y las capas de sueldo de ADR-036 | Pendiente |
@@ -133,7 +133,7 @@ Las **bases transversales** (rendimiento, PWA, navegación) aplican a todo brief
 
 - **Criterio de término:** «Una nómina mensual completa de Gard se liquida en 2.0 y cuadra al peso con la anterior; una licitación se presenta desde 2.0; **Gard opera 100 % en 2.0** y `opai.gard.cl` queda archivado».
 - **Dependencias:** núcleo (personas, vínculo laboral, cargos, capas de sueldo y anexos de contrato); Opai SpA para facturar suscripciones a otros tenants. **Asistencia (fase 4), Operaciones (fase 3) y Finanzas (fase 5, pagos y flujo de caja) son fuentes o destinos opcionales**, no dependencias (ADR-048): sin ellas, el resumen del periodo se ingresa a mano o se importa desde Excel.
-- **Nómina se puede adelantar** (Briefs 25 y 26 antes de las fases 3 a 5) si hay un cliente que la quiera comprar sola; los archivos de pago los genera Nómina, y el cruce con el flujo de caja se suma cuando Finanzas exista. **Actualización (25-oct):** Carlos confirmó que hoy no hay clientes de Payroll solo; Nómina se queda en la fase 6.
+- **Nómina se puede adelantar** (Briefs 25 y 26 antes de las fases 3 a 5) si hay un cliente que la quiera comprar sola; los archivos de pago los genera Nómina, y el cruce con el flujo de caja se suma cuando Finanzas exista. **Actualización (Decisión de Carlos, 25-oct-2026, chat con OPAI 2.0 (registrada por el bot OPAI 2.0)):** Nómina se queda en la fase 6, sin adelantarla, porque no hay clientes que compren Payroll solo.
 - **Deja de usarse en 1.0:** Payroll y Licitaciones; 1.0 se apaga.
 
 ### Backlog (sin fecha)
@@ -153,9 +153,9 @@ No se portan de 1.0 y solo se reconstruyen con demanda real (lista canónica de 
 | Tickets | Responsable obligatorio desde la creación, SLA opcional, solicitudes de trabajadores como tipos con aprobación, sin chat | `extraccion/rondas-y-tickets.md`, ADR-025 |
 | Asistencia y DT | Certificable desde el diseño: hecho inmutable, bitácora encadenada, comprobante, correcciones con oposición, reportes oficiales, acceso de inspector | `extraccion/dt-normativa.md`, ADR-023 |
 | Operaciones (puestos, pautas, turnos extra, supervisión) | 1 puesto = 1 posición; catálogo de patrones por tenant; PPC con motivo; puestos creados desde la instalación o con botón con vista previa (no al ganar); pauta por series. Extracción en esqueleto → `extraccion/operaciones.md`, se completa antes del Brief 11 | `modulos/operaciones.md`, ADR-036 y ADR-040 (25-oct), ADR-048 |
-| Portales | Extracción hecha fuera del repo (Page para Carlos, sin enlace en el repo: sin verificar); se sube a `extraccion/portales.md` tras sus respuestas, antes del Brief 15 (base ya decidida: PWA instalable, sin conexión en terreno, ADR-044) | — |
-| Finanzas y flujo de caja | Flujo de caja: extracción hecha fuera del repo (Page para Carlos, sin enlace en el repo: sin verificar); se sube a `extraccion/flujo-de-caja.md` (ADR-026) tras sus respuestas, antes del Brief 20. **Extracción pendiente** → `extraccion/finanzas.md` antes del Brief 21 | ADR-026 |
-| Nómina | Extracción hecha fuera del repo (Page para Carlos, sin enlace en el repo: sin verificar); se sube a `extraccion/nomina.md` tras sus respuestas, antes del Brief 25 | — |
+| Portales | Extracción hecha fuera del repo, sin verificar; se sube en un PR aparte (a `extraccion/portales.md`), antes del Brief 15 (base ya decidida: PWA instalable, sin conexión en terreno, ADR-044) | — |
+| Finanzas y flujo de caja | Flujo de caja: extracción hecha fuera del repo, sin verificar; se sube en un PR aparte (`extraccion/flujo-de-caja.md`, ADR-026), antes del Brief 20. **Extracción pendiente** → `extraccion/finanzas.md` antes del Brief 21 | ADR-026 |
+| Nómina | Extracción hecha fuera del repo, sin verificar; se sube en un PR aparte (a `extraccion/nomina.md`), antes del Brief 25 | — |
 | Licitaciones | **Extracción pendiente** → `extraccion/licitaciones.md` antes del Brief 27 | — |
 
 ## 4. Bases transversales (antes del brief de Comercial)
@@ -168,12 +168,12 @@ No se portan de 1.0 y solo se reconstruyen con demanda real (lista canónica de 
 
 ## 5. Próximas tareas, en orden
 
-Orden de Carlos del 25-oct: **primero se cierra el Núcleo, después Puestos → CPQ → Comercial**. Responsable y etapa de cada módulo en [`PLAN-desarrollo.md`](PLAN-desarrollo.md).
+Orden (Decisión de Carlos, 25-oct-2026, chat con OPAI 2.0 (registrada por el bot OPAI 2.0)): **primero se cierra el Núcleo, después Puestos → CPQ → Comercial**. Responsable y etapa de cada módulo en [`PLAN-desarrollo.md`](PLAN-desarrollo.md).
 
 0. **Diseño 1 · DS 2.0 en Claude Design:** cargarlo desde el repo (`tokens.css`, `design/export-ds-2.0/`) en «OPAI 2.0 Design System V2» (en curso: completando componentes). **Carlos** lo revisa y lo publica.
 1. **Brief 05 · Navegación por áreas:** Design Prompt (**Claude**) → diseño en Claude Design con el sistema cargado → **Carlos** aprueba y prueba → brief (**Claude**) → PR, Revisor, QA y merge (bot «OPAI 2.0»).
 2. **Brief 04 · Base PWA:** brief (**Claude**) → aprobación de **Carlos** → construcción en `main`. Termina cuando la app se instala desde el celular y el CI prueba manifest, service worker y modo sin conexión.
-3. **Brief 07b · Capas de sueldo:** diseño de capas de sueldo y anexo → aprobación de **Carlos** → brief y PR (**Claude**).
+3. **Brief 07b · Capas de sueldo:** **bloqueado** hasta que **Carlos** responda las 4 preguntas abiertas de ADR-048 → diseño de capas de sueldo y anexo → aprobación de **Carlos** → brief y PR (**Claude**).
 4. **En paralelo:** PR de documentación del plan (CAR-10); PR 2 del Brief 03 (**Claude**); sesión D del Brief 02 (**Carlos**, en su Mac: seeds, secretos de previews, verificación guiada); aprobación del mockup de Puestos (**Carlos**).
 5. **Brief 11 · Puestos y guardias (Operaciones I):** ajustar el mockup al sistema si difiere → completar `extraccion/operaciones.md` → brief (**Claude**).
 6. **CPQ** (se diseña cuando cierren sus reglas): 8 respuestas de **Carlos** → `modulos/cpq.md` → diseño → brief.
