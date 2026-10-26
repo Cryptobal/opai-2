@@ -1,11 +1,12 @@
 import { z } from "zod";
 
-import { esRol, PERMISOS_CORE, puedeAsignarRol, type Rol } from "@opai/domain";
+import { esRol, PERMISOS_CORE, type Rol } from "@opai/domain";
 
 import { defineCapability } from "../define";
 import { noEncontrado, prohibido, reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 import { portalSchema, rolSchema, uuidSchema } from "./esquemas";
+import { exigeAsignarRol } from "./permisos/comun";
 
 export const miembroSchema = z.object({
   id: z.string(),
@@ -33,16 +34,16 @@ async function quedanOtrosOwners(ctx: Contexto, excepto: string): Promise<boolea
   return n > 0;
 }
 
-/** Quien no es owner no puede tocar owners ni asignar un rol superior al suyo. */
+/** Quien no es owner no puede tocar owners ni asignar un rol con permisos que él no tenga de hecho. */
 function verificarJerarquia(ctx: Contexto, objetivo: Miembro, nuevoRol?: Rol): void {
-  const propio = ctx.rol;
-  if (!propio) throw prohibido("Sin rol en esta empresa.");
+  if (!ctx.rol) throw prohibido("Sin rol en esta empresa.");
   if (objetivo.rol === "owner" && !ctx.autorizar(PERMISOS_CORE.ownersManage)) {
     throw prohibido("Solo un owner puede modificar a otro owner.");
   }
-  if (nuevoRol && !puedeAsignarRol(propio, nuevoRol)) {
-    throw prohibido(`No puedes asignar el rol "${nuevoRol}".`);
-  }
+  // Dos barreras de §16.2: no asignar un rol base por encima del propio (`puedeAsignarRol` sobre el
+  // rol base) y poder conceder todo lo que ese rol otorga (acceso REAL: rol personalizado +
+  // excepciones). La jerarquía manda aunque un rol a medida iguale el acceso de uno más alto.
+  if (nuevoRol) exigeAsignarRol(ctx, nuevoRol);
 }
 
 export const usersList = defineCapability({
@@ -85,13 +86,20 @@ export const usersUpdate = defineCapability({
     if (pierdeOwner && !(await quedanOtrosOwners(ctx, actual.id))) {
       throw reglaDeNegocio("Es el último owner de la empresa: asigna otro owner antes.");
     }
+    // Un owner tiene acceso total por definición: al promover a owner se descartan su rol personalizado
+    // y sus excepciones, para que nunca quede un owner restringido que cuente como «otro owner» (§16.2).
+    const pasaAOwner = input.rol === "owner" && actual.rol !== "owner";
     const data = {
       ...(input.rol ? { rol: input.rol } : {}),
       ...(input.portales ? { portales: input.portales } : {}),
       ...(input.estado ? { estado: input.estado } : {}),
+      ...(pasaAOwner ? { roleId: null } : {}),
     };
     if (dryRun) return { ...actual, ...data };
-    await ctx.db.membership.update({ where: { id: actual.id }, data });
+    await ctx.transaccion(async (tx) => {
+      await tx.membership.update({ where: { id: actual.id }, data });
+      if (pasaAOwner) await tx.permisoExcepcion.deleteMany({ where: { membershipId: actual.id } });
+    });
     return buscar(ctx, actual.id);
   },
 });
