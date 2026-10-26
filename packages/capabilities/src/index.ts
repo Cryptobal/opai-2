@@ -1,4 +1,5 @@
 export { capacidadesDelNucleo, consumidoresDelNucleo, trabajosDelNucleo } from "./core";
+export { capacidadesComercial } from "./comercial";
 export { ajuste, defineAjustes, type CampoAjuste, type MetaAjuste } from "./core/config";
 export { enviarCorreo } from "./core/comunicaciones";
 export { generarApiKey, hashApiKey, slugDeApiKey } from "./core/apikey-formato";

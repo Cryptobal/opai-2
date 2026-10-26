@@ -11,7 +11,8 @@
     "lint": "eslint ."
   },
   "dependencies": {
-    "@opai/capabilities": "workspace:*"
+    "@opai/capabilities": "workspace:*",
+    "@opai/mod-comercial": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.9.3"

@@ -1,0 +1,54 @@
+import { z } from "zod";
+
+import { capacidadesComercial, defineModule } from "@opai/capabilities";
+
+/**
+ * Manifest del módulo Comercial (ADR-003, Brief 07 · PR 1). El núcleo deriva navegación, permisos,
+ * configuración, eventos y herramientas MCP desde aquí. Las capacidades viven en
+ * packages/capabilities/src/comercial y se listan como `capacidadesComercial`.
+ */
+export const manifest = defineModule({
+  id: "comercial",
+  nombre: "Comercial",
+  version: "0.1.0",
+  dependencias: [],
+  permisos: [
+    { id: "comercial:negocios.read", descripcion: "Ver negocios y el embudo" },
+    { id: "comercial:negocios.manage", descripcion: "Crear, editar, mover, ganar y perder negocios" },
+    { id: "comercial:config.manage", descripcion: "Configurar el embudo y los catálogos del módulo" },
+  ],
+  navegacion: [
+    { portal: "erp", href: "/negocios", etiqueta: "Negocios", icono: "Briefcase", orden: 10 },
+    { portal: "erp", href: "/contactos", etiqueta: "Contactos", icono: "Users", orden: 20 },
+  ],
+  // Ajustes del módulo (ADR-008). El embudo y los catálogos se editan con sus capacidades
+  // (comercial.config.*); aquí viven las reglas conmutables del módulo.
+  configuracion: z.object({
+    ganar_exige_cotizacion: z.boolean().default(false).meta({
+      etiqueta: "Ganar exige cotización enviada",
+      ayuda:
+        "Apagado hasta que exista CPQ: se puede ganar sin cotización (decisión de Carlos, 26-oct-2026).",
+      grupo: "Negocios",
+      ambito: "tenant",
+      permiso: "comercial:config.manage",
+      control: "switch",
+    }),
+    avisar_ganar_sin_cotizacion: z.boolean().default(true).meta({
+      etiqueta: "Avisar al ganar sin cotización",
+      ayuda: "Muestra un aviso «sin cotización» en la vista previa y al confirmar.",
+      grupo: "Negocios",
+      ambito: "tenant",
+      permiso: "comercial:config.manage",
+      control: "switch",
+    }),
+  }),
+  eventos: [
+    { id: "comercial.negocio.creado", descripcion: "Se creó un negocio." },
+    { id: "comercial.negocio.actualizado", descripcion: "Cambiaron los datos o los vínculos de un negocio." },
+    { id: "comercial.negocio.etapa_cambiada", descripcion: "Un negocio cambió de etapa." },
+    { id: "comercial.negocio.ganado", descripcion: "Un negocio se marcó como ganado." },
+    { id: "comercial.negocio.perdido", descripcion: "Un negocio se marcó como perdido." },
+    { id: "comercial.negocio.archivado", descripcion: "Un negocio se archivó o se desarchivó." },
+  ],
+  capacidades: capacidadesComercial,
+});
