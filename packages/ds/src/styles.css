@@ -138,6 +138,24 @@
     animation: ds-shimmer 1.4s infinite;
   }
 }
+/* Spinner del botón con carga (Button `cargando`): 16 px, color del texto; quieto con reduced-motion. */
+@utility ds-spinner {
+  position: absolute;
+  width: 1rem;
+  height: 1rem;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: 9999px;
+  animation: ds-girar 0.8s linear infinite;
+  @media (prefers-reduced-motion: reduce) {
+    animation: none;
+  }
+}
+@keyframes ds-girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
 @keyframes ds-shimmer {
   to {
     transform: translateX(100%);

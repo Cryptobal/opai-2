@@ -31,6 +31,8 @@ test.describe("DS V2 (ADR-050)", () => {
   }) => {
     await page.emulateMedia({ colorScheme: "light" });
     await page.goto("/ds");
+    // Tras hidratar: el tema se fuerza en <html> como lo hace Preferencias.
+    await page.waitForLoadState("networkidle");
     const claro = await colores(page, "Eliminar");
     expect(contraste(claro.fondo, claro.texto)).toBeGreaterThanOrEqual(4.5);
     await page.evaluate(() => {

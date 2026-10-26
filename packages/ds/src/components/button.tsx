@@ -1,12 +1,11 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { Loader2 } from "lucide-react";
 import type { ButtonHTMLAttributes } from "react";
 
 import { cn } from "../cn";
 
 const estilos = cva(
   [
-    "inline-flex items-center justify-center gap-2 rounded-md border border-transparent font-medium select-none",
+    "relative inline-flex items-center justify-center gap-2 rounded-md border border-transparent font-medium select-none",
     "whitespace-nowrap transition-colors duration-150 outline-none",
     "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus",
     "disabled:pointer-events-none disabled:opacity-45",
@@ -49,33 +48,27 @@ export function Button({
   block,
   type = "button",
   cargando,
-  disabled,
-  children,
   ...props
 }: ButtonProps) {
   return (
     <button
       type={type}
-      disabled={disabled || cargando}
-      aria-busy={cargando || undefined}
       className={cn(
         estilos({ variant, size, block }),
-        cargando && "relative disabled:opacity-100",
+        cargando && "disabled:opacity-100",
         className,
       )}
       {...props}
-    >
-      {cargando ? (
-        <>
-          <span className="invisible inline-flex items-center gap-2">{children}</span>
-          <Loader2
-            className="absolute size-4 animate-spin motion-reduce:animate-none"
-            aria-hidden
-          />
-        </>
-      ) : (
-        children
-      )}
-    </button>
+      {...(cargando && {
+        disabled: true,
+        "aria-busy": true,
+        children: (
+          <>
+            <span className="invisible contents">{props.children}</span>
+            <span aria-hidden className="ds-spinner" />
+          </>
+        ),
+      })}
+    />
   );
 }
