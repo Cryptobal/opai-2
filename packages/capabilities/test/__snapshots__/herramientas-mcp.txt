@@ -101,6 +101,7 @@ core_puestos_set_estado
 core_puestos_update
 core_resumen_contadores
 core_roles_list
+core_supervisores_list
 core_tenant_get
 core_tenant_update
 core_usage_summary
