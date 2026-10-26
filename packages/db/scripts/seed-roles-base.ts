@@ -39,19 +39,19 @@ const PLANTILLAS = [
   {
     nombre: "RRHH",
     descripcion:
-      "Personas y documentos de RRHH en lectura; los permisos de nómina los concede el owner/admin cuando corresponda. Acotado, nunca gerente (mínimo privilegio).",
+      "Personas y documentos de RRHH en lectura; la nómina la concede el owner/admin. Acotado, nunca gerente (mínimo privilegio).",
     permisos: ["core:tenant.read", "core:personas.read", "core:documentos.read"],
   },
   {
     nombre: "Finanzas",
     descripcion:
-      "Lectura para conciliar y facturar (cuentas, documentos); finanzas la concede el owner/admin con `finanzas:*`. Acotado, nunca gerente (mínimo privilegio).",
+      "Lectura para conciliar y facturar (cuentas, documentos); finanzas la concede el owner/admin. Acotado, nunca gerente.",
     permisos: ["core:tenant.read", "core:cuentas.read", "core:documentos.read"],
   },
   {
     nombre: "Payroll",
     descripcion:
-      "Lectura y cálculo de nómina: personas y estructuras de sueldo; nómina la concede el owner/admin con `nomina:*`. Acotado, nunca gerente (mínimo privilegio).",
+      "Lectura y cálculo de nómina (personas, estructuras de sueldo); nómina la concede el owner/admin. Acotado, nunca gerente.",
     permisos: ["core:tenant.read", "core:personas.read", "core:estructuras.read"],
   },
 ] as const;

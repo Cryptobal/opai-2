@@ -11,8 +11,13 @@ let secuencia = 0;
 const idOrdenado = () => `00000000-0000-7000-8000-${(++secuencia).toString(16).padStart(12, "0")}`;
 
 const RELACIONES: Record<string, Record<string, [tabla: string, clave: string]>> = {
-  membership: { user: ["user", "userId"], tenant: ["tenant", "tenantId"] },
+  membership: {
+    user: ["user", "userId"],
+    tenant: ["tenant", "tenantId"],
+    rolTenant: ["rol", "roleId"],
+  },
   apiKey: { user: ["user", "userId"] },
+  permisoExcepcion: { creadoPorUsuario: ["user", "creadoPor"] },
 };
 
 export function dbEnMemoria(semilla: Record<string, Fila[]> = {}) {

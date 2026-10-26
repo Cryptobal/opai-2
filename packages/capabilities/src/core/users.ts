@@ -3,42 +3,27 @@ import { z } from "zod";
 import { esRol, PERMISOS_CORE, type Rol } from "@opai/domain";
 
 import { defineCapability } from "../define";
-import { noEncontrado, prohibido, reglaDeNegocio } from "../errores";
+import { prohibido, reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 import { portalSchema, rolSchema, uuidSchema } from "./esquemas";
-import { exigeAsignarRol } from "./permisos/comun";
+import { validarAsignacionRol } from "./permisos/asignaciones";
+import { exigeAsignarRol, exigeGestionDeRoles } from "./permisos/comun";
+import {
+  aMiembro,
+  buscar,
+  type Miembro,
+  miembroSchema,
+  quedanOtrosOwners,
+  ultimosAccesos,
+} from "./users-miembro";
 
-export const miembroSchema = z.object({
-  id: z.string(),
-  userId: z.string(),
-  nombre: z.string(),
-  email: z.string(),
-  rol: z.string(),
-  portales: z.array(z.string()),
-  estado: z.string(),
-});
-
-type Miembro = z.infer<typeof miembroSchema>;
-
-async function buscar(ctx: Contexto, id: string): Promise<Miembro> {
-  const m = await ctx.db.membership.findUnique({ where: { id }, include: { user: true } });
-  if (!m) throw noEncontrado("El usuario");
-  return { ...m, nombre: m.user.name, email: m.user.email };
-}
-
-/** Owners activos además del indicado. El último owner nunca se degrada, suspende ni elimina. */
-async function quedanOtrosOwners(ctx: Contexto, excepto: string): Promise<boolean> {
-  const n = await ctx.db.membership.count({
-    where: { rol: "owner", estado: "activa", id: { not: excepto } },
-  });
-  return n > 0;
-}
+export { miembroSchema } from "./users-miembro";
 
 /** Quien no es owner no puede tocar owners ni asignar un rol con permisos que él no tenga de hecho. */
 function verificarJerarquia(ctx: Contexto, objetivo: Miembro, nuevoRol?: Rol): void {
   if (!ctx.rol) throw prohibido("Sin rol en esta empresa.");
   if (objetivo.rol === "owner" && !ctx.autorizar(PERMISOS_CORE.ownersManage)) {
-    throw prohibido("Solo un owner puede modificar a otro owner.");
+    throw prohibido("Solo un owner puede cambiar a otro owner.");
   }
   // Dos barreras de §16.2: no asignar un rol base por encima del propio (`puedeAsignarRol` sobre el
   // rol base) y poder conceder todo lo que ese rol otorga (acceso REAL: rol personalizado +
@@ -48,7 +33,7 @@ function verificarJerarquia(ctx: Contexto, objetivo: Miembro, nuevoRol?: Rol): v
 
 export const usersList = defineCapability({
   id: "core.users.list",
-  descripcion: "Usuarios de la empresa actual con rol, portales y estado.",
+  descripcion: "Usuarios de la empresa actual con rol base, rol personalizado, portales y estado.",
   permiso: PERMISOS_CORE.usersRead,
   input: z.object({}),
   output: z.array(miembroSchema),
@@ -56,21 +41,24 @@ export const usersList = defineCapability({
   dryRun: false,
   async handler(ctx) {
     const filas = await ctx.db.membership.findMany({
-      include: { user: true },
+      include: { user: true, rolTenant: true },
       orderBy: { createdAt: "asc" },
     });
-    return filas.map((m) => ({ ...m, nombre: m.user.name, email: m.user.email }));
+    const accesos = await ultimosAccesos(ctx, filas.map((m) => m.userId));
+    return filas.map((m) => aMiembro(m, accesos.get(m.userId) ?? null));
   },
 });
 
 export const usersUpdate = defineCapability({
   id: "core.users.update",
   descripcion:
-    "Cambia rol, portales o estado (activa/suspendida) de un usuario. El último owner está protegido.",
+    "Cambia rol (base o personalizado por roleId), portales o estado de un usuario en una sola llamada. El último owner está protegido.",
   permiso: PERMISOS_CORE.usersManage,
   input: z.object({
     membershipId: uuidSchema,
     rol: rolSchema.optional(),
+    // Rol personalizado del tenant: null lo quita (vuelve al rol base). ADR-022, A21.
+    roleId: uuidSchema.nullable().optional(),
     portales: z.array(portalSchema).min(1).optional(),
     estado: z.enum(["activa", "suspendida"]).optional(),
   }),
@@ -80,17 +68,29 @@ export const usersUpdate = defineCapability({
   async handler(ctx, input, { dryRun }) {
     const actual = await buscar(ctx, input.membershipId);
     verificarJerarquia(ctx, actual, input.rol);
+    // Asignar o cambiar un rol personalizado es gobierno de acceso (§16.2): solo owner o admin.
+    if (input.roleId !== undefined) exigeGestionDeRoles(ctx);
     const pierdeOwner =
       actual.rol === "owner" &&
       ((input.rol !== undefined && input.rol !== "owner") || input.estado === "suspendida");
     if (pierdeOwner && !(await quedanOtrosOwners(ctx, actual.id))) {
-      throw reglaDeNegocio("Es el último owner de la empresa: asigna otro owner antes.");
+      throw reglaDeNegocio("Es el único owner de la empresa. Asigna otro owner antes de cambiar su rol.");
     }
     // Un owner tiene acceso total por definición: al promover a owner se descartan su rol personalizado
     // y sus excepciones, para que nunca quede un owner restringido que cuente como «otro owner» (§16.2).
     const pasaAOwner = input.rol === "owner" && actual.rol !== "owner";
+    // Regla del rol base bajo un personalizado (A21): se conserva el que ya tenía (o el que se pasa a
+    // la vez); owner nunca lleva personalizado. Valida escalada y rol archivado como `roles.assign`.
+    const roleId =
+      input.roleId !== undefined
+        ? await validarAsignacionRol(ctx, {
+            rolBase: input.rol ?? actual.rol,
+            roleId: input.roleId,
+          })
+        : undefined;
     const data = {
       ...(input.rol ? { rol: input.rol } : {}),
+      ...(roleId !== undefined ? { roleId } : {}),
       ...(input.portales ? { portales: input.portales } : {}),
       ...(input.estado ? { estado: input.estado } : {}),
       ...(pasaAOwner ? { roleId: null } : {}),

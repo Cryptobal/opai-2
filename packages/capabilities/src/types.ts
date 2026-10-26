@@ -168,5 +168,11 @@ export type Resultado<T = unknown> =
   | { ok: true; data: T; dryRun: boolean; repetida?: true }
   | {
       ok: false;
-      error: { code: CodigoError; message: string; issues?: unknown; aprobacionId?: string };
+      error: {
+        code: CodigoError;
+        message: string;
+        issues?: unknown;
+        aprobacionId?: string;
+        detalles?: unknown;
+      };
     };

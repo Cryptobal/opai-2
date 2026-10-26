@@ -28,16 +28,75 @@ describe("core.users.*", () => {
     expect(u).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
   });
 
+  it("el miembro trae rol base, rol personalizado (null) y último acceso (null sin sesión)", async () => {
+    const { ctx } = contextoDePrueba({ rol: "owner", semilla: semillaTenant() });
+    const r = await executeCapability(ctx, "core.users.list", {});
+    expect(r).toMatchObject({
+      ok: true,
+      data: [{ rol: "owner", roleId: null, rolNombre: null, ultimoAccesoEn: null }, {}],
+    });
+  });
+
+  it("asigna un rol personalizado en una sola llamada y conserva el rol base (A21)", async () => {
+    const ROL_ID = "0192f3a0-0000-7000-8000-0000000000d2";
+    const base = semillaTenant("gerente");
+    const semilla = {
+      ...base,
+      rol: [
+        {
+          id: ROL_ID,
+          tenantId: TENANT_DE_PRUEBA,
+          nombre: "Central",
+          permisos: ["core:instalaciones.read"],
+          sistema: false,
+          archivadoEn: null,
+        },
+      ],
+    };
+    const { ctx, tabla } = contextoDePrueba({ rol: "owner", semilla });
+    const r = await executeCapability(ctx, "core.users.update", { membershipId: M2, roleId: ROL_ID });
+    expect(r).toMatchObject({ ok: true, data: { roleId: ROL_ID, rol: "gerente", rolNombre: "Central" } });
+    expect(tabla("membership").find((m) => m["id"] === M2)?.["roleId"]).toBe(ROL_ID);
+    // Quitar el personalizado (roleId null) vuelve al rol base.
+    const quita = await executeCapability(ctx, "core.users.update", { membershipId: M2, roleId: null });
+    expect(quita).toMatchObject({ ok: true, data: { roleId: null, rol: "gerente" } });
+  });
+
+  it("asignar por roleId no escala: no asignas un rol con permisos que no tienes (§16.2)", async () => {
+    const ROL_ID = "0192f3a0-0000-7000-8000-0000000000d3";
+    const base = semillaTenant("admin");
+    const semilla = {
+      ...base,
+      rol: [
+        {
+          id: ROL_ID,
+          tenantId: TENANT_DE_PRUEBA,
+          nombre: "Casi dios",
+          permisos: ["core:tenant.delete"],
+          sistema: false,
+          archivadoEn: null,
+        },
+      ],
+    };
+    const { ctx } = contextoDePrueba({ rol: "admin", semilla });
+    const r = await executeCapability(ctx, "core.users.update", { membershipId: M2, roleId: ROL_ID });
+    expect(r).toMatchObject({
+      ok: false,
+      error: { code: "FORBIDDEN", detalles: { permisos: ["core:tenant.delete"] } },
+    });
+  });
+
   it("el último owner no se puede degradar, suspender ni eliminar", async () => {
     const { ctx } = contextoDePrueba({ rol: "owner", semilla: semillaTenant() });
-    for (const [id, input] of [
-      ["core.users.update", { membershipId: M1, rol: "admin" }],
-      ["core.users.update", { membershipId: M1, estado: "suspendida" }],
-      ["core.users.remove", { membershipId: M1 }],
+    // update/suspender usan el texto de la sábana («único owner»); remove, su propio texto.
+    for (const [id, input, patron] of [
+      ["core.users.update", { membershipId: M1, rol: "admin" }, /único owner de la empresa/],
+      ["core.users.update", { membershipId: M1, estado: "suspendida" }, /único owner de la empresa/],
+      ["core.users.remove", { membershipId: M1 }, /último owner/],
     ] as const) {
       const r = await executeCapability(ctx, id, input);
       expect(r).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
-      expect(r.ok === false && r.error.message).toMatch(/último owner/);
+      expect(r.ok === false && r.error.message).toMatch(patron);
     }
   });
 
