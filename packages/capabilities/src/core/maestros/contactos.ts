@@ -14,6 +14,7 @@ import {
   vista,
 } from "./contactos-vista";
 import { cuentaDe } from "./cuentas";
+import { exigirNoAnonimizado } from "./anonimizado";
 
 export const contactosList = defineCapability({
   id: "core.contactos.list",
@@ -106,6 +107,7 @@ export const contactosUpdate = defineCapability({
   dryRun: true,
   async handler(ctx, { id, ...cambios }, { dryRun }) {
     const actual = await contactoDe(ctx, id);
+    exigirNoAnonimizado(actual, "El contacto");
     await emailLibre(ctx, actual.cuentaId, cambios.email, id);
     const data = definidos(cambios);
     if (dryRun) return vista({ ...actual, ...data });

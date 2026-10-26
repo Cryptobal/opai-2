@@ -9,6 +9,7 @@ export const claveAjusteRetencion = (clave: string): string =>
   `cumplimiento_retencion_${clave}_dias`;
 
 const PERMISO = "core:cumplimiento.manage";
+// Activar la política o acortar un periodo anonimiza de forma irreversible: solo una persona (ADR-034).
 
 // Un ajuste de días por regla que aplica el trabajo diario (catálogo de @opai/domain), con el
 // periodo PROPUESTO por defecto: lo confirma Carlos con el abogado (§16.4). 0 = sin vencimiento.
@@ -16,11 +17,12 @@ const dias = Object.fromEntries(
   reglasDelTrabajo().map((r) => [
     claveAjusteRetencion(r.clave),
     z.number().int().min(0).max(36_500).default(r.diasPropuestos).meta({
-      etiqueta: `Retención · ${r.tabla} (días)`,
+      etiqueta: `Retención · ${r.clave} (días)`,
       ayuda: `PROPUESTA a confirmar con el abogado. ${r.motivo} 0 = sin vencimiento.`,
       grupo: "Cumplimiento",
       ambito: "tenant",
       permiso: PERMISO,
+      soloPersonas: true,
       control: "numero",
     }),
   ]),
@@ -41,6 +43,7 @@ export const AJUSTES_RETENCION = defineAjustes(
       grupo: "Cumplimiento",
       ambito: "tenant",
       permiso: PERMISO,
+      soloPersonas: true,
       control: "switch",
     }),
     ...dias,

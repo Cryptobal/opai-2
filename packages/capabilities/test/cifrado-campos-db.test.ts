@@ -1,13 +1,14 @@
 // Cifrado de aplicación de los campos sensibles del inventario (Ley 21.719, Brief 07d PR 3 B11)
 // contra Postgres real: nada en claro, ligado a tenant+tabla+columna, solo lo declarado sensible, y
 // legible tras rotar la KEK (la rotación recifra la DEK del tenant, no los datos).
-import { execFileSync } from "node:child_process";
 import { randomBytes, randomUUID } from "node:crypto";
 import { defineDatosPersonales } from "@opai/domain";
+import { cifrar, descifrar } from "@opai/integrations";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { type Entorno, prepararEntorno, urlPropietario } from "../../db/test/entorno";
 
+import { crearCifradoDeCampos } from "../src/core/cumplimiento/cifrado-campos";
 import type * as ModuloCapacidades from "../src";
 
 // Inventario de prueba: salud y biometría aún no existen como tablas (llegan en fase 4).
@@ -28,6 +29,7 @@ describe.skipIf(!urlPropietario)("cifrado de campos sensibles en base real", () 
   let tA = "";
   let tB = "";
   const previas = { ...process.env };
+  // Versión alta: el script `rotar-kek` (que prueba secretos-db en paralelo) solo toca versiones menores.
   const v1 = randomBytes(32).toString("base64");
 
   const ctx = (tenantId: string) =>
@@ -41,7 +43,7 @@ describe.skipIf(!urlPropietario)("cifrado de campos sensibles en base real", () 
   beforeAll(async () => {
     e = await prepararEntorno();
     mod = await import("../src");
-    Object.assign(process.env, { OPAI_SECRETS_KEY: v1, OPAI_SECRETS_KEY_VERSION: "1" });
+    Object.assign(process.env, { OPAI_SECRETS_KEY: v1, OPAI_SECRETS_KEY_VERSION: "99" });
     delete process.env["OPAI_SECRETS_KEY_ANTERIOR"];
     const s = randomUUID().slice(0, 8);
     const tenant = (slug: string) =>
@@ -59,7 +61,7 @@ describe.skipIf(!urlPropietario)("cifrado de campos sensibles en base real", () 
   });
 
   it("ida y vuelta; lo guardado no contiene el dato en claro y cada cifrado es distinto", async () => {
-    const c = mod.cifradoDeCampos(ctx(tA), INVENTARIO);
+    const c = crearCifradoDeCampos(ctx(tA), INVENTARIO);
     const dato = "Hipoacusia leve bilateral";
     const g1 = await c.cifrar("fichas_salud", "diagnostico", dato);
     const g2 = await c.cifrar("fichas_salud", "diagnostico", dato);
@@ -71,7 +73,7 @@ describe.skipIf(!urlPropietario)("cifrado de campos sensibles en base real", () 
   });
 
   it("solo cifra lo que el inventario declara sensible (el RUT queda como está)", async () => {
-    const c = mod.cifradoDeCampos(ctx(tA), INVENTARIO);
+    const c = crearCifradoDeCampos(ctx(tA), INVENTARIO);
     await expect(c.cifrar("personas", "rut", "11111111-1")).rejects.toThrow(/no está declarado como sensible/);
     await expect(c.cifrar("fichas_salud", "otro", "x")).rejects.toThrow(/no está declarado/);
     // El inventario real del Núcleo hoy no declara campos sensibles: nada se cifra por accidente.
@@ -80,10 +82,10 @@ describe.skipIf(!urlPropietario)("cifrado de campos sensibles en base real", () 
   });
 
   it("el valor cifrado no se descifra en otro campo ni en otro tenant ni alterado", async () => {
-    const a = mod.cifradoDeCampos(ctx(tA), INVENTARIO);
+    const a = crearCifradoDeCampos(ctx(tA), INVENTARIO);
     const g = await a.cifrar("fichas_salud", "diagnostico", "dato reservado");
     await expect(a.descifrar("fichas_salud", "huella", g)).rejects.toThrow(/No se pudo descifrar/);
-    const b = mod.cifradoDeCampos(ctx(tB), INVENTARIO);
+    const b = crearCifradoDeCampos(ctx(tB), INVENTARIO);
     await expect(b.descifrar("fichas_salud", "diagnostico", g)).rejects.toThrow(/No se pudo descifrar/);
     const alterado = `${g.slice(0, -2)}${g.endsWith("AA") ? "BB" : "AA"}`;
     await expect(a.descifrar("fichas_salud", "diagnostico", alterado)).rejects.toThrow(/No se pudo descifrar/);
@@ -93,15 +95,19 @@ describe.skipIf(!urlPropietario)("cifrado de campos sensibles en base real", () 
 
   it("sigue legible tras rotar la KEK: la rotación recifra la DEK, no los datos", async () => {
     const dato = "Dato sensible de la persona";
-    const g = await mod.cifradoDeCampos(ctx(tA), INVENTARIO).cifrar("fichas_salud", "huella", dato);
+    const g = await crearCifradoDeCampos(ctx(tA), INVENTARIO).cifrar("fichas_salud", "huella", dato);
     const v2 = randomBytes(32).toString("base64");
-    execFileSync("pnpm", ["exec", "tsx", "scripts/rotar-kek.ts"], {
-      cwd: new URL("..", import.meta.url).pathname,
-      env: { ...process.env, OPAI_SECRETS_KEY: v2, OPAI_SECRETS_KEY_VERSION: "2", OPAI_SECRETS_KEY_ANTERIOR: v1 },
-      stdio: "pipe",
+    // Lo que hace `rotar-kek` para este tenant (sin lanzar el script, que recorre TODOS los tenants
+    // y chocaría con otros tests de base en paralelo): reenvolver la DEK con la KEK nueva.
+    const fila = await e.admin.claveTenant.findUniqueOrThrow({ where: { tenantId: tA } });
+    const dek = descifrar(Buffer.from(v1, "base64"), { cifrado: fila.dekCifrada, iv: fila.iv, tag: fila.tag });
+    const nueva = cifrar(Buffer.from(v2, "base64"), dek);
+    await e.admin.claveTenant.update({
+      where: { tenantId: tA },
+      data: { dekCifrada: Uint8Array.from(nueva.cifrado), iv: Uint8Array.from(nueva.iv), tag: Uint8Array.from(nueva.tag), kekVersion: 100 },
     });
-    Object.assign(process.env, { OPAI_SECRETS_KEY: v2, OPAI_SECRETS_KEY_VERSION: "2" });
+    Object.assign(process.env, { OPAI_SECRETS_KEY: v2, OPAI_SECRETS_KEY_VERSION: "100" });
     delete process.env["OPAI_SECRETS_KEY_ANTERIOR"];
-    expect(await mod.cifradoDeCampos(ctx(tA), INVENTARIO).descifrar("fichas_salud", "huella", g)).toBe(dato);
+    expect(await crearCifradoDeCampos(ctx(tA), INVENTARIO).descifrar("fichas_salud", "huella", g)).toBe(dato);
   }, 60_000);
 });

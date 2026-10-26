@@ -10,6 +10,7 @@ import { aFecha, definidos, diaSchema, escribirConEvento, opcionalAFecha } from 
 import { cargoParaVinculo, crearVinculo } from "./personas-escritura";
 import { personaDe } from "./personas-vista";
 import { camposVinculo, vinculoSchema, vistaVinculo } from "./vinculos-vista";
+import { exigirNoAnonimizado } from "./anonimizado";
 
 async function vinculoDe(ctx: Contexto, id: string) {
   const v = await ctx.db.vinculoLaboral.findUnique({ where: { id } });
@@ -46,6 +47,7 @@ export const vinculosCreate = defineCapability({
   dryRun: true,
   async handler(ctx, { personaId, ...v }, { dryRun }) {
     const p = await personaDe(ctx, personaId);
+    exigirNoAnonimizado(p, "La persona");
     if (p.archivadaEn) throw reglaDeNegocio("La persona está archivada.");
     const vigente = await ctx.db.vinculoLaboral.findFirst({
       where: { personaId, estado: "vigente" },

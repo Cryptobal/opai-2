@@ -263,12 +263,63 @@ describe.skipIf(!urlPropietario)("cumplimiento PR3 (retención) en base real", (
         });
         expect(!r.ok && r.error.code).toBe("UNPROCESSABLE");
       }
+      // La solicitud de acceso abierta lo frena (habría que entregarle sus datos primero).
+      const frenada = await mod.executeCapability(ctx(tA, uA), "core.cumplimiento.titular_anonimizar", {
+        titular: { tipo: "contacto", id: c.id }, motivo: "Pedido del titular",
+      });
+      expect(!frenada.ok && frenada.error.code).toBe("UNPROCESSABLE");
+      await e.admin.solicitudArco.update({ where: { id: acceso.id }, data: { estado: "resuelta" } });
       const ok = await mod.executeCapability(ctx(tA, uA), "core.cumplimiento.titular_anonimizar", {
         titular: { tipo: "contacto", id: c.id }, motivo: "Pedido del titular",
       });
       expect(ok.ok && (ok.data as { anonimizado: boolean }).anonimizado).toBe(true);
       const f = await e.admin.contacto.findUniqueOrThrow({ where: { id: c.id } });
       expect(f).toMatchObject({ nombres: "[anonimizado]", email: null, estado: "inactivo" });
+    });
+  });
+
+  describe("endurecimiento tras la autorrevisión", () => {
+    it("un agente no activa la política ni acorta un periodo (ajuste solo de personas)", async () => {
+      for (const [clave, valor] of [["cumplimiento_retencion_activa", true], ["cumplimiento_retencion_personas_dias", 1]] as const) {
+        const r = await mod.executeCapability(agente(), "core.config.set", { modulo: "core", clave, valor });
+        expect(!r.ok && r.error.code).toBe("FORBIDDEN");
+      }
+      const humano = await mod.executeCapability(ctx(tA, uA), "core.config.set", { modulo: "core", clave: "cumplimiento_retencion_personas_dias", valor: 1825 });
+      expect(humano.ok).toBe(true);
+    });
+
+    it("una persona o contacto anonimizado no admite escrituras", async () => {
+      const p = await persona("12121212-1");
+      const sol = await mod.executeCapability(ctx(tA, uA), "core.cumplimiento.titular_anonimizar", {
+        titular: { tipo: "persona", id: p.id }, motivo: "Pedido del titular",
+      });
+      expect(sol.ok).toBe(true);
+      const upd = await mod.executeCapability(ctx(tA, uA), "core.personas.update", { id: p.id, telefono: "+56922222222" });
+      expect(!upd.ok && upd.error.code).toBe("UNPROCESSABLE");
+      const vin = await mod.executeCapability(ctx(tA, uA), "core.vinculos.create", {
+        personaId: p.id, cargoId: cargo, tipo: "indefinido", inicio: "2026-01-01",
+      });
+      expect(!vin.ok && vin.error.code).toBe("UNPROCESSABLE");
+      expect((await e.admin.persona.findUniqueOrThrow({ where: { id: p.id } })).telefono).toBeNull();
+    });
+
+    it("una solicitud abierta que llegó solo con el correo frena la anonimización", async () => {
+      const p = await persona("13131313-1", { emailPersonal: "pedro@x.cl" });
+      await vinculo(p.id, { estado: "terminado", inicio: dia(HACE(3000)), termino: dia(HACE(2000)) });
+      await e.admin.solicitudArco.create({ data: { tenantId: tA, tipo: "acceso", titularEmail: "pedro@x.cl" } });
+      await correrTrabajo(tA, uA);
+      expect((await e.admin.persona.findUniqueOrThrow({ where: { id: p.id } })).anonimizadaEn).toBeNull();
+    });
+
+    it("la purga puntual se rechaza si hay otra solicitud abierta del titular", async () => {
+      const p = await persona("14141414-1");
+      const canc = await e.admin.solicitudArco.create({ data: { tenantId: tA, tipo: "cancelacion", titularTipo: "persona", titularId: p.id } });
+      await e.admin.solicitudArco.create({ data: { tenantId: tA, tipo: "portabilidad", titularTipo: "persona", titularId: p.id } });
+      const r = await mod.executeCapability(ctx(tA, uA), "core.cumplimiento.titular_anonimizar", {
+        titular: { tipo: "persona", id: p.id }, motivo: "Pedido del titular", solicitudId: canc.id,
+      });
+      expect(!r.ok && r.error.code).toBe("UNPROCESSABLE");
+      expect((await e.admin.persona.findUniqueOrThrow({ where: { id: p.id } })).anonimizadaEn).toBeNull();
     });
   });
 });

@@ -23,6 +23,7 @@ import {
   vistaPersona,
 } from "./personas-vista";
 import { camposVinculo } from "./vinculos-vista";
+import { exigirNoAnonimizado } from "./anonimizado";
 
 const DUPLICADO = "Ya existe una persona con ese RUT.";
 
@@ -125,6 +126,7 @@ export const personasUpdate = defineCapability({
   dryRun: true,
   async handler(ctx, { id, ...cambios }, { dryRun }) {
     const actual = await personaDe(ctx, id);
+    exigirNoAnonimizado(actual, "La persona");
     await rutLibre(ctx, cambios.rut, id);
     const data = definidos({
       ...cambios,

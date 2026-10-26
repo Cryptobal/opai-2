@@ -80,3 +80,32 @@ export async function anonimizarContacto(
   });
   return count === 1;
 }
+
+/**
+ * Solicitudes del titular aún abiertas (`recibida`/`en_proceso`), por id o por su correo (una
+ * solicitud puede llegar solo con el correo, §10). Se consulta dentro de la transacción que
+ * anonimiza: una solicitud que entra entre elegir y escribir también frena la anonimización.
+ * `excepto` es la solicitud de cancelación que respalda la acción.
+ */
+export async function solicitudesAbiertas(
+  tx: TenantTx,
+  tipo: "persona" | "contacto",
+  id: string,
+  excepto?: string,
+): Promise<number> {
+  const correos =
+    tipo === "persona"
+      ? await tx.persona.findUnique({ where: { id }, select: { emailPersonal: true, emailLaboral: true } })
+      : await tx.contacto.findUnique({ where: { id }, select: { email: true } });
+  const emails = Object.values(correos ?? {}).filter((v): v is string => typeof v === "string");
+  return tx.solicitudArco.count({
+    where: {
+      estado: { in: ["recibida", "en_proceso"] },
+      ...(excepto ? { id: { not: excepto } } : {}),
+      OR: [
+        { titularTipo: tipo, titularId: id },
+        ...(emails.length ? [{ titularEmail: { in: emails } }] : []),
+      ],
+    },
+  });
+}

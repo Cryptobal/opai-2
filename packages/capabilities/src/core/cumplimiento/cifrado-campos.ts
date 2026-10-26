@@ -31,9 +31,13 @@ export type CifradoDeCampos = {
  * Cifrador de los campos que el inventario declara sensibles. Cifrar o descifrar un campo que NO
  * está declarado como sensible es un error: la regla vive en el inventario, no en cada módulo.
  */
-export function cifradoDeCampos(
+export const cifradoDeCampos = (ctx: Contexto): CifradoDeCampos =>
+  crearCifradoDeCampos(ctx, listarInventario());
+
+/** Variante con inventario explícito, solo para pruebas: el código de negocio usa `cifradoDeCampos`. */
+export function crearCifradoDeCampos(
   ctx: Contexto,
-  inventario: readonly DatoPersonalDeclarado[] = listarInventario(),
+  inventario: readonly DatoPersonalDeclarado[],
 ): CifradoDeCampos {
   const sensibles = new Set(camposACifrar(inventario).map((c) => `${c.tabla}.${c.campo}`));
   let dek: Promise<Buffer> | null = null;

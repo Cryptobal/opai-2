@@ -8,7 +8,7 @@ import type { Contexto } from "../../types";
 import { uuidSchema } from "../esquemas";
 import { cargarTitular, titularSchema } from "./comunes";
 import { diasDeRegla } from "./retencion-politica";
-import { anonimizarContacto, anonimizarPersona } from "./retencion-anonimizar";
+import { anonimizarContacto, anonimizarPersona, solicitudesAbiertas } from "./retencion-anonimizar";
 
 const MOTIVOS: Record<string, string> = {
   vinculo_vigente: "La persona tiene una relación laboral vigente: no se puede anonimizar.",
@@ -102,6 +102,9 @@ export const titularAnonimizar = defineCapability({
     if (ya) return { ...previa, anonimizado: false, yaEstabaAnonimizado: true };
     if (dryRun) return { ...previa, anonimizado: false, yaEstabaAnonimizado: false };
     const hecho = await ctx.transaccion(async (tx) => {
+      // Otra solicitud abierta (acceso, portabilidad…) quedaría sin datos que entregar: se resuelve antes.
+      if ((await solicitudesAbiertas(tx, t.tipo === "persona" ? "persona" : "contacto", t.id, input.solicitudId)) > 0)
+        throw reglaDeNegocio("El titular tiene otras solicitudes abiertas; resuélvelas antes de anonimizarlo.");
       const ok =
         t.tipo === "persona"
           ? await anonimizarPersona(tx, t.id, ahora, corte)

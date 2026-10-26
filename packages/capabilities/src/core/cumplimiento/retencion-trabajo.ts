@@ -49,11 +49,13 @@ async function correr(
         filas,
       },
     });
-    await ctx.eventos.emitir(tx, {
-      tipo: "core.cumplimiento.retencion_aplicada",
-      entidadTipo: "retencion",
-      payload: { tabla: e.regla.tabla, accion: e.regla.accion, modo, filas },
-    });
+    // Solo lo aplicado es un hecho para los consumidores; la simulación queda en el registro.
+    if (activa)
+      await ctx.eventos.emitir(tx, {
+        tipo: "core.cumplimiento.retencion_aplicada",
+        entidadTipo: "retencion",
+        payload: { tabla: e.regla.tabla, accion: e.regla.accion, modo, filas },
+      });
   });
   return { tabla: e.regla.tabla, modo, filas };
 }
@@ -74,10 +76,17 @@ export const trabajoRetencion = defineTrabajo({
     const activa = await politicaActiva(ctx);
     const ahora = new Date();
     const resultados: Resultado[] = [];
+    const fallidas: string[] = [];
     for (const e of EJECUTORES) {
-      const r = await correr(ctx, e, await diasDeRegla(ctx, e.regla), ahora, activa);
-      if (r) resultados.push(r);
+      // Una regla que falla no impide las demás; al final el trabajo falla para que se reintente.
+      try {
+        const r = await correr(ctx, e, await diasDeRegla(ctx, e.regla), ahora, activa);
+        if (r) resultados.push(r);
+      } catch {
+        fallidas.push(e.regla.tabla);
+      }
     }
+    if (fallidas.length) throw new Error(`Falló la retención de: ${fallidas.join(", ")}.`);
     return { activa, resultados };
   },
 });

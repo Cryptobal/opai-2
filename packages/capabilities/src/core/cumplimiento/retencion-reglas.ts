@@ -3,7 +3,13 @@ import { type ReglaRetencion, elegibilidadPersona, reglaDe } from "@opai/domain"
 import type { TenantTx } from "@opai/db";
 
 import type { Contexto } from "../../types";
-import { anonimizarContacto, anonimizarPersona, MARCA_ANONIMO, sinRelacionViva } from "./retencion-anonimizar";
+import {
+  anonimizarContacto,
+  anonimizarPersona,
+  MARCA_ANONIMO,
+  sinRelacionViva,
+  solicitudesAbiertas,
+} from "./retencion-anonimizar";
 
 /** Titulares con una solicitud abierta: mientras se atiende no se anonimizan por política. */
 export type Exclusiones = { persona: string[]; contacto: string[] };
@@ -92,7 +98,13 @@ const contactos: Ejecutor = {
         take: tope,
       })
     ).map((f) => f.id),
-  aplicar: (tx, ids, ahora, corte) => sumar(ids, (id) => anonimizarContacto(tx, id, ahora, corte)),
+  aplicar: (tx, ids, ahora, corte) =>
+    sumar(
+      ids,
+      async (id) =>
+        (await solicitudesAbiertas(tx, "contacto", id)) === 0 &&
+        (await anonimizarContacto(tx, id, ahora, corte)),
+    ),
 };
 
 const candidatasPersona = (corte: Date, ex: Exclusiones) => ({
@@ -114,7 +126,13 @@ const personas: Ejecutor = {
     // Defensa en profundidad: la regla de dominio decide, no solo el filtro de la consulta.
     return filas.filter((f) => elegibilidadPersona(f.vinculos, dias, ahora).ok).map((f) => f.id);
   },
-  aplicar: (tx, ids, ahora, corte) => sumar(ids, (id) => anonimizarPersona(tx, id, ahora, corte)),
+  aplicar: (tx, ids, ahora, corte) =>
+    sumar(
+      ids,
+      async (id) =>
+        (await solicitudesAbiertas(tx, "persona", id)) === 0 &&
+        (await anonimizarPersona(tx, id, ahora, corte)),
+    ),
 };
 
 export const EJECUTORES: readonly Ejecutor[] = [envios, invitaciones, contactos, personas];

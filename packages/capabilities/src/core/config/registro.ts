@@ -9,6 +9,8 @@ export type MetaAjuste = {
   ambito: "tenant" | "usuario" | "plataforma";
   /** Permiso para cambiarlo en ámbito tenant (por defecto core:config.manage). */
   permiso?: string;
+  /** Lo irreversible lo decide una persona: un agente (API key/MCP) no puede cambiarlo (ADR-034). */
+  soloPersonas?: boolean;
   control?: "texto" | "numero" | "switch" | "seleccion" | "lista" | "color" | "fecha" | "json";
 };
 
