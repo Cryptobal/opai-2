@@ -35,7 +35,7 @@ export const VARIANTES: Record<string, () => React.ReactNode> = {
         n: 1,
         titulo: "El correo o la contraseña no coinciden",
         texto:
-          "Revisa los datos y vuelve a intentarlo. Tras 5 intentos pausaremos el acceso por 15 minutos.",
+          "Revisa los datos y vuelve a intentarlo. Tras varios intentos pausaremos el acceso unos minutos.",
       }}
     />
   ),
