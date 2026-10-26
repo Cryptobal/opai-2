@@ -63,6 +63,8 @@ export async function accionEntrar(
   }
   if (!r.ok) {
     if (r.fallo === "suspendida") return { tipo: "suspendida", texto: r.mensaje };
+    // El bloqueo persistido por cuenta (B1) usa el mismo aviso genérico que el límite en memoria.
+    if (r.fallo === "bloqueada") return PAUSADO;
     return {
       tipo: "error",
       titulo: "El correo o la contraseña no coinciden",

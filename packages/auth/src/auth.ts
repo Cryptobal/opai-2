@@ -1,6 +1,6 @@
 import { prismaAdapter } from "@better-auth/prisma-adapter";
 import { betterAuth } from "better-auth";
-import { APIError } from "better-auth/api";
+import { APIError, createAuthMiddleware } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
 
 import { clienteAuth } from "@opai/db";
@@ -8,6 +8,7 @@ import { COMUNICABLES_NUCLEO, renderizarCorreo } from "@opai/domain";
 import { mailerDelEntorno } from "@opai/integrations/email";
 
 import { bloqueoDeIngreso, mensajeBloqueo } from "./acceso";
+import { datosDeContexto, loginPausado, MENSAJE_PAUSA, registrarResultado } from "./bloqueo-login";
 import {
   camposUsuario,
   LARGO_MINIMO_PASSWORD,
@@ -84,6 +85,28 @@ export const auth = betterAuth({
         },
       },
     },
+  },
+  // Bloqueo de login persistido por cuenta (B1, Brief 07c). Se engancha en `sign-in/email` sobre la
+  // capa de Better Auth, no solo en la Server Action, para que cubra también el POST directo a
+  // `/api/auth/.../sign-in/email` y no sea evitable saltándose la UI. El límite en memoria de la
+  // librería y el de `apps/web/lib/rate-limit.ts` siguen como primera barrera barata.
+  hooks: {
+    before: createAuthMiddleware(async (ctx) => {
+      if (ctx.path !== "/sign-in/email") return;
+      const datos = datosDeContexto(ctx);
+      if (datos && (await loginPausado(datos))) {
+        throw new APIError("TOO_MANY_REQUESTS", { code: "ACCOUNT_LOCKED", message: MENSAJE_PAUSA });
+      }
+    }),
+    after: createAuthMiddleware(async (ctx) => {
+      if (ctx.path !== "/sign-in/email") return;
+      const datos = datosDeContexto(ctx);
+      if (!datos) return;
+      const r = ctx.context.returned;
+      const codigo =
+        r instanceof APIError ? ((r.body as { code?: string } | undefined)?.code ?? "ERROR") : null;
+      await registrarResultado(datos, codigo);
+    }),
   },
   plugins: [nextCookies()],
 });
