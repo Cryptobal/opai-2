@@ -70,6 +70,14 @@ export const EVENTOS_CORE: readonly EventoDeDominio[] = [
   { id: "core.usuario.invitado", descripcion: "Se invitó a una persona (correo transaccional)." },
   { id: "core.usuario.invitacion_solicitada", descripcion: "Alguien pidió una nueva invitación." },
   { id: "core.bitacora.rota", descripcion: "La verificación de la bitácora encontró un quiebre." },
+  {
+    id: "core.cumplimiento.dpa_aceptado",
+    descripcion: "La empresa aceptó una versión del acuerdo de tratamiento de datos (DPA).",
+  },
+  {
+    id: "core.cumplimiento.dpo_actualizado",
+    descripcion: "Cambió el contacto del delegado de protección de datos (DPO).",
+  },
 ];
 
 /** Catálogo completo: núcleo más los módulos registrados. */
