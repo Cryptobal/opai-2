@@ -5,6 +5,7 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import { clienteApp } from "../../db/src/client";
 import { type Entorno, prepararEntorno, urlPropietario } from "../../db/test/entorno";
 
 import type * as ModuloCapacidades from "../src";
@@ -67,12 +68,26 @@ describe.skipIf(!urlPropietario)("aislamiento de lecturas por enLectura (ADR-045
   });
 
   it("tras el commit de una lectura y tras un rollback, el pool sin set_config no ve filas", async () => {
+    const comprobarPoolSinTenant = async () => {
+      const app = clienteApp();
+      await Promise.all(
+        Array.from({ length: 10 }, async () => {
+          const [cantidad, tenant] = await Promise.all([
+            app.persona.count(),
+            app.$queryRaw<{ tenant: string }[]>`
+              SELECT coalesce(current_setting('app.tenant_id', true), '') AS tenant
+            `,
+          ]);
+          expect(cantidad).toBe(0);
+          expect(tenant).toEqual([{ tenant: "" }]);
+        }),
+      );
+    };
     // Commit: una lectura real por el camino de ADR-045 (una sola transacción con el tenant fijado).
     const r = await mod.executeCapability(ctx(idA), "core.personas.list", {});
     expect(r.ok).toBe(true);
-    // El `set_config(..., true)` es local a la transacción: al terminar, un cliente sin tenant fijado
-    // (el pool sin `set_config`) no ve ninguna fila, porque la RLS niega por defecto.
-    expect(await e.appSinTenant.persona.count()).toBe(0);
+    // Fuera de transacción, el mismo pool de la app queda sin tenant y la RLS niega por defecto.
+    await comprobarPoolSinTenant();
 
     // Rollback: `enLectura` revierte si el handler lanza y tampoco deja el tenant fijado en el pool.
     const c = ctx(idA);
@@ -84,6 +99,6 @@ describe.skipIf(!urlPropietario)("aislamiento de lecturas por enLectura (ADR-045
         throw new Error("revienta la lectura a propósito");
       }),
     ).rejects.toThrow("revienta la lectura a propósito");
-    expect(await e.appSinTenant.persona.count()).toBe(0);
+    await comprobarPoolSinTenant();
   });
 });
