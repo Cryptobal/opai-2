@@ -1,11 +1,6 @@
 import { z } from "zod";
 
-import {
-  type EstadoIncidente,
-  ESTADOS_INCIDENTE,
-  PERMISOS_CORE,
-  puedeAvanzarIncidente,
-} from "@opai/domain";
+import { type EstadoIncidente, PERMISOS_CORE, puedeAvanzarIncidente } from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import { reglaDeNegocio } from "../../errores";
@@ -65,12 +60,13 @@ export const incidenteRegistrar = defineCapability({
 export const incidenteAvanzar = defineCapability({
   id: "core.cumplimiento.incidente_avanzar",
   descripcion:
-    "Avanza el estado de un incidente de seguridad en su atención (en evaluación, cerrado…) agregando un hecho nuevo, sin editar los anteriores (Ley 21.719). La transición queda auditada.",
+    "Avanza el estado de un incidente de seguridad en su atención (en evaluación o cerrado) agregando un hecho nuevo, sin editar los anteriores (Ley 21.719). A «notificado» solo se llega registrando los avisos de brecha, nunca por aquí. La transición queda auditada.",
   permiso: PERMISOS_CORE.cumplimientoManage,
   soloPersonas: true,
   input: z.object({
     casoId: uuidSchema,
-    estado: z.enum(ESTADOS_INCIDENTE),
+    // "notificado" se alcanza solo cuando constan todos los avisos (incidente_notificar), no a mano.
+    estado: z.enum(["en_evaluacion", "cerrado"]),
     nota: z.string().trim().max(2000).optional(),
   }),
   output: incidenteVista,

@@ -335,8 +335,9 @@ describe("incidentes y avisos de brecha (§16.5)", () => {
       descripcion: "Incidente de prueba.",
     });
     await dato(ctx, "core.cumplimiento.incidente_avanzar", { casoId: i.casoId, estado: "cerrado" });
+    // Desde "cerrado" (terminal) no se avanza a "en_evaluacion": transición inválida.
     expect(
-      await codigo(ctx, "core.cumplimiento.incidente_avanzar", { casoId: i.casoId, estado: "abierto" }),
+      await codigo(ctx, "core.cumplimiento.incidente_avanzar", { casoId: i.casoId, estado: "en_evaluacion" }),
     ).toBe("UNPROCESSABLE");
   });
 
