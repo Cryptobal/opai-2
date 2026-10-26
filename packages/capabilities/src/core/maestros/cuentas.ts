@@ -6,12 +6,14 @@ import { defineCapability } from "../../define";
 import { noEncontrado } from "../../errores";
 import type { Contexto } from "../../types";
 import { uuidSchema } from "../esquemas";
+import { dondeCuenta, dondeInstalacion } from "./alcance";
 import { cursorDe, listaSchema, pagina } from "./comun";
 import { cuentaSchema, ESTADOS_CUENTA, vistaCuenta } from "./cuentas-vista";
 import { resumenCuentas } from "./resumenes";
 
 export async function cuentaDe(ctx: Contexto, id: string) {
-  const c = await ctx.db.cuenta.findUnique({ where: { id } });
+  // findFirst (no findUnique) para aplicar el alcance por filas: fuera de alcance = no encontrada.
+  const c = await ctx.db.cuenta.findFirst({ where: { id, AND: [dondeCuenta(ctx)] } });
   if (!c) throw noEncontrado("La cuenta");
   return c;
 }
@@ -34,6 +36,7 @@ export const cuentasList = defineCapability({
     const q = input.q;
     const filas = await ctx.db.cuenta.findMany({
       where: {
+        AND: [dondeCuenta(ctx)],
         ...(input.incluirArchivadas ? {} : { archivadaEn: null }),
         ...(input.estado ? { estado: input.estado } : {}),
         ...(q
@@ -109,7 +112,9 @@ export const cuentasGet = defineCapability({
         orderBy: [{ esPrincipal: "desc" }, { apellidos: "asc" }],
       }),
       ctx.db.instalacion.findMany({
-        where: { cuentaId: c.id, archivadaEn: null },
+        // Una cuenta puede entrar al alcance por una sola instalación: la ficha lista solo las que
+        // están a cargo del actor, no todas las de la cuenta (ADR-022).
+        where: { cuentaId: c.id, archivadaEn: null, AND: [dondeInstalacion(ctx)] },
         orderBy: { nombre: "asc" },
       }),
       ctx.db.documentoVinculo.count({ where: { entidadTipo: "cuenta", entidadId: c.id } }),
