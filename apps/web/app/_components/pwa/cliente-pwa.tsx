@@ -1,8 +1,11 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useEffect, useRef, useState } from "react";
 
-import { Banda } from "@opai/ds";
+// La banda se carga aparte: la lógica de registro no arrastra componentes del DS al primer JS de
+// cada ruta (ADR-037). El registro corre en toda la app (D5 b); la banda solo aparece si hay espera.
+const BandaNueva = dynamic(() => import("./banda-nueva").then((m) => m.BandaNueva));
 
 /**
  * Cliente PWA: registra el service worker en toda la app (D5 b del Brief 04) y ofrece la
@@ -40,8 +43,7 @@ export function ClientePwa() {
     };
 
     const recargar = () => {
-      if (!aceptado.current) return; // La primera activación (claim) no recarga.
-      window.location.reload();
+      if (aceptado.current) window.location.reload(); // La primera activación (claim) no recarga.
     };
     navigator.serviceWorker.addEventListener("controllerchange", recargar);
 
@@ -58,11 +60,5 @@ export function ClientePwa() {
     aceptado.current = true;
     enEspera.postMessage({ type: "SKIP_WAITING" });
   };
-  return (
-    <Banda
-      mensaje="Hay una versión nueva."
-      accion={{ etiqueta: "Actualizar", onClick: actualizar }}
-      onCerrar={() => setDescartado(true)}
-    />
-  );
+  return <BandaNueva onActualizar={actualizar} onCerrar={() => setDescartado(true)} />;
 }

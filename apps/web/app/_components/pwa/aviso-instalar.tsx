@@ -1,9 +1,10 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, useSyncExternalStore } from "react";
 
-import { Banda } from "@opai/ds";
+const BandaInstalar = dynamic(() => import("./banda-instalar").then((m) => m.BandaInstalar));
 
 const CLAVE = "opai_instalar_descartado";
 const TERRENO = ["/terreno", "/trabajador", "/supervisor"];
@@ -77,16 +78,19 @@ export function AvisoInstalar() {
   if (cerrado || !esTerreno(ruta)) return null;
   if (evento) {
     return (
-      <Banda
+      <BandaInstalar
         mensaje="Instala OPAI en este dispositivo."
-        accion={{ etiqueta: "Instalar", onClick: () => void evento.prompt() }}
+        onInstalar={() => void evento.prompt()}
         onCerrar={cerrar}
       />
     );
   }
   if (ios) {
     return (
-      <Banda mensaje="Instala OPAI: Compartir → «Agregar a pantalla de inicio»." onCerrar={cerrar} />
+      <BandaInstalar
+        mensaje="Instala OPAI: Compartir → «Agregar a pantalla de inicio»."
+        onCerrar={cerrar}
+      />
     );
   }
   return null;

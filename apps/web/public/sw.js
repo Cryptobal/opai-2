@@ -39,7 +39,20 @@ async function cacheFirst(request) {
 
 async function navegacion(request) {
   try {
-    return await fetch(request);
+    // Seguimos los redirects (login → /, Server Actions → 303) y reconstruimos: devolver una
+    // respuesta "redirected" u "opaqueredirect" a una navegación (redirect "manual") la rompe.
+    const res = await fetch(request.url, {
+      headers: request.headers,
+      credentials: "same-origin",
+      redirect: "follow",
+    });
+    if (!res.redirected) return res;
+    // `fetch` ya decodificó el cuerpo; copiar content-encoding/length haría que el navegador lo
+    // decodifique de nuevo. Se quitan al reconstruir.
+    const headers = new Headers(res.headers);
+    headers.delete("content-encoding");
+    headers.delete("content-length");
+    return new Response(res.body, { status: res.status, statusText: res.statusText, headers });
   } catch {
     const offline = await caches.match(OFFLINE);
     return offline ?? Response.error();

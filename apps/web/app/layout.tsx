@@ -3,8 +3,6 @@ import type { ReactNode } from "react";
 
 import "./globals.css";
 
-import { ClientePwa } from "./_components/pwa/cliente-pwa";
-
 export const metadata: Metadata = {
   title: { default: "OPAI", template: "%s · OPAI" },
   description: "Plataforma operacional para empresas intensivas en personal.",
@@ -33,16 +31,19 @@ export const viewport: Viewport = {
 // Tema elegido en Preferencias (guardado en este dispositivo): se aplica antes de pintar.
 const TEMA = `try{var t=localStorage.getItem("opai_tema");if(t==="oscuro"||t==="claro")document.documentElement.dataset.theme=t==="oscuro"?"dark":"light"}catch(e){}`;
 
+// Registro del service worker en toda la app (D5 b del Brief 04) por script en línea: no suma JS de
+// cliente al primer load de ninguna ruta (ADR-037). Degrada sin romper si no hay soporte. El aviso de
+// versión nueva (ClientePwa) y el de instalar (AvisoInstalar) son UI y viven en las capas de portal.
+const REGISTRO_SW = `if("serviceWorker"in navigator){addEventListener("load",function(){navigator.serviceWorker.register("/sw.js").catch(function(){})})}`;
+
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="es-CL" className="h-full antialiased" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: TEMA }} />
+        <script dangerouslySetInnerHTML={{ __html: REGISTRO_SW }} />
       </head>
-      <body className="flex min-h-full flex-col">
-        {children}
-        <ClientePwa />
-      </body>
+      <body className="flex min-h-full flex-col">{children}</body>
     </html>
   );
 }

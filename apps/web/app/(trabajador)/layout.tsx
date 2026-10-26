@@ -1,7 +1,12 @@
+import dynamic from "next/dynamic";
 import type { ReactNode } from "react";
 
 import { CargaPortal } from "@/app/_components/carga-portal";
-import { AvisoInstalar } from "@/app/_components/pwa/aviso-instalar";
+
+// Aparte (next/dynamic): el aviso de instalar no pesa en el primer JS de la ruta de terreno (ADR-037).
+const AvisoInstalar = dynamic(() =>
+  import("@/app/_components/pwa/aviso-instalar").then((m) => m.AvisoInstalar),
+);
 
 // Route group del portal "trabajador". Sesión y membresía con el portal se verifican en cada página.
 export default function Layout({ children }: { children: ReactNode }) {
