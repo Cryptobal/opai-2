@@ -17,7 +17,7 @@ import { destinoSeguro } from "@/app/(auth)/destino";
 import { bloqueado, ipDeCabeceras, olvidar, permitir, registrarFallo } from "@/lib/rate-limit";
 
 /**
- * "Tras 5 intentos pausaremos el acceso por 15 minutos" (diseño de acceso aprobado). Solo cuentan
+ * «Tras varios intentos pausaremos el acceso unos minutos» (texto de CAR-16: no fija el número, que vive en `@opai/domain`). Solo cuentan
  * los fallos: 5 por correo y 30 por IP (una oficina comparte IP y no debe bloquearse por éxitos).
  */
 const INTENTOS = 5;
@@ -77,7 +77,7 @@ export async function accionEntrar(
       n,
       titulo: "El correo o la contraseña no coinciden",
       texto:
-        "Revisa los datos y vuelve a intentarlo. Tras 5 intentos pausaremos el acceso por 15 minutos.",
+        "Revisa los datos y vuelve a intentarlo. Tras varios intentos pausaremos el acceso unos minutos.",
     };
   }
   redirect(`/elegir-empresa?next=${encodeURIComponent(destinoSeguro(destino))}`);
