@@ -47,6 +47,7 @@ Primero se cierra el Núcleo; después Puestos → Comercial → CPQ; después e
 | M15 | **Firma electrónica avanzada** (Brief 28) | Falta | No aplica | Falta | Falta | Falta |
 | M16 | **Apagado de 1.0** (Brief 29) | Falta | No aplica | Falta | Falta | Falta |
 | — | **Empaquetado nativo Capacitor** (Brief 17) | Parcial: ADR-044 | No aplica | Falta | Falta | Falta |
+| — | **Agente interno de OPAI** (brief propio después del Brief 11; número por fijar) | Hecho: ADR-049 (Decisión de Carlos, 26-oct-2026 10:08 CLT) | Falta; solo el punto de entrada queda reservado en el Brief 05 | Falta | Falta | Falta |
 
 ## 3. Orden vigente
 

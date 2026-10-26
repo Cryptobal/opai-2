@@ -65,7 +65,7 @@ Generado: 24-10-2026, 10:45 (hora de Chile, UTC-3). Solo lectura: se comparan re
 | N5 | Filtro de tenant manual en la aplicación como único control | `src/lib/tenant-scope.ts` | Lo reemplaza RLS (M1) | Media |
 | N6 | Autorregistro público de tenants | `src/app/api/public/signup` | 2.0 da de alta tenants solo desde la plataforma (`platform:tenants.manage`) | Media |
 | N7 | Secciones de configuración de módulos excluidos | `configuracion/{gamificacion,ats,alertas-cobertura,psicolaboral,conocimiento,asistente-ia}` | Están en el backlog del ROADMAP (`01-decisiones.md` l.336) | Baja |
-| N8 | Integraciones de Slack, agenda/Google Calendar y chat o asistente IA | modelos `Slack*`, `Calendar*`, schema `chat`, `src/lib/ai/help-chat-*` | Están en el backlog; las integraciones nuevas se declaran por ADR-027 | Baja |
+| N8 | Integraciones de Slack, agenda/Google Calendar y chat o asistente IA | modelos `Slack*`, `Calendar*`, schema `chat`, `src/lib/ai/help-chat-*` | Slack y agenda están en el backlog; las integraciones nuevas se declaran por ADR-027. **Nota del 26-oct-2026:** el asistente IA sale del backlog: es el agente interno de ADR-049 (Decisión de Carlos, 26-oct-2026 10:08 CLT), con brief propio después del Brief 11 y punto de entrada reservado en el Brief 05; no se porta el código de 1.0 | Baja (Slack y agenda) · Planificada (asistente, ADR-049) |
 | N9 | Onboarding y tours de la UI | `(app)/personas/onboarding`, modelos `Onboarding*` | Excluidos | Baja |
 
 ## 4. Preguntas abiertas para Carlos

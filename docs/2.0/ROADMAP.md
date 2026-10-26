@@ -136,6 +136,10 @@ Las **bases transversales** (rendimiento, PWA, navegación) aplican a todo brief
 - **Nómina se puede adelantar** (Briefs 25 y 26 antes de las fases 3 a 5), **siempre después de Puestos (Brief 11)**, si hay un cliente que la quiera comprar sin el resto; los archivos de pago los genera Nómina, y el cruce con el flujo de caja se suma cuando Finanzas exista. **Actualización (25-oct):** Carlos, 25-oct-2026 ~21:20, chat con OPAI 2.0, según el registro del bot OPAI 2.0: no tiene clientes que comprarían solo payroll. Como el ROADMAP solo permitía adelantar Nómina si un cliente la compraba sola, Nómina queda en la fase 6. Además, desde las 23:10 Nómina exige Puestos (respuesta 1 de ADR-048), lo que también impide venderla sola.
 - **Deja de usarse en 1.0:** Payroll y Licitaciones; 1.0 se apaga.
 
+### Agente interno de OPAI (ADR-049)
+
+Decisión de Carlos, 26-oct-2026 10:08 CLT, chat con OPAI 2.0: OPAI tendrá un agente propio en el celular (PWA) y en el escritorio, cliente del mismo registro de capacidades y del MCP, con la identidad y los permisos del usuario conectado y el consumo de IA medido por tenant con tope configurable (vendible como módulo o complemento). **Brief propio después de Puestos y guardias (Brief 11)**; su número y su lugar frente a Comercial y CPQ se fijan al planificarlo. Antes, solo se reserva el punto de entrada en el Brief 05 («Preguntar a OPAI» en ⌘K y un lugar dentro de «Buscar» en el celular). El «chat» del backlog de abajo es el chat de 1.0, que no se porta; el asistente ya no está en el backlog.
+
 ### Backlog (sin fecha)
 
 No se portan de 1.0 y solo se reconstruyen con demanda real (lista canónica de `CONTEXTO-agentes.md`): inventario, cámaras, ATS, alertas y cobertura, incidentes, conocimiento, onboarding, comunicaciones, gamificación, psicolaboral, chat, Slack como módulo (queda como canal opcional de notificaciones) y Productividad. Además: sitio de marketing 2.0, roles personalizados, «grupo de sueldo» (solo si un cliente lo pide; ADR-036, 25-oct), cadencia de seguimiento comercial y facturación de suscripciones (con Opai SpA).
