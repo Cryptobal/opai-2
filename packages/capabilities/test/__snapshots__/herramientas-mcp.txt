@@ -53,6 +53,7 @@ core_estructuras_create
 core_estructuras_efectiva
 core_estructuras_get
 core_estructuras_list
+core_excepciones_list
 core_funciones_create
 core_funciones_get
 core_funciones_list
@@ -89,6 +90,7 @@ core_patrones_get
 core_patrones_list
 core_patrones_set_activo
 core_patrones_update
+core_permisos_catalogo
 core_personas_archive
 core_personas_bloquear
 core_personas_create
@@ -108,6 +110,7 @@ core_puestos_list
 core_puestos_set_estado
 core_puestos_update
 core_resumen_contadores
+core_roles_list
 core_tenant_get
 core_tenant_update
 core_usage_summary

@@ -3,7 +3,12 @@ import { sesionDeRequest } from "@opai/auth";
 import { esRol, esRolPlataforma } from "@opai/domain";
 
 import { contextoDeApiKey, keyDeCabecera } from "./api-key";
-import { fuentesReales, type Fuentes, type MembresiaConTenant } from "./fuentes";
+import {
+  type AccesoFila,
+  fuentesReales,
+  type Fuentes,
+  type MembresiaConTenant,
+} from "./fuentes";
 import { noAutenticado } from "./respuestas";
 import { COOKIE_TENANT, elegirMembresia, leerCookie } from "./tenant-actual";
 import { despacharDiferido, diferirConAfter, medidorDiferido } from "./medidor";
@@ -21,7 +26,11 @@ export type Identidad = {
   membresias: MembresiaConTenant[];
   actual: MembresiaConTenant | null;
   modulosActivos: string[];
+  /** Acceso efectivo en el tenant actual (rol personalizado y excepciones, ADR-022). */
+  acceso: AccesoFila;
 };
+
+const SIN_ACCESO: AccesoFila = { permisosRol: null, excepciones: [] };
 
 export async function identidadDe(
   user: UsuarioSesion,
@@ -30,24 +39,30 @@ export async function identidadDe(
 ): Promise<Identidad> {
   const membresias = await fuentes.membresiasDe(user.id);
   const actual = elegirMembresia(membresias, cookieTenant);
-  const modulosActivos = actual ? await fuentes.modulosActivos(actual.tenantId) : [];
+  const [modulosActivos, acceso] = actual
+    ? await Promise.all([fuentes.modulosActivos(actual.tenantId), fuentes.acceso(actual.tenantId, user.id)])
+    : [[], SIN_ACCESO];
   const platformRole = esRolPlataforma(user.platformRole) ? user.platformRole : null;
   return {
     usuario: { id: user.id, nombre: user.name, email: user.email, platformRole },
     membresias,
     actual,
     modulosActivos,
+    acceso,
   };
 }
 
 /** Contexto de ejecución de un usuario con sesión, en el tenant actual (o sin tenant). */
 export function contextoDeIdentidad(identidad: Identidad, portal: string | null): Contexto {
-  const { usuario, actual } = identidad;
+  const { usuario, actual, acceso } = identidad;
   return crearContexto({
     tenantId: actual?.tenantId ?? null,
     actor: { tipo: "user", id: usuario.id },
     usuario,
+    // `rol` es el rol base (jerarquía); si hay rol personalizado, `permisosRol` define la autorización.
     rol: actual && esRol(actual.rol) ? actual.rol : null,
+    permisosRol: acceso.permisosRol,
+    excepciones: acceso.excepciones,
     portal,
     modulosActivos: identidad.modulosActivos,
     medidor: medidorDiferido,
