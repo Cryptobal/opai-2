@@ -1,4 +1,5 @@
 export { AppShell, type AppShellProps } from "./app-shell";
+export { BarraNavegacion } from "./barra-navegacion";
 export { BottomNav } from "./nav";
 export { Rail, type RailProps } from "./rail";
 export { Sidebar } from "./sidebar";

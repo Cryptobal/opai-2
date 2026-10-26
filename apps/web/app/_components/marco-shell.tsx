@@ -15,6 +15,7 @@ import { useCabecera } from "./cabecera-contexto";
 import { Campana } from "./campana";
 import { icono } from "./iconos";
 import { LinkMenu } from "./link-menu";
+import { usePendiente } from "./navegacion-pendiente";
 import { useEpocaSesion } from "./refresco-navegador";
 
 // La paleta (cmdk) se descarga al primer uso: no pesa en el JS inicial de cada ruta (ADR-037).
@@ -64,6 +65,13 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
   }, [buscable]);
   // La navegación no cambia al fijar la cabecera: se recalcula solo cuando cambia `datos.nav`.
   const nav = useMemo(() => datos.nav.map((n) => ({ ...n, icono: icono(n.icono) })), [datos.nav]);
+  // Navegación en curso (ADR-045): el riel marca el destino y la cabecera pone su título de inmediato
+  // (sin esperar al contenido nuevo), y se muestra la barra de progreso. Al terminar, `pendiente` se
+  // limpia y la página fija su propia cabecera.
+  const pendiente = usePendiente();
+  const rutaEfectiva = pendiente ?? rutaActual;
+  const navPendiente = pendiente ? nav.find((n) => n.href === pendiente) : undefined;
+  const tituloEfectivo = navPendiente?.etiqueta ?? cabecera.titulo;
   const empresas: ItemMenu[] =
     datos.empresas.length > 1
       ? datos.empresas.map((e, i) => ({
@@ -108,7 +116,8 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
   ];
   return (
     <AppShell
-      titulo={cabecera.titulo}
+      titulo={tituloEfectivo}
+      navegando={pendiente !== null}
       {...(cabecera.volver ? { volver: cabecera.volver } : {})}
       {...(cabecera.volverSoloTelefono ? { volverSoloTelefono: true } : {})}
       {...(cabecera.volverBajoLg ? { volverBajoLg: true } : {})}
@@ -119,7 +128,7 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
       nav={nav}
       portales={datos.portales}
       portalActual={datos.portal}
-      rutaActual={rutaActual}
+      rutaActual={rutaEfectiva}
       {...(datos.tenant ? { tenant: datos.tenant } : {})}
       {...(empresas.length ? { empresas } : {})}
       usuario={datos.usuario}

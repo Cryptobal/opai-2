@@ -1,37 +1,10 @@
 "use client";
 
-import Link, { useLinkStatus } from "next/link";
-import { useEffect } from "react";
+import Link from "next/link";
 
 import type { LinkComponent } from "@opai/ds";
 
-import { ESPERA_ESQUELETO_MS } from "@/lib/cache-navegador";
-
-/**
- * Hijo invisible de un <Link> del menú: si la navegación sigue pendiente pasado el retraso, marca
- * <html> y el CSS cambia el contenido por el esqueleto (`data-contenido` / `data-esqueleto`, ver
- * globals.css). Una navegación rápida no lo muestra nunca: sin destellos.
- */
-let pendientes = 0;
-
-function EstadoEnlace() {
-  const { pending } = useLinkStatus();
-  useEffect(() => {
-    if (!pending) return;
-    const raiz = document.documentElement;
-    let marcado = false;
-    const t = setTimeout(() => {
-      marcado = true;
-      pendientes++;
-      raiz.setAttribute("data-navegando", "");
-    }, ESPERA_ESQUELETO_MS);
-    return () => {
-      clearTimeout(t);
-      if (marcado && --pendientes === 0) raiz.removeAttribute("data-navegando");
-    };
-  }, [pending]);
-  return null;
-}
+import { EstadoEnlace } from "./estado-enlace";
 
 /**
  * Enlaces del menú. El prefetch automático de Next queda desactivado (`prefetch={false}`).
@@ -48,7 +21,7 @@ export const LinkMenu: LinkComponent = ({ href, className, children, ...rest }) 
   return (
     <Link href={href} className={className} prefetch={false} {...rest}>
       {children}
-      <EstadoEnlace />
+      <EstadoEnlace href={href} conEsqueleto />
     </Link>
   );
 };
