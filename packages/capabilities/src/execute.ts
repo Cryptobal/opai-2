@@ -46,7 +46,18 @@ async function correr(
   const reservaId = reserva?.id;
   let crudo: unknown;
   try {
-    crudo = await c.handler(ctx, entrada.data, modo);
+    // Lecturas con empresa: una sola transacción con el tenant fijado una vez (ADR-045), si el borde
+    // la ofrece. `transaccion` se redirige a esa misma tx para que un `ctx.transaccion` dentro de una
+    // lectura no abra otra (Prisma no anida transacciones interactivas). Sin empresa (`core.me` sin
+    // tenant, plataforma) no se envuelve: la RLS no devuelve filas y evita abrir una transacción para
+    // un handler que no consulta la base. Las escrituras tampoco: siguen con `db` por consulta y su
+    // propio `ctx.transaccion` para el bloque atómico.
+    crudo =
+      c.efecto === "lectura" && ctx.conTenant && ctx.enLectura
+        ? await ctx.enLectura((db) =>
+            c.handler({ ...ctx, db, transaccion: (fn) => fn(db) }, entrada.data, modo),
+          )
+        : await c.handler(ctx, entrada.data, modo);
   } catch (error) {
     if (reservaId) await ctx.idempotencia.liberar(reservaId);
     throw error;

@@ -82,9 +82,16 @@ export interface Contexto {
   /** Presupuesto y autonomía de la API key; null en sesiones humanas y procesos del sistema. */
   agente: AgenteContexto | null;
   /** Cliente acotado al tenant. Única vía de acceso a datos para los handlers. */
-  db: TenantDb;
+  db: TenantTx;
   /** Transacción con el tenant fijado: cambio + evento + bitácora atómicos. Dentro, solo `tx`. */
   transaccion<T>(fn: (tx: TenantTx) => Promise<T>): Promise<T>;
+  /**
+   * Ejecuta un bloque de solo lectura en UNA sola transacción con el tenant fijado una vez (ADR-045):
+   * `executeCapability` envuelve así a las capacidades de lectura con empresa para no abrir una
+   * transacción por consulta, sin debilitar la RLS. Lo implementa el borde real; sin él (contextos de
+   * prueba) o sin empresa actual, el handler corre con `db` tal cual.
+   */
+  enLectura?<T>(fn: (db: TenantTx) => Promise<T>): Promise<T>;
   auditoria: Auditoria;
   medidor: Medidor;
   eventos: Eventos;

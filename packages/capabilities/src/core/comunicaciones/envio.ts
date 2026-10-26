@@ -1,11 +1,11 @@
 import { renderizarCorreo } from "@opai/domain";
-import type { TenantDb } from "@opai/db";
+import type { TenantTx } from "@opai/db";
 import type { Mailer } from "@opai/integrations";
 
 import { comunicableDe, marcaDe, plantillaVigente } from "./resolver";
 
 export type DestinoCorreo = {
-  db: TenantDb;
+  db: TenantTx;
   tenantId: string;
   correo: Mailer;
   urlBase: string;
