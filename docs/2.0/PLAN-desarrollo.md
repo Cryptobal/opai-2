@@ -67,6 +67,8 @@ Primero se cierra el Núcleo; después Puestos → Comercial → CPQ; después e
 
 ## 4. Próximos pasos, en orden
 
+**Hecho:** el PR de este plan (#35, CAR-10), integrado en `main` como `f1c4064`.
+
 Después de Puestos va Comercial (paso 6) y luego CPQ (paso 7) (Decisión de Carlos, 25-oct-2026 23:29 (t267u–t268u), chat con OPAI 2.0 (registrada por el bot OPAI 2.0)); la construcción respeta además el requisito de §3 (los Briefs 06 y 07 antes del 10).
 
 | Paso | Qué | Responsable |
@@ -76,7 +78,7 @@ Después de Puestos va Comercial (paso 6) y luego CPQ (paso 7) (Decisión de Car
 | 2 | **04 PWA:** brief → aprobación → construcción en `main`. Termina cuando la app se instala desde el celular y el CI prueba manifest, service worker y modo sin conexión | Claude · Carlos · Revisor · bot «OPAI 2.0» |
 | 3 | **07b Capas de sueldo:** diseño de capas y anexo (preguntas de ADR-048 ya respondidas) → aprobación → brief y PR | Claude · Carlos · Revisor · QA · bot «OPAI 2.0» |
 | 3b | **07c Acceso y permisos** (B1 + B2 + B3) y **07d Ley 21.719** (B4, en `main` antes del 30-nov-2026): brief → aprobación de Carlos → PR | Claude · Carlos · Revisor · bot «OPAI 2.0» |
-| 4 | **En paralelo:** el PR de este plan (CAR-10); PR 2 del Brief 03; sesión D del Brief 02 en su Mac; aprobación del mockup de Puestos | Claude · Revisor · bot «OPAI 2.0» · **Carlos** (sesión D y aprobación de Puestos) |
+| 4 | **En paralelo:** PR 2 del Brief 03; sesión D del Brief 02 en su Mac; aprobación del mockup de Puestos | Claude · Revisor · bot «OPAI 2.0» · **Carlos** (sesión D y aprobación de Puestos) |
 | 5 | **Puestos:** ajustar el mockup al sistema si difiere → brief (Brief 11) | Claude · Carlos |
 | 6 | **Comercial:** v2 del mockup → `modulos/comercial.md` aprobado → Briefs 06 y 07, que se construyen antes del Brief 10 (cotizador) | Carlos · Claude |
 | 7 | **CPQ** (se diseña cuando cierren sus reglas): 8 respuestas de Carlos → `modulos/cpq.md` → diseño → Briefs 08 y 10 | Carlos (respuestas y aprobación) · Claude |

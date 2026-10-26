@@ -177,7 +177,7 @@ Ningún campo de esta sección es visible para el cliente ni para el trabajador 
 - **R26.** Cada empresa configura su embudo. La única regla fija es exactamente una etapa ganada y una perdida. Una etapa con negocios no se elimina: se archiva después de mover sus negocios. Una etapa tampoco cambia de tipo.
 - **R27.** Desde el corte de Comercial, **cuentas, contactos e instalaciones se editan solo en 2.0**. OPAI copia a 1.0 los cambios (altas, ediciones, vínculos, activaciones por negocio ganado) en un solo sentido, sin tocar el código de 1.0. Un control diario compara ambos y reporta diferencias.
 - **R28.** La importación desde 1.0 se puede ejecutar en simulación antes de hacerla. Deduplica cuentas por RUT y une los contactos con el mismo correo en una sola persona. Las cuentas duplicadas por nombre se proponen para fusión, nunca se fusionan solas. Nunca crea una instalación a partir del texto de un negocio. Todo lo que no puede resolver va a un reporte.
-- **R29.** **Cadencia de seguimiento configurable por paso.** Cada empresa define su cadencia de seguimiento de negocios como una secuencia de pasos; en cada paso elige quién lo ejecuta: una **persona**, **OPAI automático** o un **agente de IA**. Es parte del módulo Comercial, no del backlog (Decisión de Carlos del 24-oct-2026, confirmada el 26-oct-2026 9:20 CLT; informe `paridad/nucleo.md`). La cadencia de 1.0 (`extraccion/comercial-y-cpq.md` §3.6) es la referencia de partida.
+- **R29.** **Cadencia de seguimiento configurable por paso.** Cada empresa define su cadencia de seguimiento de negocios como una secuencia de pasos; en cada paso elige quién lo ejecuta: una **persona**, **OPAI automático** o un **agente de IA**. Es parte del módulo Comercial, no del backlog (fuente: chat de Carlos con el bot Paridad, 24-oct-2026 12:37, confirmado por Carlos el 26-oct-2026 9:20 CLT; cadencia de 1.0 en `extraccion/comercial-y-cpq.md` §3.6, que es la referencia de partida).
 
 ## 6. Estados y transiciones
 
@@ -392,5 +392,5 @@ Cerradas, con recomendación.
 |---|---|---|
 | 24-oct-2026 | Borrador inicial | — |
 | 25-oct-2026 | R18 y pregunta 8: los puestos no se crean al ganar (decisión de Carlos sobre Puestos; CAR-10; superada a las 23:08–23:10, fila siguiente) | — (nota; reglas definidas por Carlos) |
-| 26-oct-2026 | R29: cadencia de seguimiento configurable por paso, fuera del backlog (Decisión de Carlos del 24-oct-2026, confirmada el 26-oct-2026 9:20 CLT) | Carlos |
 | 25-oct-2026 23:10 | R18 y pregunta 8: al ganar se ofrecen los puestos de las líneas de guardias y RRHH los confirma (respuesta 3 de ADR-048; CAR-10) | — (nota; decisión de Carlos 23:08–23:10) |
+| 26-oct-2026 | R29: cadencia de seguimiento configurable por paso, fuera del backlog (chat con Paridad del 24-oct-2026 12:37, confirmado el 26-oct-2026 9:20 CLT) | Carlos |
