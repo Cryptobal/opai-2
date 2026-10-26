@@ -43,7 +43,7 @@ export function DsShowcase() {
       <BloquePlanillaYDashboard state={state} />
       <BloqueComponentes />
       <BloqueNuevos state={state} />
-      <Bloque titulo="PWA · sin conexión">
+      <Bloque titulo="PWA · sin conexión, versión nueva e instalar">
         <MuestraPwa />
       </Bloque>
     </div>
