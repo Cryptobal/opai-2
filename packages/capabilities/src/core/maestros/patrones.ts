@@ -7,18 +7,21 @@ import { reglaDeNegocio } from "../../errores";
 import { uuidSchema } from "../esquemas";
 import { definidos, escribirConEvento, sinDuplicado } from "./comun";
 import {
-  cambiaEstructura,
   camposPatron,
   conteoPuestosPatron,
   DUPLICADO_PATRON,
-  EN_USO,
-  estructuraPatron,
   nombrePatronLibre,
   patronDe,
   patronSchema,
-  puestosConPatron,
   vistaPatron,
 } from "./patrones-vista";
+import {
+  cambiaEstructura,
+  EN_USO,
+  estructuraDelCambio,
+  estructuraPatron,
+  puestosConPatron,
+} from "./patrones-estructura";
 
 export const patronesList = defineCapability({
   id: "core.patrones.list",
@@ -46,7 +49,8 @@ export const patronesList = defineCapability({
 
 export const patronesGet = defineCapability({
   id: "core.patrones.get",
-  descripcion: "Ficha de un patrón de turno: clase, ciclo o días de la semana, y puestos que lo usan.",
+  descripcion:
+    "Ficha de un patrón de turno: clase, ciclo o días de la semana, y puestos que lo usan.",
   permiso: PERMISOS_CORE.instalacionesRead,
   input: z.object({ id: uuidSchema }),
   output: patronSchema,
@@ -96,16 +100,10 @@ export const patronesUpdate = defineCapability({
   async handler(ctx, { id, ...cambios }, { dryRun }) {
     const actual = await patronDe(ctx, id);
     await nombrePatronLibre(ctx, cambios.nombre, id);
-    const clase = cambios.clase ?? actual.clase;
-    const mismaClase = clase === actual.clase;
-    const estructura = estructuraPatron({
-      clase,
-      diasTrabajo: cambios.diasTrabajo ?? (clase === "semanal" ? undefined : actual.diasTrabajo),
-      diasDescanso: cambios.diasDescanso ?? (clase === "semanal" ? undefined : actual.diasDescanso),
-      diasSemana: cambios.diasSemana ?? (mismaClase ? actual.diasSemana : []),
-    });
-    const toca = cambiaEstructura(actual, estructura);
-    const data = definidos({ ...cambios, ...estructura });
+    const { estructura, tocaForma } = estructuraDelCambio(actual, cambios);
+    // Solo renombrar o reordenar no toca la forma (aunque un patrón antiguo no cumpla la regla nueva).
+    const toca = tocaForma && cambiaEstructura(actual, estructura);
+    const data = definidos({ ...cambios, ...(tocaForma ? estructura : {}) });
     // Un patrón con puestos no cambia su forma: los puestos guardan el ciclo y las horas calculadas
     // con ella. Se revisa también dentro de la transacción (y la base lo impide con un trigger).
     if (toca && (await puestosConPatron(ctx.db, id)) > 0) throw reglaDeNegocio(EN_USO);
@@ -116,7 +114,17 @@ export const patronesUpdate = defineCapability({
       { tipo: "core.patron.actualizado", entidadTipo: "patron_turno", payload: () => data },
       async (tx) => {
         if (toca && (await puestosConPatron(tx, id)) > 0) throw reglaDeNegocio(EN_USO);
-        return sinDuplicado(tx.patronTurno.update({ where: { id }, data }), DUPLICADO_PATRON);
+        try {
+          return await sinDuplicado(
+            tx.patronTurno.update({ where: { id }, data }),
+            DUPLICADO_PATRON,
+          );
+        } catch (e) {
+          // Carrera con un puesto nuevo: la detiene el trigger patron_en_uso (check_violation).
+          if (/en uso/.test(String((e as { message?: unknown } | null)?.message ?? "")))
+            throw reglaDeNegocio(EN_USO);
+          throw e;
+        }
       },
     );
     return vistaPatron(p, n);

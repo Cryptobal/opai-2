@@ -30,10 +30,10 @@ type PuestoFila = InstalacionDetalle["puestos"][number];
 function Trozos({ partes, className }: { partes: (string | null)[]; className: string }) {
   return (
     <span className={`flex flex-wrap gap-x-1 whitespace-normal ${className}`} data-linea-puesto>
-      {partes.filter(Boolean).map((t, i) => (
+      {partes.filter(Boolean).map((t, i, arr) => (
         <span key={i} className="whitespace-nowrap">
-          {i > 0 ? "· " : ""}
           {t}
+          {i < arr.length - 1 ? " ·" : ""}
         </span>
       ))}
     </span>
@@ -42,13 +42,20 @@ function Trozos({ partes, className }: { partes: (string | null)[]; className: s
 
 /** Patrón (claro, CAR-8) y función. */
 const secundario = (p: PuestoFila) => (
-  <Trozos partes={[p.patron ?? "Sin patrón", p.funcion ?? "Sin función"]} className="text-fg-muted" />
+  <Trozos
+    partes={[p.patron ?? "Sin patrón", p.funcion ?? "Sin función"]}
+    className="text-fg-muted"
+  />
 );
 
 /** Horario por tramos y horas semanales, en el tono terciario del DS. */
 const terciario = (p: PuestoFila) => (
   <Trozos
-    partes={[p.horario, p.horarioNoche, p.horasSemanales != null ? `${p.horasSemanales} h/sem` : null]}
+    partes={[
+      p.horario,
+      p.horarioNoche,
+      p.horasSemanales != null ? `${p.horasSemanales} h/sem` : null,
+    ]}
     className="t-caption"
   />
 );

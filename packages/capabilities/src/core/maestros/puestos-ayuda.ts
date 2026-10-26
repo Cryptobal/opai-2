@@ -22,7 +22,11 @@ export async function cargoActivo(ctx: Contexto, cargoId?: string) {
  * Función del catálogo (bajo RLS: la de otro tenant no existe). Se exige activa solo si se está
  * eligiendo: un puesto que ya la tenía se sigue editando aunque la función se haya desactivado.
  */
-async function funcionDe(ctx: Contexto, funcionId: string | null | undefined, exigirActiva: boolean) {
+async function funcionDe(
+  ctx: Contexto,
+  funcionId: string | null | undefined,
+  exigirActiva: boolean,
+) {
   if (!funcionId) return null;
   const f = await ctx.db.funcionPuesto.findUnique({ where: { id: funcionId } });
   if (!f) throw noEncontrado("La función");
@@ -134,14 +138,19 @@ export const CLAVES_HORAS = [
 
 /**
  * Horas semanales de un update: un número explícito manda y null pide recalcular; si no se envían
- * y cambia el patrón, el horario o la colación, se recalculan; si no, se conservan (undefined).
+ * y cambia de verdad el patrón, el horario o la colación, se recalculan; si no, se conservan
+ * (undefined). Reenviar los mismos valores (la hoja los manda siempre) no pisa horas manuales.
  */
 export function horasDelCambio(
   cambios: { horasSemanales?: number | null | undefined } & {
     [K in (typeof CLAVES_HORAS)[number]]?: unknown;
   },
+  actual: { [K in (typeof CLAVES_HORAS)[number]]?: unknown },
   sugerencia: number | null,
 ) {
   if (cambios.horasSemanales !== undefined) return cambios.horasSemanales ?? sugerencia;
-  return CLAVES_HORAS.some((k) => cambios[k] !== undefined) ? sugerencia : undefined;
+  const distinto = CLAVES_HORAS.some(
+    (k) => cambios[k] !== undefined && (cambios[k] ?? null) !== (actual[k] ?? null),
+  );
+  return distinto ? sugerencia : undefined;
 }

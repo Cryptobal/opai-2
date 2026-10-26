@@ -35,7 +35,10 @@ export function nombreLibre(base: string, k: number, usados: Set<string>): strin
   return intento;
 }
 
-async function nombresDeCopias(db: Tx | PrismaClient, p: { tenantId: string; instalacionId: string; nombre: string; dotacion: number }) {
+async function nombresDeCopias(
+  db: Tx | PrismaClient,
+  p: { tenantId: string; instalacionId: string; nombre: string; dotacion: number },
+) {
   const filas = await db.puesto.findMany({
     where: { tenantId: p.tenantId, instalacionId: p.instalacionId },
     select: { nombre: true },
@@ -57,7 +60,9 @@ async function copiarEstructuras(tx: Tx, tenantId: string, desde: string, hacia:
         ...e,
         puestoId: hacia,
         items: {
-          create: items.map(({ id: _i, estructuraId: _e, createdAt: _ci, updatedAt: _ui, ...it }) => it),
+          create: items.map(
+            ({ id: _i, estructuraId: _e, createdAt: _ci, updatedAt: _ui, ...it }) => it,
+          ),
         },
       },
     });
@@ -96,7 +101,11 @@ async function dividirUno(tx: Tx, tenantId: string, id: string): Promise<PuestoD
 /** Simula (aplicar=false) o aplica la división en un solo tenant. */
 export async function dividirDotacion(
   db: PrismaClient,
-  { tenantId, aplicar }: { tenantId: string; aplicar: boolean },
+  {
+    tenantId,
+    aplicar,
+    alAplicar,
+  }: { tenantId: string; aplicar: boolean; alAplicar?: (r: ResultadoDivision) => void },
 ): Promise<ResultadoDivision> {
   const candidatos = await db.puesto.findMany({
     where: { tenantId, dotacion: { gt: 1 } },
@@ -122,6 +131,7 @@ export async function dividirDotacion(
     const hecho = await db.$transaction((tx) => dividirUno(tx, tenantId, p.id));
     if (hecho) r.puestos.push(hecho);
     else r.saltados.push(p.id);
+    alAplicar?.(r); // respaldo tras cada puesto: si el proceso cae, el mapa llega hasta ahí
   }
   return r;
 }

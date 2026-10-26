@@ -74,10 +74,17 @@ describe("reglas de patrones, funciones y dotación", () => {
       { nombre: "5×2 raro", clase: "semanal", diasTrabajo: 5, diasDescanso: 2, diasSemana: [1] },
       { nombre: "Repetido", clase: "semanal", diasSemana: [1, 1, 2] },
       { nombre: "Siete", clase: "semanal", diasSemana: [1, 2, 3, 4, 5, 6, 7] },
-      { nombre: "Cíclico con días", clase: "ciclico", diasTrabajo: 4, diasDescanso: 4, diasSemana: [1] },
+      {
+        nombre: "Cíclico con días",
+        clase: "ciclico",
+        diasTrabajo: 4,
+        diasDescanso: 4,
+        diasSemana: [1],
+      },
       { nombre: "Cíclico sin ciclo", clase: "ciclico" },
     ];
-    for (const m of malos) expect(await codigo(ctx, "core.patrones.create", m)).toBe("UNPROCESSABLE");
+    for (const m of malos)
+      expect(await codigo(ctx, "core.patrones.create", m)).toBe("UNPROCESSABLE");
   });
 
   it("desactivar la función o el patrón no bloquea editar el puesto, pero sí elegirlos", async () => {
@@ -93,7 +100,35 @@ describe("reglas de patrones, funciones y dotación", () => {
     });
     expect(r.nombre).toBe("Día norte");
     const otro = await puesto({ nombre: "Noche" });
-    expect(await codigo(ctx, "core.puestos.update", { id: otro.id, patronId })).toBe("UNPROCESSABLE");
-    expect(await codigo(ctx, "core.puestos.update", { id: otro.id, funcionId })).toBe("UNPROCESSABLE");
+    expect(await codigo(ctx, "core.puestos.update", { id: otro.id, patronId })).toBe(
+      "UNPROCESSABLE",
+    );
+    expect(await codigo(ctx, "core.puestos.update", { id: otro.id, funcionId })).toBe(
+      "UNPROCESSABLE",
+    );
+  });
+
+  it("reenviar el mismo horario sin horas no pisa las horas pactadas a mano", async () => {
+    const { ctx, puesto, patronId } = await base();
+    const p = await puesto({ patronId, horasSemanales: 42 });
+    const mismo = {
+      patronId,
+      horaInicio: "08:00",
+      horaFin: "20:00",
+      colacionMin: 0,
+      colacionFuera: false,
+    };
+    const r = await dato<{ horasSemanales: number }>(ctx, "core.puestos.update", {
+      id: p.id,
+      nombre: "Día norte",
+      ...mismo,
+    });
+    expect(r.horasSemanales).toBe(42);
+    const cambio = await dato<{ horasSemanales: number }>(ctx, "core.puestos.update", {
+      id: p.id,
+      ...mismo,
+      horaFin: "18:00",
+    });
+    expect(cambio.horasSemanales).not.toBe(42);
   });
 });

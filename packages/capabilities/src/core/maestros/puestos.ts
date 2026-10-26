@@ -118,7 +118,7 @@ export const puestosUpdate = defineCapability({
         patron: cambios.patronId !== undefined && cambios.patronId !== actual.patronId,
       },
     );
-    const horasSemanales = horasDelCambio(cambios, sugerencia);
+    const horasSemanales = horasDelCambio(cambios, actual, sugerencia);
     const data = definidos({ ...cambios, ...fechas(cambios), diasTrabajo, diasDescanso, horasSemanales });
     if (dryRun)
       return vistaPuesto({

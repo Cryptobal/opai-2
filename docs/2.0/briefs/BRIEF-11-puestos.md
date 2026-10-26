@@ -29,7 +29,7 @@ Se nota que funciona cuando, en una instalación, **todos los puestos se ven y s
 - **Dominio:** catálogo de los 6 patrones, cálculo de horas semanales, validación de tramos y colación en `turnos.ts` (con tests).
 - **Capacidades:** `core.puestos.*` ampliadas (función, patrón, tramos, horas, colación, PPC) con vista previa; `core.patrones.{list,get,create,update,set_activo}` y `core.funciones.{list,get,create,update,set_activo}`, dadas de alta en el registro. Paridad MCP con vista previa en `core.puestos.create`/`update` y `core.patrones.list`; snapshot de herramientas actualizado.
 - **Pantallas:** lista de puestos (una fila por posición, con función, patrón, horario/tramos, horas, colación y estado PPC), hoja de crear/editar, resumen de la instalación y copiar posiciones al crear la instalación. La vista del supervisor deja de mostrar la dotación cruda. **Configuración de Patrones y Funciones: aplazada hasta su diseño en DS V2 (pendiente de que Carlos lo confirme).** Mientras tanto se administran por API y MCP (`core.patrones.*`, `core.funciones.*`), y las funciones base se siembran solo en desarrollo y pruebas para que el selector de la hoja no quede vacío (§7).
-- **Script idempotente** con `--dry-run` que divide los puestos con `dotacion > 1` en N puestos y entrega un reporte. **Lo ejecuta Carlos**, no el PR.
+- **Script idempotente** (simula por defecto; `--apply --tenant` escribe) que divide los puestos con `dotacion > 1` en N puestos y entrega un reporte. **Lo ejecuta Carlos**, no el PR.
 
 ### Excluido (va en PR 2/3 o después)
 
