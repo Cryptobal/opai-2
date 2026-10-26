@@ -1,0 +1,120 @@
+import { z } from "zod";
+
+import { PERMISOS_CORE } from "@opai/domain";
+
+import { defineCapability } from "../../define";
+import { uuidSchema } from "../esquemas";
+import { definidos, escribirConEvento, sinDuplicado } from "./comun";
+import {
+  camposFuncion,
+  conteoPuestosFuncion,
+  DUPLICADO_FUNCION,
+  funcionDe,
+  funcionSchema,
+  nombreFuncionLibre,
+  vistaFuncion,
+} from "./funciones-vista";
+
+export const funcionesList = defineCapability({
+  id: "core.funciones.list",
+  descripcion:
+    "Catálogo de funciones operativas del tenant (guardia, supervisor, nochero…): la función del puesto, distinta del cargo contractual. Incluye cuántos puestos activos usa cada una.",
+  permiso: PERMISOS_CORE.instalacionesRead,
+  input: z.object({ incluirInactivos: z.boolean().default(false) }),
+  output: z.array(funcionSchema),
+  efecto: "lectura",
+  dryRun: false,
+  async handler(ctx, input) {
+    const filas = await ctx.db.funcionPuesto.findMany({
+      where: input.incluirInactivos ? {} : { activo: true },
+      orderBy: [{ orden: "asc" }, { nombre: "asc" }],
+    });
+    return Promise.all(
+      filas.map(async (f) => vistaFuncion(f, await conteoPuestosFuncion(ctx, f.id))),
+    );
+  },
+});
+
+export const funcionesGet = defineCapability({
+  id: "core.funciones.get",
+  descripcion: "Ficha de una función de puesto: vertical, estado y puestos activos que la usan.",
+  permiso: PERMISOS_CORE.instalacionesRead,
+  input: z.object({ id: uuidSchema }),
+  output: funcionSchema,
+  efecto: "lectura",
+  dryRun: false,
+  handler: async (ctx, input) =>
+    vistaFuncion(await funcionDe(ctx, input.id), await conteoPuestosFuncion(ctx, input.id)),
+});
+
+export const funcionesCreate = defineCapability({
+  id: "core.funciones.create",
+  descripcion:
+    "Crea una función operativa del tenant con nombre único (guardia, supervisor…). El supervisor es una función más, no un rol aparte.",
+  permiso: PERMISOS_CORE.instalacionesManage,
+  input: z.object(camposFuncion),
+  output: funcionSchema,
+  efecto: "escritura",
+  dryRun: true,
+  async handler(ctx, input, { dryRun }) {
+    await nombreFuncionLibre(ctx, input.nombre);
+    const data = definidos(input);
+    if (dryRun) return vistaFuncion({ ...data, id: "" });
+    const f = await escribirConEvento(
+      ctx,
+      { tipo: "core.funcion.creada", entidadTipo: "funcion_puesto" },
+      (tx) =>
+        sinDuplicado(
+          tx.funcionPuesto.create({ data: { activo: true, ...data, tenantId: ctx.tenantId } }),
+          DUPLICADO_FUNCION,
+        ),
+    );
+    return vistaFuncion(f);
+  },
+});
+
+export const funcionesUpdate = defineCapability({
+  id: "core.funciones.update",
+  descripcion:
+    "Actualiza una función operativa (nombre, vertical, orden). Solo cambia lo enviado.",
+  permiso: PERMISOS_CORE.instalacionesManage,
+  input: z.object({ id: uuidSchema, ...z.object(camposFuncion).partial().shape }),
+  output: funcionSchema,
+  efecto: "escritura",
+  dryRun: true,
+  async handler(ctx, { id, ...cambios }, { dryRun }) {
+    const actual = await funcionDe(ctx, id);
+    await nombreFuncionLibre(ctx, cambios.nombre, id);
+    const data = definidos(cambios);
+    const n = await conteoPuestosFuncion(ctx, id);
+    if (dryRun) return vistaFuncion({ ...actual, ...data }, n);
+    const f = await escribirConEvento(
+      ctx,
+      { tipo: "core.funcion.actualizada", entidadTipo: "funcion_puesto", payload: () => data },
+      (tx) => sinDuplicado(tx.funcionPuesto.update({ where: { id }, data }), DUPLICADO_FUNCION),
+    );
+    return vistaFuncion(f, n);
+  },
+});
+
+export const funcionesSetActivo = defineCapability({
+  id: "core.funciones.set_activo",
+  descripcion:
+    "Activa o desactiva una función de puesto. Desactivar no borra: impide elegirla en puestos nuevos.",
+  permiso: PERMISOS_CORE.instalacionesManage,
+  input: z.object({ id: uuidSchema, activo: z.boolean() }),
+  output: funcionSchema,
+  efecto: "escritura",
+  dryRun: true,
+  async handler(ctx, { id, activo }, { dryRun }) {
+    const actual = await funcionDe(ctx, id);
+    const n = await conteoPuestosFuncion(ctx, id);
+    if (dryRun) return vistaFuncion({ ...actual, activo }, n);
+    const f = await escribirConEvento(
+      ctx,
+      { tipo: "core.funcion.actualizada", entidadTipo: "funcion_puesto", payload: () => ({ activo }) },
+      (tx) => tx.funcionPuesto.update({ where: { id }, data: { activo } }),
+    );
+    return vistaFuncion(f, n);
+  },
+});

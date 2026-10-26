@@ -3,43 +3,26 @@ import { z } from "zod";
 import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
-import { noEncontrado, reglaDeNegocio } from "../../errores";
-import type { Contexto } from "../../types";
+import { reglaDeNegocio } from "../../errores";
 import { uuidSchema } from "../esquemas";
-import { definidos, escribirConEvento, opcionalAFecha } from "./comun";
+import { definidos, escribirConEvento } from "./comun";
 import { instalacionDe } from "./instalaciones";
-import { camposPuesto, errorDePatron, puestoSchema, vistaPuesto } from "./puestos-vista";
-
-async function puestoDe(ctx: Contexto, id: string) {
-  const p = await ctx.db.puesto.findUnique({ where: { id } });
-  if (!p) throw noEncontrado("El puesto");
-  return p;
-}
-
-async function cargoActivo(ctx: Contexto, cargoId?: string) {
-  if (!cargoId) return;
-  const c = await ctx.db.cargo.findUnique({ where: { id: cargoId } });
-  if (!c) throw noEncontrado("El cargo");
-  if (!c.activo) throw reglaDeNegocio(`El cargo "${c.nombre}" está desactivado.`);
-}
-
-function validarPatron(diasTrabajo: number, diasDescanso: number) {
-  const error = errorDePatron(diasTrabajo, diasDescanso);
-  if (error) throw reglaDeNegocio(error);
-}
-
-const fechas = (d: {
-  vigenteDesde?: string | null | undefined;
-  vigenteHasta?: string | null | undefined;
-}) => ({
-  vigenteDesde: opcionalAFecha(d.vigenteDesde),
-  vigenteHasta: opcionalAFecha(d.vigenteHasta),
-});
+import { camposPuesto } from "./puestos-campos";
+import {
+  CLAVES_HORAS,
+  cargoActivo,
+  componer,
+  fechas,
+  incluir,
+  mezclarPuesto,
+  puestoDe,
+} from "./puestos-ayuda";
+import { puestoSchema, vistaPuesto } from "./puestos-vista";
 
 export const puestosList = defineCapability({
   id: "core.puestos.list",
   descripcion:
-    "Puestos de servicio de una instalación o de un cargo en todas las instalaciones: cargo, patrón de turno (p. ej. 4×4), horario, jornada y dotación.",
+    "Puestos (posiciones) de una instalación o de un cargo: función, patrón de turno (p. ej. 4×4), horario por tramos, horas semanales, colación y cobertura PPC. Una fila por posición.",
   permiso: PERMISOS_CORE.instalacionesRead,
   input: z
     .object({
@@ -58,7 +41,7 @@ export const puestosList = defineCapability({
         ...(input.cargoId ? { cargoId: input.cargoId } : {}),
         ...(input.soloActivos ? { estado: "activo" } : {}),
       },
-      include: { instalacion: { select: { nombre: true } } },
+      include: { ...incluir, instalacion: { select: { nombre: true } } },
       orderBy: { nombre: "asc" },
     });
     return filas.map((f) => ({ ...vistaPuesto(f), instalacion: f.instalacion.nombre }));
@@ -68,7 +51,7 @@ export const puestosList = defineCapability({
 export const puestosGet = defineCapability({
   id: "core.puestos.get",
   descripcion:
-    "Ficha de un puesto de servicio: cargo, ciclo de turno, horario, dotación y vigencia.",
+    "Ficha de un puesto (posición): función, patrón de turno, horario por tramos, horas, colación, cobertura y vigencia.",
   permiso: PERMISOS_CORE.instalacionesRead,
   input: z.object({ id: uuidSchema }),
   output: puestoSchema,
@@ -80,7 +63,7 @@ export const puestosGet = defineCapability({
 export const puestosCreate = defineCapability({
   id: "core.puestos.create",
   descripcion:
-    "Crea un puesto en una instalación con su cargo, ciclo (días de trabajo × descanso), horario (puede cruzar medianoche) y dotación.",
+    "Crea un puesto (1 posición) en una instalación con su función, patrón de turno, horario por tramos (puede cruzar medianoche), horas y colación. Nace en cobertura PPC «Sin asignar».",
   permiso: PERMISOS_CORE.instalacionesManage,
   input: z.object({ instalacionId: uuidSchema, ...camposPuesto }),
   output: puestoSchema,
@@ -90,22 +73,32 @@ export const puestosCreate = defineCapability({
     const i = await instalacionDe(ctx, input.instalacionId);
     if (i.archivadaEn) throw reglaDeNegocio("La instalación está archivada.");
     await cargoActivo(ctx, input.cargoId);
-    validarPatron(input.diasTrabajo, input.diasDescanso);
-    const data = definidos({ ...input, ...fechas(input), estado: "activo" });
-    if (dryRun) return vistaPuesto({ ...data, id: "" });
+    const { funcion, patron, diasTrabajo, diasDescanso, sugerencia } = await componer(ctx, input);
+    const horasSemanales = input.horasSemanales ?? sugerencia;
+    const data = definidos({
+      ...input,
+      ...fechas(input),
+      diasTrabajo,
+      diasDescanso,
+      horasSemanales,
+      estado: "activo",
+      cobertura: "ppc",
+      coberturaMotivo: "sin_asignar",
+    });
+    if (dryRun) return vistaPuesto({ ...data, id: "", funcion, patron });
     const p = await escribirConEvento(
       ctx,
       { tipo: "core.puesto.creado", entidadTipo: "puesto" },
       (tx) => tx.puesto.create({ data: { ...data, tenantId: ctx.tenantId } }),
     );
-    return vistaPuesto(p);
+    return vistaPuesto(await puestoDe(ctx, p.id));
   },
 });
 
 export const puestosUpdate = defineCapability({
   id: "core.puestos.update",
   descripcion:
-    "Actualiza un puesto (nombre, cargo, ciclo, horario, jornada, dotación, vigencia). Solo cambia lo enviado.",
+    "Actualiza un puesto (nombre, función, patrón, horario por tramos, horas, colación, vigencia). Solo cambia lo enviado.",
   permiso: PERMISOS_CORE.instalacionesManage,
   input: z.object({ id: uuidSchema, ...z.object(camposPuesto).partial().shape }),
   output: puestoSchema,
@@ -114,18 +107,28 @@ export const puestosUpdate = defineCapability({
   async handler(ctx, { id, ...cambios }, { dryRun }) {
     const actual = await puestoDe(ctx, id);
     await cargoActivo(ctx, cambios.cargoId);
-    validarPatron(
-      cambios.diasTrabajo ?? actual.diasTrabajo,
-      cambios.diasDescanso ?? actual.diasDescanso,
+    const { funcion, patron, diasTrabajo, diasDescanso, sugerencia } = await componer(
+      ctx,
+      mezclarPuesto(actual, cambios),
     );
-    const data = definidos({ ...cambios, ...fechas(cambios) });
-    if (dryRun) return vistaPuesto({ ...actual, ...data });
+    // Horas: número explícito manda; si cambia patrón/horario/colación se recalcula; si no, se conserva.
+    const tocaHoras = CLAVES_HORAS.some((k) => cambios[k] !== undefined);
+    const horasSemanales =
+      cambios.horasSemanales != null ? cambios.horasSemanales : tocaHoras ? sugerencia : undefined;
+    const data = definidos({ ...cambios, ...fechas(cambios), diasTrabajo, diasDescanso, horasSemanales });
+    if (dryRun)
+      return vistaPuesto({
+        ...actual,
+        ...data,
+        funcion: cambios.funcionId === undefined ? actual.funcion : funcion,
+        patron: cambios.patronId === undefined ? actual.patron : patron,
+      });
     const p = await escribirConEvento(
       ctx,
       { tipo: "core.puesto.actualizado", entidadTipo: "puesto" },
       (tx) => tx.puesto.update({ where: { id }, data }),
     );
-    return vistaPuesto(p);
+    return vistaPuesto(await puestoDe(ctx, p.id));
   },
 });
 
@@ -145,6 +148,6 @@ export const puestosSetEstado = defineCapability({
       { tipo: "core.puesto.actualizado", entidadTipo: "puesto", payload: () => ({ estado }) },
       (tx) => tx.puesto.update({ where: { id }, data: { estado } }),
     );
-    return vistaPuesto(p);
+    return vistaPuesto(await puestoDe(ctx, p.id));
   },
 });

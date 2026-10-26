@@ -14,6 +14,20 @@ import { cuentasArchive, cuentasSetEstado, cuentasSetRepresentantes } from "./cu
 import { estructurasGet, estructurasList } from "./estructuras";
 import { estructurasEfectiva } from "./estructuras-efectiva";
 import { estructurasAnular, estructurasCreate } from "./estructuras-escritura";
+import {
+  funcionesCreate,
+  funcionesGet,
+  funcionesList,
+  funcionesSetActivo,
+  funcionesUpdate,
+} from "./funciones";
+import {
+  patronesCreate,
+  patronesGet,
+  patronesList,
+  patronesSetActivo,
+  patronesUpdate,
+} from "./patrones";
 import { instalacionesGet, instalacionesList } from "./instalaciones";
 import { instalacionesCreate, instalacionesUpdate } from "./instalaciones-escritura";
 import { instalacionesArchive, instalacionesSetEstado } from "./instalaciones-estado";
@@ -53,6 +67,16 @@ export const capacidadesMaestros: readonly Capacidad[] = [
   puestosCreate,
   puestosUpdate,
   puestosSetEstado,
+  patronesList,
+  patronesGet,
+  patronesCreate,
+  patronesUpdate,
+  patronesSetActivo,
+  funcionesList,
+  funcionesGet,
+  funcionesCreate,
+  funcionesUpdate,
+  funcionesSetActivo,
   personasList,
   personasGet,
   personasCreate,

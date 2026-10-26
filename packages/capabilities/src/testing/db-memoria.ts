@@ -13,6 +13,12 @@ const idOrdenado = () => `00000000-0000-7000-8000-${(++secuencia).toString(16).p
 const RELACIONES: Record<string, Record<string, [tabla: string, clave: string]>> = {
   membership: { user: ["user", "userId"], tenant: ["tenant", "tenantId"] },
   apiKey: { user: ["user", "userId"] },
+  puesto: {
+    instalacion: ["instalacion", "instalacionId"],
+    cargo: ["cargo", "cargoId"],
+    patron: ["patronTurno", "patronId"],
+    funcion: ["funcionPuesto", "funcionId"],
+  },
 };
 
 export function dbEnMemoria(semilla: Record<string, Fila[]> = {}) {
