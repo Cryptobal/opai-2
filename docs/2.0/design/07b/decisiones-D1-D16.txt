@@ -1,0 +1,275 @@
+
+OPAI 2.0 · Brief 07b · Diseño 3 del plan (PLAN-desarrollo.md, fila N3)
+Capas de sueldo y anexo de contrato
+Portal ERP. 34 pantallas en orden, agrupadas por sección. Los 16 puntos abiertos están numerados D1–D16: el tablero los junta aquí y cada pantalla repite, al costado, la tarjeta del punto que le aplica. Referencia de layout y jerarquía para el brief; no es código a copiar.
+Pendiente de aprobación de CarlosDatos ficticios · ejemploTenant: Seguridad Ejemplo SpA26-10-2026
+Tablero «Decide Carlos»33
+§3 Capa instalación010203040506
+§4 Capa puesto070809
+§5 Resolución sin herencia1011121314151617
+§6 Retiro del nivel cargo18192021
+§7 Vínculo laboral22232425
+§7 Anexo de contrato2627282930
+Estados3132
+§9 Componentes nuevos34
+OPAI 2.0 · Brief 07b · Capas de sueldo y anexo · 33 · Decide Carlos · resumen · 1280 · claro · 33_Decide_Carlos_resumen_1280
+Tablero · Decide Carlos
+Los 16 puntos de §2 a §7 que no están decididos en las fuentes. Cada uno con sus opciones, la recomendación y las pantallas donde aparece.
+D1
+Decide Carlos
+Dónde vive la capa instalación
+ADR-041.9 fija las pestañas de Instalación (Resumen → Puestos → Contactos → Negocios → Documentos → Actividad) y no tiene una de sueldo.
+a)
+Pestaña propia «Sueldo» después de Puestos
+Recomendada
+b)
+Sección dentro de Resumen
+c)
+Solo desde «Cargos y sueldos»
+Recomendación: a). La estructura tiene versiones, uso y acciones propias; una pestaña no alarga Resumen y respeta que lo de la entidad vive en su ficha (NAVEGACION §1.3).
+Fuente: ADR-041.9 · brief §3
+Aparece en
+0102030405
+D2
+Decide Carlos
+Instalación sin sueldo: ¿bloquea algo más?
+Un puesto puede nacer sin sueldo propio y una instalación puede estar sin sueldo definido (R7).
+a)
+Solo avisa: las personas quedan «Sin sueldo resuelto»
+Recomendada
+b)
+Bloquea confirmar puestos sin sueldo propio
+c)
+Bloquea solo la liquidación de esas personas
+Recomendación: a). No frena Operaciones; el aviso aparece en la instalación y en cada persona afectada, con la acción para definir el sueldo.
+Fuente: R7 · ADR-048 respuesta 3 · ADR-036 punto 10
+Aparece en
+0416
+D3
+Decide Carlos
+Borradores en lote al cambiar instalación o puesto
+Una nueva versión de capa instalación o puesto cambia el monto de todas las personas que la usan.
+a)
+Un borrador por persona + vista de lote «Revisar uno por uno»
+Recomendada
+b)
+Un borrador por persona, sin vista de lote
+c)
+Un solo anexo colectivo por versión
+Recomendación: a). El anexo es individual por contrato; el lote solo agrupa la revisión en la Bandeja.
+Fuente: R11 · ADR-036 punto 5 · ADR-048 punto 5
+Aparece en
+05060930
+D4
+Decide Carlos
+¿«Rol» en R11 es el rol de turno?
+R11: cambia rol, capa, monto o instalación → borrador. Que «rol» sea el rol de turno es lectura nuestra.
+a)
+Sí: rol de turno (días del patrón)
+Recomendada
+b)
+No: se refiere al cargo
+c)
+Ambos generan borrador
+Recomendación: a). Leerlo como rol de turno (ADR-036, reglas del puesto, punto 3); el cargo ya no mueve montos.
+Fuente: ADR-036 punto 5 · reglas del puesto punto 3
+Aparece en
+262728
+D5
+Decide Carlos
+Sueldo en la ficha de la persona
+Hoy la persona tiene las pestañas Laboral y Sueldo (main).
+a)
+Se mantiene la pestaña «Sueldo»
+Recomendada
+b)
+Pasa como sección dentro de «Laboral»
+Recomendación: a). La resolución de capas necesita espacio y su propio permiso de montos; Laboral queda para el vínculo.
+Fuente: Brief §5 · ADR-041
+Aparece en
+1011121321
+D6
+Decide Carlos
+Sueldo por RUT: ¿parte prellenado?
+La capa RUT define todos sus conceptos (R2).
+a)
+Prellenado con la capa que rige hoy, solo como punto de partida
+Recomendada
+b)
+Parte vacío
+Recomendación: a). Menos errores de tipeo. Al guardar, cada concepto queda definido en la capa RUT; no hay herencia.
+Fuente: R1 · R2
+Aparece en
+14
+D7
+Decide Carlos
+Montos sin permiso y sensibilidad del cargo
+Montos: solo owner y admin (ADR-016). El cargo conserva «sueldo sensible» (R3).
+a)
+«••••» en montos; el origen de la capa se ve; la marca del cargo no cambia la regla
+Recomendada
+b)
+Ocultar también el origen de la capa
+c)
+El gerente ve montos de cargos no sensibles
+Recomendación: a). El origen no revela montos y ayuda a operar; la regla de ADR-016 queda simple y sin excepciones.
+Fuente: ADR-016 · NAVEGACION §5 · R3
+Aparece en
+1718193132
+D8
+Decide Carlos
+Permiso para crear o cambiar capas y editar el vínculo
+Los permisos finos llegan con el Brief 07c (ADR-022, nota del 26-oct).
+a)
+Owner y admin hasta el 07c
+Recomendada
+b)
+Capacidad propia, configurable por rol, desde ya
+Recomendación: a). Mantener owner y admin hasta el 07c; el diseño ya muestra el estado «sin permiso».
+Fuente: ADR-022 · ADR-016
+Aparece en
+3132
+D9
+Decide Carlos
+Nombre de la entrada «Cargos y sueldos»
+El cargo ya no define montos (R3).
+a)
+Se mantiene «Cargos y sueldos»
+b)
+Pasa a «Cargos»
+Recomendada
+Recomendación: b). «Cargos» evita prometer montos que ya no están ahí; el sueldo vive en instalación, puesto y persona.
+Fuente: R3 · NAVEGACION §2
+Aparece en
+18
+D10
+Decide Carlos
+Filas `cargo` existentes en dev: ¿convertir o archivar?
+El retiro del nivel cargo es sin borrar datos (R6).
+a)
+Archivar: solo lectura, ya no se usan para pagar
+Recomendada
+b)
+Convertir en capa instalación de cada instalación
+Recomendación: a). Archivar no altera montos vigentes; convertir puede ofrecerse después como acción explícita por instalación.
+Fuente: R6 · ADR-036 Consecuencias
+Aparece en
+192021
+D11
+Decide Carlos
+Campos de la jornada pactada
+No está en las fuentes. Es dato del vínculo (R8).
+a)
+Horas semanales + distribución (lunes a viernes, 4×4…)
+Recomendada
+b)
+Lo anterior + horario de entrada y salida
+c)
+Lo anterior + tipo de jornada
+Recomendación: a). Horas y distribución bastan para el contrato y el anexo; el horario lo da la pauta.
+Fuente: R8 · ADR-036 «Jornada pactada»
+Aparece en
+22232425
+D12
+Decide Carlos
+Instalación del vínculo: obligatoria u opcional
+ADR-048 recomendaba «instalación obligatoria, puesto opcional»; la respuesta de Carlos (Nómina exige Puestos) no repitió el punto. Convivencia con la asignación de Operaciones en fase 3: queda abierta.
+a)
+Obligatoria; puesto opcional
+Recomendada
+b)
+Opcional
+Recomendación: a). Sin instalación no se resuelve la capa por defecto (R9, R10). La fase 3 se resuelve aparte.
+Fuente: R9 · R10 · ADR-048 pregunta 1
+Aparece en
+22232425
+D13
+Decide Carlos
+Rol que aprueba el anexo por defecto
+Roles base: owner, admin, gerente, supervisor, viewer (ADR-016). No hay rol «RRHH». El rol es configurable; un agente no aprueba.
+a)
+admin
+Recomendada
+b)
+owner
+c)
+gerente
+Recomendación: a). admin por defecto, configurable por tenant. Ningún agente aprueba (APPROVAL_REQUIRED).
+Fuente: R13 · ADR-016 · ADR-036 punto 8
+Aparece en
+2627282930
+D14
+Decide Carlos
+¿Rechazar pide motivo?
+Rechazar es capacidad con dry_run y auditoría (R14).
+a)
+Sí, obligatorio (como Aprobaciones)
+Recomendada
+b)
+Opcional
+Recomendación: a). Obligatorio: queda en la bitácora y quien generó el cambio sabe qué corregir.
+Fuente: R14 · Aprobaciones
+Aparece en
+29
+D15
+Decide Carlos
+Firma, cláusulas y documento en oscuro
+Firma: no está en las fuentes. Texto y cláusulas de la plantilla base: los define Carlos.
+a)
+El 07b termina en «Aprobado y guardado en Documentos»; firma después
+Recomendada
+b)
+Firma electrónica dentro de OPAI
+c)
+Firma en papel y carga del escaneo
+Recomendación: a). Cerrar el 07b en «Aprobado»; texto de ejemplo hasta tener cláusulas. En modo oscuro el documento conserva su papel claro.
+Fuente: R12 · R15 · ADR-028 · ADR-039
+Aparece en
+26272829
+D16
+Decide Carlos
+Dónde se ven los anexos pendientes
+La Bandeja de Inicio ya reúne aprobaciones (NAVEGACION §2).
+a)
+Bandeja de Inicio + ficha de la persona
+Recomendada
+b)
+Solo la pestaña Documentos de la persona
+c)
+Lista propia en «Cargos y sueldos»
+Recomendación: a). Bandeja para quien aprueba y ficha para el contexto; una lista propia duplica la Bandeja.
+Fuente: NAVEGACION §2 · ADR-041
+Aparece en
+30
+Sección
+§3 · Capa instalación
+La capa por defecto del sueldo, con su estructura, uso, versiones, nueva versión con vista previa de impacto y confirmación.
+010203040506
+Sección
+§4 · Capa puesto
+Cada puesto dice qué capa usa. Con sueldo propio, la estructura del puesto se usa completa.
+070809
+Sección
+§5 · Resolución sin herencia
+Ficha de la persona: las tres capas, la que rige resaltada y el origen de cada monto. Sueldo por RUT con motivo obligatorio.
+1011121314151617
+Sección
+§6 · Retiro del nivel cargo
+El cargo sigue como catálogo y atributo, sin montos. Sus estructuras antiguas quedan en solo lectura.
+18192021
+Sección
+§7 · Vínculo laboral
+El vínculo gana instalación, puesto (opcional) y jornada pactada, y con eso resuelve la capa de sueldo.
+22232425
+Sección
+§7 · Anexo de contrato
+El cambio genera solo el borrador; RRHH lo aprueba o rechaza y, aprobado, queda en Documentos con su bitácora.
+2627282930
+Sección
+Estados
+Cargando, vacío, error y sin permiso de las cuatro superficies.
+3132
+Sección
+§9 · Componentes nuevos
+Piezas propuestas, construidas con tokens y componentes existentes, en claro y oscuro.
+34
