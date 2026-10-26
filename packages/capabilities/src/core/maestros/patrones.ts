@@ -30,7 +30,13 @@ export const patronesList = defineCapability({
       where: input.incluirInactivos ? {} : { activo: true },
       orderBy: [{ orden: "asc" }, { nombre: "asc" }],
     });
-    return Promise.all(filas.map(async (p) => vistaPatron(p, await conteoPuestosPatron(ctx, p.id))));
+    const grupos = await ctx.db.puesto.groupBy({
+      by: ["patronId"],
+      where: { estado: "activo", patronId: { in: filas.map((f) => f.id) } },
+      _count: { _all: true },
+    });
+    const conteo = new Map(grupos.map((g) => [g.patronId, g._count._all]));
+    return filas.map((p) => vistaPatron(p, conteo.get(p.id) ?? 0));
   },
 });
 

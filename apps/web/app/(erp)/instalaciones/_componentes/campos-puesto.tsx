@@ -1,11 +1,13 @@
 "use client";
 
-import { Info } from "lucide-react";
 import type { Dispatch, SetStateAction } from "react";
 
-import { Campo, Combobox, Input, InputFecha, InputHora, RadioGroup, Select } from "@opai/ds";
+import { Campo, Combobox, Input, InputFecha, RadioGroup, Select } from "@opai/ds";
 
-import { type DatosPuesto, PATRONES } from "./puesto-datos";
+import type { FuncionPuestoOpcion, PatronTurnoOpcion } from "@/lib/tipos-maestros";
+
+import { CamposHorario } from "./campos-horario";
+import type { DatosPuesto } from "./puesto-datos";
 
 export { type DatosPuesto, inicialPuesto, puestoAInput } from "./puesto-datos";
 
@@ -13,13 +15,28 @@ type Props = {
   d: DatosPuesto;
   setD: Dispatch<SetStateAction<DatosPuesto>>;
   cargos: { valor: string; etiqueta: string }[];
+  funciones: FuncionPuestoOpcion[];
+  patrones: PatronTurnoOpcion[];
 };
 
-/** Nuevo puesto (09): nombre, cargo, patrón, horario con cruce de medianoche, jornada y dotación. */
-export function CamposPuesto({ d, setD, cargos }: Props) {
+/** Nuevo puesto-posición (Brief 11): función, patrón del catálogo, horario por tramos y colación. */
+export function CamposPuesto({ d, setD, cargos, funciones, patrones }: Props) {
   const set = <K extends keyof DatosPuesto>(k: K, v: DatosPuesto[K]) =>
     setD((x) => ({ ...x, [k]: v }));
-  const cruza = d.fin <= d.inicio;
+  const opcionesFuncion = funciones.map((f) => ({ valor: f.id, etiqueta: f.nombre }));
+  const opcionesPatron = patrones.map((p) => ({
+    valor: p.id,
+    etiqueta: `${p.nombre} · ${p.resumen}`,
+  }));
+  function elegirPatron(id: string) {
+    const p = patrones.find((x) => x.id === id);
+    setD((x) => ({
+      ...x,
+      patronId: id,
+      trabajo: p ? String(p.diasTrabajo) : x.trabajo,
+      descanso: p ? String(p.diasDescanso) : x.descanso,
+    }));
+  }
   return (
     <div className="flex flex-col gap-4">
       <Campo etiqueta="Nombre del puesto" htmlFor="p-nombre">
@@ -30,63 +47,34 @@ export function CamposPuesto({ d, setD, cargos }: Props) {
           onChange={(e) => set("nombre", e.target.value)}
         />
       </Campo>
+      <Campo etiqueta="Función" htmlFor="p-funcion">
+        <Combobox
+          id="p-funcion"
+          opciones={opcionesFuncion}
+          valor={d.funcionId ?? ""}
+          onCambiar={([v]) => set("funcionId", v ?? null)}
+          placeholder="Elegir función"
+        />
+      </Campo>
       <Campo etiqueta="Cargo" htmlFor="p-cargo">
         <Combobox
           id="p-cargo"
           opciones={cargos}
-          valor={d.cargoId}
+          valor={d.cargoId ?? ""}
           onCambiar={([v]) => set("cargoId", v ?? null)}
           placeholder="Elegir cargo"
         />
       </Campo>
-      <Campo etiqueta="Patrón" htmlFor="p-patron">
+      <Campo etiqueta="Patrón de turno" htmlFor="p-patron">
         <Select
           id="p-patron"
-          valor={d.patron}
-          onCambiar={(v) => set("patron", v)}
-          opciones={PATRONES}
+          valor={d.patronId ?? undefined}
+          onCambiar={elegirPatron}
+          opciones={opcionesPatron}
+          placeholder="Elegir patrón"
         />
       </Campo>
-      {d.patron === "otro" ? (
-        <div className="grid grid-cols-2 gap-3">
-          <Campo etiqueta="Días de trabajo" htmlFor="p-t">
-            <Input
-              id="p-t"
-              type="number"
-              inputMode="numeric"
-              min={1}
-              max={28}
-              value={d.trabajo}
-              onChange={(e) => set("trabajo", e.target.value)}
-            />
-          </Campo>
-          <Campo etiqueta="Días de descanso" htmlFor="p-r">
-            <Input
-              id="p-r"
-              type="number"
-              inputMode="numeric"
-              min={1}
-              max={28}
-              value={d.descanso}
-              onChange={(e) => set("descanso", e.target.value)}
-            />
-          </Campo>
-        </div>
-      ) : null}
-      <div className="grid grid-cols-2 gap-3">
-        <Campo etiqueta="Inicio" htmlFor="p-ini">
-          <InputHora id="p-ini" valor={d.inicio} onCambiar={(v) => set("inicio", v)} />
-        </Campo>
-        <Campo etiqueta="Fin" htmlFor="p-fin">
-          <InputHora id="p-fin" valor={d.fin} onCambiar={(v) => set("fin", v)} />
-        </Campo>
-      </div>
-      {cruza ? (
-        <p className="flex gap-2 rounded-md bg-info-muted px-3 py-2.5 text-sm font-medium text-info-fg">
-          <Info className="mt-0.5 size-4 flex-none" aria-hidden />
-          El cruce de medianoche se calcula solo: termina el día siguiente a las {d.fin}.
-        </p>
-      ) : null}
+      <CamposHorario d={d} setD={setD} />
       <RadioGroup
         etiqueta="Jornada"
         orientacion="fila"
@@ -98,21 +86,9 @@ export function CamposPuesto({ d, setD, cargos }: Props) {
           { valor: "rotativa", etiqueta: "Rotativa" },
         ]}
       />
-      <div className="grid grid-cols-2 gap-3">
-        <Campo etiqueta="Dotación" htmlFor="p-dot">
-          <Input
-            id="p-dot"
-            type="number"
-            inputMode="numeric"
-            min={1}
-            value={d.dotacion}
-            onChange={(e) => set("dotacion", e.target.value)}
-          />
-        </Campo>
-        <Campo etiqueta="Vigente desde" htmlFor="p-desde">
-          <InputFecha id="p-desde" valor={d.desde} onCambiar={(v) => set("desde", v)} />
-        </Campo>
-      </div>
+      <Campo etiqueta="Vigente desde" htmlFor="p-desde">
+        <InputFecha id="p-desde" valor={d.desde} onCambiar={(v) => set("desde", v)} />
+      </Campo>
     </div>
   );
 }

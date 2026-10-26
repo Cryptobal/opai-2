@@ -1,5 +1,6 @@
-import { ParesGrid, SeccionTarjeta, Table, Td, Th, Tr } from "@opai/ds";
+import { Badge, ParesGrid, SeccionTarjeta, Table, Td, Th, Tr } from "@opai/ds";
 
+import { COBERTURA_PUESTO, estadoDe } from "@/app/_components/maestros/estados";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { MapaOpai } from "@/app/_components/maestros/mapa";
@@ -65,20 +66,25 @@ export function ResumenInstalacion({ i }: { i: InstalacionDetalle }) {
                   <Th>Puesto</Th>
                   <Th>Patrón</Th>
                   <Th>Horario</Th>
-                  <Th className="text-right">Dotación</Th>
+                  <Th className="text-right">Cobertura</Th>
                 </tr>
               </thead>
               <tbody>
-                {activos.map((p) => (
-                  <Tr key={p.id}>
-                    <Td>{p.nombre}</Td>
-                    <Td className="t-numeric">
-                      {p.diasTrabajo}×{p.diasDescanso}
-                    </Td>
-                    <Td className="t-numeric">{p.horario}</Td>
-                    <Td className="t-numeric text-right">{p.dotacion}</Td>
-                  </Tr>
-                ))}
+                {activos.map((p) => {
+                  const c = estadoDe(COBERTURA_PUESTO, p.cobertura);
+                  return (
+                    <Tr key={p.id}>
+                      <Td>{p.nombre}</Td>
+                      <Td>{p.patron ?? "—"}</Td>
+                      <Td className="t-numeric">
+                        {p.horarioNoche ? `${p.horario} / ${p.horarioNoche}` : p.horario}
+                      </Td>
+                      <Td className="text-right">
+                        <Badge tono={c.tono}>{c.corta}</Badge>
+                      </Td>
+                    </Tr>
+                  );
+                })}
               </tbody>
             </Table>
           </div>

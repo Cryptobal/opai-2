@@ -29,9 +29,13 @@ export const funcionesList = defineCapability({
       where: input.incluirInactivos ? {} : { activo: true },
       orderBy: [{ orden: "asc" }, { nombre: "asc" }],
     });
-    return Promise.all(
-      filas.map(async (f) => vistaFuncion(f, await conteoPuestosFuncion(ctx, f.id))),
-    );
+    const grupos = await ctx.db.puesto.groupBy({
+      by: ["funcionId"],
+      where: { estado: "activo", funcionId: { in: filas.map((f) => f.id) } },
+      _count: { _all: true },
+    });
+    const conteo = new Map(grupos.map((g) => [g.funcionId, g._count._all]));
+    return filas.map((f) => vistaFuncion(f, conteo.get(f.id) ?? 0));
   },
 });
 

@@ -6,7 +6,7 @@ import { Alerta, avisar, Button, Sheet } from "@opai/ds";
 
 import { useHojaUrl } from "@/app/_components/maestros/use-url";
 import { useCapacidad } from "@/app/_components/use-capacidad";
-import type { Puesto } from "@/lib/tipos-maestros";
+import type { FuncionPuestoOpcion, PatronTurnoOpcion, Puesto } from "@/lib/tipos-maestros";
 
 import { CamposPuesto, inicialPuesto, puestoAInput } from "./campos-puesto";
 
@@ -14,10 +14,12 @@ type Props = {
   instalacionId: string;
   puestos: Puesto[];
   cargos: { valor: string; etiqueta: string }[];
+  funciones: FuncionPuestoOpcion[];
+  patrones: PatronTurnoOpcion[];
 };
 
 /** Nuevo o editar puesto (09) en Sheet, abierto por `?puesto=nuevo|<id>`. */
-export function HojaPuesto({ instalacionId, puestos, cargos }: Props) {
+export function HojaPuesto({ instalacionId, puestos, cargos, funciones, patrones }: Props) {
   const hoja = useHojaUrl("puesto");
   if (!hoja.abierta) return null;
   const actual = puestos.find((p) => p.id === hoja.valor) ?? null;
@@ -27,6 +29,8 @@ export function HojaPuesto({ instalacionId, puestos, cargos }: Props) {
       instalacionId={instalacionId}
       actual={actual}
       cargos={cargos}
+      funciones={funciones}
+      patrones={patrones}
       onCerrar={hoja.cerrar}
     />
   );
@@ -36,11 +40,15 @@ function Formulario({
   instalacionId,
   actual,
   cargos,
+  funciones,
+  patrones,
   onCerrar,
 }: {
   instalacionId: string;
   actual: Puesto | null;
   cargos: Props["cargos"];
+  funciones: FuncionPuestoOpcion[];
+  patrones: PatronTurnoOpcion[];
   onCerrar: () => void;
 }) {
   const { ejecutar, pendiente, error } = useCapacidad("erp");
@@ -67,7 +75,7 @@ function Formulario({
             Cancelar
           </Button>
           <Button
-            disabled={pendiente || d.nombre.trim().length < 2 || !d.cargoId}
+            disabled={pendiente || d.nombre.trim().length < 2 || !d.cargoId || !d.patronId}
             onClick={() => void guardar()}
           >
             {pendiente ? "Guardando…" : actual ? "Guardar" : "Crear puesto"}
@@ -77,7 +85,7 @@ function Formulario({
     >
       <div className="flex flex-col gap-4">
         {error ? <Alerta tono="danger" titulo={error} /> : null}
-        <CamposPuesto d={d} setD={setD} cargos={cargos} />
+        <CamposPuesto d={d} setD={setD} cargos={cargos} funciones={funciones} patrones={patrones} />
       </div>
     </Sheet>
   );
