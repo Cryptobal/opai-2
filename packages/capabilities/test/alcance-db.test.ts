@@ -27,6 +27,11 @@ describe.skipIf(!urlPropietario)("alcance del supervisor en base real (B3)", () 
   let docA = "";
   let docFuera = "";
   let docEmpresa = "";
+  let docPersonaExtra = "";
+  let docEmpresaExtra = "";
+  let docConAjeno = "";
+  let docV1 = "";
+  let docV2 = "";
   let personaId = "";
   const userSupId = randomUUID();
 
@@ -70,6 +75,8 @@ describe.skipIf(!urlPropietario)("alcance del supervisor en base real (B3)", () 
     mod = await import("../src");
     mod.limpiarRegistro();
     mod.registrarCapacidades(mod.capacidadesDelNucleo);
+    mod.limpiarConsumidores();
+    mod.registrarConsumidores(mod.consumidoresDelNucleo);
     const t = await e.admin.tenant.create({
       data: { slug: `alc-${randomUUID().slice(0, 8)}`, nombre: "Alc", vertical: "seguridad" },
     });
@@ -143,6 +150,50 @@ describe.skipIf(!urlPropietario)("alcance del supervisor en base real (B3)", () 
         rut: "19.876.543-0",
       })
     ).id;
+    // B-A (revisión 5659548788): fugas por tipo de dueño y por vínculos ajenos. El supervisor solo
+    // ve un documento si su DUEÑO (vínculo `propietario`) está a cargo; un vínculo extra a una
+    // instalación a cargo no debe hacer visible un documento de persona o de empresa.
+    docPersonaExtra = await doc("docPersonaExtra.pdf");
+    docEmpresaExtra = await doc("docEmpresaExtra.pdf");
+    docConAjeno = await doc("docConAjeno.pdf");
+    await e.admin.documentoVinculo.createMany({
+      data: [
+        // Dueño persona (fuera de alcance) + vínculo extra a instA (a cargo): sigue invisible.
+        { tenantId, documentoId: docPersonaExtra, entidadTipo: "persona", entidadId: personaId, rol: "propietario" },
+        { tenantId, documentoId: docPersonaExtra, entidadTipo: "instalacion", entidadId: instA, rol: "referencia" },
+        // Dueño empresa (tenant) + vínculo extra a instA: sigue invisible.
+        { tenantId, documentoId: docEmpresaExtra, entidadTipo: "tenant", entidadId: tenantId, rol: "propietario" },
+        { tenantId, documentoId: docEmpresaExtra, entidadTipo: "instalacion", entidadId: instA, rol: "referencia" },
+        // Dueño instA (a cargo) + vínculo extra a la persona (ajena): el documento se ve, el vínculo no.
+        { tenantId, documentoId: docConAjeno, entidadTipo: "instalacion", entidadId: instA, rol: "propietario" },
+        { tenantId, documentoId: docConAjeno, entidadTipo: "persona", entidadId: personaId, rol: "referencia" },
+      ],
+    });
+    // Cadena de versiones de un documento a cargo (dueño instA): las versiones NO se filtran.
+    const docVersion = async (nombre: string, version: number, estado: string, reemplazaAId: string | null) =>
+      (
+        await e.admin.documento.create({
+          data: {
+            tenantId,
+            nombre,
+            mime: "application/pdf",
+            tamano: 1_000,
+            storageKey: `k-${randomUUID()}`,
+            estado,
+            version,
+            reemplazaAId,
+            creadoPorTipo: "user",
+          },
+        })
+      ).id;
+    docV1 = await docVersion("docV1.pdf", 1, "reemplazado", null);
+    docV2 = await docVersion("docV2.pdf", 2, "disponible", docV1);
+    await e.admin.documentoVinculo.createMany({
+      data: [
+        { tenantId, documentoId: docV1, entidadTipo: "instalacion", entidadId: instA, rol: "propietario" },
+        { tenantId, documentoId: docV2, entidadTipo: "instalacion", entidadId: instA, rol: "propietario" },
+      ],
+    });
   });
 
   afterAll(async () => {
@@ -261,6 +312,44 @@ describe.skipIf(!urlPropietario)("alcance del supervisor en base real (B3)", () 
     expect(actEmpresa.items).toHaveLength(0);
   });
 
+  it("B-A: un documento de persona o de empresa no se ve aunque tenga un vínculo a una instalación a cargo", async () => {
+    const persona = await mod.executeCapability(ctxSup({ instalaciones: [instA] }), "core.documentos.get", {
+      id: docPersonaExtra,
+    });
+    expect(persona).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+    const empresa = await mod.executeCapability(ctxSup({ instalaciones: [instA] }), "core.documentos.get", {
+      id: docEmpresaExtra,
+    });
+    expect(empresa).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+    // Tampoco entran en la lista agregada por alcance (sin entidad), ni en la URL de descarga.
+    const lista = await dato<{ items: { id: string }[] }>(ctxSup({ instalaciones: [instA] }), "core.documentos.list", {});
+    const ids = lista.items.map((d) => d.id);
+    expect(ids).not.toContain(docPersonaExtra);
+    expect(ids).not.toContain(docEmpresaExtra);
+    const url = await mod.executeCapability(ctxSup({ instalaciones: [instA] }), "core.documentos.url_descarga", {
+      id: docPersonaExtra,
+    });
+    expect(url).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+  });
+
+  it("B-A: la ficha de un documento a cargo no expone vínculos ajenos y no filtra sus versiones", async () => {
+    const conAjeno = await dato<{ vinculos: { entidadTipo: string; entidadId: string; rol: string }[] }>(
+      ctxSup({ instalaciones: [instA] }),
+      "core.documentos.get",
+      { id: docConAjeno },
+    );
+    // Solo el vínculo propietario a instA; el de la persona ajena no se devuelve (no se filtran ids ajenos).
+    expect(conAjeno.vinculos).toEqual([{ entidadTipo: "instalacion", entidadId: instA, rol: "propietario" }]);
+    expect(conAjeno.vinculos.some((v) => v.entidadTipo === "persona")).toBe(false);
+    // Las versiones del mismo dueño (a cargo) NO se filtran: la ficha de la vigente trae la anterior.
+    const conVersiones = await dato<{ versiones: { id: string }[] }>(
+      ctxSup({ instalaciones: [instA] }),
+      "core.documentos.get",
+      { id: docV2 },
+    );
+    expect(conVersiones.versiones.map((v) => v.id)).toEqual([docV1]);
+  });
+
   it("CA-B3 parcial: el supervisor no ve personas (sin relación real persona ↔ instalación)", async () => {
     const ctx = ctxSup({ instalaciones: [instA] });
     const personas = await dato<{ items: unknown[] }>(ctx, "core.personas.list", {});
@@ -271,6 +360,47 @@ describe.skipIf(!urlPropietario)("alcance del supervisor en base real (B3)", () 
       entidad: { tipo: "persona", id: personaId },
     });
     expect(act.items).toHaveLength(0);
+  });
+
+  it("B-B: el aviso de un documento llega solo a los supervisores que lo tienen en su alcance", async () => {
+    const o = ctxOwner();
+    // El supervisor del alcance queda asignado a instA (dueño de docA); un segundo supervisor, no.
+    await dato(o, "core.supervisores.asignar", { membershipId: membershipSup, instalacionIds: [instA] });
+    const sufijo = randomUUID().slice(0, 8);
+    const user2 = await e.admin.user.create({
+      data: { name: "Supervisor 2", email: `sup2-${sufijo}@prueba.cl` },
+    });
+    await e.admin.membership.create({
+      data: { tenantId, userId: user2.id, rol: "supervisor", portales: ["supervisor"] },
+    });
+    // Regla: avisar a los supervisores por la bandeja (inapp) cuando un documento esté por vencer.
+    await dato(o, "core.notificacion_reglas.set", {
+      evento: "core.documento.por_vencer",
+      canal: "inapp",
+      roles: ["supervisor"],
+      usuarios: [],
+      activa: true,
+    });
+    // Evento del outbox para docA (dueño: instA).
+    const ev = await e.admin.evento.create({
+      data: {
+        tenantId,
+        tipo: "core.documento.por_vencer",
+        entidadTipo: "documento",
+        entidadId: docA,
+        actorTipo: "system",
+        payload: { venceEn: "2026-12-31", dias: 7, tipoId: null },
+      },
+    });
+    await mod.despacharPendientes(ctxOwner());
+    const delSup = await e.admin.notificacion.findFirst({
+      where: { eventoId: ev.id, usuarioId: userSupId },
+    });
+    const delOtro = await e.admin.notificacion.findFirst({
+      where: { eventoId: ev.id, usuarioId: user2.id },
+    });
+    expect(delSup).not.toBeNull(); // supervisor con docA en su alcance: recibe el aviso
+    expect(delOtro).toBeNull(); // supervisor sin instA: no lo recibe
   });
 
   it("solo owner o admin fijan el alcance: un gerente con users.manage no puede (escalada)", async () => {

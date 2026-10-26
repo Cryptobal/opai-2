@@ -8,7 +8,7 @@ import type { Contexto } from "../../types";
 import { uuidSchema } from "../esquemas";
 import { entidadEnAlcance } from "../maestros/alcance";
 import { hoy } from "../maestros/comun";
-import { documentosEnAlcance } from "./alcance-doc";
+import { documentosEnAlcance, entidadesEnAlcance, vinculoEnAlcance } from "./alcance-doc";
 import { CAPA_DE } from "./entidad";
 import { documentoSchema, entidadSchema, vistaDocumento } from "./vista";
 
@@ -100,15 +100,23 @@ export const documentosGet = defineCapability({
   async handler(ctx, input) {
     const d = await ctx.db.documento.findUnique({ where: { id: input.id } });
     if (!d) throw noEncontrado("El documento");
-    // Alcance por filas: un actor acotado solo ve documentos de sus entidades a cargo.
-    const permitidos = await documentosEnAlcance(ctx);
+    // Alcance por filas: un actor acotado solo ve documentos cuyo dueño está a cargo.
+    const alc = await entidadesEnAlcance(ctx);
+    const permitidos = await documentosEnAlcance(ctx, alc);
     if (permitidos && !permitidos.includes(d.id)) throw noEncontrado("El documento");
-    const vinculos = await ctx.db.documentoVinculo.findMany({ where: { documentoId: d.id } });
+    // Los vínculos que se devuelven se acotan al alcance: no se exponen ids de entidades ajenas
+    // (una persona o una cuenta que el supervisor no tiene a cargo) aunque cuelguen del documento.
+    const vinculosTodos = await ctx.db.documentoVinculo.findMany({ where: { documentoId: d.id } });
+    const vinculos = alc
+      ? vinculosTodos.filter((v) => vinculoEnAlcance(alc, v.entidadTipo, v.entidadId))
+      : vinculosTodos;
     const versiones = [];
     for (let previo = d.reemplazaAId, n = 0; previo && n < 50; n++) {
       const v = await ctx.db.documento.findUnique({ where: { id: previo } });
       if (!v) break;
-      versiones.push(v);
+      // Mismo filtro que el documento: una versión fuera de alcance no se expone. Las versiones del
+      // mismo dueño (el caso normal) sí aparecen, porque comparten su vínculo `propietario`.
+      if (!permitidos || permitidos.includes(v.id)) versiones.push(v);
       previo = v.reemplazaAId;
     }
     const tipos = await tiposPorId(ctx, [d.tipoId, ...versiones.map((v) => v.tipoId)]);
