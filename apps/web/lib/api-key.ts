@@ -34,9 +34,10 @@ export async function contextoDeApiKey(
   if (!fila || fila.revocadaEn || (fila.expiraEn && fila.expiraEn.getTime() <= ahora)) {
     return noAutenticado("API key inválida, revocada o vencida.");
   }
-  const [membresia, usuario] = await Promise.all([
+  const [membresia, usuario, acceso] = await Promise.all([
     fuentes.membresia(tenant.id, fila.userId),
     fuentes.usuario(fila.userId),
+    fuentes.acceso(tenant.id, fila.userId),
   ]);
   if (!membresia || membresia.estado !== "activa" || !usuario || !esRol(membresia.rol)) {
     return noAutenticado("API key inválida: su responsable ya no tiene acceso a la empresa.");
@@ -44,6 +45,7 @@ export async function contextoDeApiKey(
   if (!fila.ultimoUsoEn || ahora - fila.ultimoUsoEn.getTime() > MINUTO) {
     await fuentes.marcarUsoKey(tenant.id, fila.id).catch(() => undefined);
   }
+  // Una key hereda permisos y alcance del responsable (ADR-033): su rol personalizado y excepciones.
   return crearContexto({
     tenantId: tenant.id,
     actor: { tipo: "agent", id: fila.id, viaUserId: usuario.id },
@@ -54,6 +56,8 @@ export async function contextoDeApiKey(
       platformRole: esRolPlataforma(usuario.platformRole) ? usuario.platformRole : null,
     },
     rol: membresia.rol,
+    permisosRol: acceso.permisosRol,
+    excepciones: acceso.excepciones,
     portal: null,
     modulosActivos: await fuentes.modulosActivos(tenant.id),
     scopes: fila.scopes,
