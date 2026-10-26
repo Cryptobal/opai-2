@@ -26,14 +26,20 @@ const PAUSA_MS = 15 * 60_000;
 
 export type EstadoLogin =
   | { tipo: "inicial" }
-  | { tipo: "error"; titulo: string; texto: string }
-  | { tipo: "suspendida"; texto: string };
+  | { tipo: "error"; n: number; titulo: string; texto: string }
+  | { tipo: "pausado"; n: number; titulo: string; texto: string }
+  | { tipo: "suspendida"; n: number; texto: string };
 
-const PAUSADO: EstadoLogin = {
-  tipo: "error",
+/** Secuencia del intento: cambia el `key` del aviso para que el lector de pantalla lo reanuncie. */
+const siguiente = (previo: EstadoLogin): number => ("n" in previo ? previo.n : 0) + 1;
+
+/** Pausa por fuerza bruta: tono de aviso (no error), sin tiempo exacto (la ventana es deslizante). */
+const pausado = (n: number): EstadoLogin => ({
+  tipo: "pausado",
+  n,
   titulo: "Pausamos el acceso",
-  texto: "Hubo demasiados intentos. Vuelve a intentarlo en 15 minutos.",
-};
+  texto: "Hubo demasiados intentos. Vuelve a intentarlo en unos minutos.",
+});
 
 const texto = (form: FormData, campo: string) => String(form.get(campo) ?? "").trim();
 
@@ -49,11 +55,12 @@ export async function accionEntrar(
 ): Promise<EstadoLogin> {
   const email = texto(form, "email").toLowerCase();
   const password = String(form.get("password") ?? "");
+  const n = siguiente(_previo);
   const origen = await ip();
   const claveIp = `login-ip:${origen}`;
   const claveEmail = `login-email:${email}`;
   if (bloqueado(claveIp, INTENTOS_IP, PAUSA_MS) || bloqueado(claveEmail, INTENTOS, PAUSA_MS)) {
-    return PAUSADO;
+    return pausado(n);
   }
   const r = await entrarConPassword(email, password);
   if (r.ok) olvidar(claveEmail);
@@ -62,9 +69,12 @@ export async function accionEntrar(
     registrarFallo(claveEmail, PAUSA_MS);
   }
   if (!r.ok) {
-    if (r.fallo === "suspendida") return { tipo: "suspendida", texto: r.mensaje };
+    if (r.fallo === "suspendida") return { tipo: "suspendida", n, texto: r.mensaje };
+    // El bloqueo persistido por cuenta (B1) usa el mismo aviso genérico que el límite en memoria.
+    if (r.fallo === "bloqueada") return pausado(n);
     return {
       tipo: "error",
+      n,
       titulo: "El correo o la contraseña no coinciden",
       texto:
         "Revisa los datos y vuelve a intentarlo. Tras 5 intentos pausaremos el acceso por 15 minutos.",
