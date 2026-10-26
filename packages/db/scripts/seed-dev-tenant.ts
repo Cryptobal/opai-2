@@ -4,7 +4,7 @@
 import "dotenv/config";
 
 import { cerrarClientes, dbAdmin } from "../src/index";
-import { sembrarCatalogo, sembrarPrecios } from "./catalogo-tenant";
+import { sembrarCatalogo, sembrarComercial, sembrarPrecios } from "./catalogo-tenant";
 
 async function main(): Promise<void> {
   const db = dbAdmin();
@@ -14,6 +14,7 @@ async function main(): Promise<void> {
     create: { slug: "gard", nombre: "Gard Security", vertical: "seguridad" },
   });
   await sembrarCatalogo(db.$extends({}), tenant.id, tenant.vertical);
+  await sembrarComercial(db.$extends({}), tenant.id);
   await sembrarPrecios(db);
   console.log(`Tenant ${tenant.slug} listo con catálogo base. DEV_TENANT_ID=${tenant.id}`);
 }

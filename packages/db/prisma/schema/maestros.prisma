@@ -31,6 +31,8 @@ model Cuenta {
   contactos      Contacto[]
   instalaciones  Instalacion[]
   representantes CuentaRepresentante[]
+  // Relación inversa del módulo Comercial (Brief 07 · PR 1). Virtual: la FK vive en comercial.negocios.
+  negocios       Negocio[]
 
   @@index([tenantId, estado])
   @@index([tenantId, nombre])
@@ -78,6 +80,8 @@ model Contacto {
 
   tenant Tenant @relation(fields: [tenantId], references: [id])
   cuenta Cuenta @relation(fields: [cuentaId], references: [id])
+  // Relación inversa del módulo Comercial (Brief 07 · PR 1). Virtual: la FK vive en comercial.negocio_contactos.
+  negocioContactos NegocioContacto[]
 
   @@index([tenantId, cuentaId])
   @@map("contactos")
@@ -111,6 +115,8 @@ model Instalacion {
   tenant  Tenant   @relation(fields: [tenantId], references: [id])
   cuenta  Cuenta   @relation(fields: [cuentaId], references: [id])
   puestos Puesto[]
+  // Relación inversa del módulo Comercial (Brief 07 · PR 1). Virtual: la FK vive en comercial.negocio_instalaciones.
+  negocioInstalaciones NegocioInstalacion[]
 
   @@unique([tenantId, cuentaId, nombre])
   @@index([tenantId, estado])

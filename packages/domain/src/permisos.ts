@@ -55,7 +55,7 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
       PERMISOS_CORE.documentosRead,
       PERMISOS_CORE.configRead,
     ],
-    denegar: [...FINANCIERO, "crm:*", "cpq:*"],
+    denegar: [...FINANCIERO, "comercial:*", "cpq:*"],
   },
   viewer: {
     permitir: ["*:read", "*:*.read"],
