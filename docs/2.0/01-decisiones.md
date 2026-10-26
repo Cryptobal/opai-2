@@ -323,7 +323,7 @@ Una entrada por decisión. Las decisiones no se editan: si cambian, se agrega un
 
 ## ADR-030 · Roadmap de módulos actualizado
 
-**Fecha:** 23-oct-2026 · **Estado:** vigente, modificado por ADR-048 (25-oct-2026: Nómina ya no depende de Asistencia; los módulos operativos solo dependen del núcleo) · Reemplaza el orden de ADR-009 a partir de la fase 3.
+**Fecha:** 23-oct-2026 · **Estado:** vigente, modificado por ADR-048 (25-oct-2026: Nómina ya no depende de Asistencia; los módulos operativos solo dependen del núcleo) y por la nota del 25-oct-2026 al final (orden de trabajo: Núcleo primero, luego Puestos → CPQ → Comercial) · Reemplaza el orden de ADR-009 a partir de la fase 3.
 
 | Fase | Contenido | Corte de Gard |
 |---|---|---|
@@ -334,6 +334,8 @@ Una entrada por decisión. Las decisiones no se editan: si cambian, se agrega un
 | 5 | Finanzas con flujo de caja al centro, banca y conciliación, DTE y factoring, rendiciones, contabilidad e informes; migración del historial financiero | 1.0 a solo lectura |
 | 6 | Nómina (sobre asistencia y estructuras), Licitaciones (sobre CPQ), firma electrónica avanzada | Gard 100 % en 2.0 |
 | Backlog | Inventario, cámaras, ATS, gamificación, psicolaboral, chat, Slack, sitio de marketing 2.0, roles personalizados | — |
+
+**Modificación (25-oct-2026, decisión de Carlos; CAR-10).** Cambia el **orden de trabajo**, no los cortes de Gard. Primero se cierra el Núcleo: Brief 05 (navegación por áreas) → Brief 04 (PWA) → Brief 07b (capas de sueldo, que pasa a la fase 1 y va antes del brief de Puestos). Después se abren los módulos en este orden: **Puestos y guardias (Operaciones I, Brief 11, adelantado desde la fase 3)** → CPQ por vertical → Comercial (CRM). El resto sigue el orden de fases de esta tabla. Nómina se queda en la fase 6 (no hay clientes que la compren sola, Carlos, 25-oct). Detalle por módulo y etapa en `PLAN-desarrollo.md`; fases y semanas en `ROADMAP.md`.
 
 ---
 
@@ -408,7 +410,7 @@ OPAI puede ofrecer además **automatizaciones alojadas** (por ejemplo, búsqueda
 
 ## ADR-036 · Puestos de servicio y vínculos laborales en el núcleo
 
-**Fecha:** 23-oct-2026 · **Estado:** vigente (capas de sueldo actualizadas por Carlos el 25-oct-2026, al final; la jornada pactada pasa al vínculo laboral por ADR-048) · Completa ADR-005. Brief 02.
+**Fecha:** 23-oct-2026 · **Estado:** vigente (capas de sueldo y reglas del puesto actualizadas por Carlos el 25-oct-2026, al final; la jornada pactada pasa al vínculo laboral por ADR-048) · Completa ADR-005. Brief 02.
 
 **Contexto.** En 1.0 el puesto operativo (instalación + cargo + rol de turno + horario + dotación) vive en Operaciones y el patrón de turno es una entidad de CPQ; la relación laboral está repartida entre `OpsGuardia` (estado de ciclo de vida, contrato) y `OpsPersona`. CPQ cotiza puestos, Operaciones los cubre, Asistencia marca contra ellos y Nómina liquida con su estructura.
 
@@ -428,6 +430,19 @@ OPAI puede ofrecer además **automatizaciones alojadas** (por ejemplo, búsqueda
 **Jornada pactada (ADR-048, 25-oct).** La jornada pactada deja de ser faceta de Asistencia y Portales y pasa a ser dato del vínculo laboral en el núcleo (`core.vinculos_laborales`), porque es parte del contrato y Asistencia la necesita para marcar sin Operaciones. PIN y Face ID siguen siendo de Asistencia.
 
 **Consecuencias de la actualización.** El código del Brief 02 (`packages/domain/src/estructuras.ts`, `core.estructuras_sueldo.nivel` con `cargo | puesto | persona` y conceptos `NULL` que heredan) no cumple esta regla. Se corrige en un brief propio, con migración aditiva: nueva capa `instalacion`, resolución sin herencia y retiro del nivel `cargo` (sin borrar datos; las filas `cargo` existentes se convierten o se archivan con la decisión de Carlos sobre los datos de `dev`). Este PR no toca código. CPQ (ADR-042, punto 4) costea con la capa puesto o instalación cuando existe (ampliaciones y renovaciones); cómo se cotiza el sueldo de una instalación nueva queda como pregunta abierta en ADR-048 (con recomendación).
+
+**Actualización de Carlos (25-oct-2026, CLT; Page de Puestos y guardias, CAR-10): reglas del puesto.** Precisa el modelo del puesto de la decisión original (que hablaba de «dotación» y de una jornada `dia | noche | rotativa`), sin borrarla; el modelo de datos se fija en el brief de Puestos (Operaciones I, Brief 11). Especificación en `modulos/operaciones.md`.
+
+1. **1 puesto = 1 posición cubierta.** En los patrones corridos, el titular y el relevo cubren el puesto uno a la vez. Tres 5x2 son tres puestos. La dotación deja de ser un número dentro del puesto.
+2. **Catálogo de patrones por tenant**, con 4x4, 7x7, 14x14, 5x2, 2x5 y 3x4 de fábrica.
+3. **Rol (días), horario (tramos, de día y de noche) y horas semanales van por separado.**
+4. **La colación va en el puesto.**
+5. **Las funciones del puesto son por tenant y vertical.**
+6. **Todo lo no cubierto es PPC (puesto por cubrir) con motivo:** sin asignar, licencia, permiso, falta o finiquito.
+7. **Al trasladar a una persona,** el puesto de origen queda en PPC «Sin asignar».
+8. **El anexo de contrato lo aprueba RRHH** (el rol que aprueba es configurable); **un agente no lo aprueba** (ADR-048, punto 7, ya lo dejaba sujeto a aprobación humana).
+9. **El supervisor es un puesto más.**
+10. Los puestos no se crean al ganar un negocio (ver la nota del 25-oct en ADR-040).
 
 ---
 
@@ -465,7 +480,7 @@ OPAI puede ofrecer además **automatizaciones alojadas** (por ejemplo, búsqueda
 
 ## ADR-040 · Modelo comercial: cuenta, negocio, instalaciones, contactos con rol, etiquetas y actividad
 
-**Fecha:** 23-oct-2026 · **Estado:** vigente (decisiones de Carlos del 23-oct al final) · Completa ADR-009, ADR-010 y ADR-036. Modifica el modelo de contactos del Brief 02 (punto 5). Insumo: `extraccion/comercial-y-cpq.md` (problemas P1–P18 y modelo, §5).
+**Fecha:** 23-oct-2026 · **Estado:** vigente (decisiones de Carlos del 23-oct al final; punto 3 actualizado el 25-oct-2026: los puestos no se crean al ganar) · Completa ADR-009, ADR-010 y ADR-036. Modifica el modelo de contactos del Brief 02 (punto 5). Insumo: `extraccion/comercial-y-cpq.md` (problemas P1–P18 y modelo, §5).
 
 **Contexto.** En 1.0 el negocio copia la instalación como texto, se une a la cotización por tres vías, el rol del contacto es texto libre, no hay etiquetas, el historial está en nueve tablas y la cuenta no tiene RUT único. La fase 2 construye Comercial y CPQ sobre los maestros del núcleo ya existentes.
 
@@ -473,7 +488,7 @@ OPAI puede ofrecer además **automatizaciones alojadas** (por ejemplo, búsqueda
 
 1. **Cuenta, prospecto y solicitudes.** Un prospecto es una cuenta en estado `prospecto`. Las solicitudes entrantes (formularios web, correo, WhatsApp) no son cuentas: llegan a la bandeja `comercial.solicitudes` (canal, UTM, texto original marcado como externo, SLA de primera respuesta). Es el flujo actual de Gard: desde la bandeja se **deriva** (responsable), se crea o reutiliza la cuenta prospecto y el contacto (con deduplicación) y se crea el negocio; luego viene la cotización (CPQ) y su envío por correo. La basura entrante se descarta con motivo sin ensuciar el maestro. La cuenta pasa a `cliente_activo` por evento al ganar su primer negocio; el paso a `cliente_inactivo` se sugiere cuando su última instalación queda inactiva, nunca automático.
 2. **Negocio.** `comercial.negocios` cuelga siempre de una cuenta (`cuenta_id` obligatoria, inmutable una vez que tiene instalaciones o cotizaciones). No copia datos de la instalación. Monto: `valor_mensual`, que **CPQ escribe** en el negocio mediante la capacidad `comercial.negocios.registrar_cotizacion` (venta mensual de la vigente, fecha de envío) cuando cambia la vigente; `monto_estimado_mensual` manual solo mientras no hay cotización. Comercial nunca lee tablas de CPQ: la dependencia va solo de CPQ a Comercial (ADR-003). El "próximo paso" es la tarea abierta más próxima del negocio y el "último contacto" la interacción más reciente: ambos derivados. Licitación es faceta del módulo Licitaciones (fase 6).
-3. **Negocio ↔ instalaciones.** Tabla puente `comercial.negocio_instalaciones` (1..N instalaciones por negocio; N negocios por instalación a lo largo del tiempo) con `tipo` cerrado `nueva` | `ampliacion` | `renovacion` | `reemplazo`. Un trigger exige que la instalación sea de la cuenta del negocio al vincularla. Desde el negocio se crea la instalación en estado `prospecto`. Al ganar, el evento `comercial.negocio.ganado` tiene tres consumidores: (a) Comercial activa las instalaciones vinculadas que estén en prospecto o inactivas (cualquier tipo) y marca `aplicada_en`; (b) CPQ pasa la cotización vigente a `aceptada` y las abiertas del negocio a `rechazada`; (c) CPQ materializa los puestos de la vigente en `core.puestos` (ADR-036) por capacidad del núcleo: crea los nuevos y, en ampliación, renovación o reemplazo, cierra la vigencia del puesto referenciado (`puesto_id`) y crea el sucesor desde la fecha de inicio, sin editar el historial; los nombres en conflicto con `@@unique(instalacion, nombre)` se resuelven con sufijo y se informan. Al perder, CPQ rechaza las cotizaciones abiertas y Comercial **propone** (nunca ejecuta) archivar la instalación prospecto si este negocio la creó, no tiene operación y ningún otro negocio abierto o ganado la usa. Cambios respecto de 1.0 en `extraccion/comercial-y-cpq.md` §3.2.
+3. **Negocio ↔ instalaciones.** Tabla puente `comercial.negocio_instalaciones` (1..N instalaciones por negocio; N negocios por instalación a lo largo del tiempo) con `tipo` cerrado `nueva` | `ampliacion` | `renovacion` | `reemplazo`. Un trigger exige que la instalación sea de la cuenta del negocio al vincularla. Desde el negocio se crea la instalación en estado `prospecto`. Al ganar, el evento `comercial.negocio.ganado` tiene tres consumidores: (a) Comercial activa las instalaciones vinculadas que estén en prospecto o inactivas (cualquier tipo) y marca `aplicada_en`; (b) CPQ pasa la cotización vigente a `aceptada` y las abiertas del negocio a `rechazada`; (c) CPQ materializa los puestos de la vigente en `core.puestos` (ADR-036) por capacidad del núcleo: crea los nuevos y, en ampliación, renovación o reemplazo, cierra la vigencia del puesto referenciado (`puesto_id`) y crea el sucesor desde la fecha de inicio, sin editar el historial; los nombres en conflicto con `@@unique(instalacion, nombre)` se resuelven con sufijo y se informan. *(Actualización de Carlos, 25-oct-2026, Page de Puestos y guardias: el consumidor (c) queda **sin efecto**: los puestos **no se crean al ganar**. Se crean desde la instalación o con un **botón opcional, con vista previa, en la cotización aceptada**, solo para las líneas de tipo puesto; el botón crea **un puesto por posición**, en PPC, y no duplica los ya creados. Reglas del puesto en ADR-036, actualización del 25-oct.)* Al perder, CPQ rechaza las cotizaciones abiertas y Comercial **propone** (nunca ejecuta) archivar la instalación prospecto si este negocio la creó, no tiene operación y ningún otro negocio abierto o ganado la usa. Cambios respecto de 1.0 en `extraccion/comercial-y-cpq.md` §3.2.
 4. **Cotización.** Un solo vínculo obligatorio: `cpq.cotizaciones.negocio_id` (FK); **no existe cotización sin negocio**. La "cotización rápida" (UI y agentes) es una sola capacidad que crea el negocio en la primera etapa del pipeline por defecto y la cotización en el mismo paso y la misma transacción. La cuenta se lee del negocio. Versionada por código. "Vigente" es una **marca** única por negocio (índice parcial), no un valor del estado, porque la vigente puede estar en borrador o enviada; el ciclo de vida va en `estado` (ADR-042). Las líneas se agrupan por instalación del negocio y por puesto. Desaparecen `CrmDealQuote`, `activeQuotationId` y los bundles.
 5. **Contactos: persona única por tenant, vinculada a N cuentas, con rol en tres niveles.** Como en HubSpot o Salesforce:
    - `core.contactos` es la **persona**: nombres, apellidos, correo, teléfono, notas, estado, archivado. El correo se normaliza (minúsculas, sin espacios) y es **único por tenant** cuando existe (índice único parcial); un contacto sin correo es válido y la deduplicación sugiere por teléfono E.164 y nombre.
@@ -723,7 +738,7 @@ No se encontró: render estático roto, falta de prefetch, layouts que recarguen
 | **Finanzas** | Cuentas, instalaciones, documentos | Comercial y CPQ (facturación desde lo vendido), Nómina (remuneraciones al flujo de caja) | Sin ellos: facturación y egresos por entrada manual o importación. |
 
 5. **Anexo de contrato en el núcleo.** Vive junto a `core.vinculos_laborales` y `core.documentos`, para que funcione aunque el tenant no tenga Nómina. Un cambio de rol, de capa de sueldo, de monto o de instalación (ADR-036, actualización del 25-oct) **genera solo el borrador** del anexo, con la marca del perfil del tenant (ADR-028): hasta el Brief 09 se usa una plantilla base del sistema, y desde el editor de plantillas del Brief 09 el tenant la puede reemplazar por la suya; **RRHH lo aprueba** y el documento queda en `core.documentos` con su bitácora (ADR-039).
-6. **Pauta por series y excepciones.** La pauta guarda solo las **series** (el patrón con su fecha de inicio de ciclo) y las **excepciones** (ausencias, reemplazos, PPC, turnos extra), y **calcula el resto**. Nunca guarda una fila por trabajador por día. Al repintar (cambiar una serie o su inicio de ciclo) **no se modifican los días pasados ni los días que ya tienen marca**. Esta regla pasa a `extraccion/operaciones.md` y a `modulos/operaciones.md` cuando se escriban (hoy no existen; ver `ROADMAP.md`, fase 3).
+6. **Pauta por series y excepciones.** La pauta guarda solo las **series** (el patrón con su fecha de inicio de ciclo) y las **excepciones** (ausencias, reemplazos, PPC, turnos extra), y **calcula el resto**. Nunca guarda una fila por trabajador por día. Al repintar (cambiar una serie o su inicio de ciclo) **no se modifican los días pasados ni los días que ya tienen marca**. Esta regla pasa a `extraccion/operaciones.md` y a `modulos/operaciones.md` cuando se escriban (hoy no existen; ver `ROADMAP.md`, fase 3). *(25-oct-2026, CAR-10: ya está en ambos; `extraccion/operaciones.md` es por ahora un esqueleto.)*
 7. **Capacidades, paridad, auditoría y aislamiento.** Todo lo que este ADR agrega se expone como capacidad (`defineCapability`), igual que el resto de OPAI (ADR-004, ADR-034):
    - **Resumen del periodo:** la entrada manual y la importación son capacidades de escritura con `dry_run` (la importación devuelve una vista previa de filas válidas y errores antes de escribir) e `idempotencyKey`; su lectura también es una capacidad.
    - **Anexo de contrato:** generar el borrador, aprobarlo y rechazarlo son capacidades con `dry_run` e `idempotencyKey`; la aprobación es una acción humana de RRHH y, para agentes, pide aprobación (`APPROVAL_REQUIRED`).
@@ -745,3 +760,12 @@ No se encontró: render estático roto, falta de prefetch, layouts que recarguen
 2. **Dos fuentes activas a la vez** (pauta y asistencia). Recomendación: un ajuste de Nómina por tenant (ADR-038) elige la fuente del resumen, con asistencia por defecto cuando está activa; las diferencias entre pauta y marcas se muestran antes de cerrar el periodo.
 3. **CPQ con instalación nueva.** Recomendación: el sueldo se define en la línea cotizada y, al ganar el negocio, se ofrece crearlo como capa de instalación o de puesto.
 4. **Repintar la pauta el día de hoy.** Recomendación: hoy se trata como pasado si ya tiene una marca o una cobertura confirmada en la serie; si no, el cambio rige desde hoy.
+
+**Decisión tomada por omisión de Carlos el 25-oct-2026, confirmable (CAR-10).** Las cuatro preguntas quedan resueltas con su recomendación, tal como está escrita arriba. Carlos puede cambiar cualquiera; hasta entonces, las especificaciones y los briefs las aplican:
+
+1. Capa de sueldo sin Operaciones: el vínculo laboral guarda la instalación (obligatoria) y el puesto (opcional); con Operaciones activa, el puesto de la asignación vigente manda.
+2. Dos fuentes activas a la vez: un ajuste de Nómina por tenant (ADR-038) elige la fuente del resumen, con asistencia por defecto cuando está activa; las diferencias entre pauta y marcas se muestran antes de cerrar el periodo.
+3. CPQ con instalación nueva: el sueldo se define en la línea cotizada y, al ganar el negocio, se ofrece crearlo como capa de instalación o de puesto.
+4. Repintar la pauta el día de hoy: hoy se trata como pasado si ya tiene una marca o una cobertura confirmada en la serie; si no, el cambio rige desde hoy.
+
+*Nota:* la 3 se escribió antes de la regla del 25-oct sobre puestos (no se crean al ganar; ADR-040, punto 3). El ofrecimiento de crear la capa se mantiene tal cual; su momento exacto (al ganar o con el botón de la cotización aceptada) se confirma en `modulos/cpq.md`.
