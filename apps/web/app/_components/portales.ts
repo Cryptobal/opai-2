@@ -28,6 +28,15 @@ export function portalesVisibles(
   );
 }
 
+/**
+ * El selector de portal nombra siempre el portal en que se está (ADR-050: el nombre ya no va bajo la
+ * marca). Sin acceso a ese portal (página «Sin permisos»), se antepone para que no muestre otro.
+ */
+export function conPortalActual(visibles: readonly Portal[], portal: string): Portal[] {
+  const actual = PORTALES.find((p) => p.id === portal);
+  return actual && !visibles.some((p) => p.id === portal) ? [actual, ...visibles] : [...visibles];
+}
+
 /** Nombre del portal para el título de la pestaña: «Portal Trabajador», «Plataforma» (el ERP no lleva). */
 function nombreParaTitulo(portal: string): string | undefined {
   const etiqueta = PORTALES.find((x) => x.id === portal)?.etiqueta;
@@ -44,9 +53,4 @@ export function tituloPagina(portal: string, pagina: string): string {
 /** Título del 404 de un portal: nombra el portal para no confundir «No encontrado» entre portales. */
 export function tituloNoEncontrado(portal: string): string {
   return tituloPagina(portal, "No encontrado");
-}
-
-/** Subtítulo de la marca en el lateral: el nombre del portal (el ERP no lleva subtítulo). */
-export function subtituloMarcaPortal(portal: string): string | undefined {
-  return portal === "erp" ? undefined : PORTALES.find((x) => x.id === portal)?.etiqueta;
 }
