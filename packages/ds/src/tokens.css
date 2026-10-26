@@ -24,6 +24,10 @@
   --ds-fill: #f4f4f5; /* relleno suave: ítem activo, segmentado, badge neutro, skeleton */
   --ds-border: #e7e7ea;
   --ds-border-strong: #d4d4d8;
+  --ds-border-control: #8a8a93; /* 3:1 sobre surface · WCAG 1.4.11 (controles de formulario) */
+  --ds-destructive-bg: var(--ds-danger-fg);
+  --ds-destructive-fg: #ffffff;
+  --ds-shimmer: rgba(255, 255, 255, 0.55);
   --ds-fg: #111113; /* 18.9:1 sobre surface · AAA */
   --ds-fg-muted: #52525b; /* 7.7:1 · AAA */
   --ds-fg-subtle: #6b6b74; /* 5.3:1 · AA (captions) */
@@ -68,6 +72,10 @@
     --ds-fill: #202024;
     --ds-border: #26262a;
     --ds-border-strong: #34343a;
+    --ds-border-control: #6b6b74;
+    --ds-destructive-bg: var(--ds-danger);
+    --ds-destructive-fg: #0b0b0c;
+    --ds-shimmer: rgba(255, 255, 255, 0.05);
     --ds-fg: #f4f4f5; /* 16.7:1 · AAA */
     --ds-fg-muted: #a1a1aa; /* 7.2:1 · AAA */
     --ds-fg-subtle: #8a8a93; /* 5.4:1 · AA */
@@ -102,6 +110,10 @@
   --ds-fill: #202024;
   --ds-border: #26262a;
   --ds-border-strong: #34343a;
+  --ds-border-control: #6b6b74;
+  --ds-destructive-bg: var(--ds-danger);
+  --ds-destructive-fg: #0b0b0c;
+  --ds-shimmer: rgba(255, 255, 255, 0.05);
   --ds-fg: #f4f4f5;
   --ds-fg-muted: #a1a1aa;
   --ds-fg-subtle: #8a8a93;
@@ -136,6 +148,9 @@
   --color-fill: var(--ds-fill);
   --color-border: var(--ds-border);
   --color-border-strong: var(--ds-border-strong);
+  --color-border-control: var(--ds-border-control);
+  --color-destructive: var(--ds-destructive-bg);
+  --color-destructive-fg: var(--ds-destructive-fg);
   --color-fg: var(--ds-fg);
   --color-fg-muted: var(--ds-fg-muted);
   --color-fg-subtle: var(--ds-fg-subtle);
