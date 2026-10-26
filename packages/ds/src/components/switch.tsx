@@ -17,7 +17,7 @@ type SwitchProps = {
   className?: string;
 };
 
-/** Interruptor sobre Radix (role=switch). Fila completa tocable de 44 px; pista de 40×24 con acento. */
+/** Interruptor sobre Radix (role=switch). Fila completa tocable de 44 px; pista de 44×26 con acento y pulgar de 20 a 3 px del borde. */
 export function Switch(props: SwitchProps) {
   const { activo, onCambiar, etiqueta, descripcion, disabled, soloControl, className } = props;
   const id = useId();
@@ -33,8 +33,8 @@ export function Switch(props: SwitchProps) {
         "focus-visible:[&>span]:outline-2 focus-visible:[&>span]:outline-offset-2 focus-visible:[&>span]:outline-focus",
       )}
     >
-      <span className="flex h-6 w-10 items-center rounded-full bg-border-strong p-0.5 transition-colors duration-150 group-data-[state=checked]:bg-accent">
-        <RadixSwitch.Thumb className="size-5 rounded-full bg-surface transition-transform duration-150 ease-ds data-[state=checked]:translate-x-4 motion-reduce:transition-none" />
+      <span className="flex h-[26px] w-11 items-center rounded-full bg-border-control p-[3px] transition-colors duration-150 group-data-[state=checked]:bg-accent">
+        <RadixSwitch.Thumb className="size-5 rounded-full bg-surface shadow-[0_1px_2px_rgba(0,0,0,0.2)] transition-transform duration-150 ease-ds data-[state=checked]:translate-x-[18px] motion-reduce:transition-none" />
       </span>
     </RadixSwitch.Root>
   );

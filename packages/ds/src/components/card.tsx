@@ -33,12 +33,15 @@ const TONO_VARIACION = {
   neutro: "text-fg-subtle",
 } as const;
 
-/** Indicador de dashboard: sin color de fondo; el color solo en la variación. */
+/**
+ * Indicador de dashboard: sin color de fondo; el color solo en la variación. La tarjeta es contenedor
+ * (`@container`) y el valor escala con su ancho entre 16 y 22 px: el monto completo cabe en el celular.
+ */
 export function KpiTile({ etiqueta, valor, variacion }: KpiProps) {
   return (
-    <Card className="flex min-w-0 flex-col gap-1.5 p-4">
+    <Card className="@container flex min-w-0 flex-col gap-1.5 p-4">
       <p className="t-label-sm text-fg-muted">{etiqueta}</p>
-      <p className="t-numeric text-xl font-semibold tracking-[-0.015em] whitespace-nowrap text-fg">
+      <p className="t-numeric text-[length:clamp(16px,12cqi,22px)] leading-7 font-semibold tracking-[-0.015em] whitespace-nowrap text-fg">
         {valor}
       </p>
       {variacion ? (
