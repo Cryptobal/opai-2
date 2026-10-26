@@ -2,17 +2,14 @@ import { esRol, esVertical, vocabulario } from "@opai/domain";
 
 import type { Identidad } from "@/lib/actor";
 import { epocaDe } from "@/lib/epoca-sesion";
-import { type Contadores, NAV_PLATAFORMA, navegacionErp, navegacionPortal } from "@/lib/navegacion";
+import { NAV_PLATAFORMA, navegacionErp, navegacionPortal } from "@/lib/navegacion";
 
+import type { DatosShell } from "./marco-shell";
 import { ETIQUETA_ROL, PORTALES, portalesVisibles, subtituloMarcaPortal } from "./portales";
-import type { DatosShell } from "./shell";
 
-/** Datos del shell (navegación con contadores, portales, empresa y usuario) de una identidad. */
-export function datosShell(
-  identidad: Identidad,
-  portal: string,
-  contadores: Contadores,
-): DatosShell {
+/** Datos del shell (navegación, portales, empresa y usuario) de una identidad. Sin contadores: la
+ * barra lateral ya no los lleva (ADR-045). El contador de la campana lo carga la propia campana. */
+export function datosShell(identidad: Identidad, portal: string): DatosShell {
   const { usuario, actual, membresias } = identidad;
   const rol = actual && esRol(actual.rol) ? actual.rol : null;
   const vertical = actual?.tenant.vertical ?? "";
@@ -22,7 +19,6 @@ export function datosShell(
       ? navegacionErp(
           rol,
           identidad.modulosActivos,
-          contadores,
           vocabulario(esVertical(vertical) ? vertical : "seguridad"),
         )
       : portal === "platform"
@@ -32,8 +28,6 @@ export function datosShell(
   return {
     portal,
     subtituloMarca: subtituloMarcaPortal(portal),
-    noLeidas: contadores.notificacionesNoLeidas ?? 0,
-    generado: Date.now(),
     epoca: epocaDe(usuario.id, actual?.tenantId ?? null),
     nav,
     portales: portalesVisibles(actual?.portales ?? [], plataforma),

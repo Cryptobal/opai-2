@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { PERMISOS_CORE } from "@opai/domain";
-import type { TenantDb } from "@opai/db";
+import type { TenantTx } from "@opai/db";
 
 import { defineCapability } from "../define";
 import { listarModulos } from "../module";
@@ -16,7 +16,7 @@ export const moduloEstadoSchema = z.object({
 });
 
 /** Manifests registrados con su estado en el tenant. */
-export async function modulosConEstado(db: TenantDb) {
+export async function modulosConEstado(db: TenantTx) {
   const filas = await db.tenantModule.findMany();
   const estado = new Map(filas.map((f) => [f.moduloId, f.estado]));
   return listarModulos().map((m) => ({
@@ -98,7 +98,7 @@ export const usoSchema = z.object({
 });
 
 /** Ejecuciones de capacidades en los últimos `dias` (medidor de consumos, ADR-031). */
-export async function resumenUso(db: TenantDb, dias: number) {
+export async function resumenUso(db: TenantTx, dias: number) {
   const desde = new Date(Date.now() - dias * 86_400_000);
   const where = { recurso: "capacidad.ejecucion", createdAt: { gte: desde } };
   const [total, errores, porModulo, porPortal] = await Promise.all([

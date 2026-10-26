@@ -43,7 +43,6 @@ export function TenantsLista({ state, tenants, verticales }: Props) {
     <ListScreen<TenantFila>
       state={state}
       titulo="Empresas"
-      soloTelefono
       subtitulo={`${tenants.length} ${tenants.length === 1 ? "empresa" : "empresas"}`}
       accionPrincipal={nueva}
       buscador={<Buscador placeholder="Buscar empresa o slug" />}

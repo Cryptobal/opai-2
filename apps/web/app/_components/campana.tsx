@@ -2,7 +2,7 @@
 
 import { Bell } from "lucide-react";
 import dynamic from "next/dynamic";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import { Button, Popover, Skeleton } from "@opai/ds";
 
@@ -20,10 +20,26 @@ export type Aviso = {
   creadaEn: string;
 };
 
-/** Campana con contador real (`core.notificaciones.*`): los avisos se cargan al abrir. */
-export function Campana({ noLeidas, portal }: { noLeidas: number; portal: string }) {
+/**
+ * Campana con contador real (`core.notificaciones.*`): el número de no leídos se pide al montar, en
+ * el cliente y después de pintar (ADR-045: los conteos ya no viajan en la carga de servidor de cada
+ * navegación); los avisos se descargan al abrir.
+ */
+export function Campana({ portal }: { portal: string }) {
   const [avisos, setAvisos] = useState<Aviso[] | null>(null);
-  const [pendientes, setPendientes] = useState(noLeidas);
+  const [pendientes, setPendientes] = useState(0);
+  useEffect(() => {
+    let activo = true;
+    void ejecutarCapacidad(portal, "core.notificaciones.list", {
+      limite: 1,
+      soloNoLeidas: true,
+    }).then((r) => {
+      if (activo && r.ok) setPendientes((r.data as { noLeidas: number }).noLeidas);
+    });
+    return () => {
+      activo = false;
+    };
+  }, [portal]);
   async function cargar() {
     const r = await ejecutarCapacidad(portal, "core.notificaciones.list", { limite: 20 });
     if (r.ok) {

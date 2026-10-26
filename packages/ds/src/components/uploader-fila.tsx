@@ -1,9 +1,10 @@
 "use client";
 
-import { AlertTriangle, FileText, Image as Imagen, X } from "lucide-react";
+import { AlertTriangle, X } from "lucide-react";
 
 import { cn } from "../cn";
 import { Button } from "./button";
+import { TipoArchivo } from "./tipo-archivo";
 
 export type ArchivoEnProceso = {
   clave: number;
@@ -14,20 +15,6 @@ export type ArchivoEnProceso = {
 };
 
 const mb = (b: number) => `${(b / 1024 / 1024).toFixed(1).replace(".", ",")} MB`;
-
-/** Icono por tipo de archivo (PDF, imagen u otro): caja de 36 px. */
-export function TipoArchivo({ nombre, mime }: { nombre: string; mime?: string }) {
-  const imagen = mime?.startsWith("image/") || /\.(jpe?g|png|webp|heic)$/i.test(nombre);
-  const pdf = mime === "application/pdf" || /\.pdf$/i.test(nombre);
-  return (
-    <span
-      aria-hidden
-      className="inline-flex size-9 flex-none items-center justify-center rounded-sm border border-border bg-bg text-[10px] font-semibold text-fg-muted"
-    >
-      {pdf ? "PDF" : imagen ? <Imagen className="size-4" /> : <FileText className="size-4" />}
-    </span>
-  );
-}
 
 export function FilaArchivo(props: {
   a: ArchivoEnProceso;
