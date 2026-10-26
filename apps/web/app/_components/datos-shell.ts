@@ -15,6 +15,8 @@ export function datosShell(identidad: Identidad, portal: string): DatosShell {
   const vertical = actual?.tenant.vertical ?? "";
   const inicio = PORTALES.find((p) => p.id === portal)?.href ?? "/";
   const visibles = portalesVisibles(actual?.portales ?? [], usuario.platformRole !== null);
+  // Sin acceso al portal el shell se monta igual (`portal-layout.tsx`), pero sin navegación: solo el
+  // selector de portal y empresa, el menú de usuario y el aviso «Sin permisos» de la página.
   const nav = !visibles.some((p) => p.id === portal)
     ? []
     : portal === "erp"

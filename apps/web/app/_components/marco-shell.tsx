@@ -108,7 +108,7 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
   ];
   return (
     <AppShell
-      titulo={cabecera.titulo || "Inicio"}
+      titulo={cabecera.titulo}
       {...(cabecera.volver ? { volver: cabecera.volver } : {})}
       {...(cabecera.volverSoloTelefono ? { volverSoloTelefono: true } : {})}
       {...(cabecera.volverBajoLg ? { volverBajoLg: true } : {})}

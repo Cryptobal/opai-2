@@ -41,7 +41,7 @@ function Item({
   rutaActual: string;
   Link: LinkComponent;
 }) {
-  const activo = esActivo(rutaActual, item.href, item.exacta);
+  const activo = esActivo(rutaActual, item.href, item.exacta, item.activoEn);
   return (
     <Link
       href={item.href}

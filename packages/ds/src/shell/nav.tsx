@@ -49,7 +49,7 @@ export function BottomNav({
     ...principales.slice(visibles.length),
     ...items.filter((i) => i.pie || i.soloAmplio || i.fueraInferior),
   ];
-  const enResto = resto.some((i) => esActivo(rutaActual, i.href, i.exacta));
+  const enResto = resto.some((i) => esActivo(rutaActual, i.href, i.exacta, i.activoEn));
   return (
     <nav
       aria-label="Principal"
@@ -57,7 +57,7 @@ export function BottomNav({
     >
       <ul className="flex px-1">
         {visibles.map((item) => {
-          const activo = esActivo(rutaActual, item.href, item.exacta);
+          const activo = esActivo(rutaActual, item.href, item.exacta, item.activoEn);
           return (
             <li key={item.href} className="relative min-w-0 flex-1">
               <Link

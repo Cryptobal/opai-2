@@ -4,6 +4,10 @@ import type { ComponentType, ReactNode } from "react";
 export type NavItem = {
   href: string;
   exacta?: boolean;
+  /** Prefijo extra bajo el cual el ítem también queda activo, sin que su `href` sea el enlace. Para
+   *  fichas que cuelgan de un ítem cuya ruta no las contiene («Hoy» → `/supervisor/personas/:id`) o
+   *  para acotar un ítem con `exacta` que aun así cubre un detalle («Empresas» → `/platform/tenants`). */
+  activoEn?: string;
   etiqueta: string;
   icono: LucideIcon;
   /** Grupo en la barra lateral de desktop (Comercial, Operaciones…). Sin grupo = nivel superior. */
@@ -55,8 +59,13 @@ export const LinkPorDefecto: LinkComponent = ({ href, className, children, ...re
   </a>
 );
 
-export function esActivo(rutaActual: string, href: string, exacta = false): boolean {
-  return exacta || href === "/"
-    ? rutaActual === href
-    : rutaActual === href || rutaActual.startsWith(`${href}/`);
+export function esActivo(
+  rutaActual: string,
+  href: string,
+  exacta = false,
+  activoEn?: string,
+): boolean {
+  const bajo = (base: string) => rutaActual === base || rutaActual.startsWith(`${base}/`);
+  if (activoEn && bajo(activoEn)) return true;
+  return exacta || href === "/" ? rutaActual === href : bajo(href);
 }

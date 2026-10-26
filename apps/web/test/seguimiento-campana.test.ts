@@ -35,19 +35,24 @@ function pintar(d: DatosShell) {
 }
 
 describe("estado del shell al cambiar de contexto", () => {
-  it("la campana conserva identidad en el mismo tenant y se remonta al cambiar empresa", () => {
+  it("la campana conserva identidad en el mismo contexto y se remonta al cambiar de empresa o de usuario", () => {
     pintar(datos);
     const primera = captura.campana?.key;
     expect(primera).toBe(datos.epoca);
     pintar({ ...datos });
     expect(captura.campana?.key).toBe(primera);
+    // Otra empresa (mismo usuario) y otro usuario (mismo tenant) renuevan la época: con
+    // `key={datos.epoca}` la campana se remonta y vuelve a pedir su contador de no leídos.
     pintar({ ...datos, epoca: "u1:t2" });
+    expect(captura.campana?.key).not.toBe(primera);
+    pintar({ ...datos, epoca: "u2:t1" });
+    expect(captura.campana?.key).toBe("u2:t1");
     expect(captura.campana?.key).not.toBe(primera);
   });
 
-  it("el shell tiene título antes de que la página del ERP publique su cabecera", () => {
+  it("sin cabecera (SSR, antes de que la página publique su título) el shell no fuerza «Inicio» (H7)", () => {
     fijarCabecera({ titulo: "" });
     pintar(datos);
-    expect(captura.titulo).toBe("Inicio");
+    expect(captura.titulo).toBe("");
   });
 });

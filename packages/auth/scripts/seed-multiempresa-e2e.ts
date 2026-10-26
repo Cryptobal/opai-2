@@ -2,7 +2,8 @@
 // portales ERP y Supervisor, para el e2e del selector de portal y empresa del riel de iPad
 // (apps/web/e2e/selector-riel.spec.ts). Atlas lleva una cuenta propia («Cliente Atlas E2E») para
 // comprobar que al cambiar de empresa los datos de Gard desaparecen. Es un usuario aparte del de
-// Carlos: con dos empresas el login pasa por «Elegir empresa». Idempotente.
+// Carlos: con dos empresas el login pasa por «Elegir empresa». Siembra además un usuario sin ninguna
+// empresa activa (e2e-sin-empresa@opai.cl) para el e2e del portal sin acceso. Idempotente.
 // Solo contra una base local (Postgres de servicio de CI o de desarrollo), nunca contra Neon.
 // Uso: DATABASE_URL_MIGRATE=<url local> SEED_OWNER_PASSWORD=<…> pnpm --filter @opai/auth seed:multiempresa-e2e
 // Corre después de seed:dev-tenant. La contraseña llega por entorno y nunca se imprime.
@@ -15,6 +16,7 @@ import { digitoVerificador } from "@opai/domain";
 import { LARGO_MINIMO_PASSWORD } from "../src/opciones";
 
 const CORREO = "e2e-selector@opai.cl";
+const CORREO_SIN_EMPRESA = "e2e-sin-empresa@opai.cl";
 const CUENTA_ATLAS = "Cliente Atlas E2E";
 
 /** Valida el destino ANTES de cualquier escritura: solo desarrollo o CI, y solo base local. */
@@ -89,6 +91,31 @@ async function main(): Promise<void> {
   }
   console.log(
     `${CORREO}: admin en gard y atlas, portales erp y supervisor (sin rol de plataforma).`,
+  );
+
+  // Usuario con sesión pero SIN empresa activa (ni rol de plataforma), para el e2e del portal sin
+  // acceso (apps/web/e2e/portales-riel.spec.ts): el shell se monta igual, con el aviso «sin empresa»
+  // y la salida (Elegir empresa / Cerrar sesión). Nunca recibe membresía. Misma contraseña.
+  let huerfano = await db.user.findUnique({ where: { email: CORREO_SIN_EMPRESA } });
+  if (huerfano && huerfano.platformRole !== null) {
+    huerfano = await db.user.update({ where: { id: huerfano.id }, data: { platformRole: null } });
+  }
+  if (!huerfano) {
+    if (!password || password.length < LARGO_MINIMO_PASSWORD) {
+      throw new Error(`Falta SEED_OWNER_PASSWORD (mínimo ${LARGO_MINIMO_PASSWORD} caracteres).`);
+    }
+    const hash = await hashPassword(password);
+    await db.$transaction(async (tx) => {
+      const user = await tx.user.create({
+        data: { email: CORREO_SIN_EMPRESA, name: "Usuario e2e sin empresa", emailVerified: true },
+      });
+      await tx.account.create({
+        data: { userId: user.id, providerId: "credential", accountId: user.id, password: hash },
+      });
+    });
+  }
+  console.log(
+    `${CORREO_SIN_EMPRESA}: con sesión y sin empresa activa (e2e del portal sin acceso).`,
   );
 }
 

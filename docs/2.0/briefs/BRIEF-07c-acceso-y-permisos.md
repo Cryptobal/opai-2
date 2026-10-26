@@ -16,7 +16,7 @@ Cerrar las tres brechas **Altas** de paridad con 1.0 que faltan en el acceso y l
 
 - **B1 · Bloqueo de login persistido.** El contador de intentos fallidos y el bloqueo por cuenta viven en la base, se comparten entre instancias y sobreviven a un reinicio, con registro de cada intento (hoy el límite está en memoria por instancia, se pierde en serverless y no se comparte).
 - **B2 · Roles y permisos finos.** Roles personalizados por tenant y permisos finos por módulo y capacidad, al menos tan completos como en 1.0, con la tabla de equivalencia de roles 1.0 → 2.0 para que crear usuarios a mano no dé de más ni quite acceso.
-- **B3 · alcance del supervisor (cliente y trabajador con sus portales, fase 3)** (ADR-022). Asignaciones supervisor ↔ instalación y filtro en las consultas de las capacidades (UI, API y MCP), nunca en la UI; el supervisor solo ve las cuentas, instalaciones y personas de las instalaciones a su cargo.
+- **B3 · alcance del supervisor (el de cliente y trabajador se suma con sus portales, fase 3)** (ADR-022). Asignaciones supervisor ↔ instalación y filtro en las consultas de las capacidades (UI, API y MCP), nunca en la UI; el supervisor solo ve las cuentas, instalaciones y personas de las instalaciones a su cargo.
 
 Se nota que funciona cuando: el bloqueo de un intento de fuerza bruta sobrevive a un reinicio y se aplica igual en dos instancias; un owner crea un rol con permisos elegidos por módulo y capacidad, y cada rol de 1.0 tiene su equivalente sin dar más permisos ni quitar acceso; y un supervisor solo ve, por UI, API y MCP, las cuentas, instalaciones y personas de las instalaciones a su cargo (criterio de aceptación de `ROADMAP.md`, fila 07c).
 

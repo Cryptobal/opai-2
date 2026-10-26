@@ -3,6 +3,7 @@ import { expect, test } from "@playwright/test";
 // Usuario selector (ERP/Supervisor): sin acceso a Trabajador ni Cliente.
 // En CI falla si falta la contraseña; en local se omite.
 const email = process.env["E2E_SELECTOR_EMAIL"] ?? "e2e-selector@opai.cl";
+const sinEmpresaEmail = process.env["E2E_SIN_EMPRESA_EMAIL"] ?? "e2e-sin-empresa@opai.cl";
 const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
 
 const PORTALES = [
@@ -39,18 +40,48 @@ test.describe("acceso a portales", () => {
         ];
         for (const { ruta, titulo } of paginas) {
           await page.goto(ruta);
-          const riel = page.getByRole("navigation", { name: "Principal" });
+          const nav = page.getByRole("navigation", { name: "Principal" });
           if (autorizado) {
-            await expect(riel).toHaveCount(1);
+            await expect(nav).toHaveCount(1);
           } else {
-            await expect(riel).toHaveCount(0);
+            // H1: sin acceso el shell se monta igual (una barra de navegación visible), con el aviso
+            // dentro del marco pero sin ningún ítem de navegación del portal ajeno.
+            await expect(nav.first()).toBeVisible();
             await expect(
               page.getByText("No tienes acceso a este portal en la empresa actual."),
             ).toBeVisible();
+            await expect(nav.getByRole("link")).toHaveCount(0);
           }
           await expect(page).toHaveTitle(titulo);
         }
       }
+
+      if (!autorizado) {
+        // Desde un portal sin acceso hay salida: el menú de usuario cierra la sesión.
+        await page.getByRole("button", { name: "Menú de usuario" }).first().click();
+        await page.getByRole("menuitem", { name: "Cerrar sesión" }).click();
+        await page.waitForURL((url) => url.pathname.startsWith("/login"));
+      }
     });
   }
+
+  test("sin empresa activa: aviso dentro del shell, con Elegir empresa y Cerrar sesión", async ({
+    page,
+  }) => {
+    test.setTimeout(120_000);
+    await page.goto("/login");
+    await page.getByLabel("Correo").fill(sinEmpresaEmail);
+    await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
+    await page.getByRole("button", { name: "Entrar" }).click();
+    // Sin empresas usables, «Elegir empresa» rebota a «/», donde se muestra el aviso.
+    await page.waitForURL((url) => url.pathname === "/");
+    await expect(page.getByText(/Aún no perteneces a ninguna empresa activa/)).toBeVisible();
+    const nav = page.getByRole("navigation", { name: "Principal" });
+    await expect(nav.first()).toBeVisible();
+    await expect(nav.getByRole("link")).toHaveCount(0);
+    await expect(page.getByRole("link", { name: "Elegir empresa" })).toBeVisible();
+    await page.getByRole("button", { name: "Menú de usuario" }).first().click();
+    await page.getByRole("menuitem", { name: "Cerrar sesión" }).click();
+    await page.waitForURL((url) => url.pathname.startsWith("/login"));
+  });
 });
