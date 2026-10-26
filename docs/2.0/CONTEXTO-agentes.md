@@ -27,7 +27,7 @@ Carlos decidió construir **OPAI 2.0 desde cero**: un SaaS modular, multi-tenant
 - Ciclo de cada módulo (ADR-047): extracción de 1.0 → especificación → aprobación de Carlos → Design Prompt → diseño aprobado → brief → PR → revisión → merge con squash (bot «OPAI 2.0») → QA.
 - `main` cambia varias veces al día. Antes de opinar sobre el avance, revisa las tareas en Linear y la foto técnica de `ESTADO.md`; no te fíes de lo que viste ayer.
 - Tú no escribes código, no haces push ni integras PRs en `opai-2` (la única excepción es el bot «OPAI 2.0», que integra según ADR-043 v3). Si detectas un bug o una brecha de paridad usando el MCP de 2.0, repórtalo a Carlos con la herramienta usada, el input y la respuesta; él lo lleva al proyecto.
-- El estado de las tareas vive en Linear (equipo CAR, IDs `CAR-n`); `docs/2.0/ESTADO.md` es la foto técnica (versiones, infraestructura, riesgos aceptados y decisiones). Reglas del flujo en `AGENTS.md`, «Tareas (Linear)». El plan, en `docs/2.0/ROADMAP.md`.
+- El estado de las tareas vive en Linear (equipo CAR, IDs `CAR-n`); `docs/2.0/ESTADO.md` es la foto técnica (versiones, infraestructura, riesgos aceptados y decisiones). Reglas del flujo en `AGENTS.md`, «Tareas (Linear)». El plan, en `docs/2.0/ROADMAP.md`; la etapa de cada módulo, en `docs/2.0/PLAN-desarrollo.md`.
 - Las decisiones viven en `docs/2.0/01-decisiones.md`.
 
 ## Qué va a cambiar para ti
@@ -48,7 +48,11 @@ Carlos decidió construir **OPAI 2.0 desde cero**: un SaaS modular, multi-tenant
 
 ## Orden de construcción
 
-Según ADR-030 (detalle en `ROADMAP.md`): Núcleo (con rendimiento, PWA y navegación) → Comercial, CPQ y Documentos (Gard empieza a vender en 2.0) → Operaciones, Rondas, Tickets y portales → Asistencia y DT → Finanzas (1.0 pasa a solo lectura) → Nómina y **Licitaciones al final**.
+Según ADR-030 con la nota del 25-oct-2026 (Decisión de Carlos, 25-oct-2026, chat con OPAI 2.0 (registrada por el bot OPAI 2.0); fases en `ROADMAP.md`, etapa de cada módulo en `PLAN-desarrollo.md`):
+
+1. **Primero se cierra el Núcleo, antes de abrir los módulos:** Brief 05 (navegación por áreas) → Brief 04 (PWA) → Brief 07b (capas de sueldo), con el PR 2 del Brief 03 (rendimiento) y la sesión D del Brief 02 en paralelo.
+2. **Después, los módulos:** Puestos y guardias (Operaciones I, Brief 11) → Comercial (CRM) → CPQ por vertical, en reglas, diseño y construcción (Decisión de Carlos, 25-oct-2026 23:29 (t267u–t268u), chat con OPAI 2.0 (registrada por el bot OPAI 2.0)), con Documentos (Brief 09) dentro de la misma fase 2. La razón: la cotización cuelga del negocio y al ganarlo se ofrecen los puestos y RRHH los confirma. Los negocios (Briefs 06 y 07) van antes del cotizador (Brief 10) también como requisito (ADR-040, ADR-048).
+3. **Luego:** Operaciones II, Rondas, Tickets y portales → Asistencia y DT → Finanzas (1.0 pasa a solo lectura) → Nómina (fase 6: según el registro del bot OPAI 2.0, Carlos dijo ~21:20 que no tiene clientes que comprarían solo payroll, y desde las 23:10 Nómina exige Puestos) y **Licitaciones al final**.
 
 ## Mandato vigente
 
