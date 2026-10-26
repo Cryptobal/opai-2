@@ -23,6 +23,8 @@ const TABLA: Record<string, readonly [boolean, boolean, boolean, boolean, boolea
   [P.aprobacionesManage]: [true, true, false, false, false],
   [P.agentesManage]: [true, true, false, false, false],
   [P.auditRead]: [true, true, true, false, false],
+  [P.cumplimientoRead]: [true, true, true, false, true],
+  [P.cumplimientoManage]: [true, true, false, false, false],
 };
 
 describe("permisos del núcleo (Brief 02)", () => {

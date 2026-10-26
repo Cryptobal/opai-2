@@ -53,6 +53,13 @@ export const AJUSTES_NUCLEO = defineAjustes(
         permiso: "core:documentos.manage",
         control: "numero",
       }),
+    cumplimiento_dpa_version: z.string().max(40).default("").meta({
+      etiqueta: "Versión vigente del DPA",
+      ayuda: "Versión del acuerdo de tratamiento de datos (DPA) que los tenants aceptan (Ley 21.719). La fija y versiona OPAI. Vacío: aún no publicada.",
+      grupo: "Cumplimiento",
+      ambito: "plataforma",
+      control: "texto",
+    }),
     preferencias_tema: z
       .enum(["sistema", "claro", "oscuro"])
       .default("sistema")

@@ -25,4 +25,8 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
   "core.aprobaciones.aprobar": "Solo personas: lo irreversible lo aprueba un humano (ADR-032).",
   "core.aprobaciones.rechazar":
     "Solo personas: la decisión sobre lo irreversible es humana (ADR-032).",
+  "core.cumplimiento.dpa_aceptar":
+    "Solo personas: aceptar el DPA por la empresa es un acto humano responsable (Ley 21.719, ADR-034).",
+  "core.cumplimiento.dpo_set":
+    "Solo personas: designar al delegado de protección de datos (DPO) gobierna el cumplimiento (Ley 21.719).",
 };

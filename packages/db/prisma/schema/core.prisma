@@ -67,6 +67,9 @@ model Tenant {
   bitacoraCabeza        BitacoraCabeza?
   comprobantes          Comprobante[]
 
+  // Brief 07d · Ley 21.719 (cumplimiento por diseño).
+  dpaAceptaciones       DpaAceptacion[]
+
   @@map("tenants")
   @@schema("core")
 }
@@ -91,5 +94,29 @@ model AuditEvent {
 
   @@index([tenantId, createdAt])
   @@map("audit_events")
+  @@schema("core")
+}
+
+/// Aceptaciones del DPA (OPAI encargado ↔ tenant responsable, Ley 21.719; Brief 07d, §4.2).
+/// Append-only: se guarda el historial, no solo la última, para probar qué versión del acuerdo
+/// aceptó el tenant y cuándo. La migración revoca UPDATE/DELETE a opai_app (§6); corregir es
+/// una fila nueva. El estado «vigente aceptado» se deriva de la última fila por tenant.
+model DpaAceptacion {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  /// Versión del DPA de plataforma aceptada (ajuste `core.cumplimiento_dpa_version`, ADR-038).
+  version       String
+  /// Usuario que aceptó (id del actor, sin FK, igual que `audit_events.actor_id`).
+  aceptadoPorId String?  @map("aceptado_por_id") @db.Uuid
+  /// Nombre y correo del aceptante al momento de aceptar, como prueba legible.
+  aceptadoPor   String?  @map("aceptado_por")
+  /// Referencia opcional al documento del texto de esa versión del DPA.
+  documentoRef  String?  @map("documento_ref")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, createdAt])
+  @@map("dpa_aceptaciones")
   @@schema("core")
 }
