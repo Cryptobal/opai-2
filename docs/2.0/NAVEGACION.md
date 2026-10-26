@@ -74,7 +74,7 @@ Cada portal muestra solo lo que su módulo contratado habilita (sin Asistencia, 
 | Documentos | sí | sí | sí | según tipo | lectura |
 | Configuración | todo | todo menos eliminar la empresa y gestionar owners | lo que no es empresa, marca, usuarios, keys, integraciones, comunicaciones, aprobaciones, agentes ni sueldos (consulta y preferencias) | sus preferencias | sus preferencias |
 
-El bloqueo financiero (ADR-016) oculta el área completa. Los roles personalizados (ADR-022, backlog) usan la misma regla: un área aparece si el rol puede leer alguna de sus entradas.
+El bloqueo financiero (ADR-016) oculta el área completa. Los roles personalizados (ADR-022; Brief 07c desde el 26-oct) usan la misma regla: un área aparece si el rol puede leer alguna de sus entradas.
 
 ## 6. Nombres
 
