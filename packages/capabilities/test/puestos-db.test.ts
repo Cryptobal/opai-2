@@ -84,7 +84,13 @@ describe.skipIf(!urlPropietario)("puestos y catálogos en base real", () => {
     const p = await dato<{ id: string }>("core.puestos.create", puesto({}));
     expect(await codigo("core.puestos.update", { id: p.id, patronId: t.patronB })).toBe("NOT_FOUND");
     expect(await codigo("core.puestos.update", { id: p.id, funcionId: t.funcionB })).toBe("NOT_FOUND");
+    // Otro tenant no ve ni edita los catálogos: bajo RLS el patrón/función del tenant B no existe.
     expect(await codigo("core.patrones.get", { id: t.patronB })).toBe("NOT_FOUND");
+    expect(await codigo("core.funciones.get", { id: t.funcionB })).toBe("NOT_FOUND");
+    expect(await codigo("core.patrones.update", { id: t.patronB, nombre: "Ajeno" })).toBe("NOT_FOUND");
+    expect(await codigo("core.funciones.update", { id: t.funcionB, nombre: "Ajeno" })).toBe("NOT_FOUND");
+    expect(await codigo("core.patrones.set_activo", { id: t.patronB, activo: false })).toBe("NOT_FOUND");
+    expect(await codigo("core.funciones.set_activo", { id: t.funcionB, activo: false })).toBe("NOT_FOUND");
   });
 
   it("un patrón en uso no cambia su ciclo, ni por la capacidad ni directo en la base", async () => {

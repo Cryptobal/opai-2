@@ -19,7 +19,7 @@ export const funcionesList = defineCapability({
   id: "core.funciones.list",
   descripcion:
     "Catálogo de funciones operativas del tenant (guardia, supervisor, nochero…): la función del puesto, distinta del cargo contractual. Incluye cuántos puestos activos usa cada una.",
-  permiso: PERMISOS_CORE.instalacionesRead,
+  permiso: PERMISOS_CORE.funcionesRead,
   input: z.object({ incluirInactivos: z.boolean().default(false) }),
   output: z.array(funcionSchema),
   efecto: "lectura",
@@ -42,7 +42,7 @@ export const funcionesList = defineCapability({
 export const funcionesGet = defineCapability({
   id: "core.funciones.get",
   descripcion: "Ficha de una función de puesto: vertical, estado y puestos activos que la usan.",
-  permiso: PERMISOS_CORE.instalacionesRead,
+  permiso: PERMISOS_CORE.funcionesRead,
   input: z.object({ id: uuidSchema }),
   output: funcionSchema,
   efecto: "lectura",
@@ -55,7 +55,7 @@ export const funcionesCreate = defineCapability({
   id: "core.funciones.create",
   descripcion:
     "Crea una función operativa del tenant con nombre único (guardia, supervisor…). El supervisor es una función más, no un rol aparte.",
-  permiso: PERMISOS_CORE.instalacionesManage,
+  permiso: PERMISOS_CORE.funcionesManage,
   input: z.object(camposFuncion),
   output: funcionSchema,
   efecto: "escritura",
@@ -81,7 +81,7 @@ export const funcionesUpdate = defineCapability({
   id: "core.funciones.update",
   descripcion:
     "Actualiza una función operativa (nombre, vertical, orden). Solo cambia lo enviado.",
-  permiso: PERMISOS_CORE.instalacionesManage,
+  permiso: PERMISOS_CORE.funcionesManage,
   input: z.object({ id: uuidSchema, ...z.object(camposFuncion).partial().shape }),
   output: funcionSchema,
   efecto: "escritura",
@@ -105,7 +105,7 @@ export const funcionesSetActivo = defineCapability({
   id: "core.funciones.set_activo",
   descripcion:
     "Activa o desactiva una función de puesto. Desactivar no borra: impide elegirla en puestos nuevos.",
-  permiso: PERMISOS_CORE.instalacionesManage,
+  permiso: PERMISOS_CORE.funcionesDesactivar,
   input: z.object({ id: uuidSchema, activo: z.boolean() }),
   output: funcionSchema,
   efecto: "escritura",

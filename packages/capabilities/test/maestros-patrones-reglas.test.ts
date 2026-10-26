@@ -131,4 +131,53 @@ describe("reglas de patrones, funciones y dotación", () => {
     });
     expect(cambio.horasSemanales).not.toBe(42);
   });
+
+  it("un patrón antiguo con forma inválida se puede renombrar (la forma solo se valida al cambiarla)", async () => {
+    const { ctx, tabla } = await base();
+    const viejo = await dato<{ id: string }>(ctx, "core.patrones.create", {
+      nombre: "Viejo",
+      diasTrabajo: 4,
+      diasDescanso: 4,
+    });
+    // Simula un patrón antiguo cuya forma ya no cumple la regla nueva (cíclico sin ciclo).
+    const fila = tabla("patronTurno").find((f) => f["id"] === viejo.id)!;
+    fila["diasTrabajo"] = 0;
+    fila["diasDescanso"] = 0;
+    // Renombrar no toca la forma: no se valida y el cambio pasa aunque la forma sea inválida.
+    const r = await dato<{ nombre: string }>(ctx, "core.patrones.update", {
+      id: viejo.id,
+      nombre: "Viejo renombrado",
+    });
+    expect(r.nombre).toBe("Viejo renombrado");
+    // Pero tocar la forma sí la valida: pasar a semanal sin días marcados se rechaza.
+    expect(
+      await codigo(ctx, "core.patrones.update", { id: viejo.id, clase: "semanal" }),
+    ).toBe("UNPROCESSABLE");
+  });
+});
+
+// Revisión 5659984187: patrones y funciones usan permisos finos del #47 (lectura, edición,
+// desactivación separadas). viewer lee pero no edita; supervisor no edita.
+describe("permisos finos de patrones y funciones (#47)", () => {
+  const ID = "0192f3a0-0000-7000-8000-000000000001";
+  const edicion: [string, unknown][] = [
+    ["core.patrones.create", { nombre: "Nuevo", diasTrabajo: 4, diasDescanso: 4 }],
+    ["core.patrones.update", { id: ID, nombre: "Otro" }],
+    ["core.patrones.set_activo", { id: ID, activo: false }],
+    ["core.funciones.create", { nombre: "Nueva" }],
+    ["core.funciones.update", { id: ID, nombre: "Otra" }],
+    ["core.funciones.set_activo", { id: ID, activo: false }],
+  ];
+
+  it("viewer lee los catálogos pero no los edita ni los desactiva", async () => {
+    const { ctx } = contextoDePrueba({ rol: "viewer" });
+    expect(await codigo(ctx, "core.patrones.list", {})).toBe("OK");
+    expect(await codigo(ctx, "core.funciones.list", {})).toBe("OK");
+    for (const [id, input] of edicion) expect(await codigo(ctx, id, input)).toBe("FORBIDDEN");
+  });
+
+  it("supervisor no edita ni desactiva patrones ni funciones", async () => {
+    const { ctx } = contextoDePrueba({ rol: "supervisor" });
+    for (const [id, input] of edicion) expect(await codigo(ctx, id, input)).toBe("FORBIDDEN");
+  });
 });

@@ -75,6 +75,18 @@ export function estructuraDelCambio(actual: FilaEstructura, cambios: Partial<Est
     cambios.diasTrabajo !== undefined ||
     cambios.diasDescanso !== undefined ||
     cambios.diasSemana !== undefined;
+  // Solo renombrar o reordenar (sin tocar la forma) no valida ni recalcula la estructura: así un
+  // patrón antiguo cuya forma no cumple la regla nueva igual se puede renombrar. La forma solo se
+  // valida con `estructuraPatron` cuando el input la cambia.
+  if (!tocaForma) {
+    const estructura = {
+      clase: actual.clase,
+      diasTrabajo: actual.diasTrabajo,
+      diasDescanso: actual.diasDescanso,
+      diasSemana: actual.diasSemana,
+    };
+    return { estructura, tocaForma };
+  }
   const clase = cambios.clase ?? actual.clase;
   const semanal = clase === "semanal";
   const estructura = estructuraPatron({

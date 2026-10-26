@@ -27,7 +27,7 @@ export const patronesList = defineCapability({
   id: "core.patrones.list",
   descripcion:
     "Catálogo de patrones de turno del tenant (4×4, 7×7, 5×2…): la forma del ciclo, con su resumen legible y cuántos puestos activos lo usan. El horario y las horas van en el puesto.",
-  permiso: PERMISOS_CORE.instalacionesRead,
+  permiso: PERMISOS_CORE.patronesRead,
   input: z.object({ incluirInactivos: z.boolean().default(false) }),
   output: z.array(patronSchema),
   efecto: "lectura",
@@ -51,7 +51,7 @@ export const patronesGet = defineCapability({
   id: "core.patrones.get",
   descripcion:
     "Ficha de un patrón de turno: clase, ciclo o días de la semana, y puestos que lo usan.",
-  permiso: PERMISOS_CORE.instalacionesRead,
+  permiso: PERMISOS_CORE.patronesRead,
   input: z.object({ id: uuidSchema }),
   output: patronSchema,
   efecto: "lectura",
@@ -64,7 +64,7 @@ export const patronesCreate = defineCapability({
   id: "core.patrones.create",
   descripcion:
     "Crea un patrón de turno del tenant con nombre único: cíclico (días de trabajo × descanso) o semanal (días fijos de la semana).",
-  permiso: PERMISOS_CORE.instalacionesManage,
+  permiso: PERMISOS_CORE.patronesManage,
   input: z.object(camposPatron),
   output: patronSchema,
   efecto: "escritura",
@@ -92,7 +92,7 @@ export const patronesUpdate = defineCapability({
   id: "core.patrones.update",
   descripcion:
     "Actualiza un patrón de turno (nombre, clase, ciclo, días de la semana, orden). Solo cambia lo enviado; los de fábrica también se pueden ajustar. Si el patrón ya tiene puestos, su clase, ciclo y días no cambian.",
-  permiso: PERMISOS_CORE.instalacionesManage,
+  permiso: PERMISOS_CORE.patronesManage,
   input: z.object({ id: uuidSchema, ...z.object(camposPatron).partial().shape }),
   output: patronSchema,
   efecto: "escritura",
@@ -135,7 +135,7 @@ export const patronesSetActivo = defineCapability({
   id: "core.patrones.set_activo",
   descripcion:
     "Activa o desactiva un patrón de turno. Desactivar no borra (los de fábrica nunca se eliminan): impide elegirlo en puestos nuevos.",
-  permiso: PERMISOS_CORE.instalacionesManage,
+  permiso: PERMISOS_CORE.patronesDesactivar,
   input: z.object({ id: uuidSchema, activo: z.boolean() }),
   output: patronSchema,
   efecto: "escritura",
