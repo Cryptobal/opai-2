@@ -121,6 +121,8 @@ test.describe("CAR-8 · puestos como posición se ven y se navegan", () => {
     const ultima = page.getByRole("link").filter({ hasText: /Guardia/ }).last();
     await expect(ultima).toContainText("A Guardia retirada");
     await expect(ultima).toContainText("Inactivo");
+    // El indicador de desarrollo de Next no es parte de la pantalla: se oculta en la captura.
+    await page.addStyleTag({ content: "nextjs-portal { display: none !important; }" });
     await page.screenshot({ path: `e2e/__screenshots__/puestos-${info.project.name}.png`, fullPage: true });
     // Navegable: al abrir una posición aparece la hoja de edición.
     await filas.first().click();
