@@ -112,7 +112,7 @@ El bloqueo financiero (ADR-016) oculta el área completa. Los roles personalizad
 
 ## 10. Decisiones de diseño del 26-oct-2026
 
-Aprobación del diseño: «Confirmo que apruebo el diseño 53e9b74b» — Carlos, 26-oct-2026 10:51 CLT, chat con el Revisor OPAI 2.0 (t117u; dictado por voz). D1–D10 fueron decididas por el bot OPAI 2.0 bajo la delegación de Carlos: «Sí, que OPAI 2.0 decida los criterios de navegación. […] Pero todos tienen que ser con la paleta de diseño» — Carlos, 26-oct-2026 10:53 CLT, chat con el Revisor OPAI 2.0 (t120u; dictado por voz). D10 además ya es regla de ADR-016. Carlos confirmó que el bot OPAI 2.0 decidió D1–D10 por delegación suya (Carlos, 26-oct-2026 11:03 CLT, chat con el bot OPAI 2.0). Toda la navegación usa la paleta y los tokens del diseño aprobado. D1–D10 quedan como reglas del Brief 05 sujetas a la aprobación del brief por Carlos (PR #37).
+Aprobación del diseño: «Confirmo que apruebo el diseño 53e9b74b» — Carlos, 26-oct-2026 10:51 CLT, chat con el Revisor OPAI 2.0 (t117u; dictado por voz). D1–D10 fueron decididas por el bot OPAI 2.0 bajo la delegación de Carlos: «Sí, que OPAI 2.0 decida los criterios de navegación. […] Pero todos tienen que ser con la paleta de diseño» — Carlos, 26-oct-2026 10:53 CLT, chat con el Revisor OPAI 2.0 (t120u; dictado por voz). D10 además ya es regla de ADR-016. Carlos confirmó que el bot OPAI 2.0 decidió D1–D10 por delegación suya (Carlos, 26-oct-2026 11:03 CLT, chat con el bot OPAI 2.0 (t295u; dictado por voz)). Toda la navegación usa la paleta y los tokens del diseño aprobado. D1–D10 quedan como reglas del Brief 05 sujetas a la aprobación del brief por Carlos (PR #37).
 
 | # | Tema | Decisión |
 |---|---|---|
@@ -124,6 +124,6 @@ Aprobación del diseño: «Confirmo que apruebo el diseño 53e9b74b» — Carlos
 | D6 | Campana (ADR-014) | Muestra un punto de no leído y abre la misma Bandeja. No hay una segunda lista de avisos |
 | D7 | Búsqueda en el celular | Sale de la barra superior; solo queda «Buscar» en la barra inferior |
 | D8 | Vencimientos | Vista dentro de Personas, como está construido hoy (corrige el mapa de §2) |
-| D9 | iPad | Desde 1024 px se usa la barra lateral completa y plegable del escritorio, sin un riel nuevo y sin plegarse a solo íconos (Carlos, 26-oct-2026 11:03 CLT, chat con el bot OPAI 2.0). De 768 a 1023 sigue el riel actual |
+| D9 | iPad | Desde 1024 px se usa la barra lateral completa y plegable del escritorio, sin un riel nuevo y sin plegarse a solo íconos (Carlos, 26-oct-2026 11:03 CLT, chat con el bot OPAI 2.0 (t295u; dictado por voz)). De 768 a 1023 sigue el riel actual |
 | D10 | Visualizador (viewer) | No ve Nómina (ya es regla de ADR-016: «solo lectura, sin finanzas ni nómina»; corrige la pantalla 05) |
 

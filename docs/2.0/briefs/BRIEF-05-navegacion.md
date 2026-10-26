@@ -69,7 +69,7 @@ R8. **Toda la navegación usa la paleta y los tokens del diseño aprobado** (DS 
 
 ### 4.2 Decisiones del 26-oct
 
-Fuente de D1–D10: decididas por el bot OPAI 2.0 bajo la delegación de Carlos: «Sí, que OPAI 2.0 decida los criterios de navegación. […] Pero todos tienen que ser con la paleta de diseño» — Carlos, 26-oct-2026 10:53 CLT, chat con el Revisor OPAI 2.0 (t120u; dictado por voz). D10 además ya es regla de ADR-016. Carlos confirmó que el bot OPAI 2.0 decidió D1–D10 por delegación suya (Carlos, 26-oct-2026 11:03 CLT, chat con el bot OPAI 2.0). D1–D10 quedan como reglas del Brief 05 sujetas a la aprobación del brief por Carlos.
+Fuente de D1–D10: decididas por el bot OPAI 2.0 bajo la delegación de Carlos: «Sí, que OPAI 2.0 decida los criterios de navegación. […] Pero todos tienen que ser con la paleta de diseño» — Carlos, 26-oct-2026 10:53 CLT, chat con el Revisor OPAI 2.0 (t120u; dictado por voz). D10 además ya es regla de ADR-016. Carlos confirmó que el bot OPAI 2.0 decidió D1–D10 por delegación suya (Carlos, 26-oct-2026 11:03 CLT, chat con el bot OPAI 2.0 (t295u; dictado por voz)). D1–D10 quedan como reglas del Brief 05 sujetas a la aprobación del brief por Carlos.
 
 D1. **Grupos en acordeón:** solo queda abierta el área activa y las demás se pliegan. El estado se recuerda por usuario. `NAVEGACION.md` §10 dice lo mismo.
 D2. **Máximo 7 entradas por área.** Si un área pasa de siete, se divide en dos áreas; no hay scroll interno en un grupo. El núcleo falla en desarrollo y en `pnpm test` si un área declara más de siete entradas. Dividir un área crea un área nueva fuera de la lista cerrada de R1 y del máximo de seis de CA3, así que exige cambiar `NAVEGACION.md` §2 y §7 con una decisión de Carlos; mientras no exista, el test sigue fallando y el módulo no se integra. Hoy ningún área pasa de siete (Finanzas tiene justo siete).
@@ -79,7 +79,7 @@ D5. **Contador de la Bandeja:** en la barra inferior del celular, Inicio muestra
 D6. **Campana (ADR-014):** muestra un punto de no leído y abre la misma Bandeja; no hay una segunda lista de avisos.
 D7. **Celular:** la búsqueda sale de la barra superior; solo queda «Buscar» en la barra inferior.
 D8. **Vencimientos** sigue como vista dentro de Personas; no es entrada del menú.
-D9. **iPad:** desde 1024 px se usa la barra lateral completa de escritorio, con sus grupos plegables, sin riel nuevo. De 768 a 1023 sigue el riel actual. No se pliega a solo íconos (Carlos, 26-oct-2026 11:03 CLT, chat con el bot OPAI 2.0).
+D9. **iPad:** desde 1024 px se usa la barra lateral completa de escritorio, con sus grupos plegables, sin riel nuevo. De 768 a 1023 sigue el riel actual. No se pliega a solo íconos (Carlos, 26-oct-2026 11:03 CLT, chat con el bot OPAI 2.0 (t295u; dictado por voz)).
 D10. **El rol viewer (Visualizador) no ve Nómina.** No es una decisión nueva: es regla de ADR-016 (viewer «solo lectura, sin finanzas ni nómina»). Corrige la pantalla 05 del diseño, que se la mostraba.
 
 ### 4.3 Modelo
@@ -93,7 +93,7 @@ D10. **El rol viewer (Visualizador) no ve Nómina.** No es una decisión nueva: 
 
 ### 4.4 Punto de entrada del agente interno (reservado, se construye en el brief del agente interno)
 
-Decisión de Carlos, 26-oct-2026 10:08 CLT, chat con OPAI 2.0; ADR-049, propuesto en PR #38, pendiente de merge. El agente interno se construye en un brief propio después de CPQ («Ok, después del CPQ» — Carlos, 26-oct-2026 10:53 CLT, chat con el Revisor OPAI 2.0 (t120u); confirmado por Carlos, 26-oct-2026 11:03 CLT, chat con el bot OPAI 2.0). Aquí solo se reserva dónde vive, para que ese brief lo agregue sin rediseñar la navegación:
+Decisión de Carlos, 26-oct-2026 10:08 CLT, chat con OPAI 2.0; ADR-049, propuesto en PR #38, pendiente de merge. El agente interno se construye en un brief propio después de CPQ («Ok, después del CPQ» — Carlos, 26-oct-2026 10:53 CLT, chat con el Revisor OPAI 2.0 (t120u); confirmado por Carlos, 26-oct-2026 11:03 CLT, chat con el bot OPAI 2.0 (t295u; dictado por voz)). Aquí solo se reserva dónde vive, para que ese brief lo agregue sin rediseñar la navegación:
 
 - **Escritorio y iPad (⌘K):** la acción **«Preguntar a OPAI»** ocupa el primer lugar de la paleta, antes de recientes y acciones, y usa como pregunta el texto escrito en el buscador.
 - **Celular:** el mismo lugar, arriba de todo dentro de **«Buscar»** (la paleta a pantalla completa, pantallas 19–22), bajo el campo de búsqueda. No suma un ítem a la barra inferior ni a la barra superior (D7).
@@ -161,7 +161,7 @@ Se agregan a `packages/ds` sobre los componentes existentes, solo con tokens, y 
 
 ### 8.3 Responsive
 
-- **< 768:** barra superior de 52 px con selector de portal, campana y la foto o el avatar del usuario (Carlos, 26-oct-2026 11:03 CLT, chat con el bot OPAI 2.0; sin búsqueda desde el PR A, D7); barra inferior de 56 px + safe-area con cinco ítems (Inicio, 2, 3, Buscar, Más).
+- **< 768:** barra superior de 52 px con selector de portal, campana y la foto o el avatar del usuario (Carlos, 26-oct-2026 11:03 CLT, chat con el bot OPAI 2.0 (t295u; dictado por voz); sin búsqueda desde el PR A, D7); barra inferior de 56 px + safe-area con cinco ítems (Inicio, 2, 3, Buscar, Más).
 - **768–1023:** riel actual, sin cambios de comportamiento (D9).
 - **≥ 1024:** barra lateral de 248 px con áreas (D9); cabecera de 60 px con título, buscador ⌘K, campana y usuario.
 - Touch targets ≥ 44 px, foco visible, contraste AA en claro y oscuro, sin scroll horizontal a 375; etiquetas largas con elipsis.
@@ -193,7 +193,7 @@ Conviene dividirlo en **dos PRs** para que la cabecera de CAR-12 (urgente) llegu
 
 **PR A — Cabecera estable (CAR-12).**
 - Bloque 0 · Lectura y verificación. El PR A puede avanzar mirando las pantallas 01, 14 y 24 directo en Claude Design; el bloqueo por el export aplica solo al PR B (ver abajo).
-- Bloque 1 · `ds:`/`core:` cabecera estable en `AppBar` y `TopBarTelefono` (grupo fijo, con la foto o el avatar del usuario en el teléfono; Carlos, 26-oct-2026 11:03 CLT, chat con el bot OPAI 2.0), acción principal al patrón en las páginas que hoy la pasan a la cabecera y buscador sin cambio de forma. **Búsqueda en el celular (D7) en este PR:** sale de la barra superior y entra «Buscar» a la barra inferior en el mismo commit, para que el celular nunca quede sin búsqueda. Hasta el PR B, la barra inferior es la de respaldo del escenario A del diseño (pantalla 14): Inicio · Cuentas · Personas · Buscar · Más; Instalaciones, Cargos y sueldos, Aprobaciones y Configuración pasan a la hoja «Más» actual (`menu-mas.tsx`), sin abreviaturas. «Buscar» abre la ⌘K actual a pantalla completa. e2e `cabecera-estable.spec.ts`.
+- Bloque 1 · `ds:`/`core:` cabecera estable en `AppBar` y `TopBarTelefono` (grupo fijo, con la foto o el avatar del usuario en el teléfono; Carlos, 26-oct-2026 11:03 CLT, chat con el bot OPAI 2.0 (t295u; dictado por voz)), acción principal al patrón en las páginas que hoy la pasan a la cabecera y buscador sin cambio de forma. **Búsqueda en el celular (D7) en este PR:** sale de la barra superior y entra «Buscar» a la barra inferior en el mismo commit, para que el celular nunca quede sin búsqueda. Hasta el PR B, la barra inferior es la de respaldo del escenario A del diseño (pantalla 14): Inicio · Cuentas · Personas · Buscar · Más; Instalaciones, Cargos y sueldos, Aprobaciones y Configuración pasan a la hoja «Más» actual (`menu-mas.tsx`), sin abreviaturas. «Buscar» abre la ⌘K actual a pantalla completa. e2e `cabecera-estable.spec.ts`.
 
 **PR B — Navegación por áreas.** Empieza cuando el PR 2 del Brief 03 (shell en el layout) esté integrado. El bloque 0 del PR B se **detiene** si falta el export en `docs/2.0/design/export-navegacion/` (Carlos lo exporta desde Claude Design).
 - Bloque 2 · `core:` modelo `area`, manifest `navegacion`/`acciones`, `armarNavegacion` puro con tests, ajustes `navegacion_*`.
@@ -240,7 +240,7 @@ Conviene dividirlo en **dos PRs** para que la cabecera de CAR-12 (urgente) llegu
 - **Dependencia del PR 2 del Brief 03** (shell en el layout y quitar contadores, ADR-045 decisión 15; lo implementa Claude): R7 y CA12 exigen que el shell persista entre páginas, y hoy se monta por página. Por eso el PR B empieza cuando el PR 2 esté integrado y no mueve el shell por su cuenta. El PR A no depende de él.
 - **Presupuesto de JS:** acordeón, fijados y ⌘K suman JS de cliente; ⌘K y la hoja «Más» se cargan diferidos.
 - **e2e no obligatorio en CI:** CA1 depende de un e2e que por ahora **no** es check obligatorio. Mitigación: correrlo antes de abrir el PR y adjuntar el resultado.
-- **Decidido (Carlos, 26-oct-2026 11:03 CLT, chat con el bot OPAI 2.0):** el e2e de la cabecera (CA1) **no** es check obligatorio por ahora: corre en CI pero no bloquea el merge, y el 2-nov-2026 se revisa si pasa a serlo. El iPad desde 1024 px usa la barra lateral completa y plegable, sin plegarse a solo íconos. El celular muestra arriba la foto o el avatar del usuario.
+- **Decidido (Carlos, 26-oct-2026 11:03 CLT, chat con el bot OPAI 2.0 (t295u; dictado por voz)):** el e2e de la cabecera (CA1) **no** es check obligatorio por ahora: corre en CI pero no bloquea el merge, y el 2-nov-2026 se revisa: pasa a obligatorio cuando lleve una semana estable y Carlos lo confirme (pidió que se lo recuerden). El iPad desde 1024 px usa la barra lateral completa y plegable, sin plegarse a solo íconos. El celular muestra arriba la foto o el avatar del usuario.
 - **Export pendiente:** sin export en el repo, el bloque 0 del PR B se detiene; el PR A no lo necesita.
 - **Acción principal al patrón:** cambia de lugar el botón principal en Personas, Cuentas e Instalaciones; el QA de «Diseño y QA OPAI 2.0» lo compara con el diseño.
 - **Rollback:** los cambios son de UI y ajustes de usuario sin migración; se revierte el PR. Los ajustes `navegacion_*` que queden guardados se ignoran.
