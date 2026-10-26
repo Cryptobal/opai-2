@@ -7,7 +7,7 @@ import { Campo, Combobox, Input, InputFecha, RadioGroup, Select } from "@opai/ds
 import type { FuncionPuestoOpcion, PatronTurnoOpcion } from "@/lib/tipos-maestros";
 
 import { CamposHorario } from "./campos-horario";
-import type { DatosPuesto } from "./puesto-datos";
+import { conCambio, type DatosPuesto } from "./puesto-datos";
 
 export { type DatosPuesto, inicialPuesto, puestoAInput } from "./puesto-datos";
 
@@ -22,7 +22,7 @@ type Props = {
 /** Nuevo puesto-posición (Brief 11): función, patrón del catálogo, horario por tramos y colación. */
 export function CamposPuesto({ d, setD, cargos, funciones, patrones }: Props) {
   const set = <K extends keyof DatosPuesto>(k: K, v: DatosPuesto[K]) =>
-    setD((x) => ({ ...x, [k]: v }));
+    setD((x) => conCambio(x, k, v));
   const opcionesFuncion = funciones.map((f) => ({ valor: f.id, etiqueta: f.nombre }));
   const opcionesPatron = patrones.map((p) => ({
     valor: p.id,
@@ -31,8 +31,7 @@ export function CamposPuesto({ d, setD, cargos, funciones, patrones }: Props) {
   function elegirPatron(id: string) {
     const p = patrones.find((x) => x.id === id);
     setD((x) => ({
-      ...x,
-      patronId: id,
+      ...conCambio(x, "patronId", id),
       trabajo: p ? String(p.diasTrabajo) : x.trabajo,
       descanso: p ? String(p.diasDescanso) : x.descanso,
     }));

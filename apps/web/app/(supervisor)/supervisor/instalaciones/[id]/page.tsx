@@ -1,8 +1,8 @@
 import { Navigation, Phone } from "lucide-react";
 
-import { Alerta, Badge, SeccionTarjeta } from "@opai/ds";
+import { Alerta, SeccionTarjeta } from "@opai/ds";
 
-import { COBERTURA_PUESTO, estadoDe } from "@/app/_components/maestros/estados";
+import { BadgePuesto } from "@/app/_components/maestros/badge-puesto";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { MapaOpai } from "@/app/_components/maestros/mapa";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
@@ -74,12 +74,12 @@ export default function InstalacionTerreno({ params }: { params: Promise<{ id: s
                       <span className="flex min-w-0 flex-col">
                         <span className="text-base font-medium text-fg">{p.nombre}</span>
                         <span className="t-caption">
-                          {p.horario} · {p.patron ?? "Sin patrón"}
+                          {[p.patron ?? "Sin patrón", p.horario, p.horarioNoche]
+                            .filter(Boolean)
+                            .join(" · ")}
                         </span>
                       </span>
-                      <Badge tono={estadoDe(COBERTURA_PUESTO, p.cobertura).tono}>
-                        {estadoDe(COBERTURA_PUESTO, p.cobertura).corta}
-                      </Badge>
+                      <BadgePuesto estado={p.estado} cobertura={p.cobertura} />
                     </li>
                   ))}
                 </ul>

@@ -1,18 +1,17 @@
 "use client";
 
-import { Info } from "lucide-react";
 import type { Dispatch, SetStateAction } from "react";
 
-import { Campo, Input, InputHora, Switch } from "@opai/ds";
+import { Alerta, Campo, Input, InputHora, Switch } from "@opai/ds";
 
-import type { DatosPuesto } from "./puesto-datos";
+import { conCambio, type DatosPuesto } from "./puesto-datos";
 
 type Set = Dispatch<SetStateAction<DatosPuesto>>;
 
 /** Tramos de horario (día y, si rota, noche), colación y horas semanales del puesto (Brief 11). */
 export function CamposHorario({ d, setD }: { d: DatosPuesto; setD: Set }) {
   const set = <K extends keyof DatosPuesto>(k: K, v: DatosPuesto[K]) =>
-    setD((x) => ({ ...x, [k]: v }));
+    setD((x) => conCambio(x, k, v));
   const cruza = d.fin <= d.inicio;
   return (
     <div className="flex flex-col gap-4">
@@ -25,10 +24,10 @@ export function CamposHorario({ d, setD }: { d: DatosPuesto; setD: Set }) {
         </Campo>
       </div>
       {cruza ? (
-        <p className="flex gap-2 rounded-md bg-info-muted px-3 py-2.5 text-sm font-medium text-info-fg">
-          <Info className="mt-0.5 size-4 flex-none" aria-hidden />
-          El cruce de medianoche se calcula solo: termina el día siguiente a las {d.fin}.
-        </p>
+        <Alerta
+          tono="info"
+          titulo={`El cruce de medianoche se calcula solo: termina el día siguiente a las ${d.fin}.`}
+        />
       ) : null}
       <Switch
         etiqueta="Rotación día y noche"
@@ -66,7 +65,10 @@ export function CamposHorario({ d, setD }: { d: DatosPuesto; setD: Set }) {
             min={0}
             placeholder="Se sugiere sola"
             value={d.horas}
-            onChange={(e) => set("horas", e.target.value)}
+            onChange={(e) => {
+              const horas = e.target.value;
+              setD((x) => ({ ...x, horas, horasTocadas: true }));
+            }}
           />
         </Campo>
       </div>

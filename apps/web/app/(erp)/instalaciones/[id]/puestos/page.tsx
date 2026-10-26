@@ -1,10 +1,10 @@
 import { Plus } from "lucide-react";
 
-import { Badge, Empty, FilaSeleccionable } from "@opai/ds";
+import { Empty, FilaSeleccionable } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
+import { activosPrimero, BadgePuesto } from "@/app/_components/maestros/badge-puesto";
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
-import { COBERTURA_PUESTO, estadoDe } from "@/app/_components/maestros/estados";
 import type { SearchParams } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 import type {
@@ -21,12 +21,37 @@ export const metadata = { title: "Puestos de la instalación" };
 
 type Props = { params: Promise<{ id: string }>; searchParams: SearchParams };
 
-/** Línea secundaria de cada posición: función, patrón y horario, sin apretujarse (CAR-8). */
-function secundario(p: InstalacionDetalle["puestos"][number]): string {
-  const horario = p.horarioNoche ? `${p.horario} / ${p.horarioNoche}` : p.horario;
-  const horas = p.horasSemanales != null ? ` · ${p.horasSemanales} h/sem` : "";
-  return `${p.funcion ?? "Sin función"} · ${p.patron ?? "Sin patrón"} · ${horario}${horas}`;
+type PuestoFila = InstalacionDetalle["puestos"][number];
+
+/**
+ * Trozos de una línea que bajan de renglón en vez de cortarse (CAR-8: a 375 px el horario y el
+ * patrón se truncaban). Cada trozo es corto y se mantiene entero.
+ */
+function Trozos({ partes, className }: { partes: (string | null)[]; className: string }) {
+  return (
+    <span className={`flex flex-wrap gap-x-1 whitespace-normal ${className}`} data-linea-puesto>
+      {partes.filter(Boolean).map((t, i) => (
+        <span key={i} className="whitespace-nowrap">
+          {i > 0 ? "· " : ""}
+          {t}
+        </span>
+      ))}
+    </span>
+  );
 }
+
+/** Patrón (claro, CAR-8) y función. */
+const secundario = (p: PuestoFila) => (
+  <Trozos partes={[p.patron ?? "Sin patrón", p.funcion ?? "Sin función"]} className="text-fg-muted" />
+);
+
+/** Horario por tramos y horas semanales, en el tono terciario del DS. */
+const terciario = (p: PuestoFila) => (
+  <Trozos
+    partes={[p.horario, p.horarioNoche, p.horasSemanales != null ? `${p.horasSemanales} h/sem` : null]}
+    className="t-caption"
+  />
+);
 
 async function Puestos({ i }: { i: InstalacionDetalle }) {
   const [rc, rf, rp] = await Promise.all([
@@ -54,19 +79,17 @@ async function Puestos({ i }: { i: InstalacionDetalle }) {
         <div className="flex flex-col gap-3">
           <div className="self-end">{nuevo}</div>
           <div className="overflow-hidden rounded-lg border border-border bg-surface [&>*:last-child]:border-b-0">
-            {i.puestos.map((p) => {
-              const c = estadoDe(COBERTURA_PUESTO, p.cobertura);
-              return (
-                <FilaSeleccionable
-                  key={p.id}
-                  href={`?puesto=${p.id}`}
-                  Link={LinkNext}
-                  titulo={p.nombre}
-                  secundario={secundario(p)}
-                  fin={<Badge tono={c.tono}>{c.etiqueta}</Badge>}
-                />
-              );
-            })}
+            {activosPrimero(i.puestos).map((p) => (
+              <FilaSeleccionable
+                key={p.id}
+                href={`?puesto=${p.id}`}
+                Link={LinkNext}
+                titulo={p.nombre}
+                secundario={secundario(p)}
+                terciario={terciario(p)}
+                fin={<BadgePuesto estado={p.estado} cobertura={p.cobertura} />}
+              />
+            ))}
           </div>
         </div>
       )}

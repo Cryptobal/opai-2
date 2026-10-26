@@ -41,6 +41,24 @@ function sembrarPosiciones(): string {
       60, false, now(), now()
     FROM inst CROSS JOIN generate_series(1, 5) g
     ON CONFLICT (tenant_id, instalacion_id, nombre) DO NOTHING;
+    -- El caso más largo (rotación día y noche con horas) y uno inactivo, para QA B2 y el punto 3.
+    WITH inst AS (
+      SELECT i.id, i.tenant_id
+      FROM core.instalaciones i JOIN core.tenants t ON t.id = i.tenant_id AND t.slug = 'gard'
+      WHERE i.nombre = 'Planta Quilicura' LIMIT 1
+    )
+    INSERT INTO core.puestos
+      (id, tenant_id, instalacion_id, cargo_id, patron_id, nombre, dias_trabajo, dias_descanso,
+       hora_inicio, hora_fin, hora_inicio_noche, hora_fin_noche, jornada, horas_semanales, dotacion,
+       estado, cobertura, cobertura_motivo, colacion_min, colacion_fuera, created_at, updated_at)
+    SELECT gen_random_uuid(), inst.tenant_id, inst.id,
+      (SELECT id FROM core.cargos WHERE tenant_id = inst.tenant_id ORDER BY orden LIMIT 1),
+      (SELECT id FROM core.patrones_turno WHERE tenant_id = inst.tenant_id AND nombre = '14×14'),
+      v.nombre, 14, 14, '08:00', '20:00', '20:00', '08:00', 'rotativa', 38.5, 1, v.estado, 'ppc',
+      'sin_asignar', 60, false, now(), now()
+    FROM inst CROSS JOIN (VALUES ('A Guardia rotativa', 'activo'), ('A Guardia retirada', 'inactivo'))
+      AS v(nombre, estado)
+    ON CONFLICT (tenant_id, instalacion_id, nombre) DO NOTHING;
     SELECT i.id FROM core.instalaciones i JOIN core.tenants t ON t.id = i.tenant_id AND t.slug = 'gard'
     WHERE i.nombre = 'Planta Quilicura' LIMIT 1;`;
   const salida = execFileSync("psql", [urlDueño, "-X", "-A", "-t", "-c", sql], { encoding: "utf8" });
@@ -80,13 +98,29 @@ test.describe("CAR-8 · puestos como posición se ven y se navegan", () => {
     expect(total, "hay varias posiciones a la vista").toBeGreaterThanOrEqual(5);
     // Cada posición es navegable y muestra su patrón y su cobertura PPC (CAR-8).
     await expect(page.getByText("4×4").first()).toBeVisible();
-    await expect(page.getByText("PPC", { exact: false }).first()).toBeVisible();
+    // En teléfono el badge dice «PPC» (corto); desde md, «PPC · Sin asignar». Siempre hay uno visible.
+    await expect(page.getByText(/^PPC/).filter({ visible: true }).first()).toBeVisible();
+    // Nombre accesible completo también en teléfono (QA B2 y punto 9).
+    await expect(page.getByText("PPC · Sin asignar").first()).toBeAttached();
     // Ningún elemento corrido ni superpuesto: sin scroll horizontal en ninguno de los tres anchos.
     expect(await sinDesborde(page), `${info.project.name}: sin desborde horizontal`).toBe(true);
     // Estilo del design system 2.0: fondo claro, nunca el azul oscuro del 1.0.
     expect(await fondoClaro(page), `${info.project.name}: fondo claro (tokens 2.0)`).toBeGreaterThan(
       0.6,
     );
+    // QA B2: a 375 px el horario, el patrón y las horas no se cortan (bajan de renglón).
+    const cortadas = await page.evaluate(() =>
+      [...document.querySelectorAll<HTMLElement>("[data-linea-puesto]")]
+        .flatMap((el) => [el, el.parentElement])
+        .filter((el): el is HTMLElement => el !== null && el.scrollWidth > el.clientWidth)
+        .map((el) => el.textContent),
+    );
+    expect(cortadas, `${info.project.name}: líneas secundarias sin cortar`).toEqual([]);
+    await expect(page.getByText("20:00–08:00 (+1)").first()).toBeVisible();
+    // Punto 3: el inactivo se ve como «Inactivo» (no como PPC) y va al final.
+    const ultima = page.getByRole("link").filter({ hasText: /Guardia/ }).last();
+    await expect(ultima).toContainText("A Guardia retirada");
+    await expect(ultima).toContainText("Inactivo");
     await page.screenshot({ path: `e2e/__screenshots__/puestos-${info.project.name}.png`, fullPage: true });
     // Navegable: al abrir una posición aparece la hoja de edición.
     await filas.first().click();
