@@ -1,7 +1,8 @@
 # Previews por PR con rama Neon efímera (Brief 02, bloque 13). Requiere los secretos del repo
-# NEON_API_KEY, NEON_PROJECT_ID, VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID y
-# OPAI_APP_DB_PASSWORD; sin ellos el
+# NEON_API_KEY, NEON_PROJECT_ID, VERCEL_TOKEN, VERCEL_ORG_ID y VERCEL_PROJECT_ID; sin ellos el
 # job se salta (no falla) para no bloquear PRs mientras se configuran.
+# La contraseña de opai_app NO es un secreto del repo: en Neon los roles son por rama, así que
+# cada rama de preview recibe una contraseña aleatoria propia (no toca main ni dev).
 name: preview
 on:
   pull_request:
@@ -21,14 +22,13 @@ jobs:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-      OPAI_APP_DB_PASSWORD: ${{ secrets.OPAI_APP_DB_PASSWORD }}
       RAMA: preview/pr-${{ github.event.pull_request.number }}
       RAMA_GIT: ${{ github.head_ref }}
     steps:
       - name: ¿Hay secretos?
         id: listo
         run: |
-          if [ -n "$NEON_API_KEY" ] && [ -n "$VERCEL_TOKEN" ] && [ -n "$OPAI_APP_DB_PASSWORD" ]; then echo "ok=true" >> "$GITHUB_OUTPUT"; else echo "ok=false" >> "$GITHUB_OUTPUT"; echo "Secretos de preview no configurados: se omite."; fi
+          if [ -n "$NEON_API_KEY" ] && [ -n "$NEON_PROJECT_ID" ] && [ -n "$VERCEL_TOKEN" ] && [ -n "$VERCEL_ORG_ID" ] && [ -n "$VERCEL_PROJECT_ID" ]; then echo "ok=true" >> "$GITHUB_OUTPUT"; else echo "ok=false" >> "$GITHUB_OUTPUT"; echo "Secretos de preview no configurados: se omite."; fi
       - uses: actions/checkout@v4
         if: steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
       - uses: pnpm/action-setup@v4
@@ -54,12 +54,22 @@ jobs:
         run: |
           pnpm install --frozen-lockfile
           DATABASE_URL_MIGRATE="$DB_URL" pnpm db:deploy
+      - name: Contraseña propia de opai_app en la rama
+        if: steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
+        env:
+          DB_URL: ${{ steps.neon.outputs.db_url }}
+        run: |
+          # Hex: sin caracteres que rompan la URL. Se enmascara y solo vive en este job y en Vercel.
+          CLAVE=$(openssl rand -hex 32)
+          echo "::add-mask::$CLAVE"
+          DATABASE_URL_MIGRATE="$DB_URL" OPAI_APP_DB_PASSWORD="$CLAVE" pnpm --filter @opai/db role:password
+          echo "OPAI_APP_DB_PASSWORD=$CLAVE" >> "$GITHUB_ENV"
       - name: DATABASE_URL de preview para la rama git
         if: steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
         env:
           DB_URL_POOLED: ${{ steps.neon.outputs.db_url_pooled }}
         run: |
-          # La app usa opai_app (sin BYPASSRLS): misma contraseña que en main, heredada por la rama.
+          # La app usa opai_app (sin BYPASSRLS) con la contraseña propia de la rama (paso anterior).
           URL_APP=$(echo "$DB_URL_POOLED" | sed -E "s#://[^:]+:[^@]+@#://opai_app:${OPAI_APP_DB_PASSWORD}@#")
           npx --yes vercel@latest env rm DATABASE_URL preview "$RAMA_GIT" --yes --token "$VERCEL_TOKEN" >/dev/null 2>&1 || true
           printf '%s' "$URL_APP" | npx --yes vercel@latest env add DATABASE_URL preview "$RAMA_GIT" --token "$VERCEL_TOKEN" >/dev/null
