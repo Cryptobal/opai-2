@@ -91,6 +91,7 @@ El bloqueo financiero (ADR-016) oculta el área completa. Los roles personalizad
 - `navegacion` del manifest: `{ portal, area, href, etiqueta, icono, orden, permiso }`, con `area` de una lista cerrada (`inicio`, `comercial`, `clientes`, `operaciones`, `personas`, `finanzas`, `documentos`). El núcleo arma los grupos, aplica el máximo por área y ordena por `orden`.
 - Las pestañas de fichas se declaran en `fichas` (ADR-041.5), no en `navegacion`.
 - Las acciones para ⌘K se declaran en `acciones` (etiqueta, capacidad, permiso), y las búsquedas por entidad en el registro de entidades (ADR-041.7).
+- **Agente interno (ADR-049, nota del 26-oct-2026):** el primer lugar de ⌘K, y en el celular el primero dentro de «Buscar», queda reservado para «Preguntar a OPAI». Reservado, se construye en el brief del agente interno; mientras no exista, no se muestra (Brief 05, §4.4).
 - Un brief que agrega pantallas indica en su sección 8 el área, la entrada o la pestaña que usa, y si cambia la barra inferior de algún rol.
 
 ## 8. Estado de hoy (`main`, `fe362cc`)

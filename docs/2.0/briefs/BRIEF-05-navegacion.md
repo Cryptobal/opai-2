@@ -52,6 +52,7 @@ Se nota que funciona cuando una persona encuentra cualquier colección en un cli
 - Tareas en la Bandeja (llegan con Comercial, fase 2).
 - PWA (Brief 04), shell en el layout (Brief 03, PR 2) y roles personalizados (Brief 07c).
 - El panel de riel para iPad que aparece en la pantalla 28: queda descartado por la decisión 9.
+- **El agente interno de OPAI (ADR-049): reservado, se construye en el brief del agente interno.** Este brief solo reserva su punto de entrada (§4.4); no construye componente, acción, ajuste ni capacidad para él.
 
 ## 4. Arquitectura
 
@@ -86,6 +87,14 @@ D10. **El rol viewer (Visualizador) no ve Nómina.** Corrige la pantalla 05 del 
 - **Preferencias por usuario** como ajustes de ámbito `usuario` (ADR-038), sin migración: `navegacion_area_principal`, `navegacion_area_abierta` y `navegacion_fijados` (lista de hasta 5: `{ tipo: "entrada" | "ficha", href, etiqueta, fijadoEn }`). Se leen y escriben solo por `core.config.get/set`, así UI, API y MCP comparten la misma regla. Son escrituras escasas (cuando la persona fija, cambia el área principal o abre otra área).
 - **Recientes** (hasta 10: `{ tipo, href, etiqueta, contexto }`): se guardan en el almacenamiento del navegador, por usuario y empresa, no en el servidor. Pasar `core.config.set` en cada navegación dejaría una entrada de auditoría y un evento `core.config.cambiada` por página, y sumaría consultas que ADR-045 no permite. Consecuencia aceptada: los recientes no viajan entre dispositivos; los fijados sí.
 - **Bandeja:** componente del núcleo en Inicio que lista avisos no leídos (`core.notificaciones.list`, todos los roles) y, solo para quien tiene `aprobaciones:manage`, las aprobaciones pendientes (`core.aprobaciones.list`). El punto y el número salen de lo que el rol puede ver (`core.resumen.contadores`). Sin capacidades nuevas.
+
+### 4.4 Punto de entrada del agente interno (reservado, se construye en el brief del agente interno)
+
+Decisión de Carlos, 26-oct-2026 10:08 CLT, chat con OPAI 2.0; ADR-049. El agente interno se construye en un brief propio después del Brief 11. Aquí solo se reserva dónde vive, para que ese brief lo agregue sin rediseñar la navegación:
+
+- **Escritorio y iPad (⌘K):** la acción **«Preguntar a OPAI»** ocupa el primer lugar de la paleta, antes de recientes y acciones, y usa como pregunta el texto escrito en el buscador.
+- **Celular:** el mismo lugar, arriba de todo dentro de **«Buscar»** (la paleta a pantalla completa, pantallas 19–22), bajo el campo de búsqueda. No suma un ítem a la barra inferior ni a la barra superior (D7).
+- **Mientras no exista el agente, la entrada no se muestra:** ni deshabilitada ni con «próximamente». Aparecerá cuando el módulo del agente esté activo en el tenant, igual que las entradas de cualquier módulo (R2). En este brief no hay código para ella; los CA9 y CA10 se cumplen sin esa entrada.
 
 ## 5. Archivos (previstos)
 
@@ -122,12 +131,12 @@ D10. **El rol viewer (Visualizador) no ve Nómina.** Corrige la pantalla 05 del 
 | 05 | `Roles_comparacion_1280` | Barra por rol (gerente, supervisor, viewer, admin). **Ajuste D10:** viewer sin Nómina |
 | 06 | `Grupos_plegables_1280` | Plegado, abierto y área de una entrada como suelta (D1, R3) |
 | 07 | `Fijados_1280` | Sin fijados, cinco fijados y acción de fijar (D3) |
-| 08–12 | `CmdK_*_1280` | Inicial (recientes y acciones), resultados «quili», sin resultados, viewer, oscuro |
+| 08–12 | `CmdK_*_1280` | Inicial (recientes y acciones), resultados «quili», sin resultados, viewer, oscuro. El primer lugar queda reservado para «Preguntar a OPAI» (§4.4); no se construye aquí |
 | 13 | `Menu_usuario_portal_1280` | Menú de usuario y selector de portal (Plataforma solo para operadores) |
 | 14 | `BarraInferior_variantes_375` | Cinco variantes por área principal y respaldo del escenario A. **Ajuste D7:** vale la versión sin búsqueda en la barra superior |
 | 15 | `Inicio_bandeja_375` | Bandeja en Inicio y punto en la barra inferior (D4, D5) |
 | 16–18 | `Mas_*_375` | Hoja «Más» en escenarios C y A, y oscuro |
-| 19–22 | `Buscar_*_375` | ⌘K a pantalla completa en el celular |
+| 19–22 | `Buscar_*_375` | ⌘K a pantalla completa en el celular. El primer lugar, bajo el campo, queda reservado para «Preguntar a OPAI» (§4.4); no se construye aquí |
 | 23 | `Preferencias_area_principal_375` | Selector de área principal con vista previa de la barra |
 | 24 | `Cambio_de_pagina_375` | Shell quieto y skeleton del contenido |
 | 25 | `Estados_vacios` | Fijados vacío, recientes vacío, sin resultados, Bandeja vacía, viewer mínimo, etiqueta larga |
