@@ -187,6 +187,7 @@ Conviene **tres PR** por tema, para revisar y mergear por partes (cada PR lleva 
 - Bloque 7 · `core:`/`ds:` bandeja de solicitudes y consentimientos en la ficha, tras diseño aprobado.
 
 **PR 3 — Retención y cifrado** *(depende de §16.3 y §16.4; coordina con 07c la categoría de intentos de login).*
+- El mecanismo de PR 3 no depende de los textos legales finos: Claude propone los periodos de retención y el conjunto de campos sensibles por defecto (§16.3, §16.4) y Carlos los confirma, sin que eso retrase la implementación.
 - Bloque 8 · `core:`/`domain:` política de retención por categoría (ajuste de tenant) y evaluación pura; tests.
 - Bloque 9 · `core:` trabajo diario de anonimización/bloqueo respetando hechos regulados (ADR-023), registro de lo hecho; cron que solo despacha.
 - Bloque 10 · `core:` cifrado de aplicación de los campos sensibles del inventario con el almacén del tenant (ADR-027).
@@ -263,7 +264,7 @@ Ninguna la decide Claude. Las de fondo son **legales** y conviene revisarlas con
 
 ### 16.7 Alcance de B4 frente al plazo del 30-nov-2026 — **DECIDIDO**
 
-- **DECIDIDO por Carlos (26-oct-2026 12:28 CLT, t320u: «ok a las dos», en respuesta a la recomendación del bot en t319s1656): B4 entra completo —los tres PR, incluido el PR 3 de retención y cifrado— en `main` antes del 30-nov-2026.** No se escalona ni se deja ninguna parte de B4 para después del plazo. PR 3 no depende de los textos legales finos para su mecanismo: Claude propone los periodos de retención y el conjunto de campos sensibles por defecto (§16.3, §16.4) y Carlos los confirma, sin que eso retrase la implementación. El orden PR 1 → PR 2 → PR 3 (§11) es solo de secuencia de revisión y merge; los tres cierran antes del 30-nov-2026.
+- **DECIDIDO por Carlos (26-oct-2026 12:28 CLT, t320u).** La recomendación (t319s1656) fue, literal: «El plan de Claude dejaba la retención y el cifrado de los datos para después del 30 de noviembre. Te recomiendo hacer todo antes del 30 de noviembre, porque la ley rige completa desde el 1 de diciembre y esas dos partes también son obligatorias.» La respuesta de Carlos fue, literal: «ok a las dos» (Carlos, 26-oct-2026 12:28 CLT, t320u). Es decir, **B4 entra completo —los tres PR, incluido el PR 3 de retención y cifrado— en `main` antes del 30-nov-2026**. No se escalona ni se deja ninguna parte de B4 para después del plazo. El orden PR 1 → PR 2 → PR 3 (§11) es solo de secuencia de revisión y merge; los tres cierran antes del 30-nov-2026.
 
 ## 17. Reporte de ejecución
 
