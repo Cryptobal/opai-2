@@ -31,7 +31,7 @@ export default function Configuracion({ searchParams }: { searchParams: SearchPa
           lista={
             <>
               <h2 className="t-title mb-3 text-fg md:hidden">Configuración</h2>
-              <IndiceConfig indice={indice} q={q} conBuscador />
+              <IndiceConfig indice={indice} q={q} />
             </>
           }
           detalle={
