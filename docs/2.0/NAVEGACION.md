@@ -1,14 +1,14 @@
 # Navegación de OPAI 2.0 — mapa final y estado de hoy
 
-**Estado:** vigente (ADR-046, aprobado por Carlos el 24-oct) · **Fecha:** 23-oct-2026 · Todo brief con pantallas lo respeta; el bot «Diseño y QA OPAI 2.0» lo verifica. El diseño visual pasa por Claude Design (Design Prompt de navegación) antes de implementarse.
+**Estado:** vigente (ADR-046, aprobado por Carlos el 24-oct; decisiones de diseño del 26-oct en §10) · **Fecha:** 23-oct-2026, actualizado el 26-oct-2026 · Todo brief con pantallas lo respeta; el bot «Diseño y QA OPAI 2.0» lo verifica. **Diseño aprobado:** [Navegación OPAI 2.0 (Brief 05)](https://claude.ai/design/p/53e9b74b-3cbf-4ad4-858f-271dfc2ef465), 28 pantallas, aprobado por Carlos el 26-oct-2026 a las 9:45 CLT; se implementa con `briefs/BRIEF-05-navegacion.md`.
 
 ## 1. Principios
 
 1. **Áreas, no módulos.** El menú se ordena por lo que la persona hace (vender, operar, pagar), no por cómo está dividido el código. Cada módulo aporta entradas a un área.
-2. **Pocas entradas.** Inicio arriba, **seis áreas** como máximo, Configuración al pie. Máximo **siete entradas por área**. Un área con una sola entrada visible se muestra como entrada suelta, sin grupo.
+2. **Pocas entradas.** Inicio arriba como entrada suelta, **seis áreas** como máximo, Configuración al pie. Máximo **siete entradas por área**; si un área pasa de siete, se divide en dos áreas, sin scroll interno (§10, D2). Un área con una sola entrada visible se muestra como entrada suelta, sin grupo. Los grupos funcionan en acordeón: solo queda abierta el área activa (§10, D1).
 3. **Menú para colecciones, pestañas para partes.** Va al menú lo que se busca por sí mismo (cuentas, negocios, pauta). Lo que pertenece a una entidad (contactos de una cuenta, puestos de una instalación, cotizaciones de un negocio, documentos, actividad) es una pestaña de su ficha (ADR-041), nunca una entrada del menú.
 4. **Saltar con ⌘K.** El buscador (Ctrl/⌘K, y el botón de búsqueda en el celular) es la forma principal de moverse: busca entidades (`core.buscar`), páginas y acciones («Nueva cotización», «Agregar persona»), muestra recientes y respeta permisos y alcance.
-5. **Fijados y recientes.** Cada usuario fija hasta cinco entradas o fichas, que aparecen arriba de la barra lateral. Los recientes viven en ⌘K (los últimos diez lugares visitados).
+5. **Fijados y recientes.** Cada usuario fija hasta cinco entradas o fichas, que aparecen arriba de la barra lateral. Se fijan y desfijan con un ícono de pin (en hover sobre la entrada y en la cabecera de la ficha) y se ordenan por la fecha en que se fijaron (§10, D3). Los recientes viven en ⌘K (los últimos diez lugares visitados).
 6. **Solo lo contratado y permitido.** Un área aparece si al menos una de sus entradas está activa en el tenant y el rol la puede leer. Sin entradas deshabilitadas ni avisos de «disponible pronto» (ADR-041.5).
 7. **Un nombre por cosa.** Ver la sección 6.
 8. **Persistencia y velocidad.** La barra lateral y la barra inferior viven en el layout del portal, no se vuelven a pintar al cambiar de página y sus entradas se precargan (ADR-045).
@@ -17,11 +17,11 @@
 
 | Área | Entradas (orden) | Módulo que la aporta | Fase |
 |---|---|---|---|
-| **Inicio** | Inicio (pendientes, alertas, accesos) · Bandeja (aprobaciones, tareas asignadas, avisos) | Núcleo | 1 (Bandeja: 2) |
+| **Inicio** | Inicio, entrada suelta (pendientes, alertas, accesos y la **Bandeja** dentro: aprobaciones, avisos y, desde la fase 2, tareas asignadas) | Núcleo | 1 |
 | **Comercial** | Solicitudes · Negocios (embudo y lista) · Cotizaciones · Licitaciones | Comercial, CPQ, Licitaciones | 2 (Licitaciones: 6) |
 | **Clientes** | Cuentas · Contactos · Instalaciones | Núcleo | 1 (Contactos: 2) |
 | **Operaciones** | Pauta (planificación de turnos) · Turnos extra · Supervisión · Rondas · Novedades · Tickets | Operaciones, Rondas, Tickets | 3 |
-| **Personas** | Personas · Asistencia · Vencimientos · Nómina · Cargos y sueldos | Núcleo, Asistencia, Nómina | 1 (Asistencia: 4, Nómina: 6) |
+| **Personas** | Personas (con la vista Vencimientos dentro) · Asistencia · Nómina · Cargos y sueldos | Núcleo, Asistencia, Nómina | 1 (Asistencia: 4, Nómina: 6) |
 | **Finanzas** | Flujo de caja · Banca y conciliación · Ventas (DTE) · Compras · Rendiciones · Contabilidad · Informes | Finanzas (sub-módulos activables) | 5 |
 | **Documentos** | Documentos (explorador, plantillas, firmas pendientes) | Documentos | 2 |
 | *(pie)* **Configuración** | Una sola entrada; dentro, el centro por ámbitos (ADR-018/038): empresa, marca, usuarios y permisos, agentes, aprobaciones, módulos, integraciones, comunicaciones, catálogos (embudo, etiquetas), consumos, auditoría | Núcleo | 1 |
@@ -30,8 +30,8 @@ Notas:
 
 - **Puestos** no tiene entrada: es pestaña de Instalación y se planifica en Pauta.
 - **Modelo de costeo** de CPQ es una pantalla del módulo, accesible desde Cotizaciones (acción secundaria «Modelo de costeo», solo owner y admin, ADR-042.8), no una entrada del menú.
-- **Vencimientos** (documentos por vencer de personas) es una vista de Personas; los vencimientos de cuentas e instalaciones viven en Documentos.
-- **Aprobaciones** dejan de ser una entrada suelta en el celular: van en la Bandeja de Inicio con contador.
+- **Vencimientos** (documentos por vencer de personas) es una vista dentro de Personas, no una entrada del menú, como está construido hoy (§10, D8); los vencimientos de cuentas e instalaciones viven en Documentos.
+- **Aprobaciones** dejan de ser una entrada suelta en el celular: van en la Bandeja, dentro de Inicio. La campana de la barra superior muestra un punto de no leído y abre esa misma Bandeja; no hay otra lista de avisos (§10, D4 y D6).
 - **Plataforma** no está en el menú del ERP: se entra por el selector de portal.
 
 ## 3. Celular: barra inferior
@@ -48,7 +48,7 @@ Cuatro entradas más «Más». La segunda y la tercera dependen del **área prin
 
 Los roles base son owner, admin, gerente, supervisor y viewer (ADR-016); «Comercial» y «Finanzas» son áreas principales que el usuario elige, no roles nuevos.
 
-Mientras un área no esté activa, su entrada cae a la siguiente disponible (hoy: Inicio · Cuentas · Personas · Buscar · Más). «Más» abre una hoja con todas las áreas como en la barra lateral, los fijados y Configuración. La Bandeja muestra su contador en Inicio.
+Mientras un área no esté activa, su entrada cae a la siguiente disponible (hoy: Inicio · Cuentas · Personas · Buscar · Más). «Más» abre una hoja con todas las áreas como en la barra lateral, los fijados y Configuración. Cuando la Bandeja tiene algo pendiente, Inicio muestra un **punto** en la barra inferior; el número aparece dentro de la pantalla (§10, D5). En el celular la búsqueda no va en la barra superior: solo está «Buscar» en la barra inferior (§10, D7).
 
 ## 4. Portales
 
@@ -69,7 +69,7 @@ Cada portal muestra solo lo que su módulo contratado habilita (sin Asistencia, 
 | Comercial | sí | sí | sí | no | lectura |
 | Clientes | sí | sí | sí | lectura (alcance) | lectura |
 | Operaciones | sí | sí | sí | sí (alcance) | lectura |
-| Personas | sí | sí | sí, sin Nómina ni montos de sueldo | lectura (alcance); Nómina no | lectura sin montos |
+| Personas | sí | sí | sí, sin Nómina ni montos de sueldo | lectura (alcance); Nómina no | lectura sin montos; Nómina no (§10, D10) |
 | Finanzas | sí | sí | **no** | **no** | **no** |
 | Documentos | sí | sí | sí | según tipo | lectura |
 | Configuración | todo | todo menos eliminar la empresa y gestionar owners | lo que no es empresa, marca, usuarios, keys, integraciones, comunicaciones, aprobaciones, agentes ni sueldos (consulta y preferencias) | sus preferencias | sus preferencias |
@@ -106,5 +106,23 @@ El bloqueo financiero (ADR-016) oculta el área completa. Los roles personalizad
 ## 9. Brecha y orden de implementación
 
 1. **Brief de rendimiento (ADR-045):** shell en el layout y precarga de las entradas del menú. No cambia el mapa.
-2. **Design Prompt de navegación** (Claude Design): barra lateral con áreas plegables, fijados, ⌘K con acciones y recientes, barra inferior por rol, hoja «Más». Carlos aprueba.
-3. **Brief de navegación:** `area` en `ItemNav` y en el manifest, grupos, fijados, recientes, barra inferior por rol, renombre a Personas y Configuración. Entra antes o junto con el primer módulo de Comercial, que inaugura las áreas Comercial y Clientes.
+2. **Design Prompt de navegación** (Claude Design): barra lateral con áreas plegables, fijados, ⌘K con acciones y recientes, barra inferior por rol, hoja «Más». **Hecho:** aprobado por Carlos el 26-oct-2026 a las 9:45 CLT (28 pantallas).
+3. **Brief de navegación:** `area` en `ItemNav` y en el manifest, grupos, fijados, recientes, barra inferior por rol, renombre a Personas y Configuración. Es el Brief 05, paso 1 del cierre del Núcleo: `briefs/BRIEF-05-navegacion.md`, propuesto el 26-oct-2026 y pendiente de la aprobación de Carlos.
+
+## 10. Decisiones de diseño del 26-oct-2026
+
+Fuente: «Decidido por el bot OPAI 2.0 por delegación de Carlos, 26-oct-2026 9:47 CLT». Carlos aprobó el diseño (26-oct-2026 9:45 CLT) y delegó en el bot OPAI 2.0 los puntos que el diseño marcaba «Propuesta: decide Carlos». Desde ahora son reglas.
+
+| # | Tema | Decisión |
+|---|---|---|
+| D1 | Grupos de área | Acordeón: solo queda abierta el área activa y las demás se pliegan. El estado se recuerda por usuario |
+| D2 | Más de siete entradas | Máximo 7 por área. Si un área pasa de 7, se divide en dos áreas; no hay scroll interno |
+| D3 | Fijados | Se fija y desfija con un ícono de pin que aparece al pasar el mouse por la entrada y en la cabecera de la ficha. Se ordenan por la fecha en que se fijaron |
+| D4 | Inicio y Bandeja | Inicio es una entrada suelta arriba; la Bandeja vive dentro de Inicio |
+| D5 | Contador de la Bandeja | En la barra inferior del celular, Inicio muestra un punto y el número aparece dentro de la pantalla. No hay contadores en la barra lateral |
+| D6 | Campana (ADR-014) | Muestra un punto de no leído y abre la misma Bandeja. No hay una segunda lista de avisos |
+| D7 | Búsqueda en el celular | Sale de la barra superior; solo queda «Buscar» en la barra inferior |
+| D8 | Vencimientos | Vista dentro de Personas, como está construido hoy (corrige el mapa de §2) |
+| D9 | iPad | Desde 1024 px se usa la barra lateral completa y plegable del escritorio, sin un riel nuevo. De 768 a 1023 sigue el riel actual |
+| D10 | Visualizador (viewer) | No ve Nómina |
+
