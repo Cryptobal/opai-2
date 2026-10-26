@@ -28,7 +28,7 @@ type Props = Omit<
 };
 
 const CAMPO = cn(
-  "h-11 w-full appearance-none rounded-md border border-border-strong bg-surface pr-11 pl-3 text-md text-fg outline-none transition-[border-color,box-shadow] duration-150",
+  "h-11 w-full appearance-none rounded-md border border-border-control bg-surface pr-11 pl-3 text-md text-fg outline-none transition-[border-color,box-shadow] duration-150",
   "focus-visible:border-accent focus-visible:shadow-[0_0_0_3px_var(--ds-accent-muted)] aria-invalid:border-danger-fg aria-invalid:shadow-[0_0_0_3px_var(--ds-danger-muted)] disabled:opacity-45",
 );
 

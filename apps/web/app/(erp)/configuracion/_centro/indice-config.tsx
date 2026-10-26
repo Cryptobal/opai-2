@@ -28,7 +28,7 @@ export function IndiceConfig({ indice, seleccionada, q }: Props) {
           href={s.href}
           aria-current={activa ? "page" : undefined}
           className={cn(
-            "relative flex min-h-11 items-center gap-3 px-4 py-2 text-fg outline-none transition-colors duration-150 hover:bg-bg focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus",
+            "relative flex min-h-11 items-center gap-3 px-4 py-2 text-fg outline-none transition-colors duration-150 hover:bg-fill focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus",
             activa &&
               "bg-accent-muted hover:bg-accent-muted before:absolute before:inset-y-2 before:left-0 before:w-[3px] before:rounded-r-[3px] before:bg-accent before:content-['']",
           )}

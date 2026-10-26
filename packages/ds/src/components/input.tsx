@@ -2,11 +2,17 @@ import type { InputHTMLAttributes, ReactNode, TextareaHTMLAttributes } from "rea
 
 import { cn } from "../cn";
 
+// `hover:` de Tailwind v4 ya aplica solo con puntero (@media (hover: hover)).
 const base =
-  "w-full h-11 rounded-md border border-border-strong bg-surface px-3 text-md text-fg placeholder:text-fg-subtle outline-none transition-[border-color,box-shadow] duration-150 focus-visible:border-accent focus-visible:shadow-[0_0_0_3px_var(--ds-accent-muted)] focus-visible:outline-none aria-invalid:border-danger-fg aria-invalid:shadow-[0_0_0_3px_var(--ds-danger-muted)] disabled:opacity-45";
+  "w-full h-11 rounded-md border border-border-control bg-surface hover:border-fg-subtle px-3 text-md text-fg placeholder:text-fg-subtle outline-none transition-[border-color,box-shadow] duration-150 focus-visible:border-accent focus-visible:shadow-[0_0_0_3px_var(--ds-accent-muted)] focus-visible:outline-none aria-invalid:border-danger-fg aria-invalid:shadow-[0_0_0_3px_var(--ds-danger-muted)] disabled:opacity-45";
 
-export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElement>) {
-  return <input className={cn(base, className)} {...props} />;
+type InputProps = InputHTMLAttributes<HTMLInputElement> & {
+  /** Variante densa de 36 px (filtros de tabla, barras de herramientas en escritorio). */
+  compact?: boolean;
+};
+
+export function Input({ className, compact, ...props }: InputProps) {
+  return <input className={cn(base, compact && "h-9", className)} {...props} />;
 }
 
 export function Textarea({ className, ...props }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
