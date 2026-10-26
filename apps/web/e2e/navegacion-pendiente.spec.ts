@@ -3,8 +3,10 @@ import { expect, type Page, test } from "@playwright/test";
 /**
  * Navegación con señal de pendiente (ADR-045, arreglo de #44). Durante una navegación lenta el shell
  * marca el ítem del riel y el título de destino al instante (sin parpadeo ni barra de progreso,
- * decisión 1 de ADR-045), en vez de dejar la página anterior sin ninguna señal. Y un clic hecho apenas
- * carga la página (durante la hidratación) no se pierde: navega igual.
+ * decisión 1 de ADR-045), en vez de dejar la página anterior sin ninguna señal, y al asentarse la
+ * hidratación la navegación completa el destino. Un clic hecho durante la hidratación, en cambio,
+ * todavía entra en la carrera prefetch↔navegación de Cache Components y se cuelga: queda como
+ * `test.fixme` al final, con la razón.
  */
 const email = process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl";
 const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
@@ -56,12 +58,12 @@ test("la cabecera y el riel marcan el destino durante una navegación lenta", as
   await expect(page.getByRole("region", { name: "Lista de personas" })).toBeVisible();
 });
 
-// PENDIENTE (ADR-045 decisión 1, precarga activa). Con la precarga por defecto de Next (restaurada
-// por mandato de Carlos t365u/t366u, 26-oct-2026) un clic durante la hidratación entra en carrera con
-// el prefetch en vuelo de Cache Components y la navegación se cuelga (el riel y el título marcan el
-// destino, pero el contenido se queda en la página anterior). El `cache()` de `marcaGenerado` no lo
-// resuelve. La navegación en estado estable sí cumple (test anterior). Queda como pendiente en
-// PR-BODY.md con los datos; no se vuelve a desactivar la precarga.
+// PENDIENTE (ADR-045 decisiones 1 y 3, precarga activa). Con la precarga por intención (cursor, toque
+// o foco) de las entradas del menú (restaurada por mandato de Carlos t365u/t366u, 26-oct-2026) un clic
+// durante la hidratación entra en carrera con el prefetch en vuelo de Cache Components y la navegación
+// se cuelga (el riel y el título marcan el destino, pero el contenido se queda en la página anterior).
+// El `cache()` de `marcaGenerado` no lo resuelve. La navegación en estado estable sí cumple (test
+// anterior). Queda como pendiente en PR-BODY.md con los datos; no se vuelve a desactivar la precarga.
 test.fixme("un clic apenas carga la página (durante la hidratación) navega igual", async ({ page }) => {
   await entrar(page);
   await page.goto("/cuentas", { waitUntil: "load" });
