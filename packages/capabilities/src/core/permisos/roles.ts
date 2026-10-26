@@ -6,7 +6,7 @@ import { defineCapability } from "../../define";
 import { noEncontrado } from "../../errores";
 import type { Contexto } from "../../types";
 import { escribirConEvento, sinDuplicado } from "../maestros/comun";
-import { validarPermisos } from "./comun";
+import { exigeGestionDeRoles, normalizarPermisosRol } from "./comun";
 
 export const rolTenantSchema = z.object({
   id: z.string(),
@@ -77,12 +77,14 @@ export const rolesCreate = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    validarPermisos(ctx, input.permisos);
+    exigeGestionDeRoles(ctx);
+    // Comodines expandidos al guardar: el rol no hereda permisos que se agreguen al catálogo después.
+    const permisos = normalizarPermisosRol(ctx, input.permisos);
     const data = {
       tenantId: ctx.tenantId,
       nombre: input.nombre,
       descripcion: input.descripcion ?? null,
-      permisos: input.permisos,
+      permisos,
       sistema: false,
     };
     if (dryRun) return vista({ id: "", archivadoEn: null, ...data });
