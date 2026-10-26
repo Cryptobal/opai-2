@@ -59,6 +59,9 @@ export type CabeceraProps = {
   /** Línea sobre el título: badge de estado y texto corto (detalle). */
   sobre?: ReactNode;
   acciones?: ReactNode;
+  /** Mostrar las acciones también en md+ sin mostrar el título (listas: la acción principal vive en el
+   *  patrón, no en la cabecera del shell; Brief 05 §8.3 y REGLAS-codigo, UI). */
+  accionesSiempre?: boolean;
   /** Mostrar el título también en md+ (pantallas sin barra superior propia, como paneles de detalle). */
   tituloSiempre?: boolean;
   /** Título de detalle (22/28) en vez del de página (28/34). */
@@ -73,6 +76,7 @@ export type CabeceraProps = {
  */
 export function Cabecera(props: CabeceraProps) {
   const { titulo, subtitulo, sobre, acciones, tituloSiempre, tituloDetalle } = props;
+  const accionesVisibles = tituloSiempre || props.accionesSiempre;
   return (
     <div
       className={cn(
@@ -96,7 +100,7 @@ export function Cabecera(props: CabeceraProps) {
         {subtitulo ? <p className="mt-0.5 text-base text-fg-muted">{subtitulo}</p> : null}
       </div>
       {acciones ? (
-        <div className={cn("flex shrink-0 items-center gap-2", !tituloSiempre && "md:hidden")}>
+        <div className={cn("flex shrink-0 items-center gap-2", !accionesVisibles && "md:hidden")}>
           {acciones}
         </div>
       ) : null}

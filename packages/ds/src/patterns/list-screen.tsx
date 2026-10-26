@@ -56,7 +56,7 @@ export function ListScreen<T>(props: ListScreenProps<T>) {
           titulo={titulo}
           {...(subtitulo ? { subtitulo } : {})}
           {...(props.soloTelefono ? { soloTelefono: true } : {})}
-          {...(accionPrincipal ? { acciones: accionPrincipal } : {})}
+          {...(accionPrincipal ? { acciones: accionPrincipal, accionesSiempre: true } : {})}
         />
       )}
       {buscador || filtros ? (

@@ -1,8 +1,7 @@
-import { Building2, Plus } from "lucide-react";
+import { Building2 } from "lucide-react";
 
 import { SplitScreen } from "@opai/ds";
 
-import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import type { SearchParams } from "@/lib/parametros";
 
@@ -22,11 +21,6 @@ export default function Cuentas({ searchParams }: Props) {
       titulo="Cuentas"
       ruta="/cuentas"
       completo
-      acciones={
-        <EnlaceBotonHoja href="/cuentas?nueva=1" icono={Plus}>
-          Nueva cuenta
-        </EnlaceBotonHoja>
-      }
       cargar={async () => {
         const p = await filtrosDe(searchParams);
         return { ...(await cargarCuentas(p)), q: p.q };
