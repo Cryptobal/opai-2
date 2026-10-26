@@ -7,7 +7,8 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import type { Auth } from "../src/auth";
 import { type Entorno, prepararEntorno, urlPropietario } from "../../db/test/entorno";
 
-const PASSWORD = "Clave-de-prueba-123";
+// Contraseña efímera por ejecución: sin literal que el escaneo de secretos pueda confundir con uno real.
+const PASSWORD = `Prueba-${randomUUID()}`;
 
 describe.skipIf(!urlPropietario)("bloqueo de login con Better Auth real (B1)", () => {
   let e: Entorno;
