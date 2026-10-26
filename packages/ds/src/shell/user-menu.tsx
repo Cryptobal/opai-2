@@ -28,7 +28,7 @@ export function UserMenu({ usuario, items, lado, conNombre }: Props) {
       }
       disparador={
         conNombre ? (
-          <span className="flex w-full items-center gap-2.5 px-2 py-1 text-left">
+          <span className="flex min-h-11 w-full items-center gap-2.5 px-2 py-1 text-left">
             <Avatar nombre={usuario.nombre} />
             <span className="min-w-0">
               <span className="block truncate text-base font-medium text-fg">{usuario.nombre}</span>

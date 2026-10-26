@@ -22,7 +22,7 @@ export function CampoFechaEscrita({
       maxLength={10}
       value={texto}
       onChange={(e) => onTexto(e.target.value)}
-      className="h-11 w-full rounded-md border border-border-strong bg-surface px-3 text-md text-fg outline-none focus-visible:border-accent"
+      className="h-11 w-full rounded-md border border-border-control bg-surface px-3 text-md text-fg outline-none focus-visible:border-accent"
     />
   );
 }
