@@ -6,6 +6,7 @@ import { useState } from "react";
 import { AuthCard, Button, Monograma } from "@opai/ds";
 
 import { accionSalir } from "@/app/_acciones/auth";
+import { trasLimpiarCaches } from "@/app/_components/pwa/limpiar-cache";
 
 import { LinkNext } from "@/app/_components/link-next";
 import { ETIQUETA_ROL } from "@/app/_components/portales";
@@ -59,7 +60,9 @@ export function Invitacion({ slug, token, datos, sesion }: Props) {
   // Con otra sesión abierta: si la cuenta invitada existe, se entra con ella (login);
   // si no existe, se vuelve a esta misma invitación, que muestra el formulario de cuenta nueva.
   const cambiarDeCuenta = () =>
-    accionSalir(datos.usuarioExiste ? login : `/invitacion/${slug}/${token}`);
+    trasLimpiarCaches(() =>
+      accionSalir(datos.usuarioExiste ? login : `/invitacion/${slug}/${token}`),
+    );
   const cuenta =
     sesion && !coincide
       ? sesion

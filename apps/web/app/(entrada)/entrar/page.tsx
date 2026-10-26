@@ -7,7 +7,8 @@ import { Loading } from "@opai/ds";
 import { portalesVisibles } from "@/app/_components/portales";
 import { requerirIdentidad } from "@/lib/servidor";
 
-import { COOKIE_PORTAL, SelectorPortal } from "./selector";
+import { COOKIE_PORTAL } from "./cookie-portal";
+import { SelectorPortal } from "./selector";
 
 export const metadata = { title: "Entrar" };
 

@@ -156,7 +156,7 @@ Un **solo PR** (`brief/04-pwa`), con `Refs CAR-18`. Orden pensado para que cada 
   - **Dos usuarios, dos empresas, mismo navegador:** entra el usuario A (empresa 1), navega, cierra sesión; entra el usuario B (empresa 2), con red y luego sin red: nunca aparecen datos de A ni de la empresa 1, y las cachés se limpiaron al cerrar sesión.
   - **Actualización:** con un service worker `waiting` simulado, aparece la banda y, al aceptar, se activa (no antes).
 - **Presupuesto de JS (ADR-037):** `/terreno`, `/trabajador` y `/supervisor` ≤ 150 KB gzip; cualquier subida de tope se justifica en el PR.
-- **Lighthouse CI (D3):** en emulación móvil sobre las rutas de terreno, rendimiento y accesibilidad ≥ 90, **solo como informe** (D3 (b), t332u); pasa a gate cuando el primer módulo de terreno tenga pantallas reales. ADR-044.7 queda pendiente de enmienda. Nota: hoy los portales de terreno son placeholders, así que la medición es sobre el cascarón.
+- **Lighthouse CI (D3):** en emulación móvil, rendimiento y accesibilidad ≥ 90, **solo como informe** (D3 (b), t332u); pasa a gate cuando el primer módulo de terreno tenga pantallas reales. ADR-044.7 **enmendado** (ver §17 y ADR-044). Hoy los portales de terreno son placeholders, así que la medición es sobre el cascarón público (`/login` y `/sin-conexion`); el informe con puntajes y hallazgos está en `docs/2.0/informes/lighthouse-brief04.md` (Lighthouse 11.7.1 contra `next start`: rendimiento 96–98, accesibilidad 100, PWA 100).
 - **Gate de paridad y de presupuesto** en verde; `tools/list` en `main` sin cambios (este brief no toca capacidades).
 
 ## 13. Validación
@@ -215,6 +215,17 @@ Cada una con opciones y recomendación; no bloquean la aprobación del brief, pe
 - *(Recomendada: (b) con precache del cascarón común y página offline en todos, pero el soporte real sin red solo en terreno.)* Así la instalación y la actualización controlada valen para todos (Carlos instala el ERP en su escritorio), sin prometer offline donde no corresponde.
 
 **Resolución (26-oct-2026 13:45 CLT, t332u).** Carlos respondió «ok a las 5 del Brief 04, lánzalo» a la recomendación de D1 a D5 (chat con el bot OPAI 2.0, t331s1709). Quedan así: **D1 (b)**, ruta de entrada propia que redirige al portal de la persona, con la última preferencia guardada solo en el dispositivo; **D2 (b)**, un spike corto de Serwist en el bloque 0 y, si no es limpio, un service worker propio mínimo; **D3 (b)**, Playwright como prueba y Lighthouse CI **solo como informe** hasta que haya pantallas reales de terreno, por esta decisión; ADR-044.7 (que lo pide como gate) **queda pendiente de enmienda**; **D4 (b)**, íconos provisionales con el monograma del DS; **D5 (b)**, el service worker en toda la app, con el cascarón y la página offline en todos los portales, y el soporte real sin red solo en terreno.
+
+## 18. Resultado de ejecución (PR #45, `brief/04-pwa`)
+
+Ejecutado como un solo PR (`Fixes CAR-18`) con un commit por bloque. Decisiones resueltas: **D1 (b)** ruta `/entrar` con cookie `opai_portal` solo en el dispositivo; **D2 (b)** service worker propio mínimo (el spike de Serwist no fue limpio con Turbopack); **D3 (b)** Lighthouse como informe; **D4 (b)** íconos provisionales del DS; **D5 (b)** service worker en toda la app, offline real solo en terreno.
+
+Correcciones sobre la revisión del «Revisor OPAI 2.0» (review 5658204346):
+
+- **Limpieza de cachés al salir/cambiar de empresa:** las salidas y el cambio de empresa del selector de empresa (`elegir-empresa/selector-empresa.tsx`) y la salida de la invitación (`invitacion/[slug]/[token]/invitacion.tsx`) ahora pasan por `trasLimpiarCaches`, igual que el menú de usuario del shell (§4.4, §9, CA8).
+- **Cookie del portal (D1) legible en el servidor:** `COOKIE_PORTAL` se movió a un módulo sin `"use client"` (`(entrada)/entrar/cookie-portal.ts`); antes vivía en el módulo cliente y el servidor recibía una referencia de cliente, así que `/entrar` no leía la preferencia. Se agregó `e2e/entrar-cookie-portal.spec.ts` que prueba que, con la cookie puesta, `/entrar` redirige en el servidor sin pintar el selector.
+- **Lighthouse (D3 b) cumplido como informe:** `docs/2.0/informes/lighthouse-brief04.md` (Lighthouse 11.7.1 contra el build local con `next start`, emulación móvil): `/login` y `/sin-conexion` con rendimiento 96–98, accesibilidad 100, prácticas 100 y PWA 100; hallazgos (shell compartido del ERP y `robots.txt`) atribuidos al Brief 03 PR 2 y al SEO público, fuera del alcance de la base PWA.
+- **ADR-044.6/.7 enmendados** (ver ADR-044): el tope de ≤ 150 KB por ruta de terreno se aplica con pantallas reales (hoy 162 KB para rastrear el cascarón); Lighthouse queda como informe hasta el primer módulo de terreno.
 
 ---
 

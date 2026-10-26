@@ -2,8 +2,7 @@
 
 import { Button, type Portal } from "@opai/ds";
 
-/** Cookie con el portal elegido en la entrada, guardada solo en este dispositivo (D1 del Brief 04). */
-export const COOKIE_PORTAL = "opai_portal";
+import { COOKIE_PORTAL } from "./cookie-portal";
 
 /** Guarda la elección en el dispositivo y navega al portal. Fuera del componente: la escritura de
  *  la cookie es un efecto sobre el DOM, no estado de React. */
