@@ -6,7 +6,9 @@ import { defineCapability } from "../../define";
 import { noEncontrado } from "../../errores";
 import type { Contexto } from "../../types";
 import { uuidSchema } from "../esquemas";
+import { entidadEnAlcance } from "../maestros/alcance";
 import { hoy } from "../maestros/comun";
+import { documentosEnAlcance } from "./alcance-doc";
 import { CAPA_DE } from "./entidad";
 import { documentoSchema, entidadSchema, vistaDocumento } from "./vista";
 
@@ -37,6 +39,10 @@ export const documentosList = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
+    // Alcance por filas (ADR-022): por entidad, exige que esté a cargo; sin entidad, acota a los
+    // documentos de las entidades a cargo (null = sin alcance acotado, ve todo el tenant).
+    if (input.entidad && !(await entidadEnAlcance(ctx, input.entidad.tipo, input.entidad.id)))
+      return { items: [], faltantes: [] };
     const ids = input.entidad
       ? (
           await ctx.db.documentoVinculo.findMany({
@@ -44,12 +50,12 @@ export const documentosList = defineCapability({
             select: { documentoId: true },
           })
         ).map((v) => v.documentoId)
-      : null;
+      : await documentosEnAlcance(ctx);
     const estados = input.incluirArchivados ? ["disponible", "archivado"] : ["disponible"];
     const docs = await ctx.db.documento.findMany({
       where: {
         estado: { in: estados },
-        ...(ids ? { id: { in: ids } } : {}),
+        ...(ids ? { id: { in: [...ids] } } : {}),
         ...(input.tipoId ? { tipoId: input.tipoId } : {}),
       },
       orderBy: [{ venceEn: "asc" }, { createdAt: "desc" }],
@@ -94,6 +100,9 @@ export const documentosGet = defineCapability({
   async handler(ctx, input) {
     const d = await ctx.db.documento.findUnique({ where: { id: input.id } });
     if (!d) throw noEncontrado("El documento");
+    // Alcance por filas: un actor acotado solo ve documentos de sus entidades a cargo.
+    const permitidos = await documentosEnAlcance(ctx);
+    if (permitidos && !permitidos.includes(d.id)) throw noEncontrado("El documento");
     const vinculos = await ctx.db.documentoVinculo.findMany({ where: { documentoId: d.id } });
     const versiones = [];
     for (let previo = d.reemplazaAId, n = 0; previo && n < 50; n++) {

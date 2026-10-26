@@ -3,6 +3,7 @@ import { z } from "zod";
 import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
+import { dondeCuenta, dondeInstalacion, dondePersona } from "../maestros/alcance";
 
 const n = z.number().nullable();
 
@@ -27,12 +28,14 @@ export const resumenContadores = defineCapability({
     const usuario = ctx.actor.tipo === "user" ? ctx.actor.id : null;
     const [cuentas, instalaciones, personas, aprobacionesPendientes, notificacionesNoLeidas] =
       await Promise.all([
-        si(PERMISOS_CORE.cuentasRead, () => ctx.db.cuenta.count({ where: { archivadaEn: null } })),
+        si(PERMISOS_CORE.cuentasRead, () =>
+          ctx.db.cuenta.count({ where: { archivadaEn: null, AND: [dondeCuenta(ctx)] } }),
+        ),
         si(PERMISOS_CORE.instalacionesRead, () =>
-          ctx.db.instalacion.count({ where: { archivadaEn: null } }),
+          ctx.db.instalacion.count({ where: { archivadaEn: null, AND: [dondeInstalacion(ctx)] } }),
         ),
         si(PERMISOS_CORE.personasRead, () =>
-          ctx.db.persona.count({ where: { archivadaEn: null } }),
+          ctx.db.persona.count({ where: { archivadaEn: null, AND: [dondePersona(ctx)] } }),
         ),
         si(PERMISOS_CORE.aprobacionesManage, () =>
           ctx.db.aprobacion.count({ where: { estado: "pendiente", venceEn: { gt: new Date() } } }),

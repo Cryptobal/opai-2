@@ -2,7 +2,7 @@ import type { Excepcion, Rol } from "@opai/domain";
 
 import { autorizador } from "../contexto";
 import { idempotenciaSobre } from "../idempotencia";
-import type { AgenteContexto, ConsumoNuevo, Principal } from "../types";
+import type { AgenteContexto, Alcance, ConsumoNuevo, Principal } from "../types";
 import { almacenamientoEnMemoria } from "./almacenamiento-memoria";
 import { dbEnMemoria } from "./db-memoria";
 import { bitacoraEnMemoria, eventosEnMemoria, trabajosEnMemoria } from "./servicios-memoria";
@@ -30,6 +30,8 @@ export type OpcionesPrueba = {
   modulosActivos?: readonly string[];
   scopes?: readonly string[] | null;
   principal?: Principal | null;
+  /** Alcance por filas del actor (null = ve todo). ADR-022 · Brief 07c B3. */
+  alcance?: Alcance | null;
   agente?: AgenteContexto | null;
   semilla?: Parameters<typeof dbEnMemoria>[0];
 };
@@ -60,6 +62,7 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
     modulosActivos: o.modulosActivos ?? [],
     scopes: o.scopes ?? null,
     principal: o.principal ?? null,
+    alcance: o.alcance ?? null,
     agente: o.agente ?? null,
     db,
     // Atómica como la real: si `fn` falla, las tablas vuelven al estado previo.

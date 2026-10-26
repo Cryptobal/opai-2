@@ -3,6 +3,7 @@ import { z } from "zod";
 import { noEncontrado } from "../../errores";
 import type { Contexto } from "../../types";
 import { iso } from "../comun";
+import { dondePersona } from "./alcance";
 import { dia, diaSchema, rutSchema, telefonoSchema, textoOpcional } from "./comun";
 
 export const SEXOS = ["femenino", "masculino", "otro", "no_declara"] as const;
@@ -126,7 +127,8 @@ export const camposPersona = {
 };
 
 export async function personaDe(ctx: Contexto, id: string) {
-  const p = await ctx.db.persona.findUnique({ where: { id } });
+  // findFirst (no findUnique) para aplicar el alcance por filas: fuera de alcance = no encontrada.
+  const p = await ctx.db.persona.findFirst({ where: { id, AND: [dondePersona(ctx)] } });
   if (!p) throw noEncontrado("La persona");
   return p;
 }
