@@ -243,7 +243,7 @@ Una entrada por decisión. Las decisiones no se editan: si cambian, se agrega un
 
 **Consecuencias.** Cada módulo declara sus permisos en el manifest (ya exigido) y, para las entidades con alcance, el criterio de alcance en su capa de capacidades. Roles personalizados y excepciones: backlog hasta que un tenant los pida.
 
-**Nota del 26-oct-2026.** Los roles personalizados salen del backlog: van en el Brief 07c «Acceso y permisos», con permisos finos al menos tan completos como en 1.0 (Decisión de Carlos del 24-oct-2026, confirmada el 26-oct-2026 9:20 CLT). El alcance del supervisor por instalación (brecha B3) también va en el Brief 07c, movido desde el Brief 12 (Decisión de Carlos, 26-oct-2026 9:36 CLT, chat con OPAI 2.0 (registrada por el bot OPAI 2.0)), y es condición para cerrar el Núcleo.
+**Nota del 26-oct-2026.** Los roles personalizados salen del backlog: van en el Brief 07c «Acceso y permisos», con permisos finos al menos tan completos como en 1.0 (Decisión de Carlos del 24-oct-2026, confirmada el 26-oct-2026 9:20 CLT). El alcance del supervisor por instalación y de los portales (brecha B3) también va en el Brief 07c, movido desde el Brief 12 (Decisión de Carlos, 26-oct-2026 9:36 CLT, chat con OPAI 2.0 (registrada por el bot OPAI 2.0)), y es condición para cerrar el Núcleo.
 
 ---
 
