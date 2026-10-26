@@ -26,7 +26,7 @@ export function VistaPreviaMarca({ nombre, primario, secundario, logo, hoy }: Pr
     // eslint-disable-next-line @next/next/no-img-element
     <img src={logo} alt={nombre} className="h-5 object-contain" />
   ) : (
-    <span className="text-sm font-bold tracking-wide uppercase">{nombre || "Tu empresa"}</span>
+    <span className="t-label">{nombre || "Tu empresa"}</span>
   );
   return (
     <SeccionTarjeta

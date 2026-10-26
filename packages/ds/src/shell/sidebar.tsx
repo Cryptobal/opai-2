@@ -1,4 +1,5 @@
 import { cn } from "../cn";
+import { Avatar } from "../components/avatar";
 import type { ItemMenu } from "../components/menu";
 import { PortalSwitcher } from "./portal-switcher";
 import {
@@ -8,7 +9,9 @@ import {
   type NavItem,
   type Portal,
   type Tenant,
+  type Usuario,
 } from "./types";
+import { UserMenu } from "./user-menu";
 
 type SidebarProps = {
   items: readonly NavItem[];
@@ -17,10 +20,11 @@ type SidebarProps = {
   portales: readonly Portal[];
   portalActual: string;
   tenant?: Tenant | undefined;
-  /** Cambiar de empresa (ítems del menú del monograma). */
+  /** Cambiar de empresa (ítems del menú del selector de portal). */
   empresas?: readonly ItemMenu[] | undefined;
-  /** Nombre del portal bajo la marca (el ERP no lleva), igual que en el riel de iPad. */
-  subtitulo?: string | undefined;
+  /** Usuario al pie de la barra (ShellDesktop): con `menuUsuario`, abre su menú hacia arriba. */
+  usuario?: Usuario | undefined;
+  menuUsuario?: readonly ItemMenu[] | undefined;
 };
 
 function agrupar(items: readonly NavItem[]): [string, NavItem[]][] {
@@ -60,7 +64,32 @@ function Item({
   );
 }
 
-/** Desktop: barra lateral de 248 px con marca y monograma de la empresa, grupos y Configuración al pie. */
+function Pie({ usuario, menu }: { usuario: Usuario; menu?: readonly ItemMenu[] | undefined }) {
+  return (
+    <div className="flex-none border-t border-border px-3 py-2">
+      {menu ? (
+        <UserMenu usuario={usuario} items={menu} lado="arriba-izquierda" conNombre />
+      ) : (
+        <span className="flex items-center gap-2.5 px-2 py-1">
+          <Avatar nombre={usuario.nombre} />
+          <span className="min-w-0">
+            <span className="t-label-sm block truncate text-fg">{usuario.nombre}</span>
+            {usuario.rol ? (
+              <span className="t-caption block truncate text-[11px] leading-[14px]">
+                {usuario.rol}
+              </span>
+            ) : null}
+          </span>
+        </span>
+      )}
+    </div>
+  );
+}
+
+/**
+ * Desktop (ShellDesktop): barra lateral de 248 px con la marca, el selector de portal y empresa en
+ * tarjeta, los grupos, Configuración y el usuario al pie.
+ */
 export function Sidebar(props: SidebarProps) {
   const { items, rutaActual, Link = LinkPorDefecto } = props;
   return (
@@ -68,17 +97,18 @@ export function Sidebar(props: SidebarProps) {
       aria-label="Principal"
       className="sticky top-0 hidden h-dvh w-[248px] flex-none flex-col border-r border-border bg-surface xl:flex"
     >
-      <div className="flex h-[60px] flex-none items-center justify-between border-b border-border pr-2 pl-5">
-        <span className="grid">
+      <div className="flex flex-none flex-col gap-3 px-3 pt-3.5 pb-1">
+        <span className="flex items-center justify-between px-2">
           <span className="text-[17px] leading-6 font-bold tracking-[-0.02em] text-fg">OPAI</span>
-          {props.subtitulo ? <span className="t-caption">{props.subtitulo}</span> : null}
+          <span className="t-caption">2.0</span>
         </span>
         <PortalSwitcher
           portales={props.portales}
           portalActual={props.portalActual}
           {...(props.tenant ? { tenant: props.tenant } : {})}
           {...(props.empresas ? { extra: props.empresas } : {})}
-          variante="monograma"
+          variante="tarjeta"
+          className="w-full"
         />
       </div>
       <div className="flex-1 overflow-y-auto py-2">
@@ -91,13 +121,14 @@ export function Sidebar(props: SidebarProps) {
           </div>
         ))}
       </div>
-      <div className="flex flex-col gap-px px-3 py-3">
+      <div className="flex flex-col gap-px px-3 py-2">
         {items
           .filter((i) => i.pie)
           .map((item) => (
             <Item key={item.href} item={item} rutaActual={rutaActual} Link={Link} />
           ))}
       </div>
+      {props.usuario ? <Pie usuario={props.usuario} menu={props.menuUsuario} /> : null}
     </nav>
   );
 }

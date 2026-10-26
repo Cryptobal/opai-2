@@ -3,6 +3,7 @@ import dynamic from "next/dynamic";
 
 import { Bloque } from "../bloques";
 import { MuestraActividad } from "./actividad";
+import { MuestraDsV2 } from "./ds-v2";
 import { MuestraOverlays } from "./overlays";
 import { MuestraSeleccion } from "./seleccion";
 import { MuestraSplit } from "./split";
@@ -14,6 +15,9 @@ const MuestraCampos = dynamic(() => import("./campos").then((m) => m.MuestraCamp
 export function BloqueNuevos({ state }: { state: EstadoPantalla }) {
   return (
     <>
+      <Bloque titulo="DS V2 · Botón con carga, destructivo, input compacto, KPI y error">
+        <MuestraDsV2 />
+      </Bloque>
       <Bloque titulo="SplitScreen · estados">
         <MuestraSplit state={state} />
       </Bloque>
