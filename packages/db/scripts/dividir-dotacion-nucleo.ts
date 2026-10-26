@@ -128,10 +128,19 @@ export async function dividirDotacion(
       });
       continue;
     }
-    const hecho = await db.$transaction((tx) => dividirUno(tx, tenantId, p.id));
-    if (hecho) r.puestos.push(hecho);
-    else r.saltados.push(p.id);
-    alAplicar?.(r); // respaldo tras cada puesto: si el proceso cae, el mapa llega hasta ahí
+    await db.$transaction(async (tx) => {
+      const hecho = await dividirUno(tx, tenantId, p.id);
+      if (!hecho) {
+        r.saltados.push(p.id);
+        return;
+      }
+      r.puestos.push(hecho);
+      // Respaldo ANTES del commit de la transacción: así el mapa de copias se vuelve durable a la
+      // vez (o antes) que los datos. Si el proceso cae tras escribir el respaldo y antes del commit,
+      // la transacción se revierte y las copias del respaldo no existen; borrarlas al revertir es un
+      // no-op seguro. Nunca queda un puesto dividido en la base sin estar en el respaldo.
+      alAplicar?.(r);
+    });
   }
   return r;
 }

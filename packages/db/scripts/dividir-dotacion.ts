@@ -8,9 +8,11 @@
 //   … tsx scripts/dividir-dotacion.ts --tenant <id|slug> --apply   aplica en ese tenant
 // con `DATABASE_URL_MIGRATE=<url propietario> pnpm --filter @opai/db exec` delante.
 //
-// --apply exige --tenant y escribe ANTES un respaldo con el plan y DESPUÉS el mapa
-// original → copias (con la dotación original) en `respaldo-dividir-dotacion-<tenant>-<fecha>.json`
-// (o en la ruta de --respaldo). Idempotente: una segunda corrida no encuentra nada que dividir.
+// --apply exige --tenant. Escribe el plan en un archivo APARTE
+// (`respaldo-dividir-dotacion-<tenant>-<fecha>-plan.json`) para que el respaldo incremental no lo
+// pise, y el mapa original → copias (con la dotación original) en
+// `respaldo-dividir-dotacion-<tenant>-<fecha>.json` (o en la ruta de --respaldo), reescrito antes del
+// commit de cada puesto. Idempotente: una segunda corrida no encuentra nada que dividir.
 //
 // Cómo revertir con el respaldo: por cada entrada de `puestos`, borrar las estructuras de sueldo de
 // nivel puesto de cada `copias[].id` (sus ítems se borran en cascada), borrar esos puestos y volver a
@@ -74,9 +76,12 @@ async function main(): Promise<void> {
   const ruta =
     argumento("--respaldo") ??
     `respaldo-dividir-dotacion-${tenant.slug}-${new Date().toISOString().replace(/[:.]/g, "-")}.json`;
+  const rutaPlan = ruta.replace(/\.json$/i, "") + "-plan.json";
   if (aplicar) {
+    // El plan va a un archivo aparte: el respaldo incremental (ruta) se reescribe desde el primer
+    // puesto dividido y no debe pisar el plan completo.
     const plan = await dividirDotacion(db, { tenantId: tenant.id, aplicar: false });
-    writeFileSync(ruta, JSON.stringify({ estado: "plan", ...plan }, null, 2));
+    writeFileSync(rutaPlan, JSON.stringify({ estado: "plan", ...plan }, null, 2));
   }
   const r = await dividirDotacion(db, {
     tenantId: tenant.id,
@@ -86,6 +91,7 @@ async function main(): Promise<void> {
   });
   if (aplicar) {
     writeFileSync(ruta, JSON.stringify({ estado: "aplicado", ...r }, null, 2));
+    console.log(`Plan: ${rutaPlan}`);
     console.log(`Respaldo: ${ruta}`);
   }
   imprimir(r, tenant.slug);

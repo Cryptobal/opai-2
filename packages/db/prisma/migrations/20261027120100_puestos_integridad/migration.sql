@@ -53,3 +53,20 @@ REVOKE ALL ON FUNCTION "core"."patron_en_uso_inmutable"() FROM PUBLIC;
 DROP TRIGGER IF EXISTS patron_en_uso ON "core"."patrones_turno";
 CREATE TRIGGER patron_en_uso BEFORE UPDATE ON "core"."patrones_turno"
   FOR EACH ROW EXECUTE FUNCTION "core"."patron_en_uso_inmutable"();
+
+-- Reversión (manual, solo referencia; no la aplica Prisma). Deja la base como antes de esta
+-- migración, sin tocar datos. Corre con el rol propietario. La migración `20261027120000` queda:
+--
+--   -- 1. Restaura el trigger mismo_tenant a su versión previa (solo instalacion_id y cargo_id):
+--   DROP TRIGGER IF EXISTS mismo_tenant ON "core"."puestos";
+--   CREATE TRIGGER mismo_tenant BEFORE INSERT OR UPDATE ON "core"."puestos"
+--     FOR EACH ROW EXECUTE FUNCTION "core"."verificar_mismo_tenant"(
+--       'instalacion_id', 'core.instalaciones', 'cargo_id', 'core.cargos');
+--
+--   -- 2. Quita el ciclo-del-patrón:
+--   DROP TRIGGER IF EXISTS puesto_ciclo_patron ON "core"."puestos";
+--   DROP FUNCTION IF EXISTS "core"."puesto_ciclo_del_patron"();
+--
+--   -- 3. Quita la inmutabilidad del patrón en uso:
+--   DROP TRIGGER IF EXISTS patron_en_uso ON "core"."patrones_turno";
+--   DROP FUNCTION IF EXISTS "core"."patron_en_uso_inmutable"();

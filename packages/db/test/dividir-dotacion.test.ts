@@ -113,4 +113,49 @@ describe.skipIf(!urlPropietario)("dividir-dotacion", () => {
     expect(r1.puestos.length + r2.puestos.length).toBe(1);
     expect(await e.admin.puesto.count({ where: { tenantId: t.b } })).toBe(2);
   });
+
+  it("respalda cada puesto dividido, con las copias y sus id (revisión 5659984187)", async () => {
+    // Tenant propio para no chocar con los de arriba; dos puestos divisibles en una instalación.
+    const tc = (
+      await e.admin.tenant.create({ data: { slug: `dd-c-${sufijo}`, nombre: "c", vertical: "seguridad" } })
+    ).id;
+    const cuenta = await e.admin.cuenta.create({ data: { tenantId: tc, nombre: "C" } });
+    const inst = await e.admin.instalacion.create({
+      data: { tenantId: tc, cuentaId: cuenta.id, nombre: "Planta" },
+    });
+    const cargo = await e.admin.cargo.create({ data: { tenantId: tc, nombre: "Guardia" } });
+    for (const [nombre, dotacion] of [["Día", 2], ["Noche", 3]] as const)
+      await e.admin.puesto.create({
+        data: {
+          tenantId: tc,
+          instalacionId: inst.id,
+          cargoId: cargo.id,
+          nombre,
+          diasTrabajo: 4,
+          diasDescanso: 4,
+          horaInicio: "08:00",
+          horaFin: "20:00",
+          dotacion,
+        },
+      });
+    const snapshots: { puestos: number; copiasConId: number }[] = [];
+    await dividirDotacion(e.admin, {
+      tenantId: tc,
+      aplicar: true,
+      // `alAplicar` corre dentro de la transacción de cada puesto (antes del commit): cada respaldo
+      // ya trae la copia con su id, así el mapa para revertir es durable junto con los datos.
+      alAplicar: (parcial) => {
+        const ultimo = parcial.puestos.at(-1);
+        snapshots.push({
+          puestos: parcial.puestos.length,
+          copiasConId: ultimo?.copias.filter((c) => c.id !== null).length ?? 0,
+        });
+      },
+    });
+    // Un respaldo por puesto dividido (no por saltado), creciendo 1→2, con las copias ya con id.
+    expect(snapshots).toEqual([
+      { puestos: 1, copiasConId: 1 },
+      { puestos: 2, copiasConId: 2 },
+    ]);
+  });
 });
