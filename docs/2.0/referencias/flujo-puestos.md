@@ -1,6 +1,8 @@
 # Flujo de pantallas de Puestos — solo referencia de flujo
 
-> **SOLO REFERENCIA DE FLUJO · NO ES UN DISEÑO APROBADO.** Describe en texto el recorrido de un prototipo de Claude Design (proyecto `4cb4b749-4284-48b5-8e9b-4209f4c86715`) hecho con el estilo de 1.0. Ese export se sacó del repositorio el 26-oct-2026 por la regla de Carlos: «nunca copiar el diselo de 1.0, se debe usar el design system aprobado https://claude.ai/design/p/44e4d7b9-7464-4771-bff8-07fcff4d573d» (Carlos, 26-oct-2026 17:18 CLT, transmitido en el encargo del PR #49). Aquí no hay CSS, HTML, tokens ni clases: todo estilo sale del DS 2.0 (`@opai/ds`) que está en `main`, y toda pantalla nueva necesita su diseño aprobado en DS 2.0 antes de construirse.
+> **SOLO REFERENCIA DE FLUJO.** Describe en texto el recorrido de un prototipo de Claude Design (proyecto `4cb4b749-4284-48b5-8e9b-4209f4c86715`) hecho con el estilo de 1.0. Ese export se sacó del repositorio el 26-oct-2026 por la regla de Carlos: «nunca copiar el diselo de 1.0, se debe usar el design system aprobado https://claude.ai/design/p/44e4d7b9-7464-4771-bff8-07fcff4d573d» (Carlos, 26-oct-2026 17:18 CLT, transmitido en el encargo del PR #49). Aquí no hay CSS, HTML, tokens ni clases: todo estilo sale del DS 2.0 (`@opai/ds`) que está en `main`.
+>
+> **El diseño sí está aprobado.** El diseño de Puestos en DS 2.0 (lista, hoja, Configuración de Patrones y Funciones, edición) lo aprobó Carlos el 26-oct-2026 20:08 CLT (`t436u`); su export está en `docs/2.0/diseño/export-puestos/` (Claude Design, proyecto `3e9a6632`, DS 2.0 v2 `44e4d7b9`). Este archivo queda como referencia del recorrido; el diseño vinculante es ese export.
 
 ## Recorrido
 

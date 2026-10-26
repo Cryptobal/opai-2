@@ -35,4 +35,4 @@ Fuentes verificadas el 26-oct-2026: código de 1.0 (copia del 24-sep, e3f267e0a)
 
 ---
 
-> **Nota del 26-oct-2026 (después de la aprobación; no cambia la hoja de arriba).** Configuración de Patrones y Funciones: aplazada hasta su diseño en DS V2 (pendiente de que Carlos lo confirme). Origen: revisión 5658390255 del «Revisor OPAI 2.0» y la regla de Carlos del 26-oct-2026 17:18 CLT («nunca copiar el diselo de 1.0, se debe usar el design system aprobado»). El nombre del patrón sí se ve en cada puesto. Seguimiento en el brief (§6 y §7).
+> **Nota del 26-oct-2026 (después de la aprobación; no cambia la hoja de arriba).** La Configuración de Patrones de turno y Funciones se diseñó en DS 2.0 (Claude Design, proyecto `3e9a6632`, DS 2.0 v2 `44e4d7b9`) y Carlos la aprobó el 26-oct-2026 20:08 CLT (`t436u`): entra en el PR #49 dentro del centro de Configuración, ya no se aplaza. El export está en `docs/2.0/diseño/export-puestos/`. El nombre del patrón se ve en cada puesto y en Configuración → Patrones de turno. Seguimiento en el brief (§6 y §7).
