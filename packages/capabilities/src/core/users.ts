@@ -1,9 +1,9 @@
 import { z } from "zod";
 
-import { esRol, PERMISOS_CORE, type Rol } from "@opai/domain";
+import { esRol, PERMISOS_CORE, portalesIncoherentes, type Rol } from "@opai/domain";
 
 import { defineCapability } from "../define";
-import { prohibido, reglaDeNegocio } from "../errores";
+import { conflicto, prohibido, reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 import { portalSchema, rolSchema, uuidSchema } from "./esquemas";
 import { validarAsignacionRol } from "./permisos/asignaciones";
@@ -44,7 +44,10 @@ export const usersList = defineCapability({
       include: { user: true, rolTenant: true },
       orderBy: { createdAt: "asc" },
     });
-    const accesos = await ultimosAccesos(ctx, filas.map((m) => m.userId));
+    const accesos = await ultimosAccesos(
+      ctx,
+      filas.map((m) => m.userId),
+    );
     return filas.map((m) => aMiembro(m, accesos.get(m.userId) ?? null));
   },
 });
@@ -68,13 +71,27 @@ export const usersUpdate = defineCapability({
   async handler(ctx, input, { dryRun }) {
     const actual = await buscar(ctx, input.membershipId);
     verificarJerarquia(ctx, actual, input.rol);
+    // Coherencia rol-portal (NÚCLEO-D1): valida la combinación final (rol nuevo o el que ya tenía,
+    // contra los portales nuevos o los que ya tenía). Un rol personalizado hereda la de su rol base.
+    const rolEfectivo = input.rol ?? (esRol(actual.rol) ? actual.rol : undefined);
+    if (
+      rolEfectivo &&
+      (input.rol !== undefined || input.portales !== undefined || input.estado === "activa")
+    ) {
+      const incoherentes = portalesIncoherentes(rolEfectivo, input.portales ?? actual.portales);
+      if (incoherentes.length > 0) {
+        throw reglaDeNegocio(`El rol "${rolEfectivo}" no admite el portal "${incoherentes[0]}".`);
+      }
+    }
     // Asignar o cambiar un rol personalizado es gobierno de acceso (§16.2): solo owner o admin y,
     // como `core.roles.assign` (soloPersonas, ADR-032), nunca una API key ni un agente. `update` no
     // puede ser `soloPersonas` entera (un agente sí cambia portales o estado), así que se bloquea solo
     // el `roleId`: si no, una key de admin asignaría o quitaría roles que `core.roles.assign` le veda.
     if (input.roleId !== undefined) {
       if (ctx.actor.tipo === "agent") {
-        throw prohibido("Solo una persona puede asignar o quitar un rol personalizado, no una API key.");
+        throw prohibido(
+          "Solo una persona puede asignar o quitar un rol personalizado, no una API key.",
+        );
       }
       exigeGestionDeRoles(ctx);
     }
@@ -82,7 +99,9 @@ export const usersUpdate = defineCapability({
       actual.rol === "owner" &&
       ((input.rol !== undefined && input.rol !== "owner") || input.estado === "suspendida");
     if (pierdeOwner && !(await quedanOtrosOwners(ctx, actual.id))) {
-      throw reglaDeNegocio("Es el único owner de la empresa. Asigna otro owner antes de cambiar su rol.");
+      throw reglaDeNegocio(
+        "Es el único owner de la empresa. Asigna otro owner antes de cambiar su rol.",
+      );
     }
     // Un owner tiene acceso total por definición: al promover a owner se descartan su rol personalizado
     // y sus excepciones, para que nunca quede un owner restringido que cuente como «otro owner» (§16.2).
@@ -105,7 +124,18 @@ export const usersUpdate = defineCapability({
     };
     if (dryRun) return { ...actual, ...data };
     await ctx.transaccion(async (tx) => {
-      await tx.membership.update({ where: { id: actual.id }, data });
+      // Compare-and-swap: la combinación validada debe seguir siendo la actual al escribir.
+      const r = await tx.membership.updateMany({
+        where: {
+          id: actual.id,
+          tenantId: ctx.tenantId,
+          rol: actual.rol,
+          portales: { equals: actual.portales },
+          estado: actual.estado,
+        },
+        data,
+      });
+      if (r.count !== 1) throw conflicto("La membresía cambió. Recarga y vuelve a intentarlo.");
       if (pasaAOwner) await tx.permisoExcepcion.deleteMany({ where: { membershipId: actual.id } });
     });
     return buscar(ctx, actual.id);
