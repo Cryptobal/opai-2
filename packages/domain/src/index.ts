@@ -20,5 +20,6 @@ export * from "./turnos";
 export * from "./vigencia";
 export * from "./datos-personales";
 export * from "./cumplimiento";
+export * from "./retencion";
 export * from "./etiquetas-datos-personales";
 export * from "./actividades-tratamiento";
