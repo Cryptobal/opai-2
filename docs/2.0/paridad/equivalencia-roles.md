@@ -45,7 +45,7 @@ o `nomina:*` solo si el usuario los necesita. Los cinco roles personalizados («
 
 | Rol legacy 1.0 | Rol 2.0 | Cómo | Notas |
 |---|---|---|---|
-| `inspector_dt` | **«Inspector DT»** (personalizado) | rol sembrado | Lectura de cumplimiento DT (personas, documentos, instalaciones) más **estructuras de sueldo y auditoría** (decisión de Carlos del 26-oct-2026, chat de Diseño y QA: «el Inspector DT ve sueldos y auditoría»); sin escritura. Los permisos DT se suman cuando el módulo de Asistencia/DT los declare. |
+| `inspector_dt` | **«Inspector DT»** (personalizado) | rol sembrado | Lectura de cumplimiento DT (personas, documentos, instalaciones) más **estructuras de sueldo y auditoría** (Decisión de Carlos, 26-oct-2026 20:48 CLT, respuesta t74s350 en el chat de Diseño y QA: "Sí, el Inspector DT ve sueldos y auditoría; cambia el seed"); sin escritura. Los permisos DT se suman cuando el módulo de Asistencia/DT los declare. |
 | `rrhh` | **«RRHH»** (personalizado acotado) | rol sembrado + concesión | Personas y documentos en lectura. **Nunca gerente** (mínimo privilegio): si gestiona nómina, el owner/admin le concede `nomina:*` cuando exista ese módulo. |
 | `finanzas` | **«Finanzas»** (personalizado acotado) | rol sembrado + concesión | Lectura para conciliar y facturar (cuentas, documentos). **Nunca gerente** (mínimo privilegio): el owner/admin le concede `finanzas:*` (y `nomina:*` si corresponde) cuando exista el módulo. |
 | `operaciones` | **gerente** (base) | directo | Gestión operativa; permisos de Operaciones cuando exista el módulo. |
@@ -61,9 +61,14 @@ excede lo que el actor que la hace ya tiene.
 
 ## Roles personalizados sembrados (solo `dev`)
 
-`pnpm --filter @opai/db seed:roles-base` crea (idempotente y **sin pisar** los que ya existan, en el
-tenant `gard`) los cinco roles personalizados que 1.0 tenía y los cinco roles base de 2.0 no cubren.
-El seed **se niega a correr en producción** (solo `dev`/`test`, igual que `seed:e2e`). Son roles
+`pnpm --filter @opai/db seed:roles-base`, en el tenant `gard`, crea los cinco roles personalizados
+que 1.0 tenía y los cinco roles base de 2.0 no cubren. Es **idempotente y no pisa los ajustes del
+tenant**: crea los que faltan y actualiza al conjunto canónico solo los roles que él mismo sembró y
+que el tenant no editó (detecta un conjunto de permisos previo conocido; cualquier otro conjunto se
+considera editado y se deja intacto). Así un «Inspector DT» sembrado antes de la decisión t74s350
+—sin sueldos ni auditoría— se completa al correr de nuevo, sin tocar los roles que el tenant ya
+ajustó (I1 de la QA del PR #60). El seed **se niega a correr en producción** (solo `dev`/`test`,
+igual que `seed:e2e`). Son roles
 normales (`sistema = false`): el owner o el admin los puede ajustar. Permisos del catálogo del Núcleo;
 los de los módulos (Operaciones, Rondas, Asistencia/DT, Nómina, Finanzas) se agregan cuando esos
 módulos declaren los suyos. Los tres acotados nacen **sin** `finanzas:*` ni `nomina:*`; el owner/admin
