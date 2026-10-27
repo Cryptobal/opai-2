@@ -26,7 +26,7 @@ describe.skipIf(!urlPropietario)("RLS de identidad y pertenencia", () => {
     await e.admin.membership.createMany({
       data: [
         { tenantId: idA, userId: u1, rol: "owner", portales: ["erp"] },
-        { tenantId: idB, userId: u1, rol: "viewer", portales: ["erp"] },
+        { tenantId: idB, userId: u1, rol: "viewer", portales: ["erp"], portalInicio: "erp" },
         { tenantId: idA, userId: u2, rol: "admin", portales: ["erp"] },
       ],
     });
@@ -81,5 +81,19 @@ describe.skipIf(!urlPropietario)("RLS de identidad y pertenencia", () => {
     expect(await e.appSinTenant.invitation.findMany()).toHaveLength(0);
     expect(await e.appSinTenant.apiKey.findMany()).toHaveLength(0);
     expect(await e.appSinTenant.usageEvent.findMany()).toHaveLength(0);
+  });
+  it("portal_inicio conserva el aislamiento: A no lee ni actualiza la preferencia de B", async () => {
+    expect(
+      await e.forTenant(idA).membership.updateMany({
+        where: { tenantId: idB, userId: u1 },
+        data: { portalInicio: "supervisor" },
+      }),
+    ).toEqual({ count: 0 });
+    const propias = await e.forUser(u1).membership.findMany();
+    expect(propias.find((m) => m.tenantId === idB)?.portalInicio).toBe("erp");
+    expect(propias.find((m) => m.tenantId === idA)?.portalInicio).toBeNull();
+    expect((await e.forUser(u2).membership.findMany()).every((m) => m.portalInicio === null)).toBe(
+      true,
+    );
   });
 });

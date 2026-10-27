@@ -7,6 +7,7 @@ export type MembresiaConTenant = {
   tenantId: string;
   rol: string;
   portales: string[];
+  portalInicio?: string | null;
   estado: string;
   tenant: { id: string; slug: string; nombre: string; vertical: string; estado: string };
 };
@@ -92,7 +93,10 @@ export const fuentesReales: Fuentes = {
       // Sin rol personalizado (roleId null) manda el rol base. Con un rol personalizado archivado se
       // deniega por defecto (lista vacía): nunca se vuelve al rol base, que daría más acceso (§16.2).
       permisosRol: rol ? (rol.archivadoEn ? [] : rol.permisos) : null,
-      excepciones: (m?.excepciones ?? []).map((e) => ({ permiso: e.permiso, conceder: e.conceder })),
+      excepciones: (m?.excepciones ?? []).map((e) => ({
+        permiso: e.permiso,
+        conceder: e.conceder,
+      })),
       instalaciones,
     };
   },

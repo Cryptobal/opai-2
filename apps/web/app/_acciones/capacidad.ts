@@ -8,6 +8,7 @@ import { obtenerCapacidad, type Resultado } from "@opai/capabilities";
 
 import { ejecutarComoUsuario, identidadActual, tieneAccesoAPortal } from "@/lib/servidor";
 import { COOKIE_TENANT, membresiasUsables } from "@/lib/tenant-actual";
+import { destinoDeInicio } from "@/lib/portal-inicio";
 
 /**
  * Acción de servidor genérica: la UI invoca capacidades con las mismas reglas que /api/v1
@@ -46,10 +47,11 @@ export async function ejecutarCapacidad(
 }
 
 /** Cambia la empresa actual (solo entre membresías utilizables) y va al destino (interno). */
-export async function cambiarTenant(tenantId: string, destino = "/"): Promise<void> {
+export async function cambiarTenant(tenantId: string, destino?: string): Promise<void> {
   const identidad = await identidadActual();
   if (!identidad) redirect("/login");
-  if (!membresiasUsables(identidad.membresias).some((m) => m.tenantId === tenantId)) return;
+  const actual = membresiasUsables(identidad.membresias).find((m) => m.tenantId === tenantId);
+  if (!actual) return;
   (await cookies()).set(COOKIE_TENANT, tenantId, {
     httpOnly: true,
     sameSite: "lax",
@@ -57,5 +59,5 @@ export async function cambiarTenant(tenantId: string, destino = "/"): Promise<vo
     path: "/",
     maxAge: 60 * 60 * 24 * 365,
   });
-  redirect(destino.startsWith("/") && !destino.startsWith("//") ? destino : "/");
+  redirect(destinoDeInicio({ ...identidad, actual }, destino));
 }

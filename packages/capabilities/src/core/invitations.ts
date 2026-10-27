@@ -1,9 +1,9 @@
 import { z } from "zod";
 
-import { PERMISOS_CORE } from "@opai/domain";
+import { PERMISOS_CORE, portalesIncoherentes } from "@opai/domain";
 
 import { defineCapability } from "../define";
-import { noEncontrado } from "../errores";
+import { noEncontrado, reglaDeNegocio } from "../errores";
 import { tenantActual, usuarioResponsable } from "./comun";
 import { emailSchema, portalSchema, rolSchema, uuidSchema } from "./esquemas";
 import { crearInvitacion, estadoInvitacion } from "./invitar";
@@ -27,6 +27,7 @@ export const usersInvite = defineCapability({
     email: emailSchema,
     rol: rolSchema,
     portales: z.array(portalSchema).min(1).default(["erp"]),
+    portalInicio: portalSchema.nullable().optional(),
   }),
   output: invitacionCreadaSchema,
   efecto: "escritura",
@@ -36,6 +37,15 @@ export const usersInvite = defineCapability({
     // base) ni con uno que conceda permisos que él mismo no tiene (acceso REAL). La jerarquía del rol
     // base manda aunque un rol a medida iguale el acceso de uno más alto; owner solo lo invita un owner.
     exigeAsignarRol(ctx, input.rol);
+    // Coherencia rol-portal (NÚCLEO-D1): hoy, que "cliente" es el portal del contacto de una cuenta,
+    // nunca de alguien interno a quien se invita.
+    const incoherentes = portalesIncoherentes(input.rol, input.portales);
+    if (incoherentes.length > 0) {
+      throw reglaDeNegocio(`El rol "${input.rol}" no admite el portal "${incoherentes[0]}".`);
+    }
+    if (input.portalInicio && !input.portales.includes(input.portalInicio)) {
+      throw reglaDeNegocio("El portal de inicio debe ser uno de los portales de la invitación.");
+    }
     const tenant = await tenantActual(ctx);
     const invitadoPor = { id: usuarioResponsable(ctx), nombre: ctx.usuario?.nombre ?? "OPAI" };
     return crearInvitacion(ctx.db, tenant, { ...input, invitadoPor }, ctx.servicios, dryRun);
