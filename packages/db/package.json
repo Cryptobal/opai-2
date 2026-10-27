@@ -18,7 +18,7 @@
     "test": "vitest run",
     "seed:maestros-demo": "tsx scripts/seed-maestros-demo.ts",
     "seed:roles-base": "tsx scripts/seed-roles-base.ts",
-    "seed:e2e": "tsx scripts/seed-e2e.ts"
+    "seed:e2e": "tsx scripts/seed-e2e.ts && pnpm --filter @opai/auth seed:e2e-mfa"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.10.1",

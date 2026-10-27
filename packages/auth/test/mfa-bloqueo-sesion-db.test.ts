@@ -1,8 +1,8 @@
 // NÚCLEO-F: bloqueo por cuenta del segundo factor CUANDO YA HAY SESIÓN (Google u otro proveedor
 // social con MFA pendiente, #68). En better-auth 1.7.12 el `accountLockout` del plugin `twoFactor`
 // solo corre en el desafío de login sin sesión; con sesión, `verifyTOTP`/`verifyBackupCode` no
-// cuentan fallos ni bloquean. `verificarSegundoFactor`/`verificarCodigoRespaldo` replican el mismo
-// tope con las columnas del plugin (Revisor, PR #65, review 5662337649).
+// cuentan fallos ni bloquean. El before hook del endpoint reserva atómicamente el intento también
+// cuando estas acciones lo invocan (Revisor, PR #65, reviews 5662337649 y 5662691274).
 import { randomUUID } from "node:crypto";
 
 import { createOTP } from "@better-auth/utils/otp";

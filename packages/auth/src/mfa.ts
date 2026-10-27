@@ -2,14 +2,10 @@ import { headers } from "next/headers";
 
 import { APIError } from "better-auth/api";
 
+import { clienteAuth } from "@opai/db";
+
 import { auth } from "./auth";
 import { MENSAJE_PAUSA } from "./bloqueo-login";
-import {
-  cuentaBloqueada,
-  cuentaMfaConSesion,
-  limpiarFallosDeCuenta,
-  registrarFalloDeCuenta,
-} from "./mfa-bloqueo-con-sesion";
 import type { FalloAcceso, ResultadoAcceso } from "./acciones";
 
 /**
@@ -86,10 +82,35 @@ export async function iniciarSegundoFactor(
   }
 }
 
-/** Confirma el enrolamiento con un código del autenticador (en sesión): activa el segundo factor. */
+/** ¿La sesión actual tiene un enrolamiento TOTP sin confirmar (`verified: false`)? */
+async function enrolamientoPendiente(h: Headers): Promise<boolean> {
+  const s = await auth.api.getSession({ headers: h });
+  if (!s?.session) return false;
+  const usuario = await clienteAuth().user.findUnique({
+    where: { id: s.user.id },
+    select: { twoFactorEnabled: true },
+  });
+  if (!usuario || usuario.twoFactorEnabled) return false;
+  const cuenta = await clienteAuth().twoFactor.findUnique({
+    where: { userId: s.user.id },
+    select: { verified: true },
+  });
+  return cuenta?.verified === false;
+}
+
+/**
+ * Confirma el enrolamiento con un código del autenticador (en sesión): activa el segundo factor.
+ * Exige que haya un enrolamiento TOTP pendiente: una cuenta con el segundo factor ya activo no puede
+ * reusar este camino (Revisor, PR #65, review 5662691274). El tope de intentos lo aplica el hook de
+ * `marcaMfaSesion` sobre `/two-factor/verify-totp`, igual que a `verificarSegundoFactor`.
+ */
 export async function confirmarSegundoFactor(code: string): Promise<ResultadoAcceso> {
+  const h = await headers();
+  if (!(await enrolamientoPendiente(h))) {
+    return fallo("error", "No hay un enrolamiento pendiente para confirmar.");
+  }
   try {
-    await auth.api.verifyTOTP({ body: { code }, headers: await headers() });
+    await auth.api.verifyTOTP({ body: { code }, headers: h });
     return { ok: true };
   } catch (error) {
     return falloDeVerificacion(error);
@@ -98,34 +119,25 @@ export async function confirmarSegundoFactor(code: string): Promise<ResultadoAcc
 
 /**
  * Verifica el segundo factor en el login con un código TOTP (desafío por cookie, sin sesión aún).
- * Si YA hay una sesión (Google u otro proveedor social con MFA pendiente, #68), el bloqueo por cuenta
- * del plugin no se aplica (ver `mfa-bloqueo-con-sesion.ts`); se replica aquí con las mismas columnas.
+ * Si YA hay una sesión (Google u otro proveedor social con MFA pendiente, #68), el tope de intentos
+ * lo aplica el hook de `marcaMfaSesion` sobre el endpoint (ver `mfa-bloqueo-con-sesion.ts`), no esta
+ * función: así se aplica igual al POST directo al endpoint (Revisor, PR #65, review 5662691274).
  */
 export async function verificarSegundoFactor(code: string): Promise<ResultadoAcceso> {
-  const h = await headers();
-  const cuenta = await cuentaMfaConSesion(h);
-  if (cuenta && cuentaBloqueada(cuenta)) return fallo("bloqueada", MENSAJE_PAUSA);
   try {
-    await auth.api.verifyTOTP({ body: { code }, headers: h });
-    if (cuenta) await limpiarFallosDeCuenta(cuenta.id);
+    await auth.api.verifyTOTP({ body: { code }, headers: await headers() });
     return { ok: true };
   } catch (error) {
-    if (cuenta) await registrarFalloDeCuenta(cuenta.id);
     return falloDeVerificacion(error);
   }
 }
 
 /** Verifica el segundo factor en el login con un código de respaldo (de un solo uso). */
 export async function verificarCodigoRespaldo(code: string): Promise<ResultadoAcceso> {
-  const h = await headers();
-  const cuenta = await cuentaMfaConSesion(h);
-  if (cuenta && cuentaBloqueada(cuenta)) return fallo("bloqueada", MENSAJE_PAUSA);
   try {
-    await auth.api.verifyBackupCode({ body: { code }, headers: h });
-    if (cuenta) await limpiarFallosDeCuenta(cuenta.id);
+    await auth.api.verifyBackupCode({ body: { code }, headers: await headers() });
     return { ok: true };
   } catch (error) {
-    if (cuenta) await registrarFalloDeCuenta(cuenta.id);
     return falloDeVerificacion(error);
   }
 }

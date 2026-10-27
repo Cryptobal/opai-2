@@ -1,9 +1,9 @@
 // Enrola el segundo factor del usuario plataforma de los e2e con un secreto TOTP FIJO y conocido
 // (NÚCLEO-F). Desde que el segundo factor es obligatorio para las cuentas de plataforma, los e2e que
 // entran con ese usuario deben pasar el segundo paso; con un secreto fijo el test genera el TOTP.
-// Solo desarrollo/CI y solo contra una base local. En CI corre encadenado a `seed:multiempresa-e2e`
-// (el último seed del job de e2e, ya con el owner creado por `seed:platform-owner`), así el owner de
-// e2e entra por /mfa sin tener que tocar el workflow. Standalone:
+// Solo desarrollo/CI y solo contra una base local. Corre encadenado a `@opai/db seed:e2e`, común a
+// los jobs de e2e y rendimiento, ya con el owner creado por `seed:platform-owner`. Así ambos jobs
+// entran por /mfa sin cambiar workflows. Standalone:
 //   DATABASE_URL_MIGRATE=<url propietario local> pnpm --filter @opai/auth seed:e2e-mfa
 //
 // Acceso directo a la base (`dbAdmin()`, DATABASE_URL_MIGRATE) y SIN importar `../src/auth`: ese

@@ -1,57 +1,69 @@
-import { clienteAuth } from "@opai/db";
+import { clienteAuth, Prisma } from "@opai/db";
 
-import { auth } from "./auth";
 import { MFA_BLOQUEO_SEGUNDOS, MFA_LIMITE_INTENTOS } from "./opciones";
 
 /**
- * Bloqueo por cuenta del segundo factor CUANDO YA HAY SESIÓN (Google u otro proveedor social con MFA
+ * Bloqueo por cuenta del segundo factor CUANDO YA HAY SESIÓN (enrolamiento o Google con MFA
  * pendiente, #68): en better-auth 1.7.12 el `accountLockout` del plugin `twoFactor` (y el tope de
  * intentos por desafío) solo corren en el login sin sesión (`isSignIn` dentro de `verifyTwoFactor`);
- * con sesión, `verifyTOTP`/`verifyBackupCode` no cuentan fallos ni bloquean (Revisor, PR #65, review
- * 5662337649). Esto reutiliza las mismas columnas del plugin (`failedVerificationCount`,
- * `lockedUntil`) y el mismo tope (`MFA_LIMITE_INTENTOS`/`MFA_BLOQUEO_SEGUNDOS`) para esa sesión, sin
- * migración nueva ni tocar el plugin.
+ * con sesión, `verifyTOTP`/`verifyBackupCode` no cuentan fallos ni bloquean. Esto reutiliza las
+ * mismas columnas del plugin (`failedVerificationCount`, `lockedUntil`) y el mismo tope
+ * (`MFA_LIMITE_INTENTOS`/`MFA_BLOQUEO_SEGUNDOS`) para esa sesión, sin migración nueva ni tocar el
+ * plugin. Lo engancha un `before`/`after` hook de `marcaMfaSesion` (`mfa-sesion.ts`) sobre
+ * `/two-factor/verify-totp` y `/two-factor/verify-backup-code` (Revisor, PR #65, review 5662691274):
+ * así cubre la Server Action y el POST directo por igual, no solo quien pasa por `mfa.ts`.
  */
-type CuentaMfa = { id: string; lockedUntil: Date | null };
+export type ReservaMfaSesion = "sin-enrolar" | "bloqueada" | "reservada";
 
-/** La cuenta del segundo factor, solo si YA hay una sesión (no el desafío de login sin sesión). */
-export async function cuentaMfaConSesion(headersReq: Headers): Promise<CuentaMfa | null> {
-  const s = await auth.api.getSession({ headers: headersReq });
-  if (!s?.session) return null;
-  return clienteAuth().twoFactor.findUnique({
-    where: { userId: s.user.id },
-    select: { id: true, lockedUntil: true },
-  });
-}
-
-export function cuentaBloqueada(cuenta: CuentaMfa): boolean {
-  return !!cuenta.lockedUntil && cuenta.lockedUntil.getTime() > Date.now();
-}
-
-/** Cuenta un fallo y bloquea la cuenta si llega al tope. Best-effort: no rompe el flujo de login. */
-export async function registrarFalloDeCuenta(id: string): Promise<void> {
-  try {
-    const r = await clienteAuth().twoFactor.update({
-      where: { id },
-      data: { failedVerificationCount: { increment: 1 } },
-      select: { failedVerificationCount: true },
+/**
+ * Reserva un intento de verificación ANTES de comprobar el código: incrementa el contador y, si
+ * llega al tope, fija el bloqueo en el mismo UPDATE con retorno de Prisma. El WHERE compara el
+ * contador y bloqueo leídos; si otra petición los cambió, reintenta sin verificar el código.
+ * Así no hay TOCTOU: como mucho `MFA_LIMITE_INTENTOS` reservas por cuenta
+ * quedan en `reservada` antes de que las siguientes vean `bloqueada`, sin importar cuántas lleguen
+ * a la vez. Un bloqueo ya vencido se trata como contador en cero (igual que `assertTwoFactorNotLocked`
+ * del plugin), para que no arrastre los fallos de antes del vencimiento.
+ */
+export async function reservarIntentoMfaConSesion(userId: string): Promise<ReservaMfaSesion> {
+  const db = clienteAuth();
+  for (;;) {
+    const cuenta = await db.twoFactor.findUnique({
+      where: { userId },
+      select: { id: true, failedVerificationCount: true, lockedUntil: true },
     });
-    if (r.failedVerificationCount >= MFA_LIMITE_INTENTOS) {
-      await clienteAuth().twoFactor.updateMany({
-        where: { id, failedVerificationCount: { gte: MFA_LIMITE_INTENTOS } },
-        data: { lockedUntil: new Date(Date.now() + MFA_BLOQUEO_SEGUNDOS * 1000) },
+    if (!cuenta) return "sin-enrolar";
+    const ahora = Date.now();
+    if (cuenta.lockedUntil && cuenta.lockedUntil.getTime() > ahora) return "bloqueada";
+    const expirado = cuenta.lockedUntil !== null;
+    const siguiente = (expirado ? 0 : cuenta.failedVerificationCount) + 1;
+    const bloquear = siguiente >= MFA_LIMITE_INTENTOS;
+    try {
+      await db.twoFactor.update({
+        where: {
+          id: cuenta.id,
+          userId,
+          failedVerificationCount: cuenta.failedVerificationCount,
+          lockedUntil: cuenta.lockedUntil,
+        },
+        data: {
+          failedVerificationCount: siguiente,
+          lockedUntil: bloquear ? new Date(ahora + MFA_BLOQUEO_SEGUNDOS * 1000) : null,
+        },
+        select: { id: true },
       });
+      return "reservada";
+    } catch (error) {
+      if (!(error instanceof Prisma.PrismaClientKnownRequestError) || error.code !== "P2025")
+        throw error;
     }
-  } catch {
-    console.warn("[mfa] no se pudo registrar el fallo del segundo factor con sesión");
   }
 }
 
-/** Limpia el contador tras un código correcto. Best-effort: no rompe el flujo de login. */
-export async function limpiarFallosDeCuenta(id: string): Promise<void> {
+/** Limpia el contador de la cuenta tras un código correcto. Best-effort: no rompe el flujo de login. */
+export async function limpiarFallosMfaConSesion(userId: string): Promise<void> {
   try {
-    await clienteAuth().twoFactor.update({
-      where: { id },
+    await clienteAuth().twoFactor.updateMany({
+      where: { userId },
       data: { failedVerificationCount: 0, lockedUntil: null },
     });
   } catch {
