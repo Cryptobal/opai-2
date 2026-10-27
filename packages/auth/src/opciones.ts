@@ -10,6 +10,15 @@ export const VIGENCIA_ENLACE_SEGUNDOS = 72 * 60 * 60;
 /** Recuperación de contraseña: 30 minutos (diseño de acceso aprobado), un solo uso, solo hash. */
 export const VIGENCIA_RECUPERACION_SEGUNDOS = 30 * 60;
 
+/**
+ * Bloqueo por cuenta del paso de verificar el segundo factor (NÚCLEO-F), alineado con el bloqueo de
+ * login: 5 códigos fallidos consecutivos y pausa de 15 minutos. Lo aplica `accountLockout` del plugin
+ * twoFactor (atómico, por cuenta, a través de desafíos y factores); el mensaje se normaliza al mismo
+ * aviso genérico que el login (`MENSAJE_PAUSA`) en las Server Actions, sin revelar intentos restantes.
+ */
+export const MFA_LIMITE_INTENTOS = 5;
+export const MFA_BLOQUEO_SEGUNDOS = 15 * 60;
+
 /** Reglas de contraseña visibles en las pantallas de acceso. */
 export function reglasPassword(p: string) {
   return [

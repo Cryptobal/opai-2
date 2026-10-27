@@ -2,6 +2,7 @@ import { prismaAdapter } from "@better-auth/prisma-adapter";
 import { betterAuth } from "better-auth";
 import { APIError, createAuthMiddleware } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
+import { twoFactor } from "better-auth/plugins";
 
 import { clienteAuth } from "@opai/db";
 import { COMUNICABLES_NUCLEO, renderizarCorreo } from "@opai/domain";
@@ -20,6 +21,8 @@ import {
 import {
   camposUsuario,
   LARGO_MINIMO_PASSWORD,
+  MFA_BLOQUEO_SEGUNDOS,
+  MFA_LIMITE_INTENTOS,
   origenesConfiables,
   proveedoresSociales,
   VIGENCIA_RECUPERACION_SEGUNDOS,
@@ -140,7 +143,23 @@ export const auth = betterAuth({
       }
     }),
   },
-  plugins: [nextCookies()],
+  // Segundo factor (NÚCLEO-F, ADR-015). TOTP con códigos de respaldo; el secreto y los códigos los
+  // cifra el plugin con `BETTER_AUTH_SECRET` (sin secreto nuevo). El bloqueo del paso de verificar el
+  // código es por cuenta (atómico, a través de desafíos y factores), alineado con el bloqueo de login;
+  // el mensaje se normaliza a `MENSAJE_PAUSA` en las Server Actions (ver `mfa.ts`). `nextCookies()`
+  // queda último (requisito de Better Auth) y fija las cookies `opai.*`, incluida la del desafío 2FA.
+  plugins: [
+    twoFactor({
+      issuer: "OPAI",
+      totpOptions: { digits: 6, period: 30 },
+      accountLockout: {
+        enabled: true,
+        maxFailedAttempts: MFA_LIMITE_INTENTOS,
+        durationSeconds: MFA_BLOQUEO_SEGUNDOS,
+      },
+    }),
+    nextCookies(),
+  ],
 });
 
 export type Auth = typeof auth;
