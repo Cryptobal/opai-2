@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 
 import { obtenerCapacidad, type Resultado } from "@opai/capabilities";
 
-import { ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
+import { ejecutarComoUsuario, identidadActual, tieneAccesoAPortal } from "@/lib/servidor";
 import { COOKIE_TENANT, membresiasUsables } from "@/lib/tenant-actual";
 
 /**
@@ -22,6 +22,17 @@ export async function ejecutarCapacidad(
   const capacidad = obtenerCapacidad(id);
   if (!capacidad || capacidad.interna) {
     return { ok: false, error: { code: "NOT_FOUND", message: `Capacidad "${id}" no existe.` } };
+  }
+  // La UI solo puede invocar capacidades del portal al que el usuario tiene acceso en la empresa
+  // actual (ADR-016): sin acceso, ni la búsqueda (⌘K) ni la campana ni nada del shell devuelven
+  // datos del portal ajeno, igual que la página muestra «Sin permisos». Ocultarlo en la UI no basta
+  // (`marco-shell.tsx` ya no ofrece búsqueda ni ⌘K sin acceso); el guard vive también aquí.
+  const identidad = await identidadActual();
+  if (!identidad) {
+    return { ok: false, error: { code: "UNAUTHENTICATED", message: "Inicia sesión." } };
+  }
+  if (!tieneAccesoAPortal(identidad, portal)) {
+    return { ok: false, error: { code: "FORBIDDEN", message: "No tienes acceso a este portal." } };
   }
   const r = await ejecutarComoUsuario(portal, id, input, dryRun);
   // Una escritura real vacía la caché del navegador (staleTimes de 5 min, ADR-045): en la
