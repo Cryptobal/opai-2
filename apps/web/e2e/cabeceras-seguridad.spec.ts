@@ -44,9 +44,9 @@ test.describe("cabeceras de seguridad (núcleo P1)", () => {
     expect(h["permissions-policy"]).toBe("camera=(self), geolocation=(self), microphone=()");
     expect(h["x-frame-options"]).toBe("DENY");
     // HSTS solo en producción (los navegadores la ignoran sobre HTTP). Si está, debe ser exacta y sin
-    // preload; se detecta por la propia cabecera para no depender del modo del servidor de prueba.
+    // includeSubDomains/preload; no hay inventario HTTPS verificado de todos los subdominios.
     const hsts = h["strict-transport-security"];
-    if (hsts) expect(hsts).toBe("max-age=63072000; includeSubDomains");
+    if (hsts) expect(hsts).toBe("max-age=63072000");
   });
 
   test("ninguna ruta principal reporta violaciones de CSP", async ({ page }) => {

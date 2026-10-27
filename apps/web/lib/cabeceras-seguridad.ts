@@ -54,12 +54,12 @@ export function cabecerasSeguridad(opciones: {
     // Report-Only por ahora (ver cabecera del archivo): reporta, no bloquea.
     { key: "Content-Security-Policy-Report-Only", value: construirCsp(opciones.desarrollo) },
   ];
-  // HSTS solo en producción. Sin `preload` hasta que Carlos lo decida (inscribir el dominio en la
-  // lista de precarga es difícil de revertir).
+  // HSTS solo para el host servido. NÚCLEO-H: sin inventario HTTPS verificado de TODOS los
+  // subdominios no se habilitan includeSubDomains ni preload.
   if (opciones.produccion)
     cabeceras.push({
       key: "Strict-Transport-Security",
-      value: "max-age=63072000; includeSubDomains",
+      value: "max-age=63072000",
     });
   return cabeceras;
 }
