@@ -35,7 +35,7 @@ async function Contenido<T>({
   const identidad = await requerirIdentidad(ruta);
   const acceso = tieneAccesoAPortal(identidad, portal);
   // Usuario de plataforma sin empresa: su inicio es Plataforma.
-  if (!acceso && portal === "erp" && !identidad.actual && identidad.usuario.platformRole) {
+  if (!acceso && portal === "erp" && !identidad.actual && tieneAccesoAPortal(identidad, "platform")) {
     redirect("/platform");
   }
   const sinEmpresa = !identidad.actual && portal !== "platform";
@@ -50,11 +50,11 @@ async function Contenido<T>({
   const extra = acceso && cargar && opciones ? opciones(datos) : {};
   // El esqueleto acompaña al contenido (lo intercambia el CSS en navegaciones lentas, ver `EstadoEnlace`);
   // el resto de las opciones son la cabecera que la página fija en el shell persistente del layout.
-  const { esqueleto, ...cabecera } = { ...pagina, ...extra };
+  const { esqueleto, insignia, ...cabecera } = { ...pagina, ...extra };
   return (
     <>
       <CabeceraPagina
-        {...(acceso ? cabecera : { titulo: "Sin permisos" })}
+        {...(acceso ? { ...cabecera, insignia } : { titulo: "Sin permisos" })}
         generado={marcaGenerado()}
         epoca={epocaDeIdentidad(identidad)}
       />
@@ -68,7 +68,9 @@ async function Contenido<T>({
         ) : (
           <Forbidden
             descripcion={
-              sinEmpresa
+              portal === "platform"
+                ? "Plataforma es solo para el equipo de OPAI."
+                : sinEmpresa
                 ? "Aún no perteneces a ninguna empresa activa. Pide una invitación a su administrador."
                 : "No tienes acceso a este portal en la empresa actual."
             }

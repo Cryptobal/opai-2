@@ -56,6 +56,8 @@ describe.skipIf(!urlPropietario)("roles y excepciones en base real", () => {
     return mod.crearContexto({
       tenantId,
       actor: { tipo: "user", id: userId },
+      portal: "erp",
+      portalesMembresia: m?.portales ?? [],
       usuario: { id: userId, nombre: "Vic", email: "vic@prueba.cl", platformRole: null },
       rol: "viewer",
       // Igual que el borde (fuentes.ts): rol archivado deniega por defecto; sin rol, el rol base.

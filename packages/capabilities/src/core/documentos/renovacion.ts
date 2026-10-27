@@ -14,6 +14,7 @@ export const documentosPedirRenovacion = defineCapability({
   descripcion:
     "Pide a una o más personas que renueven documentos (vencidos, por vencer o faltantes) con un correo a su dirección laboral o personal, usando la plantilla editable del evento. Devuelve a quién se envió y a quién no (sin correo).",
   permiso: PERMISOS_CORE.documentosManage,
+  portales: ["erp", "supervisor"],
   input: z.object({
     pedidos: z
       .array(z.object({ personaId: z.uuid(), tipoIds: z.array(z.uuid()).min(1).max(20) }))

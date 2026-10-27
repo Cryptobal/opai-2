@@ -58,6 +58,8 @@ describe.skipIf(!urlPropietario)("cumplimiento (DPA/DPO) en base real", () => {
     mod.crearContexto({
       tenantId,
       actor: { tipo: "user", id: userId },
+      portal: "erp",
+      portalesMembresia: ["erp"],
       usuario: { id: userId, nombre: "Olivia", email: "olivia@prueba.cl", platformRole: null },
       rol: "owner",
       medidor: { registrar: async () => undefined },
