@@ -7,15 +7,18 @@ import {
   Home,
   KeyRound,
   LayoutGrid,
+  LogOut,
   type LucideIcon,
   MapPin,
   Palette,
   Pin,
   Plus,
   Settings,
+  Settings2,
   SlidersHorizontal,
   UserCheck,
   Users,
+  UserRound,
 } from "lucide-react";
 
 /** Iconos nombrados en manifests y navegación. Un nombre desconocido usa LayoutGrid. */
@@ -28,14 +31,17 @@ const ICONOS: Record<string, LucideIcon> = {
   Home,
   KeyRound,
   LayoutGrid,
+  LogOut,
   MapPin,
   Palette,
   Pin,
   Plus,
   Settings,
+  Settings2,
   SlidersHorizontal,
   UserCheck,
   Users,
+  UserRound,
 };
 
 export function icono(nombre: string): LucideIcon {

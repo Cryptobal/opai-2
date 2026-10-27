@@ -6,9 +6,16 @@ test.use({ actionTimeout: 30_000 });
 test.setTimeout(180_000);
 
 test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }, info) => {
+  const errores: string[] = [];
+  page.on("pageerror", (e) => { errores.push(e.message); });
   await page.emulateMedia({ reducedMotion: "reduce" });
   if (!E2E_PASSWORD) throw new Error("Falta contraseña E2E");
   await entrar(page);
+  // Estado inicial determinista incluso si una ejecución anterior se interrumpió antes de limpiar.
+  await page.goto("/configuracion/preferencias");
+  const segunRol = page.getByRole("radio", { name: /^Según mi rol/ });
+  await segunRol.click();
+  await expect(segunRol).toHaveAttribute("data-state", "checked");
   await page.goto("/");
   await expect(page.getByRole("heading", { name: /^Bandeja · \d/ })).toBeVisible();
   const nav = page
@@ -22,6 +29,14 @@ test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }
     await expect(mas.getByRole("button", { name: "Instalaciones", exact: true })).toBeVisible();
     await expect(mas.getByRole("button", { name: "Configuración", exact: true })).toBeVisible();
     await page.keyboard.press("Escape");
+    await expect(nav.getByRole("button", { name: "Más opciones" })).toBeFocused();
+    // Segunda apertura con teclado: conserva el Sheet diferido y devuelve el foco al disparador.
+    await page.keyboard.press("Enter");
+    await expect(mas).toBeVisible();
+    await page.keyboard.press("Tab");
+    await expect.poll(() => mas.evaluate((el) => el.contains(document.activeElement))).toBe(true);
+    await page.keyboard.press("Escape");
+    await expect(nav.getByRole("button", { name: "Más opciones" })).toBeFocused();
   } else {
     const clientes = nav.getByRole("button", { name: "Clientes", exact: true });
     if (await clientes.getAttribute("aria-expanded") !== "true") await clientes.click();
@@ -65,7 +80,18 @@ test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }
     await expect(nav.getByRole("link", { name: "Cuentas", exact: true }).first()).toBeVisible();
     await expect(nav.getByRole("link", { name: "Instalaciones", exact: true }).first()).toBeVisible();
   }
-  await page.goto("/personas");
+  // Los enlaces cliente conservan el mismo nodo del shell, incluso al aplicar preferencias diferidas.
+  await nav.evaluate((el) => el.setAttribute("data-prueba-persistencia", "mismo-shell"));
+  await nav.getByRole("link", { name: "Cuentas", exact: true }).filter({ visible: true }).first().click();
+  await expect(page).toHaveURL(/\/cuentas$/);
+  await expect(nav).toHaveAttribute("data-prueba-persistencia", "mismo-shell");
+  if (info.project.name !== "telefono") {
+    const personas = nav.getByRole("button", { name: "Personas", exact: true });
+    if (await personas.getAttribute("aria-expanded") !== "true") await personas.click();
+  }
+  await nav.getByRole("link", { name: "Personas", exact: true }).filter({ visible: true }).first().click();
+  await expect(page).toHaveURL(/\/personas$/);
+  await expect(nav).toHaveAttribute("data-prueba-persistencia", "mismo-shell");
   await expect.poll(() => page.evaluate(() => Object.keys(localStorage).some((k) =>
     k.startsWith("opai_recientes_") && localStorage.getItem(k)?.includes('"/personas"'),
   ))).toBe(true);
@@ -75,6 +101,7 @@ test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }
   await expect(paleta.getByText("Acciones", { exact: true })).toBeVisible();
   await page.keyboard.press("Escape");
   await page.goto("/configuracion/preferencias");
+  expect(errores).toEqual([]);
   await page.getByRole("radio", { name: /^Personas/ }).click();
   await expect(page.getByRole("radio", { name: /^Personas/ })).toHaveAttribute(
     "data-state",
@@ -83,6 +110,7 @@ test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }
   if (info.project.name === "telefono")
     await expect(nav.getByRole("link", { name: "Cargos y sueldos", exact: true })).toBeVisible();
   await page.getByRole("radio", { name: /^Según mi rol/ }).click();
+  await expect(page.getByRole("radio", { name: /^Según mi rol/ })).toHaveAttribute("data-state", "checked");
   await page.goto("/");
   await expect(page.getByRole("heading", { name: /^Bandeja · \d/ })).toBeVisible();
   await page

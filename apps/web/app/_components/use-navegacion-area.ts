@@ -28,9 +28,11 @@ export function useNavegacionArea(portal: string, activo: boolean) {
   const versiones = useRef<Record<string, number>>({});
   const cola = useRef(Promise.resolve());
   const [cargado, setCargado] = useState(false);
+  const [errorCarga, setErrorCarga] = useState(false);
   const cargar = useCallback(async () => {
-    const r = await ejecutarCapacidad(portal, "core.config.get", { modulo: "core" });
-    if (!r.ok) return;
+    setErrorCarga(false);
+    const r = await ejecutarCapacidad(portal, "core.config.get", { modulo: "core" }).catch(() => ({ ok: false } as const));
+    if (!r.ok) { setErrorCarga(true); return false; }
     const datos = r.data as Campo[];
     const de = (c: string) => datos.find((d) => d.clave === c)?.valor;
     versiones.current = Object.fromEntries(datos.map((d) => [d.clave, d.version ?? 0]));
@@ -42,6 +44,7 @@ export function useNavegacionArea(portal: string, activo: boolean) {
     actual.current = p;
     setPrefs(p);
     setCargado(true);
+    return true;
   }, [portal]);
   useEffect(() => {
     if (!activo) return;
@@ -54,7 +57,7 @@ export function useNavegacionArea(portal: string, activo: boolean) {
     (clave: string, transformar: (p: Preferencias) => Preferencias | Promise<Preferencias>) => {
       cola.current = cola.current
         .then(async () => {
-          if (!cargado) await cargar();
+          if (!cargado && !(await cargar())) return;
           const revision = versiones.current[clave] ?? 0;
           const siguiente = await transformar(actual.current);
           if ((versiones.current[clave] ?? 0) !== revision) {
@@ -121,5 +124,5 @@ export function useNavegacionArea(portal: string, activo: boolean) {
       ...p,
       fijados: p.fijados.filter((f) => f.href !== href),
     }));
-  return { ...prefs, cargado, fijarAreaAbierta, elegirAreaPrincipal, fijar, desfijar };
+  return { ...prefs, cargado, errorCarga, reintentar: cargar, fijarAreaAbierta, elegirAreaPrincipal, fijar, desfijar };
 }

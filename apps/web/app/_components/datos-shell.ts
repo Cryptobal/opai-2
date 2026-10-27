@@ -1,4 +1,5 @@
 import { esRol, esVertical, vocabulario } from "@opai/domain";
+import { createElement } from "react";
 
 import type { Identidad } from "@/lib/actor";
 import { tieneAccesoAPortal } from "@/lib/acceso-portal";
@@ -7,6 +8,7 @@ import { NAV_PLATAFORMA, navegacionErp, navegacionPortal } from "@/lib/navegacio
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
 
 import type { DatosShell } from "./marco-shell";
+import { icono } from "./iconos";
 import { conPortalActual, ETIQUETA_ROL, PORTALES, portalesVisibles } from "./portales";
 
 /** Datos del shell (navegación, portales, empresa y usuario) de una identidad. Sin contadores: la
@@ -46,6 +48,7 @@ export function datosShell(identidad: Identidad, portal: string): DatosShell {
     acceso,
     epoca: epocaDe(usuario.id, actual?.tenantId ?? null),
     nav,
+    iconos: Object.fromEntries([...new Set([...nav.map((n) => n.icono), "Building2", "Settings2", "UserRound", "LogOut"])].map((nombre) => [nombre, createElement(icono(nombre))])),
     ...(erp ? { grupos: erp.grupos, navInferior: erp.navInferior, acciones: erp.acciones } : {}),
     // Sin acceso, el portal actual no está en `visibles`; `conPortalActual` lo antepone para que el
     // selector lo nombre (ADR-050, #54), aunque la navegación vaya vacía (H1).

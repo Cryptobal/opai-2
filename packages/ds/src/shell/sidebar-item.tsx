@@ -1,7 +1,7 @@
 import { cn } from "../cn";
 import { Avatar } from "../components/avatar";
 import type { ItemMenu } from "../components/menu";
-import { BotonFijar } from "./boton-fijar";
+import { PinDiferido as BotonFijar } from "./pin-diferido";
 import { esActivo, type LinkComponent, type NavItem, type Usuario } from "./types";
 import { UserMenu } from "./user-menu";
 

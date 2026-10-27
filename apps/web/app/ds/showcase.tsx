@@ -1,18 +1,20 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 
 import { Button, type EstadoPantalla } from "@opai/ds";
 
 import { BloqueComponentes } from "./bloque-componentes";
 import { BloqueNuevos } from "./componentes-nuevos/bloque";
-import { MuestraPwa } from "./componentes-nuevos/pwa";
-import { MuestraNavegacion } from "./componentes-nuevos/navegacion";
 import { BloqueDetalle } from "./bloque-detalle";
 import { BloqueLista } from "./bloque-lista";
 import { Bloque, BloqueFormulario, BloquePlanillaYDashboard } from "./bloques";
 
 const ESTADOS: EstadoPantalla[] = ["ready", "loading", "empty", "error", "forbidden"];
+// Demostración bajo el primer viewport: no incorpora fijados y sus controles al arranque de /ds.
+const MuestraNavegacion = dynamic(() => import("./componentes-nuevos/navegacion").then((m) => m.MuestraNavegacion), { ssr: false });
+const MuestraPwa = dynamic(() => import("./componentes-nuevos/pwa").then((m) => m.MuestraPwa), { ssr: false });
 
 function alternarTema(): void {
   const html = document.documentElement;

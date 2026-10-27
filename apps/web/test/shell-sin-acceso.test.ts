@@ -1,6 +1,7 @@
-import { createElement } from "react";
+import { createElement, isValidElement, type ReactNode } from "react";
+import type * as React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Sin acceso al ERP el shell se monta igual (aviso «Sin permisos» en la página), pero no ofrece
 // búsqueda, ⌘K ni Preferencias (N1 del Revisor y N2 de QA sobre el PR #59).
@@ -8,6 +9,18 @@ type ItemMenu = { id: string };
 const captura = vi.hoisted(() => ({
   onBuscar: undefined as (() => void) | undefined,
   menu: [] as ItemMenu[],
+  slots: [] as unknown[], cursor: 0,
+  navInferior: undefined as unknown, fijados: undefined as unknown,
+  onFijar: undefined as unknown,
+  pendiente: false,
+}));
+vi.mock("react", async (importOriginal) => ({
+  ...await importOriginal<typeof React>(),
+  useState: (inicial: unknown) => {
+    const i = captura.cursor++;
+    if (!(i in captura.slots)) captura.slots[i] = inicial;
+    return [captura.slots[i], (valor: unknown) => { captura.slots[i] = valor; }];
+  },
 }));
 vi.mock("next/navigation", () => ({ usePathname: () => "/", useRouter: () => ({ push: vi.fn() }) }));
 vi.mock("next/dynamic", () => ({ default: () => () => null }));
@@ -16,9 +29,13 @@ vi.mock("@/app/_acciones/capacidad", () => ({ cambiarTenant: vi.fn() }));
 vi.mock("@/app/_components/refresco-navegador", () => ({ useEpocaSesion: vi.fn() }));
 vi.mock("@/app/_components/link-menu", () => ({ LinkMenu: () => null }));
 vi.mock("@opai/ds", () => ({
-  AppShell: (p: { onBuscar?: () => void; menuUsuario: ItemMenu[] }) => {
+  AppShell: (p: { onBuscar?: () => void; menuUsuario: ItemMenu[]; navInferior?: unknown; fijados?: unknown; onFijar?: unknown; campana?: ReactNode }) => {
     captura.onBuscar = p.onBuscar;
     captura.menu = p.menuUsuario;
+    captura.navInferior = p.navInferior;
+    captura.fijados = p.fijados;
+    captura.onFijar = p.onFijar;
+    captura.pendiente = isValidElement<{ pendiente: boolean }>(p.campana) && p.campana.props.pendiente;
     return null;
   },
 }));
@@ -35,11 +52,31 @@ const base: Omit<DatosShell, "acceso"> = {
 };
 
 function pintar(d: DatosShell) {
+  captura.cursor = 0;
   const props = { datos: d, children: null };
   renderToStaticMarkup(createElement(MarcoShell, props, null));
 }
+beforeEach(() => { captura.slots = []; });
 
 describe("acciones del shell del ERP según el acceso", () => {
+  it("descarta preferencias y contador al revocar acceso sin cambiar usuario ni empresa", () => {
+    captura.slots = [false, null, {
+      navInferiorResuelto: [{ href: "/cuentas", etiqueta: "Cuentas", icono: () => null }],
+      fijados: [], onFijar: () => undefined, bandejaPendiente: true,
+    }];
+    pintar({ ...base, acceso: true });
+    expect(captura.navInferior).toBeDefined();
+    expect(captura.pendiente).toBe(true);
+    pintar({ ...base, acceso: false });
+    expect(captura.navInferior).toBeUndefined();
+    expect(captura.fijados).toBeUndefined();
+    expect(captura.onFijar).toBeUndefined();
+    expect(captura.pendiente).toBe(false);
+    expect(captura.slots[2]).toBeNull();
+    pintar({ ...base, acceso: false });
+    expect(captura.navInferior).toBeUndefined();
+  });
+
   it("con acceso: hay búsqueda (⌘K) y Preferencias en el menú", () => {
     pintar({ ...base, acceso: true });
     expect(captura.onBuscar).toBeTypeOf("function");

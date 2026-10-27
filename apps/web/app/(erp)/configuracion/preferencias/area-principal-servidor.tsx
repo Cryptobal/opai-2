@@ -1,10 +1,10 @@
 import { datosShell } from "@/app/_components/datos-shell";
 import { identidadActual } from "@/lib/servidor";
 
-import { AreaPrincipal } from "./area-principal";
+import { AreaPrincipalDiferida } from "./area-principal-diferida";
 
 export async function AreaPrincipalServidor() {
   const identidad = await identidadActual();
   if (!identidad) return null;
-  return <AreaPrincipal grupos={datosShell(identidad, "erp").grupos ?? []} />;
+  return <AreaPrincipalDiferida grupos={datosShell(identidad, "erp").grupos ?? []} />;
 }

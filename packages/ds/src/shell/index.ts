@@ -1,6 +1,7 @@
 export { AppShell, type AppShellProps } from "./app-shell";
 export { AreaGrupo } from "./area-grupo";
 export { BotonFijar } from "./boton-fijar";
+export { PinDiferido } from "./pin-diferido";
 export { Contador, Punto } from "./contador";
 export { Fijados, type ItemFijado } from "./fijados";
 export { BottomNav } from "./nav";

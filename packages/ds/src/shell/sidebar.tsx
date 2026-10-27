@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 
 import type { ItemMenu } from "../components/menu";
 import { AreaGrupo } from "./area-grupo";
-import { Fijados, type ItemFijado } from "./fijados";
+import type { ItemFijado } from "./fijados";
 import { PortalSwitcher } from "./portal-switcher";
 import { agrupar, EntradaArea, Item, Pie } from "./sidebar-item";
 import {
@@ -16,6 +16,8 @@ import {
   type Tenant,
   type Usuario,
 } from "./types";
+
+const Fijados = lazy(() => import("./fijados").then((m) => ({ default: m.Fijados })));
 
 type SidebarProps = {
   items: readonly NavItem[];
@@ -84,12 +86,14 @@ export function Sidebar(props: SidebarProps) {
         />
       </div>
       {props.fijados ? (
+        <Suspense fallback={null}>
         <Fijados
           items={props.fijados}
           rutaActual={rutaActual}
           onDesfijar={props.onDesfijar ?? (() => undefined)}
           Link={Link}
         />
+        </Suspense>
       ) : null}
       <div className="flex-1 overflow-y-auto py-2">
         {grupos

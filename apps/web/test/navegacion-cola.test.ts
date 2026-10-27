@@ -54,6 +54,21 @@ beforeEach(() => {
 });
 
 describe("preferencias: transformaciones sobre la última respuesta confirmada", () => {
+  it("permite reintentar una carga inicial fallida y no escribe si sigue fallando", async () => {
+    h.ejecutar.mockResolvedValue({ ok: false });
+    render();
+    h.efectos[0]?.();
+    await vi.waitFor(() => expect(render().errorCarga).toBe(true));
+    expect(render().cargado).toBe(false);
+    render().elegirAreaPrincipal("personas");
+    await vi.waitFor(() => expect(h.ejecutar).toHaveBeenCalledTimes(2));
+    expect(h.ejecutar.mock.calls.every((c) => c[1] === "core.config.get")).toBe(true);
+    h.ejecutar.mockResolvedValueOnce({ ok: true, data: [] });
+    await render().reintentar();
+    expect(render().errorCarga).toBe(false);
+    expect(render().cargado).toBe(true);
+  });
+
   it("dos fijados rápidos no se pierden aunque el primer guardado tarde", async () => {
     const prefs = await montar();
     let liberar = () => {};

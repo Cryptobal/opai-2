@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
+import { Pin } from "lucide-react";
 
 import type { AreaNav } from "@opai/domain";
 import { esActivo } from "@opai/ds";
@@ -7,7 +8,7 @@ import { entradaInicio, entradasAreaPrincipal, type GrupoArea } from "@/lib/nave
 import type { ItemNav } from "@/lib/navegacion";
 import { validarFichasNav } from "@/app/_acciones/validar-fichas-nav";
 
-import { icono } from "./iconos";
+import { iconoShell } from "./icono-shell";
 import { useNavegacionArea } from "./use-navegacion-area";
 
 /**
@@ -22,6 +23,7 @@ export function useShellNavegacion(
   portal: string,
   activo: boolean,
   titulo: string,
+  iconos?: Record<string, ReactNode>,
 ) {
   const prefs = useNavegacionArea(portal, activo);
   const [fichasValidas, setFichasValidas] = useState<string[]>([]);
@@ -45,10 +47,10 @@ export function useShellNavegacion(
       .map((e) => ({ href: e.href, etiqueta: e.etiqueta, icono: e.icono }));
   }, [grupos, navInferiorDefecto, prefs.areaPrincipal]);
   const navInferiorResuelto = useMemo(
-    () => navInferior?.map((n) => ({ ...n, icono: icono(n.icono) })),
-    [navInferior],
+    () => navInferior?.map((n) => ({ ...n, icono: iconoShell(n.icono, iconos) })),
+    [navInferior, iconos],
   );
-  const iconoPin = useMemo(() => icono("Pin"), []);
+  const iconoPin = Pin;
   const entradasPermitidas = useMemo(() => grupos?.flatMap((g) => g.entradas.map((e) => e.href)), [grupos]);
   const fijados = useMemo(() => {
     const entradas = grupos?.flatMap((g) => g.entradas) ?? [];

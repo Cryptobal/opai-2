@@ -1,11 +1,10 @@
 "use client";
 
-import { Building2 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { usePathname, useRouter } from "next/navigation";
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 
-import { AppShell, BotonFijar, type ItemMenu, type Portal } from "@opai/ds";
+import { AppShell, PinDiferido as BotonFijar, type ItemMenu, type Portal } from "@opai/ds";
 
 import { cambiarTenant } from "@/app/_acciones/capacidad";
 import type { GrupoArea } from "@/lib/navegacion-areas";
@@ -13,14 +12,12 @@ import type { AccionCmdK } from "@/lib/navegacion-entradas";
 import type { ItemNav } from "@/lib/navegacion";
 
 import { useCabecera } from "./cabecera-contexto";
-import { icono } from "./iconos";
+import { iconoShell } from "./icono-shell";
 import { LinkMenu } from "./link-menu";
 import { trasLimpiarCaches } from "./limpiar-cache-diferido";
-import { useBandejaPendiente } from "./use-bandeja-pendiente";
 import { usePendiente } from "./navegacion-pendiente";
-import { useRegistrarReciente } from "./use-recientes";
 import { useEpocaSesion } from "./refresco-navegador";
-import { useShellNavegacion } from "./use-shell-navegacion";
+import type { PreferenciasShell } from "./preferencias-shell";
 import { menuCuentaShell } from "./menu-cuenta-shell";
 
 // La paleta (cmdk) se descarga al primer uso: no pesa en el JS inicial de cada ruta (ADR-037).
@@ -31,6 +28,7 @@ const Campana = dynamic(() => import("./campana").then((m) => m.Campana));
 // El cambio de contraseña (formulario y diálogo) solo se descarga si se abre.
 const CambiarPassword = dynamic(() => import("./cambiar-password").then((m) => m.CambiarPassword));
 const Avisos = dynamic(() => import("./avisos").then((m) => m.Avisos), { ssr: false });
+const Preferencias = dynamic(() => import("./preferencias-shell").then((m) => m.PreferenciasDelShell), { ssr: false });
 
 export type DatosShell = {
   portal: string;
@@ -38,6 +36,7 @@ export type DatosShell = {
    *  igual pero sin búsqueda, ⌘K ni Preferencias; el aviso «Sin permisos» vive en la página. */
   acceso: boolean;
   nav: ItemNav[];
+  iconos?: Record<string, ReactNode>;
   /** Solo el ERP (Brief 05): grupos por área (acordeón, D1) con el área principal del rol ya
    *  resuelta en `navInferior` (sin leer las preferencias del usuario en el servidor, ADR-045). */
   grupos?: GrupoArea[];
@@ -64,10 +63,13 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
   const cabecera = useCabecera();
   const [password, setPassword] = useState(false);
   const [paleta, setPaleta] = useState<boolean | null>(null);
+  const [preferencias, setPreferencias] = useState<PreferenciasShell | null>(null);
   // El ERP del usuario con acceso: habilita búsqueda, ⌘K y Preferencias. Sin acceso al portal el
   // shell se monta igual (aviso «Sin permisos»), pero sin estas acciones y sin que la acción del
   // servidor (`ejecutarCapacidad`) devuelva nada del portal ajeno.
   const enErp = datos.portal === "erp" && datos.tenant !== null && datos.acceso;
+  // Una revocación puede refrescar el layout sin cambiar la época de usuario/empresa.
+  if (!enErp && preferencias !== null) setPreferencias(null);
   useEpocaSesion(datos.epoca);
   useEffect(() => {
     if (!enErp) return;
@@ -81,7 +83,8 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
     return () => window.removeEventListener("keydown", tecla);
   }, [enErp]);
   // La navegación no cambia al fijar la cabecera: se recalcula solo cuando cambia `datos.nav`.
-  const nav = useMemo(() => datos.nav.map((n) => ({ ...n, icono: icono(n.icono) })), [datos.nav]);
+  const nav = useMemo(() => datos.nav.map((n) => ({ ...n, icono: iconoShell(n.icono, datos.iconos) })), [datos.nav, datos.iconos]);
+  const Building2 = useMemo(() => iconoShell("Building2", datos.iconos), [datos.iconos]);
   // Navegación en curso (ADR-045): el riel marca el destino y la cabecera pone su título de inmediato,
   // sin esperar al contenido nuevo (sin parpadeo ni barra de progreso, decisión 1 de ADR-045). Al
   // terminar, `pendiente` se limpia y la página fija su propia cabecera.
@@ -91,35 +94,26 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
   const tituloEfectivo = navPendiente?.etiqueta ?? cabecera.titulo;
   // Recientes (§4.3, §10): solo en este navegador, por usuario y empresa; no cuando hay un
   // destino pendiente (se registraría dos veces al llegar) ni mientras no haya acceso.
-  useRegistrarReciente(datos.epoca, rutaActual, pendiente ? "" : cabecera.titulo, enErp);
   // Preferencias de navegación (D1, D3, §3): se cargan después de montar, sin sumar consultas al
   // servidor por navegación (ADR-045); hasta entonces, la barra inferior usa el área por defecto
   // del rol que ya trae `datos.navInferior` y el acordeón abre la del lugar actual.
   const {
-    navInferiorResuelto: navInferiorBase,
-    fijados,
-    areaAbierta,
-    onFijar,
-    onDesfijar,
-    onAreaAbierta,
+    navInferiorResuelto: navInferiorPreferido,
     esFicha,
     fichaFijada,
     onFijarFicha,
-  } = useShellNavegacion(
-    datos.grupos,
-    datos.navInferior,
-    rutaEfectiva,
-    datos.portal,
-    enErp,
-    cabecera.titulo,
+  } = (enErp ? preferencias : null) ?? {};
+  const navInferiorDefecto = useMemo(
+    () => datos.navInferior?.map((n) => ({ ...n, icono: iconoShell(n.icono, datos.iconos) })), [datos.navInferior, datos.iconos],
   );
+  const navInferiorBase = navInferiorPreferido ?? navInferiorDefecto;
   const pinFicha =
-    enErp && esFicha ? (
-      <BotonFijar variante="ficha" fijado={fichaFijada} onFijar={() => void onFijarFicha()} />
+    enErp && esFicha && onFijarFicha ? (
+      <BotonFijar variante="ficha" fijado={fichaFijada ?? false} onFijar={() => void onFijarFicha()} />
     ) : null;
   // D5: Inicio muestra un punto (sin número) en la barra inferior cuando la Bandeja tiene algo
   // pendiente (avisos o aprobaciones); el número vive dentro de la pantalla, no en el shell.
-  const bandejaPendiente = useBandejaPendiente(datos.portal, enErp);
+  const bandejaPendiente = enErp && (preferencias?.bandejaPendiente ?? false);
   const navInferiorResuelto = useMemo(
     () =>
       navInferiorBase?.map((n) =>
@@ -139,7 +133,7 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
           onSelect: () => trasLimpiarCaches(() => cambiarTenant(e.id)),
         }))
       : [];
-  const menu = menuCuentaShell(enErp, (href) => router.push(href), () => setPassword(true), datos.portal === "erp" && datos.tenant !== null);
+  const menu = menuCuentaShell(enErp, (href) => router.push(href), () => setPassword(true), datos.portal === "erp" && datos.tenant !== null, datos.iconos);
   const conPin = (accion: ReactNode) => <>{accion}{pinFicha}</>;
   return (
     <AppShell
@@ -162,11 +156,18 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
         ) : undefined
       }
       {...(enErp ? { onBuscar: () => setPaleta(true) } : {})}
-      {...(enErp ? { fijados, onFijar, onDesfijar, areaAbierta, onAreaAbierta } : {})}
+      {...(enErp && preferencias ? {
+        fijados: preferencias.fijados,
+        onFijar: preferencias.onFijar,
+        onDesfijar: preferencias.onDesfijar,
+        areaAbierta: preferencias.areaAbierta,
+        onAreaAbierta: preferencias.onAreaAbierta,
+      } : {})}
       onNavegar={(href) => router.push(href)}
       Link={LinkMenu}
     >
       {children}
+      {enErp ? <Preferencias datos={datos} ruta={rutaEfectiva} titulo={cabecera.titulo} pendiente={Boolean(pendiente)} onCambiar={setPreferencias} /> : null}
       {paleta !== null ? (
         <Paleta
           abierto={paleta}
