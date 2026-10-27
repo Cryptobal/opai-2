@@ -74,6 +74,15 @@ No se declara CI, QA remota ni aprobación del head nuevo; Neon sigue sin modifi
 
 ## Hecho
 
+- **NÚCLEO-H, relanzamiento nucleo-h-1112-oc:** el mensaje de encargo contiene el
+  original completo y sustituye el bloqueo documental de la continuidad anterior.
+  Bloque 1: reglas puras de estado/avisos de incidente y verificación del archivo
+  subido extraídas a `packages/domain`, con pruebas, sin cambio de comportamiento.
+  Selección técnica del constructor OpenCode / openai/gpt-6.1-sol dentro del
+  encargo, no decisión de negocio nueva. No toca Puestos (#49), ni migraciones.
+  Sin tarea en Linear. El detalle y la cobertura de cada bloque están en
+  `briefs/NUCLEO-H-p2.md`.
+
 - **NÚCLEO-H, continuidad en `core/nucleo-p2` (OpenCode / openai/gpt-6.1-sol):**
   ARCO lista/detalle filtran alcance y auditan solo IDs revelados, actor, tenant y
   capacidad, en la misma transacción; fallo de auditoría no entrega datos. También

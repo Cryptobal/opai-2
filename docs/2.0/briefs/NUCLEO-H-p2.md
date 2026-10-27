@@ -4,20 +4,32 @@ Continuidad solicitada en esta sesión, sobre main `3199b00`.
 Constructor: OpenCode / openai/gpt-6.1-sol. Base: auditoría de NÚCLEO-A.
 No se abre PR ni se modifica otra rama, Neon, producción ni OPAI 1.0.
 
-## Fuentes y bloqueo de alcance
+## Fuentes de continuidad
 
 Se preservó todo el trabajo sin commit heredado (código, pruebas y documentación),
 usando stash antes del merge normal de origin/main (ya estaba actualizado) y pop después.
 Se leyó PR-BODY.md local. No existen en este worktree los encargos originales
 `encargos/nucleo-h-1005-oc.txt` ni `nucleo-h-1000-oc.txt`. El único seguimiento
 en `encargos/seguimiento.txt` corresponde al Brief 07d PR 1, no a NÚCLEO-H.
-No se inventan criterios de los bloques 1 y 3: se implementa lo explícito del
-encargo de continuidad y se deja la cobertura completa pendiente.
+El relanzamiento `nucleo-h-1112-oc` aporta el encargo original completo en el
+mensaje de Carlos; sustituye aquel bloqueo. No falta encargo. Sin tarea en Linear.
+
+### Bloque 1 · reglas al dominio (continuidad 1112)
+
+Extraídas sin cambiar comportamiento, mensajes, precedencia ni transacciones:
+- `estadoAvisos`: hechos de incidente → destinatarios avisados, último estado e
+  inicio del plazo (detección o registro), ahora en `domain/src/incidentes.ts`.
+- `motivoAvisoInvalido`: rechazo de caso cerrado, aviso duplicado y transición
+  inválida; el handler convierte el motivo al mismo error de negocio.
+- `motivoSubidaInvalida`: existencia, tamaño, MIME opcional y SHA-256 del objeto;
+  almacenamiento y persistencia siguen en la capacidad de confirmar subida.
+Pruebas puras en `reglas-extraidas.test.ts` más las regresiones existentes.
+Selección técnica de OpenCode dentro del encargo de extracción, no una nueva
+decisión de negocio. No se tocan reglas ni archivos de Puestos (#49).
 
 ## Criterios y estado
 
-- **Bloque 1: bloqueado** por ausencia del encargo original; no se eligen reglas
-  de negocio arbitrariamente ni se mueve código sin criterios verificables.
+- **Bloque 1: implementado** según la lista de extracción anterior.
 - **Bloque 2: ARCO implementado; bloque completo parcial.** Lista y detalle
   filtran alcance antes de responder, incluidos sus cursores. Auditoría con
   actor, tenant, capacidad y los IDs efectivamente devueltos (sin titular, correo,
