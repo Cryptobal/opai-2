@@ -11,8 +11,8 @@ type Efectiva = {
   haberes: Record<string, number> | null;
 };
 
-describe("sueldo por concepto (diseño 57)", () => {
-  it("la excepción por persona define solo la movilización; el resto viene del cargo", async () => {
+describe("capas completas (07b)", () => {
+  it("el RUT define toda su estructura y no toma conceptos del cargo", async () => {
     const { ctx } = contextoDePrueba();
     const cargo = await dato<{ id: string }>(ctx, "core.cargos.create", { nombre: "Supervisor" });
     await dato(ctx, "core.estructuras.create", {
@@ -41,6 +41,7 @@ describe("sueldo por concepto (diseño 57)", () => {
       nivel: "persona",
       personaId: persona.id,
       movilizacion: 75_000,
+      sueldoBase: 700_000, colacion: 0, gratificacion: "ninguna",
       motivo: "Traslado desde Talagante",
       vigenteDesde: "2026-02-01",
     });
@@ -51,8 +52,8 @@ describe("sueldo por concepto (diseño 57)", () => {
     });
     const de = (clave: string) => e.conceptos.find((c) => c.clave === clave);
     expect(de("movilizacion")).toMatchObject({ final: 75_000, origen: "persona" });
-    expect(de("sueldoBase")).toMatchObject({ final: 850_000, origen: "cargo" });
-    expect(e.haberes?.["noImponible"]).toBe(45_000 + 75_000);
+    expect(de("sueldoBase")).toMatchObject({ final: 700_000, origen: "persona" });
+    expect(e.haberes?.["noImponible"]).toBe(75_000);
   });
 
   it("la estructura de un cargo exige sueldo base", async () => {

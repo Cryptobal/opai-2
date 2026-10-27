@@ -4,22 +4,24 @@ import {
   combinarPorConcepto,
   haberes,
   PERMISOS_CORE,
-  resolverEstructura,
-  type Estructura,
+  resolverCapasSueldo,
+  type EstructuraCapa,
 } from "@opai/domain";
 
 import { defineCapability } from "../../define";
+import { noEncontrado, reglaDeNegocio } from "../../errores";
 import { uuidSchema } from "../esquemas";
 import { diaSchema, hoy } from "./comun";
 import { itemsDe, ocultarMontos } from "./estructuras-acceso";
 import { dondeEstructura } from "./estructuras-alcance";
 import { aDominio, estructuraSchema, NIVELES, vistaEstructura } from "./estructuras-vista";
 import { personaDe } from "./personas-vista";
+import { dondeInstalacion, dondePuesto } from "./alcance";
 
 export const estructurasEfectiva = defineCapability({
   id: "core.estructuras.efectiva",
   descripcion:
-    "Sueldo efectivo de una persona a una fecha, concepto por concepto: cada uno toma el nivel más específico que lo define (persona → puesto → cargo). Devuelve los tres niveles, el origen de cada concepto y, con el ingreso mínimo (imm), los haberes con la gratificación legal con tope.",
+    "Resuelve una sola capa completa: RUT → puesto → instalación, sin herencia. Puesto e instalación son explícitos hasta el PR 3 del vínculo. Devuelve capa, versión y conceptos faltantes; nunca calcula haberes de una estructura incompleta.",
   permiso: PERMISOS_CORE.estructurasRead,
   input: z.object({
     personaId: uuidSchema,
@@ -27,22 +29,28 @@ export const estructurasEfectiva = defineCapability({
     puestoId: uuidSchema
       .optional()
       .describe("Puesto a considerar (sin asignaciones en este brief)."),
+    instalacionId: uuidSchema.optional(),
     imm: z.number().int().min(1).optional().describe("Ingreso mínimo mensual vigente, en CLP."),
   }),
   output: z.object({
     fecha: z.string(),
     aplica: z.enum(NIVELES).nullable(),
+    capa: z.enum(["persona", "puesto", "instalacion"]).nullable(),
+    estado: z.enum(["sin_capa", "incompleta", "completa"]),
+    conceptosFaltantes: z.array(z.string()),
+    estructura: estructuraSchema.nullable(),
     niveles: z.object({
       persona: estructuraSchema.nullable(),
       puesto: estructuraSchema.nullable(),
       cargo: estructuraSchema.nullable(),
+      instalacion: estructuraSchema.nullable(),
     }),
     conceptos: z
       .array(
         z.object({
           clave: z.string(),
           nombre: z.string(),
-          valores: z.object({ persona: z.unknown(), puesto: z.unknown(), cargo: z.unknown() }),
+           valores: z.object({ persona: z.unknown(), puesto: z.unknown(), cargo: z.unknown(), instalacion: z.unknown() }),
           final: z.unknown(),
           origen: z.enum(NIVELES).nullable(),
         }),
@@ -55,13 +63,19 @@ export const estructurasEfectiva = defineCapability({
   async handler(ctx, input) {
     const fecha = input.fecha ?? hoy();
     await personaDe(ctx, input.personaId);
-    const vinculo = await ctx.db.vinculoLaboral.findFirst({
-      where: { personaId: input.personaId, estado: "vigente" },
-    });
+    if (input.puestoId) {
+      const puesto = await ctx.db.puesto.findFirst({ where: { id: input.puestoId, AND: [dondePuesto(ctx)] } });
+      if (!puesto) throw noEncontrado("La referencia");
+      if (input.instalacionId && puesto.instalacionId !== input.instalacionId)
+        throw reglaDeNegocio("El puesto no pertenece a la instalación elegida.");
+    }
+    if (input.instalacionId && !await ctx.db.instalacion.findFirst({
+      where: { id: input.instalacionId, AND: [dondeInstalacion(ctx)] },
+    })) throw noEncontrado("La referencia");
     const refs = [
       { nivel: "persona", personaId: input.personaId },
       ...(input.puestoId ? [{ nivel: "puesto", puestoId: input.puestoId }] : []),
-      ...(vinculo ? [{ nivel: "cargo", cargoId: vinculo.cargoId }] : []),
+      ...(input.instalacionId ? [{ nivel: "instalacion", instalacionId: input.instalacionId }] : []),
     ];
     const filas = await ctx.db.estructuraSueldo.findMany({
       where: { OR: refs, estado: "vigente", AND: [await dondeEstructura(ctx)] },
@@ -72,39 +86,44 @@ export const estructurasEfectiva = defineCapability({
     );
     const dominio = new Map(filas.map((f) => [f.id, aDominio(f, items.get(f.id) ?? [])]));
     const por = (n: string) =>
-      filas.filter((f) => f.nivel === n).map((f) => dominio.get(f.id) as Estructura);
-    const r = resolverEstructura(fecha, {
+      filas.filter((f) => f.nivel === n).map((f) => dominio.get(f.id) as EstructuraCapa);
+    const r = resolverCapasSueldo(fecha, {
       persona: por("persona"),
       puesto: por("puesto"),
-      cargo: por("cargo"),
+      instalacion: por("instalacion"),
     });
-    const combinada = combinarPorConcepto(r.niveles);
+    const combinada = combinarPorConcepto(r.capas);
     // Sensibilidad por fila (cargo, puesto o persona) y, si alguna lo exige, sin haberes.
     const ocultas = new Map(
       await Promise.all(filas.map(async (f) => [f.id, await ocultarMontos(ctx, f)] as const)),
     );
     const ocultar = [...ocultas.values()].some(Boolean);
-    const vista = (e: Estructura | null) => {
+    const vista = (e: EstructuraCapa | null) => {
       const f = e ? filas.find((x) => x.id === e.id) : undefined;
       return f ? vistaEstructura(f, items.get(f.id) ?? [], ocultas.get(f.id) ?? true) : null;
     };
     return {
       fecha,
-      aplica: r.aplica,
+      aplica: r.capa,
+      capa: r.capa,
+      estado: r.estado,
+      conceptosFaltantes: r.conceptosFaltantes,
+      estructura: vista(r.estructura),
       niveles: {
-        persona: vista(r.niveles.persona),
-        puesto: vista(r.niveles.puesto),
-        cargo: vista(r.niveles.cargo),
+        persona: vista(r.capas.persona),
+        puesto: vista(r.capas.puesto),
+        instalacion: vista(r.capas.instalacion),
+        cargo: null,
       },
       conceptos: ocultar
         ? combinada.conceptos.map((c) => ({
             ...c,
-            valores: { persona: null, puesto: null, cargo: null },
+            valores: { persona: null, puesto: null, cargo: null, instalacion: null },
             final: null,
           }))
         : combinada.conceptos,
       haberes:
-        combinada.estructura && input.imm && !ocultar
+        r.estado === "completa" && combinada.estructura && input.imm && !ocultar
           ? { ...haberes(combinada.estructura, input.imm) }
           : null,
     };

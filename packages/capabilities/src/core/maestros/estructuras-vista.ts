@@ -3,8 +3,9 @@ import { z } from "zod";
 import type { Estructura } from "@opai/domain";
 
 import { dia } from "./comun";
+import { impactoSchema } from "./estructuras-impacto";
 
-export const NIVELES = ["cargo", "puesto", "persona"] as const;
+export const NIVELES = ["cargo", "puesto", "persona", "instalacion"] as const;
 
 export const itemInput = z.object({
   tipo: z.enum(["bono_fijo", "bono_porcentual"]),
@@ -28,21 +29,23 @@ export const estructuraSchema = z.object({
   cargoId: z.string().nullable(),
   puestoId: z.string().nullable(),
   personaId: z.string().nullable(),
+  instalacionId: z.string().nullable(),
   sensible: z
     .boolean()
     .describe("true: montos ocultos por falta del permiso de sueldos sensibles."),
   sueldoBase: z
     .number()
     .nullable()
-    .describe("null: hereda del nivel más general (o oculto si sensible)."),
+    .describe("null: concepto histórico incompleto u oculto; nunca hereda."),
   colacion: z.number().nullable(),
   movilizacion: z.number().nullable(),
-  gratificacion: z.string().nullable().describe("null: hereda del nivel más general."),
+  gratificacion: z.string().nullable().describe("null: estructura histórica incompleta."),
   gratificacionMonto: z.number().nullable(),
   vigenteDesde: z.string(),
   vigenteHasta: z.string().nullable(),
   motivo: z.string().nullable(),
   estado: z.string(),
+  impacto: impactoSchema.optional(),
   items: z.array(
     itemInput.extend({ monto: z.number().nullable(), porcentaje: z.number().nullable() }),
   ),
@@ -54,6 +57,7 @@ export type FilaEstructura = {
   cargoId?: string | null;
   puestoId?: string | null;
   personaId?: string | null;
+  instalacionId?: string | null;
   sueldoBase?: number | null;
   colacion?: number | null;
   movilizacion?: number | null;
@@ -81,6 +85,7 @@ export function vistaEstructura(e: FilaEstructura, items: FilaItem[], ocultar: b
     cargoId: e.cargoId ?? null,
     puestoId: e.puestoId ?? null,
     personaId: e.personaId ?? null,
+    instalacionId: e.instalacionId ?? null,
     sensible: ocultar,
     sueldoBase: m(e.sueldoBase),
     colacion: m(e.colacion),

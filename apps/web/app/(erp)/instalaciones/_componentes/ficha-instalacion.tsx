@@ -12,7 +12,7 @@ import type { InstalacionDetalle } from "@/lib/tipos-maestros";
 
 import { conFiltrosInstalaciones } from "./filtros-instalaciones";
 
-export type TabInstalacion = "resumen" | "puestos" | "documentos" | "actividad";
+export type TabInstalacion = "resumen" | "puestos" | "sueldo" | "documentos" | "actividad";
 
 function acciones(i: InstalacionDetalle): AccionEntidad[] {
   const otro = i.estado === "activa" ? "inactiva" : "activa";
@@ -90,6 +90,7 @@ export function FichaInstalacion(p: {
         tabs={[
           { id: "resumen", etiqueta: "Resumen", href: conFiltrosInstalaciones(base, p.parametros) },
           { id: "puestos", etiqueta: "Puestos", contador: activos, href: conFiltrosInstalaciones(`${base}/puestos`, p.parametros) },
+          { id: "sueldo", etiqueta: "Sueldo", href: conFiltrosInstalaciones(`${base}/sueldo`, p.parametros) },
           {
             id: "personas",
             etiqueta: p.persona,

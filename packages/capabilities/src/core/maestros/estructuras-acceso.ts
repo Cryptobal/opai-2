@@ -63,6 +63,12 @@ export async function auditarLecturaSensible(ctx: Contexto, e: RefEstructura): P
  * la lectura queda en la auditoría (art. 31 del DFL 2 de 1967; decisión t479u).
  */
 export async function ocultarMontos(ctx: Contexto, e: RefEstructura): Promise<boolean> {
+  // D7 para las capas activas. Conserva el permiso explícito del Inspector DT de main (t479u).
+  if (e.nivel !== "cargo") {
+    if (!ctx.autorizar(PERMISOS_CORE.estructurasReadSensible)) return true;
+    await auditarLecturaSensible(ctx, e);
+    return false;
+  }
   if (!(await cargoSensible(ctx, e))) return false;
   if (!ctx.autorizar(PERMISOS_CORE.estructurasReadSensible)) return true;
   await auditarLecturaSensible(ctx, e);

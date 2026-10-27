@@ -1,6 +1,6 @@
 // Tipos de las vistas laborales y de sueldo (salidas de core.vinculos.* y core.estructuras.*).
 
-export type Nivel = "cargo" | "puesto" | "persona";
+export type Nivel = "instalacion" | "puesto" | "persona";
 
 export type Vinculo = {
   id: string;
@@ -24,7 +24,8 @@ export type ItemEstructura = {
 
 export type EstructuraVista = {
   id: string;
-  nivel: Nivel;
+  nivel: Nivel | "cargo";
+  instalacionId?: string | null;
   cargoId: string | null;
   puestoId: string | null;
   personaId: string | null;
@@ -55,6 +56,10 @@ export type SueldoEfectivo = {
   niveles: Record<Nivel, EstructuraVista | null>;
   conceptos: Concepto[];
   haberes: Record<string, number> | null;
+  capa: Nivel | null;
+  estructura: EstructuraVista | null;
+  estado: "sin_capa" | "incompleta" | "completa";
+  conceptosFaltantes: string[];
 };
 
 export type PuestoDeCargo = {

@@ -6,7 +6,10 @@ export type EstructuraCapa = Omit<Estructura, "nivel"> & { nivel: CapaSueldo };
 export type ConceptoFaltante =
   "sueldoBase" | "colacion" | "movilizacion" | "gratificacion" | "gratificacionMonto";
 
-export function conceptosFaltantes(e: EstructuraCapa): ConceptoFaltante[] {
+type Conceptos = Pick<EstructuraCapa,
+  "sueldoBase" | "colacion" | "movilizacion" | "gratificacion" | "gratificacionMonto">;
+
+export function conceptosFaltantes(e: Conceptos): ConceptoFaltante[] {
   const faltantes: ConceptoFaltante[] = [];
   for (const concepto of ["sueldoBase", "colacion", "movilizacion", "gratificacion"] as const) {
     if (e[concepto] == null) faltantes.push(concepto);
@@ -17,7 +20,7 @@ export function conceptosFaltantes(e: EstructuraCapa): ConceptoFaltante[] {
   return faltantes;
 }
 
-export function validarEstructuraCompleta(e: EstructuraCapa): void {
+export function validarEstructuraCompleta(e: Conceptos): void {
   const faltantes = conceptosFaltantes(e);
   if (faltantes.length) throw new Error(`Estructura incompleta: faltan ${faltantes.join(", ")}`);
 }

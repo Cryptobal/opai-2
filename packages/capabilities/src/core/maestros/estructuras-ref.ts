@@ -1,9 +1,11 @@
 import { z } from "zod";
 
+import { validarEstructuraCompleta } from "@opai/domain";
+
 import { noEncontrado, reglaDeNegocio } from "../../errores";
 import type { Contexto } from "../../types";
 import { uuidSchema } from "../esquemas";
-import { dondePersona, dondePuesto } from "./alcance";
+import { dondeInstalacion, dondePersona, dondePuesto } from "./alcance";
 import { diaSchema } from "./comun";
 import { itemInput, NIVELES } from "./estructuras-vista";
 
@@ -14,26 +16,27 @@ export const entrada = z.object({
   cargoId: uuidSchema.optional(),
   puestoId: uuidSchema.optional(),
   personaId: uuidSchema.optional(),
+  instalacionId: uuidSchema.optional(),
   sueldoBase: z
     .number()
     .int()
     .min(0)
     .nullable()
     .optional()
-    .describe("CLP entero. Obligatorio en nivel cargo; en puesto o persona, omitir = hereda."),
-  colacion: z.number().int().min(0).nullable().optional().describe("Omitir = hereda (cargo: 0)."),
+    .describe("CLP entero. Obligatorio para toda capa nueva."),
+  colacion: z.number().int().min(0).nullable().optional(),
   movilizacion: z
     .number()
     .int()
     .min(0)
     .nullable()
     .optional()
-    .describe("Omitir = hereda (cargo: 0)."),
+    .describe("CLP entero, definido explícitamente en capas nuevas."),
   gratificacion: z
     .enum(["legal_25", "monto_fijo", "ninguna"])
     .nullable()
     .optional()
-    .describe("Omitir = hereda (cargo: legal_25)."),
+    .describe("Obligatoria para capas nuevas."),
   gratificacionMonto: z.number().int().min(0).nullable().optional(),
   vigenteDesde: diaSchema,
   motivo: z.string().trim().min(5).max(500).optional().describe("Obligatorio en nivel persona."),
@@ -44,7 +47,7 @@ type Entrada = z.output<typeof entrada>;
 
 /** Valida que venga exactamente la referencia del nivel y que exista. */
 export async function referencia(ctx: Contexto, e: Entrada) {
-  const refs = { cargo: e.cargoId, puesto: e.puestoId, persona: e.personaId };
+  const refs = { cargo: e.cargoId, puesto: e.puestoId, persona: e.personaId, instalacion: e.instalacionId };
   const otras = Object.entries(refs).filter(([n, v]) => n !== e.nivel && v);
   const id = refs[e.nivel];
   if (!id || otras.length) throw reglaDeNegocio(`Nivel "${e.nivel}": envía solo ${e.nivel}Id.`);
@@ -55,8 +58,17 @@ export async function referencia(ctx: Contexto, e: Entrada) {
       ? await ctx.db.cargo.findUnique({ where: { id } })
       : e.nivel === "puesto"
         ? await ctx.db.puesto.findFirst({ where: { id, AND: [dondePuesto(ctx)] } })
-        : await ctx.db.persona.findFirst({ where: { id, AND: [dondePersona(ctx)] } });
+        : e.nivel === "instalacion"
+          ? await ctx.db.instalacion.findFirst({ where: { id, AND: [dondeInstalacion(ctx)] } })
+          : await ctx.db.persona.findFirst({ where: { id, AND: [dondePersona(ctx)] } });
   if (!existe) throw noEncontrado(`La referencia de nivel ${e.nivel}`);
+  if (e.nivel !== "cargo") {
+    try {
+      validarEstructuraCompleta({ ...conceptosDe(e), gratificacionMonto: e.gratificacionMonto ?? null });
+    } catch (error) {
+      throw reglaDeNegocio(error instanceof Error ? error.message : "Estructura incompleta.");
+    }
+  }
   if (e.nivel === "persona" && !e.motivo)
     throw reglaDeNegocio("Una excepción por persona exige motivo.");
   if (e.nivel === "cargo" && e.sueldoBase == null)
@@ -76,6 +88,7 @@ export async function referencia(ctx: Contexto, e: Entrada) {
       cargoId: e.nivel === "cargo" ? id : null,
       puestoId: e.nivel === "puesto" ? id : null,
       personaId: e.nivel === "persona" ? id : null,
+      instalacionId: e.nivel === "instalacion" ? id : null,
     },
   };
 }

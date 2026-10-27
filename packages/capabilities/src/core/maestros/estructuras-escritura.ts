@@ -1,27 +1,30 @@
-import { z } from "zod";
-
 import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
-import { noEncontrado, reglaDeNegocio } from "../../errores";
-import { uuidSchema } from "../esquemas";
+import { reglaDeNegocio } from "../../errores";
 import { aFecha, dia, escribirConEvento } from "./comun";
 import { DIA_MS, entrada, referencia } from "./estructuras-ref";
 import { ocultarMontos } from "./estructuras-acceso";
-import { dondeEstructura } from "./estructuras-alcance";
 import { estructuraSchema, vistaEstructura } from "./estructuras-vista";
+import { bloquearCapa } from "./estructuras-bloqueo";
+import { impactoCambio } from "./estructuras-impacto";
+
+export { estructurasAnular } from "./estructuras-anular";
 
 export const estructurasCreate = defineCapability({
   id: "core.estructuras.create",
   descripcion:
-    "Crea una versión de estructura de sueldo (nivel cargo, puesto o persona) desde una fecha. Cierra la versión anterior el día previo; si ya hay una versión desde esa fecha o después, responde error.",
+    "Crea una versión completa de sueldo de instalación, puesto o RUT, sin herencia. Cierra la anterior el día previo y rechaza solapes. La vista previa incluye impacto conocido y personas pendientes del vínculo del PR 3. Cargo se conserva hasta su retiro en PR 2.",
   permiso: PERMISOS_CORE.estructurasManage,
   input: entrada,
   output: estructuraSchema,
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
+    return ctx.transaccion(async (tx) => {
+    ctx = { ...ctx, db: tx, transaccion: (fn) => fn(tx) };
     const ref = await referencia(ctx, input);
+    await bloquearCapa(tx, ctx.tenantId, input.nivel, ref.id);
     const desde = aFecha(input.vigenteDesde);
     const vigentes = await ctx.db.estructuraSueldo.findMany({
       where: { nivel: input.nivel, [ref.campo]: ref.id, estado: "vigente" },
@@ -43,9 +46,10 @@ export const estructurasCreate = defineCapability({
       vigenteDesde: desde,
       estado: "vigente",
     };
+    const impacto = await impactoCambio(ctx, input.nivel, ref.id, input.vigenteDesde, abierta, data);
     if (dryRun) {
       // Sin fila persistida todavía: `ocultarMontos` no tiene id que auditar (nada se reveló aún).
-      return vistaEstructura({ ...data, id: "" }, items, await ocultarMontos(ctx, data));
+      return { ...vistaEstructura({ ...data, id: "" }, items, await ocultarMontos(ctx, data)), impacto };
     }
     const e = await escribirConEvento(
       ctx,
@@ -87,46 +91,7 @@ export const estructurasCreate = defineCapability({
     // Recién con `e.id` (la fila ya persistida) `ocultarMontos` puede auditar la revelación: la
     // respuesta de creación entrega los mismos montos sensibles que un `get`, así que queda trazada
     // igual (quién, cuándo, qué).
-    return vistaEstructura(e, items, await ocultarMontos(ctx, e));
-  },
-});
-
-export const estructurasAnular = defineCapability({
-  id: "core.estructuras.anular",
-  descripcion:
-    "IRREVERSIBLE: anula una versión de estructura de sueldo cargada por error, con motivo. No reabre la versión anterior: crea una nueva si corresponde.",
-  permiso: PERMISOS_CORE.estructurasManage,
-  input: z.object({ id: uuidSchema, motivo: z.string().trim().min(5).max(500) }),
-  output: estructuraSchema,
-  efecto: "irreversible",
-  dryRun: true,
-  async handler(ctx, input, { dryRun }) {
-    // findFirst (no findUnique) para aplicar el alcance por filas: fuera de alcance = no encontrada,
-    // igual que en lectura (`core.estructuras.get`) y sin distinguir el caso de otro tenant.
-    const e = await ctx.db.estructuraSueldo.findFirst({
-      where: { id: input.id, AND: [await dondeEstructura(ctx)] },
+    return { ...vistaEstructura(e, items, await ocultarMontos(ctx, e)), impacto };
     });
-    if (!e) throw noEncontrado("La estructura");
-    if (e.estado === "anulada") throw reglaDeNegocio("La estructura ya está anulada.");
-    const items = await ctx.db.estructuraItem.findMany({
-      where: { estructuraId: e.id },
-      orderBy: { orden: "asc" },
-    });
-    const data = {
-      estado: "anulada",
-      motivo: `${e.motivo ? `${e.motivo} · ` : ""}Anulada: ${input.motivo}`,
-    };
-    const ocultar = await ocultarMontos(ctx, e);
-    if (dryRun) return vistaEstructura({ ...e, ...data }, items, ocultar);
-    const r = await escribirConEvento(
-      ctx,
-      {
-        tipo: "core.estructura.anulada",
-        entidadTipo: "estructura",
-        payload: () => ({ motivo: input.motivo }),
-      },
-      (tx) => tx.estructuraSueldo.update({ where: { id: e.id }, data }),
-    );
-    return vistaEstructura(r, items, ocultar);
   },
 });
