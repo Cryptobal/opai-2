@@ -1,8 +1,6 @@
 import { z } from "zod";
 
-import type { Contexto } from "../../types";
-import { aFecha, dia, hoy } from "./comun";
-import { ocultarMontos } from "./estructuras-acceso";
+import { dia } from "./comun";
 
 export const resumenSueldoSchema = z
   .object({
@@ -16,30 +14,31 @@ export const resumenSueldoSchema = z
   .nullable()
   .describe("Versión vigente hoy de la estructura del cargo (null si no tiene).");
 
-/** Estructura vigente hoy de cada cargo (la de vigenteDesde más reciente ≤ hoy), con montos ocultos si es sensible. */
-export async function sueldoVigentePorCargo(ctx: Contexto, cargoIds: string[]) {
-  const filas = await ctx.db.estructuraSueldo.findMany({
-    where: {
-      nivel: "cargo",
-      cargoId: { in: cargoIds },
-      estado: "vigente",
-      vigenteDesde: { lte: aFecha(hoy()) },
-    },
-    orderBy: { vigenteDesde: "desc" },
-  });
-  const r = new Map<string, z.output<typeof resumenSueldoSchema>>();
-  for (const f of filas) {
-    if (!f.cargoId || r.has(f.cargoId)) continue;
-    const oculto = await ocultarMontos(ctx, f);
-    const m = (v: number | null) => (oculto ? null : v);
-    r.set(f.cargoId, {
-      sueldoBase: m(f.sueldoBase),
-      colacion: m(f.colacion),
-      movilizacion: m(f.movilizacion),
-      gratificacion: oculto ? null : f.gratificacion,
-      vigenteDesde: dia(f.vigenteDesde) ?? "",
-      sensible: oculto,
-    });
-  }
-  return r;
+type FilaEstructuraCargo = {
+  sueldoBase: number | null;
+  colacion: number | null;
+  movilizacion: number | null;
+  gratificacion: string | null;
+  vigenteDesde: Date | null;
+};
+
+/**
+ * Resumen de la estructura vigente de un cargo. `oculto` oculta los montos cuando el cargo es
+ * sensible y el actor no tiene el permiso sensible (ADR-022); el nivel aquí siempre es «cargo», así
+ * que basta el flag del cargo (sin consultar su cargo otra vez, a diferencia de `ocultarMontos`).
+ */
+export function resumenSueldoDe(
+  estructura: FilaEstructuraCargo | undefined,
+  oculto: boolean,
+): z.output<typeof resumenSueldoSchema> {
+  if (!estructura) return null;
+  const m = (v: number | null) => (oculto ? null : v);
+  return {
+    sueldoBase: m(estructura.sueldoBase),
+    colacion: m(estructura.colacion),
+    movilizacion: m(estructura.movilizacion),
+    gratificacion: oculto ? null : estructura.gratificacion,
+    vigenteDesde: dia(estructura.vigenteDesde) ?? "",
+    sensible: oculto,
+  };
 }
