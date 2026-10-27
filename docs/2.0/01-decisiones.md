@@ -847,6 +847,29 @@ No se encontró: render estático roto, falta de prefetch, layouts que recarguen
 7. **Módulo vendible aparte (10:51; ADR-048).** El agente es un módulo propio, que se vende aparte. Depende del Núcleo y del MCP; los demás módulos son fuentes opcionales: opera únicamente las capacidades de los módulos activos en el tenant y permitidas al usuario.
 8. **Cuándo (10:53).** Se construye en un brief propio **después de CPQ**. Orden: Puestos → Comercial → CPQ → agente interno. Antes solo se reserva su punto de entrada: la acción «Preguntar a OPAI» en ⌘K y un lugar dentro de «Buscar» en el celular (integrada en `main` (PR #37, `7e526eb`)).
 
+**Enmienda al punto 8 · adelanto al Núcleo (NÚCLEO-E2).** Origen: Carlos,
+26-oct-2026 20:47 CLT, chat con OPAI 2.0 (t457u): «ponlo entonces en el plan de
+desarrollo para que todo se haga y lo que debamos hacer en el nucleo lo hagamos
+altiro. Me preocupa que, quede como, cien por ciento agéntico, que el MSP y el,
+el agente interno de cada tenant funcione». **Decisión de Carlos,
+26-oct-2026 21:07, respuesta al widget t461s2118:** sí, el agente interno de cada
+tenant va antes de CPQ. Esta enmienda reemplaza únicamente el orden del punto 8;
+la orquestación del servidor se adelanta al cierre del Núcleo. La UI queda para
+un PR posterior con export aprobado de Claude Design, siempre con el Design
+System de OPAI 2.0; no se autoriza construir pantallas sin ese export.
+
+**Mecanismo de identidad y confirmación (NÚCLEO-E2, adaptación técnica de OpenCode).**
+El servidor delega la sesión como actor `agent`, id `agente-interno:<usuario>`,
+`via_user` igual al usuario y `apiKeyId` nulo, conservando sus permisos efectivos,
+portal y alcance. No crea una key sintética ni hereda acceso de plataforma.
+Los planes se firman con la clave de autenticación ya existente en el servidor,
+ligados a tenant, usuario, portal y acceso, con vigencia técnica de una hora.
+La reserva de idempotencia del núcleo serializa aceptar/rechazar y los pasos;
+el ledger atómico de C también admite el presupuesto conjunto del agente interno
+por tenant. No hay memoria ni tablas conversacionales nuevas: el caché temporal
+de idempotencia conserva el resultado durante 24 horas y se purga con el trabajo
+existente. El historial nuevo devuelve solo metadatos de acciones propias.
+
 **Lo que aplica de ADR ya vigentes.**
 
 - **Conversaciones y memoria aisladas por tenant (ADR-002):** si el brief guarda conversaciones, mensajes, historial o memoria del agente, cada tabla lleva `tenant_id` con RLS y la política `tenant_isolation`, y una prueba `test:db` demuestra el aislamiento entre dos tenants, incluido el mismo usuario en dos empresas. Si no se guardan, el brief lo dice.

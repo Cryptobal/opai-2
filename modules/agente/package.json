@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@opai/capabilities": "workspace:*",
+    "@opai/integrations": "workspace:*",
     "zod": "^4.6.7"
   },
   "devDependencies": {

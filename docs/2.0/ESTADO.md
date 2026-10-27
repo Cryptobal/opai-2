@@ -10,6 +10,33 @@ Hasta el 24-oct-2026 este archivo fue la fuente de verdad del avance; desde ento
 ## Hecho
 
 - **PR #61, corrección de la revisión 5660654308 (OpenCode, 27-oct-2026).** Merge normal de `origin/main` (`5c18a9237fcdee84a040dde93e3015b753d8d21a`, ya incluye #48 y #56). La transacción por lote y la propagación del fallo ya estaban en `6f948ba`; se refuerza la prueba del evento del lote confirmado y se prueba rollback de datos y registro si falla el evento. Migración `20261027070000_cumplimiento_retencion` aplicada y reaplicada sobre todas las migraciones actuales de main en PostgreSQL 16 local, sin choque y sin renombrarla. Sin decisiones de negocio nuevas. Pendientes expresamente fuera de esta corrección: orden/cursor, carreras en `exigirNoAnonimizado` y solicitudes abiertas, campos restantes por anonimizar, rotación de DEK; el plazo mínimo se confirma con el Abogado antes de activar. CA y limitaciones en el brief §21. Ninguna pantalla nueva; cualquier diseño debe usar siempre el DS de OPAI 2.0.
+> **NÚCLEO-E2 · Agente interno del tenant (OpenCode / openai/gpt-6.1-sol).**
+> Módulo `agente` vendible, herramientas derivadas del MCP y bucle servidor con
+> lecturas/dryRun, planes firmados y confirmación humana de plan o paso. Identidad
+> delegada `agente-interno:<usuario>`, actor `agent`, `via_user` del usuario y
+> `apiKeyId` nulo; sin permisos de plataforma. Se reutilizan la cola humana y el
+> presupuesto atómico de C, ahora también por tenant sin key. Migración aditiva
+> `20261028120000_agente_interno`, sin tablas ni memoria conversacionales nuevas.
+> Historial: solo metadatos propios; caché de idempotencia de 24 h y purga diaria.
+> API SSE de sesión ERP, sin UI nueva. **Adaptaciones técnicas de OpenCode:** firma
+> con el secreto de autenticación existente; token de plan de 1 h; 12 pasos y
+> 128.000 tokens medidos por turno; límite de 20 solicitudes/minuto; configuración
+> de presupuesto solo humana, por defecto owner/admin (un rol personalizado requiere
+> el permiso explícito), como el gobierno de agentes existente.
+> No son decisiones nuevas atribuidas a Carlos. El adelanto antes de CPQ sí lo
+> decidió Carlos el 26-oct-2026 21:07, t461s2118 (enmienda ADR-049 §8).
+> La UI espera export aprobado del DS 2.0. Estado de gates y límites en
+> `briefs/NUCLEO-E2-agente-interno.md`; no se abrió PR ni se aplicó nada en Neon.
+> Continuación tras ECONNRESET: resguardo remoto de `a59ab2f`; adaptación técnica
+> de OpenCode tras autorrevisión: se confirma la intención firmada, no la igualdad
+> de resultados dryRun con fechas calculadas. Las capacidades revalidan sus reglas;
+> no se ofrece un snapshot ni atomicidad entre dryRun y escritura. Confirmación
+> devuelve el identificador de aprobación por paso y lo conserva al reintentar.
+> Gate final local verde: typecheck, lint, 1.009 tests, BD 96+86+24, build web nuevo
+> y presupuesto sin subir topes. E2E en servidor propio 3286: 7 aprobados y las
+> 2 omisiones preexistentes por proyecto (escritura solo en iPad). Autorrevisión
+> independiente final sin bloqueantes; capturas regeneradas. CI y Revisor externos
+> siguen siendo necesarios sobre el commit final.
 
 > **Seguimiento de seguridad y QA PR #70 (OpenCode, continuación del 27-oct):** keys de usuario/servicio acotadas por los permisos vigentes del responsable (rol, personalizado y excepciones); servicio se invalida si este pierde alcance completo. Invitación con rol solo por personas; plataforma null para agentes; ledger acumula también sin tope; precisión mínima de micro-USD y formatos es-CL. Adaptaciones técnicas de OpenCode, no decisiones nuevas de Carlos. Seed fail-closed: solo bases locales `opai_dev`/`opai_staging`; Neon bloqueado hasta registrar un endpoint dev/staging verificado (el ID de rama no identifica su hostname). `gard-staging` es un tenant: no hay evidencia de una rama/base remota aparte y no se ejecutó el seed. Gate actual y limitaciones en `briefs/NUCLEO-C-identidad-servicio.md`.
 

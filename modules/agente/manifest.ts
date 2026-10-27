@@ -1,5 +1,6 @@
 import { defineModule } from "@opai/capabilities";
 import { z } from "zod";
+import { capacidades } from "./capacidades";
 
 /** Cliente del registro común, sin herramientas ni lógica de negocio propias (ADR-049). */
 export const manifest = defineModule({
@@ -12,7 +13,19 @@ export const manifest = defineModule({
     { id: "agente:configurar", descripcion: "Configurar el agente interno de la empresa." },
   ],
   navegacion: [],
-  configuracion: z.object({}),
+  configuracion: z.object({
+    presupuestoMensualMicro: z
+      .string()
+      .regex(/^\d{1,18}$/)
+      .default("0")
+      .meta({
+        etiqueta: "Presupuesto mensual del agente (micro-USD)",
+        ayuda: "0 = sin límite. Aviso al 80 %; el costo ya incurrido siempre se registra.",
+        ambito: "tenant",
+        permiso: "agente:configurar",
+        soloPersonas: true,
+      }),
+  }),
   eventos: [],
-  capacidades: [],
+  capacidades,
 });

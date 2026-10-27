@@ -7,7 +7,7 @@ export const periodoDeMes = (fecha: Date) =>
 export async function consumirPresupuesto(
   tx: TenantTx,
   tenantId: string,
-  apiKeyId: string,
+  apiKeyId: string | null,
   costoMicro: bigint,
   opciones: {
     /**
@@ -17,23 +17,51 @@ export async function consumirPresupuesto(
      * (`capacidad.ejecucion`, antes del handler) puede rechazarse sin incurrir en el gasto.
      */
     yaIncurrido?: boolean;
+    agenteInterno?: { viaUserId: string };
   } = {},
 ) {
   if (costoMicro < 0n) throw new Error("El costo no puede ser negativo.");
-  await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`${tenantId}:${apiKeyId}`}, 0))`;
-  const key = await tx.apiKey.findUnique({ where: { id: apiKeyId } });
+  const identidad = apiKeyId ?? "agente-interno";
+  if (!apiKeyId && !opciones.agenteInterno) throw new Error("Identidad de agente inválida.");
+  await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`${tenantId}:${identidad}`}, 0))`;
+  const ajuste = !apiKeyId
+    ? await tx.ajuste.findFirst({
+        where: {
+          tenantId,
+          ambito: "tenant",
+          sujetoId: tenantId,
+          modulo: "agente",
+          clave: "presupuestoMensualMicro",
+        },
+      })
+    : null;
+  if (ajuste && (typeof ajuste.valor !== "string" || !/^\d{1,18}$/.test(ajuste.valor))) {
+    throw new Error("Presupuesto del agente interno inválido.");
+  }
+  const key = apiKeyId
+    ? await tx.apiKey.findUnique({ where: { id: apiKeyId } })
+    : {
+        presupuestoMensualMicro: BigInt(String(ajuste?.valor ?? "0")),
+        nombre: "Agente interno",
+        userId: opciones.agenteInterno!.viaUserId,
+      };
   if (!key) throw new Error("API key inválida.");
   // `topeMicro` de la tabla es NOT NULL: 0 es el centinela de "sin tope" (mismo que usa la key).
   const tope = key.presupuestoMensualMicro ?? 0n;
   const sinTope = tope === 0n;
   const periodo = periodoDeMes(new Date());
   const previo = await tx.consumo.aggregate({
-    where: { apiKeyId, createdAt: { gte: periodo } },
+    where: {
+      apiKeyId,
+      ...(!apiKeyId ? { actorTipo: "agent", actorId: { startsWith: "agente-interno:" } } : {}),
+      createdAt: { gte: periodo },
+    },
     _sum: { costoTotalMicro: true },
   });
-  const vigente = await tx.gastoAgenteMes.findUnique({
-    where: { tenantId_apiKeyId_periodo: { tenantId, apiKeyId, periodo } },
-  });
+  const where = apiKeyId
+    ? { tenantId_apiKeyId_periodo: { tenantId, apiKeyId, periodo } }
+    : { tenantId_agenteInternoId_periodo: { tenantId, agenteInternoId: identidad, periodo } };
+  const vigente = await tx.gastoAgenteMes.findUnique({ where });
   // Si el tope cambió desde el último cargo (lo sube o lo baja quien administra la key, o lo fija por
   // primera vez), los avisos de ESTE período se reinician: si no, un tope distinto nunca vuelve a
   // avisar al 80 %/100 % porque la marca quedó puesta bajo el tope anterior (el ledger quedaría
@@ -42,10 +70,11 @@ export async function consumirPresupuesto(
   // El ledger acumula `gastadoMicro` SIEMPRE, también sin tope: si se fija un tope después, debe
   // partir de lo ya gastado en el período, no de cero (Revisor, PR #70).
   const gasto = await tx.gastoAgenteMes.upsert({
-    where: { tenantId_apiKeyId_periodo: { tenantId, apiKeyId, periodo } },
+    where,
     create: {
       tenantId,
       apiKeyId,
+      agenteInternoId: apiKeyId ? null : identidad,
       periodo,
       gastadoMicro: previo._sum.costoTotalMicro ?? 0n,
       topeMicro: tope,
@@ -73,10 +102,10 @@ export async function consumirPresupuesto(
       data: {
         tenantId,
         tipo: `core.agente.presupuesto_${umbral}`,
-        entidadTipo: "api_key",
-        entidadId: apiKeyId,
+        entidadTipo: apiKeyId ? "api_key" : "agente_interno",
+        entidadId: identidad,
         actorTipo: "agent",
-        actorId: apiKeyId,
+        actorId: identidad,
         viaUserId: key.userId,
         payload: {
           agente: key.nombre,

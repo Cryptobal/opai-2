@@ -1,6 +1,8 @@
 import { beforeAll, describe, expect, it } from "vitest";
 
 import { capacidadesDelNucleo } from "../src/core";
+import { modulos } from "../../../modules/registry/src";
+import { registrarModulos, limpiarModulos } from "../src/module";
 import { herramientasMcp } from "../src/mcp";
 import {
   limpiarRegistro,
@@ -23,6 +25,8 @@ import {
 beforeAll(() => {
   limpiarRegistro();
   registrarCapacidades(capacidadesDelNucleo);
+  limpiarModulos();
+  registrarModulos(modulos);
 });
 
 describe("paridad: toda capacidad tiene herramienta MCP", () => {
@@ -109,6 +113,8 @@ describe("paridad: instantánea de herramientas", () => {
   });
 
   it("el registro del núcleo tiene capacidades de lectura y escritura", () => {
-    expect(listarCapacidades().length).toBe(capacidadesDelNucleo.length);
+    expect(listarCapacidades().length).toBe(
+      capacidadesDelNucleo.length + modulos.reduce((n, m) => n + m.capacidades.length, 0),
+    );
   });
 });
