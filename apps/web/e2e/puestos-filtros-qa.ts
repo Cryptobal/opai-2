@@ -25,10 +25,14 @@ export async function comprobarFiltrosPuestos(page: Page, id: string, proyecto: 
   const detalle = page.getByRole("region", { name: "Detalle" });
   const buscador = detalle.getByPlaceholder("Nombre del puesto");
   await expect(buscador).toBeVisible();
-  await buscador.click();
-  await buscador.blur();
-  await page.keyboard.press("/");
-  await expect(buscador).toBeFocused();
+  // El atajo «/» lo instala un useEffect: hasta que la página hidrata, la tecla no hace nada.
+  await expect(async () => {
+    await buscador.click();
+    await buscador.blur();
+    await expect(buscador).not.toBeFocused();
+    await page.keyboard.press("/");
+    await expect(buscador).toBeFocused({ timeout: 1_000 });
+  }).toPass();
   const lista = page.getByRole("region", { name: /Lista de instalaciones/i });
   const antes = proyecto === "telefono" ? "" : await lista.innerText();
   await buscador.fill("Guardia posición 1");
@@ -47,7 +51,8 @@ export async function comprobarFiltrosPuestos(page: Page, id: string, proyecto: 
       return !!contenedor && el.getBoundingClientRect().right <= contenedor.getBoundingClientRect().right;
     })).toBe(true);
   } else {
-    await page.getByRole("link", { name: /instalaciones/i }).first().click();
+    await page.getByRole("banner").getByRole("link", { name: "Instalaciones", exact: true }).click();
+    await expect(page).toHaveURL(/\/instalaciones\?/);
     await expect(page).toHaveURL(/q=Planta/);
     await expect(page).toHaveURL(/estado=activa/);
     await expect(page).not.toHaveURL(/pq=/);
