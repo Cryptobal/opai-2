@@ -14,6 +14,7 @@ import { destinoSeguro } from "@/app/(auth)/destino";
 import { qrSvg } from "@/lib/qr";
 import { identidadActual } from "@/lib/servidor";
 import { mfaObligatoriaPara, verificarMfaDe } from "@/lib/mfa";
+import { normalizarCodigoRespaldo } from "@/lib/codigo-mfa";
 
 /** Aviso genérico de pausa, igual que el del login (no revela intentos restantes). */
 const PAUSA = {
@@ -45,7 +46,7 @@ export async function accionVerificar(
   // Normaliza en el servidor lo que el usuario pueda pegar: el TOTP a solo dígitos (acepta «123 456» o
   // «123-456») y el código de respaldo sin espacios; así un formato con separadores no se rechaza.
   const bruto = String(form.get("codigo") ?? "");
-  const codigo = metodo === "respaldo" ? bruto.replace(/\s+/g, "") : bruto.replace(/\D/g, "");
+  const codigo = metodo === "respaldo" ? normalizarCodigoRespaldo(bruto) : bruto.replace(/\D/g, "");
   const n = siguiente(previo);
   const r =
     metodo === "respaldo"

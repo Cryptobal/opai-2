@@ -49,6 +49,9 @@ export function PasoEscanear({ svg, secret, codigos, confirmar, confirmando, err
             name="codigo"
             inputMode="numeric"
             autoComplete="one-time-code"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
             maxLength={6}
             pattern="[0-9]{6}"
             required
