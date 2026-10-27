@@ -21,6 +21,11 @@ export interface Almacenamiento {
    * la huella se garantiza sin que el archivo pase por el servidor (ADR-039).
    */
   urlSubida(clave: string, mime: string, sha256: string, segundos?: number): Promise<SubidaFirmada>;
+  /**
+   * Sube bytes desde el servidor (un archivo generado, p. ej. la exportación del titular de la Ley
+   * 21.719), con la huella SHA-256 declarada: R2 rechaza el contenido si no coincide (ADR-039).
+   */
+  subir(clave: string, cuerpo: string, mime: string, sha256: string): Promise<void>;
   urlDescarga(clave: string, nombre: string, segundos?: number): Promise<string>;
   head(clave: string): Promise<ObjetoAlmacenado | null>;
   eliminar(clave: string): Promise<void>;
@@ -65,6 +70,14 @@ export function almacenamientoR2(config: ConfigR2): Almacenamiento {
       const cabeceras = { "content-type": mime, "x-amz-checksum-sha256": hexABase64(sha256) };
       return { url: await firmar(url, "PUT", cabeceras), cabeceras };
     },
+    async subir(clave, cuerpo, mime, sha256) {
+      const r = await cliente.fetch(`${base}/${codificar(clave)}`, {
+        method: "PUT",
+        headers: { "content-type": mime, "x-amz-checksum-sha256": hexABase64(sha256) },
+        body: cuerpo,
+      });
+      if (!r.ok) throw new Error(`R2 respondió ${r.status} al subir el archivo.`);
+    },
     urlDescarga(clave, nombre, segundos = 300) {
       const url = new URL(`${base}/${codificar(clave)}`);
       url.searchParams.set("X-Amz-Expires", String(segundos));
@@ -100,6 +113,7 @@ export function almacenamientoR2(config: ConfigR2): Almacenamiento {
 export const almacenamientoNoDisponible: Almacenamiento = {
   disponible: false,
   urlSubida: () => Promise.reject(new Error("Almacenamiento no configurado en este entorno.")),
+  subir: () => Promise.reject(new Error("Almacenamiento no configurado en este entorno.")),
   urlDescarga: () => Promise.reject(new Error("Almacenamiento no configurado en este entorno.")),
   head: () => Promise.reject(new Error("Almacenamiento no configurado en este entorno.")),
   eliminar: () => Promise.reject(new Error("Almacenamiento no configurado en este entorno.")),
