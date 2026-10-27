@@ -64,6 +64,13 @@ Cada portal muestra solo lo que su módulo contratado habilita (sin Asistencia, 
 
 ## 5. Qué ve cada rol en el ERP
 
+**NÚCLEO-D1:** el menú de usuario de los portales internos permite elegir «Portal de
+inicio» en una hoja del DS V2, entre los portales de la membresía de la empresa actual.
+Sin `next` explícito, tras login o cambio de empresa se usa esa preferencia; si fue
+revocada o es null, el primer portal permitido. `next` conserva `destinoSeguro`.
+No altera el selector de portales ni concede acceso a ninguno. Plataforma sigue
+siendo global y no puede guardarse como preferencia de una membresía.
+
 | Área | owner | admin | gerente | supervisor | viewer |
 |---|---|---|---|---|---|
 | Comercial | sí | sí | sí | no | lectura |
@@ -126,4 +133,3 @@ Aprobación del diseño: «Confirmo que apruebo el diseño 53e9b74b» — Carlos
 | D8 | Vencimientos | Vista dentro de Personas, como está construido hoy (corrige el mapa de §2) |
 | D9 | iPad | Desde 1024 px se usa la barra lateral completa y plegable del escritorio, sin un riel nuevo y sin plegarse a solo íconos (Carlos, 26-oct-2026 11:03 CLT, chat con el bot OPAI 2.0 (t295u; dictado por voz)). De 768 a 1023 sigue el riel actual |
 | D10 | Visualizador (viewer) | No ve Nómina (ya es regla de ADR-016: «solo lectura, sin finanzas ni nómina»; corrige la pantalla 05) |
-

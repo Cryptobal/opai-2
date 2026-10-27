@@ -9,6 +9,20 @@ Hasta el 24-oct-2026 este archivo fue la fuente de verdad del avance; desde ento
 
 ## Hecho
 
+- **NÚCLEO-D1 (rama `fix/portal-servidor`, encargo t457u):** guardas previas al catálogo
+  en ambos ejecutores web; se conserva la validación de sesiones de #68. Dominio de
+  coherencia por rol base/principal y diagnóstico sin escrituras ni correos. Columna
+  nullable `portal_inicio` en memberships e invitations; preferencia personal por
+  capacidad con auditoría, preview, idempotencia y outbox; condición atómica si se
+  revoca el portal. Login/cambio de empresa usan preferencia o primer permitido si no
+  hay next explícito; aceptación de invitación relee la identidad en otro request.
+  Hoja existente del DS V2 en el menú, diferida, sin pantalla nueva. Criterios técnicos
+  del constructor OpenCode / openai/gpt-6.1-sol: los cinco roles internos admiten los
+  cuatro portales internos, sujetos a permisos/alcance; nunca Cliente ni Plataforma.
+  No se conceden portales nuevos ni se reparan datos automáticamente. Matriz y CA en
+  `briefs/ENCARGO-nucleo-d1.md`. Migración nueva: `20261028040000_portal_inicio`;
+  Neon pendiente de Carlos, con etiqueta `migracion-pendiente` cuando se abra el PR.
+
 - **Seguimiento del #60 (rama `fix/roles-seguimiento`, PR #67, sin tarea en Linear):**
   Correcciones QA H1–H4 implementadas por OpenCode según el encargo: fixture E2E autónoma con hash propio, Empresa en texto de lectura con DS 2.0, sensibilidad en texto y estado vacío acorde al permiso. Sin decisiones de negocio adicionales ni migraciones; e2e de roles y portal-sesión 6/6 tras el merge de main. Queda pendiente una auditoría independiente de contraste y foco.
   I4/P4: el menú del ERP usa permisos efectivos (rol personalizado y excepciones), no el rol base.

@@ -26,6 +26,7 @@ const Campana = dynamic(() => import("./campana").then((m) => m.Campana));
 // El cambio de contraseña (formulario y diálogo) solo se descarga si se abre.
 const CambiarPassword = dynamic(() => import("./cambiar-password").then((m) => m.CambiarPassword));
 const Avisos = dynamic(() => import("./avisos").then((m) => m.Avisos), { ssr: false });
+const PortalInicio = dynamic(() => import("./portal-inicio").then((m) => m.PortalInicio));
 
 export type DatosShell = {
   portal: string;
@@ -52,6 +53,7 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
   const router = useRouter();
   const cabecera = useCabecera();
   const [password, setPassword] = useState(false);
+  const [inicio, setInicio] = useState(false);
   const [paleta, setPaleta] = useState<boolean | null>(null);
   // El ERP del usuario con acceso: habilita búsqueda, ⌘K y Preferencias. Sin acceso al portal el
   // shell se monta igual (aviso «Sin permisos»), pero sin estas acciones y sin que la acción del
@@ -91,6 +93,16 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
         }))
       : [];
   const menu: ItemMenu[] = [
+    ...(datos.acceso && datos.tenant && datos.portal !== "platform"
+      ? [
+          {
+            id: "portal-inicio",
+            etiqueta: "Portal de inicio",
+            icono: Settings2,
+            onSelect: () => setInicio(true),
+          },
+        ]
+      : []),
     ...(enErp
       ? [
           {
@@ -138,6 +150,7 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
       {children}
       {paleta !== null ? <Paleta abierto={paleta} onCerrar={() => setPaleta(false)} /> : null}
       {password ? <CambiarPassword abierto onCerrar={() => setPassword(false)} /> : null}
+      {inicio ? <PortalInicio portal={datos.portal} onCerrar={() => setInicio(false)} /> : null}
       <Avisos />
     </AppShell>
   );
