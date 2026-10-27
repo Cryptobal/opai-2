@@ -36,7 +36,7 @@ function ItemRiel({
           ? { title: item.etiqueta, "aria-label": item.etiqueta }
           : {})}
         className={cn(
-          "flex min-h-14 w-16 flex-col items-center justify-center gap-0.5 rounded-md text-xs leading-3 font-medium",
+          "flex min-h-14 w-20 flex-col items-center justify-center gap-0.5 rounded-md text-xs leading-3 font-medium tracking-tighter",
           activo ? "bg-fill text-fg" : "text-fg-muted hover:bg-fill",
         )}
       >
@@ -44,14 +44,14 @@ function ItemRiel({
           <item.icono className={cn("size-5", activo && "text-accent")} aria-hidden />
           {sinContador ? null : <Contador n={item.alerta ? item.contador : undefined} />}
         </span>
-        <span className="w-full break-words text-center">{item.corta ?? item.etiqueta}</span>
+        <span className="w-full wrap-normal text-center">{item.corta ?? item.etiqueta}</span>
       </Link>
     </li>
   );
 }
 
 export type RailProps = NavProps & {
-  /** Selector de portal y de empresa arriba del riel (iPad, 768–1279 px). */
+  /** Selector de portal y de empresa arriba del riel (iPad, 768–1023 px). */
   portales: readonly Portal[];
   portalActual: string;
   tenant?: Tenant | undefined;
@@ -66,7 +66,7 @@ export type RailProps = NavProps & {
 
 /**
  * iPad vertical (ShellTablet, 768–1023 px, D9 del Brief 05): riel de 80 px con el selector de
- * portal y empresa arriba (sin la marca), ítems de 64×56 y los ítems fijos (Configuración) al pie.
+ * portal y empresa arriba (sin la marca), ítems de 80×56 y los ítems fijos (Configuración) al pie.
  * Desde 1024 px se usa la barra lateral completa (`Sidebar`), sin un riel nuevo.
  */
 export function Rail({
@@ -92,7 +92,7 @@ export function Rail({
         variante="riel"
         className="mb-3 w-16"
       />
-      <ul className="flex min-h-0 flex-col gap-1 overflow-y-auto px-1 py-1">
+      <ul className="flex min-h-0 flex-col gap-1 overflow-y-auto py-1">
         {items
           .filter((i) => !i.pie && !i.soloAmplio)
           .map((item) => (

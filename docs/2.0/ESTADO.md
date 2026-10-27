@@ -74,6 +74,8 @@ No se declara CI, QA remota ni aprobación del head nuevo; Neon sigue sin modifi
 
 ## Hecho
 
+- **PR #75 · QA N1 y N2 (OpenCode):** ajuste técnico del encargo: etiquetas compactas sin corte dentro de palabras, riel de 80 px y espaciado de la escala del DS; filas de fijados y reintento de al menos 44 px. Sin decisiones de negocio nuevas ni migraciones propias. Los CA parciales del Brief 05 §16 siguen vigentes.
+
 - **PR #75 · revisión 5666749146:** OpenCode retira abreviaturas del ERP y recupera el área abierta guardada al entrar en Inicio o Configuración. Ajuste técnico según el encargo; sin decisiones de negocio nuevas. Permanecen los CA y la medición de rendimiento parciales documentados en `briefs/BRIEF-05-navegacion.md` §16.
 
 - **PR #75 · merge de main `bf97199` (OpenCode):** se preservan «Más», las preferencias y las comprobaciones y el menú de portal de inicio. Gate local verde hasta build y presupuesto; e2e bloqueado porque la base de aplicación carece de `memberships.portal_inicio`. No se aplicaron migraciones. Detalle y CA parciales en `briefs/BRIEF-05-navegacion.md` §16.

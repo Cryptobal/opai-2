@@ -27,7 +27,7 @@ export function Fijados({ items, rutaActual, onDesfijar, Link = LinkPorDefecto, 
     <div className="flex flex-col gap-px px-3 pt-2">
       <p className="t-overline px-2 pb-1.5">Fijados</p>
       {error ? (
-        <div role="alert" className="t-caption px-2 pb-2">No pudimos cargar tus fijados. <button type="button" onClick={reintentar} className="underline">Reintentar</button></div>
+        <div role="alert" className="t-caption px-2 pb-2">No pudimos cargar tus fijados. <button type="button" onClick={reintentar} className="min-h-11 min-w-11 underline focus-visible:outline-2 focus-visible:outline-focus">Reintentar</button></div>
       ) : items.length === 0 ? (
         <p className="t-caption px-2 pb-2">
           Fija hasta cinco entradas o fichas para tenerlas a mano.
@@ -40,7 +40,7 @@ export function Fijados({ items, rutaActual, onDesfijar, Link = LinkPorDefecto, 
             <div
               key={item.href}
               className={cn(
-                "group flex h-[35px] items-center gap-2.5 rounded-md pr-1 pl-2 text-base font-medium",
+                "group flex min-h-11 items-center gap-2.5 rounded-md pr-1 pl-2 text-base font-medium",
                 activo ? "bg-fill text-fg" : "text-fg-muted hover:bg-fill hover:text-fg",
               )}
             >
@@ -48,7 +48,7 @@ export function Fijados({ items, rutaActual, onDesfijar, Link = LinkPorDefecto, 
                 href={item.href}
                 {...(onNavegar ? { onClick: (e: React.MouseEvent<HTMLAnchorElement>) => { e.preventDefault(); onNavegar(item.href); } } : {})}
                 aria-current={activo ? "page" : undefined}
-                className="flex min-w-0 flex-1 items-center gap-2.5 outline-none focus-visible:outline-2 focus-visible:outline-focus"
+                className="flex min-h-11 min-w-0 flex-1 items-center gap-2.5 outline-none focus-visible:outline-2 focus-visible:outline-focus"
               >
                 <Icono className={cn("size-4 flex-none", activo && "text-accent")} aria-hidden />
                 <span className="min-w-0 flex-1 truncate">{item.etiqueta}</span>

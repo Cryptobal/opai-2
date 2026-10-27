@@ -1,5 +1,28 @@
 import { expect, test } from "@playwright/test";
+import type { Locator } from "@playwright/test";
 import { entrar } from "./sesion";
+
+async function comprobarPalabras(nav: Locator) {
+  const etiquetas = nav.locator("a > span:last-child");
+  expect(await etiquetas.count()).toBeGreaterThan(0);
+  for (const etiqueta of await etiquetas.all()) {
+    const resultado = await etiqueta.evaluate((elemento) => {
+      const texto = elemento.firstChild;
+      if (!texto || texto.nodeType !== Node.TEXT_NODE) return null;
+      const palabras = [...(texto.textContent ?? "").matchAll(/\S+/g)];
+      return palabras.map((palabra) => {
+        const rango = document.createRange();
+        rango.setStart(texto, palabra.index);
+        rango.setEnd(texto, palabra.index + palabra[0].length);
+        const rects = [...rango.getClientRects()];
+        const limites = elemento.getBoundingClientRect();
+        return rects.length === 1 && rects[0]!.left >= limites.left - 0.5 && rects[0]!.right <= limites.right + 0.5;
+      });
+    });
+    expect(resultado).not.toBeNull();
+    expect(resultado).not.toContain(false);
+  }
+}
 
 test("etiquetas completas en riel y barra", async ({ page }, info) => {
   test.skip(info.project.name !== "telefono", "Los dos anchos se prueban en este proyecto");
@@ -11,6 +34,7 @@ test("etiquetas completas en riel y barra", async ({ page }, info) => {
   const cargo = nav.getByRole("link", { name: "Cargos y sueldos", exact: true });
   await expect(cargo).toContainText("Cargos y sueldos");
   await expect.poll(() => cargo.locator("span").last().evaluate((e) => e.scrollWidth <= e.clientWidth)).toBe(true);
+  await comprobarPalabras(nav);
   await page.getByRole("radio", { name: /^Según mi rol/ }).click();
   await page.setViewportSize({ width: 768, height: 900 });
   for (const nombre of ["Instalaciones", "Configuración"]) {
@@ -18,4 +42,5 @@ test("etiquetas completas en riel y barra", async ({ page }, info) => {
     await expect(enlace).toContainText(nombre);
     await expect.poll(() => enlace.locator("span").last().evaluate((e) => e.scrollWidth <= e.clientWidth)).toBe(true);
   }
+  await comprobarPalabras(nav);
 });

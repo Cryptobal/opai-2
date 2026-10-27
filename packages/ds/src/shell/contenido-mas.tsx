@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "../components/button";
+import { cn } from "../cn";
 import { useState } from "react";
 import { Sheet } from "../components/dialog";
 import type { ItemMenu } from "../components/menu";
@@ -37,7 +38,7 @@ export function ContenidoMas({ items, extras, abierto, onCerrar, onNavegar, onRe
         {items.filter((i) => i.pie).map(entrada)}
         {extras.length ? <p className="t-overline mt-3 mb-1 text-fg-muted">Cuenta</p> : null}
         {extras.map((e) => (
-          <Button key={e.id} variant="ghost" className={`w-full justify-start ${e.peligro ? "text-danger" : ""}`} disabled={e.deshabilitado} onClick={() => {
+          <Button key={e.id} variant="ghost" className={cn("w-full justify-start", e.peligro && "text-danger")} disabled={e.deshabilitado} onClick={() => {
             onCerrar();
             e.onSelect?.();
           }}>

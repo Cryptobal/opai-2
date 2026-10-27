@@ -45,6 +45,13 @@ test("el shell informa cuando no puede cargar los fijados", async ({ page }, inf
     const mas = page.getByRole("dialog", { name: "Más" });
     await expect(mas.getByRole("alert")).toContainText("No pudimos cargar tus fijados");
     await expect(mas.getByText("Fija hasta cinco entradas o fichas")).toHaveCount(0);
+    const reintentar = mas.getByRole("button", { name: "Reintentar" });
+    const caja = await reintentar.boundingBox();
+    expect(caja?.height).toBeGreaterThanOrEqual(44);
+    expect(caja?.width).toBeGreaterThanOrEqual(44);
+    await reintentar.focus();
+    await expect(reintentar).toBeFocused();
+    await page.keyboard.press("Enter");
   } else {
     await expect(nav.getByRole("alert")).toContainText("No pudimos cargar tus fijados");
     await expect(nav.getByText("Fija hasta cinco entradas o fichas")).toHaveCount(0);

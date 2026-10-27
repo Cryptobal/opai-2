@@ -15,7 +15,7 @@ export type NavProps = {
 
 const claseItemInferior = (activo: boolean) =>
   cn(
-    "flex min-h-14 w-full flex-col items-center justify-center gap-0.5 text-xs leading-3 font-medium",
+    "flex min-h-14 w-full flex-col items-center justify-center gap-0.5 text-xs leading-3 font-medium tracking-tighter",
     activo ? "text-fg" : "text-fg-subtle",
   );
 
@@ -84,7 +84,7 @@ export function BottomNav({
                     <Contador n={item.alerta ? item.contador : undefined} />
                   )}
                 </span>
-                <span className="w-full break-words px-0.5 text-center">{item.corta ?? item.etiqueta}</span>
+                <span className="w-full wrap-normal text-center">{item.corta ?? item.etiqueta}</span>
               </Link>
             </li>
           );
