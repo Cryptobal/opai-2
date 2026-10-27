@@ -256,6 +256,85 @@ describe.skipIf(!urlPropietario)("alcance del supervisor en base real (B3)", () 
     expect(busq.instalaciones.map((i) => i.id)).toEqual([instA]);
   });
 
+  // Revisión del PR #49 (autorrevisión, punto 1 del encargo): `core.patrones.list/get` contaban
+  // TODOS los puestos activos del patrón, sin aplicar el alcance del supervisor (B3). Un patrón
+  // usado en una instalación a cargo y otra ajena debe contar solo la primera.
+  it("el conteo de puestosActivos en patrones respeta el alcance del supervisor (B3)", async () => {
+    const o = ctxOwner();
+    const sufijo = randomUUID().slice(0, 8);
+    const cargo = (await dato<{ id: string }>(o, "core.cargos.create", { nombre: `Alcance ${sufijo}` }))
+      .id;
+    const patron = await dato<{ id: string }>(o, "core.patrones.create", {
+      nombre: `Alcance ${sufijo}`,
+      diasTrabajo: 4,
+      diasDescanso: 4,
+    });
+    const puesto = (inst: string, nombre: string) =>
+      dato(o, "core.puestos.create", {
+        instalacionId: inst,
+        cargoId: cargo,
+        patronId: patron.id,
+        nombre,
+        diasTrabajo: 4,
+        diasDescanso: 4,
+        horaInicio: "08:00",
+        horaFin: "20:00",
+      });
+    await puesto(instA, `Alcance Alfa ${sufijo}`);
+    await puesto(instB, `Alcance Beta ${sufijo}`);
+    // El owner (sin alcance acotado) ve las dos posiciones.
+    const comoOwner = await dato<{ puestosActivos: number }>(o, "core.patrones.get", { id: patron.id });
+    expect(comoOwner.puestosActivos).toBe(2);
+    // El supervisor solo tiene instA a cargo: el conteo cuenta solo esa, nunca la de instB (fuga).
+    const ctx = ctxSup({ instalaciones: [instA] });
+    const comoSup = await dato<{ puestosActivos: number }>(ctx, "core.patrones.get", { id: patron.id });
+    expect(comoSup.puestosActivos).toBe(1);
+    const lista = await dato<{ puestosActivos: number; id: string }[]>(ctx, "core.patrones.list", {});
+    expect(lista.find((p) => p.id === patron.id)?.puestosActivos).toBe(1);
+    // Sin instalaciones a cargo: fail-closed, cero (nunca el total del tenant por error).
+    const sinAlcance = await dato<{ puestosActivos: number }>(
+      ctxSup({ instalaciones: [] }),
+      "core.patrones.get",
+      { id: patron.id },
+    );
+    expect(sinAlcance.puestosActivos).toBe(0);
+  });
+
+  // Mismo hallazgo (revisión de esta autorrevisión): `core.funciones.list/get` tenía la misma fuga.
+  it("el conteo de puestosActivos en funciones respeta el alcance del supervisor (B3)", async () => {
+    const o = ctxOwner();
+    const sufijo = randomUUID().slice(0, 8);
+    const cargo = (await dato<{ id: string }>(o, "core.cargos.create", { nombre: `AlcFun ${sufijo}` }))
+      .id;
+    const funcion = await dato<{ id: string }>(o, "core.funciones.create", {
+      nombre: `Alcance ${sufijo}`,
+    });
+    const puesto = (inst: string, nombre: string) =>
+      dato(o, "core.puestos.create", {
+        instalacionId: inst,
+        cargoId: cargo,
+        funcionId: funcion.id,
+        nombre,
+        diasTrabajo: 4,
+        diasDescanso: 4,
+        horaInicio: "08:00",
+        horaFin: "20:00",
+      });
+    await puesto(instA, `Func Alfa ${sufijo}`);
+    await puesto(instB, `Func Beta ${sufijo}`);
+    const comoOwner = await dato<{ puestosActivos: number }>(o, "core.funciones.get", {
+      id: funcion.id,
+    });
+    expect(comoOwner.puestosActivos).toBe(2);
+    const ctx = ctxSup({ instalaciones: [instA] });
+    const comoSup = await dato<{ puestosActivos: number }>(ctx, "core.funciones.get", {
+      id: funcion.id,
+    });
+    expect(comoSup.puestosActivos).toBe(1);
+    const lista = await dato<{ puestosActivos: number; id: string }[]>(ctx, "core.funciones.list", {});
+    expect(lista.find((f) => f.id === funcion.id)?.puestosActivos).toBe(1);
+  });
+
   it("una API key del supervisor hereda el mismo alcance (ADR-033)", async () => {
     const inst = await dato<{ items: { id: string }[] }>(ctxKeySup(await alcanceDesdeDb()), "core.instalaciones.list", {});
     expect(inst.items.map((i) => i.id)).toEqual([instA]);

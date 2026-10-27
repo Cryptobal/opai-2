@@ -4,6 +4,7 @@ import { CLASES_PATRON, diasPorSemana, resumenPatron } from "@opai/domain";
 
 import { conflicto, noEncontrado } from "../../errores";
 import type { Contexto } from "../../types";
+import { dondePuesto } from "./alcance";
 import { otroQue } from "./comun";
 
 export const patronSchema = z.object({
@@ -91,8 +92,12 @@ export async function patronDe(ctx: Contexto, id: string) {
   return p;
 }
 
+// El conteo es solo informativo (no decide nada), pero igual respeta el alcance por filas del
+// supervisor (ADR-022, Brief 07c B3): fuera de las instalaciones a cargo, el puesto no cuenta.
 export async function conteoPuestosPatron(ctx: Contexto, patronId: string) {
-  return ctx.db.puesto.count({ where: { patronId, estado: "activo" } });
+  return ctx.db.puesto.count({
+    where: { patronId, estado: "activo", AND: [dondePuesto(ctx)] },
+  });
 }
 
 export async function nombrePatronLibre(ctx: Contexto, nombre?: string, excepto?: string) {

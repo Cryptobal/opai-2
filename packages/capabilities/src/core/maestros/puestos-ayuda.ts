@@ -1,10 +1,28 @@
+import type { TenantTx } from "@opai/db";
+
 import { noEncontrado, reglaDeNegocio } from "../../errores";
 import type { Contexto } from "../../types";
 import { dondePuesto } from "./alcance";
 import { opcionalAFecha } from "./comun";
+import { bloquearPatron } from "./patrones-estructura";
 import { errorDePatron, sugerirHoras } from "./puestos-campos";
 
 export const incluir = { patron: true, funcion: true } as const;
+
+/**
+ * Vuelve a comprobar, DENTRO de la transacción de escritura, que el patrón elegido sigue activo
+ * (TOCTOU, autorrevisión del PR #49, punto 2): `componer` ya lo valida antes de abrir la
+ * transacción, pero esa lectura no tiene lock, así que un `core.patrones.set_activo` concurrente
+ * podría desactivarlo justo después. `bloquearPatron` serializa con esa escritura. Solo se llama
+ * cuando el puesto ELIGE el patrón (crear, o cambiarlo en un update): uno que ya lo tenía sigue
+ * editable aunque se desactive después, mismo criterio que `componer`.
+ */
+export async function patronSigueActivo(tx: TenantTx, patronId: string | null | undefined) {
+  if (!patronId) return;
+  await bloquearPatron(tx, patronId);
+  const p = await tx.patronTurno.findUnique({ where: { id: patronId } });
+  if (p && !p.activo) throw reglaDeNegocio(`El patrón "${p.nombre}" está desactivado.`);
+}
 
 export async function puestoDe(ctx: Contexto, id: string) {
   // findFirst (no findUnique) para aplicar el alcance por filas (#51, ADR-022): un puesto fuera del

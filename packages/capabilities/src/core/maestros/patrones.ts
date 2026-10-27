@@ -5,6 +5,7 @@ import { PERMISOS_CORE } from "@opai/domain";
 import { defineCapability } from "../../define";
 import { reglaDeNegocio } from "../../errores";
 import { uuidSchema } from "../esquemas";
+import { dondePuesto } from "./alcance";
 import { definidos, escribirConEvento, sinDuplicado } from "./comun";
 import {
   camposPatron,
@@ -16,6 +17,7 @@ import {
   vistaPatron,
 } from "./patrones-vista";
 import {
+  bloquearPatron,
   cambiaEstructura,
   EN_USO,
   estructuraDelCambio,
@@ -37,9 +39,11 @@ export const patronesList = defineCapability({
       where: input.incluirInactivos ? {} : { activo: true },
       orderBy: [{ orden: "asc" }, { nombre: "asc" }],
     });
+    // El conteo respeta el alcance por filas del supervisor (ADR-022, Brief 07c B3): sin alcance
+    // sobre una instalación, sus puestos no cuentan (fail-closed, nunca el total del tenant).
     const grupos = await ctx.db.puesto.groupBy({
       by: ["patronId"],
-      where: { estado: "activo", patronId: { in: filas.map((f) => f.id) } },
+      where: { estado: "activo", patronId: { in: filas.map((f) => f.id) }, AND: [dondePuesto(ctx)] },
       _count: { _all: true },
     });
     const conteo = new Map(grupos.map((g) => [g.patronId, g._count._all]));
@@ -147,7 +151,12 @@ export const patronesSetActivo = defineCapability({
     const p = await escribirConEvento(
       ctx,
       { tipo: "core.patron.actualizado", entidadTipo: "patron_turno", payload: () => ({ activo }) },
-      (tx) => tx.patronTurno.update({ where: { id }, data: { activo } }),
+      // Mismo bloqueo que `patronSigueActivo` (TOCTOU, autorrevisión del PR #49, punto 2): así un
+      // puesto que está eligiendo este patrón en paralelo no lo encuentra ya inactivo a medio camino.
+      async (tx) => {
+        await bloquearPatron(tx, id);
+        return tx.patronTurno.update({ where: { id }, data: { activo } });
+      },
     );
     return vistaPatron(p, n);
   },

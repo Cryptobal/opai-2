@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { conflicto, noEncontrado } from "../../errores";
 import type { Contexto } from "../../types";
+import { dondePuesto } from "./alcance";
 import { otroQue, textoOpcional } from "./comun";
 
 export const funcionSchema = z.object({
@@ -44,8 +45,12 @@ export async function funcionDe(ctx: Contexto, id: string) {
   return f;
 }
 
+// El conteo es solo informativo (no decide nada), pero igual respeta el alcance por filas del
+// supervisor (ADR-022, Brief 07c B3): fuera de las instalaciones a cargo, el puesto no cuenta.
 export async function conteoPuestosFuncion(ctx: Contexto, funcionId: string) {
-  return ctx.db.puesto.count({ where: { funcionId, estado: "activo" } });
+  return ctx.db.puesto.count({
+    where: { funcionId, estado: "activo", AND: [dondePuesto(ctx)] },
+  });
 }
 
 export async function nombreFuncionLibre(ctx: Contexto, nombre?: string, excepto?: string) {

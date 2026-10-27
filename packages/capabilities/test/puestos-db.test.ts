@@ -4,6 +4,8 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import { enTransaccion } from "@opai/db";
+
 import { type Entorno, prepararEntorno, urlPropietario } from "../../db/test/entorno";
 
 import type * as ModuloCapacidades from "../src";
@@ -102,5 +104,87 @@ describe.skipIf(!urlPropietario)("puestos y catálogos en base real", () => {
     await expect(
       e.forTenant(t.a).patronTurno.update({ where: { id: t.patronA }, data: { diasDescanso: 3 } }),
     ).rejects.toThrow(/en uso/);
+  });
+
+  it("el conteo de puestosActivos de un patrón no cruza tenants (RLS)", async () => {
+    // t.patronA ya tiene al menos un puesto (prueba anterior). Desde el tenant B, patronB es un
+    // patrón distinto sin ningún puesto: su conteo no se contamina con los puestos de A.
+    const propio = await dato<{ puestosActivos: number }>("core.patrones.get", { id: t.patronA });
+    expect(propio.puestosActivos).toBeGreaterThanOrEqual(1);
+    const ctxB = mod.crearContexto({
+      tenantId: t.b,
+      actor: { tipo: "system" },
+      rol: "owner",
+      medidor: { registrar: async () => undefined },
+    });
+    const r = await mod.executeCapability(ctxB, "core.patrones.get", { id: t.patronB });
+    if (!r.ok) throw new Error(JSON.stringify(r.error));
+    expect((r.data as { puestosActivos: number }).puestosActivos).toBe(0);
+  });
+
+  /** Promesa controlable a mano: para forzar un orden exacto entre dos transacciones concurrentes. */
+  function compuerta(): { lista: Promise<void>; abrir: () => void } {
+    let abrir: () => void = () => undefined;
+    const lista = new Promise<void>((resolve) => (abrir = resolve));
+    return { lista, abrir };
+  }
+
+  it("concurrencia: desactivar un patrón mientras se elige en un puesto nuevo no deja un puesto con un patrón ya inactivo (autorrevisión PR #49, punto 2)", async () => {
+    const patron = await dato<{ id: string }>("core.patrones.create", {
+      nombre: `Carrera ${randomUUID().slice(0, 6)}`,
+      diasTrabajo: 4,
+      diasDescanso: 4,
+    });
+    const avisoListo = compuerta();
+    const puedeComitear = compuerta();
+    // T1: desactiva el patrón (toma el mismo advisory lock que `patronSigueActivo`) y mantiene la
+    // transacción abierta —sin comitear— hasta la señal.
+    const t1 = enTransaccion(t.a, async (tx) => {
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${patron.id}, 1))`;
+      await tx.patronTurno.update({ where: { id: patron.id }, data: { activo: false } });
+      avisoListo.abrir();
+      await puedeComitear.lista;
+    });
+    await avisoListo.lista; // T1 ya desactivó el patrón, pero aún no comitea: sigue "activo" para quien no tiene el lock.
+    const t2 = mod.executeCapability(ctx(), "core.puestos.create", puesto({ patronId: patron.id }));
+    await new Promise((r) => setTimeout(r, 100)); // le da tiempo a T2 de quedar esperando el mismo lock.
+    puedeComitear.abrir(); // libera T1: comitea la desactivación.
+    await t1;
+    const r2 = await t2;
+    // Sin el bloqueo, T2 vería "activo" (lectura sin lock antes de la transacción) y crearía el
+    // puesto igual; con el bloqueo, su propia transacción espera a T1 y relee ya desactivado.
+    expect(r2).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+    expect(!r2.ok && r2.error.message).toMatch(/desactivado/);
+    expect(await e.admin.puesto.count({ where: { patronId: patron.id } })).toBe(0);
+  });
+
+  it("concurrencia: cambiar la estructura de un patrón mientras se elige en un puesto nuevo no deja una forma a medio camino", async () => {
+    const patron = await dato<{ id: string }>("core.patrones.create", {
+      nombre: `Estructura ${randomUUID().slice(0, 6)}`,
+      diasTrabajo: 4,
+      diasDescanso: 4,
+    });
+    const avisoListo = compuerta();
+    const puedeComitear = compuerta();
+    // T1: cambia la estructura directo en la base (sin puestos todavía, así que no es "en uso") y
+    // mantiene la transacción abierta —sin comitear— hasta la señal. El puesto que la elige al mismo
+    // tiempo (T2) la lee con `FOR SHARE` (trigger `puesto_ciclo_del_patron`): espera a T1 por el lock
+    // de la misma fila de `patrones_turno`, sin que haga falta el advisory lock de la prueba anterior.
+    const t1 = enTransaccion(t.a, async (tx) => {
+      await tx.patronTurno.update({ where: { id: patron.id }, data: { diasTrabajo: 6, diasDescanso: 1 } });
+      avisoListo.abrir();
+      await puedeComitear.lista;
+    });
+    await avisoListo.lista;
+    const t2 = dato<{ diasTrabajo: number; diasDescanso: number }>(
+      "core.puestos.create",
+      puesto({ patronId: patron.id }),
+    );
+    await new Promise((r) => setTimeout(r, 100));
+    puedeComitear.abrir();
+    await t1;
+    const creado = await t2;
+    // El puesto nunca queda con una mezcla de la forma vieja y la nueva: hereda la nueva por completo.
+    expect([creado.diasTrabajo, creado.diasDescanso]).toEqual([6, 1]);
   });
 });

@@ -19,6 +19,7 @@ import {
   horasDelCambio,
   incluir,
   mezclarPuesto,
+  patronSigueActivo,
   puestoDe,
 } from "./puestos-ayuda";
 import { puestoSchema, vistaPuesto } from "./puestos-vista";
@@ -95,7 +96,10 @@ export const puestosCreate = defineCapability({
     const p = await escribirConEvento(
       ctx,
       { tipo: "core.puesto.creado", entidadTipo: "puesto" },
-      (tx) => tx.puesto.create({ data: { ...data, tenantId: ctx.tenantId } }),
+      async (tx) => {
+        await patronSigueActivo(tx, input.patronId);
+        return tx.puesto.create({ data: { ...data, tenantId: ctx.tenantId } });
+      },
     );
     return vistaPuesto(await puestoDe(ctx, p.id));
   },
@@ -115,12 +119,13 @@ export const puestosUpdate = defineCapability({
     await cargoActivo(ctx, cambios.cargoId);
     // La función o el patrón se exigen activos solo si cambian (si no, desactivar un catálogo
     // bloquearía editar el nombre o las notas de los puestos que ya lo usan).
+    const eligiendoPatronNuevo = cambios.patronId !== undefined && cambios.patronId !== actual.patronId;
     const { funcion, patron, diasTrabajo, diasDescanso, sugerencia } = await componer(
       ctx,
       mezclarPuesto(actual, cambios),
       {
         funcion: cambios.funcionId !== undefined && cambios.funcionId !== actual.funcionId,
-        patron: cambios.patronId !== undefined && cambios.patronId !== actual.patronId,
+        patron: eligiendoPatronNuevo,
       },
     );
     const horasSemanales = horasDelCambio(cambios, actual, sugerencia);
@@ -135,27 +140,10 @@ export const puestosUpdate = defineCapability({
     const p = await escribirConEvento(
       ctx,
       { tipo: "core.puesto.actualizado", entidadTipo: "puesto" },
-      (tx) => tx.puesto.update({ where: { id }, data }),
-    );
-    return vistaPuesto(await puestoDe(ctx, p.id));
-  },
-});
-
-export const puestosSetEstado = defineCapability({
-  id: "core.puestos.set_estado",
-  descripcion: "Activa o desactiva un puesto de servicio. Desactivar no borra su historial.",
-  permiso: PERMISOS_CORE.instalacionesManage,
-  input: z.object({ id: uuidSchema, estado: z.enum(["activo", "inactivo"]) }),
-  output: puestoSchema,
-  efecto: "escritura",
-  dryRun: true,
-  async handler(ctx, { id, estado }, { dryRun }) {
-    const actual = await puestoDe(ctx, id);
-    if (dryRun) return vistaPuesto({ ...actual, estado });
-    const p = await escribirConEvento(
-      ctx,
-      { tipo: "core.puesto.actualizado", entidadTipo: "puesto", payload: () => ({ estado }) },
-      (tx) => tx.puesto.update({ where: { id }, data: { estado } }),
+      async (tx) => {
+        if (eligiendoPatronNuevo) await patronSigueActivo(tx, cambios.patronId);
+        return tx.puesto.update({ where: { id }, data });
+      },
     );
     return vistaPuesto(await puestoDe(ctx, p.id));
   },

@@ -4,6 +4,7 @@ import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import { uuidSchema } from "../esquemas";
+import { dondePuesto } from "./alcance";
 import { definidos, escribirConEvento, sinDuplicado } from "./comun";
 import {
   camposFuncion,
@@ -29,9 +30,15 @@ export const funcionesList = defineCapability({
       where: input.incluirInactivos ? {} : { activo: true },
       orderBy: [{ orden: "asc" }, { nombre: "asc" }],
     });
+    // El conteo respeta el alcance por filas del supervisor (ADR-022, Brief 07c B3): sin alcance
+    // sobre una instalación, sus puestos no cuentan (fail-closed, nunca el total del tenant).
     const grupos = await ctx.db.puesto.groupBy({
       by: ["funcionId"],
-      where: { estado: "activo", funcionId: { in: filas.map((f) => f.id) } },
+      where: {
+        estado: "activo",
+        funcionId: { in: filas.map((f) => f.id) },
+        AND: [dondePuesto(ctx)],
+      },
       _count: { _all: true },
     });
     const conteo = new Map(grupos.map((g) => [g.funcionId, g._count._all]));
