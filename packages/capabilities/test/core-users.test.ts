@@ -265,6 +265,10 @@ describe("core.users.invite", () => {
       name: "Carla",
       email: "carla@prueba.cl",
     });
+    // Excepción única (t500u): aceptar crea la membresía, aun sin portal ni acceso previo.
+    base.ctx.portal = null;
+    base.ctx.portalesMembresia = [];
+    base.ctx.rol = null;
     const comoAna = await executeCapability(base.ctx, "core.invitations.accept", { token });
     expect(comoAna).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
     base.ctx.usuario = {
