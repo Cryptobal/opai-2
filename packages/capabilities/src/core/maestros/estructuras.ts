@@ -6,6 +6,7 @@ import { defineCapability } from "../../define";
 import { noEncontrado } from "../../errores";
 import { uuidSchema } from "../esquemas";
 import { itemsDe, ocultarMontos } from "./estructuras-acceso";
+import { dondeEstructura } from "./estructuras-alcance";
 import { estructuraSchema, NIVELES, vistaEstructura } from "./estructuras-vista";
 
 export const estructurasList = defineCapability({
@@ -25,6 +26,7 @@ export const estructurasList = defineCapability({
     const campo = `${input.nivel}Id` as const;
     const filas = await ctx.db.estructuraSueldo.findMany({
       where: {
+        AND: [await dondeEstructura(ctx)],
         nivel: input.nivel,
         [campo]: input.refId,
         ...(input.incluirAnuladas ? {} : { estado: "vigente" }),
@@ -53,7 +55,9 @@ export const estructurasGet = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
-    const e = await ctx.db.estructuraSueldo.findUnique({ where: { id: input.id } });
+    const e = await ctx.db.estructuraSueldo.findFirst({
+      where: { id: input.id, AND: [await dondeEstructura(ctx)] },
+    });
     if (!e) throw noEncontrado("La estructura");
     const items = await itemsDe(ctx, [e.id]);
     return vistaEstructura(e, items.get(e.id) ?? [], await ocultarMontos(ctx, e));

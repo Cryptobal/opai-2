@@ -19,6 +19,8 @@ export function DireccionOpai(props: {
   onCambiar: (d: Direccion | null) => void;
   geocercaM?: number | null;
   sinMapa?: boolean;
+  /** Solo lectura: el campo no se edita (modo ver, ADR-022). */
+  disabled?: boolean;
 }) {
   const [error, setError] = useState<string | null>(null);
   const ultima = useRef(0);
