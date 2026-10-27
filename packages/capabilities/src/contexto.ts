@@ -79,6 +79,15 @@ export type ParametrosContexto = {
    * principal `servicio` no hereda rol: sus permisos salen exclusivamente de esta lista.
    */
   claveApi?: { permisos: readonly string[] | null; servicio: boolean } | null;
+  /**
+   * Techo real de permisos del responsable humano de la API key (rol, personalizado y excepciones),
+   * usado para intersectar con `claveApi` (H15): ni una key delegada ni una de servicio superan lo
+   * que su responsable puede hacer ahora mismo. El borde lo calcula siempre desde la membresía
+   * vigente del responsable, también para `servicio` (cuyo `rol`/`permisosRol`/`excepciones` de
+   * arriba van en `null` porque el principal no hereda rol). Por defecto, el mismo
+   * `rol`/`permisosRol`/`excepciones` de arriba (sesión humana sin key, donde no aplica distinción).
+   */
+  accesoResponsable?: Acceso | null;
   /** Alcance por filas del actor (null = ve todo). Lo resuelve el borde una vez (ADR-022, ADR-045). */
   alcance?: Alcance | null;
   agente?: AgenteContexto | null;
@@ -94,14 +103,18 @@ export type ParametrosContexto = {
  * Autorización real (ADR-016, ADR-022, ADR-033 · Identidad de servicio t457u): `platform:*` solo
  * con `platformRole` y nunca para una API key; el resto, por el acceso efectivo en el tenant actual
  * (rol base o personalizado + excepciones, denegar-gana). Si ejecuta una API key con permisos finos,
- * el permiso además debe estar en los de la key (intersección: nadie supera a su responsable). Un
- * principal `servicio` no hereda rol: concede solo lo que la key lista. Módulo activo y scopes los
- * verifica `executeCapability`.
+ * el permiso además debe estar entre los efectivos ACTUALES del responsable (`accesoResponsable`,
+ * H15): nadie supera a su responsable, y si este baja de rol, personaliza su rol o recibe una
+ * excepción que deniega, la key lo pierde de inmediato, sea de servicio o delegada. Un principal
+ * `servicio` no hereda rol ni alcance (su `acceso` propio queda vacío): concede solo lo que la key
+ * lista, acotado igual por `accesoResponsable`. Módulo activo y scopes los verifica
+ * `executeCapability`.
  */
 export function autorizador(
   acceso: Acceso,
   usuario: UsuarioContexto | null,
   clave?: { permisos: readonly string[] | null; servicio: boolean } | null,
+  accesoResponsable: Acceso = acceso,
 ) {
   return (permiso: string): boolean => {
     if (moduloDe(permiso) === "platform") {
@@ -110,7 +123,7 @@ export function autorizador(
     }
     if (clave)
       return permisoDeKey(permiso, clave.permisos, clave.servicio, (p) =>
-        tienePermisoEfectivo(acceso, p),
+        tienePermisoEfectivo(accesoResponsable, p),
       );
     return tienePermisoEfectivo(acceso, permiso);
   };
@@ -155,12 +168,16 @@ export function crearContexto(params: ParametrosContexto): Contexto {
       urlBase:
         params.servicios?.urlBase ?? process.env["BETTER_AUTH_URL"] ?? "http://localhost:3000",
     },
-    plataforma: usuario?.platformRole
-      ? { globales: globales(), paraTenant: (id: string) => forTenant(id) }
-      : null,
+    // Nunca para un agente (H15/H del Revisor): una API key no obtiene el acceso de plataforma del
+    // responsable, aunque este tenga `platformRole` (el permiso ya lo bloquea `autorizador`, pero
+    // `requierePlataforma` depende de este objeto, no del permiso, como defensa en profundidad).
+    plataforma:
+      usuario?.platformRole && params.actor.tipo !== "agent"
+        ? { globales: globales(), paraTenant: (id: string) => forTenant(id) }
+        : null,
     // `ctx.rol` conserva el rol base (jerarquía y etiquetas). La autorización usa el rol
     // personalizado cuando existe: si hay `permisosRol`, el rol base cede a esa lista (ADR-022).
-    // Si ejecuta una API key, además cruza con sus permisos finos (ADR-033, Identidad de servicio).
+    // Si ejecuta una API key, además cruza con los efectivos actuales del responsable (H15).
     autorizar: autorizador(
       {
         rol: params.permisosRol != null ? null : rol,
@@ -169,6 +186,7 @@ export function crearContexto(params: ParametrosContexto): Contexto {
       },
       usuario,
       params.claveApi ?? null,
+      params.accesoResponsable ?? undefined,
     ),
   };
 }

@@ -1,5 +1,5 @@
 import { crearContexto, hashApiKey, slugDeApiKey, type Contexto } from "@opai/capabilities";
-import { esRol, esRolPlataforma } from "@opai/domain";
+import { type Acceso, esRol, esRolPlataforma } from "@opai/domain";
 
 import { alcanceDe } from "./actor";
 import { fuentesReales, type Fuentes } from "./fuentes";
@@ -47,18 +47,28 @@ export async function contextoDeApiKey(
   if (!fila.ultimoUsoEn || ahora - fila.ultimoUsoEn.getTime() > MINUTO) {
     await fuentes.marcarUsoKey(tenant.id, fila.id).catch(() => undefined);
   }
-  // Un principal "servicio" no tiene dueño humano (Identidad de servicio t457u): su responsable es
-  // una persona solo para gobierno (aprobaciones y avisos); sus permisos salen exclusivamente de la
-  // key y no hereda rol ni alcance. El resto de las keys heredan permisos y alcance del responsable,
-  // acotados por los permisos finos de la key si los tiene (ADR-033).
+  // Servicio no hereda rol ni alcance, pero su lista explícita nunca supera los permisos actuales
+  // del responsable. Si este pierde el alcance completo, el servicio deja de autenticarse.
   const tipo = principalTipo(fila.principalTipo);
   const servicio = tipo === "servicio";
   if (
     servicio &&
-    (fila.heredaPermisos || !fila.presupuestoMensualMicro || fila.presupuestoMensualMicro <= 0n)
+    (fila.heredaPermisos ||
+      !fila.presupuestoMensualMicro ||
+      fila.presupuestoMensualMicro <= 0n ||
+      acceso.instalaciones !== null)
   )
     return noAutenticado("API key inválida.");
   const claveApi = { permisos: fila.heredaPermisos ? null : fila.permisos, servicio };
+  // Techo real del responsable (H15): rol, personalizado y excepciones VIGENTES, siempre, también
+  // para `servicio` (que arriba manda `rol`/`permisosRol`/`excepciones` en null porque el principal
+  // no hereda rol). Si el responsable baja de rol o recibe una excepción que deniega, la key la
+  // pierde al vuelo, sea delegada o de servicio.
+  const accesoResponsable: Acceso = {
+    rol: acceso.permisosRol != null ? null : membresia.rol,
+    permisosRol: acceso.permisosRol,
+    excepciones: acceso.excepciones,
+  };
   return crearContexto({
     tenantId: tenant.id,
     actor: { tipo: "agent", id: fila.id, viaUserId: usuario.id },
@@ -71,6 +81,7 @@ export async function contextoDeApiKey(
     rol: servicio ? null : membresia.rol,
     permisosRol: servicio ? null : acceso.permisosRol,
     excepciones: servicio ? null : acceso.excepciones,
+    accesoResponsable,
     // La key hereda el alcance por filas de su responsable (ADR-033); un servicio no hereda alcance.
     alcance: servicio ? null : alcanceDe(acceso.instalaciones),
     portal: null,

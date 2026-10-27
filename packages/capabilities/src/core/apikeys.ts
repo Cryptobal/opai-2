@@ -72,6 +72,7 @@ export const apikeysCreate = defineCapability({
       .number()
       .min(0)
       .max(100_000)
+      .multipleOf(0.000001)
       .optional()
       .describe(
         "Tope de gasto mensual en USD (IA, mapas, correo…). Requiere permiso de agentes. Obligatorio para 'servicio'.",

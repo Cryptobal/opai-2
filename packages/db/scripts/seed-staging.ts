@@ -7,6 +7,57 @@ import { fileURLToPath } from "node:url";
 
 import { cerrarClientes, dbAdmin, enTransaccion, sembrarCatalogo } from "../src/index";
 
+/** Rama prohibida por el encargo del PR #70. */
+const RAMA_PROHIBIDA = "br-dawn-morning-b6037bp9";
+
+/**
+ * Falla cerrado antes de escribir. Solo admite bases locales dev/staging conocidas. Los endpoints
+ * Neon son opacos (ep-..., no br-...): el nombre de una base NO prueba su rama. Hasta registrar
+ * un endpoint dev/staging verificado, ningún host remoto está autorizado, ni siquiera con una
+ * base llamada staging. No inferir el entorno por subcadenas ni por parámetros de la URL.
+ */
+export function exigirBaseDeStagingODev(urlConexion: string): void {
+  let url: URL;
+  try {
+    url = new URL(urlConexion);
+  } catch {
+    throw new Error("DATABASE_URL_MIGRATE no es una URL de conexión válida.");
+  }
+  if (urlConexion.toLowerCase().includes(RAMA_PROHIBIDA)) {
+    throw new Error(
+      `seed:staging nunca corre contra la rama "${RAMA_PROHIBIDA}" (main/producción de Neon).`,
+    );
+  }
+  const host = url.hostname.toLowerCase();
+  const base = decodeURIComponent(url.pathname.replace(/^\//, "")).toLowerCase();
+  if (
+    !["postgres:", "postgresql:"].includes(url.protocol) ||
+    !["localhost", "127.0.0.1", "[::1]"].includes(host) ||
+    !["opai_dev", "opai_staging"].includes(base) ||
+    url.search !== ""
+  ) {
+    throw new Error(
+      "seed:staging solo autoriza localhost con opai_dev u opai_staging, sin parámetros; " +
+        "Neon y producción están bloqueados hasta verificar el endpoint dev/staging.",
+    );
+  }
+}
+
+/** Admin y app escriben en el mismo destino; solo sus credenciales pueden diferir. */
+export function exigirMismoDestinoStaging(admin: string, app: string): void {
+  exigirBaseDeStagingODev(admin);
+  exigirBaseDeStagingODev(app);
+  const destino = (valor: string) => {
+    const url = new URL(valor);
+    return `${url.hostname}:${url.port || "5432"}${url.pathname}`;
+  };
+  if (destino(admin) !== destino(app)) {
+    throw new Error(
+      "DATABASE_URL y DATABASE_URL_MIGRATE deben apuntar al mismo destino dev/staging.",
+    );
+  }
+}
+
 /**
  * `destino` debe quedar fuera del repositorio. Compara por segmentos de ruta (nunca
  * `.startsWith("..")` sobre el string: un directorio real llamado "..secret" también empieza con
@@ -15,9 +66,7 @@ import { cerrarClientes, dbAdmin, enTransaccion, sembrarCatalogo } from "../src/
  */
 export async function exigirFueraDelRepositorio(destino: string): Promise<void> {
   // dirname(este archivo) = packages/db/scripts; tres niveles arriba es la raíz del repositorio.
-  const raizRepo = await realpath(
-    resolve(dirname(fileURLToPath(import.meta.url)), "../../.."),
-  );
+  const raizRepo = await realpath(resolve(dirname(fileURLToPath(import.meta.url)), "../../.."));
   let dirDestino: string;
   try {
     dirDestino = await realpath(dirname(destino));
@@ -27,7 +76,9 @@ export async function exigirFueraDelRepositorio(destino: string): Promise<void> 
   const rel = relative(raizRepo, dirDestino);
   const esExterno = rel === ".." || rel.startsWith(`..${sep}`) || isAbsolute(rel);
   if (!esExterno)
-    throw new Error("STAGING_KEY_FILE debe ser una ruta fuera del repositorio (secreto, modo 0600).");
+    throw new Error(
+      "STAGING_KEY_FILE debe ser una ruta fuera del repositorio (secreto, modo 0600).",
+    );
 }
 
 async function main() {
@@ -43,6 +94,10 @@ async function main() {
       "STAGING_KEY_FILE debe ser una ruta absoluta fuera del repositorio (secreto, modo 0600).",
     );
   await exigirFueraDelRepositorio(destino);
+  const urlDestino = process.env["DATABASE_URL_MIGRATE"];
+  const urlApp = process.env["DATABASE_URL"];
+  if (!urlDestino || !urlApp) throw new Error("Falta DATABASE_URL_MIGRATE o DATABASE_URL.");
+  exigirMismoDestinoStaging(urlDestino, urlApp);
   const admin = dbAdmin();
   if (!(await admin.user.findUnique({ where: { id: userId } })))
     throw new Error("Responsable inválido.");
@@ -58,7 +113,7 @@ async function main() {
   await enTransaccion(tenant.id, async (tx) => {
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended('seed:gard-staging', 0))`;
     await sembrarCatalogo(tx, tenant.id, "seguridad");
-    // Responsable solo de gobierno; el servicio NO hereda este rol ni sus permisos.
+    // No hereda el rol; sus permisos explícitos quedan acotados por el acceso actual del responsable.
     await tx.membership.upsert({
       where: { tenantId_userId: { tenantId: tenant.id, userId } },
       update: {},

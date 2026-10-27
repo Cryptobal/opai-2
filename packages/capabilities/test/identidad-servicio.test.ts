@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { executeCapability } from "../src";
-import { contextoDePrueba } from "../src/testing";
+import { contextoDePrueba, USUARIO_DE_PRUEBA } from "../src/testing";
 import { codigo, dato, reiniciar } from "./maestros-ayuda";
 import { M2, semillaTenant } from "./semilla";
 
@@ -15,6 +15,28 @@ const input = {
 };
 
 describe("identidad de servicio", () => {
+  it.each(["usuario", "servicio"])(
+    "rechaza fracciones menores a micro-USD para %s antes del dryRun",
+    async (tipo) => {
+      const { ctx } = contextoDePrueba({ semilla: semillaTenant() });
+      for (const dryRun of [true, false]) {
+        expect(
+          await executeCapability(
+            ctx,
+            "core.apikeys.create",
+            {
+              nombre: "Presupuesto inválido",
+              scopes: ["core"],
+              tipo,
+              permisos: ["core:cuentas.read"],
+              presupuestoMensualUsd: 0.0000001,
+            },
+            { dryRun },
+          ),
+        ).toMatchObject({ ok: false, error: { code: "INVALID_INPUT" } });
+      }
+    },
+  );
   it("una key de owner no cambia el rol base ni promueve a owner (#60, review 5661003883)", async () => {
     const { ctx, tabla } = contextoDePrueba({
       semilla: semillaTenant("gerente"),
@@ -63,6 +85,50 @@ describe("identidad de servicio", () => {
     expect(ctx.autorizar("platform:tenants.manage")).toBe(false);
     expect(await codigo(ctx, "core.apikeys.create", input)).toBe("FORBIDDEN");
   });
+  it("H15: si el responsable baja de rol, la key de servicio pierde el permiso al vuelo", async () => {
+    const actor = { tipo: "agent" as const, id: "key", viaUserId: "u" };
+    const claveApi = { servicio: true, permisos: ["core:instalaciones.manage"] };
+    const antes = contextoDePrueba({
+      rol: null,
+      actor,
+      claveApi,
+      accesoResponsable: { rol: "gerente", permisosRol: null, excepciones: null },
+    }).ctx;
+    expect(antes.autorizar("core:instalaciones.manage")).toBe(true);
+    // El mismo responsable, ya bajado a viewer: la key lista el permiso igual, pero el techo lo frena.
+    const despues = contextoDePrueba({
+      rol: null,
+      actor,
+      claveApi,
+      accesoResponsable: { rol: "viewer", permisosRol: null, excepciones: null },
+    }).ctx;
+    expect(despues.autorizar("core:instalaciones.manage")).toBe(false);
+  });
+  it("H15: una excepción que deniega al responsable también cierra la key de servicio", async () => {
+    const actor = { tipo: "agent" as const, id: "key", viaUserId: "u" };
+    const claveApi = { servicio: true, permisos: ["core:instalaciones.manage"] };
+    const { ctx } = contextoDePrueba({
+      rol: null,
+      actor,
+      claveApi,
+      accesoResponsable: {
+        rol: "gerente",
+        permisosRol: null,
+        excepciones: [{ permiso: "core:instalaciones.manage", conceder: false }],
+      },
+    });
+    expect(ctx.autorizar("core:instalaciones.manage")).toBe(false);
+  });
+  it("ctx.plataforma es null para cualquier agente, aunque el responsable tenga platformRole", async () => {
+    const usuario = { ...USUARIO_DE_PRUEBA, platformRole: "owner" as const };
+    const { ctx } = contextoDePrueba({
+      rol: "owner",
+      usuario,
+      actor: { tipo: "agent", id: "key", viaUserId: usuario.id },
+      claveApi: { servicio: false, permisos: null },
+    });
+    expect(ctx.plataforma).toBeNull();
+  });
   it("exige presupuesto y permisos explícitos también al actualizar", async () => {
     const { ctx } = contextoDePrueba({ semilla: semillaTenant() });
     expect(
@@ -71,7 +137,9 @@ describe("identidad de servicio", () => {
     expect(await codigo(ctx, "core.apikeys.create", { ...input, permisos: undefined })).toBe(
       "UNPROCESSABLE",
     );
-    expect((await executeCapability(ctx, "core.apikeys.create", { ...input, permisos: [] })).ok).toBe(false);
+    expect(
+      (await executeCapability(ctx, "core.apikeys.create", { ...input, permisos: [] })).ok,
+    ).toBe(false);
     const { id } = await dato<{ id: string }>(ctx, "core.apikeys.create", input);
     for (const presupuestoMensualUsd of [0, null])
       expect(await codigo(ctx, "core.apikeys.update", { id, presupuestoMensualUsd })).toBe(

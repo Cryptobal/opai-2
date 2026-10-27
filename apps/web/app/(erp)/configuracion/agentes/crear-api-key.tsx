@@ -9,6 +9,7 @@ import { useCapacidad } from "@/app/_components/use-capacidad";
 import { type KeyCreada, SecretoCreado } from "./secreto-creado";
 import { ModulosKey, PermisosKey } from "./permisos-key";
 import { montoUsd } from "./monto";
+import { PresupuestoKey } from "./presupuesto-key";
 
 type Props = {
   abierto: boolean;
@@ -19,7 +20,13 @@ type Props = {
 };
 
 /** Crear API key: nombre y scopes ("todos" o módulos). El secreto se muestra una vez en un diálogo. */
-export function CrearApiKey({ abierto, onCerrar, scopesDisponibles, permisosDisponibles, puedeCrearServicio }: Props) {
+export function CrearApiKey({
+  abierto,
+  onCerrar,
+  scopesDisponibles,
+  permisosDisponibles,
+  puedeCrearServicio,
+}: Props) {
   const { ejecutar, error, limpiarError } = useCapacidad("erp");
   const [nombre, setNombre] = useState("");
   const [todos, setTodos] = useState(false);
@@ -32,14 +39,29 @@ export function CrearApiKey({ abierto, onCerrar, scopesDisponibles, permisosDisp
   const [enviando, setEnviando] = useState(false);
   const tope = montoUsd(presupuesto);
   const montoInvalido = presupuesto.trim() !== "" && tope === null;
+  const configuracionInvalida =
+    montoInvalido ||
+    (servicio && tope === null) ||
+    ((servicio || !hereda) && permisos.length === 0);
+  const deshabilitado =
+    enviando ||
+    nombre.trim().length < 2 ||
+    (!todos && modulos.length === 0) ||
+    configuracionInvalida;
 
   const limpiar = () => {
-    setNombre(""); setPresupuesto(""); setTodos(false); setServicio(false);
-    setHereda(true); setPermisos([]); setModulos(["core"]); limpiarError();
+    setNombre("");
+    setPresupuesto("");
+    setTodos(false);
+    setServicio(false);
+    setHereda(true);
+    setPermisos([]);
+    setModulos(["core"]);
+    limpiarError();
   };
 
   async function crear() {
-    if (montoInvalido || (servicio && tope === null) || ((servicio || !hereda) && !permisos.length)) return;
+    if (deshabilitado) return;
     setEnviando(true);
     const r = await ejecutar<{ secreto: string }>("core.apikeys.create", {
       nombre,
@@ -54,7 +76,7 @@ export function CrearApiKey({ abierto, onCerrar, scopesDisponibles, permisosDisp
       setCreada({
         secreto: r.secreto,
         nombre,
-        resumen: `Scopes: ${todos ? "todos los módulos" : modulos.join(", ")} · ${tope !== null ? `presupuesto US$ ${tope} al mes` : "sin presupuesto"} · irreversibles con aprobación`,
+        resumen: `Scopes: ${todos ? "todos los módulos" : modulos.join(", ")} · ${tope !== null ? `presupuesto US$ ${tope.toLocaleString("es-CL", { maximumFractionDigits: 6 })} al mes` : "sin presupuesto"} · irreversibles con aprobación`,
       });
       limpiar();
     }
@@ -72,39 +94,30 @@ export function CrearApiKey({ abierto, onCerrar, scopesDisponibles, permisosDisp
         onCerrar={cerrar}
         titulo="Crear key"
         acciones={
-          <Button
-            block
-            size="lg"
-            disabled={
-              enviando ||
-              nombre.trim().length < 2 ||
-              (!todos && modulos.length === 0) ||
-              montoInvalido || (servicio && tope === null) ||
-              ((servicio || !hereda) && permisos.length === 0)
-            }
-            onClick={crear}
-          >
+          <Button block size="lg" disabled={deshabilitado} onClick={crear}>
             {enviando ? "Creando…" : "Crear"}
           </Button>
         }
       >
         <div className="flex flex-col gap-4">
-          {error ? <Alerta tono="danger" titulo="No se pudo crear la key">{error}</Alerta> : null}
-          {puedeCrearServicio ? <Switch
-            etiqueta="Agente de servicio"
-            activo={servicio}
-            onCambiar={setServicio}
-            descripcion={
-              servicio
-                ? "Sin rol heredado. Responsable solo para aprobaciones y avisos."
-                : "Vía usuario: permisos y alcance del responsable, acotados por la key."
-            }
-          /> : null}
-          <Campo
-            etiqueta="Nombre"
-            htmlFor="key-nombre"
-            ayuda="Para reconocerla: Grokbot, Claude…"
-          >
+          {error ? (
+            <Alerta tono="danger" titulo="No se pudo crear la key">
+              {error}
+            </Alerta>
+          ) : null}
+          {puedeCrearServicio ? (
+            <Switch
+              etiqueta="Agente de servicio"
+              activo={servicio}
+              onCambiar={setServicio}
+              descripcion={
+                servicio
+                  ? "Sin rol heredado. Los permisos nunca superan los actuales del responsable."
+                  : "Vía usuario: permisos y alcance del responsable, acotados por la key."
+              }
+            />
+          ) : null}
+          <Campo etiqueta="Nombre" htmlFor="key-nombre" ayuda="Para reconocerla: Grokbot, Claude…">
             <Input
               id="key-nombre"
               value={nombre}
@@ -112,25 +125,12 @@ export function CrearApiKey({ abierto, onCerrar, scopesDisponibles, permisosDisp
               autoComplete="off"
             />
           </Campo>
-          <Campo
-            etiqueta="Presupuesto mensual (US$)"
-            htmlFor="key-tope"
-            {...(montoInvalido ? { error: "Ingresa un monto mayor que cero, por ejemplo 15 o 10,5." } : {})}
-            ayuda={
-              servicio
-                ? "Obligatorio para servicio, mayor que cero. Aviso al 80 % y corte al 100 %."
-                : "Al 80 % avisamos; al 100 % se detiene. Vacío: sin límite."
-            }
-          >
-            <div className="flex items-center gap-2"><span>US$</span><Input
-              id="key-tope"
-              inputMode="decimal"
-              value={presupuesto}
-              onChange={(e) => setPresupuesto(e.target.value)}
-              aria-invalid={montoInvalido}
-            />
-            </div>
-          </Campo>
+          <PresupuestoKey
+            valor={presupuesto}
+            invalido={montoInvalido}
+            servicio={servicio}
+            onCambiar={setPresupuesto}
+          />
           <ModulosKey
             disponibles={scopesDisponibles}
             elegidos={modulos}
@@ -147,7 +147,11 @@ export function CrearApiKey({ abierto, onCerrar, scopesDisponibles, permisosDisp
             />
           ) : null}
           {servicio || !hereda ? (
-            <PermisosKey disponibles={permisosDisponibles} elegidos={permisos} onCambiar={setPermisos} />
+            <PermisosKey
+              disponibles={permisosDisponibles}
+              elegidos={permisos}
+              onCambiar={setPermisos}
+            />
           ) : null}
         </div>
       </Sheet>

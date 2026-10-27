@@ -1,4 +1,4 @@
-import type { Excepcion, Rol } from "@opai/domain";
+import type { Acceso, Excepcion, Rol } from "@opai/domain";
 
 import { autorizador } from "../contexto";
 import { idempotenciaSobre } from "../idempotencia";
@@ -38,6 +38,8 @@ export type OpcionesPrueba = {
   agente?: AgenteContexto | null;
   /** Permisos finos de la API key (Identidad de servicio t457u). Cruza con los del responsable. */
   claveApi?: { permisos: readonly string[] | null; servicio: boolean } | null;
+  /** Techo real del responsable de la key (H15). Por defecto, el mismo `rol`/`permisosRol`/`excepciones`. */
+  accesoResponsable?: Acceso | null;
   semilla?: Parameters<typeof dbEnMemoria>[0];
 };
 
@@ -111,7 +113,8 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
       almacenamiento: almacen.almacenamiento,
       urlBase: "https://test.opai.cl",
     },
-    plataforma: usuario?.platformRole ? { globales, paraTenant: () => db } : null,
+    plataforma:
+      usuario?.platformRole && actor.tipo !== "agent" ? { globales, paraTenant: () => db } : null,
     autorizar: o.permisos
       ? (p) => (o.permisos ?? []).includes(p)
       : autorizador(
@@ -122,6 +125,7 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
           },
           usuario,
           o.claveApi ?? null,
+          o.accesoResponsable ?? undefined,
         ),
   };
   const esperar = () => Promise.all(diferidos.splice(0));
