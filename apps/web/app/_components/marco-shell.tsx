@@ -93,7 +93,9 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
         }))
       : [];
   const menu: ItemMenu[] = [
-    ...(datos.acceso && datos.tenant && datos.portal !== "platform"
+    ...(datos.acceso &&
+    datos.tenant &&
+    ["erp", "supervisor", "trabajador", "terreno"].includes(datos.portal)
       ? [
           {
             id: "portal-inicio",

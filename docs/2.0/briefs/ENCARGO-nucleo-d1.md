@@ -30,6 +30,10 @@ Continuaciones del encargo del 27-oct-2026. No incluye ID de Linear; no se inven
   preferencia que ya no sea válida, dentro de la misma transacción y sobre el valor
   vigente de la fila. Preview no escribe; quitar y reconceder no revive la elección.
   Implementación de OpenCode según el punto 3 del encargo, no decisión nueva de negocio.
+- QA P1–P3 (`/workspace/qa/pr72/informe-dac3399.md`): menú solo en portales internos,
+  error de carga diferenciado con reintento (también ante error de red), confirmación
+  de guardado con `avisar.exito` del DS. E2e cubre los seis portales, reintento y aviso.
+  S1 (`next=/`) y S2 (Cliente para internos) se conservan sin cambios: decide Carlos.
 
 ## Criterios técnicos de implementación
 

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-import { Alerta, Button, Campo, Select, Sheet, Skeleton } from "@opai/ds";
+import { Alerta, avisar, Button, Campo, Select, Sheet, Skeleton } from "@opai/ds";
 
 import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
 
@@ -19,16 +19,20 @@ export function PortalInicio({ portal, onCerrar }: { portal: string; onCerrar: (
   const [intento, setIntento] = useState(0);
   useEffect(() => {
     let activo = true;
-    void ejecutarCapacidad(portal, "core.me", {}).then((r) => {
-      if (!activo) return;
-      if (!r.ok) {
-        setError(r.error.message);
-        return;
-      }
-      const d = r.data as { portales: string[]; portalInicio: string | null };
-      setDatos(d);
-      setValor(d.portalInicio && d.portales.includes(d.portalInicio) ? d.portalInicio : "auto");
-    });
+    void ejecutarCapacidad(portal, "core.me", {})
+      .then((r) => {
+        if (!activo) return;
+        if (!r.ok) {
+          setError(r.error.message);
+          return;
+        }
+        const d = r.data as { portales: string[]; portalInicio: string | null };
+        setDatos(d);
+        setValor(d.portalInicio && d.portales.includes(d.portalInicio) ? d.portalInicio : "auto");
+      })
+      .catch(() => {
+        if (activo) setError("Revisa tu conexión y vuelve a intentarlo.");
+      });
     return () => {
       activo = false;
     };
@@ -45,12 +49,18 @@ export function PortalInicio({ portal, onCerrar }: { portal: string; onCerrar: (
     });
     setGuardando(false);
     if (!r.ok) setError(r.error.message);
-    else onCerrar();
+    else {
+      avisar.exito("Portal de inicio guardado. Lo usaremos la próxima vez que entres.");
+      onCerrar();
+    }
   }
   return (
     <Sheet abierto onCerrar={onCerrar} titulo="Portal de inicio">
       {error ? (
-        <Alerta tono="danger" titulo="No pudimos guardar">
+        <Alerta
+          tono="danger"
+          titulo={datos ? "No pudimos guardar" : "No pudimos cargar tus portales"}
+        >
           {error}
           {!datos ? (
             <Button

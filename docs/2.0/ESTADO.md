@@ -25,6 +25,9 @@ Hasta el 24-oct-2026 este archivo fue la fuente de verdad del avance; desde ento
   Seguimiento de la review 5663625371: limpieza transaccional de preferencias obsoletas
   al cambiar rol o portales (punto 3 del encargo, implementado por OpenCode), sin
   conceder acceso ni revivir preferencias al reconceder portales. Sin decisiones nuevas.
+  QA P1–P3 del informe `informe-dac3399.md`: opción oculta en Cliente/Plataforma,
+  error de carga con reintento y aviso de éxito del DS 2.0. Implementación de OpenCode
+  según el punto 4 del encargo; S1 y S2 no cambian y su decisión sigue en Carlos.
 
 > **Seguimiento de seguridad y QA PR #70 (OpenCode, continuación del 27-oct):** keys de usuario/servicio acotadas por los permisos vigentes del responsable (rol, personalizado y excepciones); servicio se invalida si este pierde alcance completo. Invitación con rol solo por personas; plataforma null para agentes; ledger acumula también sin tope; precisión mínima de micro-USD y formatos es-CL. Adaptaciones técnicas de OpenCode, no decisiones nuevas de Carlos. Seed fail-closed: solo bases locales `opai_dev`/`opai_staging`; Neon bloqueado hasta registrar un endpoint dev/staging verificado (el ID de rama no identifica su hostname). `gard-staging` es un tenant: no hay evidencia de una rama/base remota aparte y no se ejecutó el seed. Gate actual y limitaciones en `briefs/NUCLEO-C-identidad-servicio.md`.
 
