@@ -30,6 +30,10 @@
   ],
   "infraestructuraLibConDb": [
     {
+      "archivo": "lib/rate-limit.ts",
+      "motivo": "Limitador central (NÚCLEO-B): consume la ventana en core.rate_limit_consumir (SECURITY DEFINER) con respaldo en memoria si la base falla; es el cableado del borde, no una pantalla."
+    },
+    {
       "archivo": "lib/fuentes.ts",
       "motivo": "Borde de ejecución: construye el contexto de capacidades (base por tenant, auditoría, eventos); es el cableado, no una pantalla."
     },
