@@ -6,9 +6,10 @@ import { Button, type EstadoPantalla } from "@opai/ds";
 
 import { BloqueComponentes } from "./bloque-componentes";
 import { BloqueNuevos } from "./componentes-nuevos/bloque";
+import { MuestraPwa } from "./componentes-nuevos/pwa";
 import { BloqueDetalle } from "./bloque-detalle";
 import { BloqueLista } from "./bloque-lista";
-import { BloqueFormulario, BloquePlanillaYDashboard } from "./bloques";
+import { Bloque, BloqueFormulario, BloquePlanillaYDashboard } from "./bloques";
 
 const ESTADOS: EstadoPantalla[] = ["ready", "loading", "empty", "error", "forbidden"];
 
@@ -42,6 +43,9 @@ export function DsShowcase() {
       <BloquePlanillaYDashboard state={state} />
       <BloqueComponentes />
       <BloqueNuevos state={state} />
+      <Bloque titulo="PWA · sin conexión, versión nueva e instalar">
+        <MuestraPwa />
+      </Bloque>
     </div>
   );
 }

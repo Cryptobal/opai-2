@@ -1,9 +1,9 @@
 import { expect, type Locator, type Page, test } from "@playwright/test";
 
 // CAR-12 (Brief 05, §14 CA1): la campana, el buscador y el botón de usuario mantienen tamaño y
-// posición idénticos al cambiar de vista. A 1280 (y 1024) se comparan buscador, campana y usuario;
-// a 375 se comparan la campana y el avatar en todas las vistas, también las que traen «Atrás», más
-// el ítem «Buscar» de la barra inferior (la búsqueda del teléfono dejó la barra superior, D7).
+// posición idénticos al cambiar de vista, en las tres anchuras. Desde ADR-050 (reemplaza la D7) el
+// teléfono vuelve a tener «Buscar» en la barra superior y no en la inferior, y a 1280 el usuario va al
+// pie de la barra lateral (ShellPhone, ShellTablet y ShellDesktop).
 const email = process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl";
 const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
 
@@ -36,13 +36,19 @@ async function caja(loc: Locator) {
   await expect(visible).toBeVisible();
   const b = await visible.boundingBox();
   if (!b) throw new Error("sin boundingBox");
-  return { x: Math.round(b.x), y: Math.round(b.y), w: Math.round(b.width), h: Math.round(b.height) };
+  return {
+    x: Math.round(b.x),
+    y: Math.round(b.y),
+    w: Math.round(b.width),
+    h: Math.round(b.height),
+  };
 }
 
 const campanaDe = (page: Page) =>
   page.locator("header").getByRole("button", { name: /notificaciones/i });
+// A 1280 el usuario está al pie de la barra lateral; en 375 y 1024, en la cabecera.
 const usuarioDe = (page: Page) =>
-  page.locator("header").getByRole("button", { name: "Menú de usuario" });
+  page.locator("header, nav").getByRole("button", { name: "Menú de usuario" });
 
 test.describe("cabecera estable (CAR-12, CA1)", () => {
   test.beforeEach(() => {
@@ -56,9 +62,9 @@ test.describe("cabecera estable (CAR-12, CA1)", () => {
   }, info) => {
     await entrar(page);
     const telefono = info.project.name === "telefono";
-    // A 375 el buscador es el ítem «Buscar» de la barra inferior; en md+ es el control de la cabecera.
+    // A 375 el buscador es el ícono «Buscar» de la cabecera; en md+ es la caja de búsqueda.
     const buscador = telefono
-      ? page.getByRole("button", { name: "Buscar", exact: true })
+      ? page.locator("header").getByRole("button", { name: "Buscar", exact: true })
       : page.locator("header").getByRole("button", { name: /^Buscar/ });
 
     const refs: Record<string, { x: number; y: number; w: number; h: number }> = {};
@@ -79,6 +85,13 @@ test.describe("cabecera estable (CAR-12, CA1)", () => {
         usuario: await caja(usuarioDe(page)),
         buscador: await caja(buscador),
       };
+      if (telefono) {
+        // «Buscar» ya no está en la barra inferior (ADR-050).
+        const inferior = page
+          .getByRole("navigation", { name: "Principal" })
+          .filter({ visible: true });
+        await expect(inferior.getByRole("button", { name: "Buscar" })).toHaveCount(0);
+      }
       for (const [clave, valor] of Object.entries(actual)) {
         if (refs[clave]) expect(valor, `${clave} en ${vista.nombre}`).toEqual(refs[clave]);
         else refs[clave] = valor;

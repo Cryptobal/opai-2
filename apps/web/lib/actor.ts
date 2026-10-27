@@ -30,7 +30,12 @@ export type Identidad = {
   acceso: AccesoFila;
 };
 
-const SIN_ACCESO: AccesoFila = { permisosRol: null, excepciones: [] };
+const SIN_ACCESO: AccesoFila = { permisosRol: null, excepciones: [], instalaciones: null };
+
+/** Alcance por filas del contexto (ADR-022): null = ve todo; array (quizá vacío) = acotado. */
+export function alcanceDe(instalaciones: string[] | null) {
+  return instalaciones ? { instalaciones } : null;
+}
 
 export async function identidadDe(
   user: UsuarioSesion,
@@ -63,6 +68,7 @@ export function contextoDeIdentidad(identidad: Identidad, portal: string | null)
     rol: actual && esRol(actual.rol) ? actual.rol : null,
     permisosRol: acceso.permisosRol,
     excepciones: acceso.excepciones,
+    alcance: alcanceDe(acceso.instalaciones),
     portal,
     modulosActivos: identidad.modulosActivos,
     medidor: medidorDiferido,

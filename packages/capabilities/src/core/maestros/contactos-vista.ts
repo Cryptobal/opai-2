@@ -5,6 +5,7 @@ import type { TenantTx } from "@opai/db";
 import { conflicto, noEncontrado } from "../../errores";
 import type { Contexto } from "../../types";
 import { iso } from "../comun";
+import { dondeContacto } from "./alcance";
 import { otroQue, telefonoSchema, textoOpcional } from "./comun";
 
 export const ROLES_CONTACTO = ["comercial", "operacional", "facturacion", "cobranza"] as const;
@@ -48,7 +49,8 @@ export const campos = {
 };
 
 export async function contactoDe(ctx: Contexto, id: string) {
-  const c = await ctx.db.contacto.findUnique({ where: { id } });
+  // findFirst (no findUnique) para aplicar el alcance por filas vía la cuenta del contacto.
+  const c = await ctx.db.contacto.findFirst({ where: { id, AND: [dondeContacto(ctx)] } });
   if (!c) throw noEncontrado("El contacto");
   return c;
 }
