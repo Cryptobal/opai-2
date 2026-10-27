@@ -17,6 +17,67 @@ async function main() {
   const tenant = await db.tenant.findUniqueOrThrow({ where: { slug: "gard" } });
   await db.$transaction(async (tx) => {
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(70168)`;
+    await tx.persona.upsert({
+      where: { tenantId_rut: { tenantId: tenant.id, rut: "11111111-1" } },
+      update: {},
+      create: {
+        id: "00000000-0000-7000-8000-000000000078",
+        tenantId: tenant.id,
+        rut: "11111111-1",
+        nombres: "Prueba",
+        apellidos: "Navegación",
+      },
+    });
+    for (const conceder of [false, true]) {
+      const email = `supervisor-nav-${conceder ? "concede" : "deniega"}@opai.cl`;
+      const user = await tx.user.upsert({
+        where: { email },
+        update: {},
+        create: { email, name: "Supervisor E2E", emailVerified: true },
+      });
+      const account = await tx.account.findFirst({
+        where: { userId: user.id, providerId: "credential" },
+      });
+      if (account) await tx.account.update({ where: { id: account.id }, data: { password: hash } });
+      else
+        await tx.account.create({
+          data: { userId: user.id, providerId: "credential", accountId: user.id, password: hash },
+        });
+      const rol = await tx.rol.upsert({
+        where: { tenantId_nombre: { tenantId: tenant.id, nombre: `Supervisor E2E ${conceder}` } },
+        update: {
+          permisos: ["core:personas.read", "core:documentos.read", "core:documentos.manage"],
+        },
+        create: {
+          tenantId: tenant.id,
+          nombre: `Supervisor E2E ${conceder}`,
+          permisos: ["core:personas.read", "core:documentos.read", "core:documentos.manage"],
+        },
+      });
+      const membership = await tx.membership.upsert({
+        where: { tenantId_userId: { tenantId: tenant.id, userId: user.id } },
+        update: { rol: "supervisor", roleId: rol.id, portales: ["supervisor"] },
+        create: {
+          tenantId: tenant.id,
+          userId: user.id,
+          rol: "supervisor",
+          roleId: rol.id,
+          portales: ["supervisor"],
+        },
+      });
+      await tx.permisoExcepcion.upsert({
+        where: {
+          membershipId_permiso: { membershipId: membership.id, permiso: "core:documentos.manage" },
+        },
+        update: { conceder },
+        create: {
+          tenantId: tenant.id,
+          membershipId: membership.id,
+          permiso: "core:documentos.manage",
+          conceder,
+        },
+      });
+    }
     for (const conceder of [false, true]) {
       const email = `nav-${conceder ? "concede" : "deniega"}@opai.cl`;
       const user = await tx.user.upsert({

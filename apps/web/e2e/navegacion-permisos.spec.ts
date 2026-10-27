@@ -33,3 +33,19 @@ for (const conceder of [false, true]) {
     await page.screenshot({ path: info.outputPath(`permisos-${conceder}.png`), fullPage: true });
   });
 }
+
+for (const conceder of [false, true]) {
+  test(`Supervisor limitado ${conceder ? "con permiso" : "sin permiso"} no accede a persona fuera de alcance`, async ({
+    page,
+  }) => {
+    await entrar(page, `supervisor-nav-${conceder ? "concede" : "deniega"}@opai.cl`);
+    await page.goto("/supervisor/personas/00000000-0000-7000-8000-000000000078");
+    await expect(page.getByText("No encontramos a esta persona")).toBeVisible();
+    await expect(page.getByRole("link", { name: "Subir documento" })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Pedir" })).toHaveCount(0);
+  });
+}
+
+test.skip("Supervisor limitado ve acciones para persona en alcance", async () => {
+  // Pendiente de 07b: todavía no existe el vínculo persona-instalación y se deniega toda persona.
+});

@@ -9,7 +9,7 @@ Sin decisión de negocio nueva ni migración. Adaptación técnica de OpenCode.
 - La visibilidad de las acciones usa la identidad ya cargada, sin consultas adicionales.
 - Las pruebas unitarias cubren denegación por excepción y concesión por rol personalizado
   con instalaciones no nulas. La navegación también se prueba con alcance limitado.
-- **Parcial:** falta comprobar los botones en el E2E para ambos casos. Además, un actor
+- **Parcial:** el E2E comprueba que los botones no aparecen ante una persona fuera de alcance. OPAI 2.0 decidió (t500u) aplazar el caso positivo acotado hasta integrar 07b; queda marcado con test.skip. Un actor
   limitado no puede acceder a ninguna persona ni documento de persona: `dondePersona` y
   `entidadEnAlcance` deniegan por defecto hasta que el Brief 07b aporte el vínculo real
   persona-instalación. No se debilita esa protección para fabricar el caso positivo.
