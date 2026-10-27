@@ -34,8 +34,20 @@ test.describe("configuración: empresa y plataforma del tenant", () => {
     await page.goto("/configuracion/preferencias");
     const guardado = () =>
       page.waitForResponse(
-        (r) => r.request().method() === "POST" && r.url().includes("/configuracion/preferencias"),
+        (r) =>
+          r.request().method() === "POST" &&
+          r.url().includes("/configuracion/preferencias") &&
+          (r.request().postData() ?? "").includes("core.config.set"),
       );
+    // La base local persiste entre corridas: cambiar un radio ya elegido no guarda nada.
+    // Normaliza por la misma UI y espera la escritura concreta, sin tocar datos fuera del tenant.
+    if (await page.getByRole("radio", { name: "Oscuro" }).isChecked()) {
+      const normalizado = guardado();
+      await page.getByRole("radio", { name: /Sistema/ }).click();
+      await normalizado;
+      await page.reload();
+      await expect(page.getByRole("radio", { name: /Sistema/ })).toBeChecked();
+    }
     let respuesta = guardado();
     await page.getByRole("radio", { name: "Oscuro" }).click();
     await respuesta;

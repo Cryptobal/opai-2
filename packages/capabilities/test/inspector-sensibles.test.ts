@@ -120,6 +120,10 @@ describe("Inspector DT: lectura sensible auditada (t479u; art. 31 DFL 2/1967)", 
         capability: "core.estructuras.read_sensible",
         entityType: "audit_event",
       }),
+      expect.objectContaining({
+        capability: "core.actividad.list",
+        payload: { ids: [expect.any(String)] },
+      }),
     ]);
     const fallo = {
       ...ctx,
