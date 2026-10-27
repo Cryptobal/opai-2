@@ -11,6 +11,7 @@ import { dondeEstructura } from "./estructuras-alcance";
 import { estructuraSchema, NIVELES, vistaEstructura } from "./estructuras-vista";
 
 export const estructurasList = defineCapability({
+  auditarLectura: (s) => s.map((e) => e.id),
   id: "core.estructuras.list",
   descripcion:
     "Versiones de estructura de sueldo de un cargo, puesto o persona (de la más reciente a la más antigua). Si el cargo es sensible y no tienes ese permiso, los montos vienen vacíos y sensible = true.",
@@ -32,18 +33,17 @@ export const estructurasList = defineCapability({
         [campo]: input.refId,
         ...(input.incluirAnuladas ? {} : { estado: "vigente" }),
       },
+      include: { items: { orderBy: { orden: "asc" } } },
       orderBy: { vigenteDesde: "desc" },
     });
-    const items = await itemsDe(
-      ctx,
-      filas.map((f) => f.id),
-    );
+    const items = new Map(filas.map((f) => [f.id, f.items]));
     const ocultas = await ocultasDe(ctx, filas);
     return filas.map((f) => vistaEstructura(f, items.get(f.id) ?? [], ocultas.get(f.id) ?? true));
   },
 });
 
 export const estructurasGet = defineCapability({
+  auditarLectura: (s) => [s.id],
   id: "core.estructuras.get",
   descripcion:
     "Una versión de estructura de sueldo con sus ítems (bonos fijos y porcentuales). Respeta la sensibilidad del cargo.",

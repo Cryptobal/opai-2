@@ -20,8 +20,7 @@ export function ImpactoCambio({ impacto: i }: { impacto: ImpactoSueldo }) {
     >
       <p>El consumidor de borradores llega en el PR 4; este cambio registra el evento.</p>
       <p>
-        {i.pendientesVinculo} vínculos vigentes del tenant pendientes de vínculo con instalación (PR
-        3); no atribuidos a esta instalación ni valorizados.
+        {i.pendientesVinculo} vínculos vigentes de la empresa pendientes de vínculo con instalación; no atribuidos a esta instalación ni valorizados.
       </p>
     </Alerta>
   );

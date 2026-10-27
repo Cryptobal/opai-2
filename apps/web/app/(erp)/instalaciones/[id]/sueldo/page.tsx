@@ -1,11 +1,11 @@
+import { MarcadorMetricas } from "@/app/_components/marcador-metricas";
 import { PERMISOS_CORE } from "@opai/domain";
 import { Alerta, SeccionTarjeta, TablaEstructura } from "@opai/ds";
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { HojaCapaDiferida } from "@/app/_components/sueldos/diferida";
 import { hoyIso } from "@/lib/fechas";
 import type { SearchParams } from "@/lib/parametros";
-import { ejecutarComoUsuario, identidadActual, contextoServidor } from "@/lib/servidor";
-import type { EstructuraVista } from "@/lib/tipos-sueldo";
+import { identidadActual, contextoServidor } from "@/lib/servidor";
 import { VersionesCapa } from "@/app/_components/sueldos/versiones-capa";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { PaginaInstalacion } from "../../_componentes/pagina-instalacion";
@@ -17,19 +17,13 @@ export default function Sueldo(props: {
 }) {
   return (
     <PaginaInstalacion {...props} tab="sueldo">
-      {async (i, q) => {
+      {async (i, q, panel) => {
         const puesto = i.puestos.find((p) => p.id === q["puesto"]);
         const nivel = puesto ? "puesto" : "instalacion";
         const refId = puesto?.id ?? i.id;
-        const [r, identidad] = await Promise.all([
-          ejecutarComoUsuario<EstructuraVista[]>("erp", "core.estructuras.list", {
-            nivel,
-            refId,
-            incluirAnuladas: true,
-          }),
-          identidadActual(),
-        ]);
-        if (!r.ok) return <Alerta tono="danger" titulo={r.error.message} />;
+        if (!panel) return null;
+        const r = { data: panel.versiones };
+        const identidad = await identidadActual();
         const hoy = hoyIso();
         const actual =
           r.data.find(
@@ -96,6 +90,7 @@ export default function Sueldo(props: {
                 Solo owner y admin pueden definir versiones.
               </Alerta>
             )}
+            <MarcadorMetricas id="opai-metricas-sueldo" />
           </div>
         );
       }}

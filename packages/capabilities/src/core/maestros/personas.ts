@@ -2,17 +2,12 @@ import { z } from "zod";
 
 import { PERMISOS_CORE } from "@opai/domain";
 
+import { noEncontrado } from "../../errores";
 import { defineCapability } from "../../define";
 import { uuidSchema } from "../esquemas";
 import { dondePersona } from "./alcance";
 import { cursorDe, listaSchema, pagina } from "./comun";
-import {
-  personaDe,
-  personaSchema,
-  vinculosVigentes,
-  vinculoVista,
-  vistaPersona,
-} from "./personas-vista";
+import { personaSchema, vinculoVista, vistaPersona } from "./personas-vista";
 import { alertasDocumentos, alertasSchema } from "./resumenes";
 
 export const personasList = defineCapability({
@@ -124,11 +119,20 @@ export const personasGet = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
-    const p = await personaDe(ctx, input.id);
-    const [vinculos, documentos] = await Promise.all([
-      vinculosVigentes(ctx, [p.id]),
-      ctx.db.documentoVinculo.count({ where: { entidadTipo: "persona", entidadId: p.id } }),
-    ]);
-    return { ...vistaPersona(p, vinculos.get(p.id) ?? null), documentos };
+    const p = await ctx.db.persona.findFirst({
+      where: { id: input.id, AND: [dondePersona(ctx)] },
+      include: {
+        vinculos: {
+          where: { estado: "vigente" },
+          include: { cargo: { select: { nombre: true } } },
+          take: 1,
+        },
+      },
+    });
+    if (!p) throw noEncontrado("La persona");
+    const documentos = await ctx.db.documentoVinculo.count({
+      where: { entidadTipo: "persona", entidadId: p.id },
+    });
+    return { ...vistaPersona(p, p.vinculos[0] ? vinculoVista(p.vinculos[0]) : null), documentos };
   },
 });

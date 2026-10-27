@@ -6,6 +6,8 @@ export function lecturasLocksMemoria(tabla: (nombre: string) => Fila[]) {
   const fecha = (v: unknown) => (v instanceof Date ? v.getTime() : new Date(String(v)).getTime());
   return async (sql: TemplateStringsArray, ...valores: unknown[]) => {
     const texto = sql.join("?");
+    if (texto.startsWith("SELECT id FROM core.puestos WHERE id =") && texto.endsWith("FOR UPDATE"))
+      return tabla("puesto").filter((p) => p["id"] === valores[0] && p["tenantId"] === valores[1]);
     if (texto.includes("/* nucleo-h:lista-instalaciones */"))
       return instalacionesListaMemoria(tabla, valores);
     if (texto.includes("/* nucleo-h:inbox */")) {

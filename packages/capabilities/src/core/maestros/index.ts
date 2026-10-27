@@ -1,3 +1,4 @@
+import { estructurasPanel } from "./estructuras-panel";
 import type { Capacidad } from "../../types";
 import { buscar } from "./buscar";
 import { cargosCreate, cargosGet, cargosList, cargosSetActivo, cargosUpdate } from "./cargos";
@@ -96,6 +97,7 @@ export const capacidadesMaestros: readonly Capacidad[] = [
   cargosCreate,
   cargosUpdate,
   cargosSetActivo,
+  estructurasPanel,
   estructurasList,
   estructurasGet,
   estructurasCreate,

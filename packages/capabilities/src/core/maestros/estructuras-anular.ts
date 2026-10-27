@@ -41,9 +41,7 @@ export const estructurasAnular = defineCapability({
         estado: "anulada",
         motivo: `${e.motivo ? `${e.motivo} · ` : ""}Anulada: ${input.motivo}`,
       };
-      const ocultar = dryRun
-        ? !ctx.autorizar(PERMISOS_CORE.estructurasReadSensible)
-        : await ocultarMontos(ctx, e);
+      const ocultar = await ocultarMontos(ctx, e);
       if (dryRun) return vistaEstructura({ ...e, ...data }, items, ocultar);
       const r = await escribirConEvento(
         ctx,

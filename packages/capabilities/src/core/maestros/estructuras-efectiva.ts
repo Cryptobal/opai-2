@@ -1,25 +1,20 @@
 import { z } from "zod";
 
-import {
-  combinarPorConcepto,
-  haberes,
-  PERMISOS_CORE,
-  resolverCapasSueldo,
-  type EstructuraCapa,
-} from "@opai/domain";
+import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import { noEncontrado, reglaDeNegocio } from "../../errores";
 import { uuidSchema } from "../esquemas";
 import { aFecha, diaSchema, hoy } from "./comun";
-import { itemsDe } from "./estructuras-acceso";
 import { ocultasDe } from "./estructuras-lectura";
+import { resolverVistaEfectiva } from "./estructuras-resolver-vista";
 import { dondeEstructura } from "./estructuras-alcance";
-import { aDominio, estructuraSchema, NIVELES, vistaEstructura } from "./estructuras-vista";
+import { estructuraSchema, NIVELES } from "./estructuras-vista";
 import { personaDe } from "./personas-vista";
 import { dondeInstalacion, dondePuesto } from "./alcance";
 
 export const estructurasEfectiva = defineCapability({
+  auditarLectura: (s) => Object.values(s.niveles).flatMap((e) => (e ? [e.id] : [])),
   id: "core.estructuras.efectiva",
   descripcion:
     "Resuelve una sola capa completa: RUT → puesto → instalación, sin herencia. Puesto e instalación son explícitos hasta el PR 3 del vínculo. Devuelve capa, versión y conceptos faltantes; nunca calcula haberes de una estructura incompleta.",
@@ -101,50 +96,8 @@ export const estructurasEfectiva = defineCapability({
           { OR: [{ vigenteHasta: null }, { vigenteHasta: { gte: aFecha(fecha) } }] },
         ],
       },
+      include: { items: { orderBy: { orden: "asc" } } },
     });
-    const items = await itemsDe(
-      ctx,
-      filas.map((f) => f.id),
-    );
-    const dominio = new Map(filas.map((f) => [f.id, aDominio(f, items.get(f.id) ?? [])]));
-    const por = (n: string) =>
-      filas.filter((f) => f.nivel === n).map((f) => dominio.get(f.id) as EstructuraCapa);
-    const r = resolverCapasSueldo(fecha, {
-      persona: por("persona"),
-      puesto: por("puesto"),
-      instalacion: por("instalacion"),
-    });
-    const combinada = combinarPorConcepto(r.capas);
-    const ocultas = await ocultasDe(ctx, filas);
-    const ocultar = [...ocultas.values()].some(Boolean);
-    const vista = (e: EstructuraCapa | null) => {
-      const f = e ? filas.find((x) => x.id === e.id) : undefined;
-      return f ? vistaEstructura(f, items.get(f.id) ?? [], ocultas.get(f.id) ?? true) : null;
-    };
-    return {
-      fecha,
-      aplica: r.capa,
-      capa: r.capa,
-      estado: r.estado,
-      conceptosFaltantes: r.conceptosFaltantes,
-      estructura: vista(r.estructura),
-      niveles: {
-        persona: vista(r.capas.persona),
-        puesto: vista(r.capas.puesto),
-        instalacion: vista(r.capas.instalacion),
-        cargo: null,
-      },
-      conceptos: ocultar
-        ? combinada.conceptos.map((c) => ({
-            ...c,
-            valores: { persona: null, puesto: null, cargo: null, instalacion: null },
-            final: null,
-          }))
-        : combinada.conceptos,
-      haberes:
-        r.estado === "completa" && combinada.estructura && input.imm && !ocultar
-          ? { ...haberes(combinada.estructura, input.imm) }
-          : null,
-    };
+    return resolverVistaEfectiva(fecha, filas, await ocultasDe(ctx, filas), input.imm);
   },
 });

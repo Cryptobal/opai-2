@@ -29,16 +29,27 @@ const aprobacionSchema = z.object({
 
 type Fila = Awaited<ReturnType<Contexto["db"]["aprobacion"]["findFirstOrThrow"]>>;
 
-async function vista(ctx: Contexto, filas: Fila[]) {
-  const keys = await ctx.db.apiKey.findMany({
-    where: { id: { in: [...new Set(filas.flatMap((f) => (f.apiKeyId ? [f.apiKeyId] : [])))] } },
-    select: { id: true, nombre: true },
-  });
+export async function vistaAprobaciones(
+  ctx: Contexto,
+  filas: Fila[],
+  precargado?: {
+    keys: { id: string; nombre: string }[];
+    miembros: { userId: string; user: { name: string } }[];
+  },
+) {
+  const keys =
+    precargado?.keys ??
+    (await ctx.db.apiKey.findMany({
+      where: { id: { in: [...new Set(filas.flatMap((f) => (f.apiKeyId ? [f.apiKeyId] : [])))] } },
+      select: { id: true, nombre: true },
+    }));
   const nombre = new Map(keys.map((k) => [k.id, k.nombre]));
-  const miembros = await ctx.db.membership.findMany({
-    where: { userId: { in: [...new Set(filas.map((f) => f.viaUserId))] } },
-    include: { user: true },
-  });
+  const miembros =
+    precargado?.miembros ??
+    (await ctx.db.membership.findMany({
+      where: { userId: { in: [...new Set(filas.map((f) => f.viaUserId))] } },
+      include: { user: true },
+    }));
   const via = new Map(miembros.map((m) => [m.userId, m.user.name]));
   return filas.map((a) => ({
     id: a.id,
@@ -109,7 +120,7 @@ export const aprobacionesList = defineCapability({
       orderBy: { createdAt: "desc" },
       take: input.limite,
     });
-    return vista(ctx, filas);
+    return vistaAprobaciones(ctx, filas);
   },
 });
 
@@ -134,6 +145,6 @@ export const aprobacionesGet = defineCapability({
         a.viaUserId === ctx.actor.viaUserId);
     if (!a || (!propia && !ctx.autorizar(PERMISOS_CORE.aprobacionesManage)))
       throw noEncontrado("La aprobación");
-    return (await vista(ctx, [a]))[0] as z.input<typeof aprobacionSchema>;
+    return (await vistaAprobaciones(ctx, [a]))[0] as z.input<typeof aprobacionSchema>;
   },
 });

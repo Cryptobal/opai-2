@@ -8,18 +8,23 @@ import { ejecutarComoUsuario } from "@/lib/servidor";
 import { EnlaceBoton } from "../maestros/enlace-boton";
 import { AccionesBanda } from "./acciones-banda";
 
-type Props = { entidad: { tipo: "cuenta" | "instalacion" | "persona"; id: string } };
+type Props = {
+  aprobaciones?: Aprobacion[];
+  entidad: { tipo: "cuenta" | "instalacion" | "persona"; id: string };
+};
 
 /**
  * Banda "Propuesto por agente" (45) sobre una ficha con acciones de agentes pendientes sobre esa
  * entidad. Sin permiso de aprobaciones no se muestra.
  */
-export async function BandaAprobacion({ entidad }: Props) {
-  const r = await ejecutarComoUsuario<Aprobacion[]>("erp", "core.aprobaciones.list", {
-    estado: "pendiente",
-    entidad,
-    limite: 5,
-  });
+export async function BandaAprobacion({ entidad, aprobaciones }: Props) {
+  const r = aprobaciones
+    ? { ok: true, data: aprobaciones }
+    : await ejecutarComoUsuario<Aprobacion[]>("erp", "core.aprobaciones.list", {
+        estado: "pendiente",
+        entidad,
+        limite: 5,
+      });
   if (!r.ok || r.data.length === 0) return null;
   return (
     <div className="mb-4 flex flex-col gap-2">

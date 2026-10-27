@@ -2,6 +2,7 @@ import { z } from "zod";
 import { PERMISOS_CORE } from "@opai/domain";
 
 import type { Contexto } from "../../types";
+import { ocultarMontos } from "./estructuras-acceso";
 import { aFecha } from "./comun";
 import type { FilaEstructura, FilaItem } from "./estructuras-vista";
 
@@ -56,11 +57,13 @@ export async function impactoCambio(
     ctx.alcance || nivel === "persona" || nivel === "cargo"
       ? 0
       : await ctx.db.vinculoLaboral.count({ where: { estado: "vigente" } });
+  const visible = antes
+    ? !(await ocultarMontos(ctx, antes))
+    : ctx.autorizar(PERMISOS_CORE.estructurasReadSensible);
   const diferencias = (
     ["sueldoBase", "colacion", "movilizacion", "gratificacionMonto"] as const
   ).map((concepto) => {
-    if (!ctx.autorizar(PERMISOS_CORE.estructurasReadSensible))
-      return { concepto, antes: null, despues: null, diferencia: null };
+    if (!visible) return { concepto, antes: null, despues: null, diferencia: null };
     const a = antes?.[concepto] ?? null;
     const d = despues[concepto];
     return { concepto, antes: a, despues: d, diferencia: a === null || d === null ? null : d - a };
@@ -68,7 +71,6 @@ export async function impactoCambio(
   const itemsAntes = antes
     ? await ctx.db.estructuraItem.findMany({ where: { estructuraId: antes.id } })
     : [];
-  const visible = ctx.autorizar(PERMISOS_CORE.estructurasReadSensible);
   const cambios: z.infer<typeof impactoSchema>["diferencias"] = diferencias;
   cambios.push({
     concepto: "Gratificación (modalidad)",

@@ -38,8 +38,14 @@ describe("Inspector DT: lectura sensible auditada (t479u; art. 31 DFL 2/1967)", 
     });
     await dato(ctx, "core.estructuras.list", { nivel: "cargo", refId: cargoId });
     await dato(ctx, "core.cargos.list", {});
-    expect(eventos).toHaveLength(3);
-    for (const e of eventos)
+    expect(
+      eventos
+        .filter((e) => e.capability !== "core.estructuras.read_sensible")
+        .map((e) => e.capability),
+    ).toEqual(["core.estructuras.get", "core.estructuras.list"]);
+    const sensibles = eventos.filter((e) => e.capability === "core.estructuras.read_sensible");
+    expect(sensibles).toHaveLength(3);
+    for (const e of sensibles)
       expect(e).toMatchObject({
         tenantId: ctx.tenantId,
         actor: ctx.actor,
@@ -79,7 +85,12 @@ describe("Inspector DT: lectura sensible auditada (t479u; art. 31 DFL 2/1967)", 
       sueldoBase: null,
       sensible: true,
     });
-    expect(eventos).toHaveLength(0);
+    expect(eventos).toEqual([
+      expect.objectContaining({
+        capability: "core.estructuras.get",
+        payload: { ids: [estructura.id] },
+      }),
+    ]);
   });
 
   it("la estructura efectiva devuelve haberes completos y audita el nivel sensible", async () => {
@@ -123,6 +134,10 @@ describe("Inspector DT: lectura sensible auditada (t479u; art. 31 DFL 2/1967)", 
       expect.objectContaining({
         capability: "core.estructuras.read_sensible",
         entityId: estructura.id,
+      }),
+      expect.objectContaining({
+        capability: "core.estructuras.efectiva",
+        payload: { ids: [estructura.id] },
       }),
     ]);
   });

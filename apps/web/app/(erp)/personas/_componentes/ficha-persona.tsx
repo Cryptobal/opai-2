@@ -1,3 +1,4 @@
+import type { PanelSueldo } from "@opai/capabilities";
 import type { ReactNode } from "react";
 
 import { Avatar, Badge, DetailScreen, type EstadoPantalla } from "@opai/ds";
@@ -86,6 +87,7 @@ export type TabPersona = "resumen" | "laboral" | "sueldo" | "documentos" | "acti
 
 /** Ficha de una persona (11/12): avatar, estado, nombre, "cargo · RUT"; tabs por ruta. */
 export function FichaPersona(x: {
+  aprobaciones?: PanelSueldo["aprobaciones"];
   state: EstadoPantalla;
   persona: PersonaDetalle | null;
   tab: TabPersona;
@@ -99,7 +101,12 @@ export function FichaPersona(x: {
   const q = x.consulta ?? "";
   return (
     <>
-      {p ? <BandaAprobacion entidad={{ tipo: "persona", id: p.id }} /> : null}
+      {p ? (
+        <BandaAprobacion
+          {...(x.aprobaciones ? { aprobaciones: x.aprobaciones } : {})}
+          entidad={{ tipo: "persona", id: p.id }}
+        />
+      ) : null}
       <DetailScreen
         state={p ? x.state : x.state === "ready" ? "error" : x.state}
         titulo={p?.nombreCompleto ?? "Persona"}

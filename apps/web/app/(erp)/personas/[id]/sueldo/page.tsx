@@ -1,3 +1,4 @@
+import { MarcadorMetricas } from "@/app/_components/marcador-metricas";
 import { PERMISOS_CORE } from "@opai/domain";
 import { Alerta, PilaCapas, SeccionTarjeta, TablaEstructura } from "@opai/ds";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
@@ -5,11 +6,9 @@ import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { HojaCapaDiferida } from "@/app/_components/sueldos/diferida";
 import { SelectorContexto } from "@/app/_components/sueldos/selector-contexto";
 import { VersionesCapa } from "@/app/_components/sueldos/versiones-capa";
-import type { EstructuraVista } from "@/lib/tipos-sueldo";
 import { hoyIso } from "@/lib/fechas";
 import type { SearchParams } from "@/lib/parametros";
-import { ejecutarComoUsuario, identidadActual, contextoServidor } from "@/lib/servidor";
-import type { PuestoDeCargo, SueldoEfectivo } from "@/lib/tipos-sueldo";
+import { identidadActual, contextoServidor } from "@/lib/servidor";
 import { PaginaPersona } from "../../_componentes/pagina-persona";
 
 export const metadata = { title: "Capas de sueldo" };
@@ -19,35 +18,11 @@ export default function Sueldo(props: {
 }) {
   return (
     <PaginaPersona {...props} tab="sueldo">
-      {async (p, q) => {
+      {async (p, q, panel) => {
         const fecha = q["fecha"] ?? hoyIso();
-        const [r, instalaciones, puestos, identidad, versiones] = await Promise.all([
-          ejecutarComoUsuario<SueldoEfectivo>("erp", "core.estructuras.efectiva", {
-            personaId: p.id,
-            fecha,
-            ...(q["puesto"] ? { puestoId: q["puesto"] } : {}),
-            ...(q["instalacion"] ? { instalacionId: q["instalacion"] } : {}),
-          }),
-          ejecutarComoUsuario<{ items: { id: string; nombre: string }[] }>(
-            "erp",
-            "core.instalaciones.list",
-            { limite: 100 },
-          ),
-          ejecutarComoUsuario<PuestoDeCargo[]>("erp", "core.puestos.list", {}),
-          identidadActual(),
-          ejecutarComoUsuario<EstructuraVista[]>("erp", "core.estructuras.list", {
-            nivel: "persona",
-            refId: p.id,
-            incluirAnuladas: true,
-          }),
-        ]);
-        if (!r.ok)
-          return (
-            <Alerta tono="danger" titulo={r.error.message}>
-              <EnlaceBoton href={`/personas/${p.id}/sueldo`}>Reintentar</EnlaceBoton>
-            </Alerta>
-          );
-        const s = r.data;
+        if (!panel?.efectiva) return null;
+        const s = panel.efectiva;
+        const identidad = await identidadActual();
         const gestionar = Boolean(
           identidad &&
           ["owner", "admin"].includes(identidad.actual?.rol ?? "") &&
@@ -63,12 +38,12 @@ export default function Sueldo(props: {
             </div>
             <SelectorContexto
               fecha={fecha}
-              instalaciones={instalaciones.ok ? instalaciones.data.items : []}
-              puestos={puestos.ok ? puestos.data : []}
+              instalaciones={panel.instalaciones.items}
+              puestos={panel.puestos}
             />
             <p className="t-caption">
               Contexto explícito de consulta; no cambia el vínculo laboral. La instalación y el
-              puesto del vínculo llegan en el PR 3.
+              puesto se seleccionan para esta consulta.
             </p>
             <PilaCapas capa={s.capa} capas={s.niveles} />
             <p className="t-caption">Las capas no se combinan: RUT → puesto → instalación.</p>
@@ -105,11 +80,7 @@ export default function Sueldo(props: {
               </EnlaceBoton>
             ) : null}
             <SeccionTarjeta titulo="Versiones del sueldo por RUT">
-              {versiones.ok ? (
-                <VersionesCapa versiones={versiones.data} nivel="persona" gestionar={gestionar} />
-              ) : (
-                <Alerta tono="danger" titulo={versiones.error.message} />
-              )}
+              <VersionesCapa versiones={panel.versiones} nivel="persona" gestionar={gestionar} />
             </SeccionTarjeta>
             {gestionar ? (
               <HojaCapaDiferida
@@ -120,6 +91,7 @@ export default function Sueldo(props: {
                 param="excepcion"
               />
             ) : null}
+            <MarcadorMetricas id="opai-metricas-sueldo" />
           </div>
         );
       }}

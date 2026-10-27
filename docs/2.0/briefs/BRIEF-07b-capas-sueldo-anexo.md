@@ -2,7 +2,7 @@
 
 **Repositorio:** `Cryptobal/opai-2` · **Rama de ejecución:** `brief/07b-capas-sueldo` (desde `main` actualizado) · **Fecha:** 26-oct-2026 · **Estado:** **diseño aprobado, brief en revisión** · **Tarea de Linear:** CAR-19 (<https://linear.app/carlos-irigoyen/issue/CAR-19>); cada PR la vincula con `Fixes CAR-19` (obligatorio, `AGENTS.md` «Tareas (Linear)») · **Depende de:** Brief 02 A–C integrado (maestros, `core.estructuras_sueldo`, `core.vinculos_laborales`, `core.documentos`, fichas de Instalación, Persona y `/cargos`, outbox, auditoría, configuración), y del diseño por áreas del Brief 05 y la base PWA del Brief 04 para el shell y las pestañas · **Va antes del brief de Puestos (Operaciones I, Brief 11)**, porque el puesto usa la capa «sueldo propio del puesto» (`ROADMAP.md`, fila 07b; ADR-048 respuesta 1) · **Reglas:** ADR-036 (actualización del 25-oct: capas de sueldo, «Jornada pactada», «Consecuencias de la actualización» y reglas del puesto), ADR-048 (módulos vendibles, anexo de contrato, jornada pactada), ADR-016 (roles y bloqueo financiero), ADR-022 (permisos vs. alcance; permisos finos al 07c), ADR-028 (marca del tenant), ADR-034 (paridad UI↔MCP y gobierno de agentes), ADR-039 (documentos con bitácora y SHA-256), ADR-041 (fichas con pestañas), ADR-045 (rendimiento), `NAVEGACION.md` · **Diseño aprobado:** [Brief 07b · Capas de sueldo y anexo](https://claude.ai/design/p/18f2f703-5dcf-4e59-aff6-626fdad34d09), archivo «Brief 07b - Capas de sueldo y anexo.dc.html» (34 pantallas en una sola sábana, con el tablero «Decide Carlos» D1–D16), **aprobado** (fuente: «aprobado todo con las recomendaciones tuyas» — Carlos, 26-oct-2026 14:27 CLT, chat con el bot OPAI 2.0, t340u). El pedido de diseño está en `docs/2.0/design/07b/pedido-diseno.md` (primer commit de este PR); de ahí salen las reglas R1–R15, los puntos «decide Carlos», las 34 pantallas (§8 del pedido) y las piezas nuevas del DS (§9 del pedido). El tablero «Decide Carlos» (pantalla 33) está transcrito en texto plano en `docs/2.0/design/07b/decisiones-D1-D16.txt` y el export HTML completo del proyecto en `docs/2.0/design/07b/export/`, ambos agregados al repo sin modificarlos; §16 recoge la resolución de los 16 puntos D1–D16 en la opción aprobada por Carlos.
 
-> **Pedido y aprobaciones.** El diseño lo aprobó Carlos el 26-oct-2026 a las 14:27 CLT (t340u): «aprobado todo con las recomendaciones tuyas». Con esa aprobación, **todos los puntos «decide Carlos» del pedido de diseño quedan resueltos en la opción que el pedido propone como propuesta** (o en lo que el diseño dibujó), y **R11 «cambio de rol» se entiende como el rol de turno** (días del patrón, ADR-036 reglas del puesto, punto 3). El orden de trabajo es el de ADR-048 modificación del 25-oct (Brief 05 → Brief 04 → Brief 07b, antes del brief de Puestos) y la fila 07b de `ROADMAP.md`. Este documento es **solo el brief** (sin código). Lo aprueba Carlos; recién entonces Claude lo ejecuta en la rama `brief/07b-capas-sueldo`, con un commit por bloque y el gate en verde, autorrevisión con un subagente, PR y revisión del «Revisor OPAI 2.0»; integra el bot «OPAI 2.0» con squash (ADR-043 v3). **Trae migraciones:** quien abre cada PR con migración pone la etiqueta `migracion-pendiente`; Carlos la aplica en Neon `dev` y `main` y la quita.
+> **Pedido y aprobaciones.** El diseño lo aprobó Carlos el 26-oct-2026 a las 14:27 CLT (t340u): «aprobado todo con las recomendaciones tuyas». Con esa aprobación, **todos los puntos «decide Carlos» del pedido de diseño quedan resueltos en la opción que el pedido propone como propuesta** (o en lo que el diseño dibujó), y **R11 «cambio de rol» se entiende como el rol de turno** (días del patrón, ADR-036 reglas del puesto, punto 3). El orden de trabajo es el de ADR-048 modificación del 25-oct (Brief 05 → Brief 04 → Brief 07b, antes del brief de Puestos) y la fila 07b de `ROADMAP.md`. Este documento es **solo el brief** (sin código). Estado: aprobado por OPAI 2.0 con autoridad delegada de Carlos (t500u, 26-oct-2026 22:51 CLT: "quédate esta noche avanzando con todo hasta que la fase 1 quede lista; no me pidas autorizaciones, toma tú todas las decisiones"); Carlos puede vetarlo; el texto legal del anexo queda pendiente de su revisión. Codex gpt-6.1-sol lo ejecuta en la rama `brief/07b-capas-sueldo`, con un commit por bloque y el gate en verde, autorrevisión con un subagente, PR y revisión del «Revisor OPAI 2.0»; integra el bot «OPAI 2.0» con squash (ADR-043 v3). **Trae migraciones:** quien abre cada PR con migración pone la etiqueta `migracion-pendiente`; Carlos la aplica en Neon `dev` y `main` y la quita.
 
 > **Decisiones de producto.** Los 16 puntos «decide Carlos» del tablero del diseño (D1–D16) quedaron resueltos por la aprobación del diseño, cada uno en su opción **«Recomendada»** (§16.a transcribe título, opción elegida con su texto y pantallas desde `docs/2.0/design/07b/decisiones-D1-D16.txt`). El único insumo de negocio que D1–D16 no cierra —el **texto legal de la plantilla base del anexo**, que según D15 define Carlos— queda en §16.b «pendiente de Carlos» con la recomendación de Claude, sin darlo por resuelto. Las decisiones técnicas que surgieron al escribir el brief van en §16.c con opciones y recomendación de Claude, sin inventar decisiones de Carlos.
 
@@ -280,8 +280,9 @@ Los **16 puntos D1–D16** del tablero «Decide Carlos» (pantalla 33) quedaron 
 
 ### 16.d — Precisiones para PR 1 (encargo de relanzamiento, 27-oct)
 
-Decisiones de OPAI 2.0 bajo la autoridad delegada de Carlos para cerrar el Núcleo
-(t500u), comunicadas en el encargo:
+Estado del brief: aprobado por OPAI 2.0 con autoridad delegada de Carlos (t500u, 26-oct-2026 22:51 CLT: "quédate esta noche avanzando con todo hasta que la fase 1 quede lista; no me pidas autorizaciones, toma tú todas las decisiones"); Carlos puede vetarlo; el texto legal del anexo queda pendiente de su revisión.
+
+Precisiones de OPAI 2.0 comunicadas en el encargo:
 
 1. **Impacto sin vínculo de instalación ni puesto.** La resolución de dominio es
    pura y recibe instalación, puesto y RUT explícitamente, sin depender del vínculo.
@@ -304,7 +305,7 @@ Decisiones de OPAI 2.0 bajo la autoridad delegada de Carlos para cerrar el Núcl
    herencia ni backfill y se conservan los datos sin mostrar montos falsos.
 
 El timestamp asignado por el encargo para PR 1 es
-`20261028161000_capa_instalacion_sueldo`, en lugar del sugerido en §6 y §11.
+`20261028180000_capa_instalacion_sueldo`, en lugar del sugerido en §6 y §11.
 
 ## 17. Reporte de ejecución
 
@@ -316,7 +317,7 @@ Al cerrar: commits integrados por PR, capturas a 375 y 1280 de las pantallas nue
 Rama `brief/07b-capas-sueldo`, apilada sobre #49, con merge normal de su avance.
 Se conservó íntegro el trabajo recibido y se empujaron checkpoints WIP, sin reescribir historia.
 
-- **Bloques 1–3 implementados:** migración `20261028161000_capa_instalacion_sueldo`, FK/índice/CHECK/trigger y RLS forzada; dominio sin herencia; capacidades existentes ampliadas para instalación, impacto y anulación, expuestas por el mismo registro UI/API/MCP. No se agrega una herramienta de impacto separada: se obtiene en `preview_core_estructuras_create` (`dryRun`). El snapshot ya contiene estas herramientas.
+- **Bloques 1–3 implementados:** migración `20261028180000_capa_instalacion_sueldo`, FK/índice/CHECK/trigger y RLS forzada; dominio sin herencia; capacidades existentes ampliadas para instalación, impacto y anulación, expuestas por el mismo registro UI/API/MCP. No se agrega una herramienta de impacto separada: se obtiene en `preview_core_estructuras_create` (`dryRun`). El snapshot ya contiene estas herramientas.
 - **Bloque 4 implementado, validación pendiente:** pestaña Sueldo de instalación; acceso a capas de puesto desde esa pestaña; Sueldo de persona con contexto explícito; nueva versión completa, bonos, preview, historial por vigencia y anulación con motivo. Piezas del DS disponibles también en `/ds`. La ubicación de la capa puesto adapta las pantallas 06–09 al modelo de Puestos del padre, sin rediseñarlo. El aviso de incompletitud usa metadata del servidor para no confundir conceptos ausentes con montos ocultos.
 - **Decisiones técnicas de Codex:** lock por tenant/capa/referencia dentro de la transacción para cerrar carreras de versión/anulación; los bonos nuevos necesitan su valor y nombres únicos; los bonos históricos sin valor quedan incompletos; diferencias de modalidad de gratificación y banderas imponible/tributable, además de montos. Selector de contexto diferido para mantener el presupuesto. Son implementaciones del objetivo del encargo, sin atribuirlas a Carlos.
 - **CA-1:** funcionalidad construida; pendiente cerrar validación visual y rendimiento de la navegación completa. Se conserva la limitación explícita de §16.d hasta PR 3.
@@ -352,3 +353,43 @@ Actualización de validación del mismo PR 1:
 - Fixtures de inspector y panel revisados también por el subagente: conservan pruebas de ocultación, revelación auditada y denegación de escrituras.
 
 **Diferencia pendiente respecto al encargo:** no se cumple la meta de ≤8 consultas de ADR-045. Los conteos 12/11 ya superan la meta y el marcador no abarca necesariamente todos los Suspense. El gate funcional pasa, pero CA-1/validación de rendimiento permanece parcial. No hay aprobación del Revisor sobre el head final ni CI de PR (no se abrió PR por instrucción del encargo); no se declara listo para integrar. No hay nuevas dudas de negocio: las decisiones t500u siguen resueltas. No se aplicó nada en Neon.
+
+## 19. Cierre de la revisión pr80-rev-1619-cx
+
+Este cierre sustituye el pendiente de rendimiento de §18; conserva sus resultados como historial.
+El encargo pr80-rev-1619-cx exige ≤8 operaciones por navegación y auditoría de los montos persistidos.
+Codex consolida ficha, listas, contexto, vencimientos y banda de aprobaciones en
+`core.estructuras.panel`, con los permisos y filtros de alcance de las capacidades originales.
+Las aprobaciones se incluyen solo con `aprobaciones.manage` y alcance global; sus IDs revelados
+se auditan junto a los demás IDs de la respuesta. El resumen de vencimientos se mantiene puro.
+La carga de vencimientos personales abarca el tenant para resumir la página; no se devuelve ese
+conjunto ni se habilita para actores con alcance acotado. Puede requerir paginación interna con
+volúmenes mayores. Es una limitación técnica de esta consolidación, no otra decisión de negocio.
+
+La banda de aprobaciones generaba consultas adicionales en paralelo. Recibe ahora los datos
+precargados, también cuando están vacíos. El registro diferido de ejecuciones humanas agrupa
+precio vigente e inserción de consumo en una sentencia, sin agregar caché entre requests ni alterar
+agentes, prepago o presupuesto. Decisión de implementación de Codex para cumplir el encargo;
+no se atribuye a Carlos. Se verifica con Postgres real (precio futuro, ausente y sin costo,
+trazabilidad, UUIDv7, aislamiento y rechazo de agentes/keys).
+
+`list`, `get` y `efectiva` declaran `auditarLectura`; la revelación de montos conserva
+`read_sensible`. Anulación y preview de impacto ocultan y auditan montos guardados.
+Las pruebas recorren tres referencias reales y exigen el ID correcto para cada una.
+La migración se llama `20261028180000_capa_instalacion_sueldo`, posterior a la última de main;
+conserva SQL activo, agrega `lock_timeout` y reversión comentada. No se aplicó en Neon.
+
+Playwright contra producción local, un worker: seis casos pasan (capas y protocolo de rendimiento
+a 375, 1024 y 1280 px); tres casos `fixme` preexistentes del spec de rendimiento siguen sin ejecutar.
+Ambas rutas de sueldo registran **7 operaciones** en los tres tamaños, con aserción real ≤8.
+El contador sigue midiendo operaciones lógicas de Prisma y append de auditoría; los `include`
+no demuestran una sola sentencia SQL ni una cantidad equivalente de viajes a Postgres.
+No se alteraron topes ni el contador para obtener este resultado. Las capturas se conservan locales,
+fuera del commit; las pantallas siguen usando el Design System de OPAI 2.0.
+
+- **CA-1:** implementado y comprobado por e2e, incluyendo el límite de consultas; conserva el contexto explícito de §16.d hasta PR 3.
+- **CA-2, CA-3 y CA-4:** fuera del PR 1; siguen en PR 2, PR 3 y PR 4 respectivamente.
+- **CA-paridad:** capacidad panel expuesta por UI/API/MCP y snapshots actualizados; `tools/list` remoto y CI del head siguen pendientes de despliegue/revisión.
+- **Autorrevisión:** subagente revisó alcance, transacciones, auditoría, carga consolidada, banda y consumo; sin bloqueantes. No sustituye al Revisor independiente.
+
+Los resultados finales del gate y el head se dejan en `PR-BODY.md`, sin versionarlo, conforme al encargo.

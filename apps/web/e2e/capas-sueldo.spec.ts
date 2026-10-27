@@ -30,12 +30,14 @@ test("capas completas, vista previa, historial y resolución sin herencia", asyn
     page.getByRole("heading", { name: "Sueldo de instalación", exact: true }),
   ).toBeVisible();
   await expect(page.getByText("Algo salió mal")).toHaveCount(0);
-  const metricas = await page.locator("#opai-metricas").textContent();
+  const metricas = await page.locator("#opai-metricas-sueldo").textContent();
   info.annotations.push({
     type: "rendimiento-instalacion",
     description: metricas ?? "Marcador ausente",
   });
-  console.log("07b consultas instalación:", metricas);
+  const conteo = JSON.parse(metricas ?? "{}").consultas as number;
+  expect(conteo).toBeGreaterThan(0);
+  expect(conteo).toBeLessThanOrEqual(8);
   await page.getByRole("link", { name: /Definir sueldo|Nueva versión/ }).click();
   const hoja = page.getByRole("dialog", { name: "Nueva versión de sueldo" });
   await expect(hoja).toBeVisible();
@@ -89,12 +91,14 @@ test("capas completas, vista previa, historial y resolución sin herencia", asyn
       .filter({ hasText: "Sueldo por RUT" })
       .getByText("Rige", { exact: true }),
   ).toBeVisible();
-  const metricasPersona = await page.locator("#opai-metricas").textContent();
+  const metricasPersona = await page.locator("#opai-metricas-sueldo").textContent();
   info.annotations.push({
     type: "rendimiento-persona",
     description: metricasPersona ?? "Marcador ausente",
   });
-  console.log("07b consultas persona:", metricasPersona);
+  const conteoPersona = JSON.parse(metricasPersona ?? "{}").consultas as number;
+  expect(conteoPersona).toBeGreaterThan(0);
+  expect(conteoPersona).toBeLessThanOrEqual(8);
   expect(await sinDesborde(page)).toBe(true);
   await page.screenshot({
     path: `e2e/__screenshots__/07b-rut-${info.project.name}.png`,

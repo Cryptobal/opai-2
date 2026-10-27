@@ -153,7 +153,7 @@ describe("core.estructuras.*", () => {
     expect(revelaciones).toEqual([
       expect.objectContaining({ entityType: "estructura", entityId: creada.id }),
     ]);
-    // La vista previa (dryRun), sin fila persistida, no tiene nada que auditar.
+    // La vista previa revela los montos anteriores de la fila persistida.
     owner.eventos.length = 0;
     await dato(
       owner.ctx,
@@ -161,7 +161,9 @@ describe("core.estructuras.*", () => {
       { nivel: "cargo", cargoId, sueldoBase: 1, vigenteDesde: "2027-01-01" },
       { dryRun: true },
     );
-    expect(owner.eventos).toHaveLength(0);
+    expect(owner.eventos).toEqual([
+      expect.objectContaining({ capability: "core.estructuras.read_sensible", entityId: creada.id }),
+    ]);
   });
 });
 
