@@ -123,7 +123,10 @@ describe("Inspector DT: lectura sensible auditada (t479u; art. 31 DFL 2/1967)", 
     ]);
     const fallo = {
       ...ctx,
-      auditoria: { registrar: vi.fn().mockRejectedValue(new Error("Sin auditoría")) },
+      auditoria: {
+        ...ctx.auditoria,
+        registrar: vi.fn().mockRejectedValue(new Error("Sin auditoría")),
+      },
     };
     expect(await codigo(fallo, "core.estructuras.get", { id: estructura.id })).toBe("INTERNAL");
   });

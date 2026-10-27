@@ -38,13 +38,15 @@ export async function auditarHistorialSensible(
       f.capability.startsWith("core.estructuras.") &&
       f.capability !== "core.estructuras.read_sensible",
   )) {
-    await ctx.auditoria.registrar({
-      tenantId: ctx.tenantId,
-      actor: ctx.actor,
-      capability: "core.estructuras.read_sensible",
-      entityType: "audit_event",
-      entityId: f.id,
-      payload: { origen, entidadId: f.entityId },
-    });
+    await ctx.transaccion((tx) =>
+      ctx.auditoria.registrar(tx, {
+        tenantId: ctx.tenantId,
+        actor: ctx.actor,
+        capability: "core.estructuras.read_sensible",
+        entityType: "audit_event",
+        entityId: f.id,
+        payload: { origen, entidadId: f.entityId },
+      }),
+    );
   }
 }

@@ -53,6 +53,40 @@ export function hashEncadenado(previo: string, payloadCanon: string): Promise<st
   return sha256Hex(`${previo}\n${payloadCanon}`);
 }
 
+export type EventoAuditoriaCanonico = {
+  tenantId: string;
+  seq: number;
+  actorTipo: string;
+  actorId: string | null;
+  viaUserId: string | null;
+  capability: string;
+  entityType: string | null;
+  entityId: string | null;
+  createdAt: Date;
+  payload: unknown;
+};
+
+/**
+ * Forma canónica de un evento de `core.audit_events` (ADR-023 extendido a la auditoría). El
+ * payload entra como un digest SHA-256, no crudo. Verificar exige recalcularlo desde la fila;
+ * una anonimización futura requiere su propio protocolo de integridad.
+ */
+export async function canonDeAuditoria(e: EventoAuditoriaCanonico): Promise<string> {
+  const payloadDigest = await sha256Hex(jsonCanonico(e.payload ?? null));
+  return jsonCanonico({
+    tenantId: e.tenantId,
+    seq: e.seq,
+    actorTipo: e.actorTipo,
+    actorId: e.actorId,
+    viaUserId: e.viaUserId,
+    capability: e.capability,
+    entityType: e.entityType,
+    entityId: e.entityId,
+    createdAt: e.createdAt.toISOString(),
+    payloadDigest,
+  });
+}
+
 export type EslabonCadena = { seq: number; payloadCanon: string; hashPrevio: string; hash: string };
 
 /** Verifica una cadena ordenada por `seq`. Devuelve la primera secuencia rota o null. */

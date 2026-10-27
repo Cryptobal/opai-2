@@ -911,6 +911,48 @@ existente. El historial nuevo devuelve solo metadatos de acciones propias.
 
 ---
 
+## ADR-052 · Auditoría atómica y encadenada por tenant
+
+**Fecha:** 28-oct-2026 · **Estado:** vigente · Completa ADR-004 y ADR-023 (misma técnica de cadena de hashes que la bitácora de Asistencia, aplicada aquí a `core.audit_events`).
+
+**Contexto.** Carlos pidió esta auditoría el 26-oct-2026 20:47 CLT (chat con OPAI 2.0, tarjeta t457u): «ponlo entonces en el plan de desarrollo para que todo se haga y lo que debamos hacer en el núcleo lo hagamos altiro». El núcleo tenía dos huecos: (1) `executeCapability` escribía la fila de `audit_events` DESPUÉS del handler y fuera de su transacción (si el insert fallaba o el proceso se caía entre los dos, la escritura quedaba sin rastro); (2) la migración inicial daba UPDATE/DELETE a `opai_app` sobre `audit_events`, así que la auditoría era mutable para la app pese a describirse como append-only (el PR #56, antes de este encargo, ya revocó ese permiso).
+
+**Decisión.**
+
+1. **Atómica.** Para toda capacidad con efecto distinto de lectura y tenant actual, `executeCapability` abre una única transacción: el handler corre dentro (su `ctx.db`/`ctx.transaccion` apuntan a esa misma transacción, así que un `ctx.transaccion` interno la reusa en vez de abrir otra) y el insert de `audit_events` va antes del commit. Un fallo del insert revierte la escritura; un fallo del handler nunca llega a auditar. Se audita también cuando el output no valida (antes esa escritura quedaba sin rastro). Para `platform.*` sin tenant actual (`tenantObjetivo` resuelve el tenant objetivo), no existe una transacción común posible porque el handler escribe con `ctx.plataforma.paraTenant` fuera de `ctx.transaccion`: se audita aparte, en una transacción propia del tenant objetivo (`ctx.plataforma.transaccionPara`), atómica respecto del insert de auditoría pero no respecto del handler (brecha conocida, documentada, no resuelta por este ADR).
+2. **Encadenada.** `core.audit_events` suma `seq` (entero por tenant), `hashAnterior`, `hash` y `hashCanon`, con el mismo algoritmo de `@opai/domain` que ya usaba `core.bitacora` (ADR-023): `hash = sha256(hashAnterior + "\n" + hashCanon)`. `hashCanon` congela la forma canónica del evento (tenant, seq, actor, capability, entidad, `createdAt` y un **digest** SHA-256 del payload, no el payload crudo) para que una futura anonimización del payload (Ley 21.719) no invalide hashes ya emitidos: la verificación nunca vuelve a leer el payload en vivo, solo compara `hashAnterior`/`hashCanon`/`hash` almacenados. La concurrencia del mismo tenant se serializa con `pg_advisory_xact_lock` (mismo patrón que `bloqueo-login.ts` e `incidentes-comun.ts`), dentro de la transacción de la escritura: sin TOCTOU entre escrituras simultáneas. Las filas previas a esta migración se completan con un backfill determinista (orden `created_at, id`, por tenant) en la misma migración.
+3. **Inmutable.** La migración repite (idempotente) el `REVOKE UPDATE, DELETE` sobre `audit_events` para `opai_app` que ya aplicó el PR #56; el dueño de la base conserva el acceso (scripts, migraciones y la prueba de alteración de `verificarAuditoria`).
+4. **Verificable.** `core.auditoria.verificar` (lectura), `platform.auditoria.estado` (plataforma, solo lectura) y un trabajo diario que recorre la cadena por lotes y emite `core.auditoria.rota` si se rompe, igual que el patrón ya existente de `core.bitacora.verificar`/`core.bitacora.rota`. El estado de la última verificación se guarda en `core.auditoria_cabezas` (una fila por tenant), como `core.bitacora_cabezas` para la bitácora de hechos regulados.
+
+**Consecuencias.** `Auditoria.registrar` ahora recibe la transacción (`tx`), igual que `Eventos`/`Trabajos`/`BitacoraServicio`: todo código que lo llamaba fuera de una transacción (el flujo de aprobación pendiente de agentes, el aviso de respaldo de IA agotado) se ajustó para auditar dentro de una transacción propia, sin cambiar su semántica. `seq`/`ultimoSeq` son `Int`, no `BigInt` como pedía el encargo original: un `BigInt` de Prisma no es serializable con `JSON.stringify` sin un reemplazador, y varias pruebas y vistas de actividad ya hacían `JSON.stringify` sobre filas de `audit_events` completas; `Int` basta de sobra (2,1 mil millones de escrituras por tenant) y es el mismo tipo que ya usa `core.bitacora.seq`. `REGLAS-codigo.md` incorpora la regla «toda escritura se audita en su transacción».
+
+**Corrección del 27-oct-2026 (encargo PR #71, QA A/B/C y review 5662759713).**
+Reemplaza la promesa de anonimización transparente y la verificación del punto 2:
+se recalcula el canon desde el contenido actual, incluido el digest del payload.
+Los cambios de contenido se detectan; una anonimización futura necesita un protocolo
+explícito. Se conserva el canon SQL histórico y el JSON nuevo, verificando ambos
+contra sus columnas. La verificación toma el lock de append y conserva el máximo
+previamente verificado para detectar truncados. Plataforma con `tenantObjetivo`
+audita siempre en ese destino, aun con empresa seleccionada (la brecha de atomicidad
+con su handler sigue declarada). Los diagnósticos de IA usan una transacción
+explícitamente independiente, no la reutilizada por la solicitud. La expansión
+nullable y el NOT NULL se aplican antes y después del despliegue, respectivamente.
+Detalles técnicos del constructor OpenCode / openai/gpt-6.1-sol y orden exacto en
+`briefs/FIX-auditoria-atomica-pr71.md`; no se atribuyen nuevas decisiones a Carlos.
+**Corrección de la segunda ronda de QA del PR #71 (encargo N1/N2/N3).** Reemplaza
+el lock durante el escaneo y la capacidad de lectura del punto 4: solo el job
+verifica, con snapshot acotado, canon SQL por lotes, checkpoint incremental y CAS
+por revisión bajo lock breve. La huella del prefijo conserva detección de contenido
+antiguo alterado (escaneo SQL O(N), sin bloquear append); timeout propio. El job se
+pausa entre expansión y contracción. Backfill por lotes con COMMIT, índice separado
+CONCURRENTLY y CHECK NOT VALID → VALIDATE → SET NOT NULL → DROP CHECK. Son detalles
+de implementación del constructor OpenCode / openai/gpt-6.1-sol dentro del encargo,
+documentados con pruebas y reversión en el mismo brief y ESTADO; no decisiones de
+negocio nuevas. Se conservan los timestamps existentes. Al incorporar main del
+PR #70, el identificador de auditoría pasa a ADR-052: ADR-051 ya identifica la
+identidad de servicio en main.
+
+---
 ## ADR-051 · Identidad de servicio para agentes y presupuesto atómico (núcleo P0)
 
 **Fecha:** 27-oct-2026 · **Estado:** vigente · Completa ADR-032 §3, ADR-033 y ADR-034 §1 («Sin keys compartidas… scope `*` es transitorio»).

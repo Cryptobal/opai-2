@@ -8,7 +8,7 @@ export type DefinicionTrabajo<P> = {
   payload: z.ZodType<P>;
   /** "diaria": el programador lo encola una vez al día por tenant. */
   periodicidad?: "diaria";
-  handler(ctx: Contexto, payload: P): Promise<unknown>;
+  handler(ctx: Contexto, payload: P, signal: AbortSignal): Promise<unknown>;
 };
 
 /** Trabajo registrado: el payload se valida con su esquema antes de ejecutar. */
@@ -16,7 +16,7 @@ export type Trabajo = {
   tipo: string;
   descripcion: string;
   periodicidad?: "diaria";
-  ejecutar(ctx: Contexto, payload: unknown): Promise<unknown>;
+  ejecutar(ctx: Contexto, payload: unknown, signal?: AbortSignal): Promise<unknown>;
 };
 
 /**
@@ -31,7 +31,8 @@ export function defineTrabajo<P>(def: DefinicionTrabajo<P>): Trabajo {
     tipo: def.tipo,
     descripcion: def.descripcion,
     ...(def.periodicidad ? { periodicidad: def.periodicidad } : {}),
-    ejecutar: (ctx, payload) => def.handler(ctx, def.payload.parse(payload ?? {})),
+    ejecutar: (ctx, payload, signal = new AbortController().signal) =>
+      def.handler(ctx, def.payload.parse(payload ?? {}), signal),
   };
 }
 

@@ -5,8 +5,13 @@ import { idempotenciaSobre } from "../idempotencia";
 import type { AgenteContexto, Alcance, ConsumoNuevo, Principal } from "../types";
 import { almacenamientoEnMemoria } from "./almacenamiento-memoria";
 import { dbEnMemoria } from "./db-memoria";
+import {
+  auditoriaEnMemoria,
+  bitacoraEnMemoria,
+  eventosEnMemoria,
+  trabajosEnMemoria,
+} from "./servicios-memoria";
 import { medidorEnMemoria } from "./medidor-memoria";
-import { bitacoraEnMemoria, eventosEnMemoria, trabajosEnMemoria } from "./servicios-memoria";
 import type { Actor, Contexto, Correo, EventoAuditoria, UsuarioContexto } from "./tipos";
 
 export const TENANT_DE_PRUEBA = "0192f3a0-0000-7000-8000-000000000001";
@@ -55,6 +60,7 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
   const correos: Correo[] = [];
   const diferidos: Promise<unknown>[] = [];
   const almacen = almacenamientoEnMemoria();
+  const auditoriaBase = auditoriaEnMemoria(tabla, TENANT_DE_PRUEBA);
   let despachos = 0;
   const usuario = o.usuario === undefined ? USUARIO_DE_PRUEBA : o.usuario;
   const rol = o.rol === undefined ? "owner" : o.rol;
@@ -74,6 +80,7 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
     alcance: o.alcance ?? null,
     agente: o.agente ?? null,
     db,
+    transaccionIndependiente: (fn) => fn(tx),
     // Atómica como la real: si `fn` falla, las tablas vuelven al estado previo.
     transaccion: async (fn) => {
       const restaurar = instantanea();
@@ -84,23 +91,16 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
         throw e;
       }
     },
-    // También en la tabla, para las capacidades que leen la auditoría (actividad de las fichas).
+    // También en la tabla, para las capacidades que leen la auditoría (actividad de las fichas), con
+    // la misma cadena de hashes que la real (ADR-052, `auditoriaEnMemoria`). `tx` siempre llega:
+    // lo escribe el llamador, igual que `eventos`/`trabajos`, para que el insert sea atómico con la
+    // escritura que audita.
     auditoria: {
-      registrar: async (e) => {
+      registrar: async (tx, e) => {
         eventos.push(e);
-        await db.auditEvent.create({
-          data: {
-            tenantId: e.tenantId,
-            actorType: e.actor.tipo,
-            actorId: e.actor.id ?? null,
-            viaUserId: e.actor.viaUserId ?? null,
-            capability: e.capability,
-            entityType: e.entityType ?? null,
-            entityId: e.entityId ?? null,
-            payload: JSON.parse(JSON.stringify(e.payload ?? null)),
-          },
-        });
+        return auditoriaBase.registrar(tx, e);
       },
+      verificar: () => auditoriaBase.verificar(),
     },
     medidor: medidorEnMemoria(tabla, usos, o.agente),
     eventos: eventosEnMemoria(TENANT_DE_PRUEBA, actor),
@@ -115,7 +115,9 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
       urlBase: "https://test.opai.cl",
     },
     plataforma:
-      usuario?.platformRole && actor.tipo !== "agent" ? { globales, paraTenant: () => db } : null,
+      usuario?.platformRole && actor.tipo !== "agent"
+        ? { globales, paraTenant: () => db, transaccionPara: (_id, fn) => ctx.transaccion(fn) }
+        : null,
     autorizar: o.permisos
       ? (p) => (o.permisos ?? []).includes(p)
       : autorizador(

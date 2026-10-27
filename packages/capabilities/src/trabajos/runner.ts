@@ -29,12 +29,19 @@ export type OpcionesRunner = {
   timeoutMs?: number;
 };
 
-function conTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
+function conTimeout<T>(ejecutar: (signal: AbortSignal) => Promise<T>, ms: number): Promise<T> {
+  const control = new AbortController();
   let timer: ReturnType<typeof setTimeout> | undefined;
   const limite = new Promise<never>((_, rechazar) => {
-    timer = setTimeout(() => rechazar(new Error(`Excedió ${ms / 1000} s.`)), ms);
+    timer = setTimeout(() => {
+      const error = new Error(`Excedió ${ms / 1000} s.`);
+      control.abort(error);
+      rechazar(error);
+    }, ms);
   });
-  return Promise.race([p, limite]).finally(() => clearTimeout(timer));
+  return Promise.race([Promise.resolve().then(() => ejecutar(control.signal)), limite]).finally(
+    () => clearTimeout(timer),
+  );
 }
 
 /**
@@ -57,7 +64,10 @@ export async function ejecutarTrabajos(
       const def = obtenerTrabajo(t.tipo);
       try {
         if (!def) throw new Error(`Tipo de trabajo desconocido: "${t.tipo}".`);
-        await cola.completar(t.id, await conTimeout(def.ejecutar(ctx, t.payload), timeoutMs));
+        await cola.completar(
+          t.id,
+          await conTimeout((signal) => def.ejecutar(ctx, t.payload, signal), timeoutMs),
+        );
         hechos += 1;
       } catch (e) {
         fallidos += 1;

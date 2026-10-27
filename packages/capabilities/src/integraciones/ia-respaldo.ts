@@ -80,21 +80,25 @@ export async function avisarTenantIaFallo(
   fallos: readonly FalloProveedor[],
 ): Promise<void> {
   if (fallos.length === 0) return;
-  // Registro durable e independiente de la transacción de la solicitud (forTenant propio).
+  // Registro durable e independiente de la transacción de la solicitud: cada aviso en su propia
+  // transacción atómica (ADR-052), para que sobreviva aunque la transacción de la solicitud se
+  // revierta y para que un insert fallido no arrastre al resto de la lista.
   for (const f of fallos)
-    await ctx.auditoria
-      .registrar({
-        tenantId: ctx.tenantId,
-        capability: "core.ia.respaldo_agotado",
-        actor: ctx.actor,
-        entityType: "integracion",
-        entityId: f.proveedor,
-        payload: { proveedor: f.proveedor, error: recorte(f.error.message) },
-      })
+    await ctx
+      .transaccionIndependiente((tx) =>
+        ctx.auditoria.registrar(tx, {
+          tenantId: ctx.tenantId,
+          capability: "core.ia.respaldo_agotado",
+          actor: ctx.actor,
+          entityType: "integracion",
+          entityId: f.proveedor,
+          payload: { proveedor: f.proveedor, error: recorte(f.error.message) },
+        }),
+      )
       .catch(() => undefined);
   // Aviso visible en el tenant (ADR-020): estado "error" + evento que consume Comunicaciones.
   await ctx
-    .transaccion(async (tx) => {
+    .transaccionIndependiente(async (tx) => {
       for (const f of fallos) {
         const datos = { estado: "error", ultimoTestEn: new Date(), ultimoError: recorte(f.error.message) };
         const previo = await tx.integracion.findUnique({

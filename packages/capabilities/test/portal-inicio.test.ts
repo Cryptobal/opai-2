@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { capacidadesDelNucleo } from "../src/core";
 import { executeCapability } from "../src/execute";
@@ -77,10 +77,19 @@ describe("portal de inicio personal", () => {
   it("si el portal se revoca entre la lectura y la escritura falla sin evento", async () => {
     const { ctx, tabla } = contextoDePrueba({ semilla: semillaTenant() });
     const transaccion = ctx.transaccion;
-    ctx.transaccion = async (fn) => {
-      await ctx.db.membership.update({ where: { id: M1 }, data: { portales: ["supervisor"] } });
-      return transaccion(fn);
-    };
+    ctx.transaccion = (fn) =>
+      transaccion(async (tx) => {
+        const updateMany = tx.membership.updateMany.bind(tx.membership);
+        const espia = vi.spyOn(tx.membership, "updateMany").mockImplementationOnce((args) => {
+          tabla("membership").find((m) => m["id"] === M1)!["portales"] = ["supervisor"];
+          return updateMany(args);
+        });
+        try {
+          return await fn(tx);
+        } finally {
+          espia.mockRestore();
+        }
+      });
     expect(await executeCapability(ctx, "core.me.portal_inicio", { portal: "erp" })).toMatchObject({
       ok: false,
       error: { code: "CONFLICT" },
