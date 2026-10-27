@@ -26,7 +26,7 @@ function identidad(): Identidad {
     actual,
     membresias: [actual],
     modulosActivos: [],
-    acceso: { permisosRol: null, excepciones: [] },
+    acceso: { permisosRol: null, excepciones: [], instalaciones: null },
   };
 }
 
