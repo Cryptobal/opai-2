@@ -34,6 +34,7 @@ import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
 
 function identidad(): Identidad {
   return {
+    mfaActiva: false,
     usuario: { id: "u1", nombre: "Prueba", email: "prueba@example.test", platformRole: null },
     actual: null,
     membresias: [],

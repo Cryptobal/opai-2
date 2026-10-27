@@ -1,4 +1,4 @@
-import type { Rol, RolPlataforma } from "@opai/domain";
+import type { EstadoMfa, Rol, RolPlataforma } from "@opai/domain";
 import type { Globales, TenantDb, TenantTx, VerificacionAuditoria } from "@opai/db";
 import type { Almacenamiento, Mailer } from "@opai/integrations";
 import type { z } from "zod";
@@ -87,6 +87,8 @@ export type Plataforma = {
 
 /** Contexto de ejecución. Lo construye el borde (ruta HTTP, acción de UI, MCP), nunca el módulo. */
 export interface Contexto {
+  /** Garantía de MFA comprobada en el borde; nunca procede del input de una capacidad. */
+  mfa?: EstadoMfa;
   /** Tenant actual. Si `conTenant` es false (plataforma sin empresa elegida) es un id nulo. */
   tenantId: string;
   conTenant: boolean;

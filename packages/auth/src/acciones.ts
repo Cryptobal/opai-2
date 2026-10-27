@@ -1,8 +1,9 @@
-import { headers } from "next/headers";
+import { cookies, headers } from "next/headers";
 
 import { APIError } from "better-auth/api";
 
 import { auth } from "./auth";
+import { pideSegundoFactor } from "@opai/domain";
 
 /**
  * Acceso desde el servidor (ADR-037): login, Google, cierre de sesión y contraseñas se hacen con
@@ -11,7 +12,9 @@ import { auth } from "./auth";
  */
 export type FalloAcceso = "credenciales" | "suspendida" | "bloqueada" | "invalido" | "error";
 
-export type ResultadoAcceso = { ok: true } | { ok: false; fallo: FalloAcceso; mensaje: string };
+/** `segundoFactor` en el éxito: la contraseña es correcta pero falta verificar el segundo factor. */
+export type ResultadoAcceso =
+  { ok: true; segundoFactor?: boolean } | { ok: false; fallo: FalloAcceso; mensaje: string };
 
 function codigoDe(error: unknown): string | undefined {
   if (!(error instanceof APIError)) return undefined;
@@ -26,7 +29,10 @@ function fallo(fallo: FalloAcceso, mensaje: string): ResultadoAcceso {
 /** Correo y contraseña. Un fallo de credenciales y un usuario inexistente responden igual. */
 export async function entrarConPassword(email: string, password: string): Promise<ResultadoAcceso> {
   try {
-    await auth.api.signInEmail({ body: { email, password }, headers: await headers() });
+    const r = await auth.api.signInEmail({ body: { email, password }, headers: await headers() });
+    // Con segundo factor activo, el plugin borra la sesión recién creada y fija la cookie del desafío:
+    // la contraseña es correcta pero falta verificar el código (NÚCLEO-F).
+    if (pideSegundoFactor(r)) return { ok: true, segundoFactor: true };
     return { ok: true };
   } catch (error) {
     if (codigoDe(error) === "ACCOUNT_SUSPENDED") {
@@ -57,6 +63,16 @@ export async function cerrarSesion(): Promise<void> {
     // Sin sesión no hay nada que cerrar.
     if (!(error instanceof APIError)) throw error;
   }
+  // El desafío no es una sesión: signOut no elimina su cookie. Usa nombre/atributos del servidor.
+  const ctx = await auth.$context;
+  const cookie = ctx.createAuthCookie("two_factor");
+  (await cookies()).set(cookie.name, "", {
+    path: cookie.attributes.path ?? "/",
+    maxAge: 0,
+    httpOnly: true,
+    secure: cookie.attributes.secure ?? false,
+    sameSite: "lax",
+  });
 }
 
 /** Cambia la contraseña del usuario con sesión y cierra sus otras sesiones. */

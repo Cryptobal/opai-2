@@ -38,7 +38,8 @@ describe("portales del Contexto de sesión", () => {
       body: JSON.stringify({ portal: "erp" }),
     });
     const ctx = await actor.resolverActor(req, fuentesFalsas().fuentes, async () => ({
-      user: USUARIO,
+      user: { ...USUARIO, twoFactorEnabled: true },
+      session: { mfaVerified: true },
     }));
     if (ctx instanceof Response) throw new Error("Se esperaba sesión");
     expect(ctx.portal).toBeNull();
