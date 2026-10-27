@@ -12,6 +12,7 @@ import "dotenv/config";
 
 import { cerrarClientes, dbAdmin } from "../src/index";
 import { decidirAccionRol, PLANTILLAS } from "./roles-base-plantillas";
+import { actualizarPlantilla } from "./roles-base-actualizar";
 
 async function main(): Promise<void> {
   // No corre en producción: solo contra bases de desarrollo o de test (ADR-002; igual que seed:e2e).
@@ -27,8 +28,10 @@ async function main(): Promise<void> {
     });
     const accion = decidirAccionRol(existe, p);
     if (accion === "crear") {
-      await db.rol.create({
-        data: {
+      await db.rol.upsert({
+        where: { tenantId_nombre: { tenantId: tenant.id, nombre: p.nombre } },
+        update: {},
+        create: {
           tenantId: tenant.id,
           nombre: p.nombre,
           descripcion: p.descripcion,
@@ -39,11 +42,12 @@ async function main(): Promise<void> {
       console.log(`Rol plantilla creado: ${p.nombre}`);
     } else if (accion === "actualizar" && existe) {
       // Rol sembrado por una versión anterior y no editado por el tenant: se lleva al canónico.
-      await db.rol.update({
-        where: { id: existe.id },
-        data: { descripcion: p.descripcion, permisos: [...p.permisos] },
-      });
-      console.log(`Rol plantilla actualizado (sembrado, sin edición del tenant): ${p.nombre}`);
+      const { count } = await actualizarPlantilla(db, existe, p);
+      console.log(
+        count === 1
+          ? `Rol plantilla actualizado: ${p.nombre}`
+          : `Rol editado concurrentemente (sin tocar): ${p.nombre}`,
+      );
     } else if (accion === "ya-al-dia") {
       console.log(`Rol plantilla ya al día (sin cambios): ${p.nombre}`);
     } else {

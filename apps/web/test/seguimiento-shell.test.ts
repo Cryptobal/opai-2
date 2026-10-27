@@ -125,6 +125,36 @@ describe("seguimiento del shell", () => {
     expect(esActivo("/cuentas", "/")).toBe(false);
   });
 
+  it("el menú del ERP usa los permisos efectivos, no el rol base (I4/P4)", () => {
+    const href = (i: Identidad) => datosShell(i, "erp").nav.map((x) => x.href);
+    // Rol base supervisor (sin `estructuras.read`): «Cargos y sueldos» no aparece por el rol base.
+    const base = identidad();
+    base.actual = membresia({ rol: "supervisor" });
+    expect(href(base)).not.toContain("/cargos");
+    expect(href(base)).toContain("/personas");
+    // Mismo rol base, pero con un rol personalizado que concede `estructuras.read`: ahora sí aparece
+    // (y se pierden las secciones que el personalizado no concede, como «Cuentas»).
+    const conRol = identidad();
+    conRol.actual = membresia({ rol: "supervisor" });
+    conRol.acceso = {
+      permisosRol: ["core:estructuras.read", "core:personas.read"],
+      excepciones: [],
+      instalaciones: null,
+    };
+    expect(href(conRol)).toContain("/cargos");
+    expect(href(conRol)).toContain("/personas");
+    expect(href(conRol)).not.toContain("/cuentas");
+    // Una excepción que deniega gana sobre el rol base: «Personas» desaparece aunque el rol lo dé.
+    const conExcepcion = identidad();
+    conExcepcion.actual = membresia({ rol: "supervisor" });
+    conExcepcion.acceso = {
+      permisosRol: null,
+      excepciones: [{ permiso: "core:personas.read", conceder: false }],
+      instalaciones: null,
+    };
+    expect(href(conExcepcion)).not.toContain("/personas");
+  });
+
   it.each([undefined, "", "   "])("test:db falla sin URL (%j)", (url) => {
     const env = { ...process.env };
     delete env["DATABASE_URL_TEST"];

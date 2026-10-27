@@ -35,12 +35,20 @@ function Estado({ activo }: { activo: boolean }) {
 const num = "text-right t-numeric";
 
 /** Cargos y sueldos (14): tabla con los montos de la versión vigente; filas en teléfono. */
-export function ListaCargos({ state, items }: { state: EstadoPantalla; items: CargoFila[] }) {
-  const nuevo = (
+export function ListaCargos({
+  state,
+  items,
+  puedeGestionar,
+}: {
+  state: EstadoPantalla;
+  items: CargoFila[];
+  puedeGestionar: boolean;
+}) {
+  const nuevo = puedeGestionar ? (
     <EnlaceBotonHoja href="?nuevo=1" icono={Plus}>
       Nuevo
     </EnlaceBotonHoja>
-  );
+  ) : undefined;
   return (
     <ListScreen<CargoFila>
       state={state}

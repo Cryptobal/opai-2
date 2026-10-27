@@ -99,6 +99,7 @@ export function FormularioEmpresa({ perfil, tenant, puedeEditar }: Props) {
             <DireccionOpai
               id="e-dir"
               sinMapa
+              disabled={dis}
               valor={d.direccion}
               onCambiar={(v) => setD((x) => ({ ...x, direccion: v }))}
             />

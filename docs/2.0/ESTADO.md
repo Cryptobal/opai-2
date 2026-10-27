@@ -9,6 +9,27 @@ Hasta el 24-oct-2026 este archivo fue la fuente de verdad del avance; desde ento
 
 ## Hecho
 
+- **Seguimiento del #60 (rama `fix/roles-seguimiento`, sin PR por encargo):**
+  I4/P4: el menú del ERP usa permisos efectivos (rol personalizado y excepciones), no el rol base.
+  P3: Dirección de Empresa respeta el modo lectura mediante `CampoDireccion` del DS 2.0.
+  **Decisión vigente t479u:** Carlos delegó «Velo tú, según eso y avanza» (26-oct-2026 22:06 CLT;
+  adenda del encargo confirma la decisión): Inspector DT recibe `core:estructuras.read_sensible`,
+  solo lectura, sin nuevas escrituras. Fundamento indicado en el encargo: art. 31 del DFL 2 de 1967,
+  Ley Orgánica de la DT, acceso a documentación necesaria para fiscalizar, incluidas remuneraciones;
+  enmascarar impediría la fiscalización. Cada revelación de montos sensibles queda auditada con actor,
+  fecha y estructura (historial: evento consultado); sin copiar montos y sin entregar datos si falla
+  la auditoría. El seed reconoce las versiones previas del Inspector y preserva conjuntos editados,
+  incluida una edición concurrente. El alcance de estructuras filtra puestos por instalación y
+  mantiene la negación de personas acotadas hasta 07b; la auditoría global se deniega a actores acotados.
+  Cargos oculta «Nuevo» y su hoja sin permiso de gestionar; no cambia el diseño aprobado ni los topes JS.
+  La ficha también deshabilita sensibilidad y oculta edición/versiones nuevas en lectura; ambas vías
+  de auditoría (`core.audit.list` y `core.actividad.list`) registran revelaciones y redactan sin permiso.
+  Gate local tras actualizar main: 785 tests; `test:db` 68+52+6; typecheck, lint, build, presupuesto y e2e 3/3
+  (375/1024/1280, servidor propio en 3106) en verde. El rate limit usó respaldo en memoria en el e2e.
+  Ver criterios y límites en `briefs/BRIEF-roles-seguimiento.md`. No agrega migraciones.
+  Autorrevisión: pendientes bloqueantes de alcance en escrituras de estructuras y auditoría específica
+  de la respuesta de creación sensible; criterios de aceptación parciales, no listo para push.
+
 - Decisión de construir OPAI 2.0 desde cero (ver `01-decisiones.md`, ADR-001 a ADR-016).
 - Documento de arranque, registro de decisiones, contexto para agentes e instrucciones del proyecto Claude en `docs/2.0/`.
 - Design Prompt de fundamentos del DS 2.0 en `docs/2.0/design/DESIGN-PROMPT-ds-2.0-fundamentos.md`.

@@ -1,8 +1,9 @@
-import { esRol, esVertical, vocabulario } from "@opai/domain";
+import { esVertical, vocabulario } from "@opai/domain";
 
 import type { Identidad } from "@/lib/actor";
 import { epocaDe } from "@/lib/epoca-sesion";
 import { NAV_PLATAFORMA, navegacionErp, navegacionPortal } from "@/lib/navegacion";
+import { puedeDeIdentidad } from "@/lib/permisos-ui";
 
 import type { DatosShell } from "./marco-shell";
 import { conPortalActual, ETIQUETA_ROL, PORTALES, portalesVisibles } from "./portales";
@@ -11,7 +12,6 @@ import { conPortalActual, ETIQUETA_ROL, PORTALES, portalesVisibles } from "./por
  * barra lateral ya no los lleva (ADR-045). El contador de la campana lo carga la propia campana. */
 export function datosShell(identidad: Identidad, portal: string): DatosShell {
   const { usuario, actual, membresias } = identidad;
-  const rol = actual && esRol(actual.rol) ? actual.rol : null;
   const vertical = actual?.tenant.vertical ?? "";
   const inicio = PORTALES.find((p) => p.id === portal)?.href ?? "/";
   const visibles = portalesVisibles(actual?.portales ?? [], usuario.platformRole !== null);
@@ -25,7 +25,9 @@ export function datosShell(identidad: Identidad, portal: string): DatosShell {
     ? []
     : portal === "erp"
       ? navegacionErp(
-          rol,
+          // Permisos efectivos (ADR-022): el menú tiene que reflejar el rol personalizado y las
+          // excepciones del usuario, no el rol base (I4/P4 de la QA del PR #60).
+          puedeDeIdentidad(identidad),
           identidad.modulosActivos,
           vocabulario(esVertical(vertical) ? vertical : "seguridad"),
         )
