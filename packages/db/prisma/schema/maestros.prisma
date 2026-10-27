@@ -113,6 +113,8 @@ model Instalacion {
   tenant  Tenant   @relation(fields: [tenantId], references: [id])
   cuenta  Cuenta   @relation(fields: [cuentaId], references: [id])
   puestos Puesto[]
+  /// Supervisores a cargo de esta instalación (alcance por filas, ADR-022 · Brief 07c B3).
+  supervisores SupervisorInstalacion[]
 
   @@unique([tenantId, cuentaId, nombre])
   @@index([tenantId, estado])

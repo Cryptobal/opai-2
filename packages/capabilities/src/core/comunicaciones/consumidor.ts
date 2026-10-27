@@ -3,39 +3,11 @@ import { renderizar } from "@opai/domain";
 import { defineConsumidor, type EventoPublicado } from "../../eventos/consumidores";
 import { correoDe } from "../../integraciones/adaptadores";
 import type { Contexto } from "../../types";
+import { supervisoresConDocEnAlcance } from "../documentos/alcance-doc";
+import { type Destinatario, destinatarios, silenciados } from "./destinatarios";
 import { enviarCorreo } from "./envio";
 import { comunicableDe, comunicables, plantillaVigente } from "./resolver";
 import { variablesDe } from "./variables";
-
-type Destinatario = { id: string; email: string };
-
-/** Usuarios activos del tenant con alguno de los roles o listados explícitamente en la regla. */
-async function destinatarios(
-  ctx: Contexto,
-  roles: string[],
-  usuarios: string[],
-): Promise<Destinatario[]> {
-  const m = await ctx.db.membership.findMany({
-    where: { estado: "activa", OR: [{ rol: { in: roles } }, { userId: { in: usuarios } }] },
-  });
-  const ids = [...new Set(m.map((x) => x.userId))];
-  const users = ids.length
-    ? await ctx.db.user.findMany({ where: { id: { in: ids } }, select: { id: true, email: true } })
-    : [];
-  return users;
-}
-
-async function silenciados(ctx: Contexto, ids: string[]): Promise<Set<string>> {
-  const filas = await ctx.db.ajuste.findMany({
-    where: {
-      ambito: "usuario",
-      sujetoId: { in: ids },
-      modulo: "core",
-      clave: "preferencias_silencio",
-    },
-  });
-  return new Set(filas.filter((f) => f.valor === true).map((f) => f.sujetoId));
-}
 
 async function entregar(
   ctx: Contexto,
@@ -132,8 +104,18 @@ export const consumidorComunicaciones = defineConsumidor({
       return;
     }
     const datos = await variablesDe(ctx, ev);
+    // Avisos de documentos: solo a los supervisores que tienen el documento en su alcance (ADR-022).
+    const supervisoresPermitidos =
+      ev.entidadTipo === "documento" && ev.entidadId
+        ? await supervisoresConDocEnAlcance(ctx, ev.entidadId)
+        : null;
     for (const r of reglas) {
-      const para = await destinatarios(ctx, r.destinatariosRoles, r.destinatariosUsuarios);
+      const para = await destinatarios(
+        ctx,
+        r.destinatariosRoles,
+        r.destinatariosUsuarios,
+        supervisoresPermitidos,
+      );
       const silencio = await silenciados(
         ctx,
         para.map((p) => p.id),

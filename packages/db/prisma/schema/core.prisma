@@ -68,6 +68,7 @@ model Tenant {
   bitacora              Bitacora[]
   bitacoraCabeza        BitacoraCabeza?
   comprobantes          Comprobante[]
+  supervisorInstalaciones SupervisorInstalacion[]
 
   // Brief 07d · Ley 21.719 (cumplimiento por diseño).
   dpaAceptaciones       DpaAceptacion[]

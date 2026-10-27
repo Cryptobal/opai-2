@@ -4,6 +4,7 @@ import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import { uuidSchema } from "../esquemas";
+import { dondeContacto } from "./alcance";
 import { definidos, escribirConEvento } from "./comun";
 import {
   campos,
@@ -28,6 +29,7 @@ export const contactosList = defineCapability({
     const filas = await ctx.db.contacto.findMany({
       where: {
         cuentaId: input.cuentaId,
+        AND: [dondeContacto(ctx)],
         ...(input.incluirArchivados ? {} : { archivadoEn: null }),
       },
       orderBy: [{ esPrincipal: "desc" }, { apellidos: "asc" }],

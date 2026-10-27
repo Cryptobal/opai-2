@@ -3,6 +3,7 @@ import { z } from "zod";
 import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
+import { dondeContacto, dondeCuenta, dondeInstalacion, dondePersona } from "./alcance";
 
 const MAX = 5;
 const resultado = z.object({
@@ -36,6 +37,7 @@ export const buscar = defineCapability({
       puede(PERMISOS_CORE.cuentasRead)
         ? ctx.db.cuenta.findMany({
             where: {
+              AND: [dondeCuenta(ctx)],
               archivadaEn: null,
               OR: [
                 { nombre: contiene(q) },
@@ -49,7 +51,11 @@ export const buscar = defineCapability({
         : vacio,
       puede(PERMISOS_CORE.instalacionesRead)
         ? ctx.db.instalacion.findMany({
-            where: { archivadaEn: null, OR: [{ nombre: contiene(q) }, { comuna: contiene(q) }] },
+            where: {
+              AND: [dondeInstalacion(ctx)],
+              archivadaEn: null,
+              OR: [{ nombre: contiene(q) }, { comuna: contiene(q) }],
+            },
             orderBy: { nombre: "asc" },
             take: MAX,
           })
@@ -57,6 +63,7 @@ export const buscar = defineCapability({
       puede(PERMISOS_CORE.personasRead)
         ? ctx.db.persona.findMany({
             where: {
+              AND: [dondePersona(ctx)],
               archivadaEn: null,
               OR: [
                 { nombres: contiene(q) },
@@ -71,6 +78,7 @@ export const buscar = defineCapability({
       puede(PERMISOS_CORE.cuentasRead)
         ? ctx.db.contacto.findMany({
             where: {
+              AND: [dondeContacto(ctx)],
               archivadoEn: null,
               OR: [{ nombres: contiene(q) }, { apellidos: contiene(q) }, { email: contiene(q) }],
             },

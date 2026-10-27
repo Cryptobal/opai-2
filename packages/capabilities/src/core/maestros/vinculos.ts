@@ -6,6 +6,7 @@ import { defineCapability } from "../../define";
 import { noEncontrado, reglaDeNegocio } from "../../errores";
 import type { Contexto } from "../../types";
 import { uuidSchema } from "../esquemas";
+import { dondePersona } from "./alcance";
 import { aFecha, definidos, diaSchema, escribirConEvento, opcionalAFecha } from "./comun";
 import { cargoParaVinculo, crearVinculo } from "./personas-escritura";
 import { personaDe } from "./personas-vista";
@@ -29,7 +30,8 @@ export const vinculosList = defineCapability({
   dryRun: false,
   async handler(ctx, input) {
     const filas = await ctx.db.vinculoLaboral.findMany({
-      where: { personaId: input.personaId },
+      // El historial es visible solo si la persona está en el alcance del actor (vía su vínculo).
+      where: { personaId: input.personaId, persona: dondePersona(ctx) },
       orderBy: { inicio: "desc" },
     });
     return filas.map(vistaVinculo);
