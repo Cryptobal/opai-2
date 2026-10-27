@@ -5,7 +5,7 @@ import { capacidadesDelNucleo } from "../src/core";
 import { catalogoPermisos } from "../src/core/me";
 import { executeCapability } from "../src/execute";
 import { limpiarRegistro, registrarCapacidades } from "../src/registry";
-import { contextoDePrueba, TENANT_DE_PRUEBA } from "../src/testing";
+import { contextoDePrueba, TENANT_DE_PRUEBA, USUARIO_DE_PRUEBA } from "../src/testing";
 import { M1, M2, semillaTenant } from "./semilla";
 
 beforeEach(() => {
@@ -60,6 +60,44 @@ describe("core.users.*", () => {
     // Quitar el personalizado (roleId null) vuelve al rol base.
     const quita = await executeCapability(ctx, "core.users.update", { membershipId: M2, roleId: null });
     expect(quita).toMatchObject({ ok: true, data: { roleId: null, rol: "gerente" } });
+  });
+
+  it("una API key no asigna ni quita un rol personalizado por roleId: FORBIDDEN (review §3)", async () => {
+    const ROL_ID = "0192f3a0-0000-7000-8000-0000000000d4";
+    const KEY = "0192f3a0-0000-7000-8000-00000000c0de";
+    const base = semillaTenant("gerente");
+    const semilla = {
+      ...base,
+      rol: [
+        {
+          id: ROL_ID,
+          tenantId: TENANT_DE_PRUEBA,
+          nombre: "Central",
+          permisos: ["core:instalaciones.read"],
+          sistema: false,
+          archivadoEn: null,
+        },
+      ],
+    };
+    // Actor agente con el acceso del responsable owner: pasa permiso y jerarquía; lo que lo frena es
+    // la regla de que un rol personalizado solo lo toca una persona (como core.roles.assign).
+    const { ctx } = contextoDePrueba({
+      rol: "owner",
+      semilla,
+      actor: { tipo: "agent", id: KEY, viaUserId: USUARIO_DE_PRUEBA.id },
+      agente: { apiKeyId: KEY, nombre: "Agente RR.HH.", presupuestoMensualMicro: null, autonomia: {} },
+    });
+    const asigna = await executeCapability(ctx, "core.users.update", { membershipId: M2, roleId: ROL_ID });
+    expect(asigna).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+    expect(asigna.ok === false && asigna.error.message).toMatch(/API key/);
+    const quita = await executeCapability(ctx, "core.users.update", { membershipId: M2, roleId: null });
+    expect(quita).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+    // Pero la misma key sí cambia portales o estado: solo se bloquea el roleId, no la capacidad entera.
+    const portales = await executeCapability(ctx, "core.users.update", {
+      membershipId: M2,
+      portales: ["erp", "terreno"],
+    });
+    expect(portales).toMatchObject({ ok: true, data: { portales: ["erp", "terreno"] } });
   });
 
   it("asignar por roleId no escala: no asignas un rol con permisos que no tienes (§16.2)", async () => {

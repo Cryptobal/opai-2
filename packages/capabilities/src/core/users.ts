@@ -68,8 +68,16 @@ export const usersUpdate = defineCapability({
   async handler(ctx, input, { dryRun }) {
     const actual = await buscar(ctx, input.membershipId);
     verificarJerarquia(ctx, actual, input.rol);
-    // Asignar o cambiar un rol personalizado es gobierno de acceso (§16.2): solo owner o admin.
-    if (input.roleId !== undefined) exigeGestionDeRoles(ctx);
+    // Asignar o cambiar un rol personalizado es gobierno de acceso (§16.2): solo owner o admin y,
+    // como `core.roles.assign` (soloPersonas, ADR-032), nunca una API key ni un agente. `update` no
+    // puede ser `soloPersonas` entera (un agente sí cambia portales o estado), así que se bloquea solo
+    // el `roleId`: si no, una key de admin asignaría o quitaría roles que `core.roles.assign` le veda.
+    if (input.roleId !== undefined) {
+      if (ctx.actor.tipo === "agent") {
+        throw prohibido("Solo una persona puede asignar o quitar un rol personalizado, no una API key.");
+      }
+      exigeGestionDeRoles(ctx);
+    }
     const pierdeOwner =
       actual.rol === "owner" &&
       ((input.rol !== undefined && input.rol !== "owner") || input.estado === "suspendida");

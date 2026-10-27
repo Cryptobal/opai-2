@@ -45,7 +45,7 @@ o `nomina:*` solo si el usuario los necesita. Los cinco roles personalizados («
 
 | Rol legacy 1.0 | Rol 2.0 | Cómo | Notas |
 |---|---|---|---|
-| `inspector_dt` | **«Inspector DT»** (personalizado) | rol sembrado | Lectura de cumplimiento DT (personas, documentos, instalaciones); sin escritura ni finanzas. Los permisos DT se suman cuando el módulo de Asistencia/DT los declare. |
+| `inspector_dt` | **«Inspector DT»** (personalizado) | rol sembrado | Lectura de cumplimiento DT (personas, documentos, instalaciones) más **estructuras de sueldo y auditoría** (decisión de Carlos del 26-oct-2026, chat de Diseño y QA: «el Inspector DT ve sueldos y auditoría»); sin escritura. Los permisos DT se suman cuando el módulo de Asistencia/DT los declare. |
 | `rrhh` | **«RRHH»** (personalizado acotado) | rol sembrado + concesión | Personas y documentos en lectura. **Nunca gerente** (mínimo privilegio): si gestiona nómina, el owner/admin le concede `nomina:*` cuando exista ese módulo. |
 | `finanzas` | **«Finanzas»** (personalizado acotado) | rol sembrado + concesión | Lectura para conciliar y facturar (cuentas, documentos). **Nunca gerente** (mínimo privilegio): el owner/admin le concede `finanzas:*` (y `nomina:*` si corresponde) cuando exista el módulo. |
 | `operaciones` | **gerente** (base) | directo | Gestión operativa; permisos de Operaciones cuando exista el módulo. |
@@ -72,7 +72,7 @@ los concede con `core.excepciones.set` o editando el rol, sin conceder más de l
 | Rol | Permisos del catálogo core |
 |---|---|
 | **Central de monitoreo** | `core:tenant.read`, `core:cuentas.read`, `core:instalaciones.read`, `core:personas.read`, `core:documentos.read` |
-| **Inspector DT** | `core:tenant.read`, `core:instalaciones.read`, `core:personas.read`, `core:documentos.read` |
+| **Inspector DT** | `core:tenant.read`, `core:instalaciones.read`, `core:personas.read`, `core:documentos.read`, `core:estructuras.read`, `core:audit.read` |
 | **RRHH** | `core:tenant.read`, `core:personas.read`, `core:documentos.read` |
 | **Finanzas** | `core:tenant.read`, `core:cuentas.read`, `core:documentos.read` |
 | **Payroll** | `core:tenant.read`, `core:personas.read`, `core:estructuras.read` |

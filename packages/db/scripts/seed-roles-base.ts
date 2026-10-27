@@ -1,10 +1,9 @@
 // Siembra (idempotente, solo dev/test) los roles plantilla del tenant `gard` que 1.0 tenía y los
 // cinco roles base de 2.0 no cubren (ADR-022, Brief 07c §16.1, opción B): «Central de monitoreo»,
-// «Inspector DT» y los acotados «RRHH», «Finanzas» y «Payroll» (mínimo privilegio: lectura y cálculo,
-// nunca gerente; §16.1 y equivalencia-roles.md). Son roles personalizados normales (sistema=false):
-// el owner/admin los puede ajustar. Los permisos listados son del catálogo del núcleo; los de los
-// módulos (ops, rondas, asistencia DT, nómina, finanzas) se agregan cuando esos módulos existan y
-// declaren sus permisos.
+// «Inspector DT» y los acotados «RRHH», «Finanzas» y «Payroll» (§16.1 y equivalencia-roles.md). Son
+// roles personalizados normales (sistema=false): el owner/admin los puede ajustar. Los permisos
+// listados son del catálogo del núcleo; los de los módulos (ops, rondas, asistencia DT, nómina,
+// finanzas) se agregan cuando esos módulos existan y declaren sus permisos.
 // Idempotente: no pisa un rol que ya exista (respeta los ajustes del tenant); solo crea los que faltan.
 // Uso: DATABASE_URL_MIGRATE=<url propietario> pnpm --filter @opai/db seed:roles-base
 import "dotenv/config";
@@ -16,7 +15,7 @@ const PLANTILLAS = [
   {
     nombre: "Central de monitoreo",
     descripcion:
-      "Operación en tiempo real: ve instalaciones, cuentas, personas y documentos; sin finanzas, nómina ni gestión de usuarios.",
+      "Ve instalaciones, cuentas, personas y documentos para operar en tiempo real. No ve finanzas ni sueldos y no administra usuarios.",
     permisos: [
       "core:tenant.read",
       "core:cuentas.read",
@@ -28,30 +27,35 @@ const PLANTILLAS = [
   {
     nombre: "Inspector DT",
     descripcion:
-      "Revisión de cumplimiento DT: lectura de personas, documentos e instalaciones; sin escritura ni finanzas.",
+      "Revisa el cumplimiento laboral: ve personas, documentos, instalaciones, las estructuras de sueldo y la auditoría. Solo mira, no edita.",
+    // Decisión de Carlos (26-oct-2026, chat de Diseño y QA): el Inspector DT también ve sueldos y
+    // auditoría. Mapea las dos casillas de la sábana: «Estructuras y sueldos: ver» = estructuras.read;
+    // «Auditoría: ver» = audit.read. Ver docs/2.0/paridad/equivalencia-roles.md.
     permisos: [
       "core:tenant.read",
       "core:instalaciones.read",
       "core:personas.read",
       "core:documentos.read",
+      "core:estructuras.read",
+      "core:audit.read",
     ],
   },
   {
     nombre: "RRHH",
     descripcion:
-      "Personas y documentos de RRHH en lectura; la nómina la concede el owner/admin. Acotado, nunca gerente (mínimo privilegio).",
+      "Ve personas y documentos. Para que además gestione sueldos o nómina, el dueño o el administrador se lo habilita aparte.",
     permisos: ["core:tenant.read", "core:personas.read", "core:documentos.read"],
   },
   {
     nombre: "Finanzas",
     descripcion:
-      "Lectura para conciliar y facturar (cuentas, documentos); finanzas la concede el owner/admin. Acotado, nunca gerente.",
+      "Ve cuentas y documentos para conciliar y facturar. Para emitir o anular facturas, el dueño o el administrador se lo habilita aparte.",
     permisos: ["core:tenant.read", "core:cuentas.read", "core:documentos.read"],
   },
   {
     nombre: "Payroll",
     descripcion:
-      "Lectura y cálculo de nómina (personas, estructuras de sueldo); nómina la concede el owner/admin. Acotado, nunca gerente.",
+      "Ve personas y estructuras de sueldo para calcular remuneraciones. El dueño o el administrador habilita el procesamiento de nómina.",
     permisos: ["core:tenant.read", "core:personas.read", "core:estructuras.read"],
   },
 ] as const;

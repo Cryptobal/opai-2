@@ -101,7 +101,9 @@ export const excepcionesSet = defineCapability({
       {
         tipo: "core.excepcion.fijada",
         entidadTipo: "membership",
-        payload: () => ({ permiso: input.permiso, efecto: input.efecto }),
+        // El motivo también queda en la auditoría (no solo en la fila), para rastrear el porqué sin
+        // leer `permiso_excepciones` (review 5660564536). `ninguna` quita la excepción: sin motivo.
+        payload: () => ({ permiso: input.permiso, efecto: input.efecto, motivo: input.motivo ?? null }),
       },
       async (tx) => {
         await tx.permisoExcepcion.deleteMany({
