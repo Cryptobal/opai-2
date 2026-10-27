@@ -19,6 +19,8 @@ describe.skipIf(!urlPropietario)("Inspector DT: RLS y auditoría persistida", ()
       rol: "supervisor",
       permisosRol,
       actor: { tipo: "user", id: actorId },
+      portal: "erp",
+      portalesMembresia: ["erp"],
       alcance: acotado ? { instalaciones: [] } : null,
       medidor: { registrar: async () => undefined },
     });
@@ -191,6 +193,8 @@ describe.skipIf(!urlPropietario)("core.cargos.list: montos sensibles (una sola c
       tenantId,
       rol: "viewer",
       actor: { tipo: "user", id: actorId },
+      portal: "erp",
+      portalesMembresia: ["erp"],
       medidor: { registrar: async () => undefined },
     });
     const r = await mod.executeCapability(ctx, "core.cargos.list", {});

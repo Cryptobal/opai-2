@@ -25,6 +25,8 @@ describe.skipIf(!urlPropietario)("Alcance y aislamiento en escrituras de estruct
     mod.crearContexto({
       tenantId,
       actor: { tipo: "user", id: randomUUID() },
+      portal: "erp",
+      portalesMembresia: ["erp"],
       rol: "admin",
       alcance: { instalaciones },
       medidor,

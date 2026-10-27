@@ -20,7 +20,7 @@ la fiscalización. Sustituye las respuestas contradictorias t78s373 y t468s2146 
 | 1. Actualizar desde main | Avance rápido a `origin/main`, conservando los cambios heredados mediante stash. |
 | 2. I1 ya integrado, preservar roles ajustados | Se conserva la lógica del #60 y se agrega el baseline anterior a t479u; prueba de actualización e idempotencia. Comparación y escritura atómicas para preservar ediciones concurrentes. |
 | 3. I4 acotado | `datosShell` entrega el autorizador efectivo a `navegacionErp`; test con supervisor + rol personalizado y denegación por excepción. No queda diferido a d2. |
-| 4. P3 | En lectura Empresa muestra etiquetas y valores, o «Sin dato», sin controles ni búsqueda; e2e a 375/1024/1280 pendiente de verificación local. |
+| 4. P3 | En lectura Empresa muestra etiquetas y valores, o «Sin dato», sin controles ni búsqueda; e2e a 375/1024/1280 en verde. |
 | 5. read_sensible | Inspector DT es solo lectura; get/list/resumen, efectiva, historial y la respuesta de `core.estructuras.create` sobre un cargo sensible auditan la revelación (con id real, tras persistir). |
 | 6. Aislamiento | `referencia()` (creación) y `estructurasAnular` acotan puesto y persona por `dondePuesto`/`dondePersona` igual que las lecturas (`findFirst`, nunca `findUnique`); cargo sigue sin alcance (catálogo del tenant). Prueba Postgres con dos tenants, fuera de alcance, y en memoria con paralelismo (`Promise.all`). |
 
@@ -64,7 +64,14 @@ la fiscalización. Sustituye las respuestas contradictorias t78s373 y t468s2146 
 
 ## Verificación
 
-Actualización de esta revisión: `origin/main` ya era ancestro de `01b5dd1` (#44 y #69).
+Actualización tras el merge posterior de `origin/main`: las fixtures de pruebas de base declaran
+portal y membresía ERP para atravesar la nueva guarda de sesión sin debilitar los tests de alcance.
+Typecheck, lint (con advertencias), 842 tests, test:db (68 + 61 + 6), build y presupuesto en verde;
+Playwright de roles y portal-sesión: 6/6 a 375, 1024 y 1280, en servidor propio. La fixture de
+Inspector usó `DATABASE_URL_MIGRATE` con la conexión propietaria local aislada. Las pruebas comprueban
+roles accesibles y desborde; no se realizó una auditoría independiente de contraste y foco.
+
+Actualización anterior: `origin/main` ya era ancestro de `01b5dd1` (#44 y #69).
 Typecheck, lint (con advertencias), 824 tests, test:db (68 + 58 + 6), build y presupuesto
 pasaron. El e2e quedó bloqueado antes de abrir la pantalla: la fixture requiere una conexión
 propietaria local a `opai_e2e` en `DATABASE_URL_MIGRATE`; con `DATABASE_URL` el rol de aplicación
