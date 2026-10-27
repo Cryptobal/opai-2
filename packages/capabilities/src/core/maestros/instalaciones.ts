@@ -66,19 +66,17 @@ export const instalacionesList = defineCapability({
       orderBy: [{ nombre: "asc" }, { id: "asc" }],
       take: input.limite + 1,
       ...cursorDe(input.cursor),
+      // El nombre de la cuenta va en la misma consulta (include), no una aparte por página (ADR-045).
+      include: { cuenta: { select: { nombre: true } } },
     });
     const p = pagina(filas, input.limite);
-    const nombres = await nombresDeCuentas(
-      ctx,
-      p.items.map((i) => i.cuentaId),
-    );
     const resumen = await resumenInstalaciones(
       ctx,
       p.items.map((i) => i.id),
     );
     return {
       items: p.items.map((i) => ({
-        ...vistaInstalacion(i, nombres.get(i.cuentaId) ?? null),
+        ...vistaInstalacion(i, i.cuenta?.nombre ?? null),
         ...resumen(i.id),
       })),
       siguiente: p.siguiente,

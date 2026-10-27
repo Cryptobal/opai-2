@@ -1,42 +1,19 @@
 "use client";
 
-import Link, { useLinkStatus } from "next/link";
-import { useEffect, useState } from "react";
+import Link from "next/link";
+import { useState } from "react";
 
 import type { LinkComponent } from "@opai/ds";
 
-import { ESPERA_ESQUELETO_MS } from "@/lib/cache-navegador";
+import { EstadoEnlace } from "./estado-enlace";
 
 /**
- * Hijo invisible de un <Link> del menú: si la navegación sigue pendiente pasado el retraso, marca
- * <html> y el CSS cambia el contenido por el esqueleto (`data-contenido` / `data-esqueleto`, ver
- * globals.css). Una navegación rápida no lo muestra nunca: sin destellos.
- */
-let pendientes = 0;
-
-function EstadoEnlace() {
-  const { pending } = useLinkStatus();
-  useEffect(() => {
-    if (!pending) return;
-    const raiz = document.documentElement;
-    let marcado = false;
-    const t = setTimeout(() => {
-      marcado = true;
-      pendientes++;
-      raiz.setAttribute("data-navegando", "");
-    }, ESPERA_ESQUELETO_MS);
-    return () => {
-      clearTimeout(t);
-      if (marcado && --pendientes === 0) raiz.removeAttribute("data-navegando");
-    };
-  }, [pending]);
-  return null;
-}
-
-/**
- * Enlaces del menú: al verse siguen con el prefetch parcial de Next (sin ejecutar capacidades); la
- * página completa se precarga al pasar el cursor, tocar o enfocar (visita inmediata, ADR-045; no
- * antes, para no contar como uso lecturas que nadie pidió en `core.consumos`) y avisan si tardan.
+ * Enlaces del menú. Al verse siguen con el prefetch parcial de Next; la página completa se precarga
+ * por intención —al pasar el cursor, tocar o enfocar— (visita inmediata; decisiones 1 y 3 de ADR-045:
+ * «las rutas del menú se precargan» y «prefetch explícito de las entradas del menú»), no antes, para
+ * no contar en `core.consumos` lecturas que nadie pidió. `EstadoEnlace` reporta la navegación
+ * pendiente (el shell marca el riel y el título de destino de inmediato, sin barra de progreso) y, con
+ * `conEsqueleto`, cubre con esqueleto la espera del contenido.
  */
 export const LinkMenu: LinkComponent = ({ href, className, children, ...rest }) => {
   const [intencion, setIntencion] = useState(false);
@@ -51,7 +28,7 @@ export const LinkMenu: LinkComponent = ({ href, className, children, ...rest }) 
       {...rest}
     >
       {children}
-      <EstadoEnlace />
+      <EstadoEnlace href={href} conEsqueleto />
     </Link>
   );
 };
