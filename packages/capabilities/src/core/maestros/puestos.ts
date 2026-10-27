@@ -6,12 +6,14 @@ import { defineCapability } from "../../define";
 import { noEncontrado, reglaDeNegocio } from "../../errores";
 import type { Contexto } from "../../types";
 import { uuidSchema } from "../esquemas";
+import { dondePuesto } from "./alcance";
 import { definidos, escribirConEvento, opcionalAFecha } from "./comun";
 import { instalacionDe } from "./instalaciones";
 import { camposPuesto, errorDePatron, puestoSchema, vistaPuesto } from "./puestos-vista";
 
 async function puestoDe(ctx: Contexto, id: string) {
-  const p = await ctx.db.puesto.findUnique({ where: { id } });
+  // findFirst (no findUnique) para aplicar el alcance por filas: fuera de alcance = no encontrado.
+  const p = await ctx.db.puesto.findFirst({ where: { id, AND: [dondePuesto(ctx)] } });
   if (!p) throw noEncontrado("El puesto");
   return p;
 }
@@ -54,6 +56,7 @@ export const puestosList = defineCapability({
   async handler(ctx, input) {
     const filas = await ctx.db.puesto.findMany({
       where: {
+        AND: [dondePuesto(ctx)],
         ...(input.instalacionId ? { instalacionId: input.instalacionId } : {}),
         ...(input.cargoId ? { cargoId: input.cargoId } : {}),
         ...(input.soloActivos ? { estado: "activo" } : {}),

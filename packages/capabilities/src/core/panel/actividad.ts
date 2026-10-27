@@ -5,6 +5,7 @@ import { PERMISOS_CORE } from "@opai/domain";
 import { defineCapability } from "../../define";
 import { prohibido } from "../../errores";
 import type { Contexto } from "../../types";
+import { entidadEnAlcance } from "../maestros/alcance";
 import { redactarSensibles } from "./actividad-sensible";
 import { cambios, frase } from "./actividad-texto";
 
@@ -67,6 +68,9 @@ export const actividadList = defineCapability({
     const e = input.entidad;
     if (!ctx.autorizar(e ? PERMISO_LECTURA[e.tipo] : PERMISOS_CORE.auditRead))
       throw prohibido("No tienes acceso a esta actividad.");
+    // Alcance por filas (ADR-022): un actor acotado solo ve la actividad de entidades a su cargo.
+    if (e && !(await entidadEnAlcance(ctx, e.tipo, e.id)))
+      return { items: [], siguiente: null };
     const campo = e ? `${e.tipo}Id` : "";
     const filas = await ctx.db.auditEvent.findMany({
       where: {

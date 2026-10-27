@@ -20,6 +20,8 @@ model Membership {
   user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
   rolTenant   Rol?               @relation(fields: [roleId], references: [id])
   excepciones PermisoExcepcion[]
+  /// Instalaciones a cargo si el rol acota por filas (supervisor, ADR-022 · Brief 07c B3).
+  instalacionesACargo SupervisorInstalacion[]
 
   @@unique([tenantId, userId])
   @@index([userId])
