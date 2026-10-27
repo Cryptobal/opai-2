@@ -18,6 +18,7 @@ import { cuentaDe } from "./cuentas";
 import { exigirNoAnonimizado } from "./anonimizado";
 
 export const contactosList = defineCapability({
+  auditarLectura: (s) => s.map((c) => c.id),
   id: "core.contactos.list",
   descripcion: "Contactos de una cuenta (principal primero), con correo, teléfono, cargo y roles.",
   permiso: PERMISOS_CORE.cuentasRead,
@@ -40,6 +41,7 @@ export const contactosList = defineCapability({
 });
 
 export const contactosGet = defineCapability({
+  auditarLectura: (s) => [s.id],
   id: "core.contactos.get",
   descripcion: "Ficha de un contacto de una cuenta: datos, roles y si es el principal.",
   permiso: PERMISOS_CORE.cuentasRead,

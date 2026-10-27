@@ -2,7 +2,27 @@
 
 > **Desde el 24-oct-2026, el estado de las tareas vive en Linear (enlace por definir). Este archivo queda como foto técnica: versiones, infraestructura, riesgos aceptados y decisiones.** (PR #22). Las listas de pendientes de abajo se migran a Linear en la fecha que fije Carlos; hasta entonces no se borran, y si no coinciden con Linear, manda Linear.
 
-**Última actualización:** 28-oct-2026 · **Actualizado por:** Claude (arquitectura) · **Fase en curso:** 1 — Núcleo, en cierre (Briefs 01, 01c y 02 A–C integrados a `main`; quedan la sesión D del Brief 02, la paridad MCP, los arreglos de QA y las bases transversales). Plan completo y próximas tareas en `ROADMAP.md`; etapa de cada módulo en `PLAN-desarrollo.md`.
+**Foto verificada:** main `3199b00` y continuidad NÚCLEO-H en `core/nucleo-p2` · **Actualizado por:** OpenCode / openai/gpt-6.1-sol · **Fase en curso:** 1 — Núcleo, en cierre. Plan en `ROADMAP.md`; estado de tareas en Linear, no en las notas históricas de este archivo.
+
+### Integraciones verificadas en el historial de main
+
+| Base transversal | Evidencia integrada |
+|---|---|
+| Auditoría atómica/encadenada A | #71 (`3199b00`), con verificador solo job y despliegue expand/contract |
+| Identidad de servicio y presupuesto C | #70 (`3b1b7b9`), keys con permisos mínimos y ledger atómico |
+| Rate limit, MCP por cabecera y CSP Report-Only | #64 (`ec4149c`) y #63 (`bfcacc5`) |
+| MFA y ajuste de códigos en iOS | #65 (`5c18a92`) y #74 (`4a5c507`) |
+| Agente interno, servidor sin UI de chat nueva | #62 (`15c9317`) y #73 (`7cbb1c2`) |
+| Portal validado y preferencia de inicio | #68 (`611aa25`) y #72 (`bf97199`) |
+| 07d, retención y cifrado PR 3 | #61 (`f60803c`); consentimientos/ARCO/incidentes PR 2 #56 |
+| PWA y rendimiento de consultas/navegación | #45 (`dbd901c`), #53 (`6ba61f7`) y job de rendimiento #44 (`57cd1cf`) |
+
+Los relatos posteriores que dicen «PR abierto», «construido» o «pendiente de
+integración» para estas bases son históricos y quedan sustituidos por esta foto.
+Integración de código no demuestra aplicación actual de migraciones en Neon ni
+QA remota: esta continuidad solo verifica el entorno local, sin intervenir Neon.
+Playwright ya tiene job en CI (`.github/workflows/ci.yml`), aunque sigue fuera de
+los checks obligatorios de integración según ADR-043 v3. Puestos #49 no se toca.
 - **NÚCLEO-A · Auditoría atómica y encadenada en `core.audit_events` (rama `fix/auditoria-atomica`, PR #71).** Escritura y auditoría comparten transacción en capacidades del tenant; plataforma audita en el tenant objetivo con la brecha de atomicidad global declarada. Cadena por tenant con `seq` Int y hashes, inmutable para `opai_app`. El encargo original de Carlos (t457u) se mantiene registrado en ADR-052; ADR-051 corresponde a identidad de servicio en main (#70). La nota histórica de verificación y anonimización queda sustituida por la sección «Corrección de auditoría» de abajo. Migraciones pendientes de aplicación por Carlos; no se ha tocado Neon.
 - **NÚCLEO-E1 · Capa de proveedores de IA intercambiable con herramientas (26-oct-2026, rama `core/agente-interno-pr1`, PR 1 de 2 del agente interno; P1 de la auditoría del núcleo del 26-oct-2026, encargo de Carlos a OPAI 2.0, t457u).** El adaptador de IA (`@opai/integrations/ia`) suma un contrato neutral de conversación con herramientas (tool-calling), streaming de eventos y salida estructurada por JSON Schema, y el resolvedor del núcleo (`iaDe`, `packages/capabilities/src/integraciones/ia.ts`) agrega respaldo entre proveedores conectados (reintenta ante 5xx/429/red, nunca ante un 4xx de contenido) y mide cada llamada en `core.consumos` (tokens por clase; proveedor y modelo en `referencia_tipo`/`referencia_id`; sin prompt ni key). Sin SDKs (solo `fetch`): Anthropic, OpenAI, Google y un proveedor «compatible con OpenAI» con base URL configurable (`ia_compatible`: Vercel AI Gateway, OpenRouter…) más el alias `ia_xai` (Grok). `completar()` queda sobre `conversar()`: geolocalización e «Integraciones · Probar» no cambian. Detalle en la nota de ADR-031 (26-oct-2026). No toca secretos ni la config del núcleo (los cambia #61); sin migraciones. Pendiente: la UI del agente, la elección de modelo por usuario y sus ajustes (PRs posteriores del agente interno, ADR-049, según la enmienda al punto 8). **Endurecimiento (revisión 5660937436, 26-oct-2026):** el `baseUrl` de `ia_compatible` exige `https` y rechaza destinos internos (privados, loopback, link-local, metadata, localhost; también tras resolver DNS) con `redirect: "error"` (defensa SSRF); un stream cortado o con error lanza `ErrorIa` en vez de darse por completo; el consumo del streaming se mide en `finally` aun si se corta o cancela. **Política de respaldo con key propia del tenant (resuelta):** si el tenant tiene key propia y su proveedor falla, el respaldo solo prueba otras keys del **mismo tenant**; **nunca** cae a la key de OPAI (plataforma). Si todas fallan (5xx/429/red) la solicitud falla con un error tipado (`ErrorRespaldoIa`) y se avisa al tenant: la integración queda en estado «error» (visible en Configuración → Integraciones) + evento `core.integracion.error` que entrega Comunicaciones (ADR-020), más un registro de auditoría durable (`core.ia.respaldo_agotado`). Un 4xx de contenido se propaga tal cual. Sin key propia, se usa el modelo de OPAI como hasta ahora. Implementado en `iaDe`/`ia-respaldo.ts` (`packages/capabilities/src/integraciones/`), con pruebas en `test/ia-respaldo.test.ts`. **«Decisión de Carlos, 26-oct-2026 21:58 CLT, respuesta t214s684»** a «Si el tenant tiene key propia y su proveedor falla, ¿se puede pasar a la key de OPAI?»: «Nunca, que falle y avise al tenant». Detalle en ADR-049 punto 6. _TODO:_ cuando exista un mecanismo de avisos proactivos propio del tenant (push/bandeja), enriquecer el aviso; hoy se apoya en el estado de la integración + Comunicaciones + auditoría. **Endurecimiento (revisión 5661272971, 26-oct-2026):** la decisión BYOK (t214s684) se aplica **antes** de filtrar por modelo o secreto —una key propia sin modelo para la clase, sin secreto o sin base URL ahora falla y avisa, nunca cae a OPAI (`ia-candidatos.ts`)—; la defensa SSRF clasifica las IPv6 en binario (IPv4-mapped/compatible como IPv4; `fe80::/10` completo, `fec0::/10`, `fc00::/7`, NAT64 `64:ff9b::/96`, unspecified y multicast) y normaliza el punto final del host; la medición del stream registra el uso parcial ya informado en corte o cancelación (evento `uso`) sin doble conteo; y los `*-db.test.ts` de `@opai/capabilities` corren serializados (`fileParallelism: false`) e independientes del orden.
 
@@ -77,6 +97,102 @@ No se declara CI, QA remota ni aprobación del head nuevo; Neon sigue sin modifi
 > **Seguimiento QA PR #49 (OpenCode):** separación de filtros de Puestos e Instalaciones y conservación de filtros al volver, según el encargo. Adaptación técnica al panel dividido: Función y la columna Patrón se ocultan hasta 2xl, con el patrón bajo el nombre del puesto; la vista de ancho completo del diseño queda parcial. Hay una comprobación e2e de visibilidad de Estado a 1024 y 1280. Sin migraciones nuevas en el seguimiento; `rama-neon` en verde en el head 25941e8 (27-oct-2026, 10:24 CLT).
 
 > **Corrección de presentación PR #49 (OpenCode):** la celda Puesto permite partir nombres y patrones largos para conservar visible Estado en el panel dividido. Adaptación técnica prevista en el encargo, sin decisión de negocio nueva; siguen las limitaciones parciales documentadas en el brief.
+- **NÚCLEO-H · CSP, continuidad 1112 (OpenCode / openai/gpt-6.1-sol):** reportes
+  propios con límites de cuerpo/lote y rate limit cerrado; logs categóricos sin
+  URL, muestras, IP o nonce. TEMA/SW tienen nonce de servidor por request. PPR
+  conserva scripts estáticos sin nonce: guía de Next y e2e lo confirman; por eso
+  la respuesta sigue Report-Only con unsafe-inline, sin anunciar nonce fuente
+  ni declarar el shell estricto. No se desactiva Cache Components. Preview de
+  correo aislada a imágenes propias; logo en bytes propios (?vistaPrevia=1), no
+  redirección a R2, con límites/timeout y sandbox para SVG. El correo enviado no
+  cambia. Son adaptaciones técnicas del constructor dentro del encargo; no
+  decisiones nuevas de Carlos. Audio/liveness/Rekognition/Pusher/micrófono
+  diferidos; HSTS solo host. Detalles, pruebas y límites en `briefs/NUCLEO-H-p2.md`.
+
+- **NÚCLEO-H, relanzamiento nucleo-h-1112-oc:** el mensaje de encargo contiene el
+  original completo y sustituye el bloqueo documental de la continuidad anterior.
+  Bloque 1: reglas puras de estado/avisos de incidente y verificación del archivo
+  subido extraídas a `packages/domain`, con pruebas, sin cambio de comportamiento.
+  Selección técnica del constructor OpenCode / openai/gpt-6.1-sol dentro del
+  encargo, no decisión de negocio nueva. No toca Puestos (#49), ni migraciones.
+  Sin tarea en Linear. El detalle y la cobertura de cada bloque están en
+  `briefs/NUCLEO-H-p2.md`.
+  Bloque 2: inventario de lecturas existentes en main `3199b00` y auditoría de
+  datos personales/documentos con IDs, transacción de A y fallo cerrado. Incluye
+  vías indirectas (instalaciones, búsqueda, historial, directorio, keys y cola de
+  aprobaciones); no duplica la revelación salarial existente. La autorrevisión
+  corrigió dos TOCTOU: conjuntos de documentos protegidos por locks de relaciones
+  y consentimiento limitado al conjunto de contactos efectivamente bloqueado.
+  También cierra vías de documentos de cumplimiento por versiones/vencimientos.
+  Pruebas reales con barreras; detalle técnico del constructor e inventario en
+  `briefs/NUCLEO-H-lecturas.md`. Sin permisos nuevos ni migración; no toca #49.
+
+- **NÚCLEO-H, continuidad en `core/nucleo-p2` (OpenCode / openai/gpt-6.1-sol):**
+  ARCO lista/detalle filtran alcance y auditan solo IDs revelados, actor, tenant y
+  capacidad, en la misma transacción; fallo de auditoría no entrega datos. También
+  se acotan sus mutaciones y la carga compartida de titulares. Contactos por cuenta
+  a cargo; personas siguen negadas hasta la relación de 07b; externos solo para
+  acceso no acotado. HSTS se limita al host, sin includeSubDomains ni preload por
+  falta de inventario HTTPS completo, según el encargo actual. Estas son
+  adaptaciones técnicas del constructor, no nuevas decisiones atribuidas a Carlos.
+  Autorrevisión detectó y corrigió TOCTOU de las relaciones de alcance: FOR SHARE
+  de contactos e instalaciones hasta completar la operación, también en dryRun.
+  La salida auditada se valida una sola vez y es la misma que se entrega. HSTS
+  sustituye el valor histórico con includeSubDomains de la nota P1 de abajo.
+  La autorrevisión de continuidad detectó además que el caché idempotente podía
+  revelar respuestas de mutaciones ARCO tras perder alcance: ahora se revalida la
+  solicitud antes de devolver la repetición, sin repetir efectos ni borrar reservas.
+  Corrección técnica del constructor dentro del encargo, no decisión nueva de Carlos.
+  **Nota histórica sustituida por el relanzamiento nucleo-h-1112-oc:** el original
+  completo ya está en el encargo. Bloques 1/2 implementados e inventariados; no
+  hay bloqueo por falta de texto. Sin migraciones ni pantallas nuevas. CA, límites
+  y gate por bloque en `briefs/NUCLEO-H-p2.md`.
+  Validación de continuidad: typecheck/lint, 1.104 pruebas, BD 98+130+25,
+  build y presupuesto sin subir topes en verde. E2E de cabeceras 6/6 a
+  375/1024/1280 en servidor propio 3294, detenido al terminar. Autorrevisión
+  independiente final sin bloqueantes tras corregir la repetición idempotente;
+  CI y Revisor externos pendientes. Se continúa el PR #76; no se modificó Neon.
+  **Corrección ADR-045, review 5670166405 del #76:** el gate anterior no midió
+  rendimiento (Instalaciones 10 y Personas 9 consultas, main 8/8, límite 8).
+  El encargo excluye inbox propio, pendientes sin correos/errores libres y
+  sugerencias incrementales ⌘K; las fichas siguen auditadas. Adaptación técnica
+  de OpenCode / openai/gpt-6.1-sol: append en una llamada a función SQL VOLATILE
+  SECURITY INVOKER, con snapshot posterior al mismo lock por tenant, canon SQL
+  histórico y transacción de revelación intactos. Migración idempotente
+  `20261028163000_auditoria_append` antes del despliegue de la app; sin cambios
+  de RLS ni BYPASSRLS. No aplicada en Neon. Pruebas/CA y resultados finales en
+  `briefs/NUCLEO-H-p2.md`; no hay nuevas decisiones de negocio atribuidas a Carlos.
+  Autorrevisión: el append raw notifica explícitamente una consulta al contador
+  ADR-045; inbox obtiene página y conteo en otra única sentencia contada, sin
+  cargar todo ni mezclar usuarios/tenants. Se conserva el tope de 8 y el spec.
+  La medición con append contado aún dio 10/9: se consolidan además acceso y
+  módulos de identidad en la membresía elegida (sin caché entre requests), y
+  página/cuenta/agregados de instalaciones en una consulta SQL contada y acotada
+  antes de paginar. Mismos permisos, roles, excepciones y alcance; detalles y
+  evidencia final en el brief. Son ajustes técnicos del mismo constructor.
+  Medición estricta del build final: Instalaciones **10→8 consultas (108 ms)**,
+  Personas **9→8 (139 ms)**, todas las rutas del protocolo ≤8/500 ms. Build y
+  presupuesto sin subir topes, 1.138 pruebas aprobadas; autorrevisión independiente
+  final sin hallazgos de código. BD **98+147+25** y e2e **17 aprobadas/4 omisiones
+  preexistentes**, tres resoluciones; servidor propio 3376 detenido. CI y Revisor
+   pendientes sobre el nuevo head; Neon sigue pendiente de Carlos.
+
+  **Corrección de la review 5671348942 del #76:** OpenCode / openai/gpt-6.1-sol
+  restaura la auditoría de `core.buscar` con IDs de cuentas/personas/contactos,
+  misma salida y filtros, transacción común y fallo cerrado también para keys.
+  Sustituye la excepción histórica de ⌘K mencionada arriba; solo inbox propio y
+  pendientes siguen exentos. Gate global del registro con lista heredada cerrada
+  para impedir omisiones nuevas de proyección; migración `20261028163000` con
+  lock_timeout local de 5 s y transacción DDL, sin cambiar cadena ni algoritmo.
+  Adaptaciones técnicas del constructor según el encargo, no decisiones nuevas
+  atribuidas a Carlos. CA, límites y evidencia final en `briefs/NUCLEO-H-p2.md`.
+  Validación de esta continuación: tipos/lint en serie, 899 unitarias, build,
+  presupuesto y rendimiento estricto aprobados; Instalaciones 8/183 ms y Personas
+  8/164 ms. E2E 11 aprobadas/4 omisiones preexistentes a las tres resoluciones.
+  **test:db bloqueado por timeouts de preparación/P1001 locales**, aun tras
+  reintentos: una corrida aprobó DB 98/98 pero falló en capacidades; las pruebas
+  nuevas de búsqueda no alcanzaron sus aserciones. No se declara gate completo
+  ni PR terminado. No se cambiaron timeouts/skips para ocultarlo. Neon intacto.
 
 - **NÚCLEO-D1 (rama `fix/portal-servidor`, encargo t457u):** guardas previas al catálogo
   en ambos ejecutores web; se conserva la validación de sesiones de #68. Dominio de

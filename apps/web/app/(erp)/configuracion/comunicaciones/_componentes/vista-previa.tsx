@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { Alerta, Badge, Skeleton } from "@opai/ds";
 
 import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { aislarCorreo } from "@/lib/correo-srcdoc";
 
 type Previa = { asunto: string; texto: string; html: string };
 type Props = { evento: string; canal: string; asunto: string; cuerpo: string; remitente: string };
@@ -49,8 +50,9 @@ export function VistaPrevia({ evento, canal, asunto, cuerpo, remitente }: Props)
         {previa ? (
           <iframe
             title="Vista previa del correo"
-            srcDoc={previa.html}
+            srcDoc={aislarCorreo(previa.html, window.location.origin)}
             sandbox=""
+            referrerPolicy="no-referrer"
             className="h-[440px] w-full bg-surface"
           />
         ) : (

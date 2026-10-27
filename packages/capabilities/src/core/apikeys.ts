@@ -14,6 +14,7 @@ import { keySchema } from "./apikey-schema";
 export { keySchema } from "./apikey-schema";
 
 export const apikeysList = defineCapability({
+  auditarLectura: (s) => s.map((k) => k.id),
   id: "core.apikeys.list",
   descripcion:
     "API keys de la empresa (sin secretos): nombre, prefijo, scopes, responsable, último uso y validez.",
@@ -23,6 +24,7 @@ export const apikeysList = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx) {
+    if (ctx.alcance) throw prohibido("No tienes acceso a estas API keys.");
     const keys = await ctx.db.apiKey.findMany({
       include: { user: true },
       orderBy: { createdAt: "desc" },

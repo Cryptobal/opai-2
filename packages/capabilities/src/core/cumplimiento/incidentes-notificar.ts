@@ -5,9 +5,9 @@ import {
   brechaNotificada,
   calcularPlazo,
   DESTINATARIOS_BRECHA,
-  type EstadoIncidente,
+  estadoAvisos,
+  motivoAvisoInvalido,
   PERMISOS_CORE,
-  puedeAvanzarIncidente,
 } from "@opai/domain";
 
 import { defineCapability } from "../../define";
@@ -16,21 +16,6 @@ import { ajuste } from "../config";
 import { uuidSchema } from "../esquemas";
 import { actorLegible, validarEvidenciaDelTenant } from "./comunes";
 import { bloquearCaso, hechosDeCaso, incidenteVista, salidaIncidente } from "./incidentes-comun";
-
-type Hecho = { evento: string; estado: string; destinatario: string | null; ocurridoEn: Date | null; createdAt: Date };
-
-/** Registro inicial del caso (fecha de detección/registro) y destinatarios ya avisados. */
-function estadoAvisos(hechos: readonly Hecho[]) {
-  const registro = hechos.find((h) => h.evento === "registro") ?? hechos[0];
-  const avisados = new Set(
-    hechos.filter((h) => h.evento === "aviso" && h.destinatario).map((h) => h.destinatario as string),
-  );
-  const actual = hechos[hechos.length - 1]?.estado ?? "abierto";
-  // El plazo corre desde la DETECCIÓN (`ocurrido_en`) o, si no se conoce, desde el REGISTRO
-  // (`created_at`), nunca desde el aviso (Ley 21.719 §16.5).
-  const inicioPlazo = registro?.ocurridoEn ?? registro?.createdAt ?? null;
-  return { avisados, actual: actual as EstadoIncidente, inicioPlazo };
-}
 
 export const incidenteNotificar = defineCapability({
   id: "core.cumplimiento.incidente_notificar",
@@ -59,7 +44,8 @@ export const incidenteNotificar = defineCapability({
     if (dryRun) {
       const { avisados, actual, inicioPlazo } = estadoAvisos(await hechosDeCaso(ctx.db, input.casoId));
       await validarEvidenciaDelTenant(ctx.db, input.evidenciaDocId);
-      validar(actual, avisados, input.destinatario);
+      const motivo = motivoAvisoInvalido(actual, avisados, input.destinatario);
+      if (motivo) throw reglaDeNegocio(motivo);
       const nuevos = new Set([...avisados, input.destinatario]);
       const notificada = brechaNotificada(nuevos);
       const plazoEn = calcularPlazo(inicioPlazo ?? new Date(), dias);
@@ -79,7 +65,8 @@ export const incidenteNotificar = defineCapability({
       await bloquearCaso(tx, input.casoId);
       const { avisados, actual, inicioPlazo } = estadoAvisos(await hechosDeCaso(tx, input.casoId));
       await validarEvidenciaDelTenant(tx, input.evidenciaDocId);
-      validar(actual, avisados, input.destinatario);
+      const motivo = motivoAvisoInvalido(actual, avisados, input.destinatario);
+      if (motivo) throw reglaDeNegocio(motivo);
       const nuevosSet = new Set([...avisados, input.destinatario]);
       const completa = brechaNotificada(nuevosSet);
       const plazo = calcularPlazo(inicioPlazo ?? new Date(), dias);
@@ -115,13 +102,3 @@ export const incidenteNotificar = defineCapability({
     };
   },
 });
-
-/** Valida que el caso admita un aviso y que el destinatario no esté ya avisado. */
-function validar(actual: EstadoIncidente, avisados: ReadonlySet<string>, destinatario: string): void {
-  if (actual === "cerrado") throw reglaDeNegocio('No se puede notificar un caso "cerrado".');
-  if (avisados.has(destinatario))
-    throw reglaDeNegocio(`Ya consta el aviso a "${destinatario}" en este caso.`);
-  // Si aún no está notificado, debe poder llegar a "notificado" desde el estado vigente.
-  if (actual !== "notificado" && !puedeAvanzarIncidente(actual, "notificado"))
-    throw reglaDeNegocio(`No se puede notificar un caso "${actual}".`);
-}

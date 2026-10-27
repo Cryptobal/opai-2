@@ -24,6 +24,7 @@ const excepcionDetalleSchema = z.object({
 });
 
 export const excepcionesList = defineCapability({
+  auditarLectura: (s) => s.flatMap((e) => (e.fijadoPor ? [e.fijadoPor.id] : [])),
   id: "core.excepciones.list",
   descripcion:
     "Excepciones de permiso de un usuario (concedidas o denegadas sobre su rol) con su motivo, quién las fijó y cuándo.",
@@ -80,7 +81,9 @@ export const excepcionesSet = defineCapability({
     // El owner tiene acceso total por definición: no se le recorta con una excepción (ni al último
     // owner). Para reducir a alguien, cámbiale el rol.
     if (m.rol === "owner" && input.efecto === "denegar") {
-      throw reglaDeNegocio("A un owner no se le niega un permiso con una excepción; cámbiale el rol.");
+      throw reglaDeNegocio(
+        "A un owner no se le niega un permiso con una excepción; cámbiale el rol.",
+      );
     }
     if (!quitar) {
       validarEnCatalogo([input.permiso]);
@@ -103,7 +106,11 @@ export const excepcionesSet = defineCapability({
         entidadTipo: "membership",
         // El motivo también queda en la auditoría (no solo en la fila), para rastrear el porqué sin
         // leer `permiso_excepciones` (review 5660564536). `ninguna` quita la excepción: sin motivo.
-        payload: () => ({ permiso: input.permiso, efecto: input.efecto, motivo: input.motivo ?? null }),
+        payload: () => ({
+          permiso: input.permiso,
+          efecto: input.efecto,
+          motivo: input.motivo ?? null,
+        }),
       },
       async (tx) => {
         await tx.permisoExcepcion.deleteMany({

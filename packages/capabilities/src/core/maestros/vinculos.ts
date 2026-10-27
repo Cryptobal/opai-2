@@ -20,6 +20,7 @@ async function vinculoDe(ctx: Contexto, id: string) {
 }
 
 export const vinculosList = defineCapability({
+  auditarLectura: (s) => s.map((v) => v.id),
   id: "core.vinculos.list",
   descripcion:
     "Historial de vínculos laborales de una persona (vigente y terminados), del más reciente al más antiguo.",
