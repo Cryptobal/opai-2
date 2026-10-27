@@ -11,7 +11,7 @@ Hasta el 24-oct-2026 este archivo fue la fuente de verdad del avance; desde ento
 
 - **Endurecimiento de Plataforma (encargo urgente tras #59, rama `fix/platform-superadmin`):** servidor y shell comparten `tieneAccesoAPortal`, que admite Plataforma solo con rol global `owner` o `support`, nunca por membresía del tenant (ADR-016). Roles desconocidos se deniegan. Pruebas de servidor/shell y e2e de Empresas y rechazo sin rol global. H2 conserva la TopBar móvil aprobada: el título vive en el contenido (`DISENO.md` §4). H3 parcial: con acceso a Trabajador ya existe Inicio; se agrega cobertura, pero el estado vacío opcional se difiere porque incluso cargado de forma diferida excedió el presupuesto de Laboral (165,1/165 KB). No se suben topes. No hay decisiones de negocio nuevas; implementación de OpenCode según el encargo y ADR vigentes. La hipótesis de producción no se considera demostrada: `main` ya diferenciaba Plataforma en la guarda del servidor; queda QA posterior con la sesión afectada. Alcance y CA en `briefs/FIX-platform-superadmin.md`; el encargo no incluye ID de Linear.
 
-- **Portal de sesiones (rama `core/portal-sesion`, PR pendiente de abrir):**
+- **Portal de sesiones (rama `core/portal-sesion`, PR #68):**
   a partir del hallazgo de la review **5661270514** del Revisor en #59, la capa común
   exige portal no vacío, presente en la membresía activa del tenant actual y en la
   declaración de la capacidad. Los portales vienen del contexto de servidor ya cargado,

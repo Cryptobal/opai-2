@@ -94,4 +94,60 @@ describe.skipIf(!urlPropietario)("portales de membresías reales", () => {
       error: { code: "FORBIDDEN", message: "No tienes acceso a este portal." },
     });
   });
+
+  it("la campana del Supervisor lista y marca los avisos propios, sin ver los de otro usuario ni de otro tenant", async () => {
+    await e.admin.membership.updateMany({
+      where: { tenantId: tenantA, userId },
+      data: { estado: "activa" },
+    });
+    const otroUsuarioId = randomUUID();
+    await e.admin.user.create({
+      data: { id: otroUsuarioId, name: "Otra persona", email: `${otroUsuarioId}@prueba.cl` },
+    });
+    const propia = await e.admin.notificacion.create({
+      data: { tenantId: tenantA, usuarioId: userId, titulo: "Propia en A" },
+    });
+    const deOtroUsuario = await e.admin.notificacion.create({
+      data: { tenantId: tenantA, usuarioId: otroUsuarioId, titulo: "De otro usuario en A" },
+    });
+    const deOtroTenant = await e.admin.notificacion.create({
+      data: { tenantId: tenantB, usuarioId: userId, titulo: "Propia en B" },
+    });
+
+    const ctxSupervisor = await contexto(tenantA, "supervisor");
+    const lista = await mod.executeCapability(ctxSupervisor, "core.notificaciones.list", {});
+    expect(lista).toMatchObject({
+      ok: true,
+      data: { items: [{ id: propia.id, titulo: "Propia en A" }], noLeidas: 1 },
+    });
+
+    const ajena = await mod.executeCapability(ctxSupervisor, "core.notificaciones.marcar_leida", {
+      id: deOtroUsuario.id,
+    });
+    expect(ajena).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+
+    const deOtraEmpresa = await mod.executeCapability(
+      ctxSupervisor,
+      "core.notificaciones.marcar_leida",
+      { id: deOtroTenant.id },
+    );
+    expect(deOtraEmpresa).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+
+    const propiaOk = await mod.executeCapability(ctxSupervisor, "core.notificaciones.marcar_leida", {
+      id: propia.id,
+    });
+    expect(propiaOk).toMatchObject({ ok: true });
+
+    const todas = await mod.executeCapability(ctxSupervisor, "core.notificaciones.marcar_todas", {});
+    expect(todas).toMatchObject({ ok: true, data: { marcadas: 0 } });
+
+    const ajenaSigueNoLeida = await e.admin.notificacion.findUniqueOrThrow({
+      where: { id: deOtroUsuario.id },
+    });
+    expect(ajenaSigueNoLeida.leidaEn).toBeNull();
+    const otraEmpresaSigueNoLeida = await e.admin.notificacion.findUniqueOrThrow({
+      where: { id: deOtroTenant.id },
+    });
+    expect(otraEmpresaSigueNoLeida.leidaEn).toBeNull();
+  });
 });

@@ -25,6 +25,7 @@ export const notificacionesList = defineCapability({
   descripcion:
     "Avisos del usuario en OPAI (campana): los más recientes primero, con cantidad de no leídos.",
   permiso: null,
+  portales: ["erp", "supervisor", "trabajador", "terreno", "cliente"],
   input: z.object({
     soloNoLeidas: z.boolean().default(false),
     limite: z.number().int().min(1).max(100).default(30),
@@ -61,6 +62,7 @@ export const notificacionesMarcarLeida = defineCapability({
   id: "core.notificaciones.marcar_leida",
   descripcion: "Marca como leído un aviso propio del usuario en la campana de OPAI.",
   permiso: null,
+  portales: ["erp", "supervisor", "trabajador", "terreno", "cliente"],
   input: z.object({ id: uuidSchema }),
   output: z.object({ id: z.string(), leidaEn: z.string() }),
   efecto: "escritura",
@@ -79,6 +81,7 @@ export const notificacionesMarcarTodas = defineCapability({
   id: "core.notificaciones.marcar_todas",
   descripcion: "Marca como leídos todos los avisos pendientes del usuario en la campana de OPAI.",
   permiso: null,
+  portales: ["erp", "supervisor", "trabajador", "terreno", "cliente"],
   input: z.object({}),
   output: z.object({ marcadas: z.number() }),
   efecto: "escritura",

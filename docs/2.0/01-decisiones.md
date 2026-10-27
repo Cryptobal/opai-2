@@ -400,8 +400,7 @@ Plataforma, procesos del sistema y API keys conservan sus reglas.
 Solo `core.invitations.accept` queda fuera de la comprobación de portales de membresía,
 porque crea esa membresía; su handler sigue exigiendo usuario autenticado, token y correo
 correcto. No es una excepción genérica para capacidades internas. La fuente disponible
-es la adenda, que referencia «23:42 DECISIÓN portal-sesión»; el archivo referido
-`encargos/nucleo-cierre.md` no está en este worktree.
+es la adenda, que referencia «23:42 DECISIÓN portal-sesión».
 
 **Catálogo del portal Supervisor (decisión del operador, 27-oct 00:55, autoridad
 delegada por Carlos; resuelve el bloqueo anterior).** Se declaran `portales: ["erp",
