@@ -73,6 +73,8 @@ model Contacto {
   estado      String    @default("activo")
   notas       String?
   archivadoEn DateTime? @map("archivado_en") @db.Timestamptz(6)
+  /// Anonimizado por la política de retención o a pedido del titular (Ley 21.719, 07d PR 3).
+  anonimizadoEn DateTime? @map("anonimizado_en") @db.Timestamptz(6)
   createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -207,6 +209,8 @@ model Persona {
   /// Usuario de OPAI vinculado (1:1), si la persona entra al sistema.
   usuarioId           String?   @map("usuario_id") @db.Uuid
   archivadaEn         DateTime? @map("archivada_en") @db.Timestamptz(6)
+  /// Anonimizada por la política de retención o a pedido del titular (Ley 21.719, 07d PR 3).
+  anonimizadaEn       DateTime? @map("anonimizada_en") @db.Timestamptz(6)
   createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt           DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 

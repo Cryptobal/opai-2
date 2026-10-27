@@ -9,16 +9,22 @@ export type Cifrado = { cifrado: Uint8Array; iv: Uint8Array; tag: Uint8Array };
 
 const ALGORITMO = "aes-256-gcm";
 
-export function cifrar(clave: Uint8Array, datos: Uint8Array): Cifrado {
+/**
+ * `aad` (datos autenticados adicionales) liga el cifrado a su contexto, p. ej. tenant+tabla+columna:
+ * un valor cifrado para un campo no se descifra si se copia a otro. Opcional: los secretos no lo usan.
+ */
+export function cifrar(clave: Uint8Array, datos: Uint8Array, aad?: Uint8Array): Cifrado {
   if (clave.length !== 32) throw new Error("La clave debe tener 32 bytes.");
   const iv = randomBytes(12);
   const c = createCipheriv(ALGORITMO, clave, iv);
+  if (aad) c.setAAD(aad);
   const cifrado = Buffer.concat([c.update(datos), c.final()]);
   return { cifrado, iv, tag: c.getAuthTag() };
 }
 
-export function descifrar(clave: Uint8Array, s: Cifrado): Buffer {
+export function descifrar(clave: Uint8Array, s: Cifrado, aad?: Uint8Array): Buffer {
   const d = createDecipheriv(ALGORITMO, clave, s.iv);
+  if (aad) d.setAAD(aad);
   d.setAuthTag(s.tag);
   return Buffer.concat([d.update(s.cifrado), d.final()]);
 }

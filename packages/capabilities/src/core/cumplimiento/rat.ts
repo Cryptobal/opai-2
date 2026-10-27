@@ -9,6 +9,7 @@ import {
 
 import { defineCapability } from "../../define";
 import { listarInventario } from "./inventario";
+import { politicaEfectiva } from "./retencion-politica";
 
 const categoriaRat = z.enum(CATEGORIAS_RAT);
 
@@ -64,8 +65,13 @@ export const cumplimientoRat = defineCapability({
   }),
   efecto: "lectura",
   dryRun: false,
-  async handler(_ctx, input) {
-    const inventario = listarInventario();
+  async handler(ctx, input) {
+    const { reglas } = await politicaEfectiva(ctx);
+    const retenciones = new Map(reglas.map((r) => [r.tabla, r.descripcion]));
+    const inventario = listarInventario().map((d) => ({
+      ...d,
+      retencion: retenciones.get(d.tabla) ?? d.retencion ?? "Pendiente de definición",
+    }));
     const todas = construirRatPorActividad(inventario);
     const actividades = input.categoria
       ? todas.filter((a) => a.categorias.includes(input.categoria!))
