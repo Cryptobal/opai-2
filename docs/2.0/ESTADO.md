@@ -99,7 +99,7 @@ No se declara CI, QA remota ni aprobación del head nuevo; Neon sigue sin modifi
   preparación independiente del test FORCE y corrección del harness ESLint;
   capturas heredadas conservadas sin commit (sin cambio visual intencional).
   Rama `fix/force-rls`, apilada sobre #49 según la adenda del encargo; sin cambio
-  de plan. Migración aditiva `20261028160000_force_rls`, pendiente de Carlos en
+  de plan. Migración aditiva `20261028170000_force_rls`, pendiente de Carlos en
   Neon. Se elimina el acceso global por delegados; lecturas de identidad mínimas
   y operaciones de plataforma con nombre. Test de ENABLE + FORCE + política en
   todos los esquemas y aislamiento del dueño NOBYPASSRLS. Adaptaciones técnicas

@@ -5,6 +5,59 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { prepararEntorno, urlPropietario, type Entorno } from "./entorno";
 
+const tablasReversion = [
+  "core.ajustes",
+  "core.api_keys",
+  "core.api_keys_autonomia",
+  "core.aprobaciones",
+  "core.audit_events",
+  "core.bitacora",
+  "core.bitacora_cabezas",
+  "core.cargos",
+  "core.claves_tenant",
+  "core.comprobantes",
+  "core.consentimientos",
+  "core.consumos",
+  "core.consumos_diarios",
+  "core.contactos",
+  "core.cuentas",
+  "core.cuentas_representantes",
+  "core.documento_tipos",
+  "core.documento_vinculos",
+  "core.documentos",
+  "core.dpa_aceptaciones",
+  "core.envios",
+  "core.estructuras_items",
+  "core.estructuras_sueldo",
+  "core.eventos",
+  "core.eventos_entregas",
+  "core.funciones_puesto",
+  "core.idempotencias",
+  "core.ids_externos",
+  "core.incidentes",
+  "core.instalaciones",
+  "core.integraciones",
+  "core.invitations",
+  "core.memberships",
+  "core.notificacion_reglas",
+  "core.notificaciones",
+  "core.patrones_turno",
+  "core.perfil_empresa",
+  "core.permiso_excepciones",
+  "core.personas",
+  "core.plantillas",
+  "core.puestos",
+  "core.retencion_ejecuciones",
+  "core.roles",
+  "core.secretos",
+  "core.solicitudes_arco",
+  "core.supervisor_instalaciones",
+  "core.tenant_modules",
+  "core.trabajos",
+  "core.usage_events",
+  "core.vinculos_laborales",
+];
+
 describe("FORCE RLS sobre el dueño NOBYPASSRLS", () => {
   let entorno: Entorno;
   beforeAll(async () => {
@@ -35,7 +88,7 @@ describe("FORCE RLS sobre el dueño NOBYPASSRLS", () => {
       expect((await pg.query(`SELECT * FROM ${nombre}.filas`)).rowCount).toBe(2);
       await pg.query("RESET ROLE");
       const sql = readFileSync(
-        new URL("../prisma/migrations/20261028160000_force_rls/migration.sql", import.meta.url),
+        new URL("../prisma/migrations/20261028170000_force_rls/migration.sql", import.meta.url),
         "utf8",
       );
       await pg.query(sql);
@@ -65,13 +118,9 @@ describe("FORCE RLS sobre el dueño NOBYPASSRLS", () => {
     try {
       await pg.query("BEGIN");
       const sql = readFileSync(
-        new URL("../prisma/migrations/20261028160000_force_rls/migration.sql", import.meta.url),
+        new URL("../prisma/migrations/20261028170000_force_rls/migration.sql", import.meta.url),
         "utf8",
       );
-      const catalogo = await pg.query(`
-        SELECT DISTINCT schemaname, tablename FROM pg_policies
-        WHERE policyname = 'tenant_isolation' ORDER BY schemaname, tablename
-      `);
       await pg.query(sql);
       const reversion = sql
         .split("-- Reversión (manual, solo referencia; no la aplica Prisma)")[1]!
@@ -82,14 +131,10 @@ describe("FORCE RLS sobre el dueño NOBYPASSRLS", () => {
       const tablasRevertidas = [...reversion.matchAll(/ALTER TABLE "([^"]+)"\."([^"]+)" NO FORCE/g)]
         .map(([, schema, tabla]) => `${schema}.${tabla}`)
         .sort();
-      expect(tablasRevertidas).toEqual(
-        catalogo.rows
-          .map(({ schemaname, tablename }) => `${schemaname}.${tablename}`)
-          .filter((tabla) => !["core.gasto_agente_mes", "core.auditoria_cabezas"].includes(tabla))
-          .sort(),
-      );
+      expect(tablasRevertidas).toEqual(tablasReversion);
       await pg.query(reversion);
-      for (const { schemaname, tablename } of catalogo.rows) {
+      for (const nombre of [...tablasReversion, "core.gasto_agente_mes", "core.auditoria_cabezas"]) {
+        const [schemaname, tablename] = nombre.split(".");
         const { rows } = await pg.query(
           `
           SELECT relforcerowsecurity FROM pg_class c
@@ -98,9 +143,7 @@ describe("FORCE RLS sobre el dueño NOBYPASSRLS", () => {
         `,
           [schemaname, tablename],
         );
-        expect(rows[0].relforcerowsecurity, `${schemaname}.${tablename}`).toBe(
-          schemaname === "core" && ["gasto_agente_mes", "auditoria_cabezas"].includes(tablename),
-        );
+        expect(rows[0].relforcerowsecurity, nombre).toBe(!tablasReversion.includes(nombre));
       }
       const { rows } = await pg.query(`
         SELECT proname, prosecdef, proconfig FROM pg_proc p

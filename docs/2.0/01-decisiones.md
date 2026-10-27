@@ -25,7 +25,7 @@ Una entrada por decisión. Las decisiones no se editan: si cambian, se agrega un
 **Consecuencias.** Ninguna consulta de negocio usa el cliente Prisma crudo fuera de `packages/db`. Test obligatorio de aislamiento (dos tenants, cero fuga, cero filas sin tenant).
 
 **Nota de implementación NÚCLEO-G2 (encargo t457u y adenda de apilado).**
-`20261028160000_force_rls` fuerza RLS en todas las tablas existentes con
+`20261028170000_force_rls` fuerza RLS en todas las tablas existentes con
 `tenant_isolation`, incluidos módulos. Las tablas futuras con `tenant_id` deben
 tener ENABLE + FORCE + esa política; `test:db` exige una base real. Se retira
 `globales()` público: identidad y tenant por funciones con selección fija;
@@ -45,8 +45,7 @@ local/CI o un dueño distinto. La garantía real es que la aplicación corre com
 opai_app, sin BYPASSRLS, con tenant_isolation.
 
 Resultado de la consulta de roles (solo lectura, OPAI 2.0, 27-oct-2026 15:53 CLT,
-Neon steep-wildflower-90764475, ramas main br-dawn-morning-b6037bp9 y
-dev br-cool-cell-b6f9h1vh; mismo resultado en ambas; current_user de la conexión
+mismo resultado en ambas ramas de Neon; current_user de la conexión
 = neondb_owner), proporcionado en el encargo; no se consultó Neon en esta revisión:
 
 ```sql

@@ -119,8 +119,14 @@ Estas son adaptaciones técnicas de Codex, sin nuevas decisiones de Carlos.
 
 Codex incorpora reversión comentada desde pg_policies, preservando FORCE previo
 de gasto_agente_mes y auditoria_cabezas; restaura las tres funciones DEFINER con
-search_path original. La prueba contrasta el catálogo antes y después de revertir.
-La prueba existente ya usa un dueño temporal distinto de opai_app, NOBYPASSRLS.
+search_path original. La prueba contrasta una lista fija de 50 tablas y verifica la reversión.
+La prueba existente ya usa un dueño temporal miembro de opai_app, NOBYPASSRLS.
 Se precisa BYPASSRLS de neondb_owner y la regla de migraciones de datos, según el
 encargo, sin nuevas decisiones de negocio. Los CA anteriores conservan su alcance;
 CI, revisión externa y aplicación en Neon siguen pendientes.
+
+## Revisión 5672843372
+
+Codex renombra la migración a `20261028170000_force_rls` para situarla después
+de la migración del #76 y fija en la prueba las 50 tablas de la reversión histórica.
+La lista no depende de futuras tablas. Son correcciones técnicas del encargo.
