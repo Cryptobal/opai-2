@@ -45,12 +45,14 @@ test.describe("configuración: empresa y plataforma del tenant", () => {
       const normalizado = guardado();
       await page.getByRole("radio", { name: /Sistema/ }).click();
       await normalizado;
+      await expect(page.getByRole("radio", { name: /Sistema/ })).toBeEnabled();
       await page.reload();
       await expect(page.getByRole("radio", { name: /Sistema/ })).toBeChecked();
     }
     let respuesta = guardado();
     await page.getByRole("radio", { name: "Oscuro" }).click();
     await respuesta;
+    await expect(page.getByRole("radio", { name: /Sistema/ })).toBeEnabled();
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
     // Se guarda en core.config (ámbito usuario): al recargar sigue elegido.
     await expect(async () => {
@@ -60,6 +62,7 @@ test.describe("configuración: empresa y plataforma del tenant", () => {
     respuesta = guardado();
     await page.getByRole("radio", { name: /Sistema/ }).click();
     await respuesta;
+    await expect(page.getByRole("radio", { name: /Sistema/ })).toBeEnabled();
     await expect(page.locator("html")).not.toHaveAttribute("data-theme", "dark");
     await expect(async () => {
       await page.reload();
