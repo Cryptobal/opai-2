@@ -1,10 +1,9 @@
 import { leerPuntoMapa } from "@/lib/mapa";
-import { permitir } from "@/lib/rate-limit";
+import { LIMITES, permitir } from "@/lib/rate-limit";
 import { demasiadas, noAutenticado } from "@/lib/respuestas";
 import { ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
 
 const PORTALES_CON_MAPA = ["erp", "supervisor"] as const;
-const POR_MINUTO = 30; // cada imagen se cobra a la clave: límite bajo (el contador es por instancia)
 
 const fallo = (status: number, message: string) =>
   Response.json({ ok: false, error: { message } }, { status });
@@ -18,7 +17,8 @@ const fallo = (status: number, message: string) =>
 export async function GET(req: Request): Promise<Response> {
   const identidad = await identidadActual();
   if (!identidad?.actual) return noAutenticado();
-  if (!permitir(`geo-mapa:${identidad.usuario.id}`, POR_MINUTO)) return demasiadas();
+  if (!(await permitir(`geo-mapa:${identidad.usuario.id}`, LIMITES.geoMapa.maximo)))
+    return demasiadas();
   const punto = leerPuntoMapa(new URL(req.url));
   if (!punto) return fallo(400, "Coordenadas o zoom inválidos.");
   const portal = PORTALES_CON_MAPA.find((p) => identidad.actual?.portales.includes(p));
