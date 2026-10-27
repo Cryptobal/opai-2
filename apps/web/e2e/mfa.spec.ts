@@ -25,6 +25,18 @@ test.describe("segundo factor", () => {
     await page.getByRole("button", { name: "Entrar" }).click();
     await page.waitForURL((url) => url.pathname === "/mfa");
     await expect(page.getByRole("heading", { name: "Verifica tu identidad" })).toBeVisible();
+    const campo = page.getByLabel("Código del autenticador");
+    await expect(campo).toHaveAttribute("autocapitalize", "none");
+    await expect(campo).toHaveAttribute("autocorrect", "off");
+    await expect(campo).toHaveAttribute("spellcheck", "false");
+    await expect(campo).toHaveAttribute("inputmode", "numeric");
+    await page.getByRole("button", { name: "Usar un código de respaldo" }).click();
+    const respaldo = page.getByLabel("Código de respaldo");
+    await expect(respaldo).toHaveAttribute("autocapitalize", "none");
+    await expect(respaldo).toHaveAttribute("autocorrect", "off");
+    await expect(respaldo).toHaveAttribute("spellcheck", "false");
+    await expect(respaldo).toHaveAttribute("inputmode", "text");
+    await page.getByRole("button", { name: "Usar mi autenticador" }).click();
     await captura(page, "mfa-verificar", p);
     await page.getByLabel(/Código/).fill(await codigoTotp());
     await page.getByRole("button", { name: "Verificar" }).click();
