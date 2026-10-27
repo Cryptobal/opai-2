@@ -64,6 +64,14 @@ function Formulario({
       onCerrar();
     }
   }
+  async function cambiarEstado(estado: "activo" | "inactivo") {
+    if (!actual) return;
+    const r = await ejecutar("core.puestos.set_estado", { id: actual.id, estado });
+    if (r) {
+      avisar.exito(estado === "inactivo" ? "Puesto desactivado" : "Puesto reactivado");
+      onCerrar();
+    }
+  }
   return (
     <Sheet
       abierto
@@ -86,6 +94,18 @@ function Formulario({
       <div className="flex flex-col gap-4">
         {error ? <Alerta tono="danger" titulo={error} /> : null}
         <CamposPuesto d={d} setD={setD} cargos={cargos} funciones={funciones} patrones={patrones} />
+        {actual ? (
+          <Button
+            variant={actual.estado === "activo" ? "destructive" : "secondary"}
+            block
+            disabled={pendiente}
+            onClick={() =>
+              void cambiarEstado(actual.estado === "activo" ? "inactivo" : "activo")
+            }
+          >
+            {actual.estado === "activo" ? "Desactivar puesto" : "Reactivar puesto"}
+          </Button>
+        ) : null}
       </div>
     </Sheet>
   );
