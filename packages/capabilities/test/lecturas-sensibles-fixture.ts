@@ -180,6 +180,7 @@ export function casosLecturas(f: FixtureLecturas): [string, object, string[]][] 
     ["core.vinculos.list", { personaId: f.personaId }, [f.vinculoId]],
     ["core.cuentas.list", {}, [f.cuentaId]],
     ["core.cuentas.get", { id: f.cuentaId }, [f.cuentaId, f.contactoId]],
+    ["core.buscar", { q: "Lectura" }, [f.cuentaId, f.personaId, f.contactoId]],
     ["core.empresa.get", {}, []],
     ["core.cumplimiento.estado", {}, []],
     [

@@ -130,6 +130,8 @@ describe.skipIf(!urlPropietario)("despliegue de auditoría en dos fases", () => 
       });
       const antes = (await pg.query("SELECT * FROM core.audit_events ORDER BY tenant_id, seq"))
         .rows;
+      expect(append).toMatch(/BEGIN;\s+SET LOCAL lock_timeout = '5s';/);
+      await pg.query(append); // El timeout de DDL no recalcula ningún eslabón existente.
       await pg.query(fase1);
       await pg.query(indice);
       await pg.query(fase2);

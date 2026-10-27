@@ -5,13 +5,13 @@ import { defineCapability } from "../src/define";
 import { casosLecturas, type FixtureLecturas } from "./lecturas-sensibles-fixture";
 
 describe("excepciones declarativas de lectura (#76, ADR-045)", () => {
-  it("solo las tres excepciones explícitas desactivan auditoría", () => {
+  it("solo las dos excepciones explícitas desactivan auditoría", () => {
     expect(
       capacidadesDelNucleo
         .filter((c) => c.auditarLectura === false)
         .map((c) => c.id)
         .sort(),
-    ).toEqual(["core.buscar", "core.inicio.pendientes", "core.notificaciones.list"]);
+    ).toEqual(["core.inicio.pendientes", "core.notificaciones.list"]);
   });
 
   it("no permite desactivarla en ninguna capacidad personal/documental del inventario", () => {

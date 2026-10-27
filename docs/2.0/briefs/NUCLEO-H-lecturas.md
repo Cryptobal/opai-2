@@ -20,6 +20,7 @@ capacidad y fecha ya son columnas del evento. Se eliminan IDs repetidos.
 | `core.vinculos.list` | Historial laboral; vínculos devueltos |
 | `core.contactos.list/get` | Identificación/contacto; contactos devueltos |
 | `core.cuentas.list/get` | Cuenta persona natural, contacto principal y representantes; cuenta, representantes y contactos de la ficha |
+| `core.buscar` | Nombres, RUT y correo en sugerencias de UI/API/MCP; IDs de cuentas, personas y contactos devueltos |
 | `core.instalaciones.list/get` | Revelación indirecta del nombre de cuenta; IDs de instalaciones devueltas |
 | `core.empresa.get` | Representante legal/contactos; sin IDs de salida, `ids: []`, perfil identificado por el tenant del evento |
 | `core.cumplimiento.estado` | DPO y aceptantes del DPA; sin IDs de salida, `ids: []`, tenant del evento |
@@ -61,13 +62,23 @@ abajo y sus pruebas se conservan sin cambios: no se añade otro
 
 `auditarLectura: false` solo se admite en `core.notificaciones.list` (avisos del
 propio usuario y conteo), `core.inicio.pendientes` (resumen sin correos ni errores
-libres del proveedor) y `core.buscar` (sugerencias incrementales de ⌘K). Abrir un
-resultado conserva la auditoría de la ficha/personas/contactos/documentos por su
-capacidad habitual; los permisos y filtros de búsqueda no cambian. Es la excepción
-expresa del encargo, no una exclusión general de las búsquedas de datos personales.
+libres del proveedor). El encargo de corrección de la review **5671348942** retira la excepción de
+`core.buscar`: sus sugerencias contienen datos personales y se auditan también
+por API/MCP, con IDs de cuentas, personas y contactos devueltos, sin copiar el
+texto buscado ni datos personales. Abrir la ficha conserva su auditoría habitual.
+Los permisos y filtros de búsqueda no cambian.
 `lecturas-excepciones.test.ts` protege el inventario sensible y la lista cerrada
 de excepciones en `defineCapability`; `auditoria-append-db.test.ts` comprueba que
 las excepciones no insertan eventos y que abrir la ficha sí los inserta.
+
+`apps/web/test/lecturas-registro.test.ts` recorre el registro completo (núcleo y
+módulos): la instantánea cierra la lista de lecturas heredadas sin proyección
+(identidad/plataforma, catálogos, configuración, resúmenes y auditoría salarial
+propia). Una lectura nueva o retirar una proyección existente hace fallar el
+gate; no se admite regenerar la lista para excluir lecturas personales nuevas.
+Las dos excepciones con `false` se comprueban separadamente. Esta solución técnica
+es de OpenCode / openai/gpt-6.1-sol para el punto 2 del encargo, no una nueva
+exclusión de datos sensibles ni una decisión de negocio atribuida a Carlos.
 
 El append llama una sola sentencia a `core.auditoria_append` (migración idempotente
 `20261028163000_auditoria_append`): función VOLATILE e invocadora, mismo advisory

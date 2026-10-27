@@ -226,6 +226,9 @@ PR-BODY.md queda local, ignorado, sin commit, conforme al encargo.
 
 ## Corrección ADR-045 · review 5670166405 del PR #76
 
+> Nota histórica: la excepción de búsqueda descrita aquí queda sustituida por
+> la corrección de la review 5671348942 al final del documento.
+
 El gate histórico de arriba **no incluyó rendimiento**. El Revisor informó
 Instalaciones **10 consultas** y Personas **9** (main: **8 y 8**, tope **8**).
 No se cambia `rendimiento.spec.ts`, sus aserciones ni los presupuestos de JS.
@@ -322,4 +325,64 @@ independiente se registran al cerrar el gate; CI/Revisor externos no se presumen
    función invocadora idempotente sin tablas nuevas ni cambios de RLS/BYPASSRLS.
    Verificación SQL en PR-BODY local; aplicación en Neon pendiente de Carlos.
 9. **Gate:** resultados finales y logs en la sección de pruebas; CI y revisión
-   externa siguen pendientes y no se declaran como aprobados.
+    externa siguen pendientes y no se declaran como aprobados.
+
+## Corrección de la review 5671348942 · PR #76
+
+Implementación de OpenCode / openai/gpt-6.1-sol conforme a los cuatro puntos
+del encargo actual, sin nuevas decisiones de negocio:
+
+1. `core.buscar` vuelve al inventario y audita IDs de cuentas, personas y contactos
+   devueltos, sin texto de búsqueda ni datos personales en el payload. Se conserva
+   exactamente la salida y los filtros existentes. Transacción común y fallo
+   cerrado, también para agentes/API keys. Solo inbox propio y pendientes conservan
+   `auditarLectura: false`; abrir una ficha sigue generando su evento habitual.
+2. Gate del registro completo con lista cerrada de lecturas heredadas sin
+   proyección (instantánea revisable); cualquier omisión nueva o retirada de una
+   proyección falla. No se amplían las exenciones de lecturas sensibles.
+3. Migración `20261028163000`: `BEGIN` y `SET LOCAL lock_timeout = '5s'` para DDL,
+   con `COMMIT` después de los grants. No cambia el cuerpo de la función, canon,
+   seq, hash ni hash_anterior. La reejecución se comprueba sobre eventos existentes.
+   Reversión: desplegar primero la app con append anterior y después ejecutar
+   `DROP FUNCTION core.auditoria_append(uuid, uuid, text, text, text, text, text,
+   text, jsonb, timestamptz);`; nunca borrar eventos. Neon no se modifica.
+4. Rendimiento estricto con el comando del CI y build propio: resultados del gate
+   se registran al completarlo en esta sección y PR-BODY.md local, sin subir topes
+   ni cambiar MAX_CONSULTAS, skips o aserciones.
+
+Pruebas añadidas: inventario completo con rollback si falla el append;
+`buscar-auditoria-db` para actor agente con key, dos tenants, permiso/alcance vacíos
+y fallo cerrado. No hay escrituras de negocio nuevas, ni cambios de privilegios,
+pantallas o diseño. Se mantiene el DS 2.0. Los límites anteriores de CSP/PPR y
+esqueleto preexistente siguen declarados; este encargo no los resuelve.
+
+Medición de esta corrección, build propio en puerto 3476, mismo comando del CI
+con `GATE_ESTRICTO=1`: Cuentas **6/225 ms**, Instalaciones **8/183 ms**,
+Personas **8/164 ms**, Cargos **6/147 ms**, Configuración **6/183 ms** e
+Inicio **4/129 ms**. Protocolo aprobado; fixme de esqueleto preexistente intacto.
+Build y presupuesto por ruta aprobados sin subir topes (Instalaciones 160,2/165 KB,
+Personas 160,6/165 KB). E2E Maestros/Cabecera estable/Portal de sesión:
+**11 aprobadas y 4 omisiones preexistentes**, a 375/1024/1280. La repetición
+completa pasó tras timeout inicial de Vencimientos, sin alterar pruebas ni límites.
+Autorrevisión independiente final sin bloqueantes tras corregir la expectativa
+de `dryRun` de una prueba y añadir la key sin permisos con responsable owner.
+Logs `pr76-*.log` y capturas `pr76-evidencia/` bajo `/tmp/opencode/`.
+Gate unitario/BD separado como en CI: **899 unitarias aprobadas**, con las 243
+pruebas de BD condicionadas a su runner dedicado. Typecheck y lint aprobados con
+`--concurrency=1`; el primer reintento de tipos terminó con código 137 bajo presión
+de memoria del host. La primera corrida que duplicaba BD dentro de `pnpm test` se
+interrumpió y no cuenta como aprobada.
+
+**Bloqueo local: test:db no quedó verde.** Una repetición aprobó las 98 pruebas de
+`packages/db` (incluida migración/idempotencia); capacidades terminó con 95
+aprobadas, 1 timeout y 54 casos no ejecutados por fallos de preparación. Otras
+corridas agotaron hooks o recibieron P1001 contra PostgreSQL local. El intento
+con heap de Node limitado, conexión IPv4 a la misma base aislada y comprobación
+de actualizaciones de Prisma desactivada tampoco resolvió los hooks. Las nuevas
+pruebas de búsqueda no llegaron a sus aserciones; no se declara su aprobación.
+No se tocaron timeouts, skips, permisos, tests ni bases remotas para obtener verde.
+Logs `pr76-db-{serie,final,memoria}.log` y `pr76-buscar-local.log`. Se conserva el
+arreglo y se entrega este bloqueo conforme al encargo: los CA 1–3 están
+implementados y el 4 tiene medición/build/presupuesto/e2e aprobados, pero el cierre
+del gate completo queda **parcial**, pendiente de repetir test:db con el entorno
+local estable. El PR **no está terminado**; CI y Revisor externos siguen pendientes.

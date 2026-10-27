@@ -30,7 +30,7 @@ export function defineCapability<I extends z.ZodType, O extends z.ZodType>(
   if (
     def.auditarLectura === false &&
     (def.efecto !== "lectura" ||
-      !["core.notificaciones.list", "core.inicio.pendientes", "core.buscar"].includes(def.id))
+      !["core.notificaciones.list", "core.inicio.pendientes"].includes(def.id))
   ) {
     throw new Error(`La capacidad "${def.id}" no permite desactivar la auditoría de lectura.`);
   }

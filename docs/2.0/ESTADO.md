@@ -172,7 +172,24 @@ No se declara CI, QA remota ni aprobación del head nuevo; Neon sigue sin modifi
   presupuesto sin subir topes, 1.138 pruebas aprobadas; autorrevisión independiente
   final sin hallazgos de código. BD **98+147+25** y e2e **17 aprobadas/4 omisiones
   preexistentes**, tres resoluciones; servidor propio 3376 detenido. CI y Revisor
-  pendientes sobre el nuevo head; Neon sigue pendiente de Carlos.
+   pendientes sobre el nuevo head; Neon sigue pendiente de Carlos.
+
+  **Corrección de la review 5671348942 del #76:** OpenCode / openai/gpt-6.1-sol
+  restaura la auditoría de `core.buscar` con IDs de cuentas/personas/contactos,
+  misma salida y filtros, transacción común y fallo cerrado también para keys.
+  Sustituye la excepción histórica de ⌘K mencionada arriba; solo inbox propio y
+  pendientes siguen exentos. Gate global del registro con lista heredada cerrada
+  para impedir omisiones nuevas de proyección; migración `20261028163000` con
+  lock_timeout local de 5 s y transacción DDL, sin cambiar cadena ni algoritmo.
+  Adaptaciones técnicas del constructor según el encargo, no decisiones nuevas
+  atribuidas a Carlos. CA, límites y evidencia final en `briefs/NUCLEO-H-p2.md`.
+  Validación de esta continuación: tipos/lint en serie, 899 unitarias, build,
+  presupuesto y rendimiento estricto aprobados; Instalaciones 8/183 ms y Personas
+  8/164 ms. E2E 11 aprobadas/4 omisiones preexistentes a las tres resoluciones.
+  **test:db bloqueado por timeouts de preparación/P1001 locales**, aun tras
+  reintentos: una corrida aprobó DB 98/98 pero falló en capacidades; las pruebas
+  nuevas de búsqueda no alcanzaron sus aserciones. No se declara gate completo
+  ni PR terminado. No se cambiaron timeouts/skips para ocultarlo. Neon intacto.
 
 - **NÚCLEO-D1 (rama `fix/portal-servidor`, encargo t457u):** guardas previas al catálogo
   en ambos ejecutores web; se conserva la validación de sesiones de #68. Dominio de

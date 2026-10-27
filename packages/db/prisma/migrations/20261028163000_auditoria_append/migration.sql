@@ -1,5 +1,7 @@
 -- Una llamada de app; lock y SELECT separados dentro de VOLATILE renuevan snapshot tras esperar.
 -- SECURITY INVOKER: conserva RLS, permisos append-only y la transacción del llamador.
+BEGIN;
+SET LOCAL lock_timeout = '5s';
 CREATE OR REPLACE FUNCTION core.auditoria_append(
   p_id uuid, p_tenant uuid, p_actor text, p_actor_id text, p_via_user text,
   p_capability text, p_entity_type text, p_entity_id text, p_payload jsonb,
@@ -35,4 +37,5 @@ END;
 $$;
 REVOKE ALL ON FUNCTION core.auditoria_append(uuid, uuid, text, text, text, text, text, text, jsonb, timestamptz) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION core.auditoria_append(uuid, uuid, text, text, text, text, text, text, jsonb, timestamptz) TO opai_app;
+COMMIT;
 -- Reversión tras desplegar append anterior: DROP FUNCTION core.auditoria_append(uuid, uuid, text, text, text, text, text, text, jsonb, timestamptz);

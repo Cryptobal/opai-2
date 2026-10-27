@@ -34,7 +34,6 @@ describe.skipIf(!urlPropietario)("append de una sentencia con snapshot tras el l
   it("excepciones no insertan; abrir el resultado sí audita, pendientes no revela correos", async () => {
     const antes = await e.admin.auditEvent.count({ where: { tenantId: f.tenantId } });
     for (const [id, input] of [
-      ["core.buscar", { q: "Lectura" }],
       ["core.notificaciones.list", {}],
       ["core.inicio.pendientes", {}],
     ] as const) {
