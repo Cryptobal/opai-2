@@ -12,6 +12,38 @@ Hasta el 24-oct-2026 este archivo fue la fuente de verdad del avance; desde ento
 > **Seguimiento QA PR #70 (OpenCode):** correcciones parciales H0, H1, H2, H3, H6, H8 y H10; sin decisiones de negocio nuevas. Gate y e2e pendientes por fallo de la base local de test en inserciones de auditoría (NOT NULL). Detalle en `briefs/NUCLEO-C-identidad-servicio.md`.
 
 > **NÚCLEO-C · Identidad de servicio para agentes y presupuesto atómico (27-oct-2026, rama `core/identidad-servicio-agentes`; P0 de la auditoría del núcleo del 26-oct-2026, Carlos t457u y decisión t461s2118; ADR-051).** Permisos finos por key (subconjunto de los efectivos del responsable, intersección en `autorizador`/`permisoDeKey`), principal `servicio` (sin dueño humano: permisos solo de la key, nunca hereda rol ni alcance, presupuesto obligatorio) y ledger mensual atómico (`core.gasto_agente_mes`, advisory lock por tenant/key, chequeo y consumo en la misma transacción; 20 cargos paralelos con tope 10 solo aceptan 10, probado en `test:db`). El costo ya incurrido con un proveedor (IA, mapas, correo, almacenamiento) se registra siempre aunque supere el tope de esa llamada (`yaIncurrido`, BRIEF-02 §4.9): antes se perdía sin trazabilidad y, al silenciarse el error, la siguiente llamada volvía a pasar aunque ya se hubiera excedido el gasto real; ahora la SIGUIENTE llamada corta en el prepago de `capacidad.ejecucion`. Si el tope cambia a mitad de período, los avisos del 80 %/100 % de ese período se reinician. Protección de rol base/promoción a owner por API key o agente (agregado del Revisor, review 5661003883 del #60). Script `seed:staging` (gard-staging) corregido: la fila se crea antes de escribir el secreto (un fallo de la base ya no deja un archivo huérfano que bloquee el reintento con `wx`) y la ruta del secreto se valida por segmentos de ruta con `realpath` (un directorio real llamado `..secret` ya no se confunde con una ruta fuera del repositorio); no se ejecutó contra ninguna base. UI en Configuración → Agentes con el DS 2.0 (tipo, permisos como subconjunto, presupuesto obligatorio para servicio, aviso de `*`); e2e `identidad-servicio.spec.ts` en verde a 375/1024/1280. Migración aditiva `20261028030000_identidad_servicio` (RLS, sin `BYPASSRLS`), aplicada solo en la base local de pruebas (`opai_e2e`), **no en Neon**. Decisiones pendientes de Carlos: revocar la key owner `*` de Gard, correr `seed:staging` en Neon y fijar el presupuesto de Grokbot dev.
+- **Seguimiento del #60 (rama `fix/roles-seguimiento`, PR #67, sin tarea en Linear):**
+  Correcciones QA H1–H4 implementadas por OpenCode según el encargo: fixture E2E autónoma con hash propio, Empresa en texto de lectura con DS 2.0, sensibilidad en texto y estado vacío acorde al permiso. Sin decisiones de negocio adicionales ni migraciones; e2e de roles y portal-sesión 6/6 tras el merge de main. Queda pendiente una auditoría independiente de contraste y foco.
+  I4/P4: el menú del ERP usa permisos efectivos (rol personalizado y excepciones), no el rol base.
+  P3: Dirección de Empresa respeta el modo lectura mediante `CampoDireccion` del DS 2.0.
+  **Decisión vigente t479u:** Carlos delegó «Velo tú, según eso y avanza» (26-oct-2026 22:06 CLT;
+  adenda del encargo confirma la decisión): Inspector DT recibe `core:estructuras.read_sensible`,
+  solo lectura, sin nuevas escrituras. Fundamento indicado en el encargo: art. 31 del DFL 2 de 1967,
+  Ley Orgánica de la DT, acceso a documentación necesaria para fiscalizar, incluidas remuneraciones;
+  enmascarar impediría la fiscalización. Cada revelación de montos sensibles queda auditada con actor,
+  fecha y estructura (historial: evento consultado); sin copiar montos y sin entregar datos si falla
+  la auditoría. El seed reconoce las versiones previas del Inspector y preserva conjuntos editados,
+  incluida una edición concurrente. El alcance de estructuras filtra puestos por instalación y
+  mantiene la negación de personas acotadas hasta 07b; la auditoría global se deniega a actores acotados.
+  Cargos oculta «Nuevo» y su hoja sin permiso de gestionar; no cambia el diseño aprobado ni los topes JS.
+  La ficha también deshabilita sensibilidad y oculta edición/versiones nuevas en lectura; ambas vías
+  de auditoría (`core.audit.list` y `core.actividad.list`) registran revelaciones y redactan sin permiso.
+  **Bloqueantes de la autorrevisión anterior, corregidos:** `core.estructuras.create` (nivel puesto o
+  persona) y `core.estructuras.anular` ya acotan la escritura al alcance del actor (`dondePuesto`/
+  `dondePersona`, `findFirst` en vez de `findUnique`, igual que las lecturas); fuera de alcance
+  responde `NOT_FOUND`, igual que "no existe" (sin enumeración; probado también con 5 llamadas en
+  paralelo). La respuesta de creación de una estructura sensible ahora audita la revelación (antes el
+  cálculo de `ocultarMontos` corría antes de tener el id de la fila recién creada y la auditoría se
+  saltaba en silencio). Tests nuevos: `estructuras-alcance-escritura(.test|-db.test).ts` y un caso en
+  `maestros-estructuras.test.ts`. **Bloqueante de la revisión 5662281692, corregido:** el merge de
+  main (#53, ADR-045) dejó `core.cargos.list` sin auditar la revelación sensible (conflicto semántico:
+  la consulta única pasó a usar `resumenSueldoDe`, puro, en vez de `ocultarMontos`); ahora audita con
+  `ocultarMontosDeCargo` (`estructuras-acceso.ts`), sin volver al N+1 que corrigió el #53. Detalle en
+  `briefs/BRIEF-roles-seguimiento.md`.
+  Gate tras traer main (merge `efe3322`, trae el PR #66 de Plataforma): 806 tests; `test:db` 68+56+6;
+  typecheck, lint, build, presupuesto y e2e 3/3 (375/1024/1280, servidor propio en 3106) en verde.
+  El rate limit usó respaldo en memoria en el e2e. Ver criterios y límites en
+  `briefs/BRIEF-roles-seguimiento.md`. No agrega migraciones.
 
 - **Plataforma sin acceso (encargo H4 de QA):** el aviso usa el texto solicitado en el encargo y la insignia se oculta sin acceso; se usa la guarda compartida también para la redirección. La cuenta autorizada predeterminada del e2e sigue siendo la semilla existente por compatibilidad con CI; puede sustituirse mediante `E2E_EMAIL`. Sin decisiones adicionales ni migraciones. Detalle y criterio parcial en `briefs/FIX-platform-sin-acceso-ui.md`.
 

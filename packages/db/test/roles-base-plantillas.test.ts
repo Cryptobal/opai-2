@@ -21,7 +21,12 @@ describe("decidirAccionRol (seed de roles plantilla)", () => {
   });
 
   it("actualiza el Inspector DT sembrado por una versión previa (I1): le faltaban sueldos y auditoría", () => {
-    const previo = ["core:tenant.read", "core:instalaciones.read", "core:personas.read", "core:documentos.read"];
+    const previo = [
+      "core:tenant.read",
+      "core:instalaciones.read",
+      "core:personas.read",
+      "core:documentos.read",
+    ];
     expect(decidirAccionRol({ permisos: previo }, inspector)).toBe("actualizar");
   });
 
@@ -43,5 +48,13 @@ describe("decidirAccionRol (seed de roles plantilla)", () => {
   it("el canónico del Inspector DT incluye sueldos y auditoría (decisión t74s350)", () => {
     expect(inspector.permisos).toContain("core:estructuras.read");
     expect(inspector.permisos).toContain("core:audit.read");
+  });
+
+  it("actualiza la versión del #60 a read_sensible sin conceder escrituras (t479u)", () => {
+    const previo = inspector.permisos.filter((p) => p !== "core:estructuras.read_sensible");
+    expect(decidirAccionRol({ permisos: previo }, inspector)).toBe("actualizar");
+    expect(inspector.permisos).toContain("core:estructuras.read_sensible");
+    expect(inspector.permisos.every((p) => /\.(read|read_sensible)$/.test(p))).toBe(true);
+    expect(decidirAccionRol({ permisos: inspector.permisos }, inspector)).toBe("ya-al-dia");
   });
 });
