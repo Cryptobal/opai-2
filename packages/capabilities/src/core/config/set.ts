@@ -30,6 +30,8 @@ export const configSet = defineCapability({
     if (!c) throw noEncontrado(`El ajuste ${input.modulo}.${input.clave}`);
     if (c.meta.ambito === "plataforma") throw prohibido("Este ajuste lo fija OPAI.");
     if (!puedeEditar(ctx, c)) throw prohibido("No tienes permiso para cambiar este ajuste.");
+    if (c.meta.soloPersonas && ctx.actor.tipo === "agent")
+      throw prohibido("Este ajuste lo cambia una persona, no un agente.");
     const reiniciar = input.valor === null;
     const r = reiniciar ? null : c.schema.safeParse(input.valor);
     if (r && !r.success)
