@@ -39,6 +39,9 @@ async function Contenido<T>({
     redirect("/platform");
   }
   const sinEmpresa = !identidad.actual && portal !== "platform";
+  const puedeElegir = identidad.membresias.some(
+    (m) => m.estado === "activa" && m.tenant.estado !== "suspendido",
+  );
   // Fase `datos` del `Server-Timing` (ADR-045): solo los datos de la página; el shell y su navegación
   // viven en el layout del portal (`PortalLayout`) y no se recargan por navegación.
   const datos = await medirFase("datos", () =>
@@ -51,7 +54,7 @@ async function Contenido<T>({
   return (
     <>
       <CabeceraPagina
-        {...cabecera}
+        {...(acceso ? cabecera : { titulo: "Sin permisos" })}
         generado={marcaGenerado()}
         epoca={epocaDeIdentidad(identidad)}
       />
@@ -69,7 +72,7 @@ async function Contenido<T>({
                 ? "Aún no perteneces a ninguna empresa activa. Pide una invitación a su administrador."
                 : "No tienes acceso a este portal en la empresa actual."
             }
-            {...(sinEmpresa
+            {...(sinEmpresa && puedeElegir
               ? {
                   accion: (
                     <EnlaceBoton href="/elegir-empresa" variante="secondary">
