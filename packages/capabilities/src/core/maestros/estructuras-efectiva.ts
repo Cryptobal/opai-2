@@ -11,7 +11,7 @@ import {
 import { defineCapability } from "../../define";
 import { noEncontrado, reglaDeNegocio } from "../../errores";
 import { uuidSchema } from "../esquemas";
-import { diaSchema, hoy } from "./comun";
+import { aFecha, diaSchema, hoy } from "./comun";
 import { itemsDe, ocultarMontos } from "./estructuras-acceso";
 import { dondeEstructura } from "./estructuras-alcance";
 import { aDominio, estructuraSchema, NIVELES, vistaEstructura } from "./estructuras-vista";
@@ -50,12 +50,17 @@ export const estructurasEfectiva = defineCapability({
         z.object({
           clave: z.string(),
           nombre: z.string(),
-           valores: z.object({ persona: z.unknown(), puesto: z.unknown(), cargo: z.unknown(), instalacion: z.unknown() }),
+          valores: z.object({
+            persona: z.unknown(),
+            puesto: z.unknown(),
+            cargo: z.unknown(),
+            instalacion: z.unknown(),
+          }),
           final: z.unknown(),
           origen: z.enum(NIVELES).nullable(),
         }),
       )
-      .describe("Concepto a concepto; valores null si no lo define el nivel o si son sensibles."),
+      .describe("Conceptos de una capa; null si son incompletos u ocultos."),
     haberes: z.record(z.string(), z.number()).nullable(),
   }),
   efecto: "lectura",
@@ -64,21 +69,37 @@ export const estructurasEfectiva = defineCapability({
     const fecha = input.fecha ?? hoy();
     await personaDe(ctx, input.personaId);
     if (input.puestoId) {
-      const puesto = await ctx.db.puesto.findFirst({ where: { id: input.puestoId, AND: [dondePuesto(ctx)] } });
+      const puesto = await ctx.db.puesto.findFirst({
+        where: { id: input.puestoId, AND: [dondePuesto(ctx)] },
+      });
       if (!puesto) throw noEncontrado("La referencia");
       if (input.instalacionId && puesto.instalacionId !== input.instalacionId)
         throw reglaDeNegocio("El puesto no pertenece a la instalación elegida.");
     }
-    if (input.instalacionId && !await ctx.db.instalacion.findFirst({
-      where: { id: input.instalacionId, AND: [dondeInstalacion(ctx)] },
-    })) throw noEncontrado("La referencia");
+    if (
+      input.instalacionId &&
+      !(await ctx.db.instalacion.findFirst({
+        where: { id: input.instalacionId, AND: [dondeInstalacion(ctx)] },
+      }))
+    )
+      throw noEncontrado("La referencia");
     const refs = [
       { nivel: "persona", personaId: input.personaId },
       ...(input.puestoId ? [{ nivel: "puesto", puestoId: input.puestoId }] : []),
-      ...(input.instalacionId ? [{ nivel: "instalacion", instalacionId: input.instalacionId }] : []),
+      ...(input.instalacionId
+        ? [{ nivel: "instalacion", instalacionId: input.instalacionId }]
+        : []),
     ];
     const filas = await ctx.db.estructuraSueldo.findMany({
-      where: { OR: refs, estado: "vigente", AND: [await dondeEstructura(ctx)] },
+      where: {
+        OR: refs,
+        estado: "vigente",
+        vigenteDesde: { lte: aFecha(fecha) },
+        AND: [
+          await dondeEstructura(ctx),
+          { OR: [{ vigenteHasta: null }, { vigenteHasta: { gte: aFecha(fecha) } }] },
+        ],
+      },
     });
     const items = await itemsDe(
       ctx,
@@ -93,7 +114,6 @@ export const estructurasEfectiva = defineCapability({
       instalacion: por("instalacion"),
     });
     const combinada = combinarPorConcepto(r.capas);
-    // Sensibilidad por fila (cargo, puesto o persona) y, si alguna lo exige, sin haberes.
     const ocultas = new Map(
       await Promise.all(filas.map(async (f) => [f.id, await ocultarMontos(ctx, f)] as const)),
     );

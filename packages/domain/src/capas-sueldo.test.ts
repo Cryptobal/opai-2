@@ -19,6 +19,17 @@ const estructura = (nivel: EstructuraCapa["nivel"]): EstructuraCapa => ({
 });
 
 describe("capas de sueldo sin herencia", () => {
+  it("los bonos históricos sin valor no se convierten en cero y se rechazan en capas nuevas", () => {
+    const e = {
+      ...estructura("persona"),
+      items: [{ nombre: "Turno", tipo: "bono_fijo" as const, monto: null, imponible: true }],
+    };
+    expect(resolverCapasSueldo("2026-07-01", { persona: [e] })).toMatchObject({
+      estado: "incompleta",
+      conceptosFaltantes: ["bono:Turno"],
+    });
+    expect(() => validarEstructuraCompleta(e)).toThrow("bono:Turno");
+  });
   it("elige persona, puesto e instalación en ese orden y respeta la vigencia", () => {
     const instalacion = estructura("instalacion");
     const puesto = estructura("puesto");

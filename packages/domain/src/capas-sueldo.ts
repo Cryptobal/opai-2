@@ -4,10 +4,18 @@ import { vigenteEn, type Estructura } from "./estructuras";
 export type CapaSueldo = "persona" | "puesto" | "instalacion";
 export type EstructuraCapa = Omit<Estructura, "nivel"> & { nivel: CapaSueldo };
 export type ConceptoFaltante =
-  "sueldoBase" | "colacion" | "movilizacion" | "gratificacion" | "gratificacionMonto";
+  | "sueldoBase"
+  | "colacion"
+  | "movilizacion"
+  | "gratificacion"
+  | "gratificacionMonto"
+  | `bono:${string}`;
 
-type Conceptos = Pick<EstructuraCapa,
-  "sueldoBase" | "colacion" | "movilizacion" | "gratificacion" | "gratificacionMonto">;
+type Conceptos = Pick<
+  EstructuraCapa,
+  "sueldoBase" | "colacion" | "movilizacion" | "gratificacion" | "gratificacionMonto"
+> &
+  Partial<Pick<EstructuraCapa, "items">>;
 
 export function conceptosFaltantes(e: Conceptos): ConceptoFaltante[] {
   const faltantes: ConceptoFaltante[] = [];
@@ -17,10 +25,16 @@ export function conceptosFaltantes(e: Conceptos): ConceptoFaltante[] {
   if (e.gratificacion === "monto_fijo" && e.gratificacionMonto == null) {
     faltantes.push("gratificacionMonto");
   }
+  for (const item of e.items ?? []) {
+    if ((item.tipo === "bono_fijo" ? item.monto : item.porcentaje) == null)
+      faltantes.push(`bono:${item.nombre}`);
+  }
   return faltantes;
 }
 
 export function validarEstructuraCompleta(e: Conceptos): void {
+  if (new Set((e.items ?? []).map((i) => i.nombre)).size !== (e.items ?? []).length)
+    throw new Error("Los bonos deben tener nombres únicos dentro de la capa.");
   const faltantes = conceptosFaltantes(e);
   if (faltantes.length) throw new Error(`Estructura incompleta: faltan ${faltantes.join(", ")}`);
 }

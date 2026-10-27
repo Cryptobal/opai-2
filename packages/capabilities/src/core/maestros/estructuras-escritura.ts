@@ -1,7 +1,7 @@
 import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
-import { reglaDeNegocio } from "../../errores";
+import { prohibido, reglaDeNegocio } from "../../errores";
 import { aFecha, dia, escribirConEvento } from "./comun";
 import { DIA_MS, entrada, referencia } from "./estructuras-ref";
 import { ocultarMontos } from "./estructuras-acceso";
@@ -21,77 +21,90 @@ export const estructurasCreate = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
+    if (ctx.rol !== "owner" && ctx.rol !== "admin")
+      throw prohibido("Solo owner y admin pueden cambiar capas de sueldo.");
     return ctx.transaccion(async (tx) => {
-    ctx = { ...ctx, db: tx, transaccion: (fn) => fn(tx) };
-    const ref = await referencia(ctx, input);
-    await bloquearCapa(tx, ctx.tenantId, input.nivel, ref.id);
-    const desde = aFecha(input.vigenteDesde);
-    const vigentes = await ctx.db.estructuraSueldo.findMany({
-      where: { nivel: input.nivel, [ref.campo]: ref.id, estado: "vigente" },
-    });
-    const posterior = vigentes.find((v) => v.vigenteDesde >= desde);
-    if (posterior) {
-      throw reglaDeNegocio(
-        `Ya hay una versión vigente desde ${dia(posterior.vigenteDesde)}: anúlala o usa una fecha posterior.`,
+      ctx = { ...ctx, db: tx, transaccion: (fn) => fn(tx) };
+      const ref = await referencia(ctx, input);
+      await bloquearCapa(tx, ctx.tenantId, input.nivel, ref.id);
+      const desde = aFecha(input.vigenteDesde);
+      const vigentes = await ctx.db.estructuraSueldo.findMany({
+        where: { nivel: input.nivel, [ref.campo]: ref.id, estado: "vigente" },
+      });
+      const posterior = vigentes.find((v) => v.vigenteDesde >= desde);
+      if (posterior) {
+        throw reglaDeNegocio(
+          `Ya hay una versión vigente desde ${dia(posterior.vigenteDesde)}: anúlala o usa una fecha posterior.`,
+        );
+      }
+      const abierta = vigentes.find((v) => !v.vigenteHasta || v.vigenteHasta >= desde);
+      const items = input.items;
+      const data = {
+        nivel: input.nivel,
+        ...ref.refs,
+        ...ref.conceptos,
+        gratificacionMonto: input.gratificacionMonto ?? null,
+        motivo: input.motivo ?? null,
+        vigenteDesde: desde,
+        estado: "vigente",
+      };
+      const impacto = await impactoCambio(
+        ctx,
+        input.nivel,
+        ref.id,
+        input.vigenteDesde,
+        abierta,
+        data,
+        items,
       );
-    }
-    const abierta = vigentes.find((v) => !v.vigenteHasta || v.vigenteHasta >= desde);
-    const items = input.items;
-    const data = {
-      nivel: input.nivel,
-      ...ref.refs,
-      ...ref.conceptos,
-      gratificacionMonto: input.gratificacionMonto ?? null,
-      motivo: input.motivo ?? null,
-      vigenteDesde: desde,
-      estado: "vigente",
-    };
-    const impacto = await impactoCambio(ctx, input.nivel, ref.id, input.vigenteDesde, abierta, data);
-    if (dryRun) {
-      // Sin fila persistida todavía: `ocultarMontos` no tiene id que auditar (nada se reveló aún).
-      return { ...vistaEstructura({ ...data, id: "" }, items, await ocultarMontos(ctx, data)), impacto };
-    }
-    const e = await escribirConEvento(
-      ctx,
-      {
-        tipo: "core.estructura.creada",
-        entidadTipo: "estructura",
-        payload: () => ({
-          nivel: input.nivel,
-          ref: ref.id,
-          desde: input.vigenteDesde,
-          cierra: abierta?.id ?? null,
-        }),
-      },
-      async (tx) => {
-        if (abierta) {
-          await tx.estructuraSueldo.update({
-            where: { id: abierta.id },
-            data: { vigenteHasta: new Date(desde.getTime() - DIA_MS) },
+      if (dryRun) {
+        // Sin fila persistida todavía: `ocultarMontos` no tiene id que auditar (nada se reveló aún).
+        return {
+          ...vistaEstructura({ ...data, id: "" }, items, await ocultarMontos(ctx, data)),
+          impacto,
+        };
+      }
+      const e = await escribirConEvento(
+        ctx,
+        {
+          tipo: "core.estructura.creada",
+          entidadTipo: "estructura",
+          payload: () => ({
+            nivel: input.nivel,
+            ref: ref.id,
+            desde: input.vigenteDesde,
+            cierra: abierta?.id ?? null,
+          }),
+        },
+        async (tx) => {
+          if (abierta) {
+            await tx.estructuraSueldo.update({
+              where: { id: abierta.id },
+              data: { vigenteHasta: new Date(desde.getTime() - DIA_MS) },
+            });
+          }
+          const nueva = await tx.estructuraSueldo.create({
+            data: { ...data, tenantId: ctx.tenantId, creadoPor: ctx.usuario?.id ?? null },
           });
-        }
-        const nueva = await tx.estructuraSueldo.create({
-          data: { ...data, tenantId: ctx.tenantId, creadoPor: ctx.usuario?.id ?? null },
-        });
-        for (const [orden, i] of items.entries()) {
-          await tx.estructuraItem.create({
-            data: {
-              ...i,
-              monto: i.monto ?? null,
-              porcentaje: i.porcentaje ?? null,
-              orden,
-              tenantId: ctx.tenantId,
-              estructuraId: nueva.id,
-            },
-          });
-        }
-        return nueva;
-      },
-    );
-    // Recién con `e.id` (la fila ya persistida) `ocultarMontos` puede auditar la revelación: la
-    // respuesta de creación entrega los mismos montos sensibles que un `get`, así que queda trazada
-    // igual (quién, cuándo, qué).
-    return { ...vistaEstructura(e, items, await ocultarMontos(ctx, e)), impacto };
+          for (const [orden, i] of items.entries()) {
+            await tx.estructuraItem.create({
+              data: {
+                ...i,
+                monto: i.monto ?? null,
+                porcentaje: i.porcentaje ?? null,
+                orden,
+                tenantId: ctx.tenantId,
+                estructuraId: nueva.id,
+              },
+            });
+          }
+          return nueva;
+        },
+      );
+      // Recién con `e.id` (la fila ya persistida) `ocultarMontos` puede auditar la revelación: la
+      // respuesta de creación entrega los mismos montos sensibles que un `get`, así que queda trazada
+      // igual (quién, cuándo, qué).
+      return { ...vistaEstructura(e, items, await ocultarMontos(ctx, e)), impacto };
     });
   },
 });

@@ -47,7 +47,12 @@ type Entrada = z.output<typeof entrada>;
 
 /** Valida que venga exactamente la referencia del nivel y que exista. */
 export async function referencia(ctx: Contexto, e: Entrada) {
-  const refs = { cargo: e.cargoId, puesto: e.puestoId, persona: e.personaId, instalacion: e.instalacionId };
+  const refs = {
+    cargo: e.cargoId,
+    puesto: e.puestoId,
+    persona: e.personaId,
+    instalacion: e.instalacionId,
+  };
   const otras = Object.entries(refs).filter(([n, v]) => n !== e.nivel && v);
   const id = refs[e.nivel];
   if (!id || otras.length) throw reglaDeNegocio(`Nivel "${e.nivel}": envía solo ${e.nivel}Id.`);
@@ -64,7 +69,15 @@ export async function referencia(ctx: Contexto, e: Entrada) {
   if (!existe) throw noEncontrado(`La referencia de nivel ${e.nivel}`);
   if (e.nivel !== "cargo") {
     try {
-      validarEstructuraCompleta({ ...conceptosDe(e), gratificacionMonto: e.gratificacionMonto ?? null });
+      validarEstructuraCompleta({
+        ...conceptosDe(e),
+        gratificacionMonto: e.gratificacionMonto ?? null,
+        items: e.items.map((i) => ({
+          ...i,
+          monto: i.monto ?? null,
+          porcentaje: i.porcentaje ?? null,
+        })),
+      });
     } catch (error) {
       throw reglaDeNegocio(error instanceof Error ? error.message : "Estructura incompleta.");
     }

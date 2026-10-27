@@ -82,7 +82,7 @@ export function accionesPersona(p: PersonaDetalle): AccionEntidad[] {
   ];
 }
 
-export type TabPersona = "resumen" | "laboral" | "documentos" | "actividad";
+export type TabPersona = "resumen" | "laboral" | "sueldo" | "documentos" | "actividad";
 
 /** Ficha de una persona (11/12): avatar, estado, nombre, "cargo · RUT"; tabs por ruta. */
 export function FichaPersona(x: {
@@ -130,6 +130,7 @@ export function FichaPersona(x: {
         tabs={[
           { id: "resumen", etiqueta: "Resumen", href: `${base}${q}` },
           { id: "laboral", etiqueta: "Laboral", href: `${base}/laboral${q}` },
+          { id: "sueldo", etiqueta: "Sueldo", href: `${base}/sueldo${q}` },
           {
             id: "documentos",
             etiqueta: "Documentos",
