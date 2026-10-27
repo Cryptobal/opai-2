@@ -17,7 +17,7 @@ export default function Consumos() {
       portal="platform"
       titulo="Consumos"
       ruta="/platform/consumos"
-      insignia={<Superadmin />}
+      opciones={() => ({ insignia: <Superadmin /> })}
       cargar={async () => {
         const r = await ejecutarComoUsuario<Fila[]>("platform", "platform.consumos.summary", {
           dias: 30,
