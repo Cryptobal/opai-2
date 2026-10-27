@@ -20,6 +20,16 @@ o `nomina:*` solo si el usuario los necesita. Los cinco roles personalizados («
 
 ## Principios (no se rompen)
 
+**Seguimiento del #60 — decisión vigente t479u.** Carlos delegó la resolución normativa con
+«Velo tú, según eso y avanza» (26-oct-2026 22:06 CLT, t479u; ratificada en la adenda del encargo).
+El art. 31 del DFL 2 de 1967 (Ley Orgánica de la Dirección del Trabajo) faculta a los funcionarios
+del trabajo para requerir la documentación necesaria para fiscalizar, incluidas las remuneraciones.
+Por eso **Inspector DT recibe `core:estructuras.read_sensible`**: ve los montos completos,
+sin enmascarar, sin permisos nuevos de escritura. Cada revelación sensible se registra en
+`core.audit_events` con actor, fecha y estructura; el historial de remuneraciones también deja
+traza del evento consultado. La auditoría no duplica los montos y, si falla, no se devuelve la lectura.
+La decisión sustituye las respuestas contradictorias t78s373 y t468s2146 indicadas en el encargo.
+
 - **Finanzas y nómina nacen bloqueadas.** `finanzas:*` y `nomina:*` solo los tienen owner y admin
   (bloqueo financiero de ADR-016, heredado de `applyFinancialRoleLock` de 1.0). Gerente, supervisor,
   viewer y los roles personalizados nacen **sin** ellos. El **owner o el admin** pueden concederlos
@@ -67,7 +77,9 @@ tenant**: crea los que faltan y actualiza al conjunto canónico solo los roles q
 que el tenant no editó (detecta un conjunto de permisos previo conocido; cualquier otro conjunto se
 considera editado y se deja intacto). Así un «Inspector DT» sembrado antes de la decisión t74s350
 —sin sueldos ni auditoría— se completa al correr de nuevo, sin tocar los roles que el tenant ya
-ajustó (I1 de la QA del PR #60). El seed **se niega a correr en producción** (solo `dev`/`test`,
+ajustó (I1 de la QA del PR #60). También reconoce el conjunto del #60, con sueldos y auditoría pero
+sin `read_sensible`, y lo actualiza a t479u. La actualización compara los permisos en la misma
+escritura para no pisar una edición concurrente del tenant. El seed **se niega a correr en producción** (solo `dev`/`test`,
 igual que `seed:e2e`). Son roles
 normales (`sistema = false`): el owner o el admin los puede ajustar. Permisos del catálogo del Núcleo;
 los de los módulos (Operaciones, Rondas, Asistencia/DT, Nómina, Finanzas) se agregan cuando esos
@@ -77,7 +89,7 @@ los concede con `core.excepciones.set` o editando el rol, sin conceder más de l
 | Rol | Permisos del catálogo core |
 |---|---|
 | **Central de monitoreo** | `core:tenant.read`, `core:cuentas.read`, `core:instalaciones.read`, `core:personas.read`, `core:documentos.read` |
-| **Inspector DT** | `core:tenant.read`, `core:instalaciones.read`, `core:personas.read`, `core:documentos.read`, `core:estructuras.read`, `core:audit.read` |
+| **Inspector DT** | `core:tenant.read`, `core:instalaciones.read`, `core:personas.read`, `core:documentos.read`, `core:estructuras.read`, `core:estructuras.read_sensible`, `core:audit.read` |
 | **RRHH** | `core:tenant.read`, `core:personas.read`, `core:documentos.read` |
 | **Finanzas** | `core:tenant.read`, `core:cuentas.read`, `core:documentos.read` |
 | **Payroll** | `core:tenant.read`, `core:personas.read`, `core:estructuras.read` |

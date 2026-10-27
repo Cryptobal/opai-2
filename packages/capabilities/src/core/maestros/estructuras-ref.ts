@@ -3,6 +3,7 @@ import { z } from "zod";
 import { noEncontrado, reglaDeNegocio } from "../../errores";
 import type { Contexto } from "../../types";
 import { uuidSchema } from "../esquemas";
+import { dondePersona, dondePuesto } from "./alcance";
 import { diaSchema } from "./comun";
 import { itemInput, NIVELES } from "./estructuras-vista";
 
@@ -47,12 +48,14 @@ export async function referencia(ctx: Contexto, e: Entrada) {
   const otras = Object.entries(refs).filter(([n, v]) => n !== e.nivel && v);
   const id = refs[e.nivel];
   if (!id || otras.length) throw reglaDeNegocio(`Nivel "${e.nivel}": envía solo ${e.nivel}Id.`);
+  // El catálogo de cargos es del tenant (sin alcance); puesto y persona se acotan por instalación,
+  // igual que en lectura (`dondeEstructura`): fuera de alcance = no encontrado (ADR-022, §16.4).
   const existe =
     e.nivel === "cargo"
       ? await ctx.db.cargo.findUnique({ where: { id } })
       : e.nivel === "puesto"
-        ? await ctx.db.puesto.findUnique({ where: { id } })
-        : await ctx.db.persona.findUnique({ where: { id } });
+        ? await ctx.db.puesto.findFirst({ where: { id, AND: [dondePuesto(ctx)] } })
+        : await ctx.db.persona.findFirst({ where: { id, AND: [dondePersona(ctx)] } });
   if (!existe) throw noEncontrado(`La referencia de nivel ${e.nivel}`);
   if (e.nivel === "persona" && !e.motivo)
     throw reglaDeNegocio("Una excepción por persona exige motivo.");

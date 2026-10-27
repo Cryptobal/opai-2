@@ -34,6 +34,8 @@ type Props = {
   sinMapa?: boolean;
   /** Falla del servicio de mapas (o de la búsqueda): se muestra en el campo, nunca se oculta. */
   error?: string | null;
+  /** Solo lectura: el control no se puede editar (sin autocompletar ni escritura a mano). */
+  disabled?: boolean;
 };
 
 /**
@@ -50,6 +52,7 @@ export function CampoDireccion({
   fuenteMapa,
   sinMapa,
   error,
+  disabled = false,
 }: Props) {
   const [manual, setManual] = useState(false);
   // Elegida la sugerencia y hasta que llega su detalle (2–4 s), el campo conserva su texto y el
@@ -76,6 +79,7 @@ export function CampoDireccion({
           onChange={(e) => cambiar("calle", e.target.value)}
           placeholder="Calle y número"
           aria-label="Calle y número"
+          disabled={disabled}
         />
         <div className="grid grid-cols-2 gap-2">
           <Input
@@ -84,6 +88,7 @@ export function CampoDireccion({
             onChange={(e) => cambiar("comuna", e.target.value)}
             placeholder="Comuna"
             aria-label="Comuna"
+            disabled={disabled}
           />
           <Input
             id={`${base}-region`}
@@ -91,11 +96,14 @@ export function CampoDireccion({
             onChange={(e) => cambiar("region", e.target.value)}
             placeholder="Región"
             aria-label="Región"
+            disabled={disabled}
           />
         </div>
-        <Button variant="ghost" className="self-start" onClick={() => setManual(false)}>
-          Buscar la dirección
-        </Button>
+        {disabled ? null : (
+          <Button variant="ghost" className="self-start" onClick={() => setManual(false)}>
+            Buscar la dirección
+          </Button>
+        )}
       </div>
     );
   }
@@ -111,6 +119,7 @@ export function CampoDireccion({
               : []
         }
         valor={pendiente?.placeId ?? valor?.placeId ?? null}
+        disabled={disabled}
         placeholder={valor?.calle || "Busca la dirección"}
         buscarPlaceholder="Calle y número"
         textoInicial="Escribe calle y número"
@@ -148,9 +157,11 @@ export function CampoDireccion({
           {...(valor?.comuna ? { pie: valor.comuna } : {})}
         />
       )}
-      <Button variant="ghost" className="self-start" onClick={() => setManual(true)}>
-        <Pencil className="size-4" aria-hidden /> Escribir a mano
-      </Button>
+      {disabled ? null : (
+        <Button variant="ghost" className="self-start" onClick={() => setManual(true)}>
+          <Pencil className="size-4" aria-hidden /> Escribir a mano
+        </Button>
+      )}
     </div>
   );
 }
