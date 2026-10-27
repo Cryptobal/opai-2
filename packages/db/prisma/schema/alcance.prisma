@@ -1,0 +1,24 @@
+// Alcance por filas del supervisor (ADR-022, Brief 07c B3). El supervisor se vincula por su
+// membresía (su usuario); una API key del mismo usuario hereda el alcance (ADR-033). Lleva tenant_id
+// y RLS `tenant_isolation`; las referencias se validan del mismo tenant (trigger mismo_tenant).
+
+/// Instalación a cargo de un supervisor. El alcance de cuentas, instalaciones, puestos y personas se
+/// deriva de estas filas; sin ninguna, el supervisor no ve nada (denegar por defecto, §16.4).
+model SupervisorInstalacion {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  membershipId  String   @map("membership_id") @db.Uuid
+  instalacionId String   @map("instalacion_id") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant      Tenant      @relation(fields: [tenantId], references: [id])
+  membership  Membership  @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  instalacion Instalacion @relation(fields: [instalacionId], references: [id], onDelete: Cascade)
+
+  @@unique([membershipId, instalacionId])
+  @@index([tenantId])
+  @@index([instalacionId])
+  @@map("supervisor_instalaciones")
+  @@schema("core")
+}

@@ -20,6 +20,7 @@ import {
 import type {
   Actor,
   AgenteContexto,
+  Alcance,
   Auditoria,
   Contexto,
   EventoAuditoria,
@@ -68,6 +69,8 @@ export type ParametrosContexto = {
   modulosActivos?: readonly string[];
   scopes?: readonly string[] | null;
   principal?: Principal | null;
+  /** Alcance por filas del actor (null = ve todo). Lo resuelve el borde una vez (ADR-022, ADR-045). */
+  alcance?: Alcance | null;
   agente?: AgenteContexto | null;
   medidor?: Medidor;
   /** Trabajo diferido (el borde usa `after()`). Por defecto, sin esperar y sin romper. */
@@ -106,6 +109,7 @@ export function crearContexto(params: ParametrosContexto): Contexto {
     modulosActivos: params.modulosActivos ?? [],
     scopes: params.scopes ?? null,
     principal: params.principal ?? null,
+    alcance: params.alcance ?? null,
     agente: params.agente ?? null,
     db: forTenant(tenantId),
     transaccion: transaccionEnDb(tenantId),

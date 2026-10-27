@@ -57,4 +57,8 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: asignar un rol a un usuario gobierna su acceso (ADR-034).",
   "core.excepciones.set":
     "Solo personas: conceder o denegar permisos puntuales es gobierno de acceso (ADR-034).",
+  "core.supervisores.asignar":
+    "Solo personas: fijar el alcance de un supervisor gobierna su acceso; un agente no lo hace (ADR-034).",
+  "core.supervisores.quitar":
+    "Solo personas: quitar instalaciones del alcance de un supervisor gobierna su acceso (ADR-034).",
 };

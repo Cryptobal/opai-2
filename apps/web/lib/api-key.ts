@@ -1,6 +1,7 @@
 import { crearContexto, hashApiKey, slugDeApiKey, type Contexto } from "@opai/capabilities";
 import { esRol, esRolPlataforma } from "@opai/domain";
 
+import { alcanceDe } from "./actor";
 import { fuentesReales, type Fuentes } from "./fuentes";
 import { noAutenticado } from "./respuestas";
 import { despacharDiferido, diferirConAfter, medidorDiferido } from "./medidor";
@@ -58,6 +59,8 @@ export async function contextoDeApiKey(
     rol: membresia.rol,
     permisosRol: acceso.permisosRol,
     excepciones: acceso.excepciones,
+    // La key hereda el alcance por filas de su responsable (ADR-033).
+    alcance: alcanceDe(acceso.instalaciones),
     portal: null,
     modulosActivos: await fuentes.modulosActivos(tenant.id),
     scopes: fila.scopes,

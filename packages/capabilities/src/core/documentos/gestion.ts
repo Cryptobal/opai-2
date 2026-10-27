@@ -15,12 +15,17 @@ import {
   opcionalAFecha,
   textoOpcional,
 } from "../maestros/comun";
+import { documentosEnAlcance } from "./alcance-doc";
 import { esDocCumplimiento, puedeVerCumplimiento } from "./sensibles";
 import { documentoSchema, vistaDocumento } from "./vista";
 
 export async function disponible(ctx: Contexto, id: string) {
   const d = await ctx.db.documento.findUnique({ where: { id } });
   if (!d || d.estado === "pendiente") throw noEncontrado("El documento");
+  // Alcance por filas (ADR-022): un actor acotado solo accede a los documentos de sus entidades a
+  // cargo. Vale para descargar, actualizar y archivar: el filtro va en la consulta, nunca en la UI.
+  const permitidos = await documentosEnAlcance(ctx);
+  if (permitidos && !permitidos.includes(d.id)) throw noEncontrado("El documento");
   const tipo = d.tipoId ? await ctx.db.documentoTipo.findUnique({ where: { id: d.tipoId } }) : null;
   return { d, tipo };
 }

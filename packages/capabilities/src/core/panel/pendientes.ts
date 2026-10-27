@@ -4,6 +4,7 @@ import { estadoVigencia, PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import { obtenerCapacidad } from "../../registry";
+import { documentosEnAlcance } from "../documentos/alcance-doc";
 import { dia, hoy } from "../maestros/comun";
 
 const pendienteSchema = z.object({
@@ -55,8 +56,14 @@ export const inicioPendientes = defineCapability({
     }
     if (ctx.autorizar(PERMISOS_CORE.documentosRead)) {
       const limite = new Date(ahora.getTime() + 30 * 86_400_000);
+      // Alcance por filas (ADR-022): un actor acotado solo cuenta documentos de entidades a su cargo.
+      const permitidos = await documentosEnAlcance(ctx);
       const docs = await ctx.db.documento.findMany({
-        where: { estado: "disponible", venceEn: { lte: limite } },
+        where: {
+          estado: "disponible",
+          venceEn: { lte: limite },
+          ...(permitidos ? { id: { in: [...permitidos] } } : {}),
+        },
         select: { venceEn: true },
       });
       const estados = docs.map((d) => estadoVigencia(dia(d.venceEn), hoy(), 30));
