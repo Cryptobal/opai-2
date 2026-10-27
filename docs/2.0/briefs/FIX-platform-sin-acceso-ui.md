@@ -14,3 +14,10 @@ el DS existente, sin cambiar permisos de capacidades, consultas, migraciones ni 
   queda parcial: CI no siembra otra cuenta autorizada y no se modifican workflows.
 
 No hay decisiones de negocio adicionales. QA posterior en `test.opai.cl` queda pendiente.
+
+## Seguimiento de revisión 5662267950 y QA del PR #69
+
+- El test importa el actor después de fijar una URL ficticia, y pasa sin `DATABASE_URL` externa.
+- La insignia llega por `opciones`, como en las páginas; se comprueba para `owner` y `support`, con y sin empresa, y se mantiene la prueba negativa sin rol global.
+- Los criterios anteriores se mantienen; la cuenta predeterminada del e2e sigue siendo el criterio parcial indicado arriba. No se cambia la guarda ni se toman decisiones nuevas.
+- QA en vivo posterior al merge y accesibilidad visual integral siguen pendientes; el e2e local cubre los tres tamaños, pero no reemplaza esa revisión.
