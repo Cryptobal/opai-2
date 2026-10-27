@@ -3,6 +3,7 @@ import { programarPeriodicos } from "@opai/capabilities";
 
 import { autorizarCron, hoyEn, porTenant } from "@/lib/cron";
 import { contextoSistema } from "@/lib/medidor";
+import { purgarVentanas } from "@/lib/rate-limit";
 
 export const maxDuration = 60;
 
@@ -30,6 +31,16 @@ export async function GET(req: Request): Promise<Response> {
   } catch {
     console.error("[cron programador] falló la purga de intentos de login");
   }
-  const ok = !errorTenants && intentosLoginPurgados !== null;
-  return Response.json({ ok, resultados, intentosLoginPurgados }, { status: ok ? 200 : 500 });
+  // Purga de las ventanas de rate limit vencidas (NÚCLEO-B). Global y aislada, como la de login.
+  let ventanasRatePurgadas: number | null = null;
+  try {
+    ventanasRatePurgadas = await purgarVentanas();
+  } catch {
+    console.error("[cron programador] falló la purga de ventanas de rate limit");
+  }
+  const ok = !errorTenants && intentosLoginPurgados !== null && ventanasRatePurgadas !== null;
+  return Response.json(
+    { ok, resultados, intentosLoginPurgados, ventanasRatePurgadas },
+    { status: ok ? 200 : 500 },
+  );
 }

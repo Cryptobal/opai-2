@@ -6,6 +6,16 @@ import type * as RutaMod from "../app/api/v1/[...capability]/route";
 import type * as ActorMod from "../lib/actor";
 import { fuentesFalsas, USUARIO } from "./fuentes-falsas";
 
+// El rate limit central usa la base; aquí se simula (siempre permite) para probar solo la autenticación.
+vi.mock("@/lib/rate-limit", () => ({
+  permitir: async () => true,
+  ipDe: () => "1.2.3.4",
+  LIMITES: {
+    apiPorPrincipal: { maximo: 120, ventanaMs: 60_000 },
+    apiPorIp: { maximo: 240, ventanaMs: 60_000 },
+  },
+}));
+
 vi.stubEnv("DATABASE_URL", "postgresql://opai_app:x@localhost:5432/opai");
 vi.stubEnv("BETTER_AUTH_SECRET", "secreto-de-prueba-de-al-menos-32-caracteres");
 let ruta: typeof RutaMod;

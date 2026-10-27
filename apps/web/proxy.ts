@@ -13,6 +13,9 @@ async function noExiste(request: NextRequest): Promise<boolean> {
   if (!documento || !consultaDeRuta(pathname)) return false;
   try {
     const r = await fetch(`${origin}/api/existe?ruta=${encodeURIComponent(pathname)}`, {
+      // Se reenvía la cookie para que `/api/existe` resuelva la sesión: el rate limit de esa ruta cuenta
+      // por usuario, no por IP (el `fetch` interno sale con una sola IP de Vercel, y una cabecera de IP
+      // sería falsificable por quien la golpee directo). NÚCLEO-B.
       headers: { cookie: request.headers.get("cookie") ?? "" },
       signal: AbortSignal.timeout(4000),
     });
