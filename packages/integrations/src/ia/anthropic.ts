@@ -68,8 +68,11 @@ async function* streamAnthropic(
     if (ev.type === "error")
       throw new ErrorIa("Anthropic", null, "Anthropic: el stream reportó un error.");
     if (ev.type === "message_stop") termino = true;
-    else if (ev.type === "message_start") entrada = ev.message?.usage?.input_tokens ?? 0;
-    else if (ev.type === "content_block_start" && ev.content_block?.type === "tool_use")
+    else if (ev.type === "message_start") {
+      entrada = ev.message?.usage?.input_tokens ?? 0;
+      // Uso parcial ya conocido: permite medir la entrada aunque el stream se corte antes del fin.
+      yield { tipo: "uso", uso: { tokensEntrada: entrada, tokensSalida: salida } };
+    } else if (ev.type === "content_block_start" && ev.content_block?.type === "tool_use")
       bloques.set(ev.index ?? 0, { id: ev.content_block.id ?? "", nombre: ev.content_block.name ?? "", json: "" });
     else if (ev.type === "content_block_delta" && ev.delta?.type === "text_delta") {
       texto += ev.delta.text ?? "";
@@ -90,6 +93,7 @@ async function* streamAnthropic(
       }
     } else if (ev.type === "message_delta") {
       salida = ev.usage?.output_tokens ?? salida;
+      yield { tipo: "uso", uso: { tokensEntrada: entrada, tokensSalida: salida } };
       if (ev.delta?.stop_reason) {
         razon = motivo(ev.delta.stop_reason);
         termino = true;

@@ -117,8 +117,12 @@ async function* streamGoogle(
   const llamadas: LlamadaHerramienta[] = [];
   for await (const payload of leerSSE(r, "Google")) {
     const d = JSON.parse(payload) as RespG;
-    entrada = d.usageMetadata?.promptTokenCount ?? entrada;
-    salida = d.usageMetadata?.candidatesTokenCount ?? salida;
+    if (d.usageMetadata) {
+      entrada = d.usageMetadata.promptTokenCount ?? entrada;
+      salida = d.usageMetadata.candidatesTokenCount ?? salida;
+      // Uso parcial ya conocido: permite medir aunque el stream se corte antes del fin (ADR-049).
+      yield { tipo: "uso", uso: { tokensEntrada: entrada, tokensSalida: salida } };
+    }
     const cand = d.candidates?.[0];
     for (const p of cand?.content?.parts ?? []) {
       if (p.text) {

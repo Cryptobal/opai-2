@@ -79,6 +79,8 @@ async function* streamOpenai(
     if (ev.usage) {
       entrada = ev.usage.prompt_tokens ?? entrada;
       salida = ev.usage.completion_tokens ?? salida;
+      // Uso parcial ya conocido: permite medir aunque el stream se corte antes del fin (ADR-049).
+      yield { tipo: "uso", uso: { tokensEntrada: entrada, tokensSalida: salida } };
     }
     const choice = ev.choices?.[0];
     if (choice?.delta?.content) {

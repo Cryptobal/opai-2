@@ -14,12 +14,34 @@ describe("defensa SSRF del baseUrl de IA (ADR-027, ADR-049)", () => {
       expect(ipInterna(ip)).toBe(false);
   });
 
+  it("ipInterna clasifica las IPv6 en binario: mapped/compatible hex, todo fe80::/10, site-local, ULA, NAT64, unspecified y multicast", () => {
+    for (const ip of [
+      "::ffff:7f00:1", // 127.0.0.1 IPv4-mapped en forma hexadecimal
+      "::ffff:a9fe:a9fe", // 169.254.169.254 (metadata) IPv4-mapped en hexadecimal
+      "::7f00:1", // 127.0.0.1 IPv4-compatible
+      "fe90::1", // fe80::/10 (fuera del prefijo fe80 literal)
+      "febf::1", // fe80::/10 (tope del prefijo)
+      "fec0::1", // site-local fec0::/10
+      "fd00::1", // ULA fc00::/7
+      "fc00::1", // ULA fc00::/7
+      "64:ff9b::7f00:1", // NAT64 64:ff9b::/96
+      "::", // unspecified
+      "ff02::1", // multicast
+    ])
+      expect(ipInterna(ip), ip).toBe(true);
+    // IPv6 pública válida (DNS de Cloudflare): no es interna.
+    expect(ipInterna("2606:4700:4700::1111")).toBe(false);
+  });
+
   it("baseUrlEsPublica exige https y rechaza hosts internos evidentes", () => {
     expect(baseUrlEsPublica("https://api.openai.com/v1")).toBe(true);
     expect(baseUrlEsPublica("https://gateway.ai.vercel.app/v1")).toBe(true);
     expect(baseUrlEsPublica("http://api.openai.com/v1")).toBe(false); // no https
     expect(baseUrlEsPublica("https://localhost/v1")).toBe(false);
+    expect(baseUrlEsPublica("https://localhost./v1")).toBe(false); // punto final (FQDN raíz)
     expect(baseUrlEsPublica("https://127.0.0.1/v1")).toBe(false);
+    expect(baseUrlEsPublica("https://[::ffff:7f00:1]/v1")).toBe(false); // 127.0.0.1 hexadecimal
+    expect(baseUrlEsPublica("https://[fec0::1]/v1")).toBe(false); // site-local
     expect(baseUrlEsPublica("https://169.254.169.254/latest/meta-data")).toBe(false);
     expect(baseUrlEsPublica("https://10.1.2.3/v1")).toBe(false);
     expect(baseUrlEsPublica("https://[::1]/v1")).toBe(false);

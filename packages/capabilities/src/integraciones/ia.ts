@@ -8,7 +8,6 @@ import {
   type ClaseTarea,
   ErrorIa,
   type EventoStream,
-  MODELOS_POR_DEFECTO,
   type ProveedorIaId,
   proveedorIa,
   type RespuestaConversacion,
@@ -17,51 +16,17 @@ import {
   type Uso,
 } from "@opai/integrations";
 
-import { ajuste } from "../core/config/valores";
 import type { Contexto } from "../types";
 import { consumoBase } from "./consumo-base";
-import { type Candidato, conRespaldo, type FalloProveedor, finDeCadena } from "./ia-respaldo";
-import { credencialDe, integracionDe } from "./resolver";
-
-const ORDEN_IA: readonly ProveedorIaId[] = [
-  "ia_anthropic",
-  "ia_openai",
-  "ia_google",
-  "ia_xai",
-  "ia_compatible",
-];
-
-type ConfigIa = { modelos?: Partial<Record<ClaseTarea, string>>; baseUrl?: string };
-
-/** Proveedores de IA conectados por el tenant, en orden de preferencia, con modelo resuelto. */
-async function candidatosIa(
-  ctx: Contexto,
-  clase: ClaseTarea,
-  solo?: ProveedorIaId,
-): Promise<Candidato[]> {
-  const plataforma = (
-    await ajuste<Record<ClaseTarea, { proveedor: string; modelo: string }>>(ctx, "core", "ia_modelos")
-  )[clase];
-  const out: Candidato[] = [];
-  for (const id of solo ? [solo] : ORDEN_IA) {
-    const cred = await credencialDe(ctx, id);
-    if (!cred) continue;
-    const fila = await integracionDe(ctx, id);
-    const config = (fila?.config ?? {}) as ConfigIa;
-    const modelo =
-      config.modelos?.[clase] ??
-      (plataforma?.proveedor === id ? plataforma.modelo : undefined) ??
-      MODELOS_POR_DEFECTO[id]?.[clase];
-    if (!modelo) continue;
-    if (id === "ia_compatible" && !config.baseUrl) continue;
-    out.push({ id, modelo, cred, ...(config.baseUrl ? { baseUrl: config.baseUrl } : {}) });
-  }
-  // Política BYOK (Carlos, 26-oct-2026 21:58 CLT, t214s684): si el tenant tiene key propia, la cadena
-  // de respaldo solo usa keys propias; nunca la de OPAI. No aplica al probar un proveedor concreto.
-  if (!solo && out.some((c) => c.cred.modalidad === "propia"))
-    return out.filter((c) => c.cred.modalidad === "propia");
-  return out;
-}
+import { candidatosIa } from "./ia-candidatos";
+import {
+  avisarTenantIaFallo,
+  type Candidato,
+  conRespaldo,
+  ErrorRespaldoIa,
+  type FalloProveedor,
+  finDeCadena,
+} from "./ia-respaldo";
 
 /** Mide una llamada: dos filas (entrada y salida). BYOK (propia) se mide pero no se cobra. */
 function medir(ctx: Contexto, clase: ClaseTarea, modulo: string, c: Candidato, uso: Uso) {
@@ -103,11 +68,14 @@ async function* streamConRespaldo(
       throw await finDeCadena(ctx, avisar, fallos, e);
     }
     // Ya respondió este proveedor: medimos el uso conocido en `finally`, aunque el stream se corte
-    // (lanza) o el consumidor cancele (rompe el bucle), y cerramos el iterador subyacente.
+    // (lanza) o el consumidor cancele (rompe el bucle), y cerramos el iterador subyacente. El evento
+    // `uso` trae el parcial acumulado; el `fin`, el total. Como solo medimos una vez (en `finally`
+    // con el último valor visto), un corte mide el parcial y un `fin` no lo cuenta dos veces.
     let uso: Uso = { tokensEntrada: 0, tokensSalida: 0 };
     try {
       while (!actual.done) {
-        if (actual.value.tipo === "fin") uso = actual.value.respuesta.uso;
+        if (actual.value.tipo === "uso") uso = actual.value.uso;
+        else if (actual.value.tipo === "fin") uso = actual.value.respuesta.uso;
         yield actual.value;
         actual = await it.next();
       }
@@ -127,8 +95,23 @@ export async function iaDe(
   modulo = "core",
   solo?: ProveedorIaId,
 ) {
-  const cands = await candidatosIa(ctx, clase, solo);
-  if (cands.length === 0) return null;
+  const { cands, soloPropias, propiasInutiles } = await candidatosIa(ctx, clase, solo);
+  if (cands.length === 0) {
+    // El tenant tiene key propia pero ninguna sirve (sin modelo, sin secreto o sin base URL): falla
+    // y avisa al tenant; nunca cae a OPAI (t214s684). Sin key propia, no hay IA: se devuelve null.
+    if (soloPropias) {
+      const fallos: FalloProveedor[] = propiasInutiles.map((p) => ({
+        proveedor: p.id,
+        error: new ErrorIa(p.id, null, `IA propia inservible: ${p.razon}.`),
+      }));
+      await avisarTenantIaFallo(ctx, fallos);
+      throw new ErrorRespaldoIa(
+        fallos.map((f) => f.proveedor),
+        undefined,
+      );
+    }
+    return null;
+  }
   const conRetry = !solo;
   // Avisar solo en la cadena de respaldo (no al probar un proveedor concreto) y solo con keys propias.
   const avisar = conRetry && cands.some((c) => c.cred.modalidad === "propia");

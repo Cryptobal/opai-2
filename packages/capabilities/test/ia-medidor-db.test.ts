@@ -21,6 +21,9 @@ describe.skipIf(!urlPropietario)("medidor de IA en base real: BYOK sin costo, OP
   let e: Entorno;
   let mod: typeof ModuloCapacidades;
   const previas = { ...process.env };
+  // Tenants creados aquí: sus claves (DEK cifrada con esta KEK aleatoria) se limpian en `afterAll`
+  // para que la rotación global de `secretos-db.test.ts` no tope con una KEK que no puede descifrar.
+  const tenantsCreados: string[] = [];
 
   beforeAll(async () => {
     e = await prepararEntorno();
@@ -41,6 +44,13 @@ describe.skipIf(!urlPropietario)("medidor de IA en base real: BYOK sin costo, OP
   });
 
   afterAll(async () => {
+    // Borra las claves/secretos cifrados con la KEK aleatoria de este test (no debe persistir para
+    // otros tests que comparten la base, como la rotación de `secretos-db.test.ts`).
+    if (tenantsCreados.length > 0) {
+      const where = { tenantId: { in: tenantsCreados } };
+      await e?.admin.secreto.deleteMany({ where }).catch(() => undefined);
+      await e?.admin.claveTenant.deleteMany({ where }).catch(() => undefined);
+    }
     for (const kk of ["OPAI_SECRETS_KEY", "OPAI_SECRETS_KEY_VERSION", "ANTHROPIC_API_KEY"]) {
       if (previas[kk] === undefined) delete process.env[kk];
       else process.env[kk] = previas[kk];
@@ -58,6 +68,7 @@ describe.skipIf(!urlPropietario)("medidor de IA en base real: BYOK sin costo, OP
     const t = await e.admin.tenant.create({
       data: { slug: `ia-byok-${randomUUID().slice(0, 8)}`, nombre: "BYOK", vertical: "seguridad" },
     });
+    tenantsCreados.push(t.id);
     const ctx = ctxDe(t.id);
     await mod.executeCapability(ctx, "core.integraciones.configurar", {
       proveedor: "ia_anthropic",
@@ -83,6 +94,7 @@ describe.skipIf(!urlPropietario)("medidor de IA en base real: BYOK sin costo, OP
     const t = await e.admin.tenant.create({
       data: { slug: `ia-opai-${randomUUID().slice(0, 8)}`, nombre: "OPAI", vertical: "seguridad" },
     });
+    tenantsCreados.push(t.id);
     const ctx = ctxDe(t.id);
     vi.stubGlobal("fetch", respuestaAnthropic());
     const ia = await mod.iaDe(ctx, "economica");

@@ -66,10 +66,15 @@ export type RespuestaConversacion = {
   proveedor: ProveedorIaId;
 };
 
-/** Eventos del stream: texto parcial, una llamada de herramienta ya armada, y el fin con el uso. */
+/**
+ * Eventos del stream: texto parcial, una llamada de herramienta ya armada, el uso parcial conocido
+ * (acumulado) en cuanto el proveedor lo informa, y el fin con el uso total. El evento `uso` permite
+ * medir lo ya consumido aunque el stream se corte o se cancele antes del `fin` (ADR-031, ADR-049).
+ */
 export type EventoStream =
   | { tipo: "texto"; delta: string }
   | { tipo: "herramienta"; llamada: LlamadaHerramienta }
+  | { tipo: "uso"; uso: Uso }
   | { tipo: "fin"; respuesta: RespuestaConversacion };
 
 export interface ProveedorIa {
