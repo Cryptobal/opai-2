@@ -27,6 +27,7 @@ export async function DetalleInstalacion({ datos, p, tab, persona, children }: P
         instalacion={ficha.instalacion}
         tab={tab}
         persona={persona}
+        parametros={p}
       >
         {ficha.instalacion ? children(ficha.instalacion, p) : null}
       </FichaInstalacion>

@@ -24,7 +24,15 @@ type Props = {
 };
 
 /** Nuevo o editar puesto (09) en Sheet, abierto por `?puesto=nuevo|<id>`. */
-export function HojaPuesto({ instalacionId, subtitulo, puestos, cargos, funciones, patrones, catalogosError }: Props) {
+export function HojaPuesto({
+  instalacionId,
+  subtitulo,
+  puestos,
+  cargos,
+  funciones,
+  patrones,
+  catalogosError,
+}: Props) {
   const hoja = useHojaUrl("puesto");
   if (!hoja.abierta) return null;
   const actual = puestos.find((p) => p.id === hoja.valor) ?? null;
@@ -108,8 +116,8 @@ function Formulario({
       <div className="flex flex-col gap-4">
         {error ? <Alerta tono="danger" titulo={error} /> : null}
         {catalogosError ? (
-          <Alerta tono="danger" titulo="No pudimos cargar los patrones o las funciones">
-            Vuelve a entrar a la pestaña. Sin patrón no se puede crear el puesto.
+          <Alerta tono="danger" titulo="No pudimos cargar los cargos, patrones o funciones">
+            Vuelve a entrar a la pestaña. Sin cargo o patrón no se puede crear el puesto.
           </Alerta>
         ) : null}
         <CamposPuesto d={d} setD={setD} cargos={cargos} funciones={funciones} patrones={patrones} />

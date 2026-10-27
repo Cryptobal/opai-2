@@ -9,6 +9,8 @@ Hasta el 24-oct-2026 este archivo fue la fuente de verdad del avance; desde ento
 
 ## Hecho
 
+> **Seguimiento QA PR #49 (OpenCode):** separación de filtros de Puestos e Instalaciones y conservación de filtros al volver, según el encargo. Adaptación técnica al panel dividido: Función se oculta hasta 2xl para conservar visible Patrón; la vista de ancho completo del diseño queda parcial, pendiente de comprobación visual. Sin migraciones nuevas; el fallo de `rama-neon` señalado por QA sigue pendiente de infraestructura.
+
 > **Seguimiento de seguridad y QA PR #70 (OpenCode, continuación del 27-oct):** keys de usuario/servicio acotadas por los permisos vigentes del responsable (rol, personalizado y excepciones); servicio se invalida si este pierde alcance completo. Invitación con rol solo por personas; plataforma null para agentes; ledger acumula también sin tope; precisión mínima de micro-USD y formatos es-CL. Adaptaciones técnicas de OpenCode, no decisiones nuevas de Carlos. Seed fail-closed: solo bases locales `opai_dev`/`opai_staging`; Neon bloqueado hasta registrar un endpoint dev/staging verificado (el ID de rama no identifica su hostname). `gard-staging` es un tenant: no hay evidencia de una rama/base remota aparte y no se ejecutó el seed. Gate actual y limitaciones en `briefs/NUCLEO-C-identidad-servicio.md`.
 
 > Continuación completada sobre `main` f2fcb23 mediante merge normal: gate local verde (typecheck, lint, 899 tests, BD 90+64+6, build desde caché y presupuesto), H0 sin variables de conexión 6/6 y e2e propio en 3070: servicio 6/6 + portal 3/3. Autorrevisión independiente sin bloqueantes; revisión externa y CI pendientes.

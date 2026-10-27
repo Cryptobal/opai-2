@@ -48,7 +48,7 @@ async function Puestos({ i, p }: { i: InstalacionDetalle; p: Parametros }) {
       cargos={cargos.map((c) => ({ valor: c.id, etiqueta: c.nombre }))}
       funciones={funciones}
       patrones={patrones}
-      catalogosError={!rf.ok || !rp.ok}
+      catalogosError={!rc.ok || !rf.ok || !rp.ok}
     />
   );
   const conteos = conteosPuestos(i.puestos);
@@ -64,9 +64,9 @@ async function Puestos({ i, p }: { i: InstalacionDetalle; p: Parametros }) {
       <ListaPuestos
         state="ready"
         puestos={filtradas}
-        buscador={<Buscador placeholder="Nombre del puesto" />}
+        buscador={<Buscador placeholder="Nombre del puesto" param="pq" />}
         filtros={<ChipsPuestosDiferido puestos={i.puestos} />}
-        accionVacio={nuevo}
+        accionVacio={i.puestos.length === 0 ? nuevo : null}
       />
       {hoja}
     </div>

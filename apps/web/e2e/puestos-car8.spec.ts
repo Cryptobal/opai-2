@@ -3,6 +3,7 @@ import { execFileSync } from "node:child_process";
 import { expect, type Page, test } from "@playwright/test";
 
 import { entrar, ocultarDev, password, sinDesborde, urlSiembra } from "./fixtures-puestos-car8";
+import { comprobarFiltrosPuestos } from "./puestos-filtros-qa";
 
 // CAR-8 (Brief 11 · Puestos PR 1): en una instalación con varias posiciones, todos los puestos se ven
 // y se navegan a 375, 1024 y 1280 px, el patrón se ve claro y nada se corre ni se superpone. Desde
@@ -96,9 +97,11 @@ test.describe("CAR-8 · puestos como posición se ven y se navegan", () => {
     vaciaId = sembrarVacia();
   });
 
-  test("lista de posiciones: todas visibles, patrón claro, sin desborde y tokens 2.0", async ({
-    page,
-  }, info) => {
+  test("los filtros de puestos no alteran la lista de instalaciones", async ({ page }, info) => {
+    await comprobarFiltrosPuestos(page, instalacionId, info.project.name);
+  });
+
+  test("lista de posiciones: todas visibles, patrón claro, sin desborde y tokens 2.0", async ({ page }, info) => {
     const telefono = info.project.name === "telefono";
     await entrar(page);
     await page.goto(`/instalaciones/${instalacionId}/puestos`);

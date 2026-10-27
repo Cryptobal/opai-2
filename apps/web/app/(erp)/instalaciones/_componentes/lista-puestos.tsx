@@ -110,7 +110,12 @@ export function ListaPuestos({
             <span className={p.estado !== "activo" ? "text-fg-muted" : undefined}>{p.nombre}</span>
           ),
         },
-        { id: "funcion", etiqueta: "Función", render: (p) => p.funcion ?? "—" },
+        {
+          id: "funcion",
+          etiqueta: "Función",
+          className: "hidden 2xl:table-cell",
+          render: (p) => p.funcion ?? "—",
+        },
         {
           id: "horario",
           etiqueta: "Horario",

@@ -37,9 +37,13 @@ export function CamposHorario({ d, setD }: { d: DatosPuesto; setD: Set }) {
       {d.rota ? (
         <div className="grid grid-cols-2 gap-3">
           <Campo etiqueta="Inicio noche" htmlFor="p-ini-n">
-            <InputHora id="p-ini-n" valor={d.inicioNoche} onCambiar={(v) => set("inicioNoche", v)} />
+            <InputHora
+              id="p-ini-n"
+              valor={d.inicioNoche}
+              onCambiar={(v) => set("inicioNoche", v)}
+            />
           </Campo>
-          <Campo etiqueta="Fin noche" htmlFor="p-fin-n">
+          <Campo etiqueta="Término noche" htmlFor="p-fin-n">
             <InputHora id="p-fin-n" valor={d.finNoche} onCambiar={(v) => set("finNoche", v)} />
           </Campo>
         </div>

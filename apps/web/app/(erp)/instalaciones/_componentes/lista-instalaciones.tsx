@@ -5,10 +5,11 @@ import { Badge, cn, type EstadoPantalla } from "@opai/ds";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { ESTADO_INSTALACION, estadoDe } from "@/app/_components/maestros/estados";
 import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
-import { conBusqueda } from "@/lib/parametros";
+import type { Parametros } from "@/lib/parametros";
 import type { InstalacionFila } from "@/lib/tipos-maestros";
 
 import { REGIONES } from "./datos";
+import { conFiltrosInstalaciones } from "./filtros-instalaciones";
 
 type Props = {
   state: EstadoPantalla;
@@ -18,7 +19,7 @@ type Props = {
   singular: string;
   seleccionada?: string;
   /** Búsqueda vigente: se conserva al abrir una ficha y al volver. */
-  q?: string | undefined;
+  parametros: Parametros;
 };
 
 const personas = (n: number) => `${n} ${n === 1 ? "persona" : "personas"}`;
@@ -61,7 +62,7 @@ export function ListaInstalaciones(p: Props) {
         const sel = p.seleccionada === i.id;
         return {
           id: i.id,
-          href: conBusqueda(`/instalaciones/${i.id}`, p.q),
+          href: conFiltrosInstalaciones(`/instalaciones/${i.id}`, p.parametros),
           inicio: (
             <span
               aria-hidden

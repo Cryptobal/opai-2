@@ -34,21 +34,26 @@ const normaliza = (s: string) =>
     .normalize("NFD")
     .replace(/\p{Diacritic}/gu, "");
 
-export type FiltroPuestos = { q?: string; estado?: string; cobertura?: string; patron?: string };
+export type FiltroPuestos = {
+  pq?: string;
+  pestado?: string;
+  pcobertura?: string;
+  ppatron?: string;
+};
 
 /**
- * Filtra por los chips (`?estado=`, `?cobertura=`, `?patron=`) y el buscador (`?q=`), con los
+ * Filtra por los chips (`?pestado=`, `?pcobertura=`, `?ppatron=`) y el buscador (`?pq=`), con los
  * inactivos siempre al final (review 5662449808 punto 3: chips de activo y de patrón).
  */
 export function filtrarPuestos(ps: Puesto[], f: FiltroPuestos): Puesto[] {
   let r = ps;
-  if (f.estado === "activo") r = r.filter((p) => p.estado === "activo");
-  else if (f.estado === "inactivo") r = r.filter((p) => p.estado !== "activo");
-  if (f.cobertura === "ppc") r = r.filter((p) => p.estado === "activo" && p.cobertura === "ppc");
-  else if (f.cobertura === "cubierto") r = r.filter((p) => p.cobertura === "cubierto");
-  if (f.patron === SIN_PATRON) r = r.filter((p) => !p.patronId);
-  else if (f.patron) r = r.filter((p) => p.patronId === f.patron);
-  const n = f.q?.trim() ? normaliza(f.q) : "";
+  if (f.pestado === "activo") r = r.filter((p) => p.estado === "activo");
+  else if (f.pestado === "inactivo") r = r.filter((p) => p.estado !== "activo");
+  if (f.pcobertura === "ppc") r = r.filter((p) => p.estado === "activo" && p.cobertura === "ppc");
+  else if (f.pcobertura === "cubierto") r = r.filter((p) => p.cobertura === "cubierto");
+  if (f.ppatron === SIN_PATRON) r = r.filter((p) => !p.patronId);
+  else if (f.ppatron) r = r.filter((p) => p.patronId === f.ppatron);
+  const n = f.pq?.trim() ? normaliza(f.pq) : "";
   if (n) r = r.filter((p) => normaliza(p.nombre).includes(n));
   return activosPrimero(r);
 }

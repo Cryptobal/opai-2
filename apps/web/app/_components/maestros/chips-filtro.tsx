@@ -11,8 +11,15 @@ export type Filtro = {
 };
 
 /** Chips de filtro por URL: activo como chip con quitar; inactivo como chip punteado con menú. */
-export function ChipsFiltro({ filtros }: { filtros: readonly Filtro[] }) {
+export function ChipsFiltro({
+  filtros,
+  conservarPaginacion = false,
+}: {
+  filtros: readonly Filtro[];
+  conservarPaginacion?: boolean;
+}) {
   const { valor, fijar } = useParametros();
+  const paginacion = conservarPaginacion ? {} : { cursor: null, prev: null };
   return (
     <div className="-mx-4 flex gap-2 overflow-x-auto px-4 md:mx-0 md:flex-wrap md:px-0">
       {filtros.map((f) => {
@@ -24,7 +31,7 @@ export function ChipsFiltro({ filtros }: { filtros: readonly Filtro[] }) {
               key={f.param}
               etiqueta={f.etiqueta}
               valor={opcion.etiqueta}
-              onQuitar={() => fijar({ [f.param]: null, cursor: null, prev: null })}
+              onQuitar={() => fijar({ [f.param]: null, ...paginacion })}
             />
           );
         return (
@@ -37,7 +44,7 @@ export function ChipsFiltro({ filtros }: { filtros: readonly Filtro[] }) {
             items={f.opciones.map((o) => ({
               id: o.valor,
               etiqueta: o.etiqueta,
-              onSelect: () => fijar({ [f.param]: o.valor, cursor: null, prev: null }),
+              onSelect: () => fijar({ [f.param]: o.valor, ...paginacion }),
             }))}
           />
         );

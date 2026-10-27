@@ -7,15 +7,16 @@ import { opcionesPatron } from "./puestos-filtro";
 
 /**
  * Chips de la lista de puestos (review 5662449808 punto 3): estado (activo), cobertura y patrón,
- * por `?estado=`, `?cobertura=` y `?patron=`.
+ * por `?pestado=`, `?pcobertura=` y `?ppatron=`.
  */
 export function ChipsPuestos({ puestos }: { puestos: readonly Puesto[] }) {
   const patrones = opcionesPatron(puestos);
   return (
     <ChipsFiltro
+      conservarPaginacion
       filtros={[
         {
-          param: "estado",
+          param: "pestado",
           etiqueta: "Estado",
           opciones: [
             { valor: "activo", etiqueta: "Activo" },
@@ -23,7 +24,7 @@ export function ChipsPuestos({ puestos }: { puestos: readonly Puesto[] }) {
           ],
         },
         {
-          param: "cobertura",
+          param: "pcobertura",
           etiqueta: "Cobertura",
           opciones: [
             { valor: "cubierto", etiqueta: "Cubierto" },
@@ -31,7 +32,7 @@ export function ChipsPuestos({ puestos }: { puestos: readonly Puesto[] }) {
           ],
         },
         ...(patrones.length > 0
-          ? [{ param: "patron", etiqueta: "Patrón", opciones: patrones }]
+          ? [{ param: "ppatron", etiqueta: "Patrón", opciones: patrones }]
           : []),
       ]}
     />
