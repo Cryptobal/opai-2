@@ -83,8 +83,10 @@ export interface Contexto {
   usuario: UsuarioContexto | null;
   /** Rol de la membresía en el tenant actual. */
   rol: Rol | null;
-  /** Portal desde el que se ejecuta (telemetría). */
+  /** Portal solicitado: en sesiones con tenant se valida contra la membresía y la capacidad. */
   portal: string | null;
+  /** Portales de la membresía activa en el tenant actual, cargados solo por el servidor. */
+  portalesMembresia: readonly string[];
   /** Módulos activos (o en trial) del tenant. `core` y `platform` siempre lo están. */
   modulosActivos: readonly string[];
   /** Módulos permitidos para un agente (scopes de la key); null = sin restricción. */

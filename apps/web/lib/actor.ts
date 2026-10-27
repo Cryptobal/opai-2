@@ -74,6 +74,7 @@ export function contextoDeIdentidad(identidad: Identidad, portal: string | null)
     excepciones: acceso.excepciones,
     alcance: alcanceDe(acceso.instalaciones),
     portal,
+    portalesMembresia: actual?.portales ?? [],
     modulosActivos: identidad.modulosActivos,
     medidor: medidorDiferido,
     diferir: diferirConAfter,
@@ -87,7 +88,9 @@ type Sesionador = (
 
 /**
  * Resuelve el actor de un request a la API: API key (`Authorization: Bearer`) o sesión
- * (cookie de Better Auth). Sin ninguna de las dos responde 401.
+ * (cookie de Better Auth). Sin ninguna de las dos responde 401. Con sesión, `/api/v1` siempre
+ * pasa `portal: null` (no acepta uno del cliente): solo ejecuta capacidades sin tenant o de
+ * plataforma; las de un portal con tenant las deniega `restriccion` (encargo portal-sesión).
  */
 export async function resolverActor(
   req: Request,
