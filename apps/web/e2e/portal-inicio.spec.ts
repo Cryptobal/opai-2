@@ -1,4 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
+import { codigoTotp } from "./sesion";
 
 const email = process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl";
 const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
@@ -10,7 +11,12 @@ async function entrar(page: Page, ruta = "/login") {
   await page.getByLabel("Correo").fill(email);
   await page.getByLabel("Contraseña", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Entrar", exact: true }).click();
-  await page.waitForURL((u) => u.pathname !== "/login" && u.pathname !== "/elegir-empresa");
+  await page.waitForURL((u) => u.pathname !== "/login");
+  if (new URL(page.url()).pathname === "/mfa") {
+    await page.getByLabel(/Código/).fill(await codigoTotp());
+    await page.getByRole("button", { name: "Verificar" }).click();
+  }
+  await page.waitForURL((u) => !["/login", "/mfa", "/elegir-empresa"].includes(u.pathname));
 }
 
 async function elegir(page: Page, nombre: string) {

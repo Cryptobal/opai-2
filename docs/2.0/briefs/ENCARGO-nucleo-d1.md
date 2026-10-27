@@ -22,6 +22,10 @@ Continuaciones del encargo del 27-oct-2026. No incluye ID de Linear; no se inven
 - Bloque 4: hoja del menú de usuario con Sheet, Campo, Select, Button y Alerta del
   DS V2 existente; carga diferida. No hay ruta, patrón ni componente del DS nuevo.
 - No se modifica `lib/navegacion.ts` ni `datos-shell.ts`.
+- Autorrevisión del constructor OpenCode: una membresía con rol histórico desconocido
+  no se reactiva ni cambia portales sin indicar un rol válido; aún puede suspenderse.
+  La migración se renombró a `20261028110000_portal_inicio` por colisión de timestamp,
+  sin modificar su SQL. El merge de #70 conserva el bloqueo de cambios de rol por agentes.
 
 ## Criterios técnicos de implementación
 
