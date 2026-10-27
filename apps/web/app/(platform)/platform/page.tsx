@@ -23,7 +23,7 @@ export default function Plataforma({ searchParams }: { searchParams: SearchParam
       portal="platform"
       titulo="Empresas"
       ruta="/platform"
-      insignia={<Superadmin />}
+      opciones={() => ({ insignia: <Superadmin /> })}
       cargar={async () => {
         const [r, p] = await Promise.all([
           ejecutarComoUsuario<TenantFila[]>("platform", "platform.tenants.list"),
