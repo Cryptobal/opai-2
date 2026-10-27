@@ -3,7 +3,7 @@ import { execFileSync } from "node:child_process";
 import { expect, type Page, test } from "@playwright/test";
 
 import { entrar, ocultarDev, password, sinDesborde, urlSiembra } from "./fixtures-puestos-car8";
-import { comprobarFiltrosPuestos } from "./puestos-filtros-qa";
+import { comprobarEstadoVisible, comprobarFiltrosPuestos } from "./puestos-filtros-qa";
 
 // CAR-8 (Brief 11 · Puestos PR 1): en una instalación con varias posiciones, todos los puestos se ven
 // y se navegan a 375, 1024 y 1280 px, el patrón se ve claro y nada se corre ni se superpone. Desde
@@ -114,6 +114,7 @@ test.describe("CAR-8 · puestos como posición se ven y se navegan", () => {
     await expect(page.getByText("4×4").filter({ visible: true }).first()).toBeVisible();
     // En teléfono el badge dice «PPC» (corto); desde md, «PPC · Sin asignar». Siempre hay uno visible.
     await expect(page.getByText(/^PPC/).filter({ visible: true }).first()).toBeVisible();
+    if (!telefono) await comprobarEstadoVisible(page);
     // Nombre accesible completo también en teléfono (QA B2 y punto 9).
     await expect(page.getByText("PPC · Sin asignar").first()).toBeAttached();
     // Buscador y chips en los tres anchos (QA H1).

@@ -1,6 +1,6 @@
 # BRIEF DE IMPLEMENTACIÓN — 11 PUESTOS, PR 1 (el puesto como posición)
 
-> **Seguimiento QA del PR #49 (OpenCode):** el encargo separa los parámetros de Puestos de los de Instalaciones y pide conservar los filtros al volver. Como adaptación técnica al panel dividido existente se oculta Función hasta 2xl; el diseño de ancho completo queda parcial y debe verificarse que Estado no se recorte a 1024 y 1280. Patrón permanece visible por el criterio CAR-8. No se cambia ninguna migración. El informe de QA señala además un fallo previo de `rama-neon`, cuya resolución de infraestructura queda pendiente.
+> **Seguimiento QA del PR #49 (OpenCode):** el encargo separa los parámetros de Puestos de los de Instalaciones y pide conservar los filtros al volver. Como adaptación técnica al panel dividido existente se ocultan Función y la columna Patrón hasta 2xl; el patrón sigue visible bajo el nombre del puesto. El diseño de ancho completo queda parcial. Se añadió una comprobación e2e de la visibilidad de Estado a 1024 y 1280. No se cambia ninguna migración. El informe de QA señala además un fallo previo de `rama-neon`, cuya resolución de infraestructura queda pendiente.
 
 > **Verificación pendiente:** typecheck, lint, test, test:db, build y presupuesto pasaron; el e2e no quedó verde: la primera base alternativa carecía de tablas y en la base configurada la sesión de prueba quedó esperando el login. Por tanto no se certifican todavía el flujo de filtros, el foco ni la visibilidad de Estado, y no se han tomado nuevas capturas válidas.
 

@@ -2,6 +2,19 @@ import { expect, type Page } from "@playwright/test";
 
 import { entrar } from "./fixtures-puestos-car8";
 
+export async function comprobarEstadoVisible(page: Page) {
+  const detalle = page.getByRole("region", { name: "Detalle" });
+  const filas = detalle.getByRole("row").filter({ hasText: /A Guardia rotativa|A Guardia retirada/ });
+  const celdas = [detalle.getByRole("columnheader", { name: "Estado" })];
+  for (const fila of await filas.all()) celdas.push(fila.getByRole("cell").last());
+  for (const celda of celdas) {
+    expect(await celda.evaluate((el) => {
+      const contenedor = el.closest(".overflow-x-auto");
+      return !!contenedor && el.getBoundingClientRect().right <= contenedor.getBoundingClientRect().right;
+    })).toBe(true);
+  }
+}
+
 export async function comprobarFiltrosPuestos(page: Page, id: string, proyecto: string) {
   await entrar(page);
   await page.goto("/instalaciones?q=Planta&estado=activa");
@@ -24,7 +37,7 @@ export async function comprobarFiltrosPuestos(page: Page, id: string, proyecto: 
   await page.getByRole("menuitem", { name: "Activo", exact: true }).click();
   await expect(page).toHaveURL(/pestado=activo/);
   if (proyecto !== "telefono") {
-    await expect(lista).toHaveText(antes);
+    await expect(lista).toHaveText(antes, { useInnerText: true });
     const estado = detalle.getByRole("columnheader", { name: "Estado" });
     await expect(estado).toBeVisible();
     const caja = await estado.boundingBox();

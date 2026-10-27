@@ -107,7 +107,10 @@ export function ListaPuestos({
           etiqueta: "Puesto",
           className: "font-medium",
           render: (p) => (
-            <span className={p.estado !== "activo" ? "text-fg-muted" : undefined}>{p.nombre}</span>
+            <span className={cn("flex flex-col", p.estado !== "activo" && "text-fg-muted")}>
+              <span>{p.nombre}</span>
+              <span className="t-caption text-fg-muted 2xl:hidden">{p.patron ?? "—"}</span>
+            </span>
           ),
         },
         {
@@ -130,7 +133,7 @@ export function ListaPuestos({
         {
           id: "patron",
           etiqueta: "Patrón",
-          className: "t-numeric",
+          className: "hidden t-numeric 2xl:table-cell",
           render: (p) => p.patron ?? "—",
         },
         {
