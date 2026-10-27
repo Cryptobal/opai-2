@@ -1,5 +1,5 @@
 import { crearContexto, hashApiKey, slugDeApiKey, type Contexto } from "@opai/capabilities";
-import { esRol, esRolPlataforma } from "@opai/domain";
+import { type Acceso, esRol, esRolPlataforma } from "@opai/domain";
 
 import { alcanceDe } from "./actor";
 import { fuentesReales, type Fuentes } from "./fuentes";
@@ -8,7 +8,8 @@ import { despacharDiferido, diferirConAfter, medidorDiferido } from "./medidor";
 
 const MINUTO = 60_000;
 
-const principalTipo = (t: string) => (t === "cuenta" || t === "persona" ? t : "usuario");
+const principalTipo = (t: string) =>
+  t === "cuenta" || t === "persona" || t === "servicio" ? t : "usuario";
 
 /** Extrae la key de `Authorization: Bearer <key>`. */
 export function keyDeCabecera(req: Request): string | null {
@@ -33,7 +34,7 @@ export async function contextoDeApiKey(
   const fila = await fuentes.keyPorHash(tenant.id, hashApiKey(key));
   const ahora = Date.now();
   if (!fila || fila.revocadaEn || (fila.expiraEn && fila.expiraEn.getTime() <= ahora)) {
-    return noAutenticado("API key inválida, revocada o vencida.");
+    return noAutenticado("API key inválida.");
   }
   const [membresia, usuario, acceso] = await Promise.all([
     fuentes.membresia(tenant.id, fila.userId),
@@ -41,12 +42,33 @@ export async function contextoDeApiKey(
     fuentes.acceso(tenant.id, fila.userId),
   ]);
   if (!membresia || membresia.estado !== "activa" || !usuario || !esRol(membresia.rol)) {
-    return noAutenticado("API key inválida: su responsable ya no tiene acceso a la empresa.");
+    return noAutenticado("API key inválida.");
   }
   if (!fila.ultimoUsoEn || ahora - fila.ultimoUsoEn.getTime() > MINUTO) {
     await fuentes.marcarUsoKey(tenant.id, fila.id).catch(() => undefined);
   }
-  // Una key hereda permisos y alcance del responsable (ADR-033): su rol personalizado y excepciones.
+  // Servicio no hereda rol ni alcance, pero su lista explícita nunca supera los permisos actuales
+  // del responsable. Si este pierde el alcance completo, el servicio deja de autenticarse.
+  const tipo = principalTipo(fila.principalTipo);
+  const servicio = tipo === "servicio";
+  if (
+    servicio &&
+    (fila.heredaPermisos ||
+      !fila.presupuestoMensualMicro ||
+      fila.presupuestoMensualMicro <= 0n ||
+      acceso.instalaciones !== null)
+  )
+    return noAutenticado("API key inválida.");
+  const claveApi = { permisos: fila.heredaPermisos ? null : fila.permisos, servicio };
+  // Techo real del responsable (H15): rol, personalizado y excepciones VIGENTES, siempre, también
+  // para `servicio` (que arriba manda `rol`/`permisosRol`/`excepciones` en null porque el principal
+  // no hereda rol). Si el responsable baja de rol o recibe una excepción que deniega, la key la
+  // pierde al vuelo, sea delegada o de servicio.
+  const accesoResponsable: Acceso = {
+    rol: acceso.permisosRol != null ? null : membresia.rol,
+    permisosRol: acceso.permisosRol,
+    excepciones: acceso.excepciones,
+  };
   return crearContexto({
     tenantId: tenant.id,
     actor: { tipo: "agent", id: fila.id, viaUserId: usuario.id },
@@ -56,15 +78,17 @@ export async function contextoDeApiKey(
       email: usuario.email,
       platformRole: esRolPlataforma(usuario.platformRole) ? usuario.platformRole : null,
     },
-    rol: membresia.rol,
-    permisosRol: acceso.permisosRol,
-    excepciones: acceso.excepciones,
-    // La key hereda el alcance por filas de su responsable (ADR-033).
-    alcance: alcanceDe(acceso.instalaciones),
+    rol: servicio ? null : membresia.rol,
+    permisosRol: servicio ? null : acceso.permisosRol,
+    excepciones: servicio ? null : acceso.excepciones,
+    accesoResponsable,
+    // La key hereda el alcance por filas de su responsable (ADR-033); un servicio no hereda alcance.
+    alcance: servicio ? null : alcanceDe(acceso.instalaciones),
     portal: null,
     modulosActivos: await fuentes.modulosActivos(tenant.id),
     scopes: fila.scopes,
-    principal: { tipo: principalTipo(fila.principalTipo), id: fila.principalId ?? usuario.id },
+    principal: { tipo, id: servicio ? fila.id : (fila.principalId ?? usuario.id) },
+    claveApi,
     agente: {
       apiKeyId: fila.id,
       nombre: fila.nombre,

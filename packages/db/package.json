@@ -13,6 +13,7 @@
     "deploy": "prisma migrate deploy",
     "role:password": "tsx scripts/set-app-role-password.ts",
     "seed:dev-tenant": "tsx scripts/seed-dev-tenant.ts",
+    "seed:staging": "tsx scripts/seed-staging.ts",
     "typecheck": "tsc -p tsconfig.json",
     "lint": "eslint .",
     "test": "vitest run",

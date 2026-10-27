@@ -18,6 +18,10 @@ export type ApiKeyFila = {
   scopes: string[];
   principalTipo: string;
   principalId: string | null;
+  /** Permisos finos de la key (Identidad de servicio t457u). */
+  permisos: string[];
+  /** true = hereda los permisos del responsable; false = usa `permisos` (servicio siempre false). */
+  heredaPermisos: boolean;
   revocadaEn: Date | null;
   expiraEn: Date | null;
   ultimoUsoEn: Date | null;

@@ -32,6 +32,8 @@ export const usersInvite = defineCapability({
   output: invitacionCreadaSchema,
   efecto: "escritura",
   dryRun: true,
+  // Asignar un rol al invitar gobierna acceso: ninguna API key lo hace (encargo PR #70).
+  soloPersonas: true,
   async handler(ctx, input, { dryRun }) {
     // §16.2 (ADR-022): nadie invita con un rol base por encima del suyo (`puedeAsignarRol` sobre el rol
     // base) ni con uno que conceda permisos que él mismo no tiene (acceso REAL). La jerarquía del rol

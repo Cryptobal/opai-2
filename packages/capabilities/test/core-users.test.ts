@@ -285,6 +285,23 @@ describe("core.users.*", () => {
     ).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
   });
 
+  it("rechaza reactivar o cambiar portales con rol histórico desconocido, pero permite suspender", async () => {
+    const base = semillaTenant("viewer");
+    const semilla = {
+      ...base,
+      membership: base.membership.map((m) => (m.id === M2 ? { ...m, rol: "desconocido" } : m)),
+    };
+    const { ctx } = contextoDePrueba({ rol: "owner", semilla });
+    for (const cambio of [{ estado: "activa" }, { portales: ["erp"] }]) {
+      expect(
+        await executeCapability(ctx, "core.users.update", { membershipId: M2, ...cambio }),
+      ).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+    }
+    expect(
+      await executeCapability(ctx, "core.users.update", { membershipId: M2, estado: "suspendida" }),
+    ).toMatchObject({ ok: true });
+  });
+
   it("remove en vista previa no elimina; real sí y queda auditado", async () => {
     const { ctx, tabla, eventos } = contextoDePrueba({ rol: "owner", semilla: semillaTenant() });
     await executeCapability(ctx, "core.users.remove", { membershipId: M2 }, { dryRun: true });
@@ -333,6 +350,24 @@ describe("core.users.invite", () => {
       rol: "viewer",
     });
     expect(r).toMatchObject({ ok: false, error: { code: "CONFLICT" } });
+  });
+
+  it("una API key no invita con rol admin ni owner, aunque su responsable sí pueda (encargo QA #70)", async () => {
+    const agente = { tipo: "agent" as const, id: "key", viaUserId: USUARIO_DE_PRUEBA.id };
+    const { ctx } = contextoDePrueba({ rol: "owner", actor: agente, semilla: semillaTenant() });
+    for (const rol of ["admin", "owner"] as const) {
+      const r = await executeCapability(ctx, "core.users.invite", {
+        email: "nuevo@prueba.cl",
+        rol,
+      });
+      expect(r).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+      expect(r.ok === false && r.error.message).toMatch(/API key/);
+    }
+    const viewer = await executeCapability(ctx, "core.users.invite", {
+      email: "nuevo@prueba.cl",
+      rol: "viewer",
+    });
+    expect(viewer).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
   });
 
   it("acepta la invitación con el usuario correcto y rechaza otro correo", async () => {

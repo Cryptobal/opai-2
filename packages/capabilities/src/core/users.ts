@@ -74,6 +74,9 @@ export const usersUpdate = defineCapability({
     // Coherencia rol-portal (NÚCLEO-D1): valida la combinación final (rol nuevo o el que ya tenía,
     // contra los portales nuevos o los que ya tenía). Un rol personalizado hereda la de su rol base.
     const rolEfectivo = input.rol ?? (esRol(actual.rol) ? actual.rol : undefined);
+    if (!rolEfectivo && (input.portales !== undefined || input.estado === "activa")) {
+      throw reglaDeNegocio("La membresía tiene un rol desconocido. Indica un rol válido.");
+    }
     if (
       rolEfectivo &&
       (input.rol !== undefined || input.portales !== undefined || input.estado === "activa")
@@ -83,10 +86,17 @@ export const usersUpdate = defineCapability({
         throw reglaDeNegocio(`El rol "${rolEfectivo}" no admite el portal "${incoherentes[0]}".`);
       }
     }
+    // El rol base y la promoción a owner los cambia solo una persona, nunca una API key ni un agente
+    // (review 5661003883 del #60; mandatos t365u y t366u de cerrar el Núcleo). `update` no puede ser
+    // `soloPersonas` entera (un agente sí cambia portales o estado), así que se bloquean solo el rol
+    // base y el rol personalizado: si no, una key de owner o admin se promovería o promovería a otros.
+    if (input.rol !== undefined && ctx.actor.tipo === "agent") {
+      throw prohibido(
+        "Solo una persona puede cambiar el rol base o promover a owner, no una API key.",
+      );
+    }
     // Asignar o cambiar un rol personalizado es gobierno de acceso (§16.2): solo owner o admin y,
-    // como `core.roles.assign` (soloPersonas, ADR-032), nunca una API key ni un agente. `update` no
-    // puede ser `soloPersonas` entera (un agente sí cambia portales o estado), así que se bloquea solo
-    // el `roleId`: si no, una key de admin asignaría o quitaría roles que `core.roles.assign` le veda.
+    // como `core.roles.assign` (soloPersonas, ADR-032), nunca una API key ni un agente.
     if (input.roleId !== undefined) {
       if (ctx.actor.tipo === "agent") {
         throw prohibido(
