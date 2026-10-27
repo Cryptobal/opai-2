@@ -9,6 +9,8 @@ Hasta el 24-oct-2026 este archivo fue la fuente de verdad del avance; desde ento
 
 ## Hecho
 
+- **MFA · corrección de entrada en iOS:** normalización de espacios y guion sin alterar mayúsculas, y desactivación de autocorrección/capitalización en los campos MFA. Better Auth rota la sesión al confirmar el enrolamiento; la solicitud de contraseña observada después aún requiere reproducción. Alcance y límites en `briefs/FIX-mfa-respaldo-ios.md`. Adaptación técnica de OpenCode según el encargo, sin decisiones de negocio nuevas ni migración.
+
 - **PR #61, corrección de la revisión 5660654308 (OpenCode, 27-oct-2026).** Merge normal de `origin/main` (`5c18a9237fcdee84a040dde93e3015b753d8d21a`, ya incluye #48 y #56). La transacción por lote y la propagación del fallo ya estaban en `6f948ba`; se refuerza la prueba del evento del lote confirmado y se prueba rollback de datos y registro si falla el evento. Migración `20261027070000_cumplimiento_retencion` aplicada y reaplicada sobre todas las migraciones actuales de main en PostgreSQL 16 local, sin choque y sin renombrarla. Sin decisiones de negocio nuevas. Pendientes expresamente fuera de esta corrección: orden/cursor, carreras en `exigirNoAnonimizado` y solicitudes abiertas, campos restantes por anonimizar, rotación de DEK; el plazo mínimo se confirma con el Abogado antes de activar. CA y limitaciones en el brief §21. Ninguna pantalla nueva; cualquier diseño debe usar siempre el DS de OPAI 2.0.
 > **NÚCLEO-E2 · Agente interno del tenant (OpenCode / openai/gpt-6.1-sol).**
 > Módulo `agente` vendible, herramientas derivadas del MCP y bucle servidor con
