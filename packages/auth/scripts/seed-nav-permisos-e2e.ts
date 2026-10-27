@@ -5,7 +5,7 @@ import { cerrarClientes, dbAdmin } from "@opai/db";
 async function main() {
   const url = new URL(process.env["DATABASE_URL_MIGRATE"] ?? "postgresql://sin-configurar/");
   if (
-    !["localhost", "127.0.0.1"].includes(url.hostname) ||
+    !["localhost", "127.0.0.1", "[::1]"].includes(url.hostname) ||
     !/^\/opai_e2e(?:_[a-zA-Z0-9_]+)?$/.test(url.pathname) ||
     process.env["NODE_ENV"] === "production"
   )

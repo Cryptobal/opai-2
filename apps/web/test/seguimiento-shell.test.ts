@@ -140,7 +140,7 @@ describe("seguimiento del shell", () => {
     conRol.acceso = {
       permisosRol: ["core:estructuras.read", "core:personas.read"],
       excepciones: [],
-      instalaciones: null,
+      instalaciones: ["instalacion-limitada"],
     };
     expect(href(conRol)).toContain("/cargos");
     expect(href(conRol)).toContain("/personas");
@@ -151,7 +151,7 @@ describe("seguimiento del shell", () => {
     conExcepcion.acceso = {
       permisosRol: null,
       excepciones: [{ permiso: "core:personas.read", conceder: false }],
-      instalaciones: null,
+      instalaciones: ["instalacion-limitada"],
     };
     expect(href(conExcepcion)).not.toContain("/personas");
     conExcepcion.acceso = {

@@ -78,6 +78,10 @@ No se declara CI, QA remota ni aprobación del head nuevo; Neon sigue sin modifi
   permisos efectivos de la identidad ya cargada; ERP conserva el filtrado heredado por permiso de
   cada entrada. El alcance se sigue aplicando en capacidades, no en el menú. Sin consultas ni
   migraciones nuevas. Adaptación técnica de OpenCode; sin decisiones de negocio nuevas.
+  Corrección de la review 5671568745: Supervisor calcula acciones de documentos con permisos
+  efectivos, sin consultas nuevas. El caso positivo E2E de persona para alcance limitado queda
+  bloqueado por la denegación existente hasta el Brief 07b; detalle y CA parciales en
+  `briefs/ENCARGO-nucleo-d2-review.md`. Sin decisión de negocio nueva ni migración.
 
 - **PR #75 · QA N1 y N2 (OpenCode):** etiquetas completas con separación silábica en español cuando sea necesaria, riel de 80 px y tipografía del DS; filas de fijados y reintento de al menos 44 px. Ajuste técnico de OpenCode según revisión 5668628029, sin decisiones de negocio nuevas ni migraciones propias. Los CA parciales del Brief 05 §16 siguen vigentes.
 
