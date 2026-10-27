@@ -19,6 +19,7 @@
     "db:migrate": "pnpm --filter @opai/db migrate",
     "db:deploy": "pnpm --filter @opai/db run deploy",
     "scaffold:module": "tsx scripts/scaffold-module.ts",
+    "iconos:pwa": "tsx scripts/generar-iconos-pwa.ts",
     "presupuesto": "tsx scripts/presupuesto-js.ts",
     "mcp:verificar": "tsx scripts/mcp-verificar.ts"
   },
