@@ -660,3 +660,5 @@ original. CI de `60e54f0`, run `40551210403`, sigue con car8:100 teléfono falla
 aserciones, sin ampliar timeouts ni atribuir una causa no demostrada. El objetivo
 principal sigue pendiente. Detalles, límites y capturas en §10 del Brief 11.
 Sin cambios de negocio, migraciones, permisos ni plan del ROADMAP.
+
+**Brief 05, encargo #75:** Codex incorporó `main` `7fc900c`, cerró ante fallo de red la validación de fichas fijadas y difirió el diálogo de confirmación de acciones para cumplir el presupuesto de `/instalaciones/[id]` (164,9/165 KB). Son decisiones técnicas de Codex; los CA parciales y la medición ADR-045 siguen pendientes en el Brief 05.

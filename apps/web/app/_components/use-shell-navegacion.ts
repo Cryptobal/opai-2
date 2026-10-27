@@ -32,11 +32,13 @@ export function useShellNavegacion(
   const [fichasValidas, setFichasValidas] = useState<string[]>([]);
   useEffect(() => {
     let vigente = true;
-    void validarFichasNav(prefs.fijados.filter((f) => f.tipo === "ficha").map((f) => f.href)).then(
-      (v) => {
+    void validarFichasNav(prefs.fijados.filter((f) => f.tipo === "ficha").map((f) => f.href))
+      .then((v) => {
         if (vigente) setFichasValidas(v);
-      },
-    );
+      })
+      .catch(() => {
+        if (vigente) setFichasValidas([]);
+      });
     return () => {
       vigente = false;
     };
