@@ -94,6 +94,12 @@ No se declara CI, QA remota ni aprobación del head nuevo; Neon sigue sin modifi
 
 ## Hecho
 
+- **PR #78 · integración de ramas (Codex gpt-6.1-terra):** merge normal de main y
+  del PR #75; el inbox conserva lectura transaccional y cursor propio, con adaptación
+  del simulador en memoria. Ajuste técnico sin decisión de negocio nueva. El E2E
+  positivo de persona con alcance limitado sigue parcial hasta 07b PR 3, capas de
+  sueldo/alcance.
+
 - **NÚCLEO-D2 (encargo t457u, apilado sobre #75):** navegación de portales filtrada con los
   permisos efectivos de la identidad ya cargada; ERP conserva el filtrado heredado por permiso de
   cada entrada. El alcance se sigue aplicando en capacidades, no en el menú. Sin consultas ni

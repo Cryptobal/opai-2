@@ -53,5 +53,6 @@ for (const conceder of [false, true]) {
 }
 
 test.skip("Supervisor limitado ve acciones para persona en alcance", async () => {
-  // Pendiente de 07b: todavía no existe el vínculo persona-instalación y se deniega toda persona.
+  // Todavía no existe el vínculo persona-instalación y se deniega toda persona;
+  // se activa en 07b PR 3, capas de sueldo/alcance.
 });
