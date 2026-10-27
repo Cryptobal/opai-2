@@ -70,6 +70,50 @@ export const EVENTOS_CORE: readonly EventoDeDominio[] = [
   { id: "core.usuario.invitado", descripcion: "Se invitó a una persona (correo transaccional)." },
   { id: "core.usuario.invitacion_solicitada", descripcion: "Alguien pidió una nueva invitación." },
   { id: "core.bitacora.rota", descripcion: "La verificación de la bitácora encontró un quiebre." },
+  {
+    id: "core.cumplimiento.dpa_aceptado",
+    descripcion: "La empresa aceptó una versión del acuerdo de tratamiento de datos (DPA).",
+  },
+  {
+    id: "core.cumplimiento.dpo_actualizado",
+    descripcion: "Cambió el contacto del delegado de protección de datos (DPO).",
+  },
+  {
+    id: "core.cumplimiento.consentimiento_otorgado",
+    descripcion: "Un titular otorgó su consentimiento para un fin accesorio.",
+  },
+  {
+    id: "core.cumplimiento.consentimiento_revocado",
+    descripcion: "Un titular revocó un consentimiento otorgado antes.",
+  },
+  {
+    id: "core.cumplimiento.solicitud_creada",
+    descripcion: "Se registró una solicitud del titular (acceso, rectificación, cancelación…).",
+  },
+  {
+    id: "core.cumplimiento.solicitud_avanzada",
+    descripcion: "Una solicitud del titular cambió de estado (p. ej. pasó a en proceso).",
+  },
+  {
+    id: "core.cumplimiento.solicitud_resuelta",
+    descripcion: "Una solicitud del titular se resolvió o se rechazó, con evidencia.",
+  },
+  {
+    id: "core.cumplimiento.solicitud_exportada",
+    descripcion: "Se generó la exportación de acceso o portabilidad de un titular como documento.",
+  },
+  {
+    id: "core.cumplimiento.incidente_registrado",
+    descripcion: "Se registró un incidente de seguridad o una brecha de datos personales.",
+  },
+  {
+    id: "core.cumplimiento.incidente_avanzado",
+    descripcion: "Un incidente de seguridad cambió de estado en su atención.",
+  },
+  {
+    id: "core.cumplimiento.brecha_notificada",
+    descripcion: "Se dejó constancia del aviso de una brecha a la Agencia o a los titulares.",
+  },
 ];
 
 /** Catálogo completo: núcleo más los módulos registrados. */
