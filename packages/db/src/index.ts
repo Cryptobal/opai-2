@@ -5,7 +5,8 @@ export { leerInbox } from "./inbox";
 export { listarInstalaciones, type FiltroInstalaciones } from "./instalaciones-lista";
 export { forTenant, validarTenantId, type TenantDb } from "./for-tenant";
 export { forUser, type UserDb } from "./for-user";
-export { clienteAuth, globales, listarTenants, tenantsOperables, type Globales } from "./globales";
+export { clienteAuth, tenantPorSlug, usuarioPorId, tenantsOperables } from "./globales";
+export { accesoPlataforma, preciosHasta, type Globales } from "./plataforma";
 export {
   agregarABitacora,
   type HechoBitacora,

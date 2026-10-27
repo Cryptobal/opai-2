@@ -5,7 +5,7 @@ import {
   consumirPresupuesto,
   enTransaccion,
   forTenant,
-  globales,
+  preciosHasta,
   type Prisma,
   verificarAuditoria,
   verificarBitacora,
@@ -48,10 +48,7 @@ let precios: { hasta: number; mapa: Map<string, number> } | null = null;
 
 async function precioDe(recurso: string): Promise<number> {
   if (!precios || precios.hasta < Date.now()) {
-    const filas = await globales().precioRecurso.findMany({
-      where: { vigenteDesde: { lte: new Date() } },
-      orderBy: { vigenteDesde: "asc" },
-    });
+    const filas = (await preciosHasta(new Date())).reverse();
     // Ordenado por vigencia: el último de cada recurso es el vigente.
     precios = {
       hasta: Date.now() + 600_000,

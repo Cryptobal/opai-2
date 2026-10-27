@@ -30,7 +30,7 @@ export const platformAjustesGet = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx) {
-    const filas = await requierePlataforma(ctx).globales.ajustePlataforma.findMany({});
+    const filas = await requierePlataforma(ctx).globales.listarAjustes();
     return deAmbitoPlataforma().map((c) => {
       const f = filas.find((x) => x.modulo === c.modulo && x.clave === c.clave);
       const valido = f ? c.schema.safeParse(f.valor) : null;
@@ -71,12 +71,12 @@ export const platformAjustesSet = defineCapability({
     if (r && !r.success)
       throw reglaDeNegocio(`Valor inválido: ${r.error.issues[0]?.message ?? ""}`);
     const where = { modulo_clave: { modulo: c.modulo, clave: c.clave } };
-    const previo = await p.globales.ajustePlataforma.findUnique({ where });
+    const previo = await p.globales.ajustePorClave(where);
     const version = (previo?.version ?? 0) + 1;
     const valor = r ? r.data : valorPorDefecto(c);
     if (dryRun) return { modulo: c.modulo, clave: c.clave, valor, version };
     const json = JSON.parse(JSON.stringify(valor));
-    await p.globales.ajustePlataforma.upsert({
+    await p.globales.guardarAjuste({
       where,
       create: {
         modulo: c.modulo,
