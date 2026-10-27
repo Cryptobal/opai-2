@@ -23,7 +23,7 @@ type CampoProps = {
   etiqueta: string;
   htmlFor?: string;
   ayuda?: string;
-  error?: string;
+  error?: string | undefined;
   children: ReactNode;
   className?: string;
 };
@@ -37,7 +37,12 @@ export function Campo({ etiqueta, htmlFor, ayuda, error, children, className }: 
       </label>
       {children}
       {error ? (
-        <p className="text-xs font-medium text-danger-fg">{error}</p>
+        <p
+          id={htmlFor ? `${htmlFor}-error` : undefined}
+          className="text-xs font-medium text-danger-fg"
+        >
+          {error}
+        </p>
       ) : ayuda ? (
         <p className="t-caption">{ayuda}</p>
       ) : null}

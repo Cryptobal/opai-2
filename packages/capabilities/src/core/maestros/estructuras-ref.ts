@@ -19,16 +19,24 @@ export const entrada = z.object({
   instalacionId: uuidSchema.optional(),
   sueldoBase: z
     .number()
-    .int()
-    .min(0)
+    .int("Solo pesos enteros")
+    .min(0, "El monto no puede ser negativo")
+    .max(100_000_000, "Máximo 100.000.000 pesos por concepto")
     .nullable()
     .optional()
     .describe("CLP entero. Obligatorio para toda capa nueva."),
-  colacion: z.number().int().min(0).nullable().optional(),
+  colacion: z
+    .number()
+    .int("Solo pesos enteros")
+    .min(0, "El monto no puede ser negativo")
+    .max(100_000_000, "Máximo 100.000.000 pesos por concepto")
+    .nullable()
+    .optional(),
   movilizacion: z
     .number()
-    .int()
-    .min(0)
+    .int("Solo pesos enteros")
+    .min(0, "El monto no puede ser negativo")
+    .max(100_000_000, "Máximo 100.000.000 pesos por concepto")
     .nullable()
     .optional()
     .describe("CLP entero, definido explícitamente en capas nuevas."),
@@ -37,7 +45,13 @@ export const entrada = z.object({
     .nullable()
     .optional()
     .describe("Obligatoria para capas nuevas."),
-  gratificacionMonto: z.number().int().min(0).nullable().optional(),
+  gratificacionMonto: z
+    .number()
+    .int("Solo pesos enteros")
+    .min(0, "El monto no puede ser negativo")
+    .max(100_000_000, "Máximo 100.000.000 pesos por concepto")
+    .nullable()
+    .optional(),
   vigenteDesde: diaSchema,
   motivo: z.string().trim().min(5).max(500).optional().describe("Obligatorio en nivel persona."),
   items: z.array(itemInput).max(30).default([]),

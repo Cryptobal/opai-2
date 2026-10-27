@@ -683,3 +683,5 @@ original. CI de `60e54f0`, run `40551210403`, sigue con car8:100 teléfono falla
 aserciones, sin ampliar timeouts ni atribuir una causa no demostrada. El objetivo
 principal sigue pendiente. Detalles, límites y capturas en §10 del Brief 11.
 Sin cambios de negocio, migraciones, permisos ni plan del ROADMAP.
+
+- **Corrección QA del PR #80 · montos de sueldo.** Codex aplica el tope de 100.000.000 CLP por concepto indicado en el encargo y valida separadores de miles chilenos sin corregir texto inválido. Los porcentajes conservan su regla; el detalle y la validación están en el brief 07b y el PR.
