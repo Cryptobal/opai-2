@@ -28,12 +28,18 @@ import {
   finDeCadena,
 } from "./ia-respaldo";
 
-/** Mide una llamada: dos filas (entrada y salida). BYOK (propia) se mide pero no se cobra. */
+/**
+ * Mide una llamada: dos filas (entrada y salida). BYOK (propia) se mide pero no se cobra. El
+ * proveedor ya cobró estos tokens antes de medirlos: `yaIncurrido` registra siempre el gasto real
+ * (nunca se pierde ni se repite sin trazabilidad), aunque supere el tope; la SIGUIENTE llamada del
+ * agente recibe `BUDGET_EXCEEDED` en el prepago de `capacidad.ejecucion` (BRIEF-02 §4.9).
+ */
 function medir(ctx: Contexto, clase: ClaseTarea, modulo: string, c: Candidato, uso: Uso) {
   const comun = {
     ...consumoBase(ctx, modulo),
     unidad: "token",
     sinCosto: c.cred.modalidad === "propia",
+    yaIncurrido: true,
     referenciaTipo: "ia",
     referenciaId: `${c.id}:${c.modelo}`,
   };

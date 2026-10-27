@@ -23,11 +23,21 @@ export type ConsumoNuevo = {
   referenciaId?: string | null;
   /** BYOK (credencial propia del tenant): se mide pero OPAI no lo cobra (ADR-031). */
   sinCosto?: boolean;
+  /**
+   * El gasto ya ocurrió con el proveedor (IA, mapas, correo, almacenamiento) antes de medirlo: se
+   * registra siempre, aunque supere el tope, para no perder trazabilidad (BRIEF-02 §4.9). Solo
+   * `capacidad.ejecucion` (prepago, antes del handler) puede rechazarse sin incurrir en el gasto.
+   */
+  yaIncurrido?: boolean;
 };
 
 export interface Medidor {
   registrar(consumo: ConsumoNuevo): Promise<void>;
+  /** Reserva y cobra antes del efecto; al terminar completa la misma fila, sin duplicar el cargo. */
+  preparar?(consumo: ConsumoNuevo): Promise<FinalizarConsumo>;
 }
+
+export type FinalizarConsumo = (estado: { ok: boolean; duracionMs: number }) => Promise<void>;
 
 /** Evento de dominio a publicar por outbox en la misma transacción del cambio (ADR-029). */
 export type EventoNuevo = {
@@ -71,5 +81,10 @@ export type AgenteContexto = {
   autonomia: Record<string, string>;
 };
 
-/** Principal detrás de una API key (ADR-033). Sesiones humanas: "usuario". */
-export type Principal = { tipo: "usuario" | "cuenta" | "persona"; id: string };
+/**
+ * Principal detrás de una API key (ADR-033, Identidad de servicio t457u). Sesiones humanas:
+ * "usuario". "servicio": agente del tenant sin dueño humano (integraciones, agentes alojados, bots
+ * de desarrollo); su responsable es una persona solo para gobierno y sus permisos salen solo de la
+ * key (no hereda rol).
+ */
+export type Principal = { tipo: "usuario" | "cuenta" | "persona" | "servicio"; id: string };

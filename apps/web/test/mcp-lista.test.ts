@@ -37,7 +37,9 @@ describe("MCP de punta a punta (servidor real, key de owner con scope *)", () =>
     expect(nombres.length).toBeGreaterThan(150);
     expect(nombres).toContain("core_integraciones_list");
     expect(nombres).toContain("core_geo_autocompletar");
-    expect(nombres).toContain("preview_core_users_invite");
+    expect(nombres).toContain("preview_core_cuentas_create");
+    expect(nombres).not.toContain("core_users_invite");
+    expect(nombres).not.toContain("preview_core_users_invite");
     expect(new Set(nombres).size).toBe(nombres.length);
   });
 

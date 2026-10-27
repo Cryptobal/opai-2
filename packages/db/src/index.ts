@@ -14,12 +14,9 @@ export {
 export { type ClienteCatalogo, sembrarCatalogo } from "./catalogo-tenant";
 export { consolidarConsumos, RETENCION_CONSUMOS_DIAS } from "./consumos";
 export { colaDeTrabajos, type ColaDeTrabajos, type TrabajoReclamado } from "./trabajos";
-export {
-  consumirRateLimit,
-  purgarVentanasRateLimit,
-  type ResultadoRateLimit,
-} from "./rate-limit";
+export { consumirRateLimit, purgarVentanasRateLimit, type ResultadoRateLimit } from "./rate-limit";
 export { enTransaccion, type OpcionesTransaccion, type TenantTx } from "./transaccion";
+export { consumirPresupuesto, periodoDeMes } from "./presupuesto";
 export type {
   ApiKey,
   AuditEvent,

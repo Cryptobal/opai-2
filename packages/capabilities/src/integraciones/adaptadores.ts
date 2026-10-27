@@ -31,8 +31,9 @@ export async function correoDe(
         unidad: "correo",
         cantidad: 1,
       };
+      // El correo ya salió antes de medirlo: se registra siempre (yaIncurrido), nunca se pierde.
       await ctx.medidor
-        .registrar({ ...consumo, sinCosto: cred?.modalidad === "propia" })
+        .registrar({ ...consumo, sinCosto: cred?.modalidad === "propia", yaIncurrido: true })
         .catch(() => undefined);
     },
   };
