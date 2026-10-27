@@ -2,7 +2,8 @@
 // y modelo; aquí se arma la cadena de proveedores conectados, se llama por HTTP (sin SDK) y se mide
 // cada llamada en `core.consumos` (tokens, proveedor, modelo, clase) sin guardar el prompt ni la
 // key. Respaldo: si el proveedor elegido falla por 5xx, 429 o red/timeout, prueba el siguiente que
-// el tenant tenga conectado; nunca ante un 4xx de contenido.
+// el tenant tenga conectado; nunca ante un 4xx de contenido. Si el tenant tiene key propia, el
+// respaldo solo usa otras keys propias del mismo tenant: nunca cae a la de OPAI (ver ia-respaldo.ts).
 import {
   type ClaseTarea,
   ErrorIa,
@@ -19,7 +20,8 @@ import {
 import { ajuste } from "../core/config/valores";
 import type { Contexto } from "../types";
 import { consumoBase } from "./consumo-base";
-import { type Credencial, credencialDe, integracionDe } from "./resolver";
+import { type Candidato, conRespaldo, type FalloProveedor, finDeCadena } from "./ia-respaldo";
+import { credencialDe, integracionDe } from "./resolver";
 
 const ORDEN_IA: readonly ProveedorIaId[] = [
   "ia_anthropic",
@@ -29,7 +31,6 @@ const ORDEN_IA: readonly ProveedorIaId[] = [
   "ia_compatible",
 ];
 
-type Candidato = { id: ProveedorIaId; modelo: string; cred: Credencial; baseUrl?: string };
 type ConfigIa = { modelos?: Partial<Record<ClaseTarea, string>>; baseUrl?: string };
 
 /** Proveedores de IA conectados por el tenant, en orden de preferencia, con modelo resuelto. */
@@ -55,6 +56,10 @@ async function candidatosIa(
     if (id === "ia_compatible" && !config.baseUrl) continue;
     out.push({ id, modelo, cred, ...(config.baseUrl ? { baseUrl: config.baseUrl } : {}) });
   }
+  // Política BYOK (Carlos, 26-oct-2026 21:58 CLT, t214s684): si el tenant tiene key propia, la cadena
+  // de respaldo solo usa keys propias; nunca la de OPAI. No aplica al probar un proveedor concreto.
+  if (!solo && out.some((c) => c.cred.modalidad === "propia"))
+    return out.filter((c) => c.cred.modalidad === "propia");
   return out;
 }
 
@@ -76,34 +81,16 @@ function medir(ctx: Contexto, clase: ClaseTarea, modulo: string, c: Candidato, u
 const adaptador = (c: Candidato) =>
   proveedorIa(c.id, c.cred.valor, c.baseUrl !== undefined ? { baseUrl: c.baseUrl } : undefined);
 
-/** Recorre la cadena: salta al siguiente proveedor solo ante un error reintentable (5xx/429/red). */
-async function conRespaldo<T>(
-  cands: readonly Candidato[],
-  conRetry: boolean,
-  intentar: (c: Candidato) => Promise<T>,
-): Promise<T> {
-  let ultimo: unknown;
-  for (let i = 0; i < cands.length; i++) {
-    try {
-      return await intentar(cands[i]!);
-    } catch (e) {
-      const sePuede = conRetry && i < cands.length - 1 && e instanceof ErrorIa && e.reintentable;
-      if (!sePuede) throw e;
-      ultimo = e;
-    }
-  }
-  throw (ultimo as Error | undefined) ?? new Error("Sin proveedores de IA.");
-}
-
 /** Stream con respaldo: solo cae al siguiente proveedor si falla antes del primer evento. */
 async function* streamConRespaldo(
   ctx: Contexto,
   clase: ClaseTarea,
   modulo: string,
   cands: readonly Candidato[],
+  avisar: boolean,
   s: SolicitudConversacion,
 ): AsyncGenerator<EventoStream> {
-  let ultimo: unknown;
+  const fallos: FalloProveedor[] = [];
   for (let i = 0; i < cands.length; i++) {
     const c = cands[i]!;
     const it = adaptador(c).conversarStream(c.modelo, s)[Symbol.asyncIterator]();
@@ -111,11 +98,9 @@ async function* streamConRespaldo(
     try {
       actual = await it.next();
     } catch (e) {
-      if (i < cands.length - 1 && e instanceof ErrorIa && e.reintentable) {
-        ultimo = e;
-        continue;
-      }
-      throw e;
+      if (e instanceof ErrorIa) fallos.push({ proveedor: c.id, error: e });
+      if (i < cands.length - 1 && e instanceof ErrorIa && e.reintentable) continue;
+      throw await finDeCadena(ctx, avisar, fallos, e);
     }
     // Ya respondió este proveedor: medimos el uso conocido en `finally`, aunque el stream se corte
     // (lanza) o el consumidor cancele (rompe el bucle), y cerramos el iterador subyacente.
@@ -132,7 +117,7 @@ async function* streamConRespaldo(
     }
     return;
   }
-  throw (ultimo as Error | undefined) ?? new Error("Sin proveedores de IA.");
+  throw new Error("Sin proveedores de IA.");
 }
 
 /** IA por clase de tarea (ADR-031): proveedor propio configurado, si no el de plataforma. */
@@ -145,22 +130,32 @@ export async function iaDe(
   const cands = await candidatosIa(ctx, clase, solo);
   if (cands.length === 0) return null;
   const conRetry = !solo;
+  // Avisar solo en la cadena de respaldo (no al probar un proveedor concreto) y solo con keys propias.
+  const avisar = conRetry && cands.some((c) => c.cred.modalidad === "propia");
+  const ejecutar = async <T>(fn: (c: Candidato) => Promise<T>): Promise<T> => {
+    const fallos: FalloProveedor[] = [];
+    try {
+      return await conRespaldo(cands, conRetry, fallos, fn);
+    } catch (e) {
+      throw await finDeCadena(ctx, avisar, fallos, e);
+    }
+  };
   return {
     proveedor: cands[0]!.id,
     modelo: cands[0]!.modelo,
     completar: (s: SolicitudIa) =>
-      conRespaldo(cands, conRetry, async (c) => {
+      ejecutar(async (c) => {
         const r = await adaptador(c).completar(c.modelo, s);
         await medir(ctx, clase, modulo, c, { tokensEntrada: r.tokensEntrada, tokensSalida: r.tokensSalida });
         return r;
       }),
     conversar: (s: SolicitudConversacion): Promise<RespuestaConversacion> =>
-      conRespaldo(cands, conRetry, async (c) => {
+      ejecutar(async (c) => {
         const r = await adaptador(c).conversar(c.modelo, s);
         await medir(ctx, clase, modulo, c, r.uso);
         return r;
       }),
     conversarStream: (s: SolicitudConversacion): AsyncIterable<EventoStream> =>
-      streamConRespaldo(ctx, clase, modulo, cands, s),
+      streamConRespaldo(ctx, clase, modulo, cands, avisar, s),
   };
 }
