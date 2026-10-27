@@ -65,6 +65,12 @@ describe.skipIf(!urlPropietario)("inbox propio: página y conteo en una sentenci
     } finally {
       registrarObservadorConsultas(null);
     }
+    const primera = await enTransaccion(tenantId, (tx) => leerInbox(tx, tenantId, usuarioId, false, 1));
+    const siguiente = await enTransaccion(tenantId, (tx) =>
+      leerInbox(tx, tenantId, usuarioId, false, 10, primera.items[0]!.id),
+    );
+    expect(siguiente.items.map((n) => n.titulo)).toEqual(["Propia 2", "Propia 1"]);
+    expect(siguiente.noLeidas).toBe(2);
     const pendientes = await enTransaccion(tenantId, (tx) =>
       leerInbox(tx, tenantId, usuarioId, true, 10),
     );

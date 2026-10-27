@@ -12,6 +12,7 @@ export function lecturasLocksMemoria(tabla: (nombre: string) => Fila[]) {
       const propias = tabla("notificacion").filter(
         (n) => n["tenantId"] === valores[0] && n["usuarioId"] === valores[1],
       );
+      const cursor = propias.find((n) => n["id"] === valores[5]);
       const items = propias
         .filter((n) => !valores[4] || !n["leidaEn"])
         .sort(
@@ -19,7 +20,9 @@ export function lecturasLocksMemoria(tabla: (nombre: string) => Fila[]) {
             fecha(b["createdAt"]) - fecha(a["createdAt"]) ||
             String(b["id"]).localeCompare(String(a["id"])),
         )
-        .slice(0, Number(valores[5]))
+        .filter((n) => !valores[5] || (cursor && (fecha(n["createdAt"]) < fecha(cursor["createdAt"]) ||
+          (fecha(n["createdAt"]) === fecha(cursor["createdAt"]) && String(n["id"]) < String(cursor["id"])))))
+        .slice(0, Number(valores[9]))
         .map((n) => ({
           id: n["id"],
           titulo: n["titulo"],
