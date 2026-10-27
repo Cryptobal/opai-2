@@ -8,6 +8,7 @@ import { uuidSchema } from "../esquemas";
 import { aFecha, dia, escribirConEvento } from "./comun";
 import { DIA_MS, entrada, referencia } from "./estructuras-ref";
 import { ocultarMontos } from "./estructuras-acceso";
+import { dondeEstructura } from "./estructuras-alcance";
 import { estructuraSchema, vistaEstructura } from "./estructuras-vista";
 
 export const estructurasCreate = defineCapability({
@@ -42,8 +43,10 @@ export const estructurasCreate = defineCapability({
       vigenteDesde: desde,
       estado: "vigente",
     };
-    const ocultar = await ocultarMontos(ctx, data);
-    if (dryRun) return vistaEstructura({ ...data, id: "" }, items, ocultar);
+    if (dryRun) {
+      // Sin fila persistida todavía: `ocultarMontos` no tiene id que auditar (nada se reveló aún).
+      return vistaEstructura({ ...data, id: "" }, items, await ocultarMontos(ctx, data));
+    }
     const e = await escribirConEvento(
       ctx,
       {
@@ -81,7 +84,10 @@ export const estructurasCreate = defineCapability({
         return nueva;
       },
     );
-    return vistaEstructura(e, items, ocultar);
+    // Recién con `e.id` (la fila ya persistida) `ocultarMontos` puede auditar la revelación: la
+    // respuesta de creación entrega los mismos montos sensibles que un `get`, así que queda trazada
+    // igual (quién, cuándo, qué).
+    return vistaEstructura(e, items, await ocultarMontos(ctx, e));
   },
 });
 
@@ -95,7 +101,11 @@ export const estructurasAnular = defineCapability({
   efecto: "irreversible",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    const e = await ctx.db.estructuraSueldo.findUnique({ where: { id: input.id } });
+    // findFirst (no findUnique) para aplicar el alcance por filas: fuera de alcance = no encontrada,
+    // igual que en lectura (`core.estructuras.get`) y sin distinguir el caso de otro tenant.
+    const e = await ctx.db.estructuraSueldo.findFirst({
+      where: { id: input.id, AND: [await dondeEstructura(ctx)] },
+    });
     if (!e) throw noEncontrado("La estructura");
     if (e.estado === "anulada") throw reglaDeNegocio("La estructura ya está anulada.");
     const items = await ctx.db.estructuraItem.findMany({
