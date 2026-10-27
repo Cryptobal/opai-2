@@ -16,7 +16,11 @@ async function comprobarPalabras(nav: Locator) {
         rango.setEnd(texto, palabra.index + palabra[0].length);
         const rects = [...rango.getClientRects()];
         const limites = elemento.getBoundingClientRect();
-        return rects.length === 1 && rects[0]!.left >= limites.left - 0.5 && rects[0]!.right <= limites.right + 0.5;
+        const estilo = getComputedStyle(elemento);
+        const corteSilabico = estilo.hyphens === "auto" && elemento.getAttribute("lang") === "es" &&
+          estilo.wordBreak === "normal" && estilo.overflowWrap === "normal";
+        return rects.length > 0 && (rects.length === 1 || corteSilabico) &&
+          rects.every((rect) => rect.left >= limites.left - 0.5 && rect.right <= limites.right + 0.5);
       });
     });
     expect(resultado).not.toBeNull();

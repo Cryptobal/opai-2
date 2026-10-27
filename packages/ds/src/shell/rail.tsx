@@ -28,7 +28,7 @@ function ItemRiel({
 }) {
   const activo = esActivo(rutaActual, item.href, item.exacta, item.activoEn);
   return (
-    <li>
+    <li className="w-full">
       <Link
         href={item.href}
         aria-current={activo ? "page" : undefined}
@@ -36,7 +36,7 @@ function ItemRiel({
           ? { title: item.etiqueta, "aria-label": item.etiqueta }
           : {})}
         className={cn(
-          "flex min-h-14 w-20 flex-col items-center justify-center gap-0.5 rounded-md text-xs leading-3 font-medium tracking-tighter",
+          "flex min-h-14 w-full flex-col items-center justify-center gap-0.5 rounded-md text-xs leading-3 font-medium",
           activo ? "bg-fill text-fg" : "text-fg-muted hover:bg-fill",
         )}
       >
@@ -44,7 +44,7 @@ function ItemRiel({
           <item.icono className={cn("size-5", activo && "text-accent")} aria-hidden />
           {sinContador ? null : <Contador n={item.alerta ? item.contador : undefined} />}
         </span>
-        <span className="w-full wrap-normal text-center">{item.corta ?? item.etiqueta}</span>
+        <span lang="es" className="w-full hyphens-auto wrap-normal text-center">{item.corta ?? item.etiqueta}</span>
       </Link>
     </li>
   );
@@ -92,14 +92,14 @@ export function Rail({
         variante="riel"
         className="mb-3 w-16"
       />
-      <ul className="flex min-h-0 flex-col gap-1 overflow-y-auto py-1">
+      <ul className="flex w-full min-h-0 flex-col gap-1 overflow-y-auto py-1">
         {items
           .filter((i) => !i.pie && !i.soloAmplio)
           .map((item) => (
             <ItemRiel key={item.href} item={item} rutaActual={rutaActual} Link={Link} />
           ))}
       </ul>
-      <ul className="mt-auto flex flex-col gap-1">
+      <ul className="mt-auto flex w-full flex-col gap-1">
         {fijados ? <li className="w-16"><MenuMas items={items} extras={[]} rutaActual={rutaActual} fijados={fijados} {...(errorFijados ? { errorFijados } : {})} {...(reintentarFijados ? { reintentarFijados } : {})} {...(onDesfijar ? { onDesfijar } : {})} {...(onNavegar ? { onNavegar } : {})} disparador={<span className="flex flex-col items-center text-[11px]"><IconoMenu className="size-5" />Más</span>} /></li> : null}
         {items
           .filter((i) => i.pie)
