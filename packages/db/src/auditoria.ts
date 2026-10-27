@@ -1,6 +1,7 @@
-import { canonDeAuditoria, HASH_GENESIS, hashEncadenado } from "@opai/domain";
+import { randomBytes } from "node:crypto";
 
 import { type TenantTx } from "./transaccion";
+import { notificarConsulta } from "./metricas";
 
 export { verificarAuditoria, type VerificacionAuditoria } from "./auditoria-verificar";
 
@@ -14,14 +15,9 @@ export type HechoAuditoria = {
   payload: unknown;
 };
 
-/**
- * Agrega una fila a `core.audit_events` encadenada por tenant (auditoría del 26-oct-2026, ADR-023
- * extendido): MISMA transacción que la escritura que audita. El advisory lock serializa la lectura
- * de la última `seq`/`hash` del tenant y el insert siguiente (sin TOCTOU entre escrituras
- * concurrentes del mismo tenant); se libera solo al terminar la transacción.
- */
 const colasPorTransaccion = new WeakMap<TenantTx, Promise<unknown>>();
 
+/** Append en la MISMA transacción que el hecho; orden por tenant y por llamada dentro de la tx. */
 export function agregarAAuditoria(
   tx: TenantTx,
   tenantId: string,
@@ -37,39 +33,25 @@ export function agregarAAuditoria(
   return siguiente;
 }
 
-async function insertarAuditoria(
-  tx: TenantTx,
-  tenantId: string,
-  hecho: HechoAuditoria,
-): Promise<{ id: string; seq: number; hash: string }> {
-  await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${tenantId}, 0))`;
-  // Durante la expansión conviven inserts viejos sin cadena: DESC ordena NULL primero en PG.
-  const [ultima] = await tx.$queryRaw<{ seq: number; hash: string }[]>`
-    SELECT seq, hash FROM core.audit_events
-    WHERE tenant_id = ${tenantId}::uuid AND seq IS NOT NULL
-    ORDER BY seq DESC LIMIT 1
+async function insertarAuditoria(tx: TenantTx, tenantId: string, hecho: HechoAuditoria) {
+  // UUID v7, como el default uuid(7) de Prisma que sustituye este INSERT SQL (RFC 9562).
+  const bytes = randomBytes(16);
+  bytes.writeUIntBE(Date.now(), 0, 6);
+  bytes[6] = ((bytes[6] ?? 0) & 0x0f) | 0x70;
+  bytes[8] = ((bytes[8] ?? 0) & 0x3f) | 0x80;
+  const h = bytes.toString("hex");
+  const id = `${h.slice(0, 8)}-${h.slice(8, 12)}-${h.slice(12, 16)}-${h.slice(16, 20)}-${h.slice(20)}`;
+  // VOLATILE obtiene una foto nueva DESPUÉS del lock, también si esperó otro append.
+  // Una CTE con lock y SELECT en la misma foto READ COMMITTED no garantiza esa propiedad.
+  notificarConsulta(); // SQL de negocio: $queryRaw no pasa por el hook de modelos Prisma.
+  const [fila] = await tx.$queryRaw<{ id: string; seq: number; hash: string }[]>`
+    SELECT * FROM core.auditoria_append(
+      ${id}::uuid, ${tenantId}::uuid, ${hecho.actorTipo}::text,
+      ${hecho.actorId}::text, ${hecho.viaUserId}::text, ${hecho.capability}::text,
+      ${hecho.entityType}::text, ${hecho.entityId}::text,
+      ${JSON.stringify(hecho.payload ?? null)}::jsonb, ${new Date().toISOString()}::timestamptz
+    )
   `;
-  const seq = (ultima?.seq ?? 0) + 1;
-  const hashAnterior = ultima?.hash ?? HASH_GENESIS;
-  const createdAt = new Date();
-  const hashCanon = await canonDeAuditoria({ tenantId, seq, createdAt, ...hecho });
-  const hash = await hashEncadenado(hashAnterior, hashCanon);
-  const fila = await tx.auditEvent.create({
-    data: {
-      tenantId,
-      actorType: hecho.actorTipo,
-      actorId: hecho.actorId,
-      viaUserId: hecho.viaUserId,
-      capability: hecho.capability,
-      entityType: hecho.entityType,
-      entityId: hecho.entityId,
-      payload: JSON.parse(JSON.stringify(hecho.payload ?? null)),
-      createdAt,
-      seq,
-      hashAnterior,
-      hash,
-      hashCanon,
-    },
-  });
-  return { id: fila.id, seq, hash };
+  if (!fila) throw new Error("El append de auditoría no devolvió su fila.");
+  return fila;
 }

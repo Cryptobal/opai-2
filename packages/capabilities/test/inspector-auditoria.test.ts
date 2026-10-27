@@ -34,7 +34,12 @@ describe.each(["core.audit.list", "core.actividad.list"])("%s: remuneraciones au
     expect(JSON.stringify(r)).not.toContain("3000000");
     expect(JSON.stringify(r)).not.toContain("50000");
     expect(JSON.stringify(r)).toContain("••••");
-    expect(eventos).toHaveLength(0);
+    expect(eventos.filter((e) => e.capability === "core.estructuras.read_sensible")).toHaveLength(
+      0,
+    );
+    expect(eventos).toEqual([
+      expect.objectContaining({ capability: id, payload: { ids: [expect.any(String)] } }),
+    ]);
   });
 
   it("cada revelación deja referencia al evento leído, sin copiar montos", async () => {
@@ -47,6 +52,7 @@ describe.each(["core.audit.list", "core.actividad.list"])("%s: remuneraciones au
         entityType: "audit_event",
         payload: expect.objectContaining({ origen: id }),
       }),
+      expect.objectContaining({ capability: id, payload: { ids: [expect.any(String)] } }),
     ]);
     expect(JSON.stringify(eventos)).not.toContain("3000000");
   });

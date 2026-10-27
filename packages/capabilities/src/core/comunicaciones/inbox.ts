@@ -1,9 +1,10 @@
 import { z } from "zod";
 
+import { leerInbox } from "@opai/db";
+
 import { defineCapability } from "../../define";
 import { noEncontrado, reglaDeNegocio } from "../../errores";
 import type { Contexto } from "../../types";
-import { iso } from "../comun";
 import { uuidSchema } from "../esquemas";
 
 const notificacionSchema = z.object({
@@ -21,6 +22,7 @@ function usuarioDe(ctx: Contexto): string {
 }
 
 export const notificacionesList = defineCapability({
+  auditarLectura: false, // Inbox propio, filtrado por usuario: no es acceso a registros de terceros.
   id: "core.notificaciones.list",
   descripcion:
     "Avisos del usuario en OPAI (campana): los más recientes primero, con cantidad de no leídos.",
@@ -36,35 +38,12 @@ export const notificacionesList = defineCapability({
   dryRun: false,
   async handler(ctx, input) {
     const usuarioId = usuarioDe(ctx);
-    // El cursor también debe ser propio y del tenant. Prisma conserva la precisión de Postgres
-    // al ordenar por createdAt + id; no se reconstruye desde una fecha JS truncada a milisegundos.
-    if (input.antesDe && !await ctx.db.notificacion.findFirst({
-      where: { id: input.antesDe, usuarioId }, select: { id: true },
-    })) throw noEncontrado("El aviso");
-    const [filas, noLeidas] = await Promise.all([
-      ctx.db.notificacion.findMany({
-        where: {
-          usuarioId,
-          ...(input.soloNoLeidas ? { leidaEn: null } : {}),
-          ...(input.antesDe ? { id: { not: input.antesDe } } : {}),
-        },
-        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
-        ...(input.antesDe ? { cursor: { id: input.antesDe } } : {}),
-        take: input.limite,
-      }),
-      ctx.db.notificacion.count({ where: { usuarioId, leidaEn: null } }),
-    ]);
-    return {
-      items: filas.map((n) => ({
-        id: n.id,
-        titulo: n.titulo,
-        cuerpo: n.cuerpo ?? null,
-        enlace: n.enlace ?? null,
-        leidaEn: iso(n.leidaEn),
-        creadaEn: n.createdAt.toISOString(),
-      })),
-      noLeidas,
-    };
+    return ctx.transaccion(async (tx) => {
+      if (input.antesDe && !await tx.notificacion.findFirst({
+        where: { id: input.antesDe, usuarioId }, select: { id: true },
+      })) throw noEncontrado("El aviso");
+      return leerInbox(tx, ctx.tenantId, usuarioId, input.soloNoLeidas, input.limite, input.antesDe);
+    });
   },
 });
 

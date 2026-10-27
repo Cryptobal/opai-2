@@ -19,12 +19,17 @@ describe("cabecerasSeguridad", () => {
       // La CSP viaja en Report-Only, no como `Content-Security-Policy` que bloquearía.
       expect(h["Content-Security-Policy-Report-Only"]).toBeTruthy();
       expect(h["Content-Security-Policy"]).toBeUndefined();
+      expect(h["Reporting-Endpoints"]).toBe('csp="/api/csp-report"');
+      expect(h["Content-Security-Policy-Report-Only"]).toContain(
+        "report-uri /api/csp-report; report-to csp",
+      );
     }
   });
 
-  it("solo manda HSTS en producción, con dos años, includeSubDomains y sin preload", () => {
+  it("solo manda HSTS en producción, con dos años y sin extenderlo a subdominios no verificados", () => {
     const prod = mapa(cabecerasSeguridad({ produccion: true, desarrollo: false }));
-    expect(prod["Strict-Transport-Security"]).toBe("max-age=63072000; includeSubDomains");
+    expect(prod["Strict-Transport-Security"]).toBe("max-age=63072000");
+    expect(prod["Strict-Transport-Security"]).not.toContain("includeSubDomains");
     expect(prod["Strict-Transport-Security"]).not.toContain("preload");
     const dev = mapa(cabecerasSeguridad({ produccion: false, desarrollo: true }));
     expect(dev["Strict-Transport-Security"]).toBeUndefined();

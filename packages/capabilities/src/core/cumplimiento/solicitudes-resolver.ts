@@ -11,8 +11,11 @@ import {
   validarEvidenciaDelTenant,
   vistaSolicitud,
 } from "./comunes";
+import { dondeSolicitud, enContextoArco } from "./solicitudes-alcance";
+import { autorizarRespuestaSolicitud } from "./solicitudes-repeticion";
 
 export const solicitudResolver = defineCapability({
+  autorizarRepeticion: autorizarRespuestaSolicitud,
   id: "core.cumplimiento.solicitud_resolver",
   descripcion:
     "Resuelve o rechaza una solicitud del titular con su resultado y la evidencia (Ley 21.719). Es un acto humano responsable; la transición y el documento de evidencia quedan auditados.",
@@ -30,34 +33,41 @@ export const solicitudResolver = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    const s = await ctx.db.solicitudArco.findUnique({ where: { id: input.id } });
-    if (!s) throw noEncontrado("La solicitud");
-    await validarEvidenciaDelTenant(ctx.db, input.documentoEvidenciaId);
-    if (!puedeAvanzarSolicitud(s.estado as EstadoSolicitud, input.estado))
-      throw reglaDeNegocio(`No se puede pasar de "${s.estado}" a "${input.estado}".`);
-    if (dryRun) return vistaSolicitud({ ...s, estado: input.estado, resultado: input.resultado });
-    const fila = await transicionarSolicitud(
-      ctx,
-      s.id,
-      s.estado,
-      {
-        estado: input.estado,
-        resultado: input.resultado,
-        documentoEvidenciaId: input.documentoEvidenciaId ?? s.documentoEvidenciaId ?? null,
-      },
-      {
-        tipo:
-          input.estado === "resuelta"
-            ? "core.cumplimiento.solicitud_resuelta"
-            : "core.cumplimiento.solicitud_avanzada",
-        payload: {
-          solicitud: { tipo: s.tipo, plazo: s.plazoEn ? s.plazoEn.toISOString().slice(0, 10) : "" },
-          titular: { nombre: s.titularNombre ?? "" },
+    return enContextoArco(ctx, async (ctx) => {
+      const s = await ctx.db.solicitudArco.findFirst({
+        where: { id: input.id, ...(await dondeSolicitud(ctx)) },
+      });
+      if (!s) throw noEncontrado("La solicitud");
+      await validarEvidenciaDelTenant(ctx.db, input.documentoEvidenciaId);
+      if (!puedeAvanzarSolicitud(s.estado as EstadoSolicitud, input.estado))
+        throw reglaDeNegocio(`No se puede pasar de "${s.estado}" a "${input.estado}".`);
+      if (dryRun) return vistaSolicitud({ ...s, estado: input.estado, resultado: input.resultado });
+      const fila = await transicionarSolicitud(
+        ctx,
+        s.id,
+        s.estado,
+        {
           estado: input.estado,
-          url: `${ctx.servicios.urlBase}/configuracion/cumplimiento`,
+          resultado: input.resultado,
+          documentoEvidenciaId: input.documentoEvidenciaId ?? s.documentoEvidenciaId ?? null,
         },
-      },
-    );
-    return vistaSolicitud(fila);
+        {
+          tipo:
+            input.estado === "resuelta"
+              ? "core.cumplimiento.solicitud_resuelta"
+              : "core.cumplimiento.solicitud_avanzada",
+          payload: {
+            solicitud: {
+              tipo: s.tipo,
+              plazo: s.plazoEn ? s.plazoEn.toISOString().slice(0, 10) : "",
+            },
+            titular: { nombre: s.titularNombre ?? "" },
+            estado: input.estado,
+            url: `${ctx.servicios.urlBase}/configuracion/cumplimiento`,
+          },
+        },
+      );
+      return vistaSolicitud(fila);
+    });
   },
 });
