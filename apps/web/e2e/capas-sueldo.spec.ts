@@ -3,7 +3,7 @@ import { expect, test } from "@playwright/test";
 import { entrar, ocultarDev, password, sinDesborde, urlSiembra } from "./fixtures-puestos-car8";
 
 test.use({ actionTimeout: 30_000 });
-test.setTimeout(180_000);
+test.setTimeout(240_000);
 const idDe = (tabla: string) =>
   execFileSync(
     "psql",
@@ -30,6 +30,12 @@ test("capas completas, vista previa, historial y resolución sin herencia", asyn
     page.getByRole("heading", { name: "Sueldo de instalación", exact: true }),
   ).toBeVisible();
   await expect(page.getByText("Algo salió mal")).toHaveCount(0);
+  const metricas = await page.locator("#opai-metricas").textContent();
+  info.annotations.push({
+    type: "rendimiento-instalacion",
+    description: metricas ?? "Marcador ausente",
+  });
+  console.log("07b consultas instalación:", metricas);
   await page.getByRole("link", { name: /Definir sueldo|Nueva versión/ }).click();
   const hoja = page.getByRole("dialog", { name: "Nueva versión de sueldo" });
   await expect(hoja).toBeVisible();
@@ -66,6 +72,30 @@ test("capas completas, vista previa, historial y resolución sin herencia", asyn
   const rut = page.getByRole("dialog", { name: "Definir sueldo por RUT" });
   await expect(rut.getByRole("button", { name: "Revisar cambio" })).toBeDisabled();
   await expect(rut.getByLabel("Motivo obligatorio")).toBeVisible();
+  await rut.getByLabel("Sueldo base", { exact: true }).fill("700000");
+  await rut.getByLabel("Colación", { exact: true }).fill("0");
+  await rut.getByLabel("Movilización", { exact: true }).fill("0");
+  const anio = 2200 + (Math.floor(Date.now() / 60000) % 1000);
+  await rut.getByLabel("Vigente desde").fill(`${dia}-01-${anio}`);
+  await rut.getByLabel("Motivo obligatorio").fill("Acuerdo individual de prueba E2E");
+  await rut.getByRole("button", { name: "Revisar cambio" }).click();
+  await confirmar.getByRole("button", { name: "Guardar versión" }).click();
+  await expect(confirmar).toHaveCount(0);
+  await page.goto(`/personas/${persona}/sueldo?fecha=${anio}-01-${dia}&instalacion=${instalacion}`);
+  await expect(
+    page
+      .getByRole("list", { name: "Capas de sueldo" })
+      .locator("li")
+      .filter({ hasText: "Sueldo por RUT" })
+      .getByText("Rige", { exact: true }),
+  ).toBeVisible();
+  const metricasPersona = await page.locator("#opai-metricas").textContent();
+  info.annotations.push({
+    type: "rendimiento-persona",
+    description: metricasPersona ?? "Marcador ausente",
+  });
+  console.log("07b consultas persona:", metricasPersona);
+  expect(await sinDesborde(page)).toBe(true);
   await page.screenshot({
     path: `e2e/__screenshots__/07b-rut-${info.project.name}.png`,
     fullPage: true,

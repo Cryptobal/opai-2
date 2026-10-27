@@ -83,7 +83,7 @@ describe("Inspector DT: lectura sensible auditada (t479u; art. 31 DFL 2/1967)", 
   });
 
   it("la estructura efectiva devuelve haberes completos y audita el nivel sensible", async () => {
-    const { ctx, eventos, cargoId, estructura } = await preparar();
+    const { ctx, eventos, cargoId } = await preparar();
     const { id: personaId } = await dato<{ id: string }>(
       { ...ctx, autorizar: () => true },
       "core.personas.create",
@@ -94,6 +94,21 @@ describe("Inspector DT: lectura sensible auditada (t479u; art. 31 DFL 2/1967)", 
         vinculo: { cargoId, tipo: "indefinido", inicio: "2026-01-01" },
       },
     );
+    const estructura = await dato<{ id: string }>(
+      { ...ctx, autorizar: () => true },
+      "core.estructuras.create",
+      {
+        nivel: "persona",
+        personaId,
+        sueldoBase: 3_000_000,
+        colacion: 0,
+        movilizacion: 0,
+        gratificacion: "legal_25",
+        motivo: "Acuerdo de prueba",
+        vigenteDesde: "2026-01-01",
+        items: [{ tipo: "bono_fijo", nombre: "Bono", monto: 50_000 }],
+      },
+    );
     eventos.length = 0;
     const r = await dato(ctx, "core.estructuras.efectiva", {
       personaId,
@@ -101,7 +116,7 @@ describe("Inspector DT: lectura sensible auditada (t479u; art. 31 DFL 2/1967)", 
       imm: 529_000,
     });
     expect(r).toMatchObject({
-      niveles: { cargo: { sueldoBase: 3_000_000, sensible: false } },
+      niveles: { persona: { sueldoBase: 3_000_000, sensible: false }, cargo: null },
       haberes: expect.any(Object),
     });
     expect(eventos).toEqual([

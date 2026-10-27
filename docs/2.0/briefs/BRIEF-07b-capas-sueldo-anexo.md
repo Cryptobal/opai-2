@@ -328,3 +328,27 @@ Se conservó íntegro el trabajo recibido y se empujaron checkpoints WIP, sin re
 Evidencia inicial: las 109 pruebas de base pasaron; las dos pruebas nuevas de capacidades contra Postgres verificaron aislamiento, preview, auditoría y creación concurrente. Pasaron 13 pruebas focalizadas de capacidades. Un build y typecheck completos pasaron antes de los últimos ajustes. Los e2e de iPad y escritorio pasaron inicialmente; teléfono falló por timeout de captura. Las repeticiones completas encontraron timeouts de inicialización, test de documentos y transacción. No se desactivan pruebas ni se modifican sus expectativas para obtener verde. Resultados finales se actualizarán después de ejecutar el gate sobre el último código.
 
 Pendiente confirmar ≤8 consultas por navegación (ADR-045): la auditoría de lecturas por versión puede exceder el límite. No se declara este criterio cumplido sin medición. El refinamiento de agregación de consultas no debe quitar la auditoría de lecturas sensibles que ya exige main.
+
+
+Actualización de validación del mismo PR 1:
+
+- `pnpm test:db` completo: **109 + 134 + 25 pruebas en verde**, sin omitir suites.
+- Playwright contra el build de producción, puerto local 3107: **3/3 en verde**, a 375, 1024 y 1280 px; definición de instalación y RUT con motivo, preview, guardado, historial y prioridad RUT con contexto explícito. Capturas `07b-*` actualizadas.
+- `pnpm build` completo en verde. `pnpm presupuesto` en verde; tope propio de **166 KB** para la nueva ruta de sueldo de persona, medida **165,7 KB**, alineado con las otras pestañas de persona de 166 KB. Es 1 KB sobre el valor por defecto; decisión técnica de Codex justificada por el selector explícito y el historial con anulación. No modifica otras rutas ni exime de ADR-043.
+- Auditoría de lectura por respuesta para las capas activas: registra todos los IDs y referencias en el payload, sin montos. La capa cargo conserva su auditoría individual. Prueba de lote incluida; ocho pruebas del archivo de capacidades nuevas pasaron.
+- Autorrevisión por subagente sobre `617ce60`: sin nuevos defectos bloqueantes en los cambios inspeccionados; no sustituye al Revisor ni al CI.
+- **ADR-045 pendiente:** el marcador existente midió **12 consultas** en instalación y **11 en persona**. Sus totales fueron 102–311 ms y 97–500 ms respectivamente en esas corridas locales de producción. El marcador toma una instantánea antes de completar todos los Suspense: esos conteos no prueban el total definitivo de la ficha y ya exceden 8. No se declara cumplida esa meta. Optimizar los cargadores compartidos y medir toda la navegación sigue pendiente; no se cambia la instrumentación para ocultarlo.
+- La suite general detectó dos fixtures con el modelo anterior: inspector efectivo basado en cargo y capa RUT con conceptos omitidos. Se actualizaron a capa RUT completa, conservando las comprobaciones de auditoría y ocultación; las pruebas afectadas pasaron. La repetición completa se mantiene pendiente hasta conocer su resultado.
+
+
+### Resultado del gate local al cierre de esta construcción
+
+- `pnpm typecheck`: 11 tareas en verde. `pnpm lint`: 11 tareas en verde, con warnings de longitud de archivos (sin errores).
+- `pnpm test --no-file-parallelism --testTimeout=30000 --hookTimeout=120000`, con `VITEST_MAX_WORKERS=1`: **203 archivos, 1.158 pruebas en verde**. Misma suite completa, sin desactivar tests ni omitir proyectos.
+- `pnpm test:db`, con `VITEST_MAX_WORKERS=1`: **109 base + 134 capacidades + 25 auth**, todo en verde.
+- `pnpm build` y `pnpm presupuesto`: en verde, con el tope propio de ruta justificado arriba.
+- E2E contra `next start` local en 3107: **3/3**, 375/1024/1280, capturas actualizadas y sin desborde horizontal.
+- Paridad focalizada: **12/12** comprobaciones en verde. No se verificó `tools/list` remoto porque no hubo despliegue.
+- Fixtures de inspector y panel revisados también por el subagente: conservan pruebas de ocultación, revelación auditada y denegación de escrituras.
+
+**Diferencia pendiente respecto al encargo:** no se cumple la meta de ≤8 consultas de ADR-045. Los conteos 12/11 ya superan la meta y el marcador no abarca necesariamente todos los Suspense. El gate funcional pasa, pero CA-1/validación de rendimiento permanece parcial. No hay aprobación del Revisor sobre el head final ni CI de PR (no se abrió PR por instrucción del encargo); no se declara listo para integrar. No hay nuevas dudas de negocio: las decisiones t500u siguen resueltas. No se aplicó nada en Neon.
