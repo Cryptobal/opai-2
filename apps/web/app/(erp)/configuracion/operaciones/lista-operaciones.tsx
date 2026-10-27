@@ -56,7 +56,7 @@ function Fila({
 
 const Cabeza = ({ nombre, n }: { nombre: string; n: number }) => (
   <span className="flex items-baseline justify-between gap-2">
-    <span className="t-label text-[16px]">{nombre}</span>
+    <span className="t-label text-md">{nombre}</span>
     <span className="t-body-sm t-numeric text-fg-muted">{conteoPuestos(n)}</span>
   </span>
 );

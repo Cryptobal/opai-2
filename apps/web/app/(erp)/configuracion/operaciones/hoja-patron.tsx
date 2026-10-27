@@ -78,14 +78,19 @@ export function HojaPatron({ patron }: { patron?: Patron }) {
           <Input id="p-nombre" value={nombre} onChange={(e) => setNombre(e.target.value)} />
         </Campo>
         <Campo etiqueta="Clase">
-          <Segmentado
-            etiqueta="Clase del patrón"
-            activa={clase}
-            opciones={[
-              { id: "ciclico", etiqueta: "Cíclico", onClick: () => !enUso && setClase("ciclico") },
-              { id: "semanal", etiqueta: "Semanal", onClick: () => !enUso && setClase("semanal") },
-            ]}
-          />
+          {enUso ? (
+            // En uso: la clase no se cambia (lo explica la Alerta de arriba); se muestra como texto.
+            <p className="t-body text-fg-muted">{semanal ? "Semanal" : "Cíclico"}</p>
+          ) : (
+            <Segmentado
+              etiqueta="Clase del patrón"
+              activa={clase}
+              opciones={[
+                { id: "ciclico", etiqueta: "Cíclico", onClick: () => setClase("ciclico") },
+                { id: "semanal", etiqueta: "Semanal", onClick: () => setClase("semanal") },
+              ]}
+            />
+          )}
         </Campo>
         {semanal ? (
           <Campo etiqueta="Días de la semana" ayuda="Marca uno a seis días; el resto es descanso.">

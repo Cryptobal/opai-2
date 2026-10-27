@@ -12,7 +12,6 @@ export type DatosPuesto = {
   rota: boolean;
   inicioNoche: string;
   finNoche: string;
-  jornada: string;
   colacion: string;
   colacionFuera: boolean;
   horas: string;
@@ -54,7 +53,6 @@ export const inicialPuesto = (p?: Puesto | null): DatosPuesto => ({
   rota: Boolean(p?.horaInicioNoche && p?.horaFinNoche),
   inicioNoche: p?.horaInicioNoche ?? "20:00",
   finNoche: p?.horaFinNoche ?? "08:00",
-  jornada: p?.jornada ?? "dia",
   colacion: String(p?.colacionMin ?? 0),
   colacionFuera: p?.colacionFuera ?? false,
   horas: p?.horasSemanales != null ? String(p.horasSemanales) : "",
@@ -77,7 +75,9 @@ export const puestoAInput = (d: DatosPuesto) => {
     horaFin: d.fin,
     horaInicioNoche: d.rota ? d.inicioNoche : null,
     horaFinNoche: d.rota ? d.finNoche : null,
-    jornada: d.jornada,
+    // La jornada se deriva del horario (la hoja ya no la pregunta aparte): rota ⇒ rotativa; si no,
+    // noche cuando el tramo empieza a las 18:00 o más tarde, y día en caso contrario.
+    jornada: d.rota ? "rotativa" : d.inicio >= "18:00" ? "noche" : "dia",
     colacionMin: Number(d.colacion) || 0,
     colacionFuera: d.colacionFuera,
     ...(d.horasTocadas && horasValidas ? { horasSemanales: horas } : {}),

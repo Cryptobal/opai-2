@@ -59,7 +59,7 @@ export function PreviewCiclo({ trabajo, descanso }: { trabajo: number; descanso:
     <div
       role="img"
       aria-label={`Ciclo de ${total} días: ${trabajo} de trabajo y ${descanso} de descanso`}
-      className="grid grid-cols-7 gap-1.5"
+      className="grid grid-cols-7 gap-1"
     >
       {Array.from({ length: total }, (_, i) => {
         const t = i < trabajo;
@@ -68,7 +68,7 @@ export function PreviewCiclo({ trabajo, descanso }: { trabajo: number; descanso:
             key={i}
             aria-hidden
             className={cn(
-              "flex h-11 min-w-11 items-center justify-center rounded-md text-[15px] font-semibold",
+              "flex h-11 min-w-11 items-center justify-center rounded-md text-md font-semibold",
               t
                 ? "bg-accent text-accent-fg"
                 : "border border-control bg-surface text-fg",

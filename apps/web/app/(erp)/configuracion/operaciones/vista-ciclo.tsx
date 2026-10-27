@@ -14,14 +14,14 @@ export function VistaCiclo({ patron }: { patron: Patron }) {
     ? `Trabaja ${patron.diasSemana.map((d) => DIAS_SEMANA[d - 1]).join(", ")}`
     : `${patron.diasTrabajo} días de trabajo y ${patron.diasDescanso} días de descanso`;
   return (
-    <span role="img" aria-label={etiqueta} className="inline-flex flex-wrap gap-[3px]">
+    <span role="img" aria-label={etiqueta} className="inline-flex flex-wrap gap-0.5">
       {Array.from({ length: total }, (_, i) => (
         <span
           key={i}
           className={
             trabaja(i)
-              ? "size-3 rounded-[3px] bg-accent"
-              : "size-3 rounded-[3px] border border-control bg-surface"
+              ? "size-3 rounded-sm bg-accent"
+              : "size-3 rounded-sm border border-control bg-surface"
           }
         />
       ))}

@@ -2,7 +2,7 @@
 
 import type { Dispatch, SetStateAction } from "react";
 
-import { Campo, Combobox, Input, InputFecha, RadioGroup, Select } from "@opai/ds";
+import { Campo, Combobox, Input, InputFecha, Select } from "@opai/ds";
 
 import type { FuncionPuestoOpcion, PatronTurnoOpcion } from "@/lib/tipos-maestros";
 
@@ -64,6 +64,7 @@ export function CamposPuesto({ d, setD, cargos, funciones, patrones }: Props) {
           placeholder="Elegir cargo"
         />
       </Campo>
+      <CamposHorario d={d} setD={setD} />
       <Campo etiqueta="Patrón de turno" htmlFor="p-patron">
         <Select
           id="p-patron"
@@ -73,18 +74,6 @@ export function CamposPuesto({ d, setD, cargos, funciones, patrones }: Props) {
           placeholder="Elegir patrón"
         />
       </Campo>
-      <CamposHorario d={d} setD={setD} />
-      <RadioGroup
-        etiqueta="Jornada"
-        orientacion="fila"
-        valor={d.jornada}
-        onCambiar={(v) => set("jornada", v)}
-        opciones={[
-          { valor: "dia", etiqueta: "Día" },
-          { valor: "noche", etiqueta: "Noche" },
-          { valor: "rotativa", etiqueta: "Rotativa" },
-        ]}
-      />
       <Campo etiqueta="Vigente desde" htmlFor="p-desde">
         <InputFecha id="p-desde" valor={d.desde} onCambiar={(v) => set("desde", v)} />
       </Campo>

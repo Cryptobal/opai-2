@@ -19,7 +19,7 @@ export function CamposHorario({ d, setD }: { d: DatosPuesto; setD: Set }) {
         <Campo etiqueta="Inicio" htmlFor="p-ini">
           <InputHora id="p-ini" valor={d.inicio} onCambiar={(v) => set("inicio", v)} />
         </Campo>
-        <Campo etiqueta="Fin" htmlFor="p-fin">
+        <Campo etiqueta="Término" htmlFor="p-fin">
           <InputHora id="p-fin" valor={d.fin} onCambiar={(v) => set("fin", v)} />
         </Campo>
       </div>
