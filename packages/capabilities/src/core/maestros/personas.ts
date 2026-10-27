@@ -116,6 +116,7 @@ export const personasGet = defineCapability({
   descripcion:
     "Ficha completa de una persona: identificación, contacto, dirección, estado, bloqueo y vínculo laboral vigente. Los sueldos van por core.estructuras.*.",
   permiso: PERMISOS_CORE.personasRead,
+  portales: ["erp", "supervisor"],
   input: z.object({ id: uuidSchema }),
   output: personaSchema.extend({ documentos: z.number() }),
   efecto: "lectura",

@@ -49,6 +49,8 @@ describe.skipIf(!urlPropietario)("cumplimiento PR2 (capacidades) en base real", 
     mod.crearContexto({
       tenantId,
       actor: { tipo: "user", id: userId },
+      portal: "erp",
+      portalesMembresia: ["erp"],
       usuario: { id: userId, nombre, email: `${nombre}@prueba.cl`, platformRole: null },
       rol: "owner",
       medidor: { registrar: async () => undefined },
