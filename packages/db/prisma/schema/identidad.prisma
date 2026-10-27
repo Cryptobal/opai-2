@@ -17,6 +17,8 @@ model User {
   accounts    Account[]
   memberships Membership[]
   apiKeys     ApiKey[]
+  /// Excepciones de permiso que este usuario fijó (A18/A19); se desligan si se elimina (SET NULL).
+  excepcionesFijadas PermisoExcepcion[] @relation("excepcionesFijadas")
 
   @@map("users")
   @@schema("core")
@@ -47,6 +49,7 @@ model LoginIntento {
 
   @@index([correoHash, createdAt])
   @@index([userId, createdAt])
+  @@index([ip, createdAt])
   @@map("login_intentos")
   @@schema("core")
 }

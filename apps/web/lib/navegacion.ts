@@ -8,7 +8,10 @@ export type ItemNav = {
   icono: string;
   grupo?: string;
   corta?: string;
-  contador?: number;
+  /** Activo solo en la ruta exacta. */
+  exacta?: boolean;
+  /** Prefijo extra bajo el cual el ítem también queda activo (detalle que su `href` no cubre). */
+  activoEn?: string;
   pie?: boolean;
   soloCompacto?: boolean;
   soloAmplio?: boolean;
@@ -87,7 +90,15 @@ export function navegacionErp(
 }
 
 export const NAV_PLATAFORMA: ItemNav[] = [
-  { href: "/platform", etiqueta: "Empresas", icono: "Building2" },
+  // «Empresas» cubre el índice (`/platform`) y el detalle de un tenant (`/platform/tenants/:id`),
+  // pero no las demás secciones (`exacta` evita marcarlo en Trabajos, Consumos y Ajustes) (H5).
+  {
+    href: "/platform",
+    etiqueta: "Empresas",
+    icono: "Building2",
+    exacta: true,
+    activoEn: "/platform/tenants",
+  },
   { href: "/platform/trabajos", etiqueta: "Trabajos", icono: "Clock" },
   { href: "/platform/consumos", etiqueta: "Consumos", icono: "Gauge" },
   { href: "/platform/ajustes", etiqueta: "Ajustes", icono: "SlidersHorizontal", pie: true },
@@ -97,7 +108,9 @@ export const NAV_PLATAFORMA: ItemNav[] = [
 export function navegacionPortal(href: string, portal?: string): ItemNav[] {
   if (portal === "supervisor")
     return [
-      { href, etiqueta: "Hoy", icono: "Home" },
+      // «Hoy» solo en `/supervisor`, pero la ficha de persona (`/supervisor/personas/:id`) cuelga de
+      // «Hoy» (se llega por «Atrás → Hoy»), así que `activoEn` la mantiene marcada (H6, t365u/t366u).
+      { href, etiqueta: "Hoy", icono: "Home", exacta: true, activoEn: "/supervisor/personas" },
       {
         href: "/supervisor/instalaciones",
         etiqueta: "Instalaciones",

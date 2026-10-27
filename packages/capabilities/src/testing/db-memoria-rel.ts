@@ -6,8 +6,13 @@ type Rel = { tabla: string; clave: string; muchos?: boolean };
 
 /** Relaciones por modelo: `clave` es la columna FK (local en «uno», del hijo en «muchos»). */
 export const RELACIONES: Record<string, Record<string, Rel>> = {
-  membership: { user: { tabla: "user", clave: "userId" }, tenant: { tabla: "tenant", clave: "tenantId" } },
+  membership: {
+    user: { tabla: "user", clave: "userId" },
+    tenant: { tabla: "tenant", clave: "tenantId" },
+    rolTenant: { tabla: "rol", clave: "roleId" },
+  },
   apiKey: { user: { tabla: "user", clave: "userId" } },
+  permisoExcepcion: { creadoPorUsuario: { tabla: "user", clave: "creadoPor" } },
   persona: { vinculos: { tabla: "vinculoLaboral", clave: "personaId", muchos: true } },
   vinculoLaboral: { cargo: { tabla: "cargo", clave: "cargoId" } },
   cuenta: {
@@ -24,11 +29,22 @@ export const RELACIONES: Record<string, Record<string, Rel>> = {
 };
 
 type Tabla = (nombre: string) => Fila[];
-type IncludeArg = { where?: Where; orderBy?: unknown; take?: number; include?: Include; select?: Include };
+type IncludeArg = {
+  where?: Where;
+  orderBy?: unknown;
+  take?: number;
+  include?: Include;
+  select?: Include;
+};
 export type Include = Record<string, boolean | IncludeArg | { select?: Record<string, unknown> }>;
 export type IncluirArgs = { include?: Include; select?: Include };
 
-function contar(tabla: Tabla, modelo: string, fila: Fila, select: Record<string, unknown> = {}): Fila {
+function contar(
+  tabla: Tabla,
+  modelo: string,
+  fila: Fila,
+  select: Record<string, unknown> = {},
+): Fila {
   const c: Fila = {};
   for (const [rel, arg] of Object.entries(select)) {
     const def = RELACIONES[modelo]?.[rel];
@@ -61,7 +77,9 @@ export function incluir(tabla: Tabla, modelo: string, fila: Fila, args?: Incluir
       const def = reg ?? { tabla: rel, clave: `${rel}Id` };
       const a: IncludeArg = arg === true ? {} : (arg as IncludeArg);
       if (def.muchos) {
-        let hijos = tabla(def.tabla).filter((f) => f[def.clave] === fila["id"] && cumple(f, a.where));
+        let hijos = tabla(def.tabla).filter(
+          (f) => f[def.clave] === fila["id"] && cumple(f, a.where),
+        );
         hijos = ordenar(hijos, a.orderBy);
         if (a.take != null) hijos = hijos.slice(0, a.take);
         out[rel] = hijos.map((h) => incluir(tabla, def.tabla, h, a));
@@ -76,15 +94,23 @@ export function incluir(tabla: Tabla, modelo: string, fila: Fila, args?: Incluir
   return out;
 }
 
-/** Convierte filtros de relación del where (`rel: { some|none: {...} }`) a filtros por id. */
-export function resolverWhereRelaciones(tabla: Tabla, modelo: string, where?: Where): Where | undefined {
+/** Resuelve relaciones y conectores sin sobrescribir los predicados escalares de la consulta. */
+export function resolverWhereRelaciones(
+  tabla: Tabla,
+  modelo: string,
+  where?: Where,
+): Where | undefined {
   if (!where) return where;
-  const out: Where = {};
+  const condiciones: Where[] = [];
   for (const [k, v] of Object.entries(where)) {
     const def = RELACIONES[modelo]?.[k];
-    if (def?.muchos && v && typeof v === "object" && ("some" in v || "none" in v)) {
+    if ((k === "AND" || k === "OR") && Array.isArray(v)) {
+      condiciones.push({ [k]: v.map((w: Where) => resolverWhereRelaciones(tabla, modelo, w)) });
+    } else if (k === "NOT" && v && typeof v === "object" && !Array.isArray(v)) {
+      condiciones.push({ NOT: resolverWhereRelaciones(tabla, modelo, v as Where) });
+    } else if (def?.muchos && v && typeof v === "object" && ("some" in v || "none" in v)) {
       const rel = v as { some?: Where; none?: Where };
-      const relWhere = rel.some ?? rel.none;
+      const relWhere = resolverWhereRelaciones(tabla, def.tabla, rel.some ?? rel.none);
       const ids = [
         ...new Set(
           tabla(def.tabla)
@@ -92,10 +118,16 @@ export function resolverWhereRelaciones(tabla: Tabla, modelo: string, where?: Wh
             .map((f) => f[def.clave]),
         ),
       ];
-      out["id"] = "some" in rel ? { in: ids } : { notIn: ids };
+      condiciones.push({ id: "some" in rel ? { in: ids } : { notIn: ids } });
+    } else if (def && !def.muchos && v && typeof v === "object") {
+      const relWhere = resolverWhereRelaciones(tabla, def.tabla, v as Where);
+      const ids = tabla(def.tabla)
+        .filter((f) => cumple(f, relWhere))
+        .map((f) => f["id"]);
+      condiciones.push({ [def.clave]: { in: ids } });
     } else {
-      out[k] = v;
+      condiciones.push({ [k]: v });
     }
   }
-  return out;
+  return { AND: condiciones };
 }

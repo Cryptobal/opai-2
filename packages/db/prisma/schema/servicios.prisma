@@ -23,6 +23,10 @@ model PerfilEmpresa {
   telefono            String?
   whatsapp            String?
   sitioWeb            String?  @map("sitio_web")
+  // Brief 07d · DPO (delegado/encargado de protección de datos) del tenant (Ley 21.719, §4.2).
+  dpoNombre           String?  @map("dpo_nombre")
+  dpoCorreo           String?  @map("dpo_correo")
+  dpoTelefono         String?  @map("dpo_telefono")
   nombreComercial     String?  @map("nombre_comercial")
   eslogan             String?
   /// Color de marca como dato ("#RRGGBB"): se aplica a documentos, correos y portales, no a la UI.

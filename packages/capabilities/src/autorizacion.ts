@@ -11,9 +11,13 @@ export function portalesDe(c: Capacidad): readonly string[] {
 }
 
 type Falla = Extract<Resultado, { ok: false }>;
-export const falla = (code: Falla["error"]["code"], message: string): Falla => ({
+export const falla = (
+  code: Falla["error"]["code"],
+  message: string,
+  detalles?: unknown,
+): Falla => ({
   ok: false,
-  error: { code, message },
+  error: { code, message, ...(detalles === undefined ? {} : { detalles }) },
 });
 
 /** Visibilidad sin el permiso: tenant, módulo activo, scopes del agente y portal del principal. */

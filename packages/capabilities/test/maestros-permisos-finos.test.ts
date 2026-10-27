@@ -99,6 +99,20 @@ describe("#47 · el include/_count del #53 respeta el permiso efectivo", () => {
     expect(await codigo(ownerMenos, "core.personas.list", {})).toBe("FORBIDDEN");
   });
 
+  it("personas.list no expone el catálogo de cargos sin estructuras.read efectivo", async () => {
+    const { ctx } = contextoDePrueba();
+    await dato(ctx, "core.cargos.create", { nombre: "Cargo sin personas asignadas" });
+    const sinCargos = conAcceso(ctx, {
+      rol: "owner",
+      excepciones: [{ permiso: PERMISOS_CORE.estructurasRead, conceder: false }],
+    });
+    expect(await codigo(sinCargos, "core.cargos.list", {})).toBe("FORBIDDEN");
+    const lista = await dato<{ cargos?: unknown[] }>(sinCargos, "core.personas.list", {
+      incluirFiltros: true,
+    });
+    expect(lista.cargos).toBeUndefined();
+  });
+
   it("cada conteo de resumen.contadores va en null sin el permiso efectivo", async () => {
     const { ctx } = contextoDePrueba();
     const { id: cuentaId } = await dato<{ id: string }>(ctx, "core.cuentas.create", {
@@ -112,7 +126,11 @@ describe("#47 · el include/_count del #53 respeta el permiso efectivo", () => {
     });
     type Conteos = { cuentas: number | null; personas: number | null };
     // `gerente` lee cuentas y personas: ambos conteos salen.
-    const gerente = await dato<Conteos>(conAcceso(ctx, { rol: "gerente" }), "core.resumen.contadores", {});
+    const gerente = await dato<Conteos>(
+      conAcceso(ctx, { rol: "gerente" }),
+      "core.resumen.contadores",
+      {},
+    );
     expect(gerente).toMatchObject({ cuentas: 1, personas: 1 });
     // Una excepción que deniega personas.read deja ese conteo en null aunque se pida.
     const sinPersonas = conAcceso(ctx, {

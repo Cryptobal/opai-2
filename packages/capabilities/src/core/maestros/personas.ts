@@ -4,6 +4,7 @@ import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import { uuidSchema } from "../esquemas";
+import { dondePersona } from "./alcance";
 import { cursorDe, listaSchema, pagina } from "./comun";
 import {
   personaDe,
@@ -43,6 +44,7 @@ export const personasList = defineCapability({
     const rut = (q ?? "").replace(/[.\s]/g, "").toUpperCase();
     // El filtro por cargo se resuelve con una relación (`some`), no con una consulta de ids aparte.
     const where = {
+      AND: [dondePersona(ctx)],
       ...(input.incluirArchivadas ? {} : { archivadaEn: null }),
       ...(input.cargoId
         ? { vinculos: { some: { cargoId: input.cargoId, estado: "vigente" } } }
@@ -79,7 +81,7 @@ export const personasList = defineCapability({
         },
       }),
       ctx.db.persona.count({ where }),
-      input.incluirFiltros
+      input.incluirFiltros && ctx.autorizar(PERMISOS_CORE.estructurasRead)
         ? ctx.db.cargo.findMany({
             where: { activo: true },
             orderBy: [{ orden: "asc" }, { nombre: "asc" }],

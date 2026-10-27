@@ -4,6 +4,7 @@ import { AuthCard, Badge, Button, FilaSeleccionable, Monograma } from "@opai/ds"
 
 import { accionSalir } from "@/app/_acciones/auth";
 import { cambiarTenant } from "@/app/_acciones/capacidad";
+import { trasLimpiarCaches } from "@/app/_components/pwa/limpiar-cache";
 import { useEpocaSesion } from "@/app/_components/refresco-navegador";
 import { LinkNext } from "@/app/_components/link-next";
 import { ETIQUETA_ROL } from "@/app/_components/portales";
@@ -31,7 +32,7 @@ export function SelectorEmpresa({ empresas, destino, epoca }: Props) {
         </>
       }
       acciones={
-        <Button variant="ghost" size="lg" onClick={() => void accionSalir()}>
+        <Button variant="ghost" size="lg" onClick={() => trasLimpiarCaches(accionSalir)}>
           Cerrar sesión
         </Button>
       }
@@ -40,7 +41,7 @@ export function SelectorEmpresa({ empresas, destino, epoca }: Props) {
         {empresas.map((e) => (
           <li key={e.tenantId}>
             <FilaSeleccionable
-              onClick={() => void cambiarTenant(e.tenantId, destino)}
+              onClick={() => trasLimpiarCaches(() => cambiarTenant(e.tenantId, destino))}
               className="rounded-lg border border-border bg-surface p-4"
               inicio={<Monograma nombre={e.nombre} className="size-10 rounded-md text-sm" />}
               titulo={e.nombre}
