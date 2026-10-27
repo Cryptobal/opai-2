@@ -6,6 +6,9 @@ export function lecturasLocksMemoria(tabla: (nombre: string) => Fila[]) {
   const fecha = (v: unknown) => (v instanceof Date ? v.getTime() : new Date(String(v)).getTime());
   return async (sql: TemplateStringsArray, ...valores: unknown[]) => {
     const texto = sql.join("?");
+    // El lock de Puestos se comprueba contra Postgres; en memoria no bloquea.
+    if (texto.includes("SELECT id FROM core.puestos WHERE id =") && texto.includes("FOR UPDATE"))
+      return [];
     if (texto.includes("/* nucleo-h:lista-instalaciones */"))
       return instalacionesListaMemoria(tabla, valores);
     if (texto.includes("/* nucleo-h:inbox */")) {
