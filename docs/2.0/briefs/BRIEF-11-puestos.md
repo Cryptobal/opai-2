@@ -85,12 +85,11 @@ Se nota que funciona cuando, en una instalación, **todos los puestos se ven y s
 | Gate en verde | `mcp:verificar` es posterior al despliegue (necesita `OPAI_MCP_KEY`); el resto, en el PR |
 
 **Autorrevisión posterior:** la serialización del cambio de estructura del patrón con su elección en
-un puesto está cubierta por pruebas concurrentes, pero la revisión independiente identificó dos
-carreras adicionales pendientes: actualizaciones simultáneas del horario de un mismo puesto pueden
-dejar horas calculadas con datos anteriores; y desactivar una función puede coincidir con elegirla
-en un puesto. El criterio general de concurrencia sin TOCTOU queda **parcial**, sujeto a corrección y
-pruebas específicas antes de integrar. No se considera demostrado el cierre completo de seguridad
-ni de accesibilidad por los e2e de presentación.
+un puesto está cubierta por pruebas concurrentes. La carrera de actualizaciones simultáneas del
+horario se corrige con bloqueo de la fila y recálculo dentro de la transacción, con prueba concurrente
+en Postgres (encargo sobre la revisión 5663554838). Sigue pendiente verificar la carrera entre
+desactivar una función y elegirla en un puesto: el criterio general de concurrencia sin TOCTOU es
+**parcial**. Los e2e de presentación no demuestran el cierre completo de seguridad ni accesibilidad.
 
 ## 7. Cambios tras la revisión (26-oct-2026)
 

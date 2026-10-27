@@ -151,6 +151,40 @@ describe.skipIf(!urlPropietario)("puestos y catálogos en base real", () => {
     return { lista, abrir };
   }
 
+  it("dos escrituras concurrentes recalculan las horas con el horario final", async () => {
+    const patron = await dato<{ id: string }>("core.patrones.create", {
+      nombre: `Horario ${randomUUID().slice(0, 6)}`,
+      diasTrabajo: 4,
+      diasDescanso: 4,
+    });
+    const p = await dato<{ id: string }>("core.puestos.create", puesto({ patronId: patron.id }));
+    const listo = compuerta();
+    const liberar = compuerta();
+    const bloqueo = enTransaccion(t.a, async (tx) => {
+      await tx.$queryRaw`SELECT id FROM core.puestos WHERE id = ${p.id}::uuid AND tenant_id = ${t.a}::uuid FOR UPDATE`;
+      listo.abrir();
+      await liberar.lista;
+    });
+    await listo.lista;
+    const cambios = [
+      dato("core.puestos.update", { id: p.id, horaInicio: "09:00" }),
+      dato("core.puestos.update", { id: p.id, horaFin: "18:00" }),
+    ];
+    await new Promise((r) => setTimeout(r, 100));
+    liberar.abrir();
+    await bloqueo;
+    await Promise.all(cambios);
+    const final = await e.forTenant(t.a).puesto.findFirstOrThrow({ where: { id: p.id } });
+    expect([final.horaInicio, final.horaFin]).toEqual(["09:00", "18:00"]);
+    const esperado = horasSemanalesSugeridas({
+      patron: { nombre: "x", clase: "ciclico", diasTrabajo: 4, diasDescanso: 4, diasSemana: [] },
+      tramos: [{ horaInicio: final.horaInicio, horaFin: final.horaFin }],
+      colacionMin: 0,
+      colacionFuera: false,
+    });
+    expect(Number(final.horasSemanales)).toBe(esperado);
+  });
+
   it("concurrencia: desactivar un patrón mientras se elige en un puesto nuevo no deja un puesto con un patrón ya inactivo (autorrevisión PR #49, punto 2)", async () => {
     const patron = await dato<{ id: string }>("core.patrones.create", {
       nombre: `Carrera ${randomUUID().slice(0, 6)}`,

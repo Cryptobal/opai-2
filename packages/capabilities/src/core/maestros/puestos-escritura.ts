@@ -112,20 +112,27 @@ export const puestosUpdate = defineCapability({
       ctx,
       { tipo: "core.puesto.actualizado", entidadTipo: "puesto" },
       async (tx) => {
-        // Solo se releé el patrón bloqueado si el update LO ELIGE (nuevo o distinto): ver el
-        // comentario de `patronBloqueadoParaHoras` (review 5662449808 punto 1).
-        const fresco = eligiendoPatronNuevo
-          ? await patronBloqueadoParaHoras(tx, cambios.patronId, mezclado)
+        // La lectura autorizada precede al lock; se repite tras él para calcular con la última fila.
+        const dentro = { ...ctx, db: tx };
+        await puestoDe(dentro, id);
+        await tx.$queryRaw`SELECT id FROM core.puestos WHERE id = ${id}::uuid AND tenant_id = ${ctx.tenantId}::uuid FOR UPDATE`;
+        const vigente = await puestoDe(dentro, id);
+        const mezcla = mezclarPuesto(vigente, cambios);
+        const eligePatron = cambios.patronId !== undefined && cambios.patronId !== vigente.patronId;
+        const compuesto = await componer(dentro, mezcla, {
+          funcion: cambios.funcionId !== undefined && cambios.funcionId !== vigente.funcionId,
+          patron: eligePatron,
+        });
+        const fresco = eligePatron
+          ? await patronBloqueadoParaHoras(tx, cambios.patronId, mezcla)
           : null;
-        const final = fresco
-          ? definidos({
-              ...cambios,
-              ...fechas(cambios),
-              diasTrabajo: fresco.diasTrabajo,
-              diasDescanso: fresco.diasDescanso,
-              horasSemanales: horasDelCambio(cambios, actual, fresco.sugerencia),
-            })
-          : data;
+        const final = definidos({
+          ...cambios,
+          ...fechas(cambios),
+          diasTrabajo: fresco?.diasTrabajo ?? compuesto.diasTrabajo,
+          diasDescanso: fresco?.diasDescanso ?? compuesto.diasDescanso,
+          horasSemanales: horasDelCambio(cambios, vigente, fresco ? fresco.sugerencia : compuesto.sugerencia),
+        });
         return tx.puesto.update({ where: { id }, data: final });
       },
     );

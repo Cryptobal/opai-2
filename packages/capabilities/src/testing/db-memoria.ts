@@ -115,7 +115,7 @@ export function dbEnMemoria(semilla: Record<string, Fila[]> = {}) {
   }
 
   const db: Record<string, unknown> = new Proxy(
-    {},
+    { $queryRaw: async () => [] }, // Los locks SQL se verifican en Postgres, no en memoria.
     { get: (cache: Record<string, unknown>, m: string) => (cache[m] ??= delegado(m)) },
   );
   const globales: Record<string, unknown> = {
