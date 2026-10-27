@@ -163,6 +163,8 @@ Una entrada por decisión. Las decisiones no se editan: si cambian, se agrega un
 
 **Consecuencias.** `packages/auth` encapsula la librería; el resto del código solo usa `getSession()`/`requireSession()` y `resolverActor()`. Cambiar de librería no toca módulos.
 
+**Nota (NÚCLEO-F · segundo factor, 26-oct-2026).** Se agrega el plugin `twoFactor` de Better Auth: TOTP con códigos de respaldo (la verificación por correo/OTP queda pendiente de diseño, ver más abajo). El secreto y los códigos de respaldo los cifra el plugin con `BETTER_AUTH_SECRET` (`symmetricEncrypt`): no hay secreto nuevo. Nuevas columnas/tablas de identidad en `core` (`users.two_factor_enabled`, `two_factor`), sin `tenant_id` ni RLS como el resto de identidad, y que solo toca `@opai/auth` (no se leen desde capacidades de negocio). El bloqueo del paso de verificar el código es por cuenta (`accountLockout`: 5 intentos, pausa de 15 min), alineado con el bloqueo de login de B1 y con su mismo aviso genérico; no reemplaza ni rompe los hooks de B1 (el conteo de contraseña y el de código van por separado). **Política (Decisión de Carlos, 26-oct-2026, chat con OPAI 2.0):** el segundo factor es obligatorio para las cuentas de plataforma (siempre) y para el `owner` y el `admin` de cada tenant (ajuste de tenant `core.seguridad_mfa_obligatorio_admins`, por defecto obligatorio); los demás roles lo activan de forma opcional. Si es obligatorio y la cuenta no lo tiene, tras la contraseña va a enrolarse antes de entrar (gate server-side en `PaginaPortal`). Las API keys y el MCP no cambian. SSO queda como P2, fuera de este PR.
+
 ---
 
 ## ADR-016 · Roles por tenant y bloqueo financiero
