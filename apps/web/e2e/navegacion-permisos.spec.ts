@@ -40,9 +40,15 @@ for (const conceder of [false, true]) {
   }) => {
     await entrar(page, `supervisor-nav-${conceder ? "concede" : "deniega"}@opai.cl`);
     await page.goto("/supervisor/personas/00000000-0000-7000-8000-000000000078");
-    await expect(page.getByText("No encontramos a esta persona")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "No encontrado · Portal Supervisor" }),
+    ).toBeVisible();
     await expect(page.getByRole("link", { name: "Subir documento" })).toHaveCount(0);
     await expect(page.getByRole("button", { name: "Pedir" })).toHaveCount(0);
+    await page.goto("/supervisor/personas/00000000-0000-7000-8000-000000000079");
+    await expect(
+      page.getByRole("heading", { name: "No encontrado · Portal Supervisor" }),
+    ).toBeVisible();
   });
 }
 

@@ -17,7 +17,7 @@ async function main() {
   const tenant = await db.tenant.findUniqueOrThrow({ where: { slug: "gard" } });
   await db.$transaction(async (tx) => {
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(70168)`;
-    await tx.persona.upsert({
+    const persona = await tx.persona.upsert({
       where: { tenantId_rut: { tenantId: tenant.id, rut: "11111111-1" } },
       update: {},
       create: {
@@ -28,6 +28,8 @@ async function main() {
         apellidos: "Navegación",
       },
     });
+    if (persona.id !== "00000000-0000-7000-8000-000000000078")
+      throw new Error("La persona de prueba existe con otro identificador.");
     for (const conceder of [false, true]) {
       const email = `supervisor-nav-${conceder ? "concede" : "deniega"}@opai.cl`;
       const user = await tx.user.upsert({
