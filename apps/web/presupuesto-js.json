@@ -12,6 +12,7 @@
     "/(erp)/cuentas/[id]/documentos": 166,
     "/(erp)/instalaciones/[id]/documentos": 166,
     "/(erp)/personas/[id]/documentos": 166,
+    "/(erp)/personas/[id]/laboral": 166,
     "/(platform)/platform/tenants/[id]/*": 168,
     "/(terreno)/terreno*": 162,
     "/(trabajador)/trabajador*": 162,
