@@ -17,6 +17,26 @@ Hasta el 24-oct-2026 este archivo fue la fuente de verdad del avance; desde ento
 
 - **Endurecimiento de Plataforma (encargo urgente tras #59, rama `fix/platform-superadmin`):** servidor y shell comparten `tieneAccesoAPortal`, que admite Plataforma solo con rol global `owner` o `support`, nunca por membresía del tenant (ADR-016). Roles desconocidos se deniegan. Pruebas de servidor/shell y e2e de Empresas y rechazo sin rol global. H2 conserva la TopBar móvil aprobada: el título vive en el contenido (`DISENO.md` §4). H3 parcial: con acceso a Trabajador ya existe Inicio; se agrega cobertura, pero el estado vacío opcional se difiere porque incluso cargado de forma diferida excedió el presupuesto de Laboral (165,1/165 KB). No se suben topes. No hay decisiones de negocio nuevas; implementación de OpenCode según el encargo y ADR vigentes. La hipótesis de producción no se considera demostrada: `main` ya diferenciaba Plataforma en la guarda del servidor; queda QA posterior con la sesión afectada. Alcance y CA en `briefs/FIX-platform-superadmin.md`; el encargo no incluye ID de Linear.
 
+- **Portal de sesiones (rama `core/portal-sesion`, PR #68):**
+  a partir del hallazgo de la review **5661270514** del Revisor en #59, la capa común
+  exige portal no vacío, presente en la membresía activa del tenant actual y en la
+  declaración de la capacidad. Los portales vienen del contexto de servidor ya cargado,
+  sin consultas nuevas. Vacío/null se rechaza, no se supone ERP; las rutas ERP ya fijan
+  su portal en servidor y la API genérica con sesión sin portal se cierra por defecto.
+  Excepción única para `core.invitations.accept`, conforme a la adenda del encargo:
+  decisión tomada con la autonomía de fase 1 dada por Carlos en **t500u**; mantiene token,
+  correo y autenticación. La adenda referencia `encargos/nucleo-cierre.md`, ausente aquí;
+  no se afirma haberlo leído. Plataforma, keys y sistema no cambian. **Catálogo del portal
+  Supervisor (decisión del operador, 27-oct 00:55, autoridad delegada por Carlos):** se
+  declaró `portales: ["erp", "supervisor"]` en las 11 capacidades que las pantallas de
+  `apps/web/app/(supervisor)` ya llamaban en `main` (7 de lectura: `core.documentos.matriz`,
+  `core.instalaciones.list/get`, `core.contactos.list`, `core.personas.get`,
+  `core.documentos.list`, `core.documento_tipos.list`; 4 de escritura ya construidas para el
+  supervisor según el propio código, sin permiso ni alcance nuevo: `core.documentos.pedir_renovacion`,
+  `core.documentos.iniciar_subida/confirmar_subida/update`). No se declaró ninguna capacidad
+  que esas pantallas no llamen. Detalle, archivos revisados y el e2e ampliado
+  (`/supervisor/instalaciones`) en `briefs/ENCARGO-portal-sesion.md`. Sin migraciones nuevas.
+
 - Decisión de construir OPAI 2.0 desde cero (ver `01-decisiones.md`, ADR-001 a ADR-016).
 - Documento de arranque, registro de decisiones, contexto para agentes e instrucciones del proyecto Claude en `docs/2.0/`.
 - Design Prompt de fundamentos del DS 2.0 en `docs/2.0/design/DESIGN-PROMPT-ds-2.0-fundamentos.md`.

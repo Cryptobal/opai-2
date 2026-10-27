@@ -25,6 +25,7 @@ export const documentosIniciarSubida = defineCapability({
   descripcion:
     "Primer paso para subir un documento: valida tipo, tamaño (ajuste de la empresa, hasta 25 MB) y formato, crea el documento pendiente y entrega una URL PUT firmada por 10 minutos con las cabeceras a enviar (incluye la huella SHA-256 declarada). Luego llama a core.documentos.confirmar_subida.",
   permiso: PERMISOS_CORE.documentosManage,
+  portales: ["erp", "supervisor"],
   input: z.object({
     entidad: entidadSchema,
     tipoId: uuidSchema.optional(),

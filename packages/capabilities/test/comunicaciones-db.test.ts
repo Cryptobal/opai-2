@@ -45,6 +45,8 @@ describe.skipIf(!urlPropietario)("configuración y comunicaciones en base real",
     mod.crearContexto({
       tenantId,
       actor: { tipo: "user", id: userId },
+      portal: "erp",
+      portalesMembresia: ["erp"],
       usuario: { id: userId, nombre: "Ana", email: "ana@prueba.cl", platformRole: null },
       rol: "owner",
       medidor: { registrar: async () => undefined },

@@ -35,6 +35,7 @@ export const documentosUpdate = defineCapability({
   descripcion:
     "Actualiza los datos de un documento (título, tipo, emisión, vencimiento, etiquetas y portales donde se ve). No cambia el archivo: para eso, sube una nueva versión.",
   permiso: PERMISOS_CORE.documentosManage,
+  portales: ["erp", "supervisor"],
   input: z.object({
     id: uuidSchema,
     titulo: textoOpcional(200),

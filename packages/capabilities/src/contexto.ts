@@ -67,6 +67,8 @@ export type ParametrosContexto = {
   /** Excepciones de permiso por usuario sobre el rol. ADR-022. */
   excepciones?: readonly Excepcion[] | null;
   portal?: string | null;
+  /** Solo servidor: membresía activa del usuario en este tenant; ausente = sin acceso. */
+  portalesMembresia?: readonly string[];
   modulosActivos?: readonly string[];
   scopes?: readonly string[] | null;
   principal?: Principal | null;
@@ -128,6 +130,7 @@ export function crearContexto(params: ParametrosContexto): Contexto {
     usuario,
     rol,
     portal: params.portal ?? null,
+    portalesMembresia: params.portalesMembresia ?? [],
     modulosActivos: params.modulosActivos ?? [],
     scopes: params.scopes ?? null,
     principal: params.principal ?? null,

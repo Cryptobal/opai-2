@@ -48,6 +48,7 @@ export const documentosMatriz = defineCapability({
   descripcion:
     "Semáforo de vencimientos por persona: para cada persona activa, el estado de cada tipo de documento obligatorio o con vencimiento (vigente, días para vencer, vencido o falta). Sirve para pedir renovaciones en bloque. Hasta 2.000 personas; exige también leer personas.",
   permiso: PERMISOS_CORE.documentosRead,
+  portales: ["erp", "supervisor"],
   input: z.object({
     soloPendientes: z
       .boolean()

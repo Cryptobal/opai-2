@@ -14,6 +14,7 @@ export const documentosConfirmarSubida = defineCapability({
   descripcion:
     "Segundo paso de la subida: verifica que el archivo llegó con el tamaño, formato y huella SHA-256 declarados, lo deja disponible, lo registra en la bitácora encadenada y, si es una nueva versión, reemplaza a la anterior.",
   permiso: PERMISOS_CORE.documentosManage,
+  portales: ["erp", "supervisor"],
   input: z.object({ id: uuidSchema }),
   output: documentoSchema.extend({ bitacoraSeq: z.number().nullable() }),
   efecto: "escritura",
