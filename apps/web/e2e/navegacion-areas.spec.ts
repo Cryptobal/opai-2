@@ -14,10 +14,12 @@ test("recuerda el área abierta en Inicio y Configuración", async ({ page }, in
   const nav = page.getByRole("navigation", { name: "Principal", exact: true }).filter({ visible: true });
   const personas = nav.getByRole("button", { name: "Personas", exact: true });
   if (await personas.getAttribute("aria-expanded") !== "true") {
+    const guardado = page.waitForResponse((r) => r.request().method() === "POST" &&
+      !!r.request().postData()?.includes("navegacion_area_abierta"));
     await personas.click();
+    expect((await guardado).ok()).toBe(true);
   }
   await expect(personas).toHaveAttribute("aria-expanded", "true");
-  await page.waitForTimeout(1000);
   await page.reload();
   await expect(personas).toHaveAttribute("aria-expanded", "true");
   await page.goto("/");
