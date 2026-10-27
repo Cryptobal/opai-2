@@ -12,7 +12,8 @@ import { defineCapability } from "../../define";
 import { noEncontrado, reglaDeNegocio } from "../../errores";
 import { uuidSchema } from "../esquemas";
 import { aFecha, diaSchema, hoy } from "./comun";
-import { itemsDe, ocultarMontos } from "./estructuras-acceso";
+import { itemsDe } from "./estructuras-acceso";
+import { ocultasDe } from "./estructuras-lectura";
 import { dondeEstructura } from "./estructuras-alcance";
 import { aDominio, estructuraSchema, NIVELES, vistaEstructura } from "./estructuras-vista";
 import { personaDe } from "./personas-vista";
@@ -114,9 +115,7 @@ export const estructurasEfectiva = defineCapability({
       instalacion: por("instalacion"),
     });
     const combinada = combinarPorConcepto(r.capas);
-    const ocultas = new Map(
-      await Promise.all(filas.map(async (f) => [f.id, await ocultarMontos(ctx, f)] as const)),
-    );
+    const ocultas = await ocultasDe(ctx, filas);
     const ocultar = [...ocultas.values()].some(Boolean);
     const vista = (e: EstructuraCapa | null) => {
       const f = e ? filas.find((x) => x.id === e.id) : undefined;

@@ -1,4 +1,4 @@
-import { TablaEstructura, VersionesVigencia } from "@opai/ds";
+import { Alerta, TablaEstructura, VersionesVigencia } from "@opai/ds";
 import type { EstructuraVista, Nivel } from "@/lib/tipos-sueldo";
 import { AnularCapa } from "./anular-capa";
 
@@ -20,6 +20,14 @@ export function VersionesCapa({
         estado: v.estado,
         contenido: (
           <>
+            {v.conceptosFaltantes?.length ? (
+              <Alerta
+                tono="warning"
+                titulo="Estructura incompleta: define los conceptos faltantes en una nueva versión"
+              >
+                Faltan: {v.conceptosFaltantes.join(", ")}
+              </Alerta>
+            ) : null}
             <TablaEstructura estructura={v} origen={{ capa: nivel, version: v.vigenteDesde }} />
             {v.motivo ? <p className="t-body-sm">Motivo: {v.motivo}</p> : null}
             {gestionar && v.estado !== "anulada" ? <AnularCapa id={v.id} /> : null}

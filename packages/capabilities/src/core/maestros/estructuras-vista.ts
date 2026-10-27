@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import type { Estructura } from "@opai/domain";
+import { conceptosFaltantes, type Estructura } from "@opai/domain";
 
 import { dia } from "./comun";
 import { impactoSchema } from "./estructuras-impacto";
@@ -30,6 +30,7 @@ export const estructuraSchema = z.object({
   puestoId: z.string().nullable(),
   personaId: z.string().nullable(),
   instalacionId: z.string().nullable(),
+  conceptosFaltantes: z.array(z.string()),
   sensible: z
     .boolean()
     .describe("true: montos ocultos por falta del permiso de sueldos sensibles."),
@@ -86,6 +87,7 @@ export function vistaEstructura(e: FilaEstructura, items: FilaItem[], ocultar: b
     puestoId: e.puestoId ?? null,
     personaId: e.personaId ?? null,
     instalacionId: e.instalacionId ?? null,
+    conceptosFaltantes: e.nivel === "cargo" ? [] : conceptosFaltantes(aDominio(e, items)),
     sensible: ocultar,
     sueldoBase: m(e.sueldoBase),
     colacion: m(e.colacion),

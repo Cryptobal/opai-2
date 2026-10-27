@@ -37,7 +37,11 @@ export function AntesDespues({ diferencias }: { diferencias: ImpactoSueldo["dife
     ninguna: "Ninguna",
   };
   const texto = (n: number | string | null) =>
-    n === null ? "Sin dato" : typeof n === "string" ? n : new Intl.NumberFormat("es-CL").format(n);
+    n === null
+      ? "Sin dato"
+      : typeof n === "string"
+        ? (etiquetas[n] ?? n)
+        : new Intl.NumberFormat("es-CL").format(n);
   return (
     <dl className="divide-y divide-border">
       {diferencias.map((d) => (

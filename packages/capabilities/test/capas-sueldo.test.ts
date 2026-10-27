@@ -26,6 +26,82 @@ async function preparar() {
   return { ...p, instalacionId: i.id, personaId: persona.id };
 }
 describe("07b: capas por la misma capacidad UI/API/MCP", () => {
+  it("audita la lectura de versiones por lote con todos los ids, sin copiar montos", async () => {
+    const { ctx, eventos, instalacionId } = await preparar();
+    const a = await dato<{ id: string }>(ctx, "core.estructuras.create", {
+      ...completa,
+      nivel: "instalacion",
+      instalacionId,
+    });
+    const b = await dato<{ id: string }>(ctx, "core.estructuras.create", {
+      ...completa,
+      nivel: "instalacion",
+      instalacionId,
+      vigenteDesde: "2026-02-01",
+    });
+    eventos.splice(0);
+    await dato(ctx, "core.estructuras.list", { nivel: "instalacion", refId: instalacionId });
+    const lecturas = eventos.filter((e) => e.capability === "core.estructuras.read_sensible");
+    expect(lecturas).toHaveLength(1);
+    expect(lecturas[0]?.payload).toMatchObject({
+      estructuras: expect.arrayContaining([
+        expect.objectContaining({ id: a.id }),
+        expect.objectContaining({ id: b.id }),
+      ]),
+    });
+    expect(JSON.stringify(lecturas[0]?.payload)).not.toContain("sueldoBase");
+  });
+  it("preview incluye modalidad, bonos y cambios de imponibilidad sin persistir", async () => {
+    const { ctx, instalacionId } = await preparar();
+    const bono = {
+      nombre: "Turno",
+      tipo: "bono_fijo",
+      monto: 10000,
+      imponible: true,
+      tributable: true,
+    };
+    await dato(ctx, "core.estructuras.create", {
+      ...completa,
+      nivel: "instalacion",
+      instalacionId,
+      items: [bono],
+    });
+    const r = await dato<{
+      impacto: { diferencias: { concepto: string; antes: unknown; despues: unknown }[] };
+    }>(
+      ctx,
+      "core.estructuras.create",
+      {
+        ...completa,
+        nivel: "instalacion",
+        instalacionId,
+        vigenteDesde: "2026-02-01",
+        gratificacion: "legal_25",
+        items: [{ ...bono, imponible: false }],
+      },
+      { dryRun: true },
+    );
+    expect(r.impacto.diferencias).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          concepto: "Gratificación (modalidad)",
+          antes: "ninguna",
+          despues: "legal_25",
+        }),
+        expect.objectContaining({ concepto: "Bono Turno: imponible", antes: "Sí", despues: "No" }),
+      ]),
+    );
+    expect(await ctx.db.estructuraSueldo.count()).toBe(1);
+    expect(
+      await codigo(ctx, "core.estructuras.create", {
+        ...completa,
+        nivel: "instalacion",
+        instalacionId,
+        vigenteDesde: "2026-02-01",
+        items: [{ ...bono, monto: null }],
+      }),
+    ).toBe("UNPROCESSABLE");
+  });
   it("dryRun calcula impacto sin escribir, la versión es idempotente y emite evento", async () => {
     const { ctx, eventos, instalacionId } = await preparar();
     const db = ctx.db;

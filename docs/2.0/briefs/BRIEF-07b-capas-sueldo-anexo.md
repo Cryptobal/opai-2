@@ -309,3 +309,22 @@ El timestamp asignado por el encargo para PR 1 es
 ## 17. Reporte de ejecución
 
 Al cerrar: commits integrados por PR, capturas a 375 y 1280 de las pantallas nuevas, resultado de los tests y de `pnpm test:db`, estado del gate de paridad y del presupuesto de JS, `tools/list` en `main`, y resumen ejecutivo para Carlos: qué se hizo, qué cambia para Gard (el sueldo sale de la instalación, el puesto o el RUT, sin herencia; el vínculo guarda instalación, puesto y jornada; el anexo en borrador que aprueba RRHH), qué decide él (el texto legal de la plantilla base del anexo, §16.b, y las decisiones técnicas de §16.c) y qué sigue (Brief 07c y 07d para cerrar el Núcleo; luego Puestos, Brief 11).
+
+
+## 18. Construcción del PR 1 · Codex, 27-oct-2026
+
+Rama `brief/07b-capas-sueldo`, apilada sobre #49, con merge normal de su avance.
+Se conservó íntegro el trabajo recibido y se empujaron checkpoints WIP, sin reescribir historia.
+
+- **Bloques 1–3 implementados:** migración `20261028161000_capa_instalacion_sueldo`, FK/índice/CHECK/trigger y RLS forzada; dominio sin herencia; capacidades existentes ampliadas para instalación, impacto y anulación, expuestas por el mismo registro UI/API/MCP. No se agrega una herramienta de impacto separada: se obtiene en `preview_core_estructuras_create` (`dryRun`). El snapshot ya contiene estas herramientas.
+- **Bloque 4 implementado, validación pendiente:** pestaña Sueldo de instalación; acceso a capas de puesto desde esa pestaña; Sueldo de persona con contexto explícito; nueva versión completa, bonos, preview, historial por vigencia y anulación con motivo. Piezas del DS disponibles también en `/ds`. La ubicación de la capa puesto adapta las pantallas 06–09 al modelo de Puestos del padre, sin rediseñarlo. El aviso de incompletitud usa metadata del servidor para no confundir conceptos ausentes con montos ocultos.
+- **Decisiones técnicas de Codex:** lock por tenant/capa/referencia dentro de la transacción para cerrar carreras de versión/anulación; los bonos nuevos necesitan su valor y nombres únicos; los bonos históricos sin valor quedan incompletos; diferencias de modalidad de gratificación y banderas imponible/tributable, además de montos. Selector de contexto diferido para mantener el presupuesto. Son implementaciones del objetivo del encargo, sin atribuirlas a Carlos.
+- **CA-1:** funcionalidad construida; pendiente cerrar validación visual y rendimiento de la navegación completa. Se conserva la limitación explícita de §16.d hasta PR 3.
+- **CA-2:** fuera de alcance, PR 2 (incluido el script de archivado de cargo). No se borran ni convierten filas cargo aquí.
+- **CA-3:** fuera de alcance, PR 3.
+- **CA-4:** fuera de alcance, PR 4; PR 1 emite `core.estructura.creada`/`core.estructura.anulada` mediante outbox, sin generar documentos.
+- **CA-paridad:** registro y snapshot conservan las capacidades compartidas; pendiente el gate final. `tools/list` remoto se verifica tras despliegue, no desde esta construcción.
+
+Evidencia inicial: las 109 pruebas de base pasaron; las dos pruebas nuevas de capacidades contra Postgres verificaron aislamiento, preview, auditoría y creación concurrente. Pasaron 13 pruebas focalizadas de capacidades. Un build y typecheck completos pasaron antes de los últimos ajustes. Los e2e de iPad y escritorio pasaron inicialmente; teléfono falló por timeout de captura. Las repeticiones completas encontraron timeouts de inicialización, test de documentos y transacción. No se desactivan pruebas ni se modifican sus expectativas para obtener verde. Resultados finales se actualizarán después de ejecutar el gate sobre el último código.
+
+Pendiente confirmar ≤8 consultas por navegación (ADR-045): la auditoría de lecturas por versión puede exceder el límite. No se declara este criterio cumplido sin medición. El refinamiento de agregación de consultas no debe quitar la auditoría de lecturas sensibles que ya exige main.

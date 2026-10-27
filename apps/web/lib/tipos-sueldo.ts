@@ -25,6 +25,7 @@ export type ItemEstructura = {
 export type EstructuraVista = {
   id: string;
   nivel: Nivel | "cargo";
+  conceptosFaltantes?: string[];
   instalacionId?: string | null;
   cargoId: string | null;
   puestoId: string | null;

@@ -6,6 +6,7 @@ import { defineCapability } from "../../define";
 import { noEncontrado } from "../../errores";
 import { uuidSchema } from "../esquemas";
 import { itemsDe, ocultarMontos } from "./estructuras-acceso";
+import { ocultasDe } from "./estructuras-lectura";
 import { dondeEstructura } from "./estructuras-alcance";
 import { estructuraSchema, NIVELES, vistaEstructura } from "./estructuras-vista";
 
@@ -37,11 +38,8 @@ export const estructurasList = defineCapability({
       ctx,
       filas.map((f) => f.id),
     );
-    return Promise.all(
-      filas.map(async (f) =>
-        vistaEstructura(f, items.get(f.id) ?? [], await ocultarMontos(ctx, f)),
-      ),
-    );
+    const ocultas = await ocultasDe(ctx, filas);
+    return filas.map((f) => vistaEstructura(f, items.get(f.id) ?? [], ocultas.get(f.id) ?? true));
   },
 });
 

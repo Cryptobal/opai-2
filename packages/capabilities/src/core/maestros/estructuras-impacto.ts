@@ -83,6 +83,15 @@ export async function impactoCambio(
       !i ? 0 : ((i.tipo === "bono_fijo" ? i.monto : i.porcentaje) ?? null);
     const av = visible ? valor(a) : null;
     const dv = visible ? valor(d) : null;
+    for (const bandera of ["imponible", "tributable"] as const) {
+      if (a?.[bandera] !== d?.[bandera])
+        cambios.push({
+          concepto: `Bono ${nombre}: ${bandera}`,
+          antes: !visible || !a ? null : a[bandera] === false ? "No" : "Sí",
+          despues: !visible || !d ? null : d[bandera] === false ? "No" : "Sí",
+          diferencia: null,
+        });
+    }
     cambios.push({
       concepto: `Bono ${nombre} (${a?.tipo ?? "ausente"} → ${d?.tipo ?? "ausente"})`,
       antes: av,
