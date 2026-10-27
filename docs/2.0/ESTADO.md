@@ -94,6 +94,18 @@ No se declara CI, QA remota ni aprobación del head nuevo; Neon sigue sin modifi
 
 ## Hecho
 
+- **NÚCLEO-H · CSP, continuidad 1112 (OpenCode / openai/gpt-6.1-sol):** reportes
+  propios con límites de cuerpo/lote y rate limit cerrado; logs categóricos sin
+  URL, muestras, IP o nonce. TEMA/SW tienen nonce de servidor por request. PPR
+  conserva scripts estáticos sin nonce: guía de Next y e2e lo confirman; por eso
+  la respuesta sigue Report-Only con unsafe-inline, sin anunciar nonce fuente
+  ni declarar el shell estricto. No se desactiva Cache Components. Preview de
+  correo aislada a imágenes propias; logo en bytes propios (?vistaPrevia=1), no
+  redirección a R2, con límites/timeout y sandbox para SVG. El correo enviado no
+  cambia. Son adaptaciones técnicas del constructor dentro del encargo; no
+  decisiones nuevas de Carlos. Audio/liveness/Rekognition/Pusher/micrófono
+  diferidos; HSTS solo host. Detalles, pruebas y límites en `briefs/NUCLEO-H-p2.md`.
+
 - **NÚCLEO-H, relanzamiento nucleo-h-1112-oc:** el mensaje de encargo contiene el
   original completo y sustituye el bloqueo documental de la continuidad anterior.
   Bloque 1: reglas puras de estado/avisos de incidente y verificación del archivo

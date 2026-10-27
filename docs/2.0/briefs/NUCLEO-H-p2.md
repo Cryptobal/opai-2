@@ -46,9 +46,13 @@ decisión de negocio. No se tocan reglas ni archivos de Puestos (#49).
   main `3199b00`: Playwright ya corre en CI (no obligatorio), A/C/MFA/07d/agente
   servidor/PWA/portales integrados. Se distinguen los relatos históricos de la
   foto vigente y no se presume despliegue ni aplicación de migraciones en Neon.
-- **CSP parcial:** endpoint de reporte con límite, nonce de scripts inline y
-  revisión de imágenes externas del iframe pendientes. Liveness/audio: futuro.
-  No se cambia a CSP estricta sin esas comprobaciones.
+- **Agregado CSP implementado en Report-Only:** endpoint propio con límites,
+  nonce por petición en TEMA/REGISTRO_SW y aislamiento de imágenes de `srcdoc`.
+  La activación estricta del shell sigue fuera del encargo: PPR conserva scripts
+  estáticos sin nonce (comprobado en navegador). No se anuncia una fuente nonce
+  en la política de respuesta, porque anularía `unsafe-inline` y produciría
+  reportes espurios; el nonce sí se pasa a Next y a los dos scripts propios.
+  Liveness/audio/Rekognition/Pusher/micrófono quedan diferidos (c).
 - **HSTS implementado sin flags de subdominios:** solo `max-age=63072000` en
   producción; no hay inventario HTTPS de todos los subdominios. Su ampliación
   queda diferida conforme al encargo; tampoco se activa preload.
@@ -59,6 +63,41 @@ decisión de negocio. No se tocan reglas ni archivos de Puestos (#49).
 
 Decididas por el constructor OpenCode / openai/gpt-6.1-sol dentro del encargo,
 no decisiones de negocio nuevas de Carlos:
+
+### CSP · agregado del encargo
+
+- `/api/csp-report`: telemetría pública, no una mutación de negocio. Acepta
+  reportes CSP legacy y Reporting API; 16 KiB reales de stream, máximo 10 por lote.
+  Rate limit central de B: 30 solicitudes/minuto por IP y 300/minuto globales,
+  fallo cerrado y 429/Retry-After. Registra en logs de servidor solo directiva de
+  catálogo, categoría del destino y estado HTTP; nunca URL/ruta/query, IP, muestra
+  de script ni política/nonce. `report-uri`, `report-to` y `Reporting-Endpoints`
+  apuntan al endpoint propio. Sin tabla, migración, secreto ni servicio nuevo.
+- Proxy: 128 bits de nonce nuevos por petición, sobreescribe cabeceras del cliente;
+  también en páginas públicas, sin cambiar su autenticación. TEMA y REGISTRO_SW
+  reciben el mismo nonce bajo Suspense de request; no se guarda en caché ni se
+  desactiva Cache Components. La guía instalada de Next advierte que PPR no es
+  compatible con nonce estricto. El e2e confirmó reportes de scripts estáticos
+  al anunciar nonce en la respuesta: por eso solo se prepara en el request para
+  Next y en atributos propios; la respuesta mantiene la política Report-Only
+  original con `unsafe-inline`. Resolver todo el shell y activar enforcement no
+  se declara completado ni se oculta modificando la prueba de cero violaciones.
+- Correo: el HTML de vista previa ya escapa el texto; solo su logo era imagen
+  externa indirecta por redirección a R2. El iframe conserva `sandbox=""`, añade
+  no-referrer y una CSP local que bloquea imágenes ajenas. La URL relativa de
+  preview usa `?vistaPrevia=1`: la ruta de marca sirve bytes propios, sin 302.
+  Fetch solo a HTTPS R2 firmado, sin credenciales/redirecciones, 8 s y 10 MiB,
+  tamaño real verificado; rate limit de preview 30/minuto por IP, fallo cerrado.
+  SVG servido con CSP sandbox y nosniff, también si se abre directamente. El
+  correo enviado conserva la URL pública absoluta y su redirección habitual.
+  El e2e usa imagen ficticia interceptada para comprobar carga propia y bloqueo
+  del tracker; no se afirma una descarga real de R2 ni se requieren claves nuevas.
+- (c) Se difieren liveness/audio, `media-src blob:`, Rekognition, Pusher y permiso
+  de micrófono hasta sus briefs. No se habilitan hosts/permisos preventivamente.
+- (d) HSTS sigue solo en producción para el host: `max-age=63072000`, sin
+  includeSubDomains ni preload. No se afirma inventario HTTPS de subdominios.
+
+### ARCO y lecturas sensibles
 
 - `auditarLectura` es una proyección tipada de la salida validada a una lista de
   IDs. Se valida una sola vez dentro de la transacción y esa misma salida se
@@ -125,6 +164,22 @@ no decisiones de negocio nuevas de Carlos:
   Las fixtures locales usan únicamente variables aisladas heredadas; la URL
   propietaria se limita al proceso de seed/e2e, nunca al servidor probado.
 - Logs del relanzamiento en `/tmp/opencode/nucleo-h-b1*` y `nucleo-h-b2*`.
+- Bloque 3: gate completo y Cabeceras 6/6, sin errores; autorrevisión documental
+  contrastada con paquetes, workflow e historial de main, sin hallazgos.
+- Agregado CSP: gate completo `nucleo-h-csp-gate.log`: typecheck/lint, **1.125
+  pruebas**, BD **98 + 139 + 25**, build y presupuesto por ruta verdes, sin
+  modificar topes. Typecheck/lint repetidos sobre los últimos comentarios/specs
+  en `nucleo-h-csp-tipos-final.log`. Autorrevisión corrigió el logo que redirigía
+  a R2; segunda pasada y autorrevisión final de los nueve puntos sin bloqueantes.
+  La comprobación PPR/nonce en navegador se conserva como límite explícito,
+  no se desactiva la prueba de cero violaciones ni se declara CSP estricta.
+  E2E finales: Cabeceras/srcdoc/Maestros/Configuración Empresa y Acceso/Roles
+  **32 aprobadas, 10 omisiones preexistentes por proyecto**; PWA afectado
+  (manifest, SW y offline) **9/9**, a 375/1024/1280. Una corrida mostró título
+  vacío transitorio en Configuración iPad; la repetición completa pasó sin
+  modificar su aserción ni subir timeouts. Servidor propio 3312 detenido tras
+  ambas suites. Logs `nucleo-h-csp-e2e-repetido.log`; 45 capturas preservadas en
+  `/tmp/opencode/nucleo-h-evidencia/`, sin añadir ruido binario al PR.
 
 ### Evidencia histórica de continuidad previa
 

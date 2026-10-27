@@ -19,6 +19,10 @@ describe("cabecerasSeguridad", () => {
       // La CSP viaja en Report-Only, no como `Content-Security-Policy` que bloquearía.
       expect(h["Content-Security-Policy-Report-Only"]).toBeTruthy();
       expect(h["Content-Security-Policy"]).toBeUndefined();
+      expect(h["Reporting-Endpoints"]).toBe('csp="/api/csp-report"');
+      expect(h["Content-Security-Policy-Report-Only"]).toContain(
+        "report-uri /api/csp-report; report-to csp",
+      );
     }
   });
 

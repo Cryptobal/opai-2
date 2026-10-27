@@ -1,8 +1,7 @@
 // Cabeceras de seguridad del borde (núcleo P1 · CSP y HSTS). Se aplican a todas las rutas desde
-// `next.config.ts`. La CSP viaja en modo Report-Only: no bloquea todavía porque el modo estricto
-// con nonce exige reescribir la respuesta en el proxy (`apps/web/proxy.ts`), que lo cambia el #45
-// (brief/04-pwa). Tras el #45 pasa a `Content-Security-Policy` con nonce por request y se puede
-// retirar `'unsafe-inline'` de `script-src`.
+// `next.config.ts`. Sigue Report-Only. El proxy prepara nonce de TEMA/SW y Next en el request;
+// la respuesta conserva unsafe-inline por los scripts estáticos del shell PPR sin nonce.
+// Retirarlo/activar enforcement exige resolver ese shell, no solo los dos scripts propios.
 
 export type Cabecera = { key: string; value: string };
 
@@ -16,9 +15,9 @@ const R2 = "https://*.r2.cloudflarestorage.com";
  * `frame-ancestors` y `base-uri`/`form-action`. `img-src`/`connect-src`/`frame-src` suman R2 porque
  * la app sube, descarga y previsualiza archivos contra ese host (los mapas van por `/api/geo/mapa`,
  * self). `script-src`/`style-src` conservan `'unsafe-inline'` (y `'unsafe-eval'` solo en desarrollo,
- * para el refresco de Next) hasta que el nonce del #45 permita endurecerlos.
+ * para el refresco de Next) hasta resolver el nonce del shell estático PPR.
  */
-export function construirCsp(desarrollo: boolean): string {
+export function construirCsp(desarrollo: boolean, nonce?: string): string {
   const script = desarrollo
     ? "script-src 'self' 'unsafe-inline' 'unsafe-eval'"
     : "script-src 'self' 'unsafe-inline'";
@@ -31,8 +30,10 @@ export function construirCsp(desarrollo: boolean): string {
     `img-src 'self' data: blob: ${R2}`,
     `connect-src 'self' ${R2}`,
     `frame-src 'self' blob: ${R2}`,
-    script,
+    script + (nonce ? ` 'nonce-${nonce}'` : ""),
     "style-src 'self' 'unsafe-inline'",
+    "report-uri /api/csp-report",
+    "report-to csp",
   ].join("; ");
 }
 
@@ -53,6 +54,7 @@ export function cabecerasSeguridad(opciones: {
     { key: "Permissions-Policy", value: "camera=(self), geolocation=(self), microphone=()" },
     // Report-Only por ahora (ver cabecera del archivo): reporta, no bloquea.
     { key: "Content-Security-Policy-Report-Only", value: construirCsp(opciones.desarrollo) },
+    { key: "Reporting-Endpoints", value: 'csp="/api/csp-report"' },
   ];
   // HSTS solo para el host servido. NÚCLEO-H: sin inventario HTTPS verificado de TODOS los
   // subdominios no se habilitan includeSubDomains ni preload.
