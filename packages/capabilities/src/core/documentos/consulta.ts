@@ -10,7 +10,7 @@ import { entidadEnAlcance } from "../maestros/alcance";
 import { hoy } from "../maestros/comun";
 import { documentosEnAlcance, entidadesEnAlcance, vinculoEnAlcance } from "./alcance-doc";
 import { CAPA_DE } from "./entidad";
-import { docsDeCumplimiento, esDocCumplimiento, puedeVerCumplimiento } from "./sensibles";
+import { filtroDocumentoSensible } from "./sensibles";
 import { documentoSchema, entidadSchema, vistaDocumento } from "./vista";
 
 /** Tipos por id (nombre y días de alerta) para una página de documentos. */
@@ -23,6 +23,7 @@ export async function tiposPorId(ctx: Contexto, ids: (string | null)[]) {
 }
 
 export const documentosList = defineCapability({
+  auditarLectura: (s) => s.items.map((d) => d.id),
   id: "core.documentos.list",
   descripcion:
     "Documentos vigentes (última versión) de una entidad —empresa, cuenta, instalación, persona o puesto— o de todo el tenant, con estado de vigencia; por entidad incluye los tipos obligatorios que faltan.",
@@ -65,6 +66,7 @@ export const documentosList = defineCapability({
     const estados = input.incluirArchivados ? ["disponible", "archivado"] : ["disponible"];
     const docs = await ctx.db.documento.findMany({
       where: {
+        ...filtroDocumentoSensible(ctx),
         estado: { in: estados },
         ...(ids ? { id: { in: [...ids] } } : {}),
         ...(input.tipoId ? { tipoId: input.tipoId } : {}),
@@ -74,12 +76,7 @@ export const documentosList = defineCapability({
     });
     // Documentos de cumplimiento (Ley 21.719): la exportación del titular solo la lista
     // `cumplimiento.read`; con el `documentos.read` general (supervisor, viewer) no aparecen.
-    const visibles = puedeVerCumplimiento(ctx)
-      ? docs
-      : await docsDeCumplimiento(
-          ctx,
-          docs.map((d) => d.id),
-        ).then((ocultos) => docs.filter((d) => !ocultos.has(d.id)));
+    const visibles = docs;
     const tipos = await tiposPorId(
       ctx,
       visibles.map((d) => d.tipoId),
@@ -103,6 +100,7 @@ export const documentosList = defineCapability({
 });
 
 export const documentosGet = defineCapability({
+  auditarLectura: (s) => [s.id, ...s.versiones.map((d) => d.id)],
   id: "core.documentos.get",
   descripcion:
     "Un documento con sus vínculos (propietario y referencias) y la cadena de versiones anteriores.",
@@ -117,12 +115,12 @@ export const documentosGet = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
-    const d = await ctx.db.documento.findUnique({ where: { id: input.id } });
+    const d = await ctx.db.documento.findFirst({
+      where: { id: input.id, ...filtroDocumentoSensible(ctx) },
+    });
     if (!d) throw noEncontrado("El documento");
     // Documento de cumplimiento (p. ej. la exportación del titular): sin `cumplimiento.read` se
     // responde «no encontrado», sin revelar que existe (sin enumeración).
-    if (!puedeVerCumplimiento(ctx) && (await esDocCumplimiento(ctx, d.id)))
-      throw noEncontrado("El documento");
     // Alcance por filas: un actor acotado solo ve documentos cuyo dueño está a cargo.
     const alc = await entidadesEnAlcance(ctx);
     const permitidos = await documentosEnAlcance(ctx, alc);
@@ -135,7 +133,9 @@ export const documentosGet = defineCapability({
       : vinculosTodos;
     const versiones = [];
     for (let previo = d.reemplazaAId, n = 0; previo && n < 50; n++) {
-      const v = await ctx.db.documento.findUnique({ where: { id: previo } });
+      const v = await ctx.db.documento.findFirst({
+        where: { id: previo, ...filtroDocumentoSensible(ctx) },
+      });
       if (!v) break;
       // Mismo filtro que el documento: una versión fuera de alcance no se expone. Las versiones del
       // mismo dueño (el caso normal) sí aparecen, porque comparten su vínculo `propietario`.

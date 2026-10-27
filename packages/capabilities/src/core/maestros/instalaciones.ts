@@ -29,6 +29,7 @@ export async function nombresDeCuentas(ctx: Contexto, ids: string[]) {
 }
 
 export const instalacionesList = defineCapability({
+  auditarLectura: (s) => s.items.map((i) => i.id),
   id: "core.instalaciones.list",
   descripcion:
     "Lista las instalaciones (sitios donde se presta el servicio) con búsqueda por nombre o comuna y filtros por cuenta, estado y región. Paginada por cursor.",
@@ -85,6 +86,7 @@ export const instalacionesList = defineCapability({
 });
 
 export const instalacionesGet = defineCapability({
+  auditarLectura: (s) => [s.id],
   id: "core.instalaciones.get",
   descripcion:
     "Ficha de una instalación: dirección y coordenadas, geocerca, vigencia, puestos de servicio y cantidad de documentos.",

@@ -16,6 +16,7 @@ import {
 import { alertasDocumentos, alertasSchema } from "./resumenes";
 
 export const personasList = defineCapability({
+  auditarLectura: (s) => s.items.map((p) => p.id),
   id: "core.personas.list",
   descripcion:
     "Lista las personas (trabajadores) con búsqueda por nombre o RUT y filtros por cargo y estado (activa, inactiva, bloqueada). Incluye el vínculo laboral vigente, el total de la consulta y, con incluirFiltros, los cargos para el filtro. Paginada por cursor.",
@@ -112,6 +113,7 @@ export const personasList = defineCapability({
 });
 
 export const personasGet = defineCapability({
+  auditarLectura: (s) => [s.id],
   id: "core.personas.get",
   descripcion:
     "Ficha completa de una persona: identificación, contacto, dirección, estado, bloqueo y vínculo laboral vigente. Los sueldos van por core.estructuras.*.",

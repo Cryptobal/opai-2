@@ -5,6 +5,7 @@ import { estadoVigencia, PERMISOS_CORE } from "@opai/domain";
 import { defineCapability } from "../../define";
 import { obtenerCapacidad } from "../../registry";
 import { documentosEnAlcance } from "../documentos/alcance-doc";
+import { filtroDocumentoSensible } from "../documentos/sensibles";
 import { dia, hoy } from "../maestros/comun";
 
 const pendienteSchema = z.object({
@@ -19,6 +20,7 @@ const pendienteSchema = z.object({
 const plural = (n: number, s: string, p: string) => `${n} ${n === 1 ? s : p}`;
 
 export const inicioPendientes = defineCapability({
+  auditarLectura: () => [], // Resumen sin IDs: el evento identifica actor, tenant y capacidad.
   id: "core.inicio.pendientes",
   descripcion:
     "Lo que requiere una decisión hoy en la empresa: aprobaciones de agentes por vencer, documentos vencidos o por vencer, invitaciones sin aceptar e integraciones con error, según los permisos del actor.",
@@ -60,6 +62,7 @@ export const inicioPendientes = defineCapability({
       const permitidos = await documentosEnAlcance(ctx);
       const docs = await ctx.db.documento.findMany({
         where: {
+          ...filtroDocumentoSensible(ctx),
           estado: "disponible",
           venceEn: { lte: limite },
           ...(permitidos ? { id: { in: [...permitidos] } } : {}),
@@ -79,7 +82,7 @@ export const inicioPendientes = defineCapability({
           accion: "Pedir renovación",
         });
     }
-    if (ctx.autorizar(PERMISOS_CORE.usersManage)) {
+    if (!ctx.alcance && ctx.autorizar(PERMISOS_CORE.usersManage)) {
       const inv = await ctx.db.invitation.findMany({
         where: { acceptedAt: null, revocadaEn: null, expiresAt: { gt: ahora } },
         orderBy: { expiresAt: "asc" },

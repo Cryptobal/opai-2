@@ -21,6 +21,7 @@ function usuarioDe(ctx: Contexto): string {
 }
 
 export const notificacionesList = defineCapability({
+  auditarLectura: (s) => s.items.map((n) => n.id),
   id: "core.notificaciones.list",
   descripcion:
     "Avisos del usuario en OPAI (campana): los más recientes primero, con cantidad de no leídos.",

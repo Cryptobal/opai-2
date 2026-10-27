@@ -17,7 +17,7 @@ export function ejecutarLecturaAuditada(
         tenantId: ctx.tenantId,
         capability: c.id,
         actor: ctx.actor,
-        payload: { ids: [...proyectar(validada.data)] },
+        payload: { ids: [...new Set(proyectar(validada.data, entrada))] },
       });
     return validada;
   });

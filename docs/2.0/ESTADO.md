@@ -82,6 +82,15 @@ No se declara CI, QA remota ni aprobación del head nuevo; Neon sigue sin modifi
   encargo, no decisión de negocio nueva. No toca Puestos (#49), ni migraciones.
   Sin tarea en Linear. El detalle y la cobertura de cada bloque están en
   `briefs/NUCLEO-H-p2.md`.
+  Bloque 2: inventario de lecturas existentes en main `3199b00` y auditoría de
+  datos personales/documentos con IDs, transacción de A y fallo cerrado. Incluye
+  vías indirectas (instalaciones, búsqueda, historial, directorio, keys y cola de
+  aprobaciones); no duplica la revelación salarial existente. La autorrevisión
+  corrigió dos TOCTOU: conjuntos de documentos protegidos por locks de relaciones
+  y consentimiento limitado al conjunto de contactos efectivamente bloqueado.
+  También cierra vías de documentos de cumplimiento por versiones/vencimientos.
+  Pruebas reales con barreras; detalle técnico del constructor e inventario en
+  `briefs/NUCLEO-H-lecturas.md`. Sin permisos nuevos ni migración; no toca #49.
 
 - **NÚCLEO-H, continuidad en `core/nucleo-p2` (OpenCode / openai/gpt-6.1-sol):**
   ARCO lista/detalle filtran alcance y auditan solo IDs revelados, actor, tenant y

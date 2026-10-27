@@ -30,7 +30,8 @@ decisión de negocio. No se tocan reglas ni archivos de Puestos (#49).
 ## Criterios y estado
 
 - **Bloque 1: implementado** según la lista de extracción anterior.
-- **Bloque 2: ARCO implementado; bloque completo parcial.** Lista y detalle
+- **Bloque 2: implementado.** Inventario de capacidades presentes en main y
+  pruebas en [`NUCLEO-H-lecturas.md`](NUCLEO-H-lecturas.md). ARCO: lista y detalle
   filtran alcance antes de responder, incluidos sus cursores. Auditoría con
   actor, tenant, capacidad y los IDs efectivamente devueltos (sin titular, correo,
   resultado ni fila centinela). Lectura e insert comparten transacción; si falla
@@ -38,8 +39,9 @@ decisión de negocio. No se tocan reglas ni archivos de Puestos (#49).
   Se acotan también las lecturas de avanzar/resolver/exportar y el UPDATE
   condicional; crear exige titular interno en alcance para un actor acotado.
   Cargar titulares reutiliza los filtros de maestros, también para consentimientos.
-  Pendientes: inventario completo de lecturas 07d/sueldos/documentos del original;
-  la auditoría sensible existente de sueldos no se duplica.
+  Las demás lecturas del inventario usan el mismo append mínimo de A, incluidas
+  las vías indirectas de nombres/correos y los documentos/URLs firmadas. La
+  auditoría sensible existente de sueldos no se duplica.
 - **Bloque 3: parcial.** AGENTS, contexto, estado y reglas documentan los cambios
   verificables, sin declarar cumplidos los criterios ausentes del original.
 - **CSP parcial:** endpoint de reporte con límite, nonce de scripts inline y
@@ -136,8 +138,8 @@ presupuesto), `nucleo-h-gate-tipos-lint-final.log`,
 antes de los pushes de HSTS y documentación; logs: `nucleo-h-gate-hsts.log`,
 `nucleo-h-e2e-hsts.log`, `nucleo-h-gate-docs.log` y `nucleo-h-e2e-docs.log`.
 
-No hay ID de Linear en el encargo. Se debe obtener antes de abrir un PR;
-PR-BODY.md queda local, ignorado, sin commit, conforme al uso de este repo.
+Sin tarea en Linear, según el relanzamiento. No se abre ni se crea otro PR.
+PR-BODY.md queda local, ignorado, sin commit, conforme al encargo.
 
 ## Lista de control del encargo de continuidad
 

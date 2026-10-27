@@ -55,6 +55,7 @@ async function nombres(ctx: Contexto, usuarios: string[], keys: string[]) {
 }
 
 export const actividadList = defineCapability({
+  auditarLectura: (s) => s.items.map((e) => e.id),
   id: "core.actividad.list",
   descripcion:
     "Actividad (historial) de una ficha —cuenta, instalación, persona, cargo o documento— o de toda la empresa: quién hizo qué y cuándo, distinguiendo personas y agentes, con los campos cambiados.",

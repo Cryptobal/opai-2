@@ -3,7 +3,7 @@ import { z } from "zod";
 import { PERMISOS_CORE, portalesIncoherentes } from "@opai/domain";
 
 import { defineCapability } from "../define";
-import { noEncontrado, reglaDeNegocio } from "../errores";
+import { noEncontrado, prohibido, reglaDeNegocio } from "../errores";
 import { tenantActual, usuarioResponsable } from "./comun";
 import { emailSchema, portalSchema, rolSchema, uuidSchema } from "./esquemas";
 import { crearInvitacion, estadoInvitacion } from "./invitar";
@@ -65,6 +65,7 @@ const invitacionSchema = z.object({
 });
 
 export const invitationsList = defineCapability({
+  auditarLectura: (s) => s.map((i) => i.id),
   id: "core.invitations.list",
   descripcion:
     "Invitaciones de la empresa actual con su estado (pendiente, aceptada, revocada, vencida).",
@@ -74,6 +75,7 @@ export const invitationsList = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
+    if (ctx.alcance) throw prohibido("No tienes acceso a estas invitaciones.");
     const filas = await ctx.db.invitation.findMany({ orderBy: { createdAt: "desc" }, take: 200 });
     return filas
       .map((i) => ({ ...i, estado: estadoInvitacion(i) }))
