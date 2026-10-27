@@ -1,12 +1,17 @@
 import { beforeAll, describe, expect, it, vi } from "vitest";
 
 import type { Contexto } from "@opai/capabilities";
+import type * as Capabilities from "@opai/capabilities";
 
 import type * as ActorMod from "../lib/actor";
 
 import { fuentesFalsas, membresia, TENANT, USUARIO } from "./fuentes-falsas";
 
 vi.stubEnv("DATABASE_URL", "postgresql://opai_app:x@localhost:5432/opai");
+vi.mock("@opai/capabilities", async (original) => ({
+  ...(await original<typeof Capabilities>()),
+  ajuste: async () => false,
+}));
 let actor: typeof ActorMod;
 beforeAll(async () => {
   actor = await import("../lib/actor");
@@ -14,7 +19,10 @@ beforeAll(async () => {
 
 const OTRO = "0192f3a0-0000-7000-8000-000000000002";
 const sinSesion = async () => null;
-const conSesion = async () => ({ user: USUARIO });
+const conSesion = async () => ({
+  user: { ...USUARIO, twoFactorEnabled: true },
+  session: { mfaVerified: true },
+});
 const conKey = (key: string) =>
   new Request("http://x/api/v1/core/me", { headers: { authorization: `Bearer ${key}` } });
 
@@ -24,6 +32,17 @@ function esContexto(r: Contexto | Response): Contexto {
 }
 
 describe("resolverActor", () => {
+  it("la API con cookie rechaza owner sin enrolar o sesión Google sin segundo factor", async () => {
+    for (const twoFactorEnabled of [false, true]) {
+      const r = await actor.resolverActor(
+        new Request("http://x/api/v1/core/me"),
+        fuentesFalsas().fuentes,
+        async () => ({ user: { ...USUARIO, twoFactorEnabled }, session: { mfaVerified: false } }),
+      );
+      expect(r).toBeInstanceOf(Response);
+      expect((r as Response).status).toBe(403);
+    }
+  });
   it("sin sesión ni key: 401", async () => {
     const r = await actor.resolverActor(
       new Request("http://x"),

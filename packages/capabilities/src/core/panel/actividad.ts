@@ -36,11 +36,17 @@ const dia = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Formato aaaa-mm-dd.");
 async function nombres(ctx: Contexto, usuarios: string[], keys: string[]) {
   const [m, k] = await Promise.all([
     ctx.db.membership.findMany({ where: { userId: { in: usuarios } }, include: { user: true } }),
-    ctx.db.apiKey.findMany({ where: { id: { in: keys } }, select: { id: true, nombre: true } }),
+    ctx.db.apiKey.findMany({
+      where: { id: { in: keys } },
+      select: { id: true, nombre: true, principalTipo: true },
+    }),
   ]);
   return new Map([
     ...m.map((x) => [x.userId, x.user.name] as const),
-    ...k.map((x) => [x.id, x.nombre] as const),
+    // Un agente de servicio se distingue en la auditoría: "agente <nombre> (servicio)" (t457u).
+    ...k.map(
+      (x) => [x.id, x.principalTipo === "servicio" ? `${x.nombre} (servicio)` : x.nombre] as const,
+    ),
   ]);
 }
 

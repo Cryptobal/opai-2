@@ -44,6 +44,7 @@ describe("acciones del shell del ERP según el acceso", () => {
     pintar({ ...base, acceso: true });
     expect(captura.onBuscar).toBeTypeOf("function");
     expect(captura.menu.some((m) => m.id === "pref")).toBe(true);
+    expect(captura.menu.some((m) => m.id === "mi-cuenta")).toBe(true);
   });
 
   it("sin acceso: no hay búsqueda ni Preferencias; se conserva salir", () => {
@@ -51,5 +52,13 @@ describe("acciones del shell del ERP según el acceso", () => {
     expect(captura.onBuscar).toBeUndefined();
     expect(captura.menu.some((m) => m.id === "pref")).toBe(false);
     expect(captura.menu.some((m) => m.id === "salir")).toBe(true);
+    expect(captura.menu.some((m) => m.id === "mi-cuenta")).toBe(true);
+  });
+
+  it("no ofrece Mi cuenta del ERP en otro portal o sin empresa", () => {
+    pintar({ ...base, acceso: true, portal: "platform" });
+    expect(captura.menu.some((m) => m.id === "mi-cuenta")).toBe(false);
+    pintar({ ...base, acceso: false, tenant: null });
+    expect(captura.menu.some((m) => m.id === "mi-cuenta")).toBe(false);
   });
 });

@@ -1,20 +1,11 @@
 import { expect, type Page, test } from "@playwright/test";
+import { E2E_PASSWORD as password, entrar } from "./sesion";
 
 // QA del iPad vertical (CAR-6): de 768 a 1023 px las fichas con lista + detalle (Personas, Cuentas,
 // Instalaciones) muestran un solo panel a todo el ancho; desde 1024 px la vista dividida sigue igual.
-const email = process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl";
-const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
 
 test.use({ actionTimeout: 30_000 });
 test.setTimeout(180_000);
-
-async function entrar(page: Page) {
-  await page.goto("/login");
-  await page.getByLabel("Correo").fill(email);
-  await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
-  await page.getByRole("button", { name: "Entrar" }).click();
-  await page.waitForURL((url) => url.pathname === "/" || url.pathname === "/platform");
-}
 
 const MODULOS = [
   { ruta: "/personas", lista: "Lista de personas", volver: "Personas" },

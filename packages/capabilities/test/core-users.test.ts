@@ -54,11 +54,20 @@ describe("core.users.*", () => {
       ],
     };
     const { ctx, tabla } = contextoDePrueba({ rol: "owner", semilla });
-    const r = await executeCapability(ctx, "core.users.update", { membershipId: M2, roleId: ROL_ID });
-    expect(r).toMatchObject({ ok: true, data: { roleId: ROL_ID, rol: "gerente", rolNombre: "Central" } });
+    const r = await executeCapability(ctx, "core.users.update", {
+      membershipId: M2,
+      roleId: ROL_ID,
+    });
+    expect(r).toMatchObject({
+      ok: true,
+      data: { roleId: ROL_ID, rol: "gerente", rolNombre: "Central" },
+    });
     expect(tabla("membership").find((m) => m["id"] === M2)?.["roleId"]).toBe(ROL_ID);
     // Quitar el personalizado (roleId null) vuelve al rol base.
-    const quita = await executeCapability(ctx, "core.users.update", { membershipId: M2, roleId: null });
+    const quita = await executeCapability(ctx, "core.users.update", {
+      membershipId: M2,
+      roleId: null,
+    });
     expect(quita).toMatchObject({ ok: true, data: { roleId: null, rol: "gerente" } });
   });
 
@@ -85,12 +94,23 @@ describe("core.users.*", () => {
       rol: "owner",
       semilla,
       actor: { tipo: "agent", id: KEY, viaUserId: USUARIO_DE_PRUEBA.id },
-      agente: { apiKeyId: KEY, nombre: "Agente RR.HH.", presupuestoMensualMicro: null, autonomia: {} },
+      agente: {
+        apiKeyId: KEY,
+        nombre: "Agente RR.HH.",
+        presupuestoMensualMicro: null,
+        autonomia: {},
+      },
     });
-    const asigna = await executeCapability(ctx, "core.users.update", { membershipId: M2, roleId: ROL_ID });
+    const asigna = await executeCapability(ctx, "core.users.update", {
+      membershipId: M2,
+      roleId: ROL_ID,
+    });
     expect(asigna).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
     expect(asigna.ok === false && asigna.error.message).toMatch(/API key/);
-    const quita = await executeCapability(ctx, "core.users.update", { membershipId: M2, roleId: null });
+    const quita = await executeCapability(ctx, "core.users.update", {
+      membershipId: M2,
+      roleId: null,
+    });
     expect(quita).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
     // Pero la misma key sí cambia portales o estado: solo se bloquea el roleId, no la capacidad entera.
     const portales = await executeCapability(ctx, "core.users.update", {
@@ -117,7 +137,10 @@ describe("core.users.*", () => {
       ],
     };
     const { ctx } = contextoDePrueba({ rol: "admin", semilla });
-    const r = await executeCapability(ctx, "core.users.update", { membershipId: M2, roleId: ROL_ID });
+    const r = await executeCapability(ctx, "core.users.update", {
+      membershipId: M2,
+      roleId: ROL_ID,
+    });
     expect(r).toMatchObject({
       ok: false,
       error: { code: "FORBIDDEN", detalles: { permisos: ["core:tenant.delete"] } },
@@ -129,7 +152,11 @@ describe("core.users.*", () => {
     // update/suspender usan el texto de la sábana («único owner»); remove, su propio texto.
     for (const [id, input, patron] of [
       ["core.users.update", { membershipId: M1, rol: "admin" }, /único owner de la empresa/],
-      ["core.users.update", { membershipId: M1, estado: "suspendida" }, /único owner de la empresa/],
+      [
+        "core.users.update",
+        { membershipId: M1, estado: "suspendida" },
+        /único owner de la empresa/,
+      ],
       ["core.users.remove", { membershipId: M1 }, /último owner/],
     ] as const) {
       const r = await executeCapability(ctx, id, input);
@@ -149,8 +176,15 @@ describe("core.users.*", () => {
     // El rol personalizado concede TODO el acceso efectivo de admin: `validarConcedeRol` pasaría; lo
     // que frena la escalada es `puedeAsignarRol` sobre el rol base (gerente), no el acceso efectivo.
     const permisosRol = permisosDe("admin", catalogoPermisos(), []);
-    const { ctx } = contextoDePrueba({ rol: "gerente", permisosRol, semilla: semillaTenant("viewer") });
-    const sube = await executeCapability(ctx, "core.users.update", { membershipId: M2, rol: "admin" });
+    const { ctx } = contextoDePrueba({
+      rol: "gerente",
+      permisosRol,
+      semilla: semillaTenant("viewer"),
+    });
+    const sube = await executeCapability(ctx, "core.users.update", {
+      membershipId: M2,
+      rol: "admin",
+    });
     expect(sube).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
     expect(sube.ok === false && sube.error.message).toMatch(/por encima/);
     const invita = await executeCapability(ctx, "core.users.invite", {
@@ -247,6 +281,24 @@ describe("core.users.invite", () => {
       rol: "viewer",
     });
     expect(r).toMatchObject({ ok: false, error: { code: "CONFLICT" } });
+  });
+
+  it("una API key no invita con rol admin ni owner, aunque su responsable sí pueda (encargo QA #70)", async () => {
+    const agente = { tipo: "agent" as const, id: "key", viaUserId: USUARIO_DE_PRUEBA.id };
+    const { ctx } = contextoDePrueba({ rol: "owner", actor: agente, semilla: semillaTenant() });
+    for (const rol of ["admin", "owner"] as const) {
+      const r = await executeCapability(ctx, "core.users.invite", {
+        email: "nuevo@prueba.cl",
+        rol,
+      });
+      expect(r).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+      expect(r.ok === false && r.error.message).toMatch(/API key/);
+    }
+    const viewer = await executeCapability(ctx, "core.users.invite", {
+      email: "nuevo@prueba.cl",
+      rol: "viewer",
+    });
+    expect(viewer).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
   });
 
   it("acepta la invitación con el usuario correcto y rechaza otro correo", async () => {

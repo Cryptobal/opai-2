@@ -42,12 +42,14 @@ describe("herramientasMcp", () => {
       expect.arrayContaining([
         "core_me",
         "core_users_list",
-        "core_users_invite",
-        "preview_core_users_invite",
+        "core_cuentas_create",
+        "preview_core_cuentas_create",
       ]),
     );
     expect(n).not.toContain("preview_core_users_list");
     expect(n).not.toContain("preview_core_me");
+    expect(n).not.toContain("core_users_invite");
+    expect(n).not.toContain("preview_core_users_invite");
     expect(n.some((x) => x.includes("invitations_accept") || x.includes("invitations_peek"))).toBe(
       false,
     );
@@ -89,15 +91,15 @@ describe("herramientasMcp", () => {
       semilla: semillaTenant(),
     });
     const [real, preview] = herramientasMcp(ctx).filter(
-      (h) => h.capacidad.id === "core.users.invite",
+      (h) => h.capacidad.id === "core.cuentas.create",
     );
-    const args = { email: "nuevo@prueba.cl", rol: "viewer" };
+    const args = { nombre: "Cliente de prueba" };
     expect(await ejecutarHerramienta(ctx, preview!, args)).toMatchObject({
       ok: true,
       dryRun: true,
     });
-    expect(tabla("invitation")).toHaveLength(0);
+    expect(tabla("cuenta")).toHaveLength(0);
     expect(await ejecutarHerramienta(ctx, real!, args)).toMatchObject({ ok: true, dryRun: false });
-    expect(eventos).toMatchObject([{ capability: "core.users.invite", actor: agente }]);
+    expect(eventos).toMatchObject([{ capability: "core.cuentas.create", actor: agente }]);
   });
 });

@@ -45,6 +45,8 @@ export const apikeysGet = defineCapability({
     );
     return {
       ...k,
+      tipo: k.principalTipo ?? "usuario",
+      permisos: k.heredaPermisos === false ? k.permisos : null,
       responsable: { nombre: k.user.name, email: k.user.email },
       ultimoUsoEn: iso(k.ultimoUsoEn),
       expiraEn: iso(k.expiraEn),
@@ -52,6 +54,7 @@ export const apikeysGet = defineCapability({
       presupuestoMensualUsd: k.presupuestoMensualMicro
         ? Number(k.presupuestoMensualMicro) / 1_000_000
         : null,
+      scopeAmplio: k.scopes.includes("*"),
       valida:
         !k.revocadaEn && (!k.expiraEn || k.expiraEn.getTime() > Date.now()) && Boolean(miembro),
       autonomia: irreversibles.map((c) => ({

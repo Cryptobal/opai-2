@@ -139,7 +139,7 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
           onSelect: () => trasLimpiarCaches(() => cambiarTenant(e.id)),
         }))
       : [];
-  const menu = menuCuentaShell(enErp, (href) => router.push(href), () => setPassword(true));
+  const menu = menuCuentaShell(enErp, (href) => router.push(href), () => setPassword(true), datos.portal === "erp" && datos.tenant !== null);
   const conPin = (accion: ReactNode) => <>{accion}{pinFicha}</>;
   return (
     <AppShell

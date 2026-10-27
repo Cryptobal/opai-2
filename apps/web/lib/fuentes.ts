@@ -17,6 +17,10 @@ export type ApiKeyFila = {
   scopes: string[];
   principalTipo: string;
   principalId: string | null;
+  /** Permisos finos de la key (Identidad de servicio t457u). */
+  permisos: string[];
+  /** true = hereda los permisos del responsable; false = usa `permisos` (servicio siempre false). */
+  heredaPermisos: boolean;
   revocadaEn: Date | null;
   expiraEn: Date | null;
   ultimoUsoEn: Date | null;
@@ -92,7 +96,10 @@ export const fuentesReales: Fuentes = {
       // Sin rol personalizado (roleId null) manda el rol base. Con un rol personalizado archivado se
       // deniega por defecto (lista vacía): nunca se vuelve al rol base, que daría más acceso (§16.2).
       permisosRol: rol ? (rol.archivadoEn ? [] : rol.permisos) : null,
-      excepciones: (m?.excepciones ?? []).map((e) => ({ permiso: e.permiso, conceder: e.conceder })),
+      excepciones: (m?.excepciones ?? []).map((e) => ({
+        permiso: e.permiso,
+        conceder: e.conceder,
+      })),
       instalaciones,
     };
   },

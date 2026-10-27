@@ -1,22 +1,13 @@
 import { expect, type Locator, type Page, test } from "@playwright/test";
+import { E2E_PASSWORD as password, entrar } from "./sesion";
 
 // Celular apaisado (CAR-6): las fichas usan el ancho de la pantalla, no el de «tablet», y las tarjetas
 // de dos columnas se apilan solo ahí (844×390 y 932×430): en «Ubicación y vigencia» (Instalaciones) el
 // texto queda bajo el mapa y en Laboral (Personas) la segunda columna queda bajo la primera, con el texto
 // de 200 px o más. Desde 1024 px de ancho (y a 768 de alto normal) quedan lado a lado, igual que en main.
-const email = process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl";
-const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
 
 test.use({ actionTimeout: 30_000 });
 test.setTimeout(180_000);
-
-async function entrar(page: Page) {
-  await page.goto("/login");
-  await page.getByLabel("Correo").fill(email);
-  await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
-  await page.getByRole("button", { name: "Entrar" }).click();
-  await page.waitForURL((url) => url.pathname === "/" || url.pathname === "/platform");
-}
 
 const sinDesborde = (page: Page) =>
   page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth);

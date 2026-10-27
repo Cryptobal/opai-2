@@ -258,6 +258,7 @@ Decisiones técnicas de OpenCode / GPT-6.1 Sol, dentro del encargo (no atribuida
 - `core.config.set` serializa lectura y escritura por ajuste en su transacción; revisión esperada opcional evita reemplazar fijados con una lista obsoleta. Al reiniciar ajustes de navegación se conserva una fila con valor inválido para el esquema: la lectura vuelve al defecto sin reutilizar la revisión.
 - Las fichas guardadas se validan con capacidades existentes y alcance antes de mostrarse; una falla transitoria oculta el acceso, no concede acceso. Solo se aceptan rutas internas conocidas. Recientes siguen exclusivamente en el navegador.
 - Gana ADR-050 de `main` sobre D7: Buscar arriba en teléfono; usuario al pie de la lateral. No se crea un agente interno ni se copia el estilo de 1.0.
+- Continuación del encargo de las 05:00 CLT: merge normal de `origin/main` `5c18a92` (identidad de servicio #70 y MFA #65). Se conserva «Mi cuenta» del menú del ERP incluso sin acceso al portal, igual que en main, y la navegación e2e usa el helper de login con TOTP ya existente. No se relajan permisos ni la política MFA.
 
 No hay migración nueva ni cambio del orden del plan. La tarea específica del PR B no viene identificada: CAR-13 es la del documento, no se inventa otra vinculación.
 

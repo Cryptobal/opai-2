@@ -27,9 +27,10 @@ export function TarjetaKey({ k, gasto }: { k: ApiKey; gasto: number }) {
           <span className="t-mono truncate text-sm text-fg-muted">{k.prefijo}…</span>
         </LinkNext>
         <span className="flex flex-wrap gap-1.5">
+          {k.tipo === "servicio" ? <Badge punto={false}>Servicio</Badge> : null}
           {(k.scopes.includes("*") ? ["todos los módulos"] : k.scopes).map((s) => (
             <Badge key={s} punto={false}>
-              {s}
+              {s === "todos los módulos" ? "* · amplio y transitorio" : s}
             </Badge>
           ))}
         </span>

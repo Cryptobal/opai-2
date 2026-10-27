@@ -87,6 +87,11 @@ export async function accionEntrar(
         "Revisa los datos y vuelve a intentarlo. Tras varios intentos pausaremos el acceso unos minutos.",
     };
   }
+  // Con segundo factor activo (NÚCLEO-F), la contraseña es correcta pero falta verificar el código:
+  // el plugin ya fijó la cookie del desafío; se continúa en la pantalla de verificación.
+  if (r.segundoFactor) {
+    redirect(`/mfa?next=${encodeURIComponent(destinoSeguro(destino))}`);
+  }
   redirect(`/elegir-empresa?next=${encodeURIComponent(destinoSeguro(destino))}`);
 }
 

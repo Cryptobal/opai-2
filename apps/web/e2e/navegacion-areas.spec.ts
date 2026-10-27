@@ -1,16 +1,12 @@
 import { expect, test } from "@playwright/test";
+import { E2E_PASSWORD, entrar } from "./sesion";
 
 test.use({ actionTimeout: 30_000 });
 test.setTimeout(180_000);
 
 test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }, info) => {
-  const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
-  if (!password) throw new Error("Falta contraseña E2E");
-  await page.goto("/login");
-  await page.getByLabel("Correo").fill(process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl");
-  await page.getByLabel("Contraseña", { exact: true }).fill(password);
-  await page.getByRole("button", { name: "Entrar", exact: true }).click();
-  await page.waitForURL((u) => u.pathname === "/" || u.pathname === "/platform");
+  if (!E2E_PASSWORD) throw new Error("Falta contraseña E2E");
+  await entrar(page);
   await page.goto("/");
   await expect(page.getByRole("heading", { name: /^Bandeja/ })).toBeVisible();
   const nav = page
