@@ -49,6 +49,12 @@ Carlos decidió construir **OPAI 2.0 desde cero**: un SaaS modular, multi-tenant
 
 ## Orden de construcción
 
+**Enmienda ADR-049 §8 (NÚCLEO-E2).** Carlos, 26-oct-2026 21:07, respuesta al
+widget t461s2118: el agente interno de cada tenant va antes de CPQ. La
+orquestación del servidor se adelanta al cierre del Núcleo; la UI de chat sigue
+pendiente de un export aprobado de Claude Design, siempre con el Design System
+de OPAI 2.0. El módulo vendible es `agente`: sin licencia activa no hay acceso.
+
 Según ADR-030 con la nota del 25-oct-2026 (Decisión de Carlos, 25-oct-2026, chat con OPAI 2.0 (registrada por el bot OPAI 2.0); fases en `ROADMAP.md`, etapa de cada módulo en `PLAN-desarrollo.md`):
 
 1. **Primero se cierra el Núcleo, antes de abrir los módulos:** Brief 05 (navegación por áreas) → Brief 04 (PWA) → Brief 07b (capas de sueldo) → Brief 07c (acceso y permisos, con el alcance del supervisor y de los portales) → Brief 07d (Ley 21.719, antes del 30-nov-2026) *(07c y 07d agregados el 26-oct-2026: Decisión de Carlos 9:20 CLT, transmitida por el bot Paridad; B3 al 07c 9:36 CLT; numeración confirmada 9:48 CLT, chat con OPAI 2.0)*, con el PR 2 del Brief 03 (rendimiento) y la sesión D del Brief 02 en paralelo. El Núcleo no se cierra hasta que las 4 brechas Altas de paridad (B1 a B4 de `paridad/nucleo.md`) estén en `main`; B1, B2 y B3 van en el Brief 07c y B4 en el 07d (Decisión de Carlos, 26-oct-2026 9:36 CLT, chat con OPAI 2.0 (registrada por el bot OPAI 2.0)).

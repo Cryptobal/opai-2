@@ -68,7 +68,9 @@ describe.skipIf(!urlPropietario)("rate_limit_consumir (NÚCLEO-B)", () => {
     // Aunque se pida 0, la retención se eleva al piso de 3600 s: la ventana recién creada sobrevive.
     const filas = await e.appSinTenant.$queryRaw<{ purgadas: number }[]>`
       SELECT "core"."rate_limit_purgar"(0::int) AS purgadas`;
-    expect(Number(filas[0]?.purgadas ?? 0)).toBe(0);
+    expect(Number(filas[0]?.purgadas ?? 0)).toBeGreaterThanOrEqual(0);
+    // Otros tests pueden haber dejado ventanas antiguas: lo que importa es conservar ESTA ventana.
+    expect(await e.admin.rateLimitVentana.findUnique({ where: { clave } })).not.toBeNull();
   });
 
   it("la purga borra las ventanas sin actividad fuera de la retención", async () => {

@@ -48,7 +48,7 @@ export function restriccion(ctx: Contexto, c: Capacidad): Falla | null {
   // Única excepción (t500u, encargo portal-sesión): aceptar la invitación crea la membresía;
   // su handler exige usuario autenticado, token y correo. No exime a otras internas.
   if (
-    ctx.actor.tipo === "user" &&
+    (ctx.actor.tipo === "user" || (ctx.actor.tipo === "agent" && ctx.actor.interno)) &&
     !ctx.principal &&
     ctx.conTenant &&
     c.modulo !== "platform" &&

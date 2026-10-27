@@ -2,7 +2,7 @@
 
 export type Aprobacion = {
   id: string;
-  apiKeyId: string;
+  apiKeyId: string | null;
   agente: string;
   via: string | null;
   riesgo: "alto" | "medio";

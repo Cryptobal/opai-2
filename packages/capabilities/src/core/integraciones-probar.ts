@@ -33,8 +33,8 @@ export const integracionesProbar = defineCapability({
       if (def.categoria === "geo") {
         await probarGeo(ctx);
       } else if (def.categoria === "ia") {
-        // Se prueba exactamente el proveedor pedido, no el primero disponible.
-        const ia = await iaDe(ctx, "economica", "core", def.id as ProveedorIaId);
+        // Probar registra estado y evento abajo; evita un segundo aviso desde el resolvedor.
+        const ia = await iaDe(ctx, "economica", "core", def.id as ProveedorIaId, { avisar: false });
         if (!ia) throw new Error("Sin credencial de IA disponible.");
         await ia.completar({ prompt: "Responde solo: ok", maxTokens: 5 });
         mensaje = `Conexión correcta (${ia.proveedor}, ${ia.modelo}).`;

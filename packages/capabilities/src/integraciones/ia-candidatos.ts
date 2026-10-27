@@ -33,7 +33,7 @@ export type Candidatos = {
  * Política BYOK (Carlos, 26-oct-2026 21:58 CLT, t214s684): se decide si el tenant tiene key propia
  * ANTES de descartar candidatos por modelo o secreto. Si la tiene, la cadena solo usa keys propias
  * y nunca cae a OPAI, aunque ninguna propia sirva (entonces `cands` queda vacío y se avisa arriba).
- * No aplica al probar un proveedor concreto (`solo`).
+ * También aplica al seleccionar un proveedor concreto (`solo`).
  */
 export async function candidatosIa(
   ctx: Contexto,
@@ -46,10 +46,11 @@ export async function candidatosIa(
   const out: Candidato[] = [];
   const propiasInutiles: PropiaInutil[] = [];
   let tieneKeyPropia = false;
-  for (const id of solo ? [solo] : ORDEN_IA) {
+  for (const id of ORDEN_IA) {
     const fila = await integracionDe(ctx, id);
     const esPropia = fila?.modalidad === "propia";
     if (esPropia) tieneKeyPropia = true;
+    if (solo && id !== solo) continue;
     const config = (fila?.config ?? {}) as ConfigIa;
     const modelo =
       config.modelos?.[clase] ??
@@ -73,7 +74,7 @@ export async function candidatosIa(
     }
     out.push({ id, modelo, cred, ...(config.baseUrl ? { baseUrl: config.baseUrl } : {}) });
   }
-  const soloPropias = !solo && tieneKeyPropia;
+  const soloPropias = tieneKeyPropia;
   const cands = soloPropias ? out.filter((c) => c.cred.modalidad === "propia") : out;
   return { cands, soloPropias, propiasInutiles };
 }

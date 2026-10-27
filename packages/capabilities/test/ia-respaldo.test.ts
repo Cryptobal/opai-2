@@ -121,7 +121,7 @@ describe("respaldo entre proveedores de IA (ADR-049)", () => {
       "fetch",
       vi.fn(async () => new Response("rate", { status: 429 })),
     );
-    const ia = await iaDe(ctx, "economica", "core", "ia_openai");
+    const ia = await iaDe(ctx, "economica", "core", "ia_openai", { avisar: false });
     const e = await ia?.completar({ prompt: "x" }).catch((x: unknown) => x);
     expect((e as ErrorIa).estado).toBe(429);
     expect(ia?.proveedor).toBe("ia_openai");
