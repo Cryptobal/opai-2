@@ -46,7 +46,7 @@ export const ACTIVIDADES_TRATAMIENTO: readonly ActividadTratamiento[] = [
   { id: 1, actividad: "Gestión de personal de seguridad", categoriaPrincipal: "Laboral", baseLicitud: "relacion_laboral", tablas: ["personas", "vinculos_laborales"] },
   { id: 2, actividad: "Sueldos y estructuras", categoriaPrincipal: "Económica", baseLicitud: "relacion_laboral", tablas: ["estructuras_sueldo"] },
   { id: 3, actividad: "Contactos de clientes", categoriaPrincipal: "Contacto", baseLicitud: "interes_legitimo", tablas: ["contactos", "cuentas", "cuentas_representantes"] },
-  { id: 4, actividad: "Comunicaciones comerciales a contactos", categoriaPrincipal: "Contacto", baseLicitud: "consentimiento", tablas: ["envios"] },
+  { id: 4, actividad: "Notificaciones y avisos operativos", categoriaPrincipal: "Contacto", baseLicitud: "interes_legitimo", tablas: ["envios"] },
   { id: 5, actividad: "Intentos de ingreso", categoriaPrincipal: "Identificación", baseLicitud: "interes_legitimo", tablas: ["sessions", "login_intentos"] },
   { id: 6, actividad: "Documentos de personas", categoriaPrincipal: "Laboral", baseLicitud: "obligacion_legal", tablas: ["documentos"] },
   { id: 7, actividad: "Cuentas de usuario de la plataforma", categoriaPrincipal: "Identificación", baseLicitud: "contrato", tablas: ["users", "accounts", "invitations"] },
