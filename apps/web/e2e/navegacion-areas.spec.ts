@@ -11,12 +11,17 @@ test("recuerda el área abierta en Inicio y Configuración", async ({ page }, in
   await page.goto("/configuracion");
   const nav = page.getByRole("navigation", { name: "Principal", exact: true }).filter({ visible: true });
   const personas = nav.getByRole("button", { name: "Personas", exact: true });
-  if (await personas.getAttribute("aria-expanded") !== "true") {
-    const guardado = page.waitForResponse((r) => r.request().method() === "POST" &&
-      !!r.request().postData()?.includes("navegacion_area_abierta"));
-    await personas.click();
-    expect((await guardado).ok()).toBe(true);
-  }
+  const clientes = nav.getByRole("button", { name: "Clientes", exact: true });
+  if (await clientes.getAttribute("aria-expanded") !== "true") await clientes.click();
+  await expect(nav.locator('a[href="/cuentas"]').last().locator("..").locator('button[aria-label="Fijar"], button[aria-label="Desfijar"]')).toBeAttached();
+  // Con la isla instalada, intercalar otra área garantiza una transición real a Personas.
+  const estabaAbierto = await clientes.getAttribute("aria-expanded") === "true";
+  await clientes.click();
+  await expect(clientes).toHaveAttribute("aria-expanded", String(!estabaAbierto));
+  const guardado = page.waitForResponse((r) => r.request().method() === "POST" &&
+    !!r.request().postData()?.includes("navegacion_area_abierta") &&
+    !!r.request().postData()?.includes('"personas"'));
+  await personas.click(); expect((await guardado).ok()).toBe(true);
   await expect(personas).toHaveAttribute("aria-expanded", "true");
   await page.reload();
   await expect(personas).toHaveAttribute("aria-expanded", "true");
