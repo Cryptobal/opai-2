@@ -31,6 +31,7 @@ import { platformConsumosSummary, platformEventosList } from "./platform-observa
 import { platformTrabajosCancelar, platformTrabajosReintentar } from "./platform-servicios";
 import { invitationsList, invitationsRevoke, usersInvite } from "./invitations";
 import { me } from "./me";
+import { mePortalInicio } from "./portal-inicio";
 import { ping } from "./ping";
 import { platformTenantsCreate } from "./platform-escritura";
 import { platformTenantsSetEstado, platformTenantsUpdate } from "./platform-estado";
@@ -44,6 +45,7 @@ import { usersList, usersRemove, usersUpdate } from "./users";
 export const capacidadesDelNucleo: readonly Capacidad[] = [
   ping,
   me,
+  mePortalInicio,
   tenantGet,
   tenantUpdate,
   usersList,

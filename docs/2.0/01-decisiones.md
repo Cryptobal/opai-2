@@ -179,6 +179,15 @@ Una entrada por decisión. Las decisiones no se editan: si cambian, se agrega un
 
 **Consecuencias.** Hereda el principio de 1.0 (`applyFinancialRoleLock`): los datos financieros solo los ven owner y admin. Los permisos por usuario (excepciones) quedan para cuando un tenant los pida.
 
+**Nota de implementación NÚCLEO-D1 (encargo t457u).** Los ejecutores web comprueban
+acceso al portal antes de buscar la capacidad, sin revelar si existe. Los roles de
+membresía, incluidos los personalizados por su base, no conceden Plataforma ni el
+portal del principal cuenta (Cliente). La preferencia `memberships.portal_inicio`
+no autoriza nada: solo elige entre los portales todavía permitidos tras login o
+cambio de empresa, salvo `next` explícito seguro. Matriz, adaptación a #68 y pruebas
+en `briefs/ENCARGO-nucleo-d1.md`; criterios técnicos del constructor, sin nuevas
+decisiones atribuidas a Carlos.
+
 ---
 
 ## ADR-017 · Calidad visual: primitivas accesibles, pulido y lint del DS

@@ -76,7 +76,8 @@ async function aceptarComo(slug: string, token: string, usuario: Usuario): Promi
     path: "/",
     maxAge: 60 * 60 * 24 * 365,
   });
-  redirect("/");
+  // El siguiente request carga la membresía recién creada, no la identidad anterior al alta.
+  redirect("/elegir-empresa");
 }
 
 /** Usuario con sesión: acepta la invitación (su correo debe coincidir). */

@@ -11,6 +11,9 @@ model Membership {
   roleId    String?  @map("role_id") @db.Uuid
   /// Portales a los que accede: "erp" | "supervisor" | "trabajador" | "terreno" | "cliente".
   portales  String[]
+  /// Portal donde empezar tras el login o al cambiar de empresa (NÚCLEO-D1). null = el primero de
+  /// `portales`. Si deja de estar en `portales`, el destino cae al primero permitido.
+  portalInicio String? @map("portal_inicio")
   /// "activa" | "suspendida"
   estado    String   @default("activa")
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
@@ -36,6 +39,8 @@ model Invitation {
   email           String
   rol             String
   portales        String[]
+  /// Portal de inicio que fija quien invita (NÚCLEO-D1); pasa a la membresía al aceptar.
+  portalInicio    String?   @map("portal_inicio")
   /// SHA-256 del token del enlace. El token nunca se guarda.
   tokenHash       String    @unique @map("token_hash")
   invitedByUserId String    @map("invited_by_user_id") @db.Uuid

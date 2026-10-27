@@ -52,7 +52,12 @@ export async function accionVerificar(
     metodo === "respaldo"
       ? await verificarCodigoRespaldo(codigo)
       : await verificarSegundoFactor(codigo);
-  if (r.ok) redirect(`/elegir-empresa?next=${encodeURIComponent(destinoSeguro(destino))}`);
+  if (r.ok)
+    redirect(
+      destino
+        ? `/elegir-empresa?next=${encodeURIComponent(destinoSeguro(destino))}`
+        : "/elegir-empresa",
+    );
   if (r.fallo === "bloqueada") return { tipo: "pausado", n, ...PAUSA };
   if (r.fallo === "invalido") return { tipo: "expirado", n };
   return { tipo: "error", n, texto: r.mensaje };
