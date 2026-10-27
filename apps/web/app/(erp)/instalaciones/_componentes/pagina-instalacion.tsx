@@ -5,12 +5,13 @@ import { Loading, SplitScreen } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
-import { conBusqueda, leerParametros, type Parametros, type SearchParams } from "@/lib/parametros";
+import { leerParametros, type Parametros, type SearchParams } from "@/lib/parametros";
 import type { InstalacionDetalle } from "@/lib/tipos-maestros";
 import { vocabularioActual } from "@/lib/vocabulario";
 
 import { cargarInstalacion, cargarInstalaciones } from "./datos";
 import { DetalleInstalacion } from "./detalle-instalacion";
+import { conFiltrosInstalaciones } from "./filtros-instalaciones";
 import type { TabInstalacion } from "./ficha-instalacion";
 import { ListaInstalaciones } from "./lista-instalaciones";
 
@@ -55,7 +56,7 @@ export function PaginaInstalacion({ params, searchParams, tab, acciones, childre
       opciones={(d) => ({
         titulo: d.voc.titulo("instalacion"),
         volver: {
-          href: conBusqueda("/instalaciones", d.p.q),
+          href: conFiltrosInstalaciones("/instalaciones", d.p),
           etiqueta: d.voc.titulo("instalacion"),
         },
       })}
@@ -74,7 +75,7 @@ export function PaginaInstalacion({ params, searchParams, tab, acciones, childre
                 titulo={voc.titulo("instalacion")}
                 singular={voc.instalacion.singular}
                 seleccionada={id}
-                q={p.q}
+                parametros={p}
               />
             }
             detalle={

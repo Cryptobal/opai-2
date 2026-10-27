@@ -1,11 +1,14 @@
 // Siembra idempotente del catálogo base de un tenant (cargos con su estructura vigente y tipos de
 // documento por capa). La usan `platform.tenants.create` (con `forTenant`) y los scripts de seed.
-import { CARGOS_POR_VERTICAL, esVertical, tiposDocumentoBase } from "@opai/domain";
+import { CARGOS_POR_VERTICAL, esVertical, PATRONES_FABRICA, tiposDocumentoBase } from "@opai/domain";
 
 import type { TenantDb } from "./for-tenant";
 
 /** Lo mínimo que necesita la siembra: el cliente del tenant o, en scripts, `dbAdmin().$extends({})`. */
-export type ClienteCatalogo = Pick<TenantDb, "cargo" | "estructuraSueldo" | "documentoTipo">;
+export type ClienteCatalogo = Pick<
+  TenantDb,
+  "cargo" | "estructuraSueldo" | "documentoTipo" | "patronTurno"
+>;
 
 const INICIO = new Date("2026-01-01");
 
@@ -40,6 +43,22 @@ export async function sembrarCatalogo(db: ClienteCatalogo, tenantId: string, ver
         },
       });
     }
+  }
+  for (const [i, p] of PATRONES_FABRICA.entries()) {
+    await db.patronTurno.upsert({
+      where: { tenantId_nombre: { tenantId, nombre: p.nombre } },
+      update: {},
+      create: {
+        tenantId,
+        nombre: p.nombre,
+        clase: p.clase,
+        diasTrabajo: p.diasTrabajo,
+        diasDescanso: p.diasDescanso,
+        diasSemana: [...p.diasSemana],
+        deFabrica: true,
+        orden: i,
+      },
+    });
   }
   for (const [i, t] of tiposDocumentoBase(v).entries()) {
     await db.documentoTipo.upsert({

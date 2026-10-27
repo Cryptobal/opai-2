@@ -45,19 +45,36 @@ export type Puesto = {
   id: string;
   instalacionId: string;
   cargoId: string;
+  funcionId: string | null;
+  funcion: string | null;
+  patronId: string | null;
+  patron: string | null;
+  patronResumen: string | null;
   nombre: string;
   diasTrabajo: number;
   diasDescanso: number;
   horaInicio: string;
   horaFin: string;
   horario: string;
+  horaInicioNoche: string | null;
+  horaFinNoche: string | null;
+  horarioNoche: string | null;
   jornada: string;
+  horasSemanales: number | null;
+  colacionMin: number;
+  colacionFuera: boolean;
+  cobertura: string;
+  coberturaMotivo: string | null;
   dotacion: number;
   estado: string;
   vigenteDesde: string | null;
   vigenteHasta: string | null;
   notas: string | null;
 };
+
+// prettier-ignore
+export type PatronTurnoOpcion = { id: string; nombre: string; resumen: string; diasTrabajo: number; diasDescanso: number };
+export type FuncionPuestoOpcion = { id: string; nombre: string };
 
 export type Instalacion = {
   id: string;

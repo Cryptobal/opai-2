@@ -37,8 +37,6 @@ exports[`declaración de auditoría del registro completo > ninguna lectura nuev
   "core.ping",
   "core.plantillas.get",
   "core.plantillas.preview",
-  "core.puestos.get",
-  "core.puestos.list",
   "core.resumen.contadores",
   "core.roles.list",
   "core.supervisores.list",

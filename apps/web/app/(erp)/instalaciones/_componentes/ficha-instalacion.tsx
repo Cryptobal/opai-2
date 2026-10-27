@@ -7,7 +7,10 @@ import { LinkNext } from "@/app/_components/link-next";
 import { type AccionEntidad, AccionesEntidad } from "@/app/_components/maestros/acciones-entidad";
 import { ESTADO_INSTALACION, estadoDe } from "@/app/_components/maestros/estados";
 import { fecha } from "@/lib/fechas";
+import type { Parametros } from "@/lib/parametros";
 import type { InstalacionDetalle } from "@/lib/tipos-maestros";
+
+import { conFiltrosInstalaciones } from "./filtros-instalaciones";
 
 export type TabInstalacion = "resumen" | "puestos" | "documentos" | "actividad";
 
@@ -49,6 +52,7 @@ export function FichaInstalacion(p: {
   instalacion: InstalacionDetalle | null;
   tab: TabInstalacion;
   persona: string;
+  parametros: Parametros;
   children: ReactNode;
 }) {
   const i = p.instalacion;
@@ -84,8 +88,8 @@ export function FichaInstalacion(p: {
         tabActiva={p.tab}
         Link={LinkNext}
         tabs={[
-          { id: "resumen", etiqueta: "Resumen", href: base },
-          { id: "puestos", etiqueta: "Puestos", contador: activos, href: `${base}/puestos` },
+          { id: "resumen", etiqueta: "Resumen", href: conFiltrosInstalaciones(base, p.parametros) },
+          { id: "puestos", etiqueta: "Puestos", contador: activos, href: conFiltrosInstalaciones(`${base}/puestos`, p.parametros) },
           {
             id: "personas",
             etiqueta: p.persona,
@@ -96,9 +100,9 @@ export function FichaInstalacion(p: {
             id: "documentos",
             etiqueta: "Documentos",
             contador: i?.documentos ?? 0,
-            href: `${base}/documentos`,
+            href: conFiltrosInstalaciones(`${base}/documentos`, p.parametros),
           },
-          { id: "actividad", etiqueta: "Actividad", href: `${base}/actividad` },
+          { id: "actividad", etiqueta: "Actividad", href: conFiltrosInstalaciones(`${base}/actividad`, p.parametros) },
         ]}
       >
         {p.children}
