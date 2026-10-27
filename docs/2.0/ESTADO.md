@@ -74,6 +74,32 @@ No se declara CI, QA remota ni aprobación del head nuevo; Neon sigue sin modifi
 
 ## Hecho
 
+- **NÚCLEO-H, continuidad en `core/nucleo-p2` (OpenCode / openai/gpt-6.1-sol):**
+  ARCO lista/detalle filtran alcance y auditan solo IDs revelados, actor, tenant y
+  capacidad, en la misma transacción; fallo de auditoría no entrega datos. También
+  se acotan sus mutaciones y la carga compartida de titulares. Contactos por cuenta
+  a cargo; personas siguen negadas hasta la relación de 07b; externos solo para
+  acceso no acotado. HSTS se limita al host, sin includeSubDomains ni preload por
+  falta de inventario HTTPS completo, según el encargo actual. Estas son
+  adaptaciones técnicas del constructor, no nuevas decisiones atribuidas a Carlos.
+  Autorrevisión detectó y corrigió TOCTOU de las relaciones de alcance: FOR SHARE
+  de contactos e instalaciones hasta completar la operación, también en dryRun.
+  La salida auditada se valida una sola vez y es la misma que se entrega. HSTS
+  sustituye el valor histórico con includeSubDomains de la nota P1 de abajo.
+  La autorrevisión de continuidad detectó además que el caché idempotente podía
+  revelar respuestas de mutaciones ARCO tras perder alcance: ahora se revalida la
+  solicitud antes de devolver la repetición, sin repetir efectos ni borrar reservas.
+  Corrección técnica del constructor dentro del encargo, no decisión nueva de Carlos.
+  **Entrega parcial:** los originales nucleo-h-1005-oc/nucleo-h-1000-oc no existen
+  en el worktree; bloque 1 bloqueado y bloques 2/3 completos no verificables.
+  CSP estricto/nonce/reportes y resto de lecturas sensibles pendientes. Sin
+  migraciones ni pantallas. CA, límites y gate en `briefs/NUCLEO-H-p2.md`.
+  Validación de continuidad: typecheck/lint, 1.104 pruebas, BD 98+130+25,
+  build y presupuesto sin subir topes en verde. E2E de cabeceras 6/6 a
+  375/1024/1280 en servidor propio 3294, detenido al terminar. Autorrevisión
+  independiente final sin bloqueantes tras corregir la repetición idempotente;
+  CI y Revisor externos pendientes. No se abrió PR ni se modificó Neon.
+
 - **NÚCLEO-D1 (rama `fix/portal-servidor`, encargo t457u):** guardas previas al catálogo
   en ambos ejecutores web; se conserva la validación de sesiones de #68. Dominio de
   coherencia por rol base/principal y diagnóstico sin escrituras ni correos. Columna

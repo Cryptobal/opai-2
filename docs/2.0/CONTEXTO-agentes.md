@@ -42,6 +42,7 @@ Carlos decidió construir **OPAI 2.0 desde cero**: un SaaS modular, multi-tenant
 ## Arquitectura, en una línea cada punto
 
 - Base compartida con aislamiento por tenant a nivel de base de datos (RLS).
+- ARCO: permiso y alcance son independientes. Lista/detalle dejan auditoría de los IDs revelados sin copiar datos personales; no entregan la lectura si falla auditoría. Un actor acotado no ve solicitudes externas ni personas sin relación real de alcance (07b pendiente). No se infiere acceso por email o responsable. Ver `briefs/NUCLEO-H-p2.md`.
 - Núcleo siempre encendido: tenants y plataforma, usuarios y permisos, cuentas (clientes), contactos, instalaciones, personas, cargos y estructuras de sueldo (tres niveles: cargo, puesto en instalación, persona), documentos, notificaciones, configuración, auditoría, telemetría.
 - Módulos vendibles por separado: Comercial, CPQ, Licitaciones, Operaciones, Rondas, Portales (Trabajador, Terreno, Cliente, Supervisor), Asistencia con reportes DT, Finanzas (con factoring y adaptadores por proveedor), Nómina. Un módulo apagado no rompe a otro.
 - No se portan de 1.0: inventario, cámaras, ATS, alertas y cobertura, incidentes, conocimiento, onboarding, comunicaciones, gamificación, psicolaboral, chat, Slack como módulo, Productividad. El chat de 1.0 no se porta; el agente interno de OPAI se construye nuevo según ADR-049 (26-oct-2026, propuesto en PR #38).

@@ -24,6 +24,7 @@ Contrato único para todo bot o agente que trabaje en `Cryptobal/opai-2`: Claude
 
 - Toda consulta o mutación de negocio es una **capacidad** (`defineCapability`). La pantalla, `/api/v1` y el MCP invocan la misma capacidad, con los mismos permisos y auditoría. Una pantalla sin capacidad expuesta no se integra; lo verifica el gate de paridad de `pnpm test`.
 - Toda escritura acepta `dryRun` (en MCP, la herramienta `preview_…`) y `idempotencyKey`. Lo irreversible pide aprobación humana a los agentes (`APPROVAL_REQUIRED`). Las escrituras reales quedan en la auditoría.
+- Lecturas personales auditadas: filtran alcance antes de revelar, registran solo los IDs revelados (sin copiar datos personales) y fallan cerradas si no pueden auditar. Implementación ARCO y límites: `docs/2.0/briefs/NUCLEO-H-p2.md`.
 
 ## Convenciones
 
