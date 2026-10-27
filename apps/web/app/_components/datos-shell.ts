@@ -1,6 +1,7 @@
 import { esRol, esVertical, vocabulario } from "@opai/domain";
 
 import type { Identidad } from "@/lib/actor";
+import { tieneAccesoAPortal } from "@/lib/acceso-portal";
 import { epocaDe } from "@/lib/epoca-sesion";
 import { NAV_PLATAFORMA, navegacionErp, navegacionPortal } from "@/lib/navegacion";
 
@@ -14,11 +15,11 @@ export function datosShell(identidad: Identidad, portal: string): DatosShell {
   const rol = actual && esRol(actual.rol) ? actual.rol : null;
   const vertical = actual?.tenant.vertical ?? "";
   const inicio = PORTALES.find((p) => p.id === portal)?.href ?? "/";
-  const visibles = portalesVisibles(actual?.portales ?? [], usuario.platformRole !== null);
+  const visibles = portalesVisibles(actual?.portales ?? [], tieneAccesoAPortal(identidad, "platform"));
   // Acceso efectivo al portal actual, calculado igual que `tieneAccesoAPortal` del servidor
   // (plataforma por `platformRole`, los demás por la membresía). Lo usa el shell para no ofrecer
   // búsqueda, ⌘K ni Preferencias sin acceso (`marco-shell.tsx`), y aquí para la navegación.
-  const acceso = visibles.some((p) => p.id === portal);
+  const acceso = tieneAccesoAPortal(identidad, portal);
   // Sin acceso al portal el shell se monta igual (`portal-layout.tsx`), pero sin navegación: solo el
   // selector de portal y empresa, el menú de usuario y el aviso «Sin permisos» de la página.
   const nav = !acceso
