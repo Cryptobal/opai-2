@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 
 import type { NextConfig } from "next";
 
+import { cabecerasSeguridad } from "./lib/cabeceras-seguridad";
 import { CACHE_DINAMICA_S } from "./lib/cache-navegador";
 
 // En desarrollo las variables viven en `.env.local` de la raíz del monorepo (una sola copia).
@@ -9,12 +10,10 @@ import { CACHE_DINAMICA_S } from "./lib/cache-navegador";
 const envRaiz = new URL("../../.env.local", import.meta.url);
 if (existsSync(envRaiz)) process.loadEnvFile(envRaiz);
 
-/** Cabeceras de seguridad (Brief 01). La CSP llega en un brief posterior. */
-const cabeceras = [
-  { key: "X-Frame-Options", value: "DENY" },
-  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-  { key: "X-Content-Type-Options", value: "nosniff" },
-];
+// Cabeceras de seguridad para todas las rutas (núcleo P1): HSTS en producción y Permissions-Policy,
+// además de X-Frame-Options/Referrer/Content-Type.
+const produccion = process.env.NODE_ENV === "production";
+const cabeceras = cabecerasSeguridad({ produccion });
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
