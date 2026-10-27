@@ -11,6 +11,8 @@ import { asegurarRegistro } from "./registro";
 import { COOKIE_TENANT } from "./tenant-actual";
 import { estadoMfaDe, verificarMfaDe } from "./mfa";
 
+export { tieneAccesoAPortal } from "./acceso-portal";
+
 asegurarRegistro();
 
 /** Identidad del request (una vez por render gracias a `cache`), o null sin sesión. */
@@ -30,15 +32,6 @@ export async function requerirIdentidad(destino?: string): Promise<Identidad> {
   const identidad = await identidadActual();
   if (!identidad) redirect(destino ? `/login?next=${encodeURIComponent(destino)}` : "/login");
   return identidad;
-}
-
-/**
- * Acceso al portal verificado en servidor: Plataforma exige `platformRole`; los demás, una
- * membresía activa en el tenant actual que incluya el portal. Ocultar en la UI no basta.
- */
-export function tieneAccesoAPortal(identidad: Identidad, portal: string): boolean {
-  if (portal === "platform") return identidad.usuario.platformRole !== null;
-  return identidad.actual?.portales.includes(portal) ?? false;
 }
 
 export function contextoServidor(identidad: Identidad, portal: string): Contexto {
