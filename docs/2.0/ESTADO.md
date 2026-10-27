@@ -148,7 +148,31 @@ No se declara CI, QA remota ni aprobación del head nuevo; Neon sigue sin modifi
   build y presupuesto sin subir topes en verde. E2E de cabeceras 6/6 a
   375/1024/1280 en servidor propio 3294, detenido al terminar. Autorrevisión
   independiente final sin bloqueantes tras corregir la repetición idempotente;
-  CI y Revisor externos pendientes. No se abrió PR ni se modificó Neon.
+  CI y Revisor externos pendientes. Se continúa el PR #76; no se modificó Neon.
+  **Corrección ADR-045, review 5670166405 del #76:** el gate anterior no midió
+  rendimiento (Instalaciones 10 y Personas 9 consultas, main 8/8, límite 8).
+  El encargo excluye inbox propio, pendientes sin correos/errores libres y
+  sugerencias incrementales ⌘K; las fichas siguen auditadas. Adaptación técnica
+  de OpenCode / openai/gpt-6.1-sol: append en una llamada a función SQL VOLATILE
+  SECURITY INVOKER, con snapshot posterior al mismo lock por tenant, canon SQL
+  histórico y transacción de revelación intactos. Migración idempotente
+  `20261028163000_auditoria_append` antes del despliegue de la app; sin cambios
+  de RLS ni BYPASSRLS. No aplicada en Neon. Pruebas/CA y resultados finales en
+  `briefs/NUCLEO-H-p2.md`; no hay nuevas decisiones de negocio atribuidas a Carlos.
+  Autorrevisión: el append raw notifica explícitamente una consulta al contador
+  ADR-045; inbox obtiene página y conteo en otra única sentencia contada, sin
+  cargar todo ni mezclar usuarios/tenants. Se conserva el tope de 8 y el spec.
+  La medición con append contado aún dio 10/9: se consolidan además acceso y
+  módulos de identidad en la membresía elegida (sin caché entre requests), y
+  página/cuenta/agregados de instalaciones en una consulta SQL contada y acotada
+  antes de paginar. Mismos permisos, roles, excepciones y alcance; detalles y
+  evidencia final en el brief. Son ajustes técnicos del mismo constructor.
+  Medición estricta del build final: Instalaciones **10→8 consultas (108 ms)**,
+  Personas **9→8 (139 ms)**, todas las rutas del protocolo ≤8/500 ms. Build y
+  presupuesto sin subir topes, 1.138 pruebas aprobadas; autorrevisión independiente
+  final sin hallazgos de código. BD **98+147+25** y e2e **17 aprobadas/4 omisiones
+  preexistentes**, tres resoluciones; servidor propio 3376 detenido. CI y Revisor
+  pendientes sobre el nuevo head; Neon sigue pendiente de Carlos.
 
 - **NÚCLEO-D1 (rama `fix/portal-servidor`, encargo t457u):** guardas previas al catálogo
   en ambos ejecutores web; se conserva la validación de sesiones de #68. Dominio de

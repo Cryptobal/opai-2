@@ -7,7 +7,8 @@
  *
  * Se cuenta una vez por operación de modelo (una «consulta» lógica). El `set_config` que fijan
  * `forTenant`/`forUser`/`enTransaccion` es `$executeRaw` y no pasa por el hook de `$allModels`, así que
- * no infla la cuenta. Las consultas crudas tampoco se cuentan: el código de negocio no las usa.
+ * no infla la cuenta. El append SQL de auditoría notifica explícitamente su única sentencia;
+ * no pasa por el hook de modelos. Los raw de infraestructura siguen fuera del contador.
  */
 type Observador = () => void;
 

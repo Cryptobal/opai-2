@@ -84,6 +84,15 @@ describe.skipIf(!urlPropietario)("despliegue de auditoría en dos fases", () => 
       expect(await verificarAuditoria(tenantId)).toMatchObject({ pausada: true });
       const { agregarAAuditoria } = await import("../src/auditoria");
       const { enTransaccion } = await import("../src/transaccion");
+      const append = await readFile(
+        new URL(
+          "../prisma/migrations/20261028163000_auditoria_append/migration.sql",
+          import.meta.url,
+        ),
+        "utf8",
+      );
+      await pg.query(append);
+      await pg.query(append); // CREATE OR REPLACE y GRANT/REVOKE idempotentes.
       const nuevo = await enTransaccion(tenantId, (tx) =>
         agregarAAuditoria(tx, tenantId, {
           actorTipo: "system",
@@ -99,9 +108,7 @@ describe.skipIf(!urlPropietario)("despliegue de auditoría en dos fases", () => 
       const { loteAuditoria } = await import("../src/auditoria-lotes");
       const { canonDeAuditoria, hashEncadenado } = await import("@opai/domain");
       const [filaNueva] = await enTransaccion(tenantId, (tx) => loteAuditoria(tx, tenantId, 2, 2));
-      expect(await canonDeAuditoria({ ...filaNueva!, actorTipo: filaNueva!.actorType })).toBe(
-        filaNueva!.hashCanon,
-      );
+      expect(filaNueva!.hashCanon).toBe(filaNueva!.canonHistorico);
       await pg.query(fase2);
       const filasCierre = await enTransaccion(tenantId, (tx) => loteAuditoria(tx, tenantId, 1, 3));
       expect(filasCierre.map((f) => f.seq)).toEqual([1, 2, 3]);

@@ -2,7 +2,8 @@
 
 Continuidad solicitada en esta sesión, sobre main `3199b00`.
 Constructor: OpenCode / openai/gpt-6.1-sol. Base: auditoría de NÚCLEO-A.
-No se abre PR ni se modifica otra rama, Neon, producción ni OPAI 1.0.
+Se continúa el PR #76 en `core/nucleo-p2`; no se crea otro PR ni se modifica
+otra rama, Neon, producción ni OPAI 1.0.
 
 ## Fuentes de continuidad
 
@@ -220,8 +221,85 @@ presupuesto), `nucleo-h-gate-tipos-lint-final.log`,
 antes de los pushes de HSTS y documentación; logs: `nucleo-h-gate-hsts.log`,
 `nucleo-h-e2e-hsts.log`, `nucleo-h-gate-docs.log` y `nucleo-h-e2e-docs.log`.
 
-Sin tarea en Linear, según el relanzamiento. No se abre ni se crea otro PR.
+Sin tarea en Linear, según el relanzamiento. Se continúa el PR #76, sin crear otro.
 PR-BODY.md queda local, ignorado, sin commit, conforme al encargo.
+
+## Corrección ADR-045 · review 5670166405 del PR #76
+
+El gate histórico de arriba **no incluyó rendimiento**. El Revisor informó
+Instalaciones **10 consultas** y Personas **9** (main: **8 y 8**, tope **8**).
+No se cambia `rendimiento.spec.ts`, sus aserciones ni los presupuestos de JS.
+
+Encargo actual: excluir declarativamente inbox propio, contadores de pendientes
+y sugerencias incrementales de ⌘K, conservando auditoría al abrir una ficha.
+Para que pendientes sea realmente un resumen no personal, deja de seleccionar
+correo de invitación y errores libres del proveedor. El conteo conserva una
+transacción común para los locks de alcance. No cambia diseño ni permisos.
+
+Adaptación técnica del constructor OpenCode / openai/gpt-6.1-sol: función SQL
+VOLATILE SECURITY INVOKER para adquirir el lock y leer la cabeza con una foto
+posterior al lock. Usa el canon SQL histórico que ya soporta el verificador,
+sin alterar eventos previos ni el checkpoint; conserva la cola por transacción
+para llamadas paralelas reentrantes. Una única sentencia desde la app sustituye
+las tres del append. Migración idempotente `20261028163000_auditoria_append`,
+sin tablas/roles/permisos de escritura nuevos ni cambios a RLS/BYPASSRLS.
+Desplegar esta función **antes** de la app; revertir primero la app al append
+anterior y luego retirar la función. Neon sigue pendiente de Carlos.
+
+La autorrevisión independiente detectó que `$queryRaw` quedaba fuera del contador
+Prisma: el append ahora notifica explícitamente **una** consulta de negocio y un
+test real exige ese conteo. No se acepta el primer resultado de rendimiento como
+evidencia final. Además, página y conteo del inbox se agrupan en una sentencia
+contada, con filtros explícitos de tenant/usuario y RLS: no se carga el inbox entero
+ni se altera su límite. Pruebas reales de paginación/conteo, usuario/tenant ajenos
+y fechas ISO en `inbox-consultas-db.test.ts`.
+
+La repetición **con el append contado** aún dio Instalaciones **10** y Personas
+**9**: el contador vigente mide operaciones lógicas de Prisma y ya excluía los
+dos raw de infraestructura del append anterior. Por eso reducir roundtrips no
+bastaba para ese gate. Se consolidan también las lecturas necesarias para estas
+rutas, sin cambiar su contenido ni desactivar auditoría: identidad carga módulos
+activos/trial junto al acceso de la membresía en el tenant elegido (sin caché
+entre requests, conserva roles/excepciones y asignaciones del supervisor), y la
+lista de instalaciones obtiene página, nombre de cuenta y count/suma de puestos
+en una consulta SQL contada con filtros de tenant/alcance antes del cursor y los
+agregados. No materializa todos los puestos. Son adaptaciones de rendimiento del
+constructor dentro del arreglo ADR-045, no decisiones de negocio nuevas.
+Pruebas: `fuentes-identidad.test.ts` y `instalaciones-consultas-db.test.ts`, además
+de las negativas existentes de permisos/alcance y el inventario auditado.
+
+Autorrevisión independiente del arreglo: se corrigió el raw no contado, la
+referencia desfasada a «sin migraciones» y el orden del doble de inbox (timestamp,
+incluidos milisegundos, con desempate por ID). La concurrencia del append usa
+una barrera observable en `pg_stat_activity`, no una espera que presuponga lock.
+La corrida paralela de e2e produjo timeouts de transacción/MFA y se repitió con
+un worker, como CI. La corrida general concurrente también alcanzó el timeout
+del test de verificador (2 s); se repite íntegra con un worker y sin paralelismo
+entre archivos, seguida de `pnpm test:db`. No se modifica ni omite ningún test.
+
+Medición estricta final contra el build exacto, servidor propio de este worktree
+en 3376: Instalaciones **10 → 8 consultas, 108 ms**; Personas **9 → 8, 139 ms**.
+Protocolo completo: Cuentas 6/111 ms, Instalaciones 8/108 ms, Personas 8/139 ms,
+Cargos 6/125 ms, Configuración 6/101 ms e Inicio 4/47 ms. Todas ≤8 y ≤500 ms.
+Comando del CI con `GATE_ESTRICTO=1` y `BASE_URL=http://localhost:3376`:
+`pnpm --filter @opai/web e2e rendimiento --project=telefono --reporter=list`.
+Protocolo aprobado; fixme de esqueleto preexistente e intacto. No hay skips nuevos.
+Build exacto y presupuesto por ruta en verde, sin subir ningún tope; **1.138/1.138**
+pruebas aprobadas con un worker, sin omitir tests. BD final **98+147+25**, sin
+omisiones. E2E Maestros/Cabecera estable/Portal de inicio **17 aprobadas y 4
+omisiones preexistentes** por proyecto a 375/1024/1280; servidor propio 3376
+detenido. Capturas en `/tmp/opencode/p2-rend-evidencia/`, fuera del diff de código.
+Los cuatro CA del arreglo están completos. Autorrevisión independiente final
+sin hallazgos de código; no
+sustituye a CI ni a la aprobación externa sobre el head que se empuje.
+Logs finales `/tmp/opencode/p2-rend-gate-serial.log`, `p2-rend-cierre-build.log`,
+`p2-rend-cierre-rendimiento.log` y `p2-rend-cierre-e2e.log`.
+
+CA del arreglo: (1) excepciones cerradas y regresión contra desactivar auditoría
+personal/documental; (2) append de una sentencia y cadena verificada con
+concurrencia; (3) números reales antes/después y gate en PR-BODY local;
+(4) corregidas las referencias desfasadas al PR. Resultados finales y revisión
+independiente se registran al cerrar el gate; CI/Revisor externos no se presumen.
 
 ## Lista de control del encargo de continuidad
 
@@ -240,7 +318,8 @@ PR-BODY.md queda local, ignorado, sin commit, conforme al encargo.
    HSTS permanece limitada al host conforme al encargo actual.
 7. **Web:** sin pantallas nuevas ni cambios de DS; e2e de cabeceras en las tres
    resoluciones y presupuesto por ruta, sin modificar topes.
-8. **Migraciones:** N/A, ninguna nueva ni cambios de RLS/BYPASSRLS. Sin SQL de
-   verificación de una migración inexistente ni intervención en Neon.
+8. **Migraciones:** el arreglo ADR-045 añade `20261028163000_auditoria_append`,
+   función invocadora idempotente sin tablas nuevas ni cambios de RLS/BYPASSRLS.
+   Verificación SQL en PR-BODY local; aplicación en Neon pendiente de Carlos.
 9. **Gate:** resultados finales y logs en la sección de pruebas; CI y revisión
    externa siguen pendientes y no se declaran como aprobados.

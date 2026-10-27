@@ -26,6 +26,14 @@ export function defineCapability<I extends z.ZodType, O extends z.ZodType>(
   if (def.auditarLectura && (def.efecto !== "lectura" || def.sinTenant || def.tenantObjetivo)) {
     throw new Error(`La auditoría de lectura de "${def.id}" requiere lectura con tenant actual.`);
   }
+  // Excepciones cerradas del encargo ADR-045 de #76; no extender a fichas ni documentos.
+  if (
+    def.auditarLectura === false &&
+    (def.efecto !== "lectura" ||
+      !["core.notificaciones.list", "core.inicio.pendientes", "core.buscar"].includes(def.id))
+  ) {
+    throw new Error(`La capacidad "${def.id}" no permite desactivar la auditoría de lectura.`);
+  }
   const largo = def.descripcion.trim().length;
   if (largo < DESCRIPCION_MINIMA) {
     throw new Error(

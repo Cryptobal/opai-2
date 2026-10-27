@@ -174,7 +174,7 @@ export interface Capacidad<I extends z.ZodType = z.ZodType, O extends z.ZodType 
   /** Campos del input que nunca se guardan en auditoría ni en aprobaciones (secretos). */
   sensibles?: readonly string[];
   /** Identificadores revelados por una lectura; nunca contenido personal ni input sin validar. */
-  auditarLectura?: (salida: z.output<O>, entrada: z.output<I>) => readonly string[];
+  auditarLectura?: false | ((salida: z.output<O>, entrada: z.output<I>) => readonly string[]);
   /** Revalida el acceso vigente a una respuesta idempotente sin repetir sus efectos. */
   autorizarRepeticion?: (ctx: Contexto, input: z.output<I>, salida: unknown) => Promise<void>;
   /** Nunca la ejecuta una API key (aprobaciones, autonomía y presupuesto de agentes). */

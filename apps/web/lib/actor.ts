@@ -44,12 +44,14 @@ export async function identidadDe(
 ): Promise<Identidad> {
   const membresias = await fuentes.membresiasDe(user.id);
   const actual = elegirMembresia(membresias, cookieTenant);
-  const [modulosActivos, acceso] = actual
-    ? await Promise.all([
-        fuentes.modulosActivos(actual.tenantId),
-        fuentes.acceso(actual.tenantId, user.id),
-      ])
-    : [[], SIN_ACCESO];
+  const { modulosActivos, acceso } = actual
+    ? fuentes.accesoConModulos
+      ? await fuentes.accesoConModulos(actual.tenantId, user.id)
+      : await Promise.all([
+          fuentes.modulosActivos(actual.tenantId),
+          fuentes.acceso(actual.tenantId, user.id),
+        ]).then(([modulosActivos, acceso]) => ({ modulosActivos, acceso }))
+    : { modulosActivos: [], acceso: SIN_ACCESO };
   const platformRole = esRolPlataforma(user.platformRole) ? user.platformRole : null;
   return {
     usuario: { id: user.id, nombre: user.name, email: user.email, platformRole },

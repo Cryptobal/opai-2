@@ -21,7 +21,6 @@ capacidad y fecha ya son columnas del evento. Se eliminan IDs repetidos.
 | `core.contactos.list/get` | Identificación/contacto; contactos devueltos |
 | `core.cuentas.list/get` | Cuenta persona natural, contacto principal y representantes; cuenta, representantes y contactos de la ficha |
 | `core.instalaciones.list/get` | Revelación indirecta del nombre de cuenta; IDs de instalaciones devueltas |
-| `core.buscar` | Coincidencias de cuenta/persona/contacto; solo esos IDs, nunca el texto buscado |
 | `core.empresa.get` | Representante legal/contactos; sin IDs de salida, `ids: []`, perfil identificado por el tenant del evento |
 | `core.cumplimiento.estado` | DPO y aceptantes del DPA; sin IDs de salida, `ids: []`, tenant del evento |
 | `core.cumplimiento.consentimientos_listar` | Titular e historial; titular y hechos devueltos |
@@ -35,10 +34,8 @@ capacidad y fecha ya son columnas del evento. Se eliminan IDs repetidos.
 | `core.users.list` | Directorio y último acceso; IDs de usuarios miembros del tenant |
 | `core.excepciones.list` | Autor de la excepción; IDs de los autores revelados (`fijadoPor.id`) |
 | `core.invitations.list` | Destinatarios invitados; IDs de invitaciones efectivamente devueltas |
-| `core.notificaciones.list` | Contenido personal del inbox; IDs de avisos propios devueltos |
 | `core.apikeys.list/get` | Nombre y correo del responsable, nunca el secreto; IDs de keys |
 | `core.aprobaciones.list/get` | Responsable e input/resultado de la operación; IDs de aprobaciones |
-| `core.inicio.pendientes` | Puede incluir correo de invitación; sin IDs de salida, `ids: []` |
 | `core.audit.list`, `core.actividad.list` | Historial con actores y payload de negocio; IDs de eventos revelados, sin centinela ni copiar payload |
 
 La auditoría del historial anterior es **un evento de acceso a la página**, no
@@ -59,6 +56,26 @@ abajo y sus pruebas se conservan sin cambios: no se añade otro
   `actividad-sensible`, `estructuras-alcance-escritura` (unitarias y BD según archivo).
 
 ## Lecturas 07d que no revelan registros personales
+
+### Excepciones explícitas del encargo ADR-045 del PR #76 (review 5670166405)
+
+`auditarLectura: false` solo se admite en `core.notificaciones.list` (avisos del
+propio usuario y conteo), `core.inicio.pendientes` (resumen sin correos ni errores
+libres del proveedor) y `core.buscar` (sugerencias incrementales de ⌘K). Abrir un
+resultado conserva la auditoría de la ficha/personas/contactos/documentos por su
+capacidad habitual; los permisos y filtros de búsqueda no cambian. Es la excepción
+expresa del encargo, no una exclusión general de las búsquedas de datos personales.
+`lecturas-excepciones.test.ts` protege el inventario sensible y la lista cerrada
+de excepciones en `defineCapability`; `auditoria-append-db.test.ts` comprueba que
+las excepciones no insertan eventos y que abrir la ficha sí los inserta.
+
+El append llama una sola sentencia a `core.auditoria_append` (migración idempotente
+`20261028163000_auditoria_append`): función VOLATILE e invocadora, mismo advisory
+lock por tenant y nueva foto READ COMMITTED tras adquirirlo. Conserva RLS,
+append-only, rollback y el canon SQL histórico ya validado por el verificador.
+No se usa una CTE cuyo snapshot previo a esperar el lock podría quedar obsoleto.
+Pruebas de concurrencia mezclan lecturas/escrituras y append bloqueado; la prueba
+de migración reejecuta la función sin modificar la cadena existente.
 
 `core.cumplimiento.rat`, `core.cumplimiento.dpa_texto` y
 `core.cumplimiento.retencion_politica` entregan catálogo de campos/actividades,
