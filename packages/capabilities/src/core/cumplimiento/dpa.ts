@@ -19,7 +19,11 @@ export async function versionVigenteDpa(ctx: Contexto, db: TenantTx = ctx.db): P
  * versión publicada, si no es la versión pedida, o si el texto está vacío: no se acepta un DPA sin
  * texto. Devuelve la versión, el texto exacto y su referencia estable (`<version>:sha256:<hash>`).
  */
-export async function leerDpaVigente(ctx: Contexto, db: TenantTx, versionPedida: string | undefined) {
+export async function leerDpaVigente(
+  ctx: Contexto,
+  db: TenantTx,
+  versionPedida: string | undefined,
+) {
   const version = await versionVigenteDpa(ctx, db);
   if (!version) throw reglaDeNegocio("OPAI aún no publica una versión vigente del DPA.");
   if (versionPedida && versionPedida !== version)
@@ -32,7 +36,10 @@ export async function leerDpaVigente(ctx: Contexto, db: TenantTx, versionPedida:
 }
 
 /** Separa el "Nombre <correo>" guardado en aceptado_por en sus partes (para la ficha del historial). */
-export function partirAceptadoPor(s: string | null): { nombre: string | null; correo: string | null } {
+export function partirAceptadoPor(s: string | null): {
+  nombre: string | null;
+  correo: string | null;
+} {
   if (!s) return { nombre: null, correo: null };
   const m = s.match(/^(.*?)\s*<([^>]+)>\s*$/);
   if (m) return { nombre: (m[1] ?? "").trim() || null, correo: (m[2] ?? "").trim() };
@@ -65,6 +72,7 @@ const estadoSchema = z.object({
 });
 
 export const cumplimientoEstado = defineCapability({
+  auditarLectura: () => [], // Perfil/DPO del tenant: identificado por tenantId del evento.
   id: "core.cumplimiento.estado",
   descripcion:
     "Estado de cumplimiento de la Ley 21.719: versión vigente del acuerdo de tratamiento de datos (DPA), si la empresa la aceptó (con quién y cuándo) con su historial, y el contacto del delegado de protección de datos (DPO).",
@@ -74,6 +82,7 @@ export const cumplimientoEstado = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx) {
+    if (ctx.alcance) throw prohibido("No tienes acceso al perfil de cumplimiento.");
     const [version, filas, perfil] = await Promise.all([
       versionVigenteDpa(ctx),
       ctx.db.dpaAceptacion.findMany({ orderBy: { createdAt: "desc" }, take: 50 }),

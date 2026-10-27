@@ -3,6 +3,7 @@ import { NextResponse, type NextRequest } from "next/server";
 
 import { consultaDeRuta } from "./lib/existencia-ruta";
 import { destino404, esIdInvalido } from "./lib/rutas-invalidas";
+import { cabecerasConNonce } from "./lib/nonce";
 
 /** Pregunta a `/api/existe` si la ficha o el slug existen; ante cualquier falla, que decida la página. */
 async function noExiste(request: NextRequest): Promise<boolean> {
@@ -37,29 +38,41 @@ export async function proxy(request: NextRequest) {
   // en la carga de una ficha hace otra petición— para que el `total` incluya ese trabajo. Date.now()
   // (época) es comparable entre el proxy y el render.
   const t0 = Date.now();
+  const { headers, csp } = cabecerasConNonce(request.headers);
+  headers.set("x-opai-t0", String(t0));
+  const responder = (r: NextResponse) => {
+    r.headers.set("Content-Security-Policy-Report-Only", csp);
+    return r;
+  };
+  // Antes estaban fuera del matcher; siguen públicas, pero ahora reciben nonce de servidor.
+  const publica =
+    /^\/(?:login|mfa|recuperar|invitacion|verificar|ds|sin-conexion)(?:\/|$)/.test(
+      request.nextUrl.pathname,
+    ) || ["/trabajador/login", "/cliente/login"].includes(request.nextUrl.pathname);
+  if (publica) return responder(NextResponse.next({ request: { headers } }));
   if (getSessionCookie(request, { cookiePrefix: "opai" })) {
     // La cabecera se fija en el servidor y sobrescribe cualquier `x-opai-t0` del cliente: en ninguna
     // rama (ni en el 404) se deja pasar la que mande el navegador.
-    const headers = new Headers(request.headers);
-    headers.set("x-opai-t0", String(t0));
     // Ficha que no existe: se reescribe a la página de 404 del portal (catch-all con `notFound()` sin
     // leer `params`, que ya responde HTTP 404 y con el shell). No se fuerza `status` aquí: un 404
     // puesto por el proxy puede terminar en la página genérica de Next, sin menú y en inglés.
     if (esIdInvalido(request.nextUrl.pathname) || (await noExiste(request))) {
-      return NextResponse.rewrite(new URL(destino404(request.nextUrl.pathname), request.url), {
-        request: { headers },
-      });
+      return responder(
+        NextResponse.rewrite(new URL(destino404(request.nextUrl.pathname), request.url), {
+          request: { headers },
+        }),
+      );
     }
-    return NextResponse.next({ request: { headers } });
+    return responder(NextResponse.next({ request: { headers } }));
   }
   const login = new URL("/login", request.url);
   const destino = request.nextUrl.pathname + request.nextUrl.search;
   if (destino !== "/") login.searchParams.set("next", destino);
-  return NextResponse.redirect(login);
+  return responder(NextResponse.redirect(login));
 }
 
 export const config = {
   matcher: [
-    "/((?!api|login|mfa|recuperar|invitacion|verificar|trabajador/login|cliente/login|ds|manifest.webmanifest|sw.js|sin-conexion|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?)$).*)",
+    "/((?!api|manifest.webmanifest|sw.js|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|woff2?)$).*)",
   ],
 };

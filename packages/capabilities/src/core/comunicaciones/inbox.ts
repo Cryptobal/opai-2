@@ -1,9 +1,10 @@
 import { z } from "zod";
 
+import { leerInbox } from "@opai/db";
+
 import { defineCapability } from "../../define";
 import { noEncontrado, reglaDeNegocio } from "../../errores";
 import type { Contexto } from "../../types";
-import { iso } from "../comun";
 import { uuidSchema } from "../esquemas";
 
 const notificacionSchema = z.object({
@@ -21,6 +22,7 @@ function usuarioDe(ctx: Contexto): string {
 }
 
 export const notificacionesList = defineCapability({
+  auditarLectura: false, // Inbox propio, filtrado por usuario: no es acceso a registros de terceros.
   id: "core.notificaciones.list",
   descripcion:
     "Avisos del usuario en OPAI (campana): los más recientes primero, con cantidad de no leídos.",
@@ -35,25 +37,9 @@ export const notificacionesList = defineCapability({
   dryRun: false,
   async handler(ctx, input) {
     const usuarioId = usuarioDe(ctx);
-    const [filas, noLeidas] = await Promise.all([
-      ctx.db.notificacion.findMany({
-        where: { usuarioId, ...(input.soloNoLeidas ? { leidaEn: null } : {}) },
-        orderBy: { createdAt: "desc" },
-        take: input.limite,
-      }),
-      ctx.db.notificacion.count({ where: { usuarioId, leidaEn: null } }),
-    ]);
-    return {
-      items: filas.map((n) => ({
-        id: n.id,
-        titulo: n.titulo,
-        cuerpo: n.cuerpo ?? null,
-        enlace: n.enlace ?? null,
-        leidaEn: iso(n.leidaEn),
-        creadaEn: n.createdAt.toISOString(),
-      })),
-      noLeidas,
-    };
+    return ctx.transaccion((tx) =>
+      leerInbox(tx, ctx.tenantId, usuarioId, input.soloNoLeidas, input.limite),
+    );
   },
 });
 

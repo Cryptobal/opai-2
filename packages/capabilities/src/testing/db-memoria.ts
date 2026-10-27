@@ -7,6 +7,7 @@ import type { Globales, TenantDb, TenantTx } from "@opai/db";
 import { uuid7 } from "../core/documentos/uuid7";
 import { agrupar, cumple, ordenar, type Fila, type Where } from "./db-memoria-util";
 import { type Include, incluir, resolverWhereRelaciones } from "./db-memoria-rel";
+import { lecturasLocksMemoria } from "./lecturas-locks-memoria";
 
 // Ids crecientes como uuid(7): el orden por id es el orden de creación, igual que en Postgres. Se
 // usa el MISMO generador que inyectan las capacidades (p. ej. `incidente_registrar` pasa `uuid7()`),
@@ -115,7 +116,7 @@ export function dbEnMemoria(semilla: Record<string, Fila[]> = {}) {
   }
 
   const db: Record<string, unknown> = new Proxy(
-    {},
+    { $queryRaw: lecturasLocksMemoria(tabla) },
     { get: (cache: Record<string, unknown>, m: string) => (cache[m] ??= delegado(m)) },
   );
   const globales: Record<string, unknown> = {

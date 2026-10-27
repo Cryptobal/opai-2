@@ -1,4 +1,5 @@
 import { ENTIDADES_DOC_CUMPLIMIENTO, PERMISOS_CORE } from "@opai/domain";
+import type { Prisma } from "@opai/db";
 
 import type { Contexto } from "../../types";
 
@@ -7,6 +8,14 @@ const TIPOS_CUMPLIMIENTO = [...ENTIDADES_DOC_CUMPLIMIENTO];
 /** Si el actor puede ver documentos de cumplimiento (Ley 21.719). Supervisor y viewer no. */
 export const puedeVerCumplimiento = (ctx: Contexto): boolean =>
   ctx.autorizar(PERMISOS_CORE.cumplimientoRead);
+
+/** Filtra en la misma consulta que obtiene los metadatos, también para versiones/vencimientos. */
+export const filtroDocumentoSensible = (ctx: Contexto): Prisma.DocumentoWhereInput =>
+  puedeVerCumplimiento(ctx)
+    ? {}
+    : {
+        vinculos: { none: { entidadTipo: { in: TIPOS_CUMPLIMIENTO } } },
+      };
 
 /** Ids (de entre los dados) de documentos vinculados a una entidad de cumplimiento. Una consulta. */
 export async function docsDeCumplimiento(

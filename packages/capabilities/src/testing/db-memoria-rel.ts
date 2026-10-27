@@ -26,6 +26,7 @@ export const RELACIONES: Record<string, Record<string, Rel>> = {
   },
   instalacion: { cuenta: { tabla: "cuenta", clave: "cuentaId" } },
   documentoVinculo: { documento: { tabla: "documento", clave: "documentoId" } },
+  documento: { vinculos: { tabla: "documentoVinculo", clave: "documentoId", muchos: true } },
 };
 
 type Tabla = (nombre: string) => Fila[];

@@ -1,6 +1,12 @@
 import { z } from "zod";
 
-import { claveDocumento, PERMISOS_CORE, produceExportacion, sha256Hex, type TipoSolicitud } from "@opai/domain";
+import {
+  claveDocumento,
+  PERMISOS_CORE,
+  produceExportacion,
+  sha256Hex,
+  type TipoSolicitud,
+} from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import { noEncontrado, reglaDeNegocio } from "../../errores";
@@ -9,6 +15,8 @@ import { uuidSchema } from "../esquemas";
 import { uuid7 } from "../documentos/uuid7";
 import { cargarTitular, type TitularVista } from "./comunes";
 import { armarExportacion } from "./exportacion-datos";
+import { dondeSolicitud, enContextoArco } from "./solicitudes-alcance";
+import { autorizarSolicitudRepetida } from "./solicitudes-repeticion";
 
 /**
  * Sube el JSON y lo deja como documento del Núcleo (origen generado), con bitácora y vínculo a su
@@ -47,7 +55,13 @@ async function materializar(
       },
     });
     await tx.documentoVinculo.create({
-      data: { tenantId: ctx.tenantId, documentoId: doc.id, entidadTipo: "solicitud_arco", entidadId: solicitudId, rol: "propietario" },
+      data: {
+        tenantId: ctx.tenantId,
+        documentoId: doc.id,
+        entidadTipo: "solicitud_arco",
+        entidadId: solicitudId,
+        rol: "propietario",
+      },
     });
     const hecho = await ctx.bitacora.registrar(tx, {
       tipo: "core.documento.registrado",
@@ -61,6 +75,7 @@ async function materializar(
 }
 
 export const solicitudExportar = defineCapability({
+  autorizarRepeticion: (ctx, input) => autorizarSolicitudRepetida(ctx, input.solicitudId),
   id: "core.cumplimiento.solicitud_exportar",
   descripcion:
     "Genera la exportación de acceso o portabilidad del titular de una solicitud (Ley 21.719): reúne su identificación, contacto, vínculos y documentos en un JSON legible por máquina, lo guarda como documento del Núcleo con huella SHA-256 y lo vincula a la solicitud como evidencia.",
@@ -76,39 +91,58 @@ export const solicitudExportar = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    const s = await ctx.db.solicitudArco.findUnique({ where: { id: input.solicitudId } });
-    if (!s) throw noEncontrado("La solicitud");
-    if (!produceExportacion(s.tipo as TipoSolicitud))
-      throw reglaDeNegocio("Solo las solicitudes de acceso o portabilidad producen una exportación.");
-    if (s.estado === "rechazada") throw reglaDeNegocio("La solicitud está rechazada.");
-    if (!s.titularTipo || !s.titularId)
-      throw reglaDeNegocio("La solicitud no tiene un titular interno para exportar.");
-    const titular: TitularVista = await cargarTitular(ctx, {
-      tipo: s.titularTipo as "persona" | "contacto",
-      id: s.titularId,
-    });
-    const datos = await armarExportacion(ctx, titular);
-    const contenido = JSON.stringify(
-      { generadoEn: new Date().toISOString(), solicitudId: s.id, tipo: s.tipo, titular: datos },
-      null,
-      2,
-    );
-    const sha256 = await sha256Hex(contenido);
-    if (dryRun)
-      return { documentoId: "", sha256, bytes: Buffer.byteLength(contenido), titular: { tipo: titular.tipo, id: titular.id } };
-    if (!ctx.servicios.almacenamiento.disponible)
-      throw reglaDeNegocio("El almacenamiento no está configurado en este entorno.");
-    const nombre = `exportacion-${titular.tipo}-${s.id}.json`;
-    const doc = await materializar(ctx, contenido, sha256, nombre, s.id);
-    await ctx.transaccion(async (tx) => {
-      await tx.solicitudArco.update({ where: { id: s.id }, data: { documentoEvidenciaId: doc.id } });
-      await ctx.eventos.emitir(tx, {
-        tipo: "core.cumplimiento.solicitud_exportada",
-        entidadTipo: "solicitud_arco",
-        entidadId: s.id,
-        payload: { documentoId: doc.id, titular: { tipo: titular.tipo, id: titular.id } },
+    return enContextoArco(ctx, async (ctx) => {
+      const s = await ctx.db.solicitudArco.findFirst({
+        where: { id: input.solicitudId, ...(await dondeSolicitud(ctx)) },
       });
+      if (!s) throw noEncontrado("La solicitud");
+      if (!produceExportacion(s.tipo as TipoSolicitud))
+        throw reglaDeNegocio(
+          "Solo las solicitudes de acceso o portabilidad producen una exportación.",
+        );
+      if (s.estado === "rechazada") throw reglaDeNegocio("La solicitud está rechazada.");
+      if (!s.titularTipo || !s.titularId)
+        throw reglaDeNegocio("La solicitud no tiene un titular interno para exportar.");
+      const titular: TitularVista = await cargarTitular(ctx, {
+        tipo: s.titularTipo as "persona" | "contacto",
+        id: s.titularId,
+      });
+      const datos = await armarExportacion(ctx, titular);
+      const contenido = JSON.stringify(
+        { generadoEn: new Date().toISOString(), solicitudId: s.id, tipo: s.tipo, titular: datos },
+        null,
+        2,
+      );
+      const sha256 = await sha256Hex(contenido);
+      if (dryRun)
+        return {
+          documentoId: "",
+          sha256,
+          bytes: Buffer.byteLength(contenido),
+          titular: { tipo: titular.tipo, id: titular.id },
+        };
+      if (!ctx.servicios.almacenamiento.disponible)
+        throw reglaDeNegocio("El almacenamiento no está configurado en este entorno.");
+      const nombre = `exportacion-${titular.tipo}-${s.id}.json`;
+      const doc = await materializar(ctx, contenido, sha256, nombre, s.id);
+      await ctx.transaccion(async (tx) => {
+        await tx.solicitudArco.update({
+          where: { id: s.id },
+          data: { documentoEvidenciaId: doc.id },
+        });
+        await ctx.eventos.emitir(tx, {
+          tipo: "core.cumplimiento.solicitud_exportada",
+          entidadTipo: "solicitud_arco",
+          entidadId: s.id,
+          payload: { documentoId: doc.id, titular: { tipo: titular.tipo, id: titular.id } },
+        });
+      });
+      return {
+        documentoId: doc.id,
+        sha256,
+        bytes: Buffer.byteLength(contenido),
+        titular: { tipo: titular.tipo, id: titular.id },
+      };
     });
-    return { documentoId: doc.id, sha256, bytes: Buffer.byteLength(contenido), titular: { tipo: titular.tipo, id: titular.id } };
   },
 });

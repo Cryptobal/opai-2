@@ -3,6 +3,7 @@ import { z } from "zod";
 import { brechaNotificada, PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
+import { prohibido } from "../../errores";
 
 type Hecho = {
   id: string;
@@ -53,6 +54,7 @@ function resumirCaso(hechos: Hecho[]) {
 }
 
 export const incidentesListar = defineCapability({
+  auditarLectura: (s) => s.items.map((h) => h.casoId),
   id: "core.cumplimiento.incidentes_listar",
   descripcion:
     "Lista los incidentes de seguridad y brechas del tenant con su estado vigente, alcance y, si hubo, el aviso a la Agencia o a los titulares con su plazo (Ley 21.719). Solo del tenant actual (RLS).",
@@ -85,6 +87,7 @@ export const incidentesListar = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
+    if (ctx.alcance) throw prohibido("No tienes acceso a estos incidentes.");
     // Flujo manual: pocos casos. Se traen los hechos recientes y se agrupan por caso en memoria.
     const hechos: Hecho[] = await ctx.db.incidente.findMany({
       orderBy: { id: "desc" },

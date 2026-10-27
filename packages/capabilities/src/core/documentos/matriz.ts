@@ -7,6 +7,7 @@ import { prohibido } from "../../errores";
 import { dondePersona } from "../maestros/alcance";
 import { dia, hoy } from "../maestros/comun";
 import { vinculosVigentes } from "../maestros/personas-vista";
+import { filtroDocumentoSensible } from "./sensibles";
 
 const ESTADOS = ["vigente", "por_vencer", "vencido", "sin_fecha", "falta"] as const;
 type Celda = z.input<typeof celdaSchema>;
@@ -44,6 +45,11 @@ function celdas(
 }
 
 export const documentosMatriz = defineCapability({
+  auditarLectura: (s) =>
+    s.filas.flatMap((f) => [
+      f.personaId,
+      ...f.celdas.flatMap((c) => (c.documentoId ? [c.documentoId] : [])),
+    ]),
   id: "core.documentos.matriz",
   descripcion:
     "Semáforo de vencimientos por persona: para cada persona activa, el estado de cada tipo de documento obligatorio o con vencimiento (vigente, días para vencer, vencido o falta). Sirve para pedir renovaciones en bloque. Hasta 2.000 personas; exige también leer personas.",
@@ -107,7 +113,11 @@ export const documentosMatriz = defineCapability({
       select: { documentoId: true, entidadId: true },
     });
     const docs = await ctx.db.documento.findMany({
-      where: { id: { in: propios.map((v) => v.documentoId) }, estado: "disponible" },
+      where: {
+        id: { in: propios.map((v) => v.documentoId) },
+        estado: "disponible",
+        ...filtroDocumentoSensible(ctx),
+      },
       select: { id: true, tipoId: true, venceEn: true, version: true },
     });
     const dueno = new Map(propios.map((v) => [v.documentoId, v.entidadId]));
