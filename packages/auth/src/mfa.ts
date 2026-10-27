@@ -20,6 +20,11 @@ function codigoDe(error: unknown): string | undefined {
   return (error.body as { code?: string } | undefined)?.code;
 }
 
+/** Código HTTP del `APIError` (429 cuando un límite de tasa, como el por IP del #64, corta el intento). */
+function estadoHttpDe(error: unknown): number | undefined {
+  return error instanceof APIError ? error.statusCode : undefined;
+}
+
 function fallo(f: FalloAcceso, mensaje: string): ResultadoAcceso {
   return { ok: false, fallo: f, mensaje };
 }
@@ -31,21 +36,17 @@ function fallo(f: FalloAcceso, mensaje: string): ResultadoAcceso {
  */
 function falloDeVerificacion(error: unknown): ResultadoAcceso {
   const codigo = codigoDe(error);
+  // Límite de tasa (429): el tope por IP del #64 o el del propio plugin. Comparte el aviso genérico de
+  // pausa del login en vez de parecer un «código incorrecto», que confundiría a quien no se equivocó.
+  if (estadoHttpDe(error) === 429 || codigo === "TOO_MANY_REQUESTS") {
+    return fallo("bloqueada", MENSAJE_PAUSA);
+  }
   if (codigo === "ACCOUNT_TEMPORARILY_LOCKED" || codigo === "TOO_MANY_ATTEMPTS_REQUEST_NEW_CODE") {
     return fallo("bloqueada", MENSAJE_PAUSA);
   }
   if (codigo === "INVALID_TWO_FACTOR_COOKIE") return fallo("invalido", MENSAJE_DESAFIO);
   if (error instanceof APIError) return fallo("credenciales", MENSAJE_CODIGO);
   throw error;
-}
-
-/** ¿La respuesta de `signInEmail` indica que falta el segundo factor (el plugin fijó la cookie de desafío)? */
-export function pideSegundoFactor(respuesta: unknown): boolean {
-  return (
-    typeof respuesta === "object" &&
-    respuesta !== null &&
-    Reflect.get(respuesta, "twoFactorRedirect") === true
-  );
 }
 
 /**
@@ -118,7 +119,8 @@ export async function desactivarSegundoFactor(password: string): Promise<Resulta
     if (codigoDe(error) === "INVALID_PASSWORD") {
       return fallo("credenciales", "La contraseña no es correcta.");
     }
-    if (error instanceof APIError) return fallo("error", "No se pudo desactivar el segundo factor.");
+    if (error instanceof APIError)
+      return fallo("error", "No se pudo desactivar el segundo factor.");
     throw error;
   }
 }

@@ -9,6 +9,7 @@ import { contextoDeIdentidad, identidadDe, type Identidad } from "./actor";
 import { medirFase } from "./metricas-navegacion";
 import { asegurarRegistro } from "./registro";
 import { COOKIE_TENANT } from "./tenant-actual";
+import { estadoMfaDe, verificarMfaDe } from "./mfa";
 
 asegurarRegistro();
 
@@ -19,7 +20,9 @@ export const identidadActual = cache(async (): Promise<Identidad | null> => {
   const sesion = await medirFase("sesion", () => getSession());
   if (!sesion) return null;
   const tenant = (await cookies()).get(COOKIE_TENANT)?.value;
-  return medirFase("identidad", () => identidadDe(sesion.user, tenant));
+  const identidad = await medirFase("identidad", () => identidadDe(sesion.user, tenant));
+  identidad.mfaVerificada = sesion.session.mfaVerified === true;
+  return identidad;
 });
 
 /** Identidad o redirección a /login. */
@@ -52,6 +55,10 @@ export async function ejecutarComoUsuario<T = unknown>(
   const identidad = await identidadActual();
   if (!identidad)
     return { ok: false, error: { code: "UNAUTHENTICATED", message: "Inicia sesión." } };
-  const r = await executeCapability(contextoServidor(identidad, portal), id, input, { dryRun });
+  if (await verificarMfaDe(identidad))
+    return { ok: false, error: { code: "FORBIDDEN", message: "Completa el segundo factor." } };
+  const ctx = contextoServidor(identidad, portal);
+  ctx.mfa = await estadoMfaDe(identidad);
+  const r = await executeCapability(ctx, id, input, { dryRun });
   return r as Resultado<T>;
 }

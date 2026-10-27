@@ -12,13 +12,17 @@ const E2E_MFA_SECRET_RAW = "opai-e2e-mfa-secreto-fijo-000000";
 export const codigoTotp = () => createOTP(E2E_MFA_SECRET_RAW, { digits: 6, period: 30 }).totp();
 
 /** Entra con el owner de e2e: contraseña y, como tiene segundo factor, el código TOTP. */
-export async function entrar(page: Page): Promise<void> {
+export async function entrar(page: Page, email = E2E_EMAIL): Promise<void> {
   await page.goto("/login");
-  await page.getByLabel("Correo").fill(E2E_EMAIL);
+  await page.getByLabel("Correo").fill(email);
   await page.getByLabel("Contraseña", { exact: true }).fill(E2E_PASSWORD ?? "");
   await page.getByRole("button", { name: "Entrar" }).click();
-  await page.waitForURL((url) => url.pathname === "/mfa");
-  await page.getByLabel(/Código/).fill(await codigoTotp());
-  await page.getByRole("button", { name: "Verificar" }).click();
-  await page.waitForURL((url) => url.pathname === "/" || url.pathname === "/platform");
+  await page.waitForURL((url) =>
+    ["/mfa", "/", "/platform", "/elegir-empresa", "/supervisor"].includes(url.pathname),
+  );
+  if (new URL(page.url()).pathname === "/mfa") {
+    await page.getByLabel(/Código/).fill(await codigoTotp());
+    await page.getByRole("button", { name: "Verificar" }).click();
+    await page.waitForURL((url) => url.pathname !== "/mfa");
+  }
 }

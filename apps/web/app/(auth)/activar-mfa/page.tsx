@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import { Loading } from "@opai/ds";
 
+import { mfaObligatoriaPara } from "@/lib/mfa";
 import { identidadActual } from "@/lib/servidor";
 
 import { destinoSeguro } from "../destino";
@@ -22,7 +23,11 @@ async function Contenido({ searchParams }: Props) {
   const destino = destinoSeguro((await searchParams).next);
   if (!identidad) redirect(`/login?next=${encodeURIComponent("/activar-mfa")}`);
   if (identidad.mfaActiva) redirect(destino);
-  return <ActivarMfa destino={destino} />;
+  // La política decide si el enrolamiento es obligatorio (plataforma u owner/admin según el ajuste);
+  // obligatorio → pie «Cerrar sesión»; opcional (desde Mi cuenta) → «volver» al origen. Se calcula en
+  // servidor (ADR-022), nunca en la UI.
+  const obligatoria = await mfaObligatoriaPara(identidad);
+  return <ActivarMfa destino={destino} obligatoria={obligatoria} />;
 }
 
 export default function ActivarMfaPage(props: Props) {

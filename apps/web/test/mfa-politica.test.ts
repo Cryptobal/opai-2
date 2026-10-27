@@ -1,58 +1,20 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
-import type { Identidad } from "../lib/actor";
-import { mfaObligatoriaPara } from "../lib/mfa";
+import { mfaEsObligatoria, pendienteMfa } from "@opai/domain";
 
-/** Identidad mínima para la política de MFA (NÚCLEO-F); solo importan platformRole y el rol del tenant. */
-function identidad(opts: {
-  platformRole?: "owner" | "support" | null;
-  rol?: string | null;
-}): Identidad {
-  const { platformRole = null, rol = null } = opts;
-  return {
-    usuario: { id: "u1", nombre: "U", email: "u@x.cl", platformRole },
-    membresias: [],
-    actual: rol
-      ? {
-          id: "m1",
-          tenantId: "t1",
-          rol,
-          portales: ["erp"],
-          estado: "activa",
-          tenant: { id: "t1", slug: "t", nombre: "T", vertical: "seguridad", estado: "activo" },
-        }
-      : null,
-    modulosActivos: ["core"],
-    acceso: { permisosRol: null, excepciones: [], instalaciones: null },
-    mfaActiva: false,
-  };
-}
-
-describe("mfaObligatoriaPara (política NÚCLEO-F)", () => {
-  it("una cuenta de plataforma siempre debe tener MFA, sin leer el ajuste del tenant", async () => {
-    const leer = vi.fn(async () => false);
-    expect(await mfaObligatoriaPara(identidad({ platformRole: "owner" }), leer)).toBe(true);
-    expect(await mfaObligatoriaPara(identidad({ platformRole: "support" }), leer)).toBe(true);
-    expect(leer).not.toHaveBeenCalled();
+describe("política MFA pura (sin Prisma ni DATABASE_URL)", () => {
+  it("plataforma/owner/admin son obligatorios aunque el tenant intente apagarlo", () => {
+    expect(mfaEsObligatoria("support", null, false)).toBe(true);
+    for (const rol of ["owner", "admin"]) expect(mfaEsObligatoria(null, rol, false)).toBe(true);
   });
-
-  it("owner y admin del tenant siguen el ajuste del tenant", async () => {
-    const obligatorio = vi.fn(async () => true);
-    const opcional = vi.fn(async () => false);
-    expect(await mfaObligatoriaPara(identidad({ rol: "owner" }), obligatorio)).toBe(true);
-    expect(await mfaObligatoriaPara(identidad({ rol: "admin" }), obligatorio)).toBe(true);
-    expect(await mfaObligatoriaPara(identidad({ rol: "owner" }), opcional)).toBe(false);
+  it("el ajuste solo agrega exigencia a los demás roles", () => {
+    expect(mfaEsObligatoria(null, "viewer", false)).toBe(false);
+    expect(mfaEsObligatoria(null, "viewer", true)).toBe(true);
+    expect(mfaEsObligatoria(null, null, false)).toBe(false);
   });
-
-  it("los demás roles del tenant nunca son obligados (lo activan opcional)", async () => {
-    const leer = vi.fn(async () => true);
-    for (const rol of ["gerente", "supervisor", "viewer"]) {
-      expect(await mfaObligatoriaPara(identidad({ rol }), leer)).toBe(false);
-    }
-    expect(leer).not.toHaveBeenCalled();
-  });
-
-  it("sin tenant actual (y sin platformRole) no hay exigencia", async () => {
-    expect(await mfaObligatoriaPara(identidad({}), vi.fn(async () => true))).toBe(false);
+  it("Google u otro login con MFA activo sin marca exige verificar esta sesión", () => {
+    expect(pendienteMfa({ activa: true, verificada: false, obligatoria: false })).toBe("verificar");
+    expect(pendienteMfa({ activa: false, verificada: true, obligatoria: true })).toBe("enrolar");
+    expect(pendienteMfa({ activa: true, verificada: true, obligatoria: true })).toBeNull();
   });
 });

@@ -53,6 +53,7 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
   const rol = o.rol === undefined ? "owner" : o.rol;
   const actor: Actor = o.actor ?? (usuario ? { tipo: "user", id: usuario.id } : { tipo: "system" });
   const ctx: Contexto = {
+    mfa: { activa: true, verificada: true, obligatoria: true },
     tenantId: TENANT_DE_PRUEBA,
     conTenant: o.conTenant ?? true,
     actor,

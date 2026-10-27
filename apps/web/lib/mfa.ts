@@ -1,35 +1,28 @@
 import { ajuste } from "@opai/capabilities";
+import { mfaEsObligatoria, pendienteMfa, type EstadoMfa } from "@opai/domain";
 
 import { contextoDeIdentidad, type Identidad } from "./actor";
 
-/**
- * Política de segundo factor (NÚCLEO-F). Decisión de Carlos (26-oct-2026, chat con OPAI 2.0): el
- * segundo factor es obligatorio para las cuentas de plataforma y para el owner y el admin de cada
- * tenant; los demás roles lo activan de forma opcional. Para el tenant la exigencia es parametrizada
- * por el ajuste `core.seguridad_mfa_obligatorio_admins` (por defecto obligatorio); las cuentas de
- * plataforma lo exigen siempre, sin ajuste.
- */
-const ROLES_PRIVILEGIADOS = new Set(["owner", "admin"]);
-
-/**
- * ¿La cuenta del request debe tener el segundo factor activo? Plataforma: siempre. Tenant: solo owner
- * y admin, y según el ajuste del tenant. La lectura del ajuste ocurre solo para owner/admin que aún no
- * tienen el segundo factor (la verificación en {@link requerirSegundoFactor} corta antes si ya lo tienen),
- * por lo que no agrega consultas a la navegación común (ADR-045). El rol se toma del rol base de la
- * membresía del tenant actual (owner/admin), nunca de la UI (ADR-022).
- */
-export async function mfaObligatoriaPara(
-  identidad: Identidad,
-  exigenciaTenant: (id: Identidad) => Promise<boolean> = exigenciaDelTenant,
-): Promise<boolean> {
-  if (identidad.usuario.platformRole) return true;
-  const rol = identidad.actual?.rol;
-  if (!identidad.actual || !rol || !ROLES_PRIVILEGIADOS.has(rol)) return false;
-  return exigenciaTenant(identidad);
+/** El tenant solo puede agregar exigencia: plataforma/owner/admin nunca pueden excluirse. */
+export async function mfaObligatoriaPara(identidad: Identidad): Promise<boolean> {
+  if (mfaEsObligatoria(identidad.usuario.platformRole, identidad.actual?.rol)) return true;
+  if (!identidad.actual) return false;
+  return ajuste<boolean>(
+    contextoDeIdentidad(identidad, null),
+    "core",
+    "seguridad_mfa_obligatorio_admins",
+  );
 }
 
-/** Lee el ajuste del tenant que exige el segundo factor a owner/admin (por defecto obligatorio). */
-async function exigenciaDelTenant(identidad: Identidad): Promise<boolean> {
-  const ctx = contextoDeIdentidad(identidad, "erp");
-  return ajuste<boolean>(ctx, "core", "seguridad_mfa_obligatorio_admins");
+export async function estadoMfaDe(identidad: Identidad): Promise<EstadoMfa> {
+  return {
+    activa: identidad.mfaActiva,
+    verificada: identidad.mfaVerificada === true,
+    obligatoria: await mfaObligatoriaPara(identidad),
+  };
+}
+
+/** Único punto de verificación para API con cookie, Server Actions y páginas. */
+export async function verificarMfaDe(identidad: Identidad) {
+  return pendienteMfa(await estadoMfaDe(identidad));
 }

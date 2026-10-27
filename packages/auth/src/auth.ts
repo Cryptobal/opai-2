@@ -9,6 +9,7 @@ import { COMUNICABLES_NUCLEO, renderizarCorreo } from "@opai/domain";
 import { mailerDelEntorno } from "@opai/integrations/email";
 
 import { bloqueoDeIngreso, mensajeBloqueo } from "./acceso";
+import { marcaMfaSesion } from "./mfa-sesion";
 import {
   CLAVE_INTENTO,
   datosDeContexto,
@@ -46,6 +47,9 @@ export const auth = betterAuth({
     database: { generateId: false },
   },
   user: { additionalFields: camposUsuario },
+  session: {
+    additionalFields: { mfaVerified: { type: "boolean", defaultValue: false, input: false } },
+  },
   emailAndPassword: {
     enabled: true,
     disableSignUp: true,
@@ -102,6 +106,7 @@ export const auth = betterAuth({
               code: "ACCOUNT_SUSPENDED",
             });
           }
+          return { data: { ...session, mfaVerified: false } };
         },
       },
     },
@@ -158,6 +163,7 @@ export const auth = betterAuth({
         durationSeconds: MFA_BLOQUEO_SEGUNDOS,
       },
     }),
+    marcaMfaSesion,
     nextCookies(),
   ],
 });

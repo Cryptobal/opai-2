@@ -85,6 +85,8 @@ model Session {
   ipAddress String?  @map("ip_address")
   userAgent String?  @map("user_agent")
   userId    String   @map("user_id") @db.Uuid
+  /// Solo el servidor tras verificar TOTP/respaldo; nunca heredada de otra sesión ni del cliente.
+  mfaVerified Boolean @default(false) @map("mfa_verified")
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 

@@ -12,7 +12,8 @@
     "typecheck": "tsc -p tsconfig.json",
     "lint": "eslint .",
     "seed:platform-owner": "tsx scripts/seed-platform-owner.ts",
-    "seed:multiempresa-e2e": "tsx scripts/seed-multiempresa-e2e.ts",
+    "seed:e2e-mfa": "tsx scripts/seed-e2e-mfa.ts",
+    "seed:multiempresa-e2e": "tsx scripts/seed-multiempresa-e2e.ts && tsx scripts/seed-e2e-mfa.ts",
     "test": "vitest run"
   },
   "dependencies": {

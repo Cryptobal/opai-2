@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { pideSegundoFactor } from "../src/mfa";
+import { pideSegundoFactor } from "@opai/domain";
 
 /** Detección del desafío de segundo factor en la respuesta de `signInEmail` (NÚCLEO-F). */
 describe("pideSegundoFactor", () => {

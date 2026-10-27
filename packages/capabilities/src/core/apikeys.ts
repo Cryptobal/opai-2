@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { PERMISOS_CORE } from "@opai/domain";
+import { pendienteMfa, PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../define";
 import { noEncontrado, prohibido, reglaDeNegocio } from "../errores";
@@ -86,6 +86,9 @@ export const apikeysCreate = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
+    if (!ctx.mfa || pendienteMfa(ctx.mfa)) {
+      throw prohibido("Completa el segundo factor antes de crear credenciales.");
+    }
     const validos = new Set(["*", "core", ...listarModulos().map((m) => m.id)]);
     const invalidos = input.scopes.filter((s) => !validos.has(s));
     if (invalidos.length) throw reglaDeNegocio(`Scopes desconocidos: ${invalidos.join(", ")}.`);

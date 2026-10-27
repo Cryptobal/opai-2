@@ -3,15 +3,11 @@ import { sesionDeRequest } from "@opai/auth";
 import { esRol, esRolPlataforma } from "@opai/domain";
 
 import { contextoDeApiKey, keyDeCabecera } from "./api-key";
-import {
-  type AccesoFila,
-  fuentesReales,
-  type Fuentes,
-  type MembresiaConTenant,
-} from "./fuentes";
+import { type AccesoFila, fuentesReales, type Fuentes, type MembresiaConTenant } from "./fuentes";
 import { noAutenticado } from "./respuestas";
 import { COOKIE_TENANT, elegirMembresia, leerCookie } from "./tenant-actual";
 import { despacharDiferido, diferirConAfter, medidorDiferido } from "./medidor";
+import { estadoMfaDe, verificarMfaDe } from "./mfa";
 
 export type UsuarioSesion = {
   id: string;
@@ -31,6 +27,7 @@ export type Identidad = {
   acceso: AccesoFila;
   /** Segundo factor activo en la cuenta (NÚCLEO-F). Decide el enrolamiento obligatorio. */
   mfaActiva: boolean;
+  mfaVerificada?: boolean;
 };
 
 const SIN_ACCESO: AccesoFila = { permisosRol: null, excepciones: [], instalaciones: null };
@@ -48,7 +45,10 @@ export async function identidadDe(
   const membresias = await fuentes.membresiasDe(user.id);
   const actual = elegirMembresia(membresias, cookieTenant);
   const [modulosActivos, acceso] = actual
-    ? await Promise.all([fuentes.modulosActivos(actual.tenantId), fuentes.acceso(actual.tenantId, user.id)])
+    ? await Promise.all([
+        fuentes.modulosActivos(actual.tenantId),
+        fuentes.acceso(actual.tenantId, user.id),
+      ])
     : [[], SIN_ACCESO];
   const platformRole = esRolPlataforma(user.platformRole) ? user.platformRole : null;
   return {
@@ -81,7 +81,9 @@ export function contextoDeIdentidad(identidad: Identidad, portal: string | null)
   });
 }
 
-type Sesionador = (req: Request) => Promise<{ user: UsuarioSesion } | null>;
+type Sesionador = (
+  req: Request,
+) => Promise<{ user: UsuarioSesion; session?: { mfaVerified?: boolean } } | null>;
 
 /**
  * Resuelve el actor de un request a la API: API key (`Authorization: Bearer`) o sesión
@@ -97,5 +99,14 @@ export async function resolverActor(
   const s = await sesion(req);
   if (!s) return noAutenticado();
   const identidad = await identidadDe(s.user, leerCookie(req, COOKIE_TENANT), fuentes);
-  return contextoDeIdentidad(identidad, null);
+  identidad.mfaVerificada = s.session?.mfaVerified === true;
+  if (await verificarMfaDe(identidad)) {
+    return Response.json(
+      { ok: false, error: { code: "FORBIDDEN", message: "Completa el segundo factor." } },
+      { status: 403 },
+    );
+  }
+  const ctx = contextoDeIdentidad(identidad, null);
+  ctx.mfa = await estadoMfaDe(identidad);
+  return ctx;
 }

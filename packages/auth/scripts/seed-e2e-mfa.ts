@@ -1,8 +1,10 @@
 // Enrola el segundo factor del usuario plataforma de los e2e con un secreto TOTP FIJO y conocido
 // (NÚCLEO-F). Desde que el segundo factor es obligatorio para las cuentas de plataforma, los e2e que
 // entran con ese usuario deben pasar el segundo paso; con un secreto fijo el test genera el TOTP.
-// Solo desarrollo/CI y solo contra una base local. Uso:
-//   DATABASE_URL_MIGRATE=<url propietario local> pnpm --filter @opai/auth tsx scripts/seed-e2e-mfa.ts
+// Solo desarrollo/CI y solo contra una base local. En CI corre encadenado a `seed:multiempresa-e2e`
+// (el último seed del job de e2e, ya con el owner creado por `seed:platform-owner`), así el owner de
+// e2e entra por /mfa sin tener que tocar el workflow. Standalone:
+//   DATABASE_URL_MIGRATE=<url propietario local> pnpm --filter @opai/auth seed:e2e-mfa
 import "dotenv/config";
 import { hashPassword, symmetricEncrypt } from "better-auth/crypto";
 
@@ -48,7 +50,9 @@ async function main(): Promise<void> {
     const correoPend = "mfa-pendiente-e2e@opai.cl";
     const pend =
       (await db.user.findUnique({ where: { email: correoPend } })) ??
-      (await db.user.create({ data: { name: "MFA Pendiente", email: correoPend, emailVerified: true } }));
+      (await db.user.create({
+        data: { name: "MFA Pendiente", email: correoPend, emailVerified: true },
+      }));
     const hash = await hashPassword(password);
     const cuenta = await db.account.findFirst({
       where: { userId: pend.id, providerId: "credential" },
@@ -61,7 +65,13 @@ async function main(): Promise<void> {
     await db.membership.upsert({
       where: { tenantId_userId: { tenantId: tenant.id, userId: pend.id } },
       update: { rol: "owner", portales: ["erp"], estado: "activa" },
-      create: { tenantId: tenant.id, userId: pend.id, rol: "owner", portales: ["erp"], estado: "activa" },
+      create: {
+        tenantId: tenant.id,
+        userId: pend.id,
+        rol: "owner",
+        portales: ["erp"],
+        estado: "activa",
+      },
     });
     await db.user.update({ where: { id: pend.id }, data: { twoFactorEnabled: false } });
     await db.twoFactor.deleteMany({ where: { userId: pend.id } });

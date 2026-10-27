@@ -22,6 +22,7 @@ import { PortalLayout } from "@/app/_components/portal-layout";
 function identidad(): Identidad {
   const actual = membresia();
   return {
+    mfaActiva: false,
     usuario: { id: "u1", nombre: "Prueba", email: "prueba@example.test", platformRole: null },
     actual,
     membresias: [actual],

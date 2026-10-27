@@ -4,6 +4,7 @@
   "maxSobreFramework": 35,
   "rutas": {
     "/(auth)/*": 153,
+    "/(auth)/activar-mfa": 160,
     "/(erp)/configuracion*": 175,
     "/(erp)/instalaciones/nueva": 178,
     "/(erp)/personas/vencimientos": 175,

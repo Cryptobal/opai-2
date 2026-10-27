@@ -38,8 +38,8 @@ export function DesactivarMfa() {
           disabled={pendiente}
         />
       </Campo>
-      <Button type="submit" variant="destructive" size="md" disabled={pendiente}>
-        {pendiente ? "Desactivando…" : "Desactivar segundo factor"}
+      <Button type="submit" variant="destructive" size="md" cargando={pendiente}>
+        Desactivar segundo factor
       </Button>
     </form>
   );

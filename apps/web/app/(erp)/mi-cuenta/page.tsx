@@ -1,6 +1,6 @@
 import { ShieldCheck } from "lucide-react";
 
-import { Alerta } from "@opai/ds";
+import { Alerta, estilosBoton } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
@@ -39,7 +39,11 @@ export default function MiCuenta() {
                 >
                   Al entrar te pediremos un código de tu app de autenticación.
                 </Alerta>
-                <DesactivarMfa />
+                {obligatoria ? (
+                  <p className="text-sm text-fg-muted">Tu rol requiere el segundo factor.</p>
+                ) : (
+                  <DesactivarMfa />
+                )}
               </>
             ) : (
               <>
@@ -51,11 +55,12 @@ export default function MiCuenta() {
                       : "Protege tu cuenta con un segundo factor"
                   }
                 >
-                  Agrega un código de un solo uso de tu app de autenticación, además de la contraseña.
+                  Agrega un código de un solo uso de tu app de autenticación, además de la
+                  contraseña.
                 </Alerta>
                 <LinkNext
                   href="/activar-mfa?next=/mi-cuenta"
-                  className="t-label inline-flex min-h-11 items-center text-accent"
+                  className={estilosBoton({ variant: "primary" })}
                 >
                   Activar segundo factor
                 </LinkNext>

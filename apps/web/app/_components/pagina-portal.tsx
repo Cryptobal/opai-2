@@ -5,7 +5,7 @@ import { Forbidden, Loading, type VarianteLoading } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { epocaDeIdentidad, marcaGenerado } from "@/lib/epoca-sesion";
-import { mfaObligatoriaPara } from "@/lib/mfa";
+import { verificarMfaDe } from "@/lib/mfa";
 import { medirFase } from "@/lib/metricas-navegacion";
 import { requerirIdentidad, tieneAccesoAPortal } from "@/lib/servidor";
 
@@ -37,9 +37,11 @@ async function Contenido<T>({
   // Segundo factor obligatorio (NÚCLEO-F): si la cuenta debe tenerlo y aún no lo activó, va a enrolarse
   // antes de entrar a cualquier portal. Se verifica en servidor (ADR-022); el corte rápido evita leer
   // el ajuste cuando ya tiene el segundo factor. `/activar-mfa` no pasa por aquí, así que no hay ciclo.
-  if (!identidad.mfaActiva && (await mfaObligatoriaPara(identidad))) {
-    redirect(`/activar-mfa?next=${encodeURIComponent(ruta)}`);
-  }
+  const pendiente = await verificarMfaDe(identidad);
+  if (pendiente)
+    redirect(
+      `/${pendiente === "enrolar" ? "activar-mfa" : "mfa"}?next=${encodeURIComponent(ruta)}`,
+    );
   const acceso = tieneAccesoAPortal(identidad, portal);
   // Usuario de plataforma sin empresa: su inicio es Plataforma.
   if (!acceso && portal === "erp" && !identidad.actual && identidad.usuario.platformRole) {

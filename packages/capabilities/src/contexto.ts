@@ -1,6 +1,7 @@
 import {
   type Acceso,
   type Excepcion,
+  type EstadoMfa,
   moduloDe,
   type Rol,
   tienePermisoEfectivo,
@@ -56,6 +57,7 @@ export const auditoriaEnDb: Auditoria = {
 };
 
 export type ParametrosContexto = {
+  mfa?: EstadoMfa;
   /** null: sin tenant actual (plataforma sin empresa elegida, o usuario sin membresías). */
   tenantId: string | null;
   actor: Actor;
@@ -100,6 +102,7 @@ export function crearContexto(params: ParametrosContexto): Contexto {
   const usuario = params.usuario ?? null;
   const rol = params.rol ?? null;
   return {
+    ...(params.mfa ? { mfa: params.mfa } : {}),
     tenantId,
     conTenant: params.tenantId !== null,
     actor: params.actor,

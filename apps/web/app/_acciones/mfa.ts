@@ -12,6 +12,8 @@ import {
 } from "@opai/auth";
 import { destinoSeguro } from "@/app/(auth)/destino";
 import { qrSvg } from "@/lib/qr";
+import { identidadActual } from "@/lib/servidor";
+import { mfaObligatoriaPara, verificarMfaDe } from "@/lib/mfa";
 
 /** Aviso genérico de pausa, igual que el del login (no revela intentos restantes). */
 const PAUSA = {
@@ -40,7 +42,10 @@ export async function accionVerificar(
   previo: EstadoVerificar,
   form: FormData,
 ): Promise<EstadoVerificar> {
-  const codigo = String(form.get("codigo") ?? "").trim();
+  // Normaliza en el servidor lo que el usuario pueda pegar: el TOTP a solo dígitos (acepta «123 456» o
+  // «123-456») y el código de respaldo sin espacios; así un formato con separadores no se rechaza.
+  const bruto = String(form.get("codigo") ?? "");
+  const codigo = metodo === "respaldo" ? bruto.replace(/\s+/g, "") : bruto.replace(/\D/g, "");
   const n = siguiente(previo);
   const r =
     metodo === "respaldo"
@@ -55,11 +60,13 @@ export async function accionVerificar(
 // ----- Enrolamiento (en sesión): paso 1 clave + paso 2 código -----
 
 export type InicioMfa =
-  | { ok: true; svg: string; secret: string; codigos: string[] }
-  | { ok: false; error: string };
+  { ok: true; svg: string; secret: string; codigos: string[] } | { ok: false; error: string };
 
 /** Paso 1: valida la contraseña y devuelve el QR (SVG), la clave manual y los códigos de respaldo. */
-export async function accionIniciarMfa(_previo: InicioMfa | null, form: FormData): Promise<InicioMfa> {
+export async function accionIniciarMfa(
+  _previo: InicioMfa | null,
+  form: FormData,
+): Promise<InicioMfa> {
   await requireSession();
   const password = String(form.get("password") ?? "");
   const r = await iniciarSegundoFactor(password);
@@ -75,7 +82,10 @@ export async function accionConfirmarMfa(
   form: FormData,
 ): Promise<ConfirmaMfa> {
   await requireSession();
-  const codigo = String(form.get("codigo") ?? "").trim();
+  // El TOTP del autenticador son 6 dígitos: se aceptan separadores (espacios, guiones) y se normaliza.
+  if (form.get("codigosGuardados") !== "si")
+    return { ok: false, error: "Confirma que guardaste tus códigos de respaldo." };
+  const codigo = String(form.get("codigo") ?? "").replace(/\D/g, "");
   const r = await confirmarSegundoFactor(codigo);
   return r.ok ? { ok: true } : { ok: false, error: r.mensaje };
 }
@@ -86,6 +96,9 @@ export async function accionDesactivarMfa(
   form: FormData,
 ): Promise<ConfirmaMfa> {
   await requireSession();
+  const identidad = await identidadActual();
+  if (!identidad || (await mfaObligatoriaPara(identidad)) || (await verificarMfaDe(identidad)))
+    return { ok: false, error: "Tu rol requiere el segundo factor o falta verificar la sesión." };
   const password = String(form.get("password") ?? "");
   const r = await desactivarSegundoFactor(password);
   return r.ok ? { ok: true } : { ok: false, error: r.mensaje };
