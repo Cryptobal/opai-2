@@ -34,6 +34,13 @@ Continuaciones del encargo del 27-oct-2026. No incluye ID de Linear; no se inven
   error de carga diferenciado con reintento (también ante error de red), confirmación
   de guardado con `avisar.exito` del DS. E2e cubre los seis portales, reintento y aviso.
   S1 (`next=/`) y S2 (Cliente para internos) se conservan sin cambios: decide Carlos.
+- Corrección del PR #72: el e2e espera la URL exacta de cada portal antes de comprobar
+  su menú, para no aceptar accidentalmente el menú de un portal distinto tras redirigir.
+  La reproducción local de teléfono pasó 3/3, también en `/platform`; no se reprodujo
+  el fallo de CI ni se pudo confirmar su causa. En una ejecución simultánea local el
+  menú de Supervisor quedó cerrado al comprobarlo: se espera su estado abierto antes
+  de revisar los ítems. No se altera la migración ni se omite la comprobación de
+  Plataforma. Adaptación técnica de OpenCode según el encargo.
 
 ## Criterios técnicos de implementación
 

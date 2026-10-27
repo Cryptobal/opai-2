@@ -19,8 +19,16 @@ async function entrar(page: Page, ruta = "/login") {
   await page.waitForURL((u) => !["/login", "/mfa", "/elegir-empresa"].includes(u.pathname));
 }
 
+async function abrirMenu(page: Page) {
+  const boton = page.getByRole("button", { name: "Menú de usuario" }).filter({ visible: true });
+  await expect(async () => {
+    if ((await boton.getAttribute("aria-expanded")) !== "true") await boton.click();
+    await expect(boton).toHaveAttribute("aria-expanded", "true", { timeout: 1000 });
+  }).toPass({ timeout: 30_000 });
+}
+
 async function elegir(page: Page, nombre: string) {
-  await page.getByRole("button", { name: "Menú de usuario" }).filter({ visible: true }).click();
+  await abrirMenu(page);
   await page.getByRole("menuitem", { name: "Portal de inicio", exact: true }).click();
   const hoja = page.getByRole("dialog", { name: "Portal de inicio", exact: true });
   await esperar(hoja.getByLabel("Portal de inicio", { exact: true })).toBeEnabled();
@@ -41,7 +49,7 @@ test("elige con DS V2, persiste tras login y respeta next explícito", async ({ 
     await page.context().clearCookies();
     await entrar(page);
     await esperar(page).toHaveURL(/\/supervisor$/);
-    await page.getByRole("button", { name: "Menú de usuario" }).filter({ visible: true }).click();
+    await abrirMenu(page);
     await page.getByRole("menuitem", { name: "Portal de inicio", exact: true }).click();
     const hoja = page.getByRole("dialog", { name: "Portal de inicio" });
     await esperar(hoja.getByLabel("Portal de inicio", { exact: true })).toContainText("Supervisor");
@@ -83,7 +91,9 @@ test("el menú oculta la preferencia en Cliente y Plataforma", async ({ page }) 
   await entrar(page, "/login?next=%2F");
   for (const ruta of ["/cliente", "/platform", "/supervisor", "/trabajador", "/terreno", "/"]) {
     await page.goto(ruta);
-    await page.getByRole("button", { name: "Menú de usuario" }).filter({ visible: true }).click();
+    // No aceptar un menú de otro portal después de una redirección o navegación pendiente.
+    await esperar(page).toHaveURL((url) => url.pathname === ruta);
+    await abrirMenu(page);
     const item = page.getByRole("menuitem", { name: "Portal de inicio", exact: true });
     await expect(item).toHaveCount(["/cliente", "/platform"].includes(ruta) ? 0 : 1);
     await page.keyboard.press("Escape");
@@ -92,7 +102,7 @@ test("el menú oculta la preferencia en Cliente y Plataforma", async ({ page }) 
 
 test("distingue error de carga y permite reintentar", async ({ page }) => {
   await entrar(page, "/login?next=%2F");
-  await page.getByRole("button", { name: "Menú de usuario" }).filter({ visible: true }).click();
+  await abrirMenu(page);
   await page.route("**/*", async (route) => {
     if (route.request().headers()["next-action"]) await route.abort();
     else await route.continue();
