@@ -120,10 +120,28 @@ export function dbEnMemoria(semilla: Record<string, Fila[]> = {}) {
     { get: (cache: Record<string, unknown>, m: string) => (cache[m] ??= delegado(m)) },
   );
   const globales: Record<string, unknown> = {
-    tenant: db["tenant"],
-    user: db["user"],
-    ajustePlataforma: db["ajustePlataforma"],
-    precioRecurso: db["precioRecurso"],
+    tenantPorId: (id: string) => delegado("tenant").findUnique({ where: { id } }),
+    tenantPorSlug: (slug: string) => delegado("tenant").findUnique({ where: { slug } }),
+    listarTenants: (id?: string) =>
+      delegado("tenant").findMany({
+        where: id ? { id } : {},
+        orderBy: { nombre: "asc" },
+      }),
+    crearTenant: (data: Fila) => delegado("tenant").create({ data }),
+    actualizarTenant: (id: string, data: Fila) =>
+      delegado("tenant").update({ where: { id }, data }),
+    listarAjustes: () => delegado("ajustePlataforma").findMany(),
+    ajustePorClave: (where: Fila) => delegado("ajustePlataforma").findUnique({ where }),
+    guardarAjuste: (args: Parameters<ReturnType<typeof delegado>["upsert"]>[0]) =>
+      delegado("ajustePlataforma").upsert(args),
+    listarPrecios: (hasta: Date) =>
+      delegado("precioRecurso").findMany({
+        where: { vigenteDesde: { lte: hasta } },
+        orderBy: [{ recurso: "asc" }, { vigenteDesde: "desc" }],
+      }),
+    precioPorVigencia: (where: Fila) => delegado("precioRecurso").findUnique({ where }),
+    guardarPrecio: (args: Parameters<ReturnType<typeof delegado>["upsert"]>[0]) =>
+      delegado("precioRecurso").upsert(args),
   };
   /** Copia de todas las tablas; la función devuelta las restaura (rollback de `transaccion`). */
   function instantanea(): () => void {
