@@ -250,3 +250,18 @@ describe("07b: capas por la misma capacidad UI/API/MCP", () => {
     ).toBe("NOT_FOUND");
   });
 });
+
+describe("validación de montos", () => {
+  it.each([-500, 100_000_001])("rechaza sueldo base %s sin escribir", async (sueldoBase) => {
+    const { ctx, instalacionId } = await preparar();
+    expect(
+      await codigo(ctx, "core.estructuras.create", {
+        ...completa,
+        nivel: "instalacion",
+        instalacionId,
+        sueldoBase,
+      }),
+    ).toBe("INVALID_INPUT");
+    expect(await ctx.db.estructuraSueldo.count()).toBe(0);
+  });
+});

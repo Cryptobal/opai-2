@@ -2,9 +2,19 @@
 
 import { useState } from "react";
 
-import { Alerta, avisar, Button, Campo, InputFecha, Select, Sheet, Textarea } from "@opai/ds";
+import {
+  Alerta,
+  avisar,
+  Button,
+  Campo,
+  Input,
+  InputFecha,
+  Select,
+  Sheet,
+  Textarea,
+} from "@opai/ds";
 
-import { InputPesos } from "@/app/_components/maestros/input-pesos";
+import { errorMonto, parsearMonto } from "@/app/_components/sueldos/monto";
 import { useHojaUrl } from "@/app/_components/maestros/use-url";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 import type { EstructuraVista } from "@/lib/tipos-sueldo";
@@ -26,9 +36,9 @@ export function HojaVersion({ cargoId, base, hoy }: Props) {
     const r = await ejecutar("core.estructuras.create", {
       nivel: "cargo",
       cargoId,
-      sueldoBase: Number(sueldoBase),
-      colacion: Number(colacion || 0),
-      movilizacion: Number(movilizacion || 0),
+      sueldoBase: parsearMonto(sueldoBase),
+      colacion: colacion ? parsearMonto(colacion) : 0,
+      movilizacion: movilizacion ? parsearMonto(movilizacion) : 0,
       gratificacion: grat,
       vigenteDesde: desde,
       ...(motivo.trim().length >= 5 ? { motivo: motivo.trim() } : {}),
@@ -50,7 +60,16 @@ export function HojaVersion({ cargoId, base, hoy }: Props) {
           <Button variant="secondary" onClick={hoja.cerrar}>
             Cancelar
           </Button>
-          <Button disabled={pendiente || !sueldoBase || !desde} onClick={() => void guardar()}>
+          <Button
+            disabled={
+              pendiente ||
+              parsearMonto(sueldoBase) === null ||
+              (colacion !== "" && parsearMonto(colacion) === null) ||
+              (movilizacion !== "" && parsearMonto(movilizacion) === null) ||
+              !desde
+            }
+            onClick={() => void guardar()}
+          >
             {pendiente ? "Guardando…" : "Crear versión"}
           </Button>
         </>
@@ -64,14 +83,39 @@ export function HojaVersion({ cargoId, base, hoy }: Props) {
             titulo="Montos sensibles: ingrésalos completos para la nueva versión."
           />
         ) : null}
-        <Campo etiqueta="Sueldo base" htmlFor="v-base">
-          <InputPesos id="v-base" valor={sueldoBase} onCambiar={setBase} />
+        <Campo etiqueta="Sueldo base (obligatorio)" error={errorMonto(sueldoBase)} htmlFor="v-base">
+          <Input
+            id="v-base"
+            inputMode="numeric"
+            value={sueldoBase}
+            onChange={(e) => setBase(e.target.value)}
+          />
         </Campo>
-        <Campo etiqueta="Colación" htmlFor="v-col" ayuda="No imponible">
-          <InputPesos id="v-col" valor={colacion} onCambiar={setColacion} />
+        <Campo
+          etiqueta="Colación"
+          error={errorMonto(colacion)}
+          htmlFor="v-col"
+          ayuda="No imponible"
+        >
+          <Input
+            id="v-col"
+            inputMode="numeric"
+            value={colacion}
+            onChange={(e) => setColacion(e.target.value)}
+          />
         </Campo>
-        <Campo etiqueta="Movilización" htmlFor="v-mov" ayuda="No imponible">
-          <InputPesos id="v-mov" valor={movilizacion} onCambiar={setMov} />
+        <Campo
+          etiqueta="Movilización"
+          error={errorMonto(movilizacion)}
+          htmlFor="v-mov"
+          ayuda="No imponible"
+        >
+          <Input
+            id="v-mov"
+            inputMode="numeric"
+            value={movilizacion}
+            onChange={(e) => setMov(e.target.value)}
+          />
         </Campo>
         <Campo etiqueta="Gratificación" htmlFor="v-grat">
           <Select
