@@ -11,6 +11,12 @@ export {
   verificarEslabon,
   type VerificacionBitacora,
 } from "./bitacora";
+export {
+  agregarAAuditoria,
+  type HechoAuditoria,
+  verificarAuditoria,
+  type VerificacionAuditoria,
+} from "./auditoria";
 export { type ClienteCatalogo, sembrarCatalogo } from "./catalogo-tenant";
 export { consolidarConsumos, RETENCION_CONSUMOS_DIAS } from "./consumos";
 export { colaDeTrabajos, type ColaDeTrabajos, type TrabajoReclamado } from "./trabajos";

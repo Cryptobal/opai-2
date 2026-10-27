@@ -25,6 +25,7 @@ model Tenant {
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   auditEvents AuditEvent[]
+  auditoriaCabeza AuditoriaCabeza?
   memberships Membership[]
   roles       Rol[]
   permisoExcepciones PermisoExcepcion[]
@@ -96,7 +97,15 @@ model RateLimitVentana {
   @@schema("core")
 }
 
-/// Auditoría append-only. Toda capacidad con efecto distinto de lectura escribe aquí (ADR-004).
+/// Auditoría append-only y encadenada por tenant (ADR-004, auditoría del 26-oct-2026 pedida por
+/// Carlos, ADR-023-bis): toda capacidad con efecto distinto de lectura escribe aquí, en la MISMA
+/// transacción que su escritura de negocio (`executeCapability`, ADR-023-bis §1). La migración
+/// revoca UPDATE/DELETE a `opai_app` (inmutable para la app; el dueño conserva el acceso para
+/// scripts y para la prueba de alteración de `verificarAuditoria`). `seq`/`hashAnterior`/`hash`
+/// encadenan los eventos del tenant (mismo algoritmo que `Bitacora`, `@opai/domain`); `hashCanon`
+/// congela la forma canónica ya hasheada (tenant, seq, actor, capability, entidad, createdAt y un
+/// **digest** SHA-256 del payload, no el payload crudo) para que una futura anonimización del
+/// payload (Ley 21.719) no invalide hashes ya emitidos.
 model AuditEvent {
   id         String   @id @default(uuid(7)) @db.Uuid
   tenantId   String   @map("tenant_id") @db.Uuid
@@ -111,11 +120,39 @@ model AuditEvent {
   entityId   String?  @map("entity_id")
   payload    Json?
   createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  /// Secuencia por tenant (1, 2, 3…). `Int`, no `BigInt`: igual que `Bitacora.seq` y a propósito,
+  /// para que las filas sigan siendo `JSON.stringify`-ables sin un reemplazador de BigInt (2.1 mil
+  /// millones de escrituras por tenant alcanza de sobra). ADR-023-bis.
+  seq          Int    @map("seq")
+  /// Hash del eslabón anterior del mismo tenant (génesis = 64 ceros).
+  hashAnterior String @map("hash_anterior")
+  /// sha256(hashAnterior + "\n" + hashCanon). Columna que verifica la cadena.
+  hash         String
+  /// Forma canónica ya hasheada de este eslabón (congelada: no se recalcula del payload en vivo).
+  hashCanon    String @map("hash_canon")
 
   tenant Tenant @relation(fields: [tenantId], references: [id])
 
+  @@unique([tenantId, seq])
   @@index([tenantId, createdAt])
   @@map("audit_events")
+  @@schema("core")
+}
+
+/// Última verificación de la cadena de `audit_events` por tenant (ADR-023-bis), igual que
+/// `BitacoraCabeza` para la bitácora de hechos regulados.
+model AuditoriaCabeza {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  tenantId       String    @unique @map("tenant_id") @db.Uuid
+  ultimoSeq      Int?      @map("ultimo_seq")
+  verificadaEn   DateTime? @map("verificada_en") @db.Timestamptz(6)
+  verificacionOk Boolean?  @map("verificacion_ok")
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@map("auditoria_cabezas")
   @@schema("core")
 }
 
