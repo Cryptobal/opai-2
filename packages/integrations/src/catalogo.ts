@@ -80,6 +80,41 @@ export const CATALOGO_INTEGRACIONES: readonly DefinicionIntegracion[] = [
       ia_google: "GEMINI_API_KEY",
     }[id],
   })),
+  // Proveedores "compatibles con OpenAI" (ADR-049): solo BYOK del tenant. `ia_xai` trae su base URL
+  // pública por defecto; `ia_compatible` la pide en la config (cubre Vercel AI Gateway, OpenRouter…).
+  {
+    id: "ia_xai",
+    nombre: "IA · xAI (Grok)",
+    categoria: "ia",
+    modalidades: ["propia"],
+    secretos: [{ nombre: "api_key", etiqueta: "API key de xAI" }],
+    config: z
+      .object({
+        modelos: z
+          .object({ economica: z.string(), estandar: z.string(), potente: z.string() })
+          .partial()
+          .optional(),
+      })
+      .strict(),
+    disponible: true,
+  },
+  {
+    id: "ia_compatible",
+    nombre: "IA · Compatible con OpenAI",
+    categoria: "ia",
+    modalidades: ["propia"],
+    secretos: [{ nombre: "api_key", etiqueta: "API key del proveedor" }],
+    config: z
+      .object({
+        baseUrl: z.url(),
+        modelos: z
+          .object({ economica: z.string(), estandar: z.string(), potente: z.string() })
+          .partial()
+          .optional(),
+      })
+      .strict(),
+    disponible: true,
+  },
   ...(
     [
       ["whatsapp", "WhatsApp", "whatsapp"],
