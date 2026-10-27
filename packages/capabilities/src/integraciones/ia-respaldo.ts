@@ -81,7 +81,7 @@ export async function avisarTenantIaFallo(
 ): Promise<void> {
   if (fallos.length === 0) return;
   // Registro durable e independiente de la transacción de la solicitud: cada aviso en su propia
-  // transacción atómica (ADR-051), para que sobreviva aunque la transacción de la solicitud se
+  // transacción atómica (ADR-052), para que sobreviva aunque la transacción de la solicitud se
   // revierta y para que un insert fallido no arrastre al resto de la lista.
   for (const f of fallos)
     await ctx

@@ -70,7 +70,7 @@ export function entidadAuditada(
   return tipo && id ? { entityType: tipo, entityId: id } : {};
 }
 
-/** Evento de auditoría completo (ADR-051): lo arma `executeCapability` para los dos caminos. */
+/** Evento de auditoría completo (ADR-052): lo arma `executeCapability` para los dos caminos. */
 export function eventoAuditoria(
   c: Capacidad,
   actor: Actor,

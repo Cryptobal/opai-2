@@ -29,6 +29,16 @@ describe.skipIf(!urlPropietario)("despliegue de auditoría en dos fases", () => 
         );`);
       const tenantId = randomUUID();
       await pg.query("INSERT INTO core.tenants VALUES ($1)", [tenantId]);
+      const tenantLotes = randomUUID();
+      await pg.query("INSERT INTO core.tenants VALUES ($1)", [tenantLotes]);
+      await pg.query(
+        `INSERT INTO core.audit_events
+        (id, tenant_id, actor_type, capability, payload, created_at)
+        SELECT md5('aud-lote-' || n)::uuid, $1, 'system', 'core.historica',
+          jsonb_build_object('n', n), '2026-10-26T12:34:56.123456Z'::timestamptz
+        FROM generate_series(1, 2005) n`,
+        [tenantLotes],
+      );
       const insertarVieja = async () =>
         pg.query(
           `INSERT INTO core.audit_events
@@ -51,18 +61,27 @@ describe.skipIf(!urlPropietario)("despliegue de auditoría en dos fases", () => 
         ),
         "utf8",
       );
+      const indice = await readFile(
+        new URL(
+          "../prisma/migrations/20261028093000_auditoria_indice_concurrente/migration.sql",
+          import.meta.url,
+        ),
+        "utf8",
+      );
       await pg.query(fase1);
+      await pg.query(indice);
       await cerrarClientes();
       process.env["DATABASE_URL"] = url.toString();
       const { verificarAuditoria } = await import("../src/auditoria");
       expect(await verificarAuditoria(tenantId)).toEqual({
         ok: true,
-        ultimoSeq: 1,
+        ultimoSeq: 0,
         primeraRota: null,
+        pausada: true,
       });
       // El código viejo aún escribe después de la expansión; no viola NOT NULL.
       await insertarVieja();
-      expect(await verificarAuditoria(tenantId)).toMatchObject({ ok: false });
+      expect(await verificarAuditoria(tenantId)).toMatchObject({ pausada: true });
       const { agregarAAuditoria } = await import("../src/auditoria");
       const { enTransaccion } = await import("../src/transaccion");
       const nuevo = await enTransaccion(tenantId, (tx) =>
@@ -77,16 +96,39 @@ describe.skipIf(!urlPropietario)("despliegue de auditoría en dos fases", () => 
         }),
       );
       expect(nuevo.seq).toBe(2);
+      const { loteAuditoria } = await import("../src/auditoria-lotes");
+      const { canonDeAuditoria, hashEncadenado } = await import("@opai/domain");
+      const [filaNueva] = await enTransaccion(tenantId, (tx) => loteAuditoria(tx, tenantId, 2, 2));
+      expect(await canonDeAuditoria({ ...filaNueva!, actorTipo: filaNueva!.actorType })).toBe(
+        filaNueva!.hashCanon,
+      );
       await pg.query(fase2);
+      const filasCierre = await enTransaccion(tenantId, (tx) => loteAuditoria(tx, tenantId, 1, 3));
+      expect(filasCierre.map((f) => f.seq)).toEqual([1, 2, 3]);
+      expect(filasCierre[1]!.hashAnterior).toBe(filasCierre[0]!.hash);
+      expect(filasCierre[2]!.hashAnterior).toBe(filasCierre[1]!.hash);
+      for (const f of filasCierre) {
+        expect(f.hash).toBe(await hashEncadenado(f.hashAnterior, f.hashCanon));
+        expect(f.hashCanon).toBe(
+          f.hashCanon.startsWith("{")
+            ? await canonDeAuditoria({ ...f, actorTipo: f.actorType })
+            : f.canonHistorico,
+        );
+      }
+      expect(await verificarAuditoria(tenantLotes)).toMatchObject({ ok: true, ultimoSeq: 2005 });
       expect(await verificarAuditoria(tenantId)).toEqual({
         ok: true,
         ultimoSeq: 3,
         primeraRota: null,
       });
-      const antes = (await pg.query("SELECT * FROM core.audit_events ORDER BY seq")).rows;
+      const antes = (await pg.query("SELECT * FROM core.audit_events ORDER BY tenant_id, seq"))
+        .rows;
       await pg.query(fase1);
+      await pg.query(indice);
       await pg.query(fase2);
-      expect((await pg.query("SELECT * FROM core.audit_events ORDER BY seq")).rows).toEqual(antes);
+      expect(
+        (await pg.query("SELECT * FROM core.audit_events ORDER BY tenant_id, seq")).rows,
+      ).toEqual(antes);
       await expect(insertarVieja()).rejects.toThrow();
       await pg.query("UPDATE core.audit_events SET actor_id = '' WHERE seq = 1");
       expect(await verificarAuditoria(tenantId)).toMatchObject({ ok: false, primeraRota: 1 });

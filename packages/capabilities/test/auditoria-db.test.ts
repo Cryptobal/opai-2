@@ -90,10 +90,10 @@ describe.skipIf(!urlPropietario)("auditoría atómica y encadenada en base real"
       ),
     );
     expect(resultados.every((r) => r.ok)).toBe(true);
-    const verA = await mod.executeCapability(ctxDe(tenantA), "core.auditoria.verificar", {});
-    const verB = await mod.executeCapability(ctxDe(tenantB), "core.auditoria.verificar", {});
-    expect(verA).toMatchObject({ ok: true, data: { ok: true, ultimoSeq: N, primeraRota: null } });
-    expect(verB).toMatchObject({ ok: true, data: { ok: true, ultimoSeq: N, primeraRota: null } });
+    const verA = await ctxDe(tenantA).auditoria.verificar();
+    const verB = await ctxDe(tenantB).auditoria.verificar();
+    expect(verA).toMatchObject({ ok: true, ultimoSeq: N, primeraRota: null });
+    expect(verB).toMatchObject({ ok: true, ultimoSeq: N, primeraRota: null });
     // Sin cruces: las secuencias de cada tenant son 1..N sin huecos ni saltos del otro tenant.
     const secA = (
       await e.admin.auditEvent.findMany({ where: { tenantId: tenantA }, orderBy: { seq: "asc" } })
@@ -108,11 +108,10 @@ describe.skipIf(!urlPropietario)("auditoría atómica y encadenada en base real"
   it("una fila alterada por el rol dueño se detecta como rota", async () => {
     const tenantId = await nuevoTenant(`aud-rota-${randomUUID().slice(0, 8)}`);
     for (const n of ["Una", "Dos", "Tres"]) await crearCuenta(tenantId, n);
-    expect(
-      await mod.executeCapability(ctxDe(tenantId), "core.auditoria.verificar", {}),
-    ).toMatchObject({
+    expect(await ctxDe(tenantId).auditoria.verificar()).toMatchObject({
       ok: true,
-      data: { ok: true, ultimoSeq: 3, primeraRota: null },
+      ultimoSeq: 3,
+      primeraRota: null,
     });
     const filas = await e.admin.auditEvent.findMany({
       where: { tenantId },
@@ -123,11 +122,9 @@ describe.skipIf(!urlPropietario)("auditoría atómica y encadenada en base real"
       where: { id: filas[1]!.id },
       data: { hashCanon: '{"alterado":true}' },
     });
-    expect(
-      await mod.executeCapability(ctxDe(tenantId), "core.auditoria.verificar", {}),
-    ).toMatchObject({
-      ok: true,
-      data: { ok: false, primeraRota: 2 },
+    expect(await ctxDe(tenantId).auditoria.verificar()).toMatchObject({
+      ok: false,
+      primeraRota: 2,
     });
   });
 });

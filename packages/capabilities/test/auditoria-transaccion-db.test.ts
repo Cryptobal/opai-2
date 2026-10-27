@@ -88,9 +88,9 @@ describe.skipIf(!urlPropietario)("append concurrente dentro de una sola transacc
           where: { tenantId, capability: "core.estructuras.read_sensible" },
         }),
       ).toBe(antes + 2);
-      expect(await mod.executeCapability(ctx, "core.auditoria.verificar", {})).toMatchObject({
+      expect(await ctx.auditoria.verificar()).toMatchObject({
         ok: true,
-        data: { ok: true, ultimoSeq: antes + 2 },
+        ultimoSeq: antes + 2,
       });
     },
   );
@@ -119,9 +119,8 @@ describe.skipIf(!urlPropietario)("append concurrente dentro de una sola transacc
     ).rejects.toThrow();
     expect(await e.admin.auditEvent.count({ where: { tenantId } })).toBe(antes);
     expect(await e.admin.cuenta.count({ where: { tenantId } })).toBe(0);
-    expect(await mod.executeCapability(ctx, "core.auditoria.verificar", {})).toMatchObject({
+    expect(await ctx.auditoria.verificar()).toMatchObject({
       ok: true,
-      data: { ok: true },
     });
   });
 });

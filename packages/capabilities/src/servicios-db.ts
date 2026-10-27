@@ -25,7 +25,7 @@ import { ErrorCapacidad } from "./errores";
 
 const json = (v: unknown): Prisma.InputJsonValue => JSON.parse(JSON.stringify(v ?? {}));
 
-/** Auditoría encadenada en `core.audit_events` (auditoría del 26-oct-2026, ADR-051). */
+/** Auditoría encadenada en `core.audit_events` (auditoría del 26-oct-2026, ADR-052). */
 export function auditoriaEnDb(tenantId: string): Auditoria {
   return {
     registrar(tx, evento) {
@@ -39,7 +39,7 @@ export function auditoriaEnDb(tenantId: string): Auditoria {
         payload: evento.payload ?? null,
       });
     },
-    verificar: () => verificarAuditoria(tenantId),
+    verificar: (signal) => verificarAuditoria(tenantId, signal),
   };
 }
 

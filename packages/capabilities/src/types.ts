@@ -36,13 +36,13 @@ export type EventoAuditoria = {
 
 /**
  * Auditoría en `core.audit_events`, encadenada por tenant. Recibe `tx` como `Eventos`/`Trabajos`/
- * `BitacoraServicio`: el llamador decide la transacción (ADR-051) para que el insert sea
+ * `BitacoraServicio`: el llamador decide la transacción (ADR-052) para que el insert sea
  * atómico con la escritura que audita.
  */
 export interface Auditoria {
   registrar(tx: TenantTx, evento: EventoAuditoria): Promise<{ seq: number; hash: string }>;
-  /** Recorre la cadena del tenant actual y registra el resultado (ADR-051). */
-  verificar(): Promise<VerificacionAuditoria>;
+  /** Recorre la cadena del tenant actual y registra el resultado (ADR-052). */
+  verificar(signal?: AbortSignal): Promise<VerificacionAuditoria>;
 }
 
 /** Usuario humano detrás del actor (el propio usuario o el responsable de la API key). */

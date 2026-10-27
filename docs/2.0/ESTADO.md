@@ -3,7 +3,7 @@
 > **Desde el 24-oct-2026, el estado de las tareas vive en Linear (enlace por definir). Este archivo queda como foto técnica: versiones, infraestructura, riesgos aceptados y decisiones.** (PR #22). Las listas de pendientes de abajo se migran a Linear en la fecha que fije Carlos; hasta entonces no se borran, y si no coinciden con Linear, manda Linear.
 
 **Última actualización:** 28-oct-2026 · **Actualizado por:** Claude (arquitectura) · **Fase en curso:** 1 — Núcleo, en cierre (Briefs 01, 01c y 02 A–C integrados a `main`; quedan la sesión D del Brief 02, la paridad MCP, los arreglos de QA y las bases transversales). Plan completo y próximas tareas en `ROADMAP.md`; etapa de cada módulo en `PLAN-desarrollo.md`.
-- **NÚCLEO-A · Auditoría atómica y encadenada en `core.audit_events` (28-oct-2026, rama `fix/auditoria-atomica`; P0 de la auditoría del núcleo del 26-oct-2026, encargo de Carlos a OPAI 2.0, t457u: «ponlo entonces en el plan de desarrollo para que todo se haga y lo que debamos hacer en el núcleo lo hagamos altiro»).** `executeCapability` audita en la MISMA transacción que la escritura que audita: para capacidades con tenant actual y efecto distinto de lectura, el handler corre dentro de `ctx.transaccion` y el insert de auditoría va antes del commit (un fallo de cualquiera de los dos revierte al otro); para `platform.*` sin tenant actual se audita en una transacción propia del tenant objetivo (`ctx.plataforma.transaccionPara`), no atómica con el handler (brecha conocida). `core.audit_events` queda encadenada por tenant (`seq`/`hashAnterior`/`hash`/`hashCanon`, mismo algoritmo que `core.bitacora`, ADR-023) con backfill determinista de las filas previas y advisory lock por tenant contra TOCTOU; `hashCanon` guarda un digest del payload, no el payload crudo, para que una futura anonimización no rompa la cadena. Repite (idempotente) el `REVOKE UPDATE, DELETE` sobre `audit_events` para `opai_app` que ya aplicó el PR #56. Nuevas `core.auditoria.verificar`, `platform.auditoria.estado` y el trabajo diario que emite `core.auditoria.rota` si la cadena se rompe (mismo patrón que `core.bitacora.*`). `seq`/`ultimoSeq` quedan como `Int` y no `BigInt` (pedido así en el encargo original): un `BigInt` de Prisma rompe `JSON.stringify` sin reemplazador, y ya había pruebas y vistas que serializan filas de `audit_events` completas; `Int` alcanza de sobra (2,1 mil millones de escrituras por tenant). Detalle en ADR-051. Tests contra Postgres real (`packages/capabilities/test/auditoria-db.test.ts`): atomicidad con un fallo inyectado real (restricción `CHECK (1=0)` en `audit_events`), `opai_app` sin UPDATE/DELETE, cadena 1..N sin huecos tras escrituras concurrentes del mismo tenant y de dos tenants a la vez, y detección de una fila alterada por el rol dueño. Migración `20261028090000_auditoria_encadenada` con la etiqueta `migracion-pendiente`.
+- **NÚCLEO-A · Auditoría atómica y encadenada en `core.audit_events` (rama `fix/auditoria-atomica`, PR #71).** Escritura y auditoría comparten transacción en capacidades del tenant; plataforma audita en el tenant objetivo con la brecha de atomicidad global declarada. Cadena por tenant con `seq` Int y hashes, inmutable para `opai_app`. El encargo original de Carlos (t457u) se mantiene registrado en ADR-052; ADR-051 corresponde a identidad de servicio en main (#70). La nota histórica de verificación y anonimización queda sustituida por la sección «Corrección de auditoría» de abajo. Migraciones pendientes de aplicación por Carlos; no se ha tocado Neon.
 - **NÚCLEO-E1 · Capa de proveedores de IA intercambiable con herramientas (26-oct-2026, rama `core/agente-interno-pr1`, PR 1 de 2 del agente interno; P1 de la auditoría del núcleo del 26-oct-2026, encargo de Carlos a OPAI 2.0, t457u).** El adaptador de IA (`@opai/integrations/ia`) suma un contrato neutral de conversación con herramientas (tool-calling), streaming de eventos y salida estructurada por JSON Schema, y el resolvedor del núcleo (`iaDe`, `packages/capabilities/src/integraciones/ia.ts`) agrega respaldo entre proveedores conectados (reintenta ante 5xx/429/red, nunca ante un 4xx de contenido) y mide cada llamada en `core.consumos` (tokens por clase; proveedor y modelo en `referencia_tipo`/`referencia_id`; sin prompt ni key). Sin SDKs (solo `fetch`): Anthropic, OpenAI, Google y un proveedor «compatible con OpenAI» con base URL configurable (`ia_compatible`: Vercel AI Gateway, OpenRouter…) más el alias `ia_xai` (Grok). `completar()` queda sobre `conversar()`: geolocalización e «Integraciones · Probar» no cambian. Detalle en la nota de ADR-031 (26-oct-2026). No toca secretos ni la config del núcleo (los cambia #61); sin migraciones. Pendiente: la UI del agente, la elección de modelo por usuario y sus ajustes (PRs posteriores del agente interno, ADR-049, después de CPQ). **Endurecimiento (revisión 5660937436, 26-oct-2026):** el `baseUrl` de `ia_compatible` exige `https` y rechaza destinos internos (privados, loopback, link-local, metadata, localhost; también tras resolver DNS) con `redirect: "error"` (defensa SSRF); un stream cortado o con error lanza `ErrorIa` en vez de darse por completo; el consumo del streaming se mide en `finally` aun si se corta o cancela. **Política de respaldo con key propia del tenant (resuelta):** si el tenant tiene key propia y su proveedor falla, el respaldo solo prueba otras keys del **mismo tenant**; **nunca** cae a la key de OPAI (plataforma). Si todas fallan (5xx/429/red) la solicitud falla con un error tipado (`ErrorRespaldoIa`) y se avisa al tenant: la integración queda en estado «error» (visible en Configuración → Integraciones) + evento `core.integracion.error` que entrega Comunicaciones (ADR-020), más un registro de auditoría durable (`core.ia.respaldo_agotado`). Un 4xx de contenido se propaga tal cual. Sin key propia, se usa el modelo de OPAI como hasta ahora. Implementado en `iaDe`/`ia-respaldo.ts` (`packages/capabilities/src/integraciones/`), con pruebas en `test/ia-respaldo.test.ts`. **«Decisión de Carlos, 26-oct-2026 21:58 CLT, respuesta t214s684»** a «Si el tenant tiene key propia y su proveedor falla, ¿se puede pasar a la key de OPAI?»: «Nunca, que falle y avise al tenant». Detalle en ADR-049 punto 6. _TODO:_ cuando exista un mecanismo de avisos proactivos propio del tenant (push/bandeja), enriquecer el aviso; hoy se apoya en el estado de la integración + Comunicaciones + auditoría. **Endurecimiento (revisión 5661272971, 26-oct-2026):** la decisión BYOK (t214s684) se aplica **antes** de filtrar por modelo o secreto —una key propia sin modelo para la clase, sin secreto o sin base URL ahora falla y avisa, nunca cae a OPAI (`ia-candidatos.ts`)—; la defensa SSRF clasifica las IPv6 en binario (IPv4-mapped/compatible como IPv4; `fe80::/10` completo, `fec0::/10`, `fc00::/7`, NAT64 `64:ff9b::/96`, unspecified y multicast) y normaliza el punto final del host; la medición del stream registra el uso parcial ya informado en corte o cancelación (evento `uso`) sin doble conteo; y los `*-db.test.ts` de `@opai/capabilities` corren serializados (`fileParallelism: false`) e independientes del orden.
 
 Hasta el 24-oct-2026 este archivo fue la fuente de verdad del avance; desde entonces lo es Linear (ver la nota de arriba y `AGENTS.md`, «Tareas (Linear)»). El plan hasta terminar 2.0 está en `ROADMAP.md`; la navegación final en `NAVEGACION.md`.
@@ -18,9 +18,47 @@ anterior de anonimizar payloads sin afectar la verificación queda reemplazada:
 requiere un protocolo futuro. Detalles de implementación decididos por el
 constructor OpenCode / openai/gpt-6.1-sol, CA, riesgos y despliegue en
 [`briefs/FIX-auditoria-atomica-pr71.md`](briefs/FIX-auditoria-atomica-pr71.md).
-La verificación serializa con append y no olvida la cabeza anterior tras un borrado.
+La segunda ronda de QA (`informe-76760ba.md`, encargo N1/N2/N3) sustituye la
+serialización del escaneo con append: foto REPEATABLE READ hasta max(seq), canon
+histórico SQL por lotes, avance incremental y lock breve solo para CAS por revisión
+de la cabeza. Una huella SHA-256 por lotes detecta cambios del prefijo verificado y
+dispara revisión desde génesis; este control sigue leyendo O(N) en SQL, sin bloquear
+escrituras. Presupuesto integral propio de 12 s (escaneo 9 s/SQL 8 s), inferior a
+20 s por trabajo del runner; propagación de cancelación para impedir cabeza o
+alerta tardías. No olvida el máximo tras un borrado.
+Solo lo invoca el job; se retira `core.auditoria.verificar` de UI/API/MCP.
+El job se pausa mientras `seq` sea nullable. Actividad y auditoría seleccionan
+columnas de negocio para soportar filas NULL durante convivencia.
+Fase 1 y cierre hacen backfill por lotes de hasta 1.000, con COMMIT por lote y lock
+solo del tenant; índice CONCURRENTLY en la nueva `20261028093000` (sin transacción
+externa). Fase 2: CHECK NOT VALID → VALIDATE → COMMIT → SET NOT NULL → DROP CHECK.
+No cambian los timestamps existentes. Detalles técnicos decididos por el constructor
+OpenCode / openai/gpt-6.1-sol dentro del encargo actual, no decisiones atribuidas a Carlos.
 Sin cambios de pantallas ni decisiones de negocio; se mantiene el DS de OPAI 2.0.
 El encargo no aporta ID de Linear. No se modifica el plan del ROADMAP.
+
+### Reversión de auditoría (PR #71)
+
+Carlos conserva datos, hashes, cabezas e índice válido. Para volver a código previo
+a la cadena, retira primero los cuatro NOT NULL y cualquier CHECK `auditoria_nn_*`
+residual de un cierre interrumpido; no borra migraciones ni registros de auditoría.
+Para volver a `76760ba`, pausa el job explícitamente (ese head conserva el lock largo
+y no detecta convivencia). En el código nuevo, `seq` nullable pausa el job sin falsas
+alarmas. Las migraciones usan autocommit; nunca envolver DO/CONCURRENTLY en BEGIN.
+Si falla el índice concurrente, comprobar `indisvalid`: solo Carlos retira el índice
+inválido con DROP INDEX CONCURRENTLY y reintenta según el runbook del brief. Preview
+con SQL anterior debe recrearse por quien gestiona infraestructura; no se toca Neon
+desde este encargo. Las brechas conocidas de atomicidad global de plataforma y
+llamadas externas en transacciones siguen declaradas.
+
+**Validación local de esta ronda:** merge normal de #70 (`3b1b7b9`, merge `862b924`),
+stash recuperado y autorrevisión independiente sin bloqueantes. Typecheck, lint,
+937 tests, test:db 91+96+6, build y presupuesto en verde. Entrega **bloqueada, sin
+push**: la corrida e2e previa no quedó verde (tema en iPad y caída del servidor dev);
+no se pudo habilitar la actualización administrativa de la base e2e para repetirla,
+ni consultar/editar el PR con gh por permisos del entorno. PR-BODY.md queda local
+sin commit. Main avanzó luego con #65 (`5c18a92`): pendiente incorporarlo y repetir
+el gate y los e2e. No se declara CI, QA ni aprobación del head nuevo.
 
 ## Hecho
 

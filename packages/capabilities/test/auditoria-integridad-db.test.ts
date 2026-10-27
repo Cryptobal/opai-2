@@ -32,8 +32,9 @@ describe.skipIf(!urlPropietario)("integridad del contenido y la cola de auditor√
       expect(await mod.executeCapability(ctx, "core.cuentas.create", { nombre })).toMatchObject({
         ok: true,
       });
-    expect(await mod.executeCapability(ctx, "core.auditoria.verificar", {})).toMatchObject({
-      data: { ok: true, ultimoSeq: 3 },
+    expect(await ctx.auditoria.verificar()).toMatchObject({
+      ok: true,
+      ultimoSeq: 3,
     });
     return {
       id,
@@ -60,9 +61,9 @@ describe.skipIf(!urlPropietario)("integridad del contenido y la cola de auditor√
   ])("detecta la alteraci√≥n de %j", async (data) => {
     const { ctx, filas } = await cadena();
     await e.admin.auditEvent.update({ where: { id: filas[1]!.id }, data });
-    expect(await mod.executeCapability(ctx, "core.auditoria.verificar", {})).toMatchObject({
-      ok: true,
-      data: { ok: false, primeraRota: 2 },
+    expect(await ctx.auditoria.verificar()).toMatchObject({
+      ok: false,
+      primeraRota: 2,
     });
   });
 
@@ -72,9 +73,9 @@ describe.skipIf(!urlPropietario)("integridad del contenido y la cola de auditor√
       where: { tenantId: id, ...(tipo === "cola" ? { id: filas[2]!.id } : {}) },
     });
     for (let n = 0; n < 2; n++)
-      expect(await mod.executeCapability(ctx, "core.auditoria.verificar", {})).toMatchObject({
-        ok: true,
-        data: { ok: false, primeraRota: tipo === "cola" ? 3 : 1 },
+      expect(await ctx.auditoria.verificar()).toMatchObject({
+        ok: false,
+        primeraRota: tipo === "cola" ? 3 : 1,
       });
     expect(
       await e.admin.auditoriaCabeza.findUniqueOrThrow({ where: { tenantId: id } }),

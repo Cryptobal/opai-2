@@ -905,6 +905,19 @@ explícitamente independiente, no la reutilizada por la solicitud. La expansión
 nullable y el NOT NULL se aplican antes y después del despliegue, respectivamente.
 Detalles técnicos del constructor OpenCode / openai/gpt-6.1-sol y orden exacto en
 `briefs/FIX-auditoria-atomica-pr71.md`; no se atribuyen nuevas decisiones a Carlos.
+**Corrección de la segunda ronda de QA del PR #71 (encargo N1/N2/N3).** Reemplaza
+el lock durante el escaneo y la capacidad de lectura del punto 4: solo el job
+verifica, con snapshot acotado, canon SQL por lotes, checkpoint incremental y CAS
+por revisión bajo lock breve. La huella del prefijo conserva detección de contenido
+antiguo alterado (escaneo SQL O(N), sin bloquear append); timeout propio. El job se
+pausa entre expansión y contracción. Backfill por lotes con COMMIT, índice separado
+CONCURRENTLY y CHECK NOT VALID → VALIDATE → SET NOT NULL → DROP CHECK. Son detalles
+de implementación del constructor OpenCode / openai/gpt-6.1-sol dentro del encargo,
+documentados con pruebas y reversión en el mismo brief y ESTADO; no decisiones de
+negocio nuevas. Se conservan los timestamps existentes. Al incorporar main del
+PR #70, el identificador de auditoría pasa a ADR-052: ADR-051 ya identifica la
+identidad de servicio en main.
+
 ---
 ## ADR-051 · Identidad de servicio para agentes y presupuesto atómico (núcleo P0)
 

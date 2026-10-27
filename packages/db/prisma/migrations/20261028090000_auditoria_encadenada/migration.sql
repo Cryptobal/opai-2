@@ -7,10 +7,16 @@
 --    canónica (tenant, seq, actor, capability, entidad, createdAt y un **digest** SHA-256 del
 --    payload, no el payload crudo) para que una futura anonimización del payload (Ley 21.719) no
 --    exponga el contenido en `hash_canon`. La verificación recalcula también el digest del payload.
--- 3) `pgcrypto` solo lo usa este backfill (`digest()/encode()` en SQL); el código de la app sigue
---    hasheando en Node (Web Crypto, `@opai/domain`).
+-- 3) El backfill usa sha256(bytea) nativo de PostgreSQL (independiente del schema de pgcrypto);
+--    la app usa Web Crypto (`@opai/domain`).
 
-BEGIN;
+-- Un único DO de nivel superior: permite COMMIT por lote, sin transacción externa.
+-- Prisma/Postgres lo ejecutan en autocommit; no envolver en BEGIN ni --single-transaction.
+DO $$
+DECLARE
+  v_tenant UUID;
+  v_cantidad INTEGER;
+BEGIN
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- CreateTable
@@ -20,6 +26,9 @@ CREATE TABLE IF NOT EXISTS "core"."auditoria_cabezas" (
     "ultimo_seq" INTEGER,
     "verificada_en" TIMESTAMPTZ(6),
     "verificacion_ok" BOOLEAN,
+    "ultimo_hash" TEXT,
+    "huella_prefijo" TEXT,
+    "revision" INTEGER NOT NULL DEFAULT 0,
     "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ(6) NOT NULL,
 
@@ -29,6 +38,10 @@ CREATE TABLE IF NOT EXISTS "core"."auditoria_cabezas" (
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS "auditoria_cabezas_tenant_id_key" ON "core"."auditoria_cabezas"("tenant_id");
+ALTER TABLE core.auditoria_cabezas
+  ADD COLUMN IF NOT EXISTS ultimo_hash TEXT,
+  ADD COLUMN IF NOT EXISTS huella_prefijo TEXT,
+  ADD COLUMN IF NOT EXISTS revision INTEGER NOT NULL DEFAULT 0;
 
 -- RLS: aislamiento por tenant (plantilla de REGLAS-codigo.md). CI falla si falta (rls-nucleo*.test).
 ALTER TABLE "core"."auditoria_cabezas" ENABLE ROW LEVEL SECURITY;
@@ -46,61 +59,47 @@ ALTER TABLE "core"."audit_events"
   ADD COLUMN IF NOT EXISTS "hash" TEXT,
   ADD COLUMN IF NOT EXISTS "hash_canon" TEXT;
 
--- Backfill determinista: una fila a la vez, por tenant y por (created_at, id), igual orden que
--- `verificarAuditoria` espera recorrer. Usa un separador y `digest()` de pgcrypto; el formato del
--- texto histórico se recalcula desde las columnas con `canonHistorico` (ADR-051).
--- Variables con prefijo `v_` a propósito: sin prefijo, Postgres las confunde con las columnas
--- homónimas de `audit_events` dentro del UPDATE ("column reference ... is ambiguous", 42702).
-LOCK TABLE core.audit_events IN ACCESS EXCLUSIVE MODE;
-DO $$
-DECLARE
-  r RECORD;
-  v_cur_tenant UUID;
-  v_seq INTEGER := 0;
-  v_hash_anterior TEXT := repeat('0', 64);
-  v_hash_nuevo TEXT;
-  v_canon TEXT;
-  v_payload_digest TEXT;
-  v_crypto_schema TEXT;
-BEGIN
-  SELECT n.nspname INTO STRICT v_crypto_schema FROM pg_extension e
-    JOIN pg_namespace n ON n.oid = e.extnamespace WHERE e.extname = 'pgcrypto';
-  FOR r IN
-    SELECT id, tenant_id, actor_type, actor_id, via_user_id, capability, entity_type, entity_id,
-           payload, created_at
-    FROM "core"."audit_events"
-    WHERE seq IS NULL
-    ORDER BY tenant_id, created_at, id
-  LOOP
-    IF v_cur_tenant IS NULL OR v_cur_tenant <> r.tenant_id THEN
-      v_cur_tenant := r.tenant_id;
-      SELECT seq, hash INTO v_seq, v_hash_anterior FROM core.audit_events
-        WHERE tenant_id = r.tenant_id AND seq IS NOT NULL ORDER BY seq DESC LIMIT 1;
-      v_seq := coalesce(v_seq, 0);
-      v_hash_anterior := coalesce(v_hash_anterior, repeat('0', 64));
-    END IF;
-    v_seq := v_seq + 1;
-    EXECUTE format('SELECT encode(%I.digest($1, ''sha256''), ''hex'')', v_crypto_schema)
-      INTO v_payload_digest USING coalesce(r.payload::text, 'null');
-    v_canon := jsonb_build_array(r.tenant_id::text, v_seq, r.actor_type,
-      r.actor_id, r.via_user_id, r.capability, r.entity_type, r.entity_id,
-      to_char(r.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"'),
-      v_payload_digest)::text;
-    EXECUTE format('SELECT encode(%I.digest($1, ''sha256''), ''hex'')', v_crypto_schema)
-      INTO v_hash_nuevo USING v_hash_anterior || E'\n' || v_canon;
-    UPDATE "core"."audit_events"
-      SET "seq" = v_seq, "hash_anterior" = v_hash_anterior, "hash" = v_hash_nuevo, "hash_canon" = v_canon
-      WHERE id = r.id;
-    v_hash_anterior := v_hash_nuevo;
-  END LOOP;
-END $$;
-
--- Fase 1: NULLABLE mientras conviven versiones. Fase 2 (tras desplegar): otra migración.
-
-CREATE UNIQUE INDEX IF NOT EXISTS "audit_events_tenant_id_seq_key" ON "core"."audit_events"("tenant_id", "seq");
-
--- Inmutable para la app (idempotente: el PR #48/#56 ya lo revocó; se repite "por si acaso", sin
--- TRUNCATE porque `opai_app` nunca lo tuvo concedido). El dueño de la migración conserva el acceso
--- para el backfill de arriba y para la prueba de alteración de `verificarAuditoria`.
 REVOKE UPDATE, DELETE ON "core"."audit_events" FROM opai_app;
-COMMIT;
+COMMIT; -- Libera el lock de DDL ANTES del backfill.
+
+-- Captura tenants históricos. El código viejo puede seguir insertando NULL: fase 2 los completa.
+FOR v_tenant IN SELECT DISTINCT tenant_id FROM core.audit_events WHERE seq IS NULL LOOP
+  LOOP
+    PERFORM pg_advisory_xact_lock(hashtextextended(v_tenant::text, 0));
+    WITH RECURSIVE
+    cabeza AS (
+      SELECT coalesce((SELECT seq FROM core.audit_events WHERE tenant_id = v_tenant
+        AND seq IS NOT NULL ORDER BY seq DESC LIMIT 1), 0) AS seq,
+        coalesce((SELECT hash FROM core.audit_events WHERE tenant_id = v_tenant
+        AND seq IS NOT NULL ORDER BY seq DESC LIMIT 1), repeat('0', 64)) AS hash
+    ),
+    pendientes AS MATERIALIZED (
+      SELECT e.*, row_number() OVER (ORDER BY created_at, id)::int AS n
+      FROM (SELECT * FROM core.audit_events WHERE tenant_id = v_tenant AND seq IS NULL
+        ORDER BY created_at, id LIMIT 1000) e
+    ),
+    canones AS MATERIALIZED (
+      SELECT p.id, p.n, c.seq + p.n AS seq,
+        jsonb_build_array(p.tenant_id::text, c.seq + p.n, p.actor_type, p.actor_id,
+          p.via_user_id, p.capability, p.entity_type, p.entity_id,
+          to_char(p.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"'),
+          encode(sha256(convert_to(coalesce(p.payload::text, 'null'), 'UTF8')), 'hex'))::text AS canon
+      FROM pendientes p CROSS JOIN cabeza c
+    ),
+    cadena AS (
+      SELECT p.*, c.hash AS previo,
+        encode(sha256(convert_to(c.hash || E'\n' || p.canon, 'UTF8')), 'hex') AS hash
+      FROM canones p CROSS JOIN cabeza c WHERE p.n = 1
+      UNION ALL
+      SELECT p.*, c.hash,
+        encode(sha256(convert_to(c.hash || E'\n' || p.canon, 'UTF8')), 'hex')
+      FROM canones p JOIN cadena c ON p.n = c.n + 1
+    )
+    UPDATE core.audit_events e SET seq = c.seq, hash_anterior = c.previo,
+      hash = c.hash, hash_canon = c.canon FROM cadena c WHERE e.id = c.id AND e.tenant_id = v_tenant;
+    GET DIAGNOSTICS v_cantidad = ROW_COUNT;
+    COMMIT; -- Solo locks de filas/lote y del tenant; nunca ACCESS EXCLUSIVE durante el recorrido.
+    EXIT WHEN v_cantidad < 1000;
+  END LOOP;
+END LOOP;
+END $$;

@@ -99,8 +99,8 @@ model RateLimitVentana {
 }
 
 /// Auditoría append-only y encadenada por tenant (ADR-004, auditoría del 26-oct-2026 pedida por
-/// Carlos, ADR-051): toda capacidad con efecto distinto de lectura escribe aquí, en la MISMA
-/// transacción que su escritura de negocio (`executeCapability`, ADR-051 §1). La migración
+/// Carlos, ADR-052): toda capacidad con efecto distinto de lectura escribe aquí, en la MISMA
+/// transacción que su escritura de negocio (`executeCapability`, ADR-052 §1). La migración
 /// revoca UPDATE/DELETE a `opai_app` (inmutable para la app; el dueño conserva el acceso para
 /// scripts y para la prueba de alteración de `verificarAuditoria`). `seq`/`hashAnterior`/`hash`
 /// encadenan los eventos del tenant (mismo algoritmo que `Bitacora`, `@opai/domain`); `hashCanon`
@@ -123,7 +123,7 @@ model AuditEvent {
   createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   /// Secuencia por tenant (1, 2, 3…). `Int`, no `BigInt`: igual que `Bitacora.seq` y a propósito,
   /// para que las filas sigan siendo `JSON.stringify`-ables sin un reemplazador de BigInt (2.1 mil
-  /// millones de escrituras por tenant alcanza de sobra). ADR-051.
+  /// millones de escrituras por tenant alcanza de sobra). ADR-052.
   seq          Int    @map("seq")
   /// Hash del eslabón anterior del mismo tenant (génesis = 64 ceros).
   hashAnterior String @map("hash_anterior")
@@ -140,7 +140,7 @@ model AuditEvent {
   @@schema("core")
 }
 
-/// Última verificación de la cadena de `audit_events` por tenant (ADR-051), igual que
+/// Última verificación de la cadena de `audit_events` por tenant (ADR-052), igual que
 /// `BitacoraCabeza` para la bitácora de hechos regulados.
 model AuditoriaCabeza {
   id             String    @id @default(uuid(7)) @db.Uuid
@@ -148,6 +148,9 @@ model AuditoriaCabeza {
   ultimoSeq      Int?      @map("ultimo_seq")
   verificadaEn   DateTime? @map("verificada_en") @db.Timestamptz(6)
   verificacionOk Boolean?  @map("verificacion_ok")
+  ultimoHash     String?   @map("ultimo_hash")
+  huellaPrefijo  String?   @map("huella_prefijo")
+  revision       Int       @default(0)
   createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 

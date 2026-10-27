@@ -8,6 +8,7 @@ import type { Contexto } from "../../types";
 import { entidadEnAlcance } from "../maestros/alcance";
 import { auditarHistorialSensible, redactarSensibles } from "./actividad-sensible";
 import { cambios, frase } from "./actividad-texto";
+import { auditoriaSelect } from "./auditoria-select";
 
 const TIPOS = ["cuenta", "instalacion", "persona", "cargo", "documento"] as const;
 const PERMISO_LECTURA: Record<(typeof TIPOS)[number], string> = {
@@ -79,6 +80,7 @@ export const actividadList = defineCapability({
     if (e && !(await entidadEnAlcance(ctx, e.tipo, e.id))) return { items: [], siguiente: null };
     const campo = e ? `${e.tipo}Id` : "";
     const filas = await ctx.db.auditEvent.findMany({
+      select: auditoriaSelect,
       where: {
         ...(e
           ? {

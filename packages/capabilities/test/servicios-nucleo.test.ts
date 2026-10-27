@@ -141,7 +141,7 @@ describe("bitácora y consumos", () => {
     expect(await ctx.bitacora.verificar()).toMatchObject({ ok: false, primeraRota: 2 });
   });
 
-  it("encadena auditoría tras varias escrituras y detecta una alteración (ADR-051)", async () => {
+  it("encadena auditoría tras varias escrituras y detecta una alteración (ADR-052)", async () => {
     const { ctx, tabla } = contextoDePrueba({ permisos: ["core:audit.read"] });
     for (const texto of ["a", "b", "c"]) {
       await ctx.transaccion((tx) =>
@@ -153,9 +153,10 @@ describe("bitácora y consumos", () => {
         }),
       );
     }
-    expect(await executeCapability(ctx, "core.auditoria.verificar", {})).toMatchObject({
+    expect(await ctx.auditoria.verificar()).toMatchObject({
       ok: true,
-      data: { ok: true, ultimoSeq: 3, primeraRota: null },
+      ultimoSeq: 3,
+      primeraRota: null,
     });
     const filas = tabla("auditEvent").filter((f) => f["capability"] === "test.nota.create");
     Object.assign(filas[1] ?? {}, { hashCanon: '{"alterado":true}' });

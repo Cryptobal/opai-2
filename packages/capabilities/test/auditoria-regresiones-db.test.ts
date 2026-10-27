@@ -40,7 +40,7 @@ describe.skipIf(!urlPropietario)("regresiones de auditoría de IA y plataforma",
       actor: { tipo: "system" },
       rol: "owner",
       medidor: { registrar: async () => undefined },
-  });
+    });
   it.each(["lectura", "escritura"] as const)(
     "el diagnóstico IA sobrevive al rollback de %s",
     async (efecto) => {
@@ -98,9 +98,8 @@ describe.skipIf(!urlPropietario)("regresiones de auditoría de IA y plataforma",
       expect(
         await e.admin.evento.count({ where: { tenantId, tipo: "core.integracion.error" } }),
       ).toBe(1);
-      expect(await mod.executeCapability(ctx, "core.auditoria.verificar", {})).toMatchObject({
+      expect(await ctx.auditoria.verificar()).toMatchObject({
         ok: true,
-        data: { ok: true },
       });
       // El camino real de lectura también debe conservar el aviso, sin duplicar la notificación.
       expect(

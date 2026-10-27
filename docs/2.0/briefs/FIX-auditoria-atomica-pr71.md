@@ -21,7 +21,8 @@ El encargo no aporta un ID de Linear; no se inventa uno.
   digest del payload; comparar con el guardado antes de verificar el hash.
   Comparar el máximo actual con el máximo previamente verificado, conservándolo
   tras una rotura. Tests de cada columna, borrado de cola y borrado total repetido.
-- **Baratos:** FORCE RLS y GRANT explícito en cabezas; ADR-051 uniforme;
+- **Baratos:** FORCE RLS y GRANT explícito en cabezas; ADR-052 uniforme (ADR-051
+  quedó ocupado en main por identidad de servicio, PR #70);
   `Promise.all` simultáneo de dos tenants (ocho escrituras por tenant), con
   transacciones/conexiones independientes; digest SQL calificado mediante el
   schema real de pgcrypto, probado fuera de `public`.
@@ -35,10 +36,8 @@ sin nuevas decisiones de negocio ni cambios de diseño:
    microsegundos y texto jsonb; no concatena campos con separadores ambiguos.
    `canonHistorico` lo recalcula desde la fila; los eventos nuevos
    usan el canon JSON de dominio. Ambos protegen el contenido y la cadena.
-2. La verificación completa toma el mismo advisory lock por tenant que el append
-   y lee/actualiza la cabeza en una sola transacción. No rebaja el máximo anterior
-   cuando detecta borrados. Las filas nullable pendientes se consideran rotura
-   hasta completar la fase 2, no se ignoran silenciosamente.
+2. Sustituido por la segunda ronda de QA descrita abajo: la verificación no
+   mantiene el lock de append mientras recorre la cadena ni durante convivencia.
 3. El test de migración crea y elimina únicamente su base efímera local. No aplica
    cambios en Neon ni modifica migraciones presentes en `origin/main`.
 4. La autorrevisión independiente detectó y se corrigieron la selección de NULL
@@ -58,36 +57,108 @@ sin nuevas decisiones de negocio ni cambios de diseño:
    Tests reales listan dos cargos/estructuras sensibles con `enLectura`, exigen
    ambas revelaciones auditadas y cadena válida.
 
+## Segunda ronda de QA · N1, N2, N3 y medios
+
+Fuente: encargo actual y `/workspace/qa/pr71/informe-76760ba.md`, leído completo.
+Implementación de OpenCode / openai/gpt-6.1-sol, sin decisiones de negocio nuevas:
+
+- **N1:** foto REPEATABLE READ acotada al `max(seq)` inicial; transacción propia de
+  presupuesto integral de 12 s, inferior a los 20 s por trabajo del runner: espera
+  máxima de pool 1 s, escaneo 9 s (SQL 8 s), publicación 1 s, espera de pool 0,5 s y
+  lock 0,5 s. Comprueba plazo y señal de cancelación antes y después del CAS.
+  Canon histórico calculado en SQL por lotes de
+  1.000. Checkpoint con hash, huella y revisión; solo toma el lock del tenant para
+  publicar mediante CAS por revisión en otra transacción breve. Una foto obsoleta
+  falla para que el runner reintente, nunca pisa otro resultado. No rebaja el máximo
+  tras truncados. El job es el único invocador: se retira la capacidad del registro
+  UI/API/MCP y su herramienta del snapshot.
+- **Incremental e integridad antigua:** si coincide la huella del prefijo, solo se
+  recalculan los eslabones posteriores al último seq verificado. La huella incluye
+  todas las columnas actuales, se calcula con SHA-256 SQL en grupos fijos de hasta
+  1.000 y se combina en orden en aplicación. Un cambio del prefijo obliga a validar
+  desde génesis. **Sigue existiendo un escaneo SQL O(N) del contenido** para detectar
+  alteraciones antiguas en cada pasada; no se promete coste O(solo cola), ni se
+  mantiene lock de escritura en ese escaneo. Memoria por agregado acotada; un timeout
+  es trabajo fallido, no verificación exitosa.
+- **N2:** fase 1 libera el lock de DDL antes del backfill. Un UPDATE por lote de
+  hasta 1.000 filas, con CTE recursivo para la dependencia de hashes, y COMMIT por
+  lote. Advisory lock solo del tenant del lote, compatible con el append nuevo;
+  las inserciones viejas NULL se completan en la fase 2. Índice único separado con
+  CONCURRENTLY en `20261028093000_auditoria_indice_concurrente`.
+- **N3:** fase 2 instala cuatro CHECK NOT VALID, libera DDL, completa pendientes
+  también por lotes con lock del tenant, valida los CHECK con el código nuevo vivo,
+  hace COMMIT y solo entonces SET NOT NULL (sin reescaneo) y DROP CHECK.
+- **Medios:** mientras `seq` siga nullable el verificador devuelve `pausada:true`,
+  sin cambiar cabeza ni emitir `core.auditoria.rota`. Las lecturas de actividad y
+  auditoría seleccionan solo columnas de negocio, tolerando NULL de la cadena.
+- **Tests:** append real termina con el verificador detenido dentro de su foto;
+  máximo estable; cola incremental; alteración antigua; truncado repetido; CAS de
+  dos verificadores; 2.005 filas históricas; migraciones reejecutables; lecturas
+  NULL con rechazo de otro tenant, rol sin permiso y actor acotado; job pausado.
+  El runner propaga AbortSignal al vencer; el job de auditoría cancela antes de
+  publicar y antes/después de emitir la alerta dentro de su transacción, revirtiendo
+  si venció. Tests reales vía `ejecutarTrabajos` comprueban ausencia de cabeza/alerta
+  tardías durante recorrido y rollback de alerta en curso. Los demás jobs pueden
+  adoptar la señal; no se afirma cancelación cooperativa de todos sus handlers.
+
+No cambian los timestamps de las dos migraciones existentes. Se agrega únicamente
+el directorio intermedio del índice. El encargo confirma que no se aplicaron en
+entornos reales; una preview que tenga versiones anteriores debe recrearse por
+quien gestiona infraestructura. Este trabajo no modifica Neon ni otros PRs.
+
 ## Despliegue (Carlos)
 
-No ejecutar `prisma migrate deploy` con ambos directorios pendientes antes de
+No ejecutar `prisma migrate deploy` con todos los directorios pendientes antes de
 desplegar: aplicaría también el NOT NULL incompatible con el código viejo.
 
 1. Con las migraciones previas ya aplicadas y desde este checkout, ejecutar solo
-   el SQL de `20261028090000_auditoria_encadenada` con `prisma db execute --file`.
-   Registrar esa misma migración con `prisma migrate resolve --applied
+   el SQL de `20261028090000_auditoria_encadenada` en autocommit (por ejemplo,
+   `psql "$DATABASE_URL_MIGRATE" -v ON_ERROR_STOP=1 -f <ruta/migration.sql>`).
+   No envolver en BEGIN, transacción externa ni `--single-transaction`: el DO
+   hace COMMIT por lote. Registrar con `prisma migrate resolve --applied
    20261028090000_auditoria_encadenada`. Ambos comandos usan el entorno Neon que
    Carlos seleccione en `DATABASE_URL_MIGRATE`. Desde la raíz se usa
    `pnpm --filter @opai/db exec prisma ...` (config local del paquete).
-2. Desplegar el código nuevo y esperar a que terminen todas las instancias y
+2. Ejecutar de igual forma el archivo de
+   `20261028093000_auditoria_indice_concurrente`, **sin transacción**, y registrar
+   con `prisma migrate resolve --applied 20261028093000_auditoria_indice_concurrente`.
+   Prisma PostgreSQL no envuelve automáticamente las migraciones: también se prueba
+   su aplicación con `migrate deploy` sobre una base local nueva. No incluir el
+   índice en otro archivo ni en un DO. Si CONCURRENTLY falla, consultar `pg_index`:
+   un índice existente inválido no se arregla con IF NOT EXISTS. Carlos retira
+   únicamente ese índice inválido con `DROP INDEX CONCURRENTLY
+   core.audit_events_tenant_id_seq_key` y reintenta; si Prisma lo registró fallido,
+   usa `migrate resolve --rolled-back` antes de reintentar. No retirar uno válido.
+3. Desplegar el código nuevo y esperar a que terminen todas las instancias y
    solicitudes del código viejo. Verificar una escritura real por tenant.
-3. Ejecutar `prisma migrate deploy` para aplicar
-   `20261028100000_auditoria_obligatoria`. Completa las filas de convivencia bajo
-   bloqueo de tabla y luego exige NOT NULL. Verificar las cadenas de nuevo.
+4. Ejecutar `prisma migrate deploy` para aplicar
+   `20261028100000_auditoria_obligatoria`. Completa pendientes por lotes por tenant,
+   valida CHECK antes del breve lock de SET NOT NULL y habilita el job. Verificar
+   las cadenas mediante el job y consultar `platform.auditoria.estado`.
 
 Con las dos fases en el mismo PR, Carlos coordina ese despliegue de la versión del
 PR antes de la fase 2 en cada entorno. No se integra con migraciones pendientes ni
 se levanta la etiqueta para alterar el orden de las reglas de integración.
 
-Si se revierte el código tras la fase 2, primero retirar únicamente los cuatro
-NOT NULL con SQL aprobado por Carlos; conservar tablas, columnas, filas y hashes.
-No hay borrado automático ni migración destructiva de reversa.
+### Reversión
+
+Si se revierte a código anterior a la cadena tras fase 2, primero retirar los
+cuatro NOT NULL con SQL aprobado por Carlos; retirar también cualquier CHECK
+`auditoria_nn_*` que haya quedado de una fase 2 interrumpida. Conservar índice
+válido, tabla de cabezas, columnas, filas y hashes. Si se revierte al head
+`76760ba`, pausar explícitamente el job: esa versión mantiene el lock durante el
+escaneo y no detecta la fase nullable. El código nuevo se pausa solo al detectar
+`seq` nullable. No borrar registros de `_prisma_migrations` ni datos de auditoría;
+una expansión/contracción parcialmente aplicada se reejecuta después de diagnosticar
+el fallo. No hay migración destructiva automática de reversa.
 
 ## Límites y seguimiento
 
 No se resuelven los demás no bloqueantes de QA: atomicidad global de plataforma,
-mensajes internos de errores, llamadas externas dentro de transacciones,
-verificación O(N) declarada lectura y coste del backfill/bloqueos. La integridad
+mensajes internos de errores y llamadas externas dentro de transacciones. La huella
+sigue siendo O(N) y las migraciones requieren locks breves de DDL, cuya espera
+depende del tráfico; aplicar con control de conexiones largas y medir en cada base.
+La integridad
 frente al dueño de la base que reescribe simultáneamente filas y cabezas requiere
 anclaje externo; no se promete resistencia a ese atacante. La anonimización futura
 requiere un protocolo explícito, no alterar payloads sin más.
@@ -96,3 +167,29 @@ No se cambian pantallas, componentes ni el Design System de OPAI 2.0. Se ejecuta
 los e2e existentes de Configuración/Plataforma y Maestros afectados por auditoría.
 Los resultados finales del gate y cualquier criterio parcial quedan en
 `PR-BODY.md`, sin commitearlo.
+
+## Cierre local bloqueado de esta ronda
+
+Se incorporó main `3b1b7b9` (#70) con merge normal `862b924`, conservando el trabajo
+con stash -u y recuperándolo después (la copia de respaldo del stash se mantiene).
+Autorrevisión independiente sin bloqueantes sobre esa integración: conserva
+prepago/presupuesto atómico, plataforma denegada a agentes y auditoría atómica.
+El gate posterior pasó: typecheck, lint, 937 tests, test:db 91+96+6, build y presupuesto.
+
+**CA parcial: e2e y entrega remota.** Los cinco specs de Configuración, Plataforma
+y Maestros se intentaron antes de ese merge, en servidor propio del worktree en
+3171: 9 pasaron, 12 fallaron y 12 se omitieron por condiciones existentes de los
+specs. Primero falló la persistencia del tema en iPad; luego el servidor dev dejó
+de responder (ERR_CONNECTION_REFUSED). No se cambiaron ni omitieron pruebas nuevas.
+La repetición prevista con next start queda pendiente: el esquema de la base e2e
+sembrada no incluye los campos nuevos de cabeza y el acceso administrativo intentado
+fue denegado por el entorno. No se elude esa denegación ni se toca Neon. La consulta
+del PR por gh también fue denegada: cuerpo preparado solo en PR-BODY.md, no se
+afirma actualización remota. Por la regla del encargo, **no se hace push**.
+
+Mientras terminaba el gate, origin/main avanzó a `5c18a92` (#65, MFA); queda pendiente
+incorporarlo, resolver cualquier nueva colisión de ADR y repetir el gate completo
+y los e2e antes de empujar. No se declara esta entrega terminada ni aprobada.
+Capturas generadas conservadas en `/tmp/opencode/pr71-capturas`; no se incorporan
+al commit. Logs del gate y e2e en `/tmp/opencode/pr71-final-gate.log` y
+`/tmp/opencode/pr71-e2e.log`.

@@ -91,7 +91,7 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
       }
     },
     // También en la tabla, para las capacidades que leen la auditoría (actividad de las fichas), con
-    // la misma cadena de hashes que la real (ADR-051, `auditoriaEnMemoria`). `tx` siempre llega:
+    // la misma cadena de hashes que la real (ADR-052, `auditoriaEnMemoria`). `tx` siempre llega:
     // lo escribe el llamador, igual que `eventos`/`trabajos`, para que el insert sea atómico con la
     // escritura que audita.
     auditoria: {
@@ -113,9 +113,10 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
       almacenamiento: almacen.almacenamiento,
       urlBase: "https://test.opai.cl",
     },
-    plataforma: usuario?.platformRole && actor.tipo !== "agent"
-      ? { globales, paraTenant: () => db, transaccionPara: (_id, fn) => ctx.transaccion(fn) }
-      : null,
+    plataforma:
+      usuario?.platformRole && actor.tipo !== "agent"
+        ? { globales, paraTenant: () => db, transaccionPara: (_id, fn) => ctx.transaccion(fn) }
+        : null,
     autorizar: o.permisos
       ? (p) => (o.permisos ?? []).includes(p)
       : autorizador(

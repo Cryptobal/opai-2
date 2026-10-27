@@ -8,7 +8,7 @@ import {
   platformBitacoraEstado,
   trabajosDelNucleo as trabajosServicios,
 } from "./bitacora";
-import { auditoriaVerificar, platformAuditoriaEstado, trabajoVerificarAuditoria } from "./auditoria";
+import { platformAuditoriaEstado, trabajoVerificarAuditoria } from "./auditoria";
 import { consumosPorAgente, consumosPorRecurso, consumosResumen } from "./consumos";
 import { geoAutocompletar, geoDetalle, geoGeocodificar, geoMapa, iaProbar } from "./geo-ia";
 import { integracionesProbar, platformIntegracionesEstado } from "./integraciones-probar";
@@ -76,7 +76,6 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   consumosPorRecurso,
   bitacoraVerificar,
   platformBitacoraEstado,
-  auditoriaVerificar,
   platformAuditoriaEstado,
   platformTrabajosList,
   platformTrabajosReintentar,
