@@ -25,3 +25,26 @@ export function redactarSensibles(
     );
   return copia;
 }
+
+/** El historial también revela remuneraciones: no puede eludir la trazabilidad de t479u. */
+export async function auditarHistorialSensible(
+  ctx: Contexto,
+  filas: readonly { id: string; capability: string; entityId: string | null }[],
+  origen: "core.actividad.list" | "core.audit.list",
+): Promise<void> {
+  if (!ctx.autorizar(PERMISOS_CORE.estructurasReadSensible)) return;
+  for (const f of filas.filter(
+    (f) =>
+      f.capability.startsWith("core.estructuras.") &&
+      f.capability !== "core.estructuras.read_sensible",
+  )) {
+    await ctx.auditoria.registrar({
+      tenantId: ctx.tenantId,
+      actor: ctx.actor,
+      capability: "core.estructuras.read_sensible",
+      entityType: "audit_event",
+      entityId: f.id,
+      payload: { origen, entidadId: f.entityId },
+    });
+  }
+}

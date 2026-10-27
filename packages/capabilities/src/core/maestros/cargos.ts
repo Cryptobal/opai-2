@@ -15,6 +15,7 @@ import {
   nombreLibre,
   vista,
 } from "./cargos-vista";
+import { ocultarMontosDeCargo } from "./estructuras-acceso";
 
 export const cargosList = defineCapability({
   id: "core.cargos.list",
@@ -45,11 +46,15 @@ export const cargosList = defineCapability({
         },
       },
     });
-    const sinPermisoSensible = !ctx.autorizar(PERMISOS_CORE.estructurasReadSensible);
-    return cargos.map((c) => ({
-      ...vista(c, { personasVigentes: c._count.vinculos, puestosActivos: c._count.puestos }),
-      sueldoVigente: resumenSueldoDe(c.estructuras[0], sinPermisoSensible && c.sueldoSensible),
-    }));
+    return Promise.all(
+      cargos.map(async (c) => ({
+        ...vista(c, { personasVigentes: c._count.vinculos, puestosActivos: c._count.puestos }),
+        sueldoVigente: resumenSueldoDe(
+          c.estructuras[0],
+          await ocultarMontosDeCargo(ctx, c, c.estructuras[0]),
+        ),
+      })),
+    );
   },
 });
 

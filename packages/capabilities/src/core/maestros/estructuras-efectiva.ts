@@ -12,6 +12,7 @@ import { defineCapability } from "../../define";
 import { uuidSchema } from "../esquemas";
 import { diaSchema, hoy } from "./comun";
 import { itemsDe, ocultarMontos } from "./estructuras-acceso";
+import { dondeEstructura } from "./estructuras-alcance";
 import { aDominio, estructuraSchema, NIVELES, vistaEstructura } from "./estructuras-vista";
 import { personaDe } from "./personas-vista";
 
@@ -63,7 +64,7 @@ export const estructurasEfectiva = defineCapability({
       ...(vinculo ? [{ nivel: "cargo", cargoId: vinculo.cargoId }] : []),
     ];
     const filas = await ctx.db.estructuraSueldo.findMany({
-      where: { OR: refs, estado: "vigente" },
+      where: { OR: refs, estado: "vigente", AND: [await dondeEstructura(ctx)] },
     });
     const items = await itemsDe(
       ctx,
