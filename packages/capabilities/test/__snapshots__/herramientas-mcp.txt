@@ -63,6 +63,7 @@ core_estructuras_create
 core_estructuras_efectiva
 core_estructuras_get
 core_estructuras_list
+core_estructuras_panel
 core_excepciones_list
 core_funciones_create
 core_funciones_get

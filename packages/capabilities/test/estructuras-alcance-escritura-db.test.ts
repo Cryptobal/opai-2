@@ -36,6 +36,7 @@ describe.skipIf(!urlPropietario)("Alcance y aislamiento en escrituras de estruct
       nivel: "puesto",
       puestoId,
       sueldoBase: 100,
+      colacion: 0, movilizacion: 0, gratificacion: "ninguna",
       vigenteDesde,
     });
 
@@ -92,6 +93,7 @@ describe.skipIf(!urlPropietario)("Alcance y aislamiento en escrituras de estruct
       nivel: "puesto",
       puestoId: puestoA,
       sueldoBase: 100,
+      colacion: 0, movilizacion: 0, gratificacion: "ninguna",
       vigenteDesde: "2026-02-01",
     });
     const anula = await mod.executeCapability(otro, "core.estructuras.anular", {
@@ -111,6 +113,7 @@ describe.skipIf(!urlPropietario)("Alcance y aislamiento en escrituras de estruct
       nivel: "puesto",
       puestoId: puestoB,
       sueldoBase: 100,
+      colacion: 0, movilizacion: 0, gratificacion: "ninguna",
       vigenteDesde: "2026-04-01",
     });
     const anula = await mod.executeCapability(acotado, "core.estructuras.anular", {

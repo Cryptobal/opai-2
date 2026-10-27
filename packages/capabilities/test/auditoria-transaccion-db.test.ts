@@ -90,7 +90,7 @@ describe.skipIf(!urlPropietario)("append concurrente dentro de una sola transacc
       ).toBe(antes + 2);
       expect(await ctx.auditoria.verificar()).toMatchObject({
         ok: true,
-        ultimoSeq: antes + 2,
+        ultimoSeq: antes + 2 + (id === "core.estructuras.list" ? 1 : 0),
       });
     },
   );

@@ -1,3 +1,4 @@
+import type { PanelSueldo } from "@opai/capabilities";
 import type { ReactNode } from "react";
 
 import type { Parametros } from "@/lib/parametros";
@@ -8,6 +9,7 @@ import { HojaInstalacion } from "./diferidas";
 import { FichaInstalacion, type TabInstalacion } from "./ficha-instalacion";
 
 type Props = {
+  panel?: PanelSueldo | undefined;
   /** Carga de la ficha, iniciada en paralelo con la de la lista. */
   datos: ReturnType<typeof cargarInstalacion>;
   p: Parametros;
@@ -18,11 +20,12 @@ type Props = {
 };
 
 /** Panel derecho de una instalación: carga sus datos dentro de su Suspense (la lista no espera por él). */
-export async function DetalleInstalacion({ datos, p, tab, persona, children }: Props) {
+export async function DetalleInstalacion({ datos, p, tab, persona, children, panel }: Props) {
   const ficha = await datos;
   return (
     <>
       <FichaInstalacion
+        {...(panel ? { aprobaciones: panel.aprobaciones } : {})}
         state={ficha.state}
         instalacion={ficha.instalacion}
         tab={tab}
