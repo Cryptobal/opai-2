@@ -1,6 +1,7 @@
 import type { Page } from "@playwright/test";
 
-const email = process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl";
+export { entrar } from "./sesion";
+
 export const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
 const urlTest = process.env["DATABASE_URL_TEST"] ?? "";
 const urlApp = process.env["DATABASE_URL"] ?? "";
@@ -16,13 +17,3 @@ export const sinDesborde = (page: Page) =>
   page.evaluate(
     () => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1,
   );
-
-export async function entrar(page: Page) {
-  await page.goto("/login");
-  await page.getByLabel("Correo").fill(email);
-  await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
-  await page.getByRole("button", { name: "Entrar" }).click();
-  await page.waitForURL((url) => url.pathname === "/" || url.pathname === "/platform", {
-    timeout: 60_000,
-  });
-}
