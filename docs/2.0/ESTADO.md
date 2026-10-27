@@ -8,6 +8,13 @@
 
 Hasta el 24-oct-2026 este archivo fue la fuente de verdad del avance; desde entonces lo es Linear (ver la nota de arriba y `AGENTS.md`, «Tareas (Linear)»). El plan hasta terminar 2.0 está en `ROADMAP.md`; la navegación final en `NAVEGACION.md`.
 
+## CI · e2e por shards
+
+Adaptación técnica de OpenCode según el encargo: cuatro shards aislados, evidencia y
+informe combinado, con accesos e2e compatibles con MFA. Estado y criterios pendientes
+en [`briefs/ENCARGO-ci-e2e-shards.md`](briefs/ENCARGO-ci-e2e-shards.md). Sin
+cambio de producto, migraciones ni decisiones de negocio nuevas.
+
 ## Corrección de auditoría · PR #71 (27-oct-2026)
 
 El encargo de continuidad y la review 5662759713 corrigen la nota NÚCLEO-A de

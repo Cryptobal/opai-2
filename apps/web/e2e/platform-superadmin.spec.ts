@@ -1,5 +1,7 @@
 import { expect, test } from "@playwright/test";
 
+import { entrar } from "./sesion";
+
 const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
 
 test.describe("regresión Plataforma tras #59", () => {
@@ -12,17 +14,12 @@ test.describe("regresión Plataforma tras #59", () => {
       page,
     }, info) => {
       test.setTimeout(180_000);
-      await page.goto("/login");
-      await page
-        .getByLabel("Correo")
-        .fill(
-          autorizado
-            ? (process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl")
-            : (process.env["E2E_SELECTOR_EMAIL"] ?? "e2e-selector@opai.cl"),
-        );
-      await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
-      await page.getByRole("button", { name: "Entrar" }).click();
-      await page.waitForURL((url) => !url.pathname.startsWith("/login"));
+      await entrar(
+        page,
+        autorizado
+          ? (process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl")
+          : (process.env["E2E_SELECTOR_EMAIL"] ?? "e2e-selector@opai.cl"),
+      );
       if (new URL(page.url()).pathname === "/elegir-empresa") {
         await page.getByRole("button", { name: /Gard Security/ }).click();
       }

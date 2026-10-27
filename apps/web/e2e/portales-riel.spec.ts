@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { E2E_PASSWORD as password, entrar } from "./sesion";
+import { codigoTotp, E2E_PASSWORD as password, entrar } from "./sesion";
 
 // Riel y título de pestaña de los portales Trabajador y Cliente en escritorio (1280 px, QA del #21).
 // Usa el usuario plataforma que el job e2e ya siembra, con SEED_OWNER_PASSWORD (como plataforma.spec).
@@ -76,6 +76,11 @@ test.describe("acceso a portales", () => {
     await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
     await page.getByRole("button", { name: "Entrar" }).click();
     await page.waitForURL((url) => !url.pathname.startsWith("/login"));
+    if (new URL(page.url()).pathname === "/mfa") {
+      await page.getByLabel(/Código/).fill(await codigoTotp());
+      await page.getByRole("button", { name: "Verificar" }).click();
+      await page.waitForURL((url) => url.pathname !== "/mfa");
+    }
     // El ERP es su inicio sin acceso: el shell se monta con el aviso dentro del marco.
     await page.goto("/");
     await expect(

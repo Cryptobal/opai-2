@@ -1,5 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
 
+import { entrar as iniciarSesion } from "./sesion";
+
 import { digitoVerificador } from "@opai/domain";
 
 // Caché del navegador (staleTimes, ADR-045): lo escrito desde la pantalla se ve al volver a una lista
@@ -13,17 +15,9 @@ test.use({ actionTimeout: 30_000 });
 test.setTimeout(180_000);
 
 async function entrar(page: Page, correo = email) {
-  await page.goto("/login");
-  await page.getByLabel("Correo").fill(correo);
-  await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
-  await page.getByRole("button", { name: "Entrar" }).click();
-  // Con más de una empresa el acceso pide elegir (las pruebas parten de Gard); con una, pasa de largo.
+  await iniciarSesion(page, correo);
   const gard = page.getByRole("button", { name: /Gard Security/ });
-  await Promise.race([
-    gard.waitFor({ state: "visible" }),
-    page.waitForURL((u) => u.pathname === "/" || u.pathname === "/platform"),
-  ]).catch(() => undefined);
-  if (await gard.isVisible()) await gard.click();
+  if (new URL(page.url()).pathname === "/elegir-empresa") await gard.click();
   await page.waitForURL((u) => u.pathname === "/" || u.pathname === "/platform");
 }
 

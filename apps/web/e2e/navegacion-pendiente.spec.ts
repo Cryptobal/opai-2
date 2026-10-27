@@ -1,5 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
 
+import { entrar as iniciarSesion } from "./sesion";
+
 /**
  * Navegación con señal de pendiente (ADR-045, arreglo de #44). Durante una navegación lenta el shell
  * marca el ítem del riel y el título de destino al instante (sin parpadeo ni barra de progreso,
@@ -8,20 +10,10 @@ import { expect, type Page, test } from "@playwright/test";
  * todavía entra en la carrera prefetch↔navegación de Cache Components y se cuelga: queda como
  * `test.fixme` al final, con la razón.
  */
-const email = process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl";
-const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
-
 async function entrar(page: Page) {
-  await page.goto("/login");
-  await page.getByLabel("Correo").fill(email);
-  await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
-  await page.getByRole("button", { name: "Entrar" }).click();
+  await iniciarSesion(page);
   const gard = page.getByRole("button", { name: /Gard Security/ });
-  await Promise.race([
-    gard.waitFor({ state: "visible" }),
-    page.waitForURL((u) => u.pathname === "/" || u.pathname === "/platform"),
-  ]).catch(() => undefined);
-  if (await gard.isVisible().catch(() => false)) await gard.click();
+  if (new URL(page.url()).pathname === "/elegir-empresa") await gard.click();
   await page.waitForURL((u) => u.pathname === "/" || u.pathname === "/platform");
 }
 
