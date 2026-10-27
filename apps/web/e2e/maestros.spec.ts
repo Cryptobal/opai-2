@@ -1,22 +1,13 @@
 import { expect, type Page, test } from "@playwright/test";
 
 import { digitoVerificador } from "@opai/domain";
+import { E2E_PASSWORD as password, entrar } from "./sesion";
 
 // Maestros (Brief 02, sesión C): personas (lista, alta con vínculo, laboral, sueldo en tres
 // niveles), cargos, vencimientos, Inicio y terreno del supervisor, a 375, 1024 y 1280.
-const email = process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl";
-const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
 
 async function captura(page: Page, nombre: string, proyecto: string) {
   await page.screenshot({ path: `e2e/__screenshots__/${nombre}-${proyecto}.png`, fullPage: true });
-}
-
-async function entrar(page: Page) {
-  await page.goto("/login");
-  await page.getByLabel("Correo").fill(email);
-  await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
-  await page.getByRole("button", { name: "Entrar" }).click();
-  await page.waitForURL((url) => url.pathname === "/" || url.pathname === "/platform");
 }
 
 /** RUT válido y único por corrida (cuerpo de 8 dígitos desde la hora). */

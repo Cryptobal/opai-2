@@ -1,5 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
 
+import { entrar } from "./sesion";
+
 /**
  * Gate de rendimiento (ADR-045, Brief 03). Recorre el protocolo de navegación y lee el marcador de
  * servidor `#opai-metricas` (fases, total y consultas a Neon por request).
@@ -16,8 +18,6 @@ import { expect, type Page, test } from "@playwright/test";
  * existente (contra `pnpm dev`, como informe). El YAML del job va en la descripción del PR.
  */
 const GATE_ESTRICTO = process.env["GATE_ESTRICTO"] === "1";
-const email = process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl";
-const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
 
 const MAX_ESQUELETO_MS = 200;
 const MAX_TOTAL_MS = 500;
@@ -43,20 +43,6 @@ type Metricas = {
 
 test.use({ actionTimeout: 30_000 });
 test.setTimeout(180_000);
-
-async function entrar(page: Page) {
-  await page.goto("/login");
-  await page.getByLabel("Correo").fill(email);
-  await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
-  await page.getByRole("button", { name: "Entrar" }).click();
-  const gard = page.getByRole("button", { name: /Gard Security/ });
-  await Promise.race([
-    gard.waitFor({ state: "visible" }),
-    page.waitForURL((u) => u.pathname === "/" || u.pathname === "/platform"),
-  ]).catch(() => undefined);
-  if (await gard.isVisible()) await gard.click();
-  await page.waitForURL((u) => u.pathname === "/" || u.pathname === "/platform");
-}
 
 /** Lee el marcador de servidor emitido por `MarcadorMetricas`. */
 async function leerMetricas(page: Page): Promise<Metricas | null> {

@@ -13,6 +13,28 @@ beforeEach(() => {
 });
 
 describe("core.apikeys.*", () => {
+  it("no emite credenciales sin enrolar/verificar, ni si falta la garantía del borde", async () => {
+    for (const mfa of [
+      undefined,
+      { activa: false, verificada: false, obligatoria: true },
+      { activa: true, verificada: false, obligatoria: true },
+    ]) {
+      const { ctx, tabla } = contextoDePrueba({ rol: "owner", semilla: semillaTenant() });
+      if (mfa) ctx.mfa = mfa;
+      else delete ctx.mfa;
+      for (const dryRun of [false, true]) {
+        expect(
+          await executeCapability(
+            ctx,
+            "core.apikeys.create",
+            { nombre: "Prueba", scopes: ["*"] },
+            { dryRun },
+          ),
+        ).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+      }
+      expect(tabla("apiKey")).toHaveLength(0);
+    }
+  });
   it("create devuelve el secreto una sola vez; en base solo hash y prefijo", async () => {
     const { ctx, tabla } = contextoDePrueba({ rol: "owner", semilla: semillaTenant() });
     const r = await executeCapability(ctx, "core.apikeys.create", {

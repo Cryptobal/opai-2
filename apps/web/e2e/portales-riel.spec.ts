@@ -1,11 +1,16 @@
 import { expect, test } from "@playwright/test";
 
+import { E2E_PASSWORD as password, entrar } from "./sesion";
+
+// Riel y título de pestaña de los portales Trabajador y Cliente en escritorio (1280 px, QA del #21).
+// Usa el usuario plataforma que el job e2e ya siembra, con SEED_OWNER_PASSWORD (como plataforma.spec).
+// Basta un usuario con sesión: sin acceso al portal, el shell se monta igual (con «Sin permisos»).
+// En CI falla si falta la contraseña; en local se omite.
 // Usuario selector (ERP/Supervisor): sin acceso a Trabajador ni Cliente. El usuario «con acceso» es
 // el de plataforma que el job e2e siembra con SEED_OWNER_PASSWORD. En CI falla si falta la contraseña.
 const email = process.env["E2E_SELECTOR_EMAIL"] ?? "e2e-selector@opai.cl";
 const sinEmpresaEmail = process.env["E2E_SIN_EMPRESA_EMAIL"] ?? "e2e-sin-empresa@opai.cl";
 const sinErpEmail = process.env["E2E_SIN_ERP_EMAIL"] ?? "e2e-sin-erp@opai.cl";
-const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
 
 const PORTALES = [
   { id: "trabajador", nombre: "Trabajador" },
@@ -24,17 +29,7 @@ test.describe("acceso a portales", () => {
       page,
     }) => {
       test.setTimeout(180_000);
-      await page.goto("/login");
-      await page
-        .getByLabel("Correo")
-        .fill(autorizado ? (process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl") : email);
-      await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
-      await page.getByRole("button", { name: "Entrar" }).click();
-      await page.waitForURL((url) => !url.pathname.startsWith("/login"));
-      if (new URL(page.url()).pathname === "/elegir-empresa") {
-        await page.getByRole("button", { name: /Gard Security/ }).click();
-      }
-      await page.waitForURL((url) => url.pathname === "/" || url.pathname === "/platform");
+      await entrar(page, autorizado ? undefined : email);
 
       for (const p of PORTALES) {
         const paginas = [
