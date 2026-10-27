@@ -351,6 +351,8 @@ Una entrada por decisión. Las decisiones no se editan: si cambian, se agrega un
 
 **Consecuencias.** El costo variable viaja con el tenant. Plataforma ve consumo y margen por tenant y por recurso. Las cuotas del plan (ADR-029, punto 12) se miden con el mismo medidor.
 
+**Nota del 26-oct-2026 (NÚCLEO-E1, PR 1 del agente interno; preparando ADR-049).** El adaptador de IA del núcleo deja de ser un solo turno de texto: expone un contrato neutral de conversación con **herramientas** (tool-calling), **streaming** de eventos y **salida estructurada** por JSON Schema, y una **cadena de respaldo** entre los proveedores que el tenant tenga conectados (reintenta ante 5xx, 429 o fallo de red; nunca ante un 4xx de contenido). Sigue **sin SDKs** (solo `fetch`): Anthropic (`messages`), OpenAI/`chat completions`, Google (`generateContent`) y un proveedor «compatible con OpenAI» con base URL configurable (`ia_compatible`, que cubre Vercel AI Gateway, OpenRouter y otros) más el alias `ia_xai` (Grok) con su base URL pública por defecto. `completar()` se conserva sobre `conversar()` para geolocalización e «Integraciones · Probar». Cada llamada se mide igual que antes (tokens de entrada y salida por clase de tarea); el proveedor y el modelo se anotan en `referencia_tipo = "ia"` y `referencia_id = "<proveedor>:<modelo>"`, sin guardar el prompt completo ni ninguna key (ADR-049 punto 6). La elección del modelo dentro del agente y los ajustes de configuración asociados llegan en PRs posteriores del agente interno.
+
 ---
 
 ## ADR-032 · OPAI como plataforma agéntica: qué construye y qué no
