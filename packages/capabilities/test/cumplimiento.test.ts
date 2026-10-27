@@ -194,7 +194,7 @@ describe("core.cumplimiento.* · DPA y DPO (Brief 07d, PR 1)", () => {
     // Destinatarios derivados del inventario completado (Resend / IA, a confirmar por legal).
     const docs = rat.actividades.find((a) => a.actividad === "Documentos de personas");
     expect(docs?.destinatarios.some((d) => d.includes("Proveedor de IA"))).toBe(true);
-    const envios = rat.actividades.find((a) => a.actividad === "Comunicaciones comerciales a contactos");
+    const envios = rat.actividades.find((a) => a.actividad === "Notificaciones y avisos operativos");
     expect(envios?.destinatarios.some((d) => d.includes("Resend"))).toBe(true);
   });
 
