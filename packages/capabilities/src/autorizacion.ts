@@ -38,6 +38,18 @@ export function restriccion(ctx: Contexto, c: Capacidad): Falla | null {
   if (c.soloPersonas && ctx.actor.tipo === "agent") {
     return falla("FORBIDDEN", "Solo una persona puede hacer esto, no una API key.");
   }
+  // Sesiones: fail-closed. Plataforma conserva su autorización por platformRole.
+  // Única excepción (t500u, encargo portal-sesión): aceptar la invitación crea la membresía;
+  // su handler exige usuario autenticado, token y correo. No exime a otras internas.
+  if (ctx.actor.tipo === "user" && !ctx.principal && ctx.conTenant &&
+      c.modulo !== "platform" && c.id !== "core.invitations.accept") {
+    if (!ctx.portal || !ctx.portalesMembresia.includes(ctx.portal)) {
+      return falla("FORBIDDEN", "No tienes acceso a este portal.");
+    }
+    if (!portalesDe(c).includes(ctx.portal)) {
+      return falla("FORBIDDEN", `La capacidad no está disponible en el portal "${ctx.portal}".`);
+    }
+  }
   if (ctx.principal && ctx.principal.tipo !== "usuario") {
     const portal = PORTAL_DEL_PRINCIPAL[ctx.principal.tipo];
     if (!portalesDe(c).includes(portal)) {

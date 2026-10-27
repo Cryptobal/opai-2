@@ -43,6 +43,8 @@ describe.skipIf(!urlPropietario)("alcance del supervisor en base real (B3)", () 
     mod.crearContexto({
       tenantId,
       actor: { tipo: "user", id: userSupId },
+      portal: "erp",
+      portalesMembresia: ["erp", "supervisor"],
       rol: "supervisor",
       alcance,
       medidor,
@@ -106,7 +108,7 @@ describe.skipIf(!urlPropietario)("alcance del supervisor en base real (B3)", () 
     });
     membershipSup = (
       await e.admin.membership.create({
-        data: { tenantId, userId: u.id, rol: "supervisor", portales: ["supervisor"] },
+        data: { tenantId, userId: u.id, rol: "supervisor", portales: ["erp", "supervisor"] },
       })
     ).id;
     // Documentos para probar que la lectura no se fuga por id (url_descarga/disponible/actividad):
@@ -456,6 +458,8 @@ describe.skipIf(!urlPropietario)("alcance del supervisor en base real (B3)", () 
     const ctxGerente = mod.crearContexto({
       tenantId,
       actor: { tipo: "user", id: randomUUID() },
+      portal: "erp",
+      portalesMembresia: ["erp"],
       rol: "gerente",
       excepciones: [{ permiso: PERMISOS_CORE.usersManage, conceder: true }],
       medidor,
@@ -472,6 +476,8 @@ describe.skipIf(!urlPropietario)("alcance del supervisor en base real (B3)", () 
       tenantId,
       actor: { tipo: "user", id: userSupId },
       usuario: { id: userSupId, nombre: "Supervisor", email: "sup@prueba.cl", platformRole: null },
+      portal: "erp",
+      portalesMembresia: ["erp"],
       rol: "admin",
       medidor,
     });
@@ -487,6 +493,8 @@ describe.skipIf(!urlPropietario)("alcance del supervisor en base real (B3)", () 
       tenantId,
       actor: { tipo: "user", id: randomUUID() },
       rol: "admin",
+      portal: "erp",
+      portalesMembresia: ["erp"],
       alcance: { instalaciones: [instA] },
       medidor,
     });

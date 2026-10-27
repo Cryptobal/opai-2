@@ -70,6 +70,7 @@ export function contextoDeIdentidad(identidad: Identidad, portal: string | null)
     excepciones: acceso.excepciones,
     alcance: alcanceDe(acceso.instalaciones),
     portal,
+    portalesMembresia: actual?.portales ?? [],
     modulosActivos: identidad.modulosActivos,
     medidor: medidorDiferido,
     diferir: diferirConAfter,
