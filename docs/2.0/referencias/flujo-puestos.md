@@ -21,4 +21,4 @@
 
 ## Qué entró en el PR 1 (#49)
 
-Solo el paso 1 (lista) y el paso 3 sin el bloque de sueldo, en la hoja de crear y editar, construidos con el DS 2.0. Configuración de Patrones de turno y Funciones (paso 4) queda aplazada hasta su diseño en DS 2.0 (ver `docs/2.0/briefs/BRIEF-11-puestos.md`).
+El paso 1 (lista de puestos: tabla desde tablet con Puesto · Función · Horario —con «+1 día» cuando cruza medianoche— · Patrón · Cobertura · Estado, buscador, chips Todos/Solo PPC/Inactivos y subtítulo con los conteos; en teléfono, filas con buscador y chips), el paso 3 sin el bloque de sueldo (hoja de crear y editar) y el paso 4 (Configuración de Patrones de turno y Funciones), todos con el DS 2.0 aprobado (`t436u`, export en `docs/2.0/diseño/export-puestos/`). La columna «Dotación N de M» del diseño no aplica con 1 puesto = 1 posición: se muestra como «Cobertura» (Cubierto / PPC · Sin asignar); desvío decidido en el PR #49 (QA H1). Ver `docs/2.0/briefs/BRIEF-11-puestos.md`.
