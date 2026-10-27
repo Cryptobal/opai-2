@@ -4,6 +4,7 @@ import { cn } from "../cn";
 import type { ItemMenu } from "../components/menu";
 import { Contador, Punto } from "./contador";
 import { MenuMas } from "./menu-mas";
+import type { ItemFijado } from "./fijados";
 import { esActivo, LinkPorDefecto, type LinkComponent, type NavItem } from "./types";
 
 export type NavProps = {
@@ -23,6 +24,10 @@ type InferiorProps = NavProps & {
   /** Ítems de cuenta al final del menú "Más" (contraseña, cerrar sesión). */
   extras?: readonly ItemMenu[];
   onNavegar?: (href: string) => void;
+  fijados?: readonly ItemFijado[];
+  errorFijados?: boolean;
+  reintentarFijados?: () => void;
+  onDesfijar?: (href: string) => void;
 };
 
 /**
@@ -36,6 +41,7 @@ export function BottomNav({
   extras = [],
   onNavegar,
   principales: elegidas,
+  fijados, errorFijados, reintentarFijados, onDesfijar,
 }: InferiorProps) {
   // "Instalaciones" (fueraInferior) pasa a "Más" sin desaparecer del riel ni de la barra lateral.
   const principales = elegidas ?? items.filter((i) => !i.pie && !i.soloAmplio && !i.fueraInferior);
@@ -86,7 +92,12 @@ export function BottomNav({
         {conMas ? (
           <li className="min-w-0 flex-1">
             <MenuMas
-              items={resto}
+              items={items}
+              rutaActual={rutaActual}
+              {...(fijados ? { fijados } : {})}
+              {...(errorFijados ? { errorFijados } : {})}
+              {...(reintentarFijados ? { reintentarFijados } : {})}
+              {...(onDesfijar ? { onDesfijar } : {})}
               extras={extras}
               {...(onNavegar ? { onNavegar } : {})}
               disparador={

@@ -57,6 +57,7 @@ export type LinkProps = {
   "aria-current"?: "page" | undefined;
   "aria-label"?: string;
   title?: string;
+  onClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void;
 };
 
 /** Componente de enlace inyectado por la app (next/link). Por defecto, <a>. */

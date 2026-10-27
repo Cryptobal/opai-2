@@ -57,7 +57,10 @@ export function useNavegacionArea(portal: string, activo: boolean) {
     (clave: string, transformar: (p: Preferencias) => Preferencias | Promise<Preferencias>) => {
       cola.current = cola.current
         .then(async () => {
-          if (!cargado && !(await cargar())) return;
+          if (!cargado && !(await cargar())) {
+            avisar.error(clave === "navegacion_fijados" ? "No se pudo fijar. Reintenta." : "No se pudieron cargar las preferencias. Reintenta.");
+            return;
+          }
           const revision = versiones.current[clave] ?? 0;
           const siguiente = await transformar(actual.current);
           if ((versiones.current[clave] ?? 0) !== revision) {

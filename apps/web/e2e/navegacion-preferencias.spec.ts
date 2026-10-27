@@ -23,9 +23,30 @@ test("preferencias de navegación: una carga fallida permite reintentar sin escr
   await expect(page.getByRole("radio", { name: /^Personas/ })).toBeDisabled();
   expect(escrituras).toBe(0);
   fallar = false;
-  await page.getByRole("button", { name: "Reintentar", exact: true }).click();
+  await page.getByRole("region", { name: "Preferencias" }).getByRole("button", { name: "Reintentar", exact: true }).click();
   await expect(page.getByRole("radio", { name: /^Personas/ })).toBeEnabled();
   await expect(error).toHaveCount(0);
   expect(escrituras).toBe(0);
   expect(errores).toEqual([]);
+});
+
+test("el shell informa cuando no puede cargar los fijados", async ({ page }, info) => {
+  await entrar(page);
+  await page.route("**/*", async (ruta) => {
+    const peticion = ruta.request();
+    if (peticion.method() === "POST" && (peticion.postData() ?? "").includes("core.config.get")) {
+      await ruta.abort("failed");
+    } else await ruta.continue();
+  });
+  await page.reload();
+  const nav = page.getByRole("navigation", { name: "Principal", exact: true }).filter({ visible: true });
+  if (info.project.name === "telefono") {
+    await nav.getByRole("button", { name: "Más opciones" }).click();
+    const mas = page.getByRole("dialog", { name: "Más" });
+    await expect(mas.getByRole("alert")).toContainText("No pudimos cargar tus fijados");
+    await expect(mas.getByText("Fija hasta cinco entradas o fichas")).toHaveCount(0);
+  } else {
+    await expect(nav.getByRole("alert")).toContainText("No pudimos cargar tus fijados");
+    await expect(nav.getByText("Fija hasta cinco entradas o fichas")).toHaveCount(0);
+  }
 });

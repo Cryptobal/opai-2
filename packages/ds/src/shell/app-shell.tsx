@@ -26,6 +26,8 @@ export type AppShellProps = ComunesBarra & {
   completo?: boolean;
   /** Fijados y acordeón por área (D1, D3): ver `Sidebar`. */
   fijados?: readonly ItemFijado[];
+  errorFijados?: boolean;
+  reintentarFijados?: () => void;
   onFijar?: (item: NavItem) => void;
   onDesfijar?: (href: string) => void;
   areaAbierta?: string | null;
@@ -52,6 +54,11 @@ export function AppShell(props: AppShellProps) {
         portalActual={props.portalActual}
         tenant={props.tenant}
         empresas={props.empresas}
+        {...(props.fijados ? { fijados: props.fijados } : {})}
+        {...(props.errorFijados ? { errorFijados: true } : {})}
+        {...(props.reintentarFijados ? { reintentarFijados: props.reintentarFijados } : {})}
+        {...(props.onDesfijar ? { onDesfijar: props.onDesfijar } : {})}
+        {...(onNavegar ? { onNavegar } : {})}
       />
       <Sidebar
         items={nav}
@@ -63,6 +70,8 @@ export function AppShell(props: AppShellProps) {
         usuario={props.usuario}
         menuUsuario={props.menuUsuario}
         {...(props.fijados ? { fijados: props.fijados } : {})}
+        {...(props.errorFijados ? { errorFijados: true } : {})}
+        {...(props.reintentarFijados ? { reintentarFijados: props.reintentarFijados } : {})}
         {...(props.onFijar ? { onFijar: props.onFijar } : {})}
         {...(props.onDesfijar ? { onDesfijar: props.onDesfijar } : {})}
         {...(props.areaAbierta !== undefined ? { areaAbierta: props.areaAbierta } : {})}
@@ -91,6 +100,10 @@ export function AppShell(props: AppShellProps) {
         items={nav}
         principales={navInferior}
         rutaActual={rutaActual}
+        {...(props.fijados ? { fijados: props.fijados } : {})}
+        {...(props.errorFijados ? { errorFijados: true } : {})}
+        {...(props.reintentarFijados ? { reintentarFijados: props.reintentarFijados } : {})}
+        {...(props.onDesfijar ? { onDesfijar: props.onDesfijar } : {})}
         {...(props.menuUsuario ? { extras: props.menuUsuario } : {})}
         {...(onNavegar ? { onNavegar } : {})}
         Link={Link}

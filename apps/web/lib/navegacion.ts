@@ -19,6 +19,7 @@ import {
 export type ItemNav = {
   href: string;
   etiqueta: string;
+  corta?: string;
   icono: string;
   grupo?: string;
   /** Activo solo en la ruta exacta. */
@@ -59,7 +60,8 @@ export type NavegacionErp = {
 const esDesarrollo = process.env.NODE_ENV !== "production";
 
 function itemDe(e: EntradaArea, extra: Partial<ItemNav> = {}): ItemNav {
-  return { href: e.href, etiqueta: e.etiqueta, icono: e.icono, ...extra };
+  const corta = e.href === "/instalaciones" ? "Instalac." : e.href === "/cargos" ? "Cargos" : undefined;
+  return { href: e.href, etiqueta: e.etiqueta, icono: e.icono, ...(corta ? { corta } : {}), ...extra };
 }
 
 /**
@@ -100,7 +102,7 @@ export function navegacionErp(
     }
   }
   if (esDesarrollo) nav.push({ href: "/ds", etiqueta: "Diseño", icono: "Palette" });
-  nav.push({ href: "/configuracion", etiqueta: "Configuración", icono: "Settings", pie: true });
+  nav.push({ href: "/configuracion", etiqueta: "Configuración", corta: "Ajustes", icono: "Settings", pie: true });
   const inicio = entradaInicio(grupos);
   const resto = entradasAreaPrincipal(grupos, areaPrincipal ?? areaPrincipalPorRol(rol));
   const navInferior = [inicio, ...resto]

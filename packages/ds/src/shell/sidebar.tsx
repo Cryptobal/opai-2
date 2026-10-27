@@ -33,6 +33,8 @@ type SidebarProps = {
   menuUsuario?: readonly ItemMenu[] | undefined;
   /** Fijados (D3): sin esta prop, la sección no se muestra (portales sin fijados todavía). */
   fijados?: readonly ItemFijado[] | undefined;
+  errorFijados?: boolean | undefined;
+  reintentarFijados?: (() => void) | undefined;
   onFijar?: ((item: NavItem) => void) | undefined;
   onDesfijar?: ((href: string) => void) | undefined;
   /** Acordeón por área (D1): área abierta controlada por quien use `Sidebar`. Sin esta prop, cada
@@ -51,8 +53,8 @@ export function Sidebar(props: SidebarProps) {
   const grupos = agrupar(items.filter((i) => !i.pie));
   const grupoActivo = grupos.find(([, lista]) =>
     lista.some((i) => esActivo(rutaActual, i.href, i.exacta, i.activoEn)),
-  )?.[0];
-  const [abiertoLocal, setAbiertoLocal] = useState<string | null>(grupoActivo ?? null);
+  );
+  const [abiertoLocal, setAbiertoLocal] = useState<string | null>(grupoActivo?.[1][0]?.area ?? grupoActivo?.[0] ?? null);
   const abierto = props.areaAbierta !== undefined ? props.areaAbierta : abiertoLocal;
   const fijadosHrefs = new Set((props.fijados ?? []).map((f) => f.href));
   // Controlado (`onAreaAbierta`): el llamador decide si abrir o plegar. Sin control, el acordeón
@@ -87,12 +89,10 @@ export function Sidebar(props: SidebarProps) {
       </div>
       {props.fijados ? (
         <Suspense fallback={null}>
-        <Fijados
-          items={props.fijados}
-          rutaActual={rutaActual}
-          onDesfijar={props.onDesfijar ?? (() => undefined)}
-          Link={Link}
-        />
+        <Fijados items={props.fijados} rutaActual={rutaActual} onDesfijar={props.onDesfijar ?? (() => undefined)}
+          {...(props.errorFijados ? { error: true } : {})}
+          {...(props.reintentarFijados ? { reintentar: props.reintentarFijados } : {})}
+          Link={Link} />
         </Suspense>
       ) : null}
       <div className="flex-1 overflow-y-auto py-2">

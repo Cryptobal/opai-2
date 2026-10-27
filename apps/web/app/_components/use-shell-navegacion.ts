@@ -2,7 +2,7 @@ import { type ReactNode, useEffect, useMemo, useRef, useState } from "react";
 import { Pin } from "lucide-react";
 
 import type { AreaNav } from "@opai/domain";
-import { esActivo } from "@opai/ds";
+import { avisar, esActivo } from "@opai/ds";
 
 import { entradaInicio, entradasAreaPrincipal, type GrupoArea } from "@/lib/navegacion-areas";
 import type { ItemNav } from "@/lib/navegacion";
@@ -26,6 +26,9 @@ export function useShellNavegacion(
   iconos?: Record<string, ReactNode>,
 ) {
   const prefs = useNavegacionArea(portal, activo);
+  useEffect(() => {
+    if (prefs.errorCarga) avisar.error("No se pudieron cargar las preferencias de navegación.");
+  }, [prefs.errorCarga]);
   const [fichasValidas, setFichasValidas] = useState<string[]>([]);
   useEffect(() => {
     let vigente = true;
@@ -44,7 +47,7 @@ export function useShellNavegacion(
     const resto = entradasAreaPrincipal(grupos, prefs.areaPrincipal);
     return [inicio, ...resto]
       .filter((e): e is NonNullable<typeof e> => e != null)
-      .map((e) => ({ href: e.href, etiqueta: e.etiqueta, icono: e.icono }));
+      .map((e) => ({ href: e.href, etiqueta: e.etiqueta, icono: e.icono, ...(e.href === "/cargos" ? { corta: "Cargos" } : e.href === "/instalaciones" ? { corta: "Instalac." } : {}) }));
   }, [grupos, navInferiorDefecto, prefs.areaPrincipal]);
   const navInferiorResuelto = useMemo(
     () => navInferior?.map((n) => ({ ...n, icono: iconoShell(n.icono, iconos) })),
@@ -70,17 +73,21 @@ export function useShellNavegacion(
     [grupos, rutaEfectiva],
   );
   const rutaPrevia = useRef(rutaEfectiva);
+  const [areaElegida, setAreaElegida] = useState<string | null | undefined>(undefined);
   useEffect(() => {
     if (rutaPrevia.current !== rutaEfectiva && areaActiva && prefs.cargado) {
       rutaPrevia.current = rutaEfectiva;
+      setAreaElegida(areaActiva);
       prefs.fijarAreaAbierta(areaActiva);
     }
   }, [rutaEfectiva, areaActiva, prefs]);
-  const areaAbierta = prefs.areaAbierta === "ninguna" ? null : (prefs.areaAbierta ?? areaActiva);
+  const areaAbierta = areaElegida === undefined ? areaActiva : areaElegida;
   const esFicha = /^\/(cuentas|instalaciones|personas|cargos)\/[0-9a-f-]{36}$/.test(rutaEfectiva);
   return {
     navInferiorResuelto,
     fijados,
+    errorFijados: prefs.errorCarga,
+    reintentarFijados: prefs.reintentar,
     areaAbierta,
     onFijar: (item: { href: string; etiqueta: string }) =>
       prefs.fijar(
@@ -97,7 +104,10 @@ export function useShellNavegacion(
           entradasPermitidas,
         );
     },
-    onAreaAbierta: (area: string) =>
-      prefs.fijarAreaAbierta(areaAbierta === area ? null : (area as AreaNav)),
+    onAreaAbierta: (area: string) => {
+      const siguiente = areaAbierta === area ? null : (area as AreaNav);
+      setAreaElegida(siguiente);
+      prefs.fijarAreaAbierta(siguiente);
+    },
   };
 }

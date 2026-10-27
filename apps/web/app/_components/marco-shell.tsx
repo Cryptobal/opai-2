@@ -158,6 +158,8 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
       {...(enErp ? { onBuscar: () => setPaleta(true) } : {})}
       {...(enErp && preferencias ? {
         fijados: preferencias.fijados,
+        errorFijados: preferencias.errorFijados,
+        reintentarFijados: () => { void preferencias.reintentarFijados(); },
         onFijar: preferencias.onFijar,
         onDesfijar: preferencias.onDesfijar,
         areaAbierta: preferencias.areaAbierta,

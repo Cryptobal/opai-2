@@ -1,5 +1,8 @@
 import { cn } from "../cn";
+import { Menu as IconoMenu } from "lucide-react";
 import type { ItemMenu } from "../components/menu";
+import type { ItemFijado } from "./fijados";
+import { MenuMas } from "./menu-mas";
 import { Contador } from "./contador";
 import type { NavProps } from "./nav";
 import { PortalSwitcher } from "./portal-switcher";
@@ -54,6 +57,11 @@ export type RailProps = NavProps & {
   tenant?: Tenant | undefined;
   /** Cambiar de empresa (ítems del menú del selector). */
   empresas?: readonly ItemMenu[] | undefined;
+  fijados?: readonly ItemFijado[];
+  errorFijados?: boolean;
+  reintentarFijados?: () => void;
+  onDesfijar?: (href: string) => void;
+  onNavegar?: (href: string) => void;
 };
 
 /**
@@ -69,6 +77,7 @@ export function Rail({
   portalActual,
   tenant,
   empresas,
+  fijados, errorFijados, reintentarFijados, onDesfijar, onNavegar,
 }: RailProps) {
   return (
     <nav
@@ -91,6 +100,7 @@ export function Rail({
           ))}
       </ul>
       <ul className="mt-auto flex flex-col gap-1">
+        {fijados ? <li className="w-16"><MenuMas items={items} extras={[]} rutaActual={rutaActual} fijados={fijados} {...(errorFijados ? { errorFijados } : {})} {...(reintentarFijados ? { reintentarFijados } : {})} {...(onDesfijar ? { onDesfijar } : {})} {...(onNavegar ? { onNavegar } : {})} disparador={<span className="flex flex-col items-center text-[11px]"><IconoMenu className="size-5" />Más</span>} /></li> : null}
         {items
           .filter((i) => i.pie)
           .map((item) => (

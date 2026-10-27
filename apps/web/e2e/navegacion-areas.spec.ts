@@ -26,8 +26,12 @@ test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }
     await expect(nav.getByRole("link", { name: "Personas", exact: true })).toBeVisible();
     await nav.getByRole("button", { name: "Más opciones" }).click();
     const mas = page.getByRole("dialog", { name: "Más", exact: true });
+    await expect(mas.getByText("Fijados", { exact: true })).toBeVisible();
+    await mas.getByRole("button", { name: "Clientes", exact: true }).click();
     await expect(mas.getByRole("button", { name: "Instalaciones", exact: true })).toBeVisible();
     await expect(mas.getByRole("button", { name: "Configuración", exact: true })).toBeVisible();
+    await expect(mas.getByText("Cuenta", { exact: true })).toBeVisible();
+    await expect(mas.getByRole("button", { name: "Cerrar sesión" })).toHaveClass(/text-danger/);
     await page.keyboard.press("Escape");
     await expect(nav.getByRole("button", { name: "Más opciones" })).toBeFocused();
     // Segunda apertura con teclado: conserva el Sheet diferido y devuelve el foco al disparador.
