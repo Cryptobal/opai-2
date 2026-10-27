@@ -127,7 +127,8 @@ export async function executeCapability(
   } catch (error) {
     const code = error instanceof ErrorCapacidad ? error.code : "INTERNAL";
     const message = error instanceof Error ? error.message : "Error inesperado.";
-    r = { resultado: falla(code, message) };
+    const detalles = error instanceof ErrorCapacidad ? error.detalles : undefined;
+    r = { resultado: falla(code, message, detalles) };
   }
 
   const tenantId = tenantDe(ctx, c, r.entrada, r.salida);

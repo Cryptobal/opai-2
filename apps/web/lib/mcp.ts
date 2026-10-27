@@ -5,7 +5,7 @@ import { ejecutarHerramienta, herramientasMcp } from "@opai/capabilities/mcp";
 
 import pkg from "../package.json" with { type: "json" };
 import { contextoDeApiKey } from "./api-key";
-import { permitir, ipDe } from "./rate-limit";
+import { ipDe, LIMITES, permitir } from "./rate-limit";
 import { asegurarRegistro } from "./registro";
 import { demasiadas, noAutenticado } from "./respuestas";
 
@@ -15,13 +15,14 @@ import { demasiadas, noAutenticado } from "./respuestas";
  * "agente vía usuario". Nunca registra la key ni la URL en logs.
  */
 export async function manejarMcp(req: Request, key: string | null): Promise<Response> {
-  if (!permitir(`mcp-ip:${ipDe(req)}`, 120)) return demasiadas();
+  if (!(await permitir(`mcp-ip:${ipDe(req)}`, LIMITES.apiPorIp.maximo))) return demasiadas();
   if (!key) {
     const r = noAutenticado("Falta la API key: usa Authorization: Bearer <key>.");
     r.headers.set("WWW-Authenticate", 'Bearer realm="opai"');
     return r;
   }
-  if (!permitir(`mcp-key:${key.slice(0, 24)}`, 300)) return demasiadas();
+  if (!(await permitir(`mcp-key:${key.slice(0, 24)}`, LIMITES.apiPorPrincipal.maximo)))
+    return demasiadas();
 
   asegurarRegistro();
   const ctx = await contextoDeApiKey(key);

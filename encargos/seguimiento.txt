@@ -6,3 +6,25 @@ De la revisión (review 5658390255) y de Diseño y QA (26-oct-2026):
 - Peso del export: medir el costo de la lista de puestos en instalaciones grandes (ADR-045) cuando entre la pauta mensual.
 - Permisos finos de puestos, patrones y funciones: separar lectura, edición y desactivación cuando entre el PR #47 (roles y permisos).
 - Encargo (5)-(8) y (10)-(13) de Diseño y QA: sin detalle en el encargo recibido; Carlos o el bot «OPAI 2.0» deben enviarlos para registrarlos aquí.
+SEGUIMIENTO · Brief 07d PR 1 (DPA/RAT) — ítems diferidos (no bloqueantes)
+(Nota local, no se commitea; como PR-BODY.md.)
+
+1) Append-only de audit_events a nivel de propietario (trigger + protección TRUNCATE), igual que
+   core.bitacora (bitacora_inmutable, migración 20261023160000).
+   - Estado: DIFERIDO. En este PR la inmutabilidad de audit_events y dpa_aceptaciones es un
+     REVOKE UPDATE, DELETE a opai_app (migración 20261027000000). opai_app nunca tuvo TRUNCATE.
+   - Por qué no se hizo ahora:
+     a) Un trigger estilo bitácora rechaza también al rol propietario; eso rompería la limpieza
+        de packages/db/test/rls.test.ts:37 (e.admin.auditEvent.deleteMany, como propietario) y la
+        anonimización/retención del PR 3 (§16.4), que operan como propietario.
+     b) Agregar TRUNCATE al REVOKE o cualquier cambio exige editar una migración YA aplicada
+        (en opai_test y opai_e2e) o crear una migración nueva; editar una aplicada rompe
+        `prisma migrate deploy` por checksum. Si se decide hacerlo, va en una migración nueva.
+   - Recomendación: evaluarlo junto con el PR 3 (retención/anonimización), decidiendo el modelo de
+     borrado legítimo del propietario antes de blindar con trigger.
+
+2) e2e maestros-ficha-lista.spec.ts: el primer enlace de la lista pasó a ser la acción "Nueva"
+   (patrón de pantalla) tras el merge de Brief 03 PR 2 (navegación, b868544). El e2e no corre en CI
+   (Playwright es local), por eso no se detectó. En este PR se adaptó el selector para abrir una
+   ficha real (enlace visible a <ruta>/<uuid>), que es lo que la prueba pretende. Si se quiere, el
+   dueño de ese patrón puede revisar si "Nueva" debería quedar fuera de la región de la lista.

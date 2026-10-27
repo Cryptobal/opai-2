@@ -9,6 +9,8 @@ export function almacenamientoEnMemoria() {
       url: `https://r2.test/${clave}?put&exp=${segundos}`,
       cabeceras: { "content-type": mime, "x-amz-checksum-sha256": sha256 },
     }),
+    subir: async (clave, cuerpo, mime, sha256) =>
+      void objetos.set(clave, { tamano: Buffer.byteLength(cuerpo), mime, sha256 }),
     urlDescarga: async (clave, nombre, segundos = 300) =>
       `https://r2.test/${clave}?get&nombre=${encodeURIComponent(nombre)}&exp=${segundos}`,
     head: async (clave) => objetos.get(clave) ?? null,

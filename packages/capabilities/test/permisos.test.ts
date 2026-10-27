@@ -1,10 +1,22 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { capacidadesDelNucleo } from "../src/core";
+import { catalogoPermisos } from "../src/core/me";
+import { validarEnCatalogo } from "../src/core/permisos/comun";
 import { executeCapability } from "../src/execute";
 import { limpiarRegistro, registrarCapacidades } from "../src/registry";
-import { contextoDePrueba } from "../src/testing";
+import { contextoDePrueba, TENANT_DE_PRUEBA, USUARIO_DE_PRUEBA } from "../src/testing";
 import { M1, M2, semillaTenant } from "./semilla";
+
+/** Rol personalizado para la semilla, asignable a M2. */
+function conRol(id: string, permisos: string[], rolBeto = "viewer") {
+  const base = semillaTenant(rolBeto);
+  return {
+    ...base,
+    membership: base.membership.map((m) => (m.id === M2 ? { ...m, roleId: id } : m)),
+    rol: [{ id, tenantId: TENANT_DE_PRUEBA, nombre: "Central", permisos, sistema: false, archivadoEn: null }],
+  };
+}
 
 beforeEach(() => {
   limpiarRegistro();
@@ -170,13 +182,137 @@ describe("autorización con rol personalizado y excepciones", () => {
   });
 });
 
+describe("core.roles.list (usuarios y sistema)", () => {
+  it("cuenta las membresías activas por rol y puede incluir los roles base del sistema", async () => {
+    const ROL_ID = "0192f3a0-0000-7000-8000-0000000000d7";
+    const { ctx } = contextoDePrueba({
+      rol: "owner",
+      semilla: conRol(ROL_ID, ["core:instalaciones.read"]),
+    });
+    const r = await executeCapability(ctx, "core.roles.list", { incluirSistema: true });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const roles = r.data as { id: string; sistema: boolean; nombre: string; usuarios: number; permisos: string[] }[];
+    const central = roles.find((x) => x.id === ROL_ID);
+    expect(central).toMatchObject({ usuarios: 1, sistema: false });
+    const owner = roles.find((x) => x.id === "sistema:owner");
+    expect(owner).toMatchObject({ sistema: true, nombre: "Owner", usuarios: 1 });
+    expect(owner?.permisos).toContain("core:tenant.read");
+    // Sin la opción no aparecen los roles de sistema.
+    const soloCustom = await executeCapability(ctx, "core.roles.list", {});
+    const custom = soloCustom.ok ? (soloCustom.data as { sistema: boolean }[]) : [];
+    expect(soloCustom.ok && custom.every((x) => !x.sistema)).toBe(true);
+  });
+});
+
+describe("core.permisos.catalogo", () => {
+  it("expone ver/gestionar por recurso, especiales e inactivos; coincide con validarEnCatalogo", async () => {
+    const { ctx } = contextoDePrueba({ rol: "owner", semilla: semillaTenant() });
+    const r = await executeCapability(ctx, "core.permisos.catalogo", {});
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    const data = r.data as {
+      modulo: string;
+      activo: boolean;
+      recursos: { recurso: string; ver: string | null; gestionar: string | null }[];
+      especiales: { id: string; accion: string }[];
+    }[];
+    const core = data.find((m) => m.modulo === "core");
+    expect(core?.activo).toBe(true);
+    expect(core?.recursos.find((x) => x.recurso === "cuentas")).toMatchObject({
+      ver: "core:cuentas.read",
+      gestionar: "core:cuentas.manage",
+    });
+    // Solo-gestionar (ver = N/A) y solo-ver (gestionar = N/A).
+    expect(core?.recursos.find((x) => x.recurso === "marca")).toMatchObject({
+      ver: null,
+      gestionar: "core:marca.manage",
+    });
+    expect(core?.recursos.find((x) => x.recurso === "audit")).toMatchObject({
+      ver: "core:audit.read",
+      gestionar: null,
+    });
+    const especiales = core?.especiales.map((e) => e.id) ?? [];
+    expect(especiales).toContain("core:owners.manage");
+    expect(especiales).toContain("core:tenant.delete");
+    expect(especiales).toContain("core:estructuras.read_sensible");
+    // Lo que expone el catálogo == lo que acepta validarEnCatalogo == el catálogo completo.
+    const ids = data.flatMap((m) => [
+      ...m.recursos.flatMap((x) => [x.ver, x.gestionar].filter((v): v is string => v !== null)),
+      ...m.especiales.map((e) => e.id),
+    ]);
+    expect([...ids].sort()).toEqual([...catalogoPermisos()].sort());
+    expect(() => validarEnCatalogo(ids)).not.toThrow();
+  });
+});
+
 describe("core.excepciones.set", () => {
+  it("exige motivo al conceder o denegar; lo guarda con autor y la lista lo devuelve", async () => {
+    const { ctx, tabla } = contextoDePrueba({ rol: "owner", semilla: semillaTenant() });
+    const sinMotivo = await executeCapability(ctx, "core.excepciones.set", {
+      membershipId: M2,
+      permiso: "core:cuentas.read",
+      efecto: "conceder",
+    });
+    expect(sinMotivo).toMatchObject({ ok: false, error: { code: "INVALID_INPUT" } });
+    const ok = await executeCapability(ctx, "core.excepciones.set", {
+      membershipId: M2,
+      permiso: "core:cuentas.read",
+      efecto: "conceder",
+      motivo: "Carga de certificados OS-10 de la central",
+    });
+    expect(ok).toMatchObject({ ok: true });
+    const fila = tabla("permisoExcepcion")[0];
+    expect(fila?.["motivo"]).toBe("Carga de certificados OS-10 de la central");
+    expect(fila?.["creadoPor"]).toBe(USUARIO_DE_PRUEBA.id);
+    const lista = await executeCapability(ctx, "core.excepciones.list", { membershipId: M2 });
+    expect(lista.ok).toBe(true);
+    if (lista.ok) {
+      const filas = lista.data as {
+        permiso: string;
+        conceder: boolean;
+        motivo: string | null;
+        fijadoPor: { id: string; nombre: string } | null;
+        fijadoEn: Date;
+      }[];
+      expect(filas[0]).toMatchObject({
+        permiso: "core:cuentas.read",
+        conceder: true,
+        motivo: "Carga de certificados OS-10 de la central",
+        fijadoPor: { id: USUARIO_DE_PRUEBA.id, nombre: "Ana Prueba" },
+      });
+      expect(filas[0]?.fijadoEn).toBeInstanceOf(Date);
+    }
+    // Quitar no pide motivo.
+    const quita = await executeCapability(ctx, "core.excepciones.set", {
+      membershipId: M2,
+      permiso: "core:cuentas.read",
+      efecto: "ninguna",
+    });
+    expect(quita).toMatchObject({ ok: true, data: null });
+  });
+
+  it("el error de conceder sin tenerlo incluye la lista estructurada de permisos (A10)", async () => {
+    const { ctx } = contextoDePrueba({ rol: "admin", semilla: semillaTenant() });
+    const r = await executeCapability(ctx, "core.excepciones.set", {
+      membershipId: M2,
+      permiso: "core:tenant.delete",
+      efecto: "conceder",
+      motivo: "intento de escalar",
+    });
+    expect(r).toMatchObject({
+      ok: false,
+      error: { code: "FORBIDDEN", detalles: { permisos: ["core:tenant.delete"] } },
+    });
+  });
+
   it("concede, deniega y quita una excepción; conceder exige tenerlo", async () => {
     const { ctx, tabla } = contextoDePrueba({ rol: "owner", semilla: semillaTenant() });
     const concede = await executeCapability(ctx, "core.excepciones.set", {
       membershipId: M2,
       permiso: "core:cuentas.read",
       efecto: "conceder",
+      motivo: "acceso puntual a cuentas",
     });
     expect(concede).toMatchObject({ ok: true, data: { conceder: true } });
     expect(tabla("permisoExcepcion")).toHaveLength(1);
@@ -195,6 +331,7 @@ describe("core.excepciones.set", () => {
       membershipId: M2,
       permiso: "core:tenant.delete",
       efecto: "conceder",
+      motivo: "intento de conceder borrado",
     });
     expect(r).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
   });
@@ -249,6 +386,7 @@ describe("escalamiento rechazado (§16.2, ADR-022)", () => {
       membershipId: M1,
       permiso: "core:tenant.read",
       efecto: "denegar",
+      motivo: "intento de recortar al owner",
     });
     expect(r).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
   });
@@ -271,6 +409,7 @@ describe("escalamiento rechazado (§16.2, ADR-022)", () => {
       membershipId: M2,
       permiso: "core:users.read",
       efecto: "conceder",
+      motivo: "intento de gestionar roles sin ser owner/admin",
     });
     expect(excep).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
   });
@@ -303,6 +442,7 @@ describe("escalamiento rechazado (§16.2, ADR-022)", () => {
       membershipId: M2,
       permiso: "core:*",
       efecto: "conceder",
+      motivo: "intento con comodín",
     });
     expect(r).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
   });

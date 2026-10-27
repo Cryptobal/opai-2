@@ -1,4 +1,5 @@
 import { PERMISOS_CORE } from "@opai/domain";
+import type { TenantTx } from "@opai/db";
 
 import type { Contexto } from "../../types";
 import { listarAjustes } from "./catalogo";
@@ -21,12 +22,16 @@ export function camposVisibles(ctx: Contexto, modulo?: string): CampoAjuste[] {
  * Valor efectivo de cada campo: defecto del esquema → plataforma → tenant → usuario, según el
  * ámbito del campo. Un valor guardado que ya no valida (esquema cambiado) se ignora.
  */
-export async function valoresEfectivos(ctx: Contexto, campos: CampoAjuste[]) {
+export async function valoresEfectivos(
+  ctx: Contexto,
+  campos: CampoAjuste[],
+  db: TenantTx = ctx.db,
+) {
   const modulos = [...new Set(campos.map((c) => c.modulo))];
   const usuarioId = ctx.usuario?.id ?? null;
   const [plataforma, guardados] = await Promise.all([
-    ctx.db.ajustePlataforma.findMany({ where: { modulo: { in: modulos } } }),
-    ctx.db.ajuste.findMany({
+    db.ajustePlataforma.findMany({ where: { modulo: { in: modulos } } }),
+    db.ajuste.findMany({
       where: {
         modulo: { in: modulos },
         OR: [
@@ -59,9 +64,18 @@ export async function valoresEfectivos(ctx: Contexto, campos: CampoAjuste[]) {
   return resultado;
 }
 
-/** Atajo para leer un ajuste efectivo desde otra capacidad (p. ej. tamaño máximo de documentos). */
-export async function ajuste<T>(ctx: Contexto, modulo: string, clave: string): Promise<T> {
+/**
+ * Atajo para leer un ajuste efectivo desde otra capacidad (p. ej. tamaño máximo de documentos).
+ * `db` permite leer dentro de una transacción (`ctx.transaccion`) para que la lectura del ajuste y
+ * la escritura que depende de él sean atómicas; por defecto usa `ctx.db`.
+ */
+export async function ajuste<T>(
+  ctx: Contexto,
+  modulo: string,
+  clave: string,
+  db: TenantTx = ctx.db,
+): Promise<T> {
   const campo = listarAjustes().find((c) => c.modulo === modulo && c.clave === clave);
   if (!campo) throw new Error(`Ajuste no declarado: ${modulo}.${clave}`);
-  return (await valoresEfectivos(ctx, [campo])).get(k(modulo, clave))?.valor as T;
+  return (await valoresEfectivos(ctx, [campo], db)).get(k(modulo, clave))?.valor as T;
 }

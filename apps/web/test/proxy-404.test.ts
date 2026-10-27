@@ -47,6 +47,18 @@ describe("proxy: 404 real antes de enviar el HTML", () => {
     expect((await proxy(pedir(`/personas/${CERO}`))).headers.get("x-middleware-next")).toBe("1");
   });
 
+  it("reenvía la cookie a /api/existe para que el cupo cuente por usuario (H5)", async () => {
+    const f = vi.fn().mockResolvedValue(Response.json({ existe: true }));
+    vi.stubGlobal("fetch", f);
+    await proxy(pedir(`/personas/${CERO}`, { "x-forwarded-for": "9.9.9.9, 10.0.0.1" }));
+    const init = f.mock.calls[0]?.[1] as RequestInit;
+    const headers = init.headers as Record<string, string>;
+    // La cookie viaja (la ruta resuelve la sesión y cuenta por usuario); no se manda IP del cliente
+    // (sería falsificable por quien golpee la ruta directo para saltarse el tope y enumerar).
+    expect(headers["cookie"]).toContain("opai.session_token=x");
+    expect(headers["x-opai-ip"]).toBeUndefined();
+  });
+
   it("la navegación del cliente (RSC) no consulta nada", async () => {
     const f = vi.fn();
     vi.stubGlobal("fetch", f);
