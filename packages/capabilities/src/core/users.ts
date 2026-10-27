@@ -9,16 +9,10 @@ import { portalSchema, rolSchema, uuidSchema } from "./esquemas";
 import { validarAsignacionRol } from "./permisos/asignaciones";
 import { exigeAsignarRol, exigeGestionDeRoles } from "./permisos/comun";
 import { limpiarPortalObsoleto } from "./users-portal";
-import {
-  aMiembro,
-  buscar,
-  type Miembro,
-  miembroSchema,
-  quedanOtrosOwners,
-  ultimosAccesos,
-} from "./users-miembro";
+import { buscar, type Miembro, miembroSchema, quedanOtrosOwners } from "./users-miembro";
 
 export { miembroSchema } from "./users-miembro";
+export { usersList } from "./users-consulta";
 
 /** Quien no es owner no puede tocar owners ni asignar un rol con permisos que él no tenga de hecho. */
 function verificarJerarquia(ctx: Contexto, objetivo: Miembro, nuevoRol?: Rol): void {
@@ -31,27 +25,6 @@ function verificarJerarquia(ctx: Contexto, objetivo: Miembro, nuevoRol?: Rol): v
   // excepciones). La jerarquía manda aunque un rol a medida iguale el acceso de uno más alto.
   if (nuevoRol) exigeAsignarRol(ctx, nuevoRol);
 }
-
-export const usersList = defineCapability({
-  id: "core.users.list",
-  descripcion: "Usuarios de la empresa actual con rol base, rol personalizado, portales y estado.",
-  permiso: PERMISOS_CORE.usersRead,
-  input: z.object({}),
-  output: z.array(miembroSchema),
-  efecto: "lectura",
-  dryRun: false,
-  async handler(ctx) {
-    const filas = await ctx.db.membership.findMany({
-      include: { user: true, rolTenant: true },
-      orderBy: { createdAt: "asc" },
-    });
-    const accesos = await ultimosAccesos(
-      ctx,
-      filas.map((m) => m.userId),
-    );
-    return filas.map((m) => aMiembro(m, accesos.get(m.userId) ?? null));
-  },
-});
 
 export const usersUpdate = defineCapability({
   id: "core.users.update",

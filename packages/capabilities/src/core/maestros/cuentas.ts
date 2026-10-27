@@ -3,21 +3,15 @@ import { z } from "zod";
 import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
-import { noEncontrado } from "../../errores";
-import type { Contexto } from "../../types";
 import { uuidSchema } from "../esquemas";
 import { dondeCuenta, dondeInstalacion } from "./alcance";
 import { cursorDe, listaSchema, pagina } from "./comun";
 import { cuentaSchema, ESTADOS_CUENTA, vistaCuenta } from "./cuentas-vista";
-
-export async function cuentaDe(ctx: Contexto, id: string) {
-  // findFirst (no findUnique) para aplicar el alcance por filas: fuera de alcance = no encontrada.
-  const c = await ctx.db.cuenta.findFirst({ where: { id, AND: [dondeCuenta(ctx)] } });
-  if (!c) throw noEncontrado("La cuenta");
-  return c;
-}
+import { cuentaDe } from "./cuentas-acceso";
+export { cuentaDe } from "./cuentas-acceso";
 
 export const cuentasList = defineCapability({
+  auditarLectura: (s) => s.items.map((c) => c.id),
   id: "core.cuentas.list",
   descripcion:
     "Lista las cuentas (clientes y prospectos) de la empresa, con búsqueda por nombre, razón social o RUT y filtro por estado. Paginada por cursor.",
@@ -80,6 +74,11 @@ export const cuentasList = defineCapability({
 });
 
 export const cuentasGet = defineCapability({
+  auditarLectura: (s) => [
+    s.id,
+    ...s.representantes.map((r) => r.id),
+    ...s.contactos.map((c) => c.id),
+  ],
   id: "core.cuentas.get",
   descripcion:
     "Ficha de una cuenta: datos legales y comerciales, representantes, contactos activos, instalaciones y cantidad de documentos.",

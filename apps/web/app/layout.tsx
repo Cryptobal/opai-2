@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
-import type { ReactNode } from "react";
+import { headers } from "next/headers";
+import { type ReactNode, Suspense } from "react";
 
 import "./globals.css";
 
@@ -36,12 +37,28 @@ const TEMA = `try{var t=localStorage.getItem("opai_tema");if(t==="oscuro"||t==="
 // versión nueva (ClientePwa) y el de instalar (AvisoInstalar) son UI y viven en las capas de portal.
 const REGISTRO_SW = `if("serviceWorker"in navigator){addEventListener("load",function(){navigator.serviceWorker.register("/sw.js").catch(function(){})})}`;
 
+/** Solo estos scripts dependen del request; no se cachea el nonce ni se desactiva Cache Components. */
+async function ScriptsIniciales() {
+  const nonce = (await headers()).get("x-opai-nonce") ?? undefined;
+  return (
+    <>
+      <script id="opai-tema" nonce={nonce} dangerouslySetInnerHTML={{ __html: TEMA }} />
+      <script
+        id="opai-registro-sw"
+        nonce={nonce}
+        dangerouslySetInnerHTML={{ __html: REGISTRO_SW }}
+      />
+    </>
+  );
+}
+
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="es-CL" className="h-full antialiased" suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: TEMA }} />
-        <script dangerouslySetInnerHTML={{ __html: REGISTRO_SW }} />
+        <Suspense fallback={null}>
+          <ScriptsIniciales />
+        </Suspense>
       </head>
       <body className="flex min-h-full flex-col">{children}</body>
     </html>

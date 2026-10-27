@@ -1,17 +1,13 @@
 import { z } from "zod";
 
-import {
-  ESTADOS_SOLICITUD,
-  PERMISOS_CORE,
-  semaforoPlazo,
-  TIPOS_SOLICITUD,
-} from "@opai/domain";
+import { ESTADOS_SOLICITUD, PERMISOS_CORE, semaforoPlazo, TIPOS_SOLICITUD } from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import { noEncontrado } from "../../errores";
 import { uuidSchema } from "../esquemas";
 import { cursorDe, definidos, pagina } from "../maestros/comun";
 import { solicitudSchema, vistaSolicitud } from "./comunes";
+import { dondeSolicitud } from "./solicitudes-alcance";
 
 const conSemaforo = (f: Parameters<typeof vistaSolicitud>[0]) => ({
   ...vistaSolicitud(f),
@@ -34,11 +30,25 @@ export const solicitudesListar = defineCapability({
     siguiente: z.string().nullable(),
   }),
   efecto: "lectura",
+  auditarLectura: (salida) => salida.items.map((s) => s.id),
   dryRun: false,
   async handler(ctx, input) {
+    const where = {
+      ...definidos({ estado: input.estado, tipo: input.tipo }),
+      ...(await dondeSolicitud(ctx)),
+    };
+    // Un cursor ajeno/inexistente nunca se usa como ancla de ordenación para enumerar la bandeja.
+    if (
+      input.cursor &&
+      !(await ctx.db.solicitudArco.findFirst({
+        where: { ...where, id: input.cursor },
+        select: { id: true },
+      }))
+    )
+      throw noEncontrado("La solicitud");
     const filas = await ctx.db.solicitudArco.findMany({
-      where: definidos({ estado: input.estado, tipo: input.tipo }),
-      orderBy: { createdAt: "desc" },
+      where,
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
       take: input.limite + 1,
       ...cursorDe(input.cursor),
     });
@@ -55,9 +65,12 @@ export const solicitudObtener = defineCapability({
   input: z.object({ id: uuidSchema }),
   output: solicitudSchema.extend({ semaforo: z.string() }),
   efecto: "lectura",
+  auditarLectura: (salida) => [salida.id],
   dryRun: false,
   async handler(ctx, input) {
-    const s = await ctx.db.solicitudArco.findUnique({ where: { id: input.id } });
+    const s = await ctx.db.solicitudArco.findFirst({
+      where: { id: input.id, ...(await dondeSolicitud(ctx)) },
+    });
     if (!s) throw noEncontrado("La solicitud");
     return conSemaforo(s);
   },

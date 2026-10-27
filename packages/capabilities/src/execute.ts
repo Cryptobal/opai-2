@@ -1,6 +1,7 @@
 import { controlAgente } from "./agentes/control";
 import { denegar, falla } from "./autorizacion";
 import { ErrorCapacidad } from "./errores";
+import { ejecutarLecturaAuditada } from "./execute-lectura";
 import { consumoEjecucion } from "./execute-medicion";
 import { auditarSiPlataforma, eventoAuditoria, repeticion, tenantDe } from "./execute-util";
 import { SALIDA_INVALIDA } from "./idempotencia";
@@ -42,7 +43,9 @@ async function correr(
     !dryRun && c.efecto !== "lectura" && ctx.conTenant ? opciones.idempotencyKey : undefined;
   const reserva = clave ? await ctx.idempotencia.reservar(c.id, clave, entrada.data) : null;
   if (reserva && reserva.estado !== "nueva") {
-    return { resultado: repeticion(reserva), entrada: entrada.data };
+    const resultado = repeticion(reserva);
+    if (resultado.ok) await c.autorizarRepeticion?.(ctx, entrada.data, resultado.data);
+    return { resultado, entrada: entrada.data };
   }
   const reservaId = reserva?.id;
   // Con tenant actual, la escritura audita en SU MISMA transacción, más abajo (ADR-052): si el
@@ -51,10 +54,13 @@ async function correr(
   // SIN_TENANT): `executeCapability` audita aparte con `auditarSiPlataforma`.
   const auditaAqui = c.efecto !== "lectura" && ctx.conTenant && !c.tenantObjetivo && !dryRun;
   let crudo: unknown;
+  let lecturaValidada: ReturnType<Capacidad["output"]["safeParse"]> | undefined;
   try {
     // Lecturas con empresa: una sola transacción con el tenant fijado una vez (ADR-045). Sin empresa
     // (plataforma) no se envuelve: la RLS no devuelve filas para un handler que no consulta la base.
-    if (c.efecto === "lectura" && ctx.conTenant && ctx.enLectura) {
+    if (c.auditarLectura && ctx.conTenant) {
+      lecturaValidada = await ejecutarLecturaAuditada(ctx, c, entrada.data, modo);
+    } else if (c.efecto === "lectura" && ctx.conTenant && ctx.enLectura) {
       crudo = await ctx.enLectura((db) =>
         c.handler({ ...ctx, db, transaccion: (fn) => fn(db) }, entrada.data, modo),
       );
@@ -78,7 +84,7 @@ async function correr(
     if (reservaId) await ctx.idempotencia.liberar(reservaId);
     throw error;
   }
-  const salida = c.output.safeParse(crudo);
+  const salida = lecturaValidada ?? c.output.safeParse(crudo);
   if (reservaId) {
     // El handler terminó: la escritura ya ocurrió. Nunca se libera la clave (duplicaría).
     await ctx.idempotencia.completar(

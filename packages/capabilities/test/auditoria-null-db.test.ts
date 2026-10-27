@@ -43,11 +43,20 @@ describe.skipIf(!urlPropietario)("lecturas durante expansión de auditoría", ()
         ["core.actividad.list", "items"],
         ["core.audit.list", "eventos"],
       ]) {
-        expect(await mod.executeCapability(ctx(tenant.id, "owner"), capacidad!, {})).toMatchObject({
+        // La propia lectura ahora agrega un evento: filtrar la fila histórica bajo expansión.
+        expect(
+          await mod.executeCapability(ctx(tenant.id, "owner"), capacidad!, {
+            capability: "core.prueba",
+          }),
+        ).toMatchObject({
           ok: true,
           data: { [campo!]: [expect.objectContaining({ id })] },
         });
-        expect(await mod.executeCapability(ctx(otro.id, "owner"), capacidad!, {})).toMatchObject({
+        expect(
+          await mod.executeCapability(ctx(otro.id, "owner"), capacidad!, {
+            capability: "core.prueba",
+          }),
+        ).toMatchObject({
           ok: true,
           data: { [campo!]: [] },
         });
