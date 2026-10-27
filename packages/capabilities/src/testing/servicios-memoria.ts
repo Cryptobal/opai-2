@@ -1,7 +1,8 @@
-// Servicios del núcleo en memoria para tests: outbox, trabajos y bitácora sobre la base falsa.
-import { canonDeHecho, HASH_GENESIS, hashEncadenado, primeraRotura } from "@opai/domain";
+// Servicios del núcleo en memoria para tests: outbox, trabajos, bitácora y auditoría sobre la base
+// falsa.
+import { canonDeAuditoria, canonDeHecho, HASH_GENESIS, hashEncadenado, primeraRotura } from "@opai/domain";
 
-import type { Actor, BitacoraServicio, Eventos, Trabajos } from "../types";
+import type { Actor, Auditoria, BitacoraServicio, Eventos, Trabajos } from "../types";
 import type { Fila } from "./db-memoria-util";
 
 /** Como en la real, el evento se escribe con la `tx` del hecho (y se revierte con ella). */
@@ -46,6 +47,62 @@ export function trabajosEnMemoria(tenantId: string): Trabajos {
         skipDuplicates: true,
       });
       return r.count === 1;
+    },
+  };
+}
+
+/** Auditoría encadenada con los mismos hashes que la real (dominio compartido, ADR-052). */
+export function auditoriaEnMemoria(tabla: (n: string) => Fila[], tenantId: string): Auditoria {
+  return {
+    async registrar(tx, evento) {
+      const previas = tabla("auditEvent").filter((f) => f["tenantId"] === evento.tenantId);
+      const ultima = previas.at(-1);
+      const hashAnterior = (ultima?.["hash"] as string | undefined) ?? HASH_GENESIS;
+      const seq = previas.length + 1;
+      const createdAt = new Date();
+      const hashCanon = await canonDeAuditoria({
+        tenantId: evento.tenantId,
+        seq,
+        actorTipo: evento.actor.tipo,
+        actorId: evento.actor.id ?? null,
+        viaUserId: evento.actor.viaUserId ?? null,
+        capability: evento.capability,
+        entityType: evento.entityType ?? null,
+        entityId: evento.entityId ?? null,
+        createdAt,
+        payload: evento.payload ?? null,
+      });
+      const hash = await hashEncadenado(hashAnterior, hashCanon);
+      await tx.auditEvent.create({
+        data: {
+          tenantId: evento.tenantId,
+          actorType: evento.actor.tipo,
+          actorId: evento.actor.id ?? null,
+          viaUserId: evento.actor.viaUserId ?? null,
+          capability: evento.capability,
+          entityType: evento.entityType ?? null,
+          entityId: evento.entityId ?? null,
+          payload: JSON.parse(JSON.stringify(evento.payload ?? null)),
+          createdAt,
+          seq,
+          hashAnterior,
+          hash,
+          hashCanon,
+        },
+      });
+      return { seq, hash };
+    },
+    async verificar() {
+      const cadena = tabla("auditEvent")
+        .filter((f) => f["tenantId"] === tenantId)
+        .map((f) => ({
+          seq: f["seq"] as number,
+          payloadCanon: f["hashCanon"] as string,
+          hashPrevio: f["hashAnterior"] as string,
+          hash: f["hash"] as string,
+        }));
+      const rota = await primeraRotura(cadena);
+      return { ok: rota === null, ultimoSeq: cadena.length, primeraRota: rota };
     },
   };
 }

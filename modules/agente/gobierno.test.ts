@@ -62,15 +62,17 @@ it("un servicio no hereda el historial del agente interno de su responsable", as
     permisos: ["agente:usar"],
     principal: { tipo: "servicio", id: "servicio-ficticio" },
   });
-  await e.ctx.db.auditEvent.create({
-    data: {
+  await e.ctx.transaccion((tx) =>
+    e.ctx.auditoria.registrar(tx, {
       tenantId: e.ctx.tenantId,
-      actorType: "agent",
-      actorId: `agente-interno:${e.ctx.usuario!.id}`,
-      viaUserId: e.ctx.usuario!.id,
+      actor: {
+        tipo: "agent",
+        id: `agente-interno:${e.ctx.usuario!.id}`,
+        viaUserId: e.ctx.usuario!.id,
+      },
       capability: "core.prueba.accion",
-    },
-  });
+    }),
+  );
   expect(await executeCapability(e.ctx, "agente.historial.list", {})).toMatchObject({
     ok: true,
     data: [],

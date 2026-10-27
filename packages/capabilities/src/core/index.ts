@@ -8,6 +8,7 @@ import {
   platformBitacoraEstado,
   trabajosDelNucleo as trabajosServicios,
 } from "./bitacora";
+import { platformAuditoriaEstado, trabajoVerificarAuditoria } from "./auditoria";
 import { consumosPorAgente, consumosPorRecurso, consumosResumen } from "./consumos";
 import { geoAutocompletar, geoDetalle, geoGeocodificar, geoMapa, iaProbar } from "./geo-ia";
 import { integracionesProbar, platformIntegracionesEstado } from "./integraciones-probar";
@@ -77,6 +78,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   consumosPorRecurso,
   bitacoraVerificar,
   platformBitacoraEstado,
+  platformAuditoriaEstado,
   platformTrabajosList,
   platformTrabajosReintentar,
   platformTrabajosCancelar,
@@ -111,6 +113,7 @@ export const consumidoresDelNucleo = [consumidorComunicaciones];
 /** Trabajos del núcleo que registra el borde (`apps/web/lib/registro.ts`). */
 export const trabajosDelNucleo = [
   ...trabajosServicios,
+  trabajoVerificarAuditoria,
   ...trabajosDocumentos,
   ...trabajosAgentes,
   ...trabajosCumplimiento,

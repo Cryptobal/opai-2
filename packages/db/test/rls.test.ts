@@ -23,11 +23,12 @@ describe.skipIf(!urlPropietario)("aislamiento por tenant con RLS", () => {
     });
     idA = a.id;
     idB = b.id;
+    const rellenoHash = { hashAnterior: "0".repeat(64), hash: "a".repeat(64), hashCanon: "{}" };
     await e.admin.auditEvent.createMany({
       data: [
-        { tenantId: idA, actorType: "system", capability: "test.a.1" },
-        { tenantId: idA, actorType: "system", capability: "test.a.2" },
-        { tenantId: idB, actorType: "system", capability: "test.b.1" },
+        { tenantId: idA, actorType: "system", capability: "test.a.1", seq: 1, ...rellenoHash },
+        { tenantId: idA, actorType: "system", capability: "test.a.2", seq: 2, ...rellenoHash },
+        { tenantId: idB, actorType: "system", capability: "test.b.1", seq: 1, ...rellenoHash },
       ],
     });
   });
@@ -53,7 +54,15 @@ describe.skipIf(!urlPropietario)("aislamiento por tenant con RLS", () => {
   it("un tenant no puede escribir filas de otro", async () => {
     await expect(
       e.forTenant(idA).auditEvent.create({
-        data: { tenantId: idB, actorType: "system", capability: "test.fuga" },
+        data: {
+          tenantId: idB,
+          actorType: "system",
+          capability: "test.fuga",
+          seq: 99,
+          hashAnterior: "0".repeat(64),
+          hash: "a".repeat(64),
+          hashCanon: "{}",
+        },
       }),
     ).rejects.toThrow();
     expect(await e.admin.auditEvent.count({ where: { tenantId: idB } })).toBe(1);

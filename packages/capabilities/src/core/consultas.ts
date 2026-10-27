@@ -7,6 +7,7 @@ import { defineCapability } from "../define";
 import { prohibido } from "../errores";
 import { listarModulos } from "../module";
 import { auditarHistorialSensible, redactarSensibles } from "./panel/actividad-sensible";
+import { auditoriaSelect } from "./panel/auditoria-select";
 
 export const moduloEstadoSchema = z.object({
   id: z.string(),
@@ -74,6 +75,7 @@ export const auditList = defineCapability({
   async handler(ctx, input) {
     if (ctx.alcance) throw prohibido("No tienes acceso a esta actividad.");
     const filas = await ctx.db.auditEvent.findMany({
+      select: auditoriaSelect,
       where: {
         ...(input.capability ? { capability: input.capability } : {}),
         ...(input.actorId
