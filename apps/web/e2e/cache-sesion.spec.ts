@@ -67,8 +67,10 @@ test.describe("caché y sesión", () => {
     // Todo con navegación del lado del cliente: una recarga completa vaciaría la caché y taparía el fallo.
     await menu(page, /^Personas/).click();
     await page.waitForURL("**/personas");
+    await expect(page.getByRole("region", { name: "Lista de personas" })).toBeVisible();
     await menu(page, /^Cuentas/).click();
     await page.waitForURL("**/cuentas");
+    await expect(page.getByRole("region", { name: "Lista de cuentas" })).toBeVisible();
     await menu(page, /^Personas/).click(); // Personas queda en la caché del navegador
     await page.waitForURL("**/personas");
     await page.locator('a[href="?nueva=1"]').filter({ visible: true }).first().click();

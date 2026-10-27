@@ -35,7 +35,8 @@ test.describe("la lista queda fija al cambiar de pestaña (1280 px)", () => {
       await page.goto(m.ruta);
       const lista = page.getByRole("region", { name: m.lista });
       await expect(lista).toBeVisible();
-      await lista.getByRole("link").first().click();
+      const fila = lista.locator(`a[href^="${m.ruta}/"][href*="-"]`).first();
+      await fila.click();
       await page.waitForURL(new RegExp(`${m.ruta}/[0-9a-f-]{36}$`));
       const ficha = page.getByRole("region", { name: "Detalle" });
       await expect(ficha).toBeVisible();
@@ -53,7 +54,7 @@ test.describe("la lista queda fija al cambiar de pestaña (1280 px)", () => {
             .first(),
         ).toBeVisible();
         await expect(lista, `la lista se ve en ${tab}`).toBeVisible();
-        await expect(lista.getByRole("link").first()).toBeVisible();
+        await expect(fila).toBeVisible();
         await expect(page.getByText("Algo salió mal")).toHaveCount(0);
       }
     });
@@ -66,7 +67,7 @@ test.describe("la lista queda fija al cambiar de pestaña (1280 px)", () => {
     await entrar(page);
     await page.goto("/personas?q=a");
     const lista = page.getByRole("region", { name: "Lista de personas" });
-    await lista.getByRole("link", { name: /\w/ }).first().click();
+    await lista.locator('a[href^="/personas/"][href*="-"]').first().click();
     await page.waitForURL(/\/personas\/[0-9a-f-]{36}\?q=a/);
     const ficha = page.getByRole("region", { name: "Detalle" });
     for (const tab of ["Laboral", "Documentos", "Actividad", "Resumen"]) {

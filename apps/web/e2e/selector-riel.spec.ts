@@ -1,5 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
 
+import { entrar as iniciarSesion } from "./sesion";
+
 // Selector de portal y de empresa en el riel de iPad (768–1279 px), QA del PR #27. Usa un usuario de
 // prueba CORRIENTE (sin rol de plataforma, rol «admin») con dos empresas (Gard Security y Atlas
 // Seguridad SpA) y los portales ERP y Supervisor. Datos, solo en una base local (tras seed:dev-tenant
@@ -16,10 +18,7 @@ test.use({ actionTimeout: 30_000 });
 test.setTimeout(180_000);
 
 async function entrar(page: Page) {
-  await page.goto("/login");
-  await page.getByLabel("Correo").fill(email);
-  await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
-  await page.getByRole("button", { name: "Entrar" }).click();
+  await iniciarSesion(page, email);
   await page.waitForURL(/\/elegir-empresa/);
   await page.getByRole("button", { name: /Gard Security/ }).click();
   await page.waitForURL((url) => url.pathname === "/");

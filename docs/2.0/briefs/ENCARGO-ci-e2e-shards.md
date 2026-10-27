@@ -6,9 +6,20 @@ El encargo solicita cuatro shards independientes, evidencias ante cancelación, 
 
 - Shards con PostgreSQL y servidor propios, sin cambiar proyectos ni paralelismo interno: implementado; duración y equilibrio reales pendientes de CI.
 - Test-results, blob y log con `always()`, trazas de fallos y margen de timeout: implementado; cancelación real y subida deben probarse en GitHub.
-- Informe HTML y anotaciones combinadas; check agregador falla si falta éxito: implementado, pendiente de prueba en GitHub.
+- Informe HTML y anotaciones combinadas; check agregador falla si falta éxito: implementado; informe y agregador en rojo comprobados en el run 40520862621; falta verificar seis shards y cancelación.
 - Logins afectados usan el helper MFA, conservando selección de empresa: implementado, validación integral local y CI pendiente: corrida local 32 aprobados, 14 fallidos y 8 omitidos preexistentes; hubo una corrida concurrente interrumpida y build durante el servidor dev, por lo que se requiere repetición aislada.
 - Los dos fallos sin diagnóstico confirmado requieren leer artefactos antes de corregirlos; no se cambian sus aserciones.
 - Gate, informe de los cuatro tiempos y prueba temporal de timeout de tres minutos: pendientes hasta ejecución verificable del PR. El encargo prohíbe abrirlo en esta sesión.
 
 Adaptación técnica de OpenCode: job de 35 minutos y paso de 25 para dejar margen de preparación y subida, sin garantía de subida ante cancelación forzosa o agotamiento del job completo. Informe combinado exige blobs disponibles. No se atribuyen decisiones nuevas a Carlos.
+
+## Continuación PR #77
+
+- Caché de Chromium por sistema y versión de Playwright; instalación de dependencias de sistema en cada ejecución. Se proponen seis shards sin cambiar proyectos, cobertura ni timeouts. Equilibrio y duración quedan pendientes de medir en CI; la primera ejecución puede tener caché fría.
+- `maestros-lista-fija`: el trace desktop con CPU ×4 muestra que el primer enlace apunta a `?nueva=1`, por lo que se esperaba una ficha durante cuatro minutos. El test selecciona enlaces de ficha, sin cambiar sus aserciones. Trace local en `/tmp/opencode/maestros-lista-fija-cpu4-trace.zip`.
+- ADR-015 exige MFA para plataforma, owner y admin, y opcionalmente para otros roles. Los fixtures selector (admin) y multiempresa (owner) se enrolan con el secreto fijo de prueba y usan el helper existente; no se cambió la política. Los demás fallos y su validación completa quedan sujetos a los resultados e2e.
+- Adaptaciones técnicas de OpenCode según el encargo; no son decisiones de negocio. Sin migraciones ni cambios de producto.
+
+- Validación parcial de continuación: actionlint, typecheck, lint, test, test:db, build y presupuesto pasaron antes del último ajuste del test de portales; typecheck y lint también pasaron después. En la repetición e2e, el caso ERP sin acceso agotó el tiempo esperando el menú; se ajustó la espera y queda pendiente verificarlo y completar la repetición. La nueva corrida de test se interrumpió tras una incidencia en un test de base.
+
+- Continuación de validación: actionlint, typecheck, lint, test (193 archivos), test:db, build y presupuesto pasaron. Una primera corrida de test tuvo un timeout de preparación de base y la repetición pasó. Playwright se ejecutó una vez; los fixtures MFA del selector y multiempresa se sembraron durante la corrida y el build coincidió con el servidor dev. Por ello sus fallos requieren confirmación en CI, incluidos activación MFA antes de sembrar, datos locales y esperas de navegación o menú. No se considera validación integral verde. La decisión t500u del encargo deja el equilibrio y la validación real para GitHub y sustituye la repetición e2e local.

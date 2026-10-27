@@ -30,6 +30,9 @@ test.describe("acceso a portales", () => {
     }) => {
       test.setTimeout(180_000);
       await entrar(page, autorizado ? undefined : email);
+      if (new URL(page.url()).pathname === "/elegir-empresa") {
+        await page.getByRole("button", { name: /Gard Security/ }).click();
+      }
 
       for (const p of PORTALES) {
         const paginas = [
@@ -95,7 +98,12 @@ test.describe("acceso a portales", () => {
       await expect(page.getByRole("heading", { level: 1, name: "Sin permisos" })).toBeVisible();
     }
     // N2: el menú de usuario no ofrece Preferencias, pero conserva la salida.
-    await page.getByRole("button", { name: "Menú de usuario" }).first().click();
+    const menuUsuario = page.getByRole("button", { name: "Menú de usuario" }).first();
+    const salir = page.getByRole("menuitem", { name: "Cerrar sesión" });
+    await expect(async () => {
+      if (!(await salir.isVisible())) await menuUsuario.click();
+      await expect(salir).toBeVisible({ timeout: 1000 });
+    }).toPass();
     await expect(page.getByRole("menuitem", { name: "Preferencias" })).toHaveCount(0);
     await page.getByRole("menuitem", { name: "Cerrar sesión" }).click();
     await page.waitForURL((url) => url.pathname.startsWith("/login"));

@@ -1,3 +1,4 @@
+import { entrar as iniciarSesion } from "./sesion";
 import { expect, type Page, test } from "@playwright/test";
 
 /**
@@ -135,17 +136,11 @@ const emailA = process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl"; // usuario
 const emailB = "e2e-multiempresa@opai.cl"; // usuario B, elige la empresa 2 (Empresa E2E)
 
 async function entrar(page: Page, correo: string, empresa: RegExp) {
-  await page.goto("/login");
-  await page.getByLabel("Correo").fill(correo);
-  await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
-  await page.getByRole("button", { name: "Entrar" }).click();
+  await iniciarSesion(page, correo);
   // Con más de una membresía el acceso pide elegir; se elige la empresa indicada.
-  const boton = page.getByRole("button", { name: empresa });
-  await Promise.race([
-    boton.waitFor({ state: "visible" }),
-    page.waitForURL((u) => u.pathname === "/" || u.pathname === "/platform"),
-  ]).catch(() => undefined);
-  if (await boton.isVisible().catch(() => false)) await boton.click();
+  if (new URL(page.url()).pathname === "/elegir-empresa") {
+    await page.getByRole("button", { name: empresa }).click();
+  }
   await page.waitForURL((u) => u.pathname === "/" || u.pathname === "/platform");
 }
 

@@ -10,7 +10,7 @@ Hasta el 24-oct-2026 este archivo fue la fuente de verdad del avance; desde ento
 
 ## CI · e2e por shards
 
-Adaptación técnica de OpenCode según el encargo: cuatro shards aislados, evidencia y
+Adaptación técnica de OpenCode según el encargo: seis shards aislados, caché de Chromium, evidencia y
 informe combinado, con accesos e2e compatibles con MFA. Estado y criterios pendientes
 en [`briefs/ENCARGO-ci-e2e-shards.md`](briefs/ENCARGO-ci-e2e-shards.md). Sin
 cambio de producto, migraciones ni decisiones de negocio nuevas.

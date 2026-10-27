@@ -25,8 +25,14 @@ test("Trabajador vuelve al ERP con título y Supervisor activa solo Instalacione
   if (!password) throw new Error("Falta SEED_OWNER_PASSWORD o E2E_PASSWORD");
   await entrar(page);
   await page.goto("/trabajador");
-  await page.getByRole("button", { name: /Cambiar de portal o empresa/ }).click();
-  await page.getByRole("menuitem", { name: /^ERP/ }).click();
+  const selector = page.getByRole("button", { name: /Cambiar de portal o empresa/ });
+  const erp = page.getByRole("menuitem", { name: /^ERP/ });
+  // En dev el control puede mostrarse antes de hidratarse; reintentar hasta abrir el menú.
+  await expect(async () => {
+    if (!(await erp.isVisible())) await selector.click();
+    await expect(erp).toBeVisible({ timeout: 1000 });
+  }).toPass();
+  await erp.click();
   await page.waitForURL((u) => u.pathname === "/");
   await expect(page.locator("header h1")).toHaveText("Inicio");
   await page.goto("/supervisor/instalaciones");
