@@ -1,4 +1,4 @@
-import { esVertical, vocabulario } from "@opai/domain";
+import { esRol, esVertical, vocabulario } from "@opai/domain";
 
 import type { Identidad } from "@/lib/actor";
 import { tieneAccesoAPortal } from "@/lib/acceso-portal";
@@ -15,23 +15,29 @@ export function datosShell(identidad: Identidad, portal: string): DatosShell {
   const { usuario, actual, membresias } = identidad;
   const vertical = actual?.tenant.vertical ?? "";
   const inicio = PORTALES.find((p) => p.id === portal)?.href ?? "/";
-  const visibles = portalesVisibles(actual?.portales ?? [], tieneAccesoAPortal(identidad, "platform"));
+  const visibles = portalesVisibles(
+    actual?.portales ?? [],
+    tieneAccesoAPortal(identidad, "platform"),
+  );
   // Acceso efectivo al portal actual, calculado igual que `tieneAccesoAPortal` del servidor
   // (plataforma por `platformRole`, los demás por la membresía). Lo usa el shell para no ofrecer
   // búsqueda, ⌘K ni Preferencias sin acceso (`marco-shell.tsx`), y aquí para la navegación.
   const acceso = tieneAccesoAPortal(identidad, portal);
   // Sin acceso al portal el shell se monta igual (`portal-layout.tsx`), pero sin navegación: solo el
   // selector de portal y empresa, el menú de usuario y el aviso «Sin permisos» de la página.
-  const nav = !acceso
-    ? []
-    : portal === "erp"
+  const erp =
+    acceso && portal === "erp"
       ? navegacionErp(
-          // Permisos efectivos (ADR-022): el menú tiene que reflejar el rol personalizado y las
-          // excepciones del usuario, no el rol base (I4/P4 de la QA del PR #60).
+          actual && esRol(actual.rol) ? actual.rol : null,
           puedeDeIdentidad(identidad),
           identidad.modulosActivos,
           vocabulario(esVertical(vertical) ? vertical : "seguridad"),
         )
+      : null;
+  const nav = erp
+    ? erp.nav
+    : !acceso
+      ? []
       : portal === "platform"
         ? NAV_PLATAFORMA
         : navegacionPortal(inicio, portal);
@@ -40,6 +46,7 @@ export function datosShell(identidad: Identidad, portal: string): DatosShell {
     acceso,
     epoca: epocaDe(usuario.id, actual?.tenantId ?? null),
     nav,
+    ...(erp ? { grupos: erp.grupos, navInferior: erp.navInferior, acciones: erp.acciones } : {}),
     // Sin acceso, el portal actual no está en `visibles`; `conPortalActual` lo antepone para que el
     // selector lo nombre (ADR-050, #54), aunque la navegación vaya vacía (H1).
     portales: conPortalActual(visibles, portal),

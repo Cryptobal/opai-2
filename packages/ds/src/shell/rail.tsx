@@ -57,8 +57,9 @@ export type RailProps = NavProps & {
 };
 
 /**
- * iPad (ShellTablet): riel de 80 px con el selector de portal y empresa arriba (sin la marca), ítems
- * de 64×56 y los ítems fijos (Configuración) al pie.
+ * iPad vertical (ShellTablet, 768–1023 px, D9 del Brief 05): riel de 80 px con el selector de
+ * portal y empresa arriba (sin la marca), ítems de 64×56 y los ítems fijos (Configuración) al pie.
+ * Desde 1024 px se usa la barra lateral completa (`Sidebar`), sin un riel nuevo.
  */
 export function Rail({
   items,
@@ -72,7 +73,7 @@ export function Rail({
   return (
     <nav
       aria-label="Principal"
-      className="sticky top-0 hidden h-dvh w-20 flex-none flex-col items-center border-r border-border bg-surface py-4 md:flex xl:hidden"
+      className="sticky top-0 hidden h-dvh w-20 flex-none flex-col items-center border-r border-border bg-surface py-4 md:flex lg:hidden"
     >
       <PortalSwitcher
         portales={portales}

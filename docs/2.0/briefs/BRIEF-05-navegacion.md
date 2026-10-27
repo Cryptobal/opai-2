@@ -248,3 +248,32 @@ Conviene dividirlo en **dos PRs** para que la cabecera de CAR-12 (urgente) llegu
 ## 16. Reporte de ejecución
 
 Al cerrar: commits integrados, capturas antes y después a 375, 1024 y 1280, resultado de `cabecera-estable.spec.ts`, medición de ADR-045, presupuesto de JS, actualización de `NAVEGACION.md` §8 y resumen ejecutivo para Carlos (qué se hizo, qué cambia para Gard, qué decide él, qué sigue).
+
+### Continuación del PR B · 27-oct-2026
+
+Implementación en `brief/05-pr-b-navegacion`, no integrada. Se preservó el trabajo local heredado y se incorporó `origin/main` mediante merge; al recuperar el stash se resolvieron los conflictos conservando los permisos efectivos y las protecciones del shell de `main`. El export aprobado está presente.
+
+Decisiones técnicas de OpenCode / GPT-6.1 Sol, dentro del encargo (no atribuidas a Carlos):
+- `navegacion_area_abierta = "ninguna"` representa plegado explícito; `null` conserva el respaldo por ruta.
+- `core.config.set` serializa lectura y escritura por ajuste en su transacción; revisión esperada opcional evita reemplazar fijados con una lista obsoleta. Al reiniciar ajustes de navegación se conserva una fila con valor inválido para el esquema: la lectura vuelve al defecto sin reutilizar la revisión.
+- Las fichas guardadas se validan con capacidades existentes y alcance antes de mostrarse; una falla transitoria oculta el acceso, no concede acceso. Solo se aceptan rutas internas conocidas. Recientes siguen exclusivamente en el navegador.
+- Gana ADR-050 de `main` sobre D7: Buscar arriba en teléfono; usuario al pie de la lateral. No se crea un agente interno ni se copia el estilo de 1.0.
+
+No hay migración nueva ni cambio del orden del plan. La tarea específica del PR B no viene identificada: CAR-13 es la del documento, no se inventa otra vinculación.
+
+#### Autorrevisión de aceptación del PR B
+
+| CA | Implementación y comprobación |
+|---|---|
+| 1 | e2e `cabecera-estable.spec.ts`: los controles fijos conservan su caja en los tres anchos. La campana ahora es un enlace a la Bandeja. |
+| 2–5 | Modelo puro y permisos efectivos heredados de main; grupos por áreas, límites, sin entradas inactivas ni accesos financieros de los roles excluidos. Escenarios futuros se prueban como datos del modelo, no como módulos ficticios en producción. |
+| 6 | Sin contadores laterales; punto compartido de Inicio/campana y número en Bandeja. Aprobaciones solo se consultan cuando el resumen autorizado no es null. |
+| 7 | Acordeón exclusivo, estado por usuario/tenant, plegado explícito y contenido cerrado `inert`; al navegar se abre el área de destino. |
+| 8 | Pin de entrada y ficha, cinco máximos, fecha ascendente, validación de existencia/alcance antes de mostrar. CAS rechaza listas obsoletas; no hay fusión automática entre dispositivos. |
+| 9 | Recientes locales limitados a diez, almacenamiento inválido tolerado; acciones buscables y navegación con teclado mediante cmdk/Radix. |
+| 10–12 | Barra inferior por área, Más como Sheet con navegación completa; lateral desde 1024 y riel anterior conservado entre 768–1023; shell persistente y precarga conservada. |
+| 13–14 | Tokens/componentes del DS, foco y targets de 44 px, muestra en `/ds`, capturas e2e claro/oscuro. **Parcial:** no se ejecutó una auditoría instrumental de contraste ni comparación visual exhaustiva de las 28 pantallas del export. |
+
+**ADR-037:** el build de esta rama superó 29 topes anteriores con el shell compartido ampliado (fijados, preferencias CAS, recientes y hoja Más). Se agregaron excepciones acotadas: fichas ERP a 169 KB, Cargos 166, Preferencias 180, integración 179, Ajustes/Nueva empresa de Plataforma 168 y Módulos 172; portales provisionales 162→165 y galería 220→222. No cambian el framework, el acceso, el tope general ni `maxSobreFramework`. No se atribuye la diferencia íntegra a este PR sin una medición de base equivalente. La paleta y la hoja siguen diferidas. La subida exige el check de presupuesto y revisión normal (ADR-043 v3), no una excepción de integración.
+
+**ADR-045 parcial:** las preferencias se cargan una vez al montar, no desde las páginas; recientes no consultan al navegar. La revalidación de fichas fijadas puede añadir hasta cinco lecturas tras montar. No se produjo una nueva tabla instrumental antes/después del protocolo de rendimiento; no se presenta como cumplido ese punto de §13.

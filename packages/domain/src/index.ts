@@ -20,3 +20,4 @@ export * from "./datos-personales";
 export * from "./cumplimiento";
 export * from "./etiquetas-datos-personales";
 export * from "./actividades-tratamiento";
+export * from "./navegacion";

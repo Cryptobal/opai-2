@@ -1,22 +1,27 @@
 "use client";
 
-import { Building2, LogOut, Settings2, UserRound } from "lucide-react";
+import { Building2 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { usePathname, useRouter } from "next/navigation";
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 
-import { AppShell, type ItemMenu, type Portal } from "@opai/ds";
+import { AppShell, BotonFijar, type ItemMenu, type Portal } from "@opai/ds";
 
-import { accionSalir } from "@/app/_acciones/auth";
 import { cambiarTenant } from "@/app/_acciones/capacidad";
+import type { GrupoArea } from "@/lib/navegacion-areas";
+import type { AccionCmdK } from "@/lib/navegacion-entradas";
 import type { ItemNav } from "@/lib/navegacion";
 
 import { useCabecera } from "./cabecera-contexto";
 import { icono } from "./iconos";
 import { LinkMenu } from "./link-menu";
 import { trasLimpiarCaches } from "./limpiar-cache-diferido";
+import { useBandejaPendiente } from "./use-bandeja-pendiente";
 import { usePendiente } from "./navegacion-pendiente";
+import { useRegistrarReciente } from "./use-recientes";
 import { useEpocaSesion } from "./refresco-navegador";
+import { useShellNavegacion } from "./use-shell-navegacion";
+import { menuCuentaShell } from "./menu-cuenta-shell";
 
 // La paleta (cmdk) se descarga al primer uso: no pesa en el JS inicial de cada ruta (ADR-037).
 const Paleta = dynamic(() => import("./paleta").then((m) => m.Paleta), { ssr: false });
@@ -33,6 +38,12 @@ export type DatosShell = {
    *  igual pero sin búsqueda, ⌘K ni Preferencias; el aviso «Sin permisos» vive en la página. */
   acceso: boolean;
   nav: ItemNav[];
+  /** Solo el ERP (Brief 05): grupos por área (acordeón, D1) con el área principal del rol ya
+   *  resuelta en `navInferior` (sin leer las preferencias del usuario en el servidor, ADR-045). */
+  grupos?: GrupoArea[];
+  navInferior?: ItemNav[];
+  /** Acciones de ⌘K (§7), ya filtradas por permiso y módulo activo. */
+  acciones?: AccionCmdK[];
   portales: Portal[];
   tenant: { nombre: string } | null;
   usuario: { nombre: string; email: string; rol?: string };
@@ -78,6 +89,44 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
   const rutaEfectiva = pendiente ?? rutaActual;
   const navPendiente = pendiente ? nav.find((n) => n.href === pendiente) : undefined;
   const tituloEfectivo = navPendiente?.etiqueta ?? cabecera.titulo;
+  // Recientes (§4.3, §10): solo en este navegador, por usuario y empresa; no cuando hay un
+  // destino pendiente (se registraría dos veces al llegar) ni mientras no haya acceso.
+  useRegistrarReciente(datos.epoca, rutaActual, pendiente ? "" : cabecera.titulo, enErp);
+  // Preferencias de navegación (D1, D3, §3): se cargan después de montar, sin sumar consultas al
+  // servidor por navegación (ADR-045); hasta entonces, la barra inferior usa el área por defecto
+  // del rol que ya trae `datos.navInferior` y el acordeón abre la del lugar actual.
+  const {
+    navInferiorResuelto: navInferiorBase,
+    fijados,
+    areaAbierta,
+    onFijar,
+    onDesfijar,
+    onAreaAbierta,
+    esFicha,
+    fichaFijada,
+    onFijarFicha,
+  } = useShellNavegacion(
+    datos.grupos,
+    datos.navInferior,
+    rutaEfectiva,
+    datos.portal,
+    enErp,
+    cabecera.titulo,
+  );
+  const pinFicha =
+    enErp && esFicha ? (
+      <BotonFijar variante="ficha" fijado={fichaFijada} onFijar={() => void onFijarFicha()} />
+    ) : null;
+  // D5: Inicio muestra un punto (sin número) en la barra inferior cuando la Bandeja tiene algo
+  // pendiente (avisos o aprobaciones); el número vive dentro de la pantalla, no en el shell.
+  const bandejaPendiente = useBandejaPendiente(datos.portal, enErp);
+  const navInferiorResuelto = useMemo(
+    () =>
+      navInferiorBase?.map((n) =>
+        n.href === "/" ? { ...n, punto: true, alerta: bandejaPendiente } : n,
+      ),
+    [navInferiorBase, bandejaPendiente],
+  );
   const empresas: ItemMenu[] =
     datos.empresas.length > 1
       ? datos.empresas.map((e, i) => ({
@@ -90,39 +139,16 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
           onSelect: () => trasLimpiarCaches(() => cambiarTenant(e.id)),
         }))
       : [];
-  const menu: ItemMenu[] = [
-    ...(enErp
-      ? [
-          {
-            id: "pref",
-            grupo: "Cuenta",
-            etiqueta: "Preferencias",
-            icono: Settings2,
-            onSelect: () => router.push("/configuracion/preferencias"),
-          },
-        ]
-      : []),
-    {
-      id: "password",
-      ...(enErp ? {} : { grupo: "Cuenta" }),
-      etiqueta: "Cambiar contraseña",
-      icono: UserRound,
-      onSelect: () => setPassword(true),
-    },
-    {
-      id: "salir",
-      etiqueta: "Cerrar sesión",
-      icono: LogOut,
-      peligro: true,
-      // Cerrar sesión limpia las cachés del service worker antes de redirigir (§4.4, §9, CA8).
-      onSelect: () => trasLimpiarCaches(accionSalir),
-    },
-  ];
+  const menu = menuCuentaShell(enErp, (href) => router.push(href), () => setPassword(true));
+  const conPin = (accion: ReactNode) => <>{accion}{pinFicha}</>;
   return (
     <AppShell
       {...cabecera}
+      acciones={conPin(cabecera.acciones)}
+      accionesTelefono={conPin(cabecera.accionesTelefono)}
       titulo={tituloEfectivo}
       nav={nav}
+      {...(navInferiorResuelto ? { navInferior: navInferiorResuelto } : {})}
       portales={datos.portales}
       portalActual={datos.portal}
       rutaActual={rutaEfectiva}
@@ -130,13 +156,26 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
       {...(empresas.length ? { empresas } : {})}
       usuario={datos.usuario}
       menuUsuario={menu}
-      campana={datos.tenant ? <Campana key={datos.epoca} portal={datos.portal} /> : undefined}
+      campana={
+        datos.tenant ? (
+          <Campana key={datos.epoca} portal={datos.portal} pendiente={bandejaPendiente} />
+        ) : undefined
+      }
       {...(enErp ? { onBuscar: () => setPaleta(true) } : {})}
+      {...(enErp ? { fijados, onFijar, onDesfijar, areaAbierta, onAreaAbierta } : {})}
       onNavegar={(href) => router.push(href)}
       Link={LinkMenu}
     >
       {children}
-      {paleta !== null ? <Paleta abierto={paleta} onCerrar={() => setPaleta(false)} /> : null}
+      {paleta !== null ? (
+        <Paleta
+          abierto={paleta}
+          onCerrar={() => setPaleta(false)}
+          epoca={datos.epoca}
+          acciones={datos.acciones ?? []}
+          nav={datos.nav}
+        />
+      ) : null}
       {password ? <CambiarPassword abierto onCerrar={() => setPassword(false)} /> : null}
       <Avisos />
     </AppShell>

@@ -45,7 +45,7 @@ async function caja(loc: Locator) {
 }
 
 const campanaDe = (page: Page) =>
-  page.locator("header").getByRole("button", { name: /notificaciones/i });
+  page.locator("header").getByRole("link", { name: /notificaciones/i });
 // A 1280 el usuario está al pie de la barra lateral; en 375 y 1024, en la cabecera.
 const usuarioDe = (page: Page) =>
   page.locator("header, nav").getByRole("button", { name: "Menú de usuario" });

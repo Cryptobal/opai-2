@@ -1,4 +1,8 @@
 export { AppShell, type AppShellProps } from "./app-shell";
+export { AreaGrupo } from "./area-grupo";
+export { BotonFijar } from "./boton-fijar";
+export { Contador, Punto } from "./contador";
+export { Fijados, type ItemFijado } from "./fijados";
 export { BottomNav } from "./nav";
 export { Rail, type RailProps } from "./rail";
 export { Sidebar } from "./sidebar";

@@ -7,6 +7,7 @@ import { ejecutarComoUsuario } from "@/lib/servidor";
 import { vocabularioActual } from "@/lib/vocabulario";
 
 import { ActividadInicio } from "./actividad-inicio";
+import { Bandeja } from "./bandeja";
 import { type Pendiente, PendientesInicio } from "./pendientes-inicio";
 
 const acciones = (persona: string) => [
@@ -84,6 +85,7 @@ export async function InicioErp({ nombre, empresa, actor }: Props) {
         </div>
         <ActividadInicio actor={actor} />
       </div>
+      <Bandeja />
     </div>
   );
 }

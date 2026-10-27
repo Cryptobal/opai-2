@@ -26,6 +26,13 @@ export type NavItem = {
   fueraInferior?: boolean;
   /** El contador es una alerta (globo rojo también en el riel y la barra inferior). */
   alerta?: boolean;
+  /** Punto de no leído sin número, en vez del contador numérico (D5: Inicio en la barra inferior). */
+  punto?: boolean;
+  /** Área de `NAVEGACION.md` §7 (Brief 05): clave estable del grupo para el acordeón y los fijados;
+   *  `grupo` sigue siendo la etiqueta visible. */
+  area?: string;
+  /** Muestra el pin de fijar al pasar el mouse o con foco de teclado (D3). */
+  fijable?: boolean;
 };
 
 /** Barra superior en modo detalle: "‹ Cuentas / Logística Andina SpA". */
@@ -48,6 +55,8 @@ export type LinkProps = {
   className?: string;
   children: ReactNode;
   "aria-current"?: "page" | undefined;
+  "aria-label"?: string;
+  title?: string;
 };
 
 /** Componente de enlace inyectado por la app (next/link). Por defecto, <a>. */

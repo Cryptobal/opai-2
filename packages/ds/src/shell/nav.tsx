@@ -2,7 +2,7 @@ import { Menu as IconoMenu } from "lucide-react";
 
 import { cn } from "../cn";
 import type { ItemMenu } from "../components/menu";
-import { Contador } from "./contador";
+import { Contador, Punto } from "./contador";
 import { MenuMas } from "./menu-mas";
 import { esActivo, LinkPorDefecto, type LinkComponent, type NavItem } from "./types";
 
@@ -19,6 +19,7 @@ const claseItemInferior = (activo: boolean) =>
   );
 
 type InferiorProps = NavProps & {
+  principales?: readonly NavItem[] | undefined;
   /** Ítems de cuenta al final del menú "Más" (contraseña, cerrar sesión). */
   extras?: readonly ItemMenu[];
   onNavegar?: (href: string) => void;
@@ -34,19 +35,23 @@ export function BottomNav({
   Link = LinkPorDefecto,
   extras = [],
   onNavegar,
+  principales: elegidas,
 }: InferiorProps) {
   // "Instalaciones" (fueraInferior) pasa a "Más" sin desaparecer del riel ni de la barra lateral.
-  const principales = items.filter((i) => !i.pie && !i.soloAmplio && !i.fueraInferior);
+  const principales = elegidas ?? items.filter((i) => !i.pie && !i.soloAmplio && !i.fueraInferior);
   const cupoNav = 4;
   const conMas =
+    Boolean(elegidas) ||
     principales.length > 5 ||
     extras.length > 0 ||
     items.some((i) => i.soloAmplio || i.fueraInferior);
   const visibles = conMas ? principales.slice(0, cupoNav) : principales;
-  const resto = [
-    ...principales.slice(visibles.length),
-    ...items.filter((i) => i.pie || i.soloAmplio || i.fueraInferior),
-  ];
+  const resto = elegidas
+    ? items.filter((i) => !visibles.some((v) => v.href === i.href))
+    : [
+        ...principales.slice(visibles.length),
+        ...items.filter((i) => i.pie || i.soloAmplio || i.fueraInferior),
+      ];
   const enResto = resto.some((i) => esActivo(rutaActual, i.href, i.exacta, i.activoEn));
   return (
     <nav
@@ -60,12 +65,18 @@ export function BottomNav({
             <li key={item.href} className="relative min-w-0 flex-1">
               <Link
                 href={item.href}
+                title={item.etiqueta}
+                aria-label={item.etiqueta}
                 aria-current={activo ? "page" : undefined}
                 className={claseItemInferior(activo)}
               >
                 <span className="relative">
                   <item.icono className={cn("size-5", activo && "text-accent")} aria-hidden />
-                  <Contador n={item.alerta ? item.contador : undefined} />
+                  {item.punto ? (
+                    <Punto visible={item.alerta} />
+                  ) : (
+                    <Contador n={item.alerta ? item.contador : undefined} />
+                  )}
                 </span>
                 <span className="max-w-full truncate px-0.5">{item.corta ?? item.etiqueta}</span>
               </Link>
