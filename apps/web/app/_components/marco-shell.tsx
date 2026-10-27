@@ -15,6 +15,7 @@ import { useCabecera } from "./cabecera-contexto";
 import { Campana } from "./campana";
 import { icono } from "./iconos";
 import { LinkMenu } from "./link-menu";
+import { trasLimpiarCaches } from "./pwa/limpiar-cache";
 import { useEpocaSesion } from "./refresco-navegador";
 
 // La paleta (cmdk) se descarga al primer uso: no pesa en el JS inicial de cada ruta (ADR-037).
@@ -31,8 +32,6 @@ export type DatosShell = {
   tenant: { nombre: string } | null;
   usuario: { nombre: string; email: string; rol?: string };
   empresas: { id: string; nombre: string; actual: boolean }[];
-  /** Nombre del portal bajo la marca del riel (el ERP no lleva). */
-  subtituloMarca?: string | undefined;
   /** Quién y en qué empresa ve la página (`lib/epoca-sesion.ts`); las pestañas la comparan. */
   epoca: string;
 };
@@ -72,9 +71,8 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
           etiqueta: e.nombre,
           icono: Building2,
           marcado: e.actual,
-          onSelect: () => {
-            void cambiarTenant(e.id);
-          },
+          // Cambiar de empresa limpia las cachés del service worker antes de redirigir (§4.4, CA8).
+          onSelect: () => trasLimpiarCaches(() => cambiarTenant(e.id)),
         }))
       : [];
   const menu: ItemMenu[] = [
@@ -101,9 +99,8 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
       etiqueta: "Cerrar sesión",
       icono: LogOut,
       peligro: true,
-      onSelect: () => {
-        void accionSalir();
-      },
+      // Cerrar sesión limpia las cachés del service worker antes de redirigir (§4.4, §9, CA8).
+      onSelect: () => trasLimpiarCaches(accionSalir),
     },
   ];
   return (
@@ -126,7 +123,6 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
       menuUsuario={menu}
       campana={datos.tenant ? <Campana portal={datos.portal} /> : undefined}
       {...(buscable ? { onBuscar: () => setPaleta(true) } : {})}
-      {...(datos.subtituloMarca ? { subtituloMarca: datos.subtituloMarca } : {})}
       onNavegar={(href) => router.push(href)}
       Link={LinkMenu}
     >

@@ -1,12 +1,15 @@
 import { noEncontrado, reglaDeNegocio } from "../../errores";
 import type { Contexto } from "../../types";
+import { dondePuesto } from "./alcance";
 import { opcionalAFecha } from "./comun";
 import { errorDePatron, sugerirHoras } from "./puestos-campos";
 
 export const incluir = { patron: true, funcion: true } as const;
 
 export async function puestoDe(ctx: Contexto, id: string) {
-  const p = await ctx.db.puesto.findUnique({ where: { id }, include: incluir });
+  // findFirst (no findUnique) para aplicar el alcance por filas (#51, ADR-022): un puesto fuera del
+  // alcance del actor se trata como «no encontrado», no como prohibido.
+  const p = await ctx.db.puesto.findFirst({ where: { id, AND: [dondePuesto(ctx)] }, include: incluir });
   if (!p) throw noEncontrado("El puesto");
   return p;
 }

@@ -1,6 +1,7 @@
 import nextVitals from "eslint-config-next/core-web-vitals";
 import nextTs from "eslint-config-next/typescript";
 import { defineConfig, globalIgnores } from "eslint/config";
+import globals from "globals";
 
 import { baseConfig, prismaOnlyInDb, soloComponentesDelDs } from "../../eslint.base.mjs";
 import permitidos from "./paridad-permitidos.json" with { type: "json" };
@@ -46,6 +47,11 @@ export default defineConfig([
       literal(a.archivo),
     ),
     rules: { "no-restricted-imports": "off" },
+  },
+  // Service worker propio (PWA, ADR-044): entorno de service worker, script clásico.
+  {
+    files: ["public/sw.js"],
+    languageOptions: { sourceType: "script", globals: { ...globals.serviceworker } },
   },
   globalIgnores([".next/**", "out/**", "build/**", "next-env.d.ts", "e2e/__screenshots__/**"]),
 ]);

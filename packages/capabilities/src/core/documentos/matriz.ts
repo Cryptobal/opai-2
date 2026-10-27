@@ -4,6 +4,7 @@ import { diasHasta, estadoVigencia, PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import { prohibido } from "../../errores";
+import { dondePersona } from "../maestros/alcance";
 import { dia, hoy } from "../maestros/comun";
 import { vinculosVigentes } from "../maestros/personas-vista";
 
@@ -87,7 +88,8 @@ export const documentosMatriz = defineCapability({
       orderBy: [{ orden: "asc" }, { nombre: "asc" }],
     });
     const personas = await ctx.db.persona.findMany({
-      where: { archivadaEn: null, estado: { not: "inactiva" } },
+      // Alcance por filas (ADR-022): el supervisor solo ve las personas a su cargo (hoy ninguna, 07b).
+      where: { archivadaEn: null, estado: { not: "inactiva" }, AND: [dondePersona(ctx)] },
       orderBy: [{ apellidos: "asc" }, { nombres: "asc" }],
       take: 2000,
     });

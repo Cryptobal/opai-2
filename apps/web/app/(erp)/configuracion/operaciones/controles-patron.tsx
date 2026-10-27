@@ -71,7 +71,7 @@ export function PreviewCiclo({ trabajo, descanso }: { trabajo: number; descanso:
               "flex h-11 min-w-11 items-center justify-center rounded-md text-[15px] font-semibold",
               t
                 ? "bg-accent text-accent-fg"
-                : "border border-strong bg-surface text-fg",
+                : "border border-control bg-surface text-fg",
             )}
           >
             {t ? "T" : "D"}

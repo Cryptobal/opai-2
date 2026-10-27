@@ -2,9 +2,8 @@ import { DIAS_SEMANA, type Patron } from "./tipos";
 
 /**
  * Vista del ciclo de un patrón (como en el export de DS 2.0): cuadros de trabajo (relleno de
- * acento) y de descanso (contorno con el token de borde de control del DS). `role="img"` con el
- * texto descriptivo para lectores de pantalla. El borde de control del DS en `main` es
- * `--ds-border-strong` (el export v2 lo llama `--ds-border-control`); se usa el del DS de `main`.
+ * acento) y de descanso (contorno con `border-control`, el token de borde de control del DS,
+ * incorporado por el #54/ADR-050). `role="img"` con el texto descriptivo para lectores de pantalla.
  */
 export function VistaCiclo({ patron }: { patron: Patron }) {
   const semanal = patron.clase === "semanal";
@@ -22,7 +21,7 @@ export function VistaCiclo({ patron }: { patron: Patron }) {
           className={
             trabaja(i)
               ? "size-3 rounded-[3px] bg-accent"
-              : "size-3 rounded-[3px] border border-strong bg-surface"
+              : "size-3 rounded-[3px] border border-control bg-surface"
           }
         />
       ))}

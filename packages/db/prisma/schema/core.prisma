@@ -68,6 +68,7 @@ model Tenant {
   bitacora              Bitacora[]
   bitacoraCabeza        BitacoraCabeza?
   comprobantes          Comprobante[]
+  supervisorInstalaciones SupervisorInstalacion[]
 
   @@map("tenants")
   @@schema("core")

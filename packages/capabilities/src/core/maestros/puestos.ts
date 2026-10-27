@@ -5,6 +5,10 @@ import { PERMISOS_CORE } from "@opai/domain";
 import { defineCapability } from "../../define";
 import { reglaDeNegocio } from "../../errores";
 import { uuidSchema } from "../esquemas";
+// Alcance por filas (#51, ADR-022): la lista filtra con dondePuesto y puestoDe (en puestos-ayuda)
+// usa findFirst con el mismo alcance, para que un supervisor fuera de su instalación reciba «no
+// encontrado». El resto de la lógica de posición (función, patrón, tramos, horas) es del Brief 11.
+import { dondePuesto } from "./alcance";
 import { definidos, escribirConEvento } from "./comun";
 import { instalacionDe } from "./instalaciones";
 import { camposPuesto } from "./puestos-campos";
@@ -37,6 +41,7 @@ export const puestosList = defineCapability({
   async handler(ctx, input) {
     const filas = await ctx.db.puesto.findMany({
       where: {
+        AND: [dondePuesto(ctx)],
         ...(input.instalacionId ? { instalacionId: input.instalacionId } : {}),
         ...(input.cargoId ? { cargoId: input.cargoId } : {}),
         ...(input.soloActivos ? { estado: "activo" } : {}),

@@ -84,6 +84,11 @@ jobs:
                 if echo "$salida" | grep -qiE 'not found|404'; then
                   echo "La rama $nombre ya no existe."
                 else
+                  # El error de neonctl es texto libre: se escapa como piden los comandos de workflow
+                  # (% CR LF) para que sus saltos de línea o un "::" no inyecten otros comandos.
+                  salida=${salida//'%'/'%25'}
+                  salida=${salida//$'\r'/'%0D'}
+                  salida=${salida//$'\n'/'%0A'}
                   echo "::warning::No se pudo borrar la rama huérfana $nombre: $salida"
                 fi
               fi
