@@ -1,3 +1,11 @@
+Seguimiento · PR #49 (Brief 11 · Puestos PR 1, CAR-8)
+Observaciones no bloqueantes, fuera de este PR. Sin datos personales.
+
+De la revisión (review 5658390255) y de Diseño y QA (26-oct-2026):
+- «Agregar N posiciones»: 1.0 es el piso de la función; entra en el PR 2 junto con la pauta.
+- Peso del export: medir el costo de la lista de puestos en instalaciones grandes (ADR-045) cuando entre la pauta mensual.
+- Permisos finos de puestos, patrones y funciones: separar lectura, edición y desactivación cuando entre el PR #47 (roles y permisos).
+- Encargo (5)-(8) y (10)-(13) de Diseño y QA: sin detalle en el encargo recibido; Carlos o el bot «OPAI 2.0» deben enviarlos para registrarlos aquí.
 SEGUIMIENTO · Brief 07d PR 1 (DPA/RAT) — ítems diferidos (no bloqueantes)
 (Nota local, no se commitea; como PR-BODY.md.)
 

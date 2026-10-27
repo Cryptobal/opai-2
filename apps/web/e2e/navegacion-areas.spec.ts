@@ -2,10 +2,8 @@ import { expect, test } from "@playwright/test";
 import { E2E_PASSWORD, entrar } from "./sesion";
 import { comprobarContrasteNavegacion } from "./contraste-navegacion";
 import { ocultarIndicadorDev } from "./indicador-dev";
-
 test.use({ actionTimeout: 30_000 });
 test.setTimeout(180_000);
-
 test("recuerda el área abierta en Inicio y Configuración", async ({ page }, info) => {
   test.skip(info.project.name === "telefono", "El acordeón lateral se muestra desde 1024 px");
   await ocultarIndicadorDev(page);
@@ -27,7 +25,6 @@ test("recuerda el área abierta en Inicio y Configuración", async ({ page }, in
   await page.reload();
   await expect(personas).toHaveAttribute("aria-expanded", "true");
 });
-
 test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }, info) => {
   await ocultarIndicadorDev(page);
   const errores: string[] = [];
@@ -131,20 +128,14 @@ test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }
   await page.goto("/configuracion/preferencias");
   expect(errores).toEqual([]);
   await page.getByRole("radio", { name: /^Personas/ }).click();
-  await expect(page.getByRole("radio", { name: /^Personas/ })).toHaveAttribute(
-    "data-state",
-    "checked",
-  );
+  await expect(page.getByRole("radio", { name: /^Personas/ })).toHaveAttribute("data-state", "checked");
   if (info.project.name === "telefono")
     await expect(nav.getByRole("link", { name: "Cargos y sueldos", exact: true })).toBeVisible();
   await page.getByRole("radio", { name: /^Según mi rol/ }).click();
   await expect(page.getByRole("radio", { name: /^Según mi rol/ })).toHaveAttribute("data-state", "checked");
   await page.goto("/");
   await expect(page.getByRole("heading", { name: /^Bandeja · \d/ })).toBeVisible({ timeout: 15_000 });
-  await page
-    .locator("header")
-    .getByRole("link", { name: /Notificaciones/ })
-    .click();
+  await page.locator("header").getByRole("link", { name: /Notificaciones/ }).click();
   await expect(page).toHaveURL(/#bandeja$/);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   for (const tema of ["light", "dark"]) {

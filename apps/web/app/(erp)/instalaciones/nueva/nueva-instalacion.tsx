@@ -37,7 +37,21 @@ export function NuevaInstalacion({ cuentaInicial, cuentas, instalaciones }: Prop
     });
     if (!i) return;
     for (const p of copiar) {
-      const { id: _id, instalacionId: _i, horario: _h, estado: _e, ...datos } = p;
+      // Cada posición se copia como 1 puesto (sin la dotación deprecada ni los campos solo de vista).
+      const {
+        id: _id,
+        instalacionId: _i,
+        horario: _h,
+        horarioNoche: _hn,
+        estado: _e,
+        dotacion: _dot,
+        funcion: _f,
+        patron: _p,
+        patronResumen: _pr,
+        cobertura: _c,
+        coberturaMotivo: _cm,
+        ...datos
+      } = p;
       await ejecutar("core.puestos.create", { ...datos, instalacionId: i.id });
     }
     avisar.exito(

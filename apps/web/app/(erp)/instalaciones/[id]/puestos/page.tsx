@@ -1,77 +1,83 @@
 import { Plus } from "lucide-react";
 
-import { Badge, Empty, FilaSeleccionable } from "@opai/ds";
-
-import { LinkNext } from "@/app/_components/link-next";
+import { Buscador } from "@/app/_components/maestros/buscador";
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
-import { ESTADO_PUESTO, estadoDe } from "@/app/_components/maestros/estados";
-import type { SearchParams } from "@/lib/parametros";
+import type { Parametros, SearchParams } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
-import type { Cargo, InstalacionDetalle } from "@/lib/tipos-maestros";
+import type {
+  Cargo,
+  FuncionPuestoOpcion,
+  InstalacionDetalle,
+  PatronTurnoOpcion,
+} from "@/lib/tipos-maestros";
 
+import { ChipsPuestosDiferido } from "../../_componentes/chips-puestos-diferido";
 import { HojaPuesto } from "../../_componentes/diferidas";
+import { ListaPuestos } from "../../_componentes/lista-puestos";
 import { PaginaInstalacion } from "../../_componentes/pagina-instalacion";
+import {
+  conteosPuestos,
+  filtrarPuestos,
+  subtituloPuestos,
+} from "../../_componentes/puestos-filtro";
 
 export const metadata = { title: "Puestos de la instalación" };
 
 type Props = { params: Promise<{ id: string }>; searchParams: SearchParams };
 
-async function Puestos({ i }: { i: InstalacionDetalle }) {
-  const r = await ejecutarComoUsuario<Cargo[]>("erp", "core.cargos.list", {});
-  const cargos = r.ok ? r.data.filter((c) => c.activo) : [];
-  const nombreCargo = new Map(cargos.map((c) => [c.id, c.nombre]));
+async function Puestos({ i, p }: { i: InstalacionDetalle; p: Parametros }) {
+  const [rc, rf, rp] = await Promise.all([
+    ejecutarComoUsuario<Cargo[]>("erp", "core.cargos.list", {}),
+    ejecutarComoUsuario<FuncionPuestoOpcion[]>("erp", "core.funciones.list", {}),
+    ejecutarComoUsuario<PatronTurnoOpcion[]>("erp", "core.patrones.list", {}),
+  ]);
+  const cargos = rc.ok ? rc.data.filter((c) => c.activo) : [];
+  const funciones = rf.ok ? rf.data : [];
+  const patrones = rp.ok ? rp.data : [];
+  const subtitulo = [i.nombre, i.cuenta].filter(Boolean).join(" · ");
   const nuevo = (
     <EnlaceBotonHoja href="?puesto=nuevo" icono={Plus}>
       Nuevo puesto
     </EnlaceBotonHoja>
   );
+  const hoja = (
+    <HojaPuesto
+      instalacionId={i.id}
+      subtitulo={subtitulo}
+      puestos={i.puestos}
+      cargos={cargos.map((c) => ({ valor: c.id, etiqueta: c.nombre }))}
+      funciones={funciones}
+      patrones={patrones}
+      catalogosError={!rc.ok || !rf.ok || !rp.ok}
+    />
+  );
+  const conteos = conteosPuestos(i.puestos);
+  const filtradas = filtrarPuestos(i.puestos, p);
   return (
-    <>
-      {i.puestos.length === 0 ? (
-        <Empty
-          titulo="Sin puestos de servicio"
-          descripcion="Define cargo, patrón, horario y dotación de cada puesto."
-          accion={nuevo}
-        />
-      ) : (
-        <div className="flex flex-col gap-3">
-          <div className="self-end">{nuevo}</div>
-          <div className="overflow-hidden rounded-lg border border-border bg-surface [&>*:last-child]:border-b-0">
-            {i.puestos.map((p) => {
-              const e = estadoDe(ESTADO_PUESTO, p.estado);
-              return (
-                <FilaSeleccionable
-                  key={p.id}
-                  href={`?puesto=${p.id}`}
-                  Link={LinkNext}
-                  titulo={p.nombre}
-                  secundario={`${nombreCargo.get(p.cargoId) ?? "Cargo"} · ${p.diasTrabajo}×${p.diasDescanso} · ${p.horario}`}
-                  fin={
-                    <>
-                      <Badge tono={e.tono}>{e.etiqueta}</Badge>
-                      <span className="t-caption t-numeric">Dotación {p.dotacion}</span>
-                    </>
-                  }
-                />
-              );
-            })}
-          </div>
+    <div className="flex flex-col gap-4">
+      {i.puestos.length > 0 ? (
+        <div className="flex items-start justify-between gap-4">
+          <p className="t-body-sm text-fg-muted">{subtituloPuestos(conteos)}</p>
+          <div className="flex-none">{nuevo}</div>
         </div>
-      )}
-      <HojaPuesto
-        instalacionId={i.id}
-        puestos={i.puestos}
-        cargos={cargos.map((c) => ({ valor: c.id, etiqueta: c.nombre }))}
+      ) : null}
+      <ListaPuestos
+        state="ready"
+        puestos={filtradas}
+        buscador={<Buscador placeholder="Nombre del puesto" param="pq" />}
+        filtros={<ChipsPuestosDiferido puestos={i.puestos} />}
+        accionVacio={i.puestos.length === 0 ? nuevo : null}
       />
-    </>
+      {hoja}
+    </div>
   );
 }
 
-/** Tab Puestos (07): puesto, cargo, patrón, horario, dotación y estado; nuevo y editar en Sheet. */
+/** Tab Puestos (Brief 11): tabla desde tablet y filas en teléfono, con buscador, chips y cobertura PPC. */
 export default function PuestosInstalacion(props: Props) {
   return (
     <PaginaInstalacion {...props} tab="puestos">
-      {(i) => <Puestos i={i} />}
+      {(i, p) => <Puestos i={i} p={p} />}
     </PaginaInstalacion>
   );
 }
