@@ -18,10 +18,18 @@ const ROLES_PRIVILEGIADOS = new Set(["owner", "admin"]);
  * por lo que no agrega consultas a la navegación común (ADR-045). El rol se toma del rol base de la
  * membresía del tenant actual (owner/admin), nunca de la UI (ADR-022).
  */
-export async function mfaObligatoriaPara(identidad: Identidad): Promise<boolean> {
+export async function mfaObligatoriaPara(
+  identidad: Identidad,
+  exigenciaTenant: (id: Identidad) => Promise<boolean> = exigenciaDelTenant,
+): Promise<boolean> {
   if (identidad.usuario.platformRole) return true;
   const rol = identidad.actual?.rol;
   if (!identidad.actual || !rol || !ROLES_PRIVILEGIADOS.has(rol)) return false;
+  return exigenciaTenant(identidad);
+}
+
+/** Lee el ajuste del tenant que exige el segundo factor a owner/admin (por defecto obligatorio). */
+async function exigenciaDelTenant(identidad: Identidad): Promise<boolean> {
   const ctx = contextoDeIdentidad(identidad, "erp");
   return ajuste<boolean>(ctx, "core", "seguridad_mfa_obligatorio_admins");
 }
