@@ -845,15 +845,13 @@ No se encontró: render estático roto, falta de prefetch, layouts que recarguen
    - solo las usa el adaptador de IA del núcleo en el servidor, así que nada específico del proveedor entra en los módulos (ADR-031, ADR-032). Los módulos siguen pidiendo IA por clase de tarea; la elección de modelo es del usuario dentro del agente.
    - **Respaldo solo entre keys propias; nunca a OPAI (21:58).** Si el tenant tiene key propia y su proveedor falla, el respaldo entre proveedores solo prueba otras keys del **mismo tenant**; **nunca** cae a la key de OPAI (plataforma). Si todas sus keys fallan (5xx, 429 o red), la solicitud falla con un error tipado (`ErrorRespaldoIa`) y se avisa al tenant: la integración queda en estado «error» (visible en Configuración → Integraciones) y se emite `core.integracion.error`, que entrega Comunicaciones (ADR-020), además de un registro de auditoría durable. Un 4xx de contenido se propaga tal cual (no es caída de la key). Sin key propia, se usa el modelo de OPAI como hasta ahora (punto 9). **«Decisión de Carlos, 26-oct-2026 21:58 CLT, respuesta t214s684»** a «Si el tenant tiene key propia y su proveedor falla, ¿se puede pasar a la key de OPAI?»: «Nunca, que falle y avise al tenant».
 7. **Módulo vendible aparte (10:51; ADR-048).** El agente es un módulo propio, que se vende aparte. Depende del Núcleo y del MCP; los demás módulos son fuentes opcionales: opera únicamente las capacidades de los módulos activos en el tenant y permitidas al usuario.
-8. **Cuándo (10:53).** Se construye en un brief propio **después de CPQ**. Orden: Puestos → Comercial → CPQ → agente interno. Antes solo se reserva su punto de entrada: la acción «Preguntar a OPAI» en ⌘K y un lugar dentro de «Buscar» en el celular (integrada en `main` (PR #37, `7e526eb`)).
+8. **REEMPLAZADO** por la enmienda al punto 8 (26-oct-2026 21:07, t461s2118). **Cuándo (10:53).** Se construye en un brief propio **después de CPQ**. Orden: Puestos → Comercial → CPQ → agente interno. Antes solo se reserva su punto de entrada: la acción «Preguntar a OPAI» en ⌘K y un lugar dentro de «Buscar» en el celular (integrada en `main` (PR #37, `7e526eb`)).
 
 **Enmienda al punto 8 · adelanto al Núcleo (NÚCLEO-E2).** Origen: Carlos,
 26-oct-2026 20:47 CLT, chat con OPAI 2.0 (t457u): «ponlo entonces en el plan de
 desarrollo para que todo se haga y lo que debamos hacer en el nucleo lo hagamos
 altiro. Me preocupa que, quede como, cien por ciento agéntico, que el MSP y el,
-el agente interno de cada tenant funcione». **Decisión de Carlos,
-26-oct-2026 21:07, respuesta al widget t461s2118:** sí, el agente interno de cada
-tenant va antes de CPQ. Esta enmienda reemplaza únicamente el orden del punto 8;
+el agente interno de cada tenant funcione». decisión de Carlos por widget t461s2118 del 26-oct-2026 21:07 CLT, opción elegida: Sí, el agente interno de cada tenant va antes de CPQ. Esta enmienda reemplaza únicamente el orden del punto 8;
 la orquestación del servidor se adelanta al cierre del Núcleo. La UI queda para
 un PR posterior con export aprobado de Claude Design, siempre con el Design
 System de OPAI 2.0; no se autoriza construir pantallas sin ese export.

@@ -82,6 +82,10 @@ decisiones nuevas de negocio a Carlos.
 
 ## Verificación
 
+Corrección de la revisión 5665413229: selección de proveedor propio sin respaldo a
+plataforma y con aviso; «Probar» registra su propio estado y evento, sin duplicar
+el aviso del resolvedor. Adaptación técnica de OpenCode según el encargo.
+
 Continuación final: `pnpm typecheck`, `pnpm lint` (advertencias preexistentes),
 `pnpm test` **1.009/1.009**, `pnpm test:db` **96 + 86 + 24**, `pnpm build`
 (build web nuevo, no caché) y `pnpm presupuesto` verdes, sin subir topes.
