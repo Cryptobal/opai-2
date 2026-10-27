@@ -12,8 +12,9 @@ Comercial no bloquea: el test obliga las mismas garantías en tablas futuras.
 
 ## Adaptaciones técnicas del constructor
 
-OpenCode / openai/gpt-6.1-sol, dentro de este encargo (no nuevas decisiones de
-Carlos): se elimina `globales()` del API público y se mantiene `ctx.plataforma`
+Construido con: OpenCode gpt-6.1-sol: sesiones iniciales; Codex gpt-6.1-sol: continuación y esta revisión.
+
+Adaptaciones dentro de este encargo (no nuevas decisiones de Carlos): se elimina `globales()` del API público y se mantiene `ctx.plataforma`
 como puerto de operaciones con nombre, solo construido para humanos con rol
 global. Identidad selecciona columnas mínimas; Plataforma no recibe el perfil
 legal/DPO ni delegados arbitrarios. Se conserva la autorización, auditoría y
@@ -40,7 +41,7 @@ Las funciones de login/rate-limit no consultan tablas con tenant_id y no cambian
 | `packages/db/scripts/diagnostico-portales.ts` | Lectura cross-tenant; mismo requisito, no informa falsamente «sin incoherencias». |
 | `packages/auth/scripts/seed-{platform-owner,inspector-e2e,multiempresa-e2e,e2e-mfa}.ts` | Identidad sin RLS y, según script, membresías: mismo requisito para datos de tenant. |
 | `packages/capabilities/scripts/rotar-kek.ts` | Recorre secretos cross-tenant: requiere mantenimiento explícito, nunca app. |
-| `packages/db/scripts/set-app-role-password.ts` y Prisma migrate | DDL con propietario/administrador; no dependen de lectura de negocio por bypass. |
+| `packages/db/scripts/set-app-role-password.ts` y Prisma migrate | DDL con propietario/administrador; las migraciones de datos requieren BYPASSRLS confirmado o verificar filas afectadas. |
 | Entornos de tests DB/auth/capabilities y fixtures E2E con `DATABASE_URL_MIGRATE` | Solo PostgreSQL local/CI, superusuario de prueba existente; no despliegue remoto. |
 | Crons trabajos/programador, jobs, outbox, consumos, retención y auditoría | Enumeran `tenantsOperables()` (tabla global) y operan mediante forTenant/enTransaccion; no dbAdmin ni bypass. |
 | `migrar-https` | No existe en esta rama; no se afirma verificación de un script externo. |
@@ -112,3 +113,14 @@ unitarios: `pnpm test:db` mantiene db, capacidades DB y auth completos;
 sin conexión. Se limita a dos workers para reducir presión de memoria local.
 La prueba FORCE prepara explícitamente su base y no depende del orden de archivos.
 Estas son adaptaciones técnicas de Codex, sin nuevas decisiones de Carlos.
+
+
+## Revisión 5672596436
+
+Codex incorpora reversión comentada desde pg_policies, preservando FORCE previo
+de gasto_agente_mes y auditoria_cabezas; restaura las tres funciones DEFINER con
+search_path original. La prueba contrasta el catálogo antes y después de revertir.
+La prueba existente ya usa un dueño temporal distinto de opai_app, NOBYPASSRLS.
+Se precisa BYPASSRLS de neondb_owner y la regla de migraciones de datos, según el
+encargo, sin nuevas decisiones de negocio. Los CA anteriores conservan su alcance;
+CI, revisión externa y aplicación en Neon siguen pendientes.

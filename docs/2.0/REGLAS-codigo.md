@@ -101,3 +101,12 @@ Monorepo de OPAI 2.0: SaaS modular, multi-tenant y agent-first para empresas int
 ## Flujo de trabajo
 
 Roles, ramas, commits, definición de terminado y lo prohibido están en `AGENTS.md`. El ciclo de cada módulo (extracción → especificación → diseño → brief → PR → revisión → merge con squash → QA) está en `docs/2.0/ROADMAP.md` (ADR-047).
+
+### Migraciones de datos después de FORCE RLS
+
+Si el rol de prisma migrate deploy NO tiene BYPASSRLS, los UPDATE/DELETE de una
+migración de datos posterior a 20261028160000 sobre tablas forzadas afectan 0
+filas sin error cuando no hay app.tenant_id: RLS filtra en silencio. CI corre
+como superusuario y no detecta este caso. Toda migración de datos debe verificar
+las filas afectadas (por ejemplo GET DIAGNOSTICS + RAISE si son 0 cuando se
+esperan filas) o correr con un rol con BYPASSRLS confirmado.

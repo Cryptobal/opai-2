@@ -37,8 +37,10 @@ function crearCliente(variable: "DATABASE_URL" | "DATABASE_URL_MIGRATE"): Prisma
   if (!url) {
     throw new Error(`Falta la variable de entorno ${variable}.`);
   }
-  // FORCE también afecta al dueño. Los scripts cross-tenant necesitan un rol explícito
-  // BYPASSRLS/superusuario; row_security=off NO salta RLS: falla en vez de omitir filas.
+  // En Neon, neondb_owner (dueño y prisma migrate deploy) tiene BYPASSRLS; FORCE no le afecta.
+  // FORCE es defensa en profundidad para dueños sin BYPASSRLS (local/CI u otro dueño).
+  // La garantía es opai_app sin BYPASSRLS con tenant_isolation. Para mantenimiento,
+  // confirmar BYPASSRLS: row_security=off no salta RLS, falla si filtraría filas.
   const adapter = new PrismaPg({
     connectionString: url,
     ...(variable === "DATABASE_URL_MIGRATE" ? { options: "-c row_security=off" } : {}),

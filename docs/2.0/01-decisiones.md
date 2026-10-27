@@ -31,12 +31,32 @@ tener ENABLE + FORCE + esa política; `test:db` exige una base real. Se retira
 `globales()` público: identidad y tenant por funciones con selección fija;
 Plataforma recibe operaciones con nombre, no delegados Prisma. Los scripts
 cross-tenant requieren un rol de mantenimiento BYPASSRLS explícito (o el
-superusuario local de pruebas), nunca `opai_app`; ser dueño ya no basta. No se
+superusuario local de pruebas), nunca `opai_app`; ser dueño sin BYPASSRLS no basta. No se
 concede BYPASSRLS ni se modifica Neon. Los tres triggers de referencias/patrones
 leen con los permisos del invocador y el tenant de su transacción, sin depender
 del bypass del dueño. Son adaptaciones técnicas de OpenCode / openai/gpt-6.1-sol
 para este encargo, no decisiones nuevas de Carlos. Runbook y criterios en
 `briefs/NUCLEO-G2-force-rls.md`.
+
+**Precisión de la revisión 5672596436.** En Neon, neondb_owner, dueño real de las tablas y rol de prisma migrate deploy,
+tiene BYPASSRLS (proyectos creados desde ago-2023), por lo que FORCE no le afecta.
+FORCE queda como defensa en profundidad para dueños sin BYPASSRLS, por ejemplo
+local/CI o un dueño distinto. La garantía real es que la aplicación corre como
+opai_app, sin BYPASSRLS, con tenant_isolation.
+
+Resultado de la consulta de roles (solo lectura, OPAI 2.0, 27-oct-2026 15:53 CLT,
+Neon steep-wildflower-90764475, ramas main br-dawn-morning-b6037bp9 y
+dev br-cool-cell-b6f9h1vh; mismo resultado en ambas; current_user de la conexión
+= neondb_owner), proporcionado en el encargo; no se consultó Neon en esta revisión:
+
+```sql
+SELECT rolname, rolbypassrls, rolsuper FROM pg_roles WHERE rolname IN ('neondb_owner','opai_app') OR rolname = current_user;
+```
+
+```text
+neondb_owner | rolbypassrls = true  | rolsuper = false
+opai_app     | rolbypassrls = false | rolsuper = false
+```
 
 ---
 
