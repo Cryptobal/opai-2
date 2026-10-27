@@ -75,9 +75,7 @@ export const platformAdminsInvite = defineCapability({
   dryRun: true,
   tenantObjetivo: (input) => input.tenantId,
   async handler(ctx, input, { dryRun }) {
-    const tenant = await requierePlataforma(ctx).globales.tenant.findUnique({
-      where: { id: input.tenantId },
-    });
+    const tenant = await requierePlataforma(ctx).globales.tenantPorId(input.tenantId);
     if (!tenant) throw noEncontrado("La empresa");
     return invitarAdministrador(ctx, tenant, input.email, input.rol, dryRun);
   },

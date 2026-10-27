@@ -52,13 +52,15 @@ export async function cargarPersona(id: string) {
 }
 
 /** Vínculos (vigente e historial) y sueldo efectivo concepto a concepto, con el puesto elegido. */
-export async function cargarLaboral(persona: PersonaDetalle, puestoId?: string) {
+export async function cargarLaboral(persona: PersonaDetalle, puestoId?: string, fecha?: string, instalacionId?: string) {
   const cargoId = persona.vinculoVigente?.cargoId;
   const [v, s, puestos] = await Promise.all([
     ejecutarComoUsuario<Vinculo[]>("erp", "core.vinculos.list", { personaId: persona.id }),
     ejecutarComoUsuario<SueldoEfectivo>("erp", "core.estructuras.efectiva", {
       personaId: persona.id,
       ...(puestoId ? { puestoId } : {}),
+      ...(fecha ? { fecha } : {}),
+      ...(instalacionId ? { instalacionId } : {}),
     }),
     cargoId
       ? ejecutarComoUsuario<PuestoDeCargo[]>("erp", "core.puestos.list", {

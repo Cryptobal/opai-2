@@ -10,6 +10,8 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { PrismaClient } from "../src/generated/prisma/client";
 
 export const urlPropietario = process.env["DATABASE_URL_TEST"];
+if (!urlPropietario?.trim())
+  throw new Error("Falta DATABASE_URL_TEST: RLS requiere Postgres real.");
 
 function urlParaRol(url: string, usuario: string, password: string): string {
   const u = new URL(url);

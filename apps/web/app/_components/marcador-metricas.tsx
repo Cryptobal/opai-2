@@ -15,7 +15,7 @@ import { metricasActuales, serverTiming, totalDesdeInicio } from "@/lib/metricas
  * Va en el HTML y no en una cabecera HTTP porque App Router no deja fijar cabeceras de respuesta tras
  * renderizar en streaming (ver `lib/metricas-navegacion.ts`).
  */
-export async function MarcadorMetricas() {
+export async function MarcadorMetricas({ id = "opai-metricas" }: { id?: string } = {}) {
   const total = totalDesdeInicio(Number((await headers()).get("x-opai-t0")));
   const m = metricasActuales();
   const datos = {
@@ -27,7 +27,7 @@ export async function MarcadorMetricas() {
   return (
     <script
       type="application/json"
-      id="opai-metricas"
+      id={id}
       dangerouslySetInnerHTML={{ __html: JSON.stringify(datos) }}
     />
   );

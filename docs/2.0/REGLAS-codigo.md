@@ -39,19 +39,22 @@ Monorepo de OPAI 2.0: SaaS modular, multi-tenant y agent-first para empresas int
 - TypeScript estricto. Sin `any`, sin `@ts-ignore`, sin `as unknown as`.
 - Archivos de hasta 150 líneas (ESLint lo exige); dividir antes de superar.
 - Dominio puro: `packages/domain` y `modules/*/domain` no importan `next`, `react`, `@opai/db` ni `@prisma/client`.
-- Todo acceso a datos pasa por `db.forTenant(tenantId)`. El cliente Prisma crudo solo existe en `packages/db` (ESLint lo bloquea fuera). Excepciones acotadas: `forUser(userId)` solo para leer las membresías propias (política `user_self`) antes de elegir tenant; `globales()` solo para `tenants` y `users` (sin RLS); `clienteAuth()` solo en `packages/auth`.
+- Todo acceso a datos pasa por `db.forTenant(tenantId)`. El cliente Prisma crudo solo existe en `packages/db` (ESLint lo bloquea fuera). Excepciones acotadas: `forUser(userId)` solo para leer las membresías propias (política `user_self`) antes de elegir tenant; `tenantPorSlug`/`usuarioPorId` solo devuelven columnas mínimas de identidad; `clienteAuth()` solo en `packages/auth`. Se elimina `globales()` público. Plataforma usa operaciones con nombre desde su contexto autorizado, nunca delegados libres. El lint común protege esta frontera aunque el workspace personalice sus imports restringidos.
 - Identidad: el código usa `@opai/auth` (`getSession`, `requireSession`) y `apps/web/lib/actor.ts` (`resolverActor`); nunca Better Auth directo. Toda página de portal verifica sesión y acceso al portal en servidor (`PaginaPortal`).
 - Permisos: `<modulo>:<accion>` con roles y comodines en `@opai/domain` (`tienePermiso`, ADR-016). `executeCapability` verifica tenant, módulo activo, scopes del agente y permiso; `platform:*` solo con `platformRole`. Las capacidades de plataforma reciben `tenantId` en el input y usan `ctx.plataforma.paraTenant`.
 - Toda tabla de negocio: `tenant_id`, `created_at`, `updated_at`, IDs `uuid(7)`, columnas `snake_case` vía `@map`, `@@schema("<modulo>")`. Toda migración que cree una tabla con `tenant_id` agrega:
 
   ```sql
-  ALTER TABLE "<schema>"."<tabla>" ENABLE ROW LEVEL SECURITY;
+   ALTER TABLE "<schema>"."<tabla>" ENABLE ROW LEVEL SECURITY;
+   ALTER TABLE "<schema>"."<tabla>" FORCE ROW LEVEL SECURITY;
   CREATE POLICY tenant_isolation ON "<schema>"."<tabla>" AS PERMISSIVE FOR ALL TO opai_app
     USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
     WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
   ```
 
   y, al crear un schema nuevo: `GRANT USAGE ON SCHEMA "<schema>" TO opai_app` más los `GRANT`/`ALTER DEFAULT PRIVILEGES` de la migración inicial.
+
+- Con FORCE el dueño NOBYPASSRLS también queda sujeto a políticas. Los scripts manuales cross-tenant que usan `dbAdmin()` requieren un rol explícito BYPASSRLS (o superusuario local de tests); `row_security=off` hace fallar las consultas que de otro modo devolverían filas incompletas, no evita RLS. Nunca se concede BYPASSRLS a `opai_app`. Ver auditoría y preflight en `briefs/NUCLEO-G2-force-rls.md`.
 
 - Dinero: CLP en enteros (`clp()`, `redondearCLP()` de `@opai/domain`); UF y porcentajes como enteros escalados (`UF_ESCALA`, `PCT_ESCALA`) o `Decimal` de escala fija en base de datos. Nunca float para dinero.
 - Tiempo: `timestamptz` en UTC; zona del tenant solo para presentar; turnos como intervalos `[inicio, fin)`.
@@ -99,3 +102,13 @@ Monorepo de OPAI 2.0: SaaS modular, multi-tenant y agent-first para empresas int
 ## Flujo de trabajo
 
 Roles, ramas, commits, definición de terminado y lo prohibido están en `AGENTS.md`. El ciclo de cada módulo (extracción → especificación → diseño → brief → PR → revisión → merge con squash → QA) está en `docs/2.0/ROADMAP.md` (ADR-047).
+
+### Migraciones de datos después de FORCE RLS
+
+Si el rol de prisma migrate deploy NO tiene BYPASSRLS, los UPDATE/DELETE de una
+migración de datos posterior a 20261028170000 sobre tablas forzadas afectan 0
+filas sin error cuando no hay app.tenant_id: RLS filtra en silencio. Un INSERT
+que incumple WITH CHECK falla con error de RLS. CI corre
+como superusuario y no detecta este caso. Toda migración de datos debe verificar
+las filas afectadas (por ejemplo GET DIAGNOSTICS + RAISE si son 0 cuando se
+esperan filas) o correr con un rol con BYPASSRLS confirmado.

@@ -26,11 +26,11 @@ export const platformTenantsUpdate = defineCapability({
   ...objetivo,
   async handler(ctx, { tenantId, ...cambios }, { dryRun }) {
     const p = requierePlataforma(ctx);
-    const actual = await p.globales.tenant.findUnique({ where: { id: tenantId } });
+    const actual = await p.globales.tenantPorId(tenantId);
     if (!actual) throw noEncontrado("La empresa");
     const data = Object.fromEntries(Object.entries(cambios).filter(([, v]) => v !== undefined));
     if (dryRun) return { ...actual, ...data };
-    return p.globales.tenant.update({ where: { id: tenantId }, data });
+    return p.globales.actualizarTenant(tenantId, data);
   },
 });
 
@@ -47,12 +47,9 @@ export const platformTenantsSetEstado = defineCapability({
   ...objetivo,
   async handler(ctx, input, { dryRun }) {
     const p = requierePlataforma(ctx);
-    const actual = await p.globales.tenant.findUnique({ where: { id: input.tenantId } });
+    const actual = await p.globales.tenantPorId(input.tenantId);
     if (!actual) throw noEncontrado("La empresa");
     if (dryRun) return { ...actual, estado: input.estado };
-    return p.globales.tenant.update({
-      where: { id: input.tenantId },
-      data: { estado: input.estado },
-    });
+    return p.globales.actualizarTenant(input.tenantId, { estado: input.estado });
   },
 });

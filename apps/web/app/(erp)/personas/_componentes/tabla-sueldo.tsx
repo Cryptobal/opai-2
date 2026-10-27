@@ -6,9 +6,9 @@ import { type Concepto, GRATIFICACION, type Nivel, type SueldoEfectivo } from "@
 const NIVEL: Record<Nivel, { etiqueta: string; tono: "accent" | "info" | "neutro" }> = {
   persona: { etiqueta: "Persona", tono: "accent" },
   puesto: { etiqueta: "Puesto", tono: "info" },
-  cargo: { etiqueta: "Cargo", tono: "neutro" },
+  instalacion: { etiqueta: "Instalación", tono: "neutro" },
 };
-const ORDEN: Nivel[] = ["cargo", "puesto", "persona"];
+const ORDEN: Nivel[] = ["instalacion", "puesto", "persona"];
 
 const texto = (v: unknown) =>
   typeof v === "number" ? pesos(v) : typeof v === "string" ? (GRATIFICACION[v] ?? v) : "—";

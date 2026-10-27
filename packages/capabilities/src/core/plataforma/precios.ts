@@ -25,10 +25,7 @@ export const platformPreciosList = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx) {
-    const filas = await requierePlataforma(ctx).globales.precioRecurso.findMany({
-      where: { vigenteDesde: { lte: aFecha(hoy()) } },
-      orderBy: [{ recurso: "asc" }, { vigenteDesde: "desc" }],
-    });
+    const filas = await requierePlataforma(ctx).globales.listarPrecios(aFecha(hoy()));
     const vistos = new Set<string>();
     return filas
       .filter((f) => !vistos.has(f.recurso) && vistos.add(f.recurso))
@@ -56,8 +53,8 @@ export const platformPreciosSet = defineCapability({
     // Versiona sin reescribir historia: nunca hacia atrás, y la versión de hoy no se corrige
     // (los consumos de hoy ya la usan); una versión futura sí puede ajustarse.
     if (desde < hoy()) throw reglaDeNegocio("La fecha de vigencia no puede ser pasada.");
-    const existente = await requierePlataforma(ctx).globales.precioRecurso.findUnique({
-      where: { recurso_vigenteDesde: { recurso: input.recurso, vigenteDesde: aFecha(desde) } },
+    const existente = await requierePlataforma(ctx).globales.precioPorVigencia({
+      recurso_vigenteDesde: { recurso: input.recurso, vigenteDesde: aFecha(desde) },
     });
     if (existente && desde === hoy())
       throw conflicto("Ya hay un precio vigente desde hoy: fija el nuevo desde mañana.");
@@ -67,7 +64,7 @@ export const platformPreciosSet = defineCapability({
       costoUnitarioMicro: input.costoUnitarioMicro,
     };
     if (!dryRun)
-      await requierePlataforma(ctx).globales.precioRecurso.upsert({
+      await requierePlataforma(ctx).globales.guardarPrecio({
         where: { recurso_vigenteDesde: { recurso: input.recurso, vigenteDesde: aFecha(desde) } },
         create: { ...fila, vigenteDesde: aFecha(desde) },
         update: fila,
