@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { contextoDePrueba } from "../src/testing";
-import { dato, reiniciar } from "./maestros-ayuda";
+import { codigo, dato, reiniciar } from "./maestros-ayuda";
 
 beforeEach(reiniciar);
 const completa = {
@@ -93,11 +93,9 @@ describe("07b: montos persistidos y referencias múltiples", () => {
         autorizar: (p: string) => p !== "core:estructuras.read_sensible",
       };
       eventos.splice(0);
-      const oculto = await dato<{
-        impacto: { diferencias: { antes: unknown; despues: unknown; diferencia: unknown }[] };
-      }>(sinMontos, "core.estructuras.create", input, { dryRun: true });
-      for (const d of oculto.impacto.diferencias)
-        expect(d).toMatchObject({ antes: null, despues: null, diferencia: null });
+      expect(await codigo(sinMontos, "core.estructuras.create", input, { dryRun: true })).toBe(
+        "FORBIDDEN",
+      );
       expect(eventos.filter((e) => e.capability === "core.estructuras.read_sensible")).toEqual([]);
     }
   });

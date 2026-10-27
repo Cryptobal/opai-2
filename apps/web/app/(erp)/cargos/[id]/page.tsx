@@ -104,7 +104,7 @@ export default function CargoDetalle({ params }: Props) {
                   {puedeGestionar && c.sueldoSensible && !puedeVerSensible ? (
                     <Alerta
                       tono="neutral"
-                      titulo="No tienes permiso para versionar los montos de este cargo"
+                      titulo="No puedes crear versiones de este cargo. Sus montos son sensibles. Pide a un owner o admin el permiso para ver sueldos sensibles."
                     />
                   ) : null}
                   <EstructuraBase e={vigente} />
@@ -117,7 +117,7 @@ export default function CargoDetalle({ params }: Props) {
                         <EnlaceBotonHoja href="?version=1">Crear versión</EnlaceBotonHoja>
                       </AccionFijaTelefono>
                     ) : null}
-                    <HojaCargo cargo={c} />
+                    <HojaCargo cargo={c} puedeVerSensible={puedeVerSensible} />
                     {!c.sueldoSensible || puedeVerSensible ? (
                       <HojaVersion cargoId={c.id} base={vigente ?? versiones[0]} hoy={hoy} />
                     ) : null}
