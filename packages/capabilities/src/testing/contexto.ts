@@ -76,10 +76,14 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
       }
     },
     // También en la tabla, para las capacidades que leen la auditoría (actividad de las fichas).
+    // `tx` siempre llega (ADR-023-bis): la escribe el llamador, igual que `eventos`/`trabajos`, para
+    // que el insert sea atómico con la escritura que audita. La cadena real (seq/hash) la prueba
+    // solo `test:db`; aquí basta un contador simple para no romper la unicidad de la tabla falsa.
     auditoria: {
-      registrar: async (e) => {
+      registrar: async (tx, e) => {
         eventos.push(e);
-        await db.auditEvent.create({
+        const seq = (await tx.auditEvent.count({ where: { tenantId: e.tenantId } })) + 1;
+        await tx.auditEvent.create({
           data: {
             tenantId: e.tenantId,
             actorType: e.actor.tipo,
@@ -89,8 +93,13 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
             entityType: e.entityType ?? null,
             entityId: e.entityId ?? null,
             payload: JSON.parse(JSON.stringify(e.payload ?? null)),
+            seq,
+            hashAnterior: "0".repeat(64),
+            hash: "0".repeat(64),
+            hashCanon: "{}",
           },
         });
+        return { seq, hash: "0".repeat(64) };
       },
     },
     medidor: { registrar: async (c) => void usos.push(c) },
@@ -105,7 +114,9 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
       almacenamiento: almacen.almacenamiento,
       urlBase: "https://test.opai.cl",
     },
-    plataforma: usuario?.platformRole ? { globales, paraTenant: () => db } : null,
+    plataforma: usuario?.platformRole
+      ? { globales, paraTenant: () => db, transaccionPara: (_id, fn) => ctx.transaccion(fn) }
+      : null,
     autorizar: o.permisos
       ? (p) => (o.permisos ?? []).includes(p)
       : autorizador(

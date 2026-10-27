@@ -80,6 +80,8 @@ async function aprobacion(
   }
   const venceEn = new Date(Date.now() + VIGENCIA_APROBACION_MS);
   const resumen = resumir(c, entrada);
+  // Aprobación, evento y auditoría en una sola transacción (ADR-023-bis): dejar pendiente una
+  // escritura irreversible también es una escritura, y se audita atómica con ella.
   const id = await ctx.transaccion(async (tx) => {
     const fila = await tx.aprobacion.create({
       data: {
@@ -100,17 +102,19 @@ async function aprobacion(
       entidadId: fila.id,
       payload: { agente: a.nombre, capability: c.id, resumen, venceEn: venceEn.toISOString() },
     });
+    await ctx.auditoria.registrar(tx, {
+      tenantId: ctx.tenantId,
+      capability: c.id,
+      actor: ctx.actor,
+      entityType: "aprobacion",
+      entityId: fila.id,
+      payload: {
+        intento: "APPROVAL_REQUIRED",
+        aprobacionId: fila.id,
+        input: sinSensibles(entrada, c.sensibles),
+      },
+    });
     return fila.id;
-  });
-  await ctx.auditoria.registrar({
-    tenantId: ctx.tenantId,
-    capability: c.id,
-    actor: ctx.actor,
-    payload: {
-      intento: "APPROVAL_REQUIRED",
-      aprobacionId: id,
-      input: sinSensibles(entrada, c.sensibles),
-    },
   });
   ctx.despacharEventos();
   return requerida(id);

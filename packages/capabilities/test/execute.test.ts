@@ -28,9 +28,28 @@ const crearNota = defineCapability({
   }),
 });
 
+/** Como `crearNota`, pero con una escritura real en `ctx.db`: prueba la atomicidad con la auditoría. */
+const crearNotaConEvento = defineCapability({
+  id: "test.nota.create_con_evento",
+  descripcion: "Crea una nota de prueba con un evento real, para probar la atomicidad con auditar.",
+  permiso: "test:write",
+  input: z.object({ texto: z.string().min(1) }),
+  output: z.object({ id: z.string(), texto: z.string() }),
+  efecto: "escritura",
+  dryRun: true,
+  async handler(ctx, input, modo) {
+    if (modo.dryRun) return { id: "preview", texto: input.texto };
+    if (input.texto === "falla") throw reglaDeNegocio("No se puede.");
+    const fila = await ctx.db.evento.create({
+      data: { tenantId: ctx.tenantId, tipo: "test.nota.creada", payload: {}, actorTipo: "system" },
+    });
+    return { id: fila.id, texto: input.texto };
+  },
+});
+
 beforeEach(() => {
   limpiarRegistro();
-  registrarCapacidades([...capacidadesDelNucleo, crearNota]);
+  registrarCapacidades([...capacidadesDelNucleo, crearNota, crearNotaConEvento]);
 });
 
 describe("defineCapability", () => {
@@ -166,5 +185,34 @@ describe("executeCapability", () => {
       ok: false,
       error: { code: "UNPROCESSABLE", message: "No se puede." },
     });
+  });
+
+  // ADR-023-bis (auditoría del 26-oct-2026): el handler y el insert de auditoría comparten una
+  // transacción. Un fallo de cualquiera de los dos deja la base exactamente como si no hubiera
+  // pasado nada; nunca una escritura sin su auditoría ni una auditoría sin la escritura que la causó.
+  it("fallo de auditoría ⇒ sin escritura (la transacción hace rollback)", async () => {
+    const { ctx, tabla } = ctxCon(["test:write"]);
+    ctx.auditoria.registrar = async () => {
+      throw new Error("auditoría caída");
+    };
+    const r = await executeCapability(ctx, "test.nota.create_con_evento", { texto: "hola" });
+    expect(r).toMatchObject({ ok: false, error: { code: "INTERNAL" } });
+    expect(tabla("evento")).toHaveLength(0);
+  });
+
+  it("fallo del handler ⇒ sin auditoría (nunca se llega a auditar)", async () => {
+    const { ctx, tabla, eventos } = ctxCon(["test:write"]);
+    const r = await executeCapability(ctx, "test.nota.create_con_evento", { texto: "falla" });
+    expect(r).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+    expect(tabla("evento")).toHaveLength(0);
+    expect(eventos).toHaveLength(0);
+  });
+
+  it("escritura y auditoría exitosas quedan juntas (mismo id de entidad)", async () => {
+    const { ctx, tabla, eventos } = ctxCon(["test:write"]);
+    const r = await executeCapability(ctx, "test.nota.create_con_evento", { texto: "hola" });
+    expect(r).toMatchObject({ ok: true, data: { texto: "hola" } });
+    expect(tabla("evento")).toHaveLength(1);
+    expect(eventos).toHaveLength(1);
   });
 });

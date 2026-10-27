@@ -34,8 +34,13 @@ export type EventoAuditoria = {
   payload?: unknown;
 };
 
+/**
+ * Auditoría en `core.audit_events`, encadenada por tenant. Recibe `tx` como `Eventos`/`Trabajos`/
+ * `BitacoraServicio`: el llamador decide la transacción (ADR-023-bis) para que el insert sea
+ * atómico con la escritura que audita.
+ */
 export interface Auditoria {
-  registrar(evento: EventoAuditoria): Promise<void>;
+  registrar(tx: TenantTx, evento: EventoAuditoria): Promise<{ seq: number; hash: string }>;
 }
 
 /** Usuario humano detrás del actor (el propio usuario o el responsable de la API key). */
@@ -70,6 +75,12 @@ export type Plataforma = {
   globales: Globales;
   /** Cliente acotado al tenant objetivo. Nunca consultas cross-tenant en una sola query. */
   paraTenant(tenantId: string): TenantDb;
+  /**
+   * Transacción atómica sobre un tenant objetivo distinto del actual (capacidades `platform.*`
+   * sin tenant propio). La usa `executeCapability` para auditar en la misma transacción las
+   * escrituras de plataforma que afectan a un tenant resuelto por `tenantObjetivo`.
+   */
+  transaccionPara<T>(tenantId: string, fn: (tx: TenantTx) => Promise<T>): Promise<T>;
 };
 
 /** Contexto de ejecución. Lo construye el borde (ruta HTTP, acción de UI, MCP), nunca el módulo. */

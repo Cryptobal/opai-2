@@ -1,5 +1,6 @@
 // Implementaciones reales (base de datos) de los servicios del núcleo para el Contexto.
 import {
+  agregarAAuditoria,
   agregarABitacora,
   enTransaccion,
   forTenant,
@@ -8,9 +9,32 @@ import {
   verificarBitacora,
 } from "@opai/db";
 
-import type { Actor, BitacoraServicio, Contexto, Eventos, Medidor, Trabajos } from "./types";
+import type {
+  Actor,
+  Auditoria,
+  BitacoraServicio,
+  Contexto,
+  Eventos,
+  Medidor,
+  Trabajos,
+} from "./types";
 
 const json = (v: unknown): Prisma.InputJsonValue => JSON.parse(JSON.stringify(v ?? {}));
+
+/** Auditoría encadenada en `core.audit_events` (auditoría del 26-oct-2026, ADR-023-bis). */
+export const auditoriaEnDb: Auditoria = {
+  registrar(tx, evento) {
+    return agregarAAuditoria(tx, evento.tenantId, {
+      actorTipo: evento.actor.tipo,
+      actorId: evento.actor.id ?? null,
+      viaUserId: evento.actor.viaUserId ?? null,
+      capability: evento.capability,
+      entityType: evento.entityType ?? null,
+      entityId: evento.entityId ?? null,
+      payload: evento.payload ?? null,
+    });
+  },
+};
 
 /** Precios vigentes (micro-USD por unidad) con caché de 10 minutos por proceso. */
 let precios: { hasta: number; mapa: Map<string, number> } | null = null;

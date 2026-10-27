@@ -6,11 +6,12 @@ import {
   tienePermisoEfectivo,
   tienePermisoPlataforma,
 } from "@opai/domain";
-import { forTenant, globales, type Prisma } from "@opai/db";
+import { enTransaccion, forTenant, globales } from "@opai/db";
 import { almacenamientoDelEntorno, mailerDelEntorno } from "@opai/integrations";
 
 import { idempotenciaSobre } from "./idempotencia";
 import {
+  auditoriaEnDb,
   bitacoraEnDb,
   eventosEnDb,
   medidorEnDb,
@@ -21,39 +22,17 @@ import type {
   Actor,
   AgenteContexto,
   Alcance,
-  Auditoria,
   Contexto,
-  EventoAuditoria,
   Medidor,
   Principal,
   Servicios,
   UsuarioContexto,
 } from "./types";
 
-export { medidorEnDb } from "./servicios-db";
+export { auditoriaEnDb, medidorEnDb } from "./servicios-db";
 
 /** Id nulo para contextos sin tenant (plataforma sin empresa elegida). RLS no devuelve filas. */
 export const SIN_TENANT = "00000000-0000-0000-0000-000000000000";
-
-/** Auditoría persistida en `core.audit_events` del tenant del evento. */
-export const auditoriaEnDb: Auditoria = {
-  async registrar(evento: EventoAuditoria): Promise<void> {
-    // JSON plano: elimina undefined, funciones y referencias circulares antes de persistir.
-    const payload: Prisma.InputJsonValue = JSON.parse(JSON.stringify(evento.payload ?? null));
-    await forTenant(evento.tenantId).auditEvent.create({
-      data: {
-        tenantId: evento.tenantId,
-        actorType: evento.actor.tipo,
-        actorId: evento.actor.id ?? null,
-        viaUserId: evento.actor.viaUserId ?? null,
-        capability: evento.capability,
-        entityType: evento.entityType ?? null,
-        entityId: evento.entityId ?? null,
-        payload,
-      },
-    });
-  },
-};
 
 export type ParametrosContexto = {
   /** null: sin tenant actual (plataforma sin empresa elegida, o usuario sin membresías). */
@@ -131,7 +110,11 @@ export function crearContexto(params: ParametrosContexto): Contexto {
         params.servicios?.urlBase ?? process.env["BETTER_AUTH_URL"] ?? "http://localhost:3000",
     },
     plataforma: usuario?.platformRole
-      ? { globales: globales(), paraTenant: (id: string) => forTenant(id) }
+      ? {
+          globales: globales(),
+          paraTenant: (id: string) => forTenant(id),
+          transaccionPara: (id, fn) => enTransaccion(id, fn),
+        }
       : null,
     // `ctx.rol` conserva el rol base (jerarquía y etiquetas). La autorización usa el rol
     // personalizado cuando existe: si hay `permisosRol`, el rol base cede a esa lista (ADR-022).
