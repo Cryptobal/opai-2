@@ -655,3 +655,16 @@ acotado y no se revela el conjunto completo. CA-2/3/4 siguen en los PR siguiente
 Migración `20261028180000_capa_instalacion_sueldo` sin aplicar en Neon; la aplica Carlos conforme
 al contrato. Evidencia final del gate en el borrador local `PR-BODY.md`; revisión independiente y
 CI pendientes. Este cierre reemplaza el pendiente histórico de 12/11 consultas, sin declarar merge.
+
+
+### Continuación del diagnóstico PR #49 · Codex
+
+Codex reprodujo Puestos con traces en dos bases locales nuevas y servidor propio
+con `opai_app`: teléfono 2/2, CPU ×4 2/2, filtros CPU ×8 repetidos 3/3 y secuencia
+Configuración → Puestos en teléfono/iPad CPU ×4 6/6. Los traces muestran que el
+clic y la navegación funcionan en esas corridas; no prueban la causa del fallo
+original. CI de `60e54f0`, run `40551210403`, sigue con car8:100 teléfono fallando
+(17,3 s), cancelado sin artefactos. Decisión técnica de Codex: conservar UI y
+aserciones, sin ampliar timeouts ni atribuir una causa no demostrada. El objetivo
+principal sigue pendiente. Detalles, límites y capturas en §10 del Brief 11.
+Sin cambios de negocio, migraciones, permisos ni plan del ROADMAP.

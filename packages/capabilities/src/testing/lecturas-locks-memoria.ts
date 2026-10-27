@@ -6,8 +6,11 @@ export function lecturasLocksMemoria(tabla: (nombre: string) => Fila[]) {
   const fecha = (v: unknown) => (v instanceof Date ? v.getTime() : new Date(String(v)).getTime());
   return async (sql: TemplateStringsArray, ...valores: unknown[]) => {
     const texto = sql.join("?");
-    if (texto.startsWith("SELECT id FROM core.puestos WHERE id =") && texto.endsWith("FOR UPDATE"))
-      return tabla("puesto").filter((p) => p["id"] === valores[0] && p["tenantId"] === valores[1]);
+    // Puestos vuelve a leer con Prisma tras este lock; la exclusión se prueba en Postgres.
+    if (
+      texto === "SELECT id FROM core.puestos WHERE id = ?::uuid AND tenant_id = ?::uuid FOR UPDATE"
+    )
+      return [];
     if (texto.includes("/* nucleo-h:lista-instalaciones */"))
       return instalacionesListaMemoria(tabla, valores);
     if (texto.includes("/* nucleo-h:inbox */")) {

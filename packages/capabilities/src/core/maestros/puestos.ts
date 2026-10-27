@@ -24,6 +24,7 @@ export const puestosList = defineCapability({
     })
     .refine((i) => i.instalacionId || i.cargoId, "Envía instalacionId o cargoId."),
   output: z.array(puestoSchema.extend({ instalacion: z.string() })),
+  auditarLectura: (s) => s.map((i) => i.id),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
@@ -48,6 +49,7 @@ export const puestosGet = defineCapability({
   permiso: PERMISOS_CORE.instalacionesRead,
   input: z.object({ id: uuidSchema }),
   output: puestoSchema,
+  auditarLectura: (s) => [s.id],
   efecto: "lectura",
   dryRun: false,
   handler: async (ctx, input) => vistaPuesto(await puestoDe(ctx, input.id)),
