@@ -2,7 +2,27 @@
 
 > **Desde el 24-oct-2026, el estado de las tareas vive en Linear (enlace por definir). Este archivo queda como foto técnica: versiones, infraestructura, riesgos aceptados y decisiones.** (PR #22). Las listas de pendientes de abajo se migran a Linear en la fecha que fije Carlos; hasta entonces no se borran, y si no coinciden con Linear, manda Linear.
 
-**Última actualización:** 28-oct-2026 · **Actualizado por:** Claude (arquitectura) · **Fase en curso:** 1 — Núcleo, en cierre (Briefs 01, 01c y 02 A–C integrados a `main`; quedan la sesión D del Brief 02, la paridad MCP, los arreglos de QA y las bases transversales). Plan completo y próximas tareas en `ROADMAP.md`; etapa de cada módulo en `PLAN-desarrollo.md`.
+**Foto verificada:** main `3199b00` y continuidad NÚCLEO-H en `core/nucleo-p2` · **Actualizado por:** OpenCode / openai/gpt-6.1-sol · **Fase en curso:** 1 — Núcleo, en cierre. Plan en `ROADMAP.md`; estado de tareas en Linear, no en las notas históricas de este archivo.
+
+### Integraciones verificadas en el historial de main
+
+| Base transversal | Evidencia integrada |
+|---|---|
+| Auditoría atómica/encadenada A | #71 (`3199b00`), con verificador solo job y despliegue expand/contract |
+| Identidad de servicio y presupuesto C | #70 (`3b1b7b9`), keys con permisos mínimos y ledger atómico |
+| Rate limit, MCP por cabecera y CSP Report-Only | #64 (`ec4149c`) y #63 (`bfcacc5`) |
+| MFA y ajuste de códigos en iOS | #65 (`5c18a92`) y #74 (`4a5c507`) |
+| Agente interno, servidor sin UI de chat nueva | #62 (`15c9317`) y #73 (`7cbb1c2`) |
+| Portal validado y preferencia de inicio | #68 (`611aa25`) y #72 (`bf97199`) |
+| 07d, retención y cifrado PR 3 | #61 (`f60803c`); consentimientos/ARCO/incidentes PR 2 #56 |
+| PWA y rendimiento de consultas/navegación | #45 (`dbd901c`), #53 (`6ba61f7`) y job de rendimiento #44 (`57cd1cf`) |
+
+Los relatos posteriores que dicen «PR abierto», «construido» o «pendiente de
+integración» para estas bases son históricos y quedan sustituidos por esta foto.
+Integración de código no demuestra aplicación actual de migraciones en Neon ni
+QA remota: esta continuidad solo verifica el entorno local, sin intervenir Neon.
+Playwright ya tiene job en CI (`.github/workflows/ci.yml`), aunque sigue fuera de
+los checks obligatorios de integración según ADR-043 v3. Puestos #49 no se toca.
 - **NÚCLEO-A · Auditoría atómica y encadenada en `core.audit_events` (rama `fix/auditoria-atomica`, PR #71).** Escritura y auditoría comparten transacción en capacidades del tenant; plataforma audita en el tenant objetivo con la brecha de atomicidad global declarada. Cadena por tenant con `seq` Int y hashes, inmutable para `opai_app`. El encargo original de Carlos (t457u) se mantiene registrado en ADR-052; ADR-051 corresponde a identidad de servicio en main (#70). La nota histórica de verificación y anonimización queda sustituida por la sección «Corrección de auditoría» de abajo. Migraciones pendientes de aplicación por Carlos; no se ha tocado Neon.
 - **NÚCLEO-E1 · Capa de proveedores de IA intercambiable con herramientas (26-oct-2026, rama `core/agente-interno-pr1`, PR 1 de 2 del agente interno; P1 de la auditoría del núcleo del 26-oct-2026, encargo de Carlos a OPAI 2.0, t457u).** El adaptador de IA (`@opai/integrations/ia`) suma un contrato neutral de conversación con herramientas (tool-calling), streaming de eventos y salida estructurada por JSON Schema, y el resolvedor del núcleo (`iaDe`, `packages/capabilities/src/integraciones/ia.ts`) agrega respaldo entre proveedores conectados (reintenta ante 5xx/429/red, nunca ante un 4xx de contenido) y mide cada llamada en `core.consumos` (tokens por clase; proveedor y modelo en `referencia_tipo`/`referencia_id`; sin prompt ni key). Sin SDKs (solo `fetch`): Anthropic, OpenAI, Google y un proveedor «compatible con OpenAI» con base URL configurable (`ia_compatible`: Vercel AI Gateway, OpenRouter…) más el alias `ia_xai` (Grok). `completar()` queda sobre `conversar()`: geolocalización e «Integraciones · Probar» no cambian. Detalle en la nota de ADR-031 (26-oct-2026). No toca secretos ni la config del núcleo (los cambia #61); sin migraciones. Pendiente: la UI del agente, la elección de modelo por usuario y sus ajustes (PRs posteriores del agente interno, ADR-049, según la enmienda al punto 8). **Endurecimiento (revisión 5660937436, 26-oct-2026):** el `baseUrl` de `ia_compatible` exige `https` y rechaza destinos internos (privados, loopback, link-local, metadata, localhost; también tras resolver DNS) con `redirect: "error"` (defensa SSRF); un stream cortado o con error lanza `ErrorIa` en vez de darse por completo; el consumo del streaming se mide en `finally` aun si se corta o cancela. **Política de respaldo con key propia del tenant (resuelta):** si el tenant tiene key propia y su proveedor falla, el respaldo solo prueba otras keys del **mismo tenant**; **nunca** cae a la key de OPAI (plataforma). Si todas fallan (5xx/429/red) la solicitud falla con un error tipado (`ErrorRespaldoIa`) y se avisa al tenant: la integración queda en estado «error» (visible en Configuración → Integraciones) + evento `core.integracion.error` que entrega Comunicaciones (ADR-020), más un registro de auditoría durable (`core.ia.respaldo_agotado`). Un 4xx de contenido se propaga tal cual. Sin key propia, se usa el modelo de OPAI como hasta ahora. Implementado en `iaDe`/`ia-respaldo.ts` (`packages/capabilities/src/integraciones/`), con pruebas en `test/ia-respaldo.test.ts`. **«Decisión de Carlos, 26-oct-2026 21:58 CLT, respuesta t214s684»** a «Si el tenant tiene key propia y su proveedor falla, ¿se puede pasar a la key de OPAI?»: «Nunca, que falle y avise al tenant». Detalle en ADR-049 punto 6. _TODO:_ cuando exista un mecanismo de avisos proactivos propio del tenant (push/bandeja), enriquecer el aviso; hoy se apoya en el estado de la integración + Comunicaciones + auditoría. **Endurecimiento (revisión 5661272971, 26-oct-2026):** la decisión BYOK (t214s684) se aplica **antes** de filtrar por modelo o secreto —una key propia sin modelo para la clase, sin secreto o sin base URL ahora falla y avisa, nunca cae a OPAI (`ia-candidatos.ts`)—; la defensa SSRF clasifica las IPv6 en binario (IPv4-mapped/compatible como IPv4; `fe80::/10` completo, `fec0::/10`, `fc00::/7`, NAT64 `64:ff9b::/96`, unspecified y multicast) y normaliza el punto final del host; la medición del stream registra el uso parcial ya informado en corte o cancelación (evento `uso`) sin doble conteo; y los `*-db.test.ts` de `@opai/capabilities` corren serializados (`fileParallelism: false`) e independientes del orden.
 
@@ -108,10 +128,10 @@ No se declara CI, QA remota ni aprobación del head nuevo; Neon sigue sin modifi
   revelar respuestas de mutaciones ARCO tras perder alcance: ahora se revalida la
   solicitud antes de devolver la repetición, sin repetir efectos ni borrar reservas.
   Corrección técnica del constructor dentro del encargo, no decisión nueva de Carlos.
-  **Entrega parcial:** los originales nucleo-h-1005-oc/nucleo-h-1000-oc no existen
-  en el worktree; bloque 1 bloqueado y bloques 2/3 completos no verificables.
-  CSP estricto/nonce/reportes y resto de lecturas sensibles pendientes. Sin
-  migraciones ni pantallas. CA, límites y gate en `briefs/NUCLEO-H-p2.md`.
+  **Nota histórica sustituida por el relanzamiento nucleo-h-1112-oc:** el original
+  completo ya está en el encargo. Bloques 1/2 implementados e inventariados; no
+  hay bloqueo por falta de texto. Sin migraciones ni pantallas nuevas. CA, límites
+  y gate por bloque en `briefs/NUCLEO-H-p2.md`.
   Validación de continuidad: typecheck/lint, 1.104 pruebas, BD 98+130+25,
   build y presupuesto sin subir topes en verde. E2E de cabeceras 6/6 a
   375/1024/1280 en servidor propio 3294, detenido al terminar. Autorrevisión

@@ -42,8 +42,10 @@ decisión de negocio. No se tocan reglas ni archivos de Puestos (#49).
   Las demás lecturas del inventario usan el mismo append mínimo de A, incluidas
   las vías indirectas de nombres/correos y los documentos/URLs firmadas. La
   auditoría sensible existente de sueldos no se duplica.
-- **Bloque 3: parcial.** AGENTS, contexto, estado y reglas documentan los cambios
-  verificables, sin declarar cumplidos los criterios ausentes del original.
+- **Bloque 3: implementado.** AGENTS, contexto, estado y reglas se contrastan con
+  main `3199b00`: Playwright ya corre en CI (no obligatorio), A/C/MFA/07d/agente
+  servidor/PWA/portales integrados. Se distinguen los relatos históricos de la
+  foto vigente y no se presume despliegue ni aplicación de migraciones en Neon.
 - **CSP parcial:** endpoint de reporte con límite, nonce de scripts inline y
   revisión de imágenes externas del iframe pendientes. Liveness/audio: futuro.
   No se cambia a CSP estricta sin esas comprobaciones.
@@ -101,6 +103,31 @@ no decisiones de negocio nuevas de Carlos:
 
 ## Pruebas y autorrevisión
 
+### Relanzamiento nucleo-h-1112-oc
+
+- Bloque 1: typecheck/lint, 1.107 pruebas, BD, build y presupuesto en verde.
+  E2E `maestros.spec.ts` y `cabeceras-seguridad.spec.ts`: 11 aprobadas y las
+  4 omisiones preexistentes por proyecto. Servidor propio en 3312, detenido.
+  Autorrevisión independiente sin hallazgos.
+- Bloque 2: inventario y pruebas reales en `NUCLEO-H-lecturas.md`. La
+  autorrevisión detectó/corrigió carreras de documentos/consentimientos y lecturas
+  indirectas de instalaciones/excepciones; segunda pasada sin bloqueantes.
+  Las pruebas salariales siguen exigiendo exactamente su evento salarial y ahora
+  además el acceso mínimo a la página del historial (sin repetir montos).
+  El e2e detectó que negar Empresa por alcance rompía el contrato del Inspector:
+  se conserva su lectura del perfil legal del propio tenant con `tenant.read`,
+  sin nuevos permisos, y se agrega regresión. El e2e de preferencias espera
+  específicamente el POST de `core.config.set`, no otro POST de lectura del shell.
+  Normaliza por la UI el estado inicial si una corrida previa dejó Oscuro elegido;
+  no espera una escritura al pulsar un radio ya seleccionado. Sin skips nuevos.
+  E2E final de Maestros, Configuración Empresa/Acceso y Roles: **17 aprobadas,
+  10 omisiones preexistentes por proyecto**, servidor propio 3312 y detenido.
+  Las fixtures locales usan únicamente variables aisladas heredadas; la URL
+  propietaria se limita al proceso de seed/e2e, nunca al servidor probado.
+- Logs del relanzamiento en `/tmp/opencode/nucleo-h-b1*` y `nucleo-h-b2*`.
+
+### Evidencia histórica de continuidad previa
+
 `arco-lecturas-db.test.ts`: Postgres real con rol NOBYPASSRLS, dos tenants,
 supervisor con/sin permiso y con/sin instalaciones; IDs exactos por página,
 negativas de ficha/cursor, personas/externos/huérfanos, mutaciones y dryRun sin
@@ -153,8 +180,9 @@ PR-BODY.md queda local, ignorado, sin commit, conforme al encargo.
    no hay consulta global de existencia ni promesa falsa de tiempo constante.
 5. **Decisiones:** adaptaciones técnicas del constructor registradas aquí y en
    ESTADO; no hay citas, horas, IDs ni decisiones nuevas atribuidas a Carlos.
-6. **CA:** revisados los verificables; bloque 1 bloqueado, bloques 2 y 3 parciales
-   respecto al original ausente. Prioridad ARCO y alternativa HSTS implementadas.
+6. **CA:** encargo original disponible en el relanzamiento; bloques 1, 2 y 3
+   implementados, con inventario existente/inexistente. CSP se detalla por separado;
+   HSTS permanece limitada al host conforme al encargo actual.
 7. **Web:** sin pantallas nuevas ni cambios de DS; e2e de cabeceras en las tres
    resoluciones y presupuesto por ruta, sin modificar topes.
 8. **Migraciones:** N/A, ninguna nueva ni cambios de RLS/BYPASSRLS. Sin SQL de
