@@ -141,6 +141,27 @@ describe("bitácora y consumos", () => {
     expect(await ctx.bitacora.verificar()).toMatchObject({ ok: false, primeraRota: 2 });
   });
 
+  it("encadena auditoría tras varias escrituras y detecta una alteración (ADR-023-bis)", async () => {
+    const { ctx, tabla } = contextoDePrueba({ permisos: ["core:audit.read"] });
+    for (const texto of ["a", "b", "c"]) {
+      await ctx.transaccion((tx) =>
+        ctx.auditoria.registrar(tx, {
+          tenantId: ctx.tenantId,
+          capability: "test.nota.create",
+          actor: ctx.actor,
+          payload: { texto },
+        }),
+      );
+    }
+    expect(await executeCapability(ctx, "core.auditoria.verificar", {})).toMatchObject({
+      ok: true,
+      data: { ok: true, ultimoSeq: 3, primeraRota: null },
+    });
+    const filas = tabla("auditEvent").filter((f) => f["capability"] === "test.nota.create");
+    Object.assign(filas[1] ?? {}, { hashCanon: '{"alterado":true}' });
+    expect(await ctx.auditoria.verificar()).toMatchObject({ ok: false, primeraRota: 2 });
+  });
+
   it("resume consumos del mes por recurso y por agente", async () => {
     const ahora = new Date();
     const base = {

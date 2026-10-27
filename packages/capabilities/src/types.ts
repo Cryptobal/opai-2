@@ -1,5 +1,5 @@
 import type { Rol, RolPlataforma } from "@opai/domain";
-import type { Globales, TenantDb, TenantTx } from "@opai/db";
+import type { Globales, TenantDb, TenantTx, VerificacionAuditoria } from "@opai/db";
 import type { Almacenamiento, Mailer } from "@opai/integrations";
 import type { z } from "zod";
 
@@ -41,6 +41,8 @@ export type EventoAuditoria = {
  */
 export interface Auditoria {
   registrar(tx: TenantTx, evento: EventoAuditoria): Promise<{ seq: number; hash: string }>;
+  /** Recorre la cadena del tenant actual y registra el resultado (ADR-023-bis). */
+  verificar(): Promise<VerificacionAuditoria>;
 }
 
 /** Usuario humano detrás del actor (el propio usuario o el responsable de la API key). */

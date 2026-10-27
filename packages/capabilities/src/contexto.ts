@@ -95,7 +95,7 @@ export function crearContexto(params: ParametrosContexto): Contexto {
     // Lecturas de una capacidad en una sola transacción (ADR-045): fija `app.tenant_id` una vez en
     // vez de una transacción por consulta. Misma RLS (rol `opai_app`, `set_config` local a la tx).
     enLectura: transaccionEnDb(tenantId),
-    auditoria: auditoriaEnDb,
+    auditoria: auditoriaEnDb(tenantId),
     medidor: params.medidor ?? medidorEnDb,
     eventos: eventosEnDb(tenantId, params.actor),
     trabajos: trabajosEnDb(tenantId),

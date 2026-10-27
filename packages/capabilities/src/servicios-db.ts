@@ -6,6 +6,7 @@ import {
   forTenant,
   globales,
   type Prisma,
+  verificarAuditoria,
   verificarBitacora,
 } from "@opai/db";
 
@@ -22,19 +23,22 @@ import type {
 const json = (v: unknown): Prisma.InputJsonValue => JSON.parse(JSON.stringify(v ?? {}));
 
 /** Auditoría encadenada en `core.audit_events` (auditoría del 26-oct-2026, ADR-023-bis). */
-export const auditoriaEnDb: Auditoria = {
-  registrar(tx, evento) {
-    return agregarAAuditoria(tx, evento.tenantId, {
-      actorTipo: evento.actor.tipo,
-      actorId: evento.actor.id ?? null,
-      viaUserId: evento.actor.viaUserId ?? null,
-      capability: evento.capability,
-      entityType: evento.entityType ?? null,
-      entityId: evento.entityId ?? null,
-      payload: evento.payload ?? null,
-    });
-  },
-};
+export function auditoriaEnDb(tenantId: string): Auditoria {
+  return {
+    registrar(tx, evento) {
+      return agregarAAuditoria(tx, evento.tenantId, {
+        actorTipo: evento.actor.tipo,
+        actorId: evento.actor.id ?? null,
+        viaUserId: evento.actor.viaUserId ?? null,
+        capability: evento.capability,
+        entityType: evento.entityType ?? null,
+        entityId: evento.entityId ?? null,
+        payload: evento.payload ?? null,
+      });
+    },
+    verificar: () => verificarAuditoria(tenantId),
+  };
+}
 
 /** Precios vigentes (micro-USD por unidad) con caché de 10 minutos por proceso. */
 let precios: { hasta: number; mapa: Map<string, number> } | null = null;

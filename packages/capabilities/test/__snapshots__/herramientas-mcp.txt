@@ -4,6 +4,7 @@ core_apikeys_list
 core_aprobaciones_get
 core_aprobaciones_list
 core_audit_list
+core_auditoria_verificar
 core_bitacora_verificar
 core_buscar
 core_cargos_create
