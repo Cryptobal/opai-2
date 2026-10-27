@@ -1,22 +1,13 @@
 import { type ChildProcessWithoutNullStreams, spawn } from "node:child_process";
 
-import { expect, type Page, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+import { E2E_PASSWORD as password, entrar } from "./sesion";
 
 // Pulido post-#25 (QA 24-oct), en iPad y escritorio (en celular la ficha ocupa la pantalla):
 //  - D1: al cambiar de pestaña con clic, la lista queda en pantalla y solo el panel derecho muestra la carga.
-const email = process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl";
-const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
 const baseDatos = process.env["DATABASE_URL"] ?? "";
 // El bloqueo de la tabla solo se hace contra una base local o efímera, nunca contra Neon.
 const baseLocal = /@(localhost|127\.0\.0\.1)[:/]/.test(baseDatos);
-
-async function entrar(page: Page) {
-  await page.goto("/login");
-  await page.getByLabel("Correo").fill(email);
-  await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
-  await page.getByRole("button", { name: "Entrar" }).click();
-  await page.waitForURL((url) => url.pathname === "/" || url.pathname === "/platform");
-}
 
 /** Retiene la auditoría (la lee solo la pestaña Actividad): frena el contenido del panel, no la lista. */
 async function retenerAuditoria() {

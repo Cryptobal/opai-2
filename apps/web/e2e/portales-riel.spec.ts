@@ -1,11 +1,11 @@
 import { expect, test } from "@playwright/test";
 
+import { E2E_PASSWORD as password, entrar } from "./sesion";
+
 // Riel y título de pestaña de los portales Trabajador y Cliente en escritorio (1280 px, QA del #21).
 // Usa el usuario plataforma que el job e2e ya siembra, con SEED_OWNER_PASSWORD (como plataforma.spec).
 // Basta un usuario con sesión: sin acceso al portal, el shell se monta igual (con «Sin permisos»).
 // En CI falla si falta la contraseña; en local se omite.
-const email = process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl";
-const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
 
 const PORTALES = [
   { id: "trabajador", nombre: "Trabajador" },
@@ -22,11 +22,7 @@ test.describe("portales en escritorio", () => {
 
   test("el riel nombra el portal y el 404 lleva su título", async ({ page }) => {
     test.setTimeout(180_000);
-    await page.goto("/login");
-    await page.getByLabel("Correo").fill(email);
-    await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
-    await page.getByRole("button", { name: "Entrar" }).click();
-    await page.waitForURL((url) => !url.pathname.startsWith("/login"));
+    await entrar(page);
 
     for (const p of PORTALES) {
       const paginas = [

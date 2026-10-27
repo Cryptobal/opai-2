@@ -1,0 +1,77 @@
+// Enrola el segundo factor del usuario plataforma de los e2e con un secreto TOTP FIJO y conocido
+// (NÚCLEO-F). Desde que el segundo factor es obligatorio para las cuentas de plataforma, los e2e que
+// entran con ese usuario deben pasar el segundo paso; con un secreto fijo el test genera el TOTP.
+// Solo desarrollo/CI y solo contra una base local. Uso:
+//   DATABASE_URL_MIGRATE=<url propietario local> pnpm --filter @opai/auth tsx scripts/seed-e2e-mfa.ts
+import "dotenv/config";
+import { hashPassword, symmetricEncrypt } from "better-auth/crypto";
+
+import { cerrarClientes, dbAdmin } from "@opai/db";
+
+import { auth } from "../src/auth";
+
+// Secreto TOTP crudo FIJO del owner de e2e (solo pruebas). El mismo valor vive en
+// `apps/web/e2e/sesion.ts`, que genera el código con él. No es un secreto real.
+const E2E_MFA_SECRET_RAW = "opai-e2e-mfa-secreto-fijo-000000";
+
+async function main(): Promise<void> {
+  if (process.env["VERCEL_ENV"] === "production" || process.env["NODE_ENV"] === "production") {
+    throw new Error("Solo para desarrollo y CI.");
+  }
+  const host = new URL(process.env["DATABASE_URL_MIGRATE"] ?? "postgresql://sin-configurar/")
+    .hostname;
+  if (host !== "localhost" && host !== "127.0.0.1") {
+    throw new Error(`seed:e2e-mfa solo corre contra una base local (host recibido: ${host}).`);
+  }
+  const email = (process.env["SEED_OWNER_EMAIL"] ?? "carlos.irigoyen@opai.cl").toLowerCase();
+  const db = dbAdmin();
+  const user = await db.user.findUnique({ where: { email } });
+  if (!user) throw new Error("Primero corre seed:platform-owner.");
+  const ctx = await auth.$context;
+  // Mismo cifrado que usa el plugin (symmetricEncrypt con el secretConfig del servidor), para que el
+  // código TOTP que genera el test valide contra el secreto guardado.
+  const secret = await symmetricEncrypt({ key: ctx.secretConfig, data: E2E_MFA_SECRET_RAW });
+  const backupCodes = await symmetricEncrypt({ key: ctx.secretConfig, data: JSON.stringify([]) });
+  await db.twoFactor.upsert({
+    where: { userId: user.id },
+    update: { secret, backupCodes, verified: true },
+    create: { userId: user.id, secret, backupCodes, verified: true },
+  });
+  await db.user.update({ where: { id: user.id }, data: { twoFactorEnabled: true } });
+  console.log(`${email} quedó con el segundo factor activo (secreto fijo de e2e).`);
+
+  // Usuario obligado SIN segundo factor, para el e2e del enrolamiento forzado: owner de `gard`, con
+  // contraseña (la misma que el owner, para el test) y sin MFA. Al entrar lo mandan a /activar-mfa.
+  const password = process.env["SEED_OWNER_PASSWORD"];
+  const tenant = await db.tenant.findUnique({ where: { slug: "gard" } });
+  if (password && tenant) {
+    const correoPend = "mfa-pendiente-e2e@opai.cl";
+    const pend =
+      (await db.user.findUnique({ where: { email: correoPend } })) ??
+      (await db.user.create({ data: { name: "MFA Pendiente", email: correoPend, emailVerified: true } }));
+    const hash = await hashPassword(password);
+    const cuenta = await db.account.findFirst({
+      where: { userId: pend.id, providerId: "credential" },
+    });
+    if (cuenta) await db.account.update({ where: { id: cuenta.id }, data: { password: hash } });
+    else
+      await db.account.create({
+        data: { userId: pend.id, providerId: "credential", accountId: pend.id, password: hash },
+      });
+    await db.membership.upsert({
+      where: { tenantId_userId: { tenantId: tenant.id, userId: pend.id } },
+      update: { rol: "owner", portales: ["erp"], estado: "activa" },
+      create: { tenantId: tenant.id, userId: pend.id, rol: "owner", portales: ["erp"], estado: "activa" },
+    });
+    await db.user.update({ where: { id: pend.id }, data: { twoFactorEnabled: false } });
+    await db.twoFactor.deleteMany({ where: { userId: pend.id } });
+    console.log(`${correoPend} es owner de gard SIN segundo factor (enrolamiento forzado).`);
+  }
+}
+
+main()
+  .catch((error: unknown) => {
+    console.error(error instanceof Error ? error.message : error);
+    process.exitCode = 1;
+  })
+  .finally(() => cerrarClientes());
