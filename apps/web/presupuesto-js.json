@@ -15,6 +15,6 @@
     "/(terreno)/terreno*": 162,
     "/(trabajador)/trabajador*": 162,
     "/(supervisor)/supervisor*": 162,
-    "/ds*": 220
+    "/ds*": 222
   }
 }
