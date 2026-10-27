@@ -278,6 +278,34 @@ Los **16 puntos D1–D16** del tablero «Decide Carlos» (pantalla 33) quedaron 
 3. **Convivencia del puesto del vínculo con la asignación de Operaciones (fase 3).** Solo **nota**, no se construye (pedido §2). **Recomendación:** cuando exista Operaciones, la asignación vigente manda sobre el puesto del vínculo para resolver la capa (ADR-048 pregunta abierta 1); se define en el Brief 11/12.
 4. **Timestamps de las migraciones de 07b.** **Recomendación:** posteriores a los de 07c/07d (`20261028…`), aditivas y sobre tablas disjuntas, para ordenar siempre al final sin importar el orden de merge (§6, §11).
 
+### 16.d — Precisiones para PR 1 (encargo de relanzamiento, 27-oct)
+
+Decisiones de OPAI 2.0 bajo la autoridad delegada de Carlos para cerrar el Núcleo
+(t500u), comunicadas en el encargo:
+
+1. **Impacto sin vínculo de instalación ni puesto.** La resolución de dominio es
+   pura y recibe instalación, puesto y RUT explícitamente, sin depender del vínculo.
+   `core.estructuras.efectiva` para una persona usa la capa RUT y solo usa puesto o
+   instalación cuando el llamador los proporciona; si ninguna capa se resuelve,
+   devuelve «sin capa definida». La vista previa calcula puestos afectados por
+   `core.puestos.instalacion_id`, personas con capa RUT afectadas, diferencias por
+   concepto de esas filas y número de borradores. Las personas cuyo impacto depende
+   del vínculo se cuentan aparte como «pendiente de vínculo con instalación (PR 3)»
+   sin calcular montos. Así no se inventan relaciones y PR 3 puede ampliar la fuente
+   sin cambiar la API.
+2. **Estructuras históricas incompletas.** Sin backfill ni montos inventados; la
+   migración no modifica la nulabilidad histórica. Una estructura antigua con algún
+   concepto nulo se devuelve como incompleta, con su capa y conceptos faltantes,
+   sin rellenarlos desde otra capa. La UI muestra el aviso del DS 2.0 «Estructura
+   incompleta: define los conceptos faltantes en una nueva versión». Toda estructura
+   nueva o nueva versión exige todos los conceptos, validada en capacidad y dominio;
+   el CHECK de conceptos completos solo aplica al nivel instalación. Las filas cargo
+   se archivan mediante el script idempotente aparte (D10). Así se respeta R2 sin
+   herencia ni backfill y se conservan los datos sin mostrar montos falsos.
+
+El timestamp asignado por el encargo para PR 1 es
+`20261028161000_capa_instalacion_sueldo`, en lugar del sugerido en §6 y §11.
+
 ## 17. Reporte de ejecución
 
 Al cerrar: commits integrados por PR, capturas a 375 y 1280 de las pantallas nuevas, resultado de los tests y de `pnpm test:db`, estado del gate de paridad y del presupuesto de JS, `tools/list` en `main`, y resumen ejecutivo para Carlos: qué se hizo, qué cambia para Gard (el sueldo sale de la instalación, el puesto o el RUT, sin herencia; el vínculo guarda instalación, puesto y jornada; el anexo en borrador que aprueba RRHH), qué decide él (el texto legal de la plantilla base del anexo, §16.b, y las decisiones técnicas de §16.c) y qué sigue (Brief 07c y 07d para cerrar el Núcleo; luego Puestos, Brief 11).

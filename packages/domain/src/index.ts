@@ -24,3 +24,5 @@ export * from "./cumplimiento";
 export * from "./retencion";
 export * from "./etiquetas-datos-personales";
 export * from "./actividades-tratamiento";
+
+export * from "./capas-sueldo";
