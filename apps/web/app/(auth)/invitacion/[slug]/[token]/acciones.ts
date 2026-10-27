@@ -7,6 +7,7 @@ import { crearContexto, executeCapability } from "@opai/capabilities";
 import { auth, crearUsuarioConPassword, getSession } from "@opai/auth";
 import { globales } from "@opai/db";
 
+import { ipDeCabeceras, LIMITES, permitir } from "@/lib/rate-limit";
 import { asegurarRegistro } from "@/lib/registro";
 import { COOKIE_TENANT } from "@/lib/tenant-actual";
 import { medidorDiferido } from "@/lib/medidor";
@@ -14,6 +15,18 @@ import { medidorDiferido } from "@/lib/medidor";
 asegurarRegistro();
 
 type Usuario = { id: string; name: string; email: string };
+
+/**
+ * Rate limit por IP del flujo de invitación (NÚCLEO-B): acota el sondeo de tokens. El mismo límite
+ * cubre ver, aceptar y pedir otra, así que no se puede sortear uno abusando de otro.
+ */
+async function invitacionPermitida(): Promise<boolean> {
+  return permitir(
+    `invitacion-ip:${ipDeCabeceras(await headers())}`,
+    LIMITES.invitacion.maximo,
+    LIMITES.invitacion.ventanaMs,
+  );
+}
 
 /** Contexto en el tenant de la invitación: sistema (ver, pedir otra) o el usuario que acepta. */
 async function contexto(slug: string, usuario?: Usuario) {
@@ -31,11 +44,13 @@ async function contexto(slug: string, usuario?: Usuario) {
 }
 
 export async function verInvitacion(slug: string, token: string) {
+  if (!(await invitacionPermitida())) return null;
   const ctx = await contexto(slug);
   return ctx ? executeCapability(ctx, "core.invitations.peek", { token }) : null;
 }
 
 async function aceptarComo(slug: string, token: string, usuario: Usuario): Promise<string> {
+  if (!(await invitacionPermitida())) return "Demasiados intentos. Inténtalo más tarde.";
   const ctx = await contexto(slug, usuario);
   if (!ctx) return "La invitación no existe.";
   const r = await executeCapability(ctx, "core.invitations.accept", { token });
@@ -85,6 +100,7 @@ export async function registrarYAceptar(
 
 /** Invitación vencida o usada: avisa al administrador que la envió. */
 export async function pedirNuevaInvitacion(slug: string, token: string): Promise<boolean> {
+  if (!(await invitacionPermitida())) return false;
   const ctx = await contexto(slug);
   if (!ctx) return false;
   const r = await executeCapability(ctx, "core.invitations.request_new", { token });

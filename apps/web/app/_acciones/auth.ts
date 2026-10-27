@@ -14,7 +14,14 @@ import {
 } from "@opai/auth";
 
 import { destinoSeguro } from "@/app/(auth)/destino";
-import { bloqueado, ipDeCabeceras, olvidar, permitir, registrarFallo } from "@/lib/rate-limit";
+import {
+  bloqueado,
+  ipDeCabeceras,
+  LIMITES,
+  olvidar,
+  permitir,
+  registrarFallo,
+} from "@/lib/rate-limit";
 
 /**
  * «Tras varios intentos pausaremos el acceso unos minutos» (texto de CAR-16: no fija el número, que vive en `@opai/domain`). Solo cuentan
@@ -121,7 +128,10 @@ export async function accionPedirRecuperacion(
   form: FormData,
 ): Promise<EstadoRecuperacion> {
   const email = texto(form, "email").toLowerCase();
-  if (email && permitir(`recuperar-ip:${await ip()}`, 10, PAUSA_MS)) {
+  const puede =
+    !!email &&
+    (await permitir(`recuperar-ip:${await ip()}`, LIMITES.recuperar.maximo, LIMITES.recuperar.ventanaMs));
+  if (puede) {
     await pedirRecuperacion(email, "/recuperar");
   }
   return { enviadoA: email };

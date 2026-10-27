@@ -5,7 +5,7 @@ import { slugDeComprobante } from "@opai/capabilities";
 import { forTenant, globales, verificarEslabon } from "@opai/db";
 import { Alerta, AuthCard, Loading, Pares } from "@opai/ds";
 
-import { ipDeCabeceras, permitir } from "@/lib/rate-limit";
+import { ipDeCabeceras, LIMITES, permitir } from "@/lib/rate-limit";
 
 export const metadata = { title: "Verificar comprobante" };
 
@@ -35,7 +35,10 @@ function decodificar(token: string): string {
 
 async function Contenido({ params }: Props) {
   const { token } = await params;
-  const permitido = permitir(`verificar:${ipDeCabeceras(await headers())}`, 30);
+  const permitido = await permitir(
+    `verificar:${ipDeCabeceras(await headers())}`,
+    LIMITES.verificar.maximo,
+  );
   const c = permitido ? await buscar(decodificar(token)) : null;
   return (
     <AuthCard titulo="Verificar comprobante" subtitulo="Comprobante emitido por OPAI">
