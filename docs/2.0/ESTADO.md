@@ -22,6 +22,9 @@ Hasta el 24-oct-2026 este archivo fue la fuente de verdad del avance; desde ento
   No se conceden portales nuevos ni se reparan datos automáticamente. Matriz y CA en
   `briefs/ENCARGO-nucleo-d1.md`. Migración nueva: `20261028110000_portal_inicio`;
   Neon pendiente de Carlos, con etiqueta `migracion-pendiente` cuando se abra el PR.
+  Seguimiento de la review 5663625371: limpieza transaccional de preferencias obsoletas
+  al cambiar rol o portales (punto 3 del encargo, implementado por OpenCode), sin
+  conceder acceso ni revivir preferencias al reconceder portales. Sin decisiones nuevas.
 
 > **Seguimiento de seguridad y QA PR #70 (OpenCode, continuación del 27-oct):** keys de usuario/servicio acotadas por los permisos vigentes del responsable (rol, personalizado y excepciones); servicio se invalida si este pierde alcance completo. Invitación con rol solo por personas; plataforma null para agentes; ledger acumula también sin tope; precisión mínima de micro-USD y formatos es-CL. Adaptaciones técnicas de OpenCode, no decisiones nuevas de Carlos. Seed fail-closed: solo bases locales `opai_dev`/`opai_staging`; Neon bloqueado hasta registrar un endpoint dev/staging verificado (el ID de rama no identifica su hostname). `gard-staging` es un tenant: no hay evidencia de una rama/base remota aparte y no se ejecutó el seed. Gate actual y limitaciones en `briefs/NUCLEO-C-identidad-servicio.md`.
 

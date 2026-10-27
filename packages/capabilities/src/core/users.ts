@@ -8,6 +8,7 @@ import type { Contexto } from "../types";
 import { portalSchema, rolSchema, uuidSchema } from "./esquemas";
 import { validarAsignacionRol } from "./permisos/asignaciones";
 import { exigeAsignarRol, exigeGestionDeRoles } from "./permisos/comun";
+import { limpiarPortalObsoleto } from "./users-portal";
 import {
   aMiembro,
   buscar,
@@ -146,6 +147,7 @@ export const usersUpdate = defineCapability({
         data,
       });
       if (r.count !== 1) throw conflicto("La membresía cambió. Recarga y vuelve a intentarlo.");
+      await limpiarPortalObsoleto(tx, ctx.tenantId, actual, input);
       if (pasaAOwner) await tx.permisoExcepcion.deleteMany({ where: { membershipId: actual.id } });
     });
     return buscar(ctx, actual.id);

@@ -26,6 +26,10 @@ Continuaciones del encargo del 27-oct-2026. No incluye ID de Linear; no se inven
   no se reactiva ni cambia portales sin indicar un rol válido; aún puede suspenderse.
   La migración se renombró a `20261028110000_portal_inicio` por colisión de timestamp,
   sin modificar su SQL. El merge de #70 conserva el bloqueo de cambios de rol por agentes.
+- Continuación de la review 5663625371: al cambiar rol o portales se limpia solo una
+  preferencia que ya no sea válida, dentro de la misma transacción y sobre el valor
+  vigente de la fila. Preview no escribe; quitar y reconceder no revive la elección.
+  Implementación de OpenCode según el punto 3 del encargo, no decisión nueva de negocio.
 
 ## Criterios técnicos de implementación
 
