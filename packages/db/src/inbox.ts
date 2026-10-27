@@ -18,15 +18,19 @@ export async function leerInbox(
   soloNoLeidas: boolean,
   limite: number,
   antesDe?: string,
-): Promise<{ items: Aviso[]; noLeidas: number }> {
+): Promise<{ items: Aviso[]; noLeidas: number; cursorValido: boolean }> {
   notificarConsulta(); // SQL de negocio, fuera del hook de modelos Prisma.
-  const [fila] = await tx.$queryRaw<{ items: Aviso[]; noLeidas: number }[]>`
+  const [fila] = await tx.$queryRaw<{ items: Aviso[]; noLeidas: number; cursorValido: boolean }[]>`
     /* nucleo-h:inbox */
     SELECT coalesce(jsonb_agg(to_jsonb(pagina) ORDER BY pagina."creadaEn" DESC, pagina.id DESC)
       FILTER (WHERE pagina.id IS NOT NULL), '[]'::jsonb) AS items,
       (SELECT count(*)::int FROM core.notificaciones
        WHERE tenant_id = ${tenantId}::uuid AND usuario_id = ${usuarioId}::uuid AND leida_en IS NULL
-      ) AS "noLeidas"
+      ) AS "noLeidas",
+      (${antesDe ?? null}::uuid IS NULL OR EXISTS (
+        SELECT 1 FROM core.notificaciones WHERE tenant_id = ${tenantId}::uuid
+          AND usuario_id = ${usuarioId}::uuid AND id = ${antesDe ?? null}::uuid
+      )) AS "cursorValido"
     FROM (
       SELECT id, titulo, cuerpo, enlace, leida_en AS "leidaEn", created_at AS "creadaEn"
       FROM core.notificaciones WHERE tenant_id = ${tenantId}::uuid AND usuario_id = ${usuarioId}::uuid

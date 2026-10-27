@@ -78,10 +78,10 @@ describe.skipIf(!urlPropietario)("inbox propio: página y conteo en una sentenci
     const ajena = await enTransaccion(tenantId, (tx) =>
       leerInbox(tx, otroTenant, usuarioId, false, 10),
     );
-    expect(ajena).toEqual({ items: [], noLeidas: 0 });
+    expect(ajena).toEqual({ items: [], noLeidas: 0, cursorValido: true });
     const vacia = await enTransaccion(tenantId, (tx) =>
       leerInbox(tx, tenantId, randomUUID(), false, 10),
     );
-    expect(vacia).toEqual({ items: [], noLeidas: 0 });
+    expect(vacia).toEqual({ items: [], noLeidas: 0, cursorValido: true });
   });
 });

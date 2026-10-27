@@ -41,7 +41,6 @@ test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }
   await segunRol.click();
   await expect(segunRol).toHaveAttribute("data-state", "checked");
   await page.goto("/");
-  // La Bandeja carga su chunk y sus datos después del montaje.
   await expect(page.getByRole("heading", { name: /^Bandeja · \d/ })).toBeVisible({ timeout: 15_000 });
   const nav = page
     .getByRole("navigation", { name: "Principal", exact: true })
@@ -141,7 +140,6 @@ test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }
   await page.getByRole("radio", { name: /^Según mi rol/ }).click();
   await expect(page.getByRole("radio", { name: /^Según mi rol/ })).toHaveAttribute("data-state", "checked");
   await page.goto("/");
-  // La Bandeja carga su chunk y sus datos después del montaje.
   await expect(page.getByRole("heading", { name: /^Bandeja · \d/ })).toBeVisible({ timeout: 15_000 });
   await page
     .locator("header")

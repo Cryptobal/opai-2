@@ -38,12 +38,11 @@ export const notificacionesList = defineCapability({
   dryRun: false,
   async handler(ctx, input) {
     const usuarioId = usuarioDe(ctx);
-    if (input.antesDe && !await ctx.db.notificacion.findFirst({
-      where: { id: input.antesDe, usuarioId }, select: { id: true },
-    })) throw noEncontrado("El aviso");
-    return ctx.transaccion((tx) =>
-      leerInbox(tx, ctx.tenantId, usuarioId, input.soloNoLeidas, input.limite, input.antesDe),
-    );
+    return ctx.transaccion(async (tx) => {
+      const resultado = await leerInbox(tx, ctx.tenantId, usuarioId, input.soloNoLeidas, input.limite, input.antesDe);
+      if (!resultado.cursorValido) throw noEncontrado("El aviso");
+      return { items: resultado.items, noLeidas: resultado.noLeidas };
+    });
   },
 });
 

@@ -10,7 +10,7 @@ it("el inbox en memoria ordena por timestamp e id descendentes, igual que SQL", 
   ].map((n) => ({ ...n, tenantId: "tenant", usuarioId: "usuario", titulo: "Aviso" }));
   const consultar = lecturasLocksMemoria(() => filas);
   const sql = Object.assign(["/* nucleo-h:inbox */"], { raw: ["/* nucleo-h:inbox */"] });
-  const [r] = await consultar(sql, "tenant", "usuario", "tenant", "usuario", false, 2);
+  const [r] = await consultar(sql, "tenant", "usuario", null, "tenant", "usuario", null, "tenant", "usuario", false, null, "tenant", "usuario", null, 2);
   expect(r).toMatchObject({ noLeidas: 3, items: [{ id: "c" }, { id: "b" }] });
   const subsegundos = lecturasLocksMemoria(() => [
     {
@@ -26,7 +26,7 @@ it("el inbox en memoria ordena por timestamp e id descendentes, igual que SQL", 
       createdAt: new Date("2026-01-02T00:00:00.900Z"),
     },
   ]);
-  expect(await subsegundos(sql, "tenant", "usuario", "tenant", "usuario", false, 2)).toMatchObject([
+  expect(await subsegundos(sql, "tenant", "usuario", null, "tenant", "usuario", null, "tenant", "usuario", false, null, "tenant", "usuario", null, 2)).toMatchObject([
     { items: [{ id: "a" }, { id: "b" }] },
   ]);
 });
