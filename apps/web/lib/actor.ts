@@ -18,6 +18,7 @@ export type UsuarioSesion = {
   name: string;
   email: string;
   platformRole?: string | null | undefined;
+  twoFactorEnabled?: boolean | null | undefined;
 };
 
 /** Usuario, membresías y tenant actual de una sesión. Lo comparten la API y las páginas. */
@@ -28,6 +29,8 @@ export type Identidad = {
   modulosActivos: string[];
   /** Acceso efectivo en el tenant actual (rol personalizado y excepciones, ADR-022). */
   acceso: AccesoFila;
+  /** Segundo factor activo en la cuenta (NÚCLEO-F). Decide el enrolamiento obligatorio. */
+  mfaActiva: boolean;
 };
 
 const SIN_ACCESO: AccesoFila = { permisosRol: null, excepciones: [], instalaciones: null };
@@ -54,6 +57,7 @@ export async function identidadDe(
     actual,
     modulosActivos,
     acceso,
+    mfaActiva: user.twoFactorEnabled === true,
   };
 }
 

@@ -83,6 +83,13 @@ export const AJUSTES_NUCLEO = defineAjustes(
         ambito: "plataforma",
         control: "json",
       }),
+    seguridad_mfa_obligatorio_admins: z.boolean().default(true).meta({
+      etiqueta: "Exigir segundo factor a dueños y administradores",
+      ayuda: "Owner y admin deben activar el segundo factor para entrar. Las cuentas de plataforma lo exigen siempre. Decisión de Carlos (26-oct-2026): por defecto obligatorio.",
+      grupo: "Seguridad",
+      ambito: "tenant",
+      control: "switch",
+    }),
     remuneraciones_imm: z.number().int().min(1).default(553_553).meta({
       etiqueta: "Ingreso mínimo mensual (CLP)",
       ayuda: "Ley 21.830: $553.553 desde el 1-may-2026. Base del tope de gratificación legal.",
