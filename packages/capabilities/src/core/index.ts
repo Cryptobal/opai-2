@@ -20,10 +20,12 @@ import {
 import { capacidadesAgentes, trabajosAgentes } from "./agentes";
 import { capacidadesComunicaciones, consumidorComunicaciones } from "./comunicaciones";
 import { capacidadesConfig } from "./config";
+import { capacidadesCumplimiento } from "./cumplimiento";
 import { capacidadesDocumentos, trabajosDocumentos } from "./documentos";
 import { capacidadesEmpresa } from "./empresa";
 import { capacidadesMaestros } from "./maestros";
 import { capacidadesPanel } from "./panel";
+import { capacidadesPermisos } from "./permisos";
 import { platformConsumosSummary, platformEventosList } from "./platform-observabilidad";
 import { platformTrabajosCancelar, platformTrabajosReintentar } from "./platform-servicios";
 import { invitationsList, invitationsRevoke, usersInvite } from "./invitations";
@@ -91,8 +93,10 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   platformIntegracionesEstado,
   ...capacidadesMaestros,
   ...capacidadesPanel,
+  ...capacidadesPermisos,
   ...capacidadesDocumentos,
   ...capacidadesConfig,
+  ...capacidadesCumplimiento,
   ...capacidadesEmpresa,
   ...capacidadesComunicaciones,
   ...capacidadesAgentes,

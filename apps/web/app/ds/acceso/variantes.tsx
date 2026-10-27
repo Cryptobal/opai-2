@@ -32,9 +32,22 @@ export const VARIANTES: Record<string, () => React.ReactNode> = {
       google
       inicial={{
         tipo: "error",
+        n: 1,
         titulo: "El correo o la contraseña no coinciden",
         texto:
-          "Revisa los datos y vuelve a intentarlo. Tras 5 intentos pausaremos el acceso por 15 minutos.",
+          "Revisa los datos y vuelve a intentarlo. Tras varios intentos pausaremos el acceso unos minutos.",
+      }}
+    />
+  ),
+  "login-pausado": () => (
+    <FormularioLogin
+      destino="/"
+      google
+      inicial={{
+        tipo: "pausado",
+        n: 1,
+        titulo: "Pausamos el acceso",
+        texto: "Hubo demasiados intentos. Vuelve a intentarlo en unos minutos.",
       }}
     />
   ),
@@ -44,6 +57,7 @@ export const VARIANTES: Record<string, () => React.ReactNode> = {
       google
       inicial={{
         tipo: "suspendida",
+        n: 1,
         texto:
           "No puedes entrar a Gard Security por ahora. Pide a Paula Rojas (administración de Gard Security) que reactive tu acceso.",
       }}

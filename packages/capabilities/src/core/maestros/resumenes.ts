@@ -4,6 +4,7 @@ import { z } from "zod";
 import { estadoVigencia } from "@opai/domain";
 
 import type { Contexto } from "../../types";
+import { dondeInstalacion } from "./alcance";
 import { dia, hoy } from "./comun";
 
 export const alertasSchema = z
@@ -15,7 +16,8 @@ export async function resumenCuentas(ctx: Contexto, ids: string[]) {
   const [inst, principales] = await Promise.all([
     ctx.db.instalacion.groupBy({
       by: ["cuentaId"],
-      where: { cuentaId: { in: ids }, archivadaEn: null },
+      // Cuenta la dotación visible para el actor: solo las instalaciones a su cargo (ADR-022).
+      where: { cuentaId: { in: ids }, archivadaEn: null, AND: [dondeInstalacion(ctx)] },
       _count: { _all: true },
     }),
     ctx.db.contacto.findMany({

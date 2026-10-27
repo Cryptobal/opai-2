@@ -1,11 +1,16 @@
 # Previews por PR con rama Neon efímera (Brief 02, bloque 13). Requiere los secretos del repo
-# NEON_API_KEY, NEON_PROJECT_ID, VERCEL_TOKEN, VERCEL_ORG_ID, VERCEL_PROJECT_ID y
-# OPAI_APP_DB_PASSWORD; sin ellos el
-# job se salta (no falla) para no bloquear PRs mientras se configuran.
+# NEON_API_KEY, NEON_PROJECT_ID, VERCEL_TOKEN, VERCEL_ORG_ID y VERCEL_PROJECT_ID. Si falta alguno
+# y el PR no viene de un fork, el job falla con un aviso; en un PR de fork (sin acceso a secretos)
+# se salta sin fallar.
+# La contraseña de opai_app NO es un secreto del repo: en Neon los roles son por rama, así que
+# cada rama de preview recibe una contraseña aleatoria propia (no toca main ni dev).
 name: preview
 on:
   pull_request:
     types: [opened, reopened, synchronize, closed]
+
+permissions:
+  contents: read
 
 concurrency:
   group: preview-${{ github.event.pull_request.number }}
@@ -15,20 +20,37 @@ jobs:
   rama-neon:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: read
+      pull-requests: read # solo para saber si un PR huérfano ya está cerrado
     env:
-      NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
-      NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
-      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-      OPAI_APP_DB_PASSWORD: ${{ secrets.OPAI_APP_DB_PASSWORD }}
       RAMA: preview/pr-${{ github.event.pull_request.number }}
       RAMA_GIT: ${{ github.head_ref }}
+      ES_FORK: ${{ github.event.pull_request.head.repo.fork }}
+      VERCEL_CLI: vercel@65.3.1
+      NEONCTL: neonctl@8.12.1
     steps:
       - name: ¿Hay secretos?
         id: listo
+        env:
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+          NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
-          if [ -n "$NEON_API_KEY" ] && [ -n "$VERCEL_TOKEN" ] && [ -n "$OPAI_APP_DB_PASSWORD" ]; then echo "ok=true" >> "$GITHUB_OUTPUT"; else echo "ok=false" >> "$GITHUB_OUTPUT"; echo "Secretos de preview no configurados: se omite."; fi
+          faltan=""
+          for n in NEON_API_KEY NEON_PROJECT_ID VERCEL_TOKEN VERCEL_ORG_ID VERCEL_PROJECT_ID; do
+            [ -n "${!n}" ] || faltan="$faltan $n"
+          done
+          if [ -z "$faltan" ]; then echo "ok=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+          echo "ok=false" >> "$GITHUB_OUTPUT"
+          if [ "$ES_FORK" = "true" ]; then
+            echo "PR de fork: sin acceso a secretos, se omite la preview."
+            exit 0
+          fi
+          echo "::warning::Faltan secretos de preview:$faltan. Configúralos en el repo (gh secret set)."
+          exit 1
       - uses: actions/checkout@v4
         if: steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
       - uses: pnpm/action-setup@v4
@@ -38,6 +60,40 @@ jobs:
         with:
           node-version-file: .nvmrc
           cache: pnpm
+      - name: Borrar ramas Neon huérfanas (PR ya cerrado)
+        if: steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
+        env:
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+          NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
+          GH_TOKEN: ${{ github.token }}
+          PR_ACTUAL: ${{ github.event.pull_request.number }}
+        run: |
+          # Plan con tope de 10 ramas. Solo se consideran nombres exactos preview/pr-N; main, dev y
+          # pre-* nunca coinciden. Una rama se borra únicamente si GitHub confirma su PR como cerrado.
+          ramas=$(npx --yes "$NEONCTL" branches list --project-id "$NEON_PROJECT_ID" --output json | jq -r '.[].name')
+          for nombre in $ramas; do
+            [[ "$nombre" =~ ^preview/pr-([0-9]+)$ ]] || continue
+            n="${BASH_REMATCH[1]}"
+            [ "$n" != "$PR_ACTUAL" ] || continue
+            estado=$(gh api "repos/${GITHUB_REPOSITORY}/pulls/${n}" --jq .state) || { echo "No se pudo leer el PR $n; se conserva $nombre."; continue; }
+            if [ "$estado" = "closed" ]; then
+              echo "Borrando rama huérfana $nombre (PR $n cerrado)."
+              # Limpieza oportunista: otro PR pudo borrarla antes (404) o Neon fallar un momento.
+              # Nada de esto debe poner en rojo este PR; si de verdad no hay cupo, falla la creación.
+              if ! salida=$(npx --yes "$NEONCTL" branches delete "$nombre" --project-id "$NEON_PROJECT_ID" 2>&1); then
+                if echo "$salida" | grep -qiE 'not found|404'; then
+                  echo "La rama $nombre ya no existe."
+                else
+                  # El error de neonctl es texto libre: se escapa como piden los comandos de workflow
+                  # (% CR LF) para que sus saltos de línea o un "::" no inyecten otros comandos.
+                  salida=${salida//'%'/'%25'}
+                  salida=${salida//$'\r'/'%0D'}
+                  salida=${salida//$'\n'/'%0A'}
+                  echo "::warning::No se pudo borrar la rama huérfana $nombre: $salida"
+                fi
+              fi
+            fi
+          done
       - name: Crear o reutilizar la rama Neon
         if: steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
         id: neon
@@ -54,21 +110,52 @@ jobs:
         run: |
           pnpm install --frozen-lockfile
           DATABASE_URL_MIGRATE="$DB_URL" pnpm db:deploy
-      - name: DATABASE_URL de preview para la rama git
+      - name: Contraseña propia de opai_app y DATABASE_URL de la preview
         if: steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
         env:
+          DB_URL: ${{ steps.neon.outputs.db_url }}
           DB_URL_POOLED: ${{ steps.neon.outputs.db_url_pooled }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
-          # La app usa opai_app (sin BYPASSRLS): misma contraseña que en main, heredada por la rama.
-          URL_APP=$(echo "$DB_URL_POOLED" | sed -E "s#://[^:]+:[^@]+@#://opai_app:${OPAI_APP_DB_PASSWORD}@#")
-          npx --yes vercel@latest env rm DATABASE_URL preview "$RAMA_GIT" --yes --token "$VERCEL_TOKEN" >/dev/null 2>&1 || true
-          printf '%s' "$URL_APP" | npx --yes vercel@latest env add DATABASE_URL preview "$RAMA_GIT" --token "$VERCEL_TOKEN" >/dev/null
+          # Hex: sin caracteres que rompan la URL. La clave solo vive en este paso y en Vercel.
+          CLAVE=$(openssl rand -hex 32)
+          echo "::add-mask::$CLAVE"
+          DATABASE_URL_MIGRATE="$DB_URL" OPAI_APP_DB_PASSWORD="$CLAVE" pnpm --filter @opai/db role:password
+          # La app usa opai_app (sin BYPASSRLS) con la contraseña propia de la rama.
+          URL_APP=$(echo "$DB_URL_POOLED" | sed -E "s#://[^:]+:[^@]+@#://opai_app:${CLAVE}@#")
+          echo "::add-mask::$URL_APP"
+          # Solo se tolera que la variable no exista todavía; cualquier otro error falla.
+          if ! salida=$(npx --yes "$VERCEL_CLI" env rm DATABASE_URL preview "$RAMA_GIT" --yes 2>&1); then
+            echo "$salida" | grep -qiE 'not found|no existing' || { echo "$salida"; exit 1; }
+          fi
+          printf '%s' "$URL_APP" | npx --yes "$VERCEL_CLI" env add DATABASE_URL preview "$RAMA_GIT" >/dev/null
       - name: Redesplegar la preview con la base de su rama
         if: steps.listo.outputs.ok == 'true' && github.event.action != 'closed'
         # El despliegue automático de Vercel pudo partir antes de fijar la variable: se repite.
-        run: npx --yes vercel@latest deploy --yes --token "$VERCEL_TOKEN" >/dev/null
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: npx --yes "$VERCEL_CLI" deploy --yes >/dev/null
       - name: Borrar la rama Neon y la variable al cerrar
         if: steps.listo.outputs.ok == 'true' && github.event.action == 'closed'
+        env:
+          NEON_API_KEY: ${{ secrets.NEON_API_KEY }}
+          NEON_PROJECT_ID: ${{ secrets.NEON_PROJECT_ID }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
-          npx --yes neonctl@latest branches delete "$RAMA" --project-id "$NEON_PROJECT_ID" --api-key "$NEON_API_KEY" || true
-          npx --yes vercel@latest env rm DATABASE_URL preview "$RAMA_GIT" --yes --token "$VERCEL_TOKEN" >/dev/null 2>&1 || true
+          # Un error real se ve y falla; solo se tolera que el recurso ya no exista (404).
+          if ! salida=$(npx --yes "$NEONCTL" branches delete "$RAMA" --project-id "$NEON_PROJECT_ID" 2>&1); then
+            echo "$salida"
+            echo "$salida" | grep -qiE 'not found|404' || exit 1
+            echo "La rama Neon $RAMA ya no existe."
+          fi
+          if ! salida=$(npx --yes "$VERCEL_CLI" env rm DATABASE_URL preview "$RAMA_GIT" --yes 2>&1); then
+            echo "$salida"
+            echo "$salida" | grep -qiE 'not found|no existing' || exit 1
+            echo "La variable DATABASE_URL de $RAMA_GIT ya no existe."
+          fi

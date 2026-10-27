@@ -32,7 +32,7 @@ export function ListaAvisos({ avisos, portal }: { avisos: Aviso[]; portal: strin
             {a.enlace ? (
               <Link
                 href={a.enlace}
-                className="block px-4 py-3 hover:bg-bg"
+                className="block px-4 py-3 hover:bg-fill dark:hover:bg-bg"
                 onClick={() =>
                   void ejecutarCapacidad(portal, "core.notificaciones.marcar_leida", {
                     id: a.id,

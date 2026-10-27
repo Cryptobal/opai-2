@@ -4,15 +4,28 @@
 
 import type { Globales, TenantDb, TenantTx } from "@opai/db";
 
+import { uuid7 } from "../core/documentos/uuid7";
 import { agrupar, cumple, ordenar, type Fila, type Where } from "./db-memoria-util";
 
-// Ids crecientes como uuid(7): el orden por id es el orden de creación, igual que en Postgres.
-let secuencia = 0;
-const idOrdenado = () => `00000000-0000-7000-8000-${(++secuencia).toString(16).padStart(12, "0")}`;
+// Ids crecientes como uuid(7): el orden por id es el orden de creación, igual que en Postgres. Se
+// usa el MISMO generador que inyectan las capacidades (p. ej. `incidente_registrar` pasa `uuid7()`),
+// con un contador de milisegundos monótono siempre por delante del reloj, para que un id autogenerado
+// quede estrictamente después de cualquier id inyectado antes: así ordenar por id es el orden real de
+// creación tanto aquí como en Postgres.
+let ultimoMs = 0;
+const idOrdenado = () => {
+  ultimoMs = Math.max(ultimoMs + 1, Date.now() + 1);
+  return uuid7(ultimoMs);
+};
 
 const RELACIONES: Record<string, Record<string, [tabla: string, clave: string]>> = {
-  membership: { user: ["user", "userId"], tenant: ["tenant", "tenantId"] },
+  membership: {
+    user: ["user", "userId"],
+    tenant: ["tenant", "tenantId"],
+    rolTenant: ["rol", "roleId"],
+  },
   apiKey: { user: ["user", "userId"] },
+  permisoExcepcion: { creadoPorUsuario: ["user", "creadoPor"] },
 };
 
 export function dbEnMemoria(semilla: Record<string, Fila[]> = {}) {

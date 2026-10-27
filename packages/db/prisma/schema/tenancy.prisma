@@ -7,6 +7,8 @@ model Membership {
   userId    String   @map("user_id") @db.Uuid
   /// "owner" | "admin" | "gerente" | "supervisor" | "viewer" (ADR-016)
   rol       String
+  /// Rol personalizado del tenant (ADR-022). null = el rol base de `rol`. Define los permisos.
+  roleId    String?  @map("role_id") @db.Uuid
   /// Portales a los que accede: "erp" | "supervisor" | "trabajador" | "terreno" | "cliente".
   portales  String[]
   /// "activa" | "suspendida"
@@ -14,11 +16,16 @@ model Membership {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  tenant Tenant @relation(fields: [tenantId], references: [id])
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tenant      Tenant             @relation(fields: [tenantId], references: [id])
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  rolTenant   Rol?               @relation(fields: [roleId], references: [id])
+  excepciones PermisoExcepcion[]
+  /// Instalaciones a cargo si el rol acota por filas (supervisor, ADR-022 · Brief 07c B3).
+  instalacionesACargo SupervisorInstalacion[]
 
   @@unique([tenantId, userId])
   @@index([userId])
+  @@index([roleId])
   @@map("memberships")
   @@schema("core")
 }

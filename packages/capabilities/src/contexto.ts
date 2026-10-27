@@ -1,4 +1,11 @@
-import { type Rol, tienePermiso, tienePermisoPlataforma, moduloDe } from "@opai/domain";
+import {
+  type Acceso,
+  type Excepcion,
+  moduloDe,
+  type Rol,
+  tienePermisoEfectivo,
+  tienePermisoPlataforma,
+} from "@opai/domain";
 import { forTenant, globales, type Prisma } from "@opai/db";
 import { almacenamientoDelEntorno, mailerDelEntorno } from "@opai/integrations";
 
@@ -13,6 +20,7 @@ import {
 import type {
   Actor,
   AgenteContexto,
+  Alcance,
   Auditoria,
   Contexto,
   EventoAuditoria,
@@ -53,10 +61,16 @@ export type ParametrosContexto = {
   actor: Actor;
   usuario?: UsuarioContexto | null;
   rol?: Rol | null;
+  /** Permisos del rol personalizado del tenant (null = el rol base de `rol`). ADR-022. */
+  permisosRol?: readonly string[] | null;
+  /** Excepciones de permiso por usuario sobre el rol. ADR-022. */
+  excepciones?: readonly Excepcion[] | null;
   portal?: string | null;
   modulosActivos?: readonly string[];
   scopes?: readonly string[] | null;
   principal?: Principal | null;
+  /** Alcance por filas del actor (null = ve todo). Lo resuelve el borde una vez (ADR-022, ADR-045). */
+  alcance?: Alcance | null;
   agente?: AgenteContexto | null;
   medidor?: Medidor;
   /** Trabajo diferido (el borde usa `after()`). Por defecto, sin esperar y sin romper. */
@@ -67,14 +81,15 @@ export type ParametrosContexto = {
 };
 
 /**
- * Autorización real (ADR-016): `platform:*` solo con `platformRole`; el resto, por el rol de la
- * membresía en el tenant actual. Módulo activo y scopes los verifica `executeCapability`.
+ * Autorización real (ADR-016, ADR-022): `platform:*` solo con `platformRole`; el resto, por el
+ * acceso efectivo en el tenant actual (rol base o personalizado + excepciones, denegar-gana).
+ * Módulo activo y scopes los verifica `executeCapability`.
  */
-export function autorizador(rol: Rol | null, usuario: UsuarioContexto | null) {
+export function autorizador(acceso: Acceso, usuario: UsuarioContexto | null) {
   return (permiso: string): boolean =>
     moduloDe(permiso) === "platform"
       ? tienePermisoPlataforma(usuario?.platformRole, permiso)
-      : rol !== null && tienePermiso(rol, permiso);
+      : tienePermisoEfectivo(acceso, permiso);
 }
 
 const diferirPorDefecto = (tarea: () => Promise<unknown>) => void tarea().catch(() => undefined);
@@ -94,6 +109,7 @@ export function crearContexto(params: ParametrosContexto): Contexto {
     modulosActivos: params.modulosActivos ?? [],
     scopes: params.scopes ?? null,
     principal: params.principal ?? null,
+    alcance: params.alcance ?? null,
     agente: params.agente ?? null,
     db: forTenant(tenantId),
     transaccion: transaccionEnDb(tenantId),
@@ -117,6 +133,15 @@ export function crearContexto(params: ParametrosContexto): Contexto {
     plataforma: usuario?.platformRole
       ? { globales: globales(), paraTenant: (id: string) => forTenant(id) }
       : null,
-    autorizar: autorizador(rol, usuario),
+    // `ctx.rol` conserva el rol base (jerarquía y etiquetas). La autorización usa el rol
+    // personalizado cuando existe: si hay `permisosRol`, el rol base cede a esa lista (ADR-022).
+    autorizar: autorizador(
+      {
+        rol: params.permisosRol != null ? null : rol,
+        permisosRol: params.permisosRol ?? null,
+        excepciones: params.excepciones ?? null,
+      },
+      usuario,
+    ),
   };
 }

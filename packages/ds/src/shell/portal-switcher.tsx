@@ -12,8 +12,9 @@ type Props = {
   portalActual: string;
   tenant?: Tenant | undefined;
   /** `compacto`: monograma, empresa y portal (teléfono). `monograma`: solo el monograma (barra
-   *  lateral). `riel`: monograma sobre el portal (abreviado) y ⇅, en un botón de 64 px (riel de iPad, ShellTablet). */
-  variante?: "compacto" | "monograma" | "riel";
+   *  lateral). `riel`: monograma sobre el portal (abreviado) y ⇅, en un botón de 64 px (riel de iPad, ShellTablet).
+   *  `tarjeta`: monograma, portal y empresa con ⇅ en una tarjeta de 44 px (barra lateral, ShellDesktop). */
+  variante?: "compacto" | "monograma" | "riel" | "tarjeta";
   /** Ítems extra al pie (cambiar de empresa). */
   extra?: readonly ItemMenu[] | undefined;
   className?: string;
@@ -35,6 +36,11 @@ const VARIANTES = {
     lado: "derecha",
     clase: "h-16 w-16 flex-col gap-1 rounded-[12px] border border-border bg-bg px-0.5",
     estatica: "flex h-16 w-16 flex-col items-center justify-center gap-1 px-0.5",
+  },
+  tarjeta: {
+    lado: "abajo-izquierda",
+    clase: "h-11 w-full justify-start rounded-md border border-border bg-bg px-2.5",
+    estatica: "flex h-11 w-full items-center rounded-md border border-border bg-bg px-2.5",
   },
 } as const;
 
@@ -66,6 +72,17 @@ export function PortalSwitcher(props: Props) {
           {conMenu ? <ChevronsUpDown className="size-3 flex-none" aria-hidden /> : null}
         </span>
       </>
+    ) : variante === "tarjeta" ? (
+      <span className="flex w-full min-w-0 items-center gap-2.5 text-left">
+        <Monograma nombre={nombre} />
+        <span className="flex min-w-0 flex-1 flex-col">
+          <span className="t-label-sm truncate text-fg">{actual?.etiqueta}</span>
+          <span className="t-caption truncate text-[11px] leading-[14px]">{nombre}</span>
+        </span>
+        {conMenu ? (
+          <ChevronsUpDown className="size-4 flex-none text-fg-subtle" aria-hidden />
+        ) : null}
+      </span>
     ) : (
       <span className="flex min-w-0 items-center gap-2">
         <Monograma nombre={nombre} />

@@ -156,6 +156,7 @@ jobs:
         run: pnpm --filter @opai/web e2e --reporter=list
         env:
           BASE_URL: http://localhost:3000
+          DATABASE_URL_MIGRATE: postgresql://postgres:postgres@localhost:5432/opai_e2e
       - name: Guardar resultados si fallan
         if: failure()
         uses: actions/upload-artifact@v4
