@@ -1,6 +1,6 @@
 "use client";
 
-import { Building2, LogOut, Settings2, UserRound } from "lucide-react";
+import { Building2, LogOut, Settings2, ShieldCheck, UserRound } from "lucide-react";
 import dynamic from "next/dynamic";
 import { usePathname, useRouter } from "next/navigation";
 import { type ReactNode, useEffect, useMemo, useState } from "react";
@@ -84,6 +84,16 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
             etiqueta: "Preferencias",
             icono: Settings2,
             onSelect: () => router.push("/configuracion/preferencias"),
+          },
+        ]
+      : []),
+    ...(datos.portal === "erp" && datos.tenant
+      ? [
+          {
+            id: "mi-cuenta",
+            etiqueta: "Mi cuenta",
+            icono: ShieldCheck,
+            onSelect: () => router.push("/mi-cuenta"),
           },
         ]
       : []),
