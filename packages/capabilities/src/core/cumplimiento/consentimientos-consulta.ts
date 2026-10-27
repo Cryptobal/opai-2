@@ -3,7 +3,9 @@ import { z } from "zod";
 import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
+import { noEncontrado } from "../../errores";
 import { cargarTitular, titularSchema } from "./comunes";
+import { dondeSolicitud } from "./solicitudes-alcance";
 
 const hechoSchema = z.object({
   id: z.string(),
@@ -15,6 +17,7 @@ const hechoSchema = z.object({
 });
 
 export const consentimientosListar = defineCapability({
+  auditarLectura: (s) => [s.titular.id, ...s.historial.map((h) => h.id)],
   id: "core.cumplimiento.consentimientos_listar",
   descripcion:
     "Lista el historial de consentimientos de un titular (otorgados y revocados) por fin accesorio, con el estado vigente de cada fin (Ley 21.719). El alcance se aplica en la consulta: solo del tenant actual.",
@@ -28,6 +31,14 @@ export const consentimientosListar = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
+    const alcance = await dondeSolicitud(ctx);
+    // Autoriza solo el conjunto bloqueado, nunca contactos que entren después de la selección.
+    if (
+      ctx.alcance &&
+      (input.titular.tipo !== "contacto" ||
+        !(alcance.titularId as { in: string[] }).in.includes(input.titular.id))
+    )
+      throw noEncontrado(`El titular (${input.titular.tipo})`);
     // cargarTitular valida que el titular sea del tenant (RLS), no se confía solo en el id.
     const titular = await cargarTitular(ctx, input.titular);
     const filas = await ctx.db.consentimiento.findMany({

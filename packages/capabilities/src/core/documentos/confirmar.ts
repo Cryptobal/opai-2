@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { PERMISOS_CORE } from "@opai/domain";
+import { motivoSubidaInvalida, PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import { noEncontrado, reglaDeNegocio } from "../../errores";
@@ -27,16 +27,8 @@ export const documentosConfirmarSubida = defineCapability({
       ? await ctx.db.documentoTipo.findUnique({ where: { id: d.tipoId } })
       : null;
     const objeto = await ctx.servicios.almacenamiento.head(d.storageKey);
-    if (!objeto)
-      throw reglaDeNegocio(
-        "El archivo todavía no llega al almacenamiento: súbelo con la URL firmada.",
-      );
-    if (objeto.tamano !== d.tamano)
-      throw reglaDeNegocio(`El archivo pesa ${objeto.tamano} bytes y se declararon ${d.tamano}.`);
-    if (objeto.mime && objeto.mime !== d.mime)
-      throw reglaDeNegocio(`El archivo llegó como ${objeto.mime} y se declaró ${d.mime}.`);
-    if (!objeto.sha256 || objeto.sha256 !== d.sha256)
-      throw reglaDeNegocio("La huella SHA-256 del archivo no coincide con la declarada.");
+    const motivo = motivoSubidaInvalida(d, objeto);
+    if (motivo) throw reglaDeNegocio(motivo);
     if (dryRun)
       return { ...vistaDocumento({ ...d, estado: "disponible" }, tipo, hoy()), bitacoraSeq: null };
     const r = await ctx.transaccion(async (tx) => {

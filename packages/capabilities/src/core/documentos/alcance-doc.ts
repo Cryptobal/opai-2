@@ -25,11 +25,24 @@ export async function entidadesEnAlcance(ctx: Contexto): Promise<AlcanceEntidade
   const ids = instalacionesEnAlcance(ctx);
   if (!ids) return null;
   if (!ids.length) return VACIO;
-  const instalacionIds = [...ids];
-  const [insts, puestos] = await Promise.all([
-    ctx.db.instalacion.findMany({ where: { id: { in: instalacionIds } }, select: { cuentaId: true } }),
-    ctx.db.puesto.findMany({ where: { instalacionId: { in: instalacionIds } }, select: { id: true } }),
-  ]);
+  // Se usan exclusivamente los IDs de filas bloqueadas, no una segunda selección ampliable.
+  const insts = await ctx.transaccion(
+    (tx) => tx.$queryRaw<{ id: string; cuentaId: string }[]>`
+    /* nucleo-h:instalaciones */
+    SELECT id, cuenta_id AS "cuentaId" FROM core.instalaciones
+    WHERE tenant_id = ${ctx.tenantId}::uuid AND id = ANY(${[...ids]}::uuid[])
+    ORDER BY id FOR SHARE
+  `,
+  );
+  const instalacionIds = insts.map((i) => i.id);
+  const puestos = await ctx.transaccion(
+    (tx) => tx.$queryRaw<{ id: string }[]>`
+    /* nucleo-h:puestos */
+    SELECT id FROM core.puestos
+    WHERE tenant_id = ${ctx.tenantId}::uuid AND instalacion_id = ANY(${instalacionIds}::uuid[])
+    ORDER BY id FOR SHARE
+  `,
+  );
   return {
     instalaciones: new Set(instalacionIds),
     cuentas: new Set(insts.map((i) => i.cuentaId)),
@@ -53,17 +66,17 @@ export async function documentosEnAlcance(
   const a = alc === undefined ? await entidadesEnAlcance(ctx) : alc;
   if (!a) return null;
   if (!a.instalaciones.size && !a.cuentas.size && !a.puestos.size) return [];
-  const propietarios = await ctx.db.documentoVinculo.findMany({
-    where: {
-      rol: "propietario",
-      OR: [
-        { entidadTipo: "instalacion", entidadId: { in: [...a.instalaciones] } },
-        { entidadTipo: "cuenta", entidadId: { in: [...a.cuentas] } },
-        { entidadTipo: "puesto", entidadId: { in: [...a.puestos] } },
-      ],
-    },
-    select: { documentoId: true },
-  });
+  const propietarios = await ctx.transaccion(
+    (tx) => tx.$queryRaw<{ documentoId: string }[]>`
+    /* nucleo-h:propietarios */
+    SELECT documento_id AS "documentoId" FROM core.documento_vinculos
+    WHERE tenant_id = ${ctx.tenantId}::uuid AND rol = 'propietario' AND (
+      (entidad_tipo = 'instalacion' AND entidad_id = ANY(${[...a.instalaciones]}::uuid[])) OR
+      (entidad_tipo = 'cuenta' AND entidad_id = ANY(${[...a.cuentas]}::uuid[])) OR
+      (entidad_tipo = 'puesto' AND entidad_id = ANY(${[...a.puestos]}::uuid[])))
+    ORDER BY id FOR SHARE
+  `,
+  );
   return [...new Set(propietarios.map((v) => v.documentoId))];
 }
 

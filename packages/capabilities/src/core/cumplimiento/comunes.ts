@@ -7,6 +7,8 @@ import type { TenantTx } from "@opai/db";
 import { conflicto, noEncontrado } from "../../errores";
 import type { Contexto } from "../../types";
 import { uuidSchema } from "../esquemas";
+import { dondeContacto, dondePersona } from "../maestros/alcance";
+import { dondeSolicitud } from "./solicitudes-alcance";
 
 /** Titular de los datos: persona (trabajador) o contacto de una cuenta (§4.1). */
 export const titularSchema = z.object({
@@ -28,7 +30,7 @@ export const actorLegible = (ctx: Contexto): string | null =>
  */
 export async function cargarTitular(ctx: Contexto, t: Titular): Promise<TitularVista> {
   if (t.tipo === "persona") {
-    const p = await ctx.db.persona.findUnique({ where: { id: t.id } });
+    const p = await ctx.db.persona.findFirst({ where: { id: t.id, ...dondePersona(ctx) } });
     if (!p) throw noEncontrado("El titular (persona)");
     return {
       tipo: "persona",
@@ -37,7 +39,7 @@ export async function cargarTitular(ctx: Contexto, t: Titular): Promise<TitularV
       email: p.emailLaboral ?? p.emailPersonal ?? null,
     };
   }
-  const c = await ctx.db.contacto.findUnique({ where: { id: t.id } });
+  const c = await ctx.db.contacto.findFirst({ where: { id: t.id, ...dondeContacto(ctx) } });
   if (!c) throw noEncontrado("El titular (contacto)");
   return {
     tipo: "contacto",
@@ -106,7 +108,11 @@ export async function transicionarSolicitud(
   evento: { tipo: string; payload: unknown },
 ): Promise<FilaSolicitud> {
   return ctx.transaccion(async (tx: TenantTx) => {
-    const { count } = await tx.solicitudArco.updateMany({ where: { id, estado: desde }, data });
+    const alcance = await dondeSolicitud({ ...ctx, db: tx });
+    const { count } = await tx.solicitudArco.updateMany({
+      where: { id, estado: desde, ...alcance },
+      data,
+    });
     if (count !== 1) throw conflicto("La solicitud cambió de estado; vuelve a cargarla.");
     await ctx.eventos.emitir(tx, {
       tipo: evento.tipo,

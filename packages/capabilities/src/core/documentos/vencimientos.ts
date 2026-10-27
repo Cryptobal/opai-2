@@ -8,8 +8,10 @@ import { documentosEnAlcance } from "./alcance-doc";
 import { tiposPorId } from "./consulta";
 import { CAPA_DE } from "./entidad";
 import { documentoSchema, ENTIDADES, vistaDocumento } from "./vista";
+import { filtroDocumentoSensible } from "./sensibles";
 
 export const documentosVencimientos = defineCapability({
+  auditarLectura: (s) => s.map((d) => d.id),
   id: "core.documentos.vencimientos",
   descripcion:
     "Documentos vencidos y por vencer en los próximos N días (por defecto 30), con la entidad a la que pertenecen, filtrables por capa (empresa, cuenta, instalación, persona, puesto).",
@@ -29,6 +31,7 @@ export const documentosVencimientos = defineCapability({
     const permitidos = await documentosEnAlcance(ctx);
     const docs = await ctx.db.documento.findMany({
       where: {
+        ...filtroDocumentoSensible(ctx),
         estado: "disponible",
         venceEn: { lte: limite },
         ...(permitidos ? { id: { in: [...permitidos] } } : {}),
