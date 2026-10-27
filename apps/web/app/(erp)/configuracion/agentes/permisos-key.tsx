@@ -1,6 +1,6 @@
 "use client";
 
-import { Checkbox, Switch } from "@opai/ds";
+import { Alerta, Checkbox, Switch } from "@opai/ds";
 
 import { etiquetaPermiso, porModulo } from "./etiqueta-permiso";
 
@@ -26,9 +26,7 @@ export function ModulosKey({
         onCambiar={onTodos}
       />
       {todos ? (
-        <p role="status" className="t-body-sm text-warning-fg">
-          El scope «*» es amplio y transitorio (ADR-034). Prefiere módulos concretos.
-        </p>
+        <Alerta tono="warning" titulo="Acceso a todos los módulos">Esta key podrá operar todos los módulos, incluidos los que se agreguen después. Elige módulos concretos cuando puedas.</Alerta>
       ) : (
         <div className="divide-y divide-border">
           {disponibles.map((s) => (
@@ -59,6 +57,7 @@ export function PermisosKey({
       <p className="t-caption">
         Solo puedes delegar permisos que tú tienes. Selecciona el mínimo necesario.
       </p>
+      {elegidos.length === 0 ? <p className="t-caption text-danger-fg">Elige al menos un permiso.</p> : null}
       {porModulo(disponibles).map((grupo) => (
         <fieldset key={grupo.modulo} className="flex flex-col gap-2">
           <legend className="t-label mb-2">{grupo.moduloLabel}</legend>

@@ -2,6 +2,8 @@ import { describe, expect, it, vi } from "vitest";
 
 import { fuentesFalsas } from "./fuentes-falsas";
 
+vi.stubEnv("DATABASE_URL", "postgresql://opai_app:x@localhost:5432/opai");
+
 vi.mock("../lib/medidor", () => ({
   medidorDiferido: { registrar: vi.fn() },
   diferirConAfter: vi.fn(),

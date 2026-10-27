@@ -21,10 +21,16 @@ test("crea servicio con permisos mínimos, presupuesto y sin rol heredado", asyn
   await hoja.getByLabel("Agente de servicio").click();
   await hoja.getByLabel("Nombre", { exact: true }).fill(nombre);
   await expect(hoja.getByRole("button", { name: "Crear", exact: true })).toBeDisabled();
-  await hoja.getByLabel("Presupuesto mensual (US$)").fill("5");
+  const presupuesto = hoja.getByLabel("Presupuesto mensual (US$)");
+  await presupuesto.fill("1.2.3");
+  await expect(hoja.getByText("Ingresa un monto mayor que cero, por ejemplo 15 o 10,5.")).toBeVisible();
+  await expect(hoja.getByRole("button", { name: "Crear", exact: true })).toBeDisabled();
+  await presupuesto.fill("1.000");
+  await expect(hoja.getByText("Ingresa un monto mayor que cero, por ejemplo 15 o 10,5.")).toBeHidden();
+  await presupuesto.fill("10,5");
   await hoja.getByRole("checkbox", { name: "cuentas · ver" }).check();
   await hoja.getByLabel("Todos los módulos").click();
-  await expect(hoja.getByRole("status")).toContainText("transitorio");
+  await expect(hoja.getByText(/incluidos los que se agreguen después/)).toBeVisible();
   await hoja.getByLabel("Todos los módulos").click();
   await hoja.getByRole("button", { name: "Crear", exact: true }).scrollIntoViewIfNeeded();
   await page.screenshot({ path: info.outputPath("servicio-formulario.png"), fullPage: true });

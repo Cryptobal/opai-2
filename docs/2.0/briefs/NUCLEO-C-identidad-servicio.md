@@ -44,3 +44,6 @@ Continuación de un checkpoint de OpenCode (sesión cortada sin commitear). Se c
 
 - Reserva previa del costo exacto de una llamada de IA antes de incurrir en el gasto (hoy es técnicamente imposible sin conocer el uso de tokens por adelantado); la mitigación de este PR es que el ledger nunca pierde el gasto real y la siguiente llamada corta.
 - Ejecutar `seed:staging` en Neon, fijar el presupuesto de "Grokbot dev" y revocar la key owner `*` de Gard: decisiones y acciones de Carlos / del bot OPAI 2.0 en operación, no de este PR.
+# Seguimiento QA del PR #70 (OpenCode)
+
+Correcciones H0, H1, H2, H3, H6, H8 y H10 implementadas parcialmente: falta verificar el flujo completo y la persistencia del monto en e2e. El parseo admite hasta seis decimales y el máximo del contrato existente (US$ 100.000). No hay decisiones de negocio nuevas. La validación del gate está bloqueada: la base local de test rechaza inserciones de `audit_events` por una restricción NOT NULL. No se modificó la migración ni se aplicaron migraciones. Deben repetirse todas las pruebas y la autorrevisión antes de publicar.

@@ -65,7 +65,7 @@ export const apikeysCreate = defineCapability({
      * Permisos finos (ids del catálogo, admite comodines que se expanden). Deben ser un subconjunto
      * de los tuyos. Omitir = hereda los del responsable (solo tipo "usuario"). Obligatorio en "servicio".
      */
-    permisos: z.array(z.string().min(1)).optional(),
+    permisos: z.array(z.string().min(1)).min(1).optional(),
     /** Fecha ISO 8601 (las herramientas MCP necesitan un input expresable en JSON Schema). */
     expiraEn: z.iso.datetime({ offset: true }).optional(),
     presupuestoMensualUsd: z

@@ -5,7 +5,7 @@ import { useHojaUrl } from "@/app/_components/maestros/use-url";
 import { CrearApiKey } from "./crear-api-key";
 
 /** "Crear key" abierta por `?crear=1` (acción de la cabecera, server-first). */
-export function HojaCrearKey({ scopes, permisos }: { scopes: string[]; permisos: string[] }) {
+export function HojaCrearKey({ scopes, permisos, puedeCrearServicio }: { scopes: string[]; permisos: string[]; puedeCrearServicio: boolean }) {
   const hoja = useHojaUrl("crear");
   return (
     <CrearApiKey
@@ -13,6 +13,7 @@ export function HojaCrearKey({ scopes, permisos }: { scopes: string[]; permisos:
       onCerrar={hoja.cerrar}
       scopesDisponibles={scopes}
       permisosDisponibles={permisos}
+      puedeCrearServicio={puedeCrearServicio}
     />
   );
 }

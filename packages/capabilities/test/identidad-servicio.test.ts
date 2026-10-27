@@ -71,6 +71,7 @@ describe("identidad de servicio", () => {
     expect(await codigo(ctx, "core.apikeys.create", { ...input, permisos: undefined })).toBe(
       "UNPROCESSABLE",
     );
+    expect((await executeCapability(ctx, "core.apikeys.create", { ...input, permisos: [] })).ok).toBe(false);
     const { id } = await dato<{ id: string }>(ctx, "core.apikeys.create", input);
     for (const presupuestoMensualUsd of [0, null])
       expect(await codigo(ctx, "core.apikeys.update", { id, presupuestoMensualUsd })).toBe(

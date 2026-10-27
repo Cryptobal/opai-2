@@ -2,7 +2,7 @@ import { listarModulos } from "@opai/capabilities";
 
 import { estadoPantalla } from "@/lib/formato";
 import { hoyIso } from "@/lib/fechas";
-import { ejecutarComoUsuario } from "@/lib/servidor";
+import { contextoServidor, ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
 
 export type ApiKey = {
   id: string;
@@ -39,17 +39,20 @@ export async function misPermisos() {
 }
 
 export async function cargarKeys() {
-  const [r, gasto, permisos] = await Promise.all([
+  const [r, gasto, permisos, identidad] = await Promise.all([
     ejecutarComoUsuario<ApiKey[]>("erp", "core.apikeys.list"),
     gastoDelMes(),
     misPermisos(),
+    identidadActual(),
   ]);
+  const ctx = identidad ? contextoServidor(identidad, "erp") : null;
   return {
     state: estadoPantalla(r),
     keys: r.ok ? r.data : [],
     gasto,
     scopes: ["core", ...listarModulos().map((m) => m.id)],
     permisos,
+    puedeCrearServicio: ctx !== null && ctx.alcance === null && ctx.autorizar("core:agentes.manage"),
   };
 }
 
