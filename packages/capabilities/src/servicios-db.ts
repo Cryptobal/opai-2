@@ -2,6 +2,7 @@
 import {
   agregarAAuditoria,
   agregarABitacora,
+  consumirPresupuesto,
   enTransaccion,
   forTenant,
   globales,
@@ -14,11 +15,13 @@ import type {
   Actor,
   Auditoria,
   BitacoraServicio,
+  ConsumoNuevo,
   Contexto,
   Eventos,
   Medidor,
   Trabajos,
 } from "./types";
+import { ErrorCapacidad } from "./errores";
 
 const json = (v: unknown): Prisma.InputJsonValue => JSON.parse(JSON.stringify(v ?? {}));
 
@@ -59,12 +62,39 @@ async function precioDe(recurso: string): Promise<number> {
 }
 
 /** Medidor en `core.consumos` (ADR-031). El borde lo envuelve para no retrasar respuestas. */
-export const medidorEnDb: Medidor = {
-  async registrar({ sinCosto, ...c }) {
-    const unitario = sinCosto ? 0 : await precioDe(c.recurso);
-    await forTenant(c.tenantId).consumo.create({
-      data: { ...c, costoUnitarioMicro: unitario, costoTotalMicro: unitario * c.cantidad },
+async function registrarConsumo({ sinCosto, yaIncurrido, ...c }: ConsumoNuevo) {
+  const unitario = sinCosto ? 0 : await precioDe(c.recurso);
+  const costoTotal = unitario * c.cantidad;
+  return enTransaccion(c.tenantId, async (tx) => {
+    if (
+      c.apiKeyId &&
+      !(await consumirPresupuesto(
+        tx,
+        c.tenantId,
+        c.apiKeyId,
+        BigInt(costoTotal),
+        yaIncurrido ? { yaIncurrido } : {},
+      ))
+    )
+      throw new ErrorCapacidad(
+        "BUDGET_EXCEEDED",
+        "El consumo supera el presupuesto mensual de la key.",
+      );
+    return tx.consumo.create({
+      data: { ...c, costoUnitarioMicro: unitario, costoTotalMicro: costoTotal },
     });
+  });
+}
+
+export const medidorEnDb: Medidor = {
+  registrar: async (c) => {
+    await registrarConsumo(c);
+  },
+  async preparar(c) {
+    const fila = await registrarConsumo(c);
+    return async (estado) => {
+      await forTenant(c.tenantId).consumo.update({ where: { id: fila.id }, data: estado });
+    };
   },
 };
 

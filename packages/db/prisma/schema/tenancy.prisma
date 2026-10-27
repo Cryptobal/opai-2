@@ -82,9 +82,16 @@ model ApiKey {
   hash                    String    @unique
   /// Módulos permitidos ("core", "crm", …) o "*".
   scopes                  String[]
-  /// Principal detrás de la key (ADR-033): "usuario" (Brief 01) | "cuenta" | "persona" (fase 3).
+  /// Principal detrás de la key (ADR-033): "usuario" (Brief 01) | "cuenta" | "persona" (fase 3) |
+  /// "servicio" (Identidad de servicio t457u: agente del tenant sin dueño humano; no hereda rol).
   principalTipo           String    @default("usuario") @map("principal_tipo")
   principalId             String?   @map("principal_id") @db.Uuid
+  /// Permisos finos de la key (ids del catálogo), subconjunto de los efectivos del responsable
+  /// (Identidad de servicio t457u). Si `heredaPermisos`, se ignora y la key hereda los del rol.
+  permisos                String[]  @default([])
+  /// true = la key usa los permisos efectivos del responsable (compatibilidad, defecto). false = usa
+  /// su lista `permisos`. Un principal "servicio" es siempre false (sus permisos salen solo de la key).
+  heredaPermisos          Boolean   @default(true) @map("hereda_permisos")
   /// Presupuesto mensual de consumos en micro-USD (ADR-032). Null o 0 = sin límite.
   presupuestoMensualMicro BigInt?   @map("presupuesto_mensual_micro")
   ultimoUsoEn             DateTime? @map("ultimo_uso_en") @db.Timestamptz(6)
@@ -96,6 +103,7 @@ model ApiKey {
   tenant    Tenant            @relation(fields: [tenantId], references: [id])
   user      User              @relation(fields: [userId], references: [id])
   autonomia ApiKeyAutonomia[]
+  gastoMes  GastoAgenteMes[]
 
   @@index([tenantId])
   @@map("api_keys")

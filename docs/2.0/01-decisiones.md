@@ -877,7 +877,7 @@ No se encontró: render estático roto, falta de prefetch, layouts que recarguen
 
 ---
 
-## ADR-051 · Auditoría atómica y encadenada por tenant
+## ADR-052 · Auditoría atómica y encadenada por tenant
 
 **Fecha:** 28-oct-2026 · **Estado:** vigente · Completa ADR-004 y ADR-023 (misma técnica de cadena de hashes que la bitácora de Asistencia, aplicada aquí a `core.audit_events`).
 
@@ -905,3 +905,19 @@ explícitamente independiente, no la reutilizada por la solicitud. La expansión
 nullable y el NOT NULL se aplican antes y después del despliegue, respectivamente.
 Detalles técnicos del constructor OpenCode / openai/gpt-6.1-sol y orden exacto en
 `briefs/FIX-auditoria-atomica-pr71.md`; no se atribuyen nuevas decisiones a Carlos.
+---
+## ADR-051 · Identidad de servicio para agentes y presupuesto atómico (núcleo P0)
+
+**Fecha:** 27-oct-2026 · **Estado:** vigente · Completa ADR-032 §3, ADR-033 y ADR-034 §1 («Sin keys compartidas… scope `*` es transitorio»).
+
+**Contexto.** Carlos, 26-oct-2026 20:47 CLT, chat con OPAI 2.0 (t457u): «ponlo entonces en el plan de desarrollo para que todo se haga y lo que debamos hacer en el núcleo lo hagamos altiro. Me preocupa que, quede como, cien por ciento agéntico». Hasta este ADR, el principal de una key solo era usuario, cuenta o persona, y la key heredaba TODOS los permisos y el alcance de su responsable; Grokbot operaba con una key de scope `*`, responsable con rol owner en Gard y presupuesto nulo: la IA de desarrollo y la IA del producto compartían identidad y tenant real, y el presupuesto mensual no se chequeaba y consumía en la misma transacción.
+
+**Decisión.**
+
+1. **Permisos finos por key = subconjunto de los efectivos del responsable.** Campo `permisos` en `api_keys` (lista de ids del catálogo; `null` = hereda los del responsable, para compatibilidad) y `hereda_permisos`. La autorización cruza los permisos de la key con los efectivos del responsable (`permisoDeKey`, intersección); nadie crea una key con permisos que no tiene (`normalizarPermisosRol` sobre el acceso efectivo del creador). El scope `*` sigue permitido, con una advertencia visible: amplio y transitorio.
+2. **Principal `servicio`:** agente del tenant sin dueño humano (integraciones, agentes alojados, bots de desarrollo). Su responsable es una persona solo para gobierno (aprobaciones y avisos); sus permisos salen exclusivamente de la key, nunca hereda rol ni alcance (alcance completo del tenant, nunca el del responsable). Exige presupuesto mensual mayor que cero y una lista de permisos explícita; un creador con alcance restringido no puede crear un servicio (no amplía su propio alcance). Auditoría «agente `<nombre>` (servicio)». `soloPersonas` sigue prohibido para cualquier key.
+3. **Presupuesto mensual atómico por key:** `core.gasto_agente_mes`, con `pg_advisory_xact_lock` por tenant/key; el chequeo y el consumo van en la misma transacción (`UPDATE` con guarda `gastado + costo <= tope`), así que llamadas concurrentes nunca superan el tope. Aviso al 80 % y corte al 100 %, sin duplicados; si el tope cambia a mitad de período, los avisos de ese período se reinician (si no, un tope nuevo nunca volvería a avisar bajo la marca del tope anterior). El costo ya incurrido con un proveedor (IA, mapas, correo, almacenamiento) se registra siempre, aunque supere el tope en esa llamada: no puede rechazarse sin perder trazabilidad del gasto real; la ejecución en curso termina y la SIGUIENTE recibe `BUDGET_EXCEEDED` en el prepago de `capacidad.ejecucion` (antes del handler, el único punto donde negarse no pierde un gasto ya hecho).
+4. **Tenant `gard-staging`:** decisión de Carlos, 26-oct-2026 21:07, t461s2118: sí, se crea, con una key por bot y permisos mínimos. Script idempotente `pnpm --filter @opai/db seed:staging`, que no corre en este PR; el bot OPAI 2.0 lo aplica en Neon cuando el PR esté aprobado. La key owner `*` de Gard se revoca cuando las keys nuevas estén funcionando, y la revocación la hace el bot OPAI 2.0 en operación, no este PR.
+5. **Cambios de rol base y promoción a owner, solo por una persona** (agregado del Revisor, review 5661003883 del #60; mandatos de Carlos t365u y t366u de cerrar el Núcleo): el mismo `FORBIDDEN` que ya protegía `roleId` ahora cubre también `rol` cuando la llamada viene de un agente o de una API key.
+
+**Consecuencias.** Migración aditiva `20261028030000_identidad_servicio` (RLS en `gasto_agente_mes`, sin `BYPASSRLS`). `CONTEXTO-agentes.md` documenta que la IA de desarrollo opera en `gard-staging` con su propia key de servicio y que la key `*` owner de Gard debe revocarse cuando corresponda (decisión de Carlos). Pendiente, fuera de este ADR: la reserva previa (antes de llamar al proveedor) para recursos de costo variable no determinista por adelantado sigue sin existir; hoy la atomicidad protege el chequeo-y-consumo del ledger, no una reserva anticipada del costo exacto de una respuesta de IA.
