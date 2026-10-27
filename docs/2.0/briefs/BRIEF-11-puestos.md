@@ -84,6 +84,14 @@ Se nota que funciona cuando, en una instalación, **todos los puestos se ven y s
 | Paridad MCP con vista previa (`core.puestos.create`/`update`, `core.patrones.list`) | Cumplido |
 | Gate en verde | `mcp:verificar` es posterior al despliegue (necesita `OPAI_MCP_KEY`); el resto, en el PR |
 
+**Autorrevisión posterior:** la serialización del cambio de estructura del patrón con su elección en
+un puesto está cubierta por pruebas concurrentes, pero la revisión independiente identificó dos
+carreras adicionales pendientes: actualizaciones simultáneas del horario de un mismo puesto pueden
+dejar horas calculadas con datos anteriores; y desactivar una función puede coincidir con elegirla
+en un puesto. El criterio general de concurrencia sin TOCTOU queda **parcial**, sujeto a corrección y
+pruebas específicas antes de integrar. No se considera demostrado el cierre completo de seguridad
+ni de accesibilidad por los e2e de presentación.
+
 ## 7. Cambios tras la revisión (26-oct-2026)
 
 Origen: hallazgos de Diseño y QA (2 bloqueantes, 17:16 CLT), revisión del «Revisor OPAI 2.0» 5658390255 (PEDIR CAMBIOS sobre `037707f`) y la regla de Carlos, textual: «nunca copiar el diselo de 1.0, se debe usar el design system aprobado https://claude.ai/design/p/44e4d7b9-7464-4771-bff8-07fcff4d573d» (Carlos, 26-oct-2026 17:18 CLT, transmitida en el encargo del PR #49).

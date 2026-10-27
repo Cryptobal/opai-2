@@ -2,30 +2,12 @@ import { execFileSync } from "node:child_process";
 
 import { expect, type Page, test } from "@playwright/test";
 
+import { entrar, password, urlSiembra } from "./fixtures-puestos-car8";
+
 // Brief 11 · Puestos PR 1 (CAR-8), diseño DS 2.0 aprobado (t436u): Configuración › Patrones de turno
 // y Funciones se ve y se navega a 375, 1024 y 1280 px, con la vista de ciclo clara, sin desborde y con
 // los tokens 2.0 (fondo claro). La hoja de edición abre sobre el encabezado y un patrón en uso no
 // cambia su estructura (EN_USO). Deja capturas por ancho (y una oscura) en __screenshots__.
-const email = process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl";
-const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
-const urlTest = process.env["DATABASE_URL_TEST"] ?? "";
-const urlApp = process.env["DATABASE_URL"] ?? "";
-const esLocal = (u: string) => /@(localhost|127\.0\.0\.1)[:/]/.test(u);
-// Siembra contra la base local opai_e2e. En el gate local se usa el rol propietario de
-// DATABASE_URL_TEST; en el job e2e del CI (sin DATABASE_URL_TEST) se cae a DATABASE_URL (opai_app),
-// fijando app.tenant_id para que la RLS deje insertar, igual que lo hace la app.
-const urlDueño = esLocal(urlTest) ? urlTest.replace(/\/[^/]+$/, "/opai_e2e") : "";
-const urlSiembra = urlDueño || (esLocal(urlApp) ? urlApp : "");
-
-async function entrar(page: Page) {
-  await page.goto("/login");
-  await page.getByLabel("Correo").fill(email);
-  await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
-  await page.getByRole("button", { name: "Entrar" }).click();
-  await page.waitForURL((url) => url.pathname === "/" || url.pathname === "/platform", {
-    timeout: 60_000,
-  });
-}
 
 /** Asegura un patrón 4×4 en uso y ≥1 función en gard (para EN_USO y la pestaña Funciones). Idempotente. */
 function sembrarUso(): void {
@@ -58,7 +40,9 @@ function sembrarUso(): void {
 }
 
 const sinDesborde = (page: Page) =>
-  page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1);
+  page.evaluate(
+    () => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1,
+  );
 
 const fondoClaro = (page: Page) =>
   page.evaluate(() => {
@@ -75,7 +59,10 @@ test.setTimeout(180_000);
 
 test.describe("CAR-8 · Configuración de patrones y funciones (DS 2.0)", () => {
   test.skip(!password, "Falta SEED_OWNER_PASSWORD o E2E_PASSWORD");
-  test.skip(!urlSiembra, "Necesita una base local (DATABASE_URL_TEST o DATABASE_URL sobre opai_e2e)");
+  test.skip(
+    !urlSiembra,
+    "Necesita una base local (DATABASE_URL_TEST o DATABASE_URL sobre opai_e2e)",
+  );
   test.beforeAll(() => sembrarUso());
 
   test("patrones y funciones: se ven, sin desborde, tokens 2.0, y la hoja en uso bloquea la forma", async ({
@@ -125,7 +112,10 @@ test.describe("CAR-8 · Configuración de patrones y funciones (DS 2.0)", () => 
       await expect(page.getByText("4×4").first()).toBeVisible();
       expect(await fondoClaro(page), "oscuro: fondo oscuro").toBeLessThan(0.3);
       await ocultarDev(page);
-      await page.screenshot({ path: "e2e/__screenshots__/config-patrones-oscuro.png", fullPage: true });
+      await page.screenshot({
+        path: "e2e/__screenshots__/config-patrones-oscuro.png",
+        fullPage: true,
+      });
     }
   });
 });

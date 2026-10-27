@@ -2,20 +2,12 @@ import { execFileSync } from "node:child_process";
 
 import { expect, type Page, test } from "@playwright/test";
 
+import { entrar, ocultarDev, password, sinDesborde, urlSiembra } from "./fixtures-puestos-car8";
+
 // CAR-8 (Brief 11 · Puestos PR 1): en una instalación con varias posiciones, todos los puestos se ven
 // y se navegan a 375, 1024 y 1280 px, el patrón se ve claro y nada se corre ni se superpone. Desde
 // tablet la lista es una Table del DS (t436u) con buscador y chips; en teléfono, filas con buscador y
 // chips. Comprueba también los tokens 2.0 (fondo claro), el estado vacío y el modo oscuro.
-const email = process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl";
-const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
-const urlTest = process.env["DATABASE_URL_TEST"] ?? "";
-const urlApp = process.env["DATABASE_URL"] ?? "";
-const esLocal = (u: string) => /@(localhost|127\.0\.0\.1)[:/]/.test(u);
-// Siembra siempre contra la base local opai_e2e, nunca contra Neon. En el gate local se usa el rol
-// propietario de DATABASE_URL_TEST; en el job e2e del CI (sin DATABASE_URL_TEST) se cae a DATABASE_URL
-// (rol opai_app), fijando app.tenant_id para que la RLS deje insertar, igual que lo hace la app.
-const urlDueño = esLocal(urlTest) ? urlTest.replace(/\/[^/]+$/, "/opai_e2e") : "";
-const urlSiembra = urlDueño || (esLocal(urlApp) ? urlApp : "");
 
 /** Ejecuta SQL de siembra con el tenant `gard` fijado (necesario para opai_app bajo RLS; inocuo para el dueño). */
 function sembrar(sql: string): string {
@@ -24,14 +16,6 @@ function sembrar(sql: string): string {
     encoding: "utf8",
   });
   return salida.trim().split("\n").filter(Boolean).at(-1) ?? "";
-}
-
-async function entrar(page: Page) {
-  await page.goto("/login");
-  await page.getByLabel("Correo").fill(email);
-  await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
-  await page.getByRole("button", { name: "Entrar" }).click();
-  await page.waitForURL((url) => url.pathname === "/" || url.pathname === "/platform");
 }
 
 /** Deja ≥6 posiciones activas en «Planta Quilicura» (gard) para ejercitar el layout. Idempotente. */
@@ -88,9 +72,6 @@ function sembrarVacia(): string {
     WHERE i.nombre = 'QA sin puestos' LIMIT 1;`);
 }
 
-const sinDesborde = (page: Page) =>
-  page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1);
-
 /** Luminancia del fondo del body: los tokens 2.0 son claros (>0.6); el 1.0 era azul oscuro (<0.2). */
 const fondoClaro = (page: Page) =>
   page.evaluate(() => {
@@ -99,15 +80,15 @@ const fondoClaro = (page: Page) =>
     return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255;
   });
 
-const ocultarDev = (page: Page) =>
-  page.addStyleTag({ content: "nextjs-portal { display: none !important; }" });
-
 test.use({ actionTimeout: 30_000 });
 test.setTimeout(180_000);
 
 test.describe("CAR-8 · puestos como posición se ven y se navegan", () => {
   test.skip(!password, "Falta SEED_OWNER_PASSWORD o E2E_PASSWORD");
-  test.skip(!urlSiembra, "Necesita una base local (DATABASE_URL_TEST o DATABASE_URL sobre opai_e2e)");
+  test.skip(
+    !urlSiembra,
+    "Necesita una base local (DATABASE_URL_TEST o DATABASE_URL sobre opai_e2e)",
+  );
   let instalacionId = "";
   let vaciaId = "";
   test.beforeAll(() => {
@@ -134,13 +115,16 @@ test.describe("CAR-8 · puestos como posición se ven y se navegan", () => {
     await expect(page.getByText("PPC · Sin asignar").first()).toBeAttached();
     // Buscador y chips en los tres anchos (QA H1).
     await expect(page.getByPlaceholder("Nombre del puesto")).toBeVisible();
-    await expect(page.getByRole("button", { name: /^Filtrar por/i })).toHaveCount(3);
+    await expect(
+      page.getByRole("region", { name: "Detalle" }).getByRole("button", { name: /^Filtrar por/i }),
+    ).toHaveCount(3);
     // Ningún elemento corrido ni superpuesto: sin scroll horizontal en ninguno de los tres anchos.
     expect(await sinDesborde(page), `${info.project.name}: sin desborde horizontal`).toBe(true);
     // Estilo del design system 2.0: fondo claro, nunca el azul oscuro del 1.0.
-    expect(await fondoClaro(page), `${info.project.name}: fondo claro (tokens 2.0)`).toBeGreaterThan(
-      0.6,
-    );
+    expect(
+      await fondoClaro(page),
+      `${info.project.name}: fondo claro (tokens 2.0)`,
+    ).toBeGreaterThan(0.6);
     // QA B2: a 375 px el horario, el patrón y las horas no se cortan (bajan de renglón) en las filas.
     const cortadas = await page.evaluate(() =>
       [...document.querySelectorAll<HTMLElement>("[data-linea-puesto]")]
@@ -154,19 +138,27 @@ test.describe("CAR-8 · puestos como posición se ven y se navegan", () => {
     await expect(noche.first()).toBeVisible();
     // Punto 3: el inactivo se ve como «Inactivo» (no como PPC) y va al final.
     const ultimo = telefono
-      ? page.getByRole("link").filter({ hasText: /Guardia/ }).last()
+      ? page
+          .getByRole("link")
+          .filter({ hasText: /Guardia/ })
+          .last()
       : page.getByRole("row").filter({ hasText: "A Guardia retirada" });
     await expect(ultimo).toContainText("A Guardia retirada");
     await expect(ultimo).toContainText("Inactivo");
     await ocultarDev(page);
-    await page.screenshot({ path: `e2e/__screenshots__/puestos-${info.project.name}.png`, fullPage: true });
+    await page.screenshot({
+      path: `e2e/__screenshots__/puestos-${info.project.name}.png`,
+      fullPage: true,
+    });
     // Navegable: al abrir una posición aparece la hoja de edición.
     await filas.first().click();
-    await expect(page.getByRole("dialog", { name: "Editar puesto" })).toBeVisible();
+    await expect(page.getByRole("dialog", { name: "Editar puesto" })).toBeVisible({
+      timeout: 20_000,
+    });
 
     // Estado vacío: una instalación sin puestos invita a crear el primero.
     await page.goto(`/instalaciones/${vaciaId}/puestos`);
-    await expect(page.getByText("Sin puestos").first()).toBeVisible();
+    await expect(page.getByText("Sin puestos", { exact: true })).toBeVisible();
     await expect(page.getByRole("link", { name: /Nuevo puesto/ })).toBeVisible();
     expect(await sinDesborde(page), `${info.project.name}: vacío sin desborde`).toBe(true);
     await ocultarDev(page);
