@@ -15,6 +15,8 @@ export function SwitchSensible({
   puedeGestionar: boolean;
 }) {
   const { ejecutar, pendiente } = useCapacidad("erp");
+  if (!puedeGestionar)
+    return <p className="t-body text-fg">Sueldo sensible: {activo ? "Sí" : "No"}</p>;
   return (
     <Switch
       etiqueta="Sueldo sensible"

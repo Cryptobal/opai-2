@@ -20,7 +20,7 @@ la fiscalización. Sustituye las respuestas contradictorias t78s373 y t468s2146 
 | 1. Actualizar desde main | Avance rápido a `origin/main`, conservando los cambios heredados mediante stash. |
 | 2. I1 ya integrado, preservar roles ajustados | Se conserva la lógica del #60 y se agrega el baseline anterior a t479u; prueba de actualización e idempotencia. Comparación y escritura atómicas para preservar ediciones concurrentes. |
 | 3. I4 acotado | `datosShell` entrega el autorizador efectivo a `navegacionErp`; test con supervisor + rol personalizado y denegación por excepción. No queda diferido a d2. |
-| 4. P3 | `disabled` atraviesa FormularioEmpresa → DireccionOpai → CampoDireccion/Combobox/Input; sin búsqueda manual en lectura. E2e a 375/1024/1280. |
+| 4. P3 | En lectura Empresa muestra etiquetas y valores, o «Sin dato», sin controles ni búsqueda; e2e a 375/1024/1280 pendiente de verificación local. |
 | 5. read_sensible | Inspector DT es solo lectura; get/list/resumen, efectiva, historial y la respuesta de `core.estructuras.create` sobre un cargo sensible auditan la revelación (con id real, tras persistir). |
 | 6. Aislamiento | `referencia()` (creación) y `estructurasAnular` acotan puesto y persona por `dondePuesto`/`dondePersona` igual que las lecturas (`findFirst`, nunca `findUnique`); cargo sigue sin alcance (catálogo del tenant). Prueba Postgres con dos tenants, fuera de alcance, y en memoria con paralelismo (`Promise.all`). |
 
@@ -44,6 +44,7 @@ la fiscalización. Sustituye las respuestas contradictorias t78s373 y t468s2146 
 - No se crean capacidades ni herramientas nuevas ni cambia el plan; no se toca ROADMAP.
 - Fuera del encargo: P1/P2/P5 de la QA original y los pendientes anteriores de 07b/portales.
 - Sin migraciones nuevas. Los gates locales no sustituyen CI ni la revisión oficial del Revisor.
+- Seguimiento QA #67: H1 fixture propia con contraseña E2E hasheada, H2 lectura en texto con tokens DS, H3 sensibilidad en texto y H4 estado vacío sin invitación a crear. Implementación de OpenCode según el encargo, sin decisión de negocio adicional. La cobertura visual y el gate deben validarse en esta revisión.
 - **Bloqueantes de la autorrevisión anterior, corregidos en esta sesión:**
   1. `core.estructuras.create` (vía `referencia()`, `packages/capabilities/src/core/maestros/estructuras-ref.ts`)
      y `core.estructuras.anular` (`estructuras-escritura.ts`) ya acotan puesto y persona al alcance del
@@ -63,9 +64,15 @@ la fiscalización. Sustituye las respuestas contradictorias t78s373 y t468s2146 
 
 ## Verificación
 
+Actualización de esta revisión: `origin/main` ya era ancestro de `01b5dd1` (#44 y #69).
+Typecheck, lint (con advertencias), 824 tests, test:db (68 + 58 + 6), build y presupuesto
+pasaron. El e2e quedó bloqueado antes de abrir la pantalla: la fixture requiere una conexión
+propietaria local a `opai_e2e` en `DATABASE_URL_MIGRATE`; con `DATABASE_URL` el rol de aplicación
+recibe error RLS al crear el rol de prueba. La validación visual de H1–H4 y CA 4 permanece pendiente.
+
 Gate requerido: `pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm test:db`, `pnpm build`,
 `pnpm presupuesto` y `pnpm --filter @opai/web e2e roles-seguimiento.spec.ts`.
-El e2e requiere la fixture local `packages/db/scripts/seed-inspector-e2e.ts`, solo `opai_e2e` local,
+El e2e crea la fixture `packages/auth/scripts/seed-inspector-e2e.ts`, solo bases `opai_e2e` locales,
 y `BASE_URL` al servidor de este worktree (3106 en esta sesión; nunca reutilizar 3000 a ciegas).
 La fixture usa la contraseña de prueba existente sin imprimirla ni tocar el owner.
 

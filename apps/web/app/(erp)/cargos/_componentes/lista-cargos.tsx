@@ -138,7 +138,9 @@ export function ListaCargos({
       textos={{
         vacio: {
           titulo: "Sin cargos",
-          descripcion: "Crea el primero o ajusta los filtros.",
+          descripcion: puedeGestionar
+            ? "Crea el primero o ajusta los filtros."
+            : "Ajusta los filtros.",
           accion: nuevo,
         },
       }}

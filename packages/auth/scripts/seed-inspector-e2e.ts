@@ -1,25 +1,24 @@
 // Fixture local del seguimiento #60. Nunca Neon/producción; no cambia al owner ni su contraseña.
-import { cerrarClientes, dbAdmin } from "../src/index";
-import { PLANTILLAS } from "./roles-base-plantillas";
+import { hashPassword } from "better-auth/crypto";
+import { cerrarClientes, dbAdmin } from "@opai/db";
+import { PLANTILLAS } from "../../db/scripts/roles-base-plantillas";
 
 async function main() {
   const url = new URL(process.env["DATABASE_URL_MIGRATE"] ?? "postgresql://sin-configurar/");
   if (
     !["localhost", "127.0.0.1"].includes(url.hostname) ||
-    url.pathname !== "/opai_e2e" ||
+    !/^\/opai_e2e(?:_[a-zA-Z0-9_]+)?$/.test(url.pathname) ||
     process.env["NODE_ENV"] === "production"
   )
     throw new Error("Solo opai_e2e local.");
   const db = dbAdmin();
-  const owner = await db.user.findUniqueOrThrow({
-    where: { email: process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl" },
-  });
-  const cuenta = await db.account.findFirstOrThrow({
-    where: { userId: owner.id, providerId: "credential" },
-  });
+  const password = process.env["E2E_PASSWORD"];
+  if (!password) throw new Error("Falta E2E_PASSWORD");
+  const hash = await hashPassword(password);
   const tenant = await db.tenant.findUniqueOrThrow({ where: { slug: "gard" } });
   const plantilla = PLANTILLAS.find((p) => p.nombre === "Inspector DT")!;
   await db.$transaction(async (tx) => {
+    await tx.$executeRaw`SELECT pg_advisory_xact_lock(70167)`;
     const user = await tx.user.upsert({
       where: { email: "inspector-seguimiento@opai.cl" },
       update: {},
@@ -32,15 +31,14 @@ async function main() {
     const actual = await tx.account.findFirst({
       where: { userId: user.id, providerId: "credential" },
     });
-    if (actual)
-      await tx.account.update({ where: { id: actual.id }, data: { password: cuenta.password } });
+    if (actual) await tx.account.update({ where: { id: actual.id }, data: { password: hash } });
     else
       await tx.account.create({
         data: {
           userId: user.id,
           providerId: "credential",
           accountId: user.id,
-          password: cuenta.password,
+          password: hash,
         },
       });
     const rol = await tx.rol.upsert({

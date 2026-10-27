@@ -10,6 +10,7 @@ Hasta el 24-oct-2026 este archivo fue la fuente de verdad del avance; desde ento
 ## Hecho
 
 - **Seguimiento del #60 (rama `fix/roles-seguimiento`, PR #67, sin tarea en Linear):**
+  Correcciones QA H1–H4 implementadas por OpenCode según el encargo: fixture E2E autónoma con hash propio, Empresa en texto de lectura con DS 2.0, sensibilidad en texto y estado vacío acorde al permiso. Sin decisiones de negocio adicionales ni migraciones; validación local pendiente.
   I4/P4: el menú del ERP usa permisos efectivos (rol personalizado y excepciones), no el rol base.
   P3: Dirección de Empresa respeta el modo lectura mediante `CampoDireccion` del DS 2.0.
   **Decisión vigente t479u:** Carlos delegó «Velo tú, según eso y avanza» (26-oct-2026 22:06 CLT;

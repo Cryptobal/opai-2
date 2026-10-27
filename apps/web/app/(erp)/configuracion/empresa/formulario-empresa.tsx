@@ -8,7 +8,7 @@ import { rutValido } from "@opai/domain";
 import { DireccionOpai } from "@/app/_components/maestros/direccion";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-import { CampoTexto } from "./campo-texto";
+import { CampoTexto, DatoLectura } from "./campo-texto";
 import {
   CONTACTOS,
   type DatosEmpresa,
@@ -61,7 +61,7 @@ export function FormularioEmpresa({ perfil, tenant, puedeEditar }: Props) {
       }}
     >
       {error ? <Alerta tono="danger" titulo={error} /> : null}
-      {!perfil.razonSocial ? (
+      {!perfil.razonSocial && puedeEditar ? (
         <Alerta
           tono="neutral"
           titulo={`Completa los datos reales de ${tenant.nombre}: aparecen en contratos, correos y portales.`}
@@ -95,15 +95,22 @@ export function FormularioEmpresa({ perfil, tenant, puedeEditar }: Props) {
             placeholder="Giro registrado en el SII"
             disabled={dis}
           />
-          <Campo etiqueta="Dirección" htmlFor="e-dir">
-            <DireccionOpai
-              id="e-dir"
-              sinMapa
-              disabled={dis}
-              valor={d.direccion}
-              onCambiar={(v) => setD((x) => ({ ...x, direccion: v }))}
+          {dis ? (
+            <DatoLectura
+              etiqueta="Dirección"
+              valor={[perfil.calle, perfil.comuna, perfil.region].filter(Boolean).join(", ")}
             />
-          </Campo>
+          ) : (
+            <Campo etiqueta="Dirección" htmlFor="e-dir">
+              <DireccionOpai
+                id="e-dir"
+                sinMapa
+                disabled={dis}
+                valor={d.direccion}
+                onCambiar={(v) => setD((x) => ({ ...x, direccion: v }))}
+              />
+            </Campo>
+          )}
         </div>
       </SeccionTarjeta>
       <SeccionTarjeta titulo="Representante legal">
