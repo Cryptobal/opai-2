@@ -4,6 +4,15 @@ import { NextResponse, type NextRequest } from "next/server";
 import { consultaDeRuta } from "./lib/existencia-ruta";
 import { destino404, esIdInvalido } from "./lib/rutas-invalidas";
 
+/** IP real del cliente desde las cabeceras que fija Vercel en el borde (no las puede falsear el cliente). */
+function ipCliente(request: NextRequest): string {
+  return (
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+    request.headers.get("x-real-ip") ??
+    "local"
+  );
+}
+
 /** Pregunta a `/api/existe` si la ficha o el slug existen; ante cualquier falla, que decida la página. */
 async function noExiste(request: NextRequest): Promise<boolean> {
   const { pathname, origin } = request.nextUrl;
@@ -13,7 +22,13 @@ async function noExiste(request: NextRequest): Promise<boolean> {
   if (!documento || !consultaDeRuta(pathname)) return false;
   try {
     const r = await fetch(`${origin}/api/existe?ruta=${encodeURIComponent(pathname)}`, {
-      headers: { cookie: request.headers.get("cookie") ?? "" },
+      // El `fetch` interno sale con la IP de Vercel, así que el rate limit de `/api/existe` vería una
+      // sola IP para todo el mundo. Se le pasa la IP real del cliente (NÚCLEO-B) para que el cupo sea
+      // por persona y no un único cupo global.
+      headers: {
+        cookie: request.headers.get("cookie") ?? "",
+        "x-opai-ip": ipCliente(request),
+      },
       signal: AbortSignal.timeout(4000),
     });
     const d: { existe?: boolean } = r.ok ? await r.json() : {};

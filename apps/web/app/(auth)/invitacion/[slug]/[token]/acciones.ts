@@ -3,7 +3,7 @@
 import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { crearContexto, executeCapability } from "@opai/capabilities";
+import { crearContexto, executeCapability, type Resultado } from "@opai/capabilities";
 import { auth, crearUsuarioConPassword, getSession } from "@opai/auth";
 import { globales } from "@opai/db";
 
@@ -16,16 +16,28 @@ asegurarRegistro();
 
 type Usuario = { id: string; name: string; email: string };
 
+/** Tope alcanzado: la red (wifi/CGNAT) hizo demasiados intentos; se distingue de «no existe». */
+type Limitada = { ok: false; limitada: true };
+type VistaInvitacion = Resultado | Limitada | null;
+
 /**
- * Rate limit por IP del flujo de invitación (NÚCLEO-B): acota el sondeo de tokens. El mismo límite
- * cubre ver, aceptar y pedir otra, así que no se puede sortear uno abusando de otro.
+ * Rate limit del flujo de invitación por IP **junto al token** (NÚCLEO-B): un alta masiva de guardias
+ * desde la misma red (una wifi, o CGNAT de Entel/Movistar) no se bloquea entre invitaciones distintas,
+ * porque cada token tiene su propia ventana. El mismo límite cubre ver, aceptar y pedir otra para ese
+ * token, así que no se puede sortear uno abusando de otro.
  */
-async function invitacionPermitida(): Promise<boolean> {
+async function invitacionPermitida(token: string): Promise<boolean> {
   return permitir(
-    `invitacion-ip:${ipDeCabeceras(await headers())}`,
+    `invitacion-ip:${ipDeCabeceras(await headers())}:${token}`,
     LIMITES.invitacion.maximo,
     LIMITES.invitacion.ventanaMs,
   );
+}
+
+/** Lee la invitación sin consumir tope (quien llama ya lo cobró). */
+async function leerInvitacion(slug: string, token: string): Promise<Resultado | null> {
+  const ctx = await contexto(slug);
+  return ctx ? executeCapability(ctx, "core.invitations.peek", { token }) : null;
 }
 
 /** Contexto en el tenant de la invitación: sistema (ver, pedir otra) o el usuario que acepta. */
@@ -43,14 +55,13 @@ async function contexto(slug: string, usuario?: Usuario) {
   });
 }
 
-export async function verInvitacion(slug: string, token: string) {
-  if (!(await invitacionPermitida())) return null;
-  const ctx = await contexto(slug);
-  return ctx ? executeCapability(ctx, "core.invitations.peek", { token }) : null;
+export async function verInvitacion(slug: string, token: string): Promise<VistaInvitacion> {
+  if (!(await invitacionPermitida(token))) return { ok: false, limitada: true };
+  return leerInvitacion(slug, token);
 }
 
+/** Acepta con el usuario dado. No cobra tope: quien llama (aceptar/registrar) ya lo hizo. */
 async function aceptarComo(slug: string, token: string, usuario: Usuario): Promise<string> {
-  if (!(await invitacionPermitida())) return "Demasiados intentos. Inténtalo más tarde.";
   const ctx = await contexto(slug, usuario);
   if (!ctx) return "La invitación no existe.";
   const r = await executeCapability(ctx, "core.invitations.accept", { token });
@@ -69,6 +80,7 @@ async function aceptarComo(slug: string, token: string, usuario: Usuario): Promi
 export async function aceptarInvitacion(slug: string, token: string): Promise<string> {
   const sesion = await getSession();
   if (!sesion) return "Inicia sesión para aceptar.";
+  if (!(await invitacionPermitida(token))) return "Demasiados intentos. Inténtalo más tarde.";
   return aceptarComo(slug, token, sesion.user);
 }
 
@@ -79,7 +91,10 @@ export async function registrarYAceptar(
   nombre: string,
   password: string,
 ) {
-  const vista = await verInvitacion(slug, token);
+  // El tope se cobra una sola vez, antes de crear el usuario: si cayera entre ver y aceptar, la cuenta
+  // quedaría creada sin aceptar la invitación. `aceptarComo` ya no vuelve a cobrar en este camino.
+  if (!(await invitacionPermitida(token))) return "Demasiados intentos. Inténtalo más tarde.";
+  const vista = await leerInvitacion(slug, token);
   if (!vista?.ok) return "La invitación no existe.";
   const datos = vista.data as { email: string; estado: string; usuarioExiste: boolean };
   if (datos.estado !== "pendiente") return "La invitación ya no es válida.";
@@ -100,7 +115,7 @@ export async function registrarYAceptar(
 
 /** Invitación vencida o usada: avisa al administrador que la envió. */
 export async function pedirNuevaInvitacion(slug: string, token: string): Promise<boolean> {
-  if (!(await invitacionPermitida())) return false;
+  if (!(await invitacionPermitida(token))) return false;
   const ctx = await contexto(slug);
   if (!ctx) return false;
   const r = await executeCapability(ctx, "core.invitations.request_new", { token });

@@ -47,6 +47,14 @@ describe("proxy: 404 real antes de enviar el HTML", () => {
     expect((await proxy(pedir(`/personas/${CERO}`))).headers.get("x-middleware-next")).toBe("1");
   });
 
+  it("pasa la IP real del cliente a /api/existe (cupo por persona, no uno global) (H5)", async () => {
+    const f = vi.fn().mockResolvedValue(Response.json({ existe: true }));
+    vi.stubGlobal("fetch", f);
+    await proxy(pedir(`/personas/${CERO}`, { "x-forwarded-for": "9.9.9.9, 10.0.0.1" }));
+    const init = f.mock.calls[0]?.[1] as RequestInit;
+    expect((init.headers as Record<string, string>)["x-opai-ip"]).toBe("9.9.9.9");
+  });
+
   it("la navegación del cliente (RSC) no consulta nada", async () => {
     const f = vi.fn();
     vi.stubGlobal("fetch", f);

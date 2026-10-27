@@ -5,6 +5,7 @@ import { slugDeComprobante } from "@opai/capabilities";
 import { forTenant, globales, verificarEslabon } from "@opai/db";
 import { Alerta, AuthCard, Loading, Pares } from "@opai/ds";
 
+import { BotonReintentar } from "@/app/_components/boton-reintentar";
 import { ipDeCabeceras, LIMITES, permitir } from "@/lib/rate-limit";
 
 export const metadata = { title: "Verificar comprobante" };
@@ -41,7 +42,11 @@ async function Contenido({ params }: Props) {
   );
   const c = permitido ? await buscar(decodificar(token)) : null;
   return (
-    <AuthCard titulo="Verificar comprobante" subtitulo="Comprobante emitido por OPAI">
+    <AuthCard
+      titulo="Verificar comprobante"
+      subtitulo="Comprobante emitido por OPAI"
+      acciones={!permitido ? <BotonReintentar size="lg" block /> : undefined}
+    >
       {!permitido ? (
         <Alerta tono="warning" titulo="Demasiadas consultas">
           Espera un minuto e inténtalo de nuevo.
