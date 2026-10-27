@@ -12,14 +12,16 @@ import { cambiarTenant } from "@/app/_acciones/capacidad";
 import type { ItemNav } from "@/lib/navegacion";
 
 import { useCabecera } from "./cabecera-contexto";
-import { Campana } from "./campana";
 import { icono } from "./iconos";
 import { LinkMenu } from "./link-menu";
-import { trasLimpiarCaches } from "./pwa/limpiar-cache";
+import { trasLimpiarCaches } from "./limpiar-cache-diferido";
+import { usePendiente } from "./navegacion-pendiente";
 import { useEpocaSesion } from "./refresco-navegador";
 
 // La paleta (cmdk) se descarga al primer uso: no pesa en el JS inicial de cada ruta (ADR-037).
 const Paleta = dynamic(() => import("./paleta").then((m) => m.Paleta), { ssr: false });
+// Conserva el render de servidor de la campana; su contador ya se consulta después de pintar.
+const Campana = dynamic(() => import("./campana").then((m) => m.Campana));
 // Los avisos (sonner) también: se montan después de hidratar y no bloquean el primer render.
 // El cambio de contraseña (formulario y diálogo) solo se descarga si se abre.
 const CambiarPassword = dynamic(() => import("./cambiar-password").then((m) => m.CambiarPassword));
@@ -69,6 +71,13 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
   }, [enErp]);
   // La navegación no cambia al fijar la cabecera: se recalcula solo cuando cambia `datos.nav`.
   const nav = useMemo(() => datos.nav.map((n) => ({ ...n, icono: icono(n.icono) })), [datos.nav]);
+  // Navegación en curso (ADR-045): el riel marca el destino y la cabecera pone su título de inmediato,
+  // sin esperar al contenido nuevo (sin parpadeo ni barra de progreso, decisión 1 de ADR-045). Al
+  // terminar, `pendiente` se limpia y la página fija su propia cabecera.
+  const pendiente = usePendiente();
+  const rutaEfectiva = pendiente ?? rutaActual;
+  const navPendiente = pendiente ? nav.find((n) => n.href === pendiente) : undefined;
+  const tituloEfectivo = navPendiente?.etiqueta ?? cabecera.titulo;
   const empresas: ItemMenu[] =
     datos.empresas.length > 1
       ? datos.empresas.map((e, i) => ({
@@ -111,18 +120,12 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
   ];
   return (
     <AppShell
-      titulo={cabecera.titulo}
-      {...(cabecera.volver ? { volver: cabecera.volver } : {})}
-      {...(cabecera.volverSoloTelefono ? { volverSoloTelefono: true } : {})}
-      {...(cabecera.volverBajoLg ? { volverBajoLg: true } : {})}
-      {...(cabecera.acciones ? { acciones: cabecera.acciones } : {})}
-      {...(cabecera.accionesTelefono ? { accionesTelefono: cabecera.accionesTelefono } : {})}
-      {...(cabecera.insignia ? { insignia: cabecera.insignia } : {})}
-      {...(cabecera.completo ? { completo: true } : {})}
+      {...cabecera}
+      titulo={tituloEfectivo}
       nav={nav}
       portales={datos.portales}
       portalActual={datos.portal}
-      rutaActual={rutaActual}
+      rutaActual={rutaEfectiva}
       {...(datos.tenant ? { tenant: datos.tenant } : {})}
       {...(empresas.length ? { empresas } : {})}
       usuario={datos.usuario}

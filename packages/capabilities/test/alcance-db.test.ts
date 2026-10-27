@@ -372,8 +372,9 @@ describe.skipIf(!urlPropietario)("alcance del supervisor en base real (B3)", () 
 
   it("CA-B3 parcial: el supervisor no ve personas (sin relación real persona ↔ instalación)", async () => {
     const ctx = ctxSup({ instalaciones: [instA] });
-    const personas = await dato<{ items: unknown[] }>(ctx, "core.personas.list", {});
+    const personas = await dato<{ items: unknown[]; total: number }>(ctx, "core.personas.list", {});
     expect(personas.items).toHaveLength(0);
+    expect(personas.total).toBe(0); // El count optimizado aplica el mismo alcance que la página.
     const ficha = await mod.executeCapability(ctxSup({ instalaciones: [instA] }), "core.personas.get", { id: personaId });
     expect(ficha).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
     const act = await dato<{ items: unknown[] }>(ctxSup({ instalaciones: [instA] }), "core.actividad.list", {
