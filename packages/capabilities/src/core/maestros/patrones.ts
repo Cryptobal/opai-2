@@ -117,6 +117,11 @@ export const patronesUpdate = defineCapability({
       ctx,
       { tipo: "core.patron.actualizado", entidadTipo: "patron_turno", payload: () => data },
       async (tx) => {
+        // Mismo bloqueo que `patronBloqueadoParaHoras` (TOCTOU, review 5662449808 punto 1): un
+        // puesto que está eligiendo este patrón en paralelo (crear o editar) lo lee con el mismo
+        // advisory lock antes de copiarle el ciclo y las horas, así ninguno de los dos queda a
+        // medio camino entre leer y escribir la forma.
+        if (toca) await bloquearPatron(tx, id);
         if (toca && (await puestosConPatron(tx, id)) > 0) throw reglaDeNegocio(EN_USO);
         try {
           return await sinDuplicado(
@@ -151,7 +156,7 @@ export const patronesSetActivo = defineCapability({
     const p = await escribirConEvento(
       ctx,
       { tipo: "core.patron.actualizado", entidadTipo: "patron_turno", payload: () => ({ activo }) },
-      // Mismo bloqueo que `patronSigueActivo` (TOCTOU, autorrevisión del PR #49, punto 2): así un
+      // Mismo bloqueo que `patronBloqueadoParaHoras` (TOCTOU, review 5662449808 punto 1): así un
       // puesto que está eligiendo este patrón en paralelo no lo encuentra ya inactivo a medio camino.
       async (tx) => {
         await bloquearPatron(tx, id);

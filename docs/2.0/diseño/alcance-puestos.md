@@ -31,7 +31,7 @@ Fuentes verificadas el 26-oct-2026: código de 1.0 (copia del 24-sep, e3f267e0a)
 > 1. **¿Qué pasa con los puestos que ya existen en test.opai.cl con dotación mayor que 1?** Recomiendo **dividirlos en N puestos** con un script que primero simula (--dry-run) y entrega un reporte. La columna «dotación» queda deprecada, sin borrarla.
 > 2. **El 07b dice ir antes que Puestos.** Recomiendo **Puestos PR 1 primero**, porque no lleva sueldo. Después va el 07b PR 1, con su brief dentro del PR y su bloque Sueldo encima de la hoja nueva.
 > 3. **¿El puesto conserva el cargo?** Recomiendo **sí**: el cargo (contractual, que ya existe) queda junto a la función nueva (operativa).
-> 4. **Una migración a la vez.** Puestos se construye en paralelo, pero **va primero, sin esperar al CRM** (Decisión de Carlos, 26-oct-2026 20:21 CLT, `t443s2067`: «Sí, Puestos primero, sin esperar al CRM»): Puestos se integra sin esperar al CRM PR 1, y la migración del CRM llevará una fecha posterior a `20261027120100`.
+> 4. **Una migración a la vez.** Puestos se construye en paralelo, pero **va primero, sin esperar al CRM** (Decisión de Carlos, 26-oct-2026 20:21 CLT, `t443s2067`: «Sí, Puestos primero, sin esperar al CRM»): Puestos se integra sin esperar al CRM PR 1, y la migración del CRM llevará una fecha posterior a `20261028040100`.
 
 ---
 

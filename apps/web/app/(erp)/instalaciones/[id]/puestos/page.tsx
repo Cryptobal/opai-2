@@ -1,7 +1,5 @@
 import { Plus } from "lucide-react";
 
-import { Empty } from "@opai/ds";
-
 import { Buscador } from "@/app/_components/maestros/buscador";
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import type { Parametros, SearchParams } from "@/lib/parametros";
@@ -15,9 +13,13 @@ import type {
 
 import { ChipsPuestosDiferido } from "../../_componentes/chips-puestos-diferido";
 import { HojaPuesto } from "../../_componentes/diferidas";
-import { FilasPuesto, TablaPuestos } from "../../_componentes/lista-puestos";
+import { ListaPuestos } from "../../_componentes/lista-puestos";
 import { PaginaInstalacion } from "../../_componentes/pagina-instalacion";
-import { conteosPuestos, filtrarPuestos, subtituloPuestos } from "../../_componentes/puestos-filtro";
+import {
+  conteosPuestos,
+  filtrarPuestos,
+  subtituloPuestos,
+} from "../../_componentes/puestos-filtro";
 
 export const metadata = { title: "Puestos de la instalación" };
 
@@ -49,41 +51,23 @@ async function Puestos({ i, p }: { i: InstalacionDetalle; p: Parametros }) {
       catalogosError={!rf.ok || !rp.ok}
     />
   );
-  if (i.puestos.length === 0) {
-    return (
-      <>
-        <Empty
-          titulo="Sin puestos de servicio"
-          descripcion="Cada puesto es una posición: define su función, patrón de turno y horario."
-          accion={nuevo}
-        />
-        {hoja}
-      </>
-    );
-  }
   const conteos = conteosPuestos(i.puestos);
-  const filtradas = filtrarPuestos(i.puestos, p.q, p.filtro);
+  const filtradas = filtrarPuestos(i.puestos, p);
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex items-start justify-between gap-4">
-        <p className="t-body-sm text-fg-muted">{subtituloPuestos(conteos)}</p>
-        <div className="flex-none">{nuevo}</div>
-      </div>
-      <div className="flex flex-col gap-3">
-        <Buscador placeholder="Nombre del puesto" />
-        <ChipsPuestosDiferido conteos={conteos} />
-      </div>
-      {filtradas.length === 0 ? (
-        <Empty
-          titulo="Sin resultados"
-          descripcion="Ningún puesto coincide con la búsqueda o el filtro."
-        />
-      ) : (
-        <>
-          <FilasPuesto puestos={filtradas} />
-          <TablaPuestos puestos={filtradas} />
-        </>
-      )}
+      {i.puestos.length > 0 ? (
+        <div className="flex items-start justify-between gap-4">
+          <p className="t-body-sm text-fg-muted">{subtituloPuestos(conteos)}</p>
+          <div className="flex-none">{nuevo}</div>
+        </div>
+      ) : null}
+      <ListaPuestos
+        state="ready"
+        puestos={filtradas}
+        buscador={<Buscador placeholder="Nombre del puesto" />}
+        filtros={<ChipsPuestosDiferido puestos={i.puestos} />}
+        accionVacio={nuevo}
+      />
       {hoja}
     </div>
   );

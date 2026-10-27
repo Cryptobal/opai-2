@@ -9,13 +9,16 @@ export async function puestosConPatron(db: Pick<Contexto["db"], "puesto">, patro
 }
 
 /**
- * Bloqueo por patrón dentro de la transacción (TOCTOU, autorrevisión del PR #49, punto 2): serializa
- * desactivar un patrón (`core.patrones.set_activo`) con elegirlo en un puesto nuevo o distinto
- * (`core.puestos.create`/`update`), para que ninguna de las dos lecturas quede a medio camino entre
- * leer y escribir. El cambio de estructura (clase, ciclo, días) ya queda cerrado por el `FOR SHARE`
- * del trigger `puesto_ciclo_del_patron` más `patron_en_uso_inmutable` (20261027120100): ambos toman
- * el lock de la misma fila de `patrones_turno`, así que no hace falta este bloqueo ahí. En la base en
- * memoria de prueba (`$executeRaw` no es función) es un no-op: las pruebas corren en serie.
+ * Bloqueo por patrón dentro de la transacción (TOCTOU, review 5662449808 punto 1): serializa
+ * desactivarlo (`core.patrones.set_activo`) o cambiar su forma (`core.patrones.update`, mientras no
+ * tenga puestos) con elegirlo en un puesto nuevo o distinto (`core.puestos.create`/`update`), para
+ * que ninguna de las dos lecturas quede a medio camino entre leer y escribir. El ciclo persistido
+ * del puesto (días de trabajo y descanso) ya queda cerrado por el `FOR SHARE` del trigger
+ * `puesto_ciclo_del_patron` más `patron_en_uso_inmutable` (20261028040100): ambos toman el lock de
+ * la misma fila de `patrones_turno`. Las horas semanales sugeridas no tienen trigger (se calculan en
+ * la capacidad, no en la base), así que necesitan este mismo bloqueo para releerlas con la forma
+ * definitiva (`patronBloqueadoParaHoras`). En la base en memoria de prueba (`$executeRaw` no es
+ * función) es un no-op: las pruebas corren en serie.
  */
 export async function bloquearPatron(tx: TenantTx, patronId: string): Promise<void> {
   const ejecutar = (tx as { $executeRaw?: unknown }).$executeRaw;

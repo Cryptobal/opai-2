@@ -10,7 +10,13 @@ import { useCapacidad } from "@/app/_components/use-capacidad";
 import { conteoPuestos, type Funcion } from "./tipos";
 
 /** Crear o editar una función de puesto (Brief 11). El modelo guarda nombre, vertical y estado. */
-export function HojaFuncion({ funcion }: { funcion?: Funcion }) {
+export function HojaFuncion({
+  funcion,
+  puedeDesactivar = false,
+}: {
+  funcion?: Funcion;
+  puedeDesactivar?: boolean;
+}) {
   const hoja = useHojaUrl(funcion ? "editar" : "nuevo");
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const [nombre, setNombre] = useState(funcion?.nombre ?? "");
@@ -64,7 +70,7 @@ export function HojaFuncion({ funcion }: { funcion?: Funcion }) {
         >
           <Input id="f-vertical" value={vertical} onChange={(e) => setVertical(e.target.value)} />
         </Campo>
-        {funcion ? (
+        {funcion && puedeDesactivar ? (
           <Switch
             etiqueta="Activa"
             descripcion={

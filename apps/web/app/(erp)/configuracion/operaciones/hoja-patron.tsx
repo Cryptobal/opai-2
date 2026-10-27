@@ -11,7 +11,13 @@ import { Contador, PreviewCiclo, Semana } from "./controles-patron";
 import { conteoPuestos, type Patron } from "./tipos";
 
 /** Crear o editar un patrón de turno (Brief 11). Un patrón en uso no cambia su estructura (EN_USO). */
-export function HojaPatron({ patron }: { patron?: Patron }) {
+export function HojaPatron({
+  patron,
+  puedeDesactivar = false,
+}: {
+  patron?: Patron;
+  puedeDesactivar?: boolean;
+}) {
   const hoja = useHojaUrl(patron ? "editar" : "nuevo");
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const [nombre, setNombre] = useState(patron?.nombre ?? "");
@@ -23,7 +29,9 @@ export function HojaPatron({ patron }: { patron?: Patron }) {
   const enUso = (patron?.puestosActivos ?? 0) > 0;
   const semanal = clase === "semanal";
   const semanaMala = semanal && (semana.length < 1 || semana.length > 6);
-  const estructura = semanal ? { clase, diasSemana: semana } : { clase, diasTrabajo: trabajo, diasDescanso: descanso };
+  const estructura = semanal
+    ? { clase, diasSemana: semana }
+    : { clase, diasTrabajo: trabajo, diasDescanso: descanso };
 
   async function guardar() {
     if (patron) {
@@ -99,15 +107,25 @@ export function HojaPatron({ patron }: { patron?: Patron }) {
         ) : (
           <>
             <div className="grid grid-cols-2 gap-3">
-              <Contador etiqueta="Días de trabajo" valor={trabajo} onCambiar={setTrabajo} deshabilitado={enUso} />
-              <Contador etiqueta="Días de descanso" valor={descanso} onCambiar={setDescanso} deshabilitado={enUso} />
+              <Contador
+                etiqueta="Días de trabajo"
+                valor={trabajo}
+                onCambiar={setTrabajo}
+                deshabilitado={enUso}
+              />
+              <Contador
+                etiqueta="Días de descanso"
+                valor={descanso}
+                onCambiar={setDescanso}
+                deshabilitado={enUso}
+              />
             </div>
             <Campo etiqueta="Vista de ciclo">
               <PreviewCiclo trabajo={trabajo} descanso={descanso} />
             </Campo>
           </>
         )}
-        {patron ? (
+        {patron && puedeDesactivar ? (
           <Switch
             etiqueta="Activo"
             descripcion="Un patrón inactivo no se ofrece en puestos nuevos; los de fábrica no se borran."

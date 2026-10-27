@@ -55,7 +55,7 @@ CREATE TRIGGER patron_en_uso BEFORE UPDATE ON "core"."patrones_turno"
   FOR EACH ROW EXECUTE FUNCTION "core"."patron_en_uso_inmutable"();
 
 -- Reversión (manual, solo referencia; no la aplica Prisma). Deja la base como antes de esta
--- migración, sin tocar datos. Corre con el rol propietario. La migración `20261027120000` queda:
+-- migración, sin tocar datos. Corre con el rol propietario. La migración `20261028040000` queda:
 --
 --   -- 1. Restaura el trigger mismo_tenant a su versión previa (solo instalacion_id y cargo_id):
 --   DROP TRIGGER IF EXISTS mismo_tenant ON "core"."puestos";

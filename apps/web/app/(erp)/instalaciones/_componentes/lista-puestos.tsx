@@ -1,4 +1,6 @@
-import { Badge, cn, FilaSeleccionable, Table, Td, Th, Tr } from "@opai/ds";
+import type { ReactNode } from "react";
+
+import { Badge, cn, type EstadoPantalla, ListScreen } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
 import { BadgePuesto } from "@/app/_components/maestros/badge-puesto";
@@ -23,12 +25,19 @@ function Trozos({ partes, className }: { partes: (string | null)[]; className: s
 }
 
 const secundario = (p: Puesto) => (
-  <Trozos partes={[p.patron ?? "Sin patrón", p.funcion ?? "Sin función"]} className="text-fg-muted" />
+  <Trozos
+    partes={[p.patron ?? "Sin patrón", p.funcion ?? "Sin función"]}
+    className="text-fg-muted"
+  />
 );
 
 const terciario = (p: Puesto) => (
   <Trozos
-    partes={[p.horario, p.horarioNoche, p.horasSemanales != null ? `${p.horasSemanales} h/sem` : null]}
+    partes={[
+      p.horario,
+      p.horarioNoche,
+      p.horasSemanales != null ? `${p.horasSemanales} h/sem` : null,
+    ]}
     className="t-caption"
   />
 );
@@ -45,75 +54,105 @@ function Horario({ valor }: { valor: string }) {
   );
 }
 
-/** Lista de puestos en teléfono: una fila por posición (CAR-8), con buscador y chips arriba. */
-export function FilasPuesto({ puestos }: { puestos: readonly Puesto[] }) {
+/**
+ * Lista de puestos (review 5662449808 punto 3): `ListScreen` del DS 2.0 (filas en teléfono, tabla
+ * desde tablet), con los estados vacío, cargando y error que ya trae el patrón. `sinCabecera`: el
+ * título, el subtítulo con los conteos y «Nuevo puesto» van en la pestaña (Brief 11, diseño t436u),
+ * no en el patrón.
+ */
+export function ListaPuestos({
+  state,
+  puestos,
+  buscador,
+  filtros,
+  accionVacio,
+}: {
+  state: EstadoPantalla;
+  puestos: readonly Puesto[];
+  buscador?: ReactNode;
+  filtros?: ReactNode;
+  accionVacio?: ReactNode;
+}) {
   return (
-    <div className="overflow-hidden rounded-lg border border-border bg-surface [&>*:last-child]:border-b-0 md:hidden">
-      {puestos.map((p) => (
-        <FilaSeleccionable
-          key={p.id}
-          href={`?puesto=${p.id}`}
-          Link={LinkNext}
-          titulo={p.nombre}
-          secundario={secundario(p)}
-          terciario={terciario(p)}
-          fin={<BadgePuesto estado={p.estado} cobertura={p.cobertura} />}
-        />
-      ))}
-    </div>
-  );
-}
-
-/** Tabla de puestos desde tablet (Brief 11, diseño t436u): función, horario, patrón, cobertura y estado. */
-export function TablaPuestos({ puestos }: { puestos: readonly Puesto[] }) {
-  return (
-    <div className="hidden md:block">
-      <Table>
-        <thead>
-          <tr>
-            <Th>Puesto</Th>
-            <Th>Función</Th>
-            <Th>Horario</Th>
-            <Th>Patrón</Th>
-            <Th>Cobertura</Th>
-            <Th>Estado</Th>
-          </tr>
-        </thead>
-        <tbody>
-          {puestos.map((p) => {
-            const inactivo = p.estado !== "activo";
-            const e = estadoDe(ESTADO_PUESTO, p.estado);
+    <ListScreen<Puesto>
+      state={state}
+      titulo="Puestos"
+      sinCabecera
+      buscador={buscador}
+      filtros={filtros}
+      items={puestos}
+      clave={(p) => p.id}
+      href={(p) => `?puesto=${p.id}`}
+      Link={LinkNext}
+      tarjeta={(p) => {
+        const inactivo = p.estado !== "activo";
+        return (
+          <>
+            <span className="flex min-w-0 flex-1 flex-col">
+              <span className={cn("truncate text-base font-medium", inactivo && "text-fg-muted")}>
+                {p.nombre}
+              </span>
+              <span className="truncate text-sm text-fg-muted">{secundario(p)}</span>
+              <span className="t-caption truncate">{terciario(p)}</span>
+            </span>
+            <span className="flex flex-none flex-col items-end gap-1">
+              <BadgePuesto estado={p.estado} cobertura={p.cobertura} />
+            </span>
+          </>
+        );
+      }}
+      columnas={[
+        {
+          id: "puesto",
+          etiqueta: "Puesto",
+          className: "font-medium",
+          render: (p) => (
+            <span className={p.estado !== "activo" ? "text-fg-muted" : undefined}>{p.nombre}</span>
+          ),
+        },
+        { id: "funcion", etiqueta: "Función", render: (p) => p.funcion ?? "—" },
+        {
+          id: "horario",
+          etiqueta: "Horario",
+          className: "h-auto whitespace-normal py-2.5",
+          render: (p) => (
+            <span className="flex flex-col gap-0.5">
+              <Horario valor={p.horario} />
+              {p.horarioNoche ? <Horario valor={p.horarioNoche} /> : null}
+            </span>
+          ),
+        },
+        {
+          id: "patron",
+          etiqueta: "Patrón",
+          className: "t-numeric",
+          render: (p) => p.patron ?? "—",
+        },
+        {
+          id: "cobertura",
+          etiqueta: "Cobertura",
+          render: (p) => {
+            if (p.estado !== "activo") return "—";
             const c = estadoDe(COBERTURA_PUESTO, p.cobertura);
-            return (
-              <Tr key={p.id} className={cn(inactivo && "text-fg-muted")}>
-                <Td className="font-medium">
-                  <LinkNext
-                    href={`?puesto=${p.id}`}
-                    className={cn(
-                      "rounded-sm outline-none hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus",
-                      inactivo ? "text-fg-muted" : "text-fg",
-                    )}
-                  >
-                    {p.nombre}
-                  </LinkNext>
-                </Td>
-                <Td>{p.funcion ?? "—"}</Td>
-                <Td className="h-auto whitespace-normal py-2.5">
-                  <span className="flex flex-col gap-0.5">
-                    <Horario valor={p.horario} />
-                    {p.horarioNoche ? <Horario valor={p.horarioNoche} /> : null}
-                  </span>
-                </Td>
-                <Td className="t-numeric">{p.patron ?? "—"}</Td>
-                <Td>{inactivo ? "—" : <Badge tono={c.tono}>{c.etiqueta}</Badge>}</Td>
-                <Td>
-                  <Badge tono={e.tono}>{e.etiqueta}</Badge>
-                </Td>
-              </Tr>
-            );
-          })}
-        </tbody>
-      </Table>
-    </div>
+            return <Badge tono={c.tono}>{c.etiqueta}</Badge>;
+          },
+        },
+        {
+          id: "estado",
+          etiqueta: "Estado",
+          render: (p) => {
+            const e = estadoDe(ESTADO_PUESTO, p.estado);
+            return <Badge tono={e.tono}>{e.etiqueta}</Badge>;
+          },
+        },
+      ]}
+      textos={{
+        vacio: {
+          titulo: "Sin puestos",
+          descripcion: "Crea el primero o ajusta la búsqueda y los filtros.",
+          accion: accionVacio,
+        },
+      }}
+    />
   );
 }

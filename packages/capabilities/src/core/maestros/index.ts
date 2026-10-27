@@ -39,8 +39,9 @@ import {
   personasDesbloquear,
   personasVincularUsuario,
 } from "./personas-estado";
+import { puestosCreate, puestosUpdate } from "./puestos-escritura";
 import { puestosSetEstado } from "./puestos-estado";
-import { puestosCreate, puestosGet, puestosList, puestosUpdate } from "./puestos";
+import { puestosGet, puestosList } from "./puestos";
 import { vinculosCreate, vinculosList, vinculosTerminar, vinculosUpdate } from "./vinculos";
 
 /** Maestros del núcleo (Brief 02, sesión B, bloque 6): una sola declaración para UI, API y MCP. */

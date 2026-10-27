@@ -1,10 +1,11 @@
 import { Plus } from "lucide-react";
 
 import { Alerta, Empty, Segmentado } from "@opai/ds";
-import { esRol, PERMISOS_CORE, tienePermiso } from "@opai/domain";
+import { PERMISOS_CORE } from "@opai/domain";
 
 import { LinkNext } from "@/app/_components/link-next";
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
+import { construirPuede } from "@/lib/permisos-ui";
 import { leerParametros, type SearchParams } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
@@ -14,9 +15,6 @@ import { ListaFunciones, ListaPatrones } from "./lista-operaciones";
 import type { Funcion, Patron, Tab } from "./tipos";
 
 export const metadata = { title: "Patrones y funciones" };
-
-const puede = (rol: string | null, permiso: string) =>
-  Boolean(rol && esRol(rol) && tienePermiso(rol, permiso));
 
 /** Configuración › Patrones de turno y Funciones (Brief 11, diseño DS 2.0 t436u). */
 export default function Operaciones({ searchParams }: { searchParams: SearchParams }) {
@@ -34,13 +32,16 @@ export default function Operaciones({ searchParams }: { searchParams: SearchPara
         return { tab, rp, rf, editar: p["editar"] };
       }}
       cabecera={({ tab, rp, rf }, indice) => {
-        const vacio = tab === "patrones" ? rp.ok && rp.data.length === 0 : rf.ok && rf.data.length === 0;
-        const permiso = tab === "patrones" ? PERMISOS_CORE.patronesManage : PERMISOS_CORE.funcionesManage;
+        const vacio =
+          tab === "patrones" ? rp.ok && rp.data.length === 0 : rf.ok && rf.data.length === 0;
+        const permiso =
+          tab === "patrones" ? PERMISOS_CORE.patronesManage : PERMISOS_CORE.funcionesManage;
+        const puede = construirPuede(indice.rol, indice.acceso);
         return {
           subtitulo: "Patrones de turno y funciones de los puestos",
           // El botón de crear de la cabecera se oculta en el estado vacío: ahí va el único del centro.
           acciones:
-            puede(indice.rol, permiso) && !vacio ? (
+            puede(permiso) && !vacio ? (
               <EnlaceBotonHoja href={`?tab=${tab}&nuevo=1`} icono={Plus}>
                 {tab === "patrones" ? "Nuevo patrón" : "Nueva función"}
               </EnlaceBotonHoja>
@@ -50,8 +51,12 @@ export default function Operaciones({ searchParams }: { searchParams: SearchPara
     >
       {({ tab, rp, rf, editar }, indice) => {
         const r = tab === "patrones" ? rp : rf;
-        const puedeP = puede(indice.rol, PERMISOS_CORE.patronesManage);
-        const puedeF = puede(indice.rol, PERMISOS_CORE.funcionesManage);
+        // Permisos efectivos (ADR-022): rol personalizado o excepciones, no solo el rol base.
+        const puede = construirPuede(indice.rol, indice.acceso);
+        const puedeP = puede(PERMISOS_CORE.patronesManage);
+        const puedeF = puede(PERMISOS_CORE.funcionesManage);
+        const puedeDesactivarP = puede(PERMISOS_CORE.patronesDesactivar);
+        const puedeDesactivarF = puede(PERMISOS_CORE.funcionesDesactivar);
         const nuevo = tab === "patrones" ? "Nuevo patrón" : "Nueva función";
         const puedeTab = tab === "patrones" ? puedeP : puedeF;
         return (
@@ -62,8 +67,16 @@ export default function Operaciones({ searchParams }: { searchParams: SearchPara
               Link={LinkNext}
               className="self-start"
               opciones={[
-                { id: "patrones", etiqueta: `Patrones de turno${rp.ok ? ` (${rp.data.length})` : ""}`, href: "?tab=patrones" },
-                { id: "funciones", etiqueta: `Funciones${rf.ok ? ` (${rf.data.length})` : ""}`, href: "?tab=funciones" },
+                {
+                  id: "patrones",
+                  etiqueta: `Patrones de turno${rp.ok ? ` (${rp.data.length})` : ""}`,
+                  href: "?tab=patrones",
+                },
+                {
+                  id: "funciones",
+                  etiqueta: `Funciones${rf.ok ? ` (${rf.data.length})` : ""}`,
+                  href: "?tab=funciones",
+                },
               ]}
             />
             {!r.ok ? (
@@ -74,13 +87,25 @@ export default function Operaciones({ searchParams }: { searchParams: SearchPara
               <Empty
                 titulo="Aún no hay patrones de turno"
                 descripcion="Crea un patrón para asignarlo a los puestos."
-                accion={puedeP ? <EnlaceBotonHoja href="?tab=patrones&nuevo=1" icono={Plus}>{nuevo}</EnlaceBotonHoja> : undefined}
+                accion={
+                  puedeP ? (
+                    <EnlaceBotonHoja href="?tab=patrones&nuevo=1" icono={Plus}>
+                      {nuevo}
+                    </EnlaceBotonHoja>
+                  ) : undefined
+                }
               />
             ) : tab === "funciones" && rf.ok && rf.data.length === 0 ? (
               <Empty
                 titulo="Aún no hay funciones"
                 descripcion="Crea una función para asignarla a los puestos."
-                accion={puedeF ? <EnlaceBotonHoja href="?tab=funciones&nuevo=1" icono={Plus}>{nuevo}</EnlaceBotonHoja> : undefined}
+                accion={
+                  puedeF ? (
+                    <EnlaceBotonHoja href="?tab=funciones&nuevo=1" icono={Plus}>
+                      {nuevo}
+                    </EnlaceBotonHoja>
+                  ) : undefined
+                }
               />
             ) : tab === "patrones" && rp.ok ? (
               <ListaPatrones patrones={rp.data} puede={puedeP} />
@@ -89,21 +114,25 @@ export default function Operaciones({ searchParams }: { searchParams: SearchPara
             ) : null}
             {puedeTab && tab === "patrones" ? (
               <>
-                <HojaPatron />
+                <HojaPatron puedeDesactivar={puedeDesactivarP} />
                 {rp.ok
                   ? rp.data
                       .filter((x) => x.id === editar)
-                      .map((x) => <HojaPatron key={x.id} patron={x} />)
+                      .map((x) => (
+                        <HojaPatron key={x.id} patron={x} puedeDesactivar={puedeDesactivarP} />
+                      ))
                   : null}
               </>
             ) : null}
             {puedeTab && tab === "funciones" ? (
               <>
-                <HojaFuncion />
+                <HojaFuncion puedeDesactivar={puedeDesactivarF} />
                 {rf.ok
                   ? rf.data
                       .filter((x) => x.id === editar)
-                      .map((x) => <HojaFuncion key={x.id} funcion={x} />)
+                      .map((x) => (
+                        <HojaFuncion key={x.id} funcion={x} puedeDesactivar={puedeDesactivarF} />
+                      ))
                   : null}
               </>
             ) : null}

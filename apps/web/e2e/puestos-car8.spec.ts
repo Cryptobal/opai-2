@@ -134,7 +134,7 @@ test.describe("CAR-8 · puestos como posición se ven y se navegan", () => {
     await expect(page.getByText("PPC · Sin asignar").first()).toBeAttached();
     // Buscador y chips en los tres anchos (QA H1).
     await expect(page.getByPlaceholder("Nombre del puesto")).toBeVisible();
-    await expect(page.getByRole("button", { name: /Solo PPC/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /^Filtrar por/i })).toHaveCount(3);
     // Ningún elemento corrido ni superpuesto: sin scroll horizontal en ninguno de los tres anchos.
     expect(await sinDesborde(page), `${info.project.name}: sin desborde horizontal`).toBe(true);
     // Estilo del design system 2.0: fondo claro, nunca el azul oscuro del 1.0.
@@ -166,7 +166,7 @@ test.describe("CAR-8 · puestos como posición se ven y se navegan", () => {
 
     // Estado vacío: una instalación sin puestos invita a crear el primero.
     await page.goto(`/instalaciones/${vaciaId}/puestos`);
-    await expect(page.getByText("Sin puestos de servicio")).toBeVisible();
+    await expect(page.getByText("Sin puestos").first()).toBeVisible();
     await expect(page.getByRole("link", { name: /Nuevo puesto/ })).toBeVisible();
     expect(await sinDesborde(page), `${info.project.name}: vacío sin desborde`).toBe(true);
     await ocultarDev(page);
