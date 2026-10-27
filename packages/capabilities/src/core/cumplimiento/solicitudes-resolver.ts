@@ -5,7 +5,12 @@ import { type EstadoSolicitud, PERMISOS_CORE, puedeAvanzarSolicitud } from "@opa
 import { defineCapability } from "../../define";
 import { noEncontrado, reglaDeNegocio } from "../../errores";
 import { uuidSchema } from "../esquemas";
-import { solicitudSchema, transicionarSolicitud, vistaSolicitud } from "./comunes";
+import {
+  solicitudSchema,
+  transicionarSolicitud,
+  validarEvidenciaDelTenant,
+  vistaSolicitud,
+} from "./comunes";
 
 export const solicitudResolver = defineCapability({
   id: "core.cumplimiento.solicitud_resolver",
@@ -27,6 +32,7 @@ export const solicitudResolver = defineCapability({
   async handler(ctx, input, { dryRun }) {
     const s = await ctx.db.solicitudArco.findUnique({ where: { id: input.id } });
     if (!s) throw noEncontrado("La solicitud");
+    await validarEvidenciaDelTenant(ctx.db, input.documentoEvidenciaId);
     if (!puedeAvanzarSolicitud(s.estado as EstadoSolicitud, input.estado))
       throw reglaDeNegocio(`No se puede pasar de "${s.estado}" a "${input.estado}".`);
     if (dryRun) return vistaSolicitud({ ...s, estado: input.estado, resultado: input.resultado });

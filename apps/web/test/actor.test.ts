@@ -56,7 +56,7 @@ describe("resolverActor", () => {
     // justo `core:cuentas.read`. `ctx.rol` conserva el rol base; `autorizar` usa la lista del rol.
     const { fuentes } = fuentesFalsas({
       membresias: [membresia({ rol: "viewer" })],
-      acceso: { permisosRol: ["core:cuentas.read"], excepciones: [] },
+      acceso: { permisosRol: ["core:cuentas.read"], excepciones: [], instalaciones: null },
     });
     const ctx = esContexto(await actor.resolverActor(new Request("http://x"), fuentes, conSesion));
     expect(ctx.rol).toBe("viewer");

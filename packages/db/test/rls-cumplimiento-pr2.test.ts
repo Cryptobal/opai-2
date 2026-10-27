@@ -100,6 +100,57 @@ describe.skipIf(!urlPropietario)("cumplimiento PR2: RLS y append-only en base re
     ).rejects.toThrow();
   });
 
+  it("escritura cruzada: no se cambia el tenant_id de una solicitud propia a otro tenant (WITH CHECK)", async () => {
+    // Solicitud propia del tenant A.
+    const s = await e.forTenant(a).solicitudArco.create({
+      data: { tenantId: a, tipo: "acceso", titularEmail: "mudanza@ejemplo.cl" },
+    });
+    // A intenta "mudar" su solicitud al tenant B: la ve (USING por tenant A) pero el WITH CHECK
+    // rechaza la fila nueva (tenant_id = B ≠ app.tenant_id); no se puede regalar una fila a otro tenant.
+    await expect(
+      e.forTenant(a).solicitudArco.update({ where: { id: s.id }, data: { tenantId: b } }),
+    ).rejects.toThrow();
+    // Sigue siendo del tenant A, intacta.
+    expect((await e.admin.solicitudArco.findUniqueOrThrow({ where: { id: s.id } })).tenantId).toBe(a);
+    expect(await e.forTenant(b).solicitudArco.count({ where: { id: s.id } })).toBe(0);
+  });
+
+  it("mismo_tenant: un incidente no referencia un documento REAL de otro tenant en evidencia_doc_id", async () => {
+    // Documento real del tenant B (existe, pero es ajeno a A).
+    const docAjeno = await e.admin.documento.create({
+      data: {
+        tenantId: b,
+        nombre: "evidencia-ajena.json",
+        mime: "application/json",
+        tamano: 1,
+        storageKey: `k-${randomUUID()}`,
+        creadoPorTipo: "system",
+        estado: "disponible",
+      },
+    });
+    const caso = randomUUID();
+    await e.forTenant(a).incidente.create({
+      data: { tenantId: a, casoId: caso, evento: "registro", estado: "abierto", descripcion: "brecha" },
+    });
+    // El trigger mismo_tenant (BEFORE INSERT sobre incidentes) rechaza: para A ese documento no
+    // existe (RLS lo oculta), aunque el UUID sea real en B. Vale para el aviso con evidencia.
+    await expect(
+      e.forTenant(a).incidente.create({
+        data: {
+          tenantId: a,
+          casoId: caso,
+          evento: "aviso",
+          estado: "abierto",
+          destinatario: "agencia",
+          evidenciaDocId: docAjeno.id,
+        },
+      }),
+    ).rejects.toThrow();
+    // El documento ajeno sigue invisible y sin usar desde A; el caso solo tiene su registro.
+    expect(await e.forTenant(a).documento.count({ where: { id: docAjeno.id } })).toBe(0);
+    expect(await e.admin.incidente.count({ where: { tenantId: a, casoId: caso } })).toBe(1);
+  });
+
   it("mismo_tenant: una solicitud no referencia un documento REAL de otro tenant", async () => {
     // Documento real del tenant B (existe, pero es ajeno a A).
     const docAjeno = await e.admin.documento.create({

@@ -117,11 +117,8 @@ export const INVENTARIO_NUCLEO = defineDatosPersonales("core", [
     categorias: ["identificacion", "laboral"],
     campos: ["nombre", "titulo", "creado_por_id", "via_user_id"],
     baseLicitud: "obligacion_legal",
-    // La lectura con IA pasa por el adaptador del Núcleo (ADR-031); a confirmar por legal (§4.4).
-    destinatarios: [
-      "Cloudflare R2 (archivo del documento)",
-      "Proveedor de IA (lectura de documentos) — a confirmar por legal",
-    ],
+    // Lectura con IA por el adaptador del Núcleo (ADR-031); a confirmar por legal (§4.4).
+    destinatarios: ["Cloudflare R2 (archivo del documento)", "Proveedor de IA (lectura de documentos) — a confirmar por legal"],
   },
   {
     tabla: "perfil_empresa",
