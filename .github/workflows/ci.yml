@@ -225,6 +225,7 @@ jobs:
     needs: [e2e, e2e-informe]
     if: ${{ always() }}
     runs-on: ubuntu-latest
+    timeout-minutes: 5
     steps:
       - name: Comprobar shards e informe
         env:
