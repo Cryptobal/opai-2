@@ -31,6 +31,10 @@ decisiones de negocio de Carlos): diferir el JS de la campana **con SSR conserva
 descargar la limpieza de cachés PWA al salir/cambiar empresa y pasar la cabecera
 al shell sin reconstruir cada prop. Compensan el JS de combinar main y este PR;
 no se desactiva la precarga ni se agrega una barra de progreso.
+La salida también se ejecuta si falla la descarga del chunk de limpieza (test de
+rechazo del import). Tras avanzar main, se evita el `count` redundante de Personas
+cuando la primera página contiene todo el resultado; con cursor o más páginas se
+mantiene el conteo exacto y el mismo filtro de alcance (tests de paginación).
 
 La autorrevisión detectó y se corrige con tests:
 - El catálogo opcional de cargos en `personas.list` exige `estructuras.read`
@@ -53,3 +57,8 @@ rendimiento en CI y Lighthouse no se añaden aquí: no se tocan workflows.
 La evidencia de esta ejecución y los comandos/resultados finales quedan en
 `PR-BODY.md`. La revisión formal y CI del nuevo head corresponden al flujo del PR;
 la autorrevisión local no los sustituye.
+El protocolo local se mide con la semilla disponible: si Personas supera una página,
+se necesita una consulta adicional para su total exacto y no se declara cumplido el
+tope de ocho para ese caso. La corrida ampliada de caché también ejercita clics
+inmediatos afectados por el pendiente de hidratación; sus fallos se informan, no se
+ocultan ni se convierten en nuevas omisiones.

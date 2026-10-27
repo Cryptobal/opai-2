@@ -178,6 +178,9 @@ elegible; N2 conserva la protección de Buscar/⌘K/Preferencias de main; N3 pub
 «Sin permisos» en la cabecera. Decisiones técnicas de GPT-6.1 Sol dentro del encargo:
 campana con JS diferido y SSR conservado, limpieza PWA al usarla y paso directo de
 cabecera para compensar JS sin subir otros topes. Autorrevisión: se protege el
+camino de salida aunque falle la descarga del chunk y se omite el count redundante
+solo cuando la primera página de Personas contiene todo el resultado (con cursor o
+más páginas se conserva el conteo exacto y una consulta adicional). Se protege el
 catálogo opcional de cargos con el permiso efectivo y se corrigen los filtros
 relacionales del simulador con tests negativos y positivos. Precarga restaurada,
 sin barra de progreso; la hidratación sigue pendiente del #44, que todavía no se

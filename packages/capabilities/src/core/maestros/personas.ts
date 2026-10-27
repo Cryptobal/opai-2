@@ -64,9 +64,8 @@ export const personasList = defineCapability({
           }
         : {}),
     };
-    // Página (con el vínculo vigente y su cargo por include), total de la consulta y, si se pide,
-    // los cargos del filtro: todo en la misma transacción de lectura (ADR-045).
-    const [filas, total, cargos] = await Promise.all([
+    // Página con vínculo/cargo por include y catálogo opcional del filtro (ADR-045).
+    const [filas, cargos] = await Promise.all([
       ctx.db.persona.findMany({
         where,
         orderBy: [{ apellidos: "asc" }, { nombres: "asc" }, { id: "asc" }],
@@ -80,7 +79,6 @@ export const personasList = defineCapability({
           },
         },
       }),
-      ctx.db.persona.count({ where }),
       input.incluirFiltros && ctx.autorizar(PERMISOS_CORE.estructurasRead)
         ? ctx.db.cargo.findMany({
             where: { activo: true },
@@ -89,6 +87,12 @@ export const personasList = defineCapability({
           })
         : Promise.resolve(null),
     ]);
+    // Sin cursor ni fila extra, la página contiene TODO el resultado: contar otra vez es redundante.
+    // Con más páginas (o cursor) se mantiene el total exacto, con idéntico filtro y alcance.
+    const total =
+      !input.cursor && filas.length <= input.limite
+        ? filas.length
+        : await ctx.db.persona.count({ where });
     const p = pagina(filas, input.limite);
     const alertas = await alertasDocumentos(
       ctx,
