@@ -1,11 +1,12 @@
 import { Plus } from "lucide-react";
 
 import { Alerta, Segmentado } from "@opai/ds";
-import { esRol, PERMISOS_CORE, tienePermiso } from "@opai/domain";
+import { PERMISOS_CORE } from "@opai/domain";
 
 import { LinkNext } from "@/app/_components/link-next";
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { leerParametros, type SearchParams } from "@/lib/parametros";
+import { construirPuede } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { PaginaConfig } from "../_centro/pagina-config";
@@ -32,22 +33,15 @@ export default function Documentos({ searchParams }: { searchParams: SearchParam
       }}
       cabecera={(_, indice) => ({
         subtitulo: "Tipos de documento por capa",
-        acciones:
-          indice.rol &&
-          esRol(indice.rol) &&
-          tienePermiso(indice.rol, PERMISOS_CORE.documentosManage) ? (
-            <EnlaceBotonHoja href="?nuevo=1" icono={Plus}>
-              Nuevo tipo
-            </EnlaceBotonHoja>
-          ) : undefined,
+        acciones: construirPuede(indice.rol, indice.acceso)(PERMISOS_CORE.documentosManage) ? (
+          <EnlaceBotonHoja href="?nuevo=1" icono={Plus}>
+            Nuevo tipo
+          </EnlaceBotonHoja>
+        ) : undefined,
       })}
     >
       {({ capa, r, editar }, indice) => {
-        const puede = Boolean(
-          indice.rol &&
-          esRol(indice.rol) &&
-          tienePermiso(indice.rol, PERMISOS_CORE.documentosManage),
-        );
+        const puede = construirPuede(indice.rol, indice.acceso)(PERMISOS_CORE.documentosManage);
         const tipos = r.ok ? r.data.filter((t) => !t.codigo.startsWith("marca.")) : [];
         return (
           <div className="flex flex-col gap-4">

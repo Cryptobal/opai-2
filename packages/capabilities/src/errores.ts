@@ -6,15 +6,19 @@ import type { CodigoError } from "./types";
  */
 export class ErrorCapacidad extends Error {
   readonly code: CodigoError;
+  /** Datos estructurados opcionales del error (p. ej. la lista de permisos que no se pueden conceder). */
+  readonly detalles?: unknown;
 
-  constructor(code: CodigoError, message: string) {
+  constructor(code: CodigoError, message: string, detalles?: unknown) {
     super(message);
     this.name = "ErrorCapacidad";
     this.code = code;
+    this.detalles = detalles;
   }
 }
 
 export const noEncontrado = (que: string) => new ErrorCapacidad("NOT_FOUND", `${que} no existe.`);
 export const conflicto = (mensaje: string) => new ErrorCapacidad("CONFLICT", mensaje);
 export const reglaDeNegocio = (mensaje: string) => new ErrorCapacidad("UNPROCESSABLE", mensaje);
-export const prohibido = (mensaje: string) => new ErrorCapacidad("FORBIDDEN", mensaje);
+export const prohibido = (mensaje: string, detalles?: unknown) =>
+  new ErrorCapacidad("FORBIDDEN", mensaje, detalles);
