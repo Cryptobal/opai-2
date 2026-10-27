@@ -24,11 +24,18 @@ Hasta el 24-oct-2026 este archivo fue la fuente de verdad del avance; desde ento
   Cargos oculta «Nuevo» y su hoja sin permiso de gestionar; no cambia el diseño aprobado ni los topes JS.
   La ficha también deshabilita sensibilidad y oculta edición/versiones nuevas en lectura; ambas vías
   de auditoría (`core.audit.list` y `core.actividad.list`) registran revelaciones y redactan sin permiso.
-  Gate local tras actualizar main: 785 tests; `test:db` 68+52+6; typecheck, lint, build, presupuesto y e2e 3/3
-  (375/1024/1280, servidor propio en 3106) en verde. El rate limit usó respaldo en memoria en el e2e.
-  Ver criterios y límites en `briefs/BRIEF-roles-seguimiento.md`. No agrega migraciones.
-  Autorrevisión: pendientes bloqueantes de alcance en escrituras de estructuras y auditoría específica
-  de la respuesta de creación sensible; criterios de aceptación parciales, no listo para push.
+  **Bloqueantes de la autorrevisión anterior, corregidos:** `core.estructuras.create` (nivel puesto o
+  persona) y `core.estructuras.anular` ya acotan la escritura al alcance del actor (`dondePuesto`/
+  `dondePersona`, `findFirst` en vez de `findUnique`, igual que las lecturas); fuera de alcance
+  responde `NOT_FOUND`, igual que "no existe" (sin enumeración; probado también con 5 llamadas en
+  paralelo). La respuesta de creación de una estructura sensible ahora audita la revelación (antes el
+  cálculo de `ocultarMontos` corría antes de tener el id de la fila recién creada y la auditoría se
+  saltaba en silencio). Tests nuevos: `estructuras-alcance-escritura(.test|-db.test).ts` y un caso en
+  `maestros-estructuras.test.ts`. Detalle en `briefs/BRIEF-roles-seguimiento.md`.
+  Gate tras traer main (merge `efe3322`, trae el PR #66 de Plataforma): 806 tests; `test:db` 68+56+6;
+  typecheck, lint, build, presupuesto y e2e 3/3 (375/1024/1280, servidor propio en 3106) en verde.
+  El rate limit usó respaldo en memoria en el e2e. Ver criterios y límites en
+  `briefs/BRIEF-roles-seguimiento.md`. No agrega migraciones.
 
 - **Endurecimiento de Plataforma (encargo urgente tras #59, rama `fix/platform-superadmin`):** servidor y shell comparten `tieneAccesoAPortal`, que admite Plataforma solo con rol global `owner` o `support`, nunca por membresía del tenant (ADR-016). Roles desconocidos se deniegan. Pruebas de servidor/shell y e2e de Empresas y rechazo sin rol global. H2 conserva la TopBar móvil aprobada: el título vive en el contenido (`DISENO.md` §4). H3 parcial: con acceso a Trabajador ya existe Inicio; se agrega cobertura, pero el estado vacío opcional se difiere porque incluso cargado de forma diferida excedió el presupuesto de Laboral (165,1/165 KB). No se suben topes. No hay decisiones de negocio nuevas; implementación de OpenCode según el encargo y ADR vigentes. La hipótesis de producción no se considera demostrada: `main` ya diferenciaba Plataforma en la guarda del servidor; queda QA posterior con la sesión afectada. Alcance y CA en `briefs/FIX-platform-superadmin.md`; el encargo no incluye ID de Linear.
 
