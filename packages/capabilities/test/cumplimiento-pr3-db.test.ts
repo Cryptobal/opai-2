@@ -321,5 +321,32 @@ describe.skipIf(!urlPropietario)("cumplimiento PR3 (retención) en base real", (
       expect(!r.ok && r.error.code).toBe("UNPROCESSABLE");
       expect((await e.admin.persona.findUniqueOrThrow({ where: { id: p.id } })).anonimizadaEn).toBeNull();
     });
+
+    it("cada lote queda registrado en su propia transacción: si falla uno posterior, lo hecho consta", async () => {
+      const { correrRegla } = await import("../src/core/cumplimiento/retencion-trabajo");
+      const { EJECUTORES } = await import("../src/core/cumplimiento/retencion-reglas");
+      const base = EJECUTORES.find((x) => x.regla.tabla === "envios");
+      if (!base) throw new Error("falta el ejecutor de envíos");
+      for (let i = 0; i < 2; i++)
+        await e.admin.envio.create({ data: { tenantId: tA, canal: "email", destinatario: `lote${i}@x.cl`, estado: "enviado", createdAt: HACE(500) } });
+      const antes = await e.admin.retencionEjecucion.count({ where: { tenantId: tA, tabla: "envios", modo: "aplicada" } });
+      let llamadas = 0;
+      const fallaElSegundo = {
+        ...base,
+        lote: async (...a: Parameters<typeof base.lote>) => {
+          llamadas += 1;
+          return llamadas === 1 ? (await base.lote(...a)).slice(0, 1) : ["00000000-0000-7000-8000-000000000000"];
+        },
+        aplicar: async (...a: Parameters<typeof base.aplicar>) => {
+          if (llamadas >= 2) throw new Error("falla simulada del lote 2");
+          return base.aplicar(...a);
+        },
+      };
+      await expect(correrRegla(ctx(tA, uA), fallaElSegundo, 365, new Date(), true)).rejects.toThrow(/lote 2/);
+      const filas = await e.admin.retencionEjecucion.findMany({ where: { tenantId: tA, tabla: "envios", modo: "aplicada" } });
+      expect(filas.length).toBe(antes + 1);
+      expect(filas.every((f) => f.filas > 0)).toBe(true);
+      expect(await e.admin.envio.count({ where: { tenantId: tA, destinatario: { startsWith: "lote" } } })).toBe(1);
+    });
   });
 });
