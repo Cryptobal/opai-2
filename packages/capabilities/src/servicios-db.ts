@@ -44,16 +44,15 @@ async function precioDe(recurso: string): Promise<number> {
 async function registrarConsumo({ sinCosto, yaIncurrido, ...c }: ConsumoNuevo) {
   const unitario = sinCosto ? 0 : await precioDe(c.recurso);
   const costoTotal = unitario * c.cantidad;
+  const interno =
+    c.actorTipo === "agent" && !c.apiKeyId && c.actorId?.startsWith("agente-interno:");
   return enTransaccion(c.tenantId, async (tx) => {
     if (
-      c.apiKeyId &&
-      !(await consumirPresupuesto(
-        tx,
-        c.tenantId,
-        c.apiKeyId,
-        BigInt(costoTotal),
-        yaIncurrido ? { yaIncurrido } : {},
-      ))
+      (c.apiKeyId || interno) &&
+      !(await consumirPresupuesto(tx, c.tenantId, c.apiKeyId ?? null, BigInt(costoTotal), {
+        ...(yaIncurrido ? { yaIncurrido } : {}),
+        ...(interno ? { agenteInterno: { viaUserId: c.viaUserId! } } : {}),
+      }))
     )
       throw new ErrorCapacidad(
         "BUDGET_EXCEEDED",

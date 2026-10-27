@@ -22,7 +22,7 @@ export type Efecto = "lectura" | "escritura" | "irreversible";
 export type Actor =
   | { tipo: "system"; id?: undefined; viaUserId?: undefined }
   | { tipo: "user"; id: string; viaUserId?: undefined }
-  | { tipo: "agent"; id: string; viaUserId: string };
+  | { tipo: "agent"; id: string; viaUserId: string; interno?: true };
 
 export type EventoAuditoria = {
   /** Tenant donde queda el evento (el actual o, en plataforma, el tenant objetivo). */
