@@ -35,7 +35,10 @@ describe("seguimiento del shell", () => {
     "%s sin acceso: monta el shell con la navegación vacía (H1)",
     async (portal) => {
       sesion.identidad = identidad();
-      expect(datosShell(sesion.identidad, portal).nav).toEqual([]);
+      const datos = datosShell(sesion.identidad, portal);
+      expect(datos.nav).toEqual([]);
+      // Sin acceso al portal, `acceso` es falso: el shell no ofrece búsqueda ni Preferencias.
+      expect(datos.acceso).toBe(false);
       const contenido = createElement("p", null, "Sin acceso");
       const layout = PortalLayout({ portal, children: contenido });
       const hijo = layout.props.children as ReactElement<
@@ -84,6 +87,13 @@ describe("seguimiento del shell", () => {
         instalaciones.activoEn,
       ),
     ).toBe(false);
+  });
+
+  it("con acceso al portal, `acceso` es verdadero (habilita búsqueda y Preferencias)", () => {
+    const i = identidad();
+    expect(datosShell(i, "erp").acceso).toBe(true);
+    i.usuario.platformRole = "owner";
+    expect(datosShell(i, "platform").acceso).toBe(true);
   });
 
   it("otro usuario en el mismo tenant renueva la época (remonta la campana)", () => {

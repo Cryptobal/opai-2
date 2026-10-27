@@ -4,6 +4,7 @@ import { expect, test } from "@playwright/test";
 // el de plataforma que el job e2e siembra con SEED_OWNER_PASSWORD. En CI falla si falta la contraseña.
 const email = process.env["E2E_SELECTOR_EMAIL"] ?? "e2e-selector@opai.cl";
 const sinEmpresaEmail = process.env["E2E_SIN_EMPRESA_EMAIL"] ?? "e2e-sin-empresa@opai.cl";
+const sinErpEmail = process.env["E2E_SIN_ERP_EMAIL"] ?? "e2e-sin-erp@opai.cl";
 const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
 
 const PORTALES = [
@@ -70,6 +71,29 @@ test.describe("acceso a portales", () => {
       }
     });
   }
+
+  test("ERP sin acceso (empresa pero sin el portal): sin búsqueda ni Preferencias, con salida", async ({
+    page,
+  }) => {
+    test.setTimeout(120_000);
+    await page.goto("/login");
+    await page.getByLabel("Correo").fill(sinErpEmail);
+    await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
+    await page.getByRole("button", { name: "Entrar" }).click();
+    await page.waitForURL((url) => !url.pathname.startsWith("/login"));
+    // El ERP es su inicio sin acceso: el shell se monta con el aviso dentro del marco.
+    await page.goto("/");
+    await expect(
+      page.getByText("No tienes acceso a este portal en la empresa actual."),
+    ).toBeVisible();
+    // N1: sin acceso al ERP no hay búsqueda ni ⌘K (el disparador de Buscar no se monta).
+    await expect(page.getByRole("button", { name: /Buscar/ })).toHaveCount(0);
+    // N2: el menú de usuario no ofrece Preferencias, pero conserva la salida.
+    await page.getByRole("button", { name: "Menú de usuario" }).first().click();
+    await expect(page.getByRole("menuitem", { name: "Preferencias" })).toHaveCount(0);
+    await page.getByRole("menuitem", { name: "Cerrar sesión" }).click();
+    await page.waitForURL((url) => url.pathname.startsWith("/login"));
+  });
 
   test("sin empresa activa: aviso dentro del shell, con Elegir empresa y Cerrar sesión", async ({
     page,

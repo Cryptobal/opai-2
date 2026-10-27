@@ -17,7 +17,33 @@ import { LARGO_MINIMO_PASSWORD } from "../src/opciones";
 
 const CORREO = "e2e-selector@opai.cl";
 const CORREO_SIN_EMPRESA = "e2e-sin-empresa@opai.cl";
+const CORREO_SIN_ERP = "e2e-sin-erp@opai.cl";
 const CUENTA_ATLAS = "Cliente Atlas E2E";
+
+/** Crea (idempotente) un usuario corriente con credenciales y devuelve su fila. */
+async function crearUsuario(
+  db: ReturnType<typeof dbAdmin>,
+  correo: string,
+  nombre: string,
+  password: string | undefined,
+): Promise<{ id: string }> {
+  let usuario = await db.user.findUnique({ where: { email: correo } });
+  if (usuario && usuario.platformRole !== null) {
+    usuario = await db.user.update({ where: { id: usuario.id }, data: { platformRole: null } });
+  }
+  if (usuario) return usuario;
+  if (!password || password.length < LARGO_MINIMO_PASSWORD) {
+    throw new Error(`Falta SEED_OWNER_PASSWORD (mínimo ${LARGO_MINIMO_PASSWORD} caracteres).`);
+  }
+  const hash = await hashPassword(password);
+  return db.$transaction(async (tx) => {
+    const user = await tx.user.create({ data: { email: correo, name: nombre, emailVerified: true } });
+    await tx.account.create({
+      data: { userId: user.id, providerId: "credential", accountId: user.id, password: hash },
+    });
+    return user;
+  });
+}
 
 /** Valida el destino ANTES de cualquier escritura: solo desarrollo o CI, y solo base local. */
 function exigirBaseLocal(): void {
@@ -40,26 +66,7 @@ async function main(): Promise<void> {
   const gard = await db.tenant.findUnique({ where: { slug: "gard" } });
   if (!gard) throw new Error("Primero corre seed:dev-tenant.");
 
-  let usuario = await db.user.findUnique({ where: { email: CORREO } });
-  // Si ya existía (p. ej. elevado a owner por el flujo anterior), vuelve a ser un usuario corriente.
-  if (usuario && usuario.platformRole !== null) {
-    usuario = await db.user.update({ where: { id: usuario.id }, data: { platformRole: null } });
-  }
-  if (!usuario) {
-    if (!password || password.length < LARGO_MINIMO_PASSWORD) {
-      throw new Error(`Falta SEED_OWNER_PASSWORD (mínimo ${LARGO_MINIMO_PASSWORD} caracteres).`);
-    }
-    const hash = await hashPassword(password);
-    usuario = await db.$transaction(async (tx) => {
-      const user = await tx.user.create({
-        data: { email: CORREO, name: "Usuario e2e selector", emailVerified: true },
-      });
-      await tx.account.create({
-        data: { userId: user.id, providerId: "credential", accountId: user.id, password: hash },
-      });
-      return user;
-    });
-  }
+  const usuario = await crearUsuario(db, CORREO, "Usuario e2e selector", password);
 
   const atlas = await db.tenant.upsert({
     where: { slug: "atlas" },
@@ -96,27 +103,19 @@ async function main(): Promise<void> {
   // Usuario con sesión pero SIN empresa activa (ni rol de plataforma), para el e2e del portal sin
   // acceso (apps/web/e2e/portales-riel.spec.ts): el shell se monta igual, con el aviso «sin empresa»
   // y la salida (Elegir empresa / Cerrar sesión). Nunca recibe membresía. Misma contraseña.
-  let huerfano = await db.user.findUnique({ where: { email: CORREO_SIN_EMPRESA } });
-  if (huerfano && huerfano.platformRole !== null) {
-    huerfano = await db.user.update({ where: { id: huerfano.id }, data: { platformRole: null } });
-  }
-  if (!huerfano) {
-    if (!password || password.length < LARGO_MINIMO_PASSWORD) {
-      throw new Error(`Falta SEED_OWNER_PASSWORD (mínimo ${LARGO_MINIMO_PASSWORD} caracteres).`);
-    }
-    const hash = await hashPassword(password);
-    await db.$transaction(async (tx) => {
-      const user = await tx.user.create({
-        data: { email: CORREO_SIN_EMPRESA, name: "Usuario e2e sin empresa", emailVerified: true },
-      });
-      await tx.account.create({
-        data: { userId: user.id, providerId: "credential", accountId: user.id, password: hash },
-      });
-    });
-  }
-  console.log(
-    `${CORREO_SIN_EMPRESA}: con sesión y sin empresa activa (e2e del portal sin acceso).`,
-  );
+  await crearUsuario(db, CORREO_SIN_EMPRESA, "Usuario e2e sin empresa", password);
+  console.log(`${CORREO_SIN_EMPRESA}: con sesión y sin empresa activa (e2e del portal sin acceso).`);
+
+  // Usuario con empresa (Gard) pero SIN el portal ERP, solo Supervisor: para el e2e del shell del
+  // ERP sin acceso (N1/N2 del PR #59). En ese portal no hay búsqueda, ⌘K ni Preferencias, y la acción
+  // de servidor `ejecutarCapacidad("erp", …)` devuelve FORBIDDEN; el aviso «Sin permisos» vive dentro.
+  const sinErp = await crearUsuario(db, CORREO_SIN_ERP, "Usuario e2e sin ERP", password);
+  await db.membership.upsert({
+    where: { tenantId_userId: { tenantId: gard.id, userId: sinErp.id } },
+    update: { rol: "supervisor", portales: ["supervisor"], estado: "activa" },
+    create: { tenantId: gard.id, userId: sinErp.id, rol: "supervisor", portales: ["supervisor"] },
+  });
+  console.log(`${CORREO_SIN_ERP}: supervisor en gard, sin el portal ERP (e2e del ERP sin acceso).`);
 }
 
 main()

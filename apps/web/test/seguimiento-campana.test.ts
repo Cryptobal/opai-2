@@ -21,6 +21,7 @@ import { fijarCabecera } from "@/app/_components/cabecera-contexto";
 
 const datos: DatosShell = {
   portal: "erp",
+  acceso: true,
   nav: [],
   portales: [],
   tenant: { nombre: "Empresa" },
