@@ -58,6 +58,9 @@ export const apikeysUpdate = defineCapability({
       expiraEn,
       presupuestoMensualMicro: presupuesto,
     };
+    if (k.principalTipo === "servicio" && (presupuesto === null || presupuesto <= 0n)) {
+      throw reglaDeNegocio("Un agente de servicio exige un presupuesto mensual mayor que cero.");
+    }
     const r = dryRun
       ? { ...k, ...data }
       : await ctx.db.apiKey.update({ where: { id: k.id }, data });

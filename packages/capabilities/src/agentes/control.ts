@@ -7,48 +7,6 @@ import type { Capacidad, Contexto, OpcionesEjecucion, Resultado } from "../types
 /** Una aprobación pendiente vence a las 72 horas (ADR-032). */
 export const VIGENCIA_APROBACION_MS = 72 * 3_600_000;
 
-const inicioDeMes = (d = new Date()) => new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1));
-const usd = (micro: number | bigint) => (Number(micro) / 1_000_000).toFixed(2).replace(".", ",");
-
-async function emitirUnaVezAlMes(
-  ctx: Contexto,
-  tipo: string,
-  apiKeyId: string,
-  payload: Record<string, unknown>,
-) {
-  const ya = await ctx.db.evento.count({
-    where: { tipo, entidadId: apiKeyId, createdAt: { gte: inicioDeMes() } },
-  });
-  if (ya) return;
-  await ctx.transaccion((tx) =>
-    ctx.eventos.emitir(tx, { tipo, entidadTipo: "api_key", entidadId: apiKeyId, payload }),
-  );
-}
-
-/** Corta al agente que agotó su presupuesto del mes y avisa al 80 % y al 100 % (una vez al mes). */
-async function presupuesto(ctx: Contexto): Promise<Resultado | null> {
-  const a = ctx.agente;
-  if (!a?.presupuestoMensualMicro) return null;
-  const grupos = await ctx.db.consumo.groupBy({
-    by: ["apiKeyId"],
-    where: { apiKeyId: a.apiKeyId, createdAt: { gte: inicioDeMes() } },
-    _sum: { costoTotalMicro: true },
-  });
-  const gastado = BigInt(grupos[0]?._sum.costoTotalMicro ?? 0);
-  const tope = a.presupuestoMensualMicro;
-  const payload = { agente: a.nombre, consumoUsd: usd(gastado), presupuestoUsd: usd(tope) };
-  if (gastado >= tope) {
-    await emitirUnaVezAlMes(ctx, "core.agente.presupuesto_100", a.apiKeyId, payload);
-    return falla(
-      "BUDGET_EXCEEDED",
-      `El agente agotó su presupuesto del mes (US$ ${payload.presupuestoUsd}). Pide a un administrador que lo amplíe.`,
-    );
-  }
-  if (gastado * 10n >= tope * 8n)
-    await emitirUnaVezAlMes(ctx, "core.agente.presupuesto_80", a.apiKeyId, payload);
-  return null;
-}
-
 function resumir(c: Capacidad, entrada: unknown): string {
   const texto = JSON.stringify(sinSensibles(entrada, c.sensibles));
   return `${c.id} ${texto.length > 240 ? `${texto.slice(0, 237)}…` : texto}`;
@@ -134,5 +92,6 @@ export async function controlAgente(
   opciones: OpcionesEjecucion,
 ) {
   if (ctx.actor.tipo !== "agent" || !ctx.agente || opciones.dryRun) return null;
-  return (await presupuesto(ctx)) ?? (await aprobacion(ctx, c, entrada, opciones));
+  // El presupuesto se consume atómicamente en el medidor ANTES del handler (execute.ts).
+  return aprobacion(ctx, c, entrada, opciones);
 }

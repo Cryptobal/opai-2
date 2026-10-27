@@ -86,6 +86,7 @@ export const documentosConfirmarSubida = defineCapability({
       });
       return { confirmado, seq: hecho.seq };
     });
+    // El archivo ya quedó en el almacenamiento antes de medirlo: se registra siempre (yaIncurrido).
     await ctx.medidor
       .registrar({
         ...consumoBase(ctx, "core"),
@@ -94,6 +95,7 @@ export const documentosConfirmarSubida = defineCapability({
         cantidad: Math.max(1, Math.ceil(d.tamano / 1_048_576)),
         referenciaTipo: "documento",
         referenciaId: d.id,
+        yaIncurrido: true,
       })
       .catch(() => undefined);
     return { ...vistaDocumento(r.confirmado, tipo, hoy()), bitacoraSeq: r.seq };

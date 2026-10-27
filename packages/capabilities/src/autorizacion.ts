@@ -2,8 +2,14 @@ import type { Capacidad, Contexto, Resultado } from "./types";
 
 const SIEMPRE_ACTIVOS = new Set(["core", "platform"]);
 
-/** Portal desde el que opera cada tipo de principal de una API key (ADR-033). */
-const PORTAL_DEL_PRINCIPAL = { usuario: "erp", cuenta: "cliente", persona: "trabajador" } as const;
+/**
+ * Portal desde el que opera un principal acotado a portal (ADR-033). `usuario` y `servicio` operan
+ * en el ERP y no se restringen aquí (el servicio solo por sus permisos finos, Identidad de servicio).
+ */
+const PORTAL_DEL_PRINCIPAL: Partial<Record<string, string>> = {
+  cuenta: "cliente",
+  persona: "trabajador",
+};
 
 /** Portales donde está disponible la capacidad: los declarados o el portal de su módulo. */
 export function portalesDe(c: Capacidad): readonly string[] {
@@ -38,11 +44,9 @@ export function restriccion(ctx: Contexto, c: Capacidad): Falla | null {
   if (c.soloPersonas && ctx.actor.tipo === "agent") {
     return falla("FORBIDDEN", "Solo una persona puede hacer esto, no una API key.");
   }
-  if (ctx.principal && ctx.principal.tipo !== "usuario") {
-    const portal = PORTAL_DEL_PRINCIPAL[ctx.principal.tipo];
-    if (!portalesDe(c).includes(portal)) {
-      return falla("FORBIDDEN", `La capacidad no está disponible en el portal "${portal}".`);
-    }
+  const portal = ctx.principal ? PORTAL_DEL_PRINCIPAL[ctx.principal.tipo] : undefined;
+  if (portal && !portalesDe(c).includes(portal)) {
+    return falla("FORBIDDEN", `La capacidad no está disponible en el portal "${portal}".`);
   }
   return null;
 }
