@@ -1,0 +1,24 @@
+# Flujo de pantallas de Puestos — solo referencia de flujo
+
+> **SOLO REFERENCIA DE FLUJO.** Describe en texto el recorrido de un prototipo de Claude Design (proyecto `4cb4b749-4284-48b5-8e9b-4209f4c86715`) hecho con el estilo de 1.0. Ese export se sacó del repositorio el 26-oct-2026 por la regla de Carlos: «nunca copiar el diselo de 1.0, se debe usar el design system aprobado https://claude.ai/design/p/44e4d7b9-7464-4771-bff8-07fcff4d573d» (Carlos, 26-oct-2026 17:18 CLT, transmitido en el encargo del PR #49). Aquí no hay CSS, HTML, tokens ni clases: todo estilo sale del DS 2.0 (`@opai/ds`) que está en `main`.
+>
+> **El diseño sí está aprobado.** El diseño de Puestos en DS 2.0 (lista, hoja, Configuración de Patrones y Funciones, edición) lo aprobó Carlos el 26-oct-2026 20:08 CLT (`t436u`); su export está en `docs/2.0/diseño/export-puestos/` (Claude Design, proyecto `3e9a6632`, DS 2.0 v2 `44e4d7b9`). Este archivo queda como referencia del recorrido; el diseño vinculante es ese export.
+
+## Recorrido
+
+1. **Instalaciones → instalación → pestaña Puestos.** Lista de instalaciones con su cuenta, número de puestos y PPC de hoy. En la instalación, una fila por posición: nombre, estado de cobertura (PPC «Sin asignar» o cubierto), función, patrón, horario por tramos (con «+1» si cruza medianoche) y horas semanales. Estado vacío: «Esta instalación no tiene puestos · Crea uno por cada posición que se cubre a la vez», con la acción «Nuevo puesto».
+2. **Ficha del puesto (hoja).** Datos del puesto, asignaciones vigentes, serie de los próximos 28 días e historial. Acciones: editar, desactivar, ver pauta y asignar.
+3. **Crear o editar puesto (formulario por pasos).**
+   1. Qué cubre: nombre (sugerido por función y jornada) y función del catálogo de la vertical.
+   2. Rol y horario: patrón, inicio del ciclo, rotación día/noche en el mismo puesto, tramos con aviso cuando termina el día siguiente, colación (minutos y si va dentro o fuera) y horas semanales pactadas con el promedio calculado como sugerencia.
+   3. Sueldo del puesto (Brief 07b; fuera del PR 1).
+   4. Vigencia: desde y hasta.
+4. **Configuración → Operaciones.** Patrones de turno (nombre claro, clase, días y en cuántos puestos se usa; los de fábrica no se eliminan, se desactivan si no están en uso), funciones por vertical con su uso, requisitos para cubrir PPC (radio de búsqueda, descanso mínimo) y grupos de sueldo. Se edita desde iPad o computador.
+5. **Asignar** (PR 2): elegir trabajador, rol en el puesto (titular o relevo), desde y desfase, con vista previa de la serie y de la cobertura. Traslados con borrador de anexo que aprueba RRHH.
+6. **Pauta mensual** (PR 2): calendario por puesto con Día, Noche, Libre y PPC; pintar series desde un día (iPad y computador); en el celular solo se ve y se asigna.
+7. **Asistencia y pauta diaria** (PR 3): marcas planificadas frente a reales, atraso y ausente, marca manual con motivo.
+8. **PPC y búsqueda de urgencia** (PR 3 o después): lista de PPC de los próximos días, candidatos cercanos que cumplen requisitos y contacto; asigna Operaciones.
+
+## Qué entró en el PR 1 (#49)
+
+El paso 1 (lista de puestos: tabla desde tablet con Puesto · Función · Horario —con «+1 día» cuando cruza medianoche— · Patrón · Cobertura · Estado, buscador, chips Todos/Solo PPC/Inactivos y subtítulo con los conteos; en teléfono, filas con buscador y chips), el paso 3 sin el bloque de sueldo (hoja de crear y editar) y el paso 4 (Configuración de Patrones de turno y Funciones), todos con el DS 2.0 aprobado (`t436u`, export en `docs/2.0/diseño/export-puestos/`). La columna «Dotación N de M» del diseño no aplica con 1 puesto = 1 posición: se muestra como «Cobertura» (Cubierto / PPC · Sin asignar); desvío decidido en el PR #49 (QA H1). Ver `docs/2.0/briefs/BRIEF-11-puestos.md`.

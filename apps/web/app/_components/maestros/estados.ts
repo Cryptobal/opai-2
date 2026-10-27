@@ -33,6 +33,12 @@ export const ESTADO_PUESTO: Record<string, EstadoVisible> = {
   inactivo: e("Inactivo", "neutro"),
 };
 
+/** Cobertura de un puesto-posición (Brief 11): PPC «Sin asignar» hasta que se asigne alguien. */
+export const COBERTURA_PUESTO: Record<string, EstadoVisible> = {
+  ppc: e("PPC · Sin asignar", "warning", "PPC"),
+  cubierto: e("Cubierto", "success"),
+};
+
 export const TIPO_CONTRATO: Record<string, string> = {
   indefinido: "Indefinido",
   plazo_fijo: "Plazo fijo",

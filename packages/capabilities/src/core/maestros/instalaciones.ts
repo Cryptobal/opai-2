@@ -81,7 +81,11 @@ export const instalacionesGet = defineCapability({
     const i = await instalacionDe(ctx, input.id);
     const [nombres, puestos, documentos] = await Promise.all([
       nombresDeCuentas(ctx, [i.cuentaId]),
-      ctx.db.puesto.findMany({ where: { instalacionId: i.id }, orderBy: { nombre: "asc" } }),
+      ctx.db.puesto.findMany({
+        where: { instalacionId: i.id },
+        include: { patron: true, funcion: true },
+        orderBy: { nombre: "asc" },
+      }),
       ctx.db.documentoVinculo.count({ where: { entidadTipo: "instalacion", entidadId: i.id } }),
     ]);
     return {

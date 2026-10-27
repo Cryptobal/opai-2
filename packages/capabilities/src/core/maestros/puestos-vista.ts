@@ -1,81 +1,116 @@
 import { z } from "zod";
 
-import { etiquetaHorario, horaValida, patronValido } from "@opai/domain";
+import { etiquetaHorario, resumenPatron, type ClasePatron } from "@opai/domain";
 
-import { dia, diaSchema, textoOpcional } from "./comun";
+import { dia } from "./comun";
 
 export const puestoSchema = z.object({
   id: z.string(),
   instalacionId: z.string(),
   cargoId: z.string(),
+  funcionId: z.string().nullable(),
+  funcion: z.string().nullable().describe("Nombre de la función operativa (guardia, supervisor…)."),
+  patronId: z.string().nullable(),
+  patron: z.string().nullable().describe('Nombre del patrón de turno (p. ej. "4×4").'),
+  patronResumen: z.string().nullable().describe("Resumen legible del patrón para la lista (CAR-8)."),
   nombre: z.string(),
   diasTrabajo: z.number(),
   diasDescanso: z.number(),
   horaInicio: z.string(),
   horaFin: z.string(),
-  horario: z.string().describe('Texto legible: "20:00 – 08:00 (+1)".'),
+  horario: z.string().describe('Texto legible del tramo de día: "20:00 – 08:00 (+1)".'),
+  horaInicioNoche: z.string().nullable(),
+  horaFinNoche: z.string().nullable(),
+  horarioNoche: z.string().nullable().describe("Texto legible del tramo de noche, si rota."),
   jornada: z.string(),
-  dotacion: z.number(),
+  horasSemanales: z.number().nullable(),
+  colacionMin: z.number(),
+  colacionFuera: z.boolean(),
+  cobertura: z.string().describe('"ppc" (sin asignar) o "cubierto".'),
+  coberturaMotivo: z.string().nullable(),
+  dotacion: z.number().describe("DEPRECADO: 1 puesto = 1 posición. Se conserva por compatibilidad."),
   estado: z.string(),
   vigenteDesde: z.string().nullable(),
   vigenteHasta: z.string().nullable(),
   notas: z.string().nullable(),
 });
 
+type Relacionado = { nombre: string } | null | undefined;
+
 export type FilaPuesto = {
   id: string;
   instalacionId: string;
   cargoId: string;
+  funcionId?: string | null;
+  patronId?: string | null;
   nombre: string;
   diasTrabajo: number;
   diasDescanso: number;
   horaInicio: string;
   horaFin: string;
+  horaInicioNoche?: string | null;
+  horaFinNoche?: string | null;
   jornada?: string | null;
+  horasSemanales?: number | string | { toString(): string } | null;
+  colacionMin?: number | null;
+  colacionFuera?: boolean | null;
+  cobertura?: string | null;
+  coberturaMotivo?: string | null;
   dotacion?: number | null;
   estado?: string | null;
   vigenteDesde?: Date | null;
   vigenteHasta?: Date | null;
   notas?: string | null;
+  funcion?: Relacionado;
+  patron?:
+    | { nombre: string; clase?: string | null; diasTrabajo: number; diasDescanso: number; diasSemana?: number[] | null }
+    | null;
 };
 
-export const vistaPuesto = (p: FilaPuesto) => ({
-  id: p.id,
-  instalacionId: p.instalacionId,
-  cargoId: p.cargoId,
-  nombre: p.nombre,
-  diasTrabajo: p.diasTrabajo,
-  diasDescanso: p.diasDescanso,
-  horaInicio: p.horaInicio,
-  horaFin: p.horaFin,
-  horario: etiquetaHorario(p.horaInicio, p.horaFin),
-  jornada: p.jornada ?? "dia",
-  dotacion: p.dotacion ?? 1,
-  estado: p.estado ?? "activo",
-  vigenteDesde: dia(p.vigenteDesde),
-  vigenteHasta: dia(p.vigenteHasta),
-  notas: p.notas ?? null,
-});
-
-const hora = z.string().refine(horaValida, 'Hora "HH:mm" de 00:00 a 23:59.');
-
-export const camposPuesto = {
-  cargoId: z.uuid(),
-  nombre: z.string().trim().min(2).max(120),
-  diasTrabajo: z.number().int().min(1).max(28).describe("Días de trabajo del ciclo (4 en 4×4)."),
-  diasDescanso: z.number().int().min(1).max(28).describe("Días de descanso del ciclo."),
-  horaInicio: hora,
-  horaFin: hora.describe("Si es menor o igual al inicio, el turno cruza medianoche."),
-  jornada: z.enum(["dia", "noche", "rotativa"]).optional(),
-  dotacion: z.number().int().min(1).max(500).optional(),
-  vigenteDesde: diaSchema.nullable().optional(),
-  vigenteHasta: diaSchema.nullable().optional(),
-  notas: textoOpcional(2000),
-};
-
-/** Valida el patrón combinado con el dominio (en update puede cambiar solo uno de los dos). */
-export function errorDePatron(diasTrabajo: number, diasDescanso: number): string | null {
-  return patronValido(diasTrabajo, diasDescanso)
-    ? null
-    : `Patrón ${diasTrabajo}×${diasDescanso} inválido: entre 1×1 y 28×28.`;
+function resumenDe(p: FilaPuesto["patron"]): string | null {
+  if (!p) return null;
+  return resumenPatron({
+    nombre: p.nombre,
+    clase: (p.clase === "semanal" ? "semanal" : "ciclico") as ClasePatron,
+    diasTrabajo: p.diasTrabajo,
+    diasDescanso: p.diasDescanso,
+    diasSemana: p.diasSemana ?? [],
+  });
 }
+
+export const vistaPuesto = (p: FilaPuesto) => {
+  const noche =
+    p.horaInicioNoche && p.horaFinNoche ? etiquetaHorario(p.horaInicioNoche, p.horaFinNoche) : null;
+  const horas = p.horasSemanales == null ? null : Number(p.horasSemanales);
+  return {
+    id: p.id,
+    instalacionId: p.instalacionId,
+    cargoId: p.cargoId,
+    funcionId: p.funcionId ?? null,
+    funcion: p.funcion?.nombre ?? null,
+    patronId: p.patronId ?? null,
+    patron: p.patron?.nombre ?? null,
+    patronResumen: resumenDe(p.patron),
+    nombre: p.nombre,
+    diasTrabajo: p.diasTrabajo,
+    diasDescanso: p.diasDescanso,
+    horaInicio: p.horaInicio,
+    horaFin: p.horaFin,
+    horario: etiquetaHorario(p.horaInicio, p.horaFin),
+    horaInicioNoche: p.horaInicioNoche ?? null,
+    horaFinNoche: p.horaFinNoche ?? null,
+    horarioNoche: noche,
+    jornada: p.jornada ?? "dia",
+    horasSemanales: horas != null && Number.isFinite(horas) ? horas : null,
+    colacionMin: p.colacionMin ?? 0,
+    colacionFuera: p.colacionFuera ?? false,
+    cobertura: p.cobertura ?? "ppc",
+    coberturaMotivo: p.coberturaMotivo ?? null,
+    dotacion: p.dotacion ?? 1,
+    estado: p.estado ?? "activo",
+    vigenteDesde: dia(p.vigenteDesde),
+    vigenteHasta: dia(p.vigenteHasta),
+    notas: p.notas ?? null,
+  };
+};
+
