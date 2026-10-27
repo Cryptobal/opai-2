@@ -1,9 +1,15 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 
 import { denegar } from "../../../packages/capabilities/src/autorizacion";
 import { capacidadesDelNucleo } from "@opai/capabilities";
-import { contextoDeIdentidad, identidadDe, resolverActor } from "../lib/actor";
+import type * as ActorMod from "../lib/actor";
 import { fuentesFalsas, membresia, TENANT, USUARIO } from "./fuentes-falsas";
+
+vi.stubEnv("DATABASE_URL", "postgresql://opai_app:x@localhost:5432/opai");
+let actor: typeof ActorMod;
+beforeAll(async () => {
+  actor = await import("../lib/actor");
+});
 
 describe("portales del Contexto de sesión", () => {
   it("usa solo la membresía actual, no la unión con las otras, sin lecturas adicionales", async () => {
@@ -13,15 +19,15 @@ describe("portales del Contexto de sesión", () => {
       membresias: [membresia({ rol: "supervisor", portales: ["supervisor"] }), otro],
     });
     const cargar = vi.spyOn(fuentes, "membresiasDe");
-    const identidad = await identidadDe(USUARIO, TENANT, fuentes);
+    const identidad = await actor.identidadDe(USUARIO, TENANT, fuentes);
     const buscar = capacidadesDelNucleo.find((c) => c.id === "core.buscar")!;
     for (const portal of ["erp", "supervisor", "inventado", null]) {
-      const ctx = contextoDeIdentidad(identidad, portal);
+      const ctx = actor.contextoDeIdentidad(identidad, portal);
       expect(ctx.portalesMembresia).toEqual(["supervisor"]);
       expect(denegar(ctx, buscar)).toMatchObject({ error: { code: "FORBIDDEN" } });
     }
     expect(cargar).toHaveBeenCalledOnce();
-    const erp = contextoDeIdentidad(await identidadDe(USUARIO, otroId, fuentes), "erp");
+    const erp = actor.contextoDeIdentidad(await actor.identidadDe(USUARIO, otroId, fuentes), "erp");
     expect(denegar(erp, buscar)).toBeNull();
   });
 
@@ -31,7 +37,9 @@ describe("portales del Contexto de sesión", () => {
       headers: { "x-opai-portal": "erp" },
       body: JSON.stringify({ portal: "erp" }),
     });
-    const ctx = await resolverActor(req, fuentesFalsas().fuentes, async () => ({ user: USUARIO }));
+    const ctx = await actor.resolverActor(req, fuentesFalsas().fuentes, async () => ({
+      user: USUARIO,
+    }));
     if (ctx instanceof Response) throw new Error("Se esperaba sesión");
     expect(ctx.portal).toBeNull();
     expect(
