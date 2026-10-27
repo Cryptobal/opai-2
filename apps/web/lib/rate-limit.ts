@@ -22,7 +22,7 @@ export const LIMITES = {
   invitacion: { maximo: 30, ventanaMs: 15 * 60_000 },
   /** Verificación pública de comprobantes, por IP: 30 por minuto. */
   verificar: { maximo: 30, ventanaMs: 60_000 },
-  /** /api/existe (proxy interno), por IP: 120 por minuto. */
+  /** /api/existe (proxy interno), por usuario de la sesión: 120 por minuto. */
   existe: { maximo: 120, ventanaMs: 60_000 },
   /** Proxy de mapas, por usuario: 30 por minuto. */
   geoMapa: { maximo: 30, ventanaMs: 60_000 },
@@ -47,13 +47,24 @@ const ambito = (clave: string) => clave.split(":")[0] ?? "rate-limit";
 
 /**
  * ¿Se permite una solicitud más de `clave` en su ventana? Consume una unidad en la base. Si la base
- * falla, falla abierto con el respaldo en memoria y avisa con el ámbito (nunca la key ni la IP).
+ * falla, por defecto falla ABIERTO con el respaldo en memoria (no deja caer el servicio) y avisa con el
+ * ámbito (nunca la key ni la IP). Con `fallarCerrado` deniega en vez de caer a memoria: lo usan las
+ * mutaciones públicas sensibles (recuperar contraseña, invitación), donde es preferible frenar a abrir.
  */
-export async function permitir(clave: string, maximo: number, ventanaMs = 60_000): Promise<boolean> {
+export async function permitir(
+  clave: string,
+  maximo: number,
+  ventanaMs = 60_000,
+  opciones: { fallarCerrado?: boolean } = {},
+): Promise<boolean> {
   try {
     const r = await consumirRateLimit(clave, maximo, Math.ceil(ventanaMs / 1000));
     return r.permitido;
   } catch {
+    if (opciones.fallarCerrado) {
+      console.warn(`[rate-limit] base no disponible; se deniega (fallo cerrado) el ámbito "${ambito(clave)}"`);
+      return false;
+    }
     console.warn(`[rate-limit] base no disponible; respaldo en memoria para el ámbito "${ambito(clave)}"`);
     return consumirMemoria(clave, maximo, ventanaMs);
   }

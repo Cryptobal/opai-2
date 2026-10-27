@@ -23,14 +23,19 @@ CREATE TABLE IF NOT EXISTS "core"."rate_limit_ventanas" (
 CREATE INDEX IF NOT EXISTS "rate_limit_ventanas_actualizado_idx"
   ON "core"."rate_limit_ventanas" ("actualizado");
 
--- opai_app no accede directo a la tabla: solo ejecuta las funciones de abajo.
+-- opai_app no accede directo a la tabla: solo ejecuta las funciones de abajo. Se revoca también de
+-- PUBLIC por si alguna copia de la tabla hereda un GRANT amplio (el núcleo solo concede a opai_app).
 REVOKE ALL ON "core"."rate_limit_ventanas" FROM opai_app;
+REVOKE ALL ON "core"."rate_limit_ventanas" FROM PUBLIC;
 
 -- Consumo atómico de una unidad de la ventana de `p_clave`. Un único upsert (INSERT ... ON CONFLICT DO
 -- UPDATE) toma el lock de fila por la PK, así que N llamadas en paralelo con máximo M permiten
 -- exactamente M (cada conflicto serializa e incrementa). Si la ventana venció, se reinicia (inicio
 -- `now()` y n = 1). Devuelve si se permite, cuántas quedan y cuándo se reinicia la ventana.
 -- SECURITY DEFINER porque opai_app no toca la tabla; search_path acotado y todo calificado por schema.
+-- Como corre con los privilegios del dueño, valida sus parámetros: una ventana o un máximo menores que
+-- 1 reiniciarían o vaciarían la cuenta de cualquier clave (una ventana 0 la ve siempre vencida), así que
+-- se rechazan. El llamador (apps/web/lib/rate-limit) pasa siempre valores >= 1.
 CREATE OR REPLACE FUNCTION "core"."rate_limit_consumir"(
   p_clave text, p_maximo integer, p_ventana_s integer
 ) RETURNS TABLE(permitido boolean, restantes integer, reinicio timestamptz)
@@ -40,6 +45,10 @@ DECLARE
   v_inicio timestamptz;
   v_n integer;
 BEGIN
+  IF coalesce(p_ventana_s, 0) < 1 OR coalesce(p_maximo, 0) < 1 THEN
+    RAISE EXCEPTION 'rate_limit_consumir: la ventana (%) y el máximo (%) deben ser >= 1',
+      p_ventana_s, p_maximo USING ERRCODE = 'check_violation';
+  END IF;
   INSERT INTO "core"."rate_limit_ventanas" AS r (clave, ventana_inicio, n, actualizado)
     VALUES (p_clave, v_ahora, 1, v_ahora)
   ON CONFLICT (clave) DO UPDATE SET
@@ -63,15 +72,18 @@ REVOKE ALL ON FUNCTION "core"."rate_limit_consumir"(text, integer, integer) FROM
 GRANT EXECUTE ON FUNCTION "core"."rate_limit_consumir"(text, integer, integer) TO opai_app;
 
 -- Limpieza: borra las ventanas sin actividad dentro de `p_retencion_s` (ya no sirven a ningún límite
--- vigente). La llama el programador (cron diario). SECURITY DEFINER porque opai_app no borra.
+-- vigente). La llama el programador (cron diario). SECURITY DEFINER porque opai_app no borra. Como corre
+-- con los privilegios del dueño, fija una retención MÍNIMA de 3600 s: `rate_limit_purgar(0)` borraría
+-- todos los contadores vigentes, así que un valor menor se eleva al piso en vez de vaciar la tabla.
 CREATE OR REPLACE FUNCTION "core"."rate_limit_purgar"(p_retencion_s integer DEFAULT 86400)
 RETURNS integer
 LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
 DECLARE
   borradas integer;
+  v_retencion integer := GREATEST(coalesce(p_retencion_s, 86400), 3600);
 BEGIN
   DELETE FROM "core"."rate_limit_ventanas"
-    WHERE actualizado < now() - make_interval(secs => p_retencion_s);
+    WHERE actualizado < now() - make_interval(secs => v_retencion);
   GET DIAGNOSTICS borradas = ROW_COUNT;
   RETURN borradas;
 END;

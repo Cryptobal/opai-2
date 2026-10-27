@@ -42,4 +42,15 @@ describe("permitir (rate limit central)", () => {
     expect(avisos).not.toContain("9.9.9.9"); // la IP no
     warn.mockRestore();
   });
+
+  it("con fallarCerrado deniega si la base falla (no cae a memoria)", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
+    consumirRateLimit.mockRejectedValue(new Error("base caída"));
+    // Primera llamada que en modo abierto permitiría: con fallarCerrado deniega.
+    expect(await permitir("recuperar-ip:1.2.3.4", 10, 60_000, { fallarCerrado: true })).toBe(false);
+    const avisos = warn.mock.calls.flat().join(" ");
+    expect(avisos).toContain("recuperar-ip"); // el ámbito sí
+    expect(avisos).not.toContain("1.2.3.4"); // la IP no
+    warn.mockRestore();
+  });
 });

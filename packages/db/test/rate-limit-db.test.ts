@@ -41,8 +41,19 @@ describe.skipIf(!urlPropietario)("rate_limit_consumir (NÚCLEO-B)", () => {
     const clave = `win-${randomUUID()}`;
     expect((await consumir(clave, 1, 60)).permitido).toBe(true);
     expect((await consumir(clave, 1, 60)).permitido).toBe(false);
-    // Ventana de 0 s: la siguiente llamada la ve vencida y reinicia (vuelve a permitir).
-    expect((await consumir(clave, 1, 0)).permitido).toBe(true);
+    // La ventana ya no se puede forzar con 0 s (lo rechaza la función). Se retrasa la ventana con el
+    // rol dueño para simular que venció; la siguiente llamada la ve vencida y reinicia (vuelve a permitir).
+    await e.admin.$executeRaw`
+      UPDATE "core"."rate_limit_ventanas"
+        SET ventana_inicio = now() - interval '120 seconds', actualizado = now() - interval '120 seconds'
+        WHERE clave = ${clave}`;
+    expect((await consumir(clave, 1, 60)).permitido).toBe(true);
+  });
+
+  it("rechaza una ventana o un máximo menores que 1 (no reinicia ni vacía otra clave)", async () => {
+    const clave = `guard-${randomUUID()}`;
+    await expect(consumir(clave, 1, 0)).rejects.toThrow();
+    await expect(consumir(clave, 0, 60)).rejects.toThrow();
   });
 
   it("opai_app no lee ni escribe la tabla directo", async () => {
@@ -51,11 +62,23 @@ describe.skipIf(!urlPropietario)("rate_limit_consumir (NÚCLEO-B)", () => {
     ).rejects.toThrow();
   });
 
-  it("la purga borra las ventanas sin actividad dentro de la retención", async () => {
-    const clave = `purge-${randomUUID()}`;
+  it("la purga respeta la retención mínima: no borra una ventana reciente", async () => {
+    const clave = `purge-fresca-${randomUUID()}`;
     await consumir(clave, 5, 60);
+    // Aunque se pida 0, la retención se eleva al piso de 3600 s: la ventana recién creada sobrevive.
     const filas = await e.appSinTenant.$queryRaw<{ purgadas: number }[]>`
       SELECT "core"."rate_limit_purgar"(0::int) AS purgadas`;
+    expect(Number(filas[0]?.purgadas ?? 0)).toBe(0);
+  });
+
+  it("la purga borra las ventanas sin actividad fuera de la retención", async () => {
+    const clave = `purge-vieja-${randomUUID()}`;
+    await consumir(clave, 5, 60);
+    // Se envejece la ventana con el rol dueño por encima del piso de retención (3600 s).
+    await e.admin.$executeRaw`
+      UPDATE "core"."rate_limit_ventanas" SET actualizado = now() - interval '2 hours' WHERE clave = ${clave}`;
+    const filas = await e.appSinTenant.$queryRaw<{ purgadas: number }[]>`
+      SELECT "core"."rate_limit_purgar"(3600::int) AS purgadas`;
     expect(Number(filas[0]?.purgadas ?? 0)).toBeGreaterThanOrEqual(1);
   });
 });

@@ -1,4 +1,4 @@
-import { createHash } from "node:crypto";
+import { createHmac } from "node:crypto";
 
 import { clienteApp } from "./client";
 
@@ -6,7 +6,7 @@ import { clienteApp } from "./client";
  * Rate limit centralizado (NÚCLEO-B). La cuenta vive en `core.rate_limit_ventanas` y se consume con la
  * función `SECURITY DEFINER` `core.rate_limit_consumir` (upsert atómico: cuenta y decide en una sola
  * operación, sin TOCTOU entre leer y escribir). `opai_app` no toca la tabla directo (REVOKE en la
- * migración); solo ejecuta las funciones. La clave se guarda hasheada (SHA-256 de
+ * migración); solo ejecuta las funciones. La clave se guarda hasheada (HMAC-SHA256 de
  * «ámbito:identificador»): la API key y la IP nunca quedan en claro ni en logs (Ley 21.719).
  */
 export type ResultadoRateLimit = {
@@ -16,9 +16,21 @@ export type ResultadoRateLimit = {
   reinicio: Date;
 };
 
-/** SHA-256 en hex de la clave en claro: es lo único que viaja a la base y se guarda como PK. */
+/**
+ * Sal del HMAC. Debe ser ESTABLE entre todas las instancias de Vercel (si no, cada instancia hashea
+ * distinto y la cuenta deja de ser común). `RATE_LIMIT_SALT` si Carlos la fija; si no, reutiliza
+ * `BETTER_AUTH_SECRET` (ya presente y estable). El valor por defecto solo sirve a dev/test.
+ */
+const SAL_RATE_LIMIT =
+  process.env["RATE_LIMIT_SALT"] ?? process.env["BETTER_AUTH_SECRET"] ?? "opai::rate-limit::sal-dev";
+
+/**
+ * HMAC-SHA256 en hex de la clave en claro: es lo único que viaja a la base y se guarda como PK. Con sal
+ * secreta, un volcado de la tabla no deja reconstruir por fuerza bruta la IP o la key (el espacio de las
+ * IPv4 es pequeño, un SHA-256 pelado sería reversible; Ley 21.719).
+ */
 function hashClave(clave: string): string {
-  return createHash("sha256").update(clave).digest("hex");
+  return createHmac("sha256", SAL_RATE_LIMIT).update(clave).digest("hex");
 }
 
 /**

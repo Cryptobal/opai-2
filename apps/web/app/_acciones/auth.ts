@@ -128,9 +128,13 @@ export async function accionPedirRecuperacion(
   form: FormData,
 ): Promise<EstadoRecuperacion> {
   const email = texto(form, "email").toLowerCase();
+  // Fallo cerrado: si la base del límite cae, no se cae a memoria (que relajaría el tope por instancia);
+  // se prefiere no enviar antes que abrir el envío de recuperación al abuso. La respuesta es la misma.
   const puede =
     !!email &&
-    (await permitir(`recuperar-ip:${await ip()}`, LIMITES.recuperar.maximo, LIMITES.recuperar.ventanaMs));
+    (await permitir(`recuperar-ip:${await ip()}`, LIMITES.recuperar.maximo, LIMITES.recuperar.ventanaMs, {
+      fallarCerrado: true,
+    }));
   if (puede) {
     await pedirRecuperacion(email, "/recuperar");
   }

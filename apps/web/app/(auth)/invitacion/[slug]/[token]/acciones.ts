@@ -27,10 +27,13 @@ type VistaInvitacion = Resultado | Limitada | null;
  * token, así que no se puede sortear uno abusando de otro.
  */
 async function invitacionPermitida(token: string): Promise<boolean> {
+  // Fallo cerrado (no cae a memoria): el flujo de invitación crea cuentas, así que si la base del límite
+  // cae es preferible frenar y mostrar «demasiados intentos» que abrir el alta al abuso por instancia.
   return permitir(
     `invitacion-ip:${ipDeCabeceras(await headers())}:${token}`,
     LIMITES.invitacion.maximo,
     LIMITES.invitacion.ventanaMs,
+    { fallarCerrado: true },
   );
 }
 
