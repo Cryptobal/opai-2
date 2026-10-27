@@ -142,7 +142,8 @@ model PrecioRecurso {
 model Aprobacion {
   id             String    @id @default(uuid(7)) @db.Uuid
   tenantId       String    @map("tenant_id") @db.Uuid
-  apiKeyId       String    @map("api_key_id") @db.Uuid
+  apiKeyId       String?   @map("api_key_id") @db.Uuid
+  agenteInternoId String?  @map("agente_interno_id")
   viaUserId      String    @map("via_user_id") @db.Uuid
   capability     String
   input          Json
@@ -170,7 +171,8 @@ model Aprobacion {
 model GastoAgenteMes {
   id           String    @id @default(uuid(7)) @db.Uuid
   tenantId     String    @map("tenant_id") @db.Uuid
-  apiKeyId     String    @map("api_key_id") @db.Uuid
+  apiKeyId     String?   @map("api_key_id") @db.Uuid
+  agenteInternoId String? @map("agente_interno_id")
   /// Primer día del mes en UTC.
   periodo      DateTime  @db.Date
   /// Micro-USD gastados en el mes; nunca supera `topeMicro`.
@@ -184,9 +186,10 @@ model GastoAgenteMes {
   updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   tenant Tenant @relation(fields: [tenantId], references: [id])
-  apiKey ApiKey @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
+  apiKey ApiKey? @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
 
   @@unique([tenantId, apiKeyId, periodo])
+  @@unique([tenantId, agenteInternoId, periodo])
   @@map("gasto_agente_mes")
   @@schema("core")
 }

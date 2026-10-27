@@ -44,6 +44,7 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
       PERMISOS_CORE.comunicacionesManage,
       PERMISOS_CORE.aprobacionesManage,
       PERMISOS_CORE.agentesManage,
+      "agente:configurar",
       // Cumplimiento (DPA/DPO, Ley 21.719): fijar el DPO es de owner/admin; aceptar el DPA, solo owner.
       PERMISOS_CORE.cumplimientoManage,
       PERMISOS_CORE.cumplimientoDpaAceptar,

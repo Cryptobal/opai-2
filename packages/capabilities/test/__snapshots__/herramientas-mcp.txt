@@ -1,3 +1,5 @@
+agente_historial_list
+agente_modelos_list
 core_actividad_list
 core_apikeys_get
 core_apikeys_list

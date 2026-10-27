@@ -100,6 +100,7 @@ export async function iaDe(
   clase: ClaseTarea,
   modulo = "core",
   solo?: ProveedorIaId,
+  opciones: { avisar?: boolean } = {},
 ) {
   const { cands, soloPropias, propiasInutiles } = await candidatosIa(ctx, clase, solo);
   if (cands.length === 0) {
@@ -110,7 +111,7 @@ export async function iaDe(
         proveedor: p.id,
         error: new ErrorIa(p.id, null, `IA propia inservible: ${p.razon}.`),
       }));
-      await avisarTenantIaFallo(ctx, fallos);
+      if (opciones.avisar !== false) await avisarTenantIaFallo(ctx, fallos);
       throw new ErrorRespaldoIa(
         fallos.map((f) => f.proveedor),
         undefined,
@@ -119,8 +120,8 @@ export async function iaDe(
     return null;
   }
   const conRetry = !solo;
-  // Avisar solo en la cadena de respaldo (no al probar un proveedor concreto) y solo con keys propias.
-  const avisar = conRetry && cands.some((c) => c.cred.modalidad === "propia");
+  // La selección de un proveedor no suprime el aviso; Probar lo gestiona por separado.
+  const avisar = opciones.avisar !== false && cands.some((c) => c.cred.modalidad === "propia");
   const ejecutar = async <T>(fn: (c: Candidato) => Promise<T>): Promise<T> => {
     const fallos: FalloProveedor[] = [];
     try {

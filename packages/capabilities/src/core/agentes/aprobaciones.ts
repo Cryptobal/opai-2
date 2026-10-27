@@ -11,7 +11,7 @@ import { uuidSchema } from "../esquemas";
 
 const aprobacionSchema = z.object({
   id: z.string(),
-  apiKeyId: z.string(),
+  apiKeyId: z.string().nullable(),
   agente: z.string(),
   via: z.string().nullable().describe("Persona responsable de la key (el agente actúa vía ella)."),
   riesgo: z.enum(["alto", "medio"]).describe("Alto: la capacidad es irreversible."),
@@ -31,7 +31,7 @@ type Fila = Awaited<ReturnType<Contexto["db"]["aprobacion"]["findFirstOrThrow"]>
 
 async function vista(ctx: Contexto, filas: Fila[]) {
   const keys = await ctx.db.apiKey.findMany({
-    where: { id: { in: [...new Set(filas.map((f) => f.apiKeyId))] } },
+    where: { id: { in: [...new Set(filas.flatMap((f) => (f.apiKeyId ? [f.apiKeyId] : [])))] } },
     select: { id: true, nombre: true },
   });
   const nombre = new Map(keys.map((k) => [k.id, k.nombre]));
@@ -43,7 +43,9 @@ async function vista(ctx: Contexto, filas: Fila[]) {
   return filas.map((a) => ({
     id: a.id,
     apiKeyId: a.apiKeyId,
-    agente: nombre.get(a.apiKeyId) ?? "Key eliminada",
+    agente: a.agenteInternoId
+      ? "Agente interno"
+      : (nombre.get(a.apiKeyId ?? "") ?? "Key eliminada"),
     via: via.get(a.viaUserId) ?? null,
     riesgo:
       obtenerCapacidad(a.capability)?.efecto === "irreversible"
@@ -120,7 +122,12 @@ export const aprobacionesGet = defineCapability({
   dryRun: false,
   async handler(ctx, input) {
     const a = await ctx.db.aprobacion.findUnique({ where: { id: input.id } });
-    const propia = ctx.agente && a?.apiKeyId === ctx.agente.apiKeyId;
+    const propia =
+      (ctx.agente && a?.apiKeyId === ctx.agente.apiKeyId) ||
+      (ctx.actor.tipo === "agent" &&
+        ctx.actor.interno &&
+        a?.agenteInternoId === ctx.actor.id &&
+        a.viaUserId === ctx.actor.viaUserId);
     if (!a || (!propia && !ctx.autorizar(PERMISOS_CORE.aprobacionesManage)))
       throw noEncontrado("La aprobación");
     return (await vista(ctx, [a]))[0] as z.input<typeof aprobacionSchema>;
