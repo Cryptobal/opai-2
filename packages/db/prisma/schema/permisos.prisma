@@ -29,7 +29,8 @@ model Rol {
 }
 
 /// Excepción de permiso por usuario (ADR-022): concede o deniega un permiso puntual sobre su rol.
-/// Denegar siempre gana. Ligada a la membresía; se borra con ella.
+/// Denegar siempre gana. Ligada a la membresía; se borra con ella. La sábana A18/A19 muestra el
+/// motivo y «Fijado por … · fecha»: por eso `motivo`, `creadoPor` y las fechas.
 model PermisoExcepcion {
   id           String   @id @default(uuid(7)) @db.Uuid
   tenantId     String   @map("tenant_id") @db.Uuid
@@ -37,14 +38,20 @@ model PermisoExcepcion {
   permiso      String
   /// true = concede el permiso; false = lo deniega (gana sobre cualquier concesión del rol).
   conceder     Boolean
+  /// Por qué se fijó (≤200). Null en filas previas; obligatorio al conceder/denegar (lo valida la capacidad).
+  motivo       String?
+  /// Usuario (global) que la fijó; null si ese usuario se eliminó (ON DELETE SET NULL).
+  creadoPor    String?  @map("creado_por") @db.Uuid
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  tenant     Tenant     @relation(fields: [tenantId], references: [id])
-  membership Membership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  tenant       Tenant     @relation(fields: [tenantId], references: [id])
+  membership   Membership @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  creadoPorUsuario User?  @relation("excepcionesFijadas", fields: [creadoPor], references: [id], onDelete: SetNull)
 
   @@unique([membershipId, permiso])
   @@index([tenantId])
+  @@index([creadoPor])
   @@map("permiso_excepciones")
   @@schema("core")
 }

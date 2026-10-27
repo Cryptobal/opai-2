@@ -3,23 +3,25 @@
 // a tenants es propia (Membership, con RLS) para que la segregación siga pasando por Postgres.
 
 model User {
-  id            String   @id @default(uuid(7)) @db.Uuid
-  name          String
-  email         String   @unique
-  emailVerified Boolean  @default(false) @map("email_verified")
-  image         String?
+  id               String   @id @default(uuid(7)) @db.Uuid
+  name             String
+  email            String   @unique
+  emailVerified    Boolean  @default(false) @map("email_verified")
+  image            String?
   /// "owner" | "support" | null — rol en la plataforma OPAI, no en un tenant (ADR-016).
-  platformRole  String?  @map("platform_role")
+  platformRole     String?  @map("platform_role")
   /// Segundo factor activo (NÚCLEO-F). Lo fija el plugin twoFactor de Better Auth tras verificar.
-  twoFactorEnabled Boolean @default(false) @map("two_factor_enabled")
-  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  twoFactorEnabled Boolean  @default(false) @map("two_factor_enabled")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  sessions    Session[]
-  accounts    Account[]
-  memberships Membership[]
-  apiKeys     ApiKey[]
-  twoFactor   TwoFactor?
+  sessions           Session[]
+  accounts           Account[]
+  memberships        Membership[]
+  apiKeys            ApiKey[]
+  twoFactor          TwoFactor?
+  /// Excepciones de permiso que este usuario fijó (A18/A19); se desligan si se elimina (SET NULL).
+  excepcionesFijadas PermisoExcepcion[] @relation("excepcionesFijadas")
 
   @@map("users")
   @@schema("core")

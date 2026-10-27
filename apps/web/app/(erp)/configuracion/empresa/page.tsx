@@ -1,6 +1,7 @@
 import { Button } from "@opai/ds";
-import { esRol, PERMISOS_CORE, tienePermiso } from "@opai/domain";
+import { PERMISOS_CORE } from "@opai/domain";
 
+import { construirPuede } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { PaginaConfig } from "../_centro/pagina-config";
@@ -23,8 +24,7 @@ export default function Empresa() {
         return { perfil: p.ok ? p.data : null, tenant: t.ok ? t.data : null };
       }}
       cabecera={({ tenant }, indice) => {
-        const rol = indice.rol;
-        const puede = Boolean(rol && esRol(rol) && tienePermiso(rol, PERMISOS_CORE.tenantManage));
+        const puede = construirPuede(indice.rol, indice.acceso)(PERMISOS_CORE.tenantManage);
         return {
           subtitulo: tenant
             ? `${tenant.nombre} · slug ${tenant.slug} · aparecen en documentos, correos y portales`
@@ -42,11 +42,7 @@ export default function Empresa() {
           <FormularioEmpresa
             perfil={perfil}
             tenant={tenant}
-            puedeEditar={Boolean(
-              indice.rol &&
-              esRol(indice.rol) &&
-              tienePermiso(indice.rol, PERMISOS_CORE.tenantManage),
-            )}
+            puedeEditar={construirPuede(indice.rol, indice.acceso)(PERMISOS_CORE.tenantManage)}
           />
         ) : null
       }
