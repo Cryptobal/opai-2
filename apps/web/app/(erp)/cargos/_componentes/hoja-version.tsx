@@ -32,7 +32,7 @@ export function HojaVersion({ cargoId, base, hoy }: Props) {
       gratificacion: grat,
       vigenteDesde: desde,
       ...(motivo.trim().length >= 5 ? { motivo: motivo.trim() } : {}),
-      // Los bonos de la versión anterior se conservan (si sus montos son visibles).
+      // Los bonos de la versión anterior se conservan.
       items: base && !base.sensible ? base.items : [],
     });
     if (!r) return;

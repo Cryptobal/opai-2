@@ -683,3 +683,7 @@ original. CI de `60e54f0`, run `40551210403`, sigue con car8:100 teléfono falla
 aserciones, sin ampliar timeouts ni atribuir una causa no demostrada. El objetivo
 principal sigue pendiente. Detalles, límites y capturas en §10 del Brief 11.
 Sin cambios de negocio, migraciones, permisos ni plan del ROADMAP.
+
+### Corrección de versiones de cargo y bonos
+
+En la rama `fix/version-cargo-bonos`, Codex eligió rechazar el versionado de un cargo sensible sin permiso de lectura sensible, para evitar reemplazar bonos ocultos por una lista vacía. La decisión y sus criterios están en `briefs/fix-version-cargo-bonos.md`; pendiente de revisión e integración.
