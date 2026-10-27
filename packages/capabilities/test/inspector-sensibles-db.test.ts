@@ -136,3 +136,107 @@ describe.skipIf(!urlPropietario)("Inspector DT: RLS y auditoría persistida", ()
     ).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
   });
 });
+
+describe.skipIf(!urlPropietario)("core.cargos.list: montos sensibles (una sola consulta, ADR-045)", () => {
+  let e: Entorno;
+  let tenantId: string;
+  const permisosRol = PLANTILLAS.find((p) => p.nombre === "Inspector DT")!.permisos;
+
+  /** Cargo sensible nuevo con una estructura vigente, aislado por caso (sin eventos cruzados). */
+  async function cargoSensibleConEstructura() {
+    const cargoId = (
+      await e.forTenant(tenantId).cargo.create({
+        data: { tenantId, nombre: `Cargo sensible ${randomUUID()}`, sueldoSensible: true },
+      })
+    ).id;
+    const estructuraId = (
+      await e.forTenant(tenantId).estructuraSueldo.create({
+        data: {
+          tenantId,
+          nivel: "cargo",
+          cargoId,
+          sueldoBase: 3_000_000,
+          colacion: 0,
+          movilizacion: 0,
+          gratificacion: "legal_25",
+          vigenteDesde: new Date("2026-01-01"),
+        },
+      })
+    ).id;
+    return { cargoId, estructuraId };
+  }
+
+  beforeAll(async () => {
+    e = await prepararEntorno();
+    mod.limpiarRegistro();
+    mod.registrarCapacidades(mod.capacidadesDelNucleo);
+    tenantId = (
+      await e.admin.tenant.create({
+        data: {
+          slug: `inspector-cargos-${randomUUID()}`,
+          nombre: "Inspector cargos test",
+          vertical: "seguridad",
+        },
+      })
+    ).id;
+  });
+  afterAll(async () => {
+    await e?.cerrar();
+  });
+
+  it("sin read_sensible oculta los montos y no registra una revelación", async () => {
+    const { cargoId, estructuraId } = await cargoSensibleConEstructura();
+    const actorId = randomUUID();
+    const ctx = mod.crearContexto({
+      tenantId,
+      rol: "viewer",
+      actor: { tipo: "user", id: actorId },
+      medidor: { registrar: async () => undefined },
+    });
+    const r = await mod.executeCapability(ctx, "core.cargos.list", {});
+    expect(r).toMatchObject({
+      ok: true,
+      data: expect.arrayContaining([
+        expect.objectContaining({
+          id: cargoId,
+          sueldoVigente: expect.objectContaining({ sueldoBase: null, sensible: true }),
+        }),
+      ]),
+    });
+    expect(
+      await e.forTenant(tenantId).auditEvent.count({
+        where: { capability: "core.estructuras.read_sensible", entityId: estructuraId },
+      }),
+    ).toBe(0);
+  });
+
+  it("Inspector DT ve los montos y queda un evento con actor vía (viaUserId)", async () => {
+    const { cargoId, estructuraId } = await cargoSensibleConEstructura();
+    const actorId = randomUUID();
+    const viaUserId = randomUUID();
+    const ctx = mod.crearContexto({
+      tenantId,
+      rol: "supervisor",
+      permisosRol,
+      actor: { tipo: "agent", id: actorId, viaUserId },
+      medidor: { registrar: async () => undefined },
+    });
+    const r = await mod.executeCapability(ctx, "core.cargos.list", {});
+    expect(r).toMatchObject({
+      ok: true,
+      data: expect.arrayContaining([
+        expect.objectContaining({
+          id: cargoId,
+          sueldoVigente: expect.objectContaining({ sueldoBase: 3_000_000, sensible: false }),
+        }),
+      ]),
+    });
+    const eventos = await e.forTenant(tenantId).auditEvent.findMany({
+      where: { capability: "core.estructuras.read_sensible", entityId: estructuraId },
+    });
+    expect(eventos).toHaveLength(1);
+    expect(eventos[0]?.actorType).toBe("agent");
+    expect(eventos[0]?.actorId).toBe(actorId);
+    expect(eventos[0]?.viaUserId).toBe(viaUserId);
+  });
+});

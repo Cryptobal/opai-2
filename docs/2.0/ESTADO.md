@@ -9,7 +9,7 @@ Hasta el 24-oct-2026 este archivo fue la fuente de verdad del avance; desde ento
 
 ## Hecho
 
-- **Seguimiento del #60 (rama `fix/roles-seguimiento`, sin PR por encargo):**
+- **Seguimiento del #60 (rama `fix/roles-seguimiento`, PR #67, sin tarea en Linear):**
   I4/P4: el menú del ERP usa permisos efectivos (rol personalizado y excepciones), no el rol base.
   P3: Dirección de Empresa respeta el modo lectura mediante `CampoDireccion` del DS 2.0.
   **Decisión vigente t479u:** Carlos delegó «Velo tú, según eso y avanza» (26-oct-2026 22:06 CLT;
@@ -31,7 +31,11 @@ Hasta el 24-oct-2026 este archivo fue la fuente de verdad del avance; desde ento
   paralelo). La respuesta de creación de una estructura sensible ahora audita la revelación (antes el
   cálculo de `ocultarMontos` corría antes de tener el id de la fila recién creada y la auditoría se
   saltaba en silencio). Tests nuevos: `estructuras-alcance-escritura(.test|-db.test).ts` y un caso en
-  `maestros-estructuras.test.ts`. Detalle en `briefs/BRIEF-roles-seguimiento.md`.
+  `maestros-estructuras.test.ts`. **Bloqueante de la revisión 5662281692, corregido:** el merge de
+  main (#53, ADR-045) dejó `core.cargos.list` sin auditar la revelación sensible (conflicto semántico:
+  la consulta única pasó a usar `resumenSueldoDe`, puro, en vez de `ocultarMontos`); ahora audita con
+  `ocultarMontosDeCargo` (`estructuras-acceso.ts`), sin volver al N+1 que corrigió el #53. Detalle en
+  `briefs/BRIEF-roles-seguimiento.md`.
   Gate tras traer main (merge `efe3322`, trae el PR #66 de Plataforma): 806 tests; `test:db` 68+56+6;
   typecheck, lint, build, presupuesto y e2e 3/3 (375/1024/1280, servidor propio en 3106) en verde.
   El rate limit usó respaldo en memoria en el e2e. Ver criterios y límites en

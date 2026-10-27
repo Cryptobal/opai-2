@@ -36,7 +36,7 @@ async function cargoSensible(ctx: Contexto, e: RefEstructura): Promise<boolean> 
  * a la vista, pero toda lectura queda trazada. La vista previa de creación (sin fila persistida) no
  * se audita porque aún no hay nada leído.
  */
-async function auditarLecturaSensible(ctx: Contexto, e: RefEstructura): Promise<void> {
+export async function auditarLecturaSensible(ctx: Contexto, e: RefEstructura): Promise<void> {
   if (!e.id) return;
   await ctx.auditoria.registrar({
     tenantId: ctx.tenantId,
@@ -63,6 +63,30 @@ export async function ocultarMontos(ctx: Contexto, e: RefEstructura): Promise<bo
   if (!(await cargoSensible(ctx, e))) return false;
   if (!ctx.autorizar(PERMISOS_CORE.estructurasReadSensible)) return true;
   await auditarLecturaSensible(ctx, e);
+  return false;
+}
+
+/**
+ * Variante de `ocultarMontos` para `core.cargos.list` (ADR-045): la consulta única ya trae el cargo
+ * con su `sueldoSensible`, así que no hace falta `cargoSensible` (volvería a consultar el cargo por
+ * fila, el N+1 que corrigió el #53). La auditoría de la revelación es la misma de siempre.
+ */
+export async function ocultarMontosDeCargo(
+  ctx: Contexto,
+  cargo: { id: string; sueldoSensible: boolean },
+  estructura: { id: string } | undefined,
+): Promise<boolean> {
+  if (!cargo.sueldoSensible) return false;
+  if (!ctx.autorizar(PERMISOS_CORE.estructurasReadSensible)) return true;
+  if (estructura) {
+    await auditarLecturaSensible(ctx, {
+      id: estructura.id,
+      nivel: "cargo",
+      cargoId: cargo.id,
+      puestoId: null,
+      personaId: null,
+    });
+  }
   return false;
 }
 
