@@ -19,12 +19,14 @@ test.describe("configuración · acceso", () => {
     await captura(page, "config-usuarios", p);
     await page.goto("/configuracion/api-keys");
     await expect(page).toHaveURL(/\/configuracion\/agentes$/);
+    await expect(page.getByRole("link", { name: "Conectar tu IA", exact: true })).toBeVisible();
     await captura(page, "config-agentes", p);
     await page.goto("/configuracion/agentes/conectar");
     await expect(page.getByText(/\/api\/mcp/).first()).toBeVisible();
     await captura(page, "config-conectar", p);
     await page.goto("/configuracion/aprobaciones");
     await expect(page.getByRole("heading", { name: /Aprobaciones/ }).first()).toBeAttached();
+    await expect(page.getByRole("link", { name: "Historial", exact: true })).toBeVisible();
     await captura(page, "config-aprobaciones", p);
   });
 

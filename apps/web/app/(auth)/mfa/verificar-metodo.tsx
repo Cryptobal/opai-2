@@ -67,6 +67,9 @@ export function VerificarMetodo({
             required
             autoFocus
             autoComplete="one-time-code"
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
             inputMode={metodo === "totp" ? "numeric" : "text"}
             disabled={pendiente}
             maxLength={metodo === "totp" ? 6 : 32}

@@ -1,4 +1,5 @@
 import type { ModuleManifest } from "@opai/capabilities";
+import { manifest as agente } from "@opai/mod-agente";
 
 /**
  * Registro de módulos vendibles (ADR-003). `pnpm scaffold:module <id>` agrega el import y la entrada.
@@ -6,5 +7,6 @@ import type { ModuleManifest } from "@opai/capabilities";
  * configuración, eventos y capacidades (API y MCP).
  */
 export const modulos: readonly ModuleManifest[] = [
+  agente,
   // scaffold:module — las entradas se agregan sobre esta línea
 ];

@@ -1,5 +1,5 @@
 import { jsonCanonico, sha256Hex } from "@opai/domain";
-import type { TenantDb } from "@opai/db";
+import type { TenantTx } from "@opai/db";
 
 import type { Actor } from "./types";
 
@@ -18,7 +18,12 @@ export type ReservaIdempotencia =
 
 export interface Idempotencia {
   /** Reserva la clave antes de ejecutar; si ya se usó, dice cómo terminó. */
-  reservar(capability: string, clave: string, input: unknown): Promise<ReservaIdempotencia>;
+  reservar(
+    capability: string,
+    clave: string,
+    input: unknown,
+    opciones?: { sinRecuperacionAutomatica?: boolean },
+  ): Promise<ReservaIdempotencia>;
   completar(id: string, resultado: unknown): Promise<void>;
   /** Libera la reserva si la ejecución falló: el cliente puede reintentar con la misma clave. */
   liberar(id: string): Promise<void>;
@@ -27,17 +32,28 @@ export interface Idempotencia {
 const actorClave = (a: Actor) => (a.tipo === "system" ? "system" : `${a.tipo}:${a.id ?? ""}`);
 
 /** Implementación sobre `core.idempotencias` (sirve igual para la base real y la de memoria). */
-export function idempotenciaSobre(db: TenantDb, tenantId: string, actor: Actor): Idempotencia {
+export function idempotenciaSobre(
+  db: Pick<TenantTx, "idempotencia">,
+  tenantId: string,
+  actor: Actor,
+): Idempotencia {
   return {
-    async reservar(capability, clave, input) {
+    async reservar(capability, clave, input, opciones) {
       const huella = await sha256Hex(`${capability}\n${jsonCanonico(input)}`);
       const where = { tenantId_actor_clave: { tenantId, actor: actorClave(actor), clave } };
       const previa = await db.idempotencia.findUnique({ where });
       const edad = previa ? Date.now() - previa.createdAt.getTime() : 0;
+      // El bloqueo se persiste: otra llamada a reservar sin opciones tampoco puede recuperarlo.
+      const noRecuperar =
+        opciones?.sinRecuperacionAutomatica ||
+        (previa?.resultado !== null &&
+          typeof previa?.resultado === "object" &&
+          !Array.isArray(previa.resultado) &&
+          previa.resultado["__reservaNoRecuperable"] === true);
       const vencida =
         previa &&
         (edad > VIGENCIA_IDEMPOTENCIA_MS ||
-          (previa.estado === "en_curso" && edad > EN_CURSO_MAXIMO_MS));
+          (!noRecuperar && previa.estado === "en_curso" && edad > EN_CURSO_MAXIMO_MS));
       if (previa && !vencida) {
         if (previa.huella !== huella || previa.capability !== capability) {
           return { estado: "distinta" };
@@ -49,7 +65,16 @@ export function idempotenciaSobre(db: TenantDb, tenantId: string, actor: Actor):
       if (previa) await db.idempotencia.delete({ where: { id: previa.id } });
       try {
         const fila = await db.idempotencia.create({
-          data: { tenantId, actor: actorClave(actor), clave, capability, huella },
+          data: {
+            tenantId,
+            actor: actorClave(actor),
+            clave,
+            capability,
+            huella,
+            ...(opciones?.sinRecuperacionAutomatica
+              ? { resultado: { __reservaNoRecuperable: true } }
+              : {}),
+          },
         });
         return { estado: "nueva", id: fila.id };
       } catch (error) {

@@ -72,6 +72,13 @@ export const ETIQUETA_CAMPO: Readonly<Record<string, string>> = {
   titular_nombre: "nombre del titular",
   registrado_por: "quién lo registró",
   responsable_id: "responsable",
+  actor: "usuario o agente",
+  resultado: "resultado temporal de la acción",
+  agente_interno_id: "agente interno",
+  input: "datos de la solicitud",
+  resuelta_por: "persona que decidió",
+  api_key_id: "identidad del agente externo",
+  gastado_micro: "consumo acumulado",
 };
 
 /** Etiqueta legible de un campo; si falta, devuelve el nombre crudo (un test impide que ocurra). */

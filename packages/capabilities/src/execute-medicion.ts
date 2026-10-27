@@ -16,7 +16,7 @@ export function consumoEjecucion(
     actorTipo: ctx.actor.tipo,
     actorId: ctx.actor.id ?? null,
     viaUserId: ctx.actor.viaUserId ?? null,
-    apiKeyId: ctx.actor.tipo === "agent" ? ctx.actor.id : null,
+    apiKeyId: ctx.actor.tipo === "agent" && !ctx.actor.interno ? ctx.actor.id : null,
     portal: ctx.portal,
     efecto: c.efecto,
     dryRun: opciones.dryRun === true,
