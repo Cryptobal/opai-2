@@ -27,6 +27,7 @@ export const documentosList = defineCapability({
   descripcion:
     "Documentos vigentes (última versión) de una entidad —empresa, cuenta, instalación, persona o puesto— o de todo el tenant, con estado de vigencia; por entidad incluye los tipos obligatorios que faltan.",
   permiso: PERMISOS_CORE.documentosRead,
+  portales: ["erp", "supervisor"],
   input: z.object({
     entidad: entidadSchema.optional(),
     tipoId: uuidSchema.optional(),

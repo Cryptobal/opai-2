@@ -33,6 +33,7 @@ export const instalacionesList = defineCapability({
   descripcion:
     "Lista las instalaciones (sitios donde se presta el servicio) con búsqueda por nombre o comuna y filtros por cuenta, estado y región. Paginada por cursor.",
   permiso: PERMISOS_CORE.instalacionesRead,
+  portales: ["erp", "supervisor"],
   input: listaSchema.extend({
     cuentaId: uuidSchema.optional(),
     estado: z.enum(ESTADOS_INSTALACION).optional(),
@@ -65,19 +66,17 @@ export const instalacionesList = defineCapability({
       orderBy: [{ nombre: "asc" }, { id: "asc" }],
       take: input.limite + 1,
       ...cursorDe(input.cursor),
+      // El nombre de la cuenta va en la misma consulta (include), no una aparte por página (ADR-045).
+      include: { cuenta: { select: { nombre: true } } },
     });
     const p = pagina(filas, input.limite);
-    const nombres = await nombresDeCuentas(
-      ctx,
-      p.items.map((i) => i.cuentaId),
-    );
     const resumen = await resumenInstalaciones(
       ctx,
       p.items.map((i) => i.id),
     );
     return {
       items: p.items.map((i) => ({
-        ...vistaInstalacion(i, nombres.get(i.cuentaId) ?? null),
+        ...vistaInstalacion(i, i.cuenta?.nombre ?? null),
         ...resumen(i.id),
       })),
       siguiente: p.siguiente,
@@ -90,6 +89,7 @@ export const instalacionesGet = defineCapability({
   descripcion:
     "Ficha de una instalación: dirección y coordenadas, geocerca, vigencia, puestos de servicio y cantidad de documentos.",
   permiso: PERMISOS_CORE.instalacionesRead,
+  portales: ["erp", "supervisor"],
   input: z.object({ id: uuidSchema }),
   output: instalacionSchema.extend({ puestos: z.array(puestoSchema), documentos: z.number() }),
   efecto: "lectura",

@@ -32,6 +32,8 @@ export type OpcionesPrueba = {
   usuario?: UsuarioContexto | null;
   actor?: Actor;
   conTenant?: boolean;
+  portal?: string | null;
+  portalesMembresia?: readonly string[];
   modulosActivos?: readonly string[];
   scopes?: readonly string[] | null;
   principal?: Principal | null;
@@ -64,7 +66,8 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
     actor,
     usuario,
     rol,
-    portal: "erp",
+    portal: o.portal === undefined ? "erp" : o.portal,
+    portalesMembresia: o.portalesMembresia ?? ["erp"],
     modulosActivos: o.modulosActivos ?? [],
     scopes: o.scopes ?? null,
     principal: o.principal ?? null,

@@ -65,6 +65,7 @@ export const documentoTiposList = defineCapability({
   descripcion:
     "Tipos de documento de la empresa por capa (empresa, cuenta, instalación, persona, puesto): obligatorios, con vencimiento, avisos y formatos.",
   permiso: PERMISOS_CORE.documentosRead,
+  portales: ["erp", "supervisor"],
   input: z.object({
     capa: z.enum(CAPAS_DOCUMENTO).optional(),
     incluirInactivos: z.boolean().default(false),

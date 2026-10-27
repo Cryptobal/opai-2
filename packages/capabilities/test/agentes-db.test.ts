@@ -56,6 +56,8 @@ describe.skipIf(!urlPropietario)("agentes en base real", () => {
       ...base,
       tenantId,
       actor: { tipo: "user", id: userId },
+      portal: "erp",
+      portalesMembresia: ["erp"],
       usuario: { id: userId, nombre: "Ana", email: "a@b.cl", platformRole: null },
     });
   const agente = () =>
