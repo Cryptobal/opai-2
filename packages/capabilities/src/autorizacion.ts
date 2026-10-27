@@ -41,8 +41,13 @@ export function restriccion(ctx: Contexto, c: Capacidad): Falla | null {
   // Sesiones: fail-closed. Plataforma conserva su autorización por platformRole.
   // Única excepción (t500u, encargo portal-sesión): aceptar la invitación crea la membresía;
   // su handler exige usuario autenticado, token y correo. No exime a otras internas.
-  if (ctx.actor.tipo === "user" && !ctx.principal && ctx.conTenant &&
-      c.modulo !== "platform" && c.id !== "core.invitations.accept") {
+  if (
+    ctx.actor.tipo === "user" &&
+    !ctx.principal &&
+    ctx.conTenant &&
+    c.modulo !== "platform" &&
+    c.id !== "core.invitations.accept"
+  ) {
     if (!ctx.portal || !ctx.portalesMembresia.includes(ctx.portal)) {
       return falla("FORBIDDEN", "No tienes acceso a este portal.");
     }

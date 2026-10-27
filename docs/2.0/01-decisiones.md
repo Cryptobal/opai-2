@@ -388,6 +388,39 @@ OPAI puede ofrecer además **automatizaciones alojadas** (por ejemplo, búsqueda
 
 **Consecuencias.** El modelo de `api_keys` gana `principal_tipo` y `principal_id` (Brief 02 lo deja preparado; Brief 03 lo activa para clientes con los portales). Las capacidades llevan `portales`. Un cliente puede operar con su propia IA sobre los datos de su proveedor: diferenciador comercial y barrera de salida.
 
+**Precisión de sesiones humanas (encargo portal-sesión, review 5661270514 del Revisor en #59).**
+En sesiones con tenant, la capa de capacidades valida el portal pedido tanto contra
+los portales de la membresía activa del usuario en ese tenant, cargada por el servidor,
+como contra `portalesDe(c)`. No une membresías de otros tenants ni consulta por llamada.
+Sin portal se rechaza por defecto: `null` o vacío **no** equivale a `erp`; las rutas ERP
+lo derivan en servidor. La API genérica con sesión sin portal no acepta uno del cliente.
+Plataforma, procesos del sistema y API keys conservan sus reglas.
+
+**Excepción explícita (adenda del encargo; autonomía de fase 1 dada por Carlos en t500u).**
+Solo `core.invitations.accept` queda fuera de la comprobación de portales de membresía,
+porque crea esa membresía; su handler sigue exigiendo usuario autenticado, token y correo
+correcto. No es una excepción genérica para capacidades internas. La fuente disponible
+es la adenda, que referencia «23:42 DECISIÓN portal-sesión»; el archivo referido
+`encargos/nucleo-cierre.md` no está en este worktree.
+
+**Catálogo del portal Supervisor (decisión del operador, 27-oct 00:55, autoridad
+delegada por Carlos; resuelve el bloqueo anterior).** Se declaran `portales: ["erp",
+"supervisor"]`, exactamente, en las capacidades que el código de
+`apps/web/app/(supervisor)` ya llama hoy en `main`: siete de lectura
+(`core.documentos.matriz`, `core.instalaciones.list`, `core.instalaciones.get`,
+`core.contactos.list`, `core.personas.get`, `core.documentos.list`,
+`core.documento_tipos.list`) y cuatro de escritura que esas pantallas construyeron
+para el supervisor —no una reutilización genérica— según el propio código:
+`core.documentos.pedir_renovacion` (componente `boton-pedir.tsx`, exclusivo de
+`supervisor/_componentes`) y el flujo de subida que `hoja-subir.tsx`/`subir.ts`
+documentan como "Supervisor en terreno" (`core.documentos.iniciar_subida`,
+`core.documentos.confirmar_subida`, `core.documentos.update`). Ninguna capacidad
+que esas pantallas no llamen se declaró, y ninguna de las cuatro escrituras gana
+permiso o alcance nuevo: `documentos.manage` y el alcance B3 siguen exigidos sin
+cambios; antes del fail-closed de esta misma decisión ya eran ejecutables desde
+la sesión del supervisor con ese permiso. Detalle y lista completa de archivos
+revisados en `briefs/ENCARGO-portal-sesion.md`.
+
 ---
 
 ## ADR-034 · Principios agénticos operativos

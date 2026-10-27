@@ -39,6 +39,8 @@ describe.skipIf(!urlPropietario)("alcance del supervisor en base real (B3)", () 
   const servicios = { almacenamiento: almacenamientoEnMemoria().almacenamiento };
   const ctxOwner = () =>
     mod.crearContexto({ tenantId, actor: { tipo: "system" }, rol: "owner", medidor });
+  // Escenario de alcance por filas: rol supervisor CON ERP, ejecutando capacidades ERP.
+  // El portal Supervisor sin ERP tiene cobertura separada en portal-sesion(-db).test.ts.
   const ctxSup = (alcance: Alcance | null) =>
     mod.crearContexto({
       tenantId,
