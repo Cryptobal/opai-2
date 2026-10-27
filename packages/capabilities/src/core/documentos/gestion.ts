@@ -111,6 +111,7 @@ export const documentosUrlDescarga = defineCapability({
     if (!puedeVerCumplimiento(ctx) && (await esDocCumplimiento(ctx, d.id)))
       throw noEncontrado("El documento");
     const url = await ctx.servicios.almacenamiento.urlDescarga(d.storageKey, d.nombre, 300);
+    // La URL ya se emitió antes de medirla: se registra siempre (yaIncurrido), nunca se pierde.
     await ctx.medidor
       .registrar({
         ...consumoBase(ctx, "core"),
@@ -119,6 +120,7 @@ export const documentosUrlDescarga = defineCapability({
         cantidad: 1,
         referenciaTipo: "documento",
         referenciaId: d.id,
+        yaIncurrido: true,
       })
       .catch(() => undefined);
     return {

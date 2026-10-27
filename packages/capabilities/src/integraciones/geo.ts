@@ -19,6 +19,7 @@ export async function geoDe(ctx: Contexto, modulo = "core") {
   const cred = await credencialDe(ctx, "google_maps");
   if (!cred) return null;
   const geo = geoGoogle(cred.valor);
+  // Google ya cobró la llamada antes de medirla: se registra siempre (yaIncurrido), nunca se pierde.
   const medir = (recurso: string, unidad = "consulta") =>
     ctx.medidor
       .registrar({
@@ -27,6 +28,7 @@ export async function geoDe(ctx: Contexto, modulo = "core") {
         unidad,
         cantidad: 1,
         sinCosto: cred.modalidad === "propia",
+        yaIncurrido: true,
       })
       .catch(() => undefined);
   // La falla de Google llega a la pantalla y a los agentes con su estado y mensaje (nunca la clave).
