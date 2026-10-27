@@ -10,9 +10,8 @@ import {
   verificarCodigoRespaldo,
   verificarSegundoFactor,
 } from "@opai/auth";
-import { qrSvg } from "@opai/ds";
-
 import { destinoSeguro } from "@/app/(auth)/destino";
+import { qrSvg } from "@/lib/qr";
 
 /** Aviso genérico de pausa, igual que el del login (no revela intentos restantes). */
 const PAUSA = {
@@ -56,16 +55,16 @@ export async function accionVerificar(
 // ----- Enrolamiento (en sesión): paso 1 clave + paso 2 código -----
 
 export type InicioMfa =
-  | { ok: true; svg: string; codigos: string[] }
+  | { ok: true; svg: string; secret: string; codigos: string[] }
   | { ok: false; error: string };
 
-/** Paso 1: valida la contraseña y devuelve el QR (SVG) y los códigos de respaldo (una sola vez). */
+/** Paso 1: valida la contraseña y devuelve el QR (SVG), la clave manual y los códigos de respaldo. */
 export async function accionIniciarMfa(_previo: InicioMfa | null, form: FormData): Promise<InicioMfa> {
   await requireSession();
   const password = String(form.get("password") ?? "");
   const r = await iniciarSegundoFactor(password);
   if (!r.ok) return { ok: false, error: r.mensaje };
-  return { ok: true, svg: qrSvg(r.totpURI), codigos: r.backupCodes };
+  return { ok: true, svg: qrSvg(r.totpURI), secret: r.secret, codigos: r.backupCodes };
 }
 
 export type ConfirmaMfa = { ok: true } | { ok: false; error: string };

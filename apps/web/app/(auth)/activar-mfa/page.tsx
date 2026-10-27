@@ -1,4 +1,7 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
+
+import { Loading } from "@opai/ds";
 
 import { identidadActual } from "@/lib/servidor";
 
@@ -14,10 +17,18 @@ type Props = { searchParams: Promise<Record<string, string | string[] | undefine
  * lo exige y la cuenta aún no lo tiene (owner/admin y plataforma): el gate de `PaginaPortal` manda aquí
  * antes de entrar a cualquier portal. Requiere sesión; si ya está activo, sigue al destino.
  */
-export default async function ActivarMfaPage({ searchParams }: Props) {
+async function Contenido({ searchParams }: Props) {
   const identidad = await identidadActual();
   const destino = destinoSeguro((await searchParams).next);
   if (!identidad) redirect(`/login?next=${encodeURIComponent("/activar-mfa")}`);
   if (identidad.mfaActiva) redirect(destino);
   return <ActivarMfa destino={destino} />;
+}
+
+export default function ActivarMfaPage(props: Props) {
+  return (
+    <Suspense fallback={<Loading variante="formulario" />}>
+      <Contenido {...props} />
+    </Suspense>
+  );
 }

@@ -56,6 +56,12 @@ export function ActivarMfa({ destino }: { destino?: string }) {
         <div className="flex flex-col items-center gap-3">
           <CodigoQr svg={inicio.svg} />
           <p className="text-center text-sm text-fg-muted">
+            ¿No puedes escanear? Ingresa esta clave en tu app:{" "}
+            <span className="font-mono text-fg" data-mfa-secret>
+              {inicio.secret}
+            </span>
+          </p>
+          <p className="text-center text-sm text-fg-muted">
             Guarda estos códigos de respaldo en un lugar seguro. Te dejan entrar si pierdes el
             autenticador y no los verás de nuevo.
           </p>

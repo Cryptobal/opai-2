@@ -55,11 +55,16 @@ export function pideSegundoFactor(respuesta: unknown): boolean {
  */
 export async function iniciarSegundoFactor(
   password: string,
-): Promise<{ ok: true; totpURI: string; backupCodes: string[] } | { ok: false; mensaje: string }> {
+): Promise<
+  | { ok: true; totpURI: string; secret: string; backupCodes: string[] }
+  | { ok: false; mensaje: string }
+> {
   try {
     const r = await auth.api.enableTwoFactor({ body: { password }, headers: await headers() });
     if (r.method !== "totp") return { ok: false, mensaje: "No se pudo iniciar el segundo factor." };
-    return { ok: true, totpURI: r.totpURI, backupCodes: r.backupCodes };
+    // La clave en base32 (para quien no puede escanear el QR) viaja en el parámetro `secret` del URI.
+    const secret = new URL(r.totpURI).searchParams.get("secret") ?? "";
+    return { ok: true, totpURI: r.totpURI, secret, backupCodes: r.backupCodes };
   } catch (error) {
     if (codigoDe(error) === "INVALID_PASSWORD") {
       return { ok: false, mensaje: "La contraseña no es correcta." };

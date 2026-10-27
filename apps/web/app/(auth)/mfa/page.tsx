@@ -1,3 +1,7 @@
+import { Suspense } from "react";
+
+import { Loading } from "@opai/ds";
+
 import { destinoSeguro } from "../destino";
 import { FormularioVerificar } from "./formulario-verificar";
 
@@ -10,7 +14,15 @@ type Props = { searchParams: Promise<Record<string, string | string[] | undefine
  * cuando la cuenta tiene el segundo factor activo; el desafío viaja en la cookie `opai.*` que fijó el
  * plugin. No requiere sesión todavía: la sesión se crea al verificar el código.
  */
-export default async function VerificarMfa({ searchParams }: Props) {
+async function Contenido({ searchParams }: Props) {
   const { next } = await searchParams;
   return <FormularioVerificar destino={destinoSeguro(next)} />;
+}
+
+export default function VerificarMfa(props: Props) {
+  return (
+    <Suspense fallback={<Loading variante="formulario" />}>
+      <Contenido {...props} />
+    </Suspense>
+  );
 }
