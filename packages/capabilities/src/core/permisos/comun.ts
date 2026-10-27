@@ -75,7 +75,12 @@ export function expandirPermisos(permisos: readonly string[]): string[] {
 export function validarConcedibles(ctx: Contexto, permisos: readonly string[]): void {
   const noConcedibles = permisosNoConcedibles((p) => ctx.autorizar(p), permisos, catalogoPermisos());
   if (noConcedibles.length) {
-    throw prohibido(`No puedes conceder permisos que tú no tienes: ${[...new Set(noConcedibles)].join(", ")}.`);
+    const ids = [...new Set(noConcedibles)];
+    // Mensaje con los ids y, además, la lista estructurada en los datos del error para que la UI la
+    // traduzca a nombres de permiso (A10/A11) sin parsear el texto.
+    throw prohibido(`No puedes conceder permisos que tú no tienes: ${ids.join(", ")}.`, {
+      permisos: ids,
+    });
   }
 }
 

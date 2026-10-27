@@ -1,6 +1,5 @@
-import { esRol, tienePermiso } from "@opai/domain";
-
 import type { Contadores } from "@/lib/navegacion";
+import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
 
 import { seccionModulo } from "./seccion-modulo";
@@ -8,12 +7,13 @@ import { SECCIONES, type Seccion } from "./secciones";
 
 type Modulo = { id: string; nombre: string; estado: string | null };
 
-/** Índice visible para el usuario: ámbitos según su rol y módulos activos con ajustes propios. */
+/** Índice visible para el usuario: ámbitos según sus permisos efectivos y módulos con ajustes propios. */
 export async function cargarIndice() {
   const identidad = await requerirIdentidad("/configuracion");
   const rol = identidad.actual?.rol;
-  const puede = (p: string | null) =>
-    p === null || Boolean(rol && esRol(rol) && tienePermiso(rol, p));
+  // Permisos efectivos (ADR-022): rol personalizado y excepciones, no solo el rol base (QA 1.1).
+  const permitido = puedeDeIdentidad(identidad);
+  const puede = (p: string | null) => p === null || permitido(p);
   const [mods, esquema, n] = await Promise.all([
     ejecutarComoUsuario<Modulo[]>("erp", "core.modules.list"),
     ejecutarComoUsuario<{ modulo: string }[]>("erp", "core.config.schema", {}),
@@ -30,6 +30,8 @@ export async function cargarIndice() {
     nombre: identidad.usuario.nombre,
     empresa: identidad.actual?.tenant.nombre ?? "",
     rol: rol ?? null,
+    // Acceso efectivo para que las páginas calculen sus `puede*` (ADR-022) sin volver a leerlo.
+    acceso: identidad.acceso,
   };
 }
 
