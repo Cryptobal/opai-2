@@ -30,6 +30,10 @@ function identidad(
     membresias: actual ? [actual] : [],
     modulosActivos: [],
     acceso: { permisosRol: null, excepciones: [], instalaciones: null },
+    // Ajeno al acceso de plataforma que prueba este archivo: con MFA ya resuelto no entra al gate de
+    // NÚCLEO-F (/activar-mfa o /mfa), que tiene sus propios tests.
+    mfaActiva: true,
+    mfaVerificada: true,
   };
 }
 
