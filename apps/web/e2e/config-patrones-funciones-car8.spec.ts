@@ -9,9 +9,13 @@ import { expect, type Page, test } from "@playwright/test";
 const email = process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl";
 const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
 const urlTest = process.env["DATABASE_URL_TEST"] ?? "";
-const urlDueño = /@(localhost|127\.0\.0\.1)[:/]/.test(urlTest)
-  ? urlTest.replace(/\/[^/]+$/, "/opai_e2e")
-  : "";
+const urlApp = process.env["DATABASE_URL"] ?? "";
+const esLocal = (u: string) => /@(localhost|127\.0\.0\.1)[:/]/.test(u);
+// Siembra contra la base local opai_e2e. En el gate local se usa el rol propietario de
+// DATABASE_URL_TEST; en el job e2e del CI (sin DATABASE_URL_TEST) se cae a DATABASE_URL (opai_app),
+// fijando app.tenant_id para que la RLS deje insertar, igual que lo hace la app.
+const urlDueño = esLocal(urlTest) ? urlTest.replace(/\/[^/]+$/, "/opai_e2e") : "";
+const urlSiembra = urlDueño || (esLocal(urlApp) ? urlApp : "");
 
 async function entrar(page: Page) {
   await page.goto("/login");
@@ -25,7 +29,9 @@ async function entrar(page: Page) {
 
 /** Asegura un patrón 4×4 en uso y ≥1 función en gard (para EN_USO y la pestaña Funciones). Idempotente. */
 function sembrarUso(): void {
+  // Fija el tenant gard para que opai_app (CI) pueda insertar bajo RLS; inocuo para el rol propietario.
   const sql = `
+    SELECT set_config('app.tenant_id', (SELECT id::text FROM core.tenants WHERE slug = 'gard'), false);
     INSERT INTO core.funciones_puesto (id, tenant_id, nombre, activo, orden, created_at, updated_at)
     SELECT gen_random_uuid(), t.id, f.nombre, true, f.orden, now(), now()
     FROM core.tenants t
@@ -48,7 +54,7 @@ function sembrarUso(): void {
       60, false, now(), now()
     FROM inst
     ON CONFLICT (tenant_id, instalacion_id, nombre) DO NOTHING;`;
-  execFileSync("psql", [urlDueño, "-X", "-A", "-t", "-c", sql], { encoding: "utf8" });
+  execFileSync("psql", [urlSiembra, "-X", "-A", "-t", "-c", sql], { encoding: "utf8" });
 }
 
 const sinDesborde = (page: Page) =>
@@ -69,7 +75,7 @@ test.setTimeout(180_000);
 
 test.describe("CAR-8 · Configuración de patrones y funciones (DS 2.0)", () => {
   test.skip(!password, "Falta SEED_OWNER_PASSWORD o E2E_PASSWORD");
-  test.skip(!urlDueño, "Necesita DATABASE_URL_TEST de una base local (opai_e2e)");
+  test.skip(!urlSiembra, "Necesita una base local (DATABASE_URL_TEST o DATABASE_URL sobre opai_e2e)");
   test.beforeAll(() => sembrarUso());
 
   test("patrones y funciones: se ven, sin desborde, tokens 2.0, y la hoja en uso bloquea la forma", async ({
