@@ -2,7 +2,7 @@ import { headers } from "next/headers";
 import { Suspense } from "react";
 
 import { slugDeComprobante } from "@opai/capabilities";
-import { forTenant, globales, verificarEslabon } from "@opai/db";
+import { forTenant, tenantPorSlug, verificarEslabon } from "@opai/db";
 import { Alerta, AuthCard, Loading, Pares } from "@opai/ds";
 
 import { BotonReintentar } from "@/app/_components/boton-reintentar";
@@ -15,7 +15,7 @@ type Props = { params: Promise<{ token: string }> };
 async function buscar(token: string) {
   const slug = slugDeComprobante(token);
   if (!slug) return null;
-  const tenant = await globales().tenant.findUnique({ where: { slug }, select: { id: true } });
+  const tenant = await tenantPorSlug(slug);
   if (!tenant) return null;
   const c = await forTenant(tenant.id).comprobante.findUnique({ where: { token } });
   if (!c) return null;

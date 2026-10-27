@@ -29,7 +29,7 @@ export const platformTenantsList = defineCapability({
   dryRun: false,
   async handler(ctx) {
     const p = requierePlataforma(ctx);
-    const tenants = await p.globales.tenant.findMany({ orderBy: { nombre: "asc" } });
+    const tenants = await p.globales.listarTenants();
     // Una consulta por tenant: nunca cross-tenant en una sola query.
     return porLotes(tenants, async (t) => {
       const db = p.paraTenant(t.id);

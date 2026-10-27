@@ -8,7 +8,7 @@ import {
   tienePermisoEfectivo,
   tienePermisoPlataforma,
 } from "@opai/domain";
-import { enTransaccion, forTenant, globales } from "@opai/db";
+import { accesoPlataforma, enTransaccion, forTenant } from "@opai/db";
 import { almacenamientoDelEntorno, mailerDelEntorno } from "@opai/integrations";
 
 import { idempotenciaSobre } from "./idempotencia";
@@ -157,7 +157,7 @@ export function crearContexto(params: ParametrosContexto): Contexto {
     plataforma:
       usuario?.platformRole && params.actor.tipo !== "agent"
         ? {
-            globales: globales(),
+            globales: accesoPlataforma(),
             paraTenant: (id: string) => forTenant(id),
             transaccionPara: (id, fn) => enTransaccion(id, fn),
           }

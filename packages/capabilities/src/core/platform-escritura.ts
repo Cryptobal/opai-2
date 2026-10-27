@@ -55,7 +55,7 @@ export const platformTenantsCreate = defineCapability({
   tenantObjetivo: (_input, output) => output?.tenantId ?? undefined,
   async handler(ctx, input, { dryRun }) {
     const p = requierePlataforma(ctx);
-    const existente = await p.globales.tenant.findUnique({ where: { slug: input.slug } });
+    const existente = await p.globales.tenantPorSlug(input.slug);
     if (existente && !input.adoptarExistente) {
       throw conflicto(
         `Ya existe la empresa "${existente.nombre}" con el slug "${input.slug}". Puedes usar la existente.`,
@@ -75,14 +75,12 @@ export const platformTenantsCreate = defineCapability({
     }
     const tenant =
       existente ??
-      (await p.globales.tenant.create({
-        data: {
-          slug: input.slug,
-          nombre: input.nombre,
-          vertical: input.vertical,
-          timezone: input.timezone,
-          estado: "trial",
-        },
+      (await p.globales.crearTenant({
+        slug: input.slug,
+        nombre: input.nombre,
+        vertical: input.vertical,
+        timezone: input.timezone,
+        estado: "trial",
       }));
     // Catálogo base de la vertical (cargos con estructura, tipos de documento). Idempotente.
     await sembrarCatalogo(p.paraTenant(tenant.id), tenant.id, input.vertical);

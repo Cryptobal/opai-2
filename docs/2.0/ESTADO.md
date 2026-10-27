@@ -74,6 +74,18 @@ No se declara CI, QA remota ni aprobación del head nuevo; Neon sigue sin modifi
 
 ## Hecho
 
+- **NÚCLEO-G2 · FORCE RLS y globales acotado (OpenCode / openai/gpt-6.1-sol).**
+  Rama `fix/force-rls`, apilada sobre #49 según la adenda del encargo; sin cambio
+  de plan. Migración aditiva `20261028160000_force_rls`, pendiente de Carlos en
+  Neon. Se elimina el acceso global por delegados; lecturas de identidad mínimas
+  y operaciones de plataforma con nombre. Test de ENABLE + FORCE + política en
+  todos los esquemas y aislamiento del dueño NOBYPASSRLS. Adaptaciones técnicas
+  del constructor: scripts con `row_security=off` para fallar cerrados si falta
+  un rol de mantenimiento explícito BYPASSRLS; triggers de referencias/patrones
+  SECURITY INVOKER para conservar el tenant del invocador. No se cambia ningún rol
+  remoto ni se atribuyen decisiones adicionales a Carlos. Auditoría, CA, riesgos
+  y verificación en `briefs/NUCLEO-G2-force-rls.md`.
+
 > **Seguimiento QA PR #49 (OpenCode):** separación de filtros de Puestos e Instalaciones y conservación de filtros al volver, según el encargo. Adaptación técnica al panel dividido: Función y la columna Patrón se ocultan hasta 2xl, con el patrón bajo el nombre del puesto; la vista de ancho completo del diseño queda parcial. Hay una comprobación e2e de visibilidad de Estado a 1024 y 1280. Sin migraciones nuevas en el seguimiento; `rama-neon` en verde en el head 25941e8 (27-oct-2026, 10:24 CLT).
 
 > **Corrección de presentación PR #49 (OpenCode):** la celda Puesto permite partir nombres y patrones largos para conservar visible Estado en el panel dividido. Adaptación técnica prevista en el encargo, sin decisión de negocio nueva; siguen las limitaciones parciales documentadas en el brief.

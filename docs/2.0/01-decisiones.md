@@ -24,6 +24,20 @@ Una entrada por decisión. Las decisiones no se editan: si cambian, se agrega un
 
 **Consecuencias.** Ninguna consulta de negocio usa el cliente Prisma crudo fuera de `packages/db`. Test obligatorio de aislamiento (dos tenants, cero fuga, cero filas sin tenant).
 
+**Nota de implementación NÚCLEO-G2 (encargo t457u y adenda de apilado).**
+`20261028160000_force_rls` fuerza RLS en todas las tablas existentes con
+`tenant_isolation`, incluidos módulos. Las tablas futuras con `tenant_id` deben
+tener ENABLE + FORCE + esa política; `test:db` exige una base real. Se retira
+`globales()` público: identidad y tenant por funciones con selección fija;
+Plataforma recibe operaciones con nombre, no delegados Prisma. Los scripts
+cross-tenant requieren un rol de mantenimiento BYPASSRLS explícito (o el
+superusuario local de pruebas), nunca `opai_app`; ser dueño ya no basta. No se
+concede BYPASSRLS ni se modifica Neon. Los tres triggers de referencias/patrones
+leen con los permisos del invocador y el tenant de su transacción, sin depender
+del bypass del dueño. Son adaptaciones técnicas de OpenCode / openai/gpt-6.1-sol
+para este encargo, no decisiones nuevas de Carlos. Runbook y criterios en
+`briefs/NUCLEO-G2-force-rls.md`.
+
 ---
 
 ## ADR-003 · Módulos de primera clase y entitlements por tenant

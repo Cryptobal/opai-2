@@ -1,4 +1,4 @@
-import { forTenant, forUser, globales } from "@opai/db";
+import { forTenant, forUser, tenantPorSlug, usuarioPorId } from "@opai/db";
 import type { Excepcion } from "@opai/domain";
 
 /** Membresía con su tenant, tal como se lista para elegir empresa. */
@@ -70,8 +70,8 @@ export const fuentesReales: Fuentes = {
     });
     return filas.map((f) => f.moduloId);
   },
-  usuario: (userId) => globales().user.findUnique({ where: { id: userId } }),
-  tenantPorSlug: (slug) => globales().tenant.findUnique({ where: { slug } }),
+  usuario: usuarioPorId,
+  tenantPorSlug,
   keyPorHash: (tenantId, hash) =>
     forTenant(tenantId).apiKey.findUnique({ where: { hash }, include: { autonomia: true } }),
   membresia: (tenantId, userId) =>

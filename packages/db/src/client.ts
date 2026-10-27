@@ -37,7 +37,12 @@ function crearCliente(variable: "DATABASE_URL" | "DATABASE_URL_MIGRATE"): Prisma
   if (!url) {
     throw new Error(`Falta la variable de entorno ${variable}.`);
   }
-  const adapter = new PrismaPg({ connectionString: url });
+  // FORCE también afecta al dueño. Los scripts cross-tenant necesitan un rol explícito
+  // BYPASSRLS/superusuario; row_security=off NO salta RLS: falla en vez de omitir filas.
+  const adapter = new PrismaPg({
+    connectionString: url,
+    ...(variable === "DATABASE_URL_MIGRATE" ? { options: "-c row_security=off" } : {}),
+  });
   return new PrismaClient({ adapter });
 }
 
@@ -52,7 +57,8 @@ export function clienteApp(): ClienteApp {
 }
 
 /**
- * Cliente con el rol propietario (DATABASE_URL_MIGRATE). Salta la RLS.
+ * Cliente de scripts (DATABASE_URL_MIGRATE). Con FORCE el dueño ya no salta RLS:
+ * requiere un rol de mantenimiento BYPASSRLS explícito para datos cross-tenant.
  * SOLO para migraciones, scripts de importación y seeds ejecutados a mano.
  * Nunca se usa desde apps/web ni desde módulos; la variable no existe en Vercel.
  */
