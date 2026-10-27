@@ -42,6 +42,10 @@ export async function verificarAuditoria(
       const max = limite?.max ?? 0;
       const anterior = cabeza?.ultimoSeq ?? 0;
       const huellas = await huellasAuditoria(db, tenantId, anterior, max);
+      // El prefijo ya verificado es un anclaje, no solo una optimización. Una cadena
+      // sustituta válida (truncado + append) nunca puede reemplazar ese testimonio.
+      const prefijoAlterado =
+        cabeza?.huellaPrefijo != null && cabeza.huellaPrefijo !== huellas.prefijo;
       const incremental =
         cabeza?.verificacionOk === true &&
         max >= anterior &&
@@ -63,6 +67,9 @@ export async function verificarAuditoria(
             : e.canonHistorico;
           if (
             e.seq !== esperado ||
+            // Los eventos nuevos se escriben desde Date (milisegundos). Prisma
+            // trunca microsegundos al leer: contrastar también el valor SQL real.
+            (e.hashCanon?.startsWith("{") && !e.fechaExacta) ||
             canon !== e.hashCanon ||
             e.hashAnterior !== previo ||
             (await hashEncadenado(previo, e.hashCanon)) !== e.hash
@@ -76,6 +83,7 @@ export async function verificarAuditoria(
         if (primeraRota !== null) break;
       }
       if (primeraRota === null && (max < anterior || limite?.sinCadena)) primeraRota = esperado;
+      if (primeraRota === null && prefijoAlterado) primeraRota = 1;
       const resultado = { ok: primeraRota === null, ultimoSeq: esperado - 1, primeraRota };
       comprobar();
       return { cabeza, resultado, previo, huella: huellas.total };
@@ -100,9 +108,9 @@ export async function verificarAuditoria(
       const datos = {
         verificadaEn: new Date(),
         verificacionOk: resultado.ok,
-        ultimoSeq: Math.max(resultado.ultimoSeq, cabeza?.ultimoSeq ?? 0),
-        ultimoHash: resultado.ok ? foto.previo : null,
-        huellaPrefijo: resultado.ok ? foto.huella : null,
+        ultimoSeq: resultado.ok ? resultado.ultimoSeq : (cabeza?.ultimoSeq ?? 0),
+        ultimoHash: resultado.ok ? foto.previo : (cabeza?.ultimoHash ?? null),
+        huellaPrefijo: resultado.ok ? foto.huella : (cabeza?.huellaPrefijo ?? null),
         revision: (cabeza?.revision ?? 0) + 1,
       };
       if (actual) {

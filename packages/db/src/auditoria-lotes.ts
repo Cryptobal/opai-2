@@ -9,8 +9,14 @@ export async function loteAuditoria(db: TenantTx, tenantId: string, desde: numbe
     orderBy: { seq: "asc" },
     take: 1000,
   });
-  const canones = await db.$queryRaw<{ id: string; canonHistorico: string }[]>`
-    SELECT id,
+  const canones = await db.$queryRaw<
+    {
+      id: string;
+      canonHistorico: string;
+      fechaExacta: boolean;
+    }[]
+  >`
+    SELECT id, created_at = date_trunc('milliseconds', created_at) AS "fechaExacta",
       jsonb_build_array(tenant_id::text, seq, actor_type, actor_id, via_user_id, capability,
         entity_type, entity_id,
         to_char(created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"'),
@@ -19,8 +25,12 @@ export async function loteAuditoria(db: TenantTx, tenantId: string, desde: numbe
     FROM core.audit_events WHERE tenant_id = ${tenantId}::uuid AND seq >= ${desde} AND seq <= ${hasta}
     ORDER BY seq LIMIT 1000
   `;
-  const porId = new Map(canones.map((fila) => [fila.id, fila.canonHistorico]));
-  return filas.map((fila) => ({ ...fila, canonHistorico: porId.get(fila.id) ?? "" }));
+  const porId = new Map(canones.map((fila) => [fila.id, fila]));
+  return filas.map((fila) => ({
+    ...fila,
+    canonHistorico: porId.get(fila.id)?.canonHistorico ?? "",
+    fechaExacta: porId.get(fila.id)?.fechaExacta ?? false,
+  }));
 }
 
 /** Huella del contenido actual, incluidos payload, microsegundos y hashes; agregados <=1000 filas. */

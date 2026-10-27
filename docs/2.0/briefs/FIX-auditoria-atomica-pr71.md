@@ -77,9 +77,19 @@ Implementación de OpenCode / openai/gpt-6.1-sol, sin decisiones de negocio nuev
   todas las columnas actuales, se calcula con SHA-256 SQL en grupos fijos de hasta
   1.000 y se combina en orden en aplicación. Un cambio del prefijo obliga a validar
   desde génesis. **Sigue existiendo un escaneo SQL O(N) del contenido** para detectar
-  alteraciones antiguas en cada pasada; no se promete coste O(solo cola), ni se
-  mantiene lock de escritura en ese escaneo. Memoria por agregado acotada; un timeout
-  es trabajo fallido, no verificación exitosa.
+   alteraciones antiguas en cada pasada; no se promete coste O(solo cola), ni se
+   mantiene lock de escritura en ese escaneo. Memoria por agregado acotada; un timeout
+   es trabajo fallido, no verificación exitosa.
+- **Anclaje durable (autorrevisión de continuidad):** una huella distinta del prefijo
+  ya verificado siempre invalida el resultado, aunque el reescaneo encuentre una
+  cadena sustituta internamente válida. Los fallos conservan seq, hash y huella del
+  último checkpoint válido, para no normalizar la alteración en la siguiente pasada.
+  Tests reales de truncado → append y alteración de un microsegundo, repetidos.
+  Si solo la huella permite detectar el cambio, `primeraRota:1` es conservador: no
+  identifica la fila exacta. Detalle técnico decidido por el constructor, no por Carlos.
+  Para eventos nuevos, el lote SQL exige además precisión de milisegundos (la que
+  escribe `Date`): detecta microsegundos alterados también antes de la primera
+  verificación y en la cola incremental, sin perderlos por la conversión de Prisma.
 - **N2:** fase 1 libera el lock de DDL antes del backfill. Un UPDATE por lote de
   hasta 1.000 filas, con CTE recursivo para la dependencia de hashes, y COMMIT por
   lote. Advisory lock solo del tenant del lote, compatible con el append nuevo;
@@ -168,28 +178,34 @@ los e2e existentes de Configuración/Plataforma y Maestros afectados por auditor
 Los resultados finales del gate y cualquier criterio parcial quedan en
 `PR-BODY.md`, sin commitearlo.
 
-## Cierre local bloqueado de esta ronda
+## Cierre local de continuidad (27-oct-2026)
 
-Se incorporó main `3b1b7b9` (#70) con merge normal `862b924`, conservando el trabajo
-con stash -u y recuperándolo después (la copia de respaldo del stash se mantiene).
-Autorrevisión independiente sin bloqueantes sobre esa integración: conserva
+Se conservan los commits de la sesión anterior (`862b924`, `a540a43`) y su stash de
+respaldo. El worktree estaba limpio al comenzar. Se incorpora main `5c18a92` (#65)
+con merge normal `b9f84a7`; el conflicto de tipos conserva tanto EstadoMfa como
+VerificacionAuditoria. Sin rebase, reescritura de historia ni cambios de otras ramas.
+
+Autorrevisión independiente: se corrigieron sustitución del prefijo ya verificado
+y pérdida de precisión temporal; pasada final sin bloqueantes. Mantiene MFA,
 prepago/presupuesto atómico, plataforma denegada a agentes y auditoría atómica.
-El gate posterior pasó: typecheck, lint, 937 tests, test:db 91+96+6, build y presupuesto.
+No equivale a aprobación formal del Revisor sobre el nuevo head.
 
-**CA parcial: e2e y entrega remota.** Los cinco specs de Configuración, Plataforma
-y Maestros se intentaron antes de ese merge, en servidor propio del worktree en
-3171: 9 pasaron, 12 fallaron y 12 se omitieron por condiciones existentes de los
-specs. Primero falló la persistencia del tema en iPad; luego el servidor dev dejó
-de responder (ERR_CONNECTION_REFUSED). No se cambiaron ni omitieron pruebas nuevas.
-La repetición prevista con next start queda pendiente: el esquema de la base e2e
-sembrada no incluye los campos nuevos de cabeza y el acceso administrativo intentado
-fue denegado por el entorno. No se elude esa denegación ni se toca Neon. La consulta
-del PR por gh también fue denegada: cuerpo preparado solo en PR-BODY.md, no se
-afirma actualización remota. Por la regla del encargo, **no se hace push**.
+**CA locales completos:** A, B, C y review 3 conservados; N1, N2, N3 y ambos medios
+verificados con tests de BD; regresiones nuevas de anclaje y microsegundos en verde.
+Typecheck, lint, 786 tests unitarios, test:db 91+100+24, build y presupuesto verdes.
+Los unitarios se ejecutan sin DATABASE_URL_TEST y la BD aparte, como CI: lanzarlos
+juntos inicialmente produjo un deadlock entre migraciones paralelas de proyectos.
 
-Mientras terminaba el gate, origin/main avanzó a `5c18a92` (#65, MFA); queda pendiente
-incorporarlo, resolver cualquier nueva colisión de ADR y repetir el gate completo
-y los e2e antes de empujar. No se declara esta entrega terminada ni aprobada.
-Capturas generadas conservadas en `/tmp/opencode/pr71-capturas`; no se incorporan
-al commit. Logs del gate y e2e en `/tmp/opencode/pr71-final-gate.log` y
-`/tmp/opencode/pr71-e2e.log`.
+E2E completos de `configuracion-{plataforma,empresa,acceso}`, `plataforma` y `maestros`
+contra `next start` de este worktree en 3171, a 375/1024/1280: **21 pasaron, 12 omitidos
+por condiciones existentes, EXIT=0**. Dos corridas anteriores tuvieron un fallo cada
+una (contenido temporalmente oculto en Maestros desktop y TOTP rechazado); se repitió
+la suite completa sin alterar ni desactivar tests. El bloqueo e2e de la sesión
+anterior ya no impide la entrega local.
+
+Logs: `/tmp/opencode/pr71-continuacion-final-gate.log`,
+`pr71-continuacion-recheck.log` y `pr71-continuacion-e2e-final.log` en ese directorio.
+Capturas nuevas conservadas en `/tmp/opencode/pr71-continuacion-capturas.tar.gz`,
+fuera del commit. PR-BODY.md queda local y sin commit. CI, revisión del head y
+aplicación de migraciones/renovación de preview por infraestructura siguen pendientes;
+no se declara Neon modificado ni el PR integrado.

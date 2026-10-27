@@ -23,7 +23,13 @@ serialización del escaneo con append: foto REPEATABLE READ hasta max(seq), cano
 histórico SQL por lotes, avance incremental y lock breve solo para CAS por revisión
 de la cabeza. Una huella SHA-256 por lotes detecta cambios del prefijo verificado y
 dispara revisión desde génesis; este control sigue leyendo O(N) en SQL, sin bloquear
-escrituras. Presupuesto integral propio de 12 s (escaneo 9 s/SQL 8 s), inferior a
+escrituras. El anclaje previo se conserva también tras fallos: un prefijo cambiado
+nunca se acepta por ser una cadena sustituta válida (truncado seguido de append o
+alteración de microsegundos). Si solo lo detecta la huella, primeraRota es 1 como
+diagnóstico conservador. Corrección técnica del constructor en la autorrevisión.
+El lote SQL contrasta también la precisión temporal de los eventos nuevos, para
+detectar microsegundos alterados en la cola aún no verificada.
+Presupuesto integral propio de 12 s (escaneo 9 s/SQL 8 s), inferior a
 20 s por trabajo del runner; propagación de cancelación para impedir cabeza o
 alerta tardías. No olvida el máximo tras un borrado.
 Solo lo invoca el job; se retira `core.auditoria.verificar` de UI/API/MCP.
@@ -51,14 +57,16 @@ con SQL anterior debe recrearse por quien gestiona infraestructura; no se toca N
 desde este encargo. Las brechas conocidas de atomicidad global de plataforma y
 llamadas externas en transacciones siguen declaradas.
 
-**Validación local de esta ronda:** merge normal de #70 (`3b1b7b9`, merge `862b924`),
-stash recuperado y autorrevisión independiente sin bloqueantes. Typecheck, lint,
-937 tests, test:db 91+96+6, build y presupuesto en verde. Entrega **bloqueada, sin
-push**: la corrida e2e previa no quedó verde (tema en iPad y caída del servidor dev);
-no se pudo habilitar la actualización administrativa de la base e2e para repetirla,
-ni consultar/editar el PR con gh por permisos del entorno. PR-BODY.md queda local
-sin commit. Main avanzó luego con #65 (`5c18a92`): pendiente incorporarlo y repetir
-el gate y los e2e. No se declara CI, QA ni aprobación del head nuevo.
+**Validación local de continuidad:** se conservan los commits anteriores y se incorpora
+#65 (`5c18a92`) con merge normal `b9f84a7`, sin perder MFA ni auditoría. Autorrevisión
+independiente final sin bloqueantes tras corregir anclaje y precisión temporal.
+Typecheck, lint, 786 tests unitarios (BD separada), test:db 91+100+24, build y presupuesto
+en verde. E2E de Configuración, Plataforma y Maestros a 375/1024/1280: **21 pasaron y
+12 omitidos por condiciones preexistentes de los specs**, EXIT=0, sin cambiar pruebas.
+Se repitió la suite completa tras dos fallos transitorios (contenido oculto en Maestros
+desktop y TOTP rechazado). Servidor propio `next start` en 3171, nunca el 3000 ajeno.
+Logs y capturas en `/tmp/opencode/pr71-continuacion-*`. PR-BODY.md local sin commit.
+No se declara CI, QA remota ni aprobación del head nuevo; Neon sigue sin modificarse.
 
 ## Hecho
 
