@@ -3,24 +3,48 @@
 // a tenants es propia (Membership, con RLS) para que la segregación siga pasando por Postgres.
 
 model User {
-  id            String   @id @default(uuid(7)) @db.Uuid
-  name          String
-  email         String   @unique
-  emailVerified Boolean  @default(false) @map("email_verified")
-  image         String?
+  id               String   @id @default(uuid(7)) @db.Uuid
+  name             String
+  email            String   @unique
+  emailVerified    Boolean  @default(false) @map("email_verified")
+  image            String?
   /// "owner" | "support" | null — rol en la plataforma OPAI, no en un tenant (ADR-016).
-  platformRole  String?  @map("platform_role")
-  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  platformRole     String?  @map("platform_role")
+  /// Segundo factor activo (NÚCLEO-F). Lo fija el plugin twoFactor de Better Auth tras verificar.
+  twoFactorEnabled Boolean  @default(false) @map("two_factor_enabled")
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  sessions    Session[]
-  accounts    Account[]
-  memberships Membership[]
-  apiKeys     ApiKey[]
+  sessions           Session[]
+  accounts           Account[]
+  memberships        Membership[]
+  apiKeys            ApiKey[]
+  twoFactor          TwoFactor?
   /// Excepciones de permiso que este usuario fijó (A18/A19); se desligan si se elimina (SET NULL).
   excepcionesFijadas PermisoExcepcion[] @relation("excepcionesFijadas")
 
   @@map("users")
+  @@schema("core")
+}
+
+// Segundo factor (TOTP + códigos de respaldo) del plugin twoFactor de Better Auth (NÚCLEO-F).
+// Tabla de identidad como `users`: sin tenant_id ni RLS (la protege `opai_app` NOBYPASSRLS y el que
+// solo `@opai/auth` la toca; nunca se lee desde capacidades de negocio). `secret` y `backup_codes`
+// quedan cifrados por el plugin con `BETTER_AUTH_SECRET` (symmetricEncrypt): no se agrega ningún
+// secreto nuevo. `failed_verification_count` y `locked_until` son el bloqueo por cuenta del paso de
+// verificación (accountLockout del plugin). Una fila por usuario (user_id único).
+model TwoFactor {
+  id                      String    @id @default(uuid(7)) @db.Uuid
+  userId                  String    @unique @map("user_id") @db.Uuid
+  secret                  String
+  backupCodes             String    @map("backup_codes")
+  verified                Boolean   @default(true)
+  failedVerificationCount Int       @default(0) @map("failed_verification_count")
+  lockedUntil             DateTime? @map("locked_until") @db.Timestamptz(6)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("two_factor")
   @@schema("core")
 }
 
@@ -61,6 +85,8 @@ model Session {
   ipAddress String?  @map("ip_address")
   userAgent String?  @map("user_agent")
   userId    String   @map("user_id") @db.Uuid
+  /// Solo el servidor tras verificar TOTP/respaldo; nunca heredada de otra sesión ni del cliente.
+  mfaVerified Boolean @default(false) @map("mfa_verified")
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 

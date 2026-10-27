@@ -5,7 +5,8 @@ const estado = vi.hoisted(() => ({ identidad: null as Identidad | null, ejecutar
 vi.mock("react", () => ({ cache: <T>(fn: T) => fn }));
 vi.mock("next/headers", () => ({ cookies: async () => ({ get: () => undefined }) }));
 vi.mock("next/navigation", () => ({ redirect: vi.fn() }));
-vi.mock("@opai/auth", () => ({ getSession: async () => ({ user: {} }) }));
+vi.mock("@opai/auth", () => ({ getSession: async () => ({ user: {}, session: {} }) }));
+vi.mock("@/lib/mfa", () => ({ verificarMfaDe: async () => false, estadoMfaDe: async () => ({}) }));
 vi.mock("@opai/capabilities", () => ({ executeCapability: estado.ejecutar }));
 vi.mock("@/lib/registro", () => ({ asegurarRegistro: vi.fn() }));
 vi.mock("@/lib/metricas-navegacion", () => ({
@@ -22,6 +23,7 @@ beforeEach(() => {
   estado.ejecutar.mockReset().mockResolvedValue({ ok: true, data: {} });
   estado.identidad = {
     usuario: { id: "u", nombre: "U", email: "u@example.test", platformRole: null },
+    mfaActiva: false,
     actual: {
       id: "m",
       tenantId: "t",

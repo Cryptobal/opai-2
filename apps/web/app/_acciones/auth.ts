@@ -87,6 +87,9 @@ export async function accionEntrar(
         "Revisa los datos y vuelve a intentarlo. Tras varios intentos pausaremos el acceso unos minutos.",
     };
   }
+  if (r.segundoFactor) {
+    redirect(destino ? `/mfa?next=${encodeURIComponent(destinoSeguro(destino))}` : "/mfa");
+  }
   redirect(
     destino
       ? `/elegir-empresa?next=${encodeURIComponent(destinoSeguro(destino))}`

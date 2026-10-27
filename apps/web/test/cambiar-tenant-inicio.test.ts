@@ -32,6 +32,7 @@ beforeEach(() => {
   const actual = m("a", "erp");
   estado.identidad = {
     usuario: { id: "u", nombre: "U", email: "u@example.test", platformRole: null },
+    mfaActiva: false,
     actual,
     membresias: [actual, m("b", "supervisor")],
     modulosActivos: [],

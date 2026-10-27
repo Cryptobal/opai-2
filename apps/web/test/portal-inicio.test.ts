@@ -15,6 +15,7 @@ function identidad(portalInicio: string | null = null): Identidad {
   };
   return {
     usuario: { id: "u", nombre: "U", email: "u@example.test", platformRole: null },
+    mfaActiva: false,
     actual,
     membresias: [actual],
     modulosActivos: [],

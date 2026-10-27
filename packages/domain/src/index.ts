@@ -2,6 +2,7 @@ export * from "./bloqueo-login";
 export * from "./catalogos";
 export * from "./precios-base";
 export * from "./dinero";
+export * from "./mfa";
 export * from "./documentos";
 export * from "./comunicaciones";
 export * from "./permisos";

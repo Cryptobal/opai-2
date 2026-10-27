@@ -1,22 +1,13 @@
 import { expect, type Locator, type Page, test } from "@playwright/test";
+import { E2E_PASSWORD as password, entrar } from "./sesion";
 
 // CAR-12 (Brief 05, §14 CA1): la campana, el buscador y el botón de usuario mantienen tamaño y
 // posición idénticos al cambiar de vista, en las tres anchuras. Desde ADR-050 (reemplaza la D7) el
 // teléfono vuelve a tener «Buscar» en la barra superior y no en la inferior, y a 1280 el usuario va al
 // pie de la barra lateral (ShellPhone, ShellTablet y ShellDesktop).
-const email = process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl";
-const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
 
 test.use({ actionTimeout: 30_000 });
 test.setTimeout(180_000);
-
-async function entrar(page: Page) {
-  await page.goto("/login");
-  await page.getByLabel("Correo").fill(email);
-  await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
-  await page.getByRole("button", { name: "Entrar" }).click();
-  await page.waitForURL((url) => url.pathname === "/" || url.pathname === "/platform");
-}
 
 // Vistas del recorrido de CA1: lista, vista dentro de la lista, otra lista, hoja sobre la lista e Inicio.
 // «Nueva cuenta» abre una hoja (Sheet) modal: Radix deja la cabecera inerte (aria-hidden) mientras la
