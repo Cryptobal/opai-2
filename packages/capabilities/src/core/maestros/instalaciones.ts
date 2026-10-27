@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { listarInstalaciones } from "@opai/db";
 
 import { PERMISOS_CORE } from "@opai/domain";
 
@@ -6,11 +7,10 @@ import { defineCapability } from "../../define";
 import { noEncontrado } from "../../errores";
 import type { Contexto } from "../../types";
 import { uuidSchema } from "../esquemas";
-import { dondeInstalacion } from "./alcance";
-import { cursorDe, listaSchema, pagina } from "./comun";
+import { dondeInstalacion, instalacionesEnAlcance } from "./alcance";
+import { listaSchema, pagina } from "./comun";
 import { ESTADOS_INSTALACION, instalacionSchema, vistaInstalacion } from "./instalaciones-vista";
 import { puestoSchema, vistaPuesto } from "./puestos-vista";
-import { resumenInstalaciones } from "./resumenes";
 
 export async function instalacionDe(ctx: Contexto, id: string) {
   // findFirst (no findUnique) para aplicar el alcance por filas: fuera de alcance = no encontrada.
@@ -29,6 +29,7 @@ export async function nombresDeCuentas(ctx: Contexto, ids: string[]) {
 }
 
 export const instalacionesList = defineCapability({
+  auditarLectura: (s) => s.items.map((i) => i.id),
   id: "core.instalaciones.list",
   descripcion:
     "Lista las instalaciones (sitios donde se presta el servicio) con búsqueda por nombre o comuna y filtros por cuenta, estado y región. Paginada por cursor.",
@@ -46,38 +47,19 @@ export const instalacionesList = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
-    const q = input.q;
-    const filas = await ctx.db.instalacion.findMany({
-      where: {
-        AND: [dondeInstalacion(ctx)],
-        ...(input.incluirArchivadas ? {} : { archivadaEn: null }),
-        ...(input.cuentaId ? { cuentaId: input.cuentaId } : {}),
-        ...(input.estado ? { estado: input.estado } : {}),
-        ...(input.region ? { region: input.region } : {}),
-        ...(q
-          ? {
-              OR: [
-                { nombre: { contains: q, mode: "insensitive" as const } },
-                { comuna: { contains: q, mode: "insensitive" as const } },
-              ],
-            }
-          : {}),
-      },
-      orderBy: [{ nombre: "asc" }, { id: "asc" }],
-      take: input.limite + 1,
-      ...cursorDe(input.cursor),
-      // El nombre de la cuenta va en la misma consulta (include), no una aparte por página (ADR-045).
-      include: { cuenta: { select: { nombre: true } } },
-    });
-    const p = pagina(filas, input.limite);
-    const resumen = await resumenInstalaciones(
-      ctx,
-      p.items.map((i) => i.id),
+    const filas = await ctx.transaccion((tx) =>
+      listarInstalaciones(tx, {
+        ...input,
+        tenantId: ctx.tenantId!,
+        alcance: instalacionesEnAlcance(ctx),
+      }),
     );
+    const p = pagina(filas, input.limite);
     return {
       items: p.items.map((i) => ({
-        ...vistaInstalacion(i, i.cuenta?.nombre ?? null),
-        ...resumen(i.id),
+        ...vistaInstalacion(i, i.cuentaNombre),
+        puestos: i.puestos,
+        dotacion: i.dotacion,
       })),
       siguiente: p.siguiente,
     };
@@ -85,6 +67,7 @@ export const instalacionesList = defineCapability({
 });
 
 export const instalacionesGet = defineCapability({
+  auditarLectura: (s) => [s.id],
   id: "core.instalaciones.get",
   descripcion:
     "Ficha de una instalación: dirección y coordenadas, geocerca, vigencia, puestos de servicio y cantidad de documentos.",

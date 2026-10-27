@@ -76,6 +76,7 @@ export async function pendiente(ctx: Contexto, id: string) {
 }
 
 export const aprobacionesList = defineCapability({
+  auditarLectura: (s) => s.map((a) => a.id),
   id: "core.aprobaciones.list",
   descripcion:
     "Cola de aprobaciones de acciones irreversibles pedidas por agentes: pendientes primero, con resumen, agente y vencimiento; también el historial.",
@@ -92,6 +93,7 @@ export const aprobacionesList = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
+    if (ctx.alcance) throw prohibido("No tienes acceso a estas aprobaciones.");
     const filas = await ctx.db.aprobacion.findMany({
       where: {
         ...(input.estado ? { estado: input.estado } : {}),
@@ -112,6 +114,7 @@ export const aprobacionesList = defineCapability({
 });
 
 export const aprobacionesGet = defineCapability({
+  auditarLectura: (s) => [s.id],
   id: "core.aprobaciones.get",
   descripcion:
     "Una aprobación con su input completo, estado y, si se aprobó, el resultado de la ejecución. Los agentes la consultan para saber si su acción se hizo.",
@@ -121,6 +124,7 @@ export const aprobacionesGet = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
+    if (ctx.alcance) throw noEncontrado("La aprobación");
     const a = await ctx.db.aprobacion.findUnique({ where: { id: input.id } });
     const propia =
       (ctx.agente && a?.apiKeyId === ctx.agente.apiKeyId) ||

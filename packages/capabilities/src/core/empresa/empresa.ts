@@ -51,6 +51,7 @@ const vista = (p: Partial<Record<string, unknown>> | null) =>
   ) as Record<keyof typeof campos, string | null>;
 
 export const empresaGet = defineCapability({
+  auditarLectura: () => [], // Perfil identificado por tenantId, sin copiar RUT ni contactos.
   id: "core.empresa.get",
   descripcion:
     "Perfil legal y de contacto de la empresa: razón social, RUT, giro, dirección, representante legal y correos por área.",

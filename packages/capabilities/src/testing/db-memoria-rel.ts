@@ -32,6 +32,7 @@ export const RELACIONES: Record<string, Record<string, Rel>> = {
     patron: { tabla: "patronTurno", clave: "patronId" },
     funcion: { tabla: "funcionPuesto", clave: "funcionId" },
   },
+  documento: { vinculos: { tabla: "documentoVinculo", clave: "documentoId", muchos: true } },
 };
 
 type Tabla = (nombre: string) => Fila[];

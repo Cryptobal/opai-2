@@ -16,6 +16,7 @@ const resultado = z.object({
 const contiene = (q: string) => ({ contains: q, mode: "insensitive" as const });
 
 export const buscar = defineCapability({
+  auditarLectura: (s) => [...s.cuentas, ...s.personas, ...s.contactos].map((r) => r.id),
   id: "core.buscar",
   descripcion:
     "Búsqueda global (paleta ⌘K y agentes): cuentas, instalaciones, personas y contactos que coinciden con el texto, hasta 5 de cada uno y solo de lo que el actor puede ver.",

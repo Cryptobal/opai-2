@@ -44,6 +44,7 @@ export const modulesList = defineCapability({
 });
 
 export const auditList = defineCapability({
+  auditarLectura: (s) => s.eventos.map((e) => e.id),
   id: "core.audit.list",
   descripcion:
     "Auditoría de escrituras de la empresa, más reciente primero. Paginado por cursor; filtros por capacidad y actor.",
