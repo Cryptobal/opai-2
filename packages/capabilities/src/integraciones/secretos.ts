@@ -14,7 +14,7 @@ function kek(): { clave: Buffer; version: number; anterior: Buffer | null } {
 }
 
 /** DEK del tenant: la crea la primera vez, cifrada con la KEK vigente (envelope, ADR-027). */
-async function dekDe(ctx: Contexto): Promise<Buffer> {
+export async function dekDe(ctx: Contexto): Promise<Buffer> {
   const { clave, version, anterior } = kek();
   const fila = await ctx.db.claveTenant.findUnique({ where: { tenantId: ctx.tenantId } });
   if (fila) {
