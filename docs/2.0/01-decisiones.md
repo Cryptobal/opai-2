@@ -163,6 +163,8 @@ Una entrada por decisión. Las decisiones no se editan: si cambian, se agrega un
 
 **Consecuencias.** `packages/auth` encapsula la librería; el resto del código solo usa `getSession()`/`requireSession()` y `resolverActor()`. Cambiar de librería no toca módulos.
 
+**Nota (NÚCLEO-B, 26-oct-2026; Decisión de Carlos, 26-oct-2026 20:47 CLT, chat con OPAI 2.0 (t457u): «lo que debamos hacer en el núcleo lo hagamos altiro»).** El rate limit de las rutas y acciones públicas se centralizó en Postgres (realiza en parte ADR-029 §15 «Seguridad operativa»): `core.rate_limit_consumir` (`SECURITY DEFINER`, upsert atómico) cuenta por ventana con la misma cuenta para todas las instancias de Vercel; antes era un Map en memoria por instancia, así que el tope no era real. La clave se guarda hasheada (SHA-256, sin la API key ni la IP en claro). Si la base falla, falla abierto con el límite en memoria como respaldo. El bloqueo de login real sigue persistido por cuenta (B1). La API key del MCP va siempre en `Authorization: Bearer`; la forma con la key en la URL (`/api/mcp/k/<key>`) quedó deprecada (410 Gone salvo `MCP_KEY_EN_URL_HASTA` futura), porque dejaba la key en historiales y logs. Sin secretos nuevos (no Upstash/Redis/KV). Topes iniciales fijados por Claude, a confirmar por Carlos.
+
 ---
 
 ## ADR-016 · Roles por tenant y bloqueo financiero

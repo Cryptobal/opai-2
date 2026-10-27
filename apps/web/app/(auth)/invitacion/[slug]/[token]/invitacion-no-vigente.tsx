@@ -3,7 +3,7 @@
 import { CircleCheck, Clock } from "lucide-react";
 import { useState } from "react";
 
-import { AuthCard, Button, EstadoIlustrado, estilosBoton } from "@opai/ds";
+import { Alerta, AuthCard, Button, EstadoIlustrado, estilosBoton } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
 import { fechaCorta } from "@/lib/formato";
@@ -28,6 +28,7 @@ export function InvitacionNoVigente({
   datos: DatosInvitacion;
 }) {
   const [pedida, setPedida] = useState(false);
+  const [falloAviso, setFalloAviso] = useState(false);
   if (datos.estado === "aceptada") {
     return (
       <AuthCard
@@ -61,13 +62,22 @@ export function InvitacionNoVigente({
             variant="ghost"
             size="lg"
             disabled={pedida}
-            onClick={async () => setPedida(await pedirNuevaInvitacion(slug, token))}
+            onClick={async () => {
+              const ok = await pedirNuevaInvitacion(slug, token);
+              setPedida(ok);
+              setFalloAviso(!ok);
+            }}
           >
             {pedida ? "Avisamos para que te envíen una nueva" : "Pedir nueva invitación"}
           </Button>
         </>
       }
     >
+      {falloAviso ? (
+        <Alerta tono="warning" titulo="No pudimos avisar ahora">
+          Inténtalo de nuevo en unos minutos.
+        </Alerta>
+      ) : null}
       <EstadoIlustrado
         icono={Clock}
         tono="warning"
