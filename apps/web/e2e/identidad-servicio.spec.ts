@@ -1,7 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-const email = process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl";
-const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
+import { entrar } from "./sesion";
 
 for (const colorScheme of ["light", "dark"] as const) {
   test.describe(colorScheme, () => {
@@ -10,12 +9,7 @@ for (const colorScheme of ["light", "dark"] as const) {
       page,
       request,
     }, info) => {
-      if (!password) throw new Error("Falta la contraseña del usuario e2e local.");
-      await page.goto("/login");
-      await page.getByLabel("Correo").fill(email);
-      await page.getByLabel("Contraseña", { exact: true }).fill(password);
-      await page.getByRole("button", { name: "Entrar" }).click();
-      await page.waitForURL((url) => url.pathname === "/" || url.pathname === "/platform");
+      await entrar(page);
       await page.goto("/configuracion/agentes?crear=1");
       const hoja = page.getByRole("dialog", { name: "Crear key" });
       const nombre = `Servicio E2E ${info.project.name} ${Date.now()}`;

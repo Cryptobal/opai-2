@@ -44,7 +44,7 @@ describe("MFA en Server Actions", () => {
   it("una cuenta obligada sin enrolar no invoca ninguna capacidad", async () => {
     estado.activa = false;
     estado.verificada = false;
-    expect(await ejecutarComoUsuario("erp", "core.apikeys.create", {})).toMatchObject({
+    expect(await ejecutarComoUsuario("platform", "core.apikeys.create", {})).toMatchObject({
       ok: false,
       error: { code: "FORBIDDEN" },
     });
@@ -53,7 +53,7 @@ describe("MFA en Server Actions", () => {
   it("una sesión Google con MFA activo pero sin verificar tampoco invoca capacidades", async () => {
     estado.activa = true;
     estado.verificada = false;
-    expect(await ejecutarComoUsuario("erp", "core.me", {})).toMatchObject({
+    expect(await ejecutarComoUsuario("platform", "core.me", {})).toMatchObject({
       ok: false,
       error: { code: "FORBIDDEN" },
     });
@@ -63,7 +63,7 @@ describe("MFA en Server Actions", () => {
     estado.activa = true;
     estado.verificada = true;
     estado.ejecutar.mockResolvedValue({ ok: true, data: {} });
-    expect(await ejecutarComoUsuario("erp", "core.me", {})).toMatchObject({ ok: true });
+    expect(await ejecutarComoUsuario("platform", "core.me", {})).toMatchObject({ ok: true });
     expect(estado.ejecutar.mock.calls[0]?.[0]).toMatchObject({
       mfa: { activa: true, verificada: true, obligatoria: true },
     });

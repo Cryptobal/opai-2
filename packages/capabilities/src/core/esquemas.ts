@@ -1,8 +1,6 @@
 import { z } from "zod";
 
-import { ROLES, VERTICALES } from "@opai/domain";
-
-import { PORTALES_TENANT } from "./comun";
+import { PORTALES_TENANT, ROLES, VERTICALES } from "@opai/domain";
 
 /** Tenant tal como lo devuelven las capacidades (fechas como Date → se serializan en JSON). */
 export const tenantSchema = z.object({

@@ -72,6 +72,10 @@ export const EVENTOS_CORE: readonly EventoDeDominio[] = [
   },
   { id: "core.agente.presupuesto_100", descripcion: "Un agente agotó su presupuesto mensual." },
   { id: "core.usuario.invitado", descripcion: "Se invitó a una persona (correo transaccional)." },
+  {
+    id: "core.membresia.portal_inicio_fijado",
+    descripcion: "Una persona eligió su portal de inicio en la empresa.",
+  },
   { id: "core.usuario.invitacion_solicitada", descripcion: "Alguien pidió una nueva invitación." },
   { id: "core.bitacora.rota", descripcion: "La verificación de la bitácora encontró un quiebre." },
   {

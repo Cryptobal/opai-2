@@ -246,6 +246,62 @@ describe("core.users.*", () => {
     expect(tocaOwner).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
   });
 
+  it("coherencia rol-portal (NÚCLEO-D1): 'cliente' se rechaza para cualquier rol de membresía", async () => {
+    const { ctx } = contextoDePrueba({ rol: "owner", semilla: semillaTenant("viewer") });
+    const r = await executeCapability(ctx, "core.users.update", {
+      membershipId: M2,
+      portales: ["erp", "cliente"],
+    });
+    expect(r).toMatchObject({
+      ok: false,
+      error: { code: "UNPROCESSABLE", message: 'El rol "viewer" no admite el portal "cliente".' },
+    });
+  });
+
+  it("coherencia rol-portal: cambiar el rol vuelve a validar los portales que ya tenía", async () => {
+    const base = semillaTenant("gerente");
+    const semilla = {
+      ...base,
+      membership: base.membership.map((m) =>
+        m.id === M2 ? { ...m, portales: ["erp", "cliente"] } : m,
+      ),
+    };
+    const { ctx } = contextoDePrueba({ rol: "owner", semilla });
+    const r = await executeCapability(ctx, "core.users.update", { membershipId: M2, rol: "admin" });
+    expect(r).toMatchObject({
+      ok: false,
+      error: { code: "UNPROCESSABLE", message: 'El rol "admin" no admite el portal "cliente".' },
+    });
+  });
+  it("permite suspender una membresía histórica incoherente sin conceder acceso", async () => {
+    const semilla = semillaTenant("viewer");
+    semilla.membership[1]!.portales = ["cliente"];
+    const { ctx } = contextoDePrueba({ rol: "owner", semilla });
+    expect(
+      await executeCapability(ctx, "core.users.update", { membershipId: M2, estado: "suspendida" }),
+    ).toMatchObject({ ok: true });
+    expect(
+      await executeCapability(ctx, "core.users.update", { membershipId: M2, estado: "activa" }),
+    ).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+  });
+
+  it("rechaza reactivar o cambiar portales con rol histórico desconocido, pero permite suspender", async () => {
+    const base = semillaTenant("viewer");
+    const semilla = {
+      ...base,
+      membership: base.membership.map((m) => (m.id === M2 ? { ...m, rol: "desconocido" } : m)),
+    };
+    const { ctx } = contextoDePrueba({ rol: "owner", semilla });
+    for (const cambio of [{ estado: "activa" }, { portales: ["erp"] }]) {
+      expect(
+        await executeCapability(ctx, "core.users.update", { membershipId: M2, ...cambio }),
+      ).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+    }
+    expect(
+      await executeCapability(ctx, "core.users.update", { membershipId: M2, estado: "suspendida" }),
+    ).toMatchObject({ ok: true });
+  });
+
   it("remove en vista previa no elimina; real sí y queda auditado", async () => {
     const { ctx, tabla, eventos } = contextoDePrueba({ rol: "owner", semilla: semillaTenant() });
     await executeCapability(ctx, "core.users.remove", { membershipId: M2 }, { dryRun: true });
@@ -272,6 +328,19 @@ describe("core.users.invite", () => {
     expect(enlace.length).toBeGreaterThan(40);
     expect(inv?.["tokenHash"]).toMatch(/^[0-9a-f]{64}$/);
     expect(JSON.stringify(inv)).not.toContain(enlace);
+  });
+
+  it("coherencia rol-portal (NÚCLEO-D1): no invita con el portal 'cliente'", async () => {
+    const { ctx } = contextoDePrueba({ rol: "owner", semilla: semillaTenant() });
+    const r = await executeCapability(ctx, "core.users.invite", {
+      email: "nuevo@prueba.cl",
+      rol: "viewer",
+      portales: ["erp", "cliente"],
+    });
+    expect(r).toMatchObject({
+      ok: false,
+      error: { code: "UNPROCESSABLE", message: 'El rol "viewer" no admite el portal "cliente".' },
+    });
   });
 
   it("a alguien que ya es miembro: CONFLICT 'ya pertenece'", async () => {
@@ -310,6 +379,8 @@ describe("core.users.invite", () => {
     await executeCapability(base.ctx, "core.users.invite", {
       email: "carla@prueba.cl",
       rol: "viewer",
+      portales: ["erp", "supervisor"],
+      portalInicio: "supervisor",
     });
     const token = base.correos.at(-1)?.texto.match(/invitacion\/gard\/(\S+)/)?.[1] ?? "";
     base.tabla("user").push({
@@ -332,6 +403,9 @@ describe("core.users.invite", () => {
     base.ctx.actor = { tipo: "user", id: base.ctx.usuario.id };
     const ok = await executeCapability(base.ctx, "core.invitations.accept", { token });
     expect(ok).toMatchObject({ ok: true, data: { rol: "viewer" } });
+    expect(
+      base.tabla("membership").find((m) => m["userId"] === base.ctx.usuario?.id)?.["portalInicio"],
+    ).toBe("supervisor");
     const otraVez = await executeCapability(base.ctx, "core.invitations.accept", { token });
     expect(otraVez).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
   });
