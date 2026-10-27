@@ -9,6 +9,7 @@ import { contextoDeIdentidad, identidadDe, type Identidad } from "./actor";
 import { medirFase } from "./metricas-navegacion";
 import { asegurarRegistro } from "./registro";
 import { COOKIE_TENANT } from "./tenant-actual";
+import { tieneAccesoAPortal } from "./acceso-portal";
 
 export { tieneAccesoAPortal } from "./acceso-portal";
 
@@ -45,6 +46,8 @@ export async function ejecutarComoUsuario<T = unknown>(
   const identidad = await identidadActual();
   if (!identidad)
     return { ok: false, error: { code: "UNAUTHENTICATED", message: "Inicia sesión." } };
+  if (!tieneAccesoAPortal(identidad, portal))
+    return { ok: false, error: { code: "FORBIDDEN", message: "No tienes acceso a este portal." } };
   const r = await executeCapability(contextoServidor(identidad, portal), id, input, { dryRun });
   return r as Resultado<T>;
 }

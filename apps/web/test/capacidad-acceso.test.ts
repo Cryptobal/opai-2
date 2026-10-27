@@ -72,8 +72,7 @@ describe("ejecutarCapacidad exige acceso al portal", () => {
     expect(estado.ejecutado).toEqual([]);
   });
 
-  it("capacidad inexistente o interna: NOT_FOUND, sin revelar el acceso", async () => {
-    estado.acceso = false;
+  it("capacidad inexistente o interna, con acceso al portal: NOT_FOUND", async () => {
     for (const id of ["core.oculta", "no.existe"]) {
       const r = await ejecutarCapacidad("erp", id, {});
       expect(r).toEqual({
@@ -81,6 +80,20 @@ describe("ejecutarCapacidad exige acceso al portal", () => {
         error: { code: "NOT_FOUND", message: `Capacidad "${id}" no existe.` },
       });
     }
+    expect(estado.ejecutado).toEqual([]);
+  });
+
+  it("portal ajeno a la membresía: mismo FORBIDDEN exista o no la capacidad (sin enumeración)", async () => {
+    estado.acceso = false;
+    const existe = await ejecutarCapacidad("erp", "core.buscar", { q: "a" });
+    const noExiste = await ejecutarCapacidad("erp", "no.existe", {});
+    const interna = await ejecutarCapacidad("erp", "core.oculta", {});
+    expect(existe).toEqual(noExiste);
+    expect(noExiste).toEqual(interna);
+    expect(existe).toEqual({
+      ok: false,
+      error: { code: "FORBIDDEN", message: "No tienes acceso a este portal." },
+    });
     expect(estado.ejecutado).toEqual([]);
   });
 });
