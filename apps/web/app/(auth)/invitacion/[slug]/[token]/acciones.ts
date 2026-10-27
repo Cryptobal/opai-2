@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 
 import { crearContexto, executeCapability, type Resultado } from "@opai/capabilities";
 import { auth, crearUsuarioConPassword, getSession } from "@opai/auth";
-import { globales } from "@opai/db";
+import { tenantPorSlug } from "@opai/db";
 
 import { ipDeCabeceras, LIMITES, permitir } from "@/lib/rate-limit";
 import { asegurarRegistro } from "@/lib/registro";
@@ -45,7 +45,7 @@ async function leerInvitacion(slug: string, token: string): Promise<Resultado | 
 
 /** Contexto en el tenant de la invitación: sistema (ver, pedir otra) o el usuario que acepta. */
 async function contexto(slug: string, usuario?: Usuario) {
-  const tenant = await globales().tenant.findUnique({ where: { slug } });
+  const tenant = await tenantPorSlug(slug);
   if (!tenant) return null;
   return crearContexto({
     tenantId: tenant.id,

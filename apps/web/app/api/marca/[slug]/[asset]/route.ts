@@ -1,4 +1,4 @@
-import { forTenant, globales } from "@opai/db";
+import { forTenant, tenantPorSlug } from "@opai/db";
 import { almacenamientoDelEntorno } from "@opai/integrations";
 import { imagenMarcaPrevia } from "@/lib/imagen-marca-previa";
 import { ipDe, permitir } from "@/lib/rate-limit";
@@ -29,7 +29,7 @@ export async function GET(req: Request, { params }: Params): Promise<Response> {
   const campo = ASSETS[asset as keyof typeof ASSETS];
   const noEncontrado = () => new Response("No encontrado.", { status: 404 });
   if (!campo || !/^[a-z0-9-]{2,40}$/.test(slug)) return noEncontrado();
-  const tenant = await globales().tenant.findUnique({ where: { slug }, select: { id: true } });
+  const tenant = await tenantPorSlug(slug);
   if (!tenant) return noEncontrado();
   const db = forTenant(tenant.id);
   const perfil = await db.perfilEmpresa.findUnique({ where: { tenantId: tenant.id } });

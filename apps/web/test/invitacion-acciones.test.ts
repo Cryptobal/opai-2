@@ -19,14 +19,17 @@ vi.mock("@/lib/rate-limit", () => ({
 vi.mock("@/lib/registro", () => ({ asegurarRegistro: () => undefined }));
 vi.mock("@/lib/tenant-actual", () => ({ COOKIE_TENANT: "opai_tenant" }));
 vi.mock("@/lib/medidor", () => ({ medidorDiferido: {} }));
-vi.mock("@opai/capabilities", () => ({ crearContexto: () => ({ tenantId: "t1" }), executeCapability }));
+vi.mock("@opai/capabilities", () => ({
+  crearContexto: () => ({ tenantId: "t1" }),
+  executeCapability,
+}));
 vi.mock("@opai/auth", () => ({
   auth: { api: { signInEmail } },
   crearUsuarioConPassword,
   getSession,
 }));
 vi.mock("@opai/db", () => ({
-  globales: () => ({ tenant: { findUnique: async () => ({ id: "t1" }) } }),
+  tenantPorSlug: async () => ({ id: "t1" }),
 }));
 vi.mock("next/headers", () => ({
   cookies: async () => ({ set: () => undefined }),

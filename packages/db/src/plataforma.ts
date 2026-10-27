@@ -1,0 +1,69 @@
+import { clienteApp } from "./client";
+import type { Prisma } from "./generated/prisma/client";
+
+// Perfil que devuelve tenantSchema. No expone datos legales, DPO ni otros ajustes del tenant.
+const perfil = {
+  id: true,
+  slug: true,
+  nombre: true,
+  vertical: true,
+  timezone: true,
+  estado: true,
+} as const;
+
+const ajuste = { modulo: true, clave: true, valor: true, version: true } as const;
+const precio = { recurso: true, unidad: true, costoUnitarioMicro: true, vigenteDesde: true } as const;
+
+export function listarTenants(id?: string) {
+  return clienteApp().tenant.findMany({
+    where: id ? { id } : {},
+    orderBy: { nombre: "asc" },
+    select: perfil,
+  });
+}
+
+/** Operaciones concretas para capacidades platform.*, autorizadas antes de invocarlas. */
+export function accesoPlataforma() {
+  const db = clienteApp();
+  return {
+    tenantPorId: (id: string) => db.tenant.findUnique({ where: { id }, select: perfil }),
+    tenantPorSlug: (slug: string) => db.tenant.findUnique({ where: { slug }, select: perfil }),
+    listarTenants,
+    crearTenant: (data: {
+      slug: string;
+      nombre: string;
+      vertical: string;
+      timezone: string;
+      estado: string;
+    }) => db.tenant.create({ data, select: perfil }),
+    actualizarTenant: (
+      id: string,
+      data: {
+        nombre?: string;
+        vertical?: string;
+        timezone?: string;
+        estado?: string;
+      },
+    ) => db.tenant.update({ where: { id }, data, select: perfil }),
+    listarAjustes: () => db.ajustePlataforma.findMany({ select: ajuste }),
+    ajustePorClave: (where: Prisma.AjustePlataformaWhereUniqueInput) =>
+      db.ajustePlataforma.findUnique({ where, select: ajuste }),
+    guardarAjuste: ({ where, create, update }: Pick<Prisma.AjustePlataformaUpsertArgs, "where" | "create" | "update">) =>
+      db.ajustePlataforma.upsert({ where, create, update, select: ajuste }),
+    listarPrecios: (hasta: Date) => preciosHasta(hasta),
+    precioPorVigencia: (where: Prisma.PrecioRecursoWhereUniqueInput) =>
+      db.precioRecurso.findUnique({ where, select: precio }),
+    guardarPrecio: ({ where, create, update }: Pick<Prisma.PrecioRecursoUpsertArgs, "where" | "create" | "update">) =>
+      db.precioRecurso.upsert({ where, create, update, select: precio }),
+  };
+}
+
+export function preciosHasta(hasta: Date) {
+  return clienteApp().precioRecurso.findMany({
+    where: { vigenteDesde: { lte: hasta } },
+    orderBy: [{ recurso: "asc" }, { vigenteDesde: "desc" }],
+    select: precio,
+  });
+}
+
+export type Globales = ReturnType<typeof accesoPlataforma>;

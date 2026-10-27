@@ -97,6 +97,21 @@ No se declara CI, QA remota ni aprobación del head nuevo; Neon sigue sin modifi
 
 ## Hecho
 
+- **NÚCLEO-G2 · FORCE RLS y globales acotado (OpenCode / openai/gpt-6.1-sol).**
+  Continuación por Codex: separación de unitarios y suites DB sin perder cobertura,
+  preparación independiente del test FORCE y corrección del harness ESLint;
+  capturas heredadas conservadas sin commit (sin cambio visual intencional).
+  Rama `fix/force-rls`, con #49 integrado en main; sin cambio
+  de plan. Migración aditiva `20261028170000_force_rls`, pendiente de Carlos en
+  Neon. Se elimina el acceso global por delegados; lecturas de identidad mínimas
+  y operaciones de plataforma con nombre. Test de ENABLE + FORCE + política en
+  todos los esquemas y aislamiento del dueño NOBYPASSRLS. Adaptaciones técnicas
+  del constructor: scripts con `row_security=off` para fallar cerrados si falta
+  un rol de mantenimiento explícito BYPASSRLS; triggers de referencias/patrones
+  SECURITY INVOKER para conservar el tenant del invocador. No se cambia ningún rol
+  remoto ni se atribuyen decisiones adicionales a Carlos. Auditoría, CA, riesgos
+  y verificación en `briefs/NUCLEO-G2-force-rls.md`.
+
 > **Seguimiento QA PR #49 (OpenCode):** separación de filtros de Puestos e Instalaciones y conservación de filtros al volver, según el encargo. Adaptación técnica al panel dividido: Función y la columna Patrón se ocultan hasta 2xl, con el patrón bajo el nombre del puesto; la vista de ancho completo del diseño queda parcial. Hay una comprobación e2e de visibilidad de Estado a 1024 y 1280. Sin migraciones nuevas en el seguimiento; `rama-neon` en verde en el head 25941e8 (27-oct-2026, 10:24 CLT).
 
 > **Corrección de presentación PR #49 (OpenCode):** la celda Puesto permite partir nombres y patrones largos para conservar visible Estado en el panel dividido. Adaptación técnica prevista en el encargo, sin decisión de negocio nueva; siguen las limitaciones parciales documentadas en el brief.
@@ -567,7 +582,7 @@ Node 22 · pnpm 10.28 · Next.js 16.4.2 · React 19.3.0 · Tailwind 4.3.3 · Pri
 
 - **Brief 07d · PR 1 (RAT por actividad, corrección QA 26-oct, C10/C11; decisiones de Claude, no legales).** Sobre el inventario por tabla (que se conserva como `porTabla`) va un catálogo de actividades de tratamiento en `@opai/domain` (`actividades-tratamiento.ts`), en lenguaje de negocio. Decisiones: (1) el mapa de categorías técnico→negocio muestra `credenciales` bajo «Identificación» (las 5 de la sábana son Identificación, Contacto, Laboral, Económica, Sensible); (2) se inventaría `login_intentos` (entró con el #47) y se cubre en la actividad «Intentos de ingreso»; su retención la fija el PR 3 (coordina con 07c, §4.5); (3) la retención queda **pendiente** (`retencionPendiente`) hasta el PR 3: no se adoptan como dato los plazos de muestra de la sábana (brief §16.4); (4) se completan los destinatarios del inventario con Resend (correo) e IA (lectura de documentos), marcados «a confirmar por legal» (§4.4); (5) la actividad 4 del RAT (tabla `envios`) es «Notificaciones y avisos operativos» con base **interés legítimo** —no comunicaciones comerciales con consentimiento—, coherente con `inventario.ts` (la tabla `envios` es la bitácora de notificaciones transaccionales, base interés legítimo) y con la decisión de Carlos t331u (§16.2: el consentimiento se reserva a los fines accesorios); corrección pedida por el Revisor OPAI 2.0 (revisión 5660773270, 26-oct-2026), no es una base de licitud nueva como dato legal. La lectura `core.cumplimiento.dpa_texto` deja al owner leer el texto y el hash SHA-256 del DPA que va a aceptar (C06). Detalle en `briefs/BRIEF-07d-ley-21719.md` §4.3.
 - `/ds` en vez de `/_ds`: en App Router las carpetas con `_` son privadas y no generan ruta. Sigue siendo solo fuera de producción (404 en producción, verificado).
-- RLS con `ENABLE` y no `FORCE`: el rol propietario (migraciones, importaciones, seeds) debe poder escribir en todos los tenants; la aplicación solo se conecta como `opai_app`, que no puede saltarse la RLS. El test de aislamiento lo prueba. La política usa `NULLIF(current_setting('app.tenant_id', true), '')::uuid` para que una sesión sin tenant devuelva cero filas en vez de error.
+- RLS con `ENABLE` y `FORCE` (NÚCLEO-G2): En Neon, neondb_owner, dueño real de las tablas y rol de prisma migrate deploy, tiene BYPASSRLS (proyectos creados desde ago-2023), por lo que FORCE no le afecta. FORCE queda como defensa en profundidad para dueños sin BYPASSRLS, por ejemplo local/CI o un dueño distinto. La garantía real es que la aplicación corre como opai_app, sin BYPASSRLS, con tenant_isolation. Adaptación documental de Codex solicitada en la revisión 5672596436. El dueño NOBYPASSRLS también queda sujeto a políticas. Los scripts cross-tenant requieren mantenimiento BYPASSRLS explícito; `opai_app` nunca lo recibe. La política usa `NULLIF(current_setting('app.tenant_id', true), '')::uuid` para que una sesión sin tenant devuelva cero filas en vez de error.
 - Componentes base propios (Button, Input, Select, Badge, Card, Tabs, Sheet, Table, Skeleton) en vez de la CLI de shadcn: el diseño aún no existe y la CLI escribe en la app, no en el paquete. shadcn/Radix se evalúa en el Brief 00b con el diseño aprobado.
 - Registro de módulos como paquete `modules/registry` (`@opai/modules`) en vez de `modules/index.ts`: Next necesita un paquete resoluble. Los módulos se compilan sin listarlos en `transpilePackages` (verificado con build).
 - `prisma generate` en `postinstall` de `@opai/db` para que el build de Vercel tenga el cliente; `prisma.config.ts` usa un placeholder cuando falta `DATABASE_URL_MIGRATE` para que `generate` no falle.
