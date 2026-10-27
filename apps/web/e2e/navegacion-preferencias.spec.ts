@@ -1,7 +1,9 @@
 import { expect, test } from "@playwright/test";
 import { entrar } from "./sesion";
+import { ocultarIndicadorDev } from "./indicador-dev";
 
 test("preferencias de navegación: una carga fallida permite reintentar sin escribir", async ({ page }) => {
+  await ocultarIndicadorDev(page);
   const errores: string[] = [];
   page.on("pageerror", (e) => errores.push(e.message));
   await entrar(page);
@@ -31,6 +33,7 @@ test("preferencias de navegación: una carga fallida permite reintentar sin escr
 });
 
 test("el shell informa cuando no puede cargar los fijados", async ({ page }, info) => {
+  await ocultarIndicadorDev(page);
   await entrar(page);
   await page.route("**/*", async (ruta) => {
     const peticion = ruta.request();
@@ -38,11 +41,15 @@ test("el shell informa cuando no puede cargar los fijados", async ({ page }, inf
       await ruta.abort("failed");
     } else await ruta.continue();
   });
-  await page.reload();
+  await page.goto("/");
+  await expect(page).toHaveURL(/\/$/);
   const nav = page.getByRole("navigation", { name: "Principal", exact: true }).filter({ visible: true });
   if (info.project.name === "telefono") {
-    await nav.getByRole("button", { name: "Más opciones" }).click();
     const mas = page.getByRole("dialog", { name: "Más" });
+    await expect(async () => {
+      if (!(await mas.isVisible())) await nav.getByRole("button", { name: "Más opciones" }).click();
+      await expect(mas).toBeVisible({ timeout: 1_000 });
+    }).toPass();
     await expect(mas.getByRole("alert")).toContainText("No pudimos cargar tus fijados");
     await expect(mas.getByText("Fija hasta cinco entradas o fichas")).toHaveCount(0);
     const reintentar = mas.getByRole("button", { name: "Reintentar" });
