@@ -23,6 +23,7 @@ export const funcionesList = defineCapability({
   permiso: PERMISOS_CORE.funcionesRead,
   input: z.object({ incluirInactivos: z.boolean().default(false) }),
   output: z.array(funcionSchema),
+  auditarLectura: (s) => s.map((i) => i.id),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
@@ -52,6 +53,7 @@ export const funcionesGet = defineCapability({
   permiso: PERMISOS_CORE.funcionesRead,
   input: z.object({ id: uuidSchema }),
   output: funcionSchema,
+  auditarLectura: (s) => [s.id],
   efecto: "lectura",
   dryRun: false,
   handler: async (ctx, input) =>

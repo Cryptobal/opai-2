@@ -32,6 +32,7 @@ export const patronesList = defineCapability({
   permiso: PERMISOS_CORE.patronesRead,
   input: z.object({ incluirInactivos: z.boolean().default(false) }),
   output: z.array(patronSchema),
+  auditarLectura: (s) => s.map((i) => i.id),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
@@ -58,10 +59,10 @@ export const patronesGet = defineCapability({
   permiso: PERMISOS_CORE.patronesRead,
   input: z.object({ id: uuidSchema }),
   output: patronSchema,
+  auditarLectura: (s) => [s.id],
   efecto: "lectura",
   dryRun: false,
-  handler: async (ctx, input) =>
-    vistaPatron(await patronDe(ctx, input.id), await conteoPuestosPatron(ctx, input.id)),
+  handler: async (ctx, input) => vistaPatron(await patronDe(ctx, input.id), await conteoPuestosPatron(ctx, input.id)),
 });
 
 export const patronesCreate = defineCapability({
