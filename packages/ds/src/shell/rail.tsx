@@ -36,7 +36,7 @@ function ItemRiel({
           ? { title: item.etiqueta, "aria-label": item.etiqueta }
           : {})}
         className={cn(
-          "flex h-14 w-16 flex-col items-center justify-center gap-1 rounded-md text-[11px] leading-[14px] font-medium",
+          "flex min-h-14 w-16 flex-col items-center justify-center gap-0.5 rounded-md text-xs leading-3 font-medium",
           activo ? "bg-fill text-fg" : "text-fg-muted hover:bg-fill",
         )}
       >
@@ -44,7 +44,7 @@ function ItemRiel({
           <item.icono className={cn("size-5", activo && "text-accent")} aria-hidden />
           {sinContador ? null : <Contador n={item.alerta ? item.contador : undefined} />}
         </span>
-        <span className="max-w-full truncate">{item.corta ?? item.etiqueta}</span>
+        <span className="w-full break-words text-center">{item.corta ?? item.etiqueta}</span>
       </Link>
     </li>
   );

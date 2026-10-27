@@ -253,6 +253,8 @@ Al cerrar: commits integrados, capturas antes y después a 375, 1024 y 1280, res
 
 Implementación en `brief/05-pr-b-navegacion`, no integrada. Se preservó el trabajo local heredado y se incorporó `origin/main` mediante merge; al recuperar el stash se resolvieron los conflictos conservando los permisos efectivos y las protecciones del shell de `main`. El export aprobado está presente.
 
+**Revisión 5666749146:** seguimiento del encargo del PR #75 por OpenCode: se retiran las abreviaturas del ERP y se recupera el área guardada en Inicio y Configuración, manteniendo la prioridad del área de la ruta activa. La autorrevisión señaló una navegación durante el guardado y el espacio para etiquetas multilínea; se conservó la selección local y se amplió el espacio inferior. Son ajustes técnicos, sin nuevas decisiones de negocio. Los CA 8, 9, 11, 13 y 14 y la medición ADR-045 siguen parciales por las limitaciones anotadas abajo.
+
 Decisiones técnicas de OpenCode / GPT-6.1 Sol, dentro del encargo (no atribuidas a Carlos):
 - `navegacion_area_abierta = "ninguna"` representa plegado explícito; `null` conserva el respaldo por ruta.
 - `core.config.set` serializa lectura y escritura por ajuste en su transacción; revisión esperada opcional evita reemplazar fijados con una lista obsoleta. Al reiniciar ajustes de navegación se conserva una fila con valor inválido para el esquema: la lectura vuelve al defecto sin reutilizar la revisión.

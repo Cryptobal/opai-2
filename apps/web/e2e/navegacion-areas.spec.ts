@@ -5,6 +5,25 @@ import { comprobarContrasteNavegacion } from "./contraste-navegacion";
 test.use({ actionTimeout: 30_000 });
 test.setTimeout(180_000);
 
+test("recuerda el área abierta en Inicio y Configuración", async ({ page }, info) => {
+  test.skip(info.project.name === "telefono", "El acordeón lateral se muestra desde 1024 px");
+  await entrar(page);
+  await page.goto("/configuracion");
+  const nav = page.getByRole("navigation", { name: "Principal", exact: true }).filter({ visible: true });
+  const personas = nav.getByRole("button", { name: "Personas", exact: true });
+  if (await personas.getAttribute("aria-expanded") !== "true") {
+    await personas.click();
+  }
+  await expect(personas).toHaveAttribute("aria-expanded", "true");
+  await page.waitForTimeout(1000);
+  await page.reload();
+  await expect(personas).toHaveAttribute("aria-expanded", "true");
+  await page.goto("/");
+  await expect(personas).toHaveAttribute("aria-expanded", "true");
+  await page.reload();
+  await expect(personas).toHaveAttribute("aria-expanded", "true");
+});
+
 test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }, info) => {
   const errores: string[] = [];
   page.on("pageerror", (e) => { errores.push(e.message); });

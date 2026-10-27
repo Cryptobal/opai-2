@@ -9,6 +9,8 @@ Hasta el 24-oct-2026 este archivo fue la fuente de verdad del avance; desde ento
 
 ## Hecho
 
+- **PR #75 · revisión 5666749146:** OpenCode retira abreviaturas del ERP y recupera el área abierta guardada al entrar en Inicio o Configuración. Ajuste técnico según el encargo; sin decisiones de negocio nuevas. Permanecen los CA y la medición de rendimiento parciales documentados en `briefs/BRIEF-05-navegacion.md` §16.
+
 - **PR #75 · merge de main `bf97199` (OpenCode):** se preservan «Más», las preferencias y las comprobaciones y el menú de portal de inicio. Gate local verde hasta build y presupuesto; e2e bloqueado porque la base de aplicación carece de `memberships.portal_inicio`. No se aplicaron migraciones. Detalle y CA parciales en `briefs/BRIEF-05-navegacion.md` §16.
 
 - **PR #75 · seguimiento de revisión y QA (OpenCode, encargo del PR #75).** Merge normal de main con #73 y #74; se conserva la nota de cada uno. «Más» muestra fijados, grupos plegables y cuenta con iconos y cierre en peligro; el riel incorpora acceso a «Más». El acordeón inicial compara la clave del área, las etiquetas largas tienen abreviatura y los errores de preferencias se anuncian y permiten reintentar sin presentar falsamente fijados vacíos. El revisor independiente detectó que los fijados de «Más» recargaban el documento: corregido usando la navegación del shell y cerrando la hoja. Adaptaciones técnicas de OpenCode según el encargo, sin decisión de negocio nueva. Pendientes: recorrido real a 768, dispositivos reales, lector de pantalla y resto de hallazgos medios/bajos fuera del addendum; los CA parciales del brief siguen vigentes.

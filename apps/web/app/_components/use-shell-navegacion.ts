@@ -47,7 +47,7 @@ export function useShellNavegacion(
     const resto = entradasAreaPrincipal(grupos, prefs.areaPrincipal);
     return [inicio, ...resto]
       .filter((e): e is NonNullable<typeof e> => e != null)
-      .map((e) => ({ href: e.href, etiqueta: e.etiqueta, icono: e.icono, ...(e.href === "/cargos" ? { corta: "Cargos" } : e.href === "/instalaciones" ? { corta: "Instalac." } : {}) }));
+      .map((e) => ({ href: e.href, etiqueta: e.etiqueta, icono: e.icono }));
   }, [grupos, navInferiorDefecto, prefs.areaPrincipal]);
   const navInferiorResuelto = useMemo(
     () => navInferior?.map((n) => ({ ...n, icono: iconoShell(n.icono, iconos) })),
@@ -69,19 +69,22 @@ export function useShellNavegacion(
   // D1: al entrar queda abierta el área de la página actual; si la persona abre o pliega otra, se
   // recuerda por usuario y empresa (`navegacion_area_abierta`, null = sin preferencia explícita).
   const areaActiva = useMemo(
-    () => grupos?.find((g) => g.entradas.some((e) => esActivo(rutaEfectiva, e.href)))?.area ?? null,
+    () => grupos?.find((g) => g.area !== "inicio" && g.entradas.some((e) => esActivo(rutaEfectiva, e.href)))?.area ?? null,
     [grupos, rutaEfectiva],
   );
   const rutaPrevia = useRef(rutaEfectiva);
   const [areaElegida, setAreaElegida] = useState<string | null | undefined>(undefined);
   useEffect(() => {
-    if (rutaPrevia.current !== rutaEfectiva && areaActiva && prefs.cargado) {
+    if (rutaPrevia.current !== rutaEfectiva && prefs.cargado) {
       rutaPrevia.current = rutaEfectiva;
-      setAreaElegida(areaActiva);
-      prefs.fijarAreaAbierta(areaActiva);
+      if (areaActiva) {
+        void Promise.resolve().then(() => setAreaElegida(areaActiva));
+        prefs.fijarAreaAbierta(areaActiva);
+      }
     }
   }, [rutaEfectiva, areaActiva, prefs]);
-  const areaAbierta = areaElegida === undefined ? areaActiva : areaElegida;
+  const guardada = prefs.areaAbierta === "ninguna" ? null : prefs.areaAbierta;
+  const areaAbierta = areaElegida === undefined ? (areaActiva ?? guardada) : areaElegida;
   const esFicha = /^\/(cuentas|instalaciones|personas|cargos)\/[0-9a-f-]{36}$/.test(rutaEfectiva);
   return {
     navInferiorResuelto,
