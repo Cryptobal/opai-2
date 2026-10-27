@@ -8,6 +8,7 @@ import type { Contexto } from "../../types";
 import { uuidSchema } from "../esquemas";
 import { escribirConEvento } from "./comun";
 import { personaDe, personaSchema, vinculosVigentes, vistaPersona } from "./personas-vista";
+import { exigirNoAnonimizado } from "./anonimizado";
 
 const motivo = z.string().trim().min(5).max(500).describe("Motivo (queda en la auditoría).");
 
@@ -20,6 +21,7 @@ async function cambiar(
   data: Record<string, unknown>,
 ) {
   const actual = await personaDe(ctx, id);
+  exigirNoAnonimizado(actual, "La persona");
   const vinculo = (await vinculosVigentes(ctx, [id])).get(id) ?? null;
   if (dryRun) return vistaPersona({ ...actual, ...data }, vinculo);
   const p = await escribirConEvento(

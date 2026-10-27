@@ -77,6 +77,7 @@ model Tenant {
   consentimientos       Consentimiento[]
   solicitudesArco       SolicitudArco[]
   incidentes            Incidente[]
+  retencionEjecuciones  RetencionEjecucion[]
 
   @@map("tenants")
   @@schema("core")
@@ -279,5 +280,33 @@ model Incidente {
 
   @@index([tenantId, casoId, createdAt])
   @@map("incidentes")
+  @@schema("core")
+}
+
+/// Registro de la política de retención (Ley 21.719, §4.5, §6): qué tabla, qué acción, cuántas filas
+/// y cuándo. Append-only (la migración revoca UPDATE/DELETE a opai_app). Sin datos personales en
+/// claro: solo contadores y, si fue a pedido de un titular, su id (pseudónimo) y la solicitud.
+model RetencionEjecucion {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  tenantId    String    @map("tenant_id") @db.Uuid
+  tabla       String
+  /// "anonimizar" | "eliminar"
+  accion      String
+  /// "simulacion" (la política no está activa para el tenant) | "aplicada"
+  modo        String
+  /// "trabajo" (diario) | "titular" (anonimización puntual a pedido)
+  origen      String    @default("trabajo")
+  dias        Int?
+  corte       DateTime? @db.Timestamptz(6)
+  filas       Int
+  titularTipo String?   @map("titular_tipo")
+  titularId   String?   @map("titular_id") @db.Uuid
+  solicitudId String?   @map("solicitud_id") @db.Uuid
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+
+  @@index([tenantId, createdAt])
+  @@map("retencion_ejecuciones")
   @@schema("core")
 }

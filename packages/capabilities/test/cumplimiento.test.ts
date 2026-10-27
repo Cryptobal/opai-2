@@ -176,7 +176,7 @@ describe("core.cumplimiento.* · DPA y DPO (Brief 07d, PR 1)", () => {
     expect(rat.porTabla.find((a) => a.tabla === "vinculos_laborales")?.reguladoNoBorrable).toBe(true);
   });
 
-  it("el RAT da una fila por actividad, en lenguaje de negocio, con retención pendiente (C10)", async () => {
+  it("el RAT da una fila por actividad, en lenguaje de negocio, con retención propuesta (C10)", async () => {
     const { ctx } = contextoDePrueba();
     const rat = await dato<Rat>(ctx, "core.cumplimiento.rat", {});
     const personal = rat.actividades.find((a) => a.actividad === "Gestión de personal de seguridad");
@@ -188,9 +188,9 @@ describe("core.cumplimiento.* · DPA y DPO (Brief 07d, PR 1)", () => {
     // Categoría principal una sola; el conjunto para el filtro.
     expect(personal?.categoria).toBe("Laboral");
     expect(personal?.categorias).toContain("Identificación");
-    // Retención aún no fijada (PR 3, §16.4): pendiente, no "—".
-    expect(personal?.retencion).toBeNull();
-    expect(personal?.retencionPendiente).toBe(true);
+    // PR 3 aporta la descripción efectiva; los periodos siguen sujetos a confirmación legal.
+    expect(personal?.retencion).toBeTruthy();
+    expect(personal?.retencionPendiente).toBe(false);
     // Destinatarios derivados del inventario completado (Resend / IA, a confirmar por legal).
     const docs = rat.actividades.find((a) => a.actividad === "Documentos de personas");
     expect(docs?.destinatarios.some((d) => d.includes("Proveedor de IA"))).toBe(true);

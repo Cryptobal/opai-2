@@ -21,7 +21,7 @@ import {
 import { capacidadesAgentes, trabajosAgentes } from "./agentes";
 import { capacidadesComunicaciones, consumidorComunicaciones } from "./comunicaciones";
 import { capacidadesConfig } from "./config";
-import { capacidadesCumplimiento } from "./cumplimiento";
+import { capacidadesCumplimiento, trabajosCumplimiento } from "./cumplimiento";
 import { capacidadesDocumentos, trabajosDocumentos } from "./documentos";
 import { capacidadesEmpresa } from "./empresa";
 import { capacidadesMaestros } from "./maestros";
@@ -114,4 +114,5 @@ export const trabajosDelNucleo = [
   trabajoVerificarAuditoria,
   ...trabajosDocumentos,
   ...trabajosAgentes,
+  ...trabajosCumplimiento,
 ];

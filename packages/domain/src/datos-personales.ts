@@ -69,6 +69,22 @@ export function defineDatosPersonales(
       throw new Error(`${donde}: base de licitud inválida "${d.baseLicitud}".`);
     for (const s of d.camposSensibles ?? [])
       if (!d.campos.includes(s)) throw new Error(`${donde}: sensible "${s}" no está en campos.`);
+    // §16.4: lo sensible (salud, biometría) se cifra; la categoría y los campos van de la mano.
+    const hayCampos = (d.camposSensibles ?? []).length > 0;
+    const hayCategoria = d.categorias.includes("sensible");
+    if (hayCampos && !hayCategoria)
+      throw new Error(`${donde}: tiene camposSensibles pero no la categoría "sensible".`);
+    if (hayCategoria && !hayCampos)
+      throw new Error(`${donde}: categoría "sensible" sin camposSensibles que cifrar (§16.4).`);
     return { ...d, modulo };
   });
+}
+
+/** Pares tabla/columna que se cifran a nivel de aplicación (ADR-027), de lo declarado. */
+export function camposACifrar(
+  inventario: readonly DatoPersonalDeclarado[],
+): { tabla: string; campo: string }[] {
+  return inventario.flatMap((d) =>
+    (d.camposSensibles ?? []).map((campo) => ({ tabla: d.tabla, campo })),
+  );
 }

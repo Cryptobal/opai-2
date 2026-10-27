@@ -118,6 +118,15 @@ export const EVENTOS_CORE: readonly EventoDeDominio[] = [
     id: "core.cumplimiento.brecha_notificada",
     descripcion: "Se dejó constancia del aviso de una brecha a la Agencia o a los titulares.",
   },
+  {
+    id: "core.cumplimiento.retencion_aplicada",
+    descripcion:
+      "El trabajo de retención anonimizó o eliminó datos vencidos según la política activa.",
+  },
+  {
+    id: "core.cumplimiento.titular_anonimizado",
+    descripcion: "Se anonimizó a un titular (persona o contacto) a pedido, conservando los hechos regulados.",
+  },
 ];
 
 /** Catálogo completo: núcleo más los módulos registrados. */
