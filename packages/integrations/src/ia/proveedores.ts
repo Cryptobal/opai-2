@@ -4,6 +4,7 @@
 // configurable y `ia_xai` trae la pública por defecto.
 export * from "./contrato";
 export * from "./http";
+export * from "./red-segura";
 export { anthropic } from "./anthropic";
 export { google } from "./google";
 export { openai, openaiCompatible } from "./openai";
@@ -32,7 +33,8 @@ export function proveedorIa(
     case "ia_compatible": {
       if (!opts?.baseUrl)
         throw new Error("El proveedor compatible con OpenAI necesita una base URL configurada.");
-      return openaiCompatible("ia_compatible", apiKey, opts.baseUrl);
+      // La base URL la trae la config del tenant: se valida (https + no interno, con DNS) por SSRF.
+      return openaiCompatible("ia_compatible", apiKey, opts.baseUrl, { verificarDestino: true });
     }
   }
 }

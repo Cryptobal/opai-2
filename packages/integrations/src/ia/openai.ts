@@ -10,14 +10,25 @@ import type {
   RespuestaConversacion,
   SolicitudConversacion,
 } from "./contrato";
-import { completarDesdeConversar, cuerpo, leerSSE, pedir } from "./http";
+import { ErrorIa, completarDesdeConversar, cuerpo, leerSSE, pedir } from "./http";
 import { type RespO, type ToolCall, type Uso, cabeceras, llamadasDe, motivo, peticion } from "./openai-mapa";
+import { exigirDestinoPublico } from "./red-segura";
 
-export function openaiCompatible(id: ProveedorIaId, apiKey: string, baseUrl: string): ProveedorIa {
+/** `verificarDestino`: valida (https + no interno, con DNS) la base URL antes de cada petición. */
+export function openaiCompatible(
+  id: ProveedorIaId,
+  apiKey: string,
+  baseUrl: string,
+  opts?: { verificarDestino?: boolean },
+): ProveedorIa {
   const url = `${baseUrl.replace(/\/$/, "")}/chat/completions`;
+  const verificar = opts?.verificarDestino
+    ? () => exigirDestinoPublico(baseUrl, "OpenAI")
+    : () => Promise.resolve();
   const self: ProveedorIa = {
     id,
     async conversar(modelo, s) {
+      await verificar();
       const r = await pedir(url, { method: "POST", headers: cabeceras(apiKey), body: JSON.stringify(peticion(modelo, s, false)) }, "OpenAI");
       const d = await cuerpo<RespO>(r, "OpenAI");
       const choice = d.choices[0];
@@ -30,7 +41,7 @@ export function openaiCompatible(id: ProveedorIaId, apiKey: string, baseUrl: str
         proveedor: id,
       };
     },
-    conversarStream: (modelo, s) => streamOpenai(id, url, apiKey, modelo, s),
+    conversarStream: (modelo, s) => streamOpenai(id, url, apiKey, modelo, s, verificar),
     completar: (modelo, s) => completarDesdeConversar(self).call(self, modelo, s),
   };
   return self;
@@ -53,12 +64,15 @@ async function* streamOpenai(
   apiKey: string,
   modelo: string,
   s: SolicitudConversacion,
+  verificar: () => Promise<void>,
 ): AsyncGenerator<EventoStream> {
+  await verificar();
   const r = await pedir(url, { method: "POST", headers: cabeceras(apiKey), body: JSON.stringify(peticion(modelo, s, true)) }, "OpenAI");
   let texto = "";
   let entrada = 0;
   let salida = 0;
   let razon: MotivoTermino = "fin";
+  let termino = false;
   const parciales = new Map<number, { id: string; nombre: string; args: string }>();
   for await (const payload of leerSSE(r, "OpenAI")) {
     const ev = JSON.parse(payload) as DeltaSSE;
@@ -80,8 +94,13 @@ async function* streamOpenai(
         args: prev.args + (tc.function?.arguments ?? ""),
       });
     }
-    if (choice?.finish_reason) razon = motivo(choice.finish_reason);
+    if (choice?.finish_reason) {
+      razon = motivo(choice.finish_reason);
+      termino = true;
+    }
   }
+  // Sin `finish_reason` el stream se cortó: no damos por completo lo que no lo está (ADR-049).
+  if (!termino) throw new ErrorIa("OpenAI", null, "OpenAI: stream incompleto.");
   const llamadas: LlamadaHerramienta[] = [...parciales.values()].map((p) => ({
     id: p.id,
     nombre: p.nombre,

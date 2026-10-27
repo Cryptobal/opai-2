@@ -117,10 +117,18 @@ async function* streamConRespaldo(
       }
       throw e;
     }
-    while (!actual.done) {
-      if (actual.value.tipo === "fin") await medir(ctx, clase, modulo, c, actual.value.respuesta.uso);
-      yield actual.value;
-      actual = await it.next();
+    // Ya respondió este proveedor: medimos el uso conocido en `finally`, aunque el stream se corte
+    // (lanza) o el consumidor cancele (rompe el bucle), y cerramos el iterador subyacente.
+    let uso: Uso = { tokensEntrada: 0, tokensSalida: 0 };
+    try {
+      while (!actual.done) {
+        if (actual.value.tipo === "fin") uso = actual.value.respuesta.uso;
+        yield actual.value;
+        actual = await it.next();
+      }
+    } finally {
+      await medir(ctx, clase, modulo, c, uso);
+      await it.return?.(undefined).catch(() => undefined);
     }
     return;
   }

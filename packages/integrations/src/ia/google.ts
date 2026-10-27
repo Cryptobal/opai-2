@@ -8,7 +8,7 @@ import type {
   RespuestaConversacion,
   SolicitudConversacion,
 } from "./contrato";
-import { completarDesdeConversar, cuerpo, leerSSE, pedir } from "./http";
+import { ErrorIa, completarDesdeConversar, cuerpo, leerSSE, pedir } from "./http";
 
 const base = "https://generativelanguage.googleapis.com/v1beta/models";
 const cabeceras = (apiKey: string) => ({ "x-goog-api-key": apiKey, "content-type": "application/json" });
@@ -113,6 +113,7 @@ async function* streamGoogle(
   let entrada = 0;
   let salida = 0;
   let razon: MotivoTermino = "fin";
+  let termino = false;
   const llamadas: LlamadaHerramienta[] = [];
   for await (const payload of leerSSE(r, "Google")) {
     const d = JSON.parse(payload) as RespG;
@@ -129,8 +130,13 @@ async function* streamGoogle(
         yield { tipo: "herramienta", llamada };
       }
     }
-    if (cand?.finishReason) razon = motivo(cand.finishReason);
+    if (cand?.finishReason) {
+      razon = motivo(cand.finishReason);
+      termino = true;
+    }
   }
+  // Sin `finishReason` el stream se cortó: no damos por completo lo que no lo está (ADR-049).
+  if (!termino) throw new ErrorIa("Google", null, "Google: stream incompleto.");
   const respuesta: RespuestaConversacion = {
     texto,
     llamadas,

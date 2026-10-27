@@ -30,40 +30,57 @@ export async function cuerpo<T>(r: Response, proveedor: string): Promise<T> {
   return (await r.json()) as T;
 }
 
-/** `fetch` que convierte un fallo de red o timeout en un `ErrorIa` reintentable (estado null). */
+/**
+ * `fetch` que convierte un fallo de red o timeout en un `ErrorIa` reintentable (estado null). Fuerza
+ * `redirect: "error"`: un 3xx no se sigue, así la key nunca viaja a un destino redirigido (SSRF).
+ */
 export async function pedir(
   url: string,
   init: RequestInit,
   proveedor: string,
 ): Promise<Response> {
   try {
-    return await fetch(url, init);
+    return await fetch(url, { ...init, redirect: "error" });
   } catch {
     throw new ErrorIa(proveedor, null, `${proveedor}: fallo de red o timeout.`);
   }
 }
 
-/** Lee un cuerpo SSE y entrega el contenido de cada línea `data:` (salta los `[DONE]`). */
+/**
+ * Lee un cuerpo SSE y entrega el contenido de cada línea `data:` (salta los `[DONE]`). Libera el
+ * lector al terminar o al cancelarse el consumo, y convierte un corte de red en un `ErrorIa`.
+ */
 export async function* leerSSE(r: Response, proveedor: string): AsyncGenerator<string> {
   exigirOk(r, proveedor);
   const reader = r.body?.getReader();
   if (!reader) return;
   const decoder = new TextDecoder();
   let buffer = "";
-  for (;;) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-    let corte = buffer.indexOf("\n");
-    while (corte >= 0) {
-      const linea = buffer.slice(0, corte).trim();
-      buffer = buffer.slice(corte + 1);
-      if (linea.startsWith("data:")) {
-        const payload = linea.slice(5).trim();
-        if (payload && payload !== "[DONE]") yield payload;
-      }
-      corte = buffer.indexOf("\n");
+  const leer = async () => {
+    try {
+      return await reader.read();
+    } catch {
+      throw new ErrorIa(proveedor, null, `${proveedor}: stream interrumpido.`);
     }
+  };
+  try {
+    for (;;) {
+      const { done, value } = await leer();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      let corte = buffer.indexOf("\n");
+      while (corte >= 0) {
+        const linea = buffer.slice(0, corte).trim();
+        buffer = buffer.slice(corte + 1);
+        if (linea.startsWith("data:")) {
+          const payload = linea.slice(5).trim();
+          if (payload && payload !== "[DONE]") yield payload;
+        }
+        corte = buffer.indexOf("\n");
+      }
+    }
+  } finally {
+    await reader.cancel().catch(() => undefined);
   }
 }
 

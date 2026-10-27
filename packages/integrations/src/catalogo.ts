@@ -3,6 +3,8 @@
 // solo se leen aquí, nunca en módulos.
 import { z } from "zod";
 
+import { baseUrlEsPublica } from "./ia/red-segura";
+
 export type CategoriaIntegracion =
   | "correo"
   | "geo"
@@ -106,7 +108,10 @@ export const CATALOGO_INTEGRACIONES: readonly DefinicionIntegracion[] = [
     secretos: [{ nombre: "api_key", etiqueta: "API key del proveedor" }],
     config: z
       .object({
-        baseUrl: z.url(),
+        // Exige https y rechaza destinos internos (SSRF): el adaptador revalida con DNS al pedir.
+        baseUrl: z
+          .url()
+          .refine(baseUrlEsPublica, "La base URL debe ser https y a un destino público (no interno)."),
         modelos: z
           .object({ economica: z.string(), estandar: z.string(), potente: z.string() })
           .partial()

@@ -171,6 +171,40 @@ describe("conversación con herramientas por HTTP (ADR-049)", () => {
     expect(r.llamadas).toEqual([{ id: "call_0", nombre: "ver", argumentos: { id: 1 } }]);
   });
 
+  it("Anthropic: un evento de error en el stream lanza ErrorIa", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        sse([
+          { type: "message_start", message: { usage: { input_tokens: 3 } } },
+          { type: "content_block_delta", index: 0, delta: { type: "text_delta", text: "ho" } },
+          { type: "error", error: { type: "overloaded_error", message: "x" } },
+        ]),
+      ),
+    );
+    const e = await recolectar(
+      proveedorIa("ia_anthropic", "k").conversarStream("m", { mensajes: [{ rol: "usuario", texto: "x" }] }),
+    ).catch((x: unknown) => x);
+    expect(e).toBeInstanceOf(ErrorIa);
+  });
+
+  it("un stream cortado (sin evento final) lanza ErrorIa en cada proveedor", async () => {
+    const casos: { id: Parameters<typeof proveedorIa>[0]; eventos: unknown[]; opts?: { baseUrl: string } }[] = [
+      { id: "ia_anthropic", eventos: [{ type: "content_block_delta", index: 0, delta: { type: "text_delta", text: "ho" } }] },
+      { id: "ia_openai", eventos: [{ choices: [{ delta: { content: "ho" } }] }] },
+      { id: "ia_google", eventos: [{ candidates: [{ content: { parts: [{ text: "ho" }] } }] }] },
+      { id: "ia_xai", eventos: [{ choices: [{ delta: { content: "ho" } }] }], opts: { baseUrl: "https://api.x.ai/v1" } },
+    ];
+    for (const caso of casos) {
+      vi.stubGlobal("fetch", vi.fn(async () => sse(caso.eventos)));
+      const e = await recolectar(
+        proveedorIa(caso.id, "k", caso.opts).conversarStream("m", { mensajes: [{ rol: "usuario", texto: "x" }] }),
+      ).catch((x: unknown) => x);
+      expect(e, caso.id).toBeInstanceOf(ErrorIa);
+      vi.unstubAllGlobals();
+    }
+  });
+
   it("un 429 es reintentable y un 400 no; el error nunca incluye la key", async () => {
     vi.stubGlobal(
       "fetch",

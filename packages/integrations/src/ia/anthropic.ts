@@ -9,7 +9,7 @@ import type {
   RespuestaConversacion,
   SolicitudConversacion,
 } from "./contrato";
-import { completarDesdeConversar, cuerpo, leerSSE, pedir } from "./http";
+import { ErrorIa, completarDesdeConversar, cuerpo, leerSSE, pedir } from "./http";
 
 export function anthropic(apiKey: string): ProveedorIa {
   const self: ProveedorIa = {
@@ -60,11 +60,15 @@ async function* streamAnthropic(
   let entrada = 0;
   let salida = 0;
   let razon: MotivoTermino = "fin";
+  let termino = false;
   const llamadas: LlamadaHerramienta[] = [];
   const bloques = new Map<number, { id: string; nombre: string; json: string }>();
   for await (const payload of leerSSE(r, "Anthropic")) {
     const ev = JSON.parse(payload) as EventoSSE;
-    if (ev.type === "message_start") entrada = ev.message?.usage?.input_tokens ?? 0;
+    if (ev.type === "error")
+      throw new ErrorIa("Anthropic", null, "Anthropic: el stream reportó un error.");
+    if (ev.type === "message_stop") termino = true;
+    else if (ev.type === "message_start") entrada = ev.message?.usage?.input_tokens ?? 0;
     else if (ev.type === "content_block_start" && ev.content_block?.type === "tool_use")
       bloques.set(ev.index ?? 0, { id: ev.content_block.id ?? "", nombre: ev.content_block.name ?? "", json: "" });
     else if (ev.type === "content_block_delta" && ev.delta?.type === "text_delta") {
@@ -86,9 +90,14 @@ async function* streamAnthropic(
       }
     } else if (ev.type === "message_delta") {
       salida = ev.usage?.output_tokens ?? salida;
-      if (ev.delta?.stop_reason) razon = motivo(ev.delta.stop_reason);
+      if (ev.delta?.stop_reason) {
+        razon = motivo(ev.delta.stop_reason);
+        termino = true;
+      }
     }
   }
+  // Sin `message_delta`/`message_stop` el stream se cortó: lanzamos en vez de dar un fin falso.
+  if (!termino) throw new ErrorIa("Anthropic", null, "Anthropic: stream incompleto.");
   const respuesta: RespuestaConversacion = {
     texto,
     llamadas,
