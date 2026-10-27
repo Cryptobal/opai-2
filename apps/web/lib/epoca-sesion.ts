@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { cache } from "react";
 
 import type { Identidad } from "./actor";
 
@@ -27,9 +28,11 @@ export function epocaDeIdentidad(identidad: Identidad | null): string {
 
 /**
  * Marca de servidor (ms) de cuándo se generó esta vista. El navegador mide su edad para el refresco
- * silencioso (`useRefrescoSilencioso`): tiene que ser hora de servidor, no del cliente. Envuelta en
- * una función para no llamar a `Date.now()` dentro del render de un componente (regla de pureza).
+ * silencioso (`useRefrescoSilencioso`): tiene que ser hora de servidor, no del cliente.
+ *
+ * Memoizada por request con `cache()`: así devuelve el MISMO valor en cada render del request. Sin
+ * esto, `Date.now()` cambiaba entre los dos pases de render que hace Cache Components para validar el
+ * prerender; esa impureza rompía la reconciliación del cliente al navegar (el router pedía el RSC del
+ * destino una y otra vez y nunca aplicaba la navegación: la página se quedaba en la anterior).
  */
-export function marcaGenerado(): number {
-  return Date.now();
-}
+export const marcaGenerado = cache((): number => Date.now());

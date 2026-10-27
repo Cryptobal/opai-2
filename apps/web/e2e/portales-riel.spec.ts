@@ -69,7 +69,7 @@ test.describe("acceso a portales", () => {
 
   test("ERP sin acceso (empresa pero sin el portal): sin búsqueda ni Preferencias, con salida", async ({
     page,
-  }) => {
+  }, testInfo) => {
     test.setTimeout(120_000);
     await page.goto("/login");
     await page.getByLabel("Correo").fill(sinErpEmail);
@@ -83,6 +83,12 @@ test.describe("acceso a portales", () => {
     ).toBeVisible();
     // N1: sin acceso al ERP no hay búsqueda ni ⌘K (el disparador de Buscar no se monta).
     await expect(page.getByRole("button", { name: /Buscar/ })).toHaveCount(0);
+    await page.keyboard.press("Control+k");
+    await page.keyboard.press("Meta+k");
+    await expect(page.getByRole("dialog")).toHaveCount(0);
+    if (testInfo.project.name !== "telefono") {
+      await expect(page.getByRole("heading", { level: 1, name: "Sin permisos" })).toBeVisible();
+    }
     // N2: el menú de usuario no ofrece Preferencias, pero conserva la salida.
     await page.getByRole("button", { name: "Menú de usuario" }).first().click();
     await expect(page.getByRole("menuitem", { name: "Preferencias" })).toHaveCount(0);
@@ -90,9 +96,9 @@ test.describe("acceso a portales", () => {
     await page.waitForURL((url) => url.pathname.startsWith("/login"));
   });
 
-  test("sin empresa activa: aviso dentro del shell, con Elegir empresa y Cerrar sesión", async ({
+  test("sin empresa activa: sin enlace circular, con título y Cerrar sesión", async ({
     page,
-  }) => {
+  }, testInfo) => {
     test.setTimeout(120_000);
     await page.goto("/login");
     await page.getByLabel("Correo").fill(sinEmpresaEmail);
@@ -104,7 +110,19 @@ test.describe("acceso a portales", () => {
     const nav = page.getByRole("navigation", { name: "Principal" });
     await expect(nav.first()).toBeVisible();
     await expect(nav.getByRole("link")).toHaveCount(0);
-    await expect(page.getByRole("link", { name: "Elegir empresa" })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Elegir empresa" })).toHaveCount(0);
+    if (testInfo.project.name !== "telefono") {
+      await expect(page.getByRole("heading", { level: 1, name: "Sin permisos" })).toBeVisible();
+    }
+    for (const tema of ["light", "dark"]) {
+      await page.locator("html").evaluate((html, valor) => {
+        html.classList.toggle("dark", valor === "dark");
+      }, tema);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+        true,
+      );
+      await page.screenshot({ path: testInfo.outputPath(`sin-empresa-${tema}.png`) });
+    }
     await page.getByRole("button", { name: "Menú de usuario" }).first().click();
     await page.getByRole("menuitem", { name: "Cerrar sesión" }).click();
     await page.waitForURL((url) => url.pathname.startsWith("/login"));

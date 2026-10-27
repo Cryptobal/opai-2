@@ -10,25 +10,31 @@ export const POR_PAGINA = 50;
 /** Cursores ya recorridos (`?prev=a,b`) para volver con "Anterior" en una paginación por cursor. */
 export const anteriores = (p: Parametros) => (p["prev"] ? p["prev"].split(",") : []);
 
-/** Personas filtradas (texto, cargo, estado) y paginadas por cursor, con cargos y total. */
+type PaginaPersonas = Pagina<PersonaFila> & {
+  total: number;
+  cargos: { id: string; nombre: string }[];
+};
+
+/**
+ * Personas filtradas (texto, cargo, estado) y paginadas por cursor, con el total y los cargos del
+ * filtro en la misma capacidad (ADR-045): una sola llamada, sin un contador ni una lista de cargos
+ * aparte.
+ */
 export async function cargarPersonas(p: Parametros) {
-  const [r, cargos, total] = await Promise.all([
-    ejecutarComoUsuario<Pagina<PersonaFila>>("erp", "core.personas.list", {
-      limite: POR_PAGINA,
-      ...(p["q"] ? { q: p["q"] } : {}),
-      ...(p["cargo"] ? { cargoId: p["cargo"] } : {}),
-      ...(p["estado"] ? { estado: p["estado"] } : {}),
-      ...(p["cursor"] ? { cursor: p["cursor"] } : {}),
-    }),
-    cargarCargos(),
-    ejecutarComoUsuario<{ personas: number | null }>("erp", "core.resumen.contadores", {}),
-  ]);
+  const r = await ejecutarComoUsuario<PaginaPersonas>("erp", "core.personas.list", {
+    limite: POR_PAGINA,
+    incluirFiltros: true,
+    ...(p["q"] ? { q: p["q"] } : {}),
+    ...(p["cargo"] ? { cargoId: p["cargo"] } : {}),
+    ...(p["estado"] ? { estado: p["estado"] } : {}),
+    ...(p["cursor"] ? { cursor: p["cursor"] } : {}),
+  });
   return {
     state: estadoPantalla(r),
     items: r.ok ? r.data.items : [],
     siguiente: r.ok ? r.data.siguiente : null,
-    total: total.ok ? total.data.personas : null,
-    cargos: cargos.map((c) => ({ valor: c.id, etiqueta: c.nombre })),
+    total: r.ok ? r.data.total : null,
+    cargos: r.ok ? (r.data.cargos ?? []).map((c) => ({ valor: c.id, etiqueta: c.nombre })) : [],
   };
 }
 
