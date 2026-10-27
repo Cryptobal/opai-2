@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { defineDatosPersonales } from "./datos-personales";
+import { camposACifrar, defineDatosPersonales } from "./datos-personales";
 
 const valida = {
   tabla: "personas",
@@ -33,6 +33,19 @@ describe("defineDatosPersonales", () => {
     expect(() =>
       defineDatosPersonales("core", [{ ...valida, camposSensibles: ["salud"] }]),
     ).toThrow(/sensible "salud" no está en campos/);
+  });
+
+  it("lo sensible va con su categoría y viceversa (§16.4)", () => {
+    expect(() =>
+      defineDatosPersonales("core", [{ ...valida, camposSensibles: ["rut"] }]),
+    ).toThrow(/no la categoría "sensible"/);
+    expect(() =>
+      defineDatosPersonales("core", [{ ...valida, categorias: ["sensible"] }]),
+    ).toThrow(/sin camposSensibles/);
+    const ok = defineDatosPersonales("core", [
+      { ...valida, categorias: ["sensible"], camposSensibles: ["rut"] },
+    ]);
+    expect(camposACifrar(ok)).toEqual([{ tabla: "personas", campo: "rut" }]);
   });
 
   it("rechaza declarar la misma tabla dos veces", () => {

@@ -18,6 +18,15 @@ describe("cifrado de secretos (envelope AES-256-GCM)", () => {
     expect(() => descifrar(generarDek(), s)).toThrow();
   });
 
+  it("con AAD, el valor solo se descifra en su contexto", () => {
+    const k = generarDek();
+    const aad = Buffer.from("tenant-1:personas.salud");
+    const c = cifrar(k, Buffer.from("dato"), aad);
+    expect(descifrar(k, c, aad).toString()).toBe("dato");
+    expect(() => descifrar(k, c, Buffer.from("tenant-2:personas.salud"))).toThrow();
+    expect(() => descifrar(k, c)).toThrow();
+  });
+
   it("lee la KEK del entorno y rechaza largos inválidos", () => {
     const k = generarDek().toString("base64");
     expect(kekDelEntorno({ OPAI_SECRETS_KEY: k }).actual?.length).toBe(32);
