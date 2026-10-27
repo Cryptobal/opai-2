@@ -1,10 +1,11 @@
-import type { Excepcion, Rol } from "@opai/domain";
+import type { Acceso, Excepcion, Rol } from "@opai/domain";
 
 import { autorizador } from "../contexto";
 import { idempotenciaSobre } from "../idempotencia";
 import type { AgenteContexto, Alcance, ConsumoNuevo, Principal } from "../types";
 import { almacenamientoEnMemoria } from "./almacenamiento-memoria";
 import { dbEnMemoria } from "./db-memoria";
+import { medidorEnMemoria } from "./medidor-memoria";
 import { bitacoraEnMemoria, eventosEnMemoria, trabajosEnMemoria } from "./servicios-memoria";
 import type { Actor, Contexto, Correo, EventoAuditoria, UsuarioContexto } from "./tipos";
 
@@ -35,6 +36,10 @@ export type OpcionesPrueba = {
   /** Alcance por filas del actor (null = ve todo). ADR-022 · Brief 07c B3. */
   alcance?: Alcance | null;
   agente?: AgenteContexto | null;
+  /** Permisos finos de la API key (Identidad de servicio t457u). Cruza con los del responsable. */
+  claveApi?: { permisos: readonly string[] | null; servicio: boolean } | null;
+  /** Techo real del responsable de la key (H15). Por defecto, el mismo `rol`/`permisosRol`/`excepciones`. */
+  accesoResponsable?: Acceso | null;
   semilla?: Parameters<typeof dbEnMemoria>[0];
 };
 
@@ -97,7 +102,7 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
         });
       },
     },
-    medidor: { registrar: async (c) => void usos.push(c) },
+    medidor: medidorEnMemoria(tabla, usos, o.agente),
     eventos: eventosEnMemoria(TENANT_DE_PRUEBA, actor),
     trabajos: trabajosEnMemoria(TENANT_DE_PRUEBA),
     bitacora: bitacoraEnMemoria(tabla, TENANT_DE_PRUEBA),
@@ -109,7 +114,8 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
       almacenamiento: almacen.almacenamiento,
       urlBase: "https://test.opai.cl",
     },
-    plataforma: usuario?.platformRole ? { globales, paraTenant: () => db } : null,
+    plataforma:
+      usuario?.platformRole && actor.tipo !== "agent" ? { globales, paraTenant: () => db } : null,
     autorizar: o.permisos
       ? (p) => (o.permisos ?? []).includes(p)
       : autorizador(
@@ -119,6 +125,8 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
             excepciones: o.excepciones ?? null,
           },
           usuario,
+          o.claveApi ?? null,
+          o.accesoResponsable ?? undefined,
         ),
   };
   const esperar = () => Promise.all(diferidos.splice(0));

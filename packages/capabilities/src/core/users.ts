@@ -44,7 +44,10 @@ export const usersList = defineCapability({
       include: { user: true, rolTenant: true },
       orderBy: { createdAt: "asc" },
     });
-    const accesos = await ultimosAccesos(ctx, filas.map((m) => m.userId));
+    const accesos = await ultimosAccesos(
+      ctx,
+      filas.map((m) => m.userId),
+    );
     return filas.map((m) => aMiembro(m, accesos.get(m.userId) ?? null));
   },
 });
@@ -68,13 +71,22 @@ export const usersUpdate = defineCapability({
   async handler(ctx, input, { dryRun }) {
     const actual = await buscar(ctx, input.membershipId);
     verificarJerarquia(ctx, actual, input.rol);
+    // El rol base y la promoción a owner los cambia solo una persona, nunca una API key ni un agente
+    // (review 5661003883 del #60; mandatos t365u y t366u de cerrar el Núcleo). `update` no puede ser
+    // `soloPersonas` entera (un agente sí cambia portales o estado), así que se bloquean solo el rol
+    // base y el rol personalizado: si no, una key de owner o admin se promovería o promovería a otros.
+    if (input.rol !== undefined && ctx.actor.tipo === "agent") {
+      throw prohibido(
+        "Solo una persona puede cambiar el rol base o promover a owner, no una API key.",
+      );
+    }
     // Asignar o cambiar un rol personalizado es gobierno de acceso (§16.2): solo owner o admin y,
-    // como `core.roles.assign` (soloPersonas, ADR-032), nunca una API key ni un agente. `update` no
-    // puede ser `soloPersonas` entera (un agente sí cambia portales o estado), así que se bloquea solo
-    // el `roleId`: si no, una key de admin asignaría o quitaría roles que `core.roles.assign` le veda.
+    // como `core.roles.assign` (soloPersonas, ADR-032), nunca una API key ni un agente.
     if (input.roleId !== undefined) {
       if (ctx.actor.tipo === "agent") {
-        throw prohibido("Solo una persona puede asignar o quitar un rol personalizado, no una API key.");
+        throw prohibido(
+          "Solo una persona puede asignar o quitar un rol personalizado, no una API key.",
+        );
       }
       exigeGestionDeRoles(ctx);
     }
@@ -82,7 +94,9 @@ export const usersUpdate = defineCapability({
       actual.rol === "owner" &&
       ((input.rol !== undefined && input.rol !== "owner") || input.estado === "suspendida");
     if (pierdeOwner && !(await quedanOtrosOwners(ctx, actual.id))) {
-      throw reglaDeNegocio("Es el único owner de la empresa. Asigna otro owner antes de cambiar su rol.");
+      throw reglaDeNegocio(
+        "Es el único owner de la empresa. Asigna otro owner antes de cambiar su rol.",
+      );
     }
     // Un owner tiene acceso total por definición: al promover a owner se descartan su rol personalizado
     // y sus excepciones, para que nunca quede un owner restringido que cuente como «otro owner» (§16.2).

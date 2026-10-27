@@ -5,6 +5,8 @@
  * capacidades `interna` o `soloPersonas` del registro (sin entradas obsoletas ni faltantes).
  */
 export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
+  "core.users.invite":
+    "Solo personas: invitar asigna un rol y gobierna el acceso (encargo PR #70).",
   "core.invitations.peek":
     "Interna: se ejecuta antes de existir sesión (el token del enlace es la credencial).",
   "core.geo.mapa":
@@ -53,8 +55,7 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: cambiar los permisos de un rol es gobernar el acceso (ADR-034).",
   "core.roles.archive":
     "Solo personas: archivar un rol es gobierno de acceso; un agente no lo hace (ADR-034).",
-  "core.roles.assign":
-    "Solo personas: asignar un rol a un usuario gobierna su acceso (ADR-034).",
+  "core.roles.assign": "Solo personas: asignar un rol a un usuario gobierna su acceso (ADR-034).",
   "core.excepciones.set":
     "Solo personas: conceder o denegar permisos puntuales es gobierno de acceso (ADR-034).",
   "core.supervisores.asignar":

@@ -35,6 +35,8 @@ export function fuentesFalsas(
     scopes: ["*"],
     principalTipo: "usuario",
     principalId: null,
+    permisos: [],
+    heredaPermisos: true,
     revocadaEn: null,
     expiraEn: null,
     ultimoUsoEn: null,
