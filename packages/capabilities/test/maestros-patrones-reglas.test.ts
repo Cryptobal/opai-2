@@ -176,8 +176,14 @@ describe("permisos finos de patrones y funciones (#47)", () => {
     for (const [id, input] of edicion) expect(await codigo(ctx, id, input)).toBe("FORBIDDEN");
   });
 
-  it("supervisor no edita ni desactiva patrones ni funciones", async () => {
+  it("supervisor lee los catálogos (list y get) pero no los edita ni los desactiva", async () => {
     const { ctx } = contextoDePrueba({ rol: "supervisor" });
+    // Lectura permitida: list devuelve OK y get pasa la autorización (llega a buscar y no encuentra:
+    // NOT_FOUND, no FORBIDDEN). Si al supervisor le faltara el permiso de lectura sería FORBIDDEN.
+    expect(await codigo(ctx, "core.patrones.list", {})).toBe("OK");
+    expect(await codigo(ctx, "core.funciones.list", {})).toBe("OK");
+    expect(await codigo(ctx, "core.patrones.get", { id: ID })).toBe("NOT_FOUND");
+    expect(await codigo(ctx, "core.funciones.get", { id: ID })).toBe("NOT_FOUND");
     for (const [id, input] of edicion) expect(await codigo(ctx, id, input)).toBe("FORBIDDEN");
   });
 });

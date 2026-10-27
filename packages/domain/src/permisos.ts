@@ -51,6 +51,10 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
       PERMISOS_CORE.tenantRead,
       PERMISOS_CORE.cuentasRead,
       PERMISOS_CORE.instalacionesRead,
+      // Puestos (Brief 11): el supervisor lee los catálogos de patrones y funciones para ver
+      // los puestos de su instalación, pero no los edita ni los desactiva.
+      PERMISOS_CORE.patronesRead,
+      PERMISOS_CORE.funcionesRead,
       PERMISOS_CORE.personasRead,
       PERMISOS_CORE.documentosRead,
       PERMISOS_CORE.configRead,
