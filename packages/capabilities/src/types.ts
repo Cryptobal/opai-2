@@ -173,6 +173,10 @@ export interface Capacidad<I extends z.ZodType = z.ZodType, O extends z.ZodType 
   sinTenant?: boolean;
   /** Campos del input que nunca se guardan en auditoría ni en aprobaciones (secretos). */
   sensibles?: readonly string[];
+  /** Identificadores revelados por una lectura; nunca contenido personal ni input sin validar. */
+  auditarLectura?: (salida: z.output<O>) => readonly string[];
+  /** Revalida el acceso vigente a una respuesta idempotente sin repetir sus efectos. */
+  autorizarRepeticion?: (ctx: Contexto, input: z.output<I>, salida: unknown) => Promise<void>;
   /** Nunca la ejecuta una API key (aprobaciones, autonomía y presupuesto de agentes). */
   soloPersonas?: boolean;
   /** Portales donde está disponible (ADR-033). Por defecto ["erp"] (plataforma: ["platform"]). */

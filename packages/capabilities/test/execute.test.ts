@@ -10,6 +10,20 @@ import { contextoDePrueba, TENANT_DE_PRUEBA } from "../src/testing";
 
 const agente = { tipo: "agent" as const, id: "grokbot", viaUserId: "carlos" };
 
+const lecturaPersonal = defineCapability({
+  id: "test.persona.leer",
+  descripcion: "Consulta de prueba para auditar el acceso a datos personales.",
+  permiso: "test:read",
+  input: z.object({ dato: z.string() }),
+  output: z.object({ dato: z.string() }),
+  efecto: "lectura",
+  auditarLectura: () => [],
+  dryRun: false,
+  async handler(_ctx, input) {
+    return input;
+  },
+});
+
 function ctxCon(permisos: string[] = [], extra: Parameters<typeof contextoDePrueba>[0] = {}) {
   return contextoDePrueba({ permisos, actor: agente, modulosActivos: ["test"], ...extra });
 }
@@ -49,7 +63,7 @@ const crearNotaConEvento = defineCapability({
 
 beforeEach(() => {
   limpiarRegistro();
-  registrarCapacidades([...capacidadesDelNucleo, crearNota, crearNotaConEvento]);
+  registrarCapacidades([...capacidadesDelNucleo, crearNota, crearNotaConEvento, lecturaPersonal]);
 });
 
 describe("defineCapability", () => {
@@ -75,6 +89,63 @@ describe("defineCapability", () => {
 });
 
 describe("executeCapability", () => {
+  it("audita y devuelve la misma salida transformada una sola vez; salida inválida no se revela", async () => {
+    let transformaciones = 0;
+    const transformada = defineCapability({
+      id: "test.lectura.transformada",
+      descripcion: "Lectura auditada de prueba con transformación no determinista de salida.",
+      permiso: "test:read",
+      input: z.object({}),
+      output: z.object({}).transform(() => ({ id: String(++transformaciones) })),
+      efecto: "lectura",
+      dryRun: false,
+      auditarLectura: (s) => [s.id],
+      handler: async () => ({}),
+    });
+    const invalida = defineCapability({
+      id: "test.lectura.invalida",
+      descripcion: "Lectura auditada de prueba que rechaza la validación de su salida.",
+      permiso: "test:read",
+      input: z.object({}),
+      output: z.string().refine(() => false),
+      efecto: "lectura",
+      dryRun: false,
+      auditarLectura: () => [],
+      handler: async () => "no revelar",
+    });
+    registrarCapacidades([transformada, invalida]);
+    const { ctx, eventos } = ctxCon(["test:read"]);
+    expect(await executeCapability(ctx, transformada.id, {})).toMatchObject({
+      ok: true,
+      data: { id: "1" },
+    });
+    expect(transformaciones).toBe(1);
+    expect(eventos[0]?.payload).toEqual({ ids: ["1"] });
+    expect(await executeCapability(ctx, invalida.id, {})).toMatchObject({
+      ok: false,
+      error: { code: "INVALID_OUTPUT" },
+    });
+    expect(eventos).toHaveLength(1);
+  });
+  it("audita la lectura personal sin contenido y falla cerrada si no puede auditar", async () => {
+    const { ctx, eventos } = ctxCon(["test:read"]);
+    expect(await executeCapability(ctx, lecturaPersonal.id, { dato: "privado" })).toMatchObject({
+      ok: true,
+    });
+    expect(eventos).toEqual([
+      expect.objectContaining({ capability: lecturaPersonal.id, payload: { ids: [] } }),
+    ]);
+    expect(JSON.stringify(eventos)).not.toContain("privado");
+    ctx.auditoria.registrar = async () => {
+      throw new Error("auditoría caída");
+    };
+    expect(await executeCapability(ctx, lecturaPersonal.id, { dato: "privado" })).toMatchObject({
+      ok: false,
+    });
+    expect(
+      await executeCapability(ctxCon().ctx, lecturaPersonal.id, { dato: "privado" }),
+    ).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+  });
   it("devuelve NOT_FOUND para un id inexistente", async () => {
     const r = await executeCapability(ctxCon().ctx, "core.nada", {});
     expect(r).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });

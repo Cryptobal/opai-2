@@ -23,6 +23,9 @@ export function defineCapability<I extends z.ZodType, O extends z.ZodType>(
   if (def.efecto !== "lectura" && !def.dryRun) {
     throw new Error(`La capacidad "${def.id}" escribe datos y debe soportar dryRun.`);
   }
+  if (def.auditarLectura && (def.efecto !== "lectura" || def.sinTenant || def.tenantObjetivo)) {
+    throw new Error(`La auditoría de lectura de "${def.id}" requiere lectura con tenant actual.`);
+  }
   const largo = def.descripcion.trim().length;
   if (largo < DESCRIPCION_MINIMA) {
     throw new Error(
