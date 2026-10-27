@@ -74,6 +74,11 @@ No se declara CI, QA remota ni aprobación del head nuevo; Neon sigue sin modifi
 
 ## Hecho
 
+- **NÚCLEO-D2 (encargo t457u, apilado sobre #75):** navegación de portales filtrada con los
+  permisos efectivos de la identidad ya cargada; ERP conserva el filtrado heredado por permiso de
+  cada entrada. El alcance se sigue aplicando en capacidades, no en el menú. Sin consultas ni
+  migraciones nuevas. Adaptación técnica de OpenCode; sin decisiones de negocio nuevas.
+
 - **PR #75 · QA N1 y N2 (OpenCode):** etiquetas completas con separación silábica en español cuando sea necesaria, riel de 80 px y tipografía del DS; filas de fijados y reintento de al menos 44 px. Ajuste técnico de OpenCode según revisión 5668628029, sin decisiones de negocio nuevas ni migraciones propias. Los CA parciales del Brief 05 §16 siguen vigentes.
 
 - **PR #75 · revisión 5666749146:** OpenCode retira abreviaturas del ERP y recupera el área abierta guardada al entrar en Inicio o Configuración. Ajuste técnico según el encargo; sin decisiones de negocio nuevas. Permanecen los CA y la medición de rendimiento parciales documentados en `briefs/BRIEF-05-navegacion.md` §16.

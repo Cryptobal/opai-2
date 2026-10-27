@@ -4,7 +4,7 @@ import { createElement } from "react";
 import type { Identidad } from "@/lib/actor";
 import { tieneAccesoAPortal } from "@/lib/acceso-portal";
 import { epocaDe } from "@/lib/epoca-sesion";
-import { NAV_PLATAFORMA, navegacionErp, navegacionPortal } from "@/lib/navegacion";
+import { navegacionErp, navegacionPortal } from "@/lib/navegacion";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
 
 import type { DatosShell } from "./marco-shell";
@@ -25,13 +25,14 @@ export function datosShell(identidad: Identidad, portal: string): DatosShell {
   // (plataforma por `platformRole`, los demás por la membresía). Lo usa el shell para no ofrecer
   // búsqueda, ⌘K ni Preferencias sin acceso (`marco-shell.tsx`), y aquí para la navegación.
   const acceso = tieneAccesoAPortal(identidad, portal);
+  const puede = puedeDeIdentidad(identidad);
   // Sin acceso al portal el shell se monta igual (`portal-layout.tsx`), pero sin navegación: solo el
   // selector de portal y empresa, el menú de usuario y el aviso «Sin permisos» de la página.
   const erp =
     acceso && portal === "erp"
       ? navegacionErp(
           actual && esRol(actual.rol) ? actual.rol : null,
-          puedeDeIdentidad(identidad),
+          puede,
           identidad.modulosActivos,
           vocabulario(esVertical(vertical) ? vertical : "seguridad"),
         )
@@ -40,9 +41,7 @@ export function datosShell(identidad: Identidad, portal: string): DatosShell {
     ? erp.nav
     : !acceso
       ? []
-      : portal === "platform"
-        ? NAV_PLATAFORMA
-        : navegacionPortal(inicio, portal);
+      : navegacionPortal(inicio, portal, puede);
   return {
     portal,
     acceso,
