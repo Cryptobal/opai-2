@@ -1,12 +1,14 @@
 import { expect, test } from "@playwright/test";
 import { E2E_PASSWORD, entrar } from "./sesion";
 import { comprobarContrasteNavegacion } from "./contraste-navegacion";
+import { ocultarIndicadorDev } from "./indicador-dev";
 
 test.use({ actionTimeout: 30_000 });
 test.setTimeout(180_000);
 
 test("recuerda el área abierta en Inicio y Configuración", async ({ page }, info) => {
   test.skip(info.project.name === "telefono", "El acordeón lateral se muestra desde 1024 px");
+  await ocultarIndicadorDev(page);
   await entrar(page);
   await page.goto("/configuracion");
   const nav = page.getByRole("navigation", { name: "Principal", exact: true }).filter({ visible: true });
@@ -25,6 +27,7 @@ test("recuerda el área abierta en Inicio y Configuración", async ({ page }, in
 });
 
 test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }, info) => {
+  await ocultarIndicadorDev(page);
   const errores: string[] = [];
   page.on("pageerror", (e) => { errores.push(e.message); });
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -36,7 +39,8 @@ test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }
   await segunRol.click();
   await expect(segunRol).toHaveAttribute("data-state", "checked");
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: /^Bandeja · \d/ })).toBeVisible();
+  // La Bandeja carga su chunk y sus datos después del montaje.
+  await expect(page.getByRole("heading", { name: /^Bandeja · \d/ })).toBeVisible({ timeout: 15_000 });
   const nav = page
     .getByRole("navigation", { name: "Principal", exact: true })
     .filter({ visible: true });
@@ -135,7 +139,8 @@ test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }
   await page.getByRole("radio", { name: /^Según mi rol/ }).click();
   await expect(page.getByRole("radio", { name: /^Según mi rol/ })).toHaveAttribute("data-state", "checked");
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: /^Bandeja · \d/ })).toBeVisible();
+  // La Bandeja carga su chunk y sus datos después del montaje.
+  await expect(page.getByRole("heading", { name: /^Bandeja · \d/ })).toBeVisible({ timeout: 15_000 });
   await page
     .locator("header")
     .getByRole("link", { name: /Notificaciones/ })
