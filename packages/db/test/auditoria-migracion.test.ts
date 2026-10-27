@@ -49,21 +49,21 @@ describe.skipIf(!urlPropietario)("despliegue de auditoría en dos fases", () => 
       await insertarVieja();
       const fase1 = await readFile(
         new URL(
-          "../prisma/migrations/20261028090000_auditoria_encadenada/migration.sql",
+          "../prisma/migrations/20261028130000_auditoria_encadenada/migration.sql",
           import.meta.url,
         ),
         "utf8",
       );
       const fase2 = await readFile(
         new URL(
-          "../prisma/migrations/20261028100000_auditoria_obligatoria/migration.sql",
+          "../prisma/migrations/20261028140000_auditoria_obligatoria/migration.sql",
           import.meta.url,
         ),
         "utf8",
       );
       const indice = await readFile(
         new URL(
-          "../prisma/migrations/20261028093000_auditoria_indice_concurrente/migration.sql",
+          "../prisma/migrations/20261028133000_auditoria_indice_concurrente/migration.sql",
           import.meta.url,
         ),
         "utf8",

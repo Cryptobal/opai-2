@@ -19,14 +19,24 @@ async function aprobacion(
   entrada: unknown,
   opciones: OpcionesEjecucion,
 ): Promise<Resultado | null> {
-  const a = ctx.agente;
+  const interno = ctx.actor.tipo === "agent" && ctx.actor.interno ? ctx.actor.id : null;
+  const a =
+    ctx.agente ??
+    (interno
+      ? { apiKeyId: null, nombre: "Agente interno", autonomia: {} as Record<string, string> }
+      : null);
   const nivel = a?.autonomia[c.id];
   const exige = nivel === "aprobacion" || (c.efecto === "irreversible" && nivel !== "directo");
   if (!a || !exige) return null;
   if (ctx.actor.tipo !== "agent") return null;
   const repetida = opciones.idempotencyKey
     ? await ctx.db.aprobacion.findFirst({
-        where: { apiKeyId: a.apiKeyId, capability: c.id, idempotencyKey: opciones.idempotencyKey },
+        where: {
+          apiKeyId: a.apiKeyId,
+          ...(interno ? { agenteInternoId: interno, viaUserId: ctx.actor.viaUserId } : {}),
+          capability: c.id,
+          idempotencyKey: opciones.idempotencyKey,
+        },
       })
     : null;
   if (repetida) {
@@ -45,6 +55,7 @@ async function aprobacion(
       data: {
         tenantId: ctx.tenantId,
         apiKeyId: a.apiKeyId,
+        agenteInternoId: interno,
         viaUserId: ctx.actor.viaUserId ?? "",
         capability: c.id,
         input: JSON.parse(JSON.stringify(entrada ?? {})),
@@ -95,7 +106,8 @@ export async function controlAgente(
   entrada: unknown,
   opciones: OpcionesEjecucion,
 ) {
-  if (ctx.actor.tipo !== "agent" || !ctx.agente || opciones.dryRun) return null;
+  if (ctx.actor.tipo !== "agent" || (!ctx.agente && !ctx.actor.interno) || opciones.dryRun)
+    return null;
   // El presupuesto se consume atómicamente en el medidor ANTES del handler (execute.ts).
   return aprobacion(ctx, c, entrada, opciones);
 }

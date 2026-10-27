@@ -8,7 +8,13 @@ import type { BaseLicitud, CategoriaDato } from "./datos-personales";
 import { etiquetaCampo } from "./etiquetas-datos-personales";
 
 /** Categorías de negocio del RAT; una es la principal, el conjunto completo alimenta el filtro. */
-export const CATEGORIAS_RAT = ["Identificación", "Contacto", "Laboral", "Económica", "Sensible"] as const;
+export const CATEGORIAS_RAT = [
+  "Identificación",
+  "Contacto",
+  "Laboral",
+  "Económica",
+  "Sensible",
+] as const;
 export type CategoriaRat = (typeof CATEGORIAS_RAT)[number];
 
 /** La categoría técnica del inventario → categoría de negocio. "credenciales" se muestra bajo
@@ -54,6 +60,7 @@ export const ACTIVIDADES_TRATAMIENTO: readonly ActividadTratamiento[] = [
   { id: 9, actividad: "Trazabilidad y cumplimiento", categoriaPrincipal: "Identificación", baseLicitud: "obligacion_legal", tablas: ["audit_events", "dpa_aceptaciones", "retencion_ejecuciones"] },
   { id: 10, actividad: "Consentimientos de fines accesorios", categoriaPrincipal: "Identificación", baseLicitud: "consentimiento", tablas: ["consentimientos"] },
   { id: 11, actividad: "Solicitudes del titular (ARCO+) e incidentes de brecha", categoriaPrincipal: "Identificación", baseLicitud: "obligacion_legal", tablas: ["solicitudes_arco", "incidentes"] },
+  { id: 12, actividad: "Confirmación y consumo de agentes", categoriaPrincipal: "Identificación", baseLicitud: "interes_legitimo", tablas: ["idempotencias", "aprobaciones", "gasto_agente_mes"] },
 ];
 
 /** Fila del RAT por actividad, en lenguaje de negocio. */
@@ -90,10 +97,14 @@ const esConcreta = (r?: string): r is string => !!r && !r.trim().startsWith("Pen
  * inventario los datos (etiquetas legibles), las categorías, los destinatarios y la retención, para
  * que la capa de negocio y el inventario técnico no se desincronicen.
  */
-export function construirRatPorActividad(inventario: readonly EntradaInventario[]): FilaRatActividad[] {
+export function construirRatPorActividad(
+  inventario: readonly EntradaInventario[],
+): FilaRatActividad[] {
   const porTabla = new Map(inventario.map((e) => [e.tabla, e]));
   return ACTIVIDADES_TRATAMIENTO.flatMap((act) => {
-    const entradas = act.tablas.map((t) => porTabla.get(t)).filter((e): e is EntradaInventario => !!e);
+    const entradas = act.tablas
+      .map((t) => porTabla.get(t))
+      .filter((e): e is EntradaInventario => !!e);
     if (!entradas.length) return [];
     const categorias = CATEGORIAS_RAT.filter((c) =>
       entradas.some((e) => e.categorias.some((k) => CATEGORIA_RAT_DE[k] === c)),
@@ -119,7 +130,9 @@ export function construirRatPorActividad(inventario: readonly EntradaInventario[
 
 /** Conteo por categoría de negocio (las 5, aunque alguna quede en 0) para los FilterChip. Semántica
  *  «contiene la categoría»: cuenta cada actividad cuyo conjunto de categorías incluye la categoría. */
-export function conteosPorCategoria(filas: readonly FilaRatActividad[]): { categoria: CategoriaRat; total: number }[] {
+export function conteosPorCategoria(
+  filas: readonly FilaRatActividad[],
+): { categoria: CategoriaRat; total: number }[] {
   return CATEGORIAS_RAT.map((categoria) => ({
     categoria,
     total: filas.filter((f) => f.categorias.includes(categoria)).length,

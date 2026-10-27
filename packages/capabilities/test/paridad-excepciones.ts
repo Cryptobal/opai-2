@@ -5,6 +5,10 @@
  * capacidades `interna` o `soloPersonas` del registro (sin entradas obsoletas ni faltantes).
  */
 export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
+  "agente.turno.preparar":
+    "Solo personas: la sesión humana delega su identidad al agente interno; una key no inicia otro agente.",
+  "agente.plan.confirmar":
+    "Solo personas: confirmar o rechazar un plan debe ser una decisión humana, nunca una herramienta del modelo.",
   "core.users.invite":
     "Solo personas: invitar asigna un rol y gobierna el acceso (encargo PR #70).",
   "core.invitations.peek":

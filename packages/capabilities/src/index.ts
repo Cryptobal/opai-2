@@ -64,5 +64,11 @@ export { type ComprobanteNuevo, emitirComprobante, slugDeComprobante } from "./c
 export { camposExternos, externo } from "./externo";
 export { correoDe, geoDe, iaDe } from "./integraciones/adaptadores";
 export { ErrorRespaldoIa } from "./integraciones/ia-respaldo";
+export { comoAgenteInterno } from "./agentes/interno";
+export {
+  iaElegidaDelAgente,
+  modelosDelAgente,
+  type ModeloAgente,
+} from "./integraciones/ia-modelos";
 export { credencialDe } from "./integraciones/resolver";
 export { MANUALES } from "./manuales";

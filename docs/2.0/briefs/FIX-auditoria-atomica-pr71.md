@@ -14,7 +14,7 @@ El encargo no aporta un ID de Linear; no se inventa uno.
   seleccionado. Se conserva `tenantDe(ctx, ...)` para resolver el destino.
   Test real de plataforma con empresa seleccionada y rechazo sin rol global.
 - **C:** expansión nullable con backfill y contracción NOT NULL en directorios
-  separados (`20261028090000` y `20261028100000`). La segunda completa las filas
+  separados (`20261028130000` y `20261028140000`). La segunda completa las filas
   del código viejo durante la convivencia, sin reescribir las ya encadenadas.
   Test de ambas fases, datos históricos y reejecución idempotente en base aislada.
 - **Review 3:** recalcular el canon desde actor, capacidad, entidad, fecha y
@@ -94,7 +94,7 @@ Implementación de OpenCode / openai/gpt-6.1-sol, sin decisiones de negocio nuev
   hasta 1.000 filas, con CTE recursivo para la dependencia de hashes, y COMMIT por
   lote. Advisory lock solo del tenant del lote, compatible con el append nuevo;
   las inserciones viejas NULL se completan en la fase 2. Índice único separado con
-  CONCURRENTLY en `20261028093000_auditoria_indice_concurrente`.
+  CONCURRENTLY en `20261028133000_auditoria_indice_concurrente`.
 - **N3:** fase 2 instala cuatro CHECK NOT VALID, libera DDL, completa pendientes
   también por lotes con lock del tenant, valida los CHECK con el código nuevo vivo,
   hace COMMIT y solo entonces SET NOT NULL (sin reescaneo) y DROP CHECK.
@@ -111,8 +111,8 @@ Implementación de OpenCode / openai/gpt-6.1-sol, sin decisiones de negocio nuev
   tardías durante recorrido y rollback de alerta en curso. Los demás jobs pueden
   adoptar la señal; no se afirma cancelación cooperativa de todos sus handlers.
 
-No cambian los timestamps de las dos migraciones existentes. Se agrega únicamente
-el directorio intermedio del índice. El encargo confirma que no se aplicaron en
+Para ordenar después de la migración de main 20261028120000, el encargo actual renombra
+las tres migraciones de auditoría a 20261028130000, 20261028133000 y 20261028140000. El encargo confirma que no se aplicaron en
 entornos reales; una preview que tenga versiones anteriores debe recrearse por
 quien gestiona infraestructura. Este trabajo no modifica Neon ni otros PRs.
 
@@ -122,16 +122,16 @@ No ejecutar `prisma migrate deploy` con todos los directorios pendientes antes d
 desplegar: aplicaría también el NOT NULL incompatible con el código viejo.
 
 1. Con las migraciones previas ya aplicadas y desde este checkout, ejecutar solo
-   el SQL de `20261028090000_auditoria_encadenada` en autocommit (por ejemplo,
+   el SQL de `20261028130000_auditoria_encadenada` en autocommit (por ejemplo,
    `psql "$DATABASE_URL_MIGRATE" -v ON_ERROR_STOP=1 -f <ruta/migration.sql>`).
    No envolver en BEGIN, transacción externa ni `--single-transaction`: el DO
    hace COMMIT por lote. Registrar con `prisma migrate resolve --applied
-   20261028090000_auditoria_encadenada`. Ambos comandos usan el entorno Neon que
+   20261028130000_auditoria_encadenada`. Ambos comandos usan el entorno Neon que
    Carlos seleccione en `DATABASE_URL_MIGRATE`. Desde la raíz se usa
    `pnpm --filter @opai/db exec prisma ...` (config local del paquete).
 2. Ejecutar de igual forma el archivo de
-   `20261028093000_auditoria_indice_concurrente`, **sin transacción**, y registrar
-   con `prisma migrate resolve --applied 20261028093000_auditoria_indice_concurrente`.
+   `20261028133000_auditoria_indice_concurrente`, **sin transacción**, y registrar
+   con `prisma migrate resolve --applied 20261028133000_auditoria_indice_concurrente`.
    Prisma PostgreSQL no envuelve automáticamente las migraciones: también se prueba
    su aplicación con `migrate deploy` sobre una base local nueva. No incluir el
    índice en otro archivo ni en un DO. Si CONCURRENTLY falla, consultar `pg_index`:
@@ -142,7 +142,7 @@ desplegar: aplicaría también el NOT NULL incompatible con el código viejo.
 3. Desplegar el código nuevo y esperar a que terminen todas las instancias y
    solicitudes del código viejo. Verificar una escritura real por tenant.
 4. Ejecutar `prisma migrate deploy` para aplicar
-   `20261028100000_auditoria_obligatoria`. Completa pendientes por lotes por tenant,
+   `20261028140000_auditoria_obligatoria`. Completa pendientes por lotes por tenant,
    valida CHECK antes del breve lock de SET NOT NULL y habilita el job. Verificar
    las cadenas mediante el job y consultar `platform.auditoria.estado`.
 
@@ -209,3 +209,13 @@ Capturas nuevas conservadas en `/tmp/opencode/pr71-continuacion-capturas.tar.gz`
 fuera del commit. PR-BODY.md queda local y sin commit. CI, revisión del head y
 aplicación de migraciones/renovación de preview por infraestructura siguen pendientes;
 no se declara Neon modificado ni el PR integrado.
+
+## Integración de main para PR #71
+
+OpenCode / openai/gpt-6.1-terra incorpora `origin/main` 7cbb1c2 por merge normal.
+Se conserva el agente interno y la auditoría; su prueba de gobierno inserta el
+evento mediante el servicio de auditoría encadenada. Por orden de migraciones se
+renombran 090000, 093000 y 100000 a 130000, 133000 y 140000, respectivamente.
+El procedimiento de despliegue anterior usa los nombres nuevos. Sin cambios de
+negocio ni aplicación de migraciones en Neon; las limitaciones indicadas siguen
+vigentes. La validación actual se informa en `PR-BODY.md`.
