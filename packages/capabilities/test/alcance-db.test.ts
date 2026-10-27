@@ -139,11 +139,14 @@ describe.skipIf(!urlPropietario)("alcance del supervisor en base real (B3)", () 
         { tenantId, documentoId: docEmpresa, entidadTipo: "tenant", entidadId: tenantId, rol: "propietario" },
       ],
     });
-    // Un evento de actividad por documento, para distinguir "sin acceso" de "sin actividad".
+    // Un evento de actividad por documento, para distinguir "sin acceso" de "sin actividad". Fuera
+    // de la cadena real (hash de relleno): esta prueba es de alcance, no de integridad de auditoría.
+    // `seq` sigue a lo ya auditado arriba (cuentas, instalaciones…) para no chocar con esa cadena.
+    const seqBase = await e.admin.auditEvent.count({ where: { tenantId } });
     await e.admin.auditEvent.createMany({
       data: [
-        { tenantId, actorType: "user", actorId: userSupId, capability: "core.documentos.update", entityType: "documento", entityId: docA },
-        { tenantId, actorType: "user", actorId: userSupId, capability: "core.documentos.update", entityType: "documento", entityId: docFuera },
+        { tenantId, actorType: "user", actorId: userSupId, capability: "core.documentos.update", entityType: "documento", entityId: docA, seq: seqBase + 1, hashAnterior: "0".repeat(64), hash: "a".repeat(64), hashCanon: "{}" },
+        { tenantId, actorType: "user", actorId: userSupId, capability: "core.documentos.update", entityType: "documento", entityId: docFuera, seq: seqBase + 2, hashAnterior: "a".repeat(64), hash: "b".repeat(64), hashCanon: "{}" },
       ],
     });
     // Una persona del tenant: sin relación real persona ↔ instalación, el supervisor no la ve (CA-B3 parcial).

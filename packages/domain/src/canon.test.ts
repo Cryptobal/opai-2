@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { HASH_GENESIS, hashEncadenado, jsonCanonico, primeraRotura, sha256Hex } from "./canon";
+import {
+  canonDeAuditoria,
+  HASH_GENESIS,
+  hashEncadenado,
+  jsonCanonico,
+  primeraRotura,
+  sha256Hex,
+} from "./canon";
 
 describe("canon y cadena", () => {
   it("ordena claves, omite undefined y serializa fechas", () => {
@@ -25,5 +32,26 @@ describe("canon y cadena", () => {
     ];
     expect(await primeraRotura(cadena)).toBeNull();
     expect(await primeraRotura([cadena[0]!, { ...cadena[1]!, payloadCanon: '{"n":3}' }])).toBe(2);
+  });
+
+  it("canonDeAuditoria no cambia si cambia el payload crudo con el mismo digest", async () => {
+    const base = {
+      tenantId: "t1",
+      seq: 1,
+      actorTipo: "user",
+      actorId: "u1",
+      viaUserId: null,
+      capability: "core.cuentas.update",
+      entityType: "cuenta",
+      entityId: "c1",
+      createdAt: new Date("2026-10-28T00:00:00.000Z"),
+    };
+    const a = await canonDeAuditoria({ ...base, payload: { nombre: "Ana" } });
+    const b = await canonDeAuditoria({ ...base, payload: { nombre: "Ana" } });
+    const c = await canonDeAuditoria({ ...base, payload: { nombre: "Otra" } });
+    expect(a).toBe(b);
+    expect(a).not.toBe(c);
+    expect(a).toContain("payloadDigest");
+    expect(a).not.toContain("Ana");
   });
 });

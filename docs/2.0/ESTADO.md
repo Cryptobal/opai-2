@@ -2,10 +2,75 @@
 
 > **Desde el 24-oct-2026, el estado de las tareas vive en Linear (enlace por definir). Este archivo queda como foto técnica: versiones, infraestructura, riesgos aceptados y decisiones.** (PR #22). Las listas de pendientes de abajo se migran a Linear en la fecha que fije Carlos; hasta entonces no se borran, y si no coinciden con Linear, manda Linear.
 
-**Última actualización:** 27-oct-2026 · **Actualizado por:** Claude (arquitectura) · **Fase en curso:** 1 — Núcleo, en cierre (Briefs 01, 01c y 02 A–C integrados a `main`; quedan la sesión D del Brief 02, la paridad MCP, los arreglos de QA y las bases transversales). Plan completo y próximas tareas en `ROADMAP.md`; etapa de cada módulo en `PLAN-desarrollo.md`.
+**Última actualización:** 28-oct-2026 · **Actualizado por:** Claude (arquitectura) · **Fase en curso:** 1 — Núcleo, en cierre (Briefs 01, 01c y 02 A–C integrados a `main`; quedan la sesión D del Brief 02, la paridad MCP, los arreglos de QA y las bases transversales). Plan completo y próximas tareas en `ROADMAP.md`; etapa de cada módulo en `PLAN-desarrollo.md`.
+- **NÚCLEO-A · Auditoría atómica y encadenada en `core.audit_events` (rama `fix/auditoria-atomica`, PR #71).** Escritura y auditoría comparten transacción en capacidades del tenant; plataforma audita en el tenant objetivo con la brecha de atomicidad global declarada. Cadena por tenant con `seq` Int y hashes, inmutable para `opai_app`. El encargo original de Carlos (t457u) se mantiene registrado en ADR-052; ADR-051 corresponde a identidad de servicio en main (#70). La nota histórica de verificación y anonimización queda sustituida por la sección «Corrección de auditoría» de abajo. Migraciones pendientes de aplicación por Carlos; no se ha tocado Neon.
 - **NÚCLEO-E1 · Capa de proveedores de IA intercambiable con herramientas (26-oct-2026, rama `core/agente-interno-pr1`, PR 1 de 2 del agente interno; P1 de la auditoría del núcleo del 26-oct-2026, encargo de Carlos a OPAI 2.0, t457u).** El adaptador de IA (`@opai/integrations/ia`) suma un contrato neutral de conversación con herramientas (tool-calling), streaming de eventos y salida estructurada por JSON Schema, y el resolvedor del núcleo (`iaDe`, `packages/capabilities/src/integraciones/ia.ts`) agrega respaldo entre proveedores conectados (reintenta ante 5xx/429/red, nunca ante un 4xx de contenido) y mide cada llamada en `core.consumos` (tokens por clase; proveedor y modelo en `referencia_tipo`/`referencia_id`; sin prompt ni key). Sin SDKs (solo `fetch`): Anthropic, OpenAI, Google y un proveedor «compatible con OpenAI» con base URL configurable (`ia_compatible`: Vercel AI Gateway, OpenRouter…) más el alias `ia_xai` (Grok). `completar()` queda sobre `conversar()`: geolocalización e «Integraciones · Probar» no cambian. Detalle en la nota de ADR-031 (26-oct-2026). No toca secretos ni la config del núcleo (los cambia #61); sin migraciones. Pendiente: la UI del agente, la elección de modelo por usuario y sus ajustes (PRs posteriores del agente interno, ADR-049, según la enmienda al punto 8). **Endurecimiento (revisión 5660937436, 26-oct-2026):** el `baseUrl` de `ia_compatible` exige `https` y rechaza destinos internos (privados, loopback, link-local, metadata, localhost; también tras resolver DNS) con `redirect: "error"` (defensa SSRF); un stream cortado o con error lanza `ErrorIa` en vez de darse por completo; el consumo del streaming se mide en `finally` aun si se corta o cancela. **Política de respaldo con key propia del tenant (resuelta):** si el tenant tiene key propia y su proveedor falla, el respaldo solo prueba otras keys del **mismo tenant**; **nunca** cae a la key de OPAI (plataforma). Si todas fallan (5xx/429/red) la solicitud falla con un error tipado (`ErrorRespaldoIa`) y se avisa al tenant: la integración queda en estado «error» (visible en Configuración → Integraciones) + evento `core.integracion.error` que entrega Comunicaciones (ADR-020), más un registro de auditoría durable (`core.ia.respaldo_agotado`). Un 4xx de contenido se propaga tal cual. Sin key propia, se usa el modelo de OPAI como hasta ahora. Implementado en `iaDe`/`ia-respaldo.ts` (`packages/capabilities/src/integraciones/`), con pruebas en `test/ia-respaldo.test.ts`. **«Decisión de Carlos, 26-oct-2026 21:58 CLT, respuesta t214s684»** a «Si el tenant tiene key propia y su proveedor falla, ¿se puede pasar a la key de OPAI?»: «Nunca, que falle y avise al tenant». Detalle en ADR-049 punto 6. _TODO:_ cuando exista un mecanismo de avisos proactivos propio del tenant (push/bandeja), enriquecer el aviso; hoy se apoya en el estado de la integración + Comunicaciones + auditoría. **Endurecimiento (revisión 5661272971, 26-oct-2026):** la decisión BYOK (t214s684) se aplica **antes** de filtrar por modelo o secreto —una key propia sin modelo para la clase, sin secreto o sin base URL ahora falla y avisa, nunca cae a OPAI (`ia-candidatos.ts`)—; la defensa SSRF clasifica las IPv6 en binario (IPv4-mapped/compatible como IPv4; `fe80::/10` completo, `fec0::/10`, `fc00::/7`, NAT64 `64:ff9b::/96`, unspecified y multicast) y normaliza el punto final del host; la medición del stream registra el uso parcial ya informado en corte o cancelación (evento `uso`) sin doble conteo; y los `*-db.test.ts` de `@opai/capabilities` corren serializados (`fileParallelism: false`) e independientes del orden.
 
 Hasta el 24-oct-2026 este archivo fue la fuente de verdad del avance; desde entonces lo es Linear (ver la nota de arriba y `AGENTS.md`, «Tareas (Linear)»). El plan hasta terminar 2.0 está en `ROADMAP.md`; la navegación final en `NAVEGACION.md`.
+
+## Corrección de auditoría · PR #71 (27-oct-2026)
+
+El encargo de continuidad y la review 5662759713 corrigen la nota NÚCLEO-A de
+arriba: verificación del contenido actual (también payload), diagnóstico de IA en
+transacción independiente, auditoría de plataforma en el tenant objetivo incluso
+con empresa seleccionada y migración expand/contract en dos fases. La promesa
+anterior de anonimizar payloads sin afectar la verificación queda reemplazada:
+requiere un protocolo futuro. Detalles de implementación decididos por el
+constructor OpenCode / openai/gpt-6.1-sol, CA, riesgos y despliegue en
+[`briefs/FIX-auditoria-atomica-pr71.md`](briefs/FIX-auditoria-atomica-pr71.md).
+La segunda ronda de QA (`informe-76760ba.md`, encargo N1/N2/N3) sustituye la
+serialización del escaneo con append: foto REPEATABLE READ hasta max(seq), canon
+histórico SQL por lotes, avance incremental y lock breve solo para CAS por revisión
+de la cabeza. Una huella SHA-256 por lotes detecta cambios del prefijo verificado y
+dispara revisión desde génesis; este control sigue leyendo O(N) en SQL, sin bloquear
+escrituras. El anclaje previo se conserva también tras fallos: un prefijo cambiado
+nunca se acepta por ser una cadena sustituta válida (truncado seguido de append o
+alteración de microsegundos). Si solo lo detecta la huella, primeraRota es 1 como
+diagnóstico conservador. Corrección técnica del constructor en la autorrevisión.
+El lote SQL contrasta también la precisión temporal de los eventos nuevos, para
+detectar microsegundos alterados en la cola aún no verificada.
+Presupuesto integral propio de 12 s (escaneo 9 s/SQL 8 s), inferior a
+20 s por trabajo del runner; propagación de cancelación para impedir cabeza o
+alerta tardías. No olvida el máximo tras un borrado.
+Solo lo invoca el job; se retira `core.auditoria.verificar` de UI/API/MCP.
+El job se pausa mientras `seq` sea nullable. Actividad y auditoría seleccionan
+columnas de negocio para soportar filas NULL durante convivencia.
+Fase 1 y cierre hacen backfill por lotes de hasta 1.000, con COMMIT por lote y lock
+solo del tenant; índice CONCURRENTLY en la nueva `20261028133000` (sin transacción
+externa). Fase 2: CHECK NOT VALID → VALIDATE → COMMIT → SET NOT NULL → DROP CHECK.
+No cambian los timestamps existentes. Detalles técnicos decididos por el constructor
+OpenCode / openai/gpt-6.1-sol dentro del encargo actual, no decisiones atribuidas a Carlos.
+Sin cambios de pantallas ni decisiones de negocio; se mantiene el DS de OPAI 2.0.
+Merge de `origin/main` 7cbb1c2: OpenCode / openai/gpt-6.1-terra conserva el agente
+interno y adapta su prueba a la auditoría encadenada. Las tres migraciones del #71
+se renombran a `20261028130000`, `20261028133000` y `20261028140000`, después de
+`20261028120000`; el despliegue sigue pendiente de Carlos.
+El encargo no aporta ID de Linear. No se modifica el plan del ROADMAP.
+
+### Reversión de auditoría (PR #71)
+
+Carlos conserva datos, hashes, cabezas e índice válido. Para volver a código previo
+a la cadena, retira primero los cuatro NOT NULL y cualquier CHECK `auditoria_nn_*`
+residual de un cierre interrumpido; no borra migraciones ni registros de auditoría.
+Para volver a `76760ba`, pausa el job explícitamente (ese head conserva el lock largo
+y no detecta convivencia). En el código nuevo, `seq` nullable pausa el job sin falsas
+alarmas. Las migraciones usan autocommit; nunca envolver DO/CONCURRENTLY en BEGIN.
+Si falla el índice concurrente, comprobar `indisvalid`: solo Carlos retira el índice
+inválido con DROP INDEX CONCURRENTLY y reintenta según el runbook del brief. Preview
+con SQL anterior debe recrearse por quien gestiona infraestructura; no se toca Neon
+desde este encargo. Las brechas conocidas de atomicidad global de plataforma y
+llamadas externas en transacciones siguen declaradas.
+
+**Validación local de continuidad:** se conservan los commits anteriores y se incorpora
+#65 (`5c18a92`) con merge normal `b9f84a7`, sin perder MFA ni auditoría. Autorrevisión
+independiente final sin bloqueantes tras corregir anclaje y precisión temporal.
+Typecheck, lint, 786 tests unitarios (BD separada), test:db 91+100+24, build y presupuesto
+en verde. E2E de Configuración, Plataforma y Maestros a 375/1024/1280: **21 pasaron y
+12 omitidos por condiciones preexistentes de los specs**, EXIT=0, sin cambiar pruebas.
+Se repitió la suite completa tras dos fallos transitorios (contenido oculto en Maestros
+desktop y TOTP rechazado). Servidor propio `next start` en 3171, nunca el 3000 ajeno.
+Logs y capturas en `/tmp/opencode/pr71-continuacion-*`. PR-BODY.md local sin commit.
+No se declara CI, QA remota ni aprobación del head nuevo; Neon sigue sin modificarse.
 
 ## Hecho
 
