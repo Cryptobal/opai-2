@@ -32,6 +32,7 @@ core_cuentas_set_estado
 core_cuentas_set_representantes
 core_cuentas_update
 core_cumplimiento_consentimientos_listar
+core_cumplimiento_dpa_texto
 core_cumplimiento_estado
 core_cumplimiento_incidentes_listar
 core_cumplimiento_rat
@@ -112,7 +113,6 @@ core_supervisores_list
 core_tenant_get
 core_tenant_update
 core_usage_summary
-core_users_invite
 core_users_list
 core_users_remove
 core_users_update
@@ -167,7 +167,6 @@ preview_core_puestos_create
 preview_core_puestos_set_estado
 preview_core_puestos_update
 preview_core_tenant_update
-preview_core_users_invite
 preview_core_users_remove
 preview_core_users_update
 preview_core_vinculos_create

@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
+import { executeCapability } from "../src";
 import { contextoDePrueba, USUARIO_DE_PRUEBA } from "../src/testing";
 import type { Fila } from "../src/testing/db-memoria-util";
 import { codigo, dato, reiniciar } from "./maestros-ayuda";
@@ -11,9 +12,32 @@ type Estado = {
   publicada: boolean;
   aceptadaVigente: boolean;
   pendiente: boolean;
-  ultima: { version: string; aceptadoPor: string | null } | null;
+  ultima: {
+    version: string;
+    aceptadoPor: string | null;
+    aceptadoPorNombre: string | null;
+    aceptadoPorCorreo: string | null;
+  } | null;
   historial: { version: string }[];
   dpo: { nombre: string | null; correo: string | null; telefono: string | null };
+};
+
+type Rat = {
+  basesPropuestas: boolean;
+  actividades: {
+    id: number;
+    actividad: string;
+    datos: string[];
+    categoria: string;
+    categorias: string[];
+    base: string;
+    retencion: string | null;
+    retencionPendiente: boolean;
+    destinatarios: string[];
+    tablas: string[];
+  }[];
+  conteos: { categoria: string; total: number }[];
+  porTabla: { tabla: string; modulo: string; reguladoNoBorrable: boolean; campos: string[] }[];
 };
 
 const publicarVersion = (tabla: (n: string) => Fila[], version: string) =>
@@ -47,7 +71,64 @@ describe("core.cumplimiento.* · DPA y DPO (Brief 07d, PR 1)", () => {
     const e = await dato<Estado>(ctx, "core.cumplimiento.estado", {});
     expect(e).toMatchObject({ aceptadaVigente: true, pendiente: false });
     expect(e.ultima?.aceptadoPor).toContain(USUARIO_DE_PRUEBA.email);
+    // «Aceptado por» estructurado (C02/C05): nombre y correo separados, además del string compat.
+    expect(e.ultima?.aceptadoPorNombre).toBe(USUARIO_DE_PRUEBA.nombre);
+    expect(e.ultima?.aceptadoPorCorreo).toBe(USUARIO_DE_PRUEBA.email);
     expect(e.historial.map((h) => h.version)).toEqual(["2026-10"]);
+  });
+
+  it("dpa_texto devuelve texto y hash, y el hash calza con el documento_ref de la aceptación (C06/C03)", async () => {
+    const { ctx, tabla } = contextoDePrueba();
+    publicar(tabla, "2026-10", "Texto exacto del DPA 2026-10");
+    const t = await dato<{ versionVigente: string; publicada: boolean; texto: string | null; sha256: string | null }>(
+      ctx,
+      "core.cumplimiento.dpa_texto",
+      {},
+    );
+    expect(t).toMatchObject({ versionVigente: "2026-10", publicada: true, texto: "Texto exacto del DPA 2026-10" });
+    expect(t.sha256).toMatch(/^[0-9a-f]{64}$/);
+    // Acepta y compara el hash de la lectura con el que quedó en documento_ref (sin duplicar la lógica).
+    await dato(ctx, "core.cumplimiento.dpa_aceptar", {});
+    const fila = tabla("dpaAceptacion")[0] as { documentoRef: string };
+    expect(fila.documentoRef).toBe(`2026-10:sha256:${t.sha256}`);
+  });
+
+  it("dpa_texto con versión pero sin texto: texto y sha256 null, sin error (C06)", async () => {
+    const { ctx, tabla } = contextoDePrueba();
+    publicarVersion(tabla, "2026-10"); // versión sin texto
+    const t = await dato<{ publicada: boolean; texto: string | null; sha256: string | null }>(
+      ctx,
+      "core.cumplimiento.dpa_texto",
+      {},
+    );
+    expect(t).toMatchObject({ publicada: true, texto: null, sha256: null });
+  });
+
+  it("dpa_texto sin DPA publicado: publicada false y texto null", async () => {
+    const { ctx } = contextoDePrueba();
+    const t = await dato<{ versionVigente: string; publicada: boolean; texto: string | null }>(
+      ctx,
+      "core.cumplimiento.dpa_texto",
+      {},
+    );
+    expect(t).toMatchObject({ versionVigente: "", publicada: false, texto: null });
+  });
+
+  it("un rol sin cumplimiento.read no puede leer el texto del DPA (FORBIDDEN)", async () => {
+    const { ctx, tabla } = contextoDePrueba({ rol: "supervisor" });
+    publicar(tabla, "2026-10");
+    expect(await codigo(ctx, "core.cumplimiento.dpa_texto", {})).toBe("FORBIDDEN");
+    expect(await codigo(ctx, "core.cumplimiento.rat", {})).toBe("FORBIDDEN");
+  });
+
+  it("el DPO rechaza un correo inválido con el texto de la sábana en español (C08)", async () => {
+    const { ctx } = contextoDePrueba();
+    const r = await executeCapability(ctx, "core.cumplimiento.dpo_set", { correo: "no-es-correo" });
+    expect(r.ok).toBe(false);
+    expect(r.ok === false && JSON.stringify(r.error)).toContain("Ingresa un correo válido");
+    const r2 = await executeCapability(ctx, "core.cumplimiento.dpo_set", { telefono: "abc" });
+    expect(r2.ok).toBe(false);
+    expect(r2.ok === false && JSON.stringify(r2.error)).toContain("Ingresa un teléfono válido");
   });
 
   it("con versión pero sin texto publicado, aceptar falla: no se acepta un DPA sin texto", async () => {
@@ -85,19 +166,56 @@ describe("core.cumplimiento.* · DPA y DPO (Brief 07d, PR 1)", () => {
     expect(e.dpo.telefono).toBe("+56911112222");
   });
 
-  it("el RAT lista las actividades de tratamiento del Núcleo (bases propuestas)", async () => {
+  it("el RAT mantiene el inventario técnico por tabla (bases propuestas)", async () => {
     const { ctx } = contextoDePrueba();
-    const rat = await dato<{
-      basesPropuestas: boolean;
-      actividades: { tabla: string; modulo: string; reguladoNoBorrable: boolean }[];
-    }>(ctx, "core.cumplimiento.rat", {});
+    const rat = await dato<Rat>(ctx, "core.cumplimiento.rat", {});
     expect(rat.basesPropuestas).toBe(true);
-    const tablas = rat.actividades.map((a) => a.tabla);
+    const tablas = rat.porTabla.map((a) => a.tabla);
     expect(tablas).toContain("personas");
-    expect(rat.actividades.every((a) => a.modulo === "core")).toBe(true);
-    expect(rat.actividades.find((a) => a.tabla === "vinculos_laborales")?.reguladoNoBorrable).toBe(
-      true,
-    );
+    expect(rat.porTabla.every((a) => a.modulo === "core")).toBe(true);
+    expect(rat.porTabla.find((a) => a.tabla === "vinculos_laborales")?.reguladoNoBorrable).toBe(true);
+  });
+
+  it("el RAT da una fila por actividad, en lenguaje de negocio, con retención propuesta (C10)", async () => {
+    const { ctx } = contextoDePrueba();
+    const rat = await dato<Rat>(ctx, "core.cumplimiento.rat", {});
+    const personal = rat.actividades.find((a) => a.actividad === "Gestión de personal de seguridad");
+    expect(personal).toBeDefined();
+    expect(personal?.tablas).toEqual(["personas", "vinculos_laborales"]);
+    // Datos legibles, nunca nombres de columna.
+    expect(personal?.datos).toContain("RUT");
+    expect(personal?.datos.some((d) => d.includes("_"))).toBe(false);
+    // Categoría principal una sola; el conjunto para el filtro.
+    expect(personal?.categoria).toBe("Laboral");
+    expect(personal?.categorias).toContain("Identificación");
+    // PR 3 aporta la descripción efectiva; los periodos siguen sujetos a confirmación legal.
+    expect(personal?.retencion).toBeTruthy();
+    expect(personal?.retencionPendiente).toBe(false);
+    // Destinatarios derivados del inventario completado (Resend / IA, a confirmar por legal).
+    const docs = rat.actividades.find((a) => a.actividad === "Documentos de personas");
+    expect(docs?.destinatarios.some((d) => d.includes("Proveedor de IA"))).toBe(true);
+    const envios = rat.actividades.find((a) => a.actividad === "Notificaciones y avisos operativos");
+    expect(envios?.destinatarios.some((d) => d.includes("Resend"))).toBe(true);
+  });
+
+  it("el RAT filtra por «contiene la categoría» y devuelve conteos por categoría para los chips (C11)", async () => {
+    const { ctx } = contextoDePrueba();
+    const todo = await dato<Rat>(ctx, "core.cumplimiento.rat", {});
+    // Los conteos cubren las 5 categorías y cuentan actividades que contienen la categoría.
+    expect(todo.conteos.map((c) => c.categoria)).toEqual([
+      "Identificación",
+      "Contacto",
+      "Laboral",
+      "Económica",
+      "Sensible",
+    ]);
+    const contacto = todo.conteos.find((c) => c.categoria === "Contacto")?.total ?? 0;
+    expect(contacto).toBeGreaterThan(0);
+    const filtrado = await dato<Rat>(ctx, "core.cumplimiento.rat", { categoria: "Contacto" });
+    expect(filtrado.actividades.length).toBe(contacto);
+    expect(filtrado.actividades.every((a) => a.categorias.includes("Contacto"))).toBe(true);
+    // Los conteos no cambian al filtrar (son del conjunto completo).
+    expect(filtrado.conteos).toEqual(todo.conteos);
   });
 
   it("aceptar el DPA es solo del owner: un admin es rechazado aunque fije el DPO (§16.1)", async () => {

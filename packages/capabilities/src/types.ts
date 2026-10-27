@@ -1,4 +1,4 @@
-import type { Rol, RolPlataforma } from "@opai/domain";
+import type { EstadoMfa, Rol, RolPlataforma } from "@opai/domain";
 import type { Globales, TenantDb, TenantTx } from "@opai/db";
 import type { Almacenamiento, Mailer } from "@opai/integrations";
 import type { z } from "zod";
@@ -74,6 +74,8 @@ export type Plataforma = {
 
 /** Contexto de ejecución. Lo construye el borde (ruta HTTP, acción de UI, MCP), nunca el módulo. */
 export interface Contexto {
+  /** Garantía de MFA comprobada en el borde; nunca procede del input de una capacidad. */
+  mfa?: EstadoMfa;
   /** Tenant actual. Si `conTenant` es false (plataforma sin empresa elegida) es un id nulo. */
   tenantId: string;
   conTenant: boolean;
@@ -81,8 +83,10 @@ export interface Contexto {
   usuario: UsuarioContexto | null;
   /** Rol de la membresía en el tenant actual. */
   rol: Rol | null;
-  /** Portal desde el que se ejecuta (telemetría). */
+  /** Portal solicitado: en sesiones con tenant se valida contra la membresía y la capacidad. */
   portal: string | null;
+  /** Portales de la membresía activa en el tenant actual, cargados solo por el servidor. */
+  portalesMembresia: readonly string[];
   /** Módulos activos (o en trial) del tenant. `core` y `platform` siempre lo están. */
   modulosActivos: readonly string[];
   /** Módulos permitidos para un agente (scopes de la key); null = sin restricción. */
@@ -180,5 +184,11 @@ export type Resultado<T = unknown> =
   | { ok: true; data: T; dryRun: boolean; repetida?: true }
   | {
       ok: false;
-      error: { code: CodigoError; message: string; issues?: unknown; aprobacionId?: string };
+      error: {
+        code: CodigoError;
+        message: string;
+        issues?: unknown;
+        aprobacionId?: string;
+        detalles?: unknown;
+      };
     };

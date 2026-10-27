@@ -2,13 +2,16 @@ import { listarModulos } from "@opai/capabilities";
 
 import { estadoPantalla } from "@/lib/formato";
 import { hoyIso } from "@/lib/fechas";
-import { ejecutarComoUsuario } from "@/lib/servidor";
+import { contextoServidor, ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
 
 export type ApiKey = {
   id: string;
   nombre: string;
   prefijo: string;
   scopes: string[];
+  tipo: string;
+  permisos: string[] | null;
+  scopeAmplio: boolean;
   responsable: { nombre: string; email: string };
   ultimoUsoEn: string | null;
   revocadaEn: string | null;
@@ -29,16 +32,27 @@ export async function gastoDelMes() {
   return new Map((r.ok ? r.data : []).map((g) => [g.apiKeyId, g.costoUsd]));
 }
 
+/** Permisos efectivos del usuario que crea la key: el subconjunto que puede delegar (t457u). */
+export async function misPermisos() {
+  const r = await ejecutarComoUsuario<{ permisos: string[] }>("erp", "core.me");
+  return r.ok ? r.data.permisos.filter((p) => !p.startsWith("platform:")) : [];
+}
+
 export async function cargarKeys() {
-  const [r, gasto] = await Promise.all([
+  const [r, gasto, permisos, identidad] = await Promise.all([
     ejecutarComoUsuario<ApiKey[]>("erp", "core.apikeys.list"),
     gastoDelMes(),
+    misPermisos(),
+    identidadActual(),
   ]);
+  const ctx = identidad ? contextoServidor(identidad, "erp") : null;
   return {
     state: estadoPantalla(r),
     keys: r.ok ? r.data : [],
     gasto,
     scopes: ["core", ...listarModulos().map((m) => m.id)],
+    permisos,
+    puedeCrearServicio: ctx !== null && ctx.alcance === null && ctx.autorizar("core:agentes.manage"),
   };
 }
 

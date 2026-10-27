@@ -21,11 +21,10 @@ type Hecho = {
 
 /** Reduce los hechos append-only a un caso: el registro inicial y el estado y aviso vigentes. */
 function resumirCaso(hechos: Hecho[]) {
-  // Orden por created_at y, ante empate de milisegundo, por id (uuid7 = orden de creación).
-  const orden = [...hechos].sort((a, b) => {
-    const t = a.createdAt.getTime() - b.createdAt.getTime();
-    return t !== 0 ? t : a.id < b.id ? -1 : a.id > b.id ? 1 : 0;
-  });
+  // Orden por `id` (uuid7 = orden real de creación, fijado tras el advisory lock), no por
+  // `created_at` (hora de inicio de transacción): dos avisos concurrentes pueden tener el
+  // `created_at` fuera de orden y dejar el caso sin figurar como «notificado».
+  const orden = [...hechos].sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
   const registro = orden.find((h) => h.evento === "registro") ?? orden[0];
   const ultimo = orden[orden.length - 1];
   const avisos = orden
@@ -88,7 +87,7 @@ export const incidentesListar = defineCapability({
   async handler(ctx, input) {
     // Flujo manual: pocos casos. Se traen los hechos recientes y se agrupan por caso en memoria.
     const hechos: Hecho[] = await ctx.db.incidente.findMany({
-      orderBy: { createdAt: "desc" },
+      orderBy: { id: "desc" },
       take: 1000,
     });
     const porCaso = new Map<string, Hecho[]>();

@@ -35,6 +35,7 @@ export const documentosUpdate = defineCapability({
   descripcion:
     "Actualiza los datos de un documento (título, tipo, emisión, vencimiento, etiquetas y portales donde se ve). No cambia el archivo: para eso, sube una nueva versión.",
   permiso: PERMISOS_CORE.documentosManage,
+  portales: ["erp", "supervisor"],
   input: z.object({
     id: uuidSchema,
     titulo: textoOpcional(200),
@@ -110,6 +111,7 @@ export const documentosUrlDescarga = defineCapability({
     if (!puedeVerCumplimiento(ctx) && (await esDocCumplimiento(ctx, d.id)))
       throw noEncontrado("El documento");
     const url = await ctx.servicios.almacenamiento.urlDescarga(d.storageKey, d.nombre, 300);
+    // La URL ya se emitió antes de medirla: se registra siempre (yaIncurrido), nunca se pierde.
     await ctx.medidor
       .registrar({
         ...consumoBase(ctx, "core"),
@@ -118,6 +120,7 @@ export const documentosUrlDescarga = defineCapability({
         cantidad: 1,
         referenciaTipo: "documento",
         referenciaId: d.id,
+        yaIncurrido: true,
       })
       .catch(() => undefined);
     return {

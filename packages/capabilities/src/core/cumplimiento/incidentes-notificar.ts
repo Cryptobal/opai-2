@@ -14,7 +14,7 @@ import { defineCapability } from "../../define";
 import { reglaDeNegocio } from "../../errores";
 import { ajuste } from "../config";
 import { uuidSchema } from "../esquemas";
-import { actorLegible } from "./comunes";
+import { actorLegible, validarEvidenciaDelTenant } from "./comunes";
 import { bloquearCaso, hechosDeCaso, incidenteVista, salidaIncidente } from "./incidentes-comun";
 
 type Hecho = { evento: string; estado: string; destinatario: string | null; ocurridoEn: Date | null; createdAt: Date };
@@ -58,6 +58,7 @@ export const incidenteNotificar = defineCapability({
     const dias = await ajuste<number>(ctx, "core", "cumplimiento_brecha_dias_plazo");
     if (dryRun) {
       const { avisados, actual, inicioPlazo } = estadoAvisos(await hechosDeCaso(ctx.db, input.casoId));
+      await validarEvidenciaDelTenant(ctx.db, input.evidenciaDocId);
       validar(actual, avisados, input.destinatario);
       const nuevos = new Set([...avisados, input.destinatario]);
       const notificada = brechaNotificada(nuevos);
@@ -77,6 +78,7 @@ export const incidenteNotificar = defineCapability({
     const { fila, notificada, nuevos, plazoEn } = await ctx.transaccion(async (tx) => {
       await bloquearCaso(tx, input.casoId);
       const { avisados, actual, inicioPlazo } = estadoAvisos(await hechosDeCaso(tx, input.casoId));
+      await validarEvidenciaDelTenant(tx, input.evidenciaDocId);
       validar(actual, avisados, input.destinatario);
       const nuevosSet = new Set([...avisados, input.destinatario]);
       const completa = brechaNotificada(nuevosSet);

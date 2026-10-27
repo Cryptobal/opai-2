@@ -32,7 +32,7 @@ export default function Agentes() {
         ),
       })}
     >
-      {({ state, keys, gasto, scopes }) => (
+      {({ state, keys, gasto, scopes, permisos, puedeCrearServicio }) => (
         <>
           <Estado
             state={state === "ready" && keys.length === 0 ? "empty" : state}
@@ -50,7 +50,7 @@ export default function Agentes() {
               ))}
             </ul>
           </Estado>
-          <HojaCrearKey scopes={scopes} />
+          <HojaCrearKey scopes={scopes} permisos={permisos} puedeCrearServicio={puedeCrearServicio} />
         </>
       )}
     </PaginaConfig>

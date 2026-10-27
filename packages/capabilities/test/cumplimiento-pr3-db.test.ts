@@ -27,6 +27,8 @@ describe.skipIf(!urlPropietario)("cumplimiento PR3 (retención) en base real", (
     mod.crearContexto({
       tenantId,
       actor: { tipo: "user", id: userId },
+      portal: "erp",
+      portalesMembresia: ["erp"],
       usuario: { id: userId, nombre: "ana", email: "ana@prueba.cl", platformRole: null },
       rol,
       medidor: { registrar: async () => undefined },
@@ -327,15 +329,19 @@ describe.skipIf(!urlPropietario)("cumplimiento PR3 (retención) en base real", (
       const { EJECUTORES } = await import("../src/core/cumplimiento/retencion-reglas");
       const base = EJECUTORES.find((x) => x.regla.tabla === "envios");
       if (!base) throw new Error("falta el ejecutor de envíos");
-      for (let i = 0; i < 2; i++)
-        await e.admin.envio.create({ data: { tenantId: tA, canal: "email", destinatario: `lote${i}@x.cl`, estado: "enviado", createdAt: HACE(500) } });
+      const ids: string[] = [];
+      for (let i = 0; i < 2; i++) {
+        const envio = await e.admin.envio.create({ data: { tenantId: tA, canal: "email", destinatario: `lote${i}@x.cl`, estado: "enviado", createdAt: HACE(500) } });
+        ids.push(envio.id);
+      }
       const antes = await e.admin.retencionEjecucion.count({ where: { tenantId: tA, tabla: "envios", modo: "aplicada" } });
+      const eventosAntes = await e.admin.evento.count({ where: { tenantId: tA, tipo: "core.cumplimiento.retencion_aplicada" } });
       let llamadas = 0;
       const fallaElSegundo = {
         ...base,
-        lote: async (...a: Parameters<typeof base.lote>) => {
+        lote: async () => {
           llamadas += 1;
-          return llamadas === 1 ? (await base.lote(...a)).slice(0, 1) : ["00000000-0000-7000-8000-000000000000"];
+          return ids.slice(llamadas - 1, llamadas);
         },
         aplicar: async (...a: Parameters<typeof base.aplicar>) => {
           if (llamadas >= 2) throw new Error("falla simulada del lote 2");
@@ -346,7 +352,25 @@ describe.skipIf(!urlPropietario)("cumplimiento PR3 (retención) en base real", (
       const filas = await e.admin.retencionEjecucion.findMany({ where: { tenantId: tA, tabla: "envios", modo: "aplicada" } });
       expect(filas.length).toBe(antes + 1);
       expect(filas.every((f) => f.filas > 0)).toBe(true);
+      expect(await e.admin.evento.count({ where: { tenantId: tA, tipo: "core.cumplimiento.retencion_aplicada" } })).toBe(eventosAntes + 1);
       expect(await e.admin.envio.count({ where: { tenantId: tA, destinatario: { startsWith: "lote" } } })).toBe(1);
+    });
+
+    it("revierte el lote y su registro si falla el evento en la misma transacción", async () => {
+      const { correrRegla } = await import("../src/core/cumplimiento/retencion-trabajo");
+      const { EJECUTORES } = await import("../src/core/cumplimiento/retencion-reglas");
+      const base = EJECUTORES.find((x) => x.regla.tabla === "envios");
+      if (!base) throw new Error("falta el ejecutor de envíos");
+      const envio = await e.admin.envio.create({ data: {
+        tenantId: tA, canal: "email", destinatario: "rollback@x.cl", estado: "enviado", createdAt: HACE(500),
+      } });
+      const antes = await e.admin.retencionEjecucion.count({ where: { tenantId: tA } });
+      const contexto = ctx(tA, uA);
+      contexto.eventos = { ...contexto.eventos, emitir: async () => { throw new Error("falló el evento"); } };
+      await expect(correrRegla(contexto, { ...base, lote: async () => [envio.id] }, 365, new Date(), true))
+        .rejects.toThrow("falló el evento");
+      expect((await e.admin.envio.findUniqueOrThrow({ where: { id: envio.id } })).destinatario).toBe("rollback@x.cl");
+      expect(await e.admin.retencionEjecucion.count({ where: { tenantId: tA } })).toBe(antes);
     });
   });
 });

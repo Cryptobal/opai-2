@@ -1,9 +1,9 @@
 import { expect, type Page, test } from "@playwright/test";
 
+import { E2E_PASSWORD as password, entrar } from "./sesion";
+
 // Plataforma (Brief 02, sesión C, diseños 48–51): empresas, ficha con pestañas, ajustes,
 // trabajos y consumos, a 375, 1024 y 1280. Usuario plataforma sembrado en dev.
-const email = process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl";
-const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
 
 // En desarrollo cada ruta compila al primer uso: esperas amplias.
 const esperar = expect.configure({ timeout: 60_000 });
@@ -18,11 +18,7 @@ test.describe("plataforma con sesión", () => {
   test("empresas, ficha, ajustes, trabajos y consumos", async ({ page }, info) => {
     test.setTimeout(300_000);
     const p = info.project.name;
-    await page.goto("/login");
-    await page.getByLabel("Correo").fill(email);
-    await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
-    await page.getByRole("button", { name: "Entrar" }).click();
-    await page.waitForURL((url) => url.pathname === "/" || url.pathname === "/platform");
+    await entrar(page);
 
     await page.goto("/platform");
     const gard = page.getByText("Gard Security").filter({ visible: true }).first();

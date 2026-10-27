@@ -1,5 +1,5 @@
 import { listarModulos } from "@opai/capabilities";
-import { PERMISOS_CORE, tienePermiso, type Rol, type Vocabulario } from "@opai/domain";
+import { PERMISOS_CORE, type Vocabulario } from "@opai/domain";
 
 /** Ítem de navegación serializable (el icono se nombra; el cliente lo resuelve). */
 export type ItemNav = {
@@ -8,7 +8,10 @@ export type ItemNav = {
   icono: string;
   grupo?: string;
   corta?: string;
-  contador?: number;
+  /** Activo solo en la ruta exacta. */
+  exacta?: boolean;
+  /** Prefijo extra bajo el cual el ítem también queda activo (detalle que su `href` no cubre). */
+  activoEn?: string;
   pie?: boolean;
   soloCompacto?: boolean;
   soloAmplio?: boolean;
@@ -34,15 +37,18 @@ const mayuscula = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
  * "Configuración" fija al pie (ADR-018). Los nombres pasan por el vocabulario. Sin contadores en la
  * barra lateral (ADR-045, decisión 15 de Carlos del 24-oct): los conteos quedan en Inicio y en las
  * listas, no se cargan por navegación.
+ *
+ * `puede` son los permisos EFECTIVOS del usuario (rol personalizado y excepciones, ADR-022), no el
+ * rol base: con un rol personalizado o una excepción el rol base escondía secciones concedidas o
+ * mostraba secciones denegadas (I4/P4 de la QA del PR #60). El borde lo arma con
+ * `puedeDeIdentidad`/`construirPuede`, la misma regla que `crearContexto` usa para autorizar.
  */
 export function navegacionErp(
-  rol: Rol | null,
+  puede: (permiso: string) => boolean,
   modulosActivos: readonly string[],
   voc: Vocabulario,
 ): ItemNav[] {
   const items: ItemNav[] = [{ href: "/", etiqueta: "Inicio", icono: "Home" }];
-  if (!rol) return items;
-  const puede = (p: string) => tienePermiso(rol, p);
   const grupo = "Maestros";
   if (puede(PERMISOS_CORE.cuentasRead))
     items.push({ href: "/cuentas", etiqueta: "Cuentas", icono: "Building2", grupo });
@@ -87,7 +93,15 @@ export function navegacionErp(
 }
 
 export const NAV_PLATAFORMA: ItemNav[] = [
-  { href: "/platform", etiqueta: "Empresas", icono: "Building2" },
+  // «Empresas» cubre el índice (`/platform`) y el detalle de un tenant (`/platform/tenants/:id`),
+  // pero no las demás secciones (`exacta` evita marcarlo en Trabajos, Consumos y Ajustes) (H5).
+  {
+    href: "/platform",
+    etiqueta: "Empresas",
+    icono: "Building2",
+    exacta: true,
+    activoEn: "/platform/tenants",
+  },
   { href: "/platform/trabajos", etiqueta: "Trabajos", icono: "Clock" },
   { href: "/platform/consumos", etiqueta: "Consumos", icono: "Gauge" },
   { href: "/platform/ajustes", etiqueta: "Ajustes", icono: "SlidersHorizontal", pie: true },
@@ -97,7 +111,9 @@ export const NAV_PLATAFORMA: ItemNav[] = [
 export function navegacionPortal(href: string, portal?: string): ItemNav[] {
   if (portal === "supervisor")
     return [
-      { href, etiqueta: "Hoy", icono: "Home" },
+      // «Hoy» solo en `/supervisor`, pero la ficha de persona (`/supervisor/personas/:id`) cuelga de
+      // «Hoy» (se llega por «Atrás → Hoy»), así que `activoEn` la mantiene marcada (H6, t365u/t366u).
+      { href, etiqueta: "Hoy", icono: "Home", exacta: true, activoEn: "/supervisor/personas" },
       {
         href: "/supervisor/instalaciones",
         etiqueta: "Instalaciones",

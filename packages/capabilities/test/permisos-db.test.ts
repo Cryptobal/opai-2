@@ -56,6 +56,8 @@ describe.skipIf(!urlPropietario)("roles y excepciones en base real", () => {
     return mod.crearContexto({
       tenantId,
       actor: { tipo: "user", id: userId },
+      portal: "erp",
+      portalesMembresia: m?.portales ?? [],
       usuario: { id: userId, nombre: "Vic", email: "vic@prueba.cl", platformRole: null },
       rol: "viewer",
       // Igual que el borde (fuentes.ts): rol archivado deniega por defecto; sin rol, el rol base.
@@ -98,6 +100,7 @@ describe.skipIf(!urlPropietario)("roles y excepciones en base real", () => {
       membershipId,
       permiso: "core:instalaciones.read",
       efecto: "denegar",
+      motivo: "monitorea, no necesita el detalle de instalaciones",
     });
     expect(
       await mod.executeCapability(await ctxUsuario(), "core.instalaciones.list", {}),
@@ -111,6 +114,64 @@ describe.skipIf(!urlPropietario)("roles y excepciones en base real", () => {
     expect(
       await mod.executeCapability(await ctxUsuario(), "core.instalaciones.list", {}),
     ).toMatchObject({ ok: true });
+  });
+
+  it("la excepción guarda motivo y autor; la lista los devuelve con RLS del tenant", async () => {
+    await dato("core.excepciones.set", {
+      membershipId,
+      permiso: "core:cuentas.read",
+      efecto: "conceder",
+      motivo: "acceso puntual a cuentas para conciliar",
+    });
+    const lista = await mod.executeCapability(ctxOwner(), "core.excepciones.list", {
+      membershipId,
+    });
+    expect(lista.ok).toBe(true);
+    if (lista.ok) {
+      const fila = (lista.data as { permiso: string; motivo: string | null; fijadoPor: unknown }[]).find(
+        (e) => e.permiso === "core:cuentas.read",
+      );
+      expect(fila?.motivo).toBe("acceso puntual a cuentas para conciliar");
+    }
+    // Otro tenant no ve esta membresía: la RLS devuelve «no encontrado».
+    const otro = await e.admin.tenant.create({
+      data: { slug: `otro-${randomUUID().slice(0, 8)}`, nombre: "Otro", vertical: "seguridad" },
+    });
+    const ctxOtro = mod.crearContexto({
+      tenantId: otro.id,
+      actor: { tipo: "system" },
+      rol: "owner",
+      medidor: { registrar: async () => undefined },
+    });
+    const cruzado = await mod.executeCapability(ctxOtro, "core.excepciones.list", { membershipId });
+    expect(cruzado).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+  });
+
+  it("otro tenant no escribe sobre esta membresía: assign y users.update dan «no encontrado» (RLS)", async () => {
+    // Autorrevisión §2: las escrituras filtran por tenant, no solo por id. Un owner de otro tenant,
+    // con todo el permiso en el suyo, no toca una membresía ajena: la RLS la hace invisible.
+    const otro = await e.admin.tenant.create({
+      data: { slug: `w-${randomUUID().slice(0, 8)}`, nombre: "Otro", vertical: "seguridad" },
+    });
+    const ctxOtro = mod.crearContexto({
+      tenantId: otro.id,
+      actor: { tipo: "system" },
+      rol: "owner",
+      medidor: { registrar: async () => undefined },
+    });
+    const asignar = await mod.executeCapability(ctxOtro, "core.roles.assign", {
+      membershipId,
+      roleId: null,
+    });
+    expect(asignar).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+    const actualizar = await mod.executeCapability(ctxOtro, "core.users.update", {
+      membershipId,
+      estado: "suspendida",
+    });
+    expect(actualizar).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+    // La membresía sigue intacta en su propio tenant (la escritura ajena no la tocó).
+    const intacta = await e.forTenant(tenantId).membership.findUnique({ where: { id: membershipId } });
+    expect(intacta?.estado).toBe("activa");
   });
 
   it("no se archiva un rol en uso; las escrituras quedan en la auditoría", async () => {

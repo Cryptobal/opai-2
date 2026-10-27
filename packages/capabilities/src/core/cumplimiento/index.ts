@@ -2,6 +2,7 @@ import type { Capacidad } from "../../types";
 import { consentimientosListar } from "./consentimientos-consulta";
 import { consentimientoRegistrar, consentimientoRevocar } from "./consentimientos";
 import { cumplimientoDpaAceptar, cumplimientoEstado } from "./dpa";
+import { cumplimientoDpaTexto } from "./dpa-texto";
 import { cumplimientoDpoSet } from "./dpo";
 import { incidentesListar } from "./incidentes-consulta";
 import { incidenteNotificar } from "./incidentes-notificar";
@@ -17,11 +18,12 @@ import { solicitudAvanzar, solicitudCrear } from "./solicitudes";
 
 /**
  * Capacidades de cumplimiento (Ley 21.719, Brief 07d). PR 1: DPA, DPO y RAT. PR 2: consentimientos,
- * solicitudes del titular (ARCO+) con su exportación, e incidentes/avisos de brecha. PR 3: política de
- * retención (lectura) y la anonimización puntual de un titular (única purga forzada, §16.4).
+ * solicitudes del titular (ARCO+) con su exportación, e incidentes/avisos de brecha. PR 3: política
+ * de retención y anonimización puntual del titular.
  */
 export const capacidadesCumplimiento: readonly Capacidad[] = [
   cumplimientoEstado,
+  cumplimientoDpaTexto,
   cumplimientoDpaAceptar,
   cumplimientoDpoSet,
   cumplimientoRat,

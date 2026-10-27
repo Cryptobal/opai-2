@@ -65,6 +65,7 @@ model Tenant {
   idempotencias         Idempotencia[]
   aprobaciones          Aprobacion[]
   apiKeysAutonomia      ApiKeyAutonomia[]
+  gastosAgenteMes       GastoAgenteMes[]
   bitacora              Bitacora[]
   bitacoraCabeza        BitacoraCabeza?
   comprobantes          Comprobante[]
@@ -78,6 +79,22 @@ model Tenant {
   retencionEjecuciones  RetencionEjecucion[]
 
   @@map("tenants")
+  @@schema("core")
+}
+
+/// Ventana de rate limit centralizado (NÚCLEO-B). No es dato de tenant (sin tenant_id ni RLS, como
+/// `login_intentos`): es infraestructura global. `opai_app` NO la lee ni la escribe directo (REVOKE en
+/// la migración); el acceso pasa solo por las funciones `SECURITY DEFINER` `core.rate_limit_consumir`
+/// (upsert atómico que cuenta y decide) y `core.rate_limit_purgar` (la llama el cron). La `clave` es el
+/// hash SHA-256 de «ámbito:identificador»: nunca la API key ni la IP en claro (Ley 21.719).
+model RateLimitVentana {
+  clave         String   @id
+  ventanaInicio DateTime @map("ventana_inicio") @db.Timestamptz(6)
+  n             Int
+  actualizado   DateTime @db.Timestamptz(6)
+
+  @@index([actualizado])
+  @@map("rate_limit_ventanas")
   @@schema("core")
 }
 

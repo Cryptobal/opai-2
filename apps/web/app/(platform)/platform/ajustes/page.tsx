@@ -19,7 +19,7 @@ export default function Ajustes() {
       portal="platform"
       titulo="Ajustes de plataforma"
       ruta="/platform/ajustes"
-      insignia={<Superadmin />}
+      opciones={() => ({ insignia: <Superadmin /> })}
       cargar={async () => {
         const [p, a] = await Promise.all([
           ejecutarComoUsuario<Precio[]>("platform", "platform.precios.list", {}),

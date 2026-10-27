@@ -1,10 +1,11 @@
 import { controlAgente } from "./agentes/control";
 import { denegar, falla } from "./autorizacion";
 import { ErrorCapacidad } from "./errores";
+import { consumoEjecucion } from "./execute-medicion";
 import { entidadAuditada, repeticion, sinSensibles, tenantDe } from "./execute-util";
 import { SALIDA_INVALIDA } from "./idempotencia";
 import { obtenerCapacidad } from "./registry";
-import type { Capacidad, Contexto, OpcionesEjecucion, Resultado } from "./types";
+import type { Capacidad, Contexto, FinalizarConsumo, OpcionesEjecucion, Resultado } from "./types";
 
 async function correr(
   ctx: Contexto,
@@ -107,7 +108,13 @@ export async function executeCapability(
 
   const inicio = Date.now();
   let r: Awaited<ReturnType<typeof correr>>;
+  let finalizar: FinalizarConsumo | undefined;
+  const prepago = ctx.actor.tipo === "agent" && ctx.conTenant && Boolean(ctx.medidor.preparar);
   try {
+    // Las llamadas de agentes se cobran antes de sus efectos, nunca con after(). El medidor
+    // serializa chequeo + consumo + aviso por key dentro de la misma transacción.
+    if (prepago)
+      finalizar = await ctx.medidor.preparar!(consumoEjecucion(ctx, c, opciones, ctx.tenantId));
     r = await correr(ctx, c, input, opciones);
     const tenantId = tenantDe(ctx, c, r.entrada, r.salida);
     const escrituraNueva = r.resultado.ok && !r.resultado.dryRun && !r.resultado.repetida;
@@ -127,31 +134,20 @@ export async function executeCapability(
   } catch (error) {
     const code = error instanceof ErrorCapacidad ? error.code : "INTERNAL";
     const message = error instanceof Error ? error.message : "Error inesperado.";
-    r = { resultado: falla(code, message) };
+    const detalles = error instanceof ErrorCapacidad ? error.detalles : undefined;
+    r = { resultado: falla(code, message, detalles) };
   }
 
   const tenantId = tenantDe(ctx, c, r.entrada, r.salida);
-  if (tenantId) {
-    // La medición nunca rompe una ejecución (ADR-031).
-    const consumo = {
-      tenantId,
-      recurso: "capacidad.ejecucion",
-      unidad: "llamada",
-      cantidad: 1,
-      modulo: c.modulo,
-      capability: c.id,
-      actorTipo: ctx.actor.tipo,
-      actorId: ctx.actor.id ?? null,
-      viaUserId: ctx.actor.viaUserId ?? null,
-      apiKeyId: ctx.actor.tipo === "agent" ? ctx.actor.id : null,
-      portal: ctx.portal,
-      efecto: c.efecto,
-      dryRun: opciones.dryRun === true,
-      ok: r.resultado.ok,
-      duracionMs: Date.now() - inicio,
-    };
-    await ctx.medidor.registrar(consumo).catch(() => undefined);
-  }
+  const estado = { ok: r.resultado.ok, duracionMs: Date.now() - inicio };
+  if (finalizar) await finalizar(estado).catch(() => undefined);
+  else if (tenantId && !prepago)
+    await ctx.medidor
+      .registrar({
+        ...consumoEjecucion(ctx, c, opciones, tenantId),
+        ...estado,
+      })
+      .catch(() => undefined);
   const nueva = r.resultado.ok && !r.resultado.dryRun && !r.resultado.repetida;
   if (nueva && c.efecto !== "lectura") ctx.despacharEventos();
   return r.resultado;

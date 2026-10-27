@@ -47,6 +47,23 @@ export async function cargarTitular(ctx: Contexto, t: Titular): Promise<TitularV
   };
 }
 
+/**
+ * Valida que un documento de evidencia exista en el tenant actual: la RLS impide ver los de otro,
+ * así que `findUnique` devuelve null tanto si no existe como si es de otro tenant, y en ambos casos
+ * se responde «no encontrado» sin revelar cuál de las dos cosas es (sin enumeración). Evita apuntar
+ * la evidencia a un documento ajeno (los campos `*_doc_id` / `documento_evidencia_id` no tienen FK;
+ * las referencias entre tablas son del mismo tenant). Recibe el cliente (db o tx) para validar
+ * dentro de la misma transacción.
+ */
+export async function validarEvidenciaDelTenant(
+  db: TenantTx,
+  docId: string | undefined,
+): Promise<void> {
+  if (!docId) return;
+  const d = await db.documento.findUnique({ where: { id: docId } });
+  if (!d) throw noEncontrado("El documento de evidencia");
+}
+
 /** Fila de solicitud tal como la devuelven las capacidades (fechas como ISO). */
 export type FilaSolicitud = {
   id: string;

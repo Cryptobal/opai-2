@@ -21,6 +21,7 @@ export const contactosList = defineCapability({
   id: "core.contactos.list",
   descripcion: "Contactos de una cuenta (principal primero), con correo, teléfono, cargo y roles.",
   permiso: PERMISOS_CORE.cuentasRead,
+  portales: ["erp", "supervisor"],
   input: z.object({ cuentaId: uuidSchema, incluirArchivados: z.boolean().default(false) }),
   output: z.array(contactoSchema),
   efecto: "lectura",

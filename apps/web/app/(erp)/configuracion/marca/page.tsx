@@ -1,7 +1,8 @@
 import { Button } from "@opai/ds";
-import { esRol, PERMISOS_CORE, tienePermiso } from "@opai/domain";
+import { PERMISOS_CORE } from "@opai/domain";
 
 import { fecha, hoyIso } from "@/lib/fechas";
+import { construirPuede } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
 
 import { PaginaConfig } from "../_centro/pagina-config";
@@ -31,7 +32,7 @@ export default function PaginaMarca() {
       }}
       cabecera={(_, indice) => ({
         subtitulo: "Se aplica a documentos, correos y portales; la interfaz de OPAI no cambia.",
-        acciones: puedeMarca(indice.rol) ? (
+        acciones: puedeMarca(indice) ? (
           <Button type="submit" form="form-marca">
             Guardar
           </Button>
@@ -40,7 +41,7 @@ export default function PaginaMarca() {
     >
       {({ marca, tipos, tenantId }, indice) => {
         if (!marca) return null;
-        const puede = puedeMarca(indice.rol);
+        const puede = puedeMarca(indice);
         return (
           <div className="flex flex-col gap-4">
             <LogosMarca marca={marca} puede={puede} />
@@ -53,5 +54,5 @@ export default function PaginaMarca() {
   );
 }
 
-const puedeMarca = (rol: string | null) =>
-  Boolean(rol && esRol(rol) && tienePermiso(rol, PERMISOS_CORE.marcaManage));
+const puedeMarca = (indice: { rol: string | null; acceso: Parameters<typeof construirPuede>[1] }) =>
+  construirPuede(indice.rol, indice.acceso)(PERMISOS_CORE.marcaManage);

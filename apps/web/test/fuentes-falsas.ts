@@ -1,6 +1,6 @@
 import { generarApiKey } from "@opai/capabilities";
 
-import type { ApiKeyFila, Fuentes, MembresiaConTenant } from "../lib/fuentes";
+import type { AccesoFila, ApiKeyFila, Fuentes, MembresiaConTenant } from "../lib/fuentes";
 
 export const TENANT = "0192f3a0-0000-7000-8000-000000000001";
 export const USUARIO = {
@@ -24,7 +24,7 @@ export function membresia(extra: Partial<MembresiaConTenant> = {}): MembresiaCon
 
 /** Fuentes en memoria: un tenant `gard`, una key de Carlos y su membresía. */
 export function fuentesFalsas(
-  o: { key?: Partial<ApiKeyFila>; membresias?: MembresiaConTenant[] } = {},
+  o: { key?: Partial<ApiKeyFila>; membresias?: MembresiaConTenant[]; acceso?: AccesoFila } = {},
 ) {
   const { secreto, hash } = generarApiKey("gard");
   const usos: string[] = [];
@@ -35,6 +35,8 @@ export function fuentesFalsas(
     scopes: ["*"],
     principalTipo: "usuario",
     principalId: null,
+    permisos: [],
+    heredaPermisos: true,
     revocadaEn: null,
     expiraEn: null,
     ultimoUsoEn: null,
@@ -50,7 +52,7 @@ export function fuentesFalsas(
     tenantPorSlug: async (slug) => (slug === "gard" ? { id: TENANT, estado: "activo" } : null),
     keyPorHash: async (_t, h) => (h === hash ? fila : null),
     membresia: async (t, u) => membresias.find((m) => m.tenantId === t && u === USUARIO.id) ?? null,
-    acceso: async () => ({ permisosRol: null, excepciones: [], instalaciones: null }),
+    acceso: async () => o.acceso ?? { permisosRol: null, excepciones: [], instalaciones: null },
     marcarUsoKey: async (_t, id) => void usos.push(id),
   };
   return { fuentes, secreto, usos };

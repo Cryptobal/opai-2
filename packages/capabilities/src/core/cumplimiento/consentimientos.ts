@@ -26,11 +26,13 @@ const propositoSchema = z
   .max(80)
   .describe('Fin accesorio, p. ej. "comunicaciones_comerciales" (§16.2).');
 
-/** Última fila (estado vigente) de un consentimiento por titular y propósito, dentro de la tx. */
+/** Última fila (estado vigente) de un consentimiento por titular y propósito, dentro de la tx.
+ *  Ordena por `id` (uuid7 = orden real de creación), no por `created_at` (hora de inicio de la
+ *  transacción), por el mismo motivo que los hechos de incidentes. */
 const vigente = (tx: TenantTx, t: Suscriptor, proposito: string) =>
   tx.consentimiento.findFirst({
     where: { titularTipo: t.tipo, titularId: t.id, proposito },
-    orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+    orderBy: { id: "desc" },
   });
 
 /** Anota un hecho (otorgar/revocar) y emite su evento en la misma transacción (outbox, ADR-029). */

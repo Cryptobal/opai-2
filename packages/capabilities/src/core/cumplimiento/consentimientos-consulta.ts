@@ -32,7 +32,9 @@ export const consentimientosListar = defineCapability({
     const titular = await cargarTitular(ctx, input.titular);
     const filas = await ctx.db.consentimiento.findMany({
       where: { titularTipo: titular.tipo, titularId: titular.id },
-      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      // Orden por `id` (uuid7 = orden real de creación), no por `created_at` (hora de inicio de
+      // la transacción): la primera fila por propósito es el estado vigente, igual que en incidentes.
+      orderBy: { id: "desc" },
       take: 200,
     });
     // La última fila por propósito es el estado vigente (append-only).

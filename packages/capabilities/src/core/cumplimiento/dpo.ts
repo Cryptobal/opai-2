@@ -1,11 +1,30 @@
 import { z } from "zod";
 
-import { PERMISOS_CORE } from "@opai/domain";
+import { normalizarTelefono, PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
-import { definidos, escribirConEvento, telefonoSchema, textoOpcional } from "../maestros/comun";
+import { definidos, escribirConEvento, textoOpcional } from "../maestros/comun";
 
-const correo = z.string().trim().toLowerCase().pipe(z.email()).nullable().optional();
+// Mensajes en español fijados en el schema del DPO (texto de la sábana, ParteC:195 y C08).
+const correo = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .pipe(z.email("Ingresa un correo válido"))
+  .nullable()
+  .optional();
+
+/** Teléfono chileno o internacional → E.164, con mensaje en español. */
+const telefono = z
+  .string()
+  .trim()
+  .transform((v, c) => {
+    const t = normalizarTelefono(v);
+    if (!t) c.addIssue({ code: "custom", message: "Ingresa un teléfono válido" });
+    return t ?? v;
+  })
+  .nullable()
+  .optional();
 
 const dpoSchema = z.object({
   nombre: z.string().nullable(),
@@ -28,7 +47,7 @@ export const cumplimientoDpoSet = defineCapability({
   input: z.object({
     nombre: textoOpcional(160),
     correo,
-    telefono: telefonoSchema.nullable().optional(),
+    telefono,
   }),
   output: dpoSchema,
   efecto: "escritura",

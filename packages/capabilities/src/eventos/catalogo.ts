@@ -117,7 +117,7 @@ export const EVENTOS_CORE: readonly EventoDeDominio[] = [
   {
     id: "core.cumplimiento.retencion_aplicada",
     descripcion:
-      "El trabajo de retención anonimizó o eliminó datos vencidos (o lo simuló si la política no está activa).",
+      "El trabajo de retención anonimizó o eliminó datos vencidos según la política activa.",
   },
   {
     id: "core.cumplimiento.titular_anonimizado",

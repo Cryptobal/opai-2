@@ -7,12 +7,25 @@ import { dondeCuenta, dondeInstalacion, dondePersona } from "../maestros/alcance
 
 const n = z.number().nullable();
 
+const CAMPOS = [
+  "cuentas",
+  "instalaciones",
+  "personas",
+  "aprobacionesPendientes",
+  "notificacionesNoLeidas",
+] as const;
+
 export const resumenContadores = defineCapability({
   id: "core.resumen.contadores",
   descripcion:
-    "Conteos para la navegación: cuentas, instalaciones y personas activas, aprobaciones de agentes pendientes y avisos sin leer del usuario. null donde el actor no tiene permiso.",
+    "Conteos para la navegación: cuentas, instalaciones y personas activas, aprobaciones de agentes pendientes y avisos sin leer del usuario. null donde el actor no tiene permiso o donde no se pidió el conteo.",
   permiso: null,
-  input: z.object({}),
+  input: z.object({
+    campos: z
+      .array(z.enum(CAMPOS))
+      .optional()
+      .describe("Solo estos conteos (el resto va en null). Por defecto, todos."),
+  }),
   output: z.object({
     cuentas: n,
     instalaciones: n,
@@ -22,26 +35,32 @@ export const resumenContadores = defineCapability({
   }),
   efecto: "lectura",
   dryRun: false,
-  async handler(ctx) {
-    const si = <T>(permiso: string, f: () => Promise<T>) =>
-      ctx.autorizar(permiso) ? f() : Promise.resolve(null);
+  async handler(ctx, input) {
+    const pedido = input.campos ? new Set(input.campos) : null;
+    // Solo se consulta lo pedido y permitido: una pantalla que necesita un conteo no paga los cinco.
+    const si = <T>(campo: (typeof CAMPOS)[number], permiso: string | null, f: () => Promise<T>) =>
+      (!pedido || pedido.has(campo)) && (permiso === null || ctx.autorizar(permiso))
+        ? f()
+        : Promise.resolve(null);
     const usuario = ctx.actor.tipo === "user" ? ctx.actor.id : null;
     const [cuentas, instalaciones, personas, aprobacionesPendientes, notificacionesNoLeidas] =
       await Promise.all([
-        si(PERMISOS_CORE.cuentasRead, () =>
+        si("cuentas", PERMISOS_CORE.cuentasRead, () =>
           ctx.db.cuenta.count({ where: { archivadaEn: null, AND: [dondeCuenta(ctx)] } }),
         ),
-        si(PERMISOS_CORE.instalacionesRead, () =>
+        si("instalaciones", PERMISOS_CORE.instalacionesRead, () =>
           ctx.db.instalacion.count({ where: { archivadaEn: null, AND: [dondeInstalacion(ctx)] } }),
         ),
-        si(PERMISOS_CORE.personasRead, () =>
+        si("personas", PERMISOS_CORE.personasRead, () =>
           ctx.db.persona.count({ where: { archivadaEn: null, AND: [dondePersona(ctx)] } }),
         ),
-        si(PERMISOS_CORE.aprobacionesManage, () =>
+        si("aprobacionesPendientes", PERMISOS_CORE.aprobacionesManage, () =>
           ctx.db.aprobacion.count({ where: { estado: "pendiente", venceEn: { gt: new Date() } } }),
         ),
         usuario
-          ? ctx.db.notificacion.count({ where: { usuarioId: usuario, leidaEn: null } })
+          ? si("notificacionesNoLeidas", null, () =>
+              ctx.db.notificacion.count({ where: { usuarioId: usuario, leidaEn: null } }),
+            )
           : Promise.resolve(null),
       ]);
     return { cuentas, instalaciones, personas, aprobacionesPendientes, notificacionesNoLeidas };

@@ -4,8 +4,8 @@ import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import { uuidSchema } from "../esquemas";
-import { definidos, escribirConEvento, sinDuplicado } from "./comun";
-import { resumenSueldoSchema, sueldoVigentePorCargo } from "./cargos-resumen";
+import { aFecha, definidos, escribirConEvento, hoy, sinDuplicado } from "./comun";
+import { resumenSueldoDe, resumenSueldoSchema } from "./cargos-resumen";
 import {
   campos,
   cargoDe,
@@ -15,6 +15,7 @@ import {
   nombreLibre,
   vista,
 } from "./cargos-vista";
+import { ocultarMontosDeCargo } from "./estructuras-acceso";
 
 export const cargosList = defineCapability({
   id: "core.cargos.list",
@@ -26,18 +27,32 @@ export const cargosList = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
+    // Una sola consulta (ADR-045): conteos por `_count` filtrado y la estructura vigente por `include`,
+    // en vez de dos conteos y un sueldo por cargo (N+1).
     const cargos = await ctx.db.cargo.findMany({
       where: input.incluirInactivos ? {} : { activo: true },
       orderBy: [{ orden: "asc" }, { nombre: "asc" }],
+      include: {
+        _count: {
+          select: {
+            vinculos: { where: { estado: "vigente" } },
+            puestos: { where: { estado: "activo" } },
+          },
+        },
+        estructuras: {
+          where: { nivel: "cargo", estado: "vigente", vigenteDesde: { lte: aFecha(hoy()) } },
+          orderBy: { vigenteDesde: "desc" },
+          take: 1,
+        },
+      },
     });
-    const sueldos = await sueldoVigentePorCargo(
-      ctx,
-      cargos.map((c) => c.id),
-    );
     return Promise.all(
       cargos.map(async (c) => ({
-        ...vista(c, await conteos(ctx, c.id)),
-        sueldoVigente: sueldos.get(c.id) ?? null,
+        ...vista(c, { personasVigentes: c._count.vinculos, puestosActivos: c._count.puestos }),
+        sueldoVigente: resumenSueldoDe(
+          c.estructuras[0],
+          await ocultarMontosDeCargo(ctx, c, c.estructuras[0]),
+        ),
       })),
     );
   },

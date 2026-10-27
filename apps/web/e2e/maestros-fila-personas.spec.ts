@@ -1,19 +1,10 @@
-import { expect, type Page, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+import { E2E_PASSWORD as password, entrar } from "./sesion";
 
 // Pulido post-#25 (QA 24-oct): la fila de Personas muestra «cargo · RUT» sin el tipo de contrato (va solo
 // en la ficha), en celular también, sin pasar los 64 px de alto y sin cortar nunca el RUT (se acorta el cargo).
-const email = process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl";
-const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
 const CONTRATO = /Indefinido|Plazo fijo|Por obra|Honorarios|Part[ -]?time|Reemplazo|Temporal/i;
 const RUT = /^· \d{1,2}\.\d{3}\.\d{3}-[\dkK]$/;
-
-async function entrar(page: Page) {
-  await page.goto("/login");
-  await page.getByLabel("Correo").fill(email);
-  await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
-  await page.getByRole("button", { name: "Entrar" }).click();
-  await page.waitForURL((url) => url.pathname === "/" || url.pathname === "/platform");
-}
 
 test.use({ actionTimeout: 30_000 });
 test.setTimeout(120_000);
