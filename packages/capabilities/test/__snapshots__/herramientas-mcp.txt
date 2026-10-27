@@ -31,6 +31,13 @@ core_cuentas_list
 core_cuentas_set_estado
 core_cuentas_set_representantes
 core_cuentas_update
+core_cumplimiento_consentimientos_listar
+core_cumplimiento_dpa_texto
+core_cumplimiento_estado
+core_cumplimiento_incidentes_listar
+core_cumplimiento_rat
+core_cumplimiento_solicitud_obtener
+core_cumplimiento_solicitudes_listar
 core_documento_tipos_create
 core_documento_tipos_list
 core_documento_tipos_update
@@ -53,6 +60,7 @@ core_estructuras_create
 core_estructuras_efectiva
 core_estructuras_get
 core_estructuras_list
+core_excepciones_list
 core_geo_autocompletar
 core_geo_detalle
 core_geo_geocodificar
@@ -79,6 +87,7 @@ core_notificacion_reglas_set
 core_notificaciones_list
 core_notificaciones_marcar_leida
 core_notificaciones_marcar_todas
+core_permisos_catalogo
 core_personas_archive
 core_personas_bloquear
 core_personas_create
@@ -98,6 +107,8 @@ core_puestos_list
 core_puestos_set_estado
 core_puestos_update
 core_resumen_contadores
+core_roles_list
+core_supervisores_list
 core_tenant_get
 core_tenant_update
 core_usage_summary

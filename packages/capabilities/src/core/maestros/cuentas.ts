@@ -6,12 +6,13 @@ import { defineCapability } from "../../define";
 import { noEncontrado } from "../../errores";
 import type { Contexto } from "../../types";
 import { uuidSchema } from "../esquemas";
+import { dondeCuenta, dondeInstalacion } from "./alcance";
 import { cursorDe, listaSchema, pagina } from "./comun";
 import { cuentaSchema, ESTADOS_CUENTA, vistaCuenta } from "./cuentas-vista";
-import { resumenCuentas } from "./resumenes";
 
 export async function cuentaDe(ctx: Contexto, id: string) {
-  const c = await ctx.db.cuenta.findUnique({ where: { id } });
+  // findFirst (no findUnique) para aplicar el alcance por filas: fuera de alcance = no encontrada.
+  const c = await ctx.db.cuenta.findFirst({ where: { id, AND: [dondeCuenta(ctx)] } });
   if (!c) throw noEncontrado("La cuenta");
   return c;
 }
@@ -32,8 +33,11 @@ export const cuentasList = defineCapability({
   dryRun: false,
   async handler(ctx, input) {
     const q = input.q;
+    // Instalaciones activas (conteo) y contacto principal van en la misma consulta (_count + include),
+    // no en consultas por página aparte (ADR-045).
     const filas = await ctx.db.cuenta.findMany({
       where: {
+        AND: [dondeCuenta(ctx)],
         ...(input.incluirArchivadas ? {} : { archivadaEn: null }),
         ...(input.estado ? { estado: input.estado } : {}),
         ...(q
@@ -49,14 +53,27 @@ export const cuentasList = defineCapability({
       orderBy: [{ nombre: "asc" }, { id: "asc" }],
       take: input.limite + 1,
       ...cursorDe(input.cursor),
+      include: {
+        _count: {
+          select: { instalaciones: { where: { archivadaEn: null, AND: [dondeInstalacion(ctx)] } } },
+        },
+        contactos: {
+          where: { esPrincipal: true, archivadoEn: null },
+          select: { nombres: true, apellidos: true },
+          take: 1,
+        },
+      },
     });
     const p = pagina(filas, input.limite);
-    const resumen = await resumenCuentas(
-      ctx,
-      p.items.map((c) => c.id),
-    );
     return {
-      items: p.items.map((c) => ({ ...vistaCuenta(c), ...resumen(c.id) })),
+      items: p.items.map((c) => {
+        const principal = c.contactos[0];
+        return {
+          ...vistaCuenta(c),
+          instalaciones: c._count.instalaciones,
+          contactoPrincipal: principal ? `${principal.nombres} ${principal.apellidos}` : null,
+        };
+      }),
       siguiente: p.siguiente,
     };
   },
@@ -109,7 +126,9 @@ export const cuentasGet = defineCapability({
         orderBy: [{ esPrincipal: "desc" }, { apellidos: "asc" }],
       }),
       ctx.db.instalacion.findMany({
-        where: { cuentaId: c.id, archivadaEn: null },
+        // Una cuenta puede entrar al alcance por una sola instalación: la ficha lista solo las que
+        // están a cargo del actor, no todas las de la cuenta (ADR-022).
+        where: { cuentaId: c.id, archivadaEn: null, AND: [dondeInstalacion(ctx)] },
         orderBy: { nombre: "asc" },
       }),
       ctx.db.documentoVinculo.count({ where: { entidadTipo: "cuenta", entidadId: c.id } }),

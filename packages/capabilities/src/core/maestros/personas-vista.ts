@@ -3,6 +3,7 @@ import { z } from "zod";
 import { noEncontrado } from "../../errores";
 import type { Contexto } from "../../types";
 import { iso } from "../comun";
+import { dondePersona } from "./alcance";
 import { dia, diaSchema, rutSchema, telefonoSchema, textoOpcional } from "./comun";
 
 export const SEXOS = ["femenino", "masculino", "otro", "no_declara"] as const;
@@ -126,32 +127,36 @@ export const camposPersona = {
 };
 
 export async function personaDe(ctx: Contexto, id: string) {
-  const p = await ctx.db.persona.findUnique({ where: { id } });
+  // findFirst (no findUnique) para aplicar el alcance por filas: fuera de alcance = no encontrada.
+  const p = await ctx.db.persona.findFirst({ where: { id, AND: [dondePersona(ctx)] } });
   if (!p) throw noEncontrado("La persona");
   return p;
 }
 
-/** Vínculos vigentes (con nombre de cargo) de un grupo de personas, en dos consultas. */
+/** Resumen del vínculo para una fila/ficha (con el nombre del cargo ya resuelto). */
+export function vinculoVista(v: {
+  id: string;
+  cargoId: string;
+  cargo?: { nombre: string } | null;
+  tipo: string;
+  inicio: Date | null;
+  termino: Date | null;
+}): z.input<typeof vinculoResumenSchema> {
+  return {
+    id: v.id,
+    cargoId: v.cargoId,
+    cargo: v.cargo?.nombre ?? "",
+    tipo: v.tipo,
+    inicio: dia(v.inicio) ?? "",
+    termino: dia(v.termino),
+  };
+}
+
+/** Vínculos vigentes (con nombre de cargo) de un grupo de personas, en una consulta (include del cargo). */
 export async function vinculosVigentes(ctx: Contexto, personaIds: string[]) {
   const vinculos = await ctx.db.vinculoLaboral.findMany({
     where: { personaId: { in: personaIds }, estado: "vigente" },
+    include: { cargo: { select: { nombre: true } } },
   });
-  const cargos = await ctx.db.cargo.findMany({
-    where: { id: { in: [...new Set(vinculos.map((v) => v.cargoId))] } },
-    select: { id: true, nombre: true },
-  });
-  const nombre = new Map(cargos.map((c) => [c.id, c.nombre]));
-  return new Map(
-    vinculos.map((v) => [
-      v.personaId,
-      {
-        id: v.id,
-        cargoId: v.cargoId,
-        cargo: nombre.get(v.cargoId) ?? "",
-        tipo: v.tipo,
-        inicio: dia(v.inicio) ?? "",
-        termino: dia(v.termino),
-      },
-    ]),
-  );
+  return new Map(vinculos.map((v) => [v.personaId, vinculoVista(v)]));
 }

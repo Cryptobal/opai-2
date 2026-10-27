@@ -12,13 +12,16 @@ import { cambiarTenant } from "@/app/_acciones/capacidad";
 import type { ItemNav } from "@/lib/navegacion";
 
 import { useCabecera } from "./cabecera-contexto";
-import { Campana } from "./campana";
 import { icono } from "./iconos";
 import { LinkMenu } from "./link-menu";
+import { trasLimpiarCaches } from "./limpiar-cache-diferido";
+import { usePendiente } from "./navegacion-pendiente";
 import { useEpocaSesion } from "./refresco-navegador";
 
 // La paleta (cmdk) se descarga al primer uso: no pesa en el JS inicial de cada ruta (ADR-037).
 const Paleta = dynamic(() => import("./paleta").then((m) => m.Paleta), { ssr: false });
+// Conserva el render de servidor de la campana; su contador ya se consulta después de pintar.
+const Campana = dynamic(() => import("./campana").then((m) => m.Campana));
 // Los avisos (sonner) también: se montan después de hidratar y no bloquean el primer render.
 // El cambio de contraseña (formulario y diálogo) solo se descarga si se abre.
 const CambiarPassword = dynamic(() => import("./cambiar-password").then((m) => m.CambiarPassword));
@@ -26,13 +29,14 @@ const Avisos = dynamic(() => import("./avisos").then((m) => m.Avisos), { ssr: fa
 
 export type DatosShell = {
   portal: string;
+  /** Acceso al portal actual en la empresa actual (`datos-shell.ts`). Sin acceso, el shell se monta
+   *  igual pero sin búsqueda, ⌘K ni Preferencias; el aviso «Sin permisos» vive en la página. */
+  acceso: boolean;
   nav: ItemNav[];
   portales: Portal[];
   tenant: { nombre: string } | null;
   usuario: { nombre: string; email: string; rol?: string };
   empresas: { id: string; nombre: string; actual: boolean }[];
-  /** Nombre del portal bajo la marca del riel (el ERP no lleva). */
-  subtituloMarca?: string | undefined;
   /** Quién y en qué empresa ve la página (`lib/epoca-sesion.ts`); las pestañas la comparan. */
   epoca: string;
 };
@@ -49,10 +53,13 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
   const cabecera = useCabecera();
   const [password, setPassword] = useState(false);
   const [paleta, setPaleta] = useState<boolean | null>(null);
-  const buscable = datos.portal === "erp" && datos.tenant !== null;
+  // El ERP del usuario con acceso: habilita búsqueda, ⌘K y Preferencias. Sin acceso al portal el
+  // shell se monta igual (aviso «Sin permisos»), pero sin estas acciones y sin que la acción del
+  // servidor (`ejecutarCapacidad`) devuelva nada del portal ajeno.
+  const enErp = datos.portal === "erp" && datos.tenant !== null && datos.acceso;
   useEpocaSesion(datos.epoca);
   useEffect(() => {
-    if (!buscable) return;
+    if (!enErp) return;
     const tecla = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
@@ -61,9 +68,16 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
     };
     window.addEventListener("keydown", tecla);
     return () => window.removeEventListener("keydown", tecla);
-  }, [buscable]);
+  }, [enErp]);
   // La navegación no cambia al fijar la cabecera: se recalcula solo cuando cambia `datos.nav`.
   const nav = useMemo(() => datos.nav.map((n) => ({ ...n, icono: icono(n.icono) })), [datos.nav]);
+  // Navegación en curso (ADR-045): el riel marca el destino y la cabecera pone su título de inmediato,
+  // sin esperar al contenido nuevo (sin parpadeo ni barra de progreso, decisión 1 de ADR-045). Al
+  // terminar, `pendiente` se limpia y la página fija su propia cabecera.
+  const pendiente = usePendiente();
+  const rutaEfectiva = pendiente ?? rutaActual;
+  const navPendiente = pendiente ? nav.find((n) => n.href === pendiente) : undefined;
+  const tituloEfectivo = navPendiente?.etiqueta ?? cabecera.titulo;
   const empresas: ItemMenu[] =
     datos.empresas.length > 1
       ? datos.empresas.map((e, i) => ({
@@ -72,13 +86,12 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
           etiqueta: e.nombre,
           icono: Building2,
           marcado: e.actual,
-          onSelect: () => {
-            void cambiarTenant(e.id);
-          },
+          // Cambiar de empresa limpia las cachés del service worker antes de redirigir (§4.4, CA8).
+          onSelect: () => trasLimpiarCaches(() => cambiarTenant(e.id)),
         }))
       : [];
   const menu: ItemMenu[] = [
-    ...(datos.portal === "erp" && datos.tenant
+    ...(enErp
       ? [
           {
             id: "pref",
@@ -91,7 +104,7 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
       : []),
     {
       id: "password",
-      ...(datos.portal === "erp" && datos.tenant ? {} : { grupo: "Cuenta" }),
+      ...(enErp ? {} : { grupo: "Cuenta" }),
       etiqueta: "Cambiar contraseña",
       icono: UserRound,
       onSelect: () => setPassword(true),
@@ -101,32 +114,24 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
       etiqueta: "Cerrar sesión",
       icono: LogOut,
       peligro: true,
-      onSelect: () => {
-        void accionSalir();
-      },
+      // Cerrar sesión limpia las cachés del service worker antes de redirigir (§4.4, §9, CA8).
+      onSelect: () => trasLimpiarCaches(accionSalir),
     },
   ];
   return (
     <AppShell
-      titulo={cabecera.titulo}
-      {...(cabecera.volver ? { volver: cabecera.volver } : {})}
-      {...(cabecera.volverSoloTelefono ? { volverSoloTelefono: true } : {})}
-      {...(cabecera.volverBajoLg ? { volverBajoLg: true } : {})}
-      {...(cabecera.acciones ? { acciones: cabecera.acciones } : {})}
-      {...(cabecera.accionesTelefono ? { accionesTelefono: cabecera.accionesTelefono } : {})}
-      {...(cabecera.insignia ? { insignia: cabecera.insignia } : {})}
-      {...(cabecera.completo ? { completo: true } : {})}
+      {...cabecera}
+      titulo={tituloEfectivo}
       nav={nav}
       portales={datos.portales}
       portalActual={datos.portal}
-      rutaActual={rutaActual}
+      rutaActual={rutaEfectiva}
       {...(datos.tenant ? { tenant: datos.tenant } : {})}
       {...(empresas.length ? { empresas } : {})}
       usuario={datos.usuario}
       menuUsuario={menu}
-      campana={datos.tenant ? <Campana portal={datos.portal} /> : undefined}
-      {...(buscable ? { onBuscar: () => setPaleta(true) } : {})}
-      {...(datos.subtituloMarca ? { subtituloMarca: datos.subtituloMarca } : {})}
+      campana={datos.tenant ? <Campana key={datos.epoca} portal={datos.portal} /> : undefined}
+      {...(enErp ? { onBuscar: () => setPaleta(true) } : {})}
       onNavegar={(href) => router.push(href)}
       Link={LinkMenu}
     >

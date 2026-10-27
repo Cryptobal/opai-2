@@ -1,8 +1,8 @@
-import type { Rol } from "@opai/domain";
+import type { Excepcion, Rol } from "@opai/domain";
 
 import { autorizador } from "../contexto";
 import { idempotenciaSobre } from "../idempotencia";
-import type { AgenteContexto, ConsumoNuevo, Principal } from "../types";
+import type { AgenteContexto, Alcance, ConsumoNuevo, Principal } from "../types";
 import { almacenamientoEnMemoria } from "./almacenamiento-memoria";
 import { dbEnMemoria } from "./db-memoria";
 import { bitacoraEnMemoria, eventosEnMemoria, trabajosEnMemoria } from "./servicios-memoria";
@@ -20,12 +20,18 @@ export type OpcionesPrueba = {
   /** Permisos explícitos (ignora rol). Si se omite, se usa la autorización real por `rol`. */
   permisos?: readonly string[];
   rol?: Rol | null;
+  /** Rol personalizado del tenant (null = rol base). ADR-022. */
+  permisosRol?: readonly string[] | null;
+  /** Excepciones de permiso por usuario. ADR-022. */
+  excepciones?: readonly Excepcion[] | null;
   usuario?: UsuarioContexto | null;
   actor?: Actor;
   conTenant?: boolean;
   modulosActivos?: readonly string[];
   scopes?: readonly string[] | null;
   principal?: Principal | null;
+  /** Alcance por filas del actor (null = ve todo). ADR-022 · Brief 07c B3. */
+  alcance?: Alcance | null;
   agente?: AgenteContexto | null;
   semilla?: Parameters<typeof dbEnMemoria>[0];
 };
@@ -56,6 +62,7 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
     modulosActivos: o.modulosActivos ?? [],
     scopes: o.scopes ?? null,
     principal: o.principal ?? null,
+    alcance: o.alcance ?? null,
     agente: o.agente ?? null,
     db,
     // Atómica como la real: si `fn` falla, las tablas vuelven al estado previo.
@@ -99,7 +106,16 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
       urlBase: "https://test.opai.cl",
     },
     plataforma: usuario?.platformRole ? { globales, paraTenant: () => db } : null,
-    autorizar: o.permisos ? (p) => (o.permisos ?? []).includes(p) : autorizador(rol, usuario),
+    autorizar: o.permisos
+      ? (p) => (o.permisos ?? []).includes(p)
+      : autorizador(
+          {
+            rol: o.permisosRol != null ? null : rol,
+            permisosRol: o.permisosRol ?? null,
+            excepciones: o.excepciones ?? null,
+          },
+          usuario,
+        ),
   };
   const esperar = () => Promise.all(diferidos.splice(0));
   return { ctx, eventos, usos, correos, tabla, esperar, almacen, despachos: () => despachos };

@@ -16,6 +16,6 @@ function useEsMac() {
 }
 
 /** Atajo de la búsqueda global: «⌘K» en Mac y «Ctrl K» en el resto (el shell escucha ambas). */
-export function AtajoBusqueda() {
-  return <Kbd>{useEsMac() ? "⌘K" : "Ctrl K"}</Kbd>;
+export function AtajoBusqueda({ className }: { className?: string }) {
+  return <Kbd {...(className ? { className } : {})}>{useEsMac() ? "⌘K" : "Ctrl K"}</Kbd>;
 }

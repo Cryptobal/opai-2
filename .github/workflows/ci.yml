@@ -156,11 +156,91 @@ jobs:
         run: pnpm --filter @opai/web e2e --reporter=list
         env:
           BASE_URL: http://localhost:3000
+          DATABASE_URL_MIGRATE: postgresql://postgres:postgres@localhost:5432/opai_e2e
       - name: Guardar resultados si fallan
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: e2e-resultados
+          path: |
+            apps/web/test-results
+            ${{ runner.temp }}/app.log
+          retention-days: 7
+
+  rendimiento:
+    name: rendimiento
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: opai_e2e
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      BETTER_AUTH_URL: http://localhost:3000
+      NEXT_TELEMETRY_DISABLED: "1"
+      # Gate estricto (ADR-045): las metas fallan el job, no solo informan.
+      # Check obligatorio del ruleset «Proteger main» (decisión de Carlos, t306u).
+      GATE_ESTRICTO: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Generar credenciales efímeras
+        run: |
+          for var in OPAI_APP_DB_PASSWORD BETTER_AUTH_SECRET CRON_SECRET; do
+            valor=$(openssl rand -hex 24)
+            echo "::add-mask::$valor"
+            echo "$var=$valor" >> "$GITHUB_ENV"
+          done
+          clave="$(openssl rand -hex 12)Aa1"
+          echo "::add-mask::$clave"
+          echo "SEED_OWNER_PASSWORD=$clave" >> "$GITHUB_ENV"
+      - name: Migrar y sembrar la base
+        env:
+          DATABASE_URL_MIGRATE: postgresql://postgres:postgres@localhost:5432/opai_e2e
+        run: |
+          pnpm db:deploy
+          pnpm --filter @opai/db role:password
+          echo "DATABASE_URL=postgresql://opai_app:${OPAI_APP_DB_PASSWORD}@localhost:5432/opai_e2e" >> "$GITHUB_ENV"
+          pnpm --filter @opai/db seed:dev-tenant
+          pnpm --filter @opai/auth seed:platform-owner
+          pnpm --filter @opai/db seed:e2e
+          pnpm --filter @opai/db seed:maestros-demo
+      # El build no se conecta a la base (ADR-037); la app lee DATABASE_URL al arrancar.
+      - name: Construir la app (producción)
+        run: pnpm --filter @opai/web build
+      - name: Instalar Chromium de Playwright
+        run: pnpm --filter @opai/web exec playwright install --with-deps chromium
+      - name: Levantar la app (next start) y calentar las rutas del protocolo
+        run: |
+          nohup pnpm --filter @opai/web start > "$RUNNER_TEMP/app.log" 2>&1 &
+          for i in $(seq 1 60); do curl -sf -m 10 http://localhost:3000/api/health > /dev/null && break; sleep 2; done
+          curl -sf -m 10 http://localhost:3000/api/health
+          for ruta in /login / /cuentas /instalaciones /personas /cargos /configuracion; do
+            curl -s -o /dev/null -m 120 "http://localhost:3000$ruta" || true
+          done
+      - name: Correr el gate de rendimiento (estricto)
+        run: pnpm --filter @opai/web e2e rendimiento --project=telefono --reporter=list
+        env:
+          BASE_URL: http://localhost:3000
+      - name: Guardar resultados si fallan
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rendimiento-resultados
           path: |
             apps/web/test-results
             ${{ runner.temp }}/app.log

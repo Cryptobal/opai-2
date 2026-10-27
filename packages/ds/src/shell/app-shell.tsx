@@ -18,8 +18,6 @@ export type AppShellProps = ComunesBarra & {
   /** Acciones en la barra del teléfono cuando hay "Atrás" (menú ⋯ del detalle). */
   accionesTelefono?: ReactNode;
   insignia?: ReactNode;
-  /** Subtítulo bajo la marca, en el riel de iPad y en la barra lateral de desktop ("Plataforma"). */
-  subtituloMarca?: string;
   onNavegar?: (href: string) => void;
   /** Contenido a alto completo (vistas divididas): sin márgenes del contenedor en md+. */
   completo?: boolean;
@@ -28,12 +26,13 @@ export type AppShellProps = ComunesBarra & {
 };
 
 /**
- * Shell de OPAI 2.0 (ADR-007, diseño aprobado): barra superior con selector de portal y navegación
- * inferior en teléfono; riel en iPad; barra lateral en desktop. Configuración, fija al pie.
+ * Shell de OPAI 2.0 (ADR-007, ADR-050; export ShellPhone, ShellTablet y ShellDesktop): barra superior
+ * con selector de portal, Buscar, campana y avatar, y navegación inferior en teléfono; riel en iPad;
+ * barra lateral con el usuario al pie en desktop. Configuración, fija al pie.
  */
 export function AppShell(props: AppShellProps) {
   const { titulo, nav, rutaActual, acciones, insignia, children, className, Link } = props;
-  const { accionesTelefono, subtituloMarca, onNavegar, completo, ...barra } = props;
+  const { accionesTelefono, onNavegar, completo, ...barra } = props;
   return (
     <div className="flex min-h-dvh bg-bg text-fg">
       <Rail
@@ -52,7 +51,8 @@ export function AppShell(props: AppShellProps) {
         portalActual={props.portalActual}
         tenant={props.tenant}
         empresas={props.empresas}
-        subtitulo={subtituloMarca}
+        usuario={props.usuario}
+        menuUsuario={props.menuUsuario}
         Link={Link}
       />
       <div className="flex min-w-0 flex-1 flex-col">
@@ -78,7 +78,6 @@ export function AppShell(props: AppShellProps) {
         rutaActual={rutaActual}
         {...(props.menuUsuario ? { extras: props.menuUsuario } : {})}
         {...(onNavegar ? { onNavegar } : {})}
-        {...(props.onBuscar ? { onBuscar: props.onBuscar } : {})}
         Link={Link}
       />
     </div>

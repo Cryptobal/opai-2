@@ -6,13 +6,15 @@ import { defineCapability } from "../../define";
 import { noEncontrado } from "../../errores";
 import type { Contexto } from "../../types";
 import { uuidSchema } from "../esquemas";
+import { dondeInstalacion } from "./alcance";
 import { cursorDe, listaSchema, pagina } from "./comun";
 import { ESTADOS_INSTALACION, instalacionSchema, vistaInstalacion } from "./instalaciones-vista";
 import { puestoSchema, vistaPuesto } from "./puestos-vista";
 import { resumenInstalaciones } from "./resumenes";
 
 export async function instalacionDe(ctx: Contexto, id: string) {
-  const i = await ctx.db.instalacion.findUnique({ where: { id } });
+  // findFirst (no findUnique) para aplicar el alcance por filas: fuera de alcance = no encontrada.
+  const i = await ctx.db.instalacion.findFirst({ where: { id, AND: [dondeInstalacion(ctx)] } });
   if (!i) throw noEncontrado("La instalación");
   return i;
 }
@@ -46,6 +48,7 @@ export const instalacionesList = defineCapability({
     const q = input.q;
     const filas = await ctx.db.instalacion.findMany({
       where: {
+        AND: [dondeInstalacion(ctx)],
         ...(input.incluirArchivadas ? {} : { archivadaEn: null }),
         ...(input.cuentaId ? { cuentaId: input.cuentaId } : {}),
         ...(input.estado ? { estado: input.estado } : {}),
@@ -62,19 +65,17 @@ export const instalacionesList = defineCapability({
       orderBy: [{ nombre: "asc" }, { id: "asc" }],
       take: input.limite + 1,
       ...cursorDe(input.cursor),
+      // El nombre de la cuenta va en la misma consulta (include), no una aparte por página (ADR-045).
+      include: { cuenta: { select: { nombre: true } } },
     });
     const p = pagina(filas, input.limite);
-    const nombres = await nombresDeCuentas(
-      ctx,
-      p.items.map((i) => i.cuentaId),
-    );
     const resumen = await resumenInstalaciones(
       ctx,
       p.items.map((i) => i.id),
     );
     return {
       items: p.items.map((i) => ({
-        ...vistaInstalacion(i, nombres.get(i.cuentaId) ?? null),
+        ...vistaInstalacion(i, i.cuenta?.nombre ?? null),
         ...resumen(i.id),
       })),
       siguiente: p.siguiente,
