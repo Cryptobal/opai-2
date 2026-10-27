@@ -51,31 +51,39 @@ export function useNavegacionArea(portal: string, activo: boolean) {
   }, [activo, cargar]);
 
   const cambiar = useCallback(
-    (clave: string, transformar: (p: Preferencias) => Preferencias) => {
+    (clave: string, transformar: (p: Preferencias) => Preferencias | Promise<Preferencias>) => {
       cola.current = cola.current
         .then(async () => {
           if (!cargado) await cargar();
-          const siguiente = transformar(actual.current);
+          const revision = versiones.current[clave] ?? 0;
+          const siguiente = await transformar(actual.current);
+          if ((versiones.current[clave] ?? 0) !== revision) {
+            avisar.info("Preferencias actualizadas. Reintenta.");
+            return;
+          }
           const campo =
             clave === "navegacion_fijados"
               ? "fijados"
               : clave === "navegacion_area_abierta"
-                ? "areaAbierta"
-                : "areaPrincipal";
+                 ? "areaAbierta"
+                 : "areaPrincipal";
+          // La cola compara con el último valor confirmado, no con el render que la encoló.
+          if (Object.is(siguiente[campo], actual.current[campo])) return;
           const r = await ejecutarCapacidad(portal, "core.config.set", {
             modulo: "core",
             clave,
             valor: siguiente[campo],
-            versionEsperada: versiones.current[clave] ?? 0,
+            versionEsperada: revision,
           });
           if (!r.ok) {
             avisar.error("No se guardó la preferencia. Recarga e inténtalo de nuevo.");
             await cargar();
             return;
           }
+          if ((versiones.current[clave] ?? 0) !== revision) { await cargar(); return; }
           versiones.current[clave] = (r.data as { version: number }).version;
-          actual.current = siguiente;
-          setPrefs(siguiente);
+          actual.current = { ...actual.current, [campo]: siguiente[campo] };
+          setPrefs(actual.current);
           if (clave === "navegacion_area_principal")
             window.dispatchEvent(new Event("opai-preferencias-nav"));
         })
@@ -91,12 +99,14 @@ export function useNavegacionArea(portal: string, activo: boolean) {
   const elegirAreaPrincipal = (area: AreaNav | null) =>
     cambiar("navegacion_area_principal", (p) => ({ ...p, areaPrincipal: area }));
   const fijar = (item: Omit<Fijado, "fijadoEn">, permitidos?: readonly string[]) =>
-    cambiar("navegacion_fijados", (previo) => {
+    cambiar("navegacion_fijados", async (previo) => {
+      const { revisarFichasNav } = await import("@/app/_acciones/validar-fichas-nav");
+      const { invalidas } = await revisarFichasNav(previo.fijados.filter((f) => f.tipo === "ficha").map((f) => f.href));
       const p = {
         ...previo,
         fijados: permitidos
-          ? previo.fijados.filter((f) => permitidos.includes(f.href))
-          : previo.fijados,
+          ? previo.fijados.filter((f) => f.tipo === "ficha" ? !invalidas.includes(f.href) : permitidos.includes(f.href))
+          : previo.fijados.filter((f) => !invalidas.includes(f.href)),
       };
       if (p.fijados.some((f) => f.href === item.href))
         return { ...p, fijados: p.fijados.filter((f) => f.href !== item.href) };

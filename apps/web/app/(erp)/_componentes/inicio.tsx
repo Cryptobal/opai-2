@@ -7,7 +7,7 @@ import { ejecutarComoUsuario } from "@/lib/servidor";
 import { vocabularioActual } from "@/lib/vocabulario";
 
 import { ActividadInicio } from "./actividad-inicio";
-import { Bandeja } from "./bandeja";
+import { Bandeja } from "./bandeja-diferida";
 import { type Pendiente, PendientesInicio } from "./pendientes-inicio";
 
 const acciones = (persona: string) => [

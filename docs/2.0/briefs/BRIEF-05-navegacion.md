@@ -259,6 +259,8 @@ Decisiones técnicas de OpenCode / GPT-6.1 Sol, dentro del encargo (no atribuida
 - Las fichas guardadas se validan con capacidades existentes y alcance antes de mostrarse; una falla transitoria oculta el acceso, no concede acceso. Solo se aceptan rutas internas conocidas. Recientes siguen exclusivamente en el navegador.
 - Gana ADR-050 de `main` sobre D7: Buscar arriba en teléfono; usuario al pie de la lateral. No se crea un agente interno ni se copia el estilo de 1.0.
 - Continuación del encargo de las 05:00 CLT: merge normal de `origin/main` `5c18a92` (identidad de servicio #70 y MFA #65). Se conserva «Mi cuenta» del menú del ERP incluso sin acceso al portal, igual que en main, y la navegación e2e usa el helper de login con TOTP ya existente. No se relajan permisos ni la política MFA.
+- Correcciones de autorrevisión por OpenCode / GPT-6.1 Sol: la cola transforma el último estado confirmado y no persiste áreas sin cambios; la limpieza de fichas distingue rechazo definitivo (`NOT_FOUND`/`FORBIDDEN`) de fallo transitorio, sin consumir permanentemente los cinco cupos. La Bandeja conserva enlaces y lectura individual, cuenta `noLeidas` y pagina con cursor propio validado (sin `skip`, para no perder avisos si el cursor se lee en otra pestaña). Se difiere su código interactivo tras montar para respetar el presupuesto inicial, sin subir más topes.
+- La revisión esperada se captura **antes** de validar fichas de forma asíncrona; si una recarga la cambia, se rechaza el intento sin sobrescribir la lista nueva. Si cambia durante la petición, se recarga y no se aplica una respuesta obsoleta. Al guardar solo se mezcla el campo afectado, no el resto de preferencias. La autorrevisión independiente cerró los hallazgos técnicos; no equivale a aprobación formal del PR.
 
 No hay migración nueva ni cambio del orden del plan. La tarea específica del PR B no viene identificada: CAR-13 es la del documento, no se inventa otra vinculación.
 
@@ -266,15 +268,21 @@ No hay migración nueva ni cambio del orden del plan. La tarea específica del P
 
 | CA | Implementación y comprobación |
 |---|---|
-| 1 | e2e `cabecera-estable.spec.ts`: los controles fijos conservan su caja en los tres anchos. La campana ahora es un enlace a la Bandeja. |
-| 2–5 | Modelo puro y permisos efectivos heredados de main; grupos por áreas, límites, sin entradas inactivas ni accesos financieros de los roles excluidos. Escenarios futuros se prueban como datos del modelo, no como módulos ficticios en producción. |
+| 1 | e2e `cabecera-estable.spec.ts`: cajas reales, sin redondeo ni tolerancia; incluye ficha sembrada con Atrás y cambio de filtro de vencimientos en los tres anchos. Nueva cuenta se mide tras cerrar su hoja modal porque Radix deja la cabecera inerte mientras está abierta. |
+| 2 | Modelo puro y permisos efectivos de main; mapa por áreas sin Maestros ni abreviaturas. |
+| 3 | Límites de siete entradas y cinco fijados; área de una entrada suelta. Pruebas de dominio y manifiesto. |
+| 4 | Filtrado por módulos activos; matriz A–D con los cinco roles reales. Los módulos futuros se prueban como datos, no como pantallas ficticias. |
+| 5 | Matriz con `tienePermiso` real: gerente, supervisor y viewer sin Finanzas/Nómina; supervisor sin Comercial. |
 | 6 | Sin contadores laterales; punto compartido de Inicio/campana y número en Bandeja. Aprobaciones solo se consultan cuando el resumen autorizado no es null. |
 | 7 | Acordeón exclusivo, estado por usuario/tenant, plegado explícito y contenido cerrado `inert`; al navegar se abre el área de destino. |
-| 8 | Pin de entrada y ficha, cinco máximos, fecha ascendente, validación de existencia/alcance antes de mostrar. CAS rechaza listas obsoletas; no hay fusión automática entre dispositivos. |
-| 9 | Recientes locales limitados a diez, almacenamiento inválido tolerado; acciones buscables y navegación con teclado mediante cmdk/Radix. |
-| 10–12 | Barra inferior por área, Más como Sheet con navegación completa; lateral desde 1024 y riel anterior conservado entre 768–1023; shell persistente y precarga conservada. |
-| 13–14 | Tokens/componentes del DS, foco y targets de 44 px, muestra en `/ds`, capturas e2e claro/oscuro. **Parcial:** no se ejecutó una auditoría instrumental de contraste ni comparación visual exhaustiva de las 28 pantallas del export. |
+| 8 | Pin de entrada y ficha, cinco máximos, fecha ascendente, validación de existencia/alcance. CAS rechaza listas obsoletas; e2e de dos clics con primera respuesta demorada. **Evidencia parcial:** no se hizo recorrido con dos dispositivos reales. |
+| 9 | Recientes locales limitados a diez, almacenamiento inválido tolerado; acciones buscables mediante cmdk/Radix. **Evidencia parcial:** no se recorrió con teclado cada resultado y estado posible. |
+| 10 | Barra inferior por área, respaldo del rol si desaparece la preferencia, Más como Sheet, targets de 44 px. |
+| 11 | Lateral desde 1024; riel anterior conservado entre 768–1023. **Evidencia parcial:** e2e a 375/1024/1280, sin recorrido adicional a 768. |
+| 12 | Layout persistente y precarga conservados de main. **Evidencia parcial:** el e2e de cabecera usa cargas completas y no prueba por sí solo que no haya remontajes durante enlaces cliente. |
+| 13 | DS V2, foco y targets; e2e incorpora medición WCAG del texto visible del shell, Bandeja y paleta en claro/oscuro. **Parcial:** no sustituye auditoría completa de iconos, foco y todos los estados. |
+| 14 | Tokens/componentes del DS y muestra en `/ds`, capturas claro/oscuro. **Parcial:** no se compararon exhaustivamente las 28 pantallas ni se demostraron todos los estados de galería. |
 
-**ADR-037:** el build de esta rama superó 29 topes anteriores con el shell compartido ampliado (fijados, preferencias CAS, recientes y hoja Más). Se agregaron excepciones acotadas: fichas ERP a 169 KB, Cargos 166, Preferencias 180, integración 179, Ajustes/Nueva empresa de Plataforma 168 y Módulos 172; portales provisionales 162→165 y galería 220→222. No cambian el framework, el acceso, el tope general ni `maxSobreFramework`. No se atribuye la diferencia íntegra a este PR sin una medición de base equivalente. La paleta y la hoja siguen diferidas. La subida exige el check de presupuesto y revisión normal (ADR-043 v3), no una excepción de integración.
+**ADR-037, pendiente:** por decisión del orquestador en el encargo se restituyen los topes de `origin/main`. La Bandeja interactiva se carga diferida, pero el build todavía supera el presupuesto en 31 rutas; el detalle medido queda en `PR-BODY.md`. No se atribuye la diferencia íntegra a este PR sin medición de base equivalente. El check no está verde y el PR no está listo para integrar.
 
 **ADR-045 parcial:** las preferencias se cargan una vez al montar, no desde las páginas; recientes no consultan al navegar. La revalidación de fichas fijadas puede añadir hasta cinco lecturas tras montar. No se produjo una nueva tabla instrumental antes/después del protocolo de rendimiento; no se presenta como cumplido ese punto de §13.

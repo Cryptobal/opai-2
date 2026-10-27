@@ -29,16 +29,27 @@ export const notificacionesList = defineCapability({
   input: z.object({
     soloNoLeidas: z.boolean().default(false),
     limite: z.number().int().min(1).max(100).default(30),
+    antesDe: uuidSchema.optional(),
   }),
   output: z.object({ items: z.array(notificacionSchema), noLeidas: z.number() }),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
     const usuarioId = usuarioDe(ctx);
+    // El cursor también debe ser propio y del tenant. Prisma conserva la precisión de Postgres
+    // al ordenar por createdAt + id; no se reconstruye desde una fecha JS truncada a milisegundos.
+    if (input.antesDe && !await ctx.db.notificacion.findFirst({
+      where: { id: input.antesDe, usuarioId }, select: { id: true },
+    })) throw noEncontrado("El aviso");
     const [filas, noLeidas] = await Promise.all([
       ctx.db.notificacion.findMany({
-        where: { usuarioId, ...(input.soloNoLeidas ? { leidaEn: null } : {}) },
-        orderBy: { createdAt: "desc" },
+        where: {
+          usuarioId,
+          ...(input.soloNoLeidas ? { leidaEn: null } : {}),
+          ...(input.antesDe ? { id: { not: input.antesDe } } : {}),
+        },
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        ...(input.antesDe ? { cursor: { id: input.antesDe } } : {}),
         take: input.limite,
       }),
       ctx.db.notificacion.count({ where: { usuarioId, leidaEn: null } }),

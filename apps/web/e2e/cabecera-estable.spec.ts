@@ -21,17 +21,17 @@ const VISTAS = [
   { nombre: "Inicio", ruta: "/" },
 ] as const;
 
-/** Caja redondeada del único control visible que coincide: 0 px de tolerancia en posición y tamaño. */
+/** Caja real del único control visible que coincide: sin redondeo ni tolerancia. */
 async function caja(loc: Locator) {
   const visible = loc.filter({ visible: true }).first();
   await expect(visible).toBeVisible();
   const b = await visible.boundingBox();
   if (!b) throw new Error("sin boundingBox");
   return {
-    x: Math.round(b.x),
-    y: Math.round(b.y),
-    w: Math.round(b.width),
-    h: Math.round(b.height),
+    x: b.x,
+    y: b.y,
+    w: b.width,
+    h: b.height,
   };
 }
 
@@ -52,6 +52,12 @@ test.describe("cabecera estable (CAR-12, CA1)", () => {
     page,
   }, info) => {
     await entrar(page);
+    await page.goto("/cuentas");
+    const enlaceFicha = page.locator('main a[href^="/cuentas/"]').first();
+    await expect(enlaceFicha).toBeVisible();
+    const rutaFicha = await enlaceFicha.getAttribute("href");
+    if (!rutaFicha) throw new Error("Falta la ficha de cuenta sembrada para e2e");
+    const vistas = [...VISTAS, { nombre: "Ficha de cuenta con Atrás", ruta: rutaFicha }];
     const telefono = info.project.name === "telefono";
     // A 375 el buscador es el ícono «Buscar» de la cabecera; en md+ es la caja de búsqueda.
     const buscador = telefono
@@ -59,7 +65,7 @@ test.describe("cabecera estable (CAR-12, CA1)", () => {
       : page.locator("header").getByRole("button", { name: /^Buscar/ });
 
     const refs: Record<string, { x: number; y: number; w: number; h: number }> = {};
-    for (const vista of VISTAS) {
+    for (const vista of vistas) {
       await page.goto(vista.ruta);
       if ("hoja" in vista) {
         // La hoja modal deja la cabecera inerte: se comprueba que abra sobre la lista y se cierra
@@ -86,6 +92,15 @@ test.describe("cabecera estable (CAR-12, CA1)", () => {
       for (const [clave, valor] of Object.entries(actual)) {
         if (refs[clave]) expect(valor, `${clave} en ${vista.nombre}`).toEqual(refs[clave]);
         else refs[clave] = valor;
+      }
+      if (vista.nombre === "Vencimientos") {
+        await page.getByRole("button", { name: /Faltan/ }).click();
+        const filtrada = {
+          campana: await caja(campanaDe(page)),
+          usuario: await caja(usuarioDe(page)),
+          buscador: await caja(buscador),
+        };
+        expect(filtrada).toEqual(actual);
       }
     }
   });

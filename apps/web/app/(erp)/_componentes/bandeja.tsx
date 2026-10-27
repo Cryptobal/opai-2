@@ -7,6 +7,7 @@ import { Alerta, Button, SeccionTarjeta, Skeleton } from "@opai/ds";
 
 import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
 import type { Aviso } from "@/app/_components/campana";
+import { ListaAvisos } from "@/app/_components/lista-avisos";
 
 /** Una sola Bandeja; el servidor aplica destinatario, permisos efectivos y tenant. */
 export function Bandeja() {
@@ -14,7 +15,10 @@ export function Bandeja() {
   const [aprobaciones, setAprobaciones] = useState<number | null>(null);
   const [decisiones, setDecisiones] = useState<{ id: string; resumen: string }[]>([]);
   const [error, setError] = useState(false);
+  const [noLeidas, setNoLeidas] = useState(0);
+  const [cargandoMas, setCargandoMas] = useState(false);
   const cargar = useCallback(async () => {
+    setError(false);
     const r = await ejecutarCapacidad("erp", "core.notificaciones.list", {
       limite: 50,
       soloNoLeidas: true,
@@ -22,7 +26,11 @@ export function Bandeja() {
     const c = await ejecutarCapacidad("erp", "core.resumen.contadores", {
       campos: ["aprobacionesPendientes"],
     });
-    if (r.ok) setAvisos((r.data as { items: Aviso[] }).items.filter((a) => !a.leidaEn));
+    if (r.ok) {
+      const d = r.data as { items: Aviso[]; noLeidas: number };
+      setAvisos(d.items.filter((a) => !a.leidaEn));
+      setNoLeidas(d.noLeidas);
+    }
     else {
       setAvisos([]);
       setError(true);
@@ -40,6 +48,21 @@ export function Bandeja() {
   useEffect(() => {
     void Promise.resolve().then(cargar);
   }, [cargar]);
+  async function cargarMas() {
+    const ultimo = avisos?.at(-1);
+    if (!ultimo || cargandoMas) return;
+    setCargandoMas(true);
+    try {
+      const r = await ejecutarCapacidad("erp", "core.notificaciones.list", {
+        limite: 50, soloNoLeidas: true,
+        antesDe: ultimo.id,
+      });
+      if (!r.ok) { setError(true); return; }
+      const d = r.data as { items: Aviso[]; noLeidas: number };
+      setAvisos((prev) => [...(prev ?? []), ...d.items.filter((a) => !prev?.some((p) => p.id === a.id))]);
+      setNoLeidas(d.noLeidas);
+    } finally { setCargandoMas(false); }
+  }
   async function marcar() {
     const r = await ejecutarCapacidad("erp", "core.notificaciones.marcar_todas", {});
     if (!r.ok) {
@@ -52,7 +75,7 @@ export function Bandeja() {
   return (
     <section id="bandeja" className="scroll-mt-20">
       <SeccionTarjeta
-        titulo={`Bandeja${avisos ? ` · ${avisos.length + (aprobaciones ?? 0)}` : ""}`}
+        titulo={`Bandeja${avisos ? ` · ${noLeidas + (aprobaciones ?? 0)}` : ""}`}
       >
         {error ? <Alerta tono="danger" titulo="No pudimos actualizar la Bandeja" /> : null}
         {avisos === null ? (
@@ -76,12 +99,12 @@ export function Bandeja() {
                 {d.resumen}
               </Link>
             ))}
-            {avisos.map((a) => (
-              <div key={a.id} className="border-b border-border py-2">
-                <p className="t-label">{a.titulo}</p>
-                {a.cuerpo ? <p className="t-body-sm text-fg-muted">{a.cuerpo}</p> : null}
-              </div>
-            ))}
+            <ListaAvisos avisos={avisos} portal="erp" onLeida={() => void cargar()} />
+            {avisos.length < noLeidas ? (
+              <Button variant="secondary" disabled={cargandoMas} onClick={() => void cargarMas()}>
+                Cargar más avisos
+              </Button>
+            ) : null}
             {!avisos.length && !aprobaciones ? (
               <p className="t-body text-fg-muted">Todo al día. No tienes nada pendiente.</p>
             ) : null}

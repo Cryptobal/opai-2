@@ -37,7 +37,7 @@ export function useShellNavegacion(
     };
   }, [prefs.fijados]);
   const navInferior = useMemo(() => {
-    if (!grupos || prefs.areaPrincipal === null) return navInferiorDefecto;
+    if (!grupos || !grupos.some((g) => g.area === prefs.areaPrincipal)) return navInferiorDefecto;
     const inicio = entradaInicio(grupos);
     const resto = entradasAreaPrincipal(grupos, prefs.areaPrincipal);
     return [inicio, ...resto]
@@ -49,6 +49,7 @@ export function useShellNavegacion(
     [navInferior],
   );
   const iconoPin = useMemo(() => icono("Pin"), []);
+  const entradasPermitidas = useMemo(() => grupos?.flatMap((g) => g.entradas.map((e) => e.href)), [grupos]);
   const fijados = useMemo(() => {
     const entradas = grupos?.flatMap((g) => g.entradas) ?? [];
     return [...prefs.fijados]
@@ -82,7 +83,7 @@ export function useShellNavegacion(
     onFijar: (item: { href: string; etiqueta: string }) =>
       prefs.fijar(
         { tipo: "entrada", href: item.href, etiqueta: item.etiqueta },
-        fijados.map((f) => f.href),
+        entradasPermitidas,
       ),
     onDesfijar: prefs.desfijar,
     esFicha,
@@ -91,7 +92,7 @@ export function useShellNavegacion(
       if ((await validarFichasNav([rutaEfectiva])).includes(rutaEfectiva))
         prefs.fijar(
           { tipo: "ficha", href: rutaEfectiva, etiqueta: titulo },
-          fijados.map((f) => f.href),
+          entradasPermitidas,
         );
     },
     onAreaAbierta: (area: string) =>
