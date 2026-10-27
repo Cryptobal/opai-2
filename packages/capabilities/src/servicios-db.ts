@@ -22,7 +22,7 @@ import type {
 
 const json = (v: unknown): Prisma.InputJsonValue => JSON.parse(JSON.stringify(v ?? {}));
 
-/** Auditoría encadenada en `core.audit_events` (auditoría del 26-oct-2026, ADR-023-bis). */
+/** Auditoría encadenada en `core.audit_events` (auditoría del 26-oct-2026, ADR-051). */
 export function auditoriaEnDb(tenantId: string): Auditoria {
   return {
     registrar(tx, evento) {

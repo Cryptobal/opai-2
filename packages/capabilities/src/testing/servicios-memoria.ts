@@ -51,7 +51,7 @@ export function trabajosEnMemoria(tenantId: string): Trabajos {
   };
 }
 
-/** Auditoría encadenada con los mismos hashes que la real (dominio compartido, ADR-023-bis). */
+/** Auditoría encadenada con los mismos hashes que la real (dominio compartido, ADR-051). */
 export function auditoriaEnMemoria(tabla: (n: string) => Fila[], tenantId: string): Auditoria {
   return {
     async registrar(tx, evento) {

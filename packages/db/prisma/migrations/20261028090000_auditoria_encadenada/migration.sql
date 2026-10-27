@@ -6,15 +6,15 @@
 --    de `@opai/domain` (sha256(hashAnterior + "\n" + hashCanon)). `hashCanon` congela la forma
 --    canónica (tenant, seq, actor, capability, entidad, createdAt y un **digest** SHA-256 del
 --    payload, no el payload crudo) para que una futura anonimización del payload (Ley 21.719) no
---    invalide los hashes ya emitidos: el digest se calcula una vez y queda congelado en
---    `hash_canon`; verificar nunca vuelve a leer el `payload` en vivo.
+--    exponga el contenido en `hash_canon`. La verificación recalcula también el digest del payload.
 -- 3) `pgcrypto` solo lo usa este backfill (`digest()/encode()` en SQL); el código de la app sigue
 --    hasheando en Node (Web Crypto, `@opai/domain`).
 
+BEGIN;
 CREATE EXTENSION IF NOT EXISTS pgcrypto;
 
 -- CreateTable
-CREATE TABLE "core"."auditoria_cabezas" (
+CREATE TABLE IF NOT EXISTS "core"."auditoria_cabezas" (
     "id" UUID NOT NULL,
     "tenant_id" UUID NOT NULL,
     "ultimo_seq" INTEGER,
@@ -23,33 +23,35 @@ CREATE TABLE "core"."auditoria_cabezas" (
     "created_at" TIMESTAMPTZ(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMPTZ(6) NOT NULL,
 
-    CONSTRAINT "auditoria_cabezas_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "auditoria_cabezas_pkey" PRIMARY KEY ("id"),
+    CONSTRAINT "auditoria_cabezas_tenant_id_fkey" FOREIGN KEY ("tenant_id")
+      REFERENCES "core"."tenants"("id") ON DELETE RESTRICT ON UPDATE CASCADE
 );
 
-CREATE UNIQUE INDEX "auditoria_cabezas_tenant_id_key" ON "core"."auditoria_cabezas"("tenant_id");
-
-ALTER TABLE "core"."auditoria_cabezas" ADD CONSTRAINT "auditoria_cabezas_tenant_id_fkey"
-  FOREIGN KEY ("tenant_id") REFERENCES "core"."tenants"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+CREATE UNIQUE INDEX IF NOT EXISTS "auditoria_cabezas_tenant_id_key" ON "core"."auditoria_cabezas"("tenant_id");
 
 -- RLS: aislamiento por tenant (plantilla de REGLAS-codigo.md). CI falla si falta (rls-nucleo*.test).
 ALTER TABLE "core"."auditoria_cabezas" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "core"."auditoria_cabezas" FORCE ROW LEVEL SECURITY;
+GRANT SELECT, INSERT, UPDATE, DELETE ON "core"."auditoria_cabezas" TO opai_app;
+DROP POLICY IF EXISTS tenant_isolation ON "core"."auditoria_cabezas";
 CREATE POLICY tenant_isolation ON "core"."auditoria_cabezas" AS PERMISSIVE FOR ALL TO opai_app
   USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
   WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
 
 -- AlterTable: columnas de la cadena en `audit_events` (nulas por ahora; el backfill las completa).
 ALTER TABLE "core"."audit_events"
-  ADD COLUMN "seq" INTEGER,
-  ADD COLUMN "hash_anterior" TEXT,
-  ADD COLUMN "hash" TEXT,
-  ADD COLUMN "hash_canon" TEXT;
+  ADD COLUMN IF NOT EXISTS "seq" INTEGER,
+  ADD COLUMN IF NOT EXISTS "hash_anterior" TEXT,
+  ADD COLUMN IF NOT EXISTS "hash" TEXT,
+  ADD COLUMN IF NOT EXISTS "hash_canon" TEXT;
 
 -- Backfill determinista: una fila a la vez, por tenant y por (created_at, id), igual orden que
 -- `verificarAuditoria` espera recorrer. Usa un separador y `digest()` de pgcrypto; el formato del
--- texto que se hashea no necesita coincidir con el de Node (ADR-023-bis): `hash_canon` queda
--- congelado por fila y nunca se recalcula desde columnas en vivo, solo se reencadena hacia adelante.
+-- texto histórico se recalcula desde las columnas con `canonHistorico` (ADR-051).
 -- Variables con prefijo `v_` a propósito: sin prefijo, Postgres las confunde con las columnas
 -- homónimas de `audit_events` dentro del UPDATE ("column reference ... is ambiguous", 42702).
+LOCK TABLE core.audit_events IN ACCESS EXCLUSIVE MODE;
 DO $$
 DECLARE
   r RECORD;
@@ -58,26 +60,34 @@ DECLARE
   v_hash_anterior TEXT := repeat('0', 64);
   v_hash_nuevo TEXT;
   v_canon TEXT;
+  v_payload_digest TEXT;
+  v_crypto_schema TEXT;
 BEGIN
+  SELECT n.nspname INTO STRICT v_crypto_schema FROM pg_extension e
+    JOIN pg_namespace n ON n.oid = e.extnamespace WHERE e.extname = 'pgcrypto';
   FOR r IN
     SELECT id, tenant_id, actor_type, actor_id, via_user_id, capability, entity_type, entity_id,
            payload, created_at
     FROM "core"."audit_events"
+    WHERE seq IS NULL
     ORDER BY tenant_id, created_at, id
   LOOP
     IF v_cur_tenant IS NULL OR v_cur_tenant <> r.tenant_id THEN
       v_cur_tenant := r.tenant_id;
-      v_seq := 0;
-      v_hash_anterior := repeat('0', 64);
+      SELECT seq, hash INTO v_seq, v_hash_anterior FROM core.audit_events
+        WHERE tenant_id = r.tenant_id AND seq IS NOT NULL ORDER BY seq DESC LIMIT 1;
+      v_seq := coalesce(v_seq, 0);
+      v_hash_anterior := coalesce(v_hash_anterior, repeat('0', 64));
     END IF;
     v_seq := v_seq + 1;
-    v_canon :=
-      r.tenant_id::text || '|' || v_seq::text || '|' || r.actor_type || '|' ||
-      coalesce(r.actor_id, '') || '|' || coalesce(r.via_user_id, '') || '|' || r.capability || '|' ||
-      coalesce(r.entity_type, '') || '|' || coalesce(r.entity_id, '') || '|' ||
-      to_char(r.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"') || '|' ||
-      encode(digest(coalesce(r.payload::text, 'null'), 'sha256'), 'hex');
-    v_hash_nuevo := encode(digest(v_hash_anterior || E'\n' || v_canon, 'sha256'), 'hex');
+    EXECUTE format('SELECT encode(%I.digest($1, ''sha256''), ''hex'')', v_crypto_schema)
+      INTO v_payload_digest USING coalesce(r.payload::text, 'null');
+    v_canon := jsonb_build_array(r.tenant_id::text, v_seq, r.actor_type,
+      r.actor_id, r.via_user_id, r.capability, r.entity_type, r.entity_id,
+      to_char(r.created_at AT TIME ZONE 'UTC', 'YYYY-MM-DD"T"HH24:MI:SS.US"Z"'),
+      v_payload_digest)::text;
+    EXECUTE format('SELECT encode(%I.digest($1, ''sha256''), ''hex'')', v_crypto_schema)
+      INTO v_hash_nuevo USING v_hash_anterior || E'\n' || v_canon;
     UPDATE "core"."audit_events"
       SET "seq" = v_seq, "hash_anterior" = v_hash_anterior, "hash" = v_hash_nuevo, "hash_canon" = v_canon
       WHERE id = r.id;
@@ -85,16 +95,12 @@ BEGIN
   END LOOP;
 END $$;
 
--- AlterTable: ya sin filas nulas, la cadena es obligatoria desde aquí en adelante.
-ALTER TABLE "core"."audit_events"
-  ALTER COLUMN "seq" SET NOT NULL,
-  ALTER COLUMN "hash_anterior" SET NOT NULL,
-  ALTER COLUMN "hash" SET NOT NULL,
-  ALTER COLUMN "hash_canon" SET NOT NULL;
+-- Fase 1: NULLABLE mientras conviven versiones. Fase 2 (tras desplegar): otra migración.
 
-CREATE UNIQUE INDEX "audit_events_tenant_id_seq_key" ON "core"."audit_events"("tenant_id", "seq");
+CREATE UNIQUE INDEX IF NOT EXISTS "audit_events_tenant_id_seq_key" ON "core"."audit_events"("tenant_id", "seq");
 
 -- Inmutable para la app (idempotente: el PR #48/#56 ya lo revocó; se repite "por si acaso", sin
 -- TRUNCATE porque `opai_app` nunca lo tuvo concedido). El dueño de la migración conserva el acceso
 -- para el backfill de arriba y para la prueba de alteración de `verificarAuditoria`.
 REVOKE UPDATE, DELETE ON "core"."audit_events" FROM opai_app;
+COMMIT;

@@ -22,7 +22,8 @@ describe.skipIf(!urlPropietario)("auditoría atómica y encadenada en base real"
     await e?.cerrar();
   });
 
-  const nuevoTenant = async (slug: string) => (await e.admin.tenant.create({ data: { slug, nombre: slug, vertical: "seguridad" } })).id;
+  const nuevoTenant = async (slug: string) =>
+    (await e.admin.tenant.create({ data: { slug, nombre: slug, vertical: "seguridad" } })).id;
   const ctxDe = (tenantId: string) =>
     mod.crearContexto({
       tenantId,
@@ -45,7 +46,9 @@ describe.skipIf(!urlPropietario)("auditoría atómica y encadenada en base real"
       const r = await crearCuenta(tenantId, "Cuenta que no debe quedar");
       expect(r.ok).toBe(false);
     } finally {
-      await e.admin.$executeRawUnsafe(`ALTER TABLE "core"."audit_events" DROP CONSTRAINT falla_inyectada_test`);
+      await e.admin.$executeRawUnsafe(
+        `ALTER TABLE "core"."audit_events" DROP CONSTRAINT falla_inyectada_test`,
+      );
     }
     expect(await e.admin.cuenta.count({ where: { tenantId } })).toBe(antes);
     expect(await e.admin.auditEvent.count({ where: { tenantId } })).toBe(0);
@@ -67,7 +70,9 @@ describe.skipIf(!urlPropietario)("auditoría atómica y encadenada en base real"
     await crearCuenta(tenantId, "Cuenta auditada");
     const fila = await e.admin.auditEvent.findFirstOrThrow({ where: { tenantId } });
     const db = e.forTenant(tenantId);
-    await expect(db.auditEvent.update({ where: { id: fila.id }, data: { capability: "x" } })).rejects.toThrow();
+    await expect(
+      db.auditEvent.update({ where: { id: fila.id }, data: { capability: "x" } }),
+    ).rejects.toThrow();
     await expect(db.auditEvent.delete({ where: { id: fila.id } })).rejects.toThrow();
     expect(await e.admin.auditEvent.findUniqueOrThrow({ where: { id: fila.id } })).toMatchObject({
       capability: fila.capability,
@@ -79,15 +84,23 @@ describe.skipIf(!urlPropietario)("auditoría atómica y encadenada en base real"
     const tenantA = await nuevoTenant(`aud-conc-a-${sufijo}`);
     const tenantB = await nuevoTenant(`aud-conc-b-${sufijo}`);
     const N = 8;
-    await Promise.all(Array.from({ length: N }, (_, i) => crearCuenta(tenantA, `Cuenta A${i}`)));
-    await Promise.all(Array.from({ length: N }, (_, i) => crearCuenta(tenantB, `Cuenta B${i}`)));
+    const resultados = await Promise.all(
+      [tenantA, tenantB].flatMap((tenant, n) =>
+        Array.from({ length: N }, (_, i) => crearCuenta(tenant, `Cuenta ${n}-${i}`)),
+      ),
+    );
+    expect(resultados.every((r) => r.ok)).toBe(true);
     const verA = await mod.executeCapability(ctxDe(tenantA), "core.auditoria.verificar", {});
     const verB = await mod.executeCapability(ctxDe(tenantB), "core.auditoria.verificar", {});
     expect(verA).toMatchObject({ ok: true, data: { ok: true, ultimoSeq: N, primeraRota: null } });
     expect(verB).toMatchObject({ ok: true, data: { ok: true, ultimoSeq: N, primeraRota: null } });
     // Sin cruces: las secuencias de cada tenant son 1..N sin huecos ni saltos del otro tenant.
-    const secA = (await e.admin.auditEvent.findMany({ where: { tenantId: tenantA }, orderBy: { seq: "asc" } })).map((f) => f.seq);
-    const secB = (await e.admin.auditEvent.findMany({ where: { tenantId: tenantB }, orderBy: { seq: "asc" } })).map((f) => f.seq);
+    const secA = (
+      await e.admin.auditEvent.findMany({ where: { tenantId: tenantA }, orderBy: { seq: "asc" } })
+    ).map((f) => f.seq);
+    const secB = (
+      await e.admin.auditEvent.findMany({ where: { tenantId: tenantB }, orderBy: { seq: "asc" } })
+    ).map((f) => f.seq);
     expect(secA).toEqual(Array.from({ length: N }, (_, i) => i + 1));
     expect(secB).toEqual(Array.from({ length: N }, (_, i) => i + 1));
   });
@@ -95,14 +108,24 @@ describe.skipIf(!urlPropietario)("auditoría atómica y encadenada en base real"
   it("una fila alterada por el rol dueño se detecta como rota", async () => {
     const tenantId = await nuevoTenant(`aud-rota-${randomUUID().slice(0, 8)}`);
     for (const n of ["Una", "Dos", "Tres"]) await crearCuenta(tenantId, n);
-    expect(await mod.executeCapability(ctxDe(tenantId), "core.auditoria.verificar", {})).toMatchObject({
+    expect(
+      await mod.executeCapability(ctxDe(tenantId), "core.auditoria.verificar", {}),
+    ).toMatchObject({
       ok: true,
       data: { ok: true, ultimoSeq: 3, primeraRota: null },
     });
-    const filas = await e.admin.auditEvent.findMany({ where: { tenantId }, orderBy: { seq: "asc" } });
+    const filas = await e.admin.auditEvent.findMany({
+      where: { tenantId },
+      orderBy: { seq: "asc" },
+    });
     // Solo el dueño puede escribir aquí (opai_app no tiene UPDATE): altera el eslabón 2.
-    await e.admin.auditEvent.update({ where: { id: filas[1]!.id }, data: { hashCanon: '{"alterado":true}' } });
-    expect(await mod.executeCapability(ctxDe(tenantId), "core.auditoria.verificar", {})).toMatchObject({
+    await e.admin.auditEvent.update({
+      where: { id: filas[1]!.id },
+      data: { hashCanon: '{"alterado":true}' },
+    });
+    expect(
+      await mod.executeCapability(ctxDe(tenantId), "core.auditoria.verificar", {}),
+    ).toMatchObject({
       ok: true,
       data: { ok: false, primeraRota: 2 },
     });

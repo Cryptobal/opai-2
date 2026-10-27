@@ -36,12 +36,12 @@ export type EventoAuditoria = {
 
 /**
  * Auditoría en `core.audit_events`, encadenada por tenant. Recibe `tx` como `Eventos`/`Trabajos`/
- * `BitacoraServicio`: el llamador decide la transacción (ADR-023-bis) para que el insert sea
+ * `BitacoraServicio`: el llamador decide la transacción (ADR-051) para que el insert sea
  * atómico con la escritura que audita.
  */
 export interface Auditoria {
   registrar(tx: TenantTx, evento: EventoAuditoria): Promise<{ seq: number; hash: string }>;
-  /** Recorre la cadena del tenant actual y registra el resultado (ADR-023-bis). */
+  /** Recorre la cadena del tenant actual y registra el resultado (ADR-051). */
   verificar(): Promise<VerificacionAuditoria>;
 }
 
@@ -112,6 +112,8 @@ export interface Contexto {
   db: TenantTx;
   /** Transacción con el tenant fijado: cambio + evento + bitácora atómicos. Dentro, solo `tx`. */
   transaccion<T>(fn: (tx: TenantTx) => Promise<T>): Promise<T>;
+  /** Diagnósticos durables: nunca se reutiliza la transacción de la solicitud. */
+  transaccionIndependiente<T>(fn: (tx: TenantTx) => Promise<T>): Promise<T>;
   /**
    * Ejecuta un bloque de solo lectura en UNA sola transacción con el tenant fijado una vez (ADR-045):
    * `executeCapability` envuelve así a las capacidades de lectura con empresa para no abrir una

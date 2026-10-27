@@ -1,4 +1,4 @@
-// Verificación de la cadena de `core.audit_events` (ADR-023-bis, auditoría del 26-oct-2026 pedida
+// Verificación de la cadena de `core.audit_events` (ADR-051, auditoría del 26-oct-2026 pedida
 // por Carlos, t457u). Mismo patrón que `bitacora.ts`, para una cadena distinta (toda escritura,
 // no solo los hechos regulados).
 import { z } from "zod";
@@ -19,7 +19,7 @@ const verificacionSchema = z.object({
 export const auditoriaVerificar = defineCapability({
   id: "core.auditoria.verificar",
   descripcion:
-    "Verifica la integridad de la cadena de auditoría de la empresa (ADR-023-bis): recorre audit_events y devuelve si la cadena está intacta o el primer eslabón roto.",
+    "Verifica la integridad de la cadena de auditoría de la empresa (ADR-051): recorre audit_events y devuelve si la cadena está intacta o el primer eslabón roto.",
   permiso: PERMISOS_CORE.auditRead,
   input: z.object({}),
   output: verificacionSchema,
@@ -56,7 +56,7 @@ export const platformAuditoriaEstado = defineCapability({
 
 const dia = z.object({ dia: z.string().regex(/^\d{4}-\d{2}-\d{2}$/) });
 
-/** Verificación diaria de la cadena; si se rompe, emite `core.auditoria.rota` (ADR-023-bis). */
+/** Verificación diaria de la cadena; si se rompe, emite `core.auditoria.rota` (ADR-051). */
 export const trabajoVerificarAuditoria = defineTrabajo({
   tipo: "core.auditoria.verificar",
   descripcion: "Verifica a diario la cadena de auditoría del tenant.",

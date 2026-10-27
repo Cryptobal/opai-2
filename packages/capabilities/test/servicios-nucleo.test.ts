@@ -141,7 +141,7 @@ describe("bitácora y consumos", () => {
     expect(await ctx.bitacora.verificar()).toMatchObject({ ok: false, primeraRota: 2 });
   });
 
-  it("encadena auditoría tras varias escrituras y detecta una alteración (ADR-023-bis)", async () => {
+  it("encadena auditoría tras varias escrituras y detecta una alteración (ADR-051)", async () => {
     const { ctx, tabla } = contextoDePrueba({ permisos: ["core:audit.read"] });
     for (const texto of ["a", "b", "c"]) {
       await ctx.transaccion((tx) =>

@@ -74,6 +74,7 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
     alcance: o.alcance ?? null,
     agente: o.agente ?? null,
     db,
+    transaccionIndependiente: (fn) => fn(tx),
     // Atómica como la real: si `fn` falla, las tablas vuelven al estado previo.
     transaccion: async (fn) => {
       const restaurar = instantanea();
@@ -85,7 +86,7 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
       }
     },
     // También en la tabla, para las capacidades que leen la auditoría (actividad de las fichas), con
-    // la misma cadena de hashes que la real (ADR-023-bis, `auditoriaEnMemoria`). `tx` siempre llega:
+    // la misma cadena de hashes que la real (ADR-051, `auditoriaEnMemoria`). `tx` siempre llega:
     // lo escribe el llamador, igual que `eventos`/`trabajos`, para que el insert sea atómico con la
     // escritura que audita.
     auditoria: {

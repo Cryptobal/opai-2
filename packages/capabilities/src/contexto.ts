@@ -95,6 +95,7 @@ export function crearContexto(params: ParametrosContexto): Contexto {
     agente: params.agente ?? null,
     db: forTenant(tenantId),
     transaccion: transaccionEnDb(tenantId),
+    transaccionIndependiente: transaccionEnDb(tenantId),
     // Lecturas de una capacidad en una sola transacción (ADR-045): fija `app.tenant_id` una vez en
     // vez de una transacción por consulta. Misma RLS (rol `opai_app`, `set_config` local a la tx).
     enLectura: transaccionEnDb(tenantId),

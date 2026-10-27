@@ -187,7 +187,7 @@ describe("executeCapability", () => {
     });
   });
 
-  // ADR-023-bis (auditoría del 26-oct-2026): el handler y el insert de auditoría comparten una
+  // ADR-051 (auditoría del 26-oct-2026): el handler y el insert de auditoría comparten una
   // transacción. Un fallo de cualquiera de los dos deja la base exactamente como si no hubiera
   // pasado nada; nunca una escritura sin su auditoría ni una auditoría sin la escritura que la causó.
   it("fallo de auditoría ⇒ sin escritura (la transacción hace rollback)", async () => {

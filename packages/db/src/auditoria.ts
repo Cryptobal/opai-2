@@ -1,7 +1,7 @@
 import { canonDeAuditoria, HASH_GENESIS, hashEncadenado } from "@opai/domain";
 
-import { forTenant } from "./for-tenant";
-import type { TenantTx } from "./transaccion";
+import { enTransaccion, type TenantTx } from "./transaccion";
+import { canonHistorico } from "./auditoria-canon";
 
 export type HechoAuditoria = {
   actorTipo: string;
@@ -19,17 +19,35 @@ export type HechoAuditoria = {
  * de la última `seq`/`hash` del tenant y el insert siguiente (sin TOCTOU entre escrituras
  * concurrentes del mismo tenant); se libera solo al terminar la transacción.
  */
-export async function agregarAAuditoria(
+const colasPorTransaccion = new WeakMap<TenantTx, Promise<unknown>>();
+
+export function agregarAAuditoria(
+  tx: TenantTx,
+  tenantId: string,
+  hecho: HechoAuditoria,
+): Promise<{ id: string; seq: number; hash: string }> {
+  // El advisory lock es reentrante: Promise.all dentro de UNA tx también necesita serialización.
+  const previa = colasPorTransaccion.get(tx) ?? Promise.resolve();
+  const siguiente = previa.then(() => insertarAuditoria(tx, tenantId, hecho));
+  colasPorTransaccion.set(
+    tx,
+    siguiente.catch(() => undefined),
+  );
+  return siguiente;
+}
+
+async function insertarAuditoria(
   tx: TenantTx,
   tenantId: string,
   hecho: HechoAuditoria,
 ): Promise<{ id: string; seq: number; hash: string }> {
   await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${tenantId}, 0))`;
-  const ultima = await tx.auditEvent.findFirst({
-    where: { tenantId },
-    orderBy: { seq: "desc" },
-    select: { seq: true, hash: true },
-  });
+  // Durante la expansión conviven inserts viejos sin cadena: DESC ordena NULL primero en PG.
+  const [ultima] = await tx.$queryRaw<{ seq: number; hash: string }[]>`
+    SELECT seq, hash FROM core.audit_events
+    WHERE tenant_id = ${tenantId}::uuid AND seq IS NOT NULL
+    ORDER BY seq DESC LIMIT 1
+  `;
   const seq = (ultima?.seq ?? 0) + 1;
   const hashAnterior = ultima?.hash ?? HASH_GENESIS;
   const createdAt = new Date();
@@ -59,37 +77,52 @@ export type VerificacionAuditoria = { ok: boolean; ultimoSeq: number; primeraRot
 
 /** Recorre por lotes la cadena de `audit_events` del tenant y registra el resultado. */
 export async function verificarAuditoria(tenantId: string): Promise<VerificacionAuditoria> {
-  const db = forTenant(tenantId);
-  let previo = HASH_GENESIS;
-  let esperado = 1;
-  let primeraRota: number | null = null;
-  for (;;) {
-    const lote = await db.auditEvent.findMany({
-      where: { seq: { gte: esperado } },
-      orderBy: { seq: "asc" },
-      take: 1000,
-      select: { seq: true, hashAnterior: true, hash: true, hashCanon: true },
-    });
-    for (const e of lote) {
-      const roto =
-        e.seq !== esperado ||
-        e.hashAnterior !== previo ||
-        (await hashEncadenado(previo, e.hashCanon)) !== e.hash;
-      if (roto) {
-        primeraRota = esperado;
-        break;
+  return enTransaccion(tenantId, async (db) => {
+    await db.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${tenantId}, 0))`;
+    const cabeza = await db.auditoriaCabeza.findUnique({ where: { tenantId } });
+    let previo = HASH_GENESIS;
+    let esperado = 1;
+    let primeraRota: number | null = null;
+    for (;;) {
+      const lote = await db.auditEvent.findMany({
+        where: { tenantId, seq: { gte: esperado } },
+        orderBy: { seq: "asc" },
+        take: 1000,
+      });
+      for (const e of lote) {
+        const canon = e.hashCanon.startsWith("{")
+          ? await canonDeAuditoria({ ...e, actorTipo: e.actorType })
+          : await canonHistorico(db, tenantId, e.id);
+        const roto =
+          e.seq !== esperado ||
+          canon !== e.hashCanon ||
+          e.hashAnterior !== previo ||
+          (await hashEncadenado(previo, e.hashCanon)) !== e.hash;
+        if (roto) {
+          primeraRota = esperado;
+          break;
+        }
+        previo = e.hash;
+        esperado += 1;
       }
-      previo = e.hash;
-      esperado += 1;
+      if (primeraRota !== null || lote.length < 1000) break;
     }
-    if (primeraRota !== null || lote.length < 1000) break;
-  }
-  const ultimoSeq = esperado - 1;
-  const ok = primeraRota === null;
-  await db.auditoriaCabeza.upsert({
-    where: { tenantId },
-    create: { tenantId, verificadaEn: new Date(), verificacionOk: ok, ultimoSeq },
-    update: { verificadaEn: new Date(), verificacionOk: ok, ultimoSeq },
+    const ultimoSeq = esperado - 1;
+    if (primeraRota === null && ultimoSeq < (cabeza?.ultimoSeq ?? 0)) primeraRota = esperado;
+    const [sinCadena] = await db.$queryRaw<{ hay: boolean }[]>`
+    SELECT EXISTS(SELECT 1 FROM core.audit_events WHERE tenant_id = ${tenantId}::uuid AND seq IS NULL) AS hay
+  `;
+    if (sinCadena?.hay && primeraRota === null) primeraRota = esperado;
+    const ok = primeraRota === null;
+    await db.auditoriaCabeza.upsert({
+      where: { tenantId },
+      create: { tenantId, verificadaEn: new Date(), verificacionOk: ok, ultimoSeq },
+      update: {
+        verificadaEn: new Date(),
+        verificacionOk: ok,
+        ultimoSeq: Math.max(ultimoSeq, cabeza?.ultimoSeq ?? 0),
+      },
+    });
+    return { ok, ultimoSeq, primeraRota };
   });
-  return { ok, ultimoSeq, primeraRota };
 }

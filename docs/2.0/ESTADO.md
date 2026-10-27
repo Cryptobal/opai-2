@@ -8,6 +8,20 @@
 
 Hasta el 24-oct-2026 este archivo fue la fuente de verdad del avance; desde entonces lo es Linear (ver la nota de arriba y `AGENTS.md`, «Tareas (Linear)»). El plan hasta terminar 2.0 está en `ROADMAP.md`; la navegación final en `NAVEGACION.md`.
 
+## Corrección de auditoría · PR #71 (27-oct-2026)
+
+El encargo de continuidad y la review 5662759713 corrigen la nota NÚCLEO-A de
+arriba: verificación del contenido actual (también payload), diagnóstico de IA en
+transacción independiente, auditoría de plataforma en el tenant objetivo incluso
+con empresa seleccionada y migración expand/contract en dos fases. La promesa
+anterior de anonimizar payloads sin afectar la verificación queda reemplazada:
+requiere un protocolo futuro. Detalles de implementación decididos por el
+constructor OpenCode / openai/gpt-6.1-sol, CA, riesgos y despliegue en
+[`briefs/FIX-auditoria-atomica-pr71.md`](briefs/FIX-auditoria-atomica-pr71.md).
+La verificación serializa con append y no olvida la cabeza anterior tras un borrado.
+Sin cambios de pantallas ni decisiones de negocio; se mantiene el DS de OPAI 2.0.
+El encargo no aporta ID de Linear. No se modifica el plan del ROADMAP.
+
 ## Hecho
 
 - **Seguimiento del #60 (rama `fix/roles-seguimiento`, PR #67, sin tarea en Linear):**

@@ -67,7 +67,8 @@ test.describe("configuración de plataforma del tenant", () => {
     const cuerpo = page.getByLabel("Cuerpo");
     await cuerpo.fill(`Prueba E2E ${Date.now()}: {{documento.tipo}} venció.`);
     await page.getByRole("button", { name: /Publicar versión/ }).click();
-    await expect(page.getByText(/Versión \d+ publicada/)).toBeVisible();
+    // El mismo mensaje también aparece en el toast; comprobar el estado persistente del formulario.
+    await expect(page.locator("#form-plantilla").getByText(/Versión \d+ publicada/)).toBeVisible();
     await page.getByRole("button", { name: "Volver a la de OPAI" }).click();
     await expect(page.getByText("Se usa otra vez la plantilla de OPAI")).toBeVisible();
   });

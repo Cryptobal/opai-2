@@ -80,7 +80,7 @@ async function aprobacion(
   }
   const venceEn = new Date(Date.now() + VIGENCIA_APROBACION_MS);
   const resumen = resumir(c, entrada);
-  // Aprobación, evento y auditoría en una sola transacción (ADR-023-bis): dejar pendiente una
+  // Aprobación, evento y auditoría en una sola transacción (ADR-051): dejar pendiente una
   // escritura irreversible también es una escritura, y se audita atómica con ella.
   const id = await ctx.transaccion(async (tx) => {
     const fila = await tx.aprobacion.create({

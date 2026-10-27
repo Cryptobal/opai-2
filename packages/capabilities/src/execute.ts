@@ -50,11 +50,11 @@ async function correr(
     return { resultado: repeticion(reserva), entrada: entrada.data };
   }
   const reservaId = reserva?.id;
-  // Con tenant actual, la escritura audita en SU MISMA transacción, más abajo (ADR-023-bis): si el
+  // Con tenant actual, la escritura audita en SU MISMA transacción, más abajo (ADR-051): si el
   // insert de auditoría falla, el handler hace rollback; si el handler falla, nunca se audita. Sin
   // tenant (plataforma) no hay una sola transacción posible (`ctx.transaccion` está atado al tenant
   // SIN_TENANT): `executeCapability` audita aparte con `auditarSiPlataforma`.
-  const auditaAqui = c.efecto !== "lectura" && ctx.conTenant && !dryRun;
+  const auditaAqui = c.efecto !== "lectura" && ctx.conTenant && !c.tenantObjetivo && !dryRun;
   let crudo: unknown;
   try {
     // Lecturas con empresa: una sola transacción con el tenant fijado una vez (ADR-045). Sin empresa

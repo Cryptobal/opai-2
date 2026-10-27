@@ -68,8 +68,8 @@ export type EventoAuditoriaCanonico = {
 
 /**
  * Forma canónica de un evento de `core.audit_events` (ADR-023 extendido a la auditoría). El
- * payload entra como un digest SHA-256, no crudo: una futura anonimización del payload (Ley
- * 21.719) no cambia el texto que ya se hasheó, así que no rompe la cadena.
+ * payload entra como un digest SHA-256, no crudo. Verificar exige recalcularlo desde la fila;
+ * una anonimización futura requiere su propio protocolo de integridad.
  */
 export async function canonDeAuditoria(e: EventoAuditoriaCanonico): Promise<string> {
   const payloadDigest = await sha256Hex(jsonCanonico(e.payload ?? null));

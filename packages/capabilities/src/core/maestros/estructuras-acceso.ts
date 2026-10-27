@@ -38,20 +38,23 @@ async function cargoSensible(ctx: Contexto, e: RefEstructura): Promise<boolean> 
  */
 export async function auditarLecturaSensible(ctx: Contexto, e: RefEstructura): Promise<void> {
   if (!e.id) return;
-  await ctx.auditoria.registrar({
-    tenantId: ctx.tenantId,
-    // Pseudo-capacidad que marca la revelación de montos sensibles (no es un ejecutor del registro).
-    capability: "core.estructuras.read_sensible",
-    actor: ctx.actor,
-    entityType: "estructura",
-    entityId: e.id,
-    payload: {
-      nivel: e.nivel ?? null,
-      cargoId: e.cargoId ?? null,
-      puestoId: e.puestoId ?? null,
-      personaId: e.personaId ?? null,
-    },
-  });
+  const entityId = e.id;
+  await ctx.transaccion((tx) =>
+    ctx.auditoria.registrar(tx, {
+      tenantId: ctx.tenantId,
+      // Pseudo-capacidad que marca la revelación de montos sensibles (no es un ejecutor del registro).
+      capability: "core.estructuras.read_sensible",
+      actor: ctx.actor,
+      entityType: "estructura",
+      entityId,
+      payload: {
+        nivel: e.nivel ?? null,
+        cargoId: e.cargoId ?? null,
+        puestoId: e.puestoId ?? null,
+        personaId: e.personaId ?? null,
+      },
+    }),
+  );
 }
 
 /**

@@ -891,3 +891,17 @@ No se encontró: render estático roto, falta de prefetch, layouts que recarguen
 4. **Verificable.** `core.auditoria.verificar` (lectura), `platform.auditoria.estado` (plataforma, solo lectura) y un trabajo diario que recorre la cadena por lotes y emite `core.auditoria.rota` si se rompe, igual que el patrón ya existente de `core.bitacora.verificar`/`core.bitacora.rota`. El estado de la última verificación se guarda en `core.auditoria_cabezas` (una fila por tenant), como `core.bitacora_cabezas` para la bitácora de hechos regulados.
 
 **Consecuencias.** `Auditoria.registrar` ahora recibe la transacción (`tx`), igual que `Eventos`/`Trabajos`/`BitacoraServicio`: todo código que lo llamaba fuera de una transacción (el flujo de aprobación pendiente de agentes, el aviso de respaldo de IA agotado) se ajustó para auditar dentro de una transacción propia, sin cambiar su semántica. `seq`/`ultimoSeq` son `Int`, no `BigInt` como pedía el encargo original: un `BigInt` de Prisma no es serializable con `JSON.stringify` sin un reemplazador, y varias pruebas y vistas de actividad ya hacían `JSON.stringify` sobre filas de `audit_events` completas; `Int` basta de sobra (2,1 mil millones de escrituras por tenant) y es el mismo tipo que ya usa `core.bitacora.seq`. `REGLAS-codigo.md` incorpora la regla «toda escritura se audita en su transacción».
+
+**Corrección del 27-oct-2026 (encargo PR #71, QA A/B/C y review 5662759713).**
+Reemplaza la promesa de anonimización transparente y la verificación del punto 2:
+se recalcula el canon desde el contenido actual, incluido el digest del payload.
+Los cambios de contenido se detectan; una anonimización futura necesita un protocolo
+explícito. Se conserva el canon SQL histórico y el JSON nuevo, verificando ambos
+contra sus columnas. La verificación toma el lock de append y conserva el máximo
+previamente verificado para detectar truncados. Plataforma con `tenantObjetivo`
+audita siempre en ese destino, aun con empresa seleccionada (la brecha de atomicidad
+con su handler sigue declarada). Los diagnósticos de IA usan una transacción
+explícitamente independiente, no la reutilizada por la solicitud. La expansión
+nullable y el NOT NULL se aplican antes y después del despliegue, respectivamente.
+Detalles técnicos del constructor OpenCode / openai/gpt-6.1-sol y orden exacto en
+`briefs/FIX-auditoria-atomica-pr71.md`; no se atribuyen nuevas decisiones a Carlos.

@@ -70,7 +70,7 @@ export function entidadAuditada(
   return tipo && id ? { entityType: tipo, entityId: id } : {};
 }
 
-/** Evento de auditoría completo (ADR-023-bis): lo arma `executeCapability` para los dos caminos. */
+/** Evento de auditoría completo (ADR-051): lo arma `executeCapability` para los dos caminos. */
 export function eventoAuditoria(
   c: Capacidad,
   actor: Actor,
@@ -104,7 +104,7 @@ export async function auditarSiPlataforma(
   r: { resultado: Resultado; entrada?: unknown; salida?: unknown },
   opciones: OpcionesEjecucion,
 ): Promise<void> {
-  if (ctx.conTenant || !ctx.plataforma || c.efecto === "lectura") return;
+  if ((ctx.conTenant && !c.tenantObjetivo) || !ctx.plataforma || c.efecto === "lectura") return;
   const tenantId = tenantDe(ctx, c, r.entrada, r.salida);
   const escrituraNueva = r.resultado.ok && !r.resultado.dryRun && !r.resultado.repetida;
   if (!escrituraNueva || !tenantId) return;
