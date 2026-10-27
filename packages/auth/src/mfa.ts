@@ -4,6 +4,12 @@ import { APIError } from "better-auth/api";
 
 import { auth } from "./auth";
 import { MENSAJE_PAUSA } from "./bloqueo-login";
+import {
+  cuentaBloqueada,
+  cuentaMfaConSesion,
+  limpiarFallosDeCuenta,
+  registrarFalloDeCuenta,
+} from "./mfa-bloqueo-con-sesion";
 import type { FalloAcceso, ResultadoAcceso } from "./acciones";
 
 /**
@@ -90,22 +96,36 @@ export async function confirmarSegundoFactor(code: string): Promise<ResultadoAcc
   }
 }
 
-/** Verifica el segundo factor en el login con un código TOTP (desafío por cookie, sin sesión aún). */
+/**
+ * Verifica el segundo factor en el login con un código TOTP (desafío por cookie, sin sesión aún).
+ * Si YA hay una sesión (Google u otro proveedor social con MFA pendiente, #68), el bloqueo por cuenta
+ * del plugin no se aplica (ver `mfa-bloqueo-con-sesion.ts`); se replica aquí con las mismas columnas.
+ */
 export async function verificarSegundoFactor(code: string): Promise<ResultadoAcceso> {
+  const h = await headers();
+  const cuenta = await cuentaMfaConSesion(h);
+  if (cuenta && cuentaBloqueada(cuenta)) return fallo("bloqueada", MENSAJE_PAUSA);
   try {
-    await auth.api.verifyTOTP({ body: { code }, headers: await headers() });
+    await auth.api.verifyTOTP({ body: { code }, headers: h });
+    if (cuenta) await limpiarFallosDeCuenta(cuenta.id);
     return { ok: true };
   } catch (error) {
+    if (cuenta) await registrarFalloDeCuenta(cuenta.id);
     return falloDeVerificacion(error);
   }
 }
 
 /** Verifica el segundo factor en el login con un código de respaldo (de un solo uso). */
 export async function verificarCodigoRespaldo(code: string): Promise<ResultadoAcceso> {
+  const h = await headers();
+  const cuenta = await cuentaMfaConSesion(h);
+  if (cuenta && cuentaBloqueada(cuenta)) return fallo("bloqueada", MENSAJE_PAUSA);
   try {
-    await auth.api.verifyBackupCode({ body: { code }, headers: await headers() });
+    await auth.api.verifyBackupCode({ body: { code }, headers: h });
+    if (cuenta) await limpiarFallosDeCuenta(cuenta.id);
     return { ok: true };
   } catch (error) {
+    if (cuenta) await registrarFalloDeCuenta(cuenta.id);
     return falloDeVerificacion(error);
   }
 }

@@ -5,12 +5,16 @@
 // (el último seed del job de e2e, ya con el owner creado por `seed:platform-owner`), así el owner de
 // e2e entra por /mfa sin tener que tocar el workflow. Standalone:
 //   DATABASE_URL_MIGRATE=<url propietario local> pnpm --filter @opai/auth seed:e2e-mfa
+//
+// Acceso directo a la base (`dbAdmin()`, DATABASE_URL_MIGRATE) y SIN importar `../src/auth`: ese
+// módulo construye `betterAuth(...)` al cargarse (necesita DATABASE_URL), y el paso del CI donde
+// corre este seed («Migrar y sembrar la base») todavía no tiene esa variable (solo la propietaria;
+// DATABASE_URL se exporta a `$GITHUB_ENV` recién para los pasos siguientes). `secretConfig`, sin
+// `secret`/`secrets` configurados en `auth.ts` (no lo están), es literalmente `BETTER_AUTH_SECRET`.
 import "dotenv/config";
 import { hashPassword, symmetricEncrypt } from "better-auth/crypto";
 
 import { cerrarClientes, dbAdmin } from "@opai/db";
-
-import { auth } from "../src/auth";
 
 // Secreto TOTP crudo FIJO del owner de e2e (solo pruebas). El mismo valor vive en
 // `apps/web/e2e/sesion.ts`, que genera el código con él. No es un secreto real.
@@ -25,15 +29,16 @@ async function main(): Promise<void> {
   if (host !== "localhost" && host !== "127.0.0.1") {
     throw new Error(`seed:e2e-mfa solo corre contra una base local (host recibido: ${host}).`);
   }
+  const secretoApp = process.env["BETTER_AUTH_SECRET"] || process.env["AUTH_SECRET"];
+  if (!secretoApp) throw new Error("Falta BETTER_AUTH_SECRET.");
   const email = (process.env["SEED_OWNER_EMAIL"] ?? "carlos.irigoyen@opai.cl").toLowerCase();
   const db = dbAdmin();
   const user = await db.user.findUnique({ where: { email } });
   if (!user) throw new Error("Primero corre seed:platform-owner.");
-  const ctx = await auth.$context;
   // Mismo cifrado que usa el plugin (symmetricEncrypt con el secretConfig del servidor), para que el
   // código TOTP que genera el test valide contra el secreto guardado.
-  const secret = await symmetricEncrypt({ key: ctx.secretConfig, data: E2E_MFA_SECRET_RAW });
-  const backupCodes = await symmetricEncrypt({ key: ctx.secretConfig, data: JSON.stringify([]) });
+  const secret = await symmetricEncrypt({ key: secretoApp, data: E2E_MFA_SECRET_RAW });
+  const backupCodes = await symmetricEncrypt({ key: secretoApp, data: JSON.stringify([]) });
   await db.twoFactor.upsert({
     where: { userId: user.id },
     update: { secret, backupCodes, verified: true },
