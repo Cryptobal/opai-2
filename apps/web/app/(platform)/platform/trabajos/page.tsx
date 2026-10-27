@@ -26,7 +26,7 @@ export default function Trabajos({ searchParams }: { searchParams: SearchParams 
       portal="platform"
       titulo="Trabajos"
       ruta="/platform/trabajos"
-      insignia={<Superadmin />}
+      opciones={() => ({ insignia: <Superadmin /> })}
       cargar={async () => {
         const p = await leerParametros(searchParams);
         const estado = p["estado"];

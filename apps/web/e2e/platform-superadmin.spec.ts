@@ -40,12 +40,13 @@ test.describe("regresión Plataforma tras #59", () => {
             .first(),
         ).toBeVisible();
         await expect(
-          page.getByText("No tienes acceso a este portal en la empresa actual."),
+          page.getByText("Plataforma es solo para el equipo de OPAI."),
         ).toHaveCount(0);
       } else {
         await expect(
-          page.getByText("No tienes acceso a este portal en la empresa actual."),
+          page.getByText("Plataforma es solo para el equipo de OPAI."),
         ).toBeVisible();
+        await expect(page.getByText("Superadmin", { exact: true })).toHaveCount(0);
         await expect(nav.getByRole("link")).toHaveCount(0);
         await expect(page.getByRole("link", { name: "Nueva", exact: true })).toHaveCount(0);
         if (info.project.name === "telefono") {

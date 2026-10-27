@@ -9,6 +9,8 @@ Hasta el 24-oct-2026 este archivo fue la fuente de verdad del avance; desde ento
 
 ## Hecho
 
+- **Plataforma sin acceso (encargo H4 de QA):** el aviso usa el texto solicitado en el encargo y la insignia se oculta sin acceso; se usa la guarda compartida también para la redirección. La cuenta autorizada predeterminada del e2e sigue siendo la semilla existente por compatibilidad con CI; puede sustituirse mediante `E2E_EMAIL`. Sin decisiones adicionales ni migraciones. Detalle y criterio parcial en `briefs/FIX-platform-sin-acceso-ui.md`.
+
 - **Endurecimiento de Plataforma (encargo urgente tras #59, rama `fix/platform-superadmin`):** servidor y shell comparten `tieneAccesoAPortal`, que admite Plataforma solo con rol global `owner` o `support`, nunca por membresía del tenant (ADR-016). Roles desconocidos se deniegan. Pruebas de servidor/shell y e2e de Empresas y rechazo sin rol global. H2 conserva la TopBar móvil aprobada: el título vive en el contenido (`DISENO.md` §4). H3 parcial: con acceso a Trabajador ya existe Inicio; se agrega cobertura, pero el estado vacío opcional se difiere porque incluso cargado de forma diferida excedió el presupuesto de Laboral (165,1/165 KB). No se suben topes. No hay decisiones de negocio nuevas; implementación de OpenCode según el encargo y ADR vigentes. La hipótesis de producción no se considera demostrada: `main` ya diferenciaba Plataforma en la guarda del servidor; queda QA posterior con la sesión afectada. Alcance y CA en `briefs/FIX-platform-superadmin.md`; el encargo no incluye ID de Linear.
 
 - Decisión de construir OPAI 2.0 desde cero (ver `01-decisiones.md`, ADR-001 a ADR-016).

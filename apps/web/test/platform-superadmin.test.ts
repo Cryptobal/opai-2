@@ -2,10 +2,10 @@ import { createElement, type ReactElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
-import type { Identidad } from "@/lib/actor";
+import { identidadDe, type Identidad } from "@/lib/actor";
 import { tieneAccesoAPortal } from "@/lib/acceso-portal";
 import { datosShell } from "@/app/_components/datos-shell";
-import { membresia } from "./fuentes-falsas";
+import { fuentesFalsas, membresia, USUARIO } from "./fuentes-falsas";
 
 const estado = vi.hoisted(() => ({ identidad: null as Identidad | null }));
 vi.mock("@/lib/servidor", async () => ({
@@ -15,7 +15,9 @@ vi.mock("@/lib/servidor", async () => ({
 vi.mock("@/lib/metricas-navegacion", () => ({
   medirFase: (_f: string, fn: () => unknown) => fn(),
 }));
-vi.mock("@/app/_components/cabecera-pagina", () => ({ CabeceraPagina: () => null }));
+vi.mock("@/app/_components/cabecera-pagina", () => ({
+  CabeceraPagina: ({ insignia }: { insignia?: React.ReactNode }) => insignia ?? null,
+}));
 vi.mock("@/app/_components/marcador-metricas", () => ({ MarcadorMetricas: () => null }));
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 
@@ -41,6 +43,7 @@ async function pintar() {
     portal: "platform",
     ruta: "/platform",
     titulo: "Empresas",
+    insignia: createElement("span", null, "Superadmin"),
     cargar,
     opciones,
     children,
@@ -54,6 +57,15 @@ async function pintar() {
 }
 
 describe("Plataforma: guarda real del servidor y del shell", () => {
+  it.each(["owner", "support", null, "superadmin", "Owner"])(
+    "identidadDe valida el rol global %s con membresía",
+    async (rol) => {
+      const { fuentes } = fuentesFalsas({ membresias: [membresia({ portales: ["platform"] })] });
+      const i = await identidadDe({ ...USUARIO, platformRole: rol }, undefined, fuentes);
+      expect(i.usuario.platformRole).toBe(rol === "owner" || rol === "support" ? rol : null);
+      expect(tieneAccesoAPortal(i, "platform")).toBe(rol === "owner" || rol === "support");
+    },
+  );
   for (const rol of ["owner", "support"] as const) {
     it.each([false, true])(
       `${rol}, con empresa=%s: carga Empresas sin depender del tenant`,
@@ -83,7 +95,8 @@ describe("Plataforma: guarda real del servidor y del shell", () => {
       expect(shell.nav).toEqual([]);
       expect(shell.portales.some((p) => p.id === "platform")).toBe(true);
       const r = await pintar();
-      expect(r.html).toContain("No tienes acceso");
+      expect(r.html).toContain("Plataforma es solo para el equipo de OPAI.");
+      expect(r.html).not.toContain("Superadmin");
       expect(r.cargar).not.toHaveBeenCalled();
       expect(r.opciones).not.toHaveBeenCalled();
       expect(r.children).not.toHaveBeenCalled();
