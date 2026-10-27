@@ -1,11 +1,19 @@
 import { randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { Client } from "pg";
-import { describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { urlPropietario } from "./entorno";
+import { prepararEntorno, urlPropietario, type Entorno } from "./entorno";
 
 describe("FORCE RLS sobre el dueño NOBYPASSRLS", () => {
+  let entorno: Entorno;
+  beforeAll(async () => {
+    entorno = await prepararEntorno();
+  });
+  afterAll(async () => {
+    await entorno?.cerrar();
+  });
+
   it("aplica la migración dos veces y aísla al dueño en un schema de módulo", async () => {
     const pg = new Client({ connectionString: urlPropietario });
     const nombre = `g2_${randomUUID().replaceAll("-", "")}`;

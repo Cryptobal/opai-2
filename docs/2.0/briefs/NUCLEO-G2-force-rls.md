@@ -101,3 +101,14 @@ La atomicidad global de Plataforma y la actualización concurrente de versiones
 de precios/ajustes siguen con las limitaciones existentes; este cambio no añade
 un flujo de escritura ni pretende resolverlas. Ninguna UI, permiso, pantalla,
 presupuesto de JS ni diseño cambia. El DS de OPAI 2.0 permanece intacto.
+
+## Continuación y autorrevisión con Codex
+
+Codex conserva las 19 capturas de teléfono heredadas sin commitearlas: no hay
+cambio visual intencional en este encargo. Corrige el harness de ESLint para que
+los casos válidos también se evalúen y separa las suites de Postgres de los
+unitarios: `pnpm test:db` mantiene db, capacidades DB y auth completos;
+`pnpm test` conserva el descubrimiento de paquetes y prueba las lecturas globales
+sin conexión. Se limita a dos workers para reducir presión de memoria local.
+La prueba FORCE prepara explícitamente su base y no depende del orden de archivos.
+Estas son adaptaciones técnicas de Codex, sin nuevas decisiones de Carlos.
