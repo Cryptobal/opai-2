@@ -76,6 +76,8 @@ No se declara CI, QA remota ni aprobación del head nuevo; Neon sigue sin modifi
 
 > **Seguimiento QA PR #49 (OpenCode):** separación de filtros de Puestos e Instalaciones y conservación de filtros al volver, según el encargo. Adaptación técnica al panel dividido: Función y la columna Patrón se ocultan hasta 2xl, con el patrón bajo el nombre del puesto; la vista de ancho completo del diseño queda parcial. Hay una comprobación e2e de visibilidad de Estado a 1024 y 1280. Sin migraciones nuevas en el seguimiento; `rama-neon` en verde en el head 25941e8 (27-oct-2026, 10:24 CLT).
 
+> **Corrección de presentación PR #49 (OpenCode):** la celda Puesto permite partir nombres y patrones largos para conservar visible Estado en el panel dividido. Adaptación técnica prevista en el encargo, sin decisión de negocio nueva; siguen las limitaciones parciales documentadas en el brief.
+
 - **NÚCLEO-D1 (rama `fix/portal-servidor`, encargo t457u):** guardas previas al catálogo
   en ambos ejecutores web; se conserva la validación de sesiones de #68. Dominio de
   coherencia por rol base/principal y diagnóstico sin escrituras ni correos. Columna

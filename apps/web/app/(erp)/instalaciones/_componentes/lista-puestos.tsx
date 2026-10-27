@@ -105,7 +105,7 @@ export function ListaPuestos({
         {
           id: "puesto",
           etiqueta: "Puesto",
-          className: "font-medium",
+          className: "font-medium whitespace-normal break-all",
           render: (p) => (
             <span className={cn("flex flex-col", p.estado !== "activo" && "text-fg-muted")}>
               <span>{p.nombre}</span>
