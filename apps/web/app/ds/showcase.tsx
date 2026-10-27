@@ -6,6 +6,7 @@ import { Button, type EstadoPantalla } from "@opai/ds";
 
 import { BloqueComponentes } from "./bloque-componentes";
 import { BloqueNuevos } from "./componentes-nuevos/bloque";
+import { MuestraCapasSueldo } from "./componentes-nuevos/capas-sueldo";
 import { MuestraPwa } from "./componentes-nuevos/pwa";
 import { BloqueDetalle } from "./bloque-detalle";
 import { BloqueLista } from "./bloque-lista";
@@ -42,6 +43,7 @@ export function DsShowcase() {
       <BloqueFormulario state={state} />
       <BloquePlanillaYDashboard state={state} />
       <BloqueComponentes />
+      <MuestraCapasSueldo />
       <BloqueNuevos state={state} />
       <Bloque titulo="PWA · sin conexión, versión nueva e instalar">
         <MuestraPwa />

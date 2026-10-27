@@ -78,19 +78,20 @@ export const instalacionesGet = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
-    const i = await instalacionDe(ctx, input.id);
-    const [nombres, puestos, documentos] = await Promise.all([
-      nombresDeCuentas(ctx, [i.cuentaId]),
-      ctx.db.puesto.findMany({
-        where: { instalacionId: i.id },
-        include: { patron: true, funcion: true },
-        orderBy: { nombre: "asc" },
-      }),
-      ctx.db.documentoVinculo.count({ where: { entidadTipo: "instalacion", entidadId: i.id } }),
-    ]);
+    const i = await ctx.db.instalacion.findFirst({
+      where: { id: input.id, AND: [dondeInstalacion(ctx)] },
+      include: {
+        cuenta: { select: { nombre: true } },
+        puestos: { include: { patron: true, funcion: true }, orderBy: { nombre: "asc" } },
+      },
+    });
+    if (!i) throw noEncontrado("La instalación");
+    const documentos = await ctx.db.documentoVinculo.count({
+      where: { entidadTipo: "instalacion", entidadId: i.id },
+    });
     return {
-      ...vistaInstalacion(i, nombres.get(i.cuentaId) ?? null),
-      puestos: puestos.map(vistaPuesto),
+      ...vistaInstalacion(i, i.cuenta?.nombre ?? null),
+      puestos: i.puestos.map(vistaPuesto),
       documentos,
     };
   },

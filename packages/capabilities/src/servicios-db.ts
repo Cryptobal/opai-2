@@ -1,6 +1,7 @@
 // Implementaciones reales (base de datos) de los servicios del núcleo para el Contexto.
 import {
   agregarAAuditoria,
+  registrarConsumoSesion,
   agregarABitacora,
   consumirPresupuesto,
   enTransaccion,
@@ -60,6 +61,8 @@ async function precioDe(recurso: string): Promise<number> {
 
 /** Medidor en `core.consumos` (ADR-031). El borde lo envuelve para no retrasar respuestas. */
 async function registrarConsumo({ sinCosto, yaIncurrido, ...c }: ConsumoNuevo) {
+  if (c.actorTipo === "user" && !c.apiKeyId && c.recurso === "capacidad.ejecucion")
+    return registrarConsumoSesion(c, sinCosto);
   const unitario = sinCosto ? 0 : await precioDe(c.recurso);
   const costoTotal = unitario * c.cantidad;
   const interno =

@@ -91,7 +91,7 @@ describe.skipIf(!urlPropietario)("maestros en base real", () => {
       "core.estructuras.efectiva",
       { personaId: persona.id, fecha: "2026-08-01" },
     );
-    expect(ef).toMatchObject({ aplica: "cargo", niveles: { cargo: { sueldoBase: 600_000 } } });
+    expect(ef).toMatchObject({ aplica: null, niveles: { cargo: null }, estado: "sin_capa" });
     const lista = await dato<{ items: { vinculoVigente: { cargo: string } }[] }>(
       "core.personas.list",
       { q: "roj" },

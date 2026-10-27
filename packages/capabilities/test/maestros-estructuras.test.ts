@@ -58,7 +58,7 @@ describe("core.estructuras.*", () => {
     ).toMatchObject({ estado: "anulada" });
   });
 
-  it("la excepción por persona exige motivo y la efectiva la aplica sobre el cargo", async () => {
+  it("el RUT exige motivo, no hereda del cargo y sin capa no inventa sueldo", async () => {
     const { ctx, cargoId } = await base();
     await dato(ctx, "core.estructuras.create", {
       nivel: "cargo",
@@ -74,15 +74,13 @@ describe("core.estructuras.*", () => {
       rut: "19.876.543-0",
       vinculo: { cargoId, tipo: "indefinido", inicio: "2026-02-01" },
     });
-    const sinExcepcion = await dato<{ aplica: string; haberes: { gratificacion: number } }>(
+    const sinExcepcion = await dato<{ aplica: string | null; haberes: null }>(
       ctx,
       "core.estructuras.efectiva",
       { personaId, fecha: "2026-10-01", imm: IMM },
     );
-    expect(sinExcepcion.aplica).toBe("cargo");
-    expect(sinExcepcion.haberes.gratificacion).toBe(
-      Math.min(140_000, Math.round((4.75 * IMM) / 12)),
-    );
+    expect(sinExcepcion.aplica).toBeNull();
+    expect(sinExcepcion.haberes).toBeNull();
     expect(
       await codigo(ctx, "core.estructuras.create", {
         nivel: "persona",
@@ -97,6 +95,7 @@ describe("core.estructuras.*", () => {
       sueldoBase: 700_000,
       vigenteDesde: "2026-09-01",
       motivo: "Acuerdo por antigüedad",
+      colacion: 0, movilizacion: 0, gratificacion: "ninguna",
     });
     const r = await dato<{ aplica: string; niveles: { cargo: { sueldoBase: number } } }>(
       ctx,
@@ -104,7 +103,7 @@ describe("core.estructuras.*", () => {
       { personaId, fecha: "2026-10-01" },
     );
     expect(r.aplica).toBe("persona");
-    expect(r.niveles.cargo.sueldoBase).toBe(560_000);
+    expect(r.niveles.cargo).toBeNull();
   });
 
   it("los montos de un cargo sensible se ocultan sin el permiso de sueldos sensibles", async () => {
@@ -154,7 +153,7 @@ describe("core.estructuras.*", () => {
     expect(revelaciones).toEqual([
       expect.objectContaining({ entityType: "estructura", entityId: creada.id }),
     ]);
-    // La vista previa (dryRun), sin fila persistida, no tiene nada que auditar.
+    // La vista previa revela los montos anteriores de la fila persistida.
     owner.eventos.length = 0;
     await dato(
       owner.ctx,
@@ -162,7 +161,9 @@ describe("core.estructuras.*", () => {
       { nivel: "cargo", cargoId, sueldoBase: 1, vigenteDesde: "2027-01-01" },
       { dryRun: true },
     );
-    expect(owner.eventos).toHaveLength(0);
+    expect(owner.eventos).toEqual([
+      expect.objectContaining({ capability: "core.estructuras.read_sensible", entityId: creada.id }),
+    ]);
   });
 });
 

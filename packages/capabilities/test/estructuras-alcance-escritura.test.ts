@@ -71,7 +71,7 @@ describe("alcance en escrituras de core.estructuras.* (B3)", () => {
     const creada = await dato<{ id: string; estado: string }>(
       acotado,
       "core.estructuras.create",
-      { nivel: "puesto", puestoId: puestoDentro, sueldoBase: 100, vigenteDesde: "2026-01-01" },
+      { nivel: "puesto", puestoId: puestoDentro, sueldoBase: 100, colacion: 0, movilizacion: 0, gratificacion: "ninguna", vigenteDesde: "2026-01-01" },
     );
     expect(creada.estado).toBe("vigente");
     const anulada = await dato(acotado, "core.estructuras.anular", {
@@ -87,6 +87,7 @@ describe("alcance en escrituras de core.estructuras.* (B3)", () => {
       nivel: "puesto",
       puestoId: puestoFuera,
       sueldoBase: 100,
+      colacion: 0, movilizacion: 0, gratificacion: "ninguna",
       vigenteDesde: "2026-01-01",
     });
     expect(

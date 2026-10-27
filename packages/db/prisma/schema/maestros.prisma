@@ -113,6 +113,7 @@ model Instalacion {
   tenant  Tenant   @relation(fields: [tenantId], references: [id])
   cuenta  Cuenta   @relation(fields: [cuentaId], references: [id])
   puestos Puesto[]
+  estructuras EstructuraSueldo[]
   /// Supervisores a cargo de esta instalación (alcance por filas, ADR-022 · Brief 07c B3).
   supervisores SupervisorInstalacion[]
 
@@ -277,12 +278,13 @@ model VinculoLaboral {
 model EstructuraSueldo {
   id                 String    @id @default(uuid(7)) @db.Uuid
   tenantId           String    @map("tenant_id") @db.Uuid
-  /// "cargo" | "puesto" | "persona" (CHECK en la migración: exactamente una referencia)
+  /// "instalacion" | "puesto" | "persona"; "cargo" solo para históricos.
   nivel              String
   cargoId            String?   @map("cargo_id") @db.Uuid
   puestoId           String?   @map("puesto_id") @db.Uuid
   personaId          String?   @map("persona_id") @db.Uuid
-  /// Conceptos: NULL = hereda del nivel más general (el nivel cargo los define todos).
+  instalacionId      String?   @map("instalacion_id") @db.Uuid
+  /// NULL histórico significa estructura incompleta, nunca herencia entre capas.
   sueldoBase         Int?      @map("sueldo_base")
   colacion           Int?
   movilizacion       Int?
@@ -303,11 +305,13 @@ model EstructuraSueldo {
   cargo   Cargo?           @relation(fields: [cargoId], references: [id])
   puesto  Puesto?          @relation(fields: [puestoId], references: [id])
   persona Persona?         @relation(fields: [personaId], references: [id])
+  instalacion Instalacion? @relation(fields: [instalacionId], references: [id])
   items   EstructuraItem[]
 
   @@index([tenantId, nivel, cargoId])
   @@index([tenantId, nivel, puestoId])
   @@index([tenantId, nivel, personaId])
+  @@index([tenantId, nivel, instalacionId])
   @@map("estructuras_sueldo")
   @@schema("core")
 }

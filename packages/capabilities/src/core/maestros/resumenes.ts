@@ -35,6 +35,13 @@ export async function alertasDocumentos(ctx: Contexto, tipo: string, ids: string
     },
     select: { entidadId: true, documento: { select: { venceEn: true } } },
   });
+  return resumirAlertasDocumentos(vinculos);
+}
+
+/** Resumen puro para consultas consolidadas que ya cargaron los vencimientos. */
+export function resumirAlertasDocumentos(
+  vinculos: { entidadId: string; documento: { venceEn: Date | null } }[],
+) {
   const r = new Map<string, { vencidos: number; porVencer: number }>();
   for (const v of vinculos) {
     const e = estadoVigencia(dia(v.documento.venceEn), hoy(), 30);

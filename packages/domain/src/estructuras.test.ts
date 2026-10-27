@@ -28,20 +28,21 @@ const base = (
 });
 
 describe("estructuras de sueldo", () => {
-  it("resuelve persona → puesto → cargo por fecha", () => {
-    const cargo = [
-      base("cargo", 520_000, "2025-01-01", "2025-12-31"),
-      base("cargo", 560_000, "2026-01-01"),
+  it("resuelve persona → puesto → instalación por fecha, sin cargo", () => {
+    const instalacion = [
+      base("instalacion", 520_000, "2025-01-01", "2025-12-31"),
+      base("instalacion", 560_000, "2026-01-01"),
     ];
     const puesto = [base("puesto", 600_000, "2025-03-01")];
     const persona = [base("persona", 650_000, "2026-06-01")];
-    expect(resolverEstructura("2026-02-01", { cargo }).estructura?.sueldoBase).toBe(560_000);
-    expect(resolverEstructura("2025-06-01", { cargo }).estructura?.sueldoBase).toBe(520_000);
-    expect(resolverEstructura("2026-02-01", { cargo, puesto }).aplica).toBe("puesto");
-    const r = resolverEstructura("2026-07-01", { cargo, puesto, persona });
+    expect(resolverEstructura("2026-02-01", { instalacion }).estructura?.sueldoBase).toBe(560_000);
+    expect(resolverEstructura("2025-06-01", { instalacion }).estructura?.sueldoBase).toBe(520_000);
+    expect(resolverEstructura("2026-02-01", { instalacion, puesto }).aplica).toBe("puesto");
+    const r = resolverEstructura("2026-07-01", { instalacion, puesto, persona });
     expect(r.aplica).toBe("persona");
-    expect(r.niveles.cargo?.sueldoBase).toBe(560_000);
-    expect(resolverEstructura("2024-01-01", { cargo }).aplica).toBeNull();
+    expect(r.niveles.instalacion?.sueldoBase).toBe(560_000);
+    expect(resolverEstructura("2024-01-01", { instalacion }).aplica).toBeNull();
+    expect(resolverEstructura("2026-01-01", { cargo: [base("cargo", 1, "2025-01-01")] }).aplica).toBeNull();
   });
   it("ignora estructuras anuladas", () => {
     const anulada = { ...base("persona", 900_000, "2026-01-01"), estado: "anulada" as const };
