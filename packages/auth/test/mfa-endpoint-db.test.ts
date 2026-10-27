@@ -131,6 +131,20 @@ describe.skipIf(!urlPropietario)("MFA: endpoints directos y confirmación (#65, 
     }
   });
 
+  it("un respaldo ajeno y uno ya usado fallan sin distinguir el motivo", async () => {
+    const fila = await e.admin.twoFactor.findUniqueOrThrow({ where: { userId } });
+    try {
+      const ajeno = await mfa.verificarCodigoRespaldo("codigo-ajeno");
+      expect(ajeno).toMatchObject({ ok: false, fallo: "credenciales" });
+      expect(await mfa.verificarCodigoRespaldo("respaldo-http")).toEqual({ ok: true });
+      const usado = await mfa.verificarCodigoRespaldo("respaldo-http");
+      expect(usado).toEqual(ajeno);
+    } finally {
+      await e.admin.twoFactor.update({ where: { userId }, data: { backupCodes: fila.backupCodes } });
+      await e.admin.session.updateMany({ where: { userId }, data: { mfaVerified: false } });
+    }
+  });
+
   it("confirmar un enrolamiento pendiente válido activa MFA y verifica solo su sesión", async () => {
     await e.admin.user.update({ where: { id: userId }, data: { twoFactorEnabled: false } });
     await e.admin.twoFactor.update({ where: { userId }, data: { verified: false } });
