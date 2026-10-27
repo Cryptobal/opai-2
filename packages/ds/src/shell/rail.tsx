@@ -23,7 +23,7 @@ function ItemRiel({
   Link: LinkComponent;
   sinContador?: boolean;
 }) {
-  const activo = esActivo(rutaActual, item.href);
+  const activo = esActivo(rutaActual, item.href, item.exacta, item.activoEn);
   return (
     <li>
       <Link

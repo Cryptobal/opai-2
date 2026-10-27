@@ -27,6 +27,9 @@ const Avisos = dynamic(() => import("./avisos").then((m) => m.Avisos), { ssr: fa
 
 export type DatosShell = {
   portal: string;
+  /** Acceso al portal actual en la empresa actual (`datos-shell.ts`). Sin acceso, el shell se monta
+   *  igual pero sin búsqueda, ⌘K ni Preferencias; el aviso «Sin permisos» vive en la página. */
+  acceso: boolean;
   nav: ItemNav[];
   portales: Portal[];
   tenant: { nombre: string } | null;
@@ -48,10 +51,13 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
   const cabecera = useCabecera();
   const [password, setPassword] = useState(false);
   const [paleta, setPaleta] = useState<boolean | null>(null);
-  const buscable = datos.portal === "erp" && datos.tenant !== null;
+  // El ERP del usuario con acceso: habilita búsqueda, ⌘K y Preferencias. Sin acceso al portal el
+  // shell se monta igual (aviso «Sin permisos»), pero sin estas acciones y sin que la acción del
+  // servidor (`ejecutarCapacidad`) devuelva nada del portal ajeno.
+  const enErp = datos.portal === "erp" && datos.tenant !== null && datos.acceso;
   useEpocaSesion(datos.epoca);
   useEffect(() => {
-    if (!buscable) return;
+    if (!enErp) return;
     const tecla = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
@@ -60,7 +66,7 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
     };
     window.addEventListener("keydown", tecla);
     return () => window.removeEventListener("keydown", tecla);
-  }, [buscable]);
+  }, [enErp]);
   // La navegación no cambia al fijar la cabecera: se recalcula solo cuando cambia `datos.nav`.
   const nav = useMemo(() => datos.nav.map((n) => ({ ...n, icono: icono(n.icono) })), [datos.nav]);
   const empresas: ItemMenu[] =
@@ -76,7 +82,7 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
         }))
       : [];
   const menu: ItemMenu[] = [
-    ...(datos.portal === "erp" && datos.tenant
+    ...(enErp
       ? [
           {
             id: "pref",
@@ -89,7 +95,7 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
       : []),
     {
       id: "password",
-      ...(datos.portal === "erp" && datos.tenant ? {} : { grupo: "Cuenta" }),
+      ...(enErp ? {} : { grupo: "Cuenta" }),
       etiqueta: "Cambiar contraseña",
       icono: UserRound,
       onSelect: () => setPassword(true),
@@ -121,8 +127,8 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
       {...(empresas.length ? { empresas } : {})}
       usuario={datos.usuario}
       menuUsuario={menu}
-      campana={datos.tenant ? <Campana portal={datos.portal} /> : undefined}
-      {...(buscable ? { onBuscar: () => setPaleta(true) } : {})}
+      campana={datos.tenant ? <Campana key={datos.epoca} portal={datos.portal} /> : undefined}
+      {...(enErp ? { onBuscar: () => setPaleta(true) } : {})}
       onNavegar={(href) => router.push(href)}
       Link={LinkMenu}
     >
