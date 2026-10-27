@@ -19,8 +19,13 @@ const idOrdenado = () => {
 };
 
 const RELACIONES: Record<string, Record<string, [tabla: string, clave: string]>> = {
-  membership: { user: ["user", "userId"], tenant: ["tenant", "tenantId"] },
+  membership: {
+    user: ["user", "userId"],
+    tenant: ["tenant", "tenantId"],
+    rolTenant: ["rol", "roleId"],
+  },
   apiKey: { user: ["user", "userId"] },
+  permisoExcepcion: { creadoPorUsuario: ["user", "creadoPor"] },
 };
 
 export function dbEnMemoria(semilla: Record<string, Fila[]> = {}) {
