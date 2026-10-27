@@ -7,6 +7,7 @@ import { noEncontrado } from "../../errores";
 import type { Contexto } from "../../types";
 import { escribirConEvento, sinDuplicado } from "../maestros/comun";
 import { exigeGestionDeRoles, normalizarPermisosRol } from "./comun";
+import { rolesSistema } from "./roles-sistema";
 
 export const rolTenantSchema = z.object({
   id: z.string(),
@@ -15,10 +16,14 @@ export const rolTenantSchema = z.object({
   sistema: z.boolean(),
   permisos: z.array(z.string()),
   archivado: z.boolean(),
+  /** Membresías activas que usan este rol (A03/A17: «N usuarios» / «en uso por N»). */
+  usuarios: z.number(),
 });
 
 export const nombreSchema = z.string().trim().min(2).max(60);
-export const descripcionSchema = z.string().trim().max(500).nullable().optional();
+// Sábana A16: descripción hasta 140 (antes 500). Solo en la escritura; los datos previos que la
+// superen no se truncan (el output no limita el largo).
+export const descripcionSchema = z.string().trim().max(140).nullable().optional();
 export const permisosSchema = z.array(z.string().trim().min(1)).max(500);
 
 export type RolFila = {
@@ -30,14 +35,25 @@ export type RolFila = {
   archivadoEn: Date | null;
 };
 
-export const vista = (r: RolFila) => ({
+export const vista = (r: RolFila, usuarios = 0) => ({
   id: r.id,
   nombre: r.nombre,
-  descripcion: r.descripcion,
+  descripcion: r.descripcion ?? null,
   sistema: r.sistema,
   permisos: r.permisos,
   archivado: r.archivadoEn != null,
+  usuarios,
 });
+
+/** Membresías activas por rol personalizado (roleId). Una sola consulta para la lista. */
+export async function usuariosPorRol(ctx: Contexto): Promise<Map<string, number>> {
+  const g = await ctx.db.membership.groupBy({
+    by: ["roleId"],
+    where: { estado: "activa", roleId: { not: null } },
+    _count: { _all: true },
+  });
+  return new Map(g.flatMap((x) => (x.roleId ? [[x.roleId, x._count._all] as const] : [])));
+}
 
 export async function rolDe(ctx: Contexto, id: string): Promise<RolFila> {
   const r = await ctx.db.rol.findUnique({ where: { id } });
@@ -47,9 +63,14 @@ export async function rolDe(ctx: Contexto, id: string): Promise<RolFila> {
 
 export const rolesList = defineCapability({
   id: "core.roles.list",
-  descripcion: "Roles personalizados de la empresa con sus permisos; para la matriz de permisos.",
+  descripcion:
+    "Roles personalizados de la empresa con sus permisos y cuántos usuarios los usan; opcionalmente también los roles base del sistema (para «Partir de»).",
   permiso: PERMISOS_CORE.usersRead,
-  input: z.object({ incluirArchivados: z.boolean().default(false) }),
+  input: z.object({
+    incluirArchivados: z.boolean().default(false),
+    // A09: incluye los cinco roles base del sistema con sus permisos expandidos (sistema:true).
+    incluirSistema: z.boolean().default(false),
+  }),
   output: z.array(rolTenantSchema),
   efecto: "lectura",
   dryRun: false,
@@ -58,7 +79,10 @@ export const rolesList = defineCapability({
       where: input.incluirArchivados ? {} : { archivadoEn: null },
       orderBy: { nombre: "asc" },
     });
-    return roles.map(vista);
+    const conteo = await usuariosPorRol(ctx);
+    const filas = roles.map((r) => vista(r, conteo.get(r.id) ?? 0));
+    if (!input.incluirSistema) return filas;
+    return [...(await rolesSistema(ctx)), ...filas];
   },
 });
 

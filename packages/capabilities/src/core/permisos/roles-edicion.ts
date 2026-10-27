@@ -42,7 +42,10 @@ export const rolesUpdate = defineCapability({
       ...(input.descripcion !== undefined ? { descripcion: input.descripcion } : {}),
       ...(permisos !== undefined ? { permisos } : {}),
     };
-    if (dryRun) return vista({ ...actual, ...data });
+    const usuarios = await ctx.db.membership.count({
+      where: { roleId: actual.id, estado: "activa" },
+    });
+    if (dryRun) return vista({ ...actual, ...data }, usuarios);
     const r = await sinDuplicado(
       escribirConEvento<RolFila>(
         ctx,
@@ -51,7 +54,7 @@ export const rolesUpdate = defineCapability({
       ),
       `Ya existe un rol llamado "${input.nombre ?? actual.nombre}".`,
     );
-    return vista(r);
+    return vista(r, usuarios);
   },
 });
 

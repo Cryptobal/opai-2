@@ -1,7 +1,8 @@
 import { listarModulos } from "@opai/capabilities";
 import { Alerta } from "@opai/ds";
-import { esRol, PERMISOS_CORE, tienePermiso } from "@opai/domain";
+import { PERMISOS_CORE } from "@opai/domain";
 
+import { construirPuede } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { PaginaConfig } from "../_centro/pagina-config";
@@ -37,9 +38,7 @@ export default function Modulos() {
     >
       {(r, indice) => {
         if (!r.ok) return <Alerta tono="danger" titulo={r.error.message} />;
-        const puede = Boolean(
-          indice.rol && esRol(indice.rol) && tienePermiso(indice.rol, PERMISOS_CORE.tenantManage),
-        );
+        const puede = construirPuede(indice.rol, indice.acceso)(PERMISOS_CORE.tenantManage);
         const manifests = new Map(listarModulos().map((m) => [m.id, m]));
         const nombre = (id: string) => r.data.find((x) => x.id === id)?.nombre ?? id;
         return (
