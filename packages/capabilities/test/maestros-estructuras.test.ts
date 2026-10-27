@@ -135,6 +135,35 @@ describe("core.estructuras.*", () => {
     );
     expect(oculto[0]).toMatchObject({ sueldoBase: null, sensible: true });
   });
+
+  it("la creación de una estructura sensible audita la revelación, no solo el get", async () => {
+    const owner = contextoDePrueba();
+    const { id: cargoId } = await dato<{ id: string }>(owner.ctx, "core.cargos.create", {
+      nombre: "Gerente",
+      sueldoSensible: true,
+    });
+    owner.eventos.length = 0;
+    const creada = await dato<{ id: string; sueldoBase: number }>(owner.ctx, "core.estructuras.create", {
+      nivel: "cargo",
+      cargoId,
+      sueldoBase: 3_000_000,
+      vigenteDesde: "2026-01-01",
+    });
+    expect(creada.sueldoBase).toBe(3_000_000);
+    const revelaciones = owner.eventos.filter((e) => e.capability === "core.estructuras.read_sensible");
+    expect(revelaciones).toEqual([
+      expect.objectContaining({ entityType: "estructura", entityId: creada.id }),
+    ]);
+    // La vista previa (dryRun), sin fila persistida, no tiene nada que auditar.
+    owner.eventos.length = 0;
+    await dato(
+      owner.ctx,
+      "core.estructuras.create",
+      { nivel: "cargo", cargoId, sueldoBase: 1, vigenteDesde: "2027-01-01" },
+      { dryRun: true },
+    );
+    expect(owner.eventos).toHaveLength(0);
+  });
 });
 
 describe("core.buscar", () => {

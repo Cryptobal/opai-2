@@ -10,6 +10,39 @@ Hasta el 24-oct-2026 este archivo fue la fuente de verdad del avance; desde ento
 
 ## Hecho
 
+- **Seguimiento del #60 (rama `fix/roles-seguimiento`, PR #67, sin tarea en Linear):**
+  Correcciones QA H1–H4 implementadas por OpenCode según el encargo: fixture E2E autónoma con hash propio, Empresa en texto de lectura con DS 2.0, sensibilidad en texto y estado vacío acorde al permiso. Sin decisiones de negocio adicionales ni migraciones; e2e de roles y portal-sesión 6/6 tras el merge de main. Queda pendiente una auditoría independiente de contraste y foco.
+  I4/P4: el menú del ERP usa permisos efectivos (rol personalizado y excepciones), no el rol base.
+  P3: Dirección de Empresa respeta el modo lectura mediante `CampoDireccion` del DS 2.0.
+  **Decisión vigente t479u:** Carlos delegó «Velo tú, según eso y avanza» (26-oct-2026 22:06 CLT;
+  adenda del encargo confirma la decisión): Inspector DT recibe `core:estructuras.read_sensible`,
+  solo lectura, sin nuevas escrituras. Fundamento indicado en el encargo: art. 31 del DFL 2 de 1967,
+  Ley Orgánica de la DT, acceso a documentación necesaria para fiscalizar, incluidas remuneraciones;
+  enmascarar impediría la fiscalización. Cada revelación de montos sensibles queda auditada con actor,
+  fecha y estructura (historial: evento consultado); sin copiar montos y sin entregar datos si falla
+  la auditoría. El seed reconoce las versiones previas del Inspector y preserva conjuntos editados,
+  incluida una edición concurrente. El alcance de estructuras filtra puestos por instalación y
+  mantiene la negación de personas acotadas hasta 07b; la auditoría global se deniega a actores acotados.
+  Cargos oculta «Nuevo» y su hoja sin permiso de gestionar; no cambia el diseño aprobado ni los topes JS.
+  La ficha también deshabilita sensibilidad y oculta edición/versiones nuevas en lectura; ambas vías
+  de auditoría (`core.audit.list` y `core.actividad.list`) registran revelaciones y redactan sin permiso.
+  **Bloqueantes de la autorrevisión anterior, corregidos:** `core.estructuras.create` (nivel puesto o
+  persona) y `core.estructuras.anular` ya acotan la escritura al alcance del actor (`dondePuesto`/
+  `dondePersona`, `findFirst` en vez de `findUnique`, igual que las lecturas); fuera de alcance
+  responde `NOT_FOUND`, igual que "no existe" (sin enumeración; probado también con 5 llamadas en
+  paralelo). La respuesta de creación de una estructura sensible ahora audita la revelación (antes el
+  cálculo de `ocultarMontos` corría antes de tener el id de la fila recién creada y la auditoría se
+  saltaba en silencio). Tests nuevos: `estructuras-alcance-escritura(.test|-db.test).ts` y un caso en
+  `maestros-estructuras.test.ts`. **Bloqueante de la revisión 5662281692, corregido:** el merge de
+  main (#53, ADR-045) dejó `core.cargos.list` sin auditar la revelación sensible (conflicto semántico:
+  la consulta única pasó a usar `resumenSueldoDe`, puro, en vez de `ocultarMontos`); ahora audita con
+  `ocultarMontosDeCargo` (`estructuras-acceso.ts`), sin volver al N+1 que corrigió el #53. Detalle en
+  `briefs/BRIEF-roles-seguimiento.md`.
+  Gate tras traer main (merge `efe3322`, trae el PR #66 de Plataforma): 806 tests; `test:db` 68+56+6;
+  typecheck, lint, build, presupuesto y e2e 3/3 (375/1024/1280, servidor propio en 3106) en verde.
+  El rate limit usó respaldo en memoria en el e2e. Ver criterios y límites en
+  `briefs/BRIEF-roles-seguimiento.md`. No agrega migraciones.
+
 - **Plataforma sin acceso (encargo H4 de QA):** el aviso usa el texto solicitado en el encargo y la insignia se oculta sin acceso; se usa la guarda compartida también para la redirección. La cuenta autorizada predeterminada del e2e sigue siendo la semilla existente por compatibilidad con CI; puede sustituirse mediante `E2E_EMAIL`. Sin decisiones adicionales ni migraciones. Detalle y criterio parcial en `briefs/FIX-platform-sin-acceso-ui.md`.
 
 - **Endurecimiento de Plataforma (encargo urgente tras #59, rama `fix/platform-superadmin`):** servidor y shell comparten `tieneAccesoAPortal`, que admite Plataforma solo con rol global `owner` o `support`, nunca por membresía del tenant (ADR-016). Roles desconocidos se deniegan. Pruebas de servidor/shell y e2e de Empresas y rechazo sin rol global. H2 conserva la TopBar móvil aprobada: el título vive en el contenido (`DISENO.md` §4). H3 parcial: con acceso a Trabajador ya existe Inicio; se agrega cobertura, pero el estado vacío opcional se difiere porque incluso cargado de forma diferida excedió el presupuesto de Laboral (165,1/165 KB). No se suben topes. No hay decisiones de negocio nuevas; implementación de OpenCode según el encargo y ADR vigentes. La hipótesis de producción no se considera demostrada: `main` ya diferenciaba Plataforma en la guarda del servidor; queda QA posterior con la sesión afectada. Alcance y CA en `briefs/FIX-platform-superadmin.md`; el encargo no incluye ID de Linear.
