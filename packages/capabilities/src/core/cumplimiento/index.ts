@@ -2,6 +2,7 @@ import type { Capacidad } from "../../types";
 import { consentimientosListar } from "./consentimientos-consulta";
 import { consentimientoRegistrar, consentimientoRevocar } from "./consentimientos";
 import { cumplimientoDpaAceptar, cumplimientoEstado } from "./dpa";
+import { cumplimientoDpaTexto } from "./dpa-texto";
 import { cumplimientoDpoSet } from "./dpo";
 import { incidentesListar } from "./incidentes-consulta";
 import { incidenteNotificar } from "./incidentes-notificar";
@@ -18,6 +19,7 @@ import { solicitudAvanzar, solicitudCrear } from "./solicitudes";
  */
 export const capacidadesCumplimiento: readonly Capacidad[] = [
   cumplimientoEstado,
+  cumplimientoDpaTexto,
   cumplimientoDpaAceptar,
   cumplimientoDpoSet,
   cumplimientoRat,

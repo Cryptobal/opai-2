@@ -19,7 +19,7 @@ export async function versionVigenteDpa(ctx: Contexto, db: TenantTx = ctx.db): P
  * versión publicada, si no es la versión pedida, o si el texto está vacío: no se acepta un DPA sin
  * texto. Devuelve la versión, el texto exacto y su referencia estable (`<version>:sha256:<hash>`).
  */
-async function leerDpaVigente(ctx: Contexto, db: TenantTx, versionPedida: string | undefined) {
+export async function leerDpaVigente(ctx: Contexto, db: TenantTx, versionPedida: string | undefined) {
   const version = await versionVigenteDpa(ctx, db);
   if (!version) throw reglaDeNegocio("OPAI aún no publica una versión vigente del DPA.");
   if (versionPedida && versionPedida !== version)
@@ -27,12 +27,24 @@ async function leerDpaVigente(ctx: Contexto, db: TenantTx, versionPedida: string
   const texto = (await ajuste<string>(ctx, "core", "cumplimiento_dpa_texto", db)) || "";
   if (!texto.trim())
     throw reglaDeNegocio("OPAI aún no publica el texto de la versión vigente del DPA.");
-  return { version, texto, documentoRef: `${version}:sha256:${await sha256Hex(texto)}` };
+  const sha256 = await sha256Hex(texto);
+  return { version, texto, sha256, documentoRef: `${version}:sha256:${sha256}` };
+}
+
+/** Separa el "Nombre <correo>" guardado en aceptado_por en sus partes (para la ficha del historial). */
+export function partirAceptadoPor(s: string | null): { nombre: string | null; correo: string | null } {
+  if (!s) return { nombre: null, correo: null };
+  const m = s.match(/^(.*?)\s*<([^>]+)>\s*$/);
+  if (m) return { nombre: (m[1] ?? "").trim() || null, correo: (m[2] ?? "").trim() };
+  return { nombre: s.trim() || null, correo: null };
 }
 
 const aceptacionSchema = z.object({
   version: z.string(),
+  // Se conserva el string "Nombre <correo>" por compatibilidad; además va estructurado (C02/C05).
   aceptadoPor: z.string().nullable(),
+  aceptadoPorNombre: z.string().nullable(),
+  aceptadoPorCorreo: z.string().nullable(),
   aceptadoEn: z.string(),
 });
 
@@ -67,11 +79,16 @@ export const cumplimientoEstado = defineCapability({
       ctx.db.dpaAceptacion.findMany({ orderBy: { createdAt: "desc" }, take: 50 }),
       ctx.db.perfilEmpresa.findUnique({ where: { tenantId: ctx.tenantId } }),
     ]);
-    const historial = filas.map((f) => ({
-      version: f.version,
-      aceptadoPor: f.aceptadoPor ?? null,
-      aceptadoEn: f.createdAt.toISOString(),
-    }));
+    const historial = filas.map((f) => {
+      const { nombre, correo } = partirAceptadoPor(f.aceptadoPor ?? null);
+      return {
+        version: f.version,
+        aceptadoPor: f.aceptadoPor ?? null,
+        aceptadoPorNombre: nombre,
+        aceptadoPorCorreo: correo,
+        aceptadoEn: f.createdAt.toISOString(),
+      };
+    });
     const publicada = version !== "";
     const aceptadaVigente = publicada && filas.some((f) => f.version === version);
     return {

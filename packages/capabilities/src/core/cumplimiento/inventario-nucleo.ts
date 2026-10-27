@@ -49,6 +49,7 @@ export const INVENTARIO_NUCLEO = defineDatosPersonales("core", [
     categorias: ["identificacion", "contacto"],
     campos: ["nombres", "apellidos", "email", "telefono"],
     baseLicitud: "contrato",
+    destinatarios: ["Resend (envío de correos) — a confirmar por legal"],
   },
   {
     tabla: "users",
@@ -85,6 +86,7 @@ export const INVENTARIO_NUCLEO = defineDatosPersonales("core", [
     categorias: ["contacto"],
     campos: ["destinatario"],
     baseLicitud: "interes_legitimo",
+    destinatarios: ["Resend (envío de correos) — a confirmar por legal"],
   },
   {
     tabla: "invitations",
@@ -115,7 +117,11 @@ export const INVENTARIO_NUCLEO = defineDatosPersonales("core", [
     categorias: ["identificacion", "laboral"],
     campos: ["nombre", "titulo", "creado_por_id", "via_user_id"],
     baseLicitud: "obligacion_legal",
-    destinatarios: ["Cloudflare R2 (archivo del documento)"],
+    // La lectura con IA pasa por el adaptador del Núcleo (ADR-031); a confirmar por legal (§4.4).
+    destinatarios: [
+      "Cloudflare R2 (archivo del documento)",
+      "Proveedor de IA (lectura de documentos) — a confirmar por legal",
+    ],
   },
   {
     tabla: "perfil_empresa",
