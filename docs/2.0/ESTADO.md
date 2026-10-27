@@ -9,6 +9,26 @@ Hasta el 24-oct-2026 este archivo fue la fuente de verdad del avance; desde ento
 
 ## Hecho
 
+- **NÚCLEO-D1 (rama `fix/portal-servidor`, encargo t457u):** guardas previas al catálogo
+  en ambos ejecutores web; se conserva la validación de sesiones de #68. Dominio de
+  coherencia por rol base/principal y diagnóstico sin escrituras ni correos. Columna
+  nullable `portal_inicio` en memberships e invitations; preferencia personal por
+  capacidad con auditoría, preview, idempotencia y outbox; condición atómica si se
+  revoca el portal. Login/cambio de empresa usan preferencia o primer permitido si no
+  hay next explícito; aceptación de invitación relee la identidad en otro request.
+  Hoja existente del DS V2 en el menú, diferida, sin pantalla nueva. Criterios técnicos
+  del constructor OpenCode / openai/gpt-6.1-sol: los cinco roles internos admiten los
+  cuatro portales internos, sujetos a permisos/alcance; nunca Cliente ni Plataforma.
+  No se conceden portales nuevos ni se reparan datos automáticamente. Matriz y CA en
+  `briefs/ENCARGO-nucleo-d1.md`. Migración nueva: `20261028110000_portal_inicio`;
+  Neon pendiente de Carlos, con etiqueta `migracion-pendiente` cuando se abra el PR.
+  Seguimiento de la review 5663625371: limpieza transaccional de preferencias obsoletas
+  al cambiar rol o portales (punto 3 del encargo, implementado por OpenCode), sin
+  conceder acceso ni revivir preferencias al reconceder portales. Sin decisiones nuevas.
+  QA P1–P3 del informe `informe-dac3399.md`: opción oculta en Cliente/Plataforma,
+  error de carga con reintento y aviso de éxito del DS 2.0. Implementación de OpenCode
+  según el punto 4 del encargo; S1 y S2 no cambian y su decisión sigue en Carlos.
+
 - **MFA · corrección de entrada en iOS:** normalización de espacios y guion sin alterar mayúsculas, y desactivación de autocorrección/capitalización en los campos MFA. Better Auth rota la sesión al confirmar el enrolamiento; la solicitud de contraseña observada después aún requiere reproducción. Alcance y límites en `briefs/FIX-mfa-respaldo-ios.md`. Adaptación técnica de OpenCode según el encargo, sin decisiones de negocio nuevas ni migración.
 
 - **PR #61, corrección de la revisión 5660654308 (OpenCode, 27-oct-2026).** Merge normal de `origin/main` (`5c18a9237fcdee84a040dde93e3015b753d8d21a`, ya incluye #48 y #56). La transacción por lote y la propagación del fallo ya estaban en `6f948ba`; se refuerza la prueba del evento del lote confirmado y se prueba rollback de datos y registro si falla el evento. Migración `20261027070000_cumplimiento_retencion` aplicada y reaplicada sobre todas las migraciones actuales de main en PostgreSQL 16 local, sin choque y sin renombrarla. Sin decisiones de negocio nuevas. Pendientes expresamente fuera de esta corrección: orden/cursor, carreras en `exigirNoAnonimizado` y solicitudes abiertas, campos restantes por anonimizar, rotación de DEK; el plazo mínimo se confirma con el Abogado antes de activar. CA y limitaciones en el brief §21. Ninguna pantalla nueva; cualquier diseño debe usar siempre el DS de OPAI 2.0.

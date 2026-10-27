@@ -26,6 +26,7 @@ export const me = defineCapability({
     "Quién soy: usuario, actor (usuario o agente vía usuario), empresa actual, rol, portales, permisos efectivos y módulos activos.",
   permiso: null,
   sinTenant: true,
+  portales: ["erp", "supervisor", "trabajador", "terreno"],
   input: z.object({}),
   output: z.object({
     usuario: z
@@ -44,6 +45,7 @@ export const me = defineCapability({
     tenant: tenantSchema.nullable(),
     rol: z.string().nullable(),
     portales: z.array(z.string()),
+    portalInicio: z.string().nullable().describe("Portal donde entrar; null = el primero permitido."),
     permisos: z.array(z.string()),
     modulosActivos: z.array(z.string()),
     principal: z.object({ tipo: z.string(), id: z.string() }).nullable(),
@@ -87,6 +89,7 @@ export const me = defineCapability({
       tenant,
       rol: ctx.rol,
       portales: membresia?.portales ?? [],
+      portalInicio: membresia?.portalInicio ?? null,
       permisos: [...deTenant, ...dePlataforma],
       modulosActivos: [...ctx.modulosActivos],
       principal: ctx.principal,

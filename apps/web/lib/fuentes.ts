@@ -7,6 +7,7 @@ export type MembresiaConTenant = {
   tenantId: string;
   rol: string;
   portales: string[];
+  portalInicio?: string | null;
   estado: string;
   tenant: { id: string; slug: string; nombre: string; vertical: string; estado: string };
 };

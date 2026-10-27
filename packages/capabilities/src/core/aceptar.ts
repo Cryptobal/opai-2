@@ -84,7 +84,13 @@ export const invitationsAccept = defineCapability({
     if (ya) throw conflicto("Ya perteneces a esta empresa.");
     if (dryRun) return { tenantId: i.tenantId, membershipId: null, rol: i.rol };
     const m = await ctx.db.membership.create({
-      data: { tenantId: i.tenantId, userId: ctx.usuario.id, rol: i.rol, portales: i.portales },
+      data: {
+        tenantId: i.tenantId,
+        userId: ctx.usuario.id,
+        rol: i.rol,
+        portales: i.portales,
+        portalInicio: i.portalInicio ?? null,
+      },
     });
     await ctx.db.invitation.update({ where: { id: i.id }, data: { acceptedAt: new Date() } });
     return { tenantId: i.tenantId, membershipId: m.id, rol: m.rol };

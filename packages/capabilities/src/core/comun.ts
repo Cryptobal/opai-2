@@ -30,6 +30,4 @@ export function sha256(valor: string): string {
   return createHash("sha256").update(valor).digest("hex");
 }
 
-export const PORTALES_TENANT = ["erp", "supervisor", "trabajador", "terreno", "cliente"] as const;
-
 export const iso = (d: Date | null | undefined): string | null => (d ? d.toISOString() : null);

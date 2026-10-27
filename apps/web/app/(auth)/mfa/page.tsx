@@ -16,7 +16,7 @@ type Props = { searchParams: Promise<Record<string, string | string[] | undefine
  */
 async function Contenido({ searchParams }: Props) {
   const { next } = await searchParams;
-  return <FormularioVerificar destino={destinoSeguro(next)} />;
+  return <FormularioVerificar destino={next ? destinoSeguro(next) : ""} />;
 }
 
 export default function VerificarMfa(props: Props) {
