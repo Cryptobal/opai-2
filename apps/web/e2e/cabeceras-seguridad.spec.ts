@@ -1,11 +1,11 @@
 import { expect, type Page, test } from "@playwright/test";
 
+import { E2E_PASSWORD as password, entrar } from "./sesion";
+
 // Núcleo P1 (CSP y HSTS): ninguna ruta principal debe reportar una violación de CSP y toda respuesta
 // debe llevar las cabeceras de seguridad. La CSP viaja en Report-Only, así que el navegador igual
 // dispara `securitypolicyviolation` (disposition "report") si algo no calza: así validamos que la
 // política no romperá nada al pasar a modo estricto con nonce tras el #45.
-const email = process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl";
-const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
 
 type Violacion = { directiva: string; bloqueado: string; ruta: string };
 
@@ -32,14 +32,6 @@ async function escuchar(page: Page, violaciones: Violacion[]) {
       });
     });
   });
-}
-
-async function entrar(page: Page) {
-  await page.goto("/login");
-  await page.getByLabel("Correo").fill(email);
-  await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
-  await page.getByRole("button", { name: "Entrar" }).click();
-  await page.waitForURL((url) => url.pathname === "/" || url.pathname === "/platform");
 }
 
 test.describe("cabeceras de seguridad (núcleo P1)", () => {

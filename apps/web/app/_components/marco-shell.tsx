@@ -102,6 +102,16 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
           },
         ]
       : []),
+    ...(datos.portal === "erp" && datos.tenant
+      ? [
+          {
+            id: "mi-cuenta",
+            etiqueta: "Mi cuenta",
+            icono: UserRound,
+            onSelect: () => router.push("/mi-cuenta"),
+          },
+        ]
+      : []),
     {
       id: "password",
       ...(enErp ? {} : { grupo: "Cuenta" }),
