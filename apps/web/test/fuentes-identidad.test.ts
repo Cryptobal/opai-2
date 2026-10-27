@@ -10,7 +10,8 @@ vi.mock("@opai/db", () => ({
     };
   },
   forUser: vi.fn(),
-  globales: vi.fn(),
+  usuarioPorId: vi.fn(),
+  tenantPorSlug: vi.fn(),
 }));
 import { fuentesReales } from "../lib/fuentes";
 
