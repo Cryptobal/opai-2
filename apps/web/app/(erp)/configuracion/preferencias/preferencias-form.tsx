@@ -1,13 +1,17 @@
 "use client";
 
 import { Lock } from "lucide-react";
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 
 import { Alerta, avisar, Badge, RadioGroup, SeccionTarjeta, Switch } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 type Valores = { tema: string; silencio: boolean; resumen: string };
+
+const suscribirHidratacion = () => () => {};
+const yaHidratado = () => true;
+const aunNoHidratado = () => false;
 
 const TEMAS = [
   { valor: "sistema", etiqueta: "Sistema", descripcion: "Sigue tu dispositivo" },
@@ -33,6 +37,7 @@ function aplicarTema(t: string) {
 /** Preferencias propias (35): tema, idioma y avisos personales; cada cambio se guarda solo. */
 export function PreferenciasForm({ inicial }: { inicial: Valores }) {
   const [v, setV] = useState(inicial);
+  const hidratado = useSyncExternalStore(suscribirHidratacion, yaHidratado, aunNoHidratado);
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   async function guardar<K extends keyof Valores>(k: K, valor: Valores[K], clave: string) {
     const previo = v;
@@ -52,7 +57,7 @@ export function PreferenciasForm({ inicial }: { inicial: Valores }) {
         <RadioGroup
           etiqueta="Tema"
           valor={v.tema}
-          opciones={TEMAS}
+          opciones={TEMAS.map((opcion) => ({ ...opcion, disabled: !hidratado || pendiente }))}
           onCambiar={(t) => void guardar("tema", t, "preferencias_tema")}
         />
       </SeccionTarjeta>
