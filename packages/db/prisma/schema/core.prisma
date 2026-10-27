@@ -65,6 +65,7 @@ model Tenant {
   idempotencias         Idempotencia[]
   aprobaciones          Aprobacion[]
   apiKeysAutonomia      ApiKeyAutonomia[]
+  gastosAgenteMes       GastoAgenteMes[]
   bitacora              Bitacora[]
   bitacoraCabeza        BitacoraCabeza?
   comprobantes          Comprobante[]
