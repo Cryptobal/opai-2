@@ -55,3 +55,16 @@ Rendimiento estricto contra `next start` propio en 3106: 1 pasó y 1 fixme previ
 sin modificar el spec; protocolo de seis pantallas con 5–8 consultas y 49–113 ms.
 JS: activar MFA 158,3/160 KB, verificar MFA 150,9/153 KB, login 151,3/153 KB.
 No se usa ni se altera ninguna aplicación de otra sesión en el puerto 3000.
+
+## Continuidad del 27-oct-2026 (encargo 04:15 CLT)
+
+Se conservan los commits heredados `2413090` y `4d464d3`, sin reescribir historia.
+El fetch confirma que `origin/core/mfa` contiene `2413090` y que el merge heredado
+ya incorpora `origin/main` (`f2fcb23`); no hace falta otro merge.
+La nueva autorrevisión independiente sobre `4d464d3` no encontró bloqueantes.
+Se repite el gate completo con log en segundo plano y los e2e afectados en un
+servidor exclusivo del worktree; la evidencia de esta corrida queda en el
+`PR-BODY.md` local. No se cambian código, diseño, política MFA ni migraciones.
+Riesgos no bloqueantes señalados: contención de los reintentos condicionales,
+el seed no limpia un bloqueo previo y falta cobertura mixta de éxito/fallos
+concurrentes. No se presentan como decisiones de Carlos ni como evidencia CI.
