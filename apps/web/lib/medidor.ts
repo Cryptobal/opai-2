@@ -6,7 +6,9 @@ import { asegurarRegistro } from "./registro";
 
 /** Medición fuera del request (`after()`), para no retrasar respuestas (ADR-031). */
 export const medidorDiferido: Medidor = {
+  preparar: (c) => medidorEnDb.preparar!(c),
   async registrar(consumo) {
+    if (consumo.apiKeyId) return medidorEnDb.registrar(consumo);
     after(() => medidorEnDb.registrar(consumo).catch(() => undefined));
   },
 };
