@@ -60,7 +60,7 @@ beforeEach(() => { captura.slots = []; });
 
 describe("acciones del shell del ERP según el acceso", () => {
   it("descarta preferencias y contador al revocar acceso sin cambiar usuario ni empresa", () => {
-    captura.slots = [false, null, {
+    captura.slots = [false, false, null, {
       navInferiorResuelto: [{ href: "/cuentas", etiqueta: "Cuentas", icono: () => null }],
       fijados: [], onFijar: () => undefined, bandejaPendiente: true,
     }];
@@ -72,7 +72,7 @@ describe("acciones del shell del ERP según el acceso", () => {
     expect(captura.fijados).toBeUndefined();
     expect(captura.onFijar).toBeUndefined();
     expect(captura.pendiente).toBe(false);
-    expect(captura.slots[2]).toBeNull();
+    expect(captura.slots[3]).toBeNull();
     pintar({ ...base, acceso: false });
     expect(captura.navInferior).toBeUndefined();
   });

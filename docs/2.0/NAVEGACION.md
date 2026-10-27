@@ -64,6 +64,13 @@ Cada portal muestra solo lo que su módulo contratado habilita (sin Asistencia, 
 
 ## 5. Qué ve cada rol en el ERP
 
+**NÚCLEO-D1:** el menú de usuario de los portales internos permite elegir «Portal de
+inicio» en una hoja del DS V2, entre los portales de la membresía de la empresa actual.
+Sin `next` explícito, tras login o cambio de empresa se usa esa preferencia; si fue
+revocada o es null, el primer portal permitido. `next` conserva `destinoSeguro`.
+No altera el selector de portales ni concede acceso a ninguno. Plataforma sigue
+siendo global y no puede guardarse como preferencia de una membresía.
+
 | Área | owner | admin | gerente | supervisor | viewer |
 |---|---|---|---|---|---|
 | Comercial | sí | sí | sí | no | lectura |

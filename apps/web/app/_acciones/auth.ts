@@ -87,17 +87,23 @@ export async function accionEntrar(
         "Revisa los datos y vuelve a intentarlo. Tras varios intentos pausaremos el acceso unos minutos.",
     };
   }
-  // Con segundo factor activo (NÚCLEO-F), la contraseña es correcta pero falta verificar el código:
-  // el plugin ya fijó la cookie del desafío; se continúa en la pantalla de verificación.
   if (r.segundoFactor) {
-    redirect(`/mfa?next=${encodeURIComponent(destinoSeguro(destino))}`);
+    redirect(destino ? `/mfa?next=${encodeURIComponent(destinoSeguro(destino))}` : "/mfa");
   }
-  redirect(`/elegir-empresa?next=${encodeURIComponent(destinoSeguro(destino))}`);
+  redirect(
+    destino
+      ? `/elegir-empresa?next=${encodeURIComponent(destinoSeguro(destino))}`
+      : "/elegir-empresa",
+  );
 }
 
 /** Inicia el flujo de Google (redirige al proveedor). */
 export async function accionGoogle(destino: string): Promise<void> {
-  const url = await urlDeGoogle(destinoSeguro(destino));
+  const url = await urlDeGoogle(
+    destino
+      ? `/elegir-empresa?next=${encodeURIComponent(destinoSeguro(destino))}`
+      : "/elegir-empresa",
+  );
   redirect(url ?? "/login");
 }
 
@@ -137,9 +143,14 @@ export async function accionPedirRecuperacion(
   // se prefiere no enviar antes que abrir el envío de recuperación al abuso. La respuesta es la misma.
   const puede =
     !!email &&
-    (await permitir(`recuperar-ip:${await ip()}`, LIMITES.recuperar.maximo, LIMITES.recuperar.ventanaMs, {
-      fallarCerrado: true,
-    }));
+    (await permitir(
+      `recuperar-ip:${await ip()}`,
+      LIMITES.recuperar.maximo,
+      LIMITES.recuperar.ventanaMs,
+      {
+        fallarCerrado: true,
+      },
+    ));
   if (puede) {
     await pedirRecuperacion(email, "/recuperar");
   }

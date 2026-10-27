@@ -1,13 +1,14 @@
 import { z } from "zod";
 
-import { esRol, PERMISOS_CORE, type Rol } from "@opai/domain";
+import { esRol, PERMISOS_CORE, portalesIncoherentes, type Rol } from "@opai/domain";
 
 import { defineCapability } from "../define";
-import { prohibido, reglaDeNegocio } from "../errores";
+import { conflicto, prohibido, reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 import { portalSchema, rolSchema, uuidSchema } from "./esquemas";
 import { validarAsignacionRol } from "./permisos/asignaciones";
 import { exigeAsignarRol, exigeGestionDeRoles } from "./permisos/comun";
+import { limpiarPortalObsoleto } from "./users-portal";
 import {
   aMiembro,
   buscar,
@@ -71,6 +72,21 @@ export const usersUpdate = defineCapability({
   async handler(ctx, input, { dryRun }) {
     const actual = await buscar(ctx, input.membershipId);
     verificarJerarquia(ctx, actual, input.rol);
+    // Coherencia rol-portal (NÚCLEO-D1): valida la combinación final (rol nuevo o el que ya tenía,
+    // contra los portales nuevos o los que ya tenía). Un rol personalizado hereda la de su rol base.
+    const rolEfectivo = input.rol ?? (esRol(actual.rol) ? actual.rol : undefined);
+    if (!rolEfectivo && (input.portales !== undefined || input.estado === "activa")) {
+      throw reglaDeNegocio("La membresía tiene un rol desconocido. Indica un rol válido.");
+    }
+    if (
+      rolEfectivo &&
+      (input.rol !== undefined || input.portales !== undefined || input.estado === "activa")
+    ) {
+      const incoherentes = portalesIncoherentes(rolEfectivo, input.portales ?? actual.portales);
+      if (incoherentes.length > 0) {
+        throw reglaDeNegocio(`El rol "${rolEfectivo}" no admite el portal "${incoherentes[0]}".`);
+      }
+    }
     // El rol base y la promoción a owner los cambia solo una persona, nunca una API key ni un agente
     // (review 5661003883 del #60; mandatos t365u y t366u de cerrar el Núcleo). `update` no puede ser
     // `soloPersonas` entera (un agente sí cambia portales o estado), así que se bloquean solo el rol
@@ -119,7 +135,19 @@ export const usersUpdate = defineCapability({
     };
     if (dryRun) return { ...actual, ...data };
     await ctx.transaccion(async (tx) => {
-      await tx.membership.update({ where: { id: actual.id }, data });
+      // Compare-and-swap: la combinación validada debe seguir siendo la actual al escribir.
+      const r = await tx.membership.updateMany({
+        where: {
+          id: actual.id,
+          tenantId: ctx.tenantId,
+          rol: actual.rol,
+          portales: { equals: actual.portales },
+          estado: actual.estado,
+        },
+        data,
+      });
+      if (r.count !== 1) throw conflicto("La membresía cambió. Recarga y vuelve a intentarlo.");
+      await limpiarPortalObsoleto(tx, ctx.tenantId, actual, input);
       if (pasaAOwner) await tx.permisoExcepcion.deleteMany({ where: { membershipId: actual.id } });
     });
     return buscar(ctx, actual.id);

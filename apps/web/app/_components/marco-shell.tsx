@@ -29,6 +29,7 @@ const Campana = dynamic(() => import("./campana").then((m) => m.Campana));
 const CambiarPassword = dynamic(() => import("./cambiar-password").then((m) => m.CambiarPassword));
 const Avisos = dynamic(() => import("./avisos").then((m) => m.Avisos), { ssr: false });
 const Preferencias = dynamic(() => import("./preferencias-shell").then((m) => m.PreferenciasDelShell), { ssr: false });
+const PortalInicio = dynamic(() => import("./portal-inicio").then((m) => m.PortalInicio));
 
 export type DatosShell = {
   portal: string;
@@ -62,6 +63,7 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
   const router = useRouter();
   const cabecera = useCabecera();
   const [password, setPassword] = useState(false);
+  const [inicio, setInicio] = useState(false);
   const [paleta, setPaleta] = useState<boolean | null>(null);
   const [preferencias, setPreferencias] = useState<PreferenciasShell | null>(null);
   // El ERP del usuario con acceso: habilita búsqueda, ⌘K y Preferencias. Sin acceso al portal el
@@ -133,7 +135,7 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
           onSelect: () => trasLimpiarCaches(() => cambiarTenant(e.id)),
         }))
       : [];
-  const menu = menuCuentaShell(enErp, (href) => router.push(href), () => setPassword(true), datos.portal === "erp" && datos.tenant !== null, datos.iconos);
+  const menu = menuCuentaShell(enErp, (href) => router.push(href), () => setPassword(true), datos.portal === "erp" && datos.tenant !== null, datos.iconos, datos.acceso && datos.tenant && ["erp", "supervisor", "trabajador", "terreno"].includes(datos.portal) ? () => setInicio(true) : undefined);
   const conPin = (accion: ReactNode) => <>{accion}{pinFicha}</>;
   return (
     <AppShell
@@ -180,6 +182,7 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
         />
       ) : null}
       {password ? <CambiarPassword abierto onCerrar={() => setPassword(false)} /> : null}
+      {inicio ? <PortalInicio portal={datos.portal} onCerrar={() => setInicio(false)} /> : null}
       <Avisos />
     </AppShell>
   );

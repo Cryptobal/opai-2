@@ -9,9 +9,30 @@ Hasta el 24-oct-2026 este archivo fue la fuente de verdad del avance; desde ento
 
 ## Hecho
 
+- **PR #75 · merge de main `bf97199` (OpenCode):** se preservan «Más», las preferencias y las comprobaciones y el menú de portal de inicio. Gate local verde hasta build y presupuesto; e2e bloqueado porque la base de aplicación carece de `memberships.portal_inicio`. No se aplicaron migraciones. Detalle y CA parciales en `briefs/BRIEF-05-navegacion.md` §16.
+
 - **PR #75 · seguimiento de revisión y QA (OpenCode, encargo del PR #75).** Merge normal de main con #73 y #74; se conserva la nota de cada uno. «Más» muestra fijados, grupos plegables y cuenta con iconos y cierre en peligro; el riel incorpora acceso a «Más». El acordeón inicial compara la clave del área, las etiquetas largas tienen abreviatura y los errores de preferencias se anuncian y permiten reintentar sin presentar falsamente fijados vacíos. El revisor independiente detectó que los fijados de «Más» recargaban el documento: corregido usando la navegación del shell y cerrando la hoja. Adaptaciones técnicas de OpenCode según el encargo, sin decisión de negocio nueva. Pendientes: recorrido real a 768, dispositivos reales, lector de pantalla y resto de hallazgos medios/bajos fuera del addendum; los CA parciales del brief siguen vigentes.
 
 - **Brief 05 PR B · reducción del JS del shell (OpenCode / GPT-6.1 Sol, continuación del 27-oct).** Adaptaciones técnicas dentro del encargo, sin decisiones de negocio nuevas: preferencias y recientes en una isla diferida sin remontar el shell; SVG estáticos enviados por el servidor en vez del catálogo de iconos cliente; contenido de «Más», fijados, controles de pin, editor de área principal y muestras de navegación/PWA de `/ds` diferidos. El editor conserva su estado independiente y ofrece reintento visible si falla la carga; se descartó el contexto compartido tras un fallo del e2e. Se descartan preferencias al revocar acceso y «Más» devuelve el foco al disparador. Presupuesto verde en 84 rutas (antes 31 excedidas); Inicio 163,60 → 159,17 KB gzip. Margen mínimo ERP 0,68 KB; `/ds` 0,42 KB: el objetivo orientativo de ≥1 KB queda parcial. Siempre DS OPAI 2.0; sin migraciones, cambios de topes ni del script de presupuesto. `puedeEditar` permite escribir ajustes de usuario `navegacion_` a agentes con principal usuario cuando su usuario coincide con `viaUserId`. Evidencia y límites en `briefs/BRIEF-05-navegacion.md` §16. No implica integración ni cierre en Linear.
+- **NÚCLEO-D1 (rama `fix/portal-servidor`, encargo t457u):** guardas previas al catálogo
+  en ambos ejecutores web; se conserva la validación de sesiones de #68. Dominio de
+  coherencia por rol base/principal y diagnóstico sin escrituras ni correos. Columna
+  nullable `portal_inicio` en memberships e invitations; preferencia personal por
+  capacidad con auditoría, preview, idempotencia y outbox; condición atómica si se
+  revoca el portal. Login/cambio de empresa usan preferencia o primer permitido si no
+  hay next explícito; aceptación de invitación relee la identidad en otro request.
+  Hoja existente del DS V2 en el menú, diferida, sin pantalla nueva. Criterios técnicos
+  del constructor OpenCode / openai/gpt-6.1-sol: los cinco roles internos admiten los
+  cuatro portales internos, sujetos a permisos/alcance; nunca Cliente ni Plataforma.
+  No se conceden portales nuevos ni se reparan datos automáticamente. Matriz y CA en
+  `briefs/ENCARGO-nucleo-d1.md`. Migración nueva: `20261028110000_portal_inicio`;
+  Neon pendiente de Carlos, con etiqueta `migracion-pendiente` cuando se abra el PR.
+  Seguimiento de la review 5663625371: limpieza transaccional de preferencias obsoletas
+  al cambiar rol o portales (punto 3 del encargo, implementado por OpenCode), sin
+  conceder acceso ni revivir preferencias al reconceder portales. Sin decisiones nuevas.
+  QA P1–P3 del informe `informe-dac3399.md`: opción oculta en Cliente/Plataforma,
+  error de carga con reintento y aviso de éxito del DS 2.0. Implementación de OpenCode
+  según el punto 4 del encargo; S1 y S2 no cambian y su decisión sigue en Carlos.
 
 - **MFA · corrección de entrada en iOS:** normalización de espacios y guion sin alterar mayúsculas, y desactivación de autocorrección/capitalización en los campos MFA. Better Auth rota la sesión al confirmar el enrolamiento; la solicitud de contraseña observada después aún requiere reproducción. Alcance y límites en `briefs/FIX-mfa-respaldo-ios.md`. Adaptación técnica de OpenCode según el encargo, sin decisiones de negocio nuevas ni migración.
 
