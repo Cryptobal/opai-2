@@ -1,6 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import { expect, test } from "@playwright/test";
+import { hidratado } from "./hidratacion";
 import { entrar, ocultarDev, password, sinDesborde, urlSiembra } from "./fixtures-puestos-car8";
 
 // Semilla solo en Postgres local; nunca ejecuta mantenimiento en Neon.
@@ -58,7 +59,11 @@ test("18–21: catálogo sin montos e historial retirado, sin crear/versionar", 
       fullPage: true,
       animations: "disabled",
     });
-    await page.getByRole("button", { name: "Entendido", exact: true }).click();
+    // El aviso se descarta en el cliente: un clic antes de hidratar no lo guarda.
+    const entendido = page.getByRole("button", { name: "Entendido", exact: true });
+    await hidratado(entendido);
+    await entendido.click();
+    await expect(entendido).toHaveCount(0);
     await page.reload();
     await expect(page.getByRole("button", { name: "Entendido", exact: true })).toHaveCount(0);
     await page.goto(`/cargos/${cargo}?version=1`);
@@ -105,7 +110,10 @@ test("18–21: catálogo sin montos e historial retirado, sin crear/versionar", 
       animations: "disabled",
     });
     await page.getByRole("link", { name: "Ver estructuras antiguas del cargo" }).click();
-    await expect(page.getByText("Estructuras antiguas del cargo", { exact: true })).toBeVisible();
+    // Navegación del cliente a la ficha del cargo: en dev puede pasar de 5 s.
+    await expect(page.getByText("Estructuras antiguas del cargo", { exact: true })).toBeVisible({
+      timeout: 30_000,
+    });
   } finally {
     sql(`BEGIN;
       SELECT set_config('app.tenant_id', (SELECT id::text FROM core.tenants WHERE slug='gard'), true);

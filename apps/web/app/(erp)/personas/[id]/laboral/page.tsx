@@ -83,7 +83,11 @@ export default function Laboral(props: {
                   </SeccionTarjeta>
                 ) : null}
               </div>
-              <HistorialVinculos vinculos={panel.vinculos} cargos={cargos} />
+              <HistorialVinculos
+                vinculos={panel.vinculos}
+                cargos={cargos}
+                cargosRetirados={panel.cargosRetirados}
+              />
             </div>
             {gestionar && actual ? (
               <HojaEditarVinculo key={JSON.stringify(actual)} actual={actual} {...opciones} />

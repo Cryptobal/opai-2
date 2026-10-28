@@ -22,8 +22,9 @@ Un solo archivo con colores: `packages/ds/src/tokens.css`. Fuera de él no hay h
 | Neutros | `n-0` … `n-950` | Solo dentro de `tokens.css` |
 | Movimiento | `dur`, `dur-fast`, `ease` | Transición por defecto 150 ms |
 | Sombras | `shadow-overlay` | `shadow-overlay` (solo capas flotantes) |
+| Papel de documento | `paper`, `paper-fg`, `paper-rule`, `paper-rule-subtle` | `bg-paper`, `text-paper-fg`, `border-paper-rule` (solo documentos: el anexo de contrato, D15) |
 
-- **Modo oscuro verdadero:** cada token se redefine para oscuro. Las pantallas no usan `dark:` salvo casos ya presentes en el DS.
+- **Modo oscuro verdadero:** cada token se redefine para oscuro. Las pantallas no usan `dark:` salvo casos ya presentes en el DS. Única excepción: el papel de documento (`paper*`) no cambia con el tema, porque es el papel del contrato y no la UI.
 - **Tipografía:**
   - Inter Variable para textos y JetBrains Mono Variable para RUT, folios y montos en planillas, ambas autoalojadas.
   - Escala: `xs` 12, `sm` 13, `base` 14, `md` 16, `lg` 18, `xl` 22, `2xl` 28 y `3xl` 36 px.

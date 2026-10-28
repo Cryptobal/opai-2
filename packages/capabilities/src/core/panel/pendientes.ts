@@ -5,6 +5,7 @@ import { tituloVencimientos, PERMISOS_CORE } from "@opai/domain";
 import { defineCapability } from "../../define";
 import { obtenerCapacidad } from "../../registry";
 import { documentosMatriz } from "../documentos/matriz";
+import { dondePersona } from "../maestros/alcance";
 
 const pendienteSchema = z.object({
   tipo: z.enum(["aprobaciones", "documentos", "invitaciones", "integraciones", "anexos"]),
@@ -103,15 +104,18 @@ export const inicioPendientes = defineCapability({
           });
         }
       }
-      if (ctx.autorizar(PERMISOS_CORE.anexosManage)) {
-        const n = await ctx.db.anexoContrato.count({ where: { estado: "borrador" } });
+      // Lleva a /personas?anexo=borrador, que exige anexos.read: el conteo usa el mismo alcance.
+      if (ctx.autorizar(PERMISOS_CORE.anexosManage) && ctx.autorizar(PERMISOS_CORE.anexosRead)) {
+        const n = await ctx.db.anexoContrato.count({
+          where: { estado: "borrador", persona: dondePersona(ctx) },
+        });
         if (n)
           items.push({
             tipo: "anexos",
             titulo: `${plural(n, "anexo de contrato", "anexos de contrato")} en borrador`,
             detalle: "Revisa el cambio y apruébalo o recházalo con motivo",
             tono: "warning",
-            href: "/personas",
+            href: "/personas?anexo=borrador",
             accion: "Revisar",
           });
       }

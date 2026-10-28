@@ -62,7 +62,7 @@ test.describe("Personas · la búsqueda de la lista no se pierde", () => {
 
     for (const [tab, enlace, param] of [
       ["documentos", "Subir documento", "subir"],
-      ["laboral", "Definir excepción para esta persona", "excepcion"],
+      ["sueldo", "Definir sueldo por RUT", "excepcion"],
     ] as const) {
       await page.goto(`/personas/${id}/${tab}?q=a`);
       await pulsar(

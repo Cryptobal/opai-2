@@ -30,9 +30,21 @@ export function VinculoVigente({ p }: { p: PersonaDetalle }) {
   );
 }
 
-/** Historial de vínculos (13): el vigente marcado y los terminados con su periodo. */
-export function HistorialVinculos({ vinculos, cargos }: { vinculos: Vinculo[]; cargos: Pick<Cargo, "id" | "nombre">[] }) {
-  const nombre = (id: string) => cargos.find((c) => c.id === id)?.nombre ?? "Cargo";
+/** Historial de vínculos (13): el vigente marcado y los terminados con su periodo. Un cargo
+ *  inactivo no está en `cargos` (solo activos): su nombre sale de `cargosRetirados`. */
+export function HistorialVinculos({
+  vinculos,
+  cargos,
+  cargosRetirados = [],
+}: {
+  vinculos: Vinculo[];
+  cargos: Pick<Cargo, "id" | "nombre">[];
+  cargosRetirados?: readonly { cargoId: string; cargo: string }[];
+}) {
+  const nombre = (id: string) =>
+    cargos.find((c) => c.id === id)?.nombre ??
+    cargosRetirados.find((c) => c.cargoId === id)?.cargo ??
+    "Cargo";
   if (!vinculos.length) return null;
   return (
     <SeccionTarjeta titulo="Historial de vínculos">
