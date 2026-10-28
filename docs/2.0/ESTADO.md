@@ -98,8 +98,8 @@ No se declara CI, QA remota ni aprobación del head nuevo; Neon sigue sin modifi
 ## Hecho
 
 - **PR #78 · integración de ramas (Codex gpt-6.1-terra):** merge normal de main y
-  del PR #75; el inbox conserva lectura transaccional y cursor propio, con adaptación
-  del simulador en memoria. Ajuste técnico sin decisión de negocio nueva. El E2E
+  del PR #75; en la integración posterior del squash se conserva la versión de main
+  para inbox y su simulador. Ajuste técnico sin decisión de negocio nueva. El E2E
   positivo de persona con alcance limitado sigue parcial hasta 07b PR 3, capas de
   sueldo/alcance.
 

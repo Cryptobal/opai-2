@@ -17,7 +17,6 @@ Sin decisión de negocio nueva ni migración. Adaptación técnica de OpenCode.
 
 ## Continuación de integración
 
-Codex gpt-6.1-terra conserva la lectura transaccional del inbox de main y el cursor
-propio de la navegación al resolver el conflicto. Es una adaptación técnica, sin
-decisión de negocio nueva. El caso positivo sigue parcial: se activa en 07b PR 3,
+Codex conserva la versión de main para inbox y su simulador al integrar el squash del
+PR #75. Es una resolución técnica, sin decisión de negocio nueva. El caso positivo sigue parcial: se activa en 07b PR 3,
 capas de sueldo/alcance.
