@@ -36,7 +36,10 @@ export const integracionesProbar = defineCapability({
         // Probar registra estado y evento abajo; evita un segundo aviso desde el resolvedor.
         const ia = await iaDe(ctx, "economica", "core", def.id as ProveedorIaId, { avisar: false });
         if (!ia) throw new Error("Sin credencial de IA disponible.");
-        await ia.completar({ prompt: "Responde solo: ok", maxTokens: 5 });
+        // Holgura para modelos con razonamiento activo por defecto (Haiku 5.5 y posteriores): con
+        // 5 tokens el razonamiento agota el tope antes del texto. Un error del proveedor llega con
+        // su mensaje saneado (sin la key) y se muestra tal cual en pantalla.
+        await ia.completar({ prompt: "Responde solo: ok", maxTokens: 256 });
         mensaje = `Conexión correcta (${ia.proveedor}, ${ia.modelo}).`;
       } else {
         const correo = await correoDe(ctx);

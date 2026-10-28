@@ -9,6 +9,7 @@ import type {
   RespuestaConversacion,
   SolicitudConversacion,
 } from "./contrato";
+import { sanear } from "./error-proveedor";
 import { ErrorIa, completarDesdeConversar, cuerpo, leerSSE, pedir } from "./http";
 
 export function anthropic(apiKey: string): ProveedorIa {
@@ -16,7 +17,7 @@ export function anthropic(apiKey: string): ProveedorIa {
     id: "ia_anthropic",
     async conversar(modelo, s) {
       const r = await pedir(URL, { method: "POST", headers: cabeceras(apiKey), body: JSON.stringify(peticion(modelo, s, false)) }, "Anthropic");
-      const d = await cuerpo<RespA>(r, "Anthropic");
+      const d = await cuerpo<RespA>(r, "Anthropic", apiKey);
       let texto = "";
       const llamadas: LlamadaHerramienta[] = [];
       for (const b of d.content) {
@@ -43,6 +44,7 @@ export function anthropic(apiKey: string): ProveedorIa {
 
 type EventoSSE = {
   type: string;
+  error?: { type?: string; message?: string };
   index?: number;
   message?: { usage?: { input_tokens?: number } };
   content_block?: { type?: string; id?: string; name?: string };
@@ -63,10 +65,12 @@ async function* streamAnthropic(
   let termino = false;
   const llamadas: LlamadaHerramienta[] = [];
   const bloques = new Map<number, { id: string; nombre: string; json: string }>();
-  for await (const payload of leerSSE(r, "Anthropic")) {
+  for await (const payload of leerSSE(r, "Anthropic", apiKey)) {
     const ev = JSON.parse(payload) as EventoSSE;
-    if (ev.type === "error")
-      throw new ErrorIa("Anthropic", null, "Anthropic: el stream reportó un error.");
+    if (ev.type === "error") {
+      const detalle = ev.error?.message ? `: ${sanear(`${ev.error.type ?? "error"} · ${ev.error.message}`, apiKey)}` : ".";
+      throw new ErrorIa("Anthropic", null, `Anthropic: el stream reportó un error${detalle}`);
+    }
     if (ev.type === "message_stop") termino = true;
     else if (ev.type === "message_start") {
       entrada = ev.message?.usage?.input_tokens ?? 0;

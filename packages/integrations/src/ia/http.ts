@@ -1,5 +1,6 @@
 // Utilidades HTTP compartidas por los adaptadores de IA. Ningún mensaje de error incluye la key.
 import type { ProveedorIa } from "./contrato";
+import { detalleDeCuerpo, leerCuerpoError } from "./error-proveedor";
 
 /**
  * Error de un proveedor de IA. `estado` es el código HTTP, o null ante un fallo de red o timeout.
@@ -20,13 +21,21 @@ export class ErrorIa extends Error {
   }
 }
 
-/** Lanza `ErrorIa` con el código HTTP si la respuesta no es `ok`. Nunca filtra el cuerpo ni la key. */
-export function exigirOk(r: Response, proveedor: string): void {
-  if (!r.ok) throw new ErrorIa(proveedor, r.status, `${proveedor} respondió ${r.status}.`);
+/**
+ * Lanza `ErrorIa` con el código HTTP si la respuesta no es `ok`, con el mensaje que dio el
+ * proveedor (p. ej. «invalid_request_error · Your credit balance is too low…») para que el tenant
+ * vea la causa. Ese detalle se sanea: sin la key (`secreto`) ni nada con forma de credencial, en una
+ * línea de hasta 300 caracteres; un cuerpo que no es JSON no se muestra.
+ */
+export async function exigirOk(r: Response, proveedor: string, secreto?: string): Promise<void> {
+  if (r.ok) return;
+  const detalle = detalleDeCuerpo(await leerCuerpoError(r), secreto);
+  const mensaje = `${proveedor} respondió ${r.status}${detalle ? `: ${detalle}` : "."}`;
+  throw new ErrorIa(proveedor, r.status, mensaje);
 }
 
-export async function cuerpo<T>(r: Response, proveedor: string): Promise<T> {
-  exigirOk(r, proveedor);
+export async function cuerpo<T>(r: Response, proveedor: string, secreto?: string): Promise<T> {
+  await exigirOk(r, proveedor, secreto);
   return (await r.json()) as T;
 }
 
@@ -34,11 +43,7 @@ export async function cuerpo<T>(r: Response, proveedor: string): Promise<T> {
  * `fetch` que convierte un fallo de red o timeout en un `ErrorIa` reintentable (estado null). Fuerza
  * `redirect: "error"`: un 3xx no se sigue, así la key nunca viaja a un destino redirigido (SSRF).
  */
-export async function pedir(
-  url: string,
-  init: RequestInit,
-  proveedor: string,
-): Promise<Response> {
+export async function pedir(url: string, init: RequestInit, proveedor: string): Promise<Response> {
   try {
     return await fetch(url, { ...init, redirect: "error" });
   } catch {
@@ -50,8 +55,12 @@ export async function pedir(
  * Lee un cuerpo SSE y entrega el contenido de cada línea `data:` (salta los `[DONE]`). Libera el
  * lector al terminar o al cancelarse el consumo, y convierte un corte de red en un `ErrorIa`.
  */
-export async function* leerSSE(r: Response, proveedor: string): AsyncGenerator<string> {
-  exigirOk(r, proveedor);
+export async function* leerSSE(
+  r: Response,
+  proveedor: string,
+  secreto?: string,
+): AsyncGenerator<string> {
+  await exigirOk(r, proveedor, secreto);
   const reader = r.body?.getReader();
   if (!reader) return;
   const decoder = new TextDecoder();
