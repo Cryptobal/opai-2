@@ -150,8 +150,23 @@ describe("autonomía directa sobre plataforma (ADR-055)", () => {
     ).toMatchObject({ ok: true });
   });
 
-  it("platform.admins.invite es irreversible (un agente queda en aprobación)", async () => {
+  it("los caminos que invitan a un owner son irreversibles (un agente queda en aprobación)", async () => {
     const { obtenerCapacidad } = await import("../src/registry");
-    expect(obtenerCapacidad("platform.admins.invite")?.efecto).toBe("irreversible");
+    // tenants.create también invita al adoptar una empresa existente (hallazgo de revisión).
+    for (const id of ["platform.admins.invite", "platform.tenants.create"])
+      expect(obtenerCapacidad(id)?.efecto, id).toBe("irreversible");
+  });
+
+  it("quitar el rol a otro owner funciona con el bloqueo de owners", async () => {
+    const s = semilla();
+    const dos = { ...s, user: s.user.map((u) => ({ ...u, platformRole: "owner" })) };
+    const { ctx, tabla } = contextoDePrueba({ usuario: owner, semilla: dos });
+    const quitar = { email: "beto@prueba.cl", platformRole: null };
+    expect(await executeCapability(ctx, "platform.users.set_role", quitar)).toMatchObject({
+      ok: true,
+      data: { anterior: "owner" },
+    });
+    expect(rolDe(tabla, U2)).toBeNull();
+    expect(rolDe(tabla, owner.id)).toBe("owner");
   });
 });

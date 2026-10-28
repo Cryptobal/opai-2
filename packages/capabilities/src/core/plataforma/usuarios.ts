@@ -67,6 +67,14 @@ export const platformUsersSetRole = defineCapability({
       anterior,
     };
     if (dryRun || anterior === input.platformRole) return salida;
+    // Quitar un owner se serializa: tomar el lock de fila de todos los owners antes del cambio hace
+    // que dos bajas cruzadas esperen una a la otra; la segunda recuenta ya con la primera confirmada
+    // (READ COMMITTED vuelve a evaluar el WHERE) y falla en vez de dejar cero owners.
+    if (anterior === "owner")
+      await ctx.db.user.updateMany({
+        where: { platformRole: "owner" },
+        data: { platformRole: "owner" },
+      });
     await ctx.db.user.update({ where: { id: u.id }, data: { platformRole: input.platformRole } });
     const owners = await ctx.db.user.count({ where: { platformRole: "owner" } });
     if (owners === 0) throw reglaDeNegocio("OPAI debe conservar al menos un owner de plataforma.");
