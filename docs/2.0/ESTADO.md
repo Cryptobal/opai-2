@@ -956,3 +956,9 @@ e2e `anexo-contrato.spec.ts` (375/1024/1280) en verde contra el servidor del pro
 worktree, 1 worker (el resto de la suite lo valida el CI). No se tocó la migración
 `20261028200000_anexo_contrato_borrador`. Detalle completo y la lista de autorrevisión
 en `PR-BODY.md` (sin commitear).
+
+### Menú «Más» del celular: alineación y jerarquía (encargo del 28-oct-2026)
+
+- **Entró:** en la hoja «Más» (`packages/ds/src/shell/contenido-mas.tsx`), las entradas sueltas (Inicio), los encabezados de área (Clientes, Personas), los fijados y Configuración quedan alineados a la izquierda con el mismo margen e icono que en la barra lateral. En las áreas con más de una entrada visible, las entradas (Cuentas, Instalaciones; Personas, Cargos) van sangradas, sin icono y con la guía vertical de `EntradaArea`; un área con una sola entrada visible se sigue pintando suelta, con icono (NAVEGACION.md §9). Configuración queda separada con un borde, para que no parezca parte del último área. Todas las entradas miden 44 px también en iPad. `Fijados` acepta `className`.
+- **Pendiente (no bloqueante, Revisor 5685536621):** `subEntrada` copia el marcado de la guía de `EntradaArea`; extraerla a un componente compartido del DS. La etiqueta real es «Cargos» (`navegacion-entradas.ts`) y NAVEGACION.md dice «Cargos y sueldos»: alinear. Falta un e2e de la jerarquía de «Más» y la prueba a 1024 px (riel).
+- **Pendiente (decide Carlos):** la entrada «Personas» dentro del área «Personas» se repite a propósito: NAVEGACION.md §9 y ADR-046 fijan ese nombre para el área y para la entrada. Opciones: (a) dejarlo así; (b) renombrar la entrada a «Listado» o «Todas»; (c) que el encabezado del área navegue a la lista y queden solo las otras entradas. Sin su decisión no se cambia.
