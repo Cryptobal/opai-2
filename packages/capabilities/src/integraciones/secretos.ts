@@ -1,5 +1,7 @@
 import { cifrar, descifrar, generarDek, kekDelEntorno, sufijoDe } from "@opai/integrations";
 
+import type { TenantTx } from "@opai/db";
+
 import { reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 
@@ -46,14 +48,31 @@ export async function guardarSecreto(
   nombre: string,
   valor: string,
 ): Promise<{ sufijo: string }> {
-  const c = cifrar(await dekDe(ctx), Buffer.from(valor, "utf8"));
+  // Lee la DEK y escribe en la misma transacción, con `FOR SHARE` sobre la fila de la DEK: una rotación
+  // (`rotarDek`, `FOR UPDATE`) no puede reemplazarla entre medio y dejar el secreto con la DEK vieja.
+  await ctx.transaccion(async (tx) => {
+    await tx.$queryRaw`/* 07d:bloqueo-dek */ SELECT id FROM core.claves_tenant WHERE tenant_id = ${ctx.tenantId}::uuid FOR SHARE`;
+    const c = cifrar(await dekDe({ ...ctx, db: tx }), Buffer.from(valor, "utf8"));
+    await guardarCifrado(tx, ctx, integracionId, nombre, valor, c);
+  });
+  return { sufijo: sufijoDe(valor) };
+}
+
+async function guardarCifrado(
+  db: TenantTx,
+  ctx: Contexto,
+  integracionId: string,
+  nombre: string,
+  valor: string,
+  c: ReturnType<typeof cifrar>,
+): Promise<void> {
   const datos = {
     cifrado: bytes(c.cifrado),
     iv: bytes(c.iv),
     tag: bytes(c.tag),
     sufijo: sufijoDe(valor),
   };
-  await ctx.db.secreto.upsert({
+  await db.secreto.upsert({
     where: { tenantId_integracionId_nombre: { tenantId: ctx.tenantId, integracionId, nombre } },
     create: {
       tenantId: ctx.tenantId,
@@ -64,7 +83,6 @@ export async function guardarSecreto(
     },
     update: datos,
   });
-  return { sufijo: datos.sufijo };
 }
 
 /** Solo para adaptadores del servidor. Nunca se devuelve por capacidad, API ni MCP. */
