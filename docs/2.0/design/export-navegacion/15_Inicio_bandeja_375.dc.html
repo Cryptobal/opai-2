@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <meta name="design_doc_mode" content="canvas">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+  <script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+  <style>body{margin:0;background:var(--ds-bg)} a{color:var(--ds-accent)} a:hover{color:var(--ds-accent)}</style>
+</helmet>
+<div class="ds" data-theme="light" style="padding:48px;display:flex;flex-direction:column;gap:32px;min-width:max-content;min-height:100vh">
+  <header style="display:flex;flex-direction:column;gap:8px;max-width:880px">
+    <span class="t-overline">OPAI 2.0 · Brief 05 · Navegación por áreas</span>
+    <h1 class="t-title m0">15 · Inicio con la Bandeja · escenario B</h1>
+    <p class="t-body muted m0" style="text-wrap:pretty">La Bandeja vive en Inicio. Su contador es el único número del shell.</p>
+    
+  </header>
+  <div style="display:flex;flex-wrap:wrap;gap:48px;align-items:flex-start">
+<figure style="margin:0;display:flex;flex-direction:column;gap:12px;flex:none">
+  <figcaption style="display:flex;flex-direction:column;gap:4px;width:375px"><span class="t-label">Propuesta: badge en Inicio</span><span class="t-caption" style="text-wrap:pretty">Número en el ítem Inicio de la barra inferior.</span><span style="display:flex;gap:6px;flex-wrap:wrap"><span class="proposal">Propuesta: decide Carlos</span></span></figcaption>
+  <div style="border:1px solid var(--ds-border-strong);border-radius:var(--radius-lg);overflow:hidden;width:377px;height:814px;flex:none">
+    <dc-import name="Shell" device="phone" scenario="B" role="owner" active="inicio" pins="four" primary="general" hint-size="375px,812px"></dc-import>
+  </div>
+</figure><figure style="margin:0;display:flex;flex-direction:column;gap:12px;flex:none">
+  <figcaption style="display:flex;flex-direction:column;gap:4px;width:375px"><span class="t-label">Alternativa: solo dentro de la pantalla</span><span class="t-caption" style="text-wrap:pretty">La barra inferior sin número; el conteo se ve en Inicio.</span><span style="display:flex;gap:6px;flex-wrap:wrap"><span class="proposal">Propuesta: decide Carlos</span></span></figcaption>
+  <div style="border:1px solid var(--ds-border-strong);border-radius:var(--radius-lg);overflow:hidden;width:377px;height:814px;flex:none">
+    <dc-import name="Shell" device="phone" scenario="B" role="owner" active="inicio" pins="four" primary="general" badge="none" hint-size="375px,812px"></dc-import>
+  </div>
+</figure><div style="display:flex;flex-direction:column;gap:16px;flex:none"><div class="card" style="padding:16px;width:360px;display:flex;flex-direction:column;gap:8px;align-items:flex-start"><span class="proposal">Propuesta: decide Carlos</span><span class="t-label">Contador de la Bandeja</span><span class="t-body-sm muted" style="text-wrap:pretty">Badge numérico en Inicio de la barra inferior, con el mismo componente que el contador de IconButton. Cuenta solo pendientes que piden acción (aprobaciones y tareas); los avisos marcan el punto de la campana. Tope visible «9+».</span></div><div class="card" style="padding:16px;width:360px;display:flex;flex-direction:column;gap:8px;align-items:flex-start"><span class="proposal">Propuesta: decide Carlos</span><span class="t-label">Campana y Bandeja</span><span class="t-body-sm muted" style="text-wrap:pretty">La campana muestra un punto sin número cuando hay avisos nuevos y abre los últimos avisos. «Ver todo en Bandeja» lleva a la Bandeja, que junta aprobaciones, tareas y avisos. El único número del shell es el de la Bandeja en Inicio del celular.</span></div></div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {}
+</script>
+</body>
+</html>

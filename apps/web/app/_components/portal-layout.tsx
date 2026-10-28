@@ -3,6 +3,7 @@ import { type ReactNode, Suspense } from "react";
 import { Loading } from "@opai/ds";
 
 import { identidadActual } from "@/lib/servidor";
+import { epocaDe } from "@/lib/epoca-sesion";
 
 import { CargaPortal } from "./carga-portal";
 import { datosShell } from "./datos-shell";
@@ -18,7 +19,10 @@ async function ShellResuelto({ portal, children }: { portal: string; children: R
   // menú de usuario (Salir). El acceso se sigue verificando en servidor en la página (`servidor.ts`).
   if (!identidad) return children;
   return (
-    <MarcoShell datos={datosShell(identidad, portal)}>
+    <MarcoShell
+      key={epocaDe(identidad.usuario.id, identidad.actual?.tenantId ?? null)}
+      datos={datosShell(identidad, portal)}
+    >
       <CargaPortal>{children}</CargaPortal>
     </MarcoShell>
   );

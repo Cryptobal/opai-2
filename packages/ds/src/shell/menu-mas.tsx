@@ -1,37 +1,45 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { lazy, type ReactNode, Suspense, useRef, useState } from "react";
 
-import { type ItemMenu, Menu } from "../components/menu";
+import { Button } from "../components/button";
+import type { ItemMenu } from "../components/menu";
 import type { NavItem } from "./types";
+import type { ItemFijado } from "./fijados";
 
 type Props = {
   items: readonly NavItem[];
   extras: readonly ItemMenu[];
   disparador: ReactNode;
   onNavegar?: (href: string) => void;
+  rutaActual: string;
+  fijados?: readonly ItemFijado[];
+  errorFijados?: boolean;
+  reintentarFijados?: () => void;
+  onDesfijar?: (href: string) => void;
 };
+const Contenido = lazy(() => import("./contenido-mas").then((m) => ({ default: m.ContenidoMas })));
 
-/** Menú "Más" de la barra inferior del teléfono: el resto de la navegación y la cuenta. */
-export function MenuMas({ items, extras, disparador, onNavegar }: Props) {
-  const ir = onNavegar ?? ((href: string) => window.location.assign(href));
-  const lista: ItemMenu[] = [
-    ...items.map((i) => ({
-      id: `nav-${i.href}`,
-      etiqueta: i.contador ? `${i.etiqueta} (${i.contador})` : i.etiqueta,
-      icono: i.icono,
-      onSelect: () => ir(i.href),
-    })),
-    ...extras,
-  ];
+/** Hoja por áreas del diseño aprobado (16–18), sobre el Sheet Radix del DS. */
+export function MenuMas({ items, extras, disparador, onNavegar, ...otros }: Props) {
+  const [abierto, setAbierto] = useState(false);
+  const [montado, setMontado] = useState(false);
+  const disparadorRef = useRef<HTMLButtonElement>(null);
   return (
-    <Menu
-      etiqueta="Más opciones"
-      items={lista}
-      lado="arriba-derecha"
-      disparador={disparador}
-      className="w-full"
-      claseDisparador="w-full rounded-none hover:bg-transparent data-[state=open]:bg-transparent"
-    />
+    <>
+      <Button
+        variant="ghost"
+        aria-label="Más opciones"
+        className="h-14 w-full p-0"
+        aria-haspopup="dialog"
+        aria-expanded={abierto}
+        onClick={(e) => { disparadorRef.current = e.currentTarget; setMontado(true); setAbierto(true); }}
+      >
+        {disparador}
+      </Button>
+      {montado ? <Suspense fallback={null}>
+        <Contenido items={items} extras={extras} {...otros} abierto={abierto} onCerrar={() => setAbierto(false)} onNavegar={onNavegar} onRestaurarFoco={() => disparadorRef.current?.focus()} />
+      </Suspense> : null}
+    </>
   );
 }

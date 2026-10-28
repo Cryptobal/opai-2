@@ -3,6 +3,7 @@ import { z } from "zod";
 import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
+import { prohibido } from "../../errores";
 import { uuidSchema } from "../esquemas";
 import { aFecha, definidos, escribirConEvento, hoy, sinDuplicado } from "./comun";
 import { resumenSueldoDe, resumenSueldoSchema } from "./cargos-resumen";
@@ -111,6 +112,11 @@ export const cargosUpdate = defineCapability({
   dryRun: true,
   async handler(ctx, { id, ...cambios }, { dryRun }) {
     const actual = await cargoDe(ctx, id);
+    if (
+      cambios.sueldoSensible !== undefined &&
+      !ctx.autorizar(PERMISOS_CORE.estructurasReadSensible)
+    )
+      throw prohibido("No tienes permiso para cambiar la privacidad de los montos de este cargo");
     await nombreLibre(ctx, cambios.nombre, id);
     const data = definidos(cambios);
     const n = await conteos(ctx, id);

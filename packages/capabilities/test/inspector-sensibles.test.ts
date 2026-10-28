@@ -93,6 +93,33 @@ describe("Inspector DT: lectura sensible auditada (t479u; art. 31 DFL 2/1967)", 
     ]);
   });
 
+  it("impide versionar un cargo sensible sin visibilidad y conserva sus bonos", async () => {
+    const { ctx, cargoId, estructura } = await preparar();
+    const owner = {
+      ...ctx,
+      rol: "owner" as const,
+      autorizar: (p: string) => p !== "core:estructuras.read_sensible",
+    };
+    const input = { nivel: "cargo", cargoId, sueldoBase: 1, vigenteDesde: "2027-01-01", items: [] };
+    expect(await codigo(owner, "core.cargos.update", { id: cargoId, sueldoSensible: false })).toBe(
+      "FORBIDDEN",
+    );
+    expect(await codigo(owner, "core.estructuras.create", input)).toBe("FORBIDDEN");
+    expect(await codigo(owner, "core.estructuras.create", input, { dryRun: true })).toBe(
+      "FORBIDDEN",
+    );
+    const visible = { ...owner, autorizar: () => true };
+    expect(await dato(visible, "core.estructuras.get", { id: estructura.id })).toMatchObject({
+      items: [expect.objectContaining({ monto: 50_000 })],
+      vigenteHasta: null,
+    });
+    const nueva = await dato(visible, "core.estructuras.create", {
+      ...input,
+      items: [{ tipo: "bono_fijo", nombre: "Bono", monto: 50_000 }],
+    });
+    expect(nueva).toMatchObject({ items: [expect.objectContaining({ monto: 50_000 })] });
+  });
+
   it("la estructura efectiva devuelve haberes completos y audita el nivel sensible", async () => {
     const { ctx, eventos, cargoId } = await preparar();
     const { id: personaId } = await dato<{ id: string }>(

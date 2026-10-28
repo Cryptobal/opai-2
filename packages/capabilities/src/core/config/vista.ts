@@ -19,7 +19,14 @@ export const descripcionCampo = z.object({
 
 export function puedeEditar(ctx: Contexto, c: CampoAjuste): boolean {
   if (c.meta.ambito === "plataforma") return false;
-  if (c.meta.ambito === "usuario") return ctx.actor.tipo === "user";
+  if (c.meta.ambito === "usuario")
+    return (
+      ctx.actor.tipo === "user" ||
+      (c.clave.startsWith("navegacion_") &&
+        ctx.actor.tipo === "agent" &&
+        ctx.principal?.tipo === "usuario" &&
+        ctx.usuario?.id === ctx.actor.viaUserId)
+    );
   return ctx.autorizar(c.meta.permiso ?? PERMISOS_CORE.configManage);
 }
 

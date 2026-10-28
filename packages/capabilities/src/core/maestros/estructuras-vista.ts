@@ -10,7 +10,14 @@ export const NIVELES = ["cargo", "puesto", "persona", "instalacion"] as const;
 export const itemInput = z.object({
   tipo: z.enum(["bono_fijo", "bono_porcentual"]),
   nombre: z.string().trim().min(2).max(80),
-  monto: z.number().int().min(0).nullable().optional().describe("CLP entero (bono fijo)."),
+  monto: z
+    .number()
+    .int("Solo pesos enteros")
+    .min(0, "El monto no puede ser negativo")
+    .max(100_000_000, "Máximo 100.000.000 pesos por concepto")
+    .nullable()
+    .optional()
+    .describe("CLP entero (bono fijo)."),
   porcentaje: z
     .number()
     .int()

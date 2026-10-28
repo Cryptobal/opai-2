@@ -101,7 +101,18 @@ El bloqueo financiero (ADR-016) oculta el área completa. Los roles personalizad
 - **Agente interno (ADR-049, propuesto en PR #38, pendiente de merge; nota del 26-oct-2026):** el primer lugar de ⌘K, y en el celular el primero dentro de «Buscar», queda reservado para «Preguntar a OPAI». Reservado, se construye en el brief del agente interno; mientras no exista, no se muestra (Brief 05, §4.4).
 - Un brief que agrega pantallas indica en su sección 8 el área, la entrada o la pestaña que usa, y si cambia la barra inferior de algún rol.
 
-## 8. Estado de hoy (`main`, `fe362cc`)
+## 8. Estado de hoy (implementación del PR B, rama `brief/05-pr-b-navegacion`)
+
+El estado siguiente describe esta rama, no una integración a `main` ni el cierre de la tarea en Linear.
+
+- **Áreas:** Inicio suelto; Clientes (Cuentas e Instalaciones) y Personas (Personas y Cargos y sueldos); las otras áreas aparecen al registrar módulos contratados con permiso efectivo. Configuración al pie, sin contadores. Áreas de una entrada sin encabezado y máximo siete entradas por área.
+- **Responsive:** barra lateral desde 1024, riel existente entre 768–1023, barra inferior por área principal en teléfono con respaldo Inicio · Cuentas · Personas · Más. Buscar sigue en la TopBar (ADR-050, reemplaza D7); usuario al pie de la lateral.
+- **Fijados y recientes:** hasta cinco fijados por usuario/empresa mediante `core.config`; entradas autorizadas y fichas revalidadas por capacidades con alcance. Hasta diez recientes locales por usuario/empresa, sin consulta ni auditoría por navegación. Acciones de ⌘K solo navegan y se filtran por permisos.
+- **Preferencias:** Área principal con vista previa; acordeón persistido por usuario/empresa. Las escrituras de navegación tienen control optimista de revisión y error visible, además del bloqueo transaccional del servidor.
+- **Inicio:** Bandeja única de avisos propios y aprobaciones permitidas; la campana lleva a `/#bandeja`. Inicio y campana comparten el punto, sin números en la navegación.
+- **Shell:** persiste en `PortalLayout`, con precarga por intención conservada de `main`; al cambiar de identidad/empresa se reinicia su estado local. Sin migraciones nuevas.
+
+### Foto histórica anterior al PR B
 
 - **Barra lateral (escritorio):** Inicio · grupo «Maestros» (Cuentas, Instalaciones, **Personas**, Cargos y sueldos solo en pantallas amplias) · grupo «Módulos» (vacío; los módulos activos se agregan planos) · «Diseño» solo en desarrollo · Configuración al pie, con el contador de aprobaciones.
 - **Barra inferior (celular):** Inicio · Cuentas · **Instalac.** · Personas · **Ajustes**; «Aprobaciones» aparece solo en celular cuando hay pendientes.
