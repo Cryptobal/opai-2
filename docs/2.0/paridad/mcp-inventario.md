@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 197 pares pantalla→capacidad · 180 con herramienta · 17 excepciones justificadas · 0 faltantes.
+**Resumen:** 214 pares pantalla→capacidad · 197 con herramienta · 17 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -97,10 +97,27 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.puestos.create` | `core_puestos_create` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.puestos.set_estado` | `core_puestos_set_estado` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.puestos.update` | `core_puestos_update` | existe |
+| compartido | `app/(erp)/negocios/_componentes` | `comercial.config.get` | `comercial_config_get` | existe |
 | compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.archivar` | `comercial_negocios_archivar` | existe |
+| compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.create` | `comercial_negocios_create` | existe |
+| compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.desvincular_instalacion` | `comercial_negocios_desvincular_instalacion` | existe |
 | compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.embudo` | `comercial_negocios_embudo` | existe |
+| compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.ganar` | `comercial_negocios_ganar` | existe |
 | compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.get` | `comercial_negocios_get` | existe |
 | compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.list` | `comercial_negocios_list` | existe |
+| compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.mover` | `comercial_negocios_mover` | existe |
+| compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.perder` | `comercial_negocios_perder` | existe |
+| compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.reabrir` | `comercial_negocios_reabrir` | existe |
+| compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.set_contactos` | `comercial_negocios_set_contactos` | existe |
+| compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.update` | `comercial_negocios_update` | existe |
+| compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.vincular_instalacion` | `comercial_negocios_vincular_instalacion` | existe |
+| compartido | `app/(erp)/negocios/_componentes` | `core.cuentas.get` | `core_cuentas_get` | existe |
+| compartido | `app/(erp)/negocios/_componentes` | `core.cuentas.list` | `core_cuentas_list` | existe |
+| compartido | `app/(erp)/negocios/_configuracion` | `comercial.config.actualizar_etapa` | `comercial_config_actualizar_etapa` | existe |
+| compartido | `app/(erp)/negocios/_configuracion` | `comercial.config.crear_etapa` | `comercial_config_crear_etapa` | existe |
+| compartido | `app/(erp)/negocios/_configuracion` | `comercial.config.get` | `comercial_config_get` | existe |
+| compartido | `app/(erp)/negocios/_configuracion` | `comercial.config.guardar_catalogo` | `comercial_config_guardar_catalogo` | existe |
+| compartido | `app/(erp)/negocios/_configuracion` | `comercial.config.reordenar_etapas` | `comercial_config_reordenar_etapas` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.cargos.list` | `core_cargos_list` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.documentos.pedir_renovacion` | `core_documentos_pedir_renovacion` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.estructuras.efectiva` | `core_estructuras_efectiva` | existe |
@@ -291,18 +308,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 
 - `agente.historial.list`
 - `agente.modelos.list`
-- `comercial.config.actualizar_etapa`
-- `comercial.config.get`
-- `comercial.config.guardar_catalogo`
-- `comercial.negocios.create`
-- `comercial.negocios.desvincular_instalacion`
-- `comercial.negocios.ganar`
-- `comercial.negocios.mover`
-- `comercial.negocios.perder`
-- `comercial.negocios.reabrir`
-- `comercial.negocios.set_contactos`
-- `comercial.negocios.update`
-- `comercial.negocios.vincular_instalacion`
 - `core.anexos.generar`
 - `core.aprobaciones.get`
 - `core.audit.list`
