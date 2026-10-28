@@ -28,6 +28,7 @@
 7. **QA en vivo va después de integrar** (en test.opai.cl) y **no frena nada**. Sus hallazgos van al PR de pendientes, salvo que sean de seguridad o datos: en ese caso se abre un arreglo inmediato.
 8. **Capturas.** Cuando Carlos quiera ver algo, se las pide al bot OPAI 2.0, que las toma en test.opai.cl.
 9. **Avisos:** siempre en español, al integrar y al migrar.
+10. **Agent-first: ninguna funcionalidad nueva se integra sin su herramienta MCP** (regla de Carlos del 28-oct-2026, ADR-055), **incluida Plataforma**. El gate `packages/capabilities/test/paridad-inventario.test.ts` corre en `pnpm test` (check obligatorio `typecheck · lint · test · test:db`) y falla si una pantalla invoca una capacidad sin herramienta MCP, si aparece una acción de servidor o ruta sin declarar, o si `docs/2.0/paridad/mcp-inventario.md` quedó desactualizado. Las únicas excepciones son capacidades `interna` o `soloPersonas` con motivo (`paridad-excepciones.ts`) y entradas de identidad o infraestructura con motivo (`paridad-entradas.ts`). El Revisor trata una excepción nueva sin motivo convincente como bloqueo de permisos.
 
 ### ⚠ Contradicciones con el repo (se resuelven a favor de esta sección)
 

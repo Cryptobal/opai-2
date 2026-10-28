@@ -1027,3 +1027,19 @@ identidad de servicio en main.
 7. **QA en vivo** después de integrar, sin frenar; los hallazgos de seguridad o datos abren un arreglo inmediato.
 
 **Consecuencias.** Se ajustan `AGENTS.md`, `CONTEXTO-agentes.md`, `INSTRUCCIONES-proyecto-claude.md` (Carlos debe pegarlas de nuevo en el proyecto de claude.ai) y la cabecera de `ESTADO.md`. Quedan por alinear la plantilla del PR, `checklists/revision.md`, `checklists/qa.md`, `ROADMAP.md`, `PLAN-desarrollo.md` y `00-documento-de-arranque.md`; mientras tanto, manda este ADR. El cuarto check obligatorio (`rendimiento`, ADR-045) está por confirmar en el ruleset (`OPERACION-agentes.md` E.4).
+
+## ADR-055 · El MCP expone todas las acciones de pantalla, incluida Plataforma
+
+**Fecha:** 28-oct-2026 · **Estado:** vigente · **Origen:** regla de Carlos del 28-oct-2026 («el MCP debe exponer TODAS las acciones que se pueden hacer en pantalla, incluida Plataforma; si no, no es agent-first»), tarea CAR-32. Amplía ADR-004 y ADR-034 §4; modifica la regla H15 del Revisor («una API key nunca obtiene permisos de plataforma»).
+
+**Decisión.**
+
+1. **Ninguna funcionalidad nueva se integra sin su herramienta MCP.** Toda capacidad, incluida `platform.*`, produce herramienta MCP (y `preview_` si escribe), salvo las `interna` o `soloPersonas` de `paridad-excepciones.ts`, cada una con motivo. Toda acción de servidor y ruta de `apps/web` está declarada en `paridad-entradas.ts` (pasarela a capacidades, identidad o infraestructura) con motivo.
+2. **Key de plataforma.** Una API key ve y ejecuta `platform.*` solo si: tiene el scope explícito `platform` (el `*` nunca lo cubre), es de tipo `usuario`, hereda los permisos de su responsable y ese responsable tiene **hoy** `platformRole` (se cruza en cada llamada: si lo pierde, la key también). Solo un usuario de plataforma, con MFA, puede crearla. El agente interno (ADR-049) y las keys de servicio nunca obtienen plataforma. `support` solo ve lecturas.
+3. **Mismo camino que la pantalla.** La herramienta llama a la misma capacidad (`executeCapability`): mismos permisos, `ctx.plataforma.paraTenant` con RLS del tenant objetivo, idempotencia, aprobación humana de lo irreversible y auditoría en el tenant objetivo (o en el de la key, si la capacidad no tiene objetivo).
+4. **Rol de plataforma.** Nuevas capacidades `platform.users.list` y `platform.users.set_role` (permiso `platform:roles.manage`, solo owner de plataforma). `set_role` es irreversible (un agente queda en aprobación humana), no cambia el propio rol, conserva al menos un owner y audita en la misma transacción que la escritura. Su pantalla espera diseño; hoy está en API y MCP.
+5. **Gobierno de la key de plataforma.** La autonomía «directo» sobre una capacidad `platform.*` solo la da quien tiene ese permiso de plataforma (un owner o admin del tenant no). `platform.admins.invite` pasa a irreversible: invitar un owner abre los datos de la empresa, así que un agente queda en aprobación humana.
+6. **Gate.** `packages/capabilities/test/paridad-inventario.test.ts` falla si una pantalla invoca una capacidad sin herramienta, si aparece una entrada de servidor sin declarar o si `docs/2.0/paridad/mcp-inventario.md` no coincide con lo generado.
+
+**Consecuencias.** Sin migraciones (`opai_app` ya tiene `UPDATE` en `core.users`). La instantánea `herramientas-mcp.txt` (key `*`) no cambia; la nueva `herramientas-mcp-plataforma.txt` lista las `platform_*`. Riesgo aceptado: dos owners que se quitan el rol entre sí en el mismo instante podrían dejar la plataforma sin owner (se recuperaría con el seed `seed:platform-owner`).
+
