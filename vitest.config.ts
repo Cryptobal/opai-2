@@ -23,6 +23,7 @@ export default defineConfig({
             "test/metricas.test.ts",
             "test/config-pool.test.ts",
             "test/pool.test.ts",
+            "test/pool-salud.test.ts",
             "test/importar-opai1/**/*.test.ts",
           ],
         },

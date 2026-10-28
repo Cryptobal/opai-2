@@ -1,4 +1,5 @@
 import { clienteApp } from "./client";
+import { exigirSinLockAuditoria } from "./lock-auditoria";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -29,6 +30,7 @@ export function forTenant(tenantId: string) {
     query: {
       $allModels: {
         async $allOperations({ args, query }) {
+          exigirSinLockAuditoria("Una consulta con forTenant");
           const [, resultado] = await base.$transaction([
             base.$executeRaw`SELECT set_config('app.tenant_id', ${id}, true)`,
             query(args),
