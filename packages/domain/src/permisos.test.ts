@@ -52,6 +52,8 @@ const TABLA: Record<string, Record<Rol, boolean>> = {
   },
   "comercial:negocios.read": { owner: true, admin: true, gerente: true, supervisor: false, viewer: true },
   "comercial:negocios.manage": { owner: true, admin: true, gerente: true, supervisor: false, viewer: false },
+  // Embudo y catálogos: solo owner y admin (BRIEF-07, comercial.md §7).
+  "comercial:config.manage": { owner: true, admin: true, gerente: false, supervisor: false, viewer: false },
   "ops:write": { owner: true, admin: true, gerente: true, supervisor: true, viewer: false },
   "rondas:write": { owner: true, admin: true, gerente: true, supervisor: true, viewer: false },
   "personas:read": { owner: true, admin: true, gerente: true, supervisor: true, viewer: true },
