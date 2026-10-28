@@ -1,14 +1,20 @@
 import { z } from "zod";
 
 import { defineCapability } from "../define";
-import { conflicto, reglaDeNegocio } from "../errores";
+import { reglaDeNegocio } from "../errores";
 import { uuidSchema } from "../core/esquemas";
 import { definidos, diaSchema, opcionalAFecha } from "../core/maestros/comun";
 import { estadoDeTipo } from "./dominio";
-import { cuentaValida, responsableValido } from "./validaciones";
-import { PERMISO_MANAGE, embudoPorDefecto, negocioDe, negocioSchema, vistaNegocio } from "./comun";
+import { cuentaValida, instalacionesDeCuenta, responsableValido } from "./validaciones";
+import {
+  PERMISO_MANAGE,
+  embudoPorDefecto,
+  negocioSchema,
+  tipoVinculoSchema,
+  vistaNegocio,
+} from "./comun";
 
-const camposNegocio = {
+export const camposNegocio = {
   titulo: z
     .string()
     .trim()
@@ -36,15 +42,28 @@ const camposNegocio = {
 export const negociosCreate = defineCapability({
   id: "comercial.negocios.create",
   descripcion:
-    "Crea un negocio en la primera etapa del embudo por defecto, vinculado a una cuenta, con responsable, tipo, origen y monto estimado opcionales.",
+    "Crea un negocio en la primera etapa del embudo por defecto, vinculado a una cuenta, con responsable, tipo, origen, monto estimado e instalaciones de la cuenta opcionales.",
   permiso: PERMISO_MANAGE,
-  input: z.object({ cuentaId: uuidSchema, ...camposNegocio }),
+  input: z.object({
+    cuentaId: uuidSchema,
+    ...camposNegocio,
+    instalaciones: z
+      .array(z.object({ instalacionId: uuidSchema, tipo: tipoVinculoSchema.default("nueva") }))
+      .max(50)
+      .optional()
+      .describe("Instalaciones de la misma cuenta que se vinculan al crear (R7, R16)."),
+  }),
   output: negocioSchema,
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     await cuentaValida(ctx, input.cuentaId);
     await responsableValido(ctx, input.responsableId);
+    const instalaciones = await instalacionesDeCuenta(
+      ctx,
+      input.cuentaId,
+      input.instalaciones ?? [],
+    );
     const embudo = await embudoPorDefecto(ctx);
     const primera = await ctx.db.etapa.findFirst({
       where: { embudoId: embudo.id, activa: true },
@@ -89,6 +108,11 @@ export const negociosCreate = defineCapability({
     }
     const creado = await ctx.transaccion(async (tx) => {
       const n = await tx.negocio.create({ data: { ...data, tenantId: ctx.tenantId } });
+      for (const i of instalaciones) {
+        await tx.negocioInstalacion.create({
+          data: { tenantId: ctx.tenantId, negocioId: n.id, ...i },
+        });
+      }
       await tx.historialEtapa.create({
         data: {
           tenantId: ctx.tenantId,
@@ -102,50 +126,14 @@ export const negociosCreate = defineCapability({
         tipo: "comercial.negocio.creado",
         entidadTipo: "negocio",
         entidadId: n.id,
-        payload: { cuentaId: n.cuentaId, etapaId: n.etapaId },
+        payload: {
+          cuentaId: n.cuentaId,
+          etapaId: n.etapaId,
+          instalaciones: instalaciones.map((i) => i.instalacionId),
+        },
       });
       return n;
     });
     return vistaNegocio(creado);
-  },
-});
-
-export const negociosUpdate = defineCapability({
-  id: "comercial.negocios.update",
-  descripcion:
-    "Actualiza los datos editables de un negocio (título, tipo, origen, responsable, probabilidad, monto estimado y fechas). Solo cambia lo enviado.",
-  permiso: PERMISO_MANAGE,
-  input: z.object({ id: uuidSchema, ...z.object(camposNegocio).partial().shape }),
-  output: negocioSchema,
-  efecto: "escritura",
-  dryRun: true,
-  async handler(ctx, { id, ...cambios }, { dryRun }) {
-    const actual = await negocioDe(ctx, id);
-    await responsableValido(ctx, cambios.responsableId);
-    if (cambios.montoEstimadoMensual !== undefined && actual.valorMensual != null) {
-      throw conflicto("El monto lo fija la cotización vigente; no se edita a mano.");
-    }
-    const data = definidos({
-      titulo: cambios.titulo,
-      tipoId: cambios.tipoId,
-      origenId: cambios.origenId,
-      responsableId: cambios.responsableId,
-      probabilidad: cambios.probabilidad,
-      montoEstimadoMensual: cambios.montoEstimadoMensual,
-      cierreEstimado: opcionalAFecha(cambios.cierreEstimado),
-      inicioServicioEstimado: opcionalAFecha(cambios.inicioServicioEstimado),
-    });
-    if (dryRun) return vistaNegocio({ ...actual, ...data });
-    const n = await ctx.transaccion(async (tx) => {
-      const r = await tx.negocio.update({ where: { id }, data });
-      await ctx.eventos.emitir(tx, {
-        tipo: "comercial.negocio.actualizado",
-        entidadTipo: "negocio",
-        entidadId: r.id,
-        payload: { campos: Object.keys(data) },
-      });
-      return r;
-    });
-    return vistaNegocio(n);
   },
 });

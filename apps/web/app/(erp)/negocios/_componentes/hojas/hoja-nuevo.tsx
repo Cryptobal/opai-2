@@ -9,6 +9,7 @@ import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 import type { CuentaFila } from "@/lib/tipos-maestros";
 
+import { CampoInstalaciones, faltaParaCrear } from "./campo-instalaciones";
 import { CamposNegocio, camposAInput, type DatosNegocio } from "./campos-negocio";
 import type { ConfigComercial } from "./tipos";
 import { useHojaNegocio } from "./use-hoja";
@@ -44,6 +45,7 @@ export function HojaNuevo({ config, cuentas, cuentaInicial }: Props) {
   const router = useRouter();
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const [cuentaId, setCuentaId] = useState<string | null>(cuentaInicial);
+  const [instalaciones, setInstalaciones] = useState<string[]>([]);
   // Cuentas vistas en la búsqueda: el disparador muestra el nombre de la elegida aunque no esté
   // entre las primeras 100 que trae el servidor.
   const [vistas, setVistas] = useState<Opcion[]>([]);
@@ -61,11 +63,15 @@ export function HojaNuevo({ config, cuentas, cuentaInicial }: Props) {
   const set = <K extends keyof DatosNegocio>(k: K, v: DatosNegocio[K]) =>
     setD((x) => ({ ...x, [k]: v }));
   const primera = config.embudo.etapas.find((e) => e.activa && e.tipo === "abierta");
+  const falta = faltaParaCrear(cuentaId, d.titulo);
   async function crear() {
     if (!cuentaId) return;
     const r = await ejecutar<{ id: string }>("comercial.negocios.create", {
       cuentaId,
       ...camposAInput(d, true),
+      ...(instalaciones.length
+        ? { instalaciones: instalaciones.map((instalacionId) => ({ instalacionId })) }
+        : {}),
     });
     if (!r) return;
     avisar.exito("Negocio creado");
@@ -85,7 +91,8 @@ export function HojaNuevo({ config, cuentas, cuentaInicial }: Props) {
             Cancelar
           </Button>
           <Button
-            disabled={pendiente || !cuentaId || d.titulo.trim().length < 3}
+            disabled={pendiente || falta.length > 0}
+            {...(falta.length ? { "aria-describedby": "neg-falta" } : {})}
             onClick={() => void crear()}
           >
             {pendiente ? "Creando…" : "Crear negocio"}
@@ -95,6 +102,10 @@ export function HojaNuevo({ config, cuentas, cuentaInicial }: Props) {
     >
       <div className="flex flex-col gap-4">
         {error ? <Alerta tono="danger" titulo={error} /> : null}
+        {/* Por qué «Crear negocio» está deshabilitado, arriba para verlo sin desplazarse. */}
+        <p id="neg-falta" className="t-body-sm text-fg-muted empty:hidden" aria-live="polite">
+          {falta.length ? `Para crear el negocio falta ${falta.join(" y ")}.` : ""}
+        </p>
         <Campo
           etiqueta="Cuenta"
           htmlFor="neg-cuenta"
@@ -106,9 +117,18 @@ export function HojaNuevo({ config, cuentas, cuentaInicial }: Props) {
             opciones={opciones}
             onBuscar={buscar}
             valor={cuentaId}
-            onCambiar={([v]) => setCuentaId(v ?? null)}
+            onCambiar={([v]) => {
+              setCuentaId(v ?? null);
+              // Las instalaciones elegidas eran de la cuenta anterior.
+              if ((v ?? null) !== cuentaId) setInstalaciones([]);
+            }}
           />
         </Campo>
+        <CampoInstalaciones
+          cuentaId={cuentaId}
+          valores={instalaciones}
+          onCambiar={setInstalaciones}
+        />
         <CamposNegocio d={d} set={set} config={config} />
       </div>
     </Sheet>
