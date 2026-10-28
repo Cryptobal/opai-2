@@ -113,6 +113,7 @@ export const cargosUpdate = defineCapability({
   dryRun: true,
   async handler(ctx, { id, ...cambios }, { dryRun }) {
     return ctx.transaccion(async (tx) => {
+      // Las lecturas y escrituras usan la misma transacción y el bloqueo de la fila.
       ctx = { ...ctx, db: tx, transaccion: (fn) => fn(tx) };
       if (typeof (ctx.db as { $executeRaw?: unknown }).$executeRaw === "function")
         await ctx.db
