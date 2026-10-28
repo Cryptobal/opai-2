@@ -73,7 +73,7 @@ test("protocolo ADR-045: Server-Timing y consultas por navegación", async ({ pa
 
       muestras.push(m);
     }
-    const m = muestras.sort((a, b) => (a.totalMs ?? Infinity) - (b.totalMs ?? Infinity))[1];
+    const m = [...muestras].sort((a, b) => (a.totalMs ?? Infinity) - (b.totalMs ?? Infinity))[1];
     if (!m) throw new Error(`Muestras incompletas en ${paso.nombre}`);
     informe.push(
       `${paso.nombre.padEnd(18)} muestras=${muestras.map((x) => x.totalMs).join(",")}ms mediana=${String(m.totalMs).padStart(6)}ms  ` +

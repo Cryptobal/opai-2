@@ -1,7 +1,18 @@
+let avisoPoolerEmitido = false;
+
 /** Configuración por instancia; el pool de Neon limita las conexiones al servidor. */
 export function configPool(env: NodeJS.ProcessEnv, url: string, aplicacion: boolean) {
-  if (aplicacion && env["VERCEL"] && !/^.+-pooler\..+\.neon\.tech$/.test(new URL(url).hostname)) {
-    throw new Error("DATABASE_URL en Vercel debe usar el endpoint pooler de Neon.");
+  if (aplicacion && env["VERCEL"] && !avisoPoolerEmitido) {
+    let hostConPooler = false;
+    try {
+      hostConPooler = /-pooler\./i.test(new URL(url).hostname);
+    } catch {
+      // El cliente de base de datos validará la URL; el aviso no debe interrumpir el arranque.
+    }
+    if (!hostConPooler) {
+      avisoPoolerEmitido = true;
+      console.warn("DATABASE_URL en Vercel: host sin -pooler.");
+    }
   }
   const entero = (nombre: string, defecto: number) => {
     const valor = env[nombre];

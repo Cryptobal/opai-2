@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import { configPool } from "../src/config-pool";
 
@@ -28,12 +28,18 @@ describe("pool por instancia", () => {
     expect(() => configPool({ DATABASE_POOL_MAX: "0" }, url, true)).toThrow();
     expect(() => configPool({ DATABASE_POOL_MAX: "2x" }, url, true)).toThrow();
   });
-  it("exige pooler para la aplicación en Vercel", () => {
+  it("avisa una sola vez si el host no tiene pooler, sin interrumpir la configuración", () => {
+    const aviso = vi.spyOn(console, "warn").mockImplementation(() => {});
     expect(() => configPool({ VERCEL: "1" }, url, true)).not.toThrow();
-    expect(() => configPool({ VERCEL: "1" }, "postgresql://localhost/db", true)).toThrow();
     expect(() =>
       configPool({ VERCEL: "1" }, "postgresql://falso-pooler.example.com/db", true),
-    ).toThrow();
+    ).not.toThrow();
     expect(() => configPool({ VERCEL: "1" }, "postgresql://localhost/db", false)).not.toThrow();
+    expect(aviso).not.toHaveBeenCalled();
+    expect(() => configPool({ VERCEL: "1" }, "url inválida", true)).not.toThrow();
+    expect(() => configPool({ VERCEL: "1" }, "postgresql://localhost/db", true)).not.toThrow();
+    expect(aviso).toHaveBeenCalledOnce();
+    expect(aviso).toHaveBeenCalledWith("DATABASE_URL en Vercel: host sin -pooler.");
+    aviso.mockRestore();
   });
 });

@@ -44,7 +44,7 @@ function crearCliente(variable: "DATABASE_URL" | "DATABASE_URL_MIGRATE"): Prisma
   // confirmar BYPASSRLS: row_security=off no salta RLS, falla si filtraría filas.
   const adapter = new PrismaPg({
     connectionString: url,
-    // Cada instancia serverless tiene su propio pool; Vercel debe usar el endpoint -pooler de Neon.
+    // Cada instancia serverless tiene su propio pool; en Vercel se avisa si falta -pooler.
     ...configPool(process.env, url, variable === "DATABASE_URL"),
     ...(variable === "DATABASE_URL_MIGRATE" ? { options: "-c row_security=off" } : {}),
   });

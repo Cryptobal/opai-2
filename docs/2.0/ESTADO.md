@@ -733,8 +733,8 @@ Sin cambios de negocio, migraciones, permisos ni plan del ROADMAP.
 
 En la rama `fix/version-cargo-bonos`, Codex eligió rechazar el versionado de un cargo sensible sin permiso de lectura sensible, para evitar reemplazar bonos ocultos por una lista vacía. Codex decidió además exigir ese permiso para cambiar la sensibilidad del cargo. Las decisiones y sus criterios están en `briefs/fix-version-cargo-bonos.md`; pendiente de revisión e integración.
 
-**Brief 03, continuidad CAR-7:** Codex configura el pool por instancia y exige el
-endpoint pooler de Neon en Vercel; el test de rendimiento calienta con sesión y
+**Brief 03, continuidad CAR-7:** Codex configura el pool por instancia y avisa una
+vez si el host en Vercel no contiene `-pooler.`; el test de rendimiento calienta con sesión y
 registra tres cargas. Son decisiones técnicas de implementación, pendientes de
 validación en Neon. La medición de servidor no sustituye navegación cliente ni p75;
 el esqueleto, la carrera de hidratación, la invalidación de caché y la comparación
