@@ -24,7 +24,13 @@ export function membresia(extra: Partial<MembresiaConTenant> = {}): MembresiaCon
 
 /** Fuentes en memoria: un tenant `gard`, una key de Carlos y su membresía. */
 export function fuentesFalsas(
-  o: { key?: Partial<ApiKeyFila>; membresias?: MembresiaConTenant[]; acceso?: AccesoFila } = {},
+  o: {
+    key?: Partial<ApiKeyFila>;
+    membresias?: MembresiaConTenant[];
+    acceso?: AccesoFila;
+    modulosActivos?: string[];
+    platformRole?: "owner" | "support" | null;
+  } = {},
 ) {
   const { secreto, hash } = generarApiKey("gard");
   const usos: string[] = [];
@@ -47,8 +53,9 @@ export function fuentesFalsas(
   };
   const fuentes: Fuentes = {
     membresiasDe: async () => membresias,
-    modulosActivos: async () => ["crm"],
-    usuario: async (id) => (id === USUARIO.id ? USUARIO : null),
+    modulosActivos: async () => o.modulosActivos ?? ["crm"],
+    usuario: async (id) =>
+      id === USUARIO.id ? { ...USUARIO, platformRole: o.platformRole ?? null } : null,
     tenantPorSlug: async (slug) => (slug === "gard" ? { id: TENANT, estado: "activo" } : null),
     keyPorHash: async (_t, h) => (h === hash ? fila : null),
     membresia: async (t, u) => membresias.find((m) => m.tenantId === t && u === USUARIO.id) ?? null,
