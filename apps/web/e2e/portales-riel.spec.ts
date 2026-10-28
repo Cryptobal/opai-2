@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 
-import { E2E_PASSWORD as password, entrar } from "./sesion";
+import { codigoTotp, E2E_PASSWORD as password, entrar } from "./sesion";
 
 // Riel y título de pestaña de los portales Trabajador y Cliente en escritorio (1280 px, QA del #21).
 // Usa el usuario plataforma que el job e2e ya siembra, con SEED_OWNER_PASSWORD (como plataforma.spec).
@@ -30,6 +30,9 @@ test.describe("acceso a portales", () => {
     }) => {
       test.setTimeout(180_000);
       await entrar(page, autorizado ? undefined : email);
+      if (new URL(page.url()).pathname === "/elegir-empresa") {
+        await page.getByRole("button", { name: /Gard Security/ }).click();
+      }
 
       for (const p of PORTALES) {
         const paginas = [
@@ -76,6 +79,11 @@ test.describe("acceso a portales", () => {
     await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
     await page.getByRole("button", { name: "Entrar" }).click();
     await page.waitForURL((url) => !url.pathname.startsWith("/login"));
+    if (new URL(page.url()).pathname === "/mfa") {
+      await page.getByLabel(/Código/).fill(await codigoTotp());
+      await page.getByRole("button", { name: "Verificar" }).click();
+      await page.waitForURL((url) => url.pathname !== "/mfa");
+    }
     // El ERP es su inicio sin acceso: el shell se monta con el aviso dentro del marco.
     await page.goto("/");
     await expect(
@@ -90,7 +98,12 @@ test.describe("acceso a portales", () => {
       await expect(page.getByRole("heading", { level: 1, name: "Sin permisos" })).toBeVisible();
     }
     // N2: el menú de usuario no ofrece Preferencias, pero conserva la salida.
-    await page.getByRole("button", { name: "Menú de usuario" }).first().click();
+    const menuUsuario = page.getByRole("button", { name: "Menú de usuario" }).first();
+    const salir = page.getByRole("menuitem", { name: "Cerrar sesión" });
+    await expect(async () => {
+      if (!(await salir.isVisible())) await menuUsuario.click();
+      await expect(salir).toBeVisible({ timeout: 1000 });
+    }).toPass();
     await expect(page.getByRole("menuitem", { name: "Preferencias" })).toHaveCount(0);
     await page.getByRole("menuitem", { name: "Cerrar sesión" }).click();
     await page.waitForURL((url) => url.pathname.startsWith("/login"));

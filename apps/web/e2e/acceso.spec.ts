@@ -46,10 +46,15 @@ test.describe("con sesión", () => {
     await page.goto("/platform");
     await expect(page.getByText("Gard Security").filter({ visible: true }).first()).toBeVisible();
     await captura(page, "platform-tenants", p);
-    await page.getByText("Gard Security").filter({ visible: true }).first().click();
+    await page
+      .locator('a[href^="/platform/tenants/"]')
+      .filter({ hasText: "Gard Security", visible: true })
+      .first()
+      .click();
+    await page.waitForURL(/\/platform\/tenants\/[0-9a-f-]{36}$/);
     // Las pestañas de la ficha son rutas: enlaces dentro de la navegación «Secciones».
     const secciones = page.getByRole("navigation", { name: "Secciones" });
-    await expect(secciones.getByRole("link", { name: /Módulos/ })).toBeVisible();
+    await expect(secciones.getByRole("link", { name: /Módulos/ })).toBeVisible({ timeout: 30_000 });
     await captura(page, "platform-tenant", p);
   });
 });

@@ -1,15 +1,13 @@
 import { expect, test } from "@playwright/test";
 
+import { entrar } from "./sesion";
+
 const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
 test.setTimeout(180_000);
 
 test("Empresas tiene un solo título visible y conserva Nueva", async ({ page }, info) => {
   if (!password) throw new Error("Falta SEED_OWNER_PASSWORD o E2E_PASSWORD");
-  await page.goto("/login");
-  await page.getByLabel("Correo").fill(process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl");
-  await page.getByLabel("Contraseña", { exact: true }).fill(password);
-  await page.getByRole("button", { name: "Entrar" }).click();
-  await page.waitForURL((u) => !u.pathname.startsWith("/login"));
+  await entrar(page);
   await page.goto("/platform");
   await expect(
     page.getByRole("heading", { name: "Empresas", exact: true }).filter({ visible: true }),
@@ -25,14 +23,16 @@ test("Trabajador vuelve al ERP con título y Supervisor activa solo Instalacione
   page,
 }) => {
   if (!password) throw new Error("Falta SEED_OWNER_PASSWORD o E2E_PASSWORD");
-  await page.goto("/login");
-  await page.getByLabel("Correo").fill(process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl");
-  await page.getByLabel("Contraseña", { exact: true }).fill(password);
-  await page.getByRole("button", { name: "Entrar" }).click();
-  await page.waitForURL((u) => !u.pathname.startsWith("/login"));
+  await entrar(page);
   await page.goto("/trabajador");
-  await page.getByRole("button", { name: /Cambiar de portal o empresa/ }).click();
-  await page.getByRole("menuitem", { name: /^ERP/ }).click();
+  const selector = page.getByRole("button", { name: /Cambiar de portal o empresa/ });
+  const erp = page.getByRole("menuitem", { name: /^ERP/ });
+  // En dev el control puede mostrarse antes de hidratarse; reintentar hasta abrir el menú.
+  await expect(async () => {
+    if (!(await erp.isVisible())) await selector.click();
+    await expect(erp).toBeVisible({ timeout: 1000 });
+  }).toPass();
+  await erp.click();
   await page.waitForURL((u) => u.pathname === "/");
   await expect(page.locator("header h1")).toHaveText("Inicio");
   await page.goto("/supervisor/instalaciones");

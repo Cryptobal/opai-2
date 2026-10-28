@@ -1,5 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
 
+import { entrar as iniciarSesion } from "./sesion";
+
 /**
  * D1 del Brief 04: `/entrar` (el `start_url` de la PWA) recuerda el portal elegido en una cookie del
  * dispositivo y la lee EN EL SERVIDOR para redirigir sin pintar el selector. La cookie (`opai_portal`)
@@ -12,17 +14,9 @@ const email = process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl";
 const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
 
 async function entrar(page: Page, correo: string) {
-  await page.goto("/login");
-  await page.getByLabel("Correo").fill(correo);
-  await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
-  await page.getByRole("button", { name: "Entrar" }).click();
-  // Con más de una empresa el acceso pide elegir (se parte de Gard); con una, pasa de largo.
+  await iniciarSesion(page, correo);
   const gard = page.getByRole("button", { name: /Gard Security/ });
-  await Promise.race([
-    gard.waitFor({ state: "visible" }),
-    page.waitForURL((u) => u.pathname === "/" || u.pathname === "/platform"),
-  ]).catch(() => undefined);
-  if (await gard.isVisible().catch(() => false)) await gard.click();
+  if (new URL(page.url()).pathname === "/elegir-empresa") await gard.click();
   await page.waitForURL((u) => u.pathname === "/" || u.pathname === "/platform");
 }
 

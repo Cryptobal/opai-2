@@ -85,9 +85,13 @@ jobs:
         run: ./gitleaks git --config .gitleaks.toml --redact --no-banner --exit-code 1 .
 
   e2e:
-    name: e2e (Playwright)
+    name: e2e · shard ${{ matrix.shard }}/6
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5, 6]
     services:
       postgres:
         image: postgres:16
@@ -140,8 +144,23 @@ jobs:
           pnpm --filter @opai/db seed:maestros-demo
           # Usuario con dos empresas para selector-riel.spec.ts (selector de portal y empresa en iPad).
           pnpm --filter @opai/auth seed:multiempresa-e2e
+          # Admin y owner también requieren MFA; conservar los mismos roles de los fixtures.
+          SEED_OWNER_EMAIL=e2e-selector@opai.cl pnpm --filter @opai/auth seed:e2e-mfa
+          SEED_OWNER_EMAIL=e2e-multiempresa@opai.cl pnpm --filter @opai/auth seed:e2e-mfa
+      - name: Versión de Playwright
+        id: playwright
+        run: echo "version=$(pnpm --filter @opai/web exec playwright --version | awk '{print $2}')" >> "$GITHUB_OUTPUT"
+      - name: Restaurar Chromium
+        id: chromium
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ steps.playwright.outputs.version }}-chromium
+      - name: Instalar dependencias del sistema
+        run: pnpm --filter @opai/web exec playwright install-deps chromium
       - name: Instalar Chromium de Playwright
-        run: pnpm --filter @opai/web exec playwright install --with-deps chromium
+        if: steps.chromium.outputs.cache-hit != 'true'
+        run: pnpm --filter @opai/web exec playwright install chromium
       # Las páginas /ds solo existen fuera de producción: se levanta `pnpm dev`. La primera visita de
       # cada ruta la compila, así que se calientan antes de que corran los e2e (sin tocar las pruebas).
       - name: Levantar la app y calentar las rutas
@@ -153,19 +172,66 @@ jobs:
             curl -s -o /dev/null -m 120 "http://localhost:3000$ruta" || true
           done
       - name: Correr los e2e
-        run: pnpm --filter @opai/web e2e --reporter=list
+        timeout-minutes: 25
+        run: pnpm --filter @opai/web e2e --shard=${{ matrix.shard }}/6 --reporter=list,blob
         env:
           BASE_URL: http://localhost:3000
           DATABASE_URL_MIGRATE: postgresql://postgres:postgres@localhost:5432/opai_e2e
-      - name: Guardar resultados si fallan
-        if: failure()
+      - name: Guardar evidencias del shard
+        if: ${{ always() }}
         uses: actions/upload-artifact@v4
         with:
-          name: e2e-resultados
+          name: e2e-blob-${{ matrix.shard }}
           path: |
             apps/web/test-results
+            apps/web/blob-report
             ${{ runner.temp }}/app.log
           retention-days: 7
+
+  e2e-informe:
+    name: e2e · informe
+    needs: e2e
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: e2e-blob-*
+          path: artefactos
+      - name: Combinar informes disponibles
+        run: |
+          mkdir -p blobs
+          find artefactos -path '*/blob-report/*.zip' -exec cp {} blobs/ \;
+          test -n "$(ls -A blobs)"
+          pnpm --filter @opai/web exec playwright merge-reports --reporter=html,github "$GITHUB_WORKSPACE/blobs"
+      - name: Guardar informe HTML
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-informe-html
+          path: apps/web/playwright-report
+          retention-days: 7
+
+  e2e-check:
+    name: e2e (Playwright)
+    needs: [e2e, e2e-informe]
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Comprobar shards e informe
+        env:
+          SHARDS: ${{ needs.e2e.result }}
+          INFORME: ${{ needs.e2e-informe.result }}
+        run: test "$SHARDS" = success && test "$INFORME" = success
 
   rendimiento:
     name: rendimiento
