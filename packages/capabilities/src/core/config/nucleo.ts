@@ -65,7 +65,7 @@ export const AJUSTES_NUCLEO = defineAjustes(
     cumplimiento_solicitud_dias_plazo: z.number().int().min(0).max(365).default(0).meta({
       etiqueta: "Plazo de atención de solicitudes del titular (días corridos)",
       ayuda:
-        "Días para atender una solicitud ARCO (Ley 21.719). Lo fija el abogado; 0 = sin plazo definido todavía (se calcula al recibir una vez configurado, §16.3).",
+        "Días para responder a una persona que pide acceder, corregir o eliminar sus datos (Ley 21.719). Defínelo con asesoría legal. Con 0 todavía no hay plazo; una vez fijado, se calcula al recibir cada solicitud.",
       grupo: "Cumplimiento",
       ambito: "tenant",
       permiso: "core:cumplimiento.manage",
@@ -74,7 +74,7 @@ export const AJUSTES_NUCLEO = defineAjustes(
     cumplimiento_brecha_dias_plazo: z.number().int().min(0).max(365).default(0).meta({
       etiqueta: "Plazo para avisar una brecha (días corridos)",
       ayuda:
-        "Días para notificar una brecha a la Agencia y a los titulares (Ley 21.719). Lo fija el abogado; 0 = sin plazo definido todavía (§16.5).",
+        "Días para avisar de una brecha de seguridad a la Agencia y a las personas afectadas (Ley 21.719). Defínelo con asesoría legal. Con 0 todavía no hay plazo.",
       grupo: "Cumplimiento",
       ambito: "tenant",
       permiso: "core:cumplimiento.manage",

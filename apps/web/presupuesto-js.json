@@ -21,6 +21,7 @@
     "/ds*": 225,
     "/(erp)/personas/[id]/sueldo": 167,
     "/(erp)/personas/[id]/anexos": 167,
-    "/(erp)/personas/[id]/anexos/[anexoId]": 167
+    "/(erp)/personas/[id]/anexos/[anexoId]": 167,
+    "/(erp)/personas/[id]/privacidad": 167
   }
 }

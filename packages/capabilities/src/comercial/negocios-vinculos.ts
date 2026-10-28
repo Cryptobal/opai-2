@@ -1,13 +1,22 @@
 import { z } from "zod";
 
 import { defineCapability } from "../define";
+import type { Contexto } from "../types";
 import { noEncontrado, reglaDeNegocio } from "../errores";
 import { uuidSchema } from "../core/esquemas";
+import { instalacionesEnAlcance } from "../core/maestros/alcance";
 import { sinDuplicado } from "../core/maestros/comun";
 import { PERMISO_MANAGE, etapaDe, negocioDe, tipoVinculoSchema } from "./comun";
-import { emitirActualizado } from "./validaciones";
+import { emitirActualizado, instalacionesDeCuenta } from "./validaciones";
 
 const salida = z.object({ negocioId: z.string(), total: z.number() });
+
+/** Vínculos del negocio que el actor ve: el total no delata instalaciones fuera de su alcance. */
+function visibles(ctx: Contexto, negocioId: string) {
+  const ids = instalacionesEnAlcance(ctx);
+  const where = { negocioId, ...(ids ? { instalacionId: { in: [...ids] } } : {}) };
+  return ctx.db.negocioInstalacion.count({ where });
+}
 
 export const negociosVincularInstalacion = defineCapability({
   id: "comercial.negocios.vincular_instalacion",
@@ -24,14 +33,9 @@ export const negociosVincularInstalacion = defineCapability({
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     const negocio = await negocioDe(ctx, input.negocioId);
-    const inst = await ctx.db.instalacion.findUnique({
-      where: { id: input.instalacionId },
-      select: { cuentaId: true },
-    });
-    if (!inst) throw noEncontrado("La instalación");
-    if (inst.cuentaId !== negocio.cuentaId)
-      throw reglaDeNegocio("La instalación es de otra cuenta.");
-    const total = await ctx.db.negocioInstalacion.count({ where: { negocioId: negocio.id } });
+    // Misma regla que al crear: de la cuenta, en el alcance del actor (ADR-022) y sin archivar.
+    await instalacionesDeCuenta(ctx, negocio.cuentaId, [{ instalacionId: input.instalacionId }]);
+    const total = await visibles(ctx, negocio.id);
     if (dryRun) return { negocioId: negocio.id, total: total + 1 };
     await ctx.transaccion(async (tx) => {
       await sinDuplicado(
@@ -68,7 +72,9 @@ export const negociosDesvincularInstalacion = defineCapability({
   async handler(ctx, input, { dryRun }) {
     const negocio = await negocioDe(ctx, input.negocioId);
     const vinculo = { negocioId: negocio.id, instalacionId: input.instalacionId };
-    if (!(await ctx.db.negocioInstalacion.count({ where: vinculo }))) {
+    // Un actor acotado no toca vínculos con instalaciones fuera de su alcance (ADR-022).
+    const enAlcance = instalacionesEnAlcance(ctx)?.includes(input.instalacionId) ?? true;
+    if (!enAlcance || !(await ctx.db.negocioInstalacion.count({ where: vinculo }))) {
       throw noEncontrado("El vínculo con esa instalación");
     }
     const total = await ctx.db.negocioInstalacion.count({ where: { negocioId: negocio.id } });
@@ -76,9 +82,10 @@ export const negociosDesvincularInstalacion = defineCapability({
     if (total === 1 && (await etapaDe(ctx, negocio.etapaId)).orden > 0) {
       throw reglaDeNegocio("Un negocio que ya avanzó de etapa conserva al menos una instalación.");
     }
-    if (dryRun) return { negocioId: negocio.id, total: total - 1 };
+    const quedan = (await visibles(ctx, negocio.id)) - 1;
+    if (dryRun) return { negocioId: negocio.id, total: quedan };
     await ctx.db.negocioInstalacion.deleteMany({ where: vinculo });
     await emitirActualizado(ctx, negocio.id, { desvinculoInstalacion: input.instalacionId });
-    return { negocioId: negocio.id, total: total - 1 };
+    return { negocioId: negocio.id, total: quedan };
   },
 });
