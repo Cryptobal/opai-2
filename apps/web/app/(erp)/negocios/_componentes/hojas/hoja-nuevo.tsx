@@ -1,10 +1,11 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 import { Alerta, avisar, Button, Campo, Combobox, Sheet } from "@opai/ds";
 
+import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 import type { CuentaFila } from "@/lib/tipos-maestros";
 
@@ -13,6 +14,19 @@ import type { ConfigComercial } from "./tipos";
 import { useHojaNegocio } from "./use-hoja";
 
 type Props = { config: ConfigComercial; cuentas: CuentaFila[]; cuentaInicial: string | null };
+
+type Opcion = { valor: string; etiqueta: string };
+const opcion = (c: CuentaFila): Opcion => ({ valor: c.id, etiqueta: c.nombre });
+
+/** Búsqueda de cuentas en el servidor (core.cuentas.list con `q`): no se limita a la primera página. */
+async function buscarCuentas(q: string): Promise<Opcion[]> {
+  const t = q.trim();
+  const r = await ejecutarCapacidad("erp", "core.cuentas.list", {
+    ...(t ? { q: t } : {}),
+    limite: 20,
+  });
+  return r.ok ? (r.data as { items: CuentaFila[] }).items.map(opcion) : [];
+}
 
 const VACIO: DatosNegocio = {
   titulo: "",
@@ -30,6 +44,19 @@ export function HojaNuevo({ config, cuentas, cuentaInicial }: Props) {
   const router = useRouter();
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const [cuentaId, setCuentaId] = useState<string | null>(cuentaInicial);
+  // Cuentas vistas en la búsqueda: el disparador muestra el nombre de la elegida aunque no esté
+  // entre las primeras 100 que trae el servidor.
+  const [vistas, setVistas] = useState<Opcion[]>([]);
+  const opciones = [
+    ...cuentas.map(opcion),
+    ...vistas.filter((v) => !cuentas.some((c) => c.id === v.valor)),
+  ];
+  // Estable entre renders: el Combobox vuelve a buscar cuando cambia la función.
+  const buscar = useCallback(async (q: string) => {
+    const r = await buscarCuentas(q);
+    setVistas((prev) => [...prev, ...r.filter((o) => !prev.some((p) => p.valor === o.valor))]);
+    return r;
+  }, []);
   const [d, setD] = useState<DatosNegocio>(VACIO);
   const set = <K extends keyof DatosNegocio>(k: K, v: DatosNegocio[K]) =>
     setD((x) => ({ ...x, [k]: v }));
@@ -76,7 +103,8 @@ export function HojaNuevo({ config, cuentas, cuentaInicial }: Props) {
           <Combobox
             id="neg-cuenta"
             placeholder="Buscar cuenta"
-            opciones={cuentas.map((c) => ({ valor: c.id, etiqueta: c.nombre }))}
+            opciones={opciones}
+            onBuscar={buscar}
             valor={cuentaId}
             onCambiar={([v]) => setCuentaId(v ?? null)}
           />
