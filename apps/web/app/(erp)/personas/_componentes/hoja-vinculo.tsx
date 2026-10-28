@@ -15,16 +15,26 @@ import {
   vinculoVacio,
 } from "./campos-vinculo";
 
-type Props = { personaId: string; cargos: { valor: string; etiqueta: string }[]; hoy: string };
+import type { OpcionesDestino } from "./campos-destino-vinculo";
+
+type Props = Partial<OpcionesDestino> & {
+  personaId: string;
+  cargos: { valor: string; etiqueta: string }[];
+  hoy: string;
+};
 
 /** Nuevo vínculo laboral para una persona sin vínculo vigente (recontratación). */
-export function HojaVinculo({ personaId, cargos, hoy }: Props) {
+export function HojaVinculo({ personaId, cargos, hoy, ...opciones }: Props) {
   const hoja = useHojaUrl("vinculo");
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const [v, setV] = useState<DatosVinculo>(() => vinculoVacio(hoy));
   async function guardar() {
     const r = await ejecutar("core.vinculos.create", {
       personaId,
+      instalacionId: v.instalacionId,
+      puestoId: v.puestoId || null,
+      horasSemanales: Number(v.horasSemanales),
+      distribucion: v.distribucion,
       cargoId: v.cargoId,
       tipo: v.tipo,
       inicio: v.inicio,
@@ -52,7 +62,7 @@ export function HojaVinculo({ personaId, cargos, hoy }: Props) {
     >
       <div className="flex flex-col gap-4">
         {error ? <Alerta tono="danger" titulo={error} /> : null}
-        <CamposVinculo v={v} onCambiar={setV} cargos={cargos} />
+        <CamposVinculo {...opciones} v={v} onCambiar={setV} cargos={cargos} />
       </div>
     </Sheet>
   );

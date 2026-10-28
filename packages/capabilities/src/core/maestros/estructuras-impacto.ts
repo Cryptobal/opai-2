@@ -1,3 +1,4 @@
+import { personasAfectadas } from "./vinculos-impacto";
 import { z } from "zod";
 import { PERMISOS_CORE } from "@opai/domain";
 
@@ -52,11 +53,11 @@ export async function impactoCambio(
     puestos = filas.filter((p) => !ids.has(p.id)).length;
   } else if (nivel === "puesto") puestos = 1;
   const personasRut = nivel === "persona" ? 1 : 0;
-  // Conteo del tenant, NO atribuido a esta instalación/puesto (fuente ausente hasta PR 3).
+  // Solo contratos históricos aún sin instalación; no se inventa una atribución.
   const pendientesVinculo =
     ctx.alcance || nivel === "persona" || nivel === "cargo"
       ? 0
-      : await ctx.db.vinculoLaboral.count({ where: { estado: "vigente" } });
+      : await ctx.db.vinculoLaboral.count({ where: { estado: "vigente", instalacionId: null } });
   const visible = antes
     ? !(await ocultarMontos(ctx, antes))
     : ctx.autorizar(PERMISOS_CORE.estructurasReadSensible);
@@ -101,5 +102,11 @@ export async function impactoCambio(
       diferencia: av === null || dv === null || (a && d && a.tipo !== d.tipo) ? null : dv - av,
     });
   }
-  return { puestos, personasRut, borradores: personasRut, pendientesVinculo, diferencias: cambios };
+  return {
+    puestos,
+    personasRut,
+    borradores: await personasAfectadas(ctx, nivel, ref, fecha),
+    pendientesVinculo,
+    diferencias: cambios,
+  };
 }

@@ -14,6 +14,18 @@ export async function datosPanel(ctx: Contexto, input: EntradaPanel) {
     input.tipo === "persona"
       ? [
           { nivel: "persona", personaId: input.id },
+          ...(!input.instalacionId && !input.puestoId
+            ? [
+                {
+                  nivel: "instalacion",
+                  instalacion: { vinculos: { some: { personaId: input.id, estado: "vigente" } } },
+                },
+                {
+                  nivel: "puesto",
+                  puesto: { vinculos: { some: { personaId: input.id, estado: "vigente" } } },
+                },
+              ]
+            : []),
           ...(input.instalacionId
             ? [{ nivel: "instalacion", instalacionId: input.instalacionId }]
             : []),
@@ -74,6 +86,10 @@ export async function datosPanel(ctx: Contexto, input: EntradaPanel) {
               AND: [
                 {
                   OR: [
+                    {
+                      nivel: "persona",
+                      persona: dondePersona(ctx),
+                    },
                     {
                       nivel: "instalacion",
                       instalacionId: { in: [...ctx.alcance.instalaciones] },

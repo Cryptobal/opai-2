@@ -132,6 +132,7 @@ core_users_remove
 core_users_update
 core_vinculos_create
 core_vinculos_list
+core_vinculos_previsualizar
 core_vinculos_terminar
 core_vinculos_update
 preview_core_cargos_create

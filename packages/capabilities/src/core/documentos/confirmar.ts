@@ -1,3 +1,4 @@
+import { documentosEnAlcance } from "./alcance-doc";
 import { z } from "zod";
 
 import { motivoSubidaInvalida, PERMISOS_CORE } from "@opai/domain";
@@ -20,7 +21,13 @@ export const documentosConfirmarSubida = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    const d = await ctx.db.documento.findUnique({ where: { id: input.id } });
+    const permitidos = await documentosEnAlcance(ctx);
+    const d = await ctx.db.documento.findFirst({
+      where: {
+        id: input.id,
+        ...(permitidos ? { id: { in: [...permitidos].filter((id) => id === input.id) } } : {}),
+      },
+    });
     if (!d) throw noEncontrado("El documento");
     if (d.estado !== "pendiente") throw reglaDeNegocio("El documento ya fue confirmado.");
     const tipo = d.tipoId

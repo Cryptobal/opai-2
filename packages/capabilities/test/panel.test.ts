@@ -1,3 +1,4 @@
+import { destinoVinculo } from "./vinculo-fixture";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import {
@@ -176,7 +177,7 @@ describe("la actividad no muestra sueldos sin el permiso sensible", () => {
         nombres: "María",
         apellidos: "Soto",
         rut: "16.234.567-2",
-        vinculo: { cargoId: cargo.id, tipo: "indefinido", inicio: "2026-01-05" },
+        vinculo: { ...(await destinoVinculo(ctx)), cargoId: cargo.id, tipo: "indefinido", inicio: "2026-01-05" },
       }),
     );
     ok(

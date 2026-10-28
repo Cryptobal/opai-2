@@ -1,3 +1,4 @@
+import { destinoVinculo } from "./vinculo-fixture";
 // Aprobación humana y presupuesto de agentes contra Postgres real.
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
@@ -77,7 +78,7 @@ describe.skipIf(!urlPropietario)("agentes en base real", () => {
       nombres: "Ana",
       apellidos: "Rojas",
       rut: "19.876.543-0",
-      vinculo: { cargoId, tipo: "indefinido", inicio: "2025-01-02" },
+      vinculo: { ...(await destinoVinculo(h)), cargoId, tipo: "indefinido", inicio: "2025-01-02" },
     });
     const vinculoId = p.ok ? (p.data as { vinculoVigente: { id: string } }).vinculoVigente.id : "";
     const r = await mod.executeCapability(agente(), "core.vinculos.terminar", {

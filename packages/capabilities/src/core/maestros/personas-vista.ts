@@ -1,3 +1,4 @@
+import { vinculoSchema, vistaVinculo, type FilaVinculo } from "./vinculos-vista";
 import { z } from "zod";
 
 import { noEncontrado } from "../../errores";
@@ -8,14 +9,9 @@ import { dia, diaSchema, rutSchema, telefonoSchema, textoOpcional } from "./comu
 
 export const SEXOS = ["femenino", "masculino", "otro", "no_declara"] as const;
 
-export const vinculoResumenSchema = z.object({
-  id: z.string(),
-  cargoId: z.string(),
-  cargo: z.string(),
-  tipo: z.string(),
-  inicio: z.string(),
-  termino: z.string().nullable(),
-});
+export const vinculoResumenSchema = vinculoSchema
+  .omit({ personaId: true, estado: true, motivoTermino: true, updatedAt: true })
+  .extend({ cargo: z.string() });
 
 export const personaSchema = z.object({
   id: z.string(),
@@ -48,22 +44,22 @@ export type FilaPersona = {
   nombres: string;
   apellidos: string;
   rut: string;
-  emailPersonal?: string | null;
-  emailLaboral?: string | null;
-  telefono?: string | null;
+  emailPersonal?: string | null | undefined;
+  emailLaboral?: string | null | undefined;
+  telefono?: string | null | undefined;
   fechaNacimiento?: Date | null;
-  sexo?: string | null;
-  nacionalidad?: string | null;
-  calle?: string | null;
-  comuna?: string | null;
-  region?: string | null;
-  direccionFormateada?: string | null;
+  sexo?: string | null | undefined;
+  nacionalidad?: string | null | undefined;
+  calle?: string | null | undefined;
+  comuna?: string | null | undefined;
+  region?: string | null | undefined;
+  direccionFormateada?: string | null | undefined;
   lat?: { toNumber(): number } | number | null;
   lng?: { toNumber(): number } | number | null;
-  estado?: string | null;
+  estado?: string | null | undefined;
   bloqueada?: boolean | null;
-  bloqueoMotivo?: string | null;
-  usuarioId?: string | null;
+  bloqueoMotivo?: string | null | undefined;
+  usuarioId?: string | null | undefined;
   archivadaEn?: Date | null;
 };
 
@@ -134,15 +130,14 @@ export async function personaDe(ctx: Contexto, id: string) {
 }
 
 /** Resumen del vínculo para una fila/ficha (con el nombre del cargo ya resuelto). */
-export function vinculoVista(v: {
-  id: string;
-  cargoId: string;
-  cargo?: { nombre: string } | null;
-  tipo: string;
-  inicio: Date | null;
-  termino: Date | null;
-}): z.input<typeof vinculoResumenSchema> {
+export function vinculoVista(
+  v: Omit<FilaVinculo, "personaId" | "inicio"> & {
+    cargo?: { nombre: string } | null;
+    inicio: Date | null;
+  },
+): z.input<typeof vinculoResumenSchema> {
   return {
+    ...vistaVinculo({ ...v, personaId: "", inicio: v.inicio ?? new Date(0) }),
     id: v.id,
     cargoId: v.cargoId,
     cargo: v.cargo?.nombre ?? "",

@@ -1,12 +1,28 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useCapacidad } from "@/app/_components/use-capacidad";
+import {
+  CamposDestinoVinculo,
+  type DestinoVinculo,
+  type OpcionesDestino,
+} from "./campos-destino-vinculo";
 import { Campo, InputFecha, Select } from "@opai/ds";
 
 import { TIPO_CONTRATO } from "@/app/_components/maestros/estados";
 
-export type DatosVinculo = { cargoId: string; tipo: string; inicio: string; termino: string };
+export type DatosVinculo = DestinoVinculo & {
+  cargoId: string;
+  tipo: string;
+  inicio: string;
+  termino: string;
+};
 
 export const vinculoVacio = (hoy: string): DatosVinculo => ({
+  instalacionId: "",
+  puestoId: "",
+  horasSemanales: "",
+  distribucion: "",
   cargoId: "",
   tipo: "indefinido",
   inicio: hoy,
@@ -16,16 +32,53 @@ export const vinculoVacio = (hoy: string): DatosVinculo => ({
 /** Plazo fijo y obra exigen término pactado. */
 export const conTermino = (tipo: string) => tipo === "plazo_fijo" || tipo === "por_obra";
 export const vinculoInvalido = (v: DatosVinculo) =>
-  !v.cargoId || !v.inicio || (conTermino(v.tipo) && (!v.termino || v.termino < v.inicio));
+  !v.instalacionId ||
+  !/^\d+$/.test(v.horasSemanales) ||
+  Number(v.horasSemanales) < 1 ||
+  Number(v.horasSemanales) > 168 ||
+  !v.distribucion.trim() ||
+  !v.cargoId ||
+  !v.inicio ||
+  (conTermino(v.tipo) && (!v.termino || v.termino < v.inicio));
 
-type Props = {
+type Props = Partial<OpcionesDestino> & {
   v: DatosVinculo;
   onCambiar: (v: DatosVinculo) => void;
   cargos: readonly { valor: string; etiqueta: string }[];
 };
 
 /** Vínculo laboral: cargo, tipo de contrato, inicio y término pactado. */
-export function CamposVinculo({ v, onCambiar, cargos }: Props) {
+export function CamposVinculo({ v, onCambiar, cargos, instalaciones, puestos }: Props) {
+  const { ejecutar } = useCapacidad("erp");
+  const [opciones, setOpciones] = useState<OpcionesDestino>({ instalaciones: [], puestos: [] });
+  useEffect(() => {
+    if (instalaciones) return;
+    let vigente = true;
+    void ejecutar<{ items: OpcionesDestino["instalaciones"] }>("core.instalaciones.list", {
+      limite: 100,
+    }).then((r) => {
+      if (vigente && r) setOpciones((o) => ({ ...o, instalaciones: r.items }));
+    });
+    return () => {
+      vigente = false;
+    };
+    // El formulario se monta solo al abrir la hoja.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useEffect(() => {
+    if (puestos || !v.instalacionId) return;
+    let vigente = true;
+    void ejecutar<OpcionesDestino["puestos"]>("core.puestos.list", {
+      instalacionId: v.instalacionId,
+      soloActivos: true,
+    }).then((r) => {
+      if (vigente && r) setOpciones((o) => ({ ...o, puestos: r }));
+    });
+    return () => {
+      vigente = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [v.instalacionId]);
   const set = (k: keyof DatosVinculo, valor: string) => onCambiar({ ...v, [k]: valor });
   return (
     <fieldset className="flex flex-col gap-3.5">
@@ -61,6 +114,12 @@ export function CamposVinculo({ v, onCambiar, cargos }: Props) {
           </Campo>
         ) : null}
       </div>
+      <CamposDestinoVinculo
+        v={v}
+        onCambiar={(d) => onCambiar({ ...v, ...d })}
+        instalaciones={instalaciones ?? opciones.instalaciones}
+        puestos={puestos ?? opciones.puestos}
+      />
     </fieldset>
   );
 }

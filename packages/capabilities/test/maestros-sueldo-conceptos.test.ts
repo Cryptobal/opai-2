@@ -1,3 +1,5 @@
+import { destinoVinculo } from "./vinculo-fixture";
+
 import { cargoHistorico } from "./cargo-historico-ayuda";
 import { beforeEach, describe, expect, it } from "vitest";
 
@@ -27,7 +29,7 @@ describe("capas completas (07b)", () => {
       nombres: "José Antonio",
       apellidos: "Pérez",
       rut: "12.345.678-5",
-      vinculo: { cargoId: cargo.id, tipo: "indefinido", inicio: "2026-01-05" },
+      vinculo: { ...(await destinoVinculo(ctx)), cargoId: cargo.id, tipo: "indefinido", inicio: "2026-01-05" },
     });
     expect(
       await codigo(ctx, "core.estructuras.create", {
