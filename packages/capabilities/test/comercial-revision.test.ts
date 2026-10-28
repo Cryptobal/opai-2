@@ -8,21 +8,27 @@ import { CU, I1, I2, K1, K2, ctxComercial, etapaId, reiniciarComercial } from ".
 // y admin (B2) y transiciones condicionadas a la etapa leída (carrera mover/ganar).
 beforeEach(reiniciarComercial);
 
-const lectura = ["comercial:negocios.read", "core:cuentas.read"];
 type Lista = { items: { id: string }[] };
 
 describe("comercial · correcciones de la revisión", () => {
-  it("la lista de contactos respeta el alcance por instalaciones (ADR-022)", async () => {
-    const fuera = ctxComercial({ permisos: lectura, alcance: { instalaciones: [I2] } });
-    const ninguno = await dato<Lista>(fuera.ctx, "comercial.contactos.list", {});
-    expect(ninguno.items).toEqual([]);
+  it("un supervisor con Comercial por excepción solo ve contactos de su alcance (ADR-022)", async () => {
+    // Escenario del Revisor: el rol supervisor deniega comercial:*, pero una excepción por usuario
+    // que concede le gana al rol; ya tiene core:cuentas.read y su alcance sale de sus instalaciones.
+    const supervisor = (instalaciones: string[]) =>
+      ctxComercial({
+        rol: "supervisor",
+        excepciones: [{ permiso: "comercial:negocios.read", conceder: true }],
+        alcance: { instalaciones },
+      }).ctx;
+    const lista = (ctx: ReturnType<typeof supervisor>) =>
+      dato<Lista>(ctx, "comercial.contactos.list", {});
 
-    const vacio = ctxComercial({ permisos: lectura, alcance: { instalaciones: [] } });
-    expect((await dato<Lista>(vacio.ctx, "comercial.contactos.list", {})).items).toEqual([]);
-
-    const dentro = ctxComercial({ permisos: lectura, alcance: { instalaciones: [I1] } });
-    const visibles = await dato<Lista>(dentro.ctx, "comercial.contactos.list", {});
-    expect(visibles.items.map((c) => c.id).sort()).toEqual([K1, K2].sort());
+    expect((await lista(supervisor([I2]))).items).toEqual([]);
+    expect((await lista(supervisor([]))).items).toEqual([]);
+    const dentro = await lista(supervisor([I1]));
+    expect(dentro.items.map((c) => c.id).sort()).toEqual([K1, K2].sort());
+    // Sin alcance (owner), los mismos contactos siguen visibles: el filtro solo acota.
+    expect((await lista(ctxComercial().ctx)).items).toHaveLength(2);
   });
 
   it("solo owner y admin configuran el embudo y los catálogos; gerente no", async () => {

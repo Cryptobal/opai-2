@@ -124,6 +124,7 @@ export function ctxComercial(
     rol?: Rol;
     permisos?: string[];
     alcance?: Alcance;
+    excepciones?: { permiso: string; conceder: boolean }[];
   } = {},
 ) {
   const base = {
@@ -132,6 +133,7 @@ export function ctxComercial(
     ...(opts.rol ? { rol: opts.rol } : {}),
     ...(opts.permisos ? { permisos: opts.permisos } : {}),
     ...(opts.alcance ? { alcance: opts.alcance } : {}),
+    ...(opts.excepciones ? { excepciones: opts.excepciones } : {}),
   } as const;
   if (opts.actor === "agente") {
     return contextoDePrueba({
