@@ -1,6 +1,7 @@
 import { randomBytes } from "node:crypto";
 
 import { type TenantTx } from "./transaccion";
+import { marcarLockAuditoria } from "./lock-auditoria";
 import { notificarConsulta } from "./metricas";
 
 export { verificarAuditoria, type VerificacionAuditoria } from "./auditoria-verificar";
@@ -44,6 +45,8 @@ async function insertarAuditoria(tx: TenantTx, tenantId: string, hecho: HechoAud
   // VOLATILE obtiene una foto nueva DESPUÉS del lock, también si esperó otro append.
   // Una CTE con lock y SELECT en la misma foto READ COMMITTED no garantiza esa propiedad.
   notificarConsulta(); // SQL de negocio: $queryRaw no pasa por el hook de modelos Prisma.
+  // Desde aquí la transacción tiene (o espera) el lock del tenant hasta su COMMIT o ROLLBACK.
+  marcarLockAuditoria();
   const [fila] = await tx.$queryRaw<{ id: string; seq: number; hash: string }[]>`
     SELECT * FROM core.auditoria_append(
       ${id}::uuid, ${tenantId}::uuid, ${hecho.actorTipo}::text,
