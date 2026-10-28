@@ -6,6 +6,8 @@ import { ejecutarComoUsuario } from "@/lib/servidor";
 export type NegocioFila = {
   id: string;
   titulo: string;
+  cuentaId: string;
+  responsableNombre?: string | null;
   estado: "abierto" | "ganado" | "perdido";
   etapaId: string;
   etapaNombre: string;
@@ -26,8 +28,9 @@ export type Historial = {
 };
 
 export type NegocioDetalle = NegocioFila & {
-  cuentaId: string;
   etapaTipo: string;
+  tipoId: string | null;
+  origenId: string | null;
   responsableId: string | null;
   cotizacionEnviadaEn: string | null;
   inicioServicioEstimado: string | null;

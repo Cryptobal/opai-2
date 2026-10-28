@@ -10,3 +10,9 @@ export async function verPestanaNegocios(): Promise<boolean> {
   if (!identidad?.modulosActivos.includes("comercial")) return false;
   return puedeDeIdentidad(identidad)("comercial:negocios.read");
 }
+
+/** ¿Puede crear, mover, ganar y perder negocios? Oculta esas acciones a quien solo lee (ADR-022). */
+export async function puedeGestionarNegocios(): Promise<boolean> {
+  const identidad = await identidadActual();
+  return identidad ? puedeDeIdentidad(identidad)("comercial:negocios.manage") : false;
+}
