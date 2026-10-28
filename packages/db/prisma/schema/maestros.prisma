@@ -87,6 +87,7 @@ model Contacto {
 }
 
 model Instalacion {
+  vinculos VinculoLaboral[]
   id                  String    @id @default(uuid(7)) @db.Uuid
   tenantId            String    @map("tenant_id") @db.Uuid
   cuentaId            String    @map("cuenta_id") @db.Uuid
@@ -152,6 +153,7 @@ model Cargo {
 /// ciclo salen del catálogo de patrones (`patronId`) y la función operativa de `funcionId`. El horario
 /// va por tramos (día y, si rota, noche), con horas semanales y colación en el puesto, y nace en PPC.
 model Puesto {
+  vinculos VinculoLaboral[]
   id              String    @id @default(uuid(7)) @db.Uuid
   tenantId        String    @map("tenant_id") @db.Uuid
   instalacionId   String    @map("instalacion_id") @db.Uuid
@@ -251,6 +253,12 @@ model Persona {
 }
 
 model VinculoLaboral {
+  instalacionId String? @map("instalacion_id") @db.Uuid
+  puestoId String? @map("puesto_id") @db.Uuid
+  horasSemanales Int? @map("horas_semanales")
+  distribucion String?
+  instalacion Instalacion? @relation(fields: [instalacionId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "vinculos_instalacion_fkey")
+  puesto Puesto? @relation(fields: [puestoId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "vinculos_puesto_fkey")
   id            String    @id @default(uuid(7)) @db.Uuid
   tenantId      String    @map("tenant_id") @db.Uuid
   personaId     String    @map("persona_id") @db.Uuid
@@ -270,6 +278,7 @@ model VinculoLaboral {
   cargo   Cargo   @relation(fields: [cargoId], references: [id])
 
   @@index([tenantId, personaId])
+  @@index([tenantId, instalacionId, estado], map: "vinculos_tenant_instalacion_idx")
   @@map("vinculos_laborales")
   @@schema("core")
 }
