@@ -8,6 +8,17 @@
 
 - **Flujo operativo del 28-oct-2026 (PR docs/operacion-agentes):** entra `OPERACION-agentes.md` como fuente del flujo (Claude escribe los briefs; el bot OPAI 2.0 opera la cola: avisos, migraciones con respaldo, integración y capturas; Revisor de una pasada que solo bloquea por seguridad, migraciones o datos; QA en vivo después de integrar, sin frenar) y ADR-054, que reemplaza a ADR-043 v3 en lo que choca. Se ajustan `AGENTS.md`, `CONTEXTO-agentes.md`, `INSTRUCCIONES-proyecto-claude.md` y esta cabecera. Pendiente: confirmar el cuarto check obligatorio (E.4) y alinear la plantilla del PR, `checklists/revision.md`, `checklists/qa.md`, `ROADMAP.md`, `PLAN-desarrollo.md` y `00-documento-de-arranque.md`, que siguen citando la regla anterior.
 
+- **Infra · lock de auditoría y timeouts del rol (CAR-35, agregado al mismo PR, 28-oct-2026):** causa encontrada por Carlos a las 15:53: una transacción quedó «idle in transaction» con el advisory lock de `core.auditoria_append` (tras guardar `perfil_empresa`) y 14 conexiones de `opai_app` esperaron ese lock (`wait_event=advisory`) sin tope, hasta agotar el pool. Eso produce el «timeout exceeded when trying to connect» de Better Auth. La base tenía `statement_timeout` y `lock_timeout` en 0.
+
+  Entra:
+  - **Guarda en código (`packages/db/src/lock-auditoria.ts`, AsyncLocalStorage):** una vez que la transacción hizo el append de auditoría, `forTenant` y `enTransaccion` rechazan antes de pedir otra conexión del pool. Así ninguna transacción con el lock espera al pool. Todos los tests de capacidades con base pasan con la guarda.
+  - **Lock por transacción con espera acotada:** sigue siendo `pg_advisory_xact_lock`, ahora con `ALTER FUNCTION … SET lock_timeout = '3s'`. Vencido el plazo, falla con 55P03 y la transacción del llamador hace ROLLBACK.
+  - **Topes del rol `opai_app`:** `lock_timeout` 5 s, `statement_timeout` 20 s e `idle_in_transaction_session_timeout` 30 s, más que los 15 s de las transacciones de Prisma. Este último cierra la transacción abandonada y suelta el lock.
+  - **Migración `20261028220000_timeouts_opai_app`:** una sola transacción, sin datos ni tablas. Falla entera si falta permiso para `ALTER ROLE`.
+  - **test:db `lock-auditoria-db`:** sin el arreglo, las esperas quedan bloqueadas 14 s, hasta que vence la transacción retenedora; con el arreglo fallan en ~3 s y otro tenant sigue leyendo con un pool de 3. También prueba la guarda y la configuración del rol y de la función.
+
+  **Pendiente:** el bot aplica la migración con respaldo (`dev` → `main`) y verifica con `SELECT rolconfig FROM pg_roles WHERE rolname = 'opai_app'`.
+
 - **Infra · cortes de conexión con Neon tras reanudar la instancia (CAR-35, 28-oct-2026, seguimiento del #100):** en el deploy del #100 (`dpl_6UUX…`), los «Connection terminated due to connection timeout» de Better Auth en `/`, `/personas`, `/configuracion` y `/negocios` llegan **entre 50 y 200 ms** después de que empieza el request y tras minutos sin tráfico. No son esperas reales de 10 s. Al reanudarse la instancia suspendida (Fluid compute), los temporizadores de pg (`connectionTimeoutMillis` y la espera de cupo «timeout exceeded when trying to connect») se disparan de inmediato. Además aparece «server conn crashed?» (08P01) al reutilizar una conexión ociosa que Neon cortó.
 
   Entra (`packages/db/src/pool.ts` y `pool-salud.ts`):
