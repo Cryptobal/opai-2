@@ -31,16 +31,30 @@ jobs:
           ETIQUETA: migracion-pendiente
         run: |
           set -euo pipefail
-          # Etiquetas actuales del PR según el evento (en labeled/unlabeled ya reflejan el cambio).
-          if jq -e --arg e "$ETIQUETA" '[.pull_request.labels[].name] | index($e)' \
-            "$GITHUB_EVENT_PATH" > /dev/null; then
+          # Etiquetas actuales, leídas en vivo: el payload del evento guarda las de cuando ocurrió y
+          # re-ejecutar una corrida vieja lo reutiliza.
+          # Si la API falla, `set -e` corta el paso en rojo: el check nunca pasa por no poder leer.
+          etiquetas=$(gh api --paginate "repos/$REPO/issues/$PR/labels")
+          if echo "$etiquetas" | jq -e -s --arg e "$ETIQUETA" '[.[][].name] | index($e)' > /dev/null; then
             echo "::error::El PR tiene la etiqueta '$ETIQUETA': la migración aún no se aplicó con respaldo en Neon dev y main. La quita el bot «OPAI 2.0» tras aplicarla y dejar su aviso (ADR-054)."
+            exit 1
+          fi
+
+          archivos=$(gh api --paginate "repos/$REPO/pulls/$PR/files")
+
+          # Migraciones ya integradas: aplicadas en Neon, no se editan ni se borran (AGENTS.md).
+          tocadas=$(echo "$archivos" | jq -r '.[]
+            | select(.status == "modified" or .status == "removed" or .status == "changed")
+            | .filename | select(startswith("packages/db/prisma/migrations/"))')
+          if [ -n "$tocadas" ]; then
+            echo "::error::El PR edita o borra migraciones existentes, que ya están aplicadas en Neon:"
+            echo "$tocadas"
             exit 1
           fi
 
           # Migraciones nuevas (agregadas, renombradas o copiadas) en el PR. `--paginate` emite un
           # arreglo por página; jq los recorre todos.
-          nuevas=$(gh api --paginate "repos/$REPO/pulls/$PR/files" | jq -r '.[]
+          nuevas=$(echo "$archivos" | jq -r '.[]
             | select(.status == "added" or .status == "renamed" or .status == "copied")
             | .filename | select(startswith("packages/db/prisma/migrations/"))')
           if [ -z "$nuevas" ]; then
@@ -51,7 +65,8 @@ jobs:
           echo "$nuevas"
 
           # Si trae migraciones, la etiqueta tuvo que ponerse alguna vez (y ya no está). La validez
-          # de la retirada (bot «OPAI 2.0» con aviso previo) la revisa el bot antes de integrar.
+          # de la retirada (bot «OPAI 2.0» con aviso previo) y que la migración aplicada sea la del
+          # head actual los revisa el bot antes de integrar (OPERACION-agentes.md F).
           puesta=$(gh api --paginate "repos/$REPO/issues/$PR/events" | jq -r --arg e "$ETIQUETA" \
             '.[] | select(.event == "labeled" and .label.name == $e) | .id')
           if [ -z "$puesta" ]; then
