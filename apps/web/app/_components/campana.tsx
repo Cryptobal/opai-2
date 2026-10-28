@@ -10,6 +10,7 @@ import { Alerta, Button, Empty, Popover, Punto, Skeleton } from "@opai/ds";
 import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
 
 // La lista de avisos solo se descarga al abrir la campana (ADR-037).
+const BandejaCorta = dynamic(() => import("../(erp)/_componentes/bandeja").then((m) => m.Bandeja));
 const ListaAvisos = dynamic(() => import("./lista-avisos").then((m) => m.ListaAvisos));
 
 export type Aviso = {
@@ -26,25 +27,35 @@ export function Campana({ portal, pendiente = false }: { portal: string; pendien
   return <CampanaAvisos portal={portal} pendienteInicial={pendiente} />;
 }
 
-function CampanaAvisos({ portal, pendienteInicial }: { portal: string; pendienteInicial: boolean }) {
+function CampanaAvisos({
+  portal,
+  pendienteInicial,
+}: {
+  portal: string;
+  pendienteInicial: boolean;
+}) {
   const [avisos, setAvisos] = useState<Aviso[] | null>(null);
   const [noLeidas, setNoLeidas] = useState<number | null>(null);
   const [error, setError] = useState(false);
   const [aprobaciones, setAprobaciones] = useState<number | null>(null);
   useEffect(() => {
     let activo = true;
-    void ejecutarCapacidad(portal, "core.resumen.contadores", {
-      campos: ["notificacionesNoLeidas", "aprobacionesPendientes"],
-    }).then((r) => {
-      if (!activo || !r.ok) return;
-      const d = r.data as {
-        notificacionesNoLeidas: number | null;
-        aprobacionesPendientes: number | null;
-      };
-      setNoLeidas(d.notificacionesNoLeidas ?? 0);
-      setAprobaciones(d.aprobacionesPendientes);
-    });
+    const cargarContadores = () =>
+      void ejecutarCapacidad(portal, "core.resumen.contadores", {
+        campos: ["notificacionesNoLeidas", "aprobacionesPendientes"],
+      }).then((r) => {
+        if (!activo || !r.ok) return;
+        const d = r.data as {
+          notificacionesNoLeidas: number | null;
+          aprobacionesPendientes: number | null;
+        };
+        setNoLeidas(d.notificacionesNoLeidas ?? 0);
+        setAprobaciones(d.aprobacionesPendientes);
+      });
+    cargarContadores();
+    window.addEventListener("opai-bandeja", cargarContadores);
     return () => {
+      window.removeEventListener("opai-bandeja", cargarContadores);
       activo = false;
     };
   }, [portal]);
@@ -71,7 +82,7 @@ function CampanaAvisos({ portal, pendienteInicial }: { portal: string; pendiente
   return (
     <Popover
       etiqueta="Notificaciones"
-      onCambiar={(a) => a && void cargar()}
+      onCambiar={(a) => a && portal !== "erp" && void cargar()}
       disparador={
         <Button
           variant="ghost"
@@ -84,37 +95,43 @@ function CampanaAvisos({ portal, pendienteInicial }: { portal: string; pendiente
         </Button>
       }
     >
-      <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
-        <p className="t-label">Notificaciones</p>
-        {noLeidas ? (
-          <Button variant="ghost" className="h-9" onClick={() => void marcarTodas()}>
-            Marcar todas
-          </Button>
-        ) : null}
-      </div>
-      {aprobaciones ? (
-        <Link
-          href="/configuracion/aprobaciones"
-          className="block border-b border-border px-4 py-3 text-base font-medium text-accent hover:bg-fill"
-        >
-          {aprobaciones} {aprobaciones === 1 ? "aprobación" : "aprobaciones"} pendiente
-          {aprobaciones === 1 ? "" : "s"}
-        </Link>
-      ) : null}
-      <div className="max-h-96 overflow-y-auto">
-        {error ? (
-          <Alerta tono="danger" titulo="No pudimos cargar las notificaciones" />
-        ) : avisos === null ? (
-          <div className="flex flex-col gap-2 p-4">
-            <Skeleton className="h-10" />
-            <Skeleton className="h-10" />
+      {portal === "erp" ? (
+        <BandejaCorta corta />
+      ) : (
+        <>
+          <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
+            <p className="t-label">Notificaciones</p>
+            {noLeidas ? (
+              <Button variant="ghost" className="h-11 md:h-9" onClick={() => void marcarTodas()}>
+                Marcar todas
+              </Button>
+            ) : null}
           </div>
-        ) : avisos.length === 0 ? (
-          <Empty titulo="Sin avisos por ahora" />
-        ) : (
-          <ListaAvisos avisos={avisos} portal={portal} />
-        )}
-      </div>
+          {aprobaciones ? (
+            <Link
+              href="/configuracion/aprobaciones"
+              className="block border-b border-border px-4 py-3 text-base font-medium text-accent hover:bg-fill"
+            >
+              {aprobaciones} {aprobaciones === 1 ? "aprobación" : "aprobaciones"} pendiente
+              {aprobaciones === 1 ? "" : "s"}
+            </Link>
+          ) : null}
+          <div className="max-h-96 overflow-y-auto">
+            {error ? (
+              <Alerta tono="danger" titulo="No pudimos cargar las notificaciones" />
+            ) : avisos === null ? (
+              <div className="flex flex-col gap-2 p-4">
+                <Skeleton className="h-10" />
+                <Skeleton className="h-10" />
+              </div>
+            ) : avisos.length === 0 ? (
+              <Empty titulo="Sin avisos por ahora" />
+            ) : (
+              <ListaAvisos avisos={avisos} portal={portal} />
+            )}
+          </div>
+        </>
+      )}
     </Popover>
   );
 }

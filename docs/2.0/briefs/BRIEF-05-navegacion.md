@@ -76,7 +76,7 @@ D2. **Máximo 7 entradas por área.** Si un área pasa de siete, se divide en do
 D3. **Fijados:** se fija y desfija con un ícono de pin que aparece al pasar el mouse por la entrada y en la cabecera de la ficha. Se ordenan por la fecha en que se fijaron (el más antiguo arriba). Máximo cinco; al intentar el sexto, aviso y no se fija.
 D4. **Inicio** es una entrada suelta arriba; la **Bandeja** vive dentro de Inicio (sección, no entrada del menú).
 D5. **Contador de la Bandeja:** en la barra inferior del celular, Inicio muestra un **punto**; el número aparece dentro de la pantalla. No hay contadores en la barra lateral.
-D6. **Campana (ADR-014):** muestra un punto de no leído y abre la misma Bandeja; no hay una segunda lista de avisos.
+D6. **Campana (ADR-014):** muestra un punto de no leído y abre una vista corta de la misma Bandeja con «Ver todo» a `/#bandeja`; no hay una segunda lista de avisos. Decisión OPAI 2.0, 28-oct-2026 00:35, mandato de Carlos t682u.
 D7. **Celular:** la búsqueda sale de la barra superior; solo queda «Buscar» en la barra inferior. *(Reemplazada el 26-oct-2026 17:57 por ADR-050: decisión de Carlos, «El shell sigue el diseño de Claude; que el repo se ajuste». «Buscar» vuelve a la barra superior del teléfono y sale de la barra inferior.)*
 D8. **Vencimientos** sigue como vista dentro de Personas; no es entrada del menú.
 D9. **iPad:** desde 1024 px se usa la barra lateral completa de escritorio, con sus grupos plegables, sin riel nuevo. De 768 a 1023 sigue el riel actual. No se pliega a solo íconos (Carlos, 26-oct-2026 11:03 CLT, chat con el bot OPAI 2.0 (t295u; dictado por voz)).
@@ -225,7 +225,7 @@ Conviene dividirlo en **dos PRs** para que la cabecera de CAR-12 (urgente) llegu
 - **CA3.** Límites: seis áreas, siete entradas por área, cinco fijados; un área de una entrada aparece suelta.
 - **CA4.** Nada deshabilitado en ningún escenario ni rol.
 - **CA5.** Roles: gerente, supervisor y viewer sin Finanzas; gerente, supervisor y viewer sin Nómina (D10); supervisor sin Comercial.
-- **CA6.** Sin contadores en la barra lateral; Inicio muestra un punto en la barra inferior y el número dentro de la pantalla; la campana muestra un punto y abre la Bandeja.
+- **CA6.** Sin contadores en la barra lateral; Inicio muestra un punto en la barra inferior y el número dentro de la pantalla; la campana muestra un punto y abre una vista corta de la misma Bandeja con «Ver todo» a `/#bandeja`.
 - **CA7.** Acordeón: solo queda abierta el área activa; el estado se recuerda por usuario y empresa.
 - **CA8.** Fijar y desfijar con el pin en hover y en la cabecera de la ficha; orden por fecha de fijado; los fijados persisten al recargar y en otro dispositivo (los recientes, solo en el mismo navegador).
 - **CA9.** ⌘K muestra el atajo en la cabecera de escritorio, recientes (10) y acciones, funciona entero con teclado y respeta permisos y alcance (viewer sin acciones de escritura).

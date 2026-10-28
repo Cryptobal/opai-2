@@ -1,3 +1,5 @@
+- **Campana ERP (PR #90):** vista corta de la misma Bandeja de Inicio, con «Ver todo» a `/#bandeja`; sin segunda lista. Decisión OPAI 2.0, 28-oct-2026 00:35, mandato de Carlos t682u.
+
 # ESTADO — OPAI 2.0
 
 > **Desde el 24-oct-2026, el estado de las tareas vive en Linear (enlace por definir). Este archivo queda como foto técnica: versiones, infraestructura, riesgos aceptados y decisiones.** (PR #22). Las listas de pendientes de abajo se migran a Linear en la fecha que fije Carlos; hasta entonces no se borran, y si no coinciden con Linear, manda Linear.

@@ -11,8 +11,14 @@ test("vencimientos conserva el origen y la campana abre avisos", async ({ page }
   const volver = page.locator("header:visible").getByRole("link", { name: /Inicio/ });
   await volver.click();
   await expect(page).toHaveURL(/\/$/);
-  await page.locator("header:visible").getByRole("button", { name: /Notificaciones/ }).click();
+  await page
+    .locator("header:visible")
+    .getByRole("button", { name: /Notificaciones/ })
+    .click();
   await expect(page.getByText("Notificaciones", { exact: true }).last()).toBeVisible();
+  await expect(
+    page.getByRole("dialog", { name: "Notificaciones" }).getByRole("link", { name: "Ver todo" }),
+  ).toHaveAttribute("href", "/#bandeja");
 });
 
 test("Inicio y Vencimientos concuerdan y registran las vistas", async ({ page }, info) => {
