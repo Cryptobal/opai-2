@@ -1,6 +1,13 @@
 import { describe, expect, it } from "vitest";
 
-import { diasHasta, estadoVigencia, HITO_VENCIDO, hitoAlcanzado } from "./vigencia";
+import {
+  diasHasta,
+  estadoVencimiento,
+  tituloVencimientos,
+  estadoVigencia,
+  HITO_VENCIDO,
+  hitoAlcanzado,
+} from "./vigencia";
 
 const HITOS = [30, 14, 7, 3, 1, 0];
 
@@ -22,5 +29,18 @@ describe("vigencia", () => {
   });
   it("lejos del vencimiento no avisa", () => {
     expect(hitoAlcanzado("2027-06-01", "2026-10-23", HITOS, null)).toBeNull();
+  });
+});
+
+describe("ventana de vencimientos y textos", () => {
+  it("clasifica los límites de 30 días", () => {
+    expect(estadoVencimiento("2026-11-22", "2026-10-23")).toBe("por_vencer");
+    expect(estadoVencimiento("2026-11-23", "2026-10-23")).toBe("vigente");
+    expect(estadoVencimiento("2026-10-22", "2026-10-23")).toBe("vencido");
+    expect(estadoVencimiento("2026-11-02", "2026-10-23", 5)).toBe("vigente");
+  });
+  it("concuerda en singular y plural", () => {
+    expect(tituloVencimientos(1, 1)).toBe("1 documento vencido · 1 vence pronto");
+    expect(tituloVencimientos(0, 2)).toBe("0 documentos vencidos · 2 vencen pronto");
   });
 });

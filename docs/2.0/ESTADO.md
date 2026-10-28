@@ -1,6 +1,10 @@
+- **Campana ERP (PR #90):** vista corta de la misma Bandeja de Inicio, con «Ver todo» a `/#bandeja`; sin segunda lista. Decisión OPAI 2.0, 28-oct-2026 00:35, mandato de Carlos t682u.
+
 # ESTADO — OPAI 2.0
 
 > **Desde el 24-oct-2026, el estado de las tareas vive en Linear (enlace por definir). Este archivo queda como foto técnica: versiones, infraestructura, riesgos aceptados y decisiones.** (PR #22). Las listas de pendientes de abajo se migran a Linear en la fecha que fije Carlos; hasta entonces no se borran, y si no coinciden con Linear, manda Linear.
+
+**PR #90 · Inicio y vencimientos:** Codex documenta en `briefs/fix-inicio-vencimientos.md` el conteo limitado a personas y el aviso al superar 2.000 personas accesibles; la comparación local de navegación en iPad pasó también en main `49b1d8d`. La e2e con un vencimiento positivo pasó en teléfono, iPad y escritorio; el alcance de otras entidades sigue pendiente.
 
 **Última actualización:** 28-oct-2026 · **Actualizado por:** Codex gpt-6.1-sol · **Fase en curso:** 1 — Núcleo, en cierre (Briefs 01, 01c y 02 A–C integrados a `main`; quedan la sesión D del Brief 02, la paridad MCP, los arreglos de QA y las bases transversales). Plan completo y próximas tareas en `ROADMAP.md`; etapa de cada módulo en `PLAN-desarrollo.md`.
 - **Brief 07b · PR 1 (CAR-19), construcción en `brief/07b-capas-sueldo`, apilada sobre #49.** Migración aditiva `20261028180000_capa_instalacion_sueldo` (sin backfill, conserva conceptos históricos nullable, FK y trigger de mismo tenant, RLS ENABLE + FORCE). Resolución RUT → puesto → instalación sin herencia; estructuras históricas incompletas devuelven faltantes y no generan haberes. Versiones nuevas completas, también sus bonos; crear/anular comparten lock transaccional y permisos owner/admin (D8). UI del DS 2.0 en instalación, puestos y persona, con contexto explícito, historial, preview de impacto y anulación con motivo. Las precisiones del encargo t500u están en §16.d del brief: no se deducen relaciones del vínculo ni se inventan montos. Decisiones de implementación de Codex: serializar por referencia con advisory lock; marcar bonos históricos sin valor como incompletos; incluir modalidad y banderas de bonos en diferencias; diferir el selector de contexto para el presupuesto de JS. No son decisiones nuevas de Carlos. Validación en §18 del brief: test:db 109+134+25 y e2e 3/3 en verde; build y presupuesto en verde (ruta de sueldo de persona con tope propio 166 KB, medida 165,7 KB, decisión técnica de Codex por selector/contexto e historial). ADR-045 pendiente: marcador con 12 consultas en instalación y 11 en persona, incluso sin garantizar contar todos los Suspense. La auditoría se agrupa por respuesta conservando todos los IDs. Gate local al cierre: typecheck/lint, 1.158 tests, test:db 109+134+25, build, presupuesto y e2e 3/3 en verde. No listo para integrar por la diferencia ADR-045 y por faltar Revisor/CI del PR. Ninguna migración aplicada en Neon.
@@ -733,6 +737,9 @@ Sin cambios de negocio, migraciones, permisos ni plan del ROADMAP.
 
 En la rama `fix/version-cargo-bonos`, Codex eligió rechazar el versionado de un cargo sensible sin permiso de lectura sensible, para evitar reemplazar bonos ocultos por una lista vacía. Codex decidió además exigir ese permiso para cambiar la sensibilidad del cargo. Las decisiones y sus criterios están en `briefs/fix-version-cargo-bonos.md`; pendiente de revisión e integración.
 
+### Inicio y vencimientos (encargo de continuación t500u)
+
+La decisión de alcance de OPAI 2.0 en el encargo t500u exige que Inicio y Vencimientos compartan el criterio y respeten el plazo de cada tipo (30 días por defecto). La implementación en curso usa la matriz de personas para ambos conteos. Queda pendiente conservar por separado los documentos de otras entidades que antes contaba Inicio, con un enlace propio, y verificar el límite de 2.000 personas; hasta resolverlo el criterio de alcance está parcial.
 ### Brief 07b · PR 3 — vínculo laboral, instalación y jornada (CAR-19)
 
 Construcción de Codex, encargo del 27-oct-2026, rama

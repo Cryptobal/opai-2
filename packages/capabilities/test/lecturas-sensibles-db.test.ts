@@ -56,6 +56,53 @@ describe.skipIf(!urlPropietario)("inventario NÚCLEO-H: accesos sensibles en Pos
     }
   });
 
+  it("la matriz de vencimientos no incluye personas ni documentos de otro tenant", async () => {
+    const antes = await mod.executeCapability(contexto(), "core.documentos.matriz", {});
+    const pendientesAntes = await mod.executeCapability(contexto(), "core.inicio.pendientes", {});
+    const tipo = await e.admin.documentoTipo.create({
+      data: {
+        tenantId: b.tenantId,
+        codigo: "vencido-ajeno",
+        nombre: "Ficticio",
+        capa: "persona",
+        tieneVencimiento: true,
+      },
+    });
+    const doc = await e.admin.documento.create({
+      data: {
+        tenantId: b.tenantId,
+        tipoId: tipo.id,
+        nombre: "ficticio.pdf",
+        mime: "application/pdf",
+        tamano: 1,
+        storageKey: randomUUID(),
+        creadoPorTipo: "user",
+        estado: "disponible",
+        venceEn: new Date("2020-01-01"),
+      },
+    });
+    await e.admin.documentoVinculo.create({
+      data: {
+        tenantId: b.tenantId,
+        documentoId: doc.id,
+        entidadTipo: "persona",
+        entidadId: b.personaId,
+      },
+    });
+    const r = await mod.executeCapability(contexto(), "core.documentos.matriz", {});
+    expect(r).toEqual(antes);
+    expect(await mod.executeCapability(contexto(), "core.inicio.pendientes", {})).toEqual(
+      pendientesAntes,
+    );
+    expect(r.ok).toBe(true);
+    expect(JSON.stringify(r)).not.toContain(b.personaId);
+    expect(JSON.stringify(r)).not.toContain(b.documentoId);
+    const sinAlcance = contexto();
+    sinAlcance.alcance = { instalaciones: [] };
+    const limitado = await mod.executeCapability(sinAlcance, "core.documentos.matriz", {});
+    expect(limitado).toMatchObject({ ok: true, data: { filas: [], resumen: { personas: 0 } } });
+  });
+
   it("falla cerrado y revierte el insert para cada capacidad, sin revelar datos", async () => {
     for (const [id, input] of casosLecturas(a)) {
       const ctx = contexto();

@@ -8,9 +8,10 @@ import { Alerta, Button, SeccionTarjeta, Skeleton } from "@opai/ds";
 import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
 import type { Aviso } from "@/app/_components/campana";
 import { ListaAvisos } from "@/app/_components/lista-avisos";
+import { BandejaCorta } from "./bandeja-corta";
 
 /** Una sola Bandeja; el servidor aplica destinatario, permisos efectivos y tenant. */
-export function Bandeja() {
+export function Bandeja({ corta = false }: { corta?: boolean }) {
   const [avisos, setAvisos] = useState<Aviso[] | null>(null);
   const [aprobaciones, setAprobaciones] = useState<number | null>(null);
   const [decisiones, setDecisiones] = useState<{ id: string; resumen: string }[]>([]);
@@ -30,8 +31,7 @@ export function Bandeja() {
       const d = r.data as { items: Aviso[]; noLeidas: number };
       setAvisos(d.items.filter((a) => !a.leidaEn));
       setNoLeidas(d.noLeidas);
-    }
-    else {
+    } else {
       setAvisos([]);
       setError(true);
     }
@@ -47,6 +47,9 @@ export function Bandeja() {
   }, []);
   useEffect(() => {
     void Promise.resolve().then(cargar);
+    const actualizar = () => void cargar();
+    window.addEventListener("opai-bandeja", actualizar);
+    return () => window.removeEventListener("opai-bandeja", actualizar);
   }, [cargar]);
   async function cargarMas() {
     const ultimo = avisos?.at(-1);
@@ -54,14 +57,23 @@ export function Bandeja() {
     setCargandoMas(true);
     try {
       const r = await ejecutarCapacidad("erp", "core.notificaciones.list", {
-        limite: 50, soloNoLeidas: true,
+        limite: 50,
+        soloNoLeidas: true,
         antesDe: ultimo.id,
       });
-      if (!r.ok) { setError(true); return; }
+      if (!r.ok) {
+        setError(true);
+        return;
+      }
       const d = r.data as { items: Aviso[]; noLeidas: number };
-      setAvisos((prev) => [...(prev ?? []), ...d.items.filter((a) => !prev?.some((p) => p.id === a.id))]);
+      setAvisos((prev) => [
+        ...(prev ?? []),
+        ...d.items.filter((a) => !prev?.some((p) => p.id === a.id)),
+      ]);
       setNoLeidas(d.noLeidas);
-    } finally { setCargandoMas(false); }
+    } finally {
+      setCargandoMas(false);
+    }
   }
   async function marcar() {
     const r = await ejecutarCapacidad("erp", "core.notificaciones.marcar_todas", {});
@@ -72,11 +84,20 @@ export function Bandeja() {
     await cargar();
     window.dispatchEvent(new Event("opai-bandeja"));
   }
+  if (corta)
+    return (
+      <BandejaCorta
+        avisos={avisos}
+        aprobaciones={aprobaciones}
+        decisiones={decisiones}
+        error={error}
+        onMarcar={() => void marcar()}
+        onLeida={() => void cargar()}
+      />
+    );
   return (
     <section id="bandeja" className="scroll-mt-20">
-      <SeccionTarjeta
-        titulo={`Bandeja${avisos ? ` · ${noLeidas + (aprobaciones ?? 0)}` : ""}`}
-      >
+      <SeccionTarjeta titulo={`Bandeja${avisos ? ` · ${noLeidas + (aprobaciones ?? 0)}` : ""}`}>
         {error ? <Alerta tono="danger" titulo="No pudimos actualizar la Bandeja" /> : null}
         {avisos === null ? (
           <Skeleton className="h-20" />

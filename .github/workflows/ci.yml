@@ -142,6 +142,7 @@ jobs:
           SEED_PLATFORM_ROLE=ninguno SEED_OWNER_EMAIL=e2e-multiempresa@opai.cl pnpm --filter @opai/auth seed:platform-owner
           pnpm --filter @opai/db seed:e2e
           pnpm --filter @opai/db seed:maestros-demo
+          pnpm --filter @opai/db exec tsx scripts/fixture-vencimientos-e2e.ts
           # Usuario con dos empresas para selector-riel.spec.ts (selector de portal y empresa en iPad).
           pnpm --filter @opai/auth seed:multiempresa-e2e
           # Admin y owner también requieren MFA; conservar los mismos roles de los fixtures.
