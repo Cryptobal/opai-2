@@ -54,12 +54,13 @@ export async function personaTerreno(id: string) {
       { entidad: { tipo: "persona", id } },
     ),
   ]);
+  // Sin `documentos:read` la ficha se ve sin documentos; otro fallo va al error.tsx (CAR-50).
+  const docs = datosSiHayPermiso(d, { items: [], faltantes: [] });
   return {
-    // Los documentos también cuentan: un fallo no se ve como «sin documentos» (CAR-50).
-    state: estadoPantalla(p, d),
+    state: estadoPantalla(p),
     noEncontrada: !p.ok && p.error.code === "NOT_FOUND",
     p: p.ok ? p.data : null,
-    docs: d.ok ? d.data.items : [],
-    faltantes: d.ok ? d.data.faltantes : [],
+    docs: docs.items,
+    faltantes: docs.faltantes,
   };
 }
