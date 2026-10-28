@@ -954,3 +954,9 @@ e2e `anexo-contrato.spec.ts` (375/1024/1280) en verde contra el servidor del pro
 worktree, 1 worker (el resto de la suite lo valida el CI). No se tocó la migración
 `20261028200000_anexo_contrato_borrador`. Detalle completo y la lista de autorrevisión
 en `PR-BODY.md` (sin commitear).
+
+### Importación comercial desde 1.0 · simulación (CAR-25, 28-oct-2026)
+
+- **Qué entra:** `pnpm --filter @opai/db importar:opai1 --dry-run --tenant <slug> --origen fixtures:<ruta>` (`packages/db/scripts/importar-opai1/**`): plan idempotente por fila (crear, actualizar, sin cambios, conflicto, omitido con motivo) sobre `core.ids_externos` (sistema `opai1`) y reporte sin datos personales. Cuentas por RUT; sin RUT, solo propuestas de fusión; contactos con correo en minúsculas y E.164; instalaciones por place_id o < 50 m. Negocios, etapas e historial: mapeo puro detrás de `COMERCIAL_EN_MAIN = false` hasta que el CRM PR 1 (CAR-20) esté en `main`.
+- **Decisión de Carlos (28-oct):** solo simulación por ahora; la carga real va cuando el CRM esté completo y con su OK, con todo el historial (menos de 24 meses). Sin migración, sin pantallas; no se corrió contra 1.0 ni contra Neon.
+- **Pendiente:** key dedicada de 1.0 en el almacén cifrado del tenant y copia anonimizada para probar; contactos con el mismo correo en varias cuentas esperan el N–N del CRM PR 2 (CAR-26); regla para filas archivadas en 2.0; activar negocios cuando el schema `comercial` esté en `main`.
