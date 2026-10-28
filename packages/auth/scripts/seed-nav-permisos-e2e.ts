@@ -2,16 +2,11 @@ import { sembrarAlcanceNav } from "./seed-nav-alcance-e2e";
 // Fixture exclusiva de la base local E2E: usuarios con concesión y denegación explícitas.
 import { hashPassword } from "better-auth/crypto";
 import { cerrarClientes, dbAdmin, enTransaccion } from "@opai/db";
+import { exigirBaseE2E } from "../../db/scripts/exigir-base-e2e";
 // Las tablas de tenant tienen FORCE RLS: se escribe con `enTransaccion(tenantId)`, nunca con el dueño a secas.
 
 async function main() {
-  const url = new URL(process.env["DATABASE_URL_MIGRATE"] ?? "postgresql://sin-configurar/");
-  if (
-    !["localhost", "127.0.0.1", "[::1]"].includes(url.hostname) ||
-    !/^\/opai_e2e(?:_[a-zA-Z0-9_]+)?$/.test(url.pathname) ||
-    process.env["NODE_ENV"] === "production"
-  )
-    throw new Error("Solo opai_e2e local.");
+  exigirBaseE2E();
   const password = process.env["E2E_PASSWORD"];
   if (!password) throw new Error("Falta E2E_PASSWORD");
   const hash = await hashPassword(password);

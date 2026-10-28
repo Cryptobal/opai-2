@@ -1,15 +1,10 @@
 import { cerrarClientes, dbAdmin, enTransaccion, type TenantTx } from "../src/index";
+import { exigirBaseE2E } from "./exigir-base-e2e";
 
 const PERSONA_ID = "00000000-0000-7000-8000-000000000082";
 
 async function main() {
-  const url = new URL(process.env["DATABASE_URL_MIGRATE"] ?? "postgresql://sin-configurar/");
-  if (
-    !["localhost", "127.0.0.1"].includes(url.hostname) ||
-    !/^\/opai_e2e(?:_[a-zA-Z0-9_]+)?$/.test(url.pathname) ||
-    process.env["NODE_ENV"] === "production"
-  )
-    throw new Error("Solo e2e local.");
+  exigirBaseE2E();
   // FORCE RLS: el tenant se fija con `enTransaccion`; `tenants` no tiene RLS y da el id.
   const { id: tenantId } = await dbAdmin().tenant.findUniqueOrThrow({ where: { slug: "gard" } });
   await enTransaccion(tenantId, (db) => sembrar(db, tenantId));

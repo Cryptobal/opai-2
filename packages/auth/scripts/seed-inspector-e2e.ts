@@ -2,15 +2,10 @@
 import { hashPassword } from "better-auth/crypto";
 import { cerrarClientes, dbAdmin, enTransaccion } from "@opai/db";
 import { PLANTILLAS } from "../../db/scripts/roles-base-plantillas";
+import { exigirBaseE2E } from "../../db/scripts/exigir-base-e2e";
 
 async function main() {
-  const url = new URL(process.env["DATABASE_URL_MIGRATE"] ?? "postgresql://sin-configurar/");
-  if (
-    !["localhost", "127.0.0.1"].includes(url.hostname) ||
-    !/^\/opai_e2e(?:_[a-zA-Z0-9_]+)?$/.test(url.pathname) ||
-    process.env["NODE_ENV"] === "production"
-  )
-    throw new Error("Solo opai_e2e local.");
+  exigirBaseE2E();
   const password = process.env["E2E_PASSWORD"];
   if (!password) throw new Error("Falta E2E_PASSWORD");
   const hash = await hashPassword(password);

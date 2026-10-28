@@ -1,4 +1,5 @@
 import { cerrarClientes, dbAdmin, enTransaccion, type TenantTx } from "../src/index";
+import { exigirBaseE2E } from "./exigir-base-e2e";
 
 const PERSONA_ID = "00000000-0000-7000-8000-000000000082";
 // Por defecto, el anexo que recorren las e2e; cada proyecto rechaza el suyo (`ANEXO_E2E_ID`, solo
@@ -6,13 +7,7 @@ const PERSONA_ID = "00000000-0000-7000-8000-000000000082";
 const ANEXO_ID = process.env["ANEXO_E2E_ID"] ?? "00000000-0000-7000-8000-0000000000a9";
 
 async function main() {
-  const url = new URL(process.env["DATABASE_URL_MIGRATE"] ?? "postgresql://sin-configurar/");
-  if (
-    !["localhost", "127.0.0.1"].includes(url.hostname) ||
-    !/^\/opai_e2e(?:_[a-zA-Z0-9_]+)?$/.test(url.pathname) ||
-    process.env["NODE_ENV"] === "production"
-  )
-    throw new Error("Solo e2e local.");
+  exigirBaseE2E();
   if (!/^00000000-0000-7000-8000-0000000000a[0-9a-f]$/.test(ANEXO_ID))
     throw new Error("Id de prueba inválido.");
   // FORCE RLS: el tenant se fija con `enTransaccion`; `tenants` no tiene RLS y da el id.
