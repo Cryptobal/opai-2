@@ -1,5 +1,6 @@
+import { ocultarIndicadorDev } from "./indicador-dev";
 import { entrar as iniciarSesion } from "./sesion";
-import { expect, type Page, test } from "@playwright/test";
+import { expect, type Locator, type Page, test } from "@playwright/test";
 
 /**
  * Base PWA (ADR-044, Brief 04): manifest válido con íconos que existen, service worker que controla
@@ -144,7 +145,19 @@ async function entrar(page: Page, correo: string, empresa: RegExp) {
   await page.waitForURL((u) => u.pathname === "/" || u.pathname === "/platform");
 }
 
+/** Abre el menú de usuario hasta ver `dentro`: un clic antes de hidratar no lo abre (CAR-60). */
+async function abrirMenuUsuario(page: Page, dentro: Locator) {
+  await expect(async () => {
+    if (!(await dentro.isVisible()))
+      await page.getByRole("button", { name: "Menú de usuario" }).click({ timeout: 2_000 });
+    await expect(dentro).toBeVisible({ timeout: 1_000 });
+  }).toPass({ timeout: 30_000 });
+}
+
 test.describe("dos usuarios, dos empresas", () => {
+  // Solo dev (CI levanta `next dev`): el indicador de Next tapa el «Menú de usuario» al pie de la barra
+  // lateral y el clic de «Cerrar sesión» no llega; la prueba colgaba hasta el timeout (CAR-60).
+  test.beforeEach(({ page }) => ocultarIndicadorDev(page));
   test.skip(!password, "Falta SEED_OWNER_PASSWORD o E2E_PASSWORD");
   // Igual que caché-sesión: el menú de usuario (salir) y el riel existen desde iPad; el teléfono tiene
   // otro DOM. La propiedad de seguridad no depende del tamaño de pantalla.
@@ -167,9 +180,14 @@ test.describe("dos usuarios, dos empresas", () => {
     expect(await page.evaluate(() => caches.has("prueba-sesion"))).toBe(true);
 
     // A cierra sesión: la app limpia las cachés del service worker antes de redirigir.
-    await page.getByRole("button", { name: "Menú de usuario" }).click();
-    await page.getByRole("menuitem", { name: /Cerrar sesión|Salir/i }).click();
-    await page.waitForURL(/\/login/);
+    // Justo después de entrar el shell puede repintarse y desmontar el menú abierto: abrir, hacer clic
+    // y llegar a /login se reintentan juntos.
+    const salir = page.getByRole("menuitem", { name: /Cerrar sesión|Salir/i });
+    await expect(async () => {
+      await abrirMenuUsuario(page, salir);
+      await salir.click({ timeout: 2_000 });
+      await page.waitForURL(/\/login/, { timeout: 5_000 });
+    }).toPass({ timeout: 60_000 });
     await expect.poll(() => page.evaluate(() => caches.has("prueba-sesion"))).toBe(false);
 
     // B entra en la empresa 2.
@@ -177,8 +195,7 @@ test.describe("dos usuarios, dos empresas", () => {
     await esperarControl(page);
 
     // B es B, no A: el menú de usuario muestra el correo de B y nunca el de A.
-    await page.getByRole("button", { name: "Menú de usuario" }).click();
-    await expect(page.getByText(emailB)).toBeVisible();
+    await abrirMenuUsuario(page, page.getByText(emailB));
     await expect(page.getByText(emailA)).toHaveCount(0);
     await page.keyboard.press("Escape");
     // La empresa activa es la 2 (Empresa E2E), no la 1.
