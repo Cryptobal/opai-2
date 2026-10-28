@@ -16,15 +16,16 @@ type Props = {
   error?: boolean;
   reintentar?: () => void;
   onNavegar?: (href: string) => void;
+  className?: string;
 };
 
 /**
  * Fijados (D3, §8.2.3): hasta cinco, arriba de la barra lateral, sin contador. Sin fijados, una
  * línea de ayuda discreta en vez de una sección vacía (pantalla 07-a del export).
  */
-export function Fijados({ items, rutaActual, onDesfijar, Link = LinkPorDefecto, error, reintentar, onNavegar }: Props) {
+export function Fijados({ items, rutaActual, onDesfijar, Link = LinkPorDefecto, error, reintentar, onNavegar, className }: Props) {
   return (
-    <div className="flex flex-col gap-px px-3 pt-2">
+    <div className={cn("flex flex-col gap-px px-3 pt-2", className)}>
       <p className="t-overline px-2 pb-1.5">Fijados</p>
       {error ? (
         <div role="alert" className="t-caption px-2 pb-2">No pudimos cargar tus fijados. <button type="button" onClick={reintentar} className="min-h-11 min-w-11 underline focus-visible:outline-2 focus-visible:outline-focus">Reintentar</button></div>
