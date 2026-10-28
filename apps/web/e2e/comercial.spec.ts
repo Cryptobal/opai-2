@@ -13,7 +13,8 @@ test.describe("Comercial · Negocios y Contactos", () => {
 
   test("Negocios: lista y ficha", async ({ page }, info) => {
     await entrar(page);
-    await page.goto("/negocios");
+    // Desde el PR 1b el tablero es la vista por defecto; la lista sigue en ?vista=lista.
+    await page.goto("/negocios?vista=lista");
     const lista = page.getByRole("region", { name: "Lista de negocios" });
     await expect(lista).toBeVisible();
     await page.screenshot({ path: info.outputPath("negocios-lista.png"), fullPage: true });

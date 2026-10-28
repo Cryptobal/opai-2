@@ -4,40 +4,9 @@ import { defineCapability } from "../define";
 import { ajuste } from "../core/config";
 import { reglaDeNegocio } from "../errores";
 import { uuidSchema } from "../core/esquemas";
-import { etiquetaRequisito, requisitosFaltantes } from "./dominio";
 import { PERMISO_MANAGE, etapaDe, negocioDe, negocioSchema, vistaNegocio } from "./comun";
 import { aplicarEtapa } from "./transiciones-util";
-
-/** Valida los requisitos de entrada de la etapa y, para salir de la primera, que haya ≥1 instalación. */
-async function validarEntrada(
-  ctx: Parameters<typeof negocioDe>[0],
-  negocio: {
-    id: string;
-    etapaId: string;
-    montoEstimadoMensual: number | null;
-    valorMensual: number | null;
-    cierreEstimado: Date | null;
-    cotizacionEnviadaEn: Date | null;
-    inicioServicioEstimado: Date | null;
-    motivoPerdidaId: string | null;
-    embudoId: string;
-  },
-  destino: { exige: string[]; orden: number },
-) {
-  const faltan = requisitosFaltantes(destino.exige, negocio);
-  if (faltan.length) {
-    throw reglaDeNegocio(
-      `Faltan requisitos para esta etapa: ${faltan.map(etiquetaRequisito).join(", ")}.`,
-    );
-  }
-  const actual = await etapaDe(ctx, negocio.etapaId);
-  // R10: para salir de la primera etapa (orden 0) hacia adelante debe tener ≥1 instalación.
-  if (actual.orden === 0 && destino.orden > 0) {
-    const n = await ctx.db.negocioInstalacion.count({ where: { negocioId: negocio.id } });
-    if (n === 0)
-      throw reglaDeNegocio("Vincula al menos una instalación antes de avanzar la etapa.");
-  }
-}
+import { validarEntrada } from "./validaciones";
 
 export const negociosMover = defineCapability({
   id: "comercial.negocios.mover",
