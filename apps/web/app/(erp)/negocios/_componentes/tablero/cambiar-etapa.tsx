@@ -18,7 +18,7 @@ export function CambiarEtapa(p: {
   etapaNombre: string;
   etapas: EtapaTablero[];
 }) {
-  const { mover } = useMover();
+  const { mover, moviendo } = useMover();
   return (
     <Menu
       etiqueta={`Cambiar etapa de ${p.titulo} (ahora ${p.etapaNombre})`}
@@ -31,7 +31,11 @@ export function CambiarEtapa(p: {
           <ChevronDown className="size-4 text-fg-subtle" aria-hidden />
         </>
       }
-      items={itemsMover(p, (e) => void mover(p.negocioId, e))}
+      items={itemsMover(p, (e) => void mover(p.negocioId, e)).map((i) => ({
+        ...i,
+        // Mientras se mueve, sin un segundo envío.
+        deshabilitado: moviendo !== null,
+      }))}
     />
   );
 }

@@ -17,6 +17,9 @@ export function hrefVista(vista: "tablero" | "lista", actual: URLSearchParams) {
     const v = actual.get(k);
     if (v) p.set(k, v);
   }
+  // Desde una ficha abierta en el tablero (`?tablero=`), su columna es la etapa elegida.
+  const columna = actual.get("tablero");
+  if (columna && !p.has("etapa")) p.set("etapa", columna);
   const q = p.toString();
   return q ? `/negocios?${q}` : "/negocios";
 }

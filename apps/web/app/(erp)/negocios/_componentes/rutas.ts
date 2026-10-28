@@ -6,6 +6,9 @@ import { conBusqueda, type Parametros } from "@/lib/parametros";
  * lista de la izquierda y «Atrás» vuelvan a la misma lista, no al tablero.
  */
 export function consultaLista(p: Parametros) {
+  // Ficha abierta desde el tablero: las demás filas recuerdan la misma columna, no la Lista.
+  const columna = p["tablero"];
+  if (p["vista"] !== "lista" && columna && esUuid(columna)) return `?tablero=${columna}`;
   const q = new URLSearchParams({ vista: "lista" });
   for (const k of ["q", "estado", "etapa"]) if (p[k]) q.set(k, p[k]);
   return `?${q.toString()}`;

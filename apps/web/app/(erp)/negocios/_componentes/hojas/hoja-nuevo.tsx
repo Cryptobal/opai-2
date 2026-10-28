@@ -103,7 +103,7 @@ export function HojaNuevo({ config, cuentas, cuentaInicial }: Props) {
       <div className="flex flex-col gap-4">
         {error ? <Alerta tono="danger" titulo={error} /> : null}
         {/* Por qué «Crear negocio» está deshabilitado, arriba para verlo sin desplazarse. */}
-        <p id="neg-falta" className="t-body-sm text-fg-muted empty:hidden">
+        <p id="neg-falta" className="t-body-sm text-fg-muted empty:hidden" aria-live="polite">
           {falta.length ? `Para crear el negocio falta ${falta.join(" y ")}.` : ""}
         </p>
         <Campo

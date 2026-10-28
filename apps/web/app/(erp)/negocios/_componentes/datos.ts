@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 import { estadoPantalla } from "@/lib/formato";
 import { esUuid, requerirEncontrado, requerirUuid } from "@/lib/ids";
 import { leerParametros } from "@/lib/parametros";
@@ -61,8 +63,11 @@ export async function cargarNegocios(f: Record<string, string | undefined>) {
   return { state: estadoPantalla(r), items: r.ok ? r.data.items : [] };
 }
 
-/** Etapas activas del embudo por defecto, en orden (filtro de la lista y «Cambiar etapa» de la ficha). */
-export async function cargarEtapasActivas() {
+/**
+ * Etapas activas del embudo por defecto, en orden (filtro de la lista y «Cambiar etapa» de la ficha).
+ * Con `cache` la lista y la cabecera de la ficha comparten una sola lectura por request (ADR-045).
+ */
+export const cargarEtapasActivas = cache(async () => {
   const r = await ejecutarComoUsuario<{
     embudo: { etapas: { id: string; nombre: string; tipo: string; activa: boolean }[] };
   }>("erp", "comercial.config.get", {});
@@ -71,7 +76,7 @@ export async function cargarEtapasActivas() {
         .filter((e) => e.activa)
         .map((e) => ({ id: e.id, nombre: e.nombre, tipo: e.tipo }))
     : [];
-}
+});
 
 /** Opciones del filtro «Etapa» de la lista (`?etapa=`). */
 export const cargarEtapas = async () =>
