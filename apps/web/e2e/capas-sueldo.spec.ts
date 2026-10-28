@@ -1,8 +1,17 @@
 import { execFileSync } from "node:child_process";
-import { expect, test } from "@playwright/test";
+import { expect, type Locator, test } from "@playwright/test";
 import { entrar, ocultarDev, password, sinDesborde, urlSiembra } from "./fixtures-puestos-car8";
 
 test.use({ actionTimeout: 30_000 });
+// Guardar escribe, audita y recarga la ruta (en dev compila en la primera visita): si el diálogo no
+// se cierra, el error lleva su texto (el aviso de la capacidad) para diagnosticar sin el artefacto.
+const cerrado = (dialogo: Locator) =>
+  expect(dialogo)
+    .toHaveCount(0, { timeout: 15_000 })
+    .catch(async (e: unknown) => {
+      const texto = await dialogo.innerText().catch(() => "(sin texto)");
+      throw new Error(`${String(e)}\nEl diálogo sigue abierto con: ${texto}`);
+    });
 test.setTimeout(240_000);
 const consultar = (sql: string) =>
   execFileSync(
@@ -79,7 +88,7 @@ test("capas completas, vista previa, historial y resolución sin herencia", asyn
     timeout: 60000,
   });
   await confirmar.getByRole("button", { name: "Guardar versión" }).click();
-  await expect(confirmar).toHaveCount(0);
+  await cerrado(confirmar);
   await expect(page.getByLabel("Versiones por vigencia")).toBeVisible();
   expect(await sinDesborde(page)).toBe(true);
   await page.screenshot({
@@ -105,7 +114,7 @@ test("capas completas, vista previa, historial y resolución sin herencia", asyn
   await rut.getByLabel("Motivo obligatorio").fill("Acuerdo individual de prueba E2E");
   await rut.getByRole("button", { name: "Revisar cambio" }).click();
   await confirmar.getByRole("button", { name: "Guardar versión" }).click();
-  await expect(confirmar).toHaveCount(0);
+  await cerrado(confirmar);
   await page.goto(`/personas/${persona}/sueldo?fecha=${fecha}&instalacion=${instalacion}`);
   await expect(
     page

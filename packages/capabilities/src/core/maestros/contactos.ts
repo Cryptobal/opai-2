@@ -15,7 +15,7 @@ import {
   vista,
 } from "./contactos-vista";
 import { cuentaDe } from "./cuentas";
-import { exigirNoAnonimizado } from "./anonimizado";
+import { bloquearNoAnonimizado, exigirNoAnonimizado } from "./anonimizado";
 
 export const contactosList = defineCapability({
   auditarLectura: (s) => s.map((c) => c.id),
@@ -120,6 +120,7 @@ export const contactosUpdate = defineCapability({
       ctx,
       { tipo: "core.contacto.actualizado", entidadTipo: "contacto" },
       async (tx) => {
+        await bloquearNoAnonimizado(tx, "contacto", id);
         const r = await tx.contacto.update({ where: { id }, data });
         if (r.esPrincipal) await unicoPrincipal(tx, r.cuentaId, r.id);
         return r;

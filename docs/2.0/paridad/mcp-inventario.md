@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 223 pares pantalla→capacidad · 201 con herramienta · 22 excepciones justificadas · 0 faltantes.
+**Resumen:** 244 pares pantalla→capacidad · 210 con herramienta · 34 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -33,6 +33,10 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/_components` | `core.config.buscar` | `core_config_buscar` | existe |
 | compartido | `app/_components` | `core.config.get` | `core_config_get` | existe |
 | compartido | `app/_components` | `core.config.set` | `core_config_set` | existe |
+| compartido | `app/_components` | `core.cumplimiento.consentimiento_registrar` | — | excepción |
+| compartido | `app/_components` | `core.cumplimiento.consentimiento_revocar` | — | excepción |
+| compartido | `app/_components` | `core.cumplimiento.consentimientos_listar` | `core_cumplimiento_consentimientos_listar` | existe |
+| compartido | `app/_components` | `core.cumplimiento.solicitud_crear` | — | excepción |
 | compartido | `app/_components` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
 | compartido | `app/_components` | `core.documentos.archive` | `core_documentos_archive` | existe |
 | compartido | `app/_components` | `core.documentos.confirmar_subida` | `core_documentos_confirmar_subida` | existe |
@@ -74,6 +78,22 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/comunicaciones/_componentes` | `core.plantillas.update` | `core_plantillas_update` | existe |
 | compartido | `app/(erp)/configuracion/consumos/_componentes` | `core.consumos.por_agente` | `core_consumos_por_agente` | existe |
 | compartido | `app/(erp)/configuracion/consumos/_componentes` | `core.consumos.resumen` | `core_consumos_resumen` | existe |
+| compartido | `app/(erp)/configuracion/cumplimiento/_componentes` | `core.cumplimiento.dpa_aceptar` | — | excepción |
+| compartido | `app/(erp)/configuracion/cumplimiento/_componentes` | `core.cumplimiento.dpa_texto` | `core_cumplimiento_dpa_texto` | existe |
+| compartido | `app/(erp)/configuracion/cumplimiento/_componentes` | `core.cumplimiento.dpo_set` | — | excepción |
+| compartido | `app/(erp)/configuracion/cumplimiento/_componentes` | `core.cumplimiento.estado` | `core_cumplimiento_estado` | existe |
+| compartido | `app/(erp)/configuracion/cumplimiento/_componentes` | `core.cumplimiento.incidente_avanzar` | — | excepción |
+| compartido | `app/(erp)/configuracion/cumplimiento/_componentes` | `core.cumplimiento.incidente_notificar` | — | excepción |
+| compartido | `app/(erp)/configuracion/cumplimiento/_componentes` | `core.cumplimiento.incidente_registrar` | — | excepción |
+| compartido | `app/(erp)/configuracion/cumplimiento/_componentes` | `core.cumplimiento.incidentes_listar` | `core_cumplimiento_incidentes_listar` | existe |
+| compartido | `app/(erp)/configuracion/cumplimiento/_componentes` | `core.cumplimiento.rat` | `core_cumplimiento_rat` | existe |
+| compartido | `app/(erp)/configuracion/cumplimiento/_componentes` | `core.cumplimiento.solicitud_avanzar` | — | excepción |
+| compartido | `app/(erp)/configuracion/cumplimiento/_componentes` | `core.cumplimiento.solicitud_exportar` | — | excepción |
+| compartido | `app/(erp)/configuracion/cumplimiento/_componentes` | `core.cumplimiento.solicitud_obtener` | `core_cumplimiento_solicitud_obtener` | existe |
+| compartido | `app/(erp)/configuracion/cumplimiento/_componentes` | `core.cumplimiento.solicitud_resolver` | — | excepción |
+| compartido | `app/(erp)/configuracion/cumplimiento/_componentes` | `core.cumplimiento.solicitudes_listar` | `core_cumplimiento_solicitudes_listar` | existe |
+| compartido | `app/(erp)/configuracion/cumplimiento/_componentes` | `core.cumplimiento.titular_anonimizar` | — | excepción |
+| compartido | `app/(erp)/configuracion/cumplimiento/_componentes` | `core.documentos.url_descarga` | `core_documentos_url_descarga` | existe |
 | compartido | `app/(erp)/configuracion/integraciones/_componentes` | `core.integraciones.configurar` | — | excepción |
 | compartido | `app/(erp)/configuracion/integraciones/_componentes` | `core.integraciones.probar` | `core_integraciones_probar` | existe |
 | compartido | `app/(erp)/configuracion/integraciones/_componentes` | `core.integraciones.set_secreto` | — | excepción |
@@ -165,6 +185,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/comunicaciones/[evento]` | `core.plantillas.get` | `core_plantillas_get` | existe |
 | erp | `/configuracion/comunicaciones` | `core.comunicaciones.eventos` | `core_comunicaciones_eventos` | existe |
 | erp | `/configuracion/comunicaciones` | `core.notificacion_reglas.list` | `core_notificacion_reglas_list` | existe |
+| erp | `/configuracion/cumplimiento/retencion` | `core.cumplimiento.retencion_politica` | `core_cumplimiento_retencion_politica` | existe |
 | erp | `/configuracion/documentos` | `core.documento_tipos.create` | `core_documento_tipos_create` | existe |
 | erp | `/configuracion/documentos` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
 | erp | `/configuracion/documentos` | `core.documento_tipos.update` | `core_documento_tipos_update` | existe |
@@ -331,18 +352,18 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.apikeys.update` | `/configuracion/agentes/[id]` | no | reservada a personas |
 | `core.aprobaciones.aprobar` | `/configuracion/aprobaciones` | no | reservada a personas |
 | `core.aprobaciones.rechazar` | `/configuracion/aprobaciones` | no | reservada a personas |
-| `core.cumplimiento.consentimiento_registrar` | sin pantalla todavía · CAR-39 · desde 2026-10-28 | no | reservada a personas |
-| `core.cumplimiento.consentimiento_revocar` | sin pantalla todavía · CAR-39 · desde 2026-10-28 | no | reservada a personas |
-| `core.cumplimiento.dpa_aceptar` | sin pantalla todavía · CAR-39 · desde 2026-10-28 | no | reservada a personas |
-| `core.cumplimiento.dpo_set` | sin pantalla todavía · CAR-39 · desde 2026-10-28 | no | reservada a personas |
-| `core.cumplimiento.incidente_avanzar` | sin pantalla todavía · CAR-39 · desde 2026-10-28 | no | reservada a personas |
-| `core.cumplimiento.incidente_notificar` | sin pantalla todavía · CAR-39 · desde 2026-10-28 | no | reservada a personas |
-| `core.cumplimiento.incidente_registrar` | sin pantalla todavía · CAR-39 · desde 2026-10-28 | no | reservada a personas |
-| `core.cumplimiento.solicitud_avanzar` | sin pantalla todavía · CAR-39 · desde 2026-10-28 | no | reservada a personas |
-| `core.cumplimiento.solicitud_crear` | sin pantalla todavía · CAR-39 · desde 2026-10-28 | no | reservada a personas |
-| `core.cumplimiento.solicitud_exportar` | sin pantalla todavía · CAR-39 · desde 2026-10-28 | no | reservada a personas |
-| `core.cumplimiento.solicitud_resolver` | sin pantalla todavía · CAR-39 · desde 2026-10-28 | no | reservada a personas |
-| `core.cumplimiento.titular_anonimizar` | sin pantalla todavía · CAR-39 · desde 2026-10-28 | no | reservada a personas |
+| `core.cumplimiento.consentimiento_registrar` | `app/_components` | no | reservada a personas |
+| `core.cumplimiento.consentimiento_revocar` | `app/_components` | no | reservada a personas |
+| `core.cumplimiento.dpa_aceptar` | `app/(erp)/configuracion/cumplimiento/_componentes` | no | reservada a personas |
+| `core.cumplimiento.dpo_set` | `app/(erp)/configuracion/cumplimiento/_componentes` | no | reservada a personas |
+| `core.cumplimiento.incidente_avanzar` | `app/(erp)/configuracion/cumplimiento/_componentes` | no | reservada a personas |
+| `core.cumplimiento.incidente_notificar` | `app/(erp)/configuracion/cumplimiento/_componentes` | no | reservada a personas |
+| `core.cumplimiento.incidente_registrar` | `app/(erp)/configuracion/cumplimiento/_componentes` | no | reservada a personas |
+| `core.cumplimiento.solicitud_avanzar` | `app/(erp)/configuracion/cumplimiento/_componentes` | no | reservada a personas |
+| `core.cumplimiento.solicitud_crear` | `app/_components` | no | reservada a personas |
+| `core.cumplimiento.solicitud_exportar` | `app/(erp)/configuracion/cumplimiento/_componentes` | no | reservada a personas |
+| `core.cumplimiento.solicitud_resolver` | `app/(erp)/configuracion/cumplimiento/_componentes` | no | reservada a personas |
+| `core.cumplimiento.titular_anonimizar` | `app/(erp)/configuracion/cumplimiento/_componentes` | no | reservada a personas |
 | `core.excepciones.set` | `/configuracion/usuarios` | sí (portal ERP) | reservada a personas |
 | `core.integraciones.configurar` | `app/(erp)/configuracion/integraciones/_componentes` | no | reservada a personas |
 | `core.integraciones.set_secreto` | `app/(erp)/configuracion/integraciones/_componentes` | no | reservada a personas |
@@ -364,14 +385,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.bitacora.verificar`
 - `core.consumos.por_recurso`
 - `core.contactos.archive`
-- `core.cumplimiento.consentimientos_listar`
-- `core.cumplimiento.dpa_texto`
-- `core.cumplimiento.estado`
-- `core.cumplimiento.incidentes_listar`
-- `core.cumplimiento.rat`
-- `core.cumplimiento.retencion_politica`
-- `core.cumplimiento.solicitud_obtener`
-- `core.cumplimiento.solicitudes_listar`
 - `core.documentos.desvincular`
 - `core.documentos.vencimientos`
 - `core.documentos.vincular`

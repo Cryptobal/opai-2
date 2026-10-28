@@ -76,12 +76,20 @@ describe("catálogo de retención", () => {
     expect(reglaDe("login_intentos")).toMatchObject({ gestion: "externa", diasPropuestos: 30 });
   });
 
+  it("los textos que ve el cliente no traen jerga interna ni nombres de personas", () => {
+    const jerga = /ADR-|append-only|core\.|\bB\d+\b|brief|07[cd]|Carlos|Claude|PENDIENTE|PROPUESTA|_/;
+    for (const r of POLITICA_RETENCION) {
+      expect(r.nombre, r.clave).not.toMatch(jerga);
+      for (const dias of [0, 30]) expect(describirRegla(r, dias), r.clave).not.toMatch(jerga);
+    }
+  });
+
   it("describe cada tipo de regla para el RAT", () => {
     const personas = reglaDe("personas");
     expect(personas && describirRegla(personas, 1825)).toMatch(/Anonimizar a los 1825 días/);
     expect(personas && describirRegla(personas, 0)).toMatch(/Sin vencimiento/);
     const aud = reglaDe("audit_events");
-    expect(aud && describirRegla(aud, 0)).toMatch(/hecho regulado/);
+    expect(aud && describirRegla(aud, 0)).toMatch(/Se conserva, no se borra/);
   });
 });
 
