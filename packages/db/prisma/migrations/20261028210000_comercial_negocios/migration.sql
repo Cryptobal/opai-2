@@ -3,6 +3,11 @@
 -- a core.tenants va aquí (los modelos no llevan @relation a Tenant). Referencias al mismo tenant por
 -- trigger (reutiliza core.verificar_mismo_tenant). Estado del negocio derivado del tipo de la etapa.
 
+-- Fecha posterior a la última migración de main (20261028200000): va después de Puestos y de
+-- force_rls, así que cada tabla nueva se crea con ENABLE + FORCE ROW LEVEL SECURITY.
+BEGIN;
+SET LOCAL lock_timeout = '5s';
+
 -- CreateSchema
 CREATE SCHEMA IF NOT EXISTS "comercial";
 
@@ -225,46 +230,55 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA "comercial" GRANT USAGE, SELECT ON SEQUENCES 
 -- Row-Level Security: una sola política tenant_isolation por tabla, TO opai_app.
 -- ---------------------------------------------------------------------------
 ALTER TABLE "comercial"."embudos" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "comercial"."embudos" FORCE ROW LEVEL SECURITY;
 CREATE POLICY tenant_isolation ON "comercial"."embudos" AS PERMISSIVE FOR ALL TO opai_app
   USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
   WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
 
 ALTER TABLE "comercial"."etapas" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "comercial"."etapas" FORCE ROW LEVEL SECURITY;
 CREATE POLICY tenant_isolation ON "comercial"."etapas" AS PERMISSIVE FOR ALL TO opai_app
   USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
   WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
 
 ALTER TABLE "comercial"."negocios" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "comercial"."negocios" FORCE ROW LEVEL SECURITY;
 CREATE POLICY tenant_isolation ON "comercial"."negocios" AS PERMISSIVE FOR ALL TO opai_app
   USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
   WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
 
 ALTER TABLE "comercial"."negocio_instalaciones" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "comercial"."negocio_instalaciones" FORCE ROW LEVEL SECURITY;
 CREATE POLICY tenant_isolation ON "comercial"."negocio_instalaciones" AS PERMISSIVE FOR ALL TO opai_app
   USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
   WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
 
 ALTER TABLE "comercial"."negocio_contactos" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "comercial"."negocio_contactos" FORCE ROW LEVEL SECURITY;
 CREATE POLICY tenant_isolation ON "comercial"."negocio_contactos" AS PERMISSIVE FOR ALL TO opai_app
   USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
   WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
 
 ALTER TABLE "comercial"."negocio_etapas" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "comercial"."negocio_etapas" FORCE ROW LEVEL SECURITY;
 CREATE POLICY tenant_isolation ON "comercial"."negocio_etapas" AS PERMISSIVE FOR ALL TO opai_app
   USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
   WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
 
 ALTER TABLE "comercial"."tipos_negocio" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "comercial"."tipos_negocio" FORCE ROW LEVEL SECURITY;
 CREATE POLICY tenant_isolation ON "comercial"."tipos_negocio" AS PERMISSIVE FOR ALL TO opai_app
   USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
   WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
 
 ALTER TABLE "comercial"."origenes_negocio" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "comercial"."origenes_negocio" FORCE ROW LEVEL SECURITY;
 CREATE POLICY tenant_isolation ON "comercial"."origenes_negocio" AS PERMISSIVE FOR ALL TO opai_app
   USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
   WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
 
 ALTER TABLE "comercial"."motivos_perdida" ENABLE ROW LEVEL SECURITY;
+ALTER TABLE "comercial"."motivos_perdida" FORCE ROW LEVEL SECURITY;
 CREATE POLICY tenant_isolation ON "comercial"."motivos_perdida" AS PERMISSIVE FOR ALL TO opai_app
   USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
   WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
@@ -339,3 +353,5 @@ CREATE TRIGGER inmutable BEFORE UPDATE OR DELETE ON "comercial"."negocio_etapas"
   FOR EACH ROW EXECUTE FUNCTION "comercial"."historial_inmutable"();
 CREATE TRIGGER inmutable_statement BEFORE TRUNCATE ON "comercial"."negocio_etapas"
   FOR EACH STATEMENT EXECUTE FUNCTION "comercial"."historial_inmutable"();
+
+COMMIT;
