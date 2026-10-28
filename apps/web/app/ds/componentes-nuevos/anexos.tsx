@@ -12,7 +12,9 @@ export function MuestraAnexos() {
       <AvisoAnexo estado="borrador" motivoCambio="monto" />
       <AvisoAnexo estado="aprobado" motivoCambio="instalacion" />
       <AvisoAnexo estado="rechazado" motivoCambio="capa" motivoRechazo="No corresponde todavía." />
-      <DocumentoBorrador filas={filas} />
+      <DocumentoBorrador filas={filas} estado="borrador" />
+      <DocumentoBorrador filas={filas} estado="aprobado" />
+      <DocumentoBorrador filas={filas} estado="rechazado" />
       <PanelAprobacion
         pendiente={false}
         error={null}

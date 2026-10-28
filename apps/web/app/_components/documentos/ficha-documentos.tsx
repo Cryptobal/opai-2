@@ -91,7 +91,7 @@ export async function FichaDocumentos({
                       <span className="block truncate text-base font-medium text-fg">
                         {d.titulo ?? d.nombre}
                       </span>
-                      <span className="block truncate text-sm text-fg-muted">
+                      <span className="block text-sm text-fg-muted sm:truncate">
                         {[
                           d.tipo,
                           d.emitidoEn ? `emitido ${fecha(d.emitidoEn)}` : null,
@@ -102,6 +102,11 @@ export async function FichaDocumentos({
                           .filter(Boolean)
                           .join(" · ")}
                       </span>
+                      <Vigencia
+                        estado={d.vigencia}
+                        dias={diasHasta(d.venceEn)}
+                        className="mt-1 sm:hidden"
+                      />
                     </span>
                     <Vigencia
                       estado={d.vigencia}

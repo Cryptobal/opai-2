@@ -5,7 +5,7 @@ import type { Contexto } from "../../types";
 import { dondePersona } from "../maestros/alcance";
 
 const error = () =>
-  reglaDeNegocio("Las referencias del anexo no corresponden al vínculo vigente.");
+  reglaDeNegocio("Las referencias del anexo no corresponden a los vínculos de la persona.");
 
 function estructuraIdsDe(snapshots: unknown[]): string[] {
   const ids = new Set<string>();

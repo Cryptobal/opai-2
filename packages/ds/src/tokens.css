@@ -64,6 +64,13 @@
   --ds-shadow-thumb: 0 1px 2px rgba(0, 0, 0, 0.2);
   --ds-shadow-seg: 0 1px 2px rgba(0, 0, 0, 0.06);
 
+  /* Papel de documento (anexo de contrato, D15): es el papel del contrato, no la UI, así que no
+     cambia con el tema; por eso solo vive aquí y no en los bloques oscuros. */
+  --ds-paper: #ffffff;
+  --ds-paper-fg: #111111;
+  --ds-paper-rule: #dddddd;
+  --ds-paper-rule-subtle: #eeeeee;
+
   /* Movimiento */
   --ds-ease: cubic-bezier(0.2, 0, 0, 1);
   --ds-dur-fast: 150ms;
@@ -181,6 +188,10 @@
   --color-destructive-bg: var(--ds-destructive-bg);
   --color-destructive-fg: var(--ds-destructive-fg);
   --color-scrim: var(--ds-scrim);
+  --color-paper: var(--ds-paper);
+  --color-paper-fg: var(--ds-paper-fg);
+  --color-paper-rule: var(--ds-paper-rule);
+  --color-paper-rule-subtle: var(--ds-paper-rule-subtle);
 
   /* Tipografía: Inter (texto) y JetBrains Mono (RUT, folios, montos en planillas) */
   --font-sans:
