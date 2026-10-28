@@ -397,3 +397,73 @@ Los resultados finales del gate y el head se dejan en `PR-BODY.md`, sin versiona
 ### Corrección de montos de QA del PR #80
 
 Encargo de corrección: los montos nuevos se validan como pesos enteros entre 0 y 100.000.000 por concepto, sin reinterpretar texto inválido; los porcentajes conservan su regla. Codex implementa el tope indicado en el encargo y acepta puntos únicamente como separadores chilenos de miles. La vista previa identifica conceptos nuevos y muestra los montos en pesos. La validación y pruebas del cambio quedan detalladas en el PR.
+
+## Construcción del PR 3 — vínculo laboral y jornada pactada (27-oct-2026)
+
+Implementación de Codex en `brief/07b-pr3-vinculo-jornada`, encargo de continuidad
+CAR-19. No modifica el retiro de cargo (PR 2) ni construye el anexo (PR 4).
+
+- **Bloque 6:** migración aditiva `20261028190000_vinculo_instalacion_jornada`,
+  posterior a `20261028180000_capa_instalacion_sueldo` de main. Sustituye el
+  timestamp previsto `20261028110000`, ya ocupado. Agrega instalación, puesto
+  opcional, horas semanales enteras y distribución. Conserva `tenant_id`, RLS
+  ENABLE/FORCE, `tenant_isolation` e índice único parcial de vínculo vigente.
+  FKs y triggers comprueban tenant y pertenencia del puesto a la instalación;
+  un puesto referenciado no se traslada silenciosamente. Sin backfill inventado:
+  columnas históricas nulables; toda alta/edición por capacidad exige instalación
+  y jornada completas. Carlos aplica en Neon; etiqueta lógica `migracion-pendiente`.
+- **Bloque 7:** `core.vinculos.list/create/update/terminar` usa las familias
+  `core:vinculos.read/manage`; edición owner/admin (D8), respetando denegaciones y
+  concesiones de 07c. El alta embebida en `core.personas.create` verifica también
+  el permiso del vínculo. Nueva lectura `core.vinculos.previsualizar`, con permiso
+  de estructuras adicional, compara capa/versión/conceptos actuales y propuestos,
+  ocultando los montos con el criterio salarial existente. Snapshot MCP actualizado.
+  La resolución y el panel toman instalación/puesto del vínculo vigente por defecto;
+  el contexto explícito sigue disponible como simulación. Se levanta §16.d para
+  esta fuente real. El impacto cuenta personas relacionadas sin capa más específica;
+  solo contratos sin instalación quedan en `pendientesVinculo`.
+- **Bloque 8:** Laboral muestra instalación, puesto, jornada, capa e historial;
+  Sheet de edición con validación, vista previa, guardando y error, DS OPAI 2.0.
+  La carga consolidada conserva los estados de ficha y las hojas se descargan al
+  abrirlas. Nuevas altas también recogen instalación y jornada. Supervisor obtiene
+  personas/documentos por vínculo vigente de una instalación a cargo, sin atribuir
+  alcance por cargo, correo ni vínculo documental secundario. Se reactiva el caso
+  positivo NÚCLEO-D2 y se conserva el negativo fuera de alcance.
+
+**Decisiones técnicas de Codex en este encargo (no son decisiones de Carlos):**
+
+1. Horas enteras entre 1 y 168 y distribución de 1–200 caracteres: límite físico
+   y de entrada, no certificación de cumplimiento laboral ni catálogo de patrones.
+   Se guardan las horas pactadas, sin inferirlas de Operaciones.
+2. Bloqueo de vínculo al editar/terminar y bloqueo compartido de referencias dentro
+   de la transacción auditada. La UI envía la versión `updatedAt` que revisó y se
+   rechaza una edición obsoleta; los controles no cambian durante la comparación.
+3. `core.vinculo.actualizado` lleva snapshots contractuales antes/después en outbox,
+   atómicos con la escritura. PR 4 consumirá el evento; aquí no se promete un
+   borrador ya generado ni se inventa un texto legal.
+4. La migración no endurece columnas históricas sin backfill: no hay fuente válida
+   para asignar instalaciones a contratos anteriores. No se ejecuta en Neon.
+
+**Criterios de aceptación de este PR:** CA-3 se cubre con persistencia, un vínculo
+vigente y comparación de capa al cambiar instalación/puesto; CA-1 se amplía al
+contexto real del vínculo. CA-2 pertenece al PR 2 y CA-4 al PR 4; no se declaran
+cumplidos por este PR. Las pruebas y la evidencia definitiva del gate se registran
+al cierre en `PR-BODY.md` (local, sin commitear).
+
+**Precisiones de autorrevisión:** el flujo documental del Supervisor comprueba
+alcance también al iniciar/vincular/confirmar una subida y al listar duplicados por
+huella. Una referencia documental secundaria no amplía acceso. La fecha «Desde»
+de la hoja corresponde al `inicio` del vínculo existente; no introduce una cola de
+traslados futuros ni modifica el modelo de Operaciones. La prueba de conflicto
+muestra un error recuperable ante una versión obsoleta. La autorrevisión por
+subagente cerró los hallazgos de seguridad; no sustituye al Revisor externo.
+
+
+**Evidencia local de cierre:** Node 22.23.4; typecheck de todos los workspaces
+(concurrencia 1), lint, 1.021 pruebas unitarias, 328 de base (117 db, 186
+capacidades, 25 auth), build y presupuesto sin subir topes. Playwright: 24/24 en
+los dos specs afectados con un worker, sin skips ni reintentos, en producción
+local. Laboral: 7 consultas en los tres tamaños. JS inicial: 164,8 KB Laboral y
+165,8 KB Sueldo (tope 166 KB). Capturas claras y error oscuro en
+`docs/2.0/design/07b/evidencia-pr3/`. Esto no declara CI remoto, revisión externa
+ni aplicación en Neon.

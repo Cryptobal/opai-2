@@ -1,3 +1,4 @@
+import { sembrarAlcanceNav } from "./seed-nav-alcance-e2e";
 // Fixture exclusiva de la base local E2E: usuarios con concesión y denegación explícitas.
 import { hashPassword } from "better-auth/crypto";
 import { cerrarClientes, dbAdmin } from "@opai/db";
@@ -67,6 +68,7 @@ async function main() {
           portales: ["supervisor"],
         },
       });
+      await sembrarAlcanceNav(tx, tenant.id, membership.id);
       await tx.permisoExcepcion.upsert({
         where: {
           membershipId_permiso: { membershipId: membership.id, permiso: "core:documentos.manage" },

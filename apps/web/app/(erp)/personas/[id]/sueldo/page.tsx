@@ -42,8 +42,8 @@ export default function Sueldo(props: {
               puestos={panel.puestos}
             />
             <p className="t-caption">
-              Contexto explícito de consulta; no cambia el vínculo laboral. La instalación y el
-              puesto se seleccionan para esta consulta.
+              Por defecto se usa la instalación y el puesto del vínculo vigente. Cambiar el contexto
+              solo simula otra resolución; no modifica el contrato.
             </p>
             <PilaCapas capa={s.capa} capas={s.niveles} />
             <p className="t-caption">Las capas no se combinan: RUT → puesto → instalación.</p>
@@ -64,8 +64,8 @@ export default function Sueldo(props: {
               </SeccionTarjeta>
             ) : (
               <Alerta tono="neutral" titulo="Sin capa definida">
-                Selecciona una instalación o un puesto explícito, o define un sueldo por RUT. No se
-                inventan montos.
+                Completa la instalación del vínculo o define una capa de sueldo. No se inventan
+                montos.
               </Alerta>
             )}
             {s.estructura?.sensible ? (

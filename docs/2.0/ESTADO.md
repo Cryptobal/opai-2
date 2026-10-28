@@ -109,8 +109,8 @@ No se declara CI, QA remota ni aprobación del head nuevo; Neon sigue sin modifi
 - **PR #78 · integración de ramas (Codex gpt-6.1-terra):** merge normal de main y
   del PR #75; en la integración posterior del squash se conserva la versión de main
   para inbox y su simulador. Ajuste técnico sin decisión de negocio nueva. El E2E
-  positivo de persona con alcance limitado sigue parcial hasta 07b PR 3, capas de
-  sueldo/alcance.
+  positivo de persona con alcance limitado se cubre en la rama 07b PR 3 con el
+  vínculo vigente; su disponibilidad en main depende de integrar ese PR.
 
 - **NÚCLEO-D2 (encargo t457u, apilado sobre #75):** navegación de portales filtrada con los
   permisos efectivos de la identidad ya cargada; ERP conserva el filtrado heredado por permiso de
@@ -732,3 +732,43 @@ Sin cambios de negocio, migraciones, permisos ni plan del ROADMAP.
 ### Corrección de versiones de cargo y bonos
 
 En la rama `fix/version-cargo-bonos`, Codex eligió rechazar el versionado de un cargo sensible sin permiso de lectura sensible, para evitar reemplazar bonos ocultos por una lista vacía. Codex decidió además exigir ese permiso para cambiar la sensibilidad del cargo. Las decisiones y sus criterios están en `briefs/fix-version-cargo-bonos.md`; pendiente de revisión e integración.
+
+### Brief 07b · PR 3 — vínculo laboral, instalación y jornada (CAR-19)
+
+Construcción de Codex, encargo del 27-oct-2026, rama
+`brief/07b-pr3-vinculo-jornada`. Migración aditiva
+`20261028190000_vinculo_instalacion_jornada` (aplicación en Neon a cargo de Carlos;
+`migracion-pendiente`). Vínculos con instalación, puesto opcional y jornada pactada;
+resolución de sueldo desde el contrato vigente; comparación de capas por capacidad
+con paridad API/MCP/UI. Pantallas 22–25 en Laboral con el DS OPAI 2.0. Sin trabajo
+del PR 2 (cargo) ni del PR 4 (anexo).
+
+Decisiones técnicas de Codex: expansión nulable para contratos históricos sin
+inventar backfill, instalación/jornada obligatorias en altas y ediciones, horas
+enteras 1–168 y distribución 1–200 caracteres (validación de entrada, sin afirmar
+cumplimiento legal). Edición owner/admin con permiso `core:vinculos.manage`,
+referencias y cambios bajo bloqueo en transacción auditada, control de edición
+obsoleta con `updatedAt`. Evento `core.vinculo.actualizado` con snapshots para el
+consumidor del PR 4; aún no genera anexos. Detalle en «Construcción del PR 3» del
+brief. Se levanta la limitación §16.d: el impacto usa las relaciones reales y solo
+los contratos históricos sin instalación se cuentan como pendientes de completar.
+
+NÚCLEO-D2: se reactiva el positivo de Supervisor en alcance mediante vínculo
+vigente; los casos sin vínculo, con vínculo terminado, de otra instalación o de otro
+tenant siguen denegados. Los documentos de personas usan al dueño real, sin ampliar
+alcance mediante una referencia documental secundaria. El check local y las capturas
+por viewport se consignan en el cuerpo del PR; esta entrada no afirma integración
+ni CI remoto aprobado.
+
+Autorrevisión de este PR: se cerró la frontera del flujo documental del Supervisor
+(destino, duplicados por huella y confirmación); el traslado del vínculo retira el
+acceso. La fecha de la hoja edita el inicio contractual existente; no programa
+traslados futuros. Estas son adaptaciones técnicas de Codex al modelo del brief.
+
+
+Validación local del PR 3: Node 22.23.4, typecheck/lint, 1.021 unitarias,
+328 pruebas de base en Postgres 16 (117/186/25), build y presupuesto de JS sin
+cambiar topes. Los 24 e2e afectados pasan con un worker, sin skips ni reintentos,
+en el build local de producción; Laboral mide 7 consultas a 375/1024/1280 px.
+Capturas en `design/07b/evidencia-pr3/`. La integración, el CI remoto y la aplicación
+de la migración en Neon no se declaran ejecutados por este encargo.

@@ -60,6 +60,10 @@ export function HojaPersona({ persona, cargos, hoy }: Props) {
   const invalido = invalidoPersona(d) || (!persona && vinculoInvalido(v));
   async function guardar() {
     const vinculo = {
+      instalacionId: v.instalacionId,
+      puestoId: v.puestoId || null,
+      horasSemanales: Number(v.horasSemanales),
+      distribucion: v.distribucion,
       cargoId: v.cargoId,
       tipo: v.tipo,
       inicio: v.inicio,

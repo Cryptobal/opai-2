@@ -52,7 +52,18 @@ for (const conceder of [false, true]) {
   });
 }
 
-test.skip("Supervisor limitado ve acciones para persona en alcance", async () => {
-  // Todavía no existe el vínculo persona-instalación y se deniega toda persona;
-  // se activa en 07b PR 3, capas de sueldo/alcance.
-});
+for (const conceder of [false, true]) {
+  test(`Supervisor limitado ve persona en alcance ${conceder ? "con" : "sin"} acciones documentales`, async ({
+    page,
+  }, info) => {
+    await entrar(page, `supervisor-nav-${conceder ? "concede" : "deniega"}@opai.cl`);
+    await page.goto("/supervisor/personas/00000000-0000-7000-8000-000000000082");
+    await expect(
+      page.getByRole("heading", { name: "Persona En alcance", exact: true, level: 2 }),
+    ).toBeVisible();
+    const subir = page.getByRole("link", { name: "Subir documento" });
+    if (conceder) await expect(subir).toBeVisible();
+    else await expect(subir).toHaveCount(0);
+    await page.screenshot({ path: info.outputPath("supervisor-en-alcance.png"), fullPage: true });
+  });
+}

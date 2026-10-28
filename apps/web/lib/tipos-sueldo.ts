@@ -3,8 +3,13 @@
 export type Nivel = "instalacion" | "puesto" | "persona";
 
 export type Vinculo = {
+  updatedAt?: string | null;
   id: string;
   personaId: string;
+  instalacionId: string | null;
+  puestoId: string | null;
+  horasSemanales: number | null;
+  distribucion: string | null;
   cargoId: string;
   tipo: string;
   inicio: string;

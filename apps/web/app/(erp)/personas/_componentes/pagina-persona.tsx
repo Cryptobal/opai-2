@@ -60,7 +60,10 @@ export function PaginaPersona({ params, searchParams, tab, acciones, children }:
       cargar={async () => {
         const [{ id }, p] = await Promise.all([params, leerParametros(searchParams)]);
         // Solo la lista se espera aquí: la ficha arranca en paralelo y se espera dentro de su propio Suspense.
-        const panel = tab === "sueldo" ? await cargarPanelSueldo("persona", id, p) : undefined;
+        const panel =
+          tab === "sueldo" || tab === "laboral"
+            ? await cargarPanelSueldo("persona", id, p)
+            : undefined;
         const datos = panel
           ? Promise.resolve({ state: "ready" as const, persona: panel.persona })
           : cargarPersona(id);
