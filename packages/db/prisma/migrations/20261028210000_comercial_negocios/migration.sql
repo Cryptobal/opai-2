@@ -285,7 +285,7 @@ CREATE POLICY tenant_isolation ON "comercial"."motivos_perdida" AS PERMISSIVE FO
 
 -- ---------------------------------------------------------------------------
 -- Referencias dentro del mismo tenant (las FK de Postgres no pasan por RLS). Reutiliza la función
--- del núcleo (core.verificar_mismo_tenant, SECURITY DEFINER): pares (columna, tabla referida).
+-- del núcleo (core.verificar_mismo_tenant, SECURITY INVOKER desde force_rls): pares (columna, tabla referida).
 -- ---------------------------------------------------------------------------
 CREATE TRIGGER mismo_tenant BEFORE INSERT OR UPDATE ON "comercial"."etapas"
   FOR EACH ROW EXECUTE FUNCTION "core"."verificar_mismo_tenant"('embudo_id', 'comercial.embudos');
@@ -305,8 +305,11 @@ CREATE TRIGGER mismo_tenant BEFORE INSERT OR UPDATE ON "comercial"."negocio_etap
     'negocio_id', 'comercial.negocios', 'de_etapa_id', 'comercial.etapas', 'a_etapa_id', 'comercial.etapas');
 
 -- La instalación y el contacto de un negocio son de la cuenta del negocio (R16, caso borde §12).
+-- SECURITY INVOKER como los triggers del núcleo tras force_rls: con FORCE el dueño NOBYPASSRLS no ve
+-- filas, así que la función lee con la RLS de quien escribe (opai_app con app.tenant_id). Falla
+-- cerrada si no ve el negocio o la referencia (NULL nunca coincide).
 CREATE OR REPLACE FUNCTION "comercial"."verificar_misma_cuenta"() RETURNS trigger
-LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+LANGUAGE plpgsql SECURITY INVOKER SET search_path = pg_catalog, pg_temp AS $$
 DECLARE
   cuenta_negocio uuid;
   cuenta_ref uuid;
@@ -314,7 +317,7 @@ BEGIN
   SELECT cuenta_id INTO cuenta_negocio FROM "comercial"."negocios" WHERE id = NEW.negocio_id;
   EXECUTE format('SELECT cuenta_id FROM %s WHERE id = $1', TG_ARGV[0])
     INTO cuenta_ref USING (to_jsonb(NEW) ->> TG_ARGV[1])::uuid;
-  IF cuenta_ref IS DISTINCT FROM cuenta_negocio THEN
+  IF cuenta_negocio IS NULL OR cuenta_ref IS NULL OR cuenta_ref <> cuenta_negocio THEN
     RAISE EXCEPTION '%.% no pertenece a la cuenta del negocio', TG_TABLE_NAME, TG_ARGV[1]
       USING ERRCODE = 'foreign_key_violation';
   END IF;
@@ -328,12 +331,18 @@ CREATE TRIGGER misma_cuenta BEFORE INSERT OR UPDATE ON "comercial"."negocio_cont
   FOR EACH ROW EXECUTE FUNCTION "comercial"."verificar_misma_cuenta"('core.contactos', 'contacto_id');
 
 -- El estado del negocio se deriva del tipo de su etapa (R8): abierta->abierto, ganada->ganado, perdida->perdido.
+-- SECURITY INVOKER (ver arriba); si la etapa no es visible para quien escribe, falla en vez de
+-- dejar el negocio «abierto» por omisión.
 CREATE OR REPLACE FUNCTION "comercial"."derivar_estado_negocio"() RETURNS trigger
-LANGUAGE plpgsql SECURITY DEFINER SET search_path = pg_catalog, pg_temp AS $$
+LANGUAGE plpgsql SECURITY INVOKER SET search_path = pg_catalog, pg_temp AS $$
 DECLARE
   t text;
 BEGIN
   SELECT tipo INTO t FROM "comercial"."etapas" WHERE id = NEW.etapa_id;
+  IF t IS NULL THEN
+    RAISE EXCEPTION 'comercial.negocios.etapa_id no visible para el tenant actual'
+      USING ERRCODE = 'foreign_key_violation';
+  END IF;
   NEW.estado := CASE t WHEN 'ganada' THEN 'ganado' WHEN 'perdida' THEN 'perdido' ELSE 'abierto' END;
   RETURN NEW;
 END
