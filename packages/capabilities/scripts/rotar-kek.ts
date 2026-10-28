@@ -12,7 +12,7 @@ async function main(): Promise<void> {
   const k = kekDelEntorno();
   if (!k.actual || !k.anterior)
     throw new Error("Faltan OPAI_SECRETS_KEY y OPAI_SECRETS_KEY_ANTERIOR.");
-  // Escritura condicional por fila: no pisa una rotación de DEK concurrente (`rotar-dek`).
+  // Cada tenant se relee con `FOR UPDATE` en su transacción: no pisa una rotación de DEK (`rotar-dek`).
   const recifradas = await reenvolverDeks(dbAdmin(), {
     actual: k.actual,
     anterior: k.anterior,

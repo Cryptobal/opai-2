@@ -2,48 +2,38 @@ import type { dbAdmin } from "@opai/db";
 import { cifrar, descifrar } from "@opai/integrations";
 
 type Admin = ReturnType<typeof dbAdmin>;
-type Fila = {
-  id: string;
-  dekCifrada: Uint8Array;
-  iv: Uint8Array;
-  tag: Uint8Array;
-  kekVersion: number;
-};
 type Kek = { actual: Buffer; anterior: Buffer; version: number };
 
+const b = (x: Uint8Array) => Uint8Array.from(x);
+
 /**
- * Reenvuelve la DEK de una fila con la KEK nueva (ADR-027) con una escritura CONDICIONAL: solo si la
- * fila sigue siendo la que se leyó (mismo `iv` y versión de KEK). Si entre medio corrió `rotarDek`
- * (que reemplaza la DEK bajo `FOR UPDATE`), el UPDATE espera su commit, ya no coincide y no escribe:
- * así nunca se vuelve a guardar la DEK vieja sobre la nueva (revisión 5689206639, CAR-39).
+ * Reenvuelve la DEK de una fila con la KEK nueva (ADR-027) en una transacción que RELEE la fila con
+ * `SELECT … FOR UPDATE`, el mismo bloqueo que toma `rotarDek`. Así las dos rotaciones se serializan:
+ * si `rotarDek` reemplazó la DEK, se reenvuelve la nueva y nunca se vuelve a guardar la vieja
+ * (revisión 5689206639, CAR-39). Devuelve `false` si la fila ya no existe o ya tiene la KEK nueva.
  */
-export async function reenvolverFila(db: Admin, f: Fila, k: Kek): Promise<boolean> {
-  const dek = descifrar(k.anterior, { cifrado: f.dekCifrada, iv: f.iv, tag: f.tag });
-  const c = cifrar(k.actual, dek);
-  const { count } = await db.claveTenant.updateMany({
-    where: { id: f.id, kekVersion: f.kekVersion, iv: { equals: Uint8Array.from(f.iv) } },
-    data: {
-      dekCifrada: Uint8Array.from(c.cifrado),
-      iv: Uint8Array.from(c.iv),
-      tag: Uint8Array.from(c.tag),
-      kekVersion: k.version,
-    },
+export async function reenvolverFila(db: Admin, id: string, k: Kek): Promise<boolean> {
+  return db.$transaction(async (tx) => {
+    await tx.$queryRaw`SELECT id FROM core.claves_tenant WHERE id = ${id}::uuid FOR UPDATE`;
+    const f = await tx.claveTenant.findUnique({ where: { id } });
+    if (!f || f.kekVersion >= k.version) return false;
+    const dek = descifrar(k.anterior, { cifrado: f.dekCifrada, iv: f.iv, tag: f.tag });
+    const c = cifrar(k.actual, dek);
+    await tx.claveTenant.update({
+      where: { id },
+      data: { dekCifrada: b(c.cifrado), iv: b(c.iv), tag: b(c.tag), kekVersion: k.version },
+    });
+    return true;
   });
-  return count === 1;
 }
 
-/** Reenvuelve todas las DEK con KEK anterior; una fila que cambió entre medio se relee y reintenta. */
+/** Reenvuelve, tenant por tenant, todas las DEK que siguen con una KEK anterior. */
 export async function reenvolverDeks(db: Admin, k: Kek): Promise<number> {
   let recifradas = 0;
-  for (const leida of await db.claveTenant.findMany({ where: { kekVersion: { lt: k.version } } })) {
-    let f: Fila | null = leida;
-    for (let intento = 0; f && f.kekVersion < k.version && intento < 3; intento++) {
-      if (await reenvolverFila(db, f, k)) {
-        recifradas += 1;
-        break;
-      }
-      f = await db.claveTenant.findUnique({ where: { id: leida.id } });
-    }
-  }
+  const filas = await db.claveTenant.findMany({
+    where: { kekVersion: { lt: k.version } },
+    select: { id: true },
+  });
+  for (const { id } of filas) if (await reenvolverFila(db, id, k)) recifradas += 1;
   return recifradas;
 }

@@ -146,24 +146,57 @@ describe.skipIf(!urlPropietario)("cifrado de campos sensibles en base real", () 
     expect(() => recifrarValor({ tenantId: tA, tabla: "fichas_salud", campo: "diagnostico" }, g, nueva, generarDekPrueba())).toThrow();
   }, 60_000);
 
-  it("rotar la KEK con la fila leída antes de una rotación de DEK no pisa la DEK nueva (rev. 5689206639)", async () => {
+  it("rotar la KEK y rotar la DEK cruzadas no guardan la DEK vieja (rev. 5689206639)", async () => {
     const { rotarDek } = await import("../src/core/cumplimiento/rotar-dek");
     const { reenvolverFila } = await import("../scripts/reenvolver-dek");
     const { leerSecreto } = await import("../src/integraciones/secretos");
     const integracionId = (await e.admin.secreto.findFirstOrThrow({ where: { tenantId: tA } })).integracionId;
-    const actual = Buffer.from(process.env["OPAI_SECRETS_KEY"] ?? "", "base64");
-    const version = Number(process.env["OPAI_SECRETS_KEY_VERSION"]);
-    const nueva = randomBytes(32);
-    // `rotar-kek` lee la fila; entre medio, `rotar-dek` reemplaza la DEK y recifra los secretos.
-    const leida = await e.admin.claveTenant.findUniqueOrThrow({ where: { tenantId: tA } });
+    const kekA = () => Buffer.from(process.env["OPAI_SECRETS_KEY"] ?? "", "base64");
+    const verA = () => Number(process.env["OPAI_SECRETS_KEY_VERSION"]);
+    const usar = (kek: Buffer, version: number) =>
+      Object.assign(process.env, { OPAI_SECRETS_KEY: kek.toString("base64"), OPAI_SECRETS_KEY_VERSION: String(version) });
+    const fila = () => e.admin.claveTenant.findUniqueOrThrow({ where: { tenantId: tA } });
+    const dekCon = (kek: Buffer, f: Awaited<ReturnType<typeof fila>>) => kidDe(descifrar(kek, { cifrado: f.dekCifrada, iv: f.iv, tag: f.tag }));
+
+    // 1) Intercalado: `rotar-kek` lista la fila, `rotar-dek` reemplaza la DEK y recién entonces se reenvuelve.
+    let anterior = kekA();
+    let version = verA();
+    let nueva = randomBytes(32);
+    const { id } = await fila();
     await rotarDek(ctx(tA));
-    // La escritura con la fila vieja ya no coincide: no escribe (antes guardaba la DEK vieja).
-    expect(await reenvolverFila(e.admin, leida, { actual: nueva, anterior: actual, version: version + 1 })).toBe(false);
+    const dekRotada = dekCon(anterior, await fila());
+    expect(await reenvolverFila(e.admin, id, { actual: nueva, anterior, version: version + 1 })).toBe(true);
+    expect(dekCon(nueva, await fila())).toBe(dekRotada); // la DEK nueva, no la que se listó
+    usar(nueva, version + 1);
     expect(await leerSecreto(ctx(tA), integracionId, "api_key")).toBe("re_rotar_123");
-    // Releída, se reenvuelve bien y el secreto sigue legible con la KEK nueva.
-    const releida = await e.admin.claveTenant.findUniqueOrThrow({ where: { tenantId: tA } });
-    expect(await reenvolverFila(e.admin, releida, { actual: nueva, anterior: actual, version: version + 1 })).toBe(true);
-    Object.assign(process.env, { OPAI_SECRETS_KEY: nueva.toString("base64"), OPAI_SECRETS_KEY_VERSION: String(version + 1) });
+
+    // 2) Concurrente: las dos rotaciones esperan el mismo bloqueo de fila y luego compiten.
+    anterior = kekA();
+    version = verA();
+    nueva = randomBytes(32);
+    let soltar: () => void = () => undefined;
+    let tomado: () => void = () => undefined;
+    const enEspera = new Promise<void>((r) => (soltar = r));
+    const bloqueado = new Promise<void>((r) => (tomado = r));
+    const bloqueo = e.admin.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT id FROM core.claves_tenant WHERE id = ${id}::uuid FOR UPDATE`;
+      tomado();
+      await enEspera;
+    }, { timeout: 30_000 });
+    await bloqueado;
+    const carrera = Promise.allSettled([
+      rotarDek(ctx(tA)),
+      reenvolverFila(e.admin, id, { actual: nueva, anterior, version: version + 1 }),
+    ]);
+    await new Promise((r) => setTimeout(r, 300));
+    soltar();
+    await bloqueo;
+    const [dek, kek] = await carrera;
+    // El reenvolvido siempre ocurre (antes o después de la DEK nueva); `rotar-dek` puede fallar
+    // cerrado si llega después (la DEK ya está con la KEK nueva), pero nunca deja la DEK vieja.
+    expect(kek).toEqual({ status: "fulfilled", value: true });
+    if (dek.status === "fulfilled") expect(dekCon(nueva, await fila())).toBe(dek.value.kidNuevo);
+    usar(nueva, version + 1);
     expect(await leerSecreto(ctx(tA), integracionId, "api_key")).toBe("re_rotar_123");
   }, 60_000);
 });
