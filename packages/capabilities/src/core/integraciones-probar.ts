@@ -9,6 +9,7 @@ import { PERMISOS_CORE, PERMISOS_PLATAFORMA } from "@opai/domain";
 
 import { defineCapability } from "../define";
 import { noEncontrado } from "../errores";
+import { externo } from "../externo";
 import { correoDe, iaDe } from "../integraciones/adaptadores";
 import { probarGeo } from "./integraciones-probar-geo";
 
@@ -18,7 +19,8 @@ export const integracionesProbar = defineCapability({
     "Prueba la conexión de una integración con su credencial vigente (correo, geolocalización o IA) y guarda el resultado en su estado.",
   permiso: PERMISOS_CORE.integracionesManage,
   input: z.object({ proveedor: z.string() }),
-  output: z.object({ ok: z.boolean(), mensaje: z.string(), latenciaMs: z.number() }),
+  // Ante un error, `mensaje` incluye el texto que devolvió el proveedor (saneado): dato externo.
+  output: z.object({ ok: z.boolean(), mensaje: externo(z.string()), latenciaMs: z.number() }),
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
@@ -36,7 +38,10 @@ export const integracionesProbar = defineCapability({
         // Probar registra estado y evento abajo; evita un segundo aviso desde el resolvedor.
         const ia = await iaDe(ctx, "economica", "core", def.id as ProveedorIaId, { avisar: false });
         if (!ia) throw new Error("Sin credencial de IA disponible.");
-        await ia.completar({ prompt: "Responde solo: ok", maxTokens: 5 });
+        // Holgura para modelos con razonamiento activo por defecto (Haiku 5.5 y posteriores): con
+        // 5 tokens el razonamiento agota el tope antes del texto. Un error del proveedor llega con
+        // su mensaje saneado (sin la key) y se muestra tal cual en pantalla.
+        await ia.completar({ prompt: "Responde solo: ok", maxTokens: 256 });
         mensaje = `Conexión correcta (${ia.proveedor}, ${ia.modelo}).`;
       } else {
         const correo = await correoDe(ctx);

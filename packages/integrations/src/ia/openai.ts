@@ -30,7 +30,7 @@ export function openaiCompatible(
     async conversar(modelo, s) {
       await verificar();
       const r = await pedir(url, { method: "POST", headers: cabeceras(apiKey), body: JSON.stringify(peticion(modelo, s, false)) }, "OpenAI");
-      const d = await cuerpo<RespO>(r, "OpenAI");
+      const d = await cuerpo<RespO>(r, "OpenAI", apiKey);
       const choice = d.choices[0];
       return {
         texto: choice?.message.content ?? "",
@@ -74,7 +74,7 @@ async function* streamOpenai(
   let razon: MotivoTermino = "fin";
   let termino = false;
   const parciales = new Map<number, { id: string; nombre: string; args: string }>();
-  for await (const payload of leerSSE(r, "OpenAI")) {
+  for await (const payload of leerSSE(r, "OpenAI", apiKey)) {
     const ev = JSON.parse(payload) as DeltaSSE;
     if (ev.usage) {
       entrada = ev.usage.prompt_tokens ?? entrada;
