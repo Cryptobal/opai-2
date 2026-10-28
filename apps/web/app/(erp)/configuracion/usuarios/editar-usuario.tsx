@@ -7,6 +7,7 @@ import { Button, Dialog, Sheet, Switch } from "@opai/ds";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
 import { CampoPortales, CampoRol } from "./campos";
+import { InstalacionesACargo } from "./instalaciones-a-cargo";
 import type { Miembro } from "./usuarios-lista";
 
 type Props = { miembro: Miembro | null; onCerrar: () => void; miRol: string };
@@ -69,6 +70,10 @@ function Formulario({ miembro, onCerrar, miRol }: Props & { miembro: Miembro }) 
             activo={activo}
             onCambiar={setActivo}
           />
+          {/* Alcance por filas (CAR-38): solo del rol supervisor guardado; lo fija un owner o admin. */}
+          {miembro.rol === "supervisor" && (miRol === "owner" || miRol === "admin") ? (
+            <InstalacionesACargo membershipId={miembro.id} />
+          ) : null}
         </div>
       </Sheet>
       <Dialog
