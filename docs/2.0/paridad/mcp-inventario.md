@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 235 pares pantalla→capacidad · 206 con herramienta · 29 excepciones justificadas · 0 faltantes.
+**Resumen:** 236 pares pantalla→capacidad · 207 con herramienta · 29 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -133,6 +133,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.vincular_instalacion` | `comercial_negocios_vincular_instalacion` | existe |
 | compartido | `app/(erp)/negocios/_componentes` | `core.cuentas.get` | `core_cuentas_get` | existe |
 | compartido | `app/(erp)/negocios/_componentes` | `core.cuentas.list` | `core_cuentas_list` | existe |
+| compartido | `app/(erp)/negocios/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
 | compartido | `app/(erp)/negocios/_configuracion` | `comercial.config.actualizar_etapa` | `comercial_config_actualizar_etapa` | existe |
 | compartido | `app/(erp)/negocios/_configuracion` | `comercial.config.crear_etapa` | `comercial_config_crear_etapa` | existe |
 | compartido | `app/(erp)/negocios/_configuracion` | `comercial.config.get` | `comercial_config_get` | existe |

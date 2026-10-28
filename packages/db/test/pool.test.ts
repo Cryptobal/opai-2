@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ClienteSerial } from "../src/cliente-serial";
 import { esFalloDeConexion, PoolConReintento } from "../src/pool";
+import { clienteFalso } from "./cliente-falso";
 
 afterEach(() => vi.restoreAllMocks());
 
@@ -41,9 +42,15 @@ describe("ClienteSerial", () => {
 describe("esFalloDeConexion", () => {
   it("reintenta solo fallos rápidos al abrir conexión: nunca timeouts, cupo ni credenciales", () => {
     // Ya esperó el tope completo de connectionTimeoutMillis: reintentar lo duplicaría.
-    expect(esFalloDeConexion(new Error("Connection terminated due to connection timeout"))).toBe(
-      false,
+    const vencido = new Error("Connection terminated due to connection timeout");
+    expect(esFalloDeConexion(vencido)).toBe(false);
+    expect(esFalloDeConexion(vencido, 10_000, 10_000)).toBe(false);
+    // Vencido a los 50 ms de un tope de 10 s: temporizador adelantado tras reanudar la instancia.
+    expect(esFalloDeConexion(vencido, 50, 10_000)).toBe(true);
+    expect(esFalloDeConexion(new Error("timeout exceeded when trying to connect"), 60, 10_000)).toBe(
+      true,
     );
+    expect(esFalloDeConexion(vencido, 50, undefined)).toBe(false);
     expect(esFalloDeConexion(new Error("timeout expired"))).toBe(false);
     expect(esFalloDeConexion(new Error("Connection terminated unexpectedly"))).toBe(true);
     expect(esFalloDeConexion(Object.assign(new Error("x"), { code: "ECONNRESET" }))).toBe(true);
@@ -53,30 +60,6 @@ describe("esFalloDeConexion", () => {
     expect(esFalloDeConexion("texto")).toBe(false);
   });
 });
-
-type AlConectar = ((err: Error) => void) | ((err: null, c: pg.Client) => void);
-
-/** Cliente sin red para pg-pool: cada `connect` consume el siguiente fallo de `fallos`, si hay. */
-function clienteFalso(fallos: Error[]) {
-  return class extends pg.Client {
-    override connect(): Promise<pg.Client>;
-    override connect(cb: AlConectar): void;
-    override connect(cb?: AlConectar): Promise<pg.Client> | void {
-      const err = fallos.shift();
-      const listo = new Promise<pg.Client>((ok, mal) =>
-        setTimeout(() => (err ? mal(err) : ok(this)), 1),
-      );
-      if (!cb) return listo;
-      listo.then(
-        (c) => (cb as (err: null, c: pg.Client) => void)(null, c),
-        (e: Error) => (cb as (err: Error) => void)(e),
-      );
-    }
-    override end(): Promise<void> {
-      return Promise.resolve();
-    }
-  };
-}
 
 describe("PoolConReintento", () => {
   it("reintenta una vez si la conexión nueva se cae al abrir (promesa y callback)", async () => {

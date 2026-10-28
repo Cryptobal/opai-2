@@ -53,9 +53,15 @@ export function configPool(env: NodeJS.ProcessEnv, url: string, aplicacion: bool
   return {
     connectionString: conSslVerificado(url),
     max: entero("DATABASE_POOL_MAX", 10),
-    // Corto: en Vercel `attachDatabasePool` mantiene viva la función este tiempo tras cada consulta.
+    // Corto: en Vercel `attachDatabasePool` mantiene viva la función este tiempo tras cada consulta,
+    // y una conexión que pasa más que esto en el pool se descarta al pedirla (`conexionMuerta`).
     idleTimeoutMillis: entero("DATABASE_POOL_IDLE_TIMEOUT_MS", 5000),
+    // Holgado para el arranque en frío de Neon (la compute suspendida tarda de 0,5 a pocos s en
+    // despertar). Un vencimiento adelantado tras reanudar la instancia se reintenta una vez.
     connectionTimeoutMillis: entero("DATABASE_POOL_CONNECTION_TIMEOUT_MS", 10000),
+    // Sondas TCP desde los 10 s (no las 2 h del sistema): detectan antes un socket que Neon cortó
+    // a mitad de una consulta larga o de una transacción abierta.
     keepAlive: true,
+    keepAliveInitialDelayMillis: 10000,
   };
 }
