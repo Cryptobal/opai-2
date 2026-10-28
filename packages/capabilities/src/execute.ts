@@ -63,9 +63,12 @@ async function correr(
     if (c.auditarLectura && ctx.conTenant) {
       lecturaValidada = await ejecutarLecturaAuditada(ctx, c, entrada.data, modo);
     } else if (c.efecto === "lectura" && ctx.conTenant && ctx.enLectura) {
-      crudo = await ctx.enLectura((db) =>
-        c.handler({ ...ctx, db, transaccion: (fn) => fn(db) }, entrada.data, modo),
-      );
+      crudo = await ctx.enLectura(async (db) => {
+        const alFinal = conAuditoriaAlFinal(ctx, db);
+        const salidaCruda = await c.handler(alFinal.ctx, entrada.data, modo);
+        await alFinal.volcar();
+        return salidaCruda;
+      });
     } else if (auditaAqui) {
       crudo = await ctx.transaccion(async (tx) => {
         const alFinal = conAuditoriaAlFinal(ctx, tx);

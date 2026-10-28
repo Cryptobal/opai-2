@@ -1,6 +1,13 @@
 import { falla } from "./autorizacion";
 import { type ReservaIdempotencia, SALIDA_INVALIDA } from "./idempotencia";
-import type { Actor, Capacidad, Contexto, EventoAuditoria, OpcionesEjecucion, Resultado } from "./types";
+import type {
+  Actor,
+  Capacidad,
+  Contexto,
+  EventoAuditoria,
+  OpcionesEjecucion,
+  Resultado,
+} from "./types";
 
 /** Respuesta a una clave de idempotencia ya usada: el resultado original o un conflicto. */
 export function repeticion(r: Exclude<ReservaIdempotencia, { estado: "nueva" }>): Resultado {
