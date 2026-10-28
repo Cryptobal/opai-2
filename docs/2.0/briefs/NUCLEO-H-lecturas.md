@@ -28,6 +28,9 @@ capacidad y fecha ya son columnas del evento. Se eliminan IDs repetidos.
 | `core.cumplimiento.solicitudes_listar/solicitud_obtener` | ARCO, ya implementado en ce7ffaa; solicitudes reveladas, sin centinela |
 | `core.cumplimiento.incidentes_listar` | Casos de brecha; IDs de los casos de la página |
 | `core.documentos.list` | Metadatos de archivos; solo documentos visibles tras filtros |
+| `comercial.negocios.list/embudo` (Brief 07 · PR 1) | Revelación indirecta del nombre de cuenta; IDs de negocios y de sus cuentas |
+| `comercial.negocios.get` (Brief 07 · PR 1) | Cuenta y contactos del negocio con su rol; negocio, cuenta y contactos devueltos |
+| `comercial.contactos.list` (Brief 07 · PR 1) | Nombre, correo y teléfono (exige además `core:cuentas.read`); contactos y sus cuentas |
 | `core.documentos.get` | Documento y versiones; IDs de todos los documentos revelados |
 | `core.documentos.url_descarga` | Acceso al archivo; ID autorizado del input, nunca la URL |
 | `core.documentos.vencimientos` | Documentos vencidos/por vencer; IDs tras filtro de capa |

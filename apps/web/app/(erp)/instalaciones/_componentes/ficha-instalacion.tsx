@@ -13,7 +13,8 @@ import type { InstalacionDetalle } from "@/lib/tipos-maestros";
 
 import { conFiltrosInstalaciones } from "./filtros-instalaciones";
 
-export type TabInstalacion = "resumen" | "puestos" | "sueldo" | "documentos" | "actividad";
+export type TabInstalacion =
+  "resumen" | "puestos" | "sueldo" | "negocios" | "documentos" | "actividad";
 
 function acciones(i: InstalacionDetalle): AccionEntidad[] {
   const otro = i.estado === "activa" ? "inactiva" : "activa";
@@ -55,6 +56,8 @@ export function FichaInstalacion(p: {
   tab: TabInstalacion;
   persona: string;
   parametros: Parametros;
+  /** Pestaña aportada por Comercial (ADR-041.5): solo con el módulo activo y permiso. */
+  negocios?: boolean;
   children: ReactNode;
 }) {
   const i = p.instalacion;
@@ -107,6 +110,15 @@ export function FichaInstalacion(p: {
             etiqueta: "Sueldo",
             href: conFiltrosInstalaciones(`${base}/sueldo`, p.parametros),
           },
+          ...(p.negocios
+            ? [
+                {
+                  id: "negocios",
+                  etiqueta: "Negocios",
+                  href: conFiltrosInstalaciones(`${base}/negocios`, p.parametros),
+                },
+              ]
+            : []),
           {
             id: "personas",
             etiqueta: p.persona,

@@ -1,6 +1,11 @@
 // Siembra idempotente del catálogo base de un tenant (cargos con su estructura vigente y tipos de
 // documento por capa). La usan `platform.tenants.create` (con `forTenant`) y los scripts de seed.
-import { CARGOS_POR_VERTICAL, esVertical, PATRONES_FABRICA, tiposDocumentoBase } from "@opai/domain";
+import {
+  CARGOS_POR_VERTICAL,
+  esVertical,
+  PATRONES_FABRICA,
+  tiposDocumentoBase,
+} from "@opai/domain";
 
 import type { TenantDb } from "./for-tenant";
 

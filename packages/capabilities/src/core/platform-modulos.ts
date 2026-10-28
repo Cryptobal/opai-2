@@ -9,6 +9,7 @@ import { requierePlataforma } from "./comun";
 import { emailSchema, uuidSchema } from "./esquemas";
 import { invitacionCreadaSchema } from "./invitations";
 import { invitarAdministrador } from "./platform-escritura";
+import { sembrarModulo } from "./siembras-modulo";
 
 const ACTIVOS = new Set(["activo", "trial"]);
 
@@ -54,6 +55,7 @@ export const platformModulesSet = defineCapability({
         update: { estado: input.estado },
         create: { tenantId: input.tenantId, moduloId: input.moduloId, estado: input.estado },
       });
+      if (ACTIVOS.has(input.estado)) await sembrarModulo(input.moduloId, db, input.tenantId);
     }
     return { moduloId: input.moduloId, estado: input.estado, anterior };
   },

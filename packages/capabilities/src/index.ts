@@ -1,4 +1,5 @@
 export { capacidadesDelNucleo, consumidoresDelNucleo, trabajosDelNucleo } from "./core";
+export { ajustesComercial, capacidadesComercial } from "./comercial";
 export { ajuste, defineAjustes, type CampoAjuste, type MetaAjuste } from "./core/config";
 export { cifradoDeCampos, estaCifrado, type CifradoDeCampos } from "./core/cumplimiento/cifrado-campos";
 export { enviarCorreo } from "./core/comunicaciones";

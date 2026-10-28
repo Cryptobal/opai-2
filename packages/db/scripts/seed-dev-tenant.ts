@@ -5,7 +5,7 @@
 import "dotenv/config";
 
 import { cerrarClientes, dbAdmin } from "../src/index";
-import { sembrarCatalogo, sembrarPrecios } from "./catalogo-tenant";
+import { sembrarCatalogo, sembrarComercial, sembrarPrecios } from "./catalogo-tenant";
 import { sembrarFuncionesBase } from "./funciones-base";
 
 async function main(): Promise<void> {
@@ -17,6 +17,13 @@ async function main(): Promise<void> {
   });
   await sembrarCatalogo(db.$extends({}), tenant.id, tenant.vertical);
   await sembrarFuncionesBase(db.$extends({}), tenant.id, tenant.vertical);
+  await sembrarComercial(db.$extends({}), tenant.id);
+  // Activa el módulo Comercial para el tenant de desarrollo (navegación, configuración y capacidades).
+  await db.tenantModule.upsert({
+    where: { tenantId_moduloId: { tenantId: tenant.id, moduloId: "comercial" } },
+    update: {},
+    create: { tenantId: tenant.id, moduloId: "comercial", estado: "activo" },
+  });
   await sembrarPrecios(db);
   console.log(`Tenant ${tenant.slug} listo con catálogo base. DEV_TENANT_ID=${tenant.id}`);
 }

@@ -43,13 +43,16 @@ export function accionesCuenta(c: CuentaDetalle): AccionEntidad[] {
   ];
 }
 
-export type TabCuenta = "resumen" | "contactos" | "instalaciones" | "documentos" | "actividad";
+export type TabCuenta =
+  "resumen" | "contactos" | "instalaciones" | "negocios" | "documentos" | "actividad";
 
 /** Ficha de una cuenta (03/04): estado, nombre, razón social y RUT; tabs por ruta. */
 export function FichaCuenta(p: {
   state: EstadoPantalla;
   cuenta: CuentaDetalle | null;
   tab: TabCuenta;
+  /** Pestaña aportada por Comercial (ADR-041.5): solo con el módulo activo y permiso. */
+  negocios?: boolean;
   children: ReactNode;
 }) {
   const c = p.cuenta;
@@ -105,6 +108,9 @@ export function FichaCuenta(p: {
             contador: c?.instalaciones.length ?? 0,
             href: `${base}/instalaciones`,
           },
+          ...(p.negocios
+            ? [{ id: "negocios", etiqueta: "Negocios", href: `${base}/negocios` }]
+            : []),
           {
             id: "documentos",
             etiqueta: "Documentos",

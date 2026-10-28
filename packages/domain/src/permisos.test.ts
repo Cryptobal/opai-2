@@ -50,8 +50,10 @@ const TABLA: Record<string, Record<Rol, boolean>> = {
     supervisor: false,
     viewer: false,
   },
-  "crm:read": { owner: true, admin: true, gerente: true, supervisor: false, viewer: true },
-  "crm:write": { owner: true, admin: true, gerente: true, supervisor: false, viewer: false },
+  "comercial:negocios.read": { owner: true, admin: true, gerente: true, supervisor: false, viewer: true },
+  "comercial:negocios.manage": { owner: true, admin: true, gerente: true, supervisor: false, viewer: false },
+  // Embudo y catálogos: solo owner y admin (BRIEF-07, comercial.md §7).
+  "comercial:config.manage": { owner: true, admin: true, gerente: false, supervisor: false, viewer: false },
   "ops:write": { owner: true, admin: true, gerente: true, supervisor: true, viewer: false },
   "rondas:write": { owner: true, admin: true, gerente: true, supervisor: true, viewer: false },
   "personas:read": { owner: true, admin: true, gerente: true, supervisor: true, viewer: true },
@@ -111,28 +113,28 @@ describe("tienePermisoPlataforma", () => {
 
 describe("comodines", () => {
   it("* coincide con cualquier secuencia y el resto es literal", () => {
-    expect(coincide("*", "crm:lead.create")).toBe(true);
-    expect(coincide("crm:*", "crm:lead.create")).toBe(true);
-    expect(coincide("crm:*", "cpq:read")).toBe(false);
-    expect(coincide("*:read", "crm:read")).toBe(true);
-    expect(coincide("*:read", "crm:lead.read")).toBe(false);
-    expect(coincide("*:*.read", "crm:lead.read")).toBe(true);
+    expect(coincide("*", "comercial:negocio.create")).toBe(true);
+    expect(coincide("comercial:*", "comercial:negocio.create")).toBe(true);
+    expect(coincide("comercial:*", "cpq:read")).toBe(false);
+    expect(coincide("*:read", "comercial:read")).toBe(true);
+    expect(coincide("*:read", "comercial:negocio.read")).toBe(false);
+    expect(coincide("*:*.read", "comercial:negocio.read")).toBe(true);
     expect(coincide("core:tenant.read", "core:tenantxread")).toBe(false);
   });
 });
 
 describe("permisosDe", () => {
-  const catalogo = ["core:tenant.read", "core:users.manage", "crm:read", "finanzas:read"];
+  const catalogo = ["core:tenant.read", "core:users.manage", "comercial:read", "finanzas:read"];
 
   it("filtra por rol y por módulos activos (core siempre activo)", () => {
-    expect(permisosDe("admin", catalogo, ["crm"])).toEqual([
+    expect(permisosDe("admin", catalogo, ["comercial"])).toEqual([
       "core:tenant.read",
       "core:users.manage",
-      "crm:read",
+      "comercial:read",
     ]);
-    expect(permisosDe("viewer", catalogo, ["crm", "finanzas"])).toEqual([
+    expect(permisosDe("viewer", catalogo, ["comercial", "finanzas"])).toEqual([
       "core:tenant.read",
-      "crm:read",
+      "comercial:read",
     ]);
   });
 });

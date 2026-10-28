@@ -86,9 +86,16 @@ export function entradasAreaPrincipal(
 ): readonly EntradaArea[] {
   const candidatas = grupos.filter((g) => g.area !== "inicio");
   const elegido = candidatas.find((g) => g.area === areaPrincipal);
-  if (!elegido) {
-    const entradas = candidatas.flatMap((g) => g.entradas);
-    return ["/cuentas", "/personas"].flatMap((href) => entradas.filter((e) => e.href === href));
+  const entradas = candidatas.flatMap((g) => g.entradas);
+  const respaldo = ["/cuentas", "/personas"].flatMap((href) =>
+    entradas.filter((e) => e.href === href),
+  );
+  if (!elegido) return respaldo;
+  // Un área con una sola entrada (Comercial hoy: Negocios) se completa con el respaldo, como la
+  // fila Comercial de §3 (Inicio · Negocios · Cuentas) y el lugar libre de la col. 4.
+  if (elegido.entradas.length === 1) {
+    const [unica] = elegido.entradas;
+    return [...elegido.entradas, ...respaldo.filter((e) => e.href !== unica?.href)].slice(0, 3);
   }
-  return elegido?.entradas.slice(0, 3) ?? [];
+  return elegido.entradas.slice(0, 3);
 }

@@ -4,6 +4,7 @@ import { PRECIOS_RECURSOS_BASE } from "@opai/domain";
 import type { PrismaClient } from "../src/generated/prisma/client";
 
 export { sembrarCatalogo } from "../src/catalogo-tenant";
+export { sembrarComercial } from "../src/catalogo-comercial";
 
 const INICIO = new Date("2026-01-01");
 

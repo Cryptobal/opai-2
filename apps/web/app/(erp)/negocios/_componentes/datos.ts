@@ -1,0 +1,88 @@
+import { estadoPantalla } from "@/lib/formato";
+import { requerirEncontrado, requerirUuid } from "@/lib/ids";
+import { leerParametros } from "@/lib/parametros";
+import { ejecutarComoUsuario } from "@/lib/servidor";
+
+export type NegocioFila = {
+  id: string;
+  titulo: string;
+  estado: "abierto" | "ganado" | "perdido";
+  etapaId: string;
+  etapaNombre: string;
+  cuentaNombre: string;
+  montoEstimadoMensual: number | null;
+  valorMensual: number | null;
+  probabilidad: number;
+  cierreEstimado: string | null;
+};
+
+export type Historial = {
+  id: string;
+  de: string | null;
+  a: string;
+  cuando: string;
+  dias: number | null;
+  motivo: string | null;
+};
+
+export type NegocioDetalle = NegocioFila & {
+  cuentaId: string;
+  etapaTipo: string;
+  responsableId: string | null;
+  cotizacionEnviadaEn: string | null;
+  inicioServicioEstimado: string | null;
+  motivoPerdidaDetalle: string | null;
+  competidor: string | null;
+  archivadoEn: string | null;
+  instalaciones: { id: string; instalacionId: string; nombre: string; tipo: string }[];
+  contactos: {
+    id: string;
+    contactoId: string;
+    nombre: string;
+    rol: string;
+    esPrincipal: boolean;
+  }[];
+  historial: Historial[];
+};
+
+type Lista = { items: NegocioFila[]; siguiente: string | null };
+
+/** Lista de negocios filtrada (etapa, estado, responsable) para la columna del embudo/lista. */
+export async function cargarNegocios(f: Record<string, string | undefined>) {
+  const r = await ejecutarComoUsuario<Lista>("erp", "comercial.negocios.list", {
+    limite: 100,
+    ...(f["q"] ? { q: f["q"] } : {}),
+    ...(f["etapa"] ? { etapaId: f["etapa"] } : {}),
+    ...(f["estado"] ? { estado: f["estado"] } : {}),
+  });
+  return { state: estadoPantalla(r), items: r.ok ? r.data.items : [] };
+}
+
+export async function cargarEmbudo() {
+  const r = await ejecutarComoUsuario<{
+    etapas: {
+      id: string;
+      nombre: string;
+      tipo: string;
+      orden: number;
+      probabilidad: number;
+      tono: string;
+    }[];
+    negocios: NegocioFila[];
+  }>("erp", "comercial.negocios.embudo", {});
+  return {
+    state: estadoPantalla(r),
+    etapas: r.ok ? r.data.etapas : [],
+    negocios: r.ok ? r.data.negocios : [],
+  };
+}
+
+export async function cargarNegocio(id: string) {
+  const r = await ejecutarComoUsuario<NegocioDetalle>("erp", "comercial.negocios.get", {
+    id: requerirUuid(id),
+  });
+  requerirEncontrado(r);
+  return { state: estadoPantalla(r), negocio: r.ok ? r.data : null };
+}
+
+export const filtrosDe = leerParametros;

@@ -62,10 +62,13 @@ describe("paridad: toda capacidad tiene herramienta MCP", () => {
 describe("paridad: la UI solo invoca capacidades existentes y públicas", () => {
   it("todo id literal pasado a un ejecutor existe en el registro y no es interno", () => {
     const permitidas = new Set(INTERNAS_PERMITIDAS.map((p) => p.archivo));
+    // Este registro solo tiene el núcleo; los ids de módulos (comercial.*, etc.) los valida el gate
+    // del registro completo en apps/web/test/paridad-registro.test.ts.
+    const delNucleo = (id: string) => id.startsWith("core.") || id.startsWith("platform.");
     const problemas = llamadasAEjecutores().flatMap(({ archivo, ids }) =>
       ids.flatMap((id) => {
         const c = obtenerCapacidad(id);
-        if (!c) return [`${archivo}: "${id}" no existe en el registro`];
+        if (!c) return delNucleo(id) ? [`${archivo}: "${id}" no existe en el registro`] : [];
         if (c.interna && !permitidas.has(archivo)) return [`${archivo}: "${id}" es interna`];
         return [];
       }),

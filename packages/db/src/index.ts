@@ -21,6 +21,7 @@ export {
   type VerificacionAuditoria,
 } from "./auditoria";
 export { type ClienteCatalogo, sembrarCatalogo } from "./catalogo-tenant";
+export { type ClienteComercial, sembrarComercial } from "./catalogo-comercial";
 export { consolidarConsumos, RETENCION_CONSUMOS_DIAS } from "./consumos";
 export { colaDeTrabajos, type ColaDeTrabajos, type TrabajoReclamado } from "./trabajos";
 export { consumirRateLimit, purgarVentanasRateLimit, type ResultadoRateLimit } from "./rate-limit";

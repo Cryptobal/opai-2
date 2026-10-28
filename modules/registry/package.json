@@ -12,7 +12,8 @@
   },
   "dependencies": {
     "@opai/capabilities": "workspace:*",
-    "@opai/mod-agente": "workspace:*"
+    "@opai/mod-agente": "workspace:*",
+    "@opai/mod-comercial": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.9.3"
