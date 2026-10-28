@@ -1,5 +1,5 @@
 import { estadoPantalla } from "@/lib/formato";
-import { requerirEncontrado, requerirUuid } from "@/lib/ids";
+import { esUuid, requerirEncontrado, requerirUuid } from "@/lib/ids";
 import { leerParametros } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
@@ -55,11 +55,27 @@ export async function cargarNegocios(f: Record<string, string | undefined>) {
   const r = await ejecutarComoUsuario<Lista>("erp", "comercial.negocios.list", {
     limite: 100,
     ...(f["q"] ? { q: f["q"] } : {}),
-    ...(f["etapa"] ? { etapaId: f["etapa"] } : {}),
+    ...(f["etapa"] && esUuid(f["etapa"]) ? { etapaId: f["etapa"] } : {}),
     ...(f["estado"] ? { estado: f["estado"] } : {}),
   });
   return { state: estadoPantalla(r), items: r.ok ? r.data.items : [] };
 }
+
+/** Etapas activas del embudo por defecto, en orden (filtro de la lista y «Cambiar etapa» de la ficha). */
+export async function cargarEtapasActivas() {
+  const r = await ejecutarComoUsuario<{
+    embudo: { etapas: { id: string; nombre: string; tipo: string; activa: boolean }[] };
+  }>("erp", "comercial.config.get", {});
+  return r.ok
+    ? r.data.embudo.etapas
+        .filter((e) => e.activa)
+        .map((e) => ({ id: e.id, nombre: e.nombre, tipo: e.tipo }))
+    : [];
+}
+
+/** Opciones del filtro «Etapa» de la lista (`?etapa=`). */
+export const cargarEtapas = async () =>
+  (await cargarEtapasActivas()).map((e) => ({ valor: e.id, etiqueta: e.nombre }));
 
 export async function cargarEmbudo() {
   const r = await ejecutarComoUsuario<{
