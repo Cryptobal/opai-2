@@ -2,21 +2,7 @@ import { expect, type Page, test } from "@playwright/test";
 
 import { entrar } from "./sesion";
 
-/**
- * Gate de rendimiento (ADR-045, Brief 03). Recorre el protocolo de navegación y lee el marcador de
- * servidor `#opai-metricas` (fases, total y consultas a Neon por request).
- *
- * En el PR 1 es un INFORME: siempre exige la presencia del marcador (falla sobre `main`, que no lo
- * emite) y registra las fases, el total y las consultas como anotaciones y en consola. Las metas de
- * total ≤ 500 ms, ≤ 8 consultas y esqueleto ≤ 200 ms solo se comprueban (con `expect.soft`) cuando
- * `GATE_ESTRICTO=1`, porque solo son representativas contra `next start` (los tiempos de `pnpm dev`
- * no lo son). En el PR 2, con los arreglos y el job propio `rendimiento` contra `next start`, se
- * activa `GATE_ESTRICTO` y el gate pasa a obligatorio.
- *
- * El job dedicado (build de producción + `next start` + Lighthouse móvil) no se agrega aquí porque el
- * token de push no tiene permiso `workflow`; mientras tanto este spec corre dentro del job `e2e`
- * existente (contra `pnpm dev`, como informe). El YAML del job va en la descripción del PR.
- */
+/** Gate ADR-045 contra next start: calentamiento autenticado y mediana de tres cargas. */
 const GATE_ESTRICTO = process.env["GATE_ESTRICTO"] === "1";
 
 const MAX_ESQUELETO_MS = 200;
@@ -46,7 +32,10 @@ test.setTimeout(180_000);
 
 /** Lee el marcador de servidor emitido por `MarcadorMetricas`. */
 async function leerMetricas(page: Page): Promise<Metricas | null> {
-  const texto = await page.locator("#opai-metricas").textContent().catch(() => null);
+  const texto = await page
+    .locator("#opai-metricas")
+    .textContent()
+    .catch(() => null);
   if (!texto) return null;
   return JSON.parse(texto) as Metricas;
 }
@@ -55,28 +44,39 @@ test("protocolo ADR-045: Server-Timing y consultas por navegación", async ({ pa
   await entrar(page);
 
   const informe: string[] = [];
+  // Calienta con la sesión real: curl anónimo no alcanza los datos de estas rutas.
+  for (const paso of PROTOCOLO) await page.goto(paso.href, { waitUntil: "load" });
   for (const paso of PROTOCOLO) {
-    // Carga completa del documento: medición estable del servidor (fases, total y consultas).
-    await page.goto(paso.href, { waitUntil: "load" });
-    const m = await leerMetricas(page);
+    const muestras: Metricas[] = [];
+    for (let corrida = 0; corrida < 3; corrida++) {
+      // Carga completa del documento: medición estable del servidor (fases, total y consultas).
+      await page.goto(paso.href, { waitUntil: "load" });
+      const m = await leerMetricas(page);
 
-    // CA6: el marcador (Server-Timing) está presente en toda página de portal. Falla sobre `main`.
-    expect(m, `Falta #opai-metricas en ${paso.nombre}`).not.toBeNull();
-    if (!m) continue;
+      // CA6: el marcador (Server-Timing) está presente en toda página de portal. Falla sobre `main`.
+      expect(m, `Falta #opai-metricas en ${paso.nombre}`).not.toBeNull();
+      if (!m) continue;
 
-    // La instrumentación tiene que estar conectada de punta a punta (no basta con que el marcador
-    // exista): las tres fases medidas, consultas reales y un total desde la marca del proxy. Un
-    // marcador con fases vacías, 0 consultas o `total` ausente (`null`) es un gate que no mide y no
-    // puede pasar; se comprueba siempre, no solo con GATE_ESTRICTO (no es una meta de rendimiento).
-    expect(m.fases.sesion, `${paso.nombre}: falta la fase sesion`).toBeDefined();
-    expect(m.fases.identidad, `${paso.nombre}: falta la fase identidad`).toBeDefined();
-    expect(m.fases.datos, `${paso.nombre}: falta la fase datos`).toBeDefined();
-    expect(m.consultas, `${paso.nombre}: contador de consultas desconectado`).toBeGreaterThan(0);
-    expect(m.totalMs, `${paso.nombre}: total ausente (falta x-opai-t0)`).not.toBeNull();
-    expect(m.totalMs ?? 0, `${paso.nombre}: total en 0 (instrumentación desconectada)`).toBeGreaterThan(0);
+      // La instrumentación tiene que estar conectada de punta a punta (no basta con que el marcador
+      // exista): las tres fases medidas, consultas reales y un total desde la marca del proxy. Un
+      // marcador con fases vacías, 0 consultas o `total` ausente (`null`) es un gate que no mide y no
+      // puede pasar; se comprueba siempre, no solo con GATE_ESTRICTO (no es una meta de rendimiento).
+      expect(m.fases.sesion, `${paso.nombre}: falta la fase sesion`).toBeDefined();
+      expect(m.fases.identidad, `${paso.nombre}: falta la fase identidad`).toBeDefined();
+      expect(m.fases.datos, `${paso.nombre}: falta la fase datos`).toBeDefined();
+      expect(m.consultas, `${paso.nombre}: contador de consultas desconectado`).toBeGreaterThan(0);
+      expect(m.totalMs, `${paso.nombre}: total ausente (falta x-opai-t0)`).not.toBeNull();
+      expect(
+        m.totalMs ?? 0,
+        `${paso.nombre}: total en 0 (instrumentación desconectada)`,
+      ).toBeGreaterThan(0);
 
+      muestras.push(m);
+    }
+    const m = [...muestras].sort((a, b) => (a.totalMs ?? Infinity) - (b.totalMs ?? Infinity))[1];
+    if (!m) throw new Error(`Muestras incompletas en ${paso.nombre}`);
     informe.push(
-      `${paso.nombre.padEnd(18)} total=${String(m.totalMs).padStart(6)}ms  ` +
+      `${paso.nombre.padEnd(18)} muestras=${muestras.map((x) => x.totalMs).join(",")}ms mediana=${String(m.totalMs).padStart(6)}ms  ` +
         `consultas=${String(m.consultas).padStart(2)}  [${m.serverTiming}]`,
     );
     test.info().annotations.push({
@@ -87,7 +87,10 @@ test("protocolo ADR-045: Server-Timing y consultas por navegación", async ({ pa
     // Metas de ADR-045: solo se comprueban con GATE_ESTRICTO (next start); si no, van en el informe.
     if (GATE_ESTRICTO) {
       expect
-        .soft(m.consultas, `${paso.nombre}: más de ${MAX_CONSULTAS} consultas`)
+        .soft(
+          Math.max(...muestras.map((muestra) => muestra.consultas)),
+          `${paso.nombre}: más de ${MAX_CONSULTAS} consultas`,
+        )
         .toBeLessThanOrEqual(MAX_CONSULTAS);
       expect
         .soft(m.totalMs, `${paso.nombre}: Server-Timing total sobre ${MAX_TOTAL_MS} ms`)
@@ -147,7 +150,9 @@ test.fixme("navegación entre módulos: el esqueleto aparece pronto", async ({ p
     type: "rendimiento",
     description: `Personas: esqueleto ${esqueletoTexto}, contenido ${navegacionMs} ms`,
   });
-  console.log(`\nNavegación a Personas: esqueleto=${esqueletoTexto}  contenido=${navegacionMs}ms\n`);
+  console.log(
+    `\nNavegación a Personas: esqueleto=${esqueletoTexto}  contenido=${navegacionMs}ms\n`,
+  );
   // Meta ≤ 200 ms del esqueleto: solo cuando llegó a mostrarse (bajo el umbral no aplica) y en
   // estricto (representativa contra `next start`, no en `pnpm dev`).
   if (GATE_ESTRICTO && esqueletoMs !== null) {
