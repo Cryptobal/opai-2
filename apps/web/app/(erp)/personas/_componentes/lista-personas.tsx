@@ -1,8 +1,7 @@
-import { CalendarClock, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 
 import { Avatar, Badge, type EstadoPantalla } from "@opai/ds";
 
-import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { ESTADO_PERSONA, estadoDe } from "@/app/_components/maestros/estados";
 import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
@@ -59,15 +58,6 @@ export function ListaPersonas(x: Props) {
       titulo={x.titulo}
       accion={
         <>
-          <EnlaceBoton
-            href="/personas/vencimientos"
-            variante="ghost"
-            icono={CalendarClock}
-            etiqueta="Vencimientos"
-            className="md:hidden"
-          >
-            {null}
-          </EnlaceBoton>
           {nueva}
         </>
       }
