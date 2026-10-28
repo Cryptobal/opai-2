@@ -26,6 +26,16 @@ export const falla = (
   error: { code, message, ...(detalles === undefined ? {} : { detalles }) },
 });
 
+/**
+ * Si el módulo está en los scopes del agente (sin scopes, siempre). "*" cubre todo salvo
+ * plataforma, que exige el scope explícito "platform" (ADR-055). `core.me` usa la misma regla para
+ * no listar permisos de módulos que la key no ve.
+ */
+export function enScope(ctx: Pick<Contexto, "scopes">, modulo: string): boolean {
+  if (!ctx.scopes || ctx.scopes.includes(modulo)) return true;
+  return ctx.scopes.includes("*") && modulo !== "platform";
+}
+
 /** Visibilidad sin el permiso: tenant, módulo activo, scopes del agente y portal del principal. */
 export function restriccion(ctx: Contexto, c: Capacidad): Falla | null {
   if (!ctx.conTenant && !c.sinTenant) {
@@ -34,11 +44,8 @@ export function restriccion(ctx: Contexto, c: Capacidad): Falla | null {
   if (!SIEMPRE_ACTIVOS.has(c.modulo) && !ctx.modulosActivos.includes(c.modulo)) {
     return falla("FORBIDDEN", `Módulo inactivo: "${c.modulo}".`);
   }
-  // Agentes: el módulo debe estar en los scopes. "*" cubre todo salvo plataforma.
-  if (ctx.scopes && !ctx.scopes.includes(c.modulo)) {
-    if (!ctx.scopes.includes("*") || c.modulo === "platform") {
-      return falla("FORBIDDEN", `La API key no tiene el scope "${c.modulo}".`);
-    }
+  if (!enScope(ctx, c.modulo)) {
+    return falla("FORBIDDEN", `La API key no tiene el scope "${c.modulo}".`);
   }
   // Gobierno de agentes (ADR-032): aprobar, rechazar y dar autonomía o presupuesto son de personas.
   if (c.soloPersonas && ctx.actor.tipo === "agent") {

@@ -12,7 +12,12 @@ const perfil = {
 } as const;
 
 const ajuste = { modulo: true, clave: true, valor: true, version: true } as const;
-const precio = { recurso: true, unidad: true, costoUnitarioMicro: true, vigenteDesde: true } as const;
+const precio = {
+  recurso: true,
+  unidad: true,
+  costoUnitarioMicro: true,
+  vigenteDesde: true,
+} as const;
 
 export function listarTenants(id?: string) {
   return clienteApp().tenant.findMany({
@@ -45,15 +50,30 @@ export function accesoPlataforma() {
         estado?: string;
       },
     ) => db.tenant.update({ where: { id }, data, select: perfil }),
+    /** Usuarios con rol de plataforma (ADR-055): solo identidad mínima y el rol. */
+    usuariosDePlataforma: () =>
+      db.user.findMany({
+        where: { platformRole: { not: null } },
+        orderBy: { email: "asc" },
+        select: { id: true, name: true, email: true, platformRole: true },
+      }),
     listarAjustes: () => db.ajustePlataforma.findMany({ select: ajuste }),
     ajustePorClave: (where: Prisma.AjustePlataformaWhereUniqueInput) =>
       db.ajustePlataforma.findUnique({ where, select: ajuste }),
-    guardarAjuste: ({ where, create, update }: Pick<Prisma.AjustePlataformaUpsertArgs, "where" | "create" | "update">) =>
+    guardarAjuste: ({
+      where,
+      create,
+      update,
+    }: Pick<Prisma.AjustePlataformaUpsertArgs, "where" | "create" | "update">) =>
       db.ajustePlataforma.upsert({ where, create, update, select: ajuste }),
     listarPrecios: (hasta: Date) => preciosHasta(hasta),
     precioPorVigencia: (where: Prisma.PrecioRecursoWhereUniqueInput) =>
       db.precioRecurso.findUnique({ where, select: precio }),
-    guardarPrecio: ({ where, create, update }: Pick<Prisma.PrecioRecursoUpsertArgs, "where" | "create" | "update">) =>
+    guardarPrecio: ({
+      where,
+      create,
+      update,
+    }: Pick<Prisma.PrecioRecursoUpsertArgs, "where" | "create" | "update">) =>
       db.precioRecurso.upsert({ where, create, update, select: precio }),
   };
 }

@@ -18,18 +18,35 @@ export function contextoOwnerAgente() {
   return contextoDePrueba({ rol: "owner", actor, scopes: ["*"], modulosActivos: modulos }).ctx;
 }
 
-/** Nombres de las herramientas MCP que ve ese contexto, ordenados. */
-export function nombresDeHerramientas(): string[] {
-  return herramientasMcp(contextoOwnerAgente())
+/**
+ * Key de plataforma (ADR-055): responsable con `platformRole` owner, scopes "*" y "platform" (el "*"
+ * nunca cubre plataforma) y hereda permisos. Es el máximo que puede ver un agente.
+ */
+export function contextoPlataformaAgente() {
+  const modulos = [...new Set(listarCapacidades().map((c) => c.modulo))];
+  const actor = { tipo: "agent" as const, id: "k-plataforma", viaUserId: USUARIO_DE_PRUEBA.id };
+  return contextoDePrueba({
+    rol: "owner",
+    actor,
+    usuario: { ...USUARIO_DE_PRUEBA, platformRole: "owner" },
+    scopes: ["*", "platform"],
+    claveApi: { permisos: null, servicio: false, plataforma: true },
+    modulosActivos: modulos,
+  }).ctx;
+}
+
+/** Nombres de las herramientas MCP que ve el contexto (por defecto, key "*" sin plataforma), ordenados. */
+export function nombresDeHerramientas(ctx = contextoOwnerAgente()): string[] {
+  return herramientasMcp(ctx)
     .map((h) => h.nombre)
     .sort();
 }
 
-/** Capacidades que no son de plataforma y no producen herramienta MCP. */
+/** Capacidades (incluida plataforma) sin herramienta MCP ni siquiera para una key de plataforma. */
 export function capacidadesSinHerramienta(): string[] {
-  const expuestas = new Set(herramientasMcp(contextoOwnerAgente()).map((h) => h.capacidad.id));
+  const expuestas = new Set(herramientasMcp(contextoPlataformaAgente()).map((h) => h.capacidad.id));
   return listarCapacidades()
-    .filter((c) => !c.id.startsWith("platform.") && !expuestas.has(c.id))
+    .filter((c) => !expuestas.has(c.id))
     .map((c) => c.id)
     .sort();
 }
