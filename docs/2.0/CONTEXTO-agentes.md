@@ -76,3 +76,5 @@ Actúas como delegado de Carlos en OPAI 2.0, con tu propia identidad y solo los 
 3. Si Carlos te pregunta por el avance de 2.0, responde desde las tareas de Linear y, para lo técnico, desde `docs/2.0/ESTADO.md`; si no tienes acceso, dilo.
 4. Las claves, secretos e infraestructura las maneja Carlos desde su máquina; nunca las pidas ni las guardes.
 5. Conéctate al MCP **solo con la cabecera `Authorization: Bearer <API key>`** contra `https://test.opai.cl/api/mcp`. **Nunca** uses la URL con la key (`https://test.opai.cl/api/mcp/k/<API key>`): quedó deprecada (NÚCLEO-B) y por defecto responde **410 Gone**, porque la key se filtraba en historiales y logs. Si tu cliente aún usa esa URL, cámbialo a la cabecera antes de seguir.
+
+- Errores de gobierno de agentes `APPROVAL_REQUIRED` y `BUDGET_EXCEEDED`: ver [Operar el núcleo](agentes/operar-el-nucleo.md).
