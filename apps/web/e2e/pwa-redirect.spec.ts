@@ -1,5 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
 
+import { entrar as iniciarSesion } from "./sesion";
+
 /**
  * Bloqueante del Brief 04: el service worker sirve la navegación con `fetch(request)` tal cual, así
  * que cuando el servidor redirige el navegador sigue el redirect y la barra de direcciones queda en
@@ -18,16 +20,9 @@ async function esperarControl(page: Page) {
 }
 
 async function entrar(page: Page, correo: string, empresa: RegExp) {
-  await page.goto("/login");
-  await page.getByLabel("Correo").fill(correo);
-  await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
-  await page.getByRole("button", { name: "Entrar" }).click();
+  await iniciarSesion(page, correo);
   const boton = page.getByRole("button", { name: empresa });
-  await Promise.race([
-    boton.waitFor({ state: "visible" }),
-    page.waitForURL((u) => u.pathname === "/" || u.pathname === "/platform"),
-  ]).catch(() => undefined);
-  if (await boton.isVisible().catch(() => false)) await boton.click();
+  if (new URL(page.url()).pathname === "/elegir-empresa") await boton.click();
   await page.waitForURL((u) => u.pathname === "/" || u.pathname === "/platform");
 }
 

@@ -1,4 +1,5 @@
 import { randomUUID } from "node:crypto";
+import { bloquearCargo } from "../src/core/maestros/estructuras-bloqueo";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { type Entorno, prepararEntorno, urlPropietario } from "../../db/test/entorno";
 import {
@@ -89,5 +90,27 @@ describe.skipIf(!urlPropietario)("07b: capacidades con RLS y concurrencia reales
       .forTenant(tenantId)
       .auditEvent.count({ where: { capability: "core.estructuras.create" } });
     expect(auditoria).toBe(1);
+  });
+  it("el bloqueo explícito no encuentra ni bloquea un cargo de otro tenant", async () => {
+    const cargo = await e
+      .forTenant(tenantId)
+      .cargo.create({ data: { tenantId, nombre: "Cargo aislado" } });
+    await e.admin.$transaction(async (tx) => {
+      expect(await bloquearCargo(tx, otro, cargo.id)).toBe(0);
+      await e.admin.$transaction(async (otraTx) => {
+        const filas = await otraTx.$queryRaw<
+          { id: string }[]
+        >`SELECT id FROM core.cargos WHERE id = ${cargo.id}::uuid FOR UPDATE NOWAIT`;
+        expect(filas).toHaveLength(1);
+      });
+    });
+    await e.admin.$transaction(async (tx) => {
+      expect(await bloquearCargo(tx, tenantId, cargo.id)).toBe(1);
+      await expect(
+        e.admin.$transaction(async (otraTx) => {
+          await otraTx.$queryRaw`SELECT id FROM core.cargos WHERE id = ${cargo.id}::uuid FOR UPDATE NOWAIT`;
+        }),
+      ).rejects.toThrow();
+    });
   });
 });

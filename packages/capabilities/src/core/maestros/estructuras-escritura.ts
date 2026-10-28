@@ -1,12 +1,12 @@
 import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
-import { prohibido, reglaDeNegocio } from "../../errores";
+import { prohibido, rechazoSensible, reglaDeNegocio } from "../../errores";
 import { aFecha, dia, escribirConEvento } from "./comun";
 import { DIA_MS, entrada, referencia } from "./estructuras-ref";
 import { ocultarMontos } from "./estructuras-acceso";
 import { estructuraSchema, vistaEstructura } from "./estructuras-vista";
-import { bloquearCapa } from "./estructuras-bloqueo";
+import { bloquearCapa, bloquearCargo } from "./estructuras-bloqueo";
 import { impactoCambio } from "./estructuras-impacto";
 
 export { estructurasAnular } from "./estructuras-anular";
@@ -29,12 +29,14 @@ export const estructurasCreate = defineCapability({
       await bloquearCapa(tx, ctx.tenantId, input.nivel, ref.id);
       if (input.nivel === "cargo" && !ctx.autorizar(PERMISOS_CORE.estructurasReadSensible)) {
         // Bloquea la fila para serializar la comprobación con cambios de sensibilidad.
-        if (typeof (tx as { $executeRaw?: unknown }).$executeRaw === "function") {
-          await tx.$executeRaw`SELECT id FROM core.cargos WHERE id = ${ref.id}::uuid FOR UPDATE`;
-        }
+        await bloquearCargo(tx, ctx.tenantId, ref.id);
         if (await ocultarMontos(ctx, { nivel: "cargo", ...ref.refs }, false))
-          throw prohibido("No tienes permiso para versionar los montos de este cargo");
+          throw rechazoSensible(
+            "No puedes crear versiones de este cargo. Sus montos son sensibles. Pide a un owner o admin el permiso para ver sueldos sensibles.",
+          );
       }
+      if (input.nivel !== "cargo" && !ctx.autorizar(PERMISOS_CORE.estructurasReadSensible))
+        throw rechazoSensible("No tienes permiso para crear versiones de esta capa de sueldo.");
       const desde = aFecha(input.vigenteDesde);
       const vigentes = await ctx.db.estructuraSueldo.findMany({
         where: { nivel: input.nivel, [ref.campo]: ref.id, estado: "vigente" },

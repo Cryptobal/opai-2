@@ -1,5 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
 
+import { entrar as iniciarSesion } from "./sesion";
+
 // Selector del riel de iPad según ShellTablet.html (seguimiento del PR #30, CAR-6): ⇅ junto al
 // portal, radio de 12 px, el nombre del portal una sola vez y sin recortes, y cierre con clic
 // fuera. Mismos datos que selector-riel.spec.ts (seed:multiempresa-e2e).
@@ -11,10 +13,7 @@ test.use({ actionTimeout: 30_000 });
 test.setTimeout(180_000);
 
 async function entrar(page: Page) {
-  await page.goto("/login");
-  await page.getByLabel("Correo").fill(email);
-  await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
-  await page.getByRole("button", { name: "Entrar" }).click();
+  await iniciarSesion(page, email);
   await page.waitForURL(/\/elegir-empresa/);
   await page.getByRole("button", { name: /Gard Security/ }).click();
   await page.waitForURL((url) => url.pathname === "/");

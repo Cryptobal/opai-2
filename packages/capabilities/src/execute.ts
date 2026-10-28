@@ -1,3 +1,4 @@
+import { auditarRechazoSensible } from "./execute-rechazo";
 import { controlAgente } from "./agentes/control";
 import { denegar, falla } from "./autorizacion";
 import { ErrorCapacidad } from "./errores";
@@ -82,6 +83,7 @@ async function correr(
     }
   } catch (error) {
     if (reservaId) await ctx.idempotencia.liberar(reservaId);
+    await auditarRechazoSensible(ctx, c, error);
     throw error;
   }
   const salida = lecturaValidada ?? c.output.safeParse(crudo);
