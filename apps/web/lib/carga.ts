@@ -7,8 +7,7 @@
 import { unstable_rethrow } from "next/navigation";
 
 type ResultadoCarga<T> =
-  | { ok: true; data: T }
-  | { ok: false; error: { code: string; message?: string } };
+  { ok: true; data: T } | { ok: false; error: { code: string; message?: string } };
 
 /** Error de una carga: solo lleva el código de la capacidad, nunca su mensaje ni datos. */
 export class CargaFallida extends Error {

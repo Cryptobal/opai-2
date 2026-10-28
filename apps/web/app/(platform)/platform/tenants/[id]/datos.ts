@@ -10,7 +10,11 @@ export async function cargarTenant(tenantId: string) {
     ejecutarComoUsuario<PanelTenant>("platform", "platform.tenants.panel", { tenantId }),
   ]);
   // El panel también cuenta: si falla, las pestañas no muestran «sin consumos» ni «sin keys» (CAR-50).
-  return { state: estadoPantalla(d, p), detalle: d.ok ? d.data : null, panel: p.ok ? p.data : null };
+  return {
+    state: estadoPantalla(d, p),
+    detalle: d.ok ? d.data : null,
+    panel: p.ok ? p.data : null,
+  };
 }
 
 export async function trabajosDe(tenantId: string | undefined, conProblemas: boolean, limite = 50) {

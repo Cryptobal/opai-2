@@ -21,7 +21,12 @@ type Props = { params: Promise<{ id: string }>; searchParams: SearchParams };
 async function Contactos({ cuentaId }: { cuentaId: string }) {
   const r = await ejecutarComoUsuario<Contacto[]>("erp", "core.contactos.list", { cuentaId });
   // Un fallo no se ve como «Sin contactos» (CAR-50).
-  if (!r.ok) return <Estado state={estadoPantalla(r)} variante="lista">{null}</Estado>;
+  if (!r.ok)
+    return (
+      <Estado state={estadoPantalla(r)} variante="lista">
+        {null}
+      </Estado>
+    );
   const contactos = r.data;
   const nuevo = (
     <EnlaceBotonHoja href="?contacto=nuevo" icono={Plus}>

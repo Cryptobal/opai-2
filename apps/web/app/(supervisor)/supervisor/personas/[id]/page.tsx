@@ -41,7 +41,12 @@ export default function PersonaTerreno({ params }: { params: Promise<{ id: strin
       {({ state, noEncontrada, p, docs, faltantes, puede, tipos }) => {
         if (noEncontrada) return <Alerta tono="danger" titulo="No encontramos a esta persona" />;
         // Sin permisos o con error se ve el estado del DS, nunca «no encontrada» (CAR-50).
-        if (!p || state !== "ready") return <Estado state={state} variante="detalle">{null}</Estado>;
+        if (!p || state !== "ready")
+          return (
+            <Estado state={state} variante="detalle">
+              {null}
+            </Estado>
+          );
         const e = estadoDe(ESTADO_PERSONA, p.bloqueada ? "bloqueada" : p.estado);
         const tel = p.telefono ? marcable(p.telefono) : null;
         const aviso = avisoUrgente(docs);

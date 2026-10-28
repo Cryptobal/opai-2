@@ -27,7 +27,12 @@ export default function InstalacionTerreno({ params }: { params: Promise<{ id: s
       {({ state, noEncontrada, i, contacto }) => {
         if (noEncontrada) return <Alerta tono="danger" titulo="No encontramos esta instalación" />;
         // Sin permisos o con error se ve el estado del DS, nunca «no encontrada» (CAR-50).
-        if (!i) return <Estado state={state} variante="detalle">{null}</Estado>;
+        if (!i)
+          return (
+            <Estado state={state} variante="detalle">
+              {null}
+            </Estado>
+          );
         const destino =
           i.lat !== null && i.lng !== null
             ? `${i.lat},${i.lng}`

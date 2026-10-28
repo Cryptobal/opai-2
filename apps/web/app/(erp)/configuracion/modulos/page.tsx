@@ -28,7 +28,9 @@ export default function Modulos() {
     <PaginaConfig
       seccion="modulos"
       titulo="Módulos"
-      cargar={async () => exigirDatos(await ejecutarComoUsuario<Modulo[]>("erp", "core.modules.list"))}
+      cargar={async () =>
+        exigirDatos(await ejecutarComoUsuario<Modulo[]>("erp", "core.modules.list"))
+      }
       cabecera={(m) => {
         const n = (e: string | null) => m.filter((x) => x.estado === e).length;
         return {

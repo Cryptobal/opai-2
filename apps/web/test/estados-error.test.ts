@@ -8,7 +8,10 @@ import { CargaFallida, datosSiHayPermiso, exigirDatos, falloDeCarga } from "@/li
 import { estadoPantalla } from "@/lib/formato";
 
 const ok = <T>(data: T) => ({ ok: true as const, data });
-const falla = (code: string) => ({ ok: false as const, error: { code, message: "detalle técnico" } });
+const falla = (code: string) => ({
+  ok: false as const,
+  error: { code, message: "detalle técnico" },
+});
 const capturar = (f: () => unknown) => {
   try {
     f();

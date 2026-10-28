@@ -14,10 +14,7 @@ export async function cargarAjustes(modulo: string, grupo?: string) {
   ]);
   const campos = exigirDatos(s).filter((c) => !grupo || c.grupo === grupo);
   const valores = Object.fromEntries(
-    exigirDatos(v).map((x) => [
-      `${x.modulo}.${x.clave}`,
-      { valor: x.valor, origen: x.origen },
-    ]),
+    exigirDatos(v).map((x) => [`${x.modulo}.${x.clave}`, { valor: x.valor, origen: x.origen }]),
   );
   // `ok` se conserva para los llamadores que aún lo leen: si la carga falla, ya lanzó.
   return { ok: true as const, campos, valores };
