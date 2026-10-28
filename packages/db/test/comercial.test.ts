@@ -3,7 +3,7 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { sembrarComercial } from "../src/catalogo-tenant";
+import { sembrarComercial } from "../src/catalogo-comercial";
 import { type Entorno, prepararEntorno, urlPropietario } from "./entorno";
 
 describe.skipIf(!urlPropietario)("Comercial (Brief 07 · PR 1)", () => {

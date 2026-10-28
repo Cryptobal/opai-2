@@ -36,6 +36,7 @@ async function enriquecer(ctx: Contexto, negocios: { cuentaId: string; etapaId: 
 }
 
 export const negociosList = defineCapability({
+  auditarLectura: (s) => s.items.flatMap((n) => [n.id, n.cuentaId]),
   id: "comercial.negocios.list",
   descripcion:
     "Lista los negocios (oportunidades de venta) de la empresa con filtros por etapa, responsable, origen y estado, paginada por cursor.",
@@ -74,6 +75,7 @@ export const negociosList = defineCapability({
 });
 
 export const negociosEmbudo = defineCapability({
+  auditarLectura: (s) => s.negocios.flatMap((n) => [n.id, n.cuentaId]),
   id: "comercial.negocios.embudo",
   descripcion:
     "Resumen del embudo por defecto: sus etapas con tipo, orden y probabilidad, y los negocios abiertos de cada etapa para el tablero.",

@@ -14,12 +14,34 @@ export const manifest = defineModule({
   dependencias: [],
   permisos: [
     { id: "comercial:negocios.read", descripcion: "Ver negocios y el embudo" },
-    { id: "comercial:negocios.manage", descripcion: "Crear, editar, mover, ganar y perder negocios" },
-    { id: "comercial:config.manage", descripcion: "Configurar el embudo y los catálogos del módulo" },
+    {
+      id: "comercial:negocios.manage",
+      descripcion: "Crear, editar, mover, ganar y perder negocios",
+    },
+    {
+      id: "comercial:config.manage",
+      descripcion: "Configurar el embudo y los catálogos del módulo",
+    },
   ],
   navegacion: [
-    { portal: "erp", href: "/negocios", etiqueta: "Negocios", icono: "Briefcase", orden: 10 },
-    { portal: "erp", href: "/contactos", etiqueta: "Contactos", icono: "Users", orden: 20 },
+    // Áreas de NAVEGACION.md §2: Negocios en Comercial; Contactos en Clientes, entre Cuentas (1) e
+    // Instalaciones (2).
+    {
+      portal: "erp",
+      area: "comercial",
+      href: "/negocios",
+      etiqueta: "Negocios",
+      icono: "Briefcase",
+      orden: 2,
+    },
+    {
+      portal: "erp",
+      area: "clientes",
+      href: "/contactos",
+      etiqueta: "Contactos",
+      icono: "Users",
+      orden: 1.5,
+    },
   ],
   // Ajustes del módulo (ADR-008). El embudo y los catálogos se editan con sus capacidades
   // (comercial.config.*); aquí viven las reglas conmutables del módulo.
@@ -44,7 +66,10 @@ export const manifest = defineModule({
   }),
   eventos: [
     { id: "comercial.negocio.creado", descripcion: "Se creó un negocio." },
-    { id: "comercial.negocio.actualizado", descripcion: "Cambiaron los datos o los vínculos de un negocio." },
+    {
+      id: "comercial.negocio.actualizado",
+      descripcion: "Cambiaron los datos o los vínculos de un negocio.",
+    },
     { id: "comercial.negocio.etapa_cambiada", descripcion: "Un negocio cambió de etapa." },
     { id: "comercial.negocio.ganado", descripcion: "Un negocio se marcó como ganado." },
     { id: "comercial.negocio.perdido", descripcion: "Un negocio se marcó como perdido." },

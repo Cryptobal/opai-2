@@ -7,6 +7,7 @@ import { PERMISO_READ, negocioDe, negocioSchema, vistaNegocio } from "./comun";
 
 /** Ficha de un negocio: datos, etapa, instalaciones, contactos e historial de etapas (R11). */
 export const negociosGet = defineCapability({
+  auditarLectura: (s) => [s.id, s.cuentaId, ...s.contactos.map((c) => c.contactoId)],
   id: "comercial.negocios.get",
   descripcion:
     "Ficha de un negocio: datos, cuenta, etapa actual, instalaciones con su tipo, contactos con su rol e historial de etapas con los días en cada una.",

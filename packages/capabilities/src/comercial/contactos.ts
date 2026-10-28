@@ -37,6 +37,7 @@ async function cuentasYNegocios(ctx: Contexto, contactos: { id: string; cuentaId
 
 /** Lista tenant-wide de contactos (personas) para la pantalla Clientes → Contactos. */
 export const contactosList = defineCapability({
+  auditarLectura: (s) => s.items.flatMap((c) => [c.id, c.cuentaId]),
   id: "comercial.contactos.list",
   descripcion:
     "Lista los contactos (personas) de la empresa con su cuenta, correo, teléfono, cargo y cuántos negocios abiertos tienen, paginada por cursor.",
