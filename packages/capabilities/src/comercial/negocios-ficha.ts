@@ -1,7 +1,10 @@
 import { z } from "zod";
 
+import { PERMISOS_CORE } from "@opai/domain";
+
 import { defineCapability } from "../define";
 import { uuidSchema } from "../core/esquemas";
+import { dondeContacto } from "../core/maestros/alcance";
 import { diasEntre } from "./dominio";
 import { PERMISO_READ, negocioDe, negocioSchema, vistaNegocio } from "./comun";
 
@@ -52,7 +55,10 @@ export const negociosGet = defineCapability({
       ctx.db.historialEtapa.findMany({ where: { negocioId: n.id }, orderBy: { cuando: "asc" } }),
     ]);
     const instIds = vinculosI.map((v) => v.instalacionId);
-    const contIds = vinculosC.map((v) => v.contactoId);
+    // Contactos: datos personales del núcleo. Como comercial.contactos.list, exige ver Cuentas y
+    // aplica el alcance por filas (ADR-022); los que no se pueden ver no aparecen en la ficha.
+    const verContactos = ctx.autorizar(PERMISOS_CORE.cuentasRead);
+    const contIds = verContactos ? vinculosC.map((v) => v.contactoId) : [];
     const etapaIds = [
       ...new Set(historial.flatMap((h) => [h.deEtapaId, h.aEtapaId].filter(Boolean))),
     ];
@@ -62,7 +68,7 @@ export const negociosGet = defineCapability({
         select: { id: true, nombre: true },
       }),
       ctx.db.contacto.findMany({
-        where: { id: { in: contIds } },
+        where: { id: { in: contIds }, AND: [dondeContacto(ctx)] },
         select: { id: true, nombres: true, apellidos: true },
       }),
       ctx.db.etapa.findMany({
@@ -83,15 +89,18 @@ export const negociosGet = defineCapability({
         nombre: insts.find((i) => i.id === v.instalacionId)?.nombre ?? "",
         tipo: v.tipo,
       })),
-      contactos: vinculosC.map((v) => {
+      contactos: vinculosC.flatMap((v) => {
         const c = conts.find((x) => x.id === v.contactoId);
-        return {
-          id: v.id,
-          contactoId: v.contactoId,
-          nombre: c ? `${c.nombres} ${c.apellidos}`.trim() : "",
-          rol: v.rol,
-          esPrincipal: v.esPrincipal,
-        };
+        if (!c) return [];
+        return [
+          {
+            id: v.id,
+            contactoId: v.contactoId,
+            nombre: `${c.nombres} ${c.apellidos}`.trim(),
+            rol: v.rol,
+            esPrincipal: v.esPrincipal,
+          },
+        ];
       }),
       historial: historial.map((h, i) => {
         const prev = historial[i - 1];
