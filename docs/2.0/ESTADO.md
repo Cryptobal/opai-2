@@ -772,4 +772,11 @@ cambiar topes. Los 24 e2e afectados pasan con un worker, sin skips ni reintentos
 en el build local de producción; Laboral mide 7 consultas a 375/1024/1280 px.
 Capturas en `design/07b/evidencia-pr3/`. La integración, el CI remoto y la aplicación
 de la migración en Neon no se declaran ejecutados por este encargo.
+**Brief 03, continuidad CAR-7:** Codex configura el pool por instancia y avisa una
+vez si el host en Vercel no contiene `-pooler.`; el test de rendimiento calienta con sesión y
+registra tres cargas. Son decisiones técnicas de implementación, pendientes de
+validación en Neon. La medición de servidor no sustituye navegación cliente ni p75;
+el esqueleto, la carrera de hidratación, la invalidación de caché y la comparación
+antes/después siguen pendientes. No se declara listo el gate obligatorio de ADR-045.
+
 - Pendientes de cierre del Núcleo (CAR-19): correcciones de permisos, auditoría de rechazos y regresiones de sueldos y navegación; detalle y validación en el PR.
