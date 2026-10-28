@@ -4,7 +4,7 @@ import { defineCapability } from "../define";
 import { noEncontrado, reglaDeNegocio } from "../errores";
 import { uuidSchema } from "../core/esquemas";
 import { sinDuplicado } from "../core/maestros/comun";
-import { PERMISO_MANAGE, etapaDe, negocioDe, rolContactoSchema, tipoVinculoSchema } from "./comun";
+import { PERMISO_MANAGE, etapaDe, negocioDe, tipoVinculoSchema } from "./comun";
 import { emitirActualizado } from "./validaciones";
 
 const salida = z.object({ negocioId: z.string(), total: z.number() });
@@ -80,65 +80,5 @@ export const negociosDesvincularInstalacion = defineCapability({
     await ctx.db.negocioInstalacion.deleteMany({ where: vinculo });
     await emitirActualizado(ctx, negocio.id, { desvinculoInstalacion: input.instalacionId });
     return { negocioId: negocio.id, total: total - 1 };
-  },
-});
-
-export const negociosSetContactos = defineCapability({
-  id: "comercial.negocios.set_contactos",
-  descripcion:
-    "Define los contactos del negocio con su rol (decisor, técnico, compras o usuario) y cuál es el principal; reemplaza el conjunto actual. Solo contactos de la cuenta del negocio (R16).",
-  permiso: PERMISO_MANAGE,
-  input: z.object({
-    negocioId: uuidSchema,
-    contactos: z
-      .array(
-        z.object({
-          contactoId: uuidSchema,
-          rol: rolContactoSchema,
-          esPrincipal: z.boolean().default(false),
-        }),
-      )
-      .max(50),
-  }),
-  output: salida,
-  efecto: "escritura",
-  dryRun: true,
-  async handler(ctx, input, { dryRun }) {
-    const negocio = await negocioDe(ctx, input.negocioId);
-    if (input.contactos.filter((c) => c.esPrincipal).length > 1) {
-      throw reglaDeNegocio("Solo un contacto puede ser el principal.");
-    }
-    const ids = input.contactos.map((c) => c.contactoId);
-    if (ids.length) {
-      const dela = await ctx.db.contacto.findMany({
-        where: { id: { in: ids } },
-        select: { cuentaId: true },
-      });
-      if (dela.length !== new Set(ids).size || dela.some((c) => c.cuentaId !== negocio.cuentaId)) {
-        throw reglaDeNegocio("Todos los contactos deben ser de la cuenta del negocio.");
-      }
-    }
-    if (dryRun) return { negocioId: negocio.id, total: input.contactos.length };
-    await ctx.transaccion(async (tx) => {
-      await tx.negocioContacto.deleteMany({ where: { negocioId: negocio.id } });
-      for (const c of input.contactos) {
-        await tx.negocioContacto.create({
-          data: {
-            tenantId: ctx.tenantId,
-            negocioId: negocio.id,
-            contactoId: c.contactoId,
-            rol: c.rol,
-            esPrincipal: c.esPrincipal,
-          },
-        });
-      }
-      await ctx.eventos.emitir(tx, {
-        tipo: "comercial.negocio.actualizado",
-        entidadTipo: "negocio",
-        entidadId: negocio.id,
-        payload: { contactos: input.contactos.length },
-      });
-    });
-    return { negocioId: negocio.id, total: input.contactos.length };
   },
 });
