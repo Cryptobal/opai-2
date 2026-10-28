@@ -397,3 +397,87 @@ Los resultados finales del gate y el head se dejan en `PR-BODY.md`, sin versiona
 ### Corrección de montos de QA del PR #80
 
 Encargo de corrección: los montos nuevos se validan como pesos enteros entre 0 y 100.000.000 por concepto, sin reinterpretar texto inválido; los porcentajes conservan su regla. Codex implementa el tope indicado en el encargo y acepta puntos únicamente como separadores chilenos de miles. La vista previa identifica conceptos nuevos y muestra los montos en pesos. La validación y pruebas del cambio quedan detalladas en el PR.
+
+## Construcción del PR 2 · Codex, 27-oct-2026
+
+Bloque 5, rama `brief/07b-pr2-retiro-cargo`, sin migración de esquema.
+Se conservaron y completaron los cambios sin commit recibidos del encargo anterior.
+
+- **Pantalla 18 / D9:** entrada «Cargos» y catálogo sin montos en UI, API v1 y MCP.
+  `core.cargos.list` ya no consulta estructuras ni devuelve `sueldoVigente`;
+  conserva clase, sensibilidad, estado y conteos. El aviso informativo se cierra
+  con «Entendido» y se recuerda en el navegador (si no hay almacenamiento,
+  durante la visita). Crear/editar el catálogo sigue disponible según permisos.
+- **Pantallas 19–20 / D10:** `DatoArchivado` del DS 2.0, también en `/ds`,
+  muestra todas las versiones originales, plegadas inicialmente, con vigencias,
+  conceptos, bonos, motivo y señal de anulación cuando corresponde. Sin edición,
+  borrado ni creación de versiones; `?version=1` no abre ningún formulario.
+  El export 20 representa la alternativa de conversión descartada por D10:
+  en teléfono se implementa la misma variante archivada del export 19.
+- **Pantalla 21:** «Capa cargo (retirada)» en Sueldo de persona muestra los cargos
+  de sus vínculos actuales y terminados, con sus fechas originales y enlaces a
+  las estructuras archivadas. La carga consolidada `core.estructuras.panel`
+  mantiene el vínculo vigente y audita los IDs de vínculos y cargos revelados.
+  **Adaptación necesaria:** el Núcleo no guarda periodos pagados ni snapshots de
+  liquidación/costeo. No se pueden reconstruir pagos desde una estructura o un
+  vínculo. Se conserva el historial existente y se explica que las fechas son
+  contractuales; no se inventa el historial de pagos dibujado en el export.
+- **Capacidades:** `core.estructuras.create` rechaza nivel cargo con `FORBIDDEN`
+  tanto en ejecución como en preview; `anular` también lo bloquea. `list/get`
+  conservan lectura de filas antiguas vigentes, archivadas y anuladas (estas
+  últimas con `incluirAnuladas`). D7 aplica `read_sensible` también al archivo,
+  incluso si el catálogo no está marcado sensible; la revelación agrupa IDs
+  en una auditoría por respuesta y falla cerrada. El catálogo no revela montos.
+  UI/API/MCP comparten registro y ejecutor. No cambia el conjunto de herramientas,
+  por lo que la instantánea de nombres permanece igual.
+- **Script:** `packages/db/scripts/archivar-cargos.ts --tenant <uuid> --dry-run`
+  simula; `--apply` cambia únicamente `estado=vigente` a `archivada` para nivel
+  cargo del tenant indicado. Conserva IDs, montos, conceptos, ítems, fechas y
+  motivos; no convierte capas ni modifica las activas. `updateMany` con predicado
+  es atómico e idempotente. CLI ejecutado solo en Postgres local de prueba:
+  simulación 1 candidato / 0 cambios; aplicación 1; segunda aplicación 0.
+  No se ejecutó sobre Neon.
+
+**Decisiones de implementación de Codex, sin atribuirlas a Carlos:** representar
+el archivo mediante el campo `estado` textual existente, con valor `archivada` y bloquear toda
+mutación de nivel cargo incluso antes de ejecutar mantenimiento; agrupar la
+lectura auditada del archivo para evitar N+1; consolidar los conteos del detalle
+en una consulta; recordar el aviso localmente; usar los vínculos históricos como
+contexto de acceso al archivo, sin deducir sueldos pagados. No cambia el plan del
+ROADMAP ni se adelanta el trabajo de los PR 3–4.
+
+**Criterios:** CA-2 implementado para los datos existentes, con la adaptación
+explícita de pantalla 21 anterior. CA-1 corresponde al PR 1 integrado y se conserva
+su resolución sin cargo; CA-3 y CA-4 pertenecen respectivamente a los PR 3 y 4,
+fuera de este encargo. CA-paridad se verifica localmente; `tools/list` remoto y
+CI del PR corresponden al despliegue y revisión posteriores. No se abre PR por
+instrucción del encargo.
+
+Los resultados finales del gate, las capturas sintéticas de 375/1024/1280 px y la
+autorrevisión se registran en `PR-BODY.md`, conservado sin commit. La integración
+requiere CI y la revisión independiente del head según ADR-043; esta construcción
+no equivale a su aprobación.
+
+
+### Evidencia local del PR 2
+
+Node 22, Postgres 16 local: `pnpm typecheck` y `pnpm lint` pasan (warnings
+preexistentes de longitud); `pnpm test --maxWorkers=1`: 171 archivos, 1.021 pruebas;
+`pnpm test:db`: 119 base + 181 capacidades + 25 auth, sin suites omitidas.
+`pnpm build` y `pnpm presupuesto` pasan sin elevar topes: lista 162,7/165 KB,
+detalle 161,8/167 KB, Sueldo persona 165,8/166 KB y `/ds` 221,9/222 KB.
+
+E2E de las pantallas 18–21 e Inspector a 375/1024/1280 con un worker: pasan,
+incluyendo teclado, ausencia de creación/versionado, aviso persistido, archivo
+claro/oscuro y enlaces del historial. Los cinco specs afectados terminaron con 17 casos en verde y 13 saltos
+preexistentes por viewport (ninguno en retiro/Inspector), cero fallos y cero flaky.
+Lista/detalle/persona registran **5/8/6 operaciones**, con aserción `≤8` en los
+tres tamaños. Capturas sintéticas `apps/web/e2e/__screenshots__/07b-*cargo*.png`.
+Pruebas del CLI: 1/0, 1/1 y 0/0 candidatos/archivados, solo base local.
+Verificación SQL local: cero ítems huérfanos; RLS ENABLE/FORCE y una política
+`tenant_isolation` para `opai_app`. No hay migración ni ejecución sobre Neon.
+
+Autorrevisión de subagente: sin bloqueantes en las capacidades, el script, el DS,
+el historial y sus pruebas. Los hallazgos de aviso y formulario antiguo se
+resolvieron. La revisión del SHA final se registra en `PR-BODY.md`; no es la
+aprobación del Revisor independiente ni evidencia de CI remoto.
