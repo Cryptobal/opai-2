@@ -8,6 +8,11 @@ import { hidratado } from "./hidratacion";
  * dejarla plegada. Reintenta hasta verla abierta: en dev el primer clic puede perderse.
  */
 export async function abrirArea(nav: Locator, area: string) {
+  // Recién entrado, el riel puede no estar montado: sin esperar, `count()` daba 0 y no se abría.
+  await expect(nav.first()).toBeVisible({ timeout: 30_000 });
+  await expect(nav.first().getByRole("link", { name: "Inicio" }).first()).toBeAttached({
+    timeout: 30_000,
+  });
   const boton = nav.getByRole("button", { name: area, exact: true });
   if (!(await boton.count())) return;
   await hidratado(boton);
