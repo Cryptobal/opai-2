@@ -103,6 +103,11 @@ El bloqueo financiero (ADR-016) oculta el área completa. Los roles personalizad
 
 ## 8. Estado de hoy (implementación del PR B, rama `brief/05-pr-b-navegacion`)
 
+NÚCLEO-D2: el shell filtra las entradas con los permisos efectivos de la identidad ya cargada
+(rol personalizado y excepciones, ADR-022), sin consultas adicionales. Supervisor exige los
+permisos de las capacidades de sus vistas; Plataforma usa el rol global. La navegación no sustituye
+la autorización ni los filtros de alcance de las capacidades.
+
 El estado siguiente describe esta rama, no una integración a `main` ni el cierre de la tarea en Linear.
 
 - **Áreas:** Inicio suelto; Clientes (Cuentas e Instalaciones) y Personas (Personas y Cargos y sueldos); las otras áreas aparecen al registrar módulos contratados con permiso efectivo. Configuración al pie, sin contadores. Áreas de una entrada sin encabezado y máximo siete entradas por área.
