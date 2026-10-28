@@ -1,4 +1,6 @@
 import { destinoVinculo } from "./vinculo-fixture";
+
+import { cargoHistorico } from "./cargo-historico-ayuda";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { PLANTILLAS } from "../../db/scripts/roles-base-plantillas";
@@ -13,8 +15,7 @@ async function preparar() {
     nombre: "Cargo sensible de prueba",
     sueldoSensible: true,
   });
-  const estructura = await dato<{ id: string }>(owner.ctx, "core.estructuras.create", {
-    nivel: "cargo",
+  const estructura = await cargoHistorico(owner.ctx, {
     cargoId,
     sueldoBase: 3_000_000,
     vigenteDesde: "2026-01-01",
@@ -29,7 +30,7 @@ async function preparar() {
 }
 
 describe("Inspector DT: lectura sensible auditada (t479u; art. 31 DFL 2/1967)", () => {
-  it("ve los montos completos en get, list y resumen de cargos y audita cada lectura", async () => {
+  it("ve los montos completos en get y list; cargos no revela montos y audita cada lectura", async () => {
     const { ctx, eventos, cargoId, estructura } = await preparar();
     const visto = await dato(ctx, "core.estructuras.get", { id: estructura.id });
     expect(visto).toMatchObject({
@@ -45,7 +46,7 @@ describe("Inspector DT: lectura sensible auditada (t479u; art. 31 DFL 2/1967)", 
         .map((e) => e.capability),
     ).toEqual(["core.estructuras.get", "core.estructuras.list"]);
     const sensibles = eventos.filter((e) => e.capability === "core.estructuras.read_sensible");
-    expect(sensibles).toHaveLength(3);
+    expect(sensibles).toHaveLength(2);
     for (const e of sensibles)
       expect(e).toMatchObject({
         tenantId: ctx.tenantId,
@@ -114,11 +115,7 @@ describe("Inspector DT: lectura sensible auditada (t479u; art. 31 DFL 2/1967)", 
       items: [expect.objectContaining({ monto: 50_000 })],
       vigenteHasta: null,
     });
-    const nueva = await dato(visible, "core.estructuras.create", {
-      ...input,
-      items: [{ tipo: "bono_fijo", nombre: "Bono", monto: 50_000 }],
-    });
-    expect(nueva).toMatchObject({ items: [expect.objectContaining({ monto: 50_000 })] });
+    expect(await codigo(visible, "core.estructuras.create", input)).toBe("FORBIDDEN");
   });
 
   it("la estructura efectiva devuelve haberes completos y audita el nivel sensible", async () => {
@@ -172,6 +169,17 @@ describe("Inspector DT: lectura sensible auditada (t479u; art. 31 DFL 2/1967)", 
 
   it("el historial también queda auditado y un fallo de auditoría impide revelar montos", async () => {
     const { ctx, eventos, estructura } = await preparar();
+    await ctx.transaccion((tx) =>
+      ctx.auditoria.registrar(tx, {
+        tenantId: ctx.tenantId,
+        actor: ctx.actor,
+        capability: "core.estructuras.create",
+        entityType: "estructura",
+        entityId: estructura.id,
+        payload: { sueldoBase: 3000000 },
+      }),
+    );
+    eventos.length = 0;
     await dato(ctx, "core.actividad.list", { capability: "core.estructuras.create" });
     expect(eventos).toEqual([
       expect.objectContaining({

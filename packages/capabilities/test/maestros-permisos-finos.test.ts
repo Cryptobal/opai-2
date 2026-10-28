@@ -25,45 +25,20 @@ type FilaCargo = {
   sueldoVigente: { sueldoBase: number | null; sensible: boolean } | null;
 };
 
-const admin = (l: FilaCargo[]) => l.find((f) => f.nombre === "Administrativo")?.sueldoVigente;
-
 describe("#47 · el include/_count del #53 respeta el permiso efectivo", () => {
-  it("el sueldo sensible de cargos.list sigue el rol base y sus excepciones", async () => {
+  it("cargos.list no devuelve montos para ningún rol ni excepción", async () => {
     const { ctx } = contextoDePrueba();
-    const c = await dato<{ id: string }>(ctx, "core.cargos.create", {
-      nombre: "Administrativo",
-      sueldoSensible: true,
-    });
-    await dato(ctx, "core.estructuras.create", {
-      nivel: "cargo",
-      cargoId: c.id,
-      sueldoBase: 900_000,
-      vigenteDesde: "2026-01-01",
-    });
-    // `gerente` lee estructuras pero no el monto sensible (patrón del #47): montos ocultos.
-    const gerente = conAcceso(ctx, { rol: "gerente" });
-    expect(admin(await dato<FilaCargo[]>(gerente, "core.cargos.list", {}))).toMatchObject({
-      sueldoBase: null,
-      sensible: true,
-    });
-    // Una excepción que concede el monto sensible sobre ese mismo rol: montos visibles.
-    const gerentePlus = conAcceso(ctx, {
-      rol: "gerente",
-      excepciones: [{ permiso: PERMISOS_CORE.estructurasReadSensible, conceder: true }],
-    });
-    expect(admin(await dato<FilaCargo[]>(gerentePlus, "core.cargos.list", {}))).toMatchObject({
-      sueldoBase: 900_000,
-      sensible: false,
-    });
-    // Denegar gana incluso sobre owner, que lo tendría por su rol.
-    const ownerMenos = conAcceso(ctx, {
-      rol: "owner",
-      excepciones: [{ permiso: PERMISOS_CORE.estructurasReadSensible, conceder: false }],
-    });
-    expect(admin(await dato<FilaCargo[]>(ownerMenos, "core.cargos.list", {}))).toMatchObject({
-      sueldoBase: null,
-      sensible: true,
-    });
+    await dato(ctx, "core.cargos.create", { nombre: "Administrativo", sueldoSensible: true });
+    for (const rol of ["gerente", "owner"] as const) {
+      for (const conceder of [true, false]) {
+        const acceso = conAcceso(ctx, {
+          rol,
+          excepciones: [{ permiso: PERMISOS_CORE.estructurasReadSensible, conceder }],
+        });
+        const filas = await dato<FilaCargo[]>(acceso, "core.cargos.list", {});
+        expect(filas[0]).not.toHaveProperty("sueldoVigente");
+      }
+    }
   });
 
   it("el total/cargos/vínculo de personas.list exige personas.read efectivo", async () => {

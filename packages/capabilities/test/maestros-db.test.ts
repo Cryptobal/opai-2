@@ -74,17 +74,28 @@ describe.skipIf(!urlPropietario)("maestros en base real", () => {
       nombres: "Ana",
       apellidos: "Rojas",
       rut: "19.876.543-0",
-      vinculo: { ...(await destinoVinculo(ctx())), cargoId: cargo.id, tipo: "indefinido", inicio: "2026-01-05" },
+      vinculo: {
+        ...(await destinoVinculo(ctx())),
+        cargoId: cargo.id,
+        tipo: "indefinido",
+        inicio: "2026-01-05",
+      },
     });
     await dato("core.estructuras.create", {
-      nivel: "cargo",
-      cargoId: cargo.id,
+      nivel: "instalacion",
+      instalacionId: inst.id,
+      colacion: 0,
+      movilizacion: 0,
+      gratificacion: "ninguna",
       sueldoBase: 560_000,
       vigenteDesde: "2026-01-01",
     });
     await dato("core.estructuras.create", {
-      nivel: "cargo",
-      cargoId: cargo.id,
+      nivel: "instalacion",
+      instalacionId: inst.id,
+      colacion: 0,
+      movilizacion: 0,
+      gratificacion: "ninguna",
       sueldoBase: 600_000,
       vigenteDesde: "2026-07-01",
     });
@@ -92,7 +103,11 @@ describe.skipIf(!urlPropietario)("maestros en base real", () => {
       "core.estructuras.efectiva",
       { personaId: persona.id, fecha: "2026-08-01" },
     );
-    expect(ef).toMatchObject({ aplica: null, niveles: { cargo: null }, estado: "sin_capa" });
+    expect(ef).toMatchObject({
+      aplica: "instalacion",
+      niveles: { cargo: null, instalacion: { sueldoBase: 600_000 } },
+      estado: "completa",
+    });
     const lista = await dato<{ items: { vinculoVigente: { cargo: string } }[] }>(
       "core.personas.list",
       { q: "roj" },

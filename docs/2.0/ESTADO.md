@@ -772,6 +772,35 @@ cambiar topes. Los 24 e2e afectados pasan con un worker, sin skips ni reintentos
 en el build local de producción; Laboral mide 7 consultas a 375/1024/1280 px.
 Capturas en `design/07b/evidencia-pr3/`. La integración, el CI remoto y la aplicación
 de la migración en Neon no se declaran ejecutados por este encargo.
+
+### Brief 07b · PR 2: retiro del nivel cargo (27-oct-2026)
+
+Codex completa el bloque 5 en `brief/07b-pr2-retiro-cargo`, sin migración de
+esquema. Catálogo «Cargos» sin montos en UI/API/MCP, aviso cerrable, archivo de
+versiones originales con `DatoArchivado` del DS 2.0 (también en `/ds`) y bloqueo
+`FORBIDDEN` de creación/versionado/anulación de nivel cargo, incluso en preview.
+Se conservan lectura, aislamiento y auditoría de montos con `read_sensible` (D7).
+El script manual idempotente archiva por tenant con `--dry-run`/`--apply`, sin
+conversión ni borrado. Se probó solo en Postgres local; no se ejecutó en Neon.
+
+Decisiones técnicas de Codex: campo `estado` textual existente, con valor `archivada`, bloqueo
+independiente de la corrida del script, auditoría agrupada y conteos consolidados
+para evitar N+1, aviso recordado en el navegador. El historial de persona incluye
+los cargos de vínculos actuales y terminados y enlaza sus versiones originales.
+Adaptación del export 21: no existe persistencia de periodos pagados en el Núcleo;
+se muestran fechas contractuales explícitas, sin reconstruir ni inventar pagos.
+D10 elige archivar: el export 20 de conversión no se implementa como conversión.
+CA-2 implementado con esa adaptación; el detalle está en «Construcción del PR 2»
+del brief. CA-3/CA-4 siguen en los PR 3/4; no cambia el ROADMAP. Evidencia final en
+`PR-BODY.md` sin versionar, según encargo; no sustituye CI ni revisión independiente.
+
+
+Validación local de este bloque: typecheck/lint, 1.021 tests generales, test:db
+119+181+25, build y presupuesto en verde, sin elevar topes. Pantallas e Inspector
+a 375/1024/1280 con un worker; lista/detalle/persona con 5/8/6 operaciones y
+aserción ≤8. Capturas de datos sintéticos en `apps/web/e2e/__screenshots__/07b-*cargo*.png`.
+Autorrevisión por subagente sin bloqueantes; CI y revisión independiente del head
+se verificarán después de abrir el PR, que este encargo prohíbe crear.
 **Brief 03, continuidad CAR-7:** Codex configura el pool por instancia y avisa una
 vez si el host en Vercel no contiene `-pooler.`; el test de rendimiento calienta con sesión y
 registra tres cargas. Son decisiones técnicas de implementación, pendientes de
@@ -780,3 +809,22 @@ el esqueleto, la carrera de hidratación, la invalidación de caché y la compar
 antes/después siguen pendientes. No se declara listo el gate obligatorio de ADR-045.
 
 - Pendientes de cierre del Núcleo (CAR-19): correcciones de permisos, auditoría de rechazos y regresiones de sueldos y navegación; detalle y validación en el PR.
+
+### Puesta al día del PR #89 con #87 (encargo del 28-oct-2026)
+
+Codex fusiona `origin/main` `3e1682df08c061ec786b01e2b4eb4d717f19ef15`
+mediante merge normal. Conserva el rechazo de mutaciones del nivel cargo, su
+archivo e historial y el permiso de lectura sensible en las capas vigentes,
+junto con instalación, puesto y jornada del vínculo. Laboral mantiene la vista
+consolidada del PR 3; el panel conserva el vínculo vigente y el historial del PR 2.
+Se conservan las dos entradas documentales y ambos fixtures de pruebas.
+No hay funcionalidad ni decisión de negocio nueva; no cambia el ROADMAP.
+CA-1/CA-2/CA-3 se conservan con las adaptaciones ya descritas; CA-4 sigue
+pendiente del PR 4 y `tools/list` remoto requiere despliegue. Autorrevisión
+por subagente sin hallazgos bloqueantes; resultados reales del gate y e2e en
+`PR-BODY.md` local, sin commit. No se aplica la migración en Neon.
+
+El gate detectó una expectativa desactualizada en la fusión automática de
+`maestros-db.test.ts`: con instalación en el vínculo ahora corresponde resolver
+la capa de instalación. Codex adapta la aserción a la versión de 600.000 del
+fixture, estado completo y cargo nulo; no modifica la resolución de negocio.

@@ -10,33 +10,19 @@ type Fila = {
   sueldoVigente: { sueldoBase: number | null; sensible: boolean } | null;
 };
 
-describe("cargos.list con el sueldo vigente (diseño 14)", () => {
-  it("muestra los montos vigentes y los oculta al rol sin permiso sensible", async () => {
-    const { ctx } = contextoDePrueba();
-    const c = await dato<{ id: string }>(ctx, "core.cargos.create", {
-      nombre: "Administrativo",
-      sueldoSensible: true,
-    });
-    await dato(ctx, "core.estructuras.create", {
-      nivel: "cargo",
-      cargoId: c.id,
-      sueldoBase: 900_000,
-      vigenteDesde: "2026-01-01",
-    });
-    await dato(ctx, "core.cargos.create", { nombre: "Conserje" });
-    const owner = await dato<Fila[]>(ctx, "core.cargos.list", {});
-    expect(owner.find((f) => f.nombre === "Administrativo")?.sueldoVigente).toMatchObject({
-      sueldoBase: 900_000,
-      sensible: false,
-    });
-    expect(owner.find((f) => f.nombre === "Conserje")?.sueldoVigente).toBeNull();
-
-    const sinPermiso = { ...ctx, autorizar: (x: string) => x !== "core:estructuras.read_sensible" };
-    const g = await dato<Fila[]>(sinPermiso, "core.cargos.list", {});
-    expect(g.find((f) => f.nombre === "Administrativo")?.sueldoVigente).toMatchObject({
-      sueldoBase: null,
-      sensible: true,
-    });
+describe("cargos.list sin montos (07b, pantalla 18)", () => {
+  it("no revela montos ni consulta estructuras, con o sin permiso sensible", async () => {
+    const { ctx, eventos } = contextoDePrueba();
+    await dato(ctx, "core.cargos.create", { nombre: "Administrativo", sueldoSensible: true });
+    for (const autorizar of [
+      ctx.autorizar,
+      (p: string) => p !== "core:estructuras.read_sensible",
+    ]) {
+      const lista = await dato<Fila[]>({ ...ctx, autorizar }, "core.cargos.list", {});
+      expect(lista[0]).toMatchObject({ nombre: "Administrativo" });
+      expect(lista[0]).not.toHaveProperty("sueldoVigente");
+    }
+    expect(eventos.filter((e) => e.capability === "core.estructuras.read_sensible")).toEqual([]);
   });
 
   it("puestos.list por cargo incluye el nombre de la instalación", async () => {

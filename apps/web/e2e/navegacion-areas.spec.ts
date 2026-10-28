@@ -135,7 +135,7 @@ test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }
   await page.getByRole("radio", { name: /^Personas/ }).click();
   await expect(page.getByRole("radio", { name: /^Personas/ })).toHaveAttribute("data-state", "checked");
   if (info.project.name === "telefono")
-    await expect(nav.getByRole("link", { name: "Cargos y sueldos", exact: true })).toBeVisible();
+    await expect(nav.getByRole("link", { name: "Cargos", exact: true })).toBeVisible();
   await page.getByRole("radio", { name: /^Según mi rol/ }).click();
   await expect(page.getByRole("radio", { name: /^Según mi rol/ })).toHaveAttribute("data-state", "checked");
   await page.goto("/");

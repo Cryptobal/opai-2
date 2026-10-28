@@ -1,25 +1,21 @@
-import { Plus } from "lucide-react";
-
-import { AccionFijaTelefono, Alerta, Badge, DetailScreen, SeccionTarjeta } from "@opai/ds";
+import { Alerta, Badge, DetailScreen, SeccionTarjeta } from "@opai/ds";
 import { PERMISOS_CORE } from "@opai/domain";
 
 import { AccionesEntidad } from "@/app/_components/maestros/acciones-entidad";
-import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
-import { hoyIso } from "@/lib/fechas";
 import type { SearchParams } from "@/lib/parametros";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { requerirIdentidad } from "@/lib/servidor";
 
 import { cargarCargo, CLASES } from "../_componentes/datos";
-import { EstructuraBase, Versiones } from "../_componentes/estructura-cargo";
-import { HojaCargo, HojaVersion, SwitchSensible } from "../_componentes/diferidas";
+import { Versiones } from "../_componentes/estructura-cargo";
+import { HojaCargo, SwitchSensible } from "../_componentes/diferidas";
 
 export const metadata = { title: "Cargo" };
 
 type Props = { params: Promise<{ id: string }>; searchParams: SearchParams };
 
-/** Cargo (15): sueldo sensible, estructura base vigente y versiones; "Crear versión". */
+/** Cargo: catálogo editable e historial archivado en solo lectura. */
 export default function CargoDetalle({ params }: Props) {
   return (
     <PaginaPortal
@@ -38,22 +34,9 @@ export default function CargoDetalle({ params }: Props) {
       }}
       opciones={(d) => ({
         titulo: d.cargo?.nombre ?? "Cargo",
-        acciones:
-          d.puedeGestionar && (!d.cargo?.sueldoSensible || d.puedeVerSensible) ? (
-            <EnlaceBotonHoja href="?version=1" icono={Plus}>
-              Crear versión
-            </EnlaceBotonHoja>
-          ) : null,
       })}
     >
       {({ state, cargo: c, versiones, puedeGestionar, puedeVerSensible }) => {
-        const hoy = hoyIso();
-        const vigente = versiones.find(
-          (v) =>
-            v.estado === "vigente" &&
-            v.vigenteDesde <= hoy &&
-            (!v.vigenteHasta || v.vigenteHasta >= hoy),
-        );
         return (
           <DetailScreen
             state={c ? state : state === "ready" ? "error" : state}
@@ -101,26 +84,15 @@ export default function CargoDetalle({ params }: Props) {
                       puedeGestionar={puedeGestionar && puedeVerSensible}
                     />
                   </SeccionTarjeta>
-                  {puedeGestionar && c.sueldoSensible && !puedeVerSensible ? (
-                    <Alerta
-                      tono="neutral"
-                      titulo="No puedes crear versiones de este cargo. Sus montos son sensibles. Pide a un owner o admin el permiso para ver sueldos sensibles."
-                    />
-                  ) : null}
-                  <EstructuraBase e={vigente} />
+                  <Alerta
+                    tono="neutral"
+                    titulo="Las estructuras antiguas de cargo están retiradas y son de solo lectura."
+                  />
                 </div>
                 <Versiones versiones={versiones} />
                 {puedeGestionar ? (
                   <>
-                    {!c.sueldoSensible || puedeVerSensible ? (
-                      <AccionFijaTelefono>
-                        <EnlaceBotonHoja href="?version=1">Crear versión</EnlaceBotonHoja>
-                      </AccionFijaTelefono>
-                    ) : null}
                     <HojaCargo cargo={c} puedeVerSensible={puedeVerSensible} />
-                    {!c.sueldoSensible || puedeVerSensible ? (
-                      <HojaVersion cargoId={c.id} base={vigente ?? versiones[0]} hoy={hoy} />
-                    ) : null}
                   </>
                 ) : null}
               </div>

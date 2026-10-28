@@ -1,4 +1,6 @@
 import { destinoVinculo } from "./vinculo-fixture";
+
+import { cargoHistorico } from "./cargo-historico-ayuda";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { contextoDePrueba } from "../src/testing";
@@ -16,8 +18,7 @@ describe("capas completas (07b)", () => {
   it("el RUT define toda su estructura y no toma conceptos del cargo", async () => {
     const { ctx } = contextoDePrueba();
     const cargo = await dato<{ id: string }>(ctx, "core.cargos.create", { nombre: "Supervisor" });
-    await dato(ctx, "core.estructuras.create", {
-      nivel: "cargo",
+    await cargoHistorico(ctx, {
       cargoId: cargo.id,
       sueldoBase: 850_000,
       colacion: 45_000,
@@ -42,7 +43,9 @@ describe("capas completas (07b)", () => {
       nivel: "persona",
       personaId: persona.id,
       movilizacion: 75_000,
-      sueldoBase: 700_000, colacion: 0, gratificacion: "ninguna",
+      sueldoBase: 700_000,
+      colacion: 0,
+      gratificacion: "ninguna",
       motivo: "Traslado desde Talagante",
       vigenteDesde: "2026-02-01",
     });
@@ -57,7 +60,7 @@ describe("capas completas (07b)", () => {
     expect(e.haberes?.["noImponible"]).toBe(75_000);
   });
 
-  it("la estructura de un cargo exige sueldo base", async () => {
+  it("el nivel cargo ya no admite escrituras", async () => {
     const { ctx } = contextoDePrueba();
     const cargo = await dato<{ id: string }>(ctx, "core.cargos.create", { nombre: "Guardia" });
     expect(
@@ -67,6 +70,6 @@ describe("capas completas (07b)", () => {
         colacion: 45_000,
         vigenteDesde: "2026-01-01",
       }),
-    ).toBe("UNPROCESSABLE");
+    ).toBe("FORBIDDEN");
   });
 });

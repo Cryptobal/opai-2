@@ -32,7 +32,7 @@ describe("permisos de sueldos sensibles", () => {
     const sin = { ...ctx, autorizar: (p: string) => p !== "core:estructuras.read_sensible" };
     const input = { nivel: "cargo", cargoId: id, sueldoBase: 100, vigenteDesde: "2026-01-01" };
     expect(await codigo(sin, "core.estructuras.create", input, { dryRun: true })).toBe("FORBIDDEN");
-    expect(eventos.some((e) => e.capability === "core.sueldo.rechazo_sensible")).toBe(true);
+    expect(eventos.some((e) => e.capability === "core.sueldo.rechazo_sensible")).toBe(false);
   });
   it.each(["instalacion", "puesto", "persona"] as const)(
     "rechaza reemplazar bonos ocultos en %s y audita el rechazo",
@@ -99,14 +99,22 @@ describe("permisos de sueldos sensibles", () => {
   );
   it("si falla la auditoría, no persiste la versión", async () => {
     const { ctx, tabla } = contextoDePrueba();
-    const cargo = await dato<{ id: string }>(ctx, "core.cargos.create", { nombre: "Cargo" });
+    const persona = await dato<{ id: string }>(ctx, "core.personas.create", {
+      nombres: "Ana",
+      apellidos: "Prueba",
+      rut: "12345678-5",
+    });
     ctx.auditoria.registrar = async () => {
       throw new Error("auditoría caída");
     };
     expect(
       await codigo(ctx, "core.estructuras.create", {
-        nivel: "cargo",
-        cargoId: cargo.id,
+        nivel: "persona",
+        personaId: persona.id,
+        motivo: "Acuerdo individual",
+        colacion: 0,
+        movilizacion: 0,
+        gratificacion: "ninguna",
         sueldoBase: 100,
         vigenteDesde: "2026-01-01",
       }),

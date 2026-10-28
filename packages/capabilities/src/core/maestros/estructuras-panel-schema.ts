@@ -37,6 +37,17 @@ export const salidaPanel = z.object({
   cuentas: z.array(z.object({ id: z.string(), nombre: z.string() })),
   puestos: z.array(puestoSchema),
   versiones: z.array(estructuraSchema),
+  cargosRetirados: z
+    .array(
+      z.object({
+        vinculoId: z.string(),
+        cargoId: z.string(),
+        cargo: z.string(),
+        inicio: z.string(),
+        termino: z.string().nullable(),
+      }),
+    )
+    .default([]),
   efectiva: estructurasEfectiva.output.nullable(),
 });
 export type PanelSueldo = z.infer<typeof salidaPanel>;
