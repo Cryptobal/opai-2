@@ -1,6 +1,7 @@
 import { manejarCapacidadHttp } from "@opai/capabilities/http";
 
 import { resolverActor } from "@/lib/actor";
+import { contextoSesionApi } from "@/lib/api-sesion";
 import { ipDe, LIMITES, permitir } from "@/lib/rate-limit";
 import { asegurarRegistro } from "@/lib/registro";
 import { demasiadas } from "@/lib/respuestas";
@@ -13,11 +14,14 @@ type Params = { params: Promise<{ capability: string[] }> };
  * API v1: autentica por sesión o API key y ejecuta la capacidad (Brief 01). Rate limit centralizado
  * (NÚCLEO-B): primero por IP (barrera barata antes de autenticar, acota el sondeo de keys), luego por
  * principal (API key o usuario). El actor se resuelve una sola vez y se reutiliza en el handler.
+ * Con sesión, el portal ERP lo fija el servidor y se exige el propio origen (`lib/api-sesion.ts`).
  */
 async function manejar(req: Request, { params }: Params): Promise<Response> {
   const { capability } = await params;
   if (!(await permitir(`v1-ip:${ipDe(req)}`, LIMITES.apiPorIp.maximo))) return demasiadas();
-  const ctx = await resolverActor(req);
+  const actor = await resolverActor(req);
+  if (actor instanceof Response) return actor;
+  const ctx = contextoSesionApi(req, actor);
   if (ctx instanceof Response) return ctx;
   const principal = ctx.actor.id ?? "sistema";
   if (!(await permitir(`v1-principal:${principal}`, LIMITES.apiPorPrincipal.maximo)))
