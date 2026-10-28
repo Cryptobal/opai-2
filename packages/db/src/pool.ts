@@ -13,19 +13,19 @@ type AlConectar = (
 const PAUSA_REINTENTO_MS = 300;
 
 /**
- * Fallos al ABRIR una conexión nueva (antes de enviar consulta alguna), que se pueden reintentar
- * sin riesgo: Neon despertando la compute, el pooler cortando el arranque o un socket TLS que se
- * cae. No incluye «timeout exceeded when trying to connect», que es la espera de un cupo libre del
- * pool (reintentar solo duplicaría la espera), ni credenciales inválidas.
+ * Fallos RÁPIDOS al abrir una conexión nueva (antes de enviar consulta alguna), que se pueden
+ * reintentar sin riesgo: el pooler de Neon cortando el arranque, un socket TLS que se cae o la
+ * autenticación que vence mientras la compute despierta. No incluye los vencimientos de
+ * `connectionTimeoutMillis` («due to connection timeout», «timeout expired»): ya esperaron el tope
+ * completo y reintentarlos lo duplicaría (riesgo de topar el `maxDuration` de la función). Tampoco
+ * «timeout exceeded when trying to connect» (la espera de un cupo libre) ni credenciales inválidas.
  */
 export function esFalloDeConexion(e: unknown): boolean {
   if (!(e instanceof Error)) return false;
+  if (/due to connection timeout|timeout expired|timeout exceeded/i.test(e.message)) return false;
   const codigo = "code" in e ? String(e.code) : "";
-  if (["ECONNRESET", "ECONNREFUSED", "ETIMEDOUT", "EPIPE", "EAI_AGAIN"].includes(codigo))
-    return true;
-  return /Connection terminated|timeout expired|Authentication timed out|before secure TLS/i.test(
-    e.message,
-  );
+  if (["ECONNRESET", "ECONNREFUSED", "EPIPE", "EAI_AGAIN"].includes(codigo)) return true;
+  return /Connection terminated|Authentication timed out|before secure TLS/i.test(e.message);
 }
 
 /**
@@ -38,12 +38,16 @@ export class PoolConReintento extends pg.Pool {
   override connect(callback?: AlConectar): Promise<pg.PoolClient> | void {
     const intento = this.#conectar();
     if (!callback) return intento;
+    // El callback corre fuera de la cadena de la promesa (como en pg-pool): si lanza, no queda
+    // como rechazo sin manejar. `done` respeta la semántica de pg-pool: cualquier valor truthy
+    // descarta la conexión en vez de devolverla al pool.
     intento.then(
-      (cliente) =>
-        callback(undefined, cliente, (r) =>
-          cliente.release(r === true || r instanceof Error ? r : undefined),
-        ),
-      (e: Error) => callback(e, undefined, () => undefined),
+      (cliente) => {
+        const done: Liberar = (r) =>
+          cliente.release(r ? (r instanceof Error ? r : true) : undefined);
+        process.nextTick(() => callback(undefined, cliente, done));
+      },
+      (e: Error) => process.nextTick(() => callback(e, undefined, () => undefined)),
     );
   }
 

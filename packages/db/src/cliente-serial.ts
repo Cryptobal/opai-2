@@ -1,11 +1,16 @@
 import pg from "pg";
 
-/** Formas de `query` que no devuelven una promesa: callback final o un `Submittable` (cursor). */
+/**
+ * Formas de `query` que no devuelven una promesa: callback final, un `Submittable` (cursor) o una
+ * configuración con `callback`.
+ */
 function sinPromesa(args: readonly unknown[]): boolean {
   const primero = args[0];
   return (
     typeof args.at(-1) === "function" ||
-    (typeof primero === "object" && primero !== null && "submit" in primero)
+    (typeof primero === "object" &&
+      primero !== null &&
+      ("submit" in primero || ("callback" in primero && typeof primero.callback === "function")))
   );
 }
 

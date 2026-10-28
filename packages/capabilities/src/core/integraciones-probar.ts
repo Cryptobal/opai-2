@@ -9,6 +9,7 @@ import { PERMISOS_CORE, PERMISOS_PLATAFORMA } from "@opai/domain";
 
 import { defineCapability } from "../define";
 import { noEncontrado } from "../errores";
+import { externo } from "../externo";
 import { correoDe, iaDe } from "../integraciones/adaptadores";
 import { probarGeo } from "./integraciones-probar-geo";
 
@@ -18,7 +19,8 @@ export const integracionesProbar = defineCapability({
     "Prueba la conexión de una integración con su credencial vigente (correo, geolocalización o IA) y guarda el resultado en su estado.",
   permiso: PERMISOS_CORE.integracionesManage,
   input: z.object({ proveedor: z.string() }),
-  output: z.object({ ok: z.boolean(), mensaje: z.string(), latenciaMs: z.number() }),
+  // Ante un error, `mensaje` incluye el texto que devolvió el proveedor (saneado): dato externo.
+  output: z.object({ ok: z.boolean(), mensaje: externo(z.string()), latenciaMs: z.number() }),
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {

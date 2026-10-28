@@ -39,10 +39,12 @@ describe("ClienteSerial", () => {
 });
 
 describe("esFalloDeConexion", () => {
-  it("reintenta solo fallos al abrir conexión, nunca la espera de cupo ni credenciales", () => {
+  it("reintenta solo fallos rápidos al abrir conexión: nunca timeouts, cupo ni credenciales", () => {
+    // Ya esperó el tope completo de connectionTimeoutMillis: reintentar lo duplicaría.
     expect(esFalloDeConexion(new Error("Connection terminated due to connection timeout"))).toBe(
-      true,
+      false,
     );
+    expect(esFalloDeConexion(new Error("timeout expired"))).toBe(false);
     expect(esFalloDeConexion(new Error("Connection terminated unexpectedly"))).toBe(true);
     expect(esFalloDeConexion(Object.assign(new Error("x"), { code: "ECONNRESET" }))).toBe(true);
     expect(esFalloDeConexion(new Error("Authentication timed out"))).toBe(true);
