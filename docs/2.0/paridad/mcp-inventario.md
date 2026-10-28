@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 214 pares pantalla→capacidad · 197 con herramienta · 17 excepciones justificadas · 0 faltantes.
+**Resumen:** 216 pares pantalla→capacidad · 197 con herramienta · 19 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -158,6 +158,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/aprobaciones` | `core.aprobaciones.aprobar` | — | excepción |
 | erp | `/configuracion/aprobaciones` | `core.aprobaciones.list` | `core_aprobaciones_list` | existe |
 | erp | `/configuracion/aprobaciones` | `core.aprobaciones.rechazar` | — | excepción |
+| erp | `/configuracion/aprobaciones` | `platform.aprobaciones.aprobar` | — | excepción |
+| erp | `/configuracion/aprobaciones` | `platform.aprobaciones.rechazar` | — | excepción |
 | erp | `/configuracion/comunicaciones/[evento]` | `core.comunicaciones.eventos` | `core_comunicaciones_eventos` | existe |
 | erp | `/configuracion/comunicaciones/[evento]` | `core.plantillas.get` | `core_plantillas_get` | existe |
 | erp | `/configuracion/comunicaciones` | `core.comunicaciones.eventos` | `core_comunicaciones_eventos` | existe |
@@ -303,6 +305,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.supervisores.asignar` | Solo personas: fijar el alcance de un supervisor gobierna su acceso; un agente no lo hace (ADR-034). |
 | `core.supervisores.quitar` | Solo personas: quitar instalaciones del alcance de un supervisor gobierna su acceso (ADR-034). |
 | `core.users.invite` | Solo personas: invitar asigna un rol y gobierna el acceso (encargo PR #70). |
+| `platform.aprobaciones.aprobar` | Solo personas: lo irreversible de plataforma lo aprueba un humano (ADR-032, CAR-36). |
+| `platform.aprobaciones.rechazar` | Solo personas: la decisión sobre lo irreversible de plataforma es humana (ADR-032, CAR-36). |
 
 ## Capacidades solo por API y MCP (ninguna pantalla las invoca con id literal)
 
@@ -339,6 +343,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 - `core.supervisores.list`
 - `core.usage.summary`
 - `platform.auditoria.estado`
+- `platform.auditoria.list`
 - `platform.bitacora.estado`
 - `platform.eventos.list`
 - `platform.tenants.update`
