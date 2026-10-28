@@ -77,4 +77,39 @@ describe("comercial · gobierno de las capacidades", () => {
     const ambos = ctxComercial({ permisos: ["comercial:negocios.read", "core:cuentas.read"] });
     expect(await codigo(ambos.ctx, "comercial.contactos.list", {})).toBe("OK");
   });
+
+  it("la configuración del embudo es solo de owner y admin (comercial.md §7)", async () => {
+    const etapa = { id: etapaId(1), probabilidad: 25 };
+    for (const rol of ["owner", "admin"] as const) {
+      expect(
+        await codigo(ctxComercial({ rol }).ctx, "comercial.config.actualizar_etapa", etapa),
+      ).toBe("OK");
+    }
+    const gerente = ctxComercial({ rol: "gerente" }).ctx;
+    expect(await codigo(gerente, "comercial.config.actualizar_etapa", etapa)).toBe("FORBIDDEN");
+    expect(
+      await codigo(gerente, "comercial.config.guardar_catalogo", {
+        catalogo: "tipo",
+        nombre: "Nuevo tipo",
+      }),
+    ).toBe("FORBIDDEN");
+  });
+
+  it("una transición rechaza si el negocio cambió de etapa entre la lectura y la escritura", async () => {
+    const { ctx, tabla } = ctxComercial();
+    const n = await dato<{ id: string }>(ctx, "comercial.negocios.create", nuevo);
+    await dato(ctx, "comercial.negocios.vincular_instalacion", {
+      negocioId: n.id,
+      instalacionId: I1,
+      tipo: "nueva",
+    });
+    // Simula otra petición que ya movió el negocio: la fila leída queda obsoleta.
+    const { aplicarEtapa } = await import("../src/comercial/transiciones-util");
+    const fila = tabla("negocio")?.[0] as { etapaId: string };
+    const obsoleta = { id: n.id, etapaId: etapaId(0), createdAt: new Date() };
+    fila.etapaId = etapaId(1);
+    await expect(
+      ctx.transaccion((tx) => aplicarEtapa(ctx, tx, obsoleta, { id: etapaId(2), tipo: "abierta" })),
+    ).rejects.toThrow(/cambió de etapa/);
+  });
 });

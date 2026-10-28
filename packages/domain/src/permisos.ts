@@ -43,6 +43,8 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
       PERMISOS_CORE.anexosRead,
       PERMISOS_CORE.anexosManage,
       PERMISOS_CORE.configManage,
+      // Embudo y catálogos de Comercial (comercial.md §7): owner y admin.
+      "comercial:config.manage",
       PERMISOS_CORE.marcaManage,
       PERMISOS_CORE.integracionesManage,
       PERMISOS_CORE.comunicacionesManage,
