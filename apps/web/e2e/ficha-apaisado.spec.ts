@@ -87,8 +87,10 @@ test.describe("fichas con el celular en horizontal", () => {
         .first()
         .getAttribute("href");
       await page.goto(`${persona}/laboral`);
+      // Desde el 07b (#89): vínculo vigente y jornada a la izquierda, historial a la derecha.
       const rejilla = page
-        .locator("div.grid.gap-4:has(> div.flex.flex-col.gap-4):has(> div.flex.flex-col.gap-3)")
+        .locator("main div.grid.gap-4:has(> div.flex.flex-col.gap-4)")
+        .filter({ hasText: "Vínculo vigente" })
         .first();
       await expect(rejilla).toBeVisible({ timeout: 30_000 });
       await page.waitForLoadState("networkidle");

@@ -53,6 +53,11 @@ test.describe("maestros con sesión", () => {
     await dialogo.getByLabel("RUT").fill(rutNuevo());
     await dialogo.getByLabel("Cargo").click();
     await page.getByRole("option").first().click();
+    // Desde el 07b (#89) el vínculo exige instalación y jornada pactada (horas y distribución).
+    await dialogo.getByRole("button", { name: "Instalación obligatoria" }).click();
+    await page.getByRole("option").first().click();
+    await dialogo.getByLabel("Horas semanales").fill("45");
+    await dialogo.getByLabel("Distribución").fill("Lunes a sábado");
     await dialogo.getByRole("button", { name: "Crear persona" }).click();
     await page.waitForURL(/\/personas\/[0-9a-f-]{36}$/);
     await expect(
