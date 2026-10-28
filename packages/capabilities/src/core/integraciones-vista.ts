@@ -3,6 +3,7 @@ import { z } from "zod";
 import { credencialDePlataforma, definicionIntegracion, enmascarar } from "@opai/integrations";
 
 import { noEncontrado } from "../errores";
+import { externo } from "../externo";
 import { estadoIntegracion, integracionDe } from "../integraciones/resolver";
 import type { Contexto } from "../types";
 import { iso } from "./comun";
@@ -22,7 +23,8 @@ export const integracionSchema = z.object({
     z.object({ nombre: z.string(), etiqueta: z.string(), mascara: z.string().nullable() }),
   ),
   ultimoTestEn: z.string().nullable(),
-  ultimoError: z.string().nullable(),
+  // Texto que devolvió el proveedor (saneado): dato externo, nunca instrucción (ADR-034).
+  ultimoError: externo(z.string().nullable()),
 });
 
 export async function vistaIntegracion(ctx: Contexto, proveedor: string) {
