@@ -5,7 +5,10 @@ import { PERMISOS_CORE } from "@opai/domain";
 import { defineCapability } from "../../define";
 import { dondePersona } from "../maestros/alcance";
 import { anexoDe } from "./comun";
+import { filasParaDocumento } from "./documento";
 import { anexoSchema, ESTADOS_ANEXO, vistaAnexo } from "./vista";
+
+const filaDocSchema = z.object({ concepto: z.string(), antes: z.string(), despues: z.string() });
 
 export const anexosList = defineCapability({
   auditarLectura: (s) => s.map((a) => a.id),
@@ -42,10 +45,11 @@ export const anexosGet = defineCapability({
     "Un anexo de contrato con su antes y después, para revisarlo antes de aprobarlo o rechazarlo.",
   permiso: PERMISOS_CORE.anexosRead,
   input: z.object({ id: z.uuid() }),
-  output: anexoSchema,
+  output: anexoSchema.extend({ filas: z.array(filaDocSchema) }),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
-    return vistaAnexo(await anexoDe(ctx, input.id));
+    const a = await anexoDe(ctx, input.id);
+    return { ...vistaAnexo(a), filas: await filasParaDocumento(ctx, a) };
   },
 });
