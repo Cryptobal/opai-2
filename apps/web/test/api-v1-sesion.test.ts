@@ -15,6 +15,9 @@ beforeAll(async () => {
 
 const capacidad = (id: string) => capacidadesDelNucleo.find((c) => c.id === id)!;
 const URL_V1 = "http://localhost:3000/api/v1/core/roles/create";
+const MISMO = { origin: "http://localhost:3000" };
+const req = (init: RequestInit = {}) =>
+  new Request(URL_V1, { ...init, headers: { ...MISMO, ...init.headers } });
 
 async function sesion(membresias = [membresia()]) {
   const ctx = await actor.resolverActor(
@@ -28,14 +31,14 @@ async function sesion(membresias = [membresia()]) {
 
 describe("/api/v1 con sesión: roles y permisos en el portal ERP fijado en servidor (CAR-37)", () => {
   it("las capacidades de la lista corren en ERP y pasan la autorización de un owner", async () => {
-    const ctx = contextoV1Sesion(await sesion(), "core.roles.create", new Request(URL_V1));
+    const ctx = contextoV1Sesion(await sesion(), "core.roles.create", req());
     if (ctx instanceof Response) throw new Error("Se esperaba contexto");
     expect(ctx.portal).toBe("erp");
     for (const id of CAPACIDADES_V1_SESION_ERP) expect(denegar(ctx, capacidad(id)), id).toBeNull();
   });
 
   it("fuera de la lista el portal sigue nulo y la capacidad del tenant se rechaza", async () => {
-    const ctx = contextoV1Sesion(await sesion(), "core.buscar", new Request(URL_V1));
+    const ctx = contextoV1Sesion(await sesion(), "core.buscar", req());
     if (ctx instanceof Response) throw new Error("Se esperaba contexto");
     expect(ctx.portal).toBeNull();
     expect(denegar(ctx, capacidad("core.buscar"))).toMatchObject({ error: { code: "FORBIDDEN" } });
@@ -45,7 +48,7 @@ describe("/api/v1 con sesión: roles y permisos en el portal ERP fijado en servi
     const ctx = contextoV1Sesion(
       await sesion([membresia({ portales: ["supervisor"] })]),
       "core.roles.list",
-      new Request(URL_V1),
+      req(),
     );
     if (ctx instanceof Response) throw new Error("Se esperaba contexto");
     expect(ctx.portal).toBeNull();
@@ -54,23 +57,32 @@ describe("/api/v1 con sesión: roles y permisos en el portal ERP fijado en servi
     });
   });
 
-  it("una escritura con cookie desde otro sitio se corta (CSRF)", async () => {
+  it("con cookie desde otro sitio, o sin señales de origen, se corta (CSRF), también en GET", async () => {
     const base = await sesion();
-    for (const headers of [{ origin: "https://malo.example" }, { "sec-fetch-site": "cross-site" }]) {
+    const cortes: Record<string, string>[] = [
+      { origin: "https://malo.example" },
+      { "sec-fetch-site": "cross-site" },
+      {},
+    ];
+    for (const method of ["POST", "GET"]) {
+      for (const headers of cortes) {
+        const r = contextoV1Sesion(
+          base,
+          "core.roles.list",
+          new Request(URL_V1, { method, headers }),
+        );
+        expect(r, `${method} ${JSON.stringify(headers)}`).toBeInstanceOf(Response);
+        expect((r as Response).status).toBe(403);
+      }
+    }
+    for (const headers of [MISMO, { "sec-fetch-site": "same-origin" }]) {
       const r = contextoV1Sesion(
         base,
         "core.roles.create",
         new Request(URL_V1, { method: "POST", headers }),
       );
-      expect(r).toBeInstanceOf(Response);
-      expect((r as Response).status).toBe(403);
+      expect(r).not.toBeInstanceOf(Response);
     }
-    const mismo = contextoV1Sesion(
-      base,
-      "core.roles.create",
-      new Request(URL_V1, { method: "POST", headers: { origin: "http://localhost:3000" } }),
-    );
-    expect(mismo).not.toBeInstanceOf(Response);
   });
 
   it("una API key no cambia: las soloPersonas siguen bloqueadas para agentes", async () => {

@@ -27,19 +27,26 @@ const prohibido = () =>
   );
 
 /**
- * Fija el portal ERP para una sesión humana en `/api/v1` solo si la capacidad está en la lista y la
- * membresía actual tiene el ERP; el MFA ya lo exigió `resolverActor`. Una escritura con cookie desde
- * otro sitio se corta (CSRF): `Origin` distinto o `Sec-Fetch-Site: cross-site`. API keys y sistema no
- * cambian: su autorización no depende del portal de sesión.
+ * Mismo sitio de verdad: `Origin` igual al de la API o `Sec-Fetch-Site` same-origin/none. Sin ninguna
+ * de las dos señales se rechaza (fail-closed): una llamada con cookie desde otro sitio (CSRF, o una
+ * navegación GET que ensuciaría la auditoría de lecturas) nunca llega a la capacidad.
+ */
+function mismoOrigen(req: Request): boolean {
+  const origen = req.headers.get("origin");
+  if (origen !== null) return origen === new URL(req.url).origin;
+  const sitio = req.headers.get("sec-fetch-site");
+  return sitio === "same-origin" || sitio === "none";
+}
+
+/**
+ * Fija el portal ERP para una sesión humana en `/api/v1` solo si la capacidad está en la lista, la
+ * petición viene del mismo origen y la membresía actual tiene el ERP; el MFA ya lo exigió
+ * `resolverActor`. API keys y sistema no cambian: su autorización no depende del portal de sesión.
  */
 export function contextoV1Sesion(ctx: Contexto, id: string, req: Request): Contexto | Response {
   if (ctx.actor.tipo !== "user" || ctx.portal !== null || !ctx.conTenant) return ctx;
   if (!CAPACIDADES_V1_SESION_ERP.includes(id)) return ctx;
-  if (req.method !== "GET") {
-    const origen = req.headers.get("origin");
-    if (origen !== null && origen !== new URL(req.url).origin) return prohibido();
-    if (req.headers.get("sec-fetch-site") === "cross-site") return prohibido();
-  }
+  if (!mismoOrigen(req)) return prohibido();
   if (!ctx.portalesMembresia.includes("erp")) return ctx;
   return { ...ctx, portal: "erp" };
 }
