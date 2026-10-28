@@ -1,5 +1,7 @@
 # Contexto para agentes — OPAI 2.0
 
+> **Flujo operativo vigente desde el 28-oct-2026:** [`OPERACION-agentes.md`](OPERACION-agentes.md) (ADR-054). Es la fuente del flujo de trabajo (quién hace qué, migraciones, revisión, integración, QA y capturas); ante un choque con este archivo, manda ese.
+
 Para pegar en la configuración o memoria de Grokbot o de cualquier agente que trabaje con OPAI. Versión vigente: la de este archivo en el repositorio.
 
 ---
@@ -16,18 +18,18 @@ Carlos decidió construir **OPAI 2.0 desde cero**: un SaaS modular, multi-tenant
 
 ## Cómo se trabaja
 
-- Flujo con bots (ADR-043, modifica ADR-035):
-  - **Bot «OPAI 2.0»** (orquestador): prepara los prompts de cada encargo según `ROADMAP.md`, opera los chats de construcción, revisión y QA, e **integra a `main` con squash** cuando el Revisor escribió APROBAR sin condiciones citando el SHA del head actual, los checks obligatorios están en verde sobre ese SHA, la rama no está «behind» y, si el PR toca pantallas, no hay nada con la etiqueta `qa-bloqueante`; no integra si hay un veto vigente o la etiqueta `migracion-pendiente`, con la regla de autoría de `AGENTS.md` («Veto y migración pendiente»); le avisa a Carlos después de cada merge (ADR-043 v3, 24-oct).
-  - **Constructor** (habitualmente Claude): escribe la especificación y el brief, construye en su rama y abre el PR según el encargo; nunca integra. NÚCLEO-H `nucleo-h-1112-oc` autoriza explícitamente OpenCode / openai/gpt-6.1-sol por falta de cupo de Claude y seguridad; continúa el PR existente, sin crear otro. No es una autorización general a los agentes operativos.
-  - **Bot «Revisor OPAI 2.0»**: revisa el PR con el modelo contrario al que construyó; aprueba o pide cambios; **no integra** (ADR-043 v3).
+- Flujo con bots (ADR-043 v3, ajustado por ADR-054 y `OPERACION-agentes.md` desde el 28-oct-2026):
+  - **Bot «OPAI 2.0»** (Cursor; opera la cola): no escribe briefs. Cada 15 minutos revisa los PRs abiertos y pasa cada PR nuevo o con head nuevo al Revisor y a QA (avisos); aplica las migraciones en Neon **con respaldo previo**, primero en `dev` y después en `main`, y quita la etiqueta `migracion-pendiente`; **integra a `main` con squash** cuando los checks obligatorios están en verde, la rama está al día con `main`, el Revisor no dejó bloqueos de seguridad, migraciones o datos y no hay veto vigente de Carlos; toma las capturas que Carlos pida en `test.opai.cl`, y avisa en español al migrar y al integrar.
+  - **Constructor** (habitualmente Claude): escribe la especificación y **los briefs**, construye en su rama y abre el PR según el encargo; nunca integra. NÚCLEO-H `nucleo-h-1112-oc` autoriza explícitamente OpenCode / openai/gpt-6.1-sol por falta de cupo de Claude y seguridad; continúa el PR existente, sin crear otro. No es una autorización general a los agentes operativos.
+  - **Bot «Revisor OPAI 2.0»**: revisa el PR con el modelo contrario al que construyó, en **una sola pasada** (tras un push, solo el delta); solo **bloquea** por seguridad, migraciones o datos (RLS, permisos, pérdida o mezcla de datos entre tenants); lo demás va a un PR de pendientes; **no integra**.
   - **Bot de Paridad**: compara 1.0 y 2.0 en solo lectura y reporta brechas (`docs/2.0/checklists/paridad.md`).
-  - **Bot «Diseño y QA OPAI 2.0»**: después de cada merge con pantallas, las prueba en `test.opai.cl` en celular y escritorio; un hallazgo BLOQUEANTE abierto frena los merges siguientes que toquen pantallas.
-  - **Carlos**: decide el negocio; aprueba el brief o encargo antes de que se abra cada PR, las especificaciones (`docs/2.0/modulos/`), los diseños y lo irreversible; puede vetar cualquier PR (comentario «VETO» o etiqueta `veto`).
+  - **Bot «Diseño y QA OPAI 2.0»**: después de integrar, prueba las pantallas en `test.opai.cl` en celular y escritorio; **no frena nada**: sus hallazgos van al PR de pendientes, salvo los de seguridad o datos, que abren un arreglo inmediato.
+  - **Carlos**: decide el negocio; aprueba **una vez por módulo** la hoja de alcance (qué pasa de 1.0 a 2.0, qué no y qué mejoras se suman; 1.0 es el piso, no el techo), las especificaciones (`docs/2.0/modulos/`), los diseños y lo irreversible; puede vetar cualquier PR (comentario «VETO» o etiqueta `veto`).
 - Contrato completo de roles y reglas: `AGENTS.md` en la raíz del repositorio.
 - Ciclo de cada módulo (ADR-047): extracción de 1.0 → especificación → aprobación de Carlos → Design Prompt → diseño aprobado → brief → PR → revisión → merge con squash (bot «OPAI 2.0») → QA.
-- `main` cambia varias veces al día. Antes de opinar sobre el avance, revisa las tareas en Linear y la foto técnica de `ESTADO.md`; no te fíes de lo que viste ayer.
-- Si eres un **agente operativo**, no escribes código, no haces push ni integras PRs en `opai-2`; reportas bugs o brechas del MCP con herramienta, input y respuesta, sin datos personales. El constructor trabaja solo con encargo explícito y el bot «OPAI 2.0» es el único que integra según ADR-043 v3. Este párrafo no impide ejecutar un encargo de construcción autorizado.
-- El estado de las tareas vive en Linear (equipo CAR, IDs `CAR-n`); `docs/2.0/ESTADO.md` es la foto técnica (versiones, infraestructura, riesgos aceptados y decisiones). Reglas del flujo en `AGENTS.md`, «Tareas (Linear)». El plan, en `docs/2.0/ROADMAP.md`; la etapa de cada módulo, en `docs/2.0/PLAN-desarrollo.md`.
+- `main` cambia varias veces al día. Antes de opinar sobre el avance, revisa `ESTADO.md` (y, como referencia, las tareas en Linear); no te fíes de lo que viste ayer.
+- Si eres un **agente operativo**, no escribes código, no haces push ni integras PRs en `opai-2`; reportas bugs o brechas del MCP con herramienta, input y respuesta, sin datos personales. El constructor trabaja solo con encargo explícito y el bot «OPAI 2.0» es el único que integra (ADR-043 v3 y ADR-054). Este párrafo no impide ejecutar un encargo de construcción autorizado.
+- **Cada PR actualiza `docs/2.0/ESTADO.md` (qué entró, qué quedó pendiente, qué se decidió).** Sin esa actualización, el PR no está listo. Linear (equipo CAR, IDs `CAR-n`, `Fixes CAR-n` en el PR) sigue como referencia, pero no reemplaza a `ESTADO.md`. El plan, en `docs/2.0/ROADMAP.md`; la etapa de cada módulo, en `docs/2.0/PLAN-desarrollo.md`.
 - Las decisiones viven en `docs/2.0/01-decisiones.md`.
 
 ## Qué va a cambiar para ti
@@ -73,8 +75,8 @@ Actúas como delegado de Carlos en OPAI 2.0, con tu propia identidad y solo los 
 
 1. No mezcles datos ni supuestos entre 1.0 y 2.0.
 2. No propongas cambios en 1.0 salvo bugs críticos de operación de Gard.
-3. Si Carlos te pregunta por el avance de 2.0, responde desde las tareas de Linear y, para lo técnico, desde `docs/2.0/ESTADO.md`; si no tienes acceso, dilo.
-4. Las claves, secretos e infraestructura las maneja Carlos desde su máquina; nunca las pidas ni las guardes.
+3. Si Carlos te pregunta por el avance de 2.0, responde desde `docs/2.0/ESTADO.md` (y, como referencia, las tareas de Linear); si no tienes acceso, dilo.
+4. Las claves, secretos e infraestructura las maneja Carlos desde su máquina, salvo las migraciones de Neon, que aplica el bot «OPAI 2.0» con respaldo (`OPERACION-agentes.md` A.5); nunca las pidas ni las guardes.
 5. Conéctate al MCP **solo con la cabecera `Authorization: Bearer <API key>`** contra `https://test.opai.cl/api/mcp`. **Nunca** uses la URL con la key (`https://test.opai.cl/api/mcp/k/<API key>`): quedó deprecada (NÚCLEO-B) y por defecto responde **410 Gone**, porque la key se filtraba en historiales y logs. Si tu cliente aún usa esa URL, cámbialo a la cabecera antes de seguir.
 
 - Errores de gobierno de agentes `APPROVAL_REQUIRED` y `BUDGET_EXCEEDED`: ver [Operar el núcleo](agentes/operar-el-nucleo.md).
