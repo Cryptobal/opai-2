@@ -570,3 +570,56 @@ El gate detectó una expectativa desactualizada en la fusión automática de
 `maestros-db.test.ts`: con instalación en el vínculo ahora corresponde resolver
 la capa de instalación. Codex adapta la aserción a la versión de 600.000 del
 fixture, estado completo y cargo nulo; no modifica la resolución de negocio.
+
+## Construcción del PR 4 — anexo de contrato en borrador (Claude, 28-oct-2026)
+
+Rama `brief/07b-pr4-anexo-borrador`, sobre #87/#89, con merge de `main` `4337a53`
+(#90, Inicio/Vencimientos) a mitad de la construcción.
+
+- **Bloque 9 (migración):** `20261028200000_anexo_contrato_borrador`, tabla
+  nueva `core.anexos_contrato`. RLS ENABLE/FORCE, política `tenant_isolation`,
+  trigger de mismo tenant y un CHECK de consistencia por estado (borrador sin
+  resolución; aprobado con `documento_id`; rechazado con motivo). Es
+  `CREATE TABLE`, no `ALTER` sobre una tabla existente: sin `BEGIN`/`COMMIT`
+  propios, a diferencia de los PR 1 y 3.
+- **Bloque 10 (capacidades):** `core.anexos.generar/list/get/aprobar/rechazar`.
+  Permisos `core:anexos.read`/`manage`, mismo bloqueo financiero que capas y
+  vínculo (D8: denegados a gerente, por los montos del snapshot). Consumidor de
+  `core.estructura.creada/anulada` y `core.vinculo.actualizado` que genera el
+  borrador por persona, idempotente por evento (R11, D3); la jornada pactada
+  sola no genera anexo. Aprobar materializa el documento en `core.documentos`
+  reutilizando el layout de marca de Comunicaciones (ADR-028), con SHA-256 y
+  bitácora; bloqueo `FOR UPDATE` contra la carrera aprobar/rechazar.
+  `aprobar`/`rechazar` son `soloPersonas` (un agente recibe `FORBIDDEN`, igual
+  que `core.aprobaciones.aprobar`). Eventos `core.anexo.generado/aprobado/rechazado`
+  declarados en `EVENTOS_CORE`.
+- **Bloque 11 (pantallas y DS):** pestaña «Anexos» en la ficha de persona y
+  `/personas/[id]/anexos/[anexoId]` (documento + panel de aprobación, D16).
+  Piezas nuevas del DS: `AvisoAnexo`, `DocumentoBorrador` (conserva su papel
+  claro en oscuro, D15) y `PanelAprobacion`, las tres en `/ds`.
+
+**Decisiones técnicas de Claude (no son decisiones de Carlos):** `soloPersonas`
+da `FORBIDDEN` a un agente antes de llegar a `APPROVAL_REQUIRED` (mecanismo ya
+existente, `core.aprobaciones.aprobar`); D13 «admin configurable por tenant» se
+implementa solo en su mitad interina (owner/admin estático), igual que D8,
+hasta el refinamiento por rol del Brief 07c (§16.c-1); el documento final
+muestra sueldo base, colación, movilización, gratificación y, para el motivo
+instalación, los nombres de instalación y puesto, sin editor de plantilla (R12
+lo deja para el Brief 09).
+
+**CA-4:** cumplido. El motivo "rol" no tiene fuente hoy (Operaciones es fase 3,
+§16.c-3): la capacidad y la UI lo soportan, pero el consumidor no lo dispara
+todavía. **Pendiente de Carlos (§16.b):** el texto legal definitivo de la
+plantilla base; el documento usa texto de ejemplo hasta entonces (D15).
+
+**Gate local:** typecheck, lint (0 errores), test (173 archivos, 1.036
+pruebas), test:db (122+200+25, incluye `anexos-db.test.ts` contra Postgres
+real: aislamiento por tenant, bloqueo financiero, `soloPersonas` y el documento
+final con SHA-256 y bitácora verificable), build y presupuesto en verde (dos
+rutas nuevas a 166 KB; `/ds` de 222 a 224 KB). e2e `anexo-contrato.spec.ts`
+(375/1024/1280, claro y oscuro) en verde; aprobar no se prueba de punta a punta
+en este entorno por falta de credenciales de R2 (igual que en CI): se verifica
+el mensaje de error, y el flujo completo ya se prueba contra Postgres real con
+almacenamiento en memoria en `anexos-db.test.ts`. Sin migración aplicada en
+Neon. No se abre PR (lo abre el bot «OPAI 2.0»); evidencia completa en
+`PR-BODY.md`, sin commitear.
