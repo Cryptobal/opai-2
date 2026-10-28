@@ -72,3 +72,10 @@ Se reproduce fiel el export v3 (pantallas, flujos, estados, textos y jerarquía)
 
 ## 9. Reporte de ejecución
 Al cerrar: commits, capturas 375/1024/1280 comparadas con el export, resultado de `test:db`, `e2e`, presupuesto de JS y `tools/list`, migración por aplicar, y resumen ejecutivo para Carlos (qué se hizo, qué cambia para Gard, qué decide él, qué sigue).
+
+### Estado de los criterios del alcance del §2
+
+- Embudo visual, filtros completos, creación y edición por pantalla, transiciones por pantalla y editor visual de configuración: **parciales**, pendientes del PR 1b; las capacidades existentes no sustituyen esas pantallas.
+- Lista y ficha de negocios y contactos, pestañas de negocios en cuenta e instalación: implementadas; quedan pendientes los 404 reales de las fichas y la evidencia visual señalada en `ESTADO.md`.
+- Capacidades y MCP, vista previa y aprobación al ganar: implementados; la verificación de `tools/list` en el servidor queda para después del despliegue.
+- Alcance de negocios y nombres de contactos en la ficha: pendientes de revisión según los riesgos documentados en `ESTADO.md`; la lista de contactos sí aplica `dondeContacto`.

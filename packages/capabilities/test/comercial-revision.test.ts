@@ -2,7 +2,17 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import { aplicarEtapa } from "../src/comercial/transiciones-util";
 import { codigo, dato } from "./maestros-ayuda";
-import { CU, I1, I2, K1, K2, ctxComercial, etapaId, reiniciarComercial } from "./comercial-ayuda";
+import {
+  CU,
+  I1,
+  I2,
+  K1,
+  K2,
+  N1,
+  ctxComercial,
+  etapaId,
+  reiniciarComercial,
+} from "./comercial-ayuda";
 
 // Correcciones de la revisión del PR #97: alcance de contactos (B1), configuración solo para owner
 // y admin (B2) y transiciones condicionadas a la etapa leída (carrera mover/ganar).
@@ -29,6 +39,56 @@ describe("comercial · correcciones de la revisión", () => {
     expect(dentro.items.map((c) => c.id).sort()).toEqual([K1, K2].sort());
     // Sin alcance (owner), los mismos contactos siguen visibles: el filtro solo acota.
     expect((await lista(ctxComercial().ctx)).items).toHaveLength(2);
+  });
+
+  it("la ficha del negocio (comercial.negocios.get) acota los contactos por alcance (ADR-022)", async () => {
+    // Bloqueante de la revisión 5685957626: comercial.negocios.get devolvía los nombres de K1/K2
+    // (contactos de CU) sin aplicar el alcance por filas del supervisor. N1 es el negocio de CU (con
+    // la instalación I1 y los contactos K1/K2) sembrado igual en cada contexto (`conNegocio: true`).
+    const supervisor = (instalaciones: string[]) =>
+      ctxComercial({
+        rol: "supervisor",
+        excepciones: [{ permiso: "comercial:negocios.read", conceder: true }],
+        alcance: { instalaciones },
+        conNegocio: true,
+      }).ctx;
+    const ficha = (ctx: ReturnType<typeof supervisor>) =>
+      dato<{ contactos: { contactoId: string }[] }>(ctx, "comercial.negocios.get", { id: N1 });
+
+    // Fuera de alcance (I2 es de CU2, los contactos del negocio son de CU): no ve a K1 ni K2.
+    expect((await ficha(supervisor([I2]))).contactos).toEqual([]);
+    // Dentro de alcance (I1 es de CU): los ve.
+    expect((await ficha(supervisor([I1]))).contactos.map((c) => c.contactoId).sort()).toEqual(
+      [K1, K2].sort(),
+    );
+    // Owner (sin alcance) ve a todos.
+    const owner = ctxComercial({ conNegocio: true }).ctx;
+    expect((await ficha(owner)).contactos.map((c) => c.contactoId).sort()).toEqual([K1, K2].sort());
+  });
+
+  it("set_contactos no vincula contactos fuera del alcance del actor (ADR-022)", async () => {
+    const acotado = (instalaciones: string[]) =>
+      ctxComercial({
+        rol: "supervisor",
+        excepciones: [{ permiso: "comercial:negocios.manage", conceder: true }],
+        alcance: { instalaciones },
+        conNegocio: true,
+      }).ctx;
+
+    // Fuera de alcance (I2 es de CU2): K1 es contacto de CU, fuera del alcance del actor.
+    expect(
+      await codigo(acotado([I2]), "comercial.negocios.set_contactos", {
+        negocioId: N1,
+        contactos: [{ contactoId: K1, rol: "decisor", esPrincipal: true }],
+      }),
+    ).toBe("UNPROCESSABLE");
+
+    // Dentro de alcance (I1 es de CU): puede vincularlos.
+    const r = await dato<{ total: number }>(acotado([I1]), "comercial.negocios.set_contactos", {
+      negocioId: N1,
+      contactos: [{ contactoId: K1, rol: "decisor", esPrincipal: true }],
+    });
+    expect(r.total).toBe(1);
   });
 
   it("solo owner y admin configuran el embudo y los catálogos; gerente no", async () => {

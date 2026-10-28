@@ -47,18 +47,21 @@ export const negociosGet = defineCapability({
   dryRun: false,
   async handler(ctx, input) {
     const n = await negocioDe(ctx, input.id);
+    // Contactos: datos personales del núcleo. Como comercial.contactos.list, exige ver Cuentas y
+    // aplica el alcance por filas (ADR-022); sin ese permiso la ficha no falla entera, solo no trae
+    // contactos.
+    const puedeVerContactos = ctx.autorizar(PERMISOS_CORE.cuentasRead);
     const [cuenta, etapa, vinculosI, vinculosC, historial] = await Promise.all([
       ctx.db.cuenta.findUnique({ where: { id: n.cuentaId }, select: { nombre: true } }),
       ctx.db.etapa.findUnique({ where: { id: n.etapaId }, select: { nombre: true, tipo: true } }),
       ctx.db.negocioInstalacion.findMany({ where: { negocioId: n.id } }),
-      ctx.db.negocioContacto.findMany({ where: { negocioId: n.id } }),
+      puedeVerContactos
+        ? ctx.db.negocioContacto.findMany({ where: { negocioId: n.id } })
+        : Promise.resolve([]),
       ctx.db.historialEtapa.findMany({ where: { negocioId: n.id }, orderBy: { cuando: "asc" } }),
     ]);
     const instIds = vinculosI.map((v) => v.instalacionId);
-    // Contactos: datos personales del núcleo. Como comercial.contactos.list, exige ver Cuentas y
-    // aplica el alcance por filas (ADR-022); los que no se pueden ver no aparecen en la ficha.
-    const verContactos = ctx.autorizar(PERMISOS_CORE.cuentasRead);
-    const contIds = verContactos ? vinculosC.map((v) => v.contactoId) : [];
+    const contIds = vinculosC.map((v) => v.contactoId);
     const etapaIds = [
       ...new Set(historial.flatMap((h) => [h.deEtapaId, h.aEtapaId].filter(Boolean))),
     ];
@@ -67,10 +70,14 @@ export const negociosGet = defineCapability({
         where: { id: { in: instIds } },
         select: { id: true, nombre: true },
       }),
-      ctx.db.contacto.findMany({
-        where: { id: { in: contIds }, AND: [dondeContacto(ctx)] },
-        select: { id: true, nombres: true, apellidos: true },
-      }),
+      contIds.length
+        ? ctx.db.contacto.findMany({
+            // Alcance por filas (ADR-022): igual que comercial.contactos.list, un actor acotado solo
+            // ve los contactos de cuentas con instalaciones a su cargo.
+            where: { id: { in: contIds }, AND: [dondeContacto(ctx)] },
+            select: { id: true, nombres: true, apellidos: true },
+          })
+        : Promise.resolve([]),
       ctx.db.etapa.findMany({
         where: { id: { in: etapaIds as string[] } },
         select: { id: true, nombre: true },
@@ -89,6 +96,7 @@ export const negociosGet = defineCapability({
         nombre: insts.find((i) => i.id === v.instalacionId)?.nombre ?? "",
         tipo: v.tipo,
       })),
+      // Un vínculo cuyo contacto quedó fuera del alcance no se revela: ni su nombre ni su existencia.
       contactos: vinculosC.flatMap((v) => {
         const c = conts.find((x) => x.id === v.contactoId);
         if (!c) return [];
