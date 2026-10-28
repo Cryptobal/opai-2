@@ -8,17 +8,17 @@
 
 ## Veredicto
 
-**Faltan estas 22 cosas** para cerrar el Núcleo: **4 bloqueantes** y **18 importantes**. Los bloqueantes son: uno de seguridad, que llega con #101, y tres de producto, porque B2, B3 y B4 están construidos en las capacidades pero nadie los puede operar.
+**Faltan estas 23 cosas** para cerrar el Núcleo: **4 bloqueantes** y **19 importantes**. Los bloqueantes son: uno de seguridad, que llega con #101, y tres de producto, porque B2, B3 y B4 están construidos en las capacidades pero nadie los puede operar.
 
 El mecanismo de aislamiento entre empresas es sólido: RLS con FORCE en las 62 tablas con `tenant_id`, `forTenant` fijado por transacción y `executeCapability` con permisos, scopes, portal, idempotencia y aprobación. El barrido con dos empresas no encontró ninguna fuga (§Validaciones).
 
 | Nivel | Cantidad | Issues |
 |---|---|---|
 | Bloqueante | 4 | [CAR-36](https://linear.app/carlos-irigoyen/issue/CAR-36) · [CAR-37](https://linear.app/carlos-irigoyen/issue/CAR-37) · [CAR-38](https://linear.app/carlos-irigoyen/issue/CAR-38) · [CAR-39](https://linear.app/carlos-irigoyen/issue/CAR-39) |
-| Importante | 18 abiertos | [CAR-40](https://linear.app/carlos-irigoyen/issue/CAR-40) a [CAR-59](https://linear.app/carlos-irigoyen/issue/CAR-59), salvo CAR-44 (I-05, reclasificado a menor) y CAR-55 (I-16, cerrado durante la auditoría) |
+| Importante | 19 abiertos | [CAR-40](https://linear.app/carlos-irigoyen/issue/CAR-40) a [CAR-60](https://linear.app/carlos-irigoyen/issue/CAR-60), salvo CAR-44 (I-05, reclasificado a menor) y CAR-55 (I-16, cerrado durante la auditoría) |
 | Menor | 36 | Sin issue propio (I-05 conserva CAR-44); van al PR de pendientes |
 
-**Orden sugerido.** Primero B-01 (CAR-36), porque es seguridad y llega con #101. Después, I-17, una verificación operativa de minutos en Configuración → API keys. Luego B-02, B-03 y B-04, que tienen plazo legal el 30-nov; necesitan diseño en Claude Design y deben ir junto con I-13 para que el gate no deje pasar otra capacidad sin camino humano. Al final, el resto de los importantes, en un PR de pendientes del Núcleo.
+**Orden sugerido.** Primero B-01 (CAR-36), porque es seguridad y llega con #101. Después, I-17 (una verificación de minutos en Configuración → API keys) y el triage de I-21 (e2e en rojo en main, con pruebas de alcance y cambio de empresa). Luego B-02, B-03 y B-04, que tienen plazo legal el 30-nov; necesitan diseño en Claude Design y deben ir junto con I-13 para que el gate no deje pasar otra capacidad sin camino humano. Al final, el resto de los importantes, en un PR de pendientes del Núcleo.
 
 ---
 
@@ -26,6 +26,7 @@ El mecanismo de aislamiento entre empresas es sólido: RLS con FORCE en las 62 t
 
 | Validación | Resultado |
 |---|---|
+| CI de GitHub del PR (#103) y de main | Checks obligatorios en verde; e2e en rojo en main y en el PR por las mismas pruebas, no por este cambio (I-21) |
 | `pnpm typecheck` · `pnpm lint` | Verde en `f60a88d` |
 | `pnpm test` | 1.156 tests en verde (192 archivos en `75ffb7b`; repetido en `f60a88d`) |
 | `pnpm test:db` (Postgres 16 local, mismas migraciones) | 179 (db) + 214 (capacidades) + 25 (auth) en verde |
@@ -89,6 +90,7 @@ No se verificó (fuera del repositorio): qué migraciones están aplicadas en Ne
 | I-18 | CSP en Report-Only con `unsafe-inline` en `script-src` y `style-src` | `apps/web/lib/cabeceras-seguridad.ts:17,56` | No bloquea XSS, solo reporta | Resolver los scripts y estilos inline sin nonce o hash y pasar a enforcement | [CAR-57](https://linear.app/carlos-irigoyen/issue/CAR-57) |
 | I-19 | La plantilla del anexo de contrato tiene texto legal de ejemplo (CAR-19) | `capabilities/src/core/anexos/plantilla.ts:21,43` | Un anexo aprobado no tiene validez laboral | Texto legal de Carlos y el abogado; bloquear la aprobación mientras sea ejemplo | [CAR-58](https://linear.app/carlos-irigoyen/issue/CAR-58) |
 | I-20 | `ESTADO.md` tiene unas 20 entradas obsoletas o contradictorias | Ver la lista de I-20 más abajo | Los agentes leen como verdad que falta (o que existe) algo que no | PR de pendientes con una foto única verificada | [CAR-59](https://linear.app/carlos-irigoyen/issue/CAR-59) |
+| I-21 | El e2e está en rojo en main desde hace al menos 8 commits (en `f60a88d`, shards 2 a 6), incluidas pruebas de alcance del supervisor y de cambio de empresa | `e2e/navegacion-permisos.spec.ts:42`; `e2e/cache-sesion.spec.ts:152`; `portales-riel.spec.ts:73`; `platform-superadmin.spec.ts:13`; `portal-inicio.spec.ts:44,90`; `maestros.spec.ts:45`; `maestros-ficha-lista.spec.ts:60` (timeouts de 3 min); otros de fichas y DS | No se sabe si son fallas reales o del entorno de CI; mientras sigan en rojo, una regresión de aislamiento en el navegador pasa sin aviso (el e2e no es obligatorio) | Triage inmediato de las dos de aislamiento; luego el resto; con main en verde, promover un subconjunto crítico a obligatorio | [CAR-60](https://linear.app/carlos-irigoyen/issue/CAR-60) |
 
 **Entradas obsoletas de `ESTADO.md` (I-20, líneas en `f60a88d`):**
 - :18 Brief 07b PR 1 «no listo» (#80 integrado).
@@ -230,7 +232,7 @@ El documento original (encargo t457u) no está en el repositorio. Su lista se re
 ## Pruebas
 
 - **Cubierto:** autorización, RLS y FORCE, auditoría encadenada, idempotencia, aprobaciones, API keys e identidad de servicio, MFA (unitario y e2e), rate limit, plataforma, configuración, documentos, comunicaciones, cumplimiento, alcance, y el escenario del manual MCP (`test/manuales/operar-el-nucleo.test.ts`).
-- **Falta:** I-09 (dos tenants generalizado), I-13 (camino humano), I-14 (12 capacidades sin test y e2e de invitación y Mi cuenta) y M-22.
+- **Falta:** I-09 (dos tenants generalizado), I-13 (camino humano), I-14 (12 capacidades sin test y e2e de invitación y Mi cuenta), I-21 (e2e en rojo en main) y M-22.
 
 ## Diseño (DS 2.0)
 
