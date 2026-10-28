@@ -6,6 +6,7 @@ export function lecturasLocksMemoria(tabla: (nombre: string) => Fila[]) {
   const fecha = (v: unknown) => (v instanceof Date ? v.getTime() : new Date(String(v)).getTime());
   return async (sql: TemplateStringsArray, ...valores: unknown[]) => {
     const texto = sql.join("?");
+    if (texto.includes("/* 07b:bloqueo-vinculo */") || texto.includes("/* 07b:bloqueo-destino */")) return [];
     // Puestos vuelve a leer con Prisma tras este lock; la exclusión se prueba en Postgres.
     if (
       texto === "SELECT id FROM core.puestos WHERE id = ?::uuid AND tenant_id = ?::uuid FOR UPDATE"
@@ -47,6 +48,9 @@ export function lecturasLocksMemoria(tabla: (nombre: string) => Fila[]) {
       return tabla("puesto")
         .filter((p) => ids(1).includes(p["instalacionId"]))
         .map((p) => ({ id: p["id"] }));
+    if (texto.includes("/* nucleo-h:personas-vinculadas */"))
+      return tabla("vinculoLaboral").filter((v) => v["estado"] === "vigente" && ids(2).includes(v["instalacionId"]))
+        .map((v) => ({ id: v["personaId"] }));
     if (texto.includes("/* nucleo-h:propietarios */"))
       return tabla("documentoVinculo")
         .filter(
@@ -54,7 +58,8 @@ export function lecturasLocksMemoria(tabla: (nombre: string) => Fila[]) {
             v["rol"] === "propietario" &&
             ((v["entidadTipo"] === "instalacion" && ids(1).includes(v["entidadId"])) ||
               (v["entidadTipo"] === "cuenta" && ids(2).includes(v["entidadId"])) ||
-              (v["entidadTipo"] === "puesto" && ids(3).includes(v["entidadId"]))),
+              (v["entidadTipo"] === "puesto" && ids(3).includes(v["entidadId"])) ||
+              (v["entidadTipo"] === "persona" && ids(4).includes(v["entidadId"]))),
         )
         .map((v) => ({ documentoId: v["documentoId"] }));
     throw new Error("Consulta SQL no implementada en la base de pruebas en memoria.");

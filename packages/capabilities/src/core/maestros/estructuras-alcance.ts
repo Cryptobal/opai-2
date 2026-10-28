@@ -1,7 +1,7 @@
 import type { Prisma } from "@opai/db";
 
 import type { Contexto } from "../../types";
-import { dondePuesto, instalacionesEnAlcance } from "./alcance";
+import { dondePersona, dondePuesto, instalacionesEnAlcance } from "./alcance";
 
 /** El catálogo cargo es del tenant; puestos solo de instalaciones a cargo. Personas: 07b pendiente. */
 export async function dondeEstructura(ctx: Contexto): Promise<Prisma.EstructuraSueldoWhereInput> {
@@ -11,6 +11,7 @@ export async function dondeEstructura(ctx: Contexto): Promise<Prisma.EstructuraS
   return {
     OR: [
       { nivel: "cargo" },
+      { nivel: "persona", persona: dondePersona(ctx) },
       { nivel: "instalacion", instalacionId: { in: [...instalaciones] } },
       { nivel: "puesto", puestoId: { in: puestos.map((p) => p.id) } },
     ],

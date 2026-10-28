@@ -1,3 +1,4 @@
+import { entidadesEnAlcance, vinculoEnAlcance } from "./alcance-doc";
 import type { z } from "zod";
 
 import { noEncontrado, reglaDeNegocio } from "../../errores";
@@ -17,6 +18,9 @@ export const CAPA_DE: Record<Entidad["tipo"], string> = {
 
 /** Verifica que la entidad exista en el tenant (RLS ya impide ver las de otros). */
 export async function verificarEntidad(ctx: Contexto, e: Entidad): Promise<void> {
+  const alcance = await entidadesEnAlcance(ctx);
+  if (alcance && !vinculoEnAlcance(alcance, e.tipo, e.id))
+    throw noEncontrado(`La entidad ${e.tipo}`);
   const db = ctx.db;
   const existe =
     e.tipo === "tenant"

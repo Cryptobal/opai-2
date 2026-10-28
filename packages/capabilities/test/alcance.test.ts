@@ -36,8 +36,8 @@ describe("filtro de alcance (B3)", () => {
     expect(dondeContacto(ctx)).toEqual({
       cuenta: { instalaciones: { some: { id: { in: [A, B] } } } },
     });
-    // Personas: sin relación real persona ↔ instalación hasta el Brief 07b → denegar por defecto.
-    expect(dondePersona(ctx)).toEqual({ id: { in: [] } });
+    // 07b: solo el vínculo vigente en una instalación a cargo habilita la persona.
+    expect(dondePersona(ctx)).toEqual({ vinculos: { some: { estado: "vigente", instalacionId: { in: [A, B] } } } });
   });
 
   it("supervisor sin instalaciones: no ve ninguna entidad (conjunto vacío)", () => {

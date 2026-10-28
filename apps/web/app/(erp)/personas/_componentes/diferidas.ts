@@ -15,3 +15,7 @@ export const HojaExcepcion = hojaDiferida(["excepcion"], () =>
 export const HojaVinculo = hojaDiferida(["vinculo"], () =>
   import("./hoja-vinculo").then((m) => m.HojaVinculo),
 );
+
+export const HojaEditarVinculo = hojaDiferida(["editar-vinculo"], () =>
+  import("./hoja-editar-vinculo").then((m) => m.HojaEditarVinculo),
+);

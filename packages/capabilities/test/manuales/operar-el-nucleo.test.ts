@@ -1,3 +1,4 @@
+import { destinoVinculo } from "../vinculo-fixture";
 // Escenario determinista del manual docs/2.0/agentes/operar-el-nucleo.md (ADR-034): la misma
 // secuencia de herramientas MCP que describe, contra el contexto de prueba. Si una herramienta
 // nombrada en el manual no existe o cambia de forma, falla.
@@ -91,7 +92,7 @@ describe("manual operar-el-nucleo", () => {
       nombres: "Ana",
       apellidos: "Rojas",
       rut: "19.876.543-0",
-      vinculo: { cargoId: cargo, tipo: "indefinido", inicio: "2025-01-02" },
+      vinculo: { ...(await destinoVinculo(ctx)), cargoId: cargo, tipo: "indefinido", inicio: "2025-01-02" },
     });
     const vinculo = p.ok ? (p.data as { vinculoVigente: { id: string } }).vinculoVigente.id : "";
     const irreversible = await usar(ctx, "core_vinculos_terminar", {

@@ -1,3 +1,4 @@
+import { destinoVinculo } from "./vinculo-fixture";
 import { PERMISOS_CORE } from "@opai/domain";
 import { beforeEach, describe, expect, it } from "vitest";
 
@@ -49,7 +50,7 @@ describe("#47 · el include/_count del #53 respeta el permiso efectivo", () => {
       nombres: "María",
       apellidos: "Soto",
       rut: "16.234.567-2",
-      vinculo: { cargoId, tipo: "indefinido", inicio: "2025-03-03" },
+      vinculo: { ...(await destinoVinculo(ctx)), cargoId, tipo: "indefinido", inicio: "2025-03-03" },
     });
     type Lista = {
       items: { vinculoVigente: { cargo: string } | null }[];

@@ -1,3 +1,5 @@
+import { destinoVinculo } from "./vinculo-fixture";
+
 import { cargoHistorico } from "./cargo-historico-ayuda";
 import { beforeEach, describe, expect, it } from "vitest";
 
@@ -89,7 +91,7 @@ describe("core.estructuras.*", () => {
       nombres: "Ana",
       apellidos: "Rojas",
       rut: "19.876.543-0",
-      vinculo: { cargoId, tipo: "indefinido", inicio: "2026-02-01" },
+      vinculo: { ...(await destinoVinculo(ctx)), cargoId, tipo: "indefinido", inicio: "2026-02-01" },
     });
     const sinExcepcion = await dato<{ aplica: string | null; haberes: null }>(
       ctx,

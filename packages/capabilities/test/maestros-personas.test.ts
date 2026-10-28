@@ -1,3 +1,4 @@
+import { destinoVinculo } from "./vinculo-fixture";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { contextoDePrueba } from "../src/testing";
@@ -18,7 +19,7 @@ const maria = { nombres: "María Fernanda", apellidos: "Soto", rut: "16.234.567-
 describe("core.personas.* y core.vinculos.*", () => {
   it("crea con vínculo inicial en una transacción y emite ambos eventos", async () => {
     const { ctx, cargoId, tabla } = await base();
-    const vinculo = { cargoId, tipo: "indefinido", inicio: "2025-03-03" };
+    const vinculo = { ...(await destinoVinculo(ctx)), cargoId, tipo: "indefinido", inicio: "2025-03-03" };
     const p = await dato<{ id: string; rut: string; vinculoVigente: { cargo: string } }>(
       ctx,
       "core.personas.create",
@@ -46,6 +47,7 @@ describe("core.personas.* y core.vinculos.*", () => {
     const { ctx, cargoId } = await base();
     const { id } = await dato<{ id: string }>(ctx, "core.personas.create", maria);
     const v = await dato<{ id: string }>(ctx, "core.vinculos.create", {
+      ...(await destinoVinculo(ctx)),
       personaId: id,
       cargoId,
       tipo: "plazo_fijo",
@@ -54,6 +56,7 @@ describe("core.personas.* y core.vinculos.*", () => {
     });
     expect(
       await codigo(ctx, "core.vinculos.create", {
+      ...(await destinoVinculo(ctx)),
         personaId: id,
         cargoId,
         tipo: "indefinido",

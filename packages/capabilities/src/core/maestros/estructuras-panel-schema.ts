@@ -1,3 +1,4 @@
+import { vinculoSchema } from "./vinculos-vista";
 import { aprobacionesList } from "../agentes/aprobaciones";
 import { z } from "zod";
 import { uuidSchema } from "../esquemas";
@@ -28,6 +29,7 @@ export const entradaPanel = z.object({
 export type EntradaPanel = z.infer<typeof entradaPanel>;
 export const salidaPanel = z.object({
   aprobaciones: aprobacionesList.output,
+  vinculos: z.array(vinculoSchema),
   instalacion: instalacionesGet.output.nullable(),
   persona: personasGet.output.nullable(),
   instalaciones: instalacionesList.output,

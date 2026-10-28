@@ -34,17 +34,10 @@ export function dondeContacto(ctx: Contexto): Prisma.ContactoWhereInput {
   return ids ? { cuenta: { instalaciones: { some: { id: { in: [...ids] } } } } } : {};
 }
 
-/**
- * Alcance de personas (CA-B3 parcial): la persona sería visible si tuviera un vínculo laboral
- * vigente en una instalación a cargo. El Brief 07b agregará `instalacion_id` a `vinculos_laborales`;
- * hasta entonces NO existe una relación real persona ↔ instalación en el schema, así que —decisión
- * del bot OPAI 2.0 con el mandato de Carlos (t365u, t366u)— el supervisor no ve ninguna persona
- * (negación total, denegar por defecto, §16.4). Al llegar 07b, este filtro pasa a usar el vínculo
- * vigente. Ver PR-BODY.md, el Brief 07b y §16.4.
- */
+/** Personas con vínculo vigente en una instalación a cargo (07b PR 3). */
 export function dondePersona(ctx: Contexto): Prisma.PersonaWhereInput {
   const ids = instalacionesEnAlcance(ctx);
-  return ids ? { id: { in: [] } } : {};
+  return ids ? { vinculos: { some: { estado: "vigente", instalacionId: { in: [...ids] } } } } : {};
 }
 
 /** Si una entidad concreta está en el alcance del actor (para fichas y actividad por entidad). */
@@ -52,9 +45,12 @@ export async function entidadEnAlcance(ctx: Contexto, tipo: string, id: string):
   const ids = instalacionesEnAlcance(ctx);
   if (!ids) return true;
   if (tipo === "instalacion") return ids.includes(id);
-  if (tipo === "persona") return false; // relación real pendiente del Brief 07b
-  if (tipo === "cuenta") return (await ctx.db.cuenta.count({ where: { id, ...dondeCuenta(ctx) } })) > 0;
-  if (tipo === "puesto") return (await ctx.db.puesto.count({ where: { id, ...dondePuesto(ctx) } })) > 0;
+  if (tipo === "persona")
+    return (await ctx.db.persona.count({ where: { id, AND: [dondePersona(ctx)] } })) > 0;
+  if (tipo === "cuenta")
+    return (await ctx.db.cuenta.count({ where: { id, ...dondeCuenta(ctx) } })) > 0;
+  if (tipo === "puesto")
+    return (await ctx.db.puesto.count({ where: { id, ...dondePuesto(ctx) } })) > 0;
   if (tipo === "documento") {
     // Un documento está en alcance solo si alguno de sus vínculos apunta a una entidad a cargo
     // (instalación, su cuenta o un puesto). Los documentos de empresa y los de personas quedan fuera.
