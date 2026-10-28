@@ -1,0 +1,61 @@
+name: Migración pendiente
+
+# Salvaguarda de `migracion-pendiente` (CAR-61, AGENTS.md «Veto y migración pendiente»): el PR no
+# queda en verde mientras tenga la etiqueta, ni si trae migraciones nuevas y la etiqueta nunca se
+# puso. Para que frene el merge, Carlos lo activa como check obligatorio en el ruleset «Proteger
+# main». Solo lee etiquetas y archivos: no pone ni quita etiquetas y no usa secretos propios.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: read
+
+concurrency:
+  group: migracion-pendiente-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  migracion-pendiente:
+    name: migración pendiente
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Revisar etiqueta y migraciones nuevas
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          ETIQUETA: migracion-pendiente
+        run: |
+          set -euo pipefail
+          # Etiquetas actuales del PR según el evento (en labeled/unlabeled ya reflejan el cambio).
+          if jq -e --arg e "$ETIQUETA" '[.pull_request.labels[].name] | index($e)' \
+            "$GITHUB_EVENT_PATH" > /dev/null; then
+            echo "::error::El PR tiene la etiqueta '$ETIQUETA': la migración aún no se aplicó con respaldo en Neon dev y main. La quita el bot «OPAI 2.0» tras aplicarla y dejar su aviso (ADR-054)."
+            exit 1
+          fi
+
+          # Migraciones nuevas (agregadas, renombradas o copiadas) en el PR. `--paginate` emite un
+          # arreglo por página; jq los recorre todos.
+          nuevas=$(gh api --paginate "repos/$REPO/pulls/$PR/files" | jq -r '.[]
+            | select(.status == "added" or .status == "renamed" or .status == "copied")
+            | .filename | select(startswith("packages/db/prisma/migrations/"))')
+          if [ -z "$nuevas" ]; then
+            echo "Sin migraciones nuevas y sin la etiqueta '$ETIQUETA'."
+            exit 0
+          fi
+          echo "Migraciones nuevas:"
+          echo "$nuevas"
+
+          # Si trae migraciones, la etiqueta tuvo que ponerse alguna vez (y ya no está). La validez
+          # de la retirada (bot «OPAI 2.0» con aviso previo) la revisa el bot antes de integrar.
+          puesta=$(gh api --paginate "repos/$REPO/issues/$PR/events" | jq -r --arg e "$ETIQUETA" \
+            '.[] | select(.event == "labeled" and .label.name == $e) | .id')
+          if [ -z "$puesta" ]; then
+            echo "::error::El PR trae migraciones nuevas y la etiqueta '$ETIQUETA' nunca se puso. Quien abre el PR la pone; el bot «OPAI 2.0» la quita tras aplicar la migración con respaldo (AGENTS.md)."
+            exit 1
+          fi
+          echo "La etiqueta '$ETIQUETA' se puso y ya se retiró: la migración figura como aplicada."

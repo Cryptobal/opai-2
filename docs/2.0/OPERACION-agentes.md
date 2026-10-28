@@ -184,3 +184,22 @@ Fuente: `seguimiento.txt` del bot y los informes de QA en vivo del 28-oct (#87, 
 6. **C5:** ¿aceptar vínculos anteriores aplica también a las capas de puesto, instalación y cargo?
 7. **#86:** ¿anular una capa exige lectura sensible incluso en capas no sensibles? Hoy sí, así que las API keys y roles sin ese permiso no pueden anular.
 8. **Aprobar un anexo con R2 real** (huella SHA-256 y bitácora) en test.opai.cl: solo con OK de Carlos.
+
+---
+
+## F. Salvaguarda de `migracion-pendiente` (CAR-61, 28-oct-2026)
+
+**Caso.** Los PRs #61, #65 y #70 traían migraciones y se integraron con la etiqueta `migracion-pendiente` puesta, sin el aviso de migración aplicada. El operador verificó después en `_prisma_migrations` de Neon `dev` y `main` que estaban aplicadas, dejó el aviso «registro tardío, CAR-55» en los tres PR y quitó la etiqueta (auditoría del Núcleo §I-16, CAR-55). La regla estaba escrita (`AGENTS.md`, regla 5 de «Veto y migración pendiente», y la plantilla del PR), pero **ningún check del repo la hacía cumplir**: dependía solo de la lógica del bot integrador.
+
+**Salvaguarda en el repo.** El workflow `.github/workflows/migracion-pendiente.yml` corre en cada `pull_request` (`opened`, `synchronize`, `reopened`, `labeled`, `unlabeled`) y publica el check **`migración pendiente`**, que falla:
+
+1. mientras el PR tenga la etiqueta `migracion-pendiente`;
+2. si el PR agrega archivos en `packages/db/prisma/migrations/` y la etiqueta **nunca** se puso (historial de eventos del PR).
+
+Pasa cuando no hay migraciones nuevas, o cuando la etiqueta se puso y ya se retiró. Al quitarla, el evento `unlabeled` vuelve a correr el check sobre el mismo head. Solo lee etiquetas, eventos y archivos con el `GITHUB_TOKEN` del job, en solo lectura: no pone ni quita etiquetas y no usa secretos nuevos.
+
+**Qué falta para que frene.** Carlos lo activa como check obligatorio en el ruleset «Proteger main» (los agentes no tocan el ruleset). Hasta entonces el check es informativo.
+
+**Qué no cubre (operador, fuera del repo).** El check no valida *quién* retiró la etiqueta ni que antes exista el aviso de migración aplicada con respaldo en `dev` y `main`: eso lo sigue revisando el bot «OPAI 2.0» antes del squash (`AGENTS.md`, regla 5). La causa de por qué el bot integró #61, #65 y #70 con la etiqueta puesta queda en CAR-61 para el operador.
+
+**Plantilla de migración (CAR-47).** Desde el corte `20261028230000`, toda migración nueva sigue `packages/db/prisma/plantilla-migracion.sql` (`BEGIN`, `SET LOCAL lock_timeout`, `COMMIT` y `-- Reversión:`); lo exige un test de `pnpm test`. Detalle en [`migraciones.md`](migraciones.md).
