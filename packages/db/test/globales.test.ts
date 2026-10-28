@@ -6,7 +6,7 @@ const consultas = vi.hoisted(() => ({
 }));
 vi.mock("../src/client", () => ({ clienteApp: () => consultas }));
 
-import { tenantPorSlug, tenantsOperables, usuarioPorId } from "../src/globales";
+import { clienteAuth, tenantPorSlug, tenantsOperables, usuarioPorId } from "../src/globales";
 
 describe("lecturas globales mínimas", () => {
   it("usuarioPorId no consulta credenciales, MFA ni datos privados", async () => {
@@ -31,5 +31,9 @@ describe("lecturas globales mínimas", () => {
       where: { estado: { in: ["activo", "trial"] } },
       select: { id: true, slug: true, timezone: true },
     });
+  });
+
+  it("Better Auth usa el mismo cliente de la app: mismo pool, configuración y reintento", () => {
+    expect(clienteAuth()).toBe(consultas);
   });
 });
