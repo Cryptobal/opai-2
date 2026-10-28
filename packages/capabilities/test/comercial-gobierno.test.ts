@@ -106,7 +106,7 @@ describe("comercial · gobierno de las capacidades", () => {
     // Simula otra petición que ya movió el negocio: la fila leída queda obsoleta.
     const { aplicarEtapa } = await import("../src/comercial/transiciones-util");
     const fila = tabla("negocio")?.[0] as { etapaId: string };
-    const obsoleta = { id: n.id, etapaId: etapaId(0), createdAt: new Date() };
+    const obsoleta = { id: n.id, etapaId: etapaId(0), estado: "abierto", createdAt: new Date() };
     fila.etapaId = etapaId(1);
     await expect(
       ctx.transaccion((tx) => aplicarEtapa(ctx, tx, obsoleta, { id: etapaId(2), tipo: "abierta" })),

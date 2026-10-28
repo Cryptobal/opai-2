@@ -65,8 +65,8 @@ export const contactosList = defineCapability({
     const q = input.q;
     const filas = await ctx.db.contacto.findMany({
       where: {
-        // Alcance de filas (ADR-022): un actor acotado (supervisor) ve solo los contactos de las
-        // cuentas de sus instalaciones, igual que core.contactos.list.
+        // Alcance por filas (ADR-022): un actor acotado solo ve contactos de cuentas con
+        // instalaciones a su cargo, igual que core.contactos.list.
         AND: [dondeContacto(ctx)],
         ...(input.incluirArchivadas ? {} : { archivadoEn: null }),
         ...(input.soloPrincipales ? { esPrincipal: true } : {}),

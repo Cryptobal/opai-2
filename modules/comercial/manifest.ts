@@ -1,6 +1,4 @@
-import { z } from "zod";
-
-import { capacidadesComercial, defineModule } from "@opai/capabilities";
+import { ajustesComercial, capacidadesComercial, defineModule } from "@opai/capabilities";
 
 /**
  * Manifest del módulo Comercial (ADR-003, Brief 07 · PR 1). El núcleo deriva navegación, permisos,
@@ -45,27 +43,8 @@ export const manifest = defineModule({
       permiso: "comercial:negocios.read",
     },
   ],
-  // Ajustes del módulo (ADR-008). El embudo y los catálogos se editan con sus capacidades
-  // (comercial.config.*); aquí viven las reglas conmutables del módulo.
-  configuracion: z.object({
-    ganar_exige_cotizacion: z.boolean().default(false).meta({
-      etiqueta: "Ganar exige cotización enviada",
-      ayuda:
-        "Apagado hasta que exista CPQ: se puede ganar sin cotización (decisión de Carlos, 26-oct-2026).",
-      grupo: "Negocios",
-      ambito: "tenant",
-      permiso: "comercial:config.manage",
-      control: "switch",
-    }),
-    avisar_ganar_sin_cotizacion: z.boolean().default(true).meta({
-      etiqueta: "Avisar al ganar sin cotización",
-      ayuda: "Muestra un aviso «sin cotización» en la vista previa y al confirmar.",
-      grupo: "Negocios",
-      ambito: "tenant",
-      permiso: "comercial:config.manage",
-      control: "switch",
-    }),
-  }),
+  // Ajustes del módulo (ADR-008), declarados en packages/capabilities/src/comercial/ajustes.ts.
+  configuracion: ajustesComercial,
   eventos: [
     { id: "comercial.negocio.creado", descripcion: "Se creó un negocio." },
     {
