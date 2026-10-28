@@ -18,7 +18,7 @@
     "/(terreno)/terreno*": 162,
     "/(trabajador)/trabajador*": 162,
     "/(supervisor)/supervisor*": 162,
-    "/ds*": 224,
+    "/ds*": 225,
     "/(erp)/personas/[id]/sueldo": 166,
     "/(erp)/personas/[id]/anexos": 166,
     "/(erp)/personas/[id]/anexos/[anexoId]": 166
