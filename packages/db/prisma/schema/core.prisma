@@ -79,6 +79,9 @@ model Tenant {
   incidentes            Incidente[]
   retencionEjecuciones  RetencionEjecucion[]
 
+  // Brief 07b · PR 4 (anexo de contrato en borrador).
+  anexosContrato        AnexoContrato[]
+
   @@map("tenants")
   @@schema("core")
 }

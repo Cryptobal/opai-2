@@ -70,6 +70,7 @@ model Documento {
   tenant   Tenant             @relation(fields: [tenantId], references: [id])
   tipo     DocumentoTipo?     @relation(fields: [tipoId], references: [id])
   vinculos DocumentoVinculo[]
+  anexos   AnexoContrato[]
 
   @@index([tenantId, venceEn])
   @@index([tenantId, tipoId])
