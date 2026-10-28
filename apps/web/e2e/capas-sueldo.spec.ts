@@ -4,17 +4,25 @@ import { entrar, ocultarDev, password, sinDesborde, urlSiembra } from "./fixture
 
 test.use({ actionTimeout: 30_000 });
 test.setTimeout(240_000);
-const idDe = (tabla: string) =>
+const consultar = (sql: string) =>
   execFileSync(
     "psql",
     [
       urlSiembra,
       "-XAt",
       "-c",
-      `SELECT id FROM core.${tabla} WHERE tenant_id = (SELECT id FROM core.tenants WHERE slug='gard') ORDER BY id LIMIT 1`,
+      `SELECT set_config('app.tenant_id', (SELECT id::text FROM core.tenants WHERE slug = 'gard'), false);
+       ${sql}`,
     ],
     { encoding: "utf8" },
-  ).trim();
+  )
+    .trim()
+    .split("\n")
+    .slice(1)
+    .at(-1) ?? "";
+const idDe = (tabla: "instalaciones" | "personas") =>
+  consultar(`SELECT id FROM core.${tabla} WHERE tenant_id = (SELECT id FROM core.tenants WHERE slug = 'gard')
+    AND ${tabla === "instalaciones" ? "nombre = 'Planta Quilicura'" : "nombres = 'María Fernanda' AND apellidos = 'Soto'"} LIMIT 1`);
 
 test("capas completas, vista previa, historial y resolución sin herencia", async ({
   page,
@@ -23,6 +31,13 @@ test("capas completas, vista previa, historial y resolución sin herencia", asyn
   const instalacion = idDe("instalaciones");
   const persona = idDe("personas");
   expect(instalacion).toMatch(/^[0-9a-f-]{36}$/);
+  expect(persona).toMatch(/^[0-9a-f-]{36}$/);
+  const fecha =
+    consultar(`SELECT (GREATEST(CURRENT_DATE, COALESCE(MAX(vigente_desde), CURRENT_DATE)) + 1)::text
+    FROM core.estructuras_sueldo WHERE tenant_id = (SELECT id FROM core.tenants WHERE slug = 'gard')
+    AND (instalacion_id = '${instalacion}' OR persona_id = '${persona}')`);
+  expect(fecha).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  const [anio, mes, dia] = fecha.split("-");
   await entrar(page);
   await page.goto(`/instalaciones/${instalacion}/sueldo`);
   await ocultarDev(page);
@@ -44,10 +59,7 @@ test("capas completas, vista previa, historial y resolución sin herencia", asyn
   await hoja.getByLabel("Sueldo base (obligatorio)", { exact: true }).fill("650000");
   await hoja.getByLabel("Colación (obligatorio)", { exact: true }).fill("0");
   await hoja.getByLabel("Movilización (obligatorio)", { exact: true }).fill("0");
-  const dia = info.project.name === "telefono" ? "01" : info.project.name === "ipad" ? "02" : "03";
-  await hoja
-    .getByLabel("Vigente desde (obligatorio)")
-    .fill(`${dia}-01-${2200 + (Math.floor(Date.now() / 60000) % 1000)}`);
+  await hoja.getByLabel("Vigente desde (obligatorio)").fill(`${dia}-${mes}-${anio}`);
   await hoja.getByRole("button", { name: "Revisar cambio" }).click();
   const confirmar = page.getByRole("dialog", { name: "Confirmar versión de sueldo" });
   await expect(confirmar).toBeVisible();
@@ -80,13 +92,12 @@ test("capas completas, vista previa, historial y resolución sin herencia", asyn
   await rut.getByLabel("Sueldo base (obligatorio)", { exact: true }).fill("700000");
   await rut.getByLabel("Colación (obligatorio)", { exact: true }).fill("0");
   await rut.getByLabel("Movilización (obligatorio)", { exact: true }).fill("0");
-  const anio = 2200 + (Math.floor(Date.now() / 60000) % 1000);
-  await rut.getByLabel("Vigente desde (obligatorio)").fill(`${dia}-01-${anio}`);
+  await rut.getByLabel("Vigente desde (obligatorio)").fill(`${dia}-${mes}-${anio}`);
   await rut.getByLabel("Motivo obligatorio").fill("Acuerdo individual de prueba E2E");
   await rut.getByRole("button", { name: "Revisar cambio" }).click();
   await confirmar.getByRole("button", { name: "Guardar versión" }).click();
   await expect(confirmar).toHaveCount(0);
-  await page.goto(`/personas/${persona}/sueldo?fecha=${anio}-01-${dia}&instalacion=${instalacion}`);
+  await page.goto(`/personas/${persona}/sueldo?fecha=${fecha}&instalacion=${instalacion}`);
   await expect(
     page
       .getByRole("list", { name: "Capas de sueldo" })
