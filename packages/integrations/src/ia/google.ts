@@ -84,7 +84,7 @@ export function google(apiKey: string): ProveedorIa {
     async conversar(modelo, s) {
       const url = `${base}/${encodeURIComponent(modelo)}:generateContent`;
       const r = await pedir(url, { method: "POST", headers: cabeceras(apiKey), body: JSON.stringify(peticion(s)) }, "Google");
-      const d = await cuerpo<RespG>(r, "Google");
+      const d = await cuerpo<RespG>(r, "Google", apiKey);
       const cand = d.candidates?.[0];
       const { texto, nuevas } = acumular(cand, "", []);
       return {
@@ -115,7 +115,7 @@ async function* streamGoogle(
   let razon: MotivoTermino = "fin";
   let termino = false;
   const llamadas: LlamadaHerramienta[] = [];
-  for await (const payload of leerSSE(r, "Google")) {
+  for await (const payload of leerSSE(r, "Google", apiKey)) {
     const d = JSON.parse(payload) as RespG;
     if (d.usageMetadata) {
       entrada = d.usageMetadata.promptTokenCount ?? entrada;

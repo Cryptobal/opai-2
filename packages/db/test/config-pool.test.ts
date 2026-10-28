@@ -1,14 +1,15 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { configPool } from "../src/config-pool";
+import { configPool, conSslVerificado } from "../src/config-pool";
 
 const url = "postgresql://app:password@ep-test-pooler.us-east-1.aws.neon.tech/db";
 
 describe("pool por instancia", () => {
   it("usa valores por defecto y keepalive", () => {
     expect(configPool({}, url, true)).toEqual({
-      max: 4,
-      idleTimeoutMillis: 10000,
+      connectionString: url,
+      max: 10,
+      idleTimeoutMillis: 5000,
       connectionTimeoutMillis: 10000,
       keepAlive: true,
     });
@@ -41,5 +42,28 @@ describe("pool por instancia", () => {
     expect(aviso).toHaveBeenCalledOnce();
     expect(aviso).toHaveBeenCalledWith("DATABASE_URL en Vercel: host sin -pooler.");
     aviso.mockRestore();
+  });
+  it("fija sslmode=verify-full donde pg ya lo aplicaba como alias, sin el SECURITY WARNING", () => {
+    const neon = "postgresql://app:pw@ep-x-pooler.sa-east-1.aws.neon.tech/db";
+    for (const modo of ["require", "prefer", "verify-ca"]) {
+      const nueva = new URL(conSslVerificado(`${neon}?sslmode=${modo}&channel_binding=require`));
+      expect(nueva.searchParams.get("sslmode")).toBe("verify-full");
+      expect(nueva.searchParams.get("channel_binding")).toBe("require");
+      expect(nueva.password).toBe("pw");
+    }
+    expect(configPool({}, `${neon}?sslmode=require`, true).connectionString).toContain(
+      "sslmode=verify-full",
+    );
+  });
+  it("respeta disable, verify-full, uselibpqcompat y las URL sin sslmode", () => {
+    for (const u of [
+      "postgresql://localhost/db",
+      "postgresql://localhost/db?sslmode=disable",
+      "postgresql://h/db?sslmode=verify-full",
+      "postgresql://h/db?uselibpqcompat=true&sslmode=require",
+      "url inválida",
+    ]) {
+      expect(conSslVerificado(u)).toBe(u);
+    }
   });
 });
