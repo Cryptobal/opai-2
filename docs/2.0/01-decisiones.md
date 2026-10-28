@@ -1009,3 +1009,21 @@ identidad de servicio en main.
 **Fecha:** 27-oct-2026 · **Estado:** vigente.
 
 **Decisión.** Los montos de sueldo admiten hasta 100.000.000 CLP por concepto. Fuente: «Ok con el tope» — Carlos, 27-oct-2026 20:46 CLT, chat con el Revisor OPAI 2.0 (t311u), transmitida por el Revisor.
+
+## ADR-054 · Flujo operativo del 28-oct-2026
+
+**Fecha:** 28-oct-2026 · **Estado:** vigente · **Reemplaza a ADR-043 v3 en lo que choque** (y, con él, a la «Segunda modificación de Carlos (24-oct)» en lo que toca a `ESTADO.md`). Lo que no choca de ADR-043 v3 sigue vigente: integra solo el bot «OPAI 2.0», con squash, sin force-push ni rebase; Carlos conserva el veto; el Revisor usa el modelo contrario al que construyó.
+
+**Contexto.** Flujo acordado con Carlos el 28-oct-2026 y reglas de revisión e integración t618u (27-oct-2026 17:30), más los mandatos t500u (26-oct) y t682u (28-oct), bajo los cuales el bot ya aplicaba migraciones con respaldo (por ejemplo, el #91). El detalle, las reglas permanentes, las decisiones por confirmar, los pendientes y las preguntas abiertas están en [`OPERACION-agentes.md`](OPERACION-agentes.md); este ADR no los copia.
+
+**Decisión.**
+
+1. **El repo es la fuente única** del flujo de trabajo (`docs/2.0/`); manda `OPERACION-agentes.md` ante un choque.
+2. **Claude escribe los briefs** y construye. **Carlos** aprueba una vez por módulo una hoja de alcance de una página (1.0 es el piso, no el techo). El **bot «OPAI 2.0»** opera la cola: avisa al Revisor y a QA, aplica migraciones, integra y toma capturas.
+3. **Cada PR actualiza `ESTADO.md`** (qué entró, qué quedó pendiente, qué se decidió). Linear queda como referencia.
+4. **Migraciones:** las aplica el bot «OPAI 2.0» en Neon con respaldo previo, primero `dev` y después `main`, con `lock_timeout` corto y verificación posterior; luego quita `migracion-pendiente` e integra.
+5. **Revisor:** una sola pasada; solo bloquea por seguridad, migraciones o datos; lo demás va a un PR de pendientes. Tras un push, revisa solo el delta.
+6. **Integración:** con los checks obligatorios en verde y la rama al día con `main`, sin bloqueos del Revisor ni veto de Carlos y, si el PR trae migración, ya aplicada con respaldo en `dev` y `main`.
+7. **QA en vivo** después de integrar, sin frenar; los hallazgos de seguridad o datos abren un arreglo inmediato.
+
+**Consecuencias.** Se ajustan `AGENTS.md`, `CONTEXTO-agentes.md`, `INSTRUCCIONES-proyecto-claude.md` (Carlos debe pegarlas de nuevo en el proyecto de claude.ai) y la cabecera de `ESTADO.md`. Quedan por alinear la plantilla del PR, `checklists/revision.md`, `checklists/qa.md`, `ROADMAP.md`, `PLAN-desarrollo.md` y `00-documento-de-arranque.md`; mientras tanto, manda este ADR. El cuarto check obligatorio (`rendimiento`, ADR-045) está por confirmar en el ruleset (`OPERACION-agentes.md` E.4).

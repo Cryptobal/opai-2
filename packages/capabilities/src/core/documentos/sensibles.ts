@@ -9,16 +9,22 @@ const TIPOS_CUMPLIMIENTO = [...ENTIDADES_DOC_CUMPLIMIENTO];
 export const puedeVerCumplimiento = (ctx: Contexto): boolean =>
   ctx.autorizar(PERMISOS_CORE.cumplimientoRead);
 
+/**
+ * Documentos de anexos de contrato (sueldos): solo con `anexos.read` o `estructuras.read_sensible`.
+ * La relación con el anexo identifica también documentos generados antes de este arreglo.
+ */
+export const filtroDocumentoAnexo = (ctx: Contexto): Prisma.DocumentoWhereInput[] =>
+  ctx.autorizar(PERMISOS_CORE.anexosRead) || ctx.autorizar(PERMISOS_CORE.estructurasReadSensible)
+    ? []
+    : [{ anexos: { none: {} } }];
+
 /** Filtra en la misma consulta que obtiene los metadatos, también para versiones/vencimientos. */
 export const filtroDocumentoSensible = (ctx: Contexto): Prisma.DocumentoWhereInput => ({
   AND: [
     ...(puedeVerCumplimiento(ctx)
       ? []
       : [{ vinculos: { none: { entidadTipo: { in: TIPOS_CUMPLIMIENTO } } } }]),
-    // La relación con el anexo identifica también documentos generados antes de este arreglo.
-    ...(ctx.autorizar(PERMISOS_CORE.anexosRead) || ctx.autorizar(PERMISOS_CORE.estructurasReadSensible)
-      ? []
-      : [{ anexos: { none: {} } }]),
+    ...filtroDocumentoAnexo(ctx),
   ],
 });
 

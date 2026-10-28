@@ -16,6 +16,8 @@ import {
   negociosVincularInstalacion,
 } from "./negocios-vinculos";
 
+export { ajustesComercial } from "./ajustes";
+
 export const capacidadesComercial: readonly Capacidad[] = [
   negociosList,
   negociosGet,

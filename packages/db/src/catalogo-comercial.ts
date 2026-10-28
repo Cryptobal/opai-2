@@ -80,7 +80,10 @@ export async function sembrarComercial(db: ClienteComercial, tenantId: string) {
       data: { tenantId, nombre: "Embudo de ventas", porDefecto: true },
     });
   }
-  for (const [i, e] of ETAPAS_BASE.entries()) {
+  // Las etapas se siembran solo en un embudo sin etapas: el orden es editable por el tenant, así
+  // que reactivar el módulo no debe recrear ni chocar con etapas ya reorganizadas.
+  const yaSembrado = (await db.etapa.count({ where: { tenantId, embudoId: embudo.id } })) > 0;
+  for (const [i, e] of yaSembrado ? [] : ETAPAS_BASE.entries()) {
     await db.etapa.upsert({
       where: { tenantId_embudoId_orden: { tenantId, embudoId: embudo.id, orden: i } },
       update: {},

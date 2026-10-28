@@ -1,5 +1,6 @@
 import { noEncontrado } from "../../errores";
 import type { Contexto } from "../../types";
+import { filtroDocumentoAnexo } from "../documentos/sensibles";
 import { dia } from "../maestros/comun";
 import type { TitularVista } from "./comunes";
 
@@ -9,7 +10,12 @@ async function documentosDe(ctx: Contexto, tipo: string, id: string) {
   const ids = vinculos.map((v) => v.documentoId);
   if (!ids.length) return [];
   const docs = await ctx.db.documento.findMany({
-    where: { id: { in: ids }, estado: { in: ["disponible", "reemplazado"] } },
+    // El documento de un anexo (sueldos) sale solo para quien puede ver anexos.
+    where: {
+      id: { in: ids },
+      estado: { in: ["disponible", "reemplazado"] },
+      AND: filtroDocumentoAnexo(ctx),
+    },
   });
   return docs.map((d) => ({
     nombre: d.nombre,

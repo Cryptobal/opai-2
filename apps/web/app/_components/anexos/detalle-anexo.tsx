@@ -31,7 +31,7 @@ export async function DetalleAnexo({
   return (
     <div className="flex flex-col gap-4">
       <AvisoAnexo estado={a.estado} motivoCambio={a.motivoCambio} motivoRechazo={a.motivoRechazo} />
-      <DocumentoBorrador filas={a.filas} />
+      <DocumentoBorrador filas={a.filas} estado={a.estado} />
       {a.estado === "borrador" ? (
         puedeResolver ? (
           <AccionesAnexo anexo={a} personaId={personaId} />

@@ -1,9 +1,10 @@
 import type { TenantTx } from "@opai/db";
 
+import { conflicto } from "../errores";
 import type { Contexto } from "../types";
 import { estadoDeTipo, segundosEntre } from "./dominio";
 
-type NegocioFila = { id: string; etapaId: string; createdAt: Date };
+type NegocioFila = { id: string; etapaId: string; estado: string; createdAt: Date };
 type EtapaFila = { id: string; tipo: string };
 
 /**
@@ -26,10 +27,15 @@ export async function aplicarEtapa(
     orderBy: { cuando: "desc" },
   });
   const desde = ultimo?.cuando ?? negocio.createdAt;
-  const r = await tx.negocio.update({
-    where: { id: negocio.id },
+  // Actualización condicionada a la etapa y el estado que se validaron: si otra petición movió el
+  // negocio entre la lectura y esta escritura (p. ej. ganar y mover a la vez), la fila ya no calza.
+  const { count } = await tx.negocio.updateMany({
+    where: { id: negocio.id, etapaId: negocio.etapaId, estado: negocio.estado },
     data: { etapaId: destino.id, estado: estadoDeTipo(destino.tipo), ...(opts.datos ?? {}) },
   });
+  if (count === 0) throw conflicto("El negocio cambió de etapa mientras tanto; vuelve a cargarlo.");
+  const r = await tx.negocio.findUnique({ where: { id: negocio.id } });
+  if (!r) throw conflicto("El negocio ya no existe.");
   await tx.historialEtapa.create({
     data: {
       tenantId: ctx.tenantId,

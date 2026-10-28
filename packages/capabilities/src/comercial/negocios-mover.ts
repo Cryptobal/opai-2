@@ -97,9 +97,8 @@ export const negociosGanar = defineCapability({
     // «Ganar sin cotización» habilitado mientras no exista CPQ (decisión de Carlos 26-oct): el ajuste
     // comercial.ganar_exige_cotizacion lo apaga por empresa; el aviso se puede silenciar aparte.
     const sinCotizacion = !negocio.cotizacionEnviadaEn;
-    const exige = await ajuste<boolean>(ctx, "comercial", "ganar_exige_cotizacion").catch(
-      () => false,
-    );
+    // Sin .catch: si el ajuste no se puede leer, falla cerrado (no se gana) en vez de asumir «no exige».
+    const exige = await ajuste<boolean>(ctx, "comercial", "ganar_exige_cotizacion");
     if (sinCotizacion && exige)
       throw reglaDeNegocio("Esta empresa exige una cotización enviada para ganar.");
     const avisar = await ajuste<boolean>(ctx, "comercial", "avisar_ganar_sin_cotizacion").catch(

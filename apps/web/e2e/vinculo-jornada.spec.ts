@@ -1,17 +1,35 @@
 import { execFileSync } from "node:child_process";
 import { expect, test } from "@playwright/test";
-import { entrar, ocultarDev, password, sinDesborde, urlSiembra } from "./fixtures-puestos-car8";
+import { entrar, ocultarDev, password, sinDesborde, urlPropietario } from "./fixtures-puestos-car8";
 
 const persona = "00000000-0000-7000-8000-000000000082";
-const sql = (consulta: string) =>
-  execFileSync("psql", [urlSiembra, "-X", "-v", "ON_ERROR_STOP=1", "-c", consulta], {
-    stdio: "pipe",
-  });
+// Solo el vínculo vigente (083): el terminado (089) es la referencia legítima del anexo sembrado.
+const vinculo = "00000000-0000-7000-8000-000000000083";
+// Con el rol propietario de la base local: con `opai_app` y sin `app.tenant_id`, la RLS deja el
+// UPDATE en 0 filas sin error y la prueba arranca con el vínculo que dejó otro proyecto.
+// Cada UPDATE devuelve el id (RETURNING) y se exige la fila: un dueño sin BYPASSRLS también
+// quedaría en 0 filas sin error, y la prueba no debe seguir como si se hubiera aplicado.
+const actualizarVinculo = (set: string) => {
+  const salida = execFileSync(
+    "psql",
+    [
+      urlPropietario,
+      "-XAt",
+      "-v",
+      "ON_ERROR_STOP=1",
+      "-c",
+      `UPDATE core.vinculos_laborales SET ${set} WHERE id='${vinculo}' RETURNING id;`,
+    ],
+    { encoding: "utf8" },
+  );
+  if (!salida.includes(vinculo))
+    throw new Error("El UPDATE del vínculo de prueba no afectó filas.");
+};
 test.beforeAll(() => {
   if (
     !password ||
-    !urlSiembra ||
-    !["localhost", "127.0.0.1"].includes(new URL(urlSiembra).hostname)
+    !urlPropietario ||
+    !["localhost", "127.0.0.1"].includes(new URL(urlPropietario).hostname)
   )
     throw new Error("Requiere e2e local");
   execFileSync(
@@ -19,7 +37,7 @@ test.beforeAll(() => {
     ["--filter", "@opai/auth", "exec", "tsx", "scripts/seed-nav-permisos-e2e.ts"],
     {
       cwd: new URL("../../..", import.meta.url),
-      env: { ...process.env, DATABASE_URL_MIGRATE: urlSiembra, E2E_PASSWORD: password },
+      env: { ...process.env, DATABASE_URL_MIGRATE: urlPropietario, E2E_PASSWORD: password },
       stdio: "pipe",
     },
   );
@@ -28,7 +46,7 @@ test.beforeAll(() => {
     ["--filter", "@opai/db", "exec", "tsx", "scripts/seed-vinculo-jornada-e2e.ts"],
     {
       cwd: new URL("../../..", import.meta.url),
-      env: { ...process.env, DATABASE_URL_MIGRATE: urlSiembra },
+      env: { ...process.env, DATABASE_URL_MIGRATE: urlPropietario },
       stdio: "pipe",
     },
   );
@@ -37,8 +55,8 @@ test("22–25: contrato, jornada, validación y cambio de capa con vista previa"
   page,
 }, info) => {
   test.setTimeout(180000);
-  sql(
-    `UPDATE core.vinculos_laborales SET instalacion_id='00000000-0000-7000-8000-000000000081', puesto_id=NULL, horas_semanales=40, distribucion='Lunes a viernes' WHERE persona_id='${persona}';`,
+  actualizarVinculo(
+    "instalacion_id='00000000-0000-7000-8000-000000000081', puesto_id=NULL, horas_semanales=40, distribucion='Lunes a viernes'",
   );
   await entrar(page);
   await page.goto(`/personas/${persona}/laboral`);
@@ -78,7 +96,8 @@ test("22–25: contrato, jornada, validación y cambio de capa con vista previa"
     animations: "disabled",
   });
   await hoja.getByRole("button", { name: "Guardar cambio" }).click();
-  await expect(hoja).toHaveCount(0);
+  // Guardar escribe, emite el evento y revalida la ficha: en dev puede pasar de 5 s.
+  await expect(hoja).toHaveCount(0, { timeout: 30_000 });
   await expect(page.getByText("42 h semanales · 4×4")).toBeVisible();
   await page.reload();
   await expect(page.getByText("42 h semanales · 4×4")).toBeVisible();
@@ -92,9 +111,7 @@ test("25: conflicto de edición visible y hoja accesible en oscuro", async ({ pa
   const hoja = page.getByRole("dialog", { name: "Editar vínculo", exact: true });
   await expect(hoja).toBeVisible();
   await hoja.getByLabel("Horas semanales", { exact: true }).fill("43");
-  sql(
-    `UPDATE core.vinculos_laborales SET updated_at=clock_timestamp() WHERE persona_id='${persona}';`,
-  );
+  actualizarVinculo("updated_at=clock_timestamp()");
   await hoja.getByRole("button", { name: "Revisar cambio" }).click();
   await expect(
     hoja.getByText("El vínculo cambió. Vuelve a abrirlo y revisa el cambio.", { exact: false }),
