@@ -6,10 +6,10 @@ import {
   Gauge,
   History,
   KeyRound,
-  type LucideIcon,
   MessageSquare,
   Palette,
   Plug,
+  ShieldCheck,
   UserCheck,
   UserRound,
   Users,
@@ -17,23 +17,9 @@ import {
 
 import { PERMISOS_CORE } from "@opai/domain";
 
-export type Seccion = {
-  id: string;
-  href: string;
-  titulo: string;
-  /** Descripción del índice en iPad y desktop; la corta va en teléfono. */
-  descripcion: string;
-  corta: string;
-  icono: LucideIcon;
-  grupo: "Empresa" | "Operaciones" | "Acceso" | "Plataforma" | "Módulos activos";
-  /** Permiso para ver la sección (sin permiso no aparece en el índice). */
-  permiso: string | null;
-};
+import { type Seccion, seccion as s } from "./seccion-tipo";
 
-const s = (x: Omit<Seccion, "href"> & { href?: string }): Seccion => ({
-  ...x,
-  href: x.href ?? `/configuracion/${x.id}`,
-});
+export type { Seccion };
 
 /** Ámbitos fijos del centro de Configuración (ADR-018/038), en el orden del diseño (19/20). */
 export const SECCIONES: readonly Seccion[] = [
@@ -54,6 +40,15 @@ export const SECCIONES: readonly Seccion[] = [
     icono: Palette,
     grupo: "Empresa",
     permiso: PERMISOS_CORE.tenantRead,
+  }),
+  s({
+    id: "cumplimiento",
+    titulo: "Datos personales",
+    descripcion: "Ley 21.719: DPA, DPO, solicitudes, incidentes y retención",
+    corta: "DPA, solicitudes e incidentes",
+    icono: ShieldCheck,
+    grupo: "Empresa",
+    permiso: PERMISOS_CORE.cumplimientoRead,
   }),
   s({
     id: "preferencias",

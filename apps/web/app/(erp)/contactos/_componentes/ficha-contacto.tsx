@@ -1,4 +1,8 @@
-import { Badge, DetailScreen, type EstadoPantalla, Enlace, ParesGrid, SeccionTarjeta } from "@opai/ds";
+import { Suspense } from "react";
+
+import { Badge, DetailScreen, type EstadoPantalla, Enlace, ParesGrid, SeccionTarjeta, Skeleton } from "@opai/ds";
+
+import { PrivacidadTitular } from "@/app/_components/cumplimiento/privacidad-titular";
 
 import { LinkNext } from "@/app/_components/link-next";
 import { telefono } from "@/lib/fechas";
@@ -12,7 +16,10 @@ const ROL: Record<string, string> = {
   cobranza: "Cobranza",
 };
 
-/** Ficha de un contacto (persona): datos de contacto, cuenta y roles. Sin pestañas en el PR 1. */
+/**
+ * Ficha de un contacto (persona): datos de contacto, cuenta y roles; debajo, su privacidad
+ * (consentimientos y solicitudes, Ley 21.719) para quien tiene `cumplimiento.read`.
+ */
 export function FichaContacto(p: { state: EstadoPantalla; contacto: ContactoDetalle | null }) {
   const c = p.contacto;
   return (
@@ -27,6 +34,7 @@ export function FichaContacto(p: { state: EstadoPantalla; contacto: ContactoDeta
         : {})}
     >
       {c ? (
+        <div className="flex flex-col gap-4">
         <SeccionTarjeta titulo="Datos de contacto">
           <ParesGrid
             items={[
@@ -50,6 +58,12 @@ export function FichaContacto(p: { state: EstadoPantalla; contacto: ContactoDeta
             ]}
           />
         </SeccionTarjeta>
+        <Suspense fallback={<Skeleton className="h-32 w-full" />}>
+          <PrivacidadTitular
+            titular={{ tipo: "contacto", id: c.id, nombre: `${c.nombres} ${c.apellidos}`.trim() }}
+          />
+        </Suspense>
+        </div>
       ) : null}
     </DetailScreen>
   );
