@@ -2,7 +2,9 @@
 
 # ESTADO — OPAI 2.0
 
-> **Desde el 24-oct-2026, el estado de las tareas vive en Linear (enlace por definir). Este archivo queda como foto técnica: versiones, infraestructura, riesgos aceptados y decisiones.** (PR #22). Las listas de pendientes de abajo se migran a Linear en la fecha que fije Carlos; hasta entonces no se borran, y si no coinciden con Linear, manda Linear.
+> **Desde el 28-oct-2026 (ADR-054, [`OPERACION-agentes.md`](OPERACION-agentes.md)), cada PR actualiza este archivo: qué entró, qué quedó pendiente y qué se decidió.** Sin esa actualización, el PR no está listo. Ya no es solo la foto técnica (versiones, infraestructura, riesgos aceptados y decisiones), que también sigue aquí. Linear (equipo CAR, `Fixes CAR-n`) queda como referencia de tareas y no reemplaza a este archivo. *(Antes, desde el 24-oct-2026 y el PR #22, el estado de las tareas vivía en Linear y este archivo era solo foto técnica.)*
+
+- **Flujo operativo del 28-oct-2026 (PR docs/operacion-agentes):** entra `OPERACION-agentes.md` como fuente del flujo (Claude escribe los briefs; el bot OPAI 2.0 opera la cola: avisos, migraciones con respaldo, integración y capturas; Revisor de una pasada que solo bloquea por seguridad, migraciones o datos; QA en vivo después de integrar, sin frenar) y ADR-054, que reemplaza a ADR-043 v3 en lo que choca. Se ajustan `AGENTS.md`, `CONTEXTO-agentes.md`, `INSTRUCCIONES-proyecto-claude.md` y esta cabecera. Pendiente: confirmar el cuarto check obligatorio (E.4) y alinear la plantilla del PR, `checklists/revision.md`, `checklists/qa.md`, `ROADMAP.md`, `PLAN-desarrollo.md` y `00-documento-de-arranque.md`, que siguen citando la regla anterior.
 
 **PR #90 · Inicio y vencimientos:** Codex documenta en `briefs/fix-inicio-vencimientos.md` el conteo limitado a personas y el aviso al superar 2.000 personas accesibles; la comparación local de navegación en iPad pasó también en main `49b1d8d`. La e2e con un vencimiento positivo pasó en teléfono, iPad y escritorio; el alcance de otras entidades sigue pendiente.
 
