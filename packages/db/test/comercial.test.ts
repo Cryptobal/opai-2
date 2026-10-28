@@ -53,7 +53,9 @@ describe.skipIf(!urlPropietario)("Comercial (Brief 07 · PR 1)", () => {
   it("siembra un embudo por defecto con 8 etapas (6 abiertas, 1 ganada, 1 perdida), idempotente", async () => {
     const embudos = await e.admin.embudo.findMany({ where: { tenantId: idA, porDefecto: true } });
     expect(embudos.length).toBe(1);
-    const etapas = await e.admin.etapa.findMany({ where: { tenantId: idA, embudoId: embudos[0]!.id } });
+    const etapas = await e.admin.etapa.findMany({
+      where: { tenantId: idA, embudoId: embudos[0]!.id },
+    });
     expect(etapas.length).toBe(8);
     expect(etapas.filter((x) => x.tipo === "abierta").length).toBe(6);
     expect(etapas.filter((x) => x.tipo === "ganada").length).toBe(1);
@@ -61,12 +63,28 @@ describe.skipIf(!urlPropietario)("Comercial (Brief 07 · PR 1)", () => {
     expect(etapas.find((x) => x.tipo === "ganada")?.nombre).toBe("Adjudicado");
     // Catálogos base.
     expect(await e.admin.tipoNegocio.count({ where: { tenantId: idA } })).toBeGreaterThanOrEqual(6);
-    expect(await e.admin.origenNegocio.count({ where: { tenantId: idA } })).toBeGreaterThanOrEqual(5);
+    expect(await e.admin.origenNegocio.count({ where: { tenantId: idA } })).toBeGreaterThanOrEqual(
+      5,
+    );
     expect(await e.admin.motivoPerdida.count({ where: { tenantId: idA } })).toBe(7);
   });
 
+  it("reactivar (re-sembrar) no recrea etapas en un embudo que el tenant reordenó", async () => {
+    const embudo = await e.admin.embudo.findFirstOrThrow({
+      where: { tenantId: idB, porDefecto: true },
+    });
+    const ganada = await e.admin.etapa.findFirstOrThrow({
+      where: { tenantId: idB, embudoId: embudo.id, tipo: "ganada" },
+    });
+    await e.admin.etapa.update({ where: { id: ganada.id }, data: { orden: 20 } });
+    await sembrarComercial(e.admin.$extends({}), idB);
+    expect(await e.admin.etapa.count({ where: { tenantId: idB, embudoId: embudo.id } })).toBe(8);
+  });
+
   it("el estado del negocio se deriva del tipo de la etapa (trigger)", async () => {
-    const embudo = await e.admin.embudo.findFirstOrThrow({ where: { tenantId: idA, porDefecto: true } });
+    const embudo = await e.admin.embudo.findFirstOrThrow({
+      where: { tenantId: idA, porDefecto: true },
+    });
     const abierta = await e.admin.etapa.findFirstOrThrow({
       where: { tenantId: idA, embudoId: embudo.id, tipo: "abierta", orden: 0 },
     });
@@ -94,7 +112,9 @@ describe.skipIf(!urlPropietario)("Comercial (Brief 07 · PR 1)", () => {
   it("un negocio no puede referir un embudo de otra empresa (trigger mismo_tenant)", async () => {
     const embudoA = await e.admin.embudo.findFirstOrThrow({ where: { tenantId: idA } });
     const embudoB = await e.admin.embudo.findFirstOrThrow({ where: { tenantId: idB } });
-    const etapaA = await e.admin.etapa.findFirstOrThrow({ where: { tenantId: idA, embudoId: embudoA.id } });
+    const etapaA = await e.admin.etapa.findFirstOrThrow({
+      where: { tenantId: idA, embudoId: embudoA.id },
+    });
     await expect(
       e.admin.negocio.create({
         data: {
@@ -111,9 +131,17 @@ describe.skipIf(!urlPropietario)("Comercial (Brief 07 · PR 1)", () => {
 
   it("la instalación de un negocio es de la cuenta del negocio (trigger misma_cuenta)", async () => {
     const embudo = await e.admin.embudo.findFirstOrThrow({ where: { tenantId: idA } });
-    const etapa = await e.admin.etapa.findFirstOrThrow({ where: { tenantId: idA, embudoId: embudo.id } });
+    const etapa = await e.admin.etapa.findFirstOrThrow({
+      where: { tenantId: idA, embudoId: embudo.id },
+    });
     const negocio = await e.admin.negocio.create({
-      data: { tenantId: idA, cuentaId: cuentaA1, embudoId: embudo.id, etapaId: etapa.id, titulo: "N" },
+      data: {
+        tenantId: idA,
+        cuentaId: cuentaA1,
+        embudoId: embudo.id,
+        etapaId: etapa.id,
+        titulo: "N",
+      },
     });
     // instalA2 es de la cuenta A2, el negocio es de A1: se rechaza.
     await expect(
@@ -125,25 +153,53 @@ describe.skipIf(!urlPropietario)("Comercial (Brief 07 · PR 1)", () => {
 
   it("un solo contacto principal por negocio (índice parcial)", async () => {
     const embudo = await e.admin.embudo.findFirstOrThrow({ where: { tenantId: idA } });
-    const etapa = await e.admin.etapa.findFirstOrThrow({ where: { tenantId: idA, embudoId: embudo.id } });
+    const etapa = await e.admin.etapa.findFirstOrThrow({
+      where: { tenantId: idA, embudoId: embudo.id },
+    });
     const negocio = await e.admin.negocio.create({
-      data: { tenantId: idA, cuentaId: cuentaA1, embudoId: embudo.id, etapaId: etapa.id, titulo: "NP" },
+      data: {
+        tenantId: idA,
+        cuentaId: cuentaA1,
+        embudoId: embudo.id,
+        etapaId: etapa.id,
+        titulo: "NP",
+      },
     });
     await e.admin.negocioContacto.create({
-      data: { tenantId: idA, negocioId: negocio.id, contactoId: contactoA1a, rol: "decisor", esPrincipal: true },
+      data: {
+        tenantId: idA,
+        negocioId: negocio.id,
+        contactoId: contactoA1a,
+        rol: "decisor",
+        esPrincipal: true,
+      },
     });
     await expect(
       e.admin.negocioContacto.create({
-        data: { tenantId: idA, negocioId: negocio.id, contactoId: contactoA1b, rol: "tecnico", esPrincipal: true },
+        data: {
+          tenantId: idA,
+          negocioId: negocio.id,
+          contactoId: contactoA1b,
+          rol: "tecnico",
+          esPrincipal: true,
+        },
       }),
     ).rejects.toThrow();
   });
 
   it("el historial de etapas es append-only", async () => {
     const embudo = await e.admin.embudo.findFirstOrThrow({ where: { tenantId: idA } });
-    const etapa = await e.admin.etapa.findFirstOrThrow({ where: { tenantId: idA, embudoId: embudo.id } });
+    const etapa = await e.admin.etapa.findFirstOrThrow({
+      where: { tenantId: idA, embudoId: embudo.id },
+    });
     const negocio = await e.admin.negocio.create({
-      data: { tenantId: idA, cuentaId: cuentaA1, embudoId: embudo.id, etapaId: etapa.id, titulo: "NH" },
+      data: {
+        tenantId: idA,
+        cuentaId: cuentaA1,
+        embudoId: embudo.id,
+        etapaId: etapa.id,
+        titulo: "NH",
+      },
     });
     const h = await e.admin.historialEtapa.create({
       data: { tenantId: idA, negocioId: negocio.id, aEtapaId: etapa.id, actorTipo: "system" },
@@ -151,9 +207,9 @@ describe.skipIf(!urlPropietario)("Comercial (Brief 07 · PR 1)", () => {
     await expect(
       e.admin.historialEtapa.updateMany({ where: { id: h.id }, data: { motivo: "x" } }),
     ).rejects.toThrow(/append-only/);
-    await expect(
-      e.admin.historialEtapa.deleteMany({ where: { id: h.id } }),
-    ).rejects.toThrow(/append-only/);
+    await expect(e.admin.historialEtapa.deleteMany({ where: { id: h.id } })).rejects.toThrow(
+      /append-only/,
+    );
   });
 
   it("RLS: cada tenant ve solo su embudo y no escribe en otro", async () => {
