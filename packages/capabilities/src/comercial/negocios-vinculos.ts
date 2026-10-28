@@ -3,6 +3,7 @@ import { z } from "zod";
 import { defineCapability } from "../define";
 import { noEncontrado, reglaDeNegocio } from "../errores";
 import { uuidSchema } from "../core/esquemas";
+import { dondeContacto } from "../core/maestros/alcance";
 import { sinDuplicado } from "../core/maestros/comun";
 import { PERMISO_MANAGE, etapaDe, negocioDe, rolContactoSchema, tipoVinculoSchema } from "./comun";
 import { emitirActualizado } from "./validaciones";
@@ -110,8 +111,10 @@ export const negociosSetContactos = defineCapability({
     }
     const ids = input.contactos.map((c) => c.contactoId);
     if (ids.length) {
+      // Alcance por filas (ADR-022): un actor acotado no vincula contactos fuera de su alcance,
+      // igual que la ficha (comercial.negocios.get).
       const dela = await ctx.db.contacto.findMany({
-        where: { id: { in: ids } },
+        where: { id: { in: ids }, AND: [dondeContacto(ctx)] },
         select: { cuentaId: true },
       });
       if (dela.length !== new Set(ids).size || dela.some((c) => c.cuentaId !== negocio.cuentaId)) {

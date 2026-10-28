@@ -15,6 +15,7 @@ export const K1 = "0192f3a0-0000-7000-8000-0000000000a1";
 export const K2 = "0192f3a0-0000-7000-8000-0000000000a2";
 export const MP = "0192f3a0-0000-7000-8000-0000000000d1";
 export const MPO = "0192f3a0-0000-7000-8000-0000000000d2";
+export const N1 = "0192f3a0-0000-7000-8000-0000000000b1";
 
 export const etapaId = (n: number) => `0192f3a0-0000-7000-8000-0000000000e${n}`;
 
@@ -31,8 +32,12 @@ const etapa = (n: number, nombre: string, tipo: string, prob: number, exige: str
   activa: true,
 });
 
-export function semillaComercial() {
-  return {
+/**
+ * Siembra base, más N1 (negocio de CU con instalación I1 y los contactos K1/K2) para los tests de
+ * alcance (ADR-022) que necesitan el mismo negocio visible desde contextos con permisos distintos.
+ */
+export function semillaComercial(opts: { conNegocio?: boolean } = {}) {
+  const base = {
     tenant: [
       {
         id: TENANT_DE_PRUEBA,
@@ -107,6 +112,51 @@ export function semillaComercial() {
       },
     ],
   };
+  if (!opts.conNegocio) return base;
+  return {
+    ...base,
+    negocio: [
+      {
+        id: N1,
+        tenantId: TENANT_DE_PRUEBA,
+        cuentaId: CU,
+        embudoId: E,
+        etapaId: etapaId(0),
+        estado: "abierto",
+        titulo: "Guardias · Planta 1",
+        probabilidad: 10,
+        createdAt: new Date("2026-01-01T00:00:00Z"),
+        updatedAt: new Date("2026-01-01T00:00:00Z"),
+      },
+    ],
+    negocioInstalacion: [
+      {
+        id: "0192f3a0-0000-7000-8000-0000000000b4",
+        tenantId: TENANT_DE_PRUEBA,
+        negocioId: N1,
+        instalacionId: I1,
+        tipo: "nueva",
+      },
+    ],
+    negocioContacto: [
+      {
+        id: "0192f3a0-0000-7000-8000-0000000000b2",
+        tenantId: TENANT_DE_PRUEBA,
+        negocioId: N1,
+        contactoId: K1,
+        rol: "decisor",
+        esPrincipal: true,
+      },
+      {
+        id: "0192f3a0-0000-7000-8000-0000000000b3",
+        tenantId: TENANT_DE_PRUEBA,
+        negocioId: N1,
+        contactoId: K2,
+        rol: "tecnico",
+        esPrincipal: false,
+      },
+    ],
+  };
 }
 
 export function reiniciarComercial() {
@@ -125,10 +175,12 @@ export function ctxComercial(
     permisos?: string[];
     alcance?: Alcance;
     excepciones?: { permiso: string; conceder: boolean }[];
+    /** Siembra también N1 (negocio de CU con instalación I1 y los contactos K1/K2). */
+    conNegocio?: boolean;
   } = {},
 ) {
   const base = {
-    semilla: semillaComercial(),
+    semilla: semillaComercial(opts.conNegocio ? { conNegocio: true } : {}),
     modulosActivos: ["comercial"],
     ...(opts.rol ? { rol: opts.rol } : {}),
     ...(opts.permisos ? { permisos: opts.permisos } : {}),

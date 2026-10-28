@@ -1,7 +1,10 @@
 import { z } from "zod";
 
+import { PERMISOS_CORE } from "@opai/domain";
+
 import { defineCapability } from "../define";
 import { uuidSchema } from "../core/esquemas";
+import { dondeContacto } from "../core/maestros/alcance";
 import { diasEntre } from "./dominio";
 import { PERMISO_READ, negocioDe, negocioSchema, vistaNegocio } from "./comun";
 
@@ -44,11 +47,16 @@ export const negociosGet = defineCapability({
   dryRun: false,
   async handler(ctx, input) {
     const n = await negocioDe(ctx, input.id);
+    // Correo y nombre de contacto son datos personales del núcleo (igual que contactos.ts): sin
+    // core:cuentas.read la ficha no revela contactos, pero el resto del negocio sí se devuelve.
+    const puedeVerContactos = ctx.autorizar(PERMISOS_CORE.cuentasRead);
     const [cuenta, etapa, vinculosI, vinculosC, historial] = await Promise.all([
       ctx.db.cuenta.findUnique({ where: { id: n.cuentaId }, select: { nombre: true } }),
       ctx.db.etapa.findUnique({ where: { id: n.etapaId }, select: { nombre: true, tipo: true } }),
       ctx.db.negocioInstalacion.findMany({ where: { negocioId: n.id } }),
-      ctx.db.negocioContacto.findMany({ where: { negocioId: n.id } }),
+      puedeVerContactos
+        ? ctx.db.negocioContacto.findMany({ where: { negocioId: n.id } })
+        : Promise.resolve([]),
       ctx.db.historialEtapa.findMany({ where: { negocioId: n.id }, orderBy: { cuando: "asc" } }),
     ]);
     const instIds = vinculosI.map((v) => v.instalacionId);
@@ -61,15 +69,21 @@ export const negociosGet = defineCapability({
         where: { id: { in: instIds } },
         select: { id: true, nombre: true },
       }),
-      ctx.db.contacto.findMany({
-        where: { id: { in: contIds } },
-        select: { id: true, nombres: true, apellidos: true },
-      }),
+      contIds.length
+        ? ctx.db.contacto.findMany({
+            // Alcance por filas (ADR-022): igual que comercial.contactos.list, un actor acotado solo
+            // ve los contactos de cuentas con instalaciones a su cargo.
+            where: { id: { in: contIds }, AND: [dondeContacto(ctx)] },
+            select: { id: true, nombres: true, apellidos: true },
+          })
+        : Promise.resolve([]),
       ctx.db.etapa.findMany({
         where: { id: { in: etapaIds as string[] } },
         select: { id: true, nombre: true },
       }),
     ]);
+    // Un vínculo cuyo contacto quedó fuera del alcance no se revela: ni su nombre ni su existencia.
+    const vinculosCVisibles = vinculosC.filter((v) => conts.some((c) => c.id === v.contactoId));
     const nombreEtapa = (id: string | null) =>
       id ? (etapas.find((e) => e.id === id)?.nombre ?? null) : null;
     return {
@@ -83,7 +97,7 @@ export const negociosGet = defineCapability({
         nombre: insts.find((i) => i.id === v.instalacionId)?.nombre ?? "",
         tipo: v.tipo,
       })),
-      contactos: vinculosC.map((v) => {
+      contactos: vinculosCVisibles.map((v) => {
         const c = conts.find((x) => x.id === v.contactoId);
         return {
           id: v.id,
