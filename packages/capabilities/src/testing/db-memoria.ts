@@ -130,6 +130,10 @@ export function dbEnMemoria(semilla: Record<string, Fila[]> = {}) {
     crearTenant: (data: Fila) => delegado("tenant").create({ data }),
     actualizarTenant: (id: string, data: Fila) =>
       delegado("tenant").update({ where: { id }, data }),
+    usuariosDePlataforma: async () =>
+      (await delegado("user").findMany({ orderBy: { email: "asc" } })).filter(
+        (u) => u.platformRole,
+      ),
     listarAjustes: () => delegado("ajustePlataforma").findMany(),
     ajustePorClave: (where: Fila) => delegado("ajustePlataforma").findUnique({ where }),
     guardarAjuste: (args: Parameters<ReturnType<typeof delegado>["upsert"]>[0]) =>

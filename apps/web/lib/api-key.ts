@@ -59,7 +59,13 @@ export async function contextoDeApiKey(
       acceso.instalaciones !== null)
   )
     return noAutenticado("API key inválida.");
-  const claveApi = { permisos: fila.heredaPermisos ? null : fila.permisos, servicio };
+  // Key de plataforma (ADR-055): scope explícito "platform"; el permiso real sale del `platformRole`
+  // vigente del responsable, que `autorizador` cruza en cada llamada (si lo pierde, la key también).
+  const claveApi = {
+    permisos: fila.heredaPermisos ? null : fila.permisos,
+    servicio,
+    plataforma: fila.scopes.includes("platform"),
+  };
   // Techo real del responsable (H15): rol, personalizado y excepciones VIGENTES, siempre, también
   // para `servicio` (que arriba manda `rol`/`permisosRol`/`excepciones` en null porque el principal
   // no hereda rol). Si el responsable baja de rol o recibe una excepción que deniega, la key la

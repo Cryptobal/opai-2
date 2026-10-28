@@ -102,6 +102,16 @@ export const apikeysSetAutonomia = defineCapability({
     if (c.efecto === "lectura") throw reglaDeNegocio("Las lecturas no requieren autonomía.");
     if (input.nivel === "directo" && ctx.rol !== "owner" && ctx.rol !== "admin")
       throw prohibido("Solo owner o admin dan autonomía directa.");
+    // Plataforma (ADR-055): la autonomía directa sobre `platform.*` solo la da quien tiene ese
+    // permiso de plataforma; un owner o admin del tenant no la concede a una key de plataforma.
+    if (
+      input.nivel === "directo" &&
+      c.modulo === "platform" &&
+      !(c.permiso && ctx.autorizar(c.permiso))
+    )
+      throw prohibido(
+        "Solo un usuario de plataforma con ese permiso da autonomía directa en plataforma.",
+      );
     const salida = { apiKeyId: input.apiKeyId, capability: c.id, nivel: input.nivel };
     if (dryRun) return salida;
     const clave = { tenantId: ctx.tenantId, apiKeyId: input.apiKeyId, capability: c.id };

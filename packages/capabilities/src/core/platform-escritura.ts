@@ -50,7 +50,9 @@ export const platformTenantsCreate = defineCapability({
     adoptado: z.boolean(),
     invitacion: invitacionCreadaSchema.nullable(),
   }),
-  efecto: "escritura",
+  // Irreversible (ADR-055): invita a un owner (también al adoptar una empresa existente), igual que
+  // platform.admins.invite; un agente con key de plataforma queda en aprobación humana.
+  efecto: "irreversible",
   dryRun: true,
   tenantObjetivo: (_input, output) => output?.tenantId ?? undefined,
   async handler(ctx, input, { dryRun }) {

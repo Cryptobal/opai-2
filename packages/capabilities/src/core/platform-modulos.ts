@@ -73,7 +73,9 @@ export const platformAdminsInvite = defineCapability({
     rol: z.enum(["owner", "admin"]).default("owner"),
   }),
   output: invitacionCreadaSchema,
-  efecto: "escritura",
+  // Irreversible (ADR-055): invitar un owner abre todos los datos de la empresa; un agente con key
+  // de plataforma queda en aprobación humana salvo autonomía directa dada por plataforma.
+  efecto: "irreversible",
   dryRun: true,
   tenantObjetivo: (input) => input.tenantId,
   async handler(ctx, input, { dryRun }) {
