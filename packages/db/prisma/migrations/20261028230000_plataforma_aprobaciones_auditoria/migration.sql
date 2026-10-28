@@ -19,7 +19,8 @@
 -- FORCE RLS (20261028170000): si el rol que migra no tiene BYPASSRLS, un SELECT/DELETE sobre
 -- `core.aprobaciones` o `core.audit_events` sin `app.tenant_id` ve 0 filas EN SILENCIO. Por eso el
 -- movimiento quita FORCE a esas dos tablas (a `core.api_keys`, que solo lee, y a `core.eventos`,
--- `core.eventos_entregas` y `core.notificaciones`, de las que borra los restos) solo dentro de esta
+-- `core.eventos_entregas`, `core.notificaciones` y `core.envios`, de las que borra o desliga los
+-- restos) solo dentro de esta
 -- transacción (el dueño de la tabla sin FORCE no queda sujeto a RLS), mueve con verificación de
 -- conteos y vuelve a poner FORCE antes
 -- del COMMIT. Nadie más ve el estado intermedio: ALTER TABLE toma ACCESS EXCLUSIVE hasta el final.
@@ -145,11 +146,14 @@ ALTER TABLE "core"."audit_events" NO FORCE ROW LEVEL SECURITY;
 ALTER TABLE "core"."api_keys" NO FORCE ROW LEVEL SECURITY;
 -- Restos en la empresa de la key (revisión del PR #109): los eventos `core.aprobacion.*` de las
 -- aprobaciones movidas (su payload trae el resumen, con datos de la empresa objetivo) y las
--- notificaciones que generaron se borran; sus entregas caen por ON DELETE CASCADE. `core.envios`
--- no guarda contenido (solo destinatario y estado) y se conserva como registro de envío.
+-- notificaciones y entregas que generaron se borran. `core.envios` no guarda contenido (solo
+-- destinatario y estado) y se conserva como registro de envío, desligado del evento
+-- (`evento_id` NULL): así no choca con una FK RESTRICT `envios_evento_id_fkey` (#113, CAR-45/46),
+-- se aplique esa migración antes o después que esta.
 ALTER TABLE "core"."eventos" NO FORCE ROW LEVEL SECURITY;
 ALTER TABLE "core"."eventos_entregas" NO FORCE ROW LEVEL SECURITY;
 ALTER TABLE "core"."notificaciones" NO FORCE ROW LEVEL SECURITY;
+ALTER TABLE "core"."envios" NO FORCE ROW LEVEL SECURITY;
 
 DO $$
 DECLARE
@@ -159,6 +163,7 @@ DECLARE
   v_eventos integer;
   v_restos integer;
   v_avisos integer;
+  v_envios integer;
   v_fila record;
 BEGIN
   -- Los ALTER TABLE de arriba exigen ser dueño de la tabla: sin FORCE, el dueño no queda sujeto
@@ -176,16 +181,19 @@ BEGIN
   WHERE a.capability LIKE 'platform.%';
   GET DIAGNOSTICS v_copiadas = ROW_COUNT;
   -- Avisos y eventos de esas aprobaciones en la empresa de la key (antes de borrar las filas).
-  DELETE FROM core.notificaciones n USING core.eventos e
-  WHERE n.evento_id = e.id AND n.tenant_id = e.tenant_id
-    AND e.tipo IN ('core.aprobacion.pendiente', 'core.aprobacion.resuelta')
-    AND e.entidad_tipo = 'aprobacion'
-    AND e.entidad_id IN (SELECT id::text FROM core.aprobaciones WHERE capability LIKE 'platform.%');
+  -- Primero se desligan o borran todas las filas que apuntan a esos eventos (por `evento_id`,
+  -- sin mirar su tenant), para que ninguna FK, CASCADE o RESTRICT, frene el borrado.
+  CREATE TEMP TABLE car36_eventos ON COMMIT DROP AS
+    SELECT e.id FROM core.eventos e
+    WHERE e.tipo IN ('core.aprobacion.pendiente', 'core.aprobacion.resuelta')
+      AND e.entidad_tipo = 'aprobacion'
+      AND e.entidad_id IN (SELECT id::text FROM core.aprobaciones WHERE capability LIKE 'platform.%');
+  UPDATE core.envios SET evento_id = NULL WHERE evento_id IN (SELECT id FROM car36_eventos);
+  GET DIAGNOSTICS v_envios = ROW_COUNT;
+  DELETE FROM core.notificaciones WHERE evento_id IN (SELECT id FROM car36_eventos);
   GET DIAGNOSTICS v_avisos = ROW_COUNT;
-  DELETE FROM core.eventos e
-  WHERE e.tipo IN ('core.aprobacion.pendiente', 'core.aprobacion.resuelta')
-    AND e.entidad_tipo = 'aprobacion'
-    AND e.entidad_id IN (SELECT id::text FROM core.aprobaciones WHERE capability LIKE 'platform.%');
+  DELETE FROM core.eventos_entregas WHERE evento_id IN (SELECT id FROM car36_eventos);
+  DELETE FROM core.eventos WHERE id IN (SELECT id FROM car36_eventos);
   GET DIAGNOSTICS v_restos = ROW_COUNT;
   DELETE FROM core.aprobaciones WHERE capability LIKE 'platform.%';
   GET DIAGNOSTICS v_borradas = ROW_COUNT;
@@ -212,8 +220,8 @@ BEGIN
   IF v_eventos <> v_esperadas THEN
     RAISE EXCEPTION 'CAR-36: auditoría esperada %, copiada %', v_esperadas, v_eventos;
   END IF;
-  RAISE NOTICE 'CAR-36: % aprobaciones movidas (% eventos y % notificaciones de ellas borrados), % eventos de auditoría copiados',
-    v_copiadas, v_restos, v_avisos, v_eventos;
+  RAISE NOTICE 'CAR-36: % aprobaciones movidas (% eventos y % notificaciones de ellas borrados, % envíos desligados), % eventos de auditoría copiados',
+    v_copiadas, v_restos, v_avisos, v_envios, v_eventos;
 END
 $$;
 
@@ -223,6 +231,7 @@ ALTER TABLE "core"."api_keys" FORCE ROW LEVEL SECURITY;
 ALTER TABLE "core"."eventos" FORCE ROW LEVEL SECURITY;
 ALTER TABLE "core"."eventos_entregas" FORCE ROW LEVEL SECURITY;
 ALTER TABLE "core"."notificaciones" FORCE ROW LEVEL SECURITY;
+ALTER TABLE "core"."envios" FORCE ROW LEVEL SECURITY;
 COMMIT;
 
 -- Reversión (manual, solo referencia; no la aplica Prisma). Con el rol propietario, en una tx.
