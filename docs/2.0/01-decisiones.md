@@ -442,6 +442,14 @@ Sin portal se rechaza por defecto: `null` o vacío **no** equivale a `erp`; las 
 lo derivan en servidor. La API genérica con sesión sin portal no acepta uno del cliente.
 Plataforma, procesos del sistema y API keys conservan sus reglas.
 
+**`/api/v1` con sesión (CAR-38, encargo de Carlos del 28-oct-2026: asignar supervisores «por
+`/api/v1` con sesión»).** La API genérica sigue sin aceptar un portal del cliente (query, cabecera
+ni body). Si la membresía actual tiene el ERP, el servidor fija `erp`, como hacen las pantallas
+del ERP; si no, queda `null` y se rechaza como antes. Como la cookie viaja sola, todo POST con
+sesión (también de plataforma o sin tenant) exige `Origin` igual al propio origen y un GET no puede venir de otro sitio
+(`Sec-Fetch-Site`), para que una página ajena no escriba ni deje lecturas auditadas a nombre del
+usuario (`apps/web/lib/api-sesion.ts`). Las API keys no cambian.
+
 **Excepción explícita (adenda del encargo; autonomía de fase 1 dada por Carlos en t500u).**
 Solo `core.invitations.accept` queda fuera de la comprobación de portales de membresía,
 porque crea esa membresía; su handler sigue exigiendo usuario autenticado, token y correo
