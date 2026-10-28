@@ -737,4 +737,11 @@ En la rama `fix/version-cargo-bonos`, Codex eligió rechazar el versionado de un
 
 La decisión de alcance de OPAI 2.0 en el encargo t500u exige que Inicio y Vencimientos compartan el criterio y respeten el plazo de cada tipo (30 días por defecto). La implementación en curso usa la matriz de personas para ambos conteos. Queda pendiente conservar por separado los documentos de otras entidades que antes contaba Inicio, con un enlace propio, y verificar el límite de 2.000 personas; hasta resolverlo el criterio de alcance está parcial.
 
+**Brief 03, continuidad CAR-7:** Codex configura el pool por instancia y avisa una
+vez si el host en Vercel no contiene `-pooler.`; el test de rendimiento calienta con sesión y
+registra tres cargas. Son decisiones técnicas de implementación, pendientes de
+validación en Neon. La medición de servidor no sustituye navegación cliente ni p75;
+el esqueleto, la carrera de hidratación, la invalidación de caché y la comparación
+antes/después siguen pendientes. No se declara listo el gate obligatorio de ADR-045.
+
 - Pendientes de cierre del Núcleo (CAR-19): correcciones de permisos, auditoría de rechazos y regresiones de sueldos y navegación; detalle y validación en el PR.

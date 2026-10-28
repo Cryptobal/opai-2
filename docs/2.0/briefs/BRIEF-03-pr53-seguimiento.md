@@ -62,3 +62,20 @@ se necesita una consulta adicional para su total exacto y no se declara cumplido
 tope de ocho para ese caso. La corrida ampliada de caché también ejercita clics
 inmediatos afectados por el pendiente de hidratación; sus fallos se informan, no se
 ocultan ni se convierten en nuevas omisiones.
+
+## Continuidad del cierre (CAR-7)
+
+Decisiones técnicas de Codex para el encargo: limitar el pool por instancia, avisar si el
+host no tiene pooler en Vercel y calentar rutas autenticadas antes de medir tres cargas
+completas por ruta, usando la mediana del tiempo de servidor y el máximo de consultas
+observadas. No se modifican las metas de ADR-045. La mediana admite muestras individuales sobre 500 ms, por lo que no demuestra el límite en cada navegación. Estas cargas no miden el tiempo de
+navegación cliente ni el p75, y el marcador puede no incluir todos los Suspense.
+
+Criterios parciales: sigue pendiente demostrar el esqueleto y la navegación durante
+la hidratación, la invalidación de caché, la tabla comparable antes/después y el gate
+completo de ADR-045. No se ha diagnosticado concluyentemente la falla de #84 ni se
+ha medido el pool en Neon; no se declara listo para hacerlo obligatorio.
+
+El encargo de cierre del PR #88 resuelve H1 de QA: el host sin `-pooler.` genera
+un aviso una sola vez, sin URL ni credenciales, y no interrumpe la configuración.
+La mediana se calcula sobre una copia para conservar el orden de las muestras.
