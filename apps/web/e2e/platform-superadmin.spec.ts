@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 
+import { abrirCon } from "./hidratacion";
 import { entrar } from "./sesion";
 
 const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
@@ -47,8 +48,11 @@ test.describe("regresión Plataforma tras #59", () => {
         await expect(nav.getByRole("link")).toHaveCount(0);
         await expect(page.getByRole("link", { name: "Nueva", exact: true })).toHaveCount(0);
         if (info.project.name === "telefono") {
-          await page.getByRole("button", { name: "Más opciones", exact: true }).click();
-          await expect(page.getByRole("menuitem", { name: "Cerrar sesión" })).toBeVisible();
+          // «Más» abre la hoja de Más con la cuenta (ya no un menú): ahí sigue «Cerrar sesión».
+          await abrirCon(
+            page.getByRole("button", { name: "Más opciones", exact: true }),
+            page.getByRole("dialog", { name: "Más" }).getByRole("button", { name: "Cerrar sesión" }),
+          );
           await page.keyboard.press("Escape");
         }
       }

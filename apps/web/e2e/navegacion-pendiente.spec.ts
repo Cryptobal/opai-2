@@ -1,6 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
 
-import { hidratado } from "./hidratacion";
+import { abrirArea } from "./riel";
 import { entrar as iniciarSesion } from "./sesion";
 
 /**
@@ -34,11 +34,7 @@ test("la cabecera y el riel marcan el destino durante una navegación lenta", as
   const menu = page.getByRole("navigation", { name: "Principal" });
   // En iPad y escritorio el área «Personas» del riel puede venir plegada (solo se abre sola la del
   // destino actual, y otras specs pueden haberla plegado): se abre antes del clic, como un usuario.
-  const area = menu.getByRole("button", { name: "Personas", exact: true });
-  if ((await area.count()) && (await area.getAttribute("aria-expanded")) !== "true") {
-    await hidratado(area);
-    await area.click();
-  }
+  await abrirArea(menu, "Personas");
   await menu.getByRole("link", { name: /^Personas$/ }).first().click();
 
   // Señal de pendiente inmediata (antes de que llegue el contenido): el ítem del riel/menú marca

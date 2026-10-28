@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { ocultarIndicadorDev } from "./indicador-dev";
 
 import { codigoTotp, E2E_PASSWORD as password, entrar } from "./sesion";
 
@@ -18,6 +19,8 @@ const PORTALES = [
 ] as const;
 
 test.describe("acceso a portales", () => {
+  // El badge de dev de Next tapa controles del pie y se traga los clics (`indicador-dev.ts`).
+  test.beforeEach(({ context }) => ocultarIndicadorDev(context));
   test.beforeEach(() => {
     if (password) return;
     if (process.env["CI"]) throw new Error("Falta SEED_OWNER_PASSWORD o E2E_PASSWORD en CI");

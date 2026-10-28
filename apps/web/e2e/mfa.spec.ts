@@ -1,4 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
+import { ocultarIndicadorDev } from "./indicador-dev";
 
 import { codigoTotp, E2E_EMAIL, E2E_PASSWORD } from "./sesion";
 
@@ -15,6 +16,8 @@ test.use({ actionTimeout: 30_000 });
 test.setTimeout(120_000);
 
 test.describe("segundo factor", () => {
+  // El badge de dev de Next tapa controles del pie y se traga los clics (`indicador-dev.ts`).
+  test.beforeEach(({ context }) => ocultarIndicadorDev(context));
   test.skip(!E2E_PASSWORD, "Falta SEED_OWNER_PASSWORD o E2E_PASSWORD");
 
   test("login con segundo factor: pide el código TOTP y entra", async ({ page }, info) => {

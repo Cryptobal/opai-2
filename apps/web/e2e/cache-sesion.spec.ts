@@ -1,5 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
+import { ocultarIndicadorDev } from "./indicador-dev";
 
+import { abrirArea } from "./riel";
 import { entrar as iniciarSesion } from "./sesion";
 
 import { digitoVerificador } from "@opai/domain";
@@ -30,6 +32,15 @@ function rutNuevo() {
 const menu = (page: Page, nombre: RegExp) =>
   page.getByRole("navigation", { name: "Principal" }).getByRole("link", { name: nombre });
 
+/** Área del riel de cada entrada: puede venir plegada (solo se abre sola la del destino actual). */
+const AREA = { Personas: "Personas", Cuentas: "Clientes" } as const;
+
+/** Navega desde el riel como un usuario: despliega el área si está plegada y pulsa la entrada. */
+async function ir(page: Page, entrada: keyof typeof AREA) {
+  await abrirArea(page.getByRole("navigation", { name: "Principal" }), AREA[entrada]);
+  await menu(page, new RegExp(`^${entrada}`)).click();
+}
+
 /**
  * Escritorio: selector del riel. En iPad el shell no ofrece cambiar de empresa (ni en el riel ni en
  * el menú de usuario): se usa el selector de empresa del acceso, que ejecuta la misma acción.
@@ -53,6 +64,8 @@ const filas = (page: Page, texto: string) =>
     .filter({ visible: true });
 
 test.describe("caché y sesión", () => {
+  // El badge de dev de Next tapa controles del pie y se traga los clics (`indicador-dev.ts`).
+  test.beforeEach(({ context }) => ocultarIndicadorDev(context));
   test.skip(!password, "Falta SEED_OWNER_PASSWORD o E2E_PASSWORD");
   // El riel lateral (menú) existe desde iPad; la barra inferior del teléfono tiene otro DOM.
   test.skip(({ viewport }) => (viewport?.width ?? 0) < 768, "Se prueba en iPad y escritorio");
@@ -66,13 +79,13 @@ test.describe("caché y sesión", () => {
     await page.clock.setFixedTime(new Date());
     await page.goto("/");
     // Todo con navegación del lado del cliente: una recarga completa vaciaría la caché y taparía el fallo.
-    await menu(page, /^Personas/).click();
+    await ir(page, "Personas");
     await page.waitForURL("**/personas");
     await expect(page.getByRole("region", { name: "Lista de personas" })).toBeVisible();
-    await menu(page, /^Cuentas/).click();
+    await ir(page, "Cuentas");
     await page.waitForURL("**/cuentas");
     await expect(page.getByRole("region", { name: "Lista de cuentas" })).toBeVisible();
-    await menu(page, /^Personas/).click(); // Personas queda en la caché del navegador
+    await ir(page, "Personas"); // Personas queda en la caché del navegador
     await page.waitForURL("**/personas");
     await page.locator('a[href="?nueva=1"]').filter({ visible: true }).first().click();
     const dialogo = page.getByRole("dialog", { name: /persona/i });
@@ -83,9 +96,9 @@ test.describe("caché y sesión", () => {
     await page.getByRole("option").first().click();
     await dialogo.getByRole("button", { name: "Crear persona" }).click();
     await page.waitForURL(/\/personas\/[0-9a-f-]{36}/);
-    await menu(page, /^Cuentas/).click();
+    await ir(page, "Cuentas");
     await page.waitForURL("**/cuentas");
-    await menu(page, /^Personas/).click();
+    await ir(page, "Personas");
     await page.waitForURL("**/personas");
     await expect(filas(page, apellido).first()).toBeVisible();
   });
@@ -149,7 +162,7 @@ test.describe("caché y sesión", () => {
     page,
   }) => {
     await entrar(page, emailMulti);
-    await menu(page, /^Personas/).click();
+    await ir(page, "Personas");
     await page.waitForURL("**/personas");
     await expect(filas(page, "Lagos").first()).toBeVisible(); // persona de la demo de Gard
     const otra = await context.newPage();
@@ -158,9 +171,9 @@ test.describe("caché y sesión", () => {
 
     await cambiarDeEmpresa(page, "Empresa E2E");
     await page.waitForURL((u) => u.pathname === "/");
-    await menu(page, /^Cuentas/).click();
+    await ir(page, "Cuentas");
     await page.waitForURL("**/cuentas");
-    await menu(page, /^Personas/).click(); // Personas de la otra empresa: no sale de la caché de Gard
+    await ir(page, "Personas"); // Personas de la otra empresa: no sale de la caché de Gard
     await page.waitForURL("**/personas");
     await expect(filas(page, "Otraempresa").first()).toBeVisible();
     await expect(filas(page, "Lagos")).toHaveCount(0);

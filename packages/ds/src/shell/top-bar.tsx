@@ -128,10 +128,12 @@ export function AppBar(props: AppBarProps) {
             type="button"
             onClick={onBuscar}
             aria-label="Buscar o ir a"
-            className="flex h-11 w-[280px] min-w-0 items-center gap-2 rounded-md border border-border bg-surface pr-2 pl-3 text-base text-fg-subtle outline-none hover:border-border-strong focus-visible:outline-2 focus-visible:outline-focus xl:h-9 xl:w-80"
+            // 768–1023: solo el ícono (con su nombre accesible); con la acción principal y «Fijar» de
+            // una ficha, el campo de 280 px empujaba la campana y el usuario fuera de la pantalla.
+            className="flex h-11 w-11 min-w-0 items-center justify-center gap-2 rounded-md border border-border bg-surface text-base text-fg-subtle outline-none hover:border-border-strong focus-visible:outline-2 focus-visible:outline-focus lg:w-[280px] lg:justify-start lg:pr-2 lg:pl-3 xl:h-9 xl:w-80"
           >
             <Search className="size-4 flex-none" aria-hidden />
-            <span className="flex-1 truncate text-left xl:hidden">
+            <span className="hidden flex-1 truncate text-left lg:inline xl:hidden">
               Buscar personas, clientes, folios
             </span>
             <span className="hidden flex-1 text-left xl:inline">Buscar</span>

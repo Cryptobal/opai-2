@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
 import { expect, test } from "@playwright/test";
-import { hidratado } from "./hidratacion";
+import { abrirArea } from "./riel";
 import { entrar } from "./sesion";
 
 test.beforeAll(() => {
@@ -23,14 +23,7 @@ for (const conceder of [false, true]) {
     const nav = page
       .getByRole("navigation", { name: "Principal", exact: true })
       .filter({ visible: true });
-    if (conceder && info.project.name !== "telefono") {
-      const area = nav.getByRole("button", { name: "Personas", exact: true });
-      if ((await area.count()) && (await area.getAttribute("aria-expanded")) !== "true") {
-        // Un clic antes de hidratar el riel no despliega el área.
-        await hidratado(area);
-        await area.click();
-      }
-    }
+    if (conceder && info.project.name !== "telefono") await abrirArea(nav, "Personas");
     const personas = nav.getByRole("link", { name: "Personas", exact: true });
     if (conceder) await expect(personas.first()).toBeVisible();
     else await expect(personas).toHaveCount(0);

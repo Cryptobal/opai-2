@@ -55,7 +55,9 @@ test.describe("fichas con el celular en horizontal", () => {
       [1280, 800],
       [1440, 900],
     ] as const) {
-      const apilada = alto <= 500;
+      // Apiladas en celular apaisado y entre 1024 y 1279 px, donde la barra lateral completa (D9) y la
+      // lista dejan el panel angosto; lado a lado desde 1280.
+      const apilada = alto <= 500 || (ancho >= 1024 && ancho < 1280);
       await page.setViewportSize({ width: ancho, height: alto });
       await page.goto("/instalaciones");
       const href = await page
@@ -73,7 +75,7 @@ test.describe("fichas con el celular en horizontal", () => {
         const caja = await par.boundingBox();
         expect(caja?.width, `${etiqueta} a ${ancho}×${alto}`).toBeGreaterThanOrEqual(200);
       }
-      // Apiladas solo en celular apaisado (mapa sobre el texto); en el resto, lado a lado como en main.
+      // Apiladas: mapa sobre el texto; en el resto, lado a lado.
       const ubicacion = tarjeta.locator("div.grid.gap-4").first();
       if (apilada) await expectApiladas(ubicacion, `Ubicación ${ancho}×${alto}`);
       else await expectLadoALado(ubicacion, `Ubicación ${ancho}×${alto}`);
@@ -87,8 +89,10 @@ test.describe("fichas con el celular en horizontal", () => {
         .first()
         .getAttribute("href");
       await page.goto(`${persona}/laboral`);
+      // Desde el #89 la columna derecha es el historial de vínculos (antes, sueldo y puesto).
       const rejilla = page
-        .locator("div.grid.gap-4:has(> div.flex.flex-col.gap-4):has(> div.flex.flex-col.gap-3)")
+        .locator("div.grid.gap-4:has(> div.flex.flex-col.gap-4)")
+        .filter({ hasText: "Historial de vínculos" })
         .first();
       await expect(rejilla).toBeVisible({ timeout: 30_000 });
       await page.waitForLoadState("networkidle");

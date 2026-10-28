@@ -39,7 +39,9 @@ export default function Laboral(props: {
                 Solo owner y admin modifican el contrato.
               </Alerta>
             )}
-            <div className="grid gap-4 lg:grid-cols-2">
+            {/* Dos columnas desde 1280 px: entre 1024 y 1279 la barra lateral (D9) y la lista dejan
+                el panel angosto y el texto se partía (ficha-apaisado.spec.ts). */}
+            <div className="grid gap-4 xl:grid-cols-2">
               <div className="flex flex-col gap-4">
                 <VinculoVigente p={p} />
                 {actual ? (

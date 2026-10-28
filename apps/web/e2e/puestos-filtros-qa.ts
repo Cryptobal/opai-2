@@ -19,8 +19,14 @@ export async function comprobarFiltrosPuestos(page: Page, id: string, proyecto: 
   await entrar(page);
   await page.goto("/instalaciones?q=Planta&estado=activa");
   await page.getByRole("link", { name: /Planta Quilicura/i }).first().click();
-  await page.getByRole("link", { name: /Puestos/i }).first().click();
-  await expect(page).toHaveURL(new RegExp(`/instalaciones/${id}/puestos`));
+  // Primero la ficha y después su pestaña: un clic en «Puestos» mientras la ficha aún llega (o la
+  // ruta compila en dev) se perdía y la prueba seguía en la ficha.
+  await expect(page).toHaveURL(new RegExp(`/instalaciones/${id}`), { timeout: 30_000 });
+  const pestana = page.getByRole("link", { name: /Puestos/i }).first();
+  await expect(async () => {
+    await pestana.click();
+    await expect(page).toHaveURL(new RegExp(`/instalaciones/${id}/puestos`), { timeout: 5_000 });
+  }).toPass({ timeout: 30_000 });
   await expect(page).toHaveURL(/estado=activa/);
   const detalle = page.getByRole("region", { name: "Detalle" });
   const buscador = detalle.getByPlaceholder("Nombre del puesto");

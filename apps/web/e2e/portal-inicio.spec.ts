@@ -1,4 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
+import { ocultarIndicadorDev } from "./indicador-dev";
 import { codigoTotp } from "./sesion";
 
 const email = process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl";
@@ -7,6 +8,7 @@ const esperar = expect.configure({ timeout: 30_000 });
 
 async function entrar(page: Page, ruta = "/login") {
   if (!password) throw new Error("Falta E2E_PASSWORD o SEED_OWNER_PASSWORD");
+  await ocultarIndicadorDev(page.context());
   await page.goto(ruta);
   await page.getByLabel("Correo").fill(email);
   await page.getByLabel("Contraseña", { exact: true }).fill(password);

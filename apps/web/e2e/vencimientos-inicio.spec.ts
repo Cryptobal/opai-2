@@ -54,7 +54,9 @@ test("Inicio y Vencimientos concuerdan y registran las vistas", async ({ page },
   }
   await page.goto("/personas/vencimientos?origen=inicio");
   const volver = page.locator("header:visible").getByRole("link", { name: /Inicio/ });
-  await expect(volver).toHaveAttribute("href", "/");
+  // La barra cambia a «‹ Inicio» cuando la página resuelve sus datos (opciones del portal): en dev
+  // puede pasar de 5 s; hasta entonces la cabecera muestra el selector de portal.
+  await expect(volver).toHaveAttribute("href", "/", { timeout: 30_000 });
   const vencidos = page.getByRole("button", { name: /^Vencidos/ });
   const pronto = page.getByRole("button", { name: /^Vencen pronto/ });
   await expect(vencidos).toHaveText(new RegExp(`Vencidos\\s*${cifras?.[1] ?? "0"}$`));

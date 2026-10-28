@@ -23,10 +23,12 @@ export function ResumenInstalacion({ i }: { i: InstalacionDetalle }) {
           </EnlaceBotonHoja>
         }
       >
-        {/* Como en main (lado a lado desde 768 px), salvo en celular apaisado (menos de 1024 px de ancho y hasta
-            500 px de alto), donde el mapa queda sobre el texto para que no se parta por letras (CAR-6). */}
-        <div className="grid gap-4 md:[@media(min-height:501px)]:grid-cols-[minmax(0,1fr)_minmax(0,280px)] md:[@media(min-height:501px)]:items-start lg:grid-cols-[minmax(0,1fr)_minmax(0,280px)] lg:items-start">
-          <div className="md:[@media(min-height:501px)]:order-2 lg:order-2">{mapa}</div>
+        {/* Lado a lado cuando el panel tiene ancho: de 768 a 1023 px (ficha a todo el ancho, salvo en
+            celular apaisado, hasta 500 px de alto, CAR-6) y desde 1280 px. Entre 1024 y 1279 la barra
+            lateral completa (D9) y la lista dejan el panel angosto: el mapa va sobre el texto para que
+            no se parta por letras. */}
+        <div className="grid gap-4 md:max-lg:[@media(min-height:501px)]:grid-cols-[minmax(0,1fr)_minmax(0,280px)] md:max-lg:[@media(min-height:501px)]:items-start xl:grid-cols-[minmax(0,1fr)_minmax(0,280px)] xl:items-start">
+          <div className="md:max-lg:[@media(min-height:501px)]:order-2 xl:order-2">{mapa}</div>
           <ParesGrid
             unaColumna
             items={[

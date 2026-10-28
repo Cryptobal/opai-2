@@ -954,3 +954,30 @@ e2e `anexo-contrato.spec.ts` (375/1024/1280) en verde contra el servidor del pro
 worktree, 1 worker (el resto de la suite lo valida el CI). No se tocó la migración
 `20261028200000_anexo_contrato_borrador`. Detalle completo y la lista de autorrevisión
 en `PR-BODY.md` (sin commitear).
+
+### PR de pendientes del Núcleo (CAR-28, PR #93 integrado y su continuación, Claude, 28-oct-2026)
+
+**Qué entró en el #93:**
+- **E2E:** la causa común de los shards rojos eran los seeds de e2e en TypeScript (`dbAdmin()`, `row_security=off`), que recibían la URL de `opai_app` y fallaban con 42501. Ahora reciben `urlPropietario` (dueño de la base local); la RLS no cambia.
+- **Anexo de contrato (#91):**
+  - Token de papel en el DS y Badge con el estado real.
+  - Bandeja → `/personas?anexo=borrador`, con un filtro nuevo en `core.personas.list` que exige `anexos.read`.
+  - El documento ya no sale todo en «—» en un cambio de capa o una anulación.
+  - Sin `anexos.read` ni `estructuras.read_sensible`, la exportación, la actividad y los avisos no revelan el anexo.
+- **Restos del #89:** sin `cascada-sueldo.tsx` ni `HojaExcepcion`; historial de vínculos con `cargosRetirados`.
+- **Regla de Carlos:** PR siempre listos para revisión; merge para traer `main`, nunca rebase (`AGENTS.md`, `OPERACION-agentes.md` B.20).
+
+**Continuación (e2e completos en verde):**
+- **El badge de dev de Next** (aviso «Insight» de Cache Components en `PortalLayout`) tapaba controles del pie y se tragaba clics. Lo oculta el login compartido de las e2e (`indicador-dev.ts`). El aviso de fondo sigue pendiente.
+- **Hidratación y tiempos de `pnpm dev`:** `abrirCon`/`abrirArea` y esperas de navegación.
+- **`maestros-ficha-lista`:** retiene en la red la pestaña Actividad. Antes bloqueaba `core.audit_events`, que desde NÚCLEO-H congela toda lectura auditada.
+- **Pruebas desactualizadas:** `ds-v2` (barra lateral desde 1024, D9) y la hoja «Más» en `platform-superadmin`.
+- **Pantallas:**
+  - Pestañas Personas/Vencimientos en la barra superior solo desde 1024 px.
+  - Buscador de solo ícono entre 768 y 1023 px; la barra de una ficha se salía de la pantalla.
+  - «Ubicación y vigencia» y Laboral lado a lado desde 1280 px; entre 1024 y 1279 el panel queda angosto por la barra lateral.
+
+**Qué quedó pendiente:**
+- Decidir si «e2e (Playwright)» pasa a check obligatorio.
+- Corregir el aviso de datos sin caché en `PortalLayout` (Cache Components).
+- Decidir si la exportación ARCO incluye siempre el documento del anexo.

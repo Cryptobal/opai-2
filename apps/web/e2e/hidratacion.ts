@@ -12,3 +12,15 @@ export async function hidratado(control: Locator) {
     })
     .toBe(true);
 }
+
+/**
+ * Pulsa un control hasta que aparezca lo que abre (menú, hoja, diálogo). Espera la hidratación y
+ * reintenta: en dev el primer clic puede llegar antes de que React lo atienda.
+ */
+export async function abrirCon(control: Locator, abierto: Locator) {
+  await hidratado(control);
+  await expect(async () => {
+    if (!(await abierto.isVisible())) await control.click();
+    await expect(abierto).toBeVisible({ timeout: 3_000 });
+  }).toPass({ timeout: 30_000 });
+}
