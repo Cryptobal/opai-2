@@ -49,7 +49,7 @@ describe("ajustes de la política", () => {
       const a = ajustes.find((x) => x.clave === claveAjusteRetencion(r.clave));
       expect(a, r.clave).toBeDefined();
       expect(a?.schema.parse(undefined)).toBe(r.diasPropuestos);
-      expect(a?.meta.ayuda).toMatch(/PROPUESTA/);
+      expect(a?.meta.ayuda).toMatch(/Plazo propuesto/);
     }
   });
 
@@ -61,7 +61,7 @@ describe("ajustes de la política", () => {
       const a = ajustes.find((x) => x.clave === claveAjusteRetencion(r.clave));
       expect(a?.schema.parse(undefined), r.clave).toBe(0);
       expect(a?.meta).toMatchObject({ ambito: "tenant", permiso: "core:cumplimiento.manage", soloPersonas: true });
-      expect(a?.meta.ayuda).toMatch(/PENDIENTE/);
+      expect(a?.meta.ayuda).toMatch(/Plazo por definir/);
     }
   });
 });

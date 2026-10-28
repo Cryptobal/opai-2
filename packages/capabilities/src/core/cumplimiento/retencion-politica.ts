@@ -34,6 +34,7 @@ export async function politicaEfectiva(ctx: Contexto) {
 
 const reglaSchema = z.object({
   clave: z.string(),
+  nombre: z.string().describe("Nombre del dato para el cliente."),
   tabla: z.string(),
   categoria: z.string(),
   accion: z.string(),
@@ -80,6 +81,7 @@ export const retencionPolitica = defineCapability({
       periodosPropuestos: true,
       reglas: reglas.map((r) => ({
         clave: r.clave,
+        nombre: r.nombre,
         tabla: r.tabla,
         categoria: r.categoria,
         accion: r.accion,

@@ -1,3 +1,4 @@
+import { reglaDe } from "@opai/domain";
 import { Badge, SeccionTarjeta, Table, Td, Th, Tr } from "@opai/ds";
 
 import { fechaHora } from "@/lib/formato";
@@ -6,6 +7,7 @@ import { etiquetaDe, GESTION } from "./tipos";
 
 export type Regla = {
   clave: string;
+  nombre: string;
   tabla: string;
   dias: number;
   gestion: string;
@@ -21,32 +23,6 @@ export type Ejecucion = {
   creadoEn: string;
 };
 
-const ETIQUETA: Record<string, string> = {
-  idempotencias: "Confirmaciones temporales",
-  aprobaciones: "Aprobaciones de agentes",
-  gasto_agente_mes: "Gasto de agentes",
-  personas: "Personas (trabajadores)",
-  contactos: "Contactos de clientes",
-  envios: "Envíos de avisos",
-  invitaciones: "Invitaciones",
-  vinculos: "Vínculos laborales",
-  sueldos: "Remuneraciones",
-  cuentas: "Cuentas de clientes",
-  representantes: "Representantes legales",
-  usuarios: "Usuarios",
-  sesiones: "Sesiones",
-  credenciales: "Credenciales",
-  intentos_login: "Intentos de ingreso",
-  documentos: "Documentos",
-  perfil_empresa: "Datos de la empresa",
-  dpa: "Aceptaciones del DPA",
-  auditoria: "Auditoría",
-  consentimientos: "Consentimientos",
-  solicitudes: "Solicitudes de titulares",
-  retencion_registro: "Registro de retención",
-  incidentes: "Incidentes",
-};
-
 /** Política por dato: quién la aplica, días vigentes del tenant y descripción para el RAT. */
 export function TablaReglas({ reglas }: { reglas: Regla[] }) {
   return (
@@ -60,15 +36,13 @@ export function TablaReglas({ reglas }: { reglas: Regla[] }) {
               className="flex flex-col gap-1 border-b border-border px-4 py-3 last:border-b-0"
             >
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-base font-medium text-fg">
-                  {ETIQUETA[r.clave] ?? r.tabla}
-                </span>
+                <span className="text-base font-medium text-fg">{r.nombre}</span>
                 <Badge tono={g.tono} punto={false}>
                   {g.etiqueta}
                 </Badge>
                 {r.gestion === "trabajo" || r.gestion === "pendiente" ? (
                   <span className="t-caption t-numeric">
-                    {r.dias > 0 ? `${r.dias} días` : "apagada"}
+                    {r.dias > 0 ? `${r.dias} días` : "Sin plazo"}
                   </span>
                 ) : null}
               </div>
@@ -99,7 +73,7 @@ export function TablaEjecuciones({ ejecuciones }: { ejecuciones: Ejecucion[] }) 
           {ejecuciones.map((e) => (
             <Tr key={e.id}>
               <Td className="t-numeric">{fechaHora(e.creadoEn)}</Td>
-              <Td>{e.tabla}</Td>
+              <Td>{reglaDe(e.tabla)?.nombre ?? "Otro dato"}</Td>
               <Td>
                 {e.modo === "simulacion" ? (
                   <Badge punto={false}>Simulación</Badge>

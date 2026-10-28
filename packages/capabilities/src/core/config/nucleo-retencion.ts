@@ -17,8 +17,8 @@ const dias = Object.fromEntries(
   reglasDelTrabajo().map((r) => [
     claveAjusteRetencion(r.clave),
     z.number().int().min(0).max(36_500).default(r.diasPropuestos).meta({
-      etiqueta: `Retención · ${r.clave} (días)`,
-      ayuda: `PROPUESTA a confirmar con el abogado. ${r.motivo} 0 = sin vencimiento.`,
+      etiqueta: `${r.nombre}: días de retención`,
+      ayuda: `Plazo propuesto, a confirmar con asesoría legal. ${r.motivo} Con 0 no vence.`,
       grupo: "Cumplimiento",
       ambito: "tenant",
       permiso: PERMISO,
@@ -35,8 +35,8 @@ const pendientes = Object.fromEntries(
   reglasPendientes().map((r) => [
     claveAjusteRetencion(r.clave),
     z.number().int().min(0).max(36_500).default(0).meta({
-      etiqueta: `Retención · ${r.clave} (días, pendiente)`,
-      ayuda: `PENDIENTE de decisión legal: 0 = apagada. Aunque se registre un plazo, no se aplica hasta definir la acción con el abogado. ${r.motivo}`,
+      etiqueta: `${r.nombre}: días de retención (por definir)`,
+      ayuda: `Plazo por definir con asesoría legal. Aunque registres un plazo, no se aplica hasta definirlo. ${r.motivo}`,
       grupo: "Cumplimiento",
       ambito: "tenant",
       permiso: PERMISO,

@@ -39,11 +39,12 @@ export default function Retencion() {
           <>
             {d.politica.activa ? (
               <Alerta tono="warning" titulo="La política de retención está activa">
-                El trabajo diario anonimiza o elimina lo vencido. Los hechos regulados se conservan.
+                Cada día se anonimiza o elimina lo vencido. Lo que la ley obliga a guardar se
+                conserva.
               </Alerta>
             ) : (
               <Alerta tono="info" titulo="La política de retención está apagada">
-                El trabajo diario solo simula y registra lo que haría, sin tocar datos. Los plazos
+                Cada día solo se simula y se registra lo que se haría, sin tocar datos. Los plazos
                 son una propuesta: confírmalos con asesoría legal antes de activarla.
               </Alerta>
             )}

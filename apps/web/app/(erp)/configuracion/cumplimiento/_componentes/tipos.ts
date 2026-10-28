@@ -66,10 +66,10 @@ export const DESTINATARIO: Record<string, string> = {
 };
 
 export const GESTION: Record<string, Etiqueta> = {
-  trabajo: { etiqueta: "Trabajo diario", tono: "accent" },
-  regulado: { etiqueta: "Hecho regulado", tono: "info" },
-  externa: { etiqueta: "Otro mecanismo", tono: "neutro" },
-  pendiente: { etiqueta: "Pendiente", tono: "warning" },
+  trabajo: { etiqueta: "Automática", tono: "accent" },
+  regulado: { etiqueta: "Se conserva por ley", tono: "info" },
+  externa: { etiqueta: "Por separado", tono: "neutro" },
+  pendiente: { etiqueta: "Por definir", tono: "warning" },
 };
 
 export const etiquetaDe = (m: Record<string, Etiqueta>, k: string): Etiqueta =>
