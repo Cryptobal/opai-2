@@ -9,7 +9,7 @@ import { leerParametros, type SearchParams } from "@/lib/parametros";
 import { cargarPersonas } from "./_componentes/datos";
 import { HojaPersona } from "./_componentes/diferidas";
 import { ListaPersonas } from "./_componentes/lista-personas";
-import { SegmentoPersonas } from "./_componentes/segmento";
+import { SegmentoPersonas, SegmentoPersonasMovil } from "./_componentes/segmento";
 
 export const metadata = { title: "Personas" };
 
@@ -38,15 +38,18 @@ export default function Personas({ searchParams }: { searchParams: SearchParams 
             etiquetaLista="Lista de personas"
             vacio={{ texto: "Elige una persona", icono: Users }}
             lista={
-              <ListaPersonas
-                state={d.state}
-                items={d.items}
-                cargos={d.cargos}
-                siguiente={d.siguiente}
-                total={d.total}
-                p={d.p}
-                titulo="Personas"
-              />
+              <>
+                <SegmentoPersonasMovil activa="personas" />
+                <ListaPersonas
+                  state={d.state}
+                  items={d.items}
+                  cargos={d.cargos}
+                  siguiente={d.siguiente}
+                  total={d.total}
+                  p={d.p}
+                  titulo="Personas"
+                />
+              </>
             }
           />
           <HojaPersona cargos={d.cargos} hoy={hoyIso()} />

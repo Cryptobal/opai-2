@@ -2,7 +2,7 @@ import { z } from "zod";
 
 import { PERMISOS_CORE } from "@opai/domain";
 
-import { noEncontrado } from "../../errores";
+import { noEncontrado, prohibido } from "../../errores";
 import { defineCapability } from "../../define";
 import { uuidSchema } from "../esquemas";
 import { dondePersona } from "./alcance";
@@ -14,11 +14,15 @@ export const personasList = defineCapability({
   auditarLectura: (s) => s.items.map((p) => p.id),
   id: "core.personas.list",
   descripcion:
-    "Lista las personas (trabajadores) con búsqueda por nombre o RUT y filtros por cargo y estado (activa, inactiva, bloqueada). Incluye el vínculo laboral vigente, el total de la consulta y, con incluirFiltros, los cargos para el filtro. Paginada por cursor.",
+    "Lista las personas (trabajadores) con búsqueda por nombre o RUT y filtros por cargo, estado (activa, inactiva, bloqueada) y anexo de contrato en borrador. Incluye el vínculo laboral vigente, el total de la consulta y, con incluirFiltros, los cargos para el filtro. Paginada por cursor.",
   permiso: PERMISOS_CORE.personasRead,
   input: listaSchema.extend({
     cargoId: uuidSchema.optional(),
     estado: z.enum(["activa", "inactiva", "bloqueada"]).optional(),
+    anexo: z
+      .enum(["borrador"])
+      .optional()
+      .describe("Solo personas con un anexo de contrato en borrador (requiere anexos.read)."),
     incluirFiltros: z
       .boolean()
       .default(false)
@@ -37,6 +41,9 @@ export const personasList = defineCapability({
   dryRun: false,
   async handler(ctx, input) {
     const q = input.q;
+    // Filtrar por anexo revela quién tiene un cambio de contrato pendiente: exige anexos.read.
+    if (input.anexo && !ctx.autorizar(PERMISOS_CORE.anexosRead))
+      throw prohibido("Sin permiso para filtrar por anexos de contrato.");
     const rut = (q ?? "").replace(/[.\s]/g, "").toUpperCase();
     // El filtro por cargo se resuelve con una relación (`some`), no con una consulta de ids aparte.
     const where = {
@@ -45,6 +52,7 @@ export const personasList = defineCapability({
       ...(input.cargoId
         ? { vinculos: { some: { cargoId: input.cargoId, estado: "vigente" } } }
         : {}),
+      ...(input.anexo ? { anexos: { some: { estado: input.anexo } } } : {}),
       ...(input.estado === "bloqueada"
         ? { bloqueada: true }
         : input.estado

@@ -45,30 +45,39 @@ export function AvisoAnexo({
 
 export type FilaAnexoDoc = { concepto: string; antes: string; despues: string };
 
+const BADGE_ESTADO = {
+  borrador: { tono: "warning", texto: "Borrador" },
+  aprobado: { tono: "success", texto: "Aprobado" },
+  rechazado: { tono: "danger", texto: "Rechazado" },
+} as const satisfies Record<EstadoAnexo, { tono: "warning" | "success" | "danger"; texto: string }>;
+
 /** Documento del anexo (plantilla base + marca, R12): antes/después, texto de ejemplo hasta el
  * texto legal definitivo (D15); en modo oscuro conserva su papel claro. */
 export function DocumentoBorrador({
   filas,
+  estado,
   pieLegal,
 }: {
   filas: readonly FilaAnexoDoc[];
+  estado: EstadoAnexo;
   pieLegal?: ReactNode;
 }) {
   // D15: el documento conserva su papel claro también en modo oscuro (es el papel del contrato, no
-  // la UI); por eso fija sus propios colores en vez de los tokens de superficie del tema.
+  // la UI); por eso usa los tokens de papel, que no cambian con el tema.
+  const badge = BADGE_ESTADO[estado];
   return (
-    <div className="rounded-lg border border-border bg-[#ffffff] p-4 text-[#111111] shadow-overlay dark:border-border-strong">
-      <div className="mb-3 flex items-center gap-2 border-b border-[#dddddd] pb-3">
+    <div className="rounded-lg border border-border bg-paper p-4 text-paper-fg shadow-overlay dark:border-border-strong">
+      <div className="mb-3 flex items-center gap-2 border-b border-paper-rule pb-3">
         <FileSignature className="size-4" aria-hidden />
         <p className="text-sm font-semibold">Anexo de contrato de trabajo</p>
-        <Badge punto={false} className="ml-auto">
-          Borrador
+        <Badge tono={badge.tono} punto={false} className="ml-auto">
+          {badge.texto}
         </Badge>
       </div>
       {filas.length ? (
         <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-[#dddddd] text-left">
+            <tr className="border-b border-paper-rule text-left">
               <th className="py-1.5 pr-3 font-medium">Concepto</th>
               <th className="py-1.5 pr-3 font-medium">Antes</th>
               <th className="py-1.5 font-medium">Después</th>
@@ -76,7 +85,7 @@ export function DocumentoBorrador({
           </thead>
           <tbody>
             {filas.map((f) => (
-              <tr key={f.concepto} className="border-b border-[#eeeeee] last:border-b-0">
+              <tr key={f.concepto} className="border-b border-paper-rule-subtle last:border-b-0">
                 <td className="py-1.5 pr-3">{f.concepto}</td>
                 <td className="py-1.5 pr-3 t-numeric">{f.antes}</td>
                 <td className="py-1.5 t-numeric">{f.despues}</td>

@@ -1,6 +1,7 @@
 import { clp, formatearCLP } from "@opai/domain";
 
 import type { Contexto } from "../../types";
+import { capaQueRige, diaAnterior } from "./capa-documento";
 import type { FilaAnexoDoc } from "./plantilla";
 import type { FilaAnexo } from "./vista";
 
@@ -25,20 +26,39 @@ const monto = (n: number | null | undefined) => (n == null ? "—" : formatearCL
  */
 export async function filasParaDocumento(
   ctx: Contexto,
-  anexo: Pick<FilaAnexo, "motivoCambio" | "snapshotAntes" | "snapshotDespues">,
+  anexo: Pick<
+    FilaAnexo,
+    "personaId" | "vinculoId" | "motivoCambio" | "snapshotAntes" | "snapshotDespues" | "createdAt"
+  >,
 ): Promise<FilaAnexoDoc[]> {
   const despues = (anexo.snapshotDespues ?? {}) as Record<string, unknown>;
   const antes = (anexo.snapshotAntes ?? {}) as Record<string, unknown>;
   if (anexo.motivoCambio === "capa" || anexo.motivoCambio === "monto") {
-    const [eDespues, eAntes] = await Promise.all([
+    const [refDespues, refAntes] = await Promise.all([
       estructuraDoc(ctx, despues["estructuraId"]),
       estructuraDoc(ctx, antes["estructuraId"]),
     ]);
+    // Una capa nueva sin versión previa no trae «antes» y una anulación no trae «después»: se
+    // completan con la capa que rige a la persona, para no imprimir un documento todo en «—».
+    const eAntes =
+      refAntes ??
+      (refDespues
+        ? await capaQueRige(ctx, anexo, diaAnterior(refDespues.vigenteDesde), refDespues.id)
+        : null);
+    // Anulación: rige la capa que queda en la fecha de la versión anulada (o al generar el anexo).
+    const eDespues =
+      refDespues ??
+      (await capaQueRige(
+        ctx,
+        anexo,
+        refAntes?.vigenteDesde ?? anexo.createdAt,
+        refAntes?.id ?? null,
+      ));
     return CONCEPTOS.map(({ campo, etiqueta }) => ({
       concepto: etiqueta,
       antes: monto(eAntes?.[campo] as number | null | undefined),
       despues: monto(eDespues?.[campo] as number | null | undefined),
-    }));
+    })).filter((f) => f.antes !== "—" || f.despues !== "—");
   }
   if (anexo.motivoCambio === "instalacion") {
     const idsInstalacion = [antes["instalacionId"], despues["instalacionId"]].filter(
@@ -56,7 +76,7 @@ export async function filasParaDocumento(
     const nombreInstalacion = (id: unknown) =>
       instalaciones.find((i) => i.id === id)?.nombre ?? "—";
     const nombrePuesto = (id: unknown) => puestos.find((p) => p.id === id)?.nombre ?? "—";
-    return [
+    const filas = [
       {
         concepto: "Instalación",
         antes: nombreInstalacion(antes["instalacionId"]),
@@ -68,6 +88,7 @@ export async function filasParaDocumento(
         despues: nombrePuesto(despues["puestoId"]),
       },
     ];
+    return filas.filter((f) => f.antes !== "—" || f.despues !== "—");
   }
   return [];
 }

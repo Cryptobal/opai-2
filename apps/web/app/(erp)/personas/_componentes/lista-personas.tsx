@@ -1,8 +1,7 @@
-import { CalendarClock, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 
 import { Avatar, Badge, type EstadoPantalla } from "@opai/ds";
 
-import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { ESTADO_PERSONA, estadoDe } from "@/app/_components/maestros/estados";
 import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
@@ -27,7 +26,7 @@ type Props = {
 /** Conserva búsqueda, filtros y página al abrir una ficha (la lista no se pierde al elegir). */
 export const conParametros = (p: Parametros) => {
   const q = new URLSearchParams();
-  for (const k of ["q", "cargo", "estado", "cursor", "prev"]) if (p[k]) q.set(k, p[k]);
+  for (const k of ["q", "cargo", "estado", "anexo", "cursor", "prev"]) if (p[k]) q.set(k, p[k]);
   const t = q.toString();
   return t ? `?${t}` : "";
 };
@@ -51,7 +50,7 @@ export function ListaPersonas(x: Props) {
       Nueva
     </EnlaceBotonHoja>
   );
-  const filtrando = Boolean(x.p["q"] || x.p["cargo"] || x.p["estado"]);
+  const filtrando = Boolean(x.p["q"] || x.p["cargo"] || x.p["estado"] || x.p["anexo"]);
   const total = x.total ?? x.items.length;
   return (
     <ListaMaestro
@@ -59,15 +58,6 @@ export function ListaPersonas(x: Props) {
       titulo={x.titulo}
       accion={
         <>
-          <EnlaceBoton
-            href="/personas/vencimientos"
-            variante="ghost"
-            icono={CalendarClock}
-            etiqueta="Vencimientos"
-            className="md:hidden"
-          >
-            {null}
-          </EnlaceBoton>
           {nueva}
         </>
       }
@@ -82,6 +72,16 @@ export function ListaPersonas(x: Props) {
             etiqueta: e.etiqueta,
           })),
         },
+        // Llega desde la Bandeja de Inicio («anexos en borrador»); el chip permite quitarlo.
+        ...(x.p["anexo"]
+          ? [
+              {
+                param: "anexo",
+                etiqueta: "Anexo",
+                opciones: [{ valor: "borrador", etiqueta: "En borrador" }],
+              },
+            ]
+          : []),
       ]}
       meta={{
         izquierda: `${total} ${total === 1 ? "persona" : "personas"}`,
