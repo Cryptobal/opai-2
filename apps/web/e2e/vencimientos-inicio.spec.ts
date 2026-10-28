@@ -4,7 +4,7 @@ import { entrar } from "./sesion";
 test("vencimientos conserva el origen y la campana abre avisos", async ({ page }, info) => {
   await entrar(page);
   await page.goto("/personas/vencimientos?origen=inicio");
-  await expect(page.getByText("Vencen pronto", { exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: /^Vencen pronto/ })).toBeVisible();
   if (info.project.name === "telefono") {
     await page
       .getByRole("link", { name: "Inicio", exact: true })
