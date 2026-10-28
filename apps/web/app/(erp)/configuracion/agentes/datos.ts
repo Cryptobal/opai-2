@@ -50,9 +50,15 @@ export async function cargarKeys() {
     state: estadoPantalla(r),
     keys: r.ok ? r.data : [],
     gasto,
-    scopes: ["core", ...listarModulos().map((m) => m.id)],
+    // El scope "platform" solo se ofrece a un usuario de plataforma (ADR-055).
+    scopes: [
+      "core",
+      ...listarModulos().map((m) => m.id),
+      ...(identidad?.usuario.platformRole ? ["platform"] : []),
+    ],
     permisos,
-    puedeCrearServicio: ctx !== null && ctx.alcance === null && ctx.autorizar("core:agentes.manage"),
+    puedeCrearServicio:
+      ctx !== null && ctx.alcance === null && ctx.autorizar("core:agentes.manage"),
   };
 }
 

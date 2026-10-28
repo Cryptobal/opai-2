@@ -55,4 +55,6 @@ export const PERMISOS_PLATAFORMA = {
   tenantsRead: "platform:tenants.read",
   tenantsManage: "platform:tenants.manage",
   modulesManage: "platform:modules.manage",
+  /** Asignar o quitar el rol de plataforma de un usuario: solo owner de plataforma (ADR-055). */
+  rolesManage: "platform:roles.manage",
 } as const;

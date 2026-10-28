@@ -67,7 +67,7 @@ export function CrearApiKey({
       nombre,
       tipo: servicio ? "servicio" : "usuario",
       ...(servicio || !hereda ? { permisos } : {}),
-      scopes: todos ? ["*"] : modulos,
+      scopes: todos ? ["*", ...modulos.filter((m) => m === "platform")] : modulos,
       ...(tope !== null ? { presupuestoMensualUsd: tope } : {}),
     });
     setEnviando(false);
@@ -76,7 +76,7 @@ export function CrearApiKey({
       setCreada({
         secreto: r.secreto,
         nombre,
-        resumen: `Scopes: ${todos ? "todos los módulos" : modulos.join(", ")} · ${tope !== null ? `presupuesto US$ ${tope.toLocaleString("es-CL", { maximumFractionDigits: 6 })} al mes` : "sin presupuesto"} · irreversibles con aprobación`,
+        resumen: `Scopes: ${todos ? `todos los módulos${modulos.includes("platform") ? " + platform" : ""}` : modulos.join(", ")} · ${tope !== null ? `presupuesto US$ ${tope.toLocaleString("es-CL", { maximumFractionDigits: 6 })} al mes` : "sin presupuesto"} · irreversibles con aprobación`,
       });
       limpiar();
     }
