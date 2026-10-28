@@ -244,6 +244,7 @@ model Persona {
   tenant      Tenant             @relation(fields: [tenantId], references: [id])
   vinculos    VinculoLaboral[]
   estructuras EstructuraSueldo[]
+  anexos      AnexoContrato[]
 
   @@unique([tenantId, rut])
   @@index([tenantId, estado])
@@ -276,6 +277,7 @@ model VinculoLaboral {
   tenant  Tenant  @relation(fields: [tenantId], references: [id])
   persona Persona @relation(fields: [personaId], references: [id])
   cargo   Cargo   @relation(fields: [cargoId], references: [id])
+  anexos  AnexoContrato[]
 
   @@index([tenantId, personaId])
   @@index([tenantId, instalacionId, estado], map: "vinculos_tenant_instalacion_idx")

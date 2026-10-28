@@ -6,7 +6,7 @@
 
 **PR #90 · Inicio y vencimientos:** Codex documenta en `briefs/fix-inicio-vencimientos.md` el conteo limitado a personas y el aviso al superar 2.000 personas accesibles; la comparación local de navegación en iPad pasó también en main `49b1d8d`. La e2e con un vencimiento positivo pasó en teléfono, iPad y escritorio; el alcance de otras entidades sigue pendiente.
 
-**Última actualización:** 28-oct-2026 · **Actualizado por:** Codex gpt-6.1-sol · **Fase en curso:** 1 — Núcleo, en cierre (Briefs 01, 01c y 02 A–C integrados a `main`; quedan la sesión D del Brief 02, la paridad MCP, los arreglos de QA y las bases transversales). Plan completo y próximas tareas en `ROADMAP.md`; etapa de cada módulo en `PLAN-desarrollo.md`.
+**Última actualización:** 28-oct-2026 · **Actualizado por:** Claude (Brief 07b PR 4) · **Fase en curso:** 1 — Núcleo, en cierre (Briefs 01, 01c y 02 A–C integrados a `main`; quedan la sesión D del Brief 02, la paridad MCP, los arreglos de QA y las bases transversales). Plan completo y próximas tareas en `ROADMAP.md`; etapa de cada módulo en `PLAN-desarrollo.md`.
 - **Brief 07b · PR 1 (CAR-19), construcción en `brief/07b-capas-sueldo`, apilada sobre #49.** Migración aditiva `20261028180000_capa_instalacion_sueldo` (sin backfill, conserva conceptos históricos nullable, FK y trigger de mismo tenant, RLS ENABLE + FORCE). Resolución RUT → puesto → instalación sin herencia; estructuras históricas incompletas devuelven faltantes y no generan haberes. Versiones nuevas completas, también sus bonos; crear/anular comparten lock transaccional y permisos owner/admin (D8). UI del DS 2.0 en instalación, puestos y persona, con contexto explícito, historial, preview de impacto y anulación con motivo. Las precisiones del encargo t500u están en §16.d del brief: no se deducen relaciones del vínculo ni se inventan montos. Decisiones de implementación de Codex: serializar por referencia con advisory lock; marcar bonos históricos sin valor como incompletos; incluir modalidad y banderas de bonos en diferencias; diferir el selector de contexto para el presupuesto de JS. No son decisiones nuevas de Carlos. Validación en §18 del brief: test:db 109+134+25 y e2e 3/3 en verde; build y presupuesto en verde (ruta de sueldo de persona con tope propio 166 KB, medida 165,7 KB, decisión técnica de Codex por selector/contexto e historial). ADR-045 pendiente: marcador con 12 consultas en instalación y 11 en persona, incluso sin garantizar contar todos los Suspense. La auditoría se agrupa por respuesta conservando todos los IDs. Gate local al cierre: typecheck/lint, 1.158 tests, test:db 109+134+25, build, presupuesto y e2e 3/3 en verde. No listo para integrar por la diferencia ADR-045 y por faltar Revisor/CI del PR. Ninguna migración aplicada en Neon.
 
 - **Seguimiento de cargos sensibles (#83):** Codex aplica el rechazo de versiones sin permiso sensible a instalación, puesto y persona, coherente con cargo; registra el rechazo sin montos tras el rollback. Cobertura específica de concurrencia y de las tres capas pendiente de verificación. Detalle: `briefs/cargo-sensible-pendientes.md`.
@@ -835,3 +835,118 @@ El gate detectó una expectativa desactualizada en la fusión automática de
 `maestros-db.test.ts`: con instalación en el vínculo ahora corresponde resolver
 la capa de instalación. Codex adapta la aserción a la versión de 600.000 del
 fixture, estado completo y cargo nulo; no modifica la resolución de negocio.
+
+### Brief 07b · PR 4 — anexo de contrato en borrador (CAR-19, 28-oct-2026)
+
+Claude construye en `brief/07b-pr4-anexo-borrador`, sobre #87/#89 y con merge de
+`main` `4337a53` (#90, Inicio/Vencimientos) a mitad de la construcción, sin
+conflictos de contenido salvo `panel/pendientes.ts` (auto-resuelto por git; el
+ícono del tipo nuevo `"anexos"` en `pendientes-inicio.tsx` sí requirió un ajuste
+manual tras el merge, ver bloque 11).
+
+- **Bloque 9 (migración):** `20261028200000_anexo_contrato_borrador`, tabla nueva
+  `core.anexos_contrato` (sin BEGIN/COMMIT propio: es `CREATE TABLE`, no altera
+  una tabla existente, a diferencia de los PR 1 y 3). RLS ENABLE/FORCE, política
+  `tenant_isolation`, trigger de mismo tenant (persona/vínculo/documento) y un
+  CHECK de consistencia por estado (borrador sin resolución; aprobado con
+  `documento_id`; rechazado con motivo) para que la fila nunca quede a medias.
+- **Bloque 10 (capacidades):** `core.anexos.generar/list/get/aprobar/rechazar`.
+  Permisos `core:anexos.read`/`manage` con el mismo bloqueo financiero que capas
+  y vínculo (D8: denegados a gerente, por los montos en el snapshot). Consumidor
+  de eventos (`core.estructura.creada/anulada`, `core.vinculo.actualizado`) que
+  genera el borrador por persona, idempotente por evento (R11, D3); la jornada
+  pactada sola no genera anexo (R11 no la incluye). Aprobar materializa el
+  documento en `core.documentos` reutilizando `layoutCorreo`/`escaparHtml` de
+  ADR-028 (sin plantilla nueva por fuera de la marca ya existente), con
+  SHA-256 y bitácora; bloqueo `FOR UPDATE` contra la carrera aprobar/rechazar.
+  `core.anexos.aprobar/rechazar` son `soloPersonas` (un agente recibe `FORBIDDEN`
+  antes de llegar a `APPROVAL_REQUIRED`, igual que `core.aprobaciones.aprobar`:
+  es el mecanismo ya establecido, no uno nuevo). Eventos
+  `core.anexo.generado/aprobado/rechazado` declarados en `EVENTOS_CORE`.
+- **Bloque 11 (pantallas y DS):** pestaña «Anexos» en la ficha de persona
+  (lista) y `/personas/[id]/anexos/[anexoId]` (documento + panel de aprobación),
+  D16. Piezas nuevas del DS: `AvisoAnexo`, `DocumentoBorrador` (conserva su papel
+  claro en modo oscuro, D15, con colores propios documentados en el código) y
+  `PanelAprobacion`, las tres en `/ds`. `core.anexos.get` amplía su salida con
+  las filas antes/después ya resueltas (nombres y montos) para que la UI no
+  repita esa lógica.
+
+**Decisiones técnicas de Claude (no son decisiones de Carlos):** (1) `soloPersonas`
+en aprobar/rechazar da `FORBIDDEN` a un agente, no `APPROVAL_REQUIRED` —
+`denegar()` corta antes de `controlAgente` en `execute.ts`; mismo comportamiento
+que `core.aprobaciones.aprobar`, ya existente. (2) D13 «admin configurable por
+tenant» se implementa solo en su mitad interina (`anexosManage`, owner/admin
+estático): el refinamiento por rol personalizado es del Brief 07c, tal como
+fija el propio §16.c-1 del brief para D8. (3) El documento final no repite
+cada bono ni ítem de la estructura; muestra sueldo base, colación, movilización
+y gratificación (y, para el motivo instalación, los nombres de instalación y
+puesto). (4) Sin editor de plantilla (R12 lo deja para el Brief 09): el
+documento usa el layout de marca ya construido en Comunicaciones (ADR-028).
+
+**CA-4:** cumplido — un cambio de capa, monto, instalación o rol genera el
+borrador con la plantilla base y la marca del tenant; RRHH lo aprueba o
+rechaza; aprobado queda en Documentos con SHA-256; un agente no lo aprueba
+(bloqueado antes del handler, ver decisión 1). El motivo "rol" no tiene fuente
+hoy (Operaciones es fase 3, §16.c-3 del brief): el consumidor no lo dispara
+todavía, pero la capacidad y la UI ya lo soportan.
+
+**Pendiente de Carlos (§16.b del brief):** el texto legal definitivo de la
+plantilla base del anexo; el documento usa texto de ejemplo hasta entonces (D15).
+
+**Gate local:** `pnpm typecheck`, `pnpm lint` (0 errores; solo warnings
+preexistentes de `max-lines` en archivos de test) y `pnpm test` (173 archivos,
+1.036 pruebas) en verde. `pnpm test:db`: 122 (`@opai/db`) + 200
+(`@opai/capabilities`, incluye 6 de `anexos-db.test.ts` contra Postgres real:
+aislamiento por tenant, bloqueo financiero, `soloPersonas` y el documento final
+con SHA-256 y bitácora verificable) + 25 (`@opai/auth`) en verde. `pnpm build` y
+`pnpm presupuesto` en verde (dos rutas nuevas a 166 KB, como sus hermanas de
+persona; `/ds` sube de 222 a 224 KB). e2e `anexo-contrato.spec.ts` (375/1024/1280,
+claro y oscuro): lista, documento con antes/después y rechazo con motivo
+obligatorio en verde; aprobar no se puede probar de punta a punta en este
+entorno (sin credenciales de R2, igual que en CI): se verifica que el error se
+muestra con claridad, y el flujo completo de aprobar (documento, SHA-256,
+bitácora) ya se prueba contra Postgres real con almacenamiento en memoria en
+`anexos-db.test.ts`. Sin migración aplicada en Neon. No se abre PR (lo abre el
+bot «OPAI 2.0»); evidencia completa en `PR-BODY.md`, sin commitear.
+
+### Corrección QA del PR #91 (Codex)
+
+El documento final de un anexo se identifica por su relación con `AnexoContrato` y exige `anexos.read` o `estructuras.read_sensible` en Documentos; no admite reemplazo mediante subida para evitar versiones sin la protección. Se valida la persona en la URL y se confirma la aprobación irreversible. Sin migración nueva; detalle en el brief 07b.
+
+### Corrección S1 del PR #91 (Claude, 28-oct-2026, revisión 5679644747)
+
+El Revisor bloqueó el PR #91 por S1: `core.anexos.generar` aceptaba `estructuraId`,
+`instalacionId` y `puestoId` de otra persona (los sueldos de otro trabajador podían
+terminar en el contrato aprobado de esta persona); `core.anexos.aprobar` no revalidaba.
+Una sesión anterior (Codex) había dejado `validar-snapshots.ts` sin commitear, con dos
+huecos que la propia autorrevisión detectó: la revalidación de `aprobar` no bloqueaba
+las filas referenciadas (ventana de concurrencia) y la regla rechazaba anexos
+automáticos legítimos que documentan la instalación/puesto anterior de la misma
+persona. Claude retoma esos cambios, los termina y agrega los tests que faltaban.
+
+`validarSnapshots` (`packages/capabilities/src/core/anexos/validar-snapshots.ts`) exige
+siempre el mismo tenant y la misma persona del anexo. **Decisión de implementación**
+(OPAI 2.0, con la autoridad delegada por Carlos en t500u, 26-oct-2026 22:51 CLT —la
+misma delegación que aprobó este brief, "Pedido y aprobaciones"):
+`instalacionId`/`puestoId` se aceptan si
+pertenecieron a cualquier vínculo de esa persona, **vigente o anterior** (terminado),
+no solo al vigente; un anexo puede documentar el cambio desde un vínculo previo y no se
+rechaza. `core.anexos.aprobar` revalida dentro de la misma transacción que materializa
+el documento final (la ejecución de la capacidad ya es una única transacción, ADR-052) y
+bloquea antes de leer (`SELECT ... FOR SHARE`, el patrón de `vinculos-validacion.ts`)
+los vínculos de la persona y las estructuras de sueldo referenciadas, cerrando la
+ventana de concurrencia.
+
+`seed-vinculo-jornada-e2e.ts` agrega un vínculo anterior (terminado) de la persona 082
+con la instalación/puesto destino del anexo sembrado, para que `anexo-contrato.spec.ts`
+siga pasando sin tocar el vínculo vigente que comparten `vinculo-jornada.spec.ts` y
+`navegacion-permisos.spec.ts`.
+
+**Gate:** `pnpm typecheck`, `pnpm lint` y `pnpm test` en verde (0 errores). `pnpm test:db`:
+122 (`@opai/db`) + 203 (`@opai/capabilities`, incluye 8 de `anexos-db.test.ts` contra
+Postgres real, con los 3 casos nuevos de esta corrección) + 25 (`@opai/auth`), en verde.
+`pnpm --filter @opai/web build` y `pnpm presupuesto` en verde, sin cambio de tamaño.
+e2e `anexo-contrato.spec.ts` (375/1024/1280) en verde contra el servidor del propio
+worktree, 1 worker (el resto de la suite lo valida el CI). No se tocó la migración
+`20261028200000_anexo_contrato_borrador`. Detalle completo y la lista de autorrevisión
+en `PR-BODY.md` (sin commitear).

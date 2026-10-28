@@ -1,6 +1,9 @@
 agente_historial_list
 agente_modelos_list
 core_actividad_list
+core_anexos_generar
+core_anexos_get
+core_anexos_list
 core_apikeys_get
 core_apikeys_list
 core_aprobaciones_get
@@ -135,6 +138,7 @@ core_vinculos_list
 core_vinculos_previsualizar
 core_vinculos_terminar
 core_vinculos_update
+preview_core_anexos_generar
 preview_core_cargos_create
 preview_core_cargos_set_activo
 preview_core_cargos_update

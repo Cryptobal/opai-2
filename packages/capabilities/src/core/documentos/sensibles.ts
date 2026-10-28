@@ -10,12 +10,17 @@ export const puedeVerCumplimiento = (ctx: Contexto): boolean =>
   ctx.autorizar(PERMISOS_CORE.cumplimientoRead);
 
 /** Filtra en la misma consulta que obtiene los metadatos, también para versiones/vencimientos. */
-export const filtroDocumentoSensible = (ctx: Contexto): Prisma.DocumentoWhereInput =>
-  puedeVerCumplimiento(ctx)
-    ? {}
-    : {
-        vinculos: { none: { entidadTipo: { in: TIPOS_CUMPLIMIENTO } } },
-      };
+export const filtroDocumentoSensible = (ctx: Contexto): Prisma.DocumentoWhereInput => ({
+  AND: [
+    ...(puedeVerCumplimiento(ctx)
+      ? []
+      : [{ vinculos: { none: { entidadTipo: { in: TIPOS_CUMPLIMIENTO } } } }]),
+    // La relación con el anexo identifica también documentos generados antes de este arreglo.
+    ...(ctx.autorizar(PERMISOS_CORE.anexosRead) || ctx.autorizar(PERMISOS_CORE.estructurasReadSensible)
+      ? []
+      : [{ anexos: { none: {} } }]),
+  ],
+});
 
 /** Ids (de entre los dados) de documentos vinculados a una entidad de cumplimiento. Una consulta. */
 export async function docsDeCumplimiento(

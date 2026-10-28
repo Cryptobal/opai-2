@@ -39,6 +39,9 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
       PERMISOS_CORE.vinculosManage,
       PERMISOS_CORE.estructurasManage,
       PERMISOS_CORE.estructurasReadSensible,
+      // Anexo de contrato (Brief 07b PR 4, D8): sus snapshots traen datos de sueldo.
+      PERMISOS_CORE.anexosRead,
+      PERMISOS_CORE.anexosManage,
       PERMISOS_CORE.configManage,
       PERMISOS_CORE.marcaManage,
       PERMISOS_CORE.integracionesManage,
@@ -82,6 +85,8 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
       PERMISOS_CORE.consumosRead,
       PERMISOS_CORE.auditRead,
       PERMISOS_CORE.cumplimientoRead,
+      // Anexo de contrato (Brief 07b PR 4): sus snapshots traen datos de sueldo (bloqueo financiero).
+      PERMISOS_CORE.anexosRead,
     ],
   },
 };

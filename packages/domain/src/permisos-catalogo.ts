@@ -30,6 +30,10 @@ export const PERMISOS_CORE = {
   estructurasRead: "core:estructuras.read",
   estructurasManage: "core:estructuras.manage",
   estructurasReadSensible: "core:estructuras.read_sensible",
+  // Brief 07b · PR 4: anexo de contrato en borrador. Trae snapshots con datos de sueldo, con el
+  // mismo bloqueo financiero que las capas y el vínculo (D8; solo owner y admin hasta el 07c).
+  anexosRead: "core:anexos.read",
+  anexosManage: "core:anexos.manage",
   documentosRead: "core:documentos.read",
   documentosManage: "core:documentos.manage",
   configRead: "core:config.read",

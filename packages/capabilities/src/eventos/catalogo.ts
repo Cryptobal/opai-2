@@ -37,6 +37,15 @@ export const EVENTOS_CORE: readonly EventoDeDominio[] = [
   { id: "core.cargo.actualizado", descripcion: "Cambió un cargo o su estado." },
   { id: "core.estructura.creada", descripcion: "Se creó una versión de estructura de sueldo." },
   { id: "core.estructura.anulada", descripcion: "Se anuló una estructura de sueldo." },
+  {
+    id: "core.anexo.generado",
+    descripcion: "Se generó el borrador de un anexo de contrato (capa, monto, instalación o rol).",
+  },
+  {
+    id: "core.anexo.aprobado",
+    descripcion: "RRHH aprobó un anexo de contrato; su documento final quedó en Documentos.",
+  },
+  { id: "core.anexo.rechazado", descripcion: "RRHH rechazó un anexo de contrato, con motivo." },
   { id: "core.documento.registrado", descripcion: "Se subió y confirmó un documento." },
   { id: "core.documento.actualizado", descripcion: "Cambiaron los datos de un documento." },
   { id: "core.documento.archivado", descripcion: "Se archivó un documento." },
