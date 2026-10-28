@@ -3,7 +3,8 @@ import { Suspense } from "react";
 
 import { ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
 
-import { type SupervisoresDeInstalacion, SupervisoresACargo } from "./supervisores-a-cargo";
+import type { SupervisoresDeInstalacion } from "./supervisores-a-cargo";
+import { SupervisoresACargoDiferido } from "./supervisores-a-cargo-diferido";
 
 /** Carga los supervisores de la instalación; sin permiso para leer usuarios, la sección no aparece. */
 async function Seccion({ instalacionId }: { instalacionId: string }) {
@@ -15,7 +16,7 @@ async function Seccion({ instalacionId }: { instalacionId: string }) {
   ]);
   if (!r.ok) return null;
   const rol = identidad?.actual?.rol;
-  return <SupervisoresACargo datos={r.data} puedeGestionar={rol === "owner" || rol === "admin"} />;
+  return <SupervisoresACargoDiferido datos={r.data} puedeGestionar={rol === "owner" || rol === "admin"} />;
 }
 
 /**
