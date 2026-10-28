@@ -1001,3 +1001,9 @@ identidad de servicio en main.
 5. **Cambios de rol base y promoción a owner, solo por una persona** (agregado del Revisor, review 5661003883 del #60; mandatos de Carlos t365u y t366u de cerrar el Núcleo): el mismo `FORBIDDEN` que ya protegía `roleId` ahora cubre también `rol` cuando la llamada viene de un agente o de una API key.
 
 **Consecuencias.** Migración aditiva `20261028030000_identidad_servicio` (RLS en `gasto_agente_mes`, sin `BYPASSRLS`). `CONTEXTO-agentes.md` documenta que la IA de desarrollo opera en `gard-staging` con su propia key de servicio y que la key `*` owner de Gard debe revocarse cuando corresponda (decisión de Carlos). Pendiente, fuera de este ADR: la reserva previa (antes de llamar al proveedor) para recursos de costo variable no determinista por adelantado sigue sin existir; hoy la atomicidad protege el chequeo-y-consumo del ledger, no una reserva anticipada del costo exacto de una respuesta de IA.
+
+## ADR-053 · Tope por concepto de sueldo
+
+**Fecha:** 27-oct-2026 · **Estado:** vigente.
+
+**Decisión.** Los montos de sueldo admiten hasta 100.000.000 CLP por concepto. Fuente: «Ok con el tope» — Carlos, 27-oct-2026 20:46 CLT, chat con el Revisor OPAI 2.0 (t311u), transmitida por el Revisor.

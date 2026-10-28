@@ -772,3 +772,4 @@ cambiar topes. Los 24 e2e afectados pasan con un worker, sin skips ni reintentos
 en el build local de producción; Laboral mide 7 consultas a 375/1024/1280 px.
 Capturas en `design/07b/evidencia-pr3/`. La integración, el CI remoto y la aplicación
 de la migración en Neon no se declaran ejecutados por este encargo.
+- Pendientes de cierre del Núcleo (CAR-19): correcciones de permisos, auditoría de rechazos y regresiones de sueldos y navegación; detalle y validación en el PR.
