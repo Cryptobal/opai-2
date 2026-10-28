@@ -6,7 +6,8 @@ import { configActualizarEtapa, configGuardarCatalogo } from "./config-escritura
 import { configGet } from "./config";
 import { contactosList } from "./contactos";
 import { negociosArchivar, negociosPerder, negociosReabrir } from "./negocios-cierre";
-import { negociosCreate, negociosUpdate } from "./negocios-escritura";
+import { negociosUpdate } from "./negocios-editar";
+import { negociosCreate } from "./negocios-escritura";
 import { negociosGet } from "./negocios-ficha";
 import { negociosEmbudo, negociosList } from "./negocios-lectura";
 import { negociosGanar, negociosMover } from "./negocios-mover";

@@ -31,6 +31,8 @@ type Props = {
   /** Título de la lista en teléfono (en md+ va en la barra superior). */
   titulo: string;
   accion?: ReactNode;
+  /** Fila sobre la búsqueda (por ejemplo, el cambio Tablero/Lista de Negocios). */
+  vista?: ReactNode;
   buscar: string;
   filtros?: readonly Filtro[];
   meta?: { izquierda: ReactNode; derecha?: ReactNode };
@@ -56,6 +58,7 @@ export function ListaMaestro(p: Props) {
           <Cabecera titulo={p.titulo} />
         </div>
       )}
+      {p.vista ? <div className="pb-2.5 md:px-4 md:pt-3 md:pb-0">{p.vista}</div> : null}
       <HerramientasLista>
         <Buscador placeholder={p.buscar} />
         {p.filtros?.length ? <ChipsFiltroDiferido filtros={p.filtros} /> : null}

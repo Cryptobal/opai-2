@@ -9,6 +9,30 @@ export async function cuentaValida(ctx: Contexto, cuentaId: string) {
   if (!c) throw noEncontrado("La cuenta");
 }
 
+/**
+ * Instalaciones a vincular al crear un negocio: todas de la cuenta del negocio (R16). Devuelve los
+ * vínculos sin repetir (manda la primera aparición); la RLS ya acota la búsqueda al tenant.
+ */
+export async function instalacionesDeCuenta<T extends { instalacionId: string }>(
+  ctx: Contexto,
+  cuentaId: string,
+  vinculos: readonly T[],
+): Promise<T[]> {
+  const unicos = vinculos.filter(
+    (v, i) => vinculos.findIndex((x) => x.instalacionId === v.instalacionId) === i,
+  );
+  if (!unicos.length) return [];
+  const ids = unicos.map((v) => v.instalacionId);
+  const filas = await ctx.db.instalacion.findMany({
+    where: { id: { in: ids } },
+    select: { id: true, cuentaId: true },
+  });
+  if (filas.length !== ids.length) throw noEncontrado("La instalación");
+  if (filas.some((f) => f.cuentaId !== cuentaId))
+    throw reglaDeNegocio("La instalación es de otra cuenta.");
+  return unicos;
+}
+
 /** El responsable es un usuario con membresía activa en esta empresa (core.users es global). */
 export async function responsableValido(ctx: Contexto, userId: string | null | undefined) {
   if (!userId) return;
