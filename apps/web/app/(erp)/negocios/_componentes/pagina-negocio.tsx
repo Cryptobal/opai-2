@@ -3,12 +3,13 @@ import { type ReactNode, Suspense } from "react";
 import { Loading, SplitScreen } from "@opai/ds";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
-import { conBusqueda, type Parametros, type SearchParams } from "@/lib/parametros";
+import type { Parametros, SearchParams } from "@/lib/parametros";
 
-import { cargarNegocio, cargarNegocios, filtrosDe } from "./datos";
+import { cargarEtapas, cargarNegocio, cargarNegocios, filtrosDe } from "./datos";
 import type { NegocioDetalle } from "./datos";
 import { DetalleNegocio } from "./detalle-negocio";
 import { ListaNegocios } from "./lista-negocios";
+import { volverANegocios } from "./rutas";
 import type { TabNegocio } from "./ficha-negocio";
 
 type Props = {
@@ -30,22 +31,29 @@ export function PaginaNegocio({ params, searchParams, tab, children }: Props) {
       volverSoloTelefono
       volverBajoLg
       opciones={(d) => ({
-        volver: { href: conBusqueda("/negocios", d.p.q), etiqueta: "Negocios" },
+        volver: { href: volverANegocios(d.p), etiqueta: "Negocios" },
       })}
       cargar={async () => {
         const [{ id }, p] = await Promise.all([params, filtrosDe(searchParams)]);
         const datos = cargarNegocio(id);
         datos.catch(() => undefined);
-        return { id, p, datos, lista: await cargarNegocios(p) };
+        const [lista, etapas] = await Promise.all([cargarNegocios(p), cargarEtapas()]);
+        return { id, p, datos, lista, etapas };
       }}
     >
-      {({ id, p, datos, lista }) => (
+      {({ id, p, datos, lista, etapas }) => (
         <SplitScreen
           telefono="detalle"
           unPanelHastaLg
           etiquetaLista="Lista de negocios"
           lista={
-            <ListaNegocios state={lista.state} items={lista.items} seleccionado={id} q={p.q} />
+            <ListaNegocios
+              state={lista.state}
+              items={lista.items}
+              seleccionado={id}
+              p={p}
+              etapas={etapas}
+            />
           }
           detalle={
             <Suspense fallback={<Loading variante="detalle" />}>
