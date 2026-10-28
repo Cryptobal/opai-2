@@ -1,6 +1,9 @@
 import { cerrarClientes, dbAdmin } from "../src/index";
 
 const PERSONA_ID = "00000000-0000-7000-8000-000000000082";
+// Por defecto, el anexo que recorren las e2e; cada proyecto rechaza el suyo (`ANEXO_E2E_ID`, solo
+// ids fijos de prueba) para no pisarse si los proyectos corren en paralelo.
+const ANEXO_ID = process.env["ANEXO_E2E_ID"] ?? "00000000-0000-7000-8000-0000000000a9";
 
 async function main() {
   const url = new URL(process.env["DATABASE_URL_MIGRATE"] ?? "postgresql://sin-configurar/");
@@ -10,12 +13,14 @@ async function main() {
     process.env["NODE_ENV"] === "production"
   )
     throw new Error("Solo e2e local.");
+  if (!/^00000000-0000-7000-8000-0000000000a[0-9a-f]$/.test(ANEXO_ID))
+    throw new Error("Id de prueba inválido.");
   const db = dbAdmin();
   const vinculo = await db.vinculoLaboral.findFirstOrThrow({
     where: { personaId: PERSONA_ID, estado: "vigente" },
   });
   await db.anexoContrato.upsert({
-    where: { id: "00000000-0000-7000-8000-0000000000a9" },
+    where: { id: ANEXO_ID },
     update: {
       estado: "borrador",
       aprobadoPorId: null,
@@ -26,7 +31,7 @@ async function main() {
       documentoId: null,
     },
     create: {
-      id: "00000000-0000-7000-8000-0000000000a9",
+      id: ANEXO_ID,
       tenantId: vinculo.tenantId,
       personaId: PERSONA_ID,
       vinculoId: vinculo.id,

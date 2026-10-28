@@ -55,7 +55,9 @@ test("capas completas, vista previa, historial y resolución sin herencia", asyn
   expect(conteo).toBeLessThanOrEqual(8);
   await page.getByRole("link", { name: /Definir sueldo|Nueva versión/ }).click();
   const hoja = page.getByRole("dialog", { name: "Nueva versión de sueldo" });
-  await expect(hoja).toBeVisible();
+  // La hoja se descarga al abrirse (ADR-037) y la vista previa consulta el servidor: en dev, más
+  // de 5 s en la primera visita.
+  await expect(hoja).toBeVisible({ timeout: 30_000 });
   const monto = hoja.getByLabel("Sueldo base (obligatorio)", { exact: true });
   for (const valor of ["10,5", "1.000", "999999", "100.000.000", "0"]) {
     await monto.fill("");
@@ -68,7 +70,7 @@ test("capas completas, vista previa, historial y resolución sin herencia", asyn
   await hoja.getByLabel("Vigente desde (obligatorio)").fill(`${dia}-${mes}-${anio}`);
   await hoja.getByRole("button", { name: "Revisar cambio" }).click();
   const confirmar = page.getByRole("dialog", { name: "Confirmar versión de sueldo" });
-  await expect(confirmar).toBeVisible();
+  await expect(confirmar).toBeVisible({ timeout: 30_000 });
   await expect(confirmar.getByText(/pendientes de vínculo con instalación/)).toBeVisible();
   await page.screenshot({
     path: `e2e/__screenshots__/07b-impacto-${info.project.name}.png`,
@@ -90,6 +92,7 @@ test("capas completas, vista previa, historial y resolución sin herencia", asyn
   await expect(page.getByRole("list", { name: "Capas de sueldo" })).toBeVisible();
   await page.getByRole("link", { name: "Definir sueldo por RUT", exact: true }).click();
   const rut = page.getByRole("dialog", { name: "Definir sueldo por RUT" });
+  await expect(rut).toBeVisible({ timeout: 30_000 });
   await expect(rut.getByRole("button", { name: "Revisar cambio" })).toBeDisabled();
   await expect(rut.getByLabel("Motivo obligatorio")).toBeVisible();
   await rut.getByLabel("Sueldo base (obligatorio)", { exact: true }).fill("10,5");
