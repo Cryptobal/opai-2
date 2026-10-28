@@ -89,7 +89,7 @@ describe("catálogo de retención", () => {
     expect(personas && describirRegla(personas, 1825)).toMatch(/Anonimizar a los 1825 días/);
     expect(personas && describirRegla(personas, 0)).toMatch(/Sin vencimiento/);
     const aud = reglaDe("audit_events");
-    expect(aud && describirRegla(aud, 0)).toMatch(/obligación legal/);
+    expect(aud && describirRegla(aud, 0)).toMatch(/Se conserva, no se borra/);
   });
 });
 

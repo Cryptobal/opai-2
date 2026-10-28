@@ -57,7 +57,7 @@ export const AJUSTES_RETENCION = defineAjustes(
     cumplimiento_retencion_activa: z.boolean().default(false).meta({
       etiqueta: "Aplicar la política de retención",
       ayuda:
-        "Apagado: el trabajo diario solo simula y registra lo que anonimizaría o eliminaría, sin tocar datos. Actívalo cuando los periodos estén confirmados con el abogado.",
+        "Apagado: cada día solo se simula y se registra lo que se anonimizaría o eliminaría, sin tocar datos. Actívalo cuando los plazos estén confirmados con asesoría legal.",
       grupo: "Cumplimiento",
       ambito: "tenant",
       permiso: PERMISO,

@@ -198,5 +198,37 @@ describe.skipIf(!urlPropietario)("cifrado de campos sensibles en base real", () 
     if (dek.status === "fulfilled") expect(dekCon(nueva, await fila())).toBe(dek.value.kidNuevo);
     usar(nueva, version + 1);
     expect(await leerSecreto(ctx(tA), integracionId, "api_key")).toBe("re_rotar_123");
+
+    // 3) Determinista (otro tenant): la DEK cambia mientras el script espera el bloqueo de la fila.
+    anterior = kekA();
+    version = verA();
+    nueva = randomBytes(32);
+    const envolver = (dek: Buffer) => {
+      const c = cifrar(anterior, dek);
+      return { dekCifrada: Uint8Array.from(c.cifrado), iv: Uint8Array.from(c.iv), tag: Uint8Array.from(c.tag), kekVersion: version };
+    };
+    const filaB =
+      (await e.admin.claveTenant.findUnique({ where: { tenantId: tB } })) ??
+      (await e.admin.claveTenant.create({ data: { tenantId: tB, ...envolver(randomBytes(32)) } }));
+    await e.admin.claveTenant.update({ where: { id: filaB.id }, data: envolver(randomBytes(32)) });
+    const dekNueva = randomBytes(32);
+    let soltarB: () => void = () => undefined;
+    let tomadoB: () => void = () => undefined;
+    const enEsperaB = new Promise<void>((r) => (soltarB = r));
+    const bloqueadoB = new Promise<void>((r) => (tomadoB = r));
+    const rotando = e.admin.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT id FROM core.claves_tenant WHERE id = ${filaB.id}::uuid FOR UPDATE`;
+      tomadoB();
+      await enEsperaB;
+      await tx.claveTenant.update({ where: { id: filaB.id }, data: envolver(dekNueva) });
+    }, { timeout: 30_000 });
+    await bloqueadoB;
+    const reenvuelta = reenvolverFila(e.admin, filaB.id, { actual: nueva, anterior, version: version + 1 });
+    await new Promise((r) => setTimeout(r, 300));
+    soltarB();
+    await rotando;
+    expect(await reenvuelta).toBe(true);
+    const finalB = await e.admin.claveTenant.findUniqueOrThrow({ where: { id: filaB.id } });
+    expect(dekCon(nueva, finalB)).toBe(kidDe(dekNueva)); // sin el bloqueo quedaba la DEK anterior
   }, 60_000);
 });

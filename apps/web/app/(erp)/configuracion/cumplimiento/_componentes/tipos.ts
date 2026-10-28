@@ -67,7 +67,7 @@ export const DESTINATARIO: Record<string, string> = {
 
 export const GESTION: Record<string, Etiqueta> = {
   trabajo: { etiqueta: "Automática", tono: "accent" },
-  regulado: { etiqueta: "Se conserva por ley", tono: "info" },
+  regulado: { etiqueta: "Se conserva", tono: "info" },
   externa: { etiqueta: "Por separado", tono: "neutro" },
   pendiente: { etiqueta: "Por definir", tono: "warning" },
 };
