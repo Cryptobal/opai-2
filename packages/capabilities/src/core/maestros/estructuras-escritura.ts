@@ -35,6 +35,7 @@ export const estructurasCreate = defineCapability({
             "No puedes crear versiones de este cargo. Sus montos son sensibles. Pide a un owner o admin el permiso para ver sueldos sensibles.",
           );
       }
+      // Sin lectura sensible se rechaza toda versión de estas capas: podría borrar bonos ocultos.
       if (input.nivel !== "cargo" && !ctx.autorizar(PERMISOS_CORE.estructurasReadSensible))
         throw rechazoSensible("No tienes permiso para crear versiones de esta capa de sueldo.");
       const desde = aFecha(input.vigenteDesde);

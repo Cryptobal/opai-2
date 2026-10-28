@@ -56,7 +56,13 @@ test("capas completas, vista previa, historial y resolución sin herencia", asyn
   await page.getByRole("link", { name: /Definir sueldo|Nueva versión/ }).click();
   const hoja = page.getByRole("dialog", { name: "Nueva versión de sueldo" });
   await expect(hoja).toBeVisible();
-  await hoja.getByLabel("Sueldo base (obligatorio)", { exact: true }).fill("650000");
+  const monto = hoja.getByLabel("Sueldo base (obligatorio)", { exact: true });
+  for (const valor of ["10,5", "1.000", "999999", "100.000.000", "0"]) {
+    await monto.fill("");
+    await monto.pressSequentially(valor);
+    await expect(monto).toHaveValue(valor);
+  }
+  await monto.fill("650000");
   await hoja.getByLabel("Colación (obligatorio)", { exact: true }).fill("0");
   await hoja.getByLabel("Movilización (obligatorio)", { exact: true }).fill("0");
   await hoja.getByLabel("Vigente desde (obligatorio)").fill(`${dia}-${mes}-${anio}`);

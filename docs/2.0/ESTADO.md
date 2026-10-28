@@ -739,3 +739,5 @@ registra tres cargas. Son decisiones técnicas de implementación, pendientes de
 validación en Neon. La medición de servidor no sustituye navegación cliente ni p75;
 el esqueleto, la carrera de hidratación, la invalidación de caché y la comparación
 antes/después siguen pendientes. No se declara listo el gate obligatorio de ADR-045.
+
+- Pendientes de cierre del Núcleo (CAR-19): correcciones de permisos, auditoría de rechazos y regresiones de sueldos y navegación; detalle y validación en el PR.

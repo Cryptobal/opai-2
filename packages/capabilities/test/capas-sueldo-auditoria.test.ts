@@ -31,7 +31,7 @@ async function preparar() {
 }
 
 describe("07b: montos persistidos y referencias múltiples", () => {
-  it("anulación real y preview ocultan montos sin permiso y auditan su revelación", async () => {
+  it("anulación real y preview exigen lectura sensible y auditan su revelación", async () => {
     const { ctx, eventos, refs } = await preparar();
     for (const dryRun of [true, false]) {
       const sinMontos = {
@@ -41,13 +41,13 @@ describe("07b: montos persistidos y referencias múltiples", () => {
       const idOculto = refs[0]!.estructuraId;
       eventos.splice(0);
       expect(
-        await dato(
+        await codigo(
           sinMontos,
           "core.estructuras.anular",
           { id: idOculto, motivo: "Corrección de prueba" },
           { dryRun },
         ),
-      ).toMatchObject({ sueldoBase: null, colacion: null, sensible: true });
+      ).toBe("FORBIDDEN");
       expect(eventos.filter((e) => e.capability === "core.estructuras.read_sensible")).toEqual([]);
       eventos.splice(0);
       const id = refs[1]!.estructuraId;
