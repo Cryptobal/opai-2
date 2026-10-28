@@ -7,6 +7,18 @@ import type { TenantTx } from "@opai/db";
 
 export const MARCA_ANONIMO = "[anonimizado]";
 
+/**
+ * Toma el bloqueo de la fila antes del UPDATE condicional: las escrituras de maestros toman el mismo
+ * (`bloquearNoAnonimizado`), así que un vínculo o un cambio concurrente queda confirmado antes de que
+ * este UPDATE evalúe su predicado con una instantánea nueva, o ve la marca y falla (§21).
+ */
+async function bloquear(tx: TenantTx, tabla: "personas" | "contactos", id: string) {
+  if (tabla === "personas")
+    await tx.$queryRaw`/* 07d:bloqueo-anonimizar */ SELECT id FROM core.personas WHERE id = ${id}::uuid FOR UPDATE`;
+  else
+    await tx.$queryRaw`/* 07d:bloqueo-anonimizar */ SELECT id FROM core.contactos WHERE id = ${id}::uuid FOR UPDATE`;
+}
+
 /** Todos los vínculos terminados antes del corte; sin corte, que no tenga ninguno (§10). */
 export const sinRelacionViva = (corte: Date | null) =>
   corte
@@ -24,6 +36,7 @@ export async function anonimizarPersona(
   ahora: Date,
   corte: Date | null,
 ): Promise<boolean> {
+  await bloquear(tx, "personas", id);
   const { count } = await tx.persona.updateMany({
     where: { id, anonimizadaEn: null, ...sinRelacionViva(corte) },
     data: {
@@ -61,6 +74,7 @@ export async function anonimizarContacto(
   ahora: Date,
   corte: Date | null,
 ): Promise<boolean> {
+  await bloquear(tx, "contactos", id);
   const { count } = await tx.contacto.updateMany({
     where: {
       id,
