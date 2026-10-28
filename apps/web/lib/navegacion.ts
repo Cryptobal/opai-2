@@ -1,4 +1,10 @@
-import { type AreaNav, type Rol, type Vocabulario } from "@opai/domain";
+import {
+  type AreaNav,
+  PERMISOS_CORE,
+  PERMISOS_PLATAFORMA,
+  type Rol,
+  type Vocabulario,
+} from "@opai/domain";
 
 import {
   armarNavegacion,
@@ -127,13 +133,22 @@ export const NAV_PLATAFORMA: ItemNav[] = [
 ];
 
 /** Portales sin módulos todavía (fase 3): su inicio; Supervisor suma las vistas de terreno (55/56). */
-export function navegacionPortal(href: string, portal?: string): ItemNav[] {
+export function navegacionPortal(
+  href: string,
+  portal: string,
+  puede: (permiso: string) => boolean,
+): ItemNav[] {
+  if (portal === "platform") return puede(PERMISOS_PLATAFORMA.tenantsRead) ? NAV_PLATAFORMA : [];
   if (portal === "supervisor")
     return [
       // «Hoy» solo en `/supervisor`, pero la ficha de persona (`/supervisor/personas/:id`) cuelga de
       // «Hoy» (se llega por «Atrás → Hoy»), así que `activoEn` la mantiene marcada (H6, t365u/t366u).
-      { href, etiqueta: "Hoy", icono: "Home", exacta: true, activoEn: "/supervisor/personas" },
-      { href: "/supervisor/instalaciones", etiqueta: "Instalaciones", icono: "MapPin" },
+      ...(puede(PERMISOS_CORE.documentosRead) && puede(PERMISOS_CORE.personasRead)
+        ? [{ href, etiqueta: "Hoy", icono: "Home", exacta: true, activoEn: "/supervisor/personas" }]
+        : []),
+      ...(puede(PERMISOS_CORE.instalacionesRead)
+        ? [{ href: "/supervisor/instalaciones", etiqueta: "Instalaciones", icono: "MapPin" }]
+        : []),
     ];
   return [{ href, etiqueta: "Inicio", icono: "Home" }];
 }

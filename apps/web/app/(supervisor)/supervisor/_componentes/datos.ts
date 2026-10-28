@@ -1,6 +1,7 @@
-import { esRol, PERMISOS_CORE, tienePermiso } from "@opai/domain";
+import { PERMISOS_CORE } from "@opai/domain";
 
 import { estadoPantalla } from "@/lib/formato";
+import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
 import type {
   Contacto,
@@ -14,11 +15,10 @@ import type { Documento } from "@/app/_components/documentos/tipos";
 
 const P = "supervisor";
 
-/** Si el rol del usuario permite subir documentos y pedir renovaciones (documentos.manage). */
+/** Permiso efectivo para subir documentos y pedir renovaciones. */
 export async function puedeGestionarDocumentos() {
   const id = await requerirIdentidad("/supervisor");
-  const rol = id.actual?.rol;
-  return Boolean(rol && esRol(rol) && tienePermiso(rol, PERMISOS_CORE.documentosManage));
+  return puedeDeIdentidad(id)(PERMISOS_CORE.documentosManage);
 }
 
 export async function instalacionesActivas() {
