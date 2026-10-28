@@ -1,5 +1,6 @@
 import {
   Alerta,
+  DatoArchivado,
   AntesDespues,
   BadgeCapa,
   ImpactoCambio,
@@ -28,6 +29,12 @@ export function MuestraCapasSueldo() {
   return (
     <section aria-label="Componentes de capas de sueldo" className="flex flex-col gap-4">
       <h2 className="t-heading">Capas de sueldo · DS 2.0</h2>
+      <DatoArchivado titulo="Versión del 01-01-2025" periodo="01-01-2025 – 31-12-2025">
+        <TablaEstructura estructura={estructura} />
+      </DatoArchivado>
+      <DatoArchivado titulo="Capa cargo (retirada) · montos restringidos">
+        <TablaEstructura estructura={{ ...estructura, sensible: true }} />
+      </DatoArchivado>
       <BadgeCapa capa="instalacion" />
       <PilaCapas
         capa="instalacion"

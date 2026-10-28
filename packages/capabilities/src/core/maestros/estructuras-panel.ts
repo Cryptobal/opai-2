@@ -32,6 +32,7 @@ export const estructurasPanel = defineCapability({
     ...s.puestos.map((p) => p.id),
     ...(s.personas.cargos ?? []).map((c) => c.id),
     ...s.versiones.map((e) => e.id),
+    ...s.cargosRetirados.flatMap((v) => [v.vinculoId, v.cargoId]),
     ...Object.values(s.efectiva?.niveles ?? {}).flatMap((e) => (e ? [e.id] : [])),
   ],
   async handler(ctx, input) {
@@ -43,6 +44,7 @@ export const estructurasPanel = defineCapability({
     const panel = await datosPanel(ctx, input);
     if (!panel) throw noEncontrado("La referencia");
     const { instalacion, persona, datos } = panel;
+    const vinculoVigente = persona?.vinculos.find((v) => v.estado === "vigente");
     const puesto = input.puestoId ? datos.puestos.find((p) => p.id === input.puestoId) : null;
     if (input.puestoId && !puesto) throw noEncontrado("La referencia");
     if (puesto && input.instalacionId && puesto.instalacionId !== input.instalacionId)
@@ -78,10 +80,7 @@ export const estructurasPanel = defineCapability({
         : null,
       persona: persona
         ? {
-            ...vistaPersona(
-              persona,
-              persona.vinculos[0] ? vinculoVista(persona.vinculos[0]) : null,
-            ),
+            ...vistaPersona(persona, vinculoVigente ? vinculoVista(vinculoVigente) : null),
             documentos: datos._count.documentoVinculos,
           }
         : null,
@@ -104,6 +103,14 @@ export const estructurasPanel = defineCapability({
       },
       cuentas: datos.cuentas,
       puestos: datos.puestos.map(vistaPuesto),
+      cargosRetirados:
+        persona?.vinculos.map((v) => ({
+          vinculoId: v.id,
+          cargoId: v.cargoId,
+          cargo: v.cargo.nombre,
+          inicio: dia(v.inicio)!,
+          termino: dia(v.termino),
+        })) ?? [],
       versiones: versiones.map((e) => vistaEstructura(e, e.items, ocultas.get(e.id) ?? true)),
       efectiva: persona ? resolverVistaEfectiva(fecha, vigentes, ocultas) : null,
     };

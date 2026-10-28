@@ -32,6 +32,8 @@ export const estructurasAnular = defineCapability({
       await bloquearCapa(tx, ctx.tenantId, inicial.nivel, ref);
       const e = await tx.estructuraSueldo.findFirst({ where });
       if (!e) throw noEncontrado("La estructura");
+      if (e.nivel === "cargo")
+        throw prohibido("El nivel cargo fue retirado; sus estructuras son de solo lectura.");
       if (e.estado === "anulada") throw reglaDeNegocio("La estructura ya está anulada.");
       const items = await tx.estructuraItem.findMany({
         where: { estructuraId: e.id },

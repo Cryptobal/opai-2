@@ -6,7 +6,7 @@ import { aFecha, dia, escribirConEvento } from "./comun";
 import { DIA_MS, entrada, referencia } from "./estructuras-ref";
 import { ocultarMontos } from "./estructuras-acceso";
 import { estructuraSchema, vistaEstructura } from "./estructuras-vista";
-import { bloquearCapa, bloquearCargo } from "./estructuras-bloqueo";
+import { bloquearCapa } from "./estructuras-bloqueo";
 import { impactoCambio } from "./estructuras-impacto";
 
 export { estructurasAnular } from "./estructuras-anular";
@@ -14,7 +14,7 @@ export { estructurasAnular } from "./estructuras-anular";
 export const estructurasCreate = defineCapability({
   id: "core.estructuras.create",
   descripcion:
-    "Crea una versión completa de sueldo de instalación, puesto o RUT, sin herencia. Cierra la anterior el día previo y rechaza solapes. La vista previa incluye impacto conocido y personas pendientes del vínculo del PR 3. Cargo se conserva hasta su retiro en PR 2.",
+    "Crea una versión completa de sueldo de instalación, puesto o RUT, sin herencia. Cierra la anterior el día previo y rechaza solapes.",
   permiso: PERMISOS_CORE.estructurasManage,
   input: entrada,
   output: estructuraSchema,
@@ -23,19 +23,13 @@ export const estructurasCreate = defineCapability({
   async handler(ctx, input, { dryRun }) {
     if (ctx.rol !== "owner" && ctx.rol !== "admin")
       throw prohibido("Solo owner y admin pueden cambiar capas de sueldo.");
+    if (input.nivel === "cargo")
+      throw prohibido("El nivel cargo fue retirado; sus estructuras son de solo lectura.");
     return ctx.transaccion(async (tx) => {
       ctx = { ...ctx, db: tx, transaccion: (fn) => fn(tx) };
       const ref = await referencia(ctx, input);
       await bloquearCapa(tx, ctx.tenantId, input.nivel, ref.id);
-      if (input.nivel === "cargo" && !ctx.autorizar(PERMISOS_CORE.estructurasReadSensible)) {
-        // Bloquea la fila para serializar la comprobación con cambios de sensibilidad.
-        await bloquearCargo(tx, ctx.tenantId, ref.id);
-        if (await ocultarMontos(ctx, { nivel: "cargo", ...ref.refs }, false))
-          throw rechazoSensible(
-            "No puedes crear versiones de este cargo. Sus montos son sensibles. Pide a un owner o admin el permiso para ver sueldos sensibles.",
-          );
-      }
-      if (input.nivel !== "cargo" && !ctx.autorizar(PERMISOS_CORE.estructurasReadSensible))
+      if (!ctx.autorizar(PERMISOS_CORE.estructurasReadSensible))
         throw rechazoSensible("No tienes permiso para crear versiones de esta capa de sueldo.");
       const desde = aFecha(input.vigenteDesde);
       const vigentes = await ctx.db.estructuraSueldo.findMany({

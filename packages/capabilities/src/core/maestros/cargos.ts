@@ -2,10 +2,9 @@ import { z } from "zod";
 
 import { PERMISOS_CORE } from "@opai/domain";
 import { defineCapability } from "../../define";
-import { rechazoSensible } from "../../errores";
+import { noEncontrado, rechazoSensible } from "../../errores";
 import { uuidSchema } from "../esquemas";
-import { aFecha, definidos, escribirConEvento, hoy, sinDuplicado } from "./comun";
-import { resumenSueldoDe, resumenSueldoSchema } from "./cargos-resumen";
+import { definidos, escribirConEvento, sinDuplicado } from "./comun";
 import {
   campos,
   cargoDe,
@@ -15,20 +14,18 @@ import {
   nombreLibre,
   vista,
 } from "./cargos-vista";
-import { ocultarMontosDeCargo } from "./estructuras-acceso";
 
 export const cargosList = defineCapability({
   id: "core.cargos.list",
   descripcion:
-    "Cargos de la empresa (guardia, supervisor, operario…) con personas con vínculo vigente, puestos activos y los montos de su estructura de sueldo vigente hoy.",
+    "Catálogo de cargos de la empresa con personas con vínculo vigente y puestos activos, sin montos: el cargo ya no define sueldo.",
   permiso: PERMISOS_CORE.estructurasRead,
   input: z.object({ incluirInactivos: z.boolean().default(false) }),
-  output: z.array(cargoSchema.extend({ sueldoVigente: resumenSueldoSchema })),
+  output: z.array(cargoSchema),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
-    // Una sola consulta (ADR-045): conteos por `_count` filtrado y la estructura vigente por `include`,
-    // en vez de dos conteos y un sueldo por cargo (N+1).
+    // Catálogo y conteos filtrados en una operación; no carga estructuras ni montos (ADR-045).
     const cargos = await ctx.db.cargo.findMany({
       where: input.incluirInactivos ? {} : { activo: true },
       orderBy: [{ orden: "asc" }, { nombre: "asc" }],
@@ -39,21 +36,10 @@ export const cargosList = defineCapability({
             puestos: { where: { estado: "activo" } },
           },
         },
-        estructuras: {
-          where: { nivel: "cargo", estado: "vigente", vigenteDesde: { lte: aFecha(hoy()) } },
-          orderBy: { vigenteDesde: "desc" },
-          take: 1,
-        },
       },
     });
-    return Promise.all(
-      cargos.map(async (c) => ({
-        ...vista(c, { personasVigentes: c._count.vinculos, puestosActivos: c._count.puestos }),
-        sueldoVigente: resumenSueldoDe(
-          c.estructuras[0],
-          await ocultarMontosDeCargo(ctx, c, c.estructuras[0]),
-        ),
-      })),
+    return cargos.map((c) =>
+      vista(c, { personasVigentes: c._count.vinculos, puestosActivos: c._count.puestos }),
     );
   },
 });
@@ -67,13 +53,27 @@ export const cargosGet = defineCapability({
   output: cargoSchema,
   efecto: "lectura",
   dryRun: false,
-  handler: async (ctx, input) => vista(await cargoDe(ctx, input.id), await conteos(ctx, input.id)),
+  async handler(ctx, input) {
+    const c = await ctx.db.cargo.findUnique({
+      where: { id: input.id },
+      include: {
+        _count: {
+          select: {
+            vinculos: { where: { estado: "vigente" } },
+            puestos: { where: { estado: "activo" } },
+          },
+        },
+      },
+    });
+    if (!c) throw noEncontrado("El cargo");
+    return vista(c, { personasVigentes: c._count.vinculos, puestosActivos: c._count.puestos });
+  },
 });
 
 export const cargosCreate = defineCapability({
   id: "core.cargos.create",
   descripcion:
-    "Crea un cargo con nombre único. Su estructura de sueldo se define después con core.estructuras.create (nivel cargo).",
+    "Crea un cargo de catálogo con nombre único, clase y sensibilidad. Los sueldos se definen en instalación, puesto o persona.",
   permiso: PERMISOS_CORE.estructurasManage,
   input: z.object(campos),
   output: cargoSchema,
