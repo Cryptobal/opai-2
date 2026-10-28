@@ -8,7 +8,7 @@ import type { Contexto } from "../../types";
 import { uuidSchema } from "../esquemas";
 import { escribirConEvento } from "./comun";
 import { personaDe, personaSchema, vinculosVigentes, vistaPersona } from "./personas-vista";
-import { exigirNoAnonimizado } from "./anonimizado";
+import { bloquearNoAnonimizado, exigirNoAnonimizado } from "./anonimizado";
 
 const motivo = z.string().trim().min(5).max(500).describe("Motivo (queda en la auditoría).");
 
@@ -27,7 +27,10 @@ async function cambiar(
   const p = await escribirConEvento(
     ctx,
     { tipo, entidadTipo: "persona", payload: () => data },
-    (tx) => tx.persona.update({ where: { id }, data }),
+    async (tx) => {
+      await bloquearNoAnonimizado(tx, "persona", id);
+      return tx.persona.update({ where: { id }, data });
+    },
   );
   return vistaPersona(p, vinculo);
 }

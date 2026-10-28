@@ -18,7 +18,7 @@ import {
   vistaPersona,
 } from "./personas-vista";
 import { camposVinculo } from "./vinculos-vista";
-import { exigirNoAnonimizado } from "./anonimizado";
+import { bloquearNoAnonimizado, exigirNoAnonimizado } from "./anonimizado";
 
 const DUPLICADO = "Ya existe una persona con ese RUT.";
 
@@ -113,7 +113,10 @@ export const personasUpdate = defineCapability({
         entidadTipo: "persona",
         payload: () => ({ campos: Object.keys(data) }),
       },
-      (tx) => sinDuplicado(tx.persona.update({ where: { id }, data }), DUPLICADO),
+      async (tx) => {
+        await bloquearNoAnonimizado(tx, "persona", id);
+        return sinDuplicado(tx.persona.update({ where: { id }, data }), DUPLICADO);
+      },
     );
     return vistaPersona(p, vinculo);
   },
