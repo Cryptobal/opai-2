@@ -64,13 +64,44 @@ describe("problemasDeMigracion", () => {
     expect(problemasDeMigracion(ok.replace("SET LOCAL", "-- SET LOCAL"))).not.toEqual([]);
   });
 
-  it("sin transacción solo con marca y motivo, SET de sesión y sin BEGIN/COMMIT", () => {
+  it("detecta lo que un comentario, un $$ o una forma alternativa podrían esconder", () => {
+    const vacia = ok.replace("-- Reversión: nada.", "-- Reversión:\n-- otra cosa");
+    expect(problemasDeMigracion(vacia)).not.toEqual([]);
+    const conDolar = ok.replace(
+      "SELECT 1;",
+      () => "-- ojo con $$\nCOMMIT;\nBEGIN;\n-- $$\nSELECT 1;",
+    );
+    expect(problemasDeMigracion(conDolar)).not.toEqual([]);
+    const sesion = ok.replace("SELECT 1;", "SET SESSION lock_timeout = '1s';");
+    expect(problemasDeMigracion(sesion)).not.toEqual([]);
+    const etiqueta = ok.replace("SELECT 1;", () => "DO $f1$ BEGIN COMMIT; END $f1$;");
+    expect(problemasDeMigracion(etiqueta)).toEqual([]);
+    expect(problemasDeMigracion(ok.replace("BEGIN;", "START TRANSACTION;"))).toEqual([]);
+    expect(
+      problemasDeMigracion(
+        ok.replace("SET LOCAL lock_timeout = '5s'", "set local lock_timeout to '5s'"),
+      ),
+    ).toEqual([]);
+    expect(problemasDeMigracion(ok.normalize("NFD"))).toEqual([]);
+  });
+
+  it("sin transacción: marca con motivo en la línea, una sola sentencia y sin BEGIN/COMMIT", () => {
     const sinTx =
       "-- opai:sin-transaccion: CREATE INDEX CONCURRENTLY no corre en transacción\n" +
-      "SET lock_timeout = '5s';\nCREATE INDEX CONCURRENTLY i ON t(c);\n-- Reversión: DROP INDEX CONCURRENTLY i;\n";
+      "CREATE INDEX CONCURRENTLY i ON t(c);\n-- Reversión: DROP INDEX CONCURRENTLY i;\n";
     expect(problemasDeMigracion(sinTx)).toEqual([]);
-    expect(problemasDeMigracion(sinTx.replace("SET lock_timeout = '5s';", ""))).not.toEqual([]);
+    // Dos sentencias en un envío: Postgres las envuelve en una transacción implícita y falla.
+    expect(
+      problemasDeMigracion(
+        sinTx.replace(
+          "CREATE INDEX CONCURRENTLY i",
+          "SET lock_timeout = '5s';\nCREATE INDEX CONCURRENTLY i",
+        ),
+      ),
+    ).not.toEqual([]);
     expect(problemasDeMigracion(`BEGIN;\n${sinTx}COMMIT;\n`)).not.toEqual([]);
-    expect(problemasDeMigracion(sinTx.replace(/: CREATE INDEX.*\n/, ": x\n"))).not.toEqual([]);
+    expect(
+      problemasDeMigracion(sinTx.replace(/: CREATE INDEX.*\n/, ":\n-- motivo largo abajo\n")),
+    ).not.toEqual([]);
   });
 });

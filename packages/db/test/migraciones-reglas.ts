@@ -47,49 +47,60 @@ export const EXENTAS = new Set([
   "20261028230000_plataforma_aprobaciones_auditoria",
 ]);
 
-/** Marca de las migraciones que no pueden ir en transacción (p. ej. CREATE INDEX CONCURRENTLY). */
-const SIN_TRANSACCION = /^--\s*opai:sin-transaccion:\s*\S.{9,}/m;
+/**
+ * Marca de las migraciones que no pueden ir en transacción (p. ej. CREATE INDEX CONCURRENTLY), con
+ * su motivo en la misma línea.
+ */
+const SIN_TRANSACCION = /^--[ \t]*opai:sin-transaccion:[ \t]*\S[^\n]{9,}/m;
+const REVERSION = /^--[ \t]*Reversión:[ \t]*\S/m;
+
+/**
+ * Comentarios, bloques `$etiqueta$ … $etiqueta$` y literales en una sola pasada, en orden de
+ * aparición: así un `$$` dentro de un comentario no esconde sentencias, ni un `--` dentro de un
+ * bloque DO. Los comentarios se borran, los bloques quedan como `$$` y los literales se conservan.
+ */
+const TOKENS =
+  /--[^\n]*|\/\*[\s\S]*?\*\/|\$([A-Za-z_][A-Za-z_0-9]*)?\$[\s\S]*?\$\1\$|'(?:[^']|'')*'/g;
 
 /** Sentencias SQL sin comentarios, en mayúsculas y con espacios normalizados (basta para la forma). */
 function sentencias(sql: string): string[] {
   return sql
-    .replace(/\$([A-Za-z_]*)\$[\s\S]*?\$\1\$/g, "$$$$")
-    .replace(/\/\*[\s\S]*?\*\//g, " ")
-    .replace(/--[^\n]*/g, " ")
+    .replace(TOKENS, (t) =>
+      t.startsWith("--") || t.startsWith("/*") ? " " : t.startsWith("$") ? "$$" : t,
+    )
     .split(";")
-    .map((s) => s.replace(/\s+/g, " ").trim().toUpperCase())
+    .map((x) => x.replace(/\s+/g, " ").trim().toUpperCase())
     .filter(Boolean);
 }
 
 const LOCK = /^SET LOCAL LOCK_TIMEOUT\s*(=|TO)\s*'\d+(MS|S)'$/;
+const ABRE = /^(BEGIN|START TRANSACTION)( TRANSACTION| WORK)?$/;
+const CONTROL = /^(BEGIN|START TRANSACTION|COMMIT|END|ROLLBACK|ABORT)\b/;
 
 /** Problemas de forma de una migración nueva; vacío si cumple la plantilla. */
-export function problemasDeMigracion(sql: string): string[] {
+export function problemasDeMigracion(original: string): string[] {
+  const sql = original.normalize("NFC");
   const problemas: string[] = [];
-  if (!/^--\s*Reversión:\s*\S/m.test(sql)) {
-    problemas.push("falta la sección «-- Reversión: …» con su contenido");
-  }
+  if (!REVERSION.test(sql)) problemas.push("falta la sección «-- Reversión: …» con su contenido");
   const s = sentencias(sql);
   if (SIN_TRANSACCION.test(sql)) {
-    if (!s.some((x) => /^SET LOCK_TIMEOUT\s*(=|TO)\s*'\d+(MS|S)'$/.test(x))) {
-      problemas.push("sin transacción, pero falta «SET lock_timeout = '…'» de sesión");
-    }
-    if (s.some((x) => x === "BEGIN" || x === "COMMIT")) {
+    // Postgres envuelve un envío de varias sentencias en una transacción implícita, así que
+    // CONCURRENTLY solo corre si es la única sentencia. El lock_timeout lo fija quien aplica
+    // (PGOPTIONS, OPERACION-agentes.md A.5).
+    if (s.length !== 1) problemas.push("marcada sin transacción: debe traer una sola sentencia");
+    if (s.some((x) => CONTROL.test(x)))
       problemas.push("marcada sin transacción, pero trae BEGIN o COMMIT");
-    }
     return problemas;
   }
-  if (s[0] !== "BEGIN" && s[0] !== "BEGIN TRANSACTION") {
-    problemas.push("la primera sentencia debe ser BEGIN");
-  }
+  if (!s[0] || !ABRE.test(s[0])) problemas.push("la primera sentencia debe ser BEGIN");
   if (!s[1] || !LOCK.test(s[1])) {
     problemas.push("la segunda sentencia debe ser «SET LOCAL lock_timeout = '…'»");
   }
   if (s.at(-1) !== "COMMIT") problemas.push("la última sentencia debe ser COMMIT");
-  if (s.slice(1, -1).some((x) => x === "BEGIN" || x === "COMMIT" || x === "ROLLBACK")) {
+  if (s.slice(1, -1).some((x) => CONTROL.test(x))) {
     problemas.push("solo una transacción: BEGIN al inicio y COMMIT al final");
   }
-  if (s.some((x) => /^SET LOCK_TIMEOUT/.test(x))) {
+  if (s.some((x) => /^SET (SESSION )?LOCK_TIMEOUT/.test(x))) {
     problemas.push("«SET lock_timeout» de sesión: usa SET LOCAL dentro de la transacción");
   }
   return problemas;
