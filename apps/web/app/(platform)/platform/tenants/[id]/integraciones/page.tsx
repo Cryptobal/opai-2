@@ -1,5 +1,6 @@
 import { Badge, SeccionTarjeta } from "@opai/ds";
 
+import { exigirDatos } from "@/lib/carga";
 import { haceCuanto } from "@/lib/fechas";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
@@ -62,7 +63,7 @@ export default function Pagina({ params }: { params: Promise<{ id: string }> }) 
             </SeccionTarjeta>
             <SeccionTarjeta titulo="Credenciales de plataforma en este entorno" sinRelleno>
               <ul>
-                {(r.ok ? r.data : []).map((c) => (
+                {exigirDatos(r).map((c) => (
                   <li
                     key={c.proveedor}
                     className="flex items-center justify-between border-b border-border px-4 py-3 last:border-b-0"

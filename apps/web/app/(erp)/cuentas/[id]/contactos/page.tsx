@@ -1,10 +1,11 @@
 import { Plus } from "lucide-react";
 
-import { Avatar, Badge, Empty, FilaSeleccionable } from "@opai/ds";
+import { Avatar, Badge, Empty, Estado, FilaSeleccionable } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { telefono } from "@/lib/fechas";
+import { estadoPantalla } from "@/lib/formato";
 import type { SearchParams } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 import type { Contacto } from "@/lib/tipos-maestros";
@@ -19,7 +20,9 @@ type Props = { params: Promise<{ id: string }>; searchParams: SearchParams };
 
 async function Contactos({ cuentaId }: { cuentaId: string }) {
   const r = await ejecutarComoUsuario<Contacto[]>("erp", "core.contactos.list", { cuentaId });
-  const contactos = r.ok ? r.data : [];
+  // Un fallo no se ve como «Sin contactos» (CAR-50).
+  if (!r.ok) return <Estado state={estadoPantalla(r)} variante="lista">{null}</Estado>;
+  const contactos = r.data;
   const nuevo = (
     <EnlaceBotonHoja href="?contacto=nuevo" icono={Plus}>
       Nuevo contacto

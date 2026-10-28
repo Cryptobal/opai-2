@@ -1,5 +1,6 @@
 import { PERMISOS_CORE } from "@opai/domain";
 
+import { datosSiHayPermiso } from "@/lib/carga";
 import { estadoPantalla } from "@/lib/formato";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
@@ -32,13 +33,15 @@ export async function instalacionesActivas() {
 /** Instalación con el contacto principal de su cuenta (para llamar al cliente). */
 export async function instalacionTerreno(id: string) {
   const r = await ejecutarComoUsuario<InstalacionDetalle>(P, "core.instalaciones.get", { id });
-  if (!r.ok) return { state: estadoPantalla(r), i: null, contacto: null };
+  const noEncontrada = !r.ok && r.error.code === "NOT_FOUND";
+  if (!r.ok) return { state: estadoPantalla(r), noEncontrada, i: null, contacto: null };
   const c = await ejecutarComoUsuario<Contacto[]>(P, "core.contactos.list", {
     cuentaId: r.data.cuentaId,
   });
-  const lista = c.ok ? c.data : [];
+  // Sin permiso de contactos no hay a quién llamar; un fallo no se ve como «sin teléfono» (CAR-50).
+  const lista = datosSiHayPermiso(c, []);
   const contacto = lista.find((x) => x.esPrincipal && x.telefono) ?? lista.find((x) => x.telefono);
-  return { state: estadoPantalla(r), i: r.data, contacto: contacto ?? null };
+  return { state: estadoPantalla(r), noEncontrada, i: r.data, contacto: contacto ?? null };
 }
 
 /** Persona con sus documentos y obligatorios faltantes. */
@@ -52,7 +55,9 @@ export async function personaTerreno(id: string) {
     ),
   ]);
   return {
-    state: estadoPantalla(p),
+    // Los documentos también cuentan: un fallo no se ve como «sin documentos» (CAR-50).
+    state: estadoPantalla(p, d),
+    noEncontrada: !p.ok && p.error.code === "NOT_FOUND",
     p: p.ok ? p.data : null,
     docs: d.ok ? d.data.items : [],
     faltantes: d.ok ? d.data.faltantes : [],

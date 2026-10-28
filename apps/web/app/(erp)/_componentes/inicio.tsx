@@ -9,6 +9,7 @@ import { vocabularioActual } from "@/lib/vocabulario";
 import { ActividadInicio } from "./actividad-inicio";
 import { Bandeja } from "./bandeja-diferida";
 import { type Pendiente, PendientesInicio } from "./pendientes-inicio";
+import { datosSiHayPermiso } from "@/lib/carga";
 
 const acciones = (persona: string) => [
   { href: "/cuentas?nueva=1", etiqueta: "Nueva cuenta", corta: "Cuenta", icono: Building2 },
@@ -69,7 +70,7 @@ export async function InicioErp({ nombre, empresa, actor }: Props) {
         </div>
       </div>
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,380px)] lg:items-start">
-        <PendientesInicio items={r.ok ? r.data : []} />
+        <PendientesInicio items={datosSiHayPermiso(r, [])} />
         <div className="grid grid-cols-3 gap-2 md:hidden">
           {ACCIONES.map((a) => (
             <EnlaceBoton

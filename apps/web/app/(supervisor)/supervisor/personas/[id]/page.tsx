@@ -1,11 +1,12 @@
 import { MessageCircle, Phone, Upload } from "lucide-react";
 
-import { Alerta, Avatar, Badge } from "@opai/ds";
+import { Alerta, Avatar, Badge, Estado } from "@opai/ds";
 
 import { HojaSubir } from "@/app/_components/documentos/diferidas";
 import type { TipoDocumento } from "@/app/_components/documentos/tipos";
 import { ESTADO_PERSONA, estadoDe } from "@/app/_components/maestros/estados";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
+import { datosSiHayPermiso } from "@/lib/carga";
 import { rut } from "@/lib/fechas";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
@@ -33,12 +34,14 @@ export default function PersonaTerreno({ params }: { params: Promise<{ id: strin
             capa: "persona",
           }),
         ]);
-        return { ...d, puede, tipos: t.ok ? t.data : [] };
+        return { ...d, puede, tipos: datosSiHayPermiso(t, []) };
       }}
       opciones={(d) => ({ titulo: d.p?.nombreCompleto ?? "Persona" })}
     >
-      {({ p, docs, faltantes, puede, tipos }) => {
-        if (!p) return <Alerta tono="danger" titulo="No encontramos a esta persona" />;
+      {({ state, noEncontrada, p, docs, faltantes, puede, tipos }) => {
+        if (noEncontrada) return <Alerta tono="danger" titulo="No encontramos a esta persona" />;
+        // Sin permisos o con error se ve el estado del DS, nunca «no encontrada» (CAR-50).
+        if (!p || state !== "ready") return <Estado state={state} variante="detalle">{null}</Estado>;
         const e = estadoDe(ESTADO_PERSONA, p.bloqueada ? "bloqueada" : p.estado);
         const tel = p.telefono ? marcable(p.telefono) : null;
         const aviso = avisoUrgente(docs);

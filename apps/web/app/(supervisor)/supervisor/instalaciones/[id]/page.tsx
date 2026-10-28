@@ -1,6 +1,6 @@
 import { Navigation, Phone } from "lucide-react";
 
-import { Alerta, cn, SeccionTarjeta } from "@opai/ds";
+import { Alerta, cn, Estado, SeccionTarjeta } from "@opai/ds";
 
 import { activosPrimero, BadgePuesto } from "@/app/_components/maestros/badge-puesto";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
@@ -24,8 +24,10 @@ export default function InstalacionTerreno({ params }: { params: Promise<{ id: s
       cargar={async () => instalacionTerreno((await params).id)}
       opciones={(d) => ({ titulo: d.i?.nombre ?? "Instalación" })}
     >
-      {({ i, contacto }) => {
-        if (!i) return <Alerta tono="danger" titulo="No encontramos esta instalación" />;
+      {({ state, noEncontrada, i, contacto }) => {
+        if (noEncontrada) return <Alerta tono="danger" titulo="No encontramos esta instalación" />;
+        // Sin permisos o con error se ve el estado del DS, nunca «no encontrada» (CAR-50).
+        if (!i) return <Estado state={state} variante="detalle">{null}</Estado>;
         const destino =
           i.lat !== null && i.lng !== null
             ? `${i.lat},${i.lng}`

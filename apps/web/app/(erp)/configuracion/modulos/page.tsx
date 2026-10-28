@@ -2,6 +2,7 @@ import { listarModulos } from "@opai/capabilities";
 import { Alerta } from "@opai/ds";
 import { PERMISOS_CORE } from "@opai/domain";
 
+import { exigirDatos } from "@/lib/carga";
 import { construirPuede } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
@@ -27,20 +28,18 @@ export default function Modulos() {
     <PaginaConfig
       seccion="modulos"
       titulo="Módulos"
-      cargar={() => ejecutarComoUsuario<Modulo[]>("erp", "core.modules.list")}
-      cabecera={(r) => {
-        const m = r.ok ? r.data : [];
+      cargar={async () => exigirDatos(await ejecutarComoUsuario<Modulo[]>("erp", "core.modules.list"))}
+      cabecera={(m) => {
         const n = (e: string | null) => m.filter((x) => x.estado === e).length;
         return {
           subtitulo: `${n("activo")} activos · ${n("trial")} en trial · ${n(null)} disponibles. Los activa OPAI; tú los solicitas.`,
         };
       }}
     >
-      {(r, indice) => {
-        if (!r.ok) return <Alerta tono="danger" titulo={r.error.message} />;
+      {(modulos, indice) => {
         const puede = construirPuede(indice.rol, indice.acceso)(PERMISOS_CORE.tenantManage);
         const manifests = new Map(listarModulos().map((m) => [m.id, m]));
-        const nombre = (id: string) => r.data.find((x) => x.id === id)?.nombre ?? id;
+        const nombre = (id: string) => modulos.find((x) => x.id === id)?.nombre ?? id;
         return (
           <div className="flex flex-col gap-4">
             <Alerta
@@ -54,7 +53,7 @@ export default function Modulos() {
                 funciones={NUCLEO}
                 pie="Base de todos los módulos"
               />
-              {r.data.map((m) => (
+              {modulos.map((m) => (
                 <TarjetaModulo
                   key={m.id}
                   nombre={m.nombre}
@@ -67,7 +66,7 @@ export default function Modulos() {
                 />
               ))}
             </div>
-            {r.data.length === 0 ? (
+            {modulos.length === 0 ? (
               <p className="t-caption">
                 Por ahora solo está el núcleo; los módulos (Comercial, Operaciones…) aparecerán aquí
                 al publicarse.

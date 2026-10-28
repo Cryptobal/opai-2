@@ -1,6 +1,7 @@
 import { Button } from "@opai/ds";
 import { PERMISOS_CORE } from "@opai/domain";
 
+import { datosSiHayPermiso, exigirDatos } from "@/lib/carga";
 import { fecha, hoyIso } from "@/lib/fechas";
 import { construirPuede } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
@@ -27,8 +28,8 @@ export default function PaginaMarca() {
           ejecutarComoUsuario<Tipo[]>("erp", "core.documento_tipos.list", { capa: "empresa" }),
           requerirIdentidad("/configuracion/marca"),
         ]);
-        const tipos = Object.fromEntries((t.ok ? t.data : []).map((x) => [x.codigo, x.id]));
-        return { marca: m.ok ? m.data : null, tipos, tenantId: id.actual?.tenantId ?? "" };
+        const tipos = Object.fromEntries(datosSiHayPermiso(t, []).map((x) => [x.codigo, x.id]));
+        return { marca: exigirDatos(m), tipos, tenantId: id.actual?.tenantId ?? "" };
       }}
       cabecera={(_, indice) => ({
         subtitulo: "Se aplica a documentos, correos y portales; la interfaz de OPAI no cambia.",
@@ -40,7 +41,6 @@ export default function PaginaMarca() {
       })}
     >
       {({ marca, tipos, tenantId }, indice) => {
-        if (!marca) return null;
         const puede = puedeMarca(indice);
         return (
           <div className="flex flex-col gap-4">

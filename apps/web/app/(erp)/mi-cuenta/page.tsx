@@ -5,7 +5,7 @@ import { Alerta, estilosBoton } from "@opai/ds";
 import { LinkNext } from "@/app/_components/link-next";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { mfaObligatoriaPara } from "@/lib/mfa";
-import { identidadActual } from "@/lib/servidor";
+import { requerirIdentidad } from "@/lib/servidor";
 
 import { DesactivarMfa } from "./desactivar-mfa";
 
@@ -18,12 +18,12 @@ export default function MiCuenta() {
       portal="erp"
       titulo="Mi cuenta"
       ruta="/mi-cuenta"
+      cargando="formulario"
+      // Sin sesión va al login; si leer la política falla, el error.tsx del ERP (CAR-50) y no un
+      // «Protege tu cuenta» engañoso.
       cargar={async () => {
-        const id = await identidadActual();
-        return {
-          activa: id?.mfaActiva ?? false,
-          obligatoria: id ? await mfaObligatoriaPara(id) : false,
-        };
+        const id = await requerirIdentidad("/mi-cuenta");
+        return { activa: id.mfaActiva, obligatoria: await mfaObligatoriaPara(id) };
       }}
     >
       {({ activa, obligatoria }) => (
