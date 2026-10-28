@@ -16,11 +16,14 @@ async function captura(page: Page, nombre: string, info: TestInfo) {
   ).toBe(true);
   // Con una hoja abierta, solo la pantalla: la página completa mezcla el overlay con el fondo.
   const hojaAbierta = (await page.getByRole("dialog").count()) > 0;
+  await page.mouse.move(0, 0);
   for (const tema of ["claro", "oscuro"]) {
     await page.evaluate(
       (t) => document.documentElement.setAttribute("data-theme", t === "oscuro" ? "dark" : "light"),
       tema,
     );
+    // Las filas y controles animan el color 150 ms al cambiar de tema: se espera a que terminen.
+    await page.waitForTimeout(300);
     await page.screenshot({
       path: `e2e/__screenshots__/roles-${nombre}-${tema}-${info.project.name}.png`,
       fullPage: !hojaAbierta,
@@ -117,16 +120,28 @@ test.describe("configuración · roles y permisos (CAR-37)", () => {
     await captura(page, "ficha", info);
 
     // 5. `/api/v1` con sesión: las de roles y permisos corren en el ERP; el resto sigue cerrado.
+    const origin = new URL(page.url()).origin;
     const lista = await page.request.get(
       `/api/v1/core/excepciones/list?input=${encodeURIComponent(JSON.stringify({ membershipId }))}`,
+      { headers: { origin } },
     );
     expect(lista.status()).toBe(200);
     expect((await lista.json()).data).toMatchObject([
       { permiso: "core:documentos.manage", conceder: true },
     ]);
-    const roles = await page.request.post("/api/v1/core/roles/list", { data: { input: {} } });
+    const roles = await page.request.post("/api/v1/core/roles/list", {
+      data: { input: {} },
+      headers: { origin },
+    });
     expect(roles.status()).toBe(200);
-    const fuera = await page.request.get("/api/v1/core/cuentas/list?input=%7B%7D");
+    const ajeno = await page.request.post("/api/v1/core/roles/list", {
+      data: { input: {} },
+      headers: { origin: "https://otro.example" },
+    });
+    expect(ajeno.status()).toBe(403);
+    const fuera = await page.request.get("/api/v1/core/cuentas/list?input=%7B%7D", {
+      headers: { origin },
+    });
     expect(fuera.status()).toBe(403);
 
     // 6. El rol manda de verdad: sin «Ver Cuentas», el usuario ya no ve Cuentas (viewer sí las veía).
