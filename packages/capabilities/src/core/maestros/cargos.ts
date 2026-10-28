@@ -1,9 +1,8 @@
 import { z } from "zod";
 
 import { PERMISOS_CORE } from "@opai/domain";
-
 import { defineCapability } from "../../define";
-import { prohibido } from "../../errores";
+import { rechazoSensible } from "../../errores";
 import { uuidSchema } from "../esquemas";
 import { aFecha, definidos, escribirConEvento, hoy, sinDuplicado } from "./comun";
 import { resumenSueldoDe, resumenSueldoSchema } from "./cargos-resumen";
@@ -81,6 +80,8 @@ export const cargosCreate = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
+    if (input.sueldoSensible && !ctx.autorizar(PERMISOS_CORE.estructurasReadSensible))
+      throw rechazoSensible("No tienes permiso para crear un cargo sensible.");
     await nombreLibre(ctx, input.nombre);
     const data = definidos(input);
     if (dryRun) return vista({ ...data, id: "" });
@@ -111,43 +112,32 @@ export const cargosUpdate = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, { id, ...cambios }, { dryRun }) {
-    const actual = await cargoDe(ctx, id);
-    if (
-      cambios.sueldoSensible !== undefined &&
-      !ctx.autorizar(PERMISOS_CORE.estructurasReadSensible)
-    )
-      throw prohibido("No tienes permiso para cambiar la privacidad de los montos de este cargo");
-    await nombreLibre(ctx, cambios.nombre, id);
-    const data = definidos(cambios);
-    const n = await conteos(ctx, id);
-    if (dryRun) return vista({ ...actual, ...data }, n);
-    const c = await escribirConEvento(
-      ctx,
-      { tipo: "core.cargo.actualizado", entidadTipo: "cargo", payload: () => data },
-      (tx) => sinDuplicado(tx.cargo.update({ where: { id }, data }), DUPLICADO),
-    );
-    return vista(c, n);
+    return ctx.transaccion(async (tx) => {
+      ctx = { ...ctx, db: tx, transaccion: (fn) => fn(tx) };
+      if (typeof (ctx.db as { $executeRaw?: unknown }).$executeRaw === "function")
+        await ctx.db
+          .$executeRaw`SELECT id FROM core.cargos WHERE id = ${id}::uuid AND tenant_id = ${ctx.tenantId}::uuid FOR UPDATE`;
+      const actual = await cargoDe(ctx, id);
+      if (
+        cambios.sueldoSensible !== undefined &&
+        cambios.sueldoSensible !== actual.sueldoSensible &&
+        !ctx.autorizar(PERMISOS_CORE.estructurasReadSensible)
+      )
+        throw rechazoSensible(
+          "No tienes permiso para cambiar la privacidad de los montos de este cargo.",
+        );
+      await nombreLibre(ctx, cambios.nombre, id);
+      const data = definidos(cambios);
+      const n = await conteos(ctx, id);
+      if (dryRun) return vista({ ...actual, ...data }, n);
+      const c = await escribirConEvento(
+        ctx,
+        { tipo: "core.cargo.actualizado", entidadTipo: "cargo", payload: () => data },
+        (tx) => sinDuplicado(tx.cargo.update({ where: { id }, data }), DUPLICADO),
+      );
+      return vista(c, n);
+    });
   },
 });
 
-export const cargosSetActivo = defineCapability({
-  id: "core.cargos.set_activo",
-  descripcion:
-    "Activa o desactiva un cargo. Desactivar no borra: impide usarlo en puestos y vínculos nuevos.",
-  permiso: PERMISOS_CORE.estructurasManage,
-  input: z.object({ id: uuidSchema, activo: z.boolean() }),
-  output: cargoSchema,
-  efecto: "escritura",
-  dryRun: true,
-  async handler(ctx, { id, activo }, { dryRun }) {
-    const actual = await cargoDe(ctx, id);
-    const n = await conteos(ctx, id);
-    if (dryRun) return vista({ ...actual, activo }, n);
-    const c = await escribirConEvento(
-      ctx,
-      { tipo: "core.cargo.actualizado", entidadTipo: "cargo", payload: () => ({ activo }) },
-      (tx) => tx.cargo.update({ where: { id }, data: { activo } }),
-    );
-    return vista(c, n);
-  },
-});
+export { cargosSetActivo } from "./cargos-activo";

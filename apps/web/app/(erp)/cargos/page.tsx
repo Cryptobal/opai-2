@@ -32,6 +32,7 @@ export default function Cargos({ searchParams }: { searchParams: SearchParams })
           ...(await cargarCargosLista(p)),
           voc,
           puedeGestionar: puedeDeIdentidad(identidad)(PERMISOS_CORE.estructurasManage),
+          puedeVerSensible: puedeDeIdentidad(identidad)(PERMISOS_CORE.estructurasReadSensible),
         };
       }}
     >
@@ -45,7 +46,7 @@ export default function Cargos({ searchParams }: { searchParams: SearchParams })
               titulo="Los cargos con sueldo sensible muestran sus montos solo a quien tiene permiso para ver sueldos sensibles."
             />
           ) : null}
-          {d.puedeGestionar ? <HojaCargo /> : null}
+          {d.puedeGestionar ? <HojaCargo puedeVerSensible={d.puedeVerSensible} /> : null}
         </div>
       )}
     </PaginaPortal>

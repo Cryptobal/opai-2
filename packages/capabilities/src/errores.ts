@@ -22,3 +22,11 @@ export const conflicto = (mensaje: string) => new ErrorCapacidad("CONFLICT", men
 export const reglaDeNegocio = (mensaje: string) => new ErrorCapacidad("UNPROCESSABLE", mensaje);
 export const prohibido = (mensaje: string, detalles?: unknown) =>
   new ErrorCapacidad("FORBIDDEN", mensaje, detalles);
+
+/** Rechazo que debe registrarse tras revertir la transacción de negocio. */
+export class RechazoSensible extends ErrorCapacidad {
+  constructor(mensaje: string) {
+    super("FORBIDDEN", mensaje);
+  }
+}
+export const rechazoSensible = (mensaje: string) => new RechazoSensible(mensaje);

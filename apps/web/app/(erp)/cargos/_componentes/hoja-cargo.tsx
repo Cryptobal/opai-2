@@ -15,7 +15,13 @@ const CLASES = [
 ];
 
 /** Nuevo cargo o editar sus datos (nombre, clase, descripción y si el sueldo es sensible). */
-export function HojaCargo({ cargo }: { cargo?: Cargo }) {
+export function HojaCargo({
+  cargo,
+  puedeVerSensible,
+}: {
+  cargo?: Cargo;
+  puedeVerSensible: boolean;
+}) {
   const hoja = useHojaUrl(cargo ? "editar" : "nuevo");
   const router = useRouter();
   const { ejecutar, pendiente, error } = useCapacidad("erp");
@@ -28,7 +34,7 @@ export function HojaCargo({ cargo }: { cargo?: Cargo }) {
       nombre: nombre.trim(),
       clase,
       descripcion: descripcion.trim() || null,
-      sueldoSensible: sensible,
+      ...(sensible !== (cargo?.sueldoSensible ?? false) ? { sueldoSensible: sensible } : {}),
     };
     const r = await ejecutar<{ id: string }>(
       cargo ? "core.cargos.update" : "core.cargos.create",
@@ -76,12 +82,14 @@ export function HojaCargo({ cargo }: { cargo?: Cargo }) {
             onChange={(e) => setDescripcion(e.target.value)}
           />
         </Campo>
-        <Switch
-          etiqueta="Sueldo sensible"
-          descripcion="Solo quien tiene el permiso de sueldos sensibles (owner y admin) ve los montos"
-          activo={sensible}
-          onCambiar={setSensible}
-        />
+        {puedeVerSensible ? (
+          <Switch
+            etiqueta="Sueldo sensible"
+            descripcion="Solo quien tiene el permiso de sueldos sensibles (owner y admin) ve los montos"
+            activo={sensible}
+            onCambiar={setSensible}
+          />
+        ) : null}
       </div>
     </Sheet>
   );
