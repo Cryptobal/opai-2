@@ -2,6 +2,7 @@ import { auditarRechazoSensible } from "./execute-rechazo";
 import { controlAgente } from "./agentes/control";
 import { denegar, falla } from "./autorizacion";
 import { ErrorCapacidad } from "./errores";
+import { conAuditoriaAlFinal } from "./execute-auditoria-final";
 import { ejecutarLecturaAuditada } from "./execute-lectura";
 import { consumoEjecucion } from "./execute-medicion";
 import { auditarSiPlataforma, eventoAuditoria, repeticion, tenantDe } from "./execute-util";
@@ -67,13 +68,10 @@ async function correr(
       );
     } else if (auditaAqui) {
       crudo = await ctx.transaccion(async (tx) => {
-        const salidaCruda = await c.handler(
-          { ...ctx, db: tx, transaccion: (fn) => fn(tx) },
-          entrada.data,
-          modo,
-        );
-        await ctx.auditoria.registrar(
-          tx,
+        const alFinal = conAuditoriaAlFinal(ctx, tx);
+        const salidaCruda = await c.handler(alFinal.ctx, entrada.data, modo);
+        // Último paso antes del COMMIT: con el lock de auditoría tomado no se pide nada al pool.
+        await alFinal.volcar(
           eventoAuditoria(c, ctx.actor, ctx.tenantId, entrada.data, salidaCruda, opciones),
         );
         return salidaCruda;
