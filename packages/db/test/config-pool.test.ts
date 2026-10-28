@@ -12,6 +12,7 @@ describe("pool por instancia", () => {
       idleTimeoutMillis: 5000,
       connectionTimeoutMillis: 10000,
       keepAlive: true,
+      keepAliveInitialDelayMillis: 10000,
     });
   });
   it("lee las variables y rechaza valores inválidos", () => {
@@ -54,6 +55,18 @@ describe("pool por instancia", () => {
     expect(configPool({}, `${neon}?sslmode=require`, true).connectionString).toContain(
       "sslmode=verify-full",
     );
+  });
+  it("no altera una contraseña con %, @, # u otros caracteres codificados al reescribir sslmode", () => {
+    for (const clave of ["p%40ss%23w%25rd", "a%2Fb%3Fc%26d", "%C3%B1and%C3%BA%20x", "pw+1~!*"]) {
+      const original = `postgresql://app:${clave}@ep-x-pooler.sa-east-1.aws.neon.tech/db?sslmode=require`;
+      const nueva = conSslVerificado(original);
+      expect(nueva).toBe(original.replace("sslmode=require", "sslmode=verify-full"));
+      // Lo que pg lee de la URL (decodificado) es idéntico antes y después.
+      expect(decodeURIComponent(new URL(nueva).password)).toBe(
+        decodeURIComponent(new URL(original).password),
+      );
+      expect(new URL(nueva).username).toBe("app");
+    }
   });
   it("respeta disable, verify-full, uselibpqcompat y las URL sin sslmode", () => {
     for (const u of [
