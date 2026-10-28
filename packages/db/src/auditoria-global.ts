@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 
 import { clienteApp } from "./client";
+import { marcarLockAuditoria } from "./lock-auditoria";
 import { notificarConsulta } from "./metricas";
 import type { TenantTx } from "./transaccion";
 
@@ -39,6 +40,9 @@ export async function agregarAAuditoriaGlobal(
   tx?: TenantTx,
 ) {
   notificarConsulta(); // $queryRaw no pasa por el hook de modelos Prisma.
+  // Como el append por tenant (#102): con el lock de la cadena tomado, la transacción no debe pedir
+  // otra conexión al pool hasta su COMMIT.
+  if (tx) marcarLockAuditoria();
   const ejecutar = (d: TenantTx) => d.$queryRaw<{ id: string; seq: number; hash: string }[]>`
     SELECT * FROM core.auditoria_global_append(
       ${randomUUID()}::uuid, ${ambito}::text, ${hecho.actorTipo}::text, ${hecho.actorId}::text,

@@ -94,14 +94,17 @@ REVOKE ALL ON "core"."aprobaciones_plataforma", "core"."auditoria_global" FROM o
 GRANT SELECT, INSERT, UPDATE ON "core"."aprobaciones_plataforma" TO opai_app;
 GRANT SELECT, INSERT ON "core"."auditoria_global" TO opai_app;
 
--- Append encadenado por ámbito. SECURITY INVOKER, como core.auditoria_append.
+-- Append encadenado por ámbito. SECURITY INVOKER y con la misma espera máxima del lock que
+-- core.auditoria_append desde 20261028220000_timeouts_opai_app (3 s; vencido, falla con 55P03 y la
+-- transacción del llamador hace ROLLBACK).
 CREATE FUNCTION core.auditoria_global_append(
   p_id uuid, p_ambito text, p_actor text, p_actor_id text, p_via_user text, p_capability text,
   p_tenant_objetivo uuid, p_origen_tenant uuid, p_entity_type text, p_entity_id text,
   p_payload jsonb, p_antes jsonb, p_despues jsonb, p_ip_cifrada text, p_user_agent text,
   p_created_at timestamptz, p_origen_evento uuid
 ) RETURNS TABLE(id uuid, seq integer, hash text)
-LANGUAGE plpgsql VOLATILE SECURITY INVOKER SET search_path = pg_catalog, core AS $$
+LANGUAGE plpgsql VOLATILE SECURITY INVOKER SET search_path = pg_catalog, core
+  SET lock_timeout = '3s' AS $$
 DECLARE
   v_seq integer;
   v_anterior text;
@@ -214,5 +217,5 @@ COMMIT;
 --   DROP FUNCTION core.auditoria_global_append(uuid, text, text, text, text, text, uuid, uuid, text, text, jsonb, jsonb, jsonb, text, text, timestamptz, uuid);
 --   DROP TABLE core.auditoria_global;
 --   DROP TABLE core.aprobaciones_plataforma;
---   DELETE FROM _prisma_migrations WHERE migration_name = '20261028220000_plataforma_aprobaciones_auditoria';
+--   DELETE FROM _prisma_migrations WHERE migration_name = '20261028230000_plataforma_aprobaciones_auditoria';
 --   COMMIT;

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { microAUsd, PERMISOS_PLATAFORMA } from "@opai/domain";
 
 import { defineCapability } from "../../define";
+import { externo } from "../../externo";
 import { iso, requierePlataforma } from "../comun";
 import { uuidSchema } from "../esquemas";
 import { inicioDeMes, metricasDelMes } from "./metricas";
@@ -44,7 +45,7 @@ export const platformTenantPanel = defineCapability({
         modalidad: z.string(),
         estado: z.string(),
         ultimoTestEn: z.string().nullable(),
-        ultimoError: z.string().nullable(),
+        ultimoError: externo(z.string().nullable()),
       }),
     ),
   }),

@@ -1,6 +1,5 @@
-import type { TenantTx } from "@opai/db";
-
 import { auditarEnPlataforma, hechoPlataforma } from "./agentes/plataforma";
+import type { EventoPropio } from "./execute-auditoria-final";
 import { eventoAuditoria, sinSensibles } from "./execute-util";
 import type { Capacidad, Contexto, OpcionesEjecucion, Resultado } from "./types";
 
@@ -11,7 +10,7 @@ import type { Capacidad, Contexto, OpcionesEjecucion, Resultado } from "./types"
  * Auditoría de una escritura de plataforma con `tenantObjetivo` (CAR-36): va a la auditoría de
  * plataforma y, si el objetivo se resolvió, también a la cadena de ESA empresa (es su cambio), las
  * dos en una transacción propia del objetivo (no atómica con el handler, que escribe con
- * `ctx.plataforma.paraTenant`, fuera de `ctx.transaccion`). Nunca en la empresa actual si no es el
+ * `ctx.plataforma.empresa(id)`, fuera de `ctx.transaccion`). Nunca en la empresa actual si no es el
  * objetivo. Las de plataforma sin objetivo las audita `correr`, atómicas con el handler.
  */
 export async function auditarSiPlataforma(
@@ -65,23 +64,19 @@ export const auditaConElHandler = (ctx: Contexto, c: Capacidad, dryRun: boolean)
   !dryRun;
 
 /**
- * Auditoría de una escritura con su handler, en la misma transacción (ADR-052): las `platform.*`
- * van a la auditoría de plataforma, nunca a la cadena de la empresa de la key o de la sesión.
+ * Evento propio de una escritura auditada con su handler (ADR-052): las `platform.*` van a la
+ * auditoría global (con antes/después si los declaran), nunca a la cadena de la empresa de la key
+ * o de la sesión; el resto, a la de la empresa.
  */
-export function auditarEscritura(
+export function eventoDeEscritura(
   ctx: Contexto,
   c: Capacidad,
-  tx: TenantTx,
   entrada: unknown,
   salida: unknown,
   opciones: OpcionesEjecucion,
-): Promise<unknown> {
+): EventoPropio {
   const evento = eventoAuditoria(c, ctx.actor, ctx.tenantId, entrada, salida, opciones);
   return c.modulo === "platform"
-    ? auditarEnPlataforma(
-        ctx,
-        hechoPlataforma(ctx, { ...evento, ...cambioDe(c, entrada, salida) }),
-        tx,
-      )
-    : ctx.auditoria.registrar(tx, evento);
+    ? { global: hechoPlataforma(ctx, { ...evento, ...cambioDe(c, entrada, salida) }) }
+    : { empresa: evento };
 }

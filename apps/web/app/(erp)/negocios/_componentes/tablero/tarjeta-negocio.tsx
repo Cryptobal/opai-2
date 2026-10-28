@@ -4,6 +4,7 @@ import { LinkNext } from "@/app/_components/link-next";
 import { fecha, pesos } from "@/lib/fechas";
 
 import type { NegocioFila } from "../datos";
+import { fichaDesdeTablero } from "../rutas";
 import { MoverA } from "./mover-a";
 import type { EtapaTablero } from "./use-mover";
 
@@ -27,7 +28,7 @@ export function TarjetaNegocio(p: { n: NegocioFila; etapas: EtapaTablero[] | nul
     >
       <div className="flex items-start gap-2">
         <LinkNext
-          href={`/negocios/${n.id}`}
+          href={fichaDesdeTablero(n.id, n.etapaId)}
           className="min-w-0 flex-1 py-1 text-base font-medium text-fg outline-none hover:underline focus-visible:outline-2 focus-visible:outline-focus"
         >
           {n.titulo}
