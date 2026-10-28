@@ -1,13 +1,16 @@
 "use client";
 
 import { MoreHorizontal } from "lucide-react";
+import dynamic from "next/dynamic";
 import { useState } from "react";
 
 import { avisar, type ItemMenu, Menu } from "@opai/ds";
 
 import { useCapacidad } from "../use-capacidad";
-import { type Confirmacion, DialogoConfirmar } from "./dialogo-confirmar";
+import type { Confirmacion } from "./dialogo-confirmar";
 import { useParametros } from "./use-url";
+
+const DialogoConfirmar = dynamic(() => import("./dialogo-confirmar").then((m) => m.DialogoConfirmar));
 
 /** Acción del menú ⋯ de una ficha: abrir una hoja por URL o ejecutar una capacidad. */
 export type AccionEntidad = {

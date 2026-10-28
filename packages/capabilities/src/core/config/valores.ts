@@ -6,7 +6,7 @@ import { listarAjustes } from "./catalogo";
 import { type CampoAjuste, valorPorDefecto } from "./registro";
 
 export type Origen = "defecto" | "plataforma" | "tenant" | "usuario";
-export type ValorEfectivo = { valor: unknown; origen: Origen };
+export type ValorEfectivo = { valor: unknown; origen: Origen; version?: number };
 
 const k = (modulo: string, clave: string) => `${modulo}.${clave}`;
 
@@ -59,6 +59,15 @@ export async function valoresEfectivos(
       const r = c.schema.safeParse(mapa.get(k(c.modulo, c.clave)));
       if (r.success) actual = { valor: r.data, origen };
     }
+    if (c.meta.ambito === "usuario" && c.clave.startsWith("navegacion_"))
+      actual.version =
+        guardados.find(
+          (g) =>
+            g.ambito === "usuario" &&
+            g.sujetoId === usuarioId &&
+            g.modulo === c.modulo &&
+            g.clave === c.clave,
+        )?.version ?? 0;
     resultado.set(k(c.modulo, c.clave), actual);
   }
   return resultado;

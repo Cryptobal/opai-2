@@ -31,15 +31,18 @@ export const notificacionesList = defineCapability({
   input: z.object({
     soloNoLeidas: z.boolean().default(false),
     limite: z.number().int().min(1).max(100).default(30),
+    antesDe: uuidSchema.optional(),
   }),
   output: z.object({ items: z.array(notificacionSchema), noLeidas: z.number() }),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
     const usuarioId = usuarioDe(ctx);
-    return ctx.transaccion((tx) =>
-      leerInbox(tx, ctx.tenantId, usuarioId, input.soloNoLeidas, input.limite),
-    );
+    return ctx.transaccion(async (tx) => {
+      const resultado = await leerInbox(tx, ctx.tenantId, usuarioId, input.soloNoLeidas, input.limite, input.antesDe);
+      if (!resultado.cursorValido) throw noEncontrado("El aviso");
+      return { items: resultado.items, noLeidas: resultado.noLeidas };
+    });
   },
 });
 

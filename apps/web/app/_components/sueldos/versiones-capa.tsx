@@ -1,6 +1,6 @@
 import { Alerta, TablaEstructura, VersionesVigencia } from "@opai/ds";
 import type { EstructuraVista, Nivel } from "@/lib/tipos-sueldo";
-import { AnularCapa } from "./anular-capa";
+import { AnularCapaDiferida } from "./anular-capa-diferida";
 
 export function VersionesCapa({
   versiones,
@@ -30,7 +30,7 @@ export function VersionesCapa({
             ) : null}
             <TablaEstructura estructura={v} origen={{ capa: nivel, version: v.vigenteDesde }} />
             {v.motivo ? <p className="t-body-sm">Motivo: {v.motivo}</p> : null}
-            {gestionar && v.estado !== "anulada" ? <AnularCapa id={v.id} /> : null}
+            {gestionar && v.estado !== "anulada" ? <AnularCapaDiferida id={v.id} /> : null}
           </>
         ),
       }))}

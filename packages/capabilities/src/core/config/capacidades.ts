@@ -27,7 +27,13 @@ export const configGet = defineCapability({
   permiso: null,
   input: filtro,
   output: z.array(
-    z.object({ modulo: z.string(), clave: z.string(), valor: z.unknown(), origen: z.string() }),
+    z.object({
+      modulo: z.string(),
+      clave: z.string(),
+      valor: z.unknown(),
+      origen: z.string(),
+      version: z.number().optional(),
+    }),
   ),
   efecto: "lectura",
   dryRun: false,

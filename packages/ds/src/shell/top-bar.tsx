@@ -140,7 +140,8 @@ export function AppBar(props: AppBarProps) {
         ) : null}
         {campana}
         {usuario ? (
-          <div className="xl:hidden">
+          // El usuario va aquí en iPad (768–1023, D9) y al pie de la barra lateral desde 1024 px.
+          <div className="lg:hidden">
             {menuUsuario ? (
               <UserMenu usuario={usuario} items={menuUsuario} />
             ) : (

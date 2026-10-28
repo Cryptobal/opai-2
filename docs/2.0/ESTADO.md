@@ -97,6 +97,15 @@ No se declara CI, QA remota ni aprobación del head nuevo; Neon sigue sin modifi
 
 ## Hecho
 
+- **PR #75 · QA N1 y N2 (OpenCode):** etiquetas completas con separación silábica en español cuando sea necesaria, riel de 80 px y tipografía del DS; filas de fijados y reintento de al menos 44 px. Ajuste técnico de OpenCode según revisión 5668628029, sin decisiones de negocio nuevas ni migraciones propias. Los CA parciales del Brief 05 §16 siguen vigentes.
+
+- **PR #75 · revisión 5666749146:** OpenCode retira abreviaturas del ERP y recupera el área abierta guardada al entrar en Inicio o Configuración. Ajuste técnico según el encargo; sin decisiones de negocio nuevas. Permanecen los CA y la medición de rendimiento parciales documentados en `briefs/BRIEF-05-navegacion.md` §16.
+
+- **PR #75 · merge de main `bf97199` (OpenCode):** se preservan «Más», las preferencias y las comprobaciones y el menú de portal de inicio. Gate local verde hasta build y presupuesto; e2e bloqueado porque la base de aplicación carece de `memberships.portal_inicio`. No se aplicaron migraciones. Detalle y CA parciales en `briefs/BRIEF-05-navegacion.md` §16.
+
+- **PR #75 · seguimiento de revisión y QA (OpenCode, encargo del PR #75).** Merge normal de main con #73 y #74; se conserva la nota de cada uno. «Más» muestra fijados, grupos plegables y cuenta con iconos y cierre en peligro; el riel incorpora acceso a «Más». El acordeón inicial compara la clave del área, las etiquetas largas tienen abreviatura y los errores de preferencias se anuncian y permiten reintentar sin presentar falsamente fijados vacíos. El revisor independiente detectó que los fijados de «Más» recargaban el documento: corregido usando la navegación del shell y cerrando la hoja. Adaptaciones técnicas de OpenCode según el encargo, sin decisión de negocio nueva. Pendientes: recorrido real a 768, dispositivos reales, lector de pantalla y resto de hallazgos medios/bajos fuera del addendum; los CA parciales del brief siguen vigentes.
+
+- **Brief 05 PR B · reducción del JS del shell (OpenCode / GPT-6.1 Sol, continuación del 27-oct).** Adaptaciones técnicas dentro del encargo, sin decisiones de negocio nuevas: preferencias y recientes en una isla diferida sin remontar el shell; SVG estáticos enviados por el servidor en vez del catálogo de iconos cliente; contenido de «Más», fijados, controles de pin, editor de área principal y muestras de navegación/PWA de `/ds` diferidos. El editor conserva su estado independiente y ofrece reintento visible si falla la carga; se descartó el contexto compartido tras un fallo del e2e. Se descartan preferencias al revocar acceso y «Más» devuelve el foco al disparador. Presupuesto verde en 84 rutas (antes 31 excedidas); Inicio 163,60 → 159,17 KB gzip. Margen mínimo ERP 0,68 KB; `/ds` 0,42 KB: el objetivo orientativo de ≥1 KB queda parcial. Siempre DS OPAI 2.0; sin migraciones, cambios de topes ni del script de presupuesto. `puedeEditar` permite escribir ajustes de usuario `navegacion_` a agentes con principal usuario cuando su usuario coincide con `viaUserId`. Evidencia y límites en `briefs/BRIEF-05-navegacion.md` §16. No implica integración ni cierre en Linear.
 - **NÚCLEO-G2 · FORCE RLS y globales acotado (OpenCode / openai/gpt-6.1-sol).**
   Continuación por Codex: separación de unitarios y suites DB sin perder cobertura,
   preparación independiente del test FORCE y corrección del harness ESLint;
@@ -505,6 +514,13 @@ puede integrar. Alcance, CA y límites en
 
 ## En curso
 
+- **Autorrevisión de Brief 05 PR B (continuación del 27-oct):** se corrigen pérdida de fijados con clics rápidos y con validación pendiente, cupos ocupados por fichas definitivamente inaccesibles, respaldo del área del rol, escrituras redundantes de área y pérdida de enlaces/lectura individual de avisos. La Bandeja muestra el total real y pagina con cursor propio sin saltar avisos cuando otra pestaña marca leído el cursor. Su interacción se carga diferida para no elevar más topes de JS. Elecciones técnicas de OpenCode / GPT-6.1 Sol dentro del encargo; sin decisión de negocio ni migración nueva. Pruebas y límites de evidencia por cada CA en el brief §16.
+  La cola captura la revisión antes de la validación asíncrona, rechaza una recarga concurrente y mezcla solo el campo escrito; la regresión conserva los fijados remotos sin enviar una escritura obsoleta. Autorrevisión técnica independiente cerrada, sin sustituir la revisión formal del PR.
+
+- **Continuación de Brief 05 PR B (encargo 27-oct-2026 05:00 CLT):** se incorpora `origin/main` `5c18a92` mediante merge normal, conservando identidad de servicio (#70), MFA (#65), «Mi cuenta» en el menú del ERP y las funciones de navegación del trabajo local. El e2e de navegación reutiliza el login con MFA de main. Adaptación técnica de OpenCode / GPT-6.1 Sol dentro del encargo, sin decisión de negocio ni migración nueva. El reporte de aceptación parcial sigue en el brief §16.
+
+- **Brief 05 · PR B (27-oct-2026, rama `brief/05-pr-b-navegacion`, sin integrar):** continuación del trabajo local conservado y merge normal de `origin/main`. Modelo de áreas y acciones declarativas, acordeón desde 1024, fijados, recientes, barra inferior por área con hoja Más, selector de área principal y Bandeja en Inicio; solo componentes/tokens del DS V2 y export aprobado `53e9b74b`. Se conserva ADR-050 (Buscar arriba en móvil, riel sin wordmark, usuario al pie) y las guardas de permisos efectivos/shell sin acceso de `main`. **Decisiones técnicas de implementación de OpenCode / GPT-6.1 Sol dentro del encargo:** `ninguna` distingue acordeón cerrado de ausencia de preferencia; revisiones optimistas más advisory lock por ajuste evitan sobrescribir una lista obsoleta; reiniciar una preferencia de navegación conserva una fila inválida para su esquema, que se lee como valor por defecto y mantiene la revisión monotónica (evita ABA). Fichas fijadas/recientes se revalidan por las capacidades de lectura existentes, fallando cerrado; no se muestran URLs arbitrarias del navegador. Sin decisión de negocio ni migración nueva. Aceptación y evidencia en `briefs/BRIEF-05-navegacion.md` §16; la tarea específica de implementación del PR B no aparece identificada en el encargo (CAR-13 corresponde al brief).
+
 - **Seguimiento de MFA, PR #65 (27-oct-2026, review 5662691274):** el límite con sesión
   pasa al before hook de TOTP/respaldo, incluidas llamadas HTTP directas y confirmación
   de enrolamiento; la reserva usa UPDATE condicional de Prisma con retorno y reintento
@@ -683,5 +699,7 @@ original. CI de `60e54f0`, run `40551210403`, sigue con car8:100 teléfono falla
 aserciones, sin ampliar timeouts ni atribuir una causa no demostrada. El objetivo
 principal sigue pendiente. Detalles, límites y capturas en §10 del Brief 11.
 Sin cambios de negocio, migraciones, permisos ni plan del ROADMAP.
+
+**Brief 05, encargo #75:** Codex incorporó `main` `7fc900c`, cerró ante fallo de red la validación de fichas fijadas y difirió el diálogo de confirmación de acciones para cumplir el presupuesto de `/instalaciones/[id]` (164,9/165 KB). Son decisiones técnicas de Codex; los CA parciales y la medición ADR-045 siguen pendientes en el Brief 05.
 
 - **Corrección QA del PR #80 · montos de sueldo.** Codex aplica el tope de 100.000.000 CLP por concepto indicado en el encargo y valida separadores de miles chilenos sin corregir texto inválido. Los porcentajes conservan su regla; el detalle y la validación están en el brief 07b y el PR.
