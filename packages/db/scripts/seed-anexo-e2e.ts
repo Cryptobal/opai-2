@@ -1,4 +1,4 @@
-import { cerrarClientes, dbAdmin } from "../src/index";
+import { cerrarClientes, dbAdmin, enTransaccion, type TenantTx } from "../src/index";
 
 const PERSONA_ID = "00000000-0000-7000-8000-000000000082";
 
@@ -10,7 +10,12 @@ async function main() {
     process.env["NODE_ENV"] === "production"
   )
     throw new Error("Solo e2e local.");
-  const db = dbAdmin();
+  // FORCE RLS: el tenant se fija con `enTransaccion`; `tenants` no tiene RLS y da el id.
+  const { id: tenantId } = await dbAdmin().tenant.findUniqueOrThrow({ where: { slug: "gard" } });
+  await enTransaccion(tenantId, sembrar);
+}
+
+async function sembrar(db: TenantTx) {
   const vinculo = await db.vinculoLaboral.findFirstOrThrow({
     where: { personaId: PERSONA_ID, estado: "vigente" },
   });

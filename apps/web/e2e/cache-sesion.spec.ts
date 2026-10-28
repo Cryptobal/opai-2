@@ -1,5 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
 
+import { ocultarIndicadorDev } from "./indicador-dev";
 import { entrar as iniciarSesion } from "./sesion";
 
 import { digitoVerificador } from "@opai/domain";
@@ -13,6 +14,10 @@ const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD
 
 test.use({ actionTimeout: 30_000 });
 test.setTimeout(180_000);
+
+// Solo dev: el indicador de Next (`nextjs-portal`, abajo a la izquierda) tapa el menú de usuario y el
+// selector del riel y intercepta el clic. No es un error de la app: es el badge del propio Next.
+test.beforeEach(({ page }) => ocultarIndicadorDev(page));
 
 async function entrar(page: Page, correo = email) {
   await iniciarSesion(page, correo);

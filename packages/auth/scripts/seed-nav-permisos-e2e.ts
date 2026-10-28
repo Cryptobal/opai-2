@@ -1,7 +1,8 @@
 import { sembrarAlcanceNav } from "./seed-nav-alcance-e2e";
 // Fixture exclusiva de la base local E2E: usuarios con concesión y denegación explícitas.
 import { hashPassword } from "better-auth/crypto";
-import { cerrarClientes, dbAdmin } from "@opai/db";
+import { cerrarClientes, dbAdmin, enTransaccion } from "@opai/db";
+// Las tablas de tenant tienen FORCE RLS: se escribe con `enTransaccion(tenantId)`, nunca con el dueño a secas.
 
 async function main() {
   const url = new URL(process.env["DATABASE_URL_MIGRATE"] ?? "postgresql://sin-configurar/");
@@ -14,9 +15,8 @@ async function main() {
   const password = process.env["E2E_PASSWORD"];
   if (!password) throw new Error("Falta E2E_PASSWORD");
   const hash = await hashPassword(password);
-  const db = dbAdmin();
-  const tenant = await db.tenant.findUniqueOrThrow({ where: { slug: "gard" } });
-  await db.$transaction(async (tx) => {
+  const tenant = await dbAdmin().tenant.findUniqueOrThrow({ where: { slug: "gard" } });
+  await enTransaccion(tenant.id, async (tx) => {
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(70168)`;
     const persona = await tx.persona.upsert({
       where: { tenantId_rut: { tenantId: tenant.id, rut: "11111111-1" } },
