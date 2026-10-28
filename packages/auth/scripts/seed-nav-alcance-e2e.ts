@@ -1,7 +1,7 @@
-import type { Prisma } from "@opai/db";
+import type { TenantTx } from "@opai/db";
 
 /** Solo lo invoca la fixture de navegación después de verificar que la base es opai_e2e local. */
-export async function sembrarAlcanceNav(tx: Prisma.TransactionClient, tenantId: string, membershipId: string) {
+export async function sembrarAlcanceNav(tx: TenantTx, tenantId: string, membershipId: string) {
   const cuenta = await tx.cuenta.upsert({
     where: { id: "00000000-0000-7000-8000-000000000080" },
     update: {},

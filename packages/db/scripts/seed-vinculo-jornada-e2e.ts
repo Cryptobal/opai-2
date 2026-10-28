@@ -1,20 +1,20 @@
-import { cerrarClientes, dbAdmin } from "../src/index";
+import { cerrarClientes, dbAdmin, enTransaccion, type TenantTx } from "../src/index";
+import { exigirBaseE2E } from "./exigir-base-e2e";
 
 const PERSONA_ID = "00000000-0000-7000-8000-000000000082";
 
 async function main() {
-  const url = new URL(process.env["DATABASE_URL_MIGRATE"] ?? "postgresql://sin-configurar/");
-  if (
-    !["localhost", "127.0.0.1"].includes(url.hostname) ||
-    !/^\/opai_e2e(?:_[a-zA-Z0-9_]+)?$/.test(url.pathname) ||
-    process.env["NODE_ENV"] === "production"
-  )
-    throw new Error("Solo e2e local.");
-  const db = dbAdmin();
+  exigirBaseE2E();
+  // FORCE RLS: el tenant se fija con `enTransaccion`; `tenants` no tiene RLS y da el id.
+  const { id: tenantId } = await dbAdmin().tenant.findUniqueOrThrow({ where: { slug: "gard" } });
+  await enTransaccion(tenantId, (db) => sembrar(db, tenantId));
+}
+
+async function sembrar(db: TenantTx, tenantId: string) {
   const origen = await db.instalacion.findUniqueOrThrow({
     where: { id: "00000000-0000-7000-8000-000000000081" },
   });
-  const { tenantId, cuentaId } = origen;
+  const { cuentaId } = origen;
   const cargo = await db.cargo.findUniqueOrThrow({
     where: { tenantId_nombre: { tenantId, nombre: "Cargo navegación E2E" } },
   });
