@@ -30,6 +30,19 @@ describe.skipIf(!urlPropietario)("inbox propio: página y conteo en una sentenci
       ).id;
     [tenantId, otroTenant] = await Promise.all([tenant(), tenant()]);
     [usuarioId, otroUsuario] = await Promise.all([user(), user()]);
+    // Destinatarios miembros de cada empresa (trigger usuario_miembro, CAR-46).
+    await e.admin.membership.createMany({
+      data: [
+        [tenantId, usuarioId],
+        [tenantId, otroUsuario],
+        [otroTenant, usuarioId],
+      ].map(([t, u]) => ({
+        tenantId: t as string,
+        userId: u as string,
+        rol: "viewer",
+        portales: ["erp"],
+      })),
+    });
     await e.admin.notificacion.createMany({
       data: [
         ...[1, 2, 3].map((n) => ({
