@@ -739,6 +739,34 @@ En la rama `fix/version-cargo-bonos`, Codex eligió rechazar el versionado de un
 
 La decisión de alcance de OPAI 2.0 en el encargo t500u exige que Inicio y Vencimientos compartan el criterio y respeten el plazo de cada tipo (30 días por defecto). La implementación en curso usa la matriz de personas para ambos conteos. Queda pendiente conservar por separado los documentos de otras entidades que antes contaba Inicio, con un enlace propio, y verificar el límite de 2.000 personas; hasta resolverlo el criterio de alcance está parcial.
 
+### Brief 07b · PR 2: retiro del nivel cargo (27-oct-2026)
+
+Codex completa el bloque 5 en `brief/07b-pr2-retiro-cargo`, sin migración de
+esquema. Catálogo «Cargos» sin montos en UI/API/MCP, aviso cerrable, archivo de
+versiones originales con `DatoArchivado` del DS 2.0 (también en `/ds`) y bloqueo
+`FORBIDDEN` de creación/versionado/anulación de nivel cargo, incluso en preview.
+Se conservan lectura, aislamiento y auditoría de montos con `read_sensible` (D7).
+El script manual idempotente archiva por tenant con `--dry-run`/`--apply`, sin
+conversión ni borrado. Se probó solo en Postgres local; no se ejecutó en Neon.
+
+Decisiones técnicas de Codex: campo `estado` textual existente, con valor `archivada`, bloqueo
+independiente de la corrida del script, auditoría agrupada y conteos consolidados
+para evitar N+1, aviso recordado en el navegador. El historial de persona incluye
+los cargos de vínculos actuales y terminados y enlaza sus versiones originales.
+Adaptación del export 21: no existe persistencia de periodos pagados en el Núcleo;
+se muestran fechas contractuales explícitas, sin reconstruir ni inventar pagos.
+D10 elige archivar: el export 20 de conversión no se implementa como conversión.
+CA-2 implementado con esa adaptación; el detalle está en «Construcción del PR 2»
+del brief. CA-3/CA-4 siguen en los PR 3/4; no cambia el ROADMAP. Evidencia final en
+`PR-BODY.md` sin versionar, según encargo; no sustituye CI ni revisión independiente.
+
+
+Validación local de este bloque: typecheck/lint, 1.021 tests generales, test:db
+119+181+25, build y presupuesto en verde, sin elevar topes. Pantallas e Inspector
+a 375/1024/1280 con un worker; lista/detalle/persona con 5/8/6 operaciones y
+aserción ≤8. Capturas de datos sintéticos en `apps/web/e2e/__screenshots__/07b-*cargo*.png`.
+Autorrevisión por subagente sin bloqueantes; CI y revisión independiente del head
+se verificarán después de abrir el PR, que este encargo prohíbe crear.
 **Brief 03, continuidad CAR-7:** Codex configura el pool por instancia y avisa una
 vez si el host en Vercel no contiene `-pooler.`; el test de rendimiento calienta con sesión y
 registra tres cargas. Son decisiones técnicas de implementación, pendientes de

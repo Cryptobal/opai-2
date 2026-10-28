@@ -7,7 +7,7 @@ export async function ocultasDe(ctx: Contexto, filas: FilaEstructura[]) {
   const ocultas = new Map(
     await Promise.all(filas.map(async (f) => [f.id, await ocultarMontos(ctx, f, false)] as const)),
   );
-  const visibles = filas.filter((f) => f.nivel !== "cargo" && !ocultas.get(f.id));
+  const visibles = filas.filter((f) => !ocultas.get(f.id));
   const primera = visibles[0];
   if (primera)
     await ctx.transaccion((tx) =>
@@ -21,6 +21,7 @@ export async function ocultasDe(ctx: Contexto, filas: FilaEstructura[]) {
           estructuras: visibles.map((f) => ({
             id: f.id,
             nivel: f.nivel,
+            cargoId: f.cargoId ?? null,
             instalacionId: f.instalacionId ?? null,
             puestoId: f.puestoId ?? null,
             personaId: f.personaId ?? null,

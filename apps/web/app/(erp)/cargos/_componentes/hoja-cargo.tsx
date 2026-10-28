@@ -41,9 +41,9 @@ export function HojaCargo({
       cargo ? { id: cargo.id, ...campos } : campos,
     );
     if (!r) return;
-    avisar.exito(cargo ? "Cargo actualizado" : "Cargo creado: define su estructura de sueldo");
+    avisar.exito(cargo ? "Cargo actualizado" : "Cargo creado");
     hoja.cerrar();
-    if (!cargo) router.push(`/cargos/${r.id}?version=1`);
+    if (!cargo) router.push(`/cargos/${r.id}`);
   }
   return (
     <Sheet

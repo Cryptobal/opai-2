@@ -40,7 +40,7 @@ export function MuestraNavegacion() {
           {
             valor: "personas",
             etiqueta: "Personas",
-            descripcion: "Inicio · Personas · Cargos y sueldos · Más",
+            descripcion: "Inicio · Personas · Cargos · Más",
           },
         ]}
         onCambiar={setArea}

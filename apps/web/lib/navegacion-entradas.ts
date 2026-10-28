@@ -47,7 +47,7 @@ export function entradasNucleo(voc: Vocabulario): EntradaArea[] {
     {
       area: "personas",
       href: "/cargos",
-      etiqueta: "Cargos y sueldos",
+      etiqueta: "Cargos",
       icono: "Briefcase",
       modulo: "core",
       permiso: PERMISOS_CORE.estructurasRead,

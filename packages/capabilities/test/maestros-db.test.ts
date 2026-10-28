@@ -76,14 +76,20 @@ describe.skipIf(!urlPropietario)("maestros en base real", () => {
       vinculo: { cargoId: cargo.id, tipo: "indefinido", inicio: "2026-01-05" },
     });
     await dato("core.estructuras.create", {
-      nivel: "cargo",
-      cargoId: cargo.id,
+      nivel: "instalacion",
+      instalacionId: inst.id,
+      colacion: 0,
+      movilizacion: 0,
+      gratificacion: "ninguna",
       sueldoBase: 560_000,
       vigenteDesde: "2026-01-01",
     });
     await dato("core.estructuras.create", {
-      nivel: "cargo",
-      cargoId: cargo.id,
+      nivel: "instalacion",
+      instalacionId: inst.id,
+      colacion: 0,
+      movilizacion: 0,
+      gratificacion: "ninguna",
       sueldoBase: 600_000,
       vigenteDesde: "2026-07-01",
     });

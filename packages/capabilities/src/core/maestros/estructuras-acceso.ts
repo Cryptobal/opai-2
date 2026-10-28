@@ -10,26 +10,6 @@ type RefEstructura = Pick<FilaEstructura, "cargoId" | "puestoId" | "personaId"> 
 };
 
 /**
- * ¿El cargo involucrado tiene sueldo sensible? El cargo sale de la estructura, de su puesto o del
- * vínculo vigente de la persona. Sin cargo determinable (persona sin vínculo vigente): true por
- * prudencia (se oculta, salvo que el actor tenga el permiso de sueldos sensibles).
- */
-async function cargoSensible(ctx: Contexto, e: RefEstructura): Promise<boolean> {
-  let cargoId = e.cargoId ?? null;
-  if (!cargoId && e.puestoId) {
-    cargoId = (await ctx.db.puesto.findUnique({ where: { id: e.puestoId } }))?.cargoId ?? null;
-  }
-  if (!cargoId && e.personaId) {
-    const v = await ctx.db.vinculoLaboral.findFirst({
-      where: { personaId: e.personaId, estado: "vigente" },
-    });
-    cargoId = v?.cargoId ?? null;
-  }
-  if (!cargoId) return true;
-  return (await ctx.db.cargo.findUnique({ where: { id: cargoId } }))?.sueldoSensible ?? false;
-}
-
-/**
  * Deja en la auditoría que el actor vio montos de sueldo sensibles gracias a
  * `core:estructuras.read_sensible` (quién, cuándo, qué). Lo exige la decisión t479u (Carlos delegó,
  * 26-oct-2026 22:06 CLT) por el art. 31 del DFL 2 de 1967: el Inspector DT fiscaliza con los montos
@@ -57,49 +37,15 @@ export async function auditarLecturaSensible(ctx: Contexto, e: RefEstructura): P
   );
 }
 
-/**
- * ¿Hay que ocultar montos? Sí si el cargo involucrado tiene sueldo sensible y el actor no tiene
- * `core:estructuras.read_sensible`. Si el actor SÍ lo tiene y el cargo es sensible, ve los montos y
- * la lectura queda en la auditoría (art. 31 del DFL 2 de 1967; decisión t479u).
- */
+/** D7: montos solo con read_sensible; cada revelación queda auditada. */
 export async function ocultarMontos(
   ctx: Contexto,
   e: RefEstructura,
   auditar = true,
 ): Promise<boolean> {
-  // D7 para las capas activas. Conserva el permiso explícito del Inspector DT de main (t479u).
-  if (e.nivel !== "cargo") {
-    if (!ctx.autorizar(PERMISOS_CORE.estructurasReadSensible)) return true;
-    if (auditar) await auditarLecturaSensible(ctx, e);
-    return false;
-  }
-  if (!(await cargoSensible(ctx, e))) return false;
+  // D7: el archivo conserva la misma restricción de montos que las capas activas.
   if (!ctx.autorizar(PERMISOS_CORE.estructurasReadSensible)) return true;
-  await auditarLecturaSensible(ctx, e);
-  return false;
-}
-
-/**
- * Variante de `ocultarMontos` para `core.cargos.list` (ADR-045): la consulta única ya trae el cargo
- * con su `sueldoSensible`, así que no hace falta `cargoSensible` (volvería a consultar el cargo por
- * fila, el N+1 que corrigió el #53). La auditoría de la revelación es la misma de siempre.
- */
-export async function ocultarMontosDeCargo(
-  ctx: Contexto,
-  cargo: { id: string; sueldoSensible: boolean },
-  estructura: { id: string } | undefined,
-): Promise<boolean> {
-  if (!cargo.sueldoSensible) return false;
-  if (!ctx.autorizar(PERMISOS_CORE.estructurasReadSensible)) return true;
-  if (estructura) {
-    await auditarLecturaSensible(ctx, {
-      id: estructura.id,
-      nivel: "cargo",
-      cargoId: cargo.id,
-      puestoId: null,
-      personaId: null,
-    });
-  }
+  if (auditar) await auditarLecturaSensible(ctx, e);
   return false;
 }
 
