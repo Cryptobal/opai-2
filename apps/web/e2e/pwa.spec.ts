@@ -1,6 +1,7 @@
 import { ocultarIndicadorDev } from "./indicador-dev";
+import { abrirMenuUsuario } from "./menu-usuario";
 import { entrar as iniciarSesion } from "./sesion";
-import { expect, type Locator, type Page, test } from "@playwright/test";
+import { expect, type Page, test } from "@playwright/test";
 
 /**
  * Base PWA (ADR-044, Brief 04): manifest válido con íconos que existen, service worker que controla
@@ -143,15 +144,6 @@ async function entrar(page: Page, correo: string, empresa: RegExp) {
     await page.getByRole("button", { name: empresa }).click();
   }
   await page.waitForURL((u) => u.pathname === "/" || u.pathname === "/platform");
-}
-
-/** Abre el menú de usuario hasta ver `dentro`: un clic antes de hidratar no lo abre (CAR-60). */
-async function abrirMenuUsuario(page: Page, dentro: Locator) {
-  await expect(async () => {
-    if (!(await dentro.isVisible()))
-      await page.getByRole("button", { name: "Menú de usuario" }).click({ timeout: 2_000 });
-    await expect(dentro).toBeVisible({ timeout: 1_000 });
-  }).toPass({ timeout: 30_000 });
 }
 
 test.describe("dos usuarios, dos empresas", () => {
