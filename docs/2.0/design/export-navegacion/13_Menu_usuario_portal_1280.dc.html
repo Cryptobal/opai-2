@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <meta name="design_doc_mode" content="canvas">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+  <script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+  <style>body{margin:0;background:var(--ds-bg)} a{color:var(--ds-accent)} a:hover{color:var(--ds-accent)}</style>
+</helmet>
+<div class="ds" data-theme="light" style="padding:48px;display:flex;flex-direction:column;gap:32px;min-width:max-content;min-height:100vh">
+  <header style="display:flex;flex-direction:column;gap:8px;max-width:880px">
+    <span class="t-overline">OPAI 2.0 · Brief 05 · Navegación por áreas</span>
+    <h1 class="t-title m0">13 · Menú de usuario y selector de portal</h1>
+    <p class="t-body muted m0" style="text-wrap:pretty">Componentes existentes: Menu y PortalSwitcher. Plataforma aparece solo para operadores de OPAI.</p>
+    
+  </header>
+  <div style="display:flex;flex-wrap:wrap;gap:48px;align-items:flex-start">
+<figure style="margin:0;display:flex;flex-direction:column;gap:12px;flex:none">
+  <figcaption style="display:flex;flex-direction:column;gap:4px;width:1280px"><span class="t-label">Menú de usuario</span><span class="t-caption" style="text-wrap:pretty">Cambiar de empresa, Preferencias, Tema y Cerrar sesión.</span></figcaption>
+  <div style="border:1px solid var(--ds-border-strong);border-radius:var(--radius-lg);overflow:hidden;width:1282px;height:882px;flex:none">
+    <dc-import name="Shell" device="desktop" scenario="C" role="owner" active="negocios" overlay="user" hint-size="1280px,880px"></dc-import>
+  </div>
+</figure><figure style="margin:0;display:flex;flex-direction:column;gap:12px;flex:none">
+  <figcaption style="display:flex;flex-direction:column;gap:4px;width:1280px"><span class="t-label">Selector de portal · usuario del tenant</span><span class="t-caption" style="text-wrap:pretty">Sin Plataforma.</span></figcaption>
+  <div style="border:1px solid var(--ds-border-strong);border-radius:var(--radius-lg);overflow:hidden;width:1282px;height:882px;flex:none">
+    <dc-import name="Shell" device="desktop" scenario="C" role="owner" active="negocios" overlay="portal" hint-size="1280px,880px"></dc-import>
+  </div>
+</figure><figure style="margin:0;display:flex;flex-direction:column;gap:12px;flex:none">
+  <figcaption style="display:flex;flex-direction:column;gap:4px;width:1280px"><span class="t-label">Selector de portal · operador de OPAI</span><span class="t-caption" style="text-wrap:pretty">Plataforma al final, separada.</span><span style="display:flex;gap:6px;flex-wrap:wrap"><span class="badge b-warning">Nuevo en el DS: pendiente de aprobación</span></span></figcaption>
+  <div style="border:1px solid var(--ds-border-strong);border-radius:var(--radius-lg);overflow:hidden;width:1282px;height:882px;flex:none">
+    <dc-import name="Shell" device="desktop" scenario="C" role="owner" active="negocios" overlay="portal" operator="true" hint-size="1280px,880px"></dc-import>
+  </div>
+</figure><figure style="margin:0;display:flex;flex-direction:column;gap:12px;flex:none">
+  <figcaption style="display:flex;flex-direction:column;gap:4px;width:1280px"><span class="t-label">Campana</span><span class="t-caption" style="text-wrap:pretty">Últimos avisos y acceso a la Bandeja.</span><span style="display:flex;gap:6px;flex-wrap:wrap"><span class="proposal">Propuesta: decide Carlos</span></span></figcaption>
+  <div style="border:1px solid var(--ds-border-strong);border-radius:var(--radius-lg);overflow:hidden;width:1282px;height:882px;flex:none">
+    <dc-import name="Shell" device="desktop" scenario="C" role="owner" active="negocios" overlay="bell" hint-size="1280px,880px"></dc-import>
+  </div>
+</figure><div style="display:flex;flex-direction:column;gap:16px;flex:none"><div class="card" style="padding:16px;width:360px;display:flex;flex-direction:column;gap:8px;align-items:flex-start"><span class="proposal">Propuesta: decide Carlos</span><span class="t-label">Campana y Bandeja</span><span class="t-body-sm muted" style="text-wrap:pretty">La campana muestra un punto sin número cuando hay avisos nuevos y abre los últimos avisos. «Ver todo en Bandeja» lleva a la Bandeja, que junta aprobaciones, tareas y avisos. El único número del shell es el de la Bandeja en Inicio del celular.</span></div></div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {}
+</script>
+</body>
+</html>

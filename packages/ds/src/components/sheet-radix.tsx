@@ -9,6 +9,8 @@ import { Cerrar, claseScrim } from "./dialog-partes";
 export type SheetProps = {
   abierto: boolean;
   onCerrar: () => void;
+  /** Disparadores externos a Radix (p. ej. Más): restaura el foco al cerrar el modal. */
+  onRestaurarFoco?: () => void;
   titulo: string;
   descripcion?: string;
   children: ReactNode;
@@ -30,6 +32,7 @@ export function SheetRadix(props: SheetProps) {
       <RadixDialog.Portal>
         <RadixDialog.Overlay className={claseScrim} />
         <RadixDialog.Content
+          onCloseAutoFocus={props.onRestaurarFoco ? (e) => { e.preventDefault(); props.onRestaurarFoco?.(); } : undefined}
           {...(descripcion ? {} : { "aria-describedby": undefined })}
           className={cn(
             "fixed inset-x-0 bottom-0 z-50 flex flex-col bg-surface-raised text-fg shadow-overlay outline-none",

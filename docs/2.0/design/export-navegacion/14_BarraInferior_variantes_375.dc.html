@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <meta name="design_doc_mode" content="canvas">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+  <script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+  <style>body{margin:0;background:var(--ds-bg)} a{color:var(--ds-accent)} a:hover{color:var(--ds-accent)}</style>
+</helmet>
+<div class="ds" data-theme="light" style="padding:48px;display:flex;flex-direction:column;gap:32px;min-width:max-content;min-height:100vh">
+  <header style="display:flex;flex-direction:column;gap:8px;max-width:880px">
+    <span class="t-overline">OPAI 2.0 · Brief 05 · Navegación por áreas</span>
+    <h1 class="t-title m0">14 · Barra inferior por área principal</h1>
+    <p class="t-body muted m0" style="text-wrap:pretty">Inicio y Buscar fijos; la segunda y la tercera dependen del área principal. El activo lleva fondo y etiqueta en negrita además del color.</p>
+    
+  </header>
+  <div style="display:flex;flex-wrap:wrap;gap:48px;align-items:flex-start">
+<figure style="margin:0;display:flex;flex-direction:column;gap:12px;flex:none">
+  <figcaption style="display:flex;flex-direction:column;gap:4px;width:375px"><span class="t-label">General</span><span class="t-caption" style="text-wrap:pretty">owner, admin y gerente.</span></figcaption>
+  <div style="border:1px solid var(--ds-border-strong);border-radius:var(--radius-lg);overflow:hidden;width:377px;height:814px;flex:none">
+    <dc-import name="Shell" device="phone" scenario="C" role="owner" active="inicio" pins="four" primary="general" hint-size="375px,812px"></dc-import>
+  </div>
+</figure><figure style="margin:0;display:flex;flex-direction:column;gap:12px;flex:none">
+  <figcaption style="display:flex;flex-direction:column;gap:4px;width:375px"><span class="t-label">Comercial</span></figcaption>
+  <div style="border:1px solid var(--ds-border-strong);border-radius:var(--radius-lg);overflow:hidden;width:377px;height:814px;flex:none">
+    <dc-import name="Shell" device="phone" scenario="C" role="owner" active="inicio" pins="four" primary="comercial" hint-size="375px,812px"></dc-import>
+  </div>
+</figure><figure style="margin:0;display:flex;flex-direction:column;gap:12px;flex:none">
+  <figcaption style="display:flex;flex-direction:column;gap:4px;width:375px"><span class="t-label">Operaciones</span><span class="t-caption" style="text-wrap:pretty">supervisor.</span></figcaption>
+  <div style="border:1px solid var(--ds-border-strong);border-radius:var(--radius-lg);overflow:hidden;width:377px;height:814px;flex:none">
+    <dc-import name="Shell" device="phone" scenario="C" role="supervisor" active="inicio" pins="four" primary="operaciones" hint-size="375px,812px"></dc-import>
+  </div>
+</figure><figure style="margin:0;display:flex;flex-direction:column;gap:12px;flex:none">
+  <figcaption style="display:flex;flex-direction:column;gap:4px;width:375px"><span class="t-label">Finanzas</span><span class="t-caption" style="text-wrap:pretty">Solo owner y admin.</span></figcaption>
+  <div style="border:1px solid var(--ds-border-strong);border-radius:var(--radius-lg);overflow:hidden;width:377px;height:814px;flex:none">
+    <dc-import name="Shell" device="phone" scenario="C" role="owner" active="inicio" pins="four" primary="finanzas" hint-size="375px,812px"></dc-import>
+  </div>
+</figure><figure style="margin:0;display:flex;flex-direction:column;gap:12px;flex:none">
+  <figcaption style="display:flex;flex-direction:column;gap:4px;width:375px"><span class="t-label">Consulta</span><span class="t-caption" style="text-wrap:pretty">viewer.</span></figcaption>
+  <div style="border:1px solid var(--ds-border-strong);border-radius:var(--radius-lg);overflow:hidden;width:377px;height:814px;flex:none">
+    <dc-import name="Shell" device="phone" scenario="C" role="viewer" active="inicio" pins="four" primary="consulta" hint-size="375px,812px"></dc-import>
+  </div>
+</figure><figure style="margin:0;display:flex;flex-direction:column;gap:12px;flex:none">
+  <figcaption style="display:flex;flex-direction:column;gap:4px;width:375px"><span class="t-label">Respaldo · escenario A</span><span class="t-caption" style="text-wrap:pretty">General sin Negocios ni Pauta: toman su lugar Cuentas y Personas.</span></figcaption>
+  <div style="border:1px solid var(--ds-border-strong);border-radius:var(--radius-lg);overflow:hidden;width:377px;height:814px;flex:none">
+    <dc-import name="Shell" device="phone" scenario="A" role="owner" active="inicio" pins="four" primary="general" hint-size="375px,812px"></dc-import>
+  </div>
+</figure><figure style="margin:0;display:flex;flex-direction:column;gap:12px;flex:none">
+  <figcaption style="display:flex;flex-direction:column;gap:4px;width:375px"><span class="t-label">Alternativa: lupa también arriba</span><span class="t-caption" style="text-wrap:pretty">La barra superior conserva la búsqueda.</span><span style="display:flex;gap:6px;flex-wrap:wrap"><span class="proposal">Propuesta: decide Carlos</span></span></figcaption>
+  <div style="border:1px solid var(--ds-border-strong);border-radius:var(--radius-lg);overflow:hidden;width:377px;height:814px;flex:none">
+    <dc-import name="Shell" device="phone" scenario="C" role="owner" active="inicio" pins="four" primary="general" top-search="true" hint-size="375px,812px"></dc-import>
+  </div>
+</figure><div style="display:flex;flex-direction:column;gap:16px;flex:none"><div class="card" style="padding:16px;width:360px;display:flex;flex-direction:column;gap:8px;align-items:flex-start"><span class="proposal">Propuesta: decide Carlos</span><span class="t-label">Búsqueda en el celular</span><span class="t-body-sm muted" style="text-wrap:pretty">En el ERP la lupa sale de la barra superior porque «Buscar» ya está en la barra inferior, a un toque y al alcance del pulgar. La barra superior queda con selector de portal, campana y avatar.</span></div><div class="card" style="padding:16px;width:360px;display:flex;flex-direction:column;gap:8px;align-items:flex-start"><span class="badge b-warning">Nuevo en el DS: pendiente de aprobación</span><span class="t-label">Ítem activo</span><span class="t-body-sm muted" style="text-wrap:pretty">Además del color accent, el activo lleva un fondo accent-muted detrás del icono y etiqueta 600, para no depender solo del color.</span></div></div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {}
+</script>
+</body>
+</html>

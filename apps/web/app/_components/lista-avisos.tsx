@@ -8,7 +8,7 @@ import { haceCuanto } from "@/lib/fechas";
 import type { Aviso } from "./campana";
 
 /** Filas de la campana: título, cuerpo y "hace cuánto"; el enlace marca el aviso como leído. */
-export function ListaAvisos({ avisos, portal }: { avisos: Aviso[]; portal: string }) {
+export function ListaAvisos({ avisos, portal, onLeida }: { avisos: Aviso[]; portal: string; onLeida?: () => void }) {
   return (
     <ul className="divide-y divide-border">
       {avisos.map((a) => {
@@ -36,6 +36,10 @@ export function ListaAvisos({ avisos, portal }: { avisos: Aviso[]; portal: strin
                 onClick={() =>
                   void ejecutarCapacidad(portal, "core.notificaciones.marcar_leida", {
                     id: a.id,
+                  }).then((r) => {
+                    if (!r.ok) return;
+                    window.dispatchEvent(new Event("opai-bandeja"));
+                    onLeida?.();
                   })
                 }
               >

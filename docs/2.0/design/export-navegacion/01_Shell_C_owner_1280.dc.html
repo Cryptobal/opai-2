@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <meta name="design_doc_mode" content="canvas">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+  <script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+  <style>body{margin:0;background:var(--ds-bg)} a{color:var(--ds-accent)} a:hover{color:var(--ds-accent)}</style>
+</helmet>
+<div class="ds" data-theme="light" style="padding:48px;display:flex;flex-direction:column;gap:32px;min-width:max-content;min-height:100vh">
+  <header style="display:flex;flex-direction:column;gap:8px;max-width:880px">
+    <span class="t-overline">OPAI 2.0 · Brief 05 · Navegación por áreas</span>
+    <h1 class="t-title m0">01 · Shell completo · escenario C · owner</h1>
+    <p class="t-body muted m0" style="text-wrap:pretty">Mapa final con todo contratado. Fijados arriba, Inicio y Bandeja, seis áreas plegables y Configuración al pie. Comercial abierto con Negocios activo.</p>
+    
+  </header>
+  <div style="display:flex;flex-wrap:wrap;gap:48px;align-items:flex-start">
+<figure style="margin:0;display:flex;flex-direction:column;gap:12px;flex:none">
+  <figcaption style="display:flex;flex-direction:column;gap:4px;width:1280px"><span class="t-label">1280 · claro</span><span class="t-caption" style="text-wrap:pretty">Carlos Irigoyen, owner. 4 fijados.</span></figcaption>
+  <div style="border:1px solid var(--ds-border-strong);border-radius:var(--radius-lg);overflow:hidden;width:1282px;height:882px;flex:none">
+    <dc-import name="Shell" device="desktop" scenario="C" role="owner" active="negocios" pins="four" hint-size="1280px,880px"></dc-import>
+  </div>
+</figure><div style="display:flex;flex-direction:column;gap:16px;flex:none"><div class="card" style="padding:16px;width:360px;display:flex;flex-direction:column;gap:8px;align-items:flex-start"><span class="proposal">Propuesta: decide Carlos</span><span class="t-label">Grupos: abierto el del lugar actual</span><span class="t-body-sm muted" style="text-wrap:pretty">Al entrar, solo se abre el área de la página activa; las demás quedan plegadas. Si la persona abre o pliega un grupo, se recuerda por usuario y dispositivo. Un área plegada que contiene la página activa marca su icono con el acento.</span></div><div class="card" style="padding:16px;width:360px;display:flex;flex-direction:column;gap:8px;align-items:flex-start"><span class="proposal">Propuesta: decide Carlos</span><span class="t-label">Inicio y Bandeja como dos entradas sueltas</span><span class="t-body-sm muted" style="text-wrap:pretty">Van arriba, sin encabezado de grupo: son dos entradas que se usan todos los días y un grupo plegable solo agregaría un clic. La alternativa como grupo está en 06.</span></div><div class="card" style="padding:16px;width:360px;display:flex;flex-direction:column;gap:8px;align-items:flex-start"><span class="proposal">Propuesta: decide Carlos</span><span class="t-label">Campana y Bandeja</span><span class="t-body-sm muted" style="text-wrap:pretty">La campana muestra un punto sin número cuando hay avisos nuevos y abre los últimos avisos. «Ver todo en Bandeja» lleva a la Bandeja, que junta aprobaciones, tareas y avisos. El único número del shell es el de la Bandeja en Inicio del celular.</span></div></div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {}
+</script>
+</body>
+</html>

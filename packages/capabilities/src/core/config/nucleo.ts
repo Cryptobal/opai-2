@@ -3,6 +3,7 @@ import { z } from "zod";
 import { TAMANO_MAXIMO_DOCUMENTO } from "@opai/domain";
 
 import { defineAjustes } from "./registro";
+import { ajustesNavegacion } from "./navegacion";
 
 const correoOpcional = z.union([z.literal(""), z.email()]);
 const modelo = z.object({ proveedor: z.string(), modelo: z.string() });
@@ -104,6 +105,10 @@ export const AJUSTES_NUCLEO = defineAjustes(
       ambito: "usuario",
       control: "seleccion",
     }),
+    // Brief 05 (navegación por áreas, D1/D3): preferencias de la barra lateral y de la barra
+    // inferior, por usuario y empresa (cambiar de empresa cambia estas tres, §9). Sin migración
+    // (ADR-038): van en `core.ajuste`, igual que `preferencias_*`.
+    ...ajustesNavegacion,
     ia_modelos: z
       .object({ economica: modelo, estandar: modelo, potente: modelo })
       .default({

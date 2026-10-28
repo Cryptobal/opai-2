@@ -50,6 +50,64 @@ describe("defineModule", () => {
   it("rechaza capacidades con permisos no declarados", () => {
     expect(() => defineModule({ ...base, permisos: [] })).toThrow(/no declarado/);
   });
+
+  it("exige area de la lista cerrada en las entradas del portal erp", () => {
+    expect(() =>
+      defineModule({
+        ...base,
+        navegacion: [{ portal: "erp", href: "/demo", etiqueta: "Demo", icono: "Home" }],
+      }),
+    ).toThrow(/area/);
+    expect(
+      defineModule({
+        ...base,
+        navegacion: [
+          { portal: "erp", href: "/demo", etiqueta: "Demo", icono: "Home", area: "operaciones" },
+        ],
+      }).navegacion,
+    ).toHaveLength(1);
+  });
+
+  it("no exige area fuera del portal erp", () => {
+    expect(
+      defineModule({
+        ...base,
+        navegacion: [{ portal: "supervisor", href: "/demo", etiqueta: "Demo", icono: "Home" }],
+      }).navegacion,
+    ).toHaveLength(1);
+  });
+
+  it("rechaza entradas y acciones con permisos no declarados", () => {
+    expect(() =>
+      defineModule({
+        ...base,
+        navegacion: [
+          {
+            portal: "erp",
+            href: "/demo",
+            etiqueta: "Demo",
+            icono: "Home",
+            area: "operaciones",
+            permiso: "otro:read",
+          },
+        ],
+      }),
+    ).toThrow(/no declarado/);
+    expect(() =>
+      defineModule({
+        ...base,
+        acciones: [
+          {
+            capacidad: "demo.ping",
+            etiqueta: "Nuevo demo",
+            href: "/demo?nuevo=1",
+            icono: "Plus",
+            permiso: "otro:read",
+          },
+        ],
+      }),
+    ).toThrow(/no declarado/);
+  });
 });
 
 describe("registrarModulos", () => {
