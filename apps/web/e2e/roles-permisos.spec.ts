@@ -57,7 +57,8 @@ test.describe("configuración · roles y permisos (CAR-37)", () => {
     await expect(page.getByText("Si vienes de OPAI 1.0")).toBeVisible();
     await expect(page.getByText("central_monitoreo")).toBeVisible();
     await captura(page, "lista", info);
-    await page.getByRole("link", { name: /^Supervisor/ }).click();
+    // Por href: otros specs crean roles personalizados que también empiezan con «Supervisor».
+    await page.locator('a[href="?rol=sistema%3Asupervisor"]').click();
     const detalle = hoja(page, "Supervisor");
     await expect(detalle.getByText("Los roles del sistema no se editan")).toBeVisible();
     const ver = detalle.getByRole("checkbox", { name: "Ver Instalaciones" });
