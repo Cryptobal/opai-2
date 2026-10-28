@@ -41,12 +41,12 @@ test("capas completas, vista previa, historial y resolución sin herencia", asyn
   await page.getByRole("link", { name: /Definir sueldo|Nueva versión/ }).click();
   const hoja = page.getByRole("dialog", { name: "Nueva versión de sueldo" });
   await expect(hoja).toBeVisible();
-  await hoja.getByLabel("Sueldo base", { exact: true }).fill("650000");
-  await hoja.getByLabel("Colación", { exact: true }).fill("0");
-  await hoja.getByLabel("Movilización", { exact: true }).fill("0");
+  await hoja.getByLabel("Sueldo base (obligatorio)", { exact: true }).fill("650000");
+  await hoja.getByLabel("Colación (obligatorio)", { exact: true }).fill("0");
+  await hoja.getByLabel("Movilización (obligatorio)", { exact: true }).fill("0");
   const dia = info.project.name === "telefono" ? "01" : info.project.name === "ipad" ? "02" : "03";
   await hoja
-    .getByLabel("Vigente desde")
+    .getByLabel("Vigente desde (obligatorio)")
     .fill(`${dia}-01-${2200 + (Math.floor(Date.now() / 60000) % 1000)}`);
   await hoja.getByRole("button", { name: "Revisar cambio" }).click();
   const confirmar = page.getByRole("dialog", { name: "Confirmar versión de sueldo" });
@@ -74,11 +74,14 @@ test("capas completas, vista previa, historial y resolución sin herencia", asyn
   const rut = page.getByRole("dialog", { name: "Definir sueldo por RUT" });
   await expect(rut.getByRole("button", { name: "Revisar cambio" })).toBeDisabled();
   await expect(rut.getByLabel("Motivo obligatorio")).toBeVisible();
-  await rut.getByLabel("Sueldo base", { exact: true }).fill("700000");
-  await rut.getByLabel("Colación", { exact: true }).fill("0");
-  await rut.getByLabel("Movilización", { exact: true }).fill("0");
+  await rut.getByLabel("Sueldo base (obligatorio)", { exact: true }).fill("10,5");
+  await expect(rut.getByText("Solo pesos enteros, sin decimales ni signo")).toBeVisible();
+  await expect(rut.getByRole("button", { name: "Revisar cambio" })).toBeDisabled();
+  await rut.getByLabel("Sueldo base (obligatorio)", { exact: true }).fill("700000");
+  await rut.getByLabel("Colación (obligatorio)", { exact: true }).fill("0");
+  await rut.getByLabel("Movilización (obligatorio)", { exact: true }).fill("0");
   const anio = 2200 + (Math.floor(Date.now() / 60000) % 1000);
-  await rut.getByLabel("Vigente desde").fill(`${dia}-01-${anio}`);
+  await rut.getByLabel("Vigente desde (obligatorio)").fill(`${dia}-01-${anio}`);
   await rut.getByLabel("Motivo obligatorio").fill("Acuerdo individual de prueba E2E");
   await rut.getByRole("button", { name: "Revisar cambio" }).click();
   await confirmar.getByRole("button", { name: "Guardar versión" }).click();

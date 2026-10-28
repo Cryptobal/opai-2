@@ -701,3 +701,5 @@ principal sigue pendiente. Detalles, límites y capturas en §10 del Brief 11.
 Sin cambios de negocio, migraciones, permisos ni plan del ROADMAP.
 
 **Brief 05, encargo #75:** Codex incorporó `main` `7fc900c`, cerró ante fallo de red la validación de fichas fijadas y difirió el diálogo de confirmación de acciones para cumplir el presupuesto de `/instalaciones/[id]` (164,9/165 KB). Son decisiones técnicas de Codex; los CA parciales y la medición ADR-045 siguen pendientes en el Brief 05.
+
+- **Corrección QA del PR #80 · montos de sueldo.** Codex aplica el tope de 100.000.000 CLP por concepto indicado en el encargo y valida separadores de miles chilenos sin corregir texto inválido. Los porcentajes conservan su regla; el detalle y la validación están en el brief 07b y el PR.
