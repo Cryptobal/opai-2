@@ -72,7 +72,7 @@ export default function Laboral(props: Props) {
                 >
                   {l.sueldoBloqueado
                     ? "Tu rol no permite ver las estructuras de sueldo."
-                    : "Define la estructura del cargo en Cargos y sueldos."}
+                    : "Define el sueldo en la instalación, el puesto o la persona."}
                 </Alerta>
               )}
             </div>

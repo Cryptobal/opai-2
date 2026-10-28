@@ -64,7 +64,7 @@ describe.skipIf(!urlPropietario)("append concurrente dentro de una sola transacc
   });
 
   it.each(["core.cargos.list", "core.estructuras.list"])(
-    "%s audita dos revelaciones sin secuencias duplicadas",
+    "%s conserva la cadena; solo estructuras revela montos",
     async (id) => {
       const ctx = mod.crearContexto({
         tenantId,
@@ -81,16 +81,19 @@ describe.skipIf(!urlPropietario)("append concurrente dentro de una sola transacc
         medidor: { registrar: async () => undefined },
       });
       const antes = await e.admin.auditEvent.count({ where: { tenantId } });
+      const sensiblesAntes = await e.admin.auditEvent.count({
+        where: { tenantId, capability: "core.estructuras.read_sensible" },
+      });
       const input = id === "core.estructuras.list" ? { nivel: "cargo", refId: primerCargo } : {};
       expect(await mod.executeCapability(ctx, id, input)).toMatchObject({ ok: true });
       expect(
         await e.admin.auditEvent.count({
           where: { tenantId, capability: "core.estructuras.read_sensible" },
         }),
-      ).toBe(antes + 2);
+      ).toBe(sensiblesAntes + (id === "core.estructuras.list" ? 1 : 0));
       expect(await ctx.auditoria.verificar()).toMatchObject({
         ok: true,
-        ultimoSeq: antes + 2 + (id === "core.estructuras.list" ? 1 : 0),
+        ultimoSeq: antes + (id === "core.estructuras.list" ? 2 : 0),
       });
     },
   );

@@ -3,9 +3,9 @@ import { requerirEncontrado, requerirUuid } from "@/lib/ids";
 import type { Parametros } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 import type { Cargo } from "@/lib/tipos-maestros";
-import type { EstructuraVista, SueldoVigente } from "@/lib/tipos-sueldo";
+import type { EstructuraVista } from "@/lib/tipos-sueldo";
 
-export type CargoFila = Cargo & { sueldoVigente: SueldoVigente };
+export type CargoFila = Cargo;
 
 const sinTildes = (t: string) =>
   t
@@ -13,7 +13,7 @@ const sinTildes = (t: string) =>
     .replace(/\p{Diacritic}/gu, "")
     .toLowerCase();
 
-/** Cargos con su sueldo vigente; búsqueda, clase y estado se filtran aquí (son pocos). */
+/** Catálogo sin montos; búsqueda, clase y estado se filtran aquí (son pocos). */
 export async function cargarCargosLista(p: Parametros) {
   const r = await ejecutarComoUsuario<CargoFila[]>("erp", "core.cargos.list", {
     incluirInactivos: true,
@@ -36,10 +36,15 @@ export async function cargarCargo(id: string) {
     ejecutarComoUsuario<EstructuraVista[]>("erp", "core.estructuras.list", {
       nivel: "cargo",
       refId: id,
+      incluirAnuladas: true,
     }),
   ]);
   requerirEncontrado(c);
-  return { state: estadoPantalla(c), cargo: c.ok ? c.data : null, versiones: v.ok ? v.data : [] };
+  return {
+    state: estadoPantalla(v.ok ? c : v),
+    cargo: c.ok ? c.data : null,
+    versiones: v.ok ? v.data : [],
+  };
 }
 
 export const CLASES = [

@@ -31,7 +31,9 @@ export const estructurasList = defineCapability({
         AND: [await dondeEstructura(ctx)],
         nivel: input.nivel,
         [campo]: input.refId,
-        ...(input.incluirAnuladas ? {} : { estado: "vigente" }),
+        ...(input.incluirAnuladas
+          ? {}
+          : { estado: input.nivel === "cargo" ? { in: ["vigente", "archivada"] } : "vigente" }),
       },
       include: { items: { orderBy: { orden: "asc" } } },
       orderBy: { vigenteDesde: "desc" },

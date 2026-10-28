@@ -33,16 +33,12 @@ test("Inspector con base supervisor: menú efectivo y dirección de Empresa de s
   await page.getByRole("button", { name: "Entrar" }).click();
   await page.waitForURL((u) => u.pathname === "/");
   if (info.project.name === "desktop") {
-    const area = page.getByRole("button", { name: "Personas", exact: true });
-    if ((await area.getAttribute("aria-expanded")) === "false") await area.click();
-    await expect(
-      page.getByRole("link", { name: "Cargos y sueldos", exact: true }).first(),
-    ).toBeVisible();
+    const personas = page.getByRole("button", { name: "Personas", exact: true });
+    if ((await personas.getAttribute("aria-expanded")) === "false") await personas.click();
+    await expect(page.getByRole("link", { name: "Cargos", exact: true }).first()).toBeVisible();
   }
   await page.goto("/cargos");
-  await expect(
-    page.getByRole("heading", { name: "Cargos y sueldos", exact: true }).first(),
-  ).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Cargos", exact: true }).first()).toBeVisible();
   await expect(page.getByRole("link", { name: "Nuevo", exact: true })).toHaveCount(0);
   await capturar(page, info, "cargos");
   const cargo = await page.locator('a[href^="/cargos/"]').first().getAttribute("href");

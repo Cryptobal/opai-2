@@ -5,6 +5,7 @@ import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { HojaCapaDiferida } from "@/app/_components/sueldos/diferida";
 import { SelectorContexto } from "@/app/_components/sueldos/selector-contexto";
+import { HistorialCargos } from "@/app/_components/sueldos/historial-cargos";
 import { VersionesCapa } from "@/app/_components/sueldos/versiones-capa";
 import { hoyIso } from "@/lib/fechas";
 import type { SearchParams } from "@/lib/parametros";
@@ -82,6 +83,7 @@ export default function Sueldo(props: {
             <SeccionTarjeta titulo="Versiones del sueldo por RUT">
               <VersionesCapa versiones={panel.versiones} nivel="persona" gestionar={gestionar} />
             </SeccionTarjeta>
+            <HistorialCargos vinculos={panel.cargosRetirados} />
             {gestionar ? (
               <HojaCapaDiferida
                 nivel="persona"

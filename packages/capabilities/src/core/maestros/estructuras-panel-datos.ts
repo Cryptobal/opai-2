@@ -120,7 +120,7 @@ export async function datosPanel(ctx: Contexto, input: EntradaPanel) {
   const persona = await ctx.db.persona.findFirst({
     where: { id: input.id, AND: [dondePersona(ctx)] },
     include: {
-      vinculos: { where: { estado: "vigente" }, take: 1, include: { cargo: true } },
+      vinculos: { orderBy: { inicio: "desc" }, include: { cargo: true } },
       tenant: { select },
     },
   });

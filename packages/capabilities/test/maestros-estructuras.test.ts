@@ -1,3 +1,4 @@
+import { cargoHistorico } from "./cargo-historico-ayuda";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { contextoDePrueba } from "../src/testing";
@@ -15,23 +16,34 @@ async function base(o: Parameters<typeof contextoDePrueba>[0] = {}) {
 
 describe("core.estructuras.*", () => {
   it("una versión nueva cierra la anterior el día previo y rechaza solapes", async () => {
-    const { ctx, cargoId } = await base();
+    const { ctx } = await base();
+    const cuenta = await dato<{ id: string }>(ctx, "core.cuentas.create", { nombre: "Cuenta" });
+    const { id: instalacionId } = await dato<{ id: string }>(ctx, "core.instalaciones.create", {
+      cuentaId: cuenta.id,
+      nombre: "Planta",
+    });
     const v1 = await dato<{ id: string }>(ctx, "core.estructuras.create", {
-      nivel: "cargo",
-      cargoId,
+      nivel: "instalacion",
+      colacion: 0,
+      movilizacion: 0,
+      gratificacion: "ninguna",
+      instalacionId,
       sueldoBase: 560_000,
       vigenteDesde: "2026-01-01",
     });
-    await dato(ctx, "core.estructuras.create", {
-      nivel: "cargo",
-      cargoId,
+    await dato<{ id: string }>(ctx, "core.estructuras.create", {
+      nivel: "instalacion",
+      colacion: 0,
+      movilizacion: 0,
+      gratificacion: "ninguna",
+      instalacionId,
       sueldoBase: 600_000,
       vigenteDesde: "2026-07-01",
     });
     const lista = await dato<{ vigenteDesde: string; vigenteHasta: string | null }[]>(
       ctx,
       "core.estructuras.list",
-      { nivel: "cargo", refId: cargoId },
+      { nivel: "instalacion", refId: instalacionId },
     );
     expect(lista.map((e) => [e.vigenteDesde, e.vigenteHasta])).toEqual([
       ["2026-07-01", null],
@@ -39,17 +51,23 @@ describe("core.estructuras.*", () => {
     ]);
     expect(
       await codigo(ctx, "core.estructuras.create", {
-        nivel: "cargo",
-        cargoId,
+        nivel: "instalacion",
+        instalacionId,
         sueldoBase: 1,
+        colacion: 0,
+        movilizacion: 0,
+        gratificacion: "ninguna",
         vigenteDesde: "2026-03-01",
       }),
     ).toBe("UNPROCESSABLE");
     expect(
       await codigo(ctx, "core.estructuras.create", {
-        nivel: "cargo",
-        puestoId: cargoId,
+        nivel: "instalacion",
+        puestoId: instalacionId,
         sueldoBase: 1,
+        colacion: 0,
+        movilizacion: 0,
+        gratificacion: "ninguna",
         vigenteDesde: "2027-01-01",
       }),
     ).toBe("UNPROCESSABLE");
@@ -60,8 +78,7 @@ describe("core.estructuras.*", () => {
 
   it("el RUT exige motivo, no hereda del cargo y sin capa no inventa sueldo", async () => {
     const { ctx, cargoId } = await base();
-    await dato(ctx, "core.estructuras.create", {
-      nivel: "cargo",
+    await cargoHistorico(ctx, {
       cargoId,
       sueldoBase: 560_000,
       colacion: 45_000,
@@ -95,7 +112,9 @@ describe("core.estructuras.*", () => {
       sueldoBase: 700_000,
       vigenteDesde: "2026-09-01",
       motivo: "Acuerdo por antigüedad",
-      colacion: 0, movilizacion: 0, gratificacion: "ninguna",
+      colacion: 0,
+      movilizacion: 0,
+      gratificacion: "ninguna",
     });
     const r = await dato<{ aplica: string; niveles: { cargo: { sueldoBase: number } } }>(
       ctx,
@@ -112,8 +131,7 @@ describe("core.estructuras.*", () => {
       nombre: "Gerente",
       sueldoSensible: true,
     });
-    await dato(owner.ctx, "core.estructuras.create", {
-      nivel: "cargo",
+    await cargoHistorico(owner.ctx, {
       cargoId,
       sueldoBase: 3_000_000,
       vigenteDesde: "2026-01-01",
@@ -135,35 +153,35 @@ describe("core.estructuras.*", () => {
     expect(oculto[0]).toMatchObject({ sueldoBase: null, sensible: true });
   });
 
-  it("la creación de una estructura sensible audita la revelación, no solo el get", async () => {
-    const owner = contextoDePrueba();
-    const { id: cargoId } = await dato<{ id: string }>(owner.ctx, "core.cargos.create", {
-      nombre: "Gerente",
-      sueldoSensible: true,
-    });
-    owner.eventos.length = 0;
-    const creada = await dato<{ id: string; sueldoBase: number }>(owner.ctx, "core.estructuras.create", {
-      nivel: "cargo",
+  it("rechaza crear, versionar y anular cargo, incluso en preview", async () => {
+    const { ctx, cargoId } = await base();
+    const original = await cargoHistorico(ctx, {
       cargoId,
-      sueldoBase: 3_000_000,
-      vigenteDesde: "2026-01-01",
+      sueldoBase: 3000000,
+      vigenteDesde: "2025-01-01",
     });
-    expect(creada.sueldoBase).toBe(3_000_000);
-    const revelaciones = owner.eventos.filter((e) => e.capability === "core.estructuras.read_sensible");
-    expect(revelaciones).toEqual([
-      expect.objectContaining({ entityType: "estructura", entityId: creada.id }),
-    ]);
-    // La vista previa revela los montos anteriores de la fila persistida.
-    owner.eventos.length = 0;
-    await dato(
-      owner.ctx,
-      "core.estructuras.create",
-      { nivel: "cargo", cargoId, sueldoBase: 1, vigenteDesde: "2027-01-01" },
-      { dryRun: true },
-    );
-    expect(owner.eventos).toEqual([
-      expect.objectContaining({ capability: "core.estructuras.read_sensible", entityId: creada.id }),
-    ]);
+    for (const dryRun of [true, false]) {
+      expect(
+        await codigo(
+          ctx,
+          "core.estructuras.create",
+          { nivel: "cargo", cargoId, sueldoBase: 1, vigenteDesde: "2027-01-01" },
+          { dryRun },
+        ),
+      ).toBe("FORBIDDEN");
+      expect(
+        await codigo(
+          ctx,
+          "core.estructuras.anular",
+          { id: original.id, motivo: "No se puede modificar" },
+          { dryRun },
+        ),
+      ).toBe("FORBIDDEN");
+    }
+    expect(await dato(ctx, "core.estructuras.get", { id: original.id })).toMatchObject({
+      sueldoBase: 3000000,
+      estado: "archivada",
+    });
   });
 });
 

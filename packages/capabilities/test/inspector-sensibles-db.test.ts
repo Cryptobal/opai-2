@@ -139,7 +139,7 @@ describe.skipIf(!urlPropietario)("Inspector DT: RLS y auditoría persistida", ()
   });
 });
 
-describe.skipIf(!urlPropietario)("core.cargos.list: montos sensibles (una sola consulta, ADR-045)", () => {
+describe.skipIf(!urlPropietario)("core.cargos.list: catálogo sin montos (ADR-045)", () => {
   let e: Entorno;
   let tenantId: string;
   const permisosRol = PLANTILLAS.find((p) => p.nombre === "Inspector DT")!.permisos;
@@ -186,7 +186,7 @@ describe.skipIf(!urlPropietario)("core.cargos.list: montos sensibles (una sola c
     await e?.cerrar();
   });
 
-  it("sin read_sensible oculta los montos y no registra una revelación", async () => {
+  it("sin read_sensible devuelve solo catálogo y no registra revelación", async () => {
     const { cargoId, estructuraId } = await cargoSensibleConEstructura();
     const actorId = randomUUID();
     const ctx = mod.crearContexto({
@@ -198,12 +198,13 @@ describe.skipIf(!urlPropietario)("core.cargos.list: montos sensibles (una sola c
       medidor: { registrar: async () => undefined },
     });
     const r = await mod.executeCapability(ctx, "core.cargos.list", {});
+    if (r.ok)
+      for (const fila of r.data as object[]) expect(fila).not.toHaveProperty("sueldoVigente");
     expect(r).toMatchObject({
       ok: true,
       data: expect.arrayContaining([
         expect.objectContaining({
           id: cargoId,
-          sueldoVigente: expect.objectContaining({ sueldoBase: null, sensible: true }),
         }),
       ]),
     });
@@ -226,15 +227,19 @@ describe.skipIf(!urlPropietario)("core.cargos.list: montos sensibles (una sola c
       medidor: { registrar: async () => undefined },
     });
     const r = await mod.executeCapability(ctx, "core.cargos.list", {});
+    if (r.ok)
+      for (const fila of r.data as object[]) expect(fila).not.toHaveProperty("sueldoVigente");
     expect(r).toMatchObject({
       ok: true,
       data: expect.arrayContaining([
         expect.objectContaining({
           id: cargoId,
-          sueldoVigente: expect.objectContaining({ sueldoBase: 3_000_000, sensible: false }),
         }),
       ]),
     });
+    expect(
+      await mod.executeCapability(ctx, "core.estructuras.get", { id: estructuraId }),
+    ).toMatchObject({ ok: true, data: { sueldoBase: 3_000_000 } });
     const eventos = await e.forTenant(tenantId).auditEvent.findMany({
       where: { capability: "core.estructuras.read_sensible", entityId: estructuraId },
     });

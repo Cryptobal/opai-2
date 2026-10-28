@@ -35,8 +35,8 @@ test("etiquetas completas en riel y barra", async ({ page }, info) => {
   await page.getByRole("radio", { name: /^Personas/ }).click();
   await expect(page.getByRole("radio", { name: /^Personas/ })).toHaveAttribute("data-state", "checked");
   const nav = page.getByRole("navigation", { name: "Principal", exact: true }).filter({ visible: true });
-  const cargo = nav.getByRole("link", { name: "Cargos y sueldos", exact: true });
-  await expect(cargo).toContainText("Cargos y sueldos");
+  const cargo = nav.getByRole("link", { name: "Cargos", exact: true });
+  await expect(cargo).toContainText("Cargos");
   await expect.poll(() => cargo.locator("span").last().evaluate((e) => e.scrollWidth <= e.clientWidth)).toBe(true);
   await comprobarPalabras(nav);
   await page.getByRole("radio", { name: /^Según mi rol/ }).click();
