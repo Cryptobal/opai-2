@@ -684,6 +684,8 @@ aserciones, sin ampliar timeouts ni atribuir una causa no demostrada. El objetiv
 principal sigue pendiente. Detalles, límites y capturas en §10 del Brief 11.
 Sin cambios de negocio, migraciones, permisos ni plan del ROADMAP.
 
+- **Corrección QA del PR #80 · montos de sueldo.** Codex aplica el tope de 100.000.000 CLP por concepto indicado en el encargo y valida separadores de miles chilenos sin corregir texto inválido. Los porcentajes conservan su regla; el detalle y la validación están en el brief 07b y el PR.
+
 ### Corrección de versiones de cargo y bonos
 
-En la rama `fix/version-cargo-bonos`, Codex eligió rechazar el versionado de un cargo sensible sin permiso de lectura sensible, para evitar reemplazar bonos ocultos por una lista vacía. La decisión y sus criterios están en `briefs/fix-version-cargo-bonos.md`; pendiente de revisión e integración.
+En la rama `fix/version-cargo-bonos`, Codex eligió rechazar el versionado de un cargo sensible sin permiso de lectura sensible, para evitar reemplazar bonos ocultos por una lista vacía. Codex decidió además exigir ese permiso para cambiar la sensibilidad del cargo. Las decisiones y sus criterios están en `briefs/fix-version-cargo-bonos.md`; pendiente de revisión e integración.
