@@ -27,8 +27,9 @@ export default function Roles() {
       cargar={cargarPermisos}
       cabecera={({ roles, gestionaRoles }) => {
         const n = roles.ok ? roles.data.filter((r) => !r.sistema).length : 0;
+        const s = roles.ok ? roles.data.length - n : 0;
         return {
-          subtitulo: `${n} ${n === 1 ? "rol personalizado" : "roles personalizados"} · 5 del sistema`,
+          subtitulo: `${n} ${n === 1 ? "rol personalizado" : "roles personalizados"} · ${s} del sistema`,
           ...(gestionaRoles && roles.ok
             ? {
                 acciones: (

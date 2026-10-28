@@ -72,23 +72,25 @@ export function MatrizModulo({ m, valor, concedibles, onAlternar }: Props) {
           </thead>
           <tbody>
             {[...m.recursos]
-              .sort((a, b) => nombreRecurso(a.recurso).localeCompare(nombreRecurso(b.recurso), "es"))
+              .sort((a, b) =>
+                nombreRecurso(a.recurso).localeCompare(nombreRecurso(b.recurso), "es"),
+              )
               .map((r) => (
-              <Tr key={r.recurso}>
-                <Td className="whitespace-normal">{nombreRecurso(r.recurso)}</Td>
-                {[r.ver, r.gestionar].map((id, i) => (
-                  <Td key={i} className="text-center">
-                    {id ? (
-                      <span className="inline-flex justify-center">{casilla(id, false)}</span>
-                    ) : (
-                      <span className="text-fg-subtle" aria-label="No aplica">
-                        —
-                      </span>
-                    )}
-                  </Td>
-                ))}
-              </Tr>
-            ))}
+                <Tr key={r.recurso}>
+                  <Td className="whitespace-normal">{nombreRecurso(r.recurso)}</Td>
+                  {[r.ver, r.gestionar].map((id, i) => (
+                    <Td key={i} className="text-center">
+                      {id ? (
+                        <span className="inline-flex justify-center">{casilla(id, false)}</span>
+                      ) : (
+                        <span className="text-fg-subtle" aria-label="No aplica">
+                          —
+                        </span>
+                      )}
+                    </Td>
+                  ))}
+                </Tr>
+              ))}
           </tbody>
         </Table>
       ) : null}

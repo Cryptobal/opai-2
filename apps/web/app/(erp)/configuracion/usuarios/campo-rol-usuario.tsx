@@ -13,10 +13,13 @@ import type { Miembro } from "./usuarios-lista";
 export const seleccionDe = (m: Pick<Miembro, "rol" | "roleId">) =>
   m.roleId ? `rol:${m.roleId}` : `base:${m.rol}`;
 
-/** Permisos del rol elegido (sin excepciones): los del sistema vienen expandidos en la lista. */
-export function permisosDeSeleccion(sel: string, roles: readonly RolVista[]): string[] {
+/**
+ * Permisos del rol elegido (sin excepciones): los del sistema vienen expandidos en la lista. null si
+ * el rol no está en la lista (archivado o no se pudo cargar): no se afirma que «no da acceso».
+ */
+export function permisosDeSeleccion(sel: string, roles: readonly RolVista[]): string[] | null {
   const id = sel.startsWith("base:") ? `sistema:${sel.slice(5)}` : sel.slice(4);
-  return roles.find((r) => r.id === id)?.permisos ?? [];
+  return roles.find((r) => r.id === id)?.permisos ?? null;
 }
 
 type Props = {
@@ -30,18 +33,21 @@ type Props = {
   /** Si es el único owner activo de la empresa (no se le cambia el rol). */
   ultimoOwner: boolean;
   catalogo: readonly ModuloCatalogo[];
-  /** Permisos efectivos de la selección (rol + excepciones), para «Qué puede hacer». */
-  efectivos: readonly string[];
+  /** Permisos efectivos de la selección (rol + excepciones); null si no se conocen. */
+  efectivos: readonly string[] | null;
 };
 
 /** Rol del usuario (A4 §1): roles del sistema y personalizados, y su resumen «Qué puede hacer». */
 export function CampoRolUsuario(p: Props) {
   const esOwner = p.miembro.rol === "owner";
-  const bloqueo = esOwner && p.ultimoOwner
-    ? "Es el único owner de la empresa. Asigna otro owner antes de cambiar su rol."
-    : esOwner && p.miRol !== "owner"
-      ? "Solo un owner puede cambiar a otro owner"
-      : undefined;
+  const bloqueo =
+    esOwner && p.ultimoOwner
+      ? "Es el único owner de la empresa. Asigna otro owner antes de cambiar su rol."
+      : esOwner && p.miRol !== "owner"
+        ? "Solo un owner puede cambiar a otro owner"
+        : !p.gestionaRoles && p.miembro.roleId
+          ? "Solo un owner o un administrador cambia un rol personalizado."
+          : undefined;
   const base = rolesAsignables(p.miRol).map((r) => ({
     valor: `base:${r}`,
     etiqueta: ETIQUETA_ROL[r] ?? r,
@@ -55,8 +61,13 @@ export function CampoRolUsuario(p: Props) {
       : [];
   const actual = [...base, ...propios].some((o) => o.valor === p.valor)
     ? []
-    : [{ valor: p.valor, etiqueta: p.miembro.rolNombre ?? ETIQUETA_ROL[p.miembro.rol] ?? p.miembro.rol }];
-  const resumen = resumenPermisos(p.catalogo, p.efectivos);
+    : [
+        {
+          valor: p.valor,
+          etiqueta: p.miembro.rolNombre ?? ETIQUETA_ROL[p.miembro.rol] ?? p.miembro.rol,
+        },
+      ];
+  const resumen = p.efectivos ? resumenPermisos(p.catalogo, p.efectivos) : null;
   return (
     <div className="flex flex-col gap-3">
       <Campo etiqueta="Rol" htmlFor="edit-rol" {...(bloqueo ? { ayuda: bloqueo } : {})}>
@@ -70,7 +81,9 @@ export function CampoRolUsuario(p: Props) {
       </Campo>
       <div className="flex flex-col gap-1">
         <h3 className="t-label text-fg">Qué puede hacer</h3>
-        {resumen.length ? (
+        {resumen === null ? (
+          <p className="text-sm text-fg-muted">No pudimos cargar los permisos de este rol.</p>
+        ) : resumen.length ? (
           <ul className="flex flex-col gap-1 text-sm text-fg-muted">
             {resumen.map((r) => (
               <li key={r.modulo}>

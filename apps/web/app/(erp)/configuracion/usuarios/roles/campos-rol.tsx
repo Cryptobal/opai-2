@@ -13,19 +13,20 @@ type Props = {
   onCambiar: (v: ValoresRol) => void;
   errorNombre?: string | undefined;
   /** Solo al crear: «Partir de» copia los permisos de otro rol (sin los que no puedes conceder). */
-  partirDe?: { roles: RolVista[]; concedibles: string[] };
+  partirDe?: { roles: RolVista[]; concedibles: string[]; inicial: string | null };
 };
 
 const PARTIR_SISTEMA = new Set(["sistema:gerente", "sistema:supervisor", "sistema:viewer"]);
 
 /** Nombre (único), descripción (140) y, al crear, «Partir de» (sábana 07c, A3). */
 export function CamposRol({ valores, onCambiar, errorNombre, partirDe }: Props) {
-  const [partir, setPartir] = useState("blanco");
+  // Al duplicar, «Partir de» muestra el rol de origen (sus permisos ya vienen cargados).
+  const [partir, setPartir] = useState(partirDe?.inicial ?? "blanco");
   const opciones = partirDe
     ? [
         { valor: "blanco", etiqueta: "En blanco" },
         ...partirDe.roles
-          .filter((r) => (r.sistema ? PARTIR_SISTEMA.has(r.id) : true))
+          .filter((r) => (r.sistema ? PARTIR_SISTEMA.has(r.id) || r.id === partirDe.inicial : true))
           .map((r) => ({ valor: r.id, etiqueta: nombreRol(r) })),
       ]
     : [];

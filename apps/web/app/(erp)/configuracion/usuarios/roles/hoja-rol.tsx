@@ -35,8 +35,14 @@ const iniciales = (r: RolVista | null, base: RolVista | null, puede: string[]): 
 function contarCambios(a: ValoresRol, b: ValoresRol): number {
   const pa = new Set(a.permisos);
   const pb = new Set(b.permisos);
-  const permisos = [...pa].filter((p) => !pb.has(p)).length + [...pb].filter((p) => !pa.has(p)).length;
-  return permisos + Number(a.nombre !== b.nombre) + Number(a.descripcion !== b.descripcion);
+  const permisos =
+    [...pa].filter((p) => !pb.has(p)).length + [...pb].filter((p) => !pa.has(p)).length;
+  // Nombre y descripción normalizados como los guarda el servidor (trim): «Rol » no queda pendiente.
+  return (
+    permisos +
+    Number(a.nombre.trim() !== b.nombre.trim()) +
+    Number(a.descripcion.trim() !== b.descripcion.trim())
+  );
 }
 
 /** Detalle, edición y alta de un rol (sábana 07c, A2/A3): Sheet desde 1024, pantalla completa en teléfono. */
@@ -50,7 +56,11 @@ export function HojaRol({ rol, base, roles, catalogo, concedibles, gestiona, onC
   const duplicado = error?.includes("Ya existe") ? "Ya existe un rol con ese nombre" : undefined;
 
   async function guardar() {
-    const datos = { nombre: v.nombre.trim(), descripcion: v.descripcion.trim() || null, permisos: v.permisos };
+    const datos = {
+      nombre: v.nombre.trim(),
+      descripcion: v.descripcion.trim() || null,
+      permisos: v.permisos,
+    };
     if (!rol) {
       const r = await ejecutar<RolVista>("core.roles.create", datos);
       if (!r) return;
@@ -58,7 +68,8 @@ export function HojaRol({ rol, base, roles, catalogo, concedibles, gestiona, onC
       fijar({ nuevo: null, rol: r.id });
       return;
     }
-    if (await ejecutar("core.roles.update", { id: rol.id, ...datos })) avisar.exito("Rol actualizado");
+    if (await ejecutar("core.roles.update", { id: rol.id, ...datos }))
+      avisar.exito("Rol actualizado");
   }
 
   const acciones = !editable ? (
@@ -131,7 +142,7 @@ export function HojaRol({ rol, base, roles, catalogo, concedibles, gestiona, onC
             valores={v}
             onCambiar={setV}
             errorNombre={duplicado}
-            {...(rol ? {} : { partirDe: { roles, concedibles } })}
+            {...(rol ? {} : { partirDe: { roles, concedibles, inicial: base?.id ?? null } })}
           />
         ) : null}
         <h3 className="t-label text-fg">Permisos</h3>

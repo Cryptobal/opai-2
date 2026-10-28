@@ -1,18 +1,19 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useState } from "react";
 
 import { avisar, Button, Dialog, Sheet, Switch } from "@opai/ds";
 
-import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
 import { useCapacidad } from "@/app/_components/use-capacidad";
 import { fechaHora } from "@/lib/formato";
 
 import { CampoRolUsuario, permisosDeSeleccion, seleccionDe } from "./campo-rol-usuario";
 import { CampoPortales } from "./campos";
-import { type Excepcion, ExcepcionesUsuario } from "./excepciones-usuario";
+import { ExcepcionesUsuario } from "./excepciones-usuario";
+import { escrituraFicha } from "./guardar-usuario";
 import type { PropsFicha } from "./hojas-usuario";
 import type { Miembro } from "./usuarios-lista";
+import { useExcepciones } from "./use-excepciones";
 
 type Props = PropsFicha & { miembro: Miembro | null; onCerrar: () => void; ultimoOwner: boolean };
 
@@ -27,58 +28,34 @@ export function EditarUsuario(props: Props) {
 function Formulario(p: Props & { miembro: Miembro }) {
   const { miembro } = p;
   const { ejecutar, error } = useCapacidad("erp");
-  const inicial = seleccionDe(miembro);
-  const [rolSel, setRolSel] = useState(inicial);
+  const [rolSel, setRolSel] = useState(seleccionDe(miembro));
   const [portales, setPortales] = useState<string[]>(miembro.portales);
   const [activo, setActivo] = useState(miembro.estado === "activa");
   const [confirmar, setConfirmar] = useState(false);
-  const [excepciones, setExcepciones] = useState<Excepcion[] | null | Error>(null);
+  const { excepciones, recargar } = useExcepciones(miembro.id);
 
-  const leer = useCallback(
-    () => ejecutarCapacidad("erp", "core.excepciones.list", { membershipId: miembro.id }),
-    [miembro.id],
-  );
-  const recargar = useCallback(async () => {
-    const r = await leer();
-    setExcepciones(r.ok ? (r.data as Excepcion[]) : new Error(r.error.message));
-  }, [leer]);
-  useEffect(() => {
-    let vigente = true;
-    void leer().then((r) => {
-      if (vigente) setExcepciones(r.ok ? (r.data as Excepcion[]) : new Error(r.error.message));
-    });
-    return () => {
-      vigente = false;
-    };
-  }, [leer]);
-
-  // «Qué puede hacer» con la selección actual: permisos del rol + concedidas − denegadas.
-  const efectivos = new Set(permisosDeSeleccion(rolSel, p.roles));
-  const lista = Array.isArray(excepciones) ? excepciones : [];
+  // «Qué puede hacer» con la selección: permisos del rol + concedidas − denegadas. Un owner no lleva
+  // excepciones (al promoverlo se borran), así que ahí no se aplican.
+  const delRol = permisosDeSeleccion(rolSel, p.roles);
+  const efectivos = new Set(delRol ?? []);
+  const lista = Array.isArray(excepciones) && rolSel !== "base:owner" ? excepciones : [];
   for (const e of lista) if (e.conceder) efectivos.add(e.permiso);
   for (const e of lista) if (!e.conceder) efectivos.delete(e.permiso);
 
   async function guardar() {
-    const cambiaRol = rolSel !== inicial;
-    // Rol personalizado (A21): `core.roles.assign` conserva el rol base y valida la escalada.
-    if (cambiaRol && rolSel.startsWith("rol:")) {
-      const ok = await ejecutar("core.roles.assign", {
-        membershipId: miembro.id,
-        roleId: rolSel.slice(4),
-      });
-      if (!ok) return;
-    }
-    const base =
-      cambiaRol && rolSel.startsWith("base:")
-        ? { rol: rolSel.slice(5), ...(miembro.roleId ? { roleId: null } : {}) }
-        : {};
-    const input = {
+    const ficha = {
       membershipId: miembro.id,
-      ...base,
-      portales,
-      estado: activo ? "activa" : "suspendida",
+      rol: miembro.rol,
+      roleId: miembro.roleId,
+      portales: miembro.portales,
+      activo: miembro.estado === "activa",
     };
-    if (await ejecutar("core.users.update", input)) {
+    const e = escrituraFicha(ficha, { rolSel, portales, activo });
+    const ok =
+      e.id === "core.roles.assign"
+        ? await ejecutar("core.roles.assign", e.input)
+        : await ejecutar("core.users.update", e.input);
+    if (ok) {
       avisar.exito("Usuario actualizado");
       p.onCerrar();
     }
@@ -118,7 +95,7 @@ function Formulario(p: Props & { miembro: Miembro }) {
             gestionaRoles={p.gestionaRoles}
             ultimoOwner={p.ultimoOwner}
             catalogo={p.catalogo}
-            efectivos={[...efectivos]}
+            efectivos={delRol === null ? null : [...efectivos]}
           />
           <CampoPortales valor={portales} onCambiar={setPortales} />
           <ExcepcionesUsuario

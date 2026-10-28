@@ -65,6 +65,21 @@ const ESPECIALES: Record<string, string> = {
  */
 export const MODULOS_BLOQUEADOS: ReadonlySet<string> = new Set(["finanzas", "nomina"]);
 
+/**
+ * Permisos que no se reparten como excepción puntual: borrar la empresa y gobernar owners se dan
+ * cambiando el rol (owner), nunca por una excepción a un usuario.
+ */
+export const NO_EXCEPCIONABLES: ReadonlySet<string> = new Set([
+  "core:tenant.delete",
+  "core:owners.manage",
+]);
+
+/** Qué ven las personas con acceso a un módulo bloqueado (texto del diálogo de confirmación). */
+export const DATO_BLOQUEADO: Record<string, string> = {
+  finanzas: "información financiera de la empresa",
+  nomina: "las remuneraciones del personal",
+};
+
 export const nombreModulo = (m: string) => MODULOS[m] ?? m;
 export const nombreRecurso = (r: string) => RECURSOS[r] ?? r;
 
@@ -104,7 +119,9 @@ export function resumenPermisos(
         const v = r.ver !== null && tiene.has(r.ver);
         const g = r.gestionar !== null && tiene.has(r.gestionar);
         if (!v && !g) return [];
-        return [`${nombreRecurso(r.recurso)}: ${v && g ? "ver y gestionar" : v ? "ver" : "gestionar"}`];
+        return [
+          `${nombreRecurso(r.recurso)}: ${v && g ? "ver y gestionar" : v ? "ver" : "gestionar"}`,
+        ];
       });
       const otros = m.especiales.filter((e) => tiene.has(e.id)).map((e) => nombrePermiso(e.id));
       const todo = [...partes, ...otros];

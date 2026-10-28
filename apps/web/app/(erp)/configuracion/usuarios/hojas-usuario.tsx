@@ -22,7 +22,10 @@ export function HojasUsuario({ usuarios, ...ficha }: PropsFicha & { usuarios: Mi
   const invitar = useHojaUrl("invitar");
   const editar = useHojaUrl("editar");
   const miembro = usuarios.find((u) => u.id === editar.valor) ?? null;
-  const owners = usuarios.filter((u) => u.rol === "owner" && u.estado === "activa").length;
+  // Último owner: ningún OTRO owner activo (un owner suspendido no cuenta como respaldo).
+  const otrosOwners = usuarios.filter(
+    (u) => u.id !== miembro?.id && u.rol === "owner" && u.estado === "activa",
+  ).length;
   return (
     <>
       <InvitarUsuario abierto={invitar.abierta} onCerrar={invitar.cerrar} miRol={ficha.miRol} />
@@ -30,7 +33,7 @@ export function HojasUsuario({ usuarios, ...ficha }: PropsFicha & { usuarios: Mi
         {...ficha}
         miembro={miembro}
         onCerrar={editar.cerrar}
-        ultimoOwner={miembro?.rol === "owner" && owners <= 1}
+        ultimoOwner={miembro?.rol === "owner" && otrosOwners === 0}
       />
     </>
   );

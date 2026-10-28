@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 
 import { Alerta, Button, Dialog } from "@opai/ds";
 
-import { MODULOS_BLOQUEADOS, type ModuloCatalogo, nombreModulo } from "./etiquetas";
+import { DATO_BLOQUEADO, MODULOS_BLOQUEADOS, type ModuloCatalogo, nombreModulo } from "./etiquetas";
 import { MatrizModulo } from "./matriz-modulo";
 
 type Props = {
@@ -24,10 +24,7 @@ const moduloDe = (id: string) => id.slice(0, id.indexOf(":"));
  */
 export function MatrizPermisos({ catalogo, valor, onCambiar, concedibles }: Props) {
   const elegidos = useMemo(() => new Set(valor), [valor]);
-  const puede = useMemo(
-    () => (onCambiar ? new Set(concedibles) : null),
-    [onCambiar, concedibles],
-  );
+  const puede = useMemo(() => (onCambiar ? new Set(concedibles) : null), [onCambiar, concedibles]);
   const [confirmar, setConfirmar] = useState<string | null>(null);
 
   const aplicar = (id: string, on: boolean) =>
@@ -41,6 +38,7 @@ export function MatrizPermisos({ catalogo, valor, onCambiar, concedibles }: Prop
   };
 
   const modulo = confirmar ? nombreModulo(moduloDe(confirmar)) : "";
+  const dato = confirmar ? (DATO_BLOQUEADO[moduloDe(confirmar)] ?? "información sensible") : "";
   return (
     <div className="flex flex-col">
       {valor.length === 0 ? (
@@ -65,7 +63,7 @@ export function MatrizPermisos({ catalogo, valor, onCambiar, concedibles }: Prop
         abierto={confirmar !== null}
         onCerrar={() => setConfirmar(null)}
         titulo={`¿Dar acceso a ${modulo}?`}
-        descripcion={`Vas a dar acceso a ${modulo} a este rol. Las personas con este rol verán información financiera de la empresa.`}
+        descripcion={`Vas a dar acceso a ${modulo} a este rol. Las personas con este rol verán ${dato}.`}
         acciones={
           <>
             <Button variant="secondary" onClick={() => setConfirmar(null)}>

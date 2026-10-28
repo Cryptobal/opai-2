@@ -33,7 +33,6 @@ export async function cargarPermisos(): Promise<DatosPermisos> {
   const miRol = identidad?.actual?.rol ?? "viewer";
   const puede = identidad ? puedeDeIdentidad(identidad) : () => false;
   const concedibles = catalogo.ok ? idsCatalogo(catalogo.data).filter((p) => puede(p)) : [];
-  const gestionaRoles =
-    (miRol === "owner" || miRol === "admin") && puede("core:users.manage");
+  const gestionaRoles = (miRol === "owner" || miRol === "admin") && puede("core:users.manage");
   return { catalogo, roles, miRol, gestionaRoles, concedibles };
 }

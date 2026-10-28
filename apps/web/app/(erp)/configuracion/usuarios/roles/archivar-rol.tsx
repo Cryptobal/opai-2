@@ -36,7 +36,12 @@ export function AccionesRol({ rol, onDuplicar, onArchivado }: Props) {
         disparador={<MoreHorizontal className="size-5" aria-hidden />}
         lado="abajo-derecha"
         items={[
-          { id: "duplicar", etiqueta: "Duplicar como nuevo rol", icono: Copy, onSelect: onDuplicar },
+          {
+            id: "duplicar",
+            etiqueta: "Duplicar como nuevo rol",
+            icono: Copy,
+            onSelect: onDuplicar,
+          },
           {
             id: "archivar",
             etiqueta: "Archivar rol",

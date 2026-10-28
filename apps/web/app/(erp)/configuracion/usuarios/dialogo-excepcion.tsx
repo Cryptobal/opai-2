@@ -2,11 +2,18 @@
 
 import { useState } from "react";
 
-import { avisar, Button, Campo, Combobox, Dialog, Segmentado, Textarea } from "@opai/ds";
+import { Alerta, avisar, Button, Campo, Combobox, Dialog, Segmentado, Textarea } from "@opai/ds";
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-import { type ModuloCatalogo, nombreModulo, nombrePermiso } from "./_permisos/etiquetas";
+import {
+  DATO_BLOQUEADO,
+  MODULOS_BLOQUEADOS,
+  type ModuloCatalogo,
+  NO_EXCEPCIONABLES,
+  nombreModulo,
+  nombrePermiso,
+} from "./_permisos/etiquetas";
 
 type Props = {
   abierto: boolean;
@@ -27,6 +34,10 @@ export function DialogoExcepcion(p: Props) {
   const [efecto, setEfecto] = useState<"conceder" | "denegar">("conceder");
   const [permiso, setPermiso] = useState<string | null>(null);
   const [motivo, setMotivo] = useState("");
+  const [confirmar, setConfirmar] = useState(false);
+  const moduloPermiso = permiso ? permiso.slice(0, permiso.indexOf(":")) : "";
+  // Conceder Finanzas o Nómina pide la misma confirmación explícita que la matriz (§16.2).
+  const bloqueado = efecto === "conceder" && MODULOS_BLOQUEADOS.has(moduloPermiso);
   const puede = new Set(p.concedibles);
   const opciones = p.catalogo
     .filter((m) => m.activo)
@@ -35,7 +46,7 @@ export function DialogoExcepcion(p: Props) {
         ...m.recursos.flatMap((r) => [r.ver, r.gestionar]),
         ...m.especiales.map((e) => e.id),
       ].flatMap((id) =>
-        id && (efecto === "denegar" || puede.has(id))
+        id && !NO_EXCEPCIONABLES.has(id) && (efecto === "denegar" || puede.has(id))
           ? [{ valor: id, etiqueta: nombrePermiso(id), detalle: nombreModulo(m.modulo) }]
           : [],
       ),
@@ -44,12 +55,17 @@ export function DialogoExcepcion(p: Props) {
   const cerrar = () => {
     setPermiso(null);
     setMotivo("");
+    setConfirmar(false);
     limpiarError();
     p.onCerrar();
   };
 
   async function guardar() {
     if (!permiso) return;
+    if (bloqueado && !confirmar) {
+      setConfirmar(true);
+      return;
+    }
     const r = await ejecutar("core.excepciones.set", {
       membershipId: p.membershipId,
       permiso,
@@ -74,16 +90,19 @@ export function DialogoExcepcion(p: Props) {
           <Button variant="secondary" onClick={cerrar}>
             Cancelar
           </Button>
-          <Button
-            disabled={pendiente || !permiso || motivo.trim().length < 3}
-            onClick={guardar}
-          >
-            {pendiente ? "Guardando…" : "Guardar excepción"}
+          <Button disabled={pendiente || !permiso || motivo.trim().length < 3} onClick={guardar}>
+            {pendiente ? "Guardando…" : confirmar ? "Dar acceso" : "Guardar excepción"}
           </Button>
         </>
       }
     >
       <div className="flex flex-col gap-4">
+        {error ? <Alerta tono="danger" titulo={error} /> : null}
+        {confirmar ? (
+          <Alerta tono="warning" titulo={`Vas a dar acceso a ${nombreModulo(moduloPermiso)}`}>
+            {`Esta persona verá ${DATO_BLOQUEADO[moduloPermiso] ?? "información sensible"}. Confírmalo con «Dar acceso».`}
+          </Alerta>
+        ) : null}
         <Segmentado
           etiqueta="Tipo de excepción"
           activa={efecto}
@@ -104,17 +123,15 @@ export function DialogoExcepcion(p: Props) {
             id="exc-permiso"
             opciones={opciones}
             valor={permiso}
-            onCambiar={(v) => setPermiso(v[0] ?? null)}
+            onCambiar={(v) => {
+              setPermiso(v[0] ?? null);
+              setConfirmar(false);
+            }}
             placeholder="Elegir permiso…"
             buscarPlaceholder="Buscar permiso"
           />
         </Campo>
-        <Campo
-          etiqueta="Motivo"
-          htmlFor="exc-motivo"
-          ayuda={`${motivo.length}/200`}
-          {...(error ? { error } : {})}
-        >
+        <Campo etiqueta="Motivo" htmlFor="exc-motivo" ayuda={`${motivo.length}/200`}>
           <Textarea
             id="exc-motivo"
             value={motivo}
