@@ -34,6 +34,8 @@ async function main() {
         tenantId: tenant.id,
         cuentaId: CUENTA,
         nombre: "Instalación asignable E2E",
+        // Activa: el portal Supervisor lista solo instalaciones activas (por defecto nace «prospecto»).
+        estado: "activa",
       },
     });
     {
