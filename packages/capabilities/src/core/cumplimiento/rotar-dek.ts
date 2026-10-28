@@ -1,7 +1,7 @@
 import { camposACifrar } from "@opai/domain";
 import { cifrar, descifrar, generarDek, kekDelEntorno } from "@opai/integrations";
 
-import type { TenantTx } from "@opai/db";
+import { enTransaccion, type TenantTx } from "@opai/db";
 
 import { reglaDeNegocio } from "../../errores";
 import type { Contexto } from "../../types";
@@ -11,7 +11,13 @@ import { listarInventario } from "./inventario";
 // Rotación de la DEK de un tenant (Ley 21.719, Brief 07d §21/§22, ADR-027). A diferencia de
 // `rotar-kek` (que solo reenvuelve la DEK), esto cambia la clave que cifra los datos: recifra los
 // secretos de integraciones y los campos sensibles del inventario y reemplaza la DEK, todo en UNA
-// transacción con la fila de `claves_tenant` bloqueada. Si algo falla, nada cambia.
+// transacción con la fila de `claves_tenant` bloqueada. Si algo falla, nada cambia. Las escrituras
+// de secretos toman `FOR SHARE` sobre la misma fila (`guardarSecreto`), así que no se cuelan con la DEK
+// vieja; el cifrado de campos sensibles debe hacer lo mismo cuando exista una escritura que lo use.
+// Queda constancia por el evento `core.cumplimiento.dek_rotada` (outbox), en la misma transacción.
+
+/** Recifrar todo puede tardar más que una transacción normal (15 s): tope explícito y amplio. */
+const TIMEOUT_MS = 300_000;
 
 /** Recifra un campo sensible: recorre sus filas y reescribe cada valor con `recifrar`. */
 export type Recifrador = (tx: TenantTx, recifrar: (guardado: string) => string) => Promise<number>;
@@ -30,7 +36,7 @@ export async function rotarDek(
   const sensibles = camposACifrar(listarInventario()).map((c) => `${c.tabla}.${c.campo}`);
   const faltan = sensibles.filter((c) => !recifradores[c]);
   if (faltan.length) throw reglaDeNegocio(`Falta el recifrador de: ${faltan.join(", ")}.`);
-  return ctx.transaccion(async (tx) => {
+  return enTransaccion(ctx.tenantId, async (tx) => {
     await tx.$queryRaw`SELECT id FROM core.claves_tenant WHERE tenant_id = ${ctx.tenantId}::uuid FOR UPDATE`;
     const fila = await tx.claveTenant.findUnique({ where: { tenantId: ctx.tenantId } });
     if (!fila) throw reglaDeNegocio("El tenant aún no tiene una clave de datos que rotar.");
@@ -61,6 +67,13 @@ export async function rotarDek(
       where: { tenantId: ctx.tenantId },
       data: { dekCifrada: b(w.cifrado), iv: b(w.iv), tag: b(w.tag), kekVersion: k.version },
     });
-    return { secretos, campos, kidAnterior: kidDe(vieja), kidNuevo: kidDe(nueva) };
-  });
+    const r = { secretos, campos, kidAnterior: kidDe(vieja), kidNuevo: kidDe(nueva) };
+    await ctx.eventos.emitir(tx, {
+      tipo: "core.cumplimiento.dek_rotada",
+      entidadTipo: "clave_tenant",
+      entidadId: fila.id,
+      payload: r,
+    });
+    return r;
+  }, { timeoutMs: TIMEOUT_MS });
 }

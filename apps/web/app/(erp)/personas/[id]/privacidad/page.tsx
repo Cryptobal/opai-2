@@ -12,7 +12,10 @@ export default function PrivacidadPersona(props: Props) {
   return (
     <PaginaPersona {...props} tab="privacidad">
       {(p) => (
-        <PrivacidadTitular titular={{ tipo: "persona", id: p.id, nombre: p.nombreCompleto }} />
+        <PrivacidadTitular
+          titular={{ tipo: "persona", id: p.id, nombre: p.nombreCompleto }}
+          sinPermiso="avisar"
+        />
       )}
     </PaginaPersona>
   );

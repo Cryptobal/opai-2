@@ -1,6 +1,6 @@
 import { FilePlus } from "lucide-react";
 
-import { SeccionTarjeta } from "@opai/ds";
+import { Forbidden, SeccionTarjeta } from "@opai/ds";
 import { PERMISOS_CORE } from "@opai/domain";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
@@ -11,16 +11,23 @@ import { identidadActual } from "@/lib/servidor";
 import { ConsentimientosTitular } from "./consentimientos-titular";
 import { HojaConsentimiento, HojaSolicitud } from "./diferidas";
 
-type Props = { titular: { tipo: "persona" | "contacto"; id: string; nombre: string } };
+type Props = {
+  titular: { tipo: "persona" | "contacto"; id: string; nombre: string };
+  /** En una pestaña propia, sin permiso se muestra «sin permisos»; dentro de otra ficha, nada. */
+  sinPermiso?: "ocultar" | "avisar";
+};
 
 /**
  * Privacidad del titular dentro de su ficha (ADR-041: pestaña, no pantalla suelta): consentimientos
  * y registrar una solicitud ARCO+ con el titular ya identificado. Solo con `cumplimiento.read`.
  */
-export async function PrivacidadTitular({ titular }: Props) {
+export async function PrivacidadTitular({ titular, sinPermiso = "ocultar" }: Props) {
   const identidad = await identidadActual();
   const puede = identidad ? puedeDeIdentidad(identidad) : () => false;
-  if (!puede(PERMISOS_CORE.cumplimientoRead)) return null;
+  if (!puede(PERMISOS_CORE.cumplimientoRead))
+    return sinPermiso === "avisar" ? (
+      <Forbidden descripcion="Los consentimientos y solicitudes de datos personales los ven los responsables de cumplimiento." />
+    ) : null;
   const gestionar = puede(PERMISOS_CORE.cumplimientoManage);
   const ref = { tipo: titular.tipo, id: titular.id };
   return (

@@ -8,7 +8,7 @@ export function lecturasLocksMemoria(tabla: (nombre: string) => Fila[]) {
     const texto = sql.join("?");
     if (texto.includes("/* 07b:bloqueo-vinculo */") || texto.includes("/* 07b:bloqueo-destino */")) return [];
     // 07d (§21): el lock serializa con la anonimización solo en Postgres; aquí basta la marca.
-    if (texto.includes("/* 07d:bloqueo-anonimizar */")) return [];
+    if (texto.includes("/* 07d:bloqueo-anonimizar */") || texto.includes("/* 07d:bloqueo-dek */")) return [];
     if (texto.includes("/* 07d:bloqueo-titular */")) {
       const fila = tabla(texto.includes("core.personas") ? "persona" : "contacto").find((f) => f["id"] === valores[0]);
       return fila ? [{ anonimizado: !!(fila["anonimizadaEn"] ?? fila["anonimizadoEn"]) }] : [];

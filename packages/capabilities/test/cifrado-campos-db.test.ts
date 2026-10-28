@@ -134,6 +134,8 @@ describe.skipIf(!urlPropietario)("cifrado de campos sensibles en base real", () 
     const rot = await rotarDek(ctx(tA));
     expect(rot.secretos).toBe(1);
     expect(rot.kidAnterior).not.toBe(rot.kidNuevo);
+    // Queda constancia en el outbox, en la misma transacción que la rotación.
+    expect(await e.admin.evento.count({ where: { tenantId: tA, tipo: "core.cumplimiento.dek_rotada" } })).toBe(1);
     expect(await leerSecreto(ctx(tA), integracionId, "api_key")).toBe("re_rotar_123");
     // Lo cifrado con la DEK anterior ya no se lee (mismo error genérico): hay que recifrarlo al rotar.
     await expect(crearCifradoDeCampos(ctx(tA), INVENTARIO).descifrar("fichas_salud", "diagnostico", g)).rejects.toThrow(/No se pudo descifrar/);

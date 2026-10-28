@@ -17,7 +17,7 @@ type Props = { casoId: string; estado: string; pendientes: string[]; gestionar: 
 export function AccionesIncidente({ casoId, estado, pendientes, gestionar }: Props) {
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const [aviso, setAviso] = useState(false);
-  const [destinatario, setDestinatario] = useState(pendientes[0] ?? "agencia");
+  const [destinatario, setDestinatario] = useState(pendientes[0] ?? "");
   const [canal, setCanal] = useState("");
   const [nota, setNota] = useState("");
   if (!gestionar || estado === "cerrado") return null;
@@ -52,7 +52,9 @@ export function AccionesIncidente({ casoId, estado, pendientes, gestionar }: Pro
         <Button variant="secondary" disabled={pendiente} onClick={() => void avanzar("cerrado")}>
           Cerrar incidente
         </Button>
-        <Button onClick={() => setAviso(true)}>Registrar aviso de brecha</Button>
+        {pendientes.length ? (
+          <Button onClick={() => setAviso(true)}>Registrar aviso de brecha</Button>
+        ) : null}
       </div>
       {aviso ? (
         <Dialog
@@ -65,7 +67,7 @@ export function AccionesIncidente({ casoId, estado, pendientes, gestionar }: Pro
               <Button variant="secondary" onClick={() => setAviso(false)}>
                 Cancelar
               </Button>
-              <Button disabled={pendiente} onClick={() => void notificar()}>
+              <Button disabled={pendiente || !destinatario} onClick={() => void notificar()}>
                 Registrar aviso
               </Button>
             </>
@@ -78,9 +80,9 @@ export function AccionesIncidente({ casoId, estado, pendientes, gestionar }: Pro
                 id="av-dest"
                 valor={destinatario}
                 onCambiar={setDestinatario}
-                opciones={Object.entries(DESTINATARIO).map(([valor, etiqueta]) => ({
+                opciones={pendientes.map((valor) => ({
                   valor,
-                  etiqueta,
+                  etiqueta: DESTINATARIO[valor] ?? valor,
                 }))}
               />
             </Campo>
