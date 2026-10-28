@@ -33,7 +33,7 @@ export default function Vencimientos({ searchParams }: { searchParams: SearchPar
         volver: desdeInicio
           ? { href: "/", etiqueta: "Inicio" }
           : { href: "/personas", etiqueta: "Personas" },
-        volverSoloTelefono: true,
+        volverSoloTelefono: !desdeInicio,
       })}
     >
       {({ state, m }) => (

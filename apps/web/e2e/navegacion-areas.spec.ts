@@ -148,8 +148,7 @@ test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }
     await comprobarContrasteNavegacion(page, 'header.sticky, nav[aria-label="Principal"], #bandeja');
     await page.screenshot({ path: info.outputPath(`navegacion-${tema}.png`), fullPage: true });
     await page.keyboard.press("Control+k");
-    await expect(page.getByRole("dialog")).toBeVisible();
-    await comprobarContrasteNavegacion(page, '[role="dialog"]');
+    await expect(page.getByRole("dialog")).toBeVisible(); await comprobarContrasteNavegacion(page, '[role="dialog"]');
     await page.keyboard.press("Escape");
   }
 });

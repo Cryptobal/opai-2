@@ -1,14 +1,11 @@
 import { z } from "zod";
-
 import { diasHasta, estadoVencimiento, PERMISOS_CORE } from "@opai/domain";
-
 import { defineCapability } from "../../define";
 import { prohibido } from "../../errores";
 import { dondePersona } from "../maestros/alcance";
 import { dia, hoy } from "../maestros/comun";
 import { vinculosVigentes } from "../maestros/personas-vista";
 import { filtroDocumentoSensible } from "./sensibles";
-
 const ESTADOS = ["vigente", "por_vencer", "vencido", "sin_fecha", "falta"] as const;
 type Celda = z.input<typeof celdaSchema>;
 const celdaSchema = z.object({
@@ -17,7 +14,6 @@ const celdaSchema = z.object({
   dias: z.number().nullable().describe("Días hasta el vencimiento (negativo si venció)."),
   documentoId: z.string().nullable(),
 });
-
 /**
  * Celdas de una persona: el documento más reciente de cada tipo (por su vínculo de propietario).
  * Un tipo obligatorio sin documento es "falta"; uno opcional sin documento no se informa.
@@ -43,7 +39,6 @@ function celdas(
     ];
   });
 }
-
 export const documentosMatriz = defineCapability({
   auditarLectura: (s) =>
     s.filas.flatMap((f) => [
@@ -73,6 +68,7 @@ export const documentosMatriz = defineCapability({
         celdas: z.array(celdaSchema),
       }),
     ),
+    limiteExcedido: z.boolean(),
     resumen: z.object({
       personas: z.number(),
       conPendientes: z.number(),
@@ -98,8 +94,10 @@ export const documentosMatriz = defineCapability({
       // Alcance por filas (ADR-022): el supervisor solo ve las personas a su cargo (hoy ninguna, 07b).
       where: { archivadaEn: null, estado: { not: "inactiva" }, AND: [dondePersona(ctx)] },
       orderBy: [{ apellidos: "asc" }, { nombres: "asc" }],
-      take: 2000,
+      take: 2001,
     });
+    const limiteExcedido = personas.length > 2000;
+    if (limiteExcedido) personas.pop();
     const vinculos = await vinculosVigentes(
       ctx,
       personas.map((p) => p.id),
@@ -137,6 +135,7 @@ export const documentosMatriz = defineCapability({
     const todas = filas.flatMap((f) => f.celdas);
     const conPendientes = filas.filter((f) => f.celdas.some((c) => pendiente(c.estado)));
     return {
+      limiteExcedido,
       tipos: tipos.map((t) => ({ id: t.id, nombre: t.nombre, obligatorio: t.obligatorio })),
       filas: input.soloPendientes ? conPendientes : filas,
       resumen: {

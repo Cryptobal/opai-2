@@ -62,17 +62,21 @@ export const inicioPendientes = defineCapability({
         ctx.autorizar(PERMISOS_CORE.personasRead)
       ) {
         // La matriz aplica el mismo alcance y selección de documentos que la pantalla.
-        const { resumen } = await documentosMatriz.handler(
+        const { resumen, limiteExcedido } = await documentosMatriz.handler(
           ctx,
           { soloPendientes: false },
           { dryRun: false },
         );
         const { vencidos, porVencer } = resumen;
-        if (vencidos || porVencer)
+        if (limiteExcedido || vencidos || porVencer)
           items.push({
             tipo: "documentos",
-            titulo: tituloVencimientos(vencidos, porVencer),
-            detalle: "Revisa el semáforo de vencimientos y pide la renovación",
+            titulo: limiteExcedido
+              ? "Vencimientos sin conteo completo"
+              : tituloVencimientos(vencidos, porVencer),
+            detalle: limiteExcedido
+              ? "Hay más de 2.000 personas; el semáforo es parcial."
+              : "Revisa el semáforo de vencimientos y pide la renovación",
             tono: vencidos ? "danger" : "warning",
             href: "/personas/vencimientos?origen=inicio",
             accion: "Pedir renovación",
