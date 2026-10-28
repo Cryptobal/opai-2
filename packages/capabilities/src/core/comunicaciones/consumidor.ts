@@ -4,6 +4,7 @@ import { defineConsumidor, type EventoPublicado } from "../../eventos/consumidor
 import { correoDe } from "../../integraciones/adaptadores";
 import type { Contexto } from "../../types";
 import { supervisoresConDocEnAlcance } from "../documentos/alcance-doc";
+import { conAccesoAnexo, esDocumentoDeAnexo } from "./acceso-anexo";
 import { type Destinatario, destinatarios, silenciados } from "./destinatarios";
 import { enviarCorreo } from "./envio";
 import { comunicableDe, comunicables, plantillaVigente } from "./resolver";
@@ -109,13 +110,19 @@ export const consumidorComunicaciones = defineConsumidor({
       ev.entidadTipo === "documento" && ev.entidadId
         ? await supervisoresConDocEnAlcance(ctx, ev.entidadId)
         : null;
+    // El documento final de un anexo (sueldos) solo se avisa a quien puede verlo.
+    const deAnexo =
+      ev.entidadTipo === "documento" && ev.entidadId
+        ? await esDocumentoDeAnexo(ctx, ev.entidadId)
+        : false;
     for (const r of reglas) {
-      const para = await destinatarios(
+      const todos = await destinatarios(
         ctx,
         r.destinatariosRoles,
         r.destinatariosUsuarios,
         supervisoresPermitidos,
       );
+      const para = deAnexo ? await conAccesoAnexo(ctx, todos) : todos;
       const silencio = await silenciados(
         ctx,
         para.map((p) => p.id),
