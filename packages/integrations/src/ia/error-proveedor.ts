@@ -6,13 +6,15 @@ const MAX_DETALLE = 300;
 
 /** Formas que se parecen a credenciales: se reemplazan aunque no sean la key de esta llamada. */
 const PARECE_SECRETO: [RegExp, string][] = [
-  [/sk-ant-[\w-]+/gi, "[clave]"],
-  [/sk-[\w-]{16,}/gi, "[clave]"],
-  [/xai-[\w-]{16,}/gi, "[clave]"],
+  [/\bsk-ant-[\w-]+/gi, "[clave]"],
+  [/\bsk-[\w-]{16,}/gi, "[clave]"],
+  [/\bxai-[\w-]{16,}/gi, "[clave]"],
   [/AIza[\w-]{20,}/g, "[clave]"],
   [/\b(?:ghp|gho|ghu|ghs|ghr|gsk)_[\w]{16,}/gi, "[clave]"],
   [/\bgithub_pat_[\w]{20,}/gi, "[clave]"],
-  [/\b(Bearer|Basic)\s+[\w.~+/=-]+/gi, "[clave]"],
+  [/\bBearer\s+[\w.~+/=-]+/gi, "[clave]"],
+  // `Basic` con mayúscula y credencial base64 (no «basic tier» ni «Basic plan»).
+  [/\bBasic\s+[A-Za-z0-9+/]{8,}={0,2}/g, "[clave]"],
   // Usuario y clave dentro de una URL (`https://usuario:clave@host`).
   [/(\/\/)[^/\s:@]+:[^@\s/]+@/g, "$1[clave]@"],
   // Credenciales en la query de una URL.

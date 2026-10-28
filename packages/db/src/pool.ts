@@ -60,7 +60,8 @@ export class PoolConReintento extends pg.Pool {
 
   async #conectar(): Promise<pg.PoolClient> {
     const tope = this.options.connectionTimeoutMillis;
-    const inactividad = this.options.idleTimeoutMillis ?? 0;
+    // Con `min` > 0 pg-pool conserva ociosas más allá de la inactividad: ahí no se usa ese criterio.
+    const inactividad = (this.options.min ?? 0) > 0 ? 0 : (this.options.idleTimeoutMillis ?? 0);
     let reintentado = false;
     // A lo más tantos descartes como conexiones caben: tras eso, una conexión nueva o un error.
     for (let descartes = 0; ; ) {

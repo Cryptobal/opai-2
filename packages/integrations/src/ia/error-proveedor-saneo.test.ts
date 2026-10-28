@@ -42,5 +42,11 @@ describe("sanear: formas de credencial que antes sobrevivían (no bloqueante del
     const normal = "invalid_request_error · max_tokens: 100% of the limit (model claude-haiku-5-5)";
     expect(sanear(normal, KEY)).toBe(normal);
     expect(sanear("Your credit balance is too low.", KEY)).toBe("Your credit balance is too low.");
+    for (const texto of [
+      "Your basic tier quota exceeded",
+      "Basic plan",
+      "risk-assessment-pipeline-failed",
+    ])
+      expect(sanear(texto, KEY)).toBe(texto);
   });
 });
