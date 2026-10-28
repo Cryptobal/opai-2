@@ -342,7 +342,8 @@ describe.skipIf(!urlPropietario)("cumplimiento PR3 (retención) en base real", (
         ...base,
         lote: async () => {
           llamadas += 1;
-          return ids.slice(llamadas - 1, llamadas);
+          const uno = ids.slice(llamadas - 1, llamadas);
+          return { ids: uno, ultimo: uno[0] ?? null };
         },
         aplicar: async (...a: Parameters<typeof base.aplicar>) => {
           if (llamadas >= 2) throw new Error("falla simulada del lote 2");
@@ -368,7 +369,7 @@ describe.skipIf(!urlPropietario)("cumplimiento PR3 (retención) en base real", (
       const antes = await e.admin.retencionEjecucion.count({ where: { tenantId: tA } });
       const contexto = ctx(tA, uA);
       contexto.eventos = { ...contexto.eventos, emitir: async () => { throw new Error("falló el evento"); } };
-      await expect(correrRegla(contexto, { ...base, lote: async () => [envio.id] }, 365, new Date(), true))
+      await expect(correrRegla(contexto, { ...base, lote: async () => ({ ids: [envio.id], ultimo: envio.id }) }, 365, new Date(), true))
         .rejects.toThrow("falló el evento");
       expect((await e.admin.envio.findUniqueOrThrow({ where: { id: envio.id } })).destinatario).toBe("rollback@x.cl");
       expect(await e.admin.retencionEjecucion.count({ where: { tenantId: tA } })).toBe(antes);

@@ -1,7 +1,7 @@
 // Gate de la política de retención (Ley 21.719, Brief 07d PR 3): el catálogo cubre exactamente las
 // tablas del inventario, no manda borrar hechos regulados, y lo que decide Carlos (periodos y
 // activación) es un ajuste del tenant que parte apagado y con los periodos como propuesta.
-import { POLITICA_RETENCION, reglasDelTrabajo } from "@opai/domain";
+import { POLITICA_RETENCION, reglasDelTrabajo, reglasPendientes } from "@opai/domain";
 import { describe, expect, it } from "vitest";
 
 import { listarAjustes } from "../src/core/config/catalogo";
@@ -49,7 +49,19 @@ describe("ajustes de la política", () => {
       const a = ajustes.find((x) => x.clave === claveAjusteRetencion(r.clave));
       expect(a, r.clave).toBeDefined();
       expect(a?.schema.parse(undefined)).toBe(r.diasPropuestos);
-      expect(a?.meta.ayuda).toMatch(/PROPUESTA/);
+      expect(a?.meta.ayuda).toMatch(/Plazo propuesto/);
+    }
+  });
+
+  it("las 7 categorías pendientes son configurables y parten APAGADAS (0), solo personas (CAR-39)", () => {
+    expect(reglasPendientes().map((r) => r.clave).sort()).toEqual(
+      ["aprobaciones", "cuentas", "documentos", "gasto_agente_mes", "representantes", "sesiones", "usuarios"],
+    );
+    for (const r of reglasPendientes()) {
+      const a = ajustes.find((x) => x.clave === claveAjusteRetencion(r.clave));
+      expect(a?.schema.parse(undefined), r.clave).toBe(0);
+      expect(a?.meta).toMatchObject({ ambito: "tenant", permiso: "core:cumplimiento.manage", soloPersonas: true });
+      expect(a?.meta.ayuda).toMatch(/Plazo por definir/);
     }
   });
 });
