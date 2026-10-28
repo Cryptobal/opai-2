@@ -1,23 +1,17 @@
 // Fixture local del seguimiento #60. Nunca Neon/producción; no cambia al owner ni su contraseña.
 import { hashPassword } from "better-auth/crypto";
-import { cerrarClientes, dbAdmin } from "@opai/db";
+import { cerrarClientes, dbAdmin, enTransaccion } from "@opai/db";
 import { PLANTILLAS } from "../../db/scripts/roles-base-plantillas";
+import { exigirBaseE2E } from "../../db/scripts/exigir-base-e2e";
 
 async function main() {
-  const url = new URL(process.env["DATABASE_URL_MIGRATE"] ?? "postgresql://sin-configurar/");
-  if (
-    !["localhost", "127.0.0.1"].includes(url.hostname) ||
-    !/^\/opai_e2e(?:_[a-zA-Z0-9_]+)?$/.test(url.pathname) ||
-    process.env["NODE_ENV"] === "production"
-  )
-    throw new Error("Solo opai_e2e local.");
-  const db = dbAdmin();
+  exigirBaseE2E();
   const password = process.env["E2E_PASSWORD"];
   if (!password) throw new Error("Falta E2E_PASSWORD");
   const hash = await hashPassword(password);
-  const tenant = await db.tenant.findUniqueOrThrow({ where: { slug: "gard" } });
+  const tenant = await dbAdmin().tenant.findUniqueOrThrow({ where: { slug: "gard" } });
   const plantilla = PLANTILLAS.find((p) => p.nombre === "Inspector DT")!;
-  await db.$transaction(async (tx) => {
+  await enTransaccion(tenant.id, async (tx) => {
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(70167)`;
     const user = await tx.user.upsert({
       where: { email: "inspector-seguimiento@opai.cl" },

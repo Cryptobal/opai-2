@@ -1,5 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
 
+import { ocultarIndicadorDev } from "./indicador-dev";
 import { entrar as iniciarSesion } from "./sesion";
 
 import { digitoVerificador } from "@opai/domain";
@@ -13,6 +14,10 @@ const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD
 
 test.use({ actionTimeout: 30_000 });
 test.setTimeout(180_000);
+
+// Solo dev: el indicador de Next (`nextjs-portal`, abajo a la izquierda) tapa el menú de usuario y el
+// selector del riel y intercepta el clic. No es un error de la app: es el badge del propio Next.
+test.beforeEach(({ page }) => ocultarIndicadorDev(page));
 
 async function entrar(page: Page, correo = email) {
   await iniciarSesion(page, correo);
@@ -29,6 +34,20 @@ function rutNuevo() {
 
 const menu = (page: Page, nombre: RegExp) =>
   page.getByRole("navigation", { name: "Principal" }).getByRole("link", { name: nombre });
+
+const GRUPO = { Personas: "Personas", Cuentas: "Clientes" } as const;
+
+/** El menú lateral es un acordeón: si el enlace está en un grupo cerrado, se abre antes del clic. */
+async function ir(page: Page, destino: keyof typeof GRUPO) {
+  const enlace = menu(page, new RegExp(`^${destino}`));
+  if (!(await enlace.isVisible())) {
+    const grupo = page
+      .getByRole("navigation", { name: "Principal" })
+      .getByRole("button", { name: GRUPO[destino], exact: true });
+    if ((await grupo.getAttribute("aria-expanded")) !== "true") await grupo.click();
+  }
+  await enlace.click();
+}
 
 /**
  * Escritorio: selector del riel. En iPad el shell no ofrece cambiar de empresa (ni en el riel ni en
@@ -149,7 +168,7 @@ test.describe("caché y sesión", () => {
     page,
   }) => {
     await entrar(page, emailMulti);
-    await menu(page, /^Personas/).click();
+    await ir(page, "Personas");
     await page.waitForURL("**/personas");
     await expect(filas(page, "Lagos").first()).toBeVisible(); // persona de la demo de Gard
     const otra = await context.newPage();
@@ -158,9 +177,9 @@ test.describe("caché y sesión", () => {
 
     await cambiarDeEmpresa(page, "Empresa E2E");
     await page.waitForURL((u) => u.pathname === "/");
-    await menu(page, /^Cuentas/).click();
+    await ir(page, "Cuentas");
     await page.waitForURL("**/cuentas");
-    await menu(page, /^Personas/).click(); // Personas de la otra empresa: no sale de la caché de Gard
+    await ir(page, "Personas"); // Personas de la otra empresa: no sale de la caché de Gard
     await page.waitForURL("**/personas");
     await expect(filas(page, "Otraempresa").first()).toBeVisible();
     await expect(filas(page, "Lagos")).toHaveCount(0);
