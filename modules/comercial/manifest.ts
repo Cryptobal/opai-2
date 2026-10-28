@@ -55,6 +55,10 @@ export const manifest = defineModule({
     { id: "comercial.negocio.ganado", descripcion: "Un negocio se marcó como ganado." },
     { id: "comercial.negocio.perdido", descripcion: "Un negocio se marcó como perdido." },
     { id: "comercial.negocio.archivado", descripcion: "Un negocio se archivó o se desarchivó." },
+    {
+      id: "comercial.embudo.actualizado",
+      descripcion: "Se agregó o reordenó una etapa del embudo de ventas.",
+    },
   ],
   capacidades: capacidadesComercial,
 });

@@ -5,6 +5,7 @@ import { noEncontrado, reglaDeNegocio } from "../errores";
 import { uuidSchema } from "../core/esquemas";
 import { PERMISO_MANAGE, negocioDe, negocioSchema, vistaNegocio } from "./comun";
 import { aplicarEtapa } from "./transiciones-util";
+import { validarEntrada } from "./validaciones";
 
 export const negociosPerder = defineCapability({
   id: "comercial.negocios.perder",
@@ -56,9 +57,15 @@ export const negociosPerder = defineCapability({
 export const negociosReabrir = defineCapability({
   id: "comercial.negocios.reabrir",
   descripcion:
-    "Reabre un negocio perdido con un motivo, devolviéndolo a la primera etapa abierta del embudo; queda en el historial (R20). Un negocio ganado no se reabre.",
+    "Reabre un negocio perdido con un motivo, devolviéndolo a la etapa abierta que se elija (por defecto, la primera); queda en el historial (R20). Un negocio ganado no se reabre.",
   permiso: PERMISO_MANAGE,
-  input: z.object({ id: uuidSchema, motivo: z.string().trim().min(3).max(500) }),
+  input: z.object({
+    id: uuidSchema,
+    motivo: z.string().trim().min(3).max(500),
+    etapaId: uuidSchema
+      .optional()
+      .describe("Etapa abierta a la que vuelve; por defecto, la primera."),
+  }),
   output: negocioSchema,
   efecto: "escritura",
   dryRun: true,
@@ -66,10 +73,30 @@ export const negociosReabrir = defineCapability({
     const negocio = await negocioDe(ctx, input.id);
     if (negocio.estado !== "perdido") throw reglaDeNegocio("Solo se reabre un negocio perdido.");
     const primera = await ctx.db.etapa.findFirst({
-      where: { embudoId: negocio.embudoId, tipo: "abierta", activa: true },
+      where: {
+        embudoId: negocio.embudoId,
+        tipo: "abierta",
+        activa: true,
+        ...(input.etapaId ? { id: input.etapaId } : {}),
+      },
       orderBy: { orden: "asc" },
     });
-    if (!primera) throw reglaDeNegocio("El embudo no tiene etapas abiertas.");
+    if (!primera) {
+      throw reglaDeNegocio(
+        input.etapaId
+          ? "La etapa elegida no es una etapa abierta y activa del embudo."
+          : "El embudo no tiene etapas abiertas.",
+      );
+    }
+    // Reabrir en una etapa avanzada valida como si avanzara desde la primera (R9 y R10).
+    const minimo = await ctx.db.etapa.findFirst({
+      where: { embudoId: negocio.embudoId, tipo: "abierta", activa: true },
+      orderBy: { orden: "asc" },
+      select: { orden: true },
+    });
+    if (minimo && primera.orden > minimo.orden) {
+      await validarEntrada(ctx, negocio, primera, 0);
+    }
     const datos = {
       perdidoEn: null,
       motivoPerdidaId: null,

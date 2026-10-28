@@ -7,6 +7,7 @@ import { digitoVerificador } from "@opai/domain";
 
 import { cerrarClientes, dbAdmin } from "../src/index";
 import { CUENTAS, INSTALACIONES, PERSONAS } from "./datos-demo";
+import { sembrarNegociosDemo } from "./negocios-demo";
 
 const rut = (cuerpo: string) => `${cuerpo}-${digitoVerificador(cuerpo)}`;
 const dia = (iso: string) => new Date(`${iso}T00:00:00.000Z`);
@@ -19,6 +20,7 @@ async function main(): Promise<void> {
   const tenantId = tenant.id;
   if (await db.cuenta.count({ where: { tenantId, nombre: CUENTAS[0].nombre } })) {
     console.log("Los maestros de demostración ya existen.");
+    await sembrarNegociosDemo(db, tenantId);
     return;
   }
   const cargos = new Map(
@@ -130,6 +132,7 @@ async function main(): Promise<void> {
     });
   }
   console.log(`Maestros de demostración listos en ${tenant.slug}.`);
+  await sembrarNegociosDemo(db, tenantId);
 }
 
 main()
