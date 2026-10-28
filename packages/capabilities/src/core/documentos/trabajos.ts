@@ -59,10 +59,24 @@ export const trabajoPurgarSubidasPendientes = defineTrabajo({
   periodicidad: "diaria",
   async handler(ctx) {
     const limite = new Date(Date.now() - 86_400_000);
-    const pendientes = await ctx.db.documento.findMany({
+    const candidatos = await ctx.db.documento.findMany({
       where: { estado: "pendiente", createdAt: { lt: limite } },
       take: LOTE,
     });
+    // Las FKs RESTRICT (CAR-46) harían fallar el lote entero, ya sin los objetos: se omiten los
+    // pendientes que algo referencia (evidencia de cumplimiento o versión que los reemplaza).
+    const ids = candidatos.map((d) => d.id);
+    const [evidencias, incidentes, versiones] = await Promise.all([
+      ctx.db.solicitudArco.findMany({ where: { documentoEvidenciaId: { in: ids } } }),
+      ctx.db.incidente.findMany({ where: { evidenciaDocId: { in: ids } } }),
+      ctx.db.documento.findMany({ where: { reemplazaAId: { in: ids } } }),
+    ]);
+    const referidos = new Set([
+      ...evidencias.map((s) => s.documentoEvidenciaId),
+      ...incidentes.map((i) => i.evidenciaDocId),
+      ...versiones.map((d) => d.reemplazaAId),
+    ]);
+    const pendientes = candidatos.filter((d) => !referidos.has(d.id));
     for (const d of pendientes) {
       await ctx.servicios.almacenamiento.eliminar(d.storageKey).catch(() => undefined);
     }
