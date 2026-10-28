@@ -9,6 +9,8 @@ import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { pesos } from "@/lib/fechas";
 
 import type { NegocioDetalle } from "./datos";
+import { CambiarEtapa } from "./tablero/cambiar-etapa";
+import type { EtapaTablero } from "./tablero/use-mover";
 
 const TONO = { abierto: "info", ganado: "success", perdido: "danger" } as const;
 const ESTADO = { abierto: "Abierto", ganado: "Ganado", perdido: "Perdido" } as const;
@@ -87,6 +89,8 @@ export function FichaNegocio(p: {
   tab: TabNegocio;
   /** Con `comercial:negocios.manage`: Ganar/Perder/Reabrir y «Más acciones». */
   gestiona?: boolean;
+  /** Etapas para «Cambiar etapa» (solo si gestiona y el negocio está abierto). */
+  etapas?: EtapaTablero[] | null;
   children: ReactNode;
 }) {
   const n = p.negocio;
@@ -102,7 +106,17 @@ export function FichaNegocio(p: {
               estado: (
                 <>
                   <Badge tono={TONO[n.estado]}>{ESTADO[n.estado]}</Badge>
-                  <span className="t-caption">{n.etapaNombre}</span>
+                  {p.etapas?.length ? (
+                    <CambiarEtapa
+                      negocioId={n.id}
+                      titulo={n.titulo}
+                      etapaActual={n.etapaId}
+                      etapaNombre={n.etapaNombre}
+                      etapas={p.etapas}
+                    />
+                  ) : (
+                    <span className="t-caption">{n.etapaNombre}</span>
+                  )}
                 </>
               ),
               subtitulo: (
@@ -110,9 +124,11 @@ export function FichaNegocio(p: {
                   {n.cuentaNombre}
                   {monto != null ? ` · ${pesos(monto)}/mes` : ""}
                   {` · ${n.probabilidad}%`}
-                  {/* Teléfono: Ganar/Perder o Reabrir a lo ancho bajo el título, como el export. */}
+                  {/* Teléfono, y la vista dividida angosta (lg a xl), Ganar/Perder o Reabrir a lo
+                      ancho bajo el título, como el export: al lado del título lo dejaban en una
+                      palabra por línea (CAR-33). */}
                   {p.gestiona && n.estado !== "ganado" && !n.archivadoEn ? (
-                    <span className="mt-3 flex gap-2 md:hidden [&>*]:flex-1">
+                    <span className="mt-3 flex gap-2 md:hidden lg:max-xl:flex [&>*]:flex-1">
                       <Cierre n={n} base={base} />
                     </span>
                   ) : null}
@@ -120,7 +136,7 @@ export function FichaNegocio(p: {
               ),
               acciones: p.gestiona ? (
                 <>
-                  <span className="flex gap-2 max-md:hidden">
+                  <span className="flex gap-2 max-md:hidden lg:max-xl:hidden">
                     <Cierre n={n} base={base} />
                   </span>
                   <AccionesEntidad etiqueta="Más acciones" acciones={acciones(n)} />
