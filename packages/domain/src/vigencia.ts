@@ -47,3 +47,14 @@ export function hitoAlcanzado(
   if (ultimoNotificado !== null && actual >= ultimoNotificado) return null;
   return actual;
 }
+
+/** Ventana compartida del resumen y la matriz de vencimientos. */
+export const DIAS_VENCIMIENTOS = 30;
+
+export function estadoVencimiento(vence: string | null, hoy: string, diasAlerta = DIAS_VENCIMIENTOS): EstadoVigencia {
+  return estadoVigencia(vence, hoy, diasAlerta);
+}
+
+export function tituloVencimientos(vencidos: number, porVencer: number): string {
+  return `${vencidos} ${vencidos === 1 ? "documento vencido" : "documentos vencidos"} · ${porVencer} ${porVencer === 1 ? "vence pronto" : "vencen pronto"}`;
+}

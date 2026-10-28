@@ -35,7 +35,7 @@ export function LeyendaVencimientos() {
           <span className={chip("vencido")}>Vencido</span> ya venció
         </span>
         <span className={item}>
-          <span className={chip("por_vencer")}>Por vencer · 9 d</span> días que faltan
+          <span className={chip("por_vencer")}>Por vencer · 9 días</span>
         </span>
         <span className={item}>
           <span className={chip("falta")}>Falta</span> sin documento

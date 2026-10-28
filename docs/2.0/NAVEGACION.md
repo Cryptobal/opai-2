@@ -31,7 +31,7 @@ Notas:
 - **Puestos** no tiene entrada: es pestaña de Instalación y se planifica en Pauta.
 - **Modelo de costeo** de CPQ es una pantalla del módulo, accesible desde Cotizaciones (acción secundaria «Modelo de costeo», solo owner y admin, ADR-042.8), no una entrada del menú.
 - **Vencimientos** (documentos por vencer de personas) es una vista dentro de Personas, no una entrada del menú, como está construido hoy (§10, D8); los vencimientos de cuentas e instalaciones viven en Documentos.
-- **Aprobaciones** dejan de ser una entrada suelta en el celular: van en la Bandeja, dentro de Inicio. La campana de la barra superior muestra un punto de no leído y abre esa misma Bandeja; no hay otra lista de avisos (§10, D4 y D6).
+- **Aprobaciones** dejan de ser una entrada suelta en el celular: van en la Bandeja, dentro de Inicio. La campana de la barra superior muestra un punto de no leído y abre una vista corta de esa misma Bandeja, con «Ver todo» a `/#bandeja`; no hay otra lista de avisos (§10, D4 y D6).
 - **Plataforma** no está en el menú del ERP: se entra por el selector de portal.
 
 ## 3. Celular: barra inferior
@@ -114,7 +114,7 @@ El estado siguiente describe esta rama, no una integración a `main` ni el cierr
 - **Responsive:** barra lateral desde 1024, riel existente entre 768–1023, barra inferior por área principal en teléfono con respaldo Inicio · Cuentas · Personas · Más. Buscar sigue en la TopBar (ADR-050, reemplaza D7); usuario al pie de la lateral.
 - **Fijados y recientes:** hasta cinco fijados por usuario/empresa mediante `core.config`; entradas autorizadas y fichas revalidadas por capacidades con alcance. Hasta diez recientes locales por usuario/empresa, sin consulta ni auditoría por navegación. Acciones de ⌘K solo navegan y se filtran por permisos.
 - **Preferencias:** Área principal con vista previa; acordeón persistido por usuario/empresa. Las escrituras de navegación tienen control optimista de revisión y error visible, además del bloqueo transaccional del servidor.
-- **Inicio:** Bandeja única de avisos propios y aprobaciones permitidas; la campana lleva a `/#bandeja`. Inicio y campana comparten el punto, sin números en la navegación.
+- **Inicio:** Bandeja única de avisos propios y aprobaciones permitidas; la campana abre una vista corta de esa misma Bandeja con «Ver todo» a `/#bandeja`. Inicio y campana comparten el punto, sin números en la navegación.
 - **Shell:** persiste en `PortalLayout`, con precarga por intención conservada de `main`; al cambiar de identidad/empresa se reinicia su estado local. Sin migraciones nuevas.
 
 ### Foto histórica anterior al PR B
@@ -144,7 +144,7 @@ Aprobación del diseño: «Confirmo que apruebo el diseño 53e9b74b» — Carlos
 | D3 | Fijados | Se fija y desfija con un ícono de pin que aparece al pasar el mouse por la entrada y en la cabecera de la ficha. Se ordenan por la fecha en que se fijaron |
 | D4 | Inicio y Bandeja | Inicio es una entrada suelta arriba; la Bandeja vive dentro de Inicio |
 | D5 | Contador de la Bandeja | En la barra inferior del celular, Inicio muestra un punto y el número aparece dentro de la pantalla. No hay contadores en la barra lateral |
-| D6 | Campana (ADR-014) | Muestra un punto de no leído y abre la misma Bandeja. No hay una segunda lista de avisos |
+| D6 | Campana (ADR-014) | Muestra un punto de no leído y abre una vista corta de la misma Bandeja, con «Ver todo» a `/#bandeja`. No hay una segunda lista de avisos. Decisión OPAI 2.0, 28-oct-2026 00:35, mandato de Carlos t682u |
 | D7 | Búsqueda en el celular | ~~Sale de la barra superior; solo queda «Buscar» en la barra inferior~~. **Reemplazada por ADR-050** (Carlos, 26-oct-2026 17:57): «Buscar» va en la barra superior y no en la inferior |
 | D8 | Vencimientos | Vista dentro de Personas, como está construido hoy (corrige el mapa de §2) |
 | D9 | iPad | Desde 1024 px se usa la barra lateral completa y plegable del escritorio, sin un riel nuevo y sin plegarse a solo íconos (Carlos, 26-oct-2026 11:03 CLT, chat con el bot OPAI 2.0 (t295u; dictado por voz)). De 768 a 1023 sigue el riel actual |

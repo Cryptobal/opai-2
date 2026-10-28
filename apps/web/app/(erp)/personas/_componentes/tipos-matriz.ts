@@ -15,6 +15,7 @@ export type FilaMatriz = {
   celdas: Celda[];
 };
 export type Matriz = {
+  limiteExcedido: boolean;
   tipos: { id: string; nombre: string; obligatorio: boolean }[];
   filas: FilaMatriz[];
   resumen: {
