@@ -68,12 +68,15 @@ test.describe("maestros con sesión", () => {
     ).toBeVisible();
     await captura(page, "maestros-persona", "ipad");
 
+    // Desde el 07b (#87, #89, #93) Laboral muestra el vínculo con su jornada y el sueldo vive en su
+    // pestaña con las capas («Estructura de sueldo efectiva» y «Cómo se arma» ya no existen).
     await page.getByRole("link", { name: "Laboral" }).first().click();
-    await expect(page.getByText("Estructura de sueldo efectiva")).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText("Instalación y jornada pactada")).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText("45 h semanales · Lunes a sábado")).toBeVisible();
     await captura(page, "maestros-persona-laboral", "ipad");
 
-    await page.getByRole("link", { name: /Cómo se arma/ }).click();
-    await expect(page.getByRole("columnheader", { name: /Valor final/ })).toBeVisible({
+    await page.getByRole("link", { name: /^Sueldo/ }).first().click();
+    await expect(page.getByRole("heading", { name: "Capas de sueldo" })).toBeVisible({
       timeout: 30_000,
     });
     await captura(page, "maestros-persona-sueldo", "ipad");
