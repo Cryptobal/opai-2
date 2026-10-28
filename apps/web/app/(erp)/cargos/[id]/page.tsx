@@ -1,6 +1,6 @@
 import { Plus } from "lucide-react";
 
-import { AccionFijaTelefono, Badge, DetailScreen, SeccionTarjeta } from "@opai/ds";
+import { AccionFijaTelefono, Alerta, Badge, DetailScreen, SeccionTarjeta } from "@opai/ds";
 import { PERMISOS_CORE } from "@opai/domain";
 
 import { AccionesEntidad } from "@/app/_components/maestros/acciones-entidad";
@@ -33,18 +33,20 @@ export default function CargoDetalle({ params }: Props) {
         return {
           ...(await cargarCargo((await params).id)),
           puedeGestionar: puedeDeIdentidad(identidad)(PERMISOS_CORE.estructurasManage),
+          puedeVerSensible: puedeDeIdentidad(identidad)(PERMISOS_CORE.estructurasReadSensible),
         };
       }}
       opciones={(d) => ({
         titulo: d.cargo?.nombre ?? "Cargo",
-        acciones: d.puedeGestionar ? (
-          <EnlaceBotonHoja href="?version=1" icono={Plus}>
-            Crear versión
-          </EnlaceBotonHoja>
-        ) : null,
+        acciones:
+          d.puedeGestionar && (!d.cargo?.sueldoSensible || d.puedeVerSensible) ? (
+            <EnlaceBotonHoja href="?version=1" icono={Plus}>
+              Crear versión
+            </EnlaceBotonHoja>
+          ) : null,
       })}
     >
-      {({ state, cargo: c, versiones, puedeGestionar }) => {
+      {({ state, cargo: c, versiones, puedeGestionar, puedeVerSensible }) => {
         const hoy = hoyIso();
         const vigente = versiones.find(
           (v) =>
@@ -96,19 +98,29 @@ export default function CargoDetalle({ params }: Props) {
                     <SwitchSensible
                       id={c.id}
                       activo={c.sueldoSensible}
-                      puedeGestionar={puedeGestionar}
+                      puedeGestionar={puedeGestionar && puedeVerSensible}
                     />
                   </SeccionTarjeta>
+                  {puedeGestionar && c.sueldoSensible && !puedeVerSensible ? (
+                    <Alerta
+                      tono="neutral"
+                      titulo="No tienes permiso para versionar los montos de este cargo"
+                    />
+                  ) : null}
                   <EstructuraBase e={vigente} />
                 </div>
                 <Versiones versiones={versiones} />
                 {puedeGestionar ? (
                   <>
-                    <AccionFijaTelefono>
-                      <EnlaceBotonHoja href="?version=1">Crear versión</EnlaceBotonHoja>
-                    </AccionFijaTelefono>
+                    {!c.sueldoSensible || puedeVerSensible ? (
+                      <AccionFijaTelefono>
+                        <EnlaceBotonHoja href="?version=1">Crear versión</EnlaceBotonHoja>
+                      </AccionFijaTelefono>
+                    ) : null}
                     <HojaCargo cargo={c} />
-                    <HojaVersion cargoId={c.id} base={vigente ?? versiones[0]} hoy={hoy} />
+                    {!c.sueldoSensible || puedeVerSensible ? (
+                      <HojaVersion cargoId={c.id} base={vigente ?? versiones[0]} hoy={hoy} />
+                    ) : null}
                   </>
                 ) : null}
               </div>

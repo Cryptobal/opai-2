@@ -27,6 +27,14 @@ export const estructurasCreate = defineCapability({
       ctx = { ...ctx, db: tx, transaccion: (fn) => fn(tx) };
       const ref = await referencia(ctx, input);
       await bloquearCapa(tx, ctx.tenantId, input.nivel, ref.id);
+      if (input.nivel === "cargo" && !ctx.autorizar(PERMISOS_CORE.estructurasReadSensible)) {
+        // Bloquea la fila para serializar la comprobación con cambios de sensibilidad.
+        if (typeof (tx as { $executeRaw?: unknown }).$executeRaw === "function") {
+          await tx.$executeRaw`SELECT id FROM core.cargos WHERE id = ${ref.id}::uuid FOR UPDATE`;
+        }
+        if (await ocultarMontos(ctx, { nivel: "cargo", ...ref.refs }, false))
+          throw prohibido("No tienes permiso para versionar los montos de este cargo");
+      }
       const desde = aFecha(input.vigenteDesde);
       const vigentes = await ctx.db.estructuraSueldo.findMany({
         where: { nivel: input.nivel, [ref.campo]: ref.id, estado: "vigente" },
