@@ -24,6 +24,8 @@ export const PERMISOS_CORE = {
   funcionesManage: "core:funciones.manage",
   funcionesDesactivar: "core:funciones.desactivar",
   personasRead: "core:personas.read",
+  vinculosRead: "core:vinculos.read",
+  vinculosManage: "core:vinculos.manage",
   personasManage: "core:personas.manage",
   estructurasRead: "core:estructuras.read",
   estructurasManage: "core:estructuras.manage",

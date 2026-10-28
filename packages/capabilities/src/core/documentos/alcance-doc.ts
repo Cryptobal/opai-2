@@ -1,9 +1,3 @@
-// Alcance por filas de los documentos (ADR-022, Brief 07c B3). Un documento es visible para un
-// supervisor solo si su DUEÑO (el vínculo `propietario`) está en su alcance: la instalación a cargo,
-// la cuenta de esa instalación o un puesto de ella. Un documento cuyo dueño es una persona o la
-// empresa (nivel tenant) nunca entra por aquí, aunque además tenga un vínculo a una instalación a
-// cargo: los de empresa, por la decisión ya registrada; los de persona, solo con CA-B3/§16.4 (que
-// hoy deniega por defecto). Ver PR-BODY.md.
 import type { Contexto } from "../../types";
 import { instalacionesEnAlcance } from "../maestros/alcance";
 
@@ -12,12 +6,14 @@ export type AlcanceEntidades = {
   instalaciones: ReadonlySet<string>;
   cuentas: ReadonlySet<string>;
   puestos: ReadonlySet<string>;
+  personas: ReadonlySet<string>;
 };
 
 const VACIO: AlcanceEntidades = {
   instalaciones: new Set(),
   cuentas: new Set(),
   puestos: new Set(),
+  personas: new Set(),
 };
 
 /** Conjuntos de entidades a cargo del actor, o null si ve todo el tenant (owner/admin/gerente). */
@@ -43,7 +39,17 @@ export async function entidadesEnAlcance(ctx: Contexto): Promise<AlcanceEntidade
     ORDER BY id FOR SHARE
   `,
   );
+  const personas = await ctx.transaccion(
+    (tx) => tx.$queryRaw<{ id: string }[]>`
+    /* nucleo-h:personas-vinculadas */
+    SELECT p.id FROM core.personas p JOIN core.vinculos_laborales v ON v.persona_id=p.id
+    WHERE p.tenant_id=${ctx.tenantId}::uuid AND v.tenant_id=${ctx.tenantId}::uuid
+      AND v.estado='vigente' AND v.instalacion_id=ANY(${instalacionIds}::uuid[])
+    ORDER BY p.id FOR SHARE OF p, v
+  `,
+  );
   return {
+    personas: new Set(personas.map((p) => p.id)),
     instalaciones: new Set(instalacionIds),
     cuentas: new Set(insts.map((i) => i.cuentaId)),
     puestos: new Set(puestos.map((p) => p.id)),
@@ -52,6 +58,7 @@ export async function entidadesEnAlcance(ctx: Contexto): Promise<AlcanceEntidade
 
 /** Si un vínculo concreto apunta a una entidad a cargo. Persona y empresa nunca lo están. */
 export function vinculoEnAlcance(alc: AlcanceEntidades, tipo: string, id: string): boolean {
+  if (tipo === "persona") return alc.personas.has(id);
   if (tipo === "instalacion") return alc.instalaciones.has(id);
   if (tipo === "cuenta") return alc.cuentas.has(id);
   if (tipo === "puesto") return alc.puestos.has(id);
@@ -73,7 +80,8 @@ export async function documentosEnAlcance(
     WHERE tenant_id = ${ctx.tenantId}::uuid AND rol = 'propietario' AND (
       (entidad_tipo = 'instalacion' AND entidad_id = ANY(${[...a.instalaciones]}::uuid[])) OR
       (entidad_tipo = 'cuenta' AND entidad_id = ANY(${[...a.cuentas]}::uuid[])) OR
-      (entidad_tipo = 'puesto' AND entidad_id = ANY(${[...a.puestos]}::uuid[])))
+      (entidad_tipo = 'puesto' AND entidad_id = ANY(${[...a.puestos]}::uuid[])) OR
+      (entidad_tipo = 'persona' AND entidad_id = ANY(${[...a.personas]}::uuid[])))
     ORDER BY id FOR SHARE
   `,
   );
@@ -102,7 +110,14 @@ async function instalacionesDelDueno(ctx: Contexto, documentoId: string): Promis
     });
     return p ? [p.instalacionId] : [];
   }
-  return []; // persona o empresa (tenant): ningún supervisor lo tiene en su alcance.
+  if (prop.entidadTipo === "persona") {
+    const v = await ctx.db.vinculoLaboral.findFirst({
+      where: { personaId: prop.entidadId, estado: "vigente" },
+      select: { instalacionId: true },
+    });
+    return v?.instalacionId ? [v.instalacionId] : [];
+  }
+  return []; // Empresa: ningún supervisor la tiene en su alcance.
 }
 
 /**

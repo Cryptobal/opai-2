@@ -1,3 +1,4 @@
+import { destinoVinculo } from "./vinculo-fixture";
 // Maestros contra Postgres real (si hay DATABASE_URL_TEST): las mismas capacidades que usan UI, API
 // y MCP, con RLS (rol de prueba sin BYPASSRLS), triggers de mismo tenant y transacciones reales.
 import { randomUUID } from "node:crypto";
@@ -73,7 +74,7 @@ describe.skipIf(!urlPropietario)("maestros en base real", () => {
       nombres: "Ana",
       apellidos: "Rojas",
       rut: "19.876.543-0",
-      vinculo: { cargoId: cargo.id, tipo: "indefinido", inicio: "2026-01-05" },
+      vinculo: { ...(await destinoVinculo(ctx())), cargoId: cargo.id, tipo: "indefinido", inicio: "2026-01-05" },
     });
     await dato("core.estructuras.create", {
       nivel: "cargo",

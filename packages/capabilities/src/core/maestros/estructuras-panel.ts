@@ -1,3 +1,4 @@
+import { vistaVinculo } from "./vinculos-vista";
 import { vistaAprobaciones } from "../agentes/aprobaciones";
 import { PERMISOS_CORE } from "@opai/domain";
 import { defineCapability } from "../../define";
@@ -23,6 +24,7 @@ export const estructurasPanel = defineCapability({
   efecto: "lectura",
   dryRun: false,
   auditarLectura: (s) => [
+    ...s.vinculos.map((v) => v.id),
     ...s.aprobaciones.map((a) => a.id),
     ...(s.instalacion ? [s.instalacion.id] : []),
     ...(s.persona ? [s.persona.id] : []),
@@ -37,7 +39,9 @@ export const estructurasPanel = defineCapability({
   async handler(ctx, input) {
     for (const permiso of [
       PERMISOS_CORE.instalacionesRead,
-      ...(input.tipo === "persona" ? [PERMISOS_CORE.personasRead] : [PERMISOS_CORE.cuentasRead]),
+      ...(input.tipo === "persona"
+        ? [PERMISOS_CORE.personasRead, PERMISOS_CORE.vinculosRead]
+        : [PERMISOS_CORE.cuentasRead]),
     ])
       if (!ctx.autorizar(permiso)) throw prohibido("No tienes permiso para consultar este panel.");
     const panel = await datosPanel(ctx, input);
@@ -65,6 +69,7 @@ export const estructurasPanel = defineCapability({
     const personas = pagina(datos.personas, 50);
     const alertas = resumirAlertasDocumentos(datos.documentoVinculos);
     return {
+      vinculos: persona?.vinculos.map(vistaVinculo) ?? [],
       aprobaciones: await vistaAprobaciones(ctx, datos.aprobaciones, {
         keys: datos.apiKeys,
         miembros: datos.memberships,
@@ -80,7 +85,9 @@ export const estructurasPanel = defineCapability({
         ? {
             ...vistaPersona(
               persona,
-              persona.vinculos[0] ? vinculoVista(persona.vinculos[0]) : null,
+              persona.vinculos.find((v) => v.estado === "vigente")
+                ? vinculoVista(persona.vinculos.find((v) => v.estado === "vigente")!)
+                : null,
             ),
             documentos: datos._count.documentoVinculos,
           }

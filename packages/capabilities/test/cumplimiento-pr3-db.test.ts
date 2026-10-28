@@ -1,3 +1,4 @@
+import { destinoVinculo } from "./vinculo-fixture";
 // Brief 07d, PR 3: retención, anonimización y política contra Postgres real (opai_app sin
 // BYPASSRLS). Verifica el trabajo diario (simula/aplica), los hechos regulados intactos, la
 // exclusión por solicitud abierta, el aislamiento por tenant y la anonimización puntual de un
@@ -299,7 +300,7 @@ describe.skipIf(!urlPropietario)("cumplimiento PR3 (retención) en base real", (
       const upd = await mod.executeCapability(ctx(tA, uA), "core.personas.update", { id: p.id, telefono: "+56922222222" });
       expect(!upd.ok && upd.error.code).toBe("UNPROCESSABLE");
       const vin = await mod.executeCapability(ctx(tA, uA), "core.vinculos.create", {
-        personaId: p.id, cargoId: cargo, tipo: "indefinido", inicio: "2026-01-01",
+        ...(await destinoVinculo(ctx(tA, uA))), personaId: p.id, cargoId: cargo, tipo: "indefinido", inicio: "2026-01-01",
       });
       expect(!vin.ok && vin.error.code).toBe("UNPROCESSABLE");
       expect((await e.admin.persona.findUniqueOrThrow({ where: { id: p.id } })).telefono).toBeNull();

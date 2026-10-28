@@ -14,6 +14,18 @@ export async function datosPanel(ctx: Contexto, input: EntradaPanel) {
     input.tipo === "persona"
       ? [
           { nivel: "persona", personaId: input.id },
+          ...(!input.instalacionId && !input.puestoId
+            ? [
+                {
+                  nivel: "instalacion",
+                  instalacion: { vinculos: { some: { personaId: input.id, estado: "vigente" } } },
+                },
+                {
+                  nivel: "puesto",
+                  puesto: { vinculos: { some: { personaId: input.id, estado: "vigente" } } },
+                },
+              ]
+            : []),
           ...(input.instalacionId
             ? [{ nivel: "instalacion", instalacionId: input.instalacionId }]
             : []),
@@ -75,6 +87,10 @@ export async function datosPanel(ctx: Contexto, input: EntradaPanel) {
                 {
                   OR: [
                     {
+                      nivel: "persona",
+                      persona: dondePersona(ctx),
+                    },
+                    {
                       nivel: "instalacion",
                       instalacionId: { in: [...ctx.alcance.instalaciones] },
                     },
@@ -120,7 +136,7 @@ export async function datosPanel(ctx: Contexto, input: EntradaPanel) {
   const persona = await ctx.db.persona.findFirst({
     where: { id: input.id, AND: [dondePersona(ctx)] },
     include: {
-      vinculos: { where: { estado: "vigente" }, take: 1, include: { cargo: true } },
+      vinculos: { orderBy: { inicio: "desc" }, include: { cargo: true } },
       tenant: { select },
     },
   });

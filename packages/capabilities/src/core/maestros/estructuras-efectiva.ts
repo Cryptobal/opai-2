@@ -17,7 +17,7 @@ export const estructurasEfectiva = defineCapability({
   auditarLectura: (s) => Object.values(s.niveles).flatMap((e) => (e ? [e.id] : [])),
   id: "core.estructuras.efectiva",
   descripcion:
-    "Resuelve una sola capa completa: RUT → puesto → instalación, sin herencia. Puesto e instalación son explícitos hasta el PR 3 del vínculo. Devuelve capa, versión y conceptos faltantes; nunca calcula haberes de una estructura incompleta.",
+    "Resuelve una sola capa completa: RUT → puesto → instalación, sin herencia. Por defecto usa instalación y puesto del vínculo vigente. Devuelve capa, versión y conceptos faltantes; nunca calcula haberes de una estructura incompleta.",
   permiso: PERMISOS_CORE.estructurasRead,
   input: z.object({
     personaId: uuidSchema,
@@ -64,6 +64,22 @@ export const estructurasEfectiva = defineCapability({
   async handler(ctx, input) {
     const fecha = input.fecha ?? hoy();
     await personaDe(ctx, input.personaId);
+    const vinculo = await ctx.db.vinculoLaboral.findFirst({
+      where: { personaId: input.personaId, estado: "vigente" },
+    });
+    input = {
+      ...input,
+      ...(input.instalacionId
+        ? {}
+        : vinculo?.instalacionId
+          ? { instalacionId: vinculo.instalacionId }
+          : {}),
+      ...(input.puestoId || input.instalacionId
+        ? {}
+        : vinculo?.puestoId
+          ? { puestoId: vinculo.puestoId }
+          : {}),
+    };
     if (input.puestoId) {
       const puesto = await ctx.db.puesto.findFirst({
         where: { id: input.puestoId, AND: [dondePuesto(ctx)] },

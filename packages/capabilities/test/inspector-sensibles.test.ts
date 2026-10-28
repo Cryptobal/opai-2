@@ -1,3 +1,4 @@
+import { destinoVinculo } from "./vinculo-fixture";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { PLANTILLAS } from "../../db/scripts/roles-base-plantillas";
@@ -123,13 +124,13 @@ describe("Inspector DT: lectura sensible auditada (t479u; art. 31 DFL 2/1967)", 
   it("la estructura efectiva devuelve haberes completos y audita el nivel sensible", async () => {
     const { ctx, eventos, cargoId } = await preparar();
     const { id: personaId } = await dato<{ id: string }>(
-      { ...ctx, autorizar: () => true },
+      { ...ctx, rol: "owner", autorizar: () => true },
       "core.personas.create",
       {
         nombres: "Persona",
         apellidos: "Prueba",
         rut: "19.876.543-0",
-        vinculo: { cargoId, tipo: "indefinido", inicio: "2026-01-01" },
+        vinculo: { ...(await destinoVinculo(ctx)), cargoId, tipo: "indefinido", inicio: "2026-01-01" },
       },
     );
     const estructura = await dato<{ id: string }>(

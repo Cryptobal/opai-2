@@ -1,3 +1,4 @@
+import { vinculosPrevisualizar } from "./vinculos-preview";
 import { estructurasPanel } from "./estructuras-panel";
 import type { Capacidad } from "../../types";
 import { buscar } from "./buscar";
@@ -88,6 +89,7 @@ export const capacidadesMaestros: readonly Capacidad[] = [
   personasDesbloquear,
   personasArchive,
   personasVincularUsuario,
+  vinculosPrevisualizar,
   vinculosList,
   vinculosCreate,
   vinculosUpdate,
