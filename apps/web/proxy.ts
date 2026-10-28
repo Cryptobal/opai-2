@@ -40,6 +40,12 @@ export async function proxy(request: NextRequest) {
   const t0 = Date.now();
   const { headers, csp } = cabecerasConNonce(request.headers);
   headers.set("x-opai-t0", String(t0));
+  // URL pedida, sin `_rsc` ni `reintento`, para el «Reintentar» de `ErrorCarga` (CAR-50). La fija el
+  // servidor y sobrescribe la que mande el navegador.
+  const pedida = request.nextUrl.clone();
+  pedida.searchParams.delete("_rsc");
+  pedida.searchParams.delete("reintento");
+  headers.set("x-opai-ruta", pedida.pathname + pedida.search);
   const responder = (r: NextResponse) => {
     r.headers.set("Content-Security-Policy-Report-Only", csp);
     return r;

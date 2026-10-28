@@ -1,14 +1,24 @@
-import { readdirSync, existsSync, readFileSync } from "node:fs";
+import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
-import { describe, expect, it } from "vitest";
+import { notFound, redirect } from "next/navigation";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { CargaFallida, datosSiHayPermiso, exigirDatos } from "@/lib/carga";
-import { DIGEST_CARGA_FALLIDA, DIGEST_SIN_ACCESO } from "@/lib/carga-digest";
+import { CargaFallida, datosSiHayPermiso, exigirDatos, falloDeCarga } from "@/lib/carga";
 import { estadoPantalla } from "@/lib/formato";
 
 const ok = <T>(data: T) => ({ ok: true as const, data });
 const falla = (code: string) => ({ ok: false as const, error: { code, message: "detalle técnico" } });
+const capturar = (f: () => unknown) => {
+  try {
+    f();
+  } catch (e) {
+    return e;
+  }
+  throw new Error("no lanzó");
+};
+
+afterEach(() => vi.restoreAllMocks());
 
 describe("estadoPantalla (CAR-50)", () => {
   it("listo solo si todas las cargas salieron bien", () => {
@@ -33,21 +43,11 @@ describe("exigirDatos y datosSiHayPermiso", () => {
     expect(datosSiHayPermiso(ok("x"), null)).toBe("x");
   });
 
-  it("lanza CargaFallida con un digest que distingue «sin permisos» sin exponer el mensaje", () => {
-    const capturar = (code: string) => {
-      try {
-        exigirDatos(falla(code));
-      } catch (e) {
-        return e;
-      }
-      throw new Error("no lanzó");
-    };
-    const sinAcceso = capturar("FORBIDDEN");
-    expect(sinAcceso).toBeInstanceOf(CargaFallida);
-    expect((sinAcceso as CargaFallida).digest).toBe(DIGEST_SIN_ACCESO);
-    const caida = capturar("INTERNAL") as CargaFallida;
-    expect(caida.digest).toBe(DIGEST_CARGA_FALLIDA);
-    expect(caida.message).not.toContain("detalle técnico");
+  it("lanza CargaFallida con el código, sin el mensaje del servidor", () => {
+    const e = capturar(() => exigirDatos(falla("INTERNAL")));
+    expect(e).toBeInstanceOf(CargaFallida);
+    expect((e as CargaFallida).code).toBe("INTERNAL");
+    expect((e as CargaFallida).message).not.toContain("detalle técnico");
   });
 
   it("sin el permiso de la sección usa el defecto; otro fallo lanza (no se ve como vacío)", () => {
@@ -56,27 +56,37 @@ describe("exigirDatos y datosSiHayPermiso", () => {
   });
 });
 
-describe("límites de error por portal", () => {
-  const app = fileURLToPath(new URL("../app/", import.meta.url));
-  const grupos = readdirSync(app).filter((d) => /^\(.+\)$/.test(d));
-
-  it.each(grupos)("%s tiene su error.tsx con el estado del DS", (grupo) => {
-    const ruta = `${app}${grupo}/error.tsx`;
-    expect(existsSync(ruta)).toBe(true);
-    const codigo = readFileSync(ruta, "utf8");
-    expect(codigo.startsWith('"use client";')).toBe(true);
-    expect(codigo).toContain("ErrorDiferido");
+describe("falloDeCarga: lo que muestra PaginaPortal cuando cargar lanza", () => {
+  it("FORBIDDEN → sin permisos; cualquier otro fallo → error (y queda en el log)", () => {
+    const log = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    expect(falloDeCarga(new CargaFallida("FORBIDDEN"))).toBe("forbidden");
+    expect(falloDeCarga(new CargaFallida("INTERNAL"))).toBe("error");
+    expect(falloDeCarga(new Error("se cayó la base"))).toBe("error");
+    expect(log).toHaveBeenCalledTimes(2);
   });
 
-  it("global-error.tsx existe, en español y con su propio <html>", () => {
-    const codigo = readFileSync(`${app}global-error.tsx`, "utf8");
-    expect(codigo).toContain('lang="es-CL"');
-    expect(codigo).toContain("ErrorDiferido");
+  it("404 y redirecciones de Next se vuelven a lanzar, no se convierten en error", () => {
+    const n = capturar(() => notFound());
+    expect(() => falloDeCarga(n)).toThrow();
+    const r = capturar(() => redirect("/login"));
+    expect(() => falloDeCarga(r)).toThrow();
+  });
+});
+
+describe("PaginaPortal y ErrorCarga", () => {
+  const leer = (ruta: string) =>
+    readFileSync(fileURLToPath(new URL(`../app/_components/${ruta}`, import.meta.url)), "utf8");
+
+  it("PaginaPortal atrapa el fallo de cargar y muestra ErrorCarga dentro del shell", () => {
+    const codigo = leer("pagina-portal.tsx");
+    expect(codigo).toContain("fallo = falloDeCarga(e)");
+    expect(codigo).toContain("<ErrorCarga fallo={fallo}");
   });
 
-  it("PantallaError usa ErrorState o Forbidden según el digest, con «Reintentar»", () => {
-    const codigo = readFileSync(`${app}_components/pantalla-error.tsx`, "utf8");
-    expect(codigo).toMatch(/DIGEST_SIN_ACCESO\) return <Forbidden/);
+  it("ErrorCarga es de servidor (sin JS de cliente) y usa ErrorState o Forbidden con «Reintentar»", () => {
+    const codigo = leer("error-carga.tsx");
+    expect(codigo).not.toContain('"use client"');
+    expect(codigo).toContain('if (fallo === "forbidden") return <Forbidden />');
     expect(codigo).toContain("<ErrorState");
     expect(codigo).toContain("Reintentar");
   });

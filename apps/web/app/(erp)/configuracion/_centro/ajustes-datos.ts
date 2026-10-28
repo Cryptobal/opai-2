@@ -19,7 +19,8 @@ export async function cargarAjustes(modulo: string, grupo?: string) {
       { valor: x.valor, origen: x.origen },
     ]),
   );
-  return { campos, valores };
+  // `ok` se conserva para los llamadores que aún lo leen: si la carga falla, ya lanzó.
+  return { ok: true as const, campos, valores };
 }
 
 export type Ajustes = Awaited<ReturnType<typeof cargarAjustes>>;

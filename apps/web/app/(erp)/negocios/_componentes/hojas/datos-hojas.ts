@@ -1,4 +1,3 @@
-import { exigirDatos } from "@/lib/carga";
 import { esUuid } from "@/lib/ids";
 import type { Parametros } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
@@ -7,9 +6,7 @@ import type { CuentaDetalle, CuentaFila, Pagina } from "@/lib/tipos-maestros";
 import type { NegocioDetalle } from "../datos";
 import { type ConfigComercial, type DatosHojas, PARAMS_HOJA } from "./tipos";
 
-// Un id viejo en la URL (NOT_FOUND) deja la hoja sin datos; cualquier otro fallo va al error.tsx (CAR-50).
-const datos = <T>(r: { ok: true; data: T } | { ok: false; error: { code: string } }) =>
-  !r.ok && r.error.code === "NOT_FOUND" ? null : exigirDatos(r);
+const datos = <T>(r: { ok: true; data: T } | { ok: false }) => (r.ok ? r.data : null);
 
 /**
  * Datos de la hoja abierta (si hay una): la configuración del embudo, el negocio (`?negocio=` en el
@@ -31,7 +28,7 @@ export async function cargarHojas(
       : Promise.resolve(deFicha ?? null),
     abierta === "nuevo"
       ? ejecutarComoUsuario<Pagina<CuentaFila>>("erp", "core.cuentas.list", { limite: 100 }).then(
-          (r) => exigirDatos(r).items,
+          (r) => (r.ok ? r.data.items : []),
         )
       : Promise.resolve([]),
   ]);

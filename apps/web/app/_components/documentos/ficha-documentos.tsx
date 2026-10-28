@@ -2,7 +2,6 @@ import { FileText, Upload } from "lucide-react";
 
 import { Badge, Estado, TipoArchivo, Vigencia } from "@opai/ds";
 
-import { datosSiHayPermiso } from "@/lib/carga";
 import { fecha } from "@/lib/fechas";
 import { estadoPantalla } from "@/lib/formato";
 import { ejecutarComoUsuario } from "@/lib/servidor";
@@ -41,22 +40,18 @@ export async function FichaDocumentos({
   ]);
   const docs = r.ok ? r.data.items : [];
   const faltantes = r.ok ? r.data.faltantes : [];
-  // Sin permiso para los tipos, la hoja de subir no ofrece ninguno; otro fallo va al error.tsx (CAR-50).
-  const tipos = datosSiHayPermiso(t, []);
+  // Sin permiso para los tipos, la hoja de subir no ofrece ninguno; otro fallo cuenta como error (CAR-50).
+  const tipos = t.ok ? t.data : [];
+  const cargas = !t.ok && t.error.code !== "FORBIDDEN" ? [r, t] : [r];
   const cuenta = (v: Documento["vigencia"]) => docs.filter((d) => d.vigencia === v).length;
   const grupos = [...new Set(docs.map((d) => d.tipo ?? "Sin tipo"))];
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-surface px-4 py-3">
-        {/* Con la lista caída no hay conteos que mostrar: «0 vigentes» sería falso (CAR-50). */}
-        {r.ok ? (
-          <>
-            <Badge tono="success">{cuenta("vigente")} vigentes</Badge>
-            <Badge tono="warning">{cuenta("por_vencer")} por vencer</Badge>
-            <Badge tono="danger">{cuenta("vencido")} vencidos</Badge>
-            <Badge punto={false}>{cuenta("sin_fecha")} sin vencimiento</Badge>
-          </>
-        ) : null}
+        <Badge tono="success">{cuenta("vigente")} vigentes</Badge>
+        <Badge tono="warning">{cuenta("por_vencer")} por vencer</Badge>
+        <Badge tono="danger">{cuenta("vencido")} vencidos</Badge>
+        <Badge punto={false}>{cuenta("sin_fecha")} sin vencimiento</Badge>
         {faltantes.length ? (
           <span className="text-sm text-fg-muted">
             · Falta {faltantes.length === 1 ? "1 obligatorio" : `${faltantes.length} obligatorios`}:{" "}
@@ -72,7 +67,11 @@ export async function FichaDocumentos({
         </EnlaceBotonHoja>
       </div>
       <Estado
-        state={r.ok && docs.length === 0 && faltantes.length === 0 ? "empty" : estadoPantalla(r)}
+        state={
+          cargas.length === 1 && r.ok && !docs.length && !faltantes.length
+            ? "empty"
+            : estadoPantalla(...cargas)
+        }
         variante="lista"
         textos={{
           vacio: {
