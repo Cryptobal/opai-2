@@ -6,6 +6,7 @@ import { defineCapability } from "../../define";
 import { prohibido } from "../../errores";
 import type { Contexto } from "../../types";
 import { entidadEnAlcance } from "../maestros/alcance";
+import { visibleSinAnexos } from "./actividad-anexos";
 import { auditarHistorialSensible, redactarSensibles } from "./actividad-sensible";
 import { cambios, frase } from "./actividad-texto";
 import { auditoriaSelect } from "./auditoria-select";
@@ -112,7 +113,9 @@ export const actividadList = defineCapability({
       take: input.limite + 1,
       ...(input.cursor ? { cursor: { id: input.cursor }, skip: 1 } : {}),
     });
-    const pagina = filas.slice(0, input.limite);
+    const leidas = filas.slice(0, input.limite);
+    const visible = await visibleSinAnexos(ctx, leidas);
+    const pagina = leidas.filter(visible);
     await auditarHistorialSensible(ctx, pagina, "core.actividad.list");
     const quien = await nombres(
       ctx,
@@ -147,7 +150,7 @@ export const actividadList = defineCapability({
           extra,
         };
       }),
-      siguiente: filas.length > input.limite ? (pagina.at(-1)?.id ?? null) : null,
+      siguiente: filas.length > input.limite ? (leidas.at(-1)?.id ?? null) : null,
     };
   },
 });

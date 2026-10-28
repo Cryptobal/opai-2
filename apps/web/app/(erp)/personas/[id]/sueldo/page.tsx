@@ -10,6 +10,7 @@ import { VersionesCapa } from "@/app/_components/sueldos/versiones-capa";
 import { hoyIso } from "@/lib/fechas";
 import type { SearchParams } from "@/lib/parametros";
 import { identidadActual, contextoServidor } from "@/lib/servidor";
+import { conHoja } from "../../_componentes/lista-personas";
 import { PaginaPersona } from "../../_componentes/pagina-persona";
 
 export const metadata = { title: "Capas de sueldo" };
@@ -34,7 +35,9 @@ export default function Sueldo(props: {
             <div className="flex flex-wrap items-center justify-between gap-3">
               <h2 className="t-heading">Capas de sueldo</h2>
               {gestionar ? (
-                <EnlaceBotonHoja href="?excepcion=1">Definir sueldo por RUT</EnlaceBotonHoja>
+                <EnlaceBotonHoja href={conHoja("excepcion=1", q)}>
+                  Definir sueldo por RUT
+                </EnlaceBotonHoja>
               ) : null}
             </div>
             <SelectorContexto
