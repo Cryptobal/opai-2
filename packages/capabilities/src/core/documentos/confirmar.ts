@@ -1,3 +1,4 @@
+import { filtroDocumentoSensible } from "./sensibles";
 import { documentosEnAlcance } from "./alcance-doc";
 import { z } from "zod";
 
@@ -24,6 +25,7 @@ export const documentosConfirmarSubida = defineCapability({
     const permitidos = await documentosEnAlcance(ctx);
     const d = await ctx.db.documento.findFirst({
       where: {
+        ...filtroDocumentoSensible(ctx),
         id: input.id,
         ...(permitidos ? { id: { in: [...permitidos].filter((id) => id === input.id) } } : {}),
       },

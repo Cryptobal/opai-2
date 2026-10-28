@@ -623,3 +623,9 @@ el mensaje de error, y el flujo completo ya se prueba contra Postgres real con
 almacenamiento en memoria en `anexos-db.test.ts`. Sin migración aplicada en
 Neon. No se abre PR (lo abre el bot «OPAI 2.0»); evidencia completa en
 `PR-BODY.md`, sin commitear.
+
+### Corrección QA del PR #91 (Codex)
+
+B1: la relación existente del documento con `AnexoContrato` identifica el documento sensible; Documentos exige `anexos.read` o `estructuras.read_sensible` para leerlo y no permite reemplazarlo mediante subida, para evitar que una versión pierda esa protección. Se aplica también a documentos ya generados. M1 comprueba la persona de la URL y M4 pide confirmación antes de aprobar. Sin migración nueva.
+
+Autorrevisión de Codex: queda pendiente validar que las estructuras referenciadas en snapshots correspondan a la persona o a las capas aplicables de su vínculo. CA-4 sigue parcial también por el disparador de rol pendiente indicado arriba.

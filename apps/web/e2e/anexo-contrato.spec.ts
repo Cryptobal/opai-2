@@ -73,6 +73,12 @@ test("26-29: anexo en borrador, documento con antes/después y aprobación", asy
   // completo (documento final con SHA-256 y bitácora) ya se verifica contra Postgres real con
   // almacenamiento en memoria en `packages/capabilities/test/anexos-db.test.ts`.
   await page.getByRole("button", { name: "Aprobar", exact: true }).click();
+  const confirmacion = page.getByRole("dialog", { name: "Aprobar el anexo" });
+  await expect(confirmacion).toBeVisible();
+  await confirmacion.getByRole("button", { name: "Cancelar" }).click();
+  await expect(confirmacion).not.toBeVisible();
+  await page.getByRole("button", { name: "Aprobar", exact: true }).click();
+  await confirmacion.getByRole("button", { name: "Aprobar", exact: true }).click();
   await expect(page.getByText("Almacenamiento no configurado en este entorno.")).toBeVisible();
   await page.screenshot({
     path: info.outputPath("29-aprobar-sin-almacenamiento.png"),
@@ -98,5 +104,11 @@ test("29: rechazar pide motivo obligatorio (D14)", async ({ page }, info) => {
   });
   await dialogo.getByRole("button", { name: "Rechazar", exact: true }).click();
   await expect(page).toHaveURL(new RegExp(`/personas/${persona}/anexos$`));
-  await expect(page.getByText("rechazado")).toBeVisible();
+  await expect(page.getByText("rechazado", { exact: true })).toBeVisible();
+});
+
+test("el anexo no aparece bajo otra persona", async ({ page }) => {
+  await entrar(page);
+  await page.goto(`/personas/00000000-0000-7000-8000-000000000083/anexos/${anexoId}`);
+  await expect(page.getByText("Instalación navegación E2E")).not.toBeVisible();
 });

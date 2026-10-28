@@ -2,6 +2,7 @@
 -- ADR-048 puntos 5 y 7). Tabla nueva, aditiva: no toca ninguna tabla existente. Funciona aunque el
 -- tenant no tenga Nómina (ADR-048 punto 5); el documento aprobado se materializa en
 -- `core.documentos` (ADR-039), referenciado aquí por `documento_id`.
+SET lock_timeout = '5s';
 CREATE TABLE IF NOT EXISTS "core"."anexos_contrato" (
     "id" UUID NOT NULL,
     "tenant_id" UUID NOT NULL,

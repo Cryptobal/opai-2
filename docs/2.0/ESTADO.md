@@ -908,3 +908,7 @@ muestra con claridad, y el flujo completo de aprobar (documento, SHA-256,
 bitácora) ya se prueba contra Postgres real con almacenamiento en memoria en
 `anexos-db.test.ts`. Sin migración aplicada en Neon. No se abre PR (lo abre el
 bot «OPAI 2.0»); evidencia completa en `PR-BODY.md`, sin commitear.
+
+### Corrección QA del PR #91 (Codex)
+
+El documento final de un anexo se identifica por su relación con `AnexoContrato` y exige `anexos.read` o `estructuras.read_sensible` en Documentos; no admite reemplazo mediante subida para evitar versiones sin la protección. Se valida la persona en la URL y se confirma la aprobación irreversible. Sin migración nueva; detalle en el brief 07b.

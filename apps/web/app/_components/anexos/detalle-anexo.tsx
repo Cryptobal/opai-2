@@ -1,3 +1,5 @@
+import { notFound } from "next/navigation";
+
 import { Alerta, AvisoAnexo, DocumentoBorrador, Estado } from "@opai/ds";
 
 import { estadoPantalla } from "@/lib/formato";
@@ -25,6 +27,7 @@ export async function DetalleAnexo({
     );
   }
   const a = r.data;
+  if (a.personaId !== personaId) notFound();
   return (
     <div className="flex flex-col gap-4">
       <AvisoAnexo estado={a.estado} motivoCambio={a.motivoCambio} motivoRechazo={a.motivoRechazo} />

@@ -37,14 +37,21 @@ describe.skipIf(!urlPropietario)("anexo de contrato en base real", () => {
         data: { name: "Rosa", email: `rosa-${s}@prueba.cl`, emailVerified: true },
       })
     ).id;
-    await e.admin.membership.create({ data: { tenantId, userId, rol: "owner", portales: ["erp"] } });
+    await e.admin.membership.create({
+      data: { tenantId, userId, rol: "owner", portales: ["erp"] },
+    });
   });
 
   afterAll(async () => {
     await e?.cerrar();
   });
 
-  const usuario = () => ({ id: userId, nombre: "Rosa", email: "rosa@prueba.cl", platformRole: null });
+  const usuario = () => ({
+    id: userId,
+    nombre: "Rosa",
+    email: "rosa@prueba.cl",
+    platformRole: null,
+  });
 
   const ctx = (o: { rol?: string; actor?: Record<string, unknown> } = {}) =>
     mod.crearContexto({
@@ -86,7 +93,9 @@ describe.skipIf(!urlPropietario)("anexo de contrato en base real", () => {
       vinculo: { ...destino, cargoId: cargo.id, tipo: "indefinido", inicio: "2026-01-05" },
     });
     personaId = persona.id;
-    const v = await e.admin.vinculoLaboral.findFirstOrThrow({ where: { personaId, estado: "vigente" } });
+    const v = await e.admin.vinculoLaboral.findFirstOrThrow({
+      where: { personaId, estado: "vigente" },
+    });
     vinculoId = v.id;
   });
 
@@ -139,7 +148,12 @@ describe.skipIf(!urlPropietario)("anexo de contrato en base real", () => {
       motivoCambio: "instalacion",
       snapshotDespues: { instalacionId },
     });
-    const preview = await mod.executeCapability(ctx(), "core.anexos.aprobar", { id: a.id }, { dryRun: true });
+    const preview = await mod.executeCapability(
+      ctx(),
+      "core.anexos.aprobar",
+      { id: a.id },
+      { dryRun: true },
+    );
     expect(preview.ok && preview.data).toMatchObject({ estado: "aprobado" });
     expect(await e.admin.documento.count({ where: { tenantId } })).toBe(0); // dryRun no persiste.
     const aprobado = await dato<{ estado: string; documentoId: string }>(
@@ -148,7 +162,73 @@ describe.skipIf(!urlPropietario)("anexo de contrato en base real", () => {
       { id: a.id },
     );
     expect(aprobado.estado).toBe("aprobado");
-    const doc = await e.admin.documento.findUniqueOrThrow({ where: { id: aprobado.documentoId as string } });
+    const doc = await e.admin.documento.findUniqueOrThrow({
+      where: { id: aprobado.documentoId as string },
+    });
+    // La relación del documento con el anexo es la marca sensible, incluso para registros existentes.
+    for (const rol of ["gerente", "viewer", "supervisor"]) {
+      const lector = {
+        ...ctx({ rol }),
+        ...(rol === "supervisor" ? { alcance: { instalaciones: [instalacionId] } } : {}),
+      };
+      const lista = await dato<{ items: { id: string }[] }>(lector, "core.documentos.list", {
+        entidad: { tipo: "persona", id: personaId },
+      });
+      expect(lista.items.some((d) => d.id === doc.id)).toBe(false);
+      for (const capacidad of ["core.documentos.get", "core.documentos.url_descarga"]) {
+        const resultado = await mod.executeCapability(lector, capacidad, { id: doc.id });
+        expect(!resultado.ok && resultado.error.code).toBe("NOT_FOUND");
+      }
+    }
+    const subida = {
+      entidad: { tipo: "persona", id: personaId },
+      nombre: "prueba.pdf",
+      mime: "application/pdf",
+      tamano: 100,
+      sha256: doc.sha256!,
+    };
+    const gerente = ctx({ rol: "gerente" });
+    const duplicados = await mod.executeCapability(
+      gerente,
+      "core.documentos.iniciar_subida",
+      subida,
+      { dryRun: true },
+    );
+    expect(
+      duplicados.ok &&
+        (duplicados.data as { duplicados: { id: string }[] }).duplicados.some(
+          (d) => d.id === doc.id,
+        ),
+    ).toBe(false);
+    for (const lector of [gerente, ctx()]) {
+      const reemplazo = await mod.executeCapability(
+        lector,
+        "core.documentos.iniciar_subida",
+        { ...subida, reemplazaAId: doc.id },
+        { dryRun: true },
+      );
+      expect(!reemplazo.ok && reemplazo.error.code).toBe("NOT_FOUND");
+    }
+    const confirmar = await mod.executeCapability(gerente, "core.documentos.confirmar_subida", {
+      id: doc.id,
+    });
+    expect(!confirmar.ok && confirmar.error.code).toBe("NOT_FOUND");
+    for (const rol of ["owner", "admin"]) {
+      const lector = ctx({ rol });
+      const lista = await dato<{ items: { id: string }[] }>(lector, "core.documentos.list", {
+        entidad: { tipo: "persona", id: personaId },
+      });
+      expect(lista.items.some((d) => d.id === doc.id)).toBe(true);
+      expect((await mod.executeCapability(lector, "core.documentos.get", { id: doc.id })).ok).toBe(
+        true,
+      );
+      expect(
+        (await mod.executeCapability(lector, "core.documentos.url_descarga", { id: doc.id })).ok,
+      ).toBe(true);
+    }
+    expect(
+      !(await mod.executeCapability(ctxOtro(), "core.documentos.url_descarga", { id: doc.id })).ok,
+    ).toBe(true);
     expect(doc.estado).toBe("disponible");
     expect(doc.sha256).toMatch(/^[0-9a-f]{64}$/);
     expect(doc.bitacoraSeq).toBeGreaterThan(0);
@@ -163,9 +243,9 @@ describe.skipIf(!urlPropietario)("anexo de contrato en base real", () => {
       motivoCambio: "rol",
       snapshotDespues: { nota: "rechazo" },
     });
-    expect((await mod.executeCapability(ctx(), "core.anexos.rechazar", { id: a.id, motivo: "" })).ok).toBe(
-      false,
-    );
+    expect(
+      (await mod.executeCapability(ctx(), "core.anexos.rechazar", { id: a.id, motivo: "" })).ok,
+    ).toBe(false);
     const rechazado = await dato<{ estado: string; motivoRechazo: string | null }>(
       ctx(),
       "core.anexos.rechazar",
@@ -173,7 +253,9 @@ describe.skipIf(!urlPropietario)("anexo de contrato en base real", () => {
     );
     expect(rechazado.estado).toBe("rechazado");
     expect(rechazado.motivoRechazo).toBe("No corresponde todavía");
-    expect((await mod.executeCapability(ctx(), "core.anexos.aprobar", { id: a.id })).ok).toBe(false);
+    expect((await mod.executeCapability(ctx(), "core.anexos.aprobar", { id: a.id })).ok).toBe(
+      false,
+    );
   });
 
   it("el cambio de capa de una persona dispara el borrador solo (ADR-029); la jornada sola no", async () => {
@@ -188,11 +270,17 @@ describe.skipIf(!urlPropietario)("anexo de contrato en base real", () => {
       vigenteDesde: "2026-03-01",
     });
     await mod.despacharPendientes(ctx());
-    const pendientes = await dato<{ motivoCambio: string; estado: string }[]>(ctx(), "core.anexos.list", {
-      personaId,
-      estado: "borrador",
-    });
-    expect(pendientes.some((p) => p.motivoCambio === "capa" || p.motivoCambio === "monto")).toBe(true);
+    const pendientes = await dato<{ motivoCambio: string; estado: string }[]>(
+      ctx(),
+      "core.anexos.list",
+      {
+        personaId,
+        estado: "borrador",
+      },
+    );
+    expect(pendientes.some((p) => p.motivoCambio === "capa" || p.motivoCambio === "monto")).toBe(
+      true,
+    );
 
     const antes = pendientes.length;
     await dato(ctx(), "core.vinculos.update", {
@@ -201,7 +289,10 @@ describe.skipIf(!urlPropietario)("anexo de contrato en base real", () => {
       distribucion: "Lunes a sábado",
     });
     await mod.despacharPendientes(ctx());
-    const despues = await dato<unknown[]>(ctx(), "core.anexos.list", { personaId, estado: "borrador" });
+    const despues = await dato<unknown[]>(ctx(), "core.anexos.list", {
+      personaId,
+      estado: "borrador",
+    });
     expect(despues.length).toBe(antes); // Jornada sola: R11 no la incluye, sin anexo nuevo.
   });
 });

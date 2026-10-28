@@ -1,3 +1,4 @@
+import { filtroDocumentoSensible } from "./sensibles";
 import { documentosEnAlcance } from "./alcance-doc";
 import { z } from "zod";
 
@@ -79,6 +80,7 @@ export const documentosIniciarSubida = defineCapability({
     const duplicados = (
       await ctx.db.documento.findMany({
         where: {
+          ...filtroDocumentoSensible(ctx),
           sha256: input.sha256,
           estado: "disponible",
           ...(permitidos ? { id: { in: [...permitidos] } } : {}),

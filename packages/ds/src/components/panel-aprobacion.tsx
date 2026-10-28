@@ -32,6 +32,7 @@ export function PanelAprobacion({
   onAprobar: () => void | Promise<void>;
   onRechazar: (motivo: string) => void | Promise<void>;
 }) {
+  const [aprobar, setAprobar] = useState(false);
   const [rechazar, setRechazar] = useState(false);
   const [motivo, setMotivo] = useState("");
   if (resuelto) {
@@ -40,23 +41,39 @@ export function PanelAprobacion({
         tono={resuelto.estado === "aprobado" ? "success" : "danger"}
         titulo={resuelto.estado === "aprobado" ? "Anexo aprobado" : "Anexo rechazado"}
       >
-        {resuelto.estado === "rechazado" && resuelto.motivoRechazo
-          ? resuelto.motivoRechazo
-          : null}
+        {resuelto.estado === "rechazado" && resuelto.motivoRechazo ? resuelto.motivoRechazo : null}
       </Alerta>
     );
   }
   return (
     <div className="flex flex-col gap-2">
-      {error && !rechazar ? <Alerta tono="danger" titulo={error} /> : null}
+      {error && !rechazar && !aprobar ? <Alerta tono="danger" titulo={error} /> : null}
       <div className="grid grid-cols-2 gap-3 [&>*]:h-11">
         <Button variant="secondary" disabled={pendiente} onClick={() => setRechazar(true)}>
           Rechazar
         </Button>
-        <Button disabled={pendiente} onClick={() => void onAprobar()}>
+        <Button disabled={pendiente} onClick={() => setAprobar(true)}>
           Aprobar
         </Button>
       </div>
+      <Dialog
+        abierto={aprobar}
+        onCerrar={() => setAprobar(false)}
+        titulo="Aprobar el anexo"
+        descripcion="Aprobar genera el documento final y no se puede deshacer."
+        acciones={
+          <>
+            <Button variant="secondary" disabled={pendiente} onClick={() => setAprobar(false)}>
+              Cancelar
+            </Button>
+            <Button disabled={pendiente} onClick={() => void onAprobar()}>
+              Aprobar
+            </Button>
+          </>
+        }
+      >
+        {error && aprobar ? <Alerta tono="danger" titulo={error} /> : null}
+      </Dialog>
       <Dialog
         abierto={rechazar}
         onCerrar={() => setRechazar(false)}
