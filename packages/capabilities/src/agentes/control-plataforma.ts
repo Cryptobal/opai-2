@@ -40,12 +40,14 @@ export async function aprobacionDePlataforma(
     if (!vencida) return requerida(repetida.id);
   }
   const viaUserId = ctx.actor.viaUserId;
+  const interno = ctx.actor.interno ? ctx.actor.id : null;
   const id = await ctx.transaccion(async (tx) => {
     const fila = await p.globales.crearAprobacionPlataforma(
       {
         origenTenantId: ctx.conTenant ? ctx.tenantId : null,
         apiKeyId: agente.apiKeyId,
         agente: agente.nombre,
+        agenteInternoId: interno,
         viaUserId,
         capability: c.id,
         input,

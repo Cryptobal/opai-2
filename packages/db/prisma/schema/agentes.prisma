@@ -303,6 +303,8 @@ model AprobacionPlataforma {
   apiKeyId       String?   @map("api_key_id") @db.Uuid
   /// Nombre de la key al pedir (la key vive en otra empresa; no se consulta en cada lectura).
   agente         String
+  /// Agente interno que la pidió (ADR-049), si la pidió uno; texto, como en `core.aprobaciones`.
+  agenteInternoId String?  @map("agente_interno_id")
   viaUserId      String    @map("via_user_id") @db.Uuid
   capability     String
   input          Json

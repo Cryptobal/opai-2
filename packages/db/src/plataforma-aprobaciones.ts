@@ -16,6 +16,7 @@ export type AprobacionPlataformaNueva = {
   origenTenantId: string | null;
   apiKeyId: string | null;
   agente: string;
+  agenteInternoId?: string | null;
   viaUserId: string;
   capability: string;
   input: Prisma.InputJsonValue;
