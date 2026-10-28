@@ -20,13 +20,14 @@
     "seed:maestros-demo": "tsx scripts/seed-maestros-demo.ts",
     "seed:roles-base": "tsx scripts/seed-roles-base.ts",
     "seed:e2e": "tsx scripts/seed-e2e.ts && pnpm --filter @opai/auth seed:e2e-mfa",
-    "diagnostico:portales": "tsx scripts/diagnostico-portales.ts"
+    "diagnostico:portales": "tsx scripts/diagnostico-portales.ts",
+    "importar:opai1": "tsx scripts/importar-opai1/cli.ts"
   },
   "dependencies": {
+    "@opai/domain": "workspace:*",
     "@prisma/adapter-pg": "^7.10.1",
     "@prisma/client": "^7.10.1",
-    "pg": "^8.23.1",
-    "@opai/domain": "workspace:*"
+    "pg": "^8.23.1"
   },
   "devDependencies": {
     "@types/pg": "^8.23.1",
@@ -34,6 +35,7 @@
     "prisma": "^7.10.1",
     "tsx": "^4.23.15",
     "typescript": "^5.9.3",
-    "vitest": "^5.0.5"
+    "vitest": "^5.0.5",
+    "zod": "^4.6.7"
   }
 }
