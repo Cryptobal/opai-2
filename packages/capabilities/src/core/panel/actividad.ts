@@ -10,6 +10,7 @@ import { visibleSinAnexos } from "./actividad-anexos";
 import { auditarHistorialSensible, redactarSensibles } from "./actividad-sensible";
 import { cambios, frase } from "./actividad-texto";
 import { auditoriaSelect } from "./auditoria-select";
+import { sinPlataformaAjena } from "../../agentes/plataforma";
 
 const TIPOS = ["cuenta", "instalacion", "persona", "cargo", "documento"] as const;
 const PERMISO_LECTURA: Record<(typeof TIPOS)[number], string> = {
@@ -87,6 +88,7 @@ export const actividadList = defineCapability({
     const filas = await ctx.db.auditEvent.findMany({
       select: auditoriaSelect,
       where: {
+        ...sinPlataformaAjena(),
         ...(e
           ? {
               OR: [

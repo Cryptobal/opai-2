@@ -12,6 +12,7 @@ import { accesoPlataforma, enTransaccion, forTenant } from "@opai/db";
 import { almacenamientoDelEntorno, mailerDelEntorno } from "@opai/integrations";
 
 import { idempotenciaSobre } from "./idempotencia";
+import { empresaDePlataforma } from "./plataforma-empresa";
 import {
   auditoriaEnDb,
   bitacoraEnDb,
@@ -191,8 +192,12 @@ export function crearContexto(params: ParametrosContexto): Contexto {
     plataforma: conAccesoPlataforma(usuario, params.actor, params.claveApi)
       ? {
           globales: accesoPlataforma(),
-          paraTenant: (id: string) => forTenant(id),
-          transaccionPara: (id, fn) => enTransaccion(id, fn),
+          empresa: (id: string) => empresaDePlataforma(forTenant(id), id),
+          auditarEnObjetivo: (id, hecho, evento) =>
+            enTransaccion(id, async (tx) => {
+              await accesoPlataforma().auditarPlataforma(hecho, tx);
+              await auditoriaEnDb(id).registrar(tx, evento);
+            }),
         }
       : null,
     // `ctx.rol` conserva el rol base (jerarquía y etiquetas). La autorización usa el rol

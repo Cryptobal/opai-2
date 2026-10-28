@@ -2,6 +2,8 @@
 
 export type Aprobacion = {
   id: string;
+  /** plataforma: acción platform.*, se resuelve con platform.aprobaciones.* (CAR-36). */
+  ambito: "empresa" | "plataforma";
   apiKeyId: string | null;
   agente: string;
   via: string | null;

@@ -9,7 +9,6 @@ import { requierePlataforma } from "./comun";
 import { emailSchema, uuidSchema } from "./esquemas";
 import { invitacionCreadaSchema } from "./invitations";
 import { invitarAdministrador } from "./platform-escritura";
-import { sembrarModulo } from "./siembras-modulo";
 
 const ACTIVOS = new Set(["activo", "trial"]);
 
@@ -32,8 +31,8 @@ export const platformModulesSet = defineCapability({
     if (input.moduloId === "core") throw reglaDeNegocio("El núcleo siempre está activo.");
     const manifest = obtenerModulo(input.moduloId);
     if (!manifest) throw noEncontrado(`El módulo "${input.moduloId}"`);
-    const db = requierePlataforma(ctx).paraTenant(input.tenantId);
-    const filas = await db.tenantModule.findMany();
+    const e = requierePlataforma(ctx).empresa(input.tenantId);
+    const filas = await e.modulos();
     const estado = new Map(filas.map((f) => [f.moduloId, f.estado]));
 
     if (ACTIVOS.has(input.estado)) {
@@ -50,12 +49,8 @@ export const platformModulesSet = defineCapability({
     }
     const anterior = estado.get(input.moduloId) ?? null;
     if (!dryRun) {
-      await db.tenantModule.upsert({
-        where: { tenantId_moduloId: { tenantId: input.tenantId, moduloId: input.moduloId } },
-        update: { estado: input.estado },
-        create: { tenantId: input.tenantId, moduloId: input.moduloId, estado: input.estado },
-      });
-      if (ACTIVOS.has(input.estado)) await sembrarModulo(input.moduloId, db, input.tenantId);
+      await e.fijarModulo(input.moduloId, input.estado);
+      if (ACTIVOS.has(input.estado)) await e.sembrarModulo(input.moduloId);
     }
     return { moduloId: input.moduloId, estado: input.estado, anterior };
   },

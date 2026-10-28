@@ -32,12 +32,8 @@ export const platformEventosList = defineCapability({
   tenantObjetivo: (input) => input.tenantId,
   async handler(ctx, input) {
     const filas = await requierePlataforma(ctx)
-      .paraTenant(input.tenantId)
-      .evento.findMany({
-        where: input.estado ? { estado: input.estado } : {},
-        orderBy: { createdAt: "desc" },
-        take: input.limite,
-      });
+      .empresa(input.tenantId)
+      .eventos(input.estado, input.limite);
     return filas.map((e) => ({ ...e, createdAt: iso(e.createdAt) }));
   },
 });
@@ -65,11 +61,7 @@ export const platformConsumosSummary = defineCapability({
     const tenants = await p.globales.listarTenants();
     return Promise.all(
       tenants.map(async (t) => {
-        const g = await p.paraTenant(t.id).consumo.groupBy({
-          by: ["recurso"],
-          where: { createdAt: { gte: desde } },
-          _sum: { cantidad: true, costoTotalMicro: true },
-        });
+        const g = await p.empresa(t.id).consumosPorRecurso(desde);
         const costo = g.reduce((s, x) => s + (x._sum.costoTotalMicro ?? 0), 0);
         const ejec = g.find((x) => x.recurso === "capacidad.ejecucion")?._sum.cantidad ?? 0;
         return { tenantId: t.id, nombre: t.nombre, costoUsd: microAUsd(costo), ejecuciones: ejec };

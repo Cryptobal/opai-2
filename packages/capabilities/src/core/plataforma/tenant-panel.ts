@@ -52,27 +52,19 @@ export const platformTenantPanel = defineCapability({
   dryRun: false,
   tenantObjetivo: (input) => input.tenantId,
   async handler(ctx, input) {
-    const db = requierePlataforma(ctx).paraTenant(input.tenantId);
+    const e = requierePlataforma(ctx).empresa(input.tenantId);
     const desde = inicioDeMes();
-    const [mes, recursos, porKey, keys, fallidos, reintentando, integ] = await Promise.all([
-      metricasDelMes(db),
-      db.consumo.groupBy({
-        by: ["recurso"],
-        where: { createdAt: { gte: desde } },
-        _sum: { cantidad: true, costoTotalMicro: true },
-      }),
-      db.consumo.groupBy({
-        by: ["apiKeyId"],
-        where: { createdAt: { gte: desde }, apiKeyId: { not: null } },
-        _sum: { costoTotalMicro: true },
-      }),
-      db.apiKey.findMany({ orderBy: { createdAt: "desc" } }),
-      db.trabajo.count({ where: { estado: "fallido" } }),
-      db.trabajo.count({
-        where: { estado: { in: ["pendiente", "en_curso"] }, intentos: { gt: 0 } },
-      }),
-      db.integracion.findMany({ orderBy: { proveedor: "asc" } }),
+    const [mes, recursos, porKey, keys, fallidos, conProblemas, integ] = await Promise.all([
+      metricasDelMes(e),
+      e.consumosPorRecurso(desde),
+      e.consumosPorKey(desde),
+      e.apiKeys(),
+      e.contarTrabajos({ estado: "fallido" }),
+      e.contarTrabajos({ conProblemas: true }),
+      e.integraciones(),
     ]);
+    // `conProblemas` = fallidos + los que están reintentando.
+    const reintentando = conProblemas - fallidos;
     const gasto = new Map(porKey.map((g) => [g.apiKeyId, g._sum.costoTotalMicro ?? 0]));
     return {
       mes,

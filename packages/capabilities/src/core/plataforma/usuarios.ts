@@ -1,9 +1,14 @@
 import { z } from "zod";
 
-import { esRolPlataforma, PERMISOS_PLATAFORMA, ROLES_PLATAFORMA } from "@opai/domain";
+import {
+  esRolPlataforma,
+  PERMISOS_PLATAFORMA,
+  ROLES_PLATAFORMA,
+  tienePermisoPlataforma,
+} from "@opai/domain";
 
 import { defineCapability } from "../../define";
-import { noEncontrado, prohibido, reglaDeNegocio } from "../../errores";
+import { prohibido, reglaDeNegocio } from "../../errores";
 import { requierePlataforma, usuarioResponsable } from "../comun";
 import { emailSchema } from "../esquemas";
 
@@ -35,49 +40,73 @@ export const platformUsersList = defineCapability({
   },
 });
 
+const NO_ASIGNABLE = "No se puede asignar un rol de plataforma a ese correo.";
+
 /**
  * Asigna o quita el `platformRole` de un usuario existente (ADR-055). Es irreversible para un agente:
- * sin autonomía "directo" queda en la cola de aprobaciones, y la aprobación se ejecuta con los
- * permisos de quien aprueba. Exige empresa actual: la escritura en `core.users` y su auditoría van
- * en la misma transacción (ADR-052), en la cadena de la empresa desde la que se opera.
+ * sin autonomía "directo" queda en la cola de aprobaciones de plataforma (CAR-36), y la aprobación se
+ * ejecuta con los permisos de quien aprueba. La escritura en `core.users` y su auditoría de
+ * plataforma van en la misma transacción (ADR-052), fuera de la cadena de cualquier empresa.
  */
 export const platformUsersSetRole = defineCapability({
   id: "platform.users.set_role",
   descripcion:
     "Plataforma: asigna el rol de plataforma (owner o support) a un usuario existente, o lo quita con null. No cambia el propio rol.",
   permiso: PERMISOS_PLATAFORMA.rolesManage,
+  // Sin empresa: `core.users` no tiene RLS y la auditoría es la global (CAR-36), no la de una empresa.
+  sinTenant: true,
   input: z.object({ email: emailSchema, platformRole: z.enum(ROLES_PLATAFORMA).nullable() }),
-  output: usuarioPlataformaSchema.extend({ anterior: z.enum(ROLES_PLATAFORMA).nullable() }),
+  output: usuarioPlataformaSchema.extend({
+    id: z.string().nullable().describe("null en la vista previa de un agente."),
+    nombre: z.string().nullable(),
+    anterior: z.enum(ROLES_PLATAFORMA).nullable(),
+  }),
   efecto: "irreversible",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    requierePlataforma(ctx);
+    const p = requierePlataforma(ctx);
+    const responsable = usuarioResponsable(ctx);
+    // La vista previa de un agente no consulta el correo: no es un oráculo de qué cuentas existen.
+    if (dryRun && ctx.actor.tipo === "agent")
+      return {
+        id: null,
+        nombre: null,
+        email: input.email,
+        platformRole: input.platformRole,
+        anterior: null,
+      };
     // `ctx.db` es la transacción de la escritura (con su auditoría): `core.users` no tiene RLS.
     const u = await ctx.db.user.findUnique({ where: { email: input.email } });
-    if (!u) throw noEncontrado("El usuario");
-    if (u.id === usuarioResponsable(ctx)) {
+    if (u?.id === responsable) {
       throw prohibido("Nadie cambia su propio rol de plataforma; pídeselo a otro owner.");
     }
-    const anterior = esRolPlataforma(u.platformRole) ? u.platformRole : null;
-    const salida = {
-      id: u.id,
-      nombre: u.name,
-      email: u.email,
-      platformRole: input.platformRole,
-      anterior,
-    };
-    if (dryRun || anterior === input.platformRole) return salida;
-    // Quitar un owner se serializa: tomar el lock de fila de todos los owners antes del cambio hace
-    // que dos bajas cruzadas esperen una a la otra; la segunda recuenta ya con la primera confirmada
-    // (READ COMMITTED vuelve a evaluar el WHERE) y falla en vez de dejar cero owners.
-    if (anterior === "owner")
-      await ctx.db.user.updateMany({
-        where: { platformRole: "owner" },
-        data: { platformRole: "owner" },
-      });
+    // Mismo mensaje exista o no la cuenta: la respuesta no permite enumerar correos.
+    if (!u) throw reglaDeNegocio(NO_ASIGNABLE);
+    const salida = { id: u.id, nombre: u.name, email: u.email, platformRole: input.platformRole };
+    if (dryRun)
+      return { ...salida, anterior: esRolPlataforma(u.platformRole) ? u.platformRole : null };
+    // Todo cambio de rol se serializa con `SELECT … FOR UPDATE` sobre los owners (sin tocar
+    // `updated_at`): dos bajas cruzadas esperan una a la otra y la segunda recuenta ya con la primera
+    // confirmada. Tras el lock se vuelve a comprobar que quien lo pide SIGUE siendo owner (si otro
+    // owner le quitó el rol mientras esperaba, no completa el cambio) y se relee al objetivo.
+    const vigente = await p.globales.bloquearOwnersDePlataforma(ctx.db, responsable);
+    if (
+      !esRolPlataforma(vigente) ||
+      !tienePermisoPlataforma(vigente, PERMISOS_PLATAFORMA.rolesManage)
+    )
+      throw prohibido("Tu rol de plataforma cambió: ya no puedes asignar roles de plataforma.");
+    const actual = await ctx.db.user.findUnique({ where: { id: u.id } });
+    if (!actual) throw reglaDeNegocio(NO_ASIGNABLE);
+    const anterior = esRolPlataforma(actual.platformRole) ? actual.platformRole : null;
+    if (anterior === input.platformRole) return { ...salida, anterior };
+    // Antes de escribir (no después): si la ejecución comparte una transacción mayor (al aprobar),
+    // un error tras el UPDATE no lo desharía. Con el lock tomado, el conteo ya es el vigente.
+    if (
+      anterior === "owner" &&
+      (await ctx.db.user.count({ where: { platformRole: "owner" } })) <= 1
+    )
+      throw reglaDeNegocio("OPAI debe conservar al menos un owner de plataforma.");
     await ctx.db.user.update({ where: { id: u.id }, data: { platformRole: input.platformRole } });
-    const owners = await ctx.db.user.count({ where: { platformRole: "owner" } });
-    if (owners === 0) throw reglaDeNegocio("OPAI debe conservar al menos un owner de plataforma.");
-    return salida;
+    return { ...salida, anterior };
   },
 });
