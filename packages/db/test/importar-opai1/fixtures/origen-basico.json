@@ -1,0 +1,235 @@
+{
+  "accounts": [
+    {
+      "id": "acc-a1",
+      "name": "Comercial Alfa SpA",
+      "legalName": "Comercial Alfa SpA",
+      "rut": "76.111.111-6",
+      "industry": "Retail",
+      "segment": "Pyme",
+      "size": "Mediana",
+      "createdAt": "2025-01-01T12:00:00.000Z",
+      "updatedAt": "2025-01-01T12:00:00.000Z"
+    },
+    {
+      "id": "acc-a2",
+      "name": "Comercial Alfa S.p.A.",
+      "rut": "761111116",
+      "industry": "retail ",
+      "createdAt": "2025-02-01T12:00:00.000Z",
+      "updatedAt": "2025-02-01T12:00:00.000Z"
+    },
+    {
+      "id": "acc-a3",
+      "name": "Inmobiliaria Beta",
+      "rut": null,
+      "industry": "Inmobiliario",
+      "createdAt": "2025-01-05T12:00:00.000Z",
+      "updatedAt": "2025-01-05T12:00:00.000Z"
+    },
+    {
+      "id": "acc-a4",
+      "name": "Inmobiliaria Beta Ltda.",
+      "rut": "",
+      "createdAt": "2025-03-01T12:00:00.000Z",
+      "updatedAt": "2025-03-01T12:00:00.000Z"
+    },
+    {
+      "id": "acc-a5",
+      "name": "Gamma Servicios",
+      "rut": "76.222.222-0",
+      "createdAt": "2025-01-10T12:00:00.000Z",
+      "updatedAt": "2025-01-10T12:00:00.000Z"
+    },
+    {
+      "id": "acc-a6",
+      "name": "Delta Logística",
+      "rut": "76333333-7",
+      "createdAt": "2025-01-12T12:00:00.000Z",
+      "updatedAt": "2025-01-12T12:00:00.000Z"
+    }
+  ],
+  "contacts": [
+    {
+      "id": "con-c1",
+      "accountId": "acc-a1",
+      "firstName": "Ana",
+      "lastName": "Prueba",
+      "email": " Ana.Prueba@Ejemplo.TEST ",
+      "phone": "9 8765 4321",
+      "roleTitle": "Gerenta",
+      "isPrimary": true,
+      "recibeFacturacion": true,
+      "recibeNotasCredito": true,
+      "createdAt": "2025-01-02T12:00:00.000Z",
+      "updatedAt": "2025-01-02T12:00:00.000Z"
+    },
+    {
+      "id": "con-c2",
+      "accountId": "acc-a1",
+      "firstName": "Ana",
+      "lastName": "Prueba",
+      "email": "ana.prueba@ejemplo.test",
+      "createdAt": "2025-01-03T12:00:00.000Z",
+      "updatedAt": "2025-01-03T12:00:00.000Z"
+    },
+    {
+      "id": "con-c3",
+      "accountId": "acc-a2",
+      "firstName": "Bruno",
+      "lastName": "Ficticio",
+      "email": "bruno@ejemplo.test",
+      "isPrimary": true,
+      "recibeCobranza": true,
+      "createdAt": "2025-02-02T12:00:00.000Z",
+      "updatedAt": "2025-03-01T12:00:00.000Z"
+    },
+    {
+      "id": "con-c4",
+      "accountId": "acc-a3",
+      "firstName": "Carla",
+      "lastName": "Inventada",
+      "email": "carla@ejemplo.test",
+      "createdAt": "2025-01-06T12:00:00.000Z",
+      "updatedAt": "2025-01-06T12:00:00.000Z"
+    },
+    {
+      "id": "con-c5",
+      "accountId": "acc-a6",
+      "firstName": "Carla",
+      "lastName": "Inventada",
+      "email": "CARLA@ejemplo.test",
+      "createdAt": "2025-01-13T12:00:00.000Z",
+      "updatedAt": "2025-01-13T12:00:00.000Z"
+    },
+    {
+      "id": "con-c6",
+      "accountId": "acc-a3",
+      "firstName": "Diego",
+      "lastName": "Demo",
+      "phone": "+56 9 1111 2222",
+      "recibeCesion": true,
+      "recibeOperacional": true,
+      "createdAt": "2025-01-07T12:00:00.000Z",
+      "updatedAt": "2025-01-07T12:00:00.000Z"
+    },
+    {
+      "id": "con-c7",
+      "accountId": "acc-a6",
+      "firstName": "Diego",
+      "lastName": "Demo",
+      "phone": "911112222",
+      "createdAt": "2025-01-14T12:00:00.000Z",
+      "updatedAt": "2025-01-14T12:00:00.000Z"
+    },
+    {
+      "id": "con-c8",
+      "accountId": "acc-zz",
+      "firstName": "Elena",
+      "lastName": "Sinuenta",
+      "email": "elena@ejemplo.test",
+      "createdAt": "2025-01-15T12:00:00.000Z",
+      "updatedAt": "2025-01-15T12:00:00.000Z"
+    },
+    {
+      "id": "con-c9",
+      "accountId": "acc-a5",
+      "firstName": "Fabio",
+      "lastName": "Ejemplar",
+      "email": "fabio-sin-arroba",
+      "phone": "123",
+      "createdAt": "2025-01-16T12:00:00.000Z",
+      "updatedAt": "2025-01-16T12:00:00.000Z"
+    }
+  ],
+  "installations": [
+    {
+      "id": "ins-i1",
+      "accountId": "acc-a1",
+      "name": "Bodega Central",
+      "address": "Calle Falsa 123",
+      "commune": "Santiago",
+      "placeId": "place-1",
+      "lat": -33.45,
+      "lng": -70.65,
+      "createdAt": "2025-01-04T12:00:00.000Z",
+      "updatedAt": "2025-01-04T12:00:00.000Z"
+    },
+    {
+      "id": "ins-i2",
+      "accountId": "acc-a2",
+      "name": "Bodega Central Norte",
+      "lat": -33.4502,
+      "lng": -70.6501,
+      "activatedByDealId": "deal-1",
+      "createdAt": "2025-02-03T12:00:00.000Z",
+      "updatedAt": "2025-02-03T12:00:00.000Z"
+    },
+    {
+      "id": "ins-i3",
+      "accountId": "acc-a1",
+      "name": "Bodega  central",
+      "lat": -33.5,
+      "lng": -70.7,
+      "createdAt": "2025-02-04T12:00:00.000Z",
+      "updatedAt": "2025-02-04T12:00:00.000Z"
+    },
+    {
+      "id": "ins-i4",
+      "accountId": null,
+      "leadId": "lead-1",
+      "name": "Sitio Prospecto",
+      "createdAt": "2025-02-05T12:00:00.000Z",
+      "updatedAt": "2025-02-05T12:00:00.000Z"
+    },
+    {
+      "id": "ins-i5",
+      "accountId": "acc-a6",
+      "name": "Oficina Delta",
+      "placeId": "place-9",
+      "createdAt": "2025-01-20T12:00:00.000Z",
+      "updatedAt": "2025-01-20T12:00:00.000Z"
+    },
+    {
+      "id": "ins-i6",
+      "accountId": "acc-a6",
+      "name": "Sucursal Delta",
+      "placeId": "place-9",
+      "createdAt": "2025-01-21T12:00:00.000Z",
+      "updatedAt": "2025-01-21T12:00:00.000Z"
+    }
+  ],
+  "pipelineStages": [
+    { "id": "st-1", "name": "Prospección", "order": 1 },
+    { "id": "st-2", "name": "Aceptada", "order": 2, "isAccepted": true },
+    { "id": "st-3", "name": "Ganada", "order": 3, "isClosedWon": true }
+  ],
+  "deals": [
+    {
+      "id": "deal-1",
+      "accountId": "acc-a1",
+      "stageId": "st-3",
+      "title": "Servicio bodega",
+      "createdAt": "2025-01-05T12:00:00.000Z"
+    }
+  ],
+  "dealStageHistory": [
+    {
+      "id": "h-1",
+      "dealId": "deal-1",
+      "fromStageId": null,
+      "toStageId": "st-1",
+      "changedAt": "2025-01-05T12:00:00.000Z"
+    },
+    {
+      "id": "h-2",
+      "dealId": "deal-1",
+      "fromStageId": "st-1",
+      "toStageId": "st-3",
+      "changedAt": "2025-01-06T12:00:00.000Z"
+    }
+  ],
+  "dealContacts": [
+    { "id": "dc-1", "dealId": "deal-1", "contactId": "con-c1", "role": "decision_maker" }
+  ]
+}

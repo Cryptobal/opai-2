@@ -16,7 +16,14 @@ export default defineConfig({
       {
         extends: false,
         root: "./packages/db",
-        test: { name: "db-unitarios", include: ["test/globales.test.ts", "test/metricas.test.ts"] },
+        test: {
+          name: "db-unitarios",
+          include: [
+            "test/globales.test.ts",
+            "test/metricas.test.ts",
+            "test/importar-opai1/**/*.test.ts",
+          ],
+        },
       },
       {
         extends: false,
