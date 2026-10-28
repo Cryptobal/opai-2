@@ -145,4 +145,25 @@ describe.skipIf(!urlPropietario)("cifrado de campos sensibles en base real", () 
     // Sin la DEK vieja ya no se puede recifrar: por eso la rotación recifra dentro de su transacción.
     expect(() => recifrarValor({ tenantId: tA, tabla: "fichas_salud", campo: "diagnostico" }, g, nueva, generarDekPrueba())).toThrow();
   }, 60_000);
+
+  it("rotar la KEK con la fila leída antes de una rotación de DEK no pisa la DEK nueva (rev. 5689206639)", async () => {
+    const { rotarDek } = await import("../src/core/cumplimiento/rotar-dek");
+    const { reenvolverFila } = await import("../scripts/reenvolver-dek");
+    const { leerSecreto } = await import("../src/integraciones/secretos");
+    const integracionId = (await e.admin.secreto.findFirstOrThrow({ where: { tenantId: tA } })).integracionId;
+    const actual = Buffer.from(process.env["OPAI_SECRETS_KEY"] ?? "", "base64");
+    const version = Number(process.env["OPAI_SECRETS_KEY_VERSION"]);
+    const nueva = randomBytes(32);
+    // `rotar-kek` lee la fila; entre medio, `rotar-dek` reemplaza la DEK y recifra los secretos.
+    const leida = await e.admin.claveTenant.findUniqueOrThrow({ where: { tenantId: tA } });
+    await rotarDek(ctx(tA));
+    // La escritura con la fila vieja ya no coincide: no escribe (antes guardaba la DEK vieja).
+    expect(await reenvolverFila(e.admin, leida, { actual: nueva, anterior: actual, version: version + 1 })).toBe(false);
+    expect(await leerSecreto(ctx(tA), integracionId, "api_key")).toBe("re_rotar_123");
+    // Releída, se reenvuelve bien y el secreto sigue legible con la KEK nueva.
+    const releida = await e.admin.claveTenant.findUniqueOrThrow({ where: { tenantId: tA } });
+    expect(await reenvolverFila(e.admin, releida, { actual: nueva, anterior: actual, version: version + 1 })).toBe(true);
+    Object.assign(process.env, { OPAI_SECRETS_KEY: nueva.toString("base64"), OPAI_SECRETS_KEY_VERSION: String(version + 1) });
+    expect(await leerSecreto(ctx(tA), integracionId, "api_key")).toBe("re_rotar_123");
+  }, 60_000);
 });
