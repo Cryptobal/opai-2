@@ -33,6 +33,8 @@ test("Inspector con base supervisor: menú efectivo y dirección de Empresa de s
   await page.getByRole("button", { name: "Entrar" }).click();
   await page.waitForURL((u) => u.pathname === "/");
   if (info.project.name === "desktop") {
+    const area = page.getByRole("button", { name: "Personas", exact: true });
+    if ((await area.getAttribute("aria-expanded")) === "false") await area.click();
     await expect(
       page.getByRole("link", { name: "Cargos y sueldos", exact: true }).first(),
     ).toBeVisible();
