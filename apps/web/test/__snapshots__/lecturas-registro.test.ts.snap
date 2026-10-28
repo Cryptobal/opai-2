@@ -52,5 +52,6 @@ exports[`declaración de auditoría del registro completo > ninguna lectura nuev
   "platform.tenants.panel",
   "platform.trabajos.list",
   "platform.usage.summary",
+  "platform.users.list",
 ]
 `;

@@ -42,8 +42,8 @@ export const apikeysGet = defineCapability({
         c.efecto === "irreversible" &&
         !c.soloPersonas &&
         !c.interna &&
-        c.modulo !== "platform" &&
-        (todos || k.scopes.includes(c.modulo)),
+        // "*" nunca cubre plataforma: solo una key con el scope "platform" la ve (ADR-055).
+        ((todos && c.modulo !== "platform") || k.scopes.includes(c.modulo)),
     );
     return {
       ...k,

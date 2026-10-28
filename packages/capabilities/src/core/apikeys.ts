@@ -4,10 +4,10 @@ import { pendienteMfa, PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../define";
 import { prohibido, reglaDeNegocio } from "../errores";
-import { listarModulos } from "../module";
 import { normalizarPermisosRol } from "./permisos/comun";
 import { iso, tenantActual, usuarioResponsable } from "./comun";
 import { generarApiKey } from "./apikey-formato";
+import { validarScopes } from "./apikey-scopes";
 export { apikeysRevoke } from "./apikey-revoke";
 
 import { keySchema } from "./apikey-schema";
@@ -98,9 +98,7 @@ export const apikeysCreate = defineCapability({
     if (!ctx.mfa || pendienteMfa(ctx.mfa)) {
       throw prohibido("Completa el segundo factor antes de crear credenciales.");
     }
-    const validos = new Set(["*", "core", ...listarModulos().map((m) => m.id)]);
-    const invalidos = input.scopes.filter((s) => !validos.has(s));
-    if (invalidos.length) throw reglaDeNegocio(`Scopes desconocidos: ${invalidos.join(", ")}.`);
+    validarScopes(ctx, input);
     const expiraEn = input.expiraEn ? new Date(input.expiraEn) : null;
     if (expiraEn && expiraEn.getTime() <= Date.now()) {
       throw reglaDeNegocio("La fecha de expiración debe ser futura.");

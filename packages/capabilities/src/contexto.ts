@@ -36,6 +36,16 @@ export { auditoriaEnDb, medidorEnDb } from "./servicios-db";
 /** Id nulo para contextos sin tenant (plataforma sin empresa elegida). RLS no devuelve filas. */
 export const SIN_TENANT = "00000000-0000-0000-0000-000000000000";
 
+/**
+ * API key que ejecuta: permisos finos (`null` = hereda los del responsable), si es de servicio y si
+ * tiene el scope explícito "platform" (ADR-055).
+ */
+export type ClaveApi = {
+  permisos: readonly string[] | null;
+  servicio: boolean;
+  plataforma?: boolean;
+};
+
 export type ParametrosContexto = {
   mfa?: EstadoMfa;
   /** null: sin tenant actual (plataforma sin empresa elegida, o usuario sin membresías). */
@@ -59,7 +69,7 @@ export type ParametrosContexto = {
    * (intersección); `permisos: null` ⇒ la key hereda los del responsable (compatibilidad). Un
    * principal `servicio` no hereda rol: sus permisos salen exclusivamente de esta lista.
    */
-  claveApi?: { permisos: readonly string[] | null; servicio: boolean } | null;
+  claveApi?: ClaveApi | null;
   /**
    * Techo real de permisos del responsable humano de la API key (rol, personalizado y excepciones),
    * usado para intersectar con `claveApi` (H15): ni una key delegada ni una de servicio superan lo
@@ -94,13 +104,15 @@ export type ParametrosContexto = {
 export function autorizador(
   acceso: Acceso,
   usuario: UsuarioContexto | null,
-  clave?: { permisos: readonly string[] | null; servicio: boolean } | null,
+  clave?: ClaveApi | null,
   accesoResponsable: Acceso = acceso,
 ) {
   return (permiso: string): boolean => {
     if (moduloDe(permiso) === "platform") {
-      // Una API key nunca obtiene permisos de plataforma, tenga o no responsable de plataforma.
-      return !clave && tienePermisoPlataforma(usuario?.platformRole, permiso);
+      // Una API key solo obtiene permisos de plataforma si es de plataforma (`claveDePlataforma`):
+      // y aun así, nunca más que el `platformRole` VIGENTE de su responsable (ADR-055).
+      if (clave && !claveDePlataforma(clave)) return false;
+      return tienePermisoPlataforma(usuario?.platformRole, permiso);
     }
     if (clave)
       return permisoDeKey(permiso, clave.permisos, clave.servicio, (p) =>
@@ -108,6 +120,27 @@ export function autorizador(
       );
     return tienePermisoEfectivo(acceso, permiso);
   };
+}
+
+/**
+ * Key de plataforma (ADR-055): scope explícito "platform" (el "*" nunca lo cubre), tipo "usuario" y
+ * hereda los permisos del responsable. El `platformRole` del responsable se cruza aparte, en vivo.
+ */
+export function claveDePlataforma(clave: ClaveApi | null | undefined): boolean {
+  return Boolean(clave?.plataforma) && !clave?.servicio && clave?.permisos === null;
+}
+
+/**
+ * Si el contexto obtiene `ctx.plataforma`: usuario con `platformRole` y, si es un agente, solo una
+ * key de plataforma (nunca el agente interno de ADR-049).
+ */
+export function conAccesoPlataforma(
+  usuario: UsuarioContexto | null,
+  actor: Actor,
+  clave: ClaveApi | null | undefined,
+): boolean {
+  if (!usuario?.platformRole) return false;
+  return actor.tipo !== "agent" || (!actor.interno && claveDePlataforma(clave));
 }
 
 const diferirPorDefecto = (tarea: () => Promise<unknown>) => void tarea().catch(() => undefined);
@@ -151,17 +184,17 @@ export function crearContexto(params: ParametrosContexto): Contexto {
       urlBase:
         params.servicios?.urlBase ?? process.env["BETTER_AUTH_URL"] ?? "http://localhost:3000",
     },
-    // Nunca para un agente (H15/H del Revisor): una API key no obtiene el acceso de plataforma del
-    // responsable, aunque este tenga `platformRole` (el permiso ya lo bloquea `autorizador`, pero
-    // `requierePlataforma` depende de este objeto, no del permiso, como defensa en profundidad).
-    plataforma:
-      usuario?.platformRole && params.actor.tipo !== "agent"
-        ? {
-            globales: accesoPlataforma(),
-            paraTenant: (id: string) => forTenant(id),
-            transaccionPara: (id, fn) => enTransaccion(id, fn),
-          }
-        : null,
+    // Para un agente, solo con una key de plataforma (ADR-055; antes nunca, H15/H del Revisor): una
+    // key común no obtiene el acceso de plataforma del responsable aunque este tenga `platformRole`
+    // (el permiso ya lo bloquea `autorizador`, y `requierePlataforma` depende de este objeto, no
+    // del permiso, como defensa en profundidad). El agente interno (ADR-049) nunca lo obtiene.
+    plataforma: conAccesoPlataforma(usuario, params.actor, params.claveApi)
+      ? {
+          globales: accesoPlataforma(),
+          paraTenant: (id: string) => forTenant(id),
+          transaccionPara: (id, fn) => enTransaccion(id, fn),
+        }
+      : null,
     // `ctx.rol` conserva el rol base (jerarquía y etiquetas). La autorización usa el rol
     // personalizado cuando existe: si hay `permisosRol`, el rol base cede a esa lista (ADR-022).
     // Si ejecuta una API key, además cruza con los efectivos actuales del responsable (H15).
