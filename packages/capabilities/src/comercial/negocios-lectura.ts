@@ -20,24 +20,32 @@ const filtros = listaSchema.extend({
 const filaLista = negocioSchema.extend({
   cuentaNombre: z.string(),
   etapaNombre: z.string(),
+  responsableNombre: z.string().nullable(),
 });
 
-/** Nombres de cuenta y etapa para un conjunto de negocios, en dos consultas. */
-async function enriquecer(ctx: Contexto, negocios: { cuentaId: string; etapaId: string }[]) {
+type Base = { cuentaId: string; etapaId: string; responsableId: string | null };
+
+/** Nombres de cuenta, etapa y responsable para un conjunto de negocios, en tres consultas. */
+async function enriquecer(ctx: Contexto, negocios: Base[]) {
   const cuentaIds = [...new Set(negocios.map((n) => n.cuentaId))];
   const etapaIds = [...new Set(negocios.map((n) => n.etapaId))];
-  const [cuentas, etapas] = await Promise.all([
+  const userIds = [...new Set(negocios.flatMap((n) => (n.responsableId ? [n.responsableId] : [])))];
+  const [cuentas, etapas, usuarios] = await Promise.all([
     ctx.db.cuenta.findMany({
       where: { id: { in: cuentaIds } },
       select: { id: true, nombre: true },
     }),
     ctx.db.etapa.findMany({ where: { id: { in: etapaIds } }, select: { id: true, nombre: true } }),
+    userIds.length
+      ? ctx.db.user.findMany({ where: { id: { in: userIds } }, select: { id: true, name: true } })
+      : Promise.resolve([]),
   ]);
   const nombre = (lista: { id: string; nombre: string }[], id: string) =>
     lista.find((x) => x.id === id)?.nombre ?? "";
-  return (n: { cuentaId: string; etapaId: string }) => ({
+  return (n: Base) => ({
     cuentaNombre: nombre(cuentas, n.cuentaId),
     etapaNombre: nombre(etapas, n.etapaId),
+    responsableNombre: usuarios.find((u) => u.id === n.responsableId)?.name ?? null,
   });
 }
 
@@ -103,7 +111,7 @@ export const negociosEmbudo = defineCapability({
         tono: z.string(),
       }),
     ),
-    negocios: z.array(negocioSchema.extend({ cuentaNombre: z.string(), etapaNombre: z.string() })),
+    negocios: z.array(filaLista),
   }),
   efecto: "lectura",
   dryRun: false,

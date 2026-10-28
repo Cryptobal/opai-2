@@ -1,6 +1,7 @@
 import { expect, type Page, test } from "@playwright/test";
 
 import { ocultarIndicadorDev } from "./indicador-dev";
+import { ir, menu } from "./menu-lateral";
 import { entrar as iniciarSesion } from "./sesion";
 
 import { digitoVerificador } from "@opai/domain";
@@ -32,23 +33,6 @@ function rutNuevo() {
   return `${cuerpo}-${digitoVerificador(cuerpo)}`;
 }
 
-const menu = (page: Page, nombre: RegExp) =>
-  page.getByRole("navigation", { name: "Principal" }).getByRole("link", { name: nombre });
-
-const GRUPO = { Personas: "Personas", Cuentas: "Clientes" } as const;
-
-/** El menú lateral es un acordeón: si el enlace está en un grupo cerrado, se abre antes del clic. */
-async function ir(page: Page, destino: keyof typeof GRUPO) {
-  const enlace = menu(page, new RegExp(`^${destino}`));
-  if (!(await enlace.isVisible())) {
-    const grupo = page
-      .getByRole("navigation", { name: "Principal" })
-      .getByRole("button", { name: GRUPO[destino], exact: true });
-    if ((await grupo.getAttribute("aria-expanded")) !== "true") await grupo.click();
-  }
-  await enlace.click();
-}
-
 /**
  * Escritorio: selector del riel. En iPad el shell no ofrece cambiar de empresa (ni en el riel ni en
  * el menú de usuario): se usa el selector de empresa del acceso, que ejecuta la misma acción.
@@ -77,7 +61,9 @@ test.describe("caché y sesión", () => {
   test.skip(({ viewport }) => (viewport?.width ?? 0) < 768, "Se prueba en iPad y escritorio");
 
   // pendiente: navegación cliente mantiene Inicio visible (ver seguimiento.txt)
-  test.fixme("una persona creada aparece en la lista ya visitada (sin recarga)", async ({ page }) => {
+  test.fixme("una persona creada aparece en la lista ya visitada (sin recarga)", async ({
+    page,
+  }) => {
     const apellido = `Cache ${Date.now()}`;
     await entrar(page);
     // Reloj fijo: la caché (30 s) no vence ni corre el refresco silencioso (15 s) durante la prueba,

@@ -1,22 +1,18 @@
 import { Badge, Enlace, ParesGrid, SeccionTarjeta } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
+import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { fecha, pesos } from "@/lib/fechas";
 
 import type { NegocioDetalle } from "./datos";
+import { ROL_CONTACTO as ROL, TIPO_VINCULO } from "./etiquetas";
 
-const TIPO_VINCULO: Record<string, string> = {
-  nueva: "Nueva",
-  ampliacion: "Ampliación",
-  renovacion: "Renovación",
-  reemplazo: "Reemplazo",
-};
-const ROL: Record<string, string> = {
-  decisor: "Decisor",
-  tecnico: "Técnico",
-  compras: "Compras",
-  usuario: "Usuario",
-};
+/** Abre una hoja de vínculos de la ficha (`?instalaciones=1`, `?contactos=1`). */
+const AccionHoja = (p: { id: string; hoja: string; texto: string }) => (
+  <EnlaceBoton href={`/negocios/${p.id}?${p.hoja}=1`} variante="ghost">
+    {p.texto}
+  </EnlaceBoton>
+);
 
 /** Tab Resumen de un negocio: datos, instalaciones vinculadas y contactos con su rol (ADR-041). */
 export function ResumenNegocio({ n }: { n: NegocioDetalle }) {
@@ -54,7 +50,12 @@ export function ResumenNegocio({ n }: { n: NegocioDetalle }) {
           ]}
         />
       </SeccionTarjeta>
-      <SeccionTarjeta titulo={`Instalaciones (${n.instalaciones.length})`}>
+      <SeccionTarjeta
+        titulo={`Instalaciones (${n.instalaciones.length})`}
+        {...(n.archivadoEn
+          ? {}
+          : { accion: <AccionHoja id={n.id} hoja="instalaciones" texto="Vincular" /> })}
+      >
         {n.instalaciones.length ? (
           <div className="flex flex-col gap-2">
             {n.instalaciones.map((i) => (
@@ -70,7 +71,12 @@ export function ResumenNegocio({ n }: { n: NegocioDetalle }) {
           <p className="t-caption">Sin instalaciones vinculadas.</p>
         )}
       </SeccionTarjeta>
-      <SeccionTarjeta titulo={`Contactos (${n.contactos.length})`}>
+      <SeccionTarjeta
+        titulo={`Contactos (${n.contactos.length})`}
+        {...(n.archivadoEn
+          ? {}
+          : { accion: <AccionHoja id={n.id} hoja="contactos" texto="Editar" /> })}
+      >
         {n.contactos.length ? (
           <div className="flex flex-col gap-2">
             {n.contactos.map((c) => (
