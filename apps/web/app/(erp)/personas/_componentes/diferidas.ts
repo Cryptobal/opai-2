@@ -9,9 +9,6 @@ export const HojaPersona = hojaDiferida(["editar", "nueva"], () =>
 export const HojaVincularUsuario = hojaDiferida(["vincular"], () =>
   import("./hoja-vincular").then((m) => m.HojaVincularUsuario),
 );
-export const HojaExcepcion = hojaDiferida(["excepcion"], () =>
-  import("./hoja-excepcion").then((m) => m.HojaExcepcion),
-);
 export const HojaVinculo = hojaDiferida(["vinculo"], () =>
   import("./hoja-vinculo").then((m) => m.HojaVinculo),
 );
