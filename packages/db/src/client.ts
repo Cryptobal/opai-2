@@ -44,11 +44,16 @@ function crearCliente(variable: "DATABASE_URL" | "DATABASE_URL_MIGRATE"): Prisma
   // La garantía es opai_app sin BYPASSRLS con tenant_isolation. Para mantenimiento,
   // confirmar BYPASSRLS: row_security=off no salta RLS, falla si filtraría filas.
   // Un pool por instancia serverless (este cliente se guarda en globalThis); en Vercel se avisa si
-  // falta -pooler. El adaptador lo cierra en `$disconnect` (`disposeExternalPool`).
-  const pool = crearPool({
-    ...configPool(process.env, url, variable === "DATABASE_URL"),
-    ...(variable === "DATABASE_URL_MIGRATE" ? { options: "-c row_security=off" } : {}),
-  });
+  // falta -pooler. El adaptador lo cierra en `$disconnect` (`disposeExternalPool`). Better Auth usa
+  // este mismo cliente (`clienteAuth()`), así que comparte el pool, su configuración y su reintento.
+  const app = variable === "DATABASE_URL";
+  const pool = crearPool(
+    {
+      ...configPool(process.env, url, app),
+      ...(app ? {} : { options: "-c row_security=off" }),
+    },
+    app,
+  );
   return new PrismaClient({ adapter: new PrismaPg(pool, { disposeExternalPool: true }) });
 }
 
