@@ -68,4 +68,8 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: fijar el alcance de un supervisor gobierna su acceso; un agente no lo hace (ADR-034).",
   "core.supervisores.quitar":
     "Solo personas: quitar instalaciones del alcance de un supervisor gobierna su acceso (ADR-034).",
+  "core.anexos.aprobar":
+    "Solo personas: aprobar el anexo de contrato materializa un documento irreversible, un acto humano responsable (Brief 07b PR 4, ADR-032).",
+  "core.anexos.rechazar":
+    "Solo personas: rechazar el anexo de contrato es una decisión humana responsable (Brief 07b PR 4, ADR-032).",
 };

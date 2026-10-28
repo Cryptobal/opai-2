@@ -1,5 +1,6 @@
 import type { Capacidad } from "../types";
 import { invitationsAccept, invitationsPeek, invitationsRequestNew } from "./aceptar";
+import { capacidadesAnexos, consumidorAnexos } from "./anexos";
 import { apikeysCreate, apikeysList, apikeysRevoke } from "./apikeys";
 import { auditList, modulesList, usageSummary } from "./consultas";
 import { modulesSolicitar } from "./modulos-solicitar";
@@ -96,6 +97,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   iaProbar,
   platformIntegracionesEstado,
   ...capacidadesMaestros,
+  ...capacidadesAnexos,
   ...capacidadesPanel,
   ...capacidadesPermisos,
   ...capacidadesDocumentos,
@@ -108,7 +110,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
 ];
 
 /** Consumidores de eventos del núcleo que registra el borde. */
-export const consumidoresDelNucleo = [consumidorComunicaciones];
+export const consumidoresDelNucleo = [consumidorComunicaciones, consumidorAnexos];
 
 /** Trabajos del núcleo que registra el borde (`apps/web/lib/registro.ts`). */
 export const trabajosDelNucleo = [

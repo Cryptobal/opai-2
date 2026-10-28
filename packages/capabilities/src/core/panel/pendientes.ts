@@ -9,7 +9,7 @@ import { filtroDocumentoSensible } from "../documentos/sensibles";
 import { dia, hoy } from "../maestros/comun";
 
 const pendienteSchema = z.object({
-  tipo: z.enum(["aprobaciones", "documentos", "invitaciones", "integraciones"]),
+  tipo: z.enum(["aprobaciones", "documentos", "invitaciones", "integraciones", "anexos"]),
   titulo: z.string(),
   detalle: z.string(),
   tono: z.enum(["warning", "danger", "neutro"]),
@@ -105,6 +105,18 @@ export const inicioPendientes = defineCapability({
             accion: "Reenviar",
           });
         }
+      }
+      if (ctx.autorizar(PERMISOS_CORE.anexosManage)) {
+        const n = await ctx.db.anexoContrato.count({ where: { estado: "borrador" } });
+        if (n)
+          items.push({
+            tipo: "anexos",
+            titulo: `${plural(n, "anexo de contrato", "anexos de contrato")} en borrador`,
+            detalle: "Revisa el cambio y apruébalo o recházalo con motivo",
+            tono: "warning",
+            href: "/personas",
+            accion: "Revisar",
+          });
       }
       if (ctx.autorizar(PERMISOS_CORE.integracionesManage)) {
         const conError = await ctx.db.integracion.findMany({

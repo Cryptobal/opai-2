@@ -1,0 +1,207 @@
+// Anexo de contrato (Brief 07b, PR 4) contra Postgres real: aislamiento por tenant, permisos
+// (D8/D13), gobierno de agentes (soloPersonas) y el documento final con SHA-256 y bitácora.
+import { randomUUID } from "node:crypto";
+import { afterAll, beforeAll, describe, expect, it } from "vitest";
+
+import { type Entorno, prepararEntorno, urlPropietario } from "../../db/test/entorno";
+
+import type * as ModuloCapacidades from "../src";
+import { almacenamientoEnMemoria } from "../src/testing/almacenamiento-memoria";
+import { destinoVinculo } from "./vinculo-fixture";
+
+describe.skipIf(!urlPropietario)("anexo de contrato en base real", () => {
+  let e: Entorno;
+  let mod: typeof ModuloCapacidades;
+  let tenantId = "";
+  let otroTenantId = "";
+  let userId = "";
+  let personaId = "";
+  let vinculoId = "";
+  let instalacionId = "";
+  const almacen = almacenamientoEnMemoria();
+
+  beforeAll(async () => {
+    e = await prepararEntorno();
+    mod = await import("../src");
+    mod.limpiarRegistro();
+    mod.registrarCapacidades(mod.capacidadesDelNucleo);
+    mod.limpiarConsumidores();
+    mod.registrarConsumidores(mod.consumidoresDelNucleo);
+    const s = randomUUID().slice(0, 8);
+    const tenant = (slug: string) =>
+      e.admin.tenant.create({ data: { slug, nombre: slug, vertical: "seguridad" } });
+    tenantId = (await tenant(`anx-a-${s}`)).id;
+    otroTenantId = (await tenant(`anx-b-${s}`)).id;
+    userId = (
+      await e.admin.user.create({
+        data: { name: "Rosa", email: `rosa-${s}@prueba.cl`, emailVerified: true },
+      })
+    ).id;
+    await e.admin.membership.create({ data: { tenantId, userId, rol: "owner", portales: ["erp"] } });
+  });
+
+  afterAll(async () => {
+    await e?.cerrar();
+  });
+
+  const usuario = () => ({ id: userId, nombre: "Rosa", email: "rosa@prueba.cl", platformRole: null });
+
+  const ctx = (o: { rol?: string; actor?: Record<string, unknown> } = {}) =>
+    mod.crearContexto({
+      tenantId,
+      actor: (o.actor as never) ?? { tipo: "user", id: userId },
+      usuario: usuario(),
+      rol: (o.rol as never) ?? "owner",
+      portal: "erp",
+      portalesMembresia: ["erp"],
+      medidor: { registrar: async () => undefined },
+      servicios: { almacenamiento: almacen.almacenamiento },
+    });
+
+  const ctxOtro = () =>
+    mod.crearContexto({
+      tenantId: otroTenantId,
+      actor: { tipo: "user", id: userId },
+      usuario: usuario(),
+      rol: "owner",
+      portal: "erp",
+      portalesMembresia: ["erp"],
+      medidor: { registrar: async () => undefined },
+    });
+
+  async function dato<T>(c: ModuloCapacidades.Contexto, id: string, input: unknown): Promise<T> {
+    const r = await mod.executeCapability(c, id, input);
+    if (!r.ok) throw new Error(`${id}: ${JSON.stringify(r.error)}`);
+    return r.data as T;
+  }
+
+  beforeAll(async () => {
+    const cargo = await dato<{ id: string }>(ctx(), "core.cargos.create", { nombre: "Guardia" });
+    const destino = await destinoVinculo(ctx());
+    instalacionId = destino.instalacionId;
+    const persona = await dato<{ id: string }>(ctx(), "core.personas.create", {
+      nombres: "Elena",
+      apellidos: "Ríos",
+      rut: "17.123.456-5",
+      vinculo: { ...destino, cargoId: cargo.id, tipo: "indefinido", inicio: "2026-01-05" },
+    });
+    personaId = persona.id;
+    const v = await e.admin.vinculoLaboral.findFirstOrThrow({ where: { personaId, estado: "vigente" } });
+    vinculoId = v.id;
+  });
+
+  it("gerente no lee ni genera anexos (D8, bloqueo financiero)", async () => {
+    const gerente = ctx({ rol: "gerente" });
+    expect((await mod.executeCapability(gerente, "core.anexos.list", {})).ok).toBe(false);
+    const r = await mod.executeCapability(gerente, "core.anexos.generar", {
+      personaId,
+      motivoCambio: "monto",
+      snapshotDespues: { nota: "prueba" },
+    });
+    expect(r.ok).toBe(false);
+    expect(!r.ok && r.error.code).toBe("FORBIDDEN");
+  });
+
+  it("un agente no aprueba ni rechaza (soloPersonas, ADR-032)", async () => {
+    const agente = ctx({ actor: { tipo: "agent", id: "agente-1", viaUserId: userId } });
+    const a = await dato<{ id: string }>(ctx(), "core.anexos.generar", {
+      personaId,
+      motivoCambio: "monto",
+      snapshotDespues: { nota: "para el agente" },
+    });
+    const ap = await mod.executeCapability(agente, "core.anexos.aprobar", { id: a.id });
+    expect(!ap.ok && ap.error.code).toBe("FORBIDDEN");
+    const re = await mod.executeCapability(agente, "core.anexos.rechazar", {
+      id: a.id,
+      motivo: "No corresponde",
+    });
+    expect(!re.ok && re.error.code).toBe("FORBIDDEN");
+  });
+
+  it("otro tenant no ve ni aprueba el anexo ajeno (RLS)", async () => {
+    const a = await dato<{ id: string }>(ctx(), "core.anexos.generar", {
+      personaId,
+      motivoCambio: "capa",
+      snapshotDespues: { nota: "tenant A" },
+    });
+    const otro = ctxOtro();
+    const get = await mod.executeCapability(otro, "core.anexos.get", { id: a.id });
+    expect(!get.ok && get.error.code).toBe("NOT_FOUND");
+    const lista = await dato<unknown[]>(otro, "core.anexos.list", {});
+    expect(lista).toEqual([]);
+    const aprobar = await mod.executeCapability(otro, "core.anexos.aprobar", { id: a.id });
+    expect(!aprobar.ok && aprobar.error.code).toBe("NOT_FOUND");
+  });
+
+  it("aprueba y materializa el documento final con SHA-256 y bitácora (R15)", async () => {
+    const a = await dato<{ id: string }>(ctx(), "core.anexos.generar", {
+      personaId,
+      motivoCambio: "instalacion",
+      snapshotDespues: { instalacionId },
+    });
+    const preview = await mod.executeCapability(ctx(), "core.anexos.aprobar", { id: a.id }, { dryRun: true });
+    expect(preview.ok && preview.data).toMatchObject({ estado: "aprobado" });
+    expect(await e.admin.documento.count({ where: { tenantId } })).toBe(0); // dryRun no persiste.
+    const aprobado = await dato<{ estado: string; documentoId: string }>(
+      ctx(),
+      "core.anexos.aprobar",
+      { id: a.id },
+    );
+    expect(aprobado.estado).toBe("aprobado");
+    const doc = await e.admin.documento.findUniqueOrThrow({ where: { id: aprobado.documentoId as string } });
+    expect(doc.estado).toBe("disponible");
+    expect(doc.sha256).toMatch(/^[0-9a-f]{64}$/);
+    expect(doc.bitacoraSeq).toBeGreaterThan(0);
+    expect(await dato(ctx(), "core.bitacora.verificar", {})).toMatchObject({ ok: true });
+    const otraVez = await mod.executeCapability(ctx(), "core.anexos.aprobar", { id: a.id });
+    expect(!otraVez.ok && otraVez.error.code).toBe("CONFLICT");
+  });
+
+  it("rechaza con motivo obligatorio (D14) y no genera documento", async () => {
+    const a = await dato<{ id: string }>(ctx(), "core.anexos.generar", {
+      personaId,
+      motivoCambio: "rol",
+      snapshotDespues: { nota: "rechazo" },
+    });
+    expect((await mod.executeCapability(ctx(), "core.anexos.rechazar", { id: a.id, motivo: "" })).ok).toBe(
+      false,
+    );
+    const rechazado = await dato<{ estado: string; motivoRechazo: string | null }>(
+      ctx(),
+      "core.anexos.rechazar",
+      { id: a.id, motivo: "No corresponde todavía" },
+    );
+    expect(rechazado.estado).toBe("rechazado");
+    expect(rechazado.motivoRechazo).toBe("No corresponde todavía");
+    expect((await mod.executeCapability(ctx(), "core.anexos.aprobar", { id: a.id })).ok).toBe(false);
+  });
+
+  it("el cambio de capa de una persona dispara el borrador solo (ADR-029); la jornada sola no", async () => {
+    await dato(ctx(), "core.estructuras.create", {
+      nivel: "persona",
+      personaId,
+      sueldoBase: 900_000,
+      colacion: 0,
+      movilizacion: 0,
+      gratificacion: "ninguna",
+      motivo: "Excepción acordada",
+      vigenteDesde: "2026-03-01",
+    });
+    await mod.despacharPendientes(ctx());
+    const pendientes = await dato<{ motivoCambio: string; estado: string }[]>(ctx(), "core.anexos.list", {
+      personaId,
+      estado: "borrador",
+    });
+    expect(pendientes.some((p) => p.motivoCambio === "capa" || p.motivoCambio === "monto")).toBe(true);
+
+    const antes = pendientes.length;
+    await dato(ctx(), "core.vinculos.update", {
+      id: vinculoId,
+      horasSemanales: 30,
+      distribucion: "Lunes a sábado",
+    });
+    await mod.despacharPendientes(ctx());
+    const despues = await dato<unknown[]>(ctx(), "core.anexos.list", { personaId, estado: "borrador" });
+    expect(despues.length).toBe(antes); // Jornada sola: R11 no la incluye, sin anexo nuevo.
+  });
+});
