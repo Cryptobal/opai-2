@@ -3,6 +3,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import { configPool } from "./config-pool";
 import { PrismaClient } from "./generated/prisma/client";
 import { notificarConsulta } from "./metricas";
+import { crearPool } from "./pool";
 
 /**
  * Cliente de la app con el contador de consultas por request (ADR-045): cada operación de modelo
@@ -42,13 +43,13 @@ function crearCliente(variable: "DATABASE_URL" | "DATABASE_URL_MIGRATE"): Prisma
   // FORCE es defensa en profundidad para dueños sin BYPASSRLS (local/CI u otro dueño).
   // La garantía es opai_app sin BYPASSRLS con tenant_isolation. Para mantenimiento,
   // confirmar BYPASSRLS: row_security=off no salta RLS, falla si filtraría filas.
-  const adapter = new PrismaPg({
-    connectionString: url,
-    // Cada instancia serverless tiene su propio pool; en Vercel se avisa si falta -pooler.
+  // Un pool por instancia serverless (este cliente se guarda en globalThis); en Vercel se avisa si
+  // falta -pooler. El adaptador lo cierra en `$disconnect` (`disposeExternalPool`).
+  const pool = crearPool({
     ...configPool(process.env, url, variable === "DATABASE_URL"),
     ...(variable === "DATABASE_URL_MIGRATE" ? { options: "-c row_security=off" } : {}),
   });
-  return new PrismaClient({ adapter });
+  return new PrismaClient({ adapter: new PrismaPg(pool, { disposeExternalPool: true }) });
 }
 
 /**

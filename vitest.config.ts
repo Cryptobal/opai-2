@@ -21,6 +21,8 @@ export default defineConfig({
           include: [
             "test/globales.test.ts",
             "test/metricas.test.ts",
+            "test/config-pool.test.ts",
+            "test/pool.test.ts",
             "test/importar-opai1/**/*.test.ts",
           ],
         },
