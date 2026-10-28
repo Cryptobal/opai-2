@@ -76,7 +76,7 @@ describe("seguimiento del shell", () => {
   });
 
   it("Supervisor: la ficha de persona mantiene «Hoy» activa, no «Instalaciones» (H6)", () => {
-    const [hoy, instalaciones] = navegacionPortal("/supervisor", "supervisor");
+    const [hoy, instalaciones] = navegacionPortal("/supervisor", "supervisor", () => true);
     if (!hoy || !instalaciones) throw new Error("Falta navegación");
     expect(esActivo("/supervisor/personas/abc", hoy.href, hoy.exacta, hoy.activoEn)).toBe(true);
     expect(esActivo("/supervisor/instalaciones", hoy.href, hoy.exacta, hoy.activoEn)).toBe(false);
@@ -140,7 +140,7 @@ describe("seguimiento del shell", () => {
     conRol.acceso = {
       permisosRol: ["core:estructuras.read", "core:personas.read"],
       excepciones: [],
-      instalaciones: null,
+      instalaciones: ["instalacion-limitada"],
     };
     expect(href(conRol)).toContain("/cargos");
     expect(href(conRol)).toContain("/personas");
@@ -151,9 +151,47 @@ describe("seguimiento del shell", () => {
     conExcepcion.acceso = {
       permisosRol: null,
       excepciones: [{ permiso: "core:personas.read", conceder: false }],
-      instalaciones: null,
+      instalaciones: ["instalacion-limitada"],
     };
     expect(href(conExcepcion)).not.toContain("/personas");
+    conExcepcion.acceso = {
+      permisosRol: [],
+      excepciones: [{ permiso: "core:personas.read", conceder: true }],
+      instalaciones: null,
+    };
+    expect(href(conExcepcion)).toContain("/personas");
+  });
+
+  it("Supervisor filtra cada entrada por su permiso efectivo", () => {
+    const i = identidad();
+    i.actual = membresia({ rol: "supervisor", portales: ["supervisor"] });
+    i.acceso = {
+      permisosRol: ["core:documentos.read", "core:personas.read"],
+      excepciones: [],
+      instalaciones: null,
+    };
+    expect(datosShell(i, "supervisor").nav.map((x) => x.href)).toEqual(["/supervisor"]);
+    i.acceso.excepciones = [
+      { permiso: "core:documentos.read", conceder: false },
+      { permiso: "core:instalaciones.read", conceder: true },
+    ];
+    expect(datosShell(i, "supervisor").nav.map((x) => x.href)).toEqual([
+      "/supervisor/instalaciones",
+    ]);
+    i.acceso = { permisosRol: ["core:documentos.read"], excepciones: [], instalaciones: null };
+    expect(datosShell(i, "supervisor").nav).toEqual([]);
+    i.acceso = { permisosRol: ["core:personas.read"], excepciones: [], instalaciones: null };
+    expect(datosShell(i, "supervisor").nav).toEqual([]);
+  });
+
+  it("permisos de plataforma dependen del rol global, no del rol del tenant", () => {
+    const i = identidad();
+    i.actual = membresia({ rol: "owner" });
+    expect(datosShell(i, "platform").nav).toEqual([]);
+    for (const platformRole of ["owner", "support"] as const) {
+      i.usuario.platformRole = platformRole;
+      expect(datosShell(i, "platform").nav).toEqual(NAV_PLATAFORMA);
+    }
   });
 
   it.each([undefined, "", "   "])("test:db falla sin URL (%j)", (url) => {

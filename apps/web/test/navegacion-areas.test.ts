@@ -131,6 +131,15 @@ describe("armarNavegacion", () => {
     expect(grupos.map((g) => g.area)).toEqual(["inicio"]);
   });
 
+  it("exige el permiso declarado de la entrada, no otro permiso del mismo módulo", () => {
+    const puestos = { ...PUESTOS, permiso: "ops:puestos.read" };
+    const grupos = armarNavegacion([puestos], {
+      puede: (permiso) => permiso === "ops:turnos.read",
+      modulosActivos: ["ops"],
+    });
+    expect(grupos).toEqual([]);
+  });
+
   it("viewer: sin Nómina (D10, ya es regla de ADR-016)", () => {
     const puedeViewer = (p: string) => p.endsWith(".read") && p !== "nomina:read";
     const grupos = armarNavegacion([INICIO, PERSONAS, NOMINA], {

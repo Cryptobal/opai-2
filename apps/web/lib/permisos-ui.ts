@@ -1,4 +1,4 @@
-import { type Acceso, esRol, tienePermisoEfectivo } from "@opai/domain";
+import { type Acceso, esRol, tienePermisoEfectivo, tienePermisoPlataforma } from "@opai/domain";
 
 import type { Identidad } from "./actor";
 import type { AccesoFila } from "./fuentes";
@@ -10,7 +10,10 @@ import type { AccesoFila } from "./fuentes";
  * secciones denegadas (hallazgo 1.1 del QA). Replica la misma regla que el borde arma en
  * `crearContexto`: si hay `permisosRol`, el rol base cede a esa lista; si no, manda el rol base.
  */
-export function construirPuede(rol: string | null, acceso: AccesoFila): (permiso: string) => boolean {
+export function construirPuede(
+  rol: string | null,
+  acceso: AccesoFila,
+): (permiso: string) => boolean {
   const rolBase = rol && esRol(rol) ? rol : null;
   const efectivo: Acceso = {
     rol: acceso.permisosRol != null ? null : rolBase,
@@ -22,5 +25,9 @@ export function construirPuede(rol: string | null, acceso: AccesoFila): (permiso
 
 /** `construirPuede` a partir de la identidad del request (tenant actual). */
 export function puedeDeIdentidad(identidad: Identidad): (permiso: string) => boolean {
-  return construirPuede(identidad.actual?.rol ?? null, identidad.acceso);
+  const puede = construirPuede(identidad.actual?.rol ?? null, identidad.acceso);
+  return (permiso) =>
+    permiso.startsWith("platform:")
+      ? tienePermisoPlataforma(identidad.usuario.platformRole, permiso)
+      : puede(permiso);
 }
