@@ -1,11 +1,12 @@
 // Implementaciones reales (base de datos) de los servicios del núcleo para el Contexto.
 import {
   agregarAAuditoria,
+  registrarConsumoSesion,
   agregarABitacora,
   consumirPresupuesto,
   enTransaccion,
   forTenant,
-  globales,
+  preciosHasta,
   type Prisma,
   verificarAuditoria,
   verificarBitacora,
@@ -48,10 +49,7 @@ let precios: { hasta: number; mapa: Map<string, number> } | null = null;
 
 async function precioDe(recurso: string): Promise<number> {
   if (!precios || precios.hasta < Date.now()) {
-    const filas = await globales().precioRecurso.findMany({
-      where: { vigenteDesde: { lte: new Date() } },
-      orderBy: { vigenteDesde: "asc" },
-    });
+    const filas = (await preciosHasta(new Date())).reverse();
     // Ordenado por vigencia: el último de cada recurso es el vigente.
     precios = {
       hasta: Date.now() + 600_000,
@@ -63,6 +61,8 @@ async function precioDe(recurso: string): Promise<number> {
 
 /** Medidor en `core.consumos` (ADR-031). El borde lo envuelve para no retrasar respuestas. */
 async function registrarConsumo({ sinCosto, yaIncurrido, ...c }: ConsumoNuevo) {
+  if (c.actorTipo === "user" && !c.apiKeyId && c.recurso === "capacidad.ejecucion")
+    return registrarConsumoSesion(c, sinCosto);
   const unitario = sinCosto ? 0 : await precioDe(c.recurso);
   const costoTotal = unitario * c.cantidad;
   const interno =

@@ -22,7 +22,7 @@ export default function Instalaciones({ searchParams }: { searchParams: SearchPa
       cargar={async () => {
         const p = await leerParametros(searchParams);
         const [l, voc] = await Promise.all([cargarInstalaciones(p), vocabularioActual()]);
-        return { ...l, voc, q: p.q };
+        return { ...l, voc, p };
       }}
       opciones={(d) => ({ titulo: d.voc.titulo("instalacion") })}
     >
@@ -39,7 +39,7 @@ export default function Instalaciones({ searchParams }: { searchParams: SearchPa
               cuentas={d.cuentas}
               titulo={d.voc.titulo("instalacion")}
               singular={d.voc.instalacion.singular}
-              q={d.q}
+              parametros={d.p}
             />
           }
         />

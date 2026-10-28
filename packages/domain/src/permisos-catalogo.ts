@@ -15,6 +15,14 @@ export const PERMISOS_CORE = {
   cuentasManage: "core:cuentas.manage",
   instalacionesRead: "core:instalaciones.read",
   instalacionesManage: "core:instalaciones.manage",
+  // Puestos (Brief 11): catálogos de patrones de turno y funciones, con lectura, edición y
+  // desactivación separadas (permisos finos del #47). viewer lee por el comodín `*:*.read`.
+  patronesRead: "core:patrones.read",
+  patronesManage: "core:patrones.manage",
+  patronesDesactivar: "core:patrones.desactivar",
+  funcionesRead: "core:funciones.read",
+  funcionesManage: "core:funciones.manage",
+  funcionesDesactivar: "core:funciones.desactivar",
   personasRead: "core:personas.read",
   personasManage: "core:personas.manage",
   estructurasRead: "core:estructuras.read",

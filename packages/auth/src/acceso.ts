@@ -1,4 +1,4 @@
-import { forTenant, forUser, globales } from "@opai/db";
+import { forTenant, forUser, usuarioPorId } from "@opai/db";
 
 /** Por qué no puede entrar: tenant suspendido o acceso suspendido (con a quién pedirlo). */
 export type Bloqueo = { tenant: string; administrador: string | null; tenantSuspendido: boolean };
@@ -18,7 +18,7 @@ async function administradorDe(tenantId: string): Promise<string | null> {
  * membresías entra (recién creado, antes de aceptar una invitación).
  */
 export async function bloqueoDeIngreso(userId: string): Promise<Bloqueo | null> {
-  const usuario = await globales().user.findUnique({ where: { id: userId } });
+  const usuario = await usuarioPorId(userId);
   if (!usuario) return { tenant: "OPAI", administrador: null, tenantSuspendido: false };
   if (usuario.platformRole) return null;
   const membresias = await forUser(userId).membership.findMany({ include: { tenant: true } });

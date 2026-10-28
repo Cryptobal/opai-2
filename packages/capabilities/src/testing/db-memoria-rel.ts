@@ -24,8 +24,18 @@ export const RELACIONES: Record<string, Record<string, Rel>> = {
     puestos: { tabla: "puesto", clave: "cargoId", muchos: true },
     estructuras: { tabla: "estructuraSueldo", clave: "cargoId", muchos: true },
   },
-  instalacion: { cuenta: { tabla: "cuenta", clave: "cuentaId" } },
+  instalacion: {
+    cuenta: { tabla: "cuenta", clave: "cuentaId" },
+    puestos: { tabla: "puesto", clave: "instalacionId", muchos: true },
+  },
+  estructuraSueldo: { items: { tabla: "estructuraItem", clave: "estructuraId", muchos: true } },
   documentoVinculo: { documento: { tabla: "documento", clave: "documentoId" } },
+  puesto: {
+    instalacion: { tabla: "instalacion", clave: "instalacionId" },
+    cargo: { tabla: "cargo", clave: "cargoId" },
+    patron: { tabla: "patronTurno", clave: "patronId" },
+    funcion: { tabla: "funcionPuesto", clave: "funcionId" },
+  },
   documento: { vinculos: { tabla: "documentoVinculo", clave: "documentoId", muchos: true } },
 };
 

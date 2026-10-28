@@ -1,6 +1,7 @@
 import {
   Blocks,
   Building2,
+  CalendarClock,
   FileText,
   Gauge,
   History,
@@ -24,7 +25,7 @@ export type Seccion = {
   descripcion: string;
   corta: string;
   icono: LucideIcon;
-  grupo: "Empresa" | "Acceso" | "Plataforma" | "Módulos activos";
+  grupo: "Empresa" | "Operaciones" | "Acceso" | "Plataforma" | "Módulos activos";
   /** Permiso para ver la sección (sin permiso no aparece en el índice). */
   permiso: string | null;
 };
@@ -62,6 +63,15 @@ export const SECCIONES: readonly Seccion[] = [
     icono: UserRound,
     grupo: "Empresa",
     permiso: null,
+  }),
+  s({
+    id: "operaciones",
+    titulo: "Patrones y funciones",
+    descripcion: "Patrones de turno y funciones de los puestos",
+    corta: "Patrones de turno y funciones",
+    icono: CalendarClock,
+    grupo: "Operaciones",
+    permiso: PERMISOS_CORE.patronesRead,
   }),
   s({
     id: "usuarios",

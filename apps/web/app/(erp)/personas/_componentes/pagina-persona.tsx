@@ -1,3 +1,5 @@
+import type { PanelSueldo } from "@opai/capabilities";
+import { cargarPanelSueldo } from "@/lib/panel-sueldo";
 import { Pencil } from "lucide-react";
 import { type ReactNode, Suspense } from "react";
 
@@ -22,7 +24,11 @@ type Props = {
   tab: TabPersona;
   /** Acción principal de la pestaña; por defecto, "Editar". Puede depender de los parámetros de la lista. */
   acciones?: ReactNode | ((p: Parametros) => ReactNode);
-  children: (persona: PersonaDetalle, p: Parametros) => ReactNode | Promise<ReactNode>;
+  children: (
+    persona: PersonaDetalle,
+    p: Parametros,
+    panel?: PanelSueldo,
+  ) => ReactNode | Promise<ReactNode>;
 };
 
 /** Toda pestaña de una persona (11-18): la lista a la izquierda y la ficha a la derecha; en teléfono, el detalle con "Atrás". */
@@ -54,9 +60,29 @@ export function PaginaPersona({ params, searchParams, tab, acciones, children }:
       cargar={async () => {
         const [{ id }, p] = await Promise.all([params, leerParametros(searchParams)]);
         // Solo la lista se espera aquí: la ficha arranca en paralelo y se espera dentro de su propio Suspense.
-        const datos = cargarPersona(id);
+        const panel = tab === "sueldo" ? await cargarPanelSueldo("persona", id, p) : undefined;
+        const datos = panel
+          ? Promise.resolve({ state: "ready" as const, persona: panel.persona })
+          : cargarPersona(id);
         datos.catch(() => undefined); // si la lista falla, la promesa no queda sin manejar
-        return { id, p, datos, lista: await cargarPersonas(p) };
+        return {
+          id,
+          p,
+          datos,
+          panel,
+          lista: panel
+            ? {
+                state: "ready" as const,
+                items: panel.personas.items,
+                siguiente: panel.personas.siguiente,
+                total: panel.personas.total,
+                cargos: (panel.personas.cargos ?? []).map((c) => ({
+                  valor: c.id,
+                  etiqueta: c.nombre,
+                })),
+              }
+            : await cargarPersonas(p),
+        };
       }}
     >
       {(d) => (
@@ -79,8 +105,8 @@ export function PaginaPersona({ params, searchParams, tab, acciones, children }:
             }
             detalle={
               <Suspense fallback={<Loading variante="detalle" />}>
-                <DetallePersona datos={d.datos} p={d.p} tab={tab}>
-                  {children}
+                <DetallePersona panel={d.panel} datos={d.datos} p={d.p} tab={tab}>
+                  {(p, q) => children(p, q, d.panel)}
                 </DetallePersona>
               </Suspense>
             }

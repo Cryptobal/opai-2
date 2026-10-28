@@ -72,3 +72,5 @@ export {
 } from "./integraciones/ia-modelos";
 export { credencialDe } from "./integraciones/resolver";
 export { MANUALES } from "./manuales";
+
+export type { PanelSueldo } from "./core/maestros/estructuras-panel-schema";
