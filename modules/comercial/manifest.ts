@@ -33,6 +33,7 @@ export const manifest = defineModule({
       etiqueta: "Negocios",
       icono: "Briefcase",
       orden: 2,
+      permiso: "comercial:negocios.read",
     },
     {
       portal: "erp",
@@ -41,6 +42,7 @@ export const manifest = defineModule({
       etiqueta: "Contactos",
       icono: "Users",
       orden: 1.5,
+      permiso: "comercial:negocios.read",
     },
   ],
   // Ajustes del módulo (ADR-008). El embudo y los catálogos se editan con sus capacidades

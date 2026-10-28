@@ -4,6 +4,7 @@ import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../define";
 import { prohibido } from "../errores";
+import { dondeContacto } from "../core/maestros/alcance";
 import { cursorDe, listaSchema, pagina } from "../core/maestros/comun";
 import type { Contexto } from "../types";
 import { PERMISO_READ } from "./comun";
@@ -64,6 +65,9 @@ export const contactosList = defineCapability({
     const q = input.q;
     const filas = await ctx.db.contacto.findMany({
       where: {
+        // Alcance de filas (ADR-022): un actor acotado (supervisor) ve solo los contactos de las
+        // cuentas de sus instalaciones, igual que core.contactos.list.
+        AND: [dondeContacto(ctx)],
         ...(input.incluirArchivadas ? {} : { archivadoEn: null }),
         ...(input.soloPrincipales ? { esPrincipal: true } : {}),
         ...(q

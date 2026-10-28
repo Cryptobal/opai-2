@@ -217,6 +217,19 @@ describe("entradasAreaPrincipal", () => {
     ]);
   });
 
+  it("un área con una sola entrada se completa con el respaldo (§3, fila Comercial)", () => {
+    const NEGOCIOS: EntradaArea = { ...CUENTAS, href: "/negocios", area: "comercial", orden: 2 };
+    const g = armarNavegacion([INICIO, CUENTAS, PERSONAS, NEGOCIOS], {
+      puede: todas,
+      modulosActivos: [],
+    });
+    expect(entradasAreaPrincipal(g, "comercial").map((e) => e.href)).toEqual([
+      "/negocios",
+      "/cuentas",
+      "/personas",
+    ]);
+  });
+
   it("recorta a tres entradas como máximo", () => {
     const CONTACTOS: EntradaArea = { ...INSTALACIONES, href: "/contactos", orden: 3 };
     const PUESTOS2: EntradaArea = { ...INSTALACIONES, href: "/x", area: "clientes", orden: 4 };
