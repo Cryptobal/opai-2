@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <meta name="design_doc_mode" content="canvas">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+  <script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+  <style>body{margin:0;background:var(--ds-bg)} a{color:var(--ds-accent)} a:hover{color:var(--ds-accent)}</style>
+</helmet>
+<div class="ds" data-theme="light" style="padding:48px;display:flex;flex-direction:column;gap:32px;min-width:max-content;min-height:100vh">
+  <header style="display:flex;flex-direction:column;gap:8px;max-width:880px">
+    <span class="t-overline">OPAI 2.0 · Brief 05 · Navegación por áreas</span>
+    <h1 class="t-title m0">05 · Comparación por rol · escenario C</h1>
+    <p class="t-body muted m0" style="text-wrap:pretty">Las cuatro barras con todos los grupos abiertos para comparar. Lo que el rol no puede leer no aparece; la lectura se nota dentro de cada pantalla, no en el menú.</p>
+    
+  </header>
+  <div style="display:flex;flex-wrap:wrap;gap:48px;align-items:flex-start">
+<figure style="margin:0;display:flex;flex-direction:column;gap:12px;flex:none">
+  <figcaption style="display:flex;flex-direction:column;gap:4px;width:248px"><span class="t-label">gerente</span><span class="t-caption" style="text-wrap:pretty">Sin Finanzas y sin Nómina.</span></figcaption>
+  <div style="border:1px solid var(--ds-border-strong);border-radius:var(--radius-lg);overflow:hidden;width:250px;height:1082px;flex:none">
+    <dc-import name="Shell" device="desktop" sidebar-only="true" height="1080" scenario="C" role="gerente" active="negocios" pins="none" open="all" hint-size="248px,1080px"></dc-import>
+  </div>
+</figure><figure style="margin:0;display:flex;flex-direction:column;gap:12px;flex:none">
+  <figcaption style="display:flex;flex-direction:column;gap:4px;width:248px"><span class="t-label">supervisor</span><span class="t-caption" style="text-wrap:pretty">Sin Comercial, sin Finanzas, sin Nómina. Clientes en lectura (dentro de la pantalla).</span></figcaption>
+  <div style="border:1px solid var(--ds-border-strong);border-radius:var(--radius-lg);overflow:hidden;width:250px;height:1082px;flex:none">
+    <dc-import name="Shell" device="desktop" sidebar-only="true" height="1080" scenario="C" role="supervisor" active="pauta" pins="none" open="all" hint-size="248px,1080px"></dc-import>
+  </div>
+</figure><figure style="margin:0;display:flex;flex-direction:column;gap:12px;flex:none">
+  <figcaption style="display:flex;flex-direction:column;gap:4px;width:248px"><span class="t-label">viewer</span><span class="t-caption" style="text-wrap:pretty">Sin Finanzas.</span></figcaption>
+  <div style="border:1px solid var(--ds-border-strong);border-radius:var(--radius-lg);overflow:hidden;width:250px;height:1082px;flex:none">
+    <dc-import name="Shell" device="desktop" sidebar-only="true" height="1080" scenario="C" role="viewer" active="cuentas" pins="none" open="all" hint-size="248px,1080px"></dc-import>
+  </div>
+</figure><figure style="margin:0;display:flex;flex-direction:column;gap:12px;flex:none">
+  <figcaption style="display:flex;flex-direction:column;gap:4px;width:248px"><span class="t-label">admin</span><span class="t-caption" style="text-wrap:pretty">Todo el mapa.</span></figcaption>
+  <div style="border:1px solid var(--ds-border-strong);border-radius:var(--radius-lg);overflow:hidden;width:250px;height:1082px;flex:none">
+    <dc-import name="Shell" device="desktop" sidebar-only="true" height="1080" scenario="C" role="admin" active="negocios" pins="none" open="all" hint-size="248px,1080px"></dc-import>
+  </div>
+</figure>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {}
+</script>
+</body>
+</html>

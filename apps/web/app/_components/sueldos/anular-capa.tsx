@@ -4,8 +4,8 @@ import { useState } from "react";
 import { Alerta, avisar, Button, Campo, Dialog, Textarea } from "@opai/ds";
 import { useCapacidad } from "../use-capacidad";
 
-export function AnularCapa({ id }: { id: string }) {
-  const [abierto, abrir] = useState(false);
+export function AnularCapa({ id, alCerrar }: { id: string; alCerrar: () => void }) {
+  const [abierto, abrir] = useState(true);
   const [motivo, cambiar] = useState("");
   const [preview, revisar] = useState(false);
   const { ejecutar, pendiente, error } = useCapacidad("erp");
@@ -18,18 +18,17 @@ export function AnularCapa({ id }: { id: string }) {
       abrir(false);
       revisar(false);
       cambiar("");
+      alCerrar();
     }
   }
   return (
     <>
-      <Button variant="ghost" onClick={() => abrir(true)}>
-        Anular versión
-      </Button>
       <Dialog
         abierto={abierto}
         onCerrar={() => {
           abrir(false);
           revisar(false);
+          alCerrar();
         }}
         titulo="Anular versión de sueldo"
         descripcion="No se reabre la versión anterior. Si existe otra capa vigente, podrá regir completa; nunca se mezclan conceptos."
@@ -41,6 +40,7 @@ export function AnularCapa({ id }: { id: string }) {
               onClick={() => {
                 abrir(false);
                 revisar(false);
+                alCerrar();
               }}
             >
               Cancelar

@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <meta name="design_doc_mode" content="canvas">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+  <script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+  <style>body{margin:0;background:var(--ds-bg)} a{color:var(--ds-accent)} a:hover{color:var(--ds-accent)}</style>
+</helmet>
+<div class="ds" data-theme="light" style="padding:48px;display:flex;flex-direction:column;gap:32px;min-width:max-content;min-height:100vh">
+  <header style="display:flex;flex-direction:column;gap:8px;max-width:880px">
+    <span class="t-overline">OPAI 2.0 · Brief 05 · Navegación por áreas</span>
+    <h1 class="t-title m0">07 · Fijados</h1>
+    <p class="t-body muted m0" style="text-wrap:pretty">Hasta cinco entradas o fichas, arriba de la barra lateral. No llevan contador.</p>
+    
+  </header>
+  <div style="display:flex;flex-wrap:wrap;gap:48px;align-items:flex-start">
+<figure style="margin:0;display:flex;flex-direction:column;gap:12px;flex:none">
+  <figcaption style="display:flex;flex-direction:column;gap:4px;width:248px"><span class="t-label">(a) Sin fijados</span><span class="t-caption" style="text-wrap:pretty">Una línea de ayuda discreta en vez de la sección vacía.</span></figcaption>
+  <div style="border:1px solid var(--ds-border-strong);border-radius:var(--radius-lg);overflow:hidden;width:250px;height:882px;flex:none">
+    <dc-import name="Shell" device="desktop" sidebar-only="true" height="880" role="owner" pins="hint" scenario="C" active="negocios" hint-size="248px,880px"></dc-import>
+  </div>
+</figure><figure style="margin:0;display:flex;flex-direction:column;gap:12px;flex:none">
+  <figcaption style="display:flex;flex-direction:column;gap:4px;width:248px"><span class="t-label">(b) Cinco fijados</span><span class="t-caption" style="text-wrap:pretty">Límite alcanzado.</span></figcaption>
+  <div style="border:1px solid var(--ds-border-strong);border-radius:var(--radius-lg);overflow:hidden;width:250px;height:882px;flex:none">
+    <dc-import name="Shell" device="desktop" sidebar-only="true" height="880" role="owner" pins="five" scenario="C" active="negocios" hint-size="248px,880px"></dc-import>
+  </div>
+</figure><figure style="margin:0;display:flex;flex-direction:column;gap:12px;flex:none">
+  <figcaption style="display:flex;flex-direction:column;gap:4px;width:248px"><span class="t-label">(c1) Fijar desde el menú</span><span class="t-caption" style="text-wrap:pretty">Al pasar el puntero o con foco, la entrada muestra el botón Fijar.</span></figcaption>
+  <div style="border:1px solid var(--ds-border-strong);border-radius:var(--radius-lg);overflow:hidden;width:250px;height:882px;flex:none">
+    <dc-import name="Shell" device="desktop" sidebar-only="true" height="880" role="owner" pins="four" scenario="C" active="negocios" hover="cotizaciones" hint-size="248px,880px"></dc-import>
+  </div>
+</figure><figure style="margin:0;display:flex;flex-direction:column;gap:12px;flex:none">
+  <figcaption style="display:flex;flex-direction:column;gap:4px;width:1280px"><span class="t-label">(c2) Fijar desde la ficha y ordenar</span><span class="t-caption" style="text-wrap:pretty">Botón «Fijar» en la cabecera de la ficha. En un fijado, ⋯ abre Subir, Bajar y Desfijar.</span><span style="display:flex;gap:6px;flex-wrap:wrap"><span class="proposal">Propuesta: decide Carlos</span></span></figcaption>
+  <div style="border:1px solid var(--ds-border-strong);border-radius:var(--radius-lg);overflow:hidden;width:1282px;height:882px;flex:none">
+    <dc-import name="Shell" device="desktop" scenario="C" role="owner" active="instalaciones" content="ficha" pins="four" hover="pin:1" overlay="pinmenu" hint-size="1280px,880px"></dc-import>
+  </div>
+</figure><figure style="margin:0;display:flex;flex-direction:column;gap:12px;flex:none">
+  <figcaption style="display:flex;flex-direction:column;gap:4px;width:1280px"><span class="t-label">(c3) Límite de cinco</span><span class="t-caption" style="text-wrap:pretty">Con cinco fijados, «Fijar» avisa y ofrece ver los fijados.</span><span style="display:flex;gap:6px;flex-wrap:wrap"><span class="proposal">Propuesta: decide Carlos</span></span></figcaption>
+  <div style="border:1px solid var(--ds-border-strong);border-radius:var(--radius-lg);overflow:hidden;width:1282px;height:882px;flex:none">
+    <dc-import name="Shell" device="desktop" scenario="C" role="owner" active="instalaciones" content="ficha" pins="five" overlay="pinfull" hint-size="1280px,880px"></dc-import>
+  </div>
+</figure><div style="display:flex;flex-direction:column;gap:16px;flex:none"><div class="card" style="padding:16px;width:360px;display:flex;flex-direction:column;gap:8px;align-items:flex-start"><span class="proposal">Propuesta: decide Carlos</span><span class="t-label">Cómo se fija, se desfija y se ordena</span><span class="t-body-sm muted" style="text-wrap:pretty">Fijar: botón en la entrada del menú (al pasar el puntero o con foco) o «Fijar» en la cabecera de la ficha. Desfijar: ⋯ en el fijado o el mismo botón de la ficha, que pasa a «Fijada». Ordenar: Subir y Bajar en el menú ⋯ (⌥↑ / ⌥↓) y también arrastrando. Un fijado nuevo entra al final.</span></div><div class="card" style="padding:16px;width:360px;display:flex;flex-direction:column;gap:8px;align-items:flex-start"><span class="proposal">Propuesta: decide Carlos</span><span class="t-label">Sin fijados</span><span class="t-body-sm muted" style="text-wrap:pretty">Se muestra solo el título y una línea de ayuda hasta el primer fijado. Después de desfijar todo, la sección desaparece.</span></div></div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {}
+</script>
+</body>
+</html>

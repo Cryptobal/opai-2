@@ -17,14 +17,17 @@ export function lecturasLocksMemoria(tabla: (nombre: string) => Fila[]) {
       const propias = tabla("notificacion").filter(
         (n) => n["tenantId"] === valores[0] && n["usuarioId"] === valores[1],
       );
+      const cursor = propias.find((n) => n["id"] === valores[9]);
       const items = propias
-        .filter((n) => !valores[4] || !n["leidaEn"])
+        .filter((n) => !valores[8] || !n["leidaEn"])
         .sort(
           (a, b) =>
             fecha(b["createdAt"]) - fecha(a["createdAt"]) ||
             String(b["id"]).localeCompare(String(a["id"])),
         )
-        .slice(0, Number(valores[5]))
+        .filter((n) => !valores[9] || (cursor && (fecha(n["createdAt"]) < fecha(cursor["createdAt"]) ||
+          (fecha(n["createdAt"]) === fecha(cursor["createdAt"]) && String(n["id"]) < String(cursor["id"])))))
+        .slice(0, Number(valores[13]))
         .map((n) => ({
           id: n["id"],
           titulo: n["titulo"],
@@ -33,7 +36,7 @@ export function lecturasLocksMemoria(tabla: (nombre: string) => Fila[]) {
           leidaEn: n["leidaEn"] ?? null,
           creadaEn: n["createdAt"],
         }));
-      return [{ items, noLeidas: propias.filter((n) => !n["leidaEn"]).length }];
+      return [{ items, noLeidas: propias.filter((n) => !n["leidaEn"]).length, cursorValido: !valores[9] || !!cursor }];
     }
     const ids = (n: number): unknown[] => (Array.isArray(valores[n]) ? valores[n] : []);
     if (texto.includes("/* nucleo-h:instalaciones */"))

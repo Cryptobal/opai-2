@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+  <link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+  <script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+  <style>body{margin:0;background:var(--ds-bg)} a{color:var(--ds-accent)} a:hover{color:var(--ds-accent)}</style>
+</helmet>
+<div class="ds screen" data-theme="{{ theme }}" data-device="{{ device }}" data-screen-label="{{ screenLabel }}" style="{{ frameStyle }}">
+
+  <sc-if value="{{ isDesktop }}" hint-placeholder-val="{{ true }}">
+    <nav class="sidebar" aria-label="Áreas" style="height:100%">
+      <div style="padding:14px 12px 4px;display:flex;flex-direction:column;gap:12px;flex:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:0 8px"><span class="wordmark">OPAI</span><span class="t-caption">2.0</span></div>
+        <button type="button" aria-label="Portal ERP de Gard Security · cambiar" style="{{ portalBtnStyle }}">
+          <span class="tenant">GS</span>
+          <span style="flex:1;min-width:0;display:flex;flex-direction:column"><span class="t-label-sm">ERP</span><span class="t-caption" style="font-size:11px;line-height:14px">Gard Security</span></span>
+          <span class="ic sm i-updown subtle" aria-hidden="true"></span>
+        </button>
+      </div>
+      <div style="flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:1px;padding:4px 12px 12px">
+        <sc-for list="{{ nav }}" as="r" hint-placeholder-count="12">
+          <sc-if value="{{ r.isTitle }}"><span class="t-overline" style="{{ r.style }}">{{ r.label }}</span></sc-if>
+          <sc-if value="{{ r.isHint }}"><span class="t-caption" style="{{ r.style }}">{{ r.label }}</span></sc-if>
+          <sc-if value="{{ r.isRow }}">
+            <a class="{{ r.cls }}" href="#" title="{{ r.label }}" aria-current="{{ r.current }}" aria-expanded="{{ r.expanded }}" style="{{ r.style }}">
+              <sc-if value="{{ r.guide }}"><span aria-hidden="true" style="{{ r.guideStyle }}"></span></sc-if>
+              <sc-if value="{{ r.hasIcon }}"><span class="{{ r.iconCls }}" aria-hidden="true" style="{{ r.iconStyle }}"></span></sc-if>
+              <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.label }}</span>
+              <sc-if value="{{ r.hasChev }}"><span class="{{ r.chevCls }}" aria-hidden="true"></span></sc-if>
+              <sc-if value="{{ r.pinBtn }}"><span role="button" aria-label="Fijar" style="{{ r.btnStyle }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17v5"></path><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"></path></svg></span></sc-if>
+              <sc-if value="{{ r.moreBtn }}"><span role="button" aria-label="Opciones del fijado" style="{{ r.btnStyle }}"><span class="ic sm i-more" aria-hidden="true"></span></span></sc-if>
+            </a>
+          </sc-if>
+        </sc-for>
+      </div>
+      <div style="flex:none;padding:8px 12px;border-top:1px solid var(--ds-border)">
+        <a class="{{ cfg.cls }}" href="#" style="{{ cfg.style }}" aria-current="{{ cfg.current }}"><span class="ic sm i-filter" aria-hidden="true"></span><span style="flex:1">Configuración</span></a>
+      </div>
+      <button type="button" aria-label="Menú de usuario" style="{{ userBtnStyle }}">
+        <span class="avatar">{{ user.ini }}</span>
+        <span style="flex:1;min-width:0;display:flex;flex-direction:column;text-align:left"><span class="t-label-sm">{{ user.name }}</span><span class="t-caption" style="font-size:11px;line-height:14px">{{ user.role }}</span></span>
+        <span class="ic sm i-updown subtle" aria-hidden="true"></span>
+      </button>
+    </nav>
+  </sc-if>
+
+  <sc-if value="{{ isTablet }}">
+    <nav class="rail" aria-label="Áreas" style="height:100%">
+      <button type="button" class="rail-portal" aria-label="Portal ERP · cambiar portal o empresa"><span class="tenant">GS</span><span style="display:flex;align-items:center;gap:2px">ERP<span class="ic i-updown" style="width:12px;height:12px" aria-hidden="true"></span></span></button>
+      <sc-for list="{{ railItems }}" as="it" hint-placeholder-count="6">
+        <a class="{{ it.cls }}" href="#" aria-current="{{ it.current }}" style="{{ it.style }}"><span class="{{ it.iconCls }}" aria-hidden="true"></span><span style="max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ it.label }}</span></a>
+      </sc-for>
+      <span style="flex:1"></span>
+      <a class="{{ railCfgCls }}" href="#"><span class="ic i-filter" aria-hidden="true"></span>Configuración</a>
+    </nav>
+  </sc-if>
+
+  <sc-if value="{{ showMain }}" hint-placeholder-val="{{ true }}">
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column;position:relative;height:100%">
+      <header class="appbar" style="{{ appbarStyle }}">
+        <div style="flex:1;min-width:0;display:flex;align-items:baseline;gap:10px">
+          <h1 class="t-heading m0" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ title }}</h1>
+          <span class="t-body-sm subtle t-numeric" style="font-weight:400">{{ titleCount }}</span>
+        </div>
+        <button type="button" class="searchbox" style="width:320px"><span class="ic sm i-search" aria-hidden="true"></span><span style="flex:1;text-align:left">Buscar</span><span class="kbd">{{ shortcut }}</span></button>
+        <button type="button" class="icon-btn" aria-label="Notificaciones, hay avisos sin leer"><span class="ic i-bell" aria-hidden="true"></span><span style="position:absolute;top:11px;right:11px;width:8px;height:8px;border-radius:999px;background:var(--ds-accent);box-shadow:0 0 0 2px var(--ds-bg)"></span></button>
+        <sc-if value="{{ isTablet }}"><button type="button" class="icon-btn" aria-label="Tu perfil"><span class="avatar">{{ user.ini }}</span></button></sc-if>
+      </header>
+      <div style="{{ mainPadStyle }}">
+
+        <sc-if value="{{ c.isList }}">
+          <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+            <div class="input compact" style="width:288px"><span class="ic sm i-search subtle" aria-hidden="true"></span><span class="ph">{{ list.search }}</span></div>
+            <sc-if value="{{ list.seg }}"><div class="seg" role="tablist" aria-label="Vista"><button type="button">Embudo</button><button type="button" class="on">Lista</button></div></sc-if>
+            <sc-for list="{{ list.chips }}" as="ch"><button type="button" class="{{ ch.cls }}">{{ ch.label }}</button></sc-for>
+            <span style="flex:1"></span>
+            <sc-if value="{{ list.primary }}"><button type="button" class="btn btn-primary"><span class="ic sm i-plus" aria-hidden="true"></span>{{ list.primary }}</button></sc-if>
+          </div>
+          <div class="tbl-wrap">
+            <div style="{{ list.headStyle }}">
+              <sc-for list="{{ list.cols }}" as="col"><span style="{{ col.style }}">{{ col.label }}</span></sc-for>
+            </div>
+            <sc-for list="{{ list.rows }}" as="row" hint-placeholder-count="8">
+              <div style="{{ list.rowStyle }}">
+                <sc-for list="{{ row.cells }}" as="cell"><span style="{{ cell.style }}"><span class="{{ cell.cls }}" style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ cell.text }}</span></span></sc-for>
+              </div>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ c.isSkeleton }}">
+          <div style="display:flex;align-items:center;gap:12px"><div class="skel" style="width:288px;height:36px;border-radius:10px"></div><div class="skel" style="width:88px;height:32px;border-radius:999px"></div><div class="skel" style="width:88px;height:32px;border-radius:999px"></div><span style="flex:1"></span><div class="skel" style="width:140px;height:40px;border-radius:10px"></div></div>
+          <div class="tbl-wrap">
+            <div style="height:37px;border-bottom:1px solid var(--ds-border)"></div>
+            <sc-for list="{{ skelRows }}" as="s"><div style="height:48px;display:flex;align-items:center;gap:24px;padding:0 16px;border-bottom:1px solid var(--ds-border)"><div class="skel" style="{{ s.a }}"></div><div class="skel" style="{{ s.b }}"></div><div class="skel" style="width:72px;height:22px;border-radius:999px"></div><span style="flex:1"></span><div class="skel" style="width:96px;height:12px"></div></div></sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ c.isInicio }}">
+          <div style="display:flex;flex-direction:column;gap:4px"><span class="t-title">Buenos días, {{ user.first }}</span><span class="t-body-sm muted">Domingo 25-10-2026 · Gard Security</span></div>
+          <div style="{{ kpiGridStyle }}">
+            <sc-for list="{{ kpis }}" as="k"><a class="card" href="#" style="padding:16px;display:flex;flex-direction:column;gap:8px;text-decoration:none;color:inherit"><span class="t-label-sm muted">{{ k.k }}</span><span class="t-title t-numeric" style="{{ k.vStyle }}">{{ k.v }}</span><span class="t-caption">{{ k.d }}</span></a></sc-for>
+          </div>
+          <section style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;align-items:baseline;gap:8px"><h2 class="t-label m0">{{ inicio.title }}</h2><span class="t-body-sm subtle t-numeric">{{ inicio.count }}</span><span style="flex:1"></span><sc-if value="{{ inicio.hasLink }}"><a class="t-label-sm" href="#">Ver Bandeja</a></sc-if></div>
+            <sc-if value="{{ inicio.empty }}">
+              <div class="state-panel" style="padding:32px 24px"><span class="state-ic"><span class="ic i-check-circle" aria-hidden="true"></span></span><span class="t">Estás al día</span><span class="d">No tienes aprobaciones, tareas ni avisos pendientes.</span></div>
+            </sc-if>
+            <sc-if value="{{ inicio.hasItems }}">
+              <div class="card" style="overflow:hidden">
+                <sc-for list="{{ inicio.items }}" as="b"><a class="rowcard" href="#" style="align-items:center"><span class="{{ b.iconCls }}" aria-hidden="true"></span><span style="flex:1;min-width:0;display:flex;flex-direction:column"><span class="t-label">{{ b.t }}</span><span class="t-caption">{{ b.d }}</span></span><span class="{{ b.badgeCls }}">{{ b.badge }}</span></a></sc-for>
+              </div>
+            </sc-if>
+          </section>
+        </sc-if>
+
+        <sc-if value="{{ c.isFicha }}">
+          <div style="display:flex;align-items:flex-start;gap:12px">
+            <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
+              <div style="display:flex;align-items:center;gap:8px"><span class="t-body-sm muted">Logística Andina SpA</span><span class="badge b-success">Activa</span></div>
+              <span class="t-body-sm muted">Av. Américo Vespucio 1500, Quilicura · 6 puestos</span>
+            </div>
+            <button type="button" class="btn btn-secondary" style="{{ fichaPinStyle }}" aria-pressed="{{ fichaPinned }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 17v5"></path><path d="M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"></path></svg>{{ fichaPinLabel }}</button>
+            <button type="button" class="btn btn-primary">Editar</button>
+          </div>
+          <div class="tabs" role="tablist"><button type="button" class="tab on">Resumen</button><button type="button" class="tab">Puestos</button><button type="button" class="tab">Pauta</button><button type="button" class="tab">Documentos</button><button type="button" class="tab">Actividad</button></div>
+          <div class="card" style="padding:4px 16px;max-width:640px">
+            <div class="pg-kv"><span class="l">Cuenta</span><span class="v">Logística Andina SpA</span></div>
+            <div class="pg-kv"><span class="l">RUT de la cuenta</span><span class="v t-mono">76.543.210-K</span></div>
+            <div class="pg-kv"><span class="l">Horario de servicio</span><span class="v t-numeric">Lunes a domingo · 08:00–20:00 y 20:00–08:00</span></div>
+            <div class="pg-kv"><span class="l">Supervisor</span><span class="v">Jorge Muñoz Toro</span></div>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ c.is404 }}">
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0">
+            <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.EmptyState" icon="search" title="No encontramos esta página" description="Puede que la dirección esté mal escrita o que la página ya no exista. El menú sigue disponible a la izquierda." hint-size="100%,260px"></x-import>
+            <a class="btn btn-primary" href="#" style="margin-top:-48px">Ir al inicio</a>
+          </div>
+        </sc-if>
+      </div>
+      <sc-if value="{{ ov.isToast }}"><div class="toast" role="status" style="position:absolute;left:50%;bottom:24px;transform:translateX(-50%);width:440px"><span style="flex:1">Ya tienes 5 fijados. Quita uno para fijar «Bodega Quilín».</span><button type="button" class="act">Ver fijados</button></div></sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isPhone }}">
+    <div style="display:flex;flex-direction:column;height:100%;width:100%;position:relative">
+      <div class="safe-top"></div>
+      <div class="topbar">
+        <button type="button" class="portal-btn" aria-label="Cambiar de portal o empresa"><span class="tenant">GS</span><span>ERP</span><span class="ic sm i-updown subtle" aria-hidden="true"></span></button>
+        <span style="flex:1"></span>
+        <sc-if value="{{ topSearch }}"><button type="button" class="icon-btn" aria-label="Buscar"><span class="ic i-search" aria-hidden="true"></span></button></sc-if>
+        <button type="button" class="icon-btn" aria-label="Notificaciones, hay avisos sin leer"><span class="ic i-bell" aria-hidden="true"></span><span style="position:absolute;top:11px;right:11px;width:8px;height:8px;border-radius:999px;background:var(--ds-accent);box-shadow:0 0 0 2px var(--ds-bg)"></span></button>
+        <button type="button" class="icon-btn" aria-label="Tu perfil"><span class="avatar">{{ user.ini }}</span></button>
+      </div>
+      <div style="flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;gap:16px;padding:4px 16px 24px">
+
+        <sc-if value="{{ pc.isList }}">
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;gap:12px"><div style="display:flex;align-items:baseline;gap:8px;min-width:0"><h1 class="t-title m0" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ title }}</h1><span class="t-body-sm subtle t-numeric">{{ titleCount }}</span></div><sc-if value="{{ list.primary }}"><button type="button" class="btn btn-primary icon" aria-label="{{ list.primary }}"><span class="ic i-plus" aria-hidden="true"></span></button></sc-if></div>
+          <div class="input"><span class="ic i-search subtle" aria-hidden="true"></span><span class="ph">{{ list.search }}</span></div>
+          <div class="card" style="overflow:hidden">
+            <sc-for list="{{ list.phone }}" as="pr" hint-placeholder-count="6"><a class="rowcard" href="#" style="align-items:center"><span style="flex:1;min-width:0;display:flex;flex-direction:column"><span class="t-label" style="font-size:15px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ pr.t }}</span><span class="t-caption" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ pr.d }}</span></span><span class="{{ pr.badgeCls }}">{{ pr.badge }}</span></a></sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ pc.isSkeleton }}">
+          <div style="display:flex;align-items:baseline;gap:8px"><h1 class="t-title m0">{{ title }}</h1></div>
+          <div class="skel" style="height:44px;border-radius:10px"></div>
+          <div class="card" style="overflow:hidden">
+            <sc-for list="{{ skelRows }}" as="s"><div class="rowcard" style="align-items:center"><span style="flex:1;display:flex;flex-direction:column;gap:8px"><span class="skel" style="{{ s.a }}"></span><span class="skel" style="{{ s.b }}"></span></span><span class="skel" style="width:64px;height:22px;border-radius:999px"></span></div></sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ pc.isInicio }}">
+          <div style="display:flex;flex-direction:column;gap:2px"><h1 class="t-title m0">Buenos días, {{ user.first }}</h1><span class="t-body-sm muted">Domingo 25-10-2026</span></div>
+          <section style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;align-items:baseline;gap:8px"><h2 class="t-label m0">{{ inicio.title }}</h2><span class="t-body-sm subtle t-numeric">{{ inicio.count }}</span><span style="flex:1"></span><sc-if value="{{ inicio.hasLink }}"><a class="lnk" href="#" style="min-height:44px">Ver todo</a></sc-if></div>
+            <sc-if value="{{ inicio.empty }}"><div class="state-panel" style="padding:24px 16px"><span class="state-ic"><span class="ic i-check-circle" aria-hidden="true"></span></span><span class="t">Estás al día</span><span class="d">No tienes aprobaciones, tareas ni avisos pendientes.</span></div></sc-if>
+            <sc-if value="{{ inicio.hasItems }}"><div class="card" style="overflow:hidden"><sc-for list="{{ inicio.phoneItems }}" as="b"><a class="rowcard" href="#" style="align-items:center"><span class="{{ b.iconPCls }}" aria-hidden="true"></span><span style="flex:1;min-width:0;display:flex;flex-direction:column"><span class="t-label" style="font-size:15px">{{ b.t }}</span><span class="t-caption" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ b.d }}</span></span><span class="ic sm i-chevron-right subtle" aria-hidden="true"></span></a></sc-for></div></sc-if>
+          </section>
+          <div class="kpi-grid">
+            <sc-for list="{{ kpisPhone }}" as="k"><div class="kpi"><span class="k">{{ k.k }}</span><span class="t-heading t-numeric" style="{{ k.vStyle }}">{{ k.v }}</span><span class="t-caption">{{ k.d }}</span></div></sc-for>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ pc.is404 }}">
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center">
+            <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.EmptyState" icon="search" title="No encontramos esta página" description="Puede que la dirección esté mal escrita o que la página ya no exista." hint-size="100%,260px"></x-import>
+            <a class="btn btn-primary" href="#" style="margin-top:-48px">Ir al inicio</a>
+          </div>
+        </sc-if>
+        <sc-if value="{{ pc.isPrefs }}">
+          <div style="display:flex;align-items:center;gap:4px;margin-left:-12px"><button type="button" class="icon-btn" aria-label="Volver"><span class="ic i-chevron-left" aria-hidden="true"></span></button><h1 class="t-title m0">Preferencias</h1></div>
+          <fieldset class="pg-fieldset" style="padding:0;gap:0;overflow:hidden">
+            <legend style="padding:16px 16px 8px"><span class="t-subheading">Área principal</span><span class="t-body-sm muted">Define la segunda y la tercera entrada de la barra inferior.</span></legend>
+            <div role="radiogroup" aria-label="Área principal" style="display:flex;flex-direction:column">
+              <sc-for list="{{ prefs }}" as="o"><label style="{{ o.rowStyle }}"><span style="{{ o.radioStyle }}" role="radio" aria-checked="{{ o.on }}"></span><span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span class="t-label" style="font-size:15px">{{ o.label }}</span><span class="t-caption">{{ o.desc }}</span></span></label></sc-for>
+            </div>
+          </fieldset>
+          <span class="t-caption">{{ prefsNote }}</span>
+        </sc-if>
+      </div>
+
+      <nav class="tabbar" aria-label="Navegación principal">
+        <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="5">
+          <a class="{{ t.cls }}" href="#" aria-current="{{ t.current }}" aria-label="{{ t.aria }}" style="min-width:0;padding:0 2px">
+            <span style="{{ t.pillStyle }}"><span class="{{ t.iconCls }}" aria-hidden="true"></span><sc-if value="{{ t.hasBadge }}"><span class="dot-count" style="top:-5px;right:2px">{{ t.badge }}</span></sc-if></span>
+            <span style="{{ t.labelStyle }}">{{ t.label }}</span>
+          </a>
+        </sc-for>
+      </nav>
+
+      <sc-if value="{{ ov.isMore }}">
+        <div class="scrim"></div>
+        <div class="sheet" role="dialog" aria-label="Más" style="max-height:88%">
+          <div class="grabber"></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:4px 8px 0 16px"><span class="t-subheading">Más</span><button type="button" class="icon-btn" aria-label="Cerrar"><span class="ic i-x" aria-hidden="true"></span></button></div>
+          <div style="flex:1;min-height:0;overflow:hidden;padding:0 12px 34px;display:flex;flex-direction:column;gap:1px">
+            <sc-for list="{{ sheetRows }}" as="r" hint-placeholder-count="10">
+              <sc-if value="{{ r.isTitle }}"><span class="t-overline" style="{{ r.style }}">{{ r.label }}</span></sc-if>
+              <sc-if value="{{ r.isHint }}"><span class="t-caption" style="{{ r.style }}">{{ r.label }}</span></sc-if>
+              <sc-if value="{{ r.isRow }}">
+                <a class="{{ r.cls }}" href="#" aria-current="{{ r.current }}" aria-expanded="{{ r.expanded }}" style="{{ r.style }}">
+                  <sc-if value="{{ r.guide }}"><span aria-hidden="true" style="{{ r.guideStyle }}"></span></sc-if>
+                  <sc-if value="{{ r.hasIcon }}"><span class="{{ r.iconCls }}" aria-hidden="true" style="{{ r.iconStyle }}"></span></sc-if>
+                  <span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.label }}</span>
+                  <sc-if value="{{ r.hasChev }}"><span class="{{ r.chevCls }}" aria-hidden="true"></span></sc-if>
+                </a>
+              </sc-if>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ ov.isCmdPhone }}">
+        <div role="dialog" aria-label="Buscar" style="position:absolute;inset:0;background:var(--ds-bg);display:flex;flex-direction:column;animation:ds-aparecer 150ms cubic-bezier(0.2,0,0,1)">
+          <div class="safe-top"></div>
+          <div style="display:flex;align-items:center;gap:4px;padding:4px 4px 8px 16px">
+            <div class="input focus" style="flex:1"><span class="ic i-search subtle" aria-hidden="true"></span><span style="{{ cmd.qStyle }}">{{ cmd.qText }}</span><span style="width:1px;height:20px;background:var(--ds-accent)"></span><span style="flex:1"></span></div>
+            <button type="button" class="btn btn-ghost">Cancelar</button>
+          </div>
+          <div style="flex:1;min-height:0;overflow:hidden;padding:0 8px 24px;display:flex;flex-direction:column">
+            <sc-if value="{{ cmd.isNone }}"><div style="display:flex;flex-direction:column;gap:4px;padding:24px 8px 8px"><span class="t-label">{{ cmd.noneTitle }}</span><span class="t-body-sm muted">{{ cmd.noneDesc }}</span></div></sc-if>
+            <sc-if value="{{ cmd.help }}"><span class="t-body-sm muted" style="padding:16px 8px 0">{{ cmd.help }}</span></sc-if>
+            <sc-for list="{{ cmd.groups }}" as="g">
+              <span class="t-overline" style="display:block;padding:16px 8px 4px">{{ g.title }}</span>
+              <sc-for list="{{ g.rows }}" as="r"><div class="{{ r.pCls }}" style="min-height:56px;border-radius:10px"><span class="{{ r.iconP }}" aria-hidden="true" style="color:var(--ds-fg-muted)"></span><span style="flex:1;min-width:0;display:flex;flex-direction:column"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.pre }}<strong style="font-weight:600">{{ r.match }}</strong>{{ r.post }}</span><span class="desc" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.ctx }}</span></span></div></sc-for>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ ov.isCmdDesk }}">
+    <div class="scrim"></div>
+    <div class="overlay" role="dialog" aria-label="Búsqueda global" style="position:absolute;top:40px;left:50%;transform:translateX(-50%);width:640px;max-width:calc(100% - 32px);max-height:calc(100% - 64px);overflow:hidden;display:flex;flex-direction:column;animation:ds-entrar 150ms cubic-bezier(0.2,0,0,1)">
+      <div style="display:flex;align-items:center;gap:12px;height:56px;padding:0 16px;border-bottom:1px solid var(--ds-border);flex:none">
+        <span class="ic i-search subtle" aria-hidden="true"></span>
+        <span class="t-body" style="{{ cmd.qStyle }}">{{ cmd.qText }}</span><span style="width:1px;height:20px;background:var(--ds-accent);margin-left:-11px"></span>
+        <span style="flex:1"></span>
+        <span class="kbd">esc</span>
+      </div>
+      <div style="padding:0 8px 8px;display:flex;flex-direction:column;flex:1;min-height:0;overflow:hidden">
+        <sc-if value="{{ cmd.isNone }}"><div style="display:flex;flex-direction:column;gap:4px;padding:20px 8px 4px"><span class="t-label">{{ cmd.noneTitle }}</span><span class="t-body-sm muted">{{ cmd.noneDesc }}</span></div></sc-if>
+        <sc-if value="{{ cmd.help }}"><span class="t-body-sm muted" style="padding:16px 8px 0">{{ cmd.help }}</span></sc-if>
+        <sc-for list="{{ cmd.groups }}" as="g">
+          <span class="t-overline" style="display:block;padding:12px 8px 4px">{{ g.title }}</span>
+          <sc-for list="{{ g.rows }}" as="r"><div class="{{ r.cls }}" style="{{ r.style }}"><span class="{{ r.icon }}" aria-hidden="true" style="color:var(--ds-fg-muted)"></span><span style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.pre }}<strong style="font-weight:600">{{ r.match }}</strong>{{ r.post }}</span><span class="t-caption" style="flex:none;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.ctx }}</span><sc-if value="{{ r.hl }}"><span class="kbd">↵</span></sc-if></div></sc-for>
+        </sc-for>
+      </div>
+      <div class="t-caption" style="display:flex;gap:16px;padding:10px 16px;border-top:1px solid var(--ds-border);flex:none"><span>↑↓ navegar</span><span>↵ abrir</span><span>esc cerrar</span></div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ ov.isUser }}">
+    <div class="overlay menu" role="menu" aria-label="Menú de usuario" style="position:absolute;left:12px;bottom:64px;width:272px;animation:ds-entrar 150ms cubic-bezier(0.2,0,0,1)">
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 12px 12px"><span class="avatar lg">{{ user.ini }}</span><span style="display:flex;flex-direction:column;min-width:0"><span class="t-label">{{ user.name }}</span><span class="t-caption">{{ user.mail }}</span></span></div>
+      <hr class="divider">
+      <div style="padding-top:6px;display:flex;flex-direction:column">
+        <button type="button" class="menu-item" role="menuitem"><span class="ic sm i-swap" aria-hidden="true"></span><span style="flex:1">Cambiar de empresa</span><span class="t-caption">Gard Security</span></button>
+        <button type="button" class="menu-item" role="menuitem"><span class="ic sm i-user" aria-hidden="true"></span><span style="flex:1">Preferencias</span></button>
+        <button type="button" class="menu-item" role="menuitem"><span class="ic sm i-moon" aria-hidden="true"></span><span style="flex:1">Tema</span><span class="t-caption">Sistema</span></button>
+      </div>
+      <hr class="divider" style="margin:6px 0">
+      <button type="button" class="menu-item" role="menuitem"><span class="ic sm i-chevrons-right" aria-hidden="true"></span><span style="flex:1">Cerrar sesión</span></button>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ ov.isPortal }}">
+    <div class="overlay" role="dialog" aria-label="Portal y empresa" style="position:absolute;left:12px;top:106px;width:360px;padding:8px;animation:ds-entrar 150ms cubic-bezier(0.2,0,0,1)">
+      <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PortalSwitcher" value="ERP" portals="{{ portalList }}" tenant="Gard Security" tenant-initials="GS" tenant-caption="Empresa · 2 disponibles" hint-size="100%,320px"></x-import>
+      <sc-if value="{{ operator }}">
+        <hr class="divider" style="margin:4px 0">
+        <span class="t-overline" style="display:block;padding:8px 8px 4px">Solo operadores de OPAI</span>
+        <button type="button" class="menu-item" style="height:60px;padding:0 8px"><span style="width:36px;height:36px;border-radius:10px;border:1px solid var(--ds-border);display:flex;align-items:center;justify-content:center;flex:none"><span class="ic i-command" aria-hidden="true"></span></span><span style="flex:1;display:flex;flex-direction:column"><span class="t-label" style="font-size:15px">Plataforma</span><span class="t-caption">Tenants, módulos contratados, soporte</span></span></button>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ ov.isBell }}">
+    <aside class="overlay" aria-label="Notificaciones" style="position:absolute;top:56px;right:16px;width:360px;display:flex;flex-direction:column;overflow:hidden;animation:ds-entrar 150ms cubic-bezier(0.2,0,0,1)">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:12px 8px 8px 16px"><span class="t-label">Avisos</span><button type="button" class="btn btn-ghost" style="height:32px;padding:0 10px;font-size:13px">Marcar todo leído</button></div>
+      <sc-for list="{{ avisos }}" as="a"><a href="#" style="display:flex;gap:12px;padding:12px 16px;border-top:1px solid var(--ds-border);text-decoration:none;color:inherit"><span style="{{ a.dotStyle }}"><span class="{{ a.icon }}" aria-hidden="true"></span></span><span style="flex:1;display:flex;flex-direction:column;gap:2px"><span class="t-label-sm">{{ a.t }}</span><span class="t-caption">{{ a.d }}</span></span></a></sc-for>
+      <a href="#" class="t-label-sm" style="display:flex;align-items:center;justify-content:center;height:44px;border-top:1px solid var(--ds-border)">Ver todo en Bandeja</a>
+    </aside>
+  </sc-if>
+
+  <sc-if value="{{ ov.isPinMenu }}">
+    <div class="overlay menu" role="menu" aria-label="Opciones del fijado" style="position:absolute;left:232px;top:150px;width:220px;animation:ds-entrar 150ms cubic-bezier(0.2,0,0,1)">
+      <button type="button" class="menu-item" role="menuitem"><span class="ic sm i-up" aria-hidden="true" style="transform:rotate(-45deg)"></span><span style="flex:1">Subir</span><span class="kbd">⌥↑</span></button>
+      <button type="button" class="menu-item" role="menuitem"><span class="ic sm i-down" aria-hidden="true" style="transform:rotate(45deg)"></span><span style="flex:1">Bajar</span><span class="kbd">⌥↓</span></button>
+      <hr class="divider" style="margin:6px 0">
+      <button type="button" class="menu-item" role="menuitem"><span class="ic sm i-x" aria-hidden="true"></span><span style="flex:1">Desfijar</span></button>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ ov.isRail }}">
+    <div class="overlay" role="dialog" aria-label="{{ rail.label }}" style="position:absolute;left:88px;top:16px;bottom:16px;width:248px;padding:8px 12px;display:flex;flex-direction:column;gap:1px;animation:ds-lateral 150ms cubic-bezier(0.2,0,0,1)">
+      <span class="t-subheading" style="padding:8px 8px 8px">{{ rail.label }}</span>
+      <sc-for list="{{ rail.items }}" as="it"><a class="{{ it.cls }}" href="#" style="height:44px"><span class="{{ it.iconCls }}" aria-hidden="true"></span><span style="flex:1">{{ it.label }}</span></a></sc-for>
+    </div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;desktop&quot;,&quot;tablet&quot;,&quot;phone&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;scenario&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;A&quot;,&quot;B&quot;,&quot;C&quot;,&quot;D&quot;],&quot;default&quot;:&quot;C&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;role&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;owner&quot;,&quot;admin&quot;,&quot;gerente&quot;,&quot;supervisor&quot;,&quot;viewer&quot;],&quot;default&quot;:&quot;owner&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;active&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;negocios&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;overlay&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;none&quot;,&quot;cmdk&quot;,&quot;more&quot;,&quot;user&quot;,&quot;portal&quot;,&quot;bell&quot;,&quot;pinmenu&quot;,&quot;pinfull&quot;],&quot;default&quot;:&quot;none&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;cmdk&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;initial&quot;,&quot;results&quot;,&quot;none&quot;,&quot;viewer&quot;,&quot;firstuse&quot;],&quot;default&quot;:&quot;initial&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;pins&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;none&quot;,&quot;hint&quot;,&quot;four&quot;,&quot;five&quot;],&quot;default&quot;:&quot;four&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;open&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;auto&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;primary&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;general&quot;,&quot;comercial&quot;,&quot;operaciones&quot;,&quot;finanzas&quot;,&quot;consulta&quot;],&quot;default&quot;:&quot;general&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;content&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;auto&quot;,&quot;skeleton&quot;,&quot;404&quot;,&quot;ficha&quot;,&quot;prefs&quot;],&quot;default&quot;:&quot;auto&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+const E = {
+  inicio: ['Inicio', 'home', 'inicio'], bandeja: ['Bandeja', 'inbox', 'inicio'],
+  solicitudes: ['Solicitudes', 'inbox', 'comercial'], negocios: ['Negocios', 'briefcase', 'comercial'], cotizaciones: ['Cotizaciones', 'file', 'comercial'], licitaciones: ['Licitaciones', 'flag', 'comercial'],
+  cuentas: ['Cuentas', 'building', 'clientes'], contactos: ['Contactos', 'user', 'clientes'], instalaciones: ['Instalaciones', 'pin', 'clientes'],
+  pauta: ['Pauta', 'calendar', 'operaciones'], turnos: ['Turnos extra', 'clock', 'operaciones'], supervision: ['Supervisión', 'eye', 'operaciones'], rondas: ['Rondas', 'route', 'operaciones'], novedades: ['Novedades', 'message', 'operaciones'], tickets: ['Tickets', 'ticket', 'operaciones'],
+  personas: ['Personas', 'users', 'personas'], asistencia: ['Asistencia', 'user-check', 'personas'], vencimientos: ['Vencimientos', 'alert', 'personas'], nomina: ['Nómina', 'wallet', 'personas'], cargos: ['Cargos y sueldos', 'briefcase', 'personas'],
+  flujo: ['Flujo de caja', 'chart', 'finanzas'], banca: ['Banca y conciliación', 'landmark', 'finanzas'], ventas: ['Ventas (DTE)', 'file', 'finanzas'], compras: ['Compras', 'download', 'finanzas'], rendiciones: ['Rendiciones', 'paperclip', 'finanzas'], contabilidad: ['Contabilidad', 'grid', 'finanzas'], informes: ['Informes', 'chart', 'finanzas'],
+  documentos: ['Documentos', 'file', 'documentos'],
+};
+const AREAS = [['comercial', 'Comercial', 'briefcase'], ['clientes', 'Clientes', 'building'], ['operaciones', 'Operaciones', 'clipboard'], ['personas', 'Personas', 'users'], ['finanzas', 'Finanzas', 'wallet'], ['documentos', 'Documentos', 'file']];
+const CORE = ['inicio', 'cuentas', 'instalaciones', 'personas', 'vencimientos', 'cargos'];
+const SCEN = { A: CORE, B: CORE.concat(['bandeja', 'solicitudes', 'negocios', 'cotizaciones', 'contactos', 'documentos']), C: Object.keys(E), D: CORE.concat(['nomina']) };
+const HIDE = { owner: [], admin: [], gerente: ['@finanzas', 'nomina'], supervisor: ['@comercial', '@finanzas', 'nomina'], viewer: ['@finanzas'] };
+const USERS = {
+  owner: { name: 'Carlos Irigoyen', first: 'Carlos', ini: 'CI', role: 'Propietario', mail: 'carlos@gardsecurity.cl' },
+  admin: { name: 'Fernanda Soto', first: 'Fernanda', ini: 'FS', role: 'Administradora', mail: 'fernanda@gardsecurity.cl' },
+  gerente: { name: 'Rodrigo Pizarro', first: 'Rodrigo', ini: 'RP', role: 'Gerente', mail: 'rodrigo@gardsecurity.cl' },
+  supervisor: { name: 'Jorge Muñoz', first: 'Jorge', ini: 'JM', role: 'Supervisor', mail: 'jorge@gardsecurity.cl' },
+  viewer: { name: 'Paula Rojas', first: 'Paula', ini: 'PR', role: 'Consulta', mail: 'paula@gardsecurity.cl' },
+};
+const PRIMARY = { general: ['negocios', 'pauta'], comercial: ['negocios', 'cuentas'], operaciones: ['pauta', 'personas'], finanzas: ['flujo', 'banca'], consulta: ['cuentas', 'personas'] };
+const PRIMARY_LABEL = { general: 'General', comercial: 'Comercial', operaciones: 'Operaciones', finanzas: 'Finanzas', consulta: 'Consulta' };
+const FALLBACK = ['negocios', 'pauta', 'cuentas', 'personas', 'instalaciones', 'cotizaciones', 'flujo', 'banca'];
+const PREF_BY_ROLE = { owner: ['general', 'comercial', 'operaciones', 'finanzas'], admin: ['general', 'comercial', 'operaciones', 'finanzas'], gerente: ['general', 'comercial', 'operaciones'], supervisor: ['operaciones', 'consulta'], viewer: ['consulta', 'general'] };
+const ENT = { quilicura: ['Planta Quilicura', 'pin'], logistica: ['Logística Andina SpA', 'building'], javiera: ['Javiera Quilodrán Muñoz', 'user'] };
+const PINS = { four: ['@quilicura', 'negocios', '@logistica', 'pauta'], five: ['@quilicura', 'negocios', '@logistica', 'pauta', '@javiera'] };
+
+const NEG = [
+  ['Vigilancia 24/7 · Planta Quilicura', 'Logística Andina SpA', 'Propuesta', 'accent', '$ 18.450.000', 'Paula Rojas', '24-10-2026'],
+  ['Rondas nocturnas · Bodega Lampa', 'Logística Andina SpA', 'Negociación', 'warning', '$ 6.200.000', 'Paula Rojas', '23-10-2026'],
+  ['Control de acceso · Edificio Costanera Norte', 'Inmobiliaria Los Andes', 'Calificado', 'neutral', '$ 9.870.000', 'Tomás Vidal', '22-10-2026'],
+  ['Guardias para 4 tiendas', 'Retail Sur Ltda.', 'Ganado', 'success', '$ 22.300.000', 'Tomás Vidal', '21-10-2026'],
+  ['Seguridad de eventos · Estadio Municipal', 'Corporación Deportiva Maipú', 'Propuesta', 'accent', '$ 4.560.000', 'Paula Rojas', '20-10-2026'],
+  ['Conserjería · Condominio Los Trapenses', 'Comunidad Los Trapenses', 'Perdido', 'danger', '$ 3.150.000', 'Tomás Vidal', '18-10-2026'],
+  ['Vigilancia · Centro de distribución Quilicura', 'Quilicura Logística SpA', 'Negociación', 'warning', '$ 12.900.000', 'Paula Rojas', '17-10-2026'],
+  ['Supervisión móvil · Zona norte', 'Transportes Huechuraba SpA', 'Calificado', 'neutral', '$ 5.480.000', 'Tomás Vidal', '15-10-2026'],
+];
+const CUE = [
+  ['Logística Andina SpA', '76.543.210-K', '6', 'Activa', 'success', 'Paula Rojas'],
+  ['Retail Sur Ltda.', '77.890.120-4', '4', 'Activa', 'success', 'Tomás Vidal'],
+  ['Inmobiliaria Los Andes', '96.512.330-1', '3', 'Activa', 'success', 'Tomás Vidal'],
+  ['Transportes Huechuraba SpA', '78.330.910-2', '2', 'Activa', 'success', 'Paula Rojas'],
+  ['Quilicura Logística SpA', '77.120.450-3', '1', 'En evaluación', 'warning', 'Paula Rojas'],
+  ['Corporación Deportiva Maipú', '65.987.300-5', '1', 'Activa', 'success', 'Tomás Vidal'],
+  ['Comunidad Los Trapenses', '65.104.220-7', '1', 'Inactiva', 'neutral', 'Tomás Vidal'],
+];
+const PER = [
+  ['Javiera Quilodrán Muñoz', '18.234.567-2', 'Guardia', 'Planta Quilicura', 'Activa', 'success'],
+  ['Matías Quilaqueo Ríos', '17.876.543-1', 'Guardia', 'Centro de distribución Quilicura', 'Activa', 'success'],
+  ['Jorge Muñoz Toro', '14.567.890-3', 'Supervisor', 'Zona norte', 'Activa', 'success'],
+  ['Camila Herrera Paz', '19.012.345-6', 'Guardia', 'Bodega Lampa', 'OS-10 vence 12-11-2026', 'warning'],
+  ['Luis Fuentes Araya', '16.789.012-K', 'Guardia', 'Edificio Costanera Norte', 'Licencia', 'info'],
+  ['Andrea Salinas Vera', '15.345.678-9', 'Conserje', 'Condominio Los Trapenses', 'Activa', 'success'],
+  ['Pedro Castro Lagos', '20.123.456-7', 'Guardia', 'Planta Quilicura', 'Activa', 'success'],
+];
+const NOM = [
+  ['Javiera Quilodrán Muñoz', '18.234.567-2', 'Guardia', '30', '$ 612.400', 'Calculada', 'success'],
+  ['Matías Quilaqueo Ríos', '17.876.543-1', 'Guardia', '30', '$ 598.900', 'Calculada', 'success'],
+  ['Jorge Muñoz Toro', '14.567.890-3', 'Supervisor', '30', '$ 1.045.300', 'Calculada', 'success'],
+  ['Camila Herrera Paz', '19.012.345-6', 'Guardia', '28', '$ 560.000', 'Revisar', 'warning'],
+  ['Luis Fuentes Araya', '16.789.012-K', 'Guardia', '18', '$ 371.200', 'Licencia', 'info'],
+  ['Andrea Salinas Vera', '15.345.678-9', 'Conserje', '30', '$ 534.800', 'Calculada', 'success'],
+  ['Pedro Castro Lagos', '20.123.456-7', 'Guardia', '30', '$ 605.100', 'Calculada', 'success'],
+];
+const RECENTS = [
+  { i: 'pin', l: 'Planta Quilicura', c: 'Instalación · Logística Andina SpA' },
+  { i: 'briefcase', l: 'Negocios', c: 'Página · Comercial', e: 'negocios' },
+  { i: 'building', l: 'Logística Andina SpA', c: 'Cuenta · 76.543.210-K' },
+  { i: 'file', l: 'COT-2026-0187', c: 'Cotización · Logística Andina SpA', e: 'cotizaciones' },
+  { i: 'calendar', l: 'Pauta', c: 'Página · Operaciones', e: 'pauta' },
+  { i: 'user', l: 'Javiera Quilodrán Muñoz', c: 'Persona · Guardia · Planta Quilicura' },
+  { i: 'pin', l: 'Edificio Costanera Norte', c: 'Instalación · Inmobiliaria Los Andes', out: true },
+  { i: 'alert', l: 'Vencimientos', c: 'Página · Personas', e: 'vencimientos' },
+  { i: 'building', l: 'Retail Sur Ltda.', c: 'Cuenta · 77.890.120-4', out: true },
+  { i: 'chart', l: 'Flujo de caja', c: 'Página · Finanzas', e: 'flujo' },
+];
+const ACTIONS = [
+  { i: 'plus', l: 'Nueva cotización', c: 'Comercial', w: true, e: 'cotizaciones' },
+  { i: 'plus', l: 'Agregar persona', c: 'Personas', w: true, e: 'personas' },
+  { i: 'plus', l: 'Nuevo negocio', c: 'Comercial', w: true, e: 'negocios' },
+];
+const RESULTS = [
+  ['Cuentas', [{ i: 'building', l: 'Quilicura Logística SpA', c: 'Cuenta · 77.120.450-3', out: true }]],
+  ['Instalaciones', [{ i: 'pin', l: 'Planta Quilicura', c: 'Instalación · Logística Andina SpA' }, { i: 'pin', l: 'Bodega Quilín', c: 'Instalación · Logística Andina SpA' }, { i: 'pin', l: 'Centro de distribución Quilicura', c: 'Instalación · Retail Sur Ltda.', out: true }]],
+  ['Personas', [{ i: 'user', l: 'Javiera Quilodrán Muñoz', c: 'Persona · Guardia · Planta Quilicura' }, { i: 'user', l: 'Matías Quilaqueo Ríos', c: 'Persona · Guardia · Centro de distribución Quilicura', out: true }]],
+  ['Páginas', [{ i: 'calendar', l: 'Pauta de Planta Quilicura', c: 'Página · Operaciones', e: 'pauta' }]],
+  ['Acciones', [{ i: 'plus', l: 'Nueva cotización para Quilicura Logística SpA', c: 'Comercial', w: true, e: 'cotizaciones' }, { i: 'plus', l: 'Agregar persona a Planta Quilicura', c: 'Personas', w: true, e: 'personas' }]],
+];
+const BANDEJA = [
+  { i: 'file', t: 'Aprobar cotización COT-2026-0187', d: 'Logística Andina SpA · $ 18.450.000 mensual', b: 'Aprobación', bt: 'accent', e: 'cotizaciones' },
+  { i: 'clock', t: 'Aprobar turno extra', d: 'Planta Quilicura · 26-10-2026 · 20:00–08:00', b: 'Aprobación', bt: 'accent' },
+  { i: 'alert', t: 'OS-10 por vencer · 3 personas', d: 'Vencen antes del 15-11-2026', b: 'Aviso', bt: 'warning' },
+  { i: 'clipboard', t: 'Visitar Bodega Lampa', d: 'Tarea asignada por Carlos Irigoyen · 27-10-2026', b: 'Tarea', bt: 'neutral' },
+  { i: 'file', t: 'Firmar anexo de contrato', d: 'Retail Sur Ltda. · Documentos', b: 'Firma', bt: 'neutral', e: 'documentos' },
+];
+const norm = (s) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+class Component extends DCLogic {
+  s() {
+    const P = this.props;
+    const role = P.role ?? 'owner';
+    const b = (v) => v === true || v === 'true';
+    return {
+      device: P.device ?? 'desktop', theme: P.theme ?? 'light', scenario: P.scenario ?? 'C', role,
+      active: P.active ?? 'negocios', open: P.open ?? 'auto', pins: P.pins ?? 'four', content: P.content ?? 'auto', overlay: P.overlay ?? 'none', cmdk: P.cmdk ?? 'initial',
+      primary: P.primary ?? (role === 'supervisor' ? 'operaciones' : role === 'viewer' ? 'consulta' : 'general'), vocab: P.vocab ?? 'default', hover: P.hover ?? '', focus: P.focus ?? '',
+      badge: P.badge ?? 'count', railArea: P.railArea ?? '', inicioMode: P.inicioMode ?? 'loose', os: P.os ?? 'mac', operator: b(P.operator), topSearch: b(P.topSearch),
+      sidebarOnly: b(P.sidebarOnly), bandeja: P.bandeja ?? 'full', tabActive: P.tabActive ?? '', height: P.height, pinState: P.pinState ?? 'fijar', title: P.title,
+    };
+  }
+  vis(id, role) {
+    const S = this.S; role = role || S.role;
+    if (!E[id]) return id === 'config';
+    if (!SCEN[S.scenario].includes(id)) return false;
+    const h = HIDE[role] || [];
+    return !(h.includes(id) || h.includes('@' + E[id][2]));
+  }
+  lbl(id) {
+    const v = this.S.vocab;
+    if (id === 'instalaciones' && v === 'facility') return 'Sitios';
+    if (id === 'instalaciones' && v === 'long') return 'Centros operativos';
+    if (id === 'cuentas' && v === 'long') return 'Empresas mandantes';
+    return E[id] ? E[id][0] : id;
+  }
+  areaItems(a) { return Object.keys(E).filter((k) => E[k][2] === a && this.vis(k)); }
+  pinList() {
+    const S = this.S;
+    const ids = PINS[S.pins] || [];
+    return ids.map((p) => p[0] === '@' ? { label: ENT[p.slice(1)][0], icon: ENT[p.slice(1)][1] } : (this.vis(p) ? { id: p, label: this.lbl(p), icon: E[p][1] } : null)).filter(Boolean);
+  }
+  rows(mode) {
+    const S = this.S, side = mode === 'side';
+    const base = side ? 'nav-item' : 'menu-item';
+    const ic = (n) => (side ? 'ic sm i-' : 'ic i-') + n;
+    const out = [];
+    const btnStyle = { marginLeft: 'auto', width: 24, height: 24, borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--ds-fg-muted)', flex: 'none' };
+    const title = (label, first) => out.push({ isTitle: true, label, style: { display: 'block', flex: 'none', padding: (first ? '8px' : '16px') + ' 8px 6px' } });
+    const st = (id, extra) => {
+      const o = Object.assign({ flex: 'none' }, side ? {} : { height: 44, fontSize: 15 }, extra || {});
+      if (S.hover && S.hover === id) o.color = 'var(--ds-fg)';
+      if (S.focus && S.focus === id) { o.outline = '2px solid var(--ds-focus)'; o.outlineOffset = 2; }
+      return o;
+    };
+    const loose = (id, extra) => {
+      const on = S.active === id;
+      out.push({ isRow: true, label: this.lbl(id), hasIcon: true, iconCls: ic(E[id][1]), cls: base + (on ? ' on' : ''), current: on ? 'page' : undefined, style: st(id, extra), pinBtn: side && S.hover === id, btnStyle });
+    };
+    const pins = this.pinList();
+    if (pins.length) {
+      title('Fijados', true);
+      pins.forEach((p, i) => out.push({ isRow: true, label: p.label, hasIcon: true, iconCls: ic(p.icon), cls: base, style: st('pin:' + i), moreBtn: side && S.hover === 'pin:' + i, btnStyle }));
+    } else if (S.pins === 'hint') {
+      title('Fijados', true);
+      out.push({ isHint: true, label: 'Fija hasta cinco entradas o fichas para tenerlas a mano.', style: { display: 'block', padding: '0 8px 4px', textWrap: 'pretty' } });
+    }
+    const gapTop = pins.length || S.pins === 'hint' ? 16 : 4;
+    const ini = ['inicio', 'bandeja'].filter((k) => this.vis(k));
+    const openOf = (a, items) => {
+      if (S.open === 'all') return true;
+      if (S.open === 'none') return false;
+      if (S.open === 'auto') return items.includes(S.active);
+      return S.open.split(',').includes(a);
+    };
+    const group = (a, label, icon, items, mt) => {
+      const open = openOf(a, items);
+      const hasActive = items.includes(S.active);
+      const hl = hasActive && !open;
+      out.push({ isRow: true, label, hasIcon: true, iconCls: ic(icon), iconStyle: hl ? { color: 'var(--ds-accent)' } : undefined, cls: base, expanded: open ? 'true' : 'false', style: st('@' + a, Object.assign({ marginTop: mt }, hl ? { color: 'var(--ds-fg)' } : {})), hasChev: true, chevCls: (side ? 'ic sm ' : 'ic sm ') + (open ? 'i-chevron-down' : 'i-chevron-right') + ' subtle' });
+      if (!open) return;
+      items.forEach((id) => {
+        const on = S.active === id;
+        const left = side ? 19 : 21;
+        out.push({ isRow: true, label: this.lbl(id), cls: base + (on ? ' on' : ''), current: on ? 'page' : undefined, style: st(id, { position: 'relative', paddingLeft: side ? 34 : 44 }), guide: true, guideStyle: on ? { position: 'absolute', left: left - 1, top: 6, bottom: 6, width: 3, borderRadius: 2, background: 'var(--ds-accent)' } : { position: 'absolute', left, top: -1, bottom: 0, width: 1, background: 'var(--ds-border)' }, pinBtn: side && S.hover === id, btnStyle });
+      });
+    };
+    if (S.inicioMode === 'group' && ini.length > 1) group('inicio', 'Inicio', 'home', ini, gapTop);
+    else ini.forEach((k, i) => loose(k, i === 0 ? { marginTop: gapTop } : null));
+    let first = true;
+    AREAS.forEach(([a, label, icon]) => {
+      const items = this.areaItems(a);
+      if (!items.length) return;
+      const mt = first ? 12 : 2; first = false;
+      if (items.length === 1) loose(items[0], { marginTop: mt });
+      else group(a, label, icon, items, mt);
+    });
+    if (!side) {
+      out.push({ isTitle: true, label: '', style: { display: 'block', height: 8, borderBottom: '1px solid var(--ds-border)', margin: '0 8px 8px' } });
+      const on = S.active === 'config';
+      out.push({ isRow: true, label: 'Configuración', hasIcon: true, iconCls: 'ic i-filter', cls: base + (on ? ' on' : ''), style: { height: 44, fontSize: 15, flex: 'none' } });
+    }
+    return out;
+  }
+  table() {
+    const S = this.S, a = S.active;
+    const viewer = S.role === 'viewer' || S.role === 'supervisor';
+    const badge = (t, tone) => ({ text: t, cls: 'badge b-' + tone });
+    const C = (label, w, num) => ({ label, w, num });
+    let cols, rows, phone, search, primary, seg = false, chips;
+    if (a === 'negocios') {
+      cols = [C('Negocio', '2.2fr'), C('Cuenta', '1.4fr'), C('Etapa', '120px'), C('Monto mensual', '140px', 1), C('Responsable', '120px'), C('Actualizado', '104px')];
+      rows = NEG.map((r) => [{ text: r[0], cls: 't-label' }, { text: r[1] }, badge(r[2], r[3]), { text: r[4], cls: 't-numeric' }, { text: r[5] }, { text: r[6], cls: 't-numeric subtle' }]);
+      phone = NEG.map((r) => ({ t: r[0], d: r[1] + ' · ' + r[4], badge: r[2], badgeCls: 'badge b-' + r[3] }));
+      search = 'Buscar negocios'; primary = 'Nuevo negocio'; seg = true; chips = ['Abiertos', 'Míos', 'Etapa'];
+    } else if (a === 'personas') {
+      cols = [C('Nombre', '1.8fr'), C('RUT', '140px'), C('Cargo', '110px'), C('Instalación', '1.6fr'), C('Estado', '190px')];
+      rows = PER.map((r) => [{ text: r[0], cls: 't-label' }, { text: r[1], cls: 't-mono' }, { text: r[2] }, { text: r[3] }, badge(r[4], r[5])]);
+      phone = PER.map((r) => ({ t: r[0], d: r[2] + ' · ' + r[3], badge: r[4], badgeCls: 'badge b-' + r[5] }));
+      search = 'Buscar por nombre o RUT'; primary = 'Agregar persona'; chips = ['Activas', 'Cargo', 'Instalación'];
+    } else if (a === 'nomina') {
+      cols = [C('Persona', '1.8fr'), C('RUT', '140px'), C('Cargo', '110px'), C('Días', '64px', 1), C('Líquido', '130px', 1), C('Estado', '120px')];
+      rows = NOM.map((r) => [{ text: r[0], cls: 't-label' }, { text: r[1], cls: 't-mono' }, { text: r[2] }, { text: r[3], cls: 't-numeric' }, { text: r[4], cls: 't-numeric' }, badge(r[5], r[6])]);
+      phone = NOM.map((r) => ({ t: r[0], d: r[2] + ' · ' + r[4], badge: r[5], badgeCls: 'badge b-' + r[6] }));
+      search = 'Buscar por nombre o RUT'; primary = 'Calcular nómina'; chips = ['Octubre 2026', 'Cargo'];
+    } else {
+      cols = [C('Cuenta', '1.8fr'), C('RUT', '140px'), C(this.lbl('instalaciones'), '130px', 1), C('Estado', '140px'), C('Ejecutivo', '1fr')];
+      rows = CUE.map((r) => [{ text: r[0], cls: 't-label' }, { text: r[1], cls: 't-mono' }, { text: r[2], cls: 't-numeric' }, badge(r[3], r[4]), { text: r[5] }]);
+      phone = CUE.map((r) => ({ t: r[0], d: r[1] + ' · ' + r[2] + ' ' + this.lbl('instalaciones').toLowerCase(), badge: r[3], badgeCls: 'badge b-' + r[4] }));
+      search = 'Buscar por nombre o RUT'; primary = 'Nueva cuenta'; chips = ['Activas', 'Ejecutivo'];
+    }
+    const grid = cols.map((c) => c.w).join(' ');
+    const cell = (c, i) => ({ display: 'flex', alignItems: 'center', justifyContent: c.num ? 'flex-end' : 'flex-start', minWidth: 0, overflow: 'hidden', whiteSpace: 'nowrap', textOverflow: 'ellipsis' });
+    return {
+      search, primary: viewer ? '' : primary, seg, chips: chips.map((l, i) => ({ label: l, cls: 'chip toggle' + (i === 0 ? ' on' : '') })),
+      cols: cols.map((c, i) => ({ label: c.label, style: Object.assign(cell(c, i), { font: '500 12px/16px var(--font-sans)', color: 'var(--ds-fg-subtle)' }) })),
+      headStyle: { display: 'grid', gridTemplateColumns: grid, gap: 24, padding: '10px 16px', borderBottom: '1px solid var(--ds-border)' },
+      rowStyle: { display: 'grid', gridTemplateColumns: grid, gap: 24, padding: '0 16px', height: 48, alignItems: 'center', borderBottom: '1px solid var(--ds-border)', font: '400 14px/20px var(--font-sans)' },
+      rows: rows.map((r) => ({ cells: r.map((x, i) => ({ text: x.text, cls: x.cls || '', style: cell(cols[i], i) })) })),
+      phone, count: String(rows.length),
+    };
+  }
+  tabsFor(primary) {
+    const want = PRIMARY[primary] || PRIMARY.general;
+    const picked = [];
+    want.concat(FALLBACK).forEach((id) => { if (picked.length < 2 && this.vis(id) && !picked.includes(id)) picked.push(id); });
+    return picked;
+  }
+  cmd() {
+    const S = this.S;
+    const role = S.cmdk === 'viewer' ? 'viewer' : S.role;
+    const canWrite = role !== 'viewer';
+    const okItem = (it) => (!it.w || canWrite) && (!it.e || this.vis(it.e, role)) && !(role === 'viewer' && it.out);
+    const q = S.cmdk === 'results' || S.cmdk === 'viewer' ? 'quili' : S.cmdk === 'none' ? 'quilmes' : '';
+    let groups = [];
+    if (S.cmdk === 'initial') groups = [['Recientes', RECENTS], ['Acciones sugeridas', ACTIONS]];
+    else if (S.cmdk === 'firstuse') groups = [['Acciones sugeridas', ACTIONS]];
+    else if (S.cmdk === 'none') groups = canWrite ? [['Acciones', [{ i: 'plus', l: 'Nueva cuenta «quilmes»', c: 'Clientes', w: true, e: 'cuentas', create: true }]]] : [];
+    else groups = RESULTS;
+    let firstDone = false;
+    const mk = (it) => {
+      let pre = it.l, match = '', post = '';
+      if (q && !it.create) { const k = norm(it.l).indexOf(q); if (k >= 0) { pre = it.l.slice(0, k); match = it.l.slice(k, k + q.length); post = it.l.slice(k + q.length); } }
+      const hl = !firstDone; firstDone = true;
+      return { pre, match, post, ctx: it.c, hl, icon: 'ic sm i-' + it.i, iconP: 'ic i-' + it.i, cls: 'menu-item' + (hl ? ' on' : '') + (it.create ? ' accent' : ''), pCls: 'opt' + (hl ? ' hl' : '') + (it.create ? ' create' : ''), style: { flex: 'none', ...(hl ? { boxShadow: 'inset 0 0 0 1px var(--ds-border-strong)' } : {}) } };
+    };
+    const out = groups.map(([t, list]) => ({ title: t, rows: list.filter(okItem).slice(0, 10) })).filter((g) => g.rows.length).map((g) => ({ title: g.title, rows: g.rows.map(mk) }));
+    return {
+      groups: out, qText: q || 'Busca cuentas, personas, páginas o acciones', qStyle: q ? { color: 'var(--ds-fg)' } : { color: 'var(--ds-fg-subtle)', order: 2 },
+      isNone: S.cmdk === 'none', noneTitle: 'Sin resultados para «quilmes»', noneDesc: 'Revisa cómo lo escribiste o busca por RUT, folio o nombre de la instalación.',
+      help: S.cmdk === 'firstuse' ? 'Aquí verás los últimos 10 lugares que abras. Busca por nombre, RUT o folio.' : '',
+    };
+  }
+  renderVals() {
+    const S = this.S = this.s();
+    const dev = S.device;
+    const isDesktop = dev === 'desktop', isTablet = dev === 'tablet', isPhone = dev === 'phone';
+    const user = USERS[S.role] || USERS.owner;
+    const W = isPhone ? 375 : isTablet ? 1024 : (S.sidebarOnly ? 248 : 1280);
+    const H = S.height ? Number(S.height) : (isPhone ? 812 : isTablet ? 768 : 880);
+    const content = S.content === 'auto' ? (S.active === 'inicio' || S.active === 'bandeja' ? 'inicio' : 'list') : S.content;
+    const list = this.table();
+    const title = S.title || (content === '404' ? 'Página no encontrada' : content === 'ficha' ? 'Planta Quilicura' : content === 'prefs' ? 'Preferencias' : this.lbl(S.active));
+    const titleCount = content === 'list' ? list.count : '';
+    const bandejaVis = this.vis('bandeja');
+    const bItems = BANDEJA.filter((b) => !b.e || this.vis(b.e));
+    const empty = S.bandeja === 'empty';
+    const inicio = bandejaVis
+      ? { title: 'Bandeja', count: empty ? '' : bItems.length + ' pendientes', hasLink: !empty, empty, hasItems: !empty }
+      : { title: 'Pendientes', count: '', hasLink: false, empty, hasItems: !empty };
+    const items = (bandejaVis ? bItems : bItems.filter((b) => b.b === 'Aviso' || b.b === 'Tarea')).map((b) => ({ ...b, iconCls: 'ic sm i-' + b.i + ' muted', iconPCls: 'ic i-' + b.i + ' muted', badge: b.b, badgeCls: 'badge nodot b-' + b.bt }));
+    inicio.items = items; inicio.phoneItems = items.slice(0, 3);
+    const kpiAll = [
+      { k: 'Turnos sin cubrir hoy', v: '2', d: 'Planta Quilicura · Bodega Lampa', vStyle: { color: 'var(--ds-danger-fg)' } },
+      { k: 'Vencimientos en 30 días', v: '7', d: 'OS-10 y contratos', vStyle: { color: 'var(--ds-warning-fg)' } },
+      { k: 'Negocios abiertos', v: '12', d: '$ 86.300.000 mensual', e: 'negocios' },
+      { k: 'Personas activas', v: '148', d: '9 instalaciones' },
+    ].filter((k) => !k.e || this.vis(k.e)).slice(0, 3);
+    const primaryTabs = this.tabsFor(S.primary);
+    const tabIds = ['inicio'].concat(primaryTabs, ['buscar', 'mas']);
+    const ovr = S.overlay;
+    let tabOn = S.tabActive || (ovr === 'more' ? 'mas' : ovr === 'cmdk' ? 'buscar' : tabIds.includes(S.active) ? S.active : 'mas');
+    const bCount = bandejaVis && !empty && S.badge === 'count' ? String(bItems.length) : '';
+    const tabs = tabIds.map((id) => {
+      const on = id === tabOn;
+      const label = id === 'buscar' ? 'Buscar' : id === 'mas' ? 'Más' : id === 'banca' ? 'Banca' : this.lbl(id);
+      const icon = id === 'buscar' ? 'search' : id === 'mas' ? 'menu' : E[id][1];
+      const hasBadge = id === 'inicio' && !!bCount;
+      return {
+        cls: on ? 'on' : '', current: on ? 'page' : undefined, label, aria: hasBadge ? label + ', ' + bCount + ' pendientes en Bandeja' : label, iconCls: 'ic i-' + icon, hasBadge, badge: bCount,
+        pillStyle: { position: 'relative', width: 48, height: 26, borderRadius: 999, display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 'none', background: on ? 'var(--ds-accent-muted)' : 'transparent' },
+        labelStyle: { display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', textAlign: 'center', maxWidth: '100%', fontWeight: on ? 600 : 500, color: on ? 'var(--ds-accent)' : undefined },
+      };
+    });
+    const prefIds = (PREF_BY_ROLE[S.role] || []).filter((p) => p !== 'finanzas' || (this.vis('flujo') || this.vis('banca')));
+    const prefs = prefIds.map((p) => {
+      const on = p === S.primary;
+      const t = this.tabsFor(p).map((id) => id === 'banca' ? 'Banca' : this.lbl(id));
+      return { label: PRIMARY_LABEL[p], on: on ? 'true' : 'false', desc: ['Inicio'].concat(t, ['Buscar', 'Más']).join(' · '),
+        rowStyle: { display: 'flex', alignItems: 'center', gap: 12, minHeight: 64, padding: '10px 16px', borderTop: '1px solid var(--ds-border)', cursor: 'pointer', background: on ? 'var(--ds-accent-muted)' : 'transparent' },
+        radioStyle: { width: 20, height: 20, borderRadius: 999, flex: 'none', boxSizing: 'border-box', background: 'var(--ds-surface)', border: on ? '6px solid var(--ds-accent)' : '1px solid var(--ds-border-strong)' } };
+    });
+    const activeArea = E[S.active] ? E[S.active][2] : '';
+    const railItems = [];
+    const railPush = (id, label, icon, on) => railItems.push({ label, iconCls: 'ic i-' + icon, cls: 'rail-item' + (on ? ' on' : ''), current: on ? 'page' : undefined });
+    railPush('inicio', 'Inicio', 'home', activeArea === 'inicio');
+    AREAS.forEach(([a, label, icon]) => { const it = this.areaItems(a); if (!it.length) return; if (it.length === 1) railPush(it[0], this.lbl(it[0]), E[it[0]][1], S.active === it[0]); else railPush(a, label, icon, activeArea === a || S.railArea === a); });
+    const ra = AREAS.find((x) => x[0] === S.railArea);
+    const rail = ra ? { label: ra[1], items: this.areaItems(ra[0]).map((id) => ({ label: this.lbl(id), iconCls: 'ic sm i-' + E[id][1], cls: 'nav-item' + (S.active === id ? ' on' : '') })) } : { label: '', items: [] };
+    const cfgOn = S.active === 'config';
+    const skelRows = [0, 1, 2, 3, 4, 5, 6, 7].slice(0, isPhone ? 6 : 8).map((i) => ({ a: { width: [180, 220, 150, 200, 170, 240, 160, 190][i], height: 12 }, b: { width: [120, 90, 140, 110, 100, 130, 95, 115][i], height: 12 } }));
+    const isList = content === 'list';
+    return {
+      theme: S.theme, device: dev, screenLabel: [dev, S.scenario, S.role, S.active, ovr].join(' · '),
+      frameStyle: { width: W, height: H, flexDirection: isPhone ? 'column' : 'row', flex: 'none' },
+      isDesktop, isTablet, isPhone, showMain: !isPhone && !S.sidebarOnly, topSearch: S.topSearch, operator: S.operator,
+      portalBtnStyle: { display: 'flex', alignItems: 'center', gap: 10, height: 44, padding: '0 10px', border: '1px solid var(--ds-border)', borderRadius: 10, background: 'var(--ds-bg)', color: 'var(--ds-fg)', textAlign: 'left', cursor: 'pointer', ...(ovr === 'portal' ? { outline: '2px solid var(--ds-focus)', outlineOffset: 2 } : {}) },
+      userBtnStyle: { display: 'flex', alignItems: 'center', gap: 10, padding: '12px 20px', border: 0, borderTop: '1px solid var(--ds-border)', background: ovr === 'user' ? 'var(--ds-fill)' : 'transparent', color: 'var(--ds-fg)', cursor: 'pointer', flex: 'none', width: '100%' },
+      nav: isDesktop ? this.rows('side') : [], sheetRows: isPhone && ovr === 'more' ? this.rows('sheet') : [],
+      cfg: { cls: 'nav-item' + (cfgOn ? ' on' : ''), current: cfgOn ? 'page' : undefined, style: S.focus === 'config' ? { outline: '2px solid var(--ds-focus)', outlineOffset: 2 } : {} },
+      user, title, titleCount, shortcut: S.os === 'win' ? 'Ctrl K' : '⌘K',
+      appbarStyle: { padding: isTablet ? '0 24px' : '0 32px' },
+      mainPadStyle: { flex: 1, minHeight: 0, overflow: 'hidden', padding: isTablet ? 24 : '24px 32px 32px', display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 1280 },
+      c: { isList: isList, isSkeleton: content === 'skeleton', isInicio: content === 'inicio', isFicha: content === 'ficha', is404: content === '404' },
+      pc: { isList: isList, isSkeleton: content === 'skeleton', isInicio: content === 'inicio', isPrefs: content === 'prefs', is404: content === '404' },
+      list, skelRows, inicio, kpis: kpiAll, kpisPhone: kpiAll.slice(0, 2), kpiGridStyle: { display: 'grid', gridTemplateColumns: 'repeat(' + kpiAll.length + ', minmax(0,1fr))', gap: 16 },
+      fichaPinned: S.pinState === 'fijada' ? 'true' : 'false', fichaPinLabel: S.pinState === 'fijada' ? 'Fijada' : 'Fijar', fichaPinStyle: S.pinState === 'fijada' ? { color: 'var(--ds-accent)' } : {},
+      tabs, prefs, prefsNote: 'Solo ves las áreas que puedes usar. Si una entrada no está contratada, su lugar lo toma la siguiente disponible.',
+      railItems, railCfgCls: 'rail-item' + (cfgOn ? ' on' : ''), rail,
+      cmd: this.cmd(),
+      ov: { isCmdDesk: ovr === 'cmdk' && !isPhone, isCmdPhone: ovr === 'cmdk' && isPhone, isMore: ovr === 'more' && isPhone, isUser: ovr === 'user', isPortal: ovr === 'portal', isBell: ovr === 'bell', isPinMenu: ovr === 'pinmenu', isToast: ovr === 'pinfull', isRail: !!ra && isTablet },
+      portalList: ['ERP', 'Supervisor', 'Terreno', 'Trabajador'],
+      avisos: [
+        { t: 'Turno sin cubrir · Planta Quilicura', d: 'Portería 2 · Noche · hace 12 min', icon: 'ic sm i-alert', dotStyle: { width: 32, height: 32, borderRadius: 999, flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--ds-danger-muted)', color: 'var(--ds-danger-fg)' } },
+        { t: 'OS-10 por vencer · 3 personas', d: 'Vencen antes del 15-11-2026', icon: 'ic sm i-file', dotStyle: { width: 32, height: 32, borderRadius: 999, flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--ds-warning-muted)', color: 'var(--ds-warning-fg)' } },
+        { t: 'Pauta de noviembre aprobada', d: 'Logística Andina SpA · 08:57', icon: 'ic sm i-check', dotStyle: { width: 32, height: 32, borderRadius: 999, flex: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--ds-success-muted)', color: 'var(--ds-success-fg)' } },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
