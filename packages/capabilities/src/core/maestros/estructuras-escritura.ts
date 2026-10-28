@@ -29,6 +29,7 @@ export const estructurasCreate = defineCapability({
       ctx = { ...ctx, db: tx, transaccion: (fn) => fn(tx) };
       const ref = await referencia(ctx, input);
       await bloquearCapa(tx, ctx.tenantId, input.nivel, ref.id);
+      // Sin lectura sensible se rechaza toda versión: podría borrar bonos ocultos.
       if (!ctx.autorizar(PERMISOS_CORE.estructurasReadSensible))
         throw rechazoSensible("No tienes permiso para crear versiones de esta capa de sueldo.");
       const desde = aFecha(input.vigenteDesde);

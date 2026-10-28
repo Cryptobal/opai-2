@@ -396,7 +396,7 @@ Los resultados finales del gate y el head se dejan en `PR-BODY.md`, sin versiona
 
 ### Corrección de montos de QA del PR #80
 
-Encargo de corrección: los montos nuevos se validan como pesos enteros entre 0 y 100.000.000 por concepto, sin reinterpretar texto inválido; los porcentajes conservan su regla. Codex implementa el tope indicado en el encargo y acepta puntos únicamente como separadores chilenos de miles. La vista previa identifica conceptos nuevos y muestra los montos en pesos. La validación y pruebas del cambio quedan detalladas en el PR.
+Encargo de corrección: los montos nuevos se validan como pesos enteros entre 0 y 100.000.000 por concepto (ADR-053), sin reinterpretar texto inválido; los porcentajes conservan su regla. Codex implementa el tope indicado en el encargo y acepta puntos únicamente como separadores chilenos de miles. La vista previa identifica conceptos nuevos y muestra los montos en pesos. La validación y pruebas del cambio quedan detalladas en el PR.
 
 ## Construcción del PR 2 · Codex, 27-oct-2026
 

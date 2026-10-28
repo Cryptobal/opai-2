@@ -2,7 +2,7 @@ import { z } from "zod";
 import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
-import { noEncontrado, prohibido, reglaDeNegocio } from "../../errores";
+import { noEncontrado, prohibido, rechazoSensible, reglaDeNegocio } from "../../errores";
 import { uuidSchema } from "../esquemas";
 import { escribirConEvento } from "./comun";
 import { ocultarMontos } from "./estructuras-acceso";
@@ -22,6 +22,8 @@ export const estructurasAnular = defineCapability({
   async handler(ctx, input, { dryRun }) {
     if (ctx.rol !== "owner" && ctx.rol !== "admin")
       throw prohibido("Solo owner y admin pueden cambiar capas de sueldo.");
+    if (!ctx.autorizar(PERMISOS_CORE.estructurasReadSensible))
+      throw rechazoSensible("No tienes permiso para anular versiones de esta capa de sueldo.");
     return ctx.transaccion(async (tx) => {
       ctx = { ...ctx, db: tx, transaccion: (fn) => fn(tx) };
       const where = { id: input.id, AND: [await dondeEstructura(ctx)] };

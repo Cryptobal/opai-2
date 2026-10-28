@@ -34,7 +34,7 @@ describe("permisos de sueldos sensibles", () => {
     expect(await codigo(sin, "core.estructuras.create", input, { dryRun: true })).toBe("FORBIDDEN");
     expect(eventos.some((e) => e.capability === "core.sueldo.rechazo_sensible")).toBe(false);
   });
-  it.each(["puesto", "persona"] as const)(
+  it.each(["instalacion", "puesto", "persona"] as const)(
     "rechaza reemplazar bonos ocultos en %s y audita el rechazo",
     async (nivel) => {
       const { ctx, eventos } = contextoDePrueba();
@@ -60,9 +60,11 @@ describe("permisos de sueldos sensibles", () => {
       });
       const entrada = {
         nivel,
-        ...(nivel === "puesto"
-          ? { puestoId: puesto.id }
-          : { personaId: persona.id, motivo: "Prueba" }),
+        ...(nivel === "instalacion"
+          ? { instalacionId: instalacion.id }
+          : nivel === "puesto"
+            ? { puestoId: puesto.id }
+            : { personaId: persona.id, motivo: "Prueba" }),
         sueldoBase: 600000,
         colacion: 0,
         movilizacion: 0,
@@ -86,7 +88,8 @@ describe("permisos de sueldos sensibles", () => {
       expect(rechazos[0]).toMatchObject({ tenantId: ctx.tenantId, actor: ctx.actor, payload: {} });
       const versiones = await dato<{ items: { monto: number }[] }[]>(ctx, "core.estructuras.list", {
         nivel,
-        refId: nivel === "puesto" ? puesto.id : persona.id,
+        refId:
+          nivel === "instalacion" ? instalacion.id : nivel === "puesto" ? puesto.id : persona.id,
       });
       expect(versiones).toHaveLength(1);
       expect(versiones[0]?.items).toEqual(

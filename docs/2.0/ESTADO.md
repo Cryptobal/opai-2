@@ -761,3 +761,4 @@ a 375/1024/1280 con un worker; lista/detalle/persona con 5/8/6 operaciones y
 aserción ≤8. Capturas de datos sintéticos en `apps/web/e2e/__screenshots__/07b-*cargo*.png`.
 Autorrevisión por subagente sin bloqueantes; CI y revisión independiente del head
 se verificarán después de abrir el PR, que este encargo prohíbe crear.
+- Pendientes de cierre del Núcleo (CAR-19): correcciones de permisos, auditoría de rechazos y regresiones de sueldos y navegación; detalle y validación en el PR.
