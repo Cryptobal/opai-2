@@ -9,11 +9,8 @@ import { negociosCreate, negociosUpdate } from "./negocios-escritura";
 import { negociosGet } from "./negocios-ficha";
 import { negociosEmbudo, negociosList } from "./negocios-lectura";
 import { negociosGanar, negociosMover } from "./negocios-mover";
-import {
-  negociosDesvincularInstalacion,
-  negociosSetContactos,
-  negociosVincularInstalacion,
-} from "./negocios-vinculos";
+import { negociosSetContactos } from "./negocios-contactos";
+import { negociosDesvincularInstalacion, negociosVincularInstalacion } from "./negocios-vinculos";
 
 export { ajustesComercial } from "./ajustes";
 
