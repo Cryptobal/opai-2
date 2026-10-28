@@ -25,6 +25,7 @@ export type GestionRetencion = (typeof GESTIONES_RETENCION)[number];
 export type ReglaRetencion = {
   /** Clave estable de la regla (sufijo del ajuste `cumplimiento_retencion_<clave>_dias`). */
   clave: string;
+  nombre: string; // Nombre del dato para el cliente («Contactos de clientes»).
   /** Tabla del inventario (@@map). */
   tabla: string;
   categoria: CategoriaDato;
@@ -33,7 +34,7 @@ export type ReglaRetencion = {
   /** Periodo propuesto en días corridos; 0 = sin vencimiento por política. Siempre PROPUESTA. */
   diasPropuestos: number;
   gestion: GestionRetencion;
-  /** Por qué, en lenguaje de negocio (va al RAT y al PR). */
+  /** Por qué, en lenguaje claro para el cliente (lo ve en Retención y en el RAT). */
   motivo: string;
 };
 
@@ -45,35 +46,43 @@ const DIA_MS = 86_400_000;
  * trabajo corre en simulación (ver el ajuste `cumplimiento_retencion_activa`).
  */
 export const POLITICA_RETENCION: readonly ReglaRetencion[] = [
-  { clave: "idempotencias", tabla: "idempotencias", categoria: "identificacion", accion: "eliminar", desde: "creacion", diasPropuestos: 1, gestion: "externa", motivo: "Caché temporal de resultados y confirmaciones: vigencia de 24 horas y purga diaria existente core.idempotencia.purgar; sin memoria conversacional duradera." },
-  { clave: "aprobaciones_plataforma", tabla: "aprobaciones_plataforma", categoria: "identificacion", accion: "conservar", desde: "cierre", diasPropuestos: 0, gestion: "pendiente", motivo: "Cola de aprobaciones de plataforma (CAR-36): vencen a las 72 horas; la retención del historial la confirma Carlos con el abogado." },
-  { clave: "aprobaciones", tabla: "aprobaciones", categoria: "identificacion", accion: "conservar", desde: "cierre", diasPropuestos: 0, gestion: "pendiente", motivo: "Las solicitudes pendientes vencen a las 72 horas; la retención del historial de decisiones humanas la confirma Carlos con el abogado." },
-  { clave: "gasto_agente_mes", tabla: "gasto_agente_mes", categoria: "economica", accion: "conservar", desde: "creacion", diasPropuestos: 0, gestion: "pendiente", motivo: "Contador mensual de presupuesto por agente externo o interno: retención de la evidencia de consumo por confirmar con el abogado." },
-  { clave: "personas", tabla: "personas", categoria: "identificacion", accion: "anonimizar", desde: "fin_relacion", diasPropuestos: 1825, gestion: "trabajo", motivo: "Identidad del trabajador: se conserva mientras dure el vínculo y el plazo de conservación laboral (propuesta 5 años desde el término; el abogado confirma). Se anonimiza solo la identidad: el vínculo, la remuneración y demás hechos regulados quedan íntegros." },
-  { clave: "contactos", tabla: "contactos", categoria: "contacto", accion: "anonimizar", desde: "archivado", diasPropuestos: 730, gestion: "trabajo", motivo: "Contacto de una cuenta cliente archivado: sin relación comercial viva, se anonimiza tras 2 años (propuesta)." },
-  { clave: "envios", tabla: "envios", categoria: "contacto", accion: "anonimizar", desde: "creacion", diasPropuestos: 365, gestion: "trabajo", motivo: "Bitácora de envíos: el destinatario (correo o teléfono) sobra una vez pasado el periodo de soporte (propuesta 1 año); se conserva el hecho del envío." },
-  { clave: "invitaciones", tabla: "invitations", categoria: "contacto", accion: "eliminar", desde: "cierre", diasPropuestos: 90, gestion: "trabajo", motivo: "Invitación ya aceptada, vencida o revocada: transitoria, sin valor probatorio; se elimina a los 90 días del cierre (propuesta)." },
-  { clave: "vinculos", tabla: "vinculos_laborales", categoria: "laboral", accion: "conservar", desde: "fin_relacion", diasPropuestos: 0, gestion: "regulado", motivo: "Hecho laboral regulado (ADR-023): no se borra. Al anonimizar a la persona deja de ser identificable." },
-  { clave: "sueldos", tabla: "estructuras_sueldo", categoria: "economica", accion: "conservar", desde: "creacion", diasPropuestos: 0, gestion: "regulado", motivo: "Remuneración: obligación legal de conservar (ADR-023); no se borra." },
-  { clave: "cuentas", tabla: "cuentas", categoria: "identificacion", accion: "conservar", desde: "creacion", diasPropuestos: 0, gestion: "pendiente", motivo: "Relación comercial y tributaria con el cliente: el plazo lo fija Carlos con el abogado." },
-  { clave: "representantes", tabla: "cuentas_representantes", categoria: "identificacion", accion: "conservar", desde: "creacion", diasPropuestos: 0, gestion: "pendiente", motivo: "Representante legal del cliente: sigue la suerte de la cuenta; el plazo lo fija Carlos con el abogado." },
-  { clave: "usuarios", tabla: "users", categoria: "identificacion", accion: "conservar", desde: "creacion", diasPropuestos: 0, gestion: "pendiente", motivo: "Usuario del sistema, tabla global sin tenant: su baja se define con la política de seguridad (B5) y el borrado del tenant (B10)." },
-  { clave: "sesiones", tabla: "sessions", categoria: "identificacion", accion: "conservar", desde: "creacion", diasPropuestos: 0, gestion: "pendiente", motivo: "IP y agente de las sesiones, tabla global sin tenant: la expiración y la retención de la IP se coordinan con B5." },
-  { clave: "credenciales", tabla: "accounts", categoria: "credenciales", accion: "conservar", desde: "creacion", diasPropuestos: 0, gestion: "externa", motivo: "Contraseña con hash y tokens: viven y mueren con la cuenta del usuario (identidad)." },
-  { clave: "intentos_login", tabla: "login_intentos", categoria: "identificacion", accion: "eliminar", desde: "creacion", diasPropuestos: 30, gestion: "externa", motivo: "Intentos de acceso (07c, B1): los purga a diario `core.purgar_login_intentos` a los 30 días; este brief no la duplica ni la baja de 30." },
-  { clave: "documentos", tabla: "documentos", categoria: "laboral", accion: "conservar", desde: "creacion", diasPropuestos: 0, gestion: "pendiente", motivo: "Archivos en R2 (contratos, certificados, cédulas): algunos son hechos regulados; la política por tipo de documento la decide Carlos." },
-  { clave: "perfil_empresa", tabla: "perfil_empresa", categoria: "contacto", accion: "conservar", desde: "creacion", diasPropuestos: 0, gestion: "externa", motivo: "Datos de la empresa y su DPO: se eliminan con el borrado del tenant (B10)." },
-  { clave: "dpa", tabla: "dpa_aceptaciones", categoria: "identificacion", accion: "conservar", desde: "creacion", diasPropuestos: 0, gestion: "regulado", motivo: "Prueba de aceptación del DPA: append-only, no se borra." },
-  { clave: "auditoria", tabla: "audit_events", categoria: "identificacion", accion: "conservar", desde: "creacion", diasPropuestos: 0, gestion: "regulado", motivo: "Auditoría append-only: no se borra." },
-  { clave: "auditoria_global", tabla: "auditoria_global", categoria: "identificacion", accion: "conservar", desde: "creacion", diasPropuestos: 0, gestion: "regulado", motivo: "Auditoría global append-only (plataforma y, con CAR-42, seguridad de la cuenta): no se borra." },
-  { clave: "consentimientos", tabla: "consentimientos", categoria: "identificacion", accion: "conservar", desde: "creacion", diasPropuestos: 0, gestion: "regulado", motivo: "Prueba del consentimiento y de su revocación: append-only, no se borra." },
-  { clave: "solicitudes", tabla: "solicitudes_arco", categoria: "identificacion", accion: "conservar", desde: "creacion", diasPropuestos: 0, gestion: "regulado", motivo: "Prueba de la atención al titular dentro de plazo: no se borra." },
-  { clave: "retencion_registro", tabla: "retencion_ejecuciones", categoria: "identificacion", accion: "conservar", desde: "creacion", diasPropuestos: 0, gestion: "regulado", motivo: "Prueba de lo que hizo la política de retención: append-only, sin datos personales en claro; no se borra." },
-  { clave: "incidentes", tabla: "incidentes", categoria: "contacto", accion: "conservar", desde: "creacion", diasPropuestos: 0, gestion: "regulado", motivo: "Registro de incidentes y avisos de brecha: append-only, no se borra." },
+  { clave: "idempotencias", nombre: "Confirmaciones temporales", tabla: "idempotencias", categoria: "identificacion", accion: "eliminar", desde: "creacion", diasPropuestos: 1, gestion: "externa", motivo: "Copia temporal de resultados para no repetir una misma operación: dura 24 horas y se borra sola cada día." },
+  { clave: "aprobaciones", nombre: "Aprobaciones de agentes", tabla: "aprobaciones", categoria: "identificacion", accion: "conservar", desde: "cierre", diasPropuestos: 0, gestion: "pendiente", motivo: "Las solicitudes sin respuesta vencen a las 72 horas. Cuánto tiempo guardar el historial de decisiones está por definir con asesoría legal." },
+  { clave: "aprobaciones_plataforma", nombre: "Aprobaciones de plataforma", tabla: "aprobaciones_plataforma", categoria: "identificacion", accion: "conservar", desde: "cierre", diasPropuestos: 0, gestion: "pendiente", motivo: "Solicitudes de agentes sobre acciones de plataforma, fuera de las empresas: las que no se responden vencen a las 72 horas. Cuánto tiempo guardar el historial está por definir con asesoría legal." },
+  { clave: "gasto_agente_mes", nombre: "Gasto de agentes", tabla: "gasto_agente_mes", categoria: "economica", accion: "conservar", desde: "creacion", diasPropuestos: 0, gestion: "pendiente", motivo: "Total mensual de uso de cada agente conectado. Cuánto tiempo guardarlo está por definir con asesoría legal." },
+  { clave: "personas", nombre: "Personas (trabajadores)", tabla: "personas", categoria: "identificacion", accion: "anonimizar", desde: "fin_relacion", diasPropuestos: 1825, gestion: "trabajo", motivo: "Datos que identifican al trabajador: se guardan mientras dure la relación laboral y el plazo legal de conservación (propuesta: 5 años desde el término). Después se anonimiza solo su identidad; el contrato, las remuneraciones y los demás registros laborales se mantienen completos." },
+  { clave: "contactos", nombre: "Contactos de clientes", tabla: "contactos", categoria: "contacto", accion: "anonimizar", desde: "archivado", diasPropuestos: 730, gestion: "trabajo", motivo: "Contacto de un cliente archivado: si ya no hay relación comercial, se anonimiza a los 2 años (propuesta)." },
+  { clave: "envios", nombre: "Envíos de avisos", tabla: "envios", categoria: "contacto", accion: "anonimizar", desde: "creacion", diasPropuestos: 365, gestion: "trabajo", motivo: "Registro de correos y mensajes enviados: el destinatario se anonimiza al año (propuesta) y se mantiene el registro del envío." },
+  { clave: "invitaciones", nombre: "Invitaciones", tabla: "invitations", categoria: "contacto", accion: "eliminar", desde: "cierre", diasPropuestos: 90, gestion: "trabajo", motivo: "Invitación ya aceptada, vencida o revocada: no sirve como respaldo y se elimina a los 90 días (propuesta)." },
+  { clave: "vinculos", nombre: "Vínculos laborales", tabla: "vinculos_laborales", categoria: "laboral", accion: "conservar", desde: "fin_relacion", diasPropuestos: 0, gestion: "regulado", motivo: "Registro laboral que la ley obliga a conservar: no se borra. Cuando se anonimiza a la persona, deja de identificarla." },
+  { clave: "sueldos", nombre: "Remuneraciones", tabla: "estructuras_sueldo", categoria: "economica", accion: "conservar", desde: "creacion", diasPropuestos: 0, gestion: "regulado", motivo: "La ley obliga a conservar las remuneraciones: no se borran." },
+  { clave: "cuentas", nombre: "Cuentas de clientes", tabla: "cuentas", categoria: "identificacion", accion: "conservar", desde: "creacion", diasPropuestos: 0, gestion: "pendiente", motivo: "Relación comercial y tributaria con el cliente. El plazo está por definir con asesoría legal." },
+  { clave: "representantes", nombre: "Representantes legales", tabla: "cuentas_representantes", categoria: "identificacion", accion: "conservar", desde: "creacion", diasPropuestos: 0, gestion: "pendiente", motivo: "Representante legal del cliente: sigue el mismo plazo que su cuenta, por definir con asesoría legal." },
+  { clave: "usuarios", nombre: "Usuarios", tabla: "users", categoria: "identificacion", accion: "conservar", desde: "creacion", diasPropuestos: 0, gestion: "pendiente", motivo: "Usuarios con acceso al sistema. Su baja se define junto con la política de seguridad y el cierre de la cuenta de la empresa." },
+  { clave: "sesiones", nombre: "Sesiones", tabla: "sessions", categoria: "identificacion", accion: "conservar", desde: "creacion", diasPropuestos: 0, gestion: "pendiente", motivo: "Dirección IP y dispositivo de cada inicio de sesión. Cuándo vencen y cuánto tiempo se guarda la IP se definen junto con la política de seguridad." },
+  { clave: "credenciales", nombre: "Credenciales", tabla: "accounts", categoria: "credenciales", accion: "conservar", desde: "creacion", diasPropuestos: 0, gestion: "externa", motivo: "Contraseñas (guardadas de forma que nadie puede leerlas) y accesos: existen solo mientras exista el usuario." },
+  { clave: "intentos_login", nombre: "Intentos de ingreso", tabla: "login_intentos", categoria: "identificacion", accion: "eliminar", desde: "creacion", diasPropuestos: 30, gestion: "externa", motivo: "Intentos de ingreso al sistema: se borran solos a los 30 días." },
+  { clave: "documentos", nombre: "Documentos", tabla: "documentos", categoria: "laboral", accion: "conservar", desde: "creacion", diasPropuestos: 0, gestion: "pendiente", motivo: "Archivos adjuntos (contratos, certificados, cédulas). Algunos deben conservarse por ley; el plazo de cada tipo de documento está por definir." },
+  { clave: "perfil_empresa", nombre: "Datos de la empresa", tabla: "perfil_empresa", categoria: "contacto", accion: "conservar", desde: "creacion", diasPropuestos: 0, gestion: "externa", motivo: "Datos de la empresa y de su delegado de protección de datos: se eliminan al cerrar la cuenta de la empresa." },
+  { clave: "dpa", nombre: "Aceptaciones del acuerdo de datos", tabla: "dpa_aceptaciones", categoria: "identificacion", accion: "conservar", desde: "creacion", diasPropuestos: 0, gestion: "regulado", motivo: "Constancia de que la empresa aceptó el acuerdo de tratamiento de datos: no se modifica ni se borra." },
+  { clave: "auditoria", nombre: "Auditoría", tabla: "audit_events", categoria: "identificacion", accion: "conservar", desde: "creacion", diasPropuestos: 0, gestion: "regulado", motivo: "Registro de quién hizo qué y cuándo: no se modifica ni se borra." },
+  { clave: "auditoria_global", nombre: "Auditoría de plataforma", tabla: "auditoria_global", categoria: "identificacion", accion: "conservar", desde: "creacion", diasPropuestos: 0, gestion: "regulado", motivo: "Registro de lo que hace el equipo de plataforma (y, más adelante, de los accesos a la cuenta): no se modifica ni se borra." },
+  { clave: "consentimientos", nombre: "Consentimientos", tabla: "consentimientos", categoria: "identificacion", accion: "conservar", desde: "creacion", diasPropuestos: 0, gestion: "regulado", motivo: "Constancia de cada consentimiento y de su retiro: no se modifica ni se borra." },
+  { clave: "solicitudes", nombre: "Solicitudes de titulares", tabla: "solicitudes_arco", categoria: "identificacion", accion: "conservar", desde: "creacion", diasPropuestos: 0, gestion: "regulado", motivo: "Constancia de que cada solicitud de un titular se atendió dentro de plazo: no se borra." },
+  { clave: "retencion_registro", nombre: "Registro de retención", tabla: "retencion_ejecuciones", categoria: "identificacion", accion: "conservar", desde: "creacion", diasPropuestos: 0, gestion: "regulado", motivo: "Constancia de lo que hizo la política de retención, sin datos personales: no se modifica ni se borra." },
+  { clave: "incidentes", nombre: "Incidentes", tabla: "incidentes", categoria: "contacto", accion: "conservar", desde: "creacion", diasPropuestos: 0, gestion: "regulado", motivo: "Registro de incidentes de seguridad y de sus avisos: no se modifica ni se borra." },
 ];
 
 export const reglaDe = (tabla: string): ReglaRetencion | undefined =>
   POLITICA_RETENCION.find((r) => r.tabla === tabla);
+
+/**
+ * Reglas pendientes de decisión legal (CAR-39): su plazo es configurable por el tenant pero parte en 0
+ * (apagada) y el trabajo diario no las aplica. Claude no fija sus plazos ni su acción: los decide
+ * Carlos con el abogado; recién entonces cada una pasa a «trabajo» con su mecanismo.
+ */
+export const reglasPendientes = (): ReglaRetencion[] =>
+  POLITICA_RETENCION.filter((r) => r.gestion === "pendiente");
 
 /** Reglas que el trabajo diario aplica (las demás son informativas). */
 export const reglasDelTrabajo = (): ReglaRetencion[] =>
@@ -107,17 +116,20 @@ export function fechaCorte(ahora: Date, dias: number): Date | null {
 
 /** Texto legible de la regla para el RAT («anonimizar a los 365 días de la creación»). */
 export function describirRegla(regla: ReglaRetencion, dias: number): string {
-  if (regla.gestion === "regulado") return `Se conserva (hecho regulado, ADR-023): ${regla.motivo}`;
-  if (regla.gestion === "pendiente") return `Pendiente de decisión: ${regla.motivo}`;
-  if (regla.gestion === "externa") return `Gestión externa: ${regla.motivo}`;
-  if (dias <= 0) return `Sin vencimiento configurado: ${regla.motivo}`;
+  if (regla.gestion === "regulado") return `Se conserva, no se borra. ${regla.motivo}`;
+  if (regla.gestion === "pendiente")
+    return dias > 0
+      ? `Plazo por definir (registrado: ${dias} días; todavía no se aplica). ${regla.motivo}`
+      : `Plazo por definir (sin aplicar). ${regla.motivo}`;
+  if (regla.gestion === "externa") return `Se gestiona por separado. ${regla.motivo}`;
+  if (dias <= 0) return `Sin vencimiento configurado. ${regla.motivo}`;
   const desde = {
     creacion: "de la creación",
     fin_relacion: "del término de la relación",
     archivado: "de archivarlo",
     cierre: "de su cierre",
   }[regla.desde];
-  return `${regla.accion === "eliminar" ? "Eliminar" : "Anonimizar"} a los ${dias} días ${desde} (propuesta a confirmar): ${regla.motivo}`;
+  return `${regla.accion === "eliminar" ? "Eliminar" : "Anonimizar"} a los ${dias} días ${desde} (plazo propuesto, a confirmar). ${regla.motivo}`;
 }
 
 export type Elegibilidad =

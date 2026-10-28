@@ -8,7 +8,7 @@ import { diasDeRegla, politicaActiva } from "./retencion-politica";
 import { EJECUTORES, type Ejecutor, exclusionesAbiertas } from "./retencion-reglas";
 
 const LOTE = 100;
-const MAX_LOTES = 20;
+const MAX_LOTES = 20; // tope de la corrida: 2.000 filas por regla y día (la simulación cuenta igual)
 
 type Resultado = { tabla: string; modo: "simulacion" | "aplicada"; filas: number };
 
@@ -40,12 +40,16 @@ export async function correrRegla(
   });
   let total = 0;
   if (!activa) {
-    total = await e.contar(ctx, corte, ex);
+    total = await e.contar(ctx, corte, ex, LOTE * MAX_LOTES);
     if (total > 0) await ctx.transaccion((tx) => tx.retencionEjecucion.create({ data: fila(total) }));
   } else {
+    let despues: string | null = null;
     for (let i = 0; i < MAX_LOTES; i++) {
-      const ids = await e.lote(ctx, corte, ex, LOTE, ahora, dias);
-      if (ids.length === 0) break;
+      const l = await e.lote(ctx, corte, ex, LOTE, despues, ahora, dias);
+      if (l.ultimo === null) break; // no quedan filas que leer
+      despues = l.ultimo;
+      const ids = l.ids;
+      if (ids.length === 0) continue; // lote leído sin elegibles: el cursor ya avanzó
       const n = await ctx.transaccion(async (tx) => {
         const hechas = await e.aplicar(tx, ids, ahora, corte);
         if (hechas === 0) return 0;
@@ -57,8 +61,9 @@ export async function correrRegla(
         });
         return hechas;
       });
+      // Un lote sin cambios (p. ej. todos con solicitud abierta) ya no detiene la regla (§21):
+      // el cursor avanza al siguiente y el tope de lotes acota la corrida.
       total += n;
-      if (n === 0) break; // nada cambió: no repetir el mismo lote
     }
   }
   return total === 0 ? null : { tabla: e.regla.tabla, modo, filas: total };
