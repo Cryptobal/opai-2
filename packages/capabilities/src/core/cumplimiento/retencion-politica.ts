@@ -7,12 +7,15 @@ import type { Contexto } from "../../types";
 import { ajuste } from "../config";
 import { claveAjusteRetencion } from "../config/nucleo-retencion";
 
-/** Días efectivos de una regla: el ajuste del tenant si la aplica el trabajo; si no, la propuesta. */
+/**
+ * Días efectivos de una regla: el ajuste del tenant si la aplica el trabajo o si está pendiente de
+ * decisión (configurable, parte en 0 y no se aplica, CAR-39); si no, el valor del catálogo.
+ */
 export async function diasDeRegla(
   ctx: Contexto,
   r: { clave: string; gestion: string; diasPropuestos: number },
 ): Promise<number> {
-  if (r.gestion !== "trabajo") return r.diasPropuestos;
+  if (r.gestion !== "trabajo" && r.gestion !== "pendiente") return r.diasPropuestos;
   return ajuste<number>(ctx, "core", claveAjusteRetencion(r.clave));
 }
 

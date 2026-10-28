@@ -13,7 +13,7 @@ import { aFecha, definidos, opcionalAFecha } from "./comun";
 import { cargoParaVinculo, crearVinculo } from "./personas-escritura";
 import { personaDe } from "./personas-vista";
 import { camposVinculo, vinculoSchema, vistaVinculo } from "./vinculos-vista";
-import { exigirNoAnonimizado } from "./anonimizado";
+import { bloquearNoAnonimizado, exigirNoAnonimizado } from "./anonimizado";
 
 export async function vinculoDe(ctx: Contexto, id: string) {
   const v = await ctx.db.vinculoLaboral.findFirst({
@@ -76,6 +76,7 @@ export const vinculosCreate = defineCapability({
       });
     }
     const creado = await ctx.transaccion(async (tx) => {
+      await bloquearNoAnonimizado(tx, "persona", personaId);
       const r = await crearVinculo(ctx, tx, personaId, v);
       if (p.estado !== "activa")
         await tx.persona.update({ where: { id: personaId }, data: { estado: "activa" } });

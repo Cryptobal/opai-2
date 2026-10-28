@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { reglasDelTrabajo } from "@opai/domain";
+import { reglasDelTrabajo, reglasPendientes } from "@opai/domain";
 
 import { defineAjustes } from "./registro";
 
@@ -19,6 +19,24 @@ const dias = Object.fromEntries(
     z.number().int().min(0).max(36_500).default(r.diasPropuestos).meta({
       etiqueta: `Retención · ${r.clave} (días)`,
       ayuda: `PROPUESTA a confirmar con el abogado. ${r.motivo} 0 = sin vencimiento.`,
+      grupo: "Cumplimiento",
+      ambito: "tenant",
+      permiso: PERMISO,
+      soloPersonas: true,
+      control: "numero",
+    }),
+  ]),
+);
+
+// Las 7 categorías pendientes de decisión legal (CAR-39): configurables y APAGADAS (0). El plazo
+// queda registrado si se fija, pero el trabajo diario no lo aplica hasta que Carlos defina con el
+// abogado el plazo y la acción; Claude no los fija.
+const pendientes = Object.fromEntries(
+  reglasPendientes().map((r) => [
+    claveAjusteRetencion(r.clave),
+    z.number().int().min(0).max(36_500).default(0).meta({
+      etiqueta: `Retención · ${r.clave} (días, pendiente)`,
+      ayuda: `PENDIENTE de decisión legal: 0 = apagada. Aunque se registre un plazo, no se aplica hasta definir la acción con el abogado. ${r.motivo}`,
       grupo: "Cumplimiento",
       ambito: "tenant",
       permiso: PERMISO,
@@ -47,5 +65,6 @@ export const AJUSTES_RETENCION = defineAjustes(
       control: "switch",
     }),
     ...dias,
+    ...pendientes,
   }),
 );

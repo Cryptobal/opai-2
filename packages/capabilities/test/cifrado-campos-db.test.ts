@@ -8,8 +8,10 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { type Entorno, prepararEntorno, urlPropietario } from "../../db/test/entorno";
 
-import { crearCifradoDeCampos } from "../src/core/cumplimiento/cifrado-campos";
+import { crearCifradoDeCampos, kidDe, recifrarValor } from "../src/core/cumplimiento/cifrado-campos";
 import type * as ModuloCapacidades from "../src";
+
+const generarDekPrueba = () => randomBytes(32);
 
 // Inventario de prueba: salud y biometría aún no existen como tablas (llegan en fase 4).
 const INVENTARIO = defineDatosPersonales("prueba", [
@@ -43,6 +45,8 @@ describe.skipIf(!urlPropietario)("cifrado de campos sensibles en base real", () 
   beforeAll(async () => {
     e = await prepararEntorno();
     mod = await import("../src");
+    mod.limpiarRegistro();
+    mod.registrarCapacidades(mod.capacidadesDelNucleo);
     Object.assign(process.env, { OPAI_SECRETS_KEY: v1, OPAI_SECRETS_KEY_VERSION: "99" });
     delete process.env["OPAI_SECRETS_KEY_ANTERIOR"];
     const s = randomUUID().slice(0, 8);
@@ -109,5 +113,34 @@ describe.skipIf(!urlPropietario)("cifrado de campos sensibles en base real", () 
     Object.assign(process.env, { OPAI_SECRETS_KEY: v2, OPAI_SECRETS_KEY_VERSION: "100" });
     delete process.env["OPAI_SECRETS_KEY_ANTERIOR"];
     expect(await crearCifradoDeCampos(ctx(tA), INVENTARIO).descifrar("fichas_salud", "huella", g)).toBe(dato);
+  }, 60_000);
+
+  it("el valor lleva el kid de la DEK y cifra también la cadena vacía (§21)", async () => {
+    const c = crearCifradoDeCampos(ctx(tA), INVENTARIO);
+    const g = await c.cifrar("fichas_salud", "diagnostico", "");
+    expect(g).toMatch(/^enc:v2:[\w-]{11}:/);
+    expect(await c.descifrar("fichas_salud", "diagnostico", g)).toBe("");
+  });
+
+  it("rotar la DEK recifra secretos y campos sensibles en una transacción (§22)", async () => {
+    const { rotarDek } = await import("../src/core/cumplimiento/rotar-dek");
+    const { leerSecreto } = await import("../src/integraciones/secretos");
+    const r = await mod.executeCapability(ctx(tA), "core.integraciones.set_secreto", { proveedor: "resend", nombre: "api_key", valor: "re_rotar_123" });
+    expect(r.ok ? null : r.error).toBeNull();
+    const integracionId = (await e.admin.secreto.findFirstOrThrow({ where: { tenantId: tA } })).integracionId;
+    const g = await crearCifradoDeCampos(ctx(tA), INVENTARIO).cifrar("fichas_salud", "diagnostico", "dato a rotar");
+    // El inventario real no declara campos sensibles: un recifrador extra no se usa; la guarda exige
+    // uno por cada campo declarado (hoy ninguno).
+    const rot = await rotarDek(ctx(tA));
+    expect(rot.secretos).toBe(1);
+    expect(rot.kidAnterior).not.toBe(rot.kidNuevo);
+    expect(await leerSecreto(ctx(tA), integracionId, "api_key")).toBe("re_rotar_123");
+    // Lo cifrado con la DEK anterior ya no se lee (mismo error genérico): hay que recifrarlo al rotar.
+    await expect(crearCifradoDeCampos(ctx(tA), INVENTARIO).descifrar("fichas_salud", "diagnostico", g)).rejects.toThrow(/No se pudo descifrar/);
+    const fila = await e.admin.claveTenant.findUniqueOrThrow({ where: { tenantId: tA } });
+    const nueva = descifrar(Buffer.from(process.env["OPAI_SECRETS_KEY"] ?? "", "base64"), { cifrado: fila.dekCifrada, iv: fila.iv, tag: fila.tag });
+    expect(kidDe(nueva)).toBe(rot.kidNuevo);
+    // Sin la DEK vieja ya no se puede recifrar: por eso la rotación recifra dentro de su transacción.
+    expect(() => recifrarValor({ tenantId: tA, tabla: "fichas_salud", campo: "diagnostico" }, g, nueva, generarDekPrueba())).toThrow();
   }, 60_000);
 });

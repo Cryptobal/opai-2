@@ -73,6 +73,14 @@ export const POLITICA_RETENCION: readonly ReglaRetencion[] = [
 export const reglaDe = (tabla: string): ReglaRetencion | undefined =>
   POLITICA_RETENCION.find((r) => r.tabla === tabla);
 
+/**
+ * Reglas pendientes de decisión legal (CAR-39): su plazo es configurable por el tenant pero parte en 0
+ * (apagada) y el trabajo diario no las aplica. Claude no fija sus plazos ni su acción: los decide
+ * Carlos con el abogado; recién entonces cada una pasa a «trabajo» con su mecanismo.
+ */
+export const reglasPendientes = (): ReglaRetencion[] =>
+  POLITICA_RETENCION.filter((r) => r.gestion === "pendiente");
+
 /** Reglas que el trabajo diario aplica (las demás son informativas). */
 export const reglasDelTrabajo = (): ReglaRetencion[] =>
   POLITICA_RETENCION.filter((r) => r.gestion === "trabajo");
@@ -106,7 +114,10 @@ export function fechaCorte(ahora: Date, dias: number): Date | null {
 /** Texto legible de la regla para el RAT («anonimizar a los 365 días de la creación»). */
 export function describirRegla(regla: ReglaRetencion, dias: number): string {
   if (regla.gestion === "regulado") return `Se conserva (hecho regulado, ADR-023): ${regla.motivo}`;
-  if (regla.gestion === "pendiente") return `Pendiente de decisión: ${regla.motivo}`;
+  if (regla.gestion === "pendiente")
+    return dias > 0
+      ? `Pendiente de decisión (plazo registrado: ${dias} días, aún sin aplicar): ${regla.motivo}`
+      : `Pendiente de decisión (apagada): ${regla.motivo}`;
   if (regla.gestion === "externa") return `Gestión externa: ${regla.motivo}`;
   if (dias <= 0) return `Sin vencimiento configurado: ${regla.motivo}`;
   const desde = {

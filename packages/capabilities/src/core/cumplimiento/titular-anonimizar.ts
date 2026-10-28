@@ -1,10 +1,10 @@
 import { z } from "zod";
 
+import type { TenantTx } from "@opai/db";
 import { PERMISOS_CORE, elegibilidadPersona, fechaCorte, reglaDe } from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import { conflicto, noEncontrado, reglaDeNegocio } from "../../errores";
-import type { Contexto } from "../../types";
 import { uuidSchema } from "../esquemas";
 import { cargarTitular, titularSchema } from "./comunes";
 import { diasDeRegla } from "./retencion-politica";
@@ -16,6 +16,8 @@ const MOTIVOS: Record<string, string> = {
     "No hay periodo de conservación laboral confirmado en la política de retención: no se puede probar que ya venció.",
   en_conservacion: "La obligación legal de conservar los datos laborales sigue corriendo.",
 };
+
+const OTRAS = "El titular tiene otras solicitudes abiertas; resuélvelas antes de anonimizarlo.";
 
 const salida = z.object({
   titular: z.object({ tipo: z.string(), id: z.string() }),
@@ -31,8 +33,8 @@ const salida = z.object({
 });
 
 /** Carga y valida la solicitud de cancelación que respalda la anonimización, si se indicó. */
-async function validarSolicitud(ctx: Contexto, id: string, tipo: string, titularId: string) {
-  const s = await ctx.db.solicitudArco.findUnique({ where: { id } });
+async function validarSolicitud(db: TenantTx, id: string, tipo: string, titularId: string) {
+  const s = await db.solicitudArco.findUnique({ where: { id } });
   if (!s) throw noEncontrado("La solicitud");
   if (s.tipo !== "cancelacion")
     throw reglaDeNegocio("La solicitud indicada no es de cancelación.");
@@ -60,7 +62,9 @@ export const titularAnonimizar = defineCapability({
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     const t = await cargarTitular(ctx, input.titular);
-    if (input.solicitudId) await validarSolicitud(ctx, input.solicitudId, t.tipo, t.id);
+    // Se valida aquí para la vista previa y de nuevo dentro de la transacción que escribe (§21).
+    if (input.solicitudId) await validarSolicitud(ctx.db, input.solicitudId, t.tipo, t.id);
+    const tipoT = t.tipo === "persona" ? "persona" : "contacto";
     const base = { titular: { tipo: t.tipo, id: t.id }, documentosVinculados: 0 };
     const docs = await ctx.db.documentoVinculo.count({
       where: { entidadTipo: t.tipo, entidadId: t.id },
@@ -100,11 +104,16 @@ export const titularAnonimizar = defineCapability({
         : (await ctx.db.contacto.findUnique({ where: { id: t.id } }))?.anonimizadoEn;
     const previa = { ...base, documentosVinculados: docs, elegible: true, motivo: null, procedeDesde: null };
     if (ya) return { ...previa, anonimizado: false, yaEstabaAnonimizado: true };
-    if (dryRun) return { ...previa, anonimizado: false, yaEstabaAnonimizado: false };
+    if (dryRun) {
+      // La vista previa mira también las otras solicitudes abiertas, como la escritura (§21).
+      if ((await solicitudesAbiertas(ctx.db, tipoT, t.id, input.solicitudId)) > 0)
+        return { ...previa, elegible: false, motivo: OTRAS, anonimizado: false, yaEstabaAnonimizado: false };
+      return { ...previa, anonimizado: false, yaEstabaAnonimizado: false };
+    }
     const hecho = await ctx.transaccion(async (tx) => {
+      if (input.solicitudId) await validarSolicitud(tx, input.solicitudId, t.tipo, t.id);
       // Otra solicitud abierta (acceso, portabilidad…) quedaría sin datos que entregar: se resuelve antes.
-      if ((await solicitudesAbiertas(tx, t.tipo === "persona" ? "persona" : "contacto", t.id, input.solicitudId)) > 0)
-        throw reglaDeNegocio("El titular tiene otras solicitudes abiertas; resuélvelas antes de anonimizarlo.");
+      if ((await solicitudesAbiertas(tx, tipoT, t.id, input.solicitudId)) > 0) throw reglaDeNegocio(OTRAS);
       const ok =
         t.tipo === "persona"
           ? await anonimizarPersona(tx, t.id, ahora, corte)
