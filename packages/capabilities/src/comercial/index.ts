@@ -1,6 +1,7 @@
-// Capacidades del módulo Comercial (Brief 07 · PR 1). Se exponen igual en UI, API /api/v1 y MCP
+// Capacidades del módulo Comercial (Brief 07 · PR 1 y PR 1b). Se exponen igual en UI, API /api/v1 y MCP
 // (ADR-004). El manifest de modules/comercial las lista; el registro las da de alta al arrancar.
 import type { Capacidad } from "../types";
+import { configCrearEtapa, configReordenarEtapas } from "./config-embudo";
 import { configActualizarEtapa, configGuardarCatalogo } from "./config-escritura";
 import { configGet } from "./config";
 import { contactosList } from "./contactos";
@@ -33,4 +34,6 @@ export const capacidadesComercial: readonly Capacidad[] = [
   configGet,
   configActualizarEtapa,
   configGuardarCatalogo,
+  configCrearEtapa,
+  configReordenarEtapas,
 ];

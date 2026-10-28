@@ -6,6 +6,7 @@ import { uuidSchema } from "../core/esquemas";
 import { definidos, sinDuplicado } from "../core/maestros/comun";
 import { REQUISITOS, TONOS_ETAPA } from "./dominio";
 import { PERMISO_CONFIG, etapaDe, etapaSchema } from "./comun";
+import { vistaEtapa } from "./embudo-util";
 
 /** Edita una etapa del embudo: nombre, orden, probabilidad, tono, requisitos y si está activa. El
  * tipo (abierta/ganada/perdida) no cambia (R26). */
@@ -31,6 +32,18 @@ export const configActualizarEtapa = defineCapability({
     if (cambios.activa === false && etapa.tipo !== "abierta") {
       throw reglaDeNegocio("La etapa ganada y la perdida no se desactivan.");
     }
+    if (cambios.orden !== undefined && cambios.orden !== etapa.orden && etapa.tipo !== "abierta") {
+      throw reglaDeNegocio("La etapa ganada y la perdida van siempre al final del embudo.");
+    }
+    // Una etapa con negocios no se desactiva: primero se mueven (export ConfigComercial, reglas).
+    if (cambios.activa === false && etapa.activa) {
+      const n = await ctx.db.negocio.count({ where: { etapaId: id, archivadoEn: null } });
+      if (n > 0) {
+        throw reglaDeNegocio(
+          `Mueve ${n === 1 ? "su negocio" : `sus ${n} negocios`} a otra etapa antes de desactivarla.`,
+        );
+      }
+    }
     const data = definidos({ ...cambios, exige: cambios.exige ? [...cambios.exige] : undefined });
     const fila = dryRun
       ? { ...etapa, ...data }
@@ -38,16 +51,7 @@ export const configActualizarEtapa = defineCapability({
           ctx.db.etapa.update({ where: { id }, data }),
           "Ya hay otra etapa en esa posición del embudo.",
         );
-    return {
-      id: fila.id,
-      nombre: fila.nombre,
-      orden: fila.orden,
-      tipo: fila.tipo as z.infer<typeof etapaSchema>["tipo"],
-      probabilidad: fila.probabilidad,
-      tono: fila.tono as z.infer<typeof etapaSchema>["tono"],
-      exige: fila.exige,
-      activa: fila.activa,
-    };
+    return vistaEtapa(fila);
   },
 });
 
