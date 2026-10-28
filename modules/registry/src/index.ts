@@ -1,4 +1,5 @@
 import type { ModuleManifest } from "@opai/capabilities";
+import { manifest as agente } from "@opai/mod-agente";
 
 import { manifest as Comercial } from "@opai/mod-comercial";
 
@@ -8,6 +9,7 @@ import { manifest as Comercial } from "@opai/mod-comercial";
  * configuración, eventos y capacidades (API y MCP).
  */
 export const modulos: readonly ModuleManifest[] = [
+  agente,
   Comercial,
   // scaffold:module — las entradas se agregan sobre esta línea
 ];

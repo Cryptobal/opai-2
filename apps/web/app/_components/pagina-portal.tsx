@@ -3,7 +3,9 @@ import { type ReactNode, Suspense } from "react";
 
 import { Forbidden, Loading, type VarianteLoading } from "@opai/ds";
 
+import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { epocaDeIdentidad, marcaGenerado } from "@/lib/epoca-sesion";
+import { verificarMfaDe } from "@/lib/mfa";
 import { medirFase } from "@/lib/metricas-navegacion";
 import { requerirIdentidad, tieneAccesoAPortal } from "@/lib/servidor";
 
@@ -32,12 +34,23 @@ async function Contenido<T>({
   ...pagina
 }: Props<T>) {
   const identidad = await requerirIdentidad(ruta);
+  // Segundo factor obligatorio (NÚCLEO-F): si la cuenta debe tenerlo y aún no lo activó, va a enrolarse
+  // antes de entrar a cualquier portal. Se verifica en servidor (ADR-022); el corte rápido evita leer
+  // el ajuste cuando ya tiene el segundo factor. `/activar-mfa` no pasa por aquí, así que no hay ciclo.
+  const pendiente = await verificarMfaDe(identidad);
+  if (pendiente)
+    redirect(
+      `/${pendiente === "enrolar" ? "activar-mfa" : "mfa"}?next=${encodeURIComponent(ruta)}`,
+    );
   const acceso = tieneAccesoAPortal(identidad, portal);
   // Usuario de plataforma sin empresa: su inicio es Plataforma.
-  if (!acceso && portal === "erp" && !identidad.actual && identidad.usuario.platformRole) {
+  if (!acceso && portal === "erp" && !identidad.actual && tieneAccesoAPortal(identidad, "platform")) {
     redirect("/platform");
   }
   const sinEmpresa = !identidad.actual && portal !== "platform";
+  const puedeElegir = identidad.membresias.some(
+    (m) => m.estado === "activa" && m.tenant.estado !== "suspendido",
+  );
   // Fase `datos` del `Server-Timing` (ADR-045): solo los datos de la página; el shell y su navegación
   // viven en el layout del portal (`PortalLayout`) y no se recargan por navegación.
   const datos = await medirFase("datos", () =>
@@ -46,10 +59,14 @@ async function Contenido<T>({
   const extra = acceso && cargar && opciones ? opciones(datos) : {};
   // El esqueleto acompaña al contenido (lo intercambia el CSS en navegaciones lentas, ver `EstadoEnlace`);
   // el resto de las opciones son la cabecera que la página fija en el shell persistente del layout.
-  const { esqueleto, ...cabecera } = { ...pagina, ...extra };
+  const { esqueleto, insignia, ...cabecera } = { ...pagina, ...extra };
   return (
     <>
-      <CabeceraPagina {...cabecera} generado={marcaGenerado()} epoca={epocaDeIdentidad(identidad)} />
+      <CabeceraPagina
+        {...(acceso ? { ...cabecera, insignia } : { titulo: "Sin permisos" })}
+        generado={marcaGenerado()}
+        epoca={epocaDeIdentidad(identidad)}
+      />
       <div data-contenido className="contents">
         {acceso ? (
           typeof children === "function" ? (
@@ -60,10 +77,21 @@ async function Contenido<T>({
         ) : (
           <Forbidden
             descripcion={
-              sinEmpresa
+              portal === "platform"
+                ? "Plataforma es solo para el equipo de OPAI."
+                : sinEmpresa
                 ? "Aún no perteneces a ninguna empresa activa. Pide una invitación a su administrador."
                 : "No tienes acceso a este portal en la empresa actual."
             }
+            {...(sinEmpresa && puedeElegir
+              ? {
+                  accion: (
+                    <EnlaceBoton href="/elegir-empresa" variante="secondary">
+                      Elegir empresa
+                    </EnlaceBoton>
+                  ),
+                }
+              : {})}
           />
         )}
       </div>

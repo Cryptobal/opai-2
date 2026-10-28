@@ -1,6 +1,12 @@
-import { cn } from "../cn";
+"use client";
+
+import { lazy, Suspense, useState } from "react";
+
 import type { ItemMenu } from "../components/menu";
+import { AreaGrupo } from "./area-grupo";
+import type { ItemFijado } from "./fijados";
 import { PortalSwitcher } from "./portal-switcher";
+import { agrupar, EntradaArea, Item, Pie } from "./sidebar-item";
 import {
   esActivo,
   LinkPorDefecto,
@@ -8,7 +14,10 @@ import {
   type NavItem,
   type Portal,
   type Tenant,
+  type Usuario,
 } from "./types";
+
+const Fijados = lazy(() => import("./fijados").then((m) => ({ default: m.Fijados })));
 
 type SidebarProps = {
   items: readonly NavItem[];
@@ -17,87 +26,142 @@ type SidebarProps = {
   portales: readonly Portal[];
   portalActual: string;
   tenant?: Tenant | undefined;
-  /** Cambiar de empresa (ítems del menú del monograma). */
+  /** Cambiar de empresa (ítems del menú del selector de portal). */
   empresas?: readonly ItemMenu[] | undefined;
-  /** Nombre del portal bajo la marca (el ERP no lleva), igual que en el riel de iPad. */
-  subtitulo?: string | undefined;
+  /** Usuario al pie de la barra (ShellDesktop): con `menuUsuario`, abre su menú hacia arriba. */
+  usuario?: Usuario | undefined;
+  menuUsuario?: readonly ItemMenu[] | undefined;
+  /** Fijados (D3): sin esta prop, la sección no se muestra (portales sin fijados todavía). */
+  fijados?: readonly ItemFijado[] | undefined;
+  errorFijados?: boolean | undefined;
+  reintentarFijados?: (() => void) | undefined;
+  onFijar?: ((item: NavItem) => void) | undefined;
+  onDesfijar?: ((href: string) => void) | undefined;
+  /** Acordeón por área (D1): área abierta controlada por quien use `Sidebar`. Sin esta prop, cada
+   *  `Sidebar` recuerda su propia área activa al montar (portales sin preferencia persistida). */
+  areaAbierta?: string | null | undefined;
+  onAreaAbierta?: ((area: string) => void) | undefined;
 };
 
-function agrupar(items: readonly NavItem[]): [string, NavItem[]][] {
-  const grupos = new Map<string, NavItem[]>();
-  for (const item of items) {
-    const g = item.grupo ?? "";
-    grupos.set(g, [...(grupos.get(g) ?? []), item]);
-  }
-  return [...grupos.entries()];
-}
-
-function Item({
-  item,
-  rutaActual,
-  Link,
-}: {
-  item: NavItem;
-  rutaActual: string;
-  Link: LinkComponent;
-}) {
-  const activo = esActivo(rutaActual, item.href);
-  return (
-    <Link
-      href={item.href}
-      aria-current={activo ? "page" : undefined}
-      className={cn(
-        "flex h-[35px] items-center gap-2.5 rounded-md px-2 text-base font-medium",
-        activo ? "bg-fill text-fg" : "text-fg-muted hover:bg-fill hover:text-fg",
-      )}
-    >
-      <item.icono className={cn("size-4", activo && "text-accent")} aria-hidden />
-      <span className="truncate">{item.etiqueta}</span>
-      {item.contador !== undefined ? (
-        <span className="t-numeric ml-auto text-xs text-fg-subtle">{item.contador}</span>
-      ) : null}
-    </Link>
-  );
-}
-
-/** Desktop: barra lateral de 248 px con marca y monograma de la empresa, grupos y Configuración al pie. */
+/**
+ * Desktop (ShellDesktop): fijados, la marca, el selector de portal y empresa en tarjeta, las áreas
+ * en acordeón (D1), Configuración y el usuario al pie. Las áreas de una sola entrada visible van
+ * sueltas, sin encabezado (R3, ya resuelto por quien arma la navegación).
+ */
 export function Sidebar(props: SidebarProps) {
   const { items, rutaActual, Link = LinkPorDefecto } = props;
+  const grupos = agrupar(items.filter((i) => !i.pie));
+  const grupoActivo = grupos.find(([, lista]) =>
+    lista.some((i) => esActivo(rutaActual, i.href, i.exacta, i.activoEn)),
+  );
+  const [abiertoLocal, setAbiertoLocal] = useState<string | null>(grupoActivo?.[1][0]?.area ?? grupoActivo?.[0] ?? null);
+  const abierto = props.areaAbierta !== undefined ? props.areaAbierta : abiertoLocal;
+  const fijadosHrefs = new Set((props.fijados ?? []).map((f) => f.href));
+  // Controlado (`onAreaAbierta`): el llamador decide si abrir o plegar. Sin control, el acordeón
+  // se pliega o abre solo con su propio estado (otros portales, sin preferencia persistida).
+  const alternar = (grupo: string, area: string | undefined) => {
+    const clave = area ?? grupo;
+    if (props.onAreaAbierta) props.onAreaAbierta(clave);
+    else setAbiertoLocal((a) => (a === clave ? null : clave));
+  };
+  const pinDe = (item: NavItem) =>
+    item.fijable && props.onFijar
+      ? { onFijar: () => props.onFijar?.(item), fijado: fijadosHrefs.has(item.href) }
+      : {};
   return (
     <nav
       aria-label="Principal"
-      className="sticky top-0 hidden h-dvh w-[248px] flex-none flex-col border-r border-border bg-surface xl:flex"
+      className="sticky top-0 hidden h-dvh w-[248px] flex-none flex-col border-r border-border bg-surface lg:flex"
     >
-      <div className="flex h-[60px] flex-none items-center justify-between border-b border-border pr-2 pl-5">
-        <span className="grid">
+      <div className="flex flex-none flex-col gap-3 px-3 pt-3.5 pb-1">
+        <span className="flex items-center justify-between px-2">
           <span className="text-[17px] leading-6 font-bold tracking-[-0.02em] text-fg">OPAI</span>
-          {props.subtitulo ? <span className="t-caption">{props.subtitulo}</span> : null}
+          <span className="t-caption">2.0</span>
         </span>
         <PortalSwitcher
           portales={props.portales}
           portalActual={props.portalActual}
           {...(props.tenant ? { tenant: props.tenant } : {})}
           {...(props.empresas ? { extra: props.empresas } : {})}
-          variante="monograma"
+          variante="tarjeta"
+          className="w-full"
         />
       </div>
+      {props.fijados ? (
+        <Suspense fallback={null}>
+        <Fijados items={props.fijados} rutaActual={rutaActual} onDesfijar={props.onDesfijar ?? (() => undefined)}
+          {...(props.errorFijados ? { error: true } : {})}
+          {...(props.reintentarFijados ? { reintentar: props.reintentarFijados } : {})}
+          Link={Link} />
+        </Suspense>
+      ) : null}
       <div className="flex-1 overflow-y-auto py-2">
-        {agrupar(items.filter((i) => !i.pie && !i.soloCompacto)).map(([grupo, lista]) => (
-          <div key={grupo} className="flex flex-col gap-px px-3">
-            {grupo ? <p className="t-overline px-2 pt-4 pb-1.5">{grupo}</p> : null}
-            {lista.map((item) => (
-              <Item key={item.href} item={item} rutaActual={rutaActual} Link={Link} />
-            ))}
-          </div>
-        ))}
+        {grupos
+          .filter((i) => !i[1].some((x) => x.soloCompacto))
+          .map(([grupo, lista]) => {
+            if (!grupo) {
+              return (
+                <div key="suelto" className="flex flex-col gap-px px-3">
+                  {lista.map((item) => (
+                    <Item
+                      key={item.href}
+                      item={item}
+                      rutaActual={rutaActual}
+                      Link={Link}
+                      {...pinDe(item)}
+                    />
+                  ))}
+                </div>
+              );
+            }
+            const area = lista[0]?.area;
+            const activaAquiMismo = lista.some((i) =>
+              esActivo(rutaActual, i.href, i.exacta, i.activoEn),
+            );
+            const clave = area ?? grupo;
+            if (lista.length === 1) {
+              return (
+                <div key={clave} className="flex flex-col gap-px px-3">
+                  <Item
+                    item={lista[0]!}
+                    rutaActual={rutaActual}
+                    Link={Link}
+                    {...pinDe(lista[0]!)}
+                  />
+                </div>
+              );
+            }
+            return (
+              <div key={clave} className="px-3">
+                <AreaGrupo
+                  etiqueta={grupo}
+                  icono={lista[0]!.icono}
+                  abierto={abierto === clave}
+                  activa={activaAquiMismo}
+                  onAlternar={() => alternar(grupo, area)}
+                >
+                  {lista.map((item) => (
+                    <EntradaArea
+                      key={item.href}
+                      item={item}
+                      rutaActual={rutaActual}
+                      Link={Link}
+                      {...pinDe(item)}
+                    />
+                  ))}
+                </AreaGrupo>
+              </div>
+            );
+          })}
       </div>
-      <div className="flex flex-col gap-px px-3 py-3">
+      <div className="flex flex-col gap-px px-3 py-2">
         {items
           .filter((i) => i.pie)
           .map((item) => (
             <Item key={item.href} item={item} rutaActual={rutaActual} Link={Link} />
           ))}
       </div>
+      {props.usuario ? <Pie usuario={props.usuario} menu={props.menuUsuario} /> : null}
     </nav>
   );
 }

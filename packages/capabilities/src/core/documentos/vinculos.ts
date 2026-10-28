@@ -7,6 +7,7 @@ import { conflicto, noEncontrado, reglaDeNegocio } from "../../errores";
 import { uuidSchema } from "../esquemas";
 import { verificarEntidad } from "./entidad";
 import { disponible } from "./gestion";
+import { filtroDocumentoSensible } from "./sensibles";
 import { entidadSchema } from "./vista";
 
 const vinculoSchema = z.object({
@@ -60,7 +61,12 @@ export const documentosDesvincular = defineCapability({
   dryRun: true,
   async handler(ctx, { id, entidad }, { dryRun }) {
     const v = await ctx.db.documentoVinculo.findFirst({
-      where: { documentoId: id, entidadTipo: entidad.tipo, entidadId: entidad.id },
+      where: {
+        documentoId: id,
+        entidadTipo: entidad.tipo,
+        entidadId: entidad.id,
+        documento: filtroDocumentoSensible(ctx),
+      },
     });
     if (!v) throw noEncontrado("El vínculo");
     if (v.rol === "propietario")

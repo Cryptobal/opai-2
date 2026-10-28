@@ -1,3 +1,5 @@
+import { filtroDocumentoSensible } from "./sensibles";
+import { documentosEnAlcance } from "./alcance-doc";
 import { z } from "zod";
 
 import {
@@ -25,6 +27,7 @@ export const documentosIniciarSubida = defineCapability({
   descripcion:
     "Primer paso para subir un documento: valida tipo, tamaño (ajuste de la empresa, hasta 25 MB) y formato, crea el documento pendiente y entrega una URL PUT firmada por 10 minutos con las cabeceras a enviar (incluye la huella SHA-256 declarada). Luego llama a core.documentos.confirmar_subida.",
   permiso: PERMISOS_CORE.documentosManage,
+  portales: ["erp", "supervisor"],
   input: z.object({
     entidad: entidadSchema,
     tipoId: uuidSchema.optional(),
@@ -73,9 +76,15 @@ export const documentosIniciarSubida = defineCapability({
       throw reglaDeNegocio(`"${tipo.nombre}" exige fecha de vencimiento.`);
     if (!dryRun && !ctx.servicios.almacenamiento.disponible)
       throw reglaDeNegocio("El almacenamiento no está configurado en este entorno.");
+    const permitidos = await documentosEnAlcance(ctx);
     const duplicados = (
       await ctx.db.documento.findMany({
-        where: { sha256: input.sha256, estado: "disponible" },
+        where: {
+          ...filtroDocumentoSensible(ctx),
+          sha256: input.sha256,
+          estado: "disponible",
+          ...(permitidos ? { id: { in: [...permitidos] } } : {}),
+        },
         take: 5,
       })
     ).map((d) => ({ id: d.id, nombre: d.nombre }));

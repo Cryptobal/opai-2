@@ -10,6 +10,20 @@ import { contextoDePrueba, TENANT_DE_PRUEBA } from "../src/testing";
 
 const agente = { tipo: "agent" as const, id: "grokbot", viaUserId: "carlos" };
 
+const lecturaPersonal = defineCapability({
+  id: "test.persona.leer",
+  descripcion: "Consulta de prueba para auditar el acceso a datos personales.",
+  permiso: "test:read",
+  input: z.object({ dato: z.string() }),
+  output: z.object({ dato: z.string() }),
+  efecto: "lectura",
+  auditarLectura: () => [],
+  dryRun: false,
+  async handler(_ctx, input) {
+    return input;
+  },
+});
+
 function ctxCon(permisos: string[] = [], extra: Parameters<typeof contextoDePrueba>[0] = {}) {
   return contextoDePrueba({ permisos, actor: agente, modulosActivos: ["test"], ...extra });
 }
@@ -28,9 +42,28 @@ const crearNota = defineCapability({
   }),
 });
 
+/** Como `crearNota`, pero con una escritura real en `ctx.db`: prueba la atomicidad con la auditoría. */
+const crearNotaConEvento = defineCapability({
+  id: "test.nota.create_con_evento",
+  descripcion: "Crea una nota de prueba con un evento real, para probar la atomicidad con auditar.",
+  permiso: "test:write",
+  input: z.object({ texto: z.string().min(1) }),
+  output: z.object({ id: z.string(), texto: z.string() }),
+  efecto: "escritura",
+  dryRun: true,
+  async handler(ctx, input, modo) {
+    if (modo.dryRun) return { id: "preview", texto: input.texto };
+    if (input.texto === "falla") throw reglaDeNegocio("No se puede.");
+    const fila = await ctx.db.evento.create({
+      data: { tenantId: ctx.tenantId, tipo: "test.nota.creada", payload: {}, actorTipo: "system" },
+    });
+    return { id: fila.id, texto: input.texto };
+  },
+});
+
 beforeEach(() => {
   limpiarRegistro();
-  registrarCapacidades([...capacidadesDelNucleo, crearNota]);
+  registrarCapacidades([...capacidadesDelNucleo, crearNota, crearNotaConEvento, lecturaPersonal]);
 });
 
 describe("defineCapability", () => {
@@ -56,6 +89,63 @@ describe("defineCapability", () => {
 });
 
 describe("executeCapability", () => {
+  it("audita y devuelve la misma salida transformada una sola vez; salida inválida no se revela", async () => {
+    let transformaciones = 0;
+    const transformada = defineCapability({
+      id: "test.lectura.transformada",
+      descripcion: "Lectura auditada de prueba con transformación no determinista de salida.",
+      permiso: "test:read",
+      input: z.object({}),
+      output: z.object({}).transform(() => ({ id: String(++transformaciones) })),
+      efecto: "lectura",
+      dryRun: false,
+      auditarLectura: (s) => [s.id],
+      handler: async () => ({}),
+    });
+    const invalida = defineCapability({
+      id: "test.lectura.invalida",
+      descripcion: "Lectura auditada de prueba que rechaza la validación de su salida.",
+      permiso: "test:read",
+      input: z.object({}),
+      output: z.string().refine(() => false),
+      efecto: "lectura",
+      dryRun: false,
+      auditarLectura: () => [],
+      handler: async () => "no revelar",
+    });
+    registrarCapacidades([transformada, invalida]);
+    const { ctx, eventos } = ctxCon(["test:read"]);
+    expect(await executeCapability(ctx, transformada.id, {})).toMatchObject({
+      ok: true,
+      data: { id: "1" },
+    });
+    expect(transformaciones).toBe(1);
+    expect(eventos[0]?.payload).toEqual({ ids: ["1"] });
+    expect(await executeCapability(ctx, invalida.id, {})).toMatchObject({
+      ok: false,
+      error: { code: "INVALID_OUTPUT" },
+    });
+    expect(eventos).toHaveLength(1);
+  });
+  it("audita la lectura personal sin contenido y falla cerrada si no puede auditar", async () => {
+    const { ctx, eventos } = ctxCon(["test:read"]);
+    expect(await executeCapability(ctx, lecturaPersonal.id, { dato: "privado" })).toMatchObject({
+      ok: true,
+    });
+    expect(eventos).toEqual([
+      expect.objectContaining({ capability: lecturaPersonal.id, payload: { ids: [] } }),
+    ]);
+    expect(JSON.stringify(eventos)).not.toContain("privado");
+    ctx.auditoria.registrar = async () => {
+      throw new Error("auditoría caída");
+    };
+    expect(await executeCapability(ctx, lecturaPersonal.id, { dato: "privado" })).toMatchObject({
+      ok: false,
+    });
+    expect(
+      await executeCapability(ctxCon().ctx, lecturaPersonal.id, { dato: "privado" }),
+    ).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+  });
   it("devuelve NOT_FOUND para un id inexistente", async () => {
     const r = await executeCapability(ctxCon().ctx, "core.nada", {});
     expect(r).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
@@ -166,5 +256,34 @@ describe("executeCapability", () => {
       ok: false,
       error: { code: "UNPROCESSABLE", message: "No se puede." },
     });
+  });
+
+  // ADR-052 (auditoría del 26-oct-2026): el handler y el insert de auditoría comparten una
+  // transacción. Un fallo de cualquiera de los dos deja la base exactamente como si no hubiera
+  // pasado nada; nunca una escritura sin su auditoría ni una auditoría sin la escritura que la causó.
+  it("fallo de auditoría ⇒ sin escritura (la transacción hace rollback)", async () => {
+    const { ctx, tabla } = ctxCon(["test:write"]);
+    ctx.auditoria.registrar = async () => {
+      throw new Error("auditoría caída");
+    };
+    const r = await executeCapability(ctx, "test.nota.create_con_evento", { texto: "hola" });
+    expect(r).toMatchObject({ ok: false, error: { code: "INTERNAL" } });
+    expect(tabla("evento")).toHaveLength(0);
+  });
+
+  it("fallo del handler ⇒ sin auditoría (nunca se llega a auditar)", async () => {
+    const { ctx, tabla, eventos } = ctxCon(["test:write"]);
+    const r = await executeCapability(ctx, "test.nota.create_con_evento", { texto: "falla" });
+    expect(r).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+    expect(tabla("evento")).toHaveLength(0);
+    expect(eventos).toHaveLength(0);
+  });
+
+  it("escritura y auditoría exitosas quedan juntas (mismo id de entidad)", async () => {
+    const { ctx, tabla, eventos } = ctxCon(["test:write"]);
+    const r = await executeCapability(ctx, "test.nota.create_con_evento", { texto: "hola" });
+    expect(r).toMatchObject({ ok: true, data: { texto: "hola" } });
+    expect(tabla("evento")).toHaveLength(1);
+    expect(eventos).toHaveLength(1);
   });
 });

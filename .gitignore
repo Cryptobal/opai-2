@@ -29,3 +29,6 @@ apps/web/playwright-report/
 .DS_Store
 *.pem
 *.log
+
+# respaldos locales de scripts de datos (ids internos)
+respaldo-dividir-dotacion-*.json

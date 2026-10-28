@@ -31,7 +31,7 @@ export function VinculoVigente({ p }: { p: PersonaDetalle }) {
 }
 
 /** Historial de vínculos (13): el vigente marcado y los terminados con su periodo. */
-export function HistorialVinculos({ vinculos, cargos }: { vinculos: Vinculo[]; cargos: Cargo[] }) {
+export function HistorialVinculos({ vinculos, cargos }: { vinculos: Vinculo[]; cargos: Pick<Cargo, "id" | "nombre">[] }) {
   const nombre = (id: string) => cargos.find((c) => c.id === id)?.nombre ?? "Cargo";
   if (!vinculos.length) return null;
   return (

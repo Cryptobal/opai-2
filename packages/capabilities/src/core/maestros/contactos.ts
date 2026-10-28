@@ -4,6 +4,7 @@ import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import { uuidSchema } from "../esquemas";
+import { dondeContacto } from "./alcance";
 import { definidos, escribirConEvento } from "./comun";
 import {
   campos,
@@ -14,11 +15,14 @@ import {
   vista,
 } from "./contactos-vista";
 import { cuentaDe } from "./cuentas";
+import { exigirNoAnonimizado } from "./anonimizado";
 
 export const contactosList = defineCapability({
+  auditarLectura: (s) => s.map((c) => c.id),
   id: "core.contactos.list",
   descripcion: "Contactos de una cuenta (principal primero), con correo, teléfono, cargo y roles.",
   permiso: PERMISOS_CORE.cuentasRead,
+  portales: ["erp", "supervisor"],
   input: z.object({ cuentaId: uuidSchema, incluirArchivados: z.boolean().default(false) }),
   output: z.array(contactoSchema),
   efecto: "lectura",
@@ -27,6 +31,7 @@ export const contactosList = defineCapability({
     const filas = await ctx.db.contacto.findMany({
       where: {
         cuentaId: input.cuentaId,
+        AND: [dondeContacto(ctx)],
         ...(input.incluirArchivados ? {} : { archivadoEn: null }),
       },
       orderBy: [{ esPrincipal: "desc" }, { apellidos: "asc" }],
@@ -36,6 +41,7 @@ export const contactosList = defineCapability({
 });
 
 export const contactosGet = defineCapability({
+  auditarLectura: (s) => [s.id],
   id: "core.contactos.get",
   descripcion: "Ficha de un contacto de una cuenta: datos, roles y si es el principal.",
   permiso: PERMISOS_CORE.cuentasRead,
@@ -106,6 +112,7 @@ export const contactosUpdate = defineCapability({
   dryRun: true,
   async handler(ctx, { id, ...cambios }, { dryRun }) {
     const actual = await contactoDe(ctx, id);
+    exigirNoAnonimizado(actual, "El contacto");
     await emailLibre(ctx, actual.cuentaId, cambios.email, id);
     const data = definidos(cambios);
     if (dryRun) return vista({ ...actual, ...data });

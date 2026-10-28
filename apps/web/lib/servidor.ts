@@ -9,6 +9,10 @@ import { contextoDeIdentidad, identidadDe, type Identidad } from "./actor";
 import { medirFase } from "./metricas-navegacion";
 import { asegurarRegistro } from "./registro";
 import { COOKIE_TENANT } from "./tenant-actual";
+import { tieneAccesoAPortal } from "./acceso-portal";
+import { estadoMfaDe, verificarMfaDe } from "./mfa";
+
+export { tieneAccesoAPortal } from "./acceso-portal";
 
 asegurarRegistro();
 
@@ -19,7 +23,9 @@ export const identidadActual = cache(async (): Promise<Identidad | null> => {
   const sesion = await medirFase("sesion", () => getSession());
   if (!sesion) return null;
   const tenant = (await cookies()).get(COOKIE_TENANT)?.value;
-  return medirFase("identidad", () => identidadDe(sesion.user, tenant));
+  const identidad = await medirFase("identidad", () => identidadDe(sesion.user, tenant));
+  identidad.mfaVerificada = sesion.session.mfaVerified === true;
+  return identidad;
 });
 
 /** Identidad o redirección a /login. */
@@ -27,15 +33,6 @@ export async function requerirIdentidad(destino?: string): Promise<Identidad> {
   const identidad = await identidadActual();
   if (!identidad) redirect(destino ? `/login?next=${encodeURIComponent(destino)}` : "/login");
   return identidad;
-}
-
-/**
- * Acceso al portal verificado en servidor: Plataforma exige `platformRole`; los demás, una
- * membresía activa en el tenant actual que incluya el portal. Ocultar en la UI no basta.
- */
-export function tieneAccesoAPortal(identidad: Identidad, portal: string): boolean {
-  if (portal === "platform") return identidad.usuario.platformRole !== null;
-  return identidad.actual?.portales.includes(portal) ?? false;
 }
 
 export function contextoServidor(identidad: Identidad, portal: string): Contexto {
@@ -52,6 +49,12 @@ export async function ejecutarComoUsuario<T = unknown>(
   const identidad = await identidadActual();
   if (!identidad)
     return { ok: false, error: { code: "UNAUTHENTICATED", message: "Inicia sesión." } };
-  const r = await executeCapability(contextoServidor(identidad, portal), id, input, { dryRun });
+  if (!tieneAccesoAPortal(identidad, portal))
+    return { ok: false, error: { code: "FORBIDDEN", message: "No tienes acceso a este portal." } };
+  if (await verificarMfaDe(identidad))
+    return { ok: false, error: { code: "FORBIDDEN", message: "Completa el segundo factor." } };
+  const ctx = contextoServidor(identidad, portal);
+  ctx.mfa = await estadoMfaDe(identidad);
+  const r = await executeCapability(ctx, id, input, { dryRun });
   return r as Resultado<T>;
 }

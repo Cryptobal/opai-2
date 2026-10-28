@@ -10,6 +10,7 @@ import { iso } from "../comun";
 import { uuidSchema } from "../esquemas";
 
 export const apikeysGet = defineCapability({
+  auditarLectura: (s) => [s.id],
   id: "core.apikeys.get",
   descripcion:
     "Ficha de una API key (sin secreto): responsable, scopes, presupuesto mensual y autonomía de cada capacidad irreversible disponible para sus scopes (aprobación humana por defecto o directo).",
@@ -27,6 +28,7 @@ export const apikeysGet = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
+    if (ctx.alcance) throw noEncontrado("La API key");
     const k = await ctx.db.apiKey.findUnique({ where: { id: input.id }, include: { user: true } });
     if (!k) throw noEncontrado("La API key");
     const [miembro, reglas] = await Promise.all([
@@ -45,6 +47,8 @@ export const apikeysGet = defineCapability({
     );
     return {
       ...k,
+      tipo: k.principalTipo ?? "usuario",
+      permisos: k.heredaPermisos === false ? k.permisos : null,
       responsable: { nombre: k.user.name, email: k.user.email },
       ultimoUsoEn: iso(k.ultimoUsoEn),
       expiraEn: iso(k.expiraEn),
@@ -52,6 +56,7 @@ export const apikeysGet = defineCapability({
       presupuestoMensualUsd: k.presupuestoMensualMicro
         ? Number(k.presupuestoMensualMicro) / 1_000_000
         : null,
+      scopeAmplio: k.scopes.includes("*"),
       valida:
         !k.revocadaEn && (!k.expiraEn || k.expiraEn.getTime() > Date.now()) && Boolean(miembro),
       autonomia: irreversibles.map((c) => ({

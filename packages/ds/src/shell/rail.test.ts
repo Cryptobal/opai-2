@@ -53,11 +53,11 @@ describe("Rail con selector de portal y empresa", () => {
     expect(html.indexOf("aria-haspopup")).toBeLessThan(html.indexOf('href="/"'));
   });
 
-  it("sigue siendo el riel de iPad: oculto en teléfono y en desktop", () => {
+  it("riel de iPad: oculto en teléfono y desde 1024 px (D9, Brief 05)", () => {
     const html = renderToStaticMarkup(
       createElement(Rail, { ...base, portales, portalActual: "erp" }),
     );
-    expect(html).toMatch(/<nav[^>]*class="[^"]*\bhidden\b[^"]*\bmd:flex\b[^"]*\bxl:hidden\b/);
+    expect(html).toMatch(/<nav[^>]*class="[^"]*\bhidden\b[^"]*\bmd:flex\b[^"]*\blg:hidden\b/);
   });
 
   it("sin empresa activa el selector nombra a OPAI", () => {

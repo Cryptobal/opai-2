@@ -3,52 +3,84 @@ import type { Puesto } from "@/lib/tipos-maestros";
 export type DatosPuesto = {
   nombre: string;
   cargoId: string | null;
-  patron: string;
+  funcionId: string | null;
+  patronId: string | null;
   trabajo: string;
   descanso: string;
   inicio: string;
   fin: string;
-  jornada: string;
-  dotacion: string;
+  rota: boolean;
+  inicioNoche: string;
+  finNoche: string;
+  colacion: string;
+  colacionFuera: boolean;
+  horas: string;
+  /** El usuario escribió las horas: solo entonces se envían (si no, el servidor las recalcula). */
+  horasTocadas: boolean;
   desde: string;
 };
 
-export const PATRONES = [
-  ["4x4", "4×4 · 4 días trabajo, 4 descanso"],
-  ["5x2", "5×2 · 5 días trabajo, 2 descanso"],
-  ["6x1", "6×1 · 6 días trabajo, 1 descanso"],
-  ["7x7", "7×7 · 7 días trabajo, 7 descanso"],
-  ["2x2", "2×2 · 2 días trabajo, 2 descanso"],
-  ["otro", "Personalizado"],
-].map(([valor, etiqueta]) => ({ valor: valor ?? "", etiqueta: etiqueta ?? "" }));
+/** Campos que cambian las horas semanales sugeridas (igual que CLAVES_HORAS del servidor). */
+const AFECTAN_HORAS = new Set<keyof DatosPuesto>([
+  "patronId",
+  "inicio",
+  "fin",
+  "rota",
+  "inicioNoche",
+  "finNoche",
+  "colacion",
+  "colacionFuera",
+]);
 
-export const inicialPuesto = (p?: Puesto | null): DatosPuesto => {
-  const patron = p ? `${p.diasTrabajo}x${p.diasDescanso}` : "4x4";
-  return {
-    nombre: p?.nombre ?? "",
-    cargoId: p?.cargoId ?? null,
-    patron: PATRONES.some((x) => x.valor === patron) ? patron : "otro",
-    trabajo: String(p?.diasTrabajo ?? 4),
-    descanso: String(p?.diasDescanso ?? 4),
-    inicio: p?.horaInicio ?? "08:00",
-    fin: p?.horaFin ?? "20:00",
-    jornada: p?.jornada ?? "dia",
-    dotacion: String(p?.dotacion ?? 1),
-    desde: p?.vigenteDesde ?? "",
-  };
-};
+/**
+ * Cambia un campo. Si afecta las horas y el usuario no las escribió, el valor mostrado se vacía:
+ * el servidor las recalcula al guardar (antes se reenviaban las horas viejas, revisión 5658390255).
+ */
+export function conCambio<K extends keyof DatosPuesto>(x: DatosPuesto, k: K, v: DatosPuesto[K]) {
+  const limpiar = AFECTAN_HORAS.has(k) && !x.horasTocadas && x[k] !== v;
+  return { ...x, [k]: v, ...(limpiar ? { horas: "" } : {}) };
+}
+
+export const inicialPuesto = (p?: Puesto | null): DatosPuesto => ({
+  nombre: p?.nombre ?? "",
+  cargoId: p?.cargoId ?? null,
+  funcionId: p?.funcionId ?? null,
+  patronId: p?.patronId ?? null,
+  trabajo: String(p?.diasTrabajo ?? 4),
+  descanso: String(p?.diasDescanso ?? 4),
+  inicio: p?.horaInicio ?? "08:00",
+  fin: p?.horaFin ?? "20:00",
+  rota: Boolean(p?.horaInicioNoche && p?.horaFinNoche),
+  inicioNoche: p?.horaInicioNoche ?? "20:00",
+  finNoche: p?.horaFinNoche ?? "08:00",
+  colacion: String(p?.colacionMin ?? 0),
+  colacionFuera: p?.colacionFuera ?? false,
+  horas: p?.horasSemanales != null ? String(p.horasSemanales) : "",
+  horasTocadas: false,
+  desde: p?.vigenteDesde ?? "",
+});
 
 export const puestoAInput = (d: DatosPuesto) => {
-  const [t, r] = d.patron === "otro" ? [d.trabajo, d.descanso] : d.patron.split("x");
+  // Vacío = que el servidor las sugiera (null); sin tocar = no se envían.
+  const horas = d.horas.trim() === "" ? null : Number(d.horas);
+  const horasValidas = horas === null || Number.isFinite(horas);
   return {
     nombre: d.nombre.trim(),
     cargoId: d.cargoId,
-    diasTrabajo: Number(t),
-    diasDescanso: Number(r),
+    funcionId: d.funcionId,
+    patronId: d.patronId,
+    diasTrabajo: Number(d.trabajo) || 1,
+    diasDescanso: Number(d.descanso) || 1,
     horaInicio: d.inicio,
     horaFin: d.fin,
-    jornada: d.jornada,
-    dotacion: Number(d.dotacion) || 1,
+    horaInicioNoche: d.rota ? d.inicioNoche : null,
+    horaFinNoche: d.rota ? d.finNoche : null,
+    // La jornada se deriva del horario (la hoja ya no la pregunta aparte): rota ⇒ rotativa; si no,
+    // noche cuando el tramo empieza a las 18:00 o más tarde, y día en caso contrario.
+    jornada: d.rota ? "rotativa" : d.inicio >= "18:00" ? "noche" : "dia",
+    colacionMin: Number(d.colacion) || 0,
+    colacionFuera: d.colacionFuera,
+    ...(d.horasTocadas && horasValidas ? { horasSemanales: horas } : {}),
     vigenteDesde: d.desde || null,
   };
 };

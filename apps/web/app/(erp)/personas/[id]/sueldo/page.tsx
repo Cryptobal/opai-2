@@ -1,122 +1,102 @@
-import { ChevronRight } from "lucide-react";
-
-import { Alerta, Badge, SeccionTarjeta } from "@opai/ds";
-
+import { MarcadorMetricas } from "@/app/_components/marcador-metricas";
+import { PERMISOS_CORE } from "@opai/domain";
+import { Alerta, PilaCapas, SeccionTarjeta, TablaEstructura } from "@opai/ds";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
-import { PaginaPortal } from "@/app/_components/pagina-portal";
-import { fecha, hoyIso } from "@/lib/fechas";
-import { leerParametros, type SearchParams } from "@/lib/parametros";
-import { vocabularioActual } from "@/lib/vocabulario";
+import { HojaCapaDiferida } from "@/app/_components/sueldos/diferida";
+import { SelectorContexto } from "@/app/_components/sueldos/selector-contexto";
+import { HistorialCargos } from "@/app/_components/sueldos/historial-cargos";
+import { VersionesCapa } from "@/app/_components/sueldos/versiones-capa";
+import { hoyIso } from "@/lib/fechas";
+import type { SearchParams } from "@/lib/parametros";
+import { identidadActual, contextoServidor } from "@/lib/servidor";
+import { PaginaPersona } from "../../_componentes/pagina-persona";
 
-import { cargarLaboral, cargarPersona } from "../../_componentes/datos";
-import { HojaExcepcion } from "../../_componentes/diferidas";
-import { SelectorPuesto } from "../../_componentes/selector-puesto";
-import { rotulosDe } from "../../_componentes/sueldo-comun";
-import { TablaSueldo } from "../../_componentes/tabla-sueldo";
-
-export const metadata = { title: "Cómo se arma su sueldo" };
-
-type Props = { params: Promise<{ id: string }>; searchParams: SearchParams };
-
-/** Sueldo en tres niveles (57): cada concepto, su valor por nivel y el que gana. */
-export default function Sueldo({ params, searchParams }: Props) {
+export const metadata = { title: "Capas de sueldo" };
+export default function Sueldo(props: {
+  params: Promise<{ id: string }>;
+  searchParams: SearchParams;
+}) {
   return (
-    <PaginaPortal
-      portal="erp"
-      titulo="Cómo se arma su sueldo"
-      ruta="/personas"
-      cargando="detalle"
-      acciones={
-        <EnlaceBotonHoja href="?excepcion=1" variante="secondary">
-          Editar excepción
-        </EnlaceBotonHoja>
-      }
-      cargar={async () => {
-        const [{ id }, q, voc] = await Promise.all([
-          params,
-          leerParametros(searchParams),
-          vocabularioActual(),
-        ]);
-        const d = await cargarPersona(id);
-        const l = d.persona ? await cargarLaboral(d.persona, q["puesto"]) : null;
-        return { ...d, l, q, voc };
-      }}
-      opciones={(d) => ({
-        titulo: "Cómo se arma su sueldo",
-        volver: {
-          href: `/personas/${d.persona?.id ?? ""}/laboral`,
-          etiqueta: d.persona?.nombreCompleto ?? "Persona",
-        },
-      })}
-    >
-      {({ persona: p, l, q }) => {
-        if (!p || !l) return <Alerta tono="danger" titulo="No encontramos a esta persona" />;
-        const puesto = l.puestos.find((x) => x.id === q["puesto"]);
-        const s = l.sueldo;
-        const excepcion = s?.niveles.persona;
+    <PaginaPersona {...props} tab="sueldo">
+      {async (p, q, panel) => {
+        const fecha = q["fecha"] ?? hoyIso();
+        if (!panel?.efectiva) return null;
+        const s = panel.efectiva;
+        const identidad = await identidadActual();
+        const gestionar = Boolean(
+          identidad &&
+          ["owner", "admin"].includes(identidad.actual?.rol ?? "") &&
+          contextoServidor(identidad, "erp").autorizar(PERMISOS_CORE.estructurasManage),
+        );
         return (
           <div className="flex flex-col gap-4">
-            <h2 className="t-title text-fg md:hidden">Cómo se arma su sueldo</h2>
             <div className="flex flex-wrap items-center justify-between gap-3">
-              <p className="flex flex-wrap items-center gap-2 text-base text-fg-muted">
-                Gana el nivel más específico:
-                <Badge tono="accent" punto={false}>
-                  Persona
-                </Badge>
-                <ChevronRight className="size-4" aria-hidden />
-                <Badge tono="info" punto={false}>
-                  Puesto
-                </Badge>
-                <ChevronRight className="size-4" aria-hidden />
-                <Badge punto={false}>Cargo</Badge>
-              </p>
-              <span className="t-caption">Vigente al {fecha(s?.fecha ?? hoyIso())}</span>
-            </div>
-            <SelectorPuesto puestos={l.puestos} />
-            {s ? (
-              <TablaSueldo s={s} columnas={rotulosDe(p, puesto)} />
-            ) : (
-              <Alerta
-                tono="neutral"
-                titulo={
-                  l.sueldoBloqueado ? "Sin permiso para ver sueldos" : "Sin estructura de sueldo"
-                }
-              />
-            )}
-            <div className="grid gap-3 md:grid-cols-2">
-              {excepcion ? (
-                <SeccionTarjeta titulo="Excepción de la persona">
-                  <p className="text-base text-fg">Vigente desde {fecha(excepcion.vigenteDesde)}</p>
-                  {excepcion.motivo ? (
-                    <p className="t-caption mt-1">Motivo: “{excepcion.motivo}”</p>
-                  ) : null}
-                </SeccionTarjeta>
-              ) : null}
-              {puesto ? (
-                <SeccionTarjeta titulo={`${puesto.instalacion} · ${puesto.nombre}`}>
-                  <EnlaceBoton
-                    href={`/instalaciones/${puesto.instalacionId}/puestos?puesto=${puesto.id}`}
-                    variante="ghost"
-                  >
-                    Abrir el puesto
-                  </EnlaceBoton>
-                </SeccionTarjeta>
+              <h2 className="t-heading">Capas de sueldo</h2>
+              {gestionar ? (
+                <EnlaceBotonHoja href="?excepcion=1">Definir sueldo por RUT</EnlaceBotonHoja>
               ) : null}
             </div>
-            <p className="t-caption">
-              La gratificación y los descuentos legales se calculan en la liquidación. Los montos de
-              cargos sensibles solo los ve quien tiene permiso de sueldos sensibles.
-            </p>
-            <HojaExcepcion
-              personaId={p.id}
-              actual={excepcion ?? null}
-              hoy={hoyIso()}
-              nombre={p.nombreCompleto}
+            <SelectorContexto
+              fecha={fecha}
+              instalaciones={panel.instalaciones.items}
+              puestos={panel.puestos}
             />
+            <p className="t-caption">
+              Por defecto se usa la instalación y el puesto del vínculo vigente. Cambiar el contexto
+              solo simula otra resolución; no modifica el contrato.
+            </p>
+            <PilaCapas capa={s.capa} capas={s.niveles} />
+            <p className="t-caption">Las capas no se combinan: RUT → puesto → instalación.</p>
+            {s.estado === "incompleta" ? (
+              <Alerta
+                tono="warning"
+                titulo="Estructura incompleta: define los conceptos faltantes en una nueva versión"
+              >
+                Faltan: {s.conceptosFaltantes.join(", ")}
+              </Alerta>
+            ) : null}
+            {s.estructura && s.capa ? (
+              <SeccionTarjeta titulo="Estructura que rige">
+                <TablaEstructura
+                  estructura={s.estructura}
+                  origen={{ capa: s.capa, version: s.estructura.vigenteDesde }}
+                />
+              </SeccionTarjeta>
+            ) : (
+              <Alerta tono="neutral" titulo="Sin capa definida">
+                Completa la instalación del vínculo o define una capa de sueldo. No se inventan
+                montos.
+              </Alerta>
+            )}
+            {s.estructura?.sensible ? (
+              <Alerta tono="neutral" titulo="Montos restringidos">
+                Solo owner y admin ven los montos, salvo permisos explícitos de fiscalización. El
+                origen permanece visible.
+              </Alerta>
+            ) : null}
+            {q["instalacion"] ? (
+              <EnlaceBoton variante="secondary" href={`/instalaciones/${q["instalacion"]}/sueldo`}>
+                Ver sueldo de la instalación
+              </EnlaceBoton>
+            ) : null}
+            <SeccionTarjeta titulo="Versiones del sueldo por RUT">
+              <VersionesCapa versiones={panel.versiones} nivel="persona" gestionar={gestionar} />
+            </SeccionTarjeta>
+            <HistorialCargos vinculos={panel.cargosRetirados} />
+            {gestionar ? (
+              <HojaCapaDiferida
+                nivel="persona"
+                refId={p.id}
+                base={s.estructura}
+                hoy={hoyIso()}
+                param="excepcion"
+              />
+            ) : null}
+            <MarcadorMetricas id="opai-metricas-sueldo" />
           </div>
         );
       }}
-    </PaginaPortal>
+    </PaginaPersona>
   );
 }

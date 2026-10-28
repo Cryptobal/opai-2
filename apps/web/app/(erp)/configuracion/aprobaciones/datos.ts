@@ -14,11 +14,12 @@ export async function cargarAprobaciones(p: Parametros) {
   const todas = (r.ok ? r.data : []).filter((a) => (historial ? a.estado !== "pendiente" : true));
   const items = todas.filter(
     (a) =>
-      (!p["riesgo"] || a.riesgo === p["riesgo"]) && (!p["agente"] || a.apiKeyId === p["agente"]),
+      (!p["riesgo"] || a.riesgo === p["riesgo"]) &&
+      (!p["agente"] || (a.apiKeyId ?? "agente-interno") === p["agente"]),
   );
-  const agentes = [...new Map(todas.map((a) => [a.apiKeyId, a.agente])).entries()].map(
-    ([valor, etiqueta]) => ({ valor, etiqueta }),
-  );
+  const agentes = [
+    ...new Map(todas.map((a) => [a.apiKeyId ?? "agente-interno", a.agente])).entries(),
+  ].map(([valor, etiqueta]) => ({ valor, etiqueta }));
   const pendientes = historial ? null : todas.length;
   return { state: estadoPantalla(r), items, agentes, historial, pendientes, ver: p["ver"] };
 }

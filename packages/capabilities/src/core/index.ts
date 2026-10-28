@@ -1,5 +1,6 @@
 import type { Capacidad } from "../types";
 import { invitationsAccept, invitationsPeek, invitationsRequestNew } from "./aceptar";
+import { capacidadesAnexos, consumidorAnexos } from "./anexos";
 import { apikeysCreate, apikeysList, apikeysRevoke } from "./apikeys";
 import { auditList, modulesList, usageSummary } from "./consultas";
 import { modulesSolicitar } from "./modulos-solicitar";
@@ -8,6 +9,7 @@ import {
   platformBitacoraEstado,
   trabajosDelNucleo as trabajosServicios,
 } from "./bitacora";
+import { platformAuditoriaEstado, trabajoVerificarAuditoria } from "./auditoria";
 import { consumosPorAgente, consumosPorRecurso, consumosResumen } from "./consumos";
 import { geoAutocompletar, geoDetalle, geoGeocodificar, geoMapa, iaProbar } from "./geo-ia";
 import { integracionesProbar, platformIntegracionesEstado } from "./integraciones-probar";
@@ -20,14 +22,17 @@ import {
 import { capacidadesAgentes, trabajosAgentes } from "./agentes";
 import { capacidadesComunicaciones, consumidorComunicaciones } from "./comunicaciones";
 import { capacidadesConfig } from "./config";
+import { capacidadesCumplimiento, trabajosCumplimiento } from "./cumplimiento";
 import { capacidadesDocumentos, trabajosDocumentos } from "./documentos";
 import { capacidadesEmpresa } from "./empresa";
 import { capacidadesMaestros } from "./maestros";
 import { capacidadesPanel } from "./panel";
+import { capacidadesPermisos } from "./permisos";
 import { platformConsumosSummary, platformEventosList } from "./platform-observabilidad";
 import { platformTrabajosCancelar, platformTrabajosReintentar } from "./platform-servicios";
 import { invitationsList, invitationsRevoke, usersInvite } from "./invitations";
 import { me } from "./me";
+import { mePortalInicio } from "./portal-inicio";
 import { ping } from "./ping";
 import { platformTenantsCreate } from "./platform-escritura";
 import { platformTenantsSetEstado, platformTenantsUpdate } from "./platform-estado";
@@ -41,6 +46,7 @@ import { usersList, usersRemove, usersUpdate } from "./users";
 export const capacidadesDelNucleo: readonly Capacidad[] = [
   ping,
   me,
+  mePortalInicio,
   tenantGet,
   tenantUpdate,
   usersList,
@@ -73,6 +79,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   consumosPorRecurso,
   bitacoraVerificar,
   platformBitacoraEstado,
+  platformAuditoriaEstado,
   platformTrabajosList,
   platformTrabajosReintentar,
   platformTrabajosCancelar,
@@ -90,9 +97,12 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   iaProbar,
   platformIntegracionesEstado,
   ...capacidadesMaestros,
+  ...capacidadesAnexos,
   ...capacidadesPanel,
+  ...capacidadesPermisos,
   ...capacidadesDocumentos,
   ...capacidadesConfig,
+  ...capacidadesCumplimiento,
   ...capacidadesEmpresa,
   ...capacidadesComunicaciones,
   ...capacidadesAgentes,
@@ -100,7 +110,13 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
 ];
 
 /** Consumidores de eventos del núcleo que registra el borde. */
-export const consumidoresDelNucleo = [consumidorComunicaciones];
+export const consumidoresDelNucleo = [consumidorComunicaciones, consumidorAnexos];
 
 /** Trabajos del núcleo que registra el borde (`apps/web/lib/registro.ts`). */
-export const trabajosDelNucleo = [...trabajosServicios, ...trabajosDocumentos, ...trabajosAgentes];
+export const trabajosDelNucleo = [
+  ...trabajosServicios,
+  trabajoVerificarAuditoria,
+  ...trabajosDocumentos,
+  ...trabajosAgentes,
+  ...trabajosCumplimiento,
+];

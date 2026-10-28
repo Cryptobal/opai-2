@@ -1,20 +1,15 @@
+import type { Contexto } from "../../types";
+import { exigirEdicionVinculo, validarDestino } from "./vinculos-validacion";
 import { z } from "zod";
 
 import { PERMISOS_CORE } from "@opai/domain";
-import type { TenantTx } from "@opai/db";
+export { crearVinculo } from "./vinculos-crear";
+import { crearVinculo } from "./vinculos-crear";
 
 import { defineCapability } from "../../define";
 import { conflicto, noEncontrado, reglaDeNegocio } from "../../errores";
-import type { Contexto } from "../../types";
 import { uuidSchema } from "../esquemas";
-import {
-  aFecha,
-  definidos,
-  escribirConEvento,
-  opcionalAFecha,
-  otroQue,
-  sinDuplicado,
-} from "./comun";
+import { definidos, escribirConEvento, opcionalAFecha, otroQue, sinDuplicado } from "./comun";
 import {
   camposPersona,
   personaDe,
@@ -23,6 +18,7 @@ import {
   vistaPersona,
 } from "./personas-vista";
 import { camposVinculo } from "./vinculos-vista";
+import { exigirNoAnonimizado } from "./anonimizado";
 
 const DUPLICADO = "Ya existe una persona con ese RUT.";
 
@@ -39,39 +35,6 @@ export async function cargoParaVinculo(ctx: Contexto, cargoId: string) {
   return c;
 }
 
-type DatosVinculo = z.output<z.ZodObject<typeof camposVinculo>>;
-
-/** Crea el vínculo y su evento dentro de la transacción del llamador. */
-export async function crearVinculo(
-  ctx: Contexto,
-  tx: TenantTx,
-  personaId: string,
-  v: DatosVinculo,
-) {
-  if (v.termino && v.termino < v.inicio) throw reglaDeNegocio("El término es anterior al inicio.");
-  const creado = await sinDuplicado(
-    tx.vinculoLaboral.create({
-      data: {
-        tenantId: ctx.tenantId,
-        personaId,
-        cargoId: v.cargoId,
-        tipo: v.tipo,
-        inicio: aFecha(v.inicio),
-        termino: v.termino ? aFecha(v.termino) : null,
-        estado: "vigente",
-      },
-    }),
-    "La persona ya tiene un vínculo vigente: primero termínalo.",
-  );
-  await ctx.eventos.emitir(tx, {
-    tipo: "core.vinculo.creado",
-    entidadTipo: "vinculo",
-    entidadId: creado.id,
-    payload: { personaId, cargoId: v.cargoId, tipo: v.tipo, inicio: v.inicio },
-  });
-  return creado;
-}
-
 export const personasCreate = defineCapability({
   id: "core.personas.create",
   descripcion:
@@ -82,6 +45,12 @@ export const personasCreate = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, { vinculo, ...input }, { dryRun }) {
+    if (vinculo) {
+      exigirEdicionVinculo(ctx);
+      if (!ctx.autorizar(PERMISOS_CORE.vinculosManage))
+        throw reglaDeNegocio("Sin permiso de vínculos.");
+      await validarDestino(ctx, vinculo);
+    }
     await rutLibre(ctx, input.rut);
     const cargo = vinculo ? await cargoParaVinculo(ctx, vinculo.cargoId) : null;
     const data = definidos({ ...input, fechaNacimiento: opcionalAFecha(input.fechaNacimiento) });
@@ -89,6 +58,10 @@ export const personasCreate = defineCapability({
       vinculo && cargo
         ? {
             id,
+            instalacionId: vinculo.instalacionId,
+            puestoId: vinculo.puestoId ?? null,
+            horasSemanales: vinculo.horasSemanales,
+            distribucion: vinculo.distribucion,
             cargoId: cargo.id,
             cargo: cargo.nombre,
             tipo: vinculo.tipo,
@@ -125,6 +98,7 @@ export const personasUpdate = defineCapability({
   dryRun: true,
   async handler(ctx, { id, ...cambios }, { dryRun }) {
     const actual = await personaDe(ctx, id);
+    exigirNoAnonimizado(actual, "La persona");
     await rutLibre(ctx, cambios.rut, id);
     const data = definidos({
       ...cambios,

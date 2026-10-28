@@ -1,20 +1,11 @@
 import { expect, type Page, test } from "@playwright/test";
+import { E2E_PASSWORD as password, entrar } from "./sesion";
 
 // Configuración · Acceso (Brief 02, sesión C, bloque 12): usuarios y permisos, agentes (crear key,
 // presupuesto, revocar), conectar tu IA y bandeja de aprobaciones, a 375, 1024 y 1280.
-const email = process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl";
-const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
 
 async function captura(page: Page, nombre: string, proyecto: string) {
   await page.screenshot({ path: `e2e/__screenshots__/${nombre}-${proyecto}.png`, fullPage: true });
-}
-
-async function entrar(page: Page) {
-  await page.goto("/login");
-  await page.getByLabel("Correo").fill(email);
-  await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
-  await page.getByRole("button", { name: "Entrar" }).click();
-  await page.waitForURL((url) => url.pathname === "/" || url.pathname === "/platform");
 }
 
 test.describe("configuración · acceso", () => {
@@ -28,12 +19,14 @@ test.describe("configuración · acceso", () => {
     await captura(page, "config-usuarios", p);
     await page.goto("/configuracion/api-keys");
     await expect(page).toHaveURL(/\/configuracion\/agentes$/);
+    await expect(page.getByRole("link", { name: "Conectar tu IA", exact: true })).toBeVisible();
     await captura(page, "config-agentes", p);
     await page.goto("/configuracion/agentes/conectar");
     await expect(page.getByText(/\/api\/mcp/).first()).toBeVisible();
     await captura(page, "config-conectar", p);
     await page.goto("/configuracion/aprobaciones");
     await expect(page.getByRole("heading", { name: /Aprobaciones/ }).first()).toBeAttached();
+    await expect(page.getByRole("link", { name: "Historial", exact: true })).toBeVisible();
     await captura(page, "config-aprobaciones", p);
   });
 

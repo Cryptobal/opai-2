@@ -15,11 +15,25 @@ export const PERMISOS_CORE = {
   cuentasManage: "core:cuentas.manage",
   instalacionesRead: "core:instalaciones.read",
   instalacionesManage: "core:instalaciones.manage",
+  // Puestos (Brief 11): catálogos de patrones de turno y funciones, con lectura, edición y
+  // desactivación separadas (permisos finos del #47). viewer lee por el comodín `*:*.read`.
+  patronesRead: "core:patrones.read",
+  patronesManage: "core:patrones.manage",
+  patronesDesactivar: "core:patrones.desactivar",
+  funcionesRead: "core:funciones.read",
+  funcionesManage: "core:funciones.manage",
+  funcionesDesactivar: "core:funciones.desactivar",
   personasRead: "core:personas.read",
+  vinculosRead: "core:vinculos.read",
+  vinculosManage: "core:vinculos.manage",
   personasManage: "core:personas.manage",
   estructurasRead: "core:estructuras.read",
   estructurasManage: "core:estructuras.manage",
   estructurasReadSensible: "core:estructuras.read_sensible",
+  // Brief 07b · PR 4: anexo de contrato en borrador. Trae snapshots con datos de sueldo, con el
+  // mismo bloqueo financiero que las capas y el vínculo (D8; solo owner y admin hasta el 07c).
+  anexosRead: "core:anexos.read",
+  anexosManage: "core:anexos.manage",
   documentosRead: "core:documentos.read",
   documentosManage: "core:documentos.manage",
   configRead: "core:config.read",
@@ -30,6 +44,11 @@ export const PERMISOS_CORE = {
   consumosRead: "core:consumos.read",
   aprobacionesManage: "core:aprobaciones.manage",
   agentesManage: "core:agentes.manage",
+  // Brief 07d · Ley 21.719 (DPA/DPO, RAT). Gestionar (DPO, pie legal) es de owner/admin;
+  // aceptar el DPA es acto del owner del tenant (responsable del tratamiento, §16.1), solo owner.
+  cumplimientoRead: "core:cumplimiento.read",
+  cumplimientoManage: "core:cumplimiento.manage",
+  cumplimientoDpaAceptar: "core:cumplimiento.dpa_aceptar",
 } as const;
 
 export const PERMISOS_PLATAFORMA = {

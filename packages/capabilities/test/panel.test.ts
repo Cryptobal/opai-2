@@ -1,3 +1,4 @@
+import { destinoVinculo } from "./vinculo-fixture";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import {
@@ -60,6 +61,99 @@ describe("pantallas de la sesión C: actividad, contadores y pendientes", () => 
     expect(n["aprobacionesPendientes"]).toBeNull();
   });
 
+  it("sin permiso de documentos o personas no revela vencimientos", async () => {
+    for (const permiso of ["core:documentos.read", "core:personas.read"]) {
+      const { ctx } = contextoDePrueba();
+      const limitado = { ...ctx, autorizar: (p: string) => p !== permiso && ctx.autorizar(p) };
+      const items = ok<{ tipo: string }[]>(
+        await executeCapability(limitado, "core.inicio.pendientes", {}),
+      );
+      expect(items.some((item) => item.tipo === "documentos")).toBe(false);
+      const matriz = await executeCapability(limitado, "core.documentos.matriz", {});
+      expect(matriz).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+    }
+  });
+
+  it("Inicio usa los vencimientos de la misma matriz de personas", async () => {
+    const { ctx } = contextoDePrueba({
+      semilla: {
+        persona: [
+          {
+            id: "persona-1",
+            nombres: "Persona",
+            apellidos: "Prueba",
+            archivadaEn: null,
+            estado: "activa",
+          },
+        ],
+        documentoTipo: [
+          {
+            id: "tipo-1",
+            capa: "persona",
+            activo: true,
+            obligatorio: false,
+            tieneVencimiento: true,
+            diasAlerta: 30,
+            nombre: "Documento",
+            orden: 0,
+          },
+        ],
+        documentoVinculo: [
+          {
+            documentoId: "doc-1",
+            entidadTipo: "persona",
+            entidadId: "persona-1",
+            rol: "propietario",
+          },
+        ],
+        documento: [
+          {
+            id: "doc-1",
+            tipoId: "tipo-1",
+            estado: "disponible",
+            venceEn: new Date("2020-01-01"),
+            version: 1,
+          },
+        ],
+      },
+    });
+    const matriz = ok<{ resumen: { vencidos: number; porVencer: number } }>(
+      await executeCapability(ctx, "core.documentos.matriz", {}),
+    );
+    expect(matriz.resumen.vencidos).toBe(1);
+    const items = ok<{ tipo: string; titulo: string }[]>(
+      await executeCapability(ctx, "core.inicio.pendientes", {}),
+    );
+    expect(items).toContainEqual(
+      expect.objectContaining({
+        tipo: "documentos",
+        titulo: "1 documento vencido · 0 vencen pronto",
+      }),
+    );
+  });
+
+  it("avisa cuando la matriz supera las 2.000 personas accesibles", async () => {
+    const personas = Array.from({ length: 2001 }, (_, i) => ({
+      id: `persona-${i}`,
+      nombres: "Persona",
+      apellidos: String(i),
+      archivadaEn: null,
+      estado: "activa",
+    }));
+    const { ctx } = contextoDePrueba({ semilla: { persona: personas } });
+    const matriz = ok<{ limiteExcedido: boolean; resumen: { personas: number } }>(
+      await executeCapability(ctx, "core.documentos.matriz", {}),
+    );
+    expect(matriz.limiteExcedido).toBe(true);
+    expect(matriz.resumen.personas).toBe(2000);
+    const items = ok<{ tipo: string; titulo: string }[]>(
+      await executeCapability(ctx, "core.inicio.pendientes", {}),
+    );
+    expect(items).toContainEqual(
+      expect.objectContaining({ tipo: "documentos", titulo: "Vencimientos sin conteo completo" }),
+    );
+  });
+
   it("sin nada pendiente, Inicio no muestra decisiones", async () => {
     const { ctx } = contextoDePrueba();
     expect(ok<unknown[]>(await executeCapability(ctx, "core.inicio.pendientes", {}))).toEqual([]);
@@ -83,7 +177,7 @@ describe("la actividad no muestra sueldos sin el permiso sensible", () => {
         nombres: "María",
         apellidos: "Soto",
         rut: "16.234.567-2",
-        vinculo: { cargoId: cargo.id, tipo: "indefinido", inicio: "2026-01-05" },
+        vinculo: { ...(await destinoVinculo(ctx)), cargoId: cargo.id, tipo: "indefinido", inicio: "2026-01-05" },
       }),
     );
     ok(
@@ -91,6 +185,9 @@ describe("la actividad no muestra sueldos sin el permiso sensible", () => {
         nivel: "persona",
         personaId: p.id,
         sueldoBase: 1_250_000,
+        colacion: 0,
+        movilizacion: 0,
+        gratificacion: "ninguna",
         motivo: "Excepción acordada",
         vigenteDesde: "2026-02-01",
       }),

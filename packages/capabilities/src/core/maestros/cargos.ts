@@ -1,11 +1,10 @@
 import { z } from "zod";
 
 import { PERMISOS_CORE } from "@opai/domain";
-
 import { defineCapability } from "../../define";
+import { noEncontrado, rechazoSensible } from "../../errores";
 import { uuidSchema } from "../esquemas";
 import { definidos, escribirConEvento, sinDuplicado } from "./comun";
-import { resumenSueldoSchema, sueldoVigentePorCargo } from "./cargos-resumen";
 import {
   campos,
   cargoDe,
@@ -19,26 +18,28 @@ import {
 export const cargosList = defineCapability({
   id: "core.cargos.list",
   descripcion:
-    "Cargos de la empresa (guardia, supervisor, operario…) con personas con vínculo vigente, puestos activos y los montos de su estructura de sueldo vigente hoy.",
+    "Catálogo de cargos de la empresa con personas con vínculo vigente y puestos activos, sin montos: el cargo ya no define sueldo.",
   permiso: PERMISOS_CORE.estructurasRead,
   input: z.object({ incluirInactivos: z.boolean().default(false) }),
-  output: z.array(cargoSchema.extend({ sueldoVigente: resumenSueldoSchema })),
+  output: z.array(cargoSchema),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
+    // Catálogo y conteos filtrados en una operación; no carga estructuras ni montos (ADR-045).
     const cargos = await ctx.db.cargo.findMany({
       where: input.incluirInactivos ? {} : { activo: true },
       orderBy: [{ orden: "asc" }, { nombre: "asc" }],
+      include: {
+        _count: {
+          select: {
+            vinculos: { where: { estado: "vigente" } },
+            puestos: { where: { estado: "activo" } },
+          },
+        },
+      },
     });
-    const sueldos = await sueldoVigentePorCargo(
-      ctx,
-      cargos.map((c) => c.id),
-    );
-    return Promise.all(
-      cargos.map(async (c) => ({
-        ...vista(c, await conteos(ctx, c.id)),
-        sueldoVigente: sueldos.get(c.id) ?? null,
-      })),
+    return cargos.map((c) =>
+      vista(c, { personasVigentes: c._count.vinculos, puestosActivos: c._count.puestos }),
     );
   },
 });
@@ -52,19 +53,35 @@ export const cargosGet = defineCapability({
   output: cargoSchema,
   efecto: "lectura",
   dryRun: false,
-  handler: async (ctx, input) => vista(await cargoDe(ctx, input.id), await conteos(ctx, input.id)),
+  async handler(ctx, input) {
+    const c = await ctx.db.cargo.findUnique({
+      where: { id: input.id },
+      include: {
+        _count: {
+          select: {
+            vinculos: { where: { estado: "vigente" } },
+            puestos: { where: { estado: "activo" } },
+          },
+        },
+      },
+    });
+    if (!c) throw noEncontrado("El cargo");
+    return vista(c, { personasVigentes: c._count.vinculos, puestosActivos: c._count.puestos });
+  },
 });
 
 export const cargosCreate = defineCapability({
   id: "core.cargos.create",
   descripcion:
-    "Crea un cargo con nombre único. Su estructura de sueldo se define después con core.estructuras.create (nivel cargo).",
+    "Crea un cargo de catálogo con nombre único, clase y sensibilidad. Los sueldos se definen en instalación, puesto o persona.",
   permiso: PERMISOS_CORE.estructurasManage,
   input: z.object(campos),
   output: cargoSchema,
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
+    if (input.sueldoSensible && !ctx.autorizar(PERMISOS_CORE.estructurasReadSensible))
+      throw rechazoSensible("No tienes permiso para crear un cargo sensible.");
     await nombreLibre(ctx, input.nombre);
     const data = definidos(input);
     if (dryRun) return vista({ ...data, id: "" });
@@ -95,38 +112,33 @@ export const cargosUpdate = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, { id, ...cambios }, { dryRun }) {
-    const actual = await cargoDe(ctx, id);
-    await nombreLibre(ctx, cambios.nombre, id);
-    const data = definidos(cambios);
-    const n = await conteos(ctx, id);
-    if (dryRun) return vista({ ...actual, ...data }, n);
-    const c = await escribirConEvento(
-      ctx,
-      { tipo: "core.cargo.actualizado", entidadTipo: "cargo", payload: () => data },
-      (tx) => sinDuplicado(tx.cargo.update({ where: { id }, data }), DUPLICADO),
-    );
-    return vista(c, n);
+    return ctx.transaccion(async (tx) => {
+      // Las lecturas y escrituras usan la misma transacción y el bloqueo de la fila.
+      ctx = { ...ctx, db: tx, transaccion: (fn) => fn(tx) };
+      if (typeof (ctx.db as { $executeRaw?: unknown }).$executeRaw === "function")
+        await ctx.db
+          .$executeRaw`SELECT id FROM core.cargos WHERE id = ${id}::uuid AND tenant_id = ${ctx.tenantId}::uuid FOR UPDATE`;
+      const actual = await cargoDe(ctx, id);
+      if (
+        cambios.sueldoSensible !== undefined &&
+        cambios.sueldoSensible !== actual.sueldoSensible &&
+        !ctx.autorizar(PERMISOS_CORE.estructurasReadSensible)
+      )
+        throw rechazoSensible(
+          "No tienes permiso para cambiar la privacidad de los montos de este cargo.",
+        );
+      await nombreLibre(ctx, cambios.nombre, id);
+      const data = definidos(cambios);
+      const n = await conteos(ctx, id);
+      if (dryRun) return vista({ ...actual, ...data }, n);
+      const c = await escribirConEvento(
+        ctx,
+        { tipo: "core.cargo.actualizado", entidadTipo: "cargo", payload: () => data },
+        (tx) => sinDuplicado(tx.cargo.update({ where: { id }, data }), DUPLICADO),
+      );
+      return vista(c, n);
+    });
   },
 });
 
-export const cargosSetActivo = defineCapability({
-  id: "core.cargos.set_activo",
-  descripcion:
-    "Activa o desactiva un cargo. Desactivar no borra: impide usarlo en puestos y vínculos nuevos.",
-  permiso: PERMISOS_CORE.estructurasManage,
-  input: z.object({ id: uuidSchema, activo: z.boolean() }),
-  output: cargoSchema,
-  efecto: "escritura",
-  dryRun: true,
-  async handler(ctx, { id, activo }, { dryRun }) {
-    const actual = await cargoDe(ctx, id);
-    const n = await conteos(ctx, id);
-    if (dryRun) return vista({ ...actual, activo }, n);
-    const c = await escribirConEvento(
-      ctx,
-      { tipo: "core.cargo.actualizado", entidadTipo: "cargo", payload: () => ({ activo }) },
-      (tx) => tx.cargo.update({ where: { id }, data: { activo } }),
-    );
-    return vista(c, n);
-  },
-});
+export { cargosSetActivo } from "./cargos-activo";

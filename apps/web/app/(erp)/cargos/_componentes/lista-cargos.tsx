@@ -6,14 +6,9 @@ import { LinkNext } from "@/app/_components/link-next";
 import { Buscador } from "@/app/_components/maestros/buscador";
 import { ChipsFiltro } from "@/app/_components/maestros/chips-filtro";
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
-import { pesos } from "@/lib/fechas";
-import { GRATIFICACION } from "@/lib/tipos-sueldo";
 
 import { CLASES, type CargoFila } from "./datos";
 
-const OCULTO = "••••";
-const monto = (c: CargoFila, k: "sueldoBase" | "colacion" | "movilizacion") =>
-  !c.sueldoVigente ? "—" : c.sueldoVigente.sensible ? OCULTO : pesos(c.sueldoVigente[k]);
 const clase = (v: string) => CLASES.find((c) => c.valor === v)?.etiqueta ?? v;
 const conteo = (n: number) => String(n);
 
@@ -34,17 +29,25 @@ function Estado({ activo }: { activo: boolean }) {
 
 const num = "text-right t-numeric";
 
-/** Cargos y sueldos (14): tabla con los montos de la versión vigente; filas en teléfono. */
-export function ListaCargos({ state, items }: { state: EstadoPantalla; items: CargoFila[] }) {
-  const nuevo = (
+/** Catálogo de cargos sin montos. */
+export function ListaCargos({
+  state,
+  items,
+  puedeGestionar,
+}: {
+  state: EstadoPantalla;
+  items: CargoFila[];
+  puedeGestionar: boolean;
+}) {
+  const nuevo = puedeGestionar ? (
     <EnlaceBotonHoja href="?nuevo=1" icono={Plus}>
       Nuevo
     </EnlaceBotonHoja>
-  );
+  ) : undefined;
   return (
     <ListScreen<CargoFila>
       state={state}
-      titulo="Cargos y sueldos"
+      titulo="Cargos"
       accionPrincipal={nuevo}
       buscador={<Buscador placeholder="Buscar cargo" />}
       filtros={
@@ -77,7 +80,6 @@ export function ListaCargos({ state, items }: { state: EstadoPantalla; items: Ca
               {clase(c.clase)} · {c.personasVigentes}{" "}
               {c.personasVigentes === 1 ? "persona" : "personas"}
             </span>
-            <span className="text-sm text-fg-muted">Base {monto(c, "sueldoBase")}</span>
           </span>
           <Estado activo={c.activo} />
         </>
@@ -98,39 +100,18 @@ export function ListaCargos({ state, items }: { state: EstadoPantalla; items: Ca
           render: (c) => conteo(c.puestosActivos),
         },
         {
-          id: "base",
-          etiqueta: "Sueldo base",
-          className: num,
-          render: (c) => monto(c, "sueldoBase"),
-        },
-        {
-          id: "colacion",
-          etiqueta: "Colación",
-          className: num,
-          render: (c) => monto(c, "colacion"),
-        },
-        {
-          id: "movilizacion",
-          etiqueta: "Movilización",
-          className: num,
-          render: (c) => monto(c, "movilizacion"),
-        },
-        {
-          id: "gratificacion",
-          etiqueta: "Gratificación",
-          render: (c) =>
-            !c.sueldoVigente
-              ? "—"
-              : c.sueldoVigente.sensible
-                ? OCULTO
-                : (GRATIFICACION[c.sueldoVigente.gratificacion ?? ""] ?? "—"),
+          id: "sensible",
+          etiqueta: "Sueldo sensible",
+          render: (c) => (c.sueldoSensible ? "Sí" : "No"),
         },
         { id: "estado", etiqueta: "Estado", render: (c) => <Estado activo={c.activo} /> },
       ]}
       textos={{
         vacio: {
           titulo: "Sin cargos",
-          descripcion: "Crea el primero o ajusta los filtros.",
+          descripcion: puedeGestionar
+            ? "Crea el primero o ajusta los filtros."
+            : "Ajusta los filtros.",
           accion: nuevo,
         },
       }}

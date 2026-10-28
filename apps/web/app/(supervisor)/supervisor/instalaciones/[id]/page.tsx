@@ -1,7 +1,8 @@
 import { Navigation, Phone } from "lucide-react";
 
-import { Alerta, SeccionTarjeta } from "@opai/ds";
+import { Alerta, cn, SeccionTarjeta } from "@opai/ds";
 
+import { activosPrimero, BadgePuesto } from "@/app/_components/maestros/badge-puesto";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { MapaOpai } from "@/app/_components/maestros/mapa";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
@@ -29,7 +30,8 @@ export default function InstalacionTerreno({ params }: { params: Promise<{ id: s
           i.lat !== null && i.lng !== null
             ? `${i.lat},${i.lng}`
             : encodeURIComponent([i.calle, i.comuna].filter(Boolean).join(", "));
-        const activos = i.puestos.filter((p) => p.estado === "activo");
+        // Todos los puestos, con los inactivos atenuados al final (QA #49-2, como en la lista ERP).
+        const puestos = activosPrimero(i.puestos);
         return (
           <div className="flex flex-col gap-4">
             <MapaOpai
@@ -63,25 +65,37 @@ export default function InstalacionTerreno({ params }: { params: Promise<{ id: s
               </div>
             ) : null}
             <SeccionTarjeta titulo="Puestos" sinRelleno>
-              {activos.length ? (
+              {puestos.length ? (
                 <ul>
-                  {activos.map((p) => (
-                    <li
-                      key={p.id}
-                      className="flex items-center justify-between gap-3 border-b border-border px-4 py-3 last:border-b-0"
-                    >
-                      <span className="flex flex-col">
-                        <span className="text-base font-medium text-fg">{p.nombre}</span>
-                        <span className="t-caption">
-                          {p.horario} · {p.diasTrabajo}×{p.diasDescanso}
+                  {puestos.map((p) => {
+                    const inactivo = p.estado !== "activo";
+                    return (
+                      <li
+                        key={p.id}
+                        className="flex items-center justify-between gap-3 border-b border-border px-4 py-3 last:border-b-0"
+                      >
+                        <span className="flex min-w-0 flex-col">
+                          <span
+                            className={cn(
+                              "text-base font-medium",
+                              inactivo ? "text-fg-muted" : "text-fg",
+                            )}
+                          >
+                            {p.nombre}
+                          </span>
+                          <span className="t-caption">
+                            {[p.patron ?? "Sin patrón", p.horario, p.horarioNoche]
+                              .filter(Boolean)
+                              .join(" · ")}
+                          </span>
                         </span>
-                      </span>
-                      <span className="t-numeric text-base text-fg-muted">{p.dotacion}</span>
-                    </li>
-                  ))}
+                        <BadgePuesto estado={p.estado} cobertura={p.cobertura} />
+                      </li>
+                    );
+                  })}
                 </ul>
               ) : (
-                <p className="px-4 py-4 text-base text-fg-muted">Sin puestos activos.</p>
+                <p className="px-4 py-4 text-base text-fg-muted">Sin puestos.</p>
               )}
             </SeccionTarjeta>
             <p className="t-caption">

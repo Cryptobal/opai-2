@@ -76,8 +76,8 @@ D2. **Máximo 7 entradas por área.** Si un área pasa de siete, se divide en do
 D3. **Fijados:** se fija y desfija con un ícono de pin que aparece al pasar el mouse por la entrada y en la cabecera de la ficha. Se ordenan por la fecha en que se fijaron (el más antiguo arriba). Máximo cinco; al intentar el sexto, aviso y no se fija.
 D4. **Inicio** es una entrada suelta arriba; la **Bandeja** vive dentro de Inicio (sección, no entrada del menú).
 D5. **Contador de la Bandeja:** en la barra inferior del celular, Inicio muestra un **punto**; el número aparece dentro de la pantalla. No hay contadores en la barra lateral.
-D6. **Campana (ADR-014):** muestra un punto de no leído y abre la misma Bandeja; no hay una segunda lista de avisos.
-D7. **Celular:** la búsqueda sale de la barra superior; solo queda «Buscar» en la barra inferior.
+D6. **Campana (ADR-014):** muestra un punto de no leído y abre una vista corta de la misma Bandeja con «Ver todo» a `/#bandeja`; no hay una segunda lista de avisos. Decisión OPAI 2.0, 28-oct-2026 00:35, mandato de Carlos t682u.
+D7. **Celular:** la búsqueda sale de la barra superior; solo queda «Buscar» en la barra inferior. *(Reemplazada el 26-oct-2026 17:57 por ADR-050: decisión de Carlos, «El shell sigue el diseño de Claude; que el repo se ajuste». «Buscar» vuelve a la barra superior del teléfono y sale de la barra inferior.)*
 D8. **Vencimientos** sigue como vista dentro de Personas; no es entrada del menú.
 D9. **iPad:** desde 1024 px se usa la barra lateral completa de escritorio, con sus grupos plegables, sin riel nuevo. De 768 a 1023 sigue el riel actual. No se pliega a solo íconos (Carlos, 26-oct-2026 11:03 CLT, chat con el bot OPAI 2.0 (t295u; dictado por voz)).
 D10. **El rol viewer (Visualizador) no ve Nómina.** No es una decisión nueva: es regla de ADR-016 (viewer «solo lectura, sin finanzas ni nómina»). Corrige la pantalla 05 del diseño, que se la mostraba.
@@ -96,7 +96,7 @@ D10. **El rol viewer (Visualizador) no ve Nómina.** No es una decisión nueva: 
 Decisión de Carlos, 26-oct-2026 10:08 CLT, chat con OPAI 2.0; ADR-049, propuesto en PR #38, pendiente de merge. El agente interno se construye en un brief propio después de CPQ («Ok, después del CPQ» — Carlos, 26-oct-2026 10:53 CLT, chat con el Revisor OPAI 2.0 (t120u); confirmado por Carlos, 26-oct-2026 11:03 CLT, chat con el bot OPAI 2.0 (t295u; dictado por voz)). Aquí solo se reserva dónde vive, para que ese brief lo agregue sin rediseñar la navegación:
 
 - **Escritorio y iPad (⌘K):** la acción **«Preguntar a OPAI»** ocupa el primer lugar de la paleta, antes de recientes y acciones, y usa como pregunta el texto escrito en el buscador.
-- **Celular:** el mismo lugar, arriba de todo dentro de **«Buscar»** (la paleta a pantalla completa, pantallas 19–22), bajo el campo de búsqueda. No suma un ítem a la barra inferior ni a la barra superior (D7).
+- **Celular:** el mismo lugar, arriba de todo dentro de **«Buscar»** (la paleta a pantalla completa, pantallas 19–22), bajo el campo de búsqueda. No suma un ítem propio: «Buscar» vive en la barra superior del teléfono (ADR-050, §10).
 - **Mientras no exista el agente, la entrada no se muestra:** ni deshabilitada ni con «próximamente». Aparecerá cuando el módulo del agente esté activo en el tenant, igual que las entradas de cualquier módulo (R2). En este brief no hay código para ella; los CA9 y CA10 se cumplen sin esa entrada.
 
 ## 5. Archivos (previstos)
@@ -137,7 +137,7 @@ Decisión de Carlos, 26-oct-2026 10:08 CLT, chat con OPAI 2.0; ADR-049, propuest
 | 07 | `Fijados_1280` | Sin fijados, cinco fijados y acción de fijar (D3) |
 | 08–12 | `CmdK_*_1280` | Inicial (recientes y acciones), resultados «quili», sin resultados, viewer, oscuro. El primer lugar queda reservado para «Preguntar a OPAI» (§4.4); no se construye aquí |
 | 13 | `Menu_usuario_portal_1280` | Menú de usuario y selector de portal (Plataforma solo para operadores) |
-| 14 | `BarraInferior_variantes_375` | Cinco variantes por área principal y respaldo del escenario A. **Ajuste D7:** vale la versión sin búsqueda en la barra superior |
+| 14 | `BarraInferior_variantes_375` | Cinco variantes por área principal y respaldo del escenario A. **Ajuste ADR-050:** la barra inferior no lleva «Buscar»; la búsqueda vuelve a la barra superior del teléfono (§10, D7 reemplazada) |
 | 15 | `Inicio_bandeja_375` | Bandeja en Inicio y punto en la barra inferior (D4, D5) |
 | 16–18 | `Mas_*_375` | Hoja «Más» en escenarios C y A, y oscuro |
 | 19–22 | `Buscar_*_375` | ⌘K a pantalla completa en el celular. El primer lugar, bajo el campo, queda reservado para «Preguntar a OPAI» (§4.4); no se construye aquí |
@@ -161,11 +161,11 @@ Se agregan a `packages/ds` sobre los componentes existentes, solo con tokens, y 
 
 ### 8.3 Responsive
 
-- **< 768:** barra superior de 52 px con selector de portal, campana y la foto o el avatar del usuario (Carlos, 26-oct-2026 11:03 CLT, chat con el bot OPAI 2.0 (t295u; dictado por voz); sin búsqueda desde el PR A, D7); barra inferior de 56 px + safe-area con cinco ítems (Inicio, 2, 3, Buscar, Más).
+- **< 768:** barra superior de 52 px con selector de portal, **buscar**, campana y la foto o el avatar del usuario (la búsqueda vuelve a la barra superior por ADR-050, 26-oct-2026 17:57; el avatar arriba por Carlos, 26-oct-2026 11:03 CLT, chat con el bot OPAI 2.0 (t295u; dictado por voz)); barra inferior de 56 px + safe-area con hasta cuatro ítems de navegación más «Más» (Inicio fijo; «Buscar» ya no va en la barra inferior, §10).
 - **768–1023:** riel actual, sin cambios de comportamiento (D9).
-- **≥ 1024:** barra lateral de 248 px con áreas (D9); cabecera de 60 px con título, buscador ⌘K, campana y usuario.
+- **≥ 1024:** barra lateral de 248 px con áreas (D9) y el usuario al pie de la barra lateral (ADR-050); cabecera de 60 px con título, buscador ⌘K y campana.
 - Touch targets ≥ 44 px, foco visible, contraste AA en claro y oscuro, sin scroll horizontal a 375; etiquetas largas con elipsis.
-- **Cabecera estable (CAR-12):** la acción principal de la página sale de la cabecera y va en el patrón (`REGLAS-codigo.md`, UI). La cabecera queda con título (o migas) a la izquierda y un **grupo fijo** al final (buscar, campana y usuario en escritorio; campana y avatar en el teléfono), con ancho y posición constantes en todas las vistas, también con «Atrás». El buscador no cambia de forma dentro del mismo breakpoint. Si una ficha o un formulario necesita acciones en la cabecera, van a la izquierda del grupo fijo, nunca a su derecha.
+- **Cabecera estable (CAR-12):** la acción principal de la página sale de la cabecera y va en el patrón (`REGLAS-codigo.md`, UI). La cabecera queda con título (o migas) a la izquierda y un **grupo fijo** al final (buscar y campana en escritorio, con el usuario al pie de la barra lateral por ADR-050; buscar, campana y avatar en el teléfono), con ancho y posición constantes en todas las vistas, también con «Atrás». El buscador no cambia de forma dentro del mismo breakpoint. Si una ficha o un formulario necesita acciones en la cabecera, van a la izquierda del grupo fijo, nunca a su derecha.
 
 ## 9. Seguridad y tenant
 
@@ -176,7 +176,7 @@ Se agregan a `packages/ds` sobre los componentes existentes, solo con tokens, y 
 
 ## 10. Casos límite
 
-- Tenant con solo el núcleo (escenario A): Inicio, Clientes, Personas y Configuración; barra inferior de respaldo Inicio · Cuentas · Personas · Buscar · Más.
+- Tenant con solo el núcleo (escenario A): Inicio, Clientes, Personas y Configuración; barra inferior de respaldo Inicio · Cuentas · Personas · Más (ADR-050: «Buscar» vuelve a la barra superior; §10).
 - Tenant con Puestos y Nómina (escenario D; Nómina exige Puestos, nota de ADR-048 del 25-oct 23:10): Operaciones con Puestos y Personas con Nómina; nada de Comercial ni Finanzas.
 - Área principal elegida que deja de estar disponible (módulo apagado o rol cambiado): cae a la de por defecto del rol, sin error.
 - Fijado de una ficha borrada o fuera de alcance: no aparece.
@@ -193,14 +193,14 @@ Conviene dividirlo en **dos PRs** para que la cabecera de CAR-12 (urgente) llegu
 
 **PR A — Cabecera estable (CAR-12).**
 - Bloque 0 · Lectura y verificación. El PR A puede avanzar mirando las pantallas 01, 14 y 24 directo en Claude Design; el bloqueo por el export aplica solo al PR B (ver abajo).
-- Bloque 1 · `ds:`/`core:` cabecera estable en `AppBar` y `TopBarTelefono` (grupo fijo, con la foto o el avatar del usuario en el teléfono; Carlos, 26-oct-2026 11:03 CLT, chat con el bot OPAI 2.0 (t295u; dictado por voz)), acción principal al patrón en las páginas que hoy la pasan a la cabecera y buscador sin cambio de forma. **Búsqueda en el celular (D7) en este PR:** sale de la barra superior y entra «Buscar» a la barra inferior en el mismo commit, para que el celular nunca quede sin búsqueda. Hasta el PR B, la barra inferior es la de respaldo del escenario A del diseño (pantalla 14): Inicio · Cuentas · Personas · Buscar · Más; Instalaciones, Cargos y sueldos, Aprobaciones y Configuración pasan a la hoja «Más» actual (`menu-mas.tsx`), sin abreviaturas. «Buscar» abre la ⌘K actual a pantalla completa. e2e `cabecera-estable.spec.ts`.
+- Bloque 1 · `ds:`/`core:` cabecera estable en `AppBar` y `TopBarTelefono` (grupo fijo, con la foto o el avatar del usuario en el teléfono; Carlos, 26-oct-2026 11:03 CLT, chat con el bot OPAI 2.0 (t295u; dictado por voz)), acción principal al patrón en las páginas que hoy la pasan a la cabecera y buscador sin cambio de forma. **Búsqueda en el celular (ADR-050) en este PR:** se queda en la barra superior del teléfono; no pasa a la barra inferior. Hasta el PR B, la barra inferior es la de respaldo del escenario A del diseño (pantalla 14): Inicio · Cuentas · Personas · Más; Instalaciones, Cargos y sueldos, Aprobaciones y Configuración pasan a la hoja «Más» actual (`menu-mas.tsx`), sin abreviaturas. La búsqueda de la barra superior abre la ⌘K actual a pantalla completa. e2e `cabecera-estable.spec.ts`.
 
 **PR B — Navegación por áreas.** Empieza cuando el PR 2 del Brief 03 (shell en el layout) esté integrado. El bloque 0 del PR B se **detiene** si falta el export en `docs/2.0/design/export-navegacion/` (Carlos lo exporta desde Claude Design).
 - Bloque 2 · `core:` modelo `area`, manifest `navegacion`/`acciones`, `armarNavegacion` puro con tests, ajustes `navegacion_*`.
 - Bloque 3 · `ds:` componentes nuevos (§8.2) en `/ds`.
 - Bloque 4 · `ds:` barra lateral por áreas (acordeón D1, fijados D3, Inicio suelto D4, sin contadores D5) y breakpoint `lg` (D9).
 - Bloque 5 · `ds:`/`core:` ⌘K con recientes y acciones.
-- Bloque 6 · `core:` barra inferior por área principal (Inicio y Buscar fijos, que ya dejó el PR A), hoja «Más» por áreas, Preferencias → Área principal.
+- Bloque 6 · `core:` barra inferior por área principal (Inicio fijo; «Buscar» ya no va en la barra inferior, ADR-050, §10), hoja «Más» por áreas, Preferencias → Área principal.
 - Bloque 7 · `core:` Bandeja en Inicio, punto en Inicio y campana (D5, D6).
 - Bloque 8 · `docs:` `NAVEGACION.md` §8 (estado de hoy), `ESTADO.md` y reporte.
 
@@ -220,16 +220,16 @@ Conviene dividirlo en **dos PRs** para que la cabecera de CAR-12 (urgente) llegu
 
 ## 14. Criterios de aceptación
 
-- **CA1 (CAR-12, obligatorio).** Campana, buscador y botón de usuario mantienen **tamaño y posición idénticos** al cambiar de vista (Personas → Vencimientos → Cuentas → Nueva cuenta → Inicio) y al cambiar de vencimiento. Lo verifica `cabecera-estable.spec.ts` a **375 y 1280 px** (y también a 1024, proyecto `ipad`): compara el `boundingBox` de cada ícono entre vistas con tolerancia de 0 px en posición y tamaño. A 1280 se comparan buscador, campana y usuario. A 375 se comparan campana y avatar en **todas** las vistas, también las que tienen «Atrás» (Nueva cuenta, ficha); desde el PR A el buscador del teléfono es el ítem «Buscar» de la barra inferior, que también debe quedar fijo.
+- **CA1 (CAR-12, obligatorio).** Campana y buscador (y el avatar del usuario en el teléfono) mantienen **tamaño y posición idénticos** al cambiar de vista (Personas → Vencimientos → Cuentas → Nueva cuenta → Inicio) y al cambiar de vencimiento. Lo verifica `cabecera-estable.spec.ts` a **375 y 1280 px** (y también a 1024, proyecto `ipad`): compara el `boundingBox` de cada ícono entre vistas con tolerancia de 0 px en posición y tamaño. A 1280 se comparan buscador y campana (el usuario va al pie de la barra lateral, ADR-050). A 375 se comparan buscador, campana y avatar en **todas** las vistas, también las que tienen «Atrás» (Nueva cuenta, ficha); desde el PR A el buscador del teléfono vive en la barra superior (ADR-050, §10), que también debe quedar fijo.
 - **CA2.** El mapa coincide con `NAVEGACION.md` §2 (con D8): áreas, entradas, orden y nombres; Configuración al pie; no aparecen «Maestros», «Módulos», «Guardias», «Ajustes» (en el ERP) ni abreviaturas.
 - **CA3.** Límites: seis áreas, siete entradas por área, cinco fijados; un área de una entrada aparece suelta.
 - **CA4.** Nada deshabilitado en ningún escenario ni rol.
 - **CA5.** Roles: gerente, supervisor y viewer sin Finanzas; gerente, supervisor y viewer sin Nómina (D10); supervisor sin Comercial.
-- **CA6.** Sin contadores en la barra lateral; Inicio muestra un punto en la barra inferior y el número dentro de la pantalla; la campana muestra un punto y abre la Bandeja.
+- **CA6.** Sin contadores en la barra lateral; Inicio muestra un punto en la barra inferior y el número dentro de la pantalla; la campana muestra un punto y abre una vista corta de la misma Bandeja con «Ver todo» a `/#bandeja`.
 - **CA7.** Acordeón: solo queda abierta el área activa; el estado se recuerda por usuario y empresa.
 - **CA8.** Fijar y desfijar con el pin en hover y en la cabecera de la ficha; orden por fecha de fijado; los fijados persisten al recargar y en otro dispositivo (los recientes, solo en el mismo navegador).
 - **CA9.** ⌘K muestra el atajo en la cabecera de escritorio, recientes (10) y acciones, funciona entero con teclado y respeta permisos y alcance (viewer sin acciones de escritura).
-- **CA10.** Celular: cinco ítems con Inicio y Buscar fijos, variantes según el área principal y respaldo; sin búsqueda en la barra superior; ≥ 44 px y safe-area.
+- **CA10.** Celular: Inicio fijo y hasta cuatro ítems de navegación más «Más», variantes según el área principal y respaldo; la búsqueda va en la barra superior (ADR-050, §10), no en la inferior; ≥ 44 px y safe-area.
 - **CA11.** Desde 1024 px, barra lateral completa con áreas; de 768 a 1023, el riel actual sin cambios.
 - **CA12.** Shell estable al cambiar de página: solo cambia el contenido, con su skeleton.
 - **CA13.** Claro y oscuro con contraste AA y foco visible; sin scroll horizontal a 375.
@@ -248,3 +248,83 @@ Conviene dividirlo en **dos PRs** para que la cabecera de CAR-12 (urgente) llegu
 ## 16. Reporte de ejecución
 
 Al cerrar: commits integrados, capturas antes y después a 375, 1024 y 1280, resultado de `cabecera-estable.spec.ts`, medición de ADR-045, presupuesto de JS, actualización de `NAVEGACION.md` §8 y resumen ejecutivo para Carlos (qué se hizo, qué cambia para Gard, qué decide él, qué sigue).
+
+### Continuación del PR B · 27-oct-2026
+
+Implementación en `brief/05-pr-b-navegacion`, no integrada. Se preservó el trabajo local heredado y se incorporó `origin/main` mediante merge; al recuperar el stash se resolvieron los conflictos conservando los permisos efectivos y las protecciones del shell de `main`. El export aprobado está presente.
+
+**Revisión 5666749146:** seguimiento del encargo del PR #75 por OpenCode: se retiran las abreviaturas del ERP y se recupera el área guardada en Inicio y Configuración, manteniendo la prioridad del área de la ruta activa. La autorrevisión señaló una navegación durante el guardado y el espacio para etiquetas multilínea; se conservó la selección local y se amplió el espacio inferior. Son ajustes técnicos, sin nuevas decisiones de negocio. Los CA 8, 9, 11, 13 y 14 y la medición ADR-045 siguen parciales por las limitaciones anotadas abajo.
+
+Decisiones técnicas de OpenCode / GPT-6.1 Sol, dentro del encargo (no atribuidas a Carlos):
+- `navegacion_area_abierta = "ninguna"` representa plegado explícito; `null` conserva el respaldo por ruta.
+- `core.config.set` serializa lectura y escritura por ajuste en su transacción; revisión esperada opcional evita reemplazar fijados con una lista obsoleta. Al reiniciar ajustes de navegación se conserva una fila con valor inválido para el esquema: la lectura vuelve al defecto sin reutilizar la revisión.
+- Las fichas guardadas se validan con capacidades existentes y alcance antes de mostrarse; una falla transitoria oculta el acceso, no concede acceso. Solo se aceptan rutas internas conocidas. Recientes siguen exclusivamente en el navegador.
+- Gana ADR-050 de `main` sobre D7: Buscar arriba en teléfono; usuario al pie de la lateral. No se crea un agente interno ni se copia el estilo de 1.0.
+- Continuación del encargo de las 05:00 CLT: merge normal de `origin/main` `5c18a92` (identidad de servicio #70 y MFA #65). Se conserva «Mi cuenta» del menú del ERP incluso sin acceso al portal, igual que en main, y la navegación e2e usa el helper de login con TOTP ya existente. No se relajan permisos ni la política MFA.
+- Correcciones de autorrevisión por OpenCode / GPT-6.1 Sol: la cola transforma el último estado confirmado y no persiste áreas sin cambios; la limpieza de fichas distingue rechazo definitivo (`NOT_FOUND`/`FORBIDDEN`) de fallo transitorio, sin consumir permanentemente los cinco cupos. La Bandeja conserva enlaces y lectura individual, cuenta `noLeidas` y pagina con cursor propio validado (sin `skip`, para no perder avisos si el cursor se lee en otra pestaña). Se difiere su código interactivo tras montar para respetar el presupuesto inicial, sin subir más topes.
+- La revisión esperada se captura **antes** de validar fichas de forma asíncrona; si una recarga la cambia, se rechaza el intento sin sobrescribir la lista nueva. Si cambia durante la petición, se recarga y no se aplica una respuesta obsoleta. Al guardar solo se mezcla el campo afectado, no el resto de preferencias. La autorrevisión independiente cerró los hallazgos técnicos; no equivale a aprobación formal del PR.
+
+No hay migración nueva ni cambio del orden del plan. La tarea específica del PR B no viene identificada: CAR-13 es la del documento, no se inventa otra vinculación.
+
+#### Autorrevisión de aceptación del PR B
+
+| CA | Implementación y comprobación |
+|---|---|
+| 1 | e2e `cabecera-estable.spec.ts`: cajas reales, sin redondeo ni tolerancia; incluye ficha sembrada con Atrás y cambio de filtro de vencimientos en los tres anchos. Nueva cuenta se mide tras cerrar su hoja modal porque Radix deja la cabecera inerte mientras está abierta. |
+| 2 | Modelo puro y permisos efectivos de main; mapa por áreas sin Maestros ni abreviaturas. |
+| 3 | Límites de siete entradas y cinco fijados; área de una entrada suelta. Pruebas de dominio y manifiesto. |
+| 4 | Filtrado por módulos activos; matriz A–D con los cinco roles reales. Los módulos futuros se prueban como datos, no como pantallas ficticias. |
+| 5 | Matriz con `tienePermiso` real: gerente, supervisor y viewer sin Finanzas/Nómina; supervisor sin Comercial. |
+| 6 | Sin contadores laterales; punto compartido de Inicio/campana y número en Bandeja. Aprobaciones solo se consultan cuando el resumen autorizado no es null. |
+| 7 | Acordeón exclusivo, estado por usuario/tenant, plegado explícito y contenido cerrado `inert`; al navegar se abre el área de destino. |
+| 8 | Pin de entrada y ficha, cinco máximos, fecha ascendente, validación de existencia/alcance. CAS rechaza listas obsoletas; e2e de dos clics con primera respuesta demorada. **Evidencia parcial:** no se hizo recorrido con dos dispositivos reales. |
+| 9 | Recientes locales limitados a diez, almacenamiento inválido tolerado; acciones buscables mediante cmdk/Radix. **Evidencia parcial:** no se recorrió con teclado cada resultado y estado posible. |
+| 10 | Barra inferior por área, respaldo del rol si desaparece la preferencia, Más como Sheet, targets de 44 px. |
+| 11 | Lateral desde 1024; riel anterior conservado entre 768–1023. **Evidencia parcial:** e2e a 375/1024/1280, sin recorrido adicional a 768. |
+| 12 | Layout persistente y precarga conservados de main. El e2e de navegación marca el nodo real del menú y comprueba que se conserva tras enlaces cliente a Cuentas y Personas; el e2e de cabecera complementa con cargas completas. |
+| 13 | DS V2, foco y targets; e2e incorpora medición WCAG del texto visible del shell, Bandeja y paleta en claro/oscuro. **Parcial:** no sustituye auditoría completa de iconos, foco y todos los estados. |
+| 14 | Tokens/componentes del DS y muestra en `/ds`, capturas claro/oscuro. **Parcial:** no se compararon exhaustivamente las 28 pantallas ni se demostraron todos los estados de galería. |
+
+**ADR-037, medición heredada:** el encargo exige conservar los topes de `origin/main`. El build heredado superaba el presupuesto en 31 rutas; no se atribuye la diferencia íntegra a este PR sin medición de base equivalente.
+
+#### Reducción de JS inicial · continuación del encargo del 27-oct
+
+Adaptaciones técnicas de OpenCode / GPT-6.1 Sol, sin decisiones de negocio nuevas:
+- El análisis de los manifests y chunks del build encontró preferencias/recientes y el catálogo de iconos en el cliente compartido. Las preferencias pasan a una isla posterior a la hidratación; la navegación autorizada enviada por el servidor sigue disponible desde el primer render. El shell no se reemplaza ni remonta al cargar esa isla. Al perder acceso al ERP se descarta su estado incluso si no cambia la época.
+- Los SVG estáticos de navegación y cuenta se renderizan en el servidor. El cliente conserva tamaño, acento y atributos accesibles del DS al reutilizarlos, sin descargar el catálogo completo. Las búsquedas mantienen su catálogo en el chunk diferido de la paleta.
+- «Más» descarga su contenido al abrirlo. Fijados y controles de pin se descargan cuando llegan las preferencias; la demostración de navegación de `/ds`, bajo el primer viewport, se monta diferida. No cambian los tokens ni el diseño aprobado.
+- La autorrevisión independiente detectó preferencias antiguas tras una revocación y falta de retorno de foco del Sheet preexistente. Se descarta el estado revocado y «Más» restaura explícitamente el foco; el e2e comprueba reapertura con Enter, foco dentro del modal y retorno con Escape.
+- El editor de área principal se descarga después de hidratar, con skeleton del DS; conserva su estado independiente y sincroniza con el shell mediante el evento existente después de guardar. Se descartó la alternativa de contexto compartido porque el e2e detectó que podía dejar el editor deshabilitado tras usar la paleta. Un fallo inicial muestra error y «Reintentar», sin escrituras mientras no se logre leer. Pruebas del hook, revocación con la misma época y e2e con aborto de la carga. La muestra PWA de la galería también se difiere: está bajo el primer viewport y no cambia ningún flujo de la PWA real.
+- Los topes y `scripts/presupuesto-js.ts` permanecen sin cambios. Las mediciones finales por ruta y el gate se dejan en `PR-BODY.md`, sin commitearlo.
+
+**Medición del build:** presupuesto verde en las 84 rutas, frente a 31 excedidas al iniciar esta continuación. Framework sin cambios (130,27 KB gzip). Reducción compartida de unos 4,43 KB en las rutas simples del ERP; por ejemplo Inicio 163,60 → 159,17 KB. Menor margen ERP: Instalación 164,32/165 KB (0,68 KB). `/ds`: 219,58/220 KB. **Objetivo orientativo de ≥1 KB de margen, parcial:** varias fichas quedan por debajo de ese margen, aunque pasan el gate; Invitación conserva su margen anterior de 0,34 KB, fuera del shell optimizado. Sin cambios al plan ni nuevas decisiones de Carlos.
+
+Los CA parciales de la tabla anterior siguen explícitos: esta optimización no acredita dos dispositivos reales ni una comparación exhaustiva de las 28 pantallas.
+
+**Gate de esta continuación:** typecheck, lint (sin errores; advertencias heredadas), 1.053 unitarias, `test:db` 94 + 93 + 24, build y presupuesto en verde. E2E de producción en servidor propio 3188: cabecera, navegación y recuperación de preferencias 9/9 a 375/1024/1280; incluye uso de paleta antes de editar, persistencia del nodo del menú, foco y contraste claro/oscuro. Galería en dev propio 3189: 3/3. Autorrevisión independiente sin hallazgos pendientes sobre la variante final, sin equivaler a la revisión formal. Rama 0 commits detrás de `origin/main`; CI remoto pendiente.
+
+**ADR-045 parcial:** las preferencias se cargan una vez al montar, no desde las páginas; recientes no consultan al navegar. La revalidación de fichas fijadas puede añadir hasta cinco lecturas tras montar. No se produjo una nueva tabla instrumental antes/después del protocolo de rendimiento; no se presenta como cumplido ese punto de §13.
+
+#### Seguimiento QA del PR #75
+
+**QA N1/N2 (OpenCode, encargo PR #75; revisión 5668628029):** etiquetas completas con separación silábica en español si hace falta, sin alterar el espaciado tipográfico, y riel de 80 px; las filas de fijados y el reintento alcanzan 44 px. Ajustes técnicos de OpenCode según el encargo, sin decisiones de negocio nuevas. La evidencia parcial de los CA 8, 9, 11, 13 y 14 y la medición ADR-045 siguen pendientes como se indica arriba; la prueba de 768 no sustituye el recorrido visual ni los dispositivos reales.
+
+En servidor propio de producción, los tres casos de áreas, preferencias y acceso pasaron en teléfono, iPad y escritorio. Etiquetas pasó en teléfono y 768 px; sus proyectos iPad y desktop se omiten porque la prueba cambia ambos anchos en teléfono. La primera prueba con servidor de desarrollo sufrió recargas continuas del login, sin diagnóstico concluyente. El primer test unitario y un test de base tuvieron timeouts bajo carga; se repitieron. Sin cambios de seguridad, escritura ni migraciones en esta corrección.
+
+**Corrección de la evidencia:** el resultado anterior corresponde a producción. En CI con `next dev` y un worker fallaban en teléfono los casos de áreas y de fijados: preferencias recargaba `/elegir-empresa` y pulsaba «Más» durante la redirección a `/`; el indicador «Insight» de Next, asociado al aviso de datos sin caché de `PortalLayout` también presente en main, tapaba la barra a 375 px. El encargo modificó los e2e con navegación explícita a `/`, reintento de apertura, ocultación del indicador de desarrollo y espera local de la Bandeja diferida; el job `e2e (Playwright)` del head 45b28b0 siguió fallando en fijados [telefono] y fue cancelado. El helper también oculta los overlays de error de Next; el reintento no demuestra que el primer clic se atendió. La espera fija del acordeón se sustituyó por la respuesta del guardado. Sin cambios de producto ni decisiones de negocio nuevas. Los CA 8, 9, 11, 13 y 14 y ADR-045 siguen parciales como se indica arriba.
+
+**Validación de la corrección:** los dos specs afectados en `next dev` pasaron en teléfono, iPad y escritorio (11 aprobados y una omisión preexistente); estrés ×4 con tres repeticiones en teléfono, 9 aprobados y 3 omisiones preexistentes. Dos intentos anteriores de estrés fallaron por navegación o carga de login bajo presión; no se amplían los timeouts. La suite completa `navegacion-*` no quedó verde: 9 aprobados, 6 omisiones y 6 fallos, entre ellos login del spec `navegacion-pendiente` en los tres proyectos; hubo también fallos de Bandeja, acordeón iPad y login en desktop durante carga concurrente. Los dos specs afectados se repitieron luego en verde. Typecheck y lint pasaron; `pnpm test` sin variable de BD pasó con 946 aprobados y 222 omitidos, `test:db` pasó con 98 + 129 + 25, build y presupuesto pasaron. El primer `pnpm test` con BD activa falló bajo carga con timeouts y un conteo de auditoría; no se presenta como verde.
+
+Una segunda ejecución completa tampoco pasó: 10 aprobados, 6 omitidos y 5 fallos; `navegacion-pendiente` volvió a fallar en login en los tres proyectos y ambos casos de preferencias desktop agotaron el tiempo de login o preparación del navegador. No se cambió MFA ni se omitieron pruebas para obtener verde. La suite completa sigue bloqueada; su resolución queda fuera del alcance de esta corrección.
+
+**Revisión 5671619101 (OpenCode):** en una base local nueva con las 26 migraciones y las semillas de CI, el caso del shell pasó con CPU ×4 y traza; con ×8 agotó el tiempo en `sesion.ts:16`, cargando `/login`, antes de llegar al caso. La ejecución coincidió con el gate bajo carga, que también tuvo fallos por timeout. No se ha reproducido ni identificado la causa del rojo de CI; no se modificó `sesion.ts`. El resultado del job `e2e (Playwright)` para el próximo head está **pendiente de CI**. Los resultados históricos anteriores no acreditan ese head. La autorrevisión señala riesgo de recorte del riel con barras de scroll no superpuestas y texto ampliado.
+
+**Merge de main `bf97199147f51d7ce5c01aad66dd6a945132b67a` (OpenCode):** se conserva el menú «Más» y se añade la opción de portal de inicio con las comprobaciones de acceso de main. La prueba de revocación del shell contempla el nuevo estado. Typecheck, lint, 1.126 pruebas, test:db (97 + 93 + 25), build y presupuesto pasan; `/ds` queda en 219,9/220 KB. **E2E bloqueado:** la base configurada para la aplicación no tiene `memberships.portal_inicio`; no se aplicó ninguna migración. Los CA parciales y las limitaciones anteriores siguen vigentes. Sin decisiones de negocio nuevas.
+
+OpenCode aplicó el addendum del encargo: «Más» incorpora fijados, acordeón y cuenta con iconos y peligro, también desde el riel; se corrigen la clave inicial del acordeón, abreviaturas compactas y errores de carga de preferencias. Al cargar se mantiene abierta el área de la ruta actual aun si llega una preferencia anterior distinta, sin salto; las acciones posteriores se siguen guardando. La navegación de un fijado cierra la hoja y utiliza el router del shell. Se agregan pruebas del primer render y de errores y se amplía el e2e de «Más». Son adaptaciones técnicas según el encargo, sin nueva decisión de negocio. CA 8, 9, 11, 13 y 14 siguen parciales por los límites de evidencia de la tabla anterior; queda pendiente la comparación visual y accesible a 768 y en dispositivos reales. Los demás hallazgos medios y bajos del informe quedan diferidos salvo safe-area inferior.
+
+**Continuación de Codex (revisión 5671619101):** merge normal de `origin/main` y conservación de paginación de avisos junto a la consulta de página y conteo de main. La espera fija del acordeón se reemplazó por la respuesta del guardado. En base e2e nueva, `next dev`, CPU ×4 y traza, fijados pasó; la traza muestra un primer intento de apertura sin diálogo y un reintento exitoso. Con ×8 se agotó el tiempo en `/login` antes del caso bajo carga. La causa del rojo de CI sigue sin identificarse y el CI del head actual está pendiente. Son adaptaciones técnicas de Codex, sin decisiones de negocio nuevas. Los CA 8, 9, 11, 13 y 14 y ADR-045 siguen parciales.
+
+**Autorrevisión del merge (Codex):** la validación del cursor y la página de la bandeja comparten una sentencia y snapshot, con filtros por tenant y usuario; se corrigió el simulador. El test focalizado en Postgres y el test del simulador pasaron. La revisión independiente verificó estáticamente esa corrección y observó cobertura de aislamiento y concurrencia de preferencias; no certifica una auditoría completa. La suite e2e en curso ya registra fallos en áreas, etiquetas y navegación pendiente, aunque el caso de fijados pasó en teléfono; el gate completo y CI quedan pendientes.
+
+**Continuación del encargo #75 (Codex):** se incorporó `main` `7fc900c` mediante merge. La autorrevisión independiente señaló un rechazo de red no manejado al validar fichas fijadas; se ocultan las fichas si falla la llamada. Para cumplir ADR-037 tras el merge, el diálogo de confirmación de acciones se carga al solicitarlo: `/instalaciones/[id]` baja de 165,1 a 164,9 KB frente al tope de 165 KB. Son decisiones técnicas de Codex, sin cambios de negocio. Los CA parciales y ADR-045 siguen como se indica arriba.

@@ -13,6 +13,14 @@ export {
   urlDeGoogle,
 } from "./acciones";
 export { auth, type Auth } from "./auth";
+export { LOGIN_RETENCION_DIAS, purgarIntentosLogin } from "./bloqueo-login";
+export {
+  confirmarSegundoFactor,
+  desactivarSegundoFactor,
+  iniciarSegundoFactor,
+  verificarCodigoRespaldo,
+  verificarSegundoFactor,
+} from "./mfa";
 export {
   googleHabilitado,
   LARGO_MINIMO_PASSWORD,

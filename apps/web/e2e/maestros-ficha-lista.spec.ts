@@ -1,26 +1,23 @@
 import { type ChildProcessWithoutNullStreams, spawn } from "node:child_process";
 
-import { expect, type Page, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+import { E2E_PASSWORD as password, entrar } from "./sesion";
 
 // Pulido post-#25 (QA 24-oct), en iPad y escritorio (en celular la ficha ocupa la pantalla):
 //  - D1: al cambiar de pestaña con clic, la lista queda en pantalla y solo el panel derecho muestra la carga.
-const email = process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl";
-const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
-const baseDatos = process.env["DATABASE_URL"] ?? "";
+// El lock ACCESS EXCLUSIVE sobre audit_events exige UPDATE/DELETE/TRUNCATE o MAINTAIN; desde el
+// Brief 07d opai_app ya no tiene UPDATE/DELETE sobre la auditoría (append-only, §6), así que el
+// lock se toma con el rol propietario (DATABASE_URL_MIGRATE), nunca con el rol de la app (DATABASE_URL).
+const baseLock = process.env["DATABASE_URL_MIGRATE"] ?? "";
 // El bloqueo de la tabla solo se hace contra una base local o efímera, nunca contra Neon.
-const baseLocal = /@(localhost|127\.0\.0\.1)[:/]/.test(baseDatos);
-
-async function entrar(page: Page) {
-  await page.goto("/login");
-  await page.getByLabel("Correo").fill(email);
-  await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
-  await page.getByRole("button", { name: "Entrar" }).click();
-  await page.waitForURL((url) => url.pathname === "/" || url.pathname === "/platform");
-}
+const baseLocal = /@(localhost|127\.0\.0\.1)[:/]/.test(baseLock);
+// En CI la base es efímera (localhost) y la variable del rol propietario tiene que llegar: un skip
+// silencioso dejaría este spec sin cubrir y escondería la regresión. Fuera de CI sí puede faltar.
+const enCI = !!process.env["CI"];
 
 /** Retiene la auditoría (la lee solo la pestaña Actividad): frena el contenido del panel, no la lista. */
 async function retenerAuditoria() {
-  const psql: ChildProcessWithoutNullStreams = spawn("psql", [baseDatos, "-q", "-X", "-A", "-t"]);
+  const psql: ChildProcessWithoutNullStreams = spawn("psql", [baseLock, "-q", "-X", "-A", "-t"]);
   let salida = "";
   psql.stdout.on("data", (d: Buffer) => (salida += d.toString()));
   psql.on("error", () => undefined); // sin psql, la espera de abajo vence y el test falla con su mensaje
@@ -50,7 +47,14 @@ test.setTimeout(180_000);
 
 test.describe("la lista queda a la vista mientras la ficha carga", () => {
   test.skip(!password, "Falta SEED_OWNER_PASSWORD o E2E_PASSWORD");
-  test.skip(!baseLocal, "Necesita DATABASE_URL de una base local o efímera");
+  // Solo se salta fuera de CI: en CI la ausencia de la variable es un error, no un skip (abajo).
+  test.skip(!baseLocal && !enCI, "Necesita DATABASE_URL_MIGRATE (rol propietario) de una base local o efímera");
+  test.beforeAll(() => {
+    if (!baseLocal && enCI)
+      throw new Error(
+        "En CI falta DATABASE_URL_MIGRATE (rol propietario) de una base local/efímera: el paso e2e de ci.yml debe pasarla para que este spec se cubra de verdad.",
+      );
+  });
 
   for (const m of MODULOS) {
     test(`${m.ruta}: Actividad en carga, la lista sigue visible y solo el panel muestra el esqueleto`, async ({
@@ -60,8 +64,19 @@ test.describe("la lista queda a la vista mientras la ficha carga", () => {
       await entrar(page);
       await page.goto(m.ruta);
       const lista = page.getByRole("region", { name: m.lista });
-      await lista.getByRole("link").first().click();
+      // El primer enlace de la lista es la acción "Nueva" (cabecera del patrón); abrimos una ficha
+      // real: el primer enlace visible cuyo href apunta a un registro (`<ruta>/<uuid>`), evitando
+      // el esqueleto de página que el layout deja en el DOM (oculto por CSS, ver más abajo).
+      await lista.locator(`a[href^="${m.ruta}/"]:not([href$="/nueva"]):visible`).first().click();
       await page.waitForURL(new RegExp(`${m.ruta}/[0-9a-f-]{36}`));
+      const urlFicha = page.url();
+      // Pre-compila la pestaña Actividad fuera del lock: en dev la primera visita de una ruta la
+      // compila, y si esa compilación cae mientras se sostiene el LOCK ACCESS EXCLUSIVE, dos
+      // viewports en paralelo (iPad y escritorio) chocan y uno vence su espera. Al calentarla antes,
+      // el lock solo se sostiene durante la consulta (lo que la prueba sí quiere medir), no la build.
+      await page.goto(`${urlFicha}/actividad`);
+      await expect(page.getByText("Últimos 30 días").first()).toBeVisible();
+      await page.goto(urlFicha);
       const ficha = page.getByRole("region", { name: "Detalle" });
       await expect(ficha.getByRole("link", { name: /^Actividad/ }).first()).toBeVisible();
       const liberar = await retenerAuditoria();

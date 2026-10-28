@@ -1,10 +1,13 @@
+import { auditarRechazoSensible } from "./execute-rechazo";
 import { controlAgente } from "./agentes/control";
 import { denegar, falla } from "./autorizacion";
 import { ErrorCapacidad } from "./errores";
-import { entidadAuditada, repeticion, sinSensibles, tenantDe } from "./execute-util";
+import { ejecutarLecturaAuditada } from "./execute-lectura";
+import { consumoEjecucion } from "./execute-medicion";
+import { auditarSiPlataforma, eventoAuditoria, repeticion, tenantDe } from "./execute-util";
 import { SALIDA_INVALIDA } from "./idempotencia";
 import { obtenerCapacidad } from "./registry";
-import type { Capacidad, Contexto, OpcionesEjecucion, Resultado } from "./types";
+import type { Capacidad, Contexto, FinalizarConsumo, OpcionesEjecucion, Resultado } from "./types";
 
 async function correr(
   ctx: Contexto,
@@ -41,28 +44,49 @@ async function correr(
     !dryRun && c.efecto !== "lectura" && ctx.conTenant ? opciones.idempotencyKey : undefined;
   const reserva = clave ? await ctx.idempotencia.reservar(c.id, clave, entrada.data) : null;
   if (reserva && reserva.estado !== "nueva") {
-    return { resultado: repeticion(reserva), entrada: entrada.data };
+    const resultado = repeticion(reserva);
+    if (resultado.ok) await c.autorizarRepeticion?.(ctx, entrada.data, resultado.data);
+    return { resultado, entrada: entrada.data };
   }
   const reservaId = reserva?.id;
+  // Con tenant actual, la escritura audita en SU MISMA transacción, más abajo (ADR-052): si el
+  // insert de auditoría falla, el handler hace rollback; si el handler falla, nunca se audita. Sin
+  // tenant (plataforma) no hay una sola transacción posible (`ctx.transaccion` está atado al tenant
+  // SIN_TENANT): `executeCapability` audita aparte con `auditarSiPlataforma`.
+  const auditaAqui = c.efecto !== "lectura" && ctx.conTenant && !c.tenantObjetivo && !dryRun;
   let crudo: unknown;
+  let lecturaValidada: ReturnType<Capacidad["output"]["safeParse"]> | undefined;
   try {
-    // Lecturas con empresa: una sola transacción con el tenant fijado una vez (ADR-045), si el borde
-    // la ofrece. `transaccion` se redirige a esa misma tx para que un `ctx.transaccion` dentro de una
-    // lectura no abra otra (Prisma no anida transacciones interactivas). Sin empresa (`core.me` sin
-    // tenant, plataforma) no se envuelve: la RLS no devuelve filas y evita abrir una transacción para
-    // un handler que no consulta la base. Las escrituras tampoco: siguen con `db` por consulta y su
-    // propio `ctx.transaccion` para el bloque atómico.
-    crudo =
-      c.efecto === "lectura" && ctx.conTenant && ctx.enLectura
-        ? await ctx.enLectura((db) =>
-            c.handler({ ...ctx, db, transaccion: (fn) => fn(db) }, entrada.data, modo),
-          )
-        : await c.handler(ctx, entrada.data, modo);
+    // Lecturas con empresa: una sola transacción con el tenant fijado una vez (ADR-045). Sin empresa
+    // (plataforma) no se envuelve: la RLS no devuelve filas para un handler que no consulta la base.
+    if (c.auditarLectura && ctx.conTenant) {
+      lecturaValidada = await ejecutarLecturaAuditada(ctx, c, entrada.data, modo);
+    } else if (c.efecto === "lectura" && ctx.conTenant && ctx.enLectura) {
+      crudo = await ctx.enLectura((db) =>
+        c.handler({ ...ctx, db, transaccion: (fn) => fn(db) }, entrada.data, modo),
+      );
+    } else if (auditaAqui) {
+      crudo = await ctx.transaccion(async (tx) => {
+        const salidaCruda = await c.handler(
+          { ...ctx, db: tx, transaccion: (fn) => fn(tx) },
+          entrada.data,
+          modo,
+        );
+        await ctx.auditoria.registrar(
+          tx,
+          eventoAuditoria(c, ctx.actor, ctx.tenantId, entrada.data, salidaCruda, opciones),
+        );
+        return salidaCruda;
+      });
+    } else {
+      crudo = await c.handler(ctx, entrada.data, modo);
+    }
   } catch (error) {
     if (reservaId) await ctx.idempotencia.liberar(reservaId);
+    await auditarRechazoSensible(ctx, c, error);
     throw error;
   }
-  const salida = c.output.safeParse(crudo);
+  const salida = lecturaValidada ?? c.output.safeParse(crudo);
   if (reservaId) {
     // El handler terminó: la escritura ya ocurrió. Nunca se libera la clave (duplicaría).
     await ctx.idempotencia.completar(
@@ -107,51 +131,32 @@ export async function executeCapability(
 
   const inicio = Date.now();
   let r: Awaited<ReturnType<typeof correr>>;
+  let finalizar: FinalizarConsumo | undefined;
+  const prepago = ctx.actor.tipo === "agent" && ctx.conTenant && Boolean(ctx.medidor.preparar);
   try {
+    // Las llamadas de agentes se cobran antes de sus efectos, nunca con after(). El medidor
+    // serializa chequeo + consumo + aviso por key dentro de la misma transacción.
+    if (prepago)
+      finalizar = await ctx.medidor.preparar!(consumoEjecucion(ctx, c, opciones, ctx.tenantId));
     r = await correr(ctx, c, input, opciones);
-    const tenantId = tenantDe(ctx, c, r.entrada, r.salida);
-    const escrituraNueva = r.resultado.ok && !r.resultado.dryRun && !r.resultado.repetida;
-    if (escrituraNueva && c.efecto !== "lectura" && tenantId) {
-      await ctx.auditoria.registrar({
-        tenantId,
-        capability: c.id,
-        actor: ctx.actor,
-        ...entidadAuditada(c.id, r.entrada, r.salida),
-        payload: {
-          input: sinSensibles(r.entrada, c.sensibles),
-          idempotencyKey: opciones.idempotencyKey ?? null,
-          ...opciones.auditoriaExtra,
-        },
-      });
-    }
+    await auditarSiPlataforma(ctx, c, r, opciones);
   } catch (error) {
     const code = error instanceof ErrorCapacidad ? error.code : "INTERNAL";
     const message = error instanceof Error ? error.message : "Error inesperado.";
-    r = { resultado: falla(code, message) };
+    const detalles = error instanceof ErrorCapacidad ? error.detalles : undefined;
+    r = { resultado: falla(code, message, detalles) };
   }
 
   const tenantId = tenantDe(ctx, c, r.entrada, r.salida);
-  if (tenantId) {
-    // La medición nunca rompe una ejecución (ADR-031).
-    const consumo = {
-      tenantId,
-      recurso: "capacidad.ejecucion",
-      unidad: "llamada",
-      cantidad: 1,
-      modulo: c.modulo,
-      capability: c.id,
-      actorTipo: ctx.actor.tipo,
-      actorId: ctx.actor.id ?? null,
-      viaUserId: ctx.actor.viaUserId ?? null,
-      apiKeyId: ctx.actor.tipo === "agent" ? ctx.actor.id : null,
-      portal: ctx.portal,
-      efecto: c.efecto,
-      dryRun: opciones.dryRun === true,
-      ok: r.resultado.ok,
-      duracionMs: Date.now() - inicio,
-    };
-    await ctx.medidor.registrar(consumo).catch(() => undefined);
-  }
+  const estado = { ok: r.resultado.ok, duracionMs: Date.now() - inicio };
+  if (finalizar) await finalizar(estado).catch(() => undefined);
+  else if (tenantId && !prepago)
+    await ctx.medidor
+      .registrar({
+        ...consumoEjecucion(ctx, c, opciones, tenantId),
+        ...estado,
+      })
+      .catch(() => undefined);
   const nueva = r.resultado.ok && !r.resultado.dryRun && !r.resultado.repetida;
   if (nueva && c.efecto !== "lectura") ctx.despacharEventos();
   return r.resultado;

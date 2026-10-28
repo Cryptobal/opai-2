@@ -1,3 +1,4 @@
+import { destinoVinculo } from "./vinculo-fixture";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { executeCapability } from "../src";
@@ -43,7 +44,7 @@ async function vinculoVigente(ctx: Contexto) {
     nombres: "Ana",
     apellidos: "Rojas",
     rut: "19.876.543-0",
-    vinculo: { cargoId, tipo: "indefinido", inicio: "2025-01-02" },
+    vinculo: { ...(await destinoVinculo(ctx)), cargoId, tipo: "indefinido", inicio: "2025-01-02" },
   });
   return p.vinculoVigente.id;
 }

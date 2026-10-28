@@ -75,6 +75,8 @@ model Contacto {
   estado      String    @default("activo")
   notas       String?
   archivadoEn DateTime? @map("archivado_en") @db.Timestamptz(6)
+  /// Anonimizado por la política de retención o a pedido del titular (Ley 21.719, 07d PR 3).
+  anonimizadoEn DateTime? @map("anonimizado_en") @db.Timestamptz(6)
   createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
@@ -89,6 +91,7 @@ model Contacto {
 }
 
 model Instalacion {
+  vinculos VinculoLaboral[]
   id                  String    @id @default(uuid(7)) @db.Uuid
   tenantId            String    @map("tenant_id") @db.Uuid
   cuentaId            String    @map("cuenta_id") @db.Uuid
@@ -115,6 +118,9 @@ model Instalacion {
   tenant  Tenant   @relation(fields: [tenantId], references: [id])
   cuenta  Cuenta   @relation(fields: [cuentaId], references: [id])
   puestos Puesto[]
+  estructuras EstructuraSueldo[]
+  /// Supervisores a cargo de esta instalación (alcance por filas, ADR-022 · Brief 07c B3).
+  supervisores SupervisorInstalacion[]
   // Relación inversa del módulo Comercial (Brief 07 · PR 1). Virtual: la FK vive en comercial.negocio_instalaciones.
   negocioInstalaciones NegocioInstalacion[]
 
@@ -148,35 +154,60 @@ model Cargo {
   @@schema("core")
 }
 
-/// Puesto de servicio en una instalación (ADR-036): lo cotizado y lo operado.
+/// Puesto de servicio en una instalación (ADR-036, Brief 11 PR 1): 1 puesto = 1 posición cubierta.
+/// La dotación se arma con N puestos; la columna `dotacion` queda DEPRECADA (sin borrar). El rol y el
+/// ciclo salen del catálogo de patrones (`patronId`) y la función operativa de `funcionId`. El horario
+/// va por tramos (día y, si rota, noche), con horas semanales y colación en el puesto, y nace en PPC.
 model Puesto {
-  id            String    @id @default(uuid(7)) @db.Uuid
-  tenantId      String    @map("tenant_id") @db.Uuid
-  instalacionId String    @map("instalacion_id") @db.Uuid
-  cargoId       String    @map("cargo_id") @db.Uuid
-  nombre        String
-  diasTrabajo   Int       @map("dias_trabajo")
-  diasDescanso  Int       @map("dias_descanso")
+  vinculos VinculoLaboral[]
+  id              String    @id @default(uuid(7)) @db.Uuid
+  tenantId        String    @map("tenant_id") @db.Uuid
+  instalacionId   String    @map("instalacion_id") @db.Uuid
+  cargoId         String    @map("cargo_id") @db.Uuid
+  /// Función operativa del catálogo del tenant (guardia, supervisor…); null hasta que se elige.
+  funcionId       String?   @map("funcion_id") @db.Uuid
+  /// Patrón de turno del catálogo del tenant (4×4, 5×2…); null hasta que se elige.
+  patronId        String?   @map("patron_id") @db.Uuid
+  nombre          String
+  diasTrabajo     Int       @map("dias_trabajo")
+  diasDescanso    Int       @map("dias_descanso")
   /// "HH:mm". Si horaFin <= horaInicio el turno cruza medianoche.
-  horaInicio    String    @map("hora_inicio")
-  horaFin       String    @map("hora_fin")
+  horaInicio      String    @map("hora_inicio")
+  horaFin         String    @map("hora_fin")
+  /// Tramo de noche de la rotación día/noche (opcional), "HH:mm".
+  horaInicioNoche String?   @map("hora_inicio_noche")
+  horaFinNoche    String?   @map("hora_fin_noche")
   /// "dia" | "noche" | "rotativa"
-  jornada       String    @default("dia")
-  dotacion      Int       @default(1)
+  jornada         String    @default("dia")
+  /// Horas semanales del puesto (sugeridas por el patrón y el horario, editables).
+  horasSemanales  Decimal?  @map("horas_semanales") @db.Decimal(5, 2)
+  /// Colación en minutos y si va fuera de la jornada (no se descuenta del tiempo trabajado).
+  colacionMin     Int       @default(0) @map("colacion_min")
+  colacionFuera   Boolean   @default(false) @map("colacion_fuera")
+  /// DEPRECADA (Brief 11 PR 1): la dotación se arma con N puestos. Se conserva por compatibilidad.
+  dotacion        Int       @default(1)
+  /// Cobertura de la posición: "ppc" (sin asignar) | "cubierto". Nace en PPC.
+  cobertura       String    @default("ppc")
+  /// Motivo del PPC: por ahora solo "sin_asignar" (más motivos en PR 3).
+  coberturaMotivo String?   @default("sin_asignar") @map("cobertura_motivo")
   /// "activo" | "inactivo"
-  estado        String    @default("activo")
-  vigenteDesde  DateTime? @map("vigente_desde") @db.Date
-  vigenteHasta  DateTime? @map("vigente_hasta") @db.Date
-  notas         String?
-  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  estado          String    @default("activo")
+  vigenteDesde    DateTime? @map("vigente_desde") @db.Date
+  vigenteHasta    DateTime? @map("vigente_hasta") @db.Date
+  notas           String?
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   tenant      Tenant             @relation(fields: [tenantId], references: [id])
   instalacion Instalacion        @relation(fields: [instalacionId], references: [id])
   cargo       Cargo              @relation(fields: [cargoId], references: [id])
+  funcion     FuncionPuesto?     @relation(fields: [funcionId], references: [id])
+  patron      PatronTurno?       @relation(fields: [patronId], references: [id])
   estructuras EstructuraSueldo[]
 
   @@unique([tenantId, instalacionId, nombre])
+  @@index([tenantId, patronId])
+  @@index([tenantId, funcionId])
   @@map("puestos")
   @@schema("core")
 }
@@ -211,12 +242,15 @@ model Persona {
   /// Usuario de OPAI vinculado (1:1), si la persona entra al sistema.
   usuarioId           String?   @map("usuario_id") @db.Uuid
   archivadaEn         DateTime? @map("archivada_en") @db.Timestamptz(6)
+  /// Anonimizada por la política de retención o a pedido del titular (Ley 21.719, 07d PR 3).
+  anonimizadaEn       DateTime? @map("anonimizada_en") @db.Timestamptz(6)
   createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt           DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   tenant      Tenant             @relation(fields: [tenantId], references: [id])
   vinculos    VinculoLaboral[]
   estructuras EstructuraSueldo[]
+  anexos      AnexoContrato[]
 
   @@unique([tenantId, rut])
   @@index([tenantId, estado])
@@ -226,6 +260,12 @@ model Persona {
 }
 
 model VinculoLaboral {
+  instalacionId String? @map("instalacion_id") @db.Uuid
+  puestoId String? @map("puesto_id") @db.Uuid
+  horasSemanales Int? @map("horas_semanales")
+  distribucion String?
+  instalacion Instalacion? @relation(fields: [instalacionId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "vinculos_instalacion_fkey")
+  puesto Puesto? @relation(fields: [puestoId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "vinculos_puesto_fkey")
   id            String    @id @default(uuid(7)) @db.Uuid
   tenantId      String    @map("tenant_id") @db.Uuid
   personaId     String    @map("persona_id") @db.Uuid
@@ -243,8 +283,10 @@ model VinculoLaboral {
   tenant  Tenant  @relation(fields: [tenantId], references: [id])
   persona Persona @relation(fields: [personaId], references: [id])
   cargo   Cargo   @relation(fields: [cargoId], references: [id])
+  anexos  AnexoContrato[]
 
   @@index([tenantId, personaId])
+  @@index([tenantId, instalacionId, estado], map: "vinculos_tenant_instalacion_idx")
   @@map("vinculos_laborales")
   @@schema("core")
 }
@@ -253,12 +295,13 @@ model VinculoLaboral {
 model EstructuraSueldo {
   id                 String    @id @default(uuid(7)) @db.Uuid
   tenantId           String    @map("tenant_id") @db.Uuid
-  /// "cargo" | "puesto" | "persona" (CHECK en la migración: exactamente una referencia)
+  /// "instalacion" | "puesto" | "persona"; "cargo" solo para históricos.
   nivel              String
   cargoId            String?   @map("cargo_id") @db.Uuid
   puestoId           String?   @map("puesto_id") @db.Uuid
   personaId          String?   @map("persona_id") @db.Uuid
-  /// Conceptos: NULL = hereda del nivel más general (el nivel cargo los define todos).
+  instalacionId      String?   @map("instalacion_id") @db.Uuid
+  /// NULL histórico significa estructura incompleta, nunca herencia entre capas.
   sueldoBase         Int?      @map("sueldo_base")
   colacion           Int?
   movilizacion       Int?
@@ -279,11 +322,13 @@ model EstructuraSueldo {
   cargo   Cargo?           @relation(fields: [cargoId], references: [id])
   puesto  Puesto?          @relation(fields: [puestoId], references: [id])
   persona Persona?         @relation(fields: [personaId], references: [id])
+  instalacion Instalacion? @relation(fields: [instalacionId], references: [id])
   items   EstructuraItem[]
 
   @@index([tenantId, nivel, cargoId])
   @@index([tenantId, nivel, puestoId])
   @@index([tenantId, nivel, personaId])
+  @@index([tenantId, nivel, instalacionId])
   @@map("estructuras_sueldo")
   @@schema("core")
 }

@@ -45,6 +45,8 @@ describe.skipIf(!urlPropietario)("configuración y comunicaciones en base real",
     mod.crearContexto({
       tenantId,
       actor: { tipo: "user", id: userId },
+      portal: "erp",
+      portalesMembresia: ["erp"],
       usuario: { id: userId, nombre: "Ana", email: "ana@prueba.cl", platformRole: null },
       rol: "owner",
       medidor: { registrar: async () => undefined },
@@ -82,5 +84,42 @@ describe.skipIf(!urlPropietario)("configuración y comunicaciones en base real",
     await mod.despacharPendientes(ctx());
     const inbox = await dato<{ noLeidas: number }>("core.notificaciones.list", {});
     expect(inbox.noLeidas).toBe(1);
+  });
+
+  it("pagina más de 50 avisos propios sin truncar el total ni aceptar cursores ajenos", async () => {
+    const usuarioId = randomUUID();
+    const tenantB = await e.admin.tenant.create({ data: {
+      slug: `avisos-${randomUUID()}`, nombre: "Otra empresa", vertical: "seguridad",
+    } });
+    const fecha = new Date("2026-10-27T00:00:00.000Z");
+    const ids = Array.from({ length: 80 }, () => randomUUID());
+    const otroUsuario = randomUUID();
+    const otroTenant = randomUUID();
+    await e.admin.notificacion.createMany({ data: [
+      ...ids.map((id) => ({ id, tenantId, usuarioId, titulo: "Aviso propio", createdAt: fecha })),
+      { id: otroUsuario, tenantId, usuarioId: randomUUID(), titulo: "Otro usuario" },
+      { id: otroTenant, tenantId: tenantB.id, usuarioId, titulo: "Otro tenant" },
+    ] });
+    const contexto = { ...ctx(), actor: { tipo: "user" as const, id: usuarioId } };
+    async function pagina(antesDe?: string) {
+      const r = await mod.executeCapability(contexto, "core.notificaciones.list", {
+        soloNoLeidas: true, limite: 50, ...(antesDe ? { antesDe } : {}),
+      });
+      if (!r.ok) throw new Error(JSON.stringify(r.error));
+      return r.data as { items: { id: string }[]; noLeidas: number };
+    }
+    const primera = await pagina();
+    expect(primera.items).toHaveLength(50);
+    expect(primera.noLeidas).toBe(80);
+    // Otra pestaña puede leer el último aviso antes de pedir la página siguiente.
+    await e.admin.notificacion.update({ where: { id: primera.items.at(-1)!.id }, data: { leidaEn: new Date() } });
+    const segunda = await pagina(primera.items.at(-1)?.id);
+    expect(segunda.items).toHaveLength(30);
+    expect(segunda.noLeidas).toBe(79);
+    expect(new Set([...primera.items, ...segunda.items].map((a) => a.id))).toEqual(new Set(ids));
+    for (const antesDe of [otroUsuario, otroTenant, randomUUID()]) {
+      const r = await mod.executeCapability(contexto, "core.notificaciones.list", { antesDe });
+      expect(r).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+    }
   });
 });

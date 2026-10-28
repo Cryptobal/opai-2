@@ -1,5 +1,6 @@
 export { Avatar, type AvatarProps, iniciales, Monograma } from "./avatar";
 export { Badge, type BadgeProps } from "./badge";
+export { Banda } from "./banda";
 export { BarraProgreso, tonoUso } from "./barra-progreso";
 export { Button, type ButtonProps, estilosBoton } from "./button";
 export { CampoDireccion, type Direccion } from "./campo-direccion";
@@ -36,3 +37,4 @@ export { Toaster } from "./toast";
 export { subirConProgreso, Uploader } from "./uploader";
 export { TipoArchivo } from "./tipo-archivo";
 export { CeldaVigencia, type EstadoVigencia, textoVigencia, Vigencia } from "./vigencia";
+export { DatoArchivado } from "./dato-archivado";

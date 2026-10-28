@@ -3,9 +3,9 @@
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
-import { type Entorno, prepararEntorno, urlPropietario } from "./entorno";
+import { type Entorno, prepararEntorno } from "./entorno";
 
-describe.skipIf(!urlPropietario)("RLS del núcleo (Brief 02)", () => {
+describe("RLS del núcleo (Brief 02)", () => {
   let e: Entorno;
   const sufijo = randomUUID().slice(0, 8);
   let idA = "";
@@ -39,9 +39,10 @@ describe.skipIf(!urlPropietario)("RLS del núcleo (Brief 02)", () => {
   // módulos futuros sin tocar este test.
   it("toda tabla con tenant_id, en cualquier schema, tiene RLS y la política tenant_isolation", async () => {
     const filas = await e.admin.$queryRaw<
-      { esquema: string; tabla: string; rls: boolean; politicas: bigint }[]
+      { esquema: string; tabla: string; rls: boolean; forzada: boolean; politicas: bigint }[]
     >`
       SELECT n.nspname AS esquema, c.relname AS tabla, c.relrowsecurity AS rls,
+        c.relforcerowsecurity AS forzada,
         (SELECT count(*) FROM pg_policies p
           WHERE p.schemaname = n.nspname AND p.tablename = c.relname
             AND p.policyname = 'tenant_isolation') AS politicas
@@ -54,7 +55,7 @@ describe.skipIf(!urlPropietario)("RLS del núcleo (Brief 02)", () => {
             AND col.column_name = 'tenant_id')`;
     expect(filas.length).toBeGreaterThanOrEqual(38);
     const sinRls = filas
-      .filter((f) => !f.rls || Number(f.politicas) !== 1)
+      .filter((f) => !f.rls || !f.forzada || Number(f.politicas) !== 1)
       .map((f) => `${f.esquema}.${f.tabla}`);
     expect(sinRls).toEqual([]);
   });

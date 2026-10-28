@@ -1,34 +1,42 @@
+export { vinculosTerminar } from "./vinculos-terminar";
+import { bloquearVinculo, exigirEdicionVinculo, validarDestino } from "./vinculos-validacion";
 import { z } from "zod";
 
 import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
-import { noEncontrado, reglaDeNegocio } from "../../errores";
+import { conflicto, noEncontrado, reglaDeNegocio } from "../../errores";
 import type { Contexto } from "../../types";
 import { uuidSchema } from "../esquemas";
-import { aFecha, definidos, diaSchema, escribirConEvento, opcionalAFecha } from "./comun";
+import { dondePersona } from "./alcance";
+import { aFecha, definidos, opcionalAFecha } from "./comun";
 import { cargoParaVinculo, crearVinculo } from "./personas-escritura";
 import { personaDe } from "./personas-vista";
 import { camposVinculo, vinculoSchema, vistaVinculo } from "./vinculos-vista";
+import { exigirNoAnonimizado } from "./anonimizado";
 
-async function vinculoDe(ctx: Contexto, id: string) {
-  const v = await ctx.db.vinculoLaboral.findUnique({ where: { id } });
+export async function vinculoDe(ctx: Contexto, id: string) {
+  const v = await ctx.db.vinculoLaboral.findFirst({
+    where: { id, persona: dondePersona(ctx) },
+  });
   if (!v) throw noEncontrado("El vínculo");
   return v;
 }
 
 export const vinculosList = defineCapability({
+  auditarLectura: (s) => s.map((v) => v.id),
   id: "core.vinculos.list",
   descripcion:
     "Historial de vínculos laborales de una persona (vigente y terminados), del más reciente al más antiguo.",
-  permiso: PERMISOS_CORE.personasRead,
+  permiso: PERMISOS_CORE.vinculosRead,
   input: z.object({ personaId: uuidSchema }),
   output: z.array(vinculoSchema),
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
     const filas = await ctx.db.vinculoLaboral.findMany({
-      where: { personaId: input.personaId },
+      // El historial es visible solo si la persona está en el alcance del actor (vía su vínculo).
+      where: { personaId: input.personaId, persona: dondePersona(ctx) },
       orderBy: { inicio: "desc" },
     });
     return filas.map(vistaVinculo);
@@ -38,14 +46,17 @@ export const vinculosList = defineCapability({
 export const vinculosCreate = defineCapability({
   id: "core.vinculos.create",
   descripcion:
-    "Crea un vínculo laboral (cargo, tipo de contrato, inicio). Si la persona ya tiene uno vigente responde con error: primero hay que terminarlo.",
-  permiso: PERMISOS_CORE.personasManage,
+    "Crea un vínculo laboral con instalación, puesto opcional y jornada pactada. Si la persona ya tiene uno vigente responde con error: primero hay que terminarlo.",
+  permiso: PERMISOS_CORE.vinculosManage,
   input: z.object({ personaId: uuidSchema, ...camposVinculo }),
   output: vinculoSchema,
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, { personaId, ...v }, { dryRun }) {
+    exigirEdicionVinculo(ctx);
+    await validarDestino(ctx, v);
     const p = await personaDe(ctx, personaId);
+    exigirNoAnonimizado(p, "La persona");
     if (p.archivadaEn) throw reglaDeNegocio("La persona está archivada.");
     const vigente = await ctx.db.vinculoLaboral.findFirst({
       where: { personaId, estado: "vigente" },
@@ -77,14 +88,27 @@ export const vinculosCreate = defineCapability({
 export const vinculosUpdate = defineCapability({
   id: "core.vinculos.update",
   descripcion:
-    "Corrige un vínculo vigente (cargo, tipo de contrato o término pactado). Para terminarlo, usa core.vinculos.terminar.",
-  permiso: PERMISOS_CORE.personasManage,
-  input: z.object({ id: uuidSchema, ...z.object(camposVinculo).partial().shape }),
+    "Corrige un vínculo vigente, su instalación, puesto y jornada pactada. Para terminarlo, usa core.vinculos.terminar.",
+  permiso: PERMISOS_CORE.vinculosManage,
+  input: z.object({
+    id: uuidSchema,
+    versionEsperada: z.string().optional(),
+    ...z.object(camposVinculo).partial().shape,
+  }),
   output: vinculoSchema,
   efecto: "escritura",
   dryRun: true,
-  async handler(ctx, { id, ...cambios }, { dryRun }) {
+  async handler(ctx, { id, versionEsperada, ...cambios }, { dryRun }) {
+    exigirEdicionVinculo(ctx);
+    if (!dryRun) await bloquearVinculo(ctx, id);
     const actual = await vinculoDe(ctx, id);
+    if (versionEsperada && actual.updatedAt.toISOString() !== versionEsperada)
+      throw conflicto("El vínculo cambió. Vuelve a abrirlo y revisa el cambio.");
+    await validarDestino(ctx, { ...actual, ...cambios });
+    const termino =
+      cambios.termino === undefined ? actual.termino : opcionalAFecha(cambios.termino);
+    if (termino && termino < (cambios.inicio ? aFecha(cambios.inicio) : actual.inicio))
+      throw reglaDeNegocio("El término es anterior al inicio.");
     if (actual.estado !== "vigente") throw reglaDeNegocio("Solo se corrige un vínculo vigente.");
     if (cambios.cargoId) await cargoParaVinculo(ctx, cambios.cargoId);
     const data = definidos({
@@ -96,54 +120,18 @@ export const vinculosUpdate = defineCapability({
     const r = await ctx.transaccion(async (tx) => {
       const v = await tx.vinculoLaboral.update({ where: { id }, data });
       await ctx.eventos.emitir(tx, {
-        tipo: "core.persona.actualizada",
-        entidadTipo: "persona",
-        entidadId: v.personaId,
-        payload: { vinculo: id, campos: Object.keys(data) },
+        tipo: "core.vinculo.actualizado",
+        entidadTipo: "vinculo",
+        entidadId: id,
+        payload: {
+          personaId: v.personaId,
+          antes: vistaVinculo(actual),
+          despues: vistaVinculo(v),
+          campos: Object.keys(data),
+        },
       });
       return v;
     });
-    return vistaVinculo(r);
-  },
-});
-
-export const vinculosTerminar = defineCapability({
-  id: "core.vinculos.terminar",
-  descripcion:
-    "IRREVERSIBLE: termina un vínculo laboral con fecha de término y motivo. Si no le quedan vínculos vigentes, la persona pasa a inactiva.",
-  permiso: PERMISOS_CORE.personasManage,
-  input: z.object({
-    id: uuidSchema,
-    termino: diaSchema,
-    motivo: z.string().trim().min(5).max(500),
-  }),
-  output: vinculoSchema,
-  efecto: "irreversible",
-  dryRun: true,
-  async handler(ctx, input, { dryRun }) {
-    const v = await vinculoDe(ctx, input.id);
-    if (v.estado !== "vigente") throw reglaDeNegocio("El vínculo ya está terminado.");
-    const termino = aFecha(input.termino);
-    if (termino < v.inicio) throw reglaDeNegocio("El término es anterior al inicio del vínculo.");
-    const data = { termino, motivoTermino: input.motivo, estado: "terminado" };
-    if (dryRun) return vistaVinculo({ ...v, ...data });
-    const r = await escribirConEvento(
-      ctx,
-      {
-        tipo: "core.vinculo.terminado",
-        entidadTipo: "vinculo",
-        payload: () => ({ personaId: v.personaId, termino: input.termino }),
-      },
-      async (tx) => {
-        const t = await tx.vinculoLaboral.update({ where: { id: v.id }, data });
-        const quedan = await tx.vinculoLaboral.count({
-          where: { personaId: v.personaId, estado: "vigente" },
-        });
-        if (!quedan)
-          await tx.persona.update({ where: { id: v.personaId }, data: { estado: "inactiva" } });
-        return t;
-      },
-    );
     return vistaVinculo(r);
   },
 });

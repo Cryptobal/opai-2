@@ -4,11 +4,14 @@ import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import { aFecha, hoy } from "../maestros/comun";
+import { documentosEnAlcance } from "./alcance-doc";
 import { tiposPorId } from "./consulta";
 import { CAPA_DE } from "./entidad";
 import { documentoSchema, ENTIDADES, vistaDocumento } from "./vista";
+import { filtroDocumentoSensible } from "./sensibles";
 
 export const documentosVencimientos = defineCapability({
+  auditarLectura: (s) => s.map((d) => d.id),
   id: "core.documentos.vencimientos",
   descripcion:
     "Documentos vencidos y por vencer en los próximos N días (por defecto 30), con la entidad a la que pertenecen, filtrables por capa (empresa, cuenta, instalación, persona, puesto).",
@@ -24,8 +27,15 @@ export const documentosVencimientos = defineCapability({
   dryRun: false,
   async handler(ctx, input) {
     const limite = new Date(aFecha(hoy()).getTime() + input.dias * 86_400_000);
+    // Alcance por filas (ADR-022): un actor acotado solo ve los documentos de sus entidades a cargo.
+    const permitidos = await documentosEnAlcance(ctx);
     const docs = await ctx.db.documento.findMany({
-      where: { estado: "disponible", venceEn: { lte: limite } },
+      where: {
+        ...filtroDocumentoSensible(ctx),
+        estado: "disponible",
+        venceEn: { lte: limite },
+        ...(permitidos ? { id: { in: [...permitidos] } } : {}),
+      },
       orderBy: { venceEn: "asc" },
       take: 1000,
     });

@@ -1,20 +1,11 @@
 import { expect, type Page, test } from "@playwright/test";
+import { E2E_PASSWORD as password, entrar } from "./sesion";
 
 // Configuración (Brief 02, sesión C): Integraciones, Comunicaciones (con su editor de plantilla),
 // Consumos y Auditoría, a 375, 1024 y 1280.
-const email = process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl";
-const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
 
 async function captura(page: Page, nombre: string, proyecto: string) {
   await page.screenshot({ path: `e2e/__screenshots__/${nombre}-${proyecto}.png`, fullPage: true });
-}
-
-async function entrar(page: Page) {
-  await page.goto("/login");
-  await page.getByLabel("Correo").fill(email);
-  await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
-  await page.getByRole("button", { name: "Entrar" }).click();
-  await page.waitForURL((url) => url.pathname === "/" || url.pathname === "/platform");
 }
 
 test.describe("configuración de plataforma del tenant", () => {
@@ -67,7 +58,8 @@ test.describe("configuración de plataforma del tenant", () => {
     const cuerpo = page.getByLabel("Cuerpo");
     await cuerpo.fill(`Prueba E2E ${Date.now()}: {{documento.tipo}} venció.`);
     await page.getByRole("button", { name: /Publicar versión/ }).click();
-    await expect(page.getByText(/Versión \d+ publicada/)).toBeVisible();
+    // El mismo mensaje también aparece en el toast; comprobar el estado persistente del formulario.
+    await expect(page.locator("#form-plantilla").getByText(/Versión \d+ publicada/)).toBeVisible();
     await page.getByRole("button", { name: "Volver a la de OPAI" }).click();
     await expect(page.getByText("Se usa otra vez la plantilla de OPAI")).toBeVisible();
   });

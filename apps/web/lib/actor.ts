@@ -3,16 +3,18 @@ import { sesionDeRequest } from "@opai/auth";
 import { esRol, esRolPlataforma } from "@opai/domain";
 
 import { contextoDeApiKey, keyDeCabecera } from "./api-key";
-import { fuentesReales, type Fuentes, type MembresiaConTenant } from "./fuentes";
+import { type AccesoFila, fuentesReales, type Fuentes, type MembresiaConTenant } from "./fuentes";
 import { noAutenticado } from "./respuestas";
 import { COOKIE_TENANT, elegirMembresia, leerCookie } from "./tenant-actual";
 import { despacharDiferido, diferirConAfter, medidorDiferido } from "./medidor";
+import { estadoMfaDe, verificarMfaDe } from "./mfa";
 
 export type UsuarioSesion = {
   id: string;
   name: string;
   email: string;
   platformRole?: string | null | undefined;
+  twoFactorEnabled?: boolean | null | undefined;
 };
 
 /** Usuario, membresías y tenant actual de una sesión. Lo comparten la API y las páginas. */
@@ -21,7 +23,19 @@ export type Identidad = {
   membresias: MembresiaConTenant[];
   actual: MembresiaConTenant | null;
   modulosActivos: string[];
+  /** Acceso efectivo en el tenant actual (rol personalizado y excepciones, ADR-022). */
+  acceso: AccesoFila;
+  /** Segundo factor activo en la cuenta (NÚCLEO-F). Decide el enrolamiento obligatorio. */
+  mfaActiva: boolean;
+  mfaVerificada?: boolean;
 };
+
+const SIN_ACCESO: AccesoFila = { permisosRol: null, excepciones: [], instalaciones: null };
+
+/** Alcance por filas del contexto (ADR-022): null = ve todo; array (quizá vacío) = acotado. */
+export function alcanceDe(instalaciones: string[] | null) {
+  return instalaciones ? { instalaciones } : null;
+}
 
 export async function identidadDe(
   user: UsuarioSesion,
@@ -30,25 +44,39 @@ export async function identidadDe(
 ): Promise<Identidad> {
   const membresias = await fuentes.membresiasDe(user.id);
   const actual = elegirMembresia(membresias, cookieTenant);
-  const modulosActivos = actual ? await fuentes.modulosActivos(actual.tenantId) : [];
+  const { modulosActivos, acceso } = actual
+    ? fuentes.accesoConModulos
+      ? await fuentes.accesoConModulos(actual.tenantId, user.id)
+      : await Promise.all([
+          fuentes.modulosActivos(actual.tenantId),
+          fuentes.acceso(actual.tenantId, user.id),
+        ]).then(([modulosActivos, acceso]) => ({ modulosActivos, acceso }))
+    : { modulosActivos: [], acceso: SIN_ACCESO };
   const platformRole = esRolPlataforma(user.platformRole) ? user.platformRole : null;
   return {
     usuario: { id: user.id, nombre: user.name, email: user.email, platformRole },
     membresias,
     actual,
     modulosActivos,
+    acceso,
+    mfaActiva: user.twoFactorEnabled === true,
   };
 }
 
 /** Contexto de ejecución de un usuario con sesión, en el tenant actual (o sin tenant). */
 export function contextoDeIdentidad(identidad: Identidad, portal: string | null): Contexto {
-  const { usuario, actual } = identidad;
+  const { usuario, actual, acceso } = identidad;
   return crearContexto({
     tenantId: actual?.tenantId ?? null,
     actor: { tipo: "user", id: usuario.id },
     usuario,
+    // `rol` es el rol base (jerarquía); si hay rol personalizado, `permisosRol` define la autorización.
     rol: actual && esRol(actual.rol) ? actual.rol : null,
+    permisosRol: acceso.permisosRol,
+    excepciones: acceso.excepciones,
+    alcance: alcanceDe(acceso.instalaciones),
     portal,
+    portalesMembresia: actual?.portales ?? [],
     modulosActivos: identidad.modulosActivos,
     medidor: medidorDiferido,
     diferir: diferirConAfter,
@@ -56,11 +84,15 @@ export function contextoDeIdentidad(identidad: Identidad, portal: string | null)
   });
 }
 
-type Sesionador = (req: Request) => Promise<{ user: UsuarioSesion } | null>;
+type Sesionador = (
+  req: Request,
+) => Promise<{ user: UsuarioSesion; session?: { mfaVerified?: boolean } } | null>;
 
 /**
  * Resuelve el actor de un request a la API: API key (`Authorization: Bearer`) o sesión
- * (cookie de Better Auth). Sin ninguna de las dos responde 401.
+ * (cookie de Better Auth). Sin ninguna de las dos responde 401. Con sesión, `/api/v1` siempre
+ * pasa `portal: null` (no acepta uno del cliente): solo ejecuta capacidades sin tenant o de
+ * plataforma; las de un portal con tenant las deniega `restriccion` (encargo portal-sesión).
  */
 export async function resolverActor(
   req: Request,
@@ -72,5 +104,14 @@ export async function resolverActor(
   const s = await sesion(req);
   if (!s) return noAutenticado();
   const identidad = await identidadDe(s.user, leerCookie(req, COOKIE_TENANT), fuentes);
-  return contextoDeIdentidad(identidad, null);
+  identidad.mfaVerificada = s.session?.mfaVerified === true;
+  if (await verificarMfaDe(identidad)) {
+    return Response.json(
+      { ok: false, error: { code: "FORBIDDEN", message: "Completa el segundo factor." } },
+      { status: 403 },
+    );
+  }
+  const ctx = contextoDeIdentidad(identidad, null);
+  ctx.mfa = await estadoMfaDe(identidad);
+  return ctx;
 }

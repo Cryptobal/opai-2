@@ -3,11 +3,11 @@ import { headers } from "next/headers";
 
 import { SeccionTarjeta, Tabs } from "@opai/ds";
 
+import { BotonCopiar } from "@/app/_components/boton-copiar";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { PaginaConfig } from "../../_centro/pagina-config";
-import { BotonCopiar } from "./boton-copiar";
 import { MANUAL, snippets } from "./snippets";
 
 export const metadata = { title: "Conectar tu IA" };

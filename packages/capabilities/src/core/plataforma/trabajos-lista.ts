@@ -42,10 +42,7 @@ export const platformTrabajosList = defineCapability({
   tenantObjetivo: (input) => input.tenantId,
   async handler(ctx, input) {
     const p = requierePlataforma(ctx);
-    const tenants = await p.globales.tenant.findMany({
-      where: input.tenantId ? { id: input.tenantId } : {},
-      orderBy: { nombre: "asc" },
-    });
+    const tenants = await p.globales.listarTenants(input.tenantId);
     const where = input.conProblemas
       ? {
           OR: [

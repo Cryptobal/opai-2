@@ -20,14 +20,15 @@ type Props = {
   onClick?: () => void;
   sinChevron?: boolean;
   className?: string;
+  ajustarTexto?: boolean;
 };
 
 export const claseFila = (seleccionada?: boolean) =>
   cn(
     "relative flex min-h-16 w-full items-center gap-3 border-b border-border py-2.5 pr-3 pl-4 text-left text-fg outline-none transition-colors duration-150",
-    "hover:bg-bg active:bg-fill focus-visible:rounded-md focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-focus",
+    "hover:bg-fill active:bg-fill dark:hover:bg-bg focus-visible:rounded-md focus-visible:outline-2 focus-visible:-outline-offset-4 focus-visible:outline-focus",
     seleccionada &&
-      "bg-accent-muted hover:bg-accent-muted before:absolute before:top-2.5 before:bottom-2.5 before:left-0 before:w-[3px] before:rounded-r-[3px] before:bg-accent before:content-['']",
+      "bg-accent-muted hover:bg-accent-muted active:bg-accent-muted dark:hover:bg-accent-muted before:absolute before:top-2.5 before:bottom-2.5 before:left-0 before:w-[3px] before:rounded-r-[3px] before:bg-accent before:content-['']",
   );
 
 /** Monograma cuadrado de 36 px para filas (cuentas, instalaciones). */
@@ -56,10 +57,20 @@ export function FilaSeleccionable(props: Props) {
     <>
       {inicio}
       <span className="flex min-w-0 flex-1 flex-col">
-        <span className={cn("truncate text-base font-medium", seleccionada && "font-semibold")}>
+        <span
+          className={cn(
+            !props.ajustarTexto && "truncate",
+            "text-base font-medium",
+            seleccionada && "font-semibold",
+          )}
+        >
           {titulo}
         </span>
-        {secundario ? <span className="truncate text-sm text-fg-muted">{secundario}</span> : null}
+        {secundario ? (
+          <span className={cn(!props.ajustarTexto && "truncate", "text-sm text-fg-muted")}>
+            {secundario}
+          </span>
+        ) : null}
         {terciario ? <span className="t-caption truncate">{terciario}</span> : null}
       </span>
       {fin ? <span className="flex flex-none flex-col items-end gap-1">{fin}</span> : null}

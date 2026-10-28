@@ -62,7 +62,7 @@ export const platformConsumosSummary = defineCapability({
   async handler(ctx, input) {
     const p = requierePlataforma(ctx);
     const desde = new Date(Date.now() - input.dias * 86_400_000);
-    const tenants = await p.globales.tenant.findMany({ orderBy: { nombre: "asc" } });
+    const tenants = await p.globales.listarTenants();
     return Promise.all(
       tenants.map(async (t) => {
         const g = await p.paraTenant(t.id).consumo.groupBy({

@@ -57,6 +57,11 @@ export function MatrizVencimientos({ m }: { m: Matriz }) {
   }
   return (
     <div className="flex flex-col gap-4">
+      {m.limiteExcedido ? (
+        <p role="status" className="text-base text-warning-fg">
+          Hay más de 2.000 personas. El semáforo y sus cifras son parciales.
+        </p>
+      ) : null}
       <div className="flex flex-wrap items-center gap-2">
         {FILTROS.map((f) => (
           <ChipToggle

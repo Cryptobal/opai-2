@@ -1,7 +1,9 @@
+import { entidadesEnAlcance, vinculoEnAlcance } from "./alcance-doc";
 import type { z } from "zod";
 
 import { noEncontrado, reglaDeNegocio } from "../../errores";
 import type { Contexto } from "../../types";
+import { filtroDocumentoSensible } from "./sensibles";
 import type { entidadSchema } from "./vista";
 
 export type Entidad = z.output<typeof entidadSchema>;
@@ -17,6 +19,9 @@ export const CAPA_DE: Record<Entidad["tipo"], string> = {
 
 /** Verifica que la entidad exista en el tenant (RLS ya impide ver las de otros). */
 export async function verificarEntidad(ctx: Contexto, e: Entidad): Promise<void> {
+  const alcance = await entidadesEnAlcance(ctx);
+  if (alcance && !vinculoEnAlcance(alcance, e.tipo, e.id))
+    throw noEncontrado(`La entidad ${e.tipo}`);
   const db = ctx.db;
   const existe =
     e.tipo === "tenant"
@@ -45,7 +50,9 @@ export async function tipoParaEntidad(ctx: Contexto, tipoId: string | undefined,
 
 /** Solo se versiona un documento disponible cuyo propietario es la misma entidad. */
 export async function documentoAReemplazar(ctx: Contexto, id: string, e: Entidad) {
-  const anterior = await ctx.db.documento.findUnique({ where: { id } });
+  const anterior = await ctx.db.documento.findFirst({
+    where: { id, ...filtroDocumentoSensible(ctx), anexos: { none: {} } },
+  });
   const propietario = anterior
     ? await ctx.db.documentoVinculo.findFirst({ where: { documentoId: id, rol: "propietario" } })
     : null;

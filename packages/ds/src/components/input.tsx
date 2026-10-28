@@ -2,11 +2,17 @@ import type { InputHTMLAttributes, ReactNode, TextareaHTMLAttributes } from "rea
 
 import { cn } from "../cn";
 
+// `hover:` de Tailwind 4 ya va dentro de @media (hover: hover): en táctil el borde no queda pegado.
 const base =
-  "w-full h-11 rounded-md border border-border-strong bg-surface px-3 text-md text-fg placeholder:text-fg-subtle outline-none transition-[border-color,box-shadow] duration-150 focus-visible:border-accent focus-visible:shadow-[0_0_0_3px_var(--ds-accent-muted)] focus-visible:outline-none aria-invalid:border-danger-fg aria-invalid:shadow-[0_0_0_3px_var(--ds-danger-muted)] disabled:opacity-45";
+  "w-full h-11 rounded-md border border-border-control bg-surface px-3 text-md text-fg placeholder:text-fg-subtle outline-none transition-[border-color,box-shadow] duration-150 hover:border-fg-subtle focus-visible:border-accent focus-visible:shadow-[0_0_0_3px_var(--ds-accent-muted)] focus-visible:outline-none aria-invalid:border-danger-fg aria-invalid:shadow-[0_0_0_3px_var(--ds-danger-muted)] disabled:opacity-45";
 
-export function Input({ className, ...props }: InputHTMLAttributes<HTMLInputElement>) {
-  return <input className={cn(base, className)} {...props} />;
+export type InputProps = InputHTMLAttributes<HTMLInputElement> & {
+  /** 36 px y texto de 14: filtros y celdas en md+. En teléfono se mantiene el de 44 px. */
+  compacto?: boolean;
+};
+
+export function Input({ className, compacto, ...props }: InputProps) {
+  return <input className={cn(base, compacto && "md:h-9 md:text-base", className)} {...props} />;
 }
 
 export function Textarea({ className, ...props }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
@@ -17,7 +23,7 @@ type CampoProps = {
   etiqueta: string;
   htmlFor?: string;
   ayuda?: string;
-  error?: string;
+  error?: string | undefined;
   children: ReactNode;
   className?: string;
 };
@@ -31,7 +37,12 @@ export function Campo({ etiqueta, htmlFor, ayuda, error, children, className }: 
       </label>
       {children}
       {error ? (
-        <p className="text-xs font-medium text-danger-fg">{error}</p>
+        <p
+          id={htmlFor ? `${htmlFor}-error` : undefined}
+          className="text-xs font-medium text-danger-fg"
+        >
+          {error}
+        </p>
       ) : ayuda ? (
         <p className="t-caption">{ayuda}</p>
       ) : null}

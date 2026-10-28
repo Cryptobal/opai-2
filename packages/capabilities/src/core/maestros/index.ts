@@ -1,3 +1,5 @@
+import { vinculosPrevisualizar } from "./vinculos-preview";
+import { estructurasPanel } from "./estructuras-panel";
 import type { Capacidad } from "../../types";
 import { buscar } from "./buscar";
 import { cargosCreate, cargosGet, cargosList, cargosSetActivo, cargosUpdate } from "./cargos";
@@ -14,6 +16,20 @@ import { cuentasArchive, cuentasSetEstado, cuentasSetRepresentantes } from "./cu
 import { estructurasGet, estructurasList } from "./estructuras";
 import { estructurasEfectiva } from "./estructuras-efectiva";
 import { estructurasAnular, estructurasCreate } from "./estructuras-escritura";
+import {
+  funcionesCreate,
+  funcionesGet,
+  funcionesList,
+  funcionesSetActivo,
+  funcionesUpdate,
+} from "./funciones";
+import {
+  patronesCreate,
+  patronesGet,
+  patronesList,
+  patronesSetActivo,
+  patronesUpdate,
+} from "./patrones";
 import { instalacionesGet, instalacionesList } from "./instalaciones";
 import { instalacionesCreate, instalacionesUpdate } from "./instalaciones-escritura";
 import { instalacionesArchive, instalacionesSetEstado } from "./instalaciones-estado";
@@ -25,7 +41,9 @@ import {
   personasDesbloquear,
   personasVincularUsuario,
 } from "./personas-estado";
-import { puestosCreate, puestosGet, puestosList, puestosSetEstado, puestosUpdate } from "./puestos";
+import { puestosCreate, puestosUpdate } from "./puestos-escritura";
+import { puestosSetEstado } from "./puestos-estado";
+import { puestosGet, puestosList } from "./puestos";
 import { vinculosCreate, vinculosList, vinculosTerminar, vinculosUpdate } from "./vinculos";
 
 /** Maestros del núcleo (Brief 02, sesión B, bloque 6): una sola declaración para UI, API y MCP. */
@@ -53,6 +71,16 @@ export const capacidadesMaestros: readonly Capacidad[] = [
   puestosCreate,
   puestosUpdate,
   puestosSetEstado,
+  patronesList,
+  patronesGet,
+  patronesCreate,
+  patronesUpdate,
+  patronesSetActivo,
+  funcionesList,
+  funcionesGet,
+  funcionesCreate,
+  funcionesUpdate,
+  funcionesSetActivo,
   personasList,
   personasGet,
   personasCreate,
@@ -61,6 +89,7 @@ export const capacidadesMaestros: readonly Capacidad[] = [
   personasDesbloquear,
   personasArchive,
   personasVincularUsuario,
+  vinculosPrevisualizar,
   vinculosList,
   vinculosCreate,
   vinculosUpdate,
@@ -70,6 +99,7 @@ export const capacidadesMaestros: readonly Capacidad[] = [
   cargosCreate,
   cargosUpdate,
   cargosSetActivo,
+  estructurasPanel,
   estructurasList,
   estructurasGet,
   estructurasCreate,

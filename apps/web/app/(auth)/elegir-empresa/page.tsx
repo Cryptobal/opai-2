@@ -7,6 +7,7 @@ import { epocaDeIdentidad } from "@/lib/epoca-sesion";
 import { requerirIdentidad } from "@/lib/servidor";
 import { membresiasUsables } from "@/lib/tenant-actual";
 import { ultimosAccesos } from "@/lib/ultimo-acceso";
+import { destinoDeInicio } from "@/lib/portal-inicio";
 
 import { destinoSeguro } from "../destino";
 import { SelectorEmpresa } from "./selector-empresa";
@@ -16,11 +17,12 @@ export const metadata = { title: "Elige una empresa" };
 type Props = { searchParams: Promise<Record<string, string | string[] | undefined>> };
 
 async function Contenido({ searchParams }: Props) {
-  const destino = destinoSeguro((await searchParams).next);
+  const { next } = await searchParams;
+  const destino = next === undefined ? "" : destinoSeguro(next);
   const identidad = await requerirIdentidad("/elegir-empresa");
   const usables = membresiasUsables(identidad.membresias);
   // Con una sola empresa (o ninguna) no hay nada que elegir.
-  if (usables.length <= 1) redirect(destino);
+  if (usables.length <= 1) redirect(destinoDeInicio(identidad, destino));
   const accesos = await ultimosAccesos(
     identidad.usuario.id,
     usables.map((m) => m.tenantId),

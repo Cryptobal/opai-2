@@ -3,12 +3,24 @@
   "porDefecto": 165,
   "maxSobreFramework": 35,
   "rutas": {
-    "/(auth)/*": 152,
-    "/(erp)/configuracion*": 175,
+    "/(auth)/*": 153,
+    "/(auth)/activar-mfa": 160,
+    "/(erp)/configuracion*": 176,
     "/(erp)/instalaciones/nueva": 178,
     "/(erp)/personas/vencimientos": 175,
+    "/(erp)/personas/[id]": 166,
+    "/(erp)/personas/[id]/laboral": 166,
+    "/(erp)/personas/[id]/documentos": 166,
     "/(erp)/cargos/[id]": 167,
+    "/(erp)/cuentas/[id]/documentos": 166,
+    "/(erp)/instalaciones/[id]/documentos": 166,
     "/(platform)/platform/tenants/[id]/*": 168,
-    "/ds*": 220
+    "/(terreno)/terreno*": 162,
+    "/(trabajador)/trabajador*": 162,
+    "/(supervisor)/supervisor*": 162,
+    "/ds*": 224,
+    "/(erp)/personas/[id]/sueldo": 166,
+    "/(erp)/personas/[id]/anexos": 166,
+    "/(erp)/personas/[id]/anexos/[anexoId]": 166
   }
 }

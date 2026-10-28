@@ -6,7 +6,7 @@ import type { Dispatch, SetStateAction } from "react";
 import { Badge, Campo, Input, SeccionTarjeta, Select } from "@opai/ds";
 import { esVertical, vocabulario } from "@opai/domain";
 
-import { CampoTexto } from "./campo-texto";
+import { CampoTexto, DatoLectura } from "./campo-texto";
 import { CONTACTOS, type DatosEmpresa, type Tenant, ZONAS } from "./datos-empresa";
 
 type Props = {
@@ -34,32 +34,43 @@ export function OperacionYContacto({ d, setD, tenant, dis, set, correoMalo }: Pr
     <>
       <SeccionTarjeta titulo="Operación">
         <div className="grid gap-4 md:grid-cols-2">
-          <Campo
-            etiqueta="Zona horaria"
-            htmlFor="e-zona"
-            ayuda="Para presentar horas y turnos"
-            className="md:col-span-2"
-          >
-            <Select
-              id="e-zona"
-              valor={d.timezone}
-              opciones={ZONAS}
-              disabled={dis}
-              onCambiar={(v) => setD((x) => ({ ...x, timezone: v }))}
+          {dis ? (
+            <DatoLectura
+              etiqueta="Zona horaria"
+              valor={ZONAS.find((z) => z.valor === d.timezone)?.etiqueta ?? d.timezone}
             />
-          </Campo>
-          <Campo
-            etiqueta="Vertical"
-            htmlFor="e-vertical"
-            ayuda={`Define el vocabulario: ${voc.persona.plural}, ${voc.instalacion.plural}`}
-          >
-            <div className="flex items-center gap-2">
-              <Input id="e-vertical" value={vertical} disabled readOnly />
-              <Badge tono="neutro" punto={false} className="flex-none">
-                <Lock className="size-3" aria-hidden /> Fijado por OPAI
-              </Badge>
-            </div>
-          </Campo>
+          ) : (
+            <Campo
+              etiqueta="Zona horaria"
+              htmlFor="e-zona"
+              ayuda="Para presentar horas y turnos"
+              className="md:col-span-2"
+            >
+              <Select
+                id="e-zona"
+                valor={d.timezone}
+                opciones={ZONAS}
+                disabled={dis}
+                onCambiar={(v) => setD((x) => ({ ...x, timezone: v }))}
+              />
+            </Campo>
+          )}
+          {dis ? (
+            <DatoLectura etiqueta="Vertical" valor={vertical} />
+          ) : (
+            <Campo
+              etiqueta="Vertical"
+              htmlFor="e-vertical"
+              ayuda={`Define el vocabulario: ${voc.persona.plural}, ${voc.instalacion.plural}`}
+            >
+              <div className="flex items-center gap-2">
+                <Input id="e-vertical" value={vertical} disabled readOnly />
+                <Badge tono="neutro" punto={false} className="flex-none">
+                  <Lock className="size-3" aria-hidden /> Fijado por OPAI
+                </Badge>
+              </div>
+            </Campo>
+          )}
         </div>
       </SeccionTarjeta>
       <SeccionTarjeta titulo="Contacto por área">

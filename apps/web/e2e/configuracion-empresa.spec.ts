@@ -1,17 +1,8 @@
-import { expect, type Page, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+import { E2E_PASSWORD as password, entrar } from "./sesion";
 
 // Configuración (Brief 02, sesión C, bloque 12): Empresa, Marca, Preferencias, Documentos y
 // Módulos a 375, 1024 y 1280, con capturas en e2e/__screenshots__/.
-const email = process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl";
-const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
-
-async function entrar(page: Page) {
-  await page.goto("/login");
-  await page.getByLabel("Correo").fill(email);
-  await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
-  await page.getByRole("button", { name: "Entrar" }).click();
-  await page.waitForURL((url) => url.pathname === "/" || url.pathname === "/platform");
-}
 
 const SECCIONES = [
   ["empresa", "Datos de la empresa"],
@@ -43,11 +34,25 @@ test.describe("configuración: empresa y plataforma del tenant", () => {
     await page.goto("/configuracion/preferencias");
     const guardado = () =>
       page.waitForResponse(
-        (r) => r.request().method() === "POST" && r.url().includes("/configuracion/preferencias"),
+        (r) =>
+          r.request().method() === "POST" &&
+          r.url().includes("/configuracion/preferencias") &&
+          (r.request().postData() ?? "").includes("core.config.set"),
       );
+    // La base local persiste entre corridas: cambiar un radio ya elegido no guarda nada.
+    // Normaliza por la misma UI y espera la escritura concreta, sin tocar datos fuera del tenant.
+    if (await page.getByRole("radio", { name: "Oscuro" }).isChecked()) {
+      const normalizado = guardado();
+      await page.getByRole("radio", { name: /Sistema/ }).click();
+      await normalizado;
+      await expect(page.getByRole("radio", { name: /Sistema/ })).toBeEnabled();
+      await page.reload();
+      await expect(page.getByRole("radio", { name: /Sistema/ })).toBeChecked();
+    }
     let respuesta = guardado();
     await page.getByRole("radio", { name: "Oscuro" }).click();
     await respuesta;
+    await expect(page.getByRole("radio", { name: /Sistema/ })).toBeEnabled();
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
     // Se guarda en core.config (ámbito usuario): al recargar sigue elegido.
     await expect(async () => {
@@ -57,6 +62,7 @@ test.describe("configuración: empresa y plataforma del tenant", () => {
     respuesta = guardado();
     await page.getByRole("radio", { name: /Sistema/ }).click();
     await respuesta;
+    await expect(page.getByRole("radio", { name: /Sistema/ })).toBeEnabled();
     await expect(page.locator("html")).not.toHaveAttribute("data-theme", "dark");
     await expect(async () => {
       await page.reload();

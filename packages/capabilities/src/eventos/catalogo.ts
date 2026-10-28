@@ -21,17 +21,31 @@ export const EVENTOS_CORE: readonly EventoDeDominio[] = [
   { id: "core.instalacion.archivada", descripcion: "Se archivó una instalación." },
   { id: "core.puesto.creado", descripcion: "Se creó un puesto en una instalación." },
   { id: "core.puesto.actualizado", descripcion: "Cambió un puesto (horario, dotación o estado)." },
+  { id: "core.patron.creado", descripcion: "Se creó un patrón de turno del catálogo." },
+  { id: "core.patron.actualizado", descripcion: "Cambió un patrón de turno (nombre, ciclo o estado)." },
+  { id: "core.funcion.creada", descripcion: "Se creó una función de puesto del catálogo." },
+  { id: "core.funcion.actualizada", descripcion: "Cambió una función de puesto (nombre o estado)." },
   { id: "core.persona.creada", descripcion: "Se registró una persona (trabajador)." },
   { id: "core.persona.actualizada", descripcion: "Cambiaron los datos de una persona." },
   { id: "core.persona.bloqueada", descripcion: "Se bloqueó a una persona, con motivo." },
   { id: "core.persona.desbloqueada", descripcion: "Se desbloqueó a una persona." },
   { id: "core.persona.archivada", descripcion: "Se archivó a una persona sin vínculo vigente." },
+  { id: "core.vinculo.actualizado", descripcion: "Cambió el contrato; snapshot para el borrador de anexo del PR 4." },
   { id: "core.vinculo.creado", descripcion: "Comenzó un vínculo laboral." },
   { id: "core.vinculo.terminado", descripcion: "Terminó un vínculo laboral." },
   { id: "core.cargo.creado", descripcion: "Se creó un cargo." },
   { id: "core.cargo.actualizado", descripcion: "Cambió un cargo o su estado." },
   { id: "core.estructura.creada", descripcion: "Se creó una versión de estructura de sueldo." },
   { id: "core.estructura.anulada", descripcion: "Se anuló una estructura de sueldo." },
+  {
+    id: "core.anexo.generado",
+    descripcion: "Se generó el borrador de un anexo de contrato (capa, monto, instalación o rol).",
+  },
+  {
+    id: "core.anexo.aprobado",
+    descripcion: "RRHH aprobó un anexo de contrato; su documento final quedó en Documentos.",
+  },
+  { id: "core.anexo.rechazado", descripcion: "RRHH rechazó un anexo de contrato, con motivo." },
   { id: "core.documento.registrado", descripcion: "Se subió y confirmó un documento." },
   { id: "core.documento.actualizado", descripcion: "Cambiaron los datos de un documento." },
   { id: "core.documento.archivado", descripcion: "Se archivó un documento." },
@@ -68,8 +82,69 @@ export const EVENTOS_CORE: readonly EventoDeDominio[] = [
   },
   { id: "core.agente.presupuesto_100", descripcion: "Un agente agotó su presupuesto mensual." },
   { id: "core.usuario.invitado", descripcion: "Se invitó a una persona (correo transaccional)." },
+  {
+    id: "core.membresia.portal_inicio_fijado",
+    descripcion: "Una persona eligió su portal de inicio en la empresa.",
+  },
   { id: "core.usuario.invitacion_solicitada", descripcion: "Alguien pidió una nueva invitación." },
   { id: "core.bitacora.rota", descripcion: "La verificación de la bitácora encontró un quiebre." },
+  {
+    id: "core.auditoria.rota",
+    descripcion: "La verificación de la cadena de auditoría encontró un quiebre.",
+  },
+  {
+    id: "core.cumplimiento.dpa_aceptado",
+    descripcion: "La empresa aceptó una versión del acuerdo de tratamiento de datos (DPA).",
+  },
+  {
+    id: "core.cumplimiento.dpo_actualizado",
+    descripcion: "Cambió el contacto del delegado de protección de datos (DPO).",
+  },
+  {
+    id: "core.cumplimiento.consentimiento_otorgado",
+    descripcion: "Un titular otorgó su consentimiento para un fin accesorio.",
+  },
+  {
+    id: "core.cumplimiento.consentimiento_revocado",
+    descripcion: "Un titular revocó un consentimiento otorgado antes.",
+  },
+  {
+    id: "core.cumplimiento.solicitud_creada",
+    descripcion: "Se registró una solicitud del titular (acceso, rectificación, cancelación…).",
+  },
+  {
+    id: "core.cumplimiento.solicitud_avanzada",
+    descripcion: "Una solicitud del titular cambió de estado (p. ej. pasó a en proceso).",
+  },
+  {
+    id: "core.cumplimiento.solicitud_resuelta",
+    descripcion: "Una solicitud del titular se resolvió o se rechazó, con evidencia.",
+  },
+  {
+    id: "core.cumplimiento.solicitud_exportada",
+    descripcion: "Se generó la exportación de acceso o portabilidad de un titular como documento.",
+  },
+  {
+    id: "core.cumplimiento.incidente_registrado",
+    descripcion: "Se registró un incidente de seguridad o una brecha de datos personales.",
+  },
+  {
+    id: "core.cumplimiento.incidente_avanzado",
+    descripcion: "Un incidente de seguridad cambió de estado en su atención.",
+  },
+  {
+    id: "core.cumplimiento.brecha_notificada",
+    descripcion: "Se dejó constancia del aviso de una brecha a la Agencia o a los titulares.",
+  },
+  {
+    id: "core.cumplimiento.retencion_aplicada",
+    descripcion:
+      "El trabajo de retención anonimizó o eliminó datos vencidos según la política activa.",
+  },
+  {
+    id: "core.cumplimiento.titular_anonimizado",
+    descripcion: "Se anonimizó a un titular (persona o contacto) a pedido, conservando los hechos regulados.",
+  },
 ];
 
 /** Catálogo completo: núcleo más los módulos registrados. */

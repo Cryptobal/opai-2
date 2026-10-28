@@ -2,8 +2,14 @@ import type { Capacidad, Contexto, Resultado } from "./types";
 
 const SIEMPRE_ACTIVOS = new Set(["core", "platform"]);
 
-/** Portal desde el que opera cada tipo de principal de una API key (ADR-033). */
-const PORTAL_DEL_PRINCIPAL = { usuario: "erp", cuenta: "cliente", persona: "trabajador" } as const;
+/**
+ * Portal desde el que opera un principal acotado a portal (ADR-033). `usuario` y `servicio` operan
+ * en el ERP y no se restringen aquí (el servicio solo por sus permisos finos, Identidad de servicio).
+ */
+const PORTAL_DEL_PRINCIPAL: Partial<Record<string, string>> = {
+  cuenta: "cliente",
+  persona: "trabajador",
+};
 
 /** Portales donde está disponible la capacidad: los declarados o el portal de su módulo. */
 export function portalesDe(c: Capacidad): readonly string[] {
@@ -11,9 +17,13 @@ export function portalesDe(c: Capacidad): readonly string[] {
 }
 
 type Falla = Extract<Resultado, { ok: false }>;
-export const falla = (code: Falla["error"]["code"], message: string): Falla => ({
+export const falla = (
+  code: Falla["error"]["code"],
+  message: string,
+  detalles?: unknown,
+): Falla => ({
   ok: false,
-  error: { code, message },
+  error: { code, message, ...(detalles === undefined ? {} : { detalles }) },
 });
 
 /** Visibilidad sin el permiso: tenant, módulo activo, scopes del agente y portal del principal. */
@@ -34,11 +44,26 @@ export function restriccion(ctx: Contexto, c: Capacidad): Falla | null {
   if (c.soloPersonas && ctx.actor.tipo === "agent") {
     return falla("FORBIDDEN", "Solo una persona puede hacer esto, no una API key.");
   }
-  if (ctx.principal && ctx.principal.tipo !== "usuario") {
-    const portal = PORTAL_DEL_PRINCIPAL[ctx.principal.tipo];
-    if (!portalesDe(c).includes(portal)) {
-      return falla("FORBIDDEN", `La capacidad no está disponible en el portal "${portal}".`);
+  // Sesiones: fail-closed. Plataforma conserva su autorización por platformRole.
+  // Única excepción (t500u, encargo portal-sesión): aceptar la invitación crea la membresía;
+  // su handler exige usuario autenticado, token y correo. No exime a otras internas.
+  if (
+    (ctx.actor.tipo === "user" || (ctx.actor.tipo === "agent" && ctx.actor.interno)) &&
+    !ctx.principal &&
+    ctx.conTenant &&
+    c.modulo !== "platform" &&
+    c.id !== "core.invitations.accept"
+  ) {
+    if (!ctx.portal || !ctx.portalesMembresia.includes(ctx.portal)) {
+      return falla("FORBIDDEN", "No tienes acceso a este portal.");
     }
+    if (!portalesDe(c).includes(ctx.portal)) {
+      return falla("FORBIDDEN", `La capacidad no está disponible en el portal "${ctx.portal}".`);
+    }
+  }
+  const portal = ctx.principal ? PORTAL_DEL_PRINCIPAL[ctx.principal.tipo] : undefined;
+  if (portal && !portalesDe(c).includes(portal)) {
+    return falla("FORBIDDEN", `La capacidad no está disponible en el portal "${portal}".`);
   }
   return null;
 }

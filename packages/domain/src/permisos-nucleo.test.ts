@@ -7,6 +7,13 @@ const TABLA: Record<string, readonly [boolean, boolean, boolean, boolean, boolea
   [P.cuentasRead]: [true, true, true, true, true],
   [P.cuentasManage]: [true, true, true, false, false],
   [P.instalacionesRead]: [true, true, true, true, true],
+  // Puestos (Brief 11): el supervisor lee los catálogos pero no los edita ni los desactiva.
+  [P.patronesRead]: [true, true, true, true, true],
+  [P.patronesManage]: [true, true, true, false, false],
+  [P.patronesDesactivar]: [true, true, true, false, false],
+  [P.funcionesRead]: [true, true, true, true, true],
+  [P.funcionesManage]: [true, true, true, false, false],
+  [P.funcionesDesactivar]: [true, true, true, false, false],
   [P.personasRead]: [true, true, true, true, true],
   [P.personasManage]: [true, true, true, false, false],
   [P.documentosRead]: [true, true, true, true, true],
@@ -23,6 +30,11 @@ const TABLA: Record<string, readonly [boolean, boolean, boolean, boolean, boolea
   [P.aprobacionesManage]: [true, true, false, false, false],
   [P.agentesManage]: [true, true, false, false, false],
   [P.auditRead]: [true, true, true, false, false],
+  // Cumplimiento (Ley 21.719) trae datos personales sensibles: viewer NO lo lee (solo owner/admin/gerente).
+  [P.cumplimientoRead]: [true, true, true, false, false],
+  [P.cumplimientoManage]: [true, true, false, false, false],
+  // Aceptar el DPA: solo el owner (§16.1, t331u); ni admin ni gerente.
+  [P.cumplimientoDpaAceptar]: [true, false, false, false, false],
 };
 
 describe("permisos del núcleo (Brief 02)", () => {

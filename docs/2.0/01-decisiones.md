@@ -24,6 +24,39 @@ Una entrada por decisión. Las decisiones no se editan: si cambian, se agrega un
 
 **Consecuencias.** Ninguna consulta de negocio usa el cliente Prisma crudo fuera de `packages/db`. Test obligatorio de aislamiento (dos tenants, cero fuga, cero filas sin tenant).
 
+**Nota de implementación NÚCLEO-G2 (encargo t457u y adenda de apilado).**
+`20261028170000_force_rls` fuerza RLS en todas las tablas existentes con
+`tenant_isolation`, incluidos módulos. Las tablas futuras con `tenant_id` deben
+tener ENABLE + FORCE + esa política; `test:db` exige una base real. Se retira
+`globales()` público: identidad y tenant por funciones con selección fija;
+Plataforma recibe operaciones con nombre, no delegados Prisma. Los scripts
+cross-tenant requieren un rol de mantenimiento BYPASSRLS explícito (o el
+superusuario local de pruebas), nunca `opai_app`; ser dueño sin BYPASSRLS no basta. No se
+concede BYPASSRLS ni se modifica Neon. Los tres triggers de referencias/patrones
+leen con los permisos del invocador y el tenant de su transacción, sin depender
+del bypass del dueño. Son adaptaciones técnicas de OpenCode / openai/gpt-6.1-sol
+para este encargo, no decisiones nuevas de Carlos. Runbook y criterios en
+`briefs/NUCLEO-G2-force-rls.md`.
+
+**Precisión de la revisión 5672596436.** En Neon, neondb_owner, dueño real de las tablas y rol de prisma migrate deploy,
+tiene BYPASSRLS (proyectos creados desde ago-2023), por lo que FORCE no le afecta.
+FORCE queda como defensa en profundidad para dueños sin BYPASSRLS, por ejemplo
+local/CI o un dueño distinto. La garantía real es que la aplicación corre como
+opai_app, sin BYPASSRLS, con tenant_isolation.
+
+Resultado de la consulta de roles (solo lectura, OPAI 2.0, 27-oct-2026 15:53 CLT,
+mismo resultado en ambas ramas de Neon; current_user de la conexión
+= neondb_owner), proporcionado en el encargo; no se consultó Neon en esta revisión:
+
+```sql
+SELECT rolname, rolbypassrls, rolsuper FROM pg_roles WHERE rolname IN ('neondb_owner','opai_app') OR rolname = current_user;
+```
+
+```text
+neondb_owner | rolbypassrls = true  | rolsuper = false
+opai_app     | rolbypassrls = false | rolsuper = false
+```
+
 ---
 
 ## ADR-003 · Módulos de primera clase y entitlements por tenant
@@ -163,6 +196,12 @@ Una entrada por decisión. Las decisiones no se editan: si cambian, se agrega un
 
 **Consecuencias.** `packages/auth` encapsula la librería; el resto del código solo usa `getSession()`/`requireSession()` y `resolverActor()`. Cambiar de librería no toca módulos.
 
+**Nota (NÚCLEO-F · segundo factor, 26-oct-2026).** Se agrega el plugin `twoFactor` de Better Auth: TOTP con códigos de respaldo (la verificación por correo/OTP queda pendiente de diseño, ver más abajo). El secreto y los códigos de respaldo los cifra el plugin con `BETTER_AUTH_SECRET` (`symmetricEncrypt`): no hay secreto nuevo. Nuevas columnas/tablas de identidad en `core` (`users.two_factor_enabled`, `two_factor`), sin `tenant_id` ni RLS como el resto de identidad, y que solo toca `@opai/auth` (no se leen desde capacidades de negocio). El bloqueo del paso de verificar el código es por cuenta (`accountLockout`: 5 intentos, pausa de 15 min), alineado con el bloqueo de login de B1 y con su mismo aviso genérico; no reemplaza ni rompe los hooks de B1 (el conteo de contraseña y el de código van por separado). **Política (Decisión de Carlos, 26-oct-2026, chat con OPAI 2.0):** el segundo factor es obligatorio para las cuentas de plataforma (siempre) y para el `owner` y el `admin` de cada tenant; los demás roles lo activan de forma opcional o por el ajuste de tenant `core.seguridad_mfa_obligatorio_admins`. Si es obligatorio y la cuenta no lo tiene, tras la contraseña va a enrolarse antes de entrar (gate server-side en `PaginaPortal`). Las API keys y el MCP no cambian. SSO queda como P2, fuera de este PR.
+
+**Nota (revisión del PR #65, 26-oct-2026). MFA obligatorio no desactivable para plataforma/owner/admin; decidido por el operador OPAI 2.0 con delegación de Carlos (t500u), 26-oct-2026.** El ajuste `core.seguridad_mfa_obligatorio_admins` ya no puede rebajar la exigencia de plataforma, `owner` ni `admin`: `mfaEsObligatoria` (`@opai/domain`) la fija siempre en `true` para esos tres casos, sin leer el ajuste; el ajuste solo **agrega** exigencia a los demás roles del tenant (renombrado en pantalla a «Exigir segundo factor también a los demás roles», por defecto `false`). Además, la sesión y no solo la cuenta debe acreditar el segundo factor: el login social (Google) nace con `sessions.mfa_verified = false` (migración `20261028070000_mfa_sesion`, columna de identidad sin `tenant_id` ni RLS, como el resto de `sessions`) y el plugin `opai-mfa-sesion` la marca solo tras un `verify-totp`/`verify-backup-code` exitoso de esa misma sesión; el gate de `PaginaPortal`, `resolverActor` (API con cookie) y `ejecutarComoUsuario` (Server Actions) usan ese único punto (`verificarMfaDe`/`estadoMfaDe` de `apps/web/lib/mfa.ts`), y `core.apikeys.create` rechaza si `ctx.mfa` falta o está pendiente, para que un owner/admin/plataforma sin segundo factor no pueda crear una API key y seguir sin él para siempre.
+
+**Nota (NÚCLEO-B, 26-oct-2026; Decisión de Carlos, 26-oct-2026 20:47 CLT, chat con OPAI 2.0 (t457u): «lo que debamos hacer en el núcleo lo hagamos altiro»).** El rate limit de las rutas y acciones públicas se centralizó en Postgres (realiza en parte ADR-029 §15 «Seguridad operativa»): `core.rate_limit_consumir` (`SECURITY DEFINER`, upsert atómico) cuenta por ventana con la misma cuenta para todas las instancias de Vercel; antes era un Map en memoria por instancia, así que el tope no era real. La clave se guarda hasheada (SHA-256, sin la API key ni la IP en claro). Si la base falla, falla abierto con el límite en memoria como respaldo. El bloqueo de login real sigue persistido por cuenta (B1). La API key del MCP va siempre en `Authorization: Bearer`; la forma con la key en la URL (`/api/mcp/k/<key>`) quedó deprecada (410 Gone salvo `MCP_KEY_EN_URL_HASTA` futura), porque dejaba la key en historiales y logs. Sin secretos nuevos (no Upstash/Redis/KV). Topes iniciales fijados por Claude, a confirmar por Carlos.
+
 ---
 
 ## ADR-016 · Roles por tenant y bloqueo financiero
@@ -172,6 +211,15 @@ Una entrada por decisión. Las decisiones no se editan: si cambian, se agrega un
 **Decisión.** Cinco roles por tenant: `owner` (todo, incluido borrar el tenant y gestionar owners), `admin` (todo salvo lo anterior), `gerente` (lectura y escritura en todos los módulos operativos y comerciales; sin `finanzas:*`, `nomina:*` ni gestión de usuarios y API keys), `supervisor` (operaciones, rondas, asistencia y personas en lectura; sin comercial ni finanzas), `viewer` (solo lectura, sin finanzas ni nómina). Permisos con formato `<modulo>:<accion>` y comodines por rol en `@opai/domain`. Rol de plataforma aparte (`users.platform_role`: `owner` | `support`), que otorga `platform:*` y no implica permisos dentro de ningún tenant. El acceso a portales es explícito por membresía (`memberships.portales`).
 
 **Consecuencias.** Hereda el principio de 1.0 (`applyFinancialRoleLock`): los datos financieros solo los ven owner y admin. Los permisos por usuario (excepciones) quedan para cuando un tenant los pida.
+
+**Nota de implementación NÚCLEO-D1 (encargo t457u).** Los ejecutores web comprueban
+acceso al portal antes de buscar la capacidad, sin revelar si existe. Los roles de
+membresía, incluidos los personalizados por su base, no conceden Plataforma ni el
+portal del principal cuenta (Cliente). La preferencia `memberships.portal_inicio`
+no autoriza nada: solo elige entre los portales todavía permitidos tras login o
+cambio de empresa, salvo `next` explícito seguro. Matriz, adaptación a #68 y pruebas
+en `briefs/ENCARGO-nucleo-d1.md`; criterios técnicos del constructor, sin nuevas
+decisiones atribuidas a Carlos.
 
 ---
 
@@ -351,6 +399,10 @@ Una entrada por decisión. Las decisiones no se editan: si cambian, se agrega un
 
 **Consecuencias.** El costo variable viaja con el tenant. Plataforma ve consumo y margen por tenant y por recurso. Las cuotas del plan (ADR-029, punto 12) se miden con el mismo medidor.
 
+**Nota del 26-oct-2026 (NÚCLEO-E1, PR 1 del agente interno; preparando ADR-049).** El adaptador de IA del núcleo deja de ser un solo turno de texto: expone un contrato neutral de conversación con **herramientas** (tool-calling), **streaming** de eventos y **salida estructurada** por JSON Schema, y una **cadena de respaldo** entre los proveedores que el tenant tenga conectados (reintenta ante 5xx, 429 o fallo de red; nunca ante un 4xx de contenido). Sigue **sin SDKs** (solo `fetch`): Anthropic (`messages`), OpenAI/`chat completions`, Google (`generateContent`) y un proveedor «compatible con OpenAI» con base URL configurable (`ia_compatible`, que cubre Vercel AI Gateway, OpenRouter y otros) más el alias `ia_xai` (Grok) con su base URL pública por defecto. `completar()` se conserva sobre `conversar()` para geolocalización e «Integraciones · Probar». Cada llamada se mide igual que antes (tokens de entrada y salida por clase de tarea); el proveedor y el modelo se anotan en `referencia_tipo = "ia"` y `referencia_id = "<proveedor>:<modelo>"`, sin guardar el prompt completo ni ninguna key (ADR-049 punto 6). La elección del modelo dentro del agente y los ajustes de configuración asociados llegan en PRs posteriores del agente interno.
+
+**Endurecimiento del 26-oct-2026 (revisión 5660937436 del PR 1; encargo de Carlos a OPAI 2.0).** Tres correcciones de seguridad e integridad sobre la nota anterior, sin cambiar el contrato: (a) **SSRF del `baseUrl` de `ia_compatible`**: la base URL que configura el tenant exige `https`, rechaza destinos internos (IP privada, loopback, link-local, metadata y localhost) —también tras resolver el DNS, contra rebinding— y las peticiones usan `redirect: "error"` para que la key no viaje a un destino redirigido; los endpoints de primera parte (Anthropic, OpenAI, Google, xAI por defecto) siguen siendo constantes `https` de confianza. (b) **Integridad del streaming**: un stream cortado (sin evento final) o un evento de error del proveedor lanza `ErrorIa` en vez de darse por completo, y el lector SSE se libera al terminar o cancelarse. (c) **Medición del streaming**: el consumo se mide en `finally` con el uso ya conocido, también si el stream se corta o se cancela. No se cambia la política de respaldo hacia la key de plataforma (OPAI) cuando el tenant tiene key propia: queda igual, pendiente de que Carlos decida si requiere opt-in.
+
 ---
 
 ## ADR-032 · OPAI como plataforma agéntica: qué construye y qué no
@@ -381,6 +433,38 @@ OPAI puede ofrecer además **automatizaciones alojadas** (por ejemplo, búsqueda
 **Decisión.** Las API keys y el MCP no son solo para el tenant: cada portal puede emitir keys para su propio principal. Tres tipos de principal detrás de una key: **usuario del tenant** (hecho en el Brief 01), **cuenta cliente** (emitida por un contacto autorizado desde el Portal Cliente; alcance = su cuenta y sus instalaciones) y **persona trabajadora** (emitida desde el Portal Trabajador; alcance = ella misma; fase posterior). Cada capacidad declara en qué portales está disponible (`portales: ["erp", "cliente", …]`); el MCP de una key de cliente solo expone las capacidades del portal cliente, con el alcance aplicado en la consulta (ADR-022). Lectura amplia de lo que el portal ya muestra (instalaciones, dotación, cobertura, rondas, visitas de supervisión con resumen y firma, novedades, documentos compartidos, cotizaciones, facturas y estados de pago); escrituras limitadas y con vista previa (aprobar o rechazar cotización, crear ticket o solicitud, comentar, firmar lo que le corresponda); nunca datos de otras cuentas ni datos personales de trabajadores más allá de lo que el portal muestra (ADR del Portal Cliente de oct-2026: RUT visible, evaluación psicolaboral no). El tenant decide por cuenta si habilita el acceso agéntico y con qué límites; las llamadas se miden (ADR-031) contra el tenant, que puede trasladarlas al cliente en su contrato. Cada portal tiene una página "Conectar tu IA" con la key, snippets para Claude, ChatGPT, Grokbot y Codex, y el manual de agente de ese portal (`docs/2.0/agentes/`). Toda acción queda auditada "agente vía contacto del cliente" o "vía trabajador".
 
 **Consecuencias.** El modelo de `api_keys` gana `principal_tipo` y `principal_id` (Brief 02 lo deja preparado; Brief 03 lo activa para clientes con los portales). Las capacidades llevan `portales`. Un cliente puede operar con su propia IA sobre los datos de su proveedor: diferenciador comercial y barrera de salida.
+
+**Precisión de sesiones humanas (encargo portal-sesión, review 5661270514 del Revisor en #59).**
+En sesiones con tenant, la capa de capacidades valida el portal pedido tanto contra
+los portales de la membresía activa del usuario en ese tenant, cargada por el servidor,
+como contra `portalesDe(c)`. No une membresías de otros tenants ni consulta por llamada.
+Sin portal se rechaza por defecto: `null` o vacío **no** equivale a `erp`; las rutas ERP
+lo derivan en servidor. La API genérica con sesión sin portal no acepta uno del cliente.
+Plataforma, procesos del sistema y API keys conservan sus reglas.
+
+**Excepción explícita (adenda del encargo; autonomía de fase 1 dada por Carlos en t500u).**
+Solo `core.invitations.accept` queda fuera de la comprobación de portales de membresía,
+porque crea esa membresía; su handler sigue exigiendo usuario autenticado, token y correo
+correcto. No es una excepción genérica para capacidades internas. La fuente disponible
+es la adenda, que referencia «23:42 DECISIÓN portal-sesión».
+
+**Catálogo del portal Supervisor (decisión del operador, 27-oct 00:55, autoridad
+delegada por Carlos; resuelve el bloqueo anterior).** Se declaran `portales: ["erp",
+"supervisor"]`, exactamente, en las capacidades que el código de
+`apps/web/app/(supervisor)` ya llama hoy en `main`: siete de lectura
+(`core.documentos.matriz`, `core.instalaciones.list`, `core.instalaciones.get`,
+`core.contactos.list`, `core.personas.get`, `core.documentos.list`,
+`core.documento_tipos.list`) y cuatro de escritura que esas pantallas construyeron
+para el supervisor —no una reutilización genérica— según el propio código:
+`core.documentos.pedir_renovacion` (componente `boton-pedir.tsx`, exclusivo de
+`supervisor/_componentes`) y el flujo de subida que `hoja-subir.tsx`/`subir.ts`
+documentan como "Supervisor en terreno" (`core.documentos.iniciar_subida`,
+`core.documentos.confirmar_subida`, `core.documentos.update`). Ninguna capacidad
+que esas pantallas no llamen se declaró, y ninguna de las cuatro escrituras gana
+permiso o alcance nuevo: `documentos.manage` y el alcance B3 siguen exigidos sin
+cambios; antes del fail-closed de esta misma decisión ya eran ejecutables desde
+la sesión del supervisor con ese permiso. Detalle y lista completa de archivos
+revisados en `briefs/ENCARGO-portal-sesion.md`.
 
 ---
 
@@ -659,6 +743,10 @@ Reglas:
 
 **Consecuencias.** Un brief de base PWA (manifest, íconos, SW con página sin conexión, actualización controlada, prueba en CI) entra antes de Comercial y no espera a la fase 3; la cola local y la sincronización nacen con el primer módulo de terreno (Rondas o Asistencia) con su escenario de prueba sin red. Las capacidades que se usan sin conexión deben aceptar `idempotencyKey` y la hora del dispositivo como dato, no como verdad.
 
+**Enmienda (Brief 04, 26-oct-2026; decisión de OPAI 2.0 bajo la delegación de Carlos del 26-oct-2026 16:54/16:59 CLT, t365u y t366u, a decidir todo el Núcleo).** Al ejecutar la base PWA se precisan los puntos 6 y 7, sin cambiar el objetivo:
+
+- **6 (presupuesto de terreno).** El tope de ≤ 150 KB se aplica cuando los portales de terreno tengan **pantallas reales**. Hoy son placeholders y su primera carga es el **shell compartido** del ERP (paleta ⌘K, menús, selector de portal), ~159 KB gzip, que no es alcance de la base PWA sino de los arreglos de rendimiento del shell (Brief 03, PR 2). Entretanto el tope por ruta de terreno (`/terreno`, `/trabajador`, `/supervisor`) queda en **162 KB** en `presupuesto-js.json` —más estricto que el 165 por defecto— para rastrear y evitar regresiones; baja a 150 KB cuando lleguen esos arreglos y el primer módulo de terreno su contenido real.
+- **7 (prueba en CI).** El equivalente obligatorio es **(a)** Playwright (manifest válido, SW que registra y controla la página, shell de terreno sin red con `context.setOffline(true)`) más **(c)** el presupuesto de JS; se ejecuta hoy. **(b) Lighthouse CI queda como informe, no como gate**, hasta que el primer módulo de terreno tenga pantallas reales (decisión D3 (b) del Brief 04, resuelta por Carlos el 26-oct-2026 13:45 CLT, t332u). El informe se genera contra el build local con `next start` y se guarda en `docs/2.0/informes/`; pasa a gate (≥ 90 rendimiento y accesibilidad en emulación móvil sobre rutas de terreno, ADR-029.14) con Rondas o Asistencia. La categoría PWA de Lighthouse ya no existe (la quitó la versión 12), así que la instalabilidad la cubre Playwright (a).
 
 **Decisiones de Carlos (24-oct).** (12) Empaquetado para tiendas con **Capacitor**. (13) **Una sola app «OPAI»** en App Store y Google Play para todos: personal de la empresa (ERP y Supervisor), trabajadores, dispositivos de terreno emparejados con código y clientes; al ingresar, la app abre a cada persona su portal según su membresía (con selector si tiene varios). La marca del tenant dentro de la app sigue ADR-028; apps con marca propia por tenant quedan en backlog. (14) **Se puede marcar sin señal** como marca diferida (`origen_marca = offline_queue`): queda identificada como tal en los reportes a la DT y es visible para el trabajador (en su comprobante) y para su supervisor; no es la carga manual de contingencia.
 
@@ -687,6 +775,8 @@ No se encontró: render estático roto, falta de prefetch, layouts que recarguen
 2. **Metas (p75):** respuesta visible (shell intacto; el esqueleto con la forma del contenido aparece **a más tardar a los 200 ms**, decisión de Carlos del 24-oct-2026 17:57, y solo si la página nueva aún no llegó); contenido con datos **< 1 s** en 4G y **< 500 ms** en escritorio; módulo ya visitado **< 100 ms** con datos de caché; TTFB del documento < 300 ms; **≤ 8 consultas a Neon por navegación** de lista o ficha; presupuesto de JS de ADR-037 y ADR-044.
 3. **Arreglos (brief de rendimiento, el primero de la lista, antes de Comercial):** `Server-Timing` y contador de consultas por request; shell en el layout de cada portal con su propio `Suspense` y la página solo con su contenido; identidad, membresías y módulos activos cacheados por sesión (caché de cookie de Better Auth de corta duración e invalidación al suspender una membresía o un tenant) y por tenant con etiquetas (`use cache` + `revalidateTag` en las escrituras que los cambian); `forTenant` con una transacción interactiva por capacidad (fija `app.tenant_id` una vez) en vez de una por consulta, sin debilitar la RLS; contadores en una sola consulta y cargados después de pintar (o retirados de la barra lateral, a decidir); verificar cold starts (Fluid compute) y la suspensión de Neon en `main`; prefetch explícito de las entradas del menú y caché del router para segmentos dinámicos ya visitados (revalidación en segundo plano, invalidación por las Server Actions que escriben).
 4. **Gate en CI:** (a) Playwright contra `next start` con Postgres de CI recorre la navegación entre módulos y falla si el skeleton tarda más de 200 ms o el servidor (por `Server-Timing`) más de 500 ms, o si una navegación supera las 8 consultas; (b) Lighthouse CI móvil ≥ 90 en Inicio, una lista y una ficha; (c) presupuesto de JS existente. Además, una medición sintética programada contra `test.opai.cl` después de cada despliegue (informativa, no bloquea) que el bot de Diseño y QA revisa.
+
+**Nota de implementación (Brief 03, PR 2):** el cliente `pg` limita el pool por instancia y configura tiempos de espera y keepalive mediante variables de entorno; en Vercel avisa si el host de `DATABASE_URL` no contiene `-pooler.`. Estos valores son configurables y requieren medición con concurrencia en Neon; en el entorno de cierre solo se dispuso de conexiones locales, por lo que no se midió Neon ni se demuestra la resolución de P2039/P1017.
 
 **Consecuencias.** Toda pantalla nueva declara en su brief sus consultas por navegación. Ningún arreglo de rendimiento se mezcla con PRs de documentación ni de funcionalidades.
 
@@ -797,8 +887,30 @@ No se encontró: render estático roto, falta de prefetch, layouts que recarguen
    - se guardan cifradas en el almacén de secretos del núcleo, aisladas por `tenant_id` con RLS (ADR-002, ADR-027), con una prueba `test:db` entre dos tenants;
    - nunca quedan en texto plano, logs, auditoría, respuestas de la API ni en el cliente; una vez guardadas solo se reemplazan o revocan, no se leen;
    - solo las usa el adaptador de IA del núcleo en el servidor, así que nada específico del proveedor entra en los módulos (ADR-031, ADR-032). Los módulos siguen pidiendo IA por clase de tarea; la elección de modelo es del usuario dentro del agente.
+   - **Respaldo solo entre keys propias; nunca a OPAI (21:58).** Si el tenant tiene key propia y su proveedor falla, el respaldo entre proveedores solo prueba otras keys del **mismo tenant**; **nunca** cae a la key de OPAI (plataforma). Si todas sus keys fallan (5xx, 429 o red), la solicitud falla con un error tipado (`ErrorRespaldoIa`) y se avisa al tenant: la integración queda en estado «error» (visible en Configuración → Integraciones) y se emite `core.integracion.error`, que entrega Comunicaciones (ADR-020), además de un registro de auditoría durable. Un 4xx de contenido se propaga tal cual (no es caída de la key). Sin key propia, se usa el modelo de OPAI como hasta ahora (punto 9). **«Decisión de Carlos, 26-oct-2026 21:58 CLT, respuesta t214s684»** a «Si el tenant tiene key propia y su proveedor falla, ¿se puede pasar a la key de OPAI?»: «Nunca, que falle y avise al tenant».
 7. **Módulo vendible aparte (10:51; ADR-048).** El agente es un módulo propio, que se vende aparte. Depende del Núcleo y del MCP; los demás módulos son fuentes opcionales: opera únicamente las capacidades de los módulos activos en el tenant y permitidas al usuario.
-8. **Cuándo (10:53).** Se construye en un brief propio **después de CPQ**. Orden: Puestos → Comercial → CPQ → agente interno. Antes solo se reserva su punto de entrada: la acción «Preguntar a OPAI» en ⌘K y un lugar dentro de «Buscar» en el celular (integrada en `main` (PR #37, `7e526eb`)).
+8. **REEMPLAZADO** por la enmienda al punto 8 (26-oct-2026 21:07, t461s2118). **Cuándo (10:53).** Se construye en un brief propio **después de CPQ**. Orden: Puestos → Comercial → CPQ → agente interno. Antes solo se reserva su punto de entrada: la acción «Preguntar a OPAI» en ⌘K y un lugar dentro de «Buscar» en el celular (integrada en `main` (PR #37, `7e526eb`)).
+
+**Enmienda al punto 8 · adelanto al Núcleo (NÚCLEO-E2).** Origen: Carlos,
+26-oct-2026 20:47 CLT, chat con OPAI 2.0 (t457u): «ponlo entonces en el plan de
+desarrollo para que todo se haga y lo que debamos hacer en el nucleo lo hagamos
+altiro. Me preocupa que, quede como, cien por ciento agéntico, que el MSP y el,
+el agente interno de cada tenant funcione». decisión de Carlos por widget t461s2118 del 26-oct-2026 21:07 CLT, opción elegida: Sí, el agente interno de cada tenant va antes de CPQ. Esta enmienda reemplaza únicamente el orden del punto 8;
+la orquestación del servidor se adelanta al cierre del Núcleo. La UI queda para
+un PR posterior con export aprobado de Claude Design, siempre con el Design
+System de OPAI 2.0; no se autoriza construir pantallas sin ese export.
+
+**Mecanismo de identidad y confirmación (NÚCLEO-E2, adaptación técnica de OpenCode).**
+El servidor delega la sesión como actor `agent`, id `agente-interno:<usuario>`,
+`via_user` igual al usuario y `apiKeyId` nulo, conservando sus permisos efectivos,
+portal y alcance. No crea una key sintética ni hereda acceso de plataforma.
+Los planes se firman con la clave de autenticación ya existente en el servidor,
+ligados a tenant, usuario, portal y acceso, con vigencia técnica de una hora.
+La reserva de idempotencia del núcleo serializa aceptar/rechazar y los pasos;
+el ledger atómico de C también admite el presupuesto conjunto del agente interno
+por tenant. No hay memoria ni tablas conversacionales nuevas: el caché temporal
+de idempotencia conserva el resultado durante 24 horas y se purga con el trabajo
+existente. El historial nuevo devuelve solo metadatos de acciones propias.
 
 **Lo que aplica de ADR ya vigentes.**
 
@@ -814,3 +926,86 @@ No se encontró: render estático roto, falta de prefetch, layouts que recarguen
    - **Las licencias por módulo y todos los montos** (incluido el margen) van a un ADR futuro de planes y precios, cuando exista Opai SpA; no se fijan aquí.
 
 **Consecuencias.** El agente interno no crea un segundo camino a los datos: si una acción no existe como capacidad, tampoco existe para él. Sigue sin haber copilotos por módulo ni chats entre personas (Tickets sigue sin chat, ADR-025). El número del brief y el mecanismo de la identidad delegada se fijan al planificarlo.
+
+---
+
+## ADR-050 · Paridad del repo con el DS V2 de Claude Design: shell y bordes de controles
+
+**Fecha:** 26-oct-2026 · **Estado:** vigente · **Reemplaza** la D7 del Brief 05 (`briefs/BRIEF-05-navegacion.md` §4.2 y `NAVEGACION.md` §10) y lo que decía CAR-12 sobre la búsqueda en la barra superior del teléfono · **Completa** ADR-014.
+
+**Contexto.** El informe de Diseño y QA del 26-oct-2026 17:53 comparó el repo (`packages/ds` y `apps/web`) con el design system aprobado «OPAI 2.0 Design System V2» (Claude Design 44e4d7b9). Los tokens coinciden, pero el shell se había apartado del diseño (la búsqueda del teléfono pasó a la barra inferior por la D7) y los bordes de los controles (`border-strong`, `#d4d4d8` sobre blanco, 1,5:1) no cumplen el contraste de 3:1 de WCAG 1.4.11.
+
+**Decisión** (Carlos, 26-oct-2026 17:57, en sus palabras: «El shell sigue el diseño de Claude; que el repo se ajuste» y «Sí, oscurecer los bordes para cumplir accesibilidad»):
+
+1. **Shell como en el export** (`docs/2.0/design/export-ds-2.0/pantallas/ShellPhone.html`, `ShellTablet.html` y `ShellDesktop.html`): en el teléfono «Buscar» vuelve a la barra superior de 52 px (portal, Buscar, campana y avatar) y sale de la barra inferior; en el riel no va el wordmark «OPAI» sobre el selector y la búsqueda se ve como en el export; en escritorio el usuario va al pie de la barra lateral y el selector de portal es la tarjeta del export.
+2. **Borde de controles:** token `--ds-border-control` (`#8a8a93` en claro, `#6b6b74` en oscuro, ≥ 3:1 sobre `surface` y `bg`) en Input, Select, Combobox, Textarea, Checkbox, Radio y la pista apagada del Switch. `border` y `border-strong` quedan para separadores y tarjetas.
+
+**Alcance y límites.** ADR-050 invierte, solo para el shell y los bordes de controles, la regla «en los choques entre el export y el código manda el código» de `PLAN-desarrollo.md`. No toca la D9 (barra lateral de escritorio desde 1024 px), que Carlos ya aprobó (`briefs/BRIEF-05-navegacion.md` D9, línea 84; Carlos, 26-oct-2026 11:03 CLT): el repo mantiene hoy el riel hasta 1279 px, como en el DS V2 de Claude Design, y ShellTablet queda como referencia del riel; implementar la D9 (bajar el corte a 1024 px) es un encargo de código aparte, no una decisión pendiente. Fuente de la cita: chat Diseño y QA OPAI 2.0, tarjeta t58s257, 26-oct-2026 17:57 CLT. El informe de Diseño y QA (17:53) no está en el repo. En el export de `pantallas/`, `#2A2A2F` pasó a `--ds-border` (`#26262A`) y `#1F1F23` a `--ds-fill` (`#202024`): diferencias de un tono, aceptadas para no tener grises fuera de tokens.
+
+**Consecuencias.** La D7 deja de regir: el teléfono no tiene «Buscar» en la barra inferior, que vuelve a tener hasta cuatro ítems de navegación más «Más». Un test de `packages/ds` verifica el contraste de los tokens en claro y oscuro.
+
+---
+
+## ADR-052 · Auditoría atómica y encadenada por tenant
+
+**Fecha:** 28-oct-2026 · **Estado:** vigente · Completa ADR-004 y ADR-023 (misma técnica de cadena de hashes que la bitácora de Asistencia, aplicada aquí a `core.audit_events`).
+
+**Contexto.** Carlos pidió esta auditoría el 26-oct-2026 20:47 CLT (chat con OPAI 2.0, tarjeta t457u): «ponlo entonces en el plan de desarrollo para que todo se haga y lo que debamos hacer en el núcleo lo hagamos altiro». El núcleo tenía dos huecos: (1) `executeCapability` escribía la fila de `audit_events` DESPUÉS del handler y fuera de su transacción (si el insert fallaba o el proceso se caía entre los dos, la escritura quedaba sin rastro); (2) la migración inicial daba UPDATE/DELETE a `opai_app` sobre `audit_events`, así que la auditoría era mutable para la app pese a describirse como append-only (el PR #56, antes de este encargo, ya revocó ese permiso).
+
+**Decisión.**
+
+1. **Atómica.** Para toda capacidad con efecto distinto de lectura y tenant actual, `executeCapability` abre una única transacción: el handler corre dentro (su `ctx.db`/`ctx.transaccion` apuntan a esa misma transacción, así que un `ctx.transaccion` interno la reusa en vez de abrir otra) y el insert de `audit_events` va antes del commit. Un fallo del insert revierte la escritura; un fallo del handler nunca llega a auditar. Se audita también cuando el output no valida (antes esa escritura quedaba sin rastro). Para `platform.*` sin tenant actual (`tenantObjetivo` resuelve el tenant objetivo), no existe una transacción común posible porque el handler escribe con `ctx.plataforma.paraTenant` fuera de `ctx.transaccion`: se audita aparte, en una transacción propia del tenant objetivo (`ctx.plataforma.transaccionPara`), atómica respecto del insert de auditoría pero no respecto del handler (brecha conocida, documentada, no resuelta por este ADR).
+2. **Encadenada.** `core.audit_events` suma `seq` (entero por tenant), `hashAnterior`, `hash` y `hashCanon`, con el mismo algoritmo de `@opai/domain` que ya usaba `core.bitacora` (ADR-023): `hash = sha256(hashAnterior + "\n" + hashCanon)`. `hashCanon` congela la forma canónica del evento (tenant, seq, actor, capability, entidad, `createdAt` y un **digest** SHA-256 del payload, no el payload crudo) para que una futura anonimización del payload (Ley 21.719) no invalide hashes ya emitidos: la verificación nunca vuelve a leer el payload en vivo, solo compara `hashAnterior`/`hashCanon`/`hash` almacenados. La concurrencia del mismo tenant se serializa con `pg_advisory_xact_lock` (mismo patrón que `bloqueo-login.ts` e `incidentes-comun.ts`), dentro de la transacción de la escritura: sin TOCTOU entre escrituras simultáneas. Las filas previas a esta migración se completan con un backfill determinista (orden `created_at, id`, por tenant) en la misma migración.
+3. **Inmutable.** La migración repite (idempotente) el `REVOKE UPDATE, DELETE` sobre `audit_events` para `opai_app` que ya aplicó el PR #56; el dueño de la base conserva el acceso (scripts, migraciones y la prueba de alteración de `verificarAuditoria`).
+4. **Verificable.** `core.auditoria.verificar` (lectura), `platform.auditoria.estado` (plataforma, solo lectura) y un trabajo diario que recorre la cadena por lotes y emite `core.auditoria.rota` si se rompe, igual que el patrón ya existente de `core.bitacora.verificar`/`core.bitacora.rota`. El estado de la última verificación se guarda en `core.auditoria_cabezas` (una fila por tenant), como `core.bitacora_cabezas` para la bitácora de hechos regulados.
+
+**Consecuencias.** `Auditoria.registrar` ahora recibe la transacción (`tx`), igual que `Eventos`/`Trabajos`/`BitacoraServicio`: todo código que lo llamaba fuera de una transacción (el flujo de aprobación pendiente de agentes, el aviso de respaldo de IA agotado) se ajustó para auditar dentro de una transacción propia, sin cambiar su semántica. `seq`/`ultimoSeq` son `Int`, no `BigInt` como pedía el encargo original: un `BigInt` de Prisma no es serializable con `JSON.stringify` sin un reemplazador, y varias pruebas y vistas de actividad ya hacían `JSON.stringify` sobre filas de `audit_events` completas; `Int` basta de sobra (2,1 mil millones de escrituras por tenant) y es el mismo tipo que ya usa `core.bitacora.seq`. `REGLAS-codigo.md` incorpora la regla «toda escritura se audita en su transacción».
+
+**Corrección del 27-oct-2026 (encargo PR #71, QA A/B/C y review 5662759713).**
+Reemplaza la promesa de anonimización transparente y la verificación del punto 2:
+se recalcula el canon desde el contenido actual, incluido el digest del payload.
+Los cambios de contenido se detectan; una anonimización futura necesita un protocolo
+explícito. Se conserva el canon SQL histórico y el JSON nuevo, verificando ambos
+contra sus columnas. La verificación toma el lock de append y conserva el máximo
+previamente verificado para detectar truncados. Plataforma con `tenantObjetivo`
+audita siempre en ese destino, aun con empresa seleccionada (la brecha de atomicidad
+con su handler sigue declarada). Los diagnósticos de IA usan una transacción
+explícitamente independiente, no la reutilizada por la solicitud. La expansión
+nullable y el NOT NULL se aplican antes y después del despliegue, respectivamente.
+Detalles técnicos del constructor OpenCode / openai/gpt-6.1-sol y orden exacto en
+`briefs/FIX-auditoria-atomica-pr71.md`; no se atribuyen nuevas decisiones a Carlos.
+**Corrección de la segunda ronda de QA del PR #71 (encargo N1/N2/N3).** Reemplaza
+el lock durante el escaneo y la capacidad de lectura del punto 4: solo el job
+verifica, con snapshot acotado, canon SQL por lotes, checkpoint incremental y CAS
+por revisión bajo lock breve. La huella del prefijo conserva detección de contenido
+antiguo alterado (escaneo SQL O(N), sin bloquear append); timeout propio. El job se
+pausa entre expansión y contracción. Backfill por lotes con COMMIT, índice separado
+CONCURRENTLY y CHECK NOT VALID → VALIDATE → SET NOT NULL → DROP CHECK. Son detalles
+de implementación del constructor OpenCode / openai/gpt-6.1-sol dentro del encargo,
+documentados con pruebas y reversión en el mismo brief y ESTADO; no decisiones de
+negocio nuevas. Se conservan los timestamps existentes. Al incorporar main del
+PR #70, el identificador de auditoría pasa a ADR-052: ADR-051 ya identifica la
+identidad de servicio en main.
+
+---
+## ADR-051 · Identidad de servicio para agentes y presupuesto atómico (núcleo P0)
+
+**Fecha:** 27-oct-2026 · **Estado:** vigente · Completa ADR-032 §3, ADR-033 y ADR-034 §1 («Sin keys compartidas… scope `*` es transitorio»).
+
+**Contexto.** Carlos, 26-oct-2026 20:47 CLT, chat con OPAI 2.0 (t457u): «ponlo entonces en el plan de desarrollo para que todo se haga y lo que debamos hacer en el núcleo lo hagamos altiro. Me preocupa que, quede como, cien por ciento agéntico». Hasta este ADR, el principal de una key solo era usuario, cuenta o persona, y la key heredaba TODOS los permisos y el alcance de su responsable; Grokbot operaba con una key de scope `*`, responsable con rol owner en Gard y presupuesto nulo: la IA de desarrollo y la IA del producto compartían identidad y tenant real, y el presupuesto mensual no se chequeaba y consumía en la misma transacción.
+
+**Decisión.**
+
+1. **Permisos finos por key = subconjunto de los efectivos del responsable.** Campo `permisos` en `api_keys` (lista de ids del catálogo; `null` = hereda los del responsable, para compatibilidad) y `hereda_permisos`. La autorización cruza los permisos de la key con los efectivos del responsable (`permisoDeKey`, intersección); nadie crea una key con permisos que no tiene (`normalizarPermisosRol` sobre el acceso efectivo del creador). El scope `*` sigue permitido, con una advertencia visible: amplio y transitorio.
+2. **Principal `servicio`:** agente del tenant sin dueño humano (integraciones, agentes alojados, bots de desarrollo). Su responsable es una persona solo para gobierno (aprobaciones y avisos); sus permisos salen exclusivamente de la key, nunca hereda rol ni alcance (alcance completo del tenant, nunca el del responsable). Exige presupuesto mensual mayor que cero y una lista de permisos explícita; un creador con alcance restringido no puede crear un servicio (no amplía su propio alcance). Auditoría «agente `<nombre>` (servicio)». `soloPersonas` sigue prohibido para cualquier key.
+3. **Presupuesto mensual atómico por key:** `core.gasto_agente_mes`, con `pg_advisory_xact_lock` por tenant/key; el chequeo y el consumo van en la misma transacción (`UPDATE` con guarda `gastado + costo <= tope`), así que llamadas concurrentes nunca superan el tope. Aviso al 80 % y corte al 100 %, sin duplicados; si el tope cambia a mitad de período, los avisos de ese período se reinician (si no, un tope nuevo nunca volvería a avisar bajo la marca del tope anterior). El costo ya incurrido con un proveedor (IA, mapas, correo, almacenamiento) se registra siempre, aunque supere el tope en esa llamada: no puede rechazarse sin perder trazabilidad del gasto real; la ejecución en curso termina y la SIGUIENTE recibe `BUDGET_EXCEEDED` en el prepago de `capacidad.ejecucion` (antes del handler, el único punto donde negarse no pierde un gasto ya hecho).
+4. **Tenant `gard-staging`:** decisión de Carlos, 26-oct-2026 21:07, t461s2118: sí, se crea, con una key por bot y permisos mínimos. Script idempotente `pnpm --filter @opai/db seed:staging`, que no corre en este PR; el bot OPAI 2.0 lo aplica en Neon cuando el PR esté aprobado. La key owner `*` de Gard se revoca cuando las keys nuevas estén funcionando, y la revocación la hace el bot OPAI 2.0 en operación, no este PR.
+5. **Cambios de rol base y promoción a owner, solo por una persona** (agregado del Revisor, review 5661003883 del #60; mandatos de Carlos t365u y t366u de cerrar el Núcleo): el mismo `FORBIDDEN` que ya protegía `roleId` ahora cubre también `rol` cuando la llamada viene de un agente o de una API key.
+
+**Consecuencias.** Migración aditiva `20261028030000_identidad_servicio` (RLS en `gasto_agente_mes`, sin `BYPASSRLS`). `CONTEXTO-agentes.md` documenta que la IA de desarrollo opera en `gard-staging` con su propia key de servicio y que la key `*` owner de Gard debe revocarse cuando corresponda (decisión de Carlos). Pendiente, fuera de este ADR: la reserva previa (antes de llamar al proveedor) para recursos de costo variable no determinista por adelantado sigue sin existir; hoy la atomicidad protege el chequeo-y-consumo del ledger, no una reserva anticipada del costo exacto de una respuesta de IA.
+
+## ADR-053 · Tope por concepto de sueldo
+
+**Fecha:** 27-oct-2026 · **Estado:** vigente.
+
+**Decisión.** Los montos de sueldo admiten hasta 100.000.000 CLP por concepto. Fuente: «Ok con el tope» — Carlos, 27-oct-2026 20:46 CLT, chat con el Revisor OPAI 2.0 (t311u), transmitida por el Revisor.

@@ -4,15 +4,20 @@
 
 import type { Globales, TenantDb, TenantTx } from "@opai/db";
 
+import { uuid7 } from "../core/documentos/uuid7";
 import { agrupar, cumple, ordenar, type Fila, type Where } from "./db-memoria-util";
+import { type Include, incluir, resolverWhereRelaciones } from "./db-memoria-rel";
+import { lecturasLocksMemoria } from "./lecturas-locks-memoria";
 
-// Ids crecientes como uuid(7): el orden por id es el orden de creación, igual que en Postgres.
-let secuencia = 0;
-const idOrdenado = () => `00000000-0000-7000-8000-${(++secuencia).toString(16).padStart(12, "0")}`;
-
-const RELACIONES: Record<string, Record<string, [tabla: string, clave: string]>> = {
-  membership: { user: ["user", "userId"], tenant: ["tenant", "tenantId"] },
-  apiKey: { user: ["user", "userId"] },
+// Ids crecientes como uuid(7): el orden por id es el orden de creación, igual que en Postgres. Se
+// usa el MISMO generador que inyectan las capacidades (p. ej. `incidente_registrar` pasa `uuid7()`),
+// con un contador de milisegundos monótono siempre por delante del reloj, para que un id autogenerado
+// quede estrictamente después de cualquier id inyectado antes: así ordenar por id es el orden real de
+// creación tanto aquí como en Postgres.
+let ultimoMs = 0;
+const idOrdenado = () => {
+  ultimoMs = Math.max(ultimoMs + 1, Date.now() + 1);
+  return uuid7(ultimoMs);
 };
 
 export function dbEnMemoria(semilla: Record<string, Fila[]> = {}) {
@@ -20,26 +25,21 @@ export function dbEnMemoria(semilla: Record<string, Fila[]> = {}) {
   const tabla = (n: string) => tablas.get(n) ?? (tablas.set(n, []), tablas.get(n) as Fila[]);
   const unicos: Record<string, string[]> = { trabajo: ["claveUnica"] };
 
-  function incluir(modelo: string, fila: Fila, include?: Record<string, boolean>): Fila {
-    if (!include) return { ...fila };
-    const extra: Fila = {};
-    for (const rel of Object.keys(include)) {
-      const [t, clave] = RELACIONES[modelo]?.[rel] ?? [rel, `${rel}Id`];
-      extra[rel] = tabla(t).find((f) => f["id"] === fila[clave]);
-    }
-    return { ...fila, ...extra };
-  }
-
   function delegado(modelo: string) {
     const filas = () => tabla(modelo);
     type Args = {
       where?: Where;
       data?: Fila;
-      include?: Record<string, boolean>;
+      include?: Include;
+      select?: Include;
       take?: number;
       skip?: number;
       cursor?: { id: string };
       orderBy?: unknown;
+    };
+    const filtrar = (where?: Where) => {
+      const w = resolverWhereRelaciones(tabla, modelo, where);
+      return filas().filter((x) => cumple(x, w));
     };
     const crear = (data: Fila) => {
       const fila = { id: idOrdenado(), createdAt: new Date(), updatedAt: new Date(), ...data };
@@ -53,10 +53,7 @@ export function dbEnMemoria(semilla: Record<string, Fila[]> = {}) {
           filas().some((f) => f[c] === data[c] && f["tenantId"] === data["tenantId"]),
       );
     const buscar = (a: Args = {}) => {
-      const orden = ordenar(
-        filas().filter((x) => cumple(x, a.where)),
-        a.orderBy,
-      );
+      const orden = ordenar(filtrar(a.where), a.orderBy);
       const desde = a.cursor
         ? Math.max(
             orden.findIndex((f) => f["id"] === a.cursor?.id),
@@ -69,14 +66,14 @@ export function dbEnMemoria(semilla: Record<string, Fila[]> = {}) {
     return {
       findUnique: async (a: Args) => {
         const f = filas().find((x) => cumple(x, a.where));
-        return f ? incluir(modelo, f, a.include) : null;
+        return f ? incluir(tabla, modelo, f, a) : null;
       },
       findFirst: async (a: Args = {}) => {
         const f = buscar(a)[0];
-        return f ? incluir(modelo, f, a.include) : null;
+        return f ? incluir(tabla, modelo, f, a) : null;
       },
-      findMany: async (a: Args = {}) => buscar(a).map((f) => incluir(modelo, f, a.include)),
-      count: async (a: Args = {}) => filas().filter((x) => cumple(x, a.where)).length,
+      findMany: async (a: Args = {}) => buscar(a).map((f) => incluir(tabla, modelo, f, a)),
+      count: async (a: Args = {}) => filtrar(a.where).length,
       create: async (a: Args) => crear(a.data ?? {}),
       createMany: async (a: { data: Fila[]; skipDuplicates?: boolean }) => {
         let count = 0;
@@ -119,14 +116,32 @@ export function dbEnMemoria(semilla: Record<string, Fila[]> = {}) {
   }
 
   const db: Record<string, unknown> = new Proxy(
-    {},
+    { $queryRaw: lecturasLocksMemoria(tabla) },
     { get: (cache: Record<string, unknown>, m: string) => (cache[m] ??= delegado(m)) },
   );
   const globales: Record<string, unknown> = {
-    tenant: db["tenant"],
-    user: db["user"],
-    ajustePlataforma: db["ajustePlataforma"],
-    precioRecurso: db["precioRecurso"],
+    tenantPorId: (id: string) => delegado("tenant").findUnique({ where: { id } }),
+    tenantPorSlug: (slug: string) => delegado("tenant").findUnique({ where: { slug } }),
+    listarTenants: (id?: string) =>
+      delegado("tenant").findMany({
+        where: id ? { id } : {},
+        orderBy: { nombre: "asc" },
+      }),
+    crearTenant: (data: Fila) => delegado("tenant").create({ data }),
+    actualizarTenant: (id: string, data: Fila) =>
+      delegado("tenant").update({ where: { id }, data }),
+    listarAjustes: () => delegado("ajustePlataforma").findMany(),
+    ajustePorClave: (where: Fila) => delegado("ajustePlataforma").findUnique({ where }),
+    guardarAjuste: (args: Parameters<ReturnType<typeof delegado>["upsert"]>[0]) =>
+      delegado("ajustePlataforma").upsert(args),
+    listarPrecios: (hasta: Date) =>
+      delegado("precioRecurso").findMany({
+        where: { vigenteDesde: { lte: hasta } },
+        orderBy: [{ recurso: "asc" }, { vigenteDesde: "desc" }],
+      }),
+    precioPorVigencia: (where: Fila) => delegado("precioRecurso").findUnique({ where }),
+    guardarPrecio: (args: Parameters<ReturnType<typeof delegado>["upsert"]>[0]) =>
+      delegado("precioRecurso").upsert(args),
   };
   /** Copia de todas las tablas; la función devuelta las restaura (rollback de `transaccion`). */
   function instantanea(): () => void {

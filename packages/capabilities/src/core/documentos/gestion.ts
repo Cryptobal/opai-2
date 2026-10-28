@@ -15,11 +15,17 @@ import {
   opcionalAFecha,
   textoOpcional,
 } from "../maestros/comun";
+import { documentosEnAlcance } from "./alcance-doc";
+import { filtroDocumentoSensible } from "./sensibles";
 import { documentoSchema, vistaDocumento } from "./vista";
 
 export async function disponible(ctx: Contexto, id: string) {
-  const d = await ctx.db.documento.findUnique({ where: { id } });
+  const d = await ctx.db.documento.findFirst({ where: { id, ...filtroDocumentoSensible(ctx) } });
   if (!d || d.estado === "pendiente") throw noEncontrado("El documento");
+  // Alcance por filas (ADR-022): un actor acotado solo accede a los documentos de sus entidades a
+  // cargo. Vale para descargar, actualizar y archivar: el filtro va en la consulta, nunca en la UI.
+  const permitidos = await documentosEnAlcance(ctx);
+  if (permitidos && !permitidos.includes(d.id)) throw noEncontrado("El documento");
   const tipo = d.tipoId ? await ctx.db.documentoTipo.findUnique({ where: { id: d.tipoId } }) : null;
   return { d, tipo };
 }
@@ -29,6 +35,7 @@ export const documentosUpdate = defineCapability({
   descripcion:
     "Actualiza los datos de un documento (título, tipo, emisión, vencimiento, etiquetas y portales donde se ve). No cambia el archivo: para eso, sube una nueva versión.",
   permiso: PERMISOS_CORE.documentosManage,
+  portales: ["erp", "supervisor"],
   input: z.object({
     id: uuidSchema,
     titulo: textoOpcional(200),
@@ -89,6 +96,7 @@ export const documentosArchive = defineCapability({
 });
 
 export const documentosUrlDescarga = defineCapability({
+  auditarLectura: (_s, entrada) => [entrada.id], // Solo tras autorizar y firmar con éxito.
   id: "core.documentos.url_descarga",
   descripcion:
     "URL firmada para ver o descargar un documento durante 5 minutos. No se guarda ni se comparte: pide otra cuando la necesites.",
@@ -99,7 +107,10 @@ export const documentosUrlDescarga = defineCapability({
   dryRun: false,
   async handler(ctx, { id }) {
     const { d } = await disponible(ctx, id);
+    // La exportación del titular (Ley 21.719) solo la descarga `cumplimiento.read`; con el
+    // `documentos.read` general se responde «no encontrado», sin revelar que existe (sin enumeración).
     const url = await ctx.servicios.almacenamiento.urlDescarga(d.storageKey, d.nombre, 300);
+    // La URL ya se emitió antes de medirla: se registra siempre (yaIncurrido), nunca se pierde.
     await ctx.medidor
       .registrar({
         ...consumoBase(ctx, "core"),
@@ -108,6 +119,7 @@ export const documentosUrlDescarga = defineCapability({
         cantidad: 1,
         referenciaTipo: "documento",
         referenciaId: d.id,
+        yaIncurrido: true,
       })
       .catch(() => undefined);
     return {

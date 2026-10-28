@@ -1,5 +1,6 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 
+import { configPool } from "./config-pool";
 import { PrismaClient } from "./generated/prisma/client";
 import { notificarConsulta } from "./metricas";
 
@@ -37,7 +38,16 @@ function crearCliente(variable: "DATABASE_URL" | "DATABASE_URL_MIGRATE"): Prisma
   if (!url) {
     throw new Error(`Falta la variable de entorno ${variable}.`);
   }
-  const adapter = new PrismaPg({ connectionString: url });
+  // En Neon, neondb_owner (dueño y prisma migrate deploy) tiene BYPASSRLS; FORCE no le afecta.
+  // FORCE es defensa en profundidad para dueños sin BYPASSRLS (local/CI u otro dueño).
+  // La garantía es opai_app sin BYPASSRLS con tenant_isolation. Para mantenimiento,
+  // confirmar BYPASSRLS: row_security=off no salta RLS, falla si filtraría filas.
+  const adapter = new PrismaPg({
+    connectionString: url,
+    // Cada instancia serverless tiene su propio pool; en Vercel se avisa si falta -pooler.
+    ...configPool(process.env, url, variable === "DATABASE_URL"),
+    ...(variable === "DATABASE_URL_MIGRATE" ? { options: "-c row_security=off" } : {}),
+  });
   return new PrismaClient({ adapter });
 }
 
@@ -52,7 +62,8 @@ export function clienteApp(): ClienteApp {
 }
 
 /**
- * Cliente con el rol propietario (DATABASE_URL_MIGRATE). Salta la RLS.
+ * Cliente de scripts (DATABASE_URL_MIGRATE). Con FORCE el dueño ya no salta RLS:
+ * requiere un rol de mantenimiento BYPASSRLS explícito para datos cross-tenant.
  * SOLO para migraciones, scripts de importación y seeds ejecutados a mano.
  * Nunca se usa desde apps/web ni desde módulos; la variable no existe en Vercel.
  */

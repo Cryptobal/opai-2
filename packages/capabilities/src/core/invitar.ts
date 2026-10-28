@@ -12,6 +12,7 @@ export type DatosInvitacion = {
   email: string;
   rol: Rol;
   portales: readonly string[];
+  portalInicio?: string | null | undefined;
   invitadoPor: { id: string; nombre: string };
 };
 
@@ -57,6 +58,7 @@ export async function crearInvitacion(
       email: datos.email,
       rol: datos.rol,
       portales: [...datos.portales],
+      portalInicio: datos.portalInicio ?? null,
       tokenHash: sha256(token),
       invitedByUserId: datos.invitadoPor.id,
       expiresAt,

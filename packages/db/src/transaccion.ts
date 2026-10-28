@@ -11,7 +11,11 @@ export type TenantTx = Omit<
   "$connect" | "$disconnect" | "$on" | "$transaction" | "$extends" | "$use"
 >;
 
-export type OpcionesTransaccion = { timeoutMs?: number };
+export type OpcionesTransaccion = {
+  timeoutMs?: number;
+  maxWaitMs?: number;
+  aislamiento?: "RepeatableRead";
+};
 
 /**
  * Transacción interactiva con `app.tenant_id` fijado para toda su duración (ADR-002, ADR-029).
@@ -29,6 +33,10 @@ export function enTransaccion<T>(
       await tx.$executeRaw`SELECT set_config('app.tenant_id', ${id}, true)`;
       return fn(tx);
     },
-    { timeout: opciones.timeoutMs ?? 15_000, maxWait: 5_000 },
+    {
+      timeout: opciones.timeoutMs ?? 15_000,
+      maxWait: opciones.maxWaitMs ?? 5_000,
+      ...(opciones.aislamiento ? { isolationLevel: opciones.aislamiento } : {}),
+    },
   );
 }

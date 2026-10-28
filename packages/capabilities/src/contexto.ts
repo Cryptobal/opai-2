@@ -1,9 +1,19 @@
-import { type Rol, tienePermiso, tienePermisoPlataforma, moduloDe } from "@opai/domain";
-import { forTenant, globales, type Prisma } from "@opai/db";
+import {
+  type Acceso,
+  permisoDeKey,
+  type Excepcion,
+  type EstadoMfa,
+  moduloDe,
+  type Rol,
+  tienePermisoEfectivo,
+  tienePermisoPlataforma,
+} from "@opai/domain";
+import { accesoPlataforma, enTransaccion, forTenant } from "@opai/db";
 import { almacenamientoDelEntorno, mailerDelEntorno } from "@opai/integrations";
 
 import { idempotenciaSobre } from "./idempotencia";
 import {
+  auditoriaEnDb,
   bitacoraEnDb,
   eventosEnDb,
   medidorEnDb,
@@ -13,50 +23,54 @@ import {
 import type {
   Actor,
   AgenteContexto,
-  Auditoria,
+  Alcance,
   Contexto,
-  EventoAuditoria,
   Medidor,
   Principal,
   Servicios,
   UsuarioContexto,
 } from "./types";
 
-export { medidorEnDb } from "./servicios-db";
+export { auditoriaEnDb, medidorEnDb } from "./servicios-db";
 
 /** Id nulo para contextos sin tenant (plataforma sin empresa elegida). RLS no devuelve filas. */
 export const SIN_TENANT = "00000000-0000-0000-0000-000000000000";
 
-/** Auditoría persistida en `core.audit_events` del tenant del evento. */
-export const auditoriaEnDb: Auditoria = {
-  async registrar(evento: EventoAuditoria): Promise<void> {
-    // JSON plano: elimina undefined, funciones y referencias circulares antes de persistir.
-    const payload: Prisma.InputJsonValue = JSON.parse(JSON.stringify(evento.payload ?? null));
-    await forTenant(evento.tenantId).auditEvent.create({
-      data: {
-        tenantId: evento.tenantId,
-        actorType: evento.actor.tipo,
-        actorId: evento.actor.id ?? null,
-        viaUserId: evento.actor.viaUserId ?? null,
-        capability: evento.capability,
-        entityType: evento.entityType ?? null,
-        entityId: evento.entityId ?? null,
-        payload,
-      },
-    });
-  },
-};
-
 export type ParametrosContexto = {
+  mfa?: EstadoMfa;
   /** null: sin tenant actual (plataforma sin empresa elegida, o usuario sin membresías). */
   tenantId: string | null;
   actor: Actor;
   usuario?: UsuarioContexto | null;
   rol?: Rol | null;
+  /** Permisos del rol personalizado del tenant (null = el rol base de `rol`). ADR-022. */
+  permisosRol?: readonly string[] | null;
+  /** Excepciones de permiso por usuario sobre el rol. ADR-022. */
+  excepciones?: readonly Excepcion[] | null;
   portal?: string | null;
+  /** Solo servidor: membresía activa del usuario en este tenant; ausente = sin acceso. */
+  portalesMembresia?: readonly string[];
   modulosActivos?: readonly string[];
   scopes?: readonly string[] | null;
   principal?: Principal | null;
+  /**
+   * Permisos finos de la API key (ids del catálogo), si ejecuta una (Identidad de servicio, t457u).
+   * Presente (incluido `servicio`) ⇒ la autorización los cruza con los efectivos del responsable
+   * (intersección); `permisos: null` ⇒ la key hereda los del responsable (compatibilidad). Un
+   * principal `servicio` no hereda rol: sus permisos salen exclusivamente de esta lista.
+   */
+  claveApi?: { permisos: readonly string[] | null; servicio: boolean } | null;
+  /**
+   * Techo real de permisos del responsable humano de la API key (rol, personalizado y excepciones),
+   * usado para intersectar con `claveApi` (H15): ni una key delegada ni una de servicio superan lo
+   * que su responsable puede hacer ahora mismo. El borde lo calcula siempre desde la membresía
+   * vigente del responsable, también para `servicio` (cuyo `rol`/`permisosRol`/`excepciones` de
+   * arriba van en `null` porque el principal no hereda rol). Por defecto, el mismo
+   * `rol`/`permisosRol`/`excepciones` de arriba (sesión humana sin key, donde no aplica distinción).
+   */
+  accesoResponsable?: Acceso | null;
+  /** Alcance por filas del actor (null = ve todo). Lo resuelve el borde una vez (ADR-022, ADR-045). */
+  alcance?: Alcance | null;
   agente?: AgenteContexto | null;
   medidor?: Medidor;
   /** Trabajo diferido (el borde usa `after()`). Por defecto, sin esperar y sin romper. */
@@ -67,14 +81,33 @@ export type ParametrosContexto = {
 };
 
 /**
- * Autorización real (ADR-016): `platform:*` solo con `platformRole`; el resto, por el rol de la
- * membresía en el tenant actual. Módulo activo y scopes los verifica `executeCapability`.
+ * Autorización real (ADR-016, ADR-022, ADR-033 · Identidad de servicio t457u): `platform:*` solo
+ * con `platformRole` y nunca para una API key; el resto, por el acceso efectivo en el tenant actual
+ * (rol base o personalizado + excepciones, denegar-gana). Si ejecuta una API key con permisos finos,
+ * el permiso además debe estar entre los efectivos ACTUALES del responsable (`accesoResponsable`,
+ * H15): nadie supera a su responsable, y si este baja de rol, personaliza su rol o recibe una
+ * excepción que deniega, la key lo pierde de inmediato, sea de servicio o delegada. Un principal
+ * `servicio` no hereda rol ni alcance (su `acceso` propio queda vacío): concede solo lo que la key
+ * lista, acotado igual por `accesoResponsable`. Módulo activo y scopes los verifica
+ * `executeCapability`.
  */
-export function autorizador(rol: Rol | null, usuario: UsuarioContexto | null) {
-  return (permiso: string): boolean =>
-    moduloDe(permiso) === "platform"
-      ? tienePermisoPlataforma(usuario?.platformRole, permiso)
-      : rol !== null && tienePermiso(rol, permiso);
+export function autorizador(
+  acceso: Acceso,
+  usuario: UsuarioContexto | null,
+  clave?: { permisos: readonly string[] | null; servicio: boolean } | null,
+  accesoResponsable: Acceso = acceso,
+) {
+  return (permiso: string): boolean => {
+    if (moduloDe(permiso) === "platform") {
+      // Una API key nunca obtiene permisos de plataforma, tenga o no responsable de plataforma.
+      return !clave && tienePermisoPlataforma(usuario?.platformRole, permiso);
+    }
+    if (clave)
+      return permisoDeKey(permiso, clave.permisos, clave.servicio, (p) =>
+        tienePermisoEfectivo(accesoResponsable, p),
+      );
+    return tienePermisoEfectivo(acceso, permiso);
+  };
 }
 
 const diferirPorDefecto = (tarea: () => Promise<unknown>) => void tarea().catch(() => undefined);
@@ -85,22 +118,26 @@ export function crearContexto(params: ParametrosContexto): Contexto {
   const usuario = params.usuario ?? null;
   const rol = params.rol ?? null;
   return {
+    ...(params.mfa ? { mfa: params.mfa } : {}),
     tenantId,
     conTenant: params.tenantId !== null,
     actor: params.actor,
     usuario,
     rol,
     portal: params.portal ?? null,
+    portalesMembresia: params.portalesMembresia ?? [],
     modulosActivos: params.modulosActivos ?? [],
     scopes: params.scopes ?? null,
     principal: params.principal ?? null,
+    alcance: params.alcance ?? null,
     agente: params.agente ?? null,
     db: forTenant(tenantId),
     transaccion: transaccionEnDb(tenantId),
+    transaccionIndependiente: transaccionEnDb(tenantId),
     // Lecturas de una capacidad en una sola transacción (ADR-045): fija `app.tenant_id` una vez en
     // vez de una transacción por consulta. Misma RLS (rol `opai_app`, `set_config` local a la tx).
     enLectura: transaccionEnDb(tenantId),
-    auditoria: auditoriaEnDb,
+    auditoria: auditoriaEnDb(tenantId),
     medidor: params.medidor ?? medidorEnDb,
     eventos: eventosEnDb(tenantId, params.actor),
     trabajos: trabajosEnDb(tenantId),
@@ -114,9 +151,29 @@ export function crearContexto(params: ParametrosContexto): Contexto {
       urlBase:
         params.servicios?.urlBase ?? process.env["BETTER_AUTH_URL"] ?? "http://localhost:3000",
     },
-    plataforma: usuario?.platformRole
-      ? { globales: globales(), paraTenant: (id: string) => forTenant(id) }
-      : null,
-    autorizar: autorizador(rol, usuario),
+    // Nunca para un agente (H15/H del Revisor): una API key no obtiene el acceso de plataforma del
+    // responsable, aunque este tenga `platformRole` (el permiso ya lo bloquea `autorizador`, pero
+    // `requierePlataforma` depende de este objeto, no del permiso, como defensa en profundidad).
+    plataforma:
+      usuario?.platformRole && params.actor.tipo !== "agent"
+        ? {
+            globales: accesoPlataforma(),
+            paraTenant: (id: string) => forTenant(id),
+            transaccionPara: (id, fn) => enTransaccion(id, fn),
+          }
+        : null,
+    // `ctx.rol` conserva el rol base (jerarquía y etiquetas). La autorización usa el rol
+    // personalizado cuando existe: si hay `permisosRol`, el rol base cede a esa lista (ADR-022).
+    // Si ejecuta una API key, además cruza con los efectivos actuales del responsable (H15).
+    autorizar: autorizador(
+      {
+        rol: params.permisosRol != null ? null : rol,
+        permisosRol: params.permisosRol ?? null,
+        excepciones: params.excepciones ?? null,
+      },
+      usuario,
+      params.claveApi ?? null,
+      params.accesoResponsable ?? undefined,
+    ),
   };
 }

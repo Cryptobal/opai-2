@@ -17,7 +17,11 @@ async function Contenido({ searchParams }: Props) {
   const { next } = await searchParams;
   const epoca = epocaDeIdentidad(await identidadActual());
   return (
-    <FormularioLogin destino={destinoSeguro(next)} google={googleHabilitado()} epoca={epoca} />
+    <FormularioLogin
+      destino={next === undefined ? "" : destinoSeguro(next)}
+      google={googleHabilitado()}
+      epoca={epoca}
+    />
   );
 }
 

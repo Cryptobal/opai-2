@@ -3,6 +3,7 @@ import { z } from "zod";
 import { TAMANO_MAXIMO_DOCUMENTO } from "@opai/domain";
 
 import { defineAjustes } from "./registro";
+import { ajustesNavegacion } from "./navegacion";
 
 const correoOpcional = z.union([z.literal(""), z.email()]);
 const modelo = z.object({ proveedor: z.string(), modelo: z.string() });
@@ -53,6 +54,40 @@ export const AJUSTES_NUCLEO = defineAjustes(
         permiso: "core:documentos.manage",
         control: "numero",
       }),
+    cumplimiento_dpa_version: z.string().max(40).default("").meta({
+      etiqueta: "Versión vigente del DPA",
+      ayuda:
+        "Versión del acuerdo de tratamiento de datos (DPA) que los tenants aceptan (Ley 21.719). La fija y versiona OPAI. Vacío: aún no publicada.",
+      grupo: "Cumplimiento",
+      ambito: "plataforma",
+      control: "texto",
+    }),
+    cumplimiento_solicitud_dias_plazo: z.number().int().min(0).max(365).default(0).meta({
+      etiqueta: "Plazo de atención de solicitudes del titular (días corridos)",
+      ayuda:
+        "Días para atender una solicitud ARCO (Ley 21.719). Lo fija el abogado; 0 = sin plazo definido todavía (se calcula al recibir una vez configurado, §16.3).",
+      grupo: "Cumplimiento",
+      ambito: "tenant",
+      permiso: "core:cumplimiento.manage",
+      control: "numero",
+    }),
+    cumplimiento_brecha_dias_plazo: z.number().int().min(0).max(365).default(0).meta({
+      etiqueta: "Plazo para avisar una brecha (días corridos)",
+      ayuda:
+        "Días para notificar una brecha a la Agencia y a los titulares (Ley 21.719). Lo fija el abogado; 0 = sin plazo definido todavía (§16.5).",
+      grupo: "Cumplimiento",
+      ambito: "tenant",
+      permiso: "core:cumplimiento.manage",
+      control: "numero",
+    }),
+    cumplimiento_dpa_texto: z.string().default("").meta({
+      etiqueta: "Texto del DPA",
+      ayuda:
+        "Texto del acuerdo de tratamiento de datos (DPA) de esa versión. La aceptación guarda su hash (SHA-256) como prueba de a qué texto aceptó el tenant. El texto legal lo fija Carlos.",
+      grupo: "Cumplimiento",
+      ambito: "plataforma",
+      control: "texto",
+    }),
     preferencias_tema: z
       .enum(["sistema", "claro", "oscuro"])
       .default("sistema")
@@ -70,6 +105,10 @@ export const AJUSTES_NUCLEO = defineAjustes(
       ambito: "usuario",
       control: "seleccion",
     }),
+    // Brief 05 (navegación por áreas, D1/D3): preferencias de la barra lateral y de la barra
+    // inferior, por usuario y empresa (cambiar de empresa cambia estas tres, §9). Sin migración
+    // (ADR-038): van en `core.ajuste`, igual que `preferencias_*`.
+    ...ajustesNavegacion,
     ia_modelos: z
       .object({ economica: modelo, estandar: modelo, potente: modelo })
       .default({
@@ -83,6 +122,14 @@ export const AJUSTES_NUCLEO = defineAjustes(
         ambito: "plataforma",
         control: "json",
       }),
+    seguridad_mfa_obligatorio_admins: z.boolean().default(false).meta({
+      etiqueta: "Exigir segundo factor también a los demás roles",
+      ayuda:
+        "Solo agrega exigencia. Plataforma, owner y admin siempre requieren MFA y este ajuste no puede desactivarlo.",
+      grupo: "Seguridad",
+      ambito: "tenant",
+      control: "switch",
+    }),
     remuneraciones_imm: z.number().int().min(1).default(553_553).meta({
       etiqueta: "Ingreso mínimo mensual (CLP)",
       ayuda: "Ley 21.830: $553.553 desde el 1-may-2026. Base del tope de gratificación legal.",

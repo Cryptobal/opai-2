@@ -1,11 +1,17 @@
-import type { Rol } from "@opai/domain";
+import type { Acceso, Excepcion, Rol } from "@opai/domain";
 
 import { autorizador } from "../contexto";
 import { idempotenciaSobre } from "../idempotencia";
-import type { AgenteContexto, ConsumoNuevo, Principal } from "../types";
+import type { AgenteContexto, Alcance, ConsumoNuevo, Principal } from "../types";
 import { almacenamientoEnMemoria } from "./almacenamiento-memoria";
 import { dbEnMemoria } from "./db-memoria";
-import { bitacoraEnMemoria, eventosEnMemoria, trabajosEnMemoria } from "./servicios-memoria";
+import {
+  auditoriaEnMemoria,
+  bitacoraEnMemoria,
+  eventosEnMemoria,
+  trabajosEnMemoria,
+} from "./servicios-memoria";
+import { medidorEnMemoria } from "./medidor-memoria";
 import type { Actor, Contexto, Correo, EventoAuditoria, UsuarioContexto } from "./tipos";
 
 export const TENANT_DE_PRUEBA = "0192f3a0-0000-7000-8000-000000000001";
@@ -20,13 +26,25 @@ export type OpcionesPrueba = {
   /** Permisos explícitos (ignora rol). Si se omite, se usa la autorización real por `rol`. */
   permisos?: readonly string[];
   rol?: Rol | null;
+  /** Rol personalizado del tenant (null = rol base). ADR-022. */
+  permisosRol?: readonly string[] | null;
+  /** Excepciones de permiso por usuario. ADR-022. */
+  excepciones?: readonly Excepcion[] | null;
   usuario?: UsuarioContexto | null;
   actor?: Actor;
   conTenant?: boolean;
+  portal?: string | null;
+  portalesMembresia?: readonly string[];
   modulosActivos?: readonly string[];
   scopes?: readonly string[] | null;
   principal?: Principal | null;
+  /** Alcance por filas del actor (null = ve todo). ADR-022 · Brief 07c B3. */
+  alcance?: Alcance | null;
   agente?: AgenteContexto | null;
+  /** Permisos finos de la API key (Identidad de servicio t457u). Cruza con los del responsable. */
+  claveApi?: { permisos: readonly string[] | null; servicio: boolean } | null;
+  /** Techo real del responsable de la key (H15). Por defecto, el mismo `rol`/`permisosRol`/`excepciones`. */
+  accesoResponsable?: Acceso | null;
   semilla?: Parameters<typeof dbEnMemoria>[0];
 };
 
@@ -42,22 +60,27 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
   const correos: Correo[] = [];
   const diferidos: Promise<unknown>[] = [];
   const almacen = almacenamientoEnMemoria();
+  const auditoriaBase = auditoriaEnMemoria(tabla, TENANT_DE_PRUEBA);
   let despachos = 0;
   const usuario = o.usuario === undefined ? USUARIO_DE_PRUEBA : o.usuario;
   const rol = o.rol === undefined ? "owner" : o.rol;
   const actor: Actor = o.actor ?? (usuario ? { tipo: "user", id: usuario.id } : { tipo: "system" });
   const ctx: Contexto = {
+    mfa: { activa: true, verificada: true, obligatoria: true },
     tenantId: TENANT_DE_PRUEBA,
     conTenant: o.conTenant ?? true,
     actor,
     usuario,
     rol,
-    portal: "erp",
+    portal: o.portal === undefined ? "erp" : o.portal,
+    portalesMembresia: o.portalesMembresia ?? ["erp"],
     modulosActivos: o.modulosActivos ?? [],
     scopes: o.scopes ?? null,
     principal: o.principal ?? null,
+    alcance: o.alcance ?? null,
     agente: o.agente ?? null,
     db,
+    transaccionIndependiente: (fn) => fn(tx),
     // Atómica como la real: si `fn` falla, las tablas vuelven al estado previo.
     transaccion: async (fn) => {
       const restaurar = instantanea();
@@ -68,25 +91,18 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
         throw e;
       }
     },
-    // También en la tabla, para las capacidades que leen la auditoría (actividad de las fichas).
+    // También en la tabla, para las capacidades que leen la auditoría (actividad de las fichas), con
+    // la misma cadena de hashes que la real (ADR-052, `auditoriaEnMemoria`). `tx` siempre llega:
+    // lo escribe el llamador, igual que `eventos`/`trabajos`, para que el insert sea atómico con la
+    // escritura que audita.
     auditoria: {
-      registrar: async (e) => {
+      registrar: async (tx, e) => {
         eventos.push(e);
-        await db.auditEvent.create({
-          data: {
-            tenantId: e.tenantId,
-            actorType: e.actor.tipo,
-            actorId: e.actor.id ?? null,
-            viaUserId: e.actor.viaUserId ?? null,
-            capability: e.capability,
-            entityType: e.entityType ?? null,
-            entityId: e.entityId ?? null,
-            payload: JSON.parse(JSON.stringify(e.payload ?? null)),
-          },
-        });
+        return auditoriaBase.registrar(tx, e);
       },
+      verificar: () => auditoriaBase.verificar(),
     },
-    medidor: { registrar: async (c) => void usos.push(c) },
+    medidor: medidorEnMemoria(tabla, usos, o.agente),
     eventos: eventosEnMemoria(TENANT_DE_PRUEBA, actor),
     trabajos: trabajosEnMemoria(TENANT_DE_PRUEBA),
     bitacora: bitacoraEnMemoria(tabla, TENANT_DE_PRUEBA),
@@ -98,8 +114,22 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
       almacenamiento: almacen.almacenamiento,
       urlBase: "https://test.opai.cl",
     },
-    plataforma: usuario?.platformRole ? { globales, paraTenant: () => db } : null,
-    autorizar: o.permisos ? (p) => (o.permisos ?? []).includes(p) : autorizador(rol, usuario),
+    plataforma:
+      usuario?.platformRole && actor.tipo !== "agent"
+        ? { globales, paraTenant: () => db, transaccionPara: (_id, fn) => ctx.transaccion(fn) }
+        : null,
+    autorizar: o.permisos
+      ? (p) => (o.permisos ?? []).includes(p)
+      : autorizador(
+          {
+            rol: o.permisosRol != null ? null : rol,
+            permisosRol: o.permisosRol ?? null,
+            excepciones: o.excepciones ?? null,
+          },
+          usuario,
+          o.claveApi ?? null,
+          o.accesoResponsable ?? undefined,
+        ),
   };
   const esperar = () => Promise.all(diferidos.splice(0));
   return { ctx, eventos, usos, correos, tabla, esperar, almacen, despachos: () => despachos };

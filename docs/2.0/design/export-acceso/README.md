@@ -12,6 +12,9 @@ Referencia visual de las pantallas de acceso de OPAI 2.0, hecha sobre el DS 2.0 
 | `08_Login_Cliente_375.html`, `09_Login_Cliente_1280.html` | Login Cliente: enlace mágico o RUT + PIN de empresa | Fase 3 (portales) |
 | `10_Emparejar_dispositivo_Terreno_Tablet.html`, `11_Emparejar_dispositivo_Terreno_Tel_fono.html` | Emparejar dispositivo Terreno con código de 6 caracteres | Fase 3 (portales) |
 | `00_tablero-completo.html` | Tablero original de Claude Design (todas las pantallas; pesa 2,4 MB por las fuentes embebidas) | — |
+| _(pendiente de diseño)_ | **Segundo factor (NÚCLEO-F):** verificar en el login (código TOTP / código de respaldo), enrolar (QR + clave manual + códigos de respaldo) y gestión en Mi cuenta (activar, desactivar con contraseña) | Núcleo (rama `core/mfa`) |
+
+**Pedido de diseño (NÚCLEO-F, 26-oct-2026).** No hay export de Claude Design para el segundo factor. Las pantallas se implementaron con lo mínimo imprescindible sobre `AuthCard` y componentes del DS V2 ya aprobados (`Alerta`, `InputPassword`, `Campo`, `Button`, y los nuevos `CodigoQr` y `CodigosRespaldo`), sin estilos nuevos, para que el flujo funcione. Falta el diseño aprobado en Claude Design de: (1) verificación en el login con alternancia TOTP ↔ código de respaldo; (2) enrolamiento con QR, clave manual y lista de códigos de respaldo; (3) la sección «Segundo factor» de Mi cuenta (estado, activar, desactivar). Cuando Carlos apruebe el diseño, se ajustan las pantallas; los componentes `CodigoQr`/`CodigosRespaldo` del DS se revisan ahí.
 
 Reglas de implementación observadas en el diseño:
 

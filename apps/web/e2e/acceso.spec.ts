@@ -1,9 +1,10 @@
 import { expect, type Page, test } from "@playwright/test";
 
+import { E2E_EMAIL as email, E2E_PASSWORD as password, entrar } from "./sesion";
+
 // Flujo de acceso (Brief 01): login con el usuario plataforma sembrado en la rama dev, ERP,
 // Configuración → Usuarios y Plataforma. Capturas en e2e/__screenshots__/.
-const email = process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl";
-const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
+// Desde NÚCLEO-F el owner tiene segundo factor obligatorio: `entrar` pasa por /mfa con un TOTP.
 
 async function captura(page: Page, nombre: string, proyecto: string) {
   await page.screenshot({ path: `e2e/__screenshots__/${nombre}-${proyecto}.png`, fullPage: true });
@@ -30,10 +31,7 @@ test.describe("con sesión", () => {
     const p = info.project.name;
     await page.goto("/login");
     await captura(page, "login", p);
-    await page.getByLabel("Correo").fill(email);
-    await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
-    await page.getByRole("button", { name: "Entrar" }).click();
-    await page.waitForURL((url) => url.pathname === "/" || url.pathname === "/platform");
+    await entrar(page);
 
     await page.goto("/");
     // En teléfono la barra no lleva título: el encabezado de la pantalla es el saludo.
@@ -48,10 +46,15 @@ test.describe("con sesión", () => {
     await page.goto("/platform");
     await expect(page.getByText("Gard Security").filter({ visible: true }).first()).toBeVisible();
     await captura(page, "platform-tenants", p);
-    await page.getByText("Gard Security").filter({ visible: true }).first().click();
+    await page
+      .locator('a[href^="/platform/tenants/"]')
+      .filter({ hasText: "Gard Security", visible: true })
+      .first()
+      .click();
+    await page.waitForURL(/\/platform\/tenants\/[0-9a-f-]{36}$/);
     // Las pestañas de la ficha son rutas: enlaces dentro de la navegación «Secciones».
     const secciones = page.getByRole("navigation", { name: "Secciones" });
-    await expect(secciones.getByRole("link", { name: /Módulos/ })).toBeVisible();
+    await expect(secciones.getByRole("link", { name: /Módulos/ })).toBeVisible({ timeout: 30_000 });
     await captura(page, "platform-tenant", p);
   });
 });

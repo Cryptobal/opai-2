@@ -16,8 +16,6 @@ type Props = {
   telefono: "lista" | "detalle";
   /** Ancho de la lista desde 1280: 400 px (por defecto) o 360. */
   anchoXl?: 360 | 400;
-  /** Índice angosto (Configuración): 280 px en iPad y 300 px desde 1280. */
-  angosto?: boolean;
   /**
    * Fichas con lista + detalle: de 768 a 1023 px se ve un solo panel a todo el ancho (la lista en
    * su ruta, el detalle en la suya, con "Volver a la lista") y la vista dividida empieza en 1024.
@@ -56,8 +54,8 @@ export function SplitScreen(props: Props) {
           uno
             ? "lg:flex lg:flex-none lg:overflow-y-auto lg:border-r lg:border-border lg:bg-surface lg:w-[360px]"
             : "md:flex md:flex-none md:overflow-y-auto md:border-r md:border-border md:bg-surface",
-          !uno && (props.angosto ? "md:w-[280px] xl:w-[300px]" : "md:w-[360px]"),
-          !props.angosto && anchoXl === 400 && "xl:w-[400px]",
+          !uno && "md:w-[360px]",
+          anchoXl === 400 && "xl:w-[400px]",
           telefono === "lista" ? "flex w-full" : "hidden",
         )}
       >

@@ -1,6 +1,7 @@
 export { capacidadesDelNucleo, consumidoresDelNucleo, trabajosDelNucleo } from "./core";
 export { capacidadesComercial } from "./comercial";
 export { ajuste, defineAjustes, type CampoAjuste, type MetaAjuste } from "./core/config";
+export { cifradoDeCampos, estaCifrado, type CifradoDeCampos } from "./core/cumplimiento/cifrado-campos";
 export { enviarCorreo } from "./core/comunicaciones";
 export { generarApiKey, hashApiKey, slugDeApiKey } from "./core/apikey-formato";
 export { catalogoPermisos } from "./core/me";
@@ -63,5 +64,14 @@ export {
 export { type ComprobanteNuevo, emitirComprobante, slugDeComprobante } from "./comprobantes";
 export { camposExternos, externo } from "./externo";
 export { correoDe, geoDe, iaDe } from "./integraciones/adaptadores";
+export { ErrorRespaldoIa } from "./integraciones/ia-respaldo";
+export { comoAgenteInterno } from "./agentes/interno";
+export {
+  iaElegidaDelAgente,
+  modelosDelAgente,
+  type ModeloAgente,
+} from "./integraciones/ia-modelos";
 export { credencialDe } from "./integraciones/resolver";
 export { MANUALES } from "./manuales";
+
+export type { PanelSueldo } from "./core/maestros/estructuras-panel-schema";

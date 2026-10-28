@@ -142,7 +142,8 @@ model PrecioRecurso {
 model Aprobacion {
   id             String    @id @default(uuid(7)) @db.Uuid
   tenantId       String    @map("tenant_id") @db.Uuid
-  apiKeyId       String    @map("api_key_id") @db.Uuid
+  apiKeyId       String?   @map("api_key_id") @db.Uuid
+  agenteInternoId String?  @map("agente_interno_id")
   viaUserId      String    @map("via_user_id") @db.Uuid
   capability     String
   input          Json
@@ -162,6 +163,34 @@ model Aprobacion {
 
   @@index([tenantId, estado, createdAt])
   @@map("aprobaciones")
+  @@schema("core")
+}
+
+/// Presupuesto mensual por API key (Identidad de servicio t457u, ADR-031/ADR-032). Contador atómico:
+/// el chequeo y el consumo van en una transacción con guarda (gastado + costo <= tope), sin TOCTOU.
+model GastoAgenteMes {
+  id           String    @id @default(uuid(7)) @db.Uuid
+  tenantId     String    @map("tenant_id") @db.Uuid
+  apiKeyId     String?   @map("api_key_id") @db.Uuid
+  agenteInternoId String? @map("agente_interno_id")
+  /// Primer día del mes en UTC.
+  periodo      DateTime  @db.Date
+  /// Micro-USD gastados en el mes; nunca supera `topeMicro`.
+  gastadoMicro BigInt    @default(0) @map("gastado_micro")
+  /// Instantánea del tope de la key (micro-USD); se refresca si la key cambia su presupuesto.
+  topeMicro    BigInt    @map("tope_micro")
+  /// Marcas idempotentes de los avisos del mes (ADR-031): se emiten una sola vez.
+  aviso80En    DateTime? @map("aviso_80_en") @db.Timestamptz(6)
+  aviso100En   DateTime? @map("aviso_100_en") @db.Timestamptz(6)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tenant Tenant @relation(fields: [tenantId], references: [id])
+  apiKey ApiKey? @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, apiKeyId, periodo])
+  @@unique([tenantId, agenteInternoId, periodo])
+  @@map("gasto_agente_mes")
   @@schema("core")
 }
 

@@ -3,6 +3,11 @@ import type { ComponentType, ReactNode } from "react";
 
 export type NavItem = {
   href: string;
+  exacta?: boolean;
+  /** Prefijo extra bajo el cual el ítem también queda activo, sin que su `href` sea el enlace. Para
+   *  fichas que cuelgan de un ítem cuya ruta no las contiene («Hoy» → `/supervisor/personas/:id`) o
+   *  para acotar un ítem con `exacta` que aun así cubre un detalle («Empresas» → `/platform/tenants`). */
+  activoEn?: string;
   etiqueta: string;
   icono: LucideIcon;
   /** Grupo en la barra lateral de desktop (Comercial, Operaciones…). Sin grupo = nivel superior. */
@@ -21,6 +26,13 @@ export type NavItem = {
   fueraInferior?: boolean;
   /** El contador es una alerta (globo rojo también en el riel y la barra inferior). */
   alerta?: boolean;
+  /** Punto de no leído sin número, en vez del contador numérico (D5: Inicio en la barra inferior). */
+  punto?: boolean;
+  /** Área de `NAVEGACION.md` §7 (Brief 05): clave estable del grupo para el acordeón y los fijados;
+   *  `grupo` sigue siendo la etiqueta visible. */
+  area?: string;
+  /** Muestra el pin de fijar al pasar el mouse o con foco de teclado (D3). */
+  fijable?: boolean;
 };
 
 /** Barra superior en modo detalle: "‹ Cuentas / Logística Andina SpA". */
@@ -43,6 +55,9 @@ export type LinkProps = {
   className?: string;
   children: ReactNode;
   "aria-current"?: "page" | undefined;
+  "aria-label"?: string;
+  title?: string;
+  onClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void;
 };
 
 /** Componente de enlace inyectado por la app (next/link). Por defecto, <a>. */
@@ -54,8 +69,13 @@ export const LinkPorDefecto: LinkComponent = ({ href, className, children, ...re
   </a>
 );
 
-export function esActivo(rutaActual: string, href: string): boolean {
-  return href === "/"
-    ? rutaActual === "/"
-    : rutaActual === href || rutaActual.startsWith(`${href}/`);
+export function esActivo(
+  rutaActual: string,
+  href: string,
+  exacta = false,
+  activoEn?: string,
+): boolean {
+  const bajo = (base: string) => rutaActual === base || rutaActual.startsWith(`${base}/`);
+  if (activoEn && bajo(activoEn)) return true;
+  return exacta || href === "/" ? rutaActual === href : bajo(href);
 }

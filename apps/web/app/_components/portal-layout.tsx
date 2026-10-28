@@ -3,6 +3,7 @@ import { type ReactNode, Suspense } from "react";
 import { Loading } from "@opai/ds";
 
 import { identidadActual } from "@/lib/servidor";
+import { epocaDe } from "@/lib/epoca-sesion";
 
 import { CargaPortal } from "./carga-portal";
 import { datosShell } from "./datos-shell";
@@ -12,10 +13,16 @@ import { MarcoShell } from "./marco-shell";
  *  dentro de un Suspense para que el acceso dinámico no bloquee el prerender del documento. */
 async function ShellResuelto({ portal, children }: { portal: string; children: ReactNode }) {
   const identidad = await identidadActual();
-  // Sin sesión no se monta shell: la página redirige a `/login` con el `next` correcto.
+  // Sin sesión no se monta shell: la página redirige a `/login` con el `next` correcto. Con sesión
+  // pero sin acceso al portal, el shell se monta igual —con la navegación vacía (`datos-shell.ts`)—
+  // para que el aviso «Sin permisos» viva dentro del marco, con el selector de portal y empresa y el
+  // menú de usuario (Salir). El acceso se sigue verificando en servidor en la página (`servidor.ts`).
   if (!identidad) return children;
   return (
-    <MarcoShell datos={datosShell(identidad, portal)}>
+    <MarcoShell
+      key={epocaDe(identidad.usuario.id, identidad.actual?.tenantId ?? null)}
+      datos={datosShell(identidad, portal)}
+    >
       <CargaPortal>{children}</CargaPortal>
     </MarcoShell>
   );

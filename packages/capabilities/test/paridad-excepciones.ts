@@ -5,6 +5,12 @@
  * capacidades `interna` o `soloPersonas` del registro (sin entradas obsoletas ni faltantes).
  */
 export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
+  "agente.turno.preparar":
+    "Solo personas: la sesión humana delega su identidad al agente interno; una key no inicia otro agente.",
+  "agente.plan.confirmar":
+    "Solo personas: confirmar o rechazar un plan debe ser una decisión humana, nunca una herramienta del modelo.",
+  "core.users.invite":
+    "Solo personas: invitar asigna un rol y gobierna el acceso (encargo PR #70).",
   "core.invitations.peek":
     "Interna: se ejecuta antes de existir sesión (el token del enlace es la credencial).",
   "core.geo.mapa":
@@ -25,4 +31,45 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
   "core.aprobaciones.aprobar": "Solo personas: lo irreversible lo aprueba un humano (ADR-032).",
   "core.aprobaciones.rechazar":
     "Solo personas: la decisión sobre lo irreversible es humana (ADR-032).",
+  "core.cumplimiento.dpa_aceptar":
+    "Solo personas: aceptar el DPA por la empresa es un acto humano responsable (Ley 21.719, ADR-034).",
+  "core.cumplimiento.dpo_set":
+    "Solo personas: designar al delegado de protección de datos (DPO) gobierna el cumplimiento (Ley 21.719).",
+  "core.cumplimiento.consentimiento_registrar":
+    "Solo personas: registrar el consentimiento de un titular es un acto responsable del tenant (Ley 21.719, §16.2).",
+  "core.cumplimiento.consentimiento_revocar":
+    "Solo personas: dejar constancia de la revocación de un consentimiento es un acto responsable (Ley 21.719).",
+  "core.cumplimiento.solicitud_crear":
+    "Solo personas: atender una solicitud del titular (ARCO+) es un acto humano responsable (Ley 21.719, ADR-034).",
+  "core.cumplimiento.solicitud_avanzar":
+    "Solo personas: avanzar una solicitud del titular gobierna el cumplimiento y prueba la atención en plazo (Ley 21.719).",
+  "core.cumplimiento.solicitud_resolver":
+    "Solo personas: resolver o rechazar una solicitud del titular es una decisión humana responsable (Ley 21.719).",
+  "core.cumplimiento.solicitud_exportar":
+    "Solo personas: generar la exportación de datos de un titular (acceso/portabilidad) es un acto humano responsable (Ley 21.719).",
+  "core.cumplimiento.incidente_registrar":
+    "Solo personas: registrar un incidente o brecha es un acto humano responsable, no un detector automático (Ley 21.719, §16.5).",
+  "core.cumplimiento.incidente_avanzar":
+    "Solo personas: avanzar la atención de un incidente gobierna el cumplimiento (Ley 21.719).",
+  "core.cumplimiento.titular_anonimizar":
+    "Solo personas: anonimizar a un titular es irreversible y es la única purga forzada; la decide una persona responsable (Ley 21.719, §16.4).",
+  "core.cumplimiento.incidente_notificar":
+    "Solo personas: dejar constancia del aviso de una brecha a la Agencia o a los titulares es un acto humano responsable (Ley 21.719, §16.5).",
+  "core.roles.create":
+    "Solo personas: gobierna el acceso; un agente no se crea roles ni se concede permisos (ADR-034).",
+  "core.roles.update":
+    "Solo personas: cambiar los permisos de un rol es gobernar el acceso (ADR-034).",
+  "core.roles.archive":
+    "Solo personas: archivar un rol es gobierno de acceso; un agente no lo hace (ADR-034).",
+  "core.roles.assign": "Solo personas: asignar un rol a un usuario gobierna su acceso (ADR-034).",
+  "core.excepciones.set":
+    "Solo personas: conceder o denegar permisos puntuales es gobierno de acceso (ADR-034).",
+  "core.supervisores.asignar":
+    "Solo personas: fijar el alcance de un supervisor gobierna su acceso; un agente no lo hace (ADR-034).",
+  "core.supervisores.quitar":
+    "Solo personas: quitar instalaciones del alcance de un supervisor gobierna su acceso (ADR-034).",
+  "core.anexos.aprobar":
+    "Solo personas: aprobar el anexo de contrato materializa un documento irreversible, un acto humano responsable (Brief 07b PR 4, ADR-032).",
+  "core.anexos.rechazar":
+    "Solo personas: rechazar el anexo de contrato es una decisión humana responsable (Brief 07b PR 4, ADR-032).",
 };

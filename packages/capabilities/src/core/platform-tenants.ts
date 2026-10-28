@@ -47,7 +47,7 @@ export const platformTenantsGet = defineCapability({
   dryRun: false,
   async handler(ctx, input) {
     const p = requierePlataforma(ctx);
-    const tenant = await p.globales.tenant.findUnique({ where: { id: input.tenantId } });
+    const tenant = await p.globales.tenantPorId(input.tenantId);
     if (!tenant) throw noEncontrado("La empresa");
     const db = p.paraTenant(tenant.id);
     const [modulos, admins, invitaciones, keys, uso] = await Promise.all([
@@ -102,7 +102,7 @@ export const platformUsageSummary = defineCapability({
   dryRun: false,
   async handler(ctx, input) {
     const p = requierePlataforma(ctx);
-    const tenants = await p.globales.tenant.findMany({ orderBy: { nombre: "asc" } });
+    const tenants = await p.globales.listarTenants();
     return Promise.all(
       tenants.map(async (t) => {
         const uso = await resumenUso(p.paraTenant(t.id), input.dias);

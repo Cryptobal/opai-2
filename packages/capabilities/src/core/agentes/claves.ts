@@ -28,7 +28,13 @@ export const apikeysUpdate = defineCapability({
     id: uuidSchema,
     nombre: z.string().trim().min(2).max(60).optional(),
     expiraEn: z.iso.datetime({ offset: true }).nullable().optional(),
-    presupuestoMensualUsd: z.number().min(0).max(100_000).nullable().optional(),
+    presupuestoMensualUsd: z
+      .number()
+      .min(0)
+      .max(100_000)
+      .multipleOf(0.000001)
+      .nullable()
+      .optional(),
   }),
   output: z.object({
     id: z.string(),
@@ -58,6 +64,9 @@ export const apikeysUpdate = defineCapability({
       expiraEn,
       presupuestoMensualMicro: presupuesto,
     };
+    if (k.principalTipo === "servicio" && (presupuesto === null || presupuesto <= 0n)) {
+      throw reglaDeNegocio("Un agente de servicio exige un presupuesto mensual mayor que cero.");
+    }
     const r = dryRun
       ? { ...k, ...data }
       : await ctx.db.apiKey.update({ where: { id: k.id }, data });

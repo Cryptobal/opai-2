@@ -1,4 +1,4 @@
-import { FileText, Mail, Plug, UserCheck } from "lucide-react";
+import { FileSignature, FileText, Mail, Plug, UserCheck } from "lucide-react";
 
 import { cn, FilaSeleccionable, SeccionTarjeta } from "@opai/ds";
 
@@ -6,7 +6,7 @@ import { LinkNext } from "@/app/_components/link-next";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 
 export type Pendiente = {
-  tipo: "aprobaciones" | "documentos" | "invitaciones" | "integraciones";
+  tipo: "aprobaciones" | "documentos" | "invitaciones" | "integraciones" | "anexos";
   titulo: string;
   detalle: string;
   tono: "warning" | "danger" | "neutro";
@@ -14,11 +14,12 @@ export type Pendiente = {
   accion: string;
 };
 
-const ICONO = {
+const ICONO: Record<Pendiente["tipo"], typeof UserCheck> = {
   aprobaciones: UserCheck,
   documentos: FileText,
   invitaciones: Mail,
   integraciones: Plug,
+  anexos: FileSignature,
 };
 const FONDO = {
   warning: "bg-warning-muted text-warning-fg",
@@ -60,6 +61,7 @@ export function PendientesInicio({ items }: { items: Pendiente[] }) {
             <li key={`${p.tipo}-${i}`} className="border-b border-border last:border-b-0">
               <div className="md:hidden">
                 <FilaSeleccionable
+                  ajustarTexto
                   href={p.href}
                   Link={LinkNext}
                   inicio={<Icono p={p} />}

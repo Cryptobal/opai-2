@@ -1,6 +1,8 @@
+import { filtroDocumentoSensible } from "./sensibles";
+import { documentosEnAlcance } from "./alcance-doc";
 import { z } from "zod";
 
-import { PERMISOS_CORE } from "@opai/domain";
+import { motivoSubidaInvalida, PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import { noEncontrado, reglaDeNegocio } from "../../errores";
@@ -14,28 +16,28 @@ export const documentosConfirmarSubida = defineCapability({
   descripcion:
     "Segundo paso de la subida: verifica que el archivo llegó con el tamaño, formato y huella SHA-256 declarados, lo deja disponible, lo registra en la bitácora encadenada y, si es una nueva versión, reemplaza a la anterior.",
   permiso: PERMISOS_CORE.documentosManage,
+  portales: ["erp", "supervisor"],
   input: z.object({ id: uuidSchema }),
   output: documentoSchema.extend({ bitacoraSeq: z.number().nullable() }),
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    const d = await ctx.db.documento.findUnique({ where: { id: input.id } });
+    const permitidos = await documentosEnAlcance(ctx);
+    const d = await ctx.db.documento.findFirst({
+      where: {
+        ...filtroDocumentoSensible(ctx),
+        id: input.id,
+        ...(permitidos ? { id: { in: [...permitidos].filter((id) => id === input.id) } } : {}),
+      },
+    });
     if (!d) throw noEncontrado("El documento");
     if (d.estado !== "pendiente") throw reglaDeNegocio("El documento ya fue confirmado.");
     const tipo = d.tipoId
       ? await ctx.db.documentoTipo.findUnique({ where: { id: d.tipoId } })
       : null;
     const objeto = await ctx.servicios.almacenamiento.head(d.storageKey);
-    if (!objeto)
-      throw reglaDeNegocio(
-        "El archivo todavía no llega al almacenamiento: súbelo con la URL firmada.",
-      );
-    if (objeto.tamano !== d.tamano)
-      throw reglaDeNegocio(`El archivo pesa ${objeto.tamano} bytes y se declararon ${d.tamano}.`);
-    if (objeto.mime && objeto.mime !== d.mime)
-      throw reglaDeNegocio(`El archivo llegó como ${objeto.mime} y se declaró ${d.mime}.`);
-    if (!objeto.sha256 || objeto.sha256 !== d.sha256)
-      throw reglaDeNegocio("La huella SHA-256 del archivo no coincide con la declarada.");
+    const motivo = motivoSubidaInvalida(d, objeto);
+    if (motivo) throw reglaDeNegocio(motivo);
     if (dryRun)
       return { ...vistaDocumento({ ...d, estado: "disponible" }, tipo, hoy()), bitacoraSeq: null };
     const r = await ctx.transaccion(async (tx) => {
@@ -86,6 +88,7 @@ export const documentosConfirmarSubida = defineCapability({
       });
       return { confirmado, seq: hecho.seq };
     });
+    // El archivo ya quedó en el almacenamiento antes de medirlo: se registra siempre (yaIncurrido).
     await ctx.medidor
       .registrar({
         ...consumoBase(ctx, "core"),
@@ -94,6 +97,7 @@ export const documentosConfirmarSubida = defineCapability({
         cantidad: Math.max(1, Math.ceil(d.tamano / 1_048_576)),
         referenciaTipo: "documento",
         referenciaId: d.id,
+        yaIncurrido: true,
       })
       .catch(() => undefined);
     return { ...vistaDocumento(r.confirmado, tipo, hoy()), bitacoraSeq: r.seq };

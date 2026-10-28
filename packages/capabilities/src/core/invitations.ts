@@ -1,12 +1,13 @@
 import { z } from "zod";
 
-import { PERMISOS_CORE } from "@opai/domain";
+import { PERMISOS_CORE, portalesIncoherentes } from "@opai/domain";
 
 import { defineCapability } from "../define";
-import { noEncontrado, prohibido } from "../errores";
+import { noEncontrado, prohibido, reglaDeNegocio } from "../errores";
 import { tenantActual, usuarioResponsable } from "./comun";
 import { emailSchema, portalSchema, rolSchema, uuidSchema } from "./esquemas";
 import { crearInvitacion, estadoInvitacion } from "./invitar";
+import { exigeAsignarRol } from "./permisos/comun";
 
 export const invitacionCreadaSchema = z.object({
   id: z.string().nullable(),
@@ -26,16 +27,26 @@ export const usersInvite = defineCapability({
     email: emailSchema,
     rol: rolSchema,
     portales: z.array(portalSchema).min(1).default(["erp"]),
+    portalInicio: portalSchema.nullable().optional(),
   }),
   output: invitacionCreadaSchema,
   efecto: "escritura",
   dryRun: true,
+  // Asignar un rol al invitar gobierna acceso: ninguna API key lo hace (encargo PR #70).
+  soloPersonas: true,
   async handler(ctx, input, { dryRun }) {
-    if (input.rol === "owner" && !ctx.autorizar(PERMISOS_CORE.ownersManage)) {
-      throw prohibido("Solo un owner puede invitar a otro owner.");
+    // §16.2 (ADR-022): nadie invita con un rol base por encima del suyo (`puedeAsignarRol` sobre el rol
+    // base) ni con uno que conceda permisos que él mismo no tiene (acceso REAL). La jerarquía del rol
+    // base manda aunque un rol a medida iguale el acceso de uno más alto; owner solo lo invita un owner.
+    exigeAsignarRol(ctx, input.rol);
+    // Coherencia rol-portal (NÚCLEO-D1): hoy, que "cliente" es el portal del contacto de una cuenta,
+    // nunca de alguien interno a quien se invita.
+    const incoherentes = portalesIncoherentes(input.rol, input.portales);
+    if (incoherentes.length > 0) {
+      throw reglaDeNegocio(`El rol "${input.rol}" no admite el portal "${incoherentes[0]}".`);
     }
-    if (input.rol === "admin" && ctx.rol !== "owner" && ctx.rol !== "admin") {
-      throw prohibido("No puedes invitar administradores.");
+    if (input.portalInicio && !input.portales.includes(input.portalInicio)) {
+      throw reglaDeNegocio("El portal de inicio debe ser uno de los portales de la invitación.");
     }
     const tenant = await tenantActual(ctx);
     const invitadoPor = { id: usuarioResponsable(ctx), nombre: ctx.usuario?.nombre ?? "OPAI" };
@@ -54,6 +65,7 @@ const invitacionSchema = z.object({
 });
 
 export const invitationsList = defineCapability({
+  auditarLectura: (s) => s.map((i) => i.id),
   id: "core.invitations.list",
   descripcion:
     "Invitaciones de la empresa actual con su estado (pendiente, aceptada, revocada, vencida).",
@@ -63,6 +75,7 @@ export const invitationsList = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
+    if (ctx.alcance) throw prohibido("No tienes acceso a estas invitaciones.");
     const filas = await ctx.db.invitation.findMany({ orderBy: { createdAt: "desc" }, take: 200 });
     return filas
       .map((i) => ({ ...i, estado: estadoInvitacion(i) }))

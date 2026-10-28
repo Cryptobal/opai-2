@@ -1,26 +1,55 @@
 // Implementaciones reales (base de datos) de los servicios del núcleo para el Contexto.
 import {
+  agregarAAuditoria,
+  registrarConsumoSesion,
   agregarABitacora,
+  consumirPresupuesto,
   enTransaccion,
   forTenant,
-  globales,
+  preciosHasta,
   type Prisma,
+  verificarAuditoria,
   verificarBitacora,
 } from "@opai/db";
 
-import type { Actor, BitacoraServicio, Contexto, Eventos, Medidor, Trabajos } from "./types";
+import type {
+  Actor,
+  Auditoria,
+  BitacoraServicio,
+  ConsumoNuevo,
+  Contexto,
+  Eventos,
+  Medidor,
+  Trabajos,
+} from "./types";
+import { ErrorCapacidad } from "./errores";
 
 const json = (v: unknown): Prisma.InputJsonValue => JSON.parse(JSON.stringify(v ?? {}));
+
+/** Auditoría encadenada en `core.audit_events` (auditoría del 26-oct-2026, ADR-052). */
+export function auditoriaEnDb(tenantId: string): Auditoria {
+  return {
+    registrar(tx, evento) {
+      return agregarAAuditoria(tx, evento.tenantId, {
+        actorTipo: evento.actor.tipo,
+        actorId: evento.actor.id ?? null,
+        viaUserId: evento.actor.viaUserId ?? null,
+        capability: evento.capability,
+        entityType: evento.entityType ?? null,
+        entityId: evento.entityId ?? null,
+        payload: evento.payload ?? null,
+      });
+    },
+    verificar: (signal) => verificarAuditoria(tenantId, signal),
+  };
+}
 
 /** Precios vigentes (micro-USD por unidad) con caché de 10 minutos por proceso. */
 let precios: { hasta: number; mapa: Map<string, number> } | null = null;
 
 async function precioDe(recurso: string): Promise<number> {
   if (!precios || precios.hasta < Date.now()) {
-    const filas = await globales().precioRecurso.findMany({
-      where: { vigenteDesde: { lte: new Date() } },
-      orderBy: { vigenteDesde: "asc" },
-    });
+    const filas = (await preciosHasta(new Date())).reverse();
     // Ordenado por vigencia: el último de cada recurso es el vigente.
     precios = {
       hasta: Date.now() + 600_000,
@@ -31,12 +60,40 @@ async function precioDe(recurso: string): Promise<number> {
 }
 
 /** Medidor en `core.consumos` (ADR-031). El borde lo envuelve para no retrasar respuestas. */
-export const medidorEnDb: Medidor = {
-  async registrar({ sinCosto, ...c }) {
-    const unitario = sinCosto ? 0 : await precioDe(c.recurso);
-    await forTenant(c.tenantId).consumo.create({
-      data: { ...c, costoUnitarioMicro: unitario, costoTotalMicro: unitario * c.cantidad },
+async function registrarConsumo({ sinCosto, yaIncurrido, ...c }: ConsumoNuevo) {
+  if (c.actorTipo === "user" && !c.apiKeyId && c.recurso === "capacidad.ejecucion")
+    return registrarConsumoSesion(c, sinCosto);
+  const unitario = sinCosto ? 0 : await precioDe(c.recurso);
+  const costoTotal = unitario * c.cantidad;
+  const interno =
+    c.actorTipo === "agent" && !c.apiKeyId && c.actorId?.startsWith("agente-interno:");
+  return enTransaccion(c.tenantId, async (tx) => {
+    if (
+      (c.apiKeyId || interno) &&
+      !(await consumirPresupuesto(tx, c.tenantId, c.apiKeyId ?? null, BigInt(costoTotal), {
+        ...(yaIncurrido ? { yaIncurrido } : {}),
+        ...(interno ? { agenteInterno: { viaUserId: c.viaUserId! } } : {}),
+      }))
+    )
+      throw new ErrorCapacidad(
+        "BUDGET_EXCEEDED",
+        "El consumo supera el presupuesto mensual de la key.",
+      );
+    return tx.consumo.create({
+      data: { ...c, costoUnitarioMicro: unitario, costoTotalMicro: costoTotal },
     });
+  });
+}
+
+export const medidorEnDb: Medidor = {
+  registrar: async (c) => {
+    await registrarConsumo(c);
+  },
+  async preparar(c) {
+    const fila = await registrarConsumo(c);
+    return async (estado) => {
+      await forTenant(c.tenantId).consumo.update({ where: { id: fila.id }, data: estado });
+    };
   },
 };
 

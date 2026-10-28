@@ -129,10 +129,12 @@ export function validarTextos(
 export async function vistaPrevia(ctx: Contexto, evento: string, asunto: string, cuerpo: string) {
   const e = eventoComunicable(evento);
   validarTextos(e, asunto, cuerpo);
+  const marca = await marcaDe(ctx.db, ctx.tenantId, "");
+  if (marca.logoUrl) marca.logoUrl += "?vistaPrevia=1";
   return renderizarCorreo(
     e,
     { asunto, cuerpo },
     ejemplosDe(e),
-    await marcaDe(ctx.db, ctx.tenantId, ctx.servicios.urlBase),
+    marca, // El correo real conserva su URL absoluta; srcdoc recibe bytes propios, sin redirigir a R2.
   );
 }

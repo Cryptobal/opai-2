@@ -11,7 +11,7 @@ import { uuidSchema } from "../esquemas";
 
 const aprobacionSchema = z.object({
   id: z.string(),
-  apiKeyId: z.string(),
+  apiKeyId: z.string().nullable(),
   agente: z.string(),
   via: z.string().nullable().describe("Persona responsable de la key (el agente actúa vía ella)."),
   riesgo: z.enum(["alto", "medio"]).describe("Alto: la capacidad es irreversible."),
@@ -29,21 +29,34 @@ const aprobacionSchema = z.object({
 
 type Fila = Awaited<ReturnType<Contexto["db"]["aprobacion"]["findFirstOrThrow"]>>;
 
-async function vista(ctx: Contexto, filas: Fila[]) {
-  const keys = await ctx.db.apiKey.findMany({
-    where: { id: { in: [...new Set(filas.map((f) => f.apiKeyId))] } },
-    select: { id: true, nombre: true },
-  });
+export async function vistaAprobaciones(
+  ctx: Contexto,
+  filas: Fila[],
+  precargado?: {
+    keys: { id: string; nombre: string }[];
+    miembros: { userId: string; user: { name: string } }[];
+  },
+) {
+  const keys =
+    precargado?.keys ??
+    (await ctx.db.apiKey.findMany({
+      where: { id: { in: [...new Set(filas.flatMap((f) => (f.apiKeyId ? [f.apiKeyId] : [])))] } },
+      select: { id: true, nombre: true },
+    }));
   const nombre = new Map(keys.map((k) => [k.id, k.nombre]));
-  const miembros = await ctx.db.membership.findMany({
-    where: { userId: { in: [...new Set(filas.map((f) => f.viaUserId))] } },
-    include: { user: true },
-  });
+  const miembros =
+    precargado?.miembros ??
+    (await ctx.db.membership.findMany({
+      where: { userId: { in: [...new Set(filas.map((f) => f.viaUserId))] } },
+      include: { user: true },
+    }));
   const via = new Map(miembros.map((m) => [m.userId, m.user.name]));
   return filas.map((a) => ({
     id: a.id,
     apiKeyId: a.apiKeyId,
-    agente: nombre.get(a.apiKeyId) ?? "Key eliminada",
+    agente: a.agenteInternoId
+      ? "Agente interno"
+      : (nombre.get(a.apiKeyId ?? "") ?? "Key eliminada"),
     via: via.get(a.viaUserId) ?? null,
     riesgo:
       obtenerCapacidad(a.capability)?.efecto === "irreversible"
@@ -74,6 +87,7 @@ export async function pendiente(ctx: Contexto, id: string) {
 }
 
 export const aprobacionesList = defineCapability({
+  auditarLectura: (s) => s.map((a) => a.id),
   id: "core.aprobaciones.list",
   descripcion:
     "Cola de aprobaciones de acciones irreversibles pedidas por agentes: pendientes primero, con resumen, agente y vencimiento; también el historial.",
@@ -90,6 +104,7 @@ export const aprobacionesList = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
+    if (ctx.alcance) throw prohibido("No tienes acceso a estas aprobaciones.");
     const filas = await ctx.db.aprobacion.findMany({
       where: {
         ...(input.estado ? { estado: input.estado } : {}),
@@ -105,11 +120,12 @@ export const aprobacionesList = defineCapability({
       orderBy: { createdAt: "desc" },
       take: input.limite,
     });
-    return vista(ctx, filas);
+    return vistaAprobaciones(ctx, filas);
   },
 });
 
 export const aprobacionesGet = defineCapability({
+  auditarLectura: (s) => [s.id],
   id: "core.aprobaciones.get",
   descripcion:
     "Una aprobación con su input completo, estado y, si se aprobó, el resultado de la ejecución. Los agentes la consultan para saber si su acción se hizo.",
@@ -119,10 +135,16 @@ export const aprobacionesGet = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
+    if (ctx.alcance) throw noEncontrado("La aprobación");
     const a = await ctx.db.aprobacion.findUnique({ where: { id: input.id } });
-    const propia = ctx.agente && a?.apiKeyId === ctx.agente.apiKeyId;
+    const propia =
+      (ctx.agente && a?.apiKeyId === ctx.agente.apiKeyId) ||
+      (ctx.actor.tipo === "agent" &&
+        ctx.actor.interno &&
+        a?.agenteInternoId === ctx.actor.id &&
+        a.viaUserId === ctx.actor.viaUserId);
     if (!a || (!propia && !ctx.autorizar(PERMISOS_CORE.aprobacionesManage)))
       throw noEncontrado("La aprobación");
-    return (await vista(ctx, [a]))[0] as z.input<typeof aprobacionSchema>;
+    return (await vistaAprobaciones(ctx, [a]))[0] as z.input<typeof aprobacionSchema>;
   },
 });

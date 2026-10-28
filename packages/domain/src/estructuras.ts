@@ -1,8 +1,8 @@
-// Estructuras de sueldo en tres niveles (ADR-005): persona (excepción) → puesto → cargo.
+// Capas de sueldo (ADR-036): persona → puesto → instalación. Cargo solo histórico.
 // CLP en enteros; porcentajes en PCT_ESCALA. Fechas de calendario "aaaa-mm-dd".
 import { type CLP, clp, PCT_ESCALA, porcentajeCLP, redondearCLP } from "./dinero";
 
-export type NivelEstructura = "persona" | "puesto" | "cargo";
+export type NivelEstructura = "persona" | "puesto" | "instalacion" | "cargo";
 export type Gratificacion = "legal_25" | "monto_fijo" | "ninguna";
 
 export type ItemEstructura = {
@@ -14,8 +14,8 @@ export type ItemEstructura = {
 };
 
 /**
- * Un nivel define solo los conceptos que cambia: `null` = hereda del nivel más general
- * (ADR-005 y diseño "sueldo en tres niveles"). El nivel cargo define todos.
+ * Una capa se aplica completa. Un concepto NULL histórico permanece incompleto,
+ * nunca se rellena con otra capa (precisión 07b §16.d).
  */
 export type Estructura = {
   id: string;
@@ -52,7 +52,7 @@ export type Resolucion = {
   niveles: Record<NivelEstructura, Estructura | null>;
 };
 
-/** Resuelve la estructura efectiva a una fecha: persona → puesto → cargo. */
+/** Compatibilidad de nombres: nunca usa cargo ni combina conceptos entre capas. */
 export function resolverEstructura(
   fecha: string,
   candidatas: Partial<Record<NivelEstructura, readonly Estructura[]>>,
@@ -61,8 +61,10 @@ export function resolverEstructura(
     (candidatas[n] ?? [])
       .filter((e) => vigenteEn(e, fecha))
       .sort((a, b) => b.vigenteDesde.localeCompare(a.vigenteDesde))[0] ?? null;
-  const niveles = { persona: elegir("persona"), puesto: elegir("puesto"), cargo: elegir("cargo") };
-  const aplica = (["persona", "puesto", "cargo"] as const).find((n) => niveles[n]) ?? null;
+  const niveles = {
+    persona: elegir("persona"), puesto: elegir("puesto"), instalacion: elegir("instalacion"), cargo: null,
+  };
+  const aplica = (["persona", "puesto", "instalacion"] as const).find((n) => niveles[n]) ?? null;
   return { aplica, estructura: aplica ? niveles[aplica] : null, niveles };
 }
 

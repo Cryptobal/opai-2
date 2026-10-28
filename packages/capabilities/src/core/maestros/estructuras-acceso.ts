@@ -3,29 +3,50 @@ import { PERMISOS_CORE } from "@opai/domain";
 import type { Contexto } from "../../types";
 import type { FilaEstructura, FilaItem } from "./estructuras-vista";
 
+/** Datos mínimos para resolver la sensibilidad y auditar la revelación de una estructura. */
+type RefEstructura = Pick<FilaEstructura, "cargoId" | "puestoId" | "personaId"> & {
+  id?: string;
+  nivel?: string | null;
+};
+
 /**
- * ¿Hay que ocultar montos? Sí si el cargo involucrado tiene sueldo sensible y el actor no tiene
- * `core:estructuras.read_sensible`. El cargo sale de la estructura, de su puesto o del vínculo
- * vigente de la persona.
+ * Deja en la auditoría que el actor vio montos de sueldo sensibles gracias a
+ * `core:estructuras.read_sensible` (quién, cuándo, qué). Lo exige la decisión t479u (Carlos delegó,
+ * 26-oct-2026 22:06 CLT) por el art. 31 del DFL 2 de 1967: el Inspector DT fiscaliza con los montos
+ * a la vista, pero toda lectura queda trazada. La vista previa de creación (sin fila persistida) no
+ * se audita porque aún no hay nada leído.
  */
+export async function auditarLecturaSensible(ctx: Contexto, e: RefEstructura): Promise<void> {
+  if (!e.id) return;
+  const entityId = e.id;
+  await ctx.transaccion((tx) =>
+    ctx.auditoria.registrar(tx, {
+      tenantId: ctx.tenantId,
+      // Pseudo-capacidad que marca la revelación de montos sensibles (no es un ejecutor del registro).
+      capability: "core.estructuras.read_sensible",
+      actor: ctx.actor,
+      entityType: "estructura",
+      entityId,
+      payload: {
+        nivel: e.nivel ?? null,
+        cargoId: e.cargoId ?? null,
+        puestoId: e.puestoId ?? null,
+        personaId: e.personaId ?? null,
+      },
+    }),
+  );
+}
+
+/** D7: montos solo con read_sensible; cada revelación queda auditada. */
 export async function ocultarMontos(
   ctx: Contexto,
-  e: Pick<FilaEstructura, "cargoId" | "puestoId" | "personaId">,
+  e: RefEstructura,
+  auditar = true,
 ): Promise<boolean> {
-  if (ctx.autorizar(PERMISOS_CORE.estructurasReadSensible)) return false;
-  let cargoId = e.cargoId ?? null;
-  if (!cargoId && e.puestoId) {
-    cargoId = (await ctx.db.puesto.findUnique({ where: { id: e.puestoId } }))?.cargoId ?? null;
-  }
-  if (!cargoId && e.personaId) {
-    const v = await ctx.db.vinculoLaboral.findFirst({
-      where: { personaId: e.personaId, estado: "vigente" },
-    });
-    cargoId = v?.cargoId ?? null;
-  }
-  // Sin cargo determinable (persona sin vínculo vigente): se oculta por prudencia.
-  if (!cargoId) return true;
-  return (await ctx.db.cargo.findUnique({ where: { id: cargoId } }))?.sueldoSensible ?? false;
+  // D7: el archivo conserva la misma restricción de montos que las capas activas.
+  if (!ctx.autorizar(PERMISOS_CORE.estructurasReadSensible)) return true;
+  if (auditar) await auditarLecturaSensible(ctx, e);
+  return false;
 }
 
 export async function itemsDe(ctx: Contexto, estructuraIds: string[]) {

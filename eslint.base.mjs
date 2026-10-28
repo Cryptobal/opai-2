@@ -4,6 +4,7 @@ import js from "@eslint/js";
 import prettier from "eslint-config-prettier";
 import globals from "globals";
 import tseslint from "typescript-eslint";
+import { accesoDb } from "./scripts/lint-acceso-db.mjs";
 
 export const ignores = [
   "**/node_modules/**",
@@ -35,12 +36,14 @@ export const baseConfig = tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
+    plugins: { opai: { rules: { "acceso-db": accesoDb } } },
     languageOptions: {
       ecmaVersion: 2022,
       sourceType: "module",
       globals: { ...globals.node, ...globals.es2022 },
     },
     rules: {
+      "opai/acceso-db": "error",
       "max-lines": ["error", { max: 150, skipBlankLines: true, skipComments: true }],
       "no-restricted-imports": ["error", { paths: [prismaOnlyInDb] }],
       "@typescript-eslint/no-explicit-any": "error",

@@ -1,20 +1,17 @@
+import { vinculoSchema, vistaVinculo, type FilaVinculo } from "./vinculos-vista";
 import { z } from "zod";
 
 import { noEncontrado } from "../../errores";
 import type { Contexto } from "../../types";
 import { iso } from "../comun";
+import { dondePersona } from "./alcance";
 import { dia, diaSchema, rutSchema, telefonoSchema, textoOpcional } from "./comun";
 
 export const SEXOS = ["femenino", "masculino", "otro", "no_declara"] as const;
 
-export const vinculoResumenSchema = z.object({
-  id: z.string(),
-  cargoId: z.string(),
-  cargo: z.string(),
-  tipo: z.string(),
-  inicio: z.string(),
-  termino: z.string().nullable(),
-});
+export const vinculoResumenSchema = vinculoSchema
+  .omit({ personaId: true, estado: true, motivoTermino: true, updatedAt: true })
+  .extend({ cargo: z.string() });
 
 export const personaSchema = z.object({
   id: z.string(),
@@ -47,22 +44,22 @@ export type FilaPersona = {
   nombres: string;
   apellidos: string;
   rut: string;
-  emailPersonal?: string | null;
-  emailLaboral?: string | null;
-  telefono?: string | null;
+  emailPersonal?: string | null | undefined;
+  emailLaboral?: string | null | undefined;
+  telefono?: string | null | undefined;
   fechaNacimiento?: Date | null;
-  sexo?: string | null;
-  nacionalidad?: string | null;
-  calle?: string | null;
-  comuna?: string | null;
-  region?: string | null;
-  direccionFormateada?: string | null;
+  sexo?: string | null | undefined;
+  nacionalidad?: string | null | undefined;
+  calle?: string | null | undefined;
+  comuna?: string | null | undefined;
+  region?: string | null | undefined;
+  direccionFormateada?: string | null | undefined;
   lat?: { toNumber(): number } | number | null;
   lng?: { toNumber(): number } | number | null;
-  estado?: string | null;
+  estado?: string | null | undefined;
   bloqueada?: boolean | null;
-  bloqueoMotivo?: string | null;
-  usuarioId?: string | null;
+  bloqueoMotivo?: string | null | undefined;
+  usuarioId?: string | null | undefined;
   archivadaEn?: Date | null;
 };
 
@@ -126,32 +123,35 @@ export const camposPersona = {
 };
 
 export async function personaDe(ctx: Contexto, id: string) {
-  const p = await ctx.db.persona.findUnique({ where: { id } });
+  // findFirst (no findUnique) para aplicar el alcance por filas: fuera de alcance = no encontrada.
+  const p = await ctx.db.persona.findFirst({ where: { id, AND: [dondePersona(ctx)] } });
   if (!p) throw noEncontrado("La persona");
   return p;
 }
 
-/** Vínculos vigentes (con nombre de cargo) de un grupo de personas, en dos consultas. */
+/** Resumen del vínculo para una fila/ficha (con el nombre del cargo ya resuelto). */
+export function vinculoVista(
+  v: Omit<FilaVinculo, "personaId" | "inicio"> & {
+    cargo?: { nombre: string } | null;
+    inicio: Date | null;
+  },
+): z.input<typeof vinculoResumenSchema> {
+  return {
+    ...vistaVinculo({ ...v, personaId: "", inicio: v.inicio ?? new Date(0) }),
+    id: v.id,
+    cargoId: v.cargoId,
+    cargo: v.cargo?.nombre ?? "",
+    tipo: v.tipo,
+    inicio: dia(v.inicio) ?? "",
+    termino: dia(v.termino),
+  };
+}
+
+/** Vínculos vigentes (con nombre de cargo) de un grupo de personas, en una consulta (include del cargo). */
 export async function vinculosVigentes(ctx: Contexto, personaIds: string[]) {
   const vinculos = await ctx.db.vinculoLaboral.findMany({
     where: { personaId: { in: personaIds }, estado: "vigente" },
+    include: { cargo: { select: { nombre: true } } },
   });
-  const cargos = await ctx.db.cargo.findMany({
-    where: { id: { in: [...new Set(vinculos.map((v) => v.cargoId))] } },
-    select: { id: true, nombre: true },
-  });
-  const nombre = new Map(cargos.map((c) => [c.id, c.nombre]));
-  return new Map(
-    vinculos.map((v) => [
-      v.personaId,
-      {
-        id: v.id,
-        cargoId: v.cargoId,
-        cargo: nombre.get(v.cargoId) ?? "",
-        tipo: v.tipo,
-        inicio: dia(v.inicio) ?? "",
-        termino: dia(v.termino),
-      },
-    ]),
-  );
+  return new Map(vinculos.map((v) => [v.personaId, vinculoVista(v)]));
 }

@@ -1,12 +1,366 @@
+- **Campana ERP (PR #90):** vista corta de la misma Bandeja de Inicio, con «Ver todo» a `/#bandeja`; sin segunda lista. Decisión OPAI 2.0, 28-oct-2026 00:35, mandato de Carlos t682u.
+
 # ESTADO — OPAI 2.0
 
 > **Desde el 24-oct-2026, el estado de las tareas vive en Linear (enlace por definir). Este archivo queda como foto técnica: versiones, infraestructura, riesgos aceptados y decisiones.** (PR #22). Las listas de pendientes de abajo se migran a Linear en la fecha que fije Carlos; hasta entonces no se borran, y si no coinciden con Linear, manda Linear.
 
-**Última actualización:** 25-oct-2026 · **Actualizado por:** Claude (arquitectura) · **Fase en curso:** 1 — Núcleo, en cierre (Briefs 01, 01c y 02 A–C integrados a `main`; quedan la sesión D del Brief 02, la paridad MCP, los arreglos de QA y las bases transversales). Plan completo y próximas tareas en `ROADMAP.md`; etapa de cada módulo en `PLAN-desarrollo.md`.
+**PR #90 · Inicio y vencimientos:** Codex documenta en `briefs/fix-inicio-vencimientos.md` el conteo limitado a personas y el aviso al superar 2.000 personas accesibles; la comparación local de navegación en iPad pasó también en main `49b1d8d`. La e2e con un vencimiento positivo pasó en teléfono, iPad y escritorio; el alcance de otras entidades sigue pendiente.
+
+**Última actualización:** 28-oct-2026 · **Actualizado por:** Claude (Brief 07b PR 4) · **Fase en curso:** 1 — Núcleo, en cierre (Briefs 01, 01c y 02 A–C integrados a `main`; quedan la sesión D del Brief 02, la paridad MCP, los arreglos de QA y las bases transversales). Plan completo y próximas tareas en `ROADMAP.md`; etapa de cada módulo en `PLAN-desarrollo.md`.
+- **Brief 07b · PR 1 (CAR-19), construcción en `brief/07b-capas-sueldo`, apilada sobre #49.** Migración aditiva `20261028180000_capa_instalacion_sueldo` (sin backfill, conserva conceptos históricos nullable, FK y trigger de mismo tenant, RLS ENABLE + FORCE). Resolución RUT → puesto → instalación sin herencia; estructuras históricas incompletas devuelven faltantes y no generan haberes. Versiones nuevas completas, también sus bonos; crear/anular comparten lock transaccional y permisos owner/admin (D8). UI del DS 2.0 en instalación, puestos y persona, con contexto explícito, historial, preview de impacto y anulación con motivo. Las precisiones del encargo t500u están en §16.d del brief: no se deducen relaciones del vínculo ni se inventan montos. Decisiones de implementación de Codex: serializar por referencia con advisory lock; marcar bonos históricos sin valor como incompletos; incluir modalidad y banderas de bonos en diferencias; diferir el selector de contexto para el presupuesto de JS. No son decisiones nuevas de Carlos. Validación en §18 del brief: test:db 109+134+25 y e2e 3/3 en verde; build y presupuesto en verde (ruta de sueldo de persona con tope propio 166 KB, medida 165,7 KB, decisión técnica de Codex por selector/contexto e historial). ADR-045 pendiente: marcador con 12 consultas en instalación y 11 en persona, incluso sin garantizar contar todos los Suspense. La auditoría se agrupa por respuesta conservando todos los IDs. Gate local al cierre: typecheck/lint, 1.158 tests, test:db 109+134+25, build, presupuesto y e2e 3/3 en verde. No listo para integrar por la diferencia ADR-045 y por faltar Revisor/CI del PR. Ninguna migración aplicada en Neon.
+
+- **Seguimiento de cargos sensibles (#83):** Codex aplica el rechazo de versiones sin permiso sensible a instalación, puesto y persona, coherente con cargo; registra el rechazo sin montos tras el rollback. Cobertura específica de concurrencia y de las tres capas pendiente de verificación. Detalle: `briefs/cargo-sensible-pendientes.md`.
+
+**Foto verificada:** main `3199b00` y continuidad NÚCLEO-H en `core/nucleo-p2` · **Actualizado por:** OpenCode / openai/gpt-6.1-sol · **Fase en curso:** 1 — Núcleo, en cierre. Plan en `ROADMAP.md`; estado de tareas en Linear, no en las notas históricas de este archivo.
+
+### Integraciones verificadas en el historial de main
+
+| Base transversal | Evidencia integrada |
+|---|---|
+| Auditoría atómica/encadenada A | #71 (`3199b00`), con verificador solo job y despliegue expand/contract |
+| Identidad de servicio y presupuesto C | #70 (`3b1b7b9`), keys con permisos mínimos y ledger atómico |
+| Rate limit, MCP por cabecera y CSP Report-Only | #64 (`ec4149c`) y #63 (`bfcacc5`) |
+| MFA y ajuste de códigos en iOS | #65 (`5c18a92`) y #74 (`4a5c507`) |
+| Agente interno, servidor sin UI de chat nueva | #62 (`15c9317`) y #73 (`7cbb1c2`) |
+| Portal validado y preferencia de inicio | #68 (`611aa25`) y #72 (`bf97199`) |
+| 07d, retención y cifrado PR 3 | #61 (`f60803c`); consentimientos/ARCO/incidentes PR 2 #56 |
+| PWA y rendimiento de consultas/navegación | #45 (`dbd901c`), #53 (`6ba61f7`) y job de rendimiento #44 (`57cd1cf`) |
+
+Los relatos posteriores que dicen «PR abierto», «construido» o «pendiente de
+integración» para estas bases son históricos y quedan sustituidos por esta foto.
+Integración de código no demuestra aplicación actual de migraciones en Neon ni
+QA remota: esta continuidad solo verifica el entorno local, sin intervenir Neon.
+Playwright ya tiene job en CI (`.github/workflows/ci.yml`), aunque sigue fuera de
+los checks obligatorios de integración según ADR-043 v3. Puestos #49 no se toca.
+- **NÚCLEO-A · Auditoría atómica y encadenada en `core.audit_events` (rama `fix/auditoria-atomica`, PR #71).** Escritura y auditoría comparten transacción en capacidades del tenant; plataforma audita en el tenant objetivo con la brecha de atomicidad global declarada. Cadena por tenant con `seq` Int y hashes, inmutable para `opai_app`. El encargo original de Carlos (t457u) se mantiene registrado en ADR-052; ADR-051 corresponde a identidad de servicio en main (#70). La nota histórica de verificación y anonimización queda sustituida por la sección «Corrección de auditoría» de abajo. Migraciones pendientes de aplicación por Carlos; no se ha tocado Neon.
+- **NÚCLEO-E1 · Capa de proveedores de IA intercambiable con herramientas (26-oct-2026, rama `core/agente-interno-pr1`, PR 1 de 2 del agente interno; P1 de la auditoría del núcleo del 26-oct-2026, encargo de Carlos a OPAI 2.0, t457u).** El adaptador de IA (`@opai/integrations/ia`) suma un contrato neutral de conversación con herramientas (tool-calling), streaming de eventos y salida estructurada por JSON Schema, y el resolvedor del núcleo (`iaDe`, `packages/capabilities/src/integraciones/ia.ts`) agrega respaldo entre proveedores conectados (reintenta ante 5xx/429/red, nunca ante un 4xx de contenido) y mide cada llamada en `core.consumos` (tokens por clase; proveedor y modelo en `referencia_tipo`/`referencia_id`; sin prompt ni key). Sin SDKs (solo `fetch`): Anthropic, OpenAI, Google y un proveedor «compatible con OpenAI» con base URL configurable (`ia_compatible`: Vercel AI Gateway, OpenRouter…) más el alias `ia_xai` (Grok). `completar()` queda sobre `conversar()`: geolocalización e «Integraciones · Probar» no cambian. Detalle en la nota de ADR-031 (26-oct-2026). No toca secretos ni la config del núcleo (los cambia #61); sin migraciones. Pendiente: la UI del agente, la elección de modelo por usuario y sus ajustes (PRs posteriores del agente interno, ADR-049, según la enmienda al punto 8). **Endurecimiento (revisión 5660937436, 26-oct-2026):** el `baseUrl` de `ia_compatible` exige `https` y rechaza destinos internos (privados, loopback, link-local, metadata, localhost; también tras resolver DNS) con `redirect: "error"` (defensa SSRF); un stream cortado o con error lanza `ErrorIa` en vez de darse por completo; el consumo del streaming se mide en `finally` aun si se corta o cancela. **Política de respaldo con key propia del tenant (resuelta):** si el tenant tiene key propia y su proveedor falla, el respaldo solo prueba otras keys del **mismo tenant**; **nunca** cae a la key de OPAI (plataforma). Si todas fallan (5xx/429/red) la solicitud falla con un error tipado (`ErrorRespaldoIa`) y se avisa al tenant: la integración queda en estado «error» (visible en Configuración → Integraciones) + evento `core.integracion.error` que entrega Comunicaciones (ADR-020), más un registro de auditoría durable (`core.ia.respaldo_agotado`). Un 4xx de contenido se propaga tal cual. Sin key propia, se usa el modelo de OPAI como hasta ahora. Implementado en `iaDe`/`ia-respaldo.ts` (`packages/capabilities/src/integraciones/`), con pruebas en `test/ia-respaldo.test.ts`. **«Decisión de Carlos, 26-oct-2026 21:58 CLT, respuesta t214s684»** a «Si el tenant tiene key propia y su proveedor falla, ¿se puede pasar a la key de OPAI?»: «Nunca, que falle y avise al tenant». Detalle en ADR-049 punto 6. _TODO:_ cuando exista un mecanismo de avisos proactivos propio del tenant (push/bandeja), enriquecer el aviso; hoy se apoya en el estado de la integración + Comunicaciones + auditoría. **Endurecimiento (revisión 5661272971, 26-oct-2026):** la decisión BYOK (t214s684) se aplica **antes** de filtrar por modelo o secreto —una key propia sin modelo para la clase, sin secreto o sin base URL ahora falla y avisa, nunca cae a OPAI (`ia-candidatos.ts`)—; la defensa SSRF clasifica las IPv6 en binario (IPv4-mapped/compatible como IPv4; `fe80::/10` completo, `fec0::/10`, `fc00::/7`, NAT64 `64:ff9b::/96`, unspecified y multicast) y normaliza el punto final del host; la medición del stream registra el uso parcial ya informado en corte o cancelación (evento `uso`) sin doble conteo; y los `*-db.test.ts` de `@opai/capabilities` corren serializados (`fileParallelism: false`) e independientes del orden.
 
 Hasta el 24-oct-2026 este archivo fue la fuente de verdad del avance; desde entonces lo es Linear (ver la nota de arriba y `AGENTS.md`, «Tareas (Linear)»). El plan hasta terminar 2.0 está en `ROADMAP.md`; la navegación final en `NAVEGACION.md`.
 
+## CI · e2e por shards
+
+Adaptación técnica de OpenCode según el encargo: seis shards aislados, caché de Chromium, evidencia y
+informe combinado, con accesos e2e compatibles con MFA. Estado y criterios pendientes
+en [`briefs/ENCARGO-ci-e2e-shards.md`](briefs/ENCARGO-ci-e2e-shards.md). Sin
+cambio de producto, migraciones ni decisiones de negocio nuevas.
+
+## Corrección de auditoría · PR #71 (27-oct-2026)
+
+El encargo de continuidad y la review 5662759713 corrigen la nota NÚCLEO-A de
+arriba: verificación del contenido actual (también payload), diagnóstico de IA en
+transacción independiente, auditoría de plataforma en el tenant objetivo incluso
+con empresa seleccionada y migración expand/contract en dos fases. La promesa
+anterior de anonimizar payloads sin afectar la verificación queda reemplazada:
+requiere un protocolo futuro. Detalles de implementación decididos por el
+constructor OpenCode / openai/gpt-6.1-sol, CA, riesgos y despliegue en
+[`briefs/FIX-auditoria-atomica-pr71.md`](briefs/FIX-auditoria-atomica-pr71.md).
+La segunda ronda de QA (`informe-76760ba.md`, encargo N1/N2/N3) sustituye la
+serialización del escaneo con append: foto REPEATABLE READ hasta max(seq), canon
+histórico SQL por lotes, avance incremental y lock breve solo para CAS por revisión
+de la cabeza. Una huella SHA-256 por lotes detecta cambios del prefijo verificado y
+dispara revisión desde génesis; este control sigue leyendo O(N) en SQL, sin bloquear
+escrituras. El anclaje previo se conserva también tras fallos: un prefijo cambiado
+nunca se acepta por ser una cadena sustituta válida (truncado seguido de append o
+alteración de microsegundos). Si solo lo detecta la huella, primeraRota es 1 como
+diagnóstico conservador. Corrección técnica del constructor en la autorrevisión.
+El lote SQL contrasta también la precisión temporal de los eventos nuevos, para
+detectar microsegundos alterados en la cola aún no verificada.
+Presupuesto integral propio de 12 s (escaneo 9 s/SQL 8 s), inferior a
+20 s por trabajo del runner; propagación de cancelación para impedir cabeza o
+alerta tardías. No olvida el máximo tras un borrado.
+Solo lo invoca el job; se retira `core.auditoria.verificar` de UI/API/MCP.
+El job se pausa mientras `seq` sea nullable. Actividad y auditoría seleccionan
+columnas de negocio para soportar filas NULL durante convivencia.
+Fase 1 y cierre hacen backfill por lotes de hasta 1.000, con COMMIT por lote y lock
+solo del tenant; índice CONCURRENTLY en la nueva `20261028133000` (sin transacción
+externa). Fase 2: CHECK NOT VALID → VALIDATE → COMMIT → SET NOT NULL → DROP CHECK.
+No cambian los timestamps existentes. Detalles técnicos decididos por el constructor
+OpenCode / openai/gpt-6.1-sol dentro del encargo actual, no decisiones atribuidas a Carlos.
+Sin cambios de pantallas ni decisiones de negocio; se mantiene el DS de OPAI 2.0.
+Merge de `origin/main` 7cbb1c2: OpenCode / openai/gpt-6.1-terra conserva el agente
+interno y adapta su prueba a la auditoría encadenada. Las tres migraciones del #71
+se renombran a `20261028130000`, `20261028133000` y `20261028140000`, después de
+`20261028120000`; el despliegue sigue pendiente de Carlos.
+El encargo no aporta ID de Linear. No se modifica el plan del ROADMAP.
+
+### Reversión de auditoría (PR #71)
+
+Carlos conserva datos, hashes, cabezas e índice válido. Para volver a código previo
+a la cadena, retira primero los cuatro NOT NULL y cualquier CHECK `auditoria_nn_*`
+residual de un cierre interrumpido; no borra migraciones ni registros de auditoría.
+Para volver a `76760ba`, pausa el job explícitamente (ese head conserva el lock largo
+y no detecta convivencia). En el código nuevo, `seq` nullable pausa el job sin falsas
+alarmas. Las migraciones usan autocommit; nunca envolver DO/CONCURRENTLY en BEGIN.
+Si falla el índice concurrente, comprobar `indisvalid`: solo Carlos retira el índice
+inválido con DROP INDEX CONCURRENTLY y reintenta según el runbook del brief. Preview
+con SQL anterior debe recrearse por quien gestiona infraestructura; no se toca Neon
+desde este encargo. Las brechas conocidas de atomicidad global de plataforma y
+llamadas externas en transacciones siguen declaradas.
+
+**Validación local de continuidad:** se conservan los commits anteriores y se incorpora
+#65 (`5c18a92`) con merge normal `b9f84a7`, sin perder MFA ni auditoría. Autorrevisión
+independiente final sin bloqueantes tras corregir anclaje y precisión temporal.
+Typecheck, lint, 786 tests unitarios (BD separada), test:db 91+100+24, build y presupuesto
+en verde. E2E de Configuración, Plataforma y Maestros a 375/1024/1280: **21 pasaron y
+12 omitidos por condiciones preexistentes de los specs**, EXIT=0, sin cambiar pruebas.
+Se repitió la suite completa tras dos fallos transitorios (contenido oculto en Maestros
+desktop y TOTP rechazado). Servidor propio `next start` en 3171, nunca el 3000 ajeno.
+Logs y capturas en `/tmp/opencode/pr71-continuacion-*`. PR-BODY.md local sin commit.
+No se declara CI, QA remota ni aprobación del head nuevo; Neon sigue sin modificarse.
+
 ## Hecho
+
+- **PR #78 · integración de ramas (Codex gpt-6.1-terra):** merge normal de main y
+  del PR #75; en la integración posterior del squash se conserva la versión de main
+  para inbox y su simulador. Ajuste técnico sin decisión de negocio nueva. El E2E
+  positivo de persona con alcance limitado se cubre en la rama 07b PR 3 con el
+  vínculo vigente; su disponibilidad en main depende de integrar ese PR.
+
+- **NÚCLEO-D2 (encargo t457u, apilado sobre #75):** navegación de portales filtrada con los
+  permisos efectivos de la identidad ya cargada; ERP conserva el filtrado heredado por permiso de
+  cada entrada. El alcance se sigue aplicando en capacidades, no en el menú. Sin consultas ni
+  migraciones nuevas. Adaptación técnica de OpenCode; sin decisiones de negocio nuevas.
+  Corrección de la review 5671568745: Supervisor calcula acciones de documentos con permisos
+  efectivos, sin consultas nuevas. El caso positivo E2E de persona para alcance limitado queda
+  bloqueado por la denegación existente hasta el Brief 07b; detalle y CA parciales en
+  `briefs/ENCARGO-nucleo-d2-review.md`. Sin decisión de negocio nueva ni migración.
+
+- **PR #75 · QA N1 y N2 (OpenCode):** etiquetas completas con separación silábica en español cuando sea necesaria, riel de 80 px y tipografía del DS; filas de fijados y reintento de al menos 44 px. Ajuste técnico de OpenCode según revisión 5668628029, sin decisiones de negocio nuevas ni migraciones propias. Los CA parciales del Brief 05 §16 siguen vigentes.
+
+- **PR #75 · revisión 5666749146:** OpenCode retira abreviaturas del ERP y recupera el área abierta guardada al entrar en Inicio o Configuración. Ajuste técnico según el encargo; sin decisiones de negocio nuevas. Permanecen los CA y la medición de rendimiento parciales documentados en `briefs/BRIEF-05-navegacion.md` §16.
+
+- **PR #75 · merge de main `bf97199` (OpenCode):** se preservan «Más», las preferencias y las comprobaciones y el menú de portal de inicio. Gate local verde hasta build y presupuesto; e2e bloqueado porque la base de aplicación carece de `memberships.portal_inicio`. No se aplicaron migraciones. Detalle y CA parciales en `briefs/BRIEF-05-navegacion.md` §16.
+
+- **PR #75 · seguimiento de revisión y QA (OpenCode, encargo del PR #75).** Merge normal de main con #73 y #74; se conserva la nota de cada uno. «Más» muestra fijados, grupos plegables y cuenta con iconos y cierre en peligro; el riel incorpora acceso a «Más». El acordeón inicial compara la clave del área, las etiquetas largas tienen abreviatura y los errores de preferencias se anuncian y permiten reintentar sin presentar falsamente fijados vacíos. El revisor independiente detectó que los fijados de «Más» recargaban el documento: corregido usando la navegación del shell y cerrando la hoja. Adaptaciones técnicas de OpenCode según el encargo, sin decisión de negocio nueva. Pendientes: recorrido real a 768, dispositivos reales, lector de pantalla y resto de hallazgos medios/bajos fuera del addendum; los CA parciales del brief siguen vigentes.
+
+- **Brief 05 PR B · reducción del JS del shell (OpenCode / GPT-6.1 Sol, continuación del 27-oct).** Adaptaciones técnicas dentro del encargo, sin decisiones de negocio nuevas: preferencias y recientes en una isla diferida sin remontar el shell; SVG estáticos enviados por el servidor en vez del catálogo de iconos cliente; contenido de «Más», fijados, controles de pin, editor de área principal y muestras de navegación/PWA de `/ds` diferidos. El editor conserva su estado independiente y ofrece reintento visible si falla la carga; se descartó el contexto compartido tras un fallo del e2e. Se descartan preferencias al revocar acceso y «Más» devuelve el foco al disparador. Presupuesto verde en 84 rutas (antes 31 excedidas); Inicio 163,60 → 159,17 KB gzip. Margen mínimo ERP 0,68 KB; `/ds` 0,42 KB: el objetivo orientativo de ≥1 KB queda parcial. Siempre DS OPAI 2.0; sin migraciones, cambios de topes ni del script de presupuesto. `puedeEditar` permite escribir ajustes de usuario `navegacion_` a agentes con principal usuario cuando su usuario coincide con `viaUserId`. Evidencia y límites en `briefs/BRIEF-05-navegacion.md` §16. No implica integración ni cierre en Linear.
+- **NÚCLEO-G2 · FORCE RLS y globales acotado (OpenCode / openai/gpt-6.1-sol).**
+  Continuación por Codex: separación de unitarios y suites DB sin perder cobertura,
+  preparación independiente del test FORCE y corrección del harness ESLint;
+  capturas heredadas conservadas sin commit (sin cambio visual intencional).
+  Rama `fix/force-rls`, con #49 integrado en main; sin cambio
+  de plan. Migración aditiva `20261028170000_force_rls`, pendiente de Carlos en
+  Neon. Se elimina el acceso global por delegados; lecturas de identidad mínimas
+  y operaciones de plataforma con nombre. Test de ENABLE + FORCE + política en
+  todos los esquemas y aislamiento del dueño NOBYPASSRLS. Adaptaciones técnicas
+  del constructor: scripts con `row_security=off` para fallar cerrados si falta
+  un rol de mantenimiento explícito BYPASSRLS; triggers de referencias/patrones
+  SECURITY INVOKER para conservar el tenant del invocador. No se cambia ningún rol
+  remoto ni se atribuyen decisiones adicionales a Carlos. Auditoría, CA, riesgos
+  y verificación en `briefs/NUCLEO-G2-force-rls.md`.
+
+> **Seguimiento QA PR #49 (OpenCode):** separación de filtros de Puestos e Instalaciones y conservación de filtros al volver, según el encargo. Adaptación técnica al panel dividido: Función y la columna Patrón se ocultan hasta 2xl, con el patrón bajo el nombre del puesto; la vista de ancho completo del diseño queda parcial. Hay una comprobación e2e de visibilidad de Estado a 1024 y 1280. Sin migraciones nuevas en el seguimiento; `rama-neon` en verde en el head 25941e8 (27-oct-2026, 10:24 CLT).
+
+> **Corrección de presentación PR #49 (OpenCode):** la celda Puesto permite partir nombres y patrones largos para conservar visible Estado en el panel dividido. Adaptación técnica prevista en el encargo, sin decisión de negocio nueva; siguen las limitaciones parciales documentadas en el brief.
+- **NÚCLEO-H · CSP, continuidad 1112 (OpenCode / openai/gpt-6.1-sol):** reportes
+  propios con límites de cuerpo/lote y rate limit cerrado; logs categóricos sin
+  URL, muestras, IP o nonce. TEMA/SW tienen nonce de servidor por request. PPR
+  conserva scripts estáticos sin nonce: guía de Next y e2e lo confirman; por eso
+  la respuesta sigue Report-Only con unsafe-inline, sin anunciar nonce fuente
+  ni declarar el shell estricto. No se desactiva Cache Components. Preview de
+  correo aislada a imágenes propias; logo en bytes propios (?vistaPrevia=1), no
+  redirección a R2, con límites/timeout y sandbox para SVG. El correo enviado no
+  cambia. Son adaptaciones técnicas del constructor dentro del encargo; no
+  decisiones nuevas de Carlos. Audio/liveness/Rekognition/Pusher/micrófono
+  diferidos; HSTS solo host. Detalles, pruebas y límites en `briefs/NUCLEO-H-p2.md`.
+
+- **NÚCLEO-H, relanzamiento nucleo-h-1112-oc:** el mensaje de encargo contiene el
+  original completo y sustituye el bloqueo documental de la continuidad anterior.
+  Bloque 1: reglas puras de estado/avisos de incidente y verificación del archivo
+  subido extraídas a `packages/domain`, con pruebas, sin cambio de comportamiento.
+  Selección técnica del constructor OpenCode / openai/gpt-6.1-sol dentro del
+  encargo, no decisión de negocio nueva. No toca Puestos (#49), ni migraciones.
+  Sin tarea en Linear. El detalle y la cobertura de cada bloque están en
+  `briefs/NUCLEO-H-p2.md`.
+  Bloque 2: inventario de lecturas existentes en main `3199b00` y auditoría de
+  datos personales/documentos con IDs, transacción de A y fallo cerrado. Incluye
+  vías indirectas (instalaciones, búsqueda, historial, directorio, keys y cola de
+  aprobaciones); no duplica la revelación salarial existente. La autorrevisión
+  corrigió dos TOCTOU: conjuntos de documentos protegidos por locks de relaciones
+  y consentimiento limitado al conjunto de contactos efectivamente bloqueado.
+  También cierra vías de documentos de cumplimiento por versiones/vencimientos.
+  Pruebas reales con barreras; detalle técnico del constructor e inventario en
+  `briefs/NUCLEO-H-lecturas.md`. Sin permisos nuevos ni migración; no toca #49.
+
+- **NÚCLEO-H, continuidad en `core/nucleo-p2` (OpenCode / openai/gpt-6.1-sol):**
+  ARCO lista/detalle filtran alcance y auditan solo IDs revelados, actor, tenant y
+  capacidad, en la misma transacción; fallo de auditoría no entrega datos. También
+  se acotan sus mutaciones y la carga compartida de titulares. Contactos por cuenta
+  a cargo; personas siguen negadas hasta la relación de 07b; externos solo para
+  acceso no acotado. HSTS se limita al host, sin includeSubDomains ni preload por
+  falta de inventario HTTPS completo, según el encargo actual. Estas son
+  adaptaciones técnicas del constructor, no nuevas decisiones atribuidas a Carlos.
+  Autorrevisión detectó y corrigió TOCTOU de las relaciones de alcance: FOR SHARE
+  de contactos e instalaciones hasta completar la operación, también en dryRun.
+  La salida auditada se valida una sola vez y es la misma que se entrega. HSTS
+  sustituye el valor histórico con includeSubDomains de la nota P1 de abajo.
+  La autorrevisión de continuidad detectó además que el caché idempotente podía
+  revelar respuestas de mutaciones ARCO tras perder alcance: ahora se revalida la
+  solicitud antes de devolver la repetición, sin repetir efectos ni borrar reservas.
+  Corrección técnica del constructor dentro del encargo, no decisión nueva de Carlos.
+  **Nota histórica sustituida por el relanzamiento nucleo-h-1112-oc:** el original
+  completo ya está en el encargo. Bloques 1/2 implementados e inventariados; no
+  hay bloqueo por falta de texto. Sin migraciones ni pantallas nuevas. CA, límites
+  y gate por bloque en `briefs/NUCLEO-H-p2.md`.
+  Validación de continuidad: typecheck/lint, 1.104 pruebas, BD 98+130+25,
+  build y presupuesto sin subir topes en verde. E2E de cabeceras 6/6 a
+  375/1024/1280 en servidor propio 3294, detenido al terminar. Autorrevisión
+  independiente final sin bloqueantes tras corregir la repetición idempotente;
+  CI y Revisor externos pendientes. Se continúa el PR #76; no se modificó Neon.
+  **Corrección ADR-045, review 5670166405 del #76:** el gate anterior no midió
+  rendimiento (Instalaciones 10 y Personas 9 consultas, main 8/8, límite 8).
+  El encargo excluye inbox propio, pendientes sin correos/errores libres y
+  sugerencias incrementales ⌘K; las fichas siguen auditadas. Adaptación técnica
+  de OpenCode / openai/gpt-6.1-sol: append en una llamada a función SQL VOLATILE
+  SECURITY INVOKER, con snapshot posterior al mismo lock por tenant, canon SQL
+  histórico y transacción de revelación intactos. Migración idempotente
+  `20261028163000_auditoria_append` antes del despliegue de la app; sin cambios
+  de RLS ni BYPASSRLS. No aplicada en Neon. Pruebas/CA y resultados finales en
+  `briefs/NUCLEO-H-p2.md`; no hay nuevas decisiones de negocio atribuidas a Carlos.
+  Autorrevisión: el append raw notifica explícitamente una consulta al contador
+  ADR-045; inbox obtiene página y conteo en otra única sentencia contada, sin
+  cargar todo ni mezclar usuarios/tenants. Se conserva el tope de 8 y el spec.
+  La medición con append contado aún dio 10/9: se consolidan además acceso y
+  módulos de identidad en la membresía elegida (sin caché entre requests), y
+  página/cuenta/agregados de instalaciones en una consulta SQL contada y acotada
+  antes de paginar. Mismos permisos, roles, excepciones y alcance; detalles y
+  evidencia final en el brief. Son ajustes técnicos del mismo constructor.
+  Medición estricta del build final: Instalaciones **10→8 consultas (108 ms)**,
+  Personas **9→8 (139 ms)**, todas las rutas del protocolo ≤8/500 ms. Build y
+  presupuesto sin subir topes, 1.138 pruebas aprobadas; autorrevisión independiente
+  final sin hallazgos de código. BD **98+147+25** y e2e **17 aprobadas/4 omisiones
+  preexistentes**, tres resoluciones; servidor propio 3376 detenido. CI y Revisor
+   pendientes sobre el nuevo head; Neon sigue pendiente de Carlos.
+
+  **Corrección de la review 5671348942 del #76:** OpenCode / openai/gpt-6.1-sol
+  restaura la auditoría de `core.buscar` con IDs de cuentas/personas/contactos,
+  misma salida y filtros, transacción común y fallo cerrado también para keys.
+  Sustituye la excepción histórica de ⌘K mencionada arriba; solo inbox propio y
+  pendientes siguen exentos. Gate global del registro con lista heredada cerrada
+  para impedir omisiones nuevas de proyección; migración `20261028163000` con
+  lock_timeout local de 5 s y transacción DDL, sin cambiar cadena ni algoritmo.
+  Adaptaciones técnicas del constructor según el encargo, no decisiones nuevas
+  atribuidas a Carlos. CA, límites y evidencia final en `briefs/NUCLEO-H-p2.md`.
+  Validación de esta continuación: tipos/lint en serie, 899 unitarias, build,
+  presupuesto y rendimiento estricto aprobados; Instalaciones 8/183 ms y Personas
+  8/164 ms. E2E 11 aprobadas/4 omisiones preexistentes a las tres resoluciones.
+  **test:db bloqueado por timeouts de preparación/P1001 locales**, aun tras
+  reintentos: una corrida aprobó DB 98/98 pero falló en capacidades; las pruebas
+  nuevas de búsqueda no alcanzaron sus aserciones. No se declara gate completo
+  ni PR terminado. No se cambiaron timeouts/skips para ocultarlo. Neon intacto.
+
+- **NÚCLEO-D1 (rama `fix/portal-servidor`, encargo t457u):** guardas previas al catálogo
+  en ambos ejecutores web; se conserva la validación de sesiones de #68. Dominio de
+  coherencia por rol base/principal y diagnóstico sin escrituras ni correos. Columna
+  nullable `portal_inicio` en memberships e invitations; preferencia personal por
+  capacidad con auditoría, preview, idempotencia y outbox; condición atómica si se
+  revoca el portal. Login/cambio de empresa usan preferencia o primer permitido si no
+  hay next explícito; aceptación de invitación relee la identidad en otro request.
+  Hoja existente del DS V2 en el menú, diferida, sin pantalla nueva. Criterios técnicos
+  del constructor OpenCode / openai/gpt-6.1-sol: los cinco roles internos admiten los
+  cuatro portales internos, sujetos a permisos/alcance; nunca Cliente ni Plataforma.
+  No se conceden portales nuevos ni se reparan datos automáticamente. Matriz y CA en
+  `briefs/ENCARGO-nucleo-d1.md`. Migración nueva: `20261028110000_portal_inicio`;
+  Neon pendiente de Carlos, con etiqueta `migracion-pendiente` cuando se abra el PR.
+  Seguimiento de la review 5663625371: limpieza transaccional de preferencias obsoletas
+  al cambiar rol o portales (punto 3 del encargo, implementado por OpenCode), sin
+  conceder acceso ni revivir preferencias al reconceder portales. Sin decisiones nuevas.
+  QA P1–P3 del informe `informe-dac3399.md`: opción oculta en Cliente/Plataforma,
+  error de carga con reintento y aviso de éxito del DS 2.0. Implementación de OpenCode
+  según el punto 4 del encargo; S1 y S2 no cambian y su decisión sigue en Carlos.
+
+- **MFA · corrección de entrada en iOS:** normalización de espacios y guion sin alterar mayúsculas, y desactivación de autocorrección/capitalización en los campos MFA. Better Auth rota la sesión al confirmar el enrolamiento; la solicitud de contraseña observada después aún requiere reproducción. Alcance y límites en `briefs/FIX-mfa-respaldo-ios.md`. Adaptación técnica de OpenCode según el encargo, sin decisiones de negocio nuevas ni migración.
+
+- **PR #61, corrección de la revisión 5660654308 (OpenCode, 27-oct-2026).** Merge normal de `origin/main` (`5c18a9237fcdee84a040dde93e3015b753d8d21a`, ya incluye #48 y #56). La transacción por lote y la propagación del fallo ya estaban en `6f948ba`; se refuerza la prueba del evento del lote confirmado y se prueba rollback de datos y registro si falla el evento. Migración `20261027070000_cumplimiento_retencion` aplicada y reaplicada sobre todas las migraciones actuales de main en PostgreSQL 16 local, sin choque y sin renombrarla. Sin decisiones de negocio nuevas. Pendientes expresamente fuera de esta corrección: orden/cursor, carreras en `exigirNoAnonimizado` y solicitudes abiertas, campos restantes por anonimizar, rotación de DEK; el plazo mínimo se confirma con el Abogado antes de activar. CA y limitaciones en el brief §21. Ninguna pantalla nueva; cualquier diseño debe usar siempre el DS de OPAI 2.0.
+> **NÚCLEO-E2 · Agente interno del tenant (OpenCode / openai/gpt-6.1-sol).**
+> Módulo `agente` vendible, herramientas derivadas del MCP y bucle servidor con
+> lecturas/dryRun, planes firmados y confirmación humana de plan o paso. Identidad
+> delegada `agente-interno:<usuario>`, actor `agent`, `via_user` del usuario y
+> `apiKeyId` nulo; sin permisos de plataforma. Se reutilizan la cola humana y el
+> presupuesto atómico de C, ahora también por tenant sin key. Migración aditiva
+> `20261028120000_agente_interno`, sin tablas ni memoria conversacionales nuevas.
+> Historial: solo metadatos propios; caché de idempotencia de 24 h y purga diaria.
+> API SSE de sesión ERP, sin UI nueva. **Adaptaciones técnicas de OpenCode:** firma
+> con el secreto de autenticación existente; token de plan de 1 h; 12 pasos y
+> 128.000 tokens medidos por turno; límite de 20 solicitudes/minuto; configuración
+> de presupuesto solo humana, por defecto owner/admin (un rol personalizado requiere
+> el permiso explícito), como el gobierno de agentes existente.
+> No son decisiones nuevas atribuidas a Carlos. El adelanto antes de CPQ sí lo
+> decidió Carlos el 26-oct-2026 21:07, t461s2118 (enmienda ADR-049 §8).
+> La UI espera export aprobado del DS 2.0. Estado de gates y límites en
+> `briefs/NUCLEO-E2-agente-interno.md`; PR #73 abierto; migración 20261028120000_agente_interno pendiente de aplicar en Neon.
+> Continuación tras ECONNRESET: resguardo remoto de `a59ab2f`; adaptación técnica
+> de OpenCode tras autorrevisión: se confirma la intención firmada, no la igualdad
+> de resultados dryRun con fechas calculadas. Las capacidades revalidan sus reglas;
+> no se ofrece un snapshot ni atomicidad entre dryRun y escritura. Confirmación
+> devuelve el identificador de aprobación por paso y lo conserva al reintentar.
+> Gate final local verde: typecheck, lint, 1.009 tests, BD 96+86+24, build web nuevo
+> y presupuesto sin subir topes. E2E en servidor propio 3286: 7 aprobados y las
+> 2 omisiones preexistentes por proyecto (escritura solo en iPad). Autorrevisión
+> independiente final sin bloqueantes; capturas regeneradas. CI y Revisor externos
+> siguen siendo necesarios sobre el commit final.
+
+> **Seguimiento de seguridad y QA PR #70 (OpenCode, continuación del 27-oct):** keys de usuario/servicio acotadas por los permisos vigentes del responsable (rol, personalizado y excepciones); servicio se invalida si este pierde alcance completo. Invitación con rol solo por personas; plataforma null para agentes; ledger acumula también sin tope; precisión mínima de micro-USD y formatos es-CL. Adaptaciones técnicas de OpenCode, no decisiones nuevas de Carlos. Seed fail-closed: solo bases locales `opai_dev`/`opai_staging`; Neon bloqueado hasta registrar un endpoint dev/staging verificado (el ID de rama no identifica su hostname). `gard-staging` es un tenant: no hay evidencia de una rama/base remota aparte y no se ejecutó el seed. Gate actual y limitaciones en `briefs/NUCLEO-C-identidad-servicio.md`.
+
+> Continuación completada sobre `main` f2fcb23 mediante merge normal: gate local verde (typecheck, lint, 899 tests, BD 90+64+6, build desde caché y presupuesto), H0 sin variables de conexión 6/6 y e2e propio en 3070: servicio 6/6 + portal 3/3. Autorrevisión independiente sin bloqueantes; revisión externa y CI pendientes.
+
+> **NÚCLEO-C · Identidad de servicio para agentes y presupuesto atómico (27-oct-2026, rama `core/identidad-servicio-agentes`; P0 de la auditoría del núcleo del 26-oct-2026, Carlos t457u y decisión t461s2118; ADR-051).** Permisos finos por key (subconjunto de los efectivos del responsable, intersección en `autorizador`/`permisoDeKey`), principal `servicio` (sin dueño humano: permisos solo de la key, nunca hereda rol ni alcance, presupuesto obligatorio) y ledger mensual atómico (`core.gasto_agente_mes`, advisory lock por tenant/key, chequeo y consumo en la misma transacción; 20 cargos paralelos con tope 10 solo aceptan 10, probado en `test:db`). El costo ya incurrido con un proveedor (IA, mapas, correo, almacenamiento) se registra siempre aunque supere el tope de esa llamada (`yaIncurrido`, BRIEF-02 §4.9): antes se perdía sin trazabilidad y, al silenciarse el error, la siguiente llamada volvía a pasar aunque ya se hubiera excedido el gasto real; ahora la SIGUIENTE llamada corta en el prepago de `capacidad.ejecucion`. Si el tope cambia a mitad de período, los avisos del 80 %/100 % de ese período se reinician. Protección de rol base/promoción a owner por API key o agente (agregado del Revisor, review 5661003883 del #60). Script `seed:staging` (gard-staging) corregido: la fila se crea antes de escribir el secreto (un fallo de la base ya no deja un archivo huérfano que bloquee el reintento con `wx`) y la ruta del secreto se valida por segmentos de ruta con `realpath` (un directorio real llamado `..secret` ya no se confunde con una ruta fuera del repositorio); no se ejecutó contra ninguna base. UI en Configuración → Agentes con el DS 2.0 (tipo, permisos como subconjunto, presupuesto obligatorio para servicio, aviso de `*`); e2e `identidad-servicio.spec.ts` en verde a 375/1024/1280. Migración aditiva `20261028030000_identidad_servicio` (RLS, sin `BYPASSRLS`), aplicada solo en la base local de pruebas (`opai_e2e`), **no en Neon**. Decisiones pendientes de Carlos: revocar la key owner `*` de Gard, correr `seed:staging` en Neon y fijar el presupuesto de Grokbot dev.
+- **Seguimiento del #60 (rama `fix/roles-seguimiento`, PR #67, sin tarea en Linear):**
+  Correcciones QA H1–H4 implementadas por OpenCode según el encargo: fixture E2E autónoma con hash propio, Empresa en texto de lectura con DS 2.0, sensibilidad en texto y estado vacío acorde al permiso. Sin decisiones de negocio adicionales ni migraciones; e2e de roles y portal-sesión 6/6 tras el merge de main. Queda pendiente una auditoría independiente de contraste y foco.
+  I4/P4: el menú del ERP usa permisos efectivos (rol personalizado y excepciones), no el rol base.
+  P3: Dirección de Empresa respeta el modo lectura mediante `CampoDireccion` del DS 2.0.
+  **Decisión vigente t479u:** Carlos delegó «Velo tú, según eso y avanza» (26-oct-2026 22:06 CLT;
+  adenda del encargo confirma la decisión): Inspector DT recibe `core:estructuras.read_sensible`,
+  solo lectura, sin nuevas escrituras. Fundamento indicado en el encargo: art. 31 del DFL 2 de 1967,
+  Ley Orgánica de la DT, acceso a documentación necesaria para fiscalizar, incluidas remuneraciones;
+  enmascarar impediría la fiscalización. Cada revelación de montos sensibles queda auditada con actor,
+  fecha y estructura (historial: evento consultado); sin copiar montos y sin entregar datos si falla
+  la auditoría. El seed reconoce las versiones previas del Inspector y preserva conjuntos editados,
+  incluida una edición concurrente. El alcance de estructuras filtra puestos por instalación y
+  mantiene la negación de personas acotadas hasta 07b; la auditoría global se deniega a actores acotados.
+  Cargos oculta «Nuevo» y su hoja sin permiso de gestionar; no cambia el diseño aprobado ni los topes JS.
+  La ficha también deshabilita sensibilidad y oculta edición/versiones nuevas en lectura; ambas vías
+  de auditoría (`core.audit.list` y `core.actividad.list`) registran revelaciones y redactan sin permiso.
+  **Bloqueantes de la autorrevisión anterior, corregidos:** `core.estructuras.create` (nivel puesto o
+  persona) y `core.estructuras.anular` ya acotan la escritura al alcance del actor (`dondePuesto`/
+  `dondePersona`, `findFirst` en vez de `findUnique`, igual que las lecturas); fuera de alcance
+  responde `NOT_FOUND`, igual que "no existe" (sin enumeración; probado también con 5 llamadas en
+  paralelo). La respuesta de creación de una estructura sensible ahora audita la revelación (antes el
+  cálculo de `ocultarMontos` corría antes de tener el id de la fila recién creada y la auditoría se
+  saltaba en silencio). Tests nuevos: `estructuras-alcance-escritura(.test|-db.test).ts` y un caso en
+  `maestros-estructuras.test.ts`. **Bloqueante de la revisión 5662281692, corregido:** el merge de
+  main (#53, ADR-045) dejó `core.cargos.list` sin auditar la revelación sensible (conflicto semántico:
+  la consulta única pasó a usar `resumenSueldoDe`, puro, en vez de `ocultarMontos`); ahora audita con
+  `ocultarMontosDeCargo` (`estructuras-acceso.ts`), sin volver al N+1 que corrigió el #53. Detalle en
+  `briefs/BRIEF-roles-seguimiento.md`.
+  Gate tras traer main (merge `efe3322`, trae el PR #66 de Plataforma): 806 tests; `test:db` 68+56+6;
+  typecheck, lint, build, presupuesto y e2e 3/3 (375/1024/1280, servidor propio en 3106) en verde.
+  El rate limit usó respaldo en memoria en el e2e. Ver criterios y límites en
+  `briefs/BRIEF-roles-seguimiento.md`. No agrega migraciones.
+
+- **Plataforma sin acceso (encargo H4 de QA):** el aviso usa el texto solicitado en el encargo y la insignia se oculta sin acceso; se usa la guarda compartida también para la redirección. La cuenta autorizada predeterminada del e2e sigue siendo la semilla existente por compatibilidad con CI; puede sustituirse mediante `E2E_EMAIL`. Sin decisiones adicionales ni migraciones. Detalle y criterio parcial en `briefs/FIX-platform-sin-acceso-ui.md`.
+
+- **Endurecimiento de Plataforma (encargo urgente tras #59, rama `fix/platform-superadmin`):** servidor y shell comparten `tieneAccesoAPortal`, que admite Plataforma solo con rol global `owner` o `support`, nunca por membresía del tenant (ADR-016). Roles desconocidos se deniegan. Pruebas de servidor/shell y e2e de Empresas y rechazo sin rol global. H2 conserva la TopBar móvil aprobada: el título vive en el contenido (`DISENO.md` §4). H3 parcial: con acceso a Trabajador ya existe Inicio; se agrega cobertura, pero el estado vacío opcional se difiere porque incluso cargado de forma diferida excedió el presupuesto de Laboral (165,1/165 KB). No se suben topes. No hay decisiones de negocio nuevas; implementación de OpenCode según el encargo y ADR vigentes. La hipótesis de producción no se considera demostrada: `main` ya diferenciaba Plataforma en la guarda del servidor; queda QA posterior con la sesión afectada. Alcance y CA en `briefs/FIX-platform-superadmin.md`; el encargo no incluye ID de Linear.
+
+- **Portal de sesiones (rama `core/portal-sesion`, PR #68):**
+  a partir del hallazgo de la review **5661270514** del Revisor en #59, la capa común
+  exige portal no vacío, presente en la membresía activa del tenant actual y en la
+  declaración de la capacidad. Los portales vienen del contexto de servidor ya cargado,
+  sin consultas nuevas. Vacío/null se rechaza, no se supone ERP; las rutas ERP ya fijan
+  su portal en servidor y la API genérica con sesión sin portal se cierra por defecto.
+  Excepción única para `core.invitations.accept`, conforme a la adenda del encargo:
+  decisión tomada con la autonomía de fase 1 dada por Carlos en **t500u**; mantiene token,
+  correo y autenticación. La adenda referencia `encargos/nucleo-cierre.md`, ausente aquí;
+  no se afirma haberlo leído. Plataforma, keys y sistema no cambian. **Catálogo del portal
+  Supervisor (decisión del operador, 27-oct 00:55, autoridad delegada por Carlos):** se
+  declaró `portales: ["erp", "supervisor"]` en las 11 capacidades que las pantallas de
+  `apps/web/app/(supervisor)` ya llamaban en `main` (7 de lectura: `core.documentos.matriz`,
+  `core.instalaciones.list/get`, `core.contactos.list`, `core.personas.get`,
+  `core.documentos.list`, `core.documento_tipos.list`; 4 de escritura ya construidas para el
+  supervisor según el propio código, sin permiso ni alcance nuevo: `core.documentos.pedir_renovacion`,
+  `core.documentos.iniciar_subida/confirmar_subida/update`). No se declaró ninguna capacidad
+  que esas pantallas no llamen. Detalle, archivos revisados y el e2e ampliado
+  (`/supervisor/instalaciones`) en `briefs/ENCARGO-portal-sesion.md`. Sin migraciones nuevas.
 
 - Decisión de construir OPAI 2.0 desde cero (ver `01-decisiones.md`, ADR-001 a ADR-016).
 - Documento de arranque, registro de decisiones, contexto para agentes e instrucciones del proyecto Claude en `docs/2.0/`.
@@ -31,9 +385,10 @@ Hasta el 24-oct-2026 este archivo fue la fuente de verdad del avance; desde ento
   - `packages/db`: modelos de Better Auth (`users`, `sessions`, `accounts`, `verifications`, sin RLS) y `memberships` (RLS `tenant_isolation` + `user_self` de solo lectura), `invitations`, `tenant_modules`, `api_keys`, `usage_events` (RLS), `tenants.estado`. Migración `20261023044757_identidad` aplicada en `dev` y `main`. `forUser`, `globales()`, `clienteAuth()`. Tests de RLS ampliados (8 en verde contra `dev`).
   - `@opai/auth`: Better Auth 1.7 (correo y contraseña sin registro público, Google opcional, recuperación por enlace de 30 minutos con token hasheado, cookies `opai.*`, rate limit de 5 intentos de login cada 15 minutos, bloqueo de ingreso para miembros de tenants o membresías suspendidas con motivo visible solo tras validar la contraseña). Seed idempotente del usuario plataforma. `@opai/integrations/email`: Resend por HTTP y consola.
   - `@opai/capabilities`: contexto con usuario, rol, portal, módulos activos, scopes, plataforma y servicios; `executeCapability` verifica tenant, módulo activo, scopes y permiso, audita en el tenant objetivo y mide toda ejecución en `usage_events`. 27 capacidades `core.*` y `platform.*` (sección 7 del brief más `core.invitations.peek/accept/request_new`, internas). Derivación MCP (`herramientasMcp`, `preview_<id>` para escrituras). Contexto de prueba con base en memoria en `@opai/capabilities/testing`. 47 tests.
-  - `apps/web`: `proxy.ts` (Next 16) redirige a `/login` sin sesión; `resolverActor` (sesión o API key), `/api/v1` real, MCP en `/api/mcp` y `/api/mcp/k/<key>` (mcp-handler 2 + SDK MCP 2), cabeceras de seguridad. Shell real (navegación por permisos y módulos, portales de la membresía, menú de usuario con cambio de empresa y de contraseña), ERP (inicio, Usuarios, API keys, Empresa), Plataforma (empresas, nueva con "usar existente", detalle con módulos, administradores, API keys y uso), portales placeholder protegidos. Acceso según `export-acceso`: login con estados, `/recuperar` y `/recuperar/[token]`, invitación (4 variantes), `/elegir-empresa`; Trabajador y Cliente muestran "Disponible pronto". DS: `Menu`, `Dialog`, `Switch`, `UserMenu`, `AuthCard`, `Alerta`, `EstadoIlustrado`, `InputPassword`, `Separador`, `estilosBoton`.
+  - `apps/web`: `proxy.ts` (Next 16) redirige a `/login` sin sesión; `resolverActor` (sesión o API key), `/api/v1` real (con rate limit central), MCP en `/api/mcp` (con rate limit central; la forma `/api/mcp/k/<key>` quedó deprecada en NÚCLEO-B: 410 Gone salvo `MCP_KEY_EN_URL_HASTA` futura), cabeceras de seguridad. Shell real (navegación por permisos y módulos, portales de la membresía, menú de usuario con cambio de empresa y de contraseña), ERP (inicio, Usuarios, API keys, Empresa), Plataforma (empresas, nueva con "usar existente", detalle con módulos, administradores, API keys y uso), portales placeholder protegidos. Acceso según `export-acceso`: login con estados, `/recuperar` y `/recuperar/[token]`, invitación (4 variantes), `/elegir-empresa`; Trabajador y Cliente muestran "Disponible pronto". DS: `Menu`, `Dialog`, `Switch`, `UserMenu`, `AuthCard`, `Alerta`, `EstadoIlustrado`, `InputPassword`, `Separador`, `estilosBoton`.
   - Verificado en local contra `dev`: flujo completo (login, adoptar Gard desde Plataforma, aceptar invitación, ERP, crear API key) y MCP (`tools/list`, `core_me` como agente vía Carlos, `preview_core_users_invite` sin escribir, escritura real auditada con `actor_type = agent` y `via_user_id`). Gate en verde (164 tests), `test:db` en verde, Playwright 51 en verde (capturas en `apps/web/e2e/__screenshots__/` y `__screenshots__/acceso/`), build de producción en verde.
   - Producción (`test.opai.cl`): variables creadas, migración y seed en `main`, deploy `dpl_8psk5aH21ZR7PpqA4xwZigMqpEx2`. Verificado: `/login` 200, portales redirigen a `/login`, `/ds` y `/ds/acceso` 404, `/api/v1/core/me` sin sesión 401, `/api/mcp` sin key 401, login real de Carlos 200 y `platform.tenants.list` con el tenant `gard` existente.
+- **CSP y HSTS del núcleo (26-oct, rama `fix/csp-hsts`; P1 de la auditoría del núcleo del 26-oct-2026):** origen, Decisión de Carlos, 26-oct-2026 20:47 CLT, chat con OPAI 2.0 (t457u): «ponlo entonces en el plan de desarrollo para que todo se haga y lo que debamos hacer en el nucleo lo hagamos altiro». El id `CAR-n` de Linear queda por completar en el PR (el encargo no lo trae). `apps/web/next.config.ts` (vía `apps/web/lib/cabeceras-seguridad.ts`) manda, en todas las rutas: `Permissions-Policy` (`camera=(self), geolocation=(self), microphone=()`; el micrófono queda deshabilitado), HSTS solo en producción (`max-age=63072000; includeSubDomains`, **sin `preload`** hasta que Carlos lo decida) y la CSP en `Content-Security-Policy-Report-Only` (`default-src 'self'`; `base-uri`/`form-action 'self'`; `object-src 'none'`; `frame-ancestors 'none'`; `img-src`/`connect-src`/`frame-src` con `data:`/`blob:` y el host de R2; `script-src`/`style-src` con `'unsafe-inline'`). Report-Only porque el modo estricto con nonce exige reescribir la respuesta en `apps/web/proxy.ts`, que lo cambia el #45 (brief/04-pwa, prohibido tocar aquí): el paso a `Content-Security-Policy` con nonce queda anotado para después del #45. Verificado sin violaciones en un build de producción local (login, ERP, `/supervisor`) y en `/ds` (dev) con el e2e `apps/web/e2e/cabeceras-seguridad.spec.ts`, que escucha `securitypolicyviolation`; cabeceras cubiertas por `apps/web/test/cabeceras-seguridad.test.ts`. Sin migraciones.
 
   - Primer uso (bloque 9, 23-oct): Carlos entró como usuario plataforma, invitó desde Plataforma a `carlos.irigoyen@gard.cl` como owner de Gard Security (tenant `gard` existente), aceptó la invitación creando esa cuenta, creó la API key "Grokbot" (scope `*`) y conectó Grokbot al MCP. Verificado en `main`: `core_me` responde "agente vía carlos.irigoyen@gard.cl", rol owner; `preview_core_tenant_update` (dryRun) y `core_tenant_update` real, auditado con `actor_type = agent`, key Grokbot y `via_user_id` de `carlos.irigoyen@gard.cl`.
   - Correcciones tras el primer uso: la invitación abierta con otra sesión vuelve al formulario de cuenta nueva (antes enviaba al login); Plataforma confirma "Invitación enviada".
@@ -139,7 +494,7 @@ Hasta el 24-oct-2026 este archivo fue la fuente de verdad del avance; desde ento
   **Decisión de Carlos (24-oct, 17:57):** el esqueleto aparece a más tardar a los 200 ms; ADR-045 quedó alineado (ya no dice «de inmediato» ni «< 100 ms») y la espera es de 150 ms (medido 156–160 ms en celular 4G).
   **Pruebas** (`e2e/cache-sesion.spec.ts`, en el job `e2e` de CI desde el #23, iPad y escritorio; no dependen de la tabla de Personas): una persona creada aparece en la lista ya visitada sin recarga, con el reloj fijo para que ni el vencimiento ni el refresco silencioso la tapen (se comprobó que **falla** si se quitan `revalidatePath` y `router.refresh()`); salir y entrar en una pestaña recargan las otras; y cambiar de empresa muestra lo de la nueva y nada de la anterior en ambas pestañas (usuario `e2e-multiempresa@opai.cl` y «Empresa E2E» sembrados por `seed:e2e`; en iPad el cambio va por el selector de empresa del acceso porque el shell no lo ofrece).
   **ADR-037:** ningún tope subió (`pnpm presupuesto` en verde). La lista de avisos de la campana se difiere (descarga aparte, con su HTML ya renderizado). No se tocaron capacidades ni herramientas MCP; `pnpm mcp:verificar` no se ejecutó (sin `OPAI_MCP_KEY` local).
-  **Sigue pendiente de ADR-045:** shell en el layout, contadores fuera de la barra lateral y `forTenant` en una sola transacción (los tres, PR 2 del Brief 03). `Server-Timing`, el contador de consultas y el gate en CI (informe) ya están hechos en el PR 1 del Brief 03 (ver más abajo).
+  **ADR-045:** el shell ya persiste en `PortalLayout`; la barra lateral no carga contadores y la campana consulta sus no leídos al montar en el cliente. Sigue pendiente `forTenant` en una sola transacción (PR 2 del Brief 03). `Server-Timing`, el contador de consultas y el gate en CI (informe) ya están hechos en el PR 1 del Brief 03 (ver más abajo).
 - **Consistencia de Maestros (24-oct, rama `fix/maestros-consistencia`, PR #25; se integra según «Roles» de `AGENTS.md`; la tarea de seguimiento vive en Linear, no aquí). La navegación y la caché (ADR-045) van aparte, en `qa/navegacion-adr-045` (PR #29):**
   1. **Lista y ficha en todas las pestañas.** Cuentas (Resumen, Contactos, Instalaciones, Documentos, Actividad), Instalaciones (Resumen, Puestos, Documentos, Actividad) y Personas (Resumen, Laboral, Documentos, Actividad) dibujan la ficha dentro de la vista dividida: en escritorio la lista queda a la izquierda al cambiar de pestaña; en teléfono, el detalle con «Atrás». `PaginaCuenta`, `PaginaInstalacion` y `PaginaPersona` son el único envoltorio (también del Resumen). Prueba e2e a 1280 px (`e2e/maestros-lista-fija.spec.ts`).
   2. **Personas con el mismo diseño.** Lista a la izquierda y ficha a la derecha (`ListaMaestro` + `SplitScreen`), misma navegación móvil que Cuentas e Instalaciones. **Se conserva** búsqueda por nombre o RUT, filtros de cargo y estado y paginación por cursor (50); cada fila muestra cargo, tipo de contrato (con «hasta» y la fecha de término cuando el vínculo la tiene) y RUT (el RUT no cabe en teléfono) y el semáforo de documentos siempre, más el estado cuando la persona no está activa. Al elegir a una persona, y al cambiar de pestaña de su ficha, se conservan búsqueda, filtros y página de la lista (los enlaces de las pestañas llevan la consulta; prueba en `e2e/maestros-lista-fija.spec.ts`). Cuentas e Instalaciones no conservan la búsqueda al abrir una ficha (no cambió). **Sale, y lo decide Carlos si lo quiere de vuelta:** la tabla de 6 columnas (RUT, Contrato y Documentos como columnas propias, ahora dentro de la fila), la agrupación por letra en teléfono y la vista de tabla como opción (no se agrega, por decisión suya). No había orden por columna ni acciones en bloque. Costo: cada pestaña de la ficha carga también la lista (`cargarPersonas`), una consulta más por navegación, dentro del tope de 8 de ADR-045.
@@ -158,6 +513,7 @@ Hasta el 24-oct-2026 este archivo fue la fuente de verdad del avance; desde ento
   3. **Gate en CI (informe).** `apps/web/e2e/rendimiento.spec.ts` recorre el protocolo de ADR-045 (Cuentas → Instalaciones → Personas → Cargos y sueldos → Configuración → Inicio) y lee el marcador: exige su presencia (**falla sobre `main`, que no lo emite**) y registra fases, `total` y consultas en consola y como anotaciones. Las metas (esqueleto ≤ 200 ms, `total` ≤ 500 ms, ≤ 8 consultas) se comprueban con `expect.soft` solo bajo `GATE_ESTRICTO=1`, porque solo son representativas contra `next start`. Por ahora el spec corre dentro del job `e2e` existente (contra `pnpm dev`, como informe). **El job propio `rendimiento` (build de producción + `next start` + Lighthouse móvil, `apps/web/lighthouserc.json`, con `continue-on-error`) no se agregó a `ci.yml` porque el token de push no tiene permiso `workflow`;** su YAML va en la descripción del PR para que Carlos (o un token con ese permiso) lo agregue. En el PR 2, con los arreglos, se activa `GATE_ESTRICTO`, el gate pasa a obligatorio y se le suman las pantallas con sesión.
   **Pruebas que fallan sin el cambio:** `apps/web/test/metricas-navegacion.test.ts` (valor `Server-Timing` y medición de fases) y `packages/db/test/metricas.test.ts` (observador de consultas); el e2e falla sobre `main` por la ausencia del marcador. **ADR-037:** ningún tope subió (`pnpm presupuesto` en verde); el marcador es server-only y no agrega JS de cliente. No se tocaron capacidades ni herramientas MCP. **Verificación local:** `typecheck`, `lint`, `test` (446) y `build` + `presupuesto` en verde. **No se corrieron aquí** (se declaran en el PR, sin inventar números): `pnpm test:db` y el job `e2e`/`rendimiento`, porque este entorno no tiene Postgres. **Línea base del protocolo (CA12), informativa —** tomada del job `e2e` en CI (`pnpm dev`, **no representativa de `next start`**), en escritorio (1280 px): Cuentas 898 ms / 12 consultas · Instalaciones 837 / 15 · Personas 1.126 / 31 · Cargos y sueldos 1.063 / 21 · Configuración 978 / 15 · Inicio 388 / 9. El contador ya muestra 9–31 operaciones de modelo por navegación frente a la meta de ≤ 8 (y `consultas` cuenta operaciones de modelo, no idas y vueltas: cada operación de `forTenant` son unas 4). La base representativa y la **tabla antes/después** se agregan en el PR 2 con el job `rendimiento` contra `next start` y los arreglos medidos (la medición previa de ADR-045 está en el PR #29). Las filas de 375 y 1024 px quedaron en el log del job de CI y no se transcriben aquí. `pnpm mcp:verificar` no se ejecutó (sin `OPAI_MCP_KEY` local).
   **Queda para el PR 2 (arreglos):** shell en el layout de cada portal; quitar los contadores de la barra lateral (decisión 15); `forTenant` con una sola transacción interactiva por capacidad; caché de sesión de 5 min con invalidación inmediata (decisión 16); pooling de Neon y `P2039`/`P1017`; prefetch/caché del router donde el gate lo pida; y volver el gate obligatorio con la tabla antes/después.
+- **Brief 03 · Rendimiento — PR 2: consultas y navegación (26-oct, rama `perf/brief03-consultas-navegacion`, PR #53; `Refs CAR-7`, `Refs #44`):** baja a ≤ 8 las consultas por pantalla (N+1 colapsados con `include`/`_count` bajo `forTenant`, sin SQL crudo ni cambio de aislamiento), memoiza `marcaGenerado` con `cache()` y añade la señal de navegación pendiente en el riel y el título (estado optimista, sin barra de progreso). **Decisión (OPAI 2.0, bajo el mandato de Carlos t365u/t366u, 26-oct-2026; corrige las revisiones 5659686551 sobre `d1076b5` y 5660103879 sobre `79895a4`):** se respetan las decisiones 1 y 3 de ADR-045 (`01-decisiones.md:686` y `:688`: «sin parpadeo ni barra de progreso», «las rutas del menú se precargan», «prefetch explícito de las entradas del menú»). Se restaura la precarga por intención de las entradas del menú (prefetch parcial al verse y completo al pasar el cursor, tocar o enfocar) y se elimina el patrón `BarraNavegacion` del DS (no está en `export-ds-2.0` ni en `DISENO.md`). El e2e de navegación (`navegacion-pendiente.spec.ts`, estado estable) sigue en verde con la precarga restaurada. **Medición (`next start`, `GATE_ESTRICTO=1`):** el protocolo cumple ≤ 8 consultas y total ≤ 500 ms (Cuentas 5/113 ms, Instalaciones 7/69, Personas 8/119, Cargos 5/50, Configuración 6/40, Inicio 4/22). **Pendiente:** con la precarga activa, un clic durante la hidratación vuelve a la carrera prefetch↔navegación de Cache Components y la navegación se cuelga (el riel y el título marcan el destino, el contenido se queda en la página anterior); el `cache()` no lo resuelve y, por la decisión 1, no se vuelve a desactivar la precarga. Los dos e2e que dependen de ese clic quedan en `test.fixme` con la razón; el gate del protocolo y la señal del riel/título están en verde. **Topes de JS (ADR-037, subidas justificadas por ADR-043 v3 §7):** la maquinaria de navegación pendiente y la precarga por intención restaurada suman ~1 KB por ruta; `/(auth)/*` 152→153, `/(erp)/configuracion*` 175→176 y las fichas de persona al filo del defecto 165→166 (`personas/[id]`, `/laboral`, `/documentos`). `pnpm presupuesto` en verde. **Permisos finos del #47:** cada `include`/`_count` colapsado sigue detrás del permiso efectivo (rol + excepciones), con test `maestros-permisos-finos.test.ts`. Números y pendiente en el PR.
 
 - **Módulos vendibles por separado y capas de sueldo (25-oct, decisión de Carlos 16:53 CLT; PR solo de documentación, rama `docs/modulos-separados-capas-sueldo`, PR #34, tarea CAR-9; se integra según «Roles» de `AGENTS.md`):**
   - **ADR-048** (nuevo): cada módulo vendible depende solo del núcleo; los demás son fuentes opcionales con entrada manual o importación cuando faltan; dependencias duras: CPQ → Comercial (ADR-040) y Licitaciones → CPQ (ADR-030). Tabla por módulo (Nómina, Operaciones, Asistencia, CPQ, Licitaciones, Comercial, Rondas, Tickets, Finanzas); contrato «resumen del periodo por persona» en `packages/domain`; anexo de contrato en el núcleo con borrador automático que aprueba RRHH; pauta guardada como series y excepciones, sin repintar días pasados ni días con marca. La jornada pactada pasa al vínculo laboral. Cuatro preguntas abiertas con recomendación (capa sin Operaciones, dos fuentes activas, CPQ con instalación nueva, repintar el día de hoy). ADR-030 y ADR-042 quedan marcados como modificados.
@@ -165,16 +521,59 @@ Hasta el 24-oct-2026 este archivo fue la fuente de verdad del avance; desde ento
   - **ROADMAP:** Nómina I liquida sobre el resumen del periodo, Asistencia y Operaciones pasan a fuentes opcionales y Nómina se puede adelantar si un cliente la quiere sola; Asistencia ya no depende de Operaciones; Brief 11 con la pauta por series.
 - **Integrado en `main` (PR #35, `f1c4064`) · Plan de desarrollo por módulo (25-oct, PR solo de documentación, rama `docs/car-10-plan-desarrollo`, tarea CAR-10):** nuevo [`PLAN-desarrollo.md`](PLAN-desarrollo.md) con la etapa de cada módulo (reglas, diseño en Claude Design con su link, aprobación, brief, en `main`) y su evidencia; orden (Decisión de Carlos, 25-oct-2026, chat con OPAI 2.0 (registrada por el bot OPAI 2.0)): Núcleo primero (05 → 04 → 07b; 03 PR 2 y sesión D del 02 en paralelo) y después Puestos → Comercial → CPQ (el orden de Comercial y CPQ: Decisión de Carlos, 25-oct-2026 23:29 (t267u–t268u), chat con OPAI 2.0 (registrada por el bot OPAI 2.0)); Nómina queda en la fase 6 (se deduce de lo que dijo Carlos ~21:20, según el registro del bot OPAI 2.0, y de que desde las 23:10 exige Puestos). `ROADMAP.md` (07b pasa a la fase 1; Brief 11 adelantado; §5 reescrita), `CONTEXTO-agentes.md` y nota de ADR-030. ADR-048: Carlos respondió las cuatro preguntas (Decisión de Carlos, 25-oct-2026 23:08–23:10 (t263u–t265u), chat con OPAI 2.0 (registrada por el bot OPAI 2.0)): Nómina exige Puestos (Operaciones I); los días trabajados salen de Asistencia y la pauta no alimenta la nómina; al ganar el negocio se ofrecen los puestos de las líneas de guardias y RRHH los confirma (nuevo `modulos/cpq.md`, borrador); el día de hoy con marca o cobertura confirmada no se repinta. El Brief 07b ya no está bloqueado. Reglas de Puestos definidas por Carlos el 25-oct (mockup pendiente de aprobación) anotadas como notas fechadas en ADR-036, ADR-040 §3 y `modulos/comercial.md` (R18 y pregunta 8): los puestos no se crean solos; al ganar el negocio, cada línea de guardias de la cotización se **ofrece** para crear su puesto con el sueldo bruto cotizado y RRHH lo confirma (ADR-048, respuesta 3, 23:08–23:10). Nuevos `modulos/operaciones.md` (borrador de Puestos y guardias), `modulos/cpq.md` (borrador: solo la regla de puestos al ganar; el resto espera las 8 preguntas de la Page de CPQ) y `extraccion/operaciones.md` (esqueleto, con partes sin verificar). Sin código ni migraciones.
 
+- **Arreglos de seguimiento del Núcleo (26-oct, rama `fix/nucleo-seguimiento`, PR #59; sobre #40, #42 y #44; se integra según «Roles» de `AGENTS.md`):** no bloqueantes del Revisor y correcciones de QA, solo con el Design System de OPAI 2.0 (sin pantallas ni estilos nuevos). (1) **Campana:** `key={datos.epoca}` en `marco-shell.tsx`; se remonta al cambiar de empresa o de usuario en el mismo tenant. (2) **Portal sin acceso con salida (H1, BLOQUEANTE de QA):** el shell se monta igual sin acceso (`portal-layout.tsx` solo exige sesión), con la navegación vacía (`datos-shell.ts`), el selector de portal y empresa y el menú de usuario; el aviso «Sin permisos» vive dentro del marco (estado del DS). El usuario con sesión pero sin empresa activa ni rol de plataforma ve el marco mínimo con «Elegir empresa» (→ `/elegir-empresa`) y «Cerrar sesión». El acceso se sigue verificando en servidor (`servidor.ts`): sin acceso no se ejecutan `cargar`, `opciones` ni los hijos, y no hay navegación ni dato del portal ajeno. (3) **«Hoy» del Supervisor** solo en `/supervisor` (`exacta`). (4) **H5:** «Empresas» de Plataforma queda activo solo en su índice (`/platform`) y en el detalle de un tenant (`exacta` + `activoEn: "/platform/tenants"`), no en Trabajos, Consumos ni Ajustes. (5) **H6 (decisión t365u/t366u):** la ficha de persona del Supervisor (`/supervisor/personas/:id`) cuelga de «Hoy» (`activoEn: "/supervisor/personas"`), porque se llega por «Atrás → Hoy»; sin esto ningún ítem quedaba activo. (6) **H7:** el respaldo del título del shell deja de forzar «Inicio» en todos los portales; la página de inicio del ERP publica su propio `titulo="Inicio"`. `esActivo` y `NavItem` del DS ganan `activoEn` (prefijo extra de activación), respetado por riel, barra lateral y barra inferior, sin estilos nuevos. Tests: `seguimiento-shell.test.ts`, `seguimiento-campana.test.ts` y `packages/ds/src/shell/types.test.ts`; e2e `portales-riel.spec.ts` (sin acceso y sin empresa, con un usuario `e2e-sin-empresa@opai.cl` sembrado por `seed:multiempresa-e2e`) y `nucleo-seguimiento.spec.ts`. **#54 (shell DS v2) ya está en `main`:** al traer `main` con merge, el conflicto de `datos-shell.ts` se resolvió con `portales: conPortalActual(visibles, portal)` (de #54, sin reintroducir `const plataforma`) conservando la navegación vacía sin acceso (H1); el de `portales-riel.spec.ts` quedó en un solo e2e del portal sin acceso (riel con el nombre del portal vía `conPortalActual`, sin ítems y con el aviso); y `test:db` combina el guard de `exigir-base-test.mjs` con el `--root packages/auth` de B1. `subtituloMarca` lo eliminó #54 (verificado con typecheck). **Segunda ronda (review del Revisor 5661006027, 21:53 26-oct, + N2 de QA):** (N1) la **búsqueda del ERP exige acceso al portal**, no solo en la UI: `marco-shell.tsx` no ofrece Buscar, ⌘K ni Preferencias sin acceso (un único `enErp = portal erp + tenant + acceso`, con `acceso` nuevo en `datosShell`), y la acción de servidor `ejecutarCapacidad` (la que invoca la UI: ⌘K, campana…) devuelve `FORBIDDEN` si el usuario no tiene el portal en la empresa actual (`tieneAccesoAPortal`), de modo que `ejecutarCapacidad("erp", "core.buscar", …)` ya no filtra datos del ERP a quien no entra. (N2) ⌘K y Preferencias quedan cubiertos por el mismo `enErp`. Tests nuevos: `apps/web/test/capacidad-acceso.test.ts` (sin acceso → `FORBIDDEN` sin ejecutar la capacidad; sin sesión → `UNAUTHENTICATED`) y `apps/web/test/shell-sin-acceso.test.ts` (sin acceso el shell no monta Buscar ni Preferencias, conserva Cerrar sesión); e2e `portales-riel.spec.ts` con un usuario `e2e-sin-erp@opai.cl` (supervisor en Gard, sin el portal ERP; lo siembra `seed:multiempresa-e2e`) que en `/` ve el aviso «Sin permisos» sin Buscar ni Preferencias y con salida. Decisión de implementación del bot «OPAI 2.0»/Claude ejecutando esa review: el guard va en la acción compartida `ejecutarCapacidad` (defensa en profundidad para toda capacidad invocada desde la UI, no solo la búsqueda).
+
+### Seguimiento del PR #53 (encargo de continuidad)
+
+Merge normal de main conservando permisos efectivos, alcance del supervisor y PWA,
+con topes 153/176/166. QA del #59: N1 oculta el enlace circular si no hay empresa
+elegible; N2 conserva la protección de Buscar/⌘K/Preferencias de main; N3 publica
+«Sin permisos» en la cabecera. Decisiones técnicas de GPT-6.1 Sol dentro del encargo:
+campana con JS diferido y SSR conservado, limpieza PWA al usarla y paso directo de
+cabecera para compensar JS sin subir otros topes. Autorrevisión: se protege el
+camino de salida aunque falle la descarga del chunk y se omite el count redundante
+solo cuando la primera página de Personas contiene todo el resultado (con cursor o
+más páginas se conserva el conteo exacto y una consulta adicional). Se protege el
+catálogo opcional de cargos con el permiso efectivo y se corrigen los filtros
+relacionales del simulador con tests negativos y positivos. Precarga restaurada,
+sin barra de progreso; la hidratación sigue pendiente del #44, que todavía no se
+puede integrar. Alcance, CA y límites en
+[`briefs/BRIEF-03-pr53-seguimiento.md`](briefs/BRIEF-03-pr53-seguimiento.md).
+
 ## En curso
 
+- **Autorrevisión de Brief 05 PR B (continuación del 27-oct):** se corrigen pérdida de fijados con clics rápidos y con validación pendiente, cupos ocupados por fichas definitivamente inaccesibles, respaldo del área del rol, escrituras redundantes de área y pérdida de enlaces/lectura individual de avisos. La Bandeja muestra el total real y pagina con cursor propio sin saltar avisos cuando otra pestaña marca leído el cursor. Su interacción se carga diferida para no elevar más topes de JS. Elecciones técnicas de OpenCode / GPT-6.1 Sol dentro del encargo; sin decisión de negocio ni migración nueva. Pruebas y límites de evidencia por cada CA en el brief §16.
+  La cola captura la revisión antes de la validación asíncrona, rechaza una recarga concurrente y mezcla solo el campo escrito; la regresión conserva los fijados remotos sin enviar una escritura obsoleta. Autorrevisión técnica independiente cerrada, sin sustituir la revisión formal del PR.
+
+- **Continuación de Brief 05 PR B (encargo 27-oct-2026 05:00 CLT):** se incorpora `origin/main` `5c18a92` mediante merge normal, conservando identidad de servicio (#70), MFA (#65), «Mi cuenta» en el menú del ERP y las funciones de navegación del trabajo local. El e2e de navegación reutiliza el login con MFA de main. Adaptación técnica de OpenCode / GPT-6.1 Sol dentro del encargo, sin decisión de negocio ni migración nueva. El reporte de aceptación parcial sigue en el brief §16.
+
+- **Brief 05 · PR B (27-oct-2026, rama `brief/05-pr-b-navegacion`, sin integrar):** continuación del trabajo local conservado y merge normal de `origin/main`. Modelo de áreas y acciones declarativas, acordeón desde 1024, fijados, recientes, barra inferior por área con hoja Más, selector de área principal y Bandeja en Inicio; solo componentes/tokens del DS V2 y export aprobado `53e9b74b`. Se conserva ADR-050 (Buscar arriba en móvil, riel sin wordmark, usuario al pie) y las guardas de permisos efectivos/shell sin acceso de `main`. **Decisiones técnicas de implementación de OpenCode / GPT-6.1 Sol dentro del encargo:** `ninguna` distingue acordeón cerrado de ausencia de preferencia; revisiones optimistas más advisory lock por ajuste evitan sobrescribir una lista obsoleta; reiniciar una preferencia de navegación conserva una fila inválida para su esquema, que se lee como valor por defecto y mantiene la revisión monotónica (evita ABA). Fichas fijadas/recientes se revalidan por las capacidades de lectura existentes, fallando cerrado; no se muestran URLs arbitrarias del navegador. Sin decisión de negocio ni migración nueva. Aceptación y evidencia en `briefs/BRIEF-05-navegacion.md` §16; la tarea específica de implementación del PR B no aparece identificada en el encargo (CAR-13 corresponde al brief).
+
+- **Seguimiento de MFA, PR #65 (27-oct-2026, review 5662691274):** el límite con sesión
+  pasa al before hook de TOTP/respaldo, incluidas llamadas HTTP directas y confirmación
+  de enrolamiento; la reserva usa UPDATE condicional de Prisma con retorno y reintento
+  por conflicto. Confirmar exige usuario sin MFA activo y fila pendiente. Solo se
+  corrige la fixture MFA de portal, sin relajar el gate. La preparación MFA de e2e se
+  mueve al seed común de e2e/rendimiento, sin cambiar workflows. Elecciones técnicas
+  de OpenCode / GPT-6.1 Sol dentro del encargo, sin decisión de negocio ni migración
+  nueva. Esta nota sustituye el encadenamiento antiguo a `seed:multiempresa-e2e` y
+  la brecha de confirmación descritos en la entrada histórica NÚCLEO-F de abajo.
+  Gate completo y seis e2e MFA en verde; protocolo estricto de rendimiento en verde
+  (conserva un fixme previo). Detalle, criterios y límites en
+  [`briefs/ENCARGO-mfa-review-5662691274.md`](briefs/ENCARGO-mfa-review-5662691274.md).
+
 **Cierre del Núcleo (fase 1).** **Criterio de término (26-oct; Decisión de Carlos, 26-oct-2026 9:20 CLT (transmitida por el bot Paridad, registrada por el bot OPAI 2.0)):** el Núcleo no se cierra hasta que las 4 brechas Altas de paridad con 1.0 estén en `main`: **B1** bloqueo de login persistido en la base, **B2** roles y permisos finos al nivel de 1.0 y **B3** alcance del supervisor por instalación (ADR-022; solo el supervisor en la fase 1, los portales Cliente y Trabajador con sus propios briefs en la fase 3), los tres en el Brief 07c «Acceso y permisos», después del 07b (Decisión de Carlos, 26-oct-2026 9:36 CLT, chat con OPAI 2.0 (registrada por el bot OPAI 2.0)), y **B4** Ley 21.719 por diseño (Brief 07d, fecha límite 30-nov-2026, porque la ley rige el 1-dic-2026). Detalle en «Pendientes del Núcleo por paridad con 1.0», al final. Pendientes, en orden:
+
+- **En revisión (no integrado) · NÚCLEO-F · Segundo factor (MFA) con el plugin `twoFactor` de Better Auth (P1 de la auditoría del núcleo del 26-oct-2026; rama `core/mfa`):** TOTP con códigos de respaldo (plugin `twoFactor`, sin secreto nuevo: cifra con `BETTER_AUTH_SECRET`). Migración `20261028060000_mfa` (con `migracion-pendiente`): `users.two_factor_enabled` y tabla de identidad `two_factor` (secreto, códigos de respaldo, `verified`, `failed_verification_count`, `locked_until`), sin `tenant_id` ni RLS como `users`, solo la toca `@opai/auth`. Bloqueo por cuenta en el paso de verificar el código (`accountLockout`: 5 intentos, pausa de 15 min, mismo aviso que B1) sin romper los hooks de B1. Pantallas con el DS V2 de `export-acceso` (`AuthCard`, `Alerta`, `InputPassword`, nuevos `CodigoQr` y `CodigosRespaldo`): verificar en el login, enrolar (QR + clave + códigos de respaldo) en `/activar-mfa` y gestión en Mi cuenta. **Política (Decisión de Carlos, 26-oct-2026, chat con OPAI 2.0):** obligatorio para plataforma (siempre) y para `owner`/`admin` de cada tenant (ajuste `core.seguridad_mfa_obligatorio_admins`, por defecto obligatorio); los demás opcional. Gate server-side en `PaginaPortal`: sin segundo factor y obligatorio → a enrolarse antes de entrar. API keys y MCP sin cambios; SSO queda como P2. Parcial consciente: la verificación por correo/OTP queda pendiente (ver PR). QA de Diseño y QA OPAI 2.0 sobre el head `7ebfe9a`: corregidos los dos bloqueantes (H1 salidas en `/activar-mfa` y `/mfa` —«volver», «Cerrar sesión», «Volver a iniciar sesión»— y H2 copiar/descargar los códigos de respaldo, clave agrupada, aviso y checkbox obligatorio antes de activar) más H4–H7 y H9; H3/H8/H10/H11 quedan en seguimiento. El owner de los e2e queda con el segundo factor resuelto encadenando `seed:e2e-mfa` a `seed:multiempresa-e2e` (ambos solo-local, el último seed del job de e2e), sin tocar el workflow. Revisor (review `5661449001` sobre `77d2dbb`), los 4 bloqueantes resueltos con pruebas: Google ya no se salta el TOTP (marca `sessions.mfa_verified` por sesión, migración `20261028070000_mfa_sesion`); la API con cookie, las Server Actions y `core.apikeys.create` exigen el segundo factor por el mismo punto que las pantallas (`verificarMfaDe`/`estadoMfaDe`); plataforma/owner/admin ya no pueden rebajar la exigencia con el ajuste del tenant (nota en ADR-015 y 01-decisiones.md); la política pura se movió a `@opai/domain`, sin Prisma. ADR-015 (nota MFA). **Pedidos del Revisor (review `5662337649` sobre el PR #65), resueltos:** (B) rama al día con `main` por merge normal, sin rebase (el `ci.yml` del merge quedó igual al de `main`, con el job `rendimiento`; `apps/web/presupuesto-js.json` combinó el tope de `/(auth)/activar-mfa` propio con el de `/(erp)/configuracion*` y la ruta `/(erp)/personas/[id]` de `main`); el fetch trajo también el PR #69 de `main` (una línea después del `57cd1cf` que pedía el encargo, ya integrado cuando se hizo el merge), sin relación con MFA. (A) CI en rojo por `DATABASE_URL`: `apps/web/lib/mfa.ts` importaba `./actor` (y con él `@opai/auth`, que construye `betterAuth(...)` al cargarse) de forma estática, así que cualquier prueba que solo importe `PaginaPortal` arrastraba esa dependencia aunque nunca llamara al código que la necesita; ahora el import es diferido (`await import("./actor")` dentro de `mfaObligatoriaPara`, solo cuando el tenant exige el ajuste). `apps/web/test/mfa-portal-supervisor.test.ts` tenía el mismo problema por una vía distinta (`import { identidadDe } from "../lib/actor"` estático, antes de su propio `vi.stubEnv`): se cambió al patrón de `actor.test.ts` (import dinámico en `beforeAll`, después del `stubEnv`). `packages/auth/scripts/seed-e2e-mfa.ts` ya no importa `../src/auth` (solo tenía `DATABASE_URL_MIGRATE` en ese paso del job de e2e; `DATABASE_URL` se exporta a `$GITHUB_ENV` para los pasos siguientes, no para ese): usa `dbAdmin()` y `process.env.BETTER_AUTH_SECRET` directo (es literalmente el `secretConfig` del plugin cuando no hay `secret`/`secrets` explícitos en `auth.ts`, que no los tiene); verificado de punta a punta corriendo el seed contra `opai_e2e` y los dos casos de `e2e/mfa.spec.ts` reales. (C) con sesión ya creada (Google u otro social con MFA pendiente, mismo caso del #68) el `accountLockout` del plugin `twoFactor` no corre (solo en el desafío de login sin sesión, `isSignIn` dentro de `verifyTwoFactor` de better-auth 1.7.12): `packages/auth/src/mfa-bloqueo-con-sesion.ts` replica el mismo tope (`MFA_LIMITE_INTENTOS`/`MFA_BLOQUEO_SEGUNDOS`, 5 intentos / 15 min) reutilizando las columnas que ya tenía el plugin (`failed_verification_count`, `locked_until` de la migración `20261028060000_mfa`), **sin migración nueva**; `verificarSegundoFactor`/`verificarCodigoRespaldo` (las que usa `accionVerificar` del login) lo aplican para TOTP y respaldo; prueba de base nueva (`mfa-bloqueo-sesion-db.test.ts`): 5 fallos bloquean, el sexto se rechaza con el código correcto, y con `locked_until` vencido vuelve a entrar y limpia el contador. Decisión de Claude (constructor), no pedida explícita: no se extendió el mismo bloqueo a `confirmarSegundoFactor` (paso 2 del enrolamiento, también con sesión y también sin el `accountLockout` del plugin) porque exige conocer antes la contraseña y un secreto recién generado — riesgo menor, pero queda la misma brecha en teoría; pendiente si Carlos quiere cerrarla. Hallazgo sin corregir (fuera del alcance de este encargo): `apps/web/e2e/platform-superadmin.spec.ts` no pasa el desafío `/mfa` al iniciar sesión con el owner de plataforma (a diferencia de `e2e/sesion.ts`), así que falla desde que NÚCLEO-F volvió obligatorio el segundo factor para cuentas de plataforma; no lo causó este PR (ya fallaba antes, solo el test unitario equivalente se adaptó en el commit `1e101de`).
+- **En revisión (no integrado) · CAR-16 · Endurecer el bloqueo de login (seguimiento del #46, rama `fix/login-endurecer`):** el bloqueo ya integrado queda más firme. Migración `20261026150000_login_endurecer` (con `migracion-pendiente`): índices por IP y parcial de éxitos, `marcar_login_intento` por UUID y purga con mínimo de 30 días. El lock por correo espera hasta 400 ms y, si no se libera, responde 429 (riesgo residual registrado en el brief 07c §16.3); un test con Better Auth real cubre el camino `before` → UUID → `after`; solo un ingreso correcto exime del tope global; el error del `after` se registra sin datos personales; la purga del cron va aislada; el texto de pantalla dice «Tras varios intentos pausaremos el acceso unos minutos». Documentado en el brief 07c (§16.3): IP nula o compartida (NAT) y que rotar `BETTER_AUTH_SECRET` reinicia los contadores. Decisión de este PR, tomada por Carlos en el encargo CAR-16.
+- **En revisión (no integrado) · Brief 07c · PR 1 (B1 · bloqueo de login persistido), PR #46, rama `brief/07c-acceso-y-permisos`:** el bloqueo por fuerza bruta vive en la base (`core.login_intentos`, solo-anexar) y se decide **contando** los fallos de contraseña en una ventana por correo+IP (5), correo (20) e IP (30), no con un contador mutable: así no hay carrera, cubre los correos que no existen sin revelar si existen (correo en HMAC con clave derivada del secreto de auth) y el límite por IP no se evita con un POST directo. Se engancha en `@opai/auth` (hook de Better Auth). Purga diaria de intentos fuera de retención (función `SECURITY DEFINER`, el cron la llama). Tras la revisión del Revisor (review `5658257648`) se rehízo el modelo; queda **en revisión**, no está en `main`.
 
 - **Integrado en #36 (26-oct, squash `72ddaa7`) · Brechas de paridad en el cierre del Núcleo (26-oct, PR solo de documentación, rama `docs/paridad-brechas-nucleo`; se integra según «Roles» de `AGENTS.md`):** origen, la revisión semanal del bot Paridad OPAI 1 vs 2 (`paridad/nucleo.md`), con aprobación de Carlos (Decisión de Carlos, 26-oct-2026 9:20 CLT (transmitida por el bot Paridad, registrada por el bot OPAI 2.0)). B1 a B4 entran en el criterio de término del Núcleo (ESTADO, `PLAN-desarrollo.md`, `ROADMAP.md`). Nuevas entradas **Brief 07c · Acceso y permisos** (B1, B2 y B3; B3 movido desde el Brief 12 por Decisión de Carlos, 26-oct-2026 9:36 CLT, chat con OPAI 2.0 (registrada por el bot OPAI 2.0)) y **Brief 07d · Ley 21.719** (B4, antes del 30-nov-2026), solo con alcance y criterio de aceptación de alto nivel; los briefs se escriben después y los aprueba Carlos. Salen del backlog los roles personalizados (al 07c) y la cadencia de seguimiento comercial (a Comercial, configurable por paso; `modulos/comercial.md` R29), con notas fechadas en ADR-022, ADR-030 y ADR-040 (Decisión de Carlos del 24-oct-2026, confirmada el 26-oct-2026 9:20 CLT). Numeración 07c «Acceso y permisos» y 07d «Ley 21.719» confirmada por Carlos el 26-oct-2026 a las 9:48 CLT (chat con OPAI 2.0); la propuso el bot OPAI 2.0 a recomendación de Claude (~9:23 CLT), porque el 13 y el 14 estaban ocupados. Sin código ni migraciones.
 
 
 
 1. **Seeds en Neon** (Carlos, desde el Mac; aprobados): `dev` → `pnpm --filter @opai/db seed:dev-tenant` y luego `seed:maestros-demo`; `main` → solo `seed:dev-tenant` (respaldo en `pre-brief02-main`).
-2. **Secretos de los previews por PR** (`.github/workflows/preview.yml`, Carlos con `gh secret set`): `NEON_API_KEY`, `NEON_PROJECT_ID`, `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`, `OPAI_APP_DB_PASSWORD`. Sin ellos el workflow se omite; en el primer PR con secretos, revisar que la preview use su rama Neon. Preview de Vercel: apuntar `DATABASE_URL` por defecto a la rama `dev`.
+2. **Secretos de los previews por PR** (`.github/workflows/preview.yml`, Carlos con `gh secret set`): `NEON_API_KEY`, `NEON_PROJECT_ID`, `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`. Si falta alguno, el workflow falla con `::warning::` (solo se omite en PRs de fork, sin acceso a secretos); la contraseña de `opai_app` la genera cada rama de preview. El workflow fija `vercel@65.3.1` y `neonctl@8.12.1` (subir con un PR), borra al abrir cada PR las ramas `preview/pr-N` de PRs ya cerrados (tope de 10 ramas del plan) y tolera solo el 404 al limpiar. Decisión de Claude (encargo `ci/preview-endurecer`, seguimiento del #50); en el primer PR con secretos, revisar que la preview use su rama Neon. Preview de Vercel: apuntar `DATABASE_URL` por defecto a la rama `dev`.
 3. **Verificación guiada del Brief 02 (bloque 14)** en `test.opai.cl`, con Carlos; incluye verificar con R2 real la huella firmada en el PUT.
 4. **Paridad MCP del núcleo:** integrada a `main` (rama `brief/paridad-mcp-geo`, ver Hecho). **Pendiente de Carlos:** correr `OPAI_MCP_KEY=<key> pnpm mcp:verificar` desde el Mac y, si da 164 herramientas y Grok muestra 23, volver a crear el conector en Grok.
 5. **Arreglos de QA del núcleo:** en curso en otro chat.
@@ -193,7 +592,8 @@ Hasta el 24-oct-2026 este archivo fue la fuente de verdad del avance; desde ento
 - Resuelto el 23-oct: key «Grokbot» rotada (la anterior, `opai_gard_heLe…`, revocada; `/api/mcp` la rechaza con 401); URI de redirección de Google configurada; CI en verde; contraseña inicial de `carlos.irigoyen@opai.cl` cambiada; Gard Security en estado `activo`.
 - Pendientes de diseño del sistema: logo definitivo de OPAI; contraste de `--ds-border-strong` (1,5:1) en el portal Trabajador a pleno sol.
 - **Brief 05 · Navegación por áreas: propuesto, pendiente de la aprobación de Carlos** (26-oct, PR solo de documentación, rama `docs/brief-05-navegacion`, PR #37; `Fixes CAR-13`, `Refs CAR-12`; se integra según «Roles» de `AGENTS.md`): `briefs/BRIEF-05-navegacion.md` sobre el diseño aprobado (fuente: «Confirmo que apruebo el diseño 53e9b74b» — Carlos, 26-oct-2026 10:51 CLT, chat con el Revisor OPAI 2.0 (t117u; dictado por voz); [Claude Design](https://claude.ai/design/p/53e9b74b-3cbf-4ad4-858f-271dfc2ef465), 28 pantallas), D1–D10 decididas por el bot OPAI 2.0 bajo la delegación de Carlos: «Sí, que OPAI 2.0 decida los criterios de navegación. […] Pero todos tienen que ser con la paleta de diseño» — Carlos, 26-oct-2026 10:53 CLT, chat con el Revisor OPAI 2.0 (t120u; dictado por voz) (D10 además es regla de ADR-016), en `NAVEGACION.md` §10. Incluye como criterio obligatorio la cabecera estable de CAR-12 (e2e a 375, 1024 y 1280 px) y propone dos PRs (cabecera primero; el PR B espera el PR 2 del Brief 03). El export del diseño todavía no está en el repo: el bloque 0 del PR B lo exige. Reserva además el punto de entrada del agente interno (ADR-049, PR #38). Sin código ni migraciones.
-- **Brief 04 · Base PWA: aprobado para ejecución** (Carlos, 26-oct-2026 13:45 CLT, t332u, «ok a las 5 del Brief 04, lánzalo»; PR solo de documentación, rama `docs/brief-04-pwa`, `Fixes CAR-18`; se integra según «Roles» de `AGENTS.md`): `briefs/BRIEF-04-pwa.md` sobre ADR-044 (pedido por Carlos, «escribe el Brief 04», 26-oct-2026 13:06 CLT, t328u, chat con el bot OPAI 2.0). Propone dejar lista la base PWA (un solo manifest de OPAI con ruta de entrada al portal por membresía, íconos, service worker con página sin conexión, actualización controlada y prueba en CI); la cola sin conexión de terreno y el push nacen con el primer módulo de terreno (ADR-044). No necesita diseño propio y no depende del PR 2 del Brief 03 ni del Brief 05. Verificado sobre `main` `f656324`: sin manifest, service worker ni íconos; **Serwist y `@lhci/cli` no están en los `package.json`** pese a ADR-044. Trae §17 «Decisiones para Carlos» (ruta de entrada del `start_url`, service worker Serwist o propio mínimo, Lighthouse CI como gate o informe, íconos provisionales, alcance del service worker). Sin código ni migraciones.
+- **Brief 07c · PR 2 — B2 · Roles personalizados y permisos finos: en revisión (PR #47, `Refs CAR-16`)** (26-oct, rama `brief/07c-pr2-roles-permisos`; se integra según «Roles» de `AGENTS.md`): roles personalizados por tenant (`core.roles`), excepciones de permiso por usuario (`core.permiso_excepciones`), `Membership.role_id` opcional (null = rol base), resolución de permisos efectivos en `@opai/domain` (`tienePermisoEfectivo`, `permisosEfectivos`, `permisosNoConcedibles`) y capacidades `core.permisos.catalogo`, `core.roles.list/create/update/archive/assign` y `core.excepciones.list/set`. Migración aditiva con RLS y trigger de mismo tenant; su orden respecto del PR 1 es **decisión de OPAI 2.0** (autorizado por Carlos para decidir en el Núcleo). Blindajes de escalamiento de la revisión 5658269602 (roleId null, quitar denegaciones, owner protegido de excepciones, §16.2 solo owner/admin gestionan roles, acceso real en `users.update`/invite, rol archivado deniega por defecto, comodines expandidos al guardar, seed idempotente solo `dev`/`test`) con tests por caso. Equivalencia 1.0 → 2.0 en `docs/2.0/paridad/equivalencia-roles.md` con mínimo privilegio (rrhh/finanzas/payroll a roles acotados propios, nunca gerente). **Falta solo la pantalla** (bloque 6, pendiente de diseño). Verificación local: `typecheck`, `lint`, `test` (517) y `test:db` en verde; e2e `configuracion-acceso` en verde en este worktree.
+- **Brief 04 · Base PWA: en revisión** (PR #45, rama `brief/04-pwa`, `Fixes CAR-18`; aprobado para ejecución por Carlos el 26-oct-2026 13:45 CLT, t332u, «ok a las 5 del Brief 04, lánzalo»; se integra según «Roles» de `AGENTS.md`, no está «Hecho» hasta el merge con las tres condiciones de ADR-043 v3): implementa la base PWA de ADR-044 — un solo manifest de OPAI (`app/manifest.ts`), ruta de entrada `/entrar` que abre el portal por membresía (preferencia en cookie `opai_portal` solo en el dispositivo, D1), íconos provisionales del DS (D4), **service worker propio mínimo** (`public/sw.js`, D2: el spike de Serwist no fue limpio con Turbopack), página sin conexión del DS, actualización controlada, aviso de instalar, presupuesto de terreno y `e2e/pwa.spec.ts`. La cola sin conexión de terreno y el push nacen con el primer módulo de terreno (ADR-044). No necesita diseño propio y no depende del PR 2 del Brief 03 ni del Brief 05. Sin migraciones ni capacidades nuevas. **Correcciones del Revisor (review 5658204346):** limpieza de cachés (`trasLimpiarCaches`) también en las salidas y el cambio de empresa del selector de empresa y en la salida de la invitación (§4.4, CA8); `COOKIE_PORTAL` movido a un módulo sin `"use client"` para que el servidor lea la preferencia (antes `/entrar` no la leía; cubierto por `e2e/entrar-cookie-portal.spec.ts`); **D3 (b) cumplido como informe** en `docs/2.0/informes/lighthouse-brief04.md` (Lighthouse 11.7.1 contra `next start`: rendimiento 96–98, accesibilidad 100, PWA 100 en `/login` y `/sin-conexion`); **ADR-044.6/.7 enmendados** (tope de terreno de 150 KB con pantallas reales, Lighthouse como informe hasta el primer módulo de terreno), enmienda decidida por el bot OPAI 2.0 bajo la delegación de Carlos del 26-oct-2026 16:54/16:59 CLT (t365u y t366u) a decidir todo el Núcleo. **Correcciones del Revisor (review 5658598581):** `trasLimpiarCaches` por import dinámico e `InvitacionNoVigente` en un chunk aparte (`lazy`) para que `/(auth)/invitacion/[slug]/[token]` quede en el tope de 152 KB sin subirlo (ADR-037); el service worker devuelve `fetch(request)` tal cual en la navegación, así el navegador sigue los redirects del servidor (salir → /login, /entrar de D1) y la barra queda en el destino, cubierto por `e2e/pwa-redirect.spec.ts` con el service worker controlando la página.
 
 ## Pendiente (siguiente)
 
@@ -224,8 +624,9 @@ Node 22 · pnpm 10.28 · Next.js 16.4.2 · React 19.3.0 · Tailwind 4.3.3 · Pri
 
 ## Decisiones tomadas durante la ejecución
 
+- **Brief 07d · PR 1 (RAT por actividad, corrección QA 26-oct, C10/C11; decisiones de Claude, no legales).** Sobre el inventario por tabla (que se conserva como `porTabla`) va un catálogo de actividades de tratamiento en `@opai/domain` (`actividades-tratamiento.ts`), en lenguaje de negocio. Decisiones: (1) el mapa de categorías técnico→negocio muestra `credenciales` bajo «Identificación» (las 5 de la sábana son Identificación, Contacto, Laboral, Económica, Sensible); (2) se inventaría `login_intentos` (entró con el #47) y se cubre en la actividad «Intentos de ingreso»; su retención la fija el PR 3 (coordina con 07c, §4.5); (3) la retención queda **pendiente** (`retencionPendiente`) hasta el PR 3: no se adoptan como dato los plazos de muestra de la sábana (brief §16.4); (4) se completan los destinatarios del inventario con Resend (correo) e IA (lectura de documentos), marcados «a confirmar por legal» (§4.4); (5) la actividad 4 del RAT (tabla `envios`) es «Notificaciones y avisos operativos» con base **interés legítimo** —no comunicaciones comerciales con consentimiento—, coherente con `inventario.ts` (la tabla `envios` es la bitácora de notificaciones transaccionales, base interés legítimo) y con la decisión de Carlos t331u (§16.2: el consentimiento se reserva a los fines accesorios); corrección pedida por el Revisor OPAI 2.0 (revisión 5660773270, 26-oct-2026), no es una base de licitud nueva como dato legal. La lectura `core.cumplimiento.dpa_texto` deja al owner leer el texto y el hash SHA-256 del DPA que va a aceptar (C06). Detalle en `briefs/BRIEF-07d-ley-21719.md` §4.3.
 - `/ds` en vez de `/_ds`: en App Router las carpetas con `_` son privadas y no generan ruta. Sigue siendo solo fuera de producción (404 en producción, verificado).
-- RLS con `ENABLE` y no `FORCE`: el rol propietario (migraciones, importaciones, seeds) debe poder escribir en todos los tenants; la aplicación solo se conecta como `opai_app`, que no puede saltarse la RLS. El test de aislamiento lo prueba. La política usa `NULLIF(current_setting('app.tenant_id', true), '')::uuid` para que una sesión sin tenant devuelva cero filas en vez de error.
+- RLS con `ENABLE` y `FORCE` (NÚCLEO-G2): En Neon, neondb_owner, dueño real de las tablas y rol de prisma migrate deploy, tiene BYPASSRLS (proyectos creados desde ago-2023), por lo que FORCE no le afecta. FORCE queda como defensa en profundidad para dueños sin BYPASSRLS, por ejemplo local/CI o un dueño distinto. La garantía real es que la aplicación corre como opai_app, sin BYPASSRLS, con tenant_isolation. Adaptación documental de Codex solicitada en la revisión 5672596436. El dueño NOBYPASSRLS también queda sujeto a políticas. Los scripts cross-tenant requieren mantenimiento BYPASSRLS explícito; `opai_app` nunca lo recibe. La política usa `NULLIF(current_setting('app.tenant_id', true), '')::uuid` para que una sesión sin tenant devuelva cero filas en vez de error.
 - Componentes base propios (Button, Input, Select, Badge, Card, Tabs, Sheet, Table, Skeleton) en vez de la CLI de shadcn: el diseño aún no existe y la CLI escribe en la app, no en el paquete. shadcn/Radix se evalúa en el Brief 00b con el diseño aprobado.
 - Registro de módulos como paquete `modules/registry` (`@opai/modules`) en vez de `modules/index.ts`: Next necesita un paquete resoluble. Los módulos se compilan sin listarlos en `transpilePackages` (verificado con build).
 - `prisma generate` en `postinstall` de `@opai/db` para que el build de Vercel tenga el cliente; `prisma.config.ts` usa un placeholder cuando falta `DATABASE_URL_MIGRATE` para que `generate` no falle.
@@ -253,13 +654,30 @@ Node 22 · pnpm 10.28 · Next.js 16.4.2 · React 19.3.0 · Tailwind 4.3.3 · Pri
 
 - Brief 02 (sesión C): presupuesto de JS por ruta ajustado para pantallas con formularios visibles o bandejas (Configuración 175 KB, nueva instalación 177 (+1 KB por el aviso de error del campo de dirección, brief de paridad), vencimientos 175, cargo 167, ficha de empresa en Plataforma 168, `/ds` 220 solo desarrollo); las rutas con tope propio usan ese tope completo y el resto mantiene el máximo de 35 KB sobre el framework. Las fichas de maestros quedaron bajo 165 KB tras diferir hojas, avisos y Combobox. Cargos y sueldos vive en `/cargos` (no `/personas/cargos`) y solo aparece en la barra lateral de desktop (en teléfono va en "Más"). Sin asignaciones persona↔instalación todavía: se omiten la columna Instalación en Personas, la vista "Por instalación" de Vencimientos y "en su puesto ahora" en terreno. El tema elegido en Preferencias se guarda en `core.config` y se aplica por dispositivo antes de pintar (`localStorage`). Aprobaciones muestra los valores propuestos (sin columna "antes").
 
+- Brief 11 · Puestos PR 1 (#49, tras la revisión 5658390255 y los bloqueantes de Diseño y QA del 26-oct, 17:16 CLT): se sacó del repositorio el export de Puestos con estilo 1.0 por la regla de Carlos del 26-oct-2026 17:18 CLT («nunca copiar el diselo de 1.0, se debe usar el design system aprobado»), y su recorrido queda en texto en `referencias/flujo-puestos.md`. Tras la segunda corrección del PR #49 (revisión 5659984187 y QA del informe de PR #54): se agregó el export aprobado en DS 2.0 (Claude Design, proyecto `3e9a6632`, DS 2.0 v2 `44e4d7b9`; aprobado por Carlos el 26-oct-2026 20:08 CLT, `t436u`) en `docs/2.0/diseño/export-puestos/` como referencia visual, y la **Configuración de Patrones de turno y Funciones ya no se aplaza**: entra en este PR dentro del centro de Configuración, con lista, edición y estados sobre `core.patrones.*` / `core.funciones.*`. Permisos finos del #47: `core:patrones.{read,manage,desactivar}` y `core:funciones.{read,manage,desactivar}`. Las funciones base se siembran solo en desarrollo y pruebas. La integridad de los catálogos va en una migración aparte, `20261028040100_puestos_integridad`, porque la rama Neon del preview ya pudo aplicar la primera (decisión del constructor, Claude). El bordes de control del DS de `main` (tras el #54/ADR-050) es `border-control`; las pantallas de Puestos lo usan. Detalle en `briefs/BRIEF-11-puestos.md` §7. Tras la tercera corrección del PR #49 (revisión 5660904778 del 26-oct, 21:36): (a) **Puestos va primero, sin esperar al CRM** (Decisión de Carlos, 26-oct-2026 20:21 CLT, `t443s2067`: «Sí, Puestos primero, sin esperar al CRM»); se integra sin esperar al CRM PR 1 y la migración del CRM llevará una fecha posterior a `20261028040100` (se corrige «después de la del CRM» en el brief y en `alcance-puestos`). (b) El rol **supervisor** ahora tiene `core:patrones.read` y `core:funciones.read` (antes no los tenía, por lo que recibía FORBIDDEN en list/get por API v1 y MCP y veía los catálogos vacíos en la hoja de puestos de la instalación); lee pero no edita ni desactiva (pruebas por rol en `permisos-nucleo.test.ts` y `maestros-patrones-reglas.test.ts`). Tras la QA de diseño del PR #49 (informe `/workspace/qa/pr49/informe-29e1c93.md`, 26-oct 22:10 CLT; un commit por el BLOQUEANTE H1 y los no bloqueantes H2–H10): la **lista de puestos** usa, desde tablet (≥768 px), la `Table` del DS con columnas Puesto · Función · Horario (con badge «+1 día» cuando cruza medianoche) · Patrón · Cobertura · Estado, más buscador (`?q=`), chips Todos/Solo PPC/Inactivos (`?filtro=`) y subtítulo con los conteos; en teléfono se mantienen las filas y se suman buscador y chips. **Desvío decidido** (QA H1, informe citado): la columna «Dotación N de M» del diseño `t436u` **no aplica** con 1 puesto = 1 posición, así que se muestra como «Cobertura» (Cubierto / PPC · Sin asignar). La hoja de puesto: subtítulo «instalación · cuenta», «Guardar cambios», «Término» en vez de «Fin», confirmación con `Dialog` antes de desactivar, y alerta si fallan los catálogos (sin dejar «Crear puesto» deshabilitado sin aviso). La **jornada** se deriva del horario (rota ⇒ rotativa; noche si el tramo empieza ≥ 18:00), en vez de un radio aparte que podía contradecir la rotación. En Configuración, la «Clase» de un patrón en uso se muestra como texto. Medidas fuera de escala reemplazadas por tokens del DS; la vista de ciclo de la hoja ya no desborda a 375 px. Tras la autorrevisión del PR #49 antes del push (decisiones del constructor, Claude): (a) **bloqueante de alcance corregido** — `core.patrones.list/get` contaban todos los puestos activos del patrón en el tenant, sin aplicar el alcance del supervisor (B3, ADR-022); el conteo `puestosActivos` ahora filtra con `dondePuesto(ctx)` (fail-closed: sin instalaciones a cargo, cero), con pruebas negativas en `alcance-db.test.ts` (supervisor con alcance parcial no ve los puestos de una instalación ajena) y en `puestos-db.test.ts` (el conteo no cruza tenants). Un subagente de revisión encontró la misma fuga en `core.funciones.list/get` (mismo patrón, mismo permiso `funcionesRead` del supervisor): corregida igual, con la misma prueba en `alcance-db.test.ts`. `core.cargos.*` tiene el mismo conteo sin filtrar (`cargos-vista.ts`), pero su permiso (`estructurasRead`) no lo tiene el supervisor, así que hoy no hay fuga práctica; se deja sin tocar (fuera del alcance de este punto) y anotado aquí para un futuro brief que dé `estructurasRead` a un rol acotado. (b) **Carrera real confirmada y cerrada** entre desactivar un patrón (`core.patrones.set_activo`) y elegirlo al mismo tiempo en un puesto nuevo o distinto (`core.puestos.create`/`update`): la lectura de `activo` en `componer` es anterior a la transacción de escritura y sin lock, así que un `set_activo` concurrente podía dejar un puesto con un patrón ya inactivo (reproducido con dos transacciones Postgres manuales antes de corregir). Se cierra con un advisory lock por patrón (`pg_advisory_xact_lock(hashtextextended(id,1))`, mismo idioma que `bloquearCaso` en incidentes) tomado por `set_activo` y por la nueva relectura `patronSigueActivo` dentro de la transacción de `puestos.create`/`update`, en vez de tocar el trigger `puesto_ciclo_del_patron` (20261028040100): ese trigger se usa también desde `dividir-dotacion-nucleo.ts` para copiar un puesto preservando su `patronId` tal cual (incluido uno ya inactivo), y exigir "activo" ahí habría roto esa división. El cambio de estructura (clase, ciclo, días) no necesitó un lock nuevo: ya queda serializado por el `FOR SHARE` del mismo trigger más `patron_en_uso_inmutable`, confirmado con una prueba de concurrencia (dos transacciones forzadas a un orden exacto) que no encontró corrupción. Sin migración nueva. Pruebas de concurrencia en `puestos-db.test.ts`.
+- fix/roles-sabana (Núcleo 07c, backend de la sábana A; decisiones del Núcleo tomadas por Claude, autorizado por Carlos el 26-oct-2026 para decidir en el Núcleo —misma autorización que `equivalencia-roles.md`—):
+  - **Último acceso (A02):** `ultimoAccesoEn` sale de `core.sessions` (Better Auth), la sesión más reciente del usuario. No se agregó columna ni se tocó el flujo de login (evita el oráculo de enumeración de B1); una sesión expirada y purgada deja el valor en null.
+  - **Rol base bajo un personalizado (A21):** al asignar un rol personalizado (`core.users.update` con `roleId`, o `core.roles.assign`) el rol base subyacente es el que la membresía ya tenía (o el que se pase a la vez); owner nunca lleva personalizado; `roleId: null` vuelve al rol base. El rol base solo rige jerarquía (`puedeAsignarRol`); la autorización la da el personalizado.
+  - **Catálogo ver/gestionar (A08–A10):** las filas de la matriz son por recurso con `ver`/`gestionar` (null = N/A). Van al grupo «especiales/sensibles» los permisos con verbo distinto de `read`/`manage` (p. ej. `estructuras.read_sensible`, `tenant.delete`) más `owners.manage` por ser gobierno sensible. El catálogo incluye los módulos inactivos con `activo:false`; un rol puede llevar permisos de un módulo inactivo, inertes hasta que el módulo se active (la autorización filtra por módulos activos), por eso la escritura no los rechaza.
+  - **Error estructurado (A10):** «No puedes conceder permisos que tú no tienes» ahora devuelve también `error.detalles.permisos` (lista de ids) para que la UI los traduzca a nombres sin parsear el texto.
+  - **Textos de owner:** `core.users.update` usa los de la sábana (ParteA:528): «Es el único owner de la empresa. Asigna otro owner antes de cambiar su rol.» y «Solo un owner puede cambiar a otro owner.». `core.users.remove` conserva su propio texto («Es el último owner de la empresa: no se puede quitar.»).
+  - **Descripción de rol:** máximo 140 (antes 500), solo en la escritura; los datos previos que lo superen no se truncan. El seed `seed:roles-base` se acortó a ≤140 (dev/test, sin cambiar permisos).
+  - **Permisos efectivos en la UI (QA 1.1):** `apps/web/lib/permisos-ui.ts` calcula `puede(p)` con el acceso real (rol personalizado + excepciones), usado en el índice de Configuración y en las páginas marca/empresa/módulos/documentos. **Pendiente tras el #54:** `navegacion.ts`, `_components/datos-shell.ts` y el portal supervisor (los cambian #54 y #51).
+  - **roleId no lo asigna una API key (seguridad, review 5660564536 §3):** `core.users.update` acepta `roleId` pero no puede ser `soloPersonas` entera (un agente sí cambia portales o estado); por eso, cuando viene `roleId`, rechaza con `FORBIDDEN` si el actor es un agente (`ctx.actor.tipo === "agent"`), con la misma regla que `core.roles.assign` (soloPersonas, ADR-032). Sin esto, una key de admin asignaría o quitaría roles personalizados que `core.roles.assign` veda a los agentes. Test en `core-users.test.ts`. Decisión de ejecución de Claude (Núcleo), siguiendo la review del Revisor.
+  - **Inspector DT ve sueldos y auditoría (Decisión de Carlos, 26-oct-2026 20:48 CLT, respuesta t74s350 en el chat de Diseño y QA: "Sí, el Inspector DT ve sueldos y auditoría; cambia el seed"):** el rol sembrado «Inspector DT» suma `core:estructuras.read` («Estructuras y sueldos: ver» de la sábana) y `core:audit.read` («Auditoría: ver»). Actualizado `seed-roles-base.ts` y `equivalencia-roles.md`; con esto se cierra la diferencia 5f que el PR había dejado anotada para Diseño.
+  - **Descripciones del seed en lenguaje simple:** las de los cinco roles sembrados (`seed-roles-base.ts`) se reescribieron sin jerga interna («mínimo privilegio», «acotado»), explicando en palabras del negocio qué ve cada rol y qué le habilita aparte el dueño o el administrador. Siguen ≤140.
+  - **Seed idempotente que actualiza sin pisar (I1 de la QA del PR #60, aplicado por Claude):** antes el seed dejaba sin tocar un rol plantilla que ya existía, así que un «Inspector DT» sembrado antes de la decisión t74s350 se quedaba sin sueldos ni auditoría. Ahora la decisión vive en `scripts/roles-base-plantillas.ts` (`decidirAccionRol`): crea el que falta, no reescribe el que ya está al día, actualiza al canónico solo los roles sembrados con un conjunto de permisos previo conocido del seed, y no toca ningún otro conjunto (lo editó el tenant). Prueba pura en `packages/db/test/roles-base-plantillas.test.ts`. La migración `20261027065000_roles_sabana` no toca `core.rol` (solo agrega columnas a `core.permiso_excepciones`): los roles plantilla son del tenant `gard` de dev/test y los pone `seed:roles-base`, que no corre en producción.
+- Paridad del DS con Claude Design V2 (ADR-050, rama de este encargo; decisiones de ejecución tomadas por Claude, el constructor, salvo las dos de Carlos del 26-oct-2026 17:57 que registra ADR-050): el Input compacto mide 36 px solo desde 768 px (en teléfono sigue en 44 px por la regla de toque); los otros campos de texto del DS (fecha, búsqueda, secreto) usan también `border-control`; el KPI escala el valor con `clamp(14px, 11cqi, 22px)` (mínimo 14 como en Claude Design, corregido tras el hallazgo QA #54-3: un monto de 9 dígitos ya no desborda la grilla de 2 columnas a 375 px); el selector de portal nombra siempre el portal actual (si no está entre los visibles se antepone), porque el subtítulo bajo «OPAI» se eliminó; en escritorio el avatar sale de la cabecera porque el usuario va al pie de la barra lateral; el spinner del botón es la utilidad CSS `ds-spinner` para no subir el tope de JS de `/(auth)`. Sin «Buscar» en la barra inferior queda un lugar libre: qué entrada lo ocupa lo decide Carlos.
+- Correcciones de la QA del PR #54 (ADR-050, aplicadas por Claude, el constructor, en esta rama; una por hallazgo del informe de Diseño y QA del 26-oct-2026): **#54-1 (BLOQUEANTE)** el texto del botón en carga se ocultaba mal con `display:contents` (que no acepta `opacity`), así que quedaba bajo el spinner; ahora el contenido va en un `span` `inline-flex items-center gap-2 opacity-0` que conserva la caja (mismo ancho) y el nombre accesible del botón (opacity-0 no saca el texto del árbol accesible, a diferencia de `visibility:hidden`); test unitario (`packages/ds/src/components/button.test.ts`) y e2e (`ds-v2.spec.ts`) que verifican opacidad efectiva 0, `aria-busy`, deshabilitado y el nombre accesible intacto. **#54-6** el disparador del usuario al pie de la barra lateral lleva `min-h-11` (≥44 px). **#54-4** las sombras de la perilla del `Switch` y de la píldora activa del `Segmentado` pasan a los tokens nuevos `--ds-shadow-thumb` y `--ds-shadow-seg` (mismos valores del export, iguales en claro y oscuro). **#54-7** la variante `plano` del `Segmentado` usa el radio de 8 px de la píldora (como el riel y el export), no `rounded-md` (10). **#54-3** ver el `clamp` del KPI arriba. No se tocan el breakpoint del riel/barra lateral (#54-2, la D9 del BRIEF-05: aprobada por Carlos (BRIEF-05:84, 26-oct 11:03); su implementación es un encargo aparte) ni el export HTML (#54-5).
+- Tope de JS `/(auth)/*` subido de 152 a 153 KB (ADR-037) al traer `main` con merge en esta rama: el bloqueo de login recién integrado en `main` (`bloqueo-login`) dejó `/(auth)/invitacion/[slug]/[token]` 1 byte sobre el tope de 152 KB; la ruta queda a 152,0 KB, bajo el nuevo tope. Justificación en el PR (ADR-043 v3: subir un tope no tiene excepción de Carlos; se integra con las tres condiciones).
+
 ## Riesgos y pendientes materiales
 
-- **Capas de sueldo implementadas con el modelo anterior (ADR-036, actualización del 25-oct):** el Brief 02 dejó `core.estructuras_sueldo.nivel` con `cargo | puesto | persona` y conceptos que heredan entre niveles (`packages/domain/src/estructuras.ts`). La regla vigente es instalación, puesto y RUT, sin combinar. Se corrige en el Brief 07b (`ROADMAP.md`) con migración aditiva (capa `instalacion`, resolución sin herencia, retiro del nivel `cargo` sin borrar datos, vínculo laboral con instalación y jornada pactada) antes de CPQ (Brief 08) o Nómina, lo que llegue primero.
+- **Capas de sueldo implementadas con el modelo anterior (ADR-036, actualización del 25-oct):** el Brief 02 dejó `core.estructuras_sueldo.nivel` con `cargo | puesto | persona` y conceptos que heredan entre niveles (`packages/domain/src/estructuras.ts`). La regla vigente es instalación, puesto y RUT, sin combinar. Se corrige en el Brief 07b (`ROADMAP.md`) con migración aditiva (capa `instalacion`, resolución sin herencia, retiro del nivel `cargo` sin borrar datos, vínculo laboral con instalación y jornada pactada) antes de CPQ (Brief 08) o Nómina, lo que llegue primero. **Brief en revisión:** diseño aprobado por Carlos (26-oct 14:27 CLT, t340u); brief [`BRIEF-07b-capas-sueldo-anexo.md`](briefs/BRIEF-07b-capas-sueldo-anexo.md) propuesto (CAR-19), pendiente de su aprobación.
 - 404 real de fichas y slugs (QA pasada 3 y 4): el proxy pregunta a `/api/existe` solo en cargas completas del documento. Si esa consulta falla o tarda más de 4 s, responde 200 a propósito y la página muestra «No encontrado» (decisión aceptada por el Revisor). Cada documento de ficha o slug agrega una consulta interna; las fichas nuevas deben registrarse en `FICHAS` (`apps/web/lib/existencia-ruta.ts`), con su lector en `existe-ruta.ts`.
 - `neonctl` 2.21 no tiene `regions list`; la región se eligió creando directamente en `aws-sa-east-1`.
 - Pendientes de diseño para módulos: patrón de vista dividida (lista + detalle en iPad, como `DetailTablet.html`), paleta de comandos ⌘K, menú de usuario, Combobox con búsqueda. Se diseñan con el módulo que los necesite.
-- Rate limit de `/api/auth` y `/api/mcp` en memoria por instancia: suficiente para el Brief 01; centralizar (base o Redis) antes de tráfico real.
+- ~~Rate limit de `/api/auth` y `/api/mcp` en memoria por instancia~~ **CERRADO (NÚCLEO-B, rama `fix/rate-limit-central`):** el rate limit se centralizó en Postgres (`core.rate_limit_ventanas` + función `SECURITY DEFINER` `core.rate_limit_consumir`, upsert atómico, misma cuenta para todas las instancias). `apps/web/lib/rate-limit.ts` lo consume y, si la base falla, falla abierto con el límite en memoria como respaldo, **salvo las mutaciones públicas sensibles (recuperar contraseña e invitación), que fallan cerradas** (deniegan en vez de caer a memoria; decisión de la review del Revisor 5660939862, 26-oct-2026). Se aplica en `/api/v1` (por key/usuario y por IP), MCP (por key e IP), recuperar contraseña, invitación, `/api/existe` (**por usuario de la sesión**, no por IP) y `/verificar`. Las funciones `SECURITY DEFINER` validan sus parámetros (ventana y máximo >= 1; retención de purga con piso de 3600 s) para que no vacíen ni reinicien la cuenta de otra clave, y la clave se hashea con **HMAC-SHA256** (sal `RATE_LIMIT_SALT` o `BETTER_AUTH_SECRET`) para que un volcado no deje reconstruir la IP ni la key. El bloqueo de login real sigue persistido por cuenta (B1). Sin Upstash/Redis/KV: no se agregó ningún secreto nuevo (la sal reutiliza `BETTER_AUTH_SECRET` si no se fija `RATE_LIMIT_SALT`).
 - `Menu`, `Dialog`, `Switch` y `UserMenu` no tienen diseño en Claude Design todavía (provisionales sobre tokens del DS).
 - Brief 02 (menores de la revisión, sin corregir aún): el presupuesto de agentes no bloquea llamadas en paralelo (el medidor es diferido) y el aviso mensual tiene una carrera menor; si un correo se envió pero falló el registro en `envios`, un reintento del despacho lo reenvía; el PUT firmado no limita el tamaño real subido (la confirmación lo rechaza y la purga diaria lo borra); `estructuras.create` y `cuentas.set_estado` sin restricción de base contra carreras; reiniciar un ajuste reinicia su número de versión; el `input` completo de una aprobación es visible para quien gestiona aprobaciones.
 - Preview por PR (`preview.yml`) escrito pero no probado: requiere los secretos de GitHub y revisar en el primer PR que la preview use su rama Neon.
@@ -273,5 +691,262 @@ Salen del informe preliminar `docs/2.0/paridad/nucleo.md` y de las decisiones de
 
 1. **Bloqueo de login guardado en la base (B1):** contador de intentos fallidos y bloqueo por cuenta persistentes y compartidos entre instancias, con registro de cada intento. Hoy el límite vive en memoria por instancia.
 2. **Roles y permisos finos (B2):** roles personalizados por tenant, permisos finos por módulo y capacidad, al menos tan completos como en 1.0. Los usuarios no se migran: Carlos los crea a mano.
-3. **Alcance del supervisor por instalación (B3, ADR-022):** asignaciones supervisor ↔ instalación y filtro en las consultas de las capacidades. Hoy el supervisor lee todo el tenant. En el Brief 07c, B3 cubre solo al supervisor (fase 1); el alcance de los portales Cliente y Trabajador se construye con sus portales en la fase 3, reusando el mismo mecanismo, y queda pendiente para sus briefs (Decisión de Carlos, 26-oct-2026 11:57 CLT, t310u).
-4. **Ley 21.719 de datos personales (B4):** DPA, contacto del DPO, consentimiento y atención de solicitudes ARCO, por diseño y siempre en 2.0. La ley entra en vigor el 1-dic-2026. Brief **propuesto**: [`briefs/BRIEF-07d-ley-21719.md`](briefs/BRIEF-07d-ley-21719.md), pendiente de la aprobación de Carlos.
+3. **Alcance del supervisor por instalación (B3, ADR-022):** asignaciones supervisor ↔ instalación y filtro en las consultas de las capacidades. Hoy el supervisor lee todo el tenant. En el Brief 07c, B3 cubre solo al supervisor (fase 1); el alcance de los portales Cliente y Trabajador se construye con sus portales en la fase 3, reusando el mismo mecanismo, y queda pendiente para sus briefs (Decisión de Carlos, 26-oct-2026 11:57 CLT, t310u). **En progreso (Brief 07c PR 3, rama `brief/07c-pr3-alcance-supervisor` sobre el PR 2):** mecanismo de alcance por filas construido y aplicado al supervisor. Tabla `core.supervisor_instalaciones` (con RLS `tenant_isolation` y trigger de mismo tenant; migración `20261027050000_alcance_supervisor`, el supervisor se vincula por su membresía). El alcance se resuelve una vez por contexto (`fuentes.acceso`, solo para el rol base supervisor; una key hereda el de su responsable, ADR-033) y entra como `Contexto.alcance`; el filtro va en la consulta de cuentas, instalaciones, puestos, personas, contactos, vínculos, `core.buscar`, `core.resumen.contadores`, `core.inicio.pendientes`, `core.actividad.list` y `core.documentos.*` por entidad (helpers `core/maestros/alcance.ts` y `core/documentos/alcance-doc.ts`). Owner, admin y gerente sin alcance acotado (ven todo); supervisor sin asignaciones ve listas vacías (denegar por defecto). Capacidades nuevas `core.supervisores.list` (lectura) y `core.supervisores.asignar`/`quitar` (`soloPersonas`, `dryRun`, idempotentes, auditadas); estas dos exigen ser **owner o admin** además de `users.manage`, y nadie cambia su propio alcance ni da más alcance que el propio (anti-escalada). El filtro de documentos va en `disponible()` (url_descarga/update/archive) y en `entidadEnAlcance` (actividad y lista por entidad): el supervisor **no ve** documentos fuera de su alcance ni los de empresa (nivel tenant). **Personas: CA-B3 parcial.** El modelo actual no liga persona con instalación (`vinculos_laborales` es persona↔cargo; la instalación la agrega el Brief 07b), así que —**decisión del bot OPAI 2.0 con el mandato de Carlos, t365u y t366u**— se deja la **negación total**: el supervisor no ve ninguna persona (lista vacía, ficha `NOT_FOUND`, actividad vacía). **Falta** para CA-B3 completo que 07b agregue `instalacion_id` al vínculo vigente; también la pantalla de asignación (bloque 9, pendiente de diseño en Claude Design) y el alcance de los portales Cliente y Trabajador (fase 3). **B3 integrado a `main` en el PR #51.**
+4. **Ley 21.719 de datos personales (B4):** DPA, contacto del DPO, consentimiento y atención de solicitudes ARCO, por diseño y siempre en 2.0. La ley entra en vigor el 1-dic-2026. Brief **aprobado para ejecución** (Carlos, 26-oct-2026 13:40 CLT, t331u): [`briefs/BRIEF-07d-ley-21719.md`](briefs/BRIEF-07d-ley-21719.md). **PR 1** (DPA/DPO + RAT/inventario, rama `brief/07d-pr1-dpa-rat`, PR #48, integrado a `main`). **PR 2** (rama `brief/07d-pr2-consentimientos-arco`, PR #56, integrado a `main`): consentimientos, solicitudes del titular (ARCO+) con exportación JSON como documento del Núcleo, e incidentes/avisos de brecha (§16.5); migración aditiva `20261027060000` (del PR #56, integrado tras el #48); las pantallas (bandeja, ficha, consentimientos) quedan pendientes de diseño en Claude Design. Notas de implementación en el brief §19 (Claude, 26-oct-2026). **Correcciones de la revisión 5660172876 (BLOQUEANTE, sobre `2354e00`; Claude, 26-oct-2026):** (a) la exportación del titular (RUT, domicilio, contacto) se vincula a su **solicitud ARCO** y solo se lista/descarga con `cumplimiento.read`; por eso **`viewer` deja de tener `cumplimiento.read`** (dato sensible de la Ley 21.719: lo leen owner/admin/gerente, no el rol de solo lectura más amplio ni el supervisor); (b) una brecha queda **«notificada» solo cuando constan los avisos a la Agencia y a los titulares** (un aviso suelto no cierra la obligación), con advisory lock por caso para no dejar TOCTOU; (c) el **plazo de la brecha corre desde la detección (`ocurrido_en`) o el registro**, nunca desde el aviso; (d) `responsable_id` de una solicitud se valida como **miembro activo del tenant**; (e) tests de escritura cruzada entre tenants (INSERT/UPDATE de solicitudes, INSERT de incidentes y `mismo_tenant` con un documento real de otro tenant); (f) el merge de `main` trajo `login_intentos`, declarada ahora en el inventario del Núcleo (§16.6). Sin cambios de migración (el modelo append-only ya soporta un aviso por destinatario). **Corrección de la revisión 5660773459 (Claude, 26-oct-2026):** merge de `main` (#51, PWA) y de `brief/07d-pr1-dpa-rat` conservando en documentos los dos filtros (alcance del supervisor del #51 y ocultamiento de cumplimiento); tests de escritura cruzada adicionales (cambiar el `tenant_id` de una solicitud propia a otro tenant falla por RLS `WITH CHECK`; usar un documento real de otro tenant en `incidentes.evidencia_doc_id` o en `solicitudes.documento_evidencia_id` falla con «no encontrado»); orden de los hechos de incidentes por `id` (uuid7, orden real de creación tras el advisory lock) en vez de `created_at` (hora de inicio de transacción), con prueba de dos avisos concurrentes. **PR 3** (rama `brief/07d-pr3-retencion-cifrado`, sobre el head del PR 2, 27-oct-2026; aún sin integrar): política de retención por tabla del inventario (periodos **propuestos** por Claude; **Carlos los confirma con el abogado**), trabajo diario que **parte apagado y solo simula** (`cumplimiento_retencion_activa`, decisión de Claude como salvaguarda), anonimización que respeta los hechos regulados (ADR-023), única purga forzada `core.cumplimiento.titular_anonimizar` (`soloPersonas`) y cifrado de aplicación de los campos sensibles (salud y biometría, aún sin columnas) con la KEK existente `OPAI_SECRETS_KEY`; migración aditiva `20261027070000` (pendiente de aplicar; depende del PR 2 y del #48, ya integrados). Notas en el brief §19. Quedan sin política (`pendiente`): cuentas, usuarios, sesiones y documentos. Debe integrarse antes del 30-nov-2026.
+
+NÚCLEO-D2: OPAI 2.0 decidió (t500u) cubrir en E2E el caso negativo visible de Supervisor y aplazar el positivo con alcance limitado hasta integrar 07b, por la denegación actual de personas.
+### Review 5672932073 · Brief 07b
+
+Estado del brief: aprobado por OPAI 2.0 con autoridad delegada de Carlos (t500u, 26-oct-2026 22:51 CLT: "quédate esta noche avanzando con todo hasta que la fase 1 quede lista; no me pidas autorizaciones, toma tú todas las decisiones"); Carlos puede vetarlo; el texto legal del anexo queda pendiente de su revisión.
+
+Implementación: Codex gpt-6.1-sol; las menciones a Claude como constructor de esta rama se corrigen aquí sin reescribir commits anteriores. Decisión técnica de Codex para ADR-045: consolidar relaciones en las lecturas existentes, sin caché entre requests ni cambiar topes. Gate de esta revisión pendiente de finalizar; las cifras anteriores son históricas.
+
+### Brief 07b PR 1 · cierre de pr80-rev-1619-cx (rama, no integrado)
+
+Codex consolida las vistas de sueldo, incluida la banda de aprobaciones, en la capacidad
+`core.estructuras.panel` para cumplir el tope exigido por el encargo. Conserva autorización,
+alcance y auditoría; anulación e impacto ya ocultan y auditan los montos persistidos.
+La telemetría de ejecución humana agrupa precio vigente y consumo, sin cambiar presupuestos de
+agentes ni agregar caché. Son decisiones técnicas de Codex para ejecutar pr80-rev-1619-cx.
+Playwright mide 7 operaciones lógicas en instalación y persona a 375/1024/1280 px (aserción ≤8).
+No equivale a contar sentencias SQL de los `include`. La carga de vencimientos personales del panel
+abarca el tenant para resumir la página y puede crecer con el volumen; solo se habilita sin alcance
+acotado y no se revela el conjunto completo. CA-2/3/4 siguen en los PR siguientes del brief.
+Migración `20261028180000_capa_instalacion_sueldo` sin aplicar en Neon; la aplica Carlos conforme
+al contrato. Evidencia final del gate en el borrador local `PR-BODY.md`; revisión independiente y
+CI pendientes. Este cierre reemplaza el pendiente histórico de 12/11 consultas, sin declarar merge.
+
+
+### Continuación del diagnóstico PR #49 · Codex
+
+Codex reprodujo Puestos con traces en dos bases locales nuevas y servidor propio
+con `opai_app`: teléfono 2/2, CPU ×4 2/2, filtros CPU ×8 repetidos 3/3 y secuencia
+Configuración → Puestos en teléfono/iPad CPU ×4 6/6. Los traces muestran que el
+clic y la navegación funcionan en esas corridas; no prueban la causa del fallo
+original. CI de `60e54f0`, run `40551210403`, sigue con car8:100 teléfono fallando
+(17,3 s), cancelado sin artefactos. Decisión técnica de Codex: conservar UI y
+aserciones, sin ampliar timeouts ni atribuir una causa no demostrada. El objetivo
+principal sigue pendiente. Detalles, límites y capturas en §10 del Brief 11.
+Sin cambios de negocio, migraciones, permisos ni plan del ROADMAP.
+
+**Brief 05, encargo #75:** Codex incorporó `main` `7fc900c`, cerró ante fallo de red la validación de fichas fijadas y difirió el diálogo de confirmación de acciones para cumplir el presupuesto de `/instalaciones/[id]` (164,9/165 KB). Son decisiones técnicas de Codex; los CA parciales y la medición ADR-045 siguen pendientes en el Brief 05.
+
+- **Corrección QA del PR #80 · montos de sueldo.** Codex aplica el tope de 100.000.000 CLP por concepto indicado en el encargo y valida separadores de miles chilenos sin corregir texto inválido. Los porcentajes conservan su regla; el detalle y la validación están en el brief 07b y el PR.
+
+### Corrección de versiones de cargo y bonos
+
+En la rama `fix/version-cargo-bonos`, Codex eligió rechazar el versionado de un cargo sensible sin permiso de lectura sensible, para evitar reemplazar bonos ocultos por una lista vacía. Codex decidió además exigir ese permiso para cambiar la sensibilidad del cargo. Las decisiones y sus criterios están en `briefs/fix-version-cargo-bonos.md`; pendiente de revisión e integración.
+
+### Inicio y vencimientos (encargo de continuación t500u)
+
+La decisión de alcance de OPAI 2.0 en el encargo t500u exige que Inicio y Vencimientos compartan el criterio y respeten el plazo de cada tipo (30 días por defecto). La implementación en curso usa la matriz de personas para ambos conteos. Queda pendiente conservar por separado los documentos de otras entidades que antes contaba Inicio, con un enlace propio, y verificar el límite de 2.000 personas; hasta resolverlo el criterio de alcance está parcial.
+### Brief 07b · PR 3 — vínculo laboral, instalación y jornada (CAR-19)
+
+Construcción de Codex, encargo del 27-oct-2026, rama
+`brief/07b-pr3-vinculo-jornada`. Migración aditiva
+`20261028190000_vinculo_instalacion_jornada` (aplicación en Neon a cargo de Carlos;
+`migracion-pendiente`). Vínculos con instalación, puesto opcional y jornada pactada;
+resolución de sueldo desde el contrato vigente; comparación de capas por capacidad
+con paridad API/MCP/UI. Pantallas 22–25 en Laboral con el DS OPAI 2.0. Sin trabajo
+del PR 2 (cargo) ni del PR 4 (anexo).
+
+Decisiones técnicas de Codex: expansión nulable para contratos históricos sin
+inventar backfill, instalación/jornada obligatorias en altas y ediciones, horas
+enteras 1–168 y distribución 1–200 caracteres (validación de entrada, sin afirmar
+cumplimiento legal). Edición owner/admin con permiso `core:vinculos.manage`,
+referencias y cambios bajo bloqueo en transacción auditada, control de edición
+obsoleta con `updatedAt`. Evento `core.vinculo.actualizado` con snapshots para el
+consumidor del PR 4; aún no genera anexos. Detalle en «Construcción del PR 3» del
+brief. Se levanta la limitación §16.d: el impacto usa las relaciones reales y solo
+los contratos históricos sin instalación se cuentan como pendientes de completar.
+
+NÚCLEO-D2: se reactiva el positivo de Supervisor en alcance mediante vínculo
+vigente; los casos sin vínculo, con vínculo terminado, de otra instalación o de otro
+tenant siguen denegados. Los documentos de personas usan al dueño real, sin ampliar
+alcance mediante una referencia documental secundaria. El check local y las capturas
+por viewport se consignan en el cuerpo del PR; esta entrada no afirma integración
+ni CI remoto aprobado.
+
+Autorrevisión de este PR: se cerró la frontera del flujo documental del Supervisor
+(destino, duplicados por huella y confirmación); el traslado del vínculo retira el
+acceso. La fecha de la hoja edita el inicio contractual existente; no programa
+traslados futuros. Estas son adaptaciones técnicas de Codex al modelo del brief.
+
+
+Validación local del PR 3: Node 22.23.4, typecheck/lint, 1.021 unitarias,
+328 pruebas de base en Postgres 16 (117/186/25), build y presupuesto de JS sin
+cambiar topes. Los 24 e2e afectados pasan con un worker, sin skips ni reintentos,
+en el build local de producción; Laboral mide 7 consultas a 375/1024/1280 px.
+Capturas en `design/07b/evidencia-pr3/`. La integración, el CI remoto y la aplicación
+de la migración en Neon no se declaran ejecutados por este encargo.
+
+### Brief 07b · PR 2: retiro del nivel cargo (27-oct-2026)
+
+Codex completa el bloque 5 en `brief/07b-pr2-retiro-cargo`, sin migración de
+esquema. Catálogo «Cargos» sin montos en UI/API/MCP, aviso cerrable, archivo de
+versiones originales con `DatoArchivado` del DS 2.0 (también en `/ds`) y bloqueo
+`FORBIDDEN` de creación/versionado/anulación de nivel cargo, incluso en preview.
+Se conservan lectura, aislamiento y auditoría de montos con `read_sensible` (D7).
+El script manual idempotente archiva por tenant con `--dry-run`/`--apply`, sin
+conversión ni borrado. Se probó solo en Postgres local; no se ejecutó en Neon.
+
+Decisiones técnicas de Codex: campo `estado` textual existente, con valor `archivada`, bloqueo
+independiente de la corrida del script, auditoría agrupada y conteos consolidados
+para evitar N+1, aviso recordado en el navegador. El historial de persona incluye
+los cargos de vínculos actuales y terminados y enlaza sus versiones originales.
+Adaptación del export 21: no existe persistencia de periodos pagados en el Núcleo;
+se muestran fechas contractuales explícitas, sin reconstruir ni inventar pagos.
+D10 elige archivar: el export 20 de conversión no se implementa como conversión.
+CA-2 implementado con esa adaptación; el detalle está en «Construcción del PR 2»
+del brief. CA-3/CA-4 siguen en los PR 3/4; no cambia el ROADMAP. Evidencia final en
+`PR-BODY.md` sin versionar, según encargo; no sustituye CI ni revisión independiente.
+
+
+Validación local de este bloque: typecheck/lint, 1.021 tests generales, test:db
+119+181+25, build y presupuesto en verde, sin elevar topes. Pantallas e Inspector
+a 375/1024/1280 con un worker; lista/detalle/persona con 5/8/6 operaciones y
+aserción ≤8. Capturas de datos sintéticos en `apps/web/e2e/__screenshots__/07b-*cargo*.png`.
+Autorrevisión por subagente sin bloqueantes; CI y revisión independiente del head
+se verificarán después de abrir el PR, que este encargo prohíbe crear.
+**Brief 03, continuidad CAR-7:** Codex configura el pool por instancia y avisa una
+vez si el host en Vercel no contiene `-pooler.`; el test de rendimiento calienta con sesión y
+registra tres cargas. Son decisiones técnicas de implementación, pendientes de
+validación en Neon. La medición de servidor no sustituye navegación cliente ni p75;
+el esqueleto, la carrera de hidratación, la invalidación de caché y la comparación
+antes/después siguen pendientes. No se declara listo el gate obligatorio de ADR-045.
+
+- Pendientes de cierre del Núcleo (CAR-19): correcciones de permisos, auditoría de rechazos y regresiones de sueldos y navegación; detalle y validación en el PR.
+
+### Puesta al día del PR #89 con #87 (encargo del 28-oct-2026)
+
+Codex fusiona `origin/main` `3e1682df08c061ec786b01e2b4eb4d717f19ef15`
+mediante merge normal. Conserva el rechazo de mutaciones del nivel cargo, su
+archivo e historial y el permiso de lectura sensible en las capas vigentes,
+junto con instalación, puesto y jornada del vínculo. Laboral mantiene la vista
+consolidada del PR 3; el panel conserva el vínculo vigente y el historial del PR 2.
+Se conservan las dos entradas documentales y ambos fixtures de pruebas.
+No hay funcionalidad ni decisión de negocio nueva; no cambia el ROADMAP.
+CA-1/CA-2/CA-3 se conservan con las adaptaciones ya descritas; CA-4 sigue
+pendiente del PR 4 y `tools/list` remoto requiere despliegue. Autorrevisión
+por subagente sin hallazgos bloqueantes; resultados reales del gate y e2e en
+`PR-BODY.md` local, sin commit. No se aplica la migración en Neon.
+
+El gate detectó una expectativa desactualizada en la fusión automática de
+`maestros-db.test.ts`: con instalación en el vínculo ahora corresponde resolver
+la capa de instalación. Codex adapta la aserción a la versión de 600.000 del
+fixture, estado completo y cargo nulo; no modifica la resolución de negocio.
+
+### Brief 07b · PR 4 — anexo de contrato en borrador (CAR-19, 28-oct-2026)
+
+Claude construye en `brief/07b-pr4-anexo-borrador`, sobre #87/#89 y con merge de
+`main` `4337a53` (#90, Inicio/Vencimientos) a mitad de la construcción, sin
+conflictos de contenido salvo `panel/pendientes.ts` (auto-resuelto por git; el
+ícono del tipo nuevo `"anexos"` en `pendientes-inicio.tsx` sí requirió un ajuste
+manual tras el merge, ver bloque 11).
+
+- **Bloque 9 (migración):** `20261028200000_anexo_contrato_borrador`, tabla nueva
+  `core.anexos_contrato` (sin BEGIN/COMMIT propio: es `CREATE TABLE`, no altera
+  una tabla existente, a diferencia de los PR 1 y 3). RLS ENABLE/FORCE, política
+  `tenant_isolation`, trigger de mismo tenant (persona/vínculo/documento) y un
+  CHECK de consistencia por estado (borrador sin resolución; aprobado con
+  `documento_id`; rechazado con motivo) para que la fila nunca quede a medias.
+- **Bloque 10 (capacidades):** `core.anexos.generar/list/get/aprobar/rechazar`.
+  Permisos `core:anexos.read`/`manage` con el mismo bloqueo financiero que capas
+  y vínculo (D8: denegados a gerente, por los montos en el snapshot). Consumidor
+  de eventos (`core.estructura.creada/anulada`, `core.vinculo.actualizado`) que
+  genera el borrador por persona, idempotente por evento (R11, D3); la jornada
+  pactada sola no genera anexo (R11 no la incluye). Aprobar materializa el
+  documento en `core.documentos` reutilizando `layoutCorreo`/`escaparHtml` de
+  ADR-028 (sin plantilla nueva por fuera de la marca ya existente), con
+  SHA-256 y bitácora; bloqueo `FOR UPDATE` contra la carrera aprobar/rechazar.
+  `core.anexos.aprobar/rechazar` son `soloPersonas` (un agente recibe `FORBIDDEN`
+  antes de llegar a `APPROVAL_REQUIRED`, igual que `core.aprobaciones.aprobar`:
+  es el mecanismo ya establecido, no uno nuevo). Eventos
+  `core.anexo.generado/aprobado/rechazado` declarados en `EVENTOS_CORE`.
+- **Bloque 11 (pantallas y DS):** pestaña «Anexos» en la ficha de persona
+  (lista) y `/personas/[id]/anexos/[anexoId]` (documento + panel de aprobación),
+  D16. Piezas nuevas del DS: `AvisoAnexo`, `DocumentoBorrador` (conserva su papel
+  claro en modo oscuro, D15, con colores propios documentados en el código) y
+  `PanelAprobacion`, las tres en `/ds`. `core.anexos.get` amplía su salida con
+  las filas antes/después ya resueltas (nombres y montos) para que la UI no
+  repita esa lógica.
+
+**Decisiones técnicas de Claude (no son decisiones de Carlos):** (1) `soloPersonas`
+en aprobar/rechazar da `FORBIDDEN` a un agente, no `APPROVAL_REQUIRED` —
+`denegar()` corta antes de `controlAgente` en `execute.ts`; mismo comportamiento
+que `core.aprobaciones.aprobar`, ya existente. (2) D13 «admin configurable por
+tenant» se implementa solo en su mitad interina (`anexosManage`, owner/admin
+estático): el refinamiento por rol personalizado es del Brief 07c, tal como
+fija el propio §16.c-1 del brief para D8. (3) El documento final no repite
+cada bono ni ítem de la estructura; muestra sueldo base, colación, movilización
+y gratificación (y, para el motivo instalación, los nombres de instalación y
+puesto). (4) Sin editor de plantilla (R12 lo deja para el Brief 09): el
+documento usa el layout de marca ya construido en Comunicaciones (ADR-028).
+
+**CA-4:** cumplido — un cambio de capa, monto, instalación o rol genera el
+borrador con la plantilla base y la marca del tenant; RRHH lo aprueba o
+rechaza; aprobado queda en Documentos con SHA-256; un agente no lo aprueba
+(bloqueado antes del handler, ver decisión 1). El motivo "rol" no tiene fuente
+hoy (Operaciones es fase 3, §16.c-3 del brief): el consumidor no lo dispara
+todavía, pero la capacidad y la UI ya lo soportan.
+
+**Pendiente de Carlos (§16.b del brief):** el texto legal definitivo de la
+plantilla base del anexo; el documento usa texto de ejemplo hasta entonces (D15).
+
+**Gate local:** `pnpm typecheck`, `pnpm lint` (0 errores; solo warnings
+preexistentes de `max-lines` en archivos de test) y `pnpm test` (173 archivos,
+1.036 pruebas) en verde. `pnpm test:db`: 122 (`@opai/db`) + 200
+(`@opai/capabilities`, incluye 6 de `anexos-db.test.ts` contra Postgres real:
+aislamiento por tenant, bloqueo financiero, `soloPersonas` y el documento final
+con SHA-256 y bitácora verificable) + 25 (`@opai/auth`) en verde. `pnpm build` y
+`pnpm presupuesto` en verde (dos rutas nuevas a 166 KB, como sus hermanas de
+persona; `/ds` sube de 222 a 224 KB). e2e `anexo-contrato.spec.ts` (375/1024/1280,
+claro y oscuro): lista, documento con antes/después y rechazo con motivo
+obligatorio en verde; aprobar no se puede probar de punta a punta en este
+entorno (sin credenciales de R2, igual que en CI): se verifica que el error se
+muestra con claridad, y el flujo completo de aprobar (documento, SHA-256,
+bitácora) ya se prueba contra Postgres real con almacenamiento en memoria en
+`anexos-db.test.ts`. Sin migración aplicada en Neon. No se abre PR (lo abre el
+bot «OPAI 2.0»); evidencia completa en `PR-BODY.md`, sin commitear.
+
+### Corrección QA del PR #91 (Codex)
+
+El documento final de un anexo se identifica por su relación con `AnexoContrato` y exige `anexos.read` o `estructuras.read_sensible` en Documentos; no admite reemplazo mediante subida para evitar versiones sin la protección. Se valida la persona en la URL y se confirma la aprobación irreversible. Sin migración nueva; detalle en el brief 07b.
+
+### Corrección S1 del PR #91 (Claude, 28-oct-2026, revisión 5679644747)
+
+El Revisor bloqueó el PR #91 por S1: `core.anexos.generar` aceptaba `estructuraId`,
+`instalacionId` y `puestoId` de otra persona (los sueldos de otro trabajador podían
+terminar en el contrato aprobado de esta persona); `core.anexos.aprobar` no revalidaba.
+Una sesión anterior (Codex) había dejado `validar-snapshots.ts` sin commitear, con dos
+huecos que la propia autorrevisión detectó: la revalidación de `aprobar` no bloqueaba
+las filas referenciadas (ventana de concurrencia) y la regla rechazaba anexos
+automáticos legítimos que documentan la instalación/puesto anterior de la misma
+persona. Claude retoma esos cambios, los termina y agrega los tests que faltaban.
+
+`validarSnapshots` (`packages/capabilities/src/core/anexos/validar-snapshots.ts`) exige
+siempre el mismo tenant y la misma persona del anexo. **Decisión de implementación**
+(OPAI 2.0, con la autoridad delegada por Carlos en t500u, 26-oct-2026 22:51 CLT —la
+misma delegación que aprobó este brief, "Pedido y aprobaciones"):
+`instalacionId`/`puestoId` se aceptan si
+pertenecieron a cualquier vínculo de esa persona, **vigente o anterior** (terminado),
+no solo al vigente; un anexo puede documentar el cambio desde un vínculo previo y no se
+rechaza. `core.anexos.aprobar` revalida dentro de la misma transacción que materializa
+el documento final (la ejecución de la capacidad ya es una única transacción, ADR-052) y
+bloquea antes de leer (`SELECT ... FOR SHARE`, el patrón de `vinculos-validacion.ts`)
+los vínculos de la persona y las estructuras de sueldo referenciadas, cerrando la
+ventana de concurrencia.
+
+`seed-vinculo-jornada-e2e.ts` agrega un vínculo anterior (terminado) de la persona 082
+con la instalación/puesto destino del anexo sembrado, para que `anexo-contrato.spec.ts`
+siga pasando sin tocar el vínculo vigente que comparten `vinculo-jornada.spec.ts` y
+`navegacion-permisos.spec.ts`.
+
+**Gate:** `pnpm typecheck`, `pnpm lint` y `pnpm test` en verde (0 errores). `pnpm test:db`:
+122 (`@opai/db`) + 203 (`@opai/capabilities`, incluye 8 de `anexos-db.test.ts` contra
+Postgres real, con los 3 casos nuevos de esta corrección) + 25 (`@opai/auth`), en verde.
+`pnpm --filter @opai/web build` y `pnpm presupuesto` en verde, sin cambio de tamaño.
+e2e `anexo-contrato.spec.ts` (375/1024/1280) en verde contra el servidor del propio
+worktree, 1 worker (el resto de la suite lo valida el CI). No se tocó la migración
+`20261028200000_anexo_contrato_borrador`. Detalle completo y la lista de autorrevisión
+en `PR-BODY.md` (sin commitear).

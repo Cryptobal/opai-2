@@ -1,5 +1,5 @@
-import type { Rol, RolPlataforma } from "@opai/domain";
-import type { Globales, TenantDb, TenantTx } from "@opai/db";
+import type { EstadoMfa, Rol, RolPlataforma } from "@opai/domain";
+import type { Globales, TenantDb, TenantTx, VerificacionAuditoria } from "@opai/db";
 import type { Almacenamiento, Mailer } from "@opai/integrations";
 import type { z } from "zod";
 
@@ -22,7 +22,7 @@ export type Efecto = "lectura" | "escritura" | "irreversible";
 export type Actor =
   | { tipo: "system"; id?: undefined; viaUserId?: undefined }
   | { tipo: "user"; id: string; viaUserId?: undefined }
-  | { tipo: "agent"; id: string; viaUserId: string };
+  | { tipo: "agent"; id: string; viaUserId: string; interno?: true };
 
 export type EventoAuditoria = {
   /** Tenant donde queda el evento (el actual o, en plataforma, el tenant objetivo). */
@@ -34,8 +34,15 @@ export type EventoAuditoria = {
   payload?: unknown;
 };
 
+/**
+ * Auditoría en `core.audit_events`, encadenada por tenant. Recibe `tx` como `Eventos`/`Trabajos`/
+ * `BitacoraServicio`: el llamador decide la transacción (ADR-052) para que el insert sea
+ * atómico con la escritura que audita.
+ */
 export interface Auditoria {
-  registrar(evento: EventoAuditoria): Promise<void>;
+  registrar(tx: TenantTx, evento: EventoAuditoria): Promise<{ seq: number; hash: string }>;
+  /** Recorre la cadena del tenant actual y registra el resultado (ADR-052). */
+  verificar(signal?: AbortSignal): Promise<VerificacionAuditoria>;
 }
 
 /** Usuario humano detrás del actor (el propio usuario o el responsable de la API key). */
@@ -55,15 +62,33 @@ export type Servicios = {
   urlBase: string;
 };
 
+/**
+ * Alcance por filas del actor (ADR-022, Brief 07c B3). Presente solo cuando su rol acota por filas
+ * (supervisor); `null` = ve todo el tenant (owner, admin, gerente). El filtro se aplica en la
+ * consulta de cada capacidad, nunca en la UI. Una API key hereda el alcance de su usuario (ADR-033).
+ */
+export type Alcance = {
+  /** Instalaciones a cargo. Vacío = no ve ninguna entidad (denegar por defecto). */
+  instalaciones: readonly string[];
+};
+
 /** Acceso de plataforma: solo existe si el usuario tiene `platformRole` (ADR-016). */
 export type Plataforma = {
   globales: Globales;
   /** Cliente acotado al tenant objetivo. Nunca consultas cross-tenant en una sola query. */
   paraTenant(tenantId: string): TenantDb;
+  /**
+   * Transacción atómica sobre un tenant objetivo distinto del actual (capacidades `platform.*`
+   * sin tenant propio). La usa `executeCapability` para auditar en la misma transacción las
+   * escrituras de plataforma que afectan a un tenant resuelto por `tenantObjetivo`.
+   */
+  transaccionPara<T>(tenantId: string, fn: (tx: TenantTx) => Promise<T>): Promise<T>;
 };
 
 /** Contexto de ejecución. Lo construye el borde (ruta HTTP, acción de UI, MCP), nunca el módulo. */
 export interface Contexto {
+  /** Garantía de MFA comprobada en el borde; nunca procede del input de una capacidad. */
+  mfa?: EstadoMfa;
   /** Tenant actual. Si `conTenant` es false (plataforma sin empresa elegida) es un id nulo. */
   tenantId: string;
   conTenant: boolean;
@@ -71,20 +96,26 @@ export interface Contexto {
   usuario: UsuarioContexto | null;
   /** Rol de la membresía en el tenant actual. */
   rol: Rol | null;
-  /** Portal desde el que se ejecuta (telemetría). */
+  /** Portal solicitado: en sesiones con tenant se valida contra la membresía y la capacidad. */
   portal: string | null;
+  /** Portales de la membresía activa en el tenant actual, cargados solo por el servidor. */
+  portalesMembresia: readonly string[];
   /** Módulos activos (o en trial) del tenant. `core` y `platform` siempre lo están. */
   modulosActivos: readonly string[];
   /** Módulos permitidos para un agente (scopes de la key); null = sin restricción. */
   scopes: readonly string[] | null;
   /** Principal de la API key (ADR-033). null en sesiones humanas y procesos del sistema. */
   principal: Principal | null;
+  /** Alcance por filas (ADR-022); null = ve todo el tenant. Se resuelve una vez por contexto. */
+  alcance: Alcance | null;
   /** Presupuesto y autonomía de la API key; null en sesiones humanas y procesos del sistema. */
   agente: AgenteContexto | null;
   /** Cliente acotado al tenant. Única vía de acceso a datos para los handlers. */
   db: TenantTx;
   /** Transacción con el tenant fijado: cambio + evento + bitácora atómicos. Dentro, solo `tx`. */
   transaccion<T>(fn: (tx: TenantTx) => Promise<T>): Promise<T>;
+  /** Diagnósticos durables: nunca se reutiliza la transacción de la solicitud. */
+  transaccionIndependiente<T>(fn: (tx: TenantTx) => Promise<T>): Promise<T>;
   /**
    * Ejecuta un bloque de solo lectura en UNA sola transacción con el tenant fijado una vez (ADR-045):
    * `executeCapability` envuelve así a las capacidades de lectura con empresa para no abrir una
@@ -142,6 +173,10 @@ export interface Capacidad<I extends z.ZodType = z.ZodType, O extends z.ZodType 
   sinTenant?: boolean;
   /** Campos del input que nunca se guardan en auditoría ni en aprobaciones (secretos). */
   sensibles?: readonly string[];
+  /** Identificadores revelados por una lectura; nunca contenido personal ni input sin validar. */
+  auditarLectura?: false | ((salida: z.output<O>, entrada: z.output<I>) => readonly string[]);
+  /** Revalida el acceso vigente a una respuesta idempotente sin repetir sus efectos. */
+  autorizarRepeticion?: (ctx: Contexto, input: z.output<I>, salida: unknown) => Promise<void>;
   /** Nunca la ejecuta una API key (aprobaciones, autonomía y presupuesto de agentes). */
   soloPersonas?: boolean;
   /** Portales donde está disponible (ADR-033). Por defecto ["erp"] (plataforma: ["platform"]). */
@@ -168,5 +203,11 @@ export type Resultado<T = unknown> =
   | { ok: true; data: T; dryRun: boolean; repetida?: true }
   | {
       ok: false;
-      error: { code: CodigoError; message: string; issues?: unknown; aprobacionId?: string };
+      error: {
+        code: CodigoError;
+        message: string;
+        issues?: unknown;
+        aprobacionId?: string;
+        detalles?: unknown;
+      };
     };
