@@ -11,4 +11,6 @@ regexes = [
   '''secreto-de-prueba-de-al-menos-32-caracteres''',
   '''ficticio-solo-para-build-de-ci-0+''',
   '''Clave-de-prueba-123''',
+  # Token ficticio del test de la consola de correo (CAR-51): comprueba que se oculta en el log.
+  '''Zx9aQ2bW7cE4dR1fT6gY3hU8''',
 ]
