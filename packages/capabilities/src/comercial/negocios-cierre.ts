@@ -5,6 +5,7 @@ import { noEncontrado, reglaDeNegocio } from "../errores";
 import { uuidSchema } from "../core/esquemas";
 import { PERMISO_MANAGE, negocioDe, negocioSchema, vistaNegocio } from "./comun";
 import { aplicarEtapa } from "./transiciones-util";
+import { validarEntrada } from "./validaciones";
 
 export const negociosPerder = defineCapability({
   id: "comercial.negocios.perder",
@@ -86,6 +87,15 @@ export const negociosReabrir = defineCapability({
           ? "La etapa elegida no es una etapa abierta y activa del embudo."
           : "El embudo no tiene etapas abiertas.",
       );
+    }
+    // Reabrir en una etapa avanzada valida como si avanzara desde la primera (R9 y R10).
+    const minimo = await ctx.db.etapa.findFirst({
+      where: { embudoId: negocio.embudoId, tipo: "abierta", activa: true },
+      orderBy: { orden: "asc" },
+      select: { orden: true },
+    });
+    if (minimo && primera.orden > minimo.orden) {
+      await validarEntrada(ctx, negocio, primera, 0);
     }
     const datos = {
       perdidoEn: null,

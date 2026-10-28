@@ -1,5 +1,7 @@
-import { noEncontrado } from "../errores";
+import { noEncontrado, reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
+import { etapaDe } from "./comun";
+import { etiquetaRequisito, requisitosFaltantes } from "./dominio";
 
 /** La cuenta existe en esta empresa (la RLS ya acota la búsqueda al tenant). */
 export async function cuentaValida(ctx: Contexto, cuentaId: string) {
@@ -31,4 +33,37 @@ export async function emitirActualizado(
       payload,
     });
   });
+}
+
+/** Valida los requisitos de entrada de la etapa y, para salir de la primera, que haya ≥1 instalación. */
+export async function validarEntrada(
+  ctx: Contexto,
+  negocio: {
+    id: string;
+    etapaId: string;
+    montoEstimadoMensual: number | null;
+    valorMensual: number | null;
+    cierreEstimado: Date | null;
+    cotizacionEnviadaEn: Date | null;
+    inicioServicioEstimado: Date | null;
+    motivoPerdidaId: string | null;
+    embudoId: string;
+  },
+  destino: { exige: string[]; orden: number },
+  /** Orden de origen si no es la etapa actual (reabrir parte «desde la primera»). */
+  origenOrden?: number,
+) {
+  const faltan = requisitosFaltantes(destino.exige, negocio);
+  if (faltan.length) {
+    throw reglaDeNegocio(
+      `Faltan requisitos para esta etapa: ${faltan.map(etiquetaRequisito).join(", ")}.`,
+    );
+  }
+  const desde = origenOrden ?? (await etapaDe(ctx, negocio.etapaId)).orden;
+  // R10: para salir de la primera etapa (orden 0) hacia adelante debe tener ≥1 instalación.
+  if (desde === 0 && destino.orden > 0) {
+    const n = await ctx.db.negocioInstalacion.count({ where: { negocioId: negocio.id } });
+    if (n === 0)
+      throw reglaDeNegocio("Vincula al menos una instalación antes de avanzar la etapa.");
+  }
 }

@@ -19,10 +19,9 @@ type Props = {
 export async function DetalleNegocio({ datos, p, tab, children }: Props) {
   const ficha = await datos;
   // Hojas de la ficha (editar, ganar, perder, reabrir, vínculos): sus datos solo con una abierta.
-  const [hojas, gestiona] = await Promise.all([
-    ficha.negocio ? cargarHojas(p, ficha.negocio) : null,
-    puedeGestionarNegocios(),
-  ]);
+  // Sin comercial:negocios.manage no se cargan ni montan hojas (aunque la URL traiga ?ganar=1).
+  const gestiona = await puedeGestionarNegocios();
+  const hojas = gestiona && ficha.negocio ? await cargarHojas(p, ficha.negocio) : null;
   return (
     <>
       <FichaNegocio state={ficha.state} negocio={ficha.negocio} tab={tab} gestiona={gestiona}>

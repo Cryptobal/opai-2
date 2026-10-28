@@ -13,12 +13,11 @@ import { vistaEtapa } from "./embudo-util";
 export const configActualizarEtapa = defineCapability({
   id: "comercial.config.actualizar_etapa",
   descripcion:
-    "Edita una etapa del embudo: nombre, orden, probabilidad, tono, requisitos de entrada y si está activa. El tipo no cambia (R26); una etapa ganada o perdida no se desactiva.",
+    "Edita una etapa del embudo: nombre, probabilidad, tono, requisitos de entrada y si está activa. El tipo no cambia (R26); una etapa ganada o perdida no se desactiva. El orden se cambia con comercial.config.reordenar_etapas.",
   permiso: PERMISO_CONFIG,
   input: z.object({
     id: uuidSchema,
     nombre: z.string().trim().min(2).max(60).optional(),
-    orden: z.number().int().min(0).max(99).optional(),
     probabilidad: z.number().int().min(0).max(100).optional(),
     tono: z.enum(TONOS_ETAPA).optional(),
     exige: z.array(z.enum(REQUISITOS)).optional(),
@@ -32,9 +31,6 @@ export const configActualizarEtapa = defineCapability({
     if (cambios.activa === false && etapa.tipo !== "abierta") {
       throw reglaDeNegocio("La etapa ganada y la perdida no se desactivan.");
     }
-    if (cambios.orden !== undefined && cambios.orden !== etapa.orden && etapa.tipo !== "abierta") {
-      throw reglaDeNegocio("La etapa ganada y la perdida van siempre al final del embudo.");
-    }
     // Una etapa con negocios no se desactiva: primero se mueven (export ConfigComercial, reglas).
     if (cambios.activa === false && etapa.activa) {
       const n = await ctx.db.negocio.count({ where: { etapaId: id, archivadoEn: null } });
@@ -47,10 +43,7 @@ export const configActualizarEtapa = defineCapability({
     const data = definidos({ ...cambios, exige: cambios.exige ? [...cambios.exige] : undefined });
     const fila = dryRun
       ? { ...etapa, ...data }
-      : await sinDuplicado(
-          ctx.db.etapa.update({ where: { id }, data }),
-          "Ya hay otra etapa en esa posición del embudo.",
-        );
+      : await ctx.db.etapa.update({ where: { id }, data });
     return vistaEtapa(fila);
   },
 });

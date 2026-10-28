@@ -29,12 +29,13 @@ export default function Negocios({ searchParams }: Props) {
       cargar={async () => {
         const p = await filtrosDe(searchParams);
         const lista = p["vista"] === "lista";
-        const [tablero, filas, hojas, gestiona] = await Promise.all([
+        const [tablero, filas, gestiona] = await Promise.all([
           lista ? null : cargarEmbudo(),
           lista ? cargarNegocios(p) : null,
-          cargarHojas(p),
           puedeGestionarNegocios(),
         ]);
+        // Sin comercial:negocios.manage no se cargan ni montan hojas (aunque la URL traiga ?nuevo=1).
+        const hojas = gestiona ? await cargarHojas(p) : null;
         return { q: p["q"], tablero, filas, hojas, gestiona };
       }}
       opciones={(d) => (d.gestiona ? { acciones: accionNuevo } : {})}

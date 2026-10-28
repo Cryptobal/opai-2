@@ -106,13 +106,12 @@ describe("comercial · editor del embudo", () => {
     expect(await codigo(vendedor, "comercial.config.reordenar_etapas", { ids })).toBe("FORBIDDEN");
   });
 
-  it("una etapa con negocios no se desactiva y la ganada no cambia de lugar", async () => {
+  it("una etapa con negocios no se desactiva y el orden solo cambia por reordenar", async () => {
     const { ctx } = ctxComercial();
     await dato(ctx, "comercial.negocios.create", { cuentaId: CU, titulo: "Guardias · Planta 1" });
     const id = "comercial.config.actualizar_etapa";
     expect(await codigo(ctx, id, { id: etapaId(0), activa: false })).toBe("UNPROCESSABLE");
     expect(await codigo(ctx, id, { id: etapaId(1), activa: false })).toBe("OK");
-    expect(await codigo(ctx, id, { id: etapaId(6), orden: 2 })).toBe("UNPROCESSABLE");
   });
 });
 
@@ -132,6 +131,10 @@ describe("comercial · reabrir en una etapa elegida", () => {
     expect(
       await codigo(ctx, "comercial.negocios.reabrir", { id: n.id, motivo, etapaId: etapaId(6) }),
     ).toBe("UNPROCESSABLE");
+    // R9: la etapa 2 exige monto; reabrir allí lo valida como si avanzara desde la primera.
+    const enDos = { id: n.id, motivo, etapaId: etapaId(2) };
+    expect(await codigo(ctx, "comercial.negocios.reabrir", enDos)).toBe("UNPROCESSABLE");
+    await dato(ctx, "comercial.negocios.update", { id: n.id, montoEstimadoMensual: 2_000_000 });
     const r = await dato<{ etapaId: string; estado: string }>(ctx, "comercial.negocios.reabrir", {
       id: n.id,
       motivo,

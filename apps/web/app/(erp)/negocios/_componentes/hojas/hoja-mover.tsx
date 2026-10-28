@@ -28,6 +28,8 @@ export function HojaMover({ n, config }: { n: NegocioDetalle; config: ConfigCome
   const faltan = destino ? camposFaltantes(destino.exige, n) : [];
   const sinInstalacion =
     !!destino && !!actual && actual.orden === 0 && destino.orden > 0 && !n.instalaciones.length;
+  // La cotización enviada la fija CPQ (no se completa aquí): sin ella la etapa no admite el negocio.
+  const sinCotizacion = !!destino?.exige.includes("cotizacion_enviada") && !n.cotizacionEnviadaEn;
   const [monto, setMonto] = useState("");
   const [cierre, setCierre] = useState("");
   const [inicio, setInicio] = useState("");
@@ -63,7 +65,7 @@ export function HojaMover({ n, config }: { n: NegocioDetalle; config: ConfigCome
             Cancelar
           </Button>
           <Button
-            disabled={pendiente || !destino || !completo || sinInstalacion}
+            disabled={pendiente || !destino || !completo || sinInstalacion || sinCotizacion}
             onClick={() => void mover()}
           >
             {pendiente ? "Moviendo…" : "Mover"}
@@ -87,6 +89,11 @@ export function HojaMover({ n, config }: { n: NegocioDetalle; config: ConfigCome
             }
           >
             Para salir de la primera etapa el negocio necesita al menos una instalación.
+          </Alerta>
+        ) : null}
+        {sinCotizacion ? (
+          <Alerta tono="warning" titulo="Requiere una cotización enviada">
+            Esta etapa exige una cotización enviada; llegará con el módulo CPQ.
           </Alerta>
         ) : null}
         {faltan.length ? (

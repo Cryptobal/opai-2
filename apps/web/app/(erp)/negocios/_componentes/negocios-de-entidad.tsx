@@ -6,6 +6,7 @@ import { LinkNext } from "@/app/_components/link-next";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { pesos } from "@/lib/fechas";
 import { estadoPantalla } from "@/lib/formato";
+import { puedeGestionarNegocios } from "@/lib/pestanas-modulos";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import type { NegocioFila } from "./datos";
@@ -15,26 +16,30 @@ const ESTADO = { abierto: "Abierto", ganado: "Ganado", perdido: "Perdido" } as c
 
 /** Lista de negocios de una cuenta o de una instalación, para su pestaña Negocios (ADR-041). */
 export async function NegociosDeEntidad(p: { cuentaId?: string; instalacionId?: string }) {
-  const r = await ejecutarComoUsuario<{ items: NegocioFila[] }>("erp", "comercial.negocios.list", {
-    limite: 100,
-    ...(p.cuentaId ? { cuentaId: p.cuentaId } : {}),
-    ...(p.instalacionId ? { instalacionId: p.instalacionId } : {}),
-  });
+  const [r, gestiona] = await Promise.all([
+    ejecutarComoUsuario<{ items: NegocioFila[] }>("erp", "comercial.negocios.list", {
+      limite: 100,
+      ...(p.cuentaId ? { cuentaId: p.cuentaId } : {}),
+      ...(p.instalacionId ? { instalacionId: p.instalacionId } : {}),
+    }),
+    puedeGestionarNegocios(),
+  ]);
   const items = r.ok ? r.data.items : [];
   // Sin permiso (supervisor, módulo inactivo) o error: el estado del DS, nunca «Sin negocios».
   const state = r.ok && !items.length ? "empty" : estadoPantalla(r);
   // Desde la ficha de una cuenta: «Nuevo negocio» abre la hoja del tablero con la cuenta elegida.
-  const nuevo = p.cuentaId ? (
-    <div className="mb-3 flex justify-end">
-      <EnlaceBoton
-        href={`/negocios?nuevo=1&cuenta=${p.cuentaId}`}
-        variante="secondary"
-        icono={Plus}
-      >
-        Nuevo negocio
-      </EnlaceBoton>
-    </div>
-  ) : null;
+  const nuevo =
+    p.cuentaId && gestiona ? (
+      <div className="mb-3 flex justify-end">
+        <EnlaceBoton
+          href={`/negocios?nuevo=1&cuenta=${p.cuentaId}`}
+          variante="secondary"
+          icono={Plus}
+        >
+          Nuevo negocio
+        </EnlaceBoton>
+      </div>
+    ) : null;
   return (
     <>
       {r.ok ? nuevo : null}
