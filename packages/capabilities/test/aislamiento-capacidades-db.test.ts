@@ -67,7 +67,13 @@ describe.skipIf(!urlPropietario)(
       for (const c of lecturas) {
         for (const input of entradasDePrueba(c.input, s.filas.b)) {
           const r = await mod.executeCapability(ctxA(c.portales?.[0] ?? "erp"), c.id, input, {});
-          if (!r.ok) continue;
+          if (!r.ok) {
+            // Un error tampoco revela datos de B, ni esconde un fallo interno.
+            const error = JSON.stringify(r.error);
+            if (r.error.code === "INTERNAL" || deB.some((m) => error.includes(m)))
+              fugas.push(`${c.id} ${JSON.stringify(input)}: error ${error}`);
+            continue;
+          }
           ejecutadas += 1;
           const salida = JSON.stringify(r.data);
           const vistas = deB.filter((m) => salida.includes(m));

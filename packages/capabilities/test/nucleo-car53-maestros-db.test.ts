@@ -153,7 +153,7 @@ describe.skipIf(!urlPropietario)("CAR-53 · maestros del Núcleo", () => {
       id: id.puestoAlfa,
     });
     expect(p).toMatchObject({ id: id.puestoAlfa, nombre: "Noche" });
-    // Lectura auditada (NÚCLEO-H): solo el id revelado, sin el input.
+    // Lectura auditada (NÚCLEO-H): registra el id revelado.
     expect(await f.auditorias("core.puestos.get")).toBe(antes + 1);
     const ultima = await f.e.admin.auditEvent.findFirstOrThrow({
       where: { tenantId: f.tenantId, capability: "core.puestos.get" },

@@ -179,7 +179,10 @@ describe.skipIf(!urlPropietario)("CAR-53 · documentos, plantillas e invitacione
     });
     expect(
       await f.mod.executeCapability(sinCorreo, "core.plantillas.enviar_prueba", { evento: EVENTO }),
-    ).toMatchObject({ ok: false });
+    ).toMatchObject({
+      ok: false,
+      error: { message: "La prueba se envía al correo de un usuario con sesión." },
+    });
   });
 
   it("core.invitations.revoke", async () => {

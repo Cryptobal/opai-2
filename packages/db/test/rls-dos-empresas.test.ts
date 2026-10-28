@@ -24,8 +24,11 @@ const UNICO = "23505";
 // Mensaje de `core.verificar_mismo_tenant`. En su control basta que el error, si lo hay, venga de
 // después (un CHECK, otro trigger o un único): la referencia de la misma empresa ya pasó.
 const OTRA = /apunta a una fila de otra empresa o inexistente/;
-// En comercial, `misma_cuenta` corre antes (orden alfabético de triggers) y rechaza con su mensaje.
-const RECHAZO = new RegExp(`${OTRA.source}|no pertenece a la cuenta del negocio`);
+// En comercial, `misma_cuenta` y `derivar_estado` corren antes (orden alfabético de triggers) y
+// rechazan con su mensaje una referencia que no es de la empresa fijada.
+const RECHAZO = new RegExp(
+  `${OTRA.source}|no pertenece a la cuenta del negocio|no visible para el tenant actual`,
+);
 
 describe.skipIf(!urlPropietario)("dos empresas: aislamiento de toda tabla con tenant_id", () => {
   let e: Entorno;
@@ -124,8 +127,12 @@ describe.skipIf(!urlPropietario)("dos empresas: aislamiento de toda tabla con te
       if (!filaB) continue;
       const { sql, params } = sqlInsert(x.nombre, copia(x, filaB));
       const cruzado = await comoTenant(app, t.a, sql, params);
-      if (!cruzado.codigo || !["42501", "23503"].includes(cruzado.codigo))
-        malas.push(`${x.nombre} desde A: ${JSON.stringify(cruzado)}`);
+      // 42501 es la política (o falta de privilegio); 23503 solo vale si lo lanza un trigger de
+      // misma empresa, que corre antes del WITH CHECK porque la referencia de B no es visible.
+      const rechazo =
+        cruzado.codigo === "42501" ||
+        (cruzado.codigo === "23503" && RECHAZO.test(cruzado.mensaje ?? ""));
+      if (!rechazo) malas.push(`${x.nombre} desde A: ${JSON.stringify(cruzado)}`);
       if (!(await privilegio(admin, ROL, x.nombre, "INSERT"))) continue;
       const propio = await comoTenant(app, t.b, sql, params);
       if (propio.codigo && propio.codigo !== UNICO)

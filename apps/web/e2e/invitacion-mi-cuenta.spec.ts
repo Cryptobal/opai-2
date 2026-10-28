@@ -99,6 +99,7 @@ test.describe("invitación y Mi cuenta", () => {
     // El enlace es de un solo uso: abierto otra vez, ya no sirve.
     await invitada.context().clearCookies();
     await invitada.goto(enlace);
+    await expect(invitada.getByText("Esta invitación ya se usó")).toBeVisible();
     await expect(invitada.getByRole("button", { name: "Crear cuenta y aceptar" })).toHaveCount(0);
     await invitada.close();
   });
