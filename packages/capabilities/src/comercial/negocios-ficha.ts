@@ -4,7 +4,7 @@ import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../define";
 import { uuidSchema } from "../core/esquemas";
-import { dondeContacto } from "../core/maestros/alcance";
+import { dondeContacto, dondeInstalacion } from "../core/maestros/alcance";
 import { diasEntre } from "./dominio";
 import { PERMISO_READ, negocioDe, negocioSchema, vistaNegocio } from "./comun";
 
@@ -67,7 +67,8 @@ export const negociosGet = defineCapability({
     ];
     const [insts, conts, etapas] = await Promise.all([
       ctx.db.instalacion.findMany({
-        where: { id: { in: instIds } },
+        // Alcance por filas (ADR-022): un actor acotado solo ve las instalaciones a su cargo.
+        where: { id: { in: instIds }, AND: [dondeInstalacion(ctx)] },
         select: { id: true, nombre: true },
       }),
       contIds.length
@@ -90,12 +91,11 @@ export const negociosGet = defineCapability({
       cuentaNombre: cuenta?.nombre ?? "",
       etapaNombre: etapa?.nombre ?? "",
       etapaTipo: etapa?.tipo ?? "abierta",
-      instalaciones: vinculosI.map((v) => ({
-        id: v.id,
-        instalacionId: v.instalacionId,
-        nombre: insts.find((i) => i.id === v.instalacionId)?.nombre ?? "",
-        tipo: v.tipo,
-      })),
+      // Igual que con los contactos: un vínculo con una instalación fuera del alcance no se revela.
+      instalaciones: vinculosI.flatMap((v) => {
+        const i = insts.find((x) => x.id === v.instalacionId);
+        return i ? [{ id: v.id, instalacionId: v.instalacionId, nombre: i.nombre, tipo: v.tipo }] : [];
+      }),
       // Un vínculo cuyo contacto quedó fuera del alcance no se revela: ni su nombre ni su existencia.
       contactos: vinculosC.flatMap((v) => {
         const c = conts.find((x) => x.id === v.contactoId);
