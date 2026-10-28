@@ -99,6 +99,138 @@ describe.skipIf(!urlPropietario)("anexo de contrato en base real", () => {
     vinculoId = v.id;
   });
 
+  it("rechaza referencias de otra persona sin crear borrador", async () => {
+    const cargoId = (await e.admin.vinculoLaboral.findUniqueOrThrow({ where: { id: vinculoId } }))
+      .cargoId;
+    const cuenta = await e.admin.cuenta.create({ data: { tenantId, nombre: "Otra cuenta" } });
+    const instalacion = await e.admin.instalacion.create({
+      data: { tenantId, cuentaId: cuenta.id, nombre: "Otra instalación" },
+    });
+    const puesto = await e.admin.puesto.create({
+      data: {
+        tenantId,
+        instalacionId: instalacion.id,
+        cargoId,
+        nombre: "Otro puesto",
+        diasTrabajo: 5,
+        diasDescanso: 2,
+        horaInicio: "08:00",
+        horaFin: "17:00",
+      },
+    });
+    const destino = {
+      instalacionId: instalacion.id,
+      puestoId: puesto.id,
+      horasSemanales: 40,
+      distribucion: "Lunes a viernes",
+    };
+    const otra = await dato<{ id: string }>(ctx(), "core.personas.create", {
+      nombres: "Otra",
+      apellidos: "Persona",
+      rut: "11.111.111-1",
+      vinculo: {
+        ...destino,
+        cargoId: (await e.admin.vinculoLaboral.findUniqueOrThrow({ where: { id: vinculoId } }))
+          .cargoId,
+        tipo: "indefinido",
+        inicio: "2026-01-05",
+      },
+    });
+    const estructura = await e.admin.estructuraSueldo.create({
+      data: {
+        tenantId,
+        nivel: "persona",
+        personaId: otra.id,
+        vigenteDesde: new Date("2026-01-01"),
+        sueldoBase: 900000,
+      },
+    });
+    const antes = await e.admin.anexoContrato.count({ where: { tenantId, personaId } });
+    for (const snapshotDespues of [
+      { estructuraId: estructura.id },
+      { instalacionId: destino.instalacionId },
+      { puestoId: destino.puestoId },
+    ]) {
+      const r = await mod.executeCapability(ctx(), "core.anexos.generar", {
+        personaId,
+        motivoCambio: "monto",
+        snapshotDespues,
+      });
+      expect(r.ok).toBe(false);
+      expect(!r.ok && r.error.code).toBe("UNPROCESSABLE");
+    }
+    expect(await e.admin.anexoContrato.count({ where: { tenantId, personaId } })).toBe(antes);
+  });
+
+  it("acepta instalación de un vínculo anterior de la misma persona (decisión t500u)", async () => {
+    const actual = await e.admin.vinculoLaboral.findUniqueOrThrow({ where: { id: vinculoId } });
+    const cuenta = await e.admin.cuenta.create({ data: { tenantId, nombre: "Cuenta anterior" } });
+    const instalacionAnterior = await e.admin.instalacion.create({
+      data: { tenantId, cuentaId: cuenta.id, nombre: "Instalación anterior" },
+    });
+    await e.admin.vinculoLaboral.create({
+      data: {
+        tenantId,
+        personaId,
+        cargoId: actual.cargoId,
+        instalacionId: instalacionAnterior.id,
+        tipo: "indefinido",
+        inicio: new Date("2025-01-01"),
+        termino: new Date("2025-12-31"),
+        motivoTermino: "Cambio de instalación",
+        estado: "terminado",
+      },
+    });
+    const anexo = await dato<{ id: string }>(ctx(), "core.anexos.generar", {
+      personaId,
+      motivoCambio: "instalacion",
+      snapshotAntes: { instalacionId: instalacionAnterior.id },
+      snapshotDespues: { instalacionId },
+    });
+    expect(anexo.id).toBeTruthy();
+  });
+
+  it("rechaza al aprobar un borrador contaminado insertado directo en la base", async () => {
+    const cargoId = (await e.admin.vinculoLaboral.findUniqueOrThrow({ where: { id: vinculoId } }))
+      .cargoId;
+    const ajena = await dato<{ id: string }>(ctx(), "core.personas.create", {
+      nombres: "Ajena",
+      apellidos: "Persona",
+      rut: "22.222.222-2",
+      vinculo: { ...(await destinoVinculo(ctx())), cargoId, tipo: "indefinido", inicio: "2026-01-05" },
+    });
+    const estructuraAjena = await e.admin.estructuraSueldo.create({
+      data: {
+        tenantId,
+        nivel: "persona",
+        personaId: ajena.id,
+        vigenteDesde: new Date("2026-01-01"),
+        sueldoBase: 1_500_000,
+      },
+    });
+    const contaminado = await e.admin.anexoContrato.create({
+      data: {
+        tenantId,
+        personaId,
+        vinculoId,
+        motivoCambio: "monto",
+        snapshotDespues: { estructuraId: estructuraAjena.id },
+        generadoPorTipo: "usuario",
+        generadoPorId: userId,
+        estado: "borrador",
+      },
+    });
+    const documentosAntes = await e.admin.documento.count({ where: { tenantId } });
+    const r = await mod.executeCapability(ctx(), "core.anexos.aprobar", { id: contaminado.id });
+    expect(r.ok).toBe(false);
+    expect(!r.ok && r.error.code).toBe("UNPROCESSABLE");
+    const sinCambios = await e.admin.anexoContrato.findUniqueOrThrow({
+      where: { id: contaminado.id },
+    });
+    expect(sinCambios.estado).toBe("borrador");
+    expect(await e.admin.documento.count({ where: { tenantId } })).toBe(documentosAntes);
+  });
+
   it("gerente no lee ni genera anexos (D8, bloqueo financiero)", async () => {
     const gerente = ctx({ rol: "gerente" });
     expect((await mod.executeCapability(gerente, "core.anexos.list", {})).ok).toBe(false);

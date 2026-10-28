@@ -3,9 +3,8 @@ import { z } from "zod";
 import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
-import { reglaDeNegocio } from "../../errores";
-import { dondePersona } from "../maestros/alcance";
 import { crearBorrador } from "./comun";
+import { validarSnapshots } from "./validar-snapshots";
 import { anexoSchema, MOTIVOS_ANEXO, vistaAnexo } from "./vista";
 
 const snapshotLibre = z
@@ -27,11 +26,10 @@ export const anexosGenerar = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    const vinculo = await ctx.db.vinculoLaboral.findFirst({
-      where: { personaId: input.personaId, estado: "vigente", persona: dondePersona(ctx) },
-    });
-    if (!vinculo)
-      throw reglaDeNegocio("La persona no tiene un vínculo vigente al que anexar el cambio.");
+    const vinculo = await validarSnapshots(ctx, input.personaId, [
+      input.snapshotAntes,
+      input.snapshotDespues,
+    ]);
     if (dryRun) {
       return vistaAnexo({
         id: "",

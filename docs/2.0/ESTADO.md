@@ -912,3 +912,41 @@ bot «OPAI 2.0»); evidencia completa en `PR-BODY.md`, sin commitear.
 ### Corrección QA del PR #91 (Codex)
 
 El documento final de un anexo se identifica por su relación con `AnexoContrato` y exige `anexos.read` o `estructuras.read_sensible` en Documentos; no admite reemplazo mediante subida para evitar versiones sin la protección. Se valida la persona en la URL y se confirma la aprobación irreversible. Sin migración nueva; detalle en el brief 07b.
+
+### Corrección S1 del PR #91 (Claude, 28-oct-2026, revisión 5679644747)
+
+El Revisor bloqueó el PR #91 por S1: `core.anexos.generar` aceptaba `estructuraId`,
+`instalacionId` y `puestoId` de otra persona (los sueldos de otro trabajador podían
+terminar en el contrato aprobado de esta persona); `core.anexos.aprobar` no revalidaba.
+Una sesión anterior (Codex) había dejado `validar-snapshots.ts` sin commitear, con dos
+huecos que la propia autorrevisión detectó: la revalidación de `aprobar` no bloqueaba
+las filas referenciadas (ventana de concurrencia) y la regla rechazaba anexos
+automáticos legítimos que documentan la instalación/puesto anterior de la misma
+persona. Claude retoma esos cambios, los termina y agrega los tests que faltaban.
+
+`validarSnapshots` (`packages/capabilities/src/core/anexos/validar-snapshots.ts`) exige
+siempre el mismo tenant y la misma persona del anexo. **Decisión de implementación**
+(OPAI 2.0, con la autoridad delegada por Carlos en t500u, 26-oct-2026 22:51 CLT —la
+misma delegación que aprobó este brief, "Pedido y aprobaciones"):
+`instalacionId`/`puestoId` se aceptan si
+pertenecieron a cualquier vínculo de esa persona, **vigente o anterior** (terminado),
+no solo al vigente; un anexo puede documentar el cambio desde un vínculo previo y no se
+rechaza. `core.anexos.aprobar` revalida dentro de la misma transacción que materializa
+el documento final (la ejecución de la capacidad ya es una única transacción, ADR-052) y
+bloquea antes de leer (`SELECT ... FOR SHARE`, el patrón de `vinculos-validacion.ts`)
+los vínculos de la persona y las estructuras de sueldo referenciadas, cerrando la
+ventana de concurrencia.
+
+`seed-vinculo-jornada-e2e.ts` agrega un vínculo anterior (terminado) de la persona 082
+con la instalación/puesto destino del anexo sembrado, para que `anexo-contrato.spec.ts`
+siga pasando sin tocar el vínculo vigente que comparten `vinculo-jornada.spec.ts` y
+`navegacion-permisos.spec.ts`.
+
+**Gate:** `pnpm typecheck`, `pnpm lint` y `pnpm test` en verde (0 errores). `pnpm test:db`:
+122 (`@opai/db`) + 203 (`@opai/capabilities`, incluye 8 de `anexos-db.test.ts` contra
+Postgres real, con los 3 casos nuevos de esta corrección) + 25 (`@opai/auth`), en verde.
+`pnpm --filter @opai/web build` y `pnpm presupuesto` en verde, sin cambio de tamaño.
+e2e `anexo-contrato.spec.ts` (375/1024/1280) en verde contra el servidor del propio
+worktree, 1 worker (el resto de la suite lo valida el CI). No se tocó la migración
+`20261028200000_anexo_contrato_borrador`. Detalle completo y la lista de autorrevisión
+en `PR-BODY.md` (sin commitear).

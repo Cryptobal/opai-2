@@ -12,6 +12,7 @@ import { uuid7 } from "../documentos/uuid7";
 import { hoy } from "../maestros/comun";
 import { anexoDe } from "./comun";
 import { filasParaDocumento } from "./documento";
+import { validarSnapshots } from "./validar-snapshots";
 import { renderizarAnexoHtml } from "./plantilla";
 import { anexoSchema, vistaAnexo } from "./vista";
 import type { FilaAnexo } from "./vista";
@@ -79,7 +80,13 @@ async function materializarDocumento(
     tipo: "core.documento.registrado",
     entidadTipo: "documento",
     entidadId: doc.id,
-    payload: { sha256: checksum, tamano: doc.tamano, mime: doc.mime, origen: "generado", anexoId: anexo.id },
+    payload: {
+      sha256: checksum,
+      tamano: doc.tamano,
+      mime: doc.mime,
+      origen: "generado",
+      anexoId: anexo.id,
+    },
   });
   return tx.documento.update({ where: { id: doc.id }, data: { bitacoraSeq: hecho.seq } });
 }
@@ -99,6 +106,7 @@ export const anexosAprobar = defineCapability({
     if (dryRun) {
       const a = await anexoDe(ctx, input.id);
       if (a.estado !== "borrador") throw conflicto("El anexo ya fue resuelto.");
+      await validarSnapshots(ctx, a.personaId, [a.snapshotAntes, a.snapshotDespues], a.vinculoId);
       return vistaAnexo({
         ...a,
         estado: "aprobado",
@@ -110,6 +118,9 @@ export const anexosAprobar = defineCapability({
     await bloquearAnexo(ctx, input.id);
     const a = await anexoDe(ctx, input.id);
     if (a.estado !== "borrador") throw conflicto("El anexo ya fue resuelto.");
+    await validarSnapshots(ctx, a.personaId, [a.snapshotAntes, a.snapshotDespues], a.vinculoId, {
+      bloquear: true,
+    });
     const persona = await ctx.db.persona.findUnique({ where: { id: a.personaId } });
     if (!persona) throw noEncontrado("La persona");
     const r = await ctx.transaccion(async (tx) => {
