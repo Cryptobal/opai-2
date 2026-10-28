@@ -39,5 +39,12 @@ export async function reenvolverDeks(db: Admin, k: Kek): Promise<number> {
     select: { id: true },
   });
   for (const { id } of filas) if (await reenvolverFila(db, id, k)) recifradas += 1;
+  // Una fila que no se pudo reenvolver quedaría ilegible al retirar la KEK anterior: se falla para
+  // que no se quite OPAI_SECRETS_KEY_ANTERIOR (revisión 5689460927).
+  const pendientes = await db.claveTenant.count({ where: { kekVersion: { lt: k.version } } });
+  if (pendientes > 0)
+    throw new Error(
+      `Quedan ${pendientes} DEK sin reenvolver con la KEK versión ${k.version}; reintenta antes de retirar la anterior.`,
+    );
   return recifradas;
 }
