@@ -1,5 +1,7 @@
 import { clienteApp } from "./client";
 import type { Prisma } from "./generated/prisma/client";
+import { operacionesAprobacionesPlataforma } from "./plataforma-aprobaciones";
+import type { TenantTx } from "./transaccion";
 
 // Perfil que devuelve tenantSchema. No expone datos legales, DPO ni otros ajustes del tenant.
 const perfil = {
@@ -31,6 +33,8 @@ export function listarTenants(id?: string) {
 export function accesoPlataforma() {
   const db = clienteApp();
   return {
+    // Cola de aprobaciones y auditoría de plataforma, fuera de los tenants (CAR-36).
+    ...operacionesAprobacionesPlataforma(),
     tenantPorId: (id: string) => db.tenant.findUnique({ where: { id }, select: perfil }),
     tenantPorSlug: (slug: string) => db.tenant.findUnique({ where: { slug }, select: perfil }),
     listarTenants,
@@ -60,21 +64,26 @@ export function accesoPlataforma() {
     listarAjustes: () => db.ajustePlataforma.findMany({ select: ajuste }),
     ajustePorClave: (where: Prisma.AjustePlataformaWhereUniqueInput) =>
       db.ajustePlataforma.findUnique({ where, select: ajuste }),
-    guardarAjuste: ({
-      where,
-      create,
-      update,
-    }: Pick<Prisma.AjustePlataformaUpsertArgs, "where" | "create" | "update">) =>
-      db.ajustePlataforma.upsert({ where, create, update, select: ajuste }),
+    /** Con `tx`, en la transacción de la escritura y su auditoría (CAR-41: falla cerrado). */
+    guardarAjuste: (
+      {
+        where,
+        create,
+        update,
+      }: Pick<Prisma.AjustePlataformaUpsertArgs, "where" | "create" | "update">,
+      tx?: TenantTx,
+    ) => (tx ?? db).ajustePlataforma.upsert({ where, create, update, select: ajuste }),
     listarPrecios: (hasta: Date) => preciosHasta(hasta),
     precioPorVigencia: (where: Prisma.PrecioRecursoWhereUniqueInput) =>
       db.precioRecurso.findUnique({ where, select: precio }),
-    guardarPrecio: ({
-      where,
-      create,
-      update,
-    }: Pick<Prisma.PrecioRecursoUpsertArgs, "where" | "create" | "update">) =>
-      db.precioRecurso.upsert({ where, create, update, select: precio }),
+    guardarPrecio: (
+      {
+        where,
+        create,
+        update,
+      }: Pick<Prisma.PrecioRecursoUpsertArgs, "where" | "create" | "update">,
+      tx?: TenantTx,
+    ) => (tx ?? db).precioRecurso.upsert({ where, create, update, select: precio }),
   };
 }
 
