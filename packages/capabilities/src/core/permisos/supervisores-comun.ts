@@ -10,7 +10,8 @@ export async function supervisorDe(ctx: Contexto, membershipId: string) {
   if (!m) throw noEncontrado("El usuario");
   // El alcance por filas de este brief es solo del rol base supervisor (§16.4). Otros roles no se
   // acotan por instalación; cliente y trabajador se suman con sus portales (fase 3).
-  if (m.rol !== "supervisor") throw reglaDeNegocio("El alcance por instalación es solo del supervisor.");
+  if (m.rol !== "supervisor")
+    throw reglaDeNegocio("El alcance por instalación es solo del supervisor.");
   return m;
 }
 

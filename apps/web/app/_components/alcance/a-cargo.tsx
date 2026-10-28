@@ -72,7 +72,11 @@ export function AsignarACargo(p: {
         disabled={p.pendiente || !p.elegidos.length}
         onClick={p.onAsignar}
       >
-        {p.pendiente ? "Guardando…" : p.elegidos.length > 1 ? `Asignar ${p.elegidos.length}` : "Asignar"}
+        {p.pendiente
+          ? "Guardando…"
+          : p.elegidos.length > 1
+            ? `Asignar ${p.elegidos.length}`
+            : "Asignar"}
       </Button>
     </div>
   );

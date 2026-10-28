@@ -45,7 +45,11 @@ export function InstalacionesACargo({ membershipId }: { membershipId: string }) 
       const ya = new Set((asignadas ?? []).map((i) => i.id));
       const opciones = (r.data as InstalacionLista).items
         .filter((i) => !ya.has(i.id))
-        .map((i) => ({ valor: i.id, etiqueta: i.nombre, ...(i.cuenta ? { detalle: i.cuenta } : {}) }));
+        .map((i) => ({
+          valor: i.id,
+          etiqueta: i.nombre,
+          ...(i.cuenta ? { detalle: i.cuenta } : {}),
+        }));
       // Lo visto queda para que los chips de lo elegido muestren el nombre, no el id.
       setVistas((v) => [...v, ...opciones.filter((o) => !v.some((x) => x.valor === o.valor))]);
       return opciones;

@@ -40,13 +40,21 @@ async function portalSupervisor(browser: Browser, email: string): Promise<Page> 
   return page;
 }
 
+/**
+ * La lista del portal tras cada cambio. Se recarga en cada intento: en CI (`pnpm dev`, un worker)
+ * la primera compilación de la ruta puede tardar más que la espera de un `expect`.
+ */
 async function verInstalaciones(sup: Page, asignada: boolean) {
-  await sup.goto("/supervisor/instalaciones");
-  if (asignada) await expect(sup.getByText(NOMBRE_INST).first()).toBeVisible();
-  else {
-    await expect(sup.getByText("Sin instalaciones activas", { exact: true })).toBeVisible();
-    await expect(sup.getByText(NOMBRE_INST)).toHaveCount(0);
-  }
+  await expect(async () => {
+    await sup.goto("/supervisor/instalaciones");
+    if (asignada) await expect(sup.getByText(NOMBRE_INST).first()).toBeVisible({ timeout: 10_000 });
+    else {
+      await expect(sup.getByText("Sin instalaciones activas", { exact: true })).toBeVisible({
+        timeout: 10_000,
+      });
+      await expect(sup.getByText(NOMBRE_INST)).toHaveCount(0);
+    }
+  }).toPass({ timeout: 60_000 });
 }
 
 test("asignar, ver solo lo asignado en el portal, quitar y volver a vacío", async ({
@@ -67,7 +75,9 @@ test("asignar, ver solo lo asignado en el portal, quitar y volver a vacío", asy
   await fila.click();
   const hoja = page.getByRole("dialog", { name: nombre });
   await expect(hoja).toBeVisible({ timeout: 30_000 });
-  await expect(hoja.getByText("Sin instalaciones a cargo: en su portal verá listas vacías.")).toBeVisible();
+  await expect(
+    hoja.getByText("Sin instalaciones a cargo: en su portal verá listas vacías."),
+  ).toBeVisible();
   const buscador = hoja.getByRole("button", { name: "Asignar instalaciones" });
   await hidratado(buscador);
   await buscador.click();

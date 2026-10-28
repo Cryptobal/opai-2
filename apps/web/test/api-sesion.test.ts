@@ -48,7 +48,10 @@ describe("/api/v1 con sesión (CAR-38)", () => {
 
   it("sin ERP ni tenant también exige el propio origen (plataforma y sin tenant)", async () => {
     const { fuentes } = fuentesFalsas({ membresias: [] });
-    const sinTenant = actor.contextoDeIdentidad(await actor.identidadDe(USUARIO, undefined, fuentes), null);
+    const sinTenant = actor.contextoDeIdentidad(
+      await actor.identidadDe(USUARIO, undefined, fuentes),
+      null,
+    );
     for (const ctx of [sinTenant, await ctxSesion(["supervisor"])]) {
       const r = contextoSesionApi(new Request(URL_API, { method: "POST" }), ctx);
       expect((r as Response).status).toBe(403);

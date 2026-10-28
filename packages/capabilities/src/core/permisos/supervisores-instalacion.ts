@@ -53,8 +53,14 @@ export const supervisoresDeInstalacion = defineCapability({
       a.nombre.localeCompare(b.nombre, "es");
     return {
       instalacionId: i.id,
-      asignados: filas.filter((m) => m.instalacionesACargo.length).map(ref).sort(orden),
-      candidatos: filas.filter((m) => !m.instalacionesACargo.length).map(ref).sort(orden),
+      asignados: filas
+        .filter((m) => m.instalacionesACargo.length)
+        .map(ref)
+        .sort(orden),
+      candidatos: filas
+        .filter((m) => !m.instalacionesACargo.length)
+        .map(ref)
+        .sort(orden),
     };
   },
 });

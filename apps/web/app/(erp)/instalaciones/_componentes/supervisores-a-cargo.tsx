@@ -89,7 +89,8 @@ export function SupervisoresACargo({
         ) : null}
         {puedeGestionar && !datos.candidatos.length && !datos.asignados.length ? (
           <p className="t-caption">
-            Para asignar, primero invita a un usuario con rol Supervisor en Configuración → Usuarios.
+            Para asignar, primero invita a un usuario con rol Supervisor en Configuración →
+            Usuarios.
           </p>
         ) : null}
       </div>

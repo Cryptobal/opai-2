@@ -14,7 +14,8 @@ async function main() {
   const password = process.env["E2E_PASSWORD"];
   if (!password) throw new Error("Falta E2E_PASSWORD");
   const proyecto = process.env["E2E_PROYECTO"] ?? "";
-  if (!PROYECTOS.includes(proyecto)) throw new Error("Falta E2E_PROYECTO (telefono, ipad o desktop)");
+  if (!PROYECTOS.includes(proyecto))
+    throw new Error("Falta E2E_PROYECTO (telefono, ipad o desktop)");
   const hash = await hashPassword(password);
   const tenant = await dbAdmin().tenant.findUniqueOrThrow({ where: { slug: "gard" } });
   // Las tablas de tenant tienen FORCE RLS: se escribe con `enTransaccion(tenantId)`.
@@ -53,7 +54,12 @@ async function main() {
       const membership = await tx.membership.upsert({
         where: { tenantId_userId: { tenantId: tenant.id, userId: user.id } },
         update: { rol: "supervisor", roleId: null, portales: ["supervisor"], estado: "activa" },
-        create: { tenantId: tenant.id, userId: user.id, rol: "supervisor", portales: ["supervisor"] },
+        create: {
+          tenantId: tenant.id,
+          userId: user.id,
+          rol: "supervisor",
+          portales: ["supervisor"],
+        },
       });
       await tx.supervisorInstalacion.deleteMany({ where: { membershipId: membership.id } });
     }

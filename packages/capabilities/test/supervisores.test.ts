@@ -36,8 +36,14 @@ const agente = {
 describe("core.supervisores.asignar/quitar (CAR-38)", () => {
   it("una persona owner: preview no guarda; asignar y quitar escriben y auditan", async () => {
     const { ctx, tabla, eventos } = contexto();
-    const vista = await executeCapability(ctx, "core.supervisores.asignar", input, { dryRun: true });
-    expect(vista).toMatchObject({ ok: true, dryRun: true, data: { instalaciones: [{ id: INST }] } });
+    const vista = await executeCapability(ctx, "core.supervisores.asignar", input, {
+      dryRun: true,
+    });
+    expect(vista).toMatchObject({
+      ok: true,
+      dryRun: true,
+      data: { instalaciones: [{ id: INST }] },
+    });
     expect(tabla("supervisorInstalacion")).toHaveLength(0);
     expect(await executeCapability(ctx, "core.supervisores.asignar", input)).toMatchObject({
       ok: true,
@@ -63,7 +69,9 @@ describe("core.supervisores.asignar/quitar (CAR-38)", () => {
       expect(nombres).toContain(`preview_${n}`);
     }
     expect(nombres).toContain("core_supervisores_de_instalacion");
-    const vista = await executeCapability(ctx, "core.supervisores.asignar", input, { dryRun: true });
+    const vista = await executeCapability(ctx, "core.supervisores.asignar", input, {
+      dryRun: true,
+    });
     expect(vista).toMatchObject({ ok: true, dryRun: true });
     for (const id of ["core.supervisores.asignar", "core.supervisores.quitar"]) {
       expect(await executeCapability(ctx, id, input)).toMatchObject({

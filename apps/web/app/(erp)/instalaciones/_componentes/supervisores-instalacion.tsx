@@ -16,7 +16,12 @@ async function Seccion({ instalacionId }: { instalacionId: string }) {
   ]);
   if (!r.ok) return null;
   const rol = identidad?.actual?.rol;
-  return <SupervisoresACargoDiferido datos={r.data} puedeGestionar={rol === "owner" || rol === "admin"} />;
+  return (
+    <SupervisoresACargoDiferido
+      datos={r.data}
+      puedeGestionar={rol === "owner" || rol === "admin"}
+    />
+  );
 }
 
 /**
