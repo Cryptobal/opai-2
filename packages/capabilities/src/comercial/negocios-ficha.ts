@@ -47,8 +47,9 @@ export const negociosGet = defineCapability({
   dryRun: false,
   async handler(ctx, input) {
     const n = await negocioDe(ctx, input.id);
-    // Correo y nombre de contacto son datos personales del núcleo (igual que contactos.ts): sin
-    // core:cuentas.read la ficha no revela contactos, pero el resto del negocio sí se devuelve.
+    // Contactos: datos personales del núcleo. Como comercial.contactos.list, exige ver Cuentas y
+    // aplica el alcance por filas (ADR-022); sin ese permiso la ficha no falla entera, solo no trae
+    // contactos.
     const puedeVerContactos = ctx.autorizar(PERMISOS_CORE.cuentasRead);
     const [cuenta, etapa, vinculosI, vinculosC, historial] = await Promise.all([
       ctx.db.cuenta.findUnique({ where: { id: n.cuentaId }, select: { nombre: true } }),
@@ -82,8 +83,6 @@ export const negociosGet = defineCapability({
         select: { id: true, nombre: true },
       }),
     ]);
-    // Un vínculo cuyo contacto quedó fuera del alcance no se revela: ni su nombre ni su existencia.
-    const vinculosCVisibles = vinculosC.filter((v) => conts.some((c) => c.id === v.contactoId));
     const nombreEtapa = (id: string | null) =>
       id ? (etapas.find((e) => e.id === id)?.nombre ?? null) : null;
     return {
@@ -97,15 +96,19 @@ export const negociosGet = defineCapability({
         nombre: insts.find((i) => i.id === v.instalacionId)?.nombre ?? "",
         tipo: v.tipo,
       })),
-      contactos: vinculosCVisibles.map((v) => {
+      // Un vínculo cuyo contacto quedó fuera del alcance no se revela: ni su nombre ni su existencia.
+      contactos: vinculosC.flatMap((v) => {
         const c = conts.find((x) => x.id === v.contactoId);
-        return {
-          id: v.id,
-          contactoId: v.contactoId,
-          nombre: c ? `${c.nombres} ${c.apellidos}`.trim() : "",
-          rol: v.rol,
-          esPrincipal: v.esPrincipal,
-        };
+        if (!c) return [];
+        return [
+          {
+            id: v.id,
+            contactoId: v.contactoId,
+            nombre: `${c.nombres} ${c.apellidos}`.trim(),
+            rol: v.rol,
+            esPrincipal: v.esPrincipal,
+          },
+        ];
       }),
       historial: historial.map((h, i) => {
         const prev = historial[i - 1];
