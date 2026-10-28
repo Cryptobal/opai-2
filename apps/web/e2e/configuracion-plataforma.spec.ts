@@ -1,4 +1,5 @@
 import { expect, type Page, test } from "@playwright/test";
+import { hidratado } from "./hidratacion";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
 // Configuración (Brief 02, sesión C): Integraciones, Comunicaciones (con su editor de plantilla),
@@ -29,9 +30,10 @@ test.describe("configuración de plataforma del tenant", () => {
     await captura(page, "config-comunicaciones", p);
     await page.goto("/configuracion/comunicaciones/core.documento.por_vencer");
     await expect(visible("Vista previa")).toBeVisible();
+    // La vista previa se arma en el cliente (iframe srcdoc): en dev puede tardar más de 5 s.
     await expect(
       page.frameLocator('iframe[title="Vista previa del correo"]').locator("body"),
-    ).toContainText(/vence/);
+    ).toContainText(/vence/, { timeout: 30_000 });
     await captura(page, "config-plantilla", p);
 
     await page.goto("/configuracion/consumos");
@@ -48,6 +50,7 @@ test.describe("configuración de plataforma del tenant", () => {
     await entrar(page);
     await page.goto("/configuracion/comunicaciones");
     const sw = page.getByRole("switch", { name: "Activar Documento vencido" });
+    await hidratado(sw);
     const antes = await sw.getAttribute("aria-checked");
     await sw.click();
     await expect(sw).not.toHaveAttribute("aria-checked", antes ?? "");
@@ -56,6 +59,7 @@ test.describe("configuración de plataforma del tenant", () => {
 
     await page.goto("/configuracion/comunicaciones/core.documento.vencido");
     const cuerpo = page.getByLabel("Cuerpo");
+    await hidratado(cuerpo);
     await cuerpo.fill(`Prueba E2E ${Date.now()}: {{documento.tipo}} venció.`);
     await page.getByRole("button", { name: /Publicar versión/ }).click();
     // El mismo mensaje también aparece en el toast; comprobar el estado persistente del formulario.

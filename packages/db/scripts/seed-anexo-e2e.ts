@@ -1,6 +1,9 @@
 import { cerrarClientes, dbAdmin, enTransaccion, type TenantTx } from "../src/index";
 
 const PERSONA_ID = "00000000-0000-7000-8000-000000000082";
+// Por defecto, el anexo que recorren las e2e; cada proyecto rechaza el suyo (`ANEXO_E2E_ID`, solo
+// ids fijos de prueba) para no pisarse si los proyectos corren en paralelo.
+const ANEXO_ID = process.env["ANEXO_E2E_ID"] ?? "00000000-0000-7000-8000-0000000000a9";
 
 async function main() {
   const url = new URL(process.env["DATABASE_URL_MIGRATE"] ?? "postgresql://sin-configurar/");
@@ -10,6 +13,8 @@ async function main() {
     process.env["NODE_ENV"] === "production"
   )
     throw new Error("Solo e2e local.");
+  if (!/^00000000-0000-7000-8000-0000000000a[0-9a-f]$/.test(ANEXO_ID))
+    throw new Error("Id de prueba inválido.");
   // FORCE RLS: el tenant se fija con `enTransaccion`; `tenants` no tiene RLS y da el id.
   const { id: tenantId } = await dbAdmin().tenant.findUniqueOrThrow({ where: { slug: "gard" } });
   await enTransaccion(tenantId, sembrar);
@@ -20,7 +25,7 @@ async function sembrar(db: TenantTx) {
     where: { personaId: PERSONA_ID, estado: "vigente" },
   });
   await db.anexoContrato.upsert({
-    where: { id: "00000000-0000-7000-8000-0000000000a9" },
+    where: { id: ANEXO_ID },
     update: {
       estado: "borrador",
       aprobadoPorId: null,
@@ -31,7 +36,7 @@ async function sembrar(db: TenantTx) {
       documentoId: null,
     },
     create: {
-      id: "00000000-0000-7000-8000-0000000000a9",
+      id: ANEXO_ID,
       tenantId: vinculo.tenantId,
       personaId: PERSONA_ID,
       vinculoId: vinculo.id,

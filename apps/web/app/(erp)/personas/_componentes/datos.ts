@@ -27,6 +27,7 @@ export async function cargarPersonas(p: Parametros) {
     ...(p["q"] ? { q: p["q"] } : {}),
     ...(p["cargo"] ? { cargoId: p["cargo"] } : {}),
     ...(p["estado"] ? { estado: p["estado"] } : {}),
+    ...(p["anexo"] === "borrador" ? { anexo: "borrador" } : {}),
     ...(p["cursor"] ? { cursor: p["cursor"] } : {}),
   });
   return {
