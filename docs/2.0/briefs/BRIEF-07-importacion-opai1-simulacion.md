@@ -1,6 +1,6 @@
 # BRIEF 07 — Importación comercial desde OPAI 1.0: simulación (Bloque B)
 
-**Repositorio:** `Cryptobal/opai-2` · **Rama:** `brief/car-importacion-opai1-simulacion` (desde `main` `b1612ab`) · **Fecha:** 28-oct-2026 · **Estado:** encargado por Carlos el 28-oct-2026 (Bloque B: «solo la simulación; la carga real cuando el CRM esté completo y con mi OK; se importa todo el historial, son menos de 24 meses; cotizaciones fuera») · **Tarea:** CAR-n por asignar (`Fixes CAR-n` en el PR) · **Reglas:** ADR-010, ADR-040 §5, R28 de `modulos/comercial.md`, `extraccion/comercial-y-cpq.md` §6, `REGLAS-codigo.md` («Migraciones de datos después de FORCE RLS», `dbAdmin()`), Ley 21.719.
+**Repositorio:** `Cryptobal/opai-2` · **Rama:** `brief/car-importacion-opai1-simulacion` (desde `main` `b1612ab`) · **Fecha:** 28-oct-2026 · **Estado:** encargado por Carlos el 28-oct-2026 (Bloque B: «solo la simulación; la carga real cuando el CRM esté completo y con mi OK; se importa todo el historial, son menos de 24 meses; cotizaciones fuera») · **Tarea:** CAR-25 (`Fixes CAR-25` en el PR) · **Reglas:** ADR-010, ADR-040 §5, R28 de `modulos/comercial.md`, `extraccion/comercial-y-cpq.md` §6, `REGLAS-codigo.md` («Migraciones de datos después de FORCE RLS», `dbAdmin()`), Ley 21.719.
 
 ## 1. Objetivo
 
@@ -60,7 +60,9 @@ Normalización (RUT de prueba con DV válido, correo, teléfono, nombre canónic
 - **Datos personales:** el plan en memoria tiene nombres y correos; el reporte y la consola no. Un test lo verifica sobre la salida serializada.
 - **Fixtures ≠ 1.0 real:** los nombres de campo siguen el schema de 1.0 citado en la extracción; se validan contra la copia anonimizada antes de la carga real.
 - **Contactos N–N:** hasta el CRM PR 2 quedan en conflicto; si son muchos, la carga real debe esperar al PR 2.
-- **Consistencia del estado 2.0:** se lee en una sola transacción `RepeatableRead`.
+- **Consistencia del estado 2.0:** se lee en una sola transacción `RepeatableRead` y `READ ONLY`, con orden estable por id (el emparejamiento es determinista).
+- **Coordenadas:** se redondean a 7 decimales, como `Decimal(10,7)` de 2.0, para que el plan siga «sin cambios» tras la carga.
+- **Filas archivadas en 2.0:** hoy cuentan para el emparejamiento (se puede «vincular» a un contacto archivado). Queda como pregunta 7.
 
 ## 7. Preguntas para Carlos
 
@@ -70,3 +72,4 @@ Normalización (RUT de prueba con DV válido, correo, teléfono, nombre canónic
 4. **Nombre canónico:** ¿subimos `nombreCanonico` a `@opai/domain` para que la UI de deduplicación use la misma regla?
 5. **Instalaciones de leads (sin cuenta):** ¿se crean cuentas prospecto desde el lead en la carga real o quedan en el reporte?
 6. **Rol `cesion`:** `recibeCesion` no tiene rol en el `Contacto` de `main`; ¿se espera al vínculo del PR 2?
+7. **Filas archivadas en 2.0:** si una fila de 1.0 coincide con una cuenta, contacto o instalación archivada en 2.0, ¿se vincula igual (y se reporta como «archivada»), se desarchiva en la carga real o se crea otra?

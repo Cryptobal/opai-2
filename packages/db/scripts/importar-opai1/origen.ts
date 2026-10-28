@@ -125,7 +125,13 @@ export function lectorFixtures(ruta: string): LectorOrigen {
   return {
     descripcion: "fixtures",
     async leer() {
-      const crudo: unknown = JSON.parse(await readFile(ruta, "utf8"));
+      let crudo: unknown;
+      try {
+        crudo = JSON.parse(await readFile(ruta, "utf8"));
+      } catch {
+        // El mensaje de JSON.parse puede citar un trozo del archivo: no se repite en el log.
+        throw new Error("JSON inválido en el origen.");
+      }
       return validarDatos(crudo);
     },
   };

@@ -54,8 +54,9 @@ export function datosInstalacion(f: InstalacionOpai1, cuentaId: string): DatosIn
     calle: textoLimpio(f.address),
     comuna: textoLimpio(f.commune),
     placeId: textoLimpio(f.placeId),
-    lat: f.lat ?? null,
-    lng: f.lng ?? null,
+    // core.instalaciones guarda Decimal(10,7): se redondea igual para que el plan sea idempotente.
+    lat: f.lat == null ? null : Math.round(f.lat * 1e7) / 1e7,
+    lng: f.lng == null ? null : Math.round(f.lng * 1e7) / 1e7,
   };
 }
 

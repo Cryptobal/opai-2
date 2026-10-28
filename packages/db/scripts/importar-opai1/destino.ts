@@ -17,9 +17,11 @@ export async function leerEstadoDestino(
   const estado = await enTransaccion(
     tenant.id,
     async (tx) => {
-      // Secuencial: una transacción interactiva usa una sola conexión.
+      // Solo lectura también en la base; secuencial: una transacción interactiva usa una conexión.
+      await tx.$executeRaw`SET TRANSACTION READ ONLY`;
       const cuentas = await tx.cuenta.findMany({
         select: { id: true, nombre: true, razonSocial: true, rut: true },
+        orderBy: { id: "asc" },
       });
       const contactos = await tx.contacto.findMany({
         select: {
@@ -33,6 +35,7 @@ export async function leerEstadoDestino(
           esPrincipal: true,
           roles: true,
         },
+        orderBy: { id: "asc" },
       });
       const instalaciones = await tx.instalacion.findMany({
         select: {
@@ -45,6 +48,7 @@ export async function leerEstadoDestino(
           lat: true,
           lng: true,
         },
+        orderBy: { id: "asc" },
       });
       const ids = await tx.idExterno.findMany({
         where: { sistema: SISTEMA_OPAI1 },

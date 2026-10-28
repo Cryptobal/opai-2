@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { estadoVacio } from "../../scripts/importar-opai1/destino-tipos";
+import { datosInstalacion } from "../../scripts/importar-opai1/instalaciones";
 import { calcularPlan } from "../../scripts/importar-opai1/plan";
 import { fixture } from "./memoria";
 
@@ -70,5 +71,12 @@ describe("plan de instalaciones", () => {
       accion: "conflicto",
       motivo: "nombre_existente_en_cuenta",
     });
+  });
+
+  it("redondea coordenadas a 7 decimales como Decimal(10,7) de 2.0 (plan idempotente)", () => {
+    const fila = { id: "x", name: "P", lat: -33.448912345678, lng: -70.669265432198 };
+    const d = datosInstalacion(fila as Parameters<typeof datosInstalacion>[0], "c");
+    expect(d.lat).toBe(-33.4489123);
+    expect(d.lng).toBe(-70.6692654);
   });
 });
