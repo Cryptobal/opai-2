@@ -145,7 +145,10 @@ core_puestos_set_estado
 core_puestos_update
 core_resumen_contadores
 core_roles_list
+core_supervisores_asignar
+core_supervisores_de_instalacion
 core_supervisores_list
+core_supervisores_quitar
 core_tenant_get
 core_tenant_update
 core_usage_summary
@@ -225,6 +228,8 @@ preview_core_plantillas_update
 preview_core_puestos_create
 preview_core_puestos_set_estado
 preview_core_puestos_update
+preview_core_supervisores_asignar
+preview_core_supervisores_quitar
 preview_core_tenant_update
 preview_core_users_remove
 preview_core_users_update
