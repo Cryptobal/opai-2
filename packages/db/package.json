@@ -23,10 +23,11 @@
     "diagnostico:portales": "tsx scripts/diagnostico-portales.ts"
   },
   "dependencies": {
+    "@opai/domain": "workspace:*",
     "@prisma/adapter-pg": "^7.10.1",
     "@prisma/client": "^7.10.1",
     "pg": "^8.23.1",
-    "@opai/domain": "workspace:*"
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@types/pg": "^8.23.1",
