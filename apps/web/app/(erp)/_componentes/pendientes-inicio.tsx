@@ -60,6 +60,7 @@ export function PendientesInicio({ items }: { items: Pendiente[] }) {
             <li key={`${p.tipo}-${i}`} className="border-b border-border last:border-b-0">
               <div className="md:hidden">
                 <FilaSeleccionable
+                  ajustarTexto
                   href={p.href}
                   Link={LinkNext}
                   inicio={<Icono p={p} />}

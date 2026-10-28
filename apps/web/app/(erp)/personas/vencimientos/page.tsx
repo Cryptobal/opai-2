@@ -1,4 +1,5 @@
 import { PaginaPortal } from "@/app/_components/pagina-portal";
+import { leerParametros, type SearchParams } from "@/lib/parametros";
 import { estadoPantalla } from "@/lib/formato";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
@@ -11,7 +12,7 @@ import type { Matriz } from "../_componentes/tipos-matriz";
 export const metadata = { title: "Vencimientos" };
 
 /** Vencimientos (58/59): semáforo de documentos por persona y renovación en bloque. */
-export default function Vencimientos() {
+export default function Vencimientos({ searchParams }: { searchParams: SearchParams }) {
   return (
     <PaginaPortal
       portal="erp"
@@ -19,12 +20,19 @@ export default function Vencimientos() {
       ruta="/personas"
       cargar={async () => {
         const r = await ejecutarComoUsuario<Matriz>("erp", "core.documentos.matriz", {});
-        return { state: estadoPantalla(r), m: r.ok ? r.data : null };
+        const params = await leerParametros(searchParams);
+        return {
+          state: estadoPantalla(r),
+          m: r.ok ? r.data : null,
+          desdeInicio: params["origen"] === "inicio",
+        };
       }}
-      opciones={() => ({
+      opciones={({ desdeInicio }) => ({
         titulo: "Vencimientos",
         insignia: <SegmentoPersonas activa="vencimientos" plural="Personas" />,
-        volver: { href: "/personas", etiqueta: "Personas" },
+        volver: desdeInicio
+          ? { href: "/", etiqueta: "Inicio" }
+          : { href: "/personas", etiqueta: "Personas" },
         volverSoloTelefono: true,
       })}
     >

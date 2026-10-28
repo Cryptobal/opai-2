@@ -60,6 +60,17 @@ describe("pantallas de la sesión C: actividad, contadores y pendientes", () => 
     expect(n["aprobacionesPendientes"]).toBeNull();
   });
 
+  it("sin permiso de documentos o personas no revela vencimientos", async () => {
+    for (const permiso of ["core:documentos.read", "core:personas.read"]) {
+      const { ctx } = contextoDePrueba();
+      const limitado = { ...ctx, autorizar: (p: string) => p !== permiso && ctx.autorizar(p) };
+      const items = ok<{ tipo: string }[]>(await executeCapability(limitado, "core.inicio.pendientes", {}));
+      expect(items.some((item) => item.tipo === "documentos")).toBe(false);
+      const matriz = await executeCapability(limitado, "core.documentos.matriz", {});
+      expect(matriz).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+    }
+  });
+
   it("sin nada pendiente, Inicio no muestra decisiones", async () => {
     const { ctx } = contextoDePrueba();
     expect(ok<unknown[]>(await executeCapability(ctx, "core.inicio.pendientes", {}))).toEqual([]);

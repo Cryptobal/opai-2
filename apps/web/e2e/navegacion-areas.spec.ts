@@ -140,8 +140,8 @@ test("áreas, fijados, recientes, Más, preferencias y Bandeja", async ({ page }
   await expect(page.getByRole("radio", { name: /^Según mi rol/ })).toHaveAttribute("data-state", "checked");
   await page.goto("/");
   await expect(page.getByRole("heading", { name: /^Bandeja · \d/ })).toBeVisible({ timeout: 15_000 });
-  await page.locator("header").getByRole("link", { name: /Notificaciones/ }).click();
-  await expect(page).toHaveURL(/#bandeja$/);
+  await page.locator("header").getByRole("button", { name: /Notificaciones/ }).click();
+  await expect(page.getByText("Notificaciones", { exact: true }).last()).toBeVisible(); await page.keyboard.press("Escape");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   for (const tema of ["light", "dark"]) {
     await page.evaluate((t) => document.documentElement.setAttribute("data-theme", t), tema);

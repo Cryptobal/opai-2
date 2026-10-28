@@ -1,12 +1,10 @@
 import { z } from "zod";
 
-import { estadoVigencia, PERMISOS_CORE } from "@opai/domain";
+import { tituloVencimientos, PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import { obtenerCapacidad } from "../../registry";
-import { documentosEnAlcance } from "../documentos/alcance-doc";
-import { filtroDocumentoSensible } from "../documentos/sensibles";
-import { dia, hoy } from "../maestros/comun";
+import { documentosMatriz } from "../documentos/matriz";
 
 const pendienteSchema = z.object({
   tipo: z.enum(["aprobaciones", "documentos", "invitaciones", "integraciones"]),
@@ -59,29 +57,24 @@ export const inicioPendientes = defineCapability({
           });
         }
       }
-      if (ctx.autorizar(PERMISOS_CORE.documentosRead)) {
-        const limite = new Date(ahora.getTime() + 30 * 86_400_000);
-        // Alcance por filas (ADR-022): un actor acotado solo cuenta documentos de entidades a su cargo.
-        const permitidos = await documentosEnAlcance(ctx);
-        const docs = await ctx.db.documento.findMany({
-          where: {
-            ...filtroDocumentoSensible(ctx),
-            estado: "disponible",
-            venceEn: { lte: limite },
-            ...(permitidos ? { id: { in: [...permitidos] } } : {}),
-          },
-          select: { venceEn: true },
-        });
-        const estados = docs.map((d) => estadoVigencia(dia(d.venceEn), hoy(), 30));
-        const vencidos = estados.filter((e) => e === "vencido").length;
-        const porVencer = estados.filter((e) => e === "por_vencer").length;
+      if (
+        ctx.autorizar(PERMISOS_CORE.documentosRead) &&
+        ctx.autorizar(PERMISOS_CORE.personasRead)
+      ) {
+        // La matriz aplica el mismo alcance y selección de documentos que la pantalla.
+        const { resumen } = await documentosMatriz.handler(
+          ctx,
+          { soloPendientes: false },
+          { dryRun: false },
+        );
+        const { vencidos, porVencer } = resumen;
         if (vencidos || porVencer)
           items.push({
             tipo: "documentos",
-            titulo: `${plural(vencidos, "documento vencido", "documentos vencidos")} · ${porVencer} vencen en 30 días`,
+            titulo: tituloVencimientos(vencidos, porVencer),
             detalle: "Revisa el semáforo de vencimientos y pide la renovación",
             tono: vencidos ? "danger" : "warning",
-            href: "/personas/vencimientos",
+            href: "/personas/vencimientos?origen=inicio",
             accion: "Pedir renovación",
           });
       }

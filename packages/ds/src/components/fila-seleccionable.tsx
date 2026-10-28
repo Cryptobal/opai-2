@@ -20,6 +20,7 @@ type Props = {
   onClick?: () => void;
   sinChevron?: boolean;
   className?: string;
+  ajustarTexto?: boolean;
 };
 
 export const claseFila = (seleccionada?: boolean) =>
@@ -56,10 +57,20 @@ export function FilaSeleccionable(props: Props) {
     <>
       {inicio}
       <span className="flex min-w-0 flex-1 flex-col">
-        <span className={cn("truncate text-base font-medium", seleccionada && "font-semibold")}>
+        <span
+          className={cn(
+            !props.ajustarTexto && "truncate",
+            "text-base font-medium",
+            seleccionada && "font-semibold",
+          )}
+        >
           {titulo}
         </span>
-        {secundario ? <span className="truncate text-sm text-fg-muted">{secundario}</span> : null}
+        {secundario ? (
+          <span className={cn(!props.ajustarTexto && "truncate", "text-sm text-fg-muted")}>
+            {secundario}
+          </span>
+        ) : null}
         {terciario ? <span className="t-caption truncate">{terciario}</span> : null}
       </span>
       {fin ? <span className="flex flex-none flex-col items-end gap-1">{fin}</span> : null}

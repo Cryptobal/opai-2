@@ -732,3 +732,7 @@ Sin cambios de negocio, migraciones, permisos ni plan del ROADMAP.
 ### Corrección de versiones de cargo y bonos
 
 En la rama `fix/version-cargo-bonos`, Codex eligió rechazar el versionado de un cargo sensible sin permiso de lectura sensible, para evitar reemplazar bonos ocultos por una lista vacía. Codex decidió además exigir ese permiso para cambiar la sensibilidad del cargo. Las decisiones y sus criterios están en `briefs/fix-version-cargo-bonos.md`; pendiente de revisión e integración.
+
+### Inicio y vencimientos (encargo de continuación t500u)
+
+La decisión de alcance de OPAI 2.0 en el encargo t500u exige que Inicio y Vencimientos compartan el criterio y respeten el plazo de cada tipo (30 días por defecto). La implementación en curso usa la matriz de personas para ambos conteos. Queda pendiente conservar por separado los documentos de otras entidades que antes contaba Inicio, con un enlace propio, y verificar el límite de 2.000 personas; hasta resolverlo el criterio de alcance está parcial.

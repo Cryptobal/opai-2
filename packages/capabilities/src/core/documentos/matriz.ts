@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { diasHasta, estadoVigencia, PERMISOS_CORE } from "@opai/domain";
+import { diasHasta, estadoVencimiento, PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import { prohibido } from "../../errores";
@@ -36,7 +36,7 @@ function celdas(
     return [
       {
         tipoId: t.id,
-        estado: estadoVigencia(vence, hoy(), t.diasAlerta),
+        estado: estadoVencimiento(vence, hoy(), t.diasAlerta),
         dias: vence ? diasHasta(vence, hoy()) : null,
         documentoId: d.id,
       },
