@@ -2,14 +2,21 @@ import { z } from "zod";
 
 import { noEncontrado } from "../errores";
 import type { Contexto } from "../types";
-import { ESTADOS_NEGOCIO, ROLES_CONTACTO, TIPOS_ETAPA, TIPOS_VINCULO, TONOS_ETAPA } from "./dominio";
+import {
+  ESTADOS_NEGOCIO,
+  ROLES_CONTACTO,
+  TIPOS_ETAPA,
+  TIPOS_VINCULO,
+  TONOS_ETAPA,
+} from "./dominio";
 
 export const PERMISO_READ = "comercial:negocios.read";
 export const PERMISO_MANAGE = "comercial:negocios.manage";
 export const PERMISO_CONFIG = "comercial:config.manage";
 
 const iso = (d: Date | null | undefined): string | null => (d ? d.toISOString() : null);
-const dia = (d: Date | null | undefined): string | null => (d ? d.toISOString().slice(0, 10) : null);
+const dia = (d: Date | null | undefined): string | null =>
+  d ? d.toISOString().slice(0, 10) : null;
 
 /** Un negocio tal como lo devuelven las capacidades (fechas serializadas). */
 export const negocioSchema = z.object({

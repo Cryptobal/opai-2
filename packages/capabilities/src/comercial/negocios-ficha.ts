@@ -53,14 +53,22 @@ export const negociosGet = defineCapability({
     ]);
     const instIds = vinculosI.map((v) => v.instalacionId);
     const contIds = vinculosC.map((v) => v.contactoId);
-    const etapaIds = [...new Set(historial.flatMap((h) => [h.deEtapaId, h.aEtapaId].filter(Boolean)))];
+    const etapaIds = [
+      ...new Set(historial.flatMap((h) => [h.deEtapaId, h.aEtapaId].filter(Boolean))),
+    ];
     const [insts, conts, etapas] = await Promise.all([
-      ctx.db.instalacion.findMany({ where: { id: { in: instIds } }, select: { id: true, nombre: true } }),
+      ctx.db.instalacion.findMany({
+        where: { id: { in: instIds } },
+        select: { id: true, nombre: true },
+      }),
       ctx.db.contacto.findMany({
         where: { id: { in: contIds } },
         select: { id: true, nombres: true, apellidos: true },
       }),
-      ctx.db.etapa.findMany({ where: { id: { in: etapaIds as string[] } }, select: { id: true, nombre: true } }),
+      ctx.db.etapa.findMany({
+        where: { id: { in: etapaIds as string[] } },
+        select: { id: true, nombre: true },
+      }),
     ]);
     const nombreEtapa = (id: string | null) =>
       id ? (etapas.find((e) => e.id === id)?.nombre ?? null) : null;

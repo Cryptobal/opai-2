@@ -3,7 +3,7 @@ import { z } from "zod";
 import { defineCapability } from "../define";
 import { noEncontrado, reglaDeNegocio } from "../errores";
 import { uuidSchema } from "../core/esquemas";
-import { definidos } from "../core/maestros/comun";
+import { definidos, sinDuplicado } from "../core/maestros/comun";
 import { REQUISITOS, TONOS_ETAPA } from "./dominio";
 import { PERMISO_CONFIG, etapaDe, etapaSchema } from "./comun";
 
@@ -32,7 +32,12 @@ export const configActualizarEtapa = defineCapability({
       throw reglaDeNegocio("La etapa ganada y la perdida no se desactivan.");
     }
     const data = definidos({ ...cambios, exige: cambios.exige ? [...cambios.exige] : undefined });
-    const fila = dryRun ? { ...etapa, ...data } : await ctx.db.etapa.update({ where: { id }, data });
+    const fila = dryRun
+      ? { ...etapa, ...data }
+      : await sinDuplicado(
+          ctx.db.etapa.update({ where: { id }, data }),
+          "Ya hay otra etapa en esa posición del embudo.",
+        );
     return {
       id: fila.id,
       nombre: fila.nombre,
@@ -48,6 +53,16 @@ export const configActualizarEtapa = defineCapability({
 
 const CATALOGOS = ["tipo", "origen", "motivo"] as const;
 
+/** Código estable de un motivo: sin acentos, minúsculas y guiones bajos («Pérdida» → «perdida»). */
+const codigoDe = (nombre: string) =>
+  nombre
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "_")
+    .replace(/^_+|_+$/g, "")
+    .slice(0, 40) || "motivo";
+
 /** Crea o edita un ítem de un catálogo del tenant (tipo de negocio, origen o motivo de pérdida). */
 export const configGuardarCatalogo = defineCapability({
   id: "comercial.config.guardar_catalogo",
@@ -61,12 +76,23 @@ export const configGuardarCatalogo = defineCapability({
     orden: z.number().int().min(0).max(99).default(0),
     activo: z.boolean().default(true),
   }),
-  output: z.object({ id: z.string(), catalogo: z.enum(CATALOGOS), nombre: z.string(), activo: z.boolean() }),
+  output: z.object({
+    id: z.string(),
+    catalogo: z.enum(CATALOGOS),
+    nombre: z.string(),
+    activo: z.boolean(),
+  }),
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     const data = { nombre: input.nombre, orden: input.orden, activo: input.activo };
-    if (dryRun) return { id: input.id ?? "", catalogo: input.catalogo, nombre: input.nombre, activo: input.activo };
+    if (dryRun)
+      return {
+        id: input.id ?? "",
+        catalogo: input.catalogo,
+        nombre: input.nombre,
+        activo: input.activo,
+      };
     const guardar = async <T extends { id: string; nombre: string; activo: boolean }>(
       buscar: (id: string) => Promise<T | null>,
       crear: () => Promise<T>,
@@ -74,9 +100,9 @@ export const configGuardarCatalogo = defineCapability({
     ) => {
       if (input.id) {
         if (!(await buscar(input.id))) throw noEncontrado("El ítem del catálogo");
-        return actualizar(input.id);
+        return sinDuplicado(actualizar(input.id), "Ya existe un ítem con ese nombre.");
       }
-      return crear();
+      return sinDuplicado(crear(), "Ya existe un ítem con ese nombre.");
     };
     let fila: { id: string; nombre: string; activo: boolean };
     if (input.catalogo === "tipo") {
@@ -96,7 +122,7 @@ export const configGuardarCatalogo = defineCapability({
         (id) => ctx.db.motivoPerdida.findUnique({ where: { id } }),
         () =>
           ctx.db.motivoPerdida.create({
-            data: { ...data, tenantId: ctx.tenantId, codigo: input.nombre.toLowerCase().replace(/[^a-z0-9]+/g, "_").slice(0, 40) },
+            data: { ...data, tenantId: ctx.tenantId, codigo: codigoDe(input.nombre) },
           }),
         (id) => ctx.db.motivoPerdida.update({ where: { id }, data }),
       );

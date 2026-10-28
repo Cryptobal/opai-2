@@ -1,6 +1,9 @@
 import { z } from "zod";
 
+import { PERMISOS_CORE } from "@opai/domain";
+
 import { defineCapability } from "../define";
+import { prohibido } from "../errores";
 import { cursorDe, listaSchema, pagina } from "../core/maestros/comun";
 import type { Contexto } from "../types";
 import { PERMISO_READ } from "./comun";
@@ -21,17 +24,24 @@ async function cuentasYNegocios(ctx: Contexto, contactos: { id: string; cuentaId
   const cuentaIds = [...new Set(contactos.map((c) => c.cuentaId))];
   const contactoIds = contactos.map((c) => c.id);
   const [cuentas, vinculos] = await Promise.all([
-    ctx.db.cuenta.findMany({ where: { id: { in: cuentaIds } }, select: { id: true, nombre: true } }),
+    ctx.db.cuenta.findMany({
+      where: { id: { in: cuentaIds } },
+      select: { id: true, nombre: true },
+    }),
     ctx.db.negocioContacto.findMany({ where: { contactoId: { in: contactoIds } } }),
   ]);
   const negocioIds = [...new Set(vinculos.map((v) => v.negocioId))];
   const abiertos = negocioIds.length
-    ? await ctx.db.negocio.findMany({ where: { id: { in: negocioIds }, estado: "abierto" }, select: { id: true } })
+    ? await ctx.db.negocio.findMany({
+        where: { id: { in: negocioIds }, estado: "abierto" },
+        select: { id: true },
+      })
     : [];
   const abiertosSet = new Set(abiertos.map((n) => n.id));
   return (c: { id: string; cuentaId: string }) => ({
     cuentaNombre: cuentas.find((x) => x.id === c.cuentaId)?.nombre ?? "",
-    negociosAbiertos: vinculos.filter((v) => v.contactoId === c.id && abiertosSet.has(v.negocioId)).length,
+    negociosAbiertos: vinculos.filter((v) => v.contactoId === c.id && abiertosSet.has(v.negocioId))
+      .length,
   });
 }
 
@@ -47,6 +57,10 @@ export const contactosList = defineCapability({
   efecto: "lectura",
   dryRun: false,
   async handler(ctx, input) {
+    // Correo y teléfono son datos personales del núcleo: además de Comercial exige ver Cuentas,
+    // igual que core.contactos.list/get (un rol con Comercial y sin Cuentas no los lee por aquí).
+    if (!ctx.autorizar(PERMISOS_CORE.cuentasRead))
+      throw prohibido("Sin permiso para ver contactos.");
     const q = input.q;
     const filas = await ctx.db.contacto.findMany({
       where: {

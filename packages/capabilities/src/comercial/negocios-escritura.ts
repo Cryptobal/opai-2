@@ -1,28 +1,37 @@
 import { z } from "zod";
 
 import { defineCapability } from "../define";
-import { conflicto, noEncontrado, reglaDeNegocio } from "../errores";
+import { conflicto, reglaDeNegocio } from "../errores";
 import { uuidSchema } from "../core/esquemas";
 import { definidos, diaSchema, opcionalAFecha } from "../core/maestros/comun";
-import type { Contexto } from "../types";
 import { estadoDeTipo } from "./dominio";
+import { cuentaValida, responsableValido } from "./validaciones";
 import { PERMISO_MANAGE, embudoPorDefecto, negocioDe, negocioSchema, vistaNegocio } from "./comun";
 
 const camposNegocio = {
-  titulo: z.string().trim().min(3).max(120).describe("Título del negocio (por defecto «cuenta · servicio»)."),
+  titulo: z
+    .string()
+    .trim()
+    .min(3)
+    .max(120)
+    .describe("Título del negocio (por defecto «cuenta · servicio»)."),
   tipoId: uuidSchema.nullable().optional().describe("Tipo de negocio (catálogo del tenant)."),
   origenId: uuidSchema.nullable().optional().describe("Origen del negocio (catálogo del tenant)."),
-  responsableId: uuidSchema.nullable().optional().describe("Responsable; por defecto, quien lo crea."),
+  responsableId: uuidSchema
+    .nullable()
+    .optional()
+    .describe("Responsable; por defecto, quien lo crea."),
   probabilidad: z.number().int().min(0).max(100).optional(),
-  montoEstimadoMensual: z.number().int().positive().nullable().optional().describe("CLP entero > 0."),
+  montoEstimadoMensual: z
+    .number()
+    .int()
+    .positive()
+    .nullable()
+    .optional()
+    .describe("CLP entero > 0."),
   cierreEstimado: diaSchema.nullable().optional(),
   inicioServicioEstimado: diaSchema.nullable().optional(),
 };
-
-async function cuentaValida(ctx: Contexto, cuentaId: string) {
-  const c = await ctx.db.cuenta.findUnique({ where: { id: cuentaId }, select: { id: true } });
-  if (!c) throw noEncontrado("La cuenta");
-}
 
 export const negociosCreate = defineCapability({
   id: "comercial.negocios.create",
@@ -35,6 +44,7 @@ export const negociosCreate = defineCapability({
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     await cuentaValida(ctx, input.cuentaId);
+    await responsableValido(ctx, input.responsableId);
     const embudo = await embudoPorDefecto(ctx);
     const primera = await ctx.db.etapa.findFirst({
       where: { embudoId: embudo.id, activa: true },
@@ -111,6 +121,7 @@ export const negociosUpdate = defineCapability({
   dryRun: true,
   async handler(ctx, { id, ...cambios }, { dryRun }) {
     const actual = await negocioDe(ctx, id);
+    await responsableValido(ctx, cambios.responsableId);
     if (cambios.montoEstimadoMensual !== undefined && actual.valorMensual != null) {
       throw conflicto("El monto lo fija la cotización vigente; no se edita a mano.");
     }

@@ -2,6 +2,7 @@ import { capacidadesDelNucleo, limpiarRegistro, registrarCapacidades } from "../
 import { capacidadesComercial } from "../src/comercial";
 import { contextoDePrueba, TENANT_DE_PRUEBA, USUARIO_DE_PRUEBA } from "../src/testing";
 import type { AgenteContexto } from "../src/types";
+import type { Rol } from "@opai/domain";
 
 export const E = "0192f3a0-0000-7000-8000-0000000000e0";
 export const CU = "0192f3a0-0000-7000-8000-0000000000c1";
@@ -30,7 +31,15 @@ const etapa = (n: number, nombre: string, tipo: string, prob: number, exige: str
 
 export function semillaComercial() {
   return {
-    tenant: [{ id: TENANT_DE_PRUEBA, slug: "gard", nombre: "Gard", vertical: "seguridad", estado: "activo" }],
+    tenant: [
+      {
+        id: TENANT_DE_PRUEBA,
+        slug: "gard",
+        nombre: "Gard",
+        vertical: "seguridad",
+        estado: "activo",
+      },
+    ],
     user: [{ id: USUARIO_DE_PRUEBA.id, name: "Ana", email: "ana@prueba.cl" }],
     cuenta: [
       { id: CU, tenantId: TENANT_DE_PRUEBA, nombre: "Cuenta 1", estado: "prospecto" },
@@ -38,13 +47,35 @@ export function semillaComercial() {
     ],
     instalacion: [
       { id: I1, tenantId: TENANT_DE_PRUEBA, cuentaId: CU, nombre: "Planta 1", estado: "prospecto" },
-      { id: I2, tenantId: TENANT_DE_PRUEBA, cuentaId: CU2, nombre: "Planta 2", estado: "prospecto" },
+      {
+        id: I2,
+        tenantId: TENANT_DE_PRUEBA,
+        cuentaId: CU2,
+        nombre: "Planta 2",
+        estado: "prospecto",
+      },
     ],
     contacto: [
-      { id: K1, tenantId: TENANT_DE_PRUEBA, cuentaId: CU, nombres: "Pía", apellidos: "Rol" },
-      { id: K2, tenantId: TENANT_DE_PRUEBA, cuentaId: CU, nombres: "Leo", apellidos: "Paz" },
+      {
+        id: K1,
+        tenantId: TENANT_DE_PRUEBA,
+        cuentaId: CU,
+        nombres: "Pía",
+        apellidos: "Rol",
+        esPrincipal: true,
+      },
+      {
+        id: K2,
+        tenantId: TENANT_DE_PRUEBA,
+        cuentaId: CU,
+        nombres: "Leo",
+        apellidos: "Paz",
+        esPrincipal: false,
+      },
     ],
-    embudo: [{ id: E, tenantId: TENANT_DE_PRUEBA, nombre: "Ventas", porDefecto: true, activo: true }],
+    embudo: [
+      { id: E, tenantId: TENANT_DE_PRUEBA, nombre: "Ventas", porDefecto: true, activo: true },
+    ],
     etapa: [
       etapa(0, "Prospecto", "abierta", 10, []),
       etapa(1, "Calificado", "abierta", 20, []),
@@ -54,8 +85,24 @@ export function semillaComercial() {
       etapa(7, "Perdido", "perdida", 0, ["motivo_perdida"]),
     ],
     motivoPerdida: [
-      { id: MP, tenantId: TENANT_DE_PRUEBA, codigo: "precio", nombre: "Precio", exigeDetalle: false, activo: true, orden: 0 },
-      { id: MPO, tenantId: TENANT_DE_PRUEBA, codigo: "otro", nombre: "Otro", exigeDetalle: true, activo: true, orden: 1 },
+      {
+        id: MP,
+        tenantId: TENANT_DE_PRUEBA,
+        codigo: "precio",
+        nombre: "Precio",
+        exigeDetalle: false,
+        activo: true,
+        orden: 0,
+      },
+      {
+        id: MPO,
+        tenantId: TENANT_DE_PRUEBA,
+        codigo: "otro",
+        nombre: "Otro",
+        exigeDetalle: true,
+        activo: true,
+        orden: 1,
+      },
     ],
   };
 }
@@ -66,16 +113,31 @@ export function reiniciarComercial() {
 }
 
 /** Contexto de prueba con el módulo comercial activo y la siembra lista. */
-export function ctxComercial(opts: { actor?: "humano" | "agente"; agente?: Partial<AgenteContexto> } = {}) {
+export function ctxComercial(
+  opts: {
+    actor?: "humano" | "agente";
+    agente?: Partial<AgenteContexto>;
+    rol?: Rol;
+    permisos?: string[];
+  } = {},
+) {
   const base = {
     semilla: semillaComercial(),
     modulosActivos: ["comercial"],
+    ...(opts.rol ? { rol: opts.rol } : {}),
+    ...(opts.permisos ? { permisos: opts.permisos } : {}),
   } as const;
   if (opts.actor === "agente") {
     return contextoDePrueba({
       ...base,
       actor: { tipo: "agent", id: K1, viaUserId: USUARIO_DE_PRUEBA.id },
-      agente: { apiKeyId: K1, nombre: "Agente", presupuestoMensualMicro: null, autonomia: {}, ...opts.agente },
+      agente: {
+        apiKeyId: K1,
+        nombre: "Agente",
+        presupuestoMensualMicro: null,
+        autonomia: {},
+        ...opts.agente,
+      },
     });
   }
   return contextoDePrueba(base);

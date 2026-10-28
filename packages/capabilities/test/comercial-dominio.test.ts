@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { diasEntre, estadoDeTipo, requisitosFaltantes, segundosEntre } from "../src/comercial/dominio";
+import {
+  diasEntre,
+  estadoDeTipo,
+  requisitosFaltantes,
+  segundosEntre,
+} from "../src/comercial/dominio";
 
 describe("comercial · dominio", () => {
   it("el estado sale del tipo de la etapa (R8)", () => {

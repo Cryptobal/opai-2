@@ -13,14 +13,32 @@ const ESTADO = { abierto: "Abierto", ganado: "Ganado", perdido: "Perdido" } as c
 
 export type TabNegocio = "resumen" | "cotizaciones" | "documentos" | "actividad";
 
+// Editar, mover, ganar, perder y reabrir llegan con sus hojas en el PR 1b (CAR-24); aquí solo
+// archivar o desarchivar, para no ofrecer acciones sin destino.
 function acciones(n: NegocioDetalle): AccionEntidad[] {
+  if (n.archivadoEn) {
+    return [
+      {
+        id: "desarchivar",
+        etiqueta: "Desarchivar",
+        capacidad: {
+          id: "comercial.negocios.archivar",
+          input: { id: n.id, archivar: false },
+          exito: "Negocio desarchivado",
+        },
+      },
+    ];
+  }
   return [
-    { id: "editar", etiqueta: "Editar", parametro: { clave: "editar", valor: "1" } },
     {
       id: "archivar",
-      etiqueta: n.estado === "abierto" ? "Archivar" : "Archivar negocio",
+      etiqueta: "Archivar",
       peligro: true,
-      capacidad: { id: "comercial.negocios.archivar", input: { id: n.id, archivar: true }, exito: "Negocio archivado" },
+      capacidad: {
+        id: "comercial.negocios.archivar",
+        input: { id: n.id, archivar: true },
+        exito: "Negocio archivado",
+      },
       confirmar: {
         titulo: `Archivar ${n.titulo}`,
         descripcion: "Deja de aparecer en las listas por defecto; se conserva el historial.",

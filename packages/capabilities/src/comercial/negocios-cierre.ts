@@ -23,13 +23,16 @@ export const negociosPerder = defineCapability({
   async handler(ctx, input, { dryRun }) {
     const negocio = await negocioDe(ctx, input.id);
     if (negocio.estado === "perdido") throw reglaDeNegocio("El negocio ya está perdido.");
-    if (negocio.estado === "ganado") throw reglaDeNegocio("Un negocio ganado no se pierde; se reemplaza.");
+    if (negocio.estado === "ganado")
+      throw reglaDeNegocio("Un negocio ganado no se pierde; se reemplaza.");
     const motivo = await ctx.db.motivoPerdida.findUnique({ where: { id: input.motivoPerdidaId } });
     if (!motivo) throw noEncontrado("El motivo de pérdida");
     if (motivo.exigeDetalle && !input.detalle?.trim()) {
       throw reglaDeNegocio("El motivo «otro» exige un detalle.");
     }
-    const perdida = await ctx.db.etapa.findFirst({ where: { embudoId: negocio.embudoId, tipo: "perdida" } });
+    const perdida = await ctx.db.etapa.findFirst({
+      where: { embudoId: negocio.embudoId, tipo: "perdida" },
+    });
     if (!perdida) throw reglaDeNegocio("El embudo no tiene etapa perdida.");
     const datos = {
       perdidoEn: new Date(),
@@ -37,9 +40,14 @@ export const negociosPerder = defineCapability({
       motivoPerdidaDetalle: input.detalle ?? null,
       competidor: input.competidor ?? null,
     };
-    if (dryRun) return vistaNegocio({ ...negocio, etapaId: perdida.id, estado: "perdido", ...datos });
+    if (dryRun)
+      return vistaNegocio({ ...negocio, etapaId: perdida.id, estado: "perdido", ...datos });
     const r = await ctx.transaccion((tx) =>
-      aplicarEtapa(ctx, tx, negocio, perdida, { evento: "comercial.negocio.perdido", motivo: motivo.codigo, datos }),
+      aplicarEtapa(ctx, tx, negocio, perdida, {
+        evento: "comercial.negocio.perdido",
+        motivo: motivo.codigo,
+        datos,
+      }),
     );
     return vistaNegocio(r);
   },
@@ -62,10 +70,21 @@ export const negociosReabrir = defineCapability({
       orderBy: { orden: "asc" },
     });
     if (!primera) throw reglaDeNegocio("El embudo no tiene etapas abiertas.");
-    const datos = { perdidoEn: null, motivoPerdidaId: null, motivoPerdidaDetalle: null, competidor: null, reabiertoEn: new Date() };
-    if (dryRun) return vistaNegocio({ ...negocio, etapaId: primera.id, estado: "abierto", ...datos });
+    const datos = {
+      perdidoEn: null,
+      motivoPerdidaId: null,
+      motivoPerdidaDetalle: null,
+      competidor: null,
+      reabiertoEn: new Date(),
+    };
+    if (dryRun)
+      return vistaNegocio({ ...negocio, etapaId: primera.id, estado: "abierto", ...datos });
     const r = await ctx.transaccion((tx) =>
-      aplicarEtapa(ctx, tx, negocio, primera, { evento: "comercial.negocio.etapa_cambiada", motivo: input.motivo, datos }),
+      aplicarEtapa(ctx, tx, negocio, primera, {
+        evento: "comercial.negocio.etapa_cambiada",
+        motivo: input.motivo,
+        datos,
+      }),
     );
     return vistaNegocio(r);
   },

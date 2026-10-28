@@ -6,7 +6,10 @@ import { CU, I2, K1, K2, MP, MPO, ctxComercial, reiniciarComercial } from "./com
 beforeEach(reiniciarComercial);
 
 async function crear(ctx: Parameters<typeof dato>[0]) {
-  return dato<{ id: string }>(ctx, "comercial.negocios.create", { cuentaId: CU, titulo: "Negocio" });
+  return dato<{ id: string }>(ctx, "comercial.negocios.create", {
+    cuentaId: CU,
+    titulo: "Negocio",
+  });
 }
 
 describe("comercial · vínculos y cierre", () => {
@@ -14,7 +17,11 @@ describe("comercial · vínculos y cierre", () => {
     const { ctx } = ctxComercial();
     const n = await crear(ctx);
     expect(
-      await codigo(ctx, "comercial.negocios.vincular_instalacion", { negocioId: n.id, instalacionId: I2, tipo: "nueva" }),
+      await codigo(ctx, "comercial.negocios.vincular_instalacion", {
+        negocioId: n.id,
+        instalacionId: I2,
+        tipo: "nueva",
+      }),
     ).toBe("UNPROCESSABLE");
   });
 
@@ -64,7 +71,11 @@ describe("comercial · vínculos y cierre", () => {
       {},
     );
     expect(lista.items[0]?.cuentaNombre).toBe("Cuenta 1");
-    const embudo = await dato<{ etapas: unknown[]; negocios: unknown[] }>(ctx, "comercial.negocios.embudo", {});
+    const embudo = await dato<{ etapas: unknown[]; negocios: unknown[] }>(
+      ctx,
+      "comercial.negocios.embudo",
+      {},
+    );
     expect(embudo.etapas.length).toBe(6);
     expect(embudo.negocios.length).toBe(1);
   });

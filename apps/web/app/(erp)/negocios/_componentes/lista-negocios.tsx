@@ -1,8 +1,5 @@
-import { Plus } from "lucide-react";
-
 import { Badge, type EstadoPantalla, MonoAv } from "@opai/ds";
 
-import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
 import { monograma } from "@/app/_components/maestros/estados";
 import { ListaMaestro } from "@/app/_components/maestros/lista-maestro";
 import { pesos } from "@/lib/fechas";
@@ -23,16 +20,10 @@ export function ListaNegocios(p: {
   q?: string | undefined;
 }) {
   const abiertos = p.items.filter((n) => n.estado === "abierto").length;
-  const nuevo = (
-    <EnlaceBotonHoja href="/negocios?nuevo=1" icono={Plus}>
-      Nuevo
-    </EnlaceBotonHoja>
-  );
   return (
     <ListaMaestro
       state={p.state}
       titulo="Negocios"
-      accion={nuevo}
       buscar="Buscar por título"
       filtros={[
         {
@@ -48,13 +39,17 @@ export function ListaNegocios(p: {
       seleccionada={p.seleccionado}
       vacio={{
         titulo: "Aún no hay negocios",
-        descripcion: "Crea el primero para seguir la oportunidad por el embudo.",
-        accion: nuevo,
+        descripcion: "Los negocios que se creen (por pantalla o MCP) aparecerán aquí.",
       }}
       filas={p.items.map((n) => ({
         id: n.id,
         href: conBusqueda(`/negocios/${n.id}`, p.q),
-        inicio: <MonoAv texto={monograma(n.cuentaNombre || n.titulo)} seleccionada={p.seleccionado === n.id} />,
+        inicio: (
+          <MonoAv
+            texto={monograma(n.cuentaNombre || n.titulo)}
+            seleccionada={p.seleccionado === n.id}
+          />
+        ),
         titulo: n.titulo,
         secundario: (
           <>
@@ -62,7 +57,8 @@ export function ListaNegocios(p: {
             <span> · {n.etapaNombre}</span>
           </>
         ),
-        terciario: monto(n) != null ? <span className="md:hidden">{pesos(monto(n))}/mes</span> : undefined,
+        terciario:
+          monto(n) != null ? <span className="md:hidden">{pesos(monto(n))}/mes</span> : undefined,
         fin: (
           <span className="flex flex-col items-end gap-1">
             <Badge tono={TONO[n.estado]}>{ESTADO[n.estado]}</Badge>

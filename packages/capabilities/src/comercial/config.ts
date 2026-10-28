@@ -45,7 +45,12 @@ export const configGet = defineCapability({
         })),
       },
       tipos: tipos.map((t) => ({ id: t.id, nombre: t.nombre, orden: t.orden, activo: t.activo })),
-      origenes: origenes.map((o) => ({ id: o.id, nombre: o.nombre, orden: o.orden, activo: o.activo })),
+      origenes: origenes.map((o) => ({
+        id: o.id,
+        nombre: o.nombre,
+        orden: o.orden,
+        activo: o.activo,
+      })),
       motivos: motivos.map((m) => ({
         id: m.id,
         nombre: m.nombre,

@@ -1,36 +1,28 @@
-import { expect, type Page, test } from "@playwright/test";
+import { expect, test } from "@playwright/test";
+
+import { E2E_PASSWORD, entrar } from "./sesion";
 
 // Brief 07 · PR 1 — evidencia visual de Negocios y Contactos a 375, 1024 y 1280 px, con el mismo
-// shell que /cuentas e /instalaciones. No es regresión visual: son capturas de evidencia (QA).
-const email = process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl";
-const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
-
-async function entrar(page: Page) {
-  await page.goto("/login");
-  await page.getByLabel("Correo").fill(email);
-  await page.getByLabel("Contraseña", { exact: true }).fill(password ?? "");
-  await page.getByRole("button", { name: "Entrar" }).click();
-  await page.waitForURL((url) => url.pathname === "/" || url.pathname === "/platform");
-}
-
+// shell que /cuentas e /instalaciones. No es regresión visual: son capturas de evidencia (QA), en
+// test-results/ (no en el árbol fuente). El login comparte sesion.ts (contraseña y TOTP).
 test.use({ actionTimeout: 30_000 });
 test.setTimeout(180_000);
 
 test.describe("Comercial · Negocios y Contactos", () => {
-  test.skip(!password, "Falta SEED_OWNER_PASSWORD o E2E_PASSWORD");
+  test.skip(!E2E_PASSWORD, "Falta SEED_OWNER_PASSWORD o E2E_PASSWORD");
 
   test("Negocios: lista y ficha", async ({ page }, info) => {
     await entrar(page);
     await page.goto("/negocios");
     const lista = page.getByRole("region", { name: "Lista de negocios" });
     await expect(lista).toBeVisible();
-    await page.screenshot({ path: `e2e/__screenshots__/negocios-lista-${info.project.name}.png`, fullPage: true });
-    const primero = lista.getByRole("link").first();
+    await page.screenshot({ path: info.outputPath("negocios-lista.png"), fullPage: true });
+    const primero = lista.locator('a[href^="/negocios/"]').first();
     if (await primero.count()) {
       await primero.click();
       await page.waitForURL(/\/negocios\/[0-9a-f-]{36}/);
       await expect(page.getByRole("link", { name: /^Actividad/ }).first()).toBeVisible();
-      await page.screenshot({ path: `e2e/__screenshots__/negocio-ficha-${info.project.name}.png`, fullPage: true });
+      await page.screenshot({ path: info.outputPath("negocio-ficha.png"), fullPage: true });
     }
   });
 
@@ -39,12 +31,12 @@ test.describe("Comercial · Negocios y Contactos", () => {
     await page.goto("/contactos");
     const lista = page.getByRole("region", { name: "Lista de contactos" });
     await expect(lista).toBeVisible();
-    await page.screenshot({ path: `e2e/__screenshots__/contactos-lista-${info.project.name}.png`, fullPage: true });
-    const primero = lista.getByRole("link").first();
+    await page.screenshot({ path: info.outputPath("contactos-lista.png"), fullPage: true });
+    const primero = lista.locator('a[href^="/contactos/"]').first();
     if (await primero.count()) {
       await primero.click();
       await page.waitForURL(/\/contactos\/[0-9a-f-]{36}/);
-      await page.screenshot({ path: `e2e/__screenshots__/contacto-ficha-${info.project.name}.png`, fullPage: true });
+      await page.screenshot({ path: info.outputPath("contacto-ficha.png"), fullPage: true });
     }
   });
 });

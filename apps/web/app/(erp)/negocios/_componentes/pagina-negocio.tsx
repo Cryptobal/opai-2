@@ -29,7 +29,9 @@ export function PaginaNegocio({ params, searchParams, tab, children }: Props) {
       cargando="detalle"
       volverSoloTelefono
       volverBajoLg
-      opciones={(d) => ({ volver: { href: conBusqueda("/negocios", d.p.q), etiqueta: "Negocios" } })}
+      opciones={(d) => ({
+        volver: { href: conBusqueda("/negocios", d.p.q), etiqueta: "Negocios" },
+      })}
       cargar={async () => {
         const [{ id }, p] = await Promise.all([params, filtrosDe(searchParams)]);
         const datos = cargarNegocio(id);
@@ -42,7 +44,9 @@ export function PaginaNegocio({ params, searchParams, tab, children }: Props) {
           telefono="detalle"
           unPanelHastaLg
           etiquetaLista="Lista de negocios"
-          lista={<ListaNegocios state={lista.state} items={lista.items} seleccionado={id} q={p.q} />}
+          lista={
+            <ListaNegocios state={lista.state} items={lista.items} seleccionado={id} q={p.q} />
+          }
           detalle={
             <Suspense fallback={<Loading variante="detalle" />}>
               <DetalleNegocio datos={datos} p={p} tab={tab}>

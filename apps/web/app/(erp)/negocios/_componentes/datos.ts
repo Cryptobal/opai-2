@@ -33,8 +33,15 @@ export type NegocioDetalle = NegocioFila & {
   inicioServicioEstimado: string | null;
   motivoPerdidaDetalle: string | null;
   competidor: string | null;
+  archivadoEn: string | null;
   instalaciones: { id: string; instalacionId: string; nombre: string; tipo: string }[];
-  contactos: { id: string; contactoId: string; nombre: string; rol: string; esPrincipal: boolean }[];
+  contactos: {
+    id: string;
+    contactoId: string;
+    nombre: string;
+    rol: string;
+    esPrincipal: boolean;
+  }[];
   historial: Historial[];
 };
 
@@ -53,10 +60,21 @@ export async function cargarNegocios(f: Record<string, string | undefined>) {
 
 export async function cargarEmbudo() {
   const r = await ejecutarComoUsuario<{
-    etapas: { id: string; nombre: string; tipo: string; orden: number; probabilidad: number; tono: string }[];
+    etapas: {
+      id: string;
+      nombre: string;
+      tipo: string;
+      orden: number;
+      probabilidad: number;
+      tono: string;
+    }[];
     negocios: NegocioFila[];
   }>("erp", "comercial.negocios.embudo", {});
-  return { state: estadoPantalla(r), etapas: r.ok ? r.data.etapas : [], negocios: r.ok ? r.data.negocios : [] };
+  return {
+    state: estadoPantalla(r),
+    etapas: r.ok ? r.data.etapas : [],
+    negocios: r.ok ? r.data.negocios : [],
+  };
 }
 
 export async function cargarNegocio(id: string) {

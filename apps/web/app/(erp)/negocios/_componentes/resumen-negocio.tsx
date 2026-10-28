@@ -1,7 +1,6 @@
-import Link from "next/link";
+import { Badge, Enlace, ParesGrid, SeccionTarjeta } from "@opai/ds";
 
-import { Badge, ParesGrid, SeccionTarjeta } from "@opai/ds";
-
+import { LinkNext } from "@/app/_components/link-next";
 import { fecha, pesos } from "@/lib/fechas";
 
 import type { NegocioDetalle } from "./datos";
@@ -27,14 +26,30 @@ export function ResumenNegocio({ n }: { n: NegocioDetalle }) {
       <SeccionTarjeta titulo="Oportunidad">
         <ParesGrid
           items={[
-            { etiqueta: "Cuenta", valor: <Link href={`/cuentas/${n.cuentaId}`} className="text-accent underline">{n.cuentaNombre}</Link> },
+            {
+              etiqueta: "Cuenta",
+              valor: (
+                <Enlace Link={LinkNext} href={`/cuentas/${n.cuentaId}`}>
+                  {n.cuentaNombre}
+                </Enlace>
+              ),
+            },
             { etiqueta: "Etapa", valor: n.etapaNombre },
             { etiqueta: "Monto mensual", valor: monto != null ? `${pesos(monto)}/mes` : null },
             { etiqueta: "Probabilidad", valor: `${n.probabilidad}%` },
-            { etiqueta: "Cierre estimado", valor: n.cierreEstimado ? fecha(n.cierreEstimado) : null },
-            { etiqueta: "Inicio de servicio", valor: n.inicioServicioEstimado ? fecha(n.inicioServicioEstimado) : null },
+            {
+              etiqueta: "Cierre estimado",
+              valor: n.cierreEstimado ? fecha(n.cierreEstimado) : null,
+            },
+            {
+              etiqueta: "Inicio de servicio",
+              valor: n.inicioServicioEstimado ? fecha(n.inicioServicioEstimado) : null,
+            },
             ...(n.estado === "perdido"
-              ? [{ etiqueta: "Competidor", valor: n.competidor }, { etiqueta: "Detalle", valor: n.motivoPerdidaDetalle, ancho: true }]
+              ? [
+                  { etiqueta: "Competidor", valor: n.competidor },
+                  { etiqueta: "Detalle", valor: n.motivoPerdidaDetalle, ancho: true },
+                ]
               : []),
           ]}
         />
@@ -44,9 +59,9 @@ export function ResumenNegocio({ n }: { n: NegocioDetalle }) {
           <div className="flex flex-col gap-2">
             {n.instalaciones.map((i) => (
               <div key={i.id} className="flex items-center justify-between">
-                <Link href={`/instalaciones/${i.instalacionId}`} className="text-accent underline">
+                <Enlace Link={LinkNext} href={`/instalaciones/${i.instalacionId}`}>
                   {i.nombre}
-                </Link>
+                </Enlace>
                 <Badge punto={false}>{TIPO_VINCULO[i.tipo] ?? i.tipo}</Badge>
               </div>
             ))}

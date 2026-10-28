@@ -7,7 +7,10 @@ import { PERMISO_READ, embudoPorDefecto, negocioSchema, vistaNegocio } from "./c
 
 const filtros = listaSchema.extend({
   cuentaId: z.uuid().optional().describe("Filtra por cuenta (ficha de cuenta)."),
-  instalacionId: z.uuid().optional().describe("Filtra por instalación vinculada (ficha de instalación)."),
+  instalacionId: z
+    .uuid()
+    .optional()
+    .describe("Filtra por instalación vinculada (ficha de instalación)."),
   etapaId: z.uuid().optional().describe("Filtra por etapa del embudo."),
   responsableId: z.uuid().optional().describe("Filtra por responsable."),
   origenId: z.uuid().optional().describe("Filtra por origen."),
@@ -24,7 +27,10 @@ async function enriquecer(ctx: Contexto, negocios: { cuentaId: string; etapaId: 
   const cuentaIds = [...new Set(negocios.map((n) => n.cuentaId))];
   const etapaIds = [...new Set(negocios.map((n) => n.etapaId))];
   const [cuentas, etapas] = await Promise.all([
-    ctx.db.cuenta.findMany({ where: { id: { in: cuentaIds } }, select: { id: true, nombre: true } }),
+    ctx.db.cuenta.findMany({
+      where: { id: { in: cuentaIds } },
+      select: { id: true, nombre: true },
+    }),
     ctx.db.etapa.findMany({ where: { id: { in: etapaIds } }, select: { id: true, nombre: true } }),
   ]);
   const nombre = (lista: { id: string; nombre: string }[], id: string) =>
@@ -49,9 +55,11 @@ export const negociosList = defineCapability({
     const q = input.q;
     // Filtro por instalación vinculada: resuelve los negocios de esa instalación (ficha de instalación).
     const porInstalacion = input.instalacionId
-      ? (await ctx.db.negocioInstalacion.findMany({ where: { instalacionId: input.instalacionId } })).map(
-          (v) => v.negocioId,
-        )
+      ? (
+          await ctx.db.negocioInstalacion.findMany({
+            where: { instalacionId: input.instalacionId },
+          })
+        ).map((v) => v.negocioId)
       : null;
     const filas = await ctx.db.negocio.findMany({
       where: {
@@ -70,7 +78,10 @@ export const negociosList = defineCapability({
     });
     const p = pagina(filas, input.limite);
     const extra = await enriquecer(ctx, p.items);
-    return { items: p.items.map((n) => ({ ...vistaNegocio(n), ...extra(n) })), siguiente: p.siguiente };
+    return {
+      items: p.items.map((n) => ({ ...vistaNegocio(n), ...extra(n) })),
+      siguiente: p.siguiente,
+    };
   },
 });
 
@@ -78,7 +89,7 @@ export const negociosEmbudo = defineCapability({
   auditarLectura: (s) => s.negocios.flatMap((n) => [n.id, n.cuentaId]),
   id: "comercial.negocios.embudo",
   descripcion:
-    "Resumen del embudo por defecto: sus etapas con tipo, orden y probabilidad, y los negocios abiertos de cada etapa para el tablero.",
+    "Resumen del embudo por defecto para el tablero: sus etapas con tipo, orden y probabilidad, y los negocios no archivados de cada etapa (los 500 más recientes).",
   permiso: PERMISO_READ,
   input: z.object({ responsableId: z.uuid().optional() }),
   output: z.object({
@@ -109,6 +120,7 @@ export const negociosEmbudo = defineCapability({
         ...(input.responsableId ? { responsableId: input.responsableId } : {}),
       },
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+      take: 500,
     });
     const extra = await enriquecer(ctx, negocios);
     return {

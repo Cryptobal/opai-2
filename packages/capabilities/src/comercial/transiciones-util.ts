@@ -16,7 +16,9 @@ export async function aplicarEtapa(
   tx: TenantTx,
   negocio: NegocioFila,
   destino: EtapaFila,
-  opts: { evento: string; motivo?: string | null; datos?: Record<string, unknown> } = { evento: "comercial.negocio.etapa_cambiada" },
+  opts: { evento: string; motivo?: string | null; datos?: Record<string, unknown> } = {
+    evento: "comercial.negocio.etapa_cambiada",
+  },
 ) {
   const ahora = new Date();
   const ultimo = await tx.historialEtapa.findFirst({
@@ -44,7 +46,11 @@ export async function aplicarEtapa(
     tipo: opts.evento,
     entidadTipo: "negocio",
     entidadId: negocio.id,
-    payload: { deEtapaId: negocio.etapaId, aEtapaId: destino.id, ...(opts.motivo ? { motivo: opts.motivo } : {}) },
+    payload: {
+      deEtapaId: negocio.etapaId,
+      aEtapaId: destino.id,
+      ...(opts.motivo ? { motivo: opts.motivo } : {}),
+    },
   });
   return r;
 }
