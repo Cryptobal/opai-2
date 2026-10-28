@@ -1,15 +1,18 @@
 import type { TenantTx } from "@opai/db";
 
+import { conflicto } from "../errores";
 import type { Contexto } from "../types";
 import { estadoDeTipo, segundosEntre } from "./dominio";
 
-type NegocioFila = { id: string; etapaId: string; createdAt: Date };
+type NegocioFila = { id: string; etapaId: string; estado: string; createdAt: Date };
 type EtapaFila = { id: string; tipo: string };
 
 /**
  * Aplica un cambio de etapa dentro de una transacción: registra el historial con los segundos en la
  * etapa anterior (R11), deriva el estado del tipo de la etapa (R8) y emite el evento de dominio.
  * `datos` permite fijar campos adicionales (ganado_en, perdido_en, motivo de pérdida, etc.).
+ * El update se condiciona a la etapa y el estado leídos al validar: si otra transición (p. ej. un
+ * `mover` contra un `ganar`) cambió el negocio entretanto, responde CONFLICT y no pisa el cierre.
  */
 export async function aplicarEtapa(
   ctx: Contexto,
@@ -26,10 +29,13 @@ export async function aplicarEtapa(
     orderBy: { cuando: "desc" },
   });
   const desde = ultimo?.cuando ?? negocio.createdAt;
-  const r = await tx.negocio.update({
-    where: { id: negocio.id },
+  const { count } = await tx.negocio.updateMany({
+    where: { id: negocio.id, etapaId: negocio.etapaId, estado: negocio.estado },
     data: { etapaId: destino.id, estado: estadoDeTipo(destino.tipo), ...(opts.datos ?? {}) },
   });
+  if (count !== 1) throw conflicto("El negocio cambió mientras se procesaba; vuelve a intentarlo.");
+  const r = await tx.negocio.findUnique({ where: { id: negocio.id } });
+  if (!r) throw conflicto("El negocio cambió mientras se procesaba; vuelve a intentarlo.");
   await tx.historialEtapa.create({
     data: {
       tenantId: ctx.tenantId,

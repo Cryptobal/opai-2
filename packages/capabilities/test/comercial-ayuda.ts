@@ -1,7 +1,9 @@
 import { capacidadesDelNucleo, limpiarRegistro, registrarCapacidades } from "../src";
 import { capacidadesComercial } from "../src/comercial";
+import { limpiarModulos } from "../src/module";
+import { registrarModuloComercial } from "./comercial-modulo";
 import { contextoDePrueba, TENANT_DE_PRUEBA, USUARIO_DE_PRUEBA } from "../src/testing";
-import type { AgenteContexto } from "../src/types";
+import type { AgenteContexto, Alcance } from "../src/types";
 import type { Rol } from "@opai/domain";
 
 export const E = "0192f3a0-0000-7000-8000-0000000000e0";
@@ -109,7 +111,9 @@ export function semillaComercial() {
 
 export function reiniciarComercial() {
   limpiarRegistro();
+  limpiarModulos();
   registrarCapacidades([...capacidadesDelNucleo, ...capacidadesComercial]);
+  registrarModuloComercial();
 }
 
 /** Contexto de prueba con el módulo comercial activo y la siembra lista. */
@@ -119,6 +123,7 @@ export function ctxComercial(
     agente?: Partial<AgenteContexto>;
     rol?: Rol;
     permisos?: string[];
+    alcance?: Alcance;
   } = {},
 ) {
   const base = {
@@ -126,6 +131,7 @@ export function ctxComercial(
     modulosActivos: ["comercial"],
     ...(opts.rol ? { rol: opts.rol } : {}),
     ...(opts.permisos ? { permisos: opts.permisos } : {}),
+    ...(opts.alcance ? { alcance: opts.alcance } : {}),
   } as const;
   if (opts.actor === "agente") {
     return contextoDePrueba({
