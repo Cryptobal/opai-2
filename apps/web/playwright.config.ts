@@ -10,7 +10,11 @@ if (existsSync(envRaiz)) process.loadEnvFile(envRaiz);
 export default defineConfig({
   testDir: "./e2e",
   timeout: 90_000,
-  use: { baseURL: process.env["BASE_URL"] ?? "http://localhost:3000" },
+  use: {
+    baseURL: process.env["BASE_URL"] ?? "http://localhost:3000",
+    trace: process.env["CI"] ? "retain-on-failure" : "off",
+    screenshot: "only-on-failure",
+  },
   ...(process.env["BASE_URL"]
     ? {}
     : {
