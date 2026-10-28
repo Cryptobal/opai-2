@@ -50,7 +50,9 @@ export async function ConsentimientosTitular({ titular, gestionar }: Props) {
   return (
     <SeccionTarjeta titulo="Consentimientos" {...(accion ? { accion } : {})}>
       {!r.ok ? (
-        <Alerta tono="danger" titulo={r.error.message} />
+        <Alerta tono="danger" titulo="No pudimos cargar los consentimientos">
+          Inténtalo de nuevo en unos segundos.
+        </Alerta>
       ) : r.data.vigentes.length === 0 ? (
         <p className="text-base text-fg-muted">
           Sin consentimientos registrados. Solo se piden para fines accesorios, como comunicaciones
