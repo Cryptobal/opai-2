@@ -1,3 +1,4 @@
+import { dondeInstalacion } from "../core/maestros/alcance";
 import { noEncontrado, reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 import { etapaDe } from "./comun";
@@ -10,8 +11,11 @@ export async function cuentaValida(ctx: Contexto, cuentaId: string) {
 }
 
 /**
- * Instalaciones a vincular al crear un negocio: todas de la cuenta del negocio (R16). Devuelve los
- * vínculos sin repetir (manda la primera aparición); la RLS ya acota la búsqueda al tenant.
+ * Instalaciones a vincular a un negocio (al crearlo o después): todas de la cuenta del negocio (R16),
+ * en el alcance del actor (ADR-022) y sin archivar. Devuelve los vínculos sin repetir (manda la
+ * primera aparición); la RLS ya acota la búsqueda al tenant. Una instalación fuera del alcance
+ * responde igual que una inexistente, sin revelar que existe. Las inactivas sí se vinculan: al ganar
+ * el negocio se activan (spec de Comercial, cierre ganado).
  */
 export async function instalacionesDeCuenta<T extends { instalacionId: string }>(
   ctx: Contexto,
@@ -24,12 +28,13 @@ export async function instalacionesDeCuenta<T extends { instalacionId: string }>
   if (!unicos.length) return [];
   const ids = unicos.map((v) => v.instalacionId);
   const filas = await ctx.db.instalacion.findMany({
-    where: { id: { in: ids } },
-    select: { id: true, cuentaId: true },
+    where: { id: { in: ids }, AND: [dondeInstalacion(ctx)] },
+    select: { id: true, cuentaId: true, archivadaEn: true },
   });
   if (filas.length !== ids.length) throw noEncontrado("La instalación");
   if (filas.some((f) => f.cuentaId !== cuentaId))
     throw reglaDeNegocio("La instalación es de otra cuenta.");
+  if (filas.some((f) => f.archivadaEn)) throw reglaDeNegocio("La instalación está archivada.");
   return unicos;
 }
 

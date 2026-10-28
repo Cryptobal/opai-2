@@ -2,7 +2,7 @@ import { SlidersHorizontal } from "lucide-react";
 
 import { PERMISOS_CORE } from "@opai/domain";
 
-import type { Seccion } from "./secciones";
+import type { Seccion } from "./seccion-tipo";
 
 /** Entrada del índice para un módulo activo con ajustes propios (`/configuracion/modulo/<id>`). */
 export const seccionModulo = (id: string, nombre: string): Seccion => ({

@@ -141,6 +141,7 @@ export const EVENTOS_CORE: readonly EventoDeDominio[] = [
     descripcion:
       "El trabajo de retención anonimizó o eliminó datos vencidos según la política activa.",
   },
+  { id: "core.cumplimiento.dek_rotada", descripcion: "Se rotó la clave de datos del tenant y se recifraron sus secretos." },
   {
     id: "core.cumplimiento.titular_anonimizado",
     descripcion: "Se anonimizó a un titular (persona o contacto) a pedido, conservando los hechos regulados.",
