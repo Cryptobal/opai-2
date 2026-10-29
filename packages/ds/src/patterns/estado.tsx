@@ -8,7 +8,10 @@ export type EstadoPantalla = "loading" | "empty" | "error" | "forbidden" | "read
 
 export type TextosEstado = {
   vacio?: { titulo: string; descripcion?: string; accion?: ReactNode };
-  error?: { titulo?: string; descripcion?: string; onReintentar?: () => void };
+  // `accion` para una pantalla de servidor (p. ej. `<BotonReintentar/>`, que recarga la página):
+  // una función no cruza de un Server Component a este Client Component. `onReintentar` sigue
+  // disponible para quien ya renderiza `Estado` en un árbol de cliente.
+  error?: { titulo?: string; descripcion?: string; accion?: ReactNode; onReintentar?: () => void };
 };
 
 type Props = {
@@ -28,15 +31,17 @@ export function Estado({ state, variante, textos, children }: Props) {
       <ErrorState
         titulo={e?.titulo ?? "No pudimos cargar esta información"}
         descripcion={e?.descripcion ?? "Revisa tu conexión e inténtalo de nuevo."}
-        {...(e?.onReintentar
-          ? {
-              accion: (
-                <Button variant="secondary" onClick={e.onReintentar}>
-                  Reintentar
-                </Button>
-              ),
-            }
-          : {})}
+        {...(e?.accion
+          ? { accion: e.accion }
+          : e?.onReintentar
+            ? {
+                accion: (
+                  <Button variant="secondary" onClick={e.onReintentar}>
+                    Reintentar
+                  </Button>
+                ),
+              }
+            : {})}
       />
     );
   }
