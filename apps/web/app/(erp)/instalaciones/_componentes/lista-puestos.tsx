@@ -61,7 +61,7 @@ export function ListaPuestos({
           {
             id: "puesto",
             etiqueta: "Puesto",
-            className: "min-w-24 font-medium whitespace-normal [overflow-wrap:break-word]",
+            className: "min-w-24 font-medium whitespace-normal wrap-break-word",
             render: (p) => (
               <span className={cn("flex flex-col", p.estado !== "activo" && "text-fg-muted")}>
                 <span>{p.nombre}</span>

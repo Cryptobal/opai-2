@@ -11,7 +11,9 @@ import { useCapacidad } from "../use-capacidad";
 import type { Confirmacion } from "./dialogo-confirmar";
 import { useParametros } from "./use-url";
 
-const DialogoConfirmar = dynamic(() => import("./dialogo-confirmar").then((m) => m.DialogoConfirmar));
+const DialogoConfirmar = dynamic(() =>
+  import("./dialogo-confirmar").then((m) => m.DialogoConfirmar),
+);
 
 /** Acción del menú ⋯ de una ficha: abrir una hoja por URL o ejecutar una capacidad. */
 export type AccionEntidad = {
@@ -70,6 +72,8 @@ export function AccionesEntidad({
       onSelect: pin.onFijar,
     });
   }
+  // Sin acciones (p. ej. un cargo de solo lectura) y sin «Fijar», no hay menú que mostrar.
+  if (items.length === 0) return null;
   return (
     <>
       <Menu

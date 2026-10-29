@@ -15,7 +15,7 @@ test.describe("«Fijar» de las fichas", () => {
 
   test("va en el menú ⋯ bajo 1024 px y en la cabecera desde 1024 (CAR-65)", async ({ page }) => {
     await entrar(page);
-    for (const lista of ["/cuentas", "/instalaciones"]) {
+    for (const lista of ["/cuentas", "/instalaciones", "/cargos"]) {
       await page.goto(lista);
       const href = await page
         .locator(`a[href^="${lista}/"][href*="-"]`)
@@ -32,6 +32,12 @@ test.describe("«Fijar» de las fichas", () => {
         .click();
       const fijar = page.getByRole("menuitem", { name: /^(Fijar|Desfijar)$/ });
       await expect(fijar).toBeVisible();
+      // Funciona: fija, el menú pasa a ofrecer «Desfijar» y se deshace.
+      await fijar.click();
+      await page.getByRole("button", { name: /^Acciones de/ }).filter({ visible: true }).click();
+      await page.getByRole("menuitem", { name: "Desfijar" }).click();
+      await page.getByRole("button", { name: /^Acciones de/ }).filter({ visible: true }).click();
+      await expect(page.getByRole("menuitem", { name: "Fijar" })).toBeVisible();
       await page.keyboard.press("Escape");
       // Desde 1024 px vuelve el botón de la cabecera y el menú ya no lo repite.
       await page.setViewportSize({ width: 1024, height: 768 });
