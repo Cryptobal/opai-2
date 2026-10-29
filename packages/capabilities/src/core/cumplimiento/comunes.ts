@@ -4,7 +4,7 @@ import { TITULARES } from "@opai/domain";
 
 import type { TenantTx } from "@opai/db";
 
-import { conflicto, noEncontrado } from "../../errores";
+import { conflicto, noEncontrado, reglaDeNegocio } from "../../errores";
 import type { Contexto } from "../../types";
 import { uuidSchema } from "../esquemas";
 import { dondeContacto, dondePersona } from "../maestros/alcance";
@@ -53,9 +53,9 @@ export async function cargarTitular(ctx: Contexto, t: Titular): Promise<TitularV
  * Valida que un documento de evidencia exista en el tenant actual: la RLS impide ver los de otro,
  * así que `findUnique` devuelve null tanto si no existe como si es de otro tenant, y en ambos casos
  * se responde «no encontrado» sin revelar cuál de las dos cosas es (sin enumeración). Evita apuntar
- * la evidencia a un documento ajeno (los campos `*_doc_id` / `documento_evidencia_id` no tienen FK;
- * las referencias entre tablas son del mismo tenant). Recibe el cliente (db o tx) para validar
- * dentro de la misma transacción.
+ * la evidencia a un documento ajeno (las referencias entre tablas son del mismo tenant). Exige que
+ * esté disponible: con la FK RESTRICT (CAR-46), una subida pendiente usada como evidencia trabaría
+ * la purga diaria de pendientes. Recibe el cliente (db o tx) para validar en la misma transacción.
  */
 export async function validarEvidenciaDelTenant(
   db: TenantTx,
@@ -64,6 +64,8 @@ export async function validarEvidenciaDelTenant(
   if (!docId) return;
   const d = await db.documento.findUnique({ where: { id: docId } });
   if (!d) throw noEncontrado("El documento de evidencia");
+  if (d.estado !== "disponible")
+    throw reglaDeNegocio("El documento de evidencia aún no termina de subirse.");
 }
 
 /** Fila de solicitud tal como la devuelven las capacidades (fechas como ISO). */
