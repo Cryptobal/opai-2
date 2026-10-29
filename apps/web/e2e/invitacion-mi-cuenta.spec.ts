@@ -16,9 +16,14 @@ test.use({ actionTimeout: 30_000 });
 test.setTimeout(180_000);
 test.beforeEach(({ page }) => ocultarIndicadorDev(page));
 
-function psql(sql: string): string {
+/** SQL por stdin con los valores como variables de psql (`:'nombre'`), nunca interpolados. */
+function psql(sql: string, vars: Record<string, string> = {}): string {
+  const args = Object.entries(vars).flatMap(([k, v]) => ["-v", `${k}=${v}`]);
   return (
-    execFileSync("psql", [urlPropietario, "-q", "-X", "-A", "-t", "-c", sql], { encoding: "utf8" })
+    execFileSync("psql", [urlPropietario, "-q", "-X", "-A", "-t", ...args], {
+      encoding: "utf8",
+      input: sql,
+    })
       .trim()
       .split("\n")
       .filter(Boolean)
@@ -61,8 +66,9 @@ test.describe("invitación y Mi cuenta", () => {
     const token = randomBytes(32).toString("base64url");
     const hash = createHash("sha256").update(token).digest("hex");
     const id = psql(
-      `UPDATE core.invitations SET token_hash = '${hash}' WHERE email = '${correo}'
-         AND accepted_at IS NULL AND revocada_en IS NULL RETURNING id`,
+      `UPDATE core.invitations SET token_hash = :'hash' WHERE email = :'correo'
+         AND accepted_at IS NULL AND revocada_en IS NULL RETURNING id;`,
+      { hash, correo },
     );
     expect(id).toMatch(/^[0-9a-f-]{36}$/);
     const enlace = `/invitacion/gard/${token}`;
@@ -76,9 +82,8 @@ test.describe("invitación y Mi cuenta", () => {
     await invitada.getByRole("button", { name: "Crear cuenta y aceptar" }).click();
     await invitada.waitForURL((u) => !u.pathname.startsWith("/invitacion"));
     await expect(invitada.getByText("Invitada E2E").first()).toBeVisible();
-    expect(psql(`SELECT accepted_at IS NOT NULL FROM core.invitations WHERE id = '${id}'`)).toBe(
-      "t",
-    );
+    const aceptada = "SELECT accepted_at IS NOT NULL FROM core.invitations WHERE id = :'id';";
+    expect(psql(aceptada, { id })).toBe("t");
 
     // Entrar de nuevo con la cuenta creada: llega a la empresa que la invitó.
     await invitada.context().clearCookies();
