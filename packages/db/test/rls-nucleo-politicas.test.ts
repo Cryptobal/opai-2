@@ -67,8 +67,8 @@ describe.skipIf(!urlPropietario)("políticas y referencias del núcleo", () => {
     expect(Number(extra[0]?.n)).toBe(0);
   });
 
-  // Pendiente: cuando existan schemas de módulos, extender esta prueba de fugas más allá de `core`
-  // (la de RLS y política ya cubre todos los schemas).
+  // Solo `core`; la prueba de fugas de todos los schemas, con filas en A y B y escrituras cruzadas,
+  // es `rls-dos-empresas.test.ts` (CAR-48).
   it("con el tenant A fijado, ninguna tabla devuelve filas de otro tenant", async () => {
     const tablas = await e.admin.$queryRaw<{ tabla: string }[]>`
       SELECT table_name AS tabla FROM information_schema.columns

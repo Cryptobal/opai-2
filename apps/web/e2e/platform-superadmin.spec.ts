@@ -47,8 +47,15 @@ test.describe("regresión Plataforma tras #59", () => {
         await expect(nav.getByRole("link")).toHaveCount(0);
         await expect(page.getByRole("link", { name: "Nueva", exact: true })).toHaveCount(0);
         if (info.project.name === "telefono") {
-          await page.getByRole("button", { name: "Más opciones", exact: true }).click();
-          await expect(page.getByRole("menuitem", { name: "Cerrar sesión" })).toBeVisible();
+          // Desde el Brief 05 (#75) «Más» es una hoja (Sheet), no un menú: la salida es un botón. Un
+          // clic antes de hidratar no la abre, así que se reintenta hasta verla.
+          const mas = page.getByRole("dialog", { name: "Más", exact: true });
+          await expect(async () => {
+            if (!(await mas.isVisible()))
+              await page.getByRole("button", { name: "Más opciones", exact: true }).click();
+            await expect(mas).toBeVisible({ timeout: 1_000 });
+          }).toPass({ timeout: 30_000 });
+          await expect(mas.getByRole("button", { name: "Cerrar sesión" })).toBeVisible();
           await page.keyboard.press("Escape");
         }
       }
