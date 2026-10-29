@@ -6,7 +6,7 @@ const mapa = (cs: { key: string; value: string }[]) =>
   Object.fromEntries(cs.map((c) => [c.key, c.value]));
 
 describe("cabecerasSeguridad", () => {
-  it("siempre lleva las cabeceras base, la Permissions-Policy mínima y la CSP en Report-Only", () => {
+  it("siempre lleva las cabeceras base, la Permissions-Policy mínima y la CSP en enforcement", () => {
     for (const opciones of [
       { produccion: true, desarrollo: false },
       { produccion: false, desarrollo: true },
@@ -16,11 +16,11 @@ describe("cabecerasSeguridad", () => {
       expect(h["Referrer-Policy"]).toBe("strict-origin-when-cross-origin");
       expect(h["X-Content-Type-Options"]).toBe("nosniff");
       expect(h["Permissions-Policy"]).toBe("camera=(self), geolocation=(self), microphone=()");
-      // La CSP viaja en Report-Only, no como `Content-Security-Policy` que bloquearía.
-      expect(h["Content-Security-Policy-Report-Only"]).toBeTruthy();
-      expect(h["Content-Security-Policy"]).toBeUndefined();
+      // La CSP bloquea (CAR-57): ya no viaja en Report-Only, y sigue reportando.
+      expect(h["Content-Security-Policy"]).toBeTruthy();
+      expect(h["Content-Security-Policy-Report-Only"]).toBeUndefined();
       expect(h["Reporting-Endpoints"]).toBe('csp="/api/csp-report"');
-      expect(h["Content-Security-Policy-Report-Only"]).toContain(
+      expect(h["Content-Security-Policy"]).toContain(
         "report-uri /api/csp-report; report-to csp",
       );
     }

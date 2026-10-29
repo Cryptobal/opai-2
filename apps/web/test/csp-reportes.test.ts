@@ -117,7 +117,7 @@ describe("reportes CSP públicos y acotados", () => {
 });
 
 describe("nonce y vista previa", () => {
-  it("sobrescribe nonce/CSP enviados por cliente, rota por request y solo anuncia Report-Only", () => {
+  it("sobrescribe nonce/CSP enviados por cliente, rota por request y deja el nonce solo en el request", () => {
     const a = cabecerasConNonce(
       new Headers({ "x-opai-nonce": "falsificado", "content-security-policy": "peligrosa" }),
     );

@@ -1,25 +1,64 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { mailerConsola, mailerDelEntorno } from "./index";
+import { CorreoNoConfigurado, mailerConsola, mailerDelEntorno } from "./index";
+
+const TOKEN = "Zx9aQ2bW7cE4dR1fT6gY3hU8";
+const CORREO = {
+  para: "ana.perez@empresa.cl",
+  asunto: "Invitación",
+  texto: `Entra en https://test.opai.cl/invitacion/gard/${TOKEN} o en https://test.opai.cl/api/auth/reset-password/${TOKEN}?callbackURL=%2Fnueva`,
+};
 
 describe("mailer", () => {
   afterEach(() => vi.unstubAllGlobals());
 
-  it("sin RESEND_API_KEY usa la consola y escribe el enlace en el log", async () => {
+  it("en desarrollo sin RESEND_API_KEY usa la consola sin el destinatario completo ni el token", async () => {
     const lineas: string[] = [];
-    await mailerConsola((l) => lineas.push(l)).enviar({
-      para: "a@b.cl",
-      asunto: "Invitación",
-      texto: "https://test.opai.cl/invitacion/gard/abc",
-    });
-    expect(mailerDelEntorno({}).nombre).toBe("consola");
-    expect(lineas[0]).toContain("https://test.opai.cl/invitacion/gard/abc");
+    const info = vi.spyOn(console, "info").mockImplementation((l: string) => void lineas.push(l));
+    const mailer = mailerDelEntorno({ NODE_ENV: "development" });
+    expect(mailer.nombre).toBe("consola");
+    await mailer.enviar(CORREO);
+    info.mockRestore();
+    expect(lineas).toHaveLength(1);
+    expect(lineas[0]).toContain("a***@empresa.cl");
+    expect(lineas[0]).toContain("https://test.opai.cl/invitacion/gard/[oculto]");
+    expect(lineas[0]).toContain("/reset-password/[oculto]");
+    expect(lineas[0]).not.toContain(TOKEN);
+    expect(lineas[0]).not.toContain("ana.perez");
+  });
+
+  it.each([
+    { VERCEL_ENV: "production" },
+    { VERCEL_ENV: "preview" },
+    { NODE_ENV: "production" },
+  ])("en un entorno desplegado (%o) sin RESEND_API_KEY falla cerrado y no escribe nada", async (env) => {
+    const info = vi.spyOn(console, "info").mockImplementation(() => undefined);
+    const mailer = mailerDelEntorno(env);
+    expect(mailer.nombre).toBe("no-configurado");
+    const error = await mailer.enviar(CORREO).catch((e: unknown) => e);
+    expect(error).toBeInstanceOf(CorreoNoConfigurado);
+    expect(String(error)).toMatch(/RESEND_API_KEY/);
+    expect(String(error)).not.toContain(TOKEN);
+    expect(String(error)).not.toContain(CORREO.para);
+    expect(info).not.toHaveBeenCalled();
+    info.mockRestore();
+  });
+
+  it("la consola usada directamente tampoco escribe en un entorno desplegado", async () => {
+    const lineas: string[] = [];
+    const mailer = mailerConsola((l) => lineas.push(l), { VERCEL_ENV: "production" });
+    await expect(mailer.enviar(CORREO)).rejects.toBeInstanceOf(CorreoNoConfigurado);
+    expect(lineas).toHaveLength(0);
   });
 
   it("con RESEND_API_KEY llama a la API de Resend y falla si responde error", async () => {
     const fetch = vi.fn(async () => new Response("{}", { status: 422 }));
     vi.stubGlobal("fetch", fetch);
-    const mailer = mailerDelEntorno({ RESEND_API_KEY: "re_x", EMAIL_FROM: "OPAI <a@opai.cl>" });
+    const mailer = mailerDelEntorno({
+      RESEND_API_KEY: "re_x",
+      EMAIL_FROM: "OPAI <a@opai.cl>",
+      VERCEL_ENV: "production",
+    });
     expect(mailer.nombre).toBe("resend");
     await expect(mailer.enviar({ para: "a@b.cl", asunto: "x", texto: "y" })).rejects.toThrow(/422/);
     expect(fetch).toHaveBeenCalledWith("https://api.resend.com/emails", expect.anything());
