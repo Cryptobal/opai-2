@@ -43,7 +43,7 @@ El agente **no es una página con entrada en el menú** (ADR-046: el menú es pa
 
 ### 3.1 Cómo se abre (lanzadores)
 
-1. **Botón fijo «Preguntar a OPAI»** (ícono de destello de lucide, `sparkles`), en el **grupo fijo de la cabecera** de iPad y escritorio, **a la izquierda de la búsqueda**: en escritorio el grupo queda «búsqueda + OPAI + campana» (el usuario va al pie de la barra lateral, ADR-050); bajo 1024 px conserva el avatar. Mide y está igual en todas las vistas, como exige CAR-12: no se mueve cuando cambian las acciones de la página. En escritorio muestra el atajo en el tooltip. Ojo: suma 44 px al grupo y agrava el desborde de la cabecera de fichas a 768 px ya registrado en CAR-64; el diseño debe resolverlo (por ejemplo, búsqueda como ícono bajo 1024 px).
+1. **Botón fijo «Preguntar a OPAI»** (ícono de destello de lucide, `sparkles`), en el **grupo fijo de la cabecera** de iPad y escritorio, **entre la búsqueda y la campana**: en escritorio el grupo queda «búsqueda + OPAI + campana» (el usuario va al pie de la barra lateral, ADR-050); bajo 1024 px conserva el avatar. Mide y está igual en todas las vistas, como exige CAR-12: no se mueve cuando cambian las acciones de la página. En escritorio muestra el atajo en el tooltip. Ojo: suma 44 px al grupo y agrava el desborde de la cabecera de fichas a 768 px ya registrado en CAR-64; el diseño debe resolverlo (por ejemplo, búsqueda como ícono bajo 1024 px).
 2. **Atajo de teclado** `⌘J` (Mac) / `Ctrl+J` (Windows y Linux) abre y cierra el panel desde cualquier pantalla del ERP (pregunta 3). `Esc` lo cierra y devuelve el foco al lanzador.
 3. **Desde la búsqueda (⌘K):** el primer lugar ya reservado (NAVEGACION §7, Brief 05 §4.4) es «Preguntar a OPAI: <lo escrito>». Con Enter abre el panel con ese texto ya enviado. En el celular, el mismo primer lugar dentro de «Buscar».
 4. **Teléfono:** además de «Buscar», **la columna 4 libre de la barra inferior** (ADR-050 la dejó vacía y su uso lo decide Carlos) pasa a «OPAI» cuando la empresa tiene la licencia y la persona tiene `agente:usar` (pregunta 2). Sin licencia o sin permiso, esa columna sigue con la regla actual.
@@ -151,8 +151,8 @@ Ningún campo es visible para el cliente ni para el trabajador: el agente solo e
 
 **Agent-first y paridad (ADR-055)**
 
-- **R21.** El agente no tiene herramientas propias: **toda acción que puede hacer es una capacidad del registro** y también está en el MCP para los agentes externos, con los mismos permisos. Si algo no existe como capacidad, el agente responde que no puede hacerlo y lo registra como brecha (sin datos personales).
-- **R22.** Las capacidades nuevas que necesite la pantalla (conversaciones y contexto, §9) tienen su herramienta MCP o quedan como excepción justificada en `paridad-excepciones.ts` (solo `soloPersonas`). Preparar y confirmar ya son `soloPersonas`: un agente externo no puede manejar al agente interno ni confirmar por una persona.
+- **R21.** El agente no tiene herramientas propias: **toda acción que puede hacer es una capacidad del registro** y la misma capacidad sirve a la pantalla, a `/api/v1` y al MCP de los agentes externos, con los mismos permisos, alcance y auditoría (ADR-004). Si algo no existe como capacidad, el agente responde que no puede hacerlo y lo registra como brecha (sin datos personales).
+- **R22.** Las capacidades nuevas que necesite la pantalla (conversaciones y contexto, §9) se exponen igual en pantalla, en `/api/v1` y como herramienta MCP, o quedan como excepción justificada en `paridad-excepciones.ts` (solo `soloPersonas`). Preparar y confirmar ya son `soloPersonas`: un agente externo no puede manejar al agente interno ni confirmar por una persona.
 
 **Sin conexión**
 
@@ -318,7 +318,7 @@ CONTEXTO DEL PRODUCTO
 OPAI es un ERP para empresas de seguridad privada, aseo y outsourcing (Chile). El agente actúa con los permisos de la persona conectada: consulta datos y prepara cambios, pero NUNCA escribe sin que la persona confirme un «plan» con vista previa. Lo irreversible va a una cola de aprobación humana (la Bandeja de Inicio). Usa datos de ejemplo realistas de una empresa de seguridad: cuenta «Banco Andino», instalaciones «Torre Norte» y «Centro de Distribución Quilicura», negocio «Renovación 2027 · Banco Andino», persona «Camila Rojas» (supervisora), turnos 4x4. Textos en español de Chile, tuteo, sin tecnicismos.
 
 LANZADORES (muéstralos en las pantallas de shell)
-- Escritorio e iPad: botón de ícono «Preguntar a OPAI» (ícono sparkles de lucide, 44 px) dentro del grupo FIJO de la cabecera, a la izquierda de la búsqueda; en escritorio el grupo es búsqueda + OPAI + campana (el usuario sigue al pie de la barra lateral); bajo 1024 px conserva el avatar. El grupo no cambia de tamaño ni de posición entre pantallas. Resuelve que a 768 px la cabecera de una ficha (Volver + acción principal + Fijar + grupo fijo) no se desborde. Tooltip con el atajo ⌘J.
+- Escritorio e iPad: botón de ícono «Preguntar a OPAI» (ícono sparkles de lucide, 44 px) dentro del grupo FIJO de la cabecera, entre la búsqueda y la campana; en escritorio el grupo es búsqueda + OPAI + campana (el usuario sigue al pie de la barra lateral); bajo 1024 px conserva el avatar. El grupo no cambia de tamaño ni de posición entre pantallas. Resuelve que a 768 px la cabecera de una ficha (Volver + acción principal + Fijar + grupo fijo) no se desborde. Tooltip con el atajo ⌘J.
 - ⌘K: primera fila «Preguntar a OPAI: <texto escrito>» con el mismo ícono, sobre los resultados de entidades.
 - Teléfono: barra inferior Inicio · Cuentas · Personas · OPAI · Más (OPAI en la cuarta columna) y primera fila dentro de «Buscar».
 - Ficha: menú «⋯» de la cabecera de la ficha con «Preguntar a OPAI sobre esta cuenta».
