@@ -88,10 +88,10 @@ test("26-29: anexo en borrador, documento con antes/después y aprobación", asy
   await page.evaluate(() => {
     document.documentElement.dataset["theme"] = "light";
   });
-  // El almacenamiento (R2) no tiene credenciales en e2e local ni en CI (sin secretos en el
-  // repositorio): aprobar falla con un mensaje claro en vez de generar el documento. El flujo
-  // completo (documento final con SHA-256 y bitácora) ya se verifica contra Postgres real con
-  // almacenamiento en memoria en `packages/capabilities/test/anexos-db.test.ts`.
+  // CAR-58: la plantilla base tiene texto de ejemplo, así que aprobar falla con un mensaje de
+  // negocio antes de generar el documento. El flujo completo (documento final con SHA-256 y
+  // bitácora) se verifica contra Postgres real, con la plantilla definitiva simulada y
+  // almacenamiento en memoria, en `packages/capabilities/test/anexos-db.test.ts`.
   await hidratado(page.getByRole("button", { name: "Aprobar", exact: true }));
   await page.getByRole("button", { name: "Aprobar", exact: true }).click();
   const confirmacion = page.getByRole("dialog", { name: "Aprobar el anexo" });
@@ -100,9 +100,11 @@ test("26-29: anexo en borrador, documento con antes/después y aprobación", asy
   await expect(confirmacion).not.toBeVisible();
   await page.getByRole("button", { name: "Aprobar", exact: true }).click();
   await confirmacion.getByRole("button", { name: "Aprobar", exact: true }).click();
-  await expect(page.getByText("Almacenamiento no configurado en este entorno.")).toBeVisible();
+  await expect(
+    page.getByText("Este anexo no se puede aprobar todavía", { exact: false }),
+  ).toBeVisible();
   await page.screenshot({
-    path: info.outputPath("29-aprobar-sin-almacenamiento.png"),
+    path: info.outputPath("29-aprobar-plantilla-ejemplo.png"),
     fullPage: true,
     animations: "disabled",
   });
