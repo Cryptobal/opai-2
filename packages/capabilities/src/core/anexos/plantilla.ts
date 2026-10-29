@@ -7,6 +7,19 @@ const TITULO_MOTIVO: Record<string, string> = {
   rol: "rol de turno",
 };
 
+/**
+ * Estado de la plantilla base (CAR-58, auditoría del Núcleo §I-19). Mientras `esEjemplo` sea `true`,
+ * el texto no tiene validez laboral y `core.anexos.aprobar` se niega a aprobar. Pasa a `false` solo
+ * en el PR que traiga el texto legal definitivo de Carlos y su abogado; nunca se inventa aquí.
+ */
+export const PLANTILLA_ANEXO: { readonly version: string; readonly esEjemplo: boolean } = {
+  version: "ejemplo-d15",
+  esEjemplo: true,
+};
+
+export const MENSAJE_PLANTILLA_EJEMPLO =
+  "Este anexo no se puede aprobar todavía: la plantilla del anexo de contrato tiene texto de ejemplo, sin validez laboral. Se podrá aprobar cuando esté cargado el texto legal definitivo. Mientras tanto puedes rechazarlo o dejarlo en borrador.";
+
 export type FilaAnexoDoc = { concepto: string; antes: string; despues: string };
 
 export type DatosAnexoDoc = {
