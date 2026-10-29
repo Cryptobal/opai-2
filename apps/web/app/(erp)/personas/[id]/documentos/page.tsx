@@ -18,7 +18,11 @@ export default function DocumentosPersona(props: Props) {
       {...props}
       tab="documentos"
       acciones={(q) => (
-        <EnlaceBotonHoja href={`?subir=1${consultaExtra(q)}`} icono={Upload}>
+        <EnlaceBotonHoja
+          href={`?subir=1${consultaExtra(q)}`}
+          icono={Upload}
+          className="max-lg:hidden"
+        >
           Subir documento
         </EnlaceBotonHoja>
       )}
