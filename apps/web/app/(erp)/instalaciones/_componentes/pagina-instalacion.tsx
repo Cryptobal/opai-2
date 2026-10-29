@@ -39,7 +39,7 @@ export function PaginaInstalacion({ params, searchParams, tab, acciones, childre
       volverBajoLg
       acciones={
         acciones ?? (
-          <EnlaceBoton href="/instalaciones/nueva" icono={Plus}>
+          <EnlaceBoton href="/instalaciones/nueva" icono={Plus} className="max-lg:hidden">
             Nueva instalación
           </EnlaceBoton>
         )
