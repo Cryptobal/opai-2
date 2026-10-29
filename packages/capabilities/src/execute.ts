@@ -146,10 +146,16 @@ export async function executeCapability(
     r = await correr(ctx, c, input, opciones);
     await auditarSiPlataforma(ctx, c, r, opciones);
   } catch (error) {
-    const code = error instanceof ErrorCapacidad ? error.code : "INTERNAL";
-    const message = error instanceof Error ? error.message : "Error inesperado.";
-    const detalles = error instanceof ErrorCapacidad ? error.detalles : undefined;
-    r = { resultado: falla(code, message, detalles) };
+    if (error instanceof ErrorCapacidad) {
+      r = { resultado: falla(error.code, error.message, error.detalles) };
+    } else {
+      // El detalle (incluido un 55P03 de Postgres envuelto por Prisma, con su SQL) solo al log del
+      // servidor: la UI nunca muestra el error crudo de la base (regresión del PR #109).
+      console.error(`[capacidad:${c.id}] error interno`, error);
+      r = {
+        resultado: falla("INTERNAL", "No pudimos completar la operación. Intenta de nuevo."),
+      };
+    }
   }
 
   const tenantId = tenantDe(ctx, c, r.entrada, r.salida);

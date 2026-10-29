@@ -53,34 +53,56 @@ export const configSet = defineCapability({
       const previo = await tx.ajuste.findUnique({
         where: { tenantId_ambito_sujetoId_modulo_clave: clave },
       });
-      const version = (previo?.version ?? 0) + 1;
       if (input.versionEsperada !== undefined && input.versionEsperada !== (previo?.version ?? 0))
         throw conflicto("La preferencia cambió. Recarga e inténtalo de nuevo.");
+      if (dryRun)
+        return {
+          modulo: c.modulo,
+          clave: c.clave,
+          valor: r?.data ?? null,
+          ambito: c.meta.ambito,
+          version: (previo?.version ?? 0) + 1,
+        };
+      // Tombstone inválido para el esquema: se lee el defecto, conservando revisión monotónica.
+      const valorNuevo = reiniciar
+        ? { reiniciado: true }
+        : JSON.parse(JSON.stringify(r?.data ?? null));
+      // Sin cambio real (p. ej. varios clics seguidos al mismo valor, o una respuesta tardía que
+      // llega después de una más reciente): ni escritura ni evento de auditoría, y menos tiempo con
+      // el advisory lock de esta clave tomado (regresión del PR #109, incidente del 28-oct-2026).
+      const sinFilaQueBorrar = reiniciar && !c.clave.startsWith("navegacion_") && previo === null;
+      const sinCambio =
+        sinFilaQueBorrar ||
+        (previo !== null && JSON.stringify(previo.valor) === JSON.stringify(valorNuevo));
       const salida = {
         modulo: c.modulo,
         clave: c.clave,
         valor: r?.data ?? null,
         ambito: c.meta.ambito,
-        version,
+        version: sinCambio ? (previo?.version ?? 0) : (previo?.version ?? 0) + 1,
       };
-      if (dryRun) return salida;
+      if (sinCambio) return salida;
       if (reiniciar && !c.clave.startsWith("navegacion_"))
         await tx.ajuste.deleteMany({ where: clave });
-      else {
-        // Tombstone inválido para el esquema: se lee el defecto, conservando revisión monotónica.
-        const valor = reiniciar
-          ? { reiniciado: true }
-          : JSON.parse(JSON.stringify(r?.data ?? null));
+      else
         await tx.ajuste.upsert({
           where: { tenantId_ambito_sujetoId_modulo_clave: clave },
-          create: { ...clave, valor, actualizadoPor: ctx.usuario?.id ?? null },
-          update: { valor, version, actualizadoPor: ctx.usuario?.id ?? null },
+          create: { ...clave, valor: valorNuevo, actualizadoPor: ctx.usuario?.id ?? null },
+          update: {
+            valor: valorNuevo,
+            version: salida.version,
+            actualizadoPor: ctx.usuario?.id ?? null,
+          },
         });
-      }
       await ctx.eventos.emitir(tx, {
         tipo: "core.config.cambiada",
         entidadTipo: "ajuste",
-        payload: { modulo: c.modulo, clave: c.clave, ambito: c.meta.ambito, version },
+        payload: {
+          modulo: c.modulo,
+          clave: c.clave,
+          ambito: c.meta.ambito,
+          version: salida.version,
+        },
       });
       return salida;
     });

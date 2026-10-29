@@ -271,6 +271,31 @@ describe("executeCapability", () => {
     expect(tabla("evento")).toHaveLength(0);
   });
 
+  // Regresión del PR #109: un 55P03 (u otro error interno, nunca de negocio) no debe mostrar en la
+  // UI el mensaje crudo de Prisma/Postgres (con su SQL y el código de la base); el detalle queda
+  // solo en el log del servidor.
+  it("un error interno (no de negocio) nunca expone su mensaje crudo", async () => {
+    const espía = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const { ctx } = ctxCon(["test:write"]);
+    const crudo =
+      'Invalid `prisma.$queryRaw()` invocation: Raw query failed. Code: `55P03`. ' +
+      "Message: `canceling statement due to lock timeout`";
+    ctx.auditoria.registrar = async () => {
+      throw new Error(crudo);
+    };
+    const r = await executeCapability(ctx, "test.nota.create_con_evento", { texto: "hola" });
+    expect(r).toMatchObject({ ok: false, error: { code: "INTERNAL" } });
+    if (!r.ok) {
+      expect(r.error.message).not.toMatch(/55P03|prisma|\$queryRaw/i);
+      expect(r.error.message).toBe("No pudimos completar la operación. Intenta de nuevo.");
+    }
+    expect(espía).toHaveBeenCalledWith(
+      expect.stringContaining("test.nota.create_con_evento"),
+      expect.objectContaining({ message: crudo }),
+    );
+    espía.mockRestore();
+  });
+
   it("fallo del handler ⇒ sin auditoría (nunca se llega a auditar)", async () => {
     const { ctx, tabla, eventos } = ctxCon(["test:write"]);
     const r = await executeCapability(ctx, "test.nota.create_con_evento", { texto: "falla" });
