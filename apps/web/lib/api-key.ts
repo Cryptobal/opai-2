@@ -1,4 +1,10 @@
-import { crearContexto, hashApiKey, slugDeApiKey, type Contexto } from "@opai/capabilities";
+import {
+  crearContexto,
+  hashApiKey,
+  plataformaVigente,
+  slugDeApiKey,
+  type Contexto,
+} from "@opai/capabilities";
 import { type Acceso, esRol, esRolPlataforma } from "@opai/domain";
 
 import { alcanceDe } from "./actor";
@@ -64,7 +70,8 @@ export async function contextoDeApiKey(
   const claveApi = {
     permisos: fila.heredaPermisos ? null : fila.permisos,
     servicio,
-    plataforma: fila.scopes.includes("platform"),
+    // CAR-40: además vigente (vence en ≤ 7 días); una key larga o sin vencimiento no es de plataforma.
+    plataforma: fila.scopes.includes("platform") && plataformaVigente(fila.expiraEn, ahora),
   };
   // Techo real del responsable (H15): rol, personalizado y excepciones VIGENTES, siempre, también
   // para `servicio` (que arriba manda `rol`/`permisosRol`/`excepciones` en null porque el principal

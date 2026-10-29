@@ -20,7 +20,7 @@ export function ListaAprobaciones({ items, ver, ahora }: Props) {
   const sp = useSearchParams();
   const [sel, setSel] = useState<Set<string>>(() => new Set());
   const [rechazando, setRechazando] = useState<string[] | null>(null);
-  const r = useResolver();
+  const r = useResolver(new Set(items.filter((a) => a.ambito === "plataforma").map((a) => a.id)));
   const href = (id: string) => {
     const q = new URLSearchParams(sp.toString());
     q.set("ver", id);

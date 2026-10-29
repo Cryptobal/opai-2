@@ -8,6 +8,7 @@ import { uuid7 } from "../core/documentos/uuid7";
 import { agrupar, cumple, ordenar, type Fila, type Where } from "./db-memoria-util";
 import { type Include, incluir, resolverWhereRelaciones } from "./db-memoria-rel";
 import { lecturasLocksMemoria } from "./lecturas-locks-memoria";
+import { globalesEnMemoria } from "./plataforma-memoria";
 
 // Ids crecientes como uuid(7): el orden por id es el orden de creación, igual que en Postgres. Se
 // usa el MISMO generador que inyectan las capacidades (p. ej. `incidente_registrar` pasa `uuid7()`),
@@ -119,34 +120,7 @@ export function dbEnMemoria(semilla: Record<string, Fila[]> = {}) {
     { $queryRaw: lecturasLocksMemoria(tabla) },
     { get: (cache: Record<string, unknown>, m: string) => (cache[m] ??= delegado(m)) },
   );
-  const globales: Record<string, unknown> = {
-    tenantPorId: (id: string) => delegado("tenant").findUnique({ where: { id } }),
-    tenantPorSlug: (slug: string) => delegado("tenant").findUnique({ where: { slug } }),
-    listarTenants: (id?: string) =>
-      delegado("tenant").findMany({
-        where: id ? { id } : {},
-        orderBy: { nombre: "asc" },
-      }),
-    crearTenant: (data: Fila) => delegado("tenant").create({ data }),
-    actualizarTenant: (id: string, data: Fila) =>
-      delegado("tenant").update({ where: { id }, data }),
-    usuariosDePlataforma: async () =>
-      (await delegado("user").findMany({ orderBy: { email: "asc" } })).filter(
-        (u) => u.platformRole,
-      ),
-    listarAjustes: () => delegado("ajustePlataforma").findMany(),
-    ajustePorClave: (where: Fila) => delegado("ajustePlataforma").findUnique({ where }),
-    guardarAjuste: (args: Parameters<ReturnType<typeof delegado>["upsert"]>[0]) =>
-      delegado("ajustePlataforma").upsert(args),
-    listarPrecios: (hasta: Date) =>
-      delegado("precioRecurso").findMany({
-        where: { vigenteDesde: { lte: hasta } },
-        orderBy: [{ recurso: "asc" }, { vigenteDesde: "desc" }],
-      }),
-    precioPorVigencia: (where: Fila) => delegado("precioRecurso").findUnique({ where }),
-    guardarPrecio: (args: Parameters<ReturnType<typeof delegado>["upsert"]>[0]) =>
-      delegado("precioRecurso").upsert(args),
-  };
+  const globales = globalesEnMemoria(delegado);
   /** Copia de todas las tablas; la función devuelta las restaura (rollback de `transaccion`). */
   function instantanea(): () => void {
     const copia = new Map([...tablas].map(([k, v]) => [k, v.map((f) => ({ ...f }))]));
