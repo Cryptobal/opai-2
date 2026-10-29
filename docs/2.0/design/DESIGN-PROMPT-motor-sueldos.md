@@ -19,6 +19,8 @@ Tres públicos:
 - **Vendedor:** simula el costo de un puesto (4x4, 5x2…) y entiende de dónde sale cada peso.
 - **Operador de Plataforma (OPAI):** solo vigila el estado de las fuentes y sus alertas. No confirma valores de las empresas.
 
+**Nombres de ejemplo:** todos son ficticios («Ana Rojas», «Atlas Seguridad SpA»); nunca personas ni empresas reales.
+
 **Formatos:** español de Chile; `dd-mm-aaaa`; `HH:mm`; CLP `$ 553.553`; UF `UF 41.237,01` (dos decimales al mostrar); porcentajes `10,49 %`; montos con `t-numeric`, RUT en `t-mono`. Cifras de ejemplo: las de §13 y el anexo A de la especificación (sin datos personales).
 
 **Viewports:** 375, 1024 y 1280 en todas las pantallas; modo oscuro al menos en Remuneraciones, Simulador y la hoja «Cambiar valor».
