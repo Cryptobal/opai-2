@@ -9,10 +9,10 @@ import { DialogoRechazar } from "./rechazar";
 import { useResolver } from "./use-resolver";
 
 /** Rechazar con motivo / Aprobar al pie del detalle de una aprobación (44). */
-export function AccionesDetalle({ id }: { id: string }) {
+export function AccionesDetalle({ id, plataforma }: { id: string; plataforma: boolean }) {
   const [rechazar, setRechazar] = useState(false);
   const router = useRouter();
-  const r = useResolver();
+  const r = useResolver(new Set(plataforma ? [id] : []));
   const listo = () => router.replace("/configuracion/aprobaciones");
   return (
     <div className="mt-auto flex flex-col gap-2 pt-4">

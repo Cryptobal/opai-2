@@ -3,6 +3,7 @@ import { jsonCanonico } from "@opai/domain";
 import { falla } from "../autorizacion";
 import { sinSensibles } from "../execute-util";
 import type { Capacidad, Contexto, OpcionesEjecucion, Resultado } from "../types";
+import { aprobacionDePlataforma } from "./control-plataforma";
 
 /** Una aprobación pendiente vence a las 72 horas (ADR-032). */
 export const VIGENCIA_APROBACION_MS = 72 * 3_600_000;
@@ -29,6 +30,11 @@ async function aprobacion(
   const exige = nivel === "aprobacion" || (c.efecto === "irreversible" && nivel !== "directo");
   if (!a || !exige) return null;
   if (ctx.actor.tipo !== "agent") return null;
+  const venceEn = new Date(Date.now() + VIGENCIA_APROBACION_MS);
+  const resumen = resumir(c, entrada);
+  // Lo `platform.*` va a la cola de plataforma, nunca a la de la empresa de la key (CAR-36).
+  if (c.modulo === "platform")
+    return aprobacionDePlataforma(ctx, c, entrada, opciones, a, { resumen, venceEn }, requerida);
   const repetida = opciones.idempotencyKey
     ? await ctx.db.aprobacion.findFirst({
         where: {
@@ -46,8 +52,6 @@ async function aprobacion(
     }
     if (repetida.estado !== "vencida") return requerida(repetida.id);
   }
-  const venceEn = new Date(Date.now() + VIGENCIA_APROBACION_MS);
-  const resumen = resumir(c, entrada);
   // Aprobación, evento y auditoría en una sola transacción (ADR-052): dejar pendiente una
   // escritura irreversible también es una escritura, y se audita atómica con ella.
   const id = await ctx.transaccion(async (tx) => {

@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 251 pares pantalla→capacidad · 217 con herramienta · 34 excepciones justificadas · 0 faltantes.
+**Resumen:** 253 pares pantalla→capacidad · 217 con herramienta · 36 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -184,6 +184,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/aprobaciones` | `core.aprobaciones.aprobar` | — | excepción |
 | erp | `/configuracion/aprobaciones` | `core.aprobaciones.list` | `core_aprobaciones_list` | existe |
 | erp | `/configuracion/aprobaciones` | `core.aprobaciones.rechazar` | — | excepción |
+| erp | `/configuracion/aprobaciones` | `platform.aprobaciones.aprobar` | — | excepción |
+| erp | `/configuracion/aprobaciones` | `platform.aprobaciones.rechazar` | — | excepción |
 | erp | `/configuracion/comunicaciones/[evento]` | `core.comunicaciones.eventos` | `core_comunicaciones_eventos` | existe |
 | erp | `/configuracion/comunicaciones/[evento]` | `core.plantillas.get` | `core_plantillas_get` | existe |
 | erp | `/configuracion/comunicaciones` | `core.comunicaciones.eventos` | `core_comunicaciones_eventos` | existe |
@@ -338,6 +340,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.roles.create` | Solo personas: gobierna el acceso; un agente no se crea roles ni se concede permisos (ADR-034). |
 | `core.roles.update` | Solo personas: cambiar los permisos de un rol es gobernar el acceso (ADR-034). |
 | `core.users.invite` | Solo personas: invitar asigna un rol y gobierna el acceso (encargo PR #70). |
+| `platform.aprobaciones.aprobar` | Solo personas: lo irreversible de plataforma lo aprueba un humano (ADR-032, CAR-36). |
+| `platform.aprobaciones.rechazar` | Solo personas: la decisión sobre lo irreversible de plataforma es humana (ADR-032, CAR-36). |
 
 ## Solo personas: camino humano (CAR-52)
 
@@ -377,6 +381,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.roles.create` | `/configuracion/usuarios/roles` | sí (portal ERP) | reservada a personas |
 | `core.roles.update` | `/configuracion/usuarios/roles` | sí (portal ERP) | reservada a personas |
 | `core.users.invite` | `/configuracion/usuarios` | no | reservada a personas |
+| `platform.aprobaciones.aprobar` | `/configuracion/aprobaciones` | no | reservada a personas |
+| `platform.aprobaciones.rechazar` | `/configuracion/aprobaciones` | no | reservada a personas |
 
 ## Capacidades solo por API y MCP (ninguna pantalla las invoca con id literal)
 
@@ -401,6 +407,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.puestos.get`
 - `core.usage.summary`
 - `platform.auditoria.estado`
+- `platform.auditoria.list`
 - `platform.bitacora.estado`
 - `platform.eventos.list`
 - `platform.tenants.update`

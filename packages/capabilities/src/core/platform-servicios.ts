@@ -21,9 +21,7 @@ async function trabajoDe(
   tenantId: string,
   id: string,
 ) {
-  const t = await requierePlataforma(ctx)
-    .paraTenant(tenantId)
-    .trabajo.findUnique({ where: { id } });
+  const t = await requierePlataforma(ctx).empresa(tenantId).trabajo(id);
   if (!t) throw noEncontrado("El trabajo");
   return t;
 }
@@ -44,17 +42,10 @@ export const platformTrabajosReintentar = defineCapability({
     if (!["fallido", "cancelado"].includes(t.estado)) {
       throw reglaDeNegocio("Solo se reintentan trabajos fallidos o cancelados.");
     }
-    const data = {
-      estado: "pendiente",
-      intentos: 0,
-      programadoPara: new Date(),
-      ultimoError: null,
-    };
+    const data = { estado: "pendiente", intentos: 0, programadoPara: new Date(), ultimoError: null };
     const r = dryRun
       ? { ...t, ...data }
-      : await requierePlataforma(ctx)
-          .paraTenant(input.tenantId)
-          .trabajo.update({ where: { id: t.id }, data });
+      : await requierePlataforma(ctx).empresa(input.tenantId).reintentarTrabajo(t.id);
     return { ...r, programadoPara: iso(r.programadoPara) };
   },
 });
@@ -74,12 +65,7 @@ export const platformTrabajosCancelar = defineCapability({
     if (t.estado !== "pendiente") throw reglaDeNegocio("Solo se cancelan trabajos pendientes.");
     if (!dryRun) {
       // Condicionado al estado: si un runner lo reclamó entre la lectura y aquí, no se cancela.
-      const { count } = await requierePlataforma(ctx)
-        .paraTenant(input.tenantId)
-        .trabajo.updateMany({
-          where: { id: t.id, estado: "pendiente" },
-          data: { estado: "cancelado" },
-        });
+      const count = await requierePlataforma(ctx).empresa(input.tenantId).cancelarTrabajo(t.id);
       if (count === 0) throw reglaDeNegocio("El trabajo ya no está pendiente.");
     }
     return { ...t, estado: "cancelado", programadoPara: iso(t.programadoPara) };

@@ -64,7 +64,9 @@ export function DetalleAprobacion({ a }: { a: Aprobacion }) {
       {a.estado === "rechazada" && a.motivo ? (
         <p className="text-base text-fg-muted">Motivo del rechazo: “{a.motivo}”</p>
       ) : null}
-      {a.estado === "pendiente" ? <AccionesDetalle id={a.id} /> : null}
+      {a.estado === "pendiente" ? (
+        <AccionesDetalle id={a.id} plataforma={a.ambito === "plataforma"} />
+      ) : null}
     </article>
   );
 }
