@@ -59,7 +59,7 @@ Que cualquier empresa de servicios con personal (Gard primero, con la vertical *
 
 **Teléfono frente a iPad y escritorio:** en el teléfono se **ven, comparan y aprueban** cotizaciones **[decidido, ADR-042 (9)]**, se hace la **cotización rápida** **[decidido, pregunta 7]** y se habla con el agente. La edición completa de la planilla y el Modelo de costeo son de iPad (incluido vertical, desde 768 px) y escritorio. En el teléfono el cotizador muestra el resumen (venta, margen con semáforo, estado, vence) y las secciones plegadas en solo lectura.
 
-**Resumen fijo del cotizador (iPad y escritorio):** costo mensual, venta mensual, pagos únicos, margen efectivo con semáforo contra el mínimo, efecto de los instrumentos financieros (costo financiero, póliza, RC), dotación (posiciones y personas), UF usada y advertencias. El cálculo corre en el navegador con el mismo dominio y el servidor recalcula al guardar y manda (ADR-042 (9)). **Sin `cpq:costos.ver`** (pregunta 9) el resumen muestra solo venta mensual, pagos únicos, dotación, UF y estado: sin costo, margen, semáforo ni instrumentos, y la lista no ofrece el filtro «Bajo margen».
+**Resumen fijo del cotizador (iPad y escritorio):** costo mensual, venta mensual, pagos únicos, margen efectivo con semáforo contra el mínimo, efecto de los instrumentos financieros (costo financiero, póliza, RC), dotación (posiciones y personas), UF usada y advertencias. El cálculo corre en el navegador con el mismo dominio y el servidor recalcula al guardar y manda (ADR-042 (9)). **Sin `cpq:costos.ver`** (pregunta 9) el resumen muestra solo venta mensual, pagos únicos, dotación, UF y estado: sin costo, margen, semáforo ni instrumentos, y la lista no ofrece el filtro «Bajo margen». En ese caso el cálculo corre solo en el servidor: al navegador, a `/api/v1` y al MCP no se envían los operandos (costos, sueldos, valores de variables de costo ni traza con montos), solo los totales visibles.
 
 ## 4. Campos y validaciones
 
@@ -221,7 +221,7 @@ Que cualquier empresa de servicios con personal (Gard primero, con la vertical *
 
 ## 7. Permisos por rol y portal
 
-Permisos nuevos: `cpq:cotizaciones.read`, `cpq:cotizaciones.manage`, `cpq:costos.ver` (propuesto, pregunta 9), `cpq:aprobar` **[decidido]**, `cpq:modelo.manage` **[decidido]**.
+Permisos nuevos: `cpq:cotizaciones.read`, `cpq:cotizaciones.manage`, `cpq:costos.ver` **[decidido, pregunta 9]**, `cpq:aprobar` **[decidido]**, `cpq:modelo.manage` **[decidido]**.
 
 | Acción | owner | admin | gerente | supervisor | viewer | Portal Cliente | Portal Trabajador | Agente (scope `cpq`) |
 |---|---|---|---|---|---|---|---|---|
@@ -291,7 +291,7 @@ Toda capacidad de CPQ sale por MCP con los mismos permisos (ADR-055); las de esc
 **Flujo 3 · ajustes en lenguaje natural** (sobre la cotización abierta o nombrada):
 - «Sube el margen a 18 %» → `ajustar` {fijar margen 18 %} → vista previa: venta $ 9,1 M → $ 9,8 M; margen 13 % → 18 %.
 - «Agrega un guardia nocturno» → si hay más de una instalación, pregunta cuál; propone `agregar línea de puesto` con 20:00–08:00 L–D, patrón 4x4 (supuesto), 1 posición = 2 personas, sueldo de referencia del cargo → muestra el delta.
-- «Deja el precio en 330 UF» → `ajustar` {precio objetivo} → si el margen queda bajo el mínimo, lo dice y ofrece pedir aprobación.
+- «Deja el precio en 330 UF» → `ajustar` {precio objetivo} → si el usuario tiene `cpq:costos.ver`, muestra el margen resultante y, si queda bajo el mínimo, ofrece pedir aprobación; si no lo tiene, solo dice que la versión requiere aprobación antes de enviarse, sin mostrar margen ni costo (pregunta 9).
 
 **Flujo 4 · explicar el costo** («¿por qué cuesta tanto?», «¿de dónde salen los $ 336 mil de feriados?») → `explicar`: responde con la traza (fórmula, variables y su ámbito, ítems), y señala los tres mayores componentes. Si el usuario no tiene `cpq:costos.ver`, nombra los componentes (categorías e ítems) sin montos, porcentajes ni sueldos, para que no se pueda deducir el costo desde la venta.
 
