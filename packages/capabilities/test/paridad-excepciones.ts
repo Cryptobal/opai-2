@@ -35,6 +35,12 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: lo irreversible de plataforma lo aprueba un humano (ADR-032, CAR-36).",
   "platform.aprobaciones.rechazar":
     "Solo personas: la decisión sobre lo irreversible de plataforma es humana (ADR-032, CAR-36).",
+  "core.users.restablecer_mfa":
+    "Solo personas: quitar el segundo factor de otra cuenta lo decide un owner con sesión (CAR-54).",
+  "platform.usuarios.restablecer_mfa":
+    "Solo personas: quitar el segundo factor de una cuenta lo decide Plataforma con sesión (CAR-54).",
+  "platform.usuarios.borrar":
+    "Solo personas: borrar una identidad es irreversible y lo decide Plataforma con sesión (CAR-45).",
   "core.cumplimiento.dpa_aceptar":
     "Solo personas: aceptar el DPA por la empresa es un acto humano responsable (Ley 21.719, ADR-034).",
   "core.cumplimiento.dpo_set":

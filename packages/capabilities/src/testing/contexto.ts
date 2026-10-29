@@ -12,6 +12,7 @@ import {
   eventosEnMemoria,
   trabajosEnMemoria,
 } from "./servicios-memoria";
+import { identidadEnMemoria } from "./identidad-memoria";
 import { medidorEnMemoria } from "./medidor-memoria";
 import type { Actor, Contexto, Correo, EventoAuditoria, UsuarioContexto } from "./tipos";
 
@@ -115,6 +116,7 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
       almacenamiento: almacen.almacenamiento,
       urlBase: "https://test.opai.cl",
     },
+    identidad: identidadEnMemoria(tabla),
     plataforma: conAccesoPlataforma(usuario, actor, o.claveApi)
       ? {
           globales,
@@ -140,5 +142,14 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
         ),
   };
   const esperar = () => Promise.all(diferidos.splice(0));
-  return { ctx, eventos, usos, correos, tabla, esperar, almacen, despachos: () => despachos };
+  return {
+    ctx,
+    eventos,
+    usos,
+    correos,
+    tabla,
+    esperar,
+    almacen,
+    despachos: () => despachos,
+  };
 }

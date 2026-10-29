@@ -23,6 +23,12 @@ describe("frontera global de base de datos", () => {
   it.each([
     'import { globales as libre } from "@opai/db";',
     'import { clienteAuth } from "@opai/db";',
+    'import { clienteBloqueoLogin } from "@opai/db";',
+    'import { borrarUsuario } from "@opai/db";',
+    'import { restablecerSegundoFactor } from "@opai/db";',
+    'import { ultimosAccesos } from "@opai/db";',
+    'import { usuarioEnOtrasEmpresas } from "@opai/db";',
+    'import { registrarEventoSeguridad } from "@opai/db";',
     'import { dbAdmin } from "@opai/db";',
     'import { accesoPlataforma } from "@opai/db";',
     'import * as db from "@opai/db";',
