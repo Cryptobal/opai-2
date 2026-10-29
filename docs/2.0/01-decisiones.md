@@ -321,6 +321,8 @@ decisiones atribuidas a Carlos.
 
 **Decisión.** Tickets es un módulo transversal: tipos con responsable por defecto y SLA opcional, estados `abierto → en_curso → resuelto → cerrado` (+ `rechazado`), un responsable obligatorio desde la creación, resolución devuelta al solicitante en su portal y por correo, vínculo a cualquier entidad, adjuntos vía documentos. Las solicitudes de trabajadores son tipos de ticket con aprobación de un paso dirigidos al supervisor. Nada crea tickets sin dueño; los hallazgos de supervisión no crean tickets. El chat interno no se construye.
 
+**Nota del 29-oct-2026 (CAR-70, Central de monitoreo).** Decisión de Carlos, 29-oct-2026, transmitida en la sesión de Claude de CAR-70 (PR #122): aprobó las 15 preguntas de `modulos/central.md` §14 tal como venían recomendadas (pregunta 9). El chat interno sigue sin construirse. Los hilos de «Mensaje a la central» **no son chat**: los abre siempre el terreno con un tipo (novedad, consulta, urgencia) o la central desde una alerta; quedan ligados a la instalación y al turno; el guardia escribe libre solo dentro de un hilo abierto; no hay hilos entre guardias ni sin tipo, y el hilo se cierra al resolverse. Los «Avisos de la central» van en un solo sentido, con acuse de recibo. Una alerta de la central no es un ticket: solo puede derivar a uno con responsable. Reglas R16 y R17 de `modulos/central.md`.
+
 ---
 
 ## ADR-026 · Flujo de caja como pieza central de Finanzas
@@ -564,6 +566,8 @@ revisados en `briefs/ENCARGO-portal-sesion.md`.
 
 **Consecuencias.** Ninguna pantalla de configuración se escribe a mano por módulo; un agente puede leer y cambiar ajustes con las mismas reglas que una persona.
 
+
+**Nota del 29-oct-2026 (CAR-70, Central de monitoreo).** Decisión de Carlos, 29-oct-2026, transmitida en la sesión de Claude de CAR-70 (PR #122): aprobó las 15 preguntas de `modulos/central.md` §14 tal como venían recomendadas (pregunta 15). Se agrega el ámbito **Instalación** al centro de Configuración, con resolución defecto → plataforma → tenant → instalación → usuario, para los ajustes que un módulo declare con `ambito: "instalacion"` (los umbrales de la central primero; Rondas después). Lo construye el núcleo antes del Brief 15b, por capacidad (`core.config.get/set`) con alcance de filas (ADR-022) y sin migraciones fuera de un PR.
 ---
 
 ## ADR-039 · Documentos con subida directa, verificación y bitácora
@@ -758,6 +762,8 @@ Reglas:
 
 **Decisiones de Carlos (24-oct).** (12) Empaquetado para tiendas con **Capacitor**. (13) **Una sola app «OPAI»** en App Store y Google Play para todos: personal de la empresa (ERP y Supervisor), trabajadores, dispositivos de terreno emparejados con código y clientes; al ingresar, la app abre a cada persona su portal según su membresía (con selector si tiene varios). La marca del tenant dentro de la app sigue ADR-028; apps con marca propia por tenant quedan en backlog. (14) **Se puede marcar sin señal** como marca diferida (`origen_marca = offline_queue`): queda identificada como tal en los reportes a la DT y es visible para el trabajador (en su comprobante) y para su supervisor; no es la carga manual de contingencia.
 
+
+**Nota del 29-oct-2026 sobre el punto 3 (CAR-70, Central de monitoreo).** Decisión de Carlos, 29-oct-2026, transmitida en la sesión de Claude de CAR-70 (PR #122): aprobó las 15 preguntas de `modulos/central.md` §14 tal como venían recomendadas (pregunta 9). La cola local sin conexión del punto 3 se amplía a los **mensajes a la central** (novedad, consulta y urgencia, con texto y fotos) y a los **acuses de recibo** de los avisos de la central: mismas reglas (IndexedDB, `idempotencyKey`, hora del dispositivo y sello de servidor al sincronizar, estado «pendiente de envío» visible). Una urgencia encolada muestra además «Llamar a la central» con el número del tenant. Detalle en `modulos/central.md` (R16, R17 y casos borde).
 ---
 
 ## ADR-045 · Velocidad de navegación medida y con gate
