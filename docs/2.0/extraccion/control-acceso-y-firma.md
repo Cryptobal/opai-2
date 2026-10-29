@@ -2,44 +2,44 @@
 
 **Fecha:** 29-oct-2026 · **Tarea:** CAR-73 · **Autor:** Claude · **Fuente:** lectura de `Cryptobal/opai` (HEAD del 29-oct-2026), solo lectura y como referencia de reglas de negocio. No se porta código (`REGLAS-codigo.md`).
 
-> Al 29-oct-2026 no existía en `main` una extracción de control de acceso ni de firma. Esta es la primera. Distingue lo **verificado en el código** de lo **inferido**, que se marca así. Las rutas citadas son de 1.0.
+> Al 29-oct-2026 no existía en `main` una extracción de control de acceso ni de firma. Esta es la primera. Distingue lo **verificado en el código** de lo **inferido**, que se marca así. La sección A describe el comportamiento sin rutas ni archivos de 1.0, porque varias brechas siguen vigentes en producción (A.2); la sección B cita archivos de 1.0.
 
-## A. Control de acceso físico (`/portal/acceso`, `/api/access-control/*`)
+## A. Control de acceso físico (portal de acceso de 1.0)
 
 ### A.1 Lo que hace 1.0 (verificado)
 
-| Tema | Comportamiento en 1.0 | Dónde |
-|---|---|---|
-| Configuración por instalación | Una configuración por instalación: tipos de registro habilitados, modo de acceso (`solo lista blanca` o `lista blanca + registro manual`, este por defecto), qué tipos se cruzan con lista blanca y cuáles con lista negra, exigir validación de documento, foto o firma, permanencia máxima en horas, frecuencia del reporte automático, formulario y campos de la nómina, lista negra del cliente activable | `prisma/schema.prisma` (schema `access_control`, `AccessControlConfig`) |
-| Tipos de registro | Visita, proveedor, vehículo, personal y despacho, más tipos personalizados por tenant con sus modos de escaneo y campos por defecto | `records/[installationId]/entry/route.ts`, `AccessControlRecordType` |
-| Identidad | RUT con dígito verificador, pasaporte o documento extranjero con país; lectura del QR de la cédula chilena (formatos 2013 y 2024) y de la zona MRZ | `src/lib/access-control/identity.ts`, `utils.ts`, `mrz.ts` |
-| Validación de cédula | No consulta al Registro Civil: siempre responde «no verificado» | `validate-cedula/route.ts` |
-| OCR | MRZ y patente leídos con un modelo de IA multimodal del tenant (imagen de hasta 4 MB) | `ocr-mrz/route.ts`, `ocr-plate/route.ts` |
-| Lista negra | Por documento, de la instalación, global del tenant o por grupo, filtrada por tipo. Si coincide, rechaza y registra un intento denegado | `entry/route.ts`, `whitelist-match.ts` |
-| Lista blanca | En modo estricto exige estar en la lista o tener un prerregistro de hoy; si no, rechaza y registra el intento. Admite vigencia, días y horario permitidos, uso único y grupos. Quien está en lista queda con nombre y nómina de solo lectura | `AccessControlList`, `AccessControlListGroup*` |
-| Gestión de listas | Importar (agregar o reemplazar) con simulación e historial, exportar, plantilla Excel y vaciar escribiendo «ELIMINAR LISTA» | `lists/[installationId]/*`, `list-import.ts` |
-| Visitantes conocidos | Se crea o actualiza en cada entrada fuera de la lista blanca, con número de visitas y última foto | `known-visitors/`, `AccessControlKnownVisitor` |
-| Prerregistro | Desde el ERP y desde el portal del cliente, con vista «Esperados hoy»; puede durar varios días; al entrar pasa a «ingresó» | `preregistrations/*`, `EsperadosHoySection.tsx` |
-| Entrada, salida y en sitio | Registro de entrada y de salida, lista «en sitio», estadísticas y color de permanencia según el máximo | `records/*`, `utils.ts` |
-| Dispositivo | Se empareja con el código de la instalación; la toma del equipo por el guardia se firma con PIN o rostro con prueba de vida | `pair/route.ts`, `set-guard/route.ts`, `src/lib/libro/firma.ts` |
-| Sin conexión | El service worker unificado precarga el portal; las entradas sin red van a una cola local y se sincronizan; una caché de listas impide autorizar sin red a quien no esté en la lista blanca guardada | `public/sw.js`, `AccessControlEntry.tsx`, `list-validation-cache.ts`, `sync/route.ts` |
-| Reportes | Correo diario, semanal o mensual con nombre, RUT, empresa, tipo, entrada y salida e intentos denegados; destinatarios desde ERP y portal del cliente; envío de prueba | `cron/access-control-reports`, `src/lib/access-control/report.ts` |
-| Exportación | Excel de hasta 20.000 registros, solo administradores | `src/lib/access-control/export.ts` |
+| Tema | Comportamiento en 1.0 |
+|---|---|
+| Configuración por instalación | Una configuración por instalación: tipos de registro habilitados, modo de acceso (`solo lista blanca` o `lista blanca + registro manual`, este por defecto), qué tipos se cruzan con lista blanca y cuáles con lista negra, exigir validación de documento, foto o firma, permanencia máxima en horas, frecuencia del reporte automático, formulario y campos de la nómina, lista negra del cliente activable |
+| Tipos de registro | Visita, proveedor, vehículo, personal y despacho, más tipos personalizados por tenant con sus modos de escaneo y campos por defecto |
+| Identidad | RUT con dígito verificador, pasaporte o documento extranjero con país; lectura del QR de la cédula chilena (formatos 2013 y 2024) y de la zona MRZ |
+| Validación de cédula | No consulta al Registro Civil: siempre responde «no verificado» |
+| OCR | MRZ y patente leídos con un modelo de IA multimodal del tenant (imagen de hasta 4 MB) |
+| Lista negra | Por documento, de la instalación, global del tenant o por grupo, filtrada por tipo. Si coincide, rechaza y registra un intento denegado |
+| Lista blanca | En modo estricto exige estar en la lista o tener un prerregistro de hoy; si no, rechaza y registra el intento. Admite vigencia, días y horario permitidos, uso único y grupos. Quien está en lista queda con nombre y nómina de solo lectura |
+| Gestión de listas | Importar (agregar o reemplazar) con simulación e historial, exportar, plantilla Excel y vaciar escribiendo «ELIMINAR LISTA» |
+| Visitantes conocidos | Se crea o actualiza en cada entrada fuera de la lista blanca, con número de visitas y última foto |
+| Prerregistro | Desde el ERP y desde el portal del cliente, con vista «Esperados hoy»; puede durar varios días; al entrar pasa a «ingresó» |
+| Entrada, salida y en sitio | Registro de entrada y de salida, lista «en sitio», estadísticas y color de permanencia según el máximo |
+| Dispositivo | Se empareja con el código de la instalación; la toma del equipo por el guardia se firma con PIN o rostro con prueba de vida |
+| Sin conexión | El service worker unificado precarga el portal; las entradas sin red van a una cola local y se sincronizan; una caché de listas impide autorizar sin red a quien no esté en la lista blanca guardada |
+| Reportes | Correo diario, semanal o mensual con nombre, RUT, empresa, tipo, entrada y salida e intentos denegados; destinatarios desde ERP y portal del cliente; envío de prueba |
+| Exportación | Excel de hasta 20.000 registros, solo administradores |
 
 ### A.2 Brechas observadas en 1.0
 
-Se describen en términos de negocio. Las que afectan a la seguridad de 1.0 en producción se reportan a Carlos en el PR (corregirlas en 1.0 solo procede si él lo pide, `AGENTS.md`).
+Se describen en términos de negocio y como la regla que 2.0 debe cumplir, sin la forma de reproducirlas. Las que afectan a la seguridad de 1.0 en producción (1, 2, 4, 6 y 10) se entregan en detalle a Carlos fuera del repo; corregirlas en 1.0 solo procede si él lo pide (`AGENTS.md`).
 
 1. **Rutas sin control de acceso.** Varias rutas del control de acceso aceptan llamadas sin sesión ni credencial de dispositivo, incluidas algunas que leen datos personales o cambian dispositivos. El detalle se entrega a Carlos fuera del repo y no se documenta aquí hasta que se corrija (pregunta P9 de `modulos/control-acceso.md`).
-2. **El dispositivo tiene poderes de administrador.** Con su credencial se pueden importar o vaciar listas y cambiar la configuración. No se revisan permisos por rol.
-3. **Vigencia, días y horario de la lista blanca** no se aplican al registrar la entrada; solo se muestran.
-4. **La sincronización sin conexión no revisa la lista negra** ni registra intentos denegados, toma la hora del dispositivo como verdad y deduplica de forma débil (sin tenant).
+2. **Separación de funciones del dispositivo.** El dispositivo de portería de 1.0 no está limitado a registrar. Regla para 2.0: el dispositivo solo registra entradas y salidas y abre la lista de evacuación; listas, importaciones y configuración exigen un usuario con permiso (R3 de `modulos/control-acceso.md`).
+3. **Vigencia, días y horario de la lista autorizada.** Regla para 2.0: se aplican al decidir la entrada, en el servidor y sin conexión (R6, R21).
+4. **Sincronización sin conexión.** La de 1.0 no aplica todas las reglas de listas ni trata la hora del dispositivo como un simple dato. Regla para 2.0: al sincronizar se revalida todo contra las listas vigentes, la hora oficial es la del servidor y la deduplicación es por tenant y clave de idempotencia (R20–R22).
 5. **Cola sin conexión incompleta** (inferido): las salidas no se encolan y parte de lo guardado sin red no se sube.
-6. **La caché del navegador guarda respuestas con datos personales** del control de acceso.
+6. **Caché del navegador.** Regla para 2.0: el navegador no guarda respuestas con datos personales; solo el armazón y la copia mínima de listas (R21, R23).
 7. **Prerregistro de varios días**: «hoy» y la lista blanca solo miran el primer día; nada marca «no llegó»; «hoy» se calcula en UTC.
 8. **Foto y firma exigidas por configuración no se aplican** (son marcadores visuales).
 9. **Totales del reporte** calculados sobre a lo más 200 registros.
-10. **Código de emparejamiento** permanente, de 6 caracteres y sin límite de intentos.
+10. **Emparejamiento del dispositivo.** Regla para 2.0: código temporal de un solo uso con límite de intentos (R28).
 
 ### A.3 Lo que no existe en 1.0
 

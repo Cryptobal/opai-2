@@ -82,7 +82,7 @@ Valores por defecto de la **plantilla de la vertical de seguridad**; el tenant l
 
 - **R4.** Al enviar a firma, el documento se **congela**: se genera el PDF definitivo, se calcula su huella SHA-256 y se guarda como versión en `core.documentos`. Desde ahí no se edita; cambiarlo crea una versión nueva y **cancela** la solicitud, avisando a los firmantes (corrige B.2-2 y B.2-3).
 - **R5.** Cada firmante firma **esa huella**. La pantalla de firma muestra el documento completo (no un resumen) y el firmante debe llegar al final antes de poder firmar.
-- **R6.** Al completarse, OPAI arma el **PDF firmado**: el documento congelado más una página de evidencia (firmantes, nivel, fecha y hora del servidor, método de identificación, huella y QR a `/verificar/<token>`), con un sello electrónico de la plataforma y sello de tiempo (P7). Se guarda como versión nueva e inmutable; la verificación pública compara la huella del archivo que se sube con la registrada.
+- **R6.** Hay **dos huellas**, cada una con su papel. La **huella del documento** (H1) es la del PDF congelado de R4: es lo que cada firmante firma y lo que liga su evidencia. Al completarse, OPAI arma el **PDF firmado**: el documento congelado sin cambios más una página de evidencia (firmantes, nivel, fecha y hora del servidor, método de identificación, H1 y QR a `/verificar/<token>`), con el sello electrónico de la plataforma y el sello de tiempo (P7) aplicados sobre ese archivo completo. Su huella (H2) se registra en la bitácora en ese momento y el archivo se guarda como versión nueva e inmutable. La verificación pública compara el archivo que se sube con **H2** y muestra H1 para probar que las páginas firmadas son las congeladas; un PDF firmado con N3 por el prestador lleva además su propia firma PAdES, que se verifica aparte.
 
 **Firmantes y flujo**
 
@@ -148,9 +148,11 @@ Los documentos laborales siguen el bloqueo de sueldos y Nómina de ADR-016: quie
 
 ## 10. Herramientas MCP
 
+Como toda capacidad (ADR-004, ADR-055): cada herramienta existe igual en pantalla y en `/api/v1`, con los mismos permisos, alcance y auditoría; toda escritura acepta `dryRun` (en MCP, `preview_…`) e `idempotencyKey`, y lo hecho por un agente queda en la auditoría como «agente vía <usuario>». Solicitudes, firmantes, evidencias, políticas y aceptaciones llevan `tenant_id` con RLS y la política `tenant_isolation`; la página pública de firma y `/verificar` resuelven el tenant desde el token, nunca desde el cuerpo de la petición.
+
 | Herramienta | Qué hace | Tipo | Vista previa | Aprobación humana |
 |---|---|---|---|---|
-| `documentos_firmas_enviar` | Congela el documento y lo envía a firma con firmantes, orden, nivel y plazo | irreversible con efecto legal | sí (muestra la huella, firmantes y nivel) | **según la lista cerrada de R19** |
+| `documentos_firmas_enviar` | Congela el documento y lo envía a firma con firmantes, orden, nivel y plazo | irreversible (congela el documento); con efecto legal en los de la lista de R19 | sí (muestra la huella, firmantes y nivel) | **según la lista cerrada de R19**; la excepción N1 de actas y recepciones la confirma Carlos (P12) |
 | `documentos_firmas_estado` | Estado de una solicitud y de cada firmante | lectura | — | — |
 | `documentos_firmas_list` | Solicitudes por estado, tipo o entidad (pendientes, vencidas) | lectura | — | — |
 | `documentos_firmas_recordar` | Reenvía el aviso a los pendientes | escritura | sí | no |
@@ -223,6 +225,7 @@ Los documentos laborales siguen el bloqueo de sueldos y Nómina de ADR-016: quie
 - **P9. ¿Cobro de las firmas?** **Recomendación:** N1 incluida en el módulo Documentos; N2 y N3 cobradas como consumo a costo más margen (códigos, biometría, FEA, sello de tiempo), según ADR-049 punto 9. El margen sigue pendiente del ADR de precios.
 - **P10. ¿Integración con Mi DT y el Registro Electrónico Laboral?** **Recomendación:** no en esta especificación. Va con Nómina o RRHH; aquí solo se registran los estados y se guarda el PDF.
 - **P11. ¿En qué briefs?** **Recomendación:** N1 y N2 en el **Brief 09 (Documentos)**, en dos PR (N1 con el congelado, la huella y la evidencia; luego N2); N3 en el **Brief 28**. La firma de actas en el dispositivo, con el portal Supervisor (Brief 15). Como Asistencia (con el enrolamiento biométrico) llega en la fase 4, el N2 del Brief 09 parte con código más verificación de cédula y selfie por proveedor, o firma presencial; la prueba de vida ya enrolada se suma cuando exista Asistencia (R13).
+- **P12. ¿Los envíos N1 de actas y recepciones van sin aprobación humana para un agente?** El envío congela el documento (es irreversible), pero no crea obligaciones nuevas para el firmante. **Recomendación:** sí, sin aprobación, con vista previa obligatoria y auditoría (R19); así un agente puede mandar a firmar la recepción del reglamento o un acta de supervisión sin frenar la operación. Si prefieres la regla general («todo irreversible pide aprobación»), se quita la excepción.
 
 ## 16. Benchmark de proveedores chilenos
 

@@ -78,7 +78,7 @@ Instalación (y punto, opcional), visitantes (uno o varios: nombre, documento, e
 
 - **R1.** Todo es configurable por tenant y, si el tenant lo permite, por instalación: tipos de registro y sus campos, modo de lista, qué se captura, permanencia máxima, retención y reportes. El tenant nace con la **plantilla de su vertical** copiada (seguridad, aseo, facility), que luego edita (ADR-021; principio P13 de `extraccion/comercial-y-cpq.md` §6: plantillas por vertical copiadas al tenant). Nada queda igual para todos.
 - **R2.** Hay dos modos por tipo de registro: **«solo autorizados»** (entra quien está en la lista autorizada o tiene prerregistro vigente para ese día) y **«autorizados más registro manual»** (por defecto). La lista bloqueada se aplica siempre que esté activa para ese tipo, en cualquier modo.
-- **R3.** El dispositivo de portería **registra**; no gestiona listas, ni configura, ni exporta, salvo la lista de evacuación (R26) (corrige la brecha A.2-2 de 1.0). Eso se hace con un usuario con permiso.
+- **R3.** El dispositivo de portería **registra**; no gestiona listas, ni configura, ni exporta, salvo la lista de evacuación (R26) (mejora sobre 1.0, extracción A.2-2). Eso se hace con un usuario con permiso.
 
 **Identificación**
 
@@ -87,7 +87,7 @@ Instalación (y punto, opcional), visitantes (uno o varios: nombre, documento, e
 
 **Listas**
 
-- **R6.** El cruce con listas lo decide el **servidor** (o la caché del dispositivo sin conexión, R21) y aplica vigencia, días, horario y tipos. Una entrada fuera de su horario cuenta como «no autorizado» (corrige A.2-3).
+- **R6.** El cruce con listas lo decide el **servidor** (o la caché del dispositivo sin conexión, R21) y aplica vigencia, días, horario y tipos. Una entrada fuera de su horario cuenta como «no autorizado» (extracción A.2-3).
 - **R7.** Prioridad: **bloqueado gana a autorizado**, en cualquier alcance. Si alguien está bloqueado a nivel empresa y autorizado en la instalación, no entra.
 - **R8.** Una entrada de uso único se consume al primer ingreso, también si el ingreso fue sin conexión (se consume al sincronizar y el segundo uso queda como intento denegado diferido).
 - **R9.** Quien aparece bloqueado no entra: la pantalla muestra «Acceso no autorizado» y la acción «Avisar a mi supervisor». El guardia **no ve el motivo** salvo que tenga permiso de gestionar listas. Se registra el intento denegado y se emite el evento `acceso.intento_denegado` (§8).
@@ -97,7 +97,7 @@ Instalación (y punto, opcional), visitantes (uno o varios: nombre, documento, e
 
 **Prerregistro**
 
-- **R13.** Pueden prerregistrar: los contactos de la cuenta con ese permiso en el Portal Cliente, los usuarios del tenant con alcance sobre la instalación y los agentes con una key con esos mismos permisos (ADR-033). Un visitante no se prerregistra a sí mismo (corrige A.2-1).
+- **R13.** Pueden prerregistrar: los contactos de la cuenta con ese permiso en el Portal Cliente, los usuarios del tenant con alcance sobre la instalación y los agentes con una key con esos mismos permisos (ADR-033). Un visitante no se prerregistra a sí mismo.
 - **R14.** Un prerregistro de varios días vale para cada día del rango en la zona horaria de la instalación (corrige A.2-7). La invitación lleva un **QR por día de un solo uso**; al escanearlo, el formulario llega lleno y el guardia solo confirma.
 - **R15.** Si al final del día un prerregistro no se usó, queda «no llegó» de forma automática. Al llegar la visita, si se pidió, se avisa al anfitrión (silencio por defecto, ADR-020).
 
@@ -113,15 +113,15 @@ Instalación (y punto, opcional), visitantes (uno o varios: nombre, documento, e
 - **R20.** **Amplía ADR-044.3**, que limita el modo sin conexión a marcación, rondas y novedades: se propone sumar los accesos (pregunta P13). El dispositivo emparejado registra entradas **y salidas** sin red en una cola local cifrada, cada una con su clave de idempotencia y la hora del dispositivo. Al volver la red se sincronizan por las mismas capacidades; el servidor sella su hora de recepción y el registro queda marcado «diferido». La hora del dispositivo es un dato, nunca la verdad (corrige A.2-4).
 - **R21.** El dispositivo guarda una **copia mínima de las listas de su instalación**: la huella del documento (no el número en claro), el tipo de lista, la vigencia y el horario. Con eso decide sin red: bloqueado no entra; en «solo autorizados» entra solo quien esté autorizado en la copia. La copia se renueva en cada conexión y, si tiene más de **24 horas** (ajustable), la portería muestra «Listas desactualizadas».
 - **R22.** Al sincronizar, el servidor **vuelve a cruzar todo** con las listas vigentes. Si alguien entró sin red y estaba bloqueado en la lista actual, se genera la alerta `acceso.ingreso_bloqueado_diferido` al supervisor y al tenant.
-- **R23.** La caché del navegador nunca guarda respuestas con datos personales; solo el armazón de la portería y la copia mínima de R21 (corrige A.2-6).
+- **R23.** La caché del navegador nunca guarda respuestas con datos personales; solo el armazón de la portería, la copia mínima de R21 y la copia de evacuación de R26, ambas cifradas en el dispositivo (extracción A.2-6).
 
 **Operación**
 
 - **R24.** Corregir un registro es un **hecho nuevo** que anula el anterior con motivo; no se edita ni se borra (ADR-023).
 - **R25.** Quien sigue «en sitio» más allá de la permanencia máxima aparece destacado; a la hora de cierre configurada, los registros abiertos se pueden cerrar en bloque con motivo («salida no registrada»).
-- **R26.** **Evacuación:** la lista «en sitio» de una instalación se abre y se exporta en el dispositivo aunque no haya red, con la última copia sincronizada.
+- **R26.** **Evacuación:** la lista «en sitio» de una instalación se abre y se exporta en el dispositivo aunque no haya red, con la última copia sincronizada. Esa copia es la única con nombres en el dispositivo: va **cifrada**, contiene solo a quienes están en sitio ese día (nombre, empresa, tipo y hora; documento enmascarado), se reemplaza en cada sincronización, **se borra al cierre del día** y se borra a distancia **al revocar el dispositivo** (ADR-029.10).
 - **R27.** El reporte periódico (diario, semanal o mensual, por instalación) cuenta **todos** los registros del período (corrige A.2-9) y se envía por Comunicaciones con la marca del tenant, con documentos enmascarados.
-- **R28.** El emparejamiento del dispositivo usa un código temporal de un solo uso (vence en 10 minutos), con límite de intentos, y el guardia de turno se identifica al tomar el equipo con su PIN o su prueba de vida (corrige A.2-10; mecanismo del Brief 16).
+- **R28.** El emparejamiento del dispositivo usa un código temporal de un solo uso (vence en 10 minutos), con límite de intentos, y el guardia de turno se identifica al tomar el equipo con su PIN o su prueba de vida (extracción A.2-10; mecanismo del Brief 16).
 
 ## 6. Estados y transiciones
 
@@ -168,7 +168,7 @@ Alcance de filas (ADR-022): el supervisor ve las instalaciones a su cargo; el cl
 
 ## 9. Herramientas MCP
 
-Todas existen también en pantalla y en `/api/v1`, con los mismos permisos, alcance y auditoría (ADR-004, ADR-055). Las escrituras tienen `preview_…` e `idempotency_key`. El agente interno (ADR-049) las usa con la identidad y los permisos del usuario conectado.
+Todas existen también en pantalla y en `/api/v1`, con los mismos permisos, alcance y auditoría (ADR-004, ADR-055). Toda escritura acepta `dryRun` (en MCP, `preview_…`) e `idempotencyKey`, y la real queda en la auditoría; lo hecho por un agente queda como «agente vía <usuario>». Toda tabla del módulo (puntos, registros, personas registradas, listas, prerregistros, intentos) lleva `tenant_id` con RLS y la política `tenant_isolation`. El agente interno (ADR-049) usa estas herramientas con la identidad y los permisos del usuario conectado.
 
 | Herramienta | Qué hace | Tipo | Vista previa | Aprobación humana |
 |---|---|---|---|---|
@@ -184,7 +184,7 @@ Todas existen también en pantalla y en `/api/v1`, con los mismos permisos, alca
 | `acceso_listas_agregar` | Agrega a una lista autorizada | escritura | sí | no |
 | `acceso_listas_bloquear` | Agrega a una lista bloqueada, con motivo | escritura | sí | **sí** (afecta a una persona) |
 | `acceso_listas_quitar` | Quita una entrada | escritura | sí | sí, si es bloqueada |
-| `acceso_listas_importar` | Importa un Excel o CSV (agregar o reemplazar) | escritura | **obligatoria** | **sí** si reemplaza |
+| `acceso_listas_importar` | Importa un Excel o CSV (agregar o reemplazar) | escritura | **obligatoria** | **sí** si reemplaza o si agrega filas a una lista bloqueada (la aprobación depende del efecto de las filas, como en `acceso_listas_bloquear`) |
 | `acceso_listas_vaciar` | Vacía una lista | irreversible | sí | **sí** |
 | `acceso_prerregistros_create` | Prerregistra una o varias visitas y envía la invitación | escritura | sí | no |
 | `acceso_prerregistros_cancelar` | Cancela un prerregistro | escritura | sí | no |
@@ -203,7 +203,7 @@ Todas existen también en pantalla y en `/api/v1`, con los mismos permisos, alca
 
 ## 10. Integraciones
 
-- **IA (OCR de MRZ y patente):** adaptador del núcleo, clase `economica`, medido en `core.consumos`; con la integración de IA del tenant si la tiene (ADR-031, ADR-027).
+- **IA (OCR de MRZ y patente):** adaptador del núcleo, clase `economica`, medido en `core.consumos` (ADR-031, ADR-027). Si el tenant tiene key propia, se usa esa; si su proveedor falla, el OCR falla y **nunca** cae a la key de OPAI (ADR-049, decisión del 26-oct 21:58); sin key propia, el modelo de OPAI como en el resto del núcleo, cobrado como consumo. Sin OCR, la portería sigue con el QR o la escritura manual.
 - **Mensajería (invitaciones y avisos):** Comunicaciones del núcleo (correo; WhatsApp y push medidos).
 - **Verificación de documento** (opcional, §14, P5): servicio de un proveedor contratado por el tenant (ADR-027), medido.
 - **Barreras, torniquetes y lectores** (fase posterior): webhooks salientes por `acceso.entrada` (ADR-029.3), sin integraciones a medida en el módulo.
@@ -212,11 +212,11 @@ Todas existen también en pantalla y en `/api/v1`, con los mismos permisos, alca
 
 | En 1.0 | En 2.0 | Por qué |
 |---|---|---|
-| Rutas públicas y dispositivo con poderes de administrador | Toda acción por capacidad con permiso y alcance; el dispositivo solo registra (R3) | Seguridad (A.2-1, A.2-2) |
-| Vigencia y horario de lista solo informativos | Se aplican en el servidor y sin conexión (R6, R21) | A.2-3 |
-| Sincronización sin lista negra, con la hora del dispositivo | Revalida todo, hora del servidor, alerta de ingreso bloqueado diferido (R20–R22) | A.2-4 |
+| Control de acceso y separación de funciones mejorables (A.2-1, A.2-2) | Toda acción por capacidad con permiso y alcance; el dispositivo solo registra (R3) | Seguridad |
+| Reglas de vigencia y horario de la lista (A.2-3) | Se aplican en el servidor y sin conexión (R6, R21) | Seguridad |
+| Sincronización sin conexión (A.2-4) | Revalida todo, hora del servidor, alerta de ingreso bloqueado diferido (R20–R22) | Seguridad |
 | Salidas sin conexión no se guardan | Entradas y salidas en la cola (R20) | A.2-5 |
-| Caché del navegador con datos personales | Solo el armazón y una copia mínima con huellas (R21, R23) | A.2-6, Ley 21.719 |
+| Caché del navegador (A.2-6) | Solo el armazón, una copia mínima con huellas y la copia cifrada de evacuación (R21, R23, R26) | Ley 21.719 |
 | Prerregistro de varios días mal calculado, sin «no llegó» | Por día, en la zona de la instalación, con QR por día y cierre automático (R14, R15) | A.2-7 |
 | Sin retención, sin aviso, sin derechos | Retención por defecto, aviso en el punto, solicitudes del titular (R16–R19) | Ley 21.719 (rige el 1-dic-2026) |
 | Foto opcional sin almacenamiento real | Apagada por defecto; si se activa, por `core.documentos` con retención corta (R16) | Minimización, ADR-019 |
@@ -224,7 +224,7 @@ Todas existen también en pantalla y en `/api/v1`, con los mismos permisos, alca
 | Sin MCP | 25 herramientas con permisos y aprobación (§9) | ADR-055 |
 | Sin aviso al anfitrión | Aviso opcional al llegar (R15) | Benchmark (Envoy, Eptura) |
 | Sin lista de evacuación | En sitio exportable sin conexión (R26) | Benchmark (Envoy) |
-| Código de emparejamiento permanente | Código temporal de un solo uso con límite de intentos (R28) | A.2-10 |
+| Emparejamiento del dispositivo (A.2-10) | Código temporal de un solo uso con límite de intentos (R28) | Seguridad |
 | «Visitantes conocidos» guardan foto y conteo sin límite | Persona registrada con lo mínimo y vencimiento a 90 días sin visitas (R18) | Minimización |
 
 **No se porta:** la validación de cédula que siempre respondía «no verificado» (se reemplaza por el texto honesto de R5); el formulario de nómina en dos versiones (se migra a tipos de registro con sus campos); la tabla antigua de dispositivos.
@@ -266,7 +266,7 @@ Numeradas y cerradas, cada una con mi recomendación (13 preguntas).
 - **P6. ¿Qué hace la portería sin red en modo «solo autorizados» con alguien que no está en la copia?** **Recomendación:** no entra, salvo excepción del supervisor por teléfono, registrada con motivo y validada al sincronizar (R10, R22). Antigüedad máxima de la copia: 24 h (aviso, no bloqueo).
 - **P7. ¿Módulo propio o parte de los portales?** **Recomendación:** módulo vendible propio, **«Control de acceso» (`acceso`)**, que depende del Núcleo y del Portal Terreno (dispositivos), con Portal Cliente y Operaciones como fuentes opcionales (ADR-048). Así se puede vender a un cliente que solo quiere portería.
 - **P8. ¿Qué se migra desde 1.0?** **Recomendación:** solo las listas vigentes, los grupos y los prerregistros futuros, con simulación previa (como CAR-25). El histórico de registros no se migra: se exporta una vez a un archivo del tenant y queda en 1.0 hasta que venza su retención, para no traer datos que ya no hacen falta.
-- **P9. ¿Corregimos ya las brechas de seguridad de 1.0?** La extracción encontró rutas públicas del control de acceso en producción (A.2-1, A.2-2). **Recomendación:** sí, como corrección crítica en 1.0 pedida por ti (`AGENTS.md` solo lo permite así), en una sesión aparte, antes de esperar a 2.0. Aquí no se toca 1.0.
+- **P9. ¿Corregimos ya las brechas de seguridad de 1.0?** La extracción encontró brechas de seguridad del control de acceso de 1.0 en producción (A.2-1, A.2-2, A.2-4, A.2-6 y A.2-10; el detalle está fuera del repo). **Recomendación:** sí, como corrección crítica en 1.0 pedida por ti (`AGENTS.md` solo lo permite así), en una sesión aparte, antes de esperar a 2.0. Aquí no se toca 1.0.
 - **P10. ¿Kiosco de autoservicio para que el visitante se registre solo?** **Recomendación:** no en la primera versión; la portería la opera el guardia (es el caso de Gard). El prerregistro con QR ya da la experiencia rápida. Kiosco queda en backlog.
 - **P11. ¿Entrada en el menú?** **Recomendación:** «Accesos» como séptima entrada de Operaciones (llena el máximo de siete; la siguiente entrada obligará a dividir el área, `NAVEGACION.md` §1.2), pestaña «Accesos» en la ficha de instalación, la tarea «Acceso» en Terreno y «Portería» en «Más» del Supervisor; en el Portal Cliente, dentro de Instalaciones y Reportes. Son cambios a `NAVEGACION.md` que entran con tu aprobación.
 - **P12. ¿Patentes de vehículos con lista propia?** **Recomendación:** sí: la entrada de lista acepta documento o patente (§4.2), porque, según una fuente secundaria ([IAPP](https://iapp.org/news/a/el-reglamento-de-seguridad-privada-de-la-ley-n-21-659-y-la-protecci-n-de-datos-personales-en-chile)) por confirmar en el reglamento D.209, las entidades obligadas de la Ley 21.659 deben entregar las patentes que ingresan si la fiscalía o las policías las piden.
