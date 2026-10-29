@@ -1,5 +1,6 @@
 import { Badge, Estado, HerramientasLista } from "@opai/ds";
 
+import { BotonReintentar } from "@/app/_components/boton-reintentar";
 import { ChipsFiltro } from "@/app/_components/maestros/chips-filtro";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { leerParametros, type SearchParams } from "@/lib/parametros";
@@ -83,6 +84,10 @@ export default function Aprobaciones({ searchParams }: { searchParams: SearchPar
                         descripcion:
                           "Cuando un agente pida una acción irreversible, aparecerá aquí.",
                       },
+                  // Lectura cruda del estado de aprobaciones (contención del PR #109): la pantalla
+                  // de servidor no puede pasar un callback de reintento (no cruza a `Estado`, un
+                  // Client Component), así que la acción es el botón que recarga la página.
+                  error: { accion: <BotonReintentar size="md" /> },
                 }}
               >
                 <ListaAprobaciones items={d.items} ver={d.ver} ahora={d.ahora} />
