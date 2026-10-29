@@ -113,8 +113,7 @@ describe.skipIf(!urlPropietario)("CAR-53 · documentos, plantillas e invitacione
     expect(r.enviados).toEqual([{ personaId: id.personaAlfa, para: "ana@prueba.cl" }]);
     expect(f.correos.at(-1)?.para).toBe("ana@prueba.cl");
     // Supervisor con documentos.manage: pide para las personas de sus instalaciones. Fuera de su
-    // alcance hoy también envía y revela el correo (hallazgo de CAR-53, reportado en el PR, sin test
-    // en rojo hasta que su arreglo entre).
+    // alcance la persona no existe para él: mismo error que una inexistente, sin correo ni datos.
     const propio = await f.dato<{ enviados: unknown[] }>(
       acotado("supervisor"),
       "core.documentos.pedir_renovacion",
@@ -122,6 +121,16 @@ describe.skipIf(!urlPropietario)("CAR-53 · documentos, plantillas e invitacione
       { dryRun: true },
     );
     expect(propio.enviados).toHaveLength(1);
+    const antes = await enviados();
+    const pedir = (personaId: string) =>
+      f.mod.executeCapability(acotado("supervisor"), "core.documentos.pedir_renovacion", {
+        pedidos: [{ personaId, tipoIds: [id.tipo] }],
+      });
+    const fuera = await pedir(id.personaBeta);
+    expect(fuera).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+    expect(fuera).toEqual(await pedir(randomUUID()));
+    expect(JSON.stringify(fuera)).not.toContain("bruno@prueba.cl");
+    expect(await enviados()).toBe(antes);
   });
 
   it("core.documento_tipos.update", async () => {
