@@ -149,7 +149,7 @@ export aprobado del DS 2.0. Brief y criterios en
 
 **Pantalla (CAR-69, 29-oct-2026).** El servidor está en `main` (PR #62 y #73).
 La interfaz sigue el ciclo de ADR-047: especificación en borrador en
-[`modulos/agente.md`](modulos/agente.md) con 13 preguntas para Carlos y el
+[`modulos/agente.md`](modulos/agente.md) con las 13 preguntas ya decididas por Carlos (29-oct-2026; adjuntos sí, voz no) y el
 Design Prompt (§15) → diseño aprobado en Claude Design → brief de la UI → PR.
 El módulo `agente` está apagado por defecto: **hay que activar la licencia para
 Gard** (decisión y acción de Carlos) antes de probar la pantalla en `test.opai.cl`.
