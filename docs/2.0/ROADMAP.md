@@ -1,6 +1,6 @@
 # ROADMAP — OPAI 2.0 hasta terminar
 
-**Actualizado:** 26-oct-2026 (CAR-11; antes 25-oct, CAR-10) · **Orden:** ADR-030 (nota del 25-oct: Núcleo primero, luego Puestos → Comercial → CPQ) y ADR-048 (módulos vendibles por separado) · **Vista por módulo y etapa:** [`PLAN-desarrollo.md`](PLAN-desarrollo.md) · **Estado real:** desde el 24-oct-2026 el estado de las tareas vive en Linear (`AGENTS.md`, «Tareas (Linear)») y `ESTADO.md` es la foto técnica; este archivo planifica y se actualiza si cambia el plan.
+**Actualizado:** 29-oct-2026 (CAR-68; antes 26-oct, CAR-11, y 25-oct, CAR-10) · **Orden:** ADR-030 (nota del 25-oct: Núcleo primero, luego Puestos → Comercial → CPQ) y ADR-048 (módulos vendibles por separado) · **Vista por módulo y etapa:** [`PLAN-desarrollo.md`](PLAN-desarrollo.md) · **Estado real:** desde el 24-oct-2026 el estado de las tareas vive en Linear (`AGENTS.md`, «Tareas (Linear)») y `ESTADO.md` es la foto técnica; este archivo planifica y se actualiza si cambia el plan.
 
 > **Las semanas son estimaciones** (25-oct: la fase 1 suma el 07b y el Brief 11 va antes de la fase 2, así que las fases 2 a 6 se corren unas 4 semanas; la fase 2 ya está ajustada y las fechas de las fases 3 a 6 se recalculan al cerrar el Núcleo), contadas desde el viernes 23-oct-2026 ( semana 1 = lunes 26-oct), para un constructor (Claude) con revisión y QA por bots y decisiones de Carlos a tiempo. Sirven para ordenar y detectar atrasos, no son compromisos. Las fases 1 y 2 se estiman con el ritmo real observado (Briefs 00 a 02 en dos días); de la fase 3 en adelante, con el juicio del documento de arranque, porque dependen de extracciones que aún no existen.
 
@@ -57,8 +57,8 @@ Las **bases transversales** (rendimiento, PWA, navegación) aplican a todo brief
 | ADR | 040, 041 y 042 | Vigentes (041 y 042 aprobados el 23 y 24-oct) |
 | Especificación | `modulos/comercial.md` | Borrador para aprobación de Carlos (24-oct) |
 | Especificación | `modulos/cpq.md` | Borrador: regla de puestos y sueldos al ganar (respuesta 3 de ADR-048, 25-oct 23:10); el resto espera las 8 preguntas de la Page de CPQ |
-| Especificación | `modulos/documentos.md` (explorador, editor, plantillas, firma simple) | Pendiente |
-| Design Prompt | Comercial y CPQ; Documentos | Pendiente |
+| Especificación | `modulos/documentos.md` (explorador, editor, plantillas, firma simple) | **Parte 1 · formatos de salida comercial en borrador** (29-oct, CAR-68): presentación de empresa, propuesta aperturada y cotización simple, con 14 preguntas para Carlos; las demás partes (explorador, firmas pendientes, vencimientos, contratos) siguen pendientes |
+| Design Prompt | Comercial y CPQ; Documentos | Documentos · formatos de salida: **listo** en `design/DESIGN-PROMPT-formatos-salida.md` (CAR-68), se pega en Claude Design solo con la parte 1 aprobada; Comercial y CPQ pendientes |
 | **06** | **Núcleo comercial**: contactos por persona con vínculos a N cuentas (migración aditiva), etiquetas (incluye migrar `documentos.etiquetas`), actividades, ficha declarativa (ADR-041), catálogos declarativos en Configuración, fusión y transferencia | Pendiente |
 | **07** | **Comercial**: bandeja de solicitudes, negocios, embudo configurable, negocio ↔ instalaciones, importación desde 1.0, sincronización 2.0 → 1.0 y conciliación diaria | Pendiente |
 | **08** | **Motor CPQ** (sin pantallas): lenguaje de fórmulas, modelo de costeo versionado, costo laboral desde estructuras, margen financiero con casos dorados CD-1, CD-2 y cotizaciones reales de Gard | Pendiente |
