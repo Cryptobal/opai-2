@@ -4,6 +4,7 @@
 import { hashPassword } from "better-auth/crypto";
 import { cerrarClientes, dbAdmin, enTransaccion } from "@opai/db";
 import { exigirBaseE2E } from "../../db/scripts/exigir-base-e2e";
+import { usuarioE2E } from "./usuario-e2e";
 
 const EMAIL = "roles-e2e@opai.cl";
 
@@ -15,19 +16,7 @@ async function main() {
   const tenant = await dbAdmin().tenant.findUniqueOrThrow({ where: { slug: "gard" } });
   await enTransaccion(tenant.id, async (tx) => {
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(70137)`;
-    const user = await tx.user.upsert({
-      where: { email: EMAIL },
-      update: {},
-      create: { email: EMAIL, name: "Roles E2E", emailVerified: true },
-    });
-    const actual = await tx.account.findFirst({
-      where: { userId: user.id, providerId: "credential" },
-    });
-    if (actual) await tx.account.update({ where: { id: actual.id }, data: { password: hash } });
-    else
-      await tx.account.create({
-        data: { userId: user.id, providerId: "credential", accountId: user.id, password: hash },
-      });
+    const user = await usuarioE2E(EMAIL, "Roles E2E", hash);
     const m = await tx.membership.upsert({
       where: { tenantId_userId: { tenantId: tenant.id, userId: user.id } },
       update: { rol: "viewer", roleId: null, portales: ["erp"], estado: "activa" },

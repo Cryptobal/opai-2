@@ -61,22 +61,12 @@ export function aMiembro(m: FilaMembresia, ultimoAccesoEn: Date | null): Miembro
 }
 
 /**
- * Último acceso por usuario a partir de las sesiones de Better Auth (`core.sessions`, sin tenant): la
- * sesión más reciente de cada uno. No toca el flujo de login (que evita un oráculo de enumeración) ni
- * agrega columnas; una sesión expirada y purgada deja el último acceso en null (no bloqueante, A02).
+ * Último acceso por usuario: la sesión más reciente de cada uno (`core.sessions`, sin tenant), leída
+ * por `ctx.identidad` con el rol de auth y solo `userId` y fecha (CAR-43). Una sesión expirada y
+ * purgada deja el último acceso en null (no bloqueante, A02).
  */
-export async function ultimosAccesos(
-  ctx: Contexto,
-  userIds: readonly string[],
-): Promise<Map<string, Date>> {
-  if (userIds.length === 0) return new Map();
-  const sesiones = await ctx.db.session.findMany({ where: { userId: { in: [...userIds] } } });
-  const ultimo = new Map<string, Date>();
-  for (const s of sesiones) {
-    const prev = ultimo.get(s.userId);
-    if (!prev || s.updatedAt > prev) ultimo.set(s.userId, s.updatedAt);
-  }
-  return ultimo;
+export function ultimosAccesos(ctx: Contexto, userIds: readonly string[]) {
+  return ctx.identidad.ultimosAccesos(userIds);
 }
 
 export async function buscar(ctx: Contexto, id: string): Promise<Miembro> {
