@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 
+import { ocultarIndicadorDev } from "./indicador-dev";
 import { codigoTotp, E2E_PASSWORD as password, entrar } from "./sesion";
 
 // Riel y título de pestaña de los portales Trabajador y Cliente en escritorio (1280 px, QA del #21).
@@ -11,6 +12,10 @@ import { codigoTotp, E2E_PASSWORD as password, entrar } from "./sesion";
 const email = process.env["E2E_SELECTOR_EMAIL"] ?? "e2e-selector@opai.cl";
 const sinEmpresaEmail = process.env["E2E_SIN_EMPRESA_EMAIL"] ?? "e2e-sin-empresa@opai.cl";
 const sinErpEmail = process.env["E2E_SIN_ERP_EMAIL"] ?? "e2e-sin-erp@opai.cl";
+
+// Solo dev (CI levanta `next dev`): el indicador de Next tapa el «Menú de usuario» al pie del riel y de
+// la barra lateral e intercepta el clic de «Cerrar sesión» (CAR-60).
+test.beforeEach(({ page }) => ocultarIndicadorDev(page));
 
 const PORTALES = [
   { id: "trabajador", nombre: "Trabajador" },

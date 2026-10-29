@@ -2,7 +2,8 @@ import { expect, type Page, test } from "@playwright/test";
 
 import { entrar as iniciarSesion } from "./sesion";
 
-// Selector del riel de iPad según ShellTablet.html (seguimiento del PR #30, CAR-6): ⇅ junto al
+// Selector del riel de iPad (768–1023 px; desde 1024 va la barra lateral, NAVEGACION D9) según
+// ShellTablet.html (seguimiento del PR #30, CAR-6): ⇅ junto al
 // portal, radio de 12 px, el nombre del portal una sola vez y sin recortes, y cierre con clic
 // fuera. Mismos datos que selector-riel.spec.ts (seed:multiempresa-e2e).
 const email = process.env["E2E_SELECTOR_EMAIL"] ?? "e2e-selector@opai.cl";
@@ -13,6 +14,9 @@ test.use({ actionTimeout: 30_000 });
 test.setTimeout(180_000);
 
 async function entrar(page: Page) {
+  // El proyecto iPad mide 1024, donde ya va la barra lateral: se entra con un ancho del riel.
+  const alto = page.viewportSize()?.height ?? 900;
+  await page.setViewportSize({ width: 900, height: alto });
   await iniciarSesion(page, email);
   await page.waitForURL(/\/elegir-empresa/);
   await page.getByRole("button", { name: /Gard Security/ }).click();
@@ -29,7 +33,7 @@ test.describe("selector del riel de iPad según el diseño", () => {
     test.skip(true, "Falta SEED_OWNER_PASSWORD o E2E_PASSWORD");
   });
 
-  test("⇅ junto al portal, radio 12, nombre una vez y sin recortes a 768, 1024 y 1279 (ERP y Supervisor)", async ({
+  test("⇅ junto al portal, radio 12, nombre una vez y sin recortes a 768, 900 y 1023 (ERP y Supervisor)", async ({
     page,
   }, info) => {
     await entrar(page);
@@ -40,7 +44,7 @@ test.describe("selector del riel de iPad según el diseño", () => {
         await page.getByRole("menuitem", { name: /^Supervisor/ }).click();
         await page.waitForURL((url) => url.pathname === "/supervisor");
       }
-      for (const ancho of [768, 1024, 1279]) {
+      for (const ancho of [768, 900, 1023]) {
         await page.setViewportSize({ width: ancho, height: 900 });
         const selector = riel.getByRole("button", { name: SELECTOR });
         await expect(selector).toHaveAccessibleName(new RegExp(`portal ${portal}\\.`));
@@ -59,18 +63,18 @@ test.describe("selector del riel de iPad según el diseño", () => {
         const abreviatura = portal === "ERP" ? "ERP" : "Superv.";
         expect(texto.split(abreviatura).length - 1, `«${abreviatura}» a ${ancho}px`).toBe(1);
         expect(texto).not.toContain("Supervisor");
-        if (ancho === 1024) {
+        if (ancho === 900) {
           await page.screenshot({
             path: info.outputPath(`riel-selector-${portal.toLowerCase()}-ipad.png`),
           });
         }
       }
     }
-    // «Instalac.» (Supervisor) cabe y su nombre completo está en title.
-    const instalaciones = riel.getByRole("link", { name: /Instalac/ });
-    await expect(instalaciones).toHaveAttribute("title", "Instalaciones");
+    // «Instalaciones» (Supervisor) cabe en el riel: desde el #75 la etiqueta se parte en sílabas
+    // (sin abreviatura ni title) y no desborda.
+    const instalaciones = riel.getByRole("link", { name: "Instalaciones" });
     const m = await instalaciones
-      .locator("span.truncate")
+      .locator("span[lang]")
       .evaluate((e) => [e.scrollWidth, e.clientWidth]);
     expect(m[0]).toBeLessThanOrEqual(m[1] ?? 0);
   });
