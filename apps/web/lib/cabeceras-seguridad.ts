@@ -1,7 +1,9 @@
 // Cabeceras de seguridad del borde (núcleo P1 · CSP y HSTS). Se aplican a todas las rutas desde
-// `next.config.ts`. Sigue Report-Only. El proxy prepara nonce de TEMA/SW y Next en el request;
-// la respuesta conserva unsafe-inline por los scripts estáticos del shell PPR sin nonce.
-// Retirarlo/activar enforcement exige resolver ese shell, no solo los dos scripts propios.
+// `next.config.ts` y el proxy. La CSP va en enforcement (CAR-57): bloquea scripts, estilos, marcos,
+// objetos, conexiones e imágenes de otros orígenes. Conserva 'unsafe-inline' en script-src y
+// style-src porque Next 16 con PPR emite los scripts inline del shell estático (y los de la
+// reanudación) sin nonce; un nonce en la respuesta anularía 'unsafe-inline' y rompería ese shell.
+// El proxy deja el nonce solo en el request, para TEMA/SW y los scripts que Next sí firma.
 
 export type Cabecera = { key: string; value: string };
 
@@ -15,7 +17,7 @@ const R2 = "https://*.r2.cloudflarestorage.com";
  * `frame-ancestors` y `base-uri`/`form-action`. `img-src`/`connect-src`/`frame-src` suman R2 porque
  * la app sube, descarga y previsualiza archivos contra ese host (los mapas van por `/api/geo/mapa`,
  * self). `script-src`/`style-src` conservan `'unsafe-inline'` (y `'unsafe-eval'` solo en desarrollo,
- * para el refresco de Next) hasta resolver el nonce del shell estático PPR.
+ * para el refresco de Next) mientras el shell estático PPR no lleve nonce ni hash (CAR-57).
  */
 export function construirCsp(desarrollo: boolean, nonce?: string): string {
   const script = desarrollo
@@ -52,12 +54,12 @@ export function cabecerasSeguridad(opciones: {
     // Cámara y geolocalización solo en el propio origen (los portales de terreno las usan); micrófono
     // deshabilitado del todo.
     { key: "Permissions-Policy", value: "camera=(self), geolocation=(self), microphone=()" },
-    // Report-Only por ahora (ver cabecera del archivo): reporta, no bloquea.
-    { key: "Content-Security-Policy-Report-Only", value: construirCsp(opciones.desarrollo) },
+    // Enforcement (CAR-57): bloquea y además reporta a /api/csp-report (ver cabecera del archivo).
+    { key: "Content-Security-Policy", value: construirCsp(opciones.desarrollo) },
     { key: "Reporting-Endpoints", value: 'csp="/api/csp-report"' },
   ];
-  // HSTS solo para el host servido. NÚCLEO-H: sin inventario HTTPS verificado de TODOS los
-  // subdominios no se habilitan includeSubDomains ni preload.
+  // HSTS solo para el host servido. NÚCLEO-H y CAR-57: sin inventario HTTPS verificado de TODOS los
+  // subdominios de opai.cl no se habilitan includeSubDomains ni preload (pendiente en ESTADO.md).
   if (opciones.produccion)
     cabeceras.push({
       key: "Strict-Transport-Security",

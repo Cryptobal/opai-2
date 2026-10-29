@@ -47,7 +47,7 @@ export async function proxy(request: NextRequest) {
   pedida.searchParams.delete("reintento");
   headers.set("x-opai-ruta", pedida.pathname + pedida.search);
   const responder = (r: NextResponse) => {
-    r.headers.set("Content-Security-Policy-Report-Only", csp);
+    r.headers.set("Content-Security-Policy", csp);
     return r;
   };
   // Antes estaban fuera del matcher; siguen públicas, pero ahora reciben nonce de servidor.
