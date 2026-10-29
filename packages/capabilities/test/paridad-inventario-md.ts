@@ -1,6 +1,9 @@
+import { CAPACIDADES_V1_SESION_ERP } from "../../../apps/web/lib/api-v1-sesion";
+import { listarCapacidades } from "../src/registry";
 import { EXCEPCIONES_PARIDAD } from "./paridad-excepciones";
 import { ENTRADAS_SERVIDOR } from "./paridad-entradas";
 import { type FilaInventario, inventario, soloPorMcp } from "./paridad-inventario";
+import { SOLO_PERSONAS_SIN_PANTALLA } from "./paridad-sin-pantalla";
 
 const celda = (t: string) => t.replace(/\|/g, "\\|");
 
@@ -22,6 +25,7 @@ export function inventarioMarkdown(): string {
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([id, motivo]) => `| \`${id}\` | ${celda(motivo)} |`);
   const solo = soloPorMcp(filas).map((id) => `- \`${id}\``);
+  const humanas = caminoHumano(filas);
   return [
     "# Inventario de paridad pantalla ↔ MCP",
     "",
@@ -52,9 +56,38 @@ export function inventarioMarkdown(): string {
     "| --- | --- |",
     ...excepciones,
     "",
+    "## Solo personas: camino humano (CAR-52)",
+    "",
+    "Por MCP y API key están reservadas a personas (`soloPersonas`, ADR-034): el agente recibe FORBIDDEN.",
+    "Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con sesión» marca las que",
+    "`/api/v1` ejecuta con la sesión de una persona en el portal ERP fijado en servidor (CAR-37).",
+    "",
+    "| Capacidad | Camino humano | API v1 con sesión | MCP |",
+    "| --- | --- | --- | --- |",
+    ...humanas,
+    "",
     "## Capacidades solo por API y MCP (ninguna pantalla las invoca con id literal)",
     "",
     ...solo,
     "",
   ].join("\n");
+}
+
+/** Filas de la sección «Solo personas»: pantalla o encargo pendiente, y si `/api/v1` con sesión la ejecuta. */
+function caminoHumano(filas: readonly FilaInventario[]): string[] {
+  return listarCapacidades()
+    .filter((c) => c.soloPersonas)
+    .map((c) => c.id)
+    .sort()
+    .map((id) => {
+      const rutas = [...new Set(filas.filter((f) => f.capacidad === id).map((f) => f.ruta))];
+      const pendiente = SOLO_PERSONAS_SIN_PANTALLA[id];
+      const camino = rutas.length
+        ? rutas.map((r) => `\`${celda(r)}\``).join(", ")
+        : pendiente
+          ? `sin pantalla todavía · ${pendiente.encargo} · desde ${pendiente.desde}`
+          : "—";
+      const v1 = CAPACIDADES_V1_SESION_ERP.includes(id) ? "sí (portal ERP)" : "no";
+      return `| \`${id}\` | ${camino} | ${v1} | reservada a personas |`;
+    });
 }
