@@ -34,6 +34,10 @@ test.describe("con sesión", () => {
     await entrar(page);
 
     await page.goto("/");
+    // DIAGNÓSTICO TEMPORAL (#131): qué carga `/` en CI tras entrar. Se revierte al tener el dato.
+    console.log("[diag-131] url:", page.url());
+    console.log("[diag-131] headings:", await page.getByRole("heading").allInnerTexts());
+    console.log("[diag-131] alertas:", await page.getByRole("alert").allInnerTexts());
     // En teléfono la barra no lleva título: el encabezado de la pantalla es el saludo.
     const titulo = p === "telefono" ? /^Hola, / : "Inicio";
     await expect(page.getByRole("heading", { name: titulo }).first()).toBeAttached();
