@@ -34,6 +34,14 @@ export function conexionMuerta(cliente: pg.Client, inactividadMs: number, ahora 
   return inactividadMs > 0 && desde !== undefined && ahora - desde > inactividadMs;
 }
 
+/** Mensajes de pg-pool al vencer `connectionTimeoutMillis`. */
+const VENCIMIENTO = /due to connection timeout|timeout expired|timeout exceeded/i;
+
+/** Si el error es un vencimiento de `connectionTimeoutMillis` (adelantado o real). */
+export function esVencimiento(e: unknown): boolean {
+  return e instanceof Error && VENCIMIENTO.test(e.message);
+}
+
 /**
  * Fallos al ABRIR o al esperar una conexión (antes de enviar consulta alguna), que se pueden
  * reintentar sin riesgo de repetir una escritura:
@@ -47,7 +55,7 @@ export function conexionMuerta(cliente: pg.Client, inactividadMs: number, ahora 
  */
 export function esFalloDeConexion(e: unknown, transcurridoMs?: number, topeMs?: number): boolean {
   if (!(e instanceof Error)) return false;
-  if (/due to connection timeout|timeout expired|timeout exceeded/i.test(e.message)) {
+  if (esVencimiento(e)) {
     return transcurridoMs !== undefined && !!topeMs && transcurridoMs < topeMs / 2;
   }
   const codigo = "code" in e ? String(e.code) : "";
@@ -59,4 +67,13 @@ export function esFalloDeConexion(e: unknown, transcurridoMs?: number, topeMs?: 
 export function avisarDescarte(e: unknown): void {
   const codigo = e instanceof Error && "code" in e ? String(e.code) : "sin código";
   console.warn(`pool pg: conexión ociosa descartada por error (${codigo}).`);
+}
+
+/** Aviso categórico (sin URL, usuario ni consulta) de un reintento al obtener conexión. */
+export function avisarReintento(e: unknown, n: number): void {
+  console.warn(
+    esVencimiento(e)
+      ? `pool pg: reintento tras vencimiento adelantado (${n})`
+      : `pool pg: reintento tras fallo de conexión (${n})`,
+  );
 }
