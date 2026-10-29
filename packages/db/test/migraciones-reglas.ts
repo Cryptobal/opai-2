@@ -52,7 +52,18 @@ export const EXENTAS = new Set([
  * su motivo en la misma línea.
  */
 const SIN_TRANSACCION = /^--[ \t]*opai:sin-transaccion:[ \t]*\S[^\n]{9,}/m;
-const REVERSION = /^--[ \t]*Reversión:[ \t]*\S/m;
+/**
+ * Encabezado «-- Reversión» (con «:» o con una aclaración, p. ej. «-- Reversión (manual, …):») y su
+ * contenido en esa misma línea o en la línea de comentario siguiente; nunca en SQL ejecutable.
+ */
+const REVERSION = /^--[ \t]*Reversión\b([^\n]*)(?:\n--([^\n]*))?/m;
+
+function tieneReversion(sql: string): boolean {
+  const m = REVERSION.exec(sql);
+  if (!m) return false;
+  const misma = (m[1] ?? "").replace(/^[ \t]*(\([^)]*\))?[ \t]*:?/, "").trim();
+  return misma.length > 0 || (m[2] ?? "").trim().length > 0;
+}
 
 /**
  * Comentarios, bloques `$etiqueta$ … $etiqueta$` y literales en una sola pasada, en orden de
@@ -81,7 +92,7 @@ const CONTROL = /^(BEGIN|START TRANSACTION|COMMIT|END|ROLLBACK|ABORT)\b/;
 export function problemasDeMigracion(original: string): string[] {
   const sql = original.normalize("NFC");
   const problemas: string[] = [];
-  if (!REVERSION.test(sql)) problemas.push("falta la sección «-- Reversión: …» con su contenido");
+  if (!tieneReversion(sql)) problemas.push("falta la sección «-- Reversión: …» con su contenido");
   const s = sentencias(sql);
   if (SIN_TRANSACCION.test(sql)) {
     // Postgres envuelve un envío de varias sentencias en una transacción implícita, así que

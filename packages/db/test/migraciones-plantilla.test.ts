@@ -65,8 +65,12 @@ describe("problemasDeMigracion", () => {
   });
 
   it("detecta lo que un comentario, un $$ o una forma alternativa podrían esconder", () => {
-    const vacia = ok.replace("-- Reversión: nada.", "-- Reversión:\n-- otra cosa");
+    // Encabezado vacío seguido de SQL o de un comentario vacío: no hay reversión.
+    const vacia = ok.replace("-- Reversión: nada.", "-- Reversión:\nSELECT 1;\n--\n");
     expect(problemasDeMigracion(vacia)).not.toEqual([]);
+    expect(
+      problemasDeMigracion(ok.replace("-- Reversión: nada.", "-- Reversión:\n--   \n")),
+    ).not.toEqual([]);
     const conDolar = ok.replace(
       "SELECT 1;",
       () => "-- ojo con $$\nCOMMIT;\nBEGIN;\n-- $$\nSELECT 1;",
@@ -83,6 +87,20 @@ describe("problemasDeMigracion", () => {
       ),
     ).toEqual([]);
     expect(problemasDeMigracion(ok.normalize("NFD"))).toEqual([]);
+  });
+
+  it("acepta la reversión con aclaración y el contenido en las líneas siguientes (forma del #113)", () => {
+    const conAclaracion = ok.replace(
+      "-- Reversión: nada.",
+      "-- Reversión (manual, solo referencia; Prisma no aplica down). Ejecutar con el rol propietario:\n--\n--   DROP TRIGGER t ON x;",
+    );
+    expect(problemasDeMigracion(conAclaracion)).toEqual([]);
+    const contenidoAbajo = ok.replace("-- Reversión: nada.", "-- Reversión:\n--   DROP TABLE t;");
+    expect(problemasDeMigracion(contenidoAbajo)).toEqual([]);
+    // «Reversiones» u otra palabra no cuenta como encabezado.
+    expect(problemasDeMigracion(ok.replace("Reversión: nada.", "Reversiones: nada."))).not.toEqual(
+      [],
+    );
   });
 
   it("sin transacción: marca con motivo en la línea, una sola sentencia y sin BEGIN/COMMIT", () => {
