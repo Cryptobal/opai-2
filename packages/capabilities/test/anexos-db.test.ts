@@ -1,13 +1,22 @@
 // Anexo de contrato (Brief 07b, PR 4) contra Postgres real: aislamiento por tenant, permisos
 // (D8/D13), gobierno de agentes (soloPersonas) y el documento final con SHA-256 y bitácora.
 import { randomUUID } from "node:crypto";
-import { afterAll, beforeAll, describe, expect, it } from "vitest";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
 import { type Entorno, prepararEntorno, urlPropietario } from "../../db/test/entorno";
 
 import type * as ModuloCapacidades from "../src";
+import type * as Plantilla from "../src/core/anexos/plantilla";
 import { almacenamientoEnMemoria } from "../src/testing/almacenamiento-memoria";
 import { destinoVinculo } from "./vinculo-fixture";
+
+// CAR-58: la plantilla del repositorio es de ejemplo y bloquea la aprobación (eso lo prueba
+// `anexos-plantilla-ejemplo.test.ts`). Aquí se simula el texto definitivo para seguir probando el
+// camino completo de aprobación (bloqueo, revalidación, documento con SHA-256 y bitácora).
+vi.mock("../src/core/anexos/plantilla", async (original) => ({
+  ...(await original<typeof Plantilla>()),
+  PLANTILLA_ANEXO: { version: "definitiva-de-prueba", esEjemplo: false },
+}));
 
 describe.skipIf(!urlPropietario)("anexo de contrato en base real", () => {
   let e: Entorno;
