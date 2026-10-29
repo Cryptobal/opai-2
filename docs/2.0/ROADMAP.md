@@ -56,9 +56,9 @@ Las **bases transversales** (rendimiento, PWA, navegación) aplican a todo brief
 | Extracción | `extraccion/comercial-y-cpq.md` | Hecho |
 | ADR | 040, 041 y 042 | Vigentes (041 y 042 aprobados el 23 y 24-oct) |
 | Especificación | `modulos/comercial.md` | Borrador para aprobación de Carlos (24-oct) |
-| Especificación | `modulos/cpq.md` | Borrador: regla de puestos y sueldos al ganar (respuesta 3 de ADR-048, 25-oct 23:10); el resto espera las 8 preguntas de la Page de CPQ |
+| Especificación | `modulos/cpq.md` | Borrador completo para aprobación de Carlos (29-oct, CAR-66): reglas R1–R54, agente y MCP, 15 preguntas con recomendación (las 8 de la Page, reconstruidas) |
 | Especificación | `modulos/documentos.md` (explorador, editor, plantillas, firma simple) | Pendiente |
-| Design Prompt | Comercial y CPQ; Documentos | Pendiente |
+| Design Prompt | Comercial y CPQ; Documentos | CPQ escrito ([`design/DESIGN-PROMPT-cpq.md`](design/DESIGN-PROMPT-cpq.md), CAR-66), se envía a Claude Design cuando Carlos apruebe `modulos/cpq.md`; Documentos pendiente |
 | **06** | **Núcleo comercial**: contactos por persona con vínculos a N cuentas (migración aditiva), etiquetas (incluye migrar `documentos.etiquetas`), actividades, ficha declarativa (ADR-041), catálogos declarativos en Configuración, fusión y transferencia | Pendiente |
 | **07** | **Comercial**: bandeja de solicitudes, negocios, embudo configurable, negocio ↔ instalaciones, importación desde 1.0, sincronización 2.0 → 1.0 y conciliación diaria | Pendiente |
 | **08** | **Motor CPQ** (sin pantallas): lenguaje de fórmulas, modelo de costeo versionado, costo laboral desde estructuras, margen financiero con casos dorados CD-1, CD-2 y cotizaciones reales de Gard | Pendiente |
@@ -191,5 +191,5 @@ Orden (Decisión de Carlos, 25-oct-2026, chat con OPAI 2.0 (registrada por el bo
 4. **En paralelo:** PR 2 del Brief 03 (**Claude**); sesión D del Brief 02 (**Carlos**, en su Mac: seeds, secretos de previews, verificación guiada); aprobación del mockup de Puestos (**Carlos**).
 5. **Brief 11 · Puestos y guardias (Operaciones I):** ajustar el mockup al sistema si difiere → completar `extraccion/operaciones.md` → brief (**Claude**).
 6. **Comercial:** v2 del mockup → `modulos/comercial.md` aprobado → Briefs 06 y 07. **Requisito:** los Briefs 06 y 07 se construyen antes del Brief 10 (cotizador), porque CPQ depende de Comercial. **Plan CRM (28-oct-2026, decisiones de Carlos):** alcance aprobado en `diseño/alcance-crm.md` (26-oct). Corte: **PR 1** negocios, embudo, contactos y pestañas (CAR-20) → **PR 1b** tablero con arrastre, hojas y editor del embudo (CAR-24) → **PR 2** solicitudes, contacto N–N, actividad y etiquetas (CAR-26) y **PR 3** reportes, exportación, campos personalizados, fusión y transferencia (CAR-27), estos dos después de su diseño en Claude Design (`design/DESIGN-PROMPT-crm-pr2.md` y `-pr3.md`). **Importación desde 1.0:** la simulación avanza ya (CAR-25); la carga real de los datos comerciales de Gard se hace cuando el CRM esté completo y con su OK, con **todo el historial** (menos de 24 meses). **Cotizaciones (CPQ) queda fuera del CRM** y va como el módulo siguiente.
-7. **CPQ** (se diseña cuando cierren sus reglas): 8 respuestas de **Carlos** → `modulos/cpq.md` → diseño → Briefs 08 y 10.
+7. **CPQ** (se diseña cuando cierren sus reglas): `modulos/cpq.md` completo con 15 preguntas (CAR-66, 29-oct) → respuestas y aprobación de **Carlos** → Design Prompt ya escrito → diseño → Briefs 08 y 10. Seguimiento (CAR-67) y formatos de salida (CAR-68) van aparte.
 8. **QA y merge por PR** de cada brief (Revisor, «Diseño y QA OPAI 2.0», bot «OPAI 2.0»).
