@@ -1,6 +1,6 @@
 import { createHmac, hkdfSync } from "node:crypto";
 
-import { clienteAuth } from "@opai/db";
+import { clienteBloqueoLogin } from "@opai/db";
 import { type ConteosLogin, LOGIN_VENTANA_MS, superaLimiteLogin } from "@opai/domain";
 
 /**
@@ -125,7 +125,7 @@ export async function reservarIntento(datos: DatosIntento): Promise<ReservaInten
   const ventana = new Date(ahora.getTime() - LOGIN_VENTANA_MS);
   const exencion = new Date(ahora.getTime() - LOGIN_EXENCION_MS);
   const fallo = { motivo: { in: MOTIVOS_FALLO } };
-  return clienteAuth()
+  return clienteBloqueoLogin()
     .$transaction(async (tx): Promise<ReservaIntento> => {
       await tx.$executeRaw`SELECT set_config('lock_timeout', ${`${LOCK_ESPERA_MS}ms`}, true)`;
       await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtextextended(${correoHash}, 0))`;
@@ -191,7 +191,7 @@ export async function resolverIntento(intentoId: string, codigo: string | null):
         : codigo === "ACCOUNT_LOCKED"
           ? "bloqueada"
           : codigo.toLowerCase();
-  await clienteAuth().$queryRaw`
+  await clienteBloqueoLogin().$queryRaw`
     SELECT "core"."marcar_login_intento"(${intentoId}::uuid, ${exito}::boolean, ${motivo}::text)`;
 }
 
@@ -201,7 +201,7 @@ export async function resolverIntento(intentoId: string, codigo: string | null):
  * de Better Auth, que ya validó el enlace; best-effort (ver `auth.ts`).
  */
 export async function registrarRestablecimiento(correo: string): Promise<void> {
-  await clienteAuth().loginIntento.create({
+  await clienteBloqueoLogin().loginIntento.create({
     data: {
       correoHash: hashCorreo(correo),
       exito: true,
@@ -215,7 +215,7 @@ export async function registrarRestablecimiento(correo: string): Promise<void> {
 /** Purga los intentos más viejos que la retención. La hace una función `SECURITY DEFINER` porque
  * `opai_app` solo puede anexar (REVOKE UPDATE/DELETE). La llama el cron diario. */
 export async function purgarIntentosLogin(retencionDias = LOGIN_RETENCION_DIAS): Promise<number> {
-  const filas = await clienteAuth().$queryRaw<{ purgados: number }[]>`
+  const filas = await clienteBloqueoLogin().$queryRaw<{ purgados: number }[]>`
     SELECT "core"."purgar_login_intentos"(${retencionDias}::int) AS purgados`;
   return Number(filas[0]?.purgados ?? 0);
 }

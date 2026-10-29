@@ -34,9 +34,12 @@ test.describe("con sesión", () => {
     await entrar(page);
 
     await page.goto("/");
-    // En teléfono la barra no lleva título: el encabezado de la pantalla es el saludo.
+    // En teléfono la barra no lleva título: el encabezado de la pantalla es el saludo. El título del
+    // shell lo fija el cliente al hidratar; en `pnpm dev` del CI tarda ~5 s la primera vez (#131).
     const titulo = p === "telefono" ? /^Hola, / : "Inicio";
-    await expect(page.getByRole("heading", { name: titulo }).first()).toBeAttached();
+    await expect(page.getByRole("heading", { name: titulo }).first()).toBeAttached({
+      timeout: 15_000,
+    });
     await captura(page, "erp-inicio", p);
 
     await page.goto("/configuracion/usuarios");
