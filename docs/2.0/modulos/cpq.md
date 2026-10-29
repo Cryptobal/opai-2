@@ -23,17 +23,18 @@ Que cualquier empresa de servicios con personal (Gard primero, con la vertical *
 | Entidad | Qué es | Se relaciona con | Dónde vive |
 |---|---|---|---|
 | Plantilla de vertical | Modelo de partida de OPAI para una vertical (`seguridad` en la v1 **[decidido, ADR-042 (10)]**; `aseo` y `facility` en backlog): variables, categorías, fórmulas, ítems y paquetes | Se **copia** al tenant al activar CPQ; nunca se consulta al calcular | Plataforma |
-| Modelo de costeo | Definición del tenant, **versionada**: variables, categorías, fórmulas y paquetes. Una versión publicada es inmutable; editar crea un borrador | Ítems; cotizaciones (cada versión de cotización guarda qué versión del modelo usó) | CPQ (por tenant) |
+| Modelo de costeo | Definición del tenant, **versionada**: variables, categorías, fórmulas, paquetes y los valores por defecto de las 3 pestañas de configuración (R58). Cada versión guardada es inmutable | Ítems; cotizaciones (cada versión de cotización guarda qué versión del modelo usó) | CPQ (por tenant) |
 | Variable | Dato con tipo (`entero`, `clp`, `uf`, `porcentaje`, `booleano`, `opcion`), unidad, valor por defecto y **ámbito** (`tenant`, `cuenta`, `instalacion`, `cotizacion`, `linea`); dice si el cliente la ve | Fórmulas; valores usados en cada versión | Modelo |
 | Fórmula | Expresión con nombre en el lenguaje acotado de ADR-042 (aritmética, `min`, `max`, `redondear`, `si`; sin código ni acceso a datos) | Variables, campos de la línea, otras fórmulas | Modelo |
-| Categoría de costo | Mano de obra, equipamiento, insumos, logística, infraestructura, seguros, otros (editables) | Ítems y líneas; subtotales | Modelo |
-| Ítem de catálogo | Algo que se cotiza: código, nombre, categoría, unidad, moneda, precio, **modo de cálculo** (`mensual_fijo`, `por_persona_mes`, `por_puesto_mes`, `por_hora`, `por_rotacion`, `amortizable`, `unico`, `formula`), visible al cliente, por defecto. Los «incluye» de 1.0 son ítems sin costo y visibles | Líneas (que guardan **copia** del ítem) | CPQ (por tenant) |
+| Categoría de costo | Mano de obra, equipamiento, insumos, logística, infraestructura, seguros, otros (editables), cada una marcada como costo **directo** o **indirecto** (R55) | Ítems y líneas; subtotales y resumen por categoría | Modelo |
+| Ítem de catálogo | Algo que se cotiza: código, nombre, categoría, unidad, moneda, **costo unitario**, **rateo por defecto** (R56), **modo de cálculo** (`mensual_fijo`, `por_persona_mes`, `por_puesto_mes`, `por_hora`, `por_rotacion`, `unico`, `formula`; el antiguo `amortizable` es ahora el rateo de R56), visible al cliente, por defecto. Los «incluye» de 1.0 son ítems sin costo y visibles | Líneas (que guardan **copia** del ítem) | CPQ (por tenant) |
 | Paquete | Combinación guardada del tenant para cotizar rápido (p. ej. «1 posición 24/7 4x4 con uniforme y radio») | Cotización rápida; agente | Modelo |
 | Cotización | Oferta a un cliente con **código** `CPQ-AAAA-NNN` y **versiones**; cuelga siempre de **un negocio** **[decidido, ADR-040 §4]** | 1 negocio (y por él, la cuenta); N secciones; condiciones; aprobaciones | CPQ |
 | Versión | Una foto de la cotización: líneas, valores de variables, versión del modelo, UF usada, totales. Solo una versión editable por código; enviar la congela | Cotización | CPQ |
 | Sección | Agrupación de líneas por **instalación del negocio**, más una sección **Común** para lo compartido (supervisión, vehículo de ronda) | Instalación del núcleo (vía el negocio) | CPQ |
 | Línea | Lo cotizado dentro de una sección: **puesto** (posición de servicio), **ítem** o **adicional** (con margen propio). Puede llevar un **grupo** (etiqueta libre, p. ej. «Ítem A · Control de acceso») | Ítem (copia), `core.puestos` (opcional, en ampliaciones y renovaciones), cargo, patrón | CPQ |
-| Condiciones comerciales | Pago, reajuste (ninguno, IPC, IMO, polinómico), duración, inicio, validez, póliza de garantía, responsabilidad civil, moneda de presentación | Versión | CPQ (valores por defecto en ajustes declarativos) |
+| Condiciones comerciales | Pago, reajuste (ninguno, IPC, IMO, polinómico), duración, inicio, validez, moneda de presentación | Versión | CPQ (valores por defecto en la pestaña Pólizas y finanzas, R58) |
+| Pólizas y costo financiero | Póliza de garantía o fiel cumplimiento, responsabilidad civil y costo financiero, con su detalle editable (R57) | Versión | CPQ (valores por defecto del tenant en Pólizas y finanzas) |
 | Aprobación | Pedido y decisión sobre una versión que queda bajo el margen mínimo o subvalorada | Versión; usuario que pide y que decide | CPQ |
 | Oferta de puestos | Lista que se arma al ganar el negocio con una propuesta de puesto por línea de guardias (R1–R5) | Negocio ganado; cotización aceptada; `core.puestos` | CPQ → núcleo |
 
@@ -53,13 +54,12 @@ Que cualquier empresa de servicios con personal (Gard primero, con la vertical *
 | Cotización rápida | Hoja sobre Negocios, Cotizaciones, la ficha del negocio o ⌘K («Nueva cotización») | ERP | Formulario corto | Acción principal de Cotizaciones |
 | Aprobaciones pendientes | Bandeja de Inicio (ítem «Cotización por aprobar») y filtro «Por aprobar» de la lista | ERP | Lista + hoja de decisión | — |
 | Ofrecer puestos | Hoja desde el negocio ganado o la cotización aceptada | ERP | Formulario por línea | Acción «Crear puestos» |
-| Modelo de costeo | `/cotizaciones/modelo` (pestañas: Variables · Fórmulas · Ítems · Paquetes · Versiones) | ERP | Ficha con pestañas + editor | Acción secundaria de Cotizaciones |
-| Valores para cotizar | Sección en las fichas de cuenta e instalación (solo con CPQ activo) | ERP | Pares editables | Ficha de la cuenta o la instalación |
+| Modelo de costeo (configuración del CPQ) | `/cotizaciones/modelo` con **solo 3 pestañas: Catálogo · Pólizas y finanzas · Márgenes** **[decidido, Carlos 29-oct, R58]** | ERP | Ficha con pestañas | Acción secundaria de Cotizaciones |
 | Vista cliente | Interruptor «Vista interna / Vista cliente» en el cotizador | ERP | Misma planilla sin costos internos | — |
 
-**Teléfono frente a iPad y escritorio:** en el teléfono se **ven, comparan y aprueban** cotizaciones **[decidido, ADR-042 (9)]**, se hace la **cotización rápida** **[decidido, pregunta 7]** y se habla con el agente. La edición completa de la planilla y el Modelo de costeo son de iPad (incluido vertical, desde 768 px) y escritorio. En el teléfono el cotizador muestra el resumen (venta, margen con semáforo, estado, vence) y las secciones plegadas en solo lectura.
+**Teléfono frente a iPad y escritorio:** en el teléfono se **ven, comparan y aprueban** cotizaciones **[decidido, ADR-042 (9)]**, se hace la **cotización rápida** **[decidido, pregunta 7]** y se habla con el agente. La edición completa de la planilla y la configuración del CPQ son de iPad (incluido vertical, desde 768 px) y escritorio. En el teléfono el cotizador muestra el resumen (venta, margen con semáforo, estado, vence) y las secciones plegadas en solo lectura.
 
-**Resumen fijo del cotizador (iPad y escritorio):** costo mensual, venta mensual, pagos únicos, margen efectivo con semáforo contra el mínimo, efecto de los instrumentos financieros (costo financiero, póliza, RC), dotación (posiciones y personas), UF usada y advertencias. El cálculo corre en el navegador con el mismo dominio y el servidor recalcula al guardar y manda (ADR-042 (9)). **Sin `cpq:costos.ver`** (pregunta 9) el resumen muestra solo venta mensual, pagos únicos, dotación, UF y estado: sin costo, margen, semáforo ni instrumentos, y la lista no ofrece el filtro «Bajo margen». En ese caso el cálculo corre solo en el servidor: al navegador, a `/api/v1` y al MCP no se envían los operandos (costos, sueldos, valores de variables de costo ni traza con montos), solo los totales visibles.
+**Resumen fijo del cotizador (iPad y escritorio):** **resumen de costos por categoría, con subtotal de directos y de indirectos, como en 1.0** (R55), costo mensual, venta mensual, pagos únicos, margen efectivo con semáforo contra el mínimo, efecto de los instrumentos financieros (costo financiero, póliza, RC), dotación (posiciones y personas), UF usada y advertencias. El cálculo corre en el navegador con el mismo dominio y el servidor recalcula al guardar y manda (ADR-042 (9)). **Sin `cpq:costos.ver`** (pregunta 9) el resumen muestra solo venta mensual, pagos únicos, dotación, UF y estado: sin resumen por categoría, costo, margen (ni su porcentaje), semáforo ni instrumentos, y la lista no ofrece el filtro «Bajo margen». En ese caso el cálculo corre solo en el servidor: al navegador, a `/api/v1` y al MCP no se envían los operandos (costos, sueldos, valores de variables de costo ni traza con montos), solo los totales visibles.
 
 ## 4. Campos y validaciones
 
@@ -80,7 +80,7 @@ Que cualquier empresa de servicios con personal (Gard primero, con la vertical *
 | Válida hasta | Fecha | Sí | ≥ hoy; por defecto hoy + validez del tenant (30 días, pregunta 10) | `manage` | Sí |
 | Margen objetivo y modo | Porcentaje escalado; `margen_sobre_venta` (por defecto **[decidido (7)]**), `markup`, `margen_sobre_mano_de_obra` | Sí | 0 ≤ m < 100 % en pantalla, API y MCP (la guarda `m ≥ 100 %` de R31 queda en el dominio) | `manage` | No |
 | Precio manual | CLP o UF por mes | No | Si se fija, el margen se calcula al revés y se muestra (R36) | `manage` | Sí (es el precio) |
-| Condiciones comerciales | Estructuradas (§2) | Sí | Valores por defecto de los ajustes; reajuste polinómico: pesos que suman 100 % | `manage` | Sí |
+| Condiciones comerciales | Estructuradas (§2) | Sí | Valores por defecto de la pestaña Pólizas y finanzas (R58); reajuste polinómico: pesos que suman 100 % | `manage` | Sí |
 | Totales | Costo, venta mensual, únicos, margen efectivo, instrumentos | — | Calculados; nunca se editan | Sistema | Solo venta y únicos |
 
 **Línea de puesto (posición de servicio)** — sigue las reglas del puesto de ADR-036 (1 puesto = 1 posición; rol, horario y horas por separado; colación en el puesto).
@@ -108,10 +108,11 @@ Que cualquier empresa de servicios con personal (Gard primero, con la vertical *
 | Ítem | Catálogo del tenant | Sí (ítem) | Activo al agregarlo; la línea guarda su **copia** | Según el ítem |
 | Cantidad, precio sobrescrito | Número, moneda del ítem | Según modo | Sobrescribir el precio exige permiso `manage` y queda en la traza | No |
 | Recurrencia | `mensual` o `unico` | Sí | — | Sí |
+| Rateo | `pago único`, `N meses` o `plazo del contrato` (R56) | Sí, si el ítem es una inversión | Toma el del catálogo; se puede sobrescribir en la línea y queda en la traza | No |
 | Margen propio | Porcentaje | Solo adicional | 0 ≤ m < 100 % | No |
 | Visible al cliente · habilitada | Booleanos | Sí | Deshabilitar no borra | — |
 
-**Modelo de costeo:** cada variable con clave única, tipo, unidad, defecto y ámbito; cada fórmula valida al publicar referencias, tipos, unidades, ciclos y división por cero (ADR-042 (3)); cada ítem con código único por tenant.
+**Modelo de costeo:** cada variable con clave única, tipo, unidad, defecto y ámbito; cada fórmula valida al guardar una versión referencias, tipos, unidades, ciclos y división por cero (ADR-042 (3)); cada ítem con código único por tenant, costo unitario ≥ 0, rateo por defecto y, si el rateo es `N meses`, N entre 1 y 120.
 
 ## 5. Reglas de negocio
 
@@ -127,10 +128,10 @@ Que cualquier empresa de servicios con personal (Gard primero, con la vertical *
 
 - **R6.** Cada tenant tiene **su** modelo de costeo, versionado. Al activar CPQ se **copia** la plantilla de la vertical del tenant (v1: `seguridad`) con sus variables, categorías, fórmulas, ítems y paquetes. **Nada global se consulta al calcular** (corrige P13): un cambio de la plataforma nunca mueve el precio de un tenant.
 - **R7.** Una actualización de la plantilla de la vertical se **ofrece** al tenant como novedad con sus diferencias (qué agrega y qué cambia); el tenant la adopta en un borrador de su modelo o la ignora. Nunca se aplica sola (pregunta 13).
-- **R8.** Editar el modelo crea un **borrador**. Publicar valida todo (R10) y crea una versión nueva e inmutable. Solo owner y admin con `cpq:modelo.manage` editan y publican **[decidido, ADR-042 (8)]**.
-- **R9.** Antes de publicar, «Probar» recalcula con el borrador las últimas cotizaciones enviadas (hasta 20, elegibles) y muestra la diferencia de venta y margen de cada una, sin tocarlas.
+- **R8.** Guardar un cambio en las pestañas de configuración (R58) valida todo (R10) y crea una versión nueva e inmutable del modelo. Solo owner y admin con `cpq:modelo.manage` cambian la configuración **[decidido, ADR-042 (8)]**.
+- **R9.** Antes de guardar, «Ver impacto» recalcula con los cambios las últimas cotizaciones enviadas (hasta 20, elegibles) y muestra la diferencia de venta y margen de cada una, sin tocarlas.
 - **R10.** El lenguaje de fórmulas es acotado y determinista: aritmética, `min`, `max`, `redondear`, `si` y referencias a variables, campos de la línea y otras fórmulas. Sin bucles, sin código y sin leer datos. Publicar falla con el detalle si hay una referencia rota, un tipo o unidad incompatible, un ciclo o una división que puede ser cero.
-- **R11.** Las variables tienen ámbito: `tenant` (vale para todo), `cuenta` (p. ej. días de pago pactados con ese cliente), `instalacion` (p. ej. colación local, zona extrema), `cotizacion` y `linea`. El valor más específico que exista manda; cada versión guarda **los valores usados**.
+- **R11.** Las variables tienen ámbito: `tenant` (vale para todo), `cuenta` (p. ej. días de pago pactados con ese cliente), `instalacion` (p. ej. colación local, zona extrema), `cotizacion` y `linea`. El valor más específico que exista manda; cada versión guarda **los valores usados**. **En la v1 se usan `tenant`, `cotizacion` y `linea`**: los valores por cuenta o instalación no tienen pantalla y quedan en backlog, porque todo lo que no está en las 3 pestañas se decide en la cotización (R58).
 - **R12.** Los parámetros **legales** de Chile (ingreso mínimo, topes imponibles, AFP, SIS, AFC, salud, mutual básica, aporte del empleador de la reforma de pensiones, jornada legal, gratificación legal) son **de plataforma**, con vigencia por fecha, y no los edita el tenant; la tasa adicional de mutual y los supuestos (AFP de referencia, salud de referencia) sí son del tenant (ADR-042 (4)).
 - **R13.** La plantilla `seguridad` reproduce lo que costea 1.0 (`extraccion` §3.8): mano de obra con costo empleador, ajuste por feriados (12 al año, colchón 10 %), uniformes por rotación, exámenes por permanencia o por rotación de uniformes, ítems de costo por mes o por persona, amortizables, vehículos (arriendo + combustible + mantención), infraestructura (arriendo + combustible), colación, adicionales con margen propio y pagos únicos. Cada uno es un ítem con su modo o una fórmula, no una tabla aparte (corrige P14).
 - **R14.** Una vertical nueva es **datos, no código**: otra plantilla con su vocabulario (ADR-006), sus funciones de puesto y sus ítems. `aseo` y `facility` quedan en backlog hasta que haya un tenant real **[decidido, ADR-042 (10)]**.
@@ -194,13 +195,49 @@ Que cualquier empresa de servicios con personal (Gard primero, con la vertical *
 
 - **R49.** El agente interno (ADR-049) y cualquier agente externo usan **las mismas capacidades** que la pantalla, con los permisos y el alcance del usuario (o de la key). No hay atajos ni herramientas propias de CPQ para el agente.
 - **R50.** El agente **siempre** trabaja con vista previa y deja un **plan** que la persona confirma («aprobar todo» o «paso a paso», ADR-049 (4)). Lo que el agente supone (patrón, horario, sueldo, margen) aparece como **supuesto** en el plan, nunca escondido.
-- **R51.** Un agente **no** aprueba márgenes (la capacidad es solo de personas). **Enviar**, **confirmar puestos** y **publicar el modelo** son irreversibles: el agente solo los prepara y quedan en la cola de aprobación humana (`APPROVAL_REQUIRED`), donde decide una persona con el permiso (RRHH en el caso de los puestos) (pregunta 8).
+- **R51.** Un agente **no** aprueba márgenes (la capacidad es solo de personas). **Enviar**, **confirmar puestos** y **guardar la configuración del modelo** son irreversibles: el agente solo los prepara y quedan en la cola de aprobación humana (`APPROVAL_REQUIRED`), donde decide una persona con el permiso (RRHH en el caso de los puestos) (pregunta 8).
 - **R52.** El texto de una solicitud o de un correo del cliente es **externo**: el agente lo usa para proponer, nunca para habilitar una escritura irreversible (ADR-034).
 
 ### J. Convivencia con 1.0 e importación
 
 - **R53.** Se importan de 1.0 solo las cotizaciones **vigentes** (enviadas y no vencidas) y el historial de **ganadas**, como registro de solo lectura (totales y PDF en Documentos), sin recalcular (`extraccion` §6). Una importada se puede **continuar** como versión nueva en 2.0, recalculada con el modelo y mostrando la diferencia (pregunta 11).
 - **R54.** El correlativo de 2.0 sigue desde el último número de 1.0 **[decidido (11)]**. Los códigos de 1.0 con sufijo (p. ej. `CPQ-2026-159-defe`) se importan tal cual y no cuentan para el siguiente número.
+
+### K. Ajustes de alcance de Carlos (29-oct-2026, tras la primera tanda de Claude Design) **[decidido]**
+
+- **R55.** **Resumen de costos por categoría, directos e indirectos, como en 1.0.**
+  - **Contenido:** el cotizador muestra el costo mensual de cada categoría y el subtotal de costos directos e indirectos. Debajo vienen el margen, los instrumentos financieros y la venta.
+  - **Clase de cada categoría:** directa o indirecta. La define el catálogo; la plantilla `seguridad` trae de partida:
+    - **directos:** mano de obra con feriados, uniformes, exámenes, colación y movilización;
+    - **indirectos:** equipamiento, vehículos, infraestructura y otros.
+  - **Pólizas, RC y costo financiero:** van en su bloque propio (R57).
+  - **Permiso:** el resumen respeta `cpq:costos.ver` igual que el resto de los costos (R59).
+- **R56.** **Catálogo con costo unitario y rateo por defecto.**
+  - **Qué guarda cada ítem:** su costo unitario y su **rateo por defecto**, que puede ser:
+    - **pago único:** se cobra una vez y va en el subtotal de pagos únicos;
+    - **N meses:** costo ÷ N, mensual;
+    - **plazo del contrato:** costo ÷ meses de duración de la cotización.
+  - **Por línea:** el rateo se puede **sobrescribir en cada línea** de la cotización. La traza muestra el rateo usado y si vino del catálogo o se cambió en la línea.
+  - **Ítems recurrentes:** los ítems de costo mensual (arriendos, servicios) no se ratean.
+  - **Qué reemplaza:** el modo `amortizable` de ADR-042 (2) pasa a ser este rateo.
+- **R57.** **Pólizas y costo financiero con detalle editable.**
+  - **Póliza de garantía o fiel cumplimiento:** en porcentaje del contrato (% garantizado, tasa anual, gasto administrativo, meses) o en monto fijo UF.
+  - **Responsabilidad civil:** prima anual en UF con % asignado, o tasa sobre el monto asegurado.
+  - **Costo financiero:** tasa mensual, activado o no, y si los pagos únicos entran a la base de la póliza.
+  - **En la cotización:** cada instrumento muestra su detalle y se edita en la propia cotización, partiendo de los **valores por defecto del tenant**. El cálculo es el de R33–R34.
+- **R58.** **La configuración del CPQ queda en solo 3 pestañas.** Todo lo demás se decide en la cotización.
+  - **Las 3 pestañas:**
+    - **Catálogo:** ítems con categoría y clase directo/indirecto, costo unitario, unidad, modo de cálculo, rateo por defecto, visible al cliente y por defecto. Incluye también las categorías y los paquetes.
+    - **Pólizas y finanzas:** valores por defecto de póliza de garantía o fiel cumplimiento, RC y costo financiero, más las condiciones comerciales por defecto (forma y días de pago, reajuste, duración, validez y moneda).
+    - **Márgenes:** modo de margen por defecto, margen por defecto, margen mínimo, umbral de alerta del semáforo y margen por defecto de las líneas adicionales.
+  - **Lo que pasa a la cotización:**
+    - patrón, horario, sueldo, personas por posición, cantidades y rateo por línea;
+    - los supuestos de la plantilla, que se ven y se cambian en la cotización: horas estándar, cambios de uniforme al año, permanencia promedio, feriados y su colchón;
+    - el detalle de pólizas y finanzas, y las condiciones.
+  - **Variables y fórmulas:** no tienen pestaña en la v1. Vienen de la plantilla de la vertical (R6, R13), y sus cambios llegan como novedades de la plantilla (R7). Las novedades se avisan en la cabecera de la configuración y se adoptan desde ahí. Por eso el editor de fórmulas y la pestaña de variables quedan fuera de la v1.
+- **R59.** **Margen y costo solo con `cpq:costos.ver`** (pregunta 9).
+  - **Qué se oculta:** quien no tiene el permiso no ve el porcentaje de margen, el costo, el resumen por categoría, los sueldos ni el semáforo.
+  - **Dónde se aplica:** en el **servidor**. Las capacidades no devuelven esos campos, así que vale igual en la pantalla, `/api/v1` y el MCP, y el agente tampoco los recibe.
 
 ## 6. Estados y transiciones
 
@@ -232,7 +269,7 @@ Permisos nuevos: `cpq:cotizaciones.read`, `cpq:cotizaciones.manage`, `cpq:costos
 | Aprobar o rechazar margen y subvaloración | ✓ | ✓ | — **[decidido, ADR-042 (5)]** | — | — | — | — | **Nunca** (`soloPersonas`) |
 | Enviar | ✓ | ✓ | ✓ | — | — | — | — | Aprobación humana |
 | Confirmar puestos ofrecidos al ganar | RRHH (rol configurable, ADR-036 (8)) | | | | | | | Solo prepara; decide RRHH (`APPROVAL_REQUIRED`, ADR-048 (7)) |
-| Editar y publicar el Modelo de costeo e ítems | ✓ | ✓ | — | — | — | — | — | Borrador y prueba sí; publicar con aprobación humana |
+| Cambiar la configuración del CPQ (Catálogo, Pólizas y finanzas, Márgenes) | ✓ | ✓ | — | — | — | — | — | Vista previa e impacto sí; guardar con aprobación humana |
 
 **Nota para el brief:** el gerente tiene `permitir: ["*"]` en `packages/domain/src/permisos.ts`; hay que agregar `cpq:aprobar` y `cpq:modelo.manage` a sus denegaciones (ADR-042 (5) y (8)). Hoy también tiene denegada la lectura de estructuras sensibles: `cpq:costos.ver` no se la abre (R20).
 
@@ -260,23 +297,24 @@ Toda capacidad de CPQ sale por MCP con los mismos permisos (ADR-055); las de esc
 
 | Herramienta | Qué hace | Efecto | Vista previa | Aprobación humana |
 |---|---|---|---|---|
-| `cpq_cotizaciones_list` / `get` | Lista con filtros; ficha con versiones, secciones, líneas y totales (costos solo con `cpq:costos.ver`) | Lectura | — | — |
+| `cpq_cotizaciones_list` / `get` | Lista con filtros; ficha con versiones, secciones, líneas y totales; resumen por categoría, costos y margen solo con `cpq:costos.ver` (R59) | Lectura | — | — |
 | `cpq_cotizaciones_explicar` | Traza de un monto o del total en lenguaje de negocio | Lectura | — | — |
 | `cpq_cotizaciones_comparar` | Diferencias entre dos versiones o alternativas | Lectura | — | — |
 | `cpq_cotizaciones_simular` | Calcula una cotización completa desde una especificación, **sin escribir** (ADR-042 (10)) | Lectura | — | — |
 | `cpq_cotizaciones_create` / `create_rapida` | Crear desde un negocio; o rápida con paquetes, creando el negocio si falta | Escritura | ✓ | — |
 | `cpq_cotizaciones_marcar_vigente` | Elegir la vigente del negocio (R46) | Escritura | ✓ | — |
-| `cpq_cotizaciones_ajustar` | **Lote de cambios tipados** sobre la versión editable: agregar o quitar sección, agregar línea de puesto o de ítem (o paquete), cambiar posiciones, horario, patrón o sueldo, fijar margen o precio objetivo, cambiar condiciones, mostrar u ocultar al cliente. Devuelve el **antes y después** de venta y margen | Escritura | ✓ | — |
+| `cpq_cotizaciones_ajustar` | **Lote de cambios tipados** sobre la versión editable: agregar o quitar sección, agregar línea de puesto o de ítem (o paquete), cambiar posiciones, horario, patrón o sueldo, cambiar el rateo de una línea (R56), editar el detalle de pólizas, RC o costo financiero (R57), fijar margen o precio objetivo, cambiar condiciones, mostrar u ocultar al cliente. Devuelve el **antes y después** de venta y margen | Escritura | ✓ | — |
 | `cpq_cotizaciones_nueva_version` / `renovar` / `actualizar_modelo` / `duplicar` / `archivar` | R27, R43, R44, R23 | Escritura | ✓ | — |
 | `cpq_cotizaciones_marcar_lista` / `solicitar_aprobacion` / `retirar_aprobacion` | R40, R42 | Escritura | ✓ | — |
 | *(sin herramienta)* `cpq.cotizaciones.aprobar` / `rechazar_aprobacion` | Decisión de margen. `soloPersonas`, en `paridad-excepciones.ts` con el motivo «es el control humano sobre lo que propone un agente» | — | — | Solo personas |
 | `cpq_cotizaciones_enviar` | Congela y envía en el formato elegido (CAR-68) | **Irreversible** | ✓ | **Sí** |
 | `cpq_puestos_ofrecer` / `confirmar` | Arma la oferta de puestos (R2) / RRHH la confirma | Escritura / irreversible | ✓ | Confirmar: **sí** (decide RRHH) |
-| `cpq_modelo_get` / `diferencias` | Modelo vigente y borrador; diferencias con la plantilla | Lectura | — | — |
-| `cpq_modelo_editar` / `probar` / `adoptar_novedad` | Borrador del modelo (variables, fórmulas, paquetes); prueba R9; adoptar en el borrador una novedad de la plantilla (R7) | Escritura / lectura | ✓ | — |
-| `cpq_valores_list` / `set` | Valores de variables con ámbito `cuenta` o `instalacion` (R11), editables desde la sección Modelo de la ficha de la cuenta o de la instalación y desde el cotizador | Lectura / escritura | ✓ | — |
-| `cpq_modelo_publicar` | Publica una versión | Irreversible | ✓ | **Sí** |
-| `cpq_items_list` / `create` / `update` / `archivar` (verbos `create`/`update` como el resto del núcleo) | Catálogo de ítems | Lectura / escritura | ✓ | — |
+| `cpq_modelo_get` / `diferencias` | Configuración vigente (las 3 pestañas) y su historial de versiones; diferencias con la plantilla de la vertical | Lectura | — | — |
+| `cpq_catalogo_*` (`list`, `create`, `update`, `archivar` para ítems, categorías y paquetes) | Pestaña **Catálogo**: costo unitario, rateo por defecto, categoría con su clase directo/indirecto (R55, R56) | Lectura / escritura | ✓ | — |
+| `cpq_polizas_finanzas_get` / `set` | Pestaña **Pólizas y finanzas**: valores por defecto de póliza de garantía o fiel cumplimiento, RC, costo financiero y condiciones (R57) | Lectura / escritura | ✓ | — |
+| `cpq_margenes_get` / `set` | Pestaña **Márgenes**: modo, margen por defecto, mínimo, umbral de alerta y margen de adicionales | Lectura / escritura | ✓ | — |
+| `cpq_modelo_impacto` / `adoptar_novedad` | «Ver impacto» de un cambio antes de guardarlo (R9); adoptar una novedad de la plantilla (R7) | Lectura / escritura | ✓ | — |
+| `cpq_modelo_guardar` | Guarda los cambios de configuración como versión nueva del modelo (R8; lo que antes se llamaba «publicar») | Irreversible | ✓ | **Sí** |
 
 **El agente interno en CPQ (ADR-049; el ADR figura como «Propuesto (PR #38)», pero su servidor ya está integrado por la enmienda NÚCLEO-E2).** Actúa como «agente interno vía <usuario>», con sus permisos y alcance. Arma un **plan** con lecturas y vistas previas; la persona lo confirma entero o paso a paso; cada escritura lleva clave de idempotencia; se detiene antes de aprobar, enviar, confirmar puestos o publicar el modelo.
 
@@ -341,7 +379,7 @@ Toda capacidad de CPQ sale por MCP con los mismos permisos (ADR-055); las de esc
 - Se gana un negocio cuya vigente está vencida: si Carlos aprueba la pregunta 7 de `comercial.md` (ganar exige cotización enviada), la vencida se renueva antes de ganar.
 - Reabrir un negocio ganado: la aceptada vuelve a `enviada`; los puestos ya confirmados no se borran (R5).
 - Cotización sin guardias (solo cámaras o suministros, como CPQ-2026-298 de 1.0): sin oferta de puestos (R4).
-- Contrato corto (60 días, 3 meses): los amortizables se dividen por la duración, no por 12 (como en 1.0).
+- Contrato corto (60 días, 3 meses): un ítem con rateo «plazo del contrato» se divide por esa duración, no por 12 (como en 1.0); si la línea tiene rateo `N meses` mayor que el contrato, se avisa.
 - Cotización de licitación con ítems A, B, C: se usan grupos de línea; el motor sirve a Licitaciones (fase 6) sin cambios.
 
 ## 13. Criterios de aceptación
@@ -350,7 +388,7 @@ Toda capacidad de CPQ sale por MCP con los mismos permisos (ADR-055); las de esc
 - **CA2.** CD-1, CD-2, los tests de 1.0 y las cinco cotizaciones de Gard confirmadas por Carlos dan la misma venta mensual al peso.
 - **CA3.** Una cotización con tres instalaciones y una sección Común muestra subtotales por sección y un total; las condiciones se editan una sola vez.
 - **CA4.** Cambiar el precio de un ítem del catálogo no cambia ninguna cotización existente.
-- **CA5.** Publicar un modelo con una referencia rota falla con el detalle; «Probar» muestra la diferencia de venta de las últimas enviadas.
+- **CA5.** Guardar una configuración que deja una referencia rota falla con el detalle; «Ver impacto» muestra la diferencia de venta de las últimas enviadas.
 - **CA6.** Pasar el cursor (o tocar) sobre cualquier monto muestra su traza; el agente explica el mismo monto con los mismos números.
 - **CA7.** Con margen 9 % en Gard, «Dejar lista» pasa a `en_aprobacion` y aparece en la Bandeja de Inicio de owner y admin; aprobar la deja `lista`; editarla la devuelve a `borrador`.
 - **CA8.** Una versión con `k ≥ 0,35` muestra «precio subvalorado» y no se envía sin aprobación.
@@ -363,6 +401,10 @@ Toda capacidad de CPQ sale por MCP con los mismos permisos (ADR-055); las de esc
 - **CA15.** Un usuario sin `cpq:costos.ver` no ve sueldos, costos ni margen (ni el porcentaje ni «sobre o bajo el mínimo») en pantalla, `/api/v1` ni MCP: las capacidades no devuelven esos campos; la explicación nombra componentes sin montos.
 - **CA16.** Toda tabla de CPQ tiene `tenant_id`, RLS y política `tenant_isolation`; la prueba de dos empresas pasa.
 - **CA17.** El inventario de paridad no tiene faltantes: toda acción de pantalla de CPQ tiene herramienta MCP o excepción con motivo (aprobar margen).
+- **CA18.** El cotizador muestra el costo por categoría y los subtotales de directos e indirectos. En una cotización de 1.0 recalculada en 2.0, cada categoría cuadra con el desglose de 1.0.
+- **CA19.** Un ítem del catálogo con rateo «12 meses» entra a la cotización con ese rateo. Cambiarlo en la línea a «plazo del contrato» recalcula la línea, sin tocar el catálogo ni otras cotizaciones.
+- **CA20.** La póliza de garantía, la RC y el costo financiero parten de los valores del tenant y se editan en la cotización con su detalle. El precio resultante cuadra con R33.
+- **CA21.** La configuración del CPQ tiene exactamente 3 pestañas: Catálogo, Pólizas y finanzas, y Márgenes. Un usuario sin `cpq:modelo.manage` no la ve.
 
 ## 14. Preguntas para Carlos — decididas
 
@@ -408,5 +450,6 @@ Toda capacidad de CPQ sale por MCP con los mismos permisos (ADR-055); las de esc
 | Fecha | Cambio | Aprobó |
 |---|---|---|
 | 25-oct-2026 23:10 | Borrador con la regla de puestos y sueldos al ganar (respuesta 3 de Carlos a ADR-048; CAR-10) | — (decisión de Carlos 23:08–23:10) |
+| 29-oct-2026 | Ajustes de alcance de Carlos tras la primera tanda de Claude Design (R55–R59): resumen por categoría directos/indirectos, catálogo con costo unitario y rateo sobrescribible por línea, pólizas y costo financiero con detalle, configuración en 3 pestañas (Catálogo, Pólizas y finanzas, Márgenes); valores por cuenta e instalación y editor de fórmulas fuera de la v1 | Carlos |
 | 29-oct-2026 | Carlos decide las 15 preguntas del §14 tal como venían recomendadas; ajuste en la 9: margen y costo solo con `cpq:costos.ver`, también en servidor y MCP (PR #123) | Carlos |
 | 29-oct-2026 | Especificación completa (CAR-66): modelo y plantilla por vertical, catálogo, secciones por instalación, cálculo con traza, margen financiero de 1.0, casos dorados, versiones y aprobación, cotización rápida, agente y MCP; 8 preguntas de la Page **reconstruidas** y 7 nuevas; notas para CAR-67 y CAR-68; Design Prompt aparte. R1–R5 sin cambios | — (pendiente de aprobación) |
