@@ -10,6 +10,7 @@ export const RELACIONES: Record<string, Record<string, Rel>> = {
     user: { tabla: "user", clave: "userId" },
     tenant: { tabla: "tenant", clave: "tenantId" },
     rolTenant: { tabla: "rol", clave: "roleId" },
+    excepciones: { tabla: "permisoExcepcion", clave: "membershipId", muchos: true },
   },
   apiKey: { user: { tabla: "user", clave: "userId" } },
   permisoExcepcion: { creadoPorUsuario: { tabla: "user", clave: "creadoPor" } },
