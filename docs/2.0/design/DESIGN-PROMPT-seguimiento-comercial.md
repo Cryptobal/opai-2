@@ -12,7 +12,7 @@ Resultado esperado: el **export HTML standalone**, una pantalla por archivo, nom
 
 OPAI 2.0 es un SaaS operacional multi-tenant y agent-first para empresas intensivas en personal (seguridad primero; en el export, la empresa de ejemplo es «Atlas Seguridad SpA» y el vendedor «Camila Rojas»; nada de Gard fijo). Todo lo que se ve existe también como capacidad por API y MCP: un agente puede hacer lo mismo con vista previa, y lo irreversible (enviar al cliente, ganar) espera la aprobación de una persona.
 
-El CRM ya tiene aprobados Negocios (tablero y lista), la ficha del negocio y Configuración → Comercial; el PR 2 (actividad unificada, contactos en varias cuentas) está en `DESIGN-PROMPT-crm-pr2.md`. Este prompt cubre **lo que pasa después de enviar una cotización**: el seguimiento por pasos configurable por empresa, la respuesta del cliente, el cierre y los negocios detenidos. Especificación: `docs/2.0/modulos/seguimiento-comercial.md` (reglas R1–R24).
+El CRM ya tiene aprobados Negocios (tablero y lista), la ficha del negocio y Configuración → Comercial; el PR 2 (actividad unificada, contactos en varias cuentas) está en `DESIGN-PROMPT-crm-pr2.md`. Este prompt cubre **lo que pasa después de enviar una cotización**: el seguimiento por pasos configurable por empresa, la respuesta del cliente, el cierre y los negocios detenidos. Especificación: `docs/2.0/modulos/seguimiento-comercial.md` (reglas R1–R26).
 
 **Idea central para el vendedor:** «abro OPAI y sé qué me toca hoy; cada pendiente se resuelve con uno o dos toques, sin abrir la ficha».
 
@@ -80,7 +80,7 @@ El tablero aprobado con `IndicadorSeguimiento` en varias tarjetas (uno de cada e
 ### 4.9 Configuración → Comercial → Seguimiento (iPad y escritorio; en el teléfono solo lectura)
 - **Lista de planes** (catálogo declarativo): nombre, disparador («Cuando se envía una cotización», «Cuando entra a Propuesta», «A mano»), por defecto, activo, versión y seguimientos en curso. Plan base copiado de la vertical: «Post-cotización (base Seguridad)».
 - **Editor del plan:** nombre y disparador; «Cómo se cuentan los días» (`Segmentado`: Hábiles · Corridos) con enlace al calendario hábil del núcleo; desde dónde se cuenta; hora y ventana de envío; `EditorPasos` con la vista previa de fechas; **Cuando el cliente responde** (casillas: detener, pausar hasta, reiniciar desde; mover a etapa; crear tarea con plazo); **Al terminar sin respuesta** (`RadioGroup`: Proponer el cierre · Cerrar como perdido bajo $ … · Solo avisar; «Nunca cerrar solo desde la etapa…»).
-- **Envío automático:** cada paso con «OPAI automático» o «Agente» muestra una `Alerta` que explica qué sale sin una persona; los interruptores van **apagados por defecto** y «Agente envía sin aprobación» pide confirmación.
+- **Envío automático:** cada paso con «OPAI automático» o «Agente» muestra una `Alerta` que explica qué sale sin una persona; los interruptores van **apagados por defecto** y «Agente envía sin aprobación» solo lo puede activar el owner, con confirmación; activar «OPAI automático» muestra antes la vista previa de la plantilla y los destinatarios.
 - **Ventana por canal** (opcional): llamadas y WhatsApp con su propio rango de horas.
 - Un paso con ejecutor «Agente» sin agente disponible en el tenant muestra una `Alerta` «Sin agente conectado: este paso pasará a una persona al vencer».
 - Guardar crea una versión nueva: diálogo «Hay 12 seguimientos en curso con la versión 3. ¿Pasarlos a la versión 4?» con la vista previa de fechas que cambian (No · Sí, pasarlos).
