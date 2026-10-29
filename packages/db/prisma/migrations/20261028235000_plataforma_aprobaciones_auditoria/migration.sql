@@ -252,5 +252,5 @@ COMMIT;
 --   DROP FUNCTION core.auditoria_global_append(uuid, text, text, text, text, text, uuid, uuid, text, text, jsonb, jsonb, jsonb, text, text, timestamptz, uuid);
 --   DROP TABLE core.auditoria_global;
 --   DROP TABLE core.aprobaciones_plataforma;
---   DELETE FROM _prisma_migrations WHERE migration_name = '20261028230000_plataforma_aprobaciones_auditoria';
+--   DELETE FROM _prisma_migrations WHERE migration_name = '20261028235000_plataforma_aprobaciones_auditoria';
 --   COMMIT;

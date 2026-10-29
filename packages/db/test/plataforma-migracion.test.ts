@@ -8,7 +8,7 @@ import { describe, expect, it } from "vitest";
 
 import { urlPropietario } from "./entorno";
 
-const MIGRACION = "20261028230000_plataforma_aprobaciones_auditoria";
+const MIGRACION = "20261028235000_plataforma_aprobaciones_auditoria";
 const carpeta = new URL("../prisma/migrations/", import.meta.url);
 const sql = (nombre: string) => readFile(new URL(`${nombre}/migration.sql`, carpeta), "utf8");
 
@@ -20,6 +20,8 @@ const id = (n: string) => `00000000-0000-7000-8000-0000000000${n}`;
 const SEMILLA = `
 INSERT INTO core.tenants (id, slug, nombre, vertical, updated_at) VALUES ('${T}', 'x', 'X', 'seguridad', now());
 INSERT INTO core.users (id, name, email, updated_at) VALUES ('${U}', 'u', 'u@x.cl', now());
+INSERT INTO core.memberships (id, tenant_id, user_id, rol, portales, updated_at)
+  VALUES ('${id("c9")}', '${T}', '${U}', 'admin', '{erp}', now());
 INSERT INTO core.api_keys (id, tenant_id, user_id, nombre, prefijo, hash, updated_at)
   VALUES ('${K}', '${T}', '${U}', 'K', 'p', 'h', now());
 INSERT INTO core.aprobaciones (id, tenant_id, api_key_id, agente_interno_id, via_user_id, capability,
