@@ -3,6 +3,7 @@ import { platformAuditoriaList } from "./auditoria-lista";
 import { platformPreciosList, platformPreciosSet } from "./precios";
 import { platformTenantPanel } from "./tenant-panel";
 import { platformUsersList, platformUsersSetRole } from "./usuarios";
+import { platformUsuariosBorrar, platformUsuariosRestablecerMfa } from "./usuarios-identidad";
 
 export { platformTenantsList } from "./tenants-lista";
 export { platformTrabajosList } from "./trabajos-lista";
@@ -18,5 +19,7 @@ export const capacidadesPlataforma: readonly Capacidad[] = [
   platformPreciosSet,
   platformUsersList,
   platformUsersSetRole,
+  platformUsuariosRestablecerMfa,
+  platformUsuariosBorrar,
   platformAuditoriaList,
 ];

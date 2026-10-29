@@ -24,6 +24,7 @@ export default defineConfig({
             "test/config-pool.test.ts",
             "test/pool.test.ts",
             "test/pool-salud.test.ts",
+            "test/pool-plazo.test.ts",
             "test/migraciones-plantilla.test.ts",
             "test/importar-opai1/**/*.test.ts",
           ],
