@@ -110,11 +110,7 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
     () => datos.navInferior?.map((n) => ({ ...n, icono: iconoShell(n.icono, datos.iconos) })), [datos.navInferior, datos.iconos],
   );
   const navInferiorBase = navInferiorPreferido ?? navInferiorDefecto;
-  const { contexto: fijarFicha, boton: pinFicha } = usePinFicha(
-    enErp && Boolean(esFicha),
-    fichaFijada,
-    onFijarFicha,
-  );
+  const { contexto: fijarFicha, boton: pinFicha } = usePinFicha(enErp && Boolean(esFicha), fichaFijada, onFijarFicha);
   // D5: Inicio muestra un punto (sin número) en la barra inferior cuando la Bandeja tiene algo
   // pendiente (avisos o aprobaciones); el número vive dentro de la pantalla, no en el shell.
   const bandejaPendiente = enErp && (preferencias?.bandejaPendiente ?? false);
