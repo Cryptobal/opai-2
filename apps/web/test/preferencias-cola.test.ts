@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const h = vi.hoisted(() => ({
   slots: [] as unknown[], cursor: 0, ejecutar: vi.fn(), exito: vi.fn(),
+  guardado: {} as Record<string, string>,
 }));
 // Como `navegacion-cola.test.ts`: ejercita la cola asíncrona real del hook, con estado conservado
 // entre renders (useRef/useState de verdad, sin un renderer de React).
@@ -43,7 +44,10 @@ beforeEach(() => {
   h.ejecutar.mockReset();
   h.exito.mockReset();
   vi.stubGlobal("document", { documentElement: { dataset: {} as Record<string, string> } });
-  vi.stubGlobal("localStorage", { setItem: () => undefined });
+  h.guardado = {};
+  vi.stubGlobal("localStorage", {
+    setItem: (k: string, valor: string) => void (h.guardado[k] = valor),
+  });
 });
 
 describe("preferencias: cola serial por formulario (regresión del PR #109)", () => {
@@ -97,5 +101,39 @@ describe("preferencias: cola serial por formulario (regresión del PR #109)", ()
       clave: "preferencias_resumen",
       valor: "diario",
     });
+  });
+
+  it("un guardado rechazado revierte el tema y avisa; la cola sigue y el siguiente sale", async () => {
+    h.ejecutar.mockRejectedValueOnce(new Error("Failed to fetch"));
+    h.ejecutar.mockResolvedValueOnce({ version: 1 });
+    const html = (document as unknown as { documentElement: { dataset: Record<string, string> } })
+      .documentElement;
+    render().guardar("tema", "oscuro", "preferencias_tema");
+    expect(html.dataset["theme"]).toBe("dark");
+    await vi.waitFor(() => expect(render().error).toMatch(/No se guardó/));
+    expect(render().v.tema).toBe("sistema");
+    expect(html.dataset["theme"]).toBeUndefined();
+    expect(h.guardado["opai_tema"]).toBe("sistema");
+    render().guardar("tema", "claro", "preferencias_tema");
+    await vi.waitFor(() => expect(h.exito).toHaveBeenCalledTimes(1));
+    expect(h.ejecutar).toHaveBeenCalledTimes(2);
+    expect(render().v.tema).toBe("claro");
+    expect(render().error).toBeNull();
+    expect(h.guardado["opai_tema"]).toBe("claro");
+  });
+
+  it("un fallo en vuelo no revierte una elección más nueva, aunque repita el mismo valor", async () => {
+    let fallar: (r: null) => void = () => undefined;
+    h.ejecutar.mockImplementationOnce(() => new Promise((resolve) => (fallar = resolve)));
+    h.ejecutar.mockResolvedValueOnce({ version: 1 });
+    render().guardar("tema", "oscuro", "preferencias_tema");
+    await vi.waitFor(() => expect(h.ejecutar).toHaveBeenCalledTimes(1));
+    render().guardar("tema", "claro", "preferencias_tema");
+    render().guardar("tema", "oscuro", "preferencias_tema");
+    fallar(null);
+    await vi.waitFor(() => expect(h.exito).toHaveBeenCalledTimes(1));
+    expect(h.ejecutar).toHaveBeenCalledTimes(2);
+    expect(render().v.tema).toBe("oscuro");
+    expect(h.guardado["opai_tema"]).toBe("oscuro");
   });
 });
