@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 244 pares pantalla→capacidad · 210 con herramienta · 34 excepciones justificadas · 0 faltantes.
+**Resumen:** 251 pares pantalla→capacidad · 217 con herramienta · 34 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -119,6 +119,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.puestos.create` | `core_puestos_create` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.puestos.set_estado` | `core_puestos_set_estado` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.puestos.update` | `core_puestos_update` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `core.supervisores.asignar` | `core_supervisores_asignar` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `core.supervisores.de_instalacion` | `core_supervisores_de_instalacion` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `core.supervisores.quitar` | `core_supervisores_quitar` | existe |
 | compartido | `app/(erp)/negocios/_componentes` | `comercial.config.get` | `comercial_config_get` | existe |
 | compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.archivar` | `comercial_negocios_archivar` | existe |
 | compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.create` | `comercial_negocios_create` | existe |
@@ -216,8 +219,12 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/usuarios/roles` | `core.roles.update` | — | excepción |
 | erp | `/configuracion/usuarios` | `core.excepciones.list` | `core_excepciones_list` | existe |
 | erp | `/configuracion/usuarios` | `core.excepciones.set` | — | excepción |
+| erp | `/configuracion/usuarios` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
 | erp | `/configuracion/usuarios` | `core.invitations.list` | `core_invitations_list` | existe |
 | erp | `/configuracion/usuarios` | `core.roles.assign` | — | excepción |
+| erp | `/configuracion/usuarios` | `core.supervisores.asignar` | `core_supervisores_asignar` | existe |
+| erp | `/configuracion/usuarios` | `core.supervisores.list` | `core_supervisores_list` | existe |
+| erp | `/configuracion/usuarios` | `core.supervisores.quitar` | `core_supervisores_quitar` | existe |
 | erp | `/configuracion/usuarios` | `core.users.invite` | — | excepción |
 | erp | `/configuracion/usuarios` | `core.users.list` | `core_users_list` | existe |
 | erp | `/configuracion/usuarios` | `core.users.remove` | `core_users_remove` | existe |
@@ -330,8 +337,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.roles.assign` | Solo personas: asignar un rol a un usuario gobierna su acceso (ADR-034). |
 | `core.roles.create` | Solo personas: gobierna el acceso; un agente no se crea roles ni se concede permisos (ADR-034). |
 | `core.roles.update` | Solo personas: cambiar los permisos de un rol es gobernar el acceso (ADR-034). |
-| `core.supervisores.asignar` | Solo personas: fijar el alcance de un supervisor gobierna su acceso; un agente no lo hace (ADR-034). |
-| `core.supervisores.quitar` | Solo personas: quitar instalaciones del alcance de un supervisor gobierna su acceso (ADR-034). |
 | `core.users.invite` | Solo personas: invitar asigna un rol y gobierna el acceso (encargo PR #70). |
 
 ## Solo personas: camino humano (CAR-52)
@@ -371,8 +376,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.roles.assign` | `/configuracion/usuarios` | sí (portal ERP) | reservada a personas |
 | `core.roles.create` | `/configuracion/usuarios/roles` | sí (portal ERP) | reservada a personas |
 | `core.roles.update` | `/configuracion/usuarios/roles` | sí (portal ERP) | reservada a personas |
-| `core.supervisores.asignar` | sin pantalla todavía · CAR-38 · desde 2026-10-28 | no | reservada a personas |
-| `core.supervisores.quitar` | sin pantalla todavía · CAR-38 · desde 2026-10-28 | no | reservada a personas |
 | `core.users.invite` | `/configuracion/usuarios` | no | reservada a personas |
 
 ## Capacidades solo por API y MCP (ninguna pantalla las invoca con id literal)
@@ -396,7 +399,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.patrones.get`
 - `core.ping`
 - `core.puestos.get`
-- `core.supervisores.list`
 - `core.usage.summary`
 - `platform.auditoria.estado`
 - `platform.bitacora.estado`

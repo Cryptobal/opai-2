@@ -22,7 +22,8 @@ test("Supervisor sin ERP no obtiene datos por sesión HTTP ni entrando al ERP", 
   const resultados = [];
   for (const portal of ["supervisor", "erp", "inventado"]) {
     const res = await page.request.post(`/api/v1/core/buscar?portal=${portal}`, {
-      headers: { "x-opai-portal": portal },
+      // Propio origen (CAR-38): así el rechazo que se mide es el del portal, no el del origen.
+      headers: { "x-opai-portal": portal, origin: new URL(page.url()).origin },
       data: { input: { q: "Alfa" }, portal },
     });
     expect(res.status()).toBe(403);
