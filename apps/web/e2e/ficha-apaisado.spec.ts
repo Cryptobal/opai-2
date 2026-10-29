@@ -4,7 +4,8 @@ import { E2E_PASSWORD as password, entrar } from "./sesion";
 // Celular apaisado (CAR-6): las fichas usan el ancho de la pantalla, no el de «tablet», y las tarjetas
 // de dos columnas se apilan solo ahí (844×390 y 932×430): en «Ubicación y vigencia» (Instalaciones) el
 // texto queda bajo el mapa y en Laboral (Personas) la segunda columna queda bajo la primera, con el texto
-// de 200 px o más. Desde 1024 px de ancho (y a 768 de alto normal) quedan lado a lado, igual que en main.
+// de 200 px o más. «Ubicación y vigencia» decide por el ancho del panel (consulta de contenedor, CAR-65):
+// a 1024 px, con la barra lateral y la lista, el panel mide ~390 px y también se apila; desde 1280 queda lado a lado.
 
 test.use({ actionTimeout: 30_000 });
 test.setTimeout(180_000);
@@ -56,6 +57,8 @@ test.describe("fichas con el celular en horizontal", () => {
       [1440, 900],
     ] as const) {
       const apilada = alto <= 500;
+      // «Ubicación y vigencia» también se apila con el panel angosto (1024×768: barra lateral + lista + ficha).
+      const ubicacionApilada = apilada || ancho <= 1024;
       await page.setViewportSize({ width: ancho, height: alto });
       await page.goto("/instalaciones");
       const href = await page
@@ -68,14 +71,14 @@ test.describe("fichas con el celular en horizontal", () => {
       await page.waitForLoadState("networkidle");
       expect(await sinDesborde(page), `${ancho}×${alto}`).toBe(true);
       // Cada par (Dirección, Región, Geocerca, Vigencia) mide 200 px o más: ya no se parte por letras.
-      for (const etiqueta of apilada ? ["Dirección", "Región", "Geocerca", "Vigencia"] : []) {
+      for (const etiqueta of ubicacionApilada ? ["Dirección", "Región", "Geocerca", "Vigencia"] : []) {
         const par = tarjeta.getByText(etiqueta, { exact: true }).first().locator("xpath=..");
         const caja = await par.boundingBox();
         expect(caja?.width, `${etiqueta} a ${ancho}×${alto}`).toBeGreaterThanOrEqual(200);
       }
       // Apiladas solo en celular apaisado (mapa sobre el texto); en el resto, lado a lado como en main.
       const ubicacion = tarjeta.locator("div.grid.gap-4").first();
-      if (apilada) await expectApiladas(ubicacion, `Ubicación ${ancho}×${alto}`);
+      if (ubicacionApilada) await expectApiladas(ubicacion, `Ubicación ${ancho}×${alto}`);
       else await expectLadoALado(ubicacion, `Ubicación ${ancho}×${alto}`);
       if (ancho === 844)
         await page.screenshot({ path: info.outputPath("instalacion-844x390.png") });
