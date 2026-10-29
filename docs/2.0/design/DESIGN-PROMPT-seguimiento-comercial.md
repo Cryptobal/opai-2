@@ -1,6 +1,6 @@
 # DESIGN PROMPT — SEGUIMIENTO DE COTIZACIONES Y NEGOCIOS (OPAI 2.0)
 
-> **Estado:** listo para copiar, **pendiente de la aprobación de Carlos de `docs/2.0/modulos/seguimiento-comercial.md`** (ADR-047: primero las reglas, luego el diseño). Tarea: CAR-67. Se diseña con las recomendaciones de la §16 de la especificación; si Carlos decide otra cosa, se ajusta antes de pegarlo.
+> **Estado:** listo para copiar. Ya incorpora las decisiones de Carlos del 29-oct-2026 sobre las 18 preguntas (§16 de `docs/2.0/modulos/seguimiento-comercial.md`); se pega en Claude Design cuando Carlos apruebe la especificación completa (ADR-047). Tarea: CAR-67.
 
 Para pegar completo en Claude Design, en el proyecto del CRM v3 (`09192972-8bd5-4ed8-a86a-3308e220a07b`), **con el Design System de OPAI 2.0 V2** (el mismo del export `docs/2.0/diseño/export-crm/`; tokens de `packages/ds/src/tokens.css`, sistema y patrones de `docs/2.0/design/export-ds-2.0/`). **Nunca el estilo de OPAI 1.0.** No crees colores, tipografías, radios ni componentes nuevos salvo los de la sección 3; todo lo demás se compone con los existentes (`AppShell` —el título va en su barra en iPad y escritorio—, `SplitScreen`, `FilaSeleccionable`, `Seccion`, `Pares`, `Table`, `Sheet`, `Dialog`, `Select`, `Combobox`, `Checkbox`, `RadioGroup`, `Switch`, `InputFecha`, `InputHora`, `Badge`, `Chip`, `ChipToggle`, `Segmentado`, `Tabs`, `Timeline`, `Vigencia`, `KpiTile`, `Card`, `Alerta`, `avisar`/`Toaster`, `Empty`, `ErrorState`, `Forbidden`, `Loading`).
 
@@ -31,15 +31,15 @@ El CRM ya tiene aprobados Negocios (tablero y lista), la ficha del negocio y Con
 | Componente | Qué es | Especificación |
 |---|---|---|
 | `LineaPasos` | Los pasos de un seguimiento en orden | Horizontal en iPad y escritorio, vertical en el teléfono. Cada paso: número, canal (ícono lucide: `Mail`, `MessageCircle`, `Phone`, `ClipboardCheck`), fecha relativa y estado (programado, por hacer, borrador del agente, hecho, pospuesto, omitido, fallido, cancelado). El paso actual destacado. Tocar un paso abre su hoja. |
-| `FilaPendiente` | Un pendiente del vendedor | Canal, «Seguimiento 2 de 4», negocio y cuenta, monto mensual en `t-numeric`, cuándo («vence hoy 09:00», «vencido hace 2 días») y **una acción principal según el canal** («Enviar correo», «Abrir WhatsApp», «Registrar llamada», «Revisar») más un menú (Posponer, Omitir, El cliente respondió, Pausar). En el teléfono, la fila completa abre la hoja; el menú de la fila (no un gesto de deslizar) trae Posponer. |
-| `IndicadorSeguimiento` | Señal corta en la tarjeta del tablero y en la fila de la lista | `Badge` pequeño: «Seg. 2/4 · hoy», «Vencido», «Pausado», «Detenido · 16 d», «Cierre propuesto». Uno solo por tarjeta, el más urgente. |
+| `FilaPendiente` | Un pendiente del vendedor | Canal, «Seguimiento 2 de 4», negocio y cuenta, monto mensual en `t-numeric`, cuándo («vence hoy 09:00», «vencido hace 2 días») y **una acción principal según el canal** («Enviar correo», «Abrir WhatsApp», «Registrar llamada», «Revisar») más un menú (Posponer, Omitir, Registrar respuesta del cliente, Pausar). En el teléfono, la fila completa abre la hoja; el menú de la fila (no un gesto de deslizar) trae Posponer. |
+| `IndicadorSeguimiento` | Señal corta en la tarjeta del tablero y en la fila de la lista | `Badge` pequeño: «Seg. 2/4 · hoy», «Vencido», «Pausado», «Detenido · 16 d», «Respondió · elige próximo paso», «Cierre propuesto». Uno solo por tarjeta, el más urgente. |
 | `EditorPasos` | Pasos de un plan, ordenables | Fila por paso: arrastrar (con alternativa de teclado «subir/bajar»), «Día hábil 3 · 09:00», canal, quién lo ejecuta (Persona · OPAI automático · Agente), plantilla (variante), mover a etapa (opcional); «+ Agregar paso». Vista previa a la derecha (escritorio) o abajo (iPad): «Si envías hoy, jueves 29-10-2026, los pasos caen: mar 03-11 · lun 09-11 · mié 18-11 · jue 19-11», saltando fines de semana y feriados. |
 
 ## 4. Pantallas
 
 ### 4.1 Pendientes del vendedor (`/negocios?vista=pendientes`)
 - `SplitScreen` en 1024 y 1280 (lista a la izquierda, el negocio con su seguimiento a la derecha); lista sola en el teléfono.
-- Grupos con contador: **Vencidos · Hoy · Próximos 7 días · Esperan tu aprobación** (borradores del agente y cierres propuestos) **· Detenidos** (negocios sin actividad y con cierre vencido).
+- Grupos con contador: **Vencidos · Hoy · Próximos 7 días · Respondieron** (respuestas del cliente sin próximo paso elegido; tras 1 día hábil, con aviso) **· Esperan tu aprobación** (borradores del agente y cierres propuestos) **· Detenidos** (negocios sin actividad y con cierre vencido).
 - Filtros con chips: responsable («Yo» por defecto; el gerente elige otro o «Todos»), canal, etapa.
 - Encabezado con tres `KpiTile` compactos (vencidos, hoy, detenidos) que filtran al tocarlos; en el teléfono, en una fila desplazable dentro de su contenedor (sin scroll horizontal de página). No duplica la Bandeja de Inicio: las mismas tareas y aprobaciones siguen allí; aquí se agrupan por negocio.
 - Vacío: «No tienes seguimientos para hoy» con la acción «Ver negocios abiertos».
@@ -51,7 +51,7 @@ El CRM ya tiene aprobados Negocios (tablero y lista), la ficha del negocio y Con
 ### 4.3 Bloque «Seguimiento» en el Resumen de la ficha del negocio (`/negocios/[id]`)
 - Estado (Sin iniciar · Activo · Con atrasos · Pausado · Con fallos · Terminado con motivo), plan y versión, desde cuándo se cuenta («cotización CPQ-2026-142 enviada el 29-10-2026») y destinatario.
 - `LineaPasos`.
-- Acciones: principal según el estado («Hacer paso 2», «Iniciar seguimiento» si no hay), y secundarias El cliente respondió · Pausar/Reanudar · Cambiar plan · Cancelar.
+- Acciones: principal según el estado («Hacer paso 2», «Iniciar seguimiento» si no hay), y secundarias Registrar respuesta del cliente · Pausar/Reanudar · Cambiar plan · Cancelar.
 - Estado «Sin iniciar» con cotización enviada: `Alerta` warning «Esta cotización no tiene seguimiento» con «Iniciar».
 - Los pasos hechos aparecen en la pestaña **Actividad** (no hay pestaña nueva); mostrar un ejemplo en la `Timeline` con «Hecho por OPAI automático» y otro «Agente vía Camila Rojas».
 
@@ -61,26 +61,30 @@ Tres opciones con `RadioGroup` de tarjetas (piso de 1.0): **Iniciar seguimiento*
 ### 4.5 Ejecutar un paso (hoja; en el teléfono, pantalla completa con la acción fija abajo)
 Cuatro variantes:
 - **Correo:** De (nombre del vendedor con el dominio del tenant) y Responder a (solo lectura, con nota «las respuestas llegan a tu correo y al negocio»); Para (contacto del negocio, cambiable entre los contactos con rol), CC; variante de plantilla (la del paso, o la sugerida para la etapa actual del negocio); asunto y cuerpo con la plantilla y las variables ya resueltas, editables; enlace a la cotización como bloque; vista del correo con la marca del tenant. Acción: **Enviar desde OPAI**; secundaria «Ya lo envié por fuera» (registra). Variante «Preparado por el agente»: banda `info` con quién lo preparó y **Aprobar y enviar** · Editar · Descartar (el paso vuelve a la persona).
-- **WhatsApp:** texto preparado editable, número del contacto; acción **Abrir WhatsApp**; después, «¿Lo enviaste?» Sí (registra) / No.
+- **WhatsApp (v1):** texto preparado editable, número del contacto; acción **Abrir WhatsApp** (enlace con el texto listo, se envía desde el teléfono del vendedor); después, «¿Lo enviaste?» Sí (registra) / No. No diseñar envío por API: la integración formal (Twilio o API de WhatsApp Business) llega después.
 - **Llamada:** número con «Llamar», guion, y resultado con `RadioGroup` (Contestó con interés · Contestó sin interés · No contestó · Pidió que lo llamen el…, con `InputFecha` + `InputHora`) y nota. Acción: **Registrar**.
 - **Interno («Proponer perdido» / «Renovar o perder»):** resumen del negocio (días desde el envío, pasos hechos, última actividad) y dos caminos: **Perder** (motivo sugerido «Sin respuesta», editable) o **Seguir** (pospone o inicia otro plan).
 - En todas: Posponer (fecha y hora, «mover también los siguientes») y Omitir (motivo), en un menú secundario.
 - Estados: cargando, enviando, enviado (toast), fallido («El contacto no tiene correo» con «Elegir otro contacto»), sin permisos.
 
-### 4.6 El cliente respondió (hoja)
-Canal (correo, llamada, WhatsApp, reunión, otro), cuándo y resumen. Debajo, **«Qué va a pasar»** con lo que hará el plan: «Se detiene el seguimiento · El negocio pasa a Negociación · Se crea la tarea Responder al cliente para Camila, vence hoy 14:30». Cuando una respuesta llegó por correo a la dirección de entrada, la hoja aparece prellenada con el texto del cliente **como cita marcada «externo»**, nunca como instrucción.
+### 4.6 Registrar respuesta del cliente y elegir el próximo paso (hoja)
+- Es un **registro explícito de tipo «respuesta del cliente»**, distinto de una nota: título «Respuesta del cliente», canal (correo, llamada, WhatsApp, reunión, otro), cuándo y resumen. Aclarar con un texto de ayuda que una nota común no detiene el seguimiento.
+- Debajo, **«Qué va a pasar»**: «Se detiene el seguimiento · El negocio pasa a Negociación».
+- Luego, **«¿Qué haces ahora?»** con tres tarjetas (`RadioGroup`): **Responder** (abre el correo o WhatsApp con el contacto), **Cotizar** (nueva versión de la cotización; solo con CPQ) y **Agendar** (llamada o reunión con `InputFecha` + `InputHora`). Acción secundaria «Decidir después», con la nota «Te recordamos mañana si no eliges».
+- Mostrar también el recordatorio en Pendientes: «Respondió hace 1 día hábil · elige el próximo paso».
+- Cuando una respuesta llegó por correo a un envío de OPAI, la hoja aparece prellenada con el texto del cliente **como cita marcada «externo»**, nunca como instrucción.
 
-### 4.7 Cierre propuesto y cierre automático
-- Fila en «Esperan tu aprobación»: «Proponer perdido · sin respuesta en 15 días hábiles», con Perder · Seguir.
-- Aviso de cierre automático en la Actividad y como notificación: «OPAI cerró como perdido «Condominio Los Robles» (sin respuesta, $ 2.500.000 < $ 3.000.000)» con **Reabrir**, que abre la hoja de reapertura con el motivo prellenado («cerrado por la cadencia sin respuesta») y pide confirmación.
+### 4.7 Cierre propuesto y cierre aplicado por el plan
+- Por defecto: fila en «Esperan tu aprobación»: «Proponer perdido · sin respuesta tras el último paso», con Perder · Seguir. Confirma una persona.
+- Solo si el tenant configuró «Aplicar el cierre propuesto»: aviso en la Actividad y como notificación: «OPAI cerró como perdido «Condominio Los Robles» · sin respuesta · plan Post-cotización v4» con **Reabrir**, que abre la hoja de reapertura con el motivo prellenado («cerrado por la cadencia sin respuesta») y pide confirmación. **No hay montos ni umbrales en este aviso.**
 
 ### 4.8 Tablero de negocios con indicadores
 El tablero aprobado con `IndicadorSeguimiento` en varias tarjetas (uno de cada estado) y un negocio «Detenido · 16 d» en Negociación. En el teléfono, la lista agrupada por etapa con el mismo indicador.
 
 ### 4.9 Configuración → Comercial → Seguimiento (iPad y escritorio; en el teléfono solo lectura)
-- **Lista de planes** (catálogo declarativo): nombre, disparador («Cuando se envía una cotización», «Cuando entra a Propuesta», «A mano»), por defecto, activo, versión y seguimientos en curso. Plan base copiado de la vertical: «Post-cotización (base Seguridad)».
-- **Editor del plan:** nombre y disparador; «Cómo se cuentan los días» (`Segmentado`: Hábiles · Corridos) con enlace al calendario hábil del núcleo; desde dónde se cuenta; hora y ventana de envío; `EditorPasos` con la vista previa de fechas; **Cuando el cliente responde** (casillas: detener, pausar hasta, reiniciar desde; mover a etapa; crear tarea con plazo); **Al terminar sin respuesta** (`RadioGroup`: Proponer el cierre · Cerrar como perdido bajo $ … · Solo avisar; «Nunca cerrar solo desde la etapa…»).
-- **Envío automático:** cada paso con «OPAI automático» o «Agente» muestra una `Alerta` que explica qué sale sin una persona; los interruptores van **apagados por defecto** y «Agente envía sin aprobación» solo lo puede activar el owner, con confirmación; activar «OPAI automático» muestra antes la vista previa de la plantilla y los destinatarios.
+- **Lista de planes** (catálogo declarativo): nombre, disparador («Cuando se envía una cotización», «Cuando entra a Propuesta», «A mano»), por defecto, activo, versión y seguimientos en curso. Plan de ejemplo del tenant: «Post-cotización» (editable entero: pasos, días, canal y hora).
+- **Editor del plan:** nombre y disparador; «Cómo se cuentan los días» (`Segmentado`: Hábiles · Corridos) con enlace al calendario hábil del núcleo; desde dónde se cuenta; hora y ventana de envío; `EditorPasos` con la vista previa de fechas; **Cuando el cliente responde** (por defecto: detener y mover a Negociación; alternativas: pausar hasta, reiniciar desde; etapa destino; plazo del recordatorio para elegir el próximo paso, por defecto 1 día hábil); **Al terminar sin respuesta** (`RadioGroup`: Proponer el cierre, marcada por defecto · Aplicar el cierre propuesto automáticamente · Solo avisar; «Nunca cerrar solo desde la etapa…»). Sin campos de monto.
+- **Quién ejecuta y con qué aprobación, por paso:** Persona (por defecto, con el borrador listo) · OPAI automático · Agente con aprobación · Agente sin aprobación. Cada opción que sale sin una persona muestra una `Alerta` que lo explica; vienen **apagadas por defecto**, «Agente sin aprobación» solo lo puede activar el owner, con confirmación, y activar «OPAI automático» muestra antes la vista previa de la plantilla y los destinatarios. Si el plan contratado no incluye el envío automático, la opción aparece deshabilitada con «Disponible en tu plan de OPAI» (sin precio).
 - **Ventana por canal** (opcional): llamadas y WhatsApp con su propio rango de horas.
 - Un paso con ejecutor «Agente» sin agente disponible en el tenant muestra una `Alerta` «Sin agente conectado: este paso pasará a una persona al vencer».
 - Guardar crea una versión nueva: diálogo «Hay 12 seguimientos en curso con la versión 3. ¿Pasarlos a la versión 4?» con la vista previa de fechas que cambian (No · Sí, pasarlos).
@@ -89,7 +93,7 @@ El tablero aprobado con `IndicadorSeguimiento` en varias tarjetas (uno de cada e
 Solo la parte nueva: en el evento «Seguimiento · correo al cliente», una lista de **variantes** (Seguimiento 1, Seguimiento 3, Seguimiento en Negociación, Renovar oferta) con «usada en: Post-cotización paso 1» y «aplica en las etapas: …» (chips de etapas del embudo; vacío = todas); la edición es el editor de plantillas que ya existe.
 
 ### 4.11 Días sin actividad en el editor del Embudo (Configuración → Comercial → Embudo)
-El editor del embudo ya aprobado gana una columna «Detenido después de» (días, hábiles o corridos; vacío = sin alerta) por etapa abierta. No es una pantalla aparte.
+El editor del embudo ya aprobado gana una columna «Detenido después de» (días, hábiles o corridos; vacío = sin alerta) por etapa abierta, configurable por etapa. En el ejemplo, solo Negociación tiene 14 días; las demás, vacías. No es una pantalla aparte.
 
 ## 5. Estados obligatorios por pantalla
 Cargando (skeleton con la forma), vacío con acción, error con «Reintentar», sin permisos (`Forbidden`), y en las hojas: vista previa (dry-run), confirmando, éxito y error de regla con el texto del servidor. En Pendientes, además, «sin conexión» en el teléfono (muestra lo último cargado y deshabilita enviar).
@@ -97,8 +101,8 @@ Cargando (skeleton con la forma), vacío con acción, error con «Reintentar», 
 ## 6. Qué demostrar con datos de ejemplo
 - Un negocio con el paso 1 hecho por persona, el paso 2 vencido (WhatsApp) y los pasos 3 y 4 programados.
 - Un borrador de correo preparado por el agente esperando aprobación.
-- Un negocio que respondió y pasó a Negociación con la tarea «Responder al cliente».
-- Un cierre automático bajo el umbral y un cierre propuesto sobre el umbral.
+- Un negocio que respondió y pasó a Negociación, esperando que el vendedor elija responder, cotizar o agendar, y otro con el recordatorio de 1 día hábil.
+- Un cierre propuesto esperando confirmación y, en un tenant que lo configuró, un cierre aplicado por el plan con «Reabrir».
 - Un negocio detenido en Negociación.
 - Un paso fallido por contacto sin correo.
 
