@@ -28,8 +28,7 @@ export const platformAuditoriaEstado = defineCapability({
   dryRun: false,
   tenantObjetivo: (input) => input.tenantId,
   async handler(ctx, input) {
-    const db = requierePlataforma(ctx).paraTenant(input.tenantId);
-    const c = await db.auditoriaCabeza.findUnique({ where: { tenantId: input.tenantId } });
+    const c = await requierePlataforma(ctx).empresa(input.tenantId).cabezaAuditoria();
     return {
       ultimoSeq: c?.ultimoSeq ?? null,
       verificadaEn: iso(c?.verificadaEn),

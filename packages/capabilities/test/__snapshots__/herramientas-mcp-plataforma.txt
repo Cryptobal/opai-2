@@ -2,6 +2,7 @@ platform_admins_invite
 platform_ajustes_get
 platform_ajustes_set
 platform_auditoria_estado
+platform_auditoria_list
 platform_bitacora_estado
 platform_consumos_summary
 platform_eventos_list

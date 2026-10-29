@@ -1,5 +1,5 @@
 import { vistaVinculo } from "./vinculos-vista";
-import { vistaAprobaciones } from "../agentes/aprobaciones";
+import { vistaAprobaciones } from "../agentes/aprobaciones-vista";
 import { PERMISOS_CORE } from "@opai/domain";
 import { defineCapability } from "../../define";
 import { noEncontrado, prohibido, reglaDeNegocio } from "../../errores";

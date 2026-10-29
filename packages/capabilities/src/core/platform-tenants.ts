@@ -49,16 +49,13 @@ export const platformTenantsGet = defineCapability({
     const p = requierePlataforma(ctx);
     const tenant = await p.globales.tenantPorId(input.tenantId);
     if (!tenant) throw noEncontrado("La empresa");
-    const db = p.paraTenant(tenant.id);
+    const e = p.empresa(tenant.id);
     const [modulos, admins, invitaciones, keys, uso] = await Promise.all([
-      modulosConEstado(db),
-      db.membership.findMany({
-        where: { rol: { in: ["owner", "admin"] } },
-        include: { user: true },
-      }),
-      db.invitation.findMany({ orderBy: { createdAt: "desc" }, take: 50 }),
-      db.apiKey.findMany({ orderBy: { createdAt: "desc" } }),
-      resumenUso(db, 30),
+      e.modulos().then(modulosConEstado),
+      e.administradores(),
+      e.invitaciones(),
+      e.apiKeys(),
+      resumenUso(e, 30),
     ]);
     return {
       tenant,
@@ -105,7 +102,7 @@ export const platformUsageSummary = defineCapability({
     const tenants = await p.globales.listarTenants();
     return Promise.all(
       tenants.map(async (t) => {
-        const uso = await resumenUso(p.paraTenant(t.id), input.dias);
+        const uso = await resumenUso(p.empresa(t.id), input.dias);
         return {
           tenantId: t.id,
           slug: t.slug,
