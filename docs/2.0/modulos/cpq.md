@@ -13,7 +13,7 @@ Que cualquier empresa de servicios con personal (Gard primero, con la vertical *
 **1.0 es el piso:** 2.0 calcula lo mismo que 1.0 (casos dorados al peso, §5.F) y hace todo lo que 1.0 hace por pantalla y por MCP (§11). **El techo:** una sola cotización por negocio con secciones por instalación, versiones congeladas, aprobación por margen, explicación de cada monto, simulación instantánea y un modelo que cada tenant ajusta sin programar.
 
 **Cómo se nota que funciona:**
-- Las cotizaciones reales de Gard elegidas para validar (§5.F, R52) dan el **mismo precio de venta mensual al peso** que 1.0.
+- Las cotizaciones reales de Gard elegidas para validar (§5.F, R39) dan el **mismo precio de venta mensual al peso** que 1.0.
 - Una cotización de un puesto 24/7 en una instalación conocida sale en **menos de 3 minutos** (cotización rápida) y una multi-instalación de 5 secciones en menos de 20 minutos.
 - Durante dos semanas seguidas Gard cotiza y envía **solo en 2.0** (criterio de término de la fase 2, `ROADMAP.md`).
 - El 100 % de las cotizaciones bajo el margen mínimo pasa por aprobación antes de salir.
@@ -54,9 +54,10 @@ Que cualquier empresa de servicios con personal (Gard primero, con la vertical *
 | Aprobaciones pendientes | Bandeja de Inicio (ítem «Cotización por aprobar») y filtro «Por aprobar» de la lista | ERP | Lista + hoja de decisión | — |
 | Ofrecer puestos | Hoja desde el negocio ganado o la cotización aceptada | ERP | Formulario por línea | Acción «Crear puestos» |
 | Modelo de costeo | `/cotizaciones/modelo` (pestañas: Variables · Fórmulas · Ítems · Paquetes · Versiones) | ERP | Ficha con pestañas + editor | Acción secundaria de Cotizaciones |
+| Valores para cotizar | Sección en las fichas de cuenta e instalación (solo con CPQ activo) | ERP | Pares editables | Ficha de la cuenta o la instalación |
 | Vista cliente | Interruptor «Vista interna / Vista cliente» en el cotizador | ERP | Misma planilla sin costos internos | — |
 
-**Teléfono frente a iPad y escritorio [decidido, ADR-042 (9)]:** en el teléfono se **ven, comparan y aprueban** cotizaciones, se crea una **cotización rápida** (pregunta 7) y se habla con el agente; la edición completa de la planilla y el Modelo de costeo son de iPad y escritorio. En el teléfono el cotizador muestra el resumen (venta, margen con semáforo, estado, vence) y las secciones plegadas en solo lectura.
+**Teléfono frente a iPad y escritorio:** en el teléfono se **ven, comparan y aprueban** cotizaciones **[decidido, ADR-042 (9)]** y se habla con el agente; **propuesta (pregunta 7):** también la **cotización rápida**. La edición completa de la planilla y el Modelo de costeo son de iPad (incluido vertical, desde 768 px) y escritorio. En el teléfono el cotizador muestra el resumen (venta, margen con semáforo, estado, vence) y las secciones plegadas en solo lectura.
 
 **Resumen fijo del cotizador (iPad y escritorio):** costo mensual, venta mensual, pagos únicos, margen efectivo con semáforo contra el mínimo, efecto de los instrumentos financieros (costo financiero, póliza, RC), dotación (posiciones y personas), UF usada y advertencias. El cálculo corre en el navegador con el mismo dominio y el servidor recalcula al guardar y manda (ADR-042 (9)).
 
@@ -77,7 +78,7 @@ Que cualquier empresa de servicios con personal (Gard primero, con la vertical *
 | Moneda de presentación | `CLP` o `UF` | Sí | Ajuste por defecto del tenant | `manage` | Sí |
 | UF usada | Valor y fecha | Si hay montos en UF o se presenta en UF | Del servicio de indicadores del núcleo; se congela al enviar (R30) | Sistema | Sí |
 | Válida hasta | Fecha | Sí | ≥ hoy; por defecto hoy + validez del tenant (30 días, pregunta 10) | `manage` | Sí |
-| Margen objetivo y modo | Porcentaje escalado; `margen_sobre_venta` (por defecto **[decidido (7)]**), `markup`, `margen_sobre_mano_de_obra` | Sí | 0 ≤ m < 100 % | `manage` | No |
+| Margen objetivo y modo | Porcentaje escalado; `margen_sobre_venta` (por defecto **[decidido (7)]**), `markup`, `margen_sobre_mano_de_obra` | Sí | 0 ≤ m < 100 % en pantalla, API y MCP (la guarda `m ≥ 100 %` de R31 queda en el dominio) | `manage` | No |
 | Precio manual | CLP o UF por mes | No | Si se fija, el margen se calcula al revés y se muestra (R36) | `manage` | Sí (es el precio) |
 | Condiciones comerciales | Estructuradas (§2) | Sí | Valores por defecto de los ajustes; reajuste polinómico: pesos que suman 100 % | `manage` | Sí |
 | Totales | Costo, venta mensual, únicos, margen efectivo, instrumentos | — | Calculados; nunca se editan | Sistema | Solo venta y únicos |
@@ -144,7 +145,7 @@ Que cualquier empresa de servicios con personal (Gard primero, con la vertical *
 
 - **R18.** Toda cotización cuelga de un negocio; la cuenta es la del negocio. Una cotización tiene **una sección por instalación del negocio** que se cotiza y, si hace falta, una sección **Común**. **No hay bundles** (corrige P4): las condiciones comerciales son una sola por versión.
 - **R19.** Solo se cotizan instalaciones vinculadas al negocio. Agregar una instalación nueva a la cotización la vincula antes al negocio por la capacidad de Comercial (tipo `nueva`, `ampliacion`, `renovacion`, `reemplazo`).
-- **R20.** **Sueldo de la línea de puesto.** Orden de origen, siempre visible en la línea: (1) si la línea referencia un puesto existente, la capa que rige ese puesto (puesto o instalación, ADR-036); (2) si la instalación ya tiene capa de instalación, esa; (3) si es una instalación nueva, el **sueldo de referencia para cotizar** del modelo por cargo (pregunta 1); (4) el que la persona escriba. Leer un sueldo de capa es una lectura sensible auditada (no se duplica la auditoría de `core.estructuras.read_sensible`).
+- **R20.** **Sueldo de la línea de puesto.** Orden de origen, siempre visible en la línea: (1) si la línea referencia un puesto existente, la capa que rige ese puesto (puesto o instalación, ADR-036); (2) si la instalación ya tiene capa de instalación, esa; (3) si es una instalación nueva, el **sueldo de referencia para cotizar** del modelo por cargo (pregunta 1); (4) el que la persona escriba. El sueldo de capa (1) y (2) solo se muestra a quien tiene también el permiso del núcleo para leer estructuras sensibles; sin él, la línea muestra solo «sueldo cotizado» si lo hay, o «—», y el costo se calcula igual en el servidor. Leerlo es una lectura sensible auditada (no se duplica la auditoría de `core.estructuras.read_sensible`).
 - **R21.** Las **personas por posición** las sugiere el motor desde el patrón y el horario con el dominio de turnos (4x4 y 7x7 de 12 h: 2 personas por posición). Sobrescribirlas exige motivo y queda en la traza.
 - **R22.** La sección Común se presenta como tal. Mostrar un precio por instalación con lo común prorrateado es una opción de presentación (pregunta 3), no cambia el total.
 - **R23.** Varias **alternativas** para el mismo negocio (Opción A, B, C; en 1.0 son cotizaciones sueltas) son cotizaciones hermanas marcadas como alternativa; se comparan lado a lado y una es la vigente (pregunta 2).
@@ -161,24 +162,24 @@ Que cualquier empresa de servicios con personal (Gard primero, con la vertical *
 
 ### E. Margen y costo financiero (se porta el cálculo de 1.0, `extraccion` §3.9)
 
-- **R31.** Modos de margen sobre la base de costos `C`: margen sobre venta `C / (1 − m)` (por defecto **[decidido (7)]**), markup `C × (1 + m)`, margen sobre mano de obra `MO / (1 − m) + (C − MO)`. Si `m ≥ 100 %` no se aplica margen.
+- **R31.** Modos de margen sobre la base de costos `C` (sin líneas adicionales): margen sobre venta `C / (1 − m)` (por defecto **[decidido (7)]**), markup `C × (1 + m)`, margen sobre mano de obra `MO / (1 − m) + (C − MO)`, donde `MO` = costo mensual de los puestos + ajuste de feriados. Si `m ≥ 100 %` no se aplica margen (guarda del dominio; la entrada ya lo impide).
 - **R32.** Las **líneas adicionales** no pasan por el modo: llevan su margen propio `base / (1 − m_línea)` y se suman antes de los instrumentos.
-- **R33.** Instrumentos sobre la venta `S`: `k = f + kG` (costo financiero mensual + póliza de garantía en porcentaje). Si `0 ≤ k < 0,35`: `S = (B + RC + Gfijo + únicos) / (1 − k)`; RC y póliza en monto fijo como en 1.0. Los pagos únicos entran a la base de la póliza solo si el ajuste lo pide (por defecto no).
+- **R33.** Instrumentos sobre la venta `S`: `k = f + kG`, con `f` = costo financiero mensual (2,5 % por defecto, si está habilitado) y `kG = pG × (Mg × rG / 12 + eG)` para la póliza de garantía en porcentaje (`pG` % garantizado, `rG` tasa anual, `eG` gasto administrativo, `Mg` meses del contrato). Si `0 ≤ k < 0,35`: `S = (B + RC + Gfijo + únicos) / (1 − k)`. Póliza en monto fijo UF: `Gfijo = garantía × rG / 12 + garantía × eG / Mg`. RC = prima anual en UF × UF × % asignado / 12, o tasa sobre el monto asegurado, independiente de `S`. Los pagos únicos entran a la base de la póliza solo si el ajuste lo pide (por defecto no).
 - **R34.** **Guarda `k ≥ 0,35`:** `S = (…) × (1 + k)` con advertencia visible «precio subvalorado»; la versión no pasa a `lista` ni se envía sin aprobación de owner o admin con `cpq:aprobar` **[decidido, ADR-042 (5)]**.
-- **R35.** **Margen efectivo** = `(S − costos − adicionales − instrumentos) / S`. Si queda **bajo el mínimo del tenant** (Gard: **10 % sobre venta [decidido (6)]**, ajuste declarativo), la versión pasa a `en_aprobacion` al pedir dejarla lista.
+- **R35.** **Margen efectivo** = `(S − costos − adicionales − instrumentos) / S`. Si queda **bajo el mínimo del tenant** (Gard: **10 % sobre venta [decidido (6)]**, ajuste declarativo), la versión pasa a `en_aprobacion` al pedir dejarla lista. El semáforo es verde sobre el mínimo más un **umbral de alerta** (ajuste del tenant, propuesto 3 puntos), amarillo entre el mínimo y ese umbral, y rojo bajo el mínimo.
 - **R36.** **Precio manual** (modo `manual` de 1.0): la persona fija la venta y el sistema muestra el margen resultante; si queda bajo el mínimo, aplica R35.
 - **R37.** El **simulador de margen** (deslizador o «precio objetivo») muestra en vivo venta, margen efectivo y semáforo sin guardar; aplicar es una escritura normal.
 
 ### F. Casos dorados
 
 - **R38.** El motor del Brief 08 no se integra sin pasar, al peso: **CD-1** (gross-up cerrado, `S` = $10.279.605) y **CD-2** (rama `k ≥ 0,35`, `S` = $13.500.000 con advertencia), obtenidos del código de 1.0 (`extraccion` §3.9); los tests de 1.0 `financial-policy` y `cost-lines`; y casos nuevos de los modos `markup` y `margen_sobre_mano_de_obra`, que 1.0 no prueba, construidos desde las fórmulas de R31–R33.
-- **R39.** Y **cinco cotizaciones reales de Gard** enviadas en 2026, elegidas por Claude con variedad (póliza de garantía, varias instalaciones, margen bajo) y **confirmadas por Carlos [decidido, ADR-042 (4)]**: mismas entradas en 2.0, misma venta mensual que 1.0. Preselección en la pregunta 14.
+- **R39.** Y **cinco cotizaciones reales de Gard** enviadas en 2026, elegidas por Claude con variedad (póliza de garantía, varias instalaciones, margen bajo) y **confirmadas por Carlos [decidido, ADR-042 (4)]**: mismas entradas en 2.0, misma venta mensual que 1.0; más un caso compuesto de varias instalaciones, porque en 1.0 cada cotización es una sola. Preselección en la pregunta 14.
 
 ### G. Versiones, estados y aprobación
 
-- **R40.** Estado único (corrige P5): `borrador` → `en_aprobacion` (solo si R34 o R35) → `lista` → `enviada` → `aceptada` | `rechazada` | `vencida` | `reemplazada`; más `archivada` para borradores abandonados (no hay papelera).
+- **R40.** Estado único (corrige P5): `borrador` → `en_aprobacion` (solo si R34 o R35) → `lista` → `enviada` → `aceptada` | `rechazada` | `vencida` | `reemplazada` (ADR-042 (7)); **propuesta:** más `archivada` para borradores abandonados, en vez de la papelera de 1.0. «Abierta» = `borrador`, `en_aprobacion`, `lista` o `enviada`.
 - **R41.** Una versión aprobada que se edita vuelve a `borrador`; si sigue bajo el mínimo, pide aprobación de nuevo. La aprobación vale para **esa** versión y su venta.
-- **R42.** Quien aprueba no puede ser quien pidió la aprobación, salvo que el tenant tenga un solo usuario con `cpq:aprobar` (aviso en la auditoría). Rechazar exige motivo.
+- **R42.** Quien aprueba no puede ser quien pidió la aprobación, salvo que el tenant tenga un solo usuario con `cpq:aprobar` (aviso en la auditoría) (pregunta 5). Pedir aprobación admite un comentario; rechazar exige motivo. Quien pidió puede retirar el pedido.
 - **R43.** **Enviar congela** la versión: modelo, valores usados, copias de ítems, UF y totales. Cambiar algo después crea la **versión siguiente** (`v+1`, borrador) con la misma numeración; al enviarla, la anterior queda `reemplazada` (P16).
 - **R44.** Una versión `enviada` pasa sola a `vencida` el día siguiente a «válida hasta». Una vencida se puede **renovar** como versión nueva (con la UF y el modelo del día, mostrando la diferencia).
 - **R45.** **Aceptada** es consecuencia de **ganar el negocio** (una sola fuente de verdad): la cotización vigente enviada pasa a `aceptada` y las demás abiertas del negocio, a `rechazada` (propagación de `extraccion` §3.2 como consumidor de `comercial.negocio.ganado`). Perder el negocio rechaza las abiertas.
@@ -193,7 +194,7 @@ Que cualquier empresa de servicios con personal (Gard primero, con la vertical *
 
 - **R49.** El agente interno (ADR-049) y cualquier agente externo usan **las mismas capacidades** que la pantalla, con los permisos y el alcance del usuario (o de la key). No hay atajos ni herramientas propias de CPQ para el agente.
 - **R50.** El agente **siempre** trabaja con vista previa y deja un **plan** que la persona confirma («aprobar todo» o «paso a paso», ADR-049 (4)). Lo que el agente supone (patrón, horario, sueldo, margen) aparece como **supuesto** en el plan, nunca escondido.
-- **R51.** Un agente **no** aprueba márgenes, **no** confirma puestos de RRHH y **no** publica el modelo; **enviar** al cliente siempre pide aprobación humana (`APPROVAL_REQUIRED`) (pregunta 8).
+- **R51.** Un agente **no** aprueba márgenes (la capacidad es solo de personas). **Enviar**, **confirmar puestos** y **publicar el modelo** son irreversibles: el agente solo los prepara y quedan en la cola de aprobación humana (`APPROVAL_REQUIRED`), donde decide una persona con el permiso (RRHH en el caso de los puestos) (pregunta 8).
 - **R52.** El texto de una solicitud o de un correo del cliente es **externo**: el agente lo usa para proponer, nunca para habilitar una escritura irreversible (ADR-034).
 
 ### J. Convivencia con 1.0 e importación
@@ -214,7 +215,7 @@ Que cualquier empresa de servicios con personal (Gard primero, con la vertical *
 | enviada | (v+1) borrador | `manage`; agente con vista previa | — | Nueva versión | — |
 | enviada | vencida | Sistema (diario) | Pasó «válida hasta» | `cpq.cotizacion.vencida` | Renovar crea versión nueva |
 | enviada | aceptada | Sistema | Negocio ganado y es la vigente (R45) | Oferta de puestos (R2) | No (reabrir el negocio la devuelve a enviada) |
-| abierta | rechazada | Sistema | Negocio ganado con otra vigente o negocio perdido | — | Reabrir el negocio |
+| borrador · en_aprobacion · lista · enviada | rechazada | Sistema | Negocio ganado con otra vigente o negocio perdido | — | Reabrir el negocio |
 | enviada | reemplazada | Sistema | Se envió la versión siguiente | — | No |
 | borrador | archivada | `manage`; agente con vista previa | — | Fuera de las listas por defecto | Sí |
 
@@ -228,10 +229,12 @@ Permisos nuevos: `cpq:cotizaciones.read`, `cpq:cotizaciones.manage`, `cpq:costos
 | Ver costos, sueldos y margen | ✓ | ✓ | ✓ (pregunta 9) | — | — | — | — | Lectura si el usuario puede |
 | Crear, editar, versionar, simular, archivar | ✓ | ✓ | ✓ | — | — | — | — | ✓ con vista previa y plan |
 | Pedir aprobación | ✓ | ✓ | ✓ | — | — | — | — | ✓ con vista previa |
-| Aprobar o rechazar margen y subvaloración | ✓ | ✓ | — (pregunta 5) | — | — | — | — | **Nunca** (`soloPersonas`) |
+| Aprobar o rechazar margen y subvaloración | ✓ | ✓ | — **[decidido, ADR-042 (5)]** | — | — | — | — | **Nunca** (`soloPersonas`) |
 | Enviar | ✓ | ✓ | ✓ | — | — | — | — | Aprobación humana |
-| Confirmar puestos ofrecidos al ganar | RRHH (rol configurable, ADR-036 (8)) | | | | | | | **Nunca** (`APPROVAL_REQUIRED`, ADR-048 (7)) |
+| Confirmar puestos ofrecidos al ganar | RRHH (rol configurable, ADR-036 (8)) | | | | | | | Solo prepara; decide RRHH (`APPROVAL_REQUIRED`, ADR-048 (7)) |
 | Editar y publicar el Modelo de costeo e ítems | ✓ | ✓ | — | — | — | — | — | Borrador y prueba sí; publicar con aprobación humana |
+
+**Nota para el brief:** el gerente tiene `permitir: ["*"]` en `packages/domain/src/permisos.ts`; hay que agregar `cpq:aprobar` y `cpq:modelo.manage` a sus denegaciones (ADR-042 (5) y (8)). Hoy también tiene denegada la lectura de estructuras sensibles: `cpq:costos.ver` no se la abre (R20).
 
 **Alcance de filas:** en la v1, quien ve Comercial ve todas las cotizaciones (igual que los negocios, `comercial.md` §7). El supervisor sigue sin `cpq:*` (`packages/domain/src/permisos.ts`). Ver montos de venta no está sujeto al bloqueo financiero de ADR-016; los **sueldos** sí son sensibles y se rigen por `cpq:costos.ver` y la auditoría de lecturas.
 
@@ -261,19 +264,21 @@ Toda capacidad de CPQ sale por MCP con los mismos permisos (ADR-055); las de esc
 | `cpq_cotizaciones_explicar` | Traza de un monto o del total en lenguaje de negocio | Lectura | — | — |
 | `cpq_cotizaciones_comparar` | Diferencias entre dos versiones o alternativas | Lectura | — | — |
 | `cpq_cotizaciones_simular` | Calcula una cotización completa desde una especificación, **sin escribir** (ADR-042 (10)) | Lectura | — | — |
-| `cpq_cotizaciones_crear` / `crear_rapida` | Crear desde un negocio; o rápida con paquetes, creando el negocio si falta | Escritura | ✓ | — |
+| `cpq_cotizaciones_create` / `create_rapida` | Crear desde un negocio; o rápida con paquetes, creando el negocio si falta | Escritura | ✓ | — |
+| `cpq_cotizaciones_marcar_vigente` | Elegir la vigente del negocio (R46) | Escritura | ✓ | — |
 | `cpq_cotizaciones_ajustar` | **Lote de cambios tipados** sobre la versión editable: agregar o quitar sección, agregar línea de puesto o de ítem (o paquete), cambiar posiciones, horario, patrón o sueldo, fijar margen o precio objetivo, cambiar condiciones, mostrar u ocultar al cliente. Devuelve el **antes y después** de venta y margen | Escritura | ✓ | — |
 | `cpq_cotizaciones_nueva_version` / `renovar` / `actualizar_modelo` / `duplicar` / `archivar` | R27, R43, R44, R23 | Escritura | ✓ | — |
-| `cpq_cotizaciones_marcar_lista` / `solicitar_aprobacion` | R40 | Escritura | ✓ | — |
-| `cpq_cotizaciones_aprobar` / `rechazar_aprobacion` | Decisión de margen | Escritura | ✓ | `soloPersonas` (excepción de paridad con motivo) |
+| `cpq_cotizaciones_marcar_lista` / `solicitar_aprobacion` / `retirar_aprobacion` | R40, R42 | Escritura | ✓ | — |
+| *(sin herramienta)* `cpq.cotizaciones.aprobar` / `rechazar_aprobacion` | Decisión de margen. `soloPersonas`, en `paridad-excepciones.ts` con el motivo «es el control humano sobre lo que propone un agente» | — | — | Solo personas |
 | `cpq_cotizaciones_enviar` | Congela y envía en el formato elegido (CAR-68) | **Irreversible** | ✓ | **Sí** |
-| `cpq_puestos_ofrecer` / `confirmar` | Arma la oferta de puestos (R2) / RRHH la confirma | Escritura / irreversible | ✓ | Confirmar: **sí** |
+| `cpq_puestos_ofrecer` / `confirmar` | Arma la oferta de puestos (R2) / RRHH la confirma | Escritura / irreversible | ✓ | Confirmar: **sí** (decide RRHH) |
 | `cpq_modelo_get` / `diferencias` | Modelo vigente y borrador; diferencias con la plantilla | Lectura | — | — |
-| `cpq_modelo_editar` / `probar` | Borrador del modelo (variables, fórmulas, paquetes); prueba R9 | Escritura / lectura | ✓ | — |
+| `cpq_modelo_editar` / `probar` / `adoptar_novedad` | Borrador del modelo (variables, fórmulas, paquetes); prueba R9; adoptar en el borrador una novedad de la plantilla (R7) | Escritura / lectura | ✓ | — |
+| `cpq_valores_list` / `set` | Valores de variables con ámbito `cuenta` o `instalacion` (R11), editables desde la sección Modelo de la ficha de la cuenta o de la instalación y desde el cotizador | Lectura / escritura | ✓ | — |
 | `cpq_modelo_publicar` | Publica una versión | Irreversible | ✓ | **Sí** |
-| `cpq_items_list` / `create` / `update` / `archivar` | Catálogo de ítems | Lectura / escritura | ✓ | — |
+| `cpq_items_list` / `create` / `update` / `archivar` (verbos `create`/`update` como el resto del núcleo) | Catálogo de ítems | Lectura / escritura | ✓ | — |
 
-**El agente interno en CPQ (ADR-049).** Actúa como «agente interno vía <usuario>», con sus permisos y alcance. Arma un **plan** con lecturas y vistas previas; la persona lo confirma entero o paso a paso; cada escritura lleva clave de idempotencia; se detiene antes de aprobar, enviar, confirmar puestos o publicar el modelo.
+**El agente interno en CPQ (ADR-049; el ADR figura como «Propuesto (PR #38)», pero su servidor ya está integrado por la enmienda NÚCLEO-E2).** Actúa como «agente interno vía <usuario>», con sus permisos y alcance. Arma un **plan** con lecturas y vistas previas; la persona lo confirma entero o paso a paso; cada escritura lleva clave de idempotencia; se detiene antes de aprobar, enviar, confirmar puestos o publicar el modelo.
 
 **Flujo 1 · desde una solicitud** («cotiza lo que pide esta solicitud»):
 1. Lee la solicitud (texto **externo**) y propone una interpretación: instalación, posiciones, días y horario, patrón sugerido. Si algo es ambiguo (¿24/7 o solo noche? ¿4x4 o 7x7?), **pregunta**; no adivina.
@@ -328,12 +333,12 @@ Toda capacidad de CPQ sale por MCP con los mismos permisos (ADR-055); las de esc
 - Falta el valor UF del día: advertencia, no se envía (R30).
 - `k ≥ 0,35` o margen ≥ 100 %: R34 y R31.
 - Sueldo bajo el ingreso mínimo vigente: bloquea la línea. Horas semanales sobre la jornada legal: advertencia (la persona decide si son horas extra pactadas).
-- Se quita una instalación del negocio con líneas en la cotización: Comercial lo impide (trigger de `negocio_instalaciones`); primero se quita la sección.
+- Se quita una instalación del negocio con líneas en una cotización abierta: se impide, pero sin que Comercial lea tablas de CPQ (ADR-040): CPQ publica por contrato del núcleo «instalación en uso por una cotización abierta» y la capacidad de Comercial lo consulta antes de desvincular; primero se quita la sección.
 - Se publica un modelo mientras alguien edita: la versión sigue con su modelo y se avisa (R27).
 - Ítem archivado en un borrador: la línea conserva su copia; no se puede agregar de nuevo.
 - Dos personas editan la misma versión: gana la primera; la segunda ve «la cotización cambió» y recarga sin perder su cambio pendiente (control de versión optimista).
 - El agente repite un ajuste: la clave de idempotencia evita duplicar líneas.
-- Se gana un negocio cuya vigente está vencida: Comercial exige cotización enviada (`comercial.md`, pregunta 7); la vencida se renueva antes.
+- Se gana un negocio cuya vigente está vencida: si Carlos aprueba la pregunta 7 de `comercial.md` (ganar exige cotización enviada), la vencida se renueva antes de ganar.
 - Reabrir un negocio ganado: la aceptada vuelve a `enviada`; los puestos ya confirmados no se borran (R5).
 - Cotización sin guardias (solo cámaras o suministros, como CPQ-2026-298 de 1.0): sin oferta de puestos (R4).
 - Contrato corto (60 días, 3 meses): los amortizables se dividen por la duración, no por 12 (como en 1.0).
@@ -352,8 +357,8 @@ Toda capacidad de CPQ sale por MCP con los mismos permisos (ADR-055); las de esc
 - **CA9.** Enviar congela la versión; editar después crea `v+1`; al enviar `v+1`, la `v` queda reemplazada y el negocio recibe el nuevo valor mensual.
 - **CA10.** Una enviada vence sola al día siguiente de su validez; renovarla crea versión nueva con la diferencia visible.
 - **CA11.** Ganar el negocio deja la vigente aceptada, rechaza las demás y ofrece un puesto por posición de cada línea de guardias, con el sueldo cotizado; nada se crea hasta que RRHH confirma; repetir no duplica.
-- **CA12.** Una cotización rápida de 1 posición 24/7 se crea en el teléfono en menos de 3 minutos, con negocio nuevo si no existía.
-- **CA13.** En el teléfono se ve, compara y aprueba; la planilla no es editable bajo 1024 px.
+- **CA12.** Una cotización rápida de 1 posición 24/7 se crea en menos de 3 minutos, con negocio nuevo si no existía (también en el teléfono, si Carlos aprueba la pregunta 7).
+- **CA13.** En el teléfono (bajo 768 px) se ve, compara y aprueba, y la planilla es de solo lectura; en iPad vertical (768 px) y horizontal (1024 px) y en escritorio se edita completa.
 - **CA14.** Por MCP, un agente crea una cotización, sube el margen, agrega un guardia nocturno y explica el costo, siempre con vista previa; `enviar` devuelve `APPROVAL_REQUIRED` y `aprobar` no existe para él.
 - **CA15.** Un usuario sin `cpq:costos.ver` no ve sueldos ni costos en pantalla, API ni MCP; la explicación usa porcentajes por categoría.
 - **CA16.** Toda tabla de CPQ tiene `tenant_id`, RLS y política `tenant_isolation`; la prueba de dos empresas pasa.
@@ -365,30 +370,33 @@ Cerradas, con recomendación. Lo ya respondido en `PREGUNTAS-carlos.md` (4–11)
 
 ### A. Las 8 preguntas de la Page de CPQ (reconstruidas; ver la nota del inicio)
 
-1. **¿De dónde sale el sueldo de una línea de puesto en una instalación nueva**, que todavía no tiene capa de sueldo? (a) un **sueldo de referencia para cotizar** por cargo, variable del modelo del tenant, que se puede cambiar en la línea; (b) se escribe siempre a mano; (c) se copia de la instalación más parecida. **Recomendación: (a).** No es una capa de sueldo (ADR-036 sacó al cargo de las capas): es un supuesto de venta, visible en la línea y en el plan del agente; al ganar, ese sueldo es el «sueldo bruto cotizado» que RRHH confirma (R2).
+> Antes de responder, si la Page de CPQ existe, conviene pasar su enlace: así se comparan sus 8 preguntas con estas y no se cierra un conjunto distinto. Donde una pregunta de la reconstrucción ya estaba decidida por un ADR, se marca **[decidido]** y solo queda abierta la parte nueva.
+
+1. **¿De dónde sale el sueldo de una línea de puesto en una instalación nueva**, que todavía no tiene capa de sueldo? (a) un **sueldo de referencia para cotizar** por cargo, variable del modelo del tenant, que se puede cambiar en la línea; (b) se escribe siempre a mano; (c) se copia de la instalación más parecida. **Recomendación: (a).** No es una capa de sueldo (ADR-036 sacó al cargo de las capas): es un supuesto de venta, visible en la línea y en el plan del agente. **Y para R2 y R3:** ¿el sueldo de referencia cuenta como «sueldo cotizado» (el puesto nace con ese sueldo y RRHH lo confirma) o como «sin sueldo» (el puesto toma el de la instalación)? **Recomendación: cuenta como sueldo cotizado**, porque es el precio que se vendió; RRHH lo ve marcado como «referencia del cargo» al confirmar y puede cambiarlo. Si prefieres lo contrario, R3 se aplica a toda línea con sueldo de referencia.
 2. **¿Cómo se manejan las «Opción A/B/C» de un mismo negocio** (hoy son cotizaciones sueltas en 1.0, p. ej. CPQ-2026-307/308/309)? (a) **cotizaciones hermanas marcadas como alternativas**, comparables lado a lado, con una vigente y enviables juntas; (b) opciones dentro de una sola cotización. **Recomendación: (a).** Cada opción tiene su propio precio, margen y aprobación, y al ganar queda clara cuál se aceptó; (b) mezcla precios en un mismo documento y complica las versiones.
 3. **¿Lo común a varias instalaciones** (supervisor, vehículo de ronda) se prorratea? (a) **sección Común propia, y el precio por instalación con prorrateo es solo una opción de presentación** (por posiciones); (b) se reparte siempre en las instalaciones. **Recomendación: (a).** El costo real es uno; algunos clientes piden precio por sitio y otros no. Cómo se muestra lo decide CAR-68.
-4. **¿En qué moneda se calcula y con qué UF?** **Recomendación:** cálculo en CLP enteros; presentación en UF o CLP según la cotización; **UF del día de envío**, congelada en la versión (renovar usa la del día). Así el precio enviado no cambia y el reajuste lo gobiernan las condiciones (IPC/IMO/polinómico).
-5. **¿Quién aprueba y qué más pide aprobación?** Ya decidido: bajo 10 % y subvaloración, aprueban owner o admin con `cpq:aprobar`. Falta: ¿el **gerente** también aprueba? ¿el **precio manual** pide aprobación solo si queda bajo el mínimo? **Recomendación:** gerente **no** aprueba en la v1 (se puede dar `cpq:aprobar` a un rol personalizado); precio manual permitido y con aprobación solo bajo el mínimo (R36). Mantiene el control en pocas manos sin frenar la venta.
-6. **¿Qué pasa con los borradores cuando se publica un modelo nuevo?** (a) **conservan su versión del modelo y ven el aviso con la diferencia; actualizar es explícito**; (b) se actualizan solos. **Recomendación: (a).** Es lo que corrige P16: nada cambia de precio sin que una persona lo vea.
-7. **¿La cotización rápida se puede hacer desde el teléfono?** ADR-042 (9) dejó la edición completa en iPad y escritorio. **Recomendación: sí**, solo la rápida (cuenta, instalación, paquetes, margen; menos de 5 campos), porque el vendedor en terreno la necesita y no toca la planilla.
-8. **¿Hasta dónde llega el agente en CPQ?** **Recomendación:** crea y ajusta borradores, simula, explica, compara, versiona y pide aprobación, siempre con plan confirmado (ADR-049); **nunca aprueba márgenes** (`soloPersonas`), **enviar** pide aprobación humana, **confirmar puestos** es solo de RRHH y **publicar el modelo** pide aprobación. La aprobación de margen es justamente el control humano sobre lo que propone un agente.
+4. **¿En qué moneda se presenta?** **[decidido, ADR-042 (7)]:** la UF del día se congela al enviar. Abierto: la moneda de presentación por defecto. **Recomendación:** cálculo siempre en CLP enteros y **presentación en UF por defecto** para Gard (todas sus cotizaciones de 1.0 están en UF), configurable por tenant y por cotización.
+5. **¿Puede aprobar quien pidió la aprobación?** **[decidido, ADR-042 (5) y (7)]:** aprueban owner o admin con `cpq:aprobar`, no el gerente; el precio manual pide aprobación solo si queda bajo el mínimo. Abierto: la auto-aprobación. **Recomendación: no**, salvo que el tenant tenga una sola persona con `cpq:aprobar` (queda marcado en la auditoría), porque una aprobación propia no es control (R42).
+6. **¿Qué pasa con los borradores cuando se publica un modelo nuevo?** **[decidido, ADR-042 (1)]:** publicar no mueve cotizaciones existentes. Abierto: si además se avisa. **Recomendación:** el borrador muestra «hay un modelo nuevo» con la diferencia, y actualizar es una acción explícita que la persona elige (R27).
+7. **¿La cotización rápida se puede hacer desde el teléfono?** ADR-042 (9) dejó la edición completa en iPad y escritorio y en el celular solo ver, comparar y aprobar. **Recomendación: sí**, solo la rápida (cuenta, negocio o «crear», instalación, paquetes y margen), porque el vendedor en terreno la necesita y no toca la planilla.
+8. **¿Hasta dónde llega el agente en CPQ?** **Recomendación:** crea y ajusta borradores, simula, explica, compara, versiona y pide aprobación, siempre con plan confirmado (ADR-049); **nunca aprueba márgenes** (capacidad solo de personas); **enviar**, **confirmar puestos** y **publicar el modelo** los prepara y quedan en la cola de aprobación humana (R51). La aprobación de margen es justamente el control humano sobre lo que propone un agente.
 
 ### B. Preguntas nuevas de esta especificación
 
-9. **¿Quién ve costos y sueldos?** **Recomendación:** permiso nuevo `cpq:costos.ver` para owner, admin y gerente; viewer y roles de venta sin él ven venta, estado y margen en porcentaje. Los sueldos son datos sensibles (Ley 21.719) y la venta no.
+9. **¿Quién ve costos y margen?** **Recomendación:** permiso nuevo `cpq:costos.ver` para owner, admin y gerente; viewer y roles de venta sin él ven venta, estado y margen en porcentaje. **Ojo:** el gerente hoy no puede leer estructuras de sueldo sensibles; con esta recomendación ve costos y el sueldo **cotizado**, pero no el sueldo de las capas del núcleo (R20). Si quieres que lo vea, hay que cambiar esa denegación del núcleo, no solo CPQ.
 10. **¿Validez por defecto y vencimiento?** **Recomendación:** 30 días, ajuste del tenant; vencimiento automático diario y aviso 3 días antes. El seguimiento que se hace con esos avisos es de CAR-67.
 11. **¿Cotizaciones abiertas de 1.0 durante la convivencia?** **Recomendación:** se importan de solo lectura (R53) y se **continúan** en 2.0 como versión nueva recalculada, mostrando la diferencia; no se editan en 1.0 después del corte. Evita dos precios vivos del mismo negocio.
-12. **¿«Al peso» es exacto?** **Recomendación:** exacto en la venta mensual final redondeada; si una diferencia de $ 1 viene del redondeo en coma flotante de 1.0, se documenta caso a caso y Carlos la acepta. 1.0 calcula en floats (P15) y 2.0 en enteros.
+12. **¿«Al peso» es exacto?** **Recomendación:** exacto en la venta mensual final redondeada; si una diferencia de $ 1 viene del redondeo en coma flotante de 1.0, se documenta caso a caso y tú la aceptas. 1.0 calcula en floats (P15) y 2.0 en enteros.
 13. **¿Las mejoras de la plantilla de la vertical llegan solas?** **Recomendación: nunca solas**; se ofrecen con sus diferencias y el tenant las adopta en un borrador (R7). El modelo es del tenant.
-14. **¿Confirmas estas cotizaciones de 1.0 como casos dorados** (preselección de Claude, 29-oct-2026, lectura de 1.0 por MCP; respuesta (c) de la pregunta 4 de `PREGUNTAS-carlos.md`)?
-    - **CPQ-2026-340**: licitación con póliza de garantía y costo financiero, 6 líneas (incluido supervisor 5x2), vehículo, colación, exámenes, movilización no imponible, margen 10 % (verificado).
-    - **CPQ-2026-360**: vehículos y equipamiento (camionetas + enlace satelital).
-    - **CPQ-2026-353**: horario mixto (nocturno L–V + 24 h fin de semana).
-    - **CPQ-2026-298**: sin guardias (solo suministros) — prueba R4.
-    - **Una multi-instalación** (bundle de 1.0) y **una con margen bajo**: las elige Claude en el Brief 08 al revisar el detalle, y te las pasa para confirmar.
-    **Recomendación: sí.** Cubren póliza, varias instalaciones, margen bajo, vehículos, horarios raros y el caso sin guardias. Salvo la 340, están preseleccionadas solo por su nombre: el Brief 08 verifica su detalle antes de fijarlas.
-15. **¿Personas por posición calculadas o a mano?** **Recomendación:** el motor las sugiere desde el patrón y el horario (4x4 de 12 h = 2 personas) y se pueden sobrescribir con motivo (relevo de colación, cobertura de vacaciones). En 1.0 se escriben a mano (`numGuards`) y es una fuente de error.
+14. **¿Confirmas estas cinco cotizaciones de 1.0 como casos dorados?** (Preselección de Claude, 29-oct-2026, lectura de 1.0 por MCP; respuesta (c) de la pregunta 4 de `PREGUNTAS-carlos.md`.)
+    1. **CPQ-2026-340**: póliza de garantía y costo financiero, 6 líneas (incluido supervisor 5x2), vehículo, colación, exámenes, movilización no imponible, **margen 10 %, justo en el mínimo** (detalle verificado).
+    2. **CPQ-2026-360**: vehículos y equipamiento (camionetas y enlace satelital).
+    3. **CPQ-2026-353**: horario mixto (nocturno L–V + 24 h fin de semana).
+    4. **CPQ-2026-298**: sin guardias (solo suministros), que prueba R4.
+    5. **CPQ-2026-321**: el caso base de Gard, 1 posición 24/7 4x4 (el mismo precio aparece en otras cuatro cotizaciones de 2026).
+
+    **Varias instalaciones:** en 1.0 una cotización es una instalación (P4), así que no hay un caso real de una sola cotización con varias. Se agrega un **caso compuesto**: una cotización 2.0 con dos secciones (las instalaciones de la 340 y la 353, con condiciones comunes) cuya venta se compara con la suma de las dos de 1.0, con la diferencia que explique la RC en monto fijo. **Recomendación: sí** a las cinco y al compuesto. Cubren póliza, margen en el mínimo, vehículos, horarios raros, el caso sin guardias y el caso más frecuente. Salvo la 340, se eligieron por su nombre: el Brief 08 verifica el detalle de cada una y te avisa si alguna no sirve.
+15. **¿Se pueden sobrescribir las personas por posición?** **[decidido, ADR-042 (4)]:** el motor las calcula con el dominio de turnos. Abierto: si se pueden cambiar a mano. **Recomendación: sí, con motivo** (relevo de colación, cobertura de vacaciones), visible en la traza (R21). En 1.0 se escriben siempre a mano (`numGuards`) y es una fuente de error.
 
 ## 15. Lo que toca a temas hermanos (no se resuelve aquí)
 
