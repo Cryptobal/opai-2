@@ -100,7 +100,7 @@ test.describe("DS V2 (ADR-050)", () => {
     expect(contraste(medidas.borde, medidas.fondo)).toBeGreaterThanOrEqual(3);
   });
 
-  test("el shell sigue el export: Buscar arriba en el teléfono y el usuario al pie en 1280", async ({
+  test("el shell sigue el export: Buscar arriba en el teléfono y el usuario al pie desde 1024", async ({
     page,
   }, info) => {
     await page.goto("/ds");
@@ -116,9 +116,9 @@ test.describe("DS V2 (ADR-050)", () => {
         page.locator("header").getByRole("button", { name: "Buscar o ir a" }),
       ).toBeVisible();
       const lateral = page.getByRole("navigation", { name: "Principal" }).filter({ visible: true });
-      // El riel (768–1279) ya no lleva la marca; la barra lateral (1280+) sí, con el usuario al pie.
-      await expect(lateral.getByText("OPAI", { exact: true })).toHaveCount(ancho >= 1280 ? 1 : 0);
-      if (ancho >= 1280)
+      // El riel (768–1023) ya no lleva la marca; la barra lateral (1024+, D9) sí, con el usuario al pie.
+      await expect(lateral.getByText("OPAI", { exact: true })).toHaveCount(ancho >= 1024 ? 1 : 0);
+      if (ancho >= 1024)
         await expect(lateral.getByRole("button", { name: "Menú de usuario" })).toBeVisible();
     }
     await page.screenshot({ path: info.outputPath(`shell-v2-${info.project.name}.png`) });
