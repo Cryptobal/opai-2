@@ -4,6 +4,7 @@ import { Button, Segmentado } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
 import { PaginaPortal } from "@/app/_components/pagina-portal";
+import { exigirDatos } from "@/lib/carga";
 import { leerParametros, type SearchParams } from "@/lib/parametros";
 import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
 
@@ -35,7 +36,7 @@ async function cargar({ params, searchParams }: Props) {
     "core.comunicaciones.eventos",
     {},
   );
-  const e = r.ok ? r.data.find((x) => x.evento === evento) : undefined;
+  const e = exigirDatos(r).find((x) => x.evento === evento);
   const canales = e?.canales.map((c) => c.canal) ?? [];
   const canal = p["canal"] && canales.includes(p["canal"]) ? p["canal"] : (canales[0] ?? "correo");
   const t = e
@@ -45,7 +46,7 @@ async function cargar({ params, searchParams }: Props) {
     e,
     canal,
     canales,
-    t: t?.ok ? t.data : null,
+    t: t ? exigirDatos(t) : null,
     empresa: id.actual?.tenant.nombre ?? "OPAI",
   };
 }

@@ -4,6 +4,7 @@ import { type ReactNode, Suspense } from "react";
 import { Forbidden, Loading, type VarianteLoading } from "@opai/ds";
 
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+import { falloDeCarga } from "@/lib/carga";
 import { epocaDeIdentidad, marcaGenerado } from "@/lib/epoca-sesion";
 import { verificarMfaDe } from "@/lib/mfa";
 import { medirFase } from "@/lib/metricas-navegacion";
@@ -11,6 +12,7 @@ import { requerirIdentidad, tieneAccesoAPortal } from "@/lib/servidor";
 
 import { type OpcionesPagina } from "./cabecera-contexto";
 import { CabeceraPagina } from "./cabecera-pagina";
+import { ErrorCarga } from "./error-carga";
 import { MarcadorMetricas } from "./marcador-metricas";
 
 type Props<T> = OpcionesPagina & {
@@ -53,10 +55,18 @@ async function Contenido<T>({
   );
   // Fase `datos` del `Server-Timing` (ADR-045): solo los datos de la página; el shell y su navegación
   // viven en el layout del portal (`PortalLayout`) y no se recargan por navegación.
-  const datos = await medirFase("datos", () =>
-    acceso && cargar ? cargar() : Promise.resolve(undefined as T),
-  );
-  const extra = acceso && cargar && opciones ? opciones(datos) : {};
+  // Si la carga falla, la página muestra `ErrorCarga` (error o sin permisos) dentro del shell, nunca
+  // datos vacíos ni la página genérica de Next (CAR-50).
+  let datos = undefined as T;
+  let fallo: "forbidden" | "error" | null = null;
+  try {
+    datos = await medirFase("datos", () =>
+      acceso && cargar ? cargar() : Promise.resolve(undefined as T),
+    );
+  } catch (e) {
+    fallo = falloDeCarga(e);
+  }
+  const extra = acceso && cargar && opciones && !fallo ? opciones(datos) : {};
   // El esqueleto acompaña al contenido (lo intercambia el CSS en navegaciones lentas, ver `EstadoEnlace`);
   // el resto de las opciones son la cabecera que la página fija en el shell persistente del layout.
   const { esqueleto, insignia, ...cabecera } = { ...pagina, ...extra };
@@ -68,7 +78,9 @@ async function Contenido<T>({
         epoca={epocaDeIdentidad(identidad)}
       />
       <div data-contenido className="contents">
-        {acceso ? (
+        {acceso && fallo ? (
+          <ErrorCarga fallo={fallo} ruta={ruta} />
+        ) : acceso ? (
           typeof children === "function" ? (
             children(datos)
           ) : (

@@ -1,5 +1,6 @@
 import { listarModulos } from "@opai/capabilities";
 
+import { datosSiHayPermiso } from "@/lib/carga";
 import { estadoPantalla } from "@/lib/formato";
 import { hoyIso } from "@/lib/fechas";
 import { contextoServidor, ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
@@ -29,7 +30,7 @@ export async function gastoDelMes() {
     "core.consumos.por_agente",
     { mes: hoyIso().slice(0, 7) },
   );
-  return new Map((r.ok ? r.data : []).map((g) => [g.apiKeyId, g.costoUsd]));
+  return new Map(datosSiHayPermiso(r, []).map((g) => [g.apiKeyId, g.costoUsd]));
 }
 
 /** Permisos efectivos del usuario que crea la key: el subconjunto que puede delegar (t457u). */

@@ -1,3 +1,4 @@
+import { datosSiHayPermiso } from "@/lib/carga";
 import type { Contadores } from "@/lib/navegacion";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
@@ -21,8 +22,8 @@ export async function cargarIndice() {
       campos: ["aprobacionesPendientes"],
     }),
   ]);
-  const conAjustes = new Set(esquema.ok ? esquema.data.map((c) => c.modulo) : []);
-  const modulos = (mods.ok ? mods.data : [])
+  const conAjustes = new Set(datosSiHayPermiso(esquema, []).map((c) => c.modulo));
+  const modulos = datosSiHayPermiso(mods, [])
     .filter((m) => (m.estado === "activo" || m.estado === "trial") && conAjustes.has(m.id))
     .map((m) => seccionModulo(m.id, m.nombre));
   const secciones: Seccion[] = [...SECCIONES, ...modulos].filter((x) => puede(x.permiso));

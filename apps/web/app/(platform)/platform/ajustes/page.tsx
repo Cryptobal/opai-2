@@ -1,6 +1,7 @@
 import dynamic from "next/dynamic";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
+import { exigirDatos } from "@/lib/carga";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { Superadmin } from "../_componentes/formato";
@@ -25,7 +26,7 @@ export default function Ajustes() {
           ejecutarComoUsuario<Precio[]>("platform", "platform.precios.list", {}),
           ejecutarComoUsuario<Ajuste[]>("platform", "platform.ajustes.get", {}),
         ]);
-        return { precios: p.ok ? p.data : [], ajustes: a.ok ? a.data : [] };
+        return { precios: exigirDatos(p), ajustes: exigirDatos(a) };
       }}
     >
       {(d) => (

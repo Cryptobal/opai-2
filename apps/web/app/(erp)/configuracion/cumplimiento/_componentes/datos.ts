@@ -1,3 +1,4 @@
+import { exigirDatos } from "@/lib/carga";
 import { estadoPantalla } from "@/lib/formato";
 import type { Parametros } from "@/lib/parametros";
 import { ejecutarComoUsuario, identidadActual } from "@/lib/servidor";
@@ -41,7 +42,8 @@ export async function cargarResumen() {
     ),
   ]);
   return {
-    state: estadoPantalla(estado),
+    // Las tres comparten `cumplimiento:read`: si falla una, la página no muestra datos a medias (CAR-50).
+    state: estadoPantalla(estado, texto, rat),
     estado: estado.ok ? estado.data : null,
     texto: texto.ok ? texto.data : null,
     rat: rat.ok ? rat.data : null,
@@ -70,7 +72,8 @@ export async function cargarSolicitudes(p: Parametros) {
     const una = await ejecutarComoUsuario<Solicitud>("erp", "core.cumplimiento.solicitud_obtener", {
       id: p["ver"],
     });
-    actual = una.ok ? una.data : null;
+    // Un id viejo en `?ver=` (NOT_FOUND) deja la bandeja sin elegida; otro fallo va a `ErrorCarga` (CAR-50).
+    actual = una.ok ? una.data : una.error.code === "NOT_FOUND" ? null : exigirDatos(una);
   }
   return {
     state: estadoPantalla(r),
