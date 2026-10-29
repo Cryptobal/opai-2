@@ -24,11 +24,29 @@
 -- transacción (el dueño de la tabla sin FORCE no queda sujeto a RLS), mueve con verificación de
 -- conteos y vuelve a poner FORCE antes
 -- del COMMIT. Nadie más ve el estado intermedio: ALTER TABLE toma ACCESS EXCLUSIVE hasta el final.
+--
+-- Reintentos (revisión del PR #109, bloqueante "corre después del #113"): este script es
+-- idempotente a propósito. La causa real del P3009 en `preview/pr-109` no fue el orden con el
+-- #113 ni las FK RESTRICT (esas ya se manejan arriba): esta migración vivió un tiempo con el
+-- nombre de carpeta `20261028230000_…`, y en ese momento `preview/pr-109` (rama Neon reutilizada
+-- entre pushes, no recreada) ya la había aplicado con éxito con un contenido más viejo (sin la
+-- columna `agente_interno_id`, sin la limpieza de `eventos`/`notificaciones`/`envios`). Al
+-- renombrar la carpeta a `20261028235000_…` (después de agregar el #113, 20261028234500), Prisma
+-- la trató como una migración nueva y volvió a correr el `CREATE TABLE` contra una base que ya
+-- tenía esa tabla: el error real («relation "aprobaciones_plataforma" already exists») nunca
+-- aparece en el log de `prisma migrate deploy`, que solo imprime el "current transaction is
+-- aborted" de los statements siguientes. `CREATE TABLE IF NOT EXISTS`, `ADD COLUMN IF NOT
+-- EXISTS`, `CREATE INDEX IF NOT EXISTS`, `CREATE OR REPLACE FUNCTION` y el filtro `NOT EXISTS` en
+-- la copia de auditoría hacen que una corrida parcial previa (bajo cualquier nombre) no choque ni
+-- duplique datos. Esto no sustituye limpiar la rama `preview/pr-109` ya atascada (con el intento
+-- fallido registrado en Neon, P3009): el bot «OPAI 2.0» la recrea (`docs/2.0/ESTADO.md`).
 BEGIN;
 SET LOCAL lock_timeout = '5s';
 
--- CreateTable
-CREATE TABLE "core"."aprobaciones_plataforma" (
+-- CreateTable (IF NOT EXISTS/ADD COLUMN IF NOT EXISTS: idempotente si una corrida previa de esta
+-- misma migración, bajo otro nombre de carpeta, ya la aplicó parcialmente en una rama Neon de
+-- preview reutilizada — ver nota de "Reintentos" más abajo).
+CREATE TABLE IF NOT EXISTS "core"."aprobaciones_plataforma" (
     "id" UUID NOT NULL,
     "origen_tenant_id" UUID,
     "api_key_id" UUID,
@@ -51,13 +69,16 @@ CREATE TABLE "core"."aprobaciones_plataforma" (
     CONSTRAINT "aprobaciones_plataforma_pkey" PRIMARY KEY ("id"),
     CONSTRAINT "aprobaciones_plataforma_capability_check" CHECK ("capability" LIKE 'platform.%')
 );
-CREATE INDEX "aprobaciones_plataforma_estado_created_at_idx"
+-- Columna agregada después de la primera versión de esta migración (agente_interno_id): si la
+-- tabla ya existía sin ella (reintento, ver nota de "Reintentos"), se agrega ahora.
+ALTER TABLE "core"."aprobaciones_plataforma" ADD COLUMN IF NOT EXISTS "agente_interno_id" TEXT;
+CREATE INDEX IF NOT EXISTS "aprobaciones_plataforma_estado_created_at_idx"
   ON "core"."aprobaciones_plataforma"("estado", "created_at");
-CREATE INDEX "aprobaciones_plataforma_api_key_id_capability_idempotency_key_idx"
+CREATE INDEX IF NOT EXISTS "aprobaciones_plataforma_api_key_id_capability_idempotency_key_idx"
   ON "core"."aprobaciones_plataforma"("api_key_id", "capability", "idempotency_key");
 
--- CreateTable
-CREATE TABLE "core"."auditoria_global" (
+-- CreateTable (IF NOT EXISTS: ver nota de "Reintentos" más abajo).
+CREATE TABLE IF NOT EXISTS "core"."auditoria_global" (
     "id" UUID NOT NULL,
     "ambito" TEXT NOT NULL,
     "seq" INTEGER NOT NULL,
@@ -83,12 +104,12 @@ CREATE TABLE "core"."auditoria_global" (
     CONSTRAINT "auditoria_global_pkey" PRIMARY KEY ("id"),
     CONSTRAINT "auditoria_global_ambito_check" CHECK ("ambito" IN ('plataforma', 'seguridad'))
 );
-CREATE UNIQUE INDEX "auditoria_global_ambito_seq_key" ON "core"."auditoria_global"("ambito", "seq");
-CREATE INDEX "auditoria_global_ambito_tenant_objetivo_id_seq_idx"
+CREATE UNIQUE INDEX IF NOT EXISTS "auditoria_global_ambito_seq_key" ON "core"."auditoria_global"("ambito", "seq");
+CREATE INDEX IF NOT EXISTS "auditoria_global_ambito_tenant_objetivo_id_seq_idx"
   ON "core"."auditoria_global"("ambito", "tenant_objetivo_id", "seq");
-CREATE INDEX "auditoria_global_ambito_capability_seq_idx"
+CREATE INDEX IF NOT EXISTS "auditoria_global_ambito_capability_seq_idx"
   ON "core"."auditoria_global"("ambito", "capability", "seq");
-CREATE INDEX "auditoria_global_ambito_actor_id_seq_idx"
+CREATE INDEX IF NOT EXISTS "auditoria_global_ambito_actor_id_seq_idx"
   ON "core"."auditoria_global"("ambito", "actor_id", "seq");
 
 -- Permisos de opai_app: la cola se lee, crea y resuelve (nunca se borra); la auditoría solo se
@@ -100,7 +121,7 @@ GRANT SELECT, INSERT ON "core"."auditoria_global" TO opai_app;
 -- Append encadenado por ámbito. SECURITY INVOKER y con la misma espera máxima del lock que
 -- core.auditoria_append desde 20261028220000_timeouts_opai_app (3 s; vencido, falla con 55P03 y la
 -- transacción del llamador hace ROLLBACK).
-CREATE FUNCTION core.auditoria_global_append(
+CREATE OR REPLACE FUNCTION core.auditoria_global_append(
   p_id uuid, p_ambito text, p_actor text, p_actor_id text, p_via_user text, p_capability text,
   p_tenant_objetivo uuid, p_origen_tenant uuid, p_entity_type text, p_entity_id text,
   p_payload jsonb, p_antes jsonb, p_despues jsonb, p_ip_cifrada text, p_user_agent text,
@@ -182,12 +203,18 @@ BEGIN
   GET DIAGNOSTICS v_copiadas = ROW_COUNT;
   -- Avisos y eventos de esas aprobaciones en la empresa de la key (antes de borrar las filas).
   -- Primero se desligan o borran todas las filas que apuntan a esos eventos (por `evento_id`,
-  -- sin mirar su tenant), para que ninguna FK, CASCADE o RESTRICT, frene el borrado.
+  -- sin mirar su tenant), para que ninguna FK, CASCADE o RESTRICT, frene el borrado. El id también
+  -- se busca en `aprobaciones_plataforma` (no solo en `aprobaciones`): en un reintento (ver nota de
+  -- "Reintentos" más abajo) la aprobación ya se movió, pero sus restos pueden seguir sin limpiar.
   CREATE TEMP TABLE car36_eventos ON COMMIT DROP AS
     SELECT e.id FROM core.eventos e
     WHERE e.tipo IN ('core.aprobacion.pendiente', 'core.aprobacion.resuelta')
       AND e.entidad_tipo = 'aprobacion'
-      AND e.entidad_id IN (SELECT id::text FROM core.aprobaciones WHERE capability LIKE 'platform.%');
+      AND e.entidad_id IN (
+        SELECT id::text FROM core.aprobaciones WHERE capability LIKE 'platform.%'
+        UNION
+        SELECT id::text FROM core.aprobaciones_plataforma
+      );
   UPDATE core.envios SET evento_id = NULL WHERE evento_id IN (SELECT id FROM car36_eventos);
   GET DIAGNOSTICS v_envios = ROW_COUNT;
   DELETE FROM core.notificaciones WHERE evento_id IN (SELECT id FROM car36_eventos);
@@ -203,10 +230,15 @@ BEGIN
   END IF;
 
   -- Copia (no movimiento) de la auditoría platform.*, en orden de creación, a la cadena nueva.
-  SELECT count(*) INTO v_esperadas FROM core.audit_events WHERE capability LIKE 'platform.%';
+  -- `NOT EXISTS (… origen_evento_id)` salta lo ya copiado en un reintento (ver nota de
+  -- "Reintentos" más abajo): sin esto, repetir la migración duplicaría cada evento en la cadena.
+  SELECT count(*) INTO v_esperadas FROM core.audit_events a WHERE a.capability LIKE 'platform.%'
+    AND NOT EXISTS (SELECT 1 FROM core.auditoria_global g WHERE g.origen_evento_id = a.id);
   v_eventos := 0;
   FOR v_fila IN
-    SELECT * FROM core.audit_events WHERE capability LIKE 'platform.%' ORDER BY created_at, id
+    SELECT * FROM core.audit_events a WHERE a.capability LIKE 'platform.%'
+      AND NOT EXISTS (SELECT 1 FROM core.auditoria_global g WHERE g.origen_evento_id = a.id)
+    ORDER BY created_at, id
   LOOP
     PERFORM core.auditoria_global_append(gen_random_uuid(), 'plataforma', v_fila.actor_type,
       v_fila.actor_id, v_fila.via_user_id, v_fila.capability,
