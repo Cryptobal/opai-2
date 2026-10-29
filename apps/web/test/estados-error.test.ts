@@ -4,7 +4,13 @@ import { fileURLToPath } from "node:url";
 import { notFound, redirect } from "next/navigation";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { CargaFallida, datosSiHayPermiso, exigirDatos, falloDeCarga } from "@/lib/carga";
+import {
+  CargaFallida,
+  datosSiHayPermiso,
+  exigirDatos,
+  falloDeCarga,
+  hrefReintento,
+} from "@/lib/carga";
 import { estadoPantalla } from "@/lib/formato";
 
 const ok = <T>(data: T) => ({ ok: true as const, data });
@@ -73,6 +79,21 @@ describe("falloDeCarga: lo que muestra PaginaPortal cuando cargar lanza", () => 
     expect(() => falloDeCarga(n)).toThrow();
     const r = capturar(() => redirect("/login"));
     expect(() => falloDeCarga(r)).toThrow();
+  });
+});
+
+describe("hrefReintento", () => {
+  it("conserva la ruta y sus parámetros y agrega la marca", () => {
+    expect(hrefReintento("/configuracion/empresa", "123")).toBe(
+      "/configuracion/empresa?reintento=123",
+    );
+    expect(hrefReintento("/personas?q=ana", "9")).toBe("/personas?q=ana&reintento=9");
+  });
+
+  it("nunca sale del sitio: `//` o `/\\` iniciales se reducen a una sola barra", () => {
+    expect(hrefReintento("//evil.example/x", "1")).toBe("/evil.example/x?reintento=1");
+    expect(hrefReintento("/\\evil.example", "1")).toBe("/evil.example?reintento=1");
+    expect(hrefReintento("", "1")).toBe("/?reintento=1");
   });
 });
 

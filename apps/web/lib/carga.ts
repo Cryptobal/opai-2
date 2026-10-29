@@ -46,3 +46,12 @@ export function falloDeCarga(e: unknown): "forbidden" | "error" {
   console.error(e);
   return "error";
 }
+
+/**
+ * Enlace de «Reintentar»: la misma ruta con `reintento=<marca>`. Siempre relativo al sitio: una ruta
+ * que empiece con `//` o `/\\` sería relativa al protocolo y llevaría a otro dominio.
+ */
+export function hrefReintento(ruta: string, marca: string): string {
+  const local = `/${ruta.replace(/^[/\\]+/, "")}`;
+  return `${local}${local.includes("?") ? "&" : "?"}reintento=${encodeURIComponent(marca)}`;
+}

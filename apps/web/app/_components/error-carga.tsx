@@ -3,6 +3,8 @@ import { headers } from "next/headers";
 
 import { ErrorState, Forbidden } from "@opai/ds";
 
+import { hrefReintento } from "@/lib/carga";
+
 import { EnlaceBoton } from "./maestros/enlace-boton";
 
 /**
@@ -14,9 +16,8 @@ import { EnlaceBoton } from "./maestros/enlace-boton";
 export async function ErrorCarga({ fallo, ruta }: { fallo: "forbidden" | "error"; ruta: string }) {
   if (fallo === "forbidden") return <Forbidden />;
   const h = await headers();
-  const actual = h.get("x-opai-ruta") ?? ruta;
   // Marca del request (la fija el proxy): distinta en cada intento, así la URL nunca está en caché.
-  const href = `${actual}${actual.includes("?") ? "&" : "?"}reintento=${h.get("x-opai-t0") ?? "1"}`;
+  const href = hrefReintento(h.get("x-opai-ruta") ?? ruta, h.get("x-opai-t0") ?? "1");
   return (
     <ErrorState
       titulo="No pudimos cargar esta página"
