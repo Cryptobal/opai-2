@@ -1,0 +1,166 @@
+// Módulo Rondas (Brief 14 · PR 1): puntos de control, plantillas, programación, el catálogo de tipos
+// de incidente por tenant y el modelo mínimo de Novedad (migrable a Operaciones II, decisión de
+// Carlos 29-oct-2026 17:03 CLT). Schema propio `rondas`. Toda tabla con tenant_id, RLS
+// `tenant_isolation`, IDs uuid(7), columnas snake_case por @map. El tenant_id NO lleva @relation a
+// Tenant (no se toca core.prisma): la FK a core.tenants va en el SQL de la migración. Las tablas de
+// hechos (Ejecucion, Marca, PosicionRastro) llegan en el PR 3 con su inmutabilidad.
+
+/// Punto de control: lugar físico de una instalación que el guardia debe visitar (rondas.md §2, §4).
+model PuntoControl {
+  id             String   @id @default(uuid(7)) @db.Uuid
+  tenantId       String   @map("tenant_id") @db.Uuid
+  instalacionId  String   @map("instalacion_id") @db.Uuid
+  nombre         String
+  /// "qr" | "gps" | "qr_gps" (sin NFC, decisión de Carlos p.9). R1.
+  modo           String   @default("qr_gps")
+  /// Modo estricto: una lectura de QR fuera de la geocerca es anomalía (R2).
+  estricto       Boolean  @default(false)
+  latitud        Decimal? @db.Decimal(9, 6)
+  longitud       Decimal? @db.Decimal(9, 6)
+  radioM         Int?     @map("radio_m")
+  precisionMinM  Int?     @map("precision_min_m")
+  permanenciaS   Int      @default(0) @map("permanencia_s")
+  /// Identificador opaco impreso en la etiqueta (R7). La firma y la rotación llegan en el PR 2.
+  etiquetaQr     String?  @map("etiqueta_qr")
+  exigeFoto      Boolean  @default(false) @map("exige_foto")
+  instrucciones  String?
+  /// "activo" | "archivado" (un punto con marcas nunca se borra, se archiva).
+  estado         String   @default("activo")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  plantillaPuntos PlantillaPunto[]
+  novedades       Novedad[]
+
+  @@index([tenantId, instalacionId])
+  @@map("puntos_control")
+  @@schema("rondas")
+}
+
+/// Plantilla de ronda: secuencia de puntos con orden y tiempos (rondas.md §4).
+model PlantillaRonda {
+  id                   String   @id @default(uuid(7)) @db.Uuid
+  tenantId             String   @map("tenant_id") @db.Uuid
+  instalacionId        String   @map("instalacion_id") @db.Uuid
+  nombre               String
+  /// "sugerido" | "estricto" | "aleatorio" (R12).
+  ordenModo            String   @default("sugerido") @map("orden_modo")
+  tiempoMaxMin         Int      @map("tiempo_max_min")
+  tiempoMaxTramoMin    Int?     @map("tiempo_max_tramo_min")
+  umbralIncompletaPct  Int      @default(20) @map("umbral_incompleta_pct")
+  permiteAdhoc         Boolean  @default(true) @map("permite_adhoc")
+  estado               String   @default("activo")
+  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  puntos         PlantillaPunto[]
+  programaciones Programacion[]
+
+  @@index([tenantId, instalacionId])
+  @@map("plantillas")
+  @@schema("rondas")
+}
+
+/// Punto dentro de una plantilla, con su orden y si es obligatorio (N–N con orden, rondas.md §2).
+model PlantillaPunto {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  plantillaId String   @map("plantilla_id") @db.Uuid
+  puntoId     String   @map("punto_id") @db.Uuid
+  orden       Int
+  obligatorio Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  plantilla PlantillaRonda @relation(fields: [plantillaId], references: [id], onDelete: Cascade)
+  punto     PuntoControl   @relation(fields: [puntoId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, plantillaId, puntoId])
+  @@unique([tenantId, plantillaId, orden])
+  @@index([tenantId, plantillaId])
+  @@map("plantilla_puntos")
+  @@schema("rondas")
+}
+
+/// Programación: cuándo hacer una plantilla y a quién se asigna (rondas.md §4).
+model Programacion {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  instalacionId String   @map("instalacion_id") @db.Uuid
+  plantillaId   String   @map("plantilla_id") @db.Uuid
+  nombre        String
+  /// Horarios: lista de horas "HH:MM" o { cadaMin, desde, hasta } (jsonb).
+  horarios      Json     @default("[]")
+  /// Días de la semana 0–6 (domingo = 0).
+  diasSemana    Int[]    @default([]) @map("dias_semana")
+  vigenciaDesde DateTime? @map("vigencia_desde") @db.Date
+  vigenciaHasta DateTime? @map("vigencia_hasta") @db.Date
+  toleranciaMin Int      @default(15) @map("tolerancia_min")
+  /// Responsables: { modo: "personas" | "por_turno", personaIds: string[] } (R27, decisión 18).
+  responsables  Json     @default("{\"modo\":\"personas\",\"personaIds\":[]}")
+  /// "activa" | "pausada".
+  estado        String   @default("activa")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  plantilla PlantillaRonda @relation(fields: [plantillaId], references: [id], onDelete: Restrict)
+
+  @@index([tenantId, instalacionId])
+  @@index([tenantId, plantillaId])
+  @@map("programaciones")
+  @@schema("rondas")
+}
+
+/// Tipo de incidente del tenant, con gravedad por defecto (decisión de Carlos sobre el mockup, 1).
+model TipoIncidente {
+  id              String   @id @default(uuid(7)) @db.Uuid
+  tenantId        String   @map("tenant_id") @db.Uuid
+  nombre          String
+  icono           String?
+  /// "baja" | "media" | "alta". Gravedad alta = incidente (decisión 6).
+  gravedadDefecto String   @default("media") @map("gravedad_defecto")
+  activo          Boolean  @default(true)
+  orden           Int      @default(0)
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  novedades Novedad[]
+
+  @@index([tenantId])
+  @@map("tipos_incidente")
+  @@schema("rondas")
+}
+
+/// Novedad: observación del guardia, con gravedad (una grave es el incidente de terreno, ADR-024).
+/// Modelo mínimo dentro de Rondas hasta que exista Operaciones II (decisión de Carlos 29-oct-2026
+/// 17:03 CLT): su forma permite que Operaciones II se quede con la tabla y Rondas la referencie. La
+/// escritura (`rondas.novedades.registrar`) y el ciclo de estados completo llegan en el PR 3 y PR 5;
+/// `ejecucion_id` queda sin FK hasta que el PR 3 cree `rondas.ejecuciones`.
+model Novedad {
+  id              String   @id @default(uuid(7)) @db.Uuid
+  tenantId        String   @map("tenant_id") @db.Uuid
+  instalacionId   String   @map("instalacion_id") @db.Uuid
+  /// "ronda" | "punto" | "manual".
+  origen          String   @default("manual")
+  ejecucionId     String?  @map("ejecucion_id") @db.Uuid
+  puntoId         String?  @map("punto_id") @db.Uuid
+  tipoIncidenteId String?  @map("tipo_incidente_id") @db.Uuid
+  /// "baja" | "media" | "alta".
+  gravedad        String   @default("media")
+  /// Identificador visible (p. ej. NOV-0418); lo completa el PR 5.
+  codigo          String?
+  resumen         String
+  detalle         String?
+  /// "abierta" | "en_atencion" | "resuelta" | "cerrada" | "derivada" (ciclo completo en el PR 5).
+  estado          String   @default("abierta")
+  idempotencyKey  String?  @map("idempotency_key")
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  punto         PuntoControl?  @relation(fields: [puntoId], references: [id], onDelete: SetNull)
+  tipoIncidente TipoIncidente? @relation(fields: [tipoIncidenteId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, instalacionId])
+  @@map("novedades")
+  @@schema("rondas")
+}
