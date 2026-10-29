@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="./cpq-data.js"></script>
+</helmet>
+<div style="display:flex;flex-direction:column;gap:24px;min-height:100%">
+<sc-if value="{{ agente }}" hint-placeholder-val="{{ false }}">
+<div role="status" style="display:flex;gap:10px;padding:12px;border-radius:var(--radius-md);background:var(--ds-accent-muted);color:var(--ds-fg)">
+<span class="ic sm i-bot" aria-hidden="true" style="flex:none;margin-top:2px;color:var(--ds-accent)"></span>
+<span style="display:flex;flex-direction:column;gap:2px;font-size:14px;line-height:20px"><b style="font-weight:600">Enviar requiere tu aprobación</b><span class="muted" style="text-wrap:pretty">OPAI preparó este envío a pedido de Ana Rojas. Revisa los datos; nada sale hasta que apruebes.</span></span>
+</div>
+</sc-if>
+
+<sc-if value="{{ hasBlocks }}" hint-placeholder-val="{{ false }}">
+<section aria-label="Bloqueos" style="display:flex;flex-direction:column;border-radius:var(--radius-md);background:var(--ds-danger-muted);color:var(--ds-danger-fg);padding:4px 4px 4px 12px">
+<sc-for list="{{ blocks }}" as="k" hint-placeholder-count="2">
+<div style="display:flex;align-items:center;gap:8px;min-height:44px">
+<span style="flex:1;min-width:0;font:500 14px/20px var(--font-sans);text-wrap:pretty">{{ k.label }}</span>
+<button type="button" class="btn btn-ghost" style="height:44px;padding:0 10px;color:inherit;font-weight:600;flex:none">{{ k.action }}</button>
+</div>
+</sc-for>
+</section>
+</sc-if>
+<sc-if value="{{ allOk }}" hint-placeholder-val="{{ true }}">
+<span class="t-body-sm t-numeric" style="display:flex;align-items:center;gap:8px;color:var(--ds-success-fg)"><span class="ic sm i-check-circle" aria-hidden="true"></span>{{ okTxt }}</span>
+</sc-if>
+
+<section style="display:flex;flex-direction:column;gap:10px">
+<span class="t-label">Formato</span>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">
+<sc-for list="{{ formatos }}" as="f" hint-placeholder-count="2">
+<button type="button" onClick="{{ f.pick }}" aria-pressed="{{ f.on }}" style="all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:10px;padding:8px 10px;min-height:56px;border-radius:var(--radius-md);border:1px solid {{ f.border }};background:{{ f.bg }}">
+<span aria-hidden="true" style="flex:none;width:30px;height:40px;border-radius:4px;background:var(--ds-surface);border:1px solid var(--ds-border-strong);display:flex;flex-direction:column;gap:3px;padding:5px 4px;box-sizing:border-box">
+<span style="width:8px;height:3px;border-radius:2px;background:var(--ds-inverse-bg)"></span>
+<span style="width:100%;height:3px;border-radius:2px;background:var(--ds-border-strong)"></span>
+<span style="width:80%;height:2px;border-radius:2px;background:var(--ds-border)"></span>
+<span style="width:{{ f.w }};height:2px;border-radius:2px;background:var(--ds-border)"></span>
+</span>
+<span style="display:flex;flex-direction:column;min-width:0"><span class="t-body-sm" style="font-weight:500">{{ f.label }}</span><span class="t-caption">{{ f.pages }}</span></span>
+</button>
+</sc-for>
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:2px">
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span class="t-label">Destinatarios</span><span class="t-caption">{{ destCount }}</span></div>
+<sc-for list="{{ contactos }}" as="c" hint-placeholder-count="3">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ c.on }}" on-change="{{ c.toggle }}" label="{{ c.name }}" description="{{ c.desc }}" hint-size="100%,56px"></x-import>
+</sc-for>
+<sc-if value="{{ noDest }}" hint-placeholder-val="{{ false }}">
+<span style="font:500 12px/16px var(--font-sans);color:var(--ds-danger-fg)">Elige al menos un destinatario.</span>
+</sc-if>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:6px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Mensaje" value="{{ mensaje }}" on-change="{{ setMensaje }}" rows="{{ 5 }}" hint="{{ saludoHint }}" hint-size="100%,170px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ pdf }}" on-change="{{ setPdf }}" label="Adjuntar también el PDF" hint-size="100%,44px"></x-import>
+</section>
+
+<section role="radiogroup" aria-label="Seguimiento" style="display:flex;flex-direction:column">
+<span class="t-label" style="padding-bottom:4px">Seguimiento</span>
+<sc-for list="{{ seguimientos }}" as="o" hint-placeholder-count="3">
+<button type="button" role="radio" aria-checked="{{ o.on }}" onClick="{{ o.pick }}" style="all:unset;box-sizing:border-box;cursor:pointer;display:flex;gap:10px;align-items:center;min-height:44px;padding:4px 0">
+<span aria-hidden="true" style="flex:none;width:20px;height:20px;border-radius:999px;box-sizing:border-box;border:{{ o.ring }};display:flex;align-items:center;justify-content:center"><span style="width:10px;height:10px;border-radius:999px;background:var(--ds-accent);display:{{ o.dot }}"></span></span>
+<span style="display:flex;flex-direction:column;min-width:0"><span class="t-body-sm" style="font-weight:{{ o.w }}">{{ o.label }}</span><span class="t-caption" style="display:{{ o.descDisp }};text-wrap:pretty">{{ o.desc }}</span></span>
+</button>
+</sc-for>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--ds-border);padding-top:8px">
+<button type="button" onClick="{{ toggleDiff }}" aria-expanded="{{ diffOpen }}" style="all:unset;box-sizing:border-box;cursor:pointer;display:flex;align-items:center;gap:8px;min-height:44px">
+<span class="ic sm {{ diffChev }} muted" aria-hidden="true"></span>
+<span class="t-label" style="flex:1">Qué cambia respecto de la v2</span>
+<span class="t-caption">{{ diffCount }}</span>
+</button>
+<sc-if value="{{ diffOpen }}" hint-placeholder-val="{{ false }}">
+<dc-import name="DiffVersiones" diff="{{ diff }}" hint-size="100%,260px"></dc-import>
+</sc-if>
+</section>
+
+<div style="position:sticky;bottom:-16px;margin:auto -16px -16px;padding:12px 16px 16px;background:var(--ds-surface-raised);border-top:1px solid var(--ds-border);display:flex;flex-direction:column;gap:10px">
+<sc-if value="{{ confirming }}" hint-placeholder-val="{{ false }}">
+<span class="t-body-sm" style="text-wrap:pretty">{{ confirmTxt }}</span>
+<div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" on-click="{{ cancelConfirm }}" hint-size="90px,40px">Volver</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="lock" on-click="{{ doConfirm }}" hint-size="180px,40px">{{ confirmBtn }}</x-import>
+</div>
+</sc-if>
+<sc-if value="{{ notConfirming }}" hint-placeholder-val="{{ true }}">
+<span class="t-caption t-numeric" style="text-wrap:pretty">{{ footNote }}</span>
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="paperclip" disabled="{{ blocked }}" on-click="{{ askCopy }}" hint-size="130px,40px">Copiar enlace</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="message" disabled="{{ blocked }}" on-click="{{ askWa }}" hint-size="110px,40px">WhatsApp</x-import>
+<span style="flex:1"></span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="inbox" disabled="{{ blocked }}" on-click="{{ sendMail }}" hint-size="170px,40px">{{ sendTxt }}</x-import>
+</div>
+</sc-if>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:420,&quot;height&quot;:900},&quot;version&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;v3&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;agente&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;bloqueos&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{ok:boolean,label:string,short?:string,action?:string}[]&quot;},&quot;ufTxt&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;diff&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;},&quot;onClose&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;()=&gt;void&quot;},&quot;onSend&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(p:object)=&gt;void&quot;}}">
+class Component extends DCLogic {
+  state = {};
+  renderVals() {
+    const P = window.CPQ;
+    const S = this.state, p = this.props;
+    const version = p.version ?? "v3";
+    const agente = !!p.agente;
+    const formato = S.formato ?? "simple";
+    const dest = S.dest ?? { gc: true, pm: true, rv: false };
+    const seg = S.seg ?? "iniciar";
+    const sel = (on) => ({ border: on ? "var(--ds-accent)" : "var(--ds-border-strong)", bg: on ? "var(--ds-accent-muted)" : "var(--ds-surface)" });
+    const contactos = ((P && P.CONTACTOS) || []).map((c) => ({ ...c, on: !!dest[c.id], desc: c.cargo + " · " + c.mail, toggle: (v) => this.setState({ dest: { ...dest, [c.id]: v } }) }));
+    const chosen = contactos.filter((c) => c.on);
+    const nDest = chosen.length;
+    const bloqueos = p.bloqueos ?? [];
+    const blocks = bloqueos.filter((b) => !b.ok);
+    const blocked = blocks.length > 0 || nDest === 0;
+    const diff = p.diff;
+    const diffOpen = S.diffOpen ?? false;
+    const mensaje = S.mensaje ?? "Hola {nombre}:\n\nTe envío la propuesta de seguridad para Planta Norte y Bodega Sur, con inicio el 01-12-2026. Quedo atento a tus comentarios.\n\nSaludos,\nAna Rojas · Atlas Seguridad SpA";
+    const first = (n) => n.split(" ")[0];
+    const saludos = chosen.slice(0, 3).map((c) => "«Hola " + first(c.name) + "»").join(", ");
+    const ufTxt = p.ufTxt ?? "la UF del día";
+    const confirm = S.confirm;
+    const payload = (canal) => ({ formato, canal, seg, pdf: S.pdf ?? true, dest: chosen.map((c) => c.name) });
+    return {
+      agente, hasBlocks: blocks.length > 0, allOk: blocks.length === 0,
+      blocks: blocks.map((b) => ({ ...b, label: b.short || b.label })),
+      okTxt: "Listo para enviar · " + ufTxt + " al 29-10-2026",
+      formatos: [
+        { id: "simple", label: "Cotización simple", pages: "2 páginas", w: "50%" },
+        { id: "tecnica", label: "Propuesta técnica", pages: "8 páginas", w: "90%" },
+      ].map((f) => ({ ...f, on: formato === f.id, ...sel(formato === f.id), pick: () => this.setState({ formato: f.id }) })),
+      contactos, destCount: nDest + " de " + contactos.length + " contactos del negocio", noDest: nDest === 0,
+      mensaje, setMensaje: (v) => this.setState({ mensaje: v }),
+      saludoHint: nDest ? "{nombre} se reemplaza por el nombre de cada destinatario: " + saludos + "." : "{nombre} se reemplaza por el nombre de cada destinatario.",
+      pdf: S.pdf ?? true, setPdf: (v) => this.setState({ pdf: v }),
+      seguimientos: [
+        { id: "iniciar", label: "Iniciar seguimiento", desc: "Mueve el negocio a «Propuesta enviada» y crea una tarea para Ana Rojas el 03-11-2026." },
+        { id: "mover", label: "Mover sin seguimiento", desc: "Mueve el negocio a «Propuesta enviada», sin tarea." },
+        { id: "solo", label: "Solo enviar", desc: "No cambia la etapa del negocio." },
+      ].map((o) => { const on = seg === o.id; return { ...o, on, ring: on ? "2px solid var(--ds-accent)" : "1px solid var(--ds-border-control)", dot: on ? "block" : "none", w: on ? 500 : 400, descDisp: on ? "block" : "none", pick: () => this.setState({ seg: o.id }) }; }),
+      diff, diffOpen, diffChev: diffOpen ? "i-chevron-down" : "i-chevron-right", toggleDiff: () => this.setState({ diffOpen: !diffOpen }),
+      diffCount: diff ? diff.rows.length + " cambios" : "",
+      footNote: blocks.length ? "Resuelve " + (blocks.length === 1 ? "el bloqueo" : "los " + blocks.length + " bloqueos") + " de arriba para enviar." : "Al enviar se congela la " + version + " y se fija " + ufTxt + ".",
+      blocked, sendTxt: agente ? "Aprobar y enviar por correo" : "Enviar por correo",
+      sendMail: () => p.onSend && p.onSend(payload("correo")),
+      askCopy: () => this.setState({ confirm: "enlace" }), askWa: () => this.setState({ confirm: "whatsapp" }),
+      confirming: !!confirm, notConfirming: !confirm,
+      confirmTxt: confirm === "enlace" ? "Copiar el enlace congela la " + version + " y fija " + ufTxt + ", igual que enviar por correo. Podrás pegarlo donde quieras." : "Abrir WhatsApp congela la " + version + " y fija " + ufTxt + ". El mensaje irá a " + (chosen[0] ? chosen[0].name : "el contacto") + ".",
+      confirmBtn: confirm === "enlace" ? "Congelar y copiar" : "Congelar y abrir WhatsApp",
+      cancelConfirm: () => this.setState({ confirm: null }),
+      doConfirm: () => { const c = confirm; this.setState({ confirm: null }); p.onSend && p.onSend(payload(c)); },
+    };
+  }
+}
+</script>
+</body>
+</html>

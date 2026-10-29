@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+</helmet>
+<div class="card" role="treegrid" aria-label="Planilla de la cotización" style="overflow:hidden">
+<div class="t-caption" style="display:grid;grid-template-columns:{{ cols }};gap:12px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--ds-border);font-weight:500">
+<span></span><span>Línea</span><sc-if value="{{ showCost }}" hint-placeholder-val="{{ true }}"><span style="text-align:right">Sueldo o costo</span><span style="text-align:right">Costo mensual</span></sc-if><span style="text-align:right">Venta mensual</span>
+</div>
+<sc-for list="{{ secs }}" as="s" hint-placeholder-count="3">
+<div role="row" aria-expanded="{{ s.open }}" onClick="{{ s.toggle }}" style="display:grid;grid-template-columns:{{ cols }};gap:12px;align-items:center;padding:10px 16px;background:var(--ds-fill);border-bottom:1px solid var(--ds-border);cursor:pointer;min-height:52px">
+<span class="ic sm {{ s.chev }} muted" aria-hidden="true"></span>
+<span style="display:flex;flex-direction:column;min-width:0"><span class="t-label">{{ s.name }}</span><span class="t-caption" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.sub }}</span></span>
+<sc-if value="{{ showCost }}" hint-placeholder-val="{{ true }}">
+<span class="t-caption" style="text-align:right">{{ s.countTxt }}</span>
+<span class="t-mono" style="white-space:nowrap;text-align:right;transition:opacity 200ms var(--ds-ease);opacity:{{ dim }}">{{ s.costoTxt }}</span>
+</sc-if>
+<span class="t-mono" style="white-space:nowrap;text-align:right;font-weight:600;transition:opacity 200ms var(--ds-ease);opacity:{{ dim }}">{{ s.ventaTxt }}</span>
+</div>
+<sc-if value="{{ s.open }}" hint-placeholder-val="{{ true }}">
+<sc-for list="{{ s.rows }}" as="l" hint-placeholder-count="2">
+<sc-if value="{{ l.isGroup }}" hint-placeholder-val="{{ false }}">
+<div class="t-overline" style="padding:10px 16px 4px 44px">{{ l.group }}</div>
+</sc-if>
+<sc-if value="{{ l.isLine }}" hint-placeholder-val="{{ true }}">
+<div role="row" style="display:grid;grid-template-columns:{{ cols }};gap:12px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--ds-border);opacity:{{ l.op }}" style-hover="background:var(--ds-bg)">
+<span class="ic sm i-updown subtle" title="Arrastrar para reordenar" aria-hidden="true" style="cursor:grab;visibility:{{ handleVis }}"></span>
+<span style="display:flex;flex-direction:column;gap:4px;min-width:0">
+<span style="display:flex;flex-wrap:wrap;align-items:center;gap:6px">
+<span class="t-body-sm" style="font-weight:500">{{ l.name }}</span>
+<sc-if value="{{ l.hasOrigen }}" hint-placeholder-val="{{ false }}">
+<span title="{{ l.vig }}" style="display:inline-flex"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" dot="{{ false }}" hint-size="120px,22px">{{ l.origenTxt }}</x-import></span>
+</sc-if>
+<sc-if value="{{ l.hidden }}" hint-placeholder-val="{{ false }}">
+<span class="t-caption" title="No aparece en la vista cliente ni en el documento" style="display:inline-flex;align-items:center;gap:4px"><span class="ic sm i-eye" aria-hidden="true"></span>Oculto al cliente</span>
+</sc-if>
+<sc-if value="{{ l.disabled }}" hint-placeholder-val="{{ false }}">
+<span class="t-caption">Deshabilitada · no suma</span>
+</sc-if>
+</span>
+<span class="t-caption" style="text-wrap:pretty">{{ l.detail }}</span>
+<sc-if value="{{ l.rateable }}" hint-placeholder-val="{{ false }}">
+<span style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:2px">
+<button type="button" onClick="{{ l.onRateo }}" disabled="{{ l.noRateo }}" onMouseEnter="{{ l.tipIn }}" onMouseLeave="{{ l.tipOut }}" onFocus="{{ l.tipIn }}" onBlur="{{ l.tipOut }}" aria-haspopup="menu" aria-label="Rateo de {{ l.name }}: {{ l.rateoTxt }}" style="all:unset;box-sizing:border-box;cursor:{{ l.rateoCursor }};display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 6px 0 8px;border-radius:999px;border:1px solid var(--ds-border-strong);background:var(--ds-surface);font:500 12px/16px var(--font-sans);color:var(--ds-fg)" style-hover="background:var(--ds-fill)"><span class="subtle" style="font-weight:400">Rateo</span>{{ l.rateoTxt }}<span class="ic sm i-chevron-down muted" aria-hidden="true" style="width:14px;height:14px;display:{{ l.rateoChevDisp }}"></span></button>
+<span class="t-caption t-numeric">{{ l.cuotaTxt }}</span>
+<sc-if value="{{ l.rateoOverridden }}" hint-placeholder-val="{{ false }}">
+<span title="{{ l.rateoDefTxt }}" style="display:inline-flex"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" dot="{{ false }}" hint-size="90px,22px">Sobrescrito</x-import></span>
+</sc-if>
+</span>
+</sc-if>
+</span>
+<sc-if value="{{ showCost }}" hint-placeholder-val="{{ true }}">
+<span style="display:flex;flex-direction:column;align-items:flex-end;min-width:0">
+<sc-if value="{{ l.editing }}" hint-placeholder-val="{{ false }}">
+<input ref="{{ inputRef }}" aria-label="Sueldo bruto" defaultValue="{{ l.unitRaw }}" onKeyDown="{{ l.onKey }}" onBlur="{{ l.onBlur }}" inputMode="numeric" style="width:100%;height:32px;box-sizing:border-box;padding:0 8px;text-align:right;font:400 13px/20px var(--font-mono);color:var(--ds-fg);background:var(--ds-surface);border:1px solid var(--ds-accent);border-radius:var(--radius-sm);box-shadow:0 0 0 3px var(--ds-accent-muted);outline:none">
+</sc-if>
+<sc-if value="{{ l.notEditing }}" hint-placeholder-val="{{ true }}">
+<button type="button" onClick="{{ l.onEdit }}" disabled="{{ l.noEdit }}" title="{{ l.editTitle }}" style="all:unset;box-sizing:border-box;cursor:{{ l.editCursor }};padding:4px 6px;margin:-4px -6px;border-radius:var(--radius-sm);text-align:right" style-hover="background:var(--ds-surface)"><span class="t-mono" style="white-space:nowrap">{{ l.unitTxt }}</span></button>
+</sc-if>
+<span class="t-caption" style="text-align:right">{{ l.unitSub }}</span>
+</span>
+<button type="button" onClick="{{ l.onCosto }}" aria-label="¿De dónde sale el costo de {{ l.name }}?" style="all:unset;cursor:pointer;justify-self:end;text-align:right;padding:4px 6px;margin:-4px -6px;border-radius:var(--radius-sm)" style-hover="background:var(--ds-fill)">
+<span class="t-mono" style="white-space:nowrap;text-decoration:underline dotted var(--ds-border-strong);text-underline-offset:4px;transition:opacity 200ms var(--ds-ease);opacity:{{ dim }}">{{ l.costoTxt }}</span>
+</button>
+</sc-if>
+<button type="button" onClick="{{ l.onVenta }}" aria-label="¿De dónde sale la venta de {{ l.name }}?" style="all:unset;cursor:pointer;justify-self:end;text-align:right;padding:4px 6px;margin:-4px -6px;border-radius:var(--radius-sm);display:flex;flex-direction:column;align-items:flex-end" style-hover="background:var(--ds-fill)">
+<span class="t-mono" style="white-space:nowrap;font-weight:500;text-decoration:underline dotted var(--ds-border-strong);text-underline-offset:4px;transition:opacity 200ms var(--ds-ease);opacity:{{ dim }}">{{ l.ventaTxt }}</span>
+<span class="t-caption">{{ l.ventaSub }}</span>
+</button>
+</div>
+</sc-if>
+</sc-for>
+<sc-if value="{{ editable }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-wrap:wrap;gap:4px;padding:6px 16px 6px 36px;border-bottom:1px solid var(--ds-border)">
+<button type="button" class="btn btn-ghost" style="height:32px;padding:0 10px;color:var(--ds-fg-muted)"><span class="ic sm i-plus" aria-hidden="true"></span>Puesto</button>
+<button type="button" class="btn btn-ghost" style="height:32px;padding:0 10px;color:var(--ds-fg-muted)"><span class="ic sm i-plus" aria-hidden="true"></span>Ítem</button>
+<button type="button" class="btn btn-ghost" style="height:32px;padding:0 10px;color:var(--ds-fg-muted)"><span class="ic sm i-plus" aria-hidden="true"></span>Paquete</button>
+</div>
+</sc-if>
+</sc-if>
+</sc-for>
+<div style="display:grid;grid-template-columns:{{ cols }};gap:12px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--ds-border)">
+<span class="ic sm i-wallet muted" aria-hidden="true"></span>
+<span style="display:flex;flex-direction:column;min-width:0"><span class="t-label">Pagos únicos</span><span class="t-caption" style="text-wrap:pretty">{{ unicos.detail }}</span></span>
+<sc-if value="{{ showCost }}" hint-placeholder-val="{{ true }}">
+<span class="t-caption" style="text-align:right">{{ unicos.countTxt }}</span>
+<span class="t-mono" style="white-space:nowrap;text-align:right">{{ unicos.costoTxt }}</span>
+</sc-if>
+<span class="t-mono" style="white-space:nowrap;text-align:right;font-weight:600">{{ unicos.ventaTxt }}</span>
+</div>
+<sc-if value="{{ editable }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px">
+<button type="button" class="btn btn-ghost" style="height:36px;padding:0 10px;margin-left:-10px"><span class="ic sm i-plus" aria-hidden="true"></span>Sección</button>
+<span class="t-caption" style="display:flex;gap:6px;align-items:center"><span class="kbd">Tab</span><span class="kbd">↵</span><span class="kbd">esc</span>editar sueldos en la celda</span>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:800,&quot;height&quot;:700},&quot;secs&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object[]&quot;},&quot;cols&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;16px minmax(0,1fr) 108px 116px 116px&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;editable&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;handleVis&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;visible&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;unicos&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{detail:string,countTxt:string,costoTxt:string,ventaTxt:string}&quot;},&quot;inputRef&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;Ref&quot;},&quot;dim&quot;:{&quot;editor&quot;:&quot;float&quot;,&quot;default&quot;:1,&quot;tsType&quot;:&quot;number&quot;}}"></script>
+</body>
+</html>
