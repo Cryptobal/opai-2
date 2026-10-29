@@ -2,6 +2,8 @@
 
 **Tarea:** CAR-71 · **Especificación:** [`docs/2.0/modulos/motor-sueldos.md`](../modulos/motor-sueldos.md) (**aprobada por Carlos el 29-oct-2026**, decisiones en su §16; ADR-056) · **Estado:** listo para copiar.
 
+> **Mockup v2 aprobado.** Decisión de Carlos, 29-oct-2026 16:23 CLT, chat con OPAI 2.0 (registrada por el bot OPAI 2.0). Export copiado en [`diseño/export-motor-sueldos/`](../diseño/export-motor-sueldos/README.md). Carlos decidió que los 6 ajustes pendientes del QA de v2 **no se corrigen en el mockup**: se resuelven al construir, como criterios de aceptación de [`briefs/BRIEF-07e-motor-sueldos.md`](../briefs/BRIEF-07e-motor-sueldos.md) §6.
+
 Para pegar completo en Claude Design, en un proyecto nuevo «Motor de sueldos», **con el Design System de OPAI 2.0 V2** (el oficial de la organización; en el repo: `packages/ds/src/tokens.css` y `docs/2.0/design/export-ds-2.0/`). **Nunca el estilo de OPAI 1.0.** No crees colores, tipografías, radios ni componentes nuevos salvo los de la sección 3; todo lo demás se compone con los existentes (`AppShell`, `Cabecera`, `SplitScreen`, `FilaSeleccionable`, `Seccion`, `SeccionTarjeta`, `Pares`, `Table`, `Sheet`, `Dialog`, `Popover`, `Tooltip`, `Select`, `Combobox`, `Input`, `InputFecha`, `RadioGroup`, `Switch`, `Badge`, `Chip`, `ChipToggle`, `Segmentado`, `Tabs`, `Timeline`, `Vigencia`, `KpiTile`, `Alerta` (hoy exportada desde `acceso`; si no sirve fuera del acceso, proponer su variante general), `avisar` + `Toaster`, `Empty`, `ErrorState`, `Forbidden`, `Loading`).
 
 Resultado esperado: el **export HTML standalone**, una pantalla por archivo, nombrado como en la sección 6, más una captura por pantalla y viewport. Es la referencia de contenido y jerarquía, no código a copiar.
