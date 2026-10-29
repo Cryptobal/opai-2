@@ -21,25 +21,30 @@
 | Visitantes conocidos | Se crea o actualiza en cada entrada fuera de la lista blanca, con número de visitas y última foto |
 | Prerregistro | Desde el ERP y desde el portal del cliente, con vista «Esperados hoy»; puede durar varios días; al entrar pasa a «ingresó» |
 | Entrada, salida y en sitio | Registro de entrada y de salida, lista «en sitio», estadísticas y color de permanencia según el máximo |
-| Dispositivo | Se empareja con el código de la instalación; la toma del equipo por el guardia se firma con PIN o rostro con prueba de vida |
-| Sin conexión | El service worker unificado precarga el portal; las entradas sin red van a una cola local y se sincronizan; una caché de listas impide autorizar sin red a quien no esté en la lista blanca guardada |
+| Dispositivo | Se empareja a una instalación; la toma del equipo por el guardia se firma con PIN o rostro con prueba de vida |
+| Sin conexión | La portería abre sin red; las entradas sin red se guardan en el dispositivo y se envían al volver la señal |
 | Reportes | Correo diario, semanal o mensual con nombre, RUT, empresa, tipo, entrada y salida e intentos denegados; destinatarios desde ERP y portal del cliente; envío de prueba |
 | Exportación | Excel de hasta 20.000 registros, solo administradores |
 
-### A.2 Brechas observadas en 1.0
+### A.2 Requisitos para 2.0 que salen de la revisión de 1.0
 
-Se describen en términos de negocio y como la regla que 2.0 debe cumplir, sin la forma de reproducirlas. Las que afectan a la seguridad de 1.0 en producción (1, 2, 4, 6 y 10) se entregan en detalle a Carlos fuera del repo; corregirlas en 1.0 solo procede si él lo pide (`AGENTS.md`).
+La revisión de 1.0 encontró brechas de seguridad vigentes en producción en el control de acceso. **Su detalle no se documenta en este repo**: se entrega a Carlos fuera de él, y corregirlas en 1.0 solo procede si él lo pide (`AGENTS.md`, pregunta P9 de `modulos/control-acceso.md`). Aquí solo quedan los requisitos que 2.0 debe cumplir.
 
-1. **Rutas sin control de acceso.** Varias rutas del control de acceso aceptan llamadas sin sesión ni credencial de dispositivo, incluidas algunas que leen datos personales o cambian dispositivos. El detalle se entrega a Carlos fuera del repo y no se documenta aquí hasta que se corrija (pregunta P9 de `modulos/control-acceso.md`).
-2. **Separación de funciones del dispositivo.** El dispositivo de portería de 1.0 no está limitado a registrar. Regla para 2.0: el dispositivo solo registra entradas y salidas y abre la lista de evacuación; listas, importaciones y configuración exigen un usuario con permiso (R3 de `modulos/control-acceso.md`).
-3. **Vigencia, días y horario de la lista autorizada.** Regla para 2.0: se aplican al decidir la entrada, en el servidor y sin conexión (R6, R21).
-4. **Sincronización sin conexión.** La de 1.0 no aplica todas las reglas de listas ni trata la hora del dispositivo como un simple dato. Regla para 2.0: al sincronizar se revalida todo contra las listas vigentes, la hora oficial es la del servidor y la deduplicación es por tenant y clave de idempotencia (R20–R22).
+**Requisitos de seguridad (sin detalle de 1.0)**
+
+1. **Toda acción autenticada y autorizada.** Toda lectura o escritura del control de acceso exige sesión, credencial de dispositivo emparejado o API key, con permiso y alcance verificados en la capacidad (ADR-004, ADR-022).
+2. **Rol mínimo del dispositivo.** El dispositivo de portería solo registra entradas y salidas y abre la lista de evacuación; gestionar listas, importar, vaciar, configurar y exportar exige un usuario con permiso (R3).
+3. **Reglas de lista aplicadas al decidir.** Vigencia, días, horario, tipos y uso único se aplican al decidir la entrada, en el servidor y sin conexión (R6, R8, R21).
+4. **Validar las listas al sincronizar.** Todo registro hecho sin conexión se revalida contra las listas vigentes, **incluida la lista bloqueada**, al sincronizar; la hora oficial es la del servidor y la deduplicación es por tenant y clave de idempotencia (R20–R22).
+6. **Sin datos personales en la caché del navegador**, salvo la copia mínima de listas y la copia cifrada de evacuación (R21, R23, R26).
+10. **Emparejamiento con límite de intentos.** Código temporal de un solo uso, con vencimiento corto y **límite de intentos** (R28).
+
+**Brechas funcionales**
+
 5. **Cola sin conexión incompleta** (inferido): las salidas no se encolan y parte de lo guardado sin red no se sube.
-6. **Caché del navegador.** Regla para 2.0: el navegador no guarda respuestas con datos personales; solo el armazón y la copia mínima de listas (R21, R23).
-7. **Prerregistro de varios días**: «hoy» y la lista blanca solo miran el primer día; nada marca «no llegó»; «hoy» se calcula en UTC.
+7. **Prerregistro de varios días**: «hoy» y la lista autorizada solo miran el primer día; nada marca «no llegó»; «hoy» se calcula en UTC.
 8. **Foto y firma exigidas por configuración no se aplican** (son marcadores visuales).
-9. **Totales del reporte** calculados sobre a lo más 200 registros.
-10. **Emparejamiento del dispositivo.** Regla para 2.0: código temporal de un solo uso con límite de intentos (R28).
+9. **Totales del reporte** calculados sobre una muestra acotada de registros.
 
 ### A.3 Lo que no existe en 1.0
 

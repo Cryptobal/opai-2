@@ -212,9 +212,9 @@ Todas existen también en pantalla y en `/api/v1`, con los mismos permisos, alca
 
 | En 1.0 | En 2.0 | Por qué |
 |---|---|---|
-| Control de acceso y separación de funciones mejorables (A.2-1, A.2-2) | Toda acción por capacidad con permiso y alcance; el dispositivo solo registra (R3) | Seguridad |
-| Reglas de vigencia y horario de la lista (A.2-3) | Se aplican en el servidor y sin conexión (R6, R21) | Seguridad |
-| Sincronización sin conexión (A.2-4) | Revalida todo, hora del servidor, alerta de ingreso bloqueado diferido (R20–R22) | Seguridad |
+| Requisitos de seguridad de la extracción (A.2-1, A.2-2) | Toda acción por capacidad con permiso y alcance; el dispositivo solo registra (R3) | Seguridad |
+| Reglas de lista al decidir (A.2-3) | Se aplican en el servidor y sin conexión (R6, R21) | Seguridad |
+| Validación al sincronizar (A.2-4) | Revalida todo, hora del servidor, alerta de ingreso bloqueado diferido (R20–R22) | Seguridad |
 | Salidas sin conexión no se guardan | Entradas y salidas en la cola (R20) | A.2-5 |
 | Caché del navegador (A.2-6) | Solo el armazón, una copia mínima con huellas y la copia cifrada de evacuación (R21, R23, R26) | Ley 21.719 |
 | Prerregistro de varios días mal calculado, sin «no llegó» | Por día, en la zona de la instalación, con QR por día y cierre automático (R14, R15) | A.2-7 |
@@ -266,7 +266,7 @@ Numeradas y cerradas, cada una con mi recomendación (13 preguntas).
 - **P6. ¿Qué hace la portería sin red en modo «solo autorizados» con alguien que no está en la copia?** **Recomendación:** no entra, salvo excepción del supervisor por teléfono, registrada con motivo y validada al sincronizar (R10, R22). Antigüedad máxima de la copia: 24 h (aviso, no bloqueo).
 - **P7. ¿Módulo propio o parte de los portales?** **Recomendación:** módulo vendible propio, **«Control de acceso» (`acceso`)**, que depende del Núcleo y del Portal Terreno (dispositivos), con Portal Cliente y Operaciones como fuentes opcionales (ADR-048). Así se puede vender a un cliente que solo quiere portería.
 - **P8. ¿Qué se migra desde 1.0?** **Recomendación:** solo las listas vigentes, los grupos y los prerregistros futuros, con simulación previa (como CAR-25). El histórico de registros no se migra: se exporta una vez a un archivo del tenant y queda en 1.0 hasta que venza su retención, para no traer datos que ya no hacen falta.
-- **P9. ¿Corregimos ya las brechas de seguridad de 1.0?** La extracción encontró brechas de seguridad del control de acceso de 1.0 en producción (A.2-1, A.2-2, A.2-4, A.2-6 y A.2-10; el detalle está fuera del repo). **Recomendación:** sí, como corrección crítica en 1.0 pedida por ti (`AGENTS.md` solo lo permite así), en una sesión aparte, antes de esperar a 2.0. Aquí no se toca 1.0.
+- **P9. ¿Corregimos ya las brechas de seguridad de 1.0?** La revisión de 1.0 encontró brechas de seguridad vigentes en producción en el control de acceso; el detalle está fuera del repo. **Recomendación:** sí, como corrección crítica en 1.0 pedida por ti (`AGENTS.md` solo lo permite así), en una sesión aparte, antes de esperar a 2.0. Aquí no se toca 1.0.
 - **P10. ¿Kiosco de autoservicio para que el visitante se registre solo?** **Recomendación:** no en la primera versión; la portería la opera el guardia (es el caso de Gard). El prerregistro con QR ya da la experiencia rápida. Kiosco queda en backlog.
 - **P11. ¿Entrada en el menú?** **Recomendación:** «Accesos» como séptima entrada de Operaciones (llena el máximo de siete; la siguiente entrada obligará a dividir el área, `NAVEGACION.md` §1.2), pestaña «Accesos» en la ficha de instalación, la tarea «Acceso» en Terreno y «Portería» en «Más» del Supervisor; en el Portal Cliente, dentro de Instalaciones y Reportes. Son cambios a `NAVEGACION.md` que entran con tu aprobación.
 - **P12. ¿Patentes de vehículos con lista propia?** **Recomendación:** sí: la entrada de lista acepta documento o patente (§4.2), porque, según una fuente secundaria ([IAPP](https://iapp.org/news/a/el-reglamento-de-seguridad-privada-de-la-ley-n-21-659-y-la-protecci-n-de-datos-personales-en-chile)) por confirmar en el reglamento D.209, las entidades obligadas de la Ley 21.659 deben entregar las patentes que ingresan si la fiscalía o las policías las piden.
