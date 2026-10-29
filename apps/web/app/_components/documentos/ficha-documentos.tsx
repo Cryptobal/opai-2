@@ -40,7 +40,9 @@ export async function FichaDocumentos({
   ]);
   const docs = r.ok ? r.data.items : [];
   const faltantes = r.ok ? r.data.faltantes : [];
+  // Sin permiso para los tipos, la hoja de subir no ofrece ninguno; otro fallo cuenta como error (CAR-50).
   const tipos = t.ok ? t.data : [];
+  const cargas = !t.ok && t.error.code !== "FORBIDDEN" ? [r, t] : [r];
   const cuenta = (v: Documento["vigencia"]) => docs.filter((d) => d.vigencia === v).length;
   const grupos = [...new Set(docs.map((d) => d.tipo ?? "Sin tipo"))];
   return (
@@ -65,7 +67,11 @@ export async function FichaDocumentos({
         </EnlaceBotonHoja>
       </div>
       <Estado
-        state={r.ok && docs.length === 0 && faltantes.length === 0 ? "empty" : estadoPantalla(r)}
+        state={
+          cargas.length === 1 && r.ok && !docs.length && !faltantes.length
+            ? "empty"
+            : estadoPantalla(...cargas)
+        }
         variante="lista"
         textos={{
           vacio: {

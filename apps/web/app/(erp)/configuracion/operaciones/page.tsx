@@ -1,10 +1,11 @@
 import { Plus } from "lucide-react";
 
-import { Alerta, Empty, Segmentado } from "@opai/ds";
+import { Empty, Estado, Segmentado } from "@opai/ds";
 import { PERMISOS_CORE } from "@opai/domain";
 
 import { LinkNext } from "@/app/_components/link-next";
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
+import { estadoPantalla } from "@/lib/formato";
 import { construirPuede } from "@/lib/permisos-ui";
 import { leerParametros, type SearchParams } from "@/lib/parametros";
 import { ejecutarComoUsuario } from "@/lib/servidor";
@@ -80,9 +81,9 @@ export default function Operaciones({ searchParams }: { searchParams: SearchPara
               ]}
             />
             {!r.ok ? (
-              <Alerta tono="danger" titulo="No pudimos cargar el catálogo">
-                {r.error.message}
-              </Alerta>
+              <Estado state={estadoPantalla(r)} variante="lista">
+                {null}
+              </Estado>
             ) : tab === "patrones" && rp.ok && rp.data.length === 0 ? (
               <Empty
                 titulo="Aún no hay patrones de turno"

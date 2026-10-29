@@ -1,6 +1,7 @@
 import type { PanelSueldo } from "@opai/capabilities";
 import type { Parametros } from "./parametros";
 import { ejecutarComoUsuario } from "./servidor";
+import { exigirDatos } from "./carga";
 import { requerirEncontrado } from "./ids";
 
 export async function cargarPanelSueldo(
@@ -21,6 +22,5 @@ export async function cargarPanelSueldo(
     ),
   });
   requerirEncontrado(r);
-  if (!r.ok) throw new Error(r.error.message);
-  return r.data;
+  return exigirDatos(r);
 }

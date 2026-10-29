@@ -1,6 +1,7 @@
 import { Button } from "@opai/ds";
 import { PERMISOS_CORE } from "@opai/domain";
 
+import { exigirDatos } from "@/lib/carga";
 import { construirPuede } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
@@ -21,7 +22,7 @@ export default function Empresa() {
           ejecutarComoUsuario<Perfil>("erp", "core.empresa.get", {}),
           ejecutarComoUsuario<Tenant>("erp", "core.tenant.get"),
         ]);
-        return { perfil: p.ok ? p.data : null, tenant: t.ok ? t.data : null };
+        return { perfil: exigirDatos(p), tenant: exigirDatos(t) };
       }}
       cabecera={({ tenant }, indice) => {
         const puede = construirPuede(indice.rol, indice.acceso)(PERMISOS_CORE.tenantManage);

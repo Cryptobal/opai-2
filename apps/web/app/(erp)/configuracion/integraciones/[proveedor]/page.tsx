@@ -3,7 +3,9 @@ import { notFound } from "next/navigation";
 import { Alerta, Badge, Button, SeccionTarjeta } from "@opai/ds";
 
 import { PaginaPortal } from "@/app/_components/pagina-portal";
+import { datosSiHayPermiso, exigirDatos } from "@/lib/carga";
 import { haceCuanto } from "@/lib/fechas";
+import { requerirEncontrado } from "@/lib/ids";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { Credenciales } from "../_componentes/credenciales";
@@ -21,17 +23,20 @@ async function cargar(proveedor: string) {
     const r = await ejecutarComoUsuario<Integracion>("erp", "core.integraciones.get", {
       proveedor,
     });
-    return { items: r.ok ? [r.data] : [], error: r.ok ? null : r.error.message, consumo: null };
+    // Un proveedor que no existe es un 404; otro fallo, el error.tsx del ERP (CAR-50).
+    requerirEncontrado(r);
+    return { items: [exigirDatos(r)], consumo: null };
   }
   const [r, c] = await Promise.all([
     ejecutarComoUsuario<Integracion[]>("erp", "core.integraciones.list", {}),
     ejecutarComoUsuario<Resumen>("erp", "core.consumos.resumen", {}),
   ]);
-  const ia = c.ok ? c.data.porRecurso.filter((x) => x.clave.startsWith("ia.")) : [];
+  // Sin permiso de consumos no se muestra la tarjeta; otro fallo no se ve como «sin consumo».
+  const resumen = datosSiHayPermiso(c, null);
+  const ia = resumen ? resumen.porRecurso.filter((x) => x.clave.startsWith("ia.")) : [];
   return {
-    items: r.ok ? r.data.filter((i) => i.categoria === "ia") : [],
-    error: r.ok ? null : r.error.message,
-    consumo: c.ok
+    items: exigirDatos(r).filter((i) => i.categoria === "ia"),
+    consumo: resumen
       ? {
           tokens: ia.reduce((t, x) => t + x.cantidad, 0),
           usd: ia.reduce((t, x) => t + x.costoUsd, 0),
@@ -112,8 +117,7 @@ export default function DetalleIntegracion({ params }: { params: Promise<{ prove
         };
       }}
     >
-      {({ items, error, consumo }) => {
-        if (error) return <Alerta tono="danger" titulo={error} />;
+      {({ items, consumo }) => {
         const i = items[0];
         if (!i || i.estado === "proximamente") notFound();
         return (

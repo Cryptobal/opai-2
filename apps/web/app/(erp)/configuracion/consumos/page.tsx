@@ -1,6 +1,5 @@
 import { Estado, KpiTile } from "@opai/ds";
 
-import { estadoPantalla } from "@/lib/formato";
 import { leerParametros, type SearchParams } from "@/lib/parametros";
 
 import { PaginaConfig } from "../_centro/pagina-config";
@@ -29,7 +28,7 @@ export default function Consumos({ searchParams }: { searchParams: SearchParams 
       cargar={async () => cargarConsumos((await leerParametros(searchParams))["mes"])}
       cabecera={({ mes }) => ({ acciones: <SelectorMes mes={mes} opciones={mesesHasta()} /> })}
     >
-      {({ actual, previo, agentes }) => {
+      {({ state, actual, previo, agentes }) => {
         const a = kpis(actual.ok ? actual.data : null);
         const p = previo ? kpis(previo) : null;
         const v = (k: keyof typeof a) => variacion(a[k], p?.[k]);
@@ -38,7 +37,7 @@ export default function Consumos({ searchParams }: { searchParams: SearchParams 
           return <KpiTile etiqueta={etiqueta} valor={valor} {...(x ? { variacion: x } : {})} />;
         };
         return (
-          <Estado state={estadoPantalla(actual)} variante="detalle">
+          <Estado state={state} variante="detalle">
             <div className="flex flex-col gap-4">
               <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
                 {tile("Inteligencia artificial", usd(a.iaUsd), "iaUsd")}
