@@ -282,7 +282,7 @@ Toda capacidad de CPQ sale por MCP con los mismos permisos (ADR-055); las de esc
 
 **Flujo 1 · desde una solicitud** («cotiza lo que pide esta solicitud»):
 1. Lee la solicitud (texto **externo**) y propone una interpretación: instalación, posiciones, días y horario, patrón sugerido. Si algo es ambiguo (¿24/7 o solo noche? ¿4x4 o 7x7?), **pregunta**; no adivina.
-2. Previsualiza la conversión de Comercial (cuenta, contacto, negocio, instalación prospecto) y `cpq_cotizaciones_crear_rapida` con los paquetes del tenant.
+2. Previsualiza la conversión de Comercial (cuenta, contacto, negocio, instalación prospecto) y `cpq_cotizaciones_create_rapida` con los paquetes del tenant.
 3. Muestra el plan: «Se creará el negocio X y la cotización CPQ-2026-NNN v1: 2 posiciones 24/7 4x4 · venta $ 8,4 M · margen 12,1 % 🟢», con los **supuestos** (sueldo de referencia del cargo, margen por defecto, UF del día).
 4. La persona confirma; el agente ejecuta y deja la cotización en `borrador`. No la envía.
 
@@ -293,7 +293,7 @@ Toda capacidad de CPQ sale por MCP con los mismos permisos (ADR-055); las de esc
 - «Agrega un guardia nocturno» → si hay más de una instalación, pregunta cuál; propone `agregar línea de puesto` con 20:00–08:00 L–D, patrón 4x4 (supuesto), 1 posición = 2 personas, sueldo de referencia del cargo → muestra el delta.
 - «Deja el precio en 330 UF» → `ajustar` {precio objetivo} → si el margen queda bajo el mínimo, lo dice y ofrece pedir aprobación.
 
-**Flujo 4 · explicar el costo** («¿por qué cuesta tanto?», «¿de dónde salen los $ 336 mil de feriados?») → `explicar`: responde con la traza (fórmula, variables y su ámbito, ítems), y señala los tres mayores componentes. Si el usuario no tiene `cpq:costos.ver`, explica en porcentajes por categoría, sin sueldos.
+**Flujo 4 · explicar el costo** («¿por qué cuesta tanto?», «¿de dónde salen los $ 336 mil de feriados?») → `explicar`: responde con la traza (fórmula, variables y su ámbito, ítems), y señala los tres mayores componentes. Si el usuario no tiene `cpq:costos.ver`, nombra los componentes (categorías e ítems) sin montos, porcentajes ni sueldos, para que no se pueda deducir el costo desde la venta.
 
 **Flujo 5 · dejar lista y enviar:** el agente puede pedir la aprobación y preparar el envío; el envío queda en la cola de aprobación humana con la vista previa del documento (formato de CAR-68).
 
@@ -304,7 +304,7 @@ Toda capacidad de CPQ sale por MCP con los mismos permisos (ADR-055); las de esc
 - **Indicadores (UF, IPC, IMO, ingreso mínimo):** servicio del núcleo con valores por fecha (de plataforma). Si hoy no existe como capacidad del núcleo, el Brief 08 lo agrega o lo pide; CPQ nunca consulta un proveedor directo.
 - **Documentos (ADR-019, Brief 09):** PDF de la propuesta con plantillas del tenant y su marca (ADR-028). **Formatos de salida: CAR-68** (§15).
 - **Comunicaciones (ADR-020):** envío por correo y avisos. **Seguimiento posterior al envío: CAR-67** (§15).
-- **IA:** CPQ no llama modelos. El agente interno usa el adaptador del núcleo y mide en `core.consumos` (ADR-031, ADR-049). La redacción asistida de secciones de la propuesta (en 1.0, «proposalAi») va con los formatos de salida (CAR-68).
+- **IA:** CPQ no llama modelos. El agente interno usa el adaptador del núcleo y mide en `core.consumos` (ADR-031, ADR-049): con la key de IA del tenant, si su proveedor falla nunca pasa a la key de OPAI (falla y avisa al tenant, ADR-049 (6)); el consumo no tiene tope por defecto y el tenant puede fijar un presupuesto opcional (ADR-049 (9)). La redacción asistida de secciones de la propuesta (en 1.0, «proposalAi») va con los formatos de salida (CAR-68).
 
 **Sin la fuente X (ADR-048).** CPQ **depende de Comercial** (dura): no se vende sin él. **Puestos (Operaciones I)** es fuente opcional: sin él, R2 crea el puesto del núcleo (`core.puestos`) sin estado PPC ni asignaciones, y la oferta lo dice. **Agente interno** es opcional: sin él, los agentes externos usan el mismo MCP. **Documentos** es parte del núcleo: sin plantilla propia, se usa la base del sistema.
 
@@ -360,7 +360,7 @@ Toda capacidad de CPQ sale por MCP con los mismos permisos (ADR-055); las de esc
 - **CA12.** Una cotización rápida de 1 posición 24/7 se crea en menos de 3 minutos, con negocio nuevo si no existía (también en el teléfono, si Carlos aprueba la pregunta 7).
 - **CA13.** En el teléfono (bajo 768 px) se ve, compara y aprueba, y la planilla es de solo lectura; en iPad vertical (768 px) y horizontal (1024 px) y en escritorio se edita completa.
 - **CA14.** Por MCP, un agente crea una cotización, sube el margen, agrega un guardia nocturno y explica el costo, siempre con vista previa; `enviar` devuelve `APPROVAL_REQUIRED` y `aprobar` no existe para él.
-- **CA15.** Un usuario sin `cpq:costos.ver` no ve sueldos ni costos en pantalla, API ni MCP; la explicación usa porcentajes por categoría.
+- **CA15.** Un usuario sin `cpq:costos.ver` no ve sueldos, costos ni el margen exacto en pantalla, API ni MCP (solo «sobre» o «bajo el mínimo»); la explicación nombra componentes sin montos.
 - **CA16.** Toda tabla de CPQ tiene `tenant_id`, RLS y política `tenant_isolation`; la prueba de dos empresas pasa.
 - **CA17.** El inventario de paridad no tiene faltantes: toda acción de pantalla de CPQ tiene herramienta MCP o excepción con motivo (aprobar margen).
 
@@ -383,7 +383,7 @@ Cerradas, con recomendación. Lo ya respondido en `PREGUNTAS-carlos.md` (4–11)
 
 ### B. Preguntas nuevas de esta especificación
 
-9. **¿Quién ve costos y margen?** **Recomendación:** permiso nuevo `cpq:costos.ver` para owner, admin y gerente; viewer y roles de venta sin él ven venta, estado y margen en porcentaje. **Ojo:** el gerente hoy no puede leer estructuras de sueldo sensibles; con esta recomendación ve costos y el sueldo **cotizado**, pero no el sueldo de las capas del núcleo (R20). Si quieres que lo vea, hay que cambiar esa denegación del núcleo, no solo CPQ.
+9. **¿Quién ve costos y margen?** **Recomendación:** permiso nuevo `cpq:costos.ver` para owner, admin y gerente; viewer y roles de venta sin él ven venta, estado y solo si el margen está sobre o bajo el mínimo, sin el porcentaje (con la venta y el margen exacto se deduce el costo). **Ojo:** el gerente hoy no puede leer estructuras de sueldo sensibles; con esta recomendación ve costos y el sueldo **cotizado**, pero no el sueldo de las capas del núcleo (R20). Si quieres que lo vea, hay que cambiar esa denegación del núcleo, no solo CPQ.
 10. **¿Validez por defecto y vencimiento?** **Recomendación:** 30 días, ajuste del tenant; vencimiento automático diario y aviso 3 días antes. El seguimiento que se hace con esos avisos es de CAR-67.
 11. **¿Cotizaciones abiertas de 1.0 durante la convivencia?** **Recomendación:** se importan de solo lectura (R53) y se **continúan** en 2.0 como versión nueva recalculada, mostrando la diferencia; no se editan en 1.0 después del corte. Evita dos precios vivos del mismo negocio.
 12. **¿«Al peso» es exacto?** **Recomendación:** exacto en la venta mensual final redondeada; si una diferencia de $ 1 viene del redondeo en coma flotante de 1.0, se documenta caso a caso y tú la aceptas. 1.0 calcula en floats (P15) y 2.0 en enteros.
