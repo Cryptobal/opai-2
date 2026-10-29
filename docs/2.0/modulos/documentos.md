@@ -32,6 +32,8 @@ Cada documento sale en **PDF** y como **enlace para el cliente**, donde el clien
 | **Aceptación** | El hecho de que un destinatario aceptó (o rechazó) el documento, con evidencia de firma simple (quién, cuándo, cómo, huella del PDF). Inmutable | Documento comercial, enlace, cotización | Documentos (hecho regulado: inmutable, hora de servidor, hash, bitácora encadenada; ADR-019, ADR-023) |
 | **Perfil de marca** | Logo (cuatro variantes), colores, nombre comercial, eslogan, datos legales y de contacto | Toda salida | Núcleo (ya existe: `core.perfil_empresa`, ADR-028) |
 
+Todas las entidades nuevas de esta parte (plantillas, versiones, secciones, documentos comerciales, enlaces y aceptaciones) llevan `tenant_id` con RLS forzada y la política `tenant_isolation`, y referencias validadas del mismo tenant (AGENTS.md, «Multi-tenant»).
+
 Relaciones clave:
 
 ```
@@ -104,7 +106,7 @@ Documento comercial (enviado) 1──1 PDF en core.documentos (con huella SHA-25
 |---|---|---|---|---|---|
 | Código | `<código de cotización> v<n> · <formato>` (propuesta y simple); `PRE-AAAA-NNN` (presentación, contador del núcleo) | Sí | Lo asigna el sistema | Nadie | Sí |
 | Formato y plantilla (versión) | Referencia | Sí | Plantilla publicada del mismo tenant | Al generar | No |
-| Cuenta y negocio | Referencia | Cuenta siempre; negocio en propuesta y simple | Del mismo tenant; la cuenta es la del negocio | Al generar | Sí (nombre de la cuenta) |
+| Cuenta y negocio | Referencia | Cuenta siempre, salvo la presentación suelta a un correo de prospecto (R37); negocio en propuesta y simple | Del mismo tenant; la cuenta es la del negocio | Al generar | Sí (nombre de la cuenta) |
 | Cotización (versión) | Referencia | En propuesta y simple | En estado `lista` o `enviada` (ADR-042.7); vigente del negocio | Al generar | Sí (código y versión) |
 | Contenido | Secciones editables con su origen (`plantilla`, `datos`, `persona`, `agente`) y estado (`propuesta_ia`, `editada`, `revisada`) | Sí | No se envía con secciones `propuesta_ia` sin revisar (R24) | `documentos:salida.manage` mientras es borrador | Sí |
 | Destinatarios | Contactos del negocio o de la cuenta | Para enviar | Con correo; rol en el negocio o en la cuenta (ADR-040 §5) | `documentos:salida.enviar` | Su nombre en la aceptación |
@@ -206,7 +208,7 @@ Documento comercial (enviado) 1──1 PDF en core.documentos (con huella SHA-25
 - **R34.** Al aceptar, CPQ marca la cotización `aceptada` (y rechaza las hermanas abiertas, como en 1.0 §3.2) y Comercial **propone ganar el negocio** o lo gana según el ajuste del tenant «Ganar el negocio al aceptar» (pregunta 2). Ganar sigue sus reglas de Comercial: los puestos se **ofrecen** y RRHH los confirma (`modulos/cpq.md` R1–R5); aceptar nunca crea puestos.
 - **R35.** **Rechazar** en el enlace pide un motivo; queda registrado, avisa al ejecutivo y no mueve el negocio (la pérdida la decide una persona en Comercial).
 - **R36.** Revocar un enlace o retirar un documento enviado lo deja en solo lectura con «Este documento ya no está disponible» y no borra la evidencia.
-- **R39.** **Seguridad del enlace público.** El token del enlace es aleatorio con al menos 128 bits de entropía y se guarda **solo como hash**; el tenant se resuelve desde ese hash con una consulta acotada de columnas mínimas, igual que `/verificar` (nunca `dbAdmin()` ni una lectura sin `forTenant` después de resolverlo). El código de un solo uso tiene 6 dígitos, vence a los 10 minutos, admite 5 intentos y luego se bloquea ese enlace por 15 minutos; pedir código, aceptar y rechazar pasan por el rate limit centralizado con **falla cerrada** (`permitir(..., { fallarCerrado: true })`, como recuperar contraseña). Un token inválido, vencido o revocado responde igual, sin revelar si el documento existe.
+- **R39.** **Seguridad del enlace público.** El token del enlace es aleatorio con al menos 128 bits de entropía y se guarda **solo como hash**; el tenant se resuelve desde ese hash con una consulta acotada de columnas mínimas, igual que `/verificar` (nunca `dbAdmin()` ni una lectura sin `forTenant` después de resolverlo). El código de un solo uso tiene 6 dígitos, vence a los 10 minutos, admite 5 intentos y luego se bloquea ese enlace por 15 minutos; pedir código, aceptar y rechazar pasan por el rate limit centralizado con **falla cerrada** (`permitir(..., { fallarCerrado: true })`, como recuperar contraseña). Un token inválido o revocado responde igual, sin revelar si el documento existe; un token **vencido** muestra el documento en solo lectura, como dice R30, sin permitir aceptar ni rechazar.
 
 ### 5.8 Presentación de empresa
 
@@ -263,7 +265,7 @@ Los eventos de aceptación son los que consumen CPQ (cotización aceptada) y Com
 
 ## 9. Herramientas MCP
 
-Toda acción de pantalla tiene su herramienta (ADR-055). Las escrituras tienen `preview_…`, aceptan `idempotency_key` y quedan auditadas como «agente vía <usuario>» (ADR-049).
+Toda acción de pantalla tiene su herramienta (ADR-055), y la pantalla, `/api/v1` y el MCP invocan la misma capacidad. Las escrituras aceptan `dryRun` (en MCP, `preview_…`), aceptan `idempotency_key` y quedan auditadas como «agente vía <usuario>» (ADR-049).
 
 | Herramienta | Qué hace (lenguaje de negocio) | Tipo | Vista previa | Aprobación humana |
 |---|---|---|---|---|
@@ -310,7 +312,7 @@ Toda acción de pantalla tiene su herramienta (ADR-055). Las escrituras tienen `
 - **Almacenamiento:** PDF y respaldos en R2 por `core.documentos` con URLs firmadas de corta duración (ADR-039). La página del cliente nunca expone una URL de R2 permanente.
 - **Correo:** adaptador de correo del tenant (Resend por defecto, dominio propio cuando el tenant lo configure; ADR-020).
 - **WhatsApp:** en v1, compartir el enlace desde el celular (enlace `wa.me`, sin proveedor). Envío por API de WhatsApp queda para cuando exista la integración del núcleo.
-- **IA:** asistente de plantillas y textos por el adaptador de IA del núcleo con clase de tarea `estandar` (ADR-031), con la key del tenant o la de OPAI según ADR-049.9.
+- **IA:** asistente de plantillas y textos por el adaptador de IA del núcleo con clase de tarea `estandar` (ADR-031), con la key del tenant o la de OPAI según ADR-049.9; si el tenant tiene key propia y falla, **nunca** se pasa a la key de OPAI: la generación falla y se avisa al tenant (ADR-049.6).
 - **Mapas:** mapa estático de la instalación por el servicio de geolocalización del núcleo (ADR-027).
 - **Firma electrónica avanzada:** no en esta parte; se suma en el Brief 28 (fase 6) como un nivel más de la aceptación.
 
