@@ -189,7 +189,7 @@ Como toda capacidad (ADR-004, ADR-055): cada herramienta existe igual en pantall
 | Finiquito «firmable» en OPAI | Se prepara y se sigue; se firma en Mi DT (R14) | Normativa DT |
 | Sin MCP | Herramientas con aprobación humana (§10) | ADR-055 |
 
-**No se porta:** la firma subida como imagen y el autoestampado general. La verificación pública de 2.0 compara siempre con la huella registrada (R4–R6).
+**No se porta:** la firma subida como imagen y el autoestampado general. La verificación pública de 2.0 compara siempre el documento con la huella registrada al firmar (R4–R6).
 
 ## 13. Casos borde
 
