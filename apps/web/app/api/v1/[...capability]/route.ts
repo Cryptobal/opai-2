@@ -1,8 +1,7 @@
 import { manejarCapacidadHttp } from "@opai/capabilities/http";
 
 import { resolverActor } from "@/lib/actor";
-import { contextoSesionApi } from "@/lib/api-sesion";
-import { contextoV1Sesion } from "@/lib/api-v1-sesion";
+import { contextoV1Sesion, exigirOrigenEnEscritura } from "@/lib/api-v1-sesion";
 import { ipDe, LIMITES, permitir } from "@/lib/rate-limit";
 import { asegurarRegistro } from "@/lib/registro";
 import { demasiadas } from "@/lib/respuestas";
@@ -15,16 +14,18 @@ type Params = { params: Promise<{ capability: string[] }> };
  * API v1: autentica por sesión o API key y ejecuta la capacidad (Brief 01). Rate limit centralizado
  * (NÚCLEO-B): primero por IP (barrera barata antes de autenticar, acota el sondeo de keys), luego por
  * principal (API key o usuario). El actor se resuelve una sola vez y se reutiliza en el handler.
- * Con sesión, el portal ERP lo fija el servidor y se exige el propio origen (`lib/api-sesion.ts`).
+ * Con sesión, solo las capacidades de roles y permisos corren en el portal ERP fijado en servidor
+ * (`lib/api-v1-sesion.ts`, CAR-37); el resto sigue con portal nulo. Toda escritura con sesión exige
+ * el propio `Origin` (CAR-38).
  */
 async function manejar(req: Request, { params }: Params): Promise<Response> {
   const { capability } = await params;
   if (!(await permitir(`v1-ip:${ipDe(req)}`, LIMITES.apiPorIp.maximo))) return demasiadas();
   const actor = await resolverActor(req);
   if (actor instanceof Response) return actor;
-  const ctxRoles = contextoV1Sesion(actor, capability.join("."), req);
-  if (ctxRoles instanceof Response) return ctxRoles;
-  const ctx = contextoSesionApi(req, ctxRoles);
+  const sinOrigen = exigirOrigenEnEscritura(actor, req);
+  if (sinOrigen) return sinOrigen;
+  const ctx = contextoV1Sesion(actor, capability.join("."), req);
   if (ctx instanceof Response) return ctx;
   const principal = ctx.actor.id ?? "sistema";
   if (!(await permitir(`v1-principal:${principal}`, LIMITES.apiPorPrincipal.maximo)))

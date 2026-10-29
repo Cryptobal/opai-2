@@ -43,14 +43,25 @@ describe("/api/v1 con sesión: cableado de la ruta (CAR-37)", () => {
     expect(await res.json()).toMatchObject({ error: { message: "Origen no permitido." } });
   });
 
-  it("fuera de la lista, una escritura sin origen se rechaza", async () => {
-    const res = await ruta.POST(
-      new Request("http://localhost:3000/api/v1/core/cuentas/list", { method: "POST" }),
+  it("fuera de la lista, la sesión sigue sin portal: 403 por portal", async () => {
+    const res = await ruta.GET(
+      new Request("http://localhost:3000/api/v1/core/cuentas/list?input=%7B%7D", {
+        headers: { origin: "http://localhost:3000" },
+      }),
       params(["core", "cuentas", "list"]),
     );
     expect(res.status).toBe(403);
     expect(await res.json()).toMatchObject({
-      error: { message: "Origen no permitido." },
+      error: { message: "No tienes acceso a este portal." },
     });
+  });
+
+  it("fuera de la lista, una escritura sin origen se rechaza antes del portal (CAR-38)", async () => {
+    const res = await ruta.POST(
+      new Request("http://localhost:3000/api/v1/core/supervisores/quitar", { method: "POST" }),
+      params(["core", "supervisores", "quitar"]),
+    );
+    expect(res.status).toBe(403);
+    expect(await res.json()).toMatchObject({ error: { message: "Origen no permitido." } });
   });
 });

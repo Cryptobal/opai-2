@@ -4,7 +4,11 @@ import { capacidadesDelNucleo } from "@opai/capabilities";
 
 import { denegar } from "../../../packages/capabilities/src/autorizacion";
 import type * as ActorMod from "../lib/actor";
-import { CAPACIDADES_V1_SESION_ERP, contextoV1Sesion } from "../lib/api-v1-sesion";
+import {
+  CAPACIDADES_V1_SESION_ERP,
+  contextoV1Sesion,
+  exigirOrigenEnEscritura,
+} from "../lib/api-v1-sesion";
 import { fuentesFalsas, membresia, USUARIO } from "./fuentes-falsas";
 
 vi.stubEnv("DATABASE_URL", "postgresql://opai_app:x@localhost:5432/opai");
@@ -83,6 +87,29 @@ describe("/api/v1 con sesión: roles y permisos en el portal ERP fijado en servi
       );
       expect(r).not.toBeInstanceOf(Response);
     }
+  });
+
+  it("toda escritura con sesión exige el propio Origin; las lecturas y las keys no cambian (CAR-38)", async () => {
+    const base = await sesion();
+    const url = "http://localhost:3000/api/v1/core/supervisores/asignar";
+    for (const headers of [
+      { origin: "https://malo.example" },
+      { "sec-fetch-site": "same-origin" },
+    ]) {
+      const r = exigirOrigenEnEscritura(base, new Request(url, { method: "POST", headers }));
+      expect((r as Response).status, JSON.stringify(headers)).toBe(403);
+    }
+    expect(
+      exigirOrigenEnEscritura(base, new Request(url, { method: "POST", headers: MISMO })),
+    ).toBeNull();
+    expect(exigirOrigenEnEscritura(base, new Request(url))).toBeNull();
+    const { fuentes, secreto } = fuentesFalsas();
+    const key = await actor.resolverActor(
+      new Request(url, { headers: { authorization: `Bearer ${secreto}` } }),
+      fuentes,
+    );
+    if (key instanceof Response) throw new Error("Se esperaba key");
+    expect(exigirOrigenEnEscritura(key, new Request(url, { method: "POST" }))).toBeNull();
   });
 
   it("una API key no cambia: las soloPersonas siguen bloqueadas para agentes", async () => {

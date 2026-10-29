@@ -91,27 +91,23 @@ test("asignar, ver solo lo asignado en el portal, quitar y volver a vacío", asy
   // 2 · El supervisor ve solo esa instalación (el filtro está en la consulta de la capacidad).
   await verInstalaciones(sup, true);
 
-  // 3 · /api/v1 con sesión: preview sin escribir y un POST de otro origen rechazado.
-  const lista = await page.request.get("/api/v1/core/supervisores/de_instalacion", {
-    params: { input: JSON.stringify({ instalacionId: INSTALACION }) },
-  });
-  const datos = (await lista.json()) as {
-    data: { asignados: { membershipId: string; nombre: string }[] };
-  };
-  const membershipId = datos.data.asignados.find((s) => s.nombre === nombre)?.membershipId;
-  expect(membershipId).toBeTruthy();
-  const cuerpo = { input: { membershipId, instalacionIds: [INSTALACION] }, dry_run: true };
-  const origen = new URL(page.url()).origin;
-  const vista = await page.request.post("/api/v1/core/supervisores/quitar", {
-    headers: { origin: origen },
-    data: cuerpo,
-  });
-  expect(await vista.json()).toMatchObject({ ok: true, dryRun: true, data: { instalaciones: [] } });
+  // 3 · /api/v1 con sesión: fuera de la lista de CAR-37 no fija portal (403) y una escritura de
+  // otro origen se corta antes; ninguna de las dos escribe.
+  const cuerpo = { input: { membershipId: INSTALACION, instalacionIds: [INSTALACION] } };
   const ajeno = await page.request.post("/api/v1/core/supervisores/quitar", {
     headers: { origin: "https://ajeno.example" },
-    data: { ...cuerpo, dry_run: false },
+    data: cuerpo,
   });
   expect(ajeno.status()).toBe(403);
+  expect(await ajeno.json()).toMatchObject({ error: { message: "Origen no permitido." } });
+  const propio = await page.request.post("/api/v1/core/supervisores/quitar", {
+    headers: { origin: new URL(page.url()).origin },
+    data: cuerpo,
+  });
+  expect(propio.status()).toBe(403);
+  expect(await propio.json()).toMatchObject({
+    error: { message: "No tienes acceso a este portal." },
+  });
   await verInstalaciones(sup, true);
 
   // 4 · Quitar desde la ficha de la instalación.
