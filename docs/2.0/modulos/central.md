@@ -46,38 +46,59 @@ Relaciones: instalación 1–N alertas; alerta 1–N señales, 1–N intentos, 1
 | Avisos de la central | `/central/avisos`, crear en hoja | ERP | Lista + `Sheet` | Pestaña de Central |
 | Turno de central y entrega | `/central/turno` | ERP | Ficha corta | Cabecera de la cola (quién está a cargo) |
 | Bitácora de la instalación | pestaña «Central» de la ficha de Instalación | ERP, Supervisor, (Cliente, si el tenant lo habilita) | Línea de tiempo filtrable por turno | Ficha de Instalación, pestaña de módulo (ADR-041) |
-| Configuración → Central | centro de Configuración, ámbitos tenant e instalación (ADR-018/038) | ERP | Formulario por ámbitos | Configuración (sin página propia del módulo) |
+| Configuración → Central | centro de Configuración, ámbitos tenant e instalación (ADR-018/038; el de instalación es propuesto, pregunta 15) | ERP | Formulario por ámbitos | Configuración (sin página propia del módulo) |
 | Supervisor · Hoy con alertas | `/supervisor` (Hoy) | Supervisor | Lista | Alertas abiertas de sus instalaciones y escalamientos dirigidos a él |
 | **Terreno/Trabajador · Mensaje a la central** | `…/central/nuevo` | Trabajador, Terreno | Formulario de tarea única | Botón fijo en Inicio («Central») |
-| Terreno/Trabajador · Mis hilos y Avisos | `…/central` | Trabajador, Terreno | Lista + hilo; aviso con «Acusar recibo» | Inicio (avisos sin acuse arriba) |
+| Trabajador · Mis hilos y Avisos | `…/central` | Trabajador | Lista + hilo; aviso con «Acusar recibo» | Inicio (avisos sin acuse arriba) |
+| Terreno · Avisos del puesto | dentro de «Instrucciones del puesto» | Terreno (dispositivo compartido, tarea única, `NAVEGACION.md` §4) | Tarea única | Sin «Mis hilos»: el hilo se ve mientras está abierto; el acuse identifica a la persona en turno con el mecanismo que defina el Brief 16 |
 
 **Pestañas de Central (ERP):** Cola · Mensajes · Avisos · Bitácora (vista transversal). Con un filtro de instalación, la Bitácora es la misma de la ficha.
+
+**La alerta no es una ficha maestra con pestañas** (ADR-041 rige para cuentas, instalaciones, personas, negocios): es un caso de corta vida que se ve en una sola pantalla con secciones. Sus fotos (vía `core.documentos`) aparecen en «Qué pasó» y su bitácora cumple el papel de Actividad.
 
 **Qué se hace en cada dispositivo:**
 - **Teléfono (operador o supervisor):** ver la cola, abrir la alerta, tomar el control, aceptar o rechazar propuestas, aprobar, contactar, resolver, responder hilos y acusar escalamientos («voy en camino»). La configuración de reglas y cadenas, no.
 - **iPad:** todo lo del teléfono más crear avisos con destinatarios múltiples y la entrega de turno; es la «consola portátil» del jefe de turno.
 - **Escritorio:** la **pantalla de central** (modo pantalla completa, pensado para un monitor fijo y modo oscuro), configuración de reglas, cadenas y autonomía.
-- **App del guardia (teléfono):** mandar mensajes a la central, ver sus hilos, ver y acusar avisos. Funciona sin conexión con cola local (ADR-044): el mensaje se envía al volver la señal y muestra «pendiente de envío».
+- **App del guardia (teléfono, portal Trabajador):** mandar mensajes a la central, ver sus hilos, ver y acusar avisos. En el **dispositivo de Terreno** (compartido) solo mandar el mensaje y acusar los avisos del puesto. Funciona sin conexión con cola local (ADR-044): el mensaje se envía al volver la señal y muestra «pendiente de envío».
 
 ## 4. Campos y validaciones
 
 **Regla de vigilancia**
 
-| Campo | Obligatorio | Regla |
-|---|---|---|
-| Señal | Sí | De un catálogo que publican los módulos activos; sin el módulo, la regla no se ofrece (ADR-048) |
-| Umbral | Según la señal | Minutos de atraso, puntaje mínimo, cantidad de puntos; entero con unidad |
-| Severidad | Sí | Crítica, alta, media, baja |
-| Ámbito | Sí | Tenant (por defecto) o instalación (excepción que manda sobre el tenant) |
-| Horario | No | Franjas en que la regla vigila (por defecto: siempre que haya turno en la pauta o jornada) |
-| Cadena | Sí | Cadena del tenant o de la instalación para esa severidad |
-| Activa | Sí | Ver R6 y pregunta 5 |
+| Campo | Tipo | Obligatorio | Validación | Quién lo edita | Visible para cliente o trabajador |
+|---|---|---|---|---|---|
+| Señal | Catálogo | Sí | Publicado por un módulo activo; sin el módulo, la regla no se ofrece (ADR-048) | owner, admin | No |
+| Umbral | Entero con unidad | Según la señal | Minutos de atraso, puntaje mínimo o cantidad de puntos; ≥ 0 | owner, admin | No |
+| Severidad | Lista | Sí | Crítica, alta, media, baja | owner, admin | No |
+| Ámbito | Lista | Sí | Tenant (por defecto) o instalación, que manda sobre el tenant (R3) | owner, admin | No |
+| Horario | Franjas `[inicio, fin)` | No | Por defecto, siempre que haya turno en la pauta o jornada pactada | owner, admin | No |
+| Cadena | Referencia | Sí | Cadena del tenant o de la instalación para esa severidad | owner, admin | No |
+| Activa | Sí/no | Sí | Ver R6 y pregunta 5 | owner, admin | No |
 
 **Cadena de escalamiento:** pasos ordenados (1 a 6), cada uno con destinatario (rol relativo: «supervisor de la instalación», «jefe de operaciones», «operador de turno», o una persona), canal (push, WhatsApp, SMS, correo, llamada humana, llamada por agente de IA cuando exista), espera antes del siguiente paso (minutos) y si el paso **exige confirmación** («me hago cargo»). El último paso es siempre un humano interno; el cliente nunca es un paso automático (R14).
 
-**Mensaje a la central:** tipo (novedad, consulta, urgencia; obligatorio), subtipo (catálogo del tenant, opcional), texto (obligatorio salvo urgencia, hasta 1.000 caracteres), hasta 5 fotos (vía `core.documentos`, ADR-019), instalación y turno (los pone el sistema según la sesión y la pauta, no el guardia), ubicación (si el tenant la pide y el dispositivo la da).
+**Mensaje a la central**
 
-**Aviso de la central:** tipo (consigna, cambio de turno, instrucción), texto, destinatarios (personas, puestos, instalaciones o «turno de hoy» de una instalación), acuse obligatorio (sí/no; por defecto sí en consignas), plazo del acuse (minutos), vigencia (desde–hasta; las consignas vigentes se muestran fijas en la app hasta que vencen).
+| Campo | Tipo | Obligatorio | Validación | Quién lo edita | Visible para cliente o trabajador |
+|---|---|---|---|---|---|
+| Tipo | Lista | Sí | Novedad, consulta, urgencia | El guardia al crear | Trabajador (lo propio) |
+| Subtipo | Catálogo del tenant | No | Activo en el catálogo | El guardia | Trabajador |
+| Texto | Texto externo | Sí, salvo urgencia | Hasta 1.000 caracteres | El guardia; no se edita después | Trabajador |
+| Fotos | Documentos | No | Hasta 5, vía `core.documentos` (ADR-019) | El guardia | Trabajador |
+| Instalación y turno | Referencias | Sí | Los pone el sistema según la sesión y la pauta o la jornada, nunca el guardia | Sistema | Trabajador |
+| Ubicación | Punto | No | Solo si el tenant la pide y el dispositivo la da (geolocalización del núcleo) | Sistema | No |
+
+**Aviso de la central**
+
+| Campo | Tipo | Obligatorio | Validación | Quién lo edita | Visible para cliente o trabajador |
+|---|---|---|---|---|---|
+| Tipo | Lista | Sí | Consigna, cambio de turno, instrucción | Central | Trabajador |
+| Texto | Texto o plantilla | Sí | Hasta 2.000 caracteres | Central; enviado no se edita (se reemplaza por otro) | Trabajador |
+| Destinatarios | Personas, puestos, instalaciones o «turno de hoy» | Sí | Dentro del alcance de quien envía | Central | No |
+| Acuse obligatorio y plazo | Sí/no + minutos | Sí | Por defecto sí en consignas, 15 min | Central | Trabajador |
+| Vigencia | Rango de fechas | No | Fin posterior al inicio | Central | Trabajador |
+
 
 ## 5. Reglas de negocio
 
@@ -90,7 +111,7 @@ Relaciones: instalación 1–N alertas; alerta 1–N señales, 1–N intentos, 1
   - *Operaciones* (Brief 11 y 12): **puesto sin cubrir** (PPC) en el turno de hoy, cobertura no confirmada al inicio del turno (sin Asistencia, ADR-048), relevo que no llegó.
   - *Terreno*: mensaje de tipo urgencia, botón de pánico, dispositivo de la instalación sin conexión o con batería baja, aviso sin acuse vencido.
   - *Manual*: un operador o supervisor abre una alerta a mano.
-- **R3. Umbrales configurables por tenant e instalación.** Cada regla tiene un valor del tenant y la instalación puede sobrescribirlo (ADR-038: defecto → tenant → instalación). Al activar el módulo, la **plantilla de la vertical se copia al tenant** (ADR-021, P13) y desde ahí es del tenant: cambiar la plantilla de OPAI no cambia la del tenant.
+- **R3. Umbrales configurables por tenant e instalación.** Cada regla tiene un valor del tenant y la instalación puede sobrescribirlo (defecto → tenant → instalación). ADR-038 hoy resuelve defecto → plataforma → tenant → usuario y **no tiene ámbito Instalación**: esta especificación propone agregarlo al núcleo (pregunta 15). Al activar el módulo, la **plantilla de la vertical se copia al tenant** (ADR-021, P13) y desde ahí es del tenant: cambiar la plantilla de OPAI no cambia la del tenant.
 - **R4. Agrupación.** Señales de la misma instalación y turno que llegan dentro de una ventana (por defecto 10 min) se agrupan en la misma alerta abierta y elevan su severidad si corresponde; no se abre una alerta por señal. Un guardia que no marcó y no responde es **una** alerta, no dos.
 - **R5. Severidad.** La severidad la fija la regla; el agente puede **subirla** solo, nunca bajarla (bajar es propuesta, R10). Pánico y urgencia son siempre crítica.
 - **R6. Silencio por defecto (ADR-020) y la cola.** Las reglas de la plantilla llegan **activas solo dentro de la cola de la central** (el operador y el agente las ven); los avisos hacia afuera (push, WhatsApp, correo, llamadas a supervisores) se activan por tenant en Configuración → Central o Comunicaciones. Ver pregunta 5.
@@ -103,7 +124,7 @@ Relaciones: instalación 1–N alertas; alerta 1–N señales, 1–N intentos, 1
 
 **Humano a cargo**
 
-- **R10. Tres niveles de autonomía del agente** (por defecto; el tenant los ajusta, R11):
+- **R10. Tres niveles de autonomía del agente** (por defecto; el tenant los ajusta, R11). No es un mecanismo nuevo: «solo» es la autonomía directa de la capacidad para la key del agente y «aprobación humana» es la cola de aprobaciones del núcleo (`APPROVAL_REQUIRED`, Bandeja), ambas configuradas en Configuración → Agentes y API keys (ADR-032 §3, ADR-038). Lo único propio de la central es la **propuesta**: el agente la deja en la alerta y, si el operador la acepta, la acción se ejecuta **con la identidad del operador**, no la del agente.
 
   | Nivel | El agente… | Acciones por defecto |
   |---|---|---|
@@ -111,15 +132,15 @@ Relaciones: instalación 1–N alertas; alerta 1–N señales, 1–N intentos, 1
   | **Propone** (el operador acepta o rechaza con un toque) | Prepara la acción con su vista previa y espera | Resolver o cerrar como falsa alarma; bajar la severidad; enviar una instrucción con texto libre a un guardia; pedir un reemplazo o turno extra a Operaciones; derivar a ticket; reabrir; cambiar la cadena de una alerta |
   | **Aprobación humana** (irreversible; `APPROVAL_REQUIRED`, ADR-032) | Nunca lo ejecuta solo | Llamar a servicios de emergencia o a Carabineros; avisar al cliente; **descartar un pánico**; registrar una falta disciplinaria; confirmar un turno extra con pago; cambiar la pauta; aviso masivo a más de una instalación; cambiar reglas, cadenas o la autonomía |
 
-- **R11. El tenant ajusta, con piso.** Un owner o admin puede mover acciones entre «solo» y «propone». Lo marcado como **aprobación humana no baja a «solo»** en la central, aunque ADR-032 permita autorizar por capacidad: descartar un pánico, llamar a emergencias y avisar al cliente quedan siempre en manos humanas (pregunta 3).
-- **R12. Siempre hay un humano a cargo.** Toda hora del día tiene un **responsable de central**: el operador con turno de central abierto o, si no hay, el **responsable de respaldo** que el tenant designa (por defecto, el jefe de operaciones). El agente opera **en nombre** de ese responsable y con su alcance (ADR-022). Sin responsable nombrado, el agente solo lee y escala; no ejecuta ni propone (pregunta 4).
-- **R13. Tomar el control.** Cualquier operador con permiso puede **tomar** una alerta: desde ese momento el agente deja de actuar en ella (solo sugiere en un panel aparte) hasta que el operador la **devuelve**. También puede **pausar al agente** para una instalación o para todo el tenant; reanudarlo es solo de personas. Tomar, devolver, pausar y reanudar quedan en la bitácora.
+- **R11. El tenant ajusta, con piso.** Un owner o admin puede mover acciones entre «solo» y «propone» desde la autonomía de la key del agente (Configuración → Agentes y API keys). Lo marcado como **aprobación humana no baja a «solo»** en la central, aunque ADR-032 permita autorizar por capacidad: descartar un pánico, llamar a emergencias y avisar al cliente quedan siempre en manos humanas (pregunta 3).
+- **R12. Siempre hay un humano a cargo.** Toda hora del día tiene un **responsable de central**: el operador con turno de central abierto o, si no hay, el **responsable de respaldo** que el tenant designa (por defecto, el jefe de operaciones). El agente es una **identidad de servicio** (ADR-051): sus permisos salen solo de su key, con alcance de todo el tenant, y el responsable de turno es quien **gobierna** (recibe sus aprobaciones y avisos y responde por él); no hereda el rol ni el alcance de esa persona. Sin responsable nombrado, el agente **solo lee y avisa a los owner y admin** que la central está sin responsable; no contacta, no escala ni propone (pregunta 4).
+- **R13. Tomar el control.** Cualquier operador con permiso puede **tomar** una alerta: desde ese momento el agente deja de actuar en ella (solo sugiere en un panel aparte) hasta que el operador la **devuelve**. También puede **pausar al agente** para una instalación o para todo el tenant; reanudarlo es solo de personas. Tomar, devolver, pausar y reanudar quedan en la bitácora. Tomar, devolver, reanudar y los turnos de central son **solo de personas** (`soloPersonas`, con motivo en `paridad-excepciones.ts`: garantizan que el humano a cargo sea una persona); pausar sí lo puede hacer el agente sobre sí mismo.
 - **R14. El cliente se entera por decisión humana.** Ningún aviso al cliente sale solo. El portal del cliente muestra la bitácora de su instalación solo si el tenant lo habilita, con el resumen de la alerta y sin hallazgos internos ni datos personales de los guardias más allá de lo que el portal ya muestra (ADR-033).
 - **R15. Entrega de turno.** Al cerrar su turno, el operador ve el resumen (alertas abiertas, en atención, propuestas pendientes, avisos sin acuse) y lo entrega al siguiente, que lo acepta. Lo abierto pasa a nombre del nuevo responsable.
 
 **Canales estructurados (sin chat)**
 
-- **R16. Mensaje a la central.** El guardia elige tipo (**novedad**, **consulta**, **urgencia**), escribe y adjunta fotos; el sistema lo liga a su instalación y turno según la pauta o la jornada pactada. La central responde **en el mismo hilo**. Reglas para que no sea chat:
+- **R16. Mensaje a la central.** (Precisa ADR-025: si Carlos lo aprueba, se agrega una nota a ese ADR, pregunta 9; y amplía la cola sin conexión de ADR-044.3, que hoy cubre marcas, rondas y novedades, a los mensajes a la central.) El guardia elige tipo (**novedad**, **consulta**, **urgencia**), escribe y adjunta fotos; el sistema lo liga a su instalación y turno según la pauta o la jornada pactada. La central responde **en el mismo hilo**. Reglas para que no sea chat:
   - el hilo lo abre siempre el terreno con un tipo, o la central desde una alerta; no hay hilos entre guardias ni conversaciones sin tipo;
   - mientras el hilo está abierto, el guardia puede agregar respuestas y fotos; al resolverlo, la central lo cierra y el guardia ve el cierre;
   - una **urgencia** abre una alerta crítica de inmediato; una **novedad** queda además en el libro de novedades si ese módulo está activo; una **consulta** espera respuesta con un plazo configurable (por defecto 15 min) y, vencido, entra a la cola.
@@ -127,12 +148,12 @@ Relaciones: instalación 1–N alertas; alerta 1–N señales, 1–N intentos, 1
 
 **Registro**
 
-- **R18. Todo queda en la bitácora.** Cada alerta, señal, intento de contacto, llamada, respuesta, propuesta (aceptada o rechazada), aprobación, toma de control, mensaje, aviso y acuse es una entrada **inmutable**, con hora de servidor, actor («persona», o «agente de central vía <responsable>») y encadenada por tenant como `core.bitacora` y `core.audit_events` (ADR-023, ADR-052). Una corrección es una entrada nueva que referencia a la anterior. La bitácora se consulta por instalación y por turno.
+- **R18. Todo queda en la bitácora.** Cada alerta, señal, intento de contacto, llamada, respuesta, propuesta (aceptada o rechazada), aprobación, toma de control, mensaje, aviso y acuse es una entrada **inmutable**, con hora de servidor, actor (la persona, o «agente `Agente de central` (servicio)» con el responsable de turno anotado, ADR-051) y encadenada por tenant como `core.bitacora` y `core.audit_events` (ADR-023, ADR-052). Una corrección es una entrada nueva que referencia a la anterior. La bitácora se consulta por instalación y por turno.
 - **R19. Lo externo es dato.** Textos de guardias, clientes, transcripciones y fotos llegan al agente marcados como externos: nunca habilitan por sí mismos una acción de aprobación humana (ADR-034 §2). «Llama a mi jefe y dile que me voy» en un mensaje no hace que el agente cambie la pauta.
 
 **Alcance y aislamiento**
 
-- **R20.** Un supervisor ve y atiende solo las alertas, hilos y avisos de las instalaciones a su cargo; el filtro va en la consulta (ADR-022). El agente hereda el alcance de su responsable; un agente de central de una instalación nunca ve otra.
+- **R20.** Un supervisor ve y atiende solo las alertas, hilos y avisos de las instalaciones a su cargo; el filtro va en la consulta (ADR-022). El agente de servicio ve todo el tenant (ADR-051); un tenant que quiera agentes por zona necesita una decisión sobre ADR-051, porque hoy una key de servicio no se acota a instalaciones (pregunta 2).
 - **R21. Agent-first.** Toda acción de pantalla es una capacidad con su herramienta MCP (ADR-055), con vista previa y clave de idempotencia en las escrituras; las de aprobación humana devuelven `APPROVAL_REQUIRED` a los agentes y entran a la Bandeja del responsable.
 
 ## 6. Estados y transiciones
@@ -145,6 +166,7 @@ Relaciones: instalación 1–N alertas; alerta 1–N señales, 1–N intentos, 1
 | Nueva | **En contacto** | Agente o persona | Primer intento de la cadena | Intento en bitácora | Sí |
 | En contacto | **Escalada** | Sistema | Venció la espera sin confirmación | Pasa al paso siguiente | Sí |
 | Nueva, En contacto, Escalada | **En atención** | Persona que confirma «me hago cargo» u operador que la toma | R8, R13 | Detiene la cadena; plazo para resolver | Sí (devolver) |
+| En atención | **Escalada** | Sistema | Venció el plazo para resolver de quien se hizo cargo (R8) | Retoma la cadena desde el paso siguiente | Sí |
 | En atención | **Resuelta** | Persona; agente solo como propuesta aceptada | Causa atendida, con nota | Cierra hilos ligados | Sí (reabrir, propuesta) |
 | Cualquiera abierta | **Falsa alarma** | Persona; agente como propuesta; pánico solo con aprobación humana | Con motivo | Cierra | Sí (reabrir) |
 | Resuelta, Falsa alarma | **Reabierta → En atención** | Persona | Nueva evidencia | Retoma con el mismo historial | — |
@@ -155,31 +177,34 @@ Relaciones: instalación 1–N alertas; alerta 1–N señales, 1–N intentos, 1
 
 | Acción | owner | admin | gerente | supervisor | viewer | Cliente | Trabajador / Terreno | Agente de central |
 |---|---|---|---|---|---|---|---|---|
-| Ver cola y alertas | sí | sí | sí | alcance | lectura | — | — | alcance del responsable |
+| Ver cola y alertas | sí | sí | sí | alcance | lectura | — | — | todo el tenant (servicio, ADR-051) |
 | Atender (contactar, tomar, resolver) | sí | sí | sí | alcance | no | — | — | según R10 |
 | Aprobar lo irreversible | sí | sí | sí (configurable) | no (configurable) | no | — | — | nunca |
 | Enviar avisos | sí | sí | sí | alcance | no | — | — | plantilla aprobada (solo); libre (propone) |
 | Mandar mensaje a la central y acusar | — | — | — | sí | — | — | sí (lo propio) | — |
-| Configurar reglas, cadenas y autonomía | sí | sí | no | no | no | — | — | nunca (aprobación humana) |
-| Pausar / reanudar al agente | sí | sí | sí | pausar en su alcance | no | — | — | pausarse sí; reanudarse no |
+| Configurar reglas, cadenas y autonomía | sí | sí | no | no | no | — | — | solo prepara el cambio; lo aplica una persona (aprobación humana) |
+| Pausar / reanudar al agente | sí | sí | sí | pausar en su alcance | no | — | — | pausarse sí; reanudarse no (`soloPersonas`) |
+| Tomar o devolver una alerta; abrir, entregar y aceptar turno de central | sí | sí | sí | alcance | no | — | — | no (`soloPersonas`) |
 | Ver bitácora | sí | sí | sí | alcance | lectura | resumen, si el tenant lo habilita | lo propio | alcance |
 
 Permisos propuestos: `central:alertas.ver`, `central:alertas.atender`, `central:aprobar`, `central:avisos.enviar`, `central:config.manage`, `central:agente.gobernar`. El **operador de central** es un rol personalizado de plantilla (Brief 07c), no un rol base (pregunta 12).
 
 ## 8. Eventos y notificaciones
 
-| Evento | Cuándo | Quién se entera por defecto | Canal |
-|---|---|---|---|
-| `central.alerta.abierta` | Se abre o reabre una alerta | Cola de la central (siempre); hacia afuera, silencio hasta que el tenant active (R6) | in-app; push/WhatsApp según cadena |
-| `central.alerta.escalada` | Cambia de paso | El destinatario del paso | El canal del paso |
-| `central.alerta.resuelta` | Se resuelve o se cierra | Quien se hizo cargo y el supervisor de la instalación | in-app |
-| `central.aprobacion.pedida` | El agente pide algo irreversible | Responsable de central (Bandeja) | in-app + push |
-| `central.mensaje.recibido` | Llega un mensaje del terreno | Cola de la central | in-app |
-| `central.mensaje.respondido` | La central responde | El guardia que lo abrió | push en su app |
-| `central.aviso.enviado` / `central.aviso.sin_acuse` | Se envía un aviso / vence el acuse | Destinatarios / cola | push / in-app |
-| `central.agente.pausado` | Alguien pausa al agente | Responsable de central y owner | in-app |
+**Silencio por defecto (ADR-020):** por defecto todo se ve **solo dentro de OPAI** (la cola de la central, la Bandeja y la app del destinatario cuando la abre). Cualquier envío hacia afuera (push, WhatsApp, SMS, correo, llamada) queda apagado hasta que el tenant lo activa (R6). La columna «Al activarlo» dice a quién va cuando el tenant lo enciende.
 
-Todos con plantilla por defecto editable en Comunicaciones (ADR-020) y medidos en `core.consumos` cuando usan WhatsApp, SMS o telefonía (ADR-031).
+| Evento | Cuándo | Por defecto | Al activarlo | Canal | Plantilla |
+|---|---|---|---|---|---|
+| `central.alerta.abierta` | Se abre o reabre una alerta | Cola de la central | Paso 1 de la cadena | El del paso | «Alerta en {instalación}: {título}» |
+| `central.alerta.escalada` | Cambia de paso | Cola de la central | Destinatario del paso | El del paso | «Te necesitan en {instalación}» |
+| `central.alerta.resuelta` | Se resuelve o se cierra | Cola y bitácora | Quien se hizo cargo y el supervisor | push | «Resuelta: {título}» |
+| `central.aprobacion.pedida` | El agente pide algo irreversible | Bandeja del responsable | Responsable de central | push | «La central pide tu aprobación» |
+| `central.mensaje.recibido` | Llega un mensaje del terreno | Cola de la central | Operador de turno | push | «Mensaje de {guardia}: {tipo}» |
+| `central.mensaje.respondido` | La central responde | Hilo en la app del guardia | El guardia | push | «La central respondió» |
+| `central.aviso.enviado` / `central.aviso.sin_acuse` | Se envía un aviso / vence el acuse | App del destinatario / cola | Destinatarios / operador | push | «Aviso de la central» / «Sin acuse: {aviso}» |
+| `central.agente.pausado` | Alguien pausa al agente | Cola y bitácora | Responsable de central y owner | push | «Agente de central en pausa» |
+
+Todas las plantillas son editables en Comunicaciones (ADR-020) y medidos en `core.consumos` cuando usan WhatsApp, SMS o telefonía (ADR-031).
 
 ## 9. Herramientas MCP
 
@@ -192,7 +217,6 @@ El agente de central opera **solo con estas capacidades** (no hay otro camino a 
 | `central_alertas_abrir` | Abre una alerta manual | Escritura | sí | no |
 | `central_alertas_contactar` | Registra o ejecuta un intento de contacto por un canal | Escritura | sí | no (llamar a emergencias: sí) |
 | `central_alertas_escalar` | Pasa al siguiente paso o a uno elegido | Escritura | sí | no |
-| `central_alertas_tomar` / `central_alertas_devolver` | Toma o devuelve el control | Escritura | sí | no (solo personas toman) |
 | `central_alertas_proponer` | Deja una propuesta para el operador | Escritura | sí | no |
 | `central_alertas_resolver` / `central_alertas_falsa_alarma` / `central_alertas_reabrir` | Cierra o reabre | Escritura | sí | pánico: sí |
 | `central_alertas_avisar_cliente` | Aviso al cliente con plantilla | Irreversible | sí | **sí** |
@@ -200,9 +224,10 @@ El agente de central opera **solo con estas capacidades** (no hay otro camino a 
 | `central_mensajes_enviar` | El guardia (key de trabajador o terreno, ADR-033) abre un hilo | Escritura | sí | no |
 | `central_avisos_create` / `_list` / `_get` / `_acusar` | Avisos y acuses | Escritura / lectura | sí | aviso masivo: sí |
 | `central_bitacora_list` | Bitácora por instalación y turno | Lectura | — | — |
-| `central_turnos_iniciar` / `_entregar` / `_aceptar` | Turno de central | Escritura | sí | no (solo personas) |
-| `central_agente_pausar` / `_reanudar` | Gobierno del agente | Escritura | sí | reanudar: solo personas |
-| `central_reglas_*`, `central_cadenas_*`, `central_autonomia_set` | Configuración | Escritura | sí | **sí** |
+| `central_agente_pausar` | El agente o una persona pausa al agente en una instalación o en todo el tenant | Escritura | sí | no |
+| `core_config_set` (reglas) y `central_cadenas_*` | Configuración de reglas y cadenas | Escritura | sí | **sí** |
+
+**Sin herramienta MCP, con motivo (`soloPersonas`, `paridad-excepciones.ts`):** tomar y devolver una alerta, abrir, entregar y aceptar el turno de central, y reanudar al agente. Motivo: son las acciones que garantizan que el humano a cargo es una persona. La autonomía del agente se configura con las capacidades existentes de Agentes y API keys del núcleo, no con una herramienta propia.
 
 **Flujo típico del agente (para el manual `docs/2.0/agentes/central.md`, con escenario de prueba en `pnpm test`, ADR-034 §5):** `central_estado` → por cada alerta nueva, `central_alertas_get` → si no está tomada, `preview_central_alertas_contactar` y `central_alertas_contactar` con el paso de la cadena → esperar la confirmación o el vencimiento → `central_alertas_escalar` → al confirmarse la causa, `central_alertas_proponer` con la resolución → **se detiene** ante `APPROVAL_REQUIRED`, una alerta tomada por un humano o el agente pausado.
 
@@ -232,7 +257,7 @@ El agente de central opera **solo con estas capacidades** (no hay otro camino a 
 - Guardia sin conexión: su mensaje queda «pendiente de envío» con hora del dispositivo y se sella con hora de servidor al llegar; la urgencia muestra además «llama a la central» con el número configurado.
 - Dos señales de fuentes distintas para el mismo guardia (no marcó en Asistencia y no inició ronda): una alerta (R4).
 - El supervisor confirma «me hago cargo» y no resuelve: vence el plazo y la cadena sigue (R8).
-- El operador toma una alerta y cierra la sesión sin devolverla: al entregar el turno pasa al siguiente responsable (R15); sin entrega, a los 30 min vuelve al agente y queda registrado.
+- El operador toma una alerta y cierra la sesión sin devolverla: al entregar el turno pasa al siguiente responsable (R15); sin entrega, la alerta sigue tomada a su nombre (el agente no la retoma solo, R13), se marca «tomada sin atención» en la cola y avisa al responsable de respaldo a los 30 min.
 - Instalación sin cadena propia y sin cadena del tenant para esa severidad: se usa la cadena por defecto de la plantilla y se marca en Configuración como pendiente.
 - Aviso a un puesto cuyo titular está de licencia: llega a quien cubre el turno según la pauta; sin Operaciones, a las personas con vínculo en la instalación.
 - Pánico accidental: solo una persona lo cierra como falsa alarma, con motivo (R10).
@@ -259,26 +284,27 @@ El agente de central opera **solo con estas capacidades** (no hay otro camino a 
 - **CA7.** Un aviso con acuse obligatorio no acusado en el plazo abre una alerta; el acuse queda con hora de servidor y no se puede editar.
 - **CA8.** Un supervisor solo ve alertas, hilos y avisos de sus instalaciones, por pantalla, API y MCP; con los ids de otra instalación recibe «no encontrado».
 - **CA9.** Cada acción de pantalla tiene su herramienta MCP y el gate de paridad está en verde.
-- **CA10.** Las pantallas pasan a 375, 1024 y 1280 px en claro y oscuro, con el export aprobado del DS 2.0.
+- **CA10.** Las pantallas del ERP pasan a 375, 1024 y 1280 px; las de la app del guardia y del supervisor, a 375 (y 1024 si el brief lo pide); en claro y oscuro, con oscuro obligatorio en la cola, el detalle de alerta y la pantalla de central; todo contra el export aprobado del DS 2.0.
 
 ## 14. Preguntas abiertas para Carlos
 
 Cada una con recomendación y por qué. Ninguna bloquea el Design Prompt: el diseño se hace con la recomendación y se ajusta si Carlos decide otra cosa.
 
 1. **¿Central es un módulo propio o parte de Operaciones II (Brief 12)?** Recomendación: **módulo propio «Central», vendible por separado**, que depende solo del núcleo y usa Rondas, Asistencia, Operaciones y Tickets como fuentes opcionales (ADR-048). Por qué: una empresa que solo compra Rondas también quiere la central; meterla en Operaciones II obligaría a comprar puestos y pauta. Va como **Brief 15b, después de Portales (Brief 15)**, porque los dos canales viven en las apps del guardia y del supervisor; las llamadas por IA quedan para **Central II**.
-2. **¿Qué agente opera la central?** Recomendación: un **agente de servicio** propio por tenant («Agente de central», key de servicio con permisos explícitos y presupuesto, ADR-051, como automatización alojada de ADR-032) que actúa **vía el responsable de central de turno**, y no el agente interno de ADR-049. Por qué: el agente interno pide confirmación al usuario antes de cada escritura y vive en su sesión; la central tiene que actuar de noche sin nadie frente a la pantalla, dentro de los límites de R10.
+2. **¿Qué agente opera la central?** Recomendación: un **agente de servicio** propio por tenant («Agente de central», key de servicio con permisos explícitos y presupuesto, ADR-051, como automatización alojada de ADR-032), con alcance de todo el tenant y gobernado por el responsable de central de turno, y no el agente interno de ADR-049. Si Gard necesitara agentes por zona, habría que cambiar ADR-051 (hoy una key de servicio no se acota a instalaciones); no lo recomiendo para la v1. Por qué: el agente interno pide confirmación al usuario antes de cada escritura y vive en su sesión; la central tiene que actuar de noche sin nadie frente a la pantalla, dentro de los límites de R10.
 3. **¿Aceptas la tabla de autonomía de R10 y que descartar un pánico, llamar a emergencias y avisar al cliente nunca se autoricen al agente, ni siquiera con la autorización del owner?** Recomendación: **sí**. Por qué: son las tres acciones donde un error del agente cuesta una vida o un cliente; ADR-032 permite autorizar por capacidad, pero en la central conviene un piso fijo.
-4. **¿Qué pasa si no hay operador con turno de central abierto?** Recomendación: el agente sigue con las acciones «solo» a nombre del **responsable de respaldo** (por defecto, el jefe de operaciones) y escala todo lo demás a esa persona; **sin responsable nombrado, no actúa**. Por qué: «humano a cargo» tiene que ser verificable a toda hora, no una intención.
+4. **¿Qué pasa si no hay operador con turno de central abierto?** Recomendación: el **responsable de respaldo** (por defecto, el jefe de operaciones) pasa a estar a cargo y el agente sigue con las acciones «solo», escalándole todo lo demás; **sin ningún responsable nombrado, el agente solo lee y avisa a los owner y admin**. Por qué: «humano a cargo» tiene que ser verificable a toda hora, no una intención.
 5. **Silencio por defecto (ADR-020) frente a una central que debe alertar.** Recomendación: las reglas de la plantilla llegan **activas dentro de la cola**, y los avisos hacia afuera (push, WhatsApp, llamadas a supervisores) se activan por tenant con un asistente de puesta en marcha. Por qué: el tenant ve desde el primer día lo que la central detecta, sin que nadie reciba mensajes que no pidió.
 6. **¿Usamos estos umbrales de la plantilla de seguridad?** No marcó: 15 min tras el inicio del turno · llegó tarde: más de 5 min · ronda no iniciada o atrasada: 10 min · punto obligatorio saltado: siempre · trust score rojo: menor a 60 · puesto sin cubrir: al inicio del turno · consulta sin respuesta: 15 min · aviso sin acuse: 15 min · urgencia y pánico: inmediato. Recomendación: **sí, como punto de partida**, y que Carlos los ajuste con lo que Gard usa hoy. Por qué: son los de 1.0 donde existen (trust score) y valores prudentes donde no.
-7. **¿Cadena por defecto?** Recomendación: (1) el guardia del turno por push, 3 min → (2) supervisor de la instalación por push y WhatsApp, 5 min, exige «me hago cargo» → (3) jefe de turno u operador de central por llamada humana, 10 min → (4) jefe de operaciones. Críticas: pasos 2 y 3 a la vez. El cliente nunca es un paso automático. Por qué: replica cómo escala hoy un jefe de turno y deja la llamada a una persona en la v1.
+7. **¿Cadena por defecto (en la plantilla; hacia afuera se activa por tenant, R6)?** Recomendación: (1) el guardia del turno por push, 3 min → (2) supervisor de la instalación por push y WhatsApp, 5 min, exige «me hago cargo» → (3) jefe de turno u operador de central por llamada humana, 10 min → (4) jefe de operaciones. Críticas: pasos 2 y 3 a la vez. El cliente nunca es un paso automático. Por qué: replica cómo escala hoy un jefe de turno y deja la llamada a una persona en la v1.
 8. **Llamadas por IA: ¿cuándo y cómo?** Recomendación: **v1 sin llamadas por IA** (llamada humana con un toque y registro del resultado); **Central II** con un adaptador de telefonía del núcleo, guion aprobado por el tenant, presentación explícita como asistente automatizado, grabación opcional con aviso y retención configurable. Proveedor por decidir cuando se abra Central II. Por qué: sin proveedor elegido ni evaluación legal (Ley 21.719, grabaciones), adelantarlo pone en riesgo la v1.
-9. **En el hilo de «Mensaje a la central», ¿el guardia escribe libre?** Recomendación: **sí, pero solo dentro de un hilo abierto** que él abrió con un tipo o que abrió la central; sin hilos entre guardias ni sin tipo, y el hilo se cierra al resolver. Por qué: mantiene el registro estructurado y evita que se convierta en el chat que ADR-025 descartó.
+9. **En el hilo de «Mensaje a la central», ¿el guardia escribe libre?** Recomendación: **sí, pero solo dentro de un hilo abierto** que él abrió con un tipo o que abrió la central; sin hilos entre guardias ni sin tipo, y el hilo se cierra al resolver. Si lo apruebas, se agrega una nota a ADR-025 («el hilo de la central no es chat») y otra a ADR-044.3 (cola sin conexión para los mensajes). Por qué: mantiene el registro estructurado y evita que se convierta en el chat que ADR-025 descartó.
 10. **¿Dónde se ve la bitácora y la ve el cliente?** Recomendación: pestaña **«Central»** en la ficha de la instalación (con filtro por turno) y vista transversal en Central; en el **Portal Cliente**, solo un resumen por alerta si el tenant lo habilita por cuenta, sin hallazgos internos. Por qué: sigue ADR-041 (pestaña de módulo) y el criterio de la vista del cliente de Rondas.
 11. **El backlog de `ROADMAP.md` dice que «alertas y cobertura» e «incidentes» de 1.0 no se portan. ¿La central los reemplaza y salen del backlog?** Recomendación: **sí**; la central los absorbe con un diseño nuevo (no se porta código), y «comunicaciones» y «chat» siguen en el backlog. Por qué: tu pedido del 29-oct es justamente ese caso de uso; sin esta decisión, el plan se contradice.
 12. **¿El operador de central es un rol nuevo?** Recomendación: un **rol personalizado de plantilla** «Operador de central» (Brief 07c) con `central:alertas.*` y `central:avisos.enviar`, sin aprobar ni configurar; no un sexto rol base. Por qué: los roles base son fijos (ADR-016) y 07c ya resuelve roles por tenant.
 13. **¿Qué se vende y con qué?** Recomendación: Central se vende sola (como mesa de terreno con mensajes, avisos y alertas manuales) y **suma reglas automáticas por cada fuente activa**; incluye las pantallas mínimas de los dos canales en las apps del guardia y del supervisor aunque el tenant no tenga otros módulos de portal. El monto va al ADR futuro de planes y precios. Por qué: ADR-048 exige que funcione sin fuentes y los canales no sirven si el guardia no los ve.
 14. **¿Cuántas señales por segundo y cuántas instalaciones debe aguantar la v1?** Recomendación: dimensionar para **500 instalaciones y 5.000 guardias por tenant** con respuesta en vivo de la cola en menos de 2 s, y medirlo en el brief. Por qué: es un orden de magnitud sobre Gard y fija el diseño del tiempo real (ADR-045).
+15. **¿Agregamos el ámbito «Instalación» al centro de Configuración del núcleo (ADR-038)?** Recomendación: **sí**, con resolución defecto → plataforma → tenant → instalación → usuario, como cambio del núcleo antes del brief de Central. Por qué: los umbrales por instalación son el corazón de la central y Rondas los necesitará igual (geocerca y tiempos por instalación); guardarlos como datos propios del módulo crearía una segunda forma de configurar, que ADR-018 prohíbe.
 
 ## 15. Lugar en el ROADMAP
 

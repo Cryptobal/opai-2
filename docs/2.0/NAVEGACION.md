@@ -20,7 +20,7 @@
 | **Inicio** | Inicio, entrada suelta (pendientes, alertas, accesos y la **Bandeja** dentro: aprobaciones, avisos y, desde la fase 2, tareas asignadas) | Núcleo | 1 |
 | **Comercial** | Solicitudes · Negocios (embudo y lista) · Cotizaciones · Licitaciones | Comercial, CPQ, Licitaciones | 2 (Licitaciones: 6) |
 | **Clientes** | Cuentas · Contactos · Instalaciones | Núcleo | 1 (Contactos: 2) |
-| **Operaciones** | Pauta (planificación de turnos) · Turnos extra · Supervisión · Rondas · Novedades · Tickets | Operaciones, Rondas, Tickets | 3 |
+| **Operaciones** | Pauta (planificación de turnos) · Turnos extra · Supervisión · Rondas · Novedades · Tickets · Central *(propuesta CAR-70, pendiente de Carlos; deja el área en 7, el máximo)* | Operaciones, Rondas, Tickets, Central | 3 |
 | **Personas** | Personas (con la vista Vencimientos dentro) · Asistencia · Nómina · Cargos y sueldos | Núcleo, Asistencia, Nómina | 1 (Asistencia: 4, Nómina: 6) |
 | **Finanzas** | Flujo de caja · Banca y conciliación · Ventas (DTE) · Compras · Rendiciones · Contabilidad · Informes | Finanzas (sub-módulos activables) | 5 |
 | **Documentos** | Documentos (explorador, plantillas, firmas pendientes) | Documentos | 2 |
