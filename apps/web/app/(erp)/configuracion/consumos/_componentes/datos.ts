@@ -1,3 +1,4 @@
+import { estadoPantalla } from "@/lib/formato";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 type Fila = { clave: string; cantidad: number; costoUsd: number };
@@ -50,6 +51,8 @@ export async function cargarConsumos(mes: string | undefined) {
     ejecutarComoUsuario<PorAgente>("erp", "core.consumos.por_agente", { mes: elegido }),
   ]);
   return {
+    // Un fallo del mes anterior o de los agentes no se ve como «sin consumo» (CAR-50).
+    state: estadoPantalla(actual, previo, agentes),
     actual,
     previo: previo.ok ? previo.data : null,
     agentes: agentes.ok ? agentes.data : [],

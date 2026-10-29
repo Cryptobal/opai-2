@@ -5,6 +5,7 @@ import { SeccionTarjeta, Tabs } from "@opai/ds";
 
 import { BotonCopiar } from "@/app/_components/boton-copiar";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
+import { datosSiHayPermiso } from "@/lib/carga";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { PaginaConfig } from "../../_centro/pagina-config";
@@ -36,7 +37,7 @@ export default function Conectar() {
         const host = h.get("x-forwarded-host") ?? h.get("host") ?? "test.opai.cl";
         const proto =
           h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
-        return { url: `${proto}://${host}/api/mcp`, empresa: t.ok ? t.data : null };
+        return { url: `${proto}://${host}/api/mcp`, empresa: datosSiHayPermiso(t, null) };
       }}
     >
       {({ url, empresa }) => (

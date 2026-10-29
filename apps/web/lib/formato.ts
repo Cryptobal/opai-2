@@ -19,9 +19,16 @@ export const ETIQUETA_PORTAL: Record<string, string> = {
   cliente: "Cliente",
 };
 
-export function estadoPantalla(r: { ok: boolean; error?: { code: string } }) {
-  if (r.ok) return "ready" as const;
-  return r.error?.code === "FORBIDDEN" ? ("forbidden" as const) : ("error" as const);
+/**
+ * Estado de una pantalla según sus cargas: «sin permisos» si alguna respondió FORBIDDEN, «error» si
+ * alguna otra falló y «listo» solo si todas salieron bien. Nunca convierte un fallo en vacío (CAR-50).
+ */
+export function estadoPantalla(...rs: { ok: boolean; error?: { code: string } }[]) {
+  const fallidas = rs.filter((r) => !r.ok);
+  if (fallidas.length === 0) return "ready" as const;
+  return fallidas.some((r) => r.error?.code === "FORBIDDEN")
+    ? ("forbidden" as const)
+    : ("error" as const);
 }
 
 /** dd-mm-aaaa (formato chileno de las pantallas de acceso). */
