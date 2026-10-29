@@ -340,8 +340,11 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.roles.create` | Solo personas: gobierna el acceso; un agente no se crea roles ni se concede permisos (ADR-034). |
 | `core.roles.update` | Solo personas: cambiar los permisos de un rol es gobernar el acceso (ADR-034). |
 | `core.users.invite` | Solo personas: invitar asigna un rol y gobierna el acceso (encargo PR #70). |
+| `core.users.restablecer_mfa` | Solo personas: quitar el segundo factor de otra cuenta lo decide un owner con sesión (CAR-54). |
 | `platform.aprobaciones.aprobar` | Solo personas: lo irreversible de plataforma lo aprueba un humano (ADR-032, CAR-36). |
 | `platform.aprobaciones.rechazar` | Solo personas: la decisión sobre lo irreversible de plataforma es humana (ADR-032, CAR-36). |
+| `platform.usuarios.borrar` | Solo personas: borrar una identidad es irreversible y lo decide Plataforma con sesión (CAR-45). |
+| `platform.usuarios.restablecer_mfa` | Solo personas: quitar el segundo factor de una cuenta lo decide Plataforma con sesión (CAR-54). |
 
 ## Solo personas: camino humano (CAR-52)
 
@@ -381,8 +384,11 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.roles.create` | `/configuracion/usuarios/roles` | sí (portal ERP) | reservada a personas |
 | `core.roles.update` | `/configuracion/usuarios/roles` | sí (portal ERP) | reservada a personas |
 | `core.users.invite` | `/configuracion/usuarios` | no | reservada a personas |
+| `core.users.restablecer_mfa` | sin pantalla todavía · CAR-54 · desde 2026-10-29 | no | reservada a personas |
 | `platform.aprobaciones.aprobar` | `/configuracion/aprobaciones` | no | reservada a personas |
 | `platform.aprobaciones.rechazar` | `/configuracion/aprobaciones` | no | reservada a personas |
+| `platform.usuarios.borrar` | sin pantalla todavía · CAR-45 · desde 2026-10-29 | no | reservada a personas |
+| `platform.usuarios.restablecer_mfa` | sin pantalla todavía · CAR-54 · desde 2026-10-29 | no | reservada a personas |
 
 ## Capacidades solo por API y MCP (ninguna pantalla las invoca con id literal)
 

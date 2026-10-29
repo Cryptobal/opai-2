@@ -55,4 +55,23 @@ export const COMUNICABLES_USUARIOS: readonly EventoComunicable[] = [
       },
     },
   },
+  {
+    evento: "core.usuario.mfa_restablecido",
+    nombre: "Segundo factor restablecido",
+    descripcion:
+      "Avisa a la persona que un owner o Plataforma restableció su segundo factor y cerró sus sesiones.",
+    transaccional: true,
+    variables: [
+      v("usuario.nombre", "texto", "Ana Rojas", "Nombre de la persona."),
+      v("por", "texto", "Plataforma OPAI", "Quién lo restableció."),
+      URL("Página de ingreso."),
+    ],
+    plantillas: {
+      correo: {
+        asunto: "Restablecieron el segundo factor de tu cuenta de OPAI",
+        cuerpo:
+          "Hola {{usuario.nombre}}:\n\n{{por}} restableció el segundo factor de tu cuenta y cerró tus sesiones abiertas. La próxima vez que entres con tu contraseña tendrás que configurarlo de nuevo:\n{{url}}\n\nSi no lo pediste, avisa de inmediato a quien administra tu empresa.",
+      },
+    },
+  },
 ];
