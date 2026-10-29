@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><meta name="design_doc_mode" content="canvas"><script src="./ds-base.js"></script><style>body{margin:0;background:#e7e7ea}a{color:#4a3fd8}a:hover{color:#111113}.scrim,.sheet,.overlay{animation:none!important}</style></helmet>
+<div style="display:flex;flex-direction:column;gap:72px;padding:48px;width:max-content;font-family:var(--font-sans);color:#111113">
+<header style="display:flex;flex-direction:column;gap:6px;max-width:900px">
+<span style="font:500 13px/18px var(--font-sans);color:#52525b">CAR-71 · OPAI 2.0 · DS 2.0 V2 · v2</span>
+<h1 style="margin:0;font:600 36px/40px var(--font-sans);letter-spacing:-0.022em">Motor de sueldos</h1>
+<p style="margin:0;font:400 16px/24px var(--font-sans);color:#52525b">Cargando, vacío, error y sin permisos en Detalle de un valor, Historial, Comparar y Plataforma.</p>
+<nav style="display:flex;gap:16px;flex-wrap:wrap;font:500 14px/20px var(--font-sans)"><a href="Motor de sueldos - Remuneraciones.dc.html">Remuneraciones</a><a href="Motor de sueldos - Simulador.dc.html">Simulador, Cargos, Plataforma y avisos</a><a href="Motor de sueldos - Estados.dc.html">Estados: Valores, Confirmar, Cambiar, Simulador</a><span style="color:#111113">Estados: Detalle, Historial, Comparar, Plataforma</span><a href="Componentes.dc.html">Componentes</a></nav>
+</header>
+<section id="e-detalle" style="display:flex;flex-direction:column;gap:20px">
+<h2 style="margin:0;font:600 22px/28px var(--font-sans)">Detalle de un indicador · <a href="ValorDetalle.dc.html">ValorDetalle.dc.html</a></h2>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Cargando · 375</span><div id="detalle-cargando-375" style="width:375px;height:812px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="ValorDetalle" device="phone" state="loading" hint-size="375px,812px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Vacío · 1024</span><div id="detalle-vacio-1024" style="width:1024px;height:768px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="ValorDetalle" device="tablet" state="vacio" hint-size="1024px,768px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Error · 1280</span><div id="detalle-error-1280" style="width:1280px;height:800px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="ValorDetalle" device="desktop" state="error" hint-size="1280px,800px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Sin permisos · 375</span><div id="detalle-sinpermisos-375" style="width:375px;height:812px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="ValorDetalle" device="phone" state="forbidden" hint-size="375px,812px"></dc-import></div></div>
+</div>
+</section>
+<section id="e-historial" style="display:flex;flex-direction:column;gap:20px">
+<h2 style="margin:0;font:600 22px/28px var(--font-sans)">Historial · <a href="HistorialRemuneraciones.dc.html">HistorialRemuneraciones.dc.html</a></h2>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Cargando · 375</span><div id="historial-cargando-375" style="width:375px;height:812px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="HistorialRemuneraciones" device="phone" state="loading" hint-size="375px,812px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Vacío · 1024</span><div id="historial-vacio-1024" style="width:1024px;height:768px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="HistorialRemuneraciones" device="tablet" state="vacio" hint-size="1024px,768px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Error · 1280</span><div id="historial-error-1280" style="width:1280px;height:800px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="HistorialRemuneraciones" device="desktop" state="error" hint-size="1280px,800px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Sin permisos · 375</span><div id="historial-sinpermisos-375" style="width:375px;height:812px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="HistorialRemuneraciones" device="phone" state="forbidden" hint-size="375px,812px"></dc-import></div></div>
+</div>
+</section>
+<section id="e-comparar" style="display:flex;flex-direction:column;gap:20px">
+<h2 style="margin:0;font:600 22px/28px var(--font-sans)">Comparar escenarios · <a href="SimuladorComparar.dc.html">SimuladorComparar.dc.html</a></h2>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Cargando · 375</span><div id="comparar-cargando-375" style="width:375px;height:812px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="SimuladorComparar" device="phone" state="loading" hint-size="375px,812px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Vacío · 1024</span><div id="comparar-vacio-1024" style="width:1024px;height:768px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="SimuladorComparar" device="tablet" state="vacio" hint-size="1024px,768px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Error · 1280</span><div id="comparar-error-1280" style="width:1280px;height:800px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="SimuladorComparar" device="desktop" state="error" hint-size="1280px,800px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Sin permisos · 375</span><div id="comparar-sinpermisos-375" style="width:375px;height:812px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="SimuladorComparar" device="phone" state="forbidden" hint-size="375px,812px"></dc-import></div></div>
+</div>
+</section>
+<section id="e-plataforma" style="display:flex;flex-direction:column;gap:20px">
+<h2 style="margin:0;font:600 22px/28px var(--font-sans)">Plataforma → Fuentes (vacío = sin alertas) · <a href="PlataformaFuentes.dc.html">PlataformaFuentes.dc.html</a></h2>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Cargando · 375</span><div id="plataforma-cargando-375" style="width:375px;height:812px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="PlataformaFuentes" device="phone" state="loading" hint-size="375px,812px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Vacío · 1024</span><div id="plataforma-vacio-1024" style="width:1024px;height:768px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="PlataformaFuentes" device="tablet" state="vacio" hint-size="1024px,768px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Error · 1280</span><div id="plataforma-error-1280" style="width:1280px;height:800px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="PlataformaFuentes" device="desktop" state="error" hint-size="1280px,800px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Sin permisos · 375</span><div id="plataforma-sinpermisos-375" style="width:375px;height:812px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="PlataformaFuentes" device="phone" state="forbidden" hint-size="375px,812px"></dc-import></div></div>
+</div>
+</section>
+</div>
+</x-dc>
+</body>
+</html>
