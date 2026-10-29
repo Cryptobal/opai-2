@@ -162,6 +162,8 @@ Documento comercial (enviado) 1──1 PDF en core.documentos (con huella SHA-25
 | Aceptación | Recuadro para aceptar (en la página del cliente, el botón; en el PDF, el espacio o la evidencia si ya se aceptó) | Documento | Propuesta, simple |
 | Salto de página | — | — | Los tres |
 
+El *Resumen ejecutivo* y el *Plan de implementación* de las plantillas base son bloques **Texto fijo** con variables (ver anexo); no son tipos de bloque nuevos.
+
 - **R9.** No hay bloques de código ni HTML libre. Un bloque nuevo se agrega al sistema con su diseño en Claude Design y sus pruebas, no por tenant.
 
 ### 5.3 Qué sale del CPQ y qué se abre al cliente
@@ -179,7 +181,7 @@ Documento comercial (enviado) 1──1 PDF en core.documentos (con huella SHA-25
 
 ### 5.4 Textos fijos y variables
 
-- **R17.** Los textos fijos y las secciones admiten **variables validadas** de una lista cerrada por formato (por ejemplo `{{cliente.nombre}}`, `{{negocio.titulo}}`, `{{cotizacion.codigo}}`, `{{cotizacion.valida_hasta}}`, `{{empresa.nombre_comercial}}`, `{{ejecutivo.nombre}}`, `{{instalaciones.cantidad}}`). Una variable inexistente impide **publicar** la plantilla; una variable sin dato en un documento concreto se marca en el borrador y **impide enviarlo** hasta completarla o quitarla.
+- **R17.** Los textos fijos y las secciones admiten **variables validadas** de una lista cerrada por formato (por ejemplo `{{cliente.nombre}}`, `{{negocio.titulo}}`, `{{cotizacion.codigo}}`, `{{cotizacion.valida_hasta}}`, `{{empresa.nombre_comercial}}`, `{{ejecutivo.nombre}}`, `{{ejecutivo.cargo}}`, `{{instalaciones.cantidad}}`, `{{cotizacion.total_mensual}}`, `{{cotizacion.inicio}}`). Una variable inexistente impide **publicar** la plantilla; una variable sin dato en un documento concreto se marca en el borrador y **impide enviarlo** hasta completarla o quitarla.
 - **R18.** Las variables se resuelven al generar y se **vuelven a resolver** mientras el documento es borrador; al enviar, todo queda congelado como texto.
 
 ### 5.5 Versiones
@@ -388,10 +390,11 @@ Cada una con la recomendación de Claude y por qué. Las numeradas se citan como
 11. **¿Numeración propia de los documentos?** Recomendación: propuesta y simple usan el código de la cotización y su versión (`CPQ-2026-041 v3 · Propuesta`); solo la presentación lleva correlativo propio `PRE-AAAA-NNN`. *Por qué:* el cliente ya conoce el código de la cotización y un segundo número confunde.
 12. **¿Plantillas en inglés u otros idiomas en v1?** Recomendación: no; v1 solo en español de Chile, con el idioma como campo de la plantilla para sumarlo después sin migrar. *Por qué:* no hay hoy un cliente de Gard que lo pida y duplica el trabajo de textos.
 13. **¿Avisar al ejecutivo cuando el cliente abre la propuesta?** Recomendación: sí para Gard (evento `documentos.salida.vista`, in-app y push), apagado por defecto en otros tenants (ADR-020). *Por qué:* es el momento de llamar y 1.0 ya registra las aperturas.
-14. **¿Las plantillas base de Gard se arman desde sus propuestas actuales de 1.0?** Recomendación: sí; Claude prepara la plantilla base de seguridad y la biblioteca de ejemplo a partir de los textos de `CpqFixedSection` de Gard y de dos o tres propuestas reales que Carlos elija, y Carlos las aprueba antes del brief. *Por qué:* el diseño se valida con contenido real y Gard parte con sus textos, no con relleno.
+14. **¿Las plantillas base de Gard se arman desde sus propuestas actuales de 1.0?** Recomendación: sí; Claude prepara la plantilla base de seguridad y la biblioteca de ejemplo a partir de los textos de `CpqFixedSection` de Gard y de dos o tres propuestas reales que Carlos elija, y Carlos las aprueba antes del brief. *Por qué:* el diseño se valida con contenido real y Gard parte con sus textos, no con relleno. **Resuelta (29-oct-2026):** sí; textos base en [documentos-anexo-textos-base.md](documentos-anexo-textos-base.md), construidos mejorando las tres propuestas ganadas más recientes del tenant en 1.0.
 
 ## Historial
 
 | Fecha | Cambio | Aprobó |
 |---|---|---|
 | 29-oct-2026 | Primera versión: parte 1, formatos de salida comercial (CAR-68) | — (pendiente de aprobación de Carlos) |
+| 29-oct-2026 | Anexo de textos base de seguridad; pregunta 14 resuelta; variables de ejemplo de R17 | Carlos |
