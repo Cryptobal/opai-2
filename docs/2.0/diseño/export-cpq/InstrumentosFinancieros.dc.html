@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+</helmet>
+<section aria-label="Instrumentos financieros" style="display:flex;flex-direction:column;min-width:0">
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding-bottom:4px">
+<span class="t-label-sm">Instrumentos financieros</span>
+<span class="t-mono subtle" style="font-size:12px;line-height:16px">{{ totalTxt }}</span>
+</div>
+<sc-for list="{{ rows }}" as="f" hint-placeholder-count="3">
+<div style="border-top:1px solid var(--ds-border)">
+<div style="display:flex;align-items:center;gap:4px;padding:6px 0">
+<button type="button" onClick="{{ f.toggle }}" aria-expanded="{{ f.open }}" style="all:unset;box-sizing:border-box;flex:1;min-width:0;display:flex;gap:6px;align-items:flex-start;cursor:pointer;min-height:44px;padding:4px 0;opacity:{{ f.op }}">
+<span class="ic sm {{ f.chev }} subtle" aria-hidden="true" style="width:14px;height:14px;flex:none;margin-top:3px"></span>
+<span style="display:flex;flex-direction:column;min-width:0;gap:1px">
+<span class="t-body-sm" style="font-weight:500;text-wrap:pretty">{{ f.name }}</span>
+<span class="t-caption t-numeric" style="font-weight:400;text-wrap:pretty">{{ f.summary }}</span>
+<span style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
+<button type="button" onClick="{{ f.trace }}" disabled="{{ f.off }}" aria-label="¿De dónde sale {{ f.name }}?" style="all:unset;cursor:pointer;border-radius:var(--radius-sm)">
+<span class="t-mono" style="font-size:13px;text-decoration:underline dotted var(--ds-border-strong);text-underline-offset:4px">{{ f.montoTxt }}</span>
+</button>
+<sc-if value="{{ f.overridden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" dot="{{ false }}" hint-size="90px,22px">Sobrescrito</x-import>
+</sc-if>
+</span>
+</span>
+</button>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ f.on }}" on-change="{{ f.onToggle }}" disabled="{{ readOnly }}" hint-size="48px,44px"></x-import>
+</div>
+<sc-if value="{{ f.open }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:10px;padding:0 0 12px 20px;opacity:{{ f.op }}">
+<sc-if value="{{ editable }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:8px">
+<sc-for list="{{ f.fields }}" as="fl" hint-placeholder-count="2">
+<sc-if value="{{ fl.isInput }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="{{ fl.label }}" value="{{ fl.value }}" on-change="{{ fl.onChange }}" trailing="{{ fl.unit }}" mono="{{ true }}" compact="{{ true }}" input-mode="decimal" disabled="{{ f.off }}" input-style="{{ inStyle }}" hint-size="100%,64px"></x-import>
+</sc-if>
+<sc-if value="{{ fl.isSelect }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="{{ fl.label }}" value="{{ fl.value }}" options="{{ fl.options }}" on-change="{{ fl.onChange }}" disabled="{{ f.off }}" style="{{ selStyle }}" hint-size="100%,64px"></x-import>
+</sc-if>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ readOnly }}" hint-placeholder-val="{{ false }}">
+<sc-for list="{{ f.fields }}" as="fl" hint-placeholder-count="2">
+<div style="display:flex;justify-content:space-between;gap:8px"><span class="t-body-sm muted">{{ fl.label }}</span><span class="t-mono">{{ fl.display }}</span></div>
+</sc-for>
+</sc-if>
+<div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px">
+<span class="t-caption" style="flex:1;min-width:140px;text-wrap:pretty">{{ f.defTxt }}</span>
+<sc-if value="{{ f.canReset }}" hint-placeholder-val="{{ false }}">
+<button type="button" class="btn btn-ghost" onClick="{{ f.reset }}" style="height:32px;padding:0 8px;font-size:13px;color:var(--ds-accent)"><span class="ic sm i-refresh" aria-hidden="true"></span>Volver al valor por defecto</button>
+</sc-if>
+</div>
+</div>
+</sc-if>
+</div>
+</sc-for>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:320,&quot;height&quot;:420},&quot;items&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{id:string,name:string,on:boolean,summary:string,montoTxt:string,defTxt:string,overridden:boolean,fields:{key:string,label:string,value:string,unit?:string,kind:'input'|'select',options?:{value:string,label:string}[]}[]}[]&quot;},&quot;editable&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;totalTxt&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;defaultOpen&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;Record&lt;string,boolean&gt;&quot;},&quot;onField&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(id:string,key:string,value:string)=&gt;void&quot;},&quot;onToggle&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(id:string,on:boolean)=&gt;void&quot;},&quot;onReset&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(id:string)=&gt;void&quot;},&quot;onTrace&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(id:string,e:Event)=&gt;void&quot;}}">
+class Component extends DCLogic {
+  state = { open: null };
+  renderVals() {
+    const items = this.props.items ?? [
+      { id: "cf", name: "Costo financiero", on: true, summary: "30 días · 1,0 % mensual", montoTxt: "$ 165.608", defTxt: "Configuración: 30 días · 1,0 % mensual", overridden: false,
+        fields: [{ key: "dias", label: "Días de pago", value: "30", unit: "días", kind: "input" }, { key: "tasa", label: "Tasa mensual", value: "1,0", unit: "%", kind: "input" }] },
+    ];
+    const editable = this.props.editable ?? true;
+    const open = this.state.open ?? (this.props.defaultOpen || {});
+    const on = this.props.onField, re = this.props.onReset, tr = this.props.onTrace, tg = this.props.onToggle;
+    const rows = items.map((f) => {
+      const o = !!open[f.id];
+      return {
+        ...f, open: o, off: !f.on, op: f.on ? 1 : 0.45, chev: o ? "i-chevron-down" : "i-chevron-right",
+        switchLabel: (f.on ? "Desactivar " : "Activar ") + f.name.toLowerCase(),
+        canReset: editable && f.overridden,
+        toggle: () => this.setState({ open: { ...open, [f.id]: !o } }),
+        onToggle: (v) => tg && tg(f.id, v),
+        trace: (e) => tr && f.on && tr(f.id, e),
+        reset: () => re && re(f.id),
+        fields: f.fields.map((fl) => ({
+          ...fl, isInput: fl.kind !== "select", isSelect: fl.kind === "select",
+          display: fl.kind === "select" ? ((fl.options || []).find((x) => x.value === fl.value) || {}).label : fl.value + " " + (fl.unit || ""),
+          onChange: (v) => on && on(f.id, fl.key, v),
+        })),
+      };
+    });
+    return { rows, editable, readOnly: !editable, totalTxt: this.props.totalTxt ?? "", inStyle: { textAlign: "right", fontSize: 14 }, selStyle: {} };
+  }
+}
+</script>
+</body>
+</html>
