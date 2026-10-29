@@ -27,6 +27,8 @@ Hoy el paso de **sueldo bruto a costo empresa** está previsto dentro de Nómina
 | **Juego de valores** | La «foto» de todos los indicadores y variables que rigen en una fecha, con su huella; lo que guarda quien calcula | Cotización (CPQ), liquidación (Nómina), simulación | Se calcula; quien lo usa guarda su identificador y huella |
 | **Simulación** | Entrada (sueldo o capa, contrato, patrón, horario, fecha) y resultado con traza; se guarda solo si el usuario lo pide | Capas de sueldo (ADR-036), patrones del tenant (`modulos/operaciones.md`) | Núcleo, con `tenant_id` |
 
+**Aislamiento:** las tablas de plataforma (indicadores, sus valores y capturas) no tienen `tenant_id`: son datos públicos de la ley, de solo lectura para `opai_app`, y las escriben solo las capacidades `platform.*`. Todo lo del tenant (variables, valores de variable, simulaciones guardadas) lleva `tenant_id`, RLS con la política `tenant_isolation` y acceso solo por `forTenant`/`enTransaccion` (ADR-002, AGENTS.md).
+
 Relaciones: indicador 1–N valores; variable 1–N valores; una simulación o una línea de cotización referencia **un juego de valores** (por fecha y huella) y **una capa de sueldo** (o un sueldo ingresado a mano). Las capas siguen siendo las de ADR-036 (instalación, puesto, RUT; rige una sola, sin herencia): el motor no las cambia, las **lee**.
 
 ## 3. Pantallas y pestañas
@@ -207,6 +209,8 @@ Toda acción de pantalla tiene su capacidad y su herramienta (ADR-055). El nombr
 | `platform.remuneraciones.alertas.listar` | Alertas de fuentes y valores retenidos (key `platform`) | Lectura | — | — |
 | `platform.remuneraciones.indicadores.cargar` / `.confirmar` / `.rechazar` | Carga manual con evidencia, confirmación de un retenido o rechazo (key `platform`) | Irreversible | Sí | Siempre: persona con `platformRole` y segunda firma (R5) |
 
+Toda escritura acepta `dryRun` (en MCP, su `preview_…`) e `idempotencyKey` (AGENTS.md, «Paridad y escrituras»). «Copiar como línea de cotización» del simulador es una capacidad de CPQ (crear una línea desde una simulación) y se define en su brief; mientras CPQ no esté activo, el botón queda deshabilitado.
+
 Aprobar o rechazar una propuesta se hace con la **capacidad existente de la cola de aprobaciones del Núcleo**, no con herramientas nuevas. La parte de CPQ (ver qué cotizaciones cambian y recalcularlas) son capacidades de CPQ y se definen en su brief.
 
 **Flujo típico del agente interno:** «¿cuánto cuesta un guardia 4x4 de 12 horas con el sueldo de la instalación X?» → `core.remuneraciones.costo.simular` con la capa (si el usuario no tiene `core:estructuras.read_sensible`, ofrece simular con sueldo a mano) → muestra la traza. «Sube la mutual adicional a 1,7 % desde enero» → `preview_…` de `variables.programar` → muestra el impacto → `variables.programar` → se detiene en la cola de aprobaciones.
@@ -242,7 +246,7 @@ Referencia: código de payroll de 1.0 leído en `Cryptobal/opai` `40d19a5` (solo
 - Ley publicada con efecto retroactivo (Ley 21.830): valor nuevo con vigencia pasada (R5); cotizaciones emitidas no cambian (R23); las abiertas muestran «cambio retroactivo» (R24); Nómina reliquida diferencias como hechos nuevos (cuando exista).
 - Res. Ex. que reemplaza a otra en el mismo año (topes 2026: 89,9 → 90,0 UF): valor nuevo con la misma vigencia que el anterior; el anterior queda como historia, nunca se borra.
 - Fuente caída en el cambio de mes (UTM nueva no llega): rige la anterior, `indicador_atrasado`, y la traza lo dice (R8).
-- Cotización de 12 meses que cruza agosto (tramo nuevo de la reforma) o el 26-abr-2028 (40 h): la simulación puede mostrar el costo por tramo (R4); el precio de la cotización usa la fecha de inicio del servicio salvo que el modelo de CPQ diga otra cosa (pregunta 6).
+- Cotización de 12 meses que cruza agosto (tramo nuevo de la reforma) o el 26-abr-2028 (40 h): la simulación puede mostrar el costo por tramo (R4); el precio se costea con el juego de valores de la **fecha de cálculo** y muestra aparte el costo a la fecha de inicio y por tramo (recomendación de la pregunta 6, pendiente de Carlos).
 - Turno de 12 h en 4x4: supera el máximo diario ordinario; en Chile requiere jornada excepcional autorizada por la DT. El motor no lo valida legalmente: avisa y deja la responsabilidad en el tenant (pregunta 8).
 - Sueldo base bajo el IMM vigente: se calcula, pero el resultado avisa en `danger` y CPQ no deja enviar sin aprobación.
 - Gratificación con tope: con sueldo base ≥ 4,75 IMM / 12 / 25 % el tope rige (anexo A, GC-F).

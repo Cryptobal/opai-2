@@ -74,7 +74,7 @@ Campos: valor nuevo (con unidad), **vigente desde** (hoy o futuro; pasado solo c
   - Desglose en `Seccion`: haberes (base, gratificación, no imponibles), descuentos del trabajador (solo para mostrar el líquido estimado), aportes del empleador (SIS, cesantía, mutual básica y adicional, reforma de pensiones) y provisiones (vacaciones, indemnización); cada monto con `TrazaMonto`.
   - **Líquido estimado** del trabajador, marcado «estimado, sin descuentos personales».
 - **Comparar escenarios** (iPad y escritorio): hasta tres columnas (por ejemplo 4x4 de 12 h vs 5x2 de 8,4 h vs 7x7), con las diferencias resaltadas. En el teléfono, un escenario y un `Segmentado` para cambiar.
-- Acciones: **Guardar simulación** (opcional, con nombre), «Copiar como línea de cotización» (deshabilitada con `Tooltip` «Disponible con CPQ» mientras CPQ no esté activo), «Exportar PDF» con la marca del tenant.
+- Acciones: **Guardar simulación** (opcional, con nombre), «Copiar como línea de cotización» (capacidad de CPQ; deshabilitada con `Tooltip` «Disponible con CPQ» mientras CPQ no esté activo), «Exportar PDF» con la marca del tenant.
 - Estados: sin datos suficientes («Elige un patrón y un sueldo»), con un indicador faltante (bloquea el resultado y explica cuál falta y qué hacer), con valores manuales (aviso `warning`), resultado.
 
 ### 4.7 Plataforma → Indicadores (`/platform/indicadores`)
@@ -86,7 +86,7 @@ Cola de alertas: fuente sin respuesta, valor anómalo retenido, ley publicada pe
 - `AvisoRecalculo` en sus dos variantes, aislado, con la hoja «Ver cambios».
 
 ## 5. Estados obligatorios por pantalla
-Loading (skeleton con la forma), vacío con acción, error con «Reintentar», sin permisos (`Forbidden`: un vendedor sin `core:estructuras.read_sensible` ve el simulador sin el desglose del sueldo de capas sensibles), y en las hojas: vista previa (dry-run), pendiente de aprobación, confirmando, éxito y error de regla con el texto del servidor.
+Loading (skeleton con la forma), vacío con acción, error con «Reintentar», sin permisos (sin `core:estructuras.read_sensible` no aparece «Usar una capa existente»: solo se simula con sueldo ingresado a mano, R28; sin `core:remuneraciones.simular`, `Forbidden`), y en las hojas: vista previa (dry-run), pendiente de aprobación, confirmando, éxito y error de regla con el texto del servidor.
 
 ## 6. Archivos del export
 `Indicadores.dc.html`, `IndicadorDetalle.dc.html`, `VariablesEmpresa.dc.html`, `ProgramarCambio.dc.html`, `HistorialRemuneraciones.dc.html`, `Simulador.dc.html`, `SimuladorComparar.dc.html`, `PlataformaIndicadores.dc.html`, `AvisosMotor.dc.html` (Bandeja + `AvisoRecalculo`), `Componentes.dc.html` (`TrazaMonto`, `EstadoFuente`, `CambioValor`, `AvisoRecalculo` con todos sus estados), y `shots/` con 375/1024/1280 (claro y, donde se pide, oscuro).
