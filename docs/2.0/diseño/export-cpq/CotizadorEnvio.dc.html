@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="./cpq-data.js"></script>
+<style>body{margin:0;height:100dvh}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<div class="ds" data-theme="{{ theme }}" ref="{{ rootRef }}" style="position:relative;width:100%;height:100%;overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="cot" app-bar="{{ noBar }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" notifications="{{ 3 }}" hide-top-bar="{{ isPhone }}" width="100%" height="100%" hint-size="100%,100%">
+
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div class="topbar" style="padding-left:4px;position:sticky;top:0">
+<a href="#" class="btn btn-ghost" style="height:44px;padding:0 8px 0 4px;gap:2px;color:var(--ds-fg-muted)"><span class="ic i-chevron-left" aria-hidden="true"></span>Cotizaciones</a>
+<span style="flex:1"></span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="more" label="Más acciones" on-click="{{ openMenu }}" hint-size="44px,44px"></x-import>
+</div>
+</sc-if>
+
+<sc-if value="{{ notCompare }}" hint-placeholder-val="{{ true }}">
+<header data-zone="cabecera" style="position:sticky;top:{{ hdrTop }};z-index:5;background:var(--ds-bg);border-bottom:1px solid var(--ds-border);padding:{{ hdrPad }};display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px">
+<div style="flex:1 1 320px;min-width:0;display:flex;flex-direction:column;gap:6px">
+<sc-if value="{{ titleEditing }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:4px">
+<input ref="{{ titleRef }}" aria-label="Título de la cotización" defaultValue="{{ titleTxt }}" onKeyDown="{{ titleKey }}" onBlur="{{ titleBlur }}" style="font:600 {{ h1 }}/1.25 var(--font-sans);letter-spacing:-0.012em;color:var(--ds-fg);background:var(--ds-surface);border:1px solid var(--ds-accent);border-radius:var(--radius-md);box-shadow:0 0 0 3px var(--ds-accent-muted);outline:none;padding:4px 8px;margin:-5px -9px 0;width:calc(100% + 18px);max-width:640px;box-sizing:border-box">
+<span class="t-caption">Enter guarda · Esc cancela</span>
+</div>
+</sc-if>
+<sc-if value="{{ titleNotEditing }}" hint-placeholder-val="{{ true }}">
+<h1 class="m0" style="font-size:{{ h1 }};line-height:1.25;font-weight:600;letter-spacing:-0.012em;text-wrap:pretty">
+<button type="button" onClick="{{ titleStart }}" disabled="{{ titleLocked }}" onMouseEnter="{{ titleHoverIn }}" onMouseLeave="{{ titleHoverOut }}" onFocus="{{ titleHoverIn }}" onBlur="{{ titleHoverOut }}" title="{{ titleHint }}" style="all:unset;box-sizing:border-box;cursor:{{ titleCursor }};display:inline-flex;align-items:center;gap:8px;border-radius:var(--radius-sm);padding:2px 6px;margin:-2px -6px;background:{{ titleBg }}">{{ titleTxt }}<span aria-hidden="true" style="display:{{ pencilDisp }};color:var(--ds-fg-muted);flex:none"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"></path><path d="m15 5 4 4"></path></svg></span></button>
+</h1>
+</sc-if>
+<div style="display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px">
+<span class="t-mono subtle" style="font-size:12px;line-height:16px;display:inline-flex;align-items:center;gap:4px;white-space:nowrap"><sc-if value="{{ locked }}" hint-placeholder-val="{{ false }}"><span class="ic sm i-lock" aria-hidden="true" style="width:14px;height:14px"></span></sc-if>{{ q.code }} · {{ q.version }}</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ chip.tone }}" hint-size="90px,22px">{{ chip.label }}</x-import>
+<sc-if value="{{ vistas }}" hint-placeholder-val="{{ false }}">
+<span class="t-caption" style="display:inline-flex;align-items:center;gap:4px;white-space:nowrap"><span class="ic sm i-eye" aria-hidden="true" style="width:14px;height:14px"></span>{{ vistasTxt }}</span>
+</sc-if>
+<span class="t-body-sm t-numeric" style="color:{{ venceColor }}">{{ eventTxt }}</span>
+</div>
+<span class="t-body-sm muted" style="display:flex;flex-wrap:wrap;gap:0 8px;align-items:center">
+<a href="#" style="display:inline-flex;align-items:center;min-height:{{ linkH }}">{{ q.cuenta }}</a><sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}"><span aria-hidden="true">·</span></sc-if><a href="#" style="display:inline-flex;align-items:center;min-height:{{ linkH }}">{{ q.negocio }}</a>
+</span>
+</div>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="download" icon-right="chevron-down" on-click="{{ openPdf }}" aria-haspopup="menu" data-focus="pdf" hint-size="170px,40px">Descargar PDF</x-import>
+<sc-if value="{{ hasPrimary }}" hint-placeholder-val="{{ true }}">
+<span data-tipwrap="enviar" tabIndex="{{ primary.tabIdx }}" aria-label="{{ primary.aria }}" onMouseEnter="{{ primary.tipIn }}" onMouseLeave="{{ tipOut }}" onFocus="{{ primary.tipIn }}" onBlur="{{ tipOut }}" style="display:inline-flex;border-radius:var(--radius-md)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="{{ primary.icon }}" disabled="{{ primary.disabled }}" on-click="{{ primary.go }}" data-focus="primario" hint-size="150px,40px">{{ primary.label }}</x-import>
+</span>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="more" label="Más acciones" on-click="{{ openMenu }}" hint-size="44px,44px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:8px;width:100%">
+<sc-if value="{{ hasPrimary }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" size="lg" block="{{ true }}" icon="{{ primary.icon }}" disabled="{{ primary.disabled }}" on-click="{{ primary.go }}" hint-size="100%,48px">{{ primary.label }}</x-import>
+<sc-if value="{{ primary.disabled }}" hint-placeholder-val="{{ false }}"><span class="t-caption" style="color:var(--ds-danger-fg)">{{ primary.why }}</span></sc-if>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" size="lg" variant="secondary" block="{{ true }}" icon="download" icon-right="chevron-down" on-click="{{ openPdf }}" hint-size="100%,48px">Descargar PDF</x-import>
+</div>
+</sc-if>
+</header>
+
+<div style="display:flex;flex-direction:column;gap:20px;padding:{{ pad }}">
+<sc-for list="{{ banners }}" as="b" hint-placeholder-count="0">
+<div role="status" style="display:flex;flex-wrap:wrap;align-items:flex-start;gap:8px 12px;padding:12px;border-radius:var(--radius-md);background:{{ b.bg }};color:{{ b.fg }}">
+<span class="ic sm {{ b.icon }}" aria-hidden="true" style="flex:none;margin-top:2px"></span>
+<span style="flex:1 1 220px;min-width:0;display:flex;flex-direction:column;gap:2px;font-size:14px;line-height:20px"><b style="font-weight:600;text-wrap:pretty">{{ b.title }}</b><span style="text-wrap:pretty">{{ b.text }}</span><sc-if value="{{ b.hasNote }}" hint-placeholder-val="{{ false }}"><span style="font-size:12px;line-height:16px;opacity:.9;text-wrap:pretty">{{ b.note }}</span></sc-if></span>
+<sc-if value="{{ b.hasAct }}" hint-placeholder-val="{{ false }}">
+<a href="#" class="btn btn-ghost" style="height:{{ actH }};padding:0 10px;color:inherit;font-weight:600;align-self:center">{{ b.act }}</a>
+</sc-if>
+</div>
+</sc-for>
+
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmented" options="{{ vistaOpts }}" value="{{ vista }}" on-change="{{ setVista }}" label="Vista" hint-size="240px,36px"></x-import>
+<span class="t-caption">Modelo de costeo v7 · Responsable {{ q.owner }}</span>
+</div>
+</sc-if>
+
+<sc-if value="{{ cliente }}" hint-placeholder-val="{{ false }}">
+<div class="card" style="overflow:hidden">
+<dc-import name="PropuestaCliente" device="{{ docDevice }}" theme="{{ theme }}" modo="preview" moneda="{{ moneda }}" ctx="{{ ctxCli }}" margin="{{ r.margin }}" cond="{{ cond }}" hint-size="100%,1400px"></dc-import>
+</div>
+</sc-if>
+
+<sc-if value="{{ interna }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ resTop }}" hint-placeholder-val="{{ false }}">
+<section class="card" aria-label="Resumen">
+<button type="button" onClick="{{ toggleRes }}" aria-expanded="{{ resOpen }}" style="all:unset;box-sizing:border-box;width:100%;display:flex;align-items:center;gap:10px;padding:12px 16px;min-height:56px;cursor:pointer">
+<span class="ic sm {{ resChev }} muted" aria-hidden="true"></span>
+<span class="t-label" style="flex:1">Resumen, costos e instrumentos</span>
+<span class="t-caption">{{ resToggleTxt }}</span>
+</button>
+</section>
+<sc-if value="{{ resOpen }}" hint-placeholder-val="{{ false }}">
+<dc-import name="ResumenCotizacion" moneda="{{ moneda }}" on-moneda="{{ setMoneda }}" moneda-locked="{{ locked }}" moneda-static="{{ isPhone }}" uf-line="{{ ufLine }}" venta-main="{{ ventaMain }}" venta-alt="{{ ventaAlt }}" unico-main="{{ unicoMain }}" unico-alt="{{ unicoAlt }}" costo-txt="{{ costoTxt }}" show-cost="{{ showCost }}" margen="{{ r.margin }}" minimo="{{ minV }}" alerta="{{ alertaV }}" cat-groups="{{ catGroups }}" mano-obra-txt="{{ manoObraTxt }}" touch="{{ isPhone }}" fin-items="{{ finItems }}" fin-editable="{{ editable }}" fin-total-txt="{{ finTotalTxt }}" on-fin-toggle="{{ onFinToggle }}" on-fin-edit="{{ onFinEdit }}" on-trace-venta="{{ onTraceVenta }}" dim="{{ dim }}" hint-size="100%,520px"></dc-import>
+</sc-if>
+</sc-if>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<dc-import name="ResumenCotizacion" moneda="{{ moneda }}" moneda-static="{{ true }}" uf-line="{{ ufLine }}" venta-main="{{ ventaMain }}" venta-alt="{{ ventaAlt }}" unico-main="{{ unicoMain }}" unico-alt="{{ unicoAlt }}" costo-txt="{{ costoTxt }}" show-cost="{{ showCost }}" margen="{{ r.margin }}" minimo="{{ minV }}" alerta="{{ alertaV }}" cat-groups="{{ catGroups }}" mano-obra-txt="{{ manoObraTxt }}" touch="{{ true }}" fin-items="{{ finItems }}" fin-editable="{{ false }}" fin-total-txt="{{ finTotalTxt }}" on-trace-venta="{{ onTraceVenta }}" dim="{{ dim }}" hint-size="100%,520px"></dc-import>
+</sc-if>
+<div style="display:grid;grid-template-columns:{{ bodyCols }};gap:24px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ tabItems }}" value="{{ tab }}" on-change="{{ setTab }}" hint-size="100%,44px"></x-import>
+<sc-if value="{{ tabPlanilla }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<dc-import name="PlanillaCotizacion" show-cost="{{ showCost }}" secs="{{ secs }}" cols="{{ cols }}" editable="{{ editable }}" handle-vis="{{ handleVis }}" unicos="{{ unicos }}" input-ref="{{ inputRef }}" dim="{{ dim }}" hint-size="100%,760px"></dc-import>
+</sc-if>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div class="card" style="overflow:hidden">
+<sc-for list="{{ secs }}" as="s" hint-placeholder-count="3">
+<div style="border-bottom:1px solid var(--ds-border)">
+<button type="button" onClick="{{ s.toggle }}" aria-expanded="{{ s.open }}" style="all:unset;box-sizing:border-box;width:100%;min-height:56px;display:flex;align-items:center;gap:8px;padding:10px 12px 10px 8px;cursor:pointer">
+<span class="ic sm {{ s.chev }} subtle" aria-hidden="true" style="flex:none"></span>
+<span style="display:flex;flex-direction:column;flex:1;min-width:0"><span class="t-label">{{ s.name }}</span><span class="t-caption">{{ s.countTxt }}</span></span>
+<span class="t-mono" style="font-weight:600;white-space:nowrap">{{ s.ventaTxt }}</span>
+</button>
+<sc-if value="{{ s.open }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;padding:0 12px 8px 32px">
+<sc-for list="{{ s.lines }}" as="l" hint-placeholder-count="2">
+<div style="display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--ds-border);opacity:{{ l.op }}">
+<span style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0"><span class="t-body-sm" style="font-weight:500">{{ l.name }}</span><span class="t-caption" style="text-wrap:pretty">{{ l.detail }}</span><span class="t-caption">{{ l.phoneRateo }}</span></span>
+<button type="button" onClick="{{ l.onVenta }}" style="all:unset;cursor:pointer;min-height:44px;display:flex;flex-direction:column;align-items:flex-end;justify-content:center;flex:none"><span class="t-mono" style="white-space:nowrap;text-decoration:underline dotted var(--ds-border-strong);text-underline-offset:4px">{{ l.ventaTxt }}</span><span class="t-caption">{{ l.ventaSub }}</span></button>
+</div>
+</sc-for>
+</div>
+</sc-if>
+</div>
+</sc-for>
+<div style="display:flex;align-items:center;gap:8px;padding:14px 12px 14px 32px">
+<span style="display:flex;flex-direction:column;flex:1;min-width:0"><span class="t-label">Pagos únicos</span><span class="t-caption">{{ unicos.detail }}</span></span>
+<span class="t-mono" style="font-weight:600;white-space:nowrap">{{ unicos.ventaTxt }}</span>
+</div>
+</div>
+<span class="t-caption" style="display:flex;align-items:center;gap:6px"><span class="ic sm i-info" aria-hidden="true"></span>Para editar, usa iPad o escritorio.</span>
+</sc-if>
+</sc-if>
+<sc-if value="{{ tabCond }}" hint-placeholder-val="{{ false }}">
+<dc-import name="CondicionesComerciales" values="{{ cond }}" on-change="{{ onCond }}" on-reset="{{ onCondReset }}" editable="{{ editable }}" inline="{{ true }}" touch="{{ isPhone }}" reajuste-first="{{ reFirst }}" hint-size="100%,560px"></dc-import>
+</sc-if>
+</div>
+<sc-if value="{{ resSide }}" hint-placeholder-val="{{ true }}">
+<aside aria-label="Resumen" style="position:sticky;top:{{ asideTop }}">
+<dc-import name="ResumenCotizacion" moneda="{{ moneda }}" on-moneda="{{ setMoneda }}" moneda-locked="{{ locked }}" uf-line="{{ ufLine }}" venta-main="{{ ventaMain }}" venta-alt="{{ ventaAlt }}" unico-main="{{ unicoMain }}" unico-alt="{{ unicoAlt }}" costo-txt="{{ costoTxt }}" show-cost="{{ showCost }}" margen="{{ r.margin }}" minimo="{{ minV }}" alerta="{{ alertaV }}" cat-groups="{{ catGroups }}" mano-obra-txt="{{ manoObraTxt }}" fin-items="{{ finItems }}" fin-editable="{{ editable }}" fin-total-txt="{{ finTotalTxt }}" on-fin-toggle="{{ onFinToggle }}" on-fin-edit="{{ onFinEdit }}" on-trace-venta="{{ onTraceVenta }}" dim="{{ dim }}" hint-size="100%,720px"></dc-import>
+</aside>
+</sc-if>
+</div>
+<sc-if value="{{ barOn }}" hint-placeholder-val="{{ false }}"><div style="height:72px;flex:none"></div></sc-if>
+</sc-if>
+</div>
+</sc-if>
+<sc-if value="{{ isCompare }}" hint-placeholder-val="{{ false }}">
+<header style="position:sticky;top:{{ hdrTop }};z-index:5;background:var(--ds-bg);border-bottom:1px solid var(--ds-border);padding:{{ hdrPad }};display:flex;flex-wrap:wrap;align-items:flex-end;gap:12px 24px">
+<div style="flex:1 1 320px;display:flex;flex-direction:column;gap:4px;min-width:0">
+<button type="button" class="btn btn-ghost" onClick="{{ closeCompare }}" style="align-self:flex-start;height:32px;padding:0 8px 0 4px;margin-left:-4px;color:var(--ds-fg-muted)"><span class="ic sm i-chevron-left" aria-hidden="true"></span>{{ q.code }} · {{ q.version }}</button>
+<h1 class="m0" style="font-size:{{ h1 }};line-height:1.25;font-weight:600;letter-spacing:-0.012em">Comparar versiones</h1>
+<span class="t-body-sm muted">{{ titleTxt }} · {{ q.cuenta }}</span>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px 12px;align-items:flex-end">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Desde" value="v2" options="{{ verOpts }}" style="{{ selW }}" hint-size="220px,70px"></x-import>
+<span class="ic i-swap subtle" aria-hidden="true" style="margin-bottom:12px"></span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Hasta" value="v3" options="{{ verOpts }}" style="{{ selW }}" hint-size="220px,70px"></x-import>
+</div>
+</header>
+<div style="display:flex;flex-direction:column;gap:20px;padding:{{ pad }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px">
+<sc-for list="{{ cmpKpis }}" as="k" hint-placeholder-count="4">
+<div class="card pad" style="display:flex;flex-direction:column;gap:4px">
+<span class="t-caption">{{ k.k }}</span>
+<span class="t-numeric" style="font-size:18px;line-height:26px;font-weight:600;white-space:nowrap">{{ k.v }}</span>
+<span class="t-caption t-numeric">{{ k.d }}</span>
+</div>
+</sc-for>
+</div>
+<section class="card pad">
+<dc-import name="DiffVersiones" diff="{{ cmpDiff }}" layout="lado" hint-size="100%,360px"></dc-import>
+</section>
+</div>
+</sc-if>
+</x-import>
+
+<sc-if value="{{ barOn }}" hint-placeholder-val="{{ false }}">
+<div role="region" aria-label="Total de la cotización" style="position:absolute;left:{{ barLeft }};right:0;bottom:0;z-index:6;display:flex;align-items:center;gap:16px;padding:12px 24px;min-height:64px;box-sizing:border-box;background:color-mix(in srgb,var(--ds-bg) 95%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-top:1px solid var(--ds-border)">
+<span style="display:flex;flex-direction:column;min-width:0;flex:1"><span class="t-caption">Venta mensual neta</span><span class="t-numeric" style="font-size:18px;line-height:24px;font-weight:600;white-space:nowrap">{{ ventaMain }} <span class="t-caption" style="font-weight:400">{{ ventaAltShort }}</span></span></span>
+<sc-if value="{{ showCost }}" hint-placeholder-val="{{ true }}">
+<span style="display:flex;align-items:center;gap:8px;flex:none"><span class="t-caption">Margen</span><span class="t-numeric" style="font-size:18px;line-height:24px;font-weight:600">{{ margenTxt }}</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ margenTone.tone }}" hint-size="120px,22px">{{ margenTone.label }}</x-import></span>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeMenus }}" style="position:absolute;inset:0;z-index:30"></div>
+<div style="position:absolute;top:{{ menuTop }};right:{{ menuRight }};width:264px;z-index:31;animation:ds-entrar 150ms var(--ds-ease)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Menu" items="{{ menuItems }}" on-select="{{ onMenu }}" hint-size="264px,260px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ pdfOpen }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeMenus }}" style="position:absolute;inset:0;z-index:30"></div>
+<div style="position:absolute;top:{{ pdfTop }};right:{{ pdfRight }};width:264px;z-index:31;animation:ds-entrar 150ms var(--ds-ease)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Menu" items="{{ pdfItems }}" on-select="{{ onPdf }}" hint-size="264px,120px"></x-import>
+</div>
+</sc-if>
+
+<sc-if value="{{ rateoPop }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeRateo }}" style="position:absolute;inset:0;z-index:40"></div>
+<div class="overlay" role="dialog" aria-label="Rateo" style="position:absolute;z-index:41;width:340px;padding:6px;left:{{ rp.left }};top:{{ rp.top }};display:flex;flex-direction:column;animation:ds-entrar 150ms var(--ds-ease)">
+<div style="display:flex;flex-direction:column;gap:2px;padding:8px 10px 6px">
+<span class="t-label-sm">Rateo · {{ rp.name }}</span>
+<span class="t-caption t-numeric">Costo unitario {{ rp.unitTxt }} · catálogo: {{ rp.defTxt }}</span>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Menu" overlay="{{ false }}" items="{{ rp.items }}" on-select="{{ rp.onSelect }}" hint-size="100%,190px"></x-import>
+<span class="t-caption" style="padding:6px 10px;text-wrap:pretty">{{ rp.tip }}</span>
+<sc-if value="{{ rp.nMode }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:flex-end;gap:8px;padding:8px 10px;border-top:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Meses" value="{{ rp.nVal }}" on-change="{{ rp.onN }}" trailing="meses" mono="{{ true }}" compact="{{ true }}" input-mode="numeric" style="{{ rp.inStyle }}" hint-size="140px,64px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" on-click="{{ rp.applyN }}" hint-size="90px,40px">Aplicar</x-import>
+</div>
+</sc-if>
+<sc-if value="{{ rp.canReset }}" hint-placeholder-val="{{ false }}">
+<button type="button" class="btn btn-ghost" onClick="{{ rp.reset }}" style="height:36px;justify-content:flex-start;padding:0 10px;color:var(--ds-accent);border-top:1px solid var(--ds-border);border-radius:0 0 var(--radius-md) var(--radius-md)">Volver al valor por defecto</button>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ finPop }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeFin }}" style="position:absolute;inset:0;z-index:40"></div>
+<div class="overlay" role="dialog" aria-label="{{ fe.name }}" style="position:absolute;z-index:41;width:320px;padding:16px;left:{{ fe.left }};top:{{ fe.top }};display:flex;flex-direction:column;gap:14px;animation:ds-entrar 150ms var(--ds-ease)">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+<span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span class="t-label" style="text-wrap:pretty">{{ fe.name }}</span><span class="t-caption t-numeric">{{ fe.montoTxt }}</span></span>
+<button type="button" class="icon-btn" aria-label="Cerrar" onClick="{{ closeFin }}" style="width:32px;height:32px;margin:-4px -4px 0 0"><span class="ic sm i-x" aria-hidden="true"></span></button>
+</div>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px">
+<sc-for list="{{ fe.fields }}" as="fl" hint-placeholder-count="2">
+<sc-if value="{{ fl.isInput }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="{{ fl.label }}" value="{{ fl.value }}" on-change="{{ fl.onChange }}" trailing="{{ fl.unit }}" mono="{{ true }}" compact="{{ true }}" input-mode="decimal" disabled="{{ fe.off }}" hint="{{ fl.hint }}" hint-size="100%,64px"></x-import>
+</sc-if>
+<sc-if value="{{ fl.isSelect }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="{{ fl.label }}" value="{{ fl.value }}" options="{{ fl.options }}" on-change="{{ fl.onChange }}" disabled="{{ fe.off }}" hint-size="100%,64px"></x-import>
+</sc-if>
+</sc-for>
+</div>
+<span class="t-caption" style="text-wrap:pretty">{{ fe.defTxt }}</span>
+<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+<sc-if value="{{ fe.overridden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" dot="{{ false }}" hint-size="90px,22px">Sobrescrito</x-import>
+<button type="button" class="btn btn-ghost" onClick="{{ fe.reset }}" style="height:32px;padding:0 8px;color:var(--ds-accent)">Volver al valor por defecto</button>
+</sc-if>
+<span style="flex:1"></span>
+<button type="button" class="btn btn-ghost" onClick="{{ fe.trace }}" style="height:32px;padding:0 8px">¿De dónde sale?</button>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ tracePop }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeTrace }}" style="position:absolute;inset:0;z-index:40"></div>
+<div class="overlay" role="dialog" aria-label="¿De dónde sale este monto?" style="position:absolute;z-index:41;width:360px;padding:16px;left:{{ traceLeft }};top:{{ traceTop }};animation:ds-entrar 150ms var(--ds-ease)">
+<dc-import name="TrazaMonto" trace="{{ traceData }}" on-close="{{ closeTrace }}" hint-size="100%,420px"></dc-import>
+</div>
+</sc-if>
+<sc-if value="{{ traceSheet }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Sheet" contained="{{ true }}" label="¿De dónde sale este monto?" on-close="{{ closeTrace }}" hint-size="100%,70%">
+<dc-import name="TrazaMonto" trace="{{ traceData }}" on-close="{{ closeTrace }}" hint-size="100%,420px"></dc-import>
+</x-import>
+</sc-if>
+
+<sc-if value="{{ tipOn }}" hint-placeholder-val="{{ false }}">
+<div role="tooltip" style="position:absolute;z-index:45;left:{{ tip.left }};top:{{ tip.top }};max-width:260px;padding:6px 8px;border-radius:var(--radius-sm);background:var(--ds-inverse-bg);color:var(--ds-inverse-fg);font:400 12px/16px var(--font-sans);box-shadow:var(--ds-shadow-overlay);pointer-events:none;animation:ds-aparecer 150ms var(--ds-ease)">{{ tip.text }}</div>
+</sc-if>
+
+<sc-if value="{{ histOpen }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Sheet" contained="{{ true }}" side="{{ sheetSide }}" title="Historial" description="{{ q.code }} · 3 versiones" on-close="{{ closeHist }}" hint-size="420px,100%">
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Timeline" items="{{ histItems }}" hint-size="100%,420px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="swap" on-click="{{ openCompare }}" hint-size="180px,40px">Comparar v2 ↔ v3</x-import>
+</div>
+</x-import>
+</sc-if>
+
+<sc-if value="{{ sendOpen }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Sheet" contained="{{ true }}" side="{{ sheetSide }}" title="Enviar {{ q.code }} · {{ q.version }}" description="{{ q.cuenta }} · {{ ventaMain }} al mes, neto" on-close="{{ closeSend }}" hint-size="420px,100%">
+<dc-import name="EnviarCotizacion" version="{{ q.version }}" agente="{{ agente }}" bloqueos="{{ bloqueos }}" uf-txt="{{ ufFix }}" diff="{{ diff }}" on-close="{{ closeSend }}" on-send="{{ onSend }}" hint-size="100%,1200px"></dc-import>
+</x-import>
+</sc-if>
+
+<sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:50%;bottom:{{ toastBottom }};transform:translateX(-50%);z-index:60;width:min(380px,calc(100% - 32px))">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Toast" icon="check" tone="success" message="{{ toastMsg }}" hint-size="100%,48px"></x-import>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1440,&quot;height&quot;:900},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;borrador&quot;,&quot;bajoMargen&quot;,&quot;porAprobar&quot;,&quot;enviada&quot;,&quot;aceptada&quot;,&quot;rechazada&quot;,&quot;vencida&quot;],&quot;default&quot;:&quot;borrador&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;permisos&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;completo&quot;,&quot;sinCostos&quot;],&quot;default&quot;:&quot;completo&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;vista&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;interna&quot;,&quot;cliente&quot;],&quot;default&quot;:&quot;interna&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;panel&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ninguno&quot;,&quot;enviar&quot;,&quot;enviarBloqueos&quot;,&quot;enviarAgente&quot;,&quot;pdf&quot;,&quot;menu&quot;,&quot;condiciones&quot;,&quot;reajuste&quot;,&quot;rateo&quot;,&quot;instrumento&quot;,&quot;focoCabecera&quot;,&quot;focoDrawer&quot;,&quot;renombrar&quot;,&quot;comparar&quot;,&quot;historial&quot;],&quot;default&quot;:&quot;ninguno&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = {};
+  rootRef = React.createRef();
+  titleRef = (el) => { if (el && !this._tf) { this._tf = true; el.focus(); el.select(); } if (!el) this._tf = false; };
+  inputRef = (el) => { if (el && this._focusId !== this.state.editing) { this._focusId = this.state.editing; el.focus(); el.select(); } };
+  componentDidMount() {
+    this._t = setInterval(() => { if (window.CPQ && window.OPAI20DesignSystem_44e4d7 && window.OPAI20DesignSystem_44e4d7.AppShell) { clearInterval(this._t); this.forceUpdate(); } }, 60);
+    this._k = (e) => { if (e.key === "Escape") this.setState({ trace: null, menu: false, pdf: false, rateoPop: null, finEdit: null, tip: null }); };
+    window.addEventListener("keydown", this._k);
+    this._rs = () => this.forceUpdate(); window.addEventListener("resize", this._rs);
+    setTimeout(() => this.forceUpdate(), 50);
+    const panel = this.props.panel;
+    const auto = { reajuste: '[data-tipwrap="enviar"]', rateo: 'button[aria-label^="Rateo de Kit Starlink"]', instrumento: 'button[aria-label^="Editar póliza"]', focoCabecera: '[data-zone="cabecera"] .btn-primary', focoDrawer: '[role="dialog"] [role="checkbox"]' }[panel];
+    if (auto) {
+      let n = 0;
+      this._a = setInterval(() => {
+        const root = this.rootRef.current; const el = root && root.querySelector(auto);
+        if (el || ++n > 60) {
+          clearInterval(this._a); if (!el) return;
+          if (panel === "rateo" || panel === "instrumento") el.click();
+          else if (panel === "reajuste") el.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
+          else { el.focus({ preventScroll: true }); el.style.outline = "2px solid var(--ds-focus)"; el.style.outlineOffset = "2px"; el.addEventListener("blur", () => { el.style.outline = ""; }, { once: true }); }
+        }
+      }, 150);
+    }
+  }
+  componentWillUnmount() { clearInterval(this._t); clearInterval(this._a); clearTimeout(this._rc); clearTimeout(this._to); window.removeEventListener("keydown", this._k); window.removeEventListener("resize", this._rs); }
+  recalc() { clearTimeout(this._rc); this.setState({ recalc: true }); this._rc = setTimeout(() => this.setState({ recalc: false }), 420); }
+  flash(msg) { clearTimeout(this._to); this.setState({ toast: msg }); this._to = setTimeout(() => this.setState({ toast: null }), 3200); }
+  openAt(key, id, e, w, hgt, side) {
+    if (!e || !this.rootRef.current || !e.currentTarget) return this.setState({ [key]: { id } });
+    const R = this.rootRef.current.getBoundingClientRect(), b = e.currentTarget.getBoundingClientRect();
+    let left = side === "left" ? b.left - R.left - w - 12 : key === "trace" ? b.right - R.left - w : b.left - R.left;
+    left = Math.min(Math.max(12, left), R.width - w - 12);
+    let top = side === "left" ? b.top - R.top : b.bottom - R.top + 6;
+    if (top + hgt > R.height) top = Math.max(12, (side === "left" ? R.height - hgt - 12 : b.top - R.top - hgt - 6));
+    this.setState({ [key]: { id, left, top }, rateoN: null });
+  }
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const P = window.CPQ;
+    const device = this.props.device ?? "desktop";
+    const theme = this.props.theme ?? "light";
+    const isPhone = device === "phone";
+    const base = { device, theme, isPhone, notPhone: !isPhone, rootRef: this.rootRef, inputRef: this.inputRef, noBar: h(React.Fragment) };
+    if (!P || !NS.AppShell) return base;
+    const S = this.state;
+    const st = S.st ?? this.props.estado ?? "borrador";
+    const panel = S.panel !== undefined ? S.panel : this.props.panel ?? "ninguno";
+    const showCost = (this.props.permisos ?? "completo") !== "sinCostos";
+    const H = (v) => (showCost ? v : "—");
+    const w = (this.rootRef.current && this.rootRef.current.offsetWidth) || (isPhone ? 390 : device === "tablet" ? 1024 : 1440);
+    const locked = ["enviada", "aceptada", "rechazada", "vencida"].includes(st);
+    const pending = st === "porAprobar";
+    const vista = S.vista ?? this.props.vista ?? "interna";
+    const cliente = vista === "cliente" && !isPhone, interna = !cliente;
+    const editable = !locked && !pending && !isPhone;
+    const cfg = P.getConfig();
+    const margin = st === "bajoMargen" || st === "porAprobar" ? 0.087 : 0.104;
+    const condBase = panel === "reajuste" ? { dias: "45", reajuste: "poli", pImo: "55" } : { dias: "45", reajuste: "poli" };
+    const cond = { ...P.DEFAULT_COND, ...condBase, ...(S.cond || {}) };
+    const moneda = cond.moneda;
+    const ov = S.ov ?? {};
+    const rateos = S.rateos ?? {};
+    const finPreset = panel === "instrumento" ? { pg: { pct: "6", plazo: "30" } } : {};
+    const finS = S.fin ?? finPreset;
+    const PCT = { tasa: 1, pct: 1, prima: 1 };
+    const finP = {};
+    ["cf", "pg", "rc"].forEach((id) => {
+      const o = { ...cfg.fin[id] }, s = finS[id] || {};
+      Object.keys(s).forEach((k) => { const v = s[k]; if (v == null) return; if (k === "on") o.on = v; else if (id === "rc" && k === "plazo") o.plazo = v; else { const n = P.parseNum(v); o[k] = PCT[k] ? n / 100 : n; } });
+      finP[id] = o;
+    });
+    finP.cf.dias = P.parseNum(cond.dias) || finP.cf.dias;
+    const r = P.compute(margin, { sueldos: ov, rateos, fin: finP });
+    const min = cfg.margen.min, alertaM = cfg.margen.alerta;
+    const under = margin < min;
+    const dim = S.recalc ? 0.4 : 1;
+    const U = st === "vencida" ? 39981.2 : P.UF.valor;
+    const ufStr = "$ " + P.num(U, 2);
+    const money = (clp) => (moneda === "UF" ? P.uf(clp / U) : P.fmt(clp));
+    const alt = (clp) => (moneda === "UF" ? P.fmt(clp) : P.uf(clp / U));
+    const pl = (n, a, b) => n + " " + (n === 1 ? a : b);
+
+    const defOpen = isPhone ? {} : { pn: true, bs: true, co: true };
+    const open = { ...defOpen, ...(S.open || {}) };
+    const allLines = [];
+    r.secs.forEach((s) => s.lines.forEach((l) => { if (!l.group) allLines.push(l); }));
+    const puestoIds = allLines.filter((l) => l.kind === "puesto" && !l.disabled).map((l) => l.id);
+    const parse = (v) => parseInt(String(v).replace(/\D/g, ""), 10);
+    const commit = (l, val, next) => { const n = parse(val); const nov = { ...ov }; if (n && n !== l.sueldoEf) nov[l.id] = n; this.setState({ ov: nov, editing: next || null }); if (n && n !== l.sueldoEf) this.recalc(); };
+    const tipAt = (text, below) => (e) => {
+      const el = e.currentTarget || e.target;
+      if (!this.rootRef.current || !el || !text) return;
+      const R = this.rootRef.current.getBoundingClientRect(), b = el.getBoundingClientRect();
+      this.setState({ tip: { text, left: Math.max(8, Math.min(b.left - R.left, R.width - 272)) + "px", top: (below ? b.bottom - R.top + 8 : Math.max(8, b.top - R.top - 34)) + "px" } });
+    };
+    const tipOut = () => this.setState({ tip: null });
+    const mkLine = (l) => {
+      const isP = l.kind === "puesto";
+      const canEdit = editable && isP && !l.disabled && showCost;
+      const editing = S.editing === l.id;
+      const idx = puestoIds.indexOf(l.id);
+      const tipTxt = !isP ? P.rateoTip(l.rateoId, l.rateoN) : "";
+      return {
+        isGroup: false, isLine: true, id: l.id, name: l.name,
+        detail: isP ? l.patron + " · " + l.horario + " · " + pl(l.pos, "posición", "posiciones") + " × " + pl(l.pp, "persona", "personas") : P.catLabel(l.catId) + " · " + l.qtyLabel,
+        rateable: !isP, rateoTxt: !isP ? P.rateoShort(l.rateoId, l.rateoN) : "", tipIn: tipAt(tipTxt), tipOut,
+        phoneRateo: !isP ? "Rateo " + P.rateoShort(l.rateoId, l.rateoN).toLowerCase() : "",
+        rateoOverridden: !!l.rateoOverridden, rateoDefTxt: !isP ? "Catálogo: " + P.rateoLabel(l.rateoDef, l.rateoDefN) : "",
+        cuotaTxt: isP || !showCost ? "" : l.unico ? "se cobra una vez" : l.rateoId === "mensual" ? P.fmt(l.unit) + "/mes" + (l.qty > 1 ? " × " + l.qty : "") : "cuota " + P.fmt(l.cuota) + "/mes" + (l.qty > 1 ? " × " + l.qty : ""),
+        noRateo: !editable, rateoCursor: editable ? "pointer" : "default", rateoChevDisp: editable ? "inline-block" : "none",
+        onRateo: (e) => { e.stopPropagation(); this.setState({ tip: null }); if (editable) this.openAt("rateoPop", l.id, e, 340, 360); },
+        hasOrigen: isP, origenTxt: l.manual ? "Escrito a mano" : l.origen, vig: l.manual ? "Escrito ahora · antes " + P.fmt(l.sueldo) : l.vig,
+        hidden: !l.visible, disabled: !!l.disabled,
+        unitTxt: H(P.fmt(isP ? l.sueldoEf : l.unit)), unitRaw: String(isP ? l.sueldoEf : l.unit), unitSub: isP ? "sueldo bruto" : l.rateoId === "mensual" ? "precio mensual" : "costo unitario",
+        costoTxt: H(P.fmt(l.costo)), ventaTxt: P.fmt(l.venta), ventaSub: l.unico ? "pago único" : "",
+        op: l.disabled ? 0.45 : 1,
+        editing, notEditing: !editing, noEdit: !canEdit, editCursor: canEdit ? "text" : "default", editTitle: canEdit ? "Editar sueldo (Enter guarda, Esc cancela)" : "",
+        onEdit: () => canEdit && this.setState({ editing: l.id }),
+        onKey: (e) => {
+          if (e.key === "Enter") { e.preventDefault(); commit(l, e.target.value); }
+          else if (e.key === "Escape") { e.stopPropagation(); this.setState({ editing: null }); }
+          else if (e.key === "Tab") { e.preventDefault(); commit(l, e.target.value, puestoIds[(idx + (e.shiftKey ? -1 : 1) + puestoIds.length) % puestoIds.length]); }
+        },
+        onBlur: (e) => { if (this.state.editing === l.id) commit(l, e.target.value); },
+        onCosto: (e) => { e.stopPropagation(); this.openAt("trace", l.id, e, 360, 440); },
+        onVenta: (e) => { e.stopPropagation(); if (isPhone) this.setState({ trace: { id: l.id } }); else this.openAt("trace", l.id, e, 360, 440); },
+      };
+    };
+    const secs = r.secs.map((s) => {
+      const rows = s.lines.map((l) => (l.group ? { isGroup: true, isLine: false, group: l.group } : mkLine(l)));
+      const active = s.lines.filter((l) => !l.group && !l.disabled);
+      return { id: s.id, name: s.name, sub: s.sub, open: !!open[s.id], chev: open[s.id] ? "i-chevron-down" : "i-chevron-right", toggle: () => this.setState({ open: { ...open, [s.id]: !open[s.id] } }), countTxt: pl(active.length, "línea", "líneas"), costoTxt: H(P.fmt(s.costo)), ventaTxt: P.fmt(s.venta), rows, lines: rows.filter((x) => x.isLine) };
+    });
+    const unicoLines = allLines.filter((l) => l.unico && !l.disabled);
+    const unicos = { detail: unicoLines.map((l) => l.name).join(", ") + " · aparte de la mensualidad", countTxt: pl(unicoLines.length, "línea", "líneas"), costoTxt: H(P.fmt(r.unicoCosto)), ventaTxt: P.fmt(r.unico) };
+
+    let traceData = null;
+    const trace = S.trace;
+    if (trace) {
+      if (trace.id === "venta") traceData = P.traceVenta(r, showCost);
+      else if (["cf", "pg", "rc"].includes(trace.id)) {
+        const f = r.fin.find((x) => x.id === trace.id), p = f.p;
+        traceData = { title: f.name, formula: f.id === "cf" ? "costo operativo × días de pago ÷ 30 × tasa mensual" : f.id === "pg" ? "valor del contrato × % de garantía × prima anual × plazo ÷ 12, repartido en el contrato" : "monto en UF × valor UF × prima anual × meses cubiertos ÷ 12, repartido en el contrato",
+          vars: f.id === "cf" ? [{ k: "Costo operativo", v: P.fmt(r.ops), src: "Suma de las secciones" }, { k: "Días de pago", v: String(p.dias), src: "Condiciones comerciales" }, { k: "Tasa mensual", v: P.pct(p.tasa), src: "Configuración del CPQ" }]
+            : f.id === "pg" ? [{ k: "% del contrato", v: P.pct(p.pct), src: "Configuración del CPQ" }, { k: "Prima anual", v: P.pct(p.prima), src: "Configuración del CPQ" }, { k: "Plazo", v: p.plazo + " meses", src: "Configuración del CPQ" }]
+            : [{ k: "Monto", v: "UF " + P.num(p.uf), src: "Configuración del CPQ" }, { k: "Prima anual", v: P.pct(p.prima, 2), src: "Configuración del CPQ" }, { k: "Plazo", v: P.rcPlazoLabel(p), src: "Configuración del CPQ" }],
+          result: [{ k: "Costo mensual", v: f.on ? P.fmt(f.monto) : "No suma" }] };
+      } else { const l = allLines.find((x) => x.id === trace.id); if (l) traceData = P.traceLine(l, r, showCost); }
+    }
+
+    const pv = (x) => { const v = Math.round(x * 10000) / 100; return P.num(v, Math.round(v * 10) === v * 10 ? 1 : 2); };
+    const fv = (id, k, def) => (finS[id] && finS[id][k] != null ? finS[id][k] : def);
+    const same = (a, b) => Math.abs(a - b) < 1e-9;
+    const setCond = (k, v) => this.setState((s) => ({ cond: { ...(s.cond || {}), [k]: v } }));
+    const onFinField = (id, k, v) => { if (id === "cf" && k === "dias") return setCond("dias", v); this.setState((s) => { const b = s.fin ?? finPreset; return { fin: { ...b, [id]: { ...(b[id] || {}), [k]: v } } }; }); };
+    const onFinToggle = (id, v) => { this.setState((s) => { const b = s.fin ?? finPreset; return { fin: { ...b, [id]: { ...(b[id] || {}), on: v } } }; }); this.recalc(); };
+    const onFinReset = (id) => { this.setState((s) => { const b = { ...(s.fin ?? finPreset) }; delete b[id]; return { fin: b }; }); this.recalc(); };
+    const finItems = r.fin.map((f) => {
+      const p = f.p, d = cfg.fin[f.id];
+      let fields, summary, defTxt, ovr;
+      if (f.id === "cf") {
+        fields = [{ key: "dias", label: "Días de pago", value: String(p.dias), unit: "días", hint: "Viene de Condiciones" }, { key: "tasa", label: "Tasa mensual", value: fv("cf", "tasa", pv(p.tasa)), unit: "%" }];
+        summary = p.dias + " días · " + pv(p.tasa) + " % mensual"; defTxt = "Configuración: tasa " + pv(d.tasa) + " % mensual. Los días de pago se editan en Condiciones."; ovr = !same(p.tasa, d.tasa);
+      } else if (f.id === "pg") {
+        fields = [{ key: "pct", label: "% del contrato", value: fv("pg", "pct", pv(p.pct)), unit: "%" }, { key: "prima", label: "Prima anual", value: fv("pg", "prima", pv(p.prima)), unit: "%" }, { key: "plazo", label: "Plazo", value: fv("pg", "plazo", String(p.plazo)), unit: "meses" }];
+        summary = pv(p.pct) + " % del contrato · " + p.plazo + " meses"; defTxt = "Configuración: " + pv(d.pct) + " % · prima " + pv(d.prima) + " % anual · " + d.plazo + " meses."; ovr = !same(p.pct, d.pct) || !same(p.prima, d.prima) || p.plazo !== d.plazo;
+      } else {
+        fields = [{ key: "uf", label: "Monto", value: fv("rc", "uf", P.num(p.uf)), unit: "UF" }, { key: "prima", label: "Prima anual", value: fv("rc", "prima", pv(p.prima)), unit: "%" }, { key: "plazo", label: "Plazo", value: p.plazo, kind: "select", options: P.RC_PLAZOS }];
+        if (p.plazo === "n") fields.push({ key: "plazoN", label: "Meses", value: fv("rc", "plazoN", String(p.plazoN)), unit: "meses" });
+        summary = "UF " + P.num(p.uf) + " · " + P.rcPlazoLabel(p); defTxt = "Configuración: UF " + P.num(d.uf) + " · prima " + pv(d.prima) + " % anual · " + P.rcPlazoLabel(d) + "."; ovr = p.uf !== d.uf || !same(p.prima, d.prima) || p.plazo !== d.plazo;
+      }
+      ovr = ovr || !!p.on !== !!d.on;
+      return { id: f.id, name: f.name, on: !!p.on, summary: p.on ? summary : "Desactivado en esta cotización", montoTxt: p.on ? P.fmt(f.monto) + " al mes" : "No suma", defTxt, overridden: ovr, fields };
+    });
+    let fe = {};
+    const fEd = S.finEdit && finItems.find((x) => x.id === S.finEdit.id);
+    if (fEd) {
+      fe = { ...fEd, off: !fEd.on, left: (S.finEdit.left || 400) + "px", top: (S.finEdit.top || 200) + "px",
+        fields: fEd.fields.map((fl) => ({ ...fl, isInput: fl.kind !== "select", isSelect: fl.kind === "select", hint: fl.hint, onChange: (v) => onFinField(fEd.id, fl.key, v) })),
+        reset: () => onFinReset(fEd.id), trace: (e) => { this.setState({ finEdit: null }); this.openAt("trace", fEd.id, e, 360, 340); } };
+    }
+    const catGroups = r.groups.map((g) => ({ label: g.label, totalTxt: P.fmt(g.total), rows: g.rows.map((row) => ({ id: row.id, label: row.label + (row.sistema ? " · calculado" : ""), totalTxt: P.fmt(row.total), sub: row.unico ? "+ " + P.fmt(row.unico) + " pago único" : "", items: row.items.map((it) => ({ name: it.name, sec: it.sec, montoTxt: it.unico ? P.fmt(it.unico) + " único" : P.fmt(it.monto) })) })) }));
+
+    let rp = {};
+    const rl = S.rateoPop && allLines.find((x) => x.id === S.rateoPop.id);
+    if (rl) {
+      const setR = (val) => { this.setState({ rateos: { ...rateos, [rl.id]: val }, rateoPop: null }); this.recalc(); };
+      const nMode = S.rateoN != null || rl.rateoId === "n";
+      const nVal = S.rateoN ?? (rl.rateoId === "n" ? String(rl.rateoN) : "");
+      const cuotaFor = (m) => (!showCost ? "" : m ? P.fmt(rl.unit / m) + "/mes" : "una vez");
+      rp = {
+        left: S.rateoPop.left + "px", top: S.rateoPop.top + "px", name: rl.name, unitTxt: H(P.fmt(rl.unit)), defTxt: P.rateoLabel(rl.rateoDef, rl.rateoDefN), tip: P.rateoTip(rl.rateoId, rl.rateoN),
+        items: P.RATEOS.map((o) => ({ value: o.id, label: o.id === "n" && rl.rateoId === "n" ? rl.rateoN + " meses" : o.id === "mensual" ? "Mensual" : o.label, on: o.id === rl.rateoId, meta: o.id === "n" ? (rl.rateoId === "n" ? cuotaFor(rl.rateoN) : "elige") : o.id === "contrato" ? P.MODEL.duracion + " m · " + cuotaFor(o.meses) : cuotaFor(o.meses) })),
+        onSelect: (it) => { if (it.value === "n") this.setState({ rateoN: nVal || "6" }); else setR({ id: it.value }); },
+        nMode, nVal, onN: (v) => this.setState({ rateoN: v }), inStyle: { width: 140 },
+        applyN: () => { const n = Math.max(1, Math.min(120, parse(nVal) || 1)); setR({ id: "n", n }); },
+        canReset: rl.rateoOverridden, reset: () => { const x = { ...rateos }; delete x[rl.id]; this.setState({ rateos: x, rateoPop: null }); this.recalc(); },
+      };
+    }
+
+    const CH = { borrador: ["neutral", "Borrador"], bajoMargen: ["neutral", "Borrador"], porAprobar: ["warning", "Por aprobar"], enviada: ["info", "Enviada"], aceptada: ["success", "Aceptada"], rechazada: ["danger", "Rechazada"], vencida: ["warning", "Vencida"] };
+    const EV = {
+      enviada: [S.sent ? "Enviada hoy · vence el 28-11-2026" : "Enviada el 29-10-2026 · vence el 28-11-2026", "var(--ds-fg-muted)", S.sent ? 0 : 3],
+      aceptada: ["Enviada el 22-10-2026 · aceptada el 28-10-2026", "var(--ds-fg-muted)", 4],
+      rechazada: ["Enviada el 22-10-2026 · rechazada el 28-10-2026", "var(--ds-fg-muted)", 2],
+      vencida: ["Enviada el 26-09-2026 · venció el 26-10-2026", "var(--ds-warning-fg)", 3],
+    }[st] || ["Vence en " + cond.validez + " días · 28-11-2026", "var(--ds-fg-muted)", 0];
+    const banners = [];
+    const B = (tone, icon, title, text, act, note) => banners.push({ note: note || "", hasNote: !!note, bg: tone === "neutral" ? "var(--ds-fill)" : "var(--ds-" + tone + "-muted)", fg: tone === "neutral" ? "var(--ds-fg)" : "var(--ds-" + tone + "-fg)", icon: "i-" + icon, title, text, act: act || "", hasAct: !!act });
+    if (!showCost) B("neutral", "lock", "Sin permiso para ver costos ni margen", "Ves solo la venta. Pídele el permiso cpq:costos.ver a Carlos Irigoyen, administrador de Atlas Seguridad SpA.");
+    if (st === "bajoMargen" && showCost) B("danger", "alert", "Margen " + P.pct(margin) + " bajo el mínimo de " + P.pct(min, 0), "Necesita aprobación para enviarse. Lo aprueba Carlos Irigoyen.");
+    if (st === "bajoMargen" && !showCost) B("danger", "alert", "Precio bajo el mínimo del tenant", "Necesita aprobación para enviarse. Lo aprueba Carlos Irigoyen.");
+    if (st === "porAprobar") B("warning", "clock", "Esperando aprobación de Carlos Irigoyen", "Pedida por Ana Rojas el 29-10-2026 a las 10:42. Para editar, retira el pedido.", "Retirar pedido");
+    if (st === "enviada") B("info", "lock", S.sent ? "Enviada recién a " + S.sent : "Enviada el 29-10-2026 a 2 contactos", "Esta versión es de solo lectura y quedó con UF " + ufStr + ". Para cambiarla, crea una nueva versión.");
+    if (st === "aceptada") B("success", "check-circle", "Aceptada por Gonzalo Cárdenas, Jefe de mantención", "28-10-2026 a las 15:04, con código enviado a su correo. El negocio NEG-0137 pasó a «Firma de contrato».", "Ver negocio", "Línea base de rentabilidad guardada por instalación: venta, costo y margen cotizados.");
+    if (st === "rechazada") B("danger", "x", "Rechazada por Gonzalo Cárdenas el 28-10-2026", "Motivo: Precio · «Necesitamos bajar el valor mensual en un 5 %».");
+    if (st === "vencida") B("warning", "clock", "Venció el 26-10-2026 sin respuesta", "Renovar crea la v4 con la UF del día y una validez nueva.");
+
+    const openSend = () => this.setState({ panel: "enviar", menu: false, pdf: false });
+    const PR = {
+      borrador: { label: "Enviar", icon: "file", go: openSend },
+      bajoMargen: { label: "Pedir aprobación", icon: "user-check", go: () => { this.setState({ st: "porAprobar" }); this.flash("Pedido enviado a Carlos Irigoyen"); } },
+      enviada: { label: "Crear nueva versión", icon: "plus", go: () => { this.setState({ st: "borrador", sent: null }); this.flash("Se creó la v4 como borrador"); } },
+      rechazada: { label: "Crear nueva versión", icon: "plus", go: () => { this.setState({ st: "borrador" }); this.flash("Se creó la v4 como borrador"); } },
+      vencida: { label: "Renovar", icon: "refresh", go: () => { this.setState({ st: "borrador" }); this.flash("Se creó la v4 con la UF del día"); } },
+    };
+    let primary = PR[st] || null;
+
+    const forceBlocks = panel === "enviarBloqueos";
+    const extra = Array.isArray(cond.extra) ? cond.extra : [];
+    const pSum = P.parseNum(cond.pIpc) + P.parseNum(cond.pImo) + extra.reduce((a, x) => a + P.parseNum(x.peso), 0);
+    const condErr = cond.reajuste === "poli" && Math.round(pSum) !== 100;
+    const marginOk = forceBlocks ? false : !under || st === "porAprobar";
+    const bloqueos = [
+      { ok: !forceBlocks, short: "Falta la UF de hoy", action: "Reintentar" },
+      { ok: marginOk, short: showCost ? "Margen 8,7 % bajo el mínimo, sin aprobación" : "El precio necesita aprobación", action: "Pedir aprobación" },
+      { ok: !forceBlocks, short: "Bodega Sur · Guardia nocturno: falta la colación", action: "Completar" },
+      { ok: !condErr, short: "Los pesos del polinomio suman " + P.num(pSum) + " %", action: "Revisar" },
+    ];
+    const diff = {
+      deltas: [{ k: "Venta mensual", v: "+ $ 412.300" }, { k: "Margen", v: "+ 0,6 pts" }, { k: "Pagos únicos", v: "sin cambio" }],
+      rows: [
+        { tipo: "Cambiado", tone: "info", linea: "Kit Starlink · Bodega Sur", cambio: "Rateo 6 meses → 12 meses" },
+        { tipo: "Agregado", tone: "success", linea: "Plan Starlink · Bodega Sur", cambio: "— → $ 54.000 al mes" },
+        { tipo: "Cambiado", tone: "info", linea: "Días de pago", cambio: "30 días → 45 días" },
+        { tipo: "Quitado", tone: "danger", linea: "Detector de metales · Planta Norte", cambio: "$ 3.708 al mes → —" },
+      ],
+      caption: "v2 enviada el 22-10-2026 → v3 borrador",
+    };
+    if (primary && st === "borrador" && condErr) {
+      const why = "No puedes enviar: los pesos del polinomio suman " + P.num(pSum) + " %; deben sumar 100 %.";
+      primary = { ...primary, disabled: true, why, aria: why, tabIdx: 0, tipIn: tipAt(why, true) };
+    }
+    const sendOpen = ["enviar", "enviarBloqueos", "enviarAgente", "focoDrawer"].includes(panel);
+    const menuOpen = S.menu ?? panel === "menu";
+    const pdfOpen = S.pdf ?? panel === "pdf";
+    const ventaMain = money(r.venta), unicoMain = money(r.unico);
+    const cw = w - (device === "desktop" ? 248 : device === "tablet" ? 80 : 0);
+    const wide = !isPhone && cw >= 1000, mid = !isPhone && cw >= 800 && cw < 1000;
+    const narrowTab = !isPhone && !wide && !mid;
+    const tab = S.tab ?? (panel === "condiciones" || panel === "reajuste" ? "cond" : "planilla");
+    const resOpen = S.resOpen ?? false;
+    const mt = margin < min ? ["danger", "Bajo el mínimo"] : margin < min + alertaM ? ["warning", "Cerca del mínimo"] : ["success", "Sobre el mínimo"];
+    return {
+      ...base, tabs: P.tabs, groups: P.groups, q: P.quote, tipOut,
+      ...(() => {
+        const titleTxt = S.title ?? P.quote.title;
+        const titleEditing = S.titleEditing ?? panel === "renombrar";
+        const canT = !locked && !pending;
+        const save = (v) => { const t = String(v || "").trim(); this.setState({ titleEditing: false, titleHover: false, title: t || titleTxt }); if (t && t !== titleTxt) this.flash("Título guardado"); };
+        return {
+          titleTxt, titleEditing, titleNotEditing: !titleEditing, titleRef: this.titleRef, titleLocked: !canT, titleCursor: canT ? "text" : "default",
+          titleHint: canT ? "Renombrar" : "", titleBg: canT && S.titleHover ? "var(--ds-fill)" : "transparent", pencilDisp: canT && (S.titleHover || isPhone) ? "inline-flex" : "none",
+          titleStart: () => canT && this.setState({ titleEditing: true }), titleHoverIn: () => this.setState({ titleHover: true }), titleHoverOut: () => this.setState({ titleHover: false }),
+          titleKey: (ev) => { if (ev.key === "Enter") { ev.preventDefault(); save(ev.target.value); } else if (ev.key === "Escape") { ev.stopPropagation(); this._tCancel = true; this.setState({ titleEditing: false }); } },
+          titleBlur: (ev) => { if (this._tCancel) { this._tCancel = false; return; } save(ev.target.value); },
+        };
+      })(),
+      ...(() => {
+        const isCompare = (S.view ?? (panel === "comparar" ? "comparar" : "cot")) === "comparar";
+        const v2 = r.venta - 412300;
+        return {
+          isCompare, notCompare: !isCompare, closeCompare: () => this.setState({ view: "cot" }), openCompare: () => this.setState({ view: "comparar", hist: false }),
+          verOpts: [{ value: "v1", label: "v1 · enviada 12-10-2026" }, { value: "v2", label: "v2 · enviada 22-10-2026" }, { value: "v3", label: "v3 · borrador" }], selW: { width: 240 },
+          cmpKpis: [
+            { k: "Venta mensual neta", v: money(v2) + " → " + money(r.venta), d: "+ " + money(412300) + " al mes" },
+            ...(showCost ? [{ k: "Margen", v: "9,8 % → " + P.pct(margin), d: "+ 0,6 pts" }] : []),
+            { k: "Pagos únicos", v: money(r.unico), d: "Sin cambio" },
+            { k: "Dotación", v: pl(r.pos, "posición", "posiciones") + " · " + pl(r.pers, "persona", "personas"), d: "Sin cambio" },
+          ],
+          cmpDiff: { a: "v2 · enviada 22-10-2026", b: "v3 · borrador", deltas: [], caption: "4 cambios · la v2 se envió a 2 contactos y se vio 2 veces.", rows: [
+            { tipo: "Cambiado", tone: "info", linea: "Kit Starlink", sec: "Bodega Sur", antes: "Rateo 6 meses · $ 115.000/mes", despues: "Rateo 12 meses · $ 57.500/mes", cambio: "Rateo 6 meses → 12 meses" },
+            { tipo: "Agregado", tone: "success", linea: "Plan Starlink", sec: "Bodega Sur", antes: "—", despues: "$ 54.000/mes", cambio: "— → $ 54.000 al mes" },
+            { tipo: "Cambiado", tone: "info", linea: "Días de pago", sec: "Condiciones", antes: "30 días", despues: "45 días", cambio: "30 días → 45 días" },
+            { tipo: "Quitado", tone: "danger", linea: "Detector de metales", sec: "Planta Norte", antes: "$ 3.708/mes", despues: "—", cambio: "$ 3.708 al mes → —" },
+          ] },
+          histOpen: S.hist ?? panel === "historial", closeHist: () => this.setState({ hist: false }),
+          histItems: [
+            { initials: "AR", who: "Ana Rojas", action: "editó la v3", changes: [{ field: "Rateo Kit Starlink", from: "6 meses", to: "12 meses" }, { field: "Días de pago", from: "30", to: "45" }], when: "29-10-2026 · 10:20" },
+            { agent: true, who: "OPAI", action: "creó la v3 desde la v2 a pedido de Ana Rojas", when: "28-10-2026 · 17:05" },
+            { initials: "AR", who: "Ana Rojas", action: "envió la v2 a 2 contactos · vista 2 veces", when: "22-10-2026 · 11:40" },
+            { initials: "CI", who: "Carlos Irigoyen", action: showCost ? "aprobó el margen de 9,8 % de la v2" : "aprobó el precio de la v2", when: "22-10-2026 · 09:15" },
+            { initials: "AR", who: "Ana Rojas", action: "envió la v1 · reemplazada por la v2", when: "12-10-2026 · 16:02" },
+          ],
+          onMenu: (it) => { this.setState({ menu: false }); if (it.label === "Comparar") this.setState({ view: "comparar" }); if (it.label === "Historial") this.setState({ hist: true }); },
+        };
+      })(),
+      locked, chip: { tone: CH[st][0], label: CH[st][1] }, vistas: EV[2] > 0, vistasTxt: "Vista " + EV[2] + " veces", eventTxt: EV[0], venceColor: EV[1],
+      h1: isPhone ? "20px" : "22px", hdrPad: isPhone ? "4px 16px 16px" : device === "desktop" ? "16px 32px" : "14px 24px", hdrTop: isPhone ? "52px" : "0px",
+      pad: isPhone ? "16px 16px 32px" : device === "desktop" ? "20px 32px 40px" : "20px 24px 32px",
+      linkH: isPhone ? "44px" : "20px", actH: isPhone ? "44px" : "32px",
+      banners, primary: primary || {}, hasPrimary: !!primary,
+      vistaOpts: [{ value: "interna", label: "Vista interna" }, { value: "cliente", label: "Vista cliente" }], vista: cliente ? "cliente" : "interna", setVista: (v) => this.setState({ vista: v }),
+      cliente, interna, docDevice: cw < 800 ? "tablet" : "desktop",
+      resTop: interna && narrowTab, resSide: wide || mid, bodyCols: wide ? "minmax(0,1fr) 340px" : mid ? "minmax(0,1fr) 300px" : "minmax(0,1fr)", asideTop: "140px",
+      resOpen, resChev: resOpen ? "i-chevron-down" : "i-chevron-right", toggleRes: () => this.setState({ resOpen: !resOpen }), resToggleTxt: resOpen ? "Ocultar" : "Ver detalle",
+      barOn: interna && narrowTab, barLeft: device === "tablet" ? "80px" : "0px",
+      ventaAltShort: alt(r.venta), margenTxt: P.pct(margin), margenTone: { tone: mt[0], label: mt[1] },
+      tabItems: [{ id: "planilla", label: "Planilla" }, { id: "cond", label: "Condiciones" }], tab, setTab: (t) => this.setState({ tab: t }), tabPlanilla: tab === "planilla", tabCond: tab === "cond",
+      cols: !showCost ? "16px minmax(0,1fr) 132px" : cw < 1000 ? "16px minmax(0,1fr) 96px 104px 104px" : "16px minmax(0,1fr) 108px 116px 116px", reFirst: panel === "reajuste",
+      editable, handleVis: editable ? "visible" : "hidden", secs, unicos, r, dim, showCost,
+      moneda, setMoneda: (v) => !locked && setCond("moneda", v),
+      ufLine: locked ? "UF congelada " + ufStr + " al " + (st === "vencida" ? "26-09-2026" : st === "enviada" ? "29-10-2026" : "22-10-2026") + " · fijada al enviar" : "UF del día " + ufStr + " al 29-10-2026 · se congela al enviar",
+      ufFix: "UF " + ufStr,
+      ventaMain, ventaAlt: alt(r.venta) + " · neto, sin IVA", unicoMain, unicoAlt: alt(r.unico), costoTxt: P.fmt(r.costo),
+      minV: min, alertaV: alertaM, catGroups, manoObraTxt: P.fmt(r.manoObra),
+      finItems, finTotalTxt: P.fmt(r.finTotal) + " al mes", onFinToggle,
+      onFinEdit: (id, e) => { if (e && e.stopPropagation) e.stopPropagation(); this.openAt("finEdit", id, e, 320, 380, wide || mid ? "left" : undefined); },
+      finPop: !!fEd, fe, closeFin: () => this.setState({ finEdit: null }),
+      onTraceVenta: (e) => (isPhone ? this.setState({ trace: { id: "venta" } }) : this.openAt("trace", "venta", e, 360, 440)),
+      cond, ctxCli: { sueldos: ov, rateos, fin: finP }, onCond: setCond, onCondReset: (k, keys) => this.setState((s) => { const c = { ...cond, ...(s.cond || {}) }; (keys || [k]).forEach((x) => { if (x === "extra") delete c.extra; else c[x] = P.DEFAULT_COND[x]; }); return { cond: c }; }),
+      rateoPop: !!rl, rp, closeRateo: () => this.setState({ rateoPop: null, rateoN: null }),
+      tracePop: !!traceData && !isPhone, traceSheet: !!traceData && isPhone, traceData,
+      traceLeft: (trace && trace.left) + "px", traceTop: (trace && trace.top) + "px", closeTrace: () => this.setState({ trace: null }),
+      tipOn: !!S.tip, tip: S.tip || {},
+      menuOpen, pdfOpen, menuTop: isPhone ? "52px" : "64px", menuRight: isPhone ? "8px" : "24px",
+      pdfTop: isPhone ? "210px" : "64px", pdfRight: isPhone ? "16px" : primary ? "236px" : "76px",
+      openMenu: () => this.setState({ menu: true, pdf: false }), openPdf: () => this.setState({ pdf: true, menu: false }),
+      closeMenus: () => this.setState({ menu: false, pdf: false }),
+      menuItems: [{ icon: "file", label: "Duplicar" }, { icon: "plus", label: "Nueva alternativa" }, { icon: "swap", label: "Comparar" }, { icon: "clock", label: "Historial", meta: "3 versiones" }, { divider: true }, { icon: "trash", label: "Archivar", tone: "danger" }],
+      pdfItems: [{ icon: "file", label: "Cotización simple", meta: "2 págs." }, { icon: "file", label: "Propuesta técnica", meta: "8 págs." }],
+      onPdf: (it) => { this.setState({ pdf: false }); this.flash("Descargando «" + it.label + "» · CPQ-2026-412 v3"); },
+      sendOpen, agente: panel === "enviarAgente", bloqueos, diff, sheetSide: isPhone ? "bottom" : "right",
+      closeSend: () => this.setState({ panel: "ninguno" }),
+      onSend: (p) => { const n = p.dest.length; const canal = { correo: "por correo", enlace: "por enlace copiado", whatsapp: "por WhatsApp" }[p.canal] || ""; this.setState({ panel: "ninguno", st: "enviada", sent: (n === 1 ? p.dest[0] : n + " contactos") + " " + canal }); this.flash(p.seg === "solo" ? "Enviada · el negocio no cambió de etapa" : "Enviada · el negocio pasó a «Propuesta enviada»"); },
+      toast: !!S.toast, toastMsg: S.toast || "", toastBottom: isPhone ? "104px" : narrowTab ? "88px" : "32px",
+    };
+  }
+}
+</script>
+</body>
+</html>

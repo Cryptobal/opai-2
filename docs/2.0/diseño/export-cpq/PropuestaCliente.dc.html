@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="./cpq-data.js"></script>
+<style>body{margin:0;height:100dvh}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<div class="ds" data-theme="{{ theme }}" data-device="{{ device }}" style="position:relative;width:100%;height:100%;overflow:hidden;background:{{ rootBg }}">
+<div style="height:100%;overflow:auto;display:flex;flex-direction:column">
+<sc-if value="{{ publica }}" hint-placeholder-val="{{ true }}">
+<header style="display:flex;align-items:center;gap:10px;padding:{{ barPad }};border-bottom:1px solid var(--ds-border);background:var(--ds-bg);position:sticky;top:0;z-index:2">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.TenantMark" initials="AS" size="{{ 28 }}" hint-size="28px,28px"></x-import>
+<span class="t-label" style="flex:1;min-width:0">Atlas Seguridad SpA</span>
+<span class="t-mono subtle" style="font-size:12px;line-height:16px">CPQ-2026-412 · v3</span>
+</header>
+</sc-if>
+<main style="width:100%;max-width:880px;margin:0 auto;box-sizing:border-box;padding:{{ pad }};display:flex;flex-direction:column;gap:{{ gap }}">
+<sc-if value="{{ preview }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;gap:10px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.TenantMark" initials="AS" size="{{ 28 }}" hint-size="28px,28px"></x-import>
+<span class="t-label" style="flex:1">Atlas Seguridad SpA</span>
+<span class="t-mono subtle" style="font-size:12px">CPQ-2026-412 · v3</span>
+</div>
+</sc-if>
+<sc-if value="{{ isAceptada }}" hint-placeholder-val="{{ false }}">
+<div role="status" style="display:flex;gap:10px;padding:12px;border-radius:var(--radius-md);background:var(--ds-success-muted);color:var(--ds-success-fg);font-size:14px;line-height:20px">
+<span class="ic sm i-check-circle" aria-hidden="true" style="flex:none;margin-top:2px"></span>
+<span style="display:flex;flex-direction:column;gap:2px"><b style="font-weight:600">Aceptaste esta propuesta</b><span>28-10-2026 · 15:04 · Gonzalo Cárdenas, Jefe de mantención. Recibida el 22-10-2026. Atlas Seguridad SpA ya fue notificada.</span></span>
+</div>
+</sc-if>
+<sc-if value="{{ isRechazada }}" hint-placeholder-val="{{ false }}">
+<div role="status" style="display:flex;gap:10px;padding:12px;border-radius:var(--radius-md);background:var(--ds-fill);color:var(--ds-fg);font-size:14px;line-height:20px">
+<span class="ic sm i-info" aria-hidden="true" style="flex:none;margin-top:2px"></span>
+<span style="display:flex;flex-direction:column;gap:2px"><b style="font-weight:600">Rechazaste esta propuesta</b><span class="muted">28-10-2026 · 15:10 · Motivo: {{ motivoTxt }}. Atlas Seguridad SpA ya fue notificada.</span></span>
+</div>
+</sc-if>
+<div style="display:flex;flex-direction:column;gap:6px">
+<span class="t-overline">Propuesta para Logística Andina SpA</span>
+<h1 class="m0" style="font-size:{{ h1 }};line-height:1.2;font-weight:600;letter-spacing:-0.018em;text-wrap:pretty">Seguridad Planta Norte y Bodega Sur</h1>
+<span class="t-body-sm muted t-numeric">Válida hasta 28-11-2026 · inicio 01-12-2026 · 24 meses</span>
+</div>
+
+<section class="card pad" aria-label="Valores" style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-direction:column;gap:2px">
+<span class="t-overline">Total mensual con IVA</span>
+<span class="t-numeric" style="white-space:nowrap;font-size:{{ big }};line-height:1.15;font-weight:600;letter-spacing:-0.02em">{{ m.total }}</span>
+<span class="t-caption t-numeric">{{ m.alt }}</span>
+</div>
+<div style="display:flex;flex-direction:column">
+<div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid var(--ds-border)"><span class="t-body-sm muted">Neto mensual</span><span class="t-mono" style="white-space:nowrap">{{ m.neto }}</span></div>
+<div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid var(--ds-border)"><span class="t-body-sm muted">IVA 19 %</span><span class="t-mono" style="white-space:nowrap">{{ m.iva }}</span></div>
+<div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid var(--ds-border)"><span class="t-body-sm" style="font-weight:500">Total mensual</span><span class="t-mono" style="font-weight:600;white-space:nowrap">{{ m.total }}</span></div>
+<div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid var(--ds-border)"><span style="display:flex;flex-direction:column"><span class="t-body-sm" style="font-weight:500">Pago único</span><span class="t-caption">Habilitación de caseta · neto {{ m.unicoNeto }} + IVA</span></span><span class="t-mono" style="font-weight:600;white-space:nowrap">{{ m.unicoTotal }}</span></div>
+</div>
+<span class="t-caption t-numeric" style="text-wrap:pretty">{{ m.ufNote }}</span>
+</section>
+
+<section aria-label="Servicio" style="display:flex;flex-direction:column;gap:12px">
+<span class="t-label">Servicio</span>
+<div class="card" style="overflow:hidden">
+<sc-for list="{{ secs }}" as="s" hint-placeholder-count="3">
+<div style="display:flex;justify-content:space-between;gap:12px;padding:12px 16px;background:var(--ds-fill);border-bottom:1px solid var(--ds-border)"><span class="t-label">{{ s.name }}</span><span class="t-mono" style="font-weight:600;white-space:nowrap">{{ s.total }}</span></div>
+<sc-for list="{{ s.lines }}" as="l" hint-placeholder-count="2">
+<div style="display:flex;justify-content:space-between;gap:12px;padding:10px 16px;border-bottom:1px solid var(--ds-border)">
+<span style="display:flex;flex-direction:column;min-width:0"><span class="t-body-sm" style="font-weight:500">{{ l.name }}</span><span class="t-caption" style="text-wrap:pretty">{{ l.detail }}</span></span>
+<span style="display:flex;flex-direction:column;align-items:flex-end"><span class="t-mono" style="white-space:nowrap">{{ l.value }}</span><span class="t-caption">{{ l.sub }}</span></span>
+</div>
+</sc-for>
+</sc-for>
+</div>
+<span class="t-caption">Valores netos. El IVA se agrega en el total.</span>
+</section>
+
+<section aria-label="Condiciones" style="display:flex;flex-direction:column;gap:12px">
+<span class="t-label">Condiciones</span>
+<div class="card" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:0 32px;padding:4px 16px">
+<sc-for list="{{ conds }}" as="c" hint-placeholder-count="6">
+<div style="display:flex;justify-content:space-between;gap:16px;padding:10px 0;border-bottom:1px solid var(--ds-border)"><span class="t-body-sm muted">{{ c.label }}</span><span class="t-body-sm" style="text-align:right">{{ c.value }}</span></div>
+</sc-for>
+</div>
+</section>
+
+<sc-if value="{{ deskActions }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;align-items:center;padding:8px 0 24px">
+<sc-if value="{{ preview }}" hint-placeholder-val="{{ false }}"><span class="t-caption" style="margin-right:auto">Vista previa: los botones funcionan en la página del cliente.</span></sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="download" hint-size="150px,40px">Descargar PDF</x-import>
+<sc-if value="{{ canDecide }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" on-click="{{ openRechazar }}" hint-size="100px,40px">Rechazar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="check" on-click="{{ openAceptar }}" hint-size="170px,40px">Aceptar propuesta</x-import>
+</sc-if>
+</div>
+</sc-if>
+<sc-if value="{{ phoneSpacer }}" hint-placeholder-val="{{ false }}"><div style="height:120px;flex:none"></div></sc-if>
+</main>
+</div>
+
+<sc-if value="{{ phoneActions }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:0;right:0;bottom:0;z-index:3;padding:12px 16px max(env(safe-area-inset-bottom),24px);background:color-mix(in srgb,var(--ds-bg) 95%,transparent);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-top:1px solid var(--ds-border);display:flex;flex-direction:column;gap:8px">
+<sc-if value="{{ canDecide }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" size="lg" icon="check" block="{{ true }}" on-click="{{ openAceptar }}" hint-size="100%,48px">Aceptar propuesta</x-import>
+</sc-if>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(0,1fr));gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" size="lg" variant="secondary" icon="download" block="{{ true }}" hint-size="100%,48px">PDF</x-import>
+<sc-if value="{{ canDecide }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" size="lg" variant="secondary" block="{{ true }}" on-click="{{ openRechazar }}" hint-size="100%,48px">Rechazar</x-import>
+</sc-if>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ sAceptar }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Sheet" contained="{{ true }}" side="{{ side }}" title="Aceptar propuesta" description="CPQ-2026-412 · v3 · {{ m.total }} al mes con IVA" actions="{{ aceptarActions }}" on-close="{{ close }}" hint-size="420px,100%">
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Nombre" style="{{ in44 }}" value="{{ f.nombre }}" on-change="{{ on.nombre }}" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="RUT" style="{{ in44 }}" value="{{ f.rut }}" on-change="{{ on.rut }}" placeholder="12.345.678-9" mono="{{ true }}" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Cargo" style="{{ in44 }}" value="{{ f.cargo }}" on-change="{{ on.cargo }}" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Correo" style="{{ in44 }}" value="{{ f.correo }}" on-change="{{ on.correo }}" hint="Te enviaremos un código para confirmar que eres tú." hint-size="100%,90px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ f.acepto }}" on-change="{{ on.acepto }}" label="Acepto los valores y condiciones de esta propuesta" error="{{ aceptoErr }}" hint-size="100%,56px"></x-import>
+</div>
+</x-import>
+</sc-if>
+<sc-if value="{{ sCodigo }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Sheet" contained="{{ true }}" side="{{ side }}" title="Ingresa el código" description="Lo enviamos a g•••••••@logandina.cl · vence en 10 minutos" actions="{{ codigoActions }}" on-close="{{ close }}" hint-size="420px,100%">
+<div style="display:flex;flex-direction:column;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Código de 6 dígitos" value="{{ f.codigo }}" on-change="{{ on.codigo }}" placeholder="000000" mono="{{ true }}" input-mode="numeric" input-style="{{ codeStyle }}" error="{{ codigoErr }}" hint-size="100%,80px"></x-import>
+<button type="button" class="btn btn-ghost" style="align-self:flex-start;height:44px;padding:0 8px;margin-left:-8px;color:var(--ds-accent)">Reenviar código</button>
+</div>
+</x-import>
+</sc-if>
+<sc-if value="{{ sRechazar }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Sheet" contained="{{ true }}" side="{{ side }}" title="Rechazar propuesta" description="Cuéntanos por qué; ayuda a Atlas Seguridad SpA a mejorar su oferta." actions="{{ rechazarActions }}" on-close="{{ close }}" hint-size="420px,100%">
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Motivo" value="{{ f.motivo }}" options="{{ motivos }}" on-change="{{ on.motivo }}" placeholder="Elige un motivo" error="{{ motivoErr }}" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Comentario" value="{{ f.comentario }}" on-change="{{ on.comentario }}" rows="{{ 3 }}" hint="Opcional." hint-size="100%,130px"></x-import>
+</div>
+</x-import>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:900},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;modo&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;publica&quot;,&quot;preview&quot;],&quot;default&quot;:&quot;publica&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;abierta&quot;,&quot;aceptar&quot;,&quot;codigo&quot;,&quot;aceptada&quot;,&quot;rechazar&quot;,&quot;rechazada&quot;],&quot;default&quot;:&quot;abierta&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;moneda&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;UF&quot;,&quot;CLP&quot;],&quot;default&quot;:&quot;UF&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = {};
+  componentDidMount() { this._t = setInterval(() => { if (window.CPQ && window.OPAI20DesignSystem_44e4d7 && window.OPAI20DesignSystem_44e4d7.Sheet) { clearInterval(this._t); this.forceUpdate(); } }, 60); }
+  componentWillUnmount() { clearInterval(this._t); }
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const P = window.CPQ;
+    const device = this.props.device ?? "desktop";
+    const theme = this.props.theme ?? "light";
+    const modo = this.props.modo ?? "publica";
+    const isPhone = device === "phone";
+    const preview = modo === "preview", publica = !preview;
+    const base = { device, theme, publica, preview, rootBg: preview ? "transparent" : "var(--ds-bg)" };
+    if (!P || !NS.Sheet) return base;
+    const S = this.state;
+    const st = S.st ?? this.props.estado ?? "abierta";
+    const moneda = this.props.moneda ?? "UF";
+    const cfg0 = P.getConfig();
+    const ctxIn = this.props.ctx;
+    const cond = { ...P.DEFAULT_COND, dias: "45", reajuste: "poli", ...(this.props.cond || {}) };
+    const ctx = ctxIn || { fin: { ...cfg0.fin, cf: { ...cfg0.fin.cf, dias: P.parseNum(cond.dias) } } };
+    const r = P.compute(this.props.margin ?? 0.104, ctx);
+    const U = P.UF.valor;
+    const money = (clp) => (moneda === "UF" ? P.uf(clp / U) : P.fmt(clp));
+    const alt = (clp) => (moneda === "UF" ? P.fmt(clp) : P.uf(clp / U));
+    const iva = r.venta * P.IVA, tot = r.venta + iva;
+    const secs = r.secs.map((s) => {
+      const lines = s.lines.filter((l) => !l.group && l.visible && !l.disabled).map((l) => ({
+        name: l.name,
+        detail: l.kind === "puesto" ? l.patron + " · " + l.horario + " · " + l.dias + " · " + l.pos + (l.pos === 1 ? " posición" : " posiciones") : l.unico ? "Pago único" : l.qtyLabel,
+        value: money(l.venta), sub: l.unico ? "pago único" : "al mes",
+      }));
+      return { name: s.name, total: money(s.venta), lines };
+    });
+    const f = { nombre: "Gonzalo Cárdenas", rut: "", cargo: "Jefe de mantención", correo: "gcardenas@logandina.cl", acepto: false, codigo: "", motivo: null, comentario: "", ...(S.f || {}) };
+    const on = {}; Object.keys(f).forEach((k) => (on[k] = (v) => this.setState((s) => ({ f: { ...(s.f || {}), [k]: v } }))));
+    const close = () => this.setState({ st: "abierta", tried: false });
+    const go = (x) => () => !preview && this.setState({ st: x, tried: false });
+    const btn = (p, t) => h(NS.Button, p, t);
+    const MOT = ["Precio", "Elegimos otra empresa", "Cambió la necesidad", "Sin presupuesto", "Otro"];
+    const decided = st === "aceptada" || st === "rechazada";
+    return {
+      ...base, isPhone,
+      barPad: isPhone ? "10px 16px" : "14px 32px", pad: isPhone ? "20px 16px 24px" : preview ? "24px 32px 8px" : "40px 32px 24px",
+      gap: isPhone ? "24px" : "32px", h1: isPhone ? "22px" : "28px", big: isPhone ? "28px" : "36px",
+      m: {
+        total: money(tot), neto: money(r.venta), iva: money(iva), alt: alt(tot) + " · neto " + money(r.venta) + " + IVA",
+        unicoNeto: money(r.unico), unicoTotal: money(r.unico * (1 + P.IVA)),
+        ufNote: moneda === "UF" ? "Valores en UF. UF $ 40.215,37 al 29-10-2026. Se factura en pesos al valor de la UF del día de facturación." : "Valores en pesos chilenos. Se reajustan según las condiciones.",
+      },
+      secs,
+      conds: (() => {
+        const FP = { transferencia: "Transferencia", valevista: "Vale vista", cheque: "Cheque" };
+        const RE = { ninguno: "Sin reajuste", ipc: "IPC", imo: "IMO", poli: "Polinómico" };
+        const re = RE[cond.reajuste] + (cond.reajuste === "ninguno" ? "" : " " + cond.frecuencia) + (cond.reajuste === "poli" ? " · IPC " + cond.pIpc + " % · IMO " + cond.pImo + " %" + (Array.isArray(cond.extra) ? cond.extra.map((x) => " · " + (x.nombre || "Índice") + " " + x.peso + " %").join("") : "") : "") + (cond.incremento ? " · + " + cond.incremento + " % real" : "");
+        return [
+          { label: "Forma de pago", value: (FP[cond.formaPago] || cond.formaPago) + " a " + cond.dias + " días" }, { label: "Duración", value: cond.duracion + " meses" }, { label: "Inicio", value: cond.inicio },
+          { label: "Moneda", value: moneda === "UF" ? "UF" : "Pesos chilenos" }, { label: "Reajuste", value: re }, { label: "Validez", value: cond.validez + " días · hasta el 28-11-2026" },
+        ];
+      })(),
+      isAceptada: st === "aceptada", isRechazada: st === "rechazada", motivoTxt: f.motivo || "Precio",
+      canDecide: !decided, deskActions: !isPhone || preview, phoneActions: isPhone && publica, phoneSpacer: isPhone && publica,
+      openAceptar: go("aceptar"), openRechazar: go("rechazar"),
+      side: isPhone ? "bottom" : "right", close,
+      sAceptar: st === "aceptar", sCodigo: st === "codigo", sRechazar: st === "rechazar",
+      in44: { minHeight: 44 }, f, on, codeStyle: { fontSize: 24, letterSpacing: "0.3em", textAlign: "center" },
+      aceptoErr: S.tried && !f.acepto ? "Marca la casilla para continuar." : undefined,
+      codigoErr: S.tried && String(f.codigo).replace(/\D/g, "").length !== 6 ? "El código tiene 6 dígitos." : undefined,
+      motivoErr: S.tried && !f.motivo ? "Elige un motivo." : undefined,
+      motivos: MOT.map((x) => ({ value: x, label: x })),
+      aceptarActions: [btn({ key: "c", variant: "secondary", onClick: close }, "Cancelar"), btn({ key: "o", onClick: () => (f.acepto ? this.setState({ st: "codigo", tried: false }) : this.setState({ tried: true })) }, "Enviar código")],
+      codigoActions: [btn({ key: "c", variant: "secondary", onClick: () => this.setState({ st: "aceptar" }) }, "Volver"), btn({ key: "o", icon: "check", onClick: () => (String(f.codigo).replace(/\D/g, "").length === 6 ? this.setState({ st: "aceptada", tried: false }) : this.setState({ tried: true })) }, "Confirmar aceptación")],
+      rechazarActions: [btn({ key: "c", variant: "secondary", onClick: close }, "Cancelar"), btn({ key: "o", variant: "destructive", onClick: () => (f.motivo ? this.setState({ st: "rechazada", tried: false }) : this.setState({ tried: true })) }, "Rechazar propuesta")],
+    };
+  }
+}
+</script>
+</body>
+</html>

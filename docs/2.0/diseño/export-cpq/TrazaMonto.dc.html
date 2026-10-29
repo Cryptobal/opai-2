@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+</helmet>
+<div style="display:flex;flex-direction:column;gap:12px;min-width:0">
+<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px">
+<div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+<span class="t-overline">¿De dónde sale?</span>
+<span class="t-label" style="text-wrap:pretty">{{ t.title }}</span>
+</div>
+<sc-if value="{{ hasClose }}" hint-placeholder-val="{{ true }}">
+<button type="button" class="icon-btn" aria-label="Cerrar" onClick="{{ onClose }}" style="width:32px;height:32px;margin:-4px -4px 0 0"><span class="ic sm i-x" aria-hidden="true"></span></button>
+</sc-if>
+</div>
+<div class="t-body-sm" style="padding:10px 12px;border-radius:var(--radius-md);background:var(--ds-fill);color:var(--ds-fg);text-wrap:pretty">{{ t.formula }}</div>
+<div style="display:flex;flex-direction:column">
+<sc-for list="{{ t.vars }}" as="v" hint-placeholder-count="4">
+<div style="display:flex;flex-direction:column;gap:2px;padding:8px 0;border-bottom:1px solid var(--ds-border)">
+<div style="display:flex;justify-content:space-between;gap:12px;align-items:baseline">
+<span class="t-body-sm">{{ v.k }}</span>
+<span class="t-mono" style="white-space:nowrap">{{ v.v }}</span>
+</div>
+<span class="t-caption" style="text-wrap:pretty">{{ v.src }}</span>
+</div>
+</sc-for>
+</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<sc-for list="{{ t.result }}" as="r" hint-placeholder-count="2">
+<div style="display:flex;flex-direction:column;gap:2px">
+<div style="display:flex;justify-content:space-between;gap:12px;align-items:baseline">
+<span class="t-label">{{ r.k }}</span>
+<span class="t-mono" style="font-weight:600;white-space:nowrap">{{ r.v }}</span>
+</div>
+<span class="t-caption">{{ r.sub }}</span>
+</div>
+</sc-for>
+</div>
+<sc-if value="{{ hasAll }}" hint-placeholder-val="{{ true }}">
+<button type="button" class="btn btn-ghost" onClick="{{ onAll }}" style="align-self:flex-start;height:32px;padding:0 8px;margin-left:-8px;color:var(--ds-accent)">Ver todo el cálculo<span class="ic sm i-chevron-right" aria-hidden="true"></span></button>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:360,&quot;height&quot;:460},&quot;trace&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;{title:string,formula:string,vars:{k:string,v:string,src:string}[],result:{k:string,v:string,sub?:string}[]}&quot;},&quot;onClose&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;},&quot;onAll&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const t = this.props.trace ?? {
+      title: "Costo mensual · Guardia 24/7",
+      formula: "(sueldo × factor empleador + colación) × posiciones × personas × (1 + feriados)",
+      vars: [{ k: "Sueldo bruto", v: "$ 890.000", src: "Referencia del cargo · vigente desde 01-07-2026" }],
+      result: [{ k: "Costo mensual", v: "$ 10.062.976" }],
+    };
+    return { t, onClose: this.props.onClose, onAll: this.props.onAll, hasClose: !!this.props.onClose, hasAll: !!this.props.onAll };
+  }
+}
+</script>
+</body>
+</html>
