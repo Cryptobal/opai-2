@@ -1,9 +1,14 @@
 import { expect, type Page, test } from "@playwright/test";
+import { ocultarIndicadorDev } from "./indicador-dev";
 import { codigoTotp } from "./sesion";
 
 const email = process.env["E2E_EMAIL"] ?? "carlos.irigoyen@opai.cl";
 const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD"];
 const esperar = expect.configure({ timeout: 30_000 });
+
+// Solo dev (CI levanta `next dev`): el indicador de Next tapa «Guardar» en la hoja del teléfono y el
+// «Menú de usuario» al pie de la barra lateral, e intercepta el clic.
+test.beforeEach(({ page }) => ocultarIndicadorDev(page));
 
 async function entrar(page: Page, ruta = "/login") {
   if (!password) throw new Error("Falta E2E_PASSWORD o SEED_OWNER_PASSWORD");

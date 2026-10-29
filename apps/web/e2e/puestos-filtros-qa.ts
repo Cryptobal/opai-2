@@ -19,8 +19,12 @@ export async function comprobarFiltrosPuestos(page: Page, id: string, proyecto: 
   await entrar(page);
   await page.goto("/instalaciones?q=Planta&estado=activa");
   await page.getByRole("link", { name: /Planta Quilicura/i }).first().click();
-  await page.getByRole("link", { name: /Puestos/i }).first().click();
-  await expect(page).toHaveURL(new RegExp(`/instalaciones/${id}/puestos`));
+  // En dev la ficha puede volver a pintarse mientras compila: si el clic cae en ese momento no navega,
+  // así que se reintenta hasta llegar a la pestaña (CAR-60).
+  await expect(async () => {
+    await page.getByRole("link", { name: /Puestos/i }).first().click({ timeout: 2_000 });
+    await expect(page).toHaveURL(new RegExp(`/instalaciones/${id}/puestos`), { timeout: 2_000 });
+  }).toPass({ timeout: 30_000 });
   await expect(page).toHaveURL(/estado=activa/);
   const detalle = page.getByRole("region", { name: "Detalle" });
   const buscador = detalle.getByPlaceholder("Nombre del puesto");
@@ -34,6 +38,9 @@ export async function comprobarFiltrosPuestos(page: Page, id: string, proyecto: 
     await expect(buscador).toBeFocused({ timeout: 1_000 });
   }).toPass();
   const lista = page.getByRole("region", { name: /Lista de instalaciones/i });
+  // Los chips de la lista (Cuenta, Estado, Región) se montan tras hidratar: se espera a que estén para
+  // que la foto «antes» no difiera de la de «después» solo por eso (CAR-60).
+  if (proyecto !== "telefono") await expect(lista.getByText("Región", { exact: true })).toBeVisible();
   const antes = proyecto === "telefono" ? "" : await lista.innerText();
   await buscador.fill("Guardia posición 1");
   await expect(page).toHaveURL(/pq=Guardia/);
