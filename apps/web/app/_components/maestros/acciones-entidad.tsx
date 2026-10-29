@@ -6,11 +6,14 @@ import { useState } from "react";
 
 import { avisar, type ItemMenu, Menu } from "@opai/ds";
 
+import { useBajoLg, usePinFicha } from "../pin-ficha-contexto";
 import { useCapacidad } from "../use-capacidad";
 import type { Confirmacion } from "./dialogo-confirmar";
 import { useParametros } from "./use-url";
 
-const DialogoConfirmar = dynamic(() => import("./dialogo-confirmar").then((m) => m.DialogoConfirmar));
+const DialogoConfirmar = dynamic(() =>
+  import("./dialogo-confirmar").then((m) => m.DialogoConfirmar),
+);
 
 /** Acción del menú ⋯ de una ficha: abrir una hoja por URL o ejecutar una capacidad. */
 export type AccionEntidad = {
@@ -36,6 +39,8 @@ export function AccionesEntidad({
   const { fijar } = useParametros();
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const [confirmando, setConfirmando] = useState<AccionEntidad | null>(null);
+  const pin = usePinFicha();
+  const bajoLg = useBajoLg();
   async function correr(a: AccionEntidad, motivo?: string) {
     if (!a.capacidad) return;
     const r = await ejecutar(a.capacidad.id, {
@@ -58,6 +63,17 @@ export function AccionesEntidad({
       else void correr(a);
     },
   }));
+  // Bajo 1024 px «Fijar» deja la cabecera y va aquí, tras la primera acción (CAR-65): así no cae bajo
+  // el encabezado de un grupo («Cambiar estado») ni junto a lo destructivo.
+  if (pin && bajoLg) {
+    items.splice(Math.min(1, items.length), 0, {
+      id: "fijar-ficha",
+      etiqueta: pin.fijado ? "Desfijar" : "Fijar",
+      onSelect: pin.onFijar,
+    });
+  }
+  // Sin acciones (p. ej. un cargo de solo lectura) y sin «Fijar», no hay menú que mostrar.
+  if (items.length === 0) return null;
   return (
     <>
       <Menu
