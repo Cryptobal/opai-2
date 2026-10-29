@@ -183,6 +183,14 @@ export interface Capacidad<I extends z.ZodType = z.ZodType, O extends z.ZodType 
   interna?: boolean;
   /** No exige tenant actual (`core.me`, plataforma, flujos de invitación). */
   sinTenant?: boolean;
+  /**
+   * Lectura que no consulta la base (catálogo en memoria, p. ej. `core.config.schema`): el handler
+   * corre sin abrir la transacción de tenant de `enLectura`, para no pedir ni retener una conexión
+   * del pool sin motivo (B1, P2028). Si pese a todo tocara `ctx.db`, cada operación abriría su propia
+   * transacción con el tenant fijado (misma RLS); por eso solo se marca en lecturas sin base. Solo
+   * aplica a `efecto: "lectura"` sin `auditarLectura`.
+   */
+  sinDb?: boolean;
   /** Campos del input que nunca se guardan en auditoría ni en aprobaciones (secretos). */
   sensibles?: readonly string[];
   /** Identificadores revelados por una lectura; nunca contenido personal ni input sin validar. */

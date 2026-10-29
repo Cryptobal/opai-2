@@ -1,32 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 
 import type { LinkComponent } from "@opai/ds";
 
 import { EstadoEnlace } from "./estado-enlace";
 
 /**
- * Enlace del índice/riel de Configuración. Precarga por intención —al pasar el cursor, tocar o
- * enfocar—, nunca al verse: el índice tiene ~15 secciones y se repinta en cada página de
- * `/configuracion/*`, así que la precarga por defecto de Next disparaba un render completo (y su
- * ráfaga de consultas a Neon) de cada sección al aterrizar, agotando el pool (P2028 del PR #134, B1).
- * Mismo criterio que `LinkMenu`, pero con `prefetch={false}` hasta la intención para cortar también
- * la precarga parcial; el esqueleto lo pone cada sección (`PaginaConfig`), así que no va aquí.
+ * Enlace del índice/riel de Configuración, con la precarga desactivada (`prefetch={false}`). El
+ * índice tiene ~15 secciones y se repinta en cada página de `/configuracion/*`; cada sección es
+ * dinámica (sesión, tenant y capacidades), así que un prefetch —aunque fuera por intención— hacía
+ * un render completo de la sección en el servidor y su ráfaga de capacidades contra Neon. Al pasar
+ * el cursor por el riel se precargaban varias secciones que nadie abrió (los picos de
+ * `/configuracion/cumplimiento/retencion` y `/configuracion/marca` del QA en vivo del #135), que
+ * agotaban el pool y disparaban P2028 (B1, 4.º ajuste). No hay esqueleto estático útil que precargar
+ * aquí; la respuesta inmediata al clic la da `EstadoEnlace` (marca el riel y el título de destino).
  */
 export const LinkIndice: LinkComponent = ({ href, className, children, ...rest }) => {
-  const [intencion, setIntencion] = useState(false);
   return (
-    <Link
-      href={href}
-      className={className}
-      prefetch={intencion}
-      onMouseEnter={() => setIntencion(true)}
-      onTouchStart={() => setIntencion(true)}
-      onFocus={() => setIntencion(true)}
-      {...rest}
-    >
+    <Link href={href} className={className} prefetch={false} {...rest}>
       {children}
       <EstadoEnlace href={href} />
     </Link>
