@@ -23,10 +23,11 @@ export function ResumenInstalacion({ i }: { i: InstalacionDetalle }) {
           </EnlaceBotonHoja>
         }
       >
-        {/* Como en main (lado a lado desde 768 px), salvo en celular apaisado (menos de 1024 px de ancho y hasta
-            500 px de alto), donde el mapa queda sobre el texto para que no se parta por letras (CAR-6). */}
-        <div className="grid gap-4 md:[@media(min-height:501px)]:grid-cols-[minmax(0,1fr)_minmax(0,280px)] md:[@media(min-height:501px)]:items-start lg:grid-cols-[minmax(0,1fr)_minmax(0,280px)] lg:items-start">
-          <div className="md:[@media(min-height:501px)]:order-2 lg:order-2">{mapa}</div>
+        {/* Lado a lado en iPad vertical (768–1023 px, ficha de un solo panel) y desde 1280 px; una sola
+            columna en celular apaisado (hasta 500 px de alto) y de 1024 a 1279 px, donde la lista deja
+            la ficha en unos 400 px y el texto se partiría por letras (CAR-6, CAR-64). */}
+        <div className="grid gap-4 md:[@media(min-height:501px)]:grid-cols-[minmax(0,1fr)_minmax(0,280px)] md:[@media(min-height:501px)]:items-start lg:[@media(min-height:501px)]:grid-cols-1 xl:[@media(min-height:501px)]:grid-cols-[minmax(0,1fr)_minmax(0,280px)]">
+          <div className="md:[@media(min-height:501px)]:order-2 lg:[@media(min-height:501px)]:order-none xl:[@media(min-height:501px)]:order-2">{mapa}</div>
           <ParesGrid
             unaColumna
             items={[

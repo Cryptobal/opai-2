@@ -98,10 +98,11 @@ type AppBarProps = ComunesBarra & {
 
 /**
  * iPad y desktop: título (o migas "‹ Cuentas / Logística Andina") a la izquierda y un grupo fijo al
- * final con la caja de búsqueda ⌘K y la campana; el usuario va aquí en iPad y al pie de la barra
- * lateral en desktop (ShellTablet y ShellDesktop, ADR-050). 60 px. El grupo fijo mantiene tamaño y posición idénticos
- * entre vistas (CAR-12): la acción principal de la página vive en el patrón; si una ficha o un
- * formulario necesita acciones en la cabecera, van a la izquierda del grupo fijo, nunca a su derecha.
+ * final con la búsqueda ⌘K y la campana; la búsqueda es un ícono bajo 1024 px y la caja completa desde
+ * la barra lateral. El usuario va aquí en iPad y al pie de la barra lateral en desktop (ShellTablet y
+ * ShellDesktop, ADR-050). 60 px. El grupo fijo mantiene tamaño y posición idénticos entre vistas
+ * (CAR-12): la acción principal de la página vive en el patrón; si una ficha o un formulario necesita
+ * acciones en la cabecera, van a la izquierda del grupo fijo, nunca a su derecha.
  */
 export function AppBar(props: AppBarProps) {
   const { titulo, insignia, acciones, usuario, menuUsuario, campana, onBuscar } = props;
@@ -128,11 +129,11 @@ export function AppBar(props: AppBarProps) {
             type="button"
             onClick={onBuscar}
             aria-label="Buscar o ir a"
-            className="flex h-11 w-[280px] min-w-0 items-center gap-2 rounded-md border border-border bg-surface pr-2 pl-3 text-base text-fg-subtle outline-none hover:border-border-strong focus-visible:outline-2 focus-visible:outline-focus xl:h-9 xl:w-80"
+            className="flex size-11 flex-none items-center justify-center rounded-md text-fg-muted outline-none hover:bg-fill focus-visible:outline-2 focus-visible:outline-focus lg:w-60 lg:min-w-0 lg:justify-start lg:gap-2 lg:border lg:border-border lg:bg-surface lg:pr-2 lg:pl-3 lg:text-base lg:text-fg-subtle lg:hover:border-border-strong lg:hover:bg-surface xl:h-9 xl:w-80"
           >
-            <Search className="size-4 flex-none" aria-hidden />
-            <span className="flex-1 truncate text-left xl:hidden">
-              Buscar personas, clientes, folios
+            <Search className="size-5 flex-none lg:size-4" aria-hidden />
+            <span className="hidden flex-1 truncate text-left lg:inline xl:hidden">
+              Buscar o ir a…
             </span>
             <span className="hidden flex-1 text-left xl:inline">Buscar</span>
             <AtajoBusqueda className="hidden xl:inline-flex" />

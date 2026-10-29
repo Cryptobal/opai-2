@@ -6,11 +6,14 @@ import { useState } from "react";
 
 import { avisar, type ItemMenu, Menu } from "@opai/ds";
 
+import { useFijarEnMenu } from "../fijar-ficha";
 import { useCapacidad } from "../use-capacidad";
 import type { Confirmacion } from "./dialogo-confirmar";
 import { useParametros } from "./use-url";
 
-const DialogoConfirmar = dynamic(() => import("./dialogo-confirmar").then((m) => m.DialogoConfirmar));
+const DialogoConfirmar = dynamic(() =>
+  import("./dialogo-confirmar").then((m) => m.DialogoConfirmar),
+);
 
 /** Acción del menú ⋯ de una ficha: abrir una hoja por URL o ejecutar una capacidad. */
 export type AccionEntidad = {
@@ -36,6 +39,7 @@ export function AccionesEntidad({
   const { fijar } = useParametros();
   const { ejecutar, pendiente, error } = useCapacidad("erp");
   const [confirmando, setConfirmando] = useState<AccionEntidad | null>(null);
+  const fijarFicha = useFijarEnMenu();
   async function correr(a: AccionEntidad, motivo?: string) {
     if (!a.capacidad) return;
     const r = await ejecutar(a.capacidad.id, {
@@ -58,6 +62,16 @@ export function AccionesEntidad({
       else void correr(a);
     },
   }));
+  // Bajo 1024 px «Fijar» no cabe en la cabecera: pasa a este menú, antes de las acciones destructivas.
+  if (fijarFicha) {
+    const pin: ItemMenu = {
+      id: "fijar",
+      etiqueta: fijarFicha.fijado ? "Desfijar" : "Fijar",
+      onSelect: fijarFicha.onFijar,
+    };
+    const primeraPeligrosa = items.findIndex((i) => i.peligro);
+    items.splice(primeraPeligrosa < 0 ? items.length : primeraPeligrosa, 0, pin);
+  }
   return (
     <>
       <Menu
