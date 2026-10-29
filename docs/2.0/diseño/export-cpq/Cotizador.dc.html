@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="./cpq-data.js"></script>
+<style>body{margin:0;height:100dvh}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<div class="ds" data-theme="{{ theme }}" ref="{{ rootRef }}" style="position:relative;width:100%;height:100%;overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="cot" app-bar="{{ appBar }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" notifications="{{ 3 }}" hide-top-bar="{{ isPhone }}" width="100%" height="100%" hint-size="100%,100%">
+
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div class="topbar" style="padding-left:4px;position:sticky;top:0">
+<a href="#" class="btn btn-ghost" style="height:44px;padding:0 8px 0 4px;gap:2px;color:var(--ds-fg-muted)"><span class="ic i-chevron-left" aria-hidden="true"></span>Cotizaciones</a>
+<span style="flex:1"></span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="bot" label="Preguntar a OPAI" hint-size="44px,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="more" label="Más acciones" hint-size="44px,44px"></x-import>
+</div>
+<div style="display:flex;flex-direction:column;gap:16px;padding:4px 16px 24px">
+<div style="display:flex;flex-direction:column;gap:4px">
+<span class="t-mono subtle" style="font-size:12px;line-height:16px">{{ codeLine }}</span>
+<h1 class="t-heading m0" style="text-wrap:pretty">{{ q.title }}</h1>
+<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:4px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ badge.tone }}" hint-size="80px,22px">{{ badge.label }}</x-import>
+<span class="t-body-sm muted">{{ q.cuenta }} · vence {{ q.vence }}</span>
+</div>
+</div>
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<div class="card pad" style="display:flex;flex-direction:column;gap:12px">
+<span class="skel" style="width:96px;height:14px"></span><span class="skel" style="width:180px;height:30px"></span><span class="skel" style="width:100%;height:6px"></span>
+</div>
+<div class="card" style="overflow:hidden">
+<sc-for list="{{ skelSecs }}" as="k" hint-placeholder-count="3">
+<div style="display:flex;justify-content:space-between;gap:12px;padding:16px;border-bottom:1px solid var(--ds-border)"><span class="skel" style="width:120px;height:16px"></span><span class="skel" style="width:90px;height:16px"></span></div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar la cotización" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="CPQ-503 · 7f3a2c" hint-size="100%,360px"></x-import>
+</sc-if>
+<sc-if value="{{ isReady }}" hint-placeholder-val="{{ true }}">
+<sc-for list="{{ alerts }}" as="a" hint-placeholder-count="0">
+<div role="status" style="display:flex;gap:10px;padding:12px;border-radius:var(--radius-md);background:{{ a.bg }};color:{{ a.fg }}">
+<span class="ic sm {{ a.icon }}" aria-hidden="true" style="flex:none;margin-top:2px"></span>
+<span style="display:flex;flex-direction:column;gap:2px;font-size:14px;line-height:20px;min-width:0"><b style="font-weight:600">{{ a.title }}</b><span style="text-wrap:pretty">{{ a.text }}</span></span>
+</div>
+</sc-for>
+<div class="card pad" style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-direction:column;gap:2px">
+<span class="t-overline">Venta mensual</span>
+<button type="button" onClick="{{ onTraceVenta }}" style="all:unset;cursor:pointer;align-self:flex-start;font-size:28px;line-height:34px;font-weight:600;letter-spacing:-0.018em;font-variant-numeric:tabular-nums;text-decoration:underline dotted var(--ds-border-strong);text-underline-offset:6px;transition:opacity 200ms var(--ds-ease);opacity:{{ dim }}">{{ ventaTxt }}</button>
+<span class="t-caption">{{ ventaUF }} · neto, sin IVA</span>
+</div>
+<sc-if value="{{ showCost }}" hint-placeholder-val="{{ true }}">
+<dc-import name="SemaforoMargen" margen="{{ r.margin }}" minimo="{{ minV }}" alerta="{{ alertaV }}" size="sm" hint-size="100%,84px"></dc-import>
+<div style="border-top:1px solid var(--ds-border);padding-top:8px">
+<dc-import name="ResumenCategorias" groups="{{ catGroups }}" mano-obra-txt="{{ manoObraTxt }}" hint-size="100%,360px"></dc-import>
+</div>
+</sc-if>
+<div style="display:flex;flex-direction:column;border-top:1px solid var(--ds-border);padding-top:8px">
+<div style="display:flex;justify-content:space-between;padding:6px 0"><span class="t-body-sm muted">Dotación</span><span class="t-body-sm t-numeric">{{ dotacion }}</span></div>
+<div style="display:flex;justify-content:space-between;padding:6px 0"><span class="t-body-sm muted">Pagos únicos</span><span class="t-body-sm t-numeric">{{ unicoTxt }}</span></div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<sc-if value="{{ canApprove }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" size="lg" icon="check" block="{{ true }}" hint-size="100%,48px">Aprobar</x-import>
+</sc-if>
+<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" size="lg" variant="secondary" icon="swap" block="{{ true }}" hint-size="100%,48px">Comparar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" size="lg" variant="secondary" icon="bot" block="{{ true }}" hint-size="100%,48px">Preguntar a OPAI</x-import>
+</div>
+<span class="t-caption" style="display:flex;align-items:center;gap:6px"><span class="ic sm i-info" aria-hidden="true"></span>Para editar, usa iPad o escritorio.</span>
+</div>
+<sc-if value="{{ showCost }}" hint-placeholder-val="{{ true }}">
+<div class="card pad">
+<dc-import name="InstrumentosFinancieros" items="{{ finItems }}" editable="{{ false }}" total-txt="{{ finTotalTxt }}" on-trace="{{ onFinTrace }}" hint-size="100%,200px"></dc-import>
+</div>
+</sc-if>
+<div class="card" style="overflow:hidden">
+<sc-for list="{{ secs }}" as="s" hint-placeholder-count="3">
+<div style="border-bottom:1px solid var(--ds-border)">
+<button type="button" onClick="{{ s.toggle }}" aria-expanded="{{ s.open }}" style="all:unset;box-sizing:border-box;width:100%;min-height:56px;display:flex;align-items:center;gap:8px;padding:10px 12px 10px 8px;cursor:pointer">
+<span class="ic sm {{ s.chev }} subtle" aria-hidden="true" style="flex:none"></span>
+<span style="display:flex;flex-direction:column;flex:1;min-width:0"><span class="t-label">{{ s.name }}</span><span class="t-caption">{{ s.countTxt }}</span></span>
+<span class="t-mono" style="font-weight:600;transition:opacity 200ms var(--ds-ease);opacity:{{ dim }}">{{ s.ventaTxt }}</span>
+</button>
+<sc-if value="{{ s.open }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;padding:0 12px 8px 32px">
+<sc-if value="{{ s.isEmpty }}" hint-placeholder-val="{{ false }}">
+<span class="t-body-sm muted" style="padding:10px 0;border-top:1px solid var(--ds-border)">Sin líneas todavía.</span>
+</sc-if>
+<sc-for list="{{ s.lines }}" as="l" hint-placeholder-count="2">
+<div style="display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--ds-border);opacity:{{ l.op }}">
+<span style="display:flex;flex-direction:column;gap:2px;flex:1;min-width:0"><span class="t-body-sm" style="font-weight:500">{{ l.name }}</span><span class="t-caption" style="text-wrap:pretty">{{ l.detail }}</span><span class="t-caption">{{ l.flagTxt }}</span></span>
+<button type="button" onClick="{{ l.onVenta }}" style="all:unset;cursor:pointer;min-height:44px;display:flex;flex-direction:column;align-items:flex-end;justify-content:center"><span class="t-mono" style="text-decoration:underline dotted var(--ds-border-strong);text-underline-offset:4px">{{ l.ventaTxt }}</span><span class="t-caption">{{ l.ventaSub }}</span></button>
+</div>
+</sc-for>
+</div>
+</sc-if>
+</div>
+</sc-for>
+</div>
+<div class="card pad" style="display:flex;flex-direction:column;gap:8px">
+<span class="t-label">Condiciones comerciales</span>
+<sc-for list="{{ condPhone }}" as="c" hint-placeholder-count="4">
+<div style="display:flex;flex-direction:column;padding:6px 0;border-top:1px solid var(--ds-border)"><span class="t-caption">{{ c.label }}</span><span class="t-body-sm">{{ c.value }}</span></div>
+</sc-for>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ tabBar }}" hint-placeholder-val="{{ false }}">
+<div style="position:sticky;top:0;z-index:4;background:var(--ds-bg);border-bottom:1px solid var(--ds-border);padding:12px 24px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;flex-wrap:wrap;align-items:center;gap:12px 24px">
+<div style="display:flex;flex-direction:column;min-width:0">
+<span class="t-overline">Venta mensual</span>
+<button type="button" onClick="{{ onTraceVenta }}" style="all:unset;cursor:pointer;font-size:22px;line-height:28px;font-weight:600;letter-spacing:-0.012em;font-variant-numeric:tabular-nums;text-decoration:underline dotted var(--ds-border-strong);text-underline-offset:5px;transition:opacity 200ms var(--ds-ease);opacity:{{ dim }}">{{ ventaTxt }}</button>
+</div>
+<sc-if value="{{ showMargin }}" hint-placeholder-val="{{ true }}">
+<button type="button" onClick="{{ openSim }}" aria-label="Abrir simulador de margen" style="all:unset;cursor:pointer;width:200px;border-radius:var(--radius-md)">
+<dc-import name="SemaforoMargen" margen="{{ r.margin }}" minimo="{{ minV }}" alerta="{{ alertaV }}" size="sm" hint-size="200px,84px"></dc-import>
+</button>
+</sc-if>
+<div style="display:flex;flex-direction:column"><span class="t-overline">Costo mensual</span><span class="t-mono" style="font-size:14px;transition:opacity 200ms var(--ds-ease);opacity:{{ dim }}">{{ costoTxt }}</span></div>
+<div style="display:flex;flex-direction:column"><span class="t-overline">Dotación</span><span class="t-body-sm t-numeric">{{ dotacion }}</span></div>
+<span style="flex:1"></span>
+<button type="button" class="btn btn-ghost" onClick="{{ toggleRes }}" aria-expanded="{{ resOpen }}" style="height:40px">{{ resToggleTxt }}<span class="ic sm {{ resChev }}" aria-hidden="true"></span></button>
+<sc-if value="{{ hasPrimary }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="{{ primary.icon }}" disabled="{{ primary.disabled }}" hint-size="150px,40px">{{ primary.label }}</x-import>
+</sc-if>
+</div>
+<sc-if value="{{ resOpen }}" hint-placeholder-val="{{ false }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px 32px;padding-top:12px;border-top:1px solid var(--ds-border);max-height:52dvh;overflow:auto">
+<sc-if value="{{ showMargin }}" hint-placeholder-val="{{ true }}">
+<dc-import name="ResumenCategorias" groups="{{ catGroups }}" mano-obra-txt="{{ manoObraTxt }}" hint-size="100%,360px"></dc-import>
+<div style="display:flex;flex-direction:column;gap:12px">
+<dc-import name="InstrumentosFinancieros" items="{{ finItems }}" editable="{{ editable }}" total-txt="{{ finTotalTxt }}" on-field="{{ onFinField }}" on-reset="{{ onFinReset }}" on-toggle="{{ onFinToggle }}" on-trace="{{ onFinTrace }}" hint-size="100%,200px"></dc-import>
+<div style="display:flex;justify-content:space-between;gap:12px;padding-top:8px;border-top:1px solid var(--ds-border)"><span class="t-body-sm muted">Pagos únicos</span><span class="t-mono">{{ unicoTxt }}</span></div>
+<div style="display:flex;justify-content:space-between;gap:12px"><span class="t-body-sm muted">UF usada</span><span style="display:flex;flex-direction:column;align-items:flex-end"><span class="t-mono">{{ ufTxt }}</span><span class="t-caption">{{ ufSub }}</span></span></div>
+</div>
+</sc-if>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<div style="display:flex;flex-direction:column;gap:16px;padding:{{ pad }}">
+<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ badge.tone }}" hint-size="80px,22px">{{ badge.label }}</x-import>
+<span class="t-body-sm muted" style="display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center">
+<a href="#">{{ q.negocio }}</a><span aria-hidden="true">·</span><a href="#">{{ q.cuenta }}</a><span aria-hidden="true">·</span><span class="t-numeric">Vence {{ q.vence }}</span><span aria-hidden="true">·</span><span>Modelo de costeo v7</span><span aria-hidden="true">·</span><span>Responsable {{ q.owner }}</span>
+</span>
+</div>
+<sc-for list="{{ alerts }}" as="a" hint-placeholder-count="0">
+<div role="status" style="display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:10px 12px;border-radius:var(--radius-md);background:{{ a.bg }};color:{{ a.fg }}">
+<span class="ic sm {{ a.icon }}" aria-hidden="true" style="flex:none"></span>
+<span style="flex:1;min-width:240px;font-size:14px;line-height:20px;text-wrap:pretty"><b style="font-weight:600">{{ a.title }}</b> · {{ a.text }}</span>
+<sc-for list="{{ a.acts }}" as="x" hint-placeholder-count="0">
+<button type="button" class="btn btn-ghost" style="height:32px;padding:0 10px;color:inherit;font-weight:600">{{ x }}</button>
+</sc-for>
+</div>
+</sc-for>
+
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<div class="card" style="min-height:420px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar la cotización" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="CPQ-503 · 7f3a2c" hint-size="100%,420px"></x-import>
+</div>
+</sc-if>
+
+<sc-if value="{{ showBody }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:{{ bodyCols }};gap:24px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+
+<div class="card" role="treegrid" aria-label="Planilla de la cotización" style="overflow:hidden">
+<div class="t-caption" style="display:grid;grid-template-columns:{{ cols }};gap:12px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--ds-border);font-weight:500">
+<sc-if value="{{ interna }}" hint-placeholder-val="{{ true }}">
+<span></span><span>Línea</span><span style="text-align:right">Sueldo o precio</span><span style="text-align:right">Costo mensual</span><span style="text-align:right">Venta mensual</span>
+</sc-if>
+<sc-if value="{{ cliente }}" hint-placeholder-val="{{ false }}">
+<span>Servicio</span><span style="text-align:right">Cantidad</span><span style="text-align:right">Valor mensual</span>
+</sc-if>
+</div>
+
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<sc-for list="{{ skelSecs }}" as="k" hint-placeholder-count="3">
+<div style="display:grid;grid-template-columns:{{ cols }};gap:12px;align-items:center;padding:14px 16px;background:var(--ds-fill);border-bottom:1px solid var(--ds-border)">
+<span></span><span class="skel" style="width:140px;height:16px;background:var(--ds-border)"></span><span></span><span class="skel" style="justify-self:end;width:90px;height:14px;background:var(--ds-border)"></span><span class="skel" style="justify-self:end;width:90px;height:14px;background:var(--ds-border)"></span>
+</div>
+<sc-for list="{{ k.rows }}" as="kr" hint-placeholder-count="2">
+<div style="display:grid;grid-template-columns:{{ cols }};gap:12px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--ds-border)">
+<span></span><span style="display:flex;flex-direction:column;gap:6px"><span class="skel" style="width:60%;height:14px"></span><span class="skel" style="width:80%;height:12px"></span></span><span class="skel" style="justify-self:end;width:72px;height:14px"></span><span class="skel" style="justify-self:end;width:84px;height:14px"></span><span class="skel" style="justify-self:end;width:84px;height:14px"></span>
+</div>
+</sc-for>
+</sc-for>
+</sc-if>
+
+<sc-if value="{{ isReady }}" hint-placeholder-val="{{ true }}">
+<sc-for list="{{ secs }}" as="s" hint-placeholder-count="3">
+<div role="row" aria-expanded="{{ s.open }}" onClick="{{ s.toggle }}" style="display:grid;grid-template-columns:{{ cols }};gap:12px;align-items:center;padding:10px 16px;background:var(--ds-fill);border-bottom:1px solid var(--ds-border);cursor:pointer;min-height:52px">
+<sc-if value="{{ interna }}" hint-placeholder-val="{{ true }}">
+<span class="ic sm {{ s.chev }} muted" aria-hidden="true"></span>
+<span style="display:flex;flex-direction:column;min-width:0"><span class="t-label">{{ s.name }}</span><span class="t-caption" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ s.sub }}</span></span>
+<span class="t-caption" style="text-align:right">{{ s.countTxt }}</span>
+<span class="t-mono" style="text-align:right;transition:opacity 200ms var(--ds-ease);opacity:{{ dim }}">{{ s.costoTxt }}</span>
+<span class="t-mono" style="text-align:right;font-weight:600;transition:opacity 200ms var(--ds-ease);opacity:{{ dim }}">{{ s.ventaTxt }}</span>
+</sc-if>
+<sc-if value="{{ cliente }}" hint-placeholder-val="{{ false }}">
+<span style="display:flex;align-items:center;gap:8px;min-width:0"><span class="ic sm {{ s.chev }} muted" aria-hidden="true"></span><span class="t-label">{{ s.name }}</span></span>
+<span></span>
+<span class="t-mono" style="text-align:right;font-weight:600">{{ s.ventaTxt }}</span>
+</sc-if>
+</div>
+<sc-if value="{{ s.open }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ s.isEmpty }}" hint-placeholder-val="{{ false }}">
+<div class="t-body-sm muted" style="padding:14px 16px 4px 44px">Sin líneas. Agrega un puesto, un ítem o un paquete.</div>
+</sc-if>
+<sc-for list="{{ s.rows }}" as="l" hint-placeholder-count="2">
+<sc-if value="{{ l.isGroup }}" hint-placeholder-val="{{ false }}">
+<div class="t-overline" style="padding:10px 16px 4px 44px">{{ l.group }}</div>
+</sc-if>
+<sc-if value="{{ l.isLine }}" hint-placeholder-val="{{ true }}">
+<div role="row" style="display:grid;grid-template-columns:{{ cols }};gap:12px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--ds-border);opacity:{{ l.op }}" style-hover="background:var(--ds-bg)">
+<sc-if value="{{ interna }}" hint-placeholder-val="{{ true }}">
+<span class="ic sm i-updown subtle" title="Arrastrar para reordenar" aria-hidden="true" style="cursor:grab;visibility:{{ handleVis }}"></span>
+<span style="display:flex;flex-direction:column;gap:4px;min-width:0">
+<span style="display:flex;flex-wrap:wrap;align-items:center;gap:6px">
+<span class="t-body-sm" style="font-weight:500">{{ l.name }}</span>
+<sc-if value="{{ l.hasOrigen }}" hint-placeholder-val="{{ false }}">
+<span title="{{ l.vig }}" style="display:inline-flex"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" dot="{{ false }}" hint-size="120px,22px">{{ l.origenTxt }}</x-import></span>
+</sc-if>
+<sc-if value="{{ l.hidden }}" hint-placeholder-val="{{ false }}">
+<span class="t-caption" title="No aparece en la vista cliente ni en el documento" style="display:inline-flex;align-items:center;gap:4px"><span class="ic sm i-eye" aria-hidden="true"></span>Oculto al cliente</span>
+</sc-if>
+<sc-if value="{{ l.disabled }}" hint-placeholder-val="{{ false }}">
+<span class="t-caption">Deshabilitada · no suma</span>
+</sc-if>
+<sc-if value="{{ l.overridden }}" hint-placeholder-val="{{ false }}">
+<span class="t-caption" title="{{ l.overriddenTxt }}">Precio sobrescrito</span>
+</sc-if>
+</span>
+<span class="t-caption" style="text-wrap:pretty">{{ l.detail }}</span>
+<sc-if value="{{ l.rateable }}" hint-placeholder-val="{{ false }}">
+<span style="display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:2px">
+<button type="button" onClick="{{ l.onRateo }}" disabled="{{ l.noRateo }}" aria-haspopup="menu" aria-label="Rateo de {{ l.name }}: {{ l.rateoTxt }}" style="all:unset;box-sizing:border-box;cursor:{{ l.rateoCursor }};display:inline-flex;align-items:center;gap:4px;height:24px;padding:0 6px 0 8px;border-radius:999px;border:1px solid var(--ds-border-strong);background:var(--ds-surface);font:500 12px/16px var(--font-sans);color:var(--ds-fg)" style-hover="background:var(--ds-fill)"><span class="subtle" style="font-weight:400">Rateo</span>{{ l.rateoTxt }}<span class="ic sm i-chevron-down muted" aria-hidden="true" style="width:14px;height:14px;visibility:{{ l.rateoChevVis }}"></span></button>
+<span class="t-caption t-numeric">{{ l.cuotaTxt }}</span>
+<sc-if value="{{ l.rateoOverridden }}" hint-placeholder-val="{{ false }}">
+<span title="{{ l.rateoDefTxt }}" style="display:inline-flex"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" dot="{{ false }}" hint-size="90px,22px">Sobrescrito</x-import></span>
+</sc-if>
+</span>
+</sc-if>
+</span>
+<span style="display:flex;flex-direction:column;align-items:flex-end;min-width:0">
+<sc-if value="{{ l.editing }}" hint-placeholder-val="{{ false }}">
+<input ref="{{ inputRef }}" aria-label="Sueldo bruto" defaultValue="{{ l.unitRaw }}" onKeyDown="{{ l.onKey }}" onBlur="{{ l.onBlur }}" inputMode="numeric" style="width:100%;height:32px;box-sizing:border-box;padding:0 8px;text-align:right;font:400 13px/20px var(--font-mono);color:var(--ds-fg);background:var(--ds-surface);border:1px solid var(--ds-accent);border-radius:var(--radius-sm);box-shadow:0 0 0 3px var(--ds-accent-muted);outline:none">
+</sc-if>
+<sc-if value="{{ l.notEditing }}" hint-placeholder-val="{{ true }}">
+<button type="button" onClick="{{ l.onEdit }}" disabled="{{ l.noEdit }}" title="{{ l.editTitle }}" style="all:unset;box-sizing:border-box;cursor:{{ l.editCursor }};padding:4px 6px;margin:-4px -6px;border-radius:var(--radius-sm);text-align:right" style-hover="background:var(--ds-surface)">
+<span class="t-mono">{{ l.unitTxt }}</span>
+</button>
+</sc-if>
+<span class="t-caption" style="text-align:right">{{ l.unitSub }}</span>
+</span>
+<button type="button" onClick="{{ l.onCosto }}" aria-label="¿De dónde sale el costo de {{ l.name }}?" style="all:unset;cursor:pointer;justify-self:end;text-align:right;padding:4px 6px;margin:-4px -6px;border-radius:var(--radius-sm)" style-hover="background:var(--ds-fill)">
+<span class="t-mono" style="text-decoration:underline dotted var(--ds-border-strong);text-underline-offset:4px;transition:opacity 200ms var(--ds-ease);opacity:{{ dim }}">{{ l.costoTxt }}</span>
+</button>
+<button type="button" onClick="{{ l.onVenta }}" aria-label="¿De dónde sale la venta de {{ l.name }}?" style="all:unset;cursor:pointer;justify-self:end;text-align:right;padding:4px 6px;margin:-4px -6px;border-radius:var(--radius-sm);display:flex;flex-direction:column;align-items:flex-end" style-hover="background:var(--ds-fill)">
+<span class="t-mono" style="font-weight:500;text-decoration:underline dotted var(--ds-border-strong);text-underline-offset:4px;transition:opacity 200ms var(--ds-ease);opacity:{{ dim }}">{{ l.ventaTxt }}</span>
+<span class="t-caption">{{ l.ventaSub }}</span>
+</button>
+</sc-if>
+<sc-if value="{{ cliente }}" hint-placeholder-val="{{ false }}">
+<span style="display:flex;flex-direction:column;gap:2px;min-width:0;padding-left:24px"><span class="t-body-sm" style="font-weight:500">{{ l.name }}</span><span class="t-caption">{{ l.detailCli }}</span></span>
+<span class="t-body-sm muted" style="text-align:right">{{ l.cantCli }}</span>
+<span style="display:flex;flex-direction:column;align-items:flex-end"><span class="t-mono">{{ l.ventaTxt }}</span><span class="t-caption">{{ l.ventaSub }}</span></span>
+</sc-if>
+</div>
+</sc-if>
+</sc-for>
+<sc-if value="{{ editable }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-wrap:wrap;gap:4px;padding:6px 16px 6px 36px;border-bottom:1px solid var(--ds-border)">
+<button type="button" class="btn btn-ghost" style="height:32px;padding:0 10px;color:var(--ds-fg-muted)"><span class="ic sm i-plus" aria-hidden="true"></span>Puesto</button>
+<button type="button" class="btn btn-ghost" style="height:32px;padding:0 10px;color:var(--ds-fg-muted)"><span class="ic sm i-plus" aria-hidden="true"></span>Ítem</button>
+<button type="button" class="btn btn-ghost" style="height:32px;padding:0 10px;color:var(--ds-fg-muted)"><span class="ic sm i-plus" aria-hidden="true"></span>Paquete</button>
+</div>
+</sc-if>
+</sc-if>
+</sc-for>
+<sc-if value="{{ editable }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 16px">
+<button type="button" class="btn btn-ghost" style="height:36px;padding:0 10px;margin-left:-10px"><span class="ic sm i-plus" aria-hidden="true"></span>Sección</button>
+<span class="t-caption" style="display:flex;gap:6px;align-items:center"><span class="kbd">Tab</span><span class="kbd">↵</span><span class="kbd">esc</span>editar sueldos en la celda</span>
+</div>
+</sc-if>
+</sc-if>
+</div>
+
+<sc-if value="{{ isReady }}" hint-placeholder-val="{{ true }}">
+<div class="card">
+<button type="button" onClick="{{ toggleCond }}" aria-expanded="{{ condOpen }}" style="all:unset;box-sizing:border-box;width:100%;display:flex;align-items:center;gap:8px;padding:14px 16px;cursor:pointer">
+<span class="ic sm {{ condChev }} muted" aria-hidden="true"></span>
+<span class="t-label" style="flex:1">Condiciones comerciales</span>
+<span class="t-caption">{{ condResumen }}</span>
+</button>
+<sc-if value="{{ condOpen }}" hint-placeholder-val="{{ false }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:0 32px;padding:0 16px 12px">
+<sc-for list="{{ cond }}" as="c" hint-placeholder-count="8">
+<div style="display:flex;justify-content:space-between;gap:16px;padding:10px 0;border-top:1px solid var(--ds-border)"><span class="t-body-sm muted">{{ c.label }}</span><span class="t-body-sm" style="text-align:right">{{ c.value }}</span></div>
+</sc-for>
+</div>
+</sc-if>
+</div>
+</sc-if>
+</div>
+
+<sc-if value="{{ deskAside }}" hint-placeholder-val="{{ true }}">
+<aside aria-label="Resumen de la cotización" style="position:sticky;top:20px;max-height:calc(100dvh - 104px);overflow:auto;border-radius:var(--radius-lg);display:flex;flex-direction:column;gap:12px">
+<div class="card pad" style="display:flex;flex-direction:column;gap:16px">
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<span class="skel" style="width:96px;height:14px"></span><span class="skel" style="width:200px;height:34px"></span><span class="skel" style="width:100%;height:60px"></span><span class="skel" style="width:100%;height:120px"></span><span class="skel" style="width:100%;height:48px;border-radius:var(--radius-md)"></span>
+</sc-if>
+<sc-if value="{{ isReady }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:2px">
+<span class="t-overline">Venta mensual</span>
+<button type="button" onClick="{{ onTraceVenta }}" style="all:unset;cursor:pointer;align-self:flex-start;font-size:28px;line-height:34px;font-weight:600;letter-spacing:-0.018em;font-variant-numeric:tabular-nums;text-decoration:underline dotted var(--ds-border-strong);text-underline-offset:6px;transition:opacity 200ms var(--ds-ease);opacity:{{ dim }}">{{ ventaTxt }}</button>
+<span class="t-caption">{{ ventaUF }} · neto, sin IVA</span>
+</div>
+<sc-if value="{{ showMargin }}" hint-placeholder-val="{{ true }}">
+<div style="border-top:1px solid var(--ds-border);padding-top:12px">
+<dc-import name="ResumenCategorias" groups="{{ catGroups }}" mano-obra-txt="{{ manoObraTxt }}" hint-size="100%,360px"></dc-import>
+</div>
+</sc-if>
+<sc-if value="{{ interna }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column">
+<div style="display:flex;justify-content:space-between;gap:12px;padding:6px 0"><span class="t-body-sm muted">Costo mensual</span><span class="t-mono" style="transition:opacity 200ms var(--ds-ease);opacity:{{ dim }}">{{ costoTxt }}</span></div>
+<div style="display:flex;justify-content:space-between;gap:12px;padding:6px 0"><span class="t-body-sm muted">Pagos únicos</span><span class="t-mono">{{ unicoTxt }}</span></div>
+</div>
+</sc-if>
+<sc-if value="{{ cliente }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;justify-content:space-between;gap:12px;padding:6px 0"><span class="t-body-sm muted">Pagos únicos</span><span class="t-mono">{{ unicoTxt }}</span></div>
+</sc-if>
+<sc-if value="{{ showMargin }}" hint-placeholder-val="{{ true }}">
+<button type="button" onClick="{{ openSim }}" aria-label="Abrir simulador de margen" style="all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;gap:6px;padding:12px;margin:0 -12px;border-radius:var(--radius-md)" style-hover="background:var(--ds-fill)">
+<dc-import name="SemaforoMargen" margen="{{ r.margin }}" minimo="{{ minV }}" alerta="{{ alertaV }}" hint-size="100%,96px"></dc-import>
+<span class="t-caption" style="display:flex;align-items:center;gap:4px;color:var(--ds-accent);font-weight:500">Simular margen o precio objetivo<span class="ic sm i-chevron-right" aria-hidden="true"></span></span>
+</button>
+</sc-if>
+<sc-if value="{{ noCostNote }}" hint-placeholder-val="{{ false }}">
+<span class="t-body-sm muted" style="display:flex;gap:8px;padding:10px 12px;border-radius:var(--radius-md);background:var(--ds-fill)"><span class="ic sm i-lock" aria-hidden="true" style="flex:none;margin-top:2px"></span>Costo y margen ocultos: no tienes el permiso cpq:costos.ver.</span>
+</sc-if>
+<sc-if value="{{ showMargin }}" hint-placeholder-val="{{ true }}">
+<div style="border-top:1px solid var(--ds-border);padding-top:12px">
+<dc-import name="InstrumentosFinancieros" items="{{ finItems }}" editable="{{ editable }}" total-txt="{{ finTotalTxt }}" on-field="{{ onFinField }}" on-reset="{{ onFinReset }}" on-toggle="{{ onFinToggle }}" on-trace="{{ onFinTrace }}" default-open="{{ finDefaultOpen }}" hint-size="100%,200px"></dc-import>
+</div>
+</sc-if>
+<div style="display:flex;flex-direction:column;border-top:1px solid var(--ds-border);padding-top:6px">
+<div style="display:flex;justify-content:space-between;gap:12px;padding:6px 0"><span class="t-body-sm muted">Dotación</span><span class="t-body-sm t-numeric">{{ dotacion }}</span></div>
+<div style="display:flex;justify-content:space-between;gap:12px;padding:6px 0"><span class="t-body-sm muted">UF usada</span><span style="display:flex;flex-direction:column;align-items:flex-end"><span class="t-mono">{{ ufTxt }}</span><span class="t-caption">{{ ufSub }}</span></span></div>
+</div>
+<sc-if value="{{ hasPrimary }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:6px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" size="lg" icon="{{ primary.icon }}" disabled="{{ primary.disabled }}" block="{{ true }}" hint-size="100%,48px">{{ primary.label }}</x-import>
+<span class="t-caption" style="text-wrap:pretty">{{ primary.note }}</span>
+</div>
+</sc-if>
+<sc-if value="{{ frozenNote }}" hint-placeholder-val="{{ false }}">
+<span class="t-caption" style="display:flex;gap:6px;align-items:center"><span class="ic sm i-lock" aria-hidden="true"></span>{{ frozenTxt }}</span>
+</sc-if>
+</sc-if>
+</div>
+
+<sc-if value="{{ simDesk }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeSim }}" style="position:fixed;inset:0;z-index:19"></div>
+<div class="overlay" role="dialog" aria-label="Simulador de margen" style="position:fixed;top:140px;right:368px;width:340px;z-index:20;padding:16px;display:flex;flex-direction:column;gap:14px;animation:ds-entrar 200ms var(--ds-ease)">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+<span style="display:flex;flex-direction:column"><span class="t-label">Simular</span><span class="t-caption">{{ modoTxt }} · no se guarda hasta aplicar</span></span>
+<button type="button" class="icon-btn" aria-label="Cerrar" onClick="{{ closeSim }}" style="width:32px;height:32px;margin:-4px -4px 0 0"><span class="ic sm i-x" aria-hidden="true"></span></button>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmented" options="{{ simModes }}" value="{{ simMode }}" on-change="{{ setSimMode }}" label="Simular por" style="{{ segFull }}" hint-size="100%,36px"></x-import>
+<sc-if value="{{ simByMargin }}" hint-placeholder-val="{{ true }}">
+<label style="display:flex;flex-direction:column;gap:6px">
+<span style="display:flex;justify-content:space-between"><span class="t-label-sm">Margen</span><span class="t-mono">{{ simPctTxt }}</span></span>
+<input type="range" min="5" max="25" step="0.1" value="{{ simPct }}" onChange="{{ onSimRange }}" aria-label="Margen en porcentaje" style="width:100%;accent-color:var(--ds-accent);height:24px">
+<span class="t-caption" style="display:flex;justify-content:space-between"><span>5 %</span><span>25 %</span></span>
+</label>
+</sc-if>
+<sc-if value="{{ simByTarget }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Venta mensual objetivo" value="{{ simTargetTxt }}" on-change="{{ onSimTarget }}" hint="Calcula el margen que da ese precio." hint-size="100%,90px"></x-import>
+</sc-if>
+<div style="display:flex;flex-direction:column;gap:12px;padding:12px;border-radius:var(--radius-md);background:var(--ds-bg);border:1px solid var(--ds-border)">
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span class="t-body-sm muted">Venta mensual</span><span class="t-mono" style="font-size:16px;font-weight:600">{{ simVentaTxt }}</span></div>
+<span class="t-caption t-numeric" style="text-align:right;margin-top:-10px">{{ simDeltaTxt }}</span>
+<dc-import name="SemaforoMargen" margen="{{ simM }}" minimo="{{ minV }}" alerta="{{ alertaV }}" size="sm" hint-size="100%,84px"></dc-import>
+</div>
+<div style="display:flex;justify-content:flex-end;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" on-click="{{ closeSim }}" hint-size="100px,40px">Cancelar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" on-click="{{ applySim }}" hint-size="90px,40px">Aplicar</x-import>
+</div>
+</div>
+</sc-if>
+</aside>
+</sc-if>
+</div>
+</sc-if>
+</div>
+</sc-if>
+</x-import>
+
+<sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeMenu }}" style="position:absolute;inset:0;z-index:30"></div>
+<div style="position:absolute;top:56px;right:24px;width:272px;z-index:31;animation:ds-entrar 150ms var(--ds-ease)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Menu" items="{{ menuItems }}" on-select="{{ closeMenu }}" hint-size="272px,320px"></x-import>
+</div>
+</sc-if>
+
+<sc-if value="{{ simTablet }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeSim }}" style="position:absolute;inset:0;z-index:30"></div>
+<div class="overlay" role="dialog" aria-label="Simulador de margen" style="position:absolute;top:150px;left:300px;width:340px;z-index:31;padding:16px;display:flex;flex-direction:column;gap:14px;animation:ds-entrar 200ms var(--ds-ease)">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+<span style="display:flex;flex-direction:column"><span class="t-label">Simular</span><span class="t-caption">{{ modoTxt }} · no se guarda hasta aplicar</span></span>
+<button type="button" class="icon-btn" aria-label="Cerrar" onClick="{{ closeSim }}" style="width:44px;height:44px;margin:-10px -10px 0 0"><span class="ic sm i-x" aria-hidden="true"></span></button>
+</div>
+<label style="display:flex;flex-direction:column;gap:6px">
+<span style="display:flex;justify-content:space-between"><span class="t-label-sm">Margen</span><span class="t-mono">{{ simPctTxt }}</span></span>
+<input type="range" min="5" max="25" step="0.1" value="{{ simPct }}" onChange="{{ onSimRange }}" aria-label="Margen en porcentaje" style="width:100%;accent-color:var(--ds-accent);height:44px">
+</label>
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><span class="t-body-sm muted">Venta mensual</span><span class="t-mono" style="font-size:16px;font-weight:600">{{ simVentaTxt }}</span></div>
+<dc-import name="SemaforoMargen" margen="{{ simM }}" minimo="{{ minV }}" alerta="{{ alertaV }}" size="sm" hint-size="100%,84px"></dc-import>
+<div style="display:flex;justify-content:flex-end;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" on-click="{{ closeSim }}" hint-size="100px,40px">Cancelar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" on-click="{{ applySim }}" hint-size="90px,40px">Aplicar</x-import>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ rateoPop }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeRateo }}" style="position:absolute;inset:0;z-index:40"></div>
+<div class="overlay" role="dialog" aria-label="Rateo" style="position:absolute;z-index:41;width:288px;padding:6px;left:{{ rp.left }};top:{{ rp.top }};display:flex;flex-direction:column;animation:ds-entrar 150ms var(--ds-ease)">
+<div style="display:flex;flex-direction:column;gap:2px;padding:8px 10px 6px">
+<span class="t-label-sm">Rateo · {{ rp.name }}</span>
+<span class="t-caption t-numeric">Costo unitario {{ rp.unitTxt }} · {{ rp.defTxt }}</span>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Menu" overlay="{{ false }}" items="{{ rp.items }}" on-select="{{ rp.onSelect }}" hint-size="100%,230px"></x-import>
+<sc-if value="{{ rp.nMode }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:flex-end;gap:8px;padding:8px 10px;border-top:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Meses" value="{{ rp.nVal }}" on-change="{{ rp.onN }}" trailing="meses" mono="{{ true }}" compact="{{ true }}" input-mode="numeric" style="{{ rp.inStyle }}" hint-size="140px,64px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" on-click="{{ rp.applyN }}" hint-size="90px,40px">Aplicar</x-import>
+</div>
+</sc-if>
+<sc-if value="{{ rp.canReset }}" hint-placeholder-val="{{ false }}">
+<button type="button" class="btn btn-ghost" onClick="{{ rp.reset }}" style="height:36px;justify-content:flex-start;padding:0 10px;color:var(--ds-accent);border-top:1px solid var(--ds-border);border-radius:0 0 var(--radius-md) var(--radius-md)">Volver al rateo del catálogo</button>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ tracePop }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeTrace }}" style="position:absolute;inset:0;z-index:40"></div>
+<div class="overlay" role="dialog" aria-label="¿De dónde sale este monto?" style="position:absolute;z-index:41;width:360px;padding:16px;left:{{ traceLeft }};top:{{ traceTop }};animation:ds-entrar 150ms var(--ds-ease)">
+<dc-import name="TrazaMonto" trace="{{ traceData }}" on-close="{{ closeTrace }}" on-all="{{ openFull }}" hint-size="100%,420px"></dc-import>
+</div>
+</sc-if>
+
+<sc-if value="{{ traceSheet }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Sheet" contained="{{ true }}" label="¿De dónde sale este monto?" on-close="{{ closeTrace }}" hint-size="100%,70%">
+<dc-import name="TrazaMonto" trace="{{ traceData }}" on-close="{{ closeTrace }}" on-all="{{ openFull }}" hint-size="100%,420px"></dc-import>
+</x-import>
+</sc-if>
+
+<sc-if value="{{ fullOpen }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Sheet" contained="{{ true }}" side="{{ sheetSide }}" title="Cálculo completo" description="{{ fullDesc }}" on-close="{{ closeFull }}" hint-size="420px,100%">
+<div style="display:flex;flex-direction:column;gap:20px">
+<sc-for list="{{ tree }}" as="s" hint-placeholder-count="3">
+<section style="display:flex;flex-direction:column;gap:4px">
+<div style="display:flex;justify-content:space-between;gap:12px;align-items:baseline"><span class="t-label">{{ s.name }}</span><span class="t-mono" style="font-weight:600">{{ s.costoTxt }}</span></div>
+<sc-for list="{{ s.lines }}" as="l" hint-placeholder-count="2">
+<div style="display:flex;flex-direction:column;gap:2px;padding:8px 0 8px 12px;border-left:1px solid var(--ds-border-strong);opacity:{{ l.op }}">
+<div style="display:flex;justify-content:space-between;gap:12px;align-items:baseline"><span class="t-body-sm">{{ l.name }}</span><span class="t-mono">{{ l.costoTxt }}</span></div>
+<span class="t-mono subtle" style="font-size:12px;line-height:16px;text-wrap:pretty">{{ l.calc }}</span>
+</div>
+</sc-for>
+</section>
+</sc-for>
+<section style="display:flex;flex-direction:column;gap:6px;padding-top:12px;border-top:1px solid var(--ds-border)">
+<sc-for list="{{ treeTotals }}" as="t" hint-placeholder-count="5">
+<div style="display:flex;justify-content:space-between;gap:12px;align-items:baseline"><span class="t-body-sm" style="font-weight:{{ t.w }}">{{ t.k }}</span><span class="t-mono" style="font-weight:{{ t.w }}">{{ t.v }}</span></div>
+</sc-for>
+</section>
+</div>
+</x-import>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:860},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;borrador&quot;,&quot;datos&quot;,&quot;sobrescrito&quot;,&quot;error&quot;,&quot;lista&quot;,&quot;subvalorada&quot;,&quot;enviada&quot;,&quot;desactualizada&quot;,&quot;faltaUF&quot;,&quot;recalculando&quot;,&quot;sinCostos&quot;,&quot;cargando&quot;],&quot;default&quot;:&quot;datos&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;vista&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;interna&quot;,&quot;cliente&quot;],&quot;default&quot;:&quot;interna&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;overlay&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ninguno&quot;,&quot;traza&quot;,&quot;trazaCompleta&quot;,&quot;simulador&quot;,&quot;instrumentos&quot;,&quot;menu&quot;],&quot;default&quot;:&quot;ninguno&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = {};
+  rootRef = React.createRef();
+  inputRef = (el) => { if (el && this._focusId !== this.state.editing) { this._focusId = this.state.editing; el.focus(); el.select(); } };
+  componentDidMount() {
+    this._t = setInterval(() => { if (window.CPQ && window.OPAI20DesignSystem_44e4d7 && window.OPAI20DesignSystem_44e4d7.AppBar) { clearInterval(this._t); this.forceUpdate(); } }, 60);
+    this._k = (e) => { if (e.key === "Escape") this.setState({ trace: null, sim: false, menu: false, full: false, rateoPop: null }); };
+    window.addEventListener("keydown", this._k);
+  }
+  componentWillUnmount() { clearInterval(this._t); clearTimeout(this._rc); window.removeEventListener("keydown", this._k); }
+  recalc() { clearTimeout(this._rc); this.setState({ recalc: true }); this._rc = setTimeout(() => this.setState({ recalc: false }), 420); }
+  openTrace(id, e) {
+    const isPhone = (this.props.device ?? "desktop") === "phone";
+    if (isPhone || !e || !this.rootRef.current) return this.setState({ trace: { id } });
+    const R = this.rootRef.current.getBoundingClientRect(), b = e.currentTarget.getBoundingClientRect();
+    let left = Math.min(Math.max(12, b.right - R.left - 360), R.width - 372);
+    let top = b.bottom - R.top + 6;
+    if (top + 440 > R.height) top = Math.max(12, b.top - R.top - 446);
+    this.setState({ trace: { id, left, top } });
+  }
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const P = window.CPQ;
+    const device = this.props.device ?? "desktop";
+    const theme = this.props.theme ?? "light";
+    const estado = this.props.estado ?? "datos";
+    const isPhone = device === "phone", isTablet = device === "tablet";
+    const base = { device, theme, isPhone, notPhone: !isPhone, rootRef: this.rootRef, inputRef: this.inputRef };
+    if (!P || !NS.AppBar) return base;
+    const S = this.state;
+    const vista = isPhone ? "interna" : (S.vista ?? this.props.vista ?? "interna");
+    const cliente = vista === "cliente", interna = !cliente;
+    const showCost = estado !== "sinCostos";
+    const frozen = estado === "enviada";
+    const editable = interna && !frozen && !isPhone && estado !== "cargando";
+    const isLoading = estado === "cargando", isError = estado === "error", isReady = !isLoading && !isError;
+    const margin = S.margin ?? (estado === "subvalorada" ? 0.087 : 0.104);
+    const cfg = P.getConfig();
+    const empty = estado === "borrador";
+    const preset = estado === "sobrescrito";
+    const ov = S.ov ?? (preset ? { l8: 1800000 } : {});
+    const rateos = S.rateos ?? (preset ? { l10: { id: "6" } } : {});
+    const presetFin = preset ? { cf: { dias: "45" }, pg: { on: false }, rc: { plazo: "12" } } : {};
+    const finS = S.fin ?? presetFin;
+    const PCT_KEYS = { tasa: 1, pct: 1, prima: 1 };
+    const finP = {};
+    ["cf", "pg", "rc"].forEach((id) => {
+      const o = { ...cfg.fin[id] }, s = finS[id] || {};
+      Object.keys(s).forEach((k) => { const v = s[k]; if (v == null) return; if (k === "on") o.on = v; else if (id === "rc" && k === "plazo") o.plazo = v; else { const n = P.parseNum(v); o[k] = PCT_KEYS[k] ? n / 100 : n; } });
+      finP[id] = o;
+    });
+    const ctx = { sueldos: ov, rateos, fin: finP, empty };
+    const r = P.compute(margin, ctx);
+    const H = (v) => (showCost ? v : "—");
+    const min = cfg.margen.min, alertaM = cfg.margen.alerta;
+    const under = !empty && margin < min;
+    const ov0 = this.props.overlay ?? "ninguno";
+    const trace = S.trace !== undefined ? S.trace : ov0 === "traza" ? { id: "l1", left: isTablet ? 300 : 340, top: isTablet ? 330 : 300 } : null;
+    const simOpen = S.sim !== undefined ? S.sim : ov0 === "simulador";
+    const fullOpen = S.full !== undefined ? S.full : ov0 === "trazaCompleta";
+    const menuOpen = S.menu !== undefined ? S.menu : ov0 === "menu";
+    const dim = S.recalc || estado === "recalculando" ? 0.4 : 1;
+
+    const defOpen = isPhone ? { pn: false, bs: false, co: false } : { pn: true, bs: true, co: true };
+    const open = { ...defOpen, ...(S.open || {}) };
+    const allLines = [];
+    r.secs.forEach((s) => s.lines.forEach((l) => { if (!l.group) allLines.push(l); }));
+    const puestoIds = allLines.filter((l) => l.kind === "puesto" && !l.disabled).map((l) => l.id);
+    const parse = (v) => parseInt(String(v).replace(/\D/g, ""), 10);
+    const commit = (l, val, next) => {
+      const n = parse(val);
+      const nov = { ...ov };
+      if (n && n !== l.sueldoEf) nov[l.id] = n;
+      this.setState({ ov: nov, editing: next || null });
+      if (n && n !== l.sueldoEf) this.recalc();
+    };
+    const pl = (n, a, b) => n + " " + (n === 1 ? a : b);
+    const mkLine = (l) => {
+      const isP = l.kind === "puesto";
+      const canEdit = editable && isP && showCost && !l.disabled;
+      const editing = S.editing === l.id;
+      const idx = puestoIds.indexOf(l.id);
+      return {
+        isGroup: false, isLine: true, id: l.id, name: l.name,
+        detail: isP ? l.patron + " · " + l.horario + " · " + pl(l.pos, "posición", "posiciones") + " × " + pl(l.pp, "persona", "personas") : P.catLabel(l.catId) + " · " + l.qtyLabel + (l.rateable ? "" : " · precio mensual"),
+        detailCli: isP ? l.patron + " · " + l.horario + " · " + l.dias : l.unico ? "Pago único" : P.catLabel(l.catId),
+        cantCli: isP ? pl(l.pos, "posición", "posiciones") : l.qtyLabel.split(" · ")[0],
+        rateable: !!l.rateable && interna, rateoTxt: l.rateable ? P.rateoShort(l.rateoId, l.rateoN) : "",
+        rateoOverridden: !!l.rateoOverridden, rateoDefTxt: l.rateable ? "Catálogo: " + P.rateoLabel(l.rateoDef) : "",
+        cuotaTxt: !l.rateable || !showCost ? "" : l.unico ? "se cobra una vez" : "cuota " + P.fmt(l.cuota) + "/mes" + (l.qty > 1 ? " × " + l.qty : ""),
+        noRateo: !editable, rateoCursor: editable ? "pointer" : "default", rateoChevVis: editable ? "visible" : "hidden",
+        onRateo: (e) => {
+          e.stopPropagation();
+          if (!editable || !this.rootRef.current) return;
+          const R = this.rootRef.current.getBoundingClientRect(), b = e.currentTarget.getBoundingClientRect();
+          let top = b.bottom - R.top + 6; if (top + 380 > R.height) top = Math.max(12, b.top - R.top - 386);
+          this.setState({ rateoPop: { id: l.id, left: Math.min(b.left - R.left, R.width - 300), top }, rateoN: null });
+        },
+        hasOrigen: isP, origenTxt: l.manual ? "Escrito a mano" : l.origen, vig: l.manual ? "Escrito ahora · antes " + P.fmt(l.sueldo) : l.vig,
+        hidden: !l.visible, disabled: !!l.disabled, overridden: !!l.overridden, overriddenTxt: l.overridden || "",
+        flagTxt: [!l.visible ? "Oculto al cliente" : "", l.disabled ? "Deshabilitada · no suma" : ""].filter(Boolean).join(" · "),
+        unitTxt: H(P.fmt(isP ? l.sueldoEf : l.unit)), unitRaw: String(isP ? l.sueldoEf : l.unit),
+        unitSub: isP ? "sueldo bruto" : l.rateable ? "costo unitario" : "precio mensual",
+        costoTxt: H(P.fmt(l.costo)),
+        ventaTxt: P.fmt(l.unico ? l.costo / (1 - margin) : l.venta), ventaSub: l.unico ? "pago único" : "",
+        op: l.disabled ? 0.45 : 1,
+        editing, notEditing: !editing, noEdit: !canEdit,
+        editCursor: canEdit ? "text" : "default", editTitle: canEdit ? "Editar sueldo (Enter para guardar, Esc para cancelar)" : "",
+        onEdit: () => canEdit && this.setState({ editing: l.id }),
+        onKey: (e) => {
+          if (e.key === "Enter") { e.preventDefault(); commit(l, e.target.value); }
+          else if (e.key === "Escape") { e.stopPropagation(); this.setState({ editing: null }); }
+          else if (e.key === "Tab") { e.preventDefault(); commit(l, e.target.value, puestoIds[(idx + (e.shiftKey ? -1 : 1) + puestoIds.length) % puestoIds.length]); }
+        },
+        onBlur: (e) => { if (this.state.editing === l.id) commit(l, e.target.value); },
+        onCosto: (e) => { e.stopPropagation(); this.openTrace(l.id, e); },
+        onVenta: (e) => { e.stopPropagation(); this.openTrace(l.id, e); },
+      };
+    };
+    const secs = r.secs.map((s) => {
+      const lines = s.lines.filter((l) => l.group || !cliente || (l.visible && !l.disabled));
+      const active = s.lines.filter((l) => !l.group && !l.disabled);
+      const rows = lines.map((l) => (l.group ? { isGroup: !cliente, isLine: false, group: l.group } : mkLine(l)));
+      return {
+        id: s.id, name: s.name, sub: s.sub, open: open[s.id], chev: open[s.id] ? "i-chevron-down" : "i-chevron-right",
+        toggle: () => this.setState({ open: { ...open, [s.id]: !open[s.id] } }),
+        countTxt: pl(active.length, "línea", "líneas"),
+        costoTxt: H(P.fmt(s.costo)), ventaTxt: P.fmt(s.venta),
+        rows, lines: rows.filter((x) => x.isLine), isEmpty: rows.length === 0,
+      };
+    });
+
+    let traceData = null;
+    if (trace) {
+      if (trace.id === "venta") traceData = P.traceVenta(r, showCost);
+      else if (trace.id === "cf" || trace.id === "pg" || trace.id === "rc") {
+        const f = r.fin.find((x) => x.id === trace.id), p = f.p;
+        const src = (k) => (finS[f.id] && finS[f.id][k] != null ? "Cotización · sobrescrito" : "Configuración del CPQ");
+        if (f.id === "cf") traceData = { title: "Costo financiero", formula: "costo operativo × días de pago ÷ 30 × tasa mensual", vars: [
+          { k: "Costo operativo", v: H(P.fmt(r.ops)), src: "Suma de las secciones" },
+          { k: "Días de pago", v: String(p.dias), src: src("dias") },
+          { k: "Tasa mensual", v: P.pct(p.tasa), src: src("tasa") }], result: [{ k: "Costo financiero mensual", v: H(P.fmt(f.monto)) }] };
+        if (f.id === "pg") traceData = { title: "Póliza de garantía · fiel cumplimiento", formula: "valor del contrato × % de garantía × prima anual × plazo ÷ 12, repartido en los meses del contrato", vars: [
+          { k: "Valor del contrato", v: H(P.fmt((r.ops / (1 - r.margin)) * P.MODEL.duracion)), src: "Venta antes de pólizas × " + P.MODEL.duracion + " meses" },
+          { k: "% de garantía", v: P.pct(p.pct), src: src("pct") },
+          { k: "Prima anual", v: P.pct(p.prima), src: src("prima") },
+          { k: "Plazo", v: p.plazo + " meses", src: src("plazo") }], result: [{ k: "Costo mensual", v: H(P.fmt(f.monto)) }] };
+        if (f.id === "rc") traceData = { title: "Responsabilidad civil", formula: "monto en UF × valor UF × prima anual × meses cubiertos ÷ 12, repartido en los meses del contrato", vars: [
+          { k: "Monto asegurado", v: "UF " + P.num(p.uf), src: src("uf") },
+          { k: "Valor UF", v: P.uf(P.UF.valor), src: "Banco Central · " + P.UF.fecha },
+          { k: "Prima anual", v: P.pct(p.prima, 2), src: src("prima") },
+          { k: "Plazo", v: P.rcPlazoLabel(p) + " · cubre " + Math.min(P.rcMeses(p), P.MODEL.duracion) + " de " + P.MODEL.duracion + " meses", src: src("plazo") }], result: [{ k: "Costo mensual", v: H(P.fmt(f.monto)) }] };
+      } else {
+        const l = allLines.find((x) => x.id === trace.id);
+        if (l) traceData = P.traceLine(l, r, showCost);
+      }
+    }
+    const closeTrace = () => this.setState({ trace: null });
+
+    const lbl = estado === "enviada" ? ["info", "Enviada"] : estado === "lista" ? ["success", "Lista"] : under && isPhone ? ["warning", "Por aprobar"] : ["neutral", "Borrador"];
+    const alerts = [];
+    const A = (tone, icon, title, text, acts) => alerts.push({ bg: tone === "neutral" ? "var(--ds-fill)" : "var(--ds-" + tone + "-muted)", fg: tone === "neutral" ? "var(--ds-fg)" : "var(--ds-" + tone + "-fg)", icon: "i-" + icon, title, text, acts: isPhone ? [] : acts || [] });
+    if (cliente) A("info", "eye", "Vista cliente", "Así verá el cliente esta cotización: sin costos, sueldos ni margen. Las líneas ocultas no aparecen.");
+    if (estado === "enviada") A("info", "lock", "Versión enviada: editar crea la v4", "La v3 se envió el " + P.quote.enviada + " y quedó congelada con " + P.uf(P.UF.valor) + ".", ["Editar como v4"]);
+    if (estado === "desactualizada") A("info", "refresh", "Hay un modelo de costeo nuevo", "Modelo " + P.MODEL.nuevo + ". Esta cotización usa la v7.", ["Ver diferencia", "Actualizar"]);
+    if (under && showCost && !cliente && isReady) A("danger", "alert", "Precio subvalorado: requiere aprobación", "El margen de " + P.pct(margin) + " está bajo el mínimo de " + P.pct(min, 0) + ". Pide aprobación antes de enviar.");
+    if (estado === "faltaUF") A("warning", "alert", "Falta el valor UF de hoy", "Se usa UF 40.198,12 del " + P.UF.ayer + ". Al enviar se fija el valor del día.", ["Reintentar"]);
+    if (estado === "sinCostos") A("neutral", "lock", "Sin permiso para ver costos ni margen", "Ves solo la venta. Pídele el permiso cpq:costos.ver a Carlos Irigoyen, administrador de Atlas Seguridad SpA.");
+
+    if (empty && isReady && interna) A("info", "info", "Cotización nueva", "Agrega puestos, ítems o paquetes en cada instalación. Los instrumentos financieros vienen como están en la Configuración del CPQ.");
+    if (preset && isReady && interna) A("neutral", "info", "Valores sobrescritos", "Esta cotización cambia el rateo del Kit Starlink, un sueldo, el costo financiero, la RC y desactiva la póliza de garantía. Cada cambio queda marcado.");
+    let primary = null;
+    if (!cliente && !frozen && isReady) {
+      if (empty) primary = { label: "Dejar lista", icon: "check", disabled: true, note: "Agrega al menos un puesto o un ítem." };
+      else if (under && showCost) primary = { label: "Pedir aprobación", icon: "user-check", note: "Margen bajo el mínimo: lo aprueba Carlos Irigoyen." };
+      else if (estado === "lista") primary = { label: "Enviar", icon: "file", note: "Enviar congela esta versión y fija la UF del día." };
+      else primary = { label: "Dejar lista", icon: "check", note: "Valida la planilla y la deja lista para enviar." };
+    }
+
+    const simM = S.simM ?? margin;
+    const simMode = S.simMode ?? "margen";
+    const rs = P.compute(simM, ctx);
+    const dV = rs.venta - r.venta, dM = (simM - margin) * 100;
+    const sgn = (x) => (x >= 0 ? "+ " : "− ");
+
+    const menuItems = [
+      { icon: "file", label: "Duplicar" }, { icon: "plus", label: "Nueva alternativa" }, { icon: "swap", label: "Comparar" },
+      { icon: "clock", label: "Historial", meta: "3 versiones" }, { icon: "refresh", label: "Actualizar al modelo vigente", meta: estado === "desactualizada" ? "v8" : "" },
+      { divider: true }, { icon: "trash", label: "Archivar", tone: "danger" },
+    ];
+
+    const appBar = isPhone ? null : h(NS.AppBar, {
+      title: h("span", { contentEditable: editable, suppressContentEditableWarning: true, spellCheck: false, title: editable ? "Editar título" : undefined, style: { outline: "none", borderRadius: 6 } }, P.quote.title),
+      subtitle: h("span", { className: "t-mono", style: { fontSize: 12, lineHeight: "16px" } }, P.quote.code + " · " + P.quote.version),
+      padding: isTablet ? 24 : 32,
+    },
+      h(NS.Segmented, { options: [{ value: "interna", label: isTablet ? "Interna" : "Vista interna" }, { value: "cliente", label: isTablet ? "Cliente" : "Vista cliente" }], value: vista, onChange: (v) => this.setState({ vista: v, trace: null, sim: false }), label: "Vista" }),
+      h(NS.IconButton, { icon: "bot", label: "Preguntar a OPAI" }),
+      h(NS.IconButton, { icon: "more", label: "Más acciones", onClick: () => this.setState({ menu: true }) })
+    );
+
+    const tree = r.secs.map((s) => ({
+      name: s.name, costoTxt: H(P.fmt(s.costo)),
+      lines: s.lines.filter((l) => !l.group).map((l) => ({
+        name: l.name + (l.disabled ? " · no suma" : "") + (l.unico ? " · pago único" : ""), op: l.disabled ? 0.45 : 1, costoTxt: H(P.fmt(l.costo)),
+        calc: !showCost ? "—" : l.kind === "puesto"
+          ? "(" + P.fmt(l.sueldoEf) + " × " + P.num(P.MODEL.factor, 2) + " + " + P.fmt(l.col) + ") × " + l.pos + " × " + l.pp + (l.fer ? " × " + P.num(1 + P.MODEL.feriados, 3) : "")
+          : l.rateable ? (l.unico ? P.fmt(l.unit) + " × " + l.qty + " · pago único" : P.fmt(l.unit) + " ÷ " + l.meses + " meses × " + l.qty) : P.fmt(l.unit) + " × " + l.qty + " · por mes",
+      })),
+    }));
+    const treeTotals = [
+      { k: "Costo operativo", v: H(P.fmt(r.ops)), w: 400 },
+      ...r.fin.map((f) => ({ k: "+ " + f.name, v: H(P.fmt(f.monto)), w: 400 })),
+      { k: "Costo total", v: H(P.fmt(r.costo)), w: 500 },
+      { k: "÷ (1 − margen " + (showCost ? P.pct(margin) : "—") + ")", v: "", w: 400 },
+      { k: "Venta mensual", v: P.fmt(r.venta), w: 600 },
+    ];
+
+    const pv = (x) => { const v = Math.round(x * 10000) / 100; return P.num(v, Math.round(v * 10) === v * 10 ? 1 : 2); };
+    const fv = (id, k, def) => (finS[id] && finS[id][k] != null ? finS[id][k] : def);
+    const same = (a, b) => Math.abs(a - b) < 1e-9;
+    const finItems = r.fin.map((f) => {
+      const p = f.p, d = cfg.fin[f.id];
+      let fields, summary, defTxt, ovr;
+      if (f.id === "cf") {
+        fields = [{ key: "dias", label: "Días de pago", value: fv("cf", "dias", String(p.dias)), unit: "días" }, { key: "tasa", label: "Tasa mensual", value: fv("cf", "tasa", pv(p.tasa)), unit: "%" }];
+        summary = p.dias + " días · " + pv(p.tasa) + " % mensual";
+        defTxt = "Configuración: " + d.dias + " días · " + pv(d.tasa) + " % mensual";
+        ovr = p.dias !== d.dias || !same(p.tasa, d.tasa);
+      } else if (f.id === "pg") {
+        fields = [{ key: "pct", label: "% del contrato", value: fv("pg", "pct", pv(p.pct)), unit: "%" }, { key: "prima", label: "Prima anual", value: fv("pg", "prima", pv(p.prima)), unit: "%" }, { key: "plazo", label: "Plazo", value: fv("pg", "plazo", String(p.plazo)), unit: "meses" }];
+        summary = pv(p.pct) + " % del contrato · prima " + pv(p.prima) + " % · " + p.plazo + " meses";
+        defTxt = "Configuración: " + pv(d.pct) + " % · prima " + pv(d.prima) + " % anual · " + d.plazo + " meses";
+        ovr = !same(p.pct, d.pct) || !same(p.prima, d.prima) || p.plazo !== d.plazo;
+      } else {
+        fields = [{ key: "uf", label: "Monto", value: fv("rc", "uf", P.num(p.uf)), unit: "UF" }, { key: "prima", label: "Prima anual", value: fv("rc", "prima", pv(p.prima)), unit: "%" }, { key: "plazo", label: "Plazo", value: p.plazo, kind: "select", options: P.RC_PLAZOS }];
+        if (p.plazo === "n") fields.push({ key: "plazoN", label: "Meses", value: fv("rc", "plazoN", String(p.plazoN)), unit: "meses" });
+        summary = "UF " + P.num(p.uf) + " · prima " + pv(p.prima) + " % · " + P.rcPlazoLabel(p);
+        defTxt = "Configuración: UF " + P.num(d.uf) + " · prima " + pv(d.prima) + " % anual · " + P.rcPlazoLabel(d);
+        ovr = p.uf !== d.uf || !same(p.prima, d.prima) || p.plazo !== d.plazo || (p.plazo === "n" && p.plazoN !== d.plazoN);
+      }
+      ovr = ovr || !!p.on !== !!d.on;
+      if (!d.on) defTxt += " · desactivado por defecto";
+      return { id: f.id, name: f.name, on: !!p.on, summary: p.on ? summary : "Desactivado en esta cotización · " + summary, montoTxt: p.on ? H(P.fmt(f.monto)) + " al mes" : "No suma", defTxt, overridden: ovr, fields };
+    });
+    const finBase = (s) => s.fin ?? presetFin;
+    const onFinField = (id, k, v) => this.setState((s) => { const b = finBase(s); return { fin: { ...b, [id]: { ...(b[id] || {}), [k]: v } } }; });
+    const onFinToggle = (id, v) => { this.setState((s) => { const b = finBase(s); return { fin: { ...b, [id]: { ...(b[id] || {}), on: v } } }; }); this.recalc(); };
+    const onFinReset = (id) => { this.setState((s) => { const b = { ...finBase(s) }; delete b[id]; return { fin: b }; }); this.recalc(); };
+    const catGroups = r.groups.map((g) => ({
+      label: g.label, totalTxt: P.fmt(g.total),
+      rows: g.rows.map((row) => ({ id: row.id, label: row.label + (row.activa ? "" : " · inactiva") + (row.sistema ? " · calculado" : ""), totalTxt: P.fmt(row.total), sub: row.unico ? "+ " + P.fmt(row.unico) + " pago único" : "", items: row.items.map((it) => ({ name: it.name, sec: it.sec, montoTxt: it.unico ? P.fmt(it.unico) + " único" : P.fmt(it.monto) })) })),
+    }));
+    let rp = {};
+    const rpo = S.rateoPop;
+    const rl = rpo && allLines.find((x) => x.id === rpo.id);
+    if (rl) {
+      const setR = (val) => { this.setState({ rateos: { ...rateos, [rl.id]: val }, rateoPop: null }); this.recalc(); };
+      const nVal = S.rateoN ?? (rl.rateoId === "n" ? String(rl.rateoN) : "");
+      const nMode = S.rateoN != null || rl.rateoId === "n";
+      const cuotaFor = (m) => (m ? P.fmt(rl.unit / m) + "/mes" : "una vez");
+      rp = {
+        left: rpo.left + "px", top: rpo.top + "px", name: rl.name, unitTxt: P.fmt(rl.unit), defTxt: (rl.adhoc ? "ítem propio: " : "catálogo: ") + P.rateoLabel(rl.rateoDef),
+        items: P.RATEOS.map((o) => ({ value: o.id, label: o.id === "contrato" ? "Plazo del contrato · " + P.MODEL.duracion + " m" : o.label, on: o.id === rl.rateoId, meta: o.id === "n" ? (rl.rateoId === "n" ? cuotaFor(rl.rateoN) : "elige") : cuotaFor(o.meses) })),
+        onSelect: (it) => { if (it.value === "n") this.setState({ rateoN: nVal || "18" }); else setR({ id: it.value }); },
+        nMode, nVal, onN: (v) => this.setState({ rateoN: v }),
+        applyN: () => { const n = Math.max(1, Math.min(120, parseInt(String(nVal).replace(/\D/g, ""), 10) || 1)); setR({ id: "n", n }); },
+        canReset: rl.rateoOverridden, reset: () => { const x = { ...rateos }; delete x[rl.id]; this.setState({ rateos: x, rateoPop: null }); this.recalc(); },
+        inStyle: { width: 140 },
+      };
+    }
+    const condOpen = S.condOpen ?? false;
+    const resOpen = S.resOpen ?? false;
+    const ufTxt = estado === "faltaUF" ? "UF 40.198,12" : P.uf(P.UF.valor);
+    return {
+      ...base,
+      tabs: P.tabs, groups: P.groups, appBar,
+      q: P.quote, codeLine: P.quote.code + " · " + P.quote.version,
+      badge: { tone: lbl[0], label: lbl[1] },
+      isLoading, isError, isReady, showBody: !isError,
+      pad: isTablet ? "20px 24px 32px" : "20px 32px 32px",
+      tabBar: isTablet && isReady, deskAside: !isTablet,
+      bodyCols: isTablet ? "minmax(0,1fr)" : "minmax(0,1fr) 312px",
+      cols: cliente ? "minmax(0,1fr) 160px 132px" : isTablet ? "16px minmax(0,1fr) 104px 112px 112px" : "16px minmax(0,1fr) 108px 116px 116px",
+      interna, cliente, editable, handleVis: editable ? "visible" : "hidden",
+      skelSecs: [{ rows: [1, 2] }, { rows: [1, 2] }, { rows: [1] }],
+      secs, r, dim,
+      ventaTxt: P.fmt(r.venta), ventaUF: P.uf(r.ventaUF), costoTxt: H(P.fmt(r.costo)), unicoTxt: P.fmt(r.unico),
+      dotacion: pl(r.pos, "posición", "posiciones") + " · " + pl(r.pers, "persona", "personas"),
+      ufTxt, ufSub: estado === "faltaUF" ? P.UF.ayer + " · falta la de hoy" : P.UF.fecha + (frozen ? " · fijada al enviar" : " · se fija al enviar"),
+      showCost, showMargin: showCost && interna, noCostNote: !showCost && interna,
+      finItems, finTotalTxt: H(P.fmt(r.finTotal)) + " al mes", onFinField, onFinReset, onFinToggle,
+      minV: min, alertaV: alertaM,
+      onFinTrace: (id, e) => { if (e && e.stopPropagation) e.stopPropagation(); this.openTrace(id, e); },
+      finDefaultOpen: ov0 === "instrumentos" || preset ? { cf: true, pg: true, rc: true } : { cf: true },
+      catGroups, manoObraTxt: H(P.fmt(r.manoObra)),
+      rateoPop: !!rl, rp, closeRateo: () => this.setState({ rateoPop: null, rateoN: null }),
+      cond: P.condiciones, condPhone: P.condiciones.slice(0, 5), condOpen, condChev: condOpen ? "i-chevron-down" : "i-chevron-right", toggleCond: () => this.setState({ condOpen: !condOpen }),
+      condResumen: "45 días · polinómico · 24 meses · desde 01-12-2026",
+      resOpen, resChev: resOpen ? "i-chevron-down" : "i-chevron-right", resToggleTxt: resOpen ? "Ocultar detalle" : "Detalle", toggleRes: () => this.setState({ resOpen: !resOpen }),
+      alerts, primary: primary || {}, hasPrimary: !!primary,
+      frozenNote: frozen && interna, frozenTxt: "Enviada el " + P.quote.enviada + " · solo lectura",
+      canApprove: under && showCost,
+      onTraceVenta: (e) => this.openTrace("venta", e),
+      tracePop: !!traceData && !isPhone, traceSheet: !!traceData && isPhone, traceData,
+      traceLeft: (trace && trace.left) + "px", traceTop: (trace && trace.top) + "px",
+      closeTrace, openFull: () => this.setState({ trace: null, full: true }),
+      fullOpen, closeFull: () => this.setState({ full: false }), sheetSide: isPhone ? "bottom" : "right",
+      fullDesc: P.quote.code + " · " + P.quote.version + " · Modelo de costeo v7", tree, treeTotals,
+      menuOpen, menuItems, closeMenu: () => this.setState({ menu: false }),
+      simDesk: simOpen && !isTablet && !isPhone && showCost && interna, simTablet: simOpen && isTablet && showCost,
+      openSim: () => this.setState({ sim: true, simM: margin, trace: null }), closeSim: () => this.setState({ sim: false, simM: undefined }),
+      applySim: () => { this.setState({ sim: false, margin: simM, simM: undefined }); this.recalc(); },
+      simModes: [{ value: "margen", label: "Margen" }, { value: "objetivo", label: "Precio objetivo" }], simMode,
+      setSimMode: (v) => this.setState({ simMode: v }), simByMargin: simMode === "margen", simByTarget: simMode === "objetivo",
+      segFull: { width: "100%" },
+      simPct: Math.round(simM * 1000) / 10, simPctTxt: P.pct(simM), simM,
+      onSimRange: (e) => this.setState({ simM: parseFloat(e.target.value) / 100 }),
+      simTargetTxt: S.simTarget ?? P.fmt(rs.venta),
+      onSimTarget: (e) => { const v = e && e.target ? e.target.value : e; const n = parse(v); const st = { simTarget: v }; if (n > r.costo) st.simM = 1 - r.costo / n; this.setState(st); },
+      simVentaTxt: P.fmt(rs.venta), simDeltaTxt: sgn(dV) + P.fmt(Math.abs(dV)).replace("$ ", "$ ") + " · " + sgn(dM) + P.num(Math.abs(dM), 1) + " pts",
+      modoTxt: P.MODEL.modo,
+    };
+  }
+}
+</script>
+</body>
+</html>

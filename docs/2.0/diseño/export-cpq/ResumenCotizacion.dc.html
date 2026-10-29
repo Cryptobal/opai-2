@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+</helmet>
+<div style="display:flex;flex-direction:column;gap:12px;min-width:0">
+<section class="card pad" aria-label="Resumen" style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:36px">
+<span class="t-label">Resumen</span>
+<sc-if value="{{ monedaSeg }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmented" options="{{ monedaOpts }}" value="{{ moneda }}" on-change="{{ onMoneda }}" label="Moneda al cliente" hint-size="112px,36px"></x-import>
+</sc-if>
+<sc-if value="{{ monedaStatic }}" hint-placeholder-val="{{ false }}">
+<span class="t-body-sm muted">Moneda al cliente: <b style="font-weight:600;color:var(--ds-fg)">{{ moneda }}</b></span>
+</sc-if>
+</div>
+<div style="display:flex;flex-direction:column;gap:2px">
+<span class="t-caption">Venta mensual neta</span>
+<button type="button" onClick="{{ onTraceVenta }}" style="all:unset;cursor:pointer;align-self:flex-start;white-space:nowrap;min-height:{{ ventaMinH }};display:inline-flex;align-items:center;font-size:28px;line-height:34px;font-weight:600;letter-spacing:-0.018em;font-variant-numeric:tabular-nums;text-decoration:underline dotted var(--ds-border-strong);text-underline-offset:6px;transition:opacity 200ms var(--ds-ease);opacity:{{ dim }}">{{ ventaMain }}</button>
+<span class="t-caption t-numeric" style="white-space:nowrap">{{ ventaAlt }}</span>
+<span class="t-caption t-numeric" style="text-wrap:pretty">{{ ufLine }}</span>
+</div>
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding-top:12px;border-top:1px solid var(--ds-border)">
+<span class="t-body-sm muted">Pagos únicos</span>
+<span style="display:flex;flex-direction:column;align-items:flex-end"><span class="t-mono" style="white-space:nowrap">{{ unicoMain }}</span><span class="t-caption t-numeric" style="white-space:nowrap">{{ unicoAlt }}</span></span>
+</div>
+<sc-if value="{{ showCost }}" hint-placeholder-val="{{ true }}">
+<div style="padding-top:12px;border-top:1px solid var(--ds-border)">
+<dc-import name="SemaforoMargen" margen="{{ margen }}" minimo="{{ minimo }}" alerta="{{ alerta }}" size="sm" hint-size="100%,84px"></dc-import>
+</div>
+</sc-if>
+</section>
+<sc-if value="{{ showCost }}" hint-placeholder-val="{{ true }}">
+<section class="card" aria-label="Costos por categoría">
+<button type="button" onClick="{{ toggleCat }}" aria-expanded="{{ catOpen }}" style="all:unset;box-sizing:border-box;width:100%;display:flex;align-items:center;gap:10px;padding:12px 16px;min-height:56px;cursor:pointer">
+<span class="ic sm {{ catChev }} muted" aria-hidden="true"></span>
+<span style="display:flex;flex-direction:column;flex:1;min-width:0"><span class="t-label">Costos por categoría</span><span class="t-caption">Costo mensual de la cotización</span></span>
+<span class="t-mono" style="white-space:nowrap;transition:opacity 200ms var(--ds-ease);opacity:{{ dim }}">{{ costoTxt }}</span>
+</button>
+<sc-if value="{{ catOpen }}" hint-placeholder-val="{{ false }}">
+<div style="padding:0 16px 16px">
+<dc-import name="ResumenCategorias" groups="{{ catGroups }}" mano-obra-txt="{{ manoObraTxt }}" hide-title="{{ true }}" touch="{{ touch }}" hint-size="100%,360px"></dc-import>
+</div>
+</sc-if>
+</section>
+<dc-import name="TarjetaInstrumentos" items="{{ finItems }}" editable="{{ finEditable }}" total-txt="{{ finTotalTxt }}" on-toggle="{{ onFinToggle }}" on-edit="{{ onFinEdit }}" hint-size="100%,260px"></dc-import>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:340,&quot;height&quot;:900},&quot;moneda&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;UF&quot;,&quot;CLP&quot;],&quot;default&quot;:&quot;UF&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;monedaLocked&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;monedaStatic&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;onMoneda&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(v:string)=&gt;void&quot;},&quot;ufLine&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;ventaMain&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;ventaAlt&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;unicoMain&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;unicoAlt&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;costoTxt&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;showCost&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;margen&quot;:{&quot;editor&quot;:&quot;float&quot;,&quot;default&quot;:0.104,&quot;tsType&quot;:&quot;number&quot;},&quot;minimo&quot;:{&quot;editor&quot;:&quot;float&quot;,&quot;default&quot;:0.1,&quot;tsType&quot;:&quot;number&quot;},&quot;alerta&quot;:{&quot;editor&quot;:&quot;float&quot;,&quot;default&quot;:0.03,&quot;tsType&quot;:&quot;number&quot;},&quot;catGroups&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object[]&quot;},&quot;manoObraTxt&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;catOpen&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;touch&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;finItems&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object[]&quot;},&quot;finEditable&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;finTotalTxt&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;onFinToggle&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;Function&quot;},&quot;onFinEdit&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;Function&quot;},&quot;onTraceVenta&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;Function&quot;},&quot;dim&quot;:{&quot;editor&quot;:&quot;float&quot;,&quot;default&quot;:1,&quot;tsType&quot;:&quot;number&quot;}}">
+class Component extends DCLogic {
+  state = { catOpen: null };
+  renderVals() {
+    const p = this.props;
+    const catOpen = this.state.catOpen ?? !!p.catOpen;
+    const st = !!p.monedaStatic;
+    return {
+      monedaOpts: [{ value: "UF", label: "UF", disabled: !!p.monedaLocked && p.moneda !== "UF" }, { value: "CLP", label: "CLP", disabled: !!p.monedaLocked && p.moneda !== "CLP" }],
+      moneda: p.moneda ?? "UF", onMoneda: p.onMoneda, monedaSeg: !st, monedaStatic: st,
+      ufLine: p.ufLine ?? "UF del día $ 40.215,37 al 29-10 · se congela al enviar",
+      ventaMain: p.ventaMain ?? "UF 467,65", ventaAlt: p.ventaAlt ?? "$ 18.806.774 · neto, sin IVA", onTraceVenta: p.onTraceVenta,
+      unicoMain: p.unicoMain ?? "UF 23,59", unicoAlt: p.unicoAlt ?? "$ 948.661", costoTxt: p.costoTxt ?? "",
+      showCost: p.showCost ?? true, margen: p.margen ?? 0.104, minimo: p.minimo ?? 0.1, alerta: p.alerta ?? 0.03,
+      catGroups: p.catGroups, manoObraTxt: p.manoObraTxt, touch: !!p.touch,
+      catOpen, catChev: catOpen ? "i-chevron-down" : "i-chevron-right", toggleCat: () => this.setState({ catOpen: !catOpen }),
+      finItems: p.finItems, finEditable: p.finEditable ?? true, finTotalTxt: p.finTotalTxt, onFinToggle: p.onFinToggle, onFinEdit: p.onFinEdit,
+      dim: p.dim ?? 1, ventaMinH: p.touch || p.monedaStatic ? "44px" : "34px",
+    };
+  }
+}
+</script>
+</body>
+</html>
