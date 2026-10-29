@@ -94,7 +94,7 @@ Relación central: **negocio 1—N seguimientos** (a lo más **uno activo o paus
 | No cerrar desde la etapa | Etapa abierta | No | Desde esa etapa en adelante, el plan nunca aplica un cierre solo | owner, admin |
 | Activo | Sí/no | Sí | Apagar no cancela los seguimientos en curso: los deja terminar o se cancelan en lote con vista previa | owner, admin |
 
-«owner, admin» en esta tabla incluye cualquier rol con `comercial:config.manage` (por ejemplo, un rol personalizado de jefe comercial). Activar «OPAI automático» en un paso o `aplicar_cierre_propuesto` queda en la auditoría con quién, cuándo y qué versión del plan. La única excepción es el envío del agente sin aprobación, que solo activa el owner (R18).
+«owner, admin» en esta tabla incluye cualquier rol con `comercial:config.manage` (por ejemplo, un rol personalizado de jefe comercial). Activar o desactivar «OPAI automático» en un paso o `aplicar_cierre_propuesto` queda en la auditoría con quién, cuándo y qué versión del plan. La única excepción es el envío del agente sin aprobación, que solo activa el owner (R18).
 
 **Paso del plan**
 
@@ -160,7 +160,7 @@ Relación central: **negocio 1—N seguimientos** (a lo más **uno activo o paus
 - **R14.** Ganar sigue siendo una acción humana (o de agente con aprobación) con los requisitos de su etapa (R9 y R18 de `comercial.md`). Ganar o perder el negocio **termina** su seguimiento y cancela los pasos pendientes.
 - **R15.** Al terminar los pasos sin respuesta, el plan hace lo configurado:
   - **proponer el cierre** (por defecto): un cierre propuesto («Proponer perdido», motivo `sin_respuesta` sugerido) que **confirma una persona** (R16); cerrar es la acción «Perder» de siempre, con motivo;
-  - **aplicar el cierre propuesto** (si el tenant lo configura, decisión 14; lo activa el owner, los administradores del tenant o un rol con `comercial:config.manage` y la activación queda en la auditoría con quién y cuándo): OPAI pierde el negocio con el motivo propuesto, lo deja en la Actividad como hecho por «OPAI automático · plan vN», avisa al responsable y se puede reabrir desde el aviso con el motivo prellenado («cerrado por la cadencia sin respuesta») y confirmación (R20 de `comercial.md`). Aplica a todo negocio del plan por igual: **no hay umbrales de monto** (decisión 4);
+  - **aplicar el cierre propuesto** (si el tenant lo configura, decisión 14; lo activa el owner, los administradores del tenant o un rol con `comercial:config.manage` y la activación y la desactivación quedan en la auditoría con quién, cuándo y qué versión del plan): OPAI pierde el negocio con el motivo propuesto, lo deja en la Actividad como hecho por «OPAI automático · plan vN», avisa al responsable y se puede reabrir desde el aviso con el motivo prellenado («cerrado por la cadencia sin respuesta») y confirmación (R20 de `comercial.md`). Aplica a todo negocio del plan por igual: **no hay umbrales de monto** (decisión 4);
   - **solo avisar.**
   Ningún plan aplica un cierre solo en un negocio que está en la etapa «no cerrar desde» o más adelante, ni en uno con una «respuesta del cliente» posterior al último paso.
 - **R16.** Por defecto, lo propuesto lo confirma **una persona**: el responsable del negocio o cualquiera con `comercial:negocios.manage`. Si lo propone un agente, va a la cola de aprobaciones, aunque el plan aplique los cierres propuestos de OPAI.
