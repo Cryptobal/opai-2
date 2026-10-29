@@ -20,6 +20,10 @@
 
 > **Integración CAR-38 con CAR-37:** se conservan las fichas de roles y de alcance de supervisor. Las referencias de CAR-37 a supervisores sin pantalla describen el estado anterior a CAR-38. En `/api/v1` con sesión manda la lista de CAR-37: fuera de ella, portal nulo y 403 (CAR-38 no la amplía); CAR-38 solo suma que toda escritura con sesión exige el propio `Origin`.
 
+- **CPQ · instrumentos financieros por cotización y categorías editables (CAR-66, PR #123, 29-oct-2026; solo docs).** Decisión de Carlos, ya escrita en `modulos/cpq.md` (R60, R61, CA22, CA23) y en el Design Prompt:
+  - **Instrumentos financieros:** el costo financiero, la póliza de garantía o cumplimiento y la RC traen valores por defecto y «activado por defecto» desde Configuración.
+  - **En cada cotización:** cada instrumento se activa o desactiva y se edita. El plazo de la RC puede ser 12 meses, anual, plazo del contrato o N meses. Lo que se cambia queda marcado «sobrescrito» y se puede volver al valor por defecto.
+  - **Categorías del catálogo:** cada tenant las edita (agregar, renombrar, desactivar, marcar como directa o indirecta). Las que están en uso no se borran.
 - **CPQ · ajustes de alcance tras la primera tanda de Claude Design (CAR-66, PR #123, 29-oct-2026; solo docs).** Decisión de Carlos, ya escrita en `modulos/cpq.md` (R55–R59, CA18–CA21) y en `design/DESIGN-PROMPT-cpq.md`:
   - **Resumen de costos:** por categoría, con subtotales de directos e indirectos, como en 1.0.
   - **Catálogo:** cada ítem tiene costo unitario y un rateo por defecto (pago único, N meses o plazo del contrato), que se puede sobrescribir por línea.

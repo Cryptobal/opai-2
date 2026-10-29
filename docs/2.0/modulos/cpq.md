@@ -222,13 +222,13 @@ Que cualquier empresa de servicios con personal (Gard primero, con la vertical *
   - **Qué reemplaza:** el modo `amortizable` de ADR-042 (2) pasa a ser este rateo.
 - **R57.** **Pólizas y costo financiero con detalle editable.**
   - **Póliza de garantía o fiel cumplimiento:** en porcentaje del contrato (% garantizado, tasa anual, gasto administrativo, meses) o en monto fijo UF.
-  - **Responsabilidad civil:** prima anual en UF con % asignado, o tasa sobre el monto asegurado.
+  - **Responsabilidad civil:** prima anual en UF con % asignado, o tasa sobre el monto asegurado, y su **plazo** (R60).
   - **Costo financiero:** tasa mensual, activado o no, y si los pagos únicos entran a la base de la póliza.
-  - **En la cotización:** cada instrumento muestra su detalle y se edita en la propia cotización, partiendo de los **valores por defecto del tenant**. El cálculo es el de R33–R34.
+  - **En la cotización:** cada instrumento muestra su detalle y se edita en la propia cotización, partiendo de los **valores por defecto del tenant**. El cálculo es el de R33–R34. Cómo se activa, se sobrescribe y se restablece está en R60.
 - **R58.** **La configuración del CPQ queda en solo 3 pestañas.** Todo lo demás se decide en la cotización.
   - **Las 3 pestañas:**
-    - **Catálogo:** ítems con categoría y clase directo/indirecto, costo unitario, unidad, modo de cálculo, rateo por defecto, visible al cliente y por defecto. Incluye también las categorías y los paquetes.
-    - **Pólizas y finanzas:** valores por defecto de póliza de garantía o fiel cumplimiento, RC y costo financiero, más las condiciones comerciales por defecto (forma y días de pago, reajuste, duración, validez y moneda).
+    - **Catálogo:** ítems con categoría y clase directo/indirecto, costo unitario, unidad, modo de cálculo, rateo por defecto, visible al cliente y por defecto. Incluye también las categorías (editables, R61) y los paquetes.
+    - **Pólizas y finanzas:** valores por defecto de póliza de garantía o fiel cumplimiento, RC y costo financiero, cada uno con su «activado por defecto» (R60), más las condiciones comerciales por defecto (forma y días de pago, reajuste, duración, validez y moneda).
     - **Márgenes:** modo de margen por defecto, margen por defecto, margen mínimo, umbral de alerta del semáforo y margen por defecto de las líneas adicionales.
   - **Lo que pasa a la cotización:**
     - patrón, horario, sueldo, personas por posición, cantidades y rateo por línea;
@@ -238,6 +238,24 @@ Que cualquier empresa de servicios con personal (Gard primero, con la vertical *
 - **R59.** **Margen y costo solo con `cpq:costos.ver`** (pregunta 9).
   - **Qué se oculta:** quien no tiene el permiso no ve el porcentaje de margen, el costo, el resumen por categoría, los sueldos ni el semáforo.
   - **Dónde se aplica:** en el **servidor**. Las capacidades no devuelven esos campos, así que vale igual en la pantalla, `/api/v1` y el MCP, y el agente tampoco los recibe.
+
+### L. Instrumentos financieros por cotización y categorías editables (decisión de Carlos, 29-oct-2026) **[decidido]**
+
+- **R60.** **Cada cotización decide sus instrumentos financieros.** Son tres: costo financiero, póliza de garantía o cumplimiento, y RC.
+  - **En Configuración** (Pólizas y finanzas): cada instrumento tiene sus **valores por defecto** y un interruptor **«activado por defecto»**.
+  - **Al crear la cotización:** cada instrumento parte activado o desactivado según ese interruptor y con los valores del tenant.
+  - **En cada cotización**, cada instrumento:
+    - se **activa o desactiva**;
+    - se **edita** campo por campo. El plazo de la RC puede ser **12 meses, anual, plazo del contrato o N meses**.
+  - **Marca y vuelta atrás:** todo valor distinto del de Configuración, incluido el estado activado o desactivado, lleva la marca **«sobrescrito»**. Hay una opción **«volver al valor por defecto»** por campo y por instrumento.
+  - **Cambios en Configuración:** no mueven las cotizaciones existentes (R27). Una cotización nueva toma los valores vigentes.
+  - **Cálculo:** un instrumento desactivado no entra al cálculo (vale 0 en `k`, `RC` o `Gfijo` de R33). La traza dice si estaba activo y de dónde salió cada valor: Configuración o sobrescrito.
+- **R61.** **Las categorías del catálogo son editables por tenant.**
+  - **Qué se puede hacer:** agregar, renombrar, desactivar y marcar cada una como **directa o indirecta** (R55).
+  - **Desactivar** una categoría la saca de la lista para ítems nuevos. Los ítems que ya la usan y las cotizaciones existentes no cambian.
+  - **No se borra** una categoría en uso.
+  - **Cambiar su clase** directo/indirecto solo cambia los resúmenes de las cotizaciones nuevas o recalculadas. Cada versión enviada guarda la clase que usó.
+  - **Plantilla:** la plantilla de la vertical entrega las categorías de partida (R6).
 
 ## 6. Estados y transiciones
 
@@ -303,15 +321,15 @@ Toda capacidad de CPQ sale por MCP con los mismos permisos (ADR-055); las de esc
 | `cpq_cotizaciones_simular` | Calcula una cotización completa desde una especificación, **sin escribir** (ADR-042 (10)) | Lectura | — | — |
 | `cpq_cotizaciones_create` / `create_rapida` | Crear desde un negocio; o rápida con paquetes, creando el negocio si falta | Escritura | ✓ | — |
 | `cpq_cotizaciones_marcar_vigente` | Elegir la vigente del negocio (R46) | Escritura | ✓ | — |
-| `cpq_cotizaciones_ajustar` | **Lote de cambios tipados** sobre la versión editable: agregar o quitar sección, agregar línea de puesto o de ítem (o paquete), cambiar posiciones, horario, patrón o sueldo, cambiar el rateo de una línea (R56), editar el detalle de pólizas, RC o costo financiero (R57), fijar margen o precio objetivo, cambiar condiciones, mostrar u ocultar al cliente. Devuelve el **antes y después** de venta y margen | Escritura | ✓ | — |
+| `cpq_cotizaciones_ajustar` | **Lote de cambios tipados** sobre la versión editable: agregar o quitar sección, agregar línea de puesto o de ítem (o paquete), cambiar posiciones, horario, patrón o sueldo, cambiar el rateo de una línea (R56), activar, desactivar o editar el detalle de pólizas, RC o costo financiero y volverlos al valor por defecto (R57, R60), fijar margen o precio objetivo, cambiar condiciones, mostrar u ocultar al cliente. Devuelve el **antes y después** de venta y margen | Escritura | ✓ | — |
 | `cpq_cotizaciones_nueva_version` / `renovar` / `actualizar_modelo` / `duplicar` / `archivar` | R27, R43, R44, R23 | Escritura | ✓ | — |
 | `cpq_cotizaciones_marcar_lista` / `solicitar_aprobacion` / `retirar_aprobacion` | R40, R42 | Escritura | ✓ | — |
 | *(sin herramienta)* `cpq.cotizaciones.aprobar` / `rechazar_aprobacion` | Decisión de margen. `soloPersonas`, en `paridad-excepciones.ts` con el motivo «es el control humano sobre lo que propone un agente» | — | — | Solo personas |
 | `cpq_cotizaciones_enviar` | Congela y envía en el formato elegido (CAR-68) | **Irreversible** | ✓ | **Sí** |
 | `cpq_puestos_ofrecer` / `confirmar` | Arma la oferta de puestos (R2) / RRHH la confirma | Escritura / irreversible | ✓ | Confirmar: **sí** (decide RRHH) |
 | `cpq_modelo_get` / `diferencias` | Configuración vigente (las 3 pestañas) y su historial de versiones; diferencias con la plantilla de la vertical | Lectura | — | — |
-| `cpq_catalogo_*` (`list`, `create`, `update`, `archivar` para ítems, categorías y paquetes) | Pestaña **Catálogo**: costo unitario, rateo por defecto, categoría con su clase directo/indirecto (R55, R56) | Lectura / escritura | ✓ | — |
-| `cpq_polizas_finanzas_get` / `set` | Pestaña **Pólizas y finanzas**: valores por defecto de póliza de garantía o fiel cumplimiento, RC, costo financiero y condiciones (R57) | Lectura / escritura | ✓ | — |
+| `cpq_catalogo_*` (`list`, `create`, `update`, `archivar` para ítems y paquetes; `create`, `update` y `desactivar` para categorías) | Pestaña **Catálogo**: costo unitario, rateo por defecto, categorías editables con su clase directo/indirecto (R55, R56, R61) | Lectura / escritura | ✓ | — |
+| `cpq_polizas_finanzas_get` / `set` | Pestaña **Pólizas y finanzas**: valores por defecto y «activado por defecto» de póliza de garantía o cumplimiento, RC y costo financiero, y condiciones (R57, R60) | Lectura / escritura | ✓ | — |
 | `cpq_margenes_get` / `set` | Pestaña **Márgenes**: modo, margen por defecto, mínimo, umbral de alerta y margen de adicionales | Lectura / escritura | ✓ | — |
 | `cpq_modelo_impacto` / `adoptar_novedad` | «Ver impacto» de un cambio antes de guardarlo (R9); adoptar una novedad de la plantilla (R7) | Lectura / escritura | ✓ | — |
 | `cpq_modelo_guardar` | Guarda los cambios de configuración como versión nueva del modelo (R8; lo que antes se llamaba «publicar») | Irreversible | ✓ | **Sí** |
@@ -405,6 +423,8 @@ Toda capacidad de CPQ sale por MCP con los mismos permisos (ADR-055); las de esc
 - **CA19.** Un ítem del catálogo con rateo «12 meses» entra a la cotización con ese rateo. Cambiarlo en la línea a «plazo del contrato» recalcula la línea, sin tocar el catálogo ni otras cotizaciones.
 - **CA20.** La póliza de garantía, la RC y el costo financiero parten de los valores del tenant y se editan en la cotización con su detalle. El precio resultante cuadra con R33.
 - **CA21.** La configuración del CPQ tiene exactamente 3 pestañas: Catálogo, Pólizas y finanzas, y Márgenes. Un usuario sin `cpq:modelo.manage` no la ve.
+- **CA22.** Con la RC «activada por defecto» y la póliza de garantía no, una cotización nueva parte así. Desactivar la RC en la cotización la marca «sobrescrito» y la saca del precio; «volver al valor por defecto» la reactiva con los valores del tenant. Cambiar el plazo de la RC a «plazo del contrato» recalcula su efecto mensual.
+- **CA23.** Un owner agrega la categoría «Tecnología» como indirecta, renombra «Logística» y desactiva «Insumos». Desactivar no cambia los ítems ni las cotizaciones existentes, y una categoría en uso no se puede borrar.
 
 ## 14. Preguntas para Carlos — decididas
 
@@ -450,6 +470,7 @@ Toda capacidad de CPQ sale por MCP con los mismos permisos (ADR-055); las de esc
 | Fecha | Cambio | Aprobó |
 |---|---|---|
 | 25-oct-2026 23:10 | Borrador con la regla de puestos y sueldos al ganar (respuesta 3 de Carlos a ADR-048; CAR-10) | — (decisión de Carlos 23:08–23:10) |
+| 29-oct-2026 | Instrumentos financieros por cotización (activar o desactivar, editar, plazo de RC, «sobrescrito», volver al valor por defecto, «activado por defecto» en Configuración) y categorías editables por tenant (R60, R61, CA22, CA23) | Carlos |
 | 29-oct-2026 | Ajustes de alcance de Carlos tras la primera tanda de Claude Design (R55–R59): resumen por categoría directos/indirectos, catálogo con costo unitario y rateo sobrescribible por línea, pólizas y costo financiero con detalle, configuración en 3 pestañas (Catálogo, Pólizas y finanzas, Márgenes); valores por cuenta e instalación y editor de fórmulas fuera de la v1 | Carlos |
 | 29-oct-2026 | Carlos decide las 15 preguntas del §14 tal como venían recomendadas; ajuste en la 9: margen y costo solo con `cpq:costos.ver`, también en servidor y MCP (PR #123) | Carlos |
 | 29-oct-2026 | Especificación completa (CAR-66): modelo y plantilla por vertical, catálogo, secciones por instalación, cálculo con traza, margen financiero de 1.0, casos dorados, versiones y aprobación, cotización rápida, agente y MCP; 8 preguntas de la Page **reconstruidas** y 7 nuevas; notas para CAR-67 y CAR-68; Design Prompt aparte. R1–R5 sin cambios | — (pendiente de aprobación) |
