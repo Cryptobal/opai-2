@@ -150,6 +150,13 @@ reemplaza el orden histórico del párrafo siguiente, sin autorizar pantallas si
 export aprobado del DS 2.0. Brief y criterios en
 [`NUCLEO-E2-agente-interno.md`](briefs/NUCLEO-E2-agente-interno.md).
 
+**Pantalla (CAR-69, 29-oct-2026).** El servidor está en `main` (PR #62 y #73).
+La interfaz sigue el ciclo de ADR-047: especificación en borrador en
+[`modulos/agente.md`](modulos/agente.md) con las 13 preguntas ya decididas por Carlos (29-oct-2026; adjuntos sí, voz no) y el
+Design Prompt (§15) → diseño aprobado en Claude Design → brief de la UI → PR.
+El módulo `agente` está apagado por defecto: **hay que activar la licencia para
+Gard** (decisión y acción de Carlos) antes de probar la pantalla en `test.opai.cl`.
+
 Decisión de Carlos, 26-oct-2026 10:08 CLT, chat con OPAI 2.0 (registrada por el bot OPAI 2.0): «ok» a la recomendación del bot de las 10:07; precisado por Carlos el 26-oct-2026 a las 10:51 (t117u) y 10:53 (t120u) CLT en el chat con el Revisor OPAI 2.0 (ADR-049). OPAI tendrá un agente propio en el celular (PWA) y en el escritorio, cliente del mismo registro de capacidades y del MCP, con la identidad y los permisos del usuario conectado. Pide confirmación antes de escribir, con dos niveles a elección del usuario («aprobar todo» o «confirmar paso a paso»). Usa la key de IA propia de cada tenant, con el modelo que el usuario elija entre los conectados, y mide el uso por tenant. Es un **módulo vendible aparte**. **Brief propio después de CPQ** («Ok, después del CPQ» — Carlos, 26-oct-2026 10:53 CLT, chat con el Revisor OPAI 2.0 (t120u)): Puestos → Comercial → CPQ → agente interno. Antes solo se reserva el punto de entrada («Preguntar a OPAI» en ⌘K y un lugar dentro de «Buscar» en el celular; integrada en `main` (PR #37, `7e526eb`)). El «chat» del backlog de abajo es el chat de 1.0, que no se porta; el asistente ya no está en el backlog.
 
 ### Backlog (sin fecha)
