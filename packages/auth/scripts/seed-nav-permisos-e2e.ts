@@ -3,6 +3,7 @@ import { sembrarAlcanceNav } from "./seed-nav-alcance-e2e";
 import { hashPassword } from "better-auth/crypto";
 import { cerrarClientes, dbAdmin, enTransaccion } from "@opai/db";
 import { exigirBaseE2E } from "../../db/scripts/exigir-base-e2e";
+import { usuarioE2E } from "./usuario-e2e";
 // Las tablas de tenant tienen FORCE RLS: se escribe con `enTransaccion(tenantId)`, nunca con el dueño a secas.
 
 async function main() {
@@ -28,19 +29,7 @@ async function main() {
       throw new Error("La persona de prueba existe con otro identificador.");
     for (const conceder of [false, true]) {
       const email = `supervisor-nav-${conceder ? "concede" : "deniega"}@opai.cl`;
-      const user = await tx.user.upsert({
-        where: { email },
-        update: {},
-        create: { email, name: "Supervisor E2E", emailVerified: true },
-      });
-      const account = await tx.account.findFirst({
-        where: { userId: user.id, providerId: "credential" },
-      });
-      if (account) await tx.account.update({ where: { id: account.id }, data: { password: hash } });
-      else
-        await tx.account.create({
-          data: { userId: user.id, providerId: "credential", accountId: user.id, password: hash },
-        });
+      const user = await usuarioE2E(email, "Supervisor E2E", hash);
       const rol = await tx.rol.upsert({
         where: { tenantId_nombre: { tenantId: tenant.id, nombre: `Supervisor E2E ${conceder}` } },
         update: {
@@ -79,19 +68,7 @@ async function main() {
     }
     for (const conceder of [false, true]) {
       const email = `nav-${conceder ? "concede" : "deniega"}@opai.cl`;
-      const user = await tx.user.upsert({
-        where: { email },
-        update: {},
-        create: { email, name: "Navegación E2E", emailVerified: true },
-      });
-      const account = await tx.account.findFirst({
-        where: { userId: user.id, providerId: "credential" },
-      });
-      if (account) await tx.account.update({ where: { id: account.id }, data: { password: hash } });
-      else
-        await tx.account.create({
-          data: { userId: user.id, providerId: "credential", accountId: user.id, password: hash },
-        });
+      const user = await usuarioE2E(email, "Navegación E2E", hash);
       const rol = await tx.rol.upsert({
         where: { tenantId_nombre: { tenantId: tenant.id, nombre: `Navegación E2E ${conceder}` } },
         update: { permisos: conceder ? [] : ["core:personas.read"] },

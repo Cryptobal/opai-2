@@ -23,8 +23,3 @@ export function tenantsOperables() {
     select: { id: true, slug: true, timezone: true },
   });
 }
-
-/** Solo el adaptador Better Auth, dentro de packages/auth (lint). */
-export function clienteAuth() {
-  return clienteApp();
-}

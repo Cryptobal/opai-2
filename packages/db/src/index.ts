@@ -5,12 +5,23 @@ export { leerInbox } from "./inbox";
 export { listarInstalaciones, type FiltroInstalaciones } from "./instalaciones-lista";
 export { forTenant, validarTenantId, type TenantDb } from "./for-tenant";
 export { forUser, type UserDb } from "./for-user";
-export { clienteAuth, tenantPorSlug, usuarioPorId, tenantsOperables } from "./globales";
+export { tenantPorSlug, usuarioPorId, tenantsOperables } from "./globales";
+// Identidad (CAR-43): Better Auth con el rol `opai_auth`; el resto, solo operaciones con nombre.
+export {
+  borrarUsuario,
+  clienteAuth,
+  clienteBloqueoLogin,
+  type ResultadoBorrado,
+  restablecerSegundoFactor,
+  ultimosAccesos,
+  usuarioEnOtrasEmpresas,
+} from "./identidad";
 export { accesoPlataforma, preciosHasta, type Globales } from "./plataforma";
 export type { HechoPlataforma } from "./plataforma-aprobaciones";
-// La auditoría global solo se escribe por operaciones con nombre (`accesoPlataforma()`; CAR-42
-// sumará la suya para el ámbito `seguridad`): no se exporta el append.
+// La auditoría global solo se escribe por operaciones con nombre: `accesoPlataforma()` (ámbito
+// `plataforma`) y `registrarEventoSeguridad` (ámbito `seguridad`, CAR-42). No se exporta el append.
 export type { AmbitoAuditoriaGlobal, HechoGlobal } from "./auditoria-global";
+export { type EventoSeguridad, registrarEventoSeguridad } from "./eventos-seguridad";
 export {
   type FiltroTrabajos,
   operacionesEmpresa,

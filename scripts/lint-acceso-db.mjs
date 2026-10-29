@@ -10,6 +10,14 @@ export const accesoDb = {
     const db = archivo.includes("/packages/db/");
     const auth = archivo.includes("/packages/auth/");
     const contexto = archivo.endsWith("/packages/capabilities/src/contexto.ts");
+    // Operaciones de identidad (CAR-43, CAR-54, CAR-45): solo `ctx.identidad`, ya autorizado.
+    const identidad = archivo.endsWith("/packages/capabilities/src/identidad-db.ts");
+    const IDENTIDAD = [
+      "borrarUsuario",
+      "restablecerSegundoFactor",
+      "ultimosAccesos",
+      "usuarioEnOtrasEmpresas",
+    ];
     function revisar(node) {
       if (node.source?.value !== "@opai/db" || db) return;
       for (const s of node.specifiers ?? []) {
@@ -18,8 +26,10 @@ export const accesoDb = {
           s.type === "ImportNamespaceSpecifier" ||
           s.type === "ImportDefaultSpecifier" ||
           nombre === "globales" ||
-          (nombre === "clienteAuth" && !auth) ||
+          ((nombre === "clienteAuth" || nombre === "clienteBloqueoLogin") && !auth) ||
           (nombre === "accesoPlataforma" && !contexto) ||
+          (IDENTIDAD.includes(nombre) && !identidad) ||
+          (nombre === "registrarEventoSeguridad" && !auth) ||
           (nombre === "dbAdmin" && !archivo.includes("/scripts/"))
         ) {
           context.report({ node: s, messageId: "prohibido" });

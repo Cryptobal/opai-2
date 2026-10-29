@@ -3,6 +3,7 @@
 import { hashPassword } from "better-auth/crypto";
 import { cerrarClientes, dbAdmin, enTransaccion } from "@opai/db";
 import { exigirBaseE2E } from "../../db/scripts/exigir-base-e2e";
+import { usuarioE2E } from "./usuario-e2e";
 
 // Solo el proyecto que corre (E2E_PROYECTO): limpiar a los otros rompería su prueba en paralelo.
 const PROYECTOS = ["telefono", "ipad", "desktop"];
@@ -40,19 +41,7 @@ async function main() {
     });
     {
       const email = `supervisor-asignar-${proyecto}@opai.cl`;
-      const user = await tx.user.upsert({
-        where: { email },
-        update: {},
-        create: { email, name: `Supervisor asignable ${proyecto}`, emailVerified: true },
-      });
-      const account = await tx.account.findFirst({
-        where: { userId: user.id, providerId: "credential" },
-      });
-      if (account) await tx.account.update({ where: { id: account.id }, data: { password: hash } });
-      else
-        await tx.account.create({
-          data: { userId: user.id, providerId: "credential", accountId: user.id, password: hash },
-        });
+      const user = await usuarioE2E(email, `Supervisor asignable ${proyecto}`, hash);
       const membership = await tx.membership.upsert({
         where: { tenantId_userId: { tenantId: tenant.id, userId: user.id } },
         update: { rol: "supervisor", roleId: null, portales: ["supervisor"], estado: "activa" },
