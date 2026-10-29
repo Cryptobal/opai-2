@@ -2,6 +2,7 @@ import type { Acceso, Excepcion, Rol } from "@opai/domain";
 
 import { autorizador, conAccesoPlataforma, type ClaveApi } from "../contexto";
 import { idempotenciaSobre } from "../idempotencia";
+import { empresaDePlataforma } from "../plataforma-empresa";
 import type { AgenteContexto, Alcance, ConsumoNuevo, Principal } from "../types";
 import { almacenamientoEnMemoria } from "./almacenamiento-memoria";
 import { dbEnMemoria } from "./db-memoria";
@@ -115,7 +116,15 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
       urlBase: "https://test.opai.cl",
     },
     plataforma: conAccesoPlataforma(usuario, actor, o.claveApi)
-      ? { globales, paraTenant: () => db, transaccionPara: (_id, fn) => ctx.transaccion(fn) }
+      ? {
+          globales,
+          empresa: (id) => empresaDePlataforma(db, id),
+          auditarEnObjetivo: (_id, hecho, evento) =>
+            ctx.transaccion(async (tx) => {
+              await globales.auditarPlataforma(hecho, tx);
+              await ctx.auditoria.registrar(tx, evento);
+            }),
+        }
       : null,
     autorizar: o.permisos
       ? (p) => (o.permisos ?? []).includes(p)

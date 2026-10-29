@@ -12,7 +12,7 @@ const ESTADOS = ["pendiente", "en_curso", "hecho", "fallido", "cancelado"] as co
 export const platformTrabajosList = defineCapability({
   id: "platform.trabajos.list",
   descripcion:
-    "Plataforma: cola de trabajos de una empresa o de todas (pendientes, en curso, fallidos), más reciente primero, con intentos, último error y payload. 'conProblemas' deja los fallidos y los que están reintentando.",
+    "Plataforma: cola de trabajos de una empresa o de todas (pendientes, en curso, fallidos), más reciente primero, con intentos y último error (sin el payload: CAR-40). 'conProblemas' deja los fallidos y los que están reintentando.",
   permiso: PERMISOS_PLATAFORMA.tenantsRead,
   sinTenant: true,
   input: z.object({
@@ -34,7 +34,6 @@ export const platformTrabajosList = defineCapability({
       programadoPara: z.string().nullable(),
       actualizadoEn: z.string().nullable(),
       ultimoError: z.string().nullable(),
-      payload: z.unknown(),
     }),
   ),
   efecto: "lectura",
@@ -43,22 +42,9 @@ export const platformTrabajosList = defineCapability({
   async handler(ctx, input) {
     const p = requierePlataforma(ctx);
     const tenants = await p.globales.listarTenants(input.tenantId);
-    const where = input.conProblemas
-      ? {
-          OR: [
-            { estado: "fallido" },
-            { estado: { in: ["pendiente", "en_curso"] }, intentos: { gt: 0 } },
-          ],
-        }
-      : input.estado
-        ? { estado: input.estado }
-        : {};
+    const filtro = { conProblemas: input.conProblemas, ...(input.estado ? { estado: input.estado } : {}) };
     const listas = await porLotes(tenants, async (t) => {
-      const filas = await p.paraTenant(t.id).trabajo.findMany({
-        where,
-        orderBy: { updatedAt: "desc" },
-        take: input.limite,
-      });
+      const filas = await p.empresa(t.id).trabajos(filtro, input.limite);
       return filas.map((f) => ({
         id: f.id,
         tenantId: t.id,
@@ -71,7 +57,6 @@ export const platformTrabajosList = defineCapability({
         programadoPara: iso(f.programadoPara),
         actualizadoEn: iso(f.updatedAt),
         ultimoError: f.ultimoError,
-        payload: f.payload,
       }));
     });
     return listas

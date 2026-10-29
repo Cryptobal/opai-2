@@ -291,3 +291,83 @@ model Idempotencia {
   @@map("idempotencias")
   @@schema("core")
 }
+
+/// Cola de aprobaciones de acciones `platform.*` pedidas por agentes (CAR-36). Vive FUERA de los
+/// tenants: sin `tenant_id` ni RLS, como `core.users`. Solo la tocan las operaciones con nombre de
+/// `accesoPlataforma()` (`packages/db/src/plataforma-aprobaciones.ts`), que solo recibe quien tiene
+/// `platformRole`. `origenTenantId` es la empresa donde vive la key (para leer su nombre), no un
+/// alcance: los owners y admins de esa empresa nunca ven estas filas.
+model AprobacionPlataforma {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  origenTenantId String?   @map("origen_tenant_id") @db.Uuid
+  apiKeyId       String?   @map("api_key_id") @db.Uuid
+  /// Nombre de la key al pedir (la key vive en otra empresa; no se consulta en cada lectura).
+  agente         String
+  /// Agente interno que la pidió (ADR-049), si la pidió uno; texto, como en `core.aprobaciones`.
+  agenteInternoId String?  @map("agente_interno_id")
+  viaUserId      String    @map("via_user_id") @db.Uuid
+  capability     String
+  input          Json
+  idempotencyKey String?   @map("idempotency_key")
+  resumen        String
+  /// "pendiente" | "aprobada" | "rechazada" | "vencida"
+  estado         String    @default("pendiente")
+  venceEn        DateTime  @map("vence_en") @db.Timestamptz(6)
+  resueltaPor    String?   @map("resuelta_por") @db.Uuid
+  resueltaEn     DateTime? @map("resuelta_en") @db.Timestamptz(6)
+  motivo         String?
+  resultado      Json?
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([estado, createdAt])
+  @@index([apiKeyId, capability, idempotencyKey])
+  @@map("aprobaciones_plataforma")
+  @@schema("core")
+}
+
+/// Auditoría global, fuera de los tenants (CAR-36, CAR-41; preparada para CAR-42): sin
+/// `tenant_id` ni RLS, append-only para `opai_app` y encadenada POR ÁMBITO con
+/// `core.auditoria_global_append`, con el mismo esquema de hash que `core.audit_events`.
+/// - `plataforma`: escrituras y lecturas `platform.*`, pedidos de aprobación y decisiones, con
+///   `antes`/`despues` en los cambios globales (ajustes, precios). Solo se lee con `platformRole`.
+/// - `seguridad` (CAR-42, aún sin escritor): login, logout, cambio y reseteo de contraseña y MFA;
+///   `actorId` es el usuario, `capability` el tipo de evento (`seguridad.login`…), la IP va cifrada
+///   (`ipCifrada`, nunca en claro) y `userAgent` recortado.
+model AuditoriaGlobal {
+  id               String   @id @default(uuid(7)) @db.Uuid
+  /// "plataforma" | "seguridad": cada ámbito es una cadena propia (`seq` 1, 2, 3… por ámbito).
+  ambito           String
+  seq              Int
+  actorType        String   @map("actor_type")
+  actorId          String?  @map("actor_id")
+  viaUserId        String?  @map("via_user_id")
+  /// Capacidad (`platform.*`) o tipo de evento de seguridad.
+  capability       String
+  /// Empresa sobre la que actuó (tenantObjetivo), si la hay.
+  tenantObjetivoId String?  @map("tenant_objetivo_id") @db.Uuid
+  /// Empresa desde la que se operó (la de la key o la sesión), si la hay.
+  origenTenantId   String?  @map("origen_tenant_id") @db.Uuid
+  entityType       String?  @map("entity_type")
+  entityId         String?  @map("entity_id")
+  payload          Json?
+  /// Estado anterior y nuevo de lo que cambió (CAR-41).
+  antes            Json?
+  despues          Json?
+  /// IP cifrada con la clave de plataforma y user agent (CAR-42); nunca la IP en claro.
+  ipCifrada        String?  @map("ip_cifrada")
+  userAgent        String?  @map("user_agent")
+  /// Fila de `core.audit_events` copiada por la migración de CAR-36 (la original queda en su cadena).
+  origenEventoId   String?  @map("origen_evento_id") @db.Uuid
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  hashAnterior     String   @map("hash_anterior")
+  hash             String
+  hashCanon        String   @map("hash_canon")
+
+  @@unique([ambito, seq])
+  @@index([ambito, tenantObjetivoId, seq])
+  @@index([ambito, capability, seq])
+  @@index([ambito, actorId, seq])
+  @@map("auditoria_global")
+  @@schema("core")
+}
