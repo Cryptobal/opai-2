@@ -1,6 +1,13 @@
 import { falla } from "./autorizacion";
 import { type ReservaIdempotencia, SALIDA_INVALIDA } from "./idempotencia";
-import type { Actor, Capacidad, Contexto, EventoAuditoria, OpcionesEjecucion, Resultado } from "./types";
+import type {
+  Actor,
+  Capacidad,
+  Contexto,
+  EventoAuditoria,
+  OpcionesEjecucion,
+  Resultado,
+} from "./types";
 
 /** Respuesta a una clave de idempotencia ya usada: el resultado original o un conflicto. */
 export function repeticion(r: Exclude<ReservaIdempotencia, { estado: "nueva" }>): Resultado {
@@ -90,26 +97,6 @@ export function eventoAuditoria(
       ...opciones.auditoriaExtra,
     },
   };
-}
-
-/**
- * Auditoría de una escritura de plataforma (`sinTenant`, `tenantObjetivo` resuelve el tenant):
- * `correr` ya audita las escrituras con tenant actual en su propia transacción; esta es la única
- * que falta, en una transacción propia del tenant objetivo (no atómica con el handler, que escribe
- * con `ctx.plataforma.paraTenant`, fuera de `ctx.transaccion`).
- */
-export async function auditarSiPlataforma(
-  ctx: Contexto,
-  c: Capacidad,
-  r: { resultado: Resultado; entrada?: unknown; salida?: unknown },
-  opciones: OpcionesEjecucion,
-): Promise<void> {
-  if ((ctx.conTenant && !c.tenantObjetivo) || !ctx.plataforma || c.efecto === "lectura") return;
-  const tenantId = tenantDe(ctx, c, r.entrada, r.salida);
-  const escrituraNueva = r.resultado.ok && !r.resultado.dryRun && !r.resultado.repetida;
-  if (!escrituraNueva || !tenantId) return;
-  const evento = eventoAuditoria(c, ctx.actor, tenantId, r.entrada, r.salida, opciones);
-  await ctx.plataforma.transaccionPara(tenantId, (tx) => ctx.auditoria.registrar(tx, evento));
 }
 
 /** Fila de `core.consumos` de la propia ejecución (ADR-031): nunca rompe, mide igual si falló. */

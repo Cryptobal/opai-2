@@ -7,7 +7,7 @@ Lo usan el Revisor (con el modelo contrario al que construyó) y la autorrevisi�
 - [ ] Un schema nuevo trae `GRANT USAGE` y los privilegios por defecto para `opai_app`.
 - [ ] Todo acceso a datos pasa por `forTenant(tenantId)` o `enTransaccion(tenantId, …)`. No hay `$queryRaw`, `$executeRaw` ni sus variantes `Unsafe` fuera de `enTransaccion`.
 - [ ] `dbAdmin()` aparece solo en migraciones, seeds o scripts. Nunca en `apps/web`, `modules/*` ni capacidades.
-- [ ] El `tenantId` sale de la sesión o de la key, nunca del input del usuario. Las capacidades de plataforma lo reciben explícito y usan `ctx.plataforma.paraTenant`.
+- [ ] El `tenantId` sale de la sesión o de la key, nunca del input del usuario. Las capacidades de plataforma lo reciben explícito y usan las operaciones con nombre de `ctx.plataforma.empresa(id)` (CAR-40; nunca un delegado libre) y dejan su rastro en la auditoría global (`core.auditoria_global`, CAR-36/41).
 - [ ] Las referencias entre tablas del mismo tenant están protegidas con el trigger `core.verificar_mismo_tenant`, o con su equivalente para vínculos polimórficos.
 - [ ] El alcance de filas (supervisor, cliente, persona) se filtra en la consulta de la capacidad, no en la UI. Hay test.
 - [ ] Un id inexistente o de otro tenant responde 404 o `NOT_FOUND`, sin revelar si existe en otro tenant.

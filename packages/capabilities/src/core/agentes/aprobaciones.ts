@@ -3,91 +3,20 @@ import { z } from "zod";
 import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
-import { conflicto, noEncontrado, prohibido, reglaDeNegocio } from "../../errores";
-import { obtenerCapacidad } from "../../registry";
-import type { Contexto } from "../../types";
-import { iso } from "../comun";
+import { noEncontrado, prohibido } from "../../errores";
 import { uuidSchema } from "../esquemas";
-
-const aprobacionSchema = z.object({
-  id: z.string(),
-  apiKeyId: z.string().nullable(),
-  agente: z.string(),
-  via: z.string().nullable().describe("Persona responsable de la key (el agente actúa vía ella)."),
-  riesgo: z.enum(["alto", "medio"]).describe("Alto: la capacidad es irreversible."),
-  capability: z.string(),
-  resumen: z.string(),
-  input: z.unknown(),
-  estado: z.enum(["pendiente", "aprobada", "rechazada", "vencida"]),
-  venceEn: z.string(),
-  resueltaPor: z.string().nullable(),
-  resueltaEn: z.string().nullable(),
-  motivo: z.string().nullable(),
-  resultado: z.unknown(),
-  creadaEn: z.string(),
-});
-
-type Fila = Awaited<ReturnType<Contexto["db"]["aprobacion"]["findFirstOrThrow"]>>;
-
-export async function vistaAprobaciones(
-  ctx: Contexto,
-  filas: Fila[],
-  precargado?: {
-    keys: { id: string; nombre: string }[];
-    miembros: { userId: string; user: { name: string } }[];
-  },
-) {
-  const keys =
-    precargado?.keys ??
-    (await ctx.db.apiKey.findMany({
-      where: { id: { in: [...new Set(filas.flatMap((f) => (f.apiKeyId ? [f.apiKeyId] : [])))] } },
-      select: { id: true, nombre: true },
-    }));
-  const nombre = new Map(keys.map((k) => [k.id, k.nombre]));
-  const miembros =
-    precargado?.miembros ??
-    (await ctx.db.membership.findMany({
-      where: { userId: { in: [...new Set(filas.map((f) => f.viaUserId))] } },
-      include: { user: true },
-    }));
-  const via = new Map(miembros.map((m) => [m.userId, m.user.name]));
-  return filas.map((a) => ({
-    id: a.id,
-    apiKeyId: a.apiKeyId,
-    agente: a.agenteInternoId
-      ? "Agente interno"
-      : (nombre.get(a.apiKeyId ?? "") ?? "Key eliminada"),
-    via: via.get(a.viaUserId) ?? null,
-    riesgo:
-      obtenerCapacidad(a.capability)?.efecto === "irreversible"
-        ? ("alto" as const)
-        : ("medio" as const),
-    capability: a.capability,
-    resumen: a.resumen,
-    input: a.input,
-    estado: a.estado as "pendiente",
-    venceEn: a.venceEn.toISOString(),
-    resueltaPor: a.resueltaPor ?? null,
-    resueltaEn: iso(a.resueltaEn),
-    motivo: a.motivo ?? null,
-    resultado: a.resultado ?? null,
-    creadaEn: a.createdAt.toISOString(),
-  }));
-}
-
-export async function pendiente(ctx: Contexto, id: string) {
-  const a = await ctx.db.aprobacion.findUnique({ where: { id } });
-  if (!a) throw noEncontrado("La aprobación");
-  if (a.estado !== "pendiente") throw conflicto(`La aprobación ya está ${a.estado}.`);
-  if (a.venceEn.getTime() <= Date.now())
-    throw reglaDeNegocio("La aprobación venció; el agente debe pedirla de nuevo.");
-  if (ctx.actor.tipo !== "user")
-    throw prohibido("Solo una persona puede resolver una aprobación (no una API key).");
-  return a;
-}
+import { aprobacionSchema, vistaAprobaciones } from "./aprobaciones-vista";
+import {
+  aprobacionPlataformaVisible,
+  auditarLecturaPlataforma,
+  exigirVisiblePlataforma,
+  veAprobacionesPlataforma,
+  vistaAprobacionesPlataforma,
+} from "./aprobaciones-plataforma";
 
 export const aprobacionesList = defineCapability({
-  auditarLectura: (s) => s.map((a) => a.id),
+  // Los ids de la cola de plataforma no van a la cadena de la empresa: los audita la global.
+  auditarLectura: (s) => s.filter((a) => a.ambito === "empresa").map((a) => a.id),
   id: "core.aprobaciones.list",
   descripcion:
     "Cola de aprobaciones de acciones irreversibles pedidas por agentes: pendientes primero, con resumen, agente y vencimiento; también el historial.",
@@ -105,9 +34,12 @@ export const aprobacionesList = defineCapability({
   dryRun: false,
   async handler(ctx, input) {
     if (ctx.alcance) throw prohibido("No tienes acceso a estas aprobaciones.");
+    const plataforma = veAprobacionesPlataforma(ctx);
     const filas = await ctx.db.aprobacion.findMany({
       where: {
         ...(input.estado ? { estado: input.estado } : {}),
+        // Inmediato (CAR-36): las `platform.*` que quedaron en la empresa solo con platformRole.
+        ...(plataforma ? {} : { NOT: { capability: { startsWith: "platform." } } }),
         ...(input.entidad
           ? {
               OR: [
@@ -120,12 +52,28 @@ export const aprobacionesList = defineCapability({
       orderBy: { createdAt: "desc" },
       take: input.limite,
     });
-    return vistaAprobaciones(ctx, filas);
+    // La cola de plataforma (fuera de los tenants) se suma solo para quien la ve; nunca actúa
+    // sobre una entidad de la empresa, así que no aplica al filtro por entidad.
+    const dePlataforma =
+      plataforma && !input.entidad && ctx.plataforma
+        ? await vistaAprobacionesPlataforma(
+            ctx,
+            await ctx.plataforma.globales.listarAprobacionesPlataforma({
+              ...(input.estado ? { estado: input.estado } : {}),
+              limite: input.limite,
+            }),
+          )
+        : [];
+    if (dePlataforma.length)
+      await auditarLecturaPlataforma(ctx, "core.aprobaciones.list", dePlataforma);
+    return [...(await vistaAprobaciones(ctx, filas)), ...dePlataforma]
+      .sort((x, y) => y.creadaEn.localeCompare(x.creadaEn))
+      .slice(0, input.limite);
   },
 });
 
 export const aprobacionesGet = defineCapability({
-  auditarLectura: (s) => [s.id],
+  auditarLectura: (s) => (s.ambito === "empresa" ? [s.id] : []),
   id: "core.aprobaciones.get",
   descripcion:
     "Una aprobación con su input completo, estado y, si se aprobó, el resultado de la ejecución. Los agentes la consultan para saber si su acción se hizo.",
@@ -137,14 +85,23 @@ export const aprobacionesGet = defineCapability({
   async handler(ctx, input) {
     if (ctx.alcance) throw noEncontrado("La aprobación");
     const a = await ctx.db.aprobacion.findUnique({ where: { id: input.id } });
+    if (!a) {
+      // Cola de plataforma (CAR-36): la key de plataforma consulta la suya; platformRole, todas.
+      const p = await aprobacionPlataformaVisible(ctx, input.id);
+      if (!p) throw noEncontrado("La aprobación");
+      const [vista] = await vistaAprobacionesPlataforma(ctx, [p]);
+      await auditarLecturaPlataforma(ctx, "core.aprobaciones.get", [p]);
+      return vista as z.input<typeof aprobacionSchema>;
+    }
     const propia =
-      (ctx.agente && a?.apiKeyId === ctx.agente.apiKeyId) ||
+      (ctx.agente && a.apiKeyId === ctx.agente.apiKeyId) ||
       (ctx.actor.tipo === "agent" &&
         ctx.actor.interno &&
-        a?.agenteInternoId === ctx.actor.id &&
+        a.agenteInternoId === ctx.actor.id &&
         a.viaUserId === ctx.actor.viaUserId);
-    if (!a || (!propia && !ctx.autorizar(PERMISOS_CORE.aprobacionesManage)))
+    if (!propia && !ctx.autorizar(PERMISOS_CORE.aprobacionesManage))
       throw noEncontrado("La aprobación");
+    if (!propia) exigirVisiblePlataforma(ctx, a.capability);
     return (await vistaAprobaciones(ctx, [a]))[0] as z.input<typeof aprobacionSchema>;
   },
 });

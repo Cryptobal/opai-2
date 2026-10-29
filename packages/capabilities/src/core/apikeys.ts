@@ -7,7 +7,7 @@ import { prohibido, reglaDeNegocio } from "../errores";
 import { normalizarPermisosRol } from "./permisos/comun";
 import { iso, tenantActual, usuarioResponsable } from "./comun";
 import { generarApiKey } from "./apikey-formato";
-import { validarScopes } from "./apikey-scopes";
+import { expiracionDeKey, validarScopes } from "./apikey-scopes";
 export { apikeysRevoke } from "./apikey-revoke";
 
 import { keySchema } from "./apikey-schema";
@@ -99,10 +99,7 @@ export const apikeysCreate = defineCapability({
       throw prohibido("Completa el segundo factor antes de crear credenciales.");
     }
     validarScopes(ctx, input);
-    const expiraEn = input.expiraEn ? new Date(input.expiraEn) : null;
-    if (expiraEn && expiraEn.getTime() <= Date.now()) {
-      throw reglaDeNegocio("La fecha de expiración debe ser futura.");
-    }
+    const expiraEn = expiracionDeKey(input.scopes, input.expiraEn);
     const servicio = input.tipo === "servicio";
     if (input.presupuestoMensualUsd !== undefined && !ctx.autorizar(PERMISOS_CORE.agentesManage)) {
       throw prohibido("Fijar el presupuesto de un agente requiere el permiso de agentes.");
