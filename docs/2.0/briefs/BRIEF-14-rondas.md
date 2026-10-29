@@ -1,6 +1,8 @@
 # BRIEF DE IMPLEMENTACIÓN — 14 RONDAS (puntos de control por QR y GPS)
 
-**Repositorio:** `Cryptobal/opai-2` · **Rama de ejecución (a crear por quien construya):** `brief/14-rondas` (desde `main` actualizado) · **Fecha de este brief:** 29-oct-2026 · **Tarea:** CAR-72 (`Fixes CAR-72` en el PR) · **Fase:** 3 (y la parte nativa en el Brief 17, ADR-044.8) · **Estado:** escrito en la rama `docs/brief-14-rondas` (solo documentos); pendiente de abrir el PR y de que alguien lo ejecute.
+**Repositorio:** `Cryptobal/opai-2` · **Rama de ejecución (a crear por quien construya):** `brief/14-rondas` (desde `main` actualizado) · **Fecha de este brief:** 29-oct-2026 · **Tarea:** CAR-72 (`Fixes CAR-72` en el PR) · **Fase:** 3 (y la parte nativa en el Brief 17, ADR-044.8) · **Estado:** **aprobado (29-oct-2026)**; PR 1 en construcción en esta rama.
+
+**Estado:** **aprobado (29-oct-2026)**. Carlos aprobó el Brief 14 y dio el go para construir el PR 1 el 29-oct-2026 a las 17:01 CLT, y resolvió las 4 dudas del §8 a las 17:03 CLT (Decisiones de Carlos, 29-oct-2026 17:03 CLT, chat con OPAI 2.0, registradas por el bot OPAI 2.0; ver §8). El PR 1 está en construcción.
 
 **Especificación aprobada:** [`docs/2.0/modulos/rondas.md`](../modulos/rondas.md) (aprobada por Carlos el 29-oct-2026, 14:58 CLT, ADR-047; reglas R1–R35, estados §6, permisos §7, eventos §8, herramientas MCP §9, dependencias §10, criterios de aceptación §13). **Design Prompt:** [`docs/2.0/design/DESIGN-PROMPT-rondas.md`](../design/DESIGN-PROMPT-rondas.md). **Diseño (mockup v3), referencia visual aprobada:** [`docs/2.0/diseño/export-rondas/`](../diseño/export-rondas/) — **Decisión de Carlos, 29-oct-2026 16:29 CLT, chat con OPAI 2.0 (registrada por el bot OPAI 2.0)**. **Benchmark:** [`docs/2.0/referencias/benchmark-rondas.md`](../referencias/benchmark-rondas.md). **Extracción de 1.0:** [`docs/2.0/extraccion/rondas-y-tickets.md`](../extraccion/rondas-y-tickets.md), ADR-024. **Reglas generales:** `AGENTS.md`, `docs/2.0/REGLAS-codigo.md` (en particular «Hechos regulados», «Migraciones de datos después de FORCE RLS»), ADR-004/ADR-034/ADR-055 (paridad y agent-first), ADR-016 (permisos), ADR-018/ADR-038 (Configuración por ámbitos), ADR-020 (silencio por defecto), ADR-022 (alcance en la consulta), ADR-023 (hechos regulados, GPS no bloquea), ADR-027 (integraciones y geolocalización del núcleo), ADR-028 (marca del tenant), ADR-029 (outbox, trabajos, consumos, dispositivo en el punto 10), ADR-031 (consumos por clase de tarea), ADR-037 (presupuesto de JS), ADR-044 (PWA y terreno), ADR-045 (rendimiento), ADR-048 (fuentes opcionales entre módulos), ADR-049 (agente interno).
 
@@ -140,12 +142,14 @@ Decisión de Carlos, 29-oct-2026, chat con OPAI 2.0 (registrada por el bot OPAI 
 
 **Recomendación de este brief:** no tomar la opción en el Brief 14. Construir la PWA de Terreno con QR + GPS primero (que ya iguala lo que 1.0 hace hoy en el navegador), y evaluar la publicación en Play Store junto con el Brief 17, cuando se decida también qué plugin de geolocalización en segundo plano usar. Carlos puede pedir adelantarla si algún cliente la exige antes.
 
-## 8. Dudas y decisiones pendientes para Carlos (no se construye hasta que las resuelva)
+## 8. Dudas resueltas
 
-1. **Shell de Terreno y `NAVEGACION.md`.** Este brief construye el shell de Terreno (header + barra de pestañas) porque Rondas lo necesita y nadie más lo ha construido todavía (§2). Eso cambia la descripción de Terreno en `NAVEGACION.md` §4 (hoy: «pantalla de tarea única, sin menú»). ¿Confirma que ese cambio se hace dentro de este brief, o prefiere que lo apruebe primero como parte del Brief 16 (Portales Cliente y Terreno)?
-2. **Actor «dispositivo» (ADR-029.10).** Este brief ejecuta las capacidades de terreno con la sesión del guardia, sin construir el actor «dispositivo» nuevo (§2). Si Carlos prefiere adelantar ese actor para que un dispositivo emparejado (sin sesión de una persona) también pueda ejecutar, es un cambio de alcance que hay que decidir antes de construir el PR 3.
-3. **Modelo mínimo de Novedad dentro de Rondas.** Este brief crea la tabla de Novedad dentro del schema `rondas` porque Operaciones II no existe (§2, §6). Cuando Operaciones II se construya, esa tabla se migra ahí y Rondas pasa a referenciarla. ¿Confirma ese orden, o prefiere esperar a que Operaciones II exista antes de construir Rondas?
-4. **Publicación en Play Store (§7).** Recomendación de no tomarla en este brief; a decidir si algún cliente la exige antes del Brief 17.
+Las 4 dudas que este brief dejó abiertas para Carlos quedaron resueltas. **Decisiones de Carlos, 29-oct-2026 17:03 CLT, chat con OPAI 2.0 (registradas por el bot OPAI 2.0).**
+
+1. **Modelo mínimo de Novedad dentro de Rondas.** **Resuelta: tabla propia mínima en el schema `rondas` ahora, que se migra a Operaciones II cuando exista y Rondas pasa a referenciarla.** Este PR 1 crea `rondas.novedades` con una forma pensada para que Operaciones II se quede con la tabla y Rondas solo la referencie (§2, §6). No se espera a Operaciones II para construir Rondas.
+2. **Shell de Terreno y `NAVEGACION.md`.** **Resuelta: el shell de Terreno se construye dentro del Brief 14 (PR 3), coordinado con el Brief 16; el cambio de `NAVEGACION.md` §4 va en el PR 3, no ahora.** Este PR 1 no toca `NAVEGACION.md` ni construye el shell de Terreno.
+3. **Actor «dispositivo» (ADR-029.10).** **Resuelta: no se adelanta; por ahora las capacidades de terreno usan solo la sesión del guardia.** El actor «dispositivo» queda fuera del Brief 14; la ejecución en terreno (PR 3) corre con la sesión del guardia que usa el dispositivo (§2).
+4. **Publicación en Play Store (§7).** **Resuelta: fuera del Brief 14; se decide en el Brief 17 si un cliente lo pide.** La recomendación de §7 (no tomar la opción en este brief) queda confirmada.
 
 ## 9. Criterios de aceptación
 
@@ -179,3 +183,4 @@ Los 14 de `rondas.md` §13 (CA1–CA14), verificables en `test.opai.cl` por Carl
 | Fecha | Cambio | Quién |
 |---|---|---|
 | 29-oct-2026 | Primera versión del brief, escrita en la rama `docs/brief-14-rondas` tras la aprobación del mockup v3 (16:29 CLT); solo documentación | Claude, por encargo del operador de OPAI 2.0 |
+| 29-oct-2026 | Carlos aprueba el brief y da el go para construir el PR 1 (17:01 CLT) y resuelve las 4 dudas del §8 (17:03 CLT): Novedad como tabla propia mínima en `rondas` migrable a Operaciones II; shell de Terreno y cambio de `NAVEGACION.md` §4 en el PR 3; sin actor «dispositivo» (terreno usa la sesión del guardia); Play Store fuera del Brief 14. §8 pasa a «Dudas resueltas» y el estado del brief a «aprobado (29-oct-2026)» | Carlos (29-oct-2026, 17:01 y 17:03 CLT, chat con OPAI 2.0, registradas por el bot OPAI 2.0) |

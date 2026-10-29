@@ -389,6 +389,15 @@ Decisiones de Carlos, 29-oct-2026, chat con OPAI 2.0 (registrada por el bot OPAI
 11. Ficha de la ejecución también en el ERP, con las mismas 6 pestañas que la ficha del supervisor, no solo un panel lateral.
 12. El modelo de confianza inicial se llama «Modelo de confianza v1» en pantalla (no «Modelo OPAI 1.0», que podía confundirse con la versión del producto); los pesos siguen siendo los de 1.0 (R20).
 
+## Decisiones de Carlos sobre el Brief 14 (29-oct-2026, 17:03 CLT)
+
+Carlos aprobó el Brief 14 y dio el go para construir el PR 1 el 29-oct-2026 a las 17:01 CLT, y a las 17:03 CLT resolvió las 4 dudas que el brief había dejado abiertas en su §8 (**Decisiones de Carlos, 29-oct-2026 17:03 CLT, chat con OPAI 2.0, registradas por el bot OPAI 2.0**). Se ejecutan en `docs/2.0/briefs/BRIEF-14-rondas.md` §8.
+
+1. **Novedad:** tabla propia mínima en el schema `rondas` ahora, que se migra a Operaciones II cuando exista y Rondas pasa a referenciarla (§2, §10 de este documento; ADR-048).
+2. **Shell de Terreno:** se construye dentro del Brief 14 (PR 3), coordinado con el Brief 16; el cambio de `NAVEGACION.md` §4 va en el PR 3, no en el PR 1.
+3. **Actor «dispositivo»:** no se adelanta; por ahora las capacidades de terreno usan solo la sesión del guardia (§10, R33).
+4. **Play Store:** fuera del Brief 14; se decide en el Brief 17 si un cliente lo pide (§7 del brief).
+
 ## 15. Design Prompt para Claude Design
 
 > Carlos aprobó esta especificación completa el 29-oct-2026 (ADR-047); el Design Prompt queda **listo para copiar**. El Design Prompt se mudó a su propio archivo: [`docs/2.0/design/DESIGN-PROMPT-rondas.md`](../design/DESIGN-PROMPT-rondas.md), ya actualizado con las decisiones de Carlos del 29-oct-2026 (preguntas 2, 5, 7, 8, 9, 13, 18 y 21, que son las que afectan el mockup). Se copia tal cual desde ese archivo en Claude Design.
