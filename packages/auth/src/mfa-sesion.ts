@@ -4,6 +4,7 @@ import { APIError, createAuthMiddleware, getSessionFromCtx } from "better-auth/a
 import { clienteAuth } from "@opai/db";
 
 import { limpiarFallosMfaConSesion, reservarIntentoMfaConSesion } from "./mfa-bloqueo-con-sesion";
+import { auditarSeguridad } from "./seguridad";
 
 /** Verificar el código, con sesión ya creada: enrolamiento o login social con MFA pendiente (#68). */
 const RUTAS_VERIFICAR_CON_SESION = ["/two-factor/verify-totp", "/two-factor/verify-backup-code"];
@@ -72,6 +73,40 @@ export const marcaMfaSesion = {
           // Un código correcto reinicia el tope con sesión (reserva de arriba); sin sesión (desafío
           // de login) ya lo reinicia el propio plugin (`resetTwoFactorFailures`); repetirlo es inofensivo.
           await limpiarFallosMfaConSesion(actual.user.id);
+          // CAR-42: registro de seguridad global. `ctx.context.newSession` distingue el desafío de
+          // login (sin sesión previa) de la confirmación de enrolamiento o el login social pendiente
+          // (con sesión ya creada): ambos pasan por el mismo endpoint de Better Auth.
+          await auditarSeguridad(
+            "seguridad.mfa_verificado",
+            actual.user.id,
+            ctx.headers ?? new Headers(),
+            undefined,
+            { contexto: ctx.context.newSession ? "login" : "sesion" },
+          );
+        }),
+      },
+      {
+        matcher: (ctx) => ctx.path === "/two-factor/disable",
+        handler: createAuthMiddleware(async (ctx) => {
+          const r = ctx.context.returned;
+          const s = ctx.context.session;
+          if (r instanceof APIError || !s) return;
+          // CAR-42: el segundo factor propio se desactivó (packages/auth/src/mfa.ts:desactivarSegundoFactor).
+          await auditarSeguridad("seguridad.mfa_desactivar", s.user.id, ctx.headers ?? new Headers());
+        }),
+      },
+      {
+        matcher: (ctx) => ctx.path === "/two-factor/generate-backup-codes",
+        handler: createAuthMiddleware(async (ctx) => {
+          const r = ctx.context.returned;
+          const s = ctx.context.session;
+          if (r instanceof APIError || !s) return;
+          // CAR-54: códigos de respaldo regenerados desde Mi cuenta (invalida los anteriores).
+          await auditarSeguridad(
+            "seguridad.mfa_codigos_regenerar",
+            s.user.id,
+            ctx.headers ?? new Headers(),
+          );
         }),
       },
     ],
