@@ -426,7 +426,7 @@ Toda capacidad de CPQ sale por MCP con los mismos permisos (ADR-055); las de esc
 - **CA22.** Con la RC «activada por defecto» y la póliza de garantía no, una cotización nueva parte así. Desactivar la RC en la cotización la marca «sobrescrito» y la saca del precio; «volver al valor por defecto» la reactiva con los valores del tenant. Cambiar el plazo de la RC a «plazo del contrato» recalcula su efecto mensual.
 - **CA23.** Un owner agrega la categoría «Tecnología» como indirecta, renombra «Logística» y desactiva «Insumos». Desactivar no cambia los ítems ni las cotizaciones existentes, y una categoría en uso no se puede borrar.
 
-## 14. Preguntas para Carlos — decididas
+## 14. Preguntas para Carlos — 1 a 15 decididas; 16 a 26 pendientes
 
 **Decisión de Carlos, 29-oct-2026 (PR #123, CAR-66): aprueba las 15 preguntas tal como vienen recomendadas**, con un ajuste en la 9 (el margen solo con `cpq:costos.ver`). Cada pregunta conserva su texto como historia; «Decidido» marca la opción aprobada. Lo ya respondido en `PREGUNTAS-carlos.md` (4–11) y en ADR-048 (respuesta 3) no se repite.
 
@@ -460,6 +460,63 @@ Toda capacidad de CPQ sale por MCP con los mismos permisos (ADR-055); las de esc
     **Varias instalaciones:** en 1.0 una cotización es una instalación (P4), así que no hay un caso real de una sola cotización con varias. Se agrega un **caso compuesto**: una cotización 2.0 con dos secciones (las instalaciones de la 340 y la 353, con condiciones comunes) cuya venta se compara con la suma de las dos de 1.0, con la diferencia que explique la RC en monto fijo. **Decidido (Carlos, 29-oct): sí** a las cinco y al compuesto. Cubren póliza, margen en el mínimo, vehículos, horarios raros, el caso sin guardias y el caso más frecuente. Salvo la 340, se eligieron por su nombre: el Brief 08 verifica el detalle de cada una y te avisa si alguna no sirve.
 15. **¿Se pueden sobrescribir las personas por posición?** **[decidido, ADR-042 (4)]:** el motor las calcula con el dominio de turnos. Resuelto el 29-oct: si se pueden cambiar a mano. **Decidido (Carlos, 29-oct): sí, con motivo** (relevo de colación, cobertura de vacaciones), visible en la traza (R21). En 1.0 se escriben siempre a mano (`numGuards`) y es una fuente de error.
 
+### C. Flujo de envío y pólizas: preguntas pendientes **[pendiente Carlos]**
+
+Abiertas el 29-oct-2026, después de la primera tanda de Claude Design. Se cruzan con los temas hermanos: los formatos de salida y el enlace de aceptación son de **CAR-68** ([PR #127](https://github.com/Cryptobal/opai-2/pull/127)) y el seguimiento después del envío es de **CAR-67** ([PR #125](https://github.com/Cryptobal/opai-2/pull/125)). Se numeran desde la 16 para no chocar con las 15 ya decididas. Mientras Carlos no responda, rigen las reglas actuales.
+
+16. **¿Quién marca «aceptada»?** **[pendiente Carlos]**
+    - **Recomendación:** la aceptación del cliente en el enlace de la propuesta (CAR-68) marca la cotización como **aceptada** y **propone ganar** el negocio. Ganar un negocio sin aceptación en línea exige **registrar la aceptación fuera de línea**: quién aceptó, cuándo, por qué medio, y opcionalmente el documento.
+    - **Por qué:** hoy R45 dice que «aceptada» es consecuencia de ganar el negocio. Con un enlace de aceptación, la aceptación es un hecho propio del cliente y debe quedar registrada aunque llegue por otro canal.
+    - **Si se aprueba:** R45 se alinea con la regla R34 de la especificación de documentos de CAR-68.
+17. **¿Qué estados ve el usuario?** **[pendiente Carlos]**
+    - **Recomendación:** **6 estados visibles**: Borrador, Por aprobar, Enviada, Aceptada, Rechazada y Vencida.
+      - «Lista» queda como estado **interno**: aprobada, pero no enviada.
+      - «Vista» (el cliente abrió el enlace, CAR-67/68) es un **indicador** sobre Enviada, no un estado.
+      - «Reemplazada» y «archivada» se ven **solo en el Historial**.
+    - **Por qué:** con menos estados en la lista y en los filtros, cada fila dice lo que hay que hacer. La máquina de R40 no cambia: solo cambia lo que se muestra.
+18. **¿Se puede enviar desde Borrador sin pasar por «Dejar lista»?** **[pendiente Carlos]**
+    - **Recomendación:** **sí**. «Enviar» corre los mismos chequeos que «Dejar lista»: margen mínimo, subvaloración, falta de UF y al menos una línea. Si alguno falla, pide aprobación o muestra el error.
+    - **Por qué:** se ahorra un paso en la mayoría de los casos sin saltarse ningún control.
+19. **¿Cómo se elige la moneda de presentación?** **[pendiente Carlos]**
+    - **Recomendación:** un selector **UF / CLP** en el Resumen del cotizador. Muestra la **UF del día** con su fecha y avisa: «al enviar se congela la UF de ese día» (ADR-042 (7), pregunta 4).
+    - **Por qué:** la moneda se decide en la cotización (R58), y quien cotiza tiene que ver con qué UF se va a fijar el precio.
+20. **¿Las condiciones comerciales llevan «sobrescrito» y «volver al valor por defecto», como los instrumentos de R60?** **[pendiente Carlos]**
+    - **Recomendación:** **sí**, para forma y días de pago, reajuste, duración, inicio, validez y moneda.
+    - **Por qué:** se comportan igual que pólizas y finanzas: parten de la pestaña Pólizas y finanzas (R58) y una mirada basta para saber qué se pactó distinto.
+21. **¿El reajuste lleva frecuencia, mes base e incremento real anual?** **[pendiente Carlos]**
+    - **Recomendación:** **sí**, para igualar 1.0 (`extraccion` §3.7):
+      - tipo: ninguno, IPC, IMO o polinómico con pesos;
+      - frecuencia: trimestral, semestral o anual;
+      - mes base;
+      - incremento real anual.
+    - **Por defecto:** **IPC anual**.
+    - **Por qué:** 1.0 ya lo tiene, y bajar del piso de 1.0 rompe la convivencia.
+22. **¿Hay botones de Vista previa y Descargar PDF en la cabecera del cotizador?** **[pendiente Carlos]**
+    - **Recomendación:** **sí**, «Vista previa» y «Descargar PDF ▾» en la cabecera. El menú ofrece los formatos que defina **CAR-68**, y la generación la hace CAR-68. CPQ solo entrega la vista cliente (§15).
+    - **Por qué:** es lo que más se usa antes de enviar, y delegar la generación evita dos motores de documentos.
+23. **¿Qué detalle lleva la póliza de garantía o fiel cumplimiento?** **[pendiente Carlos]**
+    - **Recomendación:** sumar estos campos:
+      - prima mínima;
+      - gastos de emisión en UF;
+      - **meses extra de vigencia**: por defecto 60 días hábiles después del término del contrato, como exige el D.661, art. 122, para contratos con el Estado;
+      - base de días: hábiles o corridos.
+    - **Fórmula:** `kG = pG × (Mv × rG / 12 + eG)`, donde `Mv = Mg + meses extra`. Cuando aplica la **prima mínima**, el costo pasa a ser un **monto fijo** (`Gfijo`). La traza muestra cuál de las dos rigió.
+    - **Ojo:** cambia la fórmula de R33, que hoy usa `Mg`. CD-1 sigue igual con meses extra = 0, así que se agrega un caso dorado con meses extra.
+    - **Por qué:** sin vigencia extra ni prima mínima, la póliza de un contrato público queda subcosteada.
+24. **¿El IVA de las primas es costo?** **[pendiente Carlos]**
+    - **Recomendación:** **no, por defecto**, porque el IVA de las primas es crédito fiscal. Se agrega un interruptor **«IVA no recuperable»**, por tenant y por cotización, que lo suma al costo de pólizas y RC.
+    - **Por qué:** cargarlo siempre infla el precio de quien recupera el IVA. Con el interruptor se cubren los casos en que no se recupera.
+25. **¿Cómo se modela la RC?** **[pendiente Carlos]**
+    - **Recomendación:** **tres modos**:
+      - **corporativa asignada:** la póliza general del tenant, con un % asignado a la cotización, como hoy;
+      - **endoso o póliza del contrato:** prima propia, con su plazo de R60;
+      - **provista por el mandante:** el cliente la contrata, al estilo OCIP, y para la cotización **vale 0**.
+    - **Datos informativos:** límite exigido, deducible, asegurado adicional y personal armado. No entran al cálculo, pero quedan en la versión y se pueden mostrar en la propuesta (CAR-68).
+    - **Por qué:** los tres casos ocurren en licitaciones reales. Sin el modo «mandante», se cotiza un costo que no existe.
+26. **¿De dónde salen las tasas por defecto de pólizas y RC?** **[pendiente Carlos]**
+    - **Recomendación:** de la **respuesta del corredor** (hoy CS Seguros), cargada en Pólizas y finanzas con **fecha y fuente** visibles. No se usan tasas públicas como valor por defecto.
+    - **Por qué:** las tasas públicas no reflejan la tarifa que consigue el tenant, y con fecha y fuente cualquiera sabe cuándo hay que pedir una cotización nueva al corredor.
+
 ## 15. Lo que toca a temas hermanos (no se resuelve aquí)
 
 - **CAR-67 · Seguimiento.** CPQ entrega los hechos: `enviada` (fecha), `por_vencer`, `vencida`, `aceptada`, `rechazada`, y el valor mensual en el negocio. La cadencia de seguimiento después del envío (Comercial R29, `extraccion` §3.6), las alertas de negociación y el «proponer perdido» son de CAR-67. Pregunta para allá: si la apertura del enlace o del PDF por el cliente es un evento de seguimiento.
@@ -470,6 +527,7 @@ Toda capacidad de CPQ sale por MCP con los mismos permisos (ADR-055); las de esc
 | Fecha | Cambio | Aprobó |
 |---|---|---|
 | 25-oct-2026 23:10 | Borrador con la regla de puestos y sueldos al ganar (respuesta 3 de Carlos a ADR-048; CAR-10) | — (decisión de Carlos 23:08–23:10) |
+| 29-oct-2026 | §14.C: 11 preguntas nuevas (16–26) sobre el flujo de envío y las pólizas, con recomendación y [pendiente Carlos]; enlazan CAR-68 (#127) y CAR-67 (#125) | — (pendiente) |
 | 29-oct-2026 | Instrumentos financieros por cotización (activar o desactivar, editar, plazo de RC, «sobrescrito», volver al valor por defecto, «activado por defecto» en Configuración) y categorías editables por tenant (R60, R61, CA22, CA23) | Carlos |
 | 29-oct-2026 | Ajustes de alcance de Carlos tras la primera tanda de Claude Design (R55–R59): resumen por categoría directos/indirectos, catálogo con costo unitario y rateo sobrescribible por línea, pólizas y costo financiero con detalle, configuración en 3 pestañas (Catálogo, Pólizas y finanzas, Márgenes); valores por cuenta e instalación y editor de fórmulas fuera de la v1 | Carlos |
 | 29-oct-2026 | Carlos decide las 15 preguntas del §14 tal como venían recomendadas; ajuste en la 9: margen y costo solo con `cpq:costos.ver`, también en servidor y MCP (PR #123) | Carlos |

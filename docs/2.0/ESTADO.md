@@ -20,6 +20,20 @@
 
 > **Integración CAR-38 con CAR-37:** se conservan las fichas de roles y de alcance de supervisor. Las referencias de CAR-37 a supervisores sin pantalla describen el estado anterior a CAR-38. En `/api/v1` con sesión manda la lista de CAR-37: fuera de ella, portal nulo y 403 (CAR-38 no la amplía); CAR-38 solo suma que toda escritura con sesión exige el propio `Origin`.
 
+- **CPQ · preguntas pendientes del flujo de envío y de pólizas (CAR-66, PR #123, 29-oct-2026; solo docs).** En `modulos/cpq.md` §14.C quedan las preguntas 16 a 26, cada una con su recomendación y la marca **[pendiente Carlos]**:
+  - quién marca «aceptada» (alinear R45 con la regla R34 de documentos);
+  - los 6 estados visibles;
+  - enviar desde Borrador;
+  - el selector UF/CLP;
+  - «sobrescrito» en las condiciones;
+  - el reajuste completo (por defecto, IPC anual);
+  - Vista previa y Descargar PDF;
+  - el detalle de la póliza de garantía (vigencia extra de 60 días hábiles según el D.661, art. 122, y prima mínima);
+  - el IVA de las primas;
+  - los tres modos de RC;
+  - las tasas tomadas del corredor.
+
+  Se enlazan con CAR-68 (#127) y CAR-67 (#125). Hasta que Carlos responda, rigen las reglas vigentes.
 - **CPQ · instrumentos financieros por cotización y categorías editables (CAR-66, PR #123, 29-oct-2026; solo docs).** Decisión de Carlos, ya escrita en `modulos/cpq.md` (R60, R61, CA22, CA23) y en el Design Prompt:
   - **Instrumentos financieros:** el costo financiero, la póliza de garantía o cumplimiento y la RC traen valores por defecto y «activado por defecto» desde Configuración.
   - **En cada cotización:** cada instrumento se activa o desactiva y se edita. El plazo de la RC puede ser 12 meses, anual, plazo del contrato o N meses. Lo que se cambia queda marcado «sobrescrito» y se puede volver al valor por defecto.
