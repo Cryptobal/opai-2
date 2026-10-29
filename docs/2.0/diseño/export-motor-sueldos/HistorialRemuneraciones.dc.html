@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><style>body{margin:0;background:var(--ds-bg)}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}html,body{height:100%}</style></helmet>
+<div style="position:absolute;inset:0;overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" user="{{ appUser }}" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="cfg" title="Remuneraciones" subtitle="Configuración" notifications="{{ 3 }}" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,800px">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:2px;padding:8px 0 12px"><span class="t-caption">Configuración</span><h1 class="t-title" style="margin:0">Remuneraciones</h1></div>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ tabItems }}" value="his" hint-size="100%,44px"></x-import>
+<div style="display:flex;flex-direction:column;gap:16px;margin-top:16px;max-width:880px">
+<sc-if value="{{ showFilters }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;gap:12px;align-items:flex-end;justify-content:space-between;flex-wrap:wrap">
+<div class="chip-row" style="flex:1;min-width:0">
+<sc-for list="{{ tipos }}" as="t" hint-placeholder-count="5">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FilterChip" variant="toggle" selected="{{ t.on }}" count="{{ t.n }}" on-click="{{ t.pick }}" hint-size="100px,32px">{{ t.label }}</x-import>
+</sc-for>
+</div>
+<div style="display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;width:{{ filtroW }}">
+<div style="flex:1;min-width:200px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Variable" value="all" options="{{ variables }}" hint-size="100%,72px"></x-import></div>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<div class="card" style="overflow:hidden"><sc-for list="{{ skRows }}" as="k" hint-placeholder-count="5"><div style="display:flex;gap:16px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--ds-border)"><div class="skel" style="width:32px;height:32px;border-radius:999px"></div><div style="flex:1;display:flex;flex-direction:column;gap:8px"><div class="skel" style="width:60%;height:14px"></div><div class="skel" style="width:35%;height:12px"></div></div><div class="skel" style="width:80px;height:14px"></div></div></sc-for></div>
+</sc-if>
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<div class="card" style="min-height:360px;display:flex"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.EmptyState" icon="filter" title="Sin cambios para estos filtros" description="Prueba con otro tipo o con todas las variables." action="{{ emptyAction }}" hint-size="100%,320px"></x-import></div>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:420px;display:flex"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar el historial" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="REM-503-2B90" on-retry="{{ noop }}" hint-size="100%,400px"></x-import></div>
+</sc-if>
+<sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:420px;display:flex"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso al historial" description="Para ver los cambios de Remuneraciones necesitas ser owner, administrador o tener la delegación. Pídele acceso a Tomás Fuentes, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" hint-size="100%,400px"></x-import></div>
+</sc-if>
+<sc-if value="{{ isReady }}" hint-placeholder-val="{{ true }}">
+<div class="card" style="padding:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Timeline" items="{{ items }}" hint-size="100%,600px"></x-import>
+</div>
+<a href="#" class="t-label" style="display:inline-flex;align-items:center;gap:4px;text-decoration:none;min-height:44px">Ver en la auditoría<span class="ic sm i-chevron-right"></span></a>
+</sc-if>
+</div>
+</x-import>
+</x-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;loading&quot;,&quot;vacio&quot;,&quot;error&quot;,&quot;forbidden&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { tipo: "all" };
+  renderVals() {
+    const device = this.props.device ?? "desktop";
+    const isPhone = device === "phone";
+    const all = [
+      { k: "cap", agent: true, who: "OPAI · actualización automática", action: "no obtuvo respuesta del Banco Central; se mantiene la última UF publicada", when: "29-10-2026 07:00", detail: "2 días sin captura · se reintenta cada hora" },
+      { k: "cap", agent: true, who: "OPAI · actualización automática", action: "capturó la UF del día", when: "27-10-2026 07:00", changes: [{ field: "UF", from: "$ 41.198,44", to: "$ 41.237,01" }] },
+      { k: "cap", agent: true, who: "OPAI · actualización automática", action: "retuvo el SIS publicado por una variación de 22 %", when: "29-10-2026 07:00", changes: [{ field: "SIS", from: "1,54 %", to: "1,88 %" }], detail: "Umbral 5 % · espera confirmación" },
+      { k: "prog", agent: true, who: "OPAI · actualización automática", action: "propuso el IMM de la Ley 21.830, desde 01-01-2027", when: "23-10-2026 09:12", changes: [{ field: "Ingreso mínimo mensual", from: "$ 529.000", to: "$ 553.553" }] },
+      { k: "man", initials: "TF", who: "Tomás Fuentes", action: "cambió a mano la cotización adicional mutual", when: "14-10-2026 16:42", changes: [{ field: "Cotización adicional mutual", from: "0,34 %", to: "0,55 %" }], detail: "Motivo: «Resolución Mutual de Seguridad 2026.» · adjunto resolucion-mutual-2026.pdf" },
+      { k: "rec", initials: "AR", who: "Ana Rojas, vía su agente", action: "rechazó un cambio propuesto en colchón de feriados", when: "10-10-2026 11:05", changes: [{ field: "Colchón de feriados", from: "1,25 días/mes", to: "1,5 días/mes" }], detail: "Motivo: «Se mantiene el supuesto del año.»" },
+      { k: "conf", initials: "TF", who: "Tomás Fuentes", action: "confirmó la UTM de octubre", when: "01-10-2026 08:20", changes: [{ field: "UTM", from: "$ 69.611", to: "$ 69.889" }] },
+    ];
+    const T = [["all", "Todos"], ["cap", "Capturados"], ["conf", "Confirmados"], ["rec", "Rechazados"], ["man", "Cambiados a mano"], ["prog", "Programados"]];
+    const tipo = this.state.tipo;
+    const st = this.props.state ?? "normal";
+    const NSx = window.OPAI20DesignSystem_44e4d7 || {};
+    const stv = { isReady: st === "normal", isLoading: st === "loading", isVacio: st === "vacio", isError: st === "error", isForbidden: st === "forbidden", skRows: [1, 2, 3, 4, 5], noop: () => {},
+      emptyAction: NSx.Button ? React.createElement(NSx.Button, { variant: "secondary" }, "Limpiar filtros") : null };
+    return { ...stv, showFilters: st === "normal" || st === "vacio" || st === "loading",  appUser: { name: "Tomás Fuentes", initials: "TF", role: "Administrador" },
+      device, theme: this.props.theme ?? "light", isPhone, filtroW: isPhone ? "100%" : "260px",
+      tipos: T.map(([id, label]) => ({ label, on: tipo === id, n: id === "all" ? all.length : all.filter((x) => x.k === id).length, pick: () => this.setState({ tipo: id }) })),
+      items: all.filter((x) => tipo === "all" || x.k === tipo),
+      variables: [{ value: "all", label: "Todas las variables" }, { value: "uf", label: "UF" }, { value: "imm", label: "Ingreso mínimo mensual" }, { value: "sis", label: "SIS" }, { value: "mut", label: "Cotización adicional mutual" }],
+      tabItems: [{ id: "val", label: "Valores", count: 2 }, { id: "his", label: "Historial" }],
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "ban", label: "Bandeja", icon: "inbox" }, { id: "per", label: "Personas", icon: "users" }, { id: "cot", label: "Cotizaciones", icon: "file" }, { id: "cfg", label: "Más", icon: "more" }],
+      groups: [
+        { items: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "ban", label: "Bandeja", icon: "inbox", count: 3 }] },
+        { title: "Comercial", items: [{ id: "cot", label: "Cotizaciones", icon: "file" }] },
+        { title: "Personas", items: [{ id: "per", label: "Personas", icon: "users" }, { id: "car", label: "Cargos y sueldos", icon: "briefcase" }] },
+        { title: "Configuración", items: [{ id: "cfg", label: "Remuneraciones", icon: "wallet" }] },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

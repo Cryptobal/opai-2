@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><style>body{margin:0;background:var(--ds-bg)}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}html,body{height:100%}[data-device="phone"] .input.with-btn{height:46px}</style></helmet>
+<div style="position:absolute;inset:0;overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" user="{{ appUser }}" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="cfg" title="Remuneraciones" subtitle="Configuración" notifications="{{ 3 }}" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,800px">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:2px;padding:8px 0 12px"><span class="t-caption">Configuración</span><h1 class="t-title" style="margin:0">Remuneraciones</h1></div>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ tabItems }}" value="val" hint-size="100%,44px"></x-import>
+
+<sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:480px;display:flex"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a Remuneraciones" description="Para ver y cambiar los valores de la empresa necesitas ser owner, administrador o tener la delegación. Pídele acceso a Tomás Fuentes, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" hint-size="100%,400px"></x-import></div>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:480px;display:flex"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar los valores" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="REM-503-7F2A" on-retry="{{ noop }}" hint-size="100%,400px"></x-import></div>
+</sc-if>
+
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:16px;margin-top:16px">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:12px">
+<sc-for list="{{ three }}" as="k" hint-placeholder-count="3"><div class="card" style="padding:16px;display:flex;flex-direction:column;gap:10px"><div class="skel" style="width:40%;height:14px"></div><div class="skel" style="width:70%;height:28px"></div><div class="skel" style="width:50%;height:12px"></div></div></sc-for>
+</div>
+<div class="card" style="overflow:hidden">
+<sc-for list="{{ eight }}" as="k" hint-placeholder-count="8"><div style="display:flex;gap:16px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--ds-border)"><div class="skel" style="flex:2;height:14px"></div><div class="skel" style="flex:1;height:14px"></div><div class="skel" style="width:80px;height:22px;border-radius:999px"></div></div></sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isReady }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:16px;margin-top:16px">
+<div style="display:flex;gap:12px;align-items:flex-end;justify-content:space-between;flex-wrap:wrap">
+<span class="t-body-sm muted" style="max-width:560px;text-wrap:pretty">Indicadores legales y variables de Atlas Seguridad SpA. Los usan el cotizador y, más adelante, Nómina.</span>
+<div style="width:200px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DateInput" label="Ver valores al" value="29-10-2026" today="29-10-2026" hint-size="200px,72px"></x-import></div>
+</div>
+
+<div style="display:grid;grid-template-columns:{{ kpiCols }};gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.KpiTile" label="UF vigente" value="$ 41.237,01" delta="Atrasado · última captura 27-10-2026" tone="warning" hint-size="100%,104px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.KpiTile" label="UTM de octubre" value="$ 69.889" delta="+0,4 % respecto de septiembre" direction="up" hint-size="100%,104px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.KpiTile" label="Ingreso mínimo mensual" value="$ 529.000" delta="$ 553.553 propuesto desde 01-01-2027" tone="warning" hint-size="100%,104px"></x-import>
+</div>
+
+<div role="status" style="display:flex;gap:12px;align-items:flex-start;padding:12px 16px;border-radius:var(--radius-md);background:var(--ds-info-muted);color:var(--ds-fg);flex-wrap:wrap">
+<span class="ic i-info" style="color:var(--ds-info-fg);margin-top:2px"></span>
+<div style="flex:1;min-width:220px;display:flex;flex-direction:column;gap:2px">
+<span class="t-label">2 valores esperan tu confirmación</span>
+<span class="t-body-sm muted" style="text-wrap:pretty">IMM $ 553.553 propuesto por OPAI (Ley 21.830) y SIS 1,88 % retenido por una variación de 22 %.</span>
+</div>
+<a href="ConfirmarValor.dc.html" style="text-decoration:none"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" hint-size="110px,40px">Confirmar</x-import></a>
+</div>
+
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;margin:0 -16px">
+<sc-for list="{{ sections }}" as="s" hint-placeholder-count="3">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowGroupHeader" count="{{ s.count }}" hint-size="100%,36px">{{ s.title }}</x-import>
+<sc-if value="{{ s.empty }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--ds-surface);border-top:1px solid var(--ds-border);border-bottom:1px solid var(--ds-border);padding:20px 16px;display:flex;flex-direction:column;gap:4px"><span class="t-label">Aún no tienes variables propias</span><span class="t-body-sm muted">Créalas desde un iPad o el escritorio.</span></div>
+</sc-if>
+<div class="rows">
+<sc-for list="{{ s.rows }}" as="r" hint-placeholder-count="3">
+<div style="display:flex;flex-direction:column;gap:8px;padding:14px 16px;border-bottom:1px solid var(--ds-border)">
+<div style="display:flex;justify-content:space-between;gap:12px;align-items:baseline"><span class="t-body" style="font-weight:500;min-width:0">{{ r.nombre }}</span><span class="t-numeric" style="font-size:16px;white-space:nowrap">{{ r.valor }}</span></div>
+<div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap"><span class="badge b-{{ r.tone }}">{{ r.estado }}</span><span class="t-caption">Desde {{ r.desde }}</span></div>
+<sc-if value="{{ r.proximo }}" hint-placeholder-val="{{ false }}"><span class="t-caption" style="color:var(--ds-info-fg)">{{ r.proximo }}</span></sc-if>
+<sc-if value="{{ r.pendiente }}" hint-placeholder-val="{{ false }}"><a href="ConfirmarValor.dc.html" style="text-decoration:none"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" block="{{ true }}" hint-size="100%,44px">Revisar y confirmar</x-import></a></sc-if>
+</div>
+</sc-for>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ isWide }}" hint-placeholder-val="{{ true }}">
+<div class="card" style="overflow:hidden">
+<div style="display:grid;grid-template-columns:{{ cols }};gap:16px;padding:10px 16px;border-bottom:1px solid var(--ds-border);background:var(--ds-surface)">
+<span class="t-label-sm subtle">Valor</span><span class="t-label-sm subtle" style="text-align:right">Vigente</span><span class="t-label-sm subtle">Desde</span><span class="t-label-sm subtle">Estado</span>
+<sc-if value="{{ showAutor }}" hint-placeholder-val="{{ true }}"><span class="t-label-sm subtle">Último cambio</span></sc-if>
+<span></span>
+</div>
+<sc-for list="{{ sections }}" as="s" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;gap:8px;padding:8px 16px;background:var(--ds-bg);border-bottom:1px solid var(--ds-border)"><span class="t-label-sm" style="color:var(--ds-fg-muted)">{{ s.title }}</span><span class="t-caption">{{ s.count }}</span></div>
+<sc-if value="{{ s.empty }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;gap:16px;padding:20px 16px;border-bottom:1px solid var(--ds-border);flex-wrap:wrap">
+<span style="width:40px;height:40px;border-radius:999px;background:var(--ds-fill);display:inline-flex;align-items:center;justify-content:center;color:var(--ds-fg-muted)"><span class="ic i-plus"></span></span>
+<div style="flex:1;min-width:200px;display:flex;flex-direction:column;gap:2px"><span class="t-label">Aún no tienes variables propias</span><span class="t-body-sm muted">Por ejemplo, un bono de asistencia o un costo de uniforme por persona.</span></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="plus" hint-size="140px,40px">Crear variable</x-import>
+</div>
+</sc-if>
+<sc-for list="{{ s.rows }}" as="r" hint-placeholder-count="3">
+<div style="display:grid;grid-template-columns:{{ cols }};gap:16px;padding:12px 16px;border-bottom:1px solid var(--ds-border);align-items:center" style-hover="background:var(--ds-bg)">
+<div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+<a href="ValorDetalle.dc.html" class="t-label" style="color:var(--ds-fg);text-decoration:none">{{ r.nombre }}</a>
+<span class="t-caption" style="display:inline-flex;gap:4px;align-items:center">{{ r.fuente }}</span>
+<sc-if value="{{ r.proximo }}" hint-placeholder-val="{{ false }}"><span style="margin-top:4px"><span class="badge b-info nodot">{{ r.proximo }}</span></span></sc-if>
+<sc-if value="{{ showAutorInline }}" hint-placeholder-val="{{ false }}"><span class="t-caption">{{ r.autor }}</span></sc-if>
+</div>
+<span class="t-numeric" style="font-size:14px;text-align:right">{{ r.valor }}</span>
+<span class="t-body-sm muted t-numeric" style="font-weight:400;white-space:nowrap">{{ r.desde }}</span>
+<span><span class="badge b-{{ r.tone }}">{{ r.estado }}</span></span>
+<sc-if value="{{ showAutor }}" hint-placeholder-val="{{ true }}"><span class="t-body-sm muted" style="min-width:0">{{ r.autor }}</span></sc-if>
+<span style="display:flex;justify-content:flex-end"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="{{ r.variant }}" hint-size="120px,40px">{{ r.accion }}</x-import></span>
+</div>
+</sc-for>
+</sc-for>
+</div>
+</sc-if>
+</div>
+</sc-if>
+</x-import>
+</x-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;\&quot;phone\&quot; | \&quot;tablet\&quot; | \&quot;desktop\&quot;&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;\&quot;light\&quot; | \&quot;dark\&quot;&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;loading&quot;,&quot;error&quot;,&quot;forbidden&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const device = this.props.device ?? "desktop";
+    const st = this.props.state ?? "normal";
+    const isPhone = device === "phone";
+    const OK = { tone: "success", estado: "Al día" };
+    const PROP = { tone: "accent", estado: "Propio de la empresa" };
+    const auto = "OPAI · actualización automática";
+    const row = (o) => ({ variant: "ghost", accion: "Cambiar valor", pendiente: false, proximo: "", autor: auto, ...o });
+    const sections = [
+      { title: "Unidades", rows: [
+        row({ nombre: "UF del día", valor: "$ 41.237,01", desde: "27-10-2026", tone: "warning", estado: "Atrasado", fuente: "Banco Central de Chile · última captura hace 2 días" }),
+        row({ nombre: "UTM del mes", valor: "$ 69.889", desde: "01-10-2026", ...OK, fuente: "Servicio de Impuestos Internos" }),
+      ]},
+      { title: "Ingreso mínimo y topes", rows: [
+        row({ nombre: "Ingreso mínimo mensual", valor: "$ 529.000", desde: "01-05-2026", tone: "info", estado: "Propuesto, por confirmar", fuente: "Dirección del Trabajo · Ley 21.830", proximo: "$ 553.553 desde 01-01-2027", variant: "secondary", accion: "Revisar", pendiente: true }),
+        row({ nombre: "Tope imponible AFP y salud", valor: "UF 89,90", desde: "01-02-2026", ...OK, fuente: "Superintendencia de Pensiones" }),
+        row({ nombre: "Tope seguro de cesantía", valor: "UF 135,10", desde: "01-02-2026", ...OK, fuente: "Superintendencia de Pensiones" }),
+        row({ nombre: "Tope gratificación legal", valor: "$ 209.396", desde: "01-05-2026", ...OK, fuente: "Código del Trabajo, art. 50 · 4,75 IMM al año" }),
+      ]},
+      { title: "Previsión", rows: [
+        row({ nombre: "Comisión AFP", valor: "0,46 % – 1,45 %", desde: "01-07-2026", ...OK, fuente: "Superintendencia de Pensiones · 7 AFP" }),
+        row({ nombre: "Seguro de invalidez (SIS)", valor: "1,54 %", desde: "01-07-2025", tone: "danger", estado: "Anómalo, por confirmar", fuente: "Superintendencia de Pensiones · publicado 1,88 %", variant: "secondary", accion: "Revisar", pendiente: true }),
+        row({ nombre: "Aporte empleador, reforma de pensiones", valor: "3,5 %", desde: "01-08-2026", ...OK, fuente: "Ley 21.735", proximo: "4,25 % desde 01-08-2027" }),
+      ]},
+      { title: "Cesantía", rows: [
+        row({ nombre: "Empleador, contrato indefinido", valor: "2,4 %", desde: "01-10-2020", ...OK, fuente: "Ley 19.728" }),
+        row({ nombre: "Empleador, plazo fijo", valor: "3,0 %", desde: "01-10-2020", ...OK, fuente: "Ley 19.728" }),
+        row({ nombre: "Trabajador, contrato indefinido", valor: "0,6 %", desde: "01-10-2020", ...OK, fuente: "Ley 19.728" }),
+      ]},
+      { title: "Accidentes del trabajo", rows: [
+        row({ nombre: "Cotización básica", valor: "0,93 %", desde: "01-01-2024", ...OK, fuente: "Ley 16.744" }),
+        row({ nombre: "Cotización adicional mutual", valor: "0,55 %", desde: "14-10-2026", ...PROP, fuente: "Resolución Mutual de Seguridad 14-03-2026 · la fuente dice 0,34 %", autor: "Tomás Fuentes", accion: "Seguir la fuente" }),
+      ]},
+      { title: "Impuesto único", rows: [
+        row({ nombre: "Tramos en UTM", valor: "8 tramos", desde: "01-10-2026", ...OK, fuente: "Servicio de Impuestos Internos · exento hasta 13,5 UTM" }),
+      ]},
+      { title: "Supuestos de costeo", rows: [
+        row({ nombre: "AFP y salud para cotizar", valor: "Habitat · Fonasa", desde: "01-03-2026", ...PROP, fuente: "Variable de la empresa", autor: "Ana Rojas" }),
+        row({ nombre: "Días de feriado al año", valor: "15 hábiles", desde: "01-03-2026", ...PROP, fuente: "Variable de la empresa", autor: "Ana Rojas" }),
+        row({ nombre: "Colchón de feriados", valor: "1,25 días/mes", desde: "01-03-2026", ...PROP, fuente: "Variable de la empresa", autor: "Ana Rojas" }),
+        row({ nombre: "Forma de las provisiones", valor: "Mensual", desde: "01-03-2026", ...PROP, fuente: "Vacaciones e indemnización", autor: "Ana Rojas" }),
+      ]},
+      { title: "Jornada", rows: [
+        row({ nombre: "Horas semanales por defecto", valor: "42 h", desde: "26-04-2026", ...OK, fuente: "Ley 21.561 · 40 h desde 26-04-2028", proximo: "40 h desde 26-04-2028" }),
+      ]},
+      { title: "Gratificación", rows: [
+        row({ nombre: "Modalidad por defecto", valor: "Legal con tope", desde: "01-03-2026", ...PROP, fuente: "Art. 50 · 25 % con tope de 4,75 IMM", autor: "Ana Rojas" }),
+      ]},
+      { title: "Personalizadas", rows: [], empty: true },
+    ].map((s) => ({ ...s, count: s.rows.length }));
+    const showAutor = device === "desktop";
+    return { appUser: { name: "Tomás Fuentes", initials: "TF", role: "Administrador" },
+      device, theme: this.props.theme ?? "light", isPhone, isWide: !isPhone,
+      isReady: st === "normal", isLoading: st === "loading", isError: st === "error", isForbidden: st === "forbidden",
+      kpiCols: isPhone ? "minmax(0,1fr)" : "repeat(3,minmax(0,1fr))",
+      showAutor, showAutorInline: !showAutor,
+      cols: showAutor ? "minmax(0,2fr) minmax(0,1fr) 92px 196px minmax(0,1fr) 128px" : "minmax(0,2fr) minmax(0,1fr) 92px 196px 128px",
+      sections, three: [1, 2, 3], eight: [1, 2, 3, 4, 5, 6, 7, 8], noop: () => {},
+      tabItems: [{ id: "val", label: "Valores", count: 2 }, { id: "his", label: "Historial" }],
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "ban", label: "Bandeja", icon: "inbox" }, { id: "per", label: "Personas", icon: "users" }, { id: "cot", label: "Cotizaciones", icon: "file" }, { id: "cfg", label: "Más", icon: "more" }],
+      groups: [
+        { items: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "ban", label: "Bandeja", icon: "inbox", count: 3 }] },
+        { title: "Comercial", items: [{ id: "cot", label: "Cotizaciones", icon: "file" }] },
+        { title: "Personas", items: [{ id: "per", label: "Personas", icon: "users" }, { id: "car", label: "Cargos y sueldos", icon: "briefcase" }] },
+        { title: "Configuración", items: [{ id: "cfg", label: "Remuneraciones", icon: "wallet" }] },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
