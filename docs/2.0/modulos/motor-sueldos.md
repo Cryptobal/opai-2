@@ -1,6 +1,6 @@
 # Motor de sueldos — Especificación funcional (servicio del Núcleo)
 
-**Estado:** borrador, pendiente de aprobación de Carlos (ADR-047) · **Fase:** propuesta: entre Puestos (Brief 11) y el Motor CPQ (Brief 08), ver §15 · **Insumos:** ADR-021, ADR-036 (capas de sueldo, 25-oct), ADR-042 (punto 4), ADR-047, ADR-048, ADR-049, ADR-053, ADR-055; `briefs/BRIEF-07b-capas-sueldo-anexo.md`; `modulos/cpq.md`; `extraccion/comercial-y-cpq.md` §3.8–3.9; payroll de OPAI 1.0 (`Cryptobal/opai`, ver §11) · **Autor:** Claude · **Tarea:** CAR-71 · **Design Prompt:** [`design/DESIGN-PROMPT-motor-sueldos.md`](../design/DESIGN-PROMPT-motor-sueldos.md)
+**Estado:** **aprobada por Carlos el 29-oct-2026** (ADR-047; decisiones en §16; registrada en ADR-056) · **Fase:** Brief 07e, entre Puestos (Brief 11) y el Motor CPQ (Brief 08), ver §15 · **Insumos:** ADR-021, ADR-036 (capas de sueldo, 25-oct), ADR-042 (punto 4), ADR-047, ADR-048, ADR-049, ADR-053, ADR-055; `briefs/BRIEF-07b-capas-sueldo-anexo.md`; `modulos/cpq.md`; `extraccion/comercial-y-cpq.md` §3.8–3.9; payroll de OPAI 1.0 (`Cryptobal/opai`, ver §11) · **Autor:** Claude · **Tarea:** CAR-71 · **Design Prompt:** [`design/DESIGN-PROMPT-motor-sueldos.md`](../design/DESIGN-PROMPT-motor-sueldos.md)
 
 > Lenguaje de negocio, sin código. **`extraccion/nomina.md` no existe en `main`** (verificado el 29-oct-2026 sobre `671899d`; ROADMAP fase 6 dice «extracción hecha fuera del repo, sin verificar»). Por eso la referencia de 1.0 es su código de payroll leído directamente (§11, commit citado), no una extracción aprobada.
 
@@ -19,15 +19,16 @@ Hoy el paso de **sueldo bruto a costo empresa** está previsto dentro de Nómina
 
 | Entidad | Qué es | Se relaciona con | Dónde vive |
 |---|---|---|---|
-| **Indicador legal** | Catálogo cerrado de lo que fija la ley o un organismo: clave, nombre, unidad (CLP, UF, UTM, %, horas), periodicidad (diaria, mensual, anual, por ley), **fuente oficial** y fuente de contraste, regla de validación (rango y variación máxima) | Valores del indicador | Núcleo, nivel plataforma (igual para todos los tenants porque es la ley) |
-| **Valor de indicador** | Un valor con **vigente desde / hasta**, origen (automático o manual), evidencia (enlace a la norma o documento), estado (`propuesto`, `vigente`, `retenido`, `rechazado`), quién lo confirmó | Indicador; capturas | Núcleo, plataforma |
+| **Indicador legal** | Catálogo cerrado de lo que fija la ley o un organismo: clave, nombre, unidad (CLP, UF, UTM, %, horas), periodicidad (diaria, mensual, anual, por ley), **fuente oficial** y fuente de contraste, regla de validación (rango y variación máxima) | Valores publicados y valores del tenant | Núcleo, nivel plataforma (el catálogo es el mismo para todos) |
+| **Valor publicado** | Lo que OPAI leyó de la fuente oficial, con vigencia, evidencia (enlace a la norma o documento) y resultado de la validación (R7) | Indicador; capturas | Núcleo, plataforma (captura compartida, solo lectura para los tenants) |
+| **Valor del tenant** | El valor que **rige en cada empresa**, con vigencia, origen (`sigue_fuente` o `propio`), estado (`propuesto`, `vigente`, `retenido`, `rechazado`), motivo y quién lo confirmó (persona o agente vía persona) | Indicador; valor publicado | Núcleo, con `tenant_id` y RLS (decisión 4 de Carlos: cada empresa ve y edita todos sus valores) |
 | **Captura** | Cada intento del trabajo diario de actualización: fuente, resultado, valor leído, diferencia con el vigente, alerta emitida | Indicador | Núcleo, plataforma (append-only) |
 | **Variable del tenant** | Supuesto propio: clave, nombre, unidad, ámbito (empresa; instalación solo para las que lo declaren), valor por defecto de la plantilla de la vertical | Valores de la variable | Núcleo, con `tenant_id` y RLS |
 | **Valor de variable** | Valor con vigencia, motivo, adjunto opcional, estado (`programado`, `pendiente_aprobacion`, `vigente`, `rechazado`), autor (persona o agente vía persona) | Variable; auditoría | Núcleo, con `tenant_id` |
 | **Juego de valores** | La «foto» de todos los indicadores y variables que rigen en una fecha, con su huella; lo que guarda quien calcula | Cotización (CPQ), liquidación (Nómina), simulación | Se calcula; quien lo usa guarda su identificador y huella |
 | **Simulación** | Entrada (sueldo o capa, contrato, patrón, horario, fecha) y resultado con traza; se guarda solo si el usuario lo pide | Capas de sueldo (ADR-036), patrones del tenant (`modulos/operaciones.md`) | Núcleo, con `tenant_id` |
 
-**Aislamiento:** las tablas de plataforma (indicadores, sus valores y capturas) no tienen `tenant_id`: son datos públicos de la ley, de solo lectura para `opai_app`, y las escriben solo las capacidades `platform.*`. Todo lo del tenant (variables, valores de variable, simulaciones guardadas) lleva `tenant_id`, RLS con la política `tenant_isolation` y acceso solo por `forTenant`/`enTransaccion` (ADR-002, AGENTS.md).
+**Aislamiento:** las tablas de plataforma (catálogo de indicadores, valores publicados y capturas) no tienen `tenant_id`: son datos públicos de la ley, de solo lectura para `opai_app`, y las escribe solo el trabajo de captura. Todo lo del tenant (valores del tenant, variables, valores de variable, simulaciones guardadas) lleva `tenant_id`, RLS con la política `tenant_isolation` y acceso solo por `forTenant`/`enTransaccion` (ADR-002, AGENTS.md). Un tenant nunca modifica lo publicado ni lo que rige en otro tenant.
 
 Relaciones: indicador 1–N valores; variable 1–N valores; una simulación o una línea de cotización referencia **un juego de valores** (por fecha y huella) y **una capa de sueldo** (o un sueldo ingresado a mano). Las capas siguen siendo las de ADR-036 (instalación, puesto, RUT; rige una sola, sin herencia): el motor no las cambia, las **lee**.
 
@@ -35,27 +36,27 @@ Relaciones: indicador 1–N valores; variable 1–N valores; una simulación o u
 
 | Pantalla | Ruta | Portal | Patrón | Entrada |
 |---|---|---|---|---|
-| Indicadores legales | `/configuracion/remuneraciones` | ERP | Lista agrupada + ficha en `SplitScreen` | Configuración → ámbito **Remuneraciones** (nuevo, ADR-018), pestaña 1 |
-| Variables de la empresa | `/configuracion/remuneraciones/variables` | ERP | Lista + hoja «Programar cambio» | Misma, pestaña 2 |
-| Historial | `/configuracion/remuneraciones/historial` | ERP | Timeline | Misma, pestaña 3 |
+| Remuneraciones: **todos los valores en una sola página** (indicadores legales y variables de la empresa) | `/configuracion/remuneraciones` | ERP | Lista agrupada por sección + ficha en `SplitScreen` + hoja «Cambiar valor» | Configuración → ámbito **Remuneraciones** (nuevo, ADR-018), pestaña 1 (decisión 4) |
+| Historial | `/configuracion/remuneraciones/historial` | ERP | Timeline | Misma, pestaña 2 |
 | Simulador de costo | `/cargos/simular` (y hoja desde Cargos y sueldos) | ERP | Formulario + resumen fijo | Personas → Cargos y sueldos (acción); ⌘K |
-| Indicadores (plataforma) | `/platform/indicadores` | Plataforma | Cola de alertas | Portal de plataforma |
+| Fuentes (plataforma) | `/platform/indicadores` | Plataforma | Estado de las fuentes y alertas (solo lectura) | Portal de plataforma |
 | Avisos | Bandeja de Inicio y `AvisoRecalculo` en CPQ | ERP | Ítems de bandeja | — |
 
-Configuración → Remuneraciones es un catálogo del Núcleo, como «catálogos (embudo, etiquetas)» en `NAVEGACION.md` §2: no es una página de configuración de un módulo (ADR-018). Sus escrituras son capacidades propias (§9), no `core.config.set`. Solo el ajuste «exigir segunda firma» (R14) es un ajuste declarativo (ADR-038).
+Configuración → Remuneraciones es un catálogo del Núcleo, como «catálogos (embudo, etiquetas)» en `NAVEGACION.md` §2: no es una página de configuración de un módulo (ADR-018). Sus escrituras son capacidades propias (§9), no `core.config.set`. No hay segunda firma (decisiones 4 y 5).
 
 Celular: ver indicadores, simular un escenario y **aprobar o rechazar** propuestas (en la Bandeja). Editar variables y comparar escenarios en paralelo: iPad y escritorio (DISENO.md §4). Detalle visual en el Design Prompt.
 
 ## 4. Campos y validaciones
 
-**Valor de indicador (plataforma)**
+**Valor del tenant para un indicador legal**
 
 | Campo | Tipo | Obligatorio | Validación | Quién lo edita |
 |---|---|---|---|---|
-| Valor | entero escalado (CLP entero; UF con 2 decimales; % con `PCT_ESCALA`) | Sí | Rango del indicador y variación máxima respecto del anterior (R7) | Trabajo automático o operador de Plataforma |
-| Vigente desde / hasta | fecha | Desde, sí | Sin solapes por indicador; hasta abierto | Ídem |
-| Evidencia | enlace o documento | Sí si es manual | URL de dominio oficial o documento en `core.documentos` | Operador |
-| Origen | `automatico` \| `manual` | Sí | — | Sistema |
+| Valor | entero escalado (CLP entero; UF con 2 decimales; % con `PCT_ESCALA`) | Sí | Rango del indicador y variación máxima respecto del anterior (R7) | Trabajo automático (si sigue la fuente) u owner, admin o rol con `core:remuneraciones.manage` |
+| Vigente desde / hasta | fecha | Desde, sí | Sin solapes por indicador y tenant; hasta abierto | Ídem |
+| Motivo | texto | Sí si es propio | ≥ 10 caracteres | Ídem |
+| Evidencia | enlace o documento | No (recomendada si es propio) | URL o documento en `core.documentos` | Ídem |
+| Origen | `sigue_fuente` \| `propio` | Sí | Volver a `sigue_fuente` es una acción explícita | Sistema / persona con permiso |
 
 **Valor de variable del tenant**
 
@@ -78,44 +79,47 @@ Montos: CLP en enteros, nunca float (REGLAS-codigo); tope por concepto de 100.00
 |---|---|---|---|---|
 | UF | Banco Central, API BDE (requiere cuenta y token) | SII, tabla UF del año | Diaria (se conoce por adelantado) | Sí (API) |
 | UTM | Banco Central, API BDE | SII, tabla UTM | Mensual | Sí (API) |
-| Ingreso mínimo mensual | Ley publicada en el Diario Oficial (hoy, según el buscador, Ley 21.830: $553.553 desde el 1-may-2026, publicada el 22-jun-2026 con efecto retroactivo; coincide con el valor de 1.0; *por verificar* en el texto) | Dirección del Trabajo | Por ley | No: carga manual con evidencia (R5) |
+| Ingreso mínimo mensual | Ley publicada en el Diario Oficial (hoy, según el buscador, Ley 21.830: $553.553 desde el 1-may-2026, publicada el 22-jun-2026 con efecto retroactivo; coincide con el valor de 1.0; *por verificar* en el texto) | Dirección del Trabajo | Por ley | No: OPAI lo publica como propuesto con la ley; lo confirma una persona del tenant (R5) |
 | Topes imponibles (AFP/salud/Ley 16.744 y seguro de cesantía) | Superintendencia de Pensiones (2026: 90,0 UF y 135,2 UF desde el 1-feb-2026, iguales a 1.0; que la Res. Ex. 237 reemplazó a la 27 viene del buscador, *por verificar*) | Previred, indicadores del mes | Anual, con correcciones | Semiautomática: se lee y se confirma |
 | Comisión por AFP | Superintendencia de Pensiones | Previred | Cambia por AFP | Semiautomática |
 | SIS | Superintendencia de Pensiones | Previred | Por licitación | Semiautomática |
 | Cotización adicional del empleador (Ley 21.735) | Ley 21.735, art. transitorio (1 % desde ago-2025 y 3,5 % desde ago-2026, iguales a 1.0; 4,25 % desde ago-2027 y la escala hasta 8,5 %, *por verificar*) | Superintendencia de Pensiones | Cada agosto | Calendario cargado por adelantado (R4) |
-| Seguro de cesantía (empleador 2,4 % indefinido, 3 % plazo fijo; trabajador 0,6 %) | Ley 19.728 | AFC / Dirección del Trabajo | Por ley | Manual con evidencia |
-| Cotización básica Ley 16.744 (0,90 %; 1.0 usa 0,93 %, que podría ser la básica más la extraordinaria de 0,03 % (Ley SANNA), *por verificar*) | Ley 16.744 / SUSESO | ISL | Por ley | Manual con evidencia |
+| Seguro de cesantía (empleador 2,4 % indefinido, 3 % plazo fijo; trabajador 0,6 %) | Ley 19.728 | AFC / Dirección del Trabajo | Por ley | OPAI lo publica como propuesto con la norma; lo confirma una persona del tenant (R5) |
+| Cotización básica Ley 16.744 (0,90 %; 1.0 usa 0,93 %, que podría ser la básica más la extraordinaria de 0,03 % (Ley SANNA), *por verificar*) | Ley 16.744 / SUSESO | ISL | Por ley | OPAI lo publica como propuesto con la norma; lo confirma una persona del tenant (R5) |
 | Tope de gratificación (4,75 IMM al año) | Código del Trabajo art. 50 | Dirección del Trabajo | Sigue al IMM | Derivado (no se carga) |
 | Jornada legal semanal (44 → 42 h el 26-abr-2026 → 40 h el 26-abr-2028) | Ley 21.561 | Mintrab | Por tramos | Calendario por adelantado (R4) |
 | Tramos del impuesto único (en UTM) | SII | — | Por ley | Manual; el monto en CLP se deriva de la UTM |
 
-- **R2. Actualización automática.** Un trabajo diario del Núcleo (ADR-029: el cron encola, el trabajo hace) consulta cada fuente automática, compara con el valor vigente y: si es igual, registra la captura; si es nuevo y pasa la validación (R7), lo deja **vigente** con origen automático; si no pasa, lo deja **retenido** y alerta (R6). Toda captura queda registrada (R3), haya o no cambio.
+- **R2. Actualización automática.** Un trabajo diario del Núcleo (ADR-029: el cron encola, el trabajo hace) consulta cada fuente automática, compara con el valor publicado y: si es igual, registra la captura; si es nuevo y pasa la validación (R7), lo publica y queda **vigente en cada tenant que sigue la fuente** (lo audita «OPAI · actualización automática»); si no pasa, lo publica como **retenido** y alerta (R6). Toda captura queda registrada (R3), haya o no cambio.
 - **R3. Registro de cada actualización.** Cada captura guarda: fecha y hora del servidor, fuente consultada, valor leído, valor vigente, diferencia, resultado y alerta emitida. Es append-only: una corrección es un valor nuevo, nunca una sobreescritura (como ADR-023 para hechos regulados).
 - **R4. Valores futuros conocidos.** Lo que la ley ya fijó a futuro (calendario de la reforma de pensiones, tramos de la jornada de 40 horas, UF ya publicada) se carga por adelantado como valores con vigencia futura. Así una cotización de 12 meses puede mostrar el costo que viene.
-- **R5. Carga manual con evidencia y segunda firma.** Lo que no tiene fuente legible por máquina (ingreso mínimo, tasas por ley) lo carga un operador de Plataforma con enlace a la norma; como afecta a todos los tenants, otro operador lo confirma antes de que rija. Admite **vigencia retroactiva** (caso real: la Ley 21.830 subió el IMM el 22-jun con efecto desde el 1-may), con el efecto de R16.
-- **R6. Alertas.** Se emiten eventos del Núcleo `core.remuneraciones.fuente_fallida` (la fuente no responde o responde algo ilegible durante más de N horas, ajuste de plataforma), `core.remuneraciones.valor_anomalo` (valor retenido) y `core.remuneraciones.indicador_atrasado` (el valor que rige debió renovarse y no se renovó: por ejemplo, UTM del mes nuevo). Llegan a Plataforma siempre; al tenant, en la Bandeja de Inicio solo cuando el atraso afecta sus cálculos. Correo y otros canales: silencio por defecto, configurables (ADR-020).
-- **R7. Valor anómalo.** Se retiene si sale del rango del indicador o si su variación supera la máxima declarada (propuesta: UF ±1 % diario; UTM ±3 % mensual; tasas ±20 % relativo; IMM solo baja con alerta). Mientras está retenido rige el último valor vigente y los cálculos muestran «valor en revisión».
+- **R5. Confirma una persona, sin segunda firma** (decisión 4 de Carlos, 29-oct-2026). Lo que no tiene fuente legible por máquina (ingreso mínimo, tasas por ley, topes) OPAI lo publica como **propuesto**, con el enlace a la norma. En cada empresa lo confirma **una sola persona**: el owner, un administrador o alguien en quien deleguen (rol con `core:remuneraciones.manage`). Esa misma persona puede escribir cualquier valor a mano. Se admite **vigencia retroactiva**: caso real, la Ley 21.830 subió el IMM el 22-jun con efecto desde el 1-may; el efecto se describe en R16 y R24.
+- **R6. Alertas.** Se emiten eventos del Núcleo `core.remuneraciones.fuente_fallida` (la fuente no responde o responde algo ilegible durante más de N horas, ajuste de plataforma), `core.remuneraciones.valor_anomalo` (valor retenido) y `core.remuneraciones.indicador_atrasado` (el valor que rige debió renovarse y no se renovó: por ejemplo, UTM del mes nuevo). Llegan siempre a Plataforma, que vigila las fuentes, y a quienes confirman en cada tenant, en la Bandeja de Inicio, cuando hay algo que confirmar o el atraso afecta sus cálculos. Correo y otros canales: silencio por defecto, configurables (ADR-020).
+- **R7. Valor anómalo.** Se retiene si sale del rango del indicador o si su variación supera la máxima declarada (propuesta: UF ±1 % diario; UTM ±3 % mensual; tasas ±20 % relativo; IMM solo baja con alerta). Mientras está retenido, en cada tenant rige el último valor vigente y los cálculos muestran «valor en revisión». La persona que confirma en el tenant lo acepta o lo rechaza (R5).
 - **R8. Sin fuente no hay invento.** Si falta un indicador para la fecha pedida (por ejemplo, UF de mañana no publicada), el cálculo usa el último valor vigente **y lo dice** en la traza («UF del 29-10-2026; la de la fecha pedida aún no se publica»). Si no existe ningún valor, el cálculo se bloquea con un error que nombra lo que falta.
 - **R9. mindicador.cl no es fuente de verdad** (no es oficial ni tiene compromiso de servicio); se puede usar solo como tercer contraste. Previred se usa como contraste de tasas y topes, no como única fuente (solo publica PDF y HTML).
 
 ### 5.2 Variables del tenant
 
-- **R10. Plantilla por vertical, copiada al tenant.** Al activar el servicio (o CPQ o Nómina), el tenant recibe una copia de la plantilla de su vertical (ADR-021; ADR-042 punto 5): AFP para cotizar, salud para cotizar (Fonasa 7 % o plan en UF), provisión de vacaciones (8,33 %), provisión de indemnización (4,166 %), cotización adicional de la mutual o ISL (la notifica su organismo cada dos años, DS 67), jornada semanal por defecto, modalidad de gratificación por defecto, días de feriado al año y colchón de feriados (12 y 10 % en 1.0, `extraccion/comercial-y-cpq.md` §3.8). Nada global se consulta al calcular, salvo los indicadores legales.
+- **R10. Plantilla por vertical, copiada al tenant.** Al activar el servicio (o CPQ o Nómina), el tenant recibe una copia de la plantilla de su vertical (ADR-021; ADR-042 punto 5): AFP para cotizar, salud para cotizar (Fonasa 7 % o plan en UF), base y forma de las provisiones de vacaciones e indemnización (R17, paso 5), cotización adicional de la mutual o ISL (la notifica su organismo cada dos años, DS 67), jornada semanal por defecto, modalidad de gratificación por defecto, días de feriado al año y colchón de feriados (12 y 10 % en 1.0, `extraccion/comercial-y-cpq.md` §3.8). Nada global se consulta al calcular, salvo los indicadores legales.
 - **R11. Personalizadas.** El tenant puede crear variables propias (por ejemplo, «bono de asistencia promedio»), con unidad y rango. Las usan las fórmulas del modelo de costeo de CPQ (ADR-042) y las estructuras.
 - **R12. Siempre con vigencia y motivo.** Un cambio se **programa** con «vigente desde» (hoy o futuro), motivo y adjunto opcional; nunca se pisa el valor anterior. El pasado solo con un permiso aparte y queda marcado como retroactivo (efecto en R16).
 - **R13. Vista previa de impacto obligatoria.** Antes de confirmar, la pantalla, la API y el MCP devuelven el impacto (`dryRun`). El Núcleo calcula el de las capas de sueldo cuyo costo cambia. Cada módulo activo que guarda juegos de valores (CPQ con sus cotizaciones abiertas; Nómina, más adelante) aporta el suyo por un **contrato del Núcleo** («proveedor de impacto», tipo en `packages/domain`), como las fuentes opcionales de ADR-048 punto 2. El Núcleo nunca lee tablas de CPQ: sin CPQ activo, el impacto muestra solo las capas.
-- **R14. Aprobación.** Un ajuste del tenant (ADR-038) define si un cambio de variable pide segunda firma (por defecto **no** para personas con permiso; **siempre** cuando lo propone un agente, R27). La aprobación usa la **cola de aprobaciones del Núcleo** (Bandeja y Configuración → Aprobaciones); no hay otra cola. Todo cambio confirmado queda en `core.audit_events`.
-- **R15. Indicadores legales: solo lectura para el tenant.** El tenant no cambia la UF ni el IMM. Sí puede, en sus variables, elegir supuestos (qué AFP usa para cotizar) y fijar lo que la ley deja a cada empresa (mutual adicional).
+- **R14. Sin segunda firma** (decisión 5 de Carlos). El cambio de una persona con permiso (owner, admin o rol con `core:remuneraciones.manage`) se aplica directo, con su vista previa y su auditoría. El cambio de un agente sigue la **autonomía que el tenant le dio a su key** (ADR-034, ADR-049). Por defecto va a la **cola de aprobaciones del Núcleo** (Bandeja y Configuración → Aprobaciones), que es la única cola. Todo cambio queda en `core.audit_events`.
+- **R15. Todos los valores se ven y se editan en una sola página** (decisión 4). La UF, la UTM, el IMM, las tasas, los topes y las variables propias están en Configuración → Remuneraciones. Por defecto, cada indicador **sigue la fuente** (R2). Si una persona con permiso lo cambia a mano, el valor pasa a ser **propio** de la empresa y deja de seguir la fuente: el cambio lleva vigencia, motivo y auditoría, y la página lo marca con «Propio» y lo compara con el valor publicado. «Volver a seguir la fuente» es una acción explícita. Un agente puede hacer lo mismo por el MCP, según R14.
 
 ### 5.3 Cálculo
 
 - **R16. Un solo motor, puro y determinista.** El cálculo vive en el dominio (sin base de datos) y recibe: el sueldo (capa ADR-036 o a mano), el contrato, el patrón y horario, y un **juego de valores**. Devuelve el resultado y la **traza** de cada monto. Mismo juego + misma entrada = mismo resultado, en el navegador (respuesta instantánea del cotizador, ADR-042 punto 9) y en el servidor (autoridad).
 - **R17. Pasos del costo empresa por persona** (detalle con los valores de 1.0 en §11):
   1. **Haberes imponibles:** sueldo base + gratificación (legal del art. 50: 25 % con tope 4,75 IMM anual, prorrateado al mes; o monto fijo; o ninguna) + bonos imponibles. 1.0 calcula el 25 % sobre el sueldo base solo; si los bonos imponibles entran en la base queda como regla del brief, verificada con la DT.
-  2. **No imponibles:** colación, movilización y bonos no imponibles (sin monto legal; deben ser razonables, art. 41 del Código del Trabajo).
+  2. **No imponibles:** colación, movilización y bonos no imponibles (sin monto legal; deben ser razonables, art. 41 del Código del Trabajo). El CPQ los costea con los montos de la capa **cuando la cotización los incluye** (decisión 16).
   3. **Bases con tope:** imponible para AFP/salud/Ley 16.744 con tope en UF; imponible para cesantía con su tope.
   4. **Aportes del empleador:** SIS, seguro de cesantía según contrato, Ley 16.744 (básica + adicional del tenant), cotización adicional de la reforma (con su tramo vigente).
-  5. **Provisiones:** vacaciones e indemnización (variables del tenant), sobre una **base configurable**: «costo directo completo» (como 1.0, que incluye colación, movilización y aportes) o «solo haberes» (pregunta 14).
+  5. **Provisiones, como las calculan finanzas y contabilidad** (decisión 14). Nunca se infla la base con colación, movilización ni aportes del empleador, como hace 1.0.
+     - **Vacaciones:** la base es la remuneración del feriado (sueldo base y remuneraciones fijas, art. 71 del Código del Trabajo). Para el costo, el CPQ suma el **promedio mensual de los días de feriado al año**: la base diaria × los días de feriado del año (15 hábiles, más el progresivo si corresponde, convertidos a días corridos según el calendario) ÷ 12. La conversión a días corridos y el trato del progresivo se fijan en el brief con el contador de Gard.
+     - **Indemnización por años de servicio:** la base es la última remuneración mensual con tope de 90 UF (art. 172). La provisión mensual es 1/12 de esa base, hasta 11 años (330 días, art. 163). Si el tenant provisiona con otra probabilidad, la fija en una variable propia.
+     - El detalle contable (cuentas y ajuste por rotación) lo valida contabilidad en el brief.
   6. **Costo empresa mensual** = haberes + no imponibles + aportes + provisiones.
   7. **Líquido estimado** (solo informativo): menos AFP (10 % + comisión), salud, cesantía del trabajador e impuesto único, sin descuentos personales.
 - **R18. Costo por turno.** Desde el patrón del catálogo del tenant (`modulos/operaciones.md`; 4x4, 5x2, 7x7, 14x14, 2x5, 3x4 de fábrica) y el horario:
@@ -123,9 +127,10 @@ Montos: CLP en enteros, nunca float (REGLAS-codigo); tope por concepto de 100.00
   - **Horas semanales promedio** = horas del turno × días de trabajo × 7 / (días de trabajo + descanso). Ejemplo: 4x4 de 12 h = 42 h (justo la jornada legal desde el 26-abr-2026). Si superan la jornada vigente, el resultado avisa y propone horas extra (R19).
   - **Costo del puesto/mes** = costo empresa por persona × personas por puesto (+ ajuste de feriados, fórmula del modelo de CPQ).
   - **Costo por día** = costo del puesto / días del mes del cálculo (30 por defecto, ajuste); **por hora** = costo del puesto / horas cubiertas en el mes.
-- **R19. Horas extra.** Propuesta: valor de la hora = sueldo base / 30 × 28 / (4 × jornada semanal pactada), con recargo legal mínimo de 50 % (art. 32; base IMM si el sueldo es menor). Con 42 h, una hora extra vale 0,008333 × sueldo base. **1.0 usa base/30/8 × 1,5 (0,00625 × base)**, sin la jornada pactada: cambia el resultado (pregunta 15).
+- **R19. Horas extra: fórmula legal con la jornada pactada** (decisión 15). Valor de la hora = sueldo base ÷ 30 × 28 ÷ (4 × jornada semanal pactada), con el recargo legal mínimo de 50 % (art. 32; la base es el IMM si el sueldo es menor). Con 42 h, una hora extra vale 0,008333 × sueldo base. **1.0 usa base/30/8 × 1,5 (0,00625 × base)**; esa fórmula no se porta.
 - **R20. Jornada parcial.** Si la jornada pactada es ≤ 30 h (art. 40 bis), el sueldo base mínimo es el IMM proporcional (caso real de Gard: $237.237 = $553.553 × 18/42).
 - **R20b. Sueldo base atado al ingreso mínimo.** Una capa puede declarar su sueldo base como «igual al ingreso mínimo» (o a una fracción por jornada parcial) en vez de un monto. Al subir el IMM, el costo se recalcula solo y RRHH recibe la lista de capas afectadas para generar los anexos de contrato (ADR-036 punto 5; el anexo lo aprueba RRHH). Caso real: la mayoría de los puestos de Gard en 1.0 tiene base $553.553 = IMM vigente, y $237.237 = IMM × 18/42.
+- **R20c. Contadores para el finiquito (en Nómina).** Nómina lleva por cada trabajador un **contador acumulado de vacaciones** (días ganados, tomados y saldo) y otro de **indemnización por años de servicio** (años y base acumulada con sus topes), para calcular el finiquito (decisión 14). El motor entrega la regla del cálculo; el contador y su historia viven en Nómina (§15).
 - **R21. La capa que rigió y el juego de valores se guardan.** Toda liquidación, cotización o simulación guardada registra la capa de sueldo usada (ADR-036 punto 6) y el juego de valores (fecha + huella), para reproducirla años después.
 
 ### 5.4 Efecto en cotizaciones (contrato con CPQ)
@@ -144,19 +149,20 @@ Estas reglas las implementa **CPQ** como consumidor del evento `core.remuneracio
 ### 5.5 Agentes
 
 - **R26. Todo por capacidad y MCP** (ADR-004, ADR-055): consultar, simular, proponer, aprobar y rechazar existen por pantalla, `/api/v1` y MCP, con los mismos permisos, alcance y auditoría. El agente interno (ADR-049) los usa con la identidad del usuario.
-- **R27. Un agente propone; una persona aprueba.** Crear, programar o anular una variable desde un agente queda `pendiente_aprobacion` en la cola de aprobaciones del Núcleo (`APPROVAL_REQUIRED`), con su vista previa de impacto. Un cambio retroactivo es **irreversible** para el agente. Cargar, confirmar o rechazar un indicador legal también existe por MCP con la key de plataforma (scope `platform`, ADR-055). Es irreversible: un agente solo lo deja propuesto y siempre lo aprueba una persona con `platformRole`, además de la segunda firma de R5. No se marca `soloPersonas`, porque no gobierna agentes, keys ni credenciales.
+- **R27. Agentes según la autonomía de su key** (decisiones 4 y 5). Un agente o el MCP puede cambiar cualquier valor del tenant (indicadores legales y variables), confirmar o rechazar un valor propuesto o retenido, y crear o anular variables, siempre con vista previa y auditoría. Por defecto todo eso va a la cola de aprobaciones del Núcleo (`APPROVAL_REQUIRED`). El tenant puede darle más autonomía a una key (ADR-034), salvo en el cambio retroactivo, que es **irreversible** y siempre pide aprobación humana. Plataforma no confirma valores: solo vigila las fuentes.
 - **R28. Lecturas sensibles.** Simular con una capa de sueldo concreta revela montos de sueldo: exige `core:estructuras.read_sensible` (el permiso de montos de sueldo de ADR-016) y se audita como la lectura sensible ya existente (`core.estructuras.read_sensible`), sin duplicarla (NÚCLEO-H). Simular con un sueldo ingresado a mano no revela datos de personas y no se audita como sensible.
 
 ## 6. Estados y transiciones
 
 | Desde | Hacia | Quién | Condición | Efecto | ¿Reversible? |
 |---|---|---|---|---|---|
-| (nuevo) | Valor de indicador `vigente` | Trabajo automático | Pasa la validación R7 | Rige desde su fecha; aviso a cotizaciones abiertas (R22) | Con otro valor nuevo |
-| (nuevo) | `retenido` | Trabajo automático | Falla R7 | Alerta R6; rige el anterior | Sí (confirmar o rechazar) |
-| `retenido` / manual `propuesto` | `vigente` | Operador de Plataforma + segunda firma | Evidencia adjunta | Igual que vigente | Con otro valor nuevo |
-| `retenido` / manual `propuesto` | `rechazado` | Operador de Plataforma | Motivo | Sigue el valor anterior | No (se carga otro) |
+| (nuevo) | Valor del tenant `vigente` (sigue la fuente) | Trabajo automático | El valor publicado pasa la validación R7 | Rige desde su fecha; aviso a cotizaciones abiertas (R22) | Con otro valor nuevo |
+| (nuevo) | `retenido` o `propuesto` | Trabajo automático | Falla R7, o la fuente no se lee por máquina | Alerta R6; rige el anterior | Sí (confirmar o rechazar) |
+| `retenido` / `propuesto` | `vigente` | **Una** persona con `core:remuneraciones.manage`, o un agente según su autonomía | — | Igual que vigente | Con otro valor nuevo |
+| `retenido` / `propuesto` | `rechazado` | Ídem | Motivo | Sigue el valor anterior | No (se escribe otro) |
+| (cualquiera) | `vigente` propio | Persona con permiso (directo) o agente (según autonomía; por defecto, cola) | Vigencia y motivo | Deja de seguir la fuente | Sí: «Volver a seguir la fuente» |
 | Valor de variable (nuevo) | `programado` | Persona con permiso | Vista previa revisada | Rige en su fecha | Sí, hasta que rija (anular) |
-| (nuevo) | `pendiente_aprobacion` | Agente (siempre, también para un retroactivo), o persona si el tenant exige segunda firma | — | Cola de aprobaciones del Núcleo | Sí |
+| (nuevo) | `pendiente_aprobacion` | Agente sin autonomía para ese cambio (el defecto), y siempre en un retroactivo | — | Cola de aprobaciones del Núcleo | Sí |
 | `programado` | `anulado` | Persona con `core:remuneraciones.manage` (un agente lo propone) | Antes de su fecha de vigencia | No llega a regir; auditoría | No (se programa otro) |
 | `pendiente_aprobacion` | `programado` / `rechazado` | Persona con `core:remuneraciones.aprobar`, desde la cola de aprobaciones | — | Auditoría | No (se crea otro) |
 | `programado` | `vigente` | Sistema, al llegar la fecha | — | Aviso R22 | Con otro valor nuevo |
@@ -165,26 +171,26 @@ Estas reglas las implementa **CPQ** como consumidor del evento `core.remuneracio
 
 | Acción | owner | admin | gerente | supervisor | viewer | Cliente | Trabajador | Agente |
 |---|---|---|---|---|---|---|---|---|
-| Ver indicadores legales | sí | sí | sí (consulta) | no | no | no | no | `core:remuneraciones.read` |
-| Ver variables del tenant | sí | sí | sí (consulta) | no | no | no | no | ídem |
+| Ver todos los valores (indicadores y variables) | sí | sí | sí (consulta) | no | no | no | no | `core:remuneraciones.read` |
 | Simular con sueldo a mano | sí | sí | sí | no | no | no | no | `core:remuneraciones.simular` |
 | Simular con una capa (montos) | sí | sí | no (sin montos, NAVEGACION §5) | no | no | no | no | + `core:estructuras.read_sensible` |
-| Crear, programar o anular una variable | sí | sí | no, salvo rol personalizado | no | no | no | no | propone → aprobación |
-| Aprobar o rechazar una propuesta | sí | sí | no, salvo rol personalizado | no | no | no | no | nunca |
-| Cambio retroactivo | sí | con rol | no | no | no | no | no | propone → aprobación |
-| Cargar, confirmar o rechazar un indicador legal | solo `platformRole` (Plataforma) | | | | | | | propone con key `platform` → aprobación |
+| Cambiar cualquier valor (indicador legal o variable), crear o anular variables | sí | sí | no, salvo delegación (rol personalizado) | no | no | no | no | según la autonomía de su key; por defecto, cola de aprobaciones |
+| Confirmar o rechazar un valor propuesto o retenido | sí (una persona basta) | sí | no, salvo delegación | no | no | no | no | ídem |
+| Aprobar o rechazar lo que propuso un agente | sí | sí | no, salvo delegación | no | no | no | no | nunca |
+| Cambio retroactivo | sí | sí | no, salvo delegación con `core:remuneraciones.retroactivo` | no | no | no | no | siempre a aprobación humana |
+| Ver el estado de las fuentes (Plataforma) | solo `platformRole` | | | | | | | key `platform`, lectura |
 
-Gerente, supervisor y viewer siguen `NAVEGACION.md` §5: en Configuración, el gerente solo consulta lo de sueldos, y supervisor y viewer ven solo sus preferencias. Un rol personalizado (Brief 07c) puede recibir `core:remuneraciones.manage` o `.aprobar`.
+Gerente, supervisor y viewer siguen `NAVEGACION.md` §5: en Configuración, el gerente solo consulta lo de sueldos, y supervisor y viewer ven solo sus preferencias. La delegación de la decisión 4 es un rol personalizado (Brief 07c) con `core:remuneraciones.manage`, al que se puede sumar `.aprobar` o `.retroactivo`.
 
-Alcance de filas: no aplica a indicadores (son de plataforma) ni a variables de empresa; la simulación con capa respeta el alcance del supervisor (ADR-022) si en el futuro se le concede.
+Alcance de filas: no aplica a los valores, que son de la empresa; la simulación con capa respeta el alcance del supervisor (ADR-022) si en el futuro se le concede.
 
 ## 8. Eventos y notificaciones
 
 | Evento | Cuándo | Quién se entera por defecto | Canal |
 |---|---|---|---|
 | `core.remuneraciones.valores_vigentes` | Empieza a regir un valor de indicador o de variable | Nadie (silencio, ADR-020); consumidores: CPQ (R22), Nómina | — |
-| `core.remuneraciones.fuente_fallida` | Fuente sin respuesta más de N horas | Plataforma; tenant solo si le afecta | Bandeja |
-| `core.remuneraciones.valor_anomalo` | Valor retenido | Plataforma | Bandeja |
+| `core.remuneraciones.fuente_fallida` | Fuente sin respuesta más de N horas | Plataforma; quien confirma en el tenant si le afecta | Bandeja |
+| `core.remuneraciones.valor_anomalo` | Valor retenido o propuesto por confirmar | Plataforma y quien confirma en cada tenant | Bandeja |
 | `core.remuneraciones.indicador_atrasado` | Debió renovarse y no se renovó | Plataforma y admins del tenant | Bandeja |
 | `core.remuneraciones.variable_propuesta` | Cambio pendiente de aprobación | Aprobadores del tenant | Bandeja |
 | `core.remuneraciones.variable_programada` | Cambio confirmado | Autor | Bandeja |
@@ -199,25 +205,26 @@ Toda acción de pantalla tiene su capacidad y su herramienta (ADR-055). El nombr
 | `core.remuneraciones.indicadores.listar` | Indicadores vigentes en una fecha, con fuente, estado y vigencia | Lectura | — | — |
 | `core.remuneraciones.indicadores.historial` | Historial de valores y capturas de un indicador | Lectura | — | — |
 | `core.remuneraciones.variables.listar` | Variables del tenant con valor vigente y programados | Lectura | — | — |
+| `core.remuneraciones.indicadores.cambiar` | Escribe el valor propio de la empresa para un indicador legal, con vigencia y motivo, o lo vuelve a «seguir la fuente» | Escritura (retroactivo: irreversible) | Sí | Según la autonomía de la key (por defecto, sí); retroactivo, siempre |
+| `core.remuneraciones.indicadores.confirmar` / `.rechazar` | Confirma o rechaza un valor propuesto o retenido (una persona basta) | Escritura | Sí | Según la autonomía de la key (por defecto, sí) |
 | `core.remuneraciones.costo.simular` | Costo empresa por persona, puesto, día y hora con traza, para un sueldo (o una capa), contrato, patrón, horario y fecha; hasta 3 escenarios | Lectura (auditada si usa capa, R28) | — | — |
 | `core.remuneraciones.impacto.calcular` | Impacto de un juego de valores nuevo: capas del Núcleo y lo que aporten los módulos activos (R13) | Lectura | — | — |
 | `core.remuneraciones.simulaciones.guardar` | Guarda una simulación con nombre | Escritura | Sí | No |
 | `core.remuneraciones.simulaciones.exportar` | PDF de la simulación con la marca del tenant, en `core.documentos` | Escritura | Sí | No |
-| `core.remuneraciones.variables.crear` | Crea una variable personalizada (R11) | Escritura | Sí | Sí, si la pide un agente |
-| `core.remuneraciones.variables.programar` | Programa un valor con vigencia y motivo y devuelve el impacto | Escritura | Sí | Sí, si la pide un agente (R27) |
-| `core.remuneraciones.variables.anular` | Anula un valor programado antes de que rija | Escritura | Sí | Sí, si la pide un agente |
-| `platform.remuneraciones.alertas.listar` | Alertas de fuentes y valores retenidos (key `platform`) | Lectura | — | — |
-| `platform.remuneraciones.indicadores.cargar` / `.confirmar` / `.rechazar` | Carga manual con evidencia, confirmación de un retenido o rechazo (key `platform`) | Irreversible | Sí | Siempre: persona con `platformRole` y segunda firma (R5) |
+| `core.remuneraciones.variables.crear` | Crea una variable personalizada (R11) | Escritura | Sí | Según la autonomía de la key (por defecto, sí) |
+| `core.remuneraciones.variables.programar` | Programa un valor con vigencia y motivo y devuelve el impacto | Escritura | Sí | Ídem (R27) |
+| `core.remuneraciones.variables.anular` | Anula un valor programado antes de que rija | Escritura | Sí | Ídem |
+| `platform.remuneraciones.fuentes.listar` | Estado de las fuentes, capturas y alertas (key `platform`) | Lectura | — | — |
 
 Toda escritura acepta `dryRun` (en MCP, su `preview_…`) e `idempotencyKey` (AGENTS.md, «Paridad y escrituras»). «Copiar como línea de cotización» del simulador es una capacidad de CPQ (crear una línea desde una simulación) y se define en su brief; mientras CPQ no esté activo, el botón queda deshabilitado.
 
 Aprobar o rechazar una propuesta se hace con la **capacidad existente de la cola de aprobaciones del Núcleo**, no con herramientas nuevas. La parte de CPQ (ver qué cotizaciones cambian y recalcularlas) son capacidades de CPQ y se definen en su brief.
 
-**Flujo típico del agente interno:** «¿cuánto cuesta un guardia 4x4 de 12 horas con el sueldo de la instalación X?» → `core.remuneraciones.costo.simular` con la capa (si el usuario no tiene `core:estructuras.read_sensible`, ofrece simular con sueldo a mano) → muestra la traza. «Sube la mutual adicional a 1,7 % desde enero» → `preview_…` de `variables.programar` → muestra el impacto → `variables.programar` → se detiene en la cola de aprobaciones.
+**Flujo típico del agente interno:** «¿cuánto cuesta un guardia 4x4 de 12 horas con el sueldo de la instalación X?» → `core.remuneraciones.costo.simular` con la capa (si el usuario no tiene `core:estructuras.read_sensible`, ofrece simular con sueldo a mano) → muestra la traza. «Sube la mutual adicional a 1,7 % desde enero» → `preview_…` de `variables.programar` → muestra el impacto → `variables.programar` → con la autonomía por defecto se detiene en la cola de aprobaciones. «Confirma el IMM nuevo» → `preview_…` de `indicadores.confirmar` → muestra el valor publicado, la ley y el impacto → `indicadores.confirmar` → según la autonomía, rige o queda en la cola.
 
 ## 10. Integraciones
 
-- **Banco Central (API BDE):** credencial **de plataforma** (no del tenant, porque el dato es público e igual para todos), en el almacén cifrado (ADR-027). Requiere que Carlos cree la cuenta y el token (pregunta 3).
+- **Banco Central (API BDE):** credencial **de plataforma** (no del tenant, porque el dato es público e igual para todos), en el almacén cifrado (ADR-027). Requiere que Carlos cree la cuenta y el token (decisión 3: la crea).
 - **Superintendencia de Pensiones, SII y Previred:** lectura de páginas públicas con validación humana cuando no hay API (semiautomática).
 - **Consumo medido** (ADR-031): cada captura y cada simulación se mide en `core.consumos`.
 
@@ -232,7 +239,8 @@ Referencia: código de payroll de 1.0 leído en `Cryptobal/opai` `40d19a5` (solo
 | Parámetros legales en un JSON global por versión; el motor usa la versión marcada «activa», **no la vigente en la fecha**, y se cargan a mano con un script (anexo A §1) | Cada indicador con su propia vigencia; el cálculo pide el juego de valores de una fecha (R2–R7, R16) | Reproducir cálculos pasados y no depender de un script |
 | Tramos del impuesto único fijos en CLP (calculados con UTM $69.611) | Tramos en UTM; el monto en CLP sale de la UTM del mes (R1) | En 1.0 el impuesto de GC-F sale $2.309; con la UTM vigente serían ≈ $938 (calculado a mano) |
 | Mutual distinta según el camino: 0,93 % en la liquidación, 1,20 % en CPQ, 0,95 % en Finanzas; AFP por defecto «habitat» o «modelo» según el camino | Una sola variable del tenant para cada supuesto (R10) | El mismo puesto costaba distinto según quién preguntara |
-| La liquidación no suma la cotización de la reforma ni provisiones; CPQ no pasa colación ni movilización al motor | Un solo cálculo con todos los conceptos (R17); CPQ manda la capa completa | El costo cotizado quedaba bajo el real (anexo A §4) |
+| La liquidación no suma la cotización de la reforma ni provisiones; CPQ no pasa colación ni movilización al motor; las provisiones se calculan sobre colación, movilización y aportes | Un solo cálculo con todos los conceptos (R17); CPQ manda la colación y la movilización cuando la cotización las incluye; provisiones como las calcula contabilidad, con contadores por trabajador en Nómina (R20c) | El costo cotizado quedaba bajo en unos conceptos e inflado en otros (anexo A §4) |
+| Parámetros legales globales que solo se cambian con un script | Todos los valores de la empresa en una sola página, editables por una persona con permiso o por un agente según su autonomía (R15, R27) | Decisión 4 de Carlos |
 | Valores de respaldo en el código (IMM $500.000, mutual 0,93 %, Fonasa 7 %) | Sin respaldos fijos: falta un valor ⇒ se dice o se bloquea (R8) | Un respaldo silencioso esconde un error |
 | Montos en float hasta el final, con `floor` y `round` mezclados | Enteros escalados y una regla de redondeo por concepto (REGLAS-codigo) | Resultado igual al peso en navegador y servidor |
 | Sin vista previa del impacto de un cambio | Impacto obligatorio antes de confirmar (R13) | Ningún competidor lo documenta (§14) |
@@ -246,8 +254,8 @@ Referencia: código de payroll de 1.0 leído en `Cryptobal/opai` `40d19a5` (solo
 - Ley publicada con efecto retroactivo (Ley 21.830): valor nuevo con vigencia pasada (R5); cotizaciones emitidas no cambian (R23); las abiertas muestran «cambio retroactivo» (R24); Nómina reliquida diferencias como hechos nuevos (cuando exista).
 - Res. Ex. que reemplaza a otra en el mismo año (topes 2026: 89,9 → 90,0 UF): valor nuevo con la misma vigencia que el anterior; el anterior queda como historia, nunca se borra.
 - Fuente caída en el cambio de mes (UTM nueva no llega): rige la anterior, `indicador_atrasado`, y la traza lo dice (R8).
-- Cotización de 12 meses que cruza agosto (tramo nuevo de la reforma) o el 26-abr-2028 (40 h): la simulación puede mostrar el costo por tramo (R4); el precio se costea con el juego de valores de la **fecha de cálculo** y muestra aparte el costo a la fecha de inicio y por tramo (recomendación de la pregunta 6, pendiente de Carlos).
-- Turno de 12 h en 4x4: supera el máximo diario ordinario; en Chile requiere jornada excepcional autorizada por la DT. El motor no lo valida legalmente: avisa y deja la responsabilidad en el tenant (pregunta 8).
+- Cotización de 12 meses que cruza agosto (tramo nuevo de la reforma) o el 26-abr-2028 (40 h): la simulación puede mostrar el costo por tramo (R4); el precio se costea con el juego de valores de la **fecha de cálculo** y muestra aparte el costo a la fecha de inicio y por tramo (decisión 6 de Carlos).
+- Turno de 12 h en 4x4: supera el máximo diario ordinario; en Chile requiere jornada excepcional autorizada por la DT. El motor no lo valida legalmente: avisa y deja la responsabilidad en el tenant; la resolución de jornada excepcional de la DT se registra en Asistencia (decisión 8).
 - Sueldo base bajo el IMM vigente: se calcula, pero el resultado avisa en `danger` y CPQ no deja enviar sin aprobación.
 - Gratificación con tope: con sueldo base ≥ 4,75 IMM / 12 / 25 % el tope rige (anexo A, GC-F).
 - Patrón que no divide el mes exacto (4x4 = ciclo de 8 días): se usa el promedio mensual (30/8 ciclos), no el mes calendario, salvo en Nómina, que usa días reales.
@@ -255,15 +263,16 @@ Referencia: código de payroll de 1.0 leído en `Cryptobal/opai` `40d19a5` (solo
 ## 13. Criterios de aceptación y casos dorados
 
 - **CA1.** Con la fuente automática disponible, la UF del día y la UTM del mes rigen sin intervención y cada captura aparece en Historial.
-- **CA2.** Simulando una caída de la fuente, aparece la alerta en Plataforma y en la Bandeja del tenant, y los cálculos siguen con el último valor y lo dicen.
-- **CA3.** Un valor fuera de rango queda retenido y no rige hasta que un operador lo confirma con evidencia y segunda firma.
+- **CA2.** Si se simula una caída de la fuente, aparece la alerta en Plataforma y en la Bandeja de quien confirma en el tenant, y los cálculos siguen con el último valor y lo dicen.
+- **CA3.** Un valor fuera de rango queda retenido y no rige hasta que **una** persona con permiso del tenant lo confirma. No hay segunda firma.
+- **CA3b.** Un admin cambia a mano el IMM o una tasa en la misma página de los demás valores. El valor queda «Propio», con auditoría, y deja de seguir la fuente hasta que alguien pulsa «Volver a seguir la fuente».
 - **CA4.** Un admin programa la mutual adicional desde una fecha futura, ve el impacto en sus cotizaciones abiertas, y el día de la vigencia las cotizaciones muestran `AvisoRecalculo`.
-- **CA5.** Un agente propone el mismo cambio por MCP: queda en aprobación humana con su vista previa; el agente no puede aprobarlo.
+- **CA5.** Un agente hace el mismo cambio por MCP. Con la autonomía por defecto queda en la cola de aprobaciones, con su vista previa, y el agente no puede aprobarlo. Con autonomía «directo» para esa capacidad, rige y queda auditado como «agente vía <usuario>».
 - **CA6.** Una cotización enviada no cambia ni un peso tras un cambio de UF, IMM o variable.
 - **CA7.** El simulador da, para cada caso dorado del anexo A, el resultado de 1.0 al peso o la diferencia explicada por regla (por ejemplo, la tasa de la reforma vigente o la fuente de la UF).
 - **CA8.** Todo lo anterior funciona igual por pantalla, `/api/v1` y MCP, y queda en la auditoría.
 
-**Casos dorados (ejecutados sobre el motor de 1.0, anexo A §5).** Son las estructuras de puesto reales de Gard en 1.0 (montos de capa, sin datos de personas), con UF $41.237,01 (29-10-2026), UTM $72.151 (oct-2026), IMM $553.553, contrato indefinido, AFP Modelo, Fonasa 7 %, mutual 1,20 % y reforma 3,5 %. En el brief, cada uno es un test con el resultado esperado **en 2.0**, y la diferencia con 1.0 queda explicada por regla (preguntas 13 a 16).
+**Casos dorados (ejecutados sobre el motor de 1.0, anexo A §5).** Son las estructuras de puesto reales de Gard en 1.0 (montos de capa, sin datos de personas), con UF $41.237,01 (29-10-2026), UTM $72.151 (oct-2026), IMM $553.553, contrato indefinido, AFP Modelo, Fonasa 7 %, mutual 1,20 % y reforma 3,5 %. En el brief, cada uno es un test con el resultado esperado **en 2.0**, y la diferencia con 1.0 queda explicada por regla (decisiones 13 a 16).
 
 | Caso | Capa de sueldo (puesto) | Costo empresa/mes en 1.0 | Líquido en 1.0 |
 |---|---|---|---|
@@ -280,13 +289,14 @@ Referencia: código de payroll de 1.0 leído en `Cryptobal/opai` `40d19a5` (solo
 |---|---|---|---|
 | 4x4 24 h (día + noche) = 2 posiciones | 4 | $3.395.828 | Igual en personas; sube con la colación y la movilización (R17) |
 | 4x4 de 12 h, solo día o solo noche | 2 | $1.697.914 | Igual (42 h semanales, dentro de la jornada) |
-| 5x2 diurno de 08:00 a 18:00 | 1 (plantilla de CPQ) o 2 (regla de dotación de CRM) | $848.957 o $1.697.914 | 1 persona, pero son 50 h semanales: el motor avisa que excede las 42 h y propone horas extra o un horario de 8,4 h (pregunta 9) |
+| 5x2 diurno de 08:00 a 18:00 | 1 (plantilla de CPQ) o 2 (regla de dotación de CRM) | $848.957 o $1.697.914 | 1 persona, pero son 50 h semanales: el motor avisa que excede las 42 h y propone horas extra o un horario de 8,4 h (regla de la decisión 9) |
 
+- **CA10.** Las provisiones de vacaciones e indemnización de cada caso dorado se calculan como en R17, paso 5, sin colación, movilización ni aportes en la base. Su diferencia con 1.0 queda explicada, caso por caso, en el test.
 - **CA9.** Para cada caso dorado, el brief fija el resultado esperado de 2.0 y una prueba que reproduce el de 1.0 con los supuestos de 1.0 (para demostrar que la diferencia es solo la regla nueva).
 
 ## 14. Benchmark
 
-> **Cómo se verificó.** La red de la sesión no permitió abrir las páginas (fallaron sii.cl, previred.com, api.cmfchile.cl, si3.bcentral.cl, mindicador.cl, spensiones.cl y developer.deel.com). Cada dato viene del **resultado del buscador** (título, URL y extracto indexado), no de leer la página completa. Las cifras legales se cruzaron además con lo que tiene cargado 1.0. **Antes del brief hay que abrir cada fuente oficial y confirmar el texto** (pregunta 17). Lo que no apareció se marca *no verificable*.
+> **Cómo se verificó.** La red de la sesión no permitió abrir las páginas (fallaron sii.cl, previred.com, api.cmfchile.cl, si3.bcentral.cl, mindicador.cl, spensiones.cl y developer.deel.com). Cada dato viene del **resultado del buscador** (título, URL y extracto indexado), no de leer la página completa. Las cifras legales se cruzaron además con lo que tiene cargado 1.0. **Antes del brief hay que abrir cada fuente oficial y confirmar el texto**. Carlos habilita esos dominios y los que hagan falta (decisión 17). Lo que no apareció se marca *no verificable*.
 
 ### 14.1 Proveedores
 
@@ -321,39 +331,39 @@ Referencia: código de payroll de 1.0 leído en `Cryptobal/opai` `40d19a5` (solo
 
 ## 15. Lugar en el ROADMAP y qué queda en Nómina
 
-**Propuesta:** un brief propio del Núcleo, **«07e · Motor de sueldos»** (el 07c y el 07d ya están ocupados), que va **después de Puestos (Brief 11) y antes del Motor CPQ (Brief 08)**, en paralelo con Comercial (Briefs 06 y 07), con los que no comparte código. No necesita Comercial; necesita las capas de sueldo (07b: PR 1 a 3 integrados según ROADMAP; el PR 4, el anexo, en curso) y el catálogo de patrones de Puestos (Brief 11) para el costo por turno. Sus pantallas pasan por Claude Design con este Design Prompt.
+**Decidido (decisiones 1 y 12):** un brief propio del Núcleo, **«07e · Motor de sueldos»** (el 07c y el 07d ya están ocupados), que va **después de Puestos (Brief 11) y antes del Motor CPQ (Brief 08)**, en paralelo con Comercial (Briefs 06 y 07), con los que no comparte código. No necesita Comercial; necesita las capas de sueldo (07b: PR 1 a 3 integrados según ROADMAP; el PR 4, el anexo, en curso) y el catálogo de patrones de Puestos (Brief 11) para el costo por turno. Sus pantallas pasan por Claude Design con este Design Prompt.
 
 | Queda en el motor (Núcleo, 07e) | Queda en Nómina (Briefs 25 y 26) |
 |---|---|
 | Indicadores legales con fuentes, capturas, alertas y vigencia | Periodo de remuneraciones y su cierre |
 | Variables del tenant con vigencia, aprobación e impacto | Días trabajados, ausencias, licencias, horas extra reales (resumen del periodo, ADR-048) |
 | Cálculo bruto → imponible → aportes → provisiones → costo empresa | Liquidación real por persona con sus datos (AFP y salud reales, cargas, APV, anticipos, préstamos, descuentos voluntarios) |
-| Costo por persona, puesto, día y hora; líquido **estimado** | Impuesto único real, reliquidaciones y finiquitos |
+| Costo por persona, puesto, día y hora; líquido **estimado** | Impuesto único real, reliquidaciones y finiquitos, con el **contador acumulado de vacaciones y de indemnización por trabajador** (R20c) |
 | Simulador y herramientas MCP de consulta y simulación | Libro de remuneraciones, LRE, archivo Previred y archivos de pago |
 
-## 16. Preguntas abiertas para Carlos
+## 16. Preguntas para Carlos y sus decisiones (29-oct-2026)
 
-Numeradas, cada una con recomendación. La 1 y la 2 condicionan el Design Prompt; de la 13 a la 16 cambian números y hay que cerrarlas antes del brief.
+Numeradas, cada una con su recomendación y, al final, la decisión de Carlos del 29-oct-2026. Quedan cerradas las 18.
 
-1. **¿El motor va como servicio del Núcleo, en un brief propio 07e, antes del Motor CPQ (Brief 08) y en paralelo con Comercial?** Recomendación: **sí**. CPQ lo necesita antes de su primera línea de guardias; ponerlo dentro del Brief 08 lo haría muy grande y a Nómina le tocaría reescribirlo. Por ADR-048 debe ser Núcleo para no crear una dependencia CPQ → Nómina.
-2. **¿Dónde viven las pantallas?** Recomendación: **Configuración → Remuneraciones** (indicadores, variables, historial) y el **Simulador como acción de Personas → Cargos y sueldos** y de ⌘K. Es un catálogo del Núcleo, como el embudo y las etiquetas: no rompe ADR-018 (sin páginas de configuración por módulo) y no agrega entradas al menú (NAVEGACION.md). Alternativa: pestañas dentro de Cargos y sueldos, pero eso obliga a cambiar NAVEGACION.md, que hoy la deja sin pestañas.
-3. **¿Creas la cuenta y el token de la API del Banco Central (BDE) como credencial de plataforma?** Recomendación: **sí**; es gratis, oficial y es la única fuente de UF y UTM con API verificada en el benchmark. Mientras no exista, el trabajo usa el SII como primaria y mindicador.cl solo como contraste.
-4. **¿Quién confirma los indicadores manuales (IMM, tasas por ley) y los valores retenidos?** Recomendación: un operador de Plataforma con **segunda firma de otro operador** (hoy, tú y el bot «OPAI 2.0» no cuentan como dos personas: propongo que la segunda firma seas tú desde el celular hasta que haya otro operador humano).
-5. **¿Un cambio de variable del tenant pide segunda firma por defecto?** Recomendación: **no** para personas con permiso (owner, admin o rol con permiso) y **siempre** cuando lo propone un agente; el tenant puede activar la segunda firma para todos con un ajuste.
-6. **¿Con qué fecha se costea una cotización?** Recomendación: con el juego de valores de la **fecha de cálculo**, y la simulación muestra además el costo en la fecha de inicio del servicio y en los tramos futuros conocidos (reforma, 40 horas), para que el vendedor decida el reajuste. Alternativa: costear siempre a la fecha de inicio.
-7. **Cotizaciones abiertas: ¿recalcular solas o con un clic?** Recomendación: **con un clic** («Recalcular»), con aviso y bloqueo de envío con valores viejos sin confirmación (R22). Un recálculo silencioso puede mover un precio que el cliente ya conversó.
-8. **Turnos de 12 horas (4x4, 7x7):** ¿el motor solo avisa, o exige registrar la resolución de jornada excepcional de la DT por instalación? Recomendación: **solo avisar** en el motor y dejar el registro de la resolución para Asistencia (fase 4, ADR-023), que es donde la fiscaliza la DT.
-9. **Personas por puesto:** ¿adoptamos la regla (trabajo + descanso) / trabajo, con sobrescritura por línea y motivo? Recomendación: **sí**, porque reproduce 1 puesto = 1 posición (ADR-036) y es auditable. Confirmar contra la regla que use hoy Gard en 1.0 (anexo A, sección 3).
-10. **¿El líquido estimado del trabajador se muestra en el simulador y en el CPQ?** Recomendación: **sí, en el simulador y como dato interno del CPQ** (nunca en la vista del cliente), marcado «estimado»; 1.0 ya lo muestra al cotizar y sirve para ofrecer sueldos competitivos.
-11. **Casos dorados:** ¿apruebas usar como referencia las 6 estructuras de puesto reales de Gard del anexo A (montos de capa, sin datos personales) y que la diferencia aceptada contra 1.0 sea **$0**, salvo diferencias explicadas por regla (por ejemplo, tramo de la reforma)? Recomendación: **sí**; y que elijas 2 liquidaciones reales de octubre para validarlas en Nómina (se citan por enlace, no se copian).
-12. **¿Se registra este diseño como un ADR nuevo (ADR-056 · Motor de sueldos del Núcleo)** que modifica la fase 6 (el costo empresa sale de Nómina) y ADR-042 punto 4 (los parámetros legales pasan del CPQ al motor)? Recomendación: **sí**, al aprobar esta especificación.
+1. **¿El motor va como servicio del Núcleo, en un brief propio 07e, antes del Motor CPQ (Brief 08) y en paralelo con Comercial?** Recomendación: **sí**. CPQ lo necesita antes de su primera línea de guardias; ponerlo dentro del Brief 08 lo haría muy grande y a Nómina le tocaría reescribirlo. Por ADR-048 debe ser Núcleo para no crear una dependencia CPQ → Nómina. **Decisión: como viene.** Servicio del Núcleo, Brief 07e, antes del Brief 08 y en paralelo con Comercial.
+2. **¿Dónde viven las pantallas?** Recomendación: **Configuración → Remuneraciones** (indicadores, variables, historial) y el **Simulador como acción de Personas → Cargos y sueldos** y de ⌘K. Es un catálogo del Núcleo, como el embudo y las etiquetas: no rompe ADR-018 (sin páginas de configuración por módulo) y no agrega entradas al menú (NAVEGACION.md). Alternativa: pestañas dentro de Cargos y sueldos, pero eso obliga a cambiar NAVEGACION.md, que hoy la deja sin pestañas. **Decisión: como viene**, con el ajuste de la decisión 4: indicadores y variables en **una sola página** de Configuración → Remuneraciones; el simulador, en Cargos y sueldos y en ⌘K.
+3. **¿Creas la cuenta y el token de la API del Banco Central (BDE) como credencial de plataforma?** Recomendación: **sí**; es gratis, oficial y es la única fuente de UF y UTM con API verificada en el benchmark. Mientras no exista, el trabajo usa el SII como primaria y mindicador.cl solo como contraste. **Decisión: como viene.** Carlos crea la cuenta y el token del Banco Central como credencial de plataforma.
+4. **¿Quién confirma los indicadores manuales (IMM, tasas por ley) y los valores retenidos?** Recomendación: un operador de Plataforma con **segunda firma de otro operador** (hoy, tú y el bot «OPAI 2.0» no cuentan como dos personas: propongo que la segunda firma seas tú desde el celular hasta que haya otro operador humano). **Decisión: cambia.** Sin segunda firma. Confirma **una** persona: el owner, un administrador o alguien en quien deleguen. Todos los valores (IMM, tasas, UF y UTM, topes y los demás) se ven y se editan en una sola página. Un agente o el MCP también puede modificarlos, con auditoría y según la autonomía de su key. Queda en R5, R15 y R27, y en las secciones 2, 3, 6, 7 y 9.
+5. **¿Un cambio de variable del tenant pide segunda firma por defecto?** Recomendación: **no** para personas con permiso (owner, admin o rol con permiso) y **siempre** cuando lo propone un agente; el tenant puede activar la segunda firma para todos con un ajuste. **Decisión: no se pide segunda firma.** Los cambios de una persona con permiso se aplican directo. Los de un agente siguen la autonomía que el tenant le dio (por defecto, la cola de aprobaciones). Queda en R14.
+6. **¿Con qué fecha se costea una cotización?** Recomendación: con el juego de valores de la **fecha de cálculo**, y la simulación muestra además el costo en la fecha de inicio del servicio y en los tramos futuros conocidos (reforma, 40 horas), para que el vendedor decida el reajuste. Alternativa: costear siempre a la fecha de inicio. **Decisión: como viene.** Se costea con la fecha de cálculo y se muestran aparte la fecha de inicio y los tramos futuros.
+7. **Cotizaciones abiertas: ¿recalcular solas o con un clic?** Recomendación: **con un clic** («Recalcular»), con aviso y bloqueo de envío con valores viejos sin confirmación (R22). Un recálculo silencioso puede mover un precio que el cliente ya conversó. **Decisión: como viene.** Con un clic, y sin enviar con valores viejos sin confirmación.
+8. **Turnos de 12 horas (4x4, 7x7):** ¿el motor solo avisa, o exige registrar la resolución de jornada excepcional de la DT por instalación? Recomendación: **solo avisar** en el motor y dejar el registro de la resolución para Asistencia (fase 4, ADR-023), que es donde la fiscaliza la DT. **Decisión: como viene.** El motor solo avisa de la jornada excepcional; la resolución de la DT se registra en Asistencia.
+9. **Personas por puesto:** ¿adoptamos la regla (trabajo + descanso) / trabajo, con sobrescritura por línea y motivo? Recomendación: **sí**, porque reproduce 1 puesto = 1 posición (ADR-036) y es auditable. Confirmar contra la regla que use hoy Gard en 1.0 (anexo A, sección 3). **Decisión: como viene.**
+10. **¿El líquido estimado del trabajador se muestra en el simulador y en el CPQ?** Recomendación: **sí, en el simulador y como dato interno del CPQ** (nunca en la vista del cliente), marcado «estimado»; 1.0 ya lo muestra al cotizar y sirve para ofrecer sueldos competitivos. **Decisión: como viene.**
+11. **Casos dorados:** ¿apruebas usar como referencia las 6 estructuras de puesto reales de Gard del anexo A (montos de capa, sin datos personales) y que la diferencia aceptada contra 1.0 sea **$0**, salvo diferencias explicadas por regla (por ejemplo, tramo de la reforma)? Recomendación: **sí**; y que elijas 2 liquidaciones reales de octubre para validarlas en Nómina (se citan por enlace, no se copian). **Decisión: como viene.** Se usan las 6 estructuras de puesto de Gard del anexo A.
+12. **¿Se registra este diseño como un ADR nuevo (ADR-056 · Motor de sueldos del Núcleo)** que modifica la fase 6 (el costo empresa sale de Nómina) y ADR-042 punto 4 (los parámetros legales pasan del CPQ al motor)? Recomendación: **sí**, al aprobar esta especificación. **Decisión: sí.** Se crea ADR-056 y Carlos aprueba esta especificación.
 
-13. **SIS desde agosto de 2026: ¿0 % (como 1.0, con la reforma de 3,5 % que lo incluiría) o 1,78 % aparte (como publican Buk y Habitat)?** Recomendación: **verificarlo en la Superintendencia de Pensiones antes del brief** y cargar lo que diga la norma. Si el 1,78 % se cobra aparte, 1.0 está cotizando bajo en ≈ $12.300 por guardia en GC-A; tú decides si eso amerita una corrección crítica en 1.0 (AGENTS.md solo permite tocar 1.0 si la pides).
-14. **¿Sobre qué base se calculan las provisiones de vacaciones e indemnización?** 1.0 las aplica al costo directo completo (incluye colación, movilización y aportes), lo que infla el costo. Recomendación: dejarlo como **variable del tenant** con dos opciones; para Gard, **«como 1.0» al partir**, para que los precios no cambien sin que lo decidas, y revisarlo contigo y tu contador para pasar a «solo haberes».
-15. **Valor de la hora extra:** ¿la fórmula legal con la jornada pactada (sueldo/30 × 28 / (4 × 42) ≈ base/180) o la de 1.0 (base/240)? Recomendación: **la legal con la jornada pactada**. La de 1.0 paga las horas extra un 25 % más bajo con 42 h, y eso es un riesgo ante la DT.
-16. **¿El CPQ de 2.0 costea con la colación y la movilización de la capa?** 1.0 no las manda al motor: en GC-A el costo por guardia pasa de $833.673 a $878.671 (+5,4 %). Recomendación: **sí**, porque es el costo real. Para las cinco cotizaciones de validación de ADR-042, la diferencia se explica por esta regla y no por un error.
-17. **Verificación de fuentes:** esta sesión no pudo abrir las páginas oficiales (red restringida). ¿Habilitas esos dominios (sii.cl, bcentral.cl, cmfchile.cl, spensiones.cl, previred.com, dt.gob.cl, bcn.cl, diariooficial.interior.gob.cl) en la configuración de red del entorno para que el brief parta confirmándolas? Recomendación: **sí**. El trabajo automático de actualización también los va a necesitar en Vercel (allí la red está abierta).
-18. **¿Una capa puede declarar su sueldo base «igual al ingreso mínimo»** (R20b), para que al subir el IMM se recalcule sola y RRHH reciba los anexos en borrador? Recomendación: **sí**. Hoy casi todos los puestos de Gard en 1.0 están en el mínimo y cada alza obliga a editarlos a mano.
+13. **SIS desde agosto de 2026: ¿0 % (como 1.0, con la reforma de 3,5 % que lo incluiría) o 1,78 % aparte (como publican Buk y Habitat)?** Recomendación: **verificarlo en la Superintendencia de Pensiones antes del brief** y cargar lo que diga la norma. Si el 1,78 % se cobra aparte, 1.0 está cotizando bajo en ≈ $12.300 por guardia en GC-A; tú decides si eso amerita una corrección crítica en 1.0 (AGENTS.md solo permite tocar 1.0 si la pides). **Decisión: como viene.** Antes del brief se verifica en la Superintendencia de Pensiones y se carga lo que diga la norma.
+14. **¿Sobre qué base se calculan las provisiones de vacaciones e indemnización?** 1.0 las aplica al costo directo completo (incluye colación, movilización y aportes), lo que infla el costo. Recomendación: dejarlo como **variable del tenant** con dos opciones; para Gard, **«como 1.0» al partir**, para que los precios no cambien sin que lo decidas, y revisarlo contigo y tu contador para pasar a «solo haberes». **Decisión: cambia.** Las provisiones de vacaciones y de indemnización por años de servicio se calculan como lo hacen finanzas y contabilidad, sin inflarlas con colación, movilización ni aportes. Para el costo, el CPQ suma el promedio mensual de los días de feriado del año. Nómina lleva un contador acumulado de vacaciones y de indemnización por trabajador para los finiquitos. Queda en R17 (paso 5) y R20c.
+15. **Valor de la hora extra:** ¿la fórmula legal con la jornada pactada (sueldo/30 × 28 / (4 × 42) ≈ base/180) o la de 1.0 (base/240)? Recomendación: **la legal con la jornada pactada**. La de 1.0 paga las horas extra un 25 % más bajo con 42 h, y eso es un riesgo ante la DT. **Decisión:** la fórmula legal con la jornada pactada (R19).
+16. **¿El CPQ de 2.0 costea con la colación y la movilización de la capa?** 1.0 no las manda al motor: en GC-A el costo por guardia pasa de $833.673 a $878.671 (+5,4 %). Recomendación: **sí**, porque es el costo real. Para las cinco cotizaciones de validación de ADR-042, la diferencia se explica por esta regla y no por un error. **Decisión: sí.** El CPQ costea con la colación y la movilización de la capa cuando la cotización las incluye (R17, paso 2).
+17. **Verificación de fuentes:** esta sesión no pudo abrir las páginas oficiales (red restringida). ¿Habilitas esos dominios (sii.cl, bcentral.cl, cmfchile.cl, spensiones.cl, previred.com, dt.gob.cl, bcn.cl, diariooficial.interior.gob.cl) en la configuración de red del entorno para que el brief parta confirmándolas? Recomendación: **sí**. El trabajo automático de actualización también los va a necesitar en Vercel (allí la red está abierta). **Decisión: sí.** Carlos habilita esos dominios y todos los que hagan falta.
+18. **¿Una capa puede declarar su sueldo base «igual al ingreso mínimo»** (R20b), para que al subir el IMM se recalcule sola y RRHH reciba los anexos en borrador? Recomendación: **sí**. Hoy casi todos los puestos de Gard en 1.0 están en el mínimo y cada alza obliga a editarlos a mano. **Decisión: sí** (R20b).
 
 ## Anexo A. Payroll de 1.0 y casos dorados
 
@@ -414,4 +424,5 @@ Con los tramos del impuesto en UTM vigente, el impuesto de F sería ≈ $938 (ca
 
 | Fecha | Cambio | Aprobó |
 |---|---|---|
-| 29-oct-2026 | Borrador: reglas, benchmark, preguntas y Design Prompt (CAR-71) | — (pendiente de aprobación) |
+| 29-oct-2026 | Borrador: reglas, benchmark, preguntas y Design Prompt (CAR-71) | — |
+| 29-oct-2026 | Decisiones de Carlos a las 18 preguntas (§16). Una sola persona confirma, sin segunda firma; todos los valores en una página, editables también por un agente según su autonomía; provisiones como contabilidad, con contadores por trabajador en Nómina; fórmula legal de horas extra; colación y movilización en el CPQ. Se registra ADR-056 | Carlos (29-oct-2026) |

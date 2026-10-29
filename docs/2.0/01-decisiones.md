@@ -1051,3 +1051,24 @@ identidad de servicio en main.
 
 **Consecuencias.** Sin migraciones (`opai_app` ya tiene `UPDATE` en `core.users`). La instantánea `herramientas-mcp.txt` (key `*`) no cambia; la nueva `herramientas-mcp-plataforma.txt` lista las `platform_*`.
 
+
+## ADR-056 · Motor de sueldos del Núcleo, con valores por empresa
+
+**Fecha:** 29-oct-2026 · **Estado:** vigente. **Origen:** decisiones de Carlos del 29-oct-2026 a las 18 preguntas de [`modulos/motor-sueldos.md`](modulos/motor-sueldos.md) §16 (CAR-71). Con ellas Carlos aprueba esa especificación. Modifica ADR-042, punto 4: los parámetros legales del costo empleador salen del motor, no del CPQ. Modifica la fase 6 de `ROADMAP.md`: el costo empresa deja de ser parte de Nómina. Completa ADR-036 y ADR-048.
+
+**Decisión.**
+
+1. **Servicio del Núcleo** (Brief 07e). Va después de Puestos (Brief 11) y antes del Motor CPQ (Brief 08), en paralelo con Comercial. Es un solo cálculo, puro y determinista: parte de la capa de sueldo y llega al costo empresa por persona, puesto, día y hora. Lo usan CPQ, Nómina, Finanzas y los agentes.
+2. **Valores por empresa, versionados por vigencia.** OPAI lee las fuentes oficiales todos los días y publica los valores (captura compartida, sin `tenant_id`). Cada empresa tiene sus propios valores vigentes, con `tenant_id` y RLS. Por defecto «siguen la fuente».
+3. **Una sola persona confirma, sin segunda firma.** Puede hacerlo el owner, un administrador o alguien en quien deleguen (`core:remuneraciones.manage`). Lo que no se lee por máquina (IMM, tasas por ley) y lo que llega anómalo se publica como propuesto o retenido, y esa persona lo confirma.
+4. **Todos los valores en una sola página** (Configuración → Remuneraciones): UF, UTM, IMM, tasas, topes y variables propias. Un valor cambiado a mano pasa a ser propio de la empresa, con vigencia, motivo y auditoría, hasta que alguien vuelve a seguir la fuente.
+5. **Agentes según la autonomía de su key.** Un agente o el MCP puede cambiar, confirmar o rechazar cualquier valor, con vista previa y auditoría. Por defecto todo pasa por la cola de aprobaciones del Núcleo. El cambio retroactivo siempre pide aprobación humana. Plataforma solo vigila las fuentes.
+6. **Reglas de cálculo:**
+   - Las provisiones de vacaciones y de indemnización por años de servicio se calculan como lo hacen finanzas y contabilidad, sin colación, movilización ni aportes en la base. Para el costo, el CPQ suma el promedio mensual de los días de feriado del año.
+   - Las horas extra usan la fórmula legal con la jornada pactada.
+   - El CPQ costea con la colación y la movilización de la capa cuando la cotización las incluye.
+   - Una capa puede atar su sueldo base al IMM.
+7. **Cotizaciones.** Las abiertas avisan y se recalculan con un clic. Las emitidas quedan congeladas con su juego de valores.
+8. **Nómina** conserva la liquidación real, el impuesto, el libro, Previred y los finiquitos. Además lleva un contador acumulado de vacaciones y de indemnización por trabajador.
+
+**Consecuencias.** Antes del brief se verifican en las fuentes oficiales el SIS y la reforma, el IMM, los topes y las tasas. Carlos habilita los dominios en la red del entorno. Este ADR no agrega código ni migraciones.
