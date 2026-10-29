@@ -8,7 +8,7 @@ import {
 import { PERMISOS_CORE, PERMISOS_PLATAFORMA } from "@opai/domain";
 
 import { defineCapability } from "../define";
-import { noEncontrado } from "../errores";
+import { noEncontrado, reglaDeNegocio } from "../errores";
 import { externo } from "../externo";
 import { correoDe, iaDe } from "../integraciones/adaptadores";
 import { probarGeo } from "./integraciones-probar-geo";
@@ -37,7 +37,7 @@ export const integracionesProbar = defineCapability({
       } else if (def.categoria === "ia") {
         // Probar registra estado y evento abajo; evita un segundo aviso desde el resolvedor.
         const ia = await iaDe(ctx, "economica", "core", def.id as ProveedorIaId, { avisar: false });
-        if (!ia) throw new Error("Sin credencial de IA disponible.");
+        if (!ia) throw reglaDeNegocio("Sin credencial de IA disponible.");
         // Holgura para modelos con razonamiento activo por defecto (Haiku 5.5 y posteriores): con
         // 5 tokens el razonamiento agota el tope antes del texto. Un error del proveedor llega con
         // su mensaje saneado (sin la key) y se muestra tal cual en pantalla.
@@ -46,7 +46,7 @@ export const integracionesProbar = defineCapability({
       } else {
         const correo = await correoDe(ctx);
         if (!correo.remitente)
-          throw new Error("Sin credencial de correo: los correos se escriben en el log.");
+          throw reglaDeNegocio("Sin credencial de correo: los correos se escriben en el log.");
       }
     } catch (e) {
       ok = false;

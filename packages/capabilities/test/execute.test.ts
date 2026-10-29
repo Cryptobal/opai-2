@@ -271,6 +271,29 @@ describe("executeCapability", () => {
     expect(tabla("evento")).toHaveLength(0);
   });
 
+  // CAR-49: un error inesperado nunca llega a la UI, la API ni el MCP con su texto crudo (esquema o
+  // valores de Prisma o pg, en inglés); se sanea a un mensaje genérico con una correlación, y el
+  // detalle queda en un log estructurado sin input ni payload.
+  it("un error inesperado se sanea con un mensaje genérico y una correlación, y se registra", async () => {
+    const consola = vi.spyOn(console, "error").mockImplementation(() => undefined);
+    const { ctx } = ctxCon(["test:write"]);
+    ctx.auditoria.registrar = async () => {
+      throw new Error("relation core.evento violates column tenant_id");
+    };
+    const r = await executeCapability(ctx, "test.nota.create_con_evento", { texto: "hola" });
+    expect(r.ok).toBe(false);
+    if (r.ok) throw new Error("no debería ok");
+    expect(r.error.code).toBe("INTERNAL");
+    expect(r.error.message).not.toContain("relation");
+    expect(r.error.message).not.toContain("tenant_id");
+    expect(r.error.message).toMatch(/^Ocurrió un error inesperado\. Reintenta en unos minutos\. \(ref: .+\)$/);
+    expect(consola).toHaveBeenCalledTimes(1);
+    const [, detalle] = consola.mock.calls[0] as [string, Record<string, unknown>];
+    expect(detalle).toMatchObject({ capacidad: "test.nota.create_con_evento", code: "INTERNAL" });
+    expect(JSON.stringify(detalle)).not.toContain("relation");
+    consola.mockRestore();
+  });
+
   it("fallo del handler ⇒ sin auditoría (nunca se llega a auditar)", async () => {
     const { ctx, tabla, eventos } = ctxCon(["test:write"]);
     const r = await executeCapability(ctx, "test.nota.create_con_evento", { texto: "falla" });
