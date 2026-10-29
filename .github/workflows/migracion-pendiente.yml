@@ -1,0 +1,76 @@
+name: Migración pendiente
+
+# Salvaguarda de `migracion-pendiente` (CAR-61, AGENTS.md «Veto y migración pendiente»): el PR no
+# queda en verde mientras tenga la etiqueta, ni si trae migraciones nuevas y la etiqueta nunca se
+# puso. Para que frene el merge, Carlos lo activa como check obligatorio en el ruleset «Proteger
+# main». Solo lee etiquetas y archivos: no pone ni quita etiquetas y no usa secretos propios.
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled, unlabeled]
+
+permissions:
+  contents: read
+  pull-requests: read
+  issues: read
+
+concurrency:
+  group: migracion-pendiente-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  migracion-pendiente:
+    name: migración pendiente
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Revisar etiqueta y migraciones nuevas
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          ETIQUETA: migracion-pendiente
+        run: |
+          set -euo pipefail
+          # Etiquetas actuales, leídas en vivo: el payload del evento guarda las de cuando ocurrió y
+          # re-ejecutar una corrida vieja lo reutiliza.
+          # Si la API falla, `set -e` corta el paso en rojo: el check nunca pasa por no poder leer.
+          etiquetas=$(gh api --paginate "repos/$REPO/issues/$PR/labels")
+          if echo "$etiquetas" | jq -e -s --arg e "$ETIQUETA" '[.[][].name] | index($e)' > /dev/null; then
+            echo "::error::El PR tiene la etiqueta '$ETIQUETA': la migración aún no se aplicó con respaldo en Neon dev y main. La quita el bot «OPAI 2.0» tras aplicarla y dejar su aviso (ADR-054)."
+            exit 1
+          fi
+
+          archivos=$(gh api --paginate "repos/$REPO/pulls/$PR/files")
+
+          # Migraciones ya integradas: aplicadas en Neon, no se editan ni se borran (AGENTS.md).
+          tocadas=$(echo "$archivos" | jq -r '.[]
+            | select(.status == "modified" or .status == "removed" or .status == "changed")
+            | .filename | select(startswith("packages/db/prisma/migrations/"))')
+          if [ -n "$tocadas" ]; then
+            echo "::error::El PR edita o borra migraciones existentes, que ya están aplicadas en Neon:"
+            echo "$tocadas"
+            exit 1
+          fi
+
+          # Migraciones nuevas (agregadas, renombradas o copiadas) en el PR. `--paginate` emite un
+          # arreglo por página; jq los recorre todos.
+          nuevas=$(echo "$archivos" | jq -r '.[]
+            | select(.status == "added" or .status == "renamed" or .status == "copied")
+            | .filename | select(startswith("packages/db/prisma/migrations/"))')
+          if [ -z "$nuevas" ]; then
+            echo "Sin migraciones nuevas y sin la etiqueta '$ETIQUETA'."
+            exit 0
+          fi
+          echo "Migraciones nuevas:"
+          echo "$nuevas"
+
+          # Si trae migraciones, la etiqueta tuvo que ponerse alguna vez (y ya no está). La validez
+          # de la retirada (bot «OPAI 2.0» con aviso previo) y que la migración aplicada sea la del
+          # head actual los revisa el bot antes de integrar (OPERACION-agentes.md F).
+          puesta=$(gh api --paginate "repos/$REPO/issues/$PR/events" | jq -r --arg e "$ETIQUETA" \
+            '.[] | select(.event == "labeled" and .label.name == $e) | .id')
+          if [ -z "$puesta" ]; then
+            echo "::error::El PR trae migraciones nuevas y la etiqueta '$ETIQUETA' nunca se puso. Quien abre el PR la pone; el bot «OPAI 2.0» la quita tras aplicar la migración con respaldo (AGENTS.md)."
+            exit 1
+          fi
+          echo "La etiqueta '$ETIQUETA' se puso y ya se retiró: la migración figura como aplicada."
