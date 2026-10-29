@@ -1,6 +1,6 @@
 # CPQ — Especificación funcional
 
-**Estado:** **borrador; las 15 preguntas del §14 las decidió Carlos el 29-oct-2026 tal como venían recomendadas** (ADR-047) · **Fase:** 2 · **Fecha:** 29-oct-2026 · **Insumos:** `extraccion/comercial-y-cpq.md` (P1–P18, §3.7–§3.9, §6), ADR-021, ADR-036 (capas de sueldo y reglas del puesto), ADR-040, ADR-042 (con las decisiones de Carlos del 23 y 24-oct en `PREGUNTAS-carlos.md`, 4–11), ADR-048 (respuesta 3), ADR-049 (agente interno), ADR-055 (todo por MCP), `modulos/comercial.md`, `NAVEGACION.md`, `DISENO.md` · **Autor:** Claude · **Tareas:** CAR-66 (este documento; antes CAR-10)
+**Estado:** **las 15 preguntas del §14 las decidió Carlos el 29-oct-2026 tal como venían recomendadas; diseño v3 aprobado el 29-oct-2026 (`t908u`) y brief de construcción [`BRIEF-10`](../briefs/BRIEF-10-cpq-cotizador.md) escrito; el §5.M suma las decisiones del flujo cotización → envío (19–21 cerradas; 23/26 en parte, pólizas pendientes del corredor)** (ADR-047) · **Fase:** 2 · **Fecha:** 29-oct-2026 · **Insumos:** `extraccion/comercial-y-cpq.md` (P1–P18, §3.7–§3.9, §6), ADR-021, ADR-036 (capas de sueldo y reglas del puesto), ADR-040, ADR-042 (con las decisiones de Carlos del 23 y 24-oct en `PREGUNTAS-carlos.md`, 4–11), ADR-048 (respuesta 3), ADR-049 (agente interno), ADR-055 (todo por MCP), `modulos/comercial.md`, `NAVEGACION.md`, `DISENO.md` · **Autor:** Claude · **Tareas:** CAR-66 (este documento; antes CAR-10)
 
 > Lenguaje de negocio, sin código (ADR-047). El diseño y los Briefs 08 y 10 citan las reglas (R1…) y los criterios (CA1…). Lo que ya decidió Carlos se marca **[decidido]** con su fuente; las preguntas del §14 las decidió Carlos el 29-oct-2026. El Design Prompt está en [`../design/DESIGN-PROMPT-cpq.md`](../design/DESIGN-PROMPT-cpq.md).
 
@@ -69,7 +69,7 @@ Que cualquier empresa de servicios con personal (Gard primero, con la vertical *
 |---|---|---|---|---|---|
 | Código | `CPQ-AAAA-NNN` | Sí | Correlativo atómico por tenant y año; continúa desde 1.0 **[decidido, ADR-042 (11)]** | Sistema | Sí |
 | Versión | Entero desde 1 | Sí | Una sola editable por código | Sistema | Sí («v3») |
-| Título | Texto ≤ 160 | Sí | — | `cpq:cotizaciones.manage` | Sí |
+| Título | Texto ≤ 160 | Sí | Editable en el mismo título; el cambio se audita y emite `cpq.cotizacion.renombrada` (R67) | `cpq:cotizaciones.manage` | Sí |
 | Negocio | Referencia | Sí | Negocio abierto del tenant; no cambia después de creada | Al crear | No |
 | Alternativa de | Referencia a otra cotización del mismo negocio | No | Mismo negocio (pregunta 2) | `manage` | Sí, como «Opción A/B» |
 | Estado | Ver §6 | Sí | Máquina de estados | Sistema por acciones | No |
@@ -257,6 +257,26 @@ Que cualquier empresa de servicios con personal (Gard primero, con la vertical *
   - **Cambiar su clase** directo/indirecto solo cambia los resúmenes de las cotizaciones nuevas o recalculadas. Cada versión enviada guarda la clase que usó.
   - **Plantilla:** la plantilla de la vertical entrega las categorías de partida (R6).
 
+### M. Flujo cotización → envío y diseño v3 aprobado (decisiones de Carlos, 29-oct-2026) **[decidido]**
+
+> Carlos aprobó el diseño final del CPQ (mockup v3, flujo cotización → envío) el 29-oct-2026 (mensaje `t908u` «ok vamos», chat con OPAI 2.0, registrada por el bot OPAI 2.0). Estas decisiones cierran parte del §14.C y agregan reglas nuevas. Las decisiones (e), (h), (i) y (j) de ese mismo día ya están escritas en R60, R56, R61 y R55; (m), el diseño con el DS de OPAI 2.0 (fácil, intuitivo, liviano y moderno; configurable pero simple, sin llenar la configuración), está en el Design Prompt. Las **fórmulas de pólizas (R66) quedan pendientes de confirmar con el corredor**.
+
+- **R62.** **Moneda de presentación por cotización.** Al cotizar se elige si el precio se le muestra al cliente en **UF o en pesos** (selector UF/CLP en el Resumen). El cálculo es siempre en CLP enteros (R25); la moneda solo cambia la presentación. El selector muestra la UF del día con su fecha y avisa que al enviar se congela esa UF (R30, R43). Por defecto, la moneda de la pestaña Pólizas y finanzas (UF para Gard, R58). Cierra §14.C Q19.
+- **R63.** **Condiciones comerciales y reajuste desde Configuración, editables en la cotización.** Las condiciones (forma y días de pago, duración, inicio, validez, moneda) y el **reajuste** vienen de la pestaña Pólizas y finanzas (R58) y se pueden **modificar en la cotización**, con la misma marca **«sobrescrito»** y la opción **«volver al valor por defecto»** de los instrumentos (R60). El reajuste admite tipo (ninguno, IPC, IMO o polinómico con pesos), frecuencia (trimestral, semestral o anual), mes base e incremento real anual; **por defecto, IPC anual**. Cierra §14.C Q20 y Q21.
+- **R64.** **Los ítems de costo mensual no se ratean.** Un ítem con unidad «por mes» (p. ej. arriendo de camioneta, plan Starlink) ya es un costo mensual: se suma igual todos los meses del contrato y **no pasa por el rateo de R56**. El rateo (pago único, N meses o plazo del contrato) es solo para las inversiones que se reparten. Aclara R56 y R21.
+- **R65.** **El «ajuste de feriados» es una categoría fija de costos directos.** «Ajuste de feriados» es una categoría de costo **directo** (R55), **fija** (no se puede marcar indirecta ni desactivar, excepción a R61), cuyo monto se **calcula desde los puestos** (costo laboral por posición, R28) con la fórmula del modelo (12 feriados al año, colchón 10 %, R13). Aparece en el resumen por categoría dentro de los directos.
+- **R66.** **Fórmulas de pólizas y RC — PENDIENTES DE CONFIRMAR con el corredor.** La dirección acordada el 29-oct, **a confirmar con el corredor (Luis Cornejo)** y con cómo cotizan las aseguradoras en Chile:
+  - **garantía / fiel cumplimiento** = monto del contrato × % garantizado × prima × plazo ÷ 12;
+  - **responsabilidad civil (RC)** = valor UF × monto asegurado × prima × meses ÷ 12;
+  - ambas se **reparten en los meses del contrato**.
+  - **Prima mínima y gastos de emisión:** el costo de la póliza **no baja de la prima mínima** y se **suman los gastos de emisión**; ambos tienen valor por defecto en Configuración (Pólizas y finanzas) y se sobrescriben por cotización. El detalle de esta regla (cuándo rige la prima mínima, base de días, meses extra de vigencia) también queda **pendiente del corredor**, igual que las fórmulas.
+  - **Estado:** estas fórmulas **sustituyen o ajustan** las provisionales de R33–R34 una vez confirmadas; hasta entonces R33–R34 siguen como referencia de implementación y los casos dorados (R38) se recalculan cuando el corredor confirme. Se marca explícito: **no se implementan las pólizas sin esta confirmación**.
+- **R67.** **Nombre de la cotización editable, con auditoría.** El título de la cotización (§4) se edita **en el mismo título** (`cpq:cotizaciones.manage`). El cambio queda en la **auditoría** (`core.audit_events`: actor, antes/después) y emite el evento **`cpq.cotizacion.renombrada`**, que aparece en el **Historial** de la cotización. No cambia el código `CPQ-AAAA-NNN`.
+- **R68.** **Línea base inmutable al aceptar (el presupuesto del negocio).** Al **aceptar** la cotización (R45) se guarda una **línea base inmutable de rentabilidad por instalación y por mes**: venta, costo de personal, costo por categoría (R55), instrumentos financieros (R60) y margen, con la **UF congelada a la fecha de aceptación**. Es el **presupuesto del negocio**.
+  - **No se edita.** Un cambio posterior **genera una versión nueva o una adenda**; nunca sobreescribe la línea base.
+  - **Comparación cotizado vs real:** queda para **Finanzas (fase 5)**, con **centro de costo = cliente + instalación**.
+  - **No hay multi-país:** el CPQ no modela países («países» fue un error de dictado por «negocios»).
+
 ## 6. Estados y transiciones
 
 | Desde | Hacia | Quién (rol, agente) | Condición | Efecto | ¿Reversible? |
@@ -300,6 +320,7 @@ Silencio por defecto (ADR-020). «Recomendado» = propuesta para Gard; se activa
 | Evento | Cuándo ocurre | Quién se entera (recomendado) | Canal | Plantilla |
 |---|---|---|---|---|
 | `cpq.cotizacion.creada` / `version_creada` | Al crear o versionar | — | — | — |
+| `cpq.cotizacion.renombrada` | Al cambiar el título (R67) | — (queda en el Historial) | In-app (Historial) | — |
 | `cpq.cotizacion.aprobacion_solicitada` | Pasa a `en_aprobacion` | Usuarios con `cpq:aprobar` (recomendado) | In-app (Bandeja de Inicio), push | Sí |
 | `cpq.cotizacion.aprobada` / `aprobacion_rechazada` | Decisión | Quien pidió (recomendado) | In-app, push | Sí |
 | `cpq.cotizacion.enviada` | Al enviar | Responsable del negocio | In-app | Sí |
@@ -318,10 +339,11 @@ Toda capacidad de CPQ sale por MCP con los mismos permisos (ADR-055); las de esc
 | `cpq_cotizaciones_list` / `get` | Lista con filtros; ficha con versiones, secciones, líneas y totales; resumen por categoría, costos y margen solo con `cpq:costos.ver` (R59) | Lectura | — | — |
 | `cpq_cotizaciones_explicar` | Traza de un monto o del total en lenguaje de negocio | Lectura | — | — |
 | `cpq_cotizaciones_comparar` | Diferencias entre dos versiones o alternativas | Lectura | — | — |
+| `cpq_cotizaciones_linea_base` | Línea base inmutable de rentabilidad por instalación y mes de una cotización aceptada (R68); costos y margen solo con `cpq:costos.ver` (R59) | Lectura | — | — |
 | `cpq_cotizaciones_simular` | Calcula una cotización completa desde una especificación, **sin escribir** (ADR-042 (10)) | Lectura | — | — |
 | `cpq_cotizaciones_create` / `create_rapida` | Crear desde un negocio; o rápida con paquetes, creando el negocio si falta | Escritura | ✓ | — |
 | `cpq_cotizaciones_marcar_vigente` | Elegir la vigente del negocio (R46) | Escritura | ✓ | — |
-| `cpq_cotizaciones_ajustar` | **Lote de cambios tipados** sobre la versión editable: agregar o quitar sección, agregar línea de puesto o de ítem (o paquete), cambiar posiciones, horario, patrón o sueldo, cambiar el rateo de una línea (R56), activar, desactivar o editar el detalle de pólizas, RC o costo financiero y volverlos al valor por defecto (R57, R60), fijar margen o precio objetivo, cambiar condiciones, mostrar u ocultar al cliente. Devuelve el **antes y después** de venta y margen | Escritura | ✓ | — |
+| `cpq_cotizaciones_ajustar` | **Lote de cambios tipados** sobre la versión editable: agregar o quitar sección, agregar línea de puesto o de ítem (o paquete), cambiar posiciones, horario, patrón o sueldo, cambiar el rateo de una línea (R56), activar, desactivar o editar el detalle de pólizas, RC o costo financiero y volverlos al valor por defecto (R57, R60), fijar margen o precio objetivo, cambiar condiciones y reajuste con «sobrescrito»/«volver al valor por defecto» (R63), cambiar la moneda de presentación (R62), renombrar la cotización (R67), mostrar u ocultar al cliente. Devuelve el **antes y después** de venta y margen | Escritura | ✓ | — |
 | `cpq_cotizaciones_nueva_version` / `renovar` / `actualizar_modelo` / `duplicar` / `archivar` | R27, R43, R44, R23 | Escritura | ✓ | — |
 | `cpq_cotizaciones_marcar_lista` / `solicitar_aprobacion` / `retirar_aprobacion` | R40, R42 | Escritura | ✓ | — |
 | *(sin herramienta)* `cpq.cotizaciones.aprobar` / `rechazar_aprobacion` | Decisión de margen. `soloPersonas`, en `paridad-excepciones.ts` con el motivo «es el control humano sobre lo que propone un agente» | — | — | Solo personas |
@@ -425,8 +447,11 @@ Toda capacidad de CPQ sale por MCP con los mismos permisos (ADR-055); las de esc
 - **CA21.** La configuración del CPQ tiene exactamente 3 pestañas: Catálogo, Pólizas y finanzas, y Márgenes. Un usuario sin `cpq:modelo.manage` no la ve.
 - **CA22.** Con la RC «activada por defecto» y la póliza de garantía no, una cotización nueva parte así. Desactivar la RC en la cotización la marca «sobrescrito» y la saca del precio; «volver al valor por defecto» la reactiva con los valores del tenant. Cambiar el plazo de la RC a «plazo del contrato» recalcula su efecto mensual.
 - **CA23.** Un owner agrega la categoría «Tecnología» como indirecta, renombra «Logística» y desactiva «Insumos». Desactivar no cambia los ítems ni las cotizaciones existentes, y una categoría en uso no se puede borrar.
+- **CA24.** Al **aceptar** una cotización se guarda su **línea base** por instalación y mes (venta, costo de personal, costo por categoría, instrumentos y margen, con la UF congelada a la fecha de aceptación). La línea base **no se puede modificar**: un intento de editarla o recalcularla falla, y un cambio posterior del negocio crea una **versión o adenda nueva** sin tocar la línea base. Hay un test que afirma que no se puede modificar (R68).
+- **CA25.** Al cotizar se elige **UF o CLP** para mostrarle el precio al cliente; el cálculo sigue en CLP (R25) y al enviar se congela la UF del día. Las **condiciones comerciales y el reajuste** parten de Configuración y, si se cambian en la cotización, quedan con **«sobrescrito»** y **«volver al valor por defecto»**; el reajuste por defecto es **IPC anual** (R62, R63).
+- **CA26.** **Renombrar** una cotización deja el cambio en la **auditoría** (actor, antes/después) y un evento **`cpq.cotizacion.renombrada`** visible en el Historial; el código `CPQ-AAAA-NNN` no cambia (R67).
 
-## 14. Preguntas para Carlos — 1 a 15 decididas; 16 a 26 pendientes
+## 14. Preguntas para Carlos — 1 a 15 decididas; 19–21 decididas y 23/26 en parte el 29-oct (v3); 16–18, 22, 24–25 pendientes
 
 **Decisión de Carlos, 29-oct-2026 (PR #123, CAR-66): aprueba las 15 preguntas tal como vienen recomendadas**, con un ajuste en la 9 (el margen solo con `cpq:costos.ver`). Cada pregunta conserva su texto como historia; «Decidido» marca la opción aprobada. Lo ya respondido en `PREGUNTAS-carlos.md` (4–11) y en ADR-048 (respuesta 3) no se repite.
 
@@ -460,9 +485,9 @@ Toda capacidad de CPQ sale por MCP con los mismos permisos (ADR-055); las de esc
     **Varias instalaciones:** en 1.0 una cotización es una instalación (P4), así que no hay un caso real de una sola cotización con varias. Se agrega un **caso compuesto**: una cotización 2.0 con dos secciones (las instalaciones de la 340 y la 353, con condiciones comunes) cuya venta se compara con la suma de las dos de 1.0, con la diferencia que explique la RC en monto fijo. **Decidido (Carlos, 29-oct): sí** a las cinco y al compuesto. Cubren póliza, margen en el mínimo, vehículos, horarios raros, el caso sin guardias y el caso más frecuente. Salvo la 340, se eligieron por su nombre: el Brief 08 verifica el detalle de cada una y te avisa si alguna no sirve.
 15. **¿Se pueden sobrescribir las personas por posición?** **[decidido, ADR-042 (4)]:** el motor las calcula con el dominio de turnos. Resuelto el 29-oct: si se pueden cambiar a mano. **Decidido (Carlos, 29-oct): sí, con motivo** (relevo de colación, cobertura de vacaciones), visible en la traza (R21). En 1.0 se escriben siempre a mano (`numGuards`) y es una fuente de error.
 
-### C. Flujo de envío y pólizas: preguntas pendientes **[pendiente Carlos]**
+### C. Flujo de envío y pólizas (algunas decididas el 29-oct con el diseño v3; el resto pendiente)
 
-Abiertas el 29-oct-2026, después de la primera tanda de Claude Design. Se cruzan con los temas hermanos: los formatos de salida y el enlace de aceptación son de **CAR-68** ([PR #127](https://github.com/Cryptobal/opai-2/pull/127)) y el seguimiento después del envío es de **CAR-67** ([PR #125](https://github.com/Cryptobal/opai-2/pull/125)). Se numeran desde la 16 para no chocar con las 15 ya decididas. Mientras Carlos no responda, rigen las reglas actuales.
+Abiertas el 29-oct-2026, después de la primera tanda de Claude Design. Con la aprobación del diseño v3 (mensaje `t908u`, chat con OPAI 2.0, registrada por el bot OPAI 2.0) Carlos **decidió la 19, la 20 y la 21** (ahora R62 y R63), y la **23 y la 26 en parte** (prima mínima y gastos de emisión se consideran; las fórmulas y su detalle quedan **pendientes de confirmar con el corredor Luis Cornejo**, R66). **Siguen [pendiente Carlos] la 16, 17, 18, 22, 24 y 25.** Se cruzan con los temas hermanos: los formatos de salida y el enlace de aceptación son de **CAR-68** ([PR #127](https://github.com/Cryptobal/opai-2/pull/127)) y el seguimiento después del envío es de **CAR-67** ([PR #125](https://github.com/Cryptobal/opai-2/pull/125)). Se numeran desde la 16 para no chocar con las 15 ya decididas. Mientras Carlos no responda las que quedan, rigen las reglas actuales.
 
 16. **¿Quién marca «aceptada»?** **[pendiente Carlos]**
     - **Recomendación:** la aceptación del cliente en el enlace de la propuesta (CAR-68) marca la cotización como **aceptada** y **propone ganar** el negocio. Ganar un negocio sin aceptación en línea exige **registrar la aceptación fuera de línea**: quién aceptó, cuándo, por qué medio, y opcionalmente el documento.
@@ -477,14 +502,14 @@ Abiertas el 29-oct-2026, después de la primera tanda de Claude Design. Se cruza
 18. **¿Se puede enviar desde Borrador sin pasar por «Dejar lista»?** **[pendiente Carlos]**
     - **Recomendación:** **sí**. «Enviar» corre los mismos chequeos que «Dejar lista»: margen mínimo, subvaloración, falta de UF y al menos una línea. Si alguno falla, pide aprobación o muestra el error.
     - **Por qué:** se ahorra un paso en la mayoría de los casos sin saltarse ningún control.
-19. **¿Cómo se elige la moneda de presentación?** **[pendiente Carlos]**
-    - **Recomendación:** un selector **UF / CLP** en el Resumen del cotizador. Muestra la **UF del día** con su fecha y avisa: «al enviar se congela la UF de ese día» (ADR-042 (7), pregunta 4).
+19. **¿Cómo se elige la moneda de presentación?** **Decidido (Carlos, 29-oct, v3): sí, un selector UF / CLP al cotizar** (R62).
+    - Un selector **UF / CLP** en el Resumen del cotizador. Muestra la **UF del día** con su fecha y avisa: «al enviar se congela la UF de ese día» (ADR-042 (7), pregunta 4).
     - **Por qué:** la moneda se decide en la cotización (R58), y quien cotiza tiene que ver con qué UF se va a fijar el precio.
-20. **¿Las condiciones comerciales llevan «sobrescrito» y «volver al valor por defecto», como los instrumentos de R60?** **[pendiente Carlos]**
-    - **Recomendación:** **sí**, para forma y días de pago, reajuste, duración, inicio, validez y moneda.
+20. **¿Las condiciones comerciales llevan «sobrescrito» y «volver al valor por defecto», como los instrumentos de R60?** **Decidido (Carlos, 29-oct, v3): sí** (R63).
+    - **Sí**, para forma y días de pago, reajuste, duración, inicio, validez y moneda: vienen de Configuración y se modifican en la cotización con «sobrescrito» y «volver al valor por defecto».
     - **Por qué:** se comportan igual que pólizas y finanzas: parten de la pestaña Pólizas y finanzas (R58) y una mirada basta para saber qué se pactó distinto.
-21. **¿El reajuste lleva frecuencia, mes base e incremento real anual?** **[pendiente Carlos]**
-    - **Recomendación:** **sí**, para igualar 1.0 (`extraccion` §3.7):
+21. **¿El reajuste lleva frecuencia, mes base e incremento real anual?** **Decidido (Carlos, 29-oct, v3): sí; por defecto IPC anual** (R63).
+    - **Sí**, para igualar 1.0 (`extraccion` §3.7):
       - tipo: ninguno, IPC, IMO o polinómico con pesos;
       - frecuencia: trimestral, semestral o anual;
       - mes base;
@@ -494,8 +519,8 @@ Abiertas el 29-oct-2026, después de la primera tanda de Claude Design. Se cruza
 22. **¿Hay botones de Vista previa y Descargar PDF en la cabecera del cotizador?** **[pendiente Carlos]**
     - **Recomendación:** **sí**, «Vista previa» y «Descargar PDF ▾» en la cabecera. El menú ofrece los formatos que defina **CAR-68**, y la generación la hace CAR-68. CPQ solo entrega la vista cliente (§15).
     - **Por qué:** es lo que más se usa antes de enviar, y delegar la generación evita dos motores de documentos.
-23. **¿Qué detalle lleva la póliza de garantía o fiel cumplimiento?** **[pendiente Carlos]**
-    - **Recomendación:** sumar estos campos:
+23. **¿Qué detalle lleva la póliza de garantía o fiel cumplimiento?** **Decidido en parte (Carlos, 29-oct, v3):** la **prima mínima** y los **gastos de emisión se consideran** —el costo de la póliza no baja de la prima mínima y se suman los gastos de emisión—, con valores por defecto en Configuración y sobrescribibles por cotización (R66). **El detalle de la regla (cuándo rige la prima mínima, base de días) y los meses extra de vigencia quedan PENDIENTES DE CONFIRMAR con el corredor (Luis Cornejo)** y con cómo cotizan las aseguradoras en Chile (R66).
+    - **Recomendación (pendiente del corredor):** sumar estos campos:
       - prima mínima;
       - gastos de emisión en UF;
       - **meses extra de vigencia**: por defecto 60 días hábiles después del término del contrato, como exige el D.661, art. 122, para contratos con el Estado;
@@ -513,8 +538,8 @@ Abiertas el 29-oct-2026, después de la primera tanda de Claude Design. Se cruza
       - **provista por el mandante:** el cliente la contrata, al estilo OCIP, y para la cotización **vale 0**.
     - **Datos informativos:** límite exigido, deducible, asegurado adicional y personal armado. No entran al cálculo, pero quedan en la versión y se pueden mostrar en la propuesta (CAR-68).
     - **Por qué:** los tres casos ocurren en licitaciones reales. Sin el modo «mandante», se cotiza un costo que no existe.
-26. **¿De dónde salen las tasas por defecto de pólizas y RC?** **[pendiente Carlos]**
-    - **Recomendación:** de la **respuesta del corredor** (hoy CS Seguros), cargada en Pólizas y finanzas con **fecha y fuente** visibles. No se usan tasas públicas como valor por defecto.
+26. **¿De dónde salen las tasas por defecto de pólizas y RC?** **Decidido en parte (Carlos, 29-oct, v3):** del **corredor (Luis Cornejo)**; las tasas y las fórmulas mismas quedan **PENDIENTES DE CONFIRMAR con él** y con cómo cotizan las aseguradoras en Chile (R66).
+    - De la **respuesta del corredor (Luis Cornejo)**, cargada en Pólizas y finanzas con **fecha y fuente** visibles. No se usan tasas públicas como valor por defecto.
     - **Por qué:** las tasas públicas no reflejan la tarifa que consigue el tenant, y con fecha y fuente cualquiera sabe cuándo hay que pedir una cotización nueva al corredor.
 
 ## 15. Lo que toca a temas hermanos (no se resuelve aquí)
@@ -526,6 +551,7 @@ Abiertas el 29-oct-2026, después de la primera tanda de Claude Design. Se cruza
 
 | Fecha | Cambio | Aprobó |
 |---|---|---|
+| 29-oct-2026 | Diseño v3 aprobado (flujo cotización → envío, mensaje `t908u`) y decisiones del §5.M: moneda UF/CLP (R62), condiciones y reajuste editables con «sobrescrito» (R63), ítems mensuales sin rateo (R64), ajuste de feriados como categoría fija directa (R65), fórmulas de pólizas/RC con prima mínima y gastos de emisión **pendientes del corredor Luis Cornejo** (R66), nombre editable con auditoría y evento «renombrada» (R67), línea base inmutable al aceptar (R68); CA24–CA26; §14.C 19–21 decididas y 23/26 en parte | Carlos |
 | 25-oct-2026 23:10 | Borrador con la regla de puestos y sueldos al ganar (respuesta 3 de Carlos a ADR-048; CAR-10) | — (decisión de Carlos 23:08–23:10) |
 | 29-oct-2026 | §14.C: 11 preguntas nuevas (16–26) sobre el flujo de envío y las pólizas, con recomendación y [pendiente Carlos]; enlazan CAR-68 (#127) y CAR-67 (#125) | — (pendiente) |
 | 29-oct-2026 | Instrumentos financieros por cotización (activar o desactivar, editar, plazo de RC, «sobrescrito», volver al valor por defecto, «activado por defecto» en Configuración) y categorías editables por tenant (R60, R61, CA22, CA23) | Carlos |
