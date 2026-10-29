@@ -67,7 +67,7 @@ async function correr(
     // (plataforma) no se envuelve: la RLS no devuelve filas para un handler que no consulta la base.
     if (c.auditarLectura && ctx.conTenant) {
       lecturaValidada = await ejecutarLecturaAuditada(ctx, c, entrada.data, modo);
-    } else if (c.efecto === "lectura" && ctx.conTenant && ctx.enLectura) {
+    } else if (c.efecto === "lectura" && ctx.conTenant && ctx.enLectura && !c.sinDb) {
       crudo = await ctx.enLectura(async (db) => {
         const alFinal = conAuditoriaAlFinal(ctx, db);
         const salidaCruda = await c.handler(alFinal.ctx, entrada.data, modo);
