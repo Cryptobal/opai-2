@@ -2,10 +2,13 @@ import pg from "pg";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ClienteSerial } from "../src/cliente-serial";
-import { esFalloDeConexion, PoolConReintento } from "../src/pool";
+import { esFalloDeConexion, esperarReloj, PoolConReintento } from "../src/pool";
 import { clienteFalso } from "./cliente-falso";
 
-afterEach(() => vi.restoreAllMocks());
+afterEach(() => {
+  vi.useRealTimers();
+  vi.restoreAllMocks();
+});
 
 describe("ClienteSerial", () => {
   it("ejecuta de a una las consultas concurrentes, en orden, y un fallo no bloquea la cola", async () => {
@@ -87,5 +90,22 @@ describe("PoolConReintento", () => {
     });
     await expect(otro.connect()).rejects.toThrow("password authentication failed");
     await Promise.all([pool.end(), otro.end()]);
+  });
+});
+
+describe("esperarReloj", () => {
+  it("se vuelve a armar si el temporizador despierta antes que el reloj de pared", async () => {
+    vi.useFakeTimers();
+    const real = Date.now.bind(Date);
+    const t0 = real();
+    let congelado = true;
+    vi.spyOn(Date, "now").mockImplementation(() => (congelado ? t0 : real()));
+    let listo = false;
+    void esperarReloj(100).then(() => (listo = true));
+    await vi.advanceTimersByTimeAsync(100);
+    expect(listo).toBe(false);
+    congelado = false;
+    await vi.advanceTimersByTimeAsync(100);
+    expect(listo).toBe(true);
   });
 });
