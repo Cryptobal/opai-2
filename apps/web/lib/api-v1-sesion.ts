@@ -20,6 +20,8 @@ export const CAPACIDADES_V1_SESION_ERP: readonly string[] = [
   "core.users.update",
 ];
 
+const LECTURA = new Set(["GET", "HEAD"]);
+
 const prohibido = () =>
   Response.json(
     { ok: false, error: { code: "FORBIDDEN", message: "Origen no permitido." } },
@@ -49,4 +51,14 @@ export function contextoV1Sesion(ctx: Contexto, id: string, req: Request): Conte
   if (!mismoOrigen(req)) return prohibido();
   if (!ctx.portalesMembresia.includes("erp")) return ctx;
   return { ...ctx, portal: "erp" };
+}
+
+/**
+ * Toda escritura con sesión, esté o no en la lista, exige `Origin` igual al de la API (CAR-38): la
+ * cookie viaja sola y sin esto una página ajena podría escribir a nombre del usuario. No fija portal
+ * ni relaja nada: las lecturas siguen el criterio de `contextoV1Sesion`. API keys y sistema no cambian.
+ */
+export function exigirOrigenEnEscritura(ctx: Contexto, req: Request): Response | null {
+  if (ctx.actor.tipo !== "user" || ctx.portal !== null || LECTURA.has(req.method)) return null;
+  return req.headers.get("origin") === new URL(req.url).origin ? null : prohibido();
 }

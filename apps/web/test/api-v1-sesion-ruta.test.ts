@@ -55,4 +55,13 @@ describe("/api/v1 con sesión: cableado de la ruta (CAR-37)", () => {
       error: { message: "No tienes acceso a este portal." },
     });
   });
+
+  it("fuera de la lista, una escritura sin origen se rechaza antes del portal (CAR-38)", async () => {
+    const res = await ruta.POST(
+      new Request("http://localhost:3000/api/v1/core/supervisores/quitar", { method: "POST" }),
+      params(["core", "supervisores", "quitar"]),
+    );
+    expect(res.status).toBe(403);
+    expect(await res.json()).toMatchObject({ error: { message: "Origen no permitido." } });
+  });
 });

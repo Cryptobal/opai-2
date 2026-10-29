@@ -7,9 +7,4 @@
  */
 export type SinPantalla = { encargo: string; desde: string; motivo: string };
 
-const B3 = "Alcance del supervisor (B3): la pantalla de instalaciones a cargo es el bloque 9 del Brief 07c.";
-
-export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> = {
-  "core.supervisores.asignar": { encargo: "CAR-38", desde: "2026-10-28", motivo: B3 },
-  "core.supervisores.quitar": { encargo: "CAR-38", desde: "2026-10-28", motivo: B3 },
-};
+export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> = {};
