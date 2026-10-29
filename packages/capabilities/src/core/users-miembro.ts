@@ -19,6 +19,8 @@ export const miembroSchema = z.object({
   estado: z.string(),
   /** Último acceso del usuario (A02/A18); null si no hay sesión registrada. */
   ultimoAccesoEn: z.date().nullable(),
+  /** Excepciones de permiso vigentes (A01: «Con excepciones» con el número). */
+  excepciones: z.number(),
 });
 
 export type Miembro = z.infer<typeof miembroSchema>;
@@ -32,7 +34,15 @@ type FilaMembresia = {
   estado: string;
   user: { name: string; email: string };
   rolTenant: { nombre: string } | null;
+  _count?: { excepciones: number };
 };
+
+/** Relaciones de una fila de usuario: identidad, rol personalizado y cuántas excepciones tiene. */
+export const INCLUIR_MIEMBRO = {
+  user: true,
+  rolTenant: true,
+  _count: { select: { excepciones: true } },
+} as const;
 
 export function aMiembro(m: FilaMembresia, ultimoAccesoEn: Date | null): Miembro {
   return {
@@ -46,6 +56,7 @@ export function aMiembro(m: FilaMembresia, ultimoAccesoEn: Date | null): Miembro
     portales: m.portales,
     estado: m.estado,
     ultimoAccesoEn,
+    excepciones: m._count?.excepciones ?? 0,
   };
 }
 
@@ -71,7 +82,7 @@ export async function ultimosAccesos(
 export async function buscar(ctx: Contexto, id: string): Promise<Miembro> {
   const m = await ctx.db.membership.findUnique({
     where: { id },
-    include: { user: true, rolTenant: true },
+    include: INCLUIR_MIEMBRO,
   });
   if (!m) throw noEncontrado("El usuario");
   const ultimo = (await ultimosAccesos(ctx, [m.userId])).get(m.userId) ?? null;
