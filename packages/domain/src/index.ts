@@ -29,3 +29,5 @@ export * from "./actividades-tratamiento";
 export * from "./navegacion";
 
 export * from "./capas-sueldo";
+
+export * from "./rondas";
