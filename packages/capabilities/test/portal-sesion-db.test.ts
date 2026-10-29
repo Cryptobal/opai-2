@@ -104,6 +104,10 @@ describe.skipIf(!urlPropietario)("portales de membresías reales", () => {
     await e.admin.user.create({
       data: { id: otroUsuarioId, name: "Otra persona", email: `${otroUsuarioId}@prueba.cl` },
     });
+    // Destinatario miembro de la empresa (trigger usuario_miembro, CAR-46).
+    await e.admin.membership.create({
+      data: { tenantId: tenantA, userId: otroUsuarioId, rol: "viewer", portales: ["erp"] },
+    });
     const propia = await e.admin.notificacion.create({
       data: { tenantId: tenantA, usuarioId: userId, titulo: "Propia en A" },
     });
