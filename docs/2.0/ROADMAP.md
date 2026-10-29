@@ -62,7 +62,7 @@ Las **bases transversales** (rendimiento, PWA, navegación) aplican a todo brief
 | **06** | **Núcleo comercial**: contactos por persona con vínculos a N cuentas (migración aditiva), etiquetas (incluye migrar `documentos.etiquetas`), actividades, ficha declarativa (ADR-041), catálogos declarativos en Configuración, fusión y transferencia | Pendiente |
 | **07** | **Comercial**: bandeja de solicitudes, negocios, embudo configurable, negocio ↔ instalaciones, importación desde 1.0, sincronización 2.0 → 1.0 y conciliación diaria | Pendiente |
 | **08** | **Motor CPQ** (sin pantallas): lenguaje de fórmulas, modelo de costeo versionado, costo laboral desde estructuras, margen financiero con casos dorados CD-1, CD-2 y cotizaciones reales de Gard | Pendiente |
-| **09** | **Documentos**: explorador, editor de plantillas con marca, PDF, firma simple | Pendiente |
+| **09** | **Documentos**: explorador, editor de plantillas con marca, PDF, firma simple | Pendiente. *(29-oct-2026, CAR-73: la firma tiene especificación propia en borrador, [`modulos/firma.md`](modulos/firma.md); se propone que el 09 traiga los niveles N1 firma simple y N2 firma simple reforzada, en dos PR, pendiente de la aprobación de Carlos, pregunta P11)* |
 | **10** | **Cotizador CPQ y propuesta**: planilla viva, versiones, aprobación por margen, envío con plantilla de Documentos, cotización rápida | Pendiente |
 
 - **Criterio de término:** «Gard recibe solicitudes, gestiona negocios, cotiza y envía propuestas solo en 2.0 durante dos semanas seguidas, y **1.0 deja de usarse para leads, cuentas, contactos, negocios y cotizaciones**»; la conciliación diaria 1.0 ↔ 2.0 no reporta diferencias en cuentas, contactos e instalaciones; las cotizaciones reales de Gard elegidas por Carlos dan el mismo precio al peso que en 1.0.
@@ -82,7 +82,7 @@ Las **bases transversales** (rendimiento, PWA, navegación) aplican a todo brief
 | **13** | **Tickets** transversal (ADR-025) | Pendiente |
 | **14** | **Rondas** (ADR-024): puntos, plantillas, ejecución sin conexión con cola local, trust score, informes | Pendiente |
 | **15** | **Portales Supervisor y Trabajador** con cola sin conexión (ADR-044.3) y push | Pendiente |
-| **16** | **Portales Cliente y Terreno**, dispositivos emparejados (ADR-029.10), keys del cliente (ADR-033), **control de acceso físico** (portado y mejorado desde `portal/acceso` de 1.0, decisión de Carlos del 24-oct) | Pendiente |
+| **16** | **Portales Cliente y Terreno**, dispositivos emparejados (ADR-029.10), keys del cliente (ADR-033), **control de acceso físico** (portado y mejorado desde `portal/acceso` de 1.0, decisión de Carlos del 24-oct) | Pendiente. *(29-oct-2026, CAR-73: especificación del control de acceso en borrador, [`modulos/control-acceso.md`](modulos/control-acceso.md), con Design Prompt en [`design/DESIGN-PROMPT-control-acceso-y-firma.md`](design/DESIGN-PROMPT-control-acceso-y-firma.md); se propone como módulo vendible propio `acceso` (pregunta P7), pendiente de la aprobación de Carlos)* |
 | **17** | **Empaquetado nativo** con Capacitor (iOS y Android), GPS en segundo plano, push nativo, publicación en tiendas | Pendiente |
 
 - **Criterio de término:** «Las pautas, turnos extra, supervisión, rondas y novedades de Gard se operan en 2.0 durante un mes completo; supervisores y guardias usan los portales de 2.0 instalados en su celular, y **1.0 deja de usarse para Operaciones, Supervisión, Rondas y portales**»; las apps están publicadas en App Store y Google Play.
@@ -130,7 +130,7 @@ Las **bases transversales** (rendimiento, PWA, navegación) aplican a todo brief
 | **25** | **Nómina I**: liquidación sobre un resumen de periodo (días trabajados desde Asistencia, o manual o importado sin ella; la pauta no la alimenta; ADR-048, respuesta 2) y las capas de sueldo de ADR-036; **exige Puestos (Operaciones I)** (ADR-048, respuesta 1) | Pendiente |
 | **26** | **Nómina II**: previsión, libro, archivos de pago y Previred | Pendiente |
 | **27** | **Licitaciones** sobre el motor CPQ | Pendiente |
-| **28** | **Firma electrónica avanzada** (proveedor chileno) | Pendiente |
+| **28** | **Firma electrónica avanzada** (proveedor chileno) | Pendiente. *(29-oct-2026, CAR-73: nivel N3 de [`modulos/firma.md`](modulos/firma.md), en borrador; prestador por decidir, pregunta P2)* |
 | **29** | **Apagado de 1.0**: archivo de datos, redirección de `opai.gard.cl`, `app.opai.cl` en producción | Pendiente |
 
 - **Criterio de término:** «Una nómina mensual completa de Gard se liquida en 2.0 y cuadra al peso con la anterior; una licitación se presenta desde 2.0; **Gard opera 100 % en 2.0** y `opai.gard.cl` queda archivado».
