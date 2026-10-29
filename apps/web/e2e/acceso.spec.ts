@@ -29,6 +29,11 @@ test.describe("con sesión", () => {
 
   test("login, ERP, Usuarios y Plataforma", async ({ page }, info) => {
     const p = info.project.name;
+    // DIAGNÓSTICO TEMPORAL (#131): errores del navegador durante el test.
+    page.on("console", (m) => {
+      if (m.type() === "error") console.log("[diag-131] consola:", m.text().slice(0, 300));
+    });
+    page.on("pageerror", (e) => console.log("[diag-131] pageerror:", e.message.slice(0, 300)));
     await page.goto("/login");
     await captura(page, "login", p);
     await entrar(page);
@@ -38,6 +43,14 @@ test.describe("con sesión", () => {
     console.log("[diag-131] url:", page.url());
     console.log("[diag-131] headings:", await page.getByRole("heading").allInnerTexts());
     console.log("[diag-131] alertas:", await page.getByRole("alert").allInnerTexts());
+    const t0 = Date.now();
+    const visto = await page
+      .getByRole("heading", { name: "Inicio" })
+      .first()
+      .waitFor({ state: "attached", timeout: 30_000 })
+      .then(() => "sí")
+      .catch(() => "no");
+    console.log("[diag-131] título Inicio:", visto, Date.now() - t0, "ms");
     // En teléfono la barra no lleva título: el encabezado de la pantalla es el saludo.
     const titulo = p === "telefono" ? /^Hola, / : "Inicio";
     await expect(page.getByRole("heading", { name: titulo }).first()).toBeAttached();
