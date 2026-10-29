@@ -41,7 +41,7 @@ export async function proxy(request: NextRequest) {
   const { headers, csp } = cabecerasConNonce(request.headers);
   headers.set("x-opai-t0", String(t0));
   const responder = (r: NextResponse) => {
-    r.headers.set("Content-Security-Policy-Report-Only", csp);
+    r.headers.set("Content-Security-Policy", csp);
     return r;
   };
   // Antes estaban fuera del matcher; siguen públicas, pero ahora reciben nonce de servidor.

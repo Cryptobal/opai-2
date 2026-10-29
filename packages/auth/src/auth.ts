@@ -75,12 +75,15 @@ export const auth = betterAuth({
         { usuario: { nombre: user.name }, url },
         { nombre: "OPAI" },
       );
-      await mailerDelEntorno().enviar({
-        para: user.email,
-        asunto: r.asunto,
-        texto: r.texto,
-        html: r.html,
-      });
+      // Si el correo falla (p. ej. sin RESEND_API_KEY en un entorno desplegado, CAR-51) no se
+      // propaga: un error solo para cuentas existentes revelaría cuáles existen. El log no lleva
+      // destinatario ni enlace.
+      await mailerDelEntorno()
+        .enviar({ para: user.email, asunto: r.asunto, texto: r.texto, html: r.html })
+        .catch((error: unknown) => {
+          const motivo = error instanceof Error ? error.message : "error desconocido";
+          console.error(`[correo] no se envió la recuperación de contraseña: ${motivo}`);
+        });
     },
   },
   socialProviders: proveedoresSociales(env),
