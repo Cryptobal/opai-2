@@ -95,11 +95,26 @@ describe.skipIf(!urlPropietario)("configuración y comunicaciones en base real",
     const ids = Array.from({ length: 80 }, () => randomUUID());
     const otroUsuario = randomUUID();
     const otroTenant = randomUUID();
-    await e.admin.notificacion.createMany({ data: [
-      ...ids.map((id) => ({ id, tenantId, usuarioId, titulo: "Aviso propio", createdAt: fecha })),
-      { id: otroUsuario, tenantId, usuarioId: randomUUID(), titulo: "Otro usuario" },
-      { id: otroTenant, tenantId: tenantB.id, usuarioId, titulo: "Otro tenant" },
-    ] });
+    // Destinatarios miembros de cada empresa (trigger usuario_miembro, CAR-46).
+    const ajeno = randomUUID();
+    for (const id of [usuarioId, ajeno])
+      await e.admin.user.create({
+        data: { id, name: "Ficticio", email: `avisos-${id}@test.opai.cl` },
+      });
+    await e.admin.membership.createMany({
+      data: [
+        { tenantId, userId: usuarioId, rol: "viewer", portales: ["erp"] },
+        { tenantId, userId: ajeno, rol: "viewer", portales: ["erp"] },
+        { tenantId: tenantB.id, userId: usuarioId, rol: "viewer", portales: ["erp"] },
+      ],
+    });
+    await e.admin.notificacion.createMany({
+      data: [
+        ...ids.map((id) => ({ id, tenantId, usuarioId, titulo: "Aviso propio", createdAt: fecha })),
+        { id: otroUsuario, tenantId, usuarioId: ajeno, titulo: "Otro usuario" },
+        { id: otroTenant, tenantId: tenantB.id, usuarioId, titulo: "Otro tenant" },
+      ],
+    });
     const contexto = { ...ctx(), actor: { tipo: "user" as const, id: usuarioId } };
     async function pagina(antesDe?: string) {
       const r = await mod.executeCapability(contexto, "core.notificaciones.list", {
