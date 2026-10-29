@@ -261,6 +261,8 @@ decisiones atribuidas a Carlos.
 
 **Consecuencias.** El Brief 02 construye el servicio (modelo, subida, vínculos, descarga segura) y la ficha de documentos en cuentas/instalaciones/personas; el módulo Documentos (explorador, editor, plantillas, firma simple) va justo después de Comercial, porque CPQ ya necesita plantillas y PDF.
 
+**Nota (CAR-73, 29-oct-2026, 15:17 CLT, decisión de Carlos).** El Brief 09 (Documentos) suma una **dependencia nueva**: la plantilla o cláusula reutilizable con los términos de tratamiento de datos de los visitantes, asociada a la cuenta, al cliente y al negocio, para incorporarla a los contratos de servicio de prestación con el cliente (cada tenant tiene varios contratos tipo, distintos según su operación). Viene de `modulos/control-acceso.md` §14 P1 y §16: el tenant sigue siendo el responsable de esos datos y OPAI su encargado (Brief 07d §4.1); el matiz del cliente como responsable de sus propios visitantes se resuelve con esa cláusula, no con una excepción al modelo del 07d.
+
 ---
 
 ## ADR-020 · Comunicaciones: plantillas de correo y notificaciones por tenant
@@ -344,6 +346,8 @@ decisiones atribuidas a Carlos.
 **Fecha:** 23-oct-2026 · **Estado:** vigente · Ver `docs/2.0/extraccion/integraciones-y-configuracion-por-tenant.md`.
 
 **Decisión.** El núcleo tiene un **catálogo de integraciones** (proveedor DTE, banco, factoring, correo, WhatsApp, mapas y geocodificación, biometría, IA, Slack, webhooks propios) con estado por tenant, prueba de conexión y registro de uso. Cada módulo declara en su manifest las integraciones que requiere; el núcleo provee el adaptador configurado. Las credenciales del tenant se guardan en un **almacén de secretos cifrado** (AES-256-GCM con clave de plataforma rotable, envelope encryption), se muestran una sola vez y nunca salen por API ni MCP. Hay dos modalidades por integración: **de plataforma** (OPAI pone la credencial y la cobra en el plan: mapas, biometría, correo, IA) y **propia del tenant** (DTE, banco, factoring, Slack, dominio de correo, Maps con cuota propia). La geolocalización (autocompletado de direcciones, geocodificación, mapas, distancias) es un servicio del núcleo con proveedor Google Maps por defecto y key de plataforma restringida por dominio; el tenant puede aportar la suya.
+
+**Nota (CAR-73, 29-oct-2026, 15:17 CLT, decisión de Carlos).** La verificación de identidad de firmantes **externos** en N2 (`modulos/firma.md` R13; quien firma sin estar enrolado: representante del cliente, proveedor, postulante) es **de plataforma**: el proveedor de cédula, selfie y prueba de vida lo contrata **OPAI**, nunca el tenant, y su costo se cobra al tenant como consumo dentro del módulo Documentos (ADR-031). Es una excepción puntual al patrón general de esta decisión (que deja biometría como «de plataforma» pero el resto de verificaciones de identidad como elegibles por el tenant); aquí no hay modalidad «propia del tenant» para esta verificación.
 
 **Nota del 29-oct-2026 (CAR-70, Central de monitoreo).** Decisión de Carlos, 29-oct-2026, transmitida en la sesión de Claude de CAR-70 (PR #122), ajuste a la pregunta 8 (telefonía) de `modulos/central.md` §14: WhatsApp/telefonía para la Central sigue el mismo patrón de plataforma-o-propia de este ADR, con Twilio como proveedor. Por defecto los avisos salen con la cuenta de Twilio **de plataforma** de OPAI y sus plantillas de WhatsApp ya aprobadas; como opción, cada tenant conecta **su propia cuenta de Twilio** en el catálogo de integraciones. Un tenant con número de WhatsApp propio necesita la aprobación de Meta **por número y por plantilla** antes de poder enviarlas; mientras no la tenga, sigue con el Twilio y las plantillas de OPAI. Detalle en `modulos/central.md` §10.
 
@@ -768,6 +772,8 @@ Reglas:
 - **6 (presupuesto de terreno).** El tope de ≤ 150 KB se aplica cuando los portales de terreno tengan **pantallas reales**. Hoy son placeholders y su primera carga es el **shell compartido** del ERP (paleta ⌘K, menús, selector de portal), ~159 KB gzip, que no es alcance de la base PWA sino de los arreglos de rendimiento del shell (Brief 03, PR 2). Entretanto el tope por ruta de terreno (`/terreno`, `/trabajador`, `/supervisor`) queda en **162 KB** en `presupuesto-js.json` —más estricto que el 165 por defecto— para rastrear y evitar regresiones; baja a 150 KB cuando lleguen esos arreglos y el primer módulo de terreno su contenido real.
 - **7 (prueba en CI).** El equivalente obligatorio es **(a)** Playwright (manifest válido, SW que registra y controla la página, shell de terreno sin red con `context.setOffline(true)`) más **(c)** el presupuesto de JS; se ejecuta hoy. **(b) Lighthouse CI queda como informe, no como gate**, hasta que el primer módulo de terreno tenga pantallas reales (decisión D3 (b) del Brief 04, resuelta por Carlos el 26-oct-2026 13:45 CLT, t332u). El informe se genera contra el build local con `next start` y se guarda en `docs/2.0/informes/`; pasa a gate (≥ 90 rendimiento y accesibilidad en emulación móvil sobre rutas de terreno, ADR-029.14) con Rondas o Asistencia. La categoría PWA de Lighthouse ya no existe (la quitó la versión 12), así que la instalabilidad la cubre Playwright (a).
 
+**Enmienda (CAR-73, 29-oct-2026, 15:17 CLT, decisión de Carlos).** El punto 3 se amplía: el modo sin conexión suma el **control de acceso físico** (`modulos/control-acceso.md` R20–R23, §14 P13), no solo marcación, rondas y novedades. El dispositivo de portería emparejado registra entradas y salidas sin red con la lista bloqueada aplicada sin red y revalidación al sincronizar; detalle completo en esas reglas, que esta enmienda no repite.
+
 **Decisiones de Carlos (24-oct).** (12) Empaquetado para tiendas con **Capacitor**. (13) **Una sola app «OPAI»** en App Store y Google Play para todos: personal de la empresa (ERP y Supervisor), trabajadores, dispositivos de terreno emparejados con código y clientes; al ingresar, la app abre a cada persona su portal según su membresía (con selector si tiene varios). La marca del tenant dentro de la app sigue ADR-028; apps con marca propia por tenant quedan en backlog. (14) **Se puede marcar sin señal** como marca diferida (`origen_marca = offline_queue`): queda identificada como tal en los reportes a la DT y es visible para el trabajador (en su comprobante) y para su supervisor; no es la carga manual de contingencia.
 
 
@@ -1089,3 +1095,23 @@ identidad de servicio en main.
 8. **Nómina** conserva la liquidación real, el impuesto, el libro, Previred y los finiquitos. Además lleva un contador acumulado de vacaciones y de indemnización por trabajador.
 
 **Consecuencias.** Antes del brief se verifican en las fuentes oficiales el SIS y la reforma, el IMM, los topes y las tasas. Carlos habilita los dominios en la red del entorno. Este ADR no agrega código ni migraciones.
+
+---
+
+## ADR-057 · Complemento «Cumplimiento DT» de Nómina (LRE, Mi DT, finiquito)
+
+**Fecha:** 29-oct-2026 · **Estado:** vigente · **Origen:** decisión de Carlos del 29-oct-2026 a las 15:23 CLT sobre la pregunta P10 de [`modulos/firma.md`](modulos/firma.md) §15, que había quedado «en investigación» en la decisión de las 15:17 CLT (§17 del mismo documento, CAR-73). Investigación completa en [`referencias/dt-integracion.md`](referencias/dt-integracion.md) (solo fuentes públicas, nada escrito en ningún sistema ni contacto con la DT).
+
+**Contexto.** La investigación encontró que la Dirección del Trabajo **no publica una API abierta y documentada para empleadores ni para software de remuneraciones**: su propia FAQ del LRE (última modificación 31-05-2023) dice que la carga es por archivo CSV/TXT o por formulario en Mi DT, y que la API es una «próxima evolución» (fuente: FAQ del LRE, https://www.dt.gob.cl/portal/1628/w3-article-120083.html). El resto de los trámites (contratos y anexos, finiquito, cartas de término) se hacen en el portal Mi DT, siempre con una persona natural autenticada con su ClaveÚnica (el representante laboral electrónico del tenant; además el trabajador, en el finiquito). Ningún proveedor chileno revisado (Nubox, Rex+, Talana) publica cómo automatiza el envío a Mi DT.
+
+**Decisión.** Se crea el complemento vendible **«Cumplimiento DT»** del módulo **Nómina**, cobrado por trabajador activo al mes o con un fijo mensual por tenant (el monto va al ADR de precios). En la v1 el complemento:
+
+1. Genera y valida el archivo del **Libro de Remuneraciones Electrónico (LRE)** en el formato oficial (CSV/TXT separado por «;», nombre `rutempleador_aaaamm`).
+2. Prepara los datos para registrar **contratos, anexos, altas y bajas** en Mi DT.
+3. Prepara la **propuesta de finiquito** y la **carta de aviso de término** (art. 162 del Código del Trabajo), con seguimiento de plazos.
+4. Deja el **envío y la firma en manos del representante laboral del tenant**, con su ClaveÚnica en Mi DT. **OPAI nunca guarda ni usa la ClaveÚnica de una persona ni opera el portal con un robot.**
+5. Si la DT abre una API o firma un convenio, el envío directo entra como un **nivel superior** del complemento.
+6. La **asistencia certificada** (Resolución Exenta N°38 de 2024, ADR-023) se evalúa aparte, con su costo y su plazo; no forma parte de este complemento.
+
+**Consecuencias.** Resuelve P10 de `modulos/firma.md` §15: la especificación de Firma queda **aprobada sin preguntas abiertas**; el complemento vive en Nómina, no en Firma (§11 de `firma.md`). `ROADMAP.md` (fase 6) anota el complemento como parte del alcance de Nómina y dependencia de su brief (Briefs 25/26). Sin código ni migraciones en esta decisión.
+
