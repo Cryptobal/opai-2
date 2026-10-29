@@ -13,6 +13,9 @@
 --   4. tenants: opai_app pierde DELETE y TRUNCATE (nada borra una empresa).
 --   5. Borrar un usuario solo por `core.borrar_usuario`, SECURITY DEFINER, que invoca la capacidad
 --      auditada `platform.usuarios.borrar`. Con membresías o keys (FK RESTRICT del #113) no borra.
+--      La función no valida quién la llama (opai_app tiene EXECUTE): la autorización es la de la
+--      capacidad (solo personas, owner de plataforma), y solo borra cuentas sin empresa, keys,
+--      negocios a cargo, excepciones fijadas ni rol de plataforma.
 -- Tablas con tenant_id: ninguna nueva. Migración de datos: ninguna.
 BEGIN;
 SET LOCAL lock_timeout = '5s';
@@ -53,7 +56,12 @@ REVOKE DELETE, TRUNCATE ON "core"."tenants" FROM opai_app;
 -- capacidad (con su auditoría) sigue viva. Tampoco borra si aún es responsable de un negocio o autor
 -- de una excepción de permiso: esas FK son SET NULL y cambiarían datos de una empresa sin su auditoría.
 CREATE OR REPLACE FUNCTION "core"."borrar_usuario"(p_user_id uuid) RETURNS text
-LANGUAGE plpgsql VOLATILE SECURITY DEFINER SET search_path = pg_catalog, core AS $$
+-- `row_security = off`: comercial.negocios y core.permiso_excepciones tienen FORCE RLS y la función
+-- corre sin app.tenant_id. Si su dueño no tuviera BYPASSRLS, los EXISTS verían 0 filas y el DELETE
+-- dispararía los SET NULL en silencio; así, en ese caso falla («query would be affected by
+-- row-level security policy») y no cambia nada (Revisor, review 5699061875).
+LANGUAGE plpgsql VOLATILE SECURITY DEFINER
+SET search_path = pg_catalog, core SET row_security = off AS $$
 DECLARE
   v_rol text;
 BEGIN

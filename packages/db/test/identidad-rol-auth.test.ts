@@ -18,6 +18,7 @@ describe.skipIf(!urlPropietario)("identidad con rol propio (CAR-43)", () => {
   let conMfa = "";
   let sinEmpresa = "";
   let miembro = "";
+  let autor = "";
 
   beforeAll(async () => {
     e = await prepararEntorno();
@@ -37,8 +38,19 @@ describe.skipIf(!urlPropietario)("identidad con rol propio (CAR-43)", () => {
     conMfa = await usuario("mfa", { twoFactorEnabled: true });
     sinEmpresa = await usuario("suelto");
     miembro = await usuario("miembro");
-    await e.admin.membership.create({
+    const m = await e.admin.membership.create({
       data: { tenantId, userId: miembro, rol: "viewer", portales: ["erp"] },
+    });
+    // Autor de una excepción en la empresa, sin membresía propia: solo lo referencia un SET NULL.
+    autor = await usuario("autor");
+    await e.admin.permisoExcepcion.create({
+      data: {
+        tenantId,
+        membershipId: m.id,
+        permiso: "core:users.read",
+        conceder: true,
+        creadoPor: autor,
+      },
     });
     await e.admin.twoFactor.create({
       data: { userId: conMfa, secret: "cifrado", backupCodes: "cifrados" },
@@ -51,7 +63,8 @@ describe.skipIf(!urlPropietario)("identidad con rol propio (CAR-43)", () => {
 
   afterAll(async () => {
     if (!e) return;
-    const ids = { in: [conMfa, sinEmpresa, miembro] };
+    const ids = { in: [conMfa, sinEmpresa, miembro, autor] };
+    await e.admin.permisoExcepcion.deleteMany({ where: { tenantId } });
     await e.admin.membership.deleteMany({ where: { tenantId } });
     await e.admin.user.deleteMany({ where: { id: ids } });
     await e.admin.tenant.delete({ where: { id: tenantId } });
@@ -124,5 +137,32 @@ describe.skipIf(!urlPropietario)("identidad con rol propio (CAR-43)", () => {
     expect(await e.admin.user.findUnique({ where: { id: sinEmpresa } })).toBeNull();
     expect(await e.admin.session.count({ where: { userId: sinEmpresa } })).toBe(0);
     expect(await e.forUser(miembro).membership.count()).toBe(1);
+  });
+
+  it("borrar no deja en NULL datos de una empresa, tampoco si el dueño de la función no tiene BYPASSRLS", async () => {
+    const borrar = () => tx.enTransaccion(tenantId, (t) => db.borrarUsuario(t, autor));
+    expect(await borrar()).toBe("con_referencias");
+    const rol = `sin_bypass_${sufijo}`;
+    const sql = (q: string) => e.admin.$executeRawUnsafe(q);
+    await sql(`CREATE ROLE ${rol} NOLOGIN NOBYPASSRLS`);
+    try {
+      await sql(`GRANT USAGE ON SCHEMA core, comercial TO ${rol}`);
+      await sql(
+        `GRANT SELECT, UPDATE, DELETE ON core.users, core.permiso_excepciones, comercial.negocios TO ${rol}`,
+      );
+      await sql(`ALTER FUNCTION core.borrar_usuario(uuid) OWNER TO ${rol}`);
+      // Con FORCE RLS y sin app.tenant_id, la RLS escondería la referencia: falla, no borra.
+      await expect(borrar()).rejects.toThrow(/row-level security/i);
+    } finally {
+      await sql(`ALTER FUNCTION core.borrar_usuario(uuid) OWNER TO CURRENT_USER`);
+      await sql(
+        `REVOKE ALL ON core.users, core.permiso_excepciones, comercial.negocios FROM ${rol}`,
+      );
+      await sql(`REVOKE ALL ON SCHEMA core, comercial FROM ${rol}`);
+      await sql(`DROP ROLE ${rol}`);
+    }
+    expect(await e.admin.user.findUnique({ where: { id: autor } })).not.toBeNull();
+    const x = await e.admin.permisoExcepcion.findFirstOrThrow({ where: { tenantId } });
+    expect(x.creadoPor).toBe(autor);
   });
 });

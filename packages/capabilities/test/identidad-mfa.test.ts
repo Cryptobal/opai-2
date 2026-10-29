@@ -72,6 +72,16 @@ describe("core.users.restablecer_mfa (owner)", () => {
     expect(
       await executeCapability(admin.ctx, "core.users.restablecer_mfa", { membershipId: M2 }),
     ).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+    // H7: un rol con `core:owners.manage` concedido (personalizado o excepción) tampoco.
+    const delegado = contextoDePrueba({
+      rol: "admin",
+      permisos: ["core:owners.manage"],
+      semilla: semilla(),
+    });
+    expect(
+      await executeCapability(delegado.ctx, "core.users.restablecer_mfa", { membershipId: M2 }),
+    ).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+    expect(delegado.tabla("twoFactor")).toHaveLength(1);
     const propio = await executeCapability(ctxOwner().ctx, "core.users.restablecer_mfa", {
       membershipId: semillaTenant().membership[0]?.id,
     });

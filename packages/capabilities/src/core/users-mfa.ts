@@ -63,6 +63,9 @@ export const usersRestablecerMfa = defineCapability({
   efecto: "irreversible",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
+    // Solo el rol base owner, no un rol personalizado o una excepción con `core:owners.manage` (H7):
+    // quitarle el MFA a otro owner no se delega.
+    if (ctx.rol !== "owner") throw prohibido("Solo un owner puede restablecer el segundo factor.");
     const objetivo = await buscar(ctx, input.membershipId);
     if (objetivo.userId === usuarioResponsable(ctx)) {
       throw prohibido("No puedes restablecer tu propio segundo factor: usa un código de respaldo.");
