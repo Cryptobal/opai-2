@@ -65,7 +65,16 @@ function semilla() {
   });
   return {
     ...s,
-    user: s.user.map((u) => (u.id === owner.id ? { ...u, platformRole: "owner" } : u)),
+    user: [
+      ...s.user.map((u) =>
+        u.id === owner.id
+          ? { ...u, platformRole: "owner" }
+          : u.id === U2
+            ? { ...u, twoFactorEnabled: true }
+            : u,
+      ),
+      { id: "0192f3a0-0000-7000-8000-0000000000c9", name: "Suelto", email: "suelto@prueba.cl" },
+    ],
     trabajo: [trabajo(TRABAJO_FALLIDO, "fallido"), trabajo(TRABAJO_PENDIENTE, "pendiente")],
     aprobacionPlataforma: [aprobacion(APROBACION_A), aprobacion(APROBACION_R)],
   };
@@ -94,6 +103,8 @@ const CASOS: Record<string, Record<string, unknown>> = {
   "platform.trabajos.reintentar": { tenantId: t, trabajoId: TRABAJO_FALLIDO },
   "platform.trabajos.cancelar": { tenantId: t, trabajoId: TRABAJO_PENDIENTE },
   "platform.users.set_role": { email: "beto@prueba.cl", platformRole: "support" },
+  "platform.usuarios.restablecer_mfa": { email: "beto@prueba.cl" },
+  "platform.usuarios.borrar": { email: "suelto@prueba.cl" },
   "platform.aprobaciones.aprobar": { id: APROBACION_A },
   "platform.aprobaciones.rechazar": { id: APROBACION_R, motivo: "no corresponde" },
 };
