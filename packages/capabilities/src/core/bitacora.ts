@@ -43,8 +43,7 @@ export const platformBitacoraEstado = defineCapability({
   dryRun: false,
   tenantObjetivo: (input) => input.tenantId,
   async handler(ctx, input) {
-    const db = requierePlataforma(ctx).paraTenant(input.tenantId);
-    const c = await db.bitacoraCabeza.findUnique({ where: { tenantId: input.tenantId } });
+    const c = await requierePlataforma(ctx).empresa(input.tenantId).cabezaBitacora();
     return {
       ultimoSeq: c?.ultimoSeq ?? 0,
       verificadaEn: iso(c?.verificadaEn),

@@ -36,6 +36,7 @@ export const ETIQUETA_CAMPO: Readonly<Record<string, string>> = {
   ip_address: "dirección IP",
   ip: "dirección IP",
   user_agent: "navegador (user agent)",
+  ip_cifrada: "dirección IP (cifrada)",
   correo_hash: "correo (HMAC, seudonimizado)",
   user_id: "usuario",
   // accounts

@@ -6,6 +6,7 @@ import { defineCapability } from "../../define";
 import { obtenerCapacidad } from "../../registry";
 import { documentosMatriz } from "../documentos/matriz";
 import { dondePersona } from "../maestros/alcance";
+import { SIN_PLATAFORMA } from "../../agentes/plataforma";
 
 const pendienteSchema = z.object({
   tipo: z.enum(["aprobaciones", "documentos", "invitaciones", "integraciones", "anexos"]),
@@ -36,7 +37,7 @@ export const inicioPendientes = defineCapability({
       const ahora = new Date();
       if (ctx.autorizar(PERMISOS_CORE.aprobacionesManage)) {
         const ap = await ctx.db.aprobacion.findMany({
-          where: { estado: "pendiente", venceEn: { gt: ahora } },
+          where: { estado: "pendiente", venceEn: { gt: ahora }, ...SIN_PLATAFORMA },
           orderBy: { venceEn: "asc" },
           select: { capability: true, venceEn: true },
         });
