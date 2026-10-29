@@ -20,7 +20,10 @@ vi.mock("@/app/_components/estado-enlace", () => ({ EstadoEnlace: () => null }))
 describe("LinkMenu (precarga del menú y del riel)", () => {
   it("no fuerza prefetch completo: deja la precarga por defecto de Next", async () => {
     const { LinkMenu } = await import("@/app/_components/link-menu");
-    renderToStaticMarkup(createElement(LinkMenu, { href: "/negocios" }, "Negocios"));
+    // `LinkComponent` exige `children` en las props, así que con `createElement` va en el objeto (no
+    // como tercer argumento): la regla de JSX no aplica a esta llamada programática.
+    // eslint-disable-next-line react/no-children-prop
+    renderToStaticMarkup(createElement(LinkMenu, { href: "/negocios", children: "Negocios" }));
     expect(capturado.props).toBeDefined();
     // Ni `true` (prefetch completo del hueco dinámico) ni `false` (precarga desactivada): sin la prop,
     // Next aplica su precarga por defecto (solo el shell estático del Suspense del layout).
