@@ -202,9 +202,12 @@ describe.skipIf(!urlPropietario)("navegación: preferencias de usuario en base r
         }),
       ),
     );
-    // Nunca un error crudo de Prisma/Postgres: cualquier fallo queda con el mensaje genérico.
+    // Nunca un error crudo de Prisma/Postgres: cualquier fallo queda con el mensaje genérico (CAR-49).
     for (const r of resultados)
-      if (!r.ok) expect(r.error.message).toBe("No pudimos completar la operación. Intenta de nuevo.");
+      if (!r.ok) {
+        expect(r.error.code).toBe("INTERNAL");
+        expect(r.error.message).toMatch(/^Ocurrió un error inesperado\. Reintenta en unos minutos\./);
+      }
     const exitosas = resultados.filter((r) => r.ok);
     expect(exitosas.length).toBeGreaterThan(0);
     const fila = await e.forTenant(tenantId).ajuste.findFirst({
@@ -257,10 +260,10 @@ describe.skipIf(!urlPropietario)("navegación: preferencias de usuario en base r
     });
     soltar();
     await retenedora;
-    expect(r).toMatchObject({
-      ok: false,
-      error: { code: "INTERNAL", message: "No pudimos completar la operación. Intenta de nuevo." },
-    });
+    expect(r.ok).toBe(false);
+    if (r.ok) throw new Error("no debería ok");
+    expect(r.error.code).toBe("INTERNAL");
+    expect(r.error.message).toMatch(/^Ocurrió un error inesperado\. Reintenta en unos minutos\./);
     expect(
       await e.forTenant(tenantId).ajuste.findFirst({
         where: { ambito: "usuario", sujetoId: usuarioId, modulo: "core", clave: "preferencias_tema" },

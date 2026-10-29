@@ -1,9 +1,9 @@
 import { auditarRechazoSensible } from "./execute-rechazo";
 import { controlAgente } from "./agentes/control";
 import { denegar, falla } from "./autorizacion";
-import { ErrorCapacidad } from "./errores";
 import { conAuditoriaAlFinal } from "./execute-auditoria-final";
 import { ejecutarLecturaAuditada } from "./execute-lectura";
+import { resultadoDeError } from "./execute-log";
 import { consumoEjecucion } from "./execute-medicion";
 import { auditaConElHandler, auditarSiPlataforma, eventoDeEscritura } from "./execute-plataforma";
 import { repeticion, tenantDe } from "./execute-util";
@@ -146,16 +146,7 @@ export async function executeCapability(
     r = await correr(ctx, c, input, opciones);
     await auditarSiPlataforma(ctx, c, r, opciones);
   } catch (error) {
-    if (error instanceof ErrorCapacidad) {
-      r = { resultado: falla(error.code, error.message, error.detalles) };
-    } else {
-      // El detalle (incluido un 55P03 de Postgres envuelto por Prisma, con su SQL) solo al log del
-      // servidor: la UI nunca muestra el error crudo de la base (regresión del PR #109).
-      console.error(`[capacidad:${c.id}] error interno`, error);
-      r = {
-        resultado: falla("INTERNAL", "No pudimos completar la operación. Intenta de nuevo."),
-      };
-    }
+    r = { resultado: resultadoDeError(ctx, c, error) };
   }
 
   const tenantId = tenantDe(ctx, c, r.entrada, r.salida);
