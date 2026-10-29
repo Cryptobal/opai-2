@@ -15,7 +15,7 @@ test.describe("configuración · acceso", () => {
     const p = info.project.name;
     await entrar(page);
     await page.goto("/configuracion/usuarios");
-    await expect(page.getByText("Matriz de permisos")).toBeVisible();
+    await expect(page.getByRole("link", { name: "Roles", exact: true })).toBeVisible();
     await captura(page, "config-usuarios", p);
     await page.goto("/configuracion/api-keys");
     await expect(page).toHaveURL(/\/configuracion\/agentes$/);
