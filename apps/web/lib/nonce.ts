@@ -10,8 +10,8 @@ export function cabecerasConNonce(entrada: Headers) {
   // Next lee la CSP de REQUEST para aplicar el mismo nonce a sus scripts de render.
   headers.delete("content-security-policy");
   headers.set("content-security-policy-report-only", construirCsp(desarrollo, nonce));
-  // PPR tiene scripts del shell estático sin nonce. La política del navegador conserva
-  // unsafe-inline en Report-Only; anunciar nonce aquí lo anularía y generaría falsos reportes.
-  // Los atributos de TEMA/SW ya están preparados; endurecer TODO el shell es un paso posterior.
+  // Este nonce queda solo en el request. PPR tiene scripts del shell estático sin nonce: la política
+  // que recibe el navegador (en enforcement, CAR-57) conserva unsafe-inline y no anuncia nonce,
+  // que lo anularía y bloquearía el shell. TEMA/SW ya llevan el atributo para el paso siguiente.
   return { headers, csp };
 }
