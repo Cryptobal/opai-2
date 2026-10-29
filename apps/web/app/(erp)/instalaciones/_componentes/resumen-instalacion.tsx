@@ -23,30 +23,33 @@ export function ResumenInstalacion({ i }: { i: InstalacionDetalle }) {
           </EnlaceBotonHoja>
         }
       >
-        {/* Como en main (lado a lado desde 768 px), salvo en celular apaisado (menos de 1024 px de ancho y hasta
-            500 px de alto), donde el mapa queda sobre el texto para que no se parta por letras (CAR-6). */}
-        <div className="grid gap-4 md:[@media(min-height:501px)]:grid-cols-[minmax(0,1fr)_minmax(0,280px)] md:[@media(min-height:501px)]:items-start lg:grid-cols-[minmax(0,1fr)_minmax(0,280px)] lg:items-start">
-          <div className="md:[@media(min-height:501px)]:order-2 lg:order-2">{mapa}</div>
-          <ParesGrid
-            unaColumna
-            items={[
-              {
-                etiqueta: "Dirección",
-                valor:
-                  i.direccionFormateada ??
-                  ([i.calle, i.comuna].filter(Boolean).join(", ") || "Sin dirección"),
-              },
-              { etiqueta: "Región", valor: i.region },
-              { etiqueta: "Geocerca", valor: `${i.geocercaM} m` },
-              {
-                etiqueta: "Vigencia",
-                valor: i.vigenteDesde
-                  ? `${fecha(i.vigenteDesde)} – ${i.vigenteHasta ? fecha(i.vigenteHasta) : "sin término"}`
-                  : null,
-              },
-              ...(i.notas ? [{ etiqueta: "Notas", valor: i.notas }] : []),
-            ]}
-          />
+        {/* Lado a lado según el ancho del panel (consulta de contenedor), no el de la ventana: con la barra
+            lateral de 1024 px el panel mide ~390 px y el texto se partía por letras (CAR-65). Con poco
+            panel, y en celular apaisado (hasta 500 px de alto, CAR-6), el mapa queda sobre el texto. */}
+        <div className="@container">
+          <div className="grid gap-4 [@media(min-height:501px)]:@[34rem]:grid-cols-[minmax(0,1fr)_minmax(0,280px)] [@media(min-height:501px)]:@[34rem]:items-start">
+            <div className="[@media(min-height:501px)]:@[34rem]:order-2">{mapa}</div>
+            <ParesGrid
+              unaColumna
+              items={[
+                {
+                  etiqueta: "Dirección",
+                  valor:
+                    i.direccionFormateada ??
+                    ([i.calle, i.comuna].filter(Boolean).join(", ") || "Sin dirección"),
+                },
+                { etiqueta: "Región", valor: i.region },
+                { etiqueta: "Geocerca", valor: `${i.geocercaM} m` },
+                {
+                  etiqueta: "Vigencia",
+                  valor: i.vigenteDesde
+                    ? `${fecha(i.vigenteDesde)} – ${i.vigenteHasta ? fecha(i.vigenteHasta) : "sin término"}`
+                    : null,
+                },
+                ...(i.notas ? [{ etiqueta: "Notas", valor: i.notas }] : []),
+              ]}
+            />
+          </div>
         </div>
       </SeccionTarjeta>
       <SeccionTarjeta
