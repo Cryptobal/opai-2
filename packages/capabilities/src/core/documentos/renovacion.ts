@@ -6,6 +6,7 @@ import { defineCapability } from "../../define";
 import { reglaDeNegocio } from "../../errores";
 import { correoDe } from "../../integraciones/adaptadores";
 import { enviarCorreo } from "../comunicaciones/envio";
+import { dondePersona } from "../maestros/alcance";
 
 const EVENTO = "core.documento.renovacion_solicitada";
 
@@ -31,7 +32,9 @@ export const documentosPedirRenovacion = defineCapability({
   async handler(ctx, input, { dryRun }) {
     const ids = input.pedidos.map((p) => p.personaId);
     const [personas, tipos, tenant] = await Promise.all([
-      ctx.db.persona.findMany({ where: { id: { in: ids } } }),
+      // Alcance por filas (ADR-022, CAR-53): una persona fuera de alcance se trata como inexistente,
+      // sin enviarle correo ni revelar su nombre o dirección en la salida.
+      ctx.db.persona.findMany({ where: { id: { in: ids }, AND: [dondePersona(ctx)] } }),
       ctx.db.documentoTipo.findMany({
         where: { id: { in: input.pedidos.flatMap((p) => p.tipoIds) } },
       }),
