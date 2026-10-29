@@ -5,7 +5,8 @@ import { ErrorCapacidad } from "./errores";
 import { conAuditoriaAlFinal } from "./execute-auditoria-final";
 import { ejecutarLecturaAuditada } from "./execute-lectura";
 import { consumoEjecucion } from "./execute-medicion";
-import { auditarSiPlataforma, eventoAuditoria, repeticion, tenantDe } from "./execute-util";
+import { auditaConElHandler, auditarSiPlataforma, eventoDeEscritura } from "./execute-plataforma";
+import { repeticion, tenantDe } from "./execute-util";
 import { SALIDA_INVALIDA } from "./idempotencia";
 import { obtenerCapacidad } from "./registry";
 import type { Capacidad, Contexto, FinalizarConsumo, OpcionesEjecucion, Resultado } from "./types";
@@ -41,8 +42,12 @@ async function correr(
     : { dryRun };
   const bloqueo = await controlAgente(ctx, c, entrada.data, opciones);
   if (bloqueo) return { resultado: bloqueo, entrada: entrada.data };
+  // Plataforma no reserva idempotencia: la reserva guardaría su input y su salida (correos, datos
+  // de otra empresa) en la empresa de la key durante 24 h (CAR-36).
   const clave =
-    !dryRun && c.efecto !== "lectura" && ctx.conTenant ? opciones.idempotencyKey : undefined;
+    !dryRun && c.efecto !== "lectura" && ctx.conTenant && c.modulo !== "platform"
+      ? opciones.idempotencyKey
+      : undefined;
   const reserva = clave ? await ctx.idempotencia.reservar(c.id, clave, entrada.data) : null;
   if (reserva && reserva.estado !== "nueva") {
     const resultado = repeticion(reserva);
@@ -50,11 +55,11 @@ async function correr(
     return { resultado, entrada: entrada.data };
   }
   const reservaId = reserva?.id;
-  // Con tenant actual, la escritura audita en SU MISMA transacción, más abajo (ADR-052): si el
-  // insert de auditoría falla, el handler hace rollback; si el handler falla, nunca se audita. Sin
-  // tenant (plataforma) no hay una sola transacción posible (`ctx.transaccion` está atado al tenant
-  // SIN_TENANT): `executeCapability` audita aparte con `auditarSiPlataforma`.
-  const auditaAqui = c.efecto !== "lectura" && ctx.conTenant && !c.tenantObjetivo && !dryRun;
+  // La escritura audita en SU MISMA transacción, más abajo (ADR-052): si el insert de auditoría
+  // falla, el handler hace rollback; si el handler falla, nunca se audita. Las `platform.*` sin
+  // objetivo también, aun sin empresa (la auditoría de plataforma no depende del tenant, CAR-36).
+  // Con `tenantObjetivo`, `executeCapability` audita aparte con `auditarSiPlataforma`.
+  const auditaAqui = auditaConElHandler(ctx, c, dryRun);
   let crudo: unknown;
   let lecturaValidada: ReturnType<Capacidad["output"]["safeParse"]> | undefined;
   try {
@@ -74,9 +79,8 @@ async function correr(
         const alFinal = conAuditoriaAlFinal(ctx, tx);
         const salidaCruda = await c.handler(alFinal.ctx, entrada.data, modo);
         // Último paso antes del COMMIT: con el lock de auditoría tomado no se pide nada al pool.
-        await alFinal.volcar(
-          eventoAuditoria(c, ctx.actor, ctx.tenantId, entrada.data, salidaCruda, opciones),
-        );
+        // Lo `platform.*` va a la auditoría global (CAR-36), nunca a la cadena de la empresa.
+        await alFinal.volcar(eventoDeEscritura(ctx, c, entrada.data, salidaCruda, opciones));
         return salidaCruda;
       });
     } else {

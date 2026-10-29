@@ -1,6 +1,5 @@
 import { z } from "zod";
 
-import { sembrarCatalogo } from "@opai/db";
 import { PERMISOS_PLATAFORMA } from "@opai/domain";
 
 import { defineCapability } from "../define";
@@ -9,7 +8,6 @@ import type { Contexto } from "../types";
 import { requierePlataforma, usuarioResponsable } from "./comun";
 import { emailSchema, slugSchema, timezoneSchema, verticalSchema } from "./esquemas";
 import { invitacionCreadaSchema } from "./invitations";
-import { crearInvitacion } from "./invitar";
 
 /** Invita al primer owner/admin salvo que ya sea miembro (adopción de un tenant existente). */
 export async function invitarAdministrador(
@@ -19,15 +17,10 @@ export async function invitarAdministrador(
   rol: "owner" | "admin",
   dryRun: boolean,
 ) {
-  const db = requierePlataforma(ctx).paraTenant(tenant.id);
   const invitadoPor = { id: usuarioResponsable(ctx), nombre: ctx.usuario?.nombre ?? "OPAI" };
-  return crearInvitacion(
-    db,
-    tenant,
-    { email, rol, portales: ["erp"], invitadoPor },
-    ctx.servicios,
-    dryRun,
-  );
+  return requierePlataforma(ctx)
+    .empresa(tenant.id)
+    .invitar(tenant, { email, rol, portales: ["erp"], invitadoPor }, ctx.servicios, dryRun);
 }
 
 export const platformTenantsCreate = defineCapability({
@@ -85,12 +78,9 @@ export const platformTenantsCreate = defineCapability({
         estado: "trial",
       }));
     // Catálogo base de la vertical (cargos con estructura, tipos de documento). Idempotente.
-    await sembrarCatalogo(p.paraTenant(tenant.id), tenant.id, input.vertical);
-    await p.paraTenant(tenant.id).tenantModule.upsert({
-      where: { tenantId_moduloId: { tenantId: tenant.id, moduloId: "core" } },
-      update: { estado: "activo" },
-      create: { tenantId: tenant.id, moduloId: "core", estado: "activo" },
-    });
+    const empresa = p.empresa(tenant.id);
+    await empresa.sembrarCatalogo(input.vertical);
+    await empresa.fijarModulo("core", "activo");
     const invitacion = await invitarAdministrador(
       ctx,
       tenant,

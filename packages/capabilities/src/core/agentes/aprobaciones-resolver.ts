@@ -7,7 +7,7 @@ import { conflicto } from "../../errores";
 import { executeCapability } from "../../execute";
 import { defineTrabajo } from "../../trabajos/registro";
 import { uuidSchema } from "../esquemas";
-import { pendiente } from "./aprobaciones";
+import { pendiente } from "./aprobaciones-pendiente";
 
 export const aprobacionesAprobar = defineCapability({
   id: "core.aprobaciones.aprobar",
@@ -21,7 +21,7 @@ export const aprobacionesAprobar = defineCapability({
   efecto: "irreversible",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    const a = await pendiente(ctx, input.id);
+    const { a } = await pendiente(ctx, input.id, true, "empresa");
     if (dryRun)
       return {
         estado: "pendiente",
@@ -64,7 +64,7 @@ export const aprobacionesRechazar = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    const a = await pendiente(ctx, input.id);
+    const { a } = await pendiente(ctx, input.id, false, "empresa");
     if (dryRun) return { estado: "pendiente" };
     await ctx.transaccion(async (tx) => {
       await tx.aprobacion.update({

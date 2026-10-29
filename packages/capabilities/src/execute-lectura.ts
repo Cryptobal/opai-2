@@ -18,10 +18,12 @@ export function ejecutarLecturaAuditada(
     await alFinal.volcar(
       validada.success
         ? {
-            tenantId: ctx.tenantId,
-            capability: c.id,
-            actor: ctx.actor,
-            payload: { ids: [...new Set(proyectar(validada.data, entrada))] },
+            empresa: {
+              tenantId: ctx.tenantId,
+              capability: c.id,
+              actor: ctx.actor,
+              payload: { ids: [...new Set(proyectar(validada.data, entrada))] },
+            },
           }
         : undefined,
     );

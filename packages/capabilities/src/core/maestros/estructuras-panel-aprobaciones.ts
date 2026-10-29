@@ -10,6 +10,8 @@ export function selectAprobacionesPanel(ctx: Contexto, input: EntradaPanel) {
     aprobaciones: {
       where: {
         estado: "pendiente",
+        // Nunca `platform.*` en una ficha de empresa (CAR-36).
+        NOT: { capability: { startsWith: "platform." } },
         OR: [
           { input: { path: ["id"], equals: input.id } },
           { input: { path: [`${input.tipo}Id`], equals: input.id } },
