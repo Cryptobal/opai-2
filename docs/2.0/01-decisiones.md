@@ -1063,3 +1063,22 @@ identidad de servicio en main.
 
 **Consecuencias.** Sin migraciones (`opai_app` ya tiene `UPDATE` en `core.users`). La instantánea `herramientas-mcp.txt` (key `*`) no cambia; la nueva `herramientas-mcp-plataforma.txt` lista las `platform_*`.
 
+---
+
+## ADR-056 · Complemento «Cumplimiento DT» de Nómina (LRE, Mi DT, finiquito)
+
+**Fecha:** 29-oct-2026 · **Estado:** vigente · **Origen:** decisión de Carlos del 29-oct-2026 a las 15:23 CLT sobre la pregunta P10 de [`modulos/firma.md`](modulos/firma.md) §15, que había quedado «en investigación» en la decisión de las 15:17 CLT (§17 del mismo documento, CAR-73). Investigación completa en [`referencias/dt-integracion.md`](referencias/dt-integracion.md) (solo fuentes públicas, nada escrito en ningún sistema ni contacto con la DT).
+
+**Contexto.** La investigación encontró que la Dirección del Trabajo **no publica una API abierta y documentada para empleadores ni para software de remuneraciones**: su propia FAQ del LRE (última modificación 31-05-2023) dice que la carga es por archivo CSV/TXT o por formulario en Mi DT, y que la API es una «próxima evolución» (fuente: FAQ del LRE, https://www.dt.gob.cl/portal/1628/w3-article-120083.html). El resto de los trámites (contratos y anexos, finiquito, cartas de término) se hacen en el portal Mi DT, siempre con una persona natural autenticada con su ClaveÚnica (el representante laboral electrónico del tenant; además el trabajador, en el finiquito). Ningún proveedor chileno revisado (Nubox, Rex+, Talana) publica cómo automatiza el envío a Mi DT.
+
+**Decisión.** Se crea el complemento vendible **«Cumplimiento DT»** del módulo **Nómina**, cobrado por trabajador activo al mes o con un fijo mensual por tenant (el monto va al ADR de precios). En la v1 el complemento:
+
+1. Genera y valida el archivo del **Libro de Remuneraciones Electrónico (LRE)** en el formato oficial (CSV/TXT separado por «;», nombre `rutempleador_aaaamm`).
+2. Prepara los datos para registrar **contratos, anexos, altas y bajas** en Mi DT.
+3. Prepara la **propuesta de finiquito** y la **carta de aviso de término** (art. 162 del Código del Trabajo), con seguimiento de plazos.
+4. Deja el **envío y la firma en manos del representante laboral del tenant**, con su ClaveÚnica en Mi DT. **OPAI nunca guarda ni usa la ClaveÚnica de una persona ni opera el portal con un robot.**
+5. Si la DT abre una API o firma un convenio, el envío directo entra como un **nivel superior** del complemento.
+6. La **asistencia certificada** (Resolución Exenta N°38 de 2024, ADR-023) se evalúa aparte, con su costo y su plazo; no forma parte de este complemento.
+
+**Consecuencias.** Resuelve P10 de `modulos/firma.md` §15: la especificación de Firma queda **aprobada sin preguntas abiertas**; el complemento vive en Nómina, no en Firma (§11 de `firma.md`). `ROADMAP.md` (fase 6) anota el complemento como parte del alcance de Nómina y dependencia de su brief (Briefs 25/26). Sin código ni migraciones en esta decisión.
+
