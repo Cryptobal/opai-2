@@ -9,6 +9,7 @@ if (existsSync(envRaiz)) process.loadEnvFile(envRaiz);
 // Evidencia visual a 375 y 1024 (y revisión a 1280). No es regresión visual todavía.
 export default defineConfig({
   testDir: "./e2e",
+  globalSetup: "./e2e/calentar.ts",
   timeout: 90_000,
   use: {
     baseURL: process.env["BASE_URL"] ?? "http://localhost:3000",
