@@ -315,6 +315,8 @@ decisiones atribuidas a Carlos.
 
 **Decisiones de Carlos (29-oct-2026, CAR-72, pedido de las 08:18 CLT).** Precisan este ADR al responder las 21 preguntas de `modulos/rondas.md` §14 (detalle completo en ese archivo, sección «Decisiones de Carlos (29-oct-2026)»): **se retira NFC** — modifica el párrafo de arriba: ya no se conservan «QR/NFC/GPS», quedan solo `QR`, `GPS` y `QR + GPS`, y las etiquetas NFC de 1.0 no se migran; el **QR es siempre físico**, sin QR dinámico; el radio de geocerca por defecto queda **bajo 20 m**, el mínimo que no dé falsos «fuera», calibrado con las marcas reales de 1.0; la **foto sigue opcional por punto** y, además, cada punto admite reportar una novedad o un incidente hacia el libro electrónico de novedades; el **trust score nunca bloquea**; y las etiquetas QR físicas de 1.0 **se reutilizan y se mejoran** durante la migración, en vez de exigir reimpresión inmediata.
 
+**Aprobación de Carlos (29-oct-2026, 14:58 CLT, mismo pedido CAR-72).** Carlos aprueba `modulos/rondas.md` completo (pasa de «borrador» a «aprobado», ADR-047): queda disponible para copiar el Design Prompt en Claude Design. Confirma además que la publicación en Play Store (decisión 5 de arriba: app web dentro de la app Terreno) **queda como opción del Brief 14** (Rondas), disponible desde ese brief y sin esperar al empaquetado nativo del Brief 17.
+
 ---
 
 ## ADR-025 · Tickets transversal y simple; sin chat

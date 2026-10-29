@@ -1,6 +1,6 @@
 # Rondas — Especificación funcional
 
-**Estado:** **borrador**, pendiente de aprobación de Carlos (ADR-047) · **Tarea:** CAR-72 (pedido de Carlos del 29-oct-2026, 08:18 CLT) · **Fase:** 3, Brief 14 (y la parte nativa en el Brief 17) · **Insumos:** `extraccion/rondas-y-tickets.md` (1.0 es el piso), ADR-021, ADR-023, ADR-024, ADR-027, ADR-029, ADR-031, ADR-044, ADR-047, ADR-048, ADR-049, ADR-055; patrones `design/export-ds-2.0/pantallas/RondaPhone.html` y `RondasPanelDesktop.html`; CAR-70 (central de monitoreo, consumidora de los eventos de §8) · **Benchmark:** [`referencias/benchmark-rondas.md`](../referencias/benchmark-rondas.md) · **Autor:** Claude
+**Estado:** **aprobado por Carlos el 29-oct-2026 (ADR-047)** · **Tarea:** CAR-72 (pedido de Carlos del 29-oct-2026, 08:18 CLT) · **Fase:** 3, Brief 14 (y la parte nativa en el Brief 17) · **Insumos:** `extraccion/rondas-y-tickets.md` (1.0 es el piso), ADR-021, ADR-023, ADR-024, ADR-027, ADR-029, ADR-031, ADR-044, ADR-047, ADR-048, ADR-049, ADR-055; patrones `design/export-ds-2.0/pantallas/RondaPhone.html` y `RondasPanelDesktop.html`; CAR-70 (central de monitoreo, consumidora de los eventos de §8) · **Benchmark:** [`referencias/benchmark-rondas.md`](../referencias/benchmark-rondas.md) · **Autor:** Claude
 
 > Lenguaje de negocio, sin código (ADR-047). El diseño y el brief citan las reglas por número (R1, R2…) y los criterios por CA1, CA2… Lo que todavía no está decidido va en §14, cada pregunta con su recomendación. El Design Prompt (§15) se usa **solo después** de que Carlos apruebe esta especificación.
 
@@ -374,7 +374,7 @@ Respuestas de Carlos a las 21 preguntas de §14, dadas en el mismo pedido CAR-72
 
 ## 15. Design Prompt para Claude Design
 
-> **Se usa solo después de que Carlos apruebe esta especificación** (ADR-047). El Design Prompt se mudó a su propio archivo: [`docs/2.0/design/DESIGN-PROMPT-rondas.md`](../design/DESIGN-PROMPT-rondas.md), ya actualizado con las decisiones de Carlos del 29-oct-2026 (preguntas 2, 5, 7, 8, 9, 13, 18 y 21, que son las que afectan el mockup). Se copia tal cual desde ese archivo en Claude Design.
+> Carlos aprobó esta especificación completa el 29-oct-2026 (ADR-047); el Design Prompt queda **listo para copiar**. El Design Prompt se mudó a su propio archivo: [`docs/2.0/design/DESIGN-PROMPT-rondas.md`](../design/DESIGN-PROMPT-rondas.md), ya actualizado con las decisiones de Carlos del 29-oct-2026 (preguntas 2, 5, 7, 8, 9, 13, 18 y 21, que son las que afectan el mockup). Se copia tal cual desde ese archivo en Claude Design.
 
 ## Historial
 
@@ -382,3 +382,4 @@ Respuestas de Carlos a las 21 preguntas de §14, dadas en el mismo pedido CAR-72
 |---|---|---|
 | 29-oct-2026 | Primera versión (borrador) con modo por punto, fidelidad del GPS, trust score versionado, sin conexión, PWA vs nativa, vistas, eventos para la central, benchmark, 21 preguntas y Design Prompt (CAR-72) | — (pendiente de aprobación) |
 | 29-oct-2026 | Carlos responde las 21 preguntas de §14 (sección «Decisiones de Carlos (29-oct-2026)»): sin NFC, radio GPS bajo 20 m calibrado con 1.0, sin QR dinámico, app web dentro de Terreno con Play Store opcional, foto opcional y novedad/incidente por punto, selección de guardia al entrar a Terreno con varios guardias, «sin movimiento» que debe funcionar de verdad, etiquetas de 1.0 reutilizadas y mejoradas; el resto queda con la recomendación. Ajusta R1, R2, R3, R5, R7, R27, R31 y la tabla de dispositivos; mueve el Design Prompt a `design/DESIGN-PROMPT-rondas.md` (CAR-72; solo documentación) | Carlos (29-oct-2026, 08:18 CLT, pedido CAR-72) |
+| 29-oct-2026 | Carlos aprueba el documento completo (cambia el estado de «borrador» a «aprobado»); confirma que la publicación en Play Store (decisión 5 de §14) queda como opción del Brief 14, sin esperar a un hito posterior; el Design Prompt de `design/DESIGN-PROMPT-rondas.md` queda listo para copiar en Claude Design (CAR-72; solo documentación) | Carlos (29-oct-2026, 14:58 CLT, pedido CAR-72) |

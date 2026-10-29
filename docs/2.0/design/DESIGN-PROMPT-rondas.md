@@ -1,6 +1,6 @@
 # DESIGN PROMPT — RONDAS (OPAI 2.0)
 
-Para pegar tal cual en Claude Design, **solo después de que Carlos apruebe `docs/2.0/modulos/rondas.md` completo** (ADR-047). Especificación: `modulos/rondas.md` §1–§13; reglas citadas como R1, R2…; benchmark en `referencias/benchmark-rondas.md`.
+**Estado: listo para copiar.** Carlos aprobó el 29-oct-2026 (14:58 CLT) el documento completo `docs/2.0/modulos/rondas.md` (ADR-047); este prompt ya refleja esa especificación aprobada y se puede pegar tal cual en Claude Design. Especificación: `modulos/rondas.md` §1–§13; reglas citadas como R1, R2…; benchmark en `referencias/benchmark-rondas.md`.
 
 **Origen.** Este prompt nació como §15 de `modulos/rondas.md` (CAR-72, 29-oct-2026) y se mudó a su propio archivo cuando Carlos respondió las 21 preguntas de §14 el mismo día (ver `modulos/rondas.md`, sección «Decisiones de Carlos (29-oct-2026)»). Ya incorpora esas decisiones, en particular las que cambian el mockup: **(2)** QR + GPS por defecto no estricto; **(5)** la app web vive dentro de la app Terreno, con publicación en Play Store como opción; **(7)** el cliente ve cumplimiento y recorrido, sin anomalías internas; **(8)** sin QR dinámico, el QR es siempre físico; **(9)** sin NFC; **(13)** foto opcional por punto y novedad o incidente reportable en cada punto; **(18)** selección de guardia al entrar a Terreno cuando hay varios; **(21)** el botón «Emergencia» siempre avisa. Si una respuesta de §14 cambia después de hoy, se ajusta este archivo antes de volver a copiarlo.
 
