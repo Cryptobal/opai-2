@@ -1,6 +1,6 @@
 import { PrismaPg } from "@prisma/adapter-pg";
 
-import { configPool } from "./config-pool";
+import { configPool, configTransaccion } from "./config-pool";
 import { PrismaClient } from "./generated/prisma/client";
 import { notificarConsulta } from "./metricas";
 import { crearPool } from "./pool";
@@ -54,7 +54,14 @@ function crearCliente(variable: "DATABASE_URL" | "DATABASE_URL_MIGRATE"): Prisma
     },
     app,
   );
-  return new PrismaClient({ adapter: new PrismaPg(pool, { disposeExternalPool: true }) });
+  // `transactionOptions` fija el `maxWait`/`timeout` por defecto de TODAS las transacciones de este
+  // cliente: las de array de `forTenant`/`forUser` y Better Auth (`clienteAuth`) y las interactivas
+  // de `enTransaccion`. Sin esto usaban el defecto de Prisma (`maxWait` 2 s) y una ráfaga agotaba el
+  // plazo antes que el pool entregara la conexión (P2028 del PR #134, B1).
+  return new PrismaClient({
+    adapter: new PrismaPg(pool, { disposeExternalPool: true }),
+    transactionOptions: configTransaccion(process.env),
+  });
 }
 
 /**
