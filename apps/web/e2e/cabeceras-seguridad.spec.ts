@@ -3,9 +3,9 @@ import { expect, type Page, test } from "@playwright/test";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
 // Núcleo P1 (CSP y HSTS): ninguna ruta principal debe reportar una violación de CSP y toda respuesta
-// debe llevar las cabeceras de seguridad. La CSP viaja en Report-Only, así que el navegador igual
-// dispara `securitypolicyviolation` (disposition "report") si algo no calza: así validamos que la
-// política no romperá nada al pasar a modo estricto con nonce tras el #45.
+// debe llevar las cabeceras de seguridad. La CSP va en enforcement (CAR-57): una violación bloquea y
+// dispara `securitypolicyviolation` (disposition "enforce"), así que este escucha detecta lo que la
+// política rompería en las rutas principales.
 
 type Violacion = { directiva: string; bloqueado: string; ruta: string };
 
@@ -40,12 +40,10 @@ test.describe("cabeceras de seguridad (núcleo P1)", () => {
   test("las respuestas llevan CSP, Permissions-Policy y HSTS (en producción)", async ({ page }) => {
     const resp = await page.goto("/login");
     const h = resp?.headers() ?? {};
-    expect(h["content-security-policy-report-only"]).toContain("default-src 'self'");
-    expect(h["content-security-policy-report-only"]).toContain(
-      "report-uri /api/csp-report; report-to csp",
-    );
+    expect(h["content-security-policy"]).toContain("default-src 'self'");
+    expect(h["content-security-policy"]).toContain("report-uri /api/csp-report; report-to csp");
     expect(h["reporting-endpoints"]).toBe('csp="/api/csp-report"');
-    expect(h["content-security-policy"]).toBeUndefined();
+    expect(h["content-security-policy-report-only"]).toBeUndefined();
     expect(h["permissions-policy"]).toBe("camera=(self), geolocation=(self), microphone=()");
     expect(h["x-frame-options"]).toBe("DENY");
     // HSTS solo en producción (los navegadores la ignoran sobre HTTP). Si está, debe ser exacta y sin
@@ -84,9 +82,11 @@ test.describe("cabeceras de seguridad (núcleo P1)", () => {
       expect(nonce).toBeTruthy();
       expect(nonce).not.toBe("falsificado");
       expect(sw).toBe(nonce);
-      // PPR conserva scripts estáticos sin nonce: no se anuncia una CSP estricta que aún no cumple.
-      expect(r?.headers()["content-security-policy-report-only"]).toContain("'unsafe-inline'");
-      expect(r?.headers()["content-security-policy"]).toBeUndefined();
+      // PPR conserva scripts estáticos sin nonce: la CSP aplicada mantiene unsafe-inline y no
+      // anuncia el nonce, que la anularía y bloquearía el shell (CAR-57).
+      const csp = r?.headers()["content-security-policy"];
+      expect(csp).toContain("'unsafe-inline'");
+      expect(csp).not.toContain("'nonce-");
       nonces.push(nonce ?? "");
     }
     expect(nonces[0]).not.toBe(nonces[1]);

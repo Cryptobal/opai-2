@@ -10,7 +10,7 @@ import { CACHE_DINAMICA_S } from "./lib/cache-navegador";
 const envRaiz = new URL("../../.env.local", import.meta.url);
 if (existsSync(envRaiz)) process.loadEnvFile(envRaiz);
 
-// Cabeceras de seguridad para todas las rutas (núcleo P1): CSP (Report-Only hasta el nonce del #45),
+// Cabeceras de seguridad para todas las rutas (núcleo P1): CSP en enforcement (CAR-57),
 // HSTS en producción y Permissions-Policy, además de X-Frame-Options/Referrer/Content-Type.
 const produccion = process.env.NODE_ENV === "production";
 const cabeceras = cabecerasSeguridad({ produccion, desarrollo: !produccion });
