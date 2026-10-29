@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><meta name="design_doc_mode" content="canvas"><script src="./ds-base.js"></script><style>body{margin:0;background:#e7e7ea}a{color:#4a3fd8}a:hover{color:#111113}.scrim,.sheet,.overlay{animation:none!important}</style></helmet>
+<div style="display:flex;flex-direction:column;gap:72px;padding:48px;width:max-content;font-family:var(--font-sans);color:#111113">
+<header style="display:flex;flex-direction:column;gap:6px;max-width:900px">
+<span style="font:500 13px/18px var(--font-sans);color:#52525b">CAR-71 · OPAI 2.0 · DS 2.0 V2 · v2</span>
+<h1 style="margin:0;font:600 36px/40px var(--font-sans);letter-spacing:-0.022em">Motor de sueldos</h1>
+<p style="margin:0;font:400 16px/24px var(--font-sans);color:#52525b">Estados de Valores, Confirmar valor, Cambiar valor y Simulador.</p>
+<nav style="display:flex;gap:16px;flex-wrap:wrap;font:500 14px/20px var(--font-sans)"><a href="Motor de sueldos - Remuneraciones.dc.html">Remuneraciones</a><a href="Motor de sueldos - Simulador.dc.html">Simulador, Cargos, Plataforma y avisos</a><span style="color:#111113">Estados: Valores, Confirmar, Cambiar, Simulador</span><a href="Motor de sueldos - Estados detalle.dc.html">Estados: Detalle, Historial, Comparar, Plataforma</a><a href="Componentes.dc.html">Componentes</a></nav>
+</header>
+<section id="e-valores" style="display:flex;flex-direction:column;gap:20px">
+<h2 style="margin:0;font:600 22px/28px var(--font-sans)">Valores · <a href="Valores.dc.html">Valores.dc.html</a></h2>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Error · 375</span><div id="valores-error-375" style="width:375px;height:812px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="Valores" device="phone" state="error" hint-size="375px,812px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Sin permisos · 1024</span><div id="valores-sinpermisos-1024" style="width:1024px;height:768px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="Valores" device="tablet" state="forbidden" hint-size="1024px,768px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Cargando · 1280</span><div id="valores-cargando-1280" style="width:1280px;height:800px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="Valores" device="desktop" state="loading" hint-size="1280px,800px"></dc-import></div></div>
+</div>
+</section>
+<section id="e-confirmar" style="display:flex;flex-direction:column;gap:20px">
+<h2 style="margin:0;font:600 22px/28px var(--font-sans)">Confirmar valor · <a href="ConfirmarValor.dc.html">ConfirmarValor.dc.html</a></h2>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Éxito · 375</span><div id="confirmar-exito-375" style="width:375px;height:812px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="ConfirmarValor" device="phone" state="exito" hint-size="375px,812px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Error de regla · 1024</span><div id="confirmar-errorregla-1024" style="width:1024px;height:768px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="ConfirmarValor" device="tablet" state="errorRegla" hint-size="1024px,768px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Propuesto por un agente · 1280</span><div id="confirmar-agente-1280" style="width:1280px;height:800px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="ConfirmarValor" device="desktop" state="agente" hint-size="1280px,800px"></dc-import></div></div>
+</div>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Confirmando · 1280</span><div id="confirmar-confirmando-1280" style="width:1280px;height:800px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="ConfirmarValor" device="desktop" state="confirmando" hint-size="1280px,800px"></dc-import></div></div>
+</div>
+</section>
+<section id="e-cambiar" style="display:flex;flex-direction:column;gap:20px">
+<h2 style="margin:0;font:600 22px/28px var(--font-sans)">Cambiar valor · <a href="CambiarValor.dc.html">CambiarValor.dc.html</a></h2>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Pendiente de aprobación (agente) · 1024</span><div id="cambiar-pendiente-1024" style="width:1024px;height:768px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="CambiarValor" device="tablet" state="pendiente" hint-size="1024px,768px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Error de regla · 1024</span><div id="cambiar-errorregla-1024" style="width:1024px;height:768px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="CambiarValor" device="tablet" state="errorRegla" hint-size="1024px,768px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Confirmando · 1280</span><div id="cambiar-confirmando-1280" style="width:1280px;height:800px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="CambiarValor" device="desktop" state="confirmando" hint-size="1280px,800px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Éxito · 1280</span><div id="cambiar-exito-1280" style="width:1280px;height:800px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="CambiarValor" device="desktop" state="exito" hint-size="1280px,800px"></dc-import></div></div>
+</div>
+</section>
+<section id="e-simulador" style="display:flex;flex-direction:column;gap:20px">
+<h2 style="margin:0;font:600 22px/28px var(--font-sans)">Simulador · <a href="Simulador.dc.html">Simulador.dc.html</a></h2>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Sin permiso de simular · 375</span><div id="simulador-sinpermisos-375" style="width:375px;height:812px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="Simulador" device="phone" state="forbidden" hint-size="375px,812px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Indicador faltante · 1024</span><div id="simulador-faltante-1024" style="width:1024px;height:768px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="Simulador" device="tablet" state="faltante" hint-size="1024px,768px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Sin datos suficientes · 1280</span><div id="simulador-vacio-1280" style="width:1280px;height:800px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="Simulador" device="desktop" state="vacio" hint-size="1280px,800px"></dc-import></div></div>
+</div>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Cargando · 1024</span><div id="simulador-cargando-1024" style="width:1024px;height:768px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="Simulador" device="tablet" state="loading" hint-size="1024px,768px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Sin acceso a capas (solo a mano) · 1280</span><div id="simulador-sincapa-1280" style="width:1280px;height:800px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="Simulador" device="desktop" state="sinCapa" hint-size="1280px,800px"></dc-import></div></div>
+</div>
+</section>
+</div>
+</x-dc>
+</body>
+</html>

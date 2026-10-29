@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><style>body{margin:0;background:var(--ds-bg)}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}html,body{height:100%}</style></helmet>
+<div style="position:absolute;inset:0;overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" portal="Plataforma" tenant="OPAI" tenant-initials="OP" user="{{ user }}" tabs="{{ tabs }}" groups="{{ groups }}" active="fue" title="Fuentes" subtitle="Indicadores" notifications="{{ 2 }}" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,800px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:2px;padding-top:8px"><span class="t-caption">Indicadores</span><h1 class="t-title" style="margin:0">Fuentes</h1></div></sc-if>
+
+<sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:480px;display:flex"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="Solo el equipo de Plataforma ve las fuentes" description="Esta vista es del portal de Plataforma de OPAI. Si administras una empresa, revisa sus valores en Configuración → Remuneraciones." action-label="Ir a Remuneraciones" hint-size="100%,400px"></x-import></div>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:480px;display:flex"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar el estado de las fuentes" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="PLT-503-9A04" on-retry="{{ noop }}" hint-size="100%,400px"></x-import></div>
+</sc-if>
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<div style="display:grid;grid-template-columns:{{ kpiCols }};gap:12px"><sc-for list="{{ three }}" as="k" hint-placeholder-count="3"><div class="card" style="padding:16px;display:flex;flex-direction:column;gap:10px"><div class="skel" style="width:50%;height:12px"></div><div class="skel" style="width:30%;height:28px"></div></div></sc-for></div>
+<div class="card" style="overflow:hidden"><sc-for list="{{ five }}" as="k" hint-placeholder-count="5"><div style="display:flex;gap:16px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--ds-border)"><div class="skel" style="flex:2;height:14px"></div><div class="skel" style="flex:1;height:14px"></div><div class="skel" style="width:90px;height:22px;border-radius:999px"></div></div></sc-for></div>
+</sc-if>
+
+<sc-if value="{{ isReady }}" hint-placeholder-val="{{ true }}">
+<div role="note" style="display:flex;gap:12px;align-items:flex-start;padding:12px 16px;border-radius:var(--radius-md);background:var(--ds-fill);color:var(--ds-fg)">
+<span class="ic i-eye" style="color:var(--ds-fg-muted);margin-top:2px"></span>
+<span class="t-body-sm" style="flex:1;text-wrap:pretty">Solo lectura. Plataforma vigila las fuentes; cada empresa confirma sus propios valores.</span>
+</div>
+<div style="display:grid;grid-template-columns:{{ kpiCols }};gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.KpiTile" label="Fuentes al día" value="{{ kAlDia }}" hint-size="100%,88px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.KpiTile" label="Alertas abiertas" value="{{ kAlertas }}" hint-size="100%,88px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.KpiTile" label="Empresas con valores por confirmar" value="{{ kEmpresas }}" hint-size="100%,88px"></x-import>
+</div>
+
+<span class="t-subheading">Alertas abiertas</span>
+<sc-if value="{{ hasAlertas }}" hint-placeholder-val="{{ true }}">
+<div class="card" style="overflow:hidden">
+<sc-for list="{{ alertas }}" as="a" hint-placeholder-count="3">
+<div style="display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-bottom:1px solid var(--ds-border);flex-wrap:wrap">
+<span class="badge b-{{ a.tone }}">{{ a.tipo }}</span>
+<div style="flex:1;min-width:220px;display:flex;flex-direction:column;gap:2px"><span class="t-label">{{ a.titulo }}</span><span class="t-caption">{{ a.meta }}</span></div>
+<span class="t-body-sm muted t-numeric" style="font-weight:400">{{ a.empresas }}</span>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ noAlertas }}" hint-placeholder-val="{{ false }}">
+<div class="card" style="display:flex"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.EmptyState" size="sm" icon="check-circle" title="Sin alertas abiertas" description="Todas las fuentes respondieron en la última captura y ningún valor quedó retenido." hint-size="100%,220px"></x-import></div>
+</sc-if>
+
+<span class="t-subheading">Estado de las fuentes</span>
+<sc-if value="{{ isTable }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ columns }}" rows="{{ fuentes }}" row-key="id" hint-size="100%,360px"></x-import>
+</sc-if>
+<sc-if value="{{ isStacked }}" hint-placeholder-val="{{ false }}">
+<div class="card" style="overflow:hidden">
+<sc-for list="{{ fuentes }}" as="f" hint-placeholder-count="5">
+<div style="display:flex;flex-direction:column;gap:6px;padding:14px 16px;border-bottom:1px solid var(--ds-border)">
+<div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap"><span class="t-label">{{ f.nombre }}</span><span class="badge b-{{ f.tone }}">{{ f.estado }}</span></div>
+<span class="t-caption">{{ f.indicadores }}</span>
+<span class="t-caption">Última captura {{ f.captura }} · {{ f.alertas }} alertas · {{ f.pendientes }} empresas por confirmar</span>
+</div>
+</sc-for>
+</div>
+</sc-if>
+</sc-if>
+</div>
+</x-import>
+</x-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;loading&quot;,&quot;vacio&quot;,&quot;error&quot;,&quot;forbidden&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const h = React.createElement;
+    const device = this.props.device ?? "desktop";
+    const isPhone = device === "phone";
+    const st = this.props.state ?? "normal";
+    const vacio = st === "vacio";
+    const ok = { tone: "success", estado: "Al día", alertas: "0", pendientes: "0" };
+    const fuentes = [
+      { id: 1, nombre: "Banco Central de Chile", indicadores: "UF", captura: "27-10-2026 07:00", ...(vacio ? ok : { tone: "warning", estado: "Atrasado", alertas: "1", pendientes: "0" }) },
+      { id: 2, nombre: "Servicio de Impuestos Internos", indicadores: "UTM · impuesto único", captura: "29-10-2026 07:00", ...ok },
+      { id: 3, nombre: "Superintendencia de Pensiones", indicadores: "Comisiones AFP · SIS · topes", captura: "29-10-2026 07:00", ...(vacio ? ok : { tone: "danger", estado: "Anómalo, por confirmar", alertas: "1", pendientes: "31" }) },
+      { id: 4, nombre: "Dirección del Trabajo", indicadores: "IMM · jornada", captura: "23-10-2026 09:12", ...(vacio ? ok : { tone: "info", estado: "Propuesto, por confirmar", alertas: "1", pendientes: "38" }) },
+      { id: 5, nombre: "Superintendencia de Seguridad Social", indicadores: "Mutual básica", captura: "29-10-2026 07:00", ...ok },
+      { id: 6, nombre: "AFC Chile", indicadores: "Seguro de cesantía", captura: "29-10-2026 07:00", ...ok },
+      { id: 7, nombre: "Diario Oficial", indicadores: "Leyes nuevas", captura: "29-10-2026 06:30", ...ok },
+    ];
+    const alertas = vacio ? [] : [
+      { tone: "danger", tipo: "Valor anómalo", titulo: "SIS 1,88 % publicado como retenido", meta: "Superintendencia de Pensiones · variación de 22 % · 29-10-2026 07:00", empresas: "31 empresas por confirmar" },
+      { tone: "info", tipo: "Ley nueva", titulo: "IMM $ 553.553 desde 01-01-2027 publicado como propuesto", meta: "Ley 21.830 · Diario Oficial 22-10-2026", empresas: "38 empresas por confirmar" },
+      { tone: "warning", tipo: "Sin respuesta", titulo: "Banco Central no responde desde hace 2 días", meta: "Se usa la última UF publicada ($ 41.237,01) · última captura 27-10-2026 07:00", empresas: "—" },
+    ];
+    return {
+      device, theme: this.props.theme ?? "light", isPhone, isTable: device === "desktop", isStacked: device !== "desktop", fuentes, alertas,
+      isReady: st === "normal" || vacio, isLoading: st === "loading", isError: st === "error", isForbidden: st === "forbidden",
+      hasAlertas: alertas.length > 0, noAlertas: alertas.length === 0, three: [1, 2, 3], five: [1, 2, 3, 4, 5], noop: () => {},
+      kAlDia: vacio ? "7 de 7" : "4 de 7", kAlertas: String(alertas.length), kEmpresas: vacio ? "0" : "38",
+      kpiCols: isPhone ? "minmax(0,1fr)" : "repeat(3,minmax(0,1fr))",
+      user: { name: "Matías Soto", initials: "MS", role: "Operador de Plataforma" },
+      columns: [
+        { key: "nombre", label: "Fuente", strong: true },
+        { key: "indicadores", label: "Indicadores", muted: true },
+        { key: "captura", label: "Última captura", muted: true },
+        { key: "estado", label: "Resultado", render: (r) => (NS.Badge ? h(NS.Badge, { tone: r.tone }, r.estado) : r.estado) },
+        { key: "alertas", label: "Alertas", align: "right" },
+        { key: "pendientes", label: "Por confirmar", align: "right" },
+      ],
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "fue", label: "Fuentes", icon: "landmark" }, { id: "emp", label: "Empresas", icon: "building" }, { id: "mas", label: "Más", icon: "more" }],
+      groups: [
+        { items: [{ id: "ini", label: "Inicio", icon: "home" }] },
+        { title: "Indicadores", items: [{ id: "fue", label: "Fuentes", icon: "landmark", count: alertas.length || undefined }] },
+        { title: "Tenants", items: [{ id: "emp", label: "Empresas", icon: "building" }] },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

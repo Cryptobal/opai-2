@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><style>body{margin:0;background:var(--ds-bg)}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}html,body{height:100%}[data-device="phone"] .input.with-btn{height:46px}[data-device="phone"] .seg button{height:44px}</style></helmet>
+<div style="position:absolute;inset:0;overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" user="{{ appUser }}" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="car" title="Simular costo" subtitle="Cargos y sueldos" notifications="{{ 3 }}" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,900px">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:12px;padding:8px 0 16px">
+<div style="display:flex;flex-direction:column;gap:2px"><span class="t-caption">Cargos y sueldos</span><h1 class="t-title" style="margin:0">Simular costo</h1></div>
+<sc-if value="{{ notForbidden }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ stepTabs }}" value="{{ step }}" on-change="{{ setStep }}" hint-size="100%,44px"></x-import>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:520px;display:flex"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No puedes simular costos" description="Necesitas el permiso para simular remuneraciones. Pídele acceso a Tomás Fuentes, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" hint-size="100%,400px"></x-import></div>
+</sc-if>
+
+<sc-if value="{{ notForbidden }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:{{ gridCols }};gap:24px;align-items:start">
+
+<sc-if value="{{ showInputs }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+<sc-if value="{{ showSueldo }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Sueldo" hint-size="100%,420px">
+<sc-if value="{{ canCapa }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmented" options="{{ origenOpts }}" value="{{ origen }}" on-change="{{ setOrigen }}" style="{{ fullW }}" hint-size="100%,44px"></x-import>
+</sc-if>
+<sc-if value="{{ noCapa }}" hint-placeholder-val="{{ false }}">
+<span class="t-caption">Solo puedes simular con un sueldo ingresado a mano. Ver las capas de sueldo requiere otro permiso.</span>
+</sc-if>
+<sc-if value="{{ isCapa }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Combobox" label="Instalación o puesto" value="cc" options="{{ capas }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" rows="{{ capaRows }}" hint-size="100%,160px"></x-import>
+</sc-if>
+<sc-if value="{{ isMano }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Sueldo base" prefix="$" value="{{ baseStr }}" on-change="{{ setBase }}" input-mode="numeric" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Gratificación" value="{{ grat }}" options="{{ gratOpts }}" on-change="{{ setGrat }}" hint-size="100%,72px"></x-import>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Colación" prefix="$" value="40.000" input-mode="numeric" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Movilización" prefix="$" value="35.000" input-mode="numeric" hint-size="100%,72px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Bono de turno" prefix="$" value="0" hint="Agrega bonos y marca si son imponibles." input-mode="numeric" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ true }}" label="Bono imponible" hint-size="100%,44px"></x-import>
+</sc-if>
+</x-import>
+</sc-if>
+
+<sc-if value="{{ showContrato }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Contrato" hint-size="100%,260px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmented" label="Tipo de contrato" options="{{ contratoOpts }}" value="{{ contrato }}" on-change="{{ setContrato }}" style="{{ fullW }}" hint-size="100%,44px"></x-import>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="AFP" value="hab" options="{{ afpOpts }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Salud" value="fon" options="{{ saludOpts }}" hint-size="100%,72px"></x-import>
+</div>
+<span class="t-caption">Por defecto, las de Supuestos de costeo de la empresa.</span>
+</x-import>
+</sc-if>
+
+<sc-if value="{{ showTurno }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Turno" hint-size="100%,320px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Patrón" value="{{ patron }}" options="{{ patronOpts }}" on-change="{{ setPatron }}" placeholder="Elige un patrón" hint-size="100%,72px"></x-import>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DateInput" type="time" label="Hora de inicio" value="{{ ini }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DateInput" type="time" label="Hora de término" value="{{ fin }}" hint="{{ finHint }}" hint-size="100%,72px"></x-import>
+</div>
+<div style="display:flex;justify-content:space-between;gap:12px;padding:10px 12px;border-radius:var(--radius-md);background:var(--ds-fill)"><span class="t-body-sm">Horas semanales resultantes</span><span class="t-numeric" style="font-size:14px">{{ horasSem }}</span></div>
+<span class="t-caption">{{ horasNota }}</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DateInput" label="Fecha de cálculo" value="{{ fecha }}" today="29-10-2026" hint="Usa una fecha futura para ver el efecto de un cambio programado." hint-size="100%,92px"></x-import>
+</x-import>
+</sc-if>
+<sc-if value="{{ phoneNext }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" block="{{ true }}" size="lg" on-click="{{ nextStep }}" hint-size="100%,48px">Siguiente</x-import>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ showResult }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:16px;min-width:0;position:sticky;top:0">
+<sc-if value="{{ isWide }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap">
+<span class="t-subheading">Resultado</span>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<a href="SimuladorComparar.dc.html" style="text-decoration:none"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="swap" hint-size="160px,40px">Comparar escenarios</x-import></a>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="download" disabled="{{ notReady }}" hint-size="130px,40px">Exportar PDF</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" disabled="{{ notReady }}" hint-size="150px,40px">Guardar simulación</x-import>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+<div class="card" style="grid-column:1/-1;padding:16px;display:flex;flex-direction:column;gap:10px"><div class="skel" style="width:40%;height:14px"></div><div class="skel" style="width:55%;height:34px"></div></div>
+<sc-for list="{{ four }}" as="k" hint-placeholder-count="4"><div class="card" style="padding:16px;display:flex;flex-direction:column;gap:10px"><div class="skel" style="width:60%;height:12px"></div><div class="skel" style="width:70%;height:24px"></div></div></sc-for>
+</div>
+<div class="card" style="padding:16px;display:flex;flex-direction:column;gap:14px"><sc-for list="{{ four }}" as="k" hint-placeholder-count="4"><div style="display:flex;justify-content:space-between;gap:16px"><div class="skel" style="width:45%;height:14px"></div><div class="skel" style="width:80px;height:14px"></div></div></sc-for></div>
+</sc-if>
+
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<div class="card" style="min-height:360px;display:flex"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.EmptyState" icon="calendar" title="Elige un patrón y un sueldo" description="Con eso calculamos el costo empresa por persona, por puesto, por día y por hora." hint-size="100%,320px"></x-import></div>
+</sc-if>
+
+<sc-if value="{{ isFaltante }}" hint-placeholder-val="{{ false }}">
+<div role="alert" style="display:flex;gap:12px;align-items:flex-start;padding:12px 16px;border-radius:var(--radius-md);background:var(--ds-danger-muted);color:var(--ds-fg)">
+<span class="ic i-alert" style="color:var(--ds-danger-fg);margin-top:2px"></span>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:8px">
+<span class="t-label">Falta la cotización adicional de la mutual vigente al 01-01-2027</span>
+<span class="t-body-sm muted" style="text-wrap:pretty">La resolución 2025-2026 de la Mutual de Seguridad vence el 31-12-2026 y aún no se registra la nueva. Elige una fecha anterior o pídele a un administrador que registre la tasa en Remuneraciones.</span>
+<div><a href="Valores.dc.html" style="text-decoration:none"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="120px,40px">Ir a Valores</x-import></a></div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isReady }}" hint-placeholder-val="{{ true }}">
+<div role="status" style="display:flex;gap:12px;align-items:flex-start;padding:12px 16px;border-radius:var(--radius-md);background:var(--ds-warning-muted);color:var(--ds-fg)">
+<span class="ic i-alert" style="color:var(--ds-warning-fg);margin-top:2px"></span>
+<span class="t-body-sm" style="flex:1;text-wrap:pretty">Este cálculo usa 1 valor propio de la empresa: cotización adicional mutual 0,55 % (la fuente dice 0,34 %).</span>
+</div>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmented" options="{{ patronSeg }}" value="{{ patron }}" on-change="{{ setPatron }}" style="{{ fullW }}" hint-size="100%,44px"></x-import>
+</sc-if>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+<div class="card" style="grid-column:1/-1;padding:16px;display:flex;flex-direction:column;gap:4px">
+<span class="t-label-sm muted">Costo empresa por persona/mes</span>
+<span class="t-numeric" style="font-size:36px;line-height:40px;font-weight:600;letter-spacing:-0.022em">{{ r.costoPersona }}</span>
+<span class="t-caption">{{ r.resumen }}</span>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.KpiTile" label="Personas por puesto" value="{{ r.personas }}" hint-size="100%,88px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.KpiTile" label="Costo del puesto/mes" value="{{ r.costoPuesto }}" hint-size="100%,88px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.KpiTile" label="Costo por día" value="{{ r.costoDia }}" hint-size="100%,88px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.KpiTile" label="Costo por hora" value="{{ r.costoHora }}" hint-size="100%,88px"></x-import>
+</div>
+
+<div class="card" style="overflow:visible">
+<sc-for list="{{ r.secciones }}" as="s" hint-placeholder-count="3">
+<div style="display:flex;flex-direction:column;padding:12px 16px 4px;border-bottom:1px solid var(--ds-border)">
+<div style="display:flex;justify-content:space-between;gap:12px;padding-bottom:4px"><span class="t-label">{{ s.title }}</span><span class="t-numeric" style="font-size:14px;font-weight:600">{{ s.total }}</span></div>
+<sc-for list="{{ s.rows }}" as="x" hint-placeholder-count="3">
+<div style="display:flex;flex-direction:column">
+<button type="button" onClick="{{ x.toggle }}" aria-expanded="{{ x.open }}" style="display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:44px;border:0;background:transparent;padding:0;color:var(--ds-fg);cursor:pointer;text-align:left;font:inherit">
+<span class="t-body-sm muted" style="display:inline-flex;gap:6px;align-items:center">{{ x.label }}<sc-if value="{{ x.manual }}" hint-placeholder-val="{{ false }}"><span class="badge b-warning nodot">Manual</span></sc-if></span>
+<span class="t-numeric" style="font-size:14px;text-decoration:underline dotted var(--ds-border-control);text-underline-offset:4px">{{ x.monto }}</span>
+</button>
+<sc-if value="{{ x.open }}" hint-placeholder-val="{{ false }}">
+<div class="overlay" style="padding:16px;margin:4px 0 12px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span class="t-label">{{ x.label }}</span><sc-if value="{{ x.manual }}" hint-placeholder-val="{{ false }}"><span class="badge b-warning">Manual</span></sc-if></div>
+<span class="t-body-sm muted" style="text-wrap:pretty">{{ x.formula }}</span>
+<div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--ds-border);padding-top:12px">
+<sc-for list="{{ x.inputs }}" as="i" hint-placeholder-count="2">
+<div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start"><span style="display:flex;flex-direction:column"><span class="t-body-sm">{{ i.l }}</span><span class="t-caption">{{ i.m }}</span></span><span class="t-numeric" style="font-size:14px">{{ i.v }}</span></div>
+</sc-for>
+</div>
+<div style="display:flex;justify-content:space-between;gap:12px;border-top:1px solid var(--ds-border);padding-top:12px"><span class="t-label">Resultado</span><span class="t-numeric" style="font-size:16px;font-weight:600">{{ x.monto }}</span></div>
+</div>
+</sc-if>
+</div>
+</sc-for>
+</div>
+</sc-for>
+<div style="display:flex;justify-content:space-between;gap:12px;padding:14px 16px"><span class="t-label">Costo empresa por persona/mes</span><span class="t-numeric" style="font-size:16px;font-weight:600">{{ r.costoPersona }}</span></div>
+</div>
+
+<div class="card" style="padding:12px 16px 4px;display:flex;flex-direction:column">
+<div style="display:flex;justify-content:space-between;gap:12px;padding-bottom:4px"><span class="t-label">Descuentos del trabajador</span><span class="t-caption">Solo para estimar el líquido</span></div>
+<sc-for list="{{ r.descuentos }}" as="d" hint-placeholder-count="3">
+<div style="display:flex;justify-content:space-between;gap:12px;min-height:44px;align-items:center"><span class="t-body-sm muted">{{ d.label }}</span><span class="t-numeric" style="font-size:14px">{{ d.monto }}</span></div>
+</sc-for>
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:12px 0;border-top:1px solid var(--ds-border)">
+<span style="display:flex;flex-direction:column"><span class="t-label">Líquido estimado</span><span class="t-caption">Estimado, sin descuentos personales</span></span>
+<span class="t-numeric" style="font-size:22px;font-weight:600">{{ r.liquido }}</span>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:4px;align-items:flex-start">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="file" disabled="{{ true }}" hint-size="230px,40px">Copiar como línea de cotización</x-import>
+<span class="t-caption">Disponible con CPQ</span>
+</div>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" block="{{ true }}" size="lg" hint-size="100%,48px">Guardar simulación</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" block="{{ true }}" icon="download" hint-size="100%,44px">Exportar PDF</x-import>
+</div>
+</sc-if>
+</sc-if>
+</div>
+</sc-if>
+</div>
+</sc-if>
+</x-import>
+</x-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;\&quot;phone\&quot; | \&quot;tablet\&quot; | \&quot;desktop\&quot;&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;\&quot;light\&quot; | \&quot;dark\&quot;&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;resultado&quot;,&quot;vacio&quot;,&quot;faltante&quot;,&quot;sinCapa&quot;,&quot;loading&quot;,&quot;forbidden&quot;],&quot;default&quot;:&quot;resultado&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;step&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;sue&quot;,&quot;con&quot;,&quot;tur&quot;,&quot;res&quot;],&quot;default&quot;:&quot;res&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { base: 650000, grat: "legal", contrato: "ind", patron: "4x4", origen: "mano", traza: "reforma", step: null };
+  renderVals() {
+    const device = this.props.device ?? "desktop";
+    const st = this.props.state ?? "resultado";
+    const isPhone = device === "phone";
+    const step = this.state.step ?? this.props.step ?? "res";
+    const f = (n) => "$ " + Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    const pct = (n) => String(n).replace(".", ",") + " %";
+    const P = { "4x4": { pers: 4, h: 12, ini: "08:00", fin: "20:00", sem: "42 h promedio", nota: "Puesto 24 h, todos los días: 4 personas en turnos de día y noche. Dentro de la jornada legal vigente (42 h).", horas: 24 * 30 },
+      "5x2": { pers: 1, h: 8.4, ini: "08:00", fin: "16:24", sem: "42 h", nota: "Puesto diurno de lunes a viernes. Dentro de la jornada legal vigente (42 h).", horas: 8.4 * 21.7 },
+      "7x7": { pers: 4, h: 12, ini: "20:00", fin: "08:00", sem: "42 h promedio", nota: "Cruza medianoche. Puesto 24 h con 4 personas. Dentro de la jornada legal vigente (42 h).", horas: 24 * 30 } };
+    const p = P[this.state.patron] || P["4x4"];
+    const base = this.state.base, ind = this.state.contrato === "ind";
+    const gratV = this.state.grat === "legal" ? Math.min(base * 0.25, 209396) : this.state.grat === "fijo" ? 100000 : 0;
+    const imp = base + gratV, noImp = 75000;
+    const sis = imp * 0.0154, afc = imp * (ind ? 0.024 : 0.03), mutB = imp * 0.0093, mutA = imp * 0.0055, ref = imp * 0.035;
+    const vac = imp / 30 * 21 / 12, ias = ind ? Math.min(imp, 90 * 41237.01) / 12 : 0;
+    const costo = imp + noImp + sis + afc + mutB + mutA + ref + vac + ias;
+    const dAfp = imp * 0.1127, dSal = imp * 0.07, dAfc = ind ? imp * 0.006 : 0;
+    const T = this.state.traza;
+    const mk = (key, label, monto, formula, inputs, manual) => ({ key, label, monto: f(monto), formula, inputs, manual: !!manual, open: T === key, toggle: () => this.setState({ traza: T === key ? null : key }) });
+    const I = { l: "Sueldo imponible", v: f(imp), m: "Base + gratificación + bonos imponibles" };
+    const secciones = [
+      { title: "Haberes", total: f(imp + noImp), rows: [
+        mk("base", "Sueldo base", base, "Monto ingresado a mano.", [{ l: "Sueldo base", v: f(base), m: "Ingresado a mano" }]),
+        mk("grat", "Gratificación", gratV, "25 % del sueldo con tope de 4,75 IMM al año, pagado mensual (art. 50).", [{ l: "25 % del sueldo base", v: f(base * 0.25), m: "" }, { l: "Tope mensual", v: "$ 209.396", m: "IMM $ 529.000 · vigente desde 01-05-2026" }]),
+        mk("noimp", "Colación y movilización", noImp, "No imponibles. No entran en la base de cotizaciones ni de provisiones.", [{ l: "Colación", v: "$ 40.000", m: "" }, { l: "Movilización", v: "$ 35.000", m: "" }]),
+      ]},
+      { title: "Aportes del empleador", total: f(sis + afc + mutB + mutA + ref), rows: [
+        mk("sis", "Seguro de invalidez (SIS)", sis, "Sueldo imponible × 1,54 % SIS.", [I, { l: "Tasa SIS", v: "1,54 %", m: "Vigente desde 01-07-2025 · Superintendencia de Pensiones" }]),
+        mk("afc", "Seguro de cesantía", afc, "Sueldo imponible × " + (ind ? "2,4 %" : "3,0 %") + " del empleador, contrato " + (ind ? "indefinido" : "a plazo fijo") + ".", [I, { l: "Tasa empleador", v: ind ? "2,4 %" : "3,0 %", m: "Ley 19.728" }]),
+        mk("mutb", "Mutual, cotización básica", mutB, "Sueldo imponible × 0,93 % cotización básica, Ley 16.744.", [I, { l: "Tasa básica", v: "0,93 %", m: "Vigente desde 01-01-2024" }]),
+        mk("muta", "Mutual, cotización adicional", mutA, "Sueldo imponible × tasa adicional de la resolución de la mutual.", [I, { l: "Tasa adicional", v: "0,55 %", m: "Propio de la empresa · Tomás Fuentes, 14-10-2026" }], true),
+        mk("reforma", "Reforma de pensiones", ref, "Sueldo imponible × 3,5 % cotización del empleador, reforma de pensiones.", [I, { l: "Tasa empleador", v: "3,5 %", m: "Vigente desde 01-08-2026 · Ley 21.735" }]),
+      ]},
+      { title: "Provisiones", total: f(vac + ias), rows: [
+        mk("vac", "Vacaciones", vac, "Promedio mensual de los días de feriado del año: sueldo imponible ÷ 30 × 21 días corridos ÷ 12. Sin colación, movilización ni aportes en la base.", [I, { l: "Feriado al año", v: "15 hábiles", m: "≈ 21 corridos · Supuestos de costeo" }]),
+        mk("ias", "Indemnización por años de servicio", ias, ind ? "Un sueldo imponible por año, provisionado mensual, con tope de 90 UF." : "No aplica en contrato a plazo fijo.", [I, { l: "Tope", v: "UF 90", m: "UF $ 41.237,01 · vigente desde 27-10-2026, fuente atrasada" }]),
+      ]},
+    ];
+    const r = { costoPersona: f(costo), personas: String(p.pers), costoPuesto: f(costo * p.pers), costoDia: f(costo * p.pers / 30), costoHora: f(costo * p.pers / p.horas),
+      resumen: "Patrón " + this.state.patron + " de " + String(p.h).replace(".", ",") + " h · " + (ind ? "indefinido" : "plazo fijo") + " · al 29-10-2026",
+      secciones, descuentos: [{ label: "AFP Habitat (11,27 %)", monto: "− " + f(dAfp) }, { label: "Salud Fonasa (7 %)", monto: "− " + f(dSal) }, { label: "Seguro de cesantía (0,6 %)", monto: "− " + f(dAfc) }],
+      liquido: f(imp - dAfp - dSal - dAfc + noImp) };
+    const wide = !isPhone;
+    const forb = st === "forbidden";
+    return { appUser: { name: "Tomás Fuentes", initials: "TF", role: "Administrador" },
+      device, theme: this.props.theme ?? "light", isPhone, isWide: wide, isForbidden: forb, notForbidden: !forb,
+      gridCols: wide ? (device === "tablet" ? "minmax(0,340px) minmax(0,1fr)" : "minmax(0,400px) minmax(0,1fr)") : "minmax(0,1fr)",
+      showInputs: wide || step !== "res", showResult: wide || step === "res",
+      showSueldo: wide || step === "sue", showContrato: wide || step === "con", showTurno: wide || step === "tur",
+      phoneNext: isPhone && step !== "res", nextStep: () => this.setState({ step: { sue: "con", con: "tur", tur: "res" }[step] || "res" }),
+      step, setStep: (s) => this.setState({ step: s }),
+      stepOpts: [{ value: "sue", label: "Sueldo" }, { value: "con", label: "Contrato" }, { value: "tur", label: "Turno" }, { value: "res", label: "Resultado" }],
+      isReady: st === "resultado" || st === "sinCapa", isLoading: st === "loading", isVacio: st === "vacio", isFaltante: st === "faltante", notReady: st !== "resultado" && st !== "sinCapa",
+      canCapa: st !== "sinCapa", noCapa: st === "sinCapa",
+      origen: st === "sinCapa" ? "mano" : this.state.origen, isCapa: st !== "sinCapa" && this.state.origen === "capa", isMano: st === "sinCapa" || this.state.origen === "mano",
+      setOrigen: (o) => this.setState({ origen: o }),
+      origenOpts: [{ value: "capa", label: "Usar una capa existente" }, { value: "mano", label: "Ingresar a mano" }],
+      capas: [{ value: "cc", label: "Edificio Costanera Center · Guardia 4x4", meta: "Capa de puesto" }, { value: "pq", label: "Planta Quilicura · Guardia nocturno", meta: "Capa de instalación" }],
+      capaRows: [{ label: "Sueldo base", value: "$ 650.000", numeric: true }, { label: "Gratificación", value: "Legal con tope" }, { label: "Colación y movilización", value: "$ 75.000", numeric: true }],
+      baseStr: f(base).replace("$ ", ""), setBase: (v) => this.setState({ base: parseInt(String(v).replace(/\D/g, ""), 10) || 0 }),
+      grat: this.state.grat, setGrat: (g) => this.setState({ grat: g }),
+      gratOpts: [{ value: "legal", label: "Legal con tope", description: "25 % con tope de 4,75 IMM" }, { value: "fijo", label: "Monto fijo", description: "$ 100.000" }, { value: "no", label: "Ninguna" }],
+      contrato: this.state.contrato, setContrato: (c) => this.setState({ contrato: c }),
+      contratoOpts: [{ value: "ind", label: "Indefinido" }, { value: "pf", label: "Plazo fijo" }],
+      afpOpts: [{ value: "hab", label: "Habitat", description: "1,27 %" }, { value: "uno", label: "Uno", description: "0,46 %" }, { value: "mod", label: "Modelo", description: "0,58 %" }],
+      saludOpts: [{ value: "fon", label: "Fonasa", description: "7 %" }, { value: "isa", label: "Isapre" }],
+      patron: st === "vacio" ? "" : this.state.patron, setPatron: (v) => this.setState({ patron: v }),
+      patronOpts: [{ value: "4x4", label: "4x4 · 12 h" }, { value: "5x2", label: "5x2 · 8,4 h" }, { value: "7x7", label: "7x7 · 12 h" }, { value: "14x14", label: "14x14 · 12 h" }, { value: "2x5", label: "2x5 · 12 h" }, { value: "3x4", label: "3x4 · 12 h" }],
+      patronSeg: ["4x4", "5x2", "7x7"],
+      ini: p.ini, fin: p.fin, finHint: p.ini > p.fin ? "Termina al día siguiente" : "", stepTabs: [{ id: "sue", label: "Sueldo" }, { id: "con", label: "Contrato" }, { id: "tur", label: "Turno" }, { id: "res", label: "Resultado" }], horasSem: p.sem, horasNota: p.nota, fecha: st === "faltante" ? "01-01-2027" : "29-10-2026",
+      r, four: [1, 2, 3, 4], fullW: { width: "100%" },
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "ban", label: "Bandeja", icon: "inbox" }, { id: "car", label: "Personas", icon: "users" }, { id: "cot", label: "Cotizaciones", icon: "file" }, { id: "mas", label: "Más", icon: "more" }],
+      groups: [
+        { items: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "ban", label: "Bandeja", icon: "inbox", count: 3 }] },
+        { title: "Comercial", items: [{ id: "cot", label: "Cotizaciones", icon: "file" }] },
+        { title: "Personas", items: [{ id: "per", label: "Personas", icon: "users" }, { id: "car", label: "Cargos y sueldos", icon: "briefcase" }] },
+        { title: "Configuración", items: [{ id: "cfg", label: "Remuneraciones", icon: "wallet" }] },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

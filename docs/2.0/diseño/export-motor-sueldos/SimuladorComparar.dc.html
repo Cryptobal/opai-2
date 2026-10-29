@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><style>body{margin:0;background:var(--ds-bg)}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}html,body{height:100%}[data-device="phone"] .seg button{height:44px}</style></helmet>
+<div style="position:absolute;inset:0;overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" user="{{ appUser }}" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="car" title="Comparar escenarios" subtitle="Cargos y sueldos · Simular costo" notifications="{{ 3 }}" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,800px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+<a href="Simulador.dc.html" class="t-label-sm" style="display:inline-flex;align-items:center;gap:4px;text-decoration:none;color:var(--ds-fg-muted);min-height:44px"><span class="ic sm i-chevron-left"></span>Simular costo</a>
+<sc-if value="{{ isWide }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="download" hint-size="130px,40px">Exportar PDF</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" hint-size="190px,40px">Guardar comparación</x-import>
+</div>
+</sc-if>
+</div>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<h1 class="t-title" style="margin:0">Comparar escenarios</h1>
+<span class="t-body-sm muted">En el teléfono, un escenario a la vez.</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmented" options="{{ segOpts }}" value="{{ sel }}" on-change="{{ setSel }}" style="{{ fullW }}" hint-size="100%,44px"></x-import>
+</sc-if>
+
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<div class="card" style="overflow:hidden"><sc-for list="{{ skRows }}" as="k" hint-placeholder-count="5"><div style="display:flex;gap:16px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--ds-border)"><div class="skel" style="width:32px;height:32px;border-radius:999px"></div><div style="flex:1;display:flex;flex-direction:column;gap:8px"><div class="skel" style="width:60%;height:14px"></div><div class="skel" style="width:35%;height:12px"></div></div><div class="skel" style="width:80px;height:14px"></div></div></sc-for></div>
+</sc-if>
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<div class="card" style="min-height:360px;display:flex"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.EmptyState" icon="swap" title="Agrega un segundo escenario" description="Compara hasta tres escenarios: por ejemplo, 4x4 de 12 h frente a 5x2 de 8,4 h." action="{{ emptyAction }}" hint-size="100%,320px"></x-import></div>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:420px;display:flex"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos calcular los escenarios" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="SIM-503-4E11" on-retry="{{ noop }}" hint-size="100%,400px"></x-import></div>
+</sc-if>
+<sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:420px;display:flex"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No puedes simular costos" description="Necesitas el permiso para simular remuneraciones. Pídele acceso a Tomás Fuentes, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" hint-size="100%,400px"></x-import></div>
+</sc-if>
+<sc-if value="{{ isReady }}" hint-placeholder-val="{{ true }}">
+<div class="card" style="overflow:auto">
+<div style="display:grid;grid-template-columns:{{ cols }};min-width:0">
+<div style="padding:16px;border-bottom:1px solid var(--ds-border)"><span class="t-caption">Al 29-10-2026 · contrato indefinido · Habitat · Fonasa</span></div>
+<sc-for list="{{ shown }}" as="e" hint-placeholder-count="3">
+<div style="padding:16px;border-bottom:1px solid var(--ds-border);border-left:1px solid var(--ds-border);display:flex;flex-direction:column;gap:4px">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:4px 8px;flex-wrap:wrap"><span class="t-label-sm subtle" style="white-space:nowrap">Escenario {{ e.letra }}</span><sc-if value="{{ e.menor }}" hint-placeholder-val="{{ false }}"><span class="badge b-success">Menor costo por hora</span></sc-if></div>
+<span class="t-subheading">{{ e.nombre }}</span>
+<span class="t-caption">{{ e.desc }}</span>
+</div>
+</sc-for>
+</div>
+<sc-for list="{{ rows }}" as="r" hint-placeholder-count="8">
+<div style="display:grid;grid-template-columns:{{ cols }};border-bottom:1px solid var(--ds-border)">
+<div style="padding:12px 16px;display:flex;align-items:center"><span class="t-body-sm" style="font-weight:{{ r.w }}">{{ r.label }}</span></div>
+<sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="3">
+<div style="padding:12px 16px;border-left:1px solid var(--ds-border);display:flex;flex-direction:column;align-items:flex-end;gap:2px;background:{{ c.bg }}">
+<span class="t-numeric" style="font-size:{{ r.fs }};font-weight:{{ r.w }}">{{ c.v }}</span>
+<span class="t-numeric" style="font-size:12px;font-weight:400;color:{{ c.dc }}">{{ c.d }}</span>
+</div>
+</sc-for>
+</div>
+</sc-for>
+</div>
+<span class="t-caption">Diferencias respecto del escenario A. Se resaltan las filas donde los escenarios difieren.</span>
+</sc-if>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" block="{{ true }}" size="lg" hint-size="100%,48px">Guardar comparación</x-import>
+</sc-if>
+</div>
+</x-import>
+</x-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;loading&quot;,&quot;vacio&quot;,&quot;error&quot;,&quot;forbidden&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { sel: "A" };
+  renderVals() {
+    const device = this.props.device ?? "desktop";
+    const isPhone = device === "phone";
+    const f = (n) => "$ " + Math.round(Math.abs(n)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    const calc = (base, pers, horas) => {
+      const imp = base + Math.min(base * 0.25, 209396), noImp = 75000;
+      const ap = imp * (0.0154 + 0.024 + 0.0093 + 0.0055 + 0.035), pr = imp / 30 * 21 / 12 + Math.min(imp, 90 * 41237.01) / 12;
+      const c = imp + noImp + ap + pr;
+      const liq = imp * (1 - 0.1127 - 0.07 - 0.006) + noImp;
+      return { base, pers, c, ap, pr, puesto: c * pers, dia: c * pers / 30, hora: c * pers / horas, liq };
+    };
+    const E = [
+      { letra: "A", nombre: "4x4 · 12 h", desc: "Puesto 24 h, todos los días · 08:00–20:00 / 20:00–08:00", ...calc(650000, 4, 720) },
+      { letra: "B", nombre: "5x2 · 8,4 h", desc: "Puesto diurno, lunes a viernes · 08:00–16:24", ...calc(620000, 1, 182.3) },
+      { letra: "C", nombre: "7x7 · 12 h", desc: "Puesto 24 h, todos los días · bono de turno incluido", ...calc(700000, 4, 720) },
+    ];
+    const minH = Math.min(...E.map((e) => e.hora));
+    E.forEach((e) => (e.menor = e.hora === minH));
+    const def = [["Sueldo base", "base", 1], ["Personas por puesto", "pers", 0], ["Costo empresa por persona/mes", "c", 1, true], ["Aportes del empleador", "ap", 1], ["Provisiones", "pr", 1], ["Costo del puesto/mes", "puesto", 1, true], ["Costo por día", "dia", 1], ["Costo por hora", "hora", 1, true], ["Líquido estimado", "liq", 1]];
+    const shown = isPhone ? E.filter((e) => e.letra === this.state.sel) : E;
+    const rows = def.map(([label, k, money, strong]) => {
+      const differs = E.some((e) => Math.round(e[k]) !== Math.round(E[0][k]));
+      return { label, w: strong ? "600" : "400", fs: strong ? "16px" : "14px",
+        cells: shown.map((e) => {
+          const d = e[k] - E[0][k];
+          const show = e.letra !== "A" && Math.round(d) !== 0;
+          return { v: money ? f(e[k]) : String(e[k]), d: show ? (d > 0 ? "+" : "−") + (money ? f(d) : String(Math.abs(d))) : "", dc: d > 0 ? "var(--ds-warning-fg)" : "var(--ds-success-fg)", bg: differs ? "var(--ds-bg)" : "transparent" };
+        }) };
+    });
+    const st = this.props.state ?? "normal";
+    const NSx = window.OPAI20DesignSystem_44e4d7 || {};
+    const stv = { isReady: st === "normal", isLoading: st === "loading", isVacio: st === "vacio", isError: st === "error", isForbidden: st === "forbidden", skRows: [1, 2, 3, 4, 5], noop: () => {},
+      emptyAction: NSx.Button ? React.createElement(NSx.Button, { variant: "secondary" }, "Agregar escenario") : null };
+    return { ...stv,  appUser: { name: "Tomás Fuentes", initials: "TF", role: "Administrador" },
+      device, theme: this.props.theme ?? "light", isPhone, isWide: !isPhone, shown, rows, sel: this.state.sel, setSel: (s) => this.setState({ sel: s }), fullW: { width: "100%" },
+      segOpts: E.map((e) => ({ value: e.letra, label: e.nombre.split(" · ")[0] })),
+      cols: isPhone ? "minmax(0,1fr) minmax(0,1fr)" : "minmax(180px,1.1fr) repeat(3,minmax(0,1fr))",
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "ban", label: "Bandeja", icon: "inbox" }, { id: "car", label: "Personas", icon: "users" }, { id: "cot", label: "Cotizaciones", icon: "file" }, { id: "mas", label: "Más", icon: "more" }],
+      groups: [
+        { items: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "ban", label: "Bandeja", icon: "inbox", count: 3 }] },
+        { title: "Comercial", items: [{ id: "cot", label: "Cotizaciones", icon: "file" }] },
+        { title: "Personas", items: [{ id: "per", label: "Personas", icon: "users" }, { id: "car", label: "Cargos y sueldos", icon: "briefcase" }] },
+        { title: "Configuración", items: [{ id: "cfg", label: "Remuneraciones", icon: "wallet" }] },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

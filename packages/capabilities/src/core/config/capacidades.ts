@@ -17,6 +17,9 @@ export const configSchema = defineCapability({
   output: z.array(descripcionCampo),
   efecto: "lectura",
   dryRun: false,
+  // Lee el catálogo en memoria, nunca la base: no abre la transacción de tenant (B1, P2028). Se
+  // invoca hasta dos veces por render de `/configuracion/*` (riel + página).
+  sinDb: true,
   handler: async (ctx, input) => camposVisibles(ctx, input.modulo).map((c) => describir(ctx, c)),
 });
 
@@ -57,6 +60,8 @@ export const configBuscar = defineCapability({
   output: z.array(descripcionCampo),
   efecto: "lectura",
   dryRun: false,
+  // Como `core.config.schema`: filtra el catálogo en memoria, sin tocar la base (B1, P2028).
+  sinDb: true,
   async handler(ctx, { q }) {
     const n = (s: string) =>
       s
