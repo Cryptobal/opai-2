@@ -1,6 +1,6 @@
 # Agente interno — Especificación funcional de la pantalla
 
-**Estado:** **borrador**, pendiente de aprobación de Carlos (ADR-047) · **Fase:** cierre del Núcleo (enmienda ADR-049 §8, NÚCLEO-E2) · **Tarea:** CAR-69 (pedido de Carlos del 29-oct-2026 08:07 CLT) · **Insumos:** ADR-049 (con su enmienda y el mecanismo de NÚCLEO-E2), ADR-045, ADR-046, ADR-047, ADR-048, ADR-050, ADR-055, [`briefs/NUCLEO-E2-agente-interno.md`](../briefs/NUCLEO-E2-agente-interno.md), [`agentes/agente-interno.md`](../agentes/agente-interno.md), `NAVEGACION.md`, `DISENO.md` · **Autor:** Claude
+**Estado:** **borrador**, pendiente de aprobación de Carlos (ADR-047) · **Fase:** cierre del Núcleo (enmienda ADR-049 §8, NÚCLEO-E2) · **Tarea:** CAR-69 (pedido de Carlos del 29-oct-2026 08:07 CLT, según la tarea CAR-69 en Linear) · **Insumos:** ADR-049 (con su enmienda y el mecanismo de NÚCLEO-E2), ADR-045, ADR-046, ADR-047, ADR-048, ADR-050, ADR-055, [`briefs/NUCLEO-E2-agente-interno.md`](../briefs/NUCLEO-E2-agente-interno.md), [`agentes/agente-interno.md`](../agentes/agente-interno.md), `NAVEGACION.md`, `DISENO.md` · **Autor:** Claude
 
 > Lenguaje de negocio, sin código (ADR-047). El servidor del agente ya está en `main` (PR #62 proveedores de IA con herramientas y respaldo; PR #73 orquestación, planes firmados y confirmación). Esta especificación define **la interfaz**: cómo se abre, cómo se conversa, cómo se confirman los planes, qué historial hay, qué límites ve cada rol y todos los estados. Proceso de esta etapa: reglas → preguntas a Carlos (§14) → Design Prompt (§15) → aprobación del diseño por Carlos → recién entonces el brief de implementación. **No se construye nada con este documento.**
 
@@ -14,7 +14,7 @@ Se nota que funciona cuando:
 
 - **Uso:** porcentaje de usuarios con `agente:usar` que lo abren al menos una vez por semana, y solicitudes por usuario activo.
 - **Confianza:** porcentaje de planes confirmados sobre planes propuestos (alto = el plan es correcto), y cero escrituras sin confirmación (auditoría).
-- **Velocidad:** tiempo desde la pregunta hasta la primera respuesta visible (meta p75 < 3 s para lecturas simples con el modelo «estándar»; el panel abre en < 100 ms, ADR-045).
+- **Velocidad:** tiempo desde la pregunta hasta la primera respuesta visible (meta p75 < 3 s para lecturas simples con el modelo «estándar»; el esqueleto del panel aparece en ≤ 200 ms, ADR-045).
 
 ## 2. Entidades y relaciones
 
@@ -36,14 +36,14 @@ El agente **no es una página con entrada en el menú** (ADR-046: el menú es pa
 
 | Superficie | Ruta | Portal | Patrón DS | Ubicación |
 |---|---|---|---|---|
-| Panel del agente | Sin ruta propia; estado en la URL `?agente=1` (para volver atrás y compartir el estado abierto) | ERP (otros portales: pregunta 9) | `Sheet` lateral derecho (iPad/escritorio) y pantalla completa (teléfono), cargado al abrirse (`hojaDiferida`) | Lanzadores de §3.1 |
+| Panel del agente | Sin ruta propia; estado en la URL `?agente=1` (para volver atrás y compartir el estado abierto) | ERP (otros portales: pregunta 9) | **Componente nuevo del DS «Panel lateral»** (ADR-017: se diseña en Claude Design y se agrega a `packages/ds`): acoplado y redimensionable en escritorio, superpuesto bajo la barra superior en iPad, pantalla completa en teléfono. El `Sheet` actual no sirve: es modal, siempre con scrim, de 420 px fijos, tapa la barra superior y se cierra al tocar fuera. Se carga al abrirse (`hojaDiferida`) | Lanzadores de §3.1 |
 | Historial | `/agente/historial` (pestañas «Conversaciones» y «Acciones») | ERP | `ListScreen`; en iPad/escritorio `SplitScreen` (lista + detalle) | Desde el menú «⋯» del panel; también desde Configuración → Agentes para quien gestiona |
 | Configuración del agente | Dentro del centro de configuración del núcleo (ADR-018): sección «Agente interno» | ERP | `AjustesForm` | Configuración → Agentes (no hay página de configuración propia del módulo) |
-| Consumo del agente | Configuración → Consumos, fila «Agente interno» (ya existe `core.consumos.por_agente`) | ERP | `DashboardScreen`/`Table` existentes | Configuración |
+| Consumo del agente | Configuración → Consumos, fila «Agente interno» (**no existe hoy**: `core.consumos.por_agente` solo cuenta keys y el resumen mensual lo suma a «personas»; cambio pedido en §9) | ERP | `DashboardScreen`/`Table` existentes | Configuración |
 
 ### 3.1 Cómo se abre (lanzadores)
 
-1. **Botón fijo «Preguntar a OPAI»** (ícono de destello de lucide, `sparkles`), en el **grupo fijo de la cabecera** (búsqueda, campana, usuario) de iPad y escritorio, **a la izquierda de la búsqueda**. Mide y está igual en todas las vistas, como exige CAR-12: no se mueve cuando cambian las acciones de la página. En escritorio muestra el atajo en el tooltip.
+1. **Botón fijo «Preguntar a OPAI»** (ícono de destello de lucide, `sparkles`), en el **grupo fijo de la cabecera** de iPad y escritorio, **a la izquierda de la búsqueda**: en escritorio el grupo queda «búsqueda + OPAI + campana» (el usuario va al pie de la barra lateral, ADR-050); bajo 1024 px conserva el avatar. Mide y está igual en todas las vistas, como exige CAR-12: no se mueve cuando cambian las acciones de la página. En escritorio muestra el atajo en el tooltip. Ojo: suma 44 px al grupo y agrava el desborde de la cabecera de fichas a 768 px ya registrado en CAR-64; el diseño debe resolverlo (por ejemplo, búsqueda como ícono bajo 1024 px).
 2. **Atajo de teclado** `⌘J` (Mac) / `Ctrl+J` (Windows y Linux) abre y cierra el panel desde cualquier pantalla del ERP (pregunta 3). `Esc` lo cierra y devuelve el foco al lanzador.
 3. **Desde la búsqueda (⌘K):** el primer lugar ya reservado (NAVEGACION §7, Brief 05 §4.4) es «Preguntar a OPAI: <lo escrito>». Con Enter abre el panel con ese texto ya enviado. En el celular, el mismo primer lugar dentro de «Buscar».
 4. **Teléfono:** además de «Buscar», **la columna 4 libre de la barra inferior** (ADR-050 la dejó vacía y su uso lo decide Carlos) pasa a «OPAI» cuando la empresa tiene la licencia y la persona tiene `agente:usar` (pregunta 2). Sin licencia o sin permiso, esa columna sigue con la regla actual.
@@ -57,7 +57,7 @@ El agente **no es una página con entrada en el menú** (ADR-046: el menú es pa
 | Tamaño | Forma | Convivencia con el shell |
 |---|---|---|
 | **Teléfono (< 768 px)** | **Pantalla completa** sobre el shell (hoja a pantalla completa, como los drawers del DS). Cabecera propia de 52 px: «Cerrar» (izquierda), título «OPAI» con el chip de contexto debajo, menú «⋯» (historial, nueva conversación, modelo, nivel). Compositor fijo abajo, sobre la safe-area de iOS; la barra inferior del shell queda oculta mientras el panel está abierto | Al cerrar, vuelve exactamente a la pantalla y posición de scroll de origen. El botón «Atrás» del sistema cierra el panel (estado en la URL) |
-| **iPad (768–1279 px)** | **Panel superpuesto** (`Sheet` derecho) de 400 px de ancho con `scrim` suave; el contenido no se reacomoda | No reacomodar evita los desbordes ya conocidos a 768 y 1024 px (CAR-64: fichas de ~390 px con la barra lateral de 248 px). Tocar fuera **no** cierra si hay un plan pendiente (pide confirmar descarte) |
+| **iPad (768–1279 px)** | **Panel superpuesto** (componente «Panel lateral», variante superpuesta) de 400 px de ancho bajo la barra superior, con `scrim` suave sobre el contenido; el contenido no se reacomoda | No reacomodar evita los desbordes ya conocidos a 768 y 1024 px (CAR-64: fichas de ~390 px con la barra lateral de 248 px). Tocar fuera **no** cierra si hay un plan pendiente (pide confirmar descarte) |
 | **Escritorio (≥ 1280 px)** | **Panel acoplado** a la derecha, 400 px (redimensionable 360–560 px, recordado por usuario), **sin scrim**: el contenido se reacomoda y sigue siendo usable | Se puede navegar con el panel abierto: el panel **persiste entre navegaciones** (vive en el layout del portal, ADR-045) y el chip de contexto se actualiza a la nueva ficha |
 | **Pantalla de historial** | Lista/ficha normal del DS | Ruta propia dentro del shell, con su `titulo` en la barra superior (iPad/escritorio) |
 
@@ -87,7 +87,7 @@ Toda escritura llega como **una tarjeta de plan** dentro del hilo, nunca como te
 - **Acciones del paso** (nivel «Paso a paso»): solo el paso en curso está activo, con «Confirmar este paso», «Pedir cambios» y «Descartar plan»; los siguientes se ven atenuados con «Pendiente».
 - **Pedir cambios** abre el compositor con «Cambia en el plan: …»; el agente prepara **un plan nuevo** y el anterior queda marcado «Reemplazado» (pregunta 4: no se editan argumentos a mano en la tarjeta).
 - **Durante la ejecución:** cada paso muestra su estado: «Ejecutando…» → «Hecho» (`success`, con enlace a la ficha modificada) o «Falló» (`danger`, con el mensaje en lenguaje de usuario y «Ver en auditoría»). Un fallo detiene los pasos siguientes (R6).
-- **Paso irreversible:** al llegar a él, el plan se detiene y la tarjeta muestra «Enviado a aprobación · lo resuelve <rol o persona>» con enlace a la solicitud en la Bandeja; los pasos siguientes quedan «En espera de la aprobación» (R5). Cuando se resuelve, la persona recibe el aviso por la campana (ADR-020, si el tenant lo activa) y el plan **no** continúa solo: hay que volver a pedirlo (NÚCLEO-E2: el plan se detiene allí).
+- **Paso irreversible:** al llegar a él, el plan se detiene y la tarjeta muestra «Enviado a aprobación · lo resuelve <rol o persona>» con enlace a la solicitud en la Bandeja; los pasos siguientes quedan «No se ejecutaron · pídelos de nuevo después de la aprobación» (R5). Si se aprueba, la acción la ejecuta quien aprueba, no «vía» quien la pidió (`core.aprobaciones.aprobar`). Cuando se resuelve, la persona recibe el aviso por la campana (ADR-020, si el tenant lo activa) y el plan **no** continúa solo: hay que volver a pedirlo (NÚCLEO-E2: el plan se detiene allí).
 - **Descartar** pide confirmación solo si el plan tenía pasos ya hechos («2 cambios ya se hicieron y no se deshacen»).
 
 ### 3.5 Historial
@@ -95,9 +95,11 @@ Toda escritura llega como **una tarjeta de plan** dentro del hilo, nunca como te
 Pestañas por ruta (`Tabs`):
 
 - **Conversaciones** (si Carlos aprueba guardarlas, pregunta 1): lista con título (generado del primer mensaje, editable), contexto de origen, fecha, número de acciones ejecutadas; buscar por texto; abrir retoma la conversación en el panel; archivar y borrar (borrar es del propio usuario y es definitivo, Ley 21.719).
-- **Acciones:** todas las escrituras hechas por «Agente interno vía <yo>» (hoy `agente.historial.list`), con fecha y hora, acción de negocio, entidad afectada (enlace), resultado (Hecho / Falló / En aprobación / Aprobado / Rechazado) y «Ver en auditoría». Filtros por periodo, resultado y módulo. Owner y admin ven, además, el filtro «Todas las personas» en Configuración → Auditoría, filtrando por actor «Agente interno».
+- **Acciones:** todas las escrituras hechas por «Agente interno vía <yo>» (hoy `agente.historial.list`), con fecha y hora, acción de negocio, entidad afectada (enlace), resultado (Hecho / Falló / En aprobación / Aprobado / Rechazado) y «Ver en auditoría». Filtros por periodo, resultado y módulo. Quien tiene `core:audit.read` (owner, admin y gerente por defecto) ve, además, el filtro «Todas las personas» en Configuración → Auditoría, filtrando por actor «Agente interno».
 
 ## 4. Campos y validaciones
+
+Ningún campo es visible para el cliente ni para el trabajador: el agente solo existe en el portal ERP (pregunta 9).
 
 | Campo | Tipo | Obligatorio | Validación | Quién lo edita |
 |---|---|---|---|---|
@@ -118,7 +120,7 @@ Pestañas por ruta (`Tabs`):
 
 - **R3.** Toda escritura requiere confirmación humana dentro del panel. La persona elige el nivel: **«Paso a paso»** (por defecto) o **«Aprobar todo»**. El tenant puede **obligar «Paso a paso»** para todos (ajuste, pregunta 5). Sin confirmación no se escribe nada.
 - **R4.** Toda escritura se muestra antes como **vista previa** (dryRun) en la tarjeta de plan, con el antes → después de cada paso en lenguaje de negocio. Un texto del agente que diga «ya lo hice» sin tarjeta es un error de producto.
-- **R5.** Lo **irreversible** (capacidades marcadas así o que la autonomía del tenant envía a aprobación) **siempre** va a la cola de aprobación humana (`core.aprobaciones`, Bandeja de Inicio), aunque el nivel sea «Aprobar todo». El plan se detiene allí. Quién puede aprobar sigue la regla vigente de aprobaciones (pregunta 6 sobre la propia persona).
+- **R5.** Lo **irreversible** (capacidades con efecto irreversible; la autonomía configurada para las keys no aplica al agente interno) **siempre** va a la cola de aprobación humana (`core.aprobaciones`, Bandeja de Inicio), aunque el nivel sea «Aprobar todo». El plan se detiene allí. Quién puede aprobar sigue la regla vigente de aprobaciones (pregunta 6 sobre la propia persona).
 - **R6.** Los pasos se ejecutan en orden; si uno falla, los siguientes no se ejecutan y la tarjeta lo dice. Lo ya hecho **no se revierte solo**: la tarjeta lista qué quedó hecho.
 - **R7.** Un plan **vence a la hora** de prepararse (NÚCLEO-E2). Vencido, sus botones se desactivan y aparece «Este plan venció. Pídelo de nuevo para ver los datos actuales».
 - **R8.** Un plan está ligado a la persona, la empresa, el portal y su acceso vigente. Si cambia de empresa, pierde el permiso o se cierra la sesión, los planes abiertos quedan **anulados** y se dice por qué.
@@ -132,12 +134,12 @@ Pestañas por ruta (`Tabs`):
 **Límites, consumo y presupuesto**
 
 - **R12.** Límites por turno del servidor: 12 pasos de herramientas y 128.000 tokens medidos. Al superarlos, el turno termina sin escribir y el panel lo explica (§12). Límite de frecuencia: 20 solicitudes por minuto por persona.
-- **R13.** Si la persona pide algo que su rol no permite, el agente responde **«Tu rol no permite <acción de negocio>. Pídeselo a alguien con ese permiso o a un administrador.»**, sin revelar datos ni nombres que no podría ver. Si lo pedido requiere un módulo inactivo: «Eso es parte de <módulo>, que tu empresa no tiene activo.»
+- **R13.** Si la persona pide una **acción** que su rol no permite (la capacidad responde «sin permiso»), el agente responde **«Tu rol no permite <acción de negocio>. Pídeselo a alguien con ese permiso o a un administrador.»**, sin revelar datos ni nombres que no podría ver. Si lo pedido requiere un módulo inactivo: «Eso es parte de <módulo>, que tu empresa no tiene activo.» Un **registro fuera de alcance** no es un «sin permiso»: se responde igual que si no existiera (ADR-022, R9). El estado con candado de §12 necesita una señal estructurada del servidor (§9), no una inferencia del texto del modelo.
 - **R14.** El **modelo** se elige entre los proveedores de IA conectados del tenant (ADR-049 §6). El tenant fija un modelo predeterminado; la persona puede cambiarlo por conversación. Si el tenant no tiene key propia, se usa el modelo de OPAI y se cobra el consumo (ADR-049 §9); la interfaz lo indica en el selector («Modelo de OPAI · se cobra por uso»).
 - **R15.** Si la key del tenant falla, **nunca** se cae a la key de OPAI (ADR-049 §6, 21:58): el turno falla con un mensaje claro y la integración queda en error en Configuración → Integraciones.
 - **R16.** Todo turno se **mide** en `core.consumos` (tokens y llamadas, proveedor y modelo, actor «Agente interno»), con o sin key propia.
 - **R17.** **Presupuesto opcional por tenant** (0 = sin tope, por defecto, ADR-049 §9). Al 80 % se avisa a quienes tienen `agente:configurar` (banda en el panel y aviso por Comunicaciones si el tenant lo activa). Al 100 %, el agente deja de aceptar solicitudes para todos hasta el mes siguiente o hasta que se suba el tope; el mensaje para quien no configura es «El agente alcanzó el presupuesto del mes de tu empresa. Avísale a un administrador.»
-- **R18.** Las personas ven el consumo **de la empresa** solo si tienen permiso de consumos (owner, admin). Cada persona ve, en el historial, cuántas solicitudes hizo, no costos.
+- **R18.** Las personas ven el consumo **de la empresa** solo si tienen `core:consumos.read` (owner, admin y gerente por defecto). Cada persona ve, en el historial, cuántas solicitudes hizo, no costos.
 
 **Historial y datos personales**
 
@@ -170,6 +172,8 @@ Pestañas por ruta (`Tabs`):
 | En ejecución | Completado | Sistema | Todos los pasos hechos | Enlaces a lo modificado; auditoría | No (cada cambio se corrige con otro cambio) |
 | En ejecución | Detenido por error | Sistema | Un paso falla (R6) | Los siguientes no se ejecutan | — |
 | En ejecución | En aprobación | Sistema | Llega un paso irreversible (R5) | Solicitud en la Bandeja; el plan se detiene | La solicitud se puede rechazar |
+| En ejecución (paso a paso) | Esperando el paso siguiente | Sistema | Se hizo un paso y quedan más | El servidor entrega el token del paso siguiente; la persona lo confirma o descarta | — |
+| Esperando el paso siguiente | Descartado con pasos hechos | Persona | «Descartar plan» | Los pasos ya hechos quedan; los demás no se ejecutan | Lo hecho no se deshace solo |
 
 **Del paso:** pendiente → ejecutando → hecho | falló | en aprobación → (aprobado | rechazado | vencido, según `core.aprobaciones`).
 
@@ -180,7 +184,7 @@ Pestañas por ruta (`Tabs`):
 | Usar el agente (`agente:usar`) | sí | sí | sí | configurable, **no por defecto** | configurable, **no por defecto** | no (pregunta 9) | no (pregunta 9) | no: preparar y confirmar son solo personas |
 | Qué puede pedir | todo lo que su rol permite | ídem | ídem, sin Finanzas ni montos de sueldo | solo lo de su alcance (ADR-022) | solo lecturas | — | — | — |
 | Configurar el agente (`agente:configurar`) | sí | sí | no | no | no | — | — | no (solo personas) |
-| Ver consumo de la empresa (`core:consumos.read`) | sí | sí | no | no | no | — | — | según scopes de la key |
+| Ver consumo de la empresa (`core:consumos.read`) | sí | sí | sí | no | no | — | — | según scopes de la key |
 | Ver su propio historial de acciones | sí | sí | sí | sí | sí | — | — | lee el de su usuario responsable solo si es key de tipo usuario; nunca una key de servicio (ADR-051) |
 | Aprobar lo irreversible pedido por el agente | según `core:aprobaciones.manage` | ídem | no | no | no | — | — | nunca |
 
@@ -190,8 +194,8 @@ Alcance de filas: el del usuario, aplicado en cada capacidad (ADR-022), nunca en
 
 | Evento | Cuándo ocurre | Quién se entera por defecto | Canal | Plantilla |
 |---|---|---|---|---|
-| `agente.presupuesto.aviso` (nuevo, o reutilizar el aviso de presupuesto de C) | El consumo del mes llega al 80 % del tope | Silencio por defecto (ADR-020); recomendado: quienes tienen `agente:configurar` | Campana y correo | «El agente interno usó el 80 % del presupuesto de <mes>.» |
-| `agente.presupuesto.agotado` | Llega al 100 % | Ídem | Campana y correo | «El agente interno se detuvo: alcanzó el presupuesto de <mes>.» |
+| `core.agente.presupuesto_80` (ya existe, `entidadTipo: agente_interno`) | El consumo del mes llega al 80 % del tope | Silencio por defecto (ADR-020); el tenant puede activarlo para quienes tienen `agente:configurar` | Campana y correo | «El agente interno usó el 80 % del presupuesto de <mes>.» |
+| `core.agente.presupuesto_100` (ya existe) | Llega al 100 % | Ídem | Campana y correo | «El agente interno se detuvo: alcanzó el presupuesto de <mes>.» |
 | Aprobación resuelta (ya existe en `core.aprobaciones`) | Alguien aprueba o rechaza un paso pedido por el agente | La persona que lo pidió | Campana | Existente |
 | `core.integracion.error` (ya existe) | La key de IA del tenant falla | Quien gestiona integraciones | Campana y correo | Existente |
 
@@ -199,12 +203,14 @@ Alcance de filas: el del usuario, aplicado en cada capacidad (ADR-022), nunca en
 
 Existentes (NÚCLEO-E2):
 
-| Capacidad | Qué hace | Tipo | MCP |
-|---|---|---|---|
-| `agente.modelos.list` | Lista los modelos conectados, sin credenciales | Lectura | Sí |
-| `agente.turno.preparar` | Prepara la solicitud: lecturas y vistas previas, plan firmado | Escritura con dryRun | No (`soloPersonas`) |
-| `agente.plan.confirmar` | Acepta o rechaza un plan o paso | Escritura con dryRun | No (`soloPersonas`) |
-| `agente.historial.list` | Metadatos de acciones del agente vía el usuario | Lectura | Sí |
+| Capacidad | Qué hace | Lectura, escritura o irreversible | Con vista previa | Aprobación humana | MCP |
+|---|---|---|---|---|---|
+| `agente.modelos.list` | Lista los modelos conectados, sin credenciales | Lectura | — | No | Sí |
+| `agente.turno.preparar` | Prepara la solicitud: lecturas y vistas previas, plan firmado | Escritura (no escribe negocio) | Sí | No | No (`soloPersonas`) |
+| `agente.plan.confirmar` | Acepta o rechaza un plan o paso | Escritura | Sí | Lo irreversible de cada paso va a `core.aprobaciones` | No (`soloPersonas`) |
+| `agente.historial.list` | Metadatos de acciones del agente vía el usuario | Lectura | — | No | Sí |
+
+Flujo típico (detalle y escenario de prueba en [`agentes/agente-interno.md`](../agentes/agente-interno.md)): modelos → preparar (lecturas y dryRun) → la persona revisa la tarjeta → confirmar plan o paso → si un paso es irreversible, el plan se detiene en la cola de aprobación.
 
 Cambios que esta pantalla **pide al servidor** (los fija el brief, no este documento):
 
@@ -212,11 +218,17 @@ Cambios que esta pantalla **pide al servidor** (los fija el brief, no este docum
 2. Eventos SSE de **progreso por herramienta** (nombre de negocio de la capacidad y conteo de registros, sin contenido) para los «pasos de trabajo» del hilo; hoy el SSE solo emite iniciado/resultado/error. El **texto** puede seguir llegando completo, sin fragmentos (pregunta 8).
 3. `agente.historial.list` agrega entidad afectada, resultado y referencia de auditoría (hoy solo capacidad y fecha).
 4. Si se guardan conversaciones: `agente.conversaciones.list`, `.get`, `.renombrar`, `.archivar`, `.borrar` (del propio usuario), con MCP para keys de tipo usuario (leen solo las de su responsable) y nunca para keys de servicio; tabla nueva con `tenant_id`, RLS `tenant_isolation`, prueba de dos empresas e inventario 07d.
-5. Ajustes nuevos del manifest (R20): modelo predeterminado, obligar paso a paso, retención, nombre visible y sugerencias de inicio, todos por `core.config.set` con `agente:configurar` y `soloPersonas`.
+5. Consumo y presupuesto del agente interno: fila «Agente interno» en Consumos (hoy `core.consumos.por_agente` solo cuenta keys) y una lectura del estado del presupuesto del mes (porcentaje usado) para la banda del 80 % (R17), visible para `agente:configurar`.
+6. Señal estructurada en la respuesta del turno cuando una herramienta respondió «sin permiso» o «módulo inactivo» (R13), sin revelar datos.
+7. Ajustes nuevos del manifest (R20): modelo predeterminado, obligar paso a paso, retención, nombre visible y sugerencias de inicio, todos por `core.config.set` con `agente:configurar` y `soloPersonas`.
 
 ## 10. Integraciones
 
 Proveedores de IA del tenant (Anthropic, OpenAI, Google, compatible con OpenAI, xAI) por el adaptador del núcleo (ADR-031, PR #62), con su key cifrada en el almacén del núcleo (ADR-027). Sin key propia, modelo de OPAI con consumo cobrado (ADR-049 §9). Todo consumo se mide en `core.consumos`. La interfaz nunca recibe ni muestra credenciales.
+
+### Sin la fuente X (ADR-048)
+
+El agente depende solo del Núcleo y del MCP; **todos los demás módulos son fuentes opcionales**. Con un módulo apagado, sus capacidades no existen para el agente: no aparecen sugerencias ni fuentes de ese módulo, el chip de contexto solo ofrece entidades de módulos activos y pedir algo de ese módulo da el mensaje de R13 («Eso es parte de <módulo>, que tu empresa no tiene activo»). Nunca hay pestañas ni lanzadores vacíos.
 
 ## 11. Mejoras respecto de 1.0 y lo que no se porta
 
@@ -236,11 +248,11 @@ Proveedores de IA del tenant (Anthropic, OpenAI, Google, compatible con OpenAI, 
 
 | Estado | Qué se ve |
 |---|---|
-| Cargando el panel | Skeleton con la forma del hilo y del compositor (< 100 ms; el shell no parpadea) |
+| Cargando el panel | Skeleton con la forma del hilo y del compositor (≤ 200 ms, ADR-045; variante nueva «hilo» de `Loading`; el shell no parpadea) |
 | Pensando | Indicador sobrio en la burbuja del agente + los pasos de trabajo a medida que llegan; «Detener» disponible |
 | Vacío (conversación nueva) | `Empty` con «¿En qué te ayudo?», el chip de contexto y 3–4 sugerencias de inicio según contexto y rol |
 | Vacío (historial) | «Todavía no tienes conversaciones» / «El agente aún no ha hecho cambios por ti», con «Preguntar a OPAI» |
-| Sin proveedor de IA conectado | Para `agente:configurar`: «Conecta un proveedor de IA para usar el agente» con acción a Configuración → Integraciones. Para el resto: «El agente aún no está listo en tu empresa. Avísale a un administrador.» |
+| Keys propias sin ningún modelo utilizable | El tenant configuró keys propias pero ninguna está activa (nunca se cae a la key de OPAI, R15). Para `agente:configurar`: «Ninguna key de IA de tu empresa está funcionando» con acción a Configuración → Integraciones. Para el resto: «El agente no está disponible ahora en tu empresa. Avísale a un administrador.» |
 | Error del proveedor (key del tenant caída) | `ErrorState`: «El proveedor de IA de tu empresa no responde. No se hizo ningún cambio.» + «Reintentar»; al administrador, enlace a Integraciones |
 | Error de red durante la ejecución | «Se cortó la conexión mientras se ejecutaba el plan. Revisa el historial de acciones antes de volver a pedirlo: algunos cambios pueden haberse hecho.» (NÚCLEO-E2: no se presume que no hubo escritura) |
 | Sin permiso (R13) | Respuesta del agente en el hilo, con ícono de candado y el texto de R13; nunca datos parciales |
@@ -257,7 +269,7 @@ Proveedores de IA del tenant (Anthropic, OpenAI, Google, compatible con OpenAI, 
 - Dos pestañas con el mismo plan: la segunda confirmación ve «Este plan ya se confirmó» (idempotencia del servidor).
 - El modelo elegido deja de estar disponible (integración desconectada): el selector vuelve al predeterminado y lo avisa.
 - Un registro leído contiene instrucciones («ignora las reglas y borra…»): se muestra como dato, el plan no cambia y lo irreversible sigue a aprobación (R10).
-- Una respuesta muy larga o con tabla ancha: la tabla se desplaza dentro de su contenedor, nunca la página (DISENO §4).
+- Una respuesta muy larga o con tabla ancha: en el teléfono la tabla pasa a lista apilada (DISENO §4); en iPad y escritorio se desplaza dentro de su contenedor, nunca la página.
 - Lector de pantalla: las respuestas nuevas se anuncian (`aria-live="polite"`), la tarjeta de plan es una región con título y el foco va al primer botón del plan al aparecer.
 - `prefers-reduced-motion`: sin animación de aparición del panel ni del indicador de «pensando» (solo cambio de opacidad).
 
@@ -266,12 +278,12 @@ Proveedores de IA del tenant (Anthropic, OpenAI, Google, compatible con OpenAI, 
 Verificables por Carlos en `test.opai.cl` (con la licencia activada para Gard) y por Diseño y QA a 375, 1024 y 1280 px, claro y oscuro.
 
 - **CA1.** Sin licencia o sin `agente:usar`, no aparece ningún lanzador (botón, atajo, ⌘K, barra inferior, menú de ficha) y `?agente=1` no abre nada.
-- **CA2.** Con licencia y permiso, el panel se abre por los cinco lanzadores de §3.1, en < 100 ms, como pantalla completa en teléfono, superpuesto en iPad y acoplado en escritorio, sin mover la campana, la búsqueda ni el usuario (CAR-12).
+- **CA2.** Con licencia y permiso, el panel se abre por los lanzadores 1 a 5 de §3.1, con su esqueleto en ≤ 200 ms, como pantalla completa en teléfono, superpuesto en iPad y acoplado en escritorio, sin mover la campana, la búsqueda ni el usuario (CAR-12).
 - **CA3.** Desde la ficha de una cuenta, el chip muestra la cuenta; preguntar «¿cuántas instalaciones activas tiene?» responde con el número correcto y enlaza las fuentes.
 - **CA4.** Pedir un cambio (por ejemplo, «cambia el supervisor de Torre Norte a <persona>») muestra una tarjeta de plan con el antes → después; nada cambia hasta confirmar; al confirmar, el cambio está en la ficha y en la auditoría como «Agente interno vía <persona>».
 - **CA5.** En «Paso a paso», un plan de dos cambios pide dos confirmaciones; en «Aprobar todo», una. Con el ajuste «obligar paso a paso», no se ofrece «Aprobar todo».
 - **CA6.** Un paso irreversible queda «En aprobación» con enlace a la Bandeja y el plan se detiene, aun en «Aprobar todo».
-- **CA7.** Un supervisor con `agente:usar` que pide datos de una instalación que no tiene a cargo recibe el mensaje de R13 y ningún dato de esa instalación.
+- **CA7.** Un supervisor con `agente:usar` que pide datos de una instalación que no tiene a cargo recibe la misma respuesta que para una instalación inexistente y ningún dato de ella; si pide una acción que su rol no permite, recibe el mensaje de R13.
 - **CA8.** Con la red apagada, el compositor se desactiva, el borrador se conserva y no se envía ninguna confirmación al volver.
 - **CA9.** El historial de acciones lista lo hecho por el agente con resultado y enlace a la auditoría; el historial de otra empresa del mismo usuario no aparece.
 - **CA10.** Al superar el 80 % del presupuesto, quien configura ve el aviso; al 100 %, nadie puede enviar y el mensaje lo explica.
@@ -286,13 +298,13 @@ Numeradas, cada una con recomendación. Ninguna bloquea el Design Prompt: el dis
 3. **Atajo de teclado: ¿`⌘J` / `Ctrl+J`?** **Recomendación: sí.** Es el atajo habitual de asistentes en apps de trabajo, queda junto a ⌘K y no choca con ningún atajo de OPAI. Alternativa si molesta (en Windows, `Ctrl+J` abre descargas en algunos navegadores cuando la página no lo captura): `⌘.` / `Ctrl+.`.
 4. **«Pedir cambios» al plan: ¿se pide por texto o se editan los campos en la tarjeta?** **Recomendación: por texto en esta versión**: el agente prepara un plan nuevo con su vista previa y firma nueva. Por qué: editar argumentos a mano exige formularios por cada capacidad (y revalidar y volver a firmar), que ya existen en las pantallas de cada módulo; si un cambio es fino, la tarjeta enlaza a la pantalla normal.
 5. **Nivel de confirmación por defecto y tope del tenant.** **Recomendación:** «Paso a paso» por defecto para todos, recordado por persona; el tenant puede **obligar** «Paso a paso». Por qué: equilibra la confianza inicial con la rapidez para quien ya conoce el agente, y deja el control al dueño de la empresa.
-6. **¿Puede la misma persona aprobar lo irreversible que pidió por el agente?** **Recomendación:** sí, si su rol puede aprobar (`core:aprobaciones.manage`), pero **siempre desde la Bandeja**, no desde el panel, con una segunda confirmación; y un ajuste del tenant «cuatro ojos» para exigir que apruebe otra persona. Por qué: en empresas chicas el owner es quien pide y aprueba; separar la aprobación del chat evita aprobar por inercia.
+6. **¿Puede la misma persona aprobar lo irreversible que pidió por el agente?** **Recomendación:** sí, si su rol puede aprobar (`core:aprobaciones.manage`; la acción queda auditada a nombre de quien aprueba), pero **siempre desde la Bandeja**, no desde el panel, con una segunda confirmación; y un ajuste del tenant «cuatro ojos» para exigir que apruebe otra persona. Por qué: en empresas chicas el owner es quien pide y aprueba; separar la aprobación del chat evita aprobar por inercia.
 7. **¿Qué roles usan el agente por defecto?** **Recomendación:** owner, admin y gerente sí; supervisor y viewer no, y cada empresa los habilita en la matriz de roles. Por qué: cada uso tiene costo de IA (o de licencia) y el supervisor opera mayormente en terreno; el viewer solo podría leer.
-8. **¿Mostrar el texto mientras se escribe (streaming)?** Hoy el servidor envía eventos completos. **Recomendación:** en esta versión, mostrar los **pasos de trabajo en vivo** (qué está buscando o leyendo) y el texto completo al final; el streaming del texto queda para después si hace falta. Por qué: da la sensación de avance sin abrir el riesgo de mostrar texto de terceros a medio procesar ni cambiar el contrato del servidor.
+8. **¿Mostrar el texto mientras se escribe (streaming)?** Hoy el servidor envía eventos completos. **Recomendación:** en esta versión, mostrar los **pasos de trabajo en vivo** (qué está buscando o leyendo) y el texto completo al final; el streaming del texto queda para después si hace falta. Por qué: da la sensación de avance sin abrir el riesgo de mostrar texto de terceros a medio procesar; solo suma eventos de progreso al SSE (§9.2), sin fragmentos de texto.
 9. **¿Qué portales tienen agente y en qué orden?** Hoy el servidor solo acepta ERP. **Recomendación:** ERP ahora; **Supervisor** después (con su alcance de instalaciones a cargo); Cliente y Trabajador recién con la especificación de Portales (fase 3). Por qué: los portales externos exponen el agente a personas fuera de la empresa y necesitan sus propias reglas de licencia y costo.
 10. **Nombre visible del agente.** **Recomendación:** «OPAI» por defecto, con un ajuste del tenant para cambiarlo (por ejemplo, «Asistente Gard»). Por qué: cumple ADR-028 (marca del tenant) sin tocar código y mantiene «Preguntar a OPAI» como nombre del producto.
 11. **Adjuntos y voz.** **Recomendación:** sin adjuntos ni botón de micrófono propio en esta versión; en el celular se usa el dictado del teclado. Adjuntar un documento ya cargado en OPAI (por `core.documentos`) entra en una versión siguiente. Por qué: los archivos pasan solo por `core.documentos` (ADR-019) y el micrófono está diferido por seguridad (cabeceras, sin permisos preventivos).
-12. **¿La persona ve el costo de sus solicitudes?** **Recomendación:** no; ve cuántas solicitudes hizo. El costo lo ven owner y admin en Consumos. Por qué: el costo depende de la key del tenant y del margen (no decidido), y mostrarlo a todos genera ruido sin decisión posible.
+12. **¿La persona ve el costo de sus solicitudes?** **Recomendación:** no; ve cuántas solicitudes hizo. El costo lo ven quienes tienen `core:consumos.read` (owner, admin y gerente por defecto) en Consumos. Por qué: el costo depende de la key del tenant y del margen (no decidido), y mostrarlo a todos genera ruido sin decisión posible.
 13. **Licencia para Gard.** El módulo `agente` está apagado por defecto. **Recomendación:** activarla para Gard cuando el diseño esté aprobado, para que Diseño y QA y tú prueben el panel en `test.opai.cl` apenas se integre; con la key de IA propia de Gard conectada en Integraciones. Es **tu decisión y tu acción** (Plataforma → Empresas → Gard → Módulos); nadie la activa por código.
 
 ## 15. Design Prompt para Claude Design
@@ -306,7 +318,7 @@ CONTEXTO DEL PRODUCTO
 OPAI es un ERP para empresas de seguridad privada, aseo y outsourcing (Chile). El agente actúa con los permisos de la persona conectada: consulta datos y prepara cambios, pero NUNCA escribe sin que la persona confirme un «plan» con vista previa. Lo irreversible va a una cola de aprobación humana (la Bandeja de Inicio). Usa datos de ejemplo realistas de una empresa de seguridad: cuenta «Banco Andino», instalaciones «Torre Norte» y «Centro de Distribución Quilicura», negocio «Renovación 2027 · Banco Andino», persona «Camila Rojas» (supervisora), turnos 4x4. Textos en español de Chile, tuteo, sin tecnicismos.
 
 LANZADORES (muéstralos en las pantallas de shell)
-- Escritorio e iPad: botón de ícono «Preguntar a OPAI» (ícono sparkles de lucide, 44 px) dentro del grupo FIJO de la cabecera, a la izquierda de la búsqueda; el grupo búsqueda + OPAI + campana + usuario no cambia de tamaño ni de posición entre pantallas. Tooltip con el atajo ⌘J.
+- Escritorio e iPad: botón de ícono «Preguntar a OPAI» (ícono sparkles de lucide, 44 px) dentro del grupo FIJO de la cabecera, a la izquierda de la búsqueda; en escritorio el grupo es búsqueda + OPAI + campana (el usuario sigue al pie de la barra lateral); bajo 1024 px conserva el avatar. El grupo no cambia de tamaño ni de posición entre pantallas. Resuelve que a 768 px la cabecera de una ficha (Volver + acción principal + Fijar + grupo fijo) no se desborde. Tooltip con el atajo ⌘J.
 - ⌘K: primera fila «Preguntar a OPAI: <texto escrito>» con el mismo ícono, sobre los resultados de entidades.
 - Teléfono: barra inferior Inicio · Cuentas · Personas · OPAI · Más (OPAI en la cuarta columna) y primera fila dentro de «Buscar».
 - Ficha: menú «⋯» de la cabecera de la ficha con «Preguntar a OPAI sobre esta cuenta».
@@ -325,12 +337,12 @@ TARJETA DE PLAN (la pieza central: diséñala con cuidado)
 - Variante «Paso a paso»: solo el paso 1 activo con «Confirmar este paso»; pasos 2 y 3 atenuados «Pendiente».
 - Ejecución: paso 1 «Hecho» (success, enlace «Ver en la ficha»), paso 2 «Ejecutando…», paso 3 en espera.
 - Error: paso 2 «Falló» (danger) con mensaje en lenguaje de usuario + «Ver en auditoría»; paso 3 «No se ejecutó»; nota «El paso 1 ya se hizo y no se deshace».
-- Irreversible: paso 3 «Enviado a aprobación · lo resuelve un administrador» con enlace «Ver en la Bandeja»; el plan muestra «Detenido hasta la aprobación».
+- Irreversible: paso 2 «Enviado a aprobación · lo resuelve un administrador» con enlace «Ver en la Bandeja»; paso 3 «No se ejecutó · pídelo de nuevo después de la aprobación». El plan termina ahí: no continúa solo.
 - Vencido: tarjeta atenuada «Este plan venció. Pídelo de nuevo para ver los datos actuales» + «Pedir de nuevo».
 
 TAMAÑOS (diseña cada uno)
 - TELÉFONO 375 px: el panel es PANTALLA COMPLETA sobre el shell (oculta la barra inferior), cabecera propia de 52 px con Cerrar a la izquierda, compositor sobre la safe-area de iOS, áreas táctiles ≥ 44 px.
-- IPAD 1024 px: panel SUPERPUESTO de 400 px a la derecha, con scrim suave; la barra superior sigue visible; el contenido NO se reacomoda.
+- IPAD 1024 px: panel SUPERPUESTO de 400 px a la derecha, bajo la barra superior (que sigue visible), con scrim suave solo sobre el contenido; el contenido NO se reacomoda; tocar fuera no lo cierra si hay un plan pendiente.
 - ESCRITORIO 1280 px: panel ACOPLADO de 400 px a la derecha bajo la barra superior, sin scrim; el contenido se reacomoda y la ficha sigue usable al lado; borde izquierdo border y tirador para redimensionar (360–560 px).
 
 PANTALLAS A ENTREGAR (claro, y oscuro donde se indica)
@@ -339,15 +351,16 @@ iPad 1024: (10) ficha de cuenta Banco Andino con el panel superpuesto y plan «A
 Escritorio 1280: (14) ficha de instalación Torre Norte con el panel acoplado y chip de contexto; (15) plan con error en el paso 2; (16) ⌘K con «Preguntar a OPAI: …» en la primera fila; (17) Historial (/agente/historial) en SplitScreen con pestañas «Conversaciones | Acciones», la pestaña Acciones con columnas fecha, acción, entidad, resultado (Badge) y «Ver en auditoría»; (18) Configuración → Agentes, sección «Agente interno» (AjustesForm: modelo predeterminado, obligar paso a paso, presupuesto mensual con aviso al 80 %, retención de conversaciones, nombre visible, sugerencias de inicio editables); (19) oscuro de (14).
 
 ESTADOS OBLIGATORIOS (inclúyelos como variantes)
-Cargando (skeleton con la forma del hilo), vacío, pensando, error del proveedor («El proveedor de IA de tu empresa no responde. No se hizo ningún cambio.» + Reintentar), sin proveedor conectado (versión administrador con «Conectar proveedor» y versión persona con «Avísale a un administrador»), sin permiso («Tu rol no permite cambiar supervisores. Pídeselo a alguien con ese permiso o a un administrador.», con candado), límite de frecuencia (cuenta regresiva), solicitud demasiado grande, presupuesto al 80 % (banda warning solo para administradores), presupuesto agotado (compositor desactivado), sin conexión (banda neutra, borrador conservado), corte de red durante la ejecución («Revisa el historial antes de volver a pedirlo»), plan vencido.
+Cargando (skeleton con la forma del hilo), vacío, pensando, error del proveedor («El proveedor de IA de tu empresa no responde. No se hizo ningún cambio.» + Reintentar), ninguna key propia funcionando (versión administrador con «Revisar integraciones» y versión persona con «Avísale a un administrador»), sin permiso («Tu rol no permite cambiar supervisores. Pídeselo a alguien con ese permiso o a un administrador.», con candado), límite de frecuencia (cuenta regresiva), solicitud demasiado grande, presupuesto al 80 % (banda warning solo para administradores), presupuesto agotado (compositor desactivado), sin conexión (banda neutra, borrador conservado), corte de red durante la ejecución («Revisa el historial antes de volver a pedirlo»), plan vencido.
 
 REGLAS DE DISEÑO
-- Componentes del DS por nombre: Sheet, Button (primary/secondary/ghost/destructive, icon 44), Select, Segmentado, Chip, Badge, Card, Pares, Textarea, Tabs, Table, Empty, ErrorState, Forbidden, Loading, Alerta, Tooltip, CommandPalette, Timeline.
+- El panel es un COMPONENTE NUEVO del DS, «Panel lateral», con tres variantes (acoplado redimensionable en escritorio, superpuesto en iPad, pantalla completa en teléfono): diséñalo también en su hoja de componente con sus estados. No es el Sheet modal actual.
+- Componentes del DS por nombre: Sheet (solo para hojas secundarias), Button (primary/secondary/ghost/destructive, icon 44), Select, Segmentado, Chip, Badge, Card, Pares, Textarea, Tabs, Table, Empty, ErrorState, Forbidden, Loading (variante nueva «hilo»), Banda (avisos de presupuesto y sin conexión), Tooltip, CommandPalette, Timeline.
 - Tipografía solo con estilos t-* (t-title, t-heading, t-body, t-body-sm, t-label, t-caption, t-mono para montos y folios).
 - Radios rounded-md/lg; sombra shadow-overlay solo en el panel superpuesto de iPad.
 - Transiciones de 150–200 ms con prefers-reduced-motion; foco visible; contraste AA en claro y oscuro.
 - El texto que viene de registros (notas, correos) se muestra como texto plano: nunca como botón ni enlace externo clicable.
-- Sin scroll horizontal de página: las tablas anchas se desplazan dentro de su contenedor.
+- Sin scroll horizontal de página: en teléfono las tablas anchas pasan a lista apilada; en iPad y escritorio se desplazan dentro de su contenedor.
 - El agente no es una entrada del menú lateral: no agregues «Agente» a la barra lateral.
 ```
 
@@ -356,3 +369,4 @@ REGLAS DE DISEÑO
 | Fecha | Cambio | Aprobó |
 |---|---|---|
 | 29-oct-2026 | Borrador inicial: reglas de la pantalla, 13 preguntas con recomendación y Design Prompt (CAR-69) | Pendiente |
+| 29-oct-2026 | Autorrevisión: panel como componente nuevo del DS, R5 sin autonomía de keys, eventos de presupuesto existentes, permisos de gerente, fuera de alcance = inexistente, §9 ampliado, «Sin la fuente X» | Pendiente |
