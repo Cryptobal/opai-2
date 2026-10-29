@@ -1,6 +1,6 @@
 import { Badge, cn } from "@opai/ds";
 
-import { LinkNext } from "@/app/_components/link-next";
+import { LinkIndice } from "@/app/_components/link-indice";
 
 import type { Indice } from "./datos";
 import { FiltroIndice } from "./filtro-indice";
@@ -24,7 +24,7 @@ export function IndiceConfig({ indice, seleccionada, q }: Props) {
       grupo: s.grupo,
       texto: `${s.titulo} ${s.descripcion}`,
       nodo: (
-        <LinkNext
+        <LinkIndice
           href={s.href}
           aria-current={activa ? "page" : undefined}
           className={cn(
@@ -44,7 +44,7 @@ export function IndiceConfig({ indice, seleccionada, q }: Props) {
             </span>
           </span>
           {n ? <Badge tono="warning">{n}</Badge> : null}
-        </LinkNext>
+        </LinkIndice>
       ),
     };
   });
