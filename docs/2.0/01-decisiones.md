@@ -313,6 +313,8 @@ decisiones atribuidas a Carlos.
 
 **Decisión.** Rondas depende solo del núcleo (instalaciones, personas, dispositivos, documentos, geolocalización, comunicaciones) y se vende solo. Conserva de 1.0: puntos de control con QR/NFC/GPS y geocerca por punto, plantillas y programación, estados y cierres automáticos, tracking con precisión y batería, trust score con pesos configurables, detección de anomalías, offline-first con cola idempotente, informes con recorrido y heatmap, vista del cliente. Integra el libro de novedades y los incidentes de terreno. El Portal Terreno y el Portal Trabajador ejecutan rondas con la misma lógica (`packages/domain`).
 
+**Nota del 29-oct-2026 (CAR-70, Central de monitoreo).** Decisión de Carlos, 29-oct-2026, transmitida en la sesión de Claude de CAR-70 (PR #122), ajuste al encargo de Central: el **libro de novedades de 1.0 pasa a 2.0 en la app Terreno** (no en Rondas como pantalla propia) y **recibe las novedades que deja una ronda**; el módulo Central lo **muestra** (no lo duplica) en la pestaña «Central» de la ficha de la instalación, junto a su propia bitácora. Detalle en `modulos/central.md` §2 y §3.
+
 ---
 
 ## ADR-025 · Tickets transversal y simple; sin chat
@@ -338,6 +340,8 @@ decisiones atribuidas a Carlos.
 **Fecha:** 23-oct-2026 · **Estado:** vigente · Ver `docs/2.0/extraccion/integraciones-y-configuracion-por-tenant.md`.
 
 **Decisión.** El núcleo tiene un **catálogo de integraciones** (proveedor DTE, banco, factoring, correo, WhatsApp, mapas y geocodificación, biometría, IA, Slack, webhooks propios) con estado por tenant, prueba de conexión y registro de uso. Cada módulo declara en su manifest las integraciones que requiere; el núcleo provee el adaptador configurado. Las credenciales del tenant se guardan en un **almacén de secretos cifrado** (AES-256-GCM con clave de plataforma rotable, envelope encryption), se muestran una sola vez y nunca salen por API ni MCP. Hay dos modalidades por integración: **de plataforma** (OPAI pone la credencial y la cobra en el plan: mapas, biometría, correo, IA) y **propia del tenant** (DTE, banco, factoring, Slack, dominio de correo, Maps con cuota propia). La geolocalización (autocompletado de direcciones, geocodificación, mapas, distancias) es un servicio del núcleo con proveedor Google Maps por defecto y key de plataforma restringida por dominio; el tenant puede aportar la suya.
+
+**Nota del 29-oct-2026 (CAR-70, Central de monitoreo).** Decisión de Carlos, 29-oct-2026, transmitida en la sesión de Claude de CAR-70 (PR #122), ajuste a la pregunta 8 (telefonía) de `modulos/central.md` §14: WhatsApp/telefonía para la Central sigue el mismo patrón de plataforma-o-propia de este ADR, con Twilio como proveedor. Por defecto los avisos salen con la cuenta de Twilio **de plataforma** de OPAI y sus plantillas de WhatsApp ya aprobadas; como opción, cada tenant conecta **su propia cuenta de Twilio** en el catálogo de integraciones. Un tenant con número de WhatsApp propio necesita la aprobación de Meta **por número y por plantilla** antes de poder enviarlas; mientras no la tenga, sigue con el Twilio y las plantillas de OPAI. Detalle en `modulos/central.md` §10.
 
 ---
 
