@@ -3,6 +3,7 @@ import { hashPassword } from "better-auth/crypto";
 import { cerrarClientes, dbAdmin, enTransaccion } from "@opai/db";
 import { PLANTILLAS } from "../../db/scripts/roles-base-plantillas";
 import { exigirBaseE2E } from "../../db/scripts/exigir-base-e2e";
+import { usuarioE2E } from "./usuario-e2e";
 
 async function main() {
   exigirBaseE2E();
@@ -13,28 +14,7 @@ async function main() {
   const plantilla = PLANTILLAS.find((p) => p.nombre === "Inspector DT")!;
   await enTransaccion(tenant.id, async (tx) => {
     await tx.$executeRaw`SELECT pg_advisory_xact_lock(70167)`;
-    const user = await tx.user.upsert({
-      where: { email: "inspector-seguimiento@opai.cl" },
-      update: {},
-      create: {
-        email: "inspector-seguimiento@opai.cl",
-        name: "Inspector E2E",
-        emailVerified: true,
-      },
-    });
-    const actual = await tx.account.findFirst({
-      where: { userId: user.id, providerId: "credential" },
-    });
-    if (actual) await tx.account.update({ where: { id: actual.id }, data: { password: hash } });
-    else
-      await tx.account.create({
-        data: {
-          userId: user.id,
-          providerId: "credential",
-          accountId: user.id,
-          password: hash,
-        },
-      });
+    const user = await usuarioE2E("inspector-seguimiento@opai.cl", "Inspector E2E", hash);
     const rol = await tx.rol.upsert({
       where: { tenantId_nombre: { tenantId: tenant.id, nombre: "Inspector seguimiento E2E" } },
       update: { permisos: [...plantilla.permisos] },
