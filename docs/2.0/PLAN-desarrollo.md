@@ -51,7 +51,7 @@ Primero se cierra el Núcleo; después Puestos → Comercial → CPQ; después e
 | M15 | **Firma electrónica avanzada** (Brief 28) | En borrador: nivel N3 de [`modulos/firma.md`](modulos/firma.md) (CAR-73, 29-oct) | No aplica | Falta | Falta | Falta |
 | M16 | **Apagado de 1.0** (Brief 29) | Falta | No aplica | Falta | Falta | Falta |
 | — | **Empaquetado nativo Capacitor** (Brief 17) | Parcial: ADR-044 | No aplica | Falta | Falta | Falta |
-| — | **Agente interno de OPAI** (NÚCLEO-E2: servidor antes de CPQ; Carlos, 26-oct-2026 21:07, t461s2118; enmienda ADR-049 §8) | ADR-049 y [`NUCLEO-E2-agente-interno.md`](briefs/NUCLEO-E2-agente-interno.md) | UI pendiente de export aprobado del DS 2.0; reserva integrada en `main` (PR #37, `7e526eb`) | Falta | Servidor en construcción | Falta |
+| — | **Agente interno de OPAI** (NÚCLEO-E2: servidor antes de CPQ; Carlos, 26-oct-2026 21:07, t461s2118; enmienda ADR-049 §8) | ADR-049, [`NUCLEO-E2-agente-interno.md`](briefs/NUCLEO-E2-agente-interno.md) y la especificación de la pantalla [`modulos/agente.md`](modulos/agente.md) (borrador, CAR-69, 29-oct-2026; las 13 preguntas decididas por Carlos el 29-oct-2026, con adjuntos sí) | Design Prompt listo en `modulos/agente.md` §15 (CAR-69); falta el diseño aprobado en Claude Design. Reserva de ⌘K integrada en `main` (PR #37, `7e526eb`) | Falta (brief de la UI después del diseño aprobado) | Servidor en `main` (PR #62 y #73); UI falta. Licencia `agente` apagada: **activarla para Gard es decisión de Carlos** | Falta |
 
 ## 3. Orden vigente
 
