@@ -21,6 +21,8 @@ export type Miembro = {
   excepciones: number;
   /** Último acceso (A4); null si no hay sesión registrada. */
   ultimoAccesoEn: Date | null;
+  /** Segundo factor activo (CAR-54): decide si la ficha ofrece restablecerlo. */
+  mfaActiva: boolean;
 };
 export type Invitacion = {
   id: string;

@@ -24,6 +24,9 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
       PERMISOS_CORE.ownersManage,
       // Aceptar el DPA es acto del owner (responsable del tratamiento, §16.1): admin no puede.
       PERMISOS_CORE.cumplimientoDpaAceptar,
+      // Restablecer el segundo factor de otro usuario es irreversible y bypasea su contraseña
+      // (CAR-54): solo un owner, igual que el DPA.
+      PERMISOS_CORE.usersMfaReset,
     ],
   },
   gerente: {
@@ -33,6 +36,8 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
       PERMISOS_CORE.tenantManage,
       PERMISOS_CORE.tenantDelete,
       PERMISOS_CORE.usersManage,
+      // Restablecer el segundo factor de otro usuario es solo del owner (CAR-54, como el DPA).
+      PERMISOS_CORE.usersMfaReset,
       PERMISOS_CORE.ownersManage,
       PERMISOS_CORE.apikeysManage,
       // Sueldos, configuración del tenant, integraciones y control de agentes: owner y admin.

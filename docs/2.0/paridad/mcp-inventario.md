@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 253 pares pantalla→capacidad · 217 con herramienta · 36 excepciones justificadas · 0 faltantes.
+**Resumen:** 254 pares pantalla→capacidad · 217 con herramienta · 37 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -229,6 +229,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/usuarios` | `core.supervisores.quitar` | `core_supervisores_quitar` | existe |
 | erp | `/configuracion/usuarios` | `core.users.invite` | — | excepción |
 | erp | `/configuracion/usuarios` | `core.users.list` | `core_users_list` | existe |
+| erp | `/configuracion/usuarios` | `core.users.mfa_restablecer` | — | excepción |
 | erp | `/configuracion/usuarios` | `core.users.remove` | `core_users_remove` | existe |
 | erp | `/configuracion/usuarios` | `core.users.update` | `core_users_update` | existe |
 | erp | `/cuentas/[id]/contactos` | `core.contactos.list` | `core_contactos_list` | existe |
@@ -282,6 +283,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `app/_acciones/mfa.ts#accionConfirmarMfa` | Identidad: confirma el enrolamiento del segundo factor. |
 | `app/_acciones/mfa.ts#accionDesactivarMfa` | Identidad: desactiva el segundo factor propio. |
 | `app/_acciones/mfa.ts#accionIniciarMfa` | Identidad: enrola el segundo factor propio. |
+| `app/_acciones/mfa.ts#accionRegenerarCodigos` | Identidad: regenera los códigos de respaldo propios (CAR-54), exige la contraseña. |
 | `app/_acciones/mfa.ts#accionVerificar` | Identidad: segundo factor de la sesión humana. |
 | `app/_acciones/validar-fichas-nav.ts#revisarFichasNav` | Igual que validarFichasNav: solo capacidades .get con alcance, ya expuestas por MCP. |
 | `app/_acciones/validar-fichas-nav.ts#validarFichasNav` | Lee fichas fijadas con core.{cuentas,instalaciones,personas,cargos}.get (herramientas MCP existentes). |
@@ -340,8 +342,10 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.roles.create` | Solo personas: gobierna el acceso; un agente no se crea roles ni se concede permisos (ADR-034). |
 | `core.roles.update` | Solo personas: cambiar los permisos de un rol es gobernar el acceso (ADR-034). |
 | `core.users.invite` | Solo personas: invitar asigna un rol y gobierna el acceso (encargo PR #70). |
+| `core.users.mfa_restablecer` | Solo personas: apagar el segundo factor de otro usuario es irreversible y bypasea su contraseña; la decide un owner, nunca un agente (CAR-54). |
 | `platform.aprobaciones.aprobar` | Solo personas: lo irreversible de plataforma lo aprueba un humano (ADR-032, CAR-36). |
 | `platform.aprobaciones.rechazar` | Solo personas: la decisión sobre lo irreversible de plataforma es humana (ADR-032, CAR-36). |
+| `platform.users.mfa_restablecer` | Solo personas: apagar el segundo factor de un usuario de cualquier empresa es irreversible y bypasea su contraseña; la decide Plataforma, nunca un agente (CAR-54). |
 
 ## Solo personas: camino humano (CAR-52)
 
@@ -381,8 +385,10 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.roles.create` | `/configuracion/usuarios/roles` | sí (portal ERP) | reservada a personas |
 | `core.roles.update` | `/configuracion/usuarios/roles` | sí (portal ERP) | reservada a personas |
 | `core.users.invite` | `/configuracion/usuarios` | no | reservada a personas |
+| `core.users.mfa_restablecer` | `/configuracion/usuarios` | no | reservada a personas |
 | `platform.aprobaciones.aprobar` | `/configuracion/aprobaciones` | no | reservada a personas |
 | `platform.aprobaciones.rechazar` | `/configuracion/aprobaciones` | no | reservada a personas |
+| `platform.users.mfa_restablecer` | sin pantalla todavía · CAR-54 · desde 2026-10-29 | no | reservada a personas |
 
 ## Capacidades solo por API y MCP (ninguna pantalla las invoca con id literal)
 

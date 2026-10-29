@@ -40,7 +40,7 @@ import { platformAdminsInvite, platformModulesSet } from "./platform-modulos";
 import { platformTenantsGet, platformUsageSummary } from "./platform-tenants";
 import { capacidadesPlataforma, platformTenantsList, platformTrabajosList } from "./plataforma";
 import { tenantGet, tenantUpdate } from "./tenant";
-import { usersList, usersRemove, usersUpdate } from "./users";
+import { usersList, usersMfaRestablecer, usersRemove, usersUpdate } from "./users";
 
 /** Capacidades del núcleo (`core.*`) y de plataforma (`platform.*`), Brief 01 sección 7. */
 export const capacidadesDelNucleo: readonly Capacidad[] = [
@@ -53,6 +53,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   usersInvite,
   usersUpdate,
   usersRemove,
+  usersMfaRestablecer,
   invitationsList,
   invitationsRevoke,
   invitationsPeek,

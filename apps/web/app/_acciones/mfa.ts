@@ -6,6 +6,7 @@ import {
   confirmarSegundoFactor,
   desactivarSegundoFactor,
   iniciarSegundoFactor,
+  regenerarCodigosRespaldo,
   requireSession,
   verificarCodigoRespaldo,
   verificarSegundoFactor,
@@ -108,4 +109,18 @@ export async function accionDesactivarMfa(
   const password = String(form.get("password") ?? "");
   const r = await desactivarSegundoFactor(password);
   return r.ok ? { ok: true } : { ok: false, error: r.mensaje };
+}
+
+export type RegenerarCodigos =
+  { ok: true; codigos: string[] } | { ok: false; error: string } | null;
+
+/** Regenera los códigos de respaldo (CAR-54, I-15); exige la contraseña. */
+export async function accionRegenerarCodigos(
+  _previo: RegenerarCodigos,
+  form: FormData,
+): Promise<RegenerarCodigos> {
+  await requireSession();
+  const password = String(form.get("password") ?? "");
+  const r = await regenerarCodigosRespaldo(password);
+  return r.ok ? { ok: true, codigos: r.codigos } : { ok: false, error: r.mensaje };
 }

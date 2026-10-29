@@ -13,6 +13,7 @@ import { ExcepcionesUsuario } from "./excepciones-usuario";
 import { escrituraFicha } from "./guardar-usuario";
 import type { PropsFicha } from "./hojas-usuario";
 import { InstalacionesACargo } from "./instalaciones-a-cargo";
+import { RestablecerMfa } from "./restablecer-mfa";
 import type { Miembro } from "./usuarios-lista";
 import { useExcepciones } from "./use-excepciones";
 
@@ -67,6 +68,9 @@ function Formulario(p: Props & { miembro: Miembro }) {
     if (await ejecutar("core.users.remove", { membershipId: miembro.id })) p.onCerrar();
   }
 
+  // Restablecer el MFA de otro usuario es acto exclusivo del owner (CAR-54), nunca sobre uno mismo.
+  const puedeRestablecerMfa = p.miRol === "owner" && miembro.mfaActiva;
+
   return (
     <>
       <Sheet
@@ -115,6 +119,10 @@ function Formulario(p: Props & { miembro: Miembro }) {
             activo={activo}
             onCambiar={setActivo}
           />
+          {/* Recuperación de MFA (CAR-54): solo un owner, y solo si la persona lo tiene activo. */}
+          {puedeRestablecerMfa ? (
+            <RestablecerMfa membershipId={miembro.id} nombre={miembro.nombre} />
+          ) : null}
           {/* Alcance por filas (CAR-38): solo del rol supervisor guardado; lo fija un owner o admin. */}
           {miembro.rol === "supervisor" && (p.miRol === "owner" || p.miRol === "admin") ? (
             <InstalacionesACargo membershipId={miembro.id} />

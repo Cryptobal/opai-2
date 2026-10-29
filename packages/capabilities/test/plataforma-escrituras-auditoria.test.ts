@@ -65,7 +65,13 @@ function semilla() {
   });
   return {
     ...s,
-    user: s.user.map((u) => (u.id === owner.id ? { ...u, platformRole: "owner" } : u)),
+    user: s.user.map((u) =>
+      u.id === owner.id
+        ? { ...u, platformRole: "owner" }
+        : u.id === U2
+          ? { ...u, twoFactorEnabled: true }
+          : u,
+    ),
     trabajo: [trabajo(TRABAJO_FALLIDO, "fallido"), trabajo(TRABAJO_PENDIENTE, "pendiente")],
     aprobacionPlataforma: [aprobacion(APROBACION_A), aprobacion(APROBACION_R)],
   };
@@ -94,6 +100,7 @@ const CASOS: Record<string, Record<string, unknown>> = {
   "platform.trabajos.reintentar": { tenantId: t, trabajoId: TRABAJO_FALLIDO },
   "platform.trabajos.cancelar": { tenantId: t, trabajoId: TRABAJO_PENDIENTE },
   "platform.users.set_role": { email: "beto@prueba.cl", platformRole: "support" },
+  "platform.users.mfa_restablecer": { email: "beto@prueba.cl" },
   "platform.aprobaciones.aprobar": { id: APROBACION_A },
   "platform.aprobaciones.rechazar": { id: APROBACION_R, motivo: "no corresponde" },
 };
@@ -114,8 +121,13 @@ describe("auditoría global de las escrituras de plataforma (CAR-41)", () => {
         const r = await executeCapability(ctx, id, input);
         expect(r, id).toMatchObject({ ok: true });
         const propios = tabla("auditoriaGlobal").filter((e) => e["capability"] === id);
-        expect(propios, id).toHaveLength(1);
-        expect(propios[0], id).toMatchObject({
+        // platform.users.mfa_restablecer deja DOS hechos a propósito (CAR-54): el automático de
+        // toda escritura platform.* (ámbito plataforma, ADR-052) y uno explícito en el registro de
+        // seguridad global (ámbito seguridad, CAR-42) porque es un cambio sobre la cuenta de una
+        // persona, no solo sobre los datos de una empresa.
+        expect(propios, id).toHaveLength(id === "platform.users.mfa_restablecer" ? 2 : 1);
+        const dePlataforma = propios.find((e) => e["ambito"] === "plataforma");
+        expect(dePlataforma, id).toMatchObject({
           ambito: "plataforma",
           actorType: "user",
           actorId: owner.id,

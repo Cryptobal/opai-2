@@ -72,4 +72,8 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: aprobar el anexo de contrato materializa un documento irreversible, un acto humano responsable (Brief 07b PR 4, ADR-032).",
   "core.anexos.rechazar":
     "Solo personas: rechazar el anexo de contrato es una decisión humana responsable (Brief 07b PR 4, ADR-032).",
+  "core.users.mfa_restablecer":
+    "Solo personas: apagar el segundo factor de otro usuario es irreversible y bypasea su contraseña; la decide un owner, nunca un agente (CAR-54).",
+  "platform.users.mfa_restablecer":
+    "Solo personas: apagar el segundo factor de un usuario de cualquier empresa es irreversible y bypasea su contraseña; la decide Plataforma, nunca un agente (CAR-54).",
 };

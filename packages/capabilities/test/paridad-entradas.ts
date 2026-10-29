@@ -44,6 +44,8 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
   "app/_acciones/mfa.ts#accionConfirmarMfa":
     "Identidad: confirma el enrolamiento del segundo factor.",
   "app/_acciones/mfa.ts#accionDesactivarMfa": "Identidad: desactiva el segundo factor propio.",
+  "app/_acciones/mfa.ts#accionRegenerarCodigos":
+    "Identidad: regenera los códigos de respaldo propios (CAR-54), exige la contraseña.",
   "app/(auth)/invitacion/[slug]/[token]/acciones.ts#verInvitacion":
     "Identidad: core.invitations.peek (interna con motivo): el token del enlace es la credencial.",
   "app/(auth)/invitacion/[slug]/[token]/acciones.ts#aceptarInvitacion":

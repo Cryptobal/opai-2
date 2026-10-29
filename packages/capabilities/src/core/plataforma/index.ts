@@ -1,5 +1,6 @@
 import type { Capacidad } from "../../types";
 import { platformAuditoriaList } from "./auditoria-lista";
+import { platformUsersMfaRestablecer } from "./mfa";
 import { platformPreciosList, platformPreciosSet } from "./precios";
 import { platformTenantPanel } from "./tenant-panel";
 import { platformUsersList, platformUsersSetRole } from "./usuarios";
@@ -9,8 +10,8 @@ export { platformTrabajosList } from "./trabajos-lista";
 
 /**
  * Capacidades de las pantallas de Plataforma (sesión C): panel por empresa y precios; y los
- * usuarios de plataforma (ADR-055) y la auditoría de plataforma (CAR-36), por ahora solo API y MCP:
- * sus pantallas esperan diseño.
+ * usuarios de plataforma (ADR-055), el restablecimiento de MFA (CAR-54) y la auditoría de
+ * plataforma (CAR-36), por ahora solo API y MCP: sus pantallas esperan diseño.
  */
 export const capacidadesPlataforma: readonly Capacidad[] = [
   platformTenantPanel,
@@ -18,5 +19,6 @@ export const capacidadesPlataforma: readonly Capacidad[] = [
   platformPreciosSet,
   platformUsersList,
   platformUsersSetRole,
+  platformUsersMfaRestablecer,
   platformAuditoriaList,
 ];

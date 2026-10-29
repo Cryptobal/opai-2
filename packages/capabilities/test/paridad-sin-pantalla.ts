@@ -7,4 +7,11 @@
  */
 export type SinPantalla = { encargo: string; desde: string; motivo: string };
 
-export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> = {};
+export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> = {
+  "platform.users.mfa_restablecer": {
+    encargo: "CAR-54",
+    desde: "2026-10-29",
+    motivo:
+      "Plataforma no tiene pantalla de usuarios todavía (igual que platform.users.set_role, que no es soloPersonas pero tampoco la tiene): por ahora solo API y MCP, como el resto de packages/capabilities/src/core/plataforma.",
+  },
+};

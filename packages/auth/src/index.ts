@@ -18,6 +18,7 @@ export {
   confirmarSegundoFactor,
   desactivarSegundoFactor,
   iniciarSegundoFactor,
+  regenerarCodigosRespaldo,
   verificarCodigoRespaldo,
   verificarSegundoFactor,
 } from "./mfa";

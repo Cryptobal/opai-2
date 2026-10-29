@@ -35,6 +35,8 @@ const TABLA: Record<string, readonly [boolean, boolean, boolean, boolean, boolea
   [P.cumplimientoManage]: [true, true, false, false, false],
   // Aceptar el DPA: solo el owner (§16.1, t331u); ni admin ni gerente.
   [P.cumplimientoDpaAceptar]: [true, false, false, false, false],
+  // Restablecer el segundo factor de otro usuario: solo el owner (CAR-54, como el DPA).
+  [P.usersMfaReset]: [true, false, false, false, false],
 };
 
 describe("permisos del núcleo (Brief 02)", () => {

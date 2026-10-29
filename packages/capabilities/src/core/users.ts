@@ -13,6 +13,7 @@ import { buscar, type Miembro, miembroSchema, quedanOtrosOwners } from "./users-
 
 export { miembroSchema } from "./users-miembro";
 export { usersList } from "./users-consulta";
+export { usersMfaRestablecer } from "./users-mfa";
 
 /** Quien no es owner no puede tocar owners ni asignar un rol con permisos que él no tenga de hecho. */
 function verificarJerarquia(ctx: Contexto, objetivo: Miembro, nuevoRol?: Rol): void {

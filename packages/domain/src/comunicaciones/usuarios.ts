@@ -55,4 +55,22 @@ export const COMUNICABLES_USUARIOS: readonly EventoComunicable[] = [
       },
     },
   },
+  {
+    evento: "core.usuario.mfa_restablecida",
+    nombre: "Segundo factor restablecido",
+    descripcion: "Avisa a la persona que otro usuario u OPAI apagó su segundo factor (CAR-54).",
+    transaccional: true,
+    variables: [
+      v("usuario.nombre", "texto", "Ana Rojas", "Nombre de la persona."),
+      v("responsable", "texto", "Carlos Irigoyen (owner)", "Quién lo restableció."),
+      URL("Mi cuenta, para activarlo de nuevo."),
+    ],
+    plantillas: {
+      correo: {
+        asunto: "Tu segundo factor quedó desactivado",
+        cuerpo:
+          "Hola {{usuario.nombre}}:\n\n{{responsable}} restableció el segundo factor de tu cuenta: queda desactivado hasta que lo vuelvas a activar.\n\nSi no lo pediste, contacta a tu empresa de inmediato.\n\nActívalo de nuevo aquí:\n{{url}}",
+      },
+    },
+  },
 ];

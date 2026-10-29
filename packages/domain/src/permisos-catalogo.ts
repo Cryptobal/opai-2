@@ -7,6 +7,8 @@ export const PERMISOS_CORE = {
   tenantDelete: "core:tenant.delete",
   usersRead: "core:users.read",
   usersManage: "core:users.manage",
+  /** Restablecer el segundo factor de otro usuario (CAR-54): solo owner, nunca admin. */
+  usersMfaReset: "core:users.mfa_reset",
   ownersManage: "core:owners.manage",
   apikeysManage: "core:apikeys.manage",
   auditRead: "core:audit.read",
@@ -57,4 +59,6 @@ export const PERMISOS_PLATAFORMA = {
   modulesManage: "platform:modules.manage",
   /** Asignar o quitar el rol de plataforma de un usuario: solo owner de plataforma (ADR-055). */
   rolesManage: "platform:roles.manage",
+  /** Restablecer el segundo factor de un usuario de cualquier empresa (CAR-54, I-15). */
+  usersManage: "platform:users.manage",
 } as const;

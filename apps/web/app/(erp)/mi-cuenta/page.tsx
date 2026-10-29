@@ -8,6 +8,7 @@ import { mfaObligatoriaPara } from "@/lib/mfa";
 import { requerirIdentidad } from "@/lib/servidor";
 
 import { DesactivarMfa } from "./desactivar-mfa";
+import { RegenerarCodigosDeRespaldo } from "./regenerar-codigos";
 
 export const metadata = { title: "Mi cuenta" };
 
@@ -39,6 +40,7 @@ export default function MiCuenta() {
                 >
                   Al entrar te pediremos un código de tu app de autenticación.
                 </Alerta>
+                <RegenerarCodigosDeRespaldo />
                 {obligatoria ? (
                   <p className="text-sm text-fg-muted">Tu rol requiere el segundo factor.</p>
                 ) : (
