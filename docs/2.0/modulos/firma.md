@@ -50,7 +50,7 @@ Valores por defecto de la **plantilla de la vertical de seguridad**; el tenant l
 | **Finiquito** | **No se firma en OPAI** | — | — | Se prepara y se sigue; se firma en Mi DT o ante ministro de fe (R14) |
 | **Propuesta comercial (CPQ)** | **N1** | N1, N2, N3 | Contacto del cliente | Es la aceptación de una oferta; el cliente puede pedir N3 |
 | **Contrato de servicio con el cliente** | **N1** | N1, N2, N3 | Contacto con poder y representante legal | Si el cliente lo exige o el monto supera el umbral del tenant, N3 (P3) |
-| **Acta de supervisión, de entrega de puesto o de inventario** | **N1** en el dispositivo | N1 | Cliente, guardia y supervisor presentes | Firma en el celular o tablet de quien levanta el acta, con nombre y RUN del firmante (corrige B.2-6 de 1.0) |
+| **Acta de supervisión, de entrega de puesto o de inventario** | **N1** en el dispositivo | N1 | Cliente, guardia y supervisor presentes | Firma en el celular o tablet de quien levanta el acta, con nombre y RUN del firmante (requisito B.2-5 de la extracción) |
 | **Acta de reunión o de acuerdos comerciales** | **N1** | N1, N2 | Asistentes | — |
 | **Poderes, pagarés y documentos para organismos públicos** | **N3** | N3 | Según el documento | Se habilita con el Brief 28 |
 
@@ -80,21 +80,21 @@ Valores por defecto de la **plantilla de la vertical de seguridad**; el tenant l
 
 **Documento y huella**
 
-- **R4.** Al enviar a firma, el documento se **congela**: se genera el PDF definitivo, se calcula su huella SHA-256 y se guarda como versión en `core.documentos`. Desde ahí no se edita; cambiarlo crea una versión nueva y **cancela** la solicitud, avisando a los firmantes (corrige B.2-2 y B.2-3).
+- **R4.** Al enviar a firma, el documento se **congela**: se genera el PDF definitivo, se calcula su huella SHA-256 y se guarda como versión en `core.documentos`. Desde ahí no se edita; cambiarlo crea una versión nueva y **cancela** la solicitud, avisando a los firmantes (requisitos B.2-2 y B.2-3).
 - **R5.** Cada firmante firma **esa huella**. La pantalla de firma muestra el documento completo (no un resumen) y el firmante debe llegar al final antes de poder firmar.
 - **R6.** Hay **dos huellas**, cada una con su papel. La **huella del documento** (H1) es la del PDF congelado de R4: es lo que cada firmante firma y lo que liga su evidencia. Al completarse, OPAI arma el **PDF firmado**: el documento congelado sin cambios más una página de evidencia (firmantes, nivel, fecha y hora del servidor, método de identificación, H1 y QR a `/verificar/<token>`), con el sello electrónico de la plataforma y el sello de tiempo (P7) aplicados sobre ese archivo completo. Su huella (H2) se registra en la bitácora en ese momento y el archivo se guarda como versión nueva e inmutable. La verificación pública compara el archivo que se sube con **H2** y muestra H1 para probar que las páginas firmadas son las congeladas; un PDF firmado con N3 por el prestador lleva además su propia firma PAdES, que se verifica aparte.
 
 **Firmantes y flujo**
 
-- **R7.** El orden es secuencial (por defecto) o paralelo, según la política. En secuencial, cada firmante recibe el aviso cuando le toca; en paralelo, todos a la vez. Los recordatorios respetan el modo y llegan a todos los pendientes (corrige B.2-5).
+- **R7.** El orden es secuencial (por defecto) o paralelo, según la política. En secuencial, cada firmante recibe el aviso cuando le toca; en paralelo, todos a la vez. Los recordatorios respetan el modo y llegan a todos los pendientes (requisito B.2-1).
 - **R8.** El plazo por defecto es de **7 días** (ajustable); vencido, la solicitud queda «vencida». Recordatorios a las 48 h y 24 h antes del vencimiento, por Comunicaciones (silencio por defecto para todo lo que no sea el firmante, ADR-020).
 - **R9.** Un firmante puede **rechazar** con motivo; la solicitud queda «rechazada» y quien la envió decide si corrige y reenvía.
 - **R10.** Para firmar electrónicamente documentos laborales, el trabajador debe haber dado su **aceptación expresa del medio electrónico** una vez (revocable). Si no la da o la revoca, el documento sale para firma en papel, que se sube escaneada y queda vinculada (art. 9 del Código del Trabajo, [DT, ORD. 2965](https://www.dt.gob.cl/legislacion/1624/w3-article-115495.html)).
-- **R11.** Dos firmas simultáneas del mismo firmante cuentan una sola vez; cada firma es una transición condicionada al estado (corrige B.2-4).
+- **R11.** Dos firmas simultáneas del mismo firmante cuentan una sola vez; cada firma es una transición condicionada al estado (requisito B.2-4).
 
 **Identidad por nivel**
 
-- **R12.** **N1:** enlace personal de un solo destinatario, que vence con la solicitud, o la sesión del usuario en OPAI; trazo dibujado o nombre escrito; casilla de aceptación cuyo texto y versión quedan en la evidencia (corrige B.2-4). No se aceptan imágenes de firma subidas desde afuera.
+- **R12.** **N1:** enlace personal de un solo destinatario, que vence con la solicitud, o la sesión del usuario en OPAI; trazo dibujado o nombre escrito; casilla de aceptación cuyo texto y versión quedan en la evidencia (requisito B.2-4). No se aceptan imágenes de firma subidas desde afuera.
 - **R13.** **N2:** además de N1, un código de un solo uso (6 dígitos, 10 minutos, 3 intentos) al correo o celular **registrado en OPAI**, no a uno que escriba el firmante; y la verificación de identidad: el trabajador enrolado usa su prueba de vida (el mismo adaptador de biometría de Asistencia, ADR-044.5); si el tenant no tiene Asistencia o el trabajador no está enrolado, usa el mismo camino que un externo (Documentos no depende de Asistencia, ADR-048); el externo, la cédula vigente con selfie y prueba de vida por el proveedor que contrate el tenant. La biometría es un dato sensible: se pide **consentimiento expreso** antes, se ofrece una alternativa sin biometría (firma presencial en el dispositivo de un supervisor o N3) y OPAI guarda el resultado de la verificación, **no la imagen** (Ley 21.719).
 - **R14.** **Finiquito:** OPAI genera el documento y su cálculo, registra «enviado a la DT», «aceptado», «aceptado con reserva» o «rechazado» y guarda el PDF ratificado. No ofrece un botón «firmar finiquito».
 - **R15.** **N3:** el firmante firma en el flujo del prestador acreditado con su certificado FEA; OPAI recibe el PDF firmado, verifica que la firma corresponde a la huella enviada y que el certificado es de un prestador de la lista de confianza vigente ([Entidad Acreditadora, TSL](https://www.entidadacreditadora.gob.cl/wp-content/uploads/2025/06/CL-TSL.pdf)), y lo guarda. El prestador lo contrata el tenant o la plataforma (P2) y cada firma se mide en `core.consumos` (ADR-031).
@@ -107,7 +107,7 @@ Valores por defecto de la **plantilla de la vertical de seguridad**; el tenant l
 
 - **R17.** Cada evento (enviado, visto, código enviado, identidad verificada, firmado, rechazado, vencido, cancelado) es un **hecho inmutable en la bitácora encadenada** del núcleo, con hora del servidor, IP y dispositivo.
 - **R18.** Los documentos firmados y su evidencia no se borran por retención mientras dure la obligación legal de conservarlos (ADR-023, Brief 07d §4.5); una supresión pedida por el titular se responde con bloqueo y la causa legal.
-- **R19.** Un **agente nunca firma** por una persona. Enviar a firma **pide aprobación humana** al agente (`APPROVAL_REQUIRED`), también con autonomía «directo», en esta lista cerrada: toda solicitud **N2 o N3**; contratos de trabajo y anexos; contratos de servicio; propuestas comerciales; cartas al trabajador. **No la pide** el envío N1 de actas (supervisión, entrega de puesto, inventario, reunión) y de recepciones o tomas de conocimiento (reglamento interno, EPP, liquidación). La lista es la misma en §8 y §10.
+- **R19.** Un **agente nunca firma** por una persona. Enviar a firma **pide aprobación humana** al agente (`APPROVAL_REQUIRED`), también con autonomía «directo», en esta lista cerrada: toda solicitud **N2 o N3**; contratos de trabajo y anexos; contratos de servicio; propuestas comerciales; cartas al trabajador. **Mientras Carlos no responda P12, todo envío a firma por un agente pide aprobación humana, también el N1.** Si aprueba P12, quedaría sin aprobación (con vista previa obligatoria y auditoría) solo el envío N1 de actas (supervisión, entrega de puesto, inventario, reunión) y de recepciones o tomas de conocimiento (reglamento interno, EPP, liquidación). La lista es la misma en §8 y §10.
 
 ## 7. Estados y transiciones
 
@@ -152,7 +152,7 @@ Como toda capacidad (ADR-004, ADR-055): cada herramienta existe igual en pantall
 
 | Herramienta | Qué hace | Tipo | Vista previa | Aprobación humana |
 |---|---|---|---|---|
-| `documentos_firmas_enviar` | Congela el documento y lo envía a firma con firmantes, orden, nivel y plazo | irreversible (congela el documento); con efecto legal en los de la lista de R19 | sí (muestra la huella, firmantes y nivel) | **según la lista cerrada de R19**; la excepción N1 de actas y recepciones la confirma Carlos (P12) |
+| `documentos_firmas_enviar` | Congela el documento y lo envía a firma con firmantes, orden, nivel y plazo | irreversible (congela el documento); con efecto legal en los de la lista de R19 | sí (muestra la huella, firmantes y nivel) | **sí, siempre**, mientras Carlos no responda P12 (R19) |
 | `documentos_firmas_estado` | Estado de una solicitud y de cada firmante | lectura | — | — |
 | `documentos_firmas_list` | Solicitudes por estado, tipo o entidad (pendientes, vencidas) | lectura | — | — |
 | `documentos_firmas_recordar` | Reenvía el aviso a los pendientes | escritura | sí | no |
@@ -179,13 +179,13 @@ Como toda capacidad (ADR-004, ADR-055): cada herramienta existe igual en pantall
 | En 1.0 | En 2.0 | Por qué |
 |---|---|---|
 | Un solo nivel (simple) | Tres niveles por política (§2, §4) | Valor legal según el documento |
-| Huella calculada al imprimir y PDF que se regenera | Documento congelado, huella al enviar, PDF firmado inmutable y verificación pública (R4–R6) | B.2-2 |
-| Documento editable en firma | Editar cancela la solicitud (R4) | B.2-3 |
-| Firma subida como imagen o URL | Trazo o nombre en OPAI; sin imágenes de afuera (R12) | B.2-4 |
-| Aceptación legal no guardada | Texto y versión en la evidencia (R12); aceptación del medio electrónico del trabajador (R10) | DT, Dictamen 0789/015 |
-| Recordatorios que no corren y no respetan el modo paralelo | Trabajo programado y recordatorios a todos los pendientes (R7, R8) | B.2-1, B.2-5 |
+| Integridad del documento firmado (B.2-2) | Documento congelado, huella al enviar, PDF firmado inmutable y verificación pública (R4–R6) | Valor probatorio |
+| Bloqueo del documento en firma (B.2-3) | Editar cancela la solicitud (R4) | Valor probatorio |
+| Firma subida como imagen | Trazo o nombre en OPAI; sin imágenes de afuera (R12) | B.2-4 |
+| Evidencia de la aceptación | Texto y versión en la evidencia (R12); aceptación del medio electrónico del trabajador (R10) | DT, Dictamen 0789/015 |
+| Recordatorios y vencimientos (B.2-1) | Trabajo programado y recordatorios a todos los pendientes (R7, R8) | Operación |
 | Autoestampado del representante sin límites | Solo N1, con autorización expresa y revocable (R16) | Riesgo legal |
-| Firma del cliente en la visita sin nombre ni RUN | Acta N1 con nombre, RUN y huella (§4) | B.2-6 |
+| Firma del cliente en la visita | Acta N1 con nombre, RUN y huella (§4) | B.2-5 |
 | Finiquito «firmable» en OPAI | Se prepara y se sigue; se firma en Mi DT (R14) | Normativa DT |
 | Sin MCP | Herramientas con aprobación humana (§10) | ADR-055 |
 

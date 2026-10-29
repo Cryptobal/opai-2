@@ -2,7 +2,7 @@
 
 **Fecha:** 29-oct-2026 · **Tarea:** CAR-73 · **Autor:** Claude · **Fuente:** lectura de `Cryptobal/opai` (HEAD del 29-oct-2026), solo lectura y como referencia de reglas de negocio. No se porta código (`REGLAS-codigo.md`).
 
-> Al 29-oct-2026 no existía en `main` una extracción de control de acceso ni de firma. Esta es la primera. Distingue lo **verificado en el código** de lo **inferido**, que se marca así. La sección A describe el comportamiento sin rutas ni archivos de 1.0, porque varias brechas siguen vigentes en producción (A.2); la sección B cita archivos de 1.0.
+> Al 29-oct-2026 no existía en `main` una extracción de control de acceso ni de firma. Esta es la primera. Distingue lo **verificado en el código** de lo **inferido**, que se marca así. Ambas secciones describen el comportamiento sin rutas ni archivos de 1.0, porque hay brechas vigentes en producción (A.2 y B.2); su detalle se entrega a Carlos fuera del repo.
 
 ## A. Control de acceso físico (portal de acceso de 1.0)
 
@@ -54,29 +54,30 @@ Retención o borrado automático de registros, visitantes conocidos e intentos; 
 
 ### B.1 Lo que hace 1.0 (verificado)
 
-| Tema | Comportamiento en 1.0 | Dónde |
-|---|---|---|
-| Nivel | Solo firma electrónica simple (Ley 19.799); casilla obligatoria de aceptación de firma electrónica | `src/lib/validations/docs.ts` |
-| Solicitud | Borrador, pendiente, en curso, completada, cancelada o vencida; firmantes y copias; orden secuencial (por defecto) o paralelo; vencimiento opcional; una solicitud activa por documento | `DocSignatureRequest`, `DocSignatureRecipient`, migraciones `20260219000000_*`, `20260511150000_*` |
-| Firmantes de la empresa | Representante legal y prevencionista con imagen de firma guardada y autoestampado | `20261221000000_docs_laborales_multi_signer`, `notify-due-signers.ts` |
-| Flujo del firmante | Enlace con token a `/sign/[token]`: marca «visto», respeta el orden, permite firma escrita, dibujada o subida, y rechazo con motivo (cancela la solicitud) | `src/app/(templates)/sign/[token]/page.tsx`, `api/docs/sign/*` |
-| Evidencia | Hora del servidor, IP, navegador, método, nombre o imagen; el RUT declarado queda solo en el historial | `DocSignatureRecipient`, `docHistory` |
-| PDF firmado | Se genera desde HTML con una página de certificado (firmantes, IP, SHA-256 del contenido y QR a una vista) | `api/docs/documents/[id]/signed-pdf/route.ts` |
-| Recordatorios | Trabajo que vence solicitudes y recuerda cada 24 h | `api/cron/signature-reminders` |
-| Documentos | Cualquier documento del módulo: contratos de servicio y laborales, aviso de término y finiquito | `prisma/seeds/seed-labor-templates.ts` |
-| Actas en terreno | La visita de supervisión captura la firma del cliente como trazo en el dispositivo del supervisor («Firma aquí / No estaba») | `FirmaCanvas.tsx`, `CierreClient.tsx` |
-| Libro y toma de equipo | Firma del guardia con PIN o rostro con prueba de vida, por propósito (anotación, relevo, consigna, toma de equipo, turno) | `OpsLibroFirma`, `src/lib/libro/firma.ts` |
+| Tema | Comportamiento en 1.0 |
+|---|---|
+| Nivel | Solo firma electrónica simple (Ley 19.799), con casilla de aceptación de firma electrónica |
+| Solicitud | Borrador, pendiente, en curso, completada, cancelada o vencida; firmantes y copias; orden secuencial (por defecto) o paralelo; vencimiento opcional; una solicitud activa por documento |
+| Firmantes de la empresa | Representante legal y prevencionista con firma guardada y firma automática |
+| Flujo del firmante | Enlace personal por correo: marca «visto», respeta el orden, permite firma escrita, dibujada o subida, y rechazo con motivo (cancela la solicitud) |
+| Evidencia | Hora del servidor, IP, navegador, método, nombre o imagen de firma, RUT declarado |
+| PDF firmado | Con una página de certificado (firmantes, IP, huella del contenido y QR a una vista) |
+| Recordatorios | Vencimiento de solicitudes y recordatorio diario a pendientes |
+| Documentos | Cualquier documento del módulo: contratos de servicio y laborales, aviso de término y finiquito |
+| Actas en terreno | La visita de supervisión captura la firma del cliente como trazo en el dispositivo del supervisor («Firma aquí / No estaba») |
+| Libro y toma de equipo | Firma del guardia con PIN o rostro con prueba de vida, por propósito (anotación, relevo, consigna, toma de equipo, turno) |
 
-`crm/signatures` y `opai/configuracion/firmas` son **firmas de correo**, no de documentos.
+Las «firmas» de la configuración del CRM de 1.0 son **firmas de correo**, no de documentos.
 
-### B.2 Brechas observadas en 1.0
+### B.2 Requisitos para 2.0 que salen de la revisión de 1.0
 
-1. **El trabajo de recordatorios no está programado** (`vercel.json`): nada vence ni recuerda solo.
-2. **El hash no prueba nada**: se calcula al generar el PDF, no al firmar, no se guarda, y el PDF se regenera con los datos actuales, así que puede cambiar después de firmado.
-3. **Un documento firmado o en firma se puede editar.**
-4. **Sin control de concurrencia** al firmar; la imagen de firma acepta cualquier URL o un data URL sin límite; la aceptación legal no se guarda.
-5. **En modo paralelo** solo se recuerda al primer orden.
-6. **La firma del cliente en la visita** no guarda nombre ni RUT de quien firma ni la huella del resumen.
+La revisión de 1.0 encontró brechas vigentes en la firma de documentos. **Su detalle no se documenta en este repo**: se entrega a Carlos fuera de él (`AGENTS.md`). Aquí solo quedan los requisitos que 2.0 debe cumplir.
+
+1. **Recordatorios y vencimientos programados** por el trabajo diario del núcleo, a todos los pendientes según el modo secuencial o paralelo (R7, R8).
+2. **Integridad verificable:** el documento se congela al enviarse, su huella se calcula y se guarda en ese momento, y el PDF firmado es una versión inmutable con su propia huella registrada; la verificación pública compara contra lo registrado (R4–R6).
+3. **Documento bloqueado en firma:** un documento en firma o firmado no se edita; cambiarlo crea una versión nueva y cancela la solicitud (R4).
+4. **Firma atómica y evidencia completa:** cada firma es una transición condicionada al estado (sin doble firma); el trazo o el nombre se capturan en OPAI y no se aceptan imágenes externas; el texto y la versión de la aceptación quedan en la evidencia (R11, R12).
+5. **Actas con identidad del firmante:** nombre, RUN y huella del acta en la firma en terreno (§4 de `modulos/firma.md`).
 
 ### B.3 Lo que no existe en 1.0
 
