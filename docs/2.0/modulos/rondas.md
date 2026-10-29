@@ -20,16 +20,16 @@ Que la empresa y su cliente puedan **creer** que la ronda se hizo: quién pasó 
 |---|---|---|---|
 | Punto de control | Lugar físico de una instalación que el guardia debe visitar. Tiene **modo de verificación** (R1), coordenadas, radio, precisión mínima, permanencia, etiqueta QR (y NFC si aplica), instrucciones y si exige foto | Instalación, plantillas, marcas | Módulo Rondas |
 | Plantilla de ronda | Secuencia de puntos (obligatorios u opcionales) con orden (estricto, sugerido o aleatorio, R12), tiempo máximo total y por tramo | Instalación, puntos, programaciones | Módulo Rondas |
-| Programación | Cuándo se debe hacer una plantilla (horarios, días, ventana de tolerancia) y a quién se asigna (personas, o «quien esté de turno» si Operaciones está activo, R21) | Plantilla, personas, puestos (fuente opcional) | Módulo Rondas |
+| Programación | Cuándo se debe hacer una plantilla (horarios, días, ventana de tolerancia) y a quién se asigna (personas, o «quien esté de turno» si Operaciones está activo; §14, pregunta 18) | Plantilla, personas, puestos (fuente opcional) | Módulo Rondas |
 | Ejecución (ronda) | Una vuelta concreta de una plantilla: programada o ad hoc. Tiene estado (§6), responsable, dispositivo, inicio, cierre, trust score y rastro | Plantilla, persona, dispositivo, marcas, novedades | Módulo Rondas |
 | Marca de punto | **Hecho inmutable** (ADR-023): el guardia pasó por un punto. Lleva método, evidencias, hora del dispositivo, sello del servidor, señales y su puntaje | Ejecución, punto, documentos (fotos) | Módulo Rondas, encadenada en la bitácora del núcleo |
 | Rastro | Secuencia de posiciones tomadas **solo mientras la ronda está en curso** (R9), con precisión, velocidad, batería y origen | Ejecución | Módulo Rondas |
 | Señal | Observación sobre una marca o una ejecución que suma o resta confianza (geocerca, permanencia, movimiento, ubicación simulada…), con su fuente (PWA o app nativa) | Marca, ejecución | Módulo Rondas |
-| Anomalía | Señal grave que pide revisión humana (velocidad imposible, salto, ubicación simulada, reloj alterado, QR leído lejos de su punto) | Ejecución, marca | Módulo Rondas |
+| Anomalía | Señal grave que pide revisión humana (velocidad imposible, salto, ubicación simulada, reloj alterado, QR leído lejos de su punto, etiqueta reemplazada), con **severidad** baja, media o alta como en 1.0 | Ejecución, marca | Módulo Rondas |
 | Revisión | Lo que un supervisor concluye sobre una anomalía o una ronda (justificada, confirmada, sin conclusión), con comentario. **No modifica la marca**: es un hecho nuevo | Anomalía, ejecución | Módulo Rondas |
 | Modelo de confianza | Pesos, umbrales y bandas del trust score, **versionado** por tenant (ADR-021); cada marca guarda la versión con que se calculó | Tenant, marcas | Configuración del núcleo, evaluado en `packages/domain` |
 | Dispositivo | Teléfono o tableta que ejecuta la ronda (personal del guardia o emparejado a la instalación) | Ejecuciones, marcas | Núcleo (ADR-029.10; **todavía no construido**, ver §10) |
-| Novedad | Observación del guardia durante la ronda (texto, foto) | Ejecución, punto | Libro de novedades (Operaciones II, Brief 12) o propio de Rondas si Operaciones no está activo (ADR-048) |
+| Novedad | Observación del guardia durante la ronda (texto, foto), con **gravedad**; una novedad grave es el **incidente de terreno** de 1.0 (ADR-024) y emite su evento (§8) | Ejecución, punto | Libro de novedades (Operaciones II, Brief 12) o propio de Rondas si Operaciones no está activo (ADR-048) |
 
 Relaciones: instalación 1–N puntos · instalación 1–N plantillas · plantilla N–N puntos (con orden) · plantilla 1–N programaciones · programación 1–N ejecuciones · ejecución 1–N marcas · ejecución 1–1 rastro · marca 1–N señales.
 
@@ -37,7 +37,7 @@ Relaciones: instalación 1–N puntos · instalación 1–N plantillas · planti
 
 | Pantalla | Ruta (indicativa) | Portal | Patrón | Entrada |
 |---|---|---|---|---|
-| Mis rondas de hoy | `/trabajador/rondas` · `/terreno/ronda` | Trabajador, Terreno | Lista | Trabajador: «Más → Rondas asignadas»; Terreno: botón «Ronda» de la pantalla de tarea única (`NAVEGACION.md` §4) |
+| Mis rondas de hoy | `/trabajador/rondas` · `/terreno/ronda` · `/supervisor/rondas/mias` | Trabajador, Terreno y Supervisor (cuando el supervisor hace la ronda) | Lista | Trabajador: «Más → Rondas asignadas»; Terreno: botón «Ronda» de la pantalla de tarea única (`NAVEGACION.md` §4) |
 | Ronda en curso | `/trabajador/rondas/[id]` | Trabajador, Terreno | Ficha de tarea (como `RondaPhone`) | Desde «Mis rondas» |
 | Lectura de punto (QR, NFC o GPS) | capa sobre la ronda en curso | Trabajador, Terreno | Hoja a pantalla completa | Acción principal «Marcar punto» |
 | Cierre de ronda | capa sobre la ronda | Trabajador, Terreno | Resumen | Al marcar el último punto o «Terminar ronda» |
@@ -103,7 +103,7 @@ Método usado, hora del dispositivo, **sello de hora del servidor** al recibirla
 - **R3. Radio y precisión.** Una lectura GPS cuenta como **dentro** del punto si su distancia al centro es ≤ al radio **y** su precisión informada es ≤ a la precisión mínima aceptada; **dudosa** si la distancia es ≤ radio + precisión pero no cumple lo anterior; **fuera** en otro caso. Defectos propuestos: radio 20 m y precisión mínima 25 m (1.0 usaba 5 m de radio, que es menor que el error típico de un teléfono; §14, pregunta 1).
 - **R4. Crear un punto en el lugar.** El supervisor puede fijar las coordenadas de un punto parado en él: OPAI toma varias lecturas durante al menos 20 s, descarta las de peor precisión y guarda el promedio con su precisión. Si la mejor precisión es peor que 30 m, advierte que el punto quedará impreciso y sugiere QR.
 - **R5. Permanencia.** Con modo solo `GPS`, el punto se da por visitado cuando hay **al menos dos lecturas dentro** separadas por la permanencia mínima (defecto 15 s). Con QR o NFC la permanencia es opcional (defecto 0).
-- **R6. Todo es configurable por tenant, con defecto de la vertical.** Radios, precisiones, permanencias, modos, pesos y bandas del trust score, umbrales de anomalía, tolerancias, cierres automáticos y alertas son ajustes declarados por el módulo (`defineAjustes`) en los ámbitos plataforma → tenant → instalación; nada es igual para todos.
+- **R6. Todo es configurable por tenant, con defecto de la vertical.** Radios, precisiones, permanencias, modos, pesos y bandas del trust score, umbrales de anomalía, tolerancias, cierres automáticos y alertas son ajustes declarados por el módulo (`defineAjustes`) en los ámbitos plataforma → tenant; el valor propio de una instalación o de un punto se guarda como dato de esa instalación o punto en el módulo, porque hoy el centro de Configuración no tiene ámbito «instalación» (ámbitos plataforma, tenant y usuario, ADR-038; ver §10). Nada es igual para todos.
 
 ### Etiquetas QR y NFC
 
@@ -117,27 +117,27 @@ Método usado, hora del dispositivo, **sello de hora del servidor** al recibirla
 - **R11. Batería.** Si el dispositivo informa batería, se registra en el rastro. Bajo 20 % se reduce la frecuencia a la mitad; bajo 10 % se toma posición solo al marcar un punto. El guardia ve un aviso. Si el dispositivo **no informa** batería (Safari no lo permite), la señal «batería» queda «no disponible» y su peso se reparte entre las demás: **no castiga** al guardia (R17).
 - **R12. Orden de los puntos.** `sugerido` (cualquier orden, se muestra el siguiente recomendado), `estricto` (marcar fuera de orden queda como señal «fuera de orden») o `aleatorio por ejecución` (OPAI sortea el orden al iniciar, para que la ronda no sea predecible; se muestra uno a uno).
 - **R13. Velocidad, saltos y teletransporte.** Entre dos posiciones o marcas consecutivas se calcula la velocidad. Sobre la velocidad máxima a pie configurada (defecto 3 m/s sostenidos; 8 m/s en instalaciones marcadas «con vehículo») se emite «velocidad imposible»; un desplazamiento > 500 m en < 10 s es «salto». Ambas son anomalías.
-- **R14. Hora del servidor manda.** Toda marca guarda la hora del dispositivo y el **sello del servidor** al recibirla. Con conexión, la diferencia mayor a 2 min es la señal «reloj del dispositivo desfasado». Sin conexión, la app guarda el desfase medido en la última sincronización y el tiempo transcurrido desde entonces según el reloj interno que el usuario no puede cambiar; al sincronizar, OPAI estima la hora real y, si difiere de la declarada en más de 5 min, emite la anomalía «reloj alterado». Limitación declarada: en la PWA ese reloj interno se reinicia si la app se cierra; entonces la estimación queda «no verificable» (señal neutra, no anomalía).
+- **R14. Hora del servidor manda.** Toda marca guarda la hora del dispositivo y el **sello del servidor** al recibirla. Con conexión, la diferencia mayor a 2 min es la señal «reloj del dispositivo desfasado». Sin conexión, la app guarda el desfase medido en la última sincronización y el tiempo transcurrido desde entonces según el reloj interno que el usuario no puede cambiar; al sincronizar, OPAI estima la hora real y, si difiere de la declarada en más de 5 min, emite la anomalía «reloj alterado». Limitación declarada: en la PWA ese reloj interno se reinicia si la app se cierra; entonces la estimación queda «no verificable» (señal neutra, no anomalía). El comportamiento exacto de ese reloj en cada navegador se prueba en el brief.
 - **R15. Ubicación simulada, root y emulador: solo lo que se puede probar.** OPAI registra estas señales **solo cuando el dispositivo las entrega de verdad**: en la app nativa de Android, la marca de ubicación simulada del sistema y el veredicto de integridad del dispositivo (Play Integrity); en la de iOS, el indicador de ubicación simulada por software y la certificación de la app (App Attest). En la PWA no existen esas señales: la ficha lo dice («integridad del dispositivo: no verificable desde el navegador») y solo se aplican heurísticas (R16). Una señal positiva de ubicación simulada **limita el trust score de la marca a rojo** (máximo 40) y emite la anomalía «ubicación simulada», con revisión humana.
 - **R16. Heurísticas que sí funcionan en la PWA.** Precisión idéntica en lecturas sucesivas, coordenadas que no varían nada estando «en movimiento», posiciones con hora anterior a la lectura, velocidad imposible (R13), lectura fuera de la ronda en curso y ausencia total de movimiento del teléfono (acelerómetro) mientras el GPS dice que camina. Cada heurística es una **señal** con su peso; ninguna sola es prueba de fraude, por eso ninguna sola llega a anomalía salvo R13.
 - **R17. Señales no disponibles no castigan.** Si una fuente no existe en el dispositivo (batería en iOS, acelerómetro sin permiso, integridad en la PWA, redes cercanas en iOS), la señal queda «no disponible» y su peso se reparte proporcionalmente entre las disponibles. La ficha muestra qué faltó.
-- **R18. Redes cercanas y balizas: solo en la app nativa.** La huella de redes Wi-Fi y Bluetooth cercanas al punto (capturada al crearlo y comparada al marcar) solo existe en la app nativa de Android; ni el navegador ni iOS la permiten a terceros (benchmark §B). Las balizas Bluetooth (BLE) como tipo de punto quedan fuera del Brief 14 (§14, pregunta 10).
+- **R18. Redes cercanas y balizas: solo en la app nativa.** La huella de redes Wi-Fi y Bluetooth cercanas al punto (capturada al crearlo y comparada al marcar) solo existe en la app nativa: Wi-Fi solo en Android (el navegador no tiene API y iOS lo restringe) y Bluetooth en la app nativa de Android e iOS (el navegador de iOS no tiene Web Bluetooth) (benchmark §B). Las balizas Bluetooth (BLE) como tipo de punto quedan fuera del Brief 14 (§14, pregunta 10).
 
 ### Trust score
 
-- **R19. Trust score por marca y por ronda, explicado.** Cada marca tiene un puntaje 0–100, suma de las señales disponibles según el modelo de confianza vigente del tenant; la ronda es el promedio de sus marcas obligatorias, con las bandas de 1.0 (verde ≥ 80, amarillo ≥ 60, rojo < 60). La ficha muestra **el desglose** («geocerca 30/30, foto 0/15 porque no se pidió, movimiento 15/15…»).
+- **R19. Trust score por marca y por ronda, explicado.** Cada marca tiene un puntaje 0–100, suma de las señales disponibles según el modelo de confianza vigente del tenant; la ronda es el promedio de sus marcas obligatorias (cambio frente a 1.0, que promediaba todas: un punto opcional no marcado no castiga), con las bandas de 1.0 (verde ≥ 80, amarillo ≥ 60, rojo < 60). La ficha muestra **el desglose** («geocerca 30/30, foto 0/15 porque no se pidió, movimiento 15/15…»).
 - **R20. Pesos de 1.0 como piso y modelo versionado.** El modelo inicial se llama «OPAI 1.0» y usa los pesos de 1.0: geocerca 30, velocidad bajo umbral 20, movimiento real 15, foto 15, mismo dispositivo 10, batería > 10 % 10. El tenant puede crear versiones nuevas (por ejemplo «Seguridad 2026», §14, pregunta 4); una versión nueva aplica a las marcas siguientes y nunca recalcula las ya hechas, salvo un **recálculo explícito** que queda en la auditoría y deja ambas versiones visibles.
 - **R21. El trust score nunca bloquea la marca.** La marca es un hecho; el puntaje es una evaluación. Un puntaje rojo emite un evento y pide revisión, pero no impide marcar, cerrar ni pagar.
 
 ### Ejecución, sin conexión y cierre
 
 - **R22. Ronda sin conexión.** Iniciar, marcar, sacar fotos, registrar novedades y cerrar funcionan sin red (ADR-044.3). Cada hecho entra en una cola local con su `idempotencyKey` generada en el dispositivo, su número de secuencia y su evidencia. El guardia ve siempre cuántos hechos están **pendientes de enviar** y no puede cerrar sesión ni desemparejar el dispositivo con pendientes sin una advertencia explícita.
-- **R23. Reconciliación.** Al volver la red, la cola se envía por las **mismas capacidades** que se usan con conexión. El servidor acepta los hechos en cualquier orden, los ordena por secuencia, ignora los duplicados (misma clave, mismo resultado) y sella la hora de recepción. Una marca que llega después de un cierre automático **se agrega** a la ronda con la etiqueta «sincronizada después del cierre», el estado se recalcula y queda evento y auditoría; nunca se descarta en silencio.
-- **R24. La cola sobrevive.** La app pide almacenamiento persistente al navegador (Safari puede borrar datos de sitios sin uso por 7 días y concede la persistencia por criterios propios, benchmark §B); si el sistema no lo concede, avisa que con poco espacio el teléfono podría borrar marcas sin enviar. Fotos pendientes se guardan comprimidas (ADR-044.5). Una versión nueva de la app no se activa con hechos pendientes en la cola (ADR-044.2).
-- **R25. Estados y cierres automáticos de 1.0.** Se conservan los estados de 1.0 (§6) y los cierres automáticos: «no realizada» si no se inicia dentro de la ventana; «cerrada automáticamente» si sigue en curso pasado su tiempo máximo más la tolerancia; «incompleta» si al cerrar faltan más puntos obligatorios que el umbral. Los crons solo encolan trabajos (ADR-029).
+- **R23. Reconciliación.** Al volver la red, la cola se envía por las **mismas capacidades** que se usan con conexión. El servidor acepta los hechos en cualquier orden, ignora los duplicados (misma clave, mismo resultado) y sella la hora de recepción; los muestra en el orden de su secuencia en el dispositivo, pero un conflicto (dos hechos sobre lo mismo) se resuelve por el sello del servidor (ADR-029.9). Una marca que llega después de un cierre automático **se agrega** a la ronda con la etiqueta «sincronizada después del cierre», el estado se recalcula y queda evento y auditoría; nunca se descarta en silencio.
+- **R24. La cola sobrevive.** La app pide almacenamiento persistente al navegador (Safari puede borrar datos tras 7 días sin uso —la app instalada en la pantalla de inicio lleva su propio contador— y concede la persistencia por criterios propios, benchmark §B); si el sistema no lo concede, avisa que con poco espacio el teléfono podría borrar marcas sin enviar. Fotos pendientes se guardan comprimidas (ADR-044.5). Una versión nueva de la app nunca se activa a mitad de una ronda ni con hechos pendientes en la cola (ADR-044.2).
+- **R25. Estados y cierres automáticos de 1.0.** Se conservan los estados de 1.0 (§6) y los cierres automáticos: «no realizada» si no se inicia dentro de la ventana; «cerrada automáticamente» si sigue en curso pasado su tiempo máximo más la tolerancia; «incompleta» si al cerrar faltan más puntos obligatorios que el umbral (1.0 contaba todos los puntos; 2.0 solo los obligatorios). Las rondas ad hoc abiertas («libres» en 1.0) también se cierran solas pasado su tiempo máximo. Al cerrar se guarda una **instantánea del recorrido** (rastro simplificado y puntos), como `route_snapshot` en 1.0, para informes rápidos. Los crons solo encolan trabajos (ADR-029).
 - **R26. Rondas ad hoc.** El guardia puede iniciar una ronda no programada de una plantilla de su instalación si la instalación lo permite; queda marcada «ad hoc» y no cuenta para el cumplimiento de las programadas.
 - **R27. Una ronda, un responsable, un dispositivo.** Una ejecución tiene un responsable y se ejecuta en un dispositivo. Si se continúa en otro dispositivo (teléfono descargado), queda la señal «cambio de dispositivo» con hora; nunca dos dispositivos marcan la misma ejecución a la vez.
-- **R28. Hechos inmutables y encadenados.** Marcas, inicio y cierre de la ronda son hechos inmutables con sello del servidor, hash y bitácora encadenada del núcleo (ADR-023 y REGLAS-codigo, «Hechos regulados»). Una corrección (por ejemplo invalidar una marca hecha por error) es un **hecho nuevo** con motivo, que hace un rol autorizado y que el agente solo puede proponer (R33).
+- **R28. Hechos inmutables y encadenados.** Marcas, inicio y cierre de la ronda son hechos inmutables con sello del servidor, hash y bitácora encadenada del núcleo (ADR-023 y REGLAS-codigo, «Hechos regulados»). Una corrección (por ejemplo invalidar una marca hecha por error) es un **hecho nuevo** con motivo, que hace un rol autorizado y que el agente solo puede proponer con aprobación humana (R34).
 
 ### Vistas, alertas e informes
 
@@ -150,6 +150,7 @@ Método usado, hora del dispositivo, **sello de hora del servidor** al recibirla
 
 - **R33. Agent-first con límites físicos.** Todo lo que se hace en pantalla de configuración, vigilancia, revisión e informes existe como capacidad y herramienta MCP para agentes externos y el agente interno (ADR-049, ADR-055), con los permisos y el alcance del usuario. **Marcar un punto, iniciar y cerrar la propia ronda** exigen presencia física y solo se aceptan desde una sesión de trabajador o un dispositivo emparejado, con evidencia; para un agente quedan en la lista de excepciones de paridad con ese motivo (§9 y §14, pregunta 11).
 - **R34. Lo irreversible va a aprobación humana.** Cerrar una ronda como administrador, invalidar una marca, reemplazar una etiqueta QR, recalcular puntajes con otro modelo y publicar un modelo de confianza nuevo piden `APPROVAL_REQUIRED` a los agentes, con vista previa.
+- **R35. Emergencia aunque no haya central.** La ronda en curso tiene un botón «Emergencia» (como las alertas de pánico de 1.0) que funciona sin conexión en cuanto vuelve la señal y emite `rondas.emergencia`. Con la central (CAR-70) activa, ella la atiende y escala; **sin central** (Rondas vendido solo, ADR-048), Comunicaciones la entrega por push y correo al supervisor de la instalación y a los responsables que el tenant elija, que la reconocen en su portal (§14, pregunta 21).
 
 ## 6. Estados y transiciones
 
@@ -160,10 +161,10 @@ Estados de la ejecución (los de 1.0): `pendiente → en_curso → completada | 
 | — | pendiente | trabajo programado | llega la hora de la programación | se asigna al responsable y aparece en «Mis rondas» | — |
 | pendiente | en_curso | guardia (sesión o dispositivo) | dentro de la ventana de tolerancia | empieza el rastro (R9) | no (es un hecho) |
 | — | en_curso (ad hoc) | guardia | la instalación permite ad hoc (R26) | ídem | no |
-| pendiente | no_realizada | trabajo `rondas.cierres` | pasó la ventana sin iniciar | evento `rondas.ejecucion.no_realizada` | no; si luego llegan marcas sin conexión (R23), pasa a `en_curso`/`completada` con la etiqueta «sincronizada después del cierre» |
+| pendiente | no_realizada | trabajo `rondas.cierres` | pasó la ventana sin iniciar | evento `rondas.ejecucion.no_realizada` | nadie la revierte a mano; si luego llegan marcas sin conexión (R23), el sistema la recalcula a `completada` o `incompleta` con la etiqueta «sincronizada después del cierre» |
 | en_curso | completada | guardia | marcó todos los obligatorios o cierra con faltantes ≤ umbral | se detiene el rastro; trust score de la ronda | no |
 | en_curso | incompleta | guardia o trabajo | cierre con faltantes > umbral | evento `rondas.ejecucion.incompleta` | no |
-| en_curso | cerrada_auto | trabajo `rondas.cierres` | tiempo máximo + tolerancia vencido | ídem; marcas tardías se agregan (R23) | no |
+| en_curso | cerrada_auto | trabajo `rondas.cierres` | tiempo máximo + tolerancia vencido | ídem; si llegan marcas tardías (R23), el sistema la recalcula a `completada` o `incompleta` con la etiqueta «sincronizada después del cierre» | solo por ese recálculo automático |
 | en_curso / pendiente | cerrada_admin | admin, gerente, supervisor (alcance); agente con aprobación | motivo obligatorio | evento y auditoría | **irreversible** (R34) |
 
 Las anomalías tienen su propio ciclo: `abierta → revisada (justificada | confirmada | sin conclusión)`; la revisión es un hecho nuevo y se puede complementar, no borrar.
@@ -181,7 +182,7 @@ Permisos `rondas:<accion>` (ADR-016). Alcance de filas por ADR-022 (R29).
 | Ejecutar ronda y marcar puntos | — | — | — | ✓ (si hace la ronda) | — | — | ✓ | **no** (R33) |
 | Revisar anomalías | ✓ | ✓ | ✓ | ✓ (sus instalaciones) | — | — | — | `rondas:revisar`, con vista previa |
 | Cerrar como administrador, invalidar marca | ✓ | ✓ | ✓ | ✓ (sus instalaciones) | — | — | — | `rondas:administrar` + aprobación humana |
-| Modelo de confianza y ajustes | ✓ | ✓ | — | — | — | — | — | `rondas:configurar` + aprobación humana para publicar |
+| Modelo de confianza y ajustes | ✓ | ✓ | — | — | — | — | — | `rondas:confianza.manage` (permiso propio, como `cpq:modelo.manage`) + aprobación humana para publicar |
 
 Todos los permisos son asignables a roles personalizados (ADR-022).
 
@@ -196,15 +197,17 @@ Todos se emiten por outbox en la misma transacción (ADR-029). **Silencio por de
 | `rondas.ejecucion.no_realizada` | ventana vencida sin iniciar | ídem | push, correo | «No se inició la ronda de las {hora}» |
 | `rondas.ejecucion.incompleta` | cierre con faltantes | ídem | push | «Ronda cerrada con {n} puntos sin marcar» |
 | `rondas.punto.omitido` | el tramo de un punto obligatorio vence | ídem | push | — |
-| `rondas.anomalia.detectada` | R8, R13, R14, R15 | ídem | push | «Revisar ronda: {tipo de anomalía}» |
+| `rondas.anomalia.detectada` | R7, R8, R13, R14, R15 | ídem | push | «Revisar ronda: {tipo de anomalía}» |
 | `rondas.ronda.sin_movimiento` | ronda en curso sin desplazamiento ni movimiento del teléfono por N min (defecto 10) | la central si está activa | push | Es insumo de la central para «hombre caído»; Rondas no escala (R31) |
 | `rondas.ronda.sin_rastro` | tramo sin rastro > umbral | nadie | — | — |
 | `rondas.marca.sincronizada_tarde` | R23 | nadie | — | — |
+| `rondas.emergencia` | botón «Emergencia» (R35) | la central; sin central, el supervisor de la instalación (excepción al silencio por defecto, §14, pregunta 21) | push, correo | «Emergencia en {instalación}: {persona} durante la ronda {plantilla}» |
+| `rondas.novedad.grave` | novedad con gravedad alta (incidente de terreno) | nadie (la central si está activa) | push | «Incidente en {instalación}: {resumen}» |
 | `rondas.informe.cliente` | informe programado por cuenta | contactos del cliente que el tenant elija | correo con PDF | plantilla editable con marca del tenant |
 
 ## 9. Herramientas MCP
 
-Capacidades `rondas.<entidad>.<verbo>` (REGLAS-codigo). Cada escritura acepta `dryRun` (`preview_…` en MCP) e `idempotencyKey`, y queda auditada.
+Capacidades `rondas.<entidad>.<verbo>` (REGLAS-codigo); el nombre de la herramienta MCP se genera en minúsculas con guiones bajos (por ejemplo `rondas_plantillas_crear` y su `preview_rondas_plantillas_crear`). Cada escritura acepta `dryRun` (`preview_…` en MCP) e `idempotencyKey`, y queda auditada.
 
 | Herramienta | Qué hace (lenguaje de negocio) | Tipo | Con vista previa | Aprobación humana |
 |---|---|---|---|---|
@@ -226,13 +229,18 @@ Capacidades `rondas.<entidad>.<verbo>` (REGLAS-codigo). Cada escritura acepta `d
 **Flujos típicos de un agente** (para `docs/2.0/agentes/rondas.md`, con su escenario de prueba, ADR-034):
 
 1. «¿Cómo van las rondas de hoy?» → `rondas.control.leer` → si hay atrasadas, `rondas.ejecuciones.leer` de cada una → resumen. Se detiene ahí: no llama a nadie (eso es la central, CAR-70).
-2. «Arma la ronda nocturna de la Planta Quilicura con estos 6 puntos» → `preview_rondas.plantillas.crear` → muestra la vista previa → con confirmación del usuario (ADR-049 punto 4) la crea → `preview_rondas.programaciones.fijar`.
+2. «Arma la ronda nocturna de la Planta Quilicura con estos 6 puntos» → `preview_rondas_plantillas_crear` → muestra la vista previa → con confirmación del usuario (ADR-049 punto 4) la crea → `preview_rondas.programaciones.fijar`.
 3. «Revisa las anomalías de la semana» → `rondas.anomalias.listar` → propone una conclusión por anomalía → el supervisor confirma cada `rondas.anomalias.revisar`.
-4. «Cierra la ronda pegada de Bodega Lampa» → `preview_rondas.ejecuciones.cerrar_admin` → `APPROVAL_REQUIRED` → queda en la cola de aprobación humana.
+4. «Cierra la ronda pegada de Bodega Lampa» → `preview_rondas_ejecuciones_cerrar_admin` → `APPROVAL_REQUIRED` → queda en la cola de aprobación humana.
 
 ## 10. Integraciones y qué permite cada dispositivo
 
 **Del núcleo:** geolocalización y mapas estáticos por el servicio del núcleo (ADR-027, `packages/integrations/src/geo`), medidos en `core.consumos` (ADR-031); fotos por `core.documentos` (ADR-019, ADR-039); comunicaciones y push (ADR-020, ADR-044.4); bitácora encadenada (ADR-023); inventario de dispositivos emparejados (ADR-029.10, **pendiente en el núcleo**: el Brief 14 lo necesita o debe construir su parte mínima, a confirmar al planificar).
+
+**Dependencias del núcleo que hoy faltan (a resolver al planificar el Brief 14):**
+
+- **Actor «dispositivo».** El registro de capacidades conoce hoy los actores sistema, usuario y agente; no hay un actor de dispositivo emparejado. La excepción de paridad de R33 (solo `interna` o `soloPersonas`, ADR-055) cubre la sesión del trabajador, pero un dispositivo de Terreno con key sería un agente y quedaría bloqueado. El Brief 14 necesita la identidad de dispositivo de ADR-029.10 o ejecuta en Terreno con la sesión del guardia que la usa.
+- **Ámbito «instalación» en Configuración.** No existe (R6); mientras tanto, los valores por instalación son datos del módulo.
 
 **Fuentes opcionales (ADR-048):** Operaciones (asignar la ronda a «quien esté de turno en el puesto»; libro de novedades), Asistencia (cruzar que el guardia marcó entrada), Tickets (crear un ticket desde una anomalía, siempre con responsable, ADR-025), Central de monitoreo (CAR-70, consume eventos). Sin ellas, Rondas funciona con personas asignadas a mano y novedades propias.
 
@@ -244,12 +252,13 @@ Capacidades `rondas.<entidad>.<verbo>` (REGLAS-codigo). Cada escritura acepta `d
 | Posición con la pantalla apagada o la app en segundo plano | **no** | **no** | sí (servicio en primer plano en Android; «ubicación siempre» en iOS) |
 | Mantener la pantalla encendida durante la ronda | sí (Wake Lock) | sí desde iOS 18.4 (en apps instaladas falló hasta esa versión según un tercero; se prueba en el brief) | sí |
 | Leer QR con la cámara | sí | sí (decodificador propio; el detector nativo del navegador no está en Safari) | sí |
-| Leer NFC | sí (Web NFC, solo Chrome Android) | **no** | sí |
-| Detectar ubicación simulada | **no** (solo heurísticas, R16) | **no** | sí (Android: marca de ubicación simulada; iOS 15+: indicador de simulación por software) |
-| Integridad del dispositivo (root, emulador, app modificada) | **no** | **no** | sí (Play Integrity; App Attest) |
-| Redes Wi-Fi y Bluetooth cercanas | **no** | **no** | solo Android (con permisos y límites de frecuencia) |
-| Movimiento del teléfono (acelerómetro) | sí | sí, con permiso explícito | sí |
-| Nivel de batería | sí | **no** | sí |
+| Leer NFC | sí (Web NFC, solo Chrome Android) | **no** | Android sí; iOS con Core NFC (no verificado en esta sesión) |
+| Detectar ubicación simulada | **no** (solo heurísticas, R16) | **no** | **parcial**: no detecta todas las herramientas ni un teléfono con root que oculte la marca (Android: marca de ubicación simulada; iOS 15+: indicador de simulación por software) |
+| Integridad del dispositivo y de la app | **no** | **no** | Android: dispositivo y app (Play Integrity: root, emulador); iOS: que la app es auténtica (App Attest), **no** detecta jailbreak |
+| Redes Wi-Fi cercanas | **no** | **no** | solo Android (con permisos y límites de frecuencia) |
+| Bluetooth cercano (balizas) | sí en Chrome Android, con elección manual del dispositivo (inútil para escanear) | **no** | sí |
+| Movimiento del teléfono (acelerómetro) | sí | sí, con permiso explícito (conocimiento previo, a verificar en el brief) | sí |
+| Nivel de batería | sí (Chromium; sin enlace verificado) | **no** | sí |
 | Sincronizar la cola en segundo plano | parcial (Background Sync) | **no** (solo al abrir la app) | sí |
 | Push | sí | sí, instalada (iOS 16.4+) | sí (APNs/FCM) |
 
@@ -271,7 +280,7 @@ Capacidades `rondas.<entidad>.<verbo>` (REGLAS-codigo). Cada escritura acepta `d
 | Alertas de pánico y críticas en el módulo | Eventos para la central (CAR-70), que decide y escala (R31) | Un solo lugar para vigilar y escalar |
 | Digest diario por instalación | Informes desde los hechos y PDF programable al cliente con la marca del tenant (R32) | Responder un reclamo en minutos |
 
-**No se porta:** hilos de Slack por ronda (pasa a Comunicaciones, ADR-020); el pánico como función propia del módulo (pasa a la central, CAR-70; Rondas emite eventos); cualquier lectura de posición fuera de la ronda.
+**No se porta:** hilos de Slack por ronda (pasa a Comunicaciones, ADR-020); la gestión y el escalamiento del pánico dentro del módulo (pasan a la central, CAR-70; Rondas conserva el botón y el aviso mínimo sin central, R35); cualquier lectura de posición fuera de la ronda.
 
 **Brechas de 1.0 a verificar contra el código antes del brief:** formato del contenido de los QR impresos (para reutilizar las etiquetas físicas, §14, pregunta 20) y cómo trata 1.0 las marcas sin conexión que llegan después de un cierre automático.
 
@@ -296,7 +305,7 @@ Capacidades `rondas.<entidad>.<verbo>` (REGLAS-codigo). Cada escritura acepta `d
 Verificables en `test.opai.cl` por Carlos y por Diseño y QA (los de la app nativa, en el Brief 17).
 
 - **CA1.** Un punto configurado `QR + GPS` en una instalación con defecto `QR` muestra su modo propio; cambiar el defecto de la instalación no lo cambia (R1).
-- **CA2.** Con el teléfono a 15 m de un punto de radio 20 m y precisión 8 m, la marca queda «dentro»; a 15 m con precisión 40 m queda «dudosa»; a 60 m, «fuera» (R3).
+- **CA2.** Con el teléfono a 15 m de un punto de radio 20 m y precisión 8 m, la marca queda «dentro»; a 15 m con precisión 40 m queda «dudosa»; a 60 m con precisión 8 m, «fuera» (R3).
 - **CA3.** Con modo solo GPS, quedarse 5 s en el punto no lo marca; quedarse 20 s con dos lecturas dentro sí (R5).
 - **CA4.** Un QR fotografiado y leído a 300 m de su punto deja la marca con la anomalía «QR leído lejos de su punto» y el evento correspondiente (R8).
 - **CA5.** Sin red, se inicia una ronda, se marcan 4 puntos con foto y se cierra; al volver la red los 4 llegan una sola vez, en orden, con sello del servidor; reenviar la cola no duplica nada (R22, R23).
@@ -312,7 +321,7 @@ Verificables en `test.opai.cl` por Carlos y por Diseño y QA (los de la app nati
 
 ## 14. Preguntas abiertas para Carlos
 
-Cerradas, cada una con recomendación. Ninguna bloquea el Design Prompt salvo la 2, la 5 y la 7.
+Cerradas, cada una con recomendación. Ninguna bloquea el Design Prompt salvo la 2, la 5, la 7 y la 21.
 
 1. **¿Qué radio y precisión por defecto usamos para los puntos GPS?** (a) 5 m como 1.0; (b) radio 20 m y precisión mínima 25 m; (c) radio 30 m y precisión 40 m. — **Recomendación: (b).** La precisión que informa el navegador es un radio con 95 % de confianza, no una garantía (benchmark §B), y TrackTik advierte que los radios chicos fallan (benchmark §A.2); 5 m es menor que el error habitual de un teléfono y produce falsos «fuera» que desacreditan el sistema ante el cliente. Los defectos se afinan en el brief con las marcas reales de 1.0. Cada tenant e instalación lo ajusta.
 2. **¿Qué significa «QR + GPS» por defecto?** (a) QR identifica y GPS solo suma confianza (la marca vale sin GPS); (b) estricto: sin geocerca la marca queda «fuera» y es anomalía. — **Recomendación: (a) por defecto y (b) como opción por punto o instalación.** Mantiene ADR-023 (el GPS no bloquea) y la operación de sótanos; el estricto queda para puntos críticos con buena señal.
@@ -335,9 +344,11 @@ Cerradas, cada una con recomendación. Ninguna bloquea el Design Prompt salvo la
 19. **¿Emitimos «sin movimiento» durante la ronda y con qué umbral?** — **Recomendación: sí, 10 min por defecto,** solo como evento para la central (CAR-70), que decide si llama; Rondas no escala.
 20. **¿Reutilizamos las etiquetas QR físicas de 1.0?** — **Recomendación: sí durante la migración:** importar los puntos de 1.0 con su código y aceptar su formato hasta que cada instalación reimprima con el QR firmado de 2.0 (R7). Hay que verificar en 1.0 qué contiene hoy el QR; si es solo un ID predecible, recomendamos reimprimir las de puntos críticos primero.
 
+21. **¿El botón «Emergencia» avisa aunque el tenant no haya configurado nada?** — **Recomendación: sí, es la única excepción al silencio por defecto (ADR-020):** sin central, llega por push y correo al supervisor de la instalación. Un tenant que solo compra Rondas no puede quedar sin el pánico que 1.0 ya tiene.
+
 ## 15. Design Prompt para Claude Design
 
-> **Se usa solo después de que Carlos apruebe esta especificación** (ADR-047). Copiar tal cual en Claude Design. Si la respuesta a las preguntas 2, 5 o 7 cambia, se ajusta antes de copiar.
+> **Se usa solo después de que Carlos apruebe esta especificación** (ADR-047). Copiar tal cual en Claude Design. Si la respuesta a las preguntas 2, 5, 7 o 21 cambia, se ajusta antes de copiar.
 
 ```text
 Proyecto: OPAI 2.0 · Módulo Rondas (puntos de control por QR, NFC y GPS).
@@ -375,6 +386,9 @@ C. ESCRITORIO E IPAD · ERP (área Operaciones → Rondas)
 D. TELÉFONO Y ESCRITORIO · CLIENTE (Portal Cliente → Reportes → Rondas)
 15. Resumen de cumplimiento por instalación y período, lista de rondas con hora y puntos, ficha con recorrido en mapa y novedades visibles. Sin anomalías internas ni desglose de confianza (opcional: solo banda verde/amarillo/rojo si el tenant lo activa).
 
+Etiquetas de estado en pantalla y su estado de la especificación: Por iniciar = pendiente; En curso = en_curso; Atrasada = en_curso fuera de plazo; Completa = completada; Incompleta = incompleta; Omitida = no_realizada; Cerrada automáticamente = cerrada_auto; Cerrada por administrador = cerrada_admin. «Con alerta» es un filtro (rondas con anomalías abiertas o atrasadas), no un estado.
+Piezas que el DS 2.0 todavía no tiene y que se proponen como componentes del DS (no del módulo): lector de QR con cámara, indicador de permanencia GPS con cuenta regresiva, indicador fijo de conexión y cola, lista ordenable, mapa con recorrido, radios y tramos sin rastro (extensión de MapaEstatico), y gráficos de informes y mapa de calor (cargados en diferido, nunca en el JS inicial de terreno, ADR-044.6).
+Botón «Emergencia» visible en la ronda en curso, separado de las acciones normales y con confirmación para evitar toques accidentales.
 Entregar cada pantalla a 375, 1024 y 1280 px (las de guardia solo 375 y 1024), en claro y oscuro, con sus cuatro estados, y un tablero con todas.
 ```
 
@@ -382,4 +396,4 @@ Entregar cada pantalla a 375, 1024 y 1280 px (las de guardia solo 375 y 1024), e
 
 | Fecha | Cambio | Aprobó |
 |---|---|---|
-| 29-oct-2026 | Primera versión (borrador) con modo por punto, fidelidad del GPS, trust score versionado, sin conexión, PWA vs nativa, vistas, eventos para la central, benchmark, 20 preguntas y Design Prompt (CAR-72) | — (pendiente de aprobación) |
+| 29-oct-2026 | Primera versión (borrador) con modo por punto, fidelidad del GPS, trust score versionado, sin conexión, PWA vs nativa, vistas, eventos para la central, benchmark, 21 preguntas y Design Prompt (CAR-72) | — (pendiente de aprobación) |
