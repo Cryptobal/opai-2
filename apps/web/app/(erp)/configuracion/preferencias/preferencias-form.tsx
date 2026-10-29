@@ -1,13 +1,11 @@
 "use client";
 
 import { Lock } from "lucide-react";
-import { useState, useSyncExternalStore } from "react";
+import { useSyncExternalStore } from "react";
 
-import { Alerta, avisar, Badge, RadioGroup, SeccionTarjeta, Switch } from "@opai/ds";
+import { Alerta, Badge, RadioGroup, SeccionTarjeta, Switch } from "@opai/ds";
 
-import { useCapacidad } from "@/app/_components/use-capacidad";
-
-type Valores = { tema: string; silencio: boolean; resumen: string };
+import { type Valores, usePreferencias } from "./use-preferencias";
 
 const suscribirHidratacion = () => () => {};
 const yaHidratado = () => true;
@@ -19,37 +17,10 @@ const TEMAS = [
   { valor: "oscuro", etiqueta: "Oscuro" },
 ];
 
-/**
- * Aplica el tema al instante (el DS lee `data-theme` en <html>) y lo recuerda en este dispositivo
- * para el script del layout raíz, que lo aplica antes de pintar en las próximas cargas.
- */
-function aplicarTema(t: string) {
-  const html = document.documentElement;
-  if (t === "sistema") delete html.dataset["theme"];
-  else html.dataset["theme"] = t === "oscuro" ? "dark" : "light";
-  try {
-    localStorage.setItem("opai_tema", t);
-  } catch {
-    // Sin almacenamiento (modo privado): el tema vale solo para esta pestaña.
-  }
-}
-
 /** Preferencias propias (35): tema, idioma y avisos personales; cada cambio se guarda solo. */
 export function PreferenciasForm({ inicial }: { inicial: Valores }) {
-  const [v, setV] = useState(inicial);
   const hidratado = useSyncExternalStore(suscribirHidratacion, yaHidratado, aunNoHidratado);
-  const { ejecutar, pendiente, error } = useCapacidad("erp");
-  async function guardar<K extends keyof Valores>(k: K, valor: Valores[K], clave: string) {
-    const previo = v;
-    setV((x) => ({ ...x, [k]: valor }));
-    if (k === "tema") aplicarTema(String(valor));
-    const r = await ejecutar("core.config.set", { modulo: "core", clave, valor });
-    if (r) avisar.exito("Preferencia guardada");
-    else {
-      setV(previo);
-      if (k === "tema") aplicarTema(previo.tema);
-    }
-  }
+  const { v, pendiente, error, guardar } = usePreferencias(inicial);
   return (
     <div className="flex flex-col gap-4">
       {error ? <Alerta tono="danger" titulo={error} /> : null}
@@ -58,7 +29,7 @@ export function PreferenciasForm({ inicial }: { inicial: Valores }) {
           etiqueta="Tema"
           valor={v.tema}
           opciones={TEMAS.map((opcion) => ({ ...opcion, disabled: !hidratado || pendiente }))}
-          onCambiar={(t) => void guardar("tema", t, "preferencias_tema")}
+          onCambiar={(t) => guardar("tema", t, "preferencias_tema")}
         />
       </SeccionTarjeta>
       <SeccionTarjeta titulo="Idioma">
@@ -76,16 +47,14 @@ export function PreferenciasForm({ inicial }: { inicial: Valores }) {
             descripcion="Los avisos transaccionales (invitaciones, recuperación) siguen llegando"
             activo={v.silencio}
             disabled={pendiente}
-            onCambiar={(a) => void guardar("silencio", a, "preferencias_silencio")}
+            onCambiar={(a) => guardar("silencio", a, "preferencias_silencio")}
           />
           <Switch
             etiqueta="Resumen diario"
             descripcion="Un correo al día con tus avisos pendientes"
             activo={v.resumen === "diario"}
             disabled={pendiente}
-            onCambiar={(a) =>
-              void guardar("resumen", a ? "diario" : "nunca", "preferencias_resumen")
-            }
+            onCambiar={(a) => guardar("resumen", a ? "diario" : "nunca", "preferencias_resumen")}
           />
         </div>
       </SeccionTarjeta>
