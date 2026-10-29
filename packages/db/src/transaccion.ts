@@ -9,8 +9,15 @@ import { comoTransaccion, exigirSinLockAuditoria } from "./lock-auditoria";
  */
 export type TenantTx = Omit<
   ClienteApp,
-  "$connect" | "$disconnect" | "$on" | "$transaction" | "$extends" | "$use"
+  "$connect" | "$disconnect" | "$on" | "$transaction" | "$extends" | "$use" | ModelosCredenciales
 >;
+
+/**
+ * Tablas de credenciales de Better Auth (CAR-43): `opai_app` no tiene privilegios sobre ellas y el
+ * tipo tampoco las ofrece. Solo `clienteAuth()` (packages/auth) y operaciones con nombre de
+ * `identidad.ts` llegan a ellas, con el rol `opai_auth`.
+ */
+export type ModelosCredenciales = "session" | "account" | "verification" | "twoFactor";
 
 export type OpcionesTransaccion = {
   timeoutMs?: number;

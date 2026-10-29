@@ -1,10 +1,5 @@
 import type { EstadoMfa, Rol, RolPlataforma } from "@opai/domain";
-import type {
-  Globales,
-  HechoPlataforma,
-  TenantTx,
-  VerificacionAuditoria,
-} from "@opai/db";
+import type { Globales, HechoPlataforma, TenantTx, VerificacionAuditoria } from "@opai/db";
 
 import type { EmpresaPlataforma } from "./plataforma-empresa";
 import type { Almacenamiento, Mailer } from "@opai/integrations";
@@ -15,6 +10,7 @@ import type {
   AgenteContexto,
   BitacoraServicio,
   Eventos,
+  Identidad,
   Medidor,
   Principal,
   Trabajos,
@@ -150,6 +146,7 @@ export interface Contexto {
   /** Pide despachar el outbox tras una escritura (el borde lo difiere). */
   despacharEventos(): void;
   servicios: Servicios;
+  identidad: Identidad;
   plataforma: Plataforma | null;
   /** Decide si el actor tiene el permiso (rol de la membresía y rol de plataforma). */
   autorizar(permiso: string): boolean;
