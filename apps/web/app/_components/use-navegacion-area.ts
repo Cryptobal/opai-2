@@ -93,8 +93,11 @@ export function useNavegacionArea(portal: string, activo: boolean) {
           if (clave === "navegacion_area_principal")
             window.dispatchEvent(new Event("opai-preferencias-nav"));
         })
-        .catch(() => {
+        .catch(async () => {
+          // La cola nunca queda rechazada; se relee lo confirmado (versiones incluidas) dentro de
+          // la cola, para que el próximo cambio no choque con una versión vieja.
           avisar.error("No se guardó la preferencia.");
+          await cargar().catch(() => false);
         });
     },
     [cargado, cargar, portal],

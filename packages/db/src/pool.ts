@@ -4,8 +4,10 @@ import pg from "pg";
 import { ClienteSerial } from "./cliente-serial";
 import {
   avisarDescarte,
+  avisarReintento,
   conexionMuerta,
   esFalloDeConexion,
+  esVencimiento,
   marcarConError,
   marcarDevuelta,
 } from "./pool-salud";
@@ -19,11 +21,23 @@ type AlConectar = (
   done: Liberar,
 ) => void;
 
-const PAUSA_REINTENTO_MS = 300;
+/** Pausas entre reintentos (la última se repite) hasta agotar el plazo real de la conexión. */
+const PAUSAS_REINTENTO_MS = [100, 200, 400];
 
 /**
- * Pool con un reintento al obtener conexión y sin conexiones muertas. Prisma (y Better Auth, que
- * usa el mismo cliente) pide conexiones con `connect()` (transacciones) y con `query()`, que
+ * Espera `ms` de reloj de pared. Tras reanudar la instancia, un `setTimeout` puede despertar antes
+ * de tiempo (el reloj del event loop quedó atrás): si falta tiempo real, se vuelve a armar.
+ */
+export async function esperarReloj(ms: number): Promise<void> {
+  const fin = Date.now() + ms;
+  for (let falta = ms; falta > 0; falta = fin - Date.now()) {
+    await new Promise((r) => setTimeout(r, falta));
+  }
+}
+
+/**
+ * Pool que reintenta al obtener conexión y no entrega conexiones muertas. Prisma (y Better Auth,
+ * que usa el mismo cliente) pide conexiones con `connect()` (transacciones) y con `query()`, que
  * internamente usa `connect(callback)`; ambas formas pasan por aquí. Todo ocurre ANTES de enviar
  * la consulta: nunca se repite una escritura.
  */
@@ -58,11 +72,22 @@ export class PoolConReintento extends pg.Pool {
     );
   }
 
+  /**
+   * Reintenta los vencimientos adelantados con pausas crecientes mientras no se cumpla el plazo
+   * real (`connectionTimeoutMillis`, medido con `Date.now()`): tras reanudar la instancia los
+   * temporizadores de pg vencen de inmediato y un solo reintento no alcanzaba. Un vencimiento real
+   * (≥ la mitad del tope por reloj) no se reintenta: `esFalloDeConexion` lo descarta. El plazo
+   * decide si empieza otro intento; ese intento puede esperar su propio tope, así que el peor caso
+   * es menos de 2× `connectionTimeoutMillis`. Los demás fallos de conexión, un solo reintento.
+   * Nada de esto ocurre después de enviar una consulta.
+   */
   async #conectar(): Promise<pg.PoolClient> {
-    const tope = this.options.connectionTimeoutMillis;
+    const tope = this.options.connectionTimeoutMillis ?? 0;
+    const limite = Date.now() + tope;
     // Con `min` > 0 pg-pool conserva ociosas más allá de la inactividad: ahí no se usa ese criterio.
     const inactividad = (this.options.min ?? 0) > 0 ? 0 : (this.options.idleTimeoutMillis ?? 0);
-    let reintentado = false;
+    let reintentos = 0;
+    let otrosFallos = 0;
     // A lo más tantos descartes como conexiones caben: tras eso, una conexión nueva o un error.
     for (let descartes = 0; ; ) {
       const inicio = Date.now();
@@ -70,9 +95,15 @@ export class PoolConReintento extends pg.Pool {
       try {
         cliente = await super.connect();
       } catch (e) {
-        if (reintentado || !esFalloDeConexion(e, Date.now() - inicio, tope)) throw e;
-        reintentado = true;
-        await new Promise((r) => setTimeout(r, PAUSA_REINTENTO_MS));
+        const ahora = Date.now();
+        if (!esFalloDeConexion(e, ahora - inicio, tope)) throw e;
+        const pausa = PAUSAS_REINTENTO_MS[Math.min(reintentos, PAUSAS_REINTENTO_MS.length - 1)]!;
+        // Un vencimiento adelantado se reintenta hasta el plazo; otro fallo de conexión (socket
+        // cortado, conexión rechazada) solo una vez: con la base caída, fallar rápido.
+        if (esVencimiento(e) ? ahora + pausa >= limite : otrosFallos++ > 0) throw e;
+        reintentos++;
+        avisarReintento(e, reintentos);
+        await esperarReloj(pausa);
         continue;
       }
       if (descartes >= this.options.max || !conexionMuerta(cliente, inactividad)) return cliente;
