@@ -186,7 +186,8 @@ describe.skipIf(!urlPropietario)("CAR-53 · documentos, plantillas e invitacione
   });
 
   it("core.invitations.revoke", async () => {
-    const invitar = (tenantId: string, email: string) =>
+    // Desde CAR-46 quien invita debe ser miembro de la empresa de la invitación.
+    const invitar = (tenantId: string, email: string, invitedByUserId = f.userId) =>
       f.e.admin.invitation.create({
         data: {
           tenantId,
@@ -194,7 +195,7 @@ describe.skipIf(!urlPropietario)("CAR-53 · documentos, plantillas e invitacione
           rol: "viewer",
           portales: ["erp"],
           tokenHash: randomUUID(),
-          invitedByUserId: f.userId,
+          invitedByUserId,
           expiresAt: new Date(Date.now() + 86_400_000),
         },
       });
@@ -218,7 +219,17 @@ describe.skipIf(!urlPropietario)("CAR-53 · documentos, plantillas e invitacione
         vertical: "seguridad",
       },
     });
-    const ajena = await invitar(otra.id, "ajena@prueba.cl");
+    const ajeno = await f.e.admin.user.create({
+      data: {
+        name: "Owner otra",
+        email: `car53-otra-${randomUUID()}@prueba.cl`,
+        emailVerified: true,
+      },
+    });
+    await f.e.admin.membership.create({
+      data: { tenantId: otra.id, userId: ajeno.id, rol: "owner", portales: ["erp"] },
+    });
+    const ajena = await invitar(otra.id, "ajena@prueba.cl", ajeno.id);
     expect(
       await f.mod.executeCapability(f.owner(), "core.invitations.revoke", {
         invitationId: ajena.id,

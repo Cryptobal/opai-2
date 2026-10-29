@@ -1,5 +1,6 @@
 // Catálogo de Postgres para la prueba de dos empresas (CAR-48): toda tabla con `tenant_id`, en todos
-// los schemas, con sus columnas, referencias (FK reales y triggers `verificar_mismo_tenant`) y únicos.
+// los schemas, con sus columnas, referencias (FK reales y triggers `verificar_mismo_tenant` y
+// `verificar_usuario_miembro`) y únicos.
 import { type Client } from "pg";
 
 export type Columna = {
@@ -56,9 +57,35 @@ async function referencias(pg: Client, tabla: string): Promise<Referencia[]> {
      WHERE k.contype = 'f' AND k.conrelid = $1::regclass AND array_length(k.conkey, 1) = 1`,
     [tabla],
   );
-  const pares = await paresMismoTenant(pg, tabla);
+  const pares = [...(await paresMismoTenant(pg, tabla)), ...(await usuariosMiembro(pg, tabla))];
   const reales = new Set(fk.rows.map((f) => f.columna));
   return [...fk.rows, ...pares.filter((p) => !reales.has(p.columna))];
+}
+
+/** Argumentos de un trigger de `tabla` que llama a `funcion`, desde `pg_trigger.tgargs`. */
+async function argsTrigger(pg: Client, funcion: string, tabla?: string) {
+  const r = await pg.query<{ origen: string; args: Buffer }>(
+    `SELECT format('%I.%I', n.nspname, c.relname) AS origen, g.tgargs AS args
+     FROM pg_trigger g JOIN pg_class c ON c.oid = g.tgrelid JOIN pg_namespace n ON n.oid = c.relnamespace
+     WHERE g.tgfoid = to_regproc($1) AND NOT g.tgisinternal
+       AND ($2::text IS NULL OR g.tgrelid = $2::regclass)`,
+    [funcion, tabla ?? null],
+  );
+  return r.rows.map(({ origen, args }) => ({
+    origen,
+    partes: args.toString("utf8").split("\0").filter(Boolean),
+  }));
+}
+
+/**
+ * Columnas que `core.verificar_usuario_miembro` (CAR-46) exige que apunten a un miembro de la empresa,
+ * sin FK a `core.users`: la siembra les da el usuario de prueba, ya miembro de su empresa.
+ */
+async function usuariosMiembro(pg: Client, tabla: string): Promise<Referencia[]> {
+  const filas = await argsTrigger(pg, "core.verificar_usuario_miembro", tabla);
+  return filas.flatMap(({ partes }) =>
+    partes.map((a) => ({ columna: a.split(":")[0] ?? "", tabla: "core.users", columnaRef: "id" })),
+  );
 }
 
 /** Pares (columna → tabla) de los triggers `core.verificar_mismo_tenant`, desde `pg_trigger.tgargs`. */
@@ -66,15 +93,8 @@ export async function paresMismoTenant(
   pg: Client,
   tabla?: string,
 ): Promise<(Referencia & { origen: string })[]> {
-  const r = await pg.query<{ origen: string; args: Buffer }>(
-    `SELECT format('%I.%I', n.nspname, c.relname) AS origen, g.tgargs AS args
-     FROM pg_trigger g JOIN pg_class c ON c.oid = g.tgrelid JOIN pg_namespace n ON n.oid = c.relnamespace
-     WHERE g.tgfoid = 'core.verificar_mismo_tenant'::regproc AND NOT g.tgisinternal
-       AND ($1::text IS NULL OR g.tgrelid = $1::regclass)`,
-    [tabla ?? null],
-  );
-  return r.rows.flatMap(({ origen, args }) => {
-    const partes = args.toString("utf8").split("\0").filter(Boolean);
+  const filas = await argsTrigger(pg, "core.verificar_mismo_tenant", tabla);
+  return filas.flatMap(({ origen, partes }) => {
     const pares: (Referencia & { origen: string })[] = [];
     for (let i = 0; i + 1 < partes.length; i += 2) {
       pares.push({

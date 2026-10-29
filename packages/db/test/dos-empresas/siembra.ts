@@ -10,6 +10,7 @@ import { type Columna, describir, type Tabla, tablasConTenant } from "./catalogo
 
 export type Fila = Record<string, unknown>;
 const GLOBALES = { tenants: "core.tenants", users: "core.users" } as const;
+const MEMBRESIAS = "core.memberships";
 
 /** Valor genérico para una columna NOT NULL sin defecto (texto único: nunca choca con un índice). */
 function generico(c: Columna): unknown {
@@ -68,13 +69,22 @@ export async function insertar(pg: Client, tabla: string, fila: Fila): Promise<F
   return nueva;
 }
 
-/** Dependencias de siembra: referencias no nulas a otras tablas con tenant y las de los ajustes. */
+/**
+ * Dependencias de siembra: referencias no nulas a otras tablas con tenant y las de los ajustes. Una
+ * referencia a `core.users` espera la membresía del usuario de prueba en su empresa (desde CAR-46 el
+ * trigger `usuario_miembro` exige que el usuario sea miembro).
+ */
 function dependencias(t: Tabla, conTenant: Set<string>): string[] {
   const noNulas = new Set(t.columnas.filter((c) => c.noNula && !c.conDefecto).map((c) => c.nombre));
-  const refs = t.referencias
-    .filter((r) => noNulas.has(r.columna) && conTenant.has(r.tabla) && r.tabla !== t.nombre)
-    .map((r) => r.tabla);
-  return [...new Set([...refs, ...(AJUSTES[t.nombre]?.dependencias ?? [])])];
+  const usadas = t.referencias.filter((r) => noNulas.has(r.columna) && r.tabla !== t.nombre);
+  const refs = usadas.filter((r) => conTenant.has(r.tabla)).map((r) => r.tabla);
+  const miembro =
+    t.nombre !== MEMBRESIAS &&
+    conTenant.has(MEMBRESIAS) &&
+    usadas.some((r) => r.tabla === GLOBALES.users)
+      ? [MEMBRESIAS]
+      : [];
+  return [...new Set([...refs, ...miembro, ...(AJUSTES[t.nombre]?.dependencias ?? [])])];
 }
 
 export type Siembra = {

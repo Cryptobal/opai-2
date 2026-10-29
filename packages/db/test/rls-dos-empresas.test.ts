@@ -25,9 +25,10 @@ const UNICO = "23505";
 // después (un CHECK, otro trigger o un único): la referencia de la misma empresa ya pasó.
 const OTRA = /apunta a una fila de otra empresa o inexistente/;
 // En comercial, `misma_cuenta` y `derivar_estado` corren antes (orden alfabético de triggers) y
-// rechazan con su mensaje una referencia que no es de la empresa fijada.
+// rechazan con su mensaje una referencia que no es de la empresa fijada. `usuario_miembro` (CAR-46)
+// busca la membresía con la RLS de la empresa fijada: la del usuario de B no es visible desde A.
 const RECHAZO = new RegExp(
-  `${OTRA.source}|no pertenece a la cuenta del negocio|no visible para el tenant actual`,
+  `${OTRA.source}|no pertenece a la cuenta del negocio|no visible para el tenant actual|no es miembro de la empresa`,
 );
 
 describe.skipIf(!urlPropietario)("dos empresas: aislamiento de toda tabla con tenant_id", () => {
