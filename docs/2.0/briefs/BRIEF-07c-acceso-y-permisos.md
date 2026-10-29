@@ -158,7 +158,7 @@ Conviene **tres PR**, uno por brecha, para revisar y mergear por partes (cada PR
 - Bloque 3 · `core:` migración de roles del tenant, permisos por rol y excepciones por usuario (RLS).
 - Bloque 4 · `domain:` resolución de permisos efectivos (rol base o personalizado + excepciones, denegar-gana, módulos activos), sin romper las firmas actuales; tests.
 - Bloque 5 · `core:` `autorizador` con permisos efectivos; capacidades `core.roles.*` y de excepciones (`soloPersonas`), con paridad MCP, auditoría, `dryRun` e idempotencia; snapshot y gate de paridad.
-- Bloque 6 · `core:`/`ds:` Configuración → Usuarios y permisos (matriz, crear/editar roles, excepciones), tras diseño aprobado; equivalencia 1.0 → 2.0 documentada y seed de roles base si Carlos lo aprueba.
+- Bloque 6 · `core:`/`ds:` Configuración → Usuarios y permisos (matriz, crear/editar roles, excepciones), tras diseño aprobado; equivalencia 1.0 → 2.0 documentada y seed de roles base si Carlos lo aprueba. **Hecho (CAR-37, 28-oct-2026):** con la sábana `export-nucleo-07c-07d` Parte A (rama `design/nucleo-07c-07d`); además `/api/v1` con sesión ejecuta estas capacidades en el ERP fijado en servidor y el gate I-13 (CAR-52) exige camino humano a toda `soloPersonas`.
 
 **PR 3 — B3 · Alcance del supervisor** *(depende de §16.4; conviene después del 07b por el vínculo laboral con instalación).*
 - Bloque 7 · `core:` migración de la asignación supervisor ↔ instalación (RLS).
