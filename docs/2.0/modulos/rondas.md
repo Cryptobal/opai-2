@@ -207,7 +207,7 @@ Todos se emiten por outbox en la misma transacción (ADR-029). **Silencio por de
 
 ## 9. Herramientas MCP
 
-Capacidades `rondas.<entidad>.<verbo>` (REGLAS-codigo); el nombre de la herramienta MCP se genera en minúsculas con guiones bajos (por ejemplo `rondas_plantillas_crear` y su `preview_rondas_plantillas_crear`). Cada escritura acepta `dryRun` (`preview_…` en MCP) e `idempotencyKey`, y queda auditada.
+**Paridad (ADR-004, ADR-055):** cada acción de pantalla de este módulo es una capacidad, y la pantalla, `/api/v1` y el MCP invocan la **misma** capacidad con los mismos permisos, alcance y auditoría; lo que hace el agente interno queda auditado como «agente interno vía <usuario>» (ADR-049 punto 5). Las tablas que nazcan de esta especificación llevan `tenant_id` con RLS y la política `tenant_isolation`, con su prueba de dos empresas (AGENTS.md, «Multi-tenant»). Capacidades `rondas.<entidad>.<verbo>` (REGLAS-codigo); el nombre de la herramienta MCP se genera en minúsculas con guiones bajos (por ejemplo `rondas_plantillas_crear` y su `preview_rondas_plantillas_crear`). Cada escritura acepta `dryRun` (`preview_…` en MCP) e `idempotencyKey`, y queda auditada.
 
 | Herramienta | Qué hace (lenguaje de negocio) | Tipo | Con vista previa | Aprobación humana |
 |---|---|---|---|---|
@@ -224,7 +224,8 @@ Capacidades `rondas.<entidad>.<verbo>` (REGLAS-codigo); el nombre de la herramie
 | `rondas.marcas.invalidar` | Registra la invalidación de una marca con motivo (hecho nuevo) | irreversible | sí | **sí** |
 | `rondas.confianza.publicar_modelo` / `.recalcular` | Publica una versión del modelo de confianza o recalcula un período con otra versión | irreversible | sí | **sí** |
 | `rondas.etiquetas.pdf` | Genera el PDF de etiquetas QR de una instalación | escritura (documento) | sí | no |
-| `rondas.ejecuciones.iniciar`, `rondas.marcas.registrar`, `rondas.ejecuciones.cerrar` | Ejecución en terreno | escritura | — | **excepción de paridad para agentes** (R33): solo sesión de trabajador o dispositivo emparejado |
+| `rondas.ejecuciones.iniciar`, `rondas.marcas.registrar`, `rondas.ejecuciones.cerrar`, `rondas.novedades.registrar`, `rondas.emergencia.activar` | Ejecución en terreno: iniciar y cerrar la propia ronda, marcar un punto, registrar una novedad y activar la emergencia (R35) | escritura | sí: aceptan `dryRun` e `idempotencyKey` como toda escritura (la vista previa valida sin escribir) | **excepción de paridad para agentes** (R33), declarada `soloPersonas` en `paridad-excepciones.ts` con el motivo «hecho físico en terreno»: solo sesión de trabajador o dispositivo emparejado (§10) |
+| `rondas.emergencia.reconocer` | Registra que el supervisor o la central recibió la emergencia y la está atendiendo | escritura | sí | no (un agente puede reconocerla en nombre de su usuario; queda «agente vía <usuario>») |
 
 **Flujos típicos de un agente** (para `docs/2.0/agentes/rondas.md`, con su escenario de prueba, ADR-034):
 
