@@ -12,8 +12,15 @@ export type Miembro = {
   nombre: string;
   email: string;
   rol: string;
+  /** Rol personalizado (A21): su id y nombre, o null si usa el rol base. */
+  roleId: string | null;
+  rolNombre: string | null;
   portales: string[];
   estado: string;
+  /** Excepciones de permiso vigentes (A1: «Con excepciones»). */
+  excepciones: number;
+  /** Último acceso (A4); null si no hay sesión registrada. */
+  ultimoAccesoEn: Date | null;
 };
 export type Invitacion = {
   id: string;
@@ -76,7 +83,14 @@ export function UsuariosLista({ state, usuarios, invitaciones, puedeGestionar }:
                   <Persona nombre={m.nombre} detalle={m.nombre === m.email ? "" : m.email} />
                 )}
               </Td>
-              <Td className="max-md:hidden">{ETIQUETA_ROL[m.rol] ?? m.rol}</Td>
+              <Td className="max-md:hidden">
+                <span className="flex flex-wrap items-center gap-1.5">
+                  {m.rolNombre ?? ETIQUETA_ROL[m.rol] ?? m.rol}
+                  {m.excepciones > 0 ? (
+                    <Badge tono="neutro">Con excepciones · {m.excepciones}</Badge>
+                  ) : null}
+                </span>
+              </Td>
               <Td className="whitespace-normal max-md:hidden">{portales(m.portales)}</Td>
               <Td>
                 <Badge tono={m.estado === "activa" ? "success" : "warning"}>
