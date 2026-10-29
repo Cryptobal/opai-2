@@ -46,8 +46,9 @@ const plataforma = (ctx: Parameters<typeof herramientasMcp>[0]) =>
 
 describe("MCP de plataforma (ADR-055)", () => {
   it("una key de plataforma ve toda capacidad platform.* (con preview_ en las escrituras)", () => {
+    // Salvo las de solo personas (resolver la cola de plataforma, CAR-36): ninguna key las ve.
     const ids = listarCapacidades()
-      .filter((c) => c.modulo === "platform")
+      .filter((c) => c.modulo === "platform" && !c.soloPersonas)
       .map((c) => c.id);
     const vistas = new Set(herramientasMcp(contextoPlataformaAgente()).map((h) => h.capacidad.id));
     expect(ids.filter((id) => !vistas.has(id))).toEqual([]);

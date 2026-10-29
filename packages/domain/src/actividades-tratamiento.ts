@@ -57,10 +57,10 @@ export const ACTIVIDADES_TRATAMIENTO: readonly ActividadTratamiento[] = [
   { id: 6, actividad: "Documentos de personas", categoriaPrincipal: "Laboral", baseLicitud: "obligacion_legal", tablas: ["documentos"] },
   { id: 7, actividad: "Cuentas de usuario de la plataforma", categoriaPrincipal: "Identificación", baseLicitud: "contrato", tablas: ["users", "accounts", "invitations"] },
   { id: 8, actividad: "Datos de la empresa y su representante legal", categoriaPrincipal: "Identificación", baseLicitud: "obligacion_legal", tablas: ["perfil_empresa"] },
-  { id: 9, actividad: "Trazabilidad y cumplimiento", categoriaPrincipal: "Identificación", baseLicitud: "obligacion_legal", tablas: ["audit_events", "dpa_aceptaciones", "retencion_ejecuciones"] },
+  { id: 9, actividad: "Trazabilidad y cumplimiento", categoriaPrincipal: "Identificación", baseLicitud: "obligacion_legal", tablas: ["audit_events", "auditoria_global", "dpa_aceptaciones", "retencion_ejecuciones"] },
   { id: 10, actividad: "Consentimientos de fines accesorios", categoriaPrincipal: "Identificación", baseLicitud: "consentimiento", tablas: ["consentimientos"] },
   { id: 11, actividad: "Solicitudes del titular (ARCO+) e incidentes de brecha", categoriaPrincipal: "Identificación", baseLicitud: "obligacion_legal", tablas: ["solicitudes_arco", "incidentes"] },
-  { id: 12, actividad: "Confirmación y consumo de agentes", categoriaPrincipal: "Identificación", baseLicitud: "interes_legitimo", tablas: ["idempotencias", "aprobaciones", "gasto_agente_mes"] },
+  { id: 12, actividad: "Confirmación y consumo de agentes", categoriaPrincipal: "Identificación", baseLicitud: "interes_legitimo", tablas: ["idempotencias", "aprobaciones", "aprobaciones_plataforma", "gasto_agente_mes"] },
 ];
 
 /** Fila del RAT por actividad, en lenguaje de negocio. */
