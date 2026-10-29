@@ -36,7 +36,7 @@ export function PaginaCuenta({ params, searchParams, tab, acciones, children }: 
       volverBajoLg
       acciones={
         acciones ?? (
-          <EnlaceBoton href="/cuentas?nueva=1" icono={Plus}>
+          <EnlaceBoton href="/cuentas?nueva=1" icono={Plus} className="max-lg:hidden">
             Nueva cuenta
           </EnlaceBoton>
         )

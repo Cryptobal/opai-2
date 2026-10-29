@@ -16,7 +16,7 @@ export default function DocumentosInstalacion(props: Props) {
       {...props}
       tab="documentos"
       acciones={
-        <EnlaceBotonHoja href="?subir=1" icono={Upload}>
+        <EnlaceBotonHoja href="?subir=1" icono={Upload} className="max-lg:hidden">
           Subir documento
         </EnlaceBotonHoja>
       }

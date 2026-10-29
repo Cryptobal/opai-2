@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import { usePathname, useRouter } from "next/navigation";
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 
-import { AppShell, PinDiferido as BotonFijar, type ItemMenu, type Portal } from "@opai/ds";
+import { AppShell, type ItemMenu, type Portal } from "@opai/ds";
 
 import { cambiarTenant } from "@/app/_acciones/capacidad";
 import type { GrupoArea } from "@/lib/navegacion-areas";
@@ -16,6 +16,7 @@ import { iconoShell } from "./icono-shell";
 import { LinkMenu } from "./link-menu";
 import { trasLimpiarCaches } from "./limpiar-cache-diferido";
 import { usePendiente } from "./navegacion-pendiente";
+import { PinFichaContexto, pinDeFicha } from "./pin-ficha-contexto";
 import { useEpocaSesion } from "./refresco-navegador";
 import type { PreferenciasShell } from "./preferencias-shell";
 import { menuCuentaShell } from "./menu-cuenta-shell";
@@ -109,10 +110,7 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
     () => datos.navInferior?.map((n) => ({ ...n, icono: iconoShell(n.icono, datos.iconos) })), [datos.navInferior, datos.iconos],
   );
   const navInferiorBase = navInferiorPreferido ?? navInferiorDefecto;
-  const pinFicha =
-    enErp && esFicha && onFijarFicha ? (
-      <BotonFijar variante="ficha" fijado={fichaFijada ?? false} onFijar={() => void onFijarFicha()} />
-    ) : null;
+  const { boton: pinFicha, menu: pinMenu } = pinDeFicha(enErp && Boolean(esFicha), fichaFijada, onFijarFicha);
   // D5: Inicio muestra un punto (sin número) en la barra inferior cuando la Bandeja tiene algo
   // pendiente (avisos o aprobaciones); el número vive dentro de la pantalla, no en el shell.
   const bandejaPendiente = enErp && (preferencias?.bandejaPendiente ?? false);
@@ -138,6 +136,7 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
   const menu = menuCuentaShell(enErp, (href) => router.push(href), () => setPassword(true), datos.portal === "erp" && datos.tenant !== null, datos.iconos, datos.acceso && datos.tenant && ["erp", "supervisor", "trabajador", "terreno"].includes(datos.portal) ? () => setInicio(true) : undefined);
   const conPin = (accion: ReactNode) => <>{accion}{pinFicha}</>;
   return (
+    <PinFichaContexto.Provider value={pinMenu}>
     <AppShell
       {...cabecera}
       acciones={conPin(cabecera.acciones)}
@@ -185,5 +184,6 @@ export function MarcoShell({ datos, children }: { datos: DatosShell; children: R
       {inicio ? <PortalInicio portal={datos.portal} onCerrar={() => setInicio(false)} /> : null}
       <Avisos />
     </AppShell>
+    </PinFichaContexto.Provider>
   );
 }
