@@ -29,6 +29,21 @@ describe.skipIf(!urlPropietario)("navegación: preferencias de usuario en base r
       })
     ).id;
 
+  // Las preferencias de ámbito usuario exigen que el usuario sea miembro (trigger usuario_miembro).
+  const miembroDe = async (...tenantIds: string[]) => {
+    const id = randomUUID();
+    await e.admin.user.create({ data: { id, name: "Prueba", email: `nav-${id}@test.opai.cl` } });
+    await e.admin.membership.createMany({
+      data: tenantIds.map((tenantId) => ({
+        tenantId,
+        userId: id,
+        rol: "owner",
+        portales: ["erp"],
+      })),
+    });
+    return id;
+  };
+
   const ctxUsuario = (tenantId: string, usuarioId: string) =>
     mod.crearContexto({
       tenantId,
@@ -40,9 +55,9 @@ describe.skipIf(!urlPropietario)("navegación: preferencias de usuario en base r
     });
 
   it("un mismo usuario tiene área principal separada por empresa", async () => {
-    const usuarioId = randomUUID();
     const tenantA = await crearTenant("A");
     const tenantB = await crearTenant("B");
+    const usuarioId = await miembroDe(tenantA, tenantB);
     const r = await mod.executeCapability(ctxUsuario(tenantA, usuarioId), "core.config.set", {
       modulo: "core",
       clave: "navegacion_area_principal",
@@ -67,8 +82,8 @@ describe.skipIf(!urlPropietario)("navegación: preferencias de usuario en base r
 
   it("dos usuarios del mismo tenant no leen ni escriben los fijados del otro", async () => {
     const tenantId = await crearTenant("C");
-    const u1 = randomUUID();
-    const u2 = randomUUID();
+    const u1 = await miembroDe(tenantId);
+    const u2 = await miembroDe(tenantId);
     const fijado = {
       tipo: "entrada",
       href: "/cuentas",
@@ -95,7 +110,7 @@ describe.skipIf(!urlPropietario)("navegación: preferencias de usuario en base r
 
   it("dryRun no persiste y la escritura real deja auditoría (ADR-034)", async () => {
     const tenantId = await crearTenant("D");
-    const usuarioId = randomUUID();
+    const usuarioId = await miembroDe(tenantId);
     const ctx = ctxUsuario(tenantId, usuarioId);
     await mod.executeCapability(
       ctx,
@@ -121,7 +136,7 @@ describe.skipIf(!urlPropietario)("navegación: preferencias de usuario en base r
 
   it("rechaza un sexto fijado (D3, validado por el esquema)", async () => {
     const tenantId = await crearTenant("E");
-    const usuarioId = randomUUID();
+    const usuarioId = await miembroDe(tenantId);
     const seis = Array.from({ length: 6 }, (_, i) => ({
       tipo: "entrada" as const,
       href: `/x${i}`,
@@ -138,7 +153,7 @@ describe.skipIf(!urlPropietario)("navegación: preferencias de usuario en base r
 
   it("CAS evita dos escrituras obsoletas, incluso tras reiniciar (sin ABA)", async () => {
     const tenantId = await crearTenant("Concurrencia");
-    const usuarioId = randomUUID();
+    const usuarioId = await miembroDe(tenantId);
     const input = { modulo: "core", clave: "navegacion_area_principal", versionEsperada: 0 };
     const resultados = await Promise.all(
       ["clientes", "personas"].map((valor) =>
@@ -170,7 +185,7 @@ describe.skipIf(!urlPropietario)("navegación: preferencias de usuario en base r
 
   it("la misma clave idempotente no duplica versión ni auditoría", async () => {
     const tenantId = await crearTenant("Idempotencia");
-    const usuarioId = randomUUID();
+    const usuarioId = await miembroDe(tenantId);
     const input = { modulo: "core", clave: "navegacion_area_abierta", valor: "clientes" };
     const idempotencyKey = randomUUID();
     const uno = await mod.executeCapability(
