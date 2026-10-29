@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><style>body{margin:0;background:var(--ds-bg)}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style></helmet>
+<div class="ds" data-theme="{{ theme }}" style="background:var(--ds-bg);color:var(--ds-fg);font-family:var(--font-sans);min-height:100vh">
+<div style="max-width:1200px;margin:0 auto;padding:40px 32px 64px;display:flex;flex-direction:column;gap:48px">
+<header style="display:flex;flex-direction:column;gap:4px">
+<span class="t-overline">Motor de sueldos · componentes nuevos</span>
+<h1 class="t-title" style="margin:0">TrazaMonto, EstadoFuente, CambioValor y AvisoRecalculo</h1>
+<p class="t-body-sm muted" style="margin:0;max-width:640px;text-wrap:pretty">Se componen con piezas del DS (overlay, badge, botón, sheet). Reutilizables por CPQ y Nómina.</p>
+</header>
+
+<section style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-direction:column;gap:2px"><h2 class="t-heading" style="margin:0">TrazaMonto</h2><span class="t-body-sm muted">De dónde sale un monto. Escritorio: al pasar o enfocar. Teléfono: al tocar.</span></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:8px">
+<span class="t-label-sm subtle">Normal</span>
+<div class="card" style="padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px"><span class="t-body-sm">Reforma de pensiones</span><span class="t-numeric" style="font-size:14px;text-decoration:underline dotted var(--ds-border-control);text-underline-offset:4px">$ 28.438</span></div>
+<div class="overlay" style="padding:16px;display:flex;flex-direction:column;gap:12px">
+<span class="t-label">Aporte reforma de pensiones</span>
+<span class="t-body-sm muted" style="text-wrap:pretty">Sueldo imponible × 3,5 % cotización del empleador, reforma de pensiones</span>
+<div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--ds-border);padding-top:12px">
+<div style="display:flex;justify-content:space-between;gap:12px"><span class="t-body-sm">Sueldo imponible</span><span class="t-numeric" style="font-size:14px">$ 812.500</span></div>
+<div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start"><span style="display:flex;flex-direction:column"><span class="t-body-sm">Tasa empleador</span><span class="t-caption">Vigente desde 01-08-2026 · Ley 21.735</span></span><span class="t-numeric" style="font-size:14px">3,5 %</span></div>
+</div>
+<div style="display:flex;justify-content:space-between;gap:12px;border-top:1px solid var(--ds-border);padding-top:12px"><span class="t-label">Resultado</span><span class="t-numeric" style="font-size:16px;font-weight:600">$ 28.438</span></div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<span class="t-label-sm subtle">Con valor manual</span>
+<div class="card" style="padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px"><span class="t-body-sm">Mutual adicional</span><span class="t-numeric" style="font-size:14px;text-decoration:underline dotted var(--ds-border-control);text-underline-offset:4px">$ 4.469</span></div>
+<div class="overlay" style="padding:16px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span class="t-label">Cotización adicional mutual</span><span class="badge b-warning">Manual</span></div>
+<span class="t-body-sm muted" style="text-wrap:pretty">Sueldo imponible × tasa adicional de la resolución de la mutual</span>
+<div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--ds-border);padding-top:12px">
+<div style="display:flex;justify-content:space-between;gap:12px"><span class="t-body-sm">Sueldo imponible</span><span class="t-numeric" style="font-size:14px">$ 812.500</span></div>
+<div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start"><span style="display:flex;flex-direction:column"><span class="t-body-sm">Tasa adicional</span><span class="t-caption">Propio de la empresa · Tomás Fuentes, 14-10-2026</span></span><span class="t-numeric" style="font-size:14px">0,55 %</span></div>
+</div>
+<div style="display:flex;justify-content:space-between;gap:12px;border-top:1px solid var(--ds-border);padding-top:12px"><span class="t-label">Resultado</span><span class="t-numeric" style="font-size:16px;font-weight:600">$ 4.469</span></div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<span class="t-label-sm subtle">Con valor faltante</span>
+<div class="card" style="padding:12px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px"><span class="t-body-sm">Mutual adicional</span><span class="t-numeric" style="font-size:14px;color:var(--ds-danger-fg)">Sin calcular</span></div>
+<div class="overlay" style="padding:16px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span class="t-label">Cotización adicional mutual</span><span class="badge b-danger">Falta un valor</span></div>
+<span class="t-body-sm muted" style="text-wrap:pretty">Sueldo imponible × tasa adicional de la resolución de la mutual</span>
+<div style="display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--ds-border);padding-top:12px">
+<div style="display:flex;justify-content:space-between;gap:12px"><span class="t-body-sm">Sueldo imponible</span><span class="t-numeric" style="font-size:14px">$ 812.500</span></div>
+<div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start"><span style="display:flex;flex-direction:column"><span class="t-body-sm">Tasa adicional</span><span class="t-caption" style="color:var(--ds-danger-fg)">La resolución vence el 31-12-2026; no hay una nueva para el 01-01-2027</span></span><span class="t-numeric" style="font-size:14px;color:var(--ds-danger-fg)">—</span></div>
+</div>
+<a href="Valores.dc.html" class="t-label" style="text-decoration:none;display:inline-flex;align-items:center;min-height:44px">Registrar la nueva tasa en Valores</a>
+</div>
+</div>
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-direction:column;gap:2px"><h2 class="t-heading" style="margin:0">EstadoFuente</h2><span class="t-body-sm muted">Badge con tono del DS. El tooltip dice la fuente y la última captura.</span></div>
+<div class="card" style="padding:16px;display:flex;flex-direction:column;gap:0">
+<sc-for list="{{ estados }}" as="e" hint-placeholder-count="5">
+<div style="display:grid;grid-template-columns:minmax(0,220px) minmax(0,1fr);gap:16px;align-items:center;padding:10px 0;border-bottom:1px solid var(--ds-border)">
+<span><span class="badge b-{{ e.tone }}">{{ e.label }}</span></span>
+<span class="t-body-sm muted">{{ e.uso }}</span>
+</div>
+</sc-for>
+<div style="display:flex;flex-direction:column;gap:8px;padding-top:16px">
+<span class="t-label-sm subtle">Tooltip (al pasar o enfocar el badge)</span>
+<div style="display:flex;flex-direction:column;align-items:flex-start;gap:6px">
+<span class="badge b-warning">Atrasado</span>
+<div style="background:var(--ds-inverse-bg);color:var(--ds-inverse-fg);border-radius:6px;padding:6px 10px;font:400 13px/18px var(--font-sans);max-width:280px">Fuente: Banco Central de Chile · última captura hace 2 días (27-10-2026 07:00)</div>
+</div>
+</div>
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-direction:column;gap:2px"><h2 class="t-heading" style="margin:0">CambioValor</h2><span class="t-body-sm muted">Antes → después. Para historial, impacto y avisos.</span></div>
+<div class="card" style="padding:16px;display:flex;flex-direction:column">
+<sc-for list="{{ cambios }}" as="c" hint-placeholder-count="4">
+<div style="display:grid;grid-template-columns:minmax(0,200px) minmax(0,1fr);gap:16px;align-items:center;padding:10px 0;border-bottom:1px solid var(--ds-border)">
+<span class="t-label-sm subtle">{{ c.caso }}</span>
+<span style="display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap">
+<span class="t-numeric" style="font-size:14px;color:var(--ds-fg-subtle);text-decoration:line-through;font-weight:400">{{ c.antes }}</span>
+<span class="ic sm i-chevron-right" style="color:var(--ds-fg-subtle)"></span>
+<span class="t-numeric" style="font-size:14px">{{ c.despues }}</span>
+<span class="t-numeric" style="font-size:13px;color:{{ c.color }}">{{ c.pct }}</span>
+</span>
+</div>
+</sc-for>
+<span class="t-caption" style="padding-top:12px">Umbral de aviso: variación sobre 1 % en un día para la UF; sobre 5 % para el resto de los valores. Solo sobre el umbral la variación va en warning.</span>
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-direction:column;gap:2px"><h2 class="t-heading" style="margin:0">AvisoRecalculo</h2><span class="t-body-sm muted">En una cotización abierta cuyos valores cambiaron. Usa la Alerta en su variante general (propuesta: fondo muted del tono, icono en tono, texto en fg, radio 10).</span></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,460px),1fr));gap:16px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:8px">
+<span class="t-label-sm subtle">Cotización abierta · warning</span>
+<div role="status" style="display:flex;gap:12px;align-items:flex-start;padding:12px 16px;border-radius:var(--radius-md);background:var(--ds-warning-muted);color:var(--ds-fg)">
+<span class="ic i-alert" style="color:var(--ds-warning-fg);margin-top:2px"></span>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:10px">
+<span class="t-body-sm" style="text-wrap:pretty">Cambiaron 2 valores desde que calculaste esta cotización (UF, IMM). Costo +$ 41.300/mes.</span>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" on-click="{{ openSheet }}" hint-size="110px,40px">Ver cambios</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" hint-size="110px,40px">Recalcular</x-import>
+</div>
+</div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<span class="t-label-sm subtle">Cotización enviada · congelada · info</span>
+<div role="status" style="display:flex;gap:12px;align-items:flex-start;padding:12px 16px;border-radius:var(--radius-md);background:var(--ds-info-muted);color:var(--ds-fg)">
+<span class="ic i-lock" style="color:var(--ds-info-fg);margin-top:2px"></span>
+<span class="t-body-sm" style="flex:1;text-wrap:pretty">Valores congelados al 14-10-2026. Los cambios posteriores no afectan esta cotización enviada.</span>
+</div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<span class="t-label-sm subtle">Hoja «Ver cambios»</span>
+<div style="position:relative;height:520px;border:1px solid var(--ds-border);border-radius:var(--radius-lg);overflow:hidden;background:var(--ds-bg)" data-device="desktop">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Sheet" contained="{{ true }}" side="right" title="Valores que cambiaron" description="Cotización COT-0142 · Inmobiliaria Apoquindo" on-close="{{ noop }}" actions="{{ sheetActions }}" hint-size="420px,520px">
+<div style="display:flex;flex-direction:column;gap:0">
+<sc-for list="{{ sheetRows }}" as="r" hint-placeholder-count="3">
+<div style="display:flex;flex-direction:column;gap:4px;padding:12px 0;border-bottom:1px solid var(--ds-border)">
+<span class="t-label">{{ r.nombre }}</span>
+<span style="display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap">
+<span class="t-numeric" style="font-size:14px;color:var(--ds-fg-subtle);text-decoration:line-through;font-weight:400">{{ r.antes }}</span>
+<span class="ic sm i-chevron-right" style="color:var(--ds-fg-subtle)"></span>
+<span class="t-numeric" style="font-size:14px">{{ r.despues }}</span>
+<span class="t-numeric" style="font-size:13px;color:{{ r.color }}">{{ r.pct }}</span>
+</span>
+<div style="display:flex;justify-content:space-between;gap:8px"><span class="t-caption">{{ r.meta }}</span><span class="t-numeric" style="font-size:13px">{{ r.dif }}</span></div>
+</div>
+</sc-for>
+<div style="display:flex;justify-content:space-between;padding-top:16px"><span class="t-label">Costo mensual de la cotización</span><span class="t-numeric" style="font-size:16px;font-weight:600">+$ 41.300</span></div>
+</div>
+</x-import>
+</div>
+</div>
+</section>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;\&quot;light\&quot; | \&quot;dark\&quot;&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const h = React.createElement;
+    return {
+      theme: this.props.theme ?? "light",
+      noop: () => {},
+      openSheet: () => {},
+      estados: [
+        { tone: "success", label: "Al día", uso: "La fuente respondió y el valor está vigente." },
+        { tone: "warning", label: "Atrasado", uso: "Última captura hace 2 días. Se usa el último valor publicado." },
+        { tone: "danger", label: "Anómalo, por confirmar", uso: "Valor fuera de rango; OPAI lo retuvo hasta que lo confirmes." },
+        { tone: "info", label: "Propuesto, por confirmar", uso: "No se lee por máquina (por ejemplo, el IMM): OPAI lo propone desde la ley publicada." },
+        { tone: "accent", label: "Propio de la empresa", uso: "Escrito a mano; ya no sigue la fuente." },
+      ],
+      cambios: [
+        { caso: "Alza normal", antes: "$ 41.198,44", despues: "$ 41.237,01", pct: "+0,09 %", color: "var(--ds-fg-muted)" },
+        { caso: "Sobre el umbral", antes: "1,54 %", despues: "1,88 %", pct: "+22,1 %", color: "var(--ds-warning-fg)" },
+        { caso: "Bajo el umbral", antes: "$ 529.000", despues: "$ 553.553", pct: "+4,64 %", color: "var(--ds-fg-muted)" },
+        { caso: "Baja", antes: "0,38 %", despues: "0,34 %", pct: "−10,5 %", color: "var(--ds-fg-muted)" },
+        { caso: "Monto mensual", antes: "$ 8.601.280", despues: "$ 8.642.580", pct: "+0,48 %", color: "var(--ds-fg-muted)" },
+      ],
+      sheetRows: [
+        { nombre: "UF", antes: "$ 41.198,44", despues: "$ 41.237,01", pct: "+0,09 %", color: "var(--ds-fg-muted)", meta: "Vigente desde 27-10-2026 · Banco Central de Chile", dif: "+$ 400/mes" },
+        { nombre: "Ingreso mínimo mensual", antes: "$ 529.000", despues: "$ 553.553", pct: "+4,64 %", color: "var(--ds-fg-muted)", meta: "Vigente desde 01-01-2027 · Ley 21.830", dif: "+$ 40.900/mes" },
+      ],
+      sheetActions: NS.Button ? h(React.Fragment, null, h(NS.Button, { variant: "secondary" }, "Cerrar"), h(NS.Button, null, "Recalcular")) : null,
+    };
+  }
+}
+</script>
+</body>
+</html>
