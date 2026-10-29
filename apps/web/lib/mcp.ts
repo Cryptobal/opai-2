@@ -21,12 +21,15 @@ export async function manejarMcp(req: Request, key: string | null): Promise<Resp
     r.headers.set("WWW-Authenticate", 'Bearer realm="opai"');
     return r;
   }
-  if (!(await permitir(`mcp-key:${key.slice(0, 24)}`, LIMITES.apiPorPrincipal.maximo)))
-    return demasiadas();
 
   asegurarRegistro();
   const ctx = await contextoDeApiKey(key);
   if (ctx instanceof Response) return ctx;
+  // Cupo por key autenticada (apiKeyId), como /api/v1. Nunca por un prefijo de la key: con slugs
+  // largos el prefijo es todo público y keys falsas agotarían el cupo de la key real (CAR-44). El
+  // sondeo de keys antes de autenticar lo acota el límite por IP de arriba.
+  if (!(await permitir(`mcp-key:${ctx.actor.id ?? "sistema"}`, LIMITES.apiPorPrincipal.maximo)))
+    return demasiadas();
 
   // Lo que esta key debe ver. Se declara en `instructions` para que un cliente (o `pnpm mcp:verificar`)
   // detecte una lista de herramientas desactualizada o recortada de su lado.
