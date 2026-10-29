@@ -90,9 +90,11 @@ test.describe("fichas con el celular en horizontal", () => {
         .first()
         .getAttribute("href");
       await page.goto(`${persona}/laboral`);
-      // Desde el #89: la columna de tarjetas (vínculo, instalación y jornada, capa) y el historial.
+      // Desde el #89 las columnas son «Vínculo vigente» (con instalación y capa) e «Historial de vínculos».
       const rejilla = page
-        .locator("div.grid.gap-4:has(> div.flex.flex-col.gap-4):has(> section)")
+        .locator("div.grid.gap-4")
+        .filter({ has: page.locator(":scope > div", { hasText: "Vínculo vigente" }) })
+        .filter({ has: page.locator(":scope > section", { hasText: "Historial de vínculos" }) })
         .first();
       await expect(rejilla).toBeVisible({ timeout: 30_000 });
       await page.waitForLoadState("networkidle");

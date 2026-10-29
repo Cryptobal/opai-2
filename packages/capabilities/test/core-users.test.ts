@@ -37,6 +37,31 @@ describe("core.users.*", () => {
     });
   });
 
+  it("cuenta las excepciones de cada usuario (A1 «Con excepciones»)", async () => {
+    const semilla = {
+      ...semillaTenant(),
+      permisoExcepcion: [
+        {
+          id: "0192f3a0-0000-7000-8000-0000000000e1",
+          tenantId: TENANT_DE_PRUEBA,
+          membershipId: M2,
+          permiso: "core:documentos.manage",
+          conceder: true,
+        },
+        {
+          id: "0192f3a0-0000-7000-8000-0000000000e2",
+          tenantId: TENANT_DE_PRUEBA,
+          membershipId: M2,
+          permiso: "core:cuentas.read",
+          conceder: false,
+        },
+      ],
+    };
+    const { ctx } = contextoDePrueba({ rol: "owner", semilla });
+    const r = await executeCapability(ctx, "core.users.list", {});
+    expect(r).toMatchObject({ ok: true, data: [{ excepciones: 0 }, { id: M2, excepciones: 2 }] });
+  });
+
   it("asigna un rol personalizado en una sola llamada y conserva el rol base (A21)", async () => {
     const ROL_ID = "0192f3a0-0000-7000-8000-0000000000d2";
     const base = semillaTenant("gerente");
