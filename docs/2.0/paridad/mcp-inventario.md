@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 243 pares pantalla→capacidad · 214 con herramienta · 29 excepciones justificadas · 0 faltantes.
+**Resumen:** 251 pares pantalla→capacidad · 217 con herramienta · 34 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -97,6 +97,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/integraciones/_componentes` | `core.integraciones.configurar` | — | excepción |
 | compartido | `app/(erp)/configuracion/integraciones/_componentes` | `core.integraciones.probar` | `core_integraciones_probar` | existe |
 | compartido | `app/(erp)/configuracion/integraciones/_componentes` | `core.integraciones.set_secreto` | — | excepción |
+| compartido | `app/(erp)/configuracion/usuarios/_permisos` | `core.permisos.catalogo` | `core_permisos_catalogo` | existe |
+| compartido | `app/(erp)/configuracion/usuarios/_permisos` | `core.roles.list` | `core_roles_list` | existe |
 | compartido | `app/(erp)/contactos/_componentes` | `comercial.contactos.list` | `comercial_contactos_list` | existe |
 | compartido | `app/(erp)/contactos/_componentes` | `core.contactos.get` | `core_contactos_get` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `core.contactos.create` | `core_contactos_create` | existe |
@@ -212,8 +214,14 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/operaciones` | `core.patrones.set_activo` | `core_patrones_set_activo` | existe |
 | erp | `/configuracion/operaciones` | `core.patrones.update` | `core_patrones_update` | existe |
 | erp | `/configuracion/preferencias` | `core.config.set` | `core_config_set` | existe |
+| erp | `/configuracion/usuarios/roles` | `core.roles.archive` | — | excepción |
+| erp | `/configuracion/usuarios/roles` | `core.roles.create` | — | excepción |
+| erp | `/configuracion/usuarios/roles` | `core.roles.update` | — | excepción |
+| erp | `/configuracion/usuarios` | `core.excepciones.list` | `core_excepciones_list` | existe |
+| erp | `/configuracion/usuarios` | `core.excepciones.set` | — | excepción |
 | erp | `/configuracion/usuarios` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
 | erp | `/configuracion/usuarios` | `core.invitations.list` | `core_invitations_list` | existe |
+| erp | `/configuracion/usuarios` | `core.roles.assign` | — | excepción |
 | erp | `/configuracion/usuarios` | `core.supervisores.asignar` | `core_supervisores_asignar` | existe |
 | erp | `/configuracion/usuarios` | `core.supervisores.list` | `core_supervisores_list` | existe |
 | erp | `/configuracion/usuarios` | `core.supervisores.quitar` | `core_supervisores_quitar` | existe |
@@ -331,6 +339,45 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.roles.update` | Solo personas: cambiar los permisos de un rol es gobernar el acceso (ADR-034). |
 | `core.users.invite` | Solo personas: invitar asigna un rol y gobierna el acceso (encargo PR #70). |
 
+## Solo personas: camino humano (CAR-52)
+
+Por MCP y API key están reservadas a personas (`soloPersonas`, ADR-034): el agente recibe FORBIDDEN.
+Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con sesión» marca las que
+`/api/v1` ejecuta con la sesión de una persona en el portal ERP fijado en servidor (CAR-37).
+
+| Capacidad | Camino humano | API v1 con sesión | MCP |
+| --- | --- | --- | --- |
+| `agente.plan.confirmar` | `/api/agente` | no | reservada a personas |
+| `agente.turno.preparar` | `/api/agente` | no | reservada a personas |
+| `core.anexos.aprobar` | `app/_components` | no | reservada a personas |
+| `core.anexos.rechazar` | `app/_components` | no | reservada a personas |
+| `core.apikeys.create` | `/configuracion/agentes` | no | reservada a personas |
+| `core.apikeys.revoke` | `/configuracion/agentes/[id]` | no | reservada a personas |
+| `core.apikeys.set_autonomia` | `/configuracion/agentes/[id]` | no | reservada a personas |
+| `core.apikeys.update` | `/configuracion/agentes/[id]` | no | reservada a personas |
+| `core.aprobaciones.aprobar` | `/configuracion/aprobaciones` | no | reservada a personas |
+| `core.aprobaciones.rechazar` | `/configuracion/aprobaciones` | no | reservada a personas |
+| `core.cumplimiento.consentimiento_registrar` | `app/_components` | no | reservada a personas |
+| `core.cumplimiento.consentimiento_revocar` | `app/_components` | no | reservada a personas |
+| `core.cumplimiento.dpa_aceptar` | `app/(erp)/configuracion/cumplimiento/_componentes` | no | reservada a personas |
+| `core.cumplimiento.dpo_set` | `app/(erp)/configuracion/cumplimiento/_componentes` | no | reservada a personas |
+| `core.cumplimiento.incidente_avanzar` | `app/(erp)/configuracion/cumplimiento/_componentes` | no | reservada a personas |
+| `core.cumplimiento.incidente_notificar` | `app/(erp)/configuracion/cumplimiento/_componentes` | no | reservada a personas |
+| `core.cumplimiento.incidente_registrar` | `app/(erp)/configuracion/cumplimiento/_componentes` | no | reservada a personas |
+| `core.cumplimiento.solicitud_avanzar` | `app/(erp)/configuracion/cumplimiento/_componentes` | no | reservada a personas |
+| `core.cumplimiento.solicitud_crear` | `app/_components` | no | reservada a personas |
+| `core.cumplimiento.solicitud_exportar` | `app/(erp)/configuracion/cumplimiento/_componentes` | no | reservada a personas |
+| `core.cumplimiento.solicitud_resolver` | `app/(erp)/configuracion/cumplimiento/_componentes` | no | reservada a personas |
+| `core.cumplimiento.titular_anonimizar` | `app/(erp)/configuracion/cumplimiento/_componentes` | no | reservada a personas |
+| `core.excepciones.set` | `/configuracion/usuarios` | sí (portal ERP) | reservada a personas |
+| `core.integraciones.configurar` | `app/(erp)/configuracion/integraciones/_componentes` | no | reservada a personas |
+| `core.integraciones.set_secreto` | `app/(erp)/configuracion/integraciones/_componentes` | no | reservada a personas |
+| `core.roles.archive` | `/configuracion/usuarios/roles` | sí (portal ERP) | reservada a personas |
+| `core.roles.assign` | `/configuracion/usuarios` | sí (portal ERP) | reservada a personas |
+| `core.roles.create` | `/configuracion/usuarios/roles` | sí (portal ERP) | reservada a personas |
+| `core.roles.update` | `/configuracion/usuarios/roles` | sí (portal ERP) | reservada a personas |
+| `core.users.invite` | `/configuracion/usuarios` | no | reservada a personas |
+
 ## Capacidades solo por API y MCP (ninguna pantalla las invoca con id literal)
 
 - `agente.historial.list`
@@ -345,16 +392,13 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 - `core.documentos.vencimientos`
 - `core.documentos.vincular`
 - `core.estructuras.get`
-- `core.excepciones.list`
 - `core.funciones.get`
 - `core.geo.geocodificar`
 - `core.ia.probar`
 - `core.invitations.revoke`
 - `core.patrones.get`
-- `core.permisos.catalogo`
 - `core.ping`
 - `core.puestos.get`
-- `core.roles.list`
 - `core.usage.summary`
 - `platform.auditoria.estado`
 - `platform.bitacora.estado`

@@ -2,6 +2,7 @@ import { manejarCapacidadHttp } from "@opai/capabilities/http";
 
 import { resolverActor } from "@/lib/actor";
 import { contextoSesionApi } from "@/lib/api-sesion";
+import { contextoV1Sesion } from "@/lib/api-v1-sesion";
 import { ipDe, LIMITES, permitir } from "@/lib/rate-limit";
 import { asegurarRegistro } from "@/lib/registro";
 import { demasiadas } from "@/lib/respuestas";
@@ -21,7 +22,9 @@ async function manejar(req: Request, { params }: Params): Promise<Response> {
   if (!(await permitir(`v1-ip:${ipDe(req)}`, LIMITES.apiPorIp.maximo))) return demasiadas();
   const actor = await resolverActor(req);
   if (actor instanceof Response) return actor;
-  const ctx = contextoSesionApi(req, actor);
+  const ctxRoles = contextoV1Sesion(actor, capability.join("."), req);
+  if (ctxRoles instanceof Response) return ctxRoles;
+  const ctx = contextoSesionApi(req, ctxRoles);
   if (ctx instanceof Response) return ctx;
   const principal = ctx.actor.id ?? "sistema";
   if (!(await permitir(`v1-principal:${principal}`, LIMITES.apiPorPrincipal.maximo)))
