@@ -59,7 +59,8 @@ describe("preferencias: cola serial por formulario (regresión del PR #109)", ()
     await vi.waitFor(() => expect(llamadas).toBe(1));
     expect(h.ejecutar).toHaveBeenCalledTimes(1);
     const esperado = { modulo: "core", clave: "preferencias_tema", valor: "sistema" };
-    expect(h.ejecutar).toHaveBeenCalledWith("core.config.set", esperado);
+    // `false, "ninguna"`: sin dryRun y sin revalidar el layout (B1, H1/H2).
+    expect(h.ejecutar).toHaveBeenCalledWith("core.config.set", esperado, false, "ninguna");
     liberar({ ok: true, data: { version: 1 } });
     await vi.waitFor(() => expect(h.exito).toHaveBeenCalledTimes(1));
     expect(llamadas).toBe(1);
@@ -80,8 +81,8 @@ describe("preferencias: cola serial por formulario (regresión del PR #109)", ()
     prefs.guardar("resumen", "diario", "preferencias_resumen");
     await vi.waitFor(() => expect(h.ejecutar).toHaveBeenCalledTimes(2));
     const cs = "core.config.set";
-    expect(h.ejecutar).toHaveBeenNthCalledWith(1, cs, { modulo: "core", clave: "preferencias_tema", valor: "oscuro" });
-    expect(h.ejecutar).toHaveBeenNthCalledWith(2, cs, { modulo: "core", clave: "preferencias_resumen", valor: "diario" });
+    expect(h.ejecutar).toHaveBeenNthCalledWith(1, cs, { modulo: "core", clave: "preferencias_tema", valor: "oscuro" }, false, "ninguna");
+    expect(h.ejecutar).toHaveBeenNthCalledWith(2, cs, { modulo: "core", clave: "preferencias_resumen", valor: "diario" }, false, "ninguna");
   });
 
   it("un guardado rechazado revierte el tema y avisa; la cola sigue y el siguiente sale", async () => {

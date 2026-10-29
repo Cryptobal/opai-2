@@ -75,7 +75,10 @@ export function usePreferencias(inicial: Valores) {
     cola.current = cola.current
       .then(async () => {
         if (!esUltimo()) return;
-        const r = await ejecutar("core.config.set", { modulo: "core", clave, valor });
+        // `revalidar: "ninguna"`: el tema ya se aplicó en el cliente y las preferencias se releen al
+        // navegar, así que guardar no revalida el layout (no re-corre sus capacidades ni re-renderiza
+        // este formulario desde el servidor a mitad de una ráfaga) (B1, H1/H2 del #135).
+        const r = await ejecutar("core.config.set", { modulo: "core", clave, valor }, false, "ninguna");
         if (r) {
           // El servidor ya tiene este valor: queda como confirmado aunque una elección más nueva lo
           // reemplace enseguida, para que un fallo posterior revierta a lo realmente guardado.
