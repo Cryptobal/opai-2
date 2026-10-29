@@ -1,6 +1,6 @@
 // Tipos de los servicios del núcleo que reciben las capacidades por el Contexto (Brief 02). Los
 // implementa el borde (base real) o `@opai/capabilities/testing` (memoria).
-import type { HechoBitacora, TenantTx, VerificacionBitacora } from "@opai/db";
+import type { HechoBitacora, HechoSeguridad, TenantTx, VerificacionBitacora } from "@opai/db";
 
 /** Una fila del medidor de consumos (ADR-031). `capacidad.ejecucion` la escribe executeCapability. */
 export type ConsumoNuevo = {
@@ -69,6 +69,24 @@ export interface Trabajos {
 export interface BitacoraServicio {
   registrar(tx: TenantTx, hecho: HechoBitacora): Promise<{ seq: number; hash: string }>;
   verificar(): Promise<VerificacionBitacora>;
+}
+
+/**
+ * Datos de identidad globales (CAR-43): `core.sessions` no tiene `tenant_id` ni RLS, y `opai_app`
+ * no tiene acceso directo (lo tiene `opai_auth`, vía `@opai/db`); por eso es un servicio inyectado,
+ * no un delegado de `ctx.db`, igual que `medidor`/`eventos`/`bitacora`.
+ */
+export interface Identidad {
+  /** Último acceso (sesión más reciente) por usuario, sin exponer el token. */
+  ultimoAcceso(userIds: readonly string[]): Promise<Map<string, Date>>;
+  /**
+   * Apaga el segundo factor de un usuario sin su contraseña (CAR-54): dentro de `tx`, atómico con
+   * la escritura y la auditoría de la capacidad que lo pide. Devuelve `false` si no tenía el
+   * segundo factor activo.
+   */
+  restablecerMfa(userId: string, tx: TenantTx): Promise<boolean>;
+  /** Hecho de seguridad (CAR-42) explícito de una capacidad, dentro de `tx` (atómico con ella). */
+  auditarSeguridad(hecho: HechoSeguridad, tx: TenantTx): Promise<void>;
 }
 
 /** Datos de la API key que ejecuta (ADR-032): presupuesto mensual y autonomía por capacidad. */

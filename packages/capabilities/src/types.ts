@@ -15,6 +15,7 @@ import type {
   AgenteContexto,
   BitacoraServicio,
   Eventos,
+  Identidad,
   Medidor,
   Principal,
   Trabajos,
@@ -143,6 +144,7 @@ export interface Contexto {
   eventos: Eventos;
   trabajos: Trabajos;
   bitacora: BitacoraServicio;
+  identidad: Identidad;
   /** Claves de idempotencia de escrituras (ADR-034). */
   idempotencia: Idempotencia;
   /** Trabajo fuera de la respuesta (el borde usa `after()`). Nunca debe romper la ejecución. */

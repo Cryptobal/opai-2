@@ -21,6 +21,8 @@ export const miembroSchema = z.object({
   ultimoAccesoEn: z.date().nullable(),
   /** Excepciones de permiso vigentes (A01: «Con excepciones» con el número). */
   excepciones: z.number(),
+  /** Segundo factor activo (CAR-54): decide si la ficha ofrece restablecerlo. */
+  mfaActiva: z.boolean(),
 });
 
 export type Miembro = z.infer<typeof miembroSchema>;
@@ -32,7 +34,7 @@ type FilaMembresia = {
   roleId: string | null;
   portales: string[];
   estado: string;
-  user: { name: string; email: string };
+  user: { name: string; email: string; twoFactorEnabled: boolean };
   rolTenant: { nombre: string } | null;
   _count?: { excepciones: number };
 };
@@ -57,26 +59,22 @@ export function aMiembro(m: FilaMembresia, ultimoAccesoEn: Date | null): Miembro
     estado: m.estado,
     ultimoAccesoEn,
     excepciones: m._count?.excepciones ?? 0,
+    mfaActiva: m.user.twoFactorEnabled ?? false,
   };
 }
 
 /**
  * Último acceso por usuario a partir de las sesiones de Better Auth (`core.sessions`, sin tenant): la
- * sesión más reciente de cada uno. No toca el flujo de login (que evita un oráculo de enumeración) ni
- * agrega columnas; una sesión expirada y purgada deja el último acceso en null (no bloqueante, A02).
+ * sesión más reciente de cada uno. `core.sessions` no tiene RLS ni `opai_app` tiene acceso directo
+ * (CAR-43): `ctx.identidad` (servicio inyectado, no un delegado de `ctx.db`) usa el rol `opai_auth`
+ * y columnas mínimas, nunca el token. No toca el flujo de login (que evita un oráculo de
+ * enumeración); una sesión expirada y purgada deja el último acceso en null (no bloqueante, A02).
  */
 export async function ultimosAccesos(
   ctx: Contexto,
   userIds: readonly string[],
 ): Promise<Map<string, Date>> {
-  if (userIds.length === 0) return new Map();
-  const sesiones = await ctx.db.session.findMany({ where: { userId: { in: [...userIds] } } });
-  const ultimo = new Map<string, Date>();
-  for (const s of sesiones) {
-    const prev = ultimo.get(s.userId);
-    if (!prev || s.updatedAt > prev) ultimo.set(s.userId, s.updatedAt);
-  }
-  return ultimo;
+  return ctx.identidad.ultimoAcceso(userIds);
 }
 
 export async function buscar(ctx: Contexto, id: string): Promise<Miembro> {

@@ -10,6 +10,7 @@ import {
   auditoriaEnMemoria,
   bitacoraEnMemoria,
   eventosEnMemoria,
+  identidadEnMemoria,
   trabajosEnMemoria,
 } from "./servicios-memoria";
 import { medidorEnMemoria } from "./medidor-memoria";
@@ -107,6 +108,7 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
     eventos: eventosEnMemoria(TENANT_DE_PRUEBA, actor),
     trabajos: trabajosEnMemoria(TENANT_DE_PRUEBA),
     bitacora: bitacoraEnMemoria(tabla, TENANT_DE_PRUEBA),
+    identidad: identidadEnMemoria(tabla),
     idempotencia: idempotenciaSobre(db, TENANT_DE_PRUEBA, actor),
     diferir: (t) => void diferidos.push(t().catch(() => undefined)),
     despacharEventos: () => void (despachos += 1),

@@ -5,6 +5,8 @@ import { canonDeAuditoria, canonDeHecho, HASH_GENESIS, hashEncadenado, primeraRo
 import type { Actor, Auditoria, BitacoraServicio, Eventos, Trabajos } from "../types";
 import type { Fila } from "./db-memoria-util";
 
+export { identidadEnMemoria } from "./identidad-memoria";
+
 /** Como en la real, el evento se escribe con la `tx` del hecho (y se revierte con ella). */
 export function eventosEnMemoria(tenantId: string, actor: Actor): Eventos {
   return {

@@ -57,3 +57,11 @@ export async function purgarVentanasRateLimit(retencionS = 86_400): Promise<numb
     SELECT "core"."rate_limit_purgar"(${retencionS}::int) AS purgadas`;
   return Number(filas[0]?.purgadas ?? 0);
 }
+
+/**
+ * HMAC-SHA256 de una IP para el registro de seguridad (CAR-42): misma sal y mecanismo que el rate
+ * limit, nunca la IP en claro ni reversible (Ley 21.719).
+ */
+export function hashIp(ip: string): string {
+  return hashClave(`seguridad-ip:${ip}`);
+}

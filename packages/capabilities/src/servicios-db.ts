@@ -8,6 +8,9 @@ import {
   forTenant,
   preciosHasta,
   type Prisma,
+  registrarSeguridad,
+  restablecerMfaDeUsuario,
+  ultimoAccesoDeUsuarios,
   verificarAuditoria,
   verificarBitacora,
 } from "@opai/db";
@@ -19,6 +22,7 @@ import type {
   ConsumoNuevo,
   Contexto,
   Eventos,
+  Identidad,
   Medidor,
   Trabajos,
 } from "./types";
@@ -143,6 +147,17 @@ export function bitacoraEnDb(tenantId: string): BitacoraServicio {
   return {
     registrar: (tx, hecho) => agregarABitacora(tx, tenantId, hecho),
     verificar: () => verificarBitacora(tenantId),
+  };
+}
+
+/** Identidad global (CAR-43): usa el rol `opai_auth` (`@opai/db`), nunca `ctx.db` directo. */
+export function identidadEnDb(): Identidad {
+  return {
+    ultimoAcceso: (userIds) => ultimoAccesoDeUsuarios(userIds),
+    restablecerMfa: (userId, tx) => restablecerMfaDeUsuario(userId, tx),
+    auditarSeguridad: async (hecho, tx) => {
+      await registrarSeguridad(hecho, tx);
+    },
   };
 }
 
