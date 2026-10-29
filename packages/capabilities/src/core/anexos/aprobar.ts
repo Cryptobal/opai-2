@@ -4,7 +4,7 @@ import { claveDocumento, PERMISOS_CORE } from "@opai/domain";
 import type { TenantTx } from "@opai/db";
 
 import { defineCapability } from "../../define";
-import { conflicto, noEncontrado } from "../../errores";
+import { conflicto, noEncontrado, reglaDeNegocio } from "../../errores";
 import type { Contexto } from "../../types";
 import { sha256 } from "../comun";
 import { marcaDe } from "../comunicaciones/resolver";
@@ -13,7 +13,7 @@ import { hoy } from "../maestros/comun";
 import { anexoDe } from "./comun";
 import { filasParaDocumento } from "./documento";
 import { validarSnapshots } from "./validar-snapshots";
-import { renderizarAnexoHtml } from "./plantilla";
+import { MENSAJE_PLANTILLA_EJEMPLO, PLANTILLA_ANEXO, renderizarAnexoHtml } from "./plantilla";
 import { anexoSchema, vistaAnexo } from "./vista";
 import type { FilaAnexo } from "./vista";
 
@@ -103,6 +103,8 @@ export const anexosAprobar = defineCapability({
   efecto: "irreversible",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
+    // CAR-58: con la plantilla de ejemplo un anexo aprobado no tiene validez laboral; ni la vista previa.
+    if (PLANTILLA_ANEXO.esEjemplo) throw reglaDeNegocio(MENSAJE_PLANTILLA_EJEMPLO);
     if (dryRun) {
       const a = await anexoDe(ctx, input.id);
       if (a.estado !== "borrador") throw conflicto("El anexo ya fue resuelto.");
