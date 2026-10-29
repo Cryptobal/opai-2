@@ -1,9 +1,9 @@
 import { auditarRechazoSensible } from "./execute-rechazo";
 import { controlAgente } from "./agentes/control";
 import { denegar, falla } from "./autorizacion";
-import { ErrorCapacidad } from "./errores";
 import { conAuditoriaAlFinal } from "./execute-auditoria-final";
 import { ejecutarLecturaAuditada } from "./execute-lectura";
+import { resultadoDeError } from "./execute-log";
 import { consumoEjecucion } from "./execute-medicion";
 import { auditaConElHandler, auditarSiPlataforma, eventoDeEscritura } from "./execute-plataforma";
 import { repeticion, tenantDe } from "./execute-util";
@@ -146,10 +146,7 @@ export async function executeCapability(
     r = await correr(ctx, c, input, opciones);
     await auditarSiPlataforma(ctx, c, r, opciones);
   } catch (error) {
-    const code = error instanceof ErrorCapacidad ? error.code : "INTERNAL";
-    const message = error instanceof Error ? error.message : "Error inesperado.";
-    const detalles = error instanceof ErrorCapacidad ? error.detalles : undefined;
-    r = { resultado: falla(code, message, detalles) };
+    r = { resultado: resultadoDeError(ctx, c, error) };
   }
 
   const tenantId = tenantDe(ctx, c, r.entrada, r.salida);
