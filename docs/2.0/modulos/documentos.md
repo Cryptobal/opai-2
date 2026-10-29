@@ -1,6 +1,6 @@
 # Documentos — Especificación funcional · Parte 1: formatos de salida comercial
 
-**Estado:** **borrador** (pendiente de aprobación de Carlos, ADR-047) · **Fase:** 2 · **Tarea:** CAR-68 (pedido de Carlos del 29-oct-2026) · **Insumos:** ADR-019, ADR-020, ADR-021, ADR-028, ADR-039, ADR-042 (puntos 2, 7 y 10), ADR-047, ADR-048, ADR-049, `extraccion/comercial-y-cpq.md` §1 y §3.7, `modulos/cpq.md`, `modulos/comercial.md`, lectura de 1.0 (`Cryptobal/opai` @ `40d19a5`, 28-oct-2026, solo lectura; ver §11) · **Autor:** Claude
+**Estado:** **borrador** (pendiente de aprobación de Carlos, ADR-047) · **Fase:** 2 · **Tarea:** CAR-68 (pedido de Carlos del 29-oct-2026) · **Insumos:** ADR-019, ADR-020, ADR-021, ADR-028, ADR-039, ADR-042 (puntos 2, 7 y 10), ADR-047, ADR-048, ADR-049 (propuesto en PR #38; su servidor ya está en `main` como NÚCLEO-E2), ADR-055, `extraccion/comercial-y-cpq.md` §1 y §3.7, `modulos/cpq.md`, `modulos/comercial.md`, lectura de 1.0 (`Cryptobal/opai` @ `40d19a5`, 28-oct-2026, solo lectura; ver §11) · **Autor:** Claude
 
 > Lenguaje de negocio, sin código (ADR-047). Este archivo es la especificación del **módulo Documentos** (ADR-019). Esta primera parte cubre solo los **formatos de salida comercial**: presentación de empresa, propuesta técnica aperturada y cotización simple de una hoja. Las otras partes del módulo (explorador transversal, bandeja de firmas pendientes, vencimientos de cuentas e instalaciones, editor de documentos no comerciales como contratos y anexos) se agregan como partes siguientes de este mismo archivo, con sus propias reglas. El diseño y el brief citan las reglas como **R1, R2…** y los criterios como **CA1, CA2…**. El Design Prompt de esta parte está en [`design/DESIGN-PROMPT-formatos-salida.md`](../design/DESIGN-PROMPT-formatos-salida.md) y se usa solo después de que Carlos apruebe esta especificación.
 
@@ -60,6 +60,8 @@ Documento comercial (enviado) 1──1 PDF en core.documentos (con huella SHA-25
 | Comprobante de aceptación | `/verificar/[token]` (ya existe, ADR-039) | Público | Página de verificación | Desde el correo de confirmación |
 | Ajustes de salidas comerciales | Configuración → Documentos (centro por ámbitos, ADR-018/038) | ERP | `AjustesForm` | Configuración |
 
+«Comerciales», «Plantillas» y «Secciones» son **pestañas** de la entrada Documentos, no entradas nuevas del menú; el brief agrega las dos nuevas (Comerciales y Secciones) a `NAVEGACION.md` §2.
+
 **Pestañas aportadas a fichas de otros módulos** (ADR-041, orden Resumen → propias → de módulos → Documentos → Actividad): en la ficha del **negocio** y de la **cuenta**, la pestaña **Documentos** existente muestra arriba las salidas comerciales (formato, versión de cotización, estado, vistas, aceptación) con la acción «Generar documento». En la ficha de la **cotización** (CPQ), la acción «Generar propuesta» abre la misma hoja con la cotización ya elegida.
 
 **Qué se hace en cada dispositivo** (DISENO.md §4):
@@ -115,12 +117,12 @@ Documento comercial (enviado) 1──1 PDF en core.documentos (con huella SHA-25
 | Campo | Tipo | Obligatorio | Validación | Quién lo edita | Visible |
 |---|---|---|---|---|---|
 | Decisión | `aceptada`, `rechazada` | Sí | — | El destinatario en el enlace, o un usuario al registrar una aceptación fuera de línea (R33) | Sí |
-| Nombre completo, RUT, cargo | Texto | Sí (aceptar) | RUT válido (módulo 11) | El destinatario | En el comprobante |
-| Correo | El del enlace, verificado con un código de un solo uso (pregunta 4) | Sí | Coincide con el destinatario | Sistema | En el comprobante, enmascarado |
+| Nombre completo, RUT, cargo | Texto | Sí (aceptar) | RUT válido (módulo 11) | El destinatario | Solo en la constancia del PDF aceptado, que reciben los destinatarios y el tenant; **nunca** en la página pública `/verificar` ni en el enlace (R32) |
+| Correo | El del enlace, verificado con un código de un solo uso (pregunta 4) | Sí | Coincide con el destinatario | Sistema | En la constancia del PDF, enmascarado |
 | Declaración | Casilla «Acepto esta propuesta y sus condiciones» | Sí (aceptar) | — | El destinatario | Sí |
-| Trazo de firma | Imagen | Según ajuste del tenant (pregunta 4) | — | El destinatario | En el comprobante y en el PDF aceptado |
+| Trazo de firma | Imagen | Según ajuste del tenant (pregunta 4) | — | El destinatario | En la constancia del PDF aceptado |
 | Motivo de rechazo | Catálogo (`precio`, `alcance`, `plazo`, `otro`) + texto | Sí (rechazar) | Texto obligatorio con `otro` | El destinatario | No |
-| Evidencia | Hora de servidor, huella del PDF, identificador del enlace, dispositivo resumido y red en forma de huella (nunca IP en claro, Ley 21.719) | Sí | — | Sistema | En el comprobante |
+| Evidencia | Hora de servidor, huella del PDF, identificador del enlace, dispositivo resumido y red como huella HMAC con sal secreta del servidor (como el rate limit de NÚCLEO-B; nunca IP en claro ni un hash simple reversible, Ley 21.719) | Sí | — | Sistema | Huella del PDF, fecha y estado en `/verificar`; el resto solo en la constancia |
 
 ## 5. Reglas de negocio
 
@@ -145,7 +147,7 @@ Documento comercial (enviado) 1──1 PDF en core.documentos (con huella SHA-25
 | Texto fijo | Párrafo del tenant con variables (§5.4) | Plantilla | Los tres |
 | Sección institucional | Una sección de la biblioteca (versión vigente al generar) | Biblioteca | Presentación, propuesta |
 | Servicios | Lista de servicios del tenant con descripción | Biblioteca (sección tipo servicios) | Presentación, propuesta |
-| Clientes | Logos o nombres de clientes de referencia (solo los que el tenant marcó como referencia, `es_referencia` de ADR-040) | Comercial + documentos | Presentación, propuesta |
+| Clientes | Logos o nombres de clientes de referencia (solo los que el tenant marcó como referencia, marca `es_referencia` de la faceta comercial de la cuenta, propuesta en `extraccion/comercial-y-cpq.md` §5 (`cuentas_comercial`)) | Comercial + documentos | Presentación, propuesta |
 | Certificaciones | Certificados con su vigencia | Documentos del tenant con vencimiento | Presentación, propuesta |
 | Comprensión del servicio | Texto por negocio (lo escribe una persona o lo propone el agente) | Documento | Propuesta |
 | Instalaciones | Una sección por instalación del negocio: dirección, mapa estático, servicio | Núcleo + Comercial | Propuesta |
@@ -191,23 +193,24 @@ Documento comercial (enviado) 1──1 PDF en core.documentos (con huella SHA-25
 - **R24.** Toda sección escrita o reescrita por un agente queda en estado **«propuesta por IA»** con su origen visible. **No se puede enviar** un documento con secciones «propuesta por IA» sin que una persona las marque revisadas (se conserva el flujo `ia → editada → aprobada` de 1.0).
 - **R25.** El agente usa el **asistente de plantillas de ADR-028**: propone textos y plantillas dentro del sistema de bloques; nunca genera HTML ni cambia montos.
 - **R26.** Todo texto de terceros que el agente use para escribir (correos del cliente, bases de una licitación privada) se trata como dato externo y nunca habilita una escritura irreversible (ADR-034).
-- **R27.** **El agente elige o propone el formato** con reglas explicables, en este orden: (a) si el negocio no tiene cotización `lista`, propone **presentación**; (b) si la tiene, propone la plantilla cuyo «uso sugerido» coincide con el tipo de negocio y de instalación (`nueva`, `ampliacion`, `renovacion`; ADR-040) y con el número de instalaciones; (c) si es una ampliación o renovación de una sola instalación, propone **cotización simple**; (d) si no hay coincidencia, la plantilla por defecto del formato. La propuesta siempre dice **por qué** eligió y la persona puede cambiarla.
+- **R27.** **El agente elige o propone el formato** con reglas explicables, en este orden: (a) si el negocio no tiene cotización `lista`, propone **presentación**; (b) si la tiene, propone la plantilla cuyo «uso sugerido» coincide con el tipo de negocio y de instalación (`nueva`, `ampliacion`, `renovacion`, `reemplazo`; ADR-040) y con el número de instalaciones; (c) si es una ampliación o renovación de una sola instalación, propone **cotización simple**; (d) si no hay coincidencia, la plantilla por defecto del formato. La propuesta siempre dice **por qué** eligió y la persona puede cambiarla.
 
 ### 5.7 Envío, enlace y aceptación
 
-- **R28.** Enviar es una acción con permiso `documentos:salida.enviar`. Para un agente es **irreversible**: va a la cola de aprobación humana (`APPROVAL_REQUIRED`) aunque tenga el permiso. Enviar una propuesta o cotización simple exige que la cotización esté `lista` (no `en_aprobacion`, ni subvalorada sin aprobación: ADR-042.6) y marca la cotización como `enviada` por la capacidad de CPQ.
+- **R28.** Enviar es una acción con permiso `documentos:salida.enviar`. Para un agente es **irreversible**: va a la cola de aprobación humana (`APPROVAL_REQUIRED`) aunque tenga el permiso. Enviar una propuesta o cotización simple exige que esa versión de la cotización esté `lista` o ya `enviada` (por ejemplo, la cotización simple primero y la propuesta después, o un reenvío), nunca `en_aprobacion` ni subvalorada sin aprobación (ADR-042.6); si estaba `lista`, la marca `enviada` por la capacidad de CPQ. Con un certificado vencido (R20), enviar exige la confirmación explícita, que la herramienta MCP recibe como parámetro y la pantalla como casilla.
 - **R29.** Se envía por correo con la plantilla de Comunicaciones del evento (ADR-020), con el **enlace personal** de cada destinatario y el PDF adjunto si el tenant lo activa. También se puede **copiar el enlace** o **compartirlo por WhatsApp** (como en 1.0); cada forma queda registrada.
 - **R30.** Cada destinatario recibe **un enlace propio**, revocable, que vence con la validez de la cotización (presentación: 90 días por defecto, ajuste del tenant). Después de vencer, el enlace muestra el documento en solo lectura con «Pedir una propuesta actualizada», que avisa al ejecutivo.
 - **R31.** La página del cliente muestra el documento con la marca del tenant, adaptado al celular, con descarga del PDF idéntico al enviado, y registra **vistas** (primera, última, cantidad) sin guardar la IP en claro.
-- **R32.** **Aceptar** exige: la declaración, nombre, RUT y cargo, y la verificación del correo del destinatario con un código de un solo uso (pregunta 4). Se registra la **aceptación** como hecho inmutable con evidencia, se agrega al PDF una página de constancia (nuevo documento en `core.documentos`, `reemplaza_a_id` del enviado) y se envía al destinatario y al ejecutivo el comprobante con `/verificar/<token>` (ADR-039). Una propuesta aceptada no se vuelve a aceptar ni se puede rechazar después.
+- **R32.** **Aceptar** exige: la declaración, nombre, RUT y cargo, y la verificación del correo del destinatario con un código de un solo uso (pregunta 4). Se registra la **aceptación** como hecho inmutable con evidencia, se agrega al PDF una página de **constancia** con quién, cuándo y cómo (nuevo documento en `core.documentos`, `reemplaza_a_id` del enviado), que reciben el destinatario y el ejecutivo, y se envía el enlace al comprobante `/verificar/<token>` (ADR-039), que muestra **solo** la huella del PDF, la fecha y el estado, **sin datos personales**. La página del enlace dice «Esta propuesta ya fue aceptada el …» sin nombrar a quién. Una propuesta aceptada no se vuelve a aceptar ni se puede rechazar después.
 - **R33.** **Aceptación fuera de línea:** un usuario con `documentos:salida.enviar` puede registrar que el cliente aceptó por otro medio (orden de compra, PDF firmado, correo), adjuntando el respaldo como documento (obligatorio). Para un agente es irreversible y va a aprobación humana.
 - **R34.** Al aceptar, CPQ marca la cotización `aceptada` (y rechaza las hermanas abiertas, como en 1.0 §3.2) y Comercial **propone ganar el negocio** o lo gana según el ajuste del tenant «Ganar el negocio al aceptar» (pregunta 2). Ganar sigue sus reglas de Comercial: los puestos se **ofrecen** y RRHH los confirma (`modulos/cpq.md` R1–R5); aceptar nunca crea puestos.
 - **R35.** **Rechazar** en el enlace pide un motivo; queda registrado, avisa al ejecutivo y no mueve el negocio (la pérdida la decide una persona en Comercial).
 - **R36.** Revocar un enlace o retirar un documento enviado lo deja en solo lectura con «Este documento ya no está disponible» y no borra la evidencia.
+- **R39.** **Seguridad del enlace público.** El token del enlace es aleatorio con al menos 128 bits de entropía y se guarda **solo como hash**; el tenant se resuelve desde ese hash con una consulta acotada de columnas mínimas, igual que `/verificar` (nunca `dbAdmin()` ni una lectura sin `forTenant` después de resolverlo). El código de un solo uso tiene 6 dígitos, vence a los 10 minutos, admite 5 intentos y luego se bloquea ese enlace por 15 minutos; pedir código, aceptar y rechazar pasan por el rate limit centralizado con **falla cerrada** (`permitir(..., { fallarCerrado: true })`, como recuperar contraseña). Un token inválido, vencido o revocado responde igual, sin revelar si el documento existe.
 
 ### 5.8 Presentación de empresa
 
-- **R37.** La presentación **no usa datos del CPQ**: se genera desde una cuenta, un negocio o **suelta** (prospección, a un correo sin cuenta todavía; en ese caso se registra con el correo y se vincula a la cuenta si después se crea). No lleva aceptación.
+- **R37.** La presentación **no usa datos del CPQ**: se genera desde una cuenta, un negocio o **suelta** (prospección, a un correo sin cuenta todavía; en ese caso se registra con el correo y se vincula a la cuenta si después se crea). No lleva aceptación. El correo de un prospecto se guarda solo para trazar el envío, con la base legal que registre el tenant en su RAT (Brief 07d); si no se vincula a una cuenta, entra en la política de retención de 07d (categoría configurable, apagada por defecto, como las demás) y nunca se usa para otros envíos.
 - **R38.** La propuesta puede incluir las **mismas secciones institucionales** de la biblioteca que usa la presentación (no se anida un documento dentro de otro): se escribe una vez y se reutiliza en los dos formatos.
 
 ## 6. Estados y transiciones
@@ -218,7 +221,7 @@ Documento comercial (enviado) 1──1 PDF en core.documentos (con huella SHA-25
 |---|---|---|---|---|---|
 | — | `borrador` | `documentos:salida.manage`; agente con vista previa | Plantilla publicada; en propuesta y simple, cotización `lista` o `enviada` | Contenido resuelto desde plantilla y datos | Sí (descartar) |
 | `borrador` | `descartado` | Ídem | — | Se archiva; no deja PDF | No (se crea otro) |
-| `borrador` | `enviado` | `documentos:salida.enviar`; agente solo con aprobación humana | Sin variables vacías, sin secciones «propuesta por IA», cotización `lista` (R28), destinatarios con correo | PDF congelado con huella; enlaces; evento `documentos.salida.enviada`; cotización → `enviada`; anterior del mismo negocio y formato → `reemplazado` | No |
+| `borrador` | `enviado` | `documentos:salida.enviar`; agente solo con aprobación humana | Sin variables vacías, sin secciones «propuesta por IA», cotización `lista` o ya `enviada` en esa versión (R28), certificados vencidos confirmados, destinatarios con correo | PDF congelado con huella; enlaces; evento `documentos.salida.enviada`; cotización → `enviada`; anterior del mismo negocio y formato → `reemplazado` | No |
 | `enviado` | `visto` | Sistema | Primera apertura de un enlace | Evento `documentos.salida.vista` | No |
 | `enviado` / `visto` | `aceptado` | Destinatario en el enlace, o usuario (fuera de línea) | Dentro de la validez | Aceptación inmutable; PDF con constancia; cotización → `aceptada`; propuesta o ganancia del negocio (R34) | No |
 | `enviado` / `visto` | `rechazado` | Destinatario en el enlace | Motivo | Aviso al ejecutivo | No (se envía una versión nueva) |
@@ -269,16 +272,30 @@ Toda acción de pantalla tiene su herramienta (ADR-055). Las escrituras tienen `
 | `documentos_salida_generar` | Crea el borrador de un documento desde una plantilla, un negocio o cuenta y, si aplica, una versión de cotización | Escritura | ✓ | — |
 | `documentos_salida_get` | Devuelve el contenido del documento, sus avisos (variables vacías, certificados vencidos, secciones por revisar) y su estado | Lectura | — | — |
 | `documentos_salida_editar_seccion` | Reescribe el texto de una sección no fija; queda «propuesta por IA» (R24) | Escritura | ✓ | — |
-| `documentos_salida_revisar_seccion` | Marca una sección como revisada | Escritura | ✓ | Sí para agentes (es la revisión humana de R24) |
+| `documentos_salida_ajustar_bloques` | Quita o repone bloques opcionales y los reordena, si la plantilla lo permite (R23) | Escritura | ✓ | — |
+| `documentos_salida_cambiar_plantilla` | Pasa un borrador a la versión nueva de su plantilla o a otra plantilla del formato, mostrando qué cambia (R4) | Escritura | ✓ | — |
 | `documentos_salida_nueva_version` | Regenera desde la última versión de la cotización (R22) | Escritura | ✓ | — |
-| `documentos_salida_enviar` | Envía a los destinatarios con su enlace personal | Irreversible | ✓ | Sí |
+| `documentos_salida_descartar` | Descarta un borrador | Escritura | ✓ | — |
+| `documentos_salida_enviar` | Envía a los destinatarios con su enlace personal; recibe la confirmación de certificados vencidos (R20, R28) | Irreversible | ✓ | Sí |
 | `documentos_salida_enlace` | Devuelve el enlace de un destinatario para compartirlo | Lectura | — | — |
-| `documentos_salida_retirar` | Revoca los enlaces de un documento enviado | Irreversible | ✓ | Sí |
+| `documentos_salida_registrar_compartido` | Registra que el enlace se compartió por WhatsApp o se copió (R29) | Escritura | ✓ | — |
+| `documentos_salida_revocar_enlace` | Revoca el enlace de un solo destinatario (R30, R36) | Irreversible | ✓ | Sí |
+| `documentos_salida_retirar` | Retira el documento enviado y revoca todos sus enlaces | Irreversible | ✓ | Sí |
 | `documentos_salida_registrar_aceptacion` | Registra una aceptación recibida fuera de línea con su respaldo (R33) | Irreversible | ✓ | Sí |
 | `documentos_salidas_list` | Lista salidas por negocio, cuenta, formato o estado, con vistas y aceptación | Lectura | — | — |
-| `documentos_plantillas_get` / `_guardar_borrador` | Lee y edita el borrador de una plantilla (bloques, orden, visibilidad, apertura, marca) | Lectura / Escritura | ✓ | — |
+| `documentos_plantillas_list` | Lista las plantillas del tenant con su versión publicada y si tienen borrador | Lectura | — | — |
+| `documentos_plantilla_get` | Lee una plantilla (borrador y versiones) | Lectura | — | — |
+| `documentos_plantilla_guardar_borrador` | Crea una plantilla o edita su borrador (bloques, orden, visibilidad, apertura, marca) | Escritura | ✓ | — |
 | `documentos_plantilla_publicar` | Publica la versión | Irreversible | ✓ | Sí |
-| `documentos_secciones_list` / `_guardar` | Lee y edita la biblioteca de secciones institucionales | Lectura / Escritura | ✓ | — |
+| `documentos_plantilla_retirar` | Retira una plantilla para documentos nuevos | Irreversible | ✓ | Sí |
+| `documentos_secciones_list` | Lista la biblioteca de secciones institucionales con su uso y avisos | Lectura | — | — |
+| `documentos_seccion_guardar` | Crea o edita una sección institucional | Escritura | ✓ | — |
+| `documentos_seccion_archivar` | Archiva una sección que ya no usa ninguna plantilla publicada | Escritura | ✓ | — |
+
+**Excepciones de paridad (con motivo, ADR-055):**
+- `documentos.salida.revisar_seccion` (marcar revisada una sección propuesta por IA) es `soloPersonas`: es la revisión humana de R24, y un agente que la marca, aunque sea con aprobación, deja sin revisar el texto.
+- Las acciones del **destinatario** en la página pública (pedir el código, aceptar, rechazar y pedir una propuesta actualizada) son capacidades con el enlace como credencial, sin sesión ni key: van en `paridad-entradas.ts` como rutas públicas, igual que `/verificar`. Cuando exista el Portal Cliente con keys de cliente (ADR-033, fase 3), aceptar y rechazar se exponen también por MCP para el agente del cliente.
+- Los ajustes de Configuración → Documentos se cambian con `core.config.set`, que ya existe.
 
 **Flujo típico del agente** (para el manual `docs/2.0/agentes/salidas-comerciales.md`, con su escenario de prueba en `pnpm test`, ADR-034):
 
@@ -325,14 +342,14 @@ Verificado en `Cryptobal/opai` @ `40d19a5` (solo lectura): `prisma/schema.prisma
 - **Treinta instalaciones:** la propuesta pone un resumen por instalación al inicio y una sección por instalación con salto de página; la cotización simple pasa a mostrar solo el total y avisa si no cabe en una hoja (R12).
 - **Líneas comunes (sin instalación):** van en una sección «Servicios comunes» o, en la simple, en una línea aparte.
 - **Destinatario sin correo:** no se puede enviar a ese contacto; se puede generar el enlace y compartirlo por WhatsApp desde la pantalla con aviso (queda registrado quién lo compartió).
-- **Dos destinatarios intentan aceptar:** gana el primero; el segundo ve «Esta propuesta ya fue aceptada por … el …».
+- **Dos destinatarios intentan aceptar:** gana el primero; el segundo ve «Esta propuesta ya fue aceptada el …», sin el nombre de quien aceptó.
 - **Aceptan después de la validez:** no se puede; ven «Pedir una propuesta actualizada».
 - **El tenant cambia el logo después de enviar:** los enviados conservan el logo con que salieron (R21); los borradores toman el nuevo.
 - **Plantilla retirada con borradores abiertos:** los borradores siguen con su versión; se ofrece actualizar a otra plantilla.
 - **Sección institucional archivada usada por una plantilla publicada:** no se puede archivar hasta reemplazarla (§4.2).
 - **Certificado vencido en la biblioteca:** aviso en el borrador; enviar pide confirmación (R20).
 - **Presentación suelta a un correo sin cuenta:** se registra con el correo; si después se crea la cuenta con ese contacto, se vincula.
-- **Enlace reenviado por el cliente a otra persona:** quien lo abre ve el documento; para aceptar debe verificar el correo del destinatario original (pregunta 4), así la aceptación siempre es del destinatario.
+- **Enlace reenviado por el cliente a otra persona:** quien lo abre ve el documento; para aceptar debe verificar el correo del destinatario original (pregunta 4), así la aceptación siempre es del destinatario; si la propuesta ya fue aceptada, ve la fecha, no el nombre (R32).
 - **Agente intenta enviar sin aprobación:** responde `APPROVAL_REQUIRED` y la solicitud aparece en la Bandeja del usuario responsable.
 - **Módulo Documentos apagado con CPQ encendido:** ver pregunta 7.
 
@@ -359,10 +376,10 @@ Cada una con la recomendación de Claude y por qué. Las numeradas se citan como
 1. **¿Hasta dónde se abre el costo en la propuesta aperturada?** Recomendación: tres niveles por plantilla (`por_instalacion`, `por_categoria`, `por_item`, R13); en `por_item` la mano de obra puede mostrar sueldo base, leyes sociales y provisiones si la plantilla lo habilita; margen, costo financiero y póliza **nunca** aparecen y la diferencia sale en una línea «Gastos generales y utilidad». *Por qué:* cubre lo que piden los clientes que exigen apertura sin regalar la estructura de margen, y evita el error humano de mostrar un porcentaje interno.
 2. **¿Aceptar en el enlace gana el negocio automáticamente?** Recomendación: ajuste del tenant «Ganar el negocio al aceptar», **encendido por defecto para Gard** (igual que 1.0, que mueve el negocio a la etapa ganada), apagado en la plantilla base de otros tenants (queda «propuesto» y una persona confirma). *Por qué:* 1.0 es el piso, y en 2.0 ganar no crea puestos, solo los ofrece a RRHH (`modulos/cpq.md` R2), así que el riesgo es bajo.
 3. **¿La propuesta y la simple llevan la firma del emisor (ejecutivo o representante legal)?** Recomendación: v1 lleva el bloque «Contacto del ejecutivo» con su nombre y cargo, sin firma manuscrita; la firma del representante legal queda para contratos con firma avanzada (Brief 28). *Por qué:* una propuesta no es un contrato y una firma en imagen pegada no agrega prueba.
-4. **¿Qué pide la firma simple del cliente?** Recomendación: declaración + nombre, RUT y cargo + **código de un solo uso al correo del destinatario**; el **trazo** de firma queda como opción del tenant, apagada por defecto. *Por qué:* el código prueba que aceptó el destinatario y no quien recibió el enlace reenviado; el trazo suma poco como prueba y es incómodo en el celular.
+4. **¿Qué pide la firma simple del cliente?** Recomendación: declaración + nombre, RUT y cargo + **código de un solo uso al correo del destinatario**; el **trazo** de firma queda como opción del tenant, apagada por defecto. *Por qué:* el código prueba que aceptó el destinatario y no quien recibió el enlace reenviado; el trazo suma poco como prueba y es incómodo en el celular. **Ojo:** esto ajusta ADR-019, que define la firma simple como «trazo + sello de tiempo» y pide IP en la evidencia; aquí la prueba principal es el código al correo y la red se guarda como huella HMAC, no como IP en claro (Ley 21.719). Si Carlos lo aprueba, se agrega una nota fechada a ADR-019.
 5. **¿Un enlace por documento o uno por destinatario?** Recomendación: **uno por destinatario**, revocable. *Por qué:* permite saber quién lo vio y quién aceptó, y revocar a una persona sin afectar a las demás (en 1.0 el enlace es uno solo y público).
 6. **¿Se registran aceptaciones recibidas fuera de OPAI (orden de compra, PDF firmado, correo)?** Recomendación: sí, con respaldo adjunto obligatorio, solo personas con `documentos:salida.enviar`; un agente solo con aprobación humana (R33). *Por qué:* es como aceptan hoy muchos clientes de Gard y sin esto el negocio quedaría sin evidencia en OPAI.
-7. **¿CPQ puede venderse sin el módulo Documentos?** Recomendación: sí. CPQ trae las **plantillas base** de propuesta y cotización simple con la marca del tenant, sin editor (como el anexo de contrato del Brief 07b usa una plantilla base del sistema); el **editor de plantillas, la biblioteca, la presentación de empresa y la aceptación con firma** son del módulo Documentos. *Por qué:* respeta ADR-048 (módulos vendibles por separado) sin dejar a CPQ sin PDF, y Documentos queda como mejora vendible.
+7. **¿CPQ puede venderse sin el módulo Documentos?** Recomendación: sí. CPQ trae las **plantillas base** de propuesta y cotización simple con la marca del tenant, sin editor (como el anexo de contrato del Brief 07b usa una plantilla base del sistema); el **editor de plantillas, la biblioteca, la presentación de empresa y la aceptación con firma** son del módulo Documentos. *Por qué:* respeta ADR-048 (módulos vendibles por separado) sin dejar a CPQ sin PDF, y Documentos queda como mejora vendible. Al revés, **Documentos sin CPQ** ofrece solo la presentación de empresa (desde una cuenta del núcleo o suelta) y oculta la propuesta y la cotización simple; **sin Comercial** la presentación sale desde la cuenta o suelta, sin negocio.
 8. **¿La presentación de empresa puede enviarse sin negocio (prospección)?** Recomendación: sí, desde la cuenta o suelta a un correo, siempre registrada (R37). *Por qué:* es el uso típico antes de que exista el negocio y así queda trazado qué se mandó a quién.
 9. **¿Quién edita plantillas y la biblioteca?** Recomendación: owner y admin por defecto, con el permiso `documentos:plantillas.manage` asignable a roles personalizados (Brief 07c), por ejemplo un rol «Marketing» que solo edita la biblioteca. *Por qué:* la marca y los textos institucionales son de la empresa, no de cada vendedor.
 10. **¿Se exige revisar cada sección escrita por IA antes de enviar?** Recomendación: sí (R24), igual que el `ia → editada → aprobada` de 1.0. *Por qué:* el agente propone, la persona responde ante el cliente; evita mandar un texto inventado.
