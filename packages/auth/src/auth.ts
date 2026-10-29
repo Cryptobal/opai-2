@@ -10,6 +10,7 @@ import { mailerDelEntorno } from "@opai/integrations/email";
 
 import { bloqueoDeIngreso, mensajeBloqueo } from "./acceso";
 import { marcaMfaSesion } from "./mfa-sesion";
+import { rastroLoginPausado, rastroRestablecimiento, rastroSeguridad } from "./rastro-seguridad";
 import {
   CLAVE_INTENTO,
   datosDeContexto,
@@ -58,7 +59,9 @@ export const auth = betterAuth({
     revokeSessionsOnPasswordReset: true,
     // Un restablecimiento exitoso reinicia el contador de bloqueo del correo (B1, §16.3): Better Auth
     // ya validó el enlace. Best-effort: anotar no debe romper el flujo ni filtrar datos (Ley 21.719).
-    async onPasswordReset({ user }: { user: { email: string } }) {
+    async onPasswordReset({ user }: { user: { id: string; email: string } }, request?: Request) {
+      // Rastro de seguridad (CAR-42): aquí sí se conoce al usuario del enlace.
+      await rastroRestablecimiento(user.id, request?.headers);
       try {
         await registrarRestablecimiento(user.email);
       } catch {
@@ -128,6 +131,8 @@ export const auth = betterAuth({
       // Al lanzar aquí, Better Auth no corre el `after`, así que no deja un provisional colgado.
       const reserva = await reservarIntento(datos);
       if (reserva.estado !== "ok") {
+        // Al lanzar aquí no corre el `after`: el rastro de seguridad (CAR-42) se deja ahora.
+        await rastroLoginPausado(ctx.headers);
         throw new APIError("TOO_MANY_REQUESTS", { code: "ACCOUNT_LOCKED", message: MENSAJE_PAUSA });
       }
       // El id del provisional viaja al `after` en el contexto de la petición (no por correo e IP).
@@ -167,6 +172,8 @@ export const auth = betterAuth({
       },
     }),
     marcaMfaSesion,
+    // Después de twoFactor y de marcaMfaSesion: ve la respuesta final (p. ej. el desafío del MFA).
+    rastroSeguridad,
     nextCookies(),
   ],
 });

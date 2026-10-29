@@ -1,5 +1,6 @@
 import { clienteApp } from "./client";
 import { exigirSinLockAuditoria } from "./lock-auditoria";
+import type { ModelosCredenciales } from "./transaccion";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -25,7 +26,7 @@ export function validarTenantId(tenantId: string): string {
 export function forTenant(tenantId: string) {
   const id = validarTenantId(tenantId);
   const base = clienteApp();
-  return base.$extends({
+  const cliente = base.$extends({
     name: "forTenant",
     query: {
       $allModels: {
@@ -40,6 +41,9 @@ export function forTenant(tenantId: string) {
       },
     },
   });
+  // Sin los delegados de credenciales (CAR-43): `opai_app` tampoco tiene privilegios sobre ellas.
+  const acotado: Omit<typeof cliente, ModelosCredenciales> = cliente;
+  return acotado;
 }
 
 export type TenantDb = ReturnType<typeof forTenant>;

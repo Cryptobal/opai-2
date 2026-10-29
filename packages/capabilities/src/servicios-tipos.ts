@@ -1,6 +1,6 @@
 // Tipos de los servicios del núcleo que reciben las capacidades por el Contexto (Brief 02). Los
 // implementa el borde (base real) o `@opai/capabilities/testing` (memoria).
-import type { HechoBitacora, TenantTx, VerificacionBitacora } from "@opai/db";
+import type { HechoBitacora, ResultadoBorrado, TenantTx, VerificacionBitacora } from "@opai/db";
 
 /** Una fila del medidor de consumos (ADR-031). `capacidad.ejecucion` la escribe executeCapability. */
 export type ConsumoNuevo = {
@@ -88,3 +88,21 @@ export type AgenteContexto = {
  * key (no hereda rol).
  */
 export type Principal = { tipo: "usuario" | "cuenta" | "persona" | "servicio"; id: string };
+
+/**
+ * Identidad global (CAR-43, CAR-54, CAR-45): las tablas de credenciales no están en `ctx.db`; las
+ * capacidades llegan a ellas solo por estas operaciones con nombre, ya autorizadas por el handler.
+ */
+export type Identidad = {
+  /** Última sesión de cada usuario: solo la fecha, nunca el token. */
+  ultimosAccesos(userIds: readonly string[]): Promise<Map<string, Date>>;
+  /** Si el usuario es miembro de alguna empresa distinta de `tenantId`. */
+  enOtrasEmpresas(userId: string, tenantId: string): Promise<boolean>;
+  /** Borra su enrolamiento de MFA y cierra todas sus sesiones, en la transacción del llamador. */
+  restablecerSegundoFactor(
+    tx: TenantTx,
+    userId: string,
+  ): Promise<{ enrolamientos: number; sesiones: number }>;
+  /** Borra un usuario sin rol de plataforma ni referencias, en la transacción del llamador. */
+  borrarUsuario(tx: TenantTx, userId: string): Promise<ResultadoBorrado>;
+};
