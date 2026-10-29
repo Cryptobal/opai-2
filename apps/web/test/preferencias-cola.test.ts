@@ -1,8 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const h = vi.hoisted(() => ({
-  slots: [] as unknown[], cursor: 0, ejecutar: vi.fn(), exito: vi.fn(),
-  guardado: {} as Record<string, string>,
+  slots: [] as unknown[], cursor: 0, ejecutar: vi.fn(), exito: vi.fn(), guardado: {} as Record<string, string>,
 }));
 // Como `navegacion-cola.test.ts`: ejercita la cola asíncrona real del hook, con estado conservado
 // entre renders (useRef/useState de verdad, sin un renderer de React).
@@ -30,12 +29,10 @@ vi.mock("@/app/_components/use-capacidad", () => ({
 import { type Valores, usePreferencias } from "@/app/(erp)/configuracion/preferencias/use-preferencias";
 
 const INICIAL: Valores = { tema: "sistema", silencio: false, resumen: "nunca" };
-function PreferenciasPrueba(inicial: Valores) {
-  return usePreferencias(inicial);
-}
+const Prueba = (inicial: Valores) => usePreferencias(inicial);
 function render(inicial: Valores = INICIAL) {
   h.cursor = 0;
-  return PreferenciasPrueba(inicial);
+  return Prueba(inicial);
 }
 
 beforeEach(() => {
@@ -45,9 +42,7 @@ beforeEach(() => {
   h.exito.mockReset();
   vi.stubGlobal("document", { documentElement: { dataset: {} as Record<string, string> } });
   h.guardado = {};
-  vi.stubGlobal("localStorage", {
-    setItem: (k: string, valor: string) => void (h.guardado[k] = valor),
-  });
+  vi.stubGlobal("localStorage", { setItem: (k: string, v: string) => void (h.guardado[k] = v) });
 });
 
 describe("preferencias: cola serial por formulario (regresión del PR #109)", () => {
@@ -55,11 +50,7 @@ describe("preferencias: cola serial por formulario (regresión del PR #109)", ()
     let liberar: (r: { ok: true; data: { version: number } }) => void = () => undefined;
     let llamadas = 0;
     h.ejecutar.mockImplementation(
-      () =>
-        new Promise((resolve) => {
-          llamadas += 1;
-          liberar = resolve as typeof liberar;
-        }),
+      () => new Promise((resolve) => ((llamadas += 1), (liberar = resolve as typeof liberar))),
     );
     const prefs = render();
     prefs.guardar("tema", "claro", "preferencias_tema");
@@ -67,11 +58,9 @@ describe("preferencias: cola serial por formulario (regresión del PR #109)", ()
     prefs.guardar("tema", "sistema", "preferencias_tema");
     await vi.waitFor(() => expect(llamadas).toBe(1));
     expect(h.ejecutar).toHaveBeenCalledTimes(1);
-    expect(h.ejecutar).toHaveBeenCalledWith("core.config.set", {
-      modulo: "core",
-      clave: "preferencias_tema",
-      valor: "sistema",
-    });
+    const esperado = { modulo: "core", clave: "preferencias_tema", valor: "sistema" };
+    // `false, "ninguna"`: sin dryRun y sin revalidar el layout (B1, H1/H2).
+    expect(h.ejecutar).toHaveBeenCalledWith("core.config.set", esperado, false, "ninguna");
     liberar({ ok: true, data: { version: 1 } });
     await vi.waitFor(() => expect(h.exito).toHaveBeenCalledTimes(1));
     expect(llamadas).toBe(1);
@@ -91,16 +80,9 @@ describe("preferencias: cola serial por formulario (regresión del PR #109)", ()
     prefs.guardar("tema", "oscuro", "preferencias_tema");
     prefs.guardar("resumen", "diario", "preferencias_resumen");
     await vi.waitFor(() => expect(h.ejecutar).toHaveBeenCalledTimes(2));
-    expect(h.ejecutar).toHaveBeenNthCalledWith(1, "core.config.set", {
-      modulo: "core",
-      clave: "preferencias_tema",
-      valor: "oscuro",
-    });
-    expect(h.ejecutar).toHaveBeenNthCalledWith(2, "core.config.set", {
-      modulo: "core",
-      clave: "preferencias_resumen",
-      valor: "diario",
-    });
+    const cs = "core.config.set";
+    expect(h.ejecutar).toHaveBeenNthCalledWith(1, cs, { modulo: "core", clave: "preferencias_tema", valor: "oscuro" }, false, "ninguna");
+    expect(h.ejecutar).toHaveBeenNthCalledWith(2, cs, { modulo: "core", clave: "preferencias_resumen", valor: "diario" }, false, "ninguna");
   });
 
   it("un guardado rechazado revierte el tema y avisa; la cola sigue y el siguiente sale", async () => {
@@ -110,7 +92,9 @@ describe("preferencias: cola serial por formulario (regresión del PR #109)", ()
       .documentElement;
     render().guardar("tema", "oscuro", "preferencias_tema");
     expect(html.dataset["theme"]).toBe("dark");
-    await vi.waitFor(() => expect(render().error).toMatch(/No se guardó/));
+    // H3: la Alerta nombra el tema al que se volvió, no un texto genérico.
+    const msg = "No pudimos guardar el tema; volvimos a Sistema.";
+    await vi.waitFor(() => expect(render().error).toBe(msg));
     expect(render().v.tema).toBe("sistema");
     expect(html.dataset["theme"]).toBeUndefined();
     expect(h.guardado["opai_tema"]).toBe("sistema");
@@ -119,6 +103,34 @@ describe("preferencias: cola serial por formulario (regresión del PR #109)", ()
     expect(h.ejecutar).toHaveBeenCalledTimes(2);
     expect(render().v.tema).toBe("claro");
     expect(render().error).toBeNull();
+    expect(h.guardado["opai_tema"]).toBe("claro");
+  });
+
+  it("si el último guardado falla, revierte al último tema confirmado por el servidor (H2)", async () => {
+    // Primero confirma Oscuro; luego un intento a Claro falla y debe volver a Oscuro, no al inicial.
+    h.ejecutar.mockResolvedValueOnce({ version: 1 });
+    render().guardar("tema", "oscuro", "preferencias_tema");
+    await vi.waitFor(() => expect(h.exito).toHaveBeenCalledTimes(1));
+    expect(render().v.tema).toBe("oscuro");
+    h.ejecutar.mockResolvedValueOnce(null);
+    render().guardar("tema", "claro", "preferencias_tema");
+    const msg = "No pudimos guardar el tema; volvimos a Oscuro.";
+    await vi.waitFor(() => expect(render().error).toBe(msg));
+    expect(render().v.tema).toBe("oscuro");
+    expect(h.guardado["opai_tema"]).toBe("oscuro");
+  });
+
+  it("una respuesta vieja que llega tarde no muestra «guardada» ni pisa la elección nueva (H2)", async () => {
+    let liberar: (r: { version: number }) => void = () => undefined;
+    h.ejecutar.mockImplementationOnce(() => new Promise((resolve) => (liberar = resolve)));
+    h.ejecutar.mockResolvedValueOnce({ version: 2 });
+    render().guardar("tema", "oscuro", "preferencias_tema");
+    await vi.waitFor(() => expect(h.ejecutar).toHaveBeenCalledTimes(1));
+    render().guardar("tema", "claro", "preferencias_tema");
+    liberar({ version: 1 }); // el pedido viejo (Oscuro) responde cuando ya no es el último
+    await vi.waitFor(() => expect(h.ejecutar).toHaveBeenCalledTimes(2));
+    await vi.waitFor(() => expect(h.exito).toHaveBeenCalledTimes(1));
+    expect(render().v.tema).toBe("claro");
     expect(h.guardado["opai_tema"]).toBe("claro");
   });
 

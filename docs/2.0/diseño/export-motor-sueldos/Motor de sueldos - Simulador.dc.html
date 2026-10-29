@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><meta name="design_doc_mode" content="canvas"><script src="./ds-base.js"></script><style>body{margin:0;background:#e7e7ea}a{color:#4a3fd8}a:hover{color:#111113}.scrim,.sheet,.overlay{animation:none!important}</style></helmet>
+<div style="display:flex;flex-direction:column;gap:72px;padding:48px;width:max-content;font-family:var(--font-sans);color:#111113">
+<header style="display:flex;flex-direction:column;gap:6px;max-width:900px">
+<span style="font:500 13px/18px var(--font-sans);color:#52525b">CAR-71 · OPAI 2.0 · DS 2.0 V2 · v2</span>
+<h1 style="margin:0;font:600 36px/40px var(--font-sans);letter-spacing:-0.022em">Motor de sueldos</h1>
+<p style="margin:0;font:400 16px/24px var(--font-sans);color:#52525b">Simulador de costo y sus entradas, Plataforma y avisos. Oscuro en el Simulador.</p>
+<nav style="display:flex;gap:16px;flex-wrap:wrap;font:500 14px/20px var(--font-sans)"><a href="Motor de sueldos - Remuneraciones.dc.html">Remuneraciones</a><span style="color:#111113">Simulador, Cargos, Plataforma y avisos</span><a href="Motor de sueldos - Estados.dc.html">Estados: Valores, Confirmar, Cambiar, Simulador</a><a href="Motor de sueldos - Estados detalle.dc.html">Estados: Detalle, Historial, Comparar, Plataforma</a><a href="Componentes.dc.html">Componentes</a></nav>
+</header>
+<section id="cargos" style="display:flex;flex-direction:column;gap:20px">
+<h2 style="margin:0;font:600 22px/28px var(--font-sans)">4.6 Entradas desde Cargos y sueldos y ⌘K · <a href="CargosSueldos.dc.html">CargosSueldos.dc.html</a></h2>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Claro · 375</span><div id="cargos-375" style="width:375px;height:812px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="CargosSueldos" device="phone" hint-size="375px,812px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Claro · 1024</span><div id="cargos-1024" style="width:1024px;height:768px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="CargosSueldos" device="tablet" hint-size="1024px,768px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Claro · 1280</span><div id="cargos-1280" style="width:1280px;height:800px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="CargosSueldos" device="desktop" hint-size="1280px,800px"></dc-import></div></div>
+</div>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">⌘K (Buscar en la barra) · 375</span><div id="cmdk-375" style="width:375px;height:812px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="CargosSueldos" device="phone" palette="{{ true }}" hint-size="375px,812px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">⌘K · 1024</span><div id="cmdk-1024" style="width:1024px;height:768px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="CargosSueldos" device="tablet" palette="{{ true }}" hint-size="1024px,768px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">⌘K · 1280</span><div id="cmdk-1280" style="width:1280px;height:800px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="CargosSueldos" device="desktop" palette="{{ true }}" hint-size="1280px,800px"></dc-import></div></div>
+</div>
+</section>
+<section id="simulador" style="display:flex;flex-direction:column;gap:20px">
+<h2 style="margin:0;font:600 22px/28px var(--font-sans)">4.6 Simulador de costo · <a href="Simulador.dc.html">Simulador.dc.html</a></h2>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Resultado · 375</span><div id="simulador-375" style="width:375px;height:812px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="Simulador" device="phone" hint-size="375px,812px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Claro · 1024</span><div id="simulador-1024" style="width:1024px;height:768px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="Simulador" device="tablet" hint-size="1024px,768px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">TrazaMonto abierta · 1280</span><div id="simulador-1280" style="width:1280px;height:800px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="Simulador" device="desktop" hint-size="1280px,800px"></dc-import></div></div>
+</div>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Oscuro · paso Turno · 375</span><div id="simulador-375-oscuro" style="width:375px;height:812px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="Simulador" device="phone" theme="dark" step="tur" hint-size="375px,812px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Oscuro · 1024</span><div id="simulador-1024-oscuro" style="width:1024px;height:768px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="Simulador" device="tablet" theme="dark" hint-size="1024px,768px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Oscuro · 1280</span><div id="simulador-1280-oscuro" style="width:1280px;height:800px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="Simulador" device="desktop" theme="dark" hint-size="1280px,800px"></dc-import></div></div>
+</div>
+</section>
+<section id="comparar" style="display:flex;flex-direction:column;gap:20px">
+<h2 style="margin:0;font:600 22px/28px var(--font-sans)">4.6 Comparar escenarios · <a href="SimuladorComparar.dc.html">SimuladorComparar.dc.html</a></h2>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Claro · 375</span><div id="comparar-375" style="width:375px;height:812px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="SimuladorComparar" device="phone" hint-size="375px,812px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Claro · 1024</span><div id="comparar-1024" style="width:1024px;height:768px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="SimuladorComparar" device="tablet" hint-size="1024px,768px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Claro · 1280</span><div id="comparar-1280" style="width:1280px;height:800px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="SimuladorComparar" device="desktop" hint-size="1280px,800px"></dc-import></div></div>
+</div>
+</section>
+<section id="plataforma" style="display:flex;flex-direction:column;gap:20px">
+<h2 style="margin:0;font:600 22px/28px var(--font-sans)">4.7 Plataforma → Fuentes · <a href="PlataformaFuentes.dc.html">PlataformaFuentes.dc.html</a></h2>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Claro · 375</span><div id="plataforma-375" style="width:375px;height:812px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="PlataformaFuentes" device="phone" hint-size="375px,812px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Claro · 1024</span><div id="plataforma-1024" style="width:1024px;height:768px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="PlataformaFuentes" device="tablet" hint-size="1024px,768px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Claro · 1280</span><div id="plataforma-1280" style="width:1280px;height:800px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="PlataformaFuentes" device="desktop" hint-size="1280px,800px"></dc-import></div></div>
+</div>
+</section>
+<section id="avisos" style="display:flex;flex-direction:column;gap:20px">
+<h2 style="margin:0;font:600 22px/28px var(--font-sans)">4.8 Bandeja y avisos · <a href="AvisosMotor.dc.html">AvisosMotor.dc.html</a></h2>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Bandeja · 375</span><div id="avisos-375" style="width:375px;height:812px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="AvisosMotor" device="phone" hint-size="375px,812px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Bandeja · 1024</span><div id="avisos-1024" style="width:1024px;height:768px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="AvisosMotor" device="tablet" hint-size="1024px,768px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Hoja «Ver cambios» · 1280</span><div id="avisos-1280" style="width:1280px;height:800px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="AvisosMotor" device="desktop" sheet="{{ true }}" hint-size="1280px,800px"></dc-import></div></div>
+</div>
+</section>
+</div>
+</x-dc>
+</body>
+</html>

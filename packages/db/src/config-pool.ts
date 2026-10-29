@@ -28,6 +28,16 @@ export function conSslVerificado(url: string): string {
   return u.toString();
 }
 
+/** Lee un entero positivo de una variable de entorno; usa el defecto si falta o viene vacía. */
+function entero(env: NodeJS.ProcessEnv, nombre: string, defecto: number) {
+  const valor = env[nombre];
+  if (valor === undefined || valor === "") return defecto;
+  if (!/^\d+$/.test(valor) || !Number.isSafeInteger(Number(valor)) || Number(valor) < 1) {
+    throw new Error(`${nombre} debe ser un entero positivo.`);
+  }
+  return Number(valor);
+}
+
 /** Configuración por instancia; el pool de Neon limita las conexiones al servidor. */
 export function configPool(env: NodeJS.ProcessEnv, url: string, aplicacion: boolean) {
   if (aplicacion && env["VERCEL"] && !avisoPoolerEmitido) {
@@ -42,26 +52,35 @@ export function configPool(env: NodeJS.ProcessEnv, url: string, aplicacion: bool
       console.warn("DATABASE_URL en Vercel: host sin -pooler.");
     }
   }
-  const entero = (nombre: string, defecto: number) => {
-    const valor = env[nombre];
-    if (valor === undefined || valor === "") return defecto;
-    if (!/^\d+$/.test(valor) || !Number.isSafeInteger(Number(valor)) || Number(valor) < 1) {
-      throw new Error(`${nombre} debe ser un entero positivo.`);
-    }
-    return Number(valor);
-  };
   return {
     connectionString: conSslVerificado(url),
-    max: entero("DATABASE_POOL_MAX", 10),
+    max: entero(env, "DATABASE_POOL_MAX", 10),
     // Corto: en Vercel `attachDatabasePool` mantiene viva la función este tiempo tras cada consulta,
     // y una conexión que pasa más que esto en el pool se descarta al pedirla (`conexionMuerta`).
-    idleTimeoutMillis: entero("DATABASE_POOL_IDLE_TIMEOUT_MS", 5000),
+    idleTimeoutMillis: entero(env, "DATABASE_POOL_IDLE_TIMEOUT_MS", 5000),
     // Holgado para el arranque en frío de Neon (la compute suspendida tarda de 0,5 a pocos s en
     // despertar). Un vencimiento adelantado tras reanudar la instancia se reintenta una vez.
-    connectionTimeoutMillis: entero("DATABASE_POOL_CONNECTION_TIMEOUT_MS", 10000),
+    connectionTimeoutMillis: entero(env, "DATABASE_POOL_CONNECTION_TIMEOUT_MS", 10000),
     // Sondas TCP desde los 10 s (no las 2 h del sistema): detectan antes un socket que Neon cortó
     // a mitad de una consulta larga o de una transacción abierta.
     keepAlive: true,
     keepAliveInitialDelayMillis: 10000,
+  };
+}
+
+/**
+ * Opciones por defecto de las transacciones de Prisma. Las comparten `forTenant`, `forUser`,
+ * `enTransaccion` y Better Auth (`clienteAuth`), porque todas pasan por el mismo cliente: cada
+ * operación de esos caminos abre una transacción (array o interactiva) y espera una conexión del
+ * pool. `maxWait` es cuánto espera Prisma por esa conexión antes de lanzar P2028 («Unable to start a
+ * transaction in the given time»). El defecto de Prisma es 2 s, demasiado corto frente a una ráfaga
+ * (el riel de Configuración, Better Auth y las lecturas de cada render): se cortaba antes de que la
+ * cola y el reintento del pool entregaran la conexión. Lo alineamos con `connectionTimeoutMillis`
+ * (10 s) para que mande el plazo real del pool, no un corte prematuro (B1, P2028 del PR #134).
+ */
+export function configTransaccion(env: NodeJS.ProcessEnv) {
+  return {
+    maxWait: entero(env, "DATABASE_TX_MAX_WAIT_MS", 10000),
+    timeout: entero(env, "DATABASE_TX_TIMEOUT_MS", 15000),
   };
 }

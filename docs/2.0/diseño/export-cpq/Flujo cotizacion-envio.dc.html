@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0;background:var(--ds-surface)}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<div class="ds" style="background:var(--ds-surface);min-width:1600px">
+<section style="display:flex;flex-direction:column;gap:20px;padding:48px 64px">
+<div style="display:flex;flex-direction:column;gap:6px">
+<span class="t-overline">OPAI 2.0 · CPQ</span>
+<h1 class="t-display m0">Cotización → envío</h1>
+<span class="t-body muted" style="max-width:760px;text-wrap:pretty">CPQ-2026-412 · v3 · Logística Andina SpA. Frames por estado en escritorio 1440, iPad 1024 y 768, y teléfono 390. Cada frame es interactivo.</span>
+</div>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0 40px;max-width:1440px">
+<sc-for list="{{ notes }}" as="n" hint-placeholder-count="9">
+<div style="display:flex;flex-direction:column;gap:4px;padding:16px 0;border-top:1px solid var(--ds-border)"><span class="t-label">{{ n.t }}</span><span class="t-body-sm muted" style="text-wrap:pretty">{{ n.d }}</span></div>
+</sc-for>
+</div>
+</section>
+<sc-for list="{{ groups }}" as="g" hint-placeholder-count="3">
+<section style="display:flex;flex-direction:column;gap:24px;padding:48px 64px;border-top:1px solid var(--ds-border)">
+<div style="display:flex;flex-direction:column;gap:4px"><h2 class="t-title m0">{{ g.title }}</h2><span class="t-body-sm muted">{{ g.sub }}</span></div>
+<div style="display:flex;flex-wrap:wrap;gap:56px 48px;align-items:flex-start">
+<sc-for list="{{ g.frames }}" as="f" hint-placeholder-count="4">
+<div id="{{ f.id }}" data-screen-label="{{ f.id }} {{ f.title }}" style="display:flex;flex-direction:column;gap:10px;flex:none;width:{{ f.wpx }}">
+<div style="display:flex;align-items:baseline;gap:10px"><a href="#{{ f.id }}" class="t-mono" style="font-size:12px;padding:2px 8px;border-radius:999px;background:var(--ds-fill);color:var(--ds-fg)">{{ f.id }}</a><span class="t-label">{{ f.title }}</span></div>
+<span class="t-caption" style="text-wrap:pretty;max-width:560px">{{ f.note }}</span>
+<div style="border:1px solid var(--ds-border);border-radius:16px;overflow:hidden;background:var(--ds-bg);width:{{ f.wpx }};height:{{ f.hpx }}" data-theme="{{ f.theme }}">
+<sc-if value="{{ f.isCot }}" hint-placeholder-val="{{ true }}">
+<dc-import name="CotizadorEnvio" device="{{ f.device }}" theme="{{ f.theme }}" permisos="{{ f.permisos }}" estado="{{ f.estado }}" panel="{{ f.panel }}" vista="{{ f.vista }}" style="{{ f.box }}" hint-size="100%,100%"></dc-import>
+</sc-if>
+<sc-if value="{{ f.isPub }}" hint-placeholder-val="{{ false }}">
+<dc-import name="PropuestaCliente" device="{{ f.device }}" theme="{{ f.theme }}" estado="{{ f.estado }}" modo="publica" style="{{ f.box }}" hint-size="100%,100%"></dc-import>
+</sc-if>
+</div>
+</div>
+</sc-for>
+</div>
+</section>
+</sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const fr = (id, title, note, device, w, hh, comp, estado, panel, vista, x) => ({ id, title, note, device, theme: (x && x.theme) || "light", permisos: (x && x.permisos) || "completo", wpx: w + "px", hpx: hh + "px", isCot: comp === "c", isPub: comp === "p", estado, panel: panel || "ninguno", vista: vista || "interna", box: { width: w, height: hh } });
+    const D = (id, t, n, e, p, v, x) => fr(id, t, n, "desktop", 1440, 900, "c", e, p, v, x);
+    const T = (id, t, n, w, e, p) => fr(id, t, n, "tablet", w, w === 1024 ? 768 : 1024, "c", e, p);
+    const Ph = (id, t, n, c, e, x) => fr(id, t, n, "phone", 390, 844, c, e, (x && x.panel) || "ninguno", "interna", x);
+    return {
+      notes: [
+        { t: "Cabecera fija", d: "Mismo orden en todos los estados: código·versión · estado · «Vista N veces» · fecha de vencimiento o del evento. El primario cambia con el estado: Enviar, Pedir aprobación, Crear nueva versión o Renovar; no hay primario en Por aprobar ni en Aceptada." },
+        { t: "Vista y PDF", d: "La vista cliente se abre con el control Vista interna / Vista cliente. Descargar PDF abre Cotización simple o Propuesta técnica. ⋯ agrupa Duplicar, Nueva alternativa, Comparar, Historial y Archivar." },
+        { t: "Resumen en tres tarjetas", d: "Resumen (moneda UF | CLP con la UF del día, venta neta, pagos únicos y margen), Costos por categoría plegable e Instrumentos financieros con switch y monto. Cada instrumento se edita en un popover; si difiere de Configuración, «Sobrescrito» y «Volver al valor por defecto»." },
+        { t: "Pestaña Condiciones", d: "Junto a Planilla. Cada campo viene de Configuración. Días de pago alimenta el costo financiero. En polinómico los pesos deben sumar 100 %: un solo mensaje de error y bloqueo al enviar. «Agregar índice» suma otro peso." },
+        { t: "Rateo", d: "Chip por ítem con tooltip de una línea al pasar el cursor o con foco. El popover muestra la cuota de cada opción; N meses pide el número." },
+        { t: "Enviar", d: "Los bloqueos van arriba con su acción. El primario es Enviar por correo; Copiar enlace y WhatsApp piden confirmar porque también congelan la versión. Saludo «Hola {nombre}» por destinatario y seguimiento con «Iniciar seguimiento» por defecto." },
+        { t: "Permisos", d: "Sin cpq:costos.ver se ve solo la venta: sin costo, margen, mano de obra, categorías ni instrumentos, y con el aviso de a quién pedir el permiso." },
+        { t: "Teléfono e iPad vertical", d: "En teléfono la planilla es de solo lectura, pero se puede enviar, pedir aprobación, renovar y crear versiones; los montos van en una línea y los objetivos táctiles miden 44 px o más. En iPad vertical, el Resumen se pliega y una barra inferior fija muestra el total y el margen." },
+        { t: "Teclado y movimiento", d: "Foco visible de 2 px en cabecera y hoja; Esc cierra cualquier capa. 150–200 ms con la curva del DS; se anula con prefers-reduced-motion." },
+      ],
+      groups: [
+        { title: "Escritorio 1440", sub: "Estados del cotizador y del envío.", frames: [
+          D("D1", "Borrador · listo para enviar", "Cabecera fija con código·versión, estado y vencimiento. Primario: Enviar.", "borrador"),
+          D("D1b", "Borrador · sin cpq:costos.ver", "Solo venta: sin costo mensual, margen, categorías ni instrumentos; aviso de a quién pedir el permiso.", "borrador", "ninguno", "interna", { permisos: "sinCostos" }),
+          D("D1c", "Borrador · oscuro", "Mismo estado en modo oscuro.", "borrador", "ninguno", "interna", { theme: "dark" }),
+          D("D1d", "Menú ⋯ abierto", "Duplicar, Nueva alternativa, Comparar, Historial y Archivar.", "borrador", "menu"),
+          D("D1e", "Popover de rateo", "Cuota resultante por opción para el Kit Starlink; tooltip de una línea en el chip.", "borrador", "rateo"),
+          D("D1f", "Editar instrumento", "Póliza de garantía con 6 % y 30 meses, distintos de Configuración: «Sobrescrito» y «Volver al valor por defecto».", "borrador", "instrumento"),
+          D("D1h", "Renombrar", "El título se edita en el mismo lugar: lápiz al pasar el cursor, Enter guarda y Esc cancela.", "borrador", "renombrar"),
+          D("D1g", "Foco con teclado · cabecera", "Contorno de 2 px en el primario tras navegar con Tab.", "borrador", "focoCabecera"),
+          D("D2", "Pestaña Condiciones", "Días de pago y reajuste difieren de Configuración: «sobrescrito» y volver al valor por defecto.", "borrador", "condiciones"),
+          D("D3", "Reajuste polinómico con error", "Pesos 40 % + 55 %: un solo mensaje de error. Enviar queda deshabilitado en la cabecera, con un tooltip que nombra el error.", "borrador", "reajuste"),
+          D("D4", "Descargar PDF ▾", "Dos formatos: Cotización simple y Propuesta técnica.", "borrador", "pdf"),
+          D("D5", "Bajo margen · Pedir aprobación", "Margen 8,7 % bajo el mínimo de 10 %: el primario pasa a Pedir aprobación.", "bajoMargen"),
+          D("D6", "Por aprobar", "Solo lectura mientras espera; sin primario. Retirar pedido vuelve a Borrador.", "porAprobar"),
+          D("D7", "Drawer Enviar", "Formato con miniatura, destinatarios, mensaje, canal, seguimiento, checklist y cambios desde la v2.", "borrador", "enviar"),
+          D("D8", "Enviar con bloqueos", "Los bloqueos van arriba, cada uno con su acción; los envíos quedan deshabilitados.", "bajoMargen", "enviarBloqueos"),
+          D("D9", "Enviar preparado por OPAI", "Si actúa el agente, el envío requiere aprobación humana.", "borrador", "enviarAgente"),
+          D("D9b", "Foco con teclado · drawer", "Contorno de 2 px en el primer destinatario.", "borrador", "focoDrawer"),
+          D("D10", "Enviada · bloqueada", "Candado, banner con destinatarios y vistas, UF congelada. Primario: Crear nueva versión.", "enviada"),
+          D("D11", "Aceptada", "Quién aceptó y cuándo, enlace al negocio y nota de la línea base de rentabilidad por instalación. Sin primario.", "aceptada"),
+          D("D12", "Rechazada", "Motivo del cliente. Primario: Crear nueva versión.", "rechazada"),
+          D("D13", "Vencida", "Venció sin respuesta. Primario: Renovar.", "vencida"),
+          D("D15", "Comparar v2 ↔ v3", "Pantalla completa desde ⋯ o el Historial: variación de venta y margen arriba, cambios lado a lado con DiffVersiones.", "borrador", "comparar"),
+          D("D16", "Historial", "Línea de tiempo corta de las versiones, con quién y cuándo; lleva a Comparar.", "borrador", "historial"),
+          D("D14", "Vista cliente", "Marca del tenant, neto, IVA, total, pagos únicos, moneda y UF; sin costos ni márgenes.", "borrador", "ninguno", "cliente"),
+        ] },
+        { title: "iPad 1024 y 768", sub: "Edición completa también en vertical.", frames: [
+          T("T1", "1024 · Borrador", "Resumen lateral de 300.", 1024, "borrador"),
+          T("T2", "1024 · Drawer Enviar", "Hoja lateral de 420.", 1024, "borrador", "enviar"),
+          T("T3", "768 · Borrador", "Resumen plegable arriba y barra inferior fija con total y margen.", 768, "borrador"),
+          T("T4", "768 · Enviada", "Solo lectura con candado.", 768, "enviada"),
+        ] },
+        { title: "Teléfono 390", sub: "Pantallas 1, 6 y 7: cabecera, versión bloqueada y página pública del cliente.", frames: [
+          Ph("P1", "Cabecera · Pedir aprobación", "Solo lectura; primario a todo el ancho y PDF debajo.", "c", "bajoMargen"),
+          Ph("P1c", "Borrador · Enviar", "El teléfono no edita la planilla, pero sí envía: Enviar abre la hoja inferior, igual que Pedir aprobación.", "c", "borrador"),
+          Ph("P1b", "Sin cpq:costos.ver", "Solo venta y aviso del permiso.", "c", "borrador", { permisos: "sinCostos" }),
+          Ph("P2", "Enviada · bloqueada", "Banner con vistas; primario Crear nueva versión.", "c", "enviada"),
+          Ph("P3", "Vencida", "Primario Renovar.", "c", "vencida"),
+          Ph("P4", "Aceptada", "Quién aceptó y enlace al negocio.", "c", "aceptada"),
+          Ph("P5", "Página pública", "Lo que abre el cliente desde su enlace personal.", "p", "abierta"),
+          Ph("P5b", "Página pública · oscuro", "Sigue el tema del sistema del cliente.", "p", "abierta", { theme: "dark" }),
+          Ph("P6", "Aceptar · datos", "Nombre, RUT, cargo y correo; casilla obligatoria.", "p", "aceptar"),
+          Ph("P7", "Aceptar · código", "Código de 6 dígitos enviado al correo.", "p", "codigo"),
+          Ph("P8", "Aceptada", "Confirmación con fecha, hora y quién aceptó.", "p", "aceptada"),
+          Ph("P9", "Rechazar", "Motivo obligatorio y comentario opcional.", "p", "rechazar"),
+        ] },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

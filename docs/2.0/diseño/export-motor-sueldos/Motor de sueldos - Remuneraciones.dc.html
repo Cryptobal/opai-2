@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><meta name="design_doc_mode" content="canvas"><script src="./ds-base.js"></script><style>body{margin:0;background:#e7e7ea}a{color:#4a3fd8}a:hover{color:#111113}.scrim,.sheet,.overlay{animation:none!important}</style></helmet>
+<div style="display:flex;flex-direction:column;gap:72px;padding:48px;width:max-content;font-family:var(--font-sans);color:#111113">
+<header style="display:flex;flex-direction:column;gap:6px;max-width:900px">
+<span style="font:500 13px/18px var(--font-sans);color:#52525b">CAR-71 · OPAI 2.0 · DS 2.0 V2 · v2</span>
+<h1 style="margin:0;font:600 36px/40px var(--font-sans);letter-spacing:-0.022em">Motor de sueldos</h1>
+<p style="margin:0;font:400 16px/24px var(--font-sans);color:#52525b">Configuración → Remuneraciones. Cada pantalla en 375, 1024 y 1280; oscuro en Remuneraciones y «Cambiar valor».</p>
+<nav style="display:flex;gap:16px;flex-wrap:wrap;font:500 14px/20px var(--font-sans)"><span style="color:#111113">Remuneraciones</span><a href="Motor de sueldos - Simulador.dc.html">Simulador, Cargos, Plataforma y avisos</a><a href="Motor de sueldos - Estados.dc.html">Estados: Valores, Confirmar, Cambiar, Simulador</a><a href="Motor de sueldos - Estados detalle.dc.html">Estados: Detalle, Historial, Comparar, Plataforma</a><a href="Componentes.dc.html">Componentes</a></nav>
+</header>
+<section id="valores" style="display:flex;flex-direction:column;gap:20px">
+<h2 style="margin:0;font:600 22px/28px var(--font-sans)">4.1 Valores · <a href="Valores.dc.html">Valores.dc.html</a></h2>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Claro · 375</span><div id="valores-375" style="width:375px;height:812px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="Valores" device="phone" hint-size="375px,812px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Claro · 1024</span><div id="valores-1024" style="width:1024px;height:768px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="Valores" device="tablet" hint-size="1024px,768px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Claro · 1280</span><div id="valores-1280" style="width:1280px;height:800px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="Valores" device="desktop" hint-size="1280px,800px"></dc-import></div></div>
+</div>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Oscuro · 375</span><div id="valores-375-oscuro" style="width:375px;height:812px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="Valores" device="phone" theme="dark" hint-size="375px,812px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Oscuro · 1024</span><div id="valores-1024-oscuro" style="width:1024px;height:768px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="Valores" device="tablet" theme="dark" hint-size="1024px,768px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Oscuro · 1280</span><div id="valores-1280-oscuro" style="width:1280px;height:800px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="Valores" device="desktop" theme="dark" hint-size="1280px,800px"></dc-import></div></div>
+</div>
+</section>
+<section id="detalle" style="display:flex;flex-direction:column;gap:20px">
+<h2 style="margin:0;font:600 22px/28px var(--font-sans)">4.2 Detalle de un indicador · <a href="ValorDetalle.dc.html">ValorDetalle.dc.html</a></h2>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Claro · 375</span><div id="detalle-375" style="width:375px;height:812px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="ValorDetalle" device="phone" hint-size="375px,812px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Claro · 1024</span><div id="detalle-1024" style="width:1024px;height:768px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="ValorDetalle" device="tablet" hint-size="1024px,768px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Claro · 1280</span><div id="detalle-1280" style="width:1280px;height:800px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="ValorDetalle" device="desktop" hint-size="1280px,800px"></dc-import></div></div>
+</div>
+</section>
+<section id="confirmar" style="display:flex;flex-direction:column;gap:20px">
+<h2 style="margin:0;font:600 22px/28px var(--font-sans)">4.3 Confirmar un valor · <a href="ConfirmarValor.dc.html">ConfirmarValor.dc.html</a></h2>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">IMM propuesto · 375</span><div id="confirmar-375" style="width:375px;height:812px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="ConfirmarValor" device="phone" hint-size="375px,812px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">IMM · rechazar con motivo · 1024</span><div id="confirmar-1024" style="width:1024px;height:768px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="ConfirmarValor" device="tablet" state="rechazar" hint-size="1024px,768px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">SIS retenido · 1280</span><div id="confirmar-1280" style="width:1280px;height:800px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="ConfirmarValor" device="desktop" valor="sis" hint-size="1280px,800px"></dc-import></div></div>
+</div>
+</section>
+<section id="cambiar" style="display:flex;flex-direction:column;gap:20px">
+<h2 style="margin:0;font:600 22px/28px var(--font-sans)">4.4 Cambiar valor · <a href="CambiarValor.dc.html">CambiarValor.dc.html</a></h2>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Teléfono: aprobar propuesta · 375</span><div id="cambiar-375" style="width:375px;height:812px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="CambiarValor" device="phone" hint-size="375px,812px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Vista previa · 1024</span><div id="cambiar-1024" style="width:1024px;height:768px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="CambiarValor" device="tablet" hint-size="1024px,768px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Vista previa · 1280</span><div id="cambiar-1280" style="width:1280px;height:800px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="CambiarValor" device="desktop" hint-size="1280px,800px"></dc-import></div></div>
+</div>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Oscuro · 375</span><div id="cambiar-375-oscuro" style="width:375px;height:812px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="CambiarValor" device="phone" theme="dark" hint-size="375px,812px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Oscuro · 1024</span><div id="cambiar-1024-oscuro" style="width:1024px;height:768px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="CambiarValor" device="tablet" theme="dark" hint-size="1024px,768px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Oscuro · 1280</span><div id="cambiar-1280-oscuro" style="width:1280px;height:800px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="CambiarValor" device="desktop" theme="dark" hint-size="1280px,800px"></dc-import></div></div>
+</div>
+</section>
+<section id="historial" style="display:flex;flex-direction:column;gap:20px">
+<h2 style="margin:0;font:600 22px/28px var(--font-sans)">4.5 Historial · <a href="HistorialRemuneraciones.dc.html">HistorialRemuneraciones.dc.html</a></h2>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Claro · 375</span><div id="historial-375" style="width:375px;height:812px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="HistorialRemuneraciones" device="phone" hint-size="375px,812px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Claro · 1024</span><div id="historial-1024" style="width:1024px;height:768px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="HistorialRemuneraciones" device="tablet" hint-size="1024px,768px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px var(--font-sans);color:#3f3f46">Claro · 1280</span><div id="historial-1280" style="width:1280px;height:800px;overflow:hidden;border-radius:12px;position:relative"><dc-import name="HistorialRemuneraciones" device="desktop" hint-size="1280px,800px"></dc-import></div></div>
+</div>
+</section>
+</div>
+</x-dc>
+</body>
+</html>

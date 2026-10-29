@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><style>body{margin:0;background:var(--ds-bg)}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}html,body{height:100%}</style></helmet>
+<div style="position:absolute;inset:0;overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" user="{{ appUser }}" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="car" title="Cargos y sueldos" subtitle="Personas" notifications="{{ 3 }}" on-search="{{ openPalette }}" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,800px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap">
+<div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}"><span class="t-caption">Personas</span><h1 class="t-title" style="margin:0">Cargos y sueldos</h1></sc-if>
+<span class="t-body-sm muted">5 capas de sueldo · instalación, puesto o RUT</span>
+</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;width:{{ actionsW }}">
+<a href="Simulador.dc.html" style="text-decoration:none;flex:1"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="wallet" block="{{ isPhone }}" hint-size="140px,40px">Simular costo</x-import></a>
+<sc-if value="{{ isWide }}" hint-placeholder-val="{{ true }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="plus" hint-size="160px,40px">Nueva capa</x-import></sc-if>
+</div>
+</div>
+
+<sc-if value="{{ isWide }}" hint-placeholder-val="{{ true }}">
+<div class="card" style="overflow:hidden">
+<div style="display:grid;grid-template-columns:{{ cols }};gap:16px;padding:10px 16px;border-bottom:1px solid var(--ds-border)">
+<span class="t-label-sm subtle">Capa</span><span class="t-label-sm subtle" style="text-align:right">Sueldo base</span><span class="t-label-sm subtle">Gratificación</span><span class="t-label-sm subtle" style="text-align:right">Personas</span><span></span>
+</div>
+<sc-for list="{{ capas }}" as="c" hint-placeholder-count="5">
+<div style="display:grid;grid-template-columns:{{ cols }};gap:16px;padding:12px 16px;border-bottom:1px solid var(--ds-border);align-items:center" style-hover="background:var(--ds-bg)">
+<div style="display:flex;flex-direction:column;gap:2px;min-width:0"><span class="t-label">{{ c.nombre }}</span><span class="t-caption">{{ c.tipo }} · {{ c.turno }}</span></div>
+<span class="t-numeric" style="font-size:14px;text-align:right">{{ c.base }}</span>
+<span class="t-body-sm muted">{{ c.grat }}</span>
+<span class="t-numeric" style="font-size:14px;text-align:right">{{ c.personas }}</span>
+<span style="display:flex;justify-content:flex-end"><a href="Simulador.dc.html" style="text-decoration:none"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="wallet" hint-size="190px,40px">Simular con esta capa</x-import></a></span>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div class="rows" style="margin:0 -16px">
+<sc-for list="{{ capas }}" as="c" hint-placeholder-count="5">
+<div style="display:flex;flex-direction:column;gap:8px;padding:14px 16px;border-bottom:1px solid var(--ds-border)">
+<div style="display:flex;justify-content:space-between;gap:12px;align-items:baseline"><span class="t-body" style="font-weight:500;min-width:0">{{ c.nombre }}</span><span class="t-numeric" style="font-size:16px;white-space:nowrap">{{ c.base }}</span></div>
+<span class="t-caption">{{ c.tipo }} · {{ c.turno }} · {{ c.personas }} personas</span>
+<a href="Simulador.dc.html" class="t-label" style="display:inline-flex;align-items:center;gap:6px;min-height:44px;text-decoration:none;align-self:flex-start"><span class="ic sm i-wallet"></span>Simular con esta capa</a>
+</div>
+</sc-for>
+</div>
+</sc-if>
+</div>
+</x-import>
+</x-import>
+
+<sc-if value="{{ paletteOpen }}" hint-placeholder-val="{{ false }}">
+<div class="ds" data-device="{{ device }}" data-theme="{{ theme }}" style="position:absolute;inset:0;background:transparent;z-index:60">
+<div class="scrim" onClick="{{ closePalette }}"></div>
+<div class="overlay" role="dialog" aria-modal="true" aria-label="Buscar en OPAI" style="position:absolute;left:{{ pal.left }};right:{{ pal.right }};top:{{ pal.top }};width:{{ pal.width }};margin:0 auto;bottom:{{ pal.bottom }};display:flex;flex-direction:column;overflow:hidden;border-radius:{{ pal.radius }}">
+<div style="display:flex;align-items:center;gap:10px;padding:0 8px 0 16px;min-height:56px;border-bottom:1px solid var(--ds-border)">
+<span class="ic i-search" style="color:var(--ds-fg-muted)"></span>
+<span class="t-body" style="flex:1">simular</span>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" on-click="{{ closePalette }}" hint-size="90px,44px">Cancelar</x-import></sc-if>
+<sc-if value="{{ isWide }}" hint-placeholder-val="{{ true }}"><span class="kbd">esc</span></sc-if>
+</div>
+<div style="display:flex;flex-direction:column;padding:8px;gap:2px;overflow:auto;flex:1">
+<sc-for list="{{ grupos }}" as="g" hint-placeholder-count="2">
+<span class="t-label-sm subtle" style="padding:10px 8px 6px">{{ g.titulo }}</span>
+<sc-for list="{{ g.items }}" as="i" hint-placeholder-count="2">
+<a href="{{ i.href }}" style="display:flex;align-items:center;gap:12px;min-height:44px;padding:6px 8px;border-radius:var(--radius-md);text-decoration:none;color:var(--ds-fg);background:{{ i.bg }}" style-hover="background:var(--ds-fill)">
+<span class="ic sm i-{{ i.icon }}" style="color:var(--ds-fg-muted)"></span>
+<span style="flex:1;min-width:0;display:flex;flex-direction:column"><span class="t-body-sm" style="font-weight:500">{{ i.label }}</span><span class="t-caption">{{ i.meta }}</span></span>
+<sc-if value="{{ i.kbd }}" hint-placeholder-val="{{ false }}"><span class="kbd">↵</span></sc-if>
+</a>
+</sc-for>
+</sc-for>
+</div>
+<sc-if value="{{ isWide }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;gap:16px;align-items:center;padding:10px 16px;border-top:1px solid var(--ds-border)">
+<span class="t-caption" style="display:inline-flex;gap:6px;align-items:center"><span class="kbd">↑</span><span class="kbd">↓</span>para moverte</span>
+<span class="t-caption" style="display:inline-flex;gap:6px;align-items:center"><span class="kbd">↵</span>para abrir</span>
+<span class="t-caption" style="display:inline-flex;gap:6px;align-items:center;margin-left:auto"><span class="kbd">⌘K</span>para abrir desde cualquier pantalla</span>
+</div>
+</sc-if>
+</div>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;palette&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state = { open: null };
+  renderVals() {
+    const device = this.props.device ?? "desktop";
+    const isPhone = device === "phone";
+    const open = this.state.open ?? (this.props.palette ?? false);
+    const pal = isPhone ? { left: "0", right: "0", top: "0", bottom: "0", width: "auto", radius: "0" }
+      : { left: "0", right: "0", top: "88px", bottom: "auto", width: "min(600px, calc(100% - 48px))", radius: "16px" };
+    return {
+      appUser: { name: "Tomás Fuentes", initials: "TF", role: "Administrador" },
+      device, theme: this.props.theme ?? "light", isPhone, isWide: !isPhone, actionsW: isPhone ? "100%" : "auto",
+      cols: device === "desktop" ? "minmax(0,2.4fr) minmax(0,1fr) minmax(0,1.2fr) 80px 210px" : "minmax(0,2fr) minmax(0,1fr) minmax(0,1.1fr) 72px 200px",
+      paletteOpen: open, pal, openPalette: () => this.setState({ open: true }), closePalette: () => this.setState({ open: false }),
+      capas: [
+        { nombre: "Edificio Costanera Center · Guardia 4x4", tipo: "Capa de puesto", turno: "4x4 · 12 h", base: "$ 650.000", grat: "Legal con tope", personas: "8" },
+        { nombre: "Planta Quilicura · Guardia nocturno", tipo: "Capa de instalación", turno: "7x7 · 12 h", base: "$ 680.000", grat: "Legal con tope", personas: "4" },
+        { nombre: "Torre Apoquindo · Conserje", tipo: "Capa de puesto", turno: "5x2 · 8,4 h", base: "$ 620.000", grat: "Monto fijo $ 100.000", personas: "3" },
+        { nombre: "Clínica Los Aromos · Supervisor", tipo: "Capa de puesto", turno: "7x7 · 12 h", base: "$ 820.000", grat: "Legal con tope", personas: "2" },
+        { nombre: "Ana Rojas · 16.234.567-8", tipo: "Capa de RUT", turno: "4x4 · 12 h", base: "$ 700.000", grat: "Legal con tope", personas: "1" },
+      ],
+      grupos: [
+        { titulo: "Acciones", items: [
+          { icon: "wallet", label: "Simular costo de un puesto", meta: "Cargos y sueldos", href: "Simulador.dc.html", active: true, kbd: !isPhone, bg: "var(--ds-fill)" },
+          { icon: "landmark", label: "Ver indicadores vigentes", meta: "UF, UTM, IMM, tasas y topes · Remuneraciones", href: "Valores.dc.html", active: false, bg: "transparent" },
+        ]},
+        { titulo: "Capas de sueldo", items: [
+          { icon: "briefcase", label: "Simular con «Edificio Costanera Center · Guardia 4x4»", meta: "Capa de puesto · $ 650.000", href: "Simulador.dc.html", active: false, bg: "transparent" },
+          { icon: "briefcase", label: "Simular con «Planta Quilicura · Guardia nocturno»", meta: "Capa de instalación · $ 680.000", href: "Simulador.dc.html", active: false, bg: "transparent" },
+        ]},
+      ],
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "ban", label: "Bandeja", icon: "inbox" }, { id: "car", label: "Personas", icon: "users" }, { id: "cot", label: "Cotizaciones", icon: "file" }, { id: "mas", label: "Más", icon: "more" }],
+      groups: [
+        { items: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "ban", label: "Bandeja", icon: "inbox", count: 3 }] },
+        { title: "Comercial", items: [{ id: "cot", label: "Cotizaciones", icon: "file" }] },
+        { title: "Personas", items: [{ id: "per", label: "Personas", icon: "users" }, { id: "car", label: "Cargos y sueldos", icon: "briefcase" }] },
+        { title: "Configuración", items: [{ id: "cfg", label: "Remuneraciones", icon: "wallet" }] },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

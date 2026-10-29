@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { configPool, conSslVerificado } from "../src/config-pool";
+import { configPool, configTransaccion, conSslVerificado } from "../src/config-pool";
 
 const url = "postgresql://app:password@ep-test-pooler.us-east-1.aws.neon.tech/db";
 
@@ -67,6 +67,15 @@ describe("pool por instancia", () => {
       );
       expect(new URL(nueva).username).toBe("app");
     }
+  });
+  it("opciones de transacción: defecto alineado al plazo del pool y variables válidas", () => {
+    // Por defecto `maxWait` = `connectionTimeoutMillis` (10 s): Prisma no se corta antes que el pool.
+    expect(configTransaccion({})).toEqual({ maxWait: 10000, timeout: 15000 });
+    expect(
+      configTransaccion({ DATABASE_TX_MAX_WAIT_MS: "8000", DATABASE_TX_TIMEOUT_MS: "20000" }),
+    ).toEqual({ maxWait: 8000, timeout: 20000 });
+    expect(() => configTransaccion({ DATABASE_TX_MAX_WAIT_MS: "0" })).toThrow();
+    expect(() => configTransaccion({ DATABASE_TX_TIMEOUT_MS: "x" })).toThrow();
   });
   it("respeta disable, verify-full, uselibpqcompat y las URL sin sslmode", () => {
     for (const u of [

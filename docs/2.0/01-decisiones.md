@@ -261,6 +261,8 @@ decisiones atribuidas a Carlos.
 
 **Consecuencias.** El Brief 02 construye el servicio (modelo, subida, vínculos, descarga segura) y la ficha de documentos en cuentas/instalaciones/personas; el módulo Documentos (explorador, editor, plantillas, firma simple) va justo después de Comercial, porque CPQ ya necesita plantillas y PDF.
 
+**Nota (CAR-73, 29-oct-2026, 15:17 CLT, decisión de Carlos).** El Brief 09 (Documentos) suma una **dependencia nueva**: la plantilla o cláusula reutilizable con los términos de tratamiento de datos de los visitantes, asociada a la cuenta, al cliente y al negocio, para incorporarla a los contratos de servicio de prestación con el cliente (cada tenant tiene varios contratos tipo, distintos según su operación). Viene de `modulos/control-acceso.md` §14 P1 y §16: el tenant sigue siendo el responsable de esos datos y OPAI su encargado (Brief 07d §4.1); el matiz del cliente como responsable de sus propios visitantes se resuelve con esa cláusula, no con una excepción al modelo del 07d.
+
 ---
 
 ## ADR-020 · Comunicaciones: plantillas de correo y notificaciones por tenant
@@ -313,6 +315,12 @@ decisiones atribuidas a Carlos.
 
 **Decisión.** Rondas depende solo del núcleo (instalaciones, personas, dispositivos, documentos, geolocalización, comunicaciones) y se vende solo. Conserva de 1.0: puntos de control con QR/NFC/GPS y geocerca por punto, plantillas y programación, estados y cierres automáticos, tracking con precisión y batería, trust score con pesos configurables, detección de anomalías, offline-first con cola idempotente, informes con recorrido y heatmap, vista del cliente. Integra el libro de novedades y los incidentes de terreno. El Portal Terreno y el Portal Trabajador ejecutan rondas con la misma lógica (`packages/domain`).
 
+**Nota del 29-oct-2026 (CAR-70, Central de monitoreo).** Decisión de Carlos, 29-oct-2026, transmitida en la sesión de Claude de CAR-70 (PR #122), ajuste al encargo de Central: el **libro de novedades de 1.0 pasa a 2.0 en la app Terreno** (no en Rondas como pantalla propia) y **recibe las novedades que deja una ronda**; el módulo Central lo **muestra** (no lo duplica) en la pestaña «Central» de la ficha de la instalación, junto a su propia bitácora. Detalle en `modulos/central.md` §2 y §3.
+
+**Decisiones de Carlos (29-oct-2026, CAR-72, pedido de las 08:18 CLT).** Precisan este ADR al responder las 21 preguntas de `modulos/rondas.md` §14 (detalle completo en ese archivo, sección «Decisiones de Carlos (29-oct-2026)»): **se retira NFC** — modifica el párrafo de arriba: ya no se conservan «QR/NFC/GPS», quedan solo `QR`, `GPS` y `QR + GPS`, y las etiquetas NFC de 1.0 no se migran; el **QR es siempre físico**, sin QR dinámico; el radio de geocerca por defecto queda **bajo 20 m**, el mínimo que no dé falsos «fuera», calibrado con las marcas reales de 1.0; la **foto sigue opcional por punto** y, además, cada punto admite reportar una novedad o un incidente hacia el libro electrónico de novedades; el **trust score nunca bloquea**; y las etiquetas QR físicas de 1.0 **se reutilizan y se mejoran** durante la migración, en vez de exigir reimpresión inmediata.
+
+**Aprobación de Carlos (29-oct-2026, 14:58 CLT, mismo pedido CAR-72).** Carlos aprueba `modulos/rondas.md` completo (pasa de «borrador» a «aprobado», ADR-047): queda disponible para copiar el Design Prompt en Claude Design. Confirma además que la publicación en Play Store (decisión 5 de arriba: app web dentro de la app Terreno) **queda como opción del Brief 14** (Rondas), disponible desde ese brief y sin esperar al empaquetado nativo del Brief 17.
+
 ---
 
 ## ADR-025 · Tickets transversal y simple; sin chat
@@ -320,6 +328,8 @@ decisiones atribuidas a Carlos.
 **Fecha:** 23-oct-2026 · **Estado:** vigente · Ver `docs/2.0/extraccion/rondas-y-tickets.md`.
 
 **Decisión.** Tickets es un módulo transversal: tipos con responsable por defecto y SLA opcional, estados `abierto → en_curso → resuelto → cerrado` (+ `rechazado`), un responsable obligatorio desde la creación, resolución devuelta al solicitante en su portal y por correo, vínculo a cualquier entidad, adjuntos vía documentos. Las solicitudes de trabajadores son tipos de ticket con aprobación de un paso dirigidos al supervisor. Nada crea tickets sin dueño; los hallazgos de supervisión no crean tickets. El chat interno no se construye.
+
+**Nota del 29-oct-2026 (CAR-70, Central de monitoreo).** Decisión de Carlos, 29-oct-2026, transmitida en la sesión de Claude de CAR-70 (PR #122): aprobó las 15 preguntas de `modulos/central.md` §14 tal como venían recomendadas (pregunta 9). El chat interno sigue sin construirse. Los hilos de «Mensaje a la central» **no son chat**: los abre siempre el terreno con un tipo (novedad, consulta, urgencia) o la central desde una alerta; quedan ligados a la instalación y al turno; el guardia escribe libre solo dentro de un hilo abierto; no hay hilos entre guardias ni sin tipo, y el hilo se cierra al resolverse. Los «Avisos de la central» van en un solo sentido, con acuse de recibo. Una alerta de la central no es un ticket: solo puede derivar a uno con responsable. Reglas R16 y R17 de `modulos/central.md`.
 
 ---
 
@@ -336,6 +346,10 @@ decisiones atribuidas a Carlos.
 **Fecha:** 23-oct-2026 · **Estado:** vigente · Ver `docs/2.0/extraccion/integraciones-y-configuracion-por-tenant.md`.
 
 **Decisión.** El núcleo tiene un **catálogo de integraciones** (proveedor DTE, banco, factoring, correo, WhatsApp, mapas y geocodificación, biometría, IA, Slack, webhooks propios) con estado por tenant, prueba de conexión y registro de uso. Cada módulo declara en su manifest las integraciones que requiere; el núcleo provee el adaptador configurado. Las credenciales del tenant se guardan en un **almacén de secretos cifrado** (AES-256-GCM con clave de plataforma rotable, envelope encryption), se muestran una sola vez y nunca salen por API ni MCP. Hay dos modalidades por integración: **de plataforma** (OPAI pone la credencial y la cobra en el plan: mapas, biometría, correo, IA) y **propia del tenant** (DTE, banco, factoring, Slack, dominio de correo, Maps con cuota propia). La geolocalización (autocompletado de direcciones, geocodificación, mapas, distancias) es un servicio del núcleo con proveedor Google Maps por defecto y key de plataforma restringida por dominio; el tenant puede aportar la suya.
+
+**Nota (CAR-73, 29-oct-2026, 15:17 CLT, decisión de Carlos).** La verificación de identidad de firmantes **externos** en N2 (`modulos/firma.md` R13; quien firma sin estar enrolado: representante del cliente, proveedor, postulante) es **de plataforma**: el proveedor de cédula, selfie y prueba de vida lo contrata **OPAI**, nunca el tenant, y su costo se cobra al tenant como consumo dentro del módulo Documentos (ADR-031). Es una excepción puntual al patrón general de esta decisión (que deja biometría como «de plataforma» pero el resto de verificaciones de identidad como elegibles por el tenant); aquí no hay modalidad «propia del tenant» para esta verificación.
+
+**Nota del 29-oct-2026 (CAR-70, Central de monitoreo).** Decisión de Carlos, 29-oct-2026, transmitida en la sesión de Claude de CAR-70 (PR #122), ajuste a la pregunta 8 (telefonía) de `modulos/central.md` §14: WhatsApp/telefonía para la Central sigue el mismo patrón de plataforma-o-propia de este ADR, con Twilio como proveedor. Por defecto los avisos salen con la cuenta de Twilio **de plataforma** de OPAI y sus plantillas de WhatsApp ya aprobadas; como opción, cada tenant conecta **su propia cuenta de Twilio** en el catálogo de integraciones. Un tenant con número de WhatsApp propio necesita la aprobación de Meta **por número y por plantilla** antes de poder enviarlas; mientras no la tenga, sigue con el Twilio y las plantillas de OPAI. Detalle en `modulos/central.md` §10.
 
 ---
 
@@ -564,6 +578,8 @@ revisados en `briefs/ENCARGO-portal-sesion.md`.
 
 **Consecuencias.** Ninguna pantalla de configuración se escribe a mano por módulo; un agente puede leer y cambiar ajustes con las mismas reglas que una persona.
 
+
+**Nota del 29-oct-2026 (CAR-70, Central de monitoreo).** Decisión de Carlos, 29-oct-2026, transmitida en la sesión de Claude de CAR-70 (PR #122): aprobó las 15 preguntas de `modulos/central.md` §14 tal como venían recomendadas (pregunta 15). Se agrega el ámbito **Instalación** al centro de Configuración, con resolución defecto → plataforma → tenant → instalación → usuario, para los ajustes que un módulo declare con `ambito: "instalacion"` (los umbrales de la central primero; Rondas después). Lo construye el núcleo antes del Brief 15b, por capacidad (`core.config.get/set`) con alcance de filas (ADR-022) y sin migraciones fuera de un PR.
 ---
 
 ## ADR-039 · Documentos con subida directa, verificación y bitácora
@@ -756,7 +772,14 @@ Reglas:
 - **6 (presupuesto de terreno).** El tope de ≤ 150 KB se aplica cuando los portales de terreno tengan **pantallas reales**. Hoy son placeholders y su primera carga es el **shell compartido** del ERP (paleta ⌘K, menús, selector de portal), ~159 KB gzip, que no es alcance de la base PWA sino de los arreglos de rendimiento del shell (Brief 03, PR 2). Entretanto el tope por ruta de terreno (`/terreno`, `/trabajador`, `/supervisor`) queda en **162 KB** en `presupuesto-js.json` —más estricto que el 165 por defecto— para rastrear y evitar regresiones; baja a 150 KB cuando lleguen esos arreglos y el primer módulo de terreno su contenido real.
 - **7 (prueba en CI).** El equivalente obligatorio es **(a)** Playwright (manifest válido, SW que registra y controla la página, shell de terreno sin red con `context.setOffline(true)`) más **(c)** el presupuesto de JS; se ejecuta hoy. **(b) Lighthouse CI queda como informe, no como gate**, hasta que el primer módulo de terreno tenga pantallas reales (decisión D3 (b) del Brief 04, resuelta por Carlos el 26-oct-2026 13:45 CLT, t332u). El informe se genera contra el build local con `next start` y se guarda en `docs/2.0/informes/`; pasa a gate (≥ 90 rendimiento y accesibilidad en emulación móvil sobre rutas de terreno, ADR-029.14) con Rondas o Asistencia. La categoría PWA de Lighthouse ya no existe (la quitó la versión 12), así que la instalabilidad la cubre Playwright (a).
 
+**Enmienda (CAR-73, 29-oct-2026, 15:17 CLT, decisión de Carlos).** El punto 3 se amplía: el modo sin conexión suma el **control de acceso físico** (`modulos/control-acceso.md` R20–R23, §14 P13), no solo marcación, rondas y novedades. El dispositivo de portería emparejado registra entradas y salidas sin red con la lista bloqueada aplicada sin red y revalidación al sincronizar; detalle completo en esas reglas, que esta enmienda no repite.
+
 **Decisiones de Carlos (24-oct).** (12) Empaquetado para tiendas con **Capacitor**. (13) **Una sola app «OPAI»** en App Store y Google Play para todos: personal de la empresa (ERP y Supervisor), trabajadores, dispositivos de terreno emparejados con código y clientes; al ingresar, la app abre a cada persona su portal según su membresía (con selector si tiene varios). La marca del tenant dentro de la app sigue ADR-028; apps con marca propia por tenant quedan en backlog. (14) **Se puede marcar sin señal** como marca diferida (`origen_marca = offline_queue`): queda identificada como tal en los reportes a la DT y es visible para el trabajador (en su comprobante) y para su supervisor; no es la carga manual de contingencia.
+
+
+**Nota del 29-oct-2026 sobre el punto 3 (CAR-70, Central de monitoreo).** Decisión de Carlos, 29-oct-2026, transmitida en la sesión de Claude de CAR-70 (PR #122): aprobó las 15 preguntas de `modulos/central.md` §14 tal como venían recomendadas (pregunta 9). La cola local sin conexión del punto 3 se amplía a los **mensajes a la central** (novedad, consulta y urgencia, con texto y fotos) y a los **acuses de recibo** de los avisos de la central: mismas reglas (IndexedDB, `idempotencyKey`, hora del dispositivo y sello de servidor al sincronizar, estado «pendiente de envío» visible). Una urgencia encolada muestra además «Llamar a la central» con el número del tenant. Detalle en `modulos/central.md` (R16, R17 y casos borde).
+
+**Decisiones de Carlos (29-oct-2026, CAR-72).** Para Rondas (`modulos/rondas.md`, decisión 5 de la sección «Decisiones de Carlos (29-oct-2026)»): la app web vive **dentro de la app Terreno** (la misma app «OPAI» de este ADR, punto 1) y la publicación en Play Store (empaquetado de este ADR, punto 8) queda como **opción** para ese módulo, no obligatoria desde el día uno ni reservada a un hito posterior. No cambia el resto de este ADR; el momento exacto en que se ejecuta ese empaquetado para Rondas se resuelve al planificar el brief.
 
 ---
 
@@ -1050,4 +1073,45 @@ identidad de servicio en main.
 6. **Gate.** `packages/capabilities/test/paridad-inventario.test.ts` falla si una pantalla invoca una capacidad sin herramienta, si aparece una entrada de servidor sin declarar o si `docs/2.0/paridad/mcp-inventario.md` no coincide con lo generado.
 
 **Consecuencias.** Sin migraciones (`opai_app` ya tiene `UPDATE` en `core.users`). La instantánea `herramientas-mcp.txt` (key `*`) no cambia; la nueva `herramientas-mcp-plataforma.txt` lista las `platform_*`.
+
+
+## ADR-056 · Motor de sueldos del Núcleo, con valores por empresa
+
+**Fecha:** 29-oct-2026 · **Estado:** vigente. **Origen:** decisiones de Carlos del 29-oct-2026 a las 18 preguntas de [`modulos/motor-sueldos.md`](modulos/motor-sueldos.md) §16 (CAR-71). Con ellas Carlos aprueba esa especificación. Modifica ADR-042, punto 4: los parámetros legales del costo empleador salen del motor, no del CPQ. Modifica la fase 6 de `ROADMAP.md`: el costo empresa deja de ser parte de Nómina. Completa ADR-036 y ADR-048.
+
+**Decisión.**
+
+1. **Servicio del Núcleo** (Brief 07e). Va después de Puestos (Brief 11) y antes del Motor CPQ (Brief 08), en paralelo con Comercial. Es un solo cálculo, puro y determinista: parte de la capa de sueldo y llega al costo empresa por persona, puesto, día y hora. Lo usan CPQ, Nómina, Finanzas y los agentes.
+2. **Valores por empresa, versionados por vigencia.** OPAI lee las fuentes oficiales todos los días y publica los valores (captura compartida, sin `tenant_id`). Cada empresa tiene sus propios valores vigentes, con `tenant_id` y RLS. Por defecto «siguen la fuente».
+3. **Una sola persona confirma, sin segunda firma.** Puede hacerlo el owner, un administrador o alguien en quien deleguen (`core:remuneraciones.manage`). Lo que no se lee por máquina (IMM, tasas por ley) y lo que llega anómalo se publica como propuesto o retenido, y esa persona lo confirma.
+4. **Todos los valores en una sola página** (Configuración → Remuneraciones): UF, UTM, IMM, tasas, topes y variables propias. Un valor cambiado a mano pasa a ser propio de la empresa, con vigencia, motivo y auditoría, hasta que alguien vuelve a seguir la fuente.
+5. **Agentes según la autonomía de su key.** Un agente o el MCP puede cambiar, confirmar o rechazar cualquier valor, con vista previa y auditoría. Por defecto todo pasa por la cola de aprobaciones del Núcleo. El cambio retroactivo siempre pide aprobación humana. Plataforma solo vigila las fuentes.
+6. **Reglas de cálculo:**
+   - Las provisiones de vacaciones y de indemnización por años de servicio se calculan como lo hacen finanzas y contabilidad, sin colación, movilización ni aportes en la base. Para el costo, el CPQ suma el promedio mensual de los días de feriado del año.
+   - Las horas extra usan la fórmula legal con la jornada pactada.
+   - El CPQ costea con la colación y la movilización de la capa cuando la cotización las incluye.
+   - Una capa puede atar su sueldo base al IMM.
+7. **Cotizaciones.** Las abiertas avisan y se recalculan con un clic. Las emitidas quedan congeladas con su juego de valores.
+8. **Nómina** conserva la liquidación real, el impuesto, el libro, Previred y los finiquitos. Además lleva un contador acumulado de vacaciones y de indemnización por trabajador.
+
+**Consecuencias.** Antes del brief se verifican en las fuentes oficiales el SIS y la reforma, el IMM, los topes y las tasas. Carlos habilita los dominios en la red del entorno. Este ADR no agrega código ni migraciones.
+
+---
+
+## ADR-057 · Complemento «Cumplimiento DT» de Nómina (LRE, Mi DT, finiquito)
+
+**Fecha:** 29-oct-2026 · **Estado:** vigente · **Origen:** decisión de Carlos del 29-oct-2026 a las 15:23 CLT sobre la pregunta P10 de [`modulos/firma.md`](modulos/firma.md) §15, que había quedado «en investigación» en la decisión de las 15:17 CLT (§17 del mismo documento, CAR-73). Investigación completa en [`referencias/dt-integracion.md`](referencias/dt-integracion.md) (solo fuentes públicas, nada escrito en ningún sistema ni contacto con la DT).
+
+**Contexto.** La investigación encontró que la Dirección del Trabajo **no publica una API abierta y documentada para empleadores ni para software de remuneraciones**: su propia FAQ del LRE (última modificación 31-05-2023) dice que la carga es por archivo CSV/TXT o por formulario en Mi DT, y que la API es una «próxima evolución» (fuente: FAQ del LRE, https://www.dt.gob.cl/portal/1628/w3-article-120083.html). El resto de los trámites (contratos y anexos, finiquito, cartas de término) se hacen en el portal Mi DT, siempre con una persona natural autenticada con su ClaveÚnica (el representante laboral electrónico del tenant; además el trabajador, en el finiquito). Ningún proveedor chileno revisado (Nubox, Rex+, Talana) publica cómo automatiza el envío a Mi DT.
+
+**Decisión.** Se crea el complemento vendible **«Cumplimiento DT»** del módulo **Nómina**, cobrado por trabajador activo al mes o con un fijo mensual por tenant (el monto va al ADR de precios). En la v1 el complemento:
+
+1. Genera y valida el archivo del **Libro de Remuneraciones Electrónico (LRE)** en el formato oficial (CSV/TXT separado por «;», nombre `rutempleador_aaaamm`).
+2. Prepara los datos para registrar **contratos, anexos, altas y bajas** en Mi DT.
+3. Prepara la **propuesta de finiquito** y la **carta de aviso de término** (art. 162 del Código del Trabajo), con seguimiento de plazos.
+4. Deja el **envío y la firma en manos del representante laboral del tenant**, con su ClaveÚnica en Mi DT. **OPAI nunca guarda ni usa la ClaveÚnica de una persona ni opera el portal con un robot.**
+5. Si la DT abre una API o firma un convenio, el envío directo entra como un **nivel superior** del complemento.
+6. La **asistencia certificada** (Resolución Exenta N°38 de 2024, ADR-023) se evalúa aparte, con su costo y su plazo; no forma parte de este complemento.
+
+**Consecuencias.** Resuelve P10 de `modulos/firma.md` §15: la especificación de Firma queda **aprobada sin preguntas abiertas**; el complemento vive en Nómina, no en Firma (§11 de `firma.md`). `ROADMAP.md` (fase 6) anota el complemento como parte del alcance de Nómina y dependencia de su brief (Briefs 25/26). Sin código ni migraciones en esta decisión.
 
