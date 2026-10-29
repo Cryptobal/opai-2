@@ -20,7 +20,8 @@ model Membership {
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   tenant      Tenant             @relation(fields: [tenantId], references: [id])
-  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Restrict (CAR-45): borrar un usuario no arrastra sus membresías; la baja es por `estado`.
+  user        User               @relation(fields: [userId], references: [id], onDelete: Restrict)
   rolTenant   Rol?               @relation(fields: [roleId], references: [id])
   excepciones PermisoExcepcion[]
   /// Instalaciones a cargo si el rol acota por filas (supervisor, ADR-022 · Brief 07c B3).
