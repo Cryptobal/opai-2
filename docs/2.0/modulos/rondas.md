@@ -372,6 +372,23 @@ Respuestas de Carlos a las 21 preguntas de §14, dadas en el mismo pedido CAR-72
 20. **(20) Etiquetas QR de 1.0.** **Se reutilizan y se mejoran.** Se importan los puntos de 1.0 con su código físico actual y se mejora el formato (firma y opacidad, R7) durante la migración; difiere en matiz de la recomendación (que proponía reimprimir primero las de puntos críticos si el QR de 1.0 resulta un ID predecible): la mejora es gradual y no bloquea la migración.
 21. **(21) Botón «Emergencia» sin configuración.** Como se recomendaba: **sí**, única excepción al silencio por defecto (R35).
 
+## Decisiones de Carlos sobre el mockup (29-oct-2026)
+
+Decisiones de Carlos, 29-oct-2026, chat con OPAI 2.0 (registrada por el bot OPAI 2.0), tomadas durante la revisión de los mockups v1 a v3 de Rondas (insumos de QA fuera del repo). Complementan, sin contradecir, las 21 decisiones de arriba; se detallan en `docs/2.0/briefs/BRIEF-14-rondas.md` §6, que es donde se ejecutan.
+
+1. Tipos de incidente predefinidos por cada tenant, con gravedad configurable por tenant (Configuración → Rondas).
+2. Evidencia completa en la novedad o incidente: varias fotos, video corto y nota de voz con dictado.
+3. En cada punto, confirmación «Realizado» / «Hay un problema»; «Hay un problema» abre la hoja de novedad prellenada con el punto ya enlazado.
+4. Checklist corto por punto (1 a 3 ítems sí/no) cuando el punto requiere realizar algo.
+5. Historial de marcas, confirmaciones, checklists e incidentes visible en la ficha de la instalación, pestaña Rondas, y exportable.
+6. Incidente de ronda conectado con Novedades y la Central: un solo objeto «Novedad» (gravedad alta = incidente), sin copias entre Rondas, el Libro de novedades y la Central; cada vista referencia el mismo identificador y su línea de tiempo.
+7. El guardia ve un mapa con su posición y el próximo punto en la ronda en curso.
+8. Filtro por instalación en el control de rondas del ERP y en «Rondas de hoy» del supervisor.
+9. Rondas vive en la app Terreno junto con Control de acceso, Libro de novedades y Asistencia, con una pantalla Inicio de Terreno y su propia barra de pestañas (actualiza la descripción de Terreno de `NAVEGACION.md` §4, ver `BRIEF-14-rondas.md` §2 y §8).
+10. Radio de geocerca por defecto de 15 m, con un techo de 19–20 m (afina la decisión 1 de arriba, que fijaba «menor a 20 m, calibrado con 1.0» sin un número exacto; la calibración contra marcas reales de 1.0 sigue pendiente, ver `BRIEF-14-rondas.md` §11).
+11. Ficha de la ejecución también en el ERP, con las mismas 6 pestañas que la ficha del supervisor, no solo un panel lateral.
+12. El modelo de confianza inicial se llama «Modelo de confianza v1» en pantalla (no «Modelo OPAI 1.0», que podía confundirse con la versión del producto); los pesos siguen siendo los de 1.0 (R20).
+
 ## 15. Design Prompt para Claude Design
 
 > Carlos aprobó esta especificación completa el 29-oct-2026 (ADR-047); el Design Prompt queda **listo para copiar**. El Design Prompt se mudó a su propio archivo: [`docs/2.0/design/DESIGN-PROMPT-rondas.md`](../design/DESIGN-PROMPT-rondas.md), ya actualizado con las decisiones de Carlos del 29-oct-2026 (preguntas 2, 5, 7, 8, 9, 13, 18 y 21, que son las que afectan el mockup). Se copia tal cual desde ese archivo en Claude Design.
@@ -383,3 +400,4 @@ Respuestas de Carlos a las 21 preguntas de §14, dadas en el mismo pedido CAR-72
 | 29-oct-2026 | Primera versión (borrador) con modo por punto, fidelidad del GPS, trust score versionado, sin conexión, PWA vs nativa, vistas, eventos para la central, benchmark, 21 preguntas y Design Prompt (CAR-72) | — (pendiente de aprobación) |
 | 29-oct-2026 | Carlos responde las 21 preguntas de §14 (sección «Decisiones de Carlos (29-oct-2026)»): sin NFC, radio GPS bajo 20 m calibrado con 1.0, sin QR dinámico, app web dentro de Terreno con Play Store opcional, foto opcional y novedad/incidente por punto, selección de guardia al entrar a Terreno con varios guardias, «sin movimiento» que debe funcionar de verdad, etiquetas de 1.0 reutilizadas y mejoradas; el resto queda con la recomendación. Ajusta R1, R2, R3, R5, R7, R27, R31 y la tabla de dispositivos; mueve el Design Prompt a `design/DESIGN-PROMPT-rondas.md` (CAR-72; solo documentación) | Carlos (29-oct-2026, 08:18 CLT, pedido CAR-72) |
 | 29-oct-2026 | Carlos aprueba el documento completo (cambia el estado de «borrador» a «aprobado»); confirma que la publicación en Play Store (decisión 5 de §14) queda como opción del Brief 14, sin esperar a un hito posterior; el Design Prompt de `design/DESIGN-PROMPT-rondas.md` queda listo para copiar en Claude Design (CAR-72; solo documentación) | Carlos (29-oct-2026, 14:58 CLT, pedido CAR-72) |
+| 29-oct-2026 | Carlos aprueba el mockup v3 (16:29 CLT) y agrega 12 decisiones tomadas durante la QA de los mockups v1 a v3 (sección «Decisiones de Carlos sobre el mockup (29-oct-2026)», sobre todo tipos de incidente por tenant, evidencia completa, «Realizado»/«Hay un problema» con checklist, incidente único conectado con Novedades y la Central, mapa del guardia, filtro por instalación, Rondas dentro de la app Terreno con Control de acceso/Novedades/Asistencia, radio de 15 m, ficha de la ejecución también en el ERP y «Modelo de confianza v1»); se escribe `docs/2.0/briefs/BRIEF-14-rondas.md` en la rama `docs/brief-14-rondas` (CAR-72; solo documentación) | Carlos (29-oct-2026, 16:29 CLT, chat con OPAI 2.0, registrada por el bot OPAI 2.0) |
