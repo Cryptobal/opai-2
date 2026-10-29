@@ -100,7 +100,7 @@ test.describe("DS V2 (ADR-050)", () => {
     expect(contraste(medidas.borde, medidas.fondo)).toBeGreaterThanOrEqual(3);
   });
 
-  test("el shell sigue el export: Buscar arriba en el teléfono y el usuario al pie en 1280", async ({
+  test("el shell sigue el export: Buscar arriba en el teléfono y el usuario al pie desde 1024", async ({
     page,
   }, info) => {
     await page.goto("/ds");
