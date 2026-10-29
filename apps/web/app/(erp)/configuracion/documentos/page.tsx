@@ -1,10 +1,11 @@
 import { Plus } from "lucide-react";
 
-import { Alerta, Segmentado } from "@opai/ds";
+import { Estado, Segmentado } from "@opai/ds";
 import { PERMISOS_CORE } from "@opai/domain";
 
 import { LinkNext } from "@/app/_components/link-next";
 import { EnlaceBotonHoja } from "@/app/_components/maestros/enlace-boton-hoja";
+import { estadoPantalla } from "@/lib/formato";
 import { leerParametros, type SearchParams } from "@/lib/parametros";
 import { construirPuede } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario } from "@/lib/servidor";
@@ -56,11 +57,9 @@ export default function Documentos({ searchParams }: { searchParams: SearchParam
                 href: `?capa=${c.id}`,
               }))}
             />
-            {r.ok ? (
+            <Estado state={estadoPantalla(r)} variante="lista">
               <TablaTipos tipos={tipos} puede={puede} />
-            ) : (
-              <Alerta tono="danger" titulo={r.error.message} />
-            )}
+            </Estado>
             {puede ? (
               <>
                 <HojaTipo capa={capa} />

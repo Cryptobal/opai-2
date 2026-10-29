@@ -1,23 +1,23 @@
 import type { CampoAjusteVista } from "@opai/ds";
 
+import { exigirDatos } from "@/lib/carga";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 type Valor = { modulo: string; clave: string; valor: unknown; origen: string };
 
-/** Esquema y valores efectivos de los ajustes de un módulo (opcionalmente, de un grupo). */
+/** Esquema y valores efectivos de los ajustes de un módulo (opcionalmente, de un grupo). Un fallo
+ * lanza (`error.tsx`): no se muestra como «Sin ajustes» (CAR-50). */
 export async function cargarAjustes(modulo: string, grupo?: string) {
   const [s, v] = await Promise.all([
     ejecutarComoUsuario<CampoAjusteVista[]>("erp", "core.config.schema", { modulo }),
     ejecutarComoUsuario<Valor[]>("erp", "core.config.get", { modulo }),
   ]);
-  const campos = (s.ok ? s.data : []).filter((c) => !grupo || c.grupo === grupo);
+  const campos = exigirDatos(s).filter((c) => !grupo || c.grupo === grupo);
   const valores = Object.fromEntries(
-    (v.ok ? v.data : []).map((x) => [
-      `${x.modulo}.${x.clave}`,
-      { valor: x.valor, origen: x.origen },
-    ]),
+    exigirDatos(v).map((x) => [`${x.modulo}.${x.clave}`, { valor: x.valor, origen: x.origen }]),
   );
-  return { ok: s.ok && v.ok, campos, valores };
+  // `ok` se conserva para los llamadores que aún lo leen: si la carga falla, ya lanzó.
+  return { ok: true as const, campos, valores };
 }
 
 export type Ajustes = Awaited<ReturnType<typeof cargarAjustes>>;

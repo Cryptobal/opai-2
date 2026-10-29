@@ -22,15 +22,15 @@ export default function Comunicaciones() {
           ejecutarComoUsuario<EventoComunicable[]>("erp", "core.comunicaciones.eventos", {}),
           ejecutarComoUsuario<Regla[]>("erp", "core.notificacion_reglas.list", {}),
         ]);
-        return { e, reglas: r.ok ? r.data : [] };
+        return { e, r, reglas: r.ok ? r.data : [] };
       }}
       cabecera={() => ({ subtitulo: "Todo apagado por defecto, salvo los avisos transaccionales" })}
     >
-      {({ e, reglas }) => {
+      {({ e, r, reglas }) => {
         const eventos = e.ok ? e.data : [];
         const grupos = [...new Set(eventos.map((x) => grupoDe(x.evento)))];
         return (
-          <Estado state={estadoPantalla(e)} variante="lista">
+          <Estado state={estadoPantalla(e, r)} variante="lista">
             <Table>
               <thead>
                 <tr>

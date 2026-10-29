@@ -1,7 +1,10 @@
 import { Building2, MapPin, UserPlus } from "lucide-react";
 
+import { Estado } from "@opai/ds";
+
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 import { diaLargo } from "@/lib/fechas";
+import { estadoPantalla } from "@/lib/formato";
 import { nombreDePila } from "@/lib/nombre";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 import { vocabularioActual } from "@/lib/vocabulario";
@@ -69,7 +72,14 @@ export async function InicioErp({ nombre, empresa, actor }: Props) {
         </div>
       </div>
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,380px)] lg:items-start">
-        <PendientesInicio items={r.ok ? r.data : []} />
+        {/* Sin el permiso, la bandeja queda vacía; un fallo se ve como error, no como «nada pendiente» (CAR-50). */}
+        {r.ok || r.error.code === "FORBIDDEN" ? (
+          <PendientesInicio items={r.ok ? r.data : []} />
+        ) : (
+          <Estado state={estadoPantalla(r)} variante="lista">
+            {null}
+          </Estado>
+        )}
         <div className="grid grid-cols-3 gap-2 md:hidden">
           {ACCIONES.map((a) => (
             <EnlaceBoton
