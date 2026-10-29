@@ -1,7 +1,7 @@
 import type { Rol } from "@opai/domain";
 import type { TenantTx } from "@opai/db";
 
-import { conflicto } from "../errores";
+import { conflicto, reglaDeNegocio } from "../errores";
 import type { Servicios } from "../types";
 import { sha256, tokenAleatorio } from "./comun";
 import { enviarCorreo } from "./comunicaciones/envio";
@@ -77,7 +77,7 @@ export async function crearInvitacion(
     },
   );
   if (!enviado)
-    throw new Error("No pudimos enviar el correo de invitación. Reintenta en unos minutos.");
+    throw reglaDeNegocio("No pudimos enviar el correo de invitación. Reintenta en unos minutos.");
   return { id: invitacion.id, ...resumen };
 }
 
