@@ -10,7 +10,7 @@ afterEach(() => vi.restoreAllMocks());
 const vencido = () => new Error("Connection terminated due to connection timeout");
 
 describe("conexiones tras reanudar la instancia (Fluid compute)", () => {
-  it("reintenta una vez el vencimiento adelantado; el que esperó el tope no se reintenta", async () => {
+  it("reintenta los vencimientos adelantados; sin tope configurado, no se reintentan", async () => {
     const fallos = [vencido()];
     const pool = new PoolConReintento({
       Client: clienteFalso(fallos),
@@ -21,12 +21,12 @@ describe("conexiones tras reanudar la instancia (Fluid compute)", () => {
     // Sin tope configurado no hay forma de saber que fue adelantado: no se reintenta.
     const sinTope = new PoolConReintento({ Client: clienteFalso([vencido()]) });
     await expect(sinTope.connect()).rejects.toThrow("due to connection timeout");
-    // Dos adelantados seguidos: un solo reintento.
+    // Dos adelantados seguidos: se reintenta dentro del plazo real hasta conectar.
     const dos = new PoolConReintento({
       Client: clienteFalso([vencido(), vencido()]),
       connectionTimeoutMillis: 10_000,
     });
-    await expect(dos.connect()).rejects.toThrow("due to connection timeout");
+    (await dos.connect()).release();
     await Promise.all([pool.end(), sinTope.end(), dos.end()]);
   });
 
