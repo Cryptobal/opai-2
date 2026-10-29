@@ -315,6 +315,10 @@ decisiones atribuidas a Carlos.
 
 **Nota del 29-oct-2026 (CAR-70, Central de monitoreo).** Decisión de Carlos, 29-oct-2026, transmitida en la sesión de Claude de CAR-70 (PR #122), ajuste al encargo de Central: el **libro de novedades de 1.0 pasa a 2.0 en la app Terreno** (no en Rondas como pantalla propia) y **recibe las novedades que deja una ronda**; el módulo Central lo **muestra** (no lo duplica) en la pestaña «Central» de la ficha de la instalación, junto a su propia bitácora. Detalle en `modulos/central.md` §2 y §3.
 
+**Decisiones de Carlos (29-oct-2026, CAR-72, pedido de las 08:18 CLT).** Precisan este ADR al responder las 21 preguntas de `modulos/rondas.md` §14 (detalle completo en ese archivo, sección «Decisiones de Carlos (29-oct-2026)»): **se retira NFC** — modifica el párrafo de arriba: ya no se conservan «QR/NFC/GPS», quedan solo `QR`, `GPS` y `QR + GPS`, y las etiquetas NFC de 1.0 no se migran; el **QR es siempre físico**, sin QR dinámico; el radio de geocerca por defecto queda **bajo 20 m**, el mínimo que no dé falsos «fuera», calibrado con las marcas reales de 1.0; la **foto sigue opcional por punto** y, además, cada punto admite reportar una novedad o un incidente hacia el libro electrónico de novedades; el **trust score nunca bloquea**; y las etiquetas QR físicas de 1.0 **se reutilizan y se mejoran** durante la migración, en vez de exigir reimpresión inmediata.
+
+**Aprobación de Carlos (29-oct-2026, 14:58 CLT, mismo pedido CAR-72).** Carlos aprueba `modulos/rondas.md` completo (pasa de «borrador» a «aprobado», ADR-047): queda disponible para copiar el Design Prompt en Claude Design. Confirma además que la publicación en Play Store (decisión 5 de arriba: app web dentro de la app Terreno) **queda como opción del Brief 14** (Rondas), disponible desde ese brief y sin esperar al empaquetado nativo del Brief 17.
+
 ---
 
 ## ADR-025 · Tickets transversal y simple; sin chat
@@ -768,6 +772,9 @@ Reglas:
 
 
 **Nota del 29-oct-2026 sobre el punto 3 (CAR-70, Central de monitoreo).** Decisión de Carlos, 29-oct-2026, transmitida en la sesión de Claude de CAR-70 (PR #122): aprobó las 15 preguntas de `modulos/central.md` §14 tal como venían recomendadas (pregunta 9). La cola local sin conexión del punto 3 se amplía a los **mensajes a la central** (novedad, consulta y urgencia, con texto y fotos) y a los **acuses de recibo** de los avisos de la central: mismas reglas (IndexedDB, `idempotencyKey`, hora del dispositivo y sello de servidor al sincronizar, estado «pendiente de envío» visible). Una urgencia encolada muestra además «Llamar a la central» con el número del tenant. Detalle en `modulos/central.md` (R16, R17 y casos borde).
+
+**Decisiones de Carlos (29-oct-2026, CAR-72).** Para Rondas (`modulos/rondas.md`, decisión 5 de la sección «Decisiones de Carlos (29-oct-2026)»): la app web vive **dentro de la app Terreno** (la misma app «OPAI» de este ADR, punto 1) y la publicación en Play Store (empaquetado de este ADR, punto 8) queda como **opción** para ese módulo, no obligatoria desde el día uno ni reservada a un hito posterior. No cambia el resto de este ADR; el momento exacto en que se ejecuta ese empaquetado para Rondas se resuelve al planificar el brief.
+
 ---
 
 ## ADR-045 · Velocidad de navegación medida y con gate
