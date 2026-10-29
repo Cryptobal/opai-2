@@ -154,7 +154,7 @@ Relaciones: instalación 1–N alertas; alerta 1–N señales, 1–N intentos, 1
 **Alcance y aislamiento**
 
 - **R20.** Un supervisor ve y atiende solo las alertas, hilos y avisos de las instalaciones a su cargo; el filtro va en la consulta (ADR-022). El agente de servicio ve todo el tenant (ADR-051); un tenant que quiera agentes por zona necesita una decisión sobre ADR-051, porque hoy una key de servicio no se acota a instalaciones (pregunta 2).
-- **R21. Agent-first.** Toda acción de pantalla es una capacidad con su herramienta MCP (ADR-055), con vista previa y clave de idempotencia en las escrituras; las de aprobación humana devuelven `APPROVAL_REQUIRED` a los agentes y entran a la Bandeja del responsable.
+- **R21. Agent-first.** Toda acción de pantalla es una capacidad expuesta igual en la pantalla, en `/api/v1` y como herramienta MCP (ADR-004, ADR-055); toda escritura acepta `dryRun` (en MCP, `preview_…`) y clave de idempotencia y queda en la auditoría. Toda tabla nueva lleva `tenant_id` con RLS y la política `tenant_isolation` (ADR-002); las de aprobación humana devuelven `APPROVAL_REQUIRED` a los agentes y entran a la Bandeja del responsable.
 
 ## 6. Estados y transiciones
 
@@ -208,7 +208,7 @@ Todas las plantillas son editables en Comunicaciones (ADR-020) y medidos en `cor
 
 ## 9. Herramientas MCP
 
-El agente de central opera **solo con estas capacidades** (no hay otro camino a los datos, ADR-049 «Consecuencias»), con la identidad de su key y el alcance de su responsable.
+El agente de central opera **solo con estas capacidades** (no hay otro camino a los datos, ADR-049 «Consecuencias»), con la identidad de su key de servicio y alcance de todo el tenant (ADR-051), nunca el alcance de su responsable.
 
 | Herramienta | Qué hace | Tipo | Vista previa | Aprobación humana |
 |---|---|---|---|---|
@@ -235,7 +235,7 @@ El agente de central opera **solo con estas capacidades** (no hay otro camino a 
 
 - **Push** (ADR-044) y **in-app** del núcleo; **WhatsApp y SMS** por el adaptador de mensajería del núcleo, con credenciales del tenant (ADR-027) y consumo medido (ADR-031).
 - **Telefonía** (llamada humana desde el navegador o el teléfono en la v1; llamada por agente de IA en Central II) por un adaptador del núcleo aún no existente; proveedor por decidir (pregunta 8).
-- **IA** por clase de tarea (`economica` para clasificar señales, `estandar` para resumir y proponer), nunca por nombre de modelo (ADR-031), con la key del tenant si la tiene (ADR-049 §6).
+- **IA** por clase de tarea (`economica` para clasificar señales, `estandar` para resumir y proponer), nunca por nombre de modelo (ADR-031), con la key del tenant si la tiene (ADR-049 §6): si todas sus keys fallan, la solicitud falla y se avisa al tenant, **nunca** se pasa a la key de OPAI.
 - **Mapas** solo por el servicio de geolocalización del núcleo, para la posición de la instalación y de la última marca o punto de ronda.
 
 ## 11. Mejoras respecto de 1.0 y lo que no se porta
