@@ -51,7 +51,8 @@ La reversión de la base va siempre junto con la reversión del código del PR #
    -- Solo si el paso 2 dio más de 0 y se aceptó perder esas filas (quedan en el CSV):
    -- SET LOCAL car36.descartar_sin_origen = 'si';
    ALTER TABLE core.aprobaciones NO FORCE ROW LEVEL SECURITY;
-   -- El trigger mismo_tenant (SECURITY DEFINER) y la selección leen las keys de cada empresa.
+   -- El trigger mismo_tenant (SECURITY INVOKER: corre con el rol que revierte) y la selección
+   -- leen las keys de cada empresa.
    ALTER TABLE core.api_keys NO FORCE ROW LEVEL SECURITY;
    DO $$
    DECLARE
@@ -96,10 +97,10 @@ La reversión de la base va siempre junto con la reversión del código del PR #
    COMMIT;
    ```
 
-   Diferencias con el bloque del `migration.sql`: `SET LOCAL lock_timeout`; el fallo cerrado ante las filas que no pueden volver (el bloque viejo omitía en silencio las de `origen_tenant_id` NULL, y una fila sin identidad de agente o con la key borrada hacía fallar el `INSERT` entero); `NO FORCE` también en `core.api_keys`, y la verificación del conteo devuelto. `NO FORCE` vale solo dentro de la transacción: si el rol que revierte no tiene BYPASSRLS, con FORCE el `INSERT` en `core.aprobaciones` fallaría por `WITH CHECK` (no hay `app.tenant_id`) y el trigger `mismo_tenant` no vería ninguna key.
+   Diferencias con el bloque del `migration.sql`: `SET LOCAL lock_timeout`; el fallo cerrado ante las filas que no pueden volver (el bloque viejo omitía en silencio las de `origen_tenant_id` NULL, y una fila sin identidad de agente o con la key borrada hacía fallar el `INSERT` entero); `NO FORCE` también en `core.api_keys`, y la verificación del conteo devuelto. `NO FORCE` vale solo dentro de la transacción: si el rol que revierte no tiene BYPASSRLS, con FORCE el `INSERT` en `core.aprobaciones` fallaría por RLS (la única política, `tenant_isolation`, es para `opai_app` y exige `app.tenant_id`; sin política aplicable se niega por defecto) y el trigger `mismo_tenant`, que corre con el rol que revierte, no vería ninguna key.
 
 4. **Verificar:** `core.aprobaciones_plataforma` y `core.auditoria_global` ya no existen, `core.aprobaciones` y `core.api_keys` tienen otra vez `relforcerowsecurity = true` y las aprobaciones `platform.*` devueltas están en su empresa de origen. Avisar a Carlos en español con los conteos del `NOTICE`.
 
 ## Probado
 
-El script se probó el 29-oct-2026 en una base desechable (Postgres 16, superusuario local, así que no ejercita el caso sin BYPASSRLS) con las migraciones hasta `20261028235000` y cuatro aprobaciones: una válida, una sin empresa de origen, una sin key ni agente interno y una con la key borrada. Sin confirmar, falla cerrado y no cambia nada; con `car36.descartar_sin_origen = 'si'` devuelve la válida a su empresa, descarta las otras tres, borra las tablas, la función y la fila de `_prisma_migrations`, y deja FORCE puesto en `core.aprobaciones` y `core.api_keys`.
+El script se probó el 29-oct-2026 en una base desechable (Postgres 16) con las migraciones hasta `20261028235000` y cuatro aprobaciones: una válida, una sin empresa de origen, una sin key ni agente interno y una con la key borrada. Sin confirmar, falla cerrado y no cambia nada; con `car36.descartar_sin_origen = 'si'` devuelve la válida a su empresa, descarta las otras tres, borra las tablas, la función y la fila de `_prisma_migrations`, y deja FORCE puesto en `core.aprobaciones` y `core.api_keys`. La autorrevisión repitió el paso 3 con un rol propietario NOSUPERUSER y NOBYPASSRLS (sin pertenecer a `opai_app`) con el mismo resultado; el conteo del paso 2 corrido fuera de esa transacción dio un falso positivo, como se advierte arriba.

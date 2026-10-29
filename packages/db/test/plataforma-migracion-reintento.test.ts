@@ -1,8 +1,9 @@
 // CAR-36 (pendiente de la revisión del PR #109): la rama Neon `preview/pr-109` aplicó una versión
 // vieja de la migración con la carpeta `20261028230000_…` (sin `agente_interno_id` ni la limpieza
 // de eventos y envíos) y después la actual `20261028235000_…`. `CREATE TABLE IF NOT EXISTS` no
-// valida el esquema de una tabla que ya existe: este test comprueba que, frente a esa única versión
-// vieja conocida, el esquema final es igual al de aplicar la actual desde cero.
+// valida el esquema de una tabla que ya existe: este test comprueba que, frente a la versión
+// vieja que según el diagnóstico del #109 quedó en esa rama, el esquema final es igual al de aplicar
+// la actual desde cero.
 import { randomUUID } from "node:crypto";
 import { readdir, readFile } from "node:fs/promises";
 import { Client } from "pg";
