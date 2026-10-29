@@ -70,6 +70,47 @@ test.describe("configuración: empresa y plataforma del tenant", () => {
     }).toPass({ timeout: 20_000 });
   });
 
+  test("preferencias: si falla el guardado del tema, revierte y lo explica (H2/H3)", async ({
+    page,
+  }, info) => {
+    test.skip(info.project.name !== "ipad", "La escritura se prueba una vez (iPad)");
+    await entrar(page);
+    await page.goto("/configuracion/preferencias");
+    const guardado = () =>
+      page.waitForResponse(
+        (r) =>
+          r.request().method() === "POST" &&
+          r.url().includes("/configuracion/preferencias") &&
+          (r.request().postData() ?? "").includes("core.config.set"),
+      );
+    // Parte de Sistema confirmado por el servidor (la base local persiste entre corridas).
+    if (!(await page.getByRole("radio", { name: /Sistema/ }).isChecked())) {
+      const normalizado = guardado();
+      await page.getByRole("radio", { name: /Sistema/ }).click();
+      await normalizado;
+    }
+    await expect(page.getByRole("radio", { name: /Sistema/ })).toBeChecked();
+    // Desde aquí el guardado del tema falla: debe revertir a Sistema y decir a qué se volvió.
+    await page.route("**/configuracion/preferencias", async (ruta) => {
+      const cuerpo = ruta.request().postData() ?? "";
+      if (
+        ruta.request().method() === "POST" &&
+        cuerpo.includes("core.config.set") &&
+        cuerpo.includes("preferencias_tema")
+      ) {
+        await ruta.abort("failed");
+        return;
+      }
+      await ruta.continue();
+    });
+    await page.getByRole("radio", { name: "Oscuro" }).click();
+    await expect(
+      page.getByRole("alert").filter({ hasText: "No pudimos guardar el tema; volvimos a Sistema" }),
+    ).toBeVisible();
+    await expect(page.getByRole("radio", { name: /Sistema/ })).toBeChecked();
+    await expect(page.locator("html")).not.toHaveAttribute("data-theme", "dark");
+  });
+
   test("documentos: la hoja de nuevo tipo valida el código", async ({ page }, info) => {
     test.skip(info.project.name !== "ipad", "Una vez (iPad)");
     await entrar(page);

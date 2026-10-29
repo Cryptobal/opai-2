@@ -8,6 +8,19 @@ import { useCapacidad } from "@/app/_components/use-capacidad";
 
 export type Valores = { tema: string; silencio: boolean; resumen: string };
 
+const ETIQUETA_TEMA: Record<string, string> = {
+  sistema: "Sistema",
+  claro: "Claro",
+  oscuro: "Oscuro",
+};
+
+/** Mensaje de la Alerta al revertir: nombra el tema al que se volvió; genérico para el resto (H3). */
+function mensajeReversion<K extends keyof Valores>(k: K, confirmado: Valores): string {
+  if (k === "tema")
+    return `No pudimos guardar el tema; volvimos a ${ETIQUETA_TEMA[confirmado.tema] ?? confirmado.tema}.`;
+  return "No pudimos guardar tu preferencia; la dejamos como estaba.";
+}
+
 /**
  * Aplica el tema al instante (el DS lee `data-theme` en <html>) y lo recuerda en este dispositivo
  * para el script del layout raíz, que lo aplica antes de pintar en las próximas cargas.
@@ -29,13 +42,15 @@ export function aplicarTema(t: string) {
  * paralelo, que podían completar en otro orden y dejar guardado algo distinto de lo último
  * elegido bajo contención del lock de auditoría del tenant (regresión del PR #109).
  * `ultimoPedido` descarta en la cola los pedidos que una elección más nueva del mismo campo ya
- * volvió obsoletos, así solo sale el último valor por campo. La cola nunca queda rechazada: si un
- * eslabón falla, revierte ese campo (tema, localStorage y estado), muestra el error y el guardado
- * siguiente sale igual, sin recargar.
+ * volvió obsoletos, así solo sale el último valor por campo. Una respuesta que llega tarde (su
+ * elección ya no es la última) actualiza lo confirmado por el servidor pero no avisa ni revierte:
+ * decide la elección más nueva. La cola nunca queda rechazada: si el último eslabón falla, revierte
+ * ese campo (tema, localStorage y estado) al último valor confirmado por el servidor y muestra un
+ * mensaje específico (H2/H3); el guardado siguiente sale igual, sin recargar.
  */
 export function usePreferencias(inicial: Valores) {
   const [v, setV] = useState(inicial);
-  const { ejecutar, pendiente, error } = useCapacidad("erp");
+  const { ejecutar, pendiente } = useCapacidad("erp");
   const [errorCola, setErrorCola] = useState<string | null>(null);
   const confirmado = useRef(inicial);
   const cola = useRef(Promise.resolve());
@@ -49,26 +64,27 @@ export function usePreferencias(inicial: Valores) {
     const pedido = ++pedidos.current;
     ultimoPedido.current[k] = pedido;
     setErrorCola(null);
+    const esUltimo = () => ultimoPedido.current[k] === pedido;
     // Si ya hay una elección más nueva del campo en la cola, su resultado decide: no se pisa.
     const revertir = () => {
-      if (ultimoPedido.current[k] !== pedido) return;
+      if (!esUltimo()) return;
       setV((x) => ({ ...x, [k]: confirmado.current[k] }));
       if (k === "tema") aplicarTema(String(confirmado.current.tema));
+      setErrorCola(mensajeReversion(k, confirmado.current));
     };
     cola.current = cola.current
       .then(async () => {
-        if (ultimoPedido.current[k] !== pedido) return;
+        if (!esUltimo()) return;
         const r = await ejecutar("core.config.set", { modulo: "core", clave, valor });
         if (r) {
+          // El servidor ya tiene este valor: queda como confirmado aunque una elección más nueva lo
+          // reemplace enseguida, para que un fallo posterior revierta a lo realmente guardado.
           confirmado.current = { ...confirmado.current, [k]: valor };
-          avisar.exito("Preferencia guardada");
+          if (esUltimo()) avisar.exito("Preferencia guardada");
         } else revertir();
       })
-      .catch(() => {
-        revertir();
-        setErrorCola("No se guardó la preferencia. Reintenta.");
-      });
+      .catch(() => revertir());
   }
 
-  return { v, pendiente, error: error ?? errorCola, guardar };
+  return { v, pendiente, error: errorCola, guardar };
 }
