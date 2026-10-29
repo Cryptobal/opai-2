@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="./cpq-data.js"></script>
+</helmet>
+<section class="card" aria-label="Condiciones comerciales">
+<sc-if value="{{ inlineHead }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 16px;padding:16px 16px 4px">
+<span class="t-body-sm muted" style="text-wrap:pretty">{{ overNote }}</span>
+</div>
+</sc-if>
+<sc-if value="{{ foldable }}" hint-placeholder-val="{{ true }}">
+<button type="button" onClick="{{ toggle }}" aria-expanded="{{ open }}" style="all:unset;box-sizing:border-box;width:100%;display:flex;align-items:center;gap:10px;padding:14px 16px;cursor:pointer;min-height:56px">
+<span class="ic sm {{ chev }} muted" aria-hidden="true"></span>
+<span style="display:flex;flex-direction:column;flex:1;min-width:0">
+<span class="t-label">Condiciones comerciales</span>
+<span class="t-caption" style="text-wrap:pretty">{{ summary }}</span>
+</span>
+<sc-if value="{{ hasOver }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" dot="{{ false }}" hint-size="110px,22px">{{ overTxt }}</x-import>
+</sc-if>
+<sc-if value="{{ hasError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="danger" hint-size="90px,22px">Revisar</x-import>
+</sc-if>
+</button>
+</sc-if>
+<sc-if value="{{ open }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:20px;padding:{{ bodyPad }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:20px 24px">
+<sc-for list="{{ fields }}" as="fd" hint-placeholder-count="6">
+<div style="display:flex;flex-direction:column;gap:6px;min-width:0">
+<div style="display:flex;align-items:center;gap:6px;min-height:22px">
+<span class="t-label-sm">{{ fd.label }}</span>
+<sc-if value="{{ fd.over }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" dot="{{ false }}" hint-size="90px,22px">Sobrescrito</x-import>
+</sc-if>
+</div>
+<sc-if value="{{ editable }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ fd.isInput }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" value="{{ fd.value }}" on-change="{{ fd.onChange }}" trailing="{{ fd.unit }}" icon="{{ fd.icon }}" mono="{{ fd.mono }}" input-mode="{{ fd.mode }}" hint-size="100%,44px"></x-import>
+</sc-if>
+<sc-if value="{{ fd.isSelect }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" value="{{ fd.value }}" options="{{ fd.options }}" on-change="{{ fd.onChange }}" hint-size="100%,44px"></x-import>
+</sc-if>
+<sc-if value="{{ fd.isSeg }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmented" options="{{ fd.options }}" value="{{ fd.value }}" on-change="{{ fd.onChange }}" label="{{ fd.label }}" style="{{ segFull }}" hint-size="100%,36px"></x-import>
+</sc-if>
+</sc-if>
+<sc-if value="{{ readOnly }}" hint-placeholder-val="{{ false }}">
+<span class="t-body-sm">{{ fd.display }}</span>
+</sc-if>
+<sc-if value="{{ fd.over }}" hint-placeholder-val="{{ false }}">
+<span class="t-caption" style="display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px"><span>{{ fd.defTxt }}</span>
+<sc-if value="{{ editable }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ fd.reset }}" style="all:unset;cursor:pointer;color:var(--ds-accent);font-weight:500;min-height:{{ linkH }}">Volver al valor por defecto</button></sc-if>
+</span>
+</sc-if>
+</div>
+</sc-for>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:16px;order:{{ reOrder }};padding:{{ rePad }};border-top:{{ reBt }};border-bottom:{{ reBb }}">
+<div style="display:flex;flex-direction:column;gap:6px">
+<div style="display:flex;align-items:center;gap:6px;min-height:22px">
+<span class="t-label-sm">Reajuste</span>
+<sc-if value="{{ re.over }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" dot="{{ false }}" hint-size="90px,22px">Sobrescrito</x-import>
+</sc-if>
+</div>
+<sc-if value="{{ editable }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmented" options="{{ reOpts }}" value="{{ re.tipo }}" on-change="{{ re.setTipo }}" label="Reajuste" style="{{ segMax }}" hint-size="360px,36px"></x-import>
+</sc-if>
+<sc-if value="{{ readOnly }}" hint-placeholder-val="{{ false }}">
+<span class="t-body-sm">{{ re.display }}</span>
+</sc-if>
+<sc-if value="{{ re.over }}" hint-placeholder-val="{{ false }}">
+<span class="t-caption" style="display:flex;flex-wrap:wrap;align-items:center;gap:2px 8px"><span>{{ re.defTxt }}</span>
+<sc-if value="{{ editable }}" hint-placeholder-val="{{ true }}"><button type="button" onClick="{{ re.reset }}" style="all:unset;cursor:pointer;color:var(--ds-accent);font-weight:500;min-height:{{ linkH }}">Volver al valor por defecto</button></sc-if>
+</span>
+</sc-if>
+</div>
+<sc-if value="{{ re.hasIdx }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ editable }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:16px 24px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Frecuencia" value="{{ v.frecuencia }}" options="{{ frecOpts }}" on-change="{{ on.frecuencia }}" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Mes base" value="{{ v.mesBase }}" options="{{ mesOpts }}" on-change="{{ on.mesBase }}" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Incremento real anual" value="{{ v.incremento }}" on-change="{{ on.incremento }}" placeholder="Opcional" trailing="%" mono="{{ true }}" input-mode="decimal" hint-size="100%,70px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ readOnly }}" hint-placeholder-val="{{ false }}">
+<span class="t-body-sm muted">{{ re.detailRO }}</span>
+</sc-if>
+</sc-if>
+<sc-if value="{{ re.poli }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:10px">
+<span class="t-label-sm">Pesos del polinomio</span>
+<sc-if value="{{ editable }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;align-items:end">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="IPC" value="{{ v.pIpc }}" on-change="{{ on.pIpc }}" trailing="%" mono="{{ true }}" input-mode="numeric" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="IMO" value="{{ v.pImo }}" on-change="{{ on.pImo }}" trailing="%" mono="{{ true }}" input-mode="numeric" hint-size="100%,70px"></x-import>
+<sc-for list="{{ re.extras }}" as="x" hint-placeholder-count="0">
+<div style="display:flex;flex-direction:column;gap:6px;grid-column:1 / -1">
+<div style="display:grid;grid-template-columns:minmax(0,1fr) 150px 44px;gap:8px;align-items:end">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Índice" value="{{ x.nombre }}" on-change="{{ x.setNombre }}" placeholder="Ej.: Combustible" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Peso" value="{{ x.peso }}" on-change="{{ x.setPeso }}" trailing="%" mono="{{ true }}" input-mode="numeric" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="x" label="Quitar índice" on-click="{{ x.remove }}" hint-size="44px,44px"></x-import>
+</div>
+</div>
+</sc-for>
+</div>
+<button type="button" class="btn btn-ghost" onClick="{{ re.addIdx }}" style="align-self:flex-start;height:44px;padding:0 10px;margin-left:-10px;color:var(--ds-accent)"><span class="ic sm i-plus" aria-hidden="true"></span>Agregar índice</button>
+</sc-if>
+<sc-if value="{{ readOnly }}" hint-placeholder-val="{{ false }}">
+<span class="t-body-sm">{{ re.pesosRO }}</span>
+</sc-if>
+<sc-if value="{{ re.err }}" hint-placeholder-val="{{ false }}">
+<span role="alert" style="font:500 13px/18px var(--font-sans);color:var(--ds-danger-fg)">{{ re.errTxt }}</span>
+</sc-if>
+<sc-if value="{{ re.ok }}" hint-placeholder-val="{{ false }}">
+<span class="t-caption">Los pesos suman 100 %.</span>
+</sc-if>
+</div>
+</sc-if>
+</div>
+</div>
+</sc-if>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:760,&quot;height&quot;:620},&quot;values&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;Record&lt;string,string&gt;&quot;},&quot;editable&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;defaultOpen&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;onChange&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(key:string,v:string)=&gt;void&quot;},&quot;onReset&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;(key:string,keys?:string[])=&gt;void&quot;}}">
+class Component extends DCLogic {
+  state = { open: null };
+  renderVals() {
+    const P = window.CPQ;
+    if (!P) return { open: false, fields: [] };
+    const D = P.DEFAULT_COND;
+    const v = { ...D, ...(this.props.values || {}) };
+    const editable = this.props.editable ?? true;
+    const inline = !!this.props.inline;
+    const open = inline || (this.state.open ?? (this.props.defaultOpen ?? false));
+    const touch = !!this.props.touch;
+    const ch = this.props.onChange, rs = this.props.onReset;
+    const FP = [{ value: "transferencia", label: "Transferencia" }, { value: "valevista", label: "Vale vista" }, { value: "cheque", label: "Cheque" }];
+    const lab = (opts, x) => (opts.find((o) => o.value === x) || {}).label || x;
+    const MON = [{ value: "UF", label: "UF" }, { value: "CLP", label: "CLP" }];
+    const defs = [
+      { key: "formaPago", label: "Forma de pago", kind: "select", options: FP, fmt: (x) => lab(FP, x) },
+      { key: "dias", label: "Días de pago", kind: "input", unit: "días", mono: true, mode: "numeric", fmt: (x) => x + " días" },
+      { key: "duracion", label: "Duración", kind: "input", unit: "meses", mono: true, mode: "numeric", fmt: (x) => x + " meses" },
+      { key: "inicio", label: "Inicio", kind: "input", icon: "calendar", mono: true, fmt: (x) => x },
+      { key: "validez", label: "Validez de la oferta", kind: "input", unit: "días", mono: true, mode: "numeric", fmt: (x) => x + " días" },
+      { key: "moneda", label: "Moneda", kind: "seg", options: MON, fmt: (x) => x },
+    ];
+    const fields = defs.map((d) => {
+      const over = String(v[d.key]) !== String(D[d.key]);
+      return {
+        ...d, value: v[d.key], display: d.fmt(v[d.key]), over, defTxt: "Configuración: " + d.fmt(D[d.key]),
+        isInput: d.kind === "input", isSelect: d.kind === "select", isSeg: d.kind === "seg", icon: d.icon, unit: d.unit, mono: !!d.mono, mode: d.mode,
+        onChange: (x) => ch && ch(d.key, x), reset: () => rs && rs(d.key),
+      };
+    });
+    const RE = [{ value: "ninguno", label: "Ninguno" }, { value: "ipc", label: "IPC" }, { value: "imo", label: "IMO" }, { value: "poli", label: "Polinómico" }];
+    const reKeys = ["reajuste", "frecuencia", "mesBase", "incremento", "pIpc", "pImo", "extra"];
+    const extra = Array.isArray(v.extra) ? v.extra : [];
+    const reOver = reKeys.some((k) => (k === "extra" ? extra.length > 0 : String(v[k]) !== String(D[k])));
+    const sum = P.parseNum(v.pIpc) + P.parseNum(v.pImo) + extra.reduce((a, x) => a + P.parseNum(x.peso), 0);
+    const setExtra = (arr) => ch && ch("extra", arr);
+    const poli = v.reajuste === "poli";
+    const err = poli && Math.round(sum) !== 100;
+    const FREQ = [{ value: "anual", label: "Anual" }, { value: "semestral", label: "Semestral" }, { value: "trimestral", label: "Trimestral" }];
+    const reDisplay = (x) => lab(RE, x.reajuste) + (x.reajuste === "ninguno" ? "" : " · " + lab(FREQ, x.frecuencia).toLowerCase() + " · base " + x.mesBase.toLowerCase()) + (x.reajuste === "poli" ? " · IPC " + x.pIpc + " % · IMO " + x.pImo + " %" : "") + (x.incremento ? " · + " + x.incremento + " % real" : "");
+    const on = {}; ["frecuencia", "mesBase", "incremento", "pIpc", "pImo"].forEach((k) => (on[k] = (x) => ch && ch(k, x)));
+    const nOver = fields.filter((f) => f.over).length + (reOver ? 1 : 0);
+    const summary = [lab(FP, v.formaPago) + " a " + v.dias + " días", v.duracion + " meses desde " + v.inicio, "validez " + v.validez + " días", v.moneda, "reajuste " + lab(RE, v.reajuste).toLowerCase()].join(" · ");
+    return {
+      open, chev: open ? "i-chevron-down" : "i-chevron-right", toggle: () => this.setState({ open: !open }),
+      foldable: !inline, inlineHead: inline,
+      reOrder: this.props.reajusteFirst ? -1 : 0, rePad: this.props.reajusteFirst ? "0 0 20px" : "20px 0 0", reBt: this.props.reajusteFirst ? "0" : "1px solid var(--ds-border)", reBb: this.props.reajusteFirst ? "1px solid var(--ds-border)" : "0", bodyPad: inline ? "12px 16px 20px" : "4px 16px 20px 42px", linkH: touch ? "44px" : "24px",
+      overNote: nOver ? nOver + (nOver === 1 ? " valor difiere" : " valores difieren") + " de Configuración del CPQ." : "Todos los valores vienen de Configuración del CPQ.",
+      summary, hasOver: nOver > 0, overTxt: nOver === 1 ? "1 sobrescrito" : nOver + " sobrescritos", hasError: err,
+      fields, editable, readOnly: !editable, v, on, segFull: { width: "100%" }, segMax: { maxWidth: 420, width: "100%" },
+      reOpts: RE, frecOpts: FREQ, mesOpts: P.MESES.map((m) => ({ value: m, label: m })),
+      re: {
+        tipo: v.reajuste, over: reOver, hasIdx: v.reajuste !== "ninguno", poli, display: reDisplay(v), defTxt: "Configuración: " + reDisplay(D),
+        detailRO: v.reajuste === "ninguno" ? "" : lab(FREQ, v.frecuencia) + " · mes base " + v.mesBase.toLowerCase() + (v.incremento ? " · incremento real " + v.incremento + " %" : " · sin incremento real"),
+        setTipo: (x) => ch && ch("reajuste", x), reset: () => rs && rs("reajuste", reKeys),
+                err, ok: poli && !err, errTxt: "Los pesos suman " + P.num(sum) + " %. Deben sumar 100 %.",
+        extras: extra.map((x, i) => ({ ...x, setNombre: (val) => setExtra(extra.map((y, j) => (j === i ? { ...y, nombre: val } : y))), setPeso: (val) => setExtra(extra.map((y, j) => (j === i ? { ...y, peso: val } : y))), remove: () => setExtra(extra.filter((_, j) => j !== i)) })),
+        addIdx: () => setExtra([...extra, { nombre: "", peso: "" }]),
+        pesosRO: "IPC " + v.pIpc + " % · IMO " + v.pImo + " %" + extra.map((x) => " · " + (x.nombre || "Índice") + " " + x.peso + " %").join(""),
+      },
+    };
+  }
+}
+</script>
+</body>
+</html>
