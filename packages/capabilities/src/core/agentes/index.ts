@@ -5,6 +5,10 @@ import {
   aprobacionesRechazar,
   trabajoExpirarAprobaciones,
 } from "./aprobaciones-resolver";
+import {
+  platformAprobacionesAprobar,
+  platformAprobacionesRechazar,
+} from "./aprobaciones-plataforma-resolver";
 import { apikeysGet } from "./clave-detalle";
 import { apikeysSetAutonomia, apikeysUpdate } from "./claves";
 
@@ -19,4 +23,6 @@ export const capacidadesAgentes: readonly Capacidad[] = [
   aprobacionesGet,
   aprobacionesAprobar,
   aprobacionesRechazar,
+  platformAprobacionesAprobar,
+  platformAprobacionesRechazar,
 ];

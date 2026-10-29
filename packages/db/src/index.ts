@@ -7,6 +7,15 @@ export { forTenant, validarTenantId, type TenantDb } from "./for-tenant";
 export { forUser, type UserDb } from "./for-user";
 export { clienteAuth, tenantPorSlug, usuarioPorId, tenantsOperables } from "./globales";
 export { accesoPlataforma, preciosHasta, type Globales } from "./plataforma";
+export type { HechoPlataforma } from "./plataforma-aprobaciones";
+// La auditoría global solo se escribe por operaciones con nombre (`accesoPlataforma()`; CAR-42
+// sumará la suya para el ámbito `seguridad`): no se exporta el append.
+export type { AmbitoAuditoriaGlobal, HechoGlobal } from "./auditoria-global";
+export {
+  type FiltroTrabajos,
+  operacionesEmpresa,
+  type OperacionesEmpresa,
+} from "./plataforma-empresa";
 export {
   agregarABitacora,
   type HechoBitacora,
@@ -29,7 +38,9 @@ export { enTransaccion, type OpcionesTransaccion, type TenantTx } from "./transa
 export { consumirPresupuesto, periodoDeMes } from "./presupuesto";
 export type {
   ApiKey,
+  AprobacionPlataforma,
   AuditEvent,
+  AuditoriaGlobal,
   Invitation,
   Membership,
   Tenant,

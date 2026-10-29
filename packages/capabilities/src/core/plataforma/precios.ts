@@ -45,9 +45,16 @@ export const platformPreciosSet = defineCapability({
     costoUnitarioMicro: z.number().int().min(0).max(1_000_000_000),
     vigenteDesde: z.iso.date().optional(),
   }),
-  output: precioSchema,
-  efecto: "escritura",
+  output: precioSchema.extend({
+    anterior: precioSchema
+      .nullable()
+      .describe("Precio que regía para el recurso en esa fecha antes del cambio."),
+  }),
+  // Irreversible (CAR-41): un precio que rige desde hoy se aplica a todos los consumos que se midan
+  // con él, de todas las empresas, y no se corrige hacia atrás; un agente queda en aprobación humana.
+  efecto: "irreversible",
   dryRun: true,
+  cambio: ({ anterior, ...nuevo }) => ({ antes: anterior, despues: nuevo }),
   async handler(ctx, input, { dryRun }) {
     const desde = input.vigenteDesde ?? hoy();
     // Versiona sin reescribir historia: nunca hacia atrás, y la versión de hoy no se corrige
@@ -58,17 +65,24 @@ export const platformPreciosSet = defineCapability({
     });
     if (existente && desde === hoy())
       throw conflicto("Ya hay un precio vigente desde hoy: fija el nuevo desde mañana.");
+    const previo = (await requierePlataforma(ctx).globales.listarPrecios(aFecha(desde))).find(
+      (f) => f.recurso === input.recurso,
+    );
+    const anterior = previo ? { ...previo, vigenteDesde: dia(previo.vigenteDesde) ?? "" } : null;
     const fila = {
       recurso: input.recurso,
       unidad: input.unidad,
       costoUnitarioMicro: input.costoUnitarioMicro,
     };
     if (!dryRun)
-      await requierePlataforma(ctx).globales.guardarPrecio({
-        where: { recurso_vigenteDesde: { recurso: input.recurso, vigenteDesde: aFecha(desde) } },
-        create: { ...fila, vigenteDesde: aFecha(desde) },
-        update: fila,
-      });
-    return { ...fila, vigenteDesde: desde };
+      await requierePlataforma(ctx).globales.guardarPrecio(
+        {
+          where: { recurso_vigenteDesde: { recurso: input.recurso, vigenteDesde: aFecha(desde) } },
+          create: { ...fila, vigenteDesde: aFecha(desde) },
+          update: fila,
+        },
+        ctx.db,
+      ); // En la transacción de su auditoría global: falla cerrado (CAR-41).
+    return { ...fila, vigenteDesde: desde, anterior };
   },
 });

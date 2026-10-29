@@ -65,9 +65,11 @@ describe("MCP: herramientas según módulo activo y scopes de la key (servidor r
   });
 
   it("plataforma: solo con el scope platform y un responsable con platformRole (ADR-055)", async () => {
+    // CAR-40: la key de plataforma vence en ≤ 7 días; sin vencimiento no es de plataforma.
+    const expiraEn = new Date(Date.now() + 86_400_000);
     const conRol = await herramientas({
       platformRole: "owner",
-      key: { scopes: ["*", "platform"] },
+      key: { scopes: ["*", "platform"], expiraEn },
     });
     expect(conRol).toContain("platform_modules_set");
     expect(conRol).toContain("preview_platform_modules_set");
@@ -75,7 +77,15 @@ describe("MCP: herramientas según módulo activo y scopes de la key (servidor r
     expect(conRol).toContain("platform_tenants_get");
     const soloTodo = await herramientas({ platformRole: "owner", key: { scopes: ["*"] } });
     expect(soloTodo.filter((n) => n.includes("platform_"))).toEqual([]);
-    const sinRol = await herramientas({ platformRole: null, key: { scopes: ["*", "platform"] } });
+    const sinRol = await herramientas({
+      platformRole: null,
+      key: { scopes: ["*", "platform"], expiraEn },
+    });
     expect(sinRol.filter((n) => n.includes("platform_"))).toEqual([]);
+    const sinVencimiento = await herramientas({
+      platformRole: "owner",
+      key: { scopes: ["*", "platform"] },
+    });
+    expect(sinVencimiento.filter((n) => n.includes("platform_"))).toEqual([]);
   });
 });
