@@ -102,7 +102,7 @@ CREATE TRIGGER usuario_miembro BEFORE INSERT OR UPDATE OF "responsable_id", "ten
 
 COMMIT;
 
--- Reversión (manual, solo referencia; Prisma no aplica down). Ejecutar con el rol propietario,
+-- Reversión: manual, solo referencia (Prisma no aplica down). Ejecutar con el rol propietario,
 -- dentro de BEGIN … COMMIT con SET LOCAL lock_timeout = '5s':
 --
 --   DROP TRIGGER IF EXISTS usuario_miembro ON "comercial"."negocios";

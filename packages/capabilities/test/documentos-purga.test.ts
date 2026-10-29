@@ -55,4 +55,24 @@ describe("core.documentos.purgar_pendientes", () => {
     for (const id of ["evidencia-arco", "evidencia-incidente", "reemplazado"])
       expect(almacen.objetos.has(`k-${id}`)).toBe(true);
   });
+
+  it("si un lote entero está referenciado, sigue con los siguientes por id", async () => {
+    const referidos = Array.from({ length: 500 }, (_, i) => `a-${String(i).padStart(3, "0")}`);
+    const { ctx, tabla } = contextoDePrueba({
+      semilla: {
+        documento: [...referidos, "b-suelto"].map(pendiente),
+        solicitudArco: referidos.map((id) => ({
+          id: `s-${id}`,
+          tenantId: TENANT_DE_PRUEBA,
+          documentoEvidenciaId: id,
+        })),
+      },
+    });
+
+    const r = await trabajoPurgarSubidasPendientes.ejecutar(ctx, { dia: "2026-10-29" });
+
+    expect(r).toEqual({ eliminados: 1 });
+    expect(tabla("documento")).toHaveLength(500);
+    expect(tabla("documento").some((d) => d["id"] === "b-suelto")).toBe(false);
+  });
 });
