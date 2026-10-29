@@ -1098,7 +1098,7 @@ identidad de servicio en main.
 
 ---
 
-## ADR-056 · Complemento «Cumplimiento DT» de Nómina (LRE, Mi DT, finiquito)
+## ADR-057 · Complemento «Cumplimiento DT» de Nómina (LRE, Mi DT, finiquito)
 
 **Fecha:** 29-oct-2026 · **Estado:** vigente · **Origen:** decisión de Carlos del 29-oct-2026 a las 15:23 CLT sobre la pregunta P10 de [`modulos/firma.md`](modulos/firma.md) §15, que había quedado «en investigación» en la decisión de las 15:17 CLT (§17 del mismo documento, CAR-73). Investigación completa en [`referencias/dt-integracion.md`](referencias/dt-integracion.md) (solo fuentes públicas, nada escrito en ningún sistema ni contacto con la DT).
 
