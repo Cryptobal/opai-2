@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><style>body{margin:0;background:var(--ds-bg)}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}html,body{height:100%}</style></helmet>
+<div style="position:absolute;inset:0;overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" user="{{ appUser }}" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="cfg" title="Remuneraciones" subtitle="Configuración" width="100%" height="100%" hint-size="100%,100%"></x-import>
+<div class="ds" data-device="{{ device }}" data-theme="{{ theme }}" style="position:absolute;inset:0;background:transparent">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Sheet" contained="{{ true }}" side="{{ side }}" title="{{ v.title }}" description="{{ v.desc }}" on-close="{{ noop }}" actions="{{ actions }}" hint-size="420px,100%">
+<div style="display:flex;flex-direction:column;gap:16px">
+<sc-if value="{{ isAgente }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--radius-md);background:var(--ds-fill)"><span class="avatar xs">AR</span><span class="t-body-sm" style="flex:1">Propuesto por el agente de Ana Rojas · en tu cola de aprobaciones</span></div>
+</sc-if>
+
+<sc-if value="{{ isExito }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:32px 8px;text-align:center">
+<span style="width:56px;height:56px;border-radius:999px;background:var(--ds-success-muted);color:var(--ds-success-fg);display:inline-flex;align-items:center;justify-content:center"><span class="ic lg i-check"></span></span>
+<span class="t-subheading">{{ v.exito }}</span>
+<span class="t-body-sm muted" style="max-width:300px;text-wrap:pretty">Quedó registrado en el historial con tu nombre. Avisamos a los dueños de las cotizaciones abiertas.</span>
+</div>
+</sc-if>
+
+<sc-if value="{{ notExito }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:6px">
+<span class="badge b-{{ v.tone }}" style="align-self:flex-start">{{ v.estado }}</span>
+<span style="display:inline-flex;align-items:center;gap:8px;flex-wrap:wrap;padding-top:4px"><span class="t-numeric" style="font-size:16px;color:var(--ds-fg-subtle);text-decoration:line-through;font-weight:400">{{ v.antes }}</span><span class="ic sm i-chevron-right" style="color:var(--ds-fg-subtle)"></span><span class="t-numeric" style="font-size:22px;font-weight:600">{{ v.despues }}</span><span class="t-numeric" style="font-size:13px;color:{{ v.pctColor }}">{{ v.pct }}</span></span>
+<span class="t-caption">Vigente → publicado por OPAI · regiría desde {{ v.desde }} · {{ v.umbral }}</span>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" rows="{{ v.rows }}" hint-size="100%,160px"></x-import>
+<div role="note" style="display:flex;gap:12px;align-items:flex-start;padding:12px 16px;border-radius:var(--radius-md);background:var(--ds-{{ v.tone }}-muted);color:var(--ds-fg)">
+<span class="ic i-info" style="color:var(--ds-{{ v.tone }}-fg);margin-top:2px"></span>
+<span class="t-body-sm" style="text-wrap:pretty">{{ v.motivo }}</span>
+</div>
+<sc-if value="{{ isErrorRegla }}" hint-placeholder-val="{{ false }}">
+<div role="alert" style="display:flex;gap:12px;align-items:flex-start;padding:12px 16px;border-radius:var(--radius-md);background:var(--ds-danger-muted);color:var(--ds-fg)">
+<span class="ic i-alert" style="color:var(--ds-danger-fg);margin-top:2px"></span>
+<div style="display:flex;flex-direction:column;gap:2px"><span class="t-label">No pudimos confirmar el valor</span><span class="t-body-sm muted" style="text-wrap:pretty">{{ v.errorRegla }}</span></div>
+</div>
+</sc-if>
+<sc-if value="{{ isRechazar }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Motivo del rechazo" placeholder="Ej.: la ley aún no está publicada en el Diario Oficial." rows="{{ 3 }}" hint="Queda en el historial y se avisa a OPAI." hint-size="100%,140px"></x-import>
+</sc-if>
+<div style="display:flex;flex-direction:column;border-top:1px solid var(--ds-border);padding-top:16px">
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding-bottom:8px"><span class="t-label">Vista previa del impacto</span><span class="t-caption">Simulación, aún no se aplica</span></div>
+<span class="t-label-sm subtle" style="padding:4px 0">Cotizaciones abiertas · {{ v.nCot }}</span>
+<sc-for list="{{ v.impacto }}" as="i" hint-placeholder-count="3">
+<div style="display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--ds-border);align-items:baseline">
+<span style="display:flex;flex-direction:column;min-width:0"><span class="t-body-sm">{{ i.l }}</span><span class="t-caption">{{ i.m }}</span></span>
+<span class="t-numeric" style="font-size:14px;white-space:nowrap;color:{{ i.c }}">{{ i.v }}</span>
+</div>
+</sc-for>
+<div style="display:flex;justify-content:space-between;gap:8px;padding:12px 0;border-bottom:1px solid var(--ds-border)"><span class="t-label">Total mensual estimado</span><span class="t-numeric" style="font-size:16px;font-weight:600">{{ v.total }}</span></div>
+<div style="display:flex;justify-content:space-between;gap:12px;padding:10px 0;align-items:baseline"><span style="display:flex;flex-direction:column;min-width:0"><span class="t-body-sm">{{ v.capas.l }}</span><span class="t-caption">{{ v.capas.m }}</span></span><span class="t-numeric" style="font-size:14px;white-space:nowrap;color:{{ v.capas.c }}">{{ v.capas.v }}</span></div>
+</div>
+<span class="t-caption">Una sola persona basta para confirmar. No hay segunda firma.</span>
+</sc-if>
+</div>
+</x-import>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;valor&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;imm&quot;,&quot;sis&quot;],&quot;default&quot;:&quot;imm&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;preview&quot;,&quot;rechazar&quot;,&quot;confirmando&quot;,&quot;exito&quot;,&quot;agente&quot;,&quot;errorRegla&quot;],&quot;default&quot;:&quot;preview&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const h = React.createElement;
+    const device = this.props.device ?? "desktop";
+    const isPhone = device === "phone";
+    const st = this.props.state ?? "preview";
+    const which = this.props.valor ?? "imm";
+    const V = {
+      imm: { title: "Confirmar ingreso mínimo", desc: "Ingreso mínimo y topes", tone: "info", estado: "Propuesto, por confirmar", antes: "$ 529.000", despues: "$ 553.553", pct: "+4,64 %", desde: "01-01-2027", exito: "IMM $ 553.553 regirá desde 01-01-2027",
+        rows: [{ label: "Fuente", value: "Dirección del Trabajo" }, { label: "Norma", value: h("a", { href: "#" }, "Ley 21.830, Diario Oficial 22-10-2026") }, { label: "Publicado", value: "23-10-2026 09:12", numeric: true }],
+        motivo: "El IMM no se lee por máquina. OPAI lo propone desde la ley publicada y espera tu confirmación.",
+        pctColor: "var(--ds-fg-muted)", umbral: "bajo el umbral de 5 %", nCot: 4, errorRegla: "«Ya existe un ingreso mínimo programado desde 01-01-2027 ($ 550.000, Tomás Fuentes, 24-10-2026). Las vigencias no pueden solaparse.» Revisa el valor programado en el historial del indicador antes de confirmar.",
+        impacto: [{ l: "Inmobiliaria Apoquindo", m: "COT-0142", v: "+$ 40.900/mes", c: "var(--ds-fg)" }, { l: "Clínica Los Aromos", m: "COT-0151", v: "+$ 61.600/mes", c: "var(--ds-fg)" }, { l: "Colegio San Esteban", m: "COT-0155", v: "+$ 48.900/mes", c: "var(--ds-fg)" }, { l: "Bodegas del Maipo", m: "COT-0158", v: "+$ 34.800/mes", c: "var(--ds-fg)" }], total: "+$ 186.200",
+        capas: { l: "Capas de sueldo bajo el nuevo mínimo", m: "Deberás subir su sueldo base · también sube el tope de gratificación a $ 219.115", v: "2 capas", c: "var(--ds-warning-fg)" } },
+      sis: { title: "Confirmar seguro de invalidez", desc: "Previsión", tone: "danger", estado: "Anómalo, por confirmar", antes: "1,54 %", despues: "1,88 %", pct: "+22,1 %", desde: "01-11-2026", exito: "SIS 1,88 % regirá desde 01-11-2026",
+        rows: [{ label: "Fuente", value: "Superintendencia de Pensiones" }, { label: "Contraste", value: "Circular AFP 2026-11" }, { label: "Capturado", value: "29-10-2026 07:00", numeric: true }],
+        motivo: "Retenido: variación de 22 % respecto del valor vigente, sobre el umbral de 5 %. Se sigue usando 1,54 % hasta que confirmes.",
+        pctColor: "var(--ds-warning-fg)", umbral: "sobre el umbral de 5 %", nCot: 4, errorRegla: "«El valor ya fue rechazado por Ana Rojas el 29-10-2026 10:14.» Actualiza la página para ver el estado actual.",
+        impacto: [{ l: "Inmobiliaria Apoquindo", m: "COT-0142", v: "+$ 21.900/mes", c: "var(--ds-fg)" }, { l: "Clínica Los Aromos", m: "COT-0151", v: "+$ 17.400/mes", c: "var(--ds-fg)" }, { l: "Colegio San Esteban", m: "COT-0155", v: "+$ 15.100/mes", c: "var(--ds-fg)" }, { l: "Bodegas del Maipo", m: "COT-0158", v: "+$ 11.900/mes", c: "var(--ds-fg)" }], total: "+$ 66.300",
+        capas: { l: "Capas de sueldo cuyo costo cambia", m: "Sin efecto en el total: aún no están en una cotización", v: "12 capas", c: "var(--ds-fg)" } },
+    };
+    const v = V[which] || V.imm;
+    const B = (p, t) => NS.Button ? h(NS.Button, p, t) : null;
+    const bl = isPhone ? { block: true } : {};
+    let actions;
+    if (st === "rechazar") actions = h(React.Fragment, null, B({ variant: "secondary", ...bl }, "Volver"), B({ variant: "destructive", ...bl }, "Rechazar"));
+    else if (st === "confirmando") actions = h(React.Fragment, null, B({ variant: "secondary", disabled: true }, "Rechazar"), B({ loading: true, loadingLabel: "Confirmando" }, "Confirmar"));
+    else if (st === "exito") actions = B({ variant: "secondary", ...bl }, "Cerrar");
+    else actions = h(React.Fragment, null, B({ variant: "secondary", ...bl }, "Rechazar"), B({ ...bl }, "Confirmar"));
+    return { appUser: { name: "Tomás Fuentes", initials: "TF", role: "Administrador" },
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "ban", label: "Bandeja", icon: "inbox" }, { id: "per", label: "Personas", icon: "users" }, { id: "cot", label: "Cotizaciones", icon: "file" }, { id: "cfg", label: "Más", icon: "more" }],
+      groups: [{ items: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "ban", label: "Bandeja", icon: "inbox", count: 3 }] }, { title: "Personas", items: [{ id: "per", label: "Personas", icon: "users" }, { id: "car", label: "Cargos y sueldos", icon: "briefcase" }] }, { title: "Configuración", items: [{ id: "cfg", label: "Remuneraciones", icon: "wallet" }] }],
+      device, theme: this.props.theme ?? "light", side: isPhone ? "bottom" : "right", noop: () => {}, v, actions,
+      isAgente: st === "agente", isErrorRegla: st === "errorRegla", isRechazar: st === "rechazar", isExito: st === "exito", notExito: st !== "exito" };
+  }
+}
+</script>
+</body>
+</html>
