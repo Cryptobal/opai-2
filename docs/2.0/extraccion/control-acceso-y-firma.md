@@ -36,7 +36,7 @@ La revisión de 1.0 encontró brechas de seguridad vigentes en producción en el
 2. **Rol mínimo del dispositivo.** El dispositivo de portería solo registra entradas y salidas y abre la lista de evacuación; gestionar listas, importar, vaciar, configurar y exportar exige un usuario con permiso (R3).
 3. **Reglas de lista aplicadas al decidir.** Vigencia, días, horario, tipos y uso único se aplican al decidir la entrada, en el servidor y sin conexión (R6, R8, R21).
 4. **Validar las listas al sincronizar.** Todo registro hecho sin conexión se revalida contra las listas vigentes, **incluida la lista bloqueada**, al sincronizar; la hora oficial es la del servidor y la deduplicación es por tenant y clave de idempotencia (R20–R22).
-6. **Sin datos personales en la caché del navegador**, salvo la copia mínima de listas y la copia cifrada de evacuación (R21, R23, R26).
+6. **Sin datos personales en la caché del navegador**, salvo la cola pendiente cifrada, la copia mínima de listas y la copia cifrada de evacuación (R20, R21, R23, R26).
 10. **Emparejamiento con límite de intentos.** Código temporal de un solo uso, con vencimiento corto y **límite de intentos** (R28).
 
 **Brechas funcionales**

@@ -113,7 +113,7 @@ Instalación (y punto, opcional), visitantes (uno o varios: nombre, documento, e
 - **R20.** **Amplía ADR-044.3**, que limita el modo sin conexión a marcación, rondas y novedades: se propone sumar los accesos (pregunta P13). El dispositivo emparejado registra entradas **y salidas** sin red en una cola local cifrada, cada una con su clave de idempotencia y la hora del dispositivo. Al volver la red se sincronizan por las mismas capacidades; el servidor sella su hora de recepción y el registro queda marcado «diferido». La hora del dispositivo es un dato, nunca la verdad (requisito A.2-4). **Qué guarda la cola:** lo mínimo para enviar cada registro (tipo, documento, nombre, empresa, motivo, anfitrión, patente, horas y punto); va cifrada, cada registro se borra del dispositivo en cuanto el servidor confirma su recepción, y la cola entera se borra a distancia al revocar el dispositivo. Si un registro no se puede enviar en **72 horas**, el dispositivo avisa al supervisor y lo conserva hasta enviarlo o hasta la revocación.
 - **R21.** El dispositivo guarda una **copia mínima de las listas de su instalación**: la huella del documento (no el número en claro), el tipo de lista, la vigencia y el horario. Con eso decide sin red: bloqueado no entra; en «solo autorizados» entra solo quien esté autorizado en la copia. La copia se renueva en cada conexión y, si tiene más de **24 horas** (ajustable), la portería muestra «Listas desactualizadas».
 - **R22.** Al sincronizar, el servidor **vuelve a cruzar todo** con las listas vigentes. Si alguien entró sin red y estaba bloqueado en la lista actual, se genera la alerta `acceso.ingreso_bloqueado_diferido` al supervisor y al tenant.
-- **R23.** La caché del navegador nunca guarda respuestas con datos personales; solo el armazón de la portería, la copia mínima de R21 y la copia de evacuación de R26, ambas cifradas en el dispositivo (extracción A.2-6).
+- **R23.** La caché del navegador nunca guarda respuestas con datos personales; solo el armazón de la portería, la cola pendiente de R20, la copia mínima de R21 y la copia de evacuación de R26, todas cifradas en el dispositivo (extracción A.2-6).
 
 **Operación**
 
@@ -216,7 +216,7 @@ Todas existen también en pantalla y en `/api/v1`, con los mismos permisos, alca
 | Reglas de lista al decidir (A.2-3) | Se aplican en el servidor y sin conexión (R6, R21) | Seguridad |
 | Validación al sincronizar (A.2-4) | Revalida todo, hora del servidor, alerta de ingreso bloqueado diferido (R20–R22) | Seguridad |
 | Salidas sin conexión no se guardan | Entradas y salidas en la cola (R20) | A.2-5 |
-| Caché del navegador (A.2-6) | Solo el armazón, una copia mínima con huellas y la copia cifrada de evacuación (R21, R23, R26) | Ley 21.719 |
+| Caché del navegador (A.2-6) | Solo el armazón, la cola pendiente cifrada, una copia mínima con huellas y la copia cifrada de evacuación (R20, R21, R23, R26) | Ley 21.719 |
 | Prerregistro de varios días mal calculado, sin «no llegó» | Por día, en la zona de la instalación, con QR por día y cierre automático (R14, R15) | A.2-7 |
 | Sin retención, sin aviso, sin derechos | Retención por defecto, aviso en el punto, solicitudes del titular (R16–R19) | Ley 21.719 (rige el 1-dic-2026) |
 | Foto opcional sin almacenamiento real | Apagada por defecto; si se activa, por `core.documentos` con retención corta (R16) | Minimización, ADR-019 |
