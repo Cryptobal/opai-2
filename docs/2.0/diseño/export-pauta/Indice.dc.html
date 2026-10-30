@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<style>body{margin:0;background:var(--ds-bg)}a{color:var(--ds-accent)}a:hover{color:var(--ds-accent)}</style>
+</helmet>
+<div data-theme="light" style="min-height:100vh;background:var(--ds-bg);color:var(--ds-fg);font-family:var(--font-sans);padding:48px 24px">
+  <div style="max-width:1040px;margin:0 auto;display:flex;flex-direction:column;gap:24px">
+    <header style="display:flex;flex-direction:column;gap:6px">
+      <div class="t-overline">OPAI 2.0 · Operaciones · Pauta · v2 · Atlas Seguridad SpA</div>
+      <h1 class="t-title m0">Índice de pantallas</h1>
+      <p class="t-body-sm muted m0" style="text-wrap:pretty">Una sola sección «Pauta» en Operaciones, con pestañas Mensual y Diaria. Cada archivo trae 1280, 1024 y 375 en claro y oscuro, y sus estados vacío, cargando, error y sin permiso. Datos al vie 30-10-2026 · 10:24. Lo que está por confirmar va como variante B separada.</p>
+    </header>
+    <div class="tbl-wrap">
+      <table class="tbl">
+        <thead><tr><th>Pantalla</th><th>Quién la ve</th><th></th></tr></thead>
+        <tbody>
+          <sc-for list="{{ items }}" as="it" hint-placeholder-count="9">
+            <tr>
+              <td style="white-space:normal;padding-top:12px;padding-bottom:12px"><div style="display:flex;flex-direction:column;gap:2px"><a href="{{ it.href }}" class="t-label">{{ it.t }}</a><span class="t-caption" style="text-wrap:pretty">{{ it.d }}</span></div></td>
+              <td class="t-body-sm" style="white-space:normal;max-width:360px">{{ it.r }}</td>
+              <td style="text-align:right"><sc-if value="{{ it.b }}"><span class="badge b-warning nodot">{{ it.b }}</span></sc-if></td>
+            </tr>
+          </sc-for>
+        </tbody>
+      </table>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:4px">
+      <a href="Componentes.dc.html" class="t-label">Hoja de componentes</a>
+      <span class="t-caption">Componentes usados, variantes y estados en claro y oscuro; señala los nuevos para el DS.</span>
+    </div>
+    <div class="t-caption" style="text-wrap:pretty">Roles: owner, admin y gerente ven y editan todo · supervisor solo sus instalaciones (Planta Quilicura y Bodega Lampa), edita y asigna reemplazos · viewer solo lectura · sin permiso ve Forbidden. Fuera de alcance: «Mi pauta» del guardia, contenido de la notificación y del archivo exportado, aprobación de turnos extra, nómina y marcas de Asistencia.</div>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals(){
+    const T=[
+      ['P01 Mensual por instalacion','01 · Pauta · Mensual · por instalación','Grilla puestos × días, feriados, PPC con motivo, excepciones, Exportar.','owner, admin, gerente · supervisor (sus instalaciones) · viewer (solo lectura)',''],
+      ['P02 Hoja Serie del puesto','02 · Hoja «Serie del puesto»','Patrón, inicio de ciclo y titular; no modifica días pasados.','owner, admin, gerente · supervisor · viewer: Forbidden',''],
+      ['P03 Hoja Excepcion de un dia','03 · Hoja «Excepción de un día»','Ausencia, licencia, vacaciones o permiso, con motivo.','owner, admin, gerente · supervisor · viewer: Forbidden',''],
+      ['P04 Historial de cambios','04 · Historial de cambios','Timeline: quién, cuándo y qué.','Todos con acceso a la pauta, incluido viewer',''],
+      ['P05 Mensual todas las instalaciones','05 · Pauta · Mensual · todas las instalaciones','Cobertura % y PPC del mes por instalación.','owner, admin, gerente · supervisor (las suyas) · viewer',''],
+      ['P06 Cobertura puestos sin cubrir','06 · Cobertura: puestos sin cubrir','Filtro «Solo sin cubrir» con acceso a cubrir.','Todos ven · cubren owner, admin, gerente y supervisor','Incluye variante B'],
+      ['P07 Diaria','07 · Pauta · Diaria','Hoy por instalación; Confirmar cobertura o cruce con Asistencia.','ERP (owner, admin, gerente) · Portal Supervisor · viewer',''],
+      ['P08 Hoja Asignar reemplazo','08 · Hoja «Asignar reemplazo»','Sugerencias con motivo, alertas legales, bloqueo si dobla.','owner, admin, gerente · supervisor · viewer: Forbidden','Incluye variante B'],
+      ['P09 Alertas','09 · Alertas en Mensual y Diaria','Vacaciones, licencias, permisos y horas legales.','Todos los que ven la pauta','Incluye variante B'],
+      ['P10 Hoja Agregar refuerzo','10 · Hoja «Agregar refuerzo»','Turno fuera de la serie: instalación, función, fecha, horario, cantidad, quién lo cubre y motivo; vínculo a la Solicitud del cliente.','owner, admin, gerente · supervisor · viewer: Forbidden','Nueva']];
+    T[0][2]='Grilla puestos × días, menú contextual (clic derecho o pulsación larga), varios días, refuerzos, Pintar serie, Exportar.';T[0][4]='Actualizada';
+    T[6][2]='Marca Face ID o manual, «No llegó» → Asignar reemplazo, refuerzos, Confirmar cobertura sin Asistencia.';T[6][4]='Actualizada';
+    T[7][2]='Sugerencias con motivo, confirmar en un toque, alertas legales, bloqueo si dobla.';T[7][4]='Actualizada · variante B';
+    return{items:T.map(([f,t,d,r,b])=>({href:encodeURI(f+'.dc.html'),t,d,r,b}))};
+  }
+}
+</script>
+</body>
+</html>

@@ -199,6 +199,13 @@ export interface Capacidad<I extends z.ZodType = z.ZodType, O extends z.ZodType 
   autorizarRepeticion?: (ctx: Contexto, input: z.output<I>, salida: unknown) => Promise<void>;
   /** Nunca la ejecuta una API key (aprobaciones, autonomía y presupuesto de agentes). */
   soloPersonas?: boolean;
+  /**
+   * Aprobación humana condicionada al input (firma.md R19): cuando se declara, reemplaza al efecto
+   * como disparador de la aprobación de un agente. Si devuelve `true`, esta llamada queda en la cola
+   * de aprobación igual que una irreversible; si `false`, el agente la ejecuta directo (salvo que su
+   * autonomía sea "aprobacion", que siempre la exige). Solo afecta a agentes; a las personas nunca.
+   */
+  exigeAprobacion?: (input: z.output<I>) => boolean;
   /** Portales donde está disponible (ADR-033). Por defecto ["erp"] (plataforma: ["platform"]). */
   portales?: readonly string[];
   /**
