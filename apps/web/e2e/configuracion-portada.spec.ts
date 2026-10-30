@@ -108,7 +108,14 @@ test.describe("configuración: portada por tarjetas de grupo", () => {
     const pref = page.getByRole("menuitem", { name: "Preferencias" });
     await abrirMenuUsuario(page, pref);
     await pref.click();
-    await page.waitForURL(/\/configuracion\/preferencias$/);
+    await page.waitForURL(/\/mi-cuenta\/preferencias$/);
+    await expect(page.getByRole("region", { name: "Preferencias" })).toBeVisible();
+  });
+
+  test("la URL antigua de Preferencias redirige a /mi-cuenta/preferencias", async ({ page }) => {
+    await entrar(page);
+    await page.goto("/configuracion/preferencias");
+    await expect(page).toHaveURL(/\/mi-cuenta\/preferencias$/);
     await expect(page.getByRole("region", { name: "Preferencias" })).toBeVisible();
   });
 });

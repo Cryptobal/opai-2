@@ -13,7 +13,7 @@ export function destinoAjuste(a: AjusteRef): string {
     a.clave.startsWith("preferencias") ||
     a.clave.startsWith("usuario")
   )
-    return "/configuracion/preferencias";
+    return "/mi-cuenta/preferencias";
   if (a.clave.startsWith("comunicaciones")) return "/configuracion/comunicaciones";
   return "/configuracion/empresa";
 }

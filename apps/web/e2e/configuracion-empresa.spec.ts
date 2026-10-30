@@ -1,13 +1,13 @@
 import { expect, test } from "@playwright/test";
 import { E2E_PASSWORD as password, entrar } from "./sesion";
 
-// Configuración (Brief 02, sesión C, bloque 12): Empresa, Marca, Preferencias, Documentos y
-// Módulos a 375, 1024 y 1280, con capturas en e2e/__screenshots__/.
+// Configuración (Brief 02, sesión C, bloque 12): Empresa, Marca, Documentos y Módulos a 375, 1024 y
+// 1280, con capturas en e2e/__screenshots__/. Preferencias es ahora una página propia de la cuenta
+// (`/mi-cuenta/preferencias`, decisión de Carlos del 30-oct-2026 09:33 CLT): sus pruebas van abajo.
 
 const SECCIONES = [
   ["empresa", "Datos de la empresa"],
   ["marca", "Marca"],
-  ["preferencias", "Preferencias"],
   ["documentos", "Documentos"],
   ["modulos", "Catálogo de módulos"],
 ] as const;
@@ -31,12 +31,12 @@ test.describe("configuración: empresa y plataforma del tenant", () => {
   test("preferencias: el tema se guarda y se aplica", async ({ page }, info) => {
     test.skip(info.project.name !== "ipad", "La escritura se prueba una vez (iPad)");
     await entrar(page);
-    await page.goto("/configuracion/preferencias");
+    await page.goto("/mi-cuenta/preferencias");
     const guardado = () =>
       page.waitForResponse(
         (r) =>
           r.request().method() === "POST" &&
-          r.url().includes("/configuracion/preferencias") &&
+          r.url().includes("/mi-cuenta/preferencias") &&
           (r.request().postData() ?? "").includes("core.config.set"),
       );
     // La base local persiste entre corridas: cambiar un radio ya elegido no guarda nada.
@@ -75,12 +75,12 @@ test.describe("configuración: empresa y plataforma del tenant", () => {
   }, info) => {
     test.skip(info.project.name !== "ipad", "La escritura se prueba una vez (iPad)");
     await entrar(page);
-    await page.goto("/configuracion/preferencias");
+    await page.goto("/mi-cuenta/preferencias");
     const guardado = () =>
       page.waitForResponse(
         (r) =>
           r.request().method() === "POST" &&
-          r.url().includes("/configuracion/preferencias") &&
+          r.url().includes("/mi-cuenta/preferencias") &&
           (r.request().postData() ?? "").includes("core.config.set"),
       );
     // Parte de Sistema confirmado por el servidor (la base local persiste entre corridas).
@@ -91,7 +91,7 @@ test.describe("configuración: empresa y plataforma del tenant", () => {
     }
     await expect(page.getByRole("radio", { name: /Sistema/ })).toBeChecked();
     // Desde aquí el guardado del tema falla: debe revertir a Sistema y decir a qué se volvió.
-    await page.route("**/configuracion/preferencias", async (ruta) => {
+    await page.route("**/mi-cuenta/preferencias", async (ruta) => {
       const cuerpo = ruta.request().postData() ?? "";
       if (
         ruta.request().method() === "POST" &&

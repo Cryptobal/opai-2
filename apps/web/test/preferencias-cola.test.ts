@@ -26,7 +26,7 @@ vi.mock("@opai/ds", () => ({ avisar: { exito: h.exito, error: vi.fn(), info: vi.
 vi.mock("@/app/_components/use-capacidad", () => ({
   useCapacidad: () => ({ ejecutar: h.ejecutar, pendiente: false, error: null }),
 }));
-import { type Valores, usePreferencias } from "@/app/(erp)/configuracion/preferencias/use-preferencias";
+import { type Valores, usePreferencias } from "@/app/(erp)/mi-cuenta/preferencias/use-preferencias";
 
 const INICIAL: Valores = { tema: "sistema", silencio: false, resumen: "nunca" };
 const Prueba = (inicial: Valores) => usePreferencias(inicial);

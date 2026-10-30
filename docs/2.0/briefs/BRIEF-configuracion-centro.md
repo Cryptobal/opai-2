@@ -37,18 +37,18 @@ Todas las entradas ya existen y **se reusan tal cual** (su contenido no cambia e
 | Documentos | `/configuracion/documentos` | `documentosManage` | Plataforma → **Operación** |
 | Usuarios y permisos | `/configuracion/usuarios` (+ pestaña Roles `/usuarios/roles`) | `usersRead` | Acceso → **Personas y acceso** |
 | Agentes y API keys | `/configuracion/agentes` (+ `/[id]`, `/conectar`; `/api-keys`) | `apikeysManage` | Acceso → **Agentes** |
-| Aprobaciones pendientes | `/configuracion/aprobaciones` | `aprobacionesManage` | Acceso → **Agentes** |
+| Aprobaciones pendientes | `/configuracion/aprobaciones` | `aprobacionesManage` | Acceso → **Agentes** (fila con `Badge` del número de pendientes, oculto si hay 0; decisión de Carlos, 30-oct-2026 09:33 CLT, chat con OPAI 2.0, §6 bis) |
 | Módulos (catálogo) | `/configuracion/modulos` | `tenantRead` | Plataforma → **Módulos** |
 | Un módulo activo con ajustes | `/configuracion/modulo/[id]` (Comercial: Embudo, Catálogos, Ajustes; Rondas: Tipos de incidente, #141) | `configRead` + permiso de cada pestaña | Módulos activos → **Módulos** |
 | Integraciones | `/configuracion/integraciones` (+ `/[proveedor]`) | `integracionesManage` | Plataforma → **Uso y registros** |
 | Consumos | `/configuracion/consumos` | `consumosRead` | Plataforma → **Uso y registros** |
 | Auditoría | `/configuracion/auditoria` | `auditRead` | Plataforma → **Uso y registros** |
-| Preferencias (las mías) | `/configuracion/preferencias` | ninguno | Empresa → **sale de Configuración** (menú de usuario) |
+| Preferencias (las mías) | `/mi-cuenta/preferencias` (nueva; `/configuracion/preferencias` redirige de forma permanente, decisión de Carlos, 30-oct-2026 09:33 CLT, chat con OPAI 2.0, §6 bis) | ninguno | Empresa → **sale de Configuración** (menú de usuario) |
 
 Piezas del marco que hoy existen y que este PR cambia o reemplaza:
 - `apps/web/app/(erp)/configuracion/_centro/seccion-tipo.ts` (tipo `Seccion`, `grupo` con 5 valores), `secciones.ts`, `secciones-plataforma.ts`, `seccion-modulo.ts`, `datos.ts` (`cargarIndice`), `indice-config.tsx`, `filtro-indice.tsx`, `pagina-config.tsx` (SplitScreen con el índice completo a la izquierda) y `configuracion/page.tsx` (portada con «Elige un ajuste» y la `Alerta` de aprobaciones).
 - `secciones-modulos.ts` (pestañas por módulo, ADR-018) **se conserva** como único lugar donde un módulo registra su configuración.
-- Menú de usuario: `apps/web/app/_components/menu-cuenta-shell.ts` **ya** tiene «Preferencias» (→ `/configuracion/preferencias`) junto a «Mi cuenta». Se conserva.
+- Menú de usuario: `apps/web/app/_components/menu-cuenta-shell.ts` **ya** tiene «Preferencias» junto a «Mi cuenta»; el ajuste de §6 bis cambia su destino a `/mi-cuenta/preferencias`.
 - Búsqueda: `core.config.buscar` (`packages/capabilities/src/core/config/capacidades.ts`, `sinDb`, permiso `null`) busca **campos de ajuste** del catálogo; la paleta global ⌘K (`_components/paleta.tsx`) ya la usa. No se crea otra capacidad de búsqueda.
 - Permisos por defecto (`packages/domain/src/permisos*.ts`, tests en `permisos.test.ts` y `permisos-nucleo.test.ts`): supervisor y viewer ya tienen `false` en `apikeys.manage`, `integraciones.manage`, `consumos.read` y `aprobaciones.manage`. **No hay que cambiar permisos ni hacer migración** para cumplir la regla; el test de §9 lo fija.
 - e2e que tocan Configuración: `configuracion-empresa.spec.ts`, `configuracion-acceso.spec.ts`, `configuracion-calendario.spec.ts`, `configuracion-plataforma.spec.ts`, `config-patrones-funciones-car8.spec.ts`, `navegacion-preferencias.spec.ts`, `preferencias-tema-rafaga.spec.ts`, `rondas-config.spec.ts` y los helpers `menu-lateral.ts` y `menu-usuario.ts`. Las capturas de `e2e/__screenshots__/` son `page.screenshot` (no comparaciones), así que cambian sin romper.
@@ -60,7 +60,7 @@ Piezas del marco que hoy existen y que este PR cambia o reemplaza:
 2. **Portada `/configuracion`** (§4.1): título, buscador de ajustes ancho completo, `Alerta` de aprobaciones si hay pendientes, grilla de tarjetas de grupo **sin contadores**.
 3. **Subpágina de grupo** (§4.2): migas «Configuración › <Grupo>», lista de las entradas visibles del grupo (máx. 7) y la entrada a la derecha en iPad/escritorio; en teléfono, lista → entrada con «atrás». `PaginaConfig` muestra a la izquierda **solo las entradas del grupo de la entrada abierta** (no el índice completo).
 4. **Grupo Módulos** (§4.3): «Catálogo de módulos» primero y después cada módulo activo o en trial con ajustes; con más de 7, la lista completa propia (con buscador), sin dividir. Al abrir un módulo, sus pestañas de `secciones-modulos.ts` como hoy.
-5. **Preferencias fuera de Configuración:** la página `/configuracion/preferencias` **conserva su URL** (no rompe enlaces, menú de usuario ni e2e) pero se muestra como página propia de la cuenta, **sin** el índice/lista de Configuración ni migas de Configuración; «atrás» en teléfono vuelve a la página anterior (o a Inicio). Solo se llega desde el menú de usuario (y desde Mi cuenta si hoy enlaza). No aparece en la portada, en ningún grupo ni en los resultados del buscador de Configuración.
+5. **Preferencias fuera de Configuración, con URL propia** (decisión de Carlos, 30-oct-2026 09:33 CLT, chat con OPAI 2.0, §6 bis: cambia el punto 5 original, que conservaba la URL antigua). La página pasa a `/mi-cuenta/preferencias`: una página propia de la cuenta, **sin** el índice/lista de Configuración ni migas de Configuración; «atrás» en teléfono vuelve a la página anterior (o a Inicio). `/configuracion/preferencias` queda como **redirect permanente en el servidor** hacia la nueva URL, para no romper enlaces existentes. Solo se llega desde el menú de usuario (y desde Mi cuenta si hoy enlaza, lo que hoy no hace). No aparece en la portada, en ningún grupo ni en los resultados del buscador de Configuración.
 6. **Estados** (§5) en los tres anchos, claro y oscuro.
 7. **Test de la regla** (§9.1) y búsqueda de cada entrada por su título.
 8. **Docs:** este brief, `REGLA-configuracion.md`, el Design Prompt; `NAVEGACION.md` (fila «Configuración» de la tabla de áreas: los 6 grupos y el enlace a la regla), `ESTADO.md` (una línea: Configuración 2.0 · PR 1 en construcción) y, si corresponde, `modulos/` o `01-decisiones.md` solo para enlazar la regla (sin inventar ADR nuevo).
@@ -101,6 +101,7 @@ Cada una a **1280 (escritorio), 1024 (iPad, barra lateral completa, D9) y 375 (t
 - Migas «Configuración › <Grupo>» (iPad/escritorio) sobre el título de la entrada. La barra lateral del ERP sigue marcando «Configuración».
 - Las subpantallas internas (solicitudes, incidentes, retención, roles, detalle de agente, conectar, proveedor, evento, `api-keys`) siguen siendo **pestañas o rutas hijas de su entrada** y resaltan su entrada en la lista; no son entradas (REGLA §1.4).
 - `PaginaConfig` se adapta para resolver el grupo desde la sección (`seccion` → grupo) y pintar solo ese grupo. Las páginas de cada entrada no cambian su contenido.
+- La fila «Aprobaciones pendientes» de la lista del grupo Agentes lleva un `Badge` con el número de pendientes (oculto si hay 0; §6 bis punto 1).
 
 ### 4.3 Grupo Módulos
 - Primera entrada «Catálogo de módulos» (`/configuracion/modulos`, la página existente: contratados, en trial y disponibles).
@@ -109,7 +110,7 @@ Cada una a **1280 (escritorio), 1024 (iPad, barra lateral completa, D9) y 375 (t
 - Al abrir un módulo: sus pestañas de `secciones-modulos.ts` (Comercial: Embudo · Catálogos · Ajustes; Rondas: Tipos de incidente · Ajustes), como hoy.
 
 ### 4.4 Menú de usuario
-- Se conserva el menú actual (`menu-cuenta-shell.ts`): «Preferencias» en el grupo «Cuenta» junto a «Mi cuenta». Verificar que el menú siga mostrando Preferencias en el ERP en los tres anchos y que no aparezca en Cliente ni Plataforma (e2e `portal-inicio.spec.ts` ya lo cubre: no romperlo).
+- Se conserva el menú actual (`menu-cuenta-shell.ts`): «Preferencias» en el grupo «Cuenta» junto a «Mi cuenta», ahora apuntando a `/mi-cuenta/preferencias` (§6 bis punto 2). Verificar que el menú siga mostrando Preferencias en el ERP en los tres anchos y que no aparezca en Cliente ni Plataforma (e2e `portal-inicio.spec.ts` ya lo cubre: no romperlo).
 
 ## 5. Estados (los tres anchos, claro y oscuro; ajuste 3a y 3b)
 - **Carga:** esqueleto de la grilla de tarjetas (portada) y de la lista del grupo (subpágina), con el shell (`PaginaPortal` `cargando`).
@@ -125,6 +126,12 @@ Cada una a **1280 (escritorio), 1024 (iPad, barra lateral completa, D9) y 375 (t
 1. Sin contadores en las tarjetas de grupo de la portada (ni «4 ajustes», «3 ajustes», «1 ajuste» ni otro número). Cada tarjeta: nombre, descripción y entradas.
 2. Barra lateral del mockup: «Pauta mensual» → «Pauta» (una sola sección con pestañas Mensual y Diaria). **No aplica al PR 1** (ver Fuera).
 3. a) Modo oscuro en todas las pantallas (portada, subpáginas, grupo Módulos, menú de usuario, estados). b) Estados también a 1024. c) Supervisor y Visualizador **no** ven Agentes (Agentes y API keys, Aprobaciones), Integraciones ni Consumos.
+
+## 6 bis. Addendum del PR 1 (decisiones de Carlos, 30-oct-2026 09:33 CLT, respuesta al widget «Configuración PR 1», chat con OPAI 2.0)
+
+1. **Badge de Aprobaciones pendientes en su fila.** La fila «Aprobaciones pendientes» dentro del grupo Agentes (lista del grupo, tanto en `/configuracion/grupo/agentes` como en `PaginaConfig`) muestra el número de pendientes con un `Badge` del DS 2.0, oculto si hay 0. Sale del mismo `aprobacionesPendientes` que ya trae `cargarIndice` para el aviso de la portada: **sin lecturas nuevas a la base**. Las tarjetas de la portada siguen **sin** contadores (ajuste 1 de §6, sin cambios). Nota de implementación: `ListaGrupo` (`_centro/lista-grupo.tsx`) ya traía este Badge desde el bloque B/C de este mismo PR; el addendum confirma la decisión y la deja escrita.
+2. **Preferencias con URL propia.** `/mi-cuenta/preferencias` reemplaza a `/configuracion/preferencias` como URL canónica (detalle en §3.5); `/configuracion/preferencias` queda como redirect permanente en el servidor. Se actualizan `menu-cuenta-shell.ts`, Mi cuenta (sin cambio: hoy no enlaza a Preferencias), `lib/ajuste-destino.ts` (los campos de ajuste de «Preferencias» que busca `core.config.buscar` apuntan a la nueva URL), `NAVEGACION.md` y los e2e que navegaban a la URL antigua (`navegacion-preferencias.spec.ts`, `preferencias-tema-rafaga.spec.ts`, `configuracion-portada.spec.ts`, `configuracion-empresa.spec.ts`, `navegacion-etiquetas.spec.ts`, `navegacion-areas.spec.ts`), con un caso nuevo de e2e para el redirect. El registro de existencia de slugs (`/api/existe`, `existencia-ruta.ts`) no tenía entradas para `preferencias` (es una ruta estática, sin `[id]`): no necesitó cambios. **Presupuesto de JS (ADR-037):** el wildcard `/(erp)/configuracion*` (176 KB) ya no cubre la página al vivir en `/mi-cuenta`; se agrega `"/(erp)/mi-cuenta/preferencias": 176` a `apps/web/presupuesto-js.json` con el mismo tope que ya tenía (174,7 KB reales, sin JS nuevo: es la misma página, solo cambia de ruta).
+3. **Los grupos quedan en `/configuracion/grupo/<id>`, sin cambio** (confirma la decisión técnica de §4.2; no se tocó ninguna ruta de grupo).
 
 ## 7. Permisos por rol (roles por defecto; los efectivos con rol personalizado y excepciones mandan, ADR-022)
 Regla: una entrada aparece solo si el usuario tiene su permiso efectivo; una tarjeta aparece si el usuario ve al menos una entrada (REGLA §3.7). Nada de `platform:*` en `/configuracion`.
@@ -179,17 +186,17 @@ Un test (p. ej. `apps/web/test/configuracion-regla.test.ts`) que falle si:
 - **CA-3** Cada entrada de §2 está en su grupo nuevo, se abre desde su tarjeta y resalta su entrada en la lista del grupo, con migas «Configuración › <Grupo>».
 - **CA-4** Ningún grupo distinto de Módulos pasa de 7 entradas; Módulos con > 7 muestra su lista completa con buscador.
 - **CA-5** Buscar «feriados» encuentra Operación › Calendario; buscar «logo» encuentra Empresa › Marca; buscar un campo de ajuste de un módulo lleva a su pestaña Ajustes; sin resultados muestra el vacío de §5.
-- **CA-6** Preferencias no aparece en Configuración (portada, grupos, buscador) y sigue accesible desde el menú de usuario en el ERP, con su URL actual, guardando el tema como hoy.
-- **CA-7** Aviso de aprobaciones visible solo con pendientes y solo para quien ve Aprobaciones.
+- **CA-6** Preferencias no aparece en Configuración (portada, grupos, buscador) y sigue accesible desde el menú de usuario en el ERP, ahora en su propia URL `/mi-cuenta/preferencias` (decisión de Carlos, 30-oct-2026 09:33 CLT, §6 bis punto 2); `/configuracion/preferencias` redirige de forma permanente sin romper enlaces, guardando el tema como hoy.
+- **CA-7** Aviso de aprobaciones visible solo con pendientes y solo para quien ve Aprobaciones; la fila «Aprobaciones pendientes» del grupo Agentes (lista del grupo y `PaginaConfig`) muestra el mismo número en un `Badge` del DS 2.0, oculto si hay 0 (decisión de Carlos, 30-oct-2026 09:33 CLT, §6 bis punto 1); las tarjetas de la portada siguen sin contadores.
 - **CA-8** Estados de §5 en los tres anchos y en oscuro; 404 con shell para un grupo inexistente.
 - **CA-9** Ningún cambio de permisos, capacidades, base de datos ni migraciones; sin `platform:*` en `/configuracion`.
 - **CA-10** Accesibilidad: tarjetas y filas ≥ 44 px, foco visible, `aria-current` en la entrada activa, migas con `nav aria-label`, nombres accesibles de los enlaces de tarjeta.
 
 ### 9.3 Gate y e2e
 - Gate local: `pnpm typecheck && pnpm lint && pnpm test && pnpm test:db` y build/presupuesto de la web.
-- **e2e nuevo** `apps/web/e2e/configuracion-portada.spec.ts` en los proyectos **desktop (1280), ipad (1024) y telefono (375)**: portada con 6 tarjetas para owner y sin contadores; navegación tarjeta → entrada (desktop/ipad) y tarjeta → lista del grupo → entrada → atrás (telefono); buscador («feriados», vacío); 404 de grupo; Preferencias desde el menú de usuario y no en la portada; oscuro (al menos la portada y un grupo, con `colorScheme: "dark"` o el tema del usuario). Capturas `page.screenshot` en `e2e/__screenshots__/configuracion-portada-*` y en `docs/2.0/qa/brief_configuracion-pr1-portada/` (REGLA §5).
+- **e2e nuevo** `apps/web/e2e/configuracion-portada.spec.ts` en los proyectos **desktop (1280), ipad (1024) y telefono (375)**: portada con 6 tarjetas para owner y sin contadores; navegación tarjeta → entrada (desktop/ipad) y tarjeta → lista del grupo → entrada → atrás (telefono); buscador («feriados», vacío); 404 de grupo; Preferencias desde el menú de usuario (a `/mi-cuenta/preferencias`) y no en la portada; **la URL antigua `/configuracion/preferencias` redirige a `/mi-cuenta/preferencias`** (caso nuevo, §6 bis punto 2); oscuro (al menos la portada y un grupo, con `colorScheme: "dark"` o el tema del usuario). Capturas `page.screenshot` en `e2e/__screenshots__/configuracion-portada-*` y en `docs/2.0/qa/brief_configuracion-pr1-portada/` (REGLA §5).
 - e2e de permisos: con un usuario supervisor o viewer del seed, si el seed e2e lo tiene; si no lo tiene, cubrirlo con el test unitario de §9.1 y decirlo en el PR (no crear usuarios ni tocar el seed sin necesidad).
-- Actualizar los e2e existentes que dependan del índice antiguo (textos «Elige un ajuste», grupos «Plataforma», «Acceso», «Módulos activos», la fila Preferencias en el índice) sin debilitar lo que verifican.
+- Actualizar los e2e existentes que dependan del índice antiguo (textos «Elige un ajuste», grupos «Plataforma», «Acceso», «Módulos activos», la fila Preferencias en el índice) sin debilitar lo que verifican. Los que navegaban a `/configuracion/preferencias` (`navegacion-preferencias.spec.ts`, `preferencias-tema-rafaga.spec.ts`, `configuracion-empresa.spec.ts`, `navegacion-etiquetas.spec.ts`, `navegacion-areas.spec.ts`) pasan a `/mi-cuenta/preferencias` (§6 bis punto 2).
 - **No correr e2e en local** (ver encargo): los corre el CI.
 
 ## 10. Riesgos
@@ -200,3 +207,4 @@ Un test (p. ej. `apps/web/test/configuracion-regla.test.ts`) que falle si:
 
 ## Historial
 - 30-oct-2026: brief escrito por el bot OPAI 2.0 a partir de la regla (00:53/00:55 CLT), el Design Prompt y el mockup aprobado (08:18 CLT). PR 1 en construcción en `brief/configuracion-pr1-portada`.
+- 30-oct-2026 09:33 CLT: addendum de Carlos (respuesta al widget «Configuración PR 1», chat con OPAI 2.0, §6 bis). Tres decisiones sobre la misma rama: (1) la fila «Aprobaciones pendientes» del grupo Agentes muestra el número de pendientes en un `Badge` del DS 2.0, oculto si hay 0, sin lecturas nuevas; las tarjetas de la portada siguen sin contadores; (2) Preferencias pasa a `/mi-cuenta/preferencias` como página propia de la cuenta; `/configuracion/preferencias` queda como redirect permanente en el servidor; (3) los grupos quedan en `/configuracion/grupo/<id>`, sin cambio.
