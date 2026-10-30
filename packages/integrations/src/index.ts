@@ -3,6 +3,7 @@
 export * from "./almacenamiento/r2";
 export * from "./catalogo";
 export * from "./email";
+export * from "./firma";
 export * from "./geo/google";
 export * from "./ia/proveedores";
 export * from "./secretos/cifrado";

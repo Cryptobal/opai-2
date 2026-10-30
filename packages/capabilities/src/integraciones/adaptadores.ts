@@ -7,6 +7,7 @@ import { credencialDe, integracionDe } from "./resolver";
 export { consumoBase } from "./consumo-base";
 export { geoDe } from "./geo";
 export { iaDe } from "./ia";
+export { selloDe } from "./sello";
 
 /** Correo del tenant: Resend propio o de plataforma; en desarrollo, consola. Mide cada envío. */
 export async function correoDe(
