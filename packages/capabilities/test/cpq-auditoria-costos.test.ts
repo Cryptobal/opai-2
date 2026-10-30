@@ -1,55 +1,106 @@
-// Brief 10 · CPQ PR 10.1 (Revisor, bloqueo 1): la auditoría no es una vía lateral para ver costos
-// (R59). Quien lee el historial con `core:audit.read` pero sin `cpq:costos.ver` ve los campos de costo
-// del input de `cpq.*` redactados, también dentro del lote de `cpq.cotizaciones.ajustar`.
+// Bloqueo del Revisor en el PR 10.1 (R59): la auditoría de `cpq.*` guarda el input completo, así que
+// el historial (panel de actividad, `core.audit.list` y su herramienta MCP) redacta los campos de
+// costo y margen de la lista central a quien no tiene `cpq:costos.ver`, como el Inspector DT.
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { executeCapability } from "../src";
-import { CARGO, N1, ctxCpq, puesto, registrarCpq, semillaCpq } from "./cpq-ayuda";
+import { CAMPOS_COSTO_CPQ, executeCapability } from "../src";
+import { ejecutarHerramienta, herramientasMcp } from "../src/mcp";
+import { USUARIO_DE_PRUEBA } from "../src/testing";
+import { CARGO, N1, ctxCpq, registrarCpq } from "./cpq-ayuda";
 
 beforeEach(registrarCpq);
 
-/** El owner crea con margen y agrega una línea con sueldo; devuelve la semilla con la auditoría. */
-async function historial() {
-  const { ctx, tabla } = ctxCpq();
-  const c = await executeCapability(ctx, "cpq.cotizaciones.create", {
+// Valores reconocibles en el JSON: si alguno aparece, el costo se filtró.
+const VALORES = ["654321", "1234567", "111111", "222222", "Motivo secreto de dotación"];
+const agente = { tipo: "agent" as const, id: "k1", viaUserId: USUARIO_DE_PRUEBA.id };
+
+/** El owner crea y ajusta una cotización con todos los campos de costo; deja su auditoría real. */
+async function auditada() {
+  const p = ctxCpq();
+  const c = await executeCapability(p.ctx, "cpq.cotizaciones.create", {
     negocioId: N1,
-    margenObjetivo: 150_000,
+    modoMargen: "markup",
+    margenObjetivo: 111_111,
   });
-  const d = c.ok ? (c.data as { id: string; secciones: { id: string }[] }) : null;
-  if (!d) throw new Error("no se creó");
-  const a = await executeCapability(ctx, "cpq.cotizaciones.ajustar", {
+  if (!c.ok) throw new Error(JSON.stringify(c.error));
+  const d = c.data as { id: string; secciones: { id: string }[] };
+  const a = await executeCapability(p.ctx, "cpq.cotizaciones.ajustar", {
     id: d.id,
-    operaciones: [puesto(d.secciones[0]?.id ?? "", { cargoId: CARGO, sueldoBruto: 650_000 })],
+    operaciones: [
+      { op: "fijar_margen", margenObjetivo: 222_222 },
+      {
+        op: "agregar_linea",
+        seccionId: d.secciones[0]?.id,
+        tipo: "puesto",
+        nombre: "Guardia",
+        cargoId: CARGO,
+        sueldoBruto: 654_321,
+        costoUnitario: 1_234_567,
+        margenPropio: 111_111,
+        personasPorPosicion: 200,
+        motivoPersonas: "Motivo secreto de dotación",
+      },
+    ],
   });
-  expect(a.ok).toBe(true);
-  return { ...semillaCpq(), auditEvent: tabla("auditEvent") };
+  if (!a.ok) throw new Error(JSON.stringify(a.error));
+  return p.ctx;
 }
 
-const inputs = async (permisos: readonly string[]) => {
-  const { ctx } = ctxCpq({ semilla: await historial(), permisos });
-  const r = await executeCapability(ctx, "core.audit.list", { limite: 50 });
-  if (!r.ok) throw new Error(JSON.stringify(r.error));
-  const eventos = (r.data as { eventos: { capability: string; payload: { input?: unknown } }[] })
-    .eventos;
-  const cpq = eventos.filter((e) => e.capability.startsWith("cpq.cotizaciones."));
-  expect(cpq.map((e) => e.capability).sort()).toEqual([
-    "cpq.cotizaciones.ajustar",
-    "cpq.cotizaciones.create",
-  ]);
-  return JSON.stringify(cpq.map((e) => e.payload.input));
-};
+type Ctx = Awaited<ReturnType<typeof auditada>>;
+const inspector = (ctx: Ctx): Ctx => ({
+  ...ctx,
+  autorizar: (p: string) => p === "core:audit.read",
+});
+const conCostos = (ctx: Ctx): Ctx => ({
+  ...ctx,
+  autorizar: (p: string) => p === "core:audit.read" || p === "cpq:costos.ver",
+});
 
-describe("core.audit.list y los costos de CPQ (R59)", () => {
-  it("sin cpq:costos.ver, el margen y el sueldo del input auditado salen redactados", async () => {
-    const texto = await inputs(["core:audit.read"]);
-    expect(texto).not.toContain("150000");
-    expect(texto).not.toContain("650000");
-    expect(texto).toContain("••••");
+async function lecturas(ctx: Ctx) {
+  const panel = await executeCapability(ctx, "core.actividad.list", {});
+  const consultas = await executeCapability(ctx, "core.audit.list", {});
+  const ctxAgente = { ...ctx, actor: agente, scopes: ["*"] };
+  const h = herramientasMcp(ctxAgente).find((x) => x.nombre === "core_audit_list");
+  if (!h) throw new Error("falta la herramienta core_audit_list");
+  const mcp = await ejecutarHerramienta(ctxAgente, h, {});
+  return { panel, consultas, mcp };
+}
+
+describe("R59: la auditoría de CPQ no revela costos sin cpq:costos.ver", () => {
+  it("el Inspector DT (core:audit.read sin cpq:costos.ver) los ve redactados en panel, consultas y MCP", async () => {
+    const ctx = await auditada();
+    for (const [via, r] of Object.entries(await lecturas(inspector(ctx)))) {
+      expect(r.ok, via).toBe(true);
+      const json = JSON.stringify(r.ok && r.data);
+      expect(json, via).toContain("cpq.cotizaciones.ajustar");
+      expect(json, via).toContain("••••");
+      for (const v of VALORES) expect(json, `${via}: ${v}`).not.toContain(v);
+      expect(json, via).not.toContain('"markup"');
+    }
   });
 
-  it("con cpq:costos.ver se ven (control)", async () => {
-    const texto = await inputs(["core:audit.read", "cpq:costos.ver"]);
-    expect(texto).toContain("150000");
-    expect(texto).toContain("650000");
+  it("quien tiene cpq:costos.ver sí los ve en panel, consultas y MCP", async () => {
+    const ctx = await auditada();
+    for (const [via, r] of Object.entries(await lecturas(conCostos(ctx)))) {
+      expect(r.ok, via).toBe(true);
+      const json = JSON.stringify(r.ok && r.data);
+      for (const v of VALORES) expect(json, `${via}: ${v}`).toContain(v);
+      expect(json, via).toContain('"markup"');
+    }
+  });
+
+  it("la lista central cubre los campos que las vistas omiten sin el permiso", () => {
+    expect([...CAMPOS_COSTO_CPQ].sort()).toEqual(
+      [
+        "costoMensual",
+        "costoUnitario",
+        "margenEfectivo",
+        "margenObjetivo",
+        "margenPropio",
+        "modoMargen",
+        "motivoPersonas",
+        "sueldoBruto",
+      ].sort(),
+    );
   });
 });

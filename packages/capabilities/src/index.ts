@@ -2,6 +2,7 @@ export { capacidadesDelNucleo, consumidoresDelNucleo, trabajosDelNucleo } from "
 export { ajustesComercial, capacidadesComercial } from "./comercial";
 export { ajustesRondas, capacidadesRondas } from "./rondas";
 export { capacidadesCpq } from "./cpq";
+export { CAMPOS_COSTO_CPQ } from "./cpq/campos-costo";
 export { ajuste, defineAjustes, type CampoAjuste, type MetaAjuste } from "./core/config";
 export {
   cifradoDeCampos,

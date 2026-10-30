@@ -3,13 +3,14 @@ import { z } from "zod";
 import { ESTADOS_COTIZACION, type EstadoCotizacion, PCT_ESCALA, esEditable } from "@opai/domain";
 
 import { instalacionesEnAlcance } from "../core/maestros/alcance";
+import { PERMISO_COSTOS, contieneCostos } from "./campos-costo";
 import { noEncontrado, prohibido, reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 
 export const PERMISO_READ = "cpq:cotizaciones.read";
 export const PERMISO_MANAGE = "cpq:cotizaciones.manage";
 /** Ver costo, margen, sueldos y semáforo (R59): se aplica en el servidor, en los tres bordes. */
-export const PERMISO_COSTOS = "cpq:costos.ver";
+export { PERMISO_COSTOS };
 export const PERMISO_APROBAR = "cpq:aprobar";
 export const PERMISO_MODELO = "cpq:modelo.manage";
 
@@ -54,12 +55,7 @@ export function dondeSeccion(ctx: Contexto) {
  * tiene `cpq:costos.ver`.
  */
 export async function revalidarCostos(ctx: Contexto, _input: unknown, salida: unknown) {
-  if (
-    !veCostos(ctx) &&
-    /"(margenObjetivo|costoMensual|margenEfectivo|sueldoBruto)"/.test(
-      JSON.stringify(salida ?? null),
-    )
-  )
+  if (!veCostos(ctx) && contieneCostos(salida))
     throw prohibido(`Ver esta respuesta exige el permiso «${PERMISO_COSTOS}».`);
 }
 

@@ -1,50 +1,25 @@
 import { PERMISOS_CORE } from "@opai/domain";
 
+import { PERMISO_COSTOS, ocultarCostos } from "../../cpq/campos-costo";
 import type { Contexto } from "../../types";
 
 const MONTOS = ["sueldoBase", "colacion", "movilizacion", "gratificacionMonto"] as const;
 const OCULTO = "••••";
-/** Campos de costo de CPQ (R59): en el input de `cpq.*` y en cada `operaciones[]` de ajustar. */
-const COSTOS_CPQ = [
-  "margenObjetivo",
-  "modoMargen",
-  "sueldoBruto",
-  "costoUnitario",
-  "margenPropio",
-] as const;
-const PERMISO_COSTOS_CPQ = "cpq:costos.ver";
-
-function sinCostosCpq(o: Record<string, unknown>): Record<string, unknown> {
-  const copia: Record<string, unknown> = { ...o };
-  for (const k of COSTOS_CPQ) if (copia[k] != null) copia[k] = OCULTO;
-  return copia;
-}
-
-/**
- * Costos del input auditado de `cpq.*` (R59): sin `cpq:costos.ver` se reemplazan, también dentro
- * del lote de `cpq.cotizaciones.ajustar`. El historial no puede ser una vía lateral para ver costos.
- */
-function redactarCostosCpq(ctx: Contexto, entrada: Record<string, unknown>) {
-  if (ctx.autorizar(PERMISO_COSTOS_CPQ)) return entrada;
-  const copia = sinCostosCpq(entrada);
-  if (Array.isArray(copia["operaciones"]))
-    copia["operaciones"] = copia["operaciones"].map((o: unknown) =>
-      o && typeof o === "object" ? sinCostosCpq({ ...o }) : o,
-    );
-  return copia;
-}
 
 /**
  * Montos de sueldo en el input auditado de `core.estructuras.*`: sin el permiso de sueldos
  * sensibles se reemplazan (también los de los bonos), igual que en `ocultarMontos` (Brief 02 §9).
- * El historial no puede ser una vía lateral para ver sueldos.
+ * Costos y márgenes de `cpq.*` (lista central `CAMPOS_COSTO_CPQ`, en cualquier nivel, también en
+ * las operaciones de `ajustar`): sin `cpq:costos.ver` se reemplazan (R59). El historial (panel,
+ * `core.audit.list` y su herramienta MCP) no puede ser una vía lateral para ver sueldos ni costos.
  */
 export function redactarSensibles(
   ctx: Contexto,
   capability: string,
   entrada: Record<string, unknown>,
 ): Record<string, unknown> {
-  if (capability.startsWith("cpq.")) return redactarCostosCpq(ctx, entrada);
+  if (capability.startsWith("cpq."))
+    return ctx.autorizar(PERMISO_COSTOS) ? entrada : ocultarCostos(entrada);
   if (!capability.startsWith("core.estructuras.")) return entrada;
   if (ctx.autorizar(PERMISOS_CORE.estructurasReadSensible)) return entrada;
   const copia: Record<string, unknown> = { ...entrada };
