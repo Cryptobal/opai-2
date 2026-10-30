@@ -176,6 +176,31 @@ describe.skipIf(!urlPropietario)("cumplimiento PR2 (capacidades) en base real", 
     expect(await e.admin.incidente.count({ where: { tenantId: tenantA, casoId } })).toBe(1);
   });
 
+  it("un aviso de brecha no acepta como evidencia una subida pendiente (CAR-46)", async () => {
+    const reg = await mod.executeCapability(ctx(tenantA, userA, "ana"), "core.cumplimiento.incidente_registrar", {
+      descripcion: "Brecha con evidencia sin confirmar.",
+    });
+    const casoId = reg.ok ? (reg.data as { casoId: string }).casoId : "";
+    const pendiente = await e.admin.documento.create({
+      data: {
+        tenantId: tenantA,
+        nombre: "evidencia.json",
+        mime: "application/json",
+        tamano: 1,
+        storageKey: `k-${randomUUID()}`,
+        creadoPorTipo: "system",
+      },
+    });
+    // Con la FK RESTRICT, una evidencia pendiente trabaría la purga diaria de subidas pendientes.
+    const r = await mod.executeCapability(ctx(tenantA, userA, "ana"), "core.cumplimiento.incidente_notificar", {
+      casoId,
+      destinatario: "agencia",
+      evidenciaDocId: pendiente.id,
+    });
+    expect(!r.ok && r.error.code).toBe("UNPROCESSABLE");
+    expect(await e.admin.incidente.count({ where: { tenantId: tenantA, casoId } })).toBe(1);
+  });
+
   it("dos avisos de brecha concurrentes dejan el caso «notificado» (advisory lock + orden por id)", async () => {
     const reg = await mod.executeCapability(ctx(tenantA, userA, "ana"), "core.cumplimiento.incidente_registrar", {
       descripcion: "Brecha con dos avisos simultáneos.",

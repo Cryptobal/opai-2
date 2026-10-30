@@ -49,28 +49,33 @@ export default function CargoDetalle({ params }: Props) {
                     </Badge>
                   ),
                   subtitulo: `${CLASES.find((x) => x.valor === c.clase)?.etiqueta ?? c.clase} · ${c.personasVigentes} personas · ${c.puestosActivos} puestos`,
-                  acciones: puedeGestionar ? (
+                  // Sin permiso de gestión el menú queda vacío y solo ofrece «Fijar» bajo 1024 px (CAR-65).
+                  acciones: (
                     <AccionesEntidad
                       etiqueta="Acciones del cargo"
-                      acciones={[
-                        {
-                          id: "editar",
-                          etiqueta: "Editar",
-                          parametro: { clave: "editar", valor: "1" },
-                        },
-                        {
-                          id: "activo",
-                          etiqueta: c.activo ? "Desactivar" : "Activar",
-                          ...(c.activo ? { peligro: true } : {}),
-                          capacidad: {
-                            id: "core.cargos.set_activo",
-                            input: { id: c.id, activo: !c.activo },
-                            exito: c.activo ? "Cargo desactivado" : "Cargo activado",
-                          },
-                        },
-                      ]}
+                      acciones={
+                        !puedeGestionar
+                          ? []
+                          : [
+                              {
+                                id: "editar",
+                                etiqueta: "Editar",
+                                parametro: { clave: "editar", valor: "1" },
+                              },
+                              {
+                                id: "activo",
+                                etiqueta: c.activo ? "Desactivar" : "Activar",
+                                ...(c.activo ? { peligro: true } : {}),
+                                capacidad: {
+                                  id: "core.cargos.set_activo",
+                                  input: { id: c.id, activo: !c.activo },
+                                  exito: c.activo ? "Cargo desactivado" : "Cargo activado",
+                                },
+                              },
+                            ]
+                      }
                     />
-                  ) : null,
+                  ),
                 }
               : {})}
           >

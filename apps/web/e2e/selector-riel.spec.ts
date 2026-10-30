@@ -2,7 +2,8 @@ import { expect, type Page, test } from "@playwright/test";
 
 import { entrar as iniciarSesion } from "./sesion";
 
-// Selector de portal y de empresa en el riel de iPad (768–1279 px), QA del PR #27. Usa un usuario de
+// Selector de portal y de empresa en el riel de iPad (768–1023 px; desde 1024 va la barra lateral,
+// NAVEGACION D9), QA del PR #27. Usa un usuario de
 // prueba CORRIENTE (sin rol de plataforma, rol «admin») con dos empresas (Gard Security y Atlas
 // Seguridad SpA) y los portales ERP y Supervisor. Datos, solo en una base local (tras seed:dev-tenant
 // y seed:maestros-demo; el job de e2e del CI lo hace):
@@ -12,12 +13,17 @@ const password = process.env["E2E_PASSWORD"] ?? process.env["SEED_OWNER_PASSWORD
 const CUENTA_GARD = "Logística Andina SpA"; // sembrada solo en Gard (seed:maestros-demo)
 const CUENTA_ATLAS = "Cliente Atlas E2E"; // sembrada solo en Atlas (seed:multiempresa-e2e)
 const SELECTOR = /Cambiar de portal o empresa/;
+// Ancho dentro del riel: el proyecto iPad mide 1024, donde ya va la barra lateral (D9); teléfono
+// y escritorio conservan su ancho.
+const ANCHO_RIEL = 900;
 
 // El servidor de desarrollo compila cada ruta en su primera visita.
 test.use({ actionTimeout: 30_000 });
 test.setTimeout(180_000);
 
 async function entrar(page: Page) {
+  const vista = page.viewportSize();
+  if (vista?.width === 1024) await page.setViewportSize({ width: ANCHO_RIEL, height: vista.height });
   await iniciarSesion(page, email);
   await page.waitForURL(/\/elegir-empresa/);
   await page.getByRole("button", { name: /Gard Security/ }).click();
@@ -135,7 +141,7 @@ test.describe("selector de portal y empresa", () => {
     await expect(selector).toBeFocused();
   });
 
-  test("iPad: el selector está en el riel entre 768 y 1279 px y en su lugar fuera de ese rango", async ({
+  test("iPad: el selector está en el riel entre 768 y 1023 px y en la barra lateral desde 1024", async ({
     page,
   }, info) => {
     test.skip(info.project.name !== "ipad", "Recorre los anchos con el proyecto iPad.");
@@ -144,8 +150,8 @@ test.describe("selector de portal y empresa", () => {
     const casos = [
       { ancho: 767, dentro: page.getByRole("banner"), fuera: principal(page) },
       { ancho: 768, dentro: principal(page), fuera: page.getByRole("banner") },
-      { ancho: 1279, dentro: principal(page), fuera: page.getByRole("banner") },
-      { ancho: 1280, dentro: principal(page), fuera: page.getByRole("banner") },
+      { ancho: 1023, dentro: principal(page), fuera: page.getByRole("banner") },
+      { ancho: 1024, dentro: principal(page), fuera: page.getByRole("banner") },
     ];
     for (const { ancho, dentro, fuera } of casos) {
       await page.setViewportSize({ width: ancho, height: 900 });
@@ -154,11 +160,11 @@ test.describe("selector de portal y empresa", () => {
       await expect(dentro.getByRole("button", { name: SELECTOR })).toHaveCount(1);
       await expect(fuera.getByRole("button", { name: SELECTOR })).toHaveCount(0);
     }
-    // El riel mide 80 px a 768 y a 1279; a 1280 lo reemplaza la barra lateral de 248 px.
+    // El riel mide 80 px a 768 y a 1023; desde 1024 lo reemplaza la barra lateral de 248 px (D9).
     for (const [ancho, esperado] of [
       [768, 80],
-      [1279, 80],
-      [1280, 248],
+      [1023, 80],
+      [1024, 248],
     ] as const) {
       await page.setViewportSize({ width: ancho, height: 900 });
       const caja = await principal(page).boundingBox();
