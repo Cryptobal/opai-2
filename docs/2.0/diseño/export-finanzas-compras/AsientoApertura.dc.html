@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="fin-shell.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ nav.tabs }}" groups="{{ nav.groups }}" active="{{ nav.active }}" title="{{ shellTitle }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<sc-if value="{{ notForbidden }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" tab-bar="{{ isPhone }}" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Contabilidad · Variante B" title="Asiento de apertura" subtitle="Corte al 01-07-2026 · Atlas Seguridad SpA" badge="{{ propBadge }}" hint-size="100%,80px"></x-import>
+<sc-if value="{{ isDatos }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Los saldos de OPAI 1.0 no se copian" hint-size="100%,72px">Sube el balance de comprobación revisado al corte. Proponemos la cuenta del plan para cada línea; confirmas antes de cargar.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="1 · Balance al corte" description="Excel o CSV con código, nombre, debe y haber" hint-size="100%,180px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Uploader" accept=".xlsx,.csv" tipos="Excel o CSV" tamano-maximo-mb="{{ 10 }}" archivos-iniciales="{{ archivos }}" compacto="{{ isPhone }}" hint-size="100%,140px"></x-import>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="2 · Revisa la cuenta de cada línea" description="38 líneas · 34 asignadas · 3 sugeridas · 1 sin cuenta" hint-size="100%,360px">
+<div style="display:grid;gap:12px">
+<div class="chip-row"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Por revisar" contador="{{ 4 }}" activo="{{ true }}" hint-size="130px,32px"></x-import></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" dc-props="{{ tblProps }}" columns="{{ cols }}" rows="{{ lineas }}" cards="{{ isPhone }}" to-card="{{ toCard }}" hint-size="100%,260px"></x-import>
+</div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ActionBar" summary="{{ resumen }}" hint-size="100%,72px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="140px,40px">Guardar borrador</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" disabled="{{ true }}" hint-size="150px,40px">Cargar apertura</x-import>
+</x-import>
+<span class="t-caption">«Cargar apertura» se habilita cuando todas las líneas tienen cuenta y debe = haber.</span>
+</div>
+</sc-if>
+<sc-if value="{{ isCargando }}" hint-placeholder-val="{{ false }}">
+<div style="display:grid;gap:16px" aria-busy="true" aria-label="Cargando apertura">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="100%" height="72px" radius="{{ 16 }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="100%" height="160px" radius="{{ 16 }}" hint-size="100%,160px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="100%" height="300px" radius="{{ 16 }}" hint-size="100%,300px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="file" title="Aún no hay asiento de apertura" description="Sube el balance de comprobación revisado al día del corte." action="{{ emptyAction }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos leer el balance" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="CON-APE-500" on-retry="{{ noop }}" hint-size="100%,320px"></x-import>
+</sc-if>
+</x-import>
+</sc-if>
+<sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="{{ fb.title }}" description="{{ fb.description }}" action-label="Pedir acceso" hint-size="100%,100%"></x-import>
+</sc-if>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;datos&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinPermiso&quot;],&quot;default&quot;:&quot;datos&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  componentDidMount() { if (!window.FinShell) { const t = setInterval(() => { if (window.FinShell) { clearInterval(t); this.forceUpdate(); } }, 40); } }
+  renderVals() {
+    const F = window.FinShell;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const h = React.createElement;
+    const device = this.props.device ?? "desktop";
+    const isPhone = device === "phone";
+    const st = F ? F.estado(this.props) : { isDatos: true, notForbidden: true };
+    const badge = (t, l) => (NS.Badge ? h(NS.Badge, { tone: t }, l) : l);
+    const num = (t) => h("span", { className: "t-numeric" }, t);
+    const lineas = [
+      { id: 1, orig: "110501 Clientes nacionales", cta: "1.1.05 Deudores por venta", d: "$ 98.400.000", hb: "", est: ["info", "Sugerida"] },
+      { id: 2, orig: "110702 Fondos por rendir", cta: "1.1.06 Fondos por rendir", d: "$ 1.250.000", hb: "", est: ["info", "Sugerida"] },
+      { id: 3, orig: "210305 Retenciones 2a cat.", cta: "2.1.07 Impuestos por pagar", d: "", hb: "$ 3.180.000", est: ["info", "Sugerida"] },
+      { id: 4, orig: "190001 Cuenta puente 1.0", cta: "", d: "$ 640.000", hb: "", est: ["warning", "Sin cuenta"] },
+    ];
+    const B = NS.Button;
+    return {
+      tblProps: { style: { display: "block" } },
+      device, theme: this.props.theme ?? "light", isPhone, ...st,
+      nav: F ? F.shell("asi", device) : { tabs: [], groups: [] },
+      fb: F ? F.forbidden : {},
+      shellTitle: isPhone ? "" : "Contabilidad",
+      propBadge: badge("accent", "Propuesta, a confirmar por Carlos"),
+      archivos: [{ nombre: "balance-comprobacion-30-06-2026.xlsx", size: 184320, estado: "listo" }],
+      lineas, noop: () => {},
+      cols: [
+        { key: "orig", label: "Línea del balance", render: (r) => h("span", { className: "t-mono" }, r.orig) },
+        { key: "cta", label: "Cuenta del plan", render: (r) => r.cta ? r.cta : h("span", { className: "muted" }, "Elige una cuenta") },
+        { key: "d", label: "Debe", align: "right", render: (r) => num(r.d) },
+        { key: "hb", label: "Haber", align: "right", render: (r) => num(r.hb) },
+        { key: "est", label: "Estado", render: (r) => badge(r.est[0], r.est[1]) },
+      ],
+      toCard: (r) => ({ title: r.cta || "Sin cuenta asignada", subtitle: (r.d || r.hb) + (r.d ? " al debe" : " al haber"), meta: r.orig, badge: { tone: r.est[0], label: r.est[1] } }),
+      resumen: [{ label: "Debe", value: "$ 412.300.000" }, { label: "Haber", value: "$ 411.660.000" }, { label: "Diferencia", value: "$ 640.000" }],
+      emptyAction: B ? h(B, null, "Subir balance") : null,
+    };
+  }
+}
+</script>
+</body>
+</html>
