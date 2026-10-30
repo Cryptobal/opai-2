@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0} a{color:var(--ds-accent)} a:hover{color:var(--ds-accent)}</style>
+</helmet>
+<div ref="{{ rootRef }}" style="width:100%;height:100%;position:relative">
+<sc-if value="{{ rgFull }}" hint-placeholder-val="{{ false }}">
+<dc-import name="Rondas Guardia" screen="{{ rg }}" state="{{ rgState }}" theme="{{ theme }}" mapa="{{ rgMapa }}" style="position:absolute;inset:0" hint-size="100%,100%"></dc-import>
+</sc-if>
+<sc-if value="{{ notRgFull }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" offline="{{ offline }}" device="{{ device }}" theme="{{ theme }}" portal="Trabajador" tenant="Atlas Seguridad SpA" tenant-initials="AS" user="{{ user }}" tabs="{{ tabs }}" groups="{{ groups }}" active="{{ active }}" title="{{ barTitle }}" notifications="{{ 2 }}" width="100%" height="100%" hint-size="100%,100%">
+<sc-if value="{{ rgEmbed }}" hint-placeholder-val="{{ false }}">
+<div data-rg-embed="1" style="position:relative;flex:1;min-height:0">
+<dc-import name="Rondas Guardia" screen="{{ rg }}" state="{{ rgState }}" theme="{{ theme }}" mapa="{{ rgMapa }}" style="position:absolute;inset:0" hint-size="100%,100%"></dc-import>
+</div>
+</sc-if>
+<sc-if value="{{ usePage }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<sc-if value="{{ back }}" hint-placeholder-val="{{ false }}">
+<div style="margin:0 0 4px -12px;display:flex">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="chevron-left" hint-size="120px,40px">{{ back }}</x-import>
+</div>
+</sc-if>
+<sc-if value="{{ showHeader }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="{{ head.eyebrow }}" title="{{ head.title }}" subtitle="{{ head.subtitle }}" badge="{{ head.badge }}" hint-size="100%,64px">
+<sc-if value="{{ headButton }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="{{ headIcon }}" on-click="{{ goNueva }}" hint-size="170px,40px">{{ headButton }}</x-import>
+</sc-if>
+</x-import>
+</sc-if>
+<sc-if value="{{ showTabs }}" hint-placeholder-val="{{ false }}">
+<div style="margin-bottom:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ tabItems }}" value="{{ tabValue }}" on-change="{{ setTab }}" hint-size="100%,44px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:420px;display:flex;flex-direction:column">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="{{ sc.icon }}" title="{{ sc.vacio }}" description="{{ sc.vacioDesc }}" action="{{ sc.vacioAction }}" hint-size="100%,360px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:420px;display:flex;flex-direction:column">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="{{ sc.error }}" description="Revisa tu conexión. Si el problema sigue, avísale a RRHH con el código." code="PT-504 · 30-10-2026 09:41" on-retry="{{ noop }}" hint-size="100%,360px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:420px;display:flex;flex-direction:column">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="Tu cuenta está suspendida" description="Mientras esté suspendida no puedes ver tus turnos ni tus documentos. Habla con Paula Rojas, RRHH de Atlas Seguridad SpA: +56 2 2345 6789 · rrhh@atlasseguridad.cl" action-label="Llamar a RRHH" hint-size="100%,360px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ isBloqueado }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:420px;display:flex;flex-direction:column">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="{{ bloqTitle }}" description="{{ bloqDesc }}" action-label="Ver mi horario" hint-size="100%,360px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ isCargando }}" hint-placeholder-val="{{ false }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:16px;align-items:start" aria-busy="true" aria-label="Cargando">
+<sc-if value="{{ skelCard }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,220px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="35%" height="{{ 12 }}" hint-size="35%,12px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="65%" height="{{ 28 }}" hint-size="65%,28px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="80%" height="{{ 14 }}" hint-size="80%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 64 }}" radius="{{ 10 }}" hint-size="100%,64px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 48 }}" radius="{{ 10 }}" hint-size="100%,48px"></x-import>
+</div>
+</x-import>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" padding="{{ 0 }}" hint-size="100%,220px">
+<sc-for list="{{ skelRows }}" as="r" hint-placeholder-count="4">
+<div style="display:flex;gap:12px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ 24 }}" height="{{ 24 }}" circle="{{ true }}" hint-size="24px,24px"></x-import>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="60%" height="{{ 14 }}" hint-size="60%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="40%" height="{{ 12 }}" hint-size="40%,12px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ 64 }}" height="{{ 22 }}" radius="{{ 999 }}" hint-size="64px,22px"></x-import>
+</div>
+</sc-for>
+</x-import>
+</div>
+</sc-if>
+<sc-if value="{{ ok }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ sInicio }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px">
+<sc-if value="{{ noAcuse }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,160px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+<div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+<span class="t-caption">Aviso de la central · hoy 07:40</span>
+<span class="t-subheading">Consigna: control de camiones</span>
+<span class="t-body-sm muted">Todo camión que entre por Acceso camiones debe mostrar guía de despacho.</span>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="warning" hint-size="100px,22px">Sin confirmar</x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" size="lg" block="{{ true }}" icon="check" on-click="{{ darAcuse }}" hint-size="100%,48px">Recibido</x-import>
+</div>
+</x-import>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" padding="{{ 0 }}" style="overflow:hidden" hint-size="100%,72px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" icon="message" title="Central de monitoreo" subtitle="Avisos recibidos y mensajes enviados · último respondido hoy 07:02" chevron="{{ true }}" on-click="{{ noop }}" hint-size="100%,72px"></x-import>
+</x-import>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:24px 16px;align-items:start">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,300px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+<div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+<span class="t-caption">Tu próximo turno</span>
+<span class="t-heading">Planta Quilicura</span>
+<span class="t-body-sm muted">Portería 1 · Guardia · Patrón 4x4 día</span>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="info" hint-size="70px,22px">Mañana</x-import>
+</div>
+<span class="t-label t-numeric" style="display:flex;align-items:center;gap:8px"><span class="ic sm i-calendar muted" aria-hidden="true"></span>Sábado 31-10-2026</span>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border:1px solid var(--ds-border);border-radius:var(--radius-md)">
+<div style="padding:10px 12px;border-right:1px solid var(--ds-border);display:flex;flex-direction:column"><span class="t-caption">Entrada</span><span class="t-heading t-numeric">08:00</span></div>
+<div style="padding:10px 12px;display:flex;flex-direction:column"><span class="t-caption">Salida</span><span class="t-heading t-numeric">20:00</span></div>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" size="lg" block="{{ true }}" icon-right="chevron-right" hint-size="100%,48px">Ver mi horario</x-import>
+</div>
+</x-import>
+<section style="display:flex;flex-direction:column;gap:8px">
+<h2 class="t-label muted m0">Avisos</h2>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" padding="{{ 0 }}" style="overflow:hidden" hint-size="100%,220px">
+<sc-for list="{{ avisos }}" as="a" hint-placeholder-count="3">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" icon="{{ a.icon }}" title="{{ a.title }}" subtitle="{{ a.subtitle }}" badge="{{ a.badge }}" chevron="{{ a.chevron }}" on-click="{{ noop }}" hint-size="100%,72px"></x-import>
+</sc-for>
+</x-import>
+</section>
+<section style="display:flex;flex-direction:column;gap:8px">
+<h2 class="t-label muted m0">Últimas liquidaciones</h2>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" padding="{{ 0 }}" style="overflow:hidden" hint-size="100%,220px">
+<sc-for list="{{ liquidaciones }}" as="a" hint-placeholder-count="3">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" icon="{{ a.icon }}" title="{{ a.title }}" subtitle="{{ a.subtitle }}" trailing="{{ a.trailing }}" hint-size="100%,72px"></x-import>
+</sc-for>
+</x-import>
+</section>
+<section style="display:flex;flex-direction:column;gap:8px">
+<h2 class="t-label muted m0">Documentos recientes</h2>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" padding="{{ 0 }}" style="overflow:hidden" hint-size="100%,150px">
+<sc-for list="{{ docsRecientes }}" as="a" hint-placeholder-count="2">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" icon="{{ a.icon }}" title="{{ a.title }}" subtitle="{{ a.subtitle }}" trailing="{{ a.trailing }}" hint-size="100%,72px"></x-import>
+</sc-for>
+</x-import>
+</section>
+</div>
+</sc-if>
+<sc-if value="{{ sPauta }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:16px;max-width:720px">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="chevron-left" label="Octubre 2026" hint-size="44px,44px"></x-import>
+<span class="t-subheading">Noviembre 2026</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="chevron-right" label="Diciembre 2026" hint-size="44px,44px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Tu pauta cambió el 28-10-2026" icono="bell" hint-size="100%,56px">Los días con cambios están marcados. No necesitas confirmar nada.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" padding="{{ 0 }}" style="overflow:hidden" hint-size="100%,600px">
+<sc-for list="{{ dias }}" as="d" hint-placeholder-count="8">
+<div style="display:grid;grid-template-columns:44px minmax(0,1fr) 40px;gap:12px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--ds-border);min-height:64px">
+<div style="display:flex;flex-direction:column;align-items:center"><span class="t-caption">{{ d.dow }}</span><span class="t-subheading t-numeric">{{ d.d }}</span></div>
+<div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span class="t-label">{{ d.inst }}</span><sc-if value="{{ d.hasCambio }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="info" hint-size="64px,22px">Cambió</x-import></sc-if></div>
+<span class="t-body-sm muted t-numeric">{{ d.hor }}</span>
+<sc-if value="{{ d.hasCambio }}" hint-placeholder-val="{{ false }}"><span class="t-caption" style="text-decoration:line-through">{{ d.cambio }}</span></sc-if>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ShiftCell" code="{{ d.code }}" label="{{ d.cellLabel }}" hint-size="40px,28px"></x-import>
+</div>
+</sc-for>
+</x-import>
+</div>
+</sc-if>
+<sc-if value="{{ isSolSplit }}" hint-placeholder-val="{{ false }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:16px;align-items:start">
+<sc-if value="{{ showSolList }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" padding="{{ 0 }}" style="overflow:hidden" hint-size="100%,400px">
+<sc-for list="{{ solicitudes }}" as="s" hint-placeholder-count="5">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" title="{{ s.tipo }}" subtitle="{{ s.det }}" meta="{{ s.id }}" badge="{{ s.badge }}" chevron="{{ s.chevron }}" on-click="{{ s.pick }}" style="{{ s.rowStyle }}" hint-size="100%,84px"></x-import>
+</sc-for>
+</x-import>
+</sc-if>
+<sc-if value="{{ showFicha }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,600px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-direction:column;gap:6px">
+<span class="t-mono subtle">SOL-0148</span>
+<h2 class="t-heading m0">Anticipo de sueldo</h2>
+<div style="display:flex"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="warning" hint-size="170px,22px">Esperando al solicitante</x-import></div>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" titulo="RRHH necesita tu respuesta" icono="message" hint-size="100%,56px">Confirma la cuenta donde quieres recibir el anticipo.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" rows="{{ ficha }}" hint-size="100%,170px"></x-import>
+<sc-if value="{{ vB }}" hint-placeholder-val="{{ false }}"><span class="t-caption">Variante B · propuesta, a confirmar por Carlos: el tope lo define la empresa.</span></sc-if>
+<section style="display:flex;flex-direction:column;gap:12px">
+<h3 class="t-label m0">Historial</h3>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Timeline" items="{{ timeline }}" hint-size="100%,220px"></x-import>
+</section>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" size="lg" block="{{ true }}" icon="message" hint-size="100%,48px">Responder</x-import>
+</div>
+</x-import>
+</sc-if>
+</div>
+</sc-if>
+<sc-if value="{{ sExtra }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:16px">
+<span class="t-body-sm muted">Turnos que la empresa necesita cubrir. RRHH elige entre quienes se ofrecen y te avisa.</span>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px;align-items:start">
+<sc-for list="{{ extras }}" as="e" hint-placeholder-count="4">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,220px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+<div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+<span class="t-label-sm muted t-numeric">{{ e.fecha }}</span>
+<span class="t-subheading">{{ e.inst }}</span>
+<span class="t-body-sm muted t-numeric">{{ e.puesto }} · {{ e.hor }}</span>
+</div>
+<span class="t-subheading t-numeric" style="white-space:nowrap">{{ e.monto }}</span>
+</div>
+<sc-if value="{{ e.canOffer }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" size="lg" block="{{ true }}" on-click="{{ e.offer }}" hint-size="100%,48px">Me ofrezco</x-import>
+</sc-if>
+<sc-if value="{{ e.isOffered }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+<div style="display:flex;flex-direction:column;gap:4px">
+<div style="display:flex"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="info" hint-size="100px,22px">Te ofreciste</x-import></div>
+<span class="t-caption">RRHH te avisará si quedas asignada.</span>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" on-click="{{ e.retire }}" style="height:44px" hint-size="120px,44px">Retirar oferta</x-import>
+</div>
+</sc-if>
+<sc-if value="{{ e.isBlocked }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" titulo="No puedes ofrecerte a este turno" icono="alert" hint-size="100%,72px">{{ e.blocked }}</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" size="lg" block="{{ true }}" disabled="{{ true }}" hint-size="100%,48px">Me ofrezco</x-import>
+</sc-if>
+</div>
+</x-import>
+</sc-for>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ sNueva }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:16px;max-width:640px">
+<fieldset class="pg-fieldset">
+<legend>Tipo de solicitud</legend>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RadioGroup" etiqueta="Tipo de solicitud" valor="{{ tipo }}" on-cambiar="{{ setTipo }}" opciones="{{ tipos }}" hint-size="100%,240px"></x-import>
+</fieldset>
+<fieldset class="pg-fieldset">
+<legend>Detalle</legend>
+<div style="display:flex;flex-direction:column;gap:16px">
+<sc-if value="{{ tPermiso }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DateRangeInput" label="Fechas" dc-props="{{ fPermiso }}" hint="RRHH revisa tu pauta antes de aprobar." hint-size="100%,90px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Motivo" default-value="Control médico de mi hijo en el Cesfam." rows="{{ 3 }}" hint-size="100%,110px"></x-import>
+</sc-if>
+<sc-if value="{{ tVacaciones }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DateRangeInput" label="Fechas" dc-props="{{ fVacaciones }}" hint="El 25-12-2026 es feriado y no se descuenta." hint-size="100%,90px"></x-import>
+<sc-if value="{{ vA }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Saldo de vacaciones" rows="{{ saldo }}" hint-size="100%,150px"></x-import>
+</sc-if>
+<sc-if value="{{ vB }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Saldo según RRHH: 14 días hábiles" hint-size="100%,72px">Lo informó RRHH el 01-10-2026. Lo confirman al revisar tu solicitud.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" rows="{{ saldo }}" hint-size="100%,130px"></x-import>
+</sc-if>
+</sc-if>
+<sc-if value="{{ tAnticipo }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Monto" prefix="$" default-value="100.000" input-mode="numeric" hint="{{ topeHint }}" hint-size="100%,90px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" rows="{{ anticipoRows }}" hint-size="100%,90px"></x-import>
+</sc-if>
+<sc-if value="{{ tCertificado }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Tipo de certificado" value="ant" options="{{ certOpts }}" hint="Lo recibirás en Mis documentos." hint-size="100%,90px"></x-import>
+</sc-if>
+</div>
+</fieldset>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ActionBar" hint-size="100%,72px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="110px,40px">Cancelar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="check" hint-size="160px,40px">Enviar solicitud</x-import>
+</x-import>
+</div>
+</sc-if>
+<sc-if value="{{ isDocSplit }}" hint-placeholder-val="{{ false }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:16px;align-items:start">
+<sc-if value="{{ showDocList }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:12px">
+<sc-if value="{{ showPorFirmar }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="neutral" hint-size="100%,56px">Los contratos y anexos pasan primero por RRHH. La copia firmada queda en «Firmados».</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" padding="{{ 0 }}" style="overflow:hidden" hint-size="100%,320px">
+<sc-for list="{{ porFirmar }}" as="d" hint-placeholder-count="4">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" icon="{{ d.icon }}" title="{{ d.title }}" subtitle="{{ d.subtitle }}" badge="{{ d.badge }}" on-click="{{ noop }}" style="{{ d.rowStyle }}" hint-size="100%,72px"></x-import>
+</sc-for>
+</x-import>
+</sc-if>
+<sc-if value="{{ showFirmados }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" padding="{{ 0 }}" style="overflow:hidden" hint-size="100%,300px">
+<sc-for list="{{ firmados }}" as="d" hint-placeholder-count="4">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" icon="{{ d.icon }}" title="{{ d.title }}" subtitle="{{ d.subtitle }}" trailing="{{ d.trailing }}" hint-size="100%,72px"></x-import>
+</sc-for>
+</x-import>
+</sc-if>
+</div>
+</sc-if>
+<sc-if value="{{ showDocDetail }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,640px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-direction:column;gap:4px">
+<span class="t-caption">{{ doc.kind }}</span>
+<h2 class="t-heading m0">{{ doc.title }}</h2>
+<span class="t-body-sm muted">{{ doc.meta }}</span>
+</div>
+<div style="background:var(--ds-paper);color:var(--ds-paper-fg);border:1px solid var(--ds-paper-rule);border-radius:var(--radius-md);padding:20px;display:flex;flex-direction:column;gap:8px;max-height:220px;overflow:hidden">
+<span class="t-label">{{ doc.paperTitle }}</span>
+<span class="t-caption" style="color:var(--ds-paper-fg)">{{ doc.paperSub }}</span>
+<div style="height:1px;background:var(--ds-paper-rule-subtle)"></div>
+<p class="t-body-sm m0">{{ doc.paperText }}</p>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="download" hint-size="200px,40px">{{ doc.dlLabel }}</x-import>
+<sc-if value="{{ isN1 }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ noFirmado }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ acepto }}" on-change="{{ setAcepto }}" label="Acepto firmar por medio electrónico" description="Tiene la misma validez que tu firma en papel (Ley 19.799)." hint-size="100%,64px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" size="lg" block="{{ true }}" icon="check" disabled="{{ noAcepto }}" on-click="{{ firmar }}" hint-size="100%,48px">Firmar</x-import>
+</sc-if>
+<sc-if value="{{ firmado }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="success" titulo="Firmaste el Reglamento interno 2026" hint-size="100%,56px">La copia quedó en Mis documentos · Firmados, 30-10-2026 09:42.</x-import>
+</sc-if>
+</sc-if>
+<sc-if value="{{ notN1 }}" hint-placeholder-val="{{ false }}">
+<section style="display:flex;flex-direction:column;gap:4px">
+<h3 class="t-label m0">Pasos</h3>
+<div style="margin:0 -16px;border-top:1px solid var(--ds-border);border-bottom:1px solid var(--ds-border)">
+<sc-for list="{{ pasos }}" as="s" hint-placeholder-count="2">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" icon="{{ s.icon }}" title="{{ s.title }}" subtitle="{{ s.subtitle }}" badge="{{ s.badge }}" hint-size="100%,72px"></x-import>
+</sc-for>
+</div>
+</section>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="{{ n2Alerta.tono }}" titulo="{{ n2Alerta.titulo }}" icono="lock" hint-size="100%,90px">{{ n2Alerta.texto }}</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" size="lg" block="{{ true }}" disabled="{{ true }}" icon="lock" hint-size="100%,48px">Firmar · Próximamente</x-import>
+</sc-if>
+</div>
+</x-import>
+</sc-if>
+</div>
+</sc-if>
+<sc-if value="{{ isCen }}" hint-placeholder-val="{{ false }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:16px;align-items:start">
+<sc-if value="{{ showCenList }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="neutral" hint-size="100%,56px">Las consignas, cambios de turno e instrucciones se confirman con «Recibido». La central ve tu acuse.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" padding="{{ 0 }}" style="overflow:hidden" hint-size="100%,240px">
+<sc-for list="{{ avisosCentral }}" as="a" hint-placeholder-count="3">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" icon="{{ a.icon }}" title="{{ a.title }}" subtitle="{{ a.subtitle }}" badge="{{ a.badge }}" on-click="{{ noop }}" style="{{ a.rowStyle }}" hint-size="100%,72px"></x-import>
+</sc-for>
+</x-import>
+</div>
+</sc-if>
+<sc-if value="{{ showMsgList }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="neutral" hint-size="100%,56px">No es un chat: cada mensaje es un registro con su respuesta. Para otra novedad, envía un mensaje nuevo.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" padding="{{ 0 }}" style="overflow:hidden" hint-size="100%,300px">
+<sc-for list="{{ mensajes }}" as="m" hint-placeholder-count="4">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" icon="{{ m.icon }}" title="{{ m.title }}" subtitle="{{ m.subtitle }}" meta="{{ m.id }}" badge="{{ m.badge }}" on-click="{{ noop }}" style="{{ m.rowStyle }}" hint-size="100%,84px"></x-import>
+</sc-for>
+</x-import>
+</div>
+</sc-if>
+<sc-if value="{{ showAvisoDet }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,420px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-direction:column;gap:6px">
+<span class="t-mono subtle">AV-2291 · Consigna</span>
+<h2 class="t-heading m0">Control de camiones</h2>
+<span class="t-body-sm muted">Central de monitoreo · hoy 07:40 · Planta Quilicura · turno 08:00–20:00</span>
+</div>
+<p class="t-body m0">Desde hoy, todo camión que entre por Acceso camiones debe mostrar guía de despacho. Anota patente y número de guía en el registro de accesos. Si no trae guía, no lo dejes pasar y avisa a la central.</p>
+<sc-if value="{{ noAcuse }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" size="lg" block="{{ true }}" icon="check" on-click="{{ darAcuse }}" hint-size="100%,48px">Recibido</x-import>
+<span class="t-caption">El acuse queda registrado con tu nombre y la hora.</span>
+</sc-if>
+<sc-if value="{{ acuse }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="success" titulo="Confirmaste el aviso a las 07:52" hint-size="100%,56px">La central ve tu acuse de recibo.</x-import>
+</sc-if>
+</div>
+</x-import>
+</sc-if>
+<sc-if value="{{ showMsgDet }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,600px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-direction:column;gap:6px">
+<span class="t-mono subtle">MC-0412 · Novedad</span>
+<h2 class="t-heading m0">Portón 2 no cierra</h2>
+<div style="display:flex"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="success" hint-size="100px,22px">Respondido</x-import></div>
+</div>
+<p class="t-body m0">El portón 2 quedó trabado a medio cerrar después del último camión.</p>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" rows="{{ msgKv }}" hint-size="100%,130px"></x-import>
+<section style="display:flex;flex-direction:column;gap:12px">
+<h3 class="t-label m0">Historial</h3>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Timeline" items="{{ msgTimeline }}" hint-size="100%,260px"></x-import>
+</section>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" size="lg" block="{{ true }}" icon="message" hint-size="100%,48px">Avisar a la central</x-import>
+</div>
+</x-import>
+</sc-if>
+</div>
+</sc-if>
+<sc-if value="{{ sAvisar }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:16px;max-width:640px">
+<sc-if value="{{ vB }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,150px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;flex-direction:column;gap:2px"><span class="t-subheading">Botón de pánico</span><span class="t-body-sm muted">Alerta a la central con tu ubicación, sin escribir.</span></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="destructive" size="lg" block="{{ true }}" icon="alert" hint-size="100%,48px">Mantén presionado 2 s</x-import>
+</div>
+</x-import>
+</sc-if>
+<fieldset class="pg-fieldset">
+<legend>Tipo</legend>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RadioGroup" etiqueta="Tipo de mensaje" valor="{{ tipoMsg }}" on-cambiar="{{ setTipoMsg }}" opciones="{{ tiposMsg }}" hint-size="100%,190px"></x-import>
+<sc-if value="{{ isUrg }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="danger" titulo="Urgencia: la central te llama de inmediato" style="margin-top:12px" hint-size="100%,72px">Si hay riesgo para la vida, llama también al 133 (Carabineros) o al 131 (SAMU).</x-import>
+</sc-if>
+</fieldset>
+<fieldset class="pg-fieldset">
+<legend>Mensaje</legend>
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Qué pasa" dc-props="{{ msgText }}" rows="{{ 3 }}" hint="Texto corto · 68 de 280 caracteres" hint-size="100%,120px"></x-import>
+<div style="display:flex;flex-direction:column;gap:6px">
+<span class="t-label">Foto (opcional)</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Uploader" compacto="{{ true }}" tipos="JPG o PNG" tamano-maximo-mb="{{ 10 }}" hint-size="100%,48px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Según tu asignación" rows="{{ ctxKv }}" hint-size="100%,150px"></x-import>
+</div>
+</fieldset>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ActionBar" hint-size="100%,72px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="110px,40px">Cancelar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="{{ sendVariant }}" icon="message" on-click="{{ sendClick }}" hint-size="160px,40px">{{ sendLabel }}</x-import>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Dialog" open="{{ confirmOpen }}" contained="{{ true }}" title="¿Enviar urgencia a la central?" description="La central recibe una alerta prioritaria y te llama al +56 9 8765 4321. Queda registrada con tu ubicación en Planta Quilicura." on-close="{{ closeConfirm }}" actions="{{ urgActions }}" hint-size="0px,0px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ sAccesos }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" titulo="Pendiente: usa las pantallas de Portería del mockup de Terreno (design-prompt-terreno-v1)" hint-size="100%,72px">El mockup de Terreno para Control de accesos aún no existe. Cuando exista, estas pantallas se importan tal cual, sin rediseñar.</x-import>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:12px">
+<sc-for list="{{ slotsAcceso }}" as="r" hint-placeholder-count="6">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.StatePanel" icon="{{ r.icon }}" title="{{ r.title }}" description="{{ r.desc }}" style="padding:24px 16px" hint-size="100%,180px"></x-import>
+</sc-for>
+</div>
+<section style="display:flex;flex-direction:column;gap:8px">
+<h2 class="t-label muted m0">Reglas del portal</h2>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" padding="{{ 0 }}" style="overflow:hidden" hint-size="100%,220px">
+<sc-for list="{{ cambiaAccesos }}" as="r" hint-placeholder-count="3">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" icon="{{ r.icon }}" title="{{ r.title }}" subtitle="{{ r.subtitle }}" hint-size="100%,72px"></x-import>
+</sc-for>
+</x-import>
+</section>
+</div>
+</sc-if>
+<sc-if value="{{ sDatos }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:16px;max-width:720px">
+<sc-if value="{{ guardado }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="success" titulo="Guardamos tus cambios · 30-10-2026 09:50" hint-size="100%,72px">Tu ficha se actualizó. El estado civil y la dirección quedan en revisión por RRHH.</x-import>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Qué valida RRHH" hint-size="100%,72px">RRHH revisa el estado civil y la dirección porque se usan en tu contrato. Los demás datos se actualizan al guardar.</x-import>
+<fieldset class="pg-fieldset">
+<legend>Datos personales</legend>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Teléfono" default-value="+56 9 8765 4321" input-mode="tel" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Correo" default-value="msoto@correo.cl" input-mode="email" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Estado civil" value="Soltera" options="{{ civilOpts }}" hint="Lo valida RRHH." hint-size="100%,90px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Contacto de emergencia" default-value="Rosa Rivas · madre" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Teléfono de emergencia" default-value="+56 9 7654 3210" input-mode="tel" hint-size="100%,72px"></x-import>
+</div>
+</fieldset>
+<fieldset class="pg-fieldset">
+<legend>Dirección</legend>
+<div style="display:flex;flex-direction:column;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Combobox" label="Dirección" value="a" options="{{ dirOpts }}" placeholder="Busca tu calle y número" hint="Sugerencias de Google Maps." hint-size="100%,90px"></x-import>
+<div class="ds-mapa" role="img" aria-label="Mapa de confirmación: Av. Las Torres 1450, Quilicura" style="height:160px;border:1px solid var(--ds-border);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;color:var(--ds-accent)">
+<span class="ic lg i-pin" aria-hidden="true"></span>
+</div>
+<span class="t-caption">Confirma que el punto coincide con tu casa. Si no, muévelo en el mapa.</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Depto. o casa" default-value="Casa 12" hint-size="100%,72px"></x-import>
+<div style="display:flex"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="warning" hint-size="220px,22px">Cambio en revisión por RRHH · 29-10-2026</x-import></div>
+</div>
+</fieldset>
+<fieldset class="pg-fieldset">
+<legend>Datos bancarios</legend>
+<div style="display:flex;flex-direction:column;gap:16px">
+<sc-if value="{{ vB }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" titulo="Pendiente de validación por RRHH" icono="lock" hint-size="100%,90px">Pediste cambiar a Cuenta corriente Banco de Chile terminada en 4471 el 29-10-2026. Avisamos a RRHH y a ti cuando se valide. Mientras tanto, tu sueldo se paga en la cuenta actual.</x-import>
+</sc-if>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Banco" value="BancoEstado" options="{{ bancoOpts }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Tipo de cuenta" value="Cuenta RUT" options="{{ cuentaOpts }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Número de cuenta" default-value="16234567" mono="{{ true }}" input-mode="numeric" hint-size="100%,72px"></x-import>
+</div>
+<span class="t-caption">{{ bancoHint }}</span>
+</div>
+</fieldset>
+<fieldset class="pg-fieldset">
+<legend>Previsión · solo lectura</legend>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" rows="{{ previsionKv }}" hint-size="100%,90px"></x-import>
+<span class="t-caption" style="display:block;margin-top:8px">Para cambiar tu AFP o salud, habla con RRHH.</span>
+</fieldset>
+<fieldset class="pg-fieldset">
+<legend>Tallas de uniforme</legend>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Camisa" value="M" options="{{ tallaOpts }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Chaqueta" value="M" options="{{ tallaOpts }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Pantalón" value="42" options="{{ pantOpts }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Calzado" value="38" options="{{ calzOpts }}" hint-size="100%,72px"></x-import>
+</div>
+</fieldset>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ActionBar" hint-size="100%,72px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="110px,40px">Cancelar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="check" on-click="{{ guardar }}" hint-size="160px,40px">Guardar cambios</x-import>
+</x-import>
+</div>
+</sc-if>
+<sc-if value="{{ sPrivacidad }}" hint-placeholder-val="{{ false }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:24px 16px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:24px">
+<section style="display:flex;flex-direction:column;gap:8px">
+<h2 class="t-label muted m0">Qué datos tuyos tratamos y para qué</h2>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" padding="{{ 0 }}" style="overflow:hidden" hint-size="100%,360px">
+<sc-for list="{{ datosTrata }}" as="r" hint-placeholder-count="5">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" icon="{{ r.icon }}" title="{{ r.title }}" subtitle="{{ r.subtitle }}" hint-size="100%,72px"></x-import>
+</sc-for>
+</x-import>
+</section>
+<section style="display:flex;flex-direction:column;gap:8px">
+<h2 class="t-label muted m0">Quién los ve</h2>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" padding="{{ 0 }}" style="overflow:hidden" hint-size="100%,360px">
+<sc-for list="{{ quienVe }}" as="r" hint-placeholder-count="5">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" icon="{{ r.icon }}" title="{{ r.title }}" subtitle="{{ r.subtitle }}" hint-size="100%,72px"></x-import>
+</sc-for>
+</x-import>
+<span class="t-caption">El cliente de la instalación ve tu nombre, foto y RUT para controlar quién entra, y solo los documentos que la empresa marcó como visibles.</span>
+</section>
+</div>
+<div style="display:flex;flex-direction:column;gap:24px">
+<section style="display:flex;flex-direction:column;gap:8px">
+<h2 class="t-label muted m0">Tus consentimientos</h2>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,260px">
+<div style="display:flex;flex-direction:column;gap:4px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ cons.firma }}" on-change="{{ consFirma }}" label="Firma por medio electrónico" description="Si lo revocas, RRHH te enviará los documentos en papel." hint-size="100%,56px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ cons.correo }}" on-change="{{ consCorreo }}" label="Avisos por correo" description="Revocable. Los avisos obligatorios siguen llegando al portal." hint-size="100%,56px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ cons.clima }}" on-change="{{ consClima }}" label="Encuestas de clima laboral" description="Revocable cuando quieras." hint-size="100%,56px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ true }}" disabled="{{ true }}" label="Foto en tu credencial" description="No se puede revocar: la exige la normativa de seguridad privada." hint-size="100%,56px"></x-import>
+</div>
+</x-import>
+</section>
+<section style="display:flex;flex-direction:column;gap:8px">
+<h2 class="t-label muted m0">Tus derechos</h2>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" padding="{{ 0 }}" style="overflow:hidden" hint-size="100%,360px">
+<sc-for list="{{ derechos }}" as="r" hint-placeholder-count="5">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" icon="{{ r.icon }}" title="{{ r.title }}" subtitle="{{ r.subtitle }}" chevron="{{ true }}" on-click="{{ noop }}" hint-size="100%,72px"></x-import>
+</sc-for>
+</x-import>
+<span class="t-caption">Cada derecho se pide como solicitud y la ves en Solicitudes. Plazo de respuesta: 30 días corridos, prorrogable una vez por 30 días más.</span>
+</section>
+<div style="display:flex;flex-direction:column;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" size="lg" block="{{ true }}" icon="download" hint-size="100%,48px">Descargar mis datos</x-import>
+<span class="t-caption">Recibirás un archivo PDF y CSV en Mis documentos.</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Enlace" href="#" hint-size="260px,44px">Política de privacidad de Atlas Seguridad SpA</x-import>
+</div>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ sNotif }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:16px;max-width:720px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="neutral" titulo="Algunos avisos son obligatorios" icono="lock" hint-size="100%,72px">Los cambios de pauta y los avisos de la central son instrucciones de trabajo: siempre te llegan por notificación y por correo.</x-import>
+<sc-if value="{{ vB }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="WhatsApp al +56 9 8765 4321" hint-size="100%,56px">Variante B · propuesta, a confirmar por Carlos. Usa el teléfono de Mis datos.</x-import>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" padding="{{ 0 }}" style="overflow:hidden" hint-size="100%,420px">
+<div style="display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--ds-border)">
+<span class="t-caption" style="flex:1">Aviso</span>
+<span class="t-caption" style="width:48px;text-align:center">Sistema</span>
+<span class="t-caption" style="width:48px;text-align:center">Correo</span>
+<sc-if value="{{ vB }}" hint-placeholder-val="{{ false }}"><span class="t-caption" style="width:48px;text-align:center">WhatsApp</span></sc-if>
+</div>
+<sc-for list="{{ notifRows }}" as="r" hint-placeholder-count="6">
+<div style="display:flex;align-items:center;gap:12px;padding:8px 16px;border-bottom:1px solid var(--ds-border);min-height:60px">
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+<span class="t-label">{{ r.title }}</span>
+<sc-if value="{{ r.fixed }}" hint-placeholder-val="{{ false }}"><span class="t-caption" style="display:flex;align-items:center;gap:4px"><span class="ic sm i-lock" aria-hidden="true"></span>Obligatorio, no se puede apagar</span></sc-if>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ r.sis }}" disabled="{{ r.fixed }}" on-change="{{ r.setSis }}" hint-size="48px,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ r.mail }}" disabled="{{ r.fixed }}" on-change="{{ r.setMail }}" hint-size="48px,44px"></x-import>
+<sc-if value="{{ vB }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ r.wa }}" disabled="{{ r.fixed }}" on-change="{{ r.setWa }}" hint-size="48px,44px"></x-import></sc-if>
+</div>
+</sc-for>
+</x-import>
+</div>
+</sc-if>
+<sc-if value="{{ sMas }}" hint-placeholder-val="{{ false }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:16px;align-items:start">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,340px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;gap:12px;align-items:center">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Avatar" initials="MS" size="{{ avatarSize }}" hint-size="48px,48px"></x-import>
+<div style="display:flex;flex-direction:column;min-width:0">
+<span class="t-subheading">María Fernanda Soto Rivas</span>
+<span class="t-mono subtle">16.234.567-8</span>
+</div>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" rows="{{ perfil }}" hint-size="100%,200px"></x-import>
+</div>
+</x-import>
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" padding="{{ 0 }}" style="overflow:hidden" hint-size="100%,290px">
+<sc-for list="{{ masRows }}" as="r" hint-placeholder-count="4">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" icon="{{ r.icon }}" title="{{ r.title }}" subtitle="{{ r.subtitle }}" chevron="{{ true }}" on-click="{{ noop }}" hint-size="100%,72px"></x-import>
+</sc-for>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" size="lg" block="{{ true }}" hint-size="100%,48px">Cerrar sesión</x-import>
+<span class="t-caption" style="text-align:center">OPAI 2.0 · Portal Trabajador · Atlas Seguridad SpA</span>
+</div>
+</div>
+</sc-if>
+</sc-if>
+</x-import>
+</sc-if>
+</x-import>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;screen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;inicio&quot;,&quot;pauta&quot;,&quot;solicitudes&quot;,&quot;extra&quot;,&quot;solicitud&quot;,&quot;nueva&quot;,&quot;documentos&quot;,&quot;firmar&quot;,&quot;mas&quot;,&quot;central&quot;,&quot;aviso&quot;,&quot;mensaje&quot;,&quot;avisar&quot;,&quot;rondas&quot;,&quot;accesos&quot;,&quot;datos&quot;,&quot;privacidad&quot;,&quot;notificaciones&quot;],&quot;default&quot;:&quot;inicio&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;phone&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ok&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;,&quot;bloqueado&quot;,&quot;sinconexion&quot;],&quot;default&quot;:&quot;ok&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;motivo&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;turno&quot;,&quot;instalacion&quot;,&quot;via&quot;,&quot;dispositivo&quot;],&quot;default&quot;:&quot;turno&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;asistencia&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;rondas&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;accesos&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;variante&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;A&quot;,&quot;B&quot;],&quot;default&quot;:&quot;A&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;acuse&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;tipoMsg&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;novedad&quot;,&quot;consulta&quot;,&quot;urgencia&quot;],&quot;default&quot;:&quot;novedad&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;confirmar&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;guardado&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;cenTab&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;avi&quot;,&quot;env&quot;],&quot;default&quot;:&quot;avi&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;tipo&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;permiso&quot;,&quot;vacaciones&quot;,&quot;anticipo&quot;,&quot;certificado&quot;],&quot;default&quot;:&quot;permiso&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;doc&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;n1&quot;,&quot;rrhh&quot;,&quot;n2&quot;],&quot;default&quot;:&quot;n1&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;docTab&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;por&quot;,&quot;fir&quot;],&quot;default&quot;:&quot;por&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;firmado&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;rg&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;g2&quot;,&quot;g3&quot;,&quot;g3e&quot;,&quot;g4qr&quot;,&quot;g4gps&quot;,&quot;g4gpsP&quot;,&quot;g4gpsF&quot;,&quot;g4res&quot;,&quot;g4nov&quot;,&quot;g10&quot;,&quot;g5&quot;,&quot;g6&quot;,&quot;g7&quot;],&quot;default&quot;:&quot;g2&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;barra&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;oculta&quot;,&quot;visible&quot;],&quot;default&quot;:&quot;oculta&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;rgMapa&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;abierto&quot;,&quot;plegado&quot;],&quot;default&quot;:&quot;abierto&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;$preview&quot;:{&quot;width&quot;:375,&quot;height&quot;:812}}">
+class Component extends DCLogic {
+  state = { tab: null, tipo: null, offered: { 2: true }, acepto: false, firmado: null, sel: "SOL-0148" };
+  rootRef = React.createRef();
+  componentDidMount() {
+    const patch = () => {
+      const r = this.rootRef.current; if (!r) return;
+      const h = r.querySelector(".sidebar-head");
+      if (h && h.dataset.pt !== "1") {
+        const cap = h.querySelector(".t-caption");
+        if (cap) { cap.textContent = "Trabajador"; Object.assign(h.style, { flexDirection: "column", alignItems: "flex-start", justifyContent: "center", gap: "0" }); h.dataset.pt = "1"; }
+      }
+    };
+    const patchRg = () => {
+      const r = this.rootRef.current; if (!r) return;
+      r.querySelectorAll('[data-rg-embed] .safe-top, [data-rg-embed] nav.tabbar').forEach((e) => { e.style.display = "none"; });
+      r.querySelectorAll('[data-rg-embed] .topbar').forEach((t) => { if (t.querySelector(".tenant")) t.style.display = "none"; });
+    };
+    const both = () => { patch(); patchRg(); };
+    this.mo = new MutationObserver(both);
+    if (this.rootRef.current) this.mo.observe(this.rootRef.current, { childList: true, subtree: true });
+    both();
+  }
+  componentWillUnmount() { this.mo && this.mo.disconnect(); }
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const p = this.props;
+    const device = p.device ?? "phone";
+    const isPhone = device === "phone";
+    const screen = p.screen ?? "inicio";
+    const st = p.estado ?? "ok";
+    const asis = p.asistencia ?? true;
+    const vb = (p.variante ?? "A") === "B";
+    const noop = () => {};
+    const btn = (label, extra) => (NS.Button ? h(NS.Button, { variant: "secondary", ...extra }, label) : null);
+    const dl = (label) => (NS.IconButton ? h(NS.IconButton, { icon: "download", label: "Descargar " + label }) : null);
+
+    const hasRondas = p.rondas ?? true;
+    const hasAccesos = p.accesos ?? true;
+    const tabs = [{ id: "ini", label: "Inicio", icon: "home" }];
+    if (asis) tabs.push({ id: "mar", label: "Marcar", icon: "clock" });
+    if (hasRondas) tabs.push({ id: "ron", label: "Rondas", icon: "route" });
+    tabs.push({ id: "cen", label: "Central", icon: "message" }, { id: "mas", label: "Más", icon: "more" });
+    const masItems = [{ id: "hor", label: "Mi horario", icon: "calendar" }, { id: "doc", label: "Mis documentos", icon: "file" }, { id: "sol", label: "Solicitudes", icon: "ticket" }, { id: "ext", label: "Turnos extra", icon: "briefcase" }];
+    if (hasAccesos) masItems.push({ id: "acc", label: "Accesos", icon: "scan" });
+    masItems.push({ id: "dat", label: "Mis datos", icon: "user" }, { id: "pri", label: "Privacidad", icon: "lock" }, { id: "not", label: "Notificaciones", icon: "bell" });
+    const groups = [{ items: tabs.filter((t) => t.id !== "mas") }, { title: "Más", items: masItems }];
+
+    const isSol = ["solicitudes", "extra", "solicitud"].includes(screen);
+    const isDoc = ["documentos", "firmar"].includes(screen);
+    const tab = this.state.tab ?? (screen === "extra" ? "extra" : isDoc ? (p.docTab ?? "por") : "mis");
+    const solTab = isSol ? (tab === "extra" ? "extra" : "mis") : null;
+    const docTab = isDoc ? (tab === "fir" ? "fir" : "por") : null;
+
+    const M = (id) => (device === "desktop" ? id : "mas");
+    const activeMap = { inicio: "ini", pauta: M("hor"), solicitudes: M("sol"), extra: M("ext"), solicitud: M("sol"), nueva: M("sol"), documentos: M("doc"), firmar: M("doc"), mas: "mas", central: "cen", aviso: "cen", mensaje: "cen", avisar: "cen", rondas: "ron", accesos: M("acc"), datos: M("dat"), privacidad: M("pri"), notificaciones: M("not") };
+    const titles = { inicio: "Inicio", pauta: "Mi horario", solicitudes: "Solicitudes", extra: "Turnos extra", solicitud: "Solicitudes", nueva: "Nueva solicitud", documentos: "Mis documentos", firmar: "Mis documentos", mas: "Más", central: "Central", aviso: "Central", mensaje: "Central", avisar: "Avisar a la central", rondas: "Rondas", accesos: "Control de accesos", datos: "Mis datos", privacidad: "Privacidad y mis datos", notificaciones: "Notificaciones" };
+
+    const heads = {
+      inicio: { eyebrow: "Viernes 30-10-2026", title: "Hola, María" },
+      pauta: { title: "Mi horario", subtitle: "Noviembre 2026 · Patrón 4x4" },
+      solicitudes: { title: "Solicitudes", subtitle: "Permisos, vacaciones, anticipos, certificados y turnos extra" },
+      extra: { title: "Solicitudes", subtitle: "Permisos, vacaciones, anticipos, certificados y turnos extra" },
+      solicitud: { title: "Solicitudes", subtitle: "Permisos, vacaciones, anticipos, certificados y turnos extra" },
+      nueva: { title: "Nueva solicitud", subtitle: "RRHH la revisa y te responde aquí.", badge: vb ? (NS.Badge ? h(NS.Badge, { tone: "accent", dot: false }, "Variante B · propuesta") : null) : null },
+      documentos: { title: "Mis documentos" },
+      firmar: { title: "Mis documentos" },
+      mas: { title: "Más" },
+      central: { title: "Central", subtitle: "Central de monitoreo · Atlas Seguridad SpA · 24 horas" },
+      aviso: { title: "Central", subtitle: "Central de monitoreo · Atlas Seguridad SpA · 24 horas" },
+      mensaje: { title: "Central", subtitle: "Central de monitoreo · Atlas Seguridad SpA · 24 horas" },
+      avisar: { title: "Avisar a la central", subtitle: "Queda registrado y la central te responde aquí.", badge: vb ? (NS.Badge ? h(NS.Badge, { tone: "accent", dot: false }, "Variante B · propuesta") : null) : null },
+      rondas: { title: "Mis rondas de hoy", subtitle: "Viernes 30-10-2026 · Planta Quilicura" },
+      accesos: { title: "Control de accesos", subtitle: "Planta Quilicura · Portería 1 · turno de hoy 08:00–20:00" },
+      datos: { title: "Mis datos", subtitle: "Al guardar, se actualiza tu ficha en Atlas Seguridad SpA.", badge: vb ? (NS.Badge ? h(NS.Badge, { tone: "accent", dot: false }, "Variante B · propuesta") : null) : null },
+      privacidad: { title: "Privacidad y mis datos", subtitle: "Ley 21.719 de protección de datos personales" },
+      notificaciones: { title: "Notificaciones", subtitle: "Qué avisos recibes y por dónde.", badge: vb ? (NS.Badge ? h(NS.Badge, { tone: "accent", dot: false }, "Variante B · propuesta") : null) : null },
+    };
+    const backs = { avisar: "Central", aviso: isPhone ? "Central" : null, mensaje: isPhone ? "Central" : null, accesos: isPhone ? "Más" : null, datos: isPhone ? "Más" : null, privacidad: isPhone ? "Más" : null, notificaciones: isPhone ? "Más" : null, documentos: isPhone ? "Más" : null, solicitudes: isPhone ? "Más" : null, pauta: isPhone ? "Más" : null, solicitud: isPhone ? "Solicitudes" : null, nueva: "Solicitudes", firmar: isPhone ? "Mis documentos" : null };
+    const showHeader = !(isPhone && ["solicitud", "firmar", "aviso", "mensaje"].includes(screen)) && !(screen === "rondas" && st !== "bloqueado");
+
+    const sCfg = {
+      inicio: { icon: "calendar", vacio: "Aún no tienes turnos asignados", vacioDesc: "Cuando RRHH publique tu pauta, verás aquí tu próximo turno y tus avisos.", act: "Ver turnos extra", error: "No pudimos cargar tu inicio" },
+      pauta: { icon: "calendar", vacio: "Aún no hay pauta para noviembre", vacioDesc: "RRHH la publica antes de fin de mes. Te llegará un aviso.", act: "Ver octubre", error: "No pudimos cargar tu horario" },
+      solicitudes: { icon: "ticket", vacio: "Aún no tienes solicitudes", vacioDesc: "Pide permisos, vacaciones, anticipos o certificados.", act: "Nueva solicitud", primary: true, error: "No pudimos cargar tus solicitudes" },
+      extra: { icon: "briefcase", vacio: "No hay turnos extra disponibles", vacioDesc: "Te avisaremos cuando la empresa publique uno.", act: "Ver mi horario", error: "No pudimos cargar los turnos extra" },
+      solicitud: { icon: "ticket", vacio: "Esta solicitud ya no existe", vacioDesc: "Puede que RRHH la haya cerrado.", act: "Ver solicitudes", error: "No pudimos cargar la solicitud" },
+      nueva: { icon: "ticket", vacio: "No hay tipos de solicitud habilitados", vacioDesc: "Pídele a RRHH que los active.", act: "Llamar a RRHH", error: "No pudimos cargar el formulario" },
+      documentos: { icon: "file", vacio: "No tienes documentos por firmar", vacioDesc: "Cuando RRHH te envíe uno, aparecerá aquí.", act: "Ver firmados", error: "No pudimos cargar tus documentos" },
+      firmar: { icon: "file", vacio: "Este documento ya no está disponible", vacioDesc: "RRHH lo retiró o lo reemplazó por otro.", act: "Ver mis documentos", error: "No pudimos cargar el documento" },
+      mas: { icon: "route", vacio: "Aún no tienes rondas asignadas", vacioDesc: "Tu supervisor las asigna por instalación.", act: "Ver mi horario", error: "No pudimos cargar tu perfil" },
+    };
+    Object.assign(sCfg, {
+      central: { icon: "message", vacio: "Aún no hay avisos ni mensajes", vacioDesc: "Aquí llegan las consignas de la central y lo que tú le envíes.", act: "Avisar a la central", primary: true, error: "No pudimos cargar la central" },
+      aviso: { icon: "message", vacio: "Este aviso ya no está disponible", vacioDesc: "La central lo reemplazó por uno nuevo.", act: "Ver avisos", error: "No pudimos cargar el aviso" },
+      mensaje: { icon: "message", vacio: "Este mensaje ya no está disponible", vacioDesc: "Revisa tus mensajes enviados.", act: "Ver mensajes", error: "No pudimos cargar el mensaje" },
+      avisar: { icon: "message", vacio: "No tienes una instalación asignada hoy", vacioDesc: "Para avisar a la central necesitas un turno asignado.", act: "Ver mi horario", error: "No pudimos preparar el mensaje" },
+      rondas: { icon: "route", vacio: "No hay rondas en este turno", vacioDesc: "Tu supervisor no programó rondas para Planta Quilicura hoy.", act: "Avisar a la central", error: "No pudimos cargar tus rondas", bloq: "Rondas disponibles solo en tu turno", bloqDesc: "Puedes hacer rondas en Planta Quilicura durante tu turno. El próximo es el sábado 31-10-2026, 08:00–20:00.", bloqI: "Bodega Lampa no está en tu asignación", bloqIDesc: "Solo puedes hacer rondas en las instalaciones donde tienes turno hoy: Planta Quilicura." },
+      accesos: { icon: "scan", vacio: "Aún no hay movimientos en este turno", vacioDesc: "Registra la primera entrada de persona o vehículo.", act: "Registrar entrada", primary: true, error: "No pudimos cargar los accesos", bloq: "Accesos disponibles solo en tu turno", bloqDesc: "Puedes registrar entradas y salidas en Planta Quilicura durante tu turno. El próximo es el sábado 31-10-2026, 08:00–20:00.", bloqI: "Torre Apoquindo no está en tu asignación", bloqIDesc: "Solo registras accesos donde tienes turno hoy y la instalación tiene control de accesos." },
+      datos: { icon: "user", vacio: "Aún no tienes datos cargados", vacioDesc: "RRHH completa tu ficha al contratarte. Pídele que la revise.", act: "Llamar a RRHH", error: "No pudimos cargar tus datos" },
+      privacidad: { icon: "lock", vacio: "Aún no hay información de privacidad", vacioDesc: "La empresa todavía no publica su política.", act: "Llamar a RRHH", error: "No pudimos cargar tu información de privacidad" },
+      notificaciones: { icon: "bell", vacio: "No hay avisos configurables", vacioDesc: "Por ahora solo recibes los avisos obligatorios.", act: "Ver avisos", error: "No pudimos cargar tus notificaciones" },
+    });
+    const c = sCfg[screen] || sCfg.inicio;
+    const sc = { ...c, vacioAction: btn(c.act, { size: "lg", variant: c.primary ? "primary" : "secondary", icon: c.primary ? "plus" : undefined }) };
+
+    // Inicio
+    const avisos = [
+      { icon: "swap", title: "Cambio en tu pauta", subtitle: "03-11-2026 · Bodega Lampa · 20:00–08:00", badge: { tone: "info", label: "Nuevo" } },
+      { icon: "file", title: "Reglamento interno 2026", subtitle: "Documento por firmar · RRHH", badge: { tone: "warning", label: "Por firmar" } },
+      { icon: "check-circle", title: "Certificado de antigüedad", subtitle: "Solicitud resuelta · 29-10-2026", chevron: true },
+    ];
+    const liquidaciones = [
+      { icon: "wallet", title: "Septiembre 2026", subtitle: "Líquido $ 684.320 · pagada 30-09-2026", trailing: dl("liquidación de septiembre") },
+      { icon: "wallet", title: "Agosto 2026", subtitle: "Líquido $ 671.905 · pagada 31-08-2026", trailing: dl("liquidación de agosto") },
+      { icon: "wallet", title: "Julio 2026", subtitle: "Líquido $ 702.110 · pagada 31-07-2026", trailing: dl("liquidación de julio") },
+    ];
+    const docsRecientes = [
+      { icon: "file", title: "Recepción de EPP", subtitle: "Firmado 14-10-2026", trailing: dl("recepción de EPP") },
+      { icon: "file", title: "Anexo de contrato · jornada", subtitle: "Firmado 01-09-2025", trailing: dl("anexo de contrato") },
+    ];
+
+    // Pauta
+    const D = (dow, d, code, inst, hor, cambio) => ({ dow, d, code, inst: inst || "Libre", hor: hor || "", libre: code === "L", cambio: cambio || null, hasCambio: !!cambio, cellLabel: code === "L" ? "Libre" : code === "N" ? "Noche" : "Día" });
+    const PQ = "Planta Quilicura · Portería 1";
+    const dias = [
+      D("Dom", "01", "D", PQ, "08:00–20:00"), D("Lun", "02", "D", PQ, "08:00–20:00"),
+      D("Mar", "03", "N", "Bodega Lampa · Acceso camiones", "20:00–08:00", "Antes: Planta Quilicura · 08:00–20:00"),
+      D("Mié", "04", "L"), D("Jue", "05", "L"), D("Vie", "06", "L"), D("Sáb", "07", "L"),
+      D("Dom", "08", "D", PQ, "08:00–20:00"), D("Lun", "09", "D", PQ, "09:00–21:00", "Antes: 08:00–20:00"),
+      D("Mar", "10", "D", PQ, "08:00–20:00"), D("Mié", "11", "D", PQ, "08:00–20:00"),
+      D("Jue", "12", "L"), D("Vie", "13", "L"), D("Sáb", "14", "L"),
+    ];
+
+    // Turnos extra
+    const off = this.state.offered;
+    const extras = [
+      { id: 1, fecha: "Jue 05-11-2026", inst: "Planta Quilicura", puesto: "Portería 1 · Día", hor: "08:00–20:00", monto: "$ 45.000" },
+      { id: 2, fecha: "Vie 06-11-2026", inst: "Bodega Lampa", puesto: "Acceso camiones · Noche", hor: "20:00–08:00", monto: "$ 52.000" },
+      { id: 3, fecha: "Mar 03-11-2026", inst: "Torre Apoquindo", puesto: "Recepción · Día", hor: "08:00–20:00", monto: "$ 45.000", blocked: "Ese día entras a las 20:00 en Bodega Lampa. Juntos suman 24 horas seguidas y no se permite doblar turno." },
+      { id: 4, fecha: "Sáb 07-11-2026", inst: "Torre Apoquindo", puesto: "Recepción · Día", hor: "08:00–20:00", monto: "$ 48.000" },
+    ].map((e) => ({ ...e, isOffered: !!off[e.id] && !e.blocked, canOffer: !off[e.id] && !e.blocked, isBlocked: !!e.blocked,
+      offer: () => this.setState({ offered: { ...off, [e.id]: true } }), retire: () => this.setState({ offered: { ...off, [e.id]: false } }) }));
+
+    // Solicitudes
+    const sel = this.state.sel;
+    const solicitudes = [
+      { id: "SOL-0150", tipo: "Certificado de remuneraciones", det: "Últimos 3 meses · 30-10-2026", estado: "Abierto", tone: "accent" },
+      { id: "SOL-0148", tipo: "Anticipo de sueldo", det: "$ 100.000 · 28-10-2026", estado: "Esperando al solicitante", tone: "warning" },
+      { id: "SOL-0142", tipo: "Vacaciones", det: "16-12-2026 – 27-12-2026 · 7 días hábiles", estado: "En atención", tone: "info" },
+      { id: "SOL-0139", tipo: "Permiso", det: "22-10-2026 · trámite médico", estado: "Resuelto", tone: "success" },
+      { id: "SOL-0131", tipo: "Certificado de antigüedad", det: "02-10-2026", estado: "Cerrado", tone: "neutral" },
+    ].map((s) => ({ ...s, badge: { tone: s.tone, label: s.estado }, chevron: isPhone, rowStyle: !isPhone && s.id === sel ? { background: "var(--ds-accent-muted)" } : {}, pick: () => this.setState({ sel: s.id }) }));
+    const timeline = [
+      { initials: "MS", who: "Tú", action: "creaste la solicitud por $ 100.000", when: "28-10-2026 10:14" },
+      { initials: "PR", who: "Paula Rojas", action: "tomó la solicitud", when: "28-10-2026 11:02", changes: [{ field: "Estado", from: "Abierto", to: "En atención" }] },
+      { initials: "PR", who: "Paula Rojas", action: "te preguntó: «¿Depositamos en tu cuenta RUT terminada en 5678?»", when: "29-10-2026 09:30", changes: [{ field: "Estado", from: "En atención", to: "Esperando al solicitante" }] },
+    ];
+    const ficha = [
+      { label: "Monto", value: "$ 100.000", numeric: true },
+      { label: vb ? "Tope definido por la empresa" : "Tope del mes", value: "$ 200.000", numeric: true },
+      { label: "Pago estimado", value: "05-11-2026", numeric: true },
+      { label: "Atiende", value: "Paula Rojas · RRHH" },
+    ];
+
+    // Nueva solicitud
+    const tipo = this.state.tipo ?? p.tipo ?? "permiso";
+    const tipos = [
+      { valor: "permiso", etiqueta: "Permiso", descripcion: "Ausentarte uno o más días" },
+      { valor: "vacaciones", etiqueta: "Vacaciones", descripcion: "Usar tus días de feriado legal" },
+      { valor: "anticipo", etiqueta: "Anticipo", descripcion: "Parte de tu sueldo antes de fin de mes" },
+      { valor: "certificado", etiqueta: "Certificado", descripcion: "Antigüedad, remuneraciones o vigencia de contrato" },
+    ];
+    const saldo = [
+      { label: "Saldo disponible", value: "14 días hábiles", numeric: true },
+      { label: "Días que pides", value: "7 días hábiles", numeric: true },
+      { label: "Te quedarían", value: "7 días hábiles", numeric: true },
+    ];
+
+    // Documentos
+    const porFirmar = [
+      { id: "n1", icon: "file", title: "Reglamento interno 2026", subtitle: "Firma simple · enviado 29-10-2026", badge: { tone: "accent", label: "Listo para firmar" } },
+      { id: "epp", icon: "file", title: "Recepción de EPP", subtitle: "Firma simple · 2 chalecos reflectantes, 1 linterna", badge: { tone: "accent", label: "Listo para firmar" } },
+      { id: "rrhh", icon: "file", title: "Anexo de contrato · cambio de jornada", subtitle: "Firma avanzada · enviado 27-10-2026", badge: { tone: "warning", label: "Esperando aprobación de RRHH" } },
+      { id: "n2", icon: "file", title: "Contrato de trabajo · renovación", subtitle: "Firma avanzada · aprobado por RRHH", badge: { tone: "neutral", label: "Firma próximamente" } },
+    ];
+    const firmados = [
+      { icon: "file", title: "Recepción de EPP", subtitle: "Firmado 14-10-2026", trailing: dl("recepción de EPP") },
+      { icon: "file", title: "Reglamento interno 2025", subtitle: "Firmado 05-01-2025", trailing: dl("reglamento interno 2025") },
+      { icon: "file", title: "Anexo de contrato · jornada", subtitle: "Firmado 01-09-2025", trailing: dl("anexo de contrato") },
+      { icon: "file", title: "Contrato de trabajo", subtitle: "Firmado 01-03-2023", trailing: dl("contrato de trabajo") },
+    ];
+    const docId = p.doc ?? "n1";
+    const docs = {
+      n1: { kind: "Firma simple", title: "Reglamento interno 2026", meta: "Enviado por Paula Rojas · RRHH · 29-10-2026 · 18 páginas", paperTitle: "Reglamento interno de orden, higiene y seguridad", paperSub: "Atlas Seguridad SpA · vigente desde 01-11-2026", paperText: "Título I. Disposiciones generales. Artículo 1. El presente reglamento regula las obligaciones y prohibiciones a que debe sujetarse el personal en relación con sus labores, permanencia y vida en las instalaciones de la empresa y de sus clientes." },
+      rrhh: { kind: "Firma avanzada", title: "Anexo de contrato · cambio de jornada", meta: "Enviado por Paula Rojas · RRHH · 27-10-2026 · 2 páginas", paperTitle: "Anexo de contrato de trabajo", paperSub: "Atlas Seguridad SpA y María Fernanda Soto Rivas", paperText: "Primero. Las partes acuerdan modificar la cláusula cuarta del contrato de trabajo, relativa a la jornada, que a contar del 01-12-2026 se distribuirá en turnos rotativos de 12 horas según la pauta 4x4." },
+      n2: { kind: "Firma avanzada", title: "Contrato de trabajo · renovación", meta: "Aprobado por Paula Rojas · RRHH · 28-10-2026 · 6 páginas", paperTitle: "Contrato de trabajo", paperSub: "Atlas Seguridad SpA y María Fernanda Soto Rivas", paperText: "En Santiago, a 28-10-2026, entre Atlas Seguridad SpA, RUT 76.543.210-K, y doña María Fernanda Soto Rivas, RUT 16.234.567-8, se ha convenido el siguiente contrato de trabajo." },
+    };
+    const doc = docs[docId] || docs.n1;
+    const isN1 = docId === "n1";
+    const firmado = this.state.firmado ?? (p.firmado ?? false);
+    const pasos = docId === "rrhh"
+      ? [{ icon: "clock", title: "Aprobación RRHH", subtitle: "Desde 27-10-2026", badge: { tone: "warning", label: "Esperando" } }, { icon: "lock", title: "Firma N2", subtitle: "Prueba de vida", badge: { tone: "neutral", label: "Próximamente" } }]
+      : [{ icon: "check-circle", title: "Aprobación RRHH", subtitle: "28-10-2026", badge: { tone: "success", label: "Aprobado" } }, { icon: "lock", title: "Firma N2", subtitle: "Prueba de vida", badge: { tone: "neutral", label: "Próximamente" } }];
+    const n2Alerta = docId === "rrhh"
+      ? { tono: "info", titulo: "RRHH está revisando este anexo", texto: "Podrás firmarlo cuando lo aprueben. Te llegará un aviso." }
+      : { tono: "neutral", titulo: "La firma avanzada estará disponible pronto", texto: "Los contratos y anexos se firman con prueba de vida, que aún no está habilitada. Te avisaremos cuando puedas firmar. Mientras tanto, puedes descargar el borrador." };
+
+    // Más
+    const perfil = [
+      { label: "Cargo", value: "Guardia" },
+      { label: "Instalación", value: "Planta Quilicura" },
+      { label: "Contrato", value: "Indefinido desde 01-03-2023" },
+      { label: "Supervisor", value: "Jorge Muñoz" },
+      { label: "Teléfono", value: "+56 9 8765 4321", numeric: true },
+    ];
+    const masRows = [
+      { icon: "calendar", title: "Mi horario", subtitle: "Turnos de noviembre" },
+      { icon: "file", title: "Mis documentos", subtitle: "4 por firmar" },
+      { icon: "ticket", title: "Solicitudes", subtitle: "Permisos, vacaciones, anticipos y certificados" },
+      { icon: "briefcase", title: "Turnos extra", subtitle: "Ofrécete a cubrir turnos" },
+      ...(hasAccesos ? [{ icon: "scan", title: "Accesos", subtitle: "Planta Quilicura · entradas y salidas" }] : []),
+      { icon: "user", title: "Mis datos", subtitle: "Contacto, dirección, banco y tallas" },
+      { icon: "lock", title: "Privacidad", subtitle: "Tus datos y tus derechos" },
+      { icon: "bell", title: "Notificaciones", subtitle: "Qué avisos recibes y por dónde" },
+    ];
+
+    // ---- v2: Central
+    const isCen = ["central", "aviso", "mensaje"].includes(screen);
+    const stTab = this.state.tab;
+    const cenTab = isCen ? (stTab === "avi" || stTab === "env" ? stTab : (screen === "mensaje" ? "env" : screen === "aviso" ? "avi" : (p.cenTab ?? "avi"))) : null;
+    const acuse = this.state.acuse ?? (p.acuse ?? false);
+    const avisosCentral = [
+      { id: "AV-2291", icon: "flag", title: "Consigna: control de camiones", subtitle: "Hoy 07:40 · Planta Quilicura", badge: acuse ? { tone: "success", label: "Recibido" } : { tone: "warning", label: "Sin confirmar" } },
+      { id: "AV-2287", icon: "swap", title: "Cambio de turno del 03-11-2026", subtitle: "28-10-2026 · Bodega Lampa · 20:00–08:00", badge: { tone: "success", label: "Recibido" } },
+      { id: "AV-2270", icon: "info", title: "Corte de luz programado", subtitle: "25-10-2026 · Planta Quilicura", badge: { tone: "success", label: "Recibido" } },
+    ].map((a, i) => ({ ...a, rowStyle: !isPhone && i === 0 ? { background: "var(--ds-accent-muted)" } : {} }));
+    const mensajes = [
+      { id: "MC-0412", icon: "message", title: "Novedad · Portón 2 no cierra", subtitle: "Hoy 06:55 · Planta Quilicura", badge: { tone: "success", label: "Respondido" } },
+      { id: "MC-0409", icon: "message", title: "Consulta · Retiro de basura", subtitle: "27-10-2026 · Planta Quilicura", badge: { tone: "info", label: "Recibido por la central" } },
+      { id: "MC-0405", icon: "alert", title: "Urgencia · Persona en el perímetro", subtitle: "22-10-2026 02:14 · Respondido", badge: { tone: "danger", label: "Urgencia" } },
+      { id: "MC-0401", icon: "message", title: "Consulta · Llaves de bodega 3", subtitle: "20-10-2026 · Planta Quilicura", badge: { tone: "neutral", label: "Enviado" } },
+    ].map((m, i) => ({ ...m, rowStyle: !isPhone && i === 0 ? { background: "var(--ds-accent-muted)" } : {} }));
+    const msgTimeline = [
+      { initials: "MS", who: "Tú", action: "enviaste una novedad con 1 foto", when: "30-10-2026 06:55" },
+      { initials: "RP", who: "Rodrigo Pérez · Central", action: "recibió el mensaje", when: "30-10-2026 06:56", changes: [{ field: "Estado", from: "Enviado", to: "Recibido por la central" }] },
+      { initials: "RP", who: "Rodrigo Pérez · Central", action: "respondió: «Avisamos a mantención. Quédate en el portón hasta que llegue el técnico, 07:30 aprox.»", when: "30-10-2026 07:02", changes: [{ field: "Estado", from: "Recibido por la central", to: "Respondido" }] },
+    ];
+    const msgKv = [{ label: "Instalación", value: "Planta Quilicura" }, { label: "Turno", value: "29-10-2026 · 20:00–08:00", numeric: true }, { label: "Adjunto", value: "1 foto" }];
+    // ---- v2: Avisar
+    const tipoMsg = this.state.tipoMsg ?? (p.tipoMsg ?? "novedad");
+    const isUrg = tipoMsg === "urgencia";
+    const tiposMsg = [
+      { valor: "novedad", etiqueta: "Novedad", descripcion: "Algo que pasó en la instalación" },
+      { valor: "consulta", etiqueta: "Consulta", descripcion: "Una duda sobre tu turno o una consigna" },
+      { valor: "urgencia", etiqueta: "Urgencia", descripcion: "Riesgo para personas o bienes: la central te llama" },
+    ];
+    const ctxKv = [{ label: "Instalación", value: "Planta Quilicura" }, { label: "Puesto", value: "Portería 1" }, { label: "Turno", value: "Hoy · 08:00–20:00", numeric: true }];
+    const confirmOpen = this.state.confirm ?? (p.confirmar ?? false);
+    // ---- v2: Rondas y accesos
+    const rondasTurno = [
+      { icon: "route", title: "Ronda perimetral", subtitle: "10:00 · 6 puntos de control", badge: { tone: "info", label: "Próxima" } },
+      { icon: "route", title: "Ronda interior bodegas", subtitle: "14:00 · 8 puntos de control", badge: { tone: "neutral", label: "Pendiente" } },
+      { icon: "route", title: "Ronda perimetral", subtitle: "08:15 · 6 de 6 puntos", badge: { tone: "success", label: "Cerrada" } },
+    ];
+    const flujoRonda = [
+      { icon: "route", title: "1 · Inicio de ronda", subtitle: "Cambia: muestra tu nombre y turno, sin elegir guardia" },
+      { icon: "scan", title: "2 · Escaneo de QR por punto", subtitle: "Sin cambios" },
+      { icon: "alert", title: "3 · Novedad en un punto", subtitle: "Sin cambios" },
+      { icon: "check-circle", title: "4 · Cierre de ronda", subtitle: "Cambia: al cerrar vuelves a Rondas del portal" },
+    ];
+    const cambiaRondas = [
+      { icon: "lock", title: "Solo en tu instalación y en tu turno", subtitle: "Terreno: lo habilita el equipo de la instalación" },
+      { icon: "phone", title: "Desde tu celular, con tu sesión", subtitle: "Terreno: equipo compartido de la instalación" },
+      { icon: "user-check", title: "Cada escaneo queda a tu nombre", subtitle: "Terreno: el guardia se elige al iniciar" },
+    ];
+    const dentro = [
+      { icon: "briefcase", title: "Camión · GHTR-45", subtitle: "Transportes Andes · entró 09:12", badge: { tone: "info", label: "Dentro" } },
+      { initials: "JP", title: "Juan Pérez · visita", subtitle: "Mantención · entró 09:40", meta: "12.345.678-9", badge: { tone: "info", label: "Dentro" } },
+      { icon: "briefcase", title: "Camioneta · LKPS-21", subtitle: "Proveedor de agua · salió 10:05", badge: { tone: "neutral", label: "Salió" } },
+    ];
+    const pantallasAcceso = [
+      { icon: "scan", title: "Registrar entrada", subtitle: "Mockup v2 de acceso · sin cambios" },
+      { icon: "scan", title: "Registrar salida", subtitle: "Mockup v2 de acceso · sin cambios" },
+      { icon: "users", title: "Lista de autorizados", subtitle: "Mockup v2 de acceso · solo lectura" },
+      { icon: "clipboard", title: "Detalle de movimiento", subtitle: "Mockup v2 de acceso · sin cambios" },
+    ];
+    const cambiaAccesos = [
+      { icon: "lock", title: "Solo instalaciones con control de accesos donde tienes turno", subtitle: "Y mientras ese turno dura" },
+      { icon: "user-check", title: "Cada registro queda a tu nombre", subtitle: "Con hora y puesto de tu asignación" },
+      { icon: "scan", title: "Áreas táctiles de 56 px", subtitle: "Igual que en Terreno" },
+    ];
+    // ---- v2: Mis datos, privacidad, notificaciones
+    const guardado = this.state.guardado ?? (p.guardado ?? false);
+    const previsionKv = [{ label: "AFP", value: "Modelo" }, { label: "Salud", value: "Fonasa · tramo B" }];
+    const datosTrata = [
+      { icon: "user", title: "Identificación: nombre, RUT y foto", subtitle: "Contrato, credencial y control de accesos" },
+      { icon: "phone", title: "Contacto, dirección y contacto de emergencia", subtitle: "Avisos de trabajo y emergencias" },
+      { icon: "wallet", title: "Datos bancarios y previsionales", subtitle: "Pago de sueldo y cotizaciones" },
+      { icon: "calendar", title: "Turnos, marcas, rondas y accesos", subtitle: "Control de jornada y operación del servicio" },
+      { icon: "pin", title: "Ubicación al marcar y hacer rondas", subtitle: "Verificar que estás en la instalación" },
+    ];
+    const quienVe = [
+      { icon: "users", title: "RRHH de Atlas Seguridad SpA", subtitle: "Todos tus datos laborales" },
+      { icon: "user-check", title: "Tu supervisor", subtitle: "Turnos, marcas, rondas y contacto" },
+      { icon: "message", title: "Central de monitoreo", subtitle: "Tu nombre, turno y tus mensajes" },
+      { icon: "building", title: "Cliente de la instalación", subtitle: "Tu nombre, foto y RUT, y los documentos que la empresa marcó como visibles" },
+      { icon: "landmark", title: "AFP, Fonasa o Isapre y Previred", subtitle: "Lo necesario para tus cotizaciones" },
+    ];
+    const cons = this.state.cons ?? { firma: true, correo: true, clima: false };
+    const setCons = (k) => (v) => this.setState({ cons: { ...cons, [k]: v } });
+    const derechos = [
+      { icon: "eye", title: "Acceso", subtitle: "Saber qué datos tuyos tenemos" },
+      { icon: "clipboard", title: "Rectificación", subtitle: "Corregir un dato que está mal" },
+      { icon: "trash", title: "Supresión", subtitle: "Pedir que borremos datos que ya no se necesitan" },
+      { icon: "x", title: "Oposición", subtitle: "Oponerte a un uso de tus datos" },
+      { icon: "download", title: "Portabilidad", subtitle: "Recibir tus datos para llevarlos a otra empresa" },
+    ];
+    const nf = this.state.nf ?? { doc: [true, true, false], sol: [true, false, false], ext: [true, false, false], liq: [true, true, false] };
+    const setNf = (k, i) => (v) => { const a = nf[k].slice(); a[i] = v; this.setState({ nf: { ...nf, [k]: a } }); };
+    const notifRows = [
+      { title: "Cambios de pauta", desc: "Obligatorio", fixed: true },
+      { title: "Avisos de la central", desc: "Obligatorio", fixed: true },
+      { title: "Documentos por firmar", k: "doc" },
+      { title: "Solicitudes resueltas", k: "sol" },
+      { title: "Turnos extra disponibles", k: "ext" },
+      { title: "Liquidaciones", k: "liq" },
+    ].map((r) => ({ ...r, notFixed: !r.fixed, sis: r.fixed ? true : nf[r.k][0], mail: r.fixed ? true : nf[r.k][1], wa: r.fixed ? true : nf[r.k][2], setSis: r.fixed ? noop : setNf(r.k, 0), setMail: r.fixed ? noop : setNf(r.k, 1), setWa: r.fixed ? noop : setNf(r.k, 2) }));
+    const isRon = screen === "rondas";
+    const rg = p.rg ?? "g2";
+    const IN_RONDA = ["g3", "g3e", "g4qr", "g4gps", "g4gpsP", "g4gpsF", "g4res", "g4nov", "g10", "g5", "g6", "g7", "g13"];
+    const barra = p.barra ?? "oculta";
+    const rgState = { vacio: "vacio", cargando: "cargando", error: "error", sinpermiso: "permisos" }[st] || "contenido";
+    const rgFull = isRon && st !== "bloqueado" && IN_RONDA.includes(rg) && barra === "oculta";
+    const rgEmbed = isRon && st !== "bloqueado" && !rgFull;
+    const slotsAcceso = [
+      { icon: "lock", title: "Portería", desc: "Inicio de Control de accesos en Terreno" },
+      { icon: "scan", title: "EscanerDocumento", desc: "Cédula, pasaporte o patente" },
+      { icon: "check-circle", title: "ResultadoAcceso", desc: "Autorizado, rechazado o por confirmar" },
+      { icon: "users", title: "En sitio · FilaEnSitio", desc: "Personas y vehículos dentro, con salida" },
+      { icon: "clipboard", title: "Lista de autorizados", desc: "Solo lectura" },
+      { icon: "wifi-off", title: "IndicadorConexion", desc: "Estado de conexión y cola" },
+    ];
+    const okState = st === "ok" || st === "sinconexion";
+    const tabItems = isSol ? [{ id: "mis", label: "Mis solicitudes" }, { id: "extra", label: "Turnos extra" }] : [{ id: "por", label: "Por firmar", count: 4 }, { id: "fir", label: "Firmados" }];
+    const showSolList = isSol && solTab === "mis" && (screen !== "solicitud" || !isPhone);
+    const showFicha = isSol && solTab === "mis" && (screen === "solicitud" || !isPhone);
+    const showDocList = isDoc && (screen === "documentos" || !isPhone);
+    const showDocDetail = isDoc && docTab === "por" && (screen === "firmar" || !isPhone);
+
+    return {
+      rootRef: this.rootRef, device, theme: p.theme ?? "light", isPhone, notPhone: !isPhone, noop,
+      user: { name: "María F. Soto", initials: "MS", role: "Guardia" },
+      tabs, groups, active: activeMap[screen], barTitle: titles[screen],
+      back: backs[screen] || null, showHeader, head: heads[screen] || heads.inicio,
+      headButton: okState && screen === "central" ? "Avisar a la central" : okState && isSol && solTab === "mis" ? "Nueva solicitud" : null,
+      headIcon: isCen ? "message" : "plus",
+      goNueva: noop,
+      showTabs: (isCen && (screen === "central" || !isPhone) && (st === "ok" || st === "vacio")) || (isSol || (isDoc && (screen === "documentos" || !isPhone))) && (st === "ok" || st === "vacio") && !(isPhone && screen === "solicitud"),
+      tabItems: isCen ? [{ id: "avi", label: "Avisos recibidos", count: acuse ? null : 1 }, { id: "env", label: "Mensajes enviados" }] : tabItems, tabValue: isCen ? cenTab : isSol ? solTab : docTab, setTab: (v) => this.setState({ tab: v }),
+      isBloqueado: st === "bloqueado", bloqTitle: ({ instalacion: c.bloqI, via: "Rondas desde el teléfono de la instalación", dispositivo: "Accesos solo desde el dispositivo emparejado" })[p.motivo ?? "turno"] || c.bloq,
+      bloqDesc: ({ instalacion: c.bloqIDesc, via: "En Planta Quilicura las rondas se hacen en el teléfono compartido de la portería. Desde el portal no se pueden iniciar.", dispositivo: "En Planta Quilicura el control de accesos se registra en el equipo emparejado de la portería, no en tu celular." })[p.motivo ?? "turno"] || c.bloqDesc,
+      isVacio: st === "vacio" && !isRon, isError: st === "error" && !isRon, isForbidden: st === "sinpermiso" && !isRon, isCargando: st === "cargando" && !isRon, ok: okState || (isRon && st !== "bloqueado"),
+      rg, rgState, rgFull, notRgFull: !rgFull, rgEmbed, usePage: !rgEmbed, rgMapa: p.rgMapa ?? "abierto", slotsAcceso,
+      offline: st === "sinconexion" ? { message: isRon ? "Sin conexión · tus marcas se guardan en este teléfono" : "Sin conexión · los registros se guardan en este teléfono", since: "desde 10:12" } : null,
+      sc, skelCard: ["inicio", "extra", "firmar", "mas", "nueva"].includes(screen), skelRows: [1, 2, 3, 4],
+      sInicio: screen === "inicio", sPauta: screen === "pauta", sExtra: isSol && solTab === "extra", sNueva: screen === "nueva", sMas: screen === "mas",
+      showSolList, showFicha, isSolSplit: showSolList || showFicha, showDocList, showDocDetail, showPorFirmar: docTab === "por", showFirmados: docTab === "fir",
+      avisos, liquidaciones, docsRecientes, dias, extras, solicitudes, timeline, ficha,
+      tipo, tipos, setTipo: (v) => this.setState({ tipo: v }), tPermiso: tipo === "permiso", tVacaciones: tipo === "vacaciones", tAnticipo: tipo === "anticipo", tCertificado: tipo === "certificado",
+      vA: !vb, vB: vb, saldo, fPermiso: { from: "06-11-2026", to: "06-11-2026", today: "30-10-2026" }, fVacaciones: { from: "16-12-2026", to: "27-12-2026", today: "30-10-2026" },
+      anticipoRows: [{ label: "Se descuenta de", value: "Liquidación de noviembre" }, { label: "Pago estimado", value: "05-11-2026", numeric: true }],
+      certOpts: [{ value: "ant", label: "Antigüedad" }, { value: "rem", label: "Remuneraciones (últimos 3 meses)" }, { value: "vig", label: "Vigencia de contrato" }], topeHint: vb ? "Tope definido por la empresa: $ 200.000 este mes" : "Tope: $ 200.000 este mes",
+      porFirmar: porFirmar.map((d) => ({ ...d, rowStyle: !isPhone && d.id === docId ? { background: "var(--ds-accent-muted)" } : {} })), firmados,
+      doc: { ...doc, dlLabel: isN1 ? "Descargar PDF" : "Descargar borrador" }, isDocSplit: showDocList || showDocDetail, avatarSize: isPhone ? 48 : 64, isN1, notN1: !isN1, pasos, n2Alerta,
+      acepto: this.state.acepto, setAcepto: (v) => this.setState({ acepto: v }), noAcepto: !this.state.acepto,
+      firmado, noFirmado: !firmado, firmar: () => this.setState({ firmado: true }),
+      perfil, masRows,
+      isCen, showCenList: isCen && cenTab === "avi" && (screen === "central" || !isPhone), showMsgList: isCen && cenTab === "env" && (screen === "central" || !isPhone),
+      showAvisoDet: isCen && cenTab === "avi" && (screen === "aviso" || !isPhone), showMsgDet: isCen && cenTab === "env" && (screen === "mensaje" || !isPhone),
+      avisosCentral, mensajes, msgTimeline, msgKv, acuse, noAcuse: !acuse, darAcuse: () => this.setState({ acuse: true }),
+      sAvisar: screen === "avisar", tipoMsg, tiposMsg, setTipoMsg: (v) => this.setState({ tipoMsg: v }), isUrg, notUrg: !isUrg, ctxKv,
+      confirmOpen, openConfirm: () => this.setState({ confirm: true }), closeConfirm: () => this.setState({ confirm: false }),
+      sendLabel: isUrg ? "Enviar urgencia" : "Enviar", sendVariant: isUrg ? "destructive" : "primary", sendClick: isUrg ? () => this.setState({ confirm: true }) : noop,
+      msgText: { defaultValue: isUrg ? "Hay una persona saltando la reja norte, junto a la bodega 3." : "El portón 2 quedó trabado a medio cerrar después del último camión." },
+      urgActions: NS.Button ? [h(NS.Button, { key: "c", variant: "secondary", onClick: () => this.setState({ confirm: false }) }, "Cancelar"), h(NS.Button, { key: "u", variant: "destructive", icon: "alert" }, "Enviar urgencia")] : null,
+      sRondas: screen === "rondas", rondasTurno, flujoRonda, cambiaRondas,
+      sAccesos: screen === "accesos", dentro, pantallasAcceso, cambiaAccesos,
+      sDatos: screen === "datos", guardado, noGuardado: !guardado, guardar: () => this.setState({ guardado: true }), previsionKv,
+      bancoHint: vb ? "Queda pendiente hasta que RRHH lo valide." : "Se aplica al guardar. Tu próxima liquidación se paga en esta cuenta.",
+      civilOpts: ["Soltera", "Casada", "Conviviente civil", "Divorciada", "Viuda"].map((v) => ({ value: v, label: v })),
+      bancoOpts: ["BancoEstado", "Banco de Chile", "Santander", "BCI", "Scotiabank"].map((v) => ({ value: v, label: v })),
+      cuentaOpts: ["Cuenta RUT", "Cuenta vista", "Cuenta corriente", "Cuenta de ahorro"].map((v) => ({ value: v, label: v })),
+      tallaOpts: ["S", "M", "L", "XL"].map((v) => ({ value: v, label: v })), pantOpts: ["40", "42", "44", "46"].map((v) => ({ value: v, label: v })), calzOpts: ["37", "38", "39", "40"].map((v) => ({ value: v, label: v })),
+      dirOpts: [{ value: "a", label: "Av. Las Torres 1450, Quilicura", description: "Región Metropolitana, Chile" }, { value: "b", label: "Av. Las Torres 1450, Puente Alto", description: "Región Metropolitana, Chile" }],
+      sPrivacidad: screen === "privacidad", datosTrata, quienVe, cons, consFirma: setCons("firma"), consCorreo: setCons("correo"), consClima: setCons("clima"), derechos,
+      sNotif: screen === "notificaciones", notifRows,
+    };
+  }
+}
+</script>
+</body>
+</html>
