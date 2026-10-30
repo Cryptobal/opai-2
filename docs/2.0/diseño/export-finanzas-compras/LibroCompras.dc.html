@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="fin-shell.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ nav.tabs }}" groups="{{ nav.groups }}" active="{{ nav.active }}" title="{{ shellTitle }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<sc-if value="{{ notForbidden }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" tab-bar="{{ isPhone }}" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Compras" title="Libro de compras" subtitle="Octubre 2026 · recibidos por RCV del SII" hint-size="100%,80px">
+<sc-if value="{{ showHeaderActions }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="file" hint-size="150px,40px">Libro IVA y F29</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="download" hint-size="120px,40px">Exportar</x-import>
+</sc-if>
+</x-import>
+<sc-if value="{{ isDatos }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:16px">
+<div style="flex:1 1 288px;max-width:{{ searchMax }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" icon="search" placeholder="Buscar por folio, proveedor o RUT" style="width:100%" hint-size="100%,44px"></x-import>
+</div>
+<div class="chip-row">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Sin centro de costo" contador="{{ sinCcCount }}" activo="{{ onlySinCc }}" on-cambiar="{{ toggleSinCc }}" hint-size="190px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Por aceptar o reclamar" contador="{{ 3 }}" hint-size="200px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Chip" etiqueta="Período" valor="Octubre 2026" hint-size="170px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipAgregar" hint-size="120px,32px"></x-import>
+</div>
+</div>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="margin:0 -16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" cards="{{ true }}" to-card="{{ toCard }}" on-row-click="{{ noop }}" hint-size="100%,400px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" hint-size="100%,400px"></x-import>
+</sc-if>
+<p class="t-caption" style="margin:12px 0 0">El estado de pago sale de la conciliación bancaria; no se marca a mano. El plazo para aceptar o reclamar es de 8 días desde la recepción en el SII.</p>
+<div style="position:sticky;bottom:{{ selBottom }};margin-top:16px;z-index:5">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.SelectionBar" label="{{ selLabel }}" on-clear="{{ clearSel }}" placement="sticky" hint-size="100%,64px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" on-click="{{ openSheet }}" hint-size="190px,40px">Asignar centro de costo</x-import>
+</x-import>
+</div>
+</sc-if>
+<sc-if value="{{ isCargando }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:16px" aria-busy="true" aria-label="Cargando compras">
+<div style="display:flex;gap:12px;flex-wrap:wrap">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="288px" height="44px" radius="{{ 10 }}" hint-size="288px,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="170px" height="32px" radius="{{ 999 }}" hint-size="170px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="190px" height="32px" radius="{{ 999 }}" hint-size="190px,32px"></x-import>
+</div>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);overflow:hidden">
+<sc-for list="{{ sk }}" as="s" hint-placeholder-count="6">
+<div style="display:flex;gap:16px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="72px" height="14px" hint-size="72px,14px"></x-import>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="60%" height="14px" hint-size="60%,14px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="30%" height="12px" hint-size="30%,12px"></x-import></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="88px" height="14px" hint-size="88px,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="72px" height="22px" radius="{{ 999 }}" hint-size="72px,22px"></x-import>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="file" title="Aún no hay compras de octubre" description="Las facturas recibidas llegan desde el RCV del SII. Sincroniza para traer las de este mes." action="{{ emptyAction }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar el libro de compras" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="FIN-COM-502" on-retry="{{ noop }}" hint-size="100%,320px"></x-import>
+</sc-if>
+</x-import>
+</sc-if>
+<sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="{{ fb.title }}" description="{{ fb.description }}" action-label="Pedir acceso" hint-size="100%,100%"></x-import>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Sheet" open="{{ sheetOpen }}" contained="{{ true }}" side="{{ sheetSide }}" title="Asignar centro de costo" description="{{ selLabel }}" on-close="{{ closeSheet }}" actions="{{ sheetActions }}" hint-size="0px,0px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Centro de costo" value="sug" options="{{ ccOptions }}" hint-size="100%,72px"></x-import>
+<div style="display:flex;flex-direction:column;gap:8px">
+<span class="t-label">Vista previa</span>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);overflow:hidden">
+<sc-for list="{{ preview }}" as="p" hint-placeholder-count="3">
+<div style="display:flex;flex-direction:column;gap:2px;padding:12px 16px;border-bottom:1px solid var(--ds-border)">
+<div style="display:flex;justify-content:space-between;gap:12px"><span class="t-label">{{ p.prov }}</span><span class="t-numeric t-body-sm">{{ p.monto }}</span></div>
+<span class="t-caption"><span class="t-mono">{{ p.folio }}</span> · Sin centro de costo → <span style="color:var(--ds-fg)">{{ p.cc }}</span> · {{ p.origen }}</span>
+</div>
+</sc-for>
+</div>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" label="Guardar como centro de costo por defecto de cada proveedor" checked="{{ false }}" hint-size="100%,44px"></x-import>
+</div>
+</x-import>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;\&quot;phone\&quot; | \&quot;tablet\&quot; | \&quot;desktop\&quot;&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;\&quot;light\&quot; | \&quot;dark\&quot;&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;datos&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinPermiso&quot;],&quot;default&quot;:&quot;datos&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;abierto&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state = { onlySinCc: false, sel: [1, 4, 6], sheet: null };
+  componentDidMount() { if (!window.FinShell) { const t = setInterval(() => { if (window.FinShell) { clearInterval(t); this.forceUpdate(); } }, 40); } }
+  renderVals() {
+    const F = window.FinShell;
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = this.props.device ?? "desktop";
+    const isPhone = device === "phone";
+    const st = F ? F.estado(this.props) : { isDatos: true, notForbidden: true };
+    const all = [
+      { id: 1, folio: "33 · 18452", prov: "Uniformes Pacífico Ltda", rut: "78.234.567-1", fecha: "14-10-2026", monto: "$ 2.380.000", cc: null, sug: "Planta Quilicura", origen: "por proveedor", pago: ["neutral", "Pendiente"], plazo: ["warning", "Quedan 2 días"] },
+      { id: 2, folio: "33 · 9921", prov: "Combustibles del Sur S.A.", rut: "96.555.210-K", fecha: "12-10-2026", monto: "$ 846.300", cc: "Bodega Lampa", pago: ["success", "Pagada"], plazo: ["success", "Aceptada"] },
+      { id: 3, folio: "33 · 30418", prov: "Arriendos Lampa SpA", rut: "77.410.882-6", fecha: "13-10-2026", monto: "$ 4.200.000", cc: "Bodega Lampa", pago: ["info", "Pago parcial"], plazo: ["success", "Aceptada"] },
+      { id: 4, folio: "33 · 5530", prov: "Comunicaciones Austral SpA", rut: "76.998.221-3", fecha: "20-10-2026", monto: "$ 318.990", cc: null, sug: "Administración", origen: "última compra", pago: ["neutral", "Pendiente"], plazo: ["neutral", "Quedan 6 días"] },
+      { id: 5, folio: "34 · 1207", prov: "Distribuidora Andes SpA", rut: "77.889.100-2", fecha: "08-10-2026", monto: "$ 1.120.500", cc: "Torre Apoquindo", pago: ["danger", "Vencida"], plazo: ["success", "Aceptada"] },
+      { id: 6, folio: "33 · 77810", prov: "Seguridad Total Ltda", rut: "76.112.334-5", fecha: "21-10-2026", monto: "$ 6.540.000", cc: null, sug: "Torre Apoquindo", origen: "regla «Guardias Apoquindo»", pago: ["neutral", "Pendiente"], plazo: ["danger", "Vence hoy"] },
+      { id: 7, folio: "61 · 402", prov: "Combustibles del Sur S.A.", rut: "96.555.210-K", fecha: "22-10-2026", monto: "−$ 120.000", cc: "Bodega Lampa", pago: ["success", "Aplicada"], plazo: ["success", "Aceptada"] },
+    ];
+    const rows = this.state.onlySinCc ? all.filter((r) => !r.cc) : all;
+    const sel = this.state.sel;
+    const toggle = (id) => this.setState((s) => ({ sel: s.sel.includes(id) ? s.sel.filter((x) => x !== id) : [...s.sel, id] }));
+    const badge = (t, l) => (NS.Badge ? h(NS.Badge, { tone: t }, l) : l);
+    const ccCell = (r) => r.cc ? h("span", null, r.cc) : h("span", { style: { display: "flex", flexDirection: "column", gap: 4, alignItems: "flex-start" } }, badge("warning", "Sin centro de costo"), h("span", { className: "t-caption" }, "Sugerido: " + r.sug + " · " + r.origen));
+    const open = this.state.sheet ?? !!this.props.abierto;
+    const selRows = all.filter((r) => sel.includes(r.id));
+    return {
+      device, theme: this.props.theme ?? "light", isPhone, notPhone: !isPhone, ...st,
+      nav: F ? F.shell("com", device) : { tabs: [], groups: [] },
+      fb: F ? F.forbidden : {},
+      shellTitle: isPhone ? "" : "Finanzas",
+      showHeaderActions: !isPhone && st.isDatos,
+      searchMax: isPhone ? "100%" : "288px",
+      sinCcCount: 3, onlySinCc: this.state.onlySinCc,
+      toggleSinCc: () => this.setState((s) => ({ onlySinCc: !s.onlySinCc })),
+      rows, sk: [1, 2, 3, 4, 5, 6], noop: () => {},
+      selBottom: isPhone ? "72px" : "16px",
+      selLabel: sel.length + (sel.length === 1 ? " compra seleccionada" : " compras seleccionadas") + " · sin centro de costo",
+      clearSel: () => this.setState({ sel: [] }),
+      openSheet: () => this.setState({ sheet: true }),
+      closeSheet: () => this.setState({ sheet: false }),
+      sheetOpen: open && st.isDatos, sheetSide: isPhone ? "bottom" : "right",
+      ccOptions: [{ value: "sug", label: "Usar el sugerido de cada compra", description: "Por proveedor, regla o última compra" }, "Planta Quilicura", "Bodega Lampa", "Torre Apoquindo", "Administración"],
+      preview: selRows.map((r) => ({ prov: r.prov, folio: r.folio, monto: r.monto, cc: r.sug || r.cc, origen: r.origen || "actual" })),
+      sheetActions: h(React.Fragment, null, NS.Button ? h(NS.Button, { variant: "secondary", onClick: () => this.setState({ sheet: false }) }, "Cancelar") : null, NS.Button ? h(NS.Button, null, "Asignar a " + selRows.length + " compras") : null),
+      emptyAction: NS.Button ? h(NS.Button, { icon: "refresh" }, "Sincronizar RCV") : null,
+      cols: [
+        { key: "sel", label: "", width: 44, render: (r) => NS.Checkbox ? h(NS.Checkbox, { checked: sel.includes(r.id), onChange: () => toggle(r.id), label: h("span", { className: "sr-only", style: { position: "absolute", width: 1, height: 1, overflow: "hidden", clip: "rect(0 0 0 0)" } }, "Seleccionar " + r.folio) }) : null },
+        { key: "folio", label: "Tipo · folio", mono: true },
+        { key: "prov", label: "Proveedor", render: (r) => h("span", { style: { display: "flex", flexDirection: "column" } }, h("span", { className: "t-label" }, r.prov), h("span", { className: "t-mono", style: { color: "var(--ds-fg-subtle)", fontSize: 12, lineHeight: "16px" } }, r.rut)) },
+        { key: "fecha", label: "Emisión", muted: true },
+        { key: "monto", label: "Monto", align: "right", render: (r) => h("span", { className: "t-numeric" }, r.monto) },
+        { key: "cc", label: "Centro de costo", render: ccCell },
+        { key: "pago", label: "Estado de pago", render: (r) => badge(r.pago[0], r.pago[1]) },
+        { key: "plazo", label: "Aceptar o reclamar", render: (r) => badge(r.plazo[0], r.plazo[1]) },
+      ],
+      toCard: (r) => ({ title: r.prov, subtitle: (r.cc || "Sin centro de costo") + " · " + r.plazo[1].toLowerCase(), meta: r.folio, badge: { tone: r.pago[0], label: r.pago[1] }, trailing: h("span", { className: "t-numeric", style: { fontSize: 14 } }, r.monto) }),
+    };
+  }
+}
+</script>
+</body>
+</html>
