@@ -1,5 +1,3 @@
-import { randomUUID } from "node:crypto";
-
 import { z } from "zod";
 
 import { permanenciaDefecto, RADIO_GEOCERCA_M } from "@opai/domain";
@@ -15,6 +13,7 @@ import {
   modoSchema,
   puntoDe,
 } from "./comun";
+import { crearEtiquetaVigente } from "./etiqueta-escritura";
 import { puntoSchema, vistaPunto } from "./vistas";
 
 const camposPunto = {
@@ -85,13 +84,19 @@ export const puntosCrear = defineCapability({
         createdAt: new Date(),
       });
     }
-    // Identificador opaco de la etiqueta (R7); la firma y la rotación llegan en el PR 2.
-    const etiquetaQr = incluyeQr(modo) ? `RQR-${randomUUID().replace(/-/g, "")}` : null;
     const creado = await sinDuplicado(
-      ctx.db.puntoControl.create({ data: { ...data, etiquetaQr, tenantId: ctx.tenantId } }),
+      ctx.db.puntoControl.create({ data: { ...data, etiquetaQr: null, tenantId: ctx.tenantId } }),
       "Ya existe un punto con ese nombre en la instalación.",
     );
-    return vistaPunto(creado);
+    if (!incluyeQr(modo)) return vistaPunto(creado);
+    // Etiqueta opaca y firmada (R7): su fila vigente y el código denormalizado en el punto, en la
+    // misma transacción de la escritura (ADR-052).
+    const codigo = await crearEtiquetaVigente(ctx.db, ctx.tenantId, creado.id);
+    const conEtiqueta = await ctx.db.puntoControl.update({
+      where: { id: creado.id },
+      data: { etiquetaQr: codigo },
+    });
+    return vistaPunto(conEtiqueta);
   },
 });
 
