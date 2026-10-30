@@ -459,6 +459,13 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.ping`
 - `core.puestos.get`
 - `core.usage.summary`
+- `pauta.excepciones.anular`
+- `pauta.excepciones.crear`
+- `pauta.historial.listar`
+- `pauta.mes.leer`
+- `pauta.ppc.listar`
+- `pauta.resumen.leer`
+- `pauta.series.fijar`
 - `platform.auditoria.estado`
 - `platform.auditoria.list`
 - `platform.bitacora.estado`

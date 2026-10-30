@@ -1,0 +1,80 @@
+// Módulo Pauta (Operaciones, Brief 11b · PR 1): series por puesto, excepciones por día e historial.
+// Schema propio `pauta`. La pauta guarda solo series (patrón + inicio de ciclo + titular) y
+// excepciones; el resto se calcula (R11): nunca una fila por trabajador por día. Toda tabla con
+// tenant_id, RLS `tenant_isolation`, IDs uuid(7), columnas snake_case por @map. Las FK hacia
+// core.tenants, core.puestos, core.patrones_turno, core.personas y core.instalaciones van en el SQL
+// de la migración, sin @relation (no se tocan maestros.prisma ni core.prisma).
+
+/// Serie de un puesto: patrón + inicio de ciclo + titular, con vigencia. Cambiar la serie cierra la
+/// vigente y abre otra desde una fecha ≥ hoy: no modifica días pasados (R11). Una sola vigente
+/// abierta (`vigente_hasta` nula) por puesto, garantizada por un índice parcial de la migración.
+model SeriePauta {
+  id               String    @id @default(uuid(7)) @db.Uuid
+  tenantId         String    @map("tenant_id") @db.Uuid
+  puestoId         String    @map("puesto_id") @db.Uuid
+  patronId         String    @map("patron_id") @db.Uuid
+  /// Primer día de trabajo de un ciclo: ancla la fase de los patrones cíclicos.
+  inicioCiclo      DateTime  @map("inicio_ciclo") @db.Date
+  /// Persona titular; nula = PPC «sin titular».
+  titularPersonaId String?   @map("titular_persona_id") @db.Uuid
+  vigenteDesde     DateTime  @map("vigente_desde") @db.Date
+  /// Último día de vigencia (inclusive); nula = sin fecha límite (A2).
+  vigenteHasta     DateTime? @map("vigente_hasta") @db.Date
+  creadaPor        String?   @map("creada_por") @db.Uuid
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([tenantId, puestoId, vigenteDesde])
+  @@map("series")
+  @@schema("pauta")
+}
+
+/// Excepción de un día sobre la serie de un puesto: el turno queda PPC con motivo. Se anula, no se
+/// borra (queda en el historial). A lo sumo una activa por puesto y día (índice parcial).
+model ExcepcionPauta {
+  id            String    @id @default(uuid(7)) @db.Uuid
+  tenantId      String    @map("tenant_id") @db.Uuid
+  puestoId      String    @map("puesto_id") @db.Uuid
+  fecha         DateTime  @db.Date
+  /// "ausencia" | "licencia" | "vacaciones" | "permiso" (CHECK en la migración).
+  tipo          String
+  motivo        String
+  /// Titular que faltó ese día (para alertas y trazabilidad); no cambia aunque cambie la serie.
+  personaId     String?   @map("persona_id") @db.Uuid
+  /// "activa" | "anulada".
+  estado        String    @default("activa")
+  creadaPor     String?   @map("creada_por") @db.Uuid
+  anuladaPor    String?   @map("anulada_por") @db.Uuid
+  anuladaEn     DateTime? @map("anulada_en") @db.Timestamptz(6)
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([tenantId, puestoId, fecha])
+  @@map("excepciones")
+  @@schema("pauta")
+}
+
+/// Historial de cambios de la pauta (quién, cuándo, qué). Append-only: `opai_app` no puede
+/// modificarlo ni borrarlo. Guarda IDs, nunca RUT ni sueldos (Ley 21.719).
+model HistorialPauta {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  instalacionId String   @map("instalacion_id") @db.Uuid
+  puestoId      String   @map("puesto_id") @db.Uuid
+  /// "serie_fijada" | "excepcion_creada" | "excepcion_anulada".
+  accion        String
+  /// "user" | "agent" | "system".
+  actorTipo     String   @map("actor_tipo")
+  actorId       String?  @map("actor_id") @db.Uuid
+  /// Primer día afectado y último (inclusive) por el cambio.
+  fechaDesde    DateTime @map("fecha_desde") @db.Date
+  fechaHasta    DateTime @map("fecha_hasta") @db.Date
+  /// Datos estructurados del cambio (tipo, patrón, ids); sin datos personales.
+  detalle       Json     @default("{}")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  @@index([tenantId, instalacionId, createdAt(sort: Desc)])
+  @@index([tenantId, puestoId, createdAt(sort: Desc)])
+  @@map("historial")
+  @@schema("pauta")
+}

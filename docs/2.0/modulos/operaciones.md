@@ -59,6 +59,19 @@ Del puesto (el modelo de datos exacto se define en el Brief 11):
 - **R12.** Un cambio de rol, de capa de sueldo, de monto o de instalación de una persona genera el borrador del anexo de contrato (ADR-036 y ADR-048, punto 5).
 - **R13.** El supervisor ve y opera solo las instalaciones a su cargo; el filtro va en la consulta (ADR-022).
 
+## 5b. Pauta mensual (Brief 11b, PR 1)
+
+Reglas de la pauta, decididas por Carlos el 30-oct-2026 y construidas en el PR 1 (`briefs/BRIEF-11b-pauta.md`):
+
+- **Una sola sección «Pauta»** en Operaciones, con pestañas Mensual y Diaria (en la barra inferior del celular se llama «Pauta»). El PR 1 construye la Mensual; la Diaria llega en el PR 2.
+- **Series y excepciones (R11).** Un puesto tiene una serie: patrón del catálogo, inicio de ciclo y titular, con vigencia. Se replica sola mes a mes por el ciclo, sin fecha límite. La arma el supervisor o quien tenga permiso; todo queda en el historial. Cambiar la serie cierra la anterior el día antes y no modifica los días pasados.
+- **Excepciones por día:** ausencia, licencia, vacaciones o permiso, con motivo, para un día o un rango. El turno afectado queda como PPC con ese motivo. Se anulan sin borrar el historial.
+- **PPC con motivo (R6):** todo turno que debía cubrirse y no se cubre: sin titular, ausencia, licencia, vacaciones o permiso. La cobertura del mes es cubiertos sobre programados.
+- **Feriados** desde el calendario del Núcleo (CAR-79); se marcan, no cambian el patrón.
+- **Prohibido doblar (A9):** un titular no puede tener turnos solapados ni seguidos (24 h) entre sus series; se bloquea con la explicación.
+- **Roles:** owner, admin y gerente todo; supervisor solo sus instalaciones (ADR-022); viewer solo lectura.
+- **Fuera de este PR (PR 2, CAR-86):** Diaria, reemplazos sugeridos, turno extra por aprobar, refuerzos, cruce con marcas de Asistencia, alertas de horas legales, exportar a PDF o Excel y el aviso al guardia como notificación del sistema.
+
 ## 6. Estados y transiciones
 
 Estado de cobertura del puesto: **cubierto** ↔ **PPC (con motivo)**. El detalle de transiciones, quién las ejecuta y su reversibilidad se fija con el diseño aprobado y el Brief 11.

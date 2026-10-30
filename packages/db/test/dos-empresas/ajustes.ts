@@ -15,6 +15,9 @@ type Ajuste = {
 const id = (ctx: Contexto, tabla: string) => ctx.filas.get(tabla)?.["id"] ?? null;
 
 export const AJUSTES: Record<string, Ajuste> = {
+  // Pauta (CAR-81): CHECK de tipo de excepción y de acción del historial.
+  "pauta.excepciones": { valores: () => ({ tipo: "ausencia", estado: "activa" }) },
+  "pauta.historial": { valores: () => ({ accion: "serie_fijada" }) },
   "core.anexos_contrato": {
     valores: () => ({ motivo_cambio: "capa", generado_por_tipo: "usuario" }),
   },
