@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+</helmet>
+<sc-if value="{{ isSidebar }}" hint-placeholder-val="{{ true }}">
+<div role="group" aria-label="{{ aria }}" style="display:flex;align-items:center;gap:10px;margin:0 12px 8px;padding:8px 10px;min-height:48px;border:1px solid var(--ds-border);border-radius:var(--radius-md);background:var(--ds-bg)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.TenantMark" initials="{{ ini }}" hint-size="24px,24px"></x-import>
+<span style="flex:1;min-width:0;display:flex;flex-direction:column"><span class="t-label-sm">{{ empresa }}</span><span class="t-caption" style="font-size:11px;line-height:14px">{{ caption }}</span></span>
+<sc-if value="{{ selector }}" hint-placeholder-val="{{ false }}"><span class="ic sm i-updown subtle" aria-hidden="true"></span></sc-if>
+</div>
+</sc-if>
+<sc-if value="{{ isRail }}" hint-placeholder-val="{{ false }}">
+<div role="group" aria-label="{{ aria }}" style="width:72px;display:flex;flex-direction:column;align-items:center;gap:4px;padding:8px 2px;text-align:center">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.TenantMark" initials="{{ ini }}" hint-size="24px,24px"></x-import>
+<span style="font:500 11px/14px var(--font-sans);color:var(--ds-fg)">{{ empresa }}</span>
+<span style="font:400 11px/14px var(--font-sans);color:var(--ds-fg-subtle)">{{ caption }}</span>
+<sc-if value="{{ selector }}" hint-placeholder-val="{{ false }}"><span class="ic sm i-updown subtle" aria-hidden="true"></span></sc-if>
+</div>
+</sc-if>
+<sc-if value="{{ isTopbar }}" hint-placeholder-val="{{ false }}">
+<div role="group" aria-label="{{ aria }}" style="display:flex;align-items:center;gap:8px;min-height:44px;padding:0 4px;min-width:0">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.TenantMark" initials="{{ ini }}" hint-size="24px,24px"></x-import>
+<span style="min-width:0;display:flex;flex-direction:column"><span style="font:600 15px/20px var(--font-sans);color:var(--ds-fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ empresa }}</span><span style="font:400 11px/14px var(--font-sans);color:var(--ds-fg-subtle);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ caption }}</span></span>
+<sc-if value="{{ selector }}" hint-placeholder-val="{{ false }}"><span class="ic sm i-updown subtle" aria-hidden="true"></span></sc-if>
+</div>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:260,&quot;height&quot;:80},&quot;superficie&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;sidebar&quot;,&quot;rail&quot;,&quot;topbar&quot;],&quot;default&quot;:&quot;sidebar&quot;,&quot;tsType&quot;:&quot;\&quot;sidebar\&quot; | \&quot;rail\&quot; | \&quot;topbar\&quot;&quot;},&quot;selector&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;empresa&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Logística Andina SpA&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;tenant&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Atlas Seguridad SpA&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;iniciales&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;AS&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const s = this.props.superficie ?? "sidebar", sel = !!this.props.selector;
+    const empresa = this.props.empresa ?? "Logística Andina SpA", tenant = this.props.tenant ?? "Atlas Seguridad SpA";
+    const caption = sel ? "2 empresas · cambiar" : "Portal Cliente de " + tenant;
+    return { isSidebar: s === "sidebar", isRail: s === "rail", isTopbar: s === "topbar", selector: sel, empresa, caption, ini: this.props.iniciales ?? "AS",
+      aria: empresa + " · " + (sel ? "cambiar de empresa" : "Portal Cliente de " + tenant) };
+  }
+}
+</script>
+</body>
+</html>

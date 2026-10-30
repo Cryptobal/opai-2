@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<title>Solicitudes · Portal Cliente</title>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="portal-cliente.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<div data-pc-brand="fijo" style="width:100%;height:100%"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" top-bar="{{ pcTopBar }}" device="{{ device }}" theme="{{ theme }}" portal="{{ portalName }}" tenant="{{ tenantCaption }}" tenant-initials="AS" user="{{ user }}" tabs="{{ tabs }}" rail-footer="{{ railFooter }}" groups="{{ groups }}" active="{{ active }}" title="Solicitudes" width="100%" height="100%" hint-size="100%,100%">
+<sc-if value="{{ isForm }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<div style="width:100%;max-width:640px;display:flex;flex-direction:column;gap:16px">
+<a href="#" class="t-label" style="display:inline-flex;align-items:center;gap:4px;min-height:44px;text-decoration:none;color:var(--ds-fg-muted)"><span class="ic sm i-chevron-left" aria-hidden="true"></span>Solicitudes</a>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" title="Nueva solicitud" subtitle="Servicio adicional fuera de pauta" hint-size="100%,60px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,520px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Tipo de solicitud" value="g1" options="{{ tipoOpts }}" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Instalación" value="bl" options="{{ instOpts }}" hint-size="100%,70px"></x-import>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DateInput" label="Fecha" value="05-11-2026" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DateInput" label="Desde" type="time" value="08:00" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DateInput" label="Hasta" type="time" value="20:00" hint-size="100%,70px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Guardias" value="1" input-mode="numeric" hint="Cuántos guardias necesitas a la vez." hint-size="100%,90px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Comentario" rows="{{ 3 }}" value="Llega un despacho grande; necesitamos cubrir el andén 3 todo el día." hint-size="100%,110px"></x-import>
+<sc-if value="{{ isPrecio }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:12px;border:1px solid var(--ds-border);border-radius:var(--radius-md)"><span style="display:flex;flex-direction:column;gap:2px"><span class="t-label">Valor según cotización vigente</span><span class="t-caption">COT-2026-118 · por turno de 12 h</span></span><span class="t-subheading t-numeric">$ 98.000</span></div>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="neutral" titulo="Fuera de pauta" hint-size="100%,56px">Se cobra aparte. Atlas Seguridad SpA te confirma la solicitud antes de programarla.</x-import>
+</div>
+</x-import>
+<div style="display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" size="lg" hint-size="110px,48px">Cancelar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="primary" size="lg" icon="check" hint-size="180px,48px">Enviar solicitud</x-import>
+</div>
+</div>
+</x-import>
+</sc-if>
+<sc-if value="{{ isList }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex:1;min-height:0">
+<sc-if value="{{ showSplit }}" hint-placeholder-val="{{ false }}">
+<div style="width:360px;flex:none;border-right:1px solid var(--ds-border);background:var(--ds-surface);overflow:auto;display:flex;flex-direction:column">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:16px">
+<span class="t-subheading">Solicitudes</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="primary" icon="plus" disabled="{{ forbidden }}" hint-size="150px,40px">Nueva solicitud</x-import>
+</div>
+<sc-if value="{{ isOk }}" hint-placeholder-val="{{ true }}">
+<sc-for list="{{ sols }}" as="s" hint-placeholder-count="4">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.SelectableRow" selected="{{ s.selected }}" title="{{ s.tipo }}" subtitle="{{ s.sub }}" meta="{{ s.id }}" badge="{{ s.badge }}" hint-size="100%,64px"></x-import>
+</sc-for>
+</sc-if>
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<sc-for list="{{ skel }}" as="k" hint-placeholder-count="4">
+<div style="display:flex;flex-direction:column;gap:6px;padding:12px 16px;border-bottom:1px solid var(--ds-border)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="70%" hint-size="70%,14px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="50%" height="{{ 12 }}" hint-size="50%,12px"></x-import></div>
+</sc-for>
+</sc-if>
+</div>
+</sc-if>
+<div style="flex:1;min-width:0;overflow:auto">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<sc-if value="{{ forbidden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No puedes pedir servicios" description="Tu perfil de contacto no incluye solicitudes. Pídele acceso a Andrea Rojas, contacto principal de Logística Andina SpA." action-label="Pedir acceso" hint-size="100%,400px"></x-import>
+</sc-if>
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="ticket" title="Aún no tienes solicitudes" description="Pide un servicio adicional fuera de pauta, por ejemplo un guardia por un día." action="{{ emptyAction }}" hint-size="100%,360px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar tus solicitudes" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="PC-SOL-503" hint-size="100%,360px"></x-import>
+</sc-if>
+<sc-if value="{{ phoneList }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" title="Solicitudes" hint-size="100%,60px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="primary" icon="plus" block="{{ true }}" hint-size="100%,40px">Nueva solicitud</x-import>
+</x-import>
+<sc-if value="{{ isOk }}" hint-placeholder-val="{{ true }}">
+<div class="rows" style="margin:0 -16px">
+<sc-for list="{{ sols }}" as="s" hint-placeholder-count="4">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" icon="ticket" title="{{ s.tipo }}" subtitle="{{ s.sub }}" meta="{{ s.id }}" badge="{{ s.badge }}" chevron="{{ true }}" hint-size="100%,72px"></x-import>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<div aria-busy="true" class="rows" style="margin:0 -16px">
+<sc-for list="{{ skel }}" as="k" hint-placeholder-count="4">
+<div style="display:flex;gap:12px;padding:14px 16px;border-bottom:1px solid var(--ds-border)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="20px" height="{{ 20 }}" hint-size="20px,20px"></x-import><div style="flex:1;display:flex;flex-direction:column;gap:6px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="70%" hint-size="70%,14px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="45%" height="{{ 12 }}" hint-size="45%,12px"></x-import></div></div>
+</sc-for>
+</div>
+</sc-if>
+</sc-if>
+<sc-if value="{{ splitLoading }}" hint-placeholder-val="{{ false }}">
+<div aria-busy="true" aria-label="Cargando solicitud" style="display:flex;flex-direction:column;gap:16px;max-width:720px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="320px" height="{{ 28 }}" hint-size="320px,28px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 180 }}" radius="{{ 16 }}" hint-size="100%,180px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 140 }}" radius="{{ 16 }}" hint-size="100%,140px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ splitOk }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:16px;max-width:720px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" size="heading" eyebrow="SOL-0142" title="Guardia adicional por un día" badge="{{ selBadge }}" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Pedido" rows="{{ detail }}" hint-size="100%,200px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="neutral" titulo="Fuera de pauta" hint-size="100%,56px">Se cobra aparte. Atlas Seguridad SpA te confirma antes de programarlo.</x-import>
+<section style="display:flex;flex-direction:column;gap:12px">
+<h2 class="t-subheading m0">Estado del pedido</h2>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Timeline" items="{{ timeline }}" hint-size="100%,200px"></x-import>
+</section>
+</div>
+</sc-if>
+</x-import>
+</div>
+</div>
+</sc-if>
+</x-import></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ok&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;ok&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;vista&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;lista&quot;,&quot;form&quot;],&quot;default&quot;:&quot;lista&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;variante&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;&quot;,&quot;precio&quot;],&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  componentDidMount() { if (!window.PC) { const t = setInterval(() => { if (window.PC) { clearInterval(t); this.forceUpdate(); } }, 50); } }
+  renderVals() {
+    const P = window.PC || {}; const h = React.createElement, NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = this.props.device ?? "desktop", estado = this.props.estado ?? "ok", variante = this.props.variante ?? "", vista = this.props.vista ?? "lista";
+    const isPhone = device === "phone", ok = estado === "ok";
+    const isForm = vista === "form";
+    const split = !isPhone;
+    return {
+      pcTopBar: P.topBar ? P.topBar(device, this.props.rol, false) : undefined,
+      portalName: "Logística Andina SpA", tenantCaption: "Portal Cliente de Atlas Seguridad SpA",
+      device, theme: this.props.theme ?? "light", isPhone, active: isPhone ? "mas" : "sol",
+      user: P.USERS ? P.USERS.total : undefined,
+      tabs: device === "tablet" ? P.NAV_RAIL : P.NAV_PHONE, railFooter: [{ id: "age", label: "Agentes", icon: "bot" }], groups: P.GROUPS,
+      isForm, isList: !isForm, showSplit: split, phoneList: isPhone && (ok || estado === "cargando"),
+      forbidden: estado === "sinpermiso", isOk: ok, isLoading: estado === "cargando", isEmpty: estado === "vacio", isError: estado === "error",
+      splitOk: split && ok, splitLoading: split && estado === "cargando",
+      sols: (P.SOLICITUDES || []).map((s, i) => ({ ...s, selected: i === 0, sub: s.inst + " · " + s.cuando, badge: { tone: s.tone, label: s.estado } })),
+      selBadge: NS.Badge ? h(NS.Badge, { tone: "info" }, "En revisión") : null,
+      detail: [
+        { label: "Tipo", value: "Guardia adicional por un día" }, { label: "Instalación", value: "Bodega Lampa" },
+        { label: "Fecha y horario", value: "05-11-2026 · 08:00–20:00", numeric: true }, { label: "Guardias", value: "1", numeric: true },
+        { label: "Comentario", value: "Llega un despacho grande; necesitamos cubrir el andén 3 todo el día." },
+        { label: "Pedido por", value: "Andrea Rojas · 28-10-2026 10:12", numeric: true },
+      ],
+      timeline: [
+        { initials: "CI", who: "Carlos Irigoyen", action: "está revisando la dotación disponible para esa fecha", when: "28-10-2026 11:40" },
+        { initials: "AS", who: "Atlas Seguridad SpA", action: "recibió la solicitud", when: "28-10-2026 10:12" },
+        { initials: "AR", who: "Andrea Rojas", action: "creó la solicitud", when: "28-10-2026 10:12" },
+      ],
+      tipoOpts: [{ value: "g1", label: "Guardia adicional por un día" }, { value: "ref", label: "Refuerzo de turno" }, { value: "ev", label: "Guardia para evento" }, { value: "otro", label: "Otro servicio fuera de pauta" }],
+      instOpts: (P.INST || []).map((i) => ({ value: i.id, label: i.name })),
+      isPrecio: variante !== "sinprecio",
+      emptyAction: NS.Button ? h(NS.Button, { variant: "secondary", size: "lg", icon: "plus" }, "Nueva solicitud") : null,
+      skel: [1, 2, 3, 4],
+    };
+  }
+}
+</script>
+</body>
+</html>

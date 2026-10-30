@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="portal-cliente.js"></script>
+</helmet>
+<div style="display:flex;flex-direction:column;gap:24px">
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<div aria-busy="true" aria-label="Cargando supervisión" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr));gap:12px">
+<sc-for list="{{ skel }}" as="k" hint-placeholder-count="6">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,170px"><div style="display:flex;flex-direction:column;gap:10px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="60%" hint-size="60%,14px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="40%" height="{{ 28 }}" hint-size="40%,28px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 40 }}" hint-size="100%,40px"></x-import></div></x-import>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="eye" title="Aún no hay visitas de supervisión" description="La primera visita está comprometida para la primera semana de servicio. Los indicadores aparecen al cerrar el primer mes." action="{{ emptyAction }}" hint-size="100%,340px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar la supervisión" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="PC-SUP-503" hint-size="100%,340px"></x-import>
+</sc-if>
+<sc-if value="{{ isOk }}" hint-placeholder-val="{{ true }}">
+<section style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap"><h2 class="t-subheading m0">Indicadores de octubre</h2><span class="t-caption">Contra la meta del contrato · tendencia de 6 meses</span></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,230px),1fr));gap:12px">
+<sc-for list="{{ kpis }}" as="k" hint-placeholder-count="6">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,180px">
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px"><span class="t-label-sm muted">{{ k.label }}</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ k.tone }}" hint-size="80px,22px">{{ k.estado }}</x-import></div>
+<div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap"><span class="t-heading t-numeric">{{ k.valor }}</span><span class="t-caption t-numeric">{{ k.meta }}</span></div>
+<sc-if value="{{ k.hasDet }}" hint-placeholder-val="{{ false }}"><span class="t-caption">{{ k.detalle }}</span></sc-if>
+<div role="img" aria-label="{{ k.aria }}" style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;align-items:end;height:40px">
+<sc-for list="{{ k.bars }}" as="b" hint-placeholder-count="6"><div style="height:{{ b.h }};background:{{ b.c }};border-radius:3px 3px 0 0"></div></sc-for>
+</div>
+<div style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px"><sc-for list="{{ meses }}" as="m" hint-placeholder-count="6"><span class="t-caption" style="text-align:center;font-size:11px">{{ m }}</span></sc-for></div>
+</div>
+</x-import>
+</sc-for>
+</div>
+</section>
+<section style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap"><span style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><h2 class="t-subheading m0">Visitas del supervisor</h2><sc-if value="{{ soloResumen }}" hint-placeholder-val="{{ false }}"><span class="badge b-warning">Decide Carlos</span><span class="t-caption">Solo el resumen, sin fotos</span></sc-if></span><span class="t-caption t-numeric">3 de 4 comprometidas en octubre · Jorge Muñoz</span></div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<sc-for list="{{ visitas }}" as="v" hint-placeholder-count="3">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,160px">
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap"><span style="display:flex;flex-direction:column;gap:2px"><span class="t-label t-numeric">{{ v.f }} · {{ v.hh }}</span><span class="t-caption">{{ v.sup }} · supervisor</span></span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ v.tone }}" hint-size="110px,22px">{{ v.estado }}</x-import></div>
+<ul class="t-body-sm m0" style="padding-left:18px;display:flex;flex-direction:column;gap:2px">
+<sc-for list="{{ v.hall }}" as="x" hint-placeholder-count="2"><li>{{ x }}</li></sc-for>
+</ul>
+<sc-if value="{{ conFotos }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<sc-for list="{{ v.fotosL }}" as="f" hint-placeholder-count="3"><div role="img" aria-label="{{ f.alt }}" style="width:88px;height:66px;border-radius:var(--radius-md);border:1px solid var(--ds-border);background:var(--ds-fill);display:flex;align-items:center;justify-content:center;color:var(--ds-fg-subtle)"><span class="ic i-camera" aria-hidden="true"></span></div></sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ soloResumen }}" hint-placeholder-val="{{ false }}">
+<span class="t-caption" style="display:inline-flex;gap:6px;align-items:center"><span class="ic sm i-camera" aria-hidden="true"></span>{{ v.fotosTxt }}</span>
+</sc-if>
+</div>
+</x-import>
+</sc-for>
+</div>
+</section>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  componentDidMount() { if (!window.PC) { const t = setInterval(() => { if (window.PC) { clearInterval(t); this.forceUpdate(); } }, 50); } }
+  renderVals() {
+    const P = window.PC || {}; const h = React.createElement, NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const estado = this.props.estado ?? "ok", variante = this.props.variante ?? "";
+    const soloResumen = variante === "resumen";
+    const kpis = (P.KPIS || []).map((k) => {
+      const max = Math.max(...k.serie), min = k.min;
+      const bars = k.serie.map((v, i) => ({ h: (max === min ? 50 : Math.max(10, Math.round(((v - min) / (max - min || 1)) * 90) + 10)) + "%", c: i === 5 ? "var(--ds-" + k.tone + ")" : "var(--ds-border-strong)" }));
+      return { ...k, bars, hasDet: !!k.detalle, aria: "Tendencia de " + k.label.toLowerCase() + ", mayo a octubre: " + k.serie.join(", ") };
+    });
+    const visitas = (P.VISITAS_SUP || []).map((v) => ({ ...v, fotosL: Array.from({ length: Math.min(v.fotos, 4) }, (_, i) => ({ alt: "Foto " + (i + 1) + " de la visita del " + v.f })), fotosTxt: v.fotos + " fotos en el informe de la visita" }));
+    return {
+      isOk: estado === "ok", isLoading: estado === "cargando", isEmpty: estado === "vacio", isError: estado === "error",
+      kpis, meses: P.MESES6 || [], visitas, conFotos: !soloResumen, soloResumen,
+      emptyAction: NS.Button ? h(NS.Button, { variant: "secondary", size: "lg" }, "Ver cobertura") : null,
+      skel: [1, 2, 3, 4, 5, 6],
+    };
+  }
+}
+</script>
+</body>
+</html>
