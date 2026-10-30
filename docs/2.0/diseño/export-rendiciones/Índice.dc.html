@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0;background:var(--ds-bg);color:var(--ds-fg)} a{color:var(--ds-accent);text-decoration:none} a:hover{color:var(--ds-fg);text-decoration:underline}</style>
+</helmet>
+<main class="ds" style="max-width:960px;margin:0 auto;padding:48px 24px;display:flex;flex-direction:column;gap:40px;box-sizing:border-box">
+<header style="display:flex;flex-direction:column;gap:6px">
+<span class="t-body-sm" style="color:var(--ds-fg-muted)">OPAI 2.0 · DS 2.0 V2 · Atlas Seguridad SpA (datos ficticios)</span>
+<h1 class="t-title" style="margin:0">Rendiciones · v2</h1>
+<p class="t-body" style="margin:0;color:var(--ds-fg-muted);text-wrap:pretty">Cada pantalla tiene sus artboards 375 · 1024 · 1280 en claro y oscuro, y los estados vacío, cargando, error y sin permiso (375 claro y oscuro; 1280 alternando tema). Flujo: borrador → enviada → aprobada 1.er nivel → aprobada 2.º nivel si corresponde → en lote de pago → pagada, o rechazada con motivo (vuelve a borrador).</p>
+</header>
+
+<section style="display:flex;flex-direction:column;gap:8px">
+<h2 class="t-subheading" style="margin:0">Pantallas</h2>
+<div style="display:flex;flex-direction:column;border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);overflow:hidden">
+<sc-for list="{{ screens }}" as="s" hint-placeholder-count="8">
+<div style="display:grid;grid-template-columns:48px minmax(0,1fr) minmax(0,1fr);gap:8px 16px;padding:14px 16px;border-bottom:1px solid var(--ds-border);align-items:start">
+<span class="t-mono t-body-sm" style="color:var(--ds-fg-subtle)">{{ s.n }}</span>
+<div style="display:flex;flex-direction:column;gap:2px;min-width:0"><a class="t-label" href="{{ s.href }}">{{ s.title }}</a><span class="t-caption" style="color:var(--ds-fg-muted)">{{ s.portal }}</span></div>
+<span class="t-body-sm" style="color:var(--ds-fg-muted)">{{ s.rol }}</span>
+</div>
+</sc-for>
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:8px">
+<h2 class="t-subheading" style="margin:0">Otros entregables</h2>
+<div style="display:flex;flex-direction:column;border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);overflow:hidden">
+<div style="display:flex;flex-direction:column;gap:2px;padding:14px 16px;border-bottom:1px solid var(--ds-border)"><a class="t-label" href="Componentes.dc.html">Hoja de componentes</a><span class="t-body-sm" style="color:var(--ds-fg-muted)">Variantes y estados en claro y oscuro; mapa de nombres del pedido al DS; piezas nuevas propuestas al DS.</span></div>
+<div style="display:flex;flex-direction:column;gap:2px;padding:14px 16px;border-bottom:1px solid var(--ds-border)"><a class="t-label" href="Propuesta B.dc.html">Variante B · Propuesta, a confirmar por Carlos</a><span class="t-body-sm" style="color:var(--ds-fg-muted)">Recordatorios a los 5 y 10 días, lectura del comprobante desde la foto, importación de las 38 pendientes de 1.0.</span></div>
+<div style="display:flex;flex-direction:column;gap:2px;padding:14px 16px"><a class="t-label" href="Rendiciones.dc.html">Rendiciones (componente fuente)</a><span class="t-body-sm" style="color:var(--ds-fg-muted)">Una sola fuente para todas las pantallas. Props: pantalla, dispositivo, tema, estado, overlay, con Finanzas, propuesta.</span></div>
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:8px">
+<h2 class="t-subheading" style="margin:0">Roles</h2>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" rows="{{ roles }}" hint-size="100%,200px"></x-import>
+</section>
+</main>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      screens: [
+        { n: "01", title: "Mis rendiciones", href: "01 Mis rendiciones.dc.html", portal: "Portal Trabajador · 375 primero", rol: "Cualquier persona con cuenta (solo las suyas)" },
+        { n: "02", title: "Nueva rendición · compra", href: "02 Nueva rendicion compra.dc.html", portal: "Portal Trabajador o app · 375", rol: "Cualquier persona con cuenta" },
+        { n: "03", title: "Nueva rendición · kilometraje", href: "03 Nueva rendicion kilometraje.dc.html", portal: "Portal Trabajador o app · 375", rol: "Cualquier persona con cuenta" },
+        { n: "04", title: "Bandeja del aprobador", href: "04 Bandeja del aprobador.dc.html", portal: "ERP o celular · 1280 y 375", rol: "Aprobador de 1.er nivel (jefatura de la persona o de la instalación) y de 2.º nivel (owner, admin o rol con permiso)" },
+        { n: "05", title: "Detalle de rendición", href: "05 Detalle de rendicion.dc.html", portal: "Portal Trabajador o ERP", rol: "Quien rinde (las suyas) y quien la aprueba; el resto ve Forbidden" },
+        { n: "06", title: "Lotes de pago", href: "06 Lotes de pago.dc.html", portal: "ERP", rol: "owner, admin, finanzas" },
+        { n: "07", title: "Reporte", href: "07 Reporte.dc.html", portal: "ERP", rol: "owner, admin, finanzas" },
+        { n: "08", title: "Configuración › Módulos › Rendiciones", href: "08 Configuracion rendiciones.dc.html", portal: "ERP", rol: "owner, admin, finanzas" },
+      ],
+      roles: [
+        { label: "Cualquier persona con cuenta", value: "Crea y ve sus rendiciones · 01, 02, 03, 05" },
+        { label: "Aprobador 1.er nivel", value: "Aprueba o rechaza · 04, 05" },
+        { label: "Aprobador 2.º nivel", value: "Aprueba o rechaza las que exigen 2.º nivel · 04, 05" },
+        { label: "owner, admin, finanzas", value: "Lotes, reporte y configuración · 06, 07, 08" },
+        { label: "Resto", value: "Forbidden en lo ajeno" },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
