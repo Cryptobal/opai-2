@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0;background:var(--ds-n-200)}a{color:var(--ds-accent)}a:hover{color:var(--ds-n-900)}</style>
+</helmet>
+<div style="display:flex;flex-direction:column;gap:32px;padding:48px;width:1560px;font-family:var(--font-sans);color:var(--ds-n-900)">
+<header style="display:flex;flex-direction:column;gap:8px;max-width:960px">
+<span class="t-overline" style="color:var(--ds-n-600)">OPAI 2.0 · Finanzas · Compras, conciliación y contabilidad</span>
+<h1 class="t-display" style="margin:0">Hoja de componentes</h1>
+<p class="t-body" style="margin:0;color:var(--ds-n-700)">Todos los componentes usados en las pantallas 01–08 y 07B, con sus variantes y estados en claro y oscuro. Lo marcado «Nuevo para el DS» se propone como pieza del DS, no del módulo. <a href="00 Indice.dc.html">Índice de pantallas</a></p>
+</header>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px">
+<sc-for list="{{ temas }}" as="th" hint-placeholder-count="2">
+<div data-theme="{{ th.t }}" class="ds" style="display:flex;flex-direction:column;gap:24px;padding:24px;border-radius:var(--radius-lg);background:var(--ds-bg);color:var(--ds-fg)">
+<span class="t-heading">{{ th.label }}</span>
+<section style="display:grid;gap:12px"><span class="t-overline">Button · primary, secondary, ghost, destructive · foco · deshabilitado · cargando</span>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" hint-size="110px,40px">Guardar regla</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="download" hint-size="100px,40px">Excel</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" hint-size="80px,40px">Editar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="destructive" hint-size="150px,40px">Reversar asiento</x-import>
+<span style="display:inline-flex;border-radius:var(--radius-md);outline:2px solid var(--ds-focus);outline-offset:2px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="80px,40px">Foco</x-import></span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" disabled="{{ true }}" icon="lock" hint-size="120px,40px">Cerrar mes</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" loading="{{ true }}" hint-size="120px,40px">Calzar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="x" label="Quitar condición" hint-size="44px,44px"></x-import>
+</div></section>
+<section style="display:grid;gap:12px"><span class="t-overline">Badge · tonos de estado</span>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="success" hint-size="60px,22px">Pagada</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="info" hint-size="90px,22px">Pago parcial</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" hint-size="80px,22px">Pendiente</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="warning" hint-size="140px,22px">Sin centro de costo</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="danger" hint-size="80px,22px">Vence hoy</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="accent" hint-size="90px,22px">Propuesta</x-import>
+</div></section>
+<section style="display:grid;gap:12px"><span class="t-overline">Chip · ChipToggle (apagado, activo, deshabilitado) · ChipAgregar</span>
+<div class="chip-row" style="flex-wrap:wrap">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Sin centro de costo" contador="{{ 3 }}" hint-size="180px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Por revisar" contador="{{ 4 }}" activo="{{ true }}" hint-size="130px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Manuales" disabled="{{ true }}" hint-size="100px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Chip" etiqueta="Período" valor="Octubre 2026" hint-size="170px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipAgregar" hint-size="130px,32px"></x-import>
+</div></section>
+<section style="display:grid;gap:12px"><span class="t-overline">Segmentado · Tabs</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ vistas }}" value="eerr" label="Reporte" style="max-width:360px" hint-size="360px,40px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ tabs }}" value="a" hint-size="100%,44px"></x-import>
+</section>
+<section style="display:grid;gap:12px"><span class="t-overline">Input · Select · normal, foco, error, deshabilitado, mono</span>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Nombre" value="Proveedores de guardias" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="RUT" value="76.112.334-5" mono="{{ true }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Monto asignado" value="9.900.000" prefix="$" error="Supera el saldo de la factura" hint-size="100%,92px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Monto asignado" prefix="$" disabled="{{ true }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Cuenta" value="a" options="{{ cuentas }}" hint-size="100%,72px"></x-import>
+<div style="display:grid;gap:6px"><span class="t-label">Foco</span><span style="display:block;border-radius:var(--radius-md);box-shadow:0 0 0 3px var(--ds-accent-muted)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" value="SEG TOTAL" mono="{{ true }}" input-style="{{ focusStyle }}" hint-size="100%,44px"></x-import></span></div>
+</div></section>
+<section style="display:grid;gap:4px"><span class="t-overline">Checkbox · Switch</span>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" label="33 · 77810" checked="{{ true }}" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" label="Activa" checked="{{ true }}" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" label="33 · 77455" checked="{{ false }}" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" label="Inactiva" checked="{{ false }}" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" label="Deshabilitado" disabled="{{ true }}" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" label="Deshabilitado" disabled="{{ true }}" hint-size="100%,44px"></x-import>
+</div></section>
+<section style="display:grid;gap:12px"><span class="t-overline">Alerta · info, warning, danger</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Aplicaría a 42 movimientos de los últimos 90 días" hint-size="100%,60px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" titulo="4 partidas abiertas" hint-size="100%,60px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="danger" titulo="2 cuentas en grupo o naturaleza incorrecta" hint-size="100%,60px"></x-import>
+</section>
+<section style="display:grid;gap:12px"><span class="t-overline">KpiTile · Card + DetailSection (Pares) · Table · RowCard</span>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.KpiTile" label="Diferencia" value="$ 384.600" delta="4 partidas abiertas" direction="up" tone="warning" hint-size="100%,104px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,104px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" rows="{{ pares }}" hint-size="100%,80px"></x-import></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" dc-props="{{ tblProps }}" columns="{{ cols }}" rows="{{ rows }}" compact="{{ true }}" hint-size="100%,130px"></x-import>
+<div class="rows" style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);overflow:hidden"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" title="Uniformes Pacífico Ltda" subtitle="Sin centro de costo · quedan 2 días" meta="33 · 18452" badge="{{ rcBadge }}" hint-size="100%,72px"></x-import></div>
+</section>
+<section style="display:grid;gap:12px"><span class="t-overline">SelectionBar · ActionBar · Skeleton</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.SelectionBar" label="3 compras seleccionadas" on-clear="{{ noop }}" hint-size="100%,64px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" hint-size="190px,40px">Asignar centro de costo</x-import></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ActionBar" summary="{{ resumen }}" hint-size="100%,64px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" hint-size="130px,40px">Cargar apertura</x-import></x-import>
+<div style="display:flex;gap:12px;align-items:center"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="72px" height="14px" hint-size="72px,14px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="50%" height="14px" hint-size="50%,14px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="72px" height="22px" radius="{{ 999 }}" hint-size="72px,22px"></x-import></div>
+</section>
+<section style="display:grid;gap:12px"><span class="t-overline">Empty · ErrorState · Forbidden (tamaño reducido)</span>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;align-items:start">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="file" title="Aún no hay compras" size="sm" hint-size="100%,160px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar" code="FIN-COM-502" on-retry="{{ noop }}" hint-size="100%,200px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="Sin acceso a Finanzas" action-label="{{ nulo }}" hint-size="100%,200px"></x-import>
+</div></section>
+<section style="display:grid;gap:12px;padding:16px;border:1px dashed var(--ds-border-strong);border-radius:var(--radius-lg)">
+<div style="display:flex;gap:8px;align-items:center"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="accent" hint-size="120px,22px">Nuevo para el DS</x-import><span class="t-overline">Banda · tono danger, en línea</span></div>
+<div role="alert" style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:12px 16px;border:1px solid var(--ds-danger);border-radius:var(--radius-lg);background:var(--ds-danger-muted);color:var(--ds-danger-fg)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Icon" name="alert" hint-size="20px,20px"></x-import><p class="t-body" style="margin:0;flex:1 1 200px;color:var(--ds-fg)"><strong style="font-weight:600">El balance no cuadra por $ 12.000.</strong> Causa: asiento 2026-1041.</p><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="110px,40px">Ver asiento</x-import></div>
+<span class="t-caption">La Banda del repo (banda.tsx) es neutra y flotante. Se propone la prop «tono» y el modo en línea para bloqueos contables.</span>
+</section>
+<section style="display:grid;gap:12px;padding:16px;border:1px dashed var(--ds-border-strong);border-radius:var(--radius-lg)">
+<div style="display:flex;gap:8px;align-items:center"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="accent" hint-size="120px,22px">Nuevo para el DS</x-import><span class="t-overline">FilaOrdenable · FilaArbol · FilaReporte</span></div>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);overflow:hidden">
+<div style="display:grid;grid-template-columns:44px 24px minmax(0,1fr) auto;align-items:center;gap:4px;min-height:56px;padding-right:12px;border-bottom:1px solid var(--ds-border);background:var(--ds-fill)"><span style="display:flex;justify-content:center;color:var(--ds-fg-subtle)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Icon" name="menu" size="sm" hint-size="16px,16px"></x-import></span><span class="t-mono" style="color:var(--ds-fg-subtle)">02</span><span style="display:grid"><span class="t-label">Proveedores de guardias</span><span class="t-caption">Cargos · Cuenta y proveedor · seleccionada</span></span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="success" hint-size="60px,22px">Activa</x-import></div>
+<div style="display:flex;align-items:center;gap:8px;min-height:44px;padding:4px 16px 4px 52px;border-bottom:1px solid var(--ds-border);background:var(--ds-danger-muted)"><span class="t-mono" style="color:var(--ds-fg-muted)">1.1.05</span><span class="t-body-sm" style="flex:1">Deudores por venta</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="danger" hint-size="200px,22px">Debe estar en activo corriente</x-import></div>
+<div style="display:flex;align-items:center;gap:8px;min-height:48px;padding:6px 16px"><span style="display:flex;color:var(--ds-fg-subtle)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Icon" name="chevron-down" size="sm" hint-size="16px,16px"></x-import></span><span class="t-label" style="flex:1">Costo de explotación</span><span class="t-numeric">−$ 128.910.000</span></div>
+</div>
+<span class="t-caption">Asa de 44 para arrastrar (también con teclado: espacio y flechas). Árbol con aria-level e indentación de 20 (12 en teléfono). Línea de reporte que colapsa su grupo o abre el desglose.</span>
+</section>
+<section style="display:grid;gap:12px;padding:16px;border:1px dashed var(--ds-border-strong);border-radius:var(--radius-lg)">
+<div style="display:flex;gap:8px;align-items:center"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="accent" hint-size="120px,22px">Nuevo para el DS</x-import><span class="t-overline">CondicionRegla · FilaCalce · ListaChequeo</span></div>
+<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.3fr) 44px;gap:8px;align-items:end">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" value="g" options="{{ campos }}" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" value="c" options="{{ ops }}" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" value="SEG TOTAL" mono="{{ true }}" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="x" label="Quitar condición" hint-size="44px,44px"></x-import>
+</div>
+<div style="display:grid;grid-template-columns:44px minmax(0,1fr) 128px;gap:8px;align-items:center;padding:4px 12px 4px 4px;border:1px solid var(--ds-border);border-radius:var(--radius-lg)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ true }}" label="" hint-size="44px,44px"></x-import>
+<div style="display:grid"><span class="t-mono">33 · 77602</span><span class="t-caption">Saldo $ 3.100.000 · vence 05-11-2026</span></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" value="2.380.000" prefix="$" mono="{{ true }}" compact="{{ true }}" hint-size="128px,40px"></x-import>
+</div>
+<div style="display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:12px;align-items:start;padding:8px 0">
+<span style="color:var(--ds-danger-fg)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Icon" name="alert" hint-size="20px,20px"></x-import></span>
+<span style="display:grid"><span class="t-label">1 asiento descuadrado</span><span class="t-body-sm muted">2026-1041 · diferencia $ 12.000</span></span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" hint-size="60px,40px">Ver</x-import>
+</div>
+</section>
+</div>
+</sc-for>
+</div>
+<section style="display:grid;gap:12px;max-width:1100px">
+<h2 class="t-heading" style="margin:0">Nombres del pedido y su equivalente</h2>
+<div style="display:grid;grid-template-columns:240px minmax(0,1fr);gap:8px 24px" class="t-body-sm">
+<sc-for list="{{ mapa }}" as="m" hint-placeholder-count="8"><span class="t-label">{{ m.a }}</span><span style="color:var(--ds-n-700)">{{ m.b }}</span></sc-for>
+</div>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const badge = (t, l) => (NS.Badge ? h(NS.Badge, { tone: t }, l) : l);
+    return {
+      temas: [{ t: "light", label: "Claro" }, { t: "dark", label: "Oscuro" }],
+      noop: () => {}, nulo: null,
+      tblProps: { style: { display: "block" } },
+      focusStyle: { borderColor: "var(--ds-accent)" },
+      vistas: [{ value: "eerr", label: "EERR" }, { value: "balance", label: "Balance" }, { value: "mayor", label: "Mayor" }],
+      tabs: [{ id: "a", label: "Partidas abiertas", count: 4 }, { id: "b", label: "Conciliados", count: 128 }, { id: "c", label: "Cerrado", disabled: true }],
+      cuentas: [{ value: "a", label: "5.1.02 Servicios de guardias externos" }],
+      campos: [{ value: "g", label: "Glosa" }], ops: [{ value: "c", label: "contiene" }],
+      pares: [{ label: "Plazo de pago", value: "30 días" }, { label: "RUT", value: "78.234.567-1", mono: true }],
+      rcBadge: { tone: "neutral", label: "Pendiente" },
+      resumen: [{ label: "Debe", value: "$ 412.300.000" }, { label: "Diferencia", value: "$ 640.000" }],
+      cols: [{ key: "f", label: "Tipo · folio", mono: true }, { key: "p", label: "Proveedor", strong: true }, { key: "m", label: "Monto", align: "right" }, { key: "e", label: "Estado de pago", render: (r) => badge(r.t, r.e) }],
+      rows: [{ id: 1, f: "33 · 9921", p: "Combustibles del Sur S.A.", m: "$ 846.300", e: "Pagada", t: "success" }, { id: 2, f: "34 · 1207", p: "Distribuidora Andes SpA", m: "$ 1.120.500", e: "Vencida", t: "danger" }],
+      mapa: [
+        { a: "ListScreen", b: "Page + PageHeader + Table (cards en teléfono). En el repo existe como patrón; falta como componente en DS V2." },
+        { a: "SplitScreen", b: "Grilla lista 300–340 + detalle (Editor de reglas). Patrón del repo; falta en DS V2." },
+        { a: "DetailScreen", b: "Page + PageHeader con badge + Tabs + Card/DetailSection (Ficha de proveedor)." },
+        { a: "FormScreen · AjustesForm", b: "FormSection + ActionBar (Regla, Asiento de apertura)." },
+        { a: "Pares", b: "DetailSection." },
+        { a: "InputFecha", b: "DateInput (no se usó: los períodos van en Chip)." },
+        { a: "Banda", b: "Existe en el repo sin tono; se propone tono danger en línea." },
+        { a: "Loading", b: "Skeleton con la forma de cada pantalla; nunca spinner de página." },
+        { a: "Dialog · Textarea · Timeline", b: "No hicieron falta en estas pantallas." },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
