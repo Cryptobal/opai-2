@@ -5,7 +5,7 @@ import { defineCapability, noEncontrado, prohibido, reglaDeNegocio } from "@opai
 import { ESTADOS_VIVOS } from "../domain";
 import { prioridadSchema, uuidSchema } from "./esquemas";
 import { PERMISO_GESTIONAR, PERMISO_VER_TODOS } from "./permisos";
-import { responsablePorDefecto, ticketDe, vistaDeFila } from "./util";
+import { exigirMiembroActivo, ID_VISTA_PREVIA, responsablePorDefecto, ticketDe, vistaDeFila } from "./util";
 
 export const ticketsCrear = defineCapability({
   id: "tickets.tickets.crear",
@@ -29,11 +29,14 @@ export const ticketsCrear = defineCapability({
     const rol = ctx.rol;
     if (tipo.rolesPermitidos.length > 0 && !(rol && tipo.rolesPermitidos.includes(rol)))
       throw prohibido("Tu rol no puede crear este tipo de ticket.");
-    const responsableId =
-      input.responsableId && ctx.autorizar(PERMISO_VER_TODOS)
-        ? input.responsableId
-        : await responsablePorDefecto(ctx, tipo);
-    if (dryRun) return { id: "" };
+    let responsableId: string;
+    if (input.responsableId && ctx.autorizar(PERMISO_VER_TODOS)) {
+      await exigirMiembroActivo(ctx, input.responsableId, "El responsable indicado");
+      responsableId = input.responsableId;
+    } else {
+      responsableId = await responsablePorDefecto(ctx, tipo);
+    }
+    if (dryRun) return { id: ID_VISTA_PREVIA };
     const creado = await ctx.transaccion(async (tx) => {
       const t = await tx.ticket.create({
         data: {

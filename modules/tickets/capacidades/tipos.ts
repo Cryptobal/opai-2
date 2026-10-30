@@ -5,6 +5,7 @@ import { esRol } from "@opai/domain";
 
 import { sinDuplicado, tipoSchema, vistaTipo } from "./esquemas";
 import { PERMISO_TIPOS_MANAGE, PERMISO_VER } from "./permisos";
+import { exigirMiembroActivo, ID_VISTA_PREVIA } from "./util";
 
 /**
  * Tipos activos visibles para el rol actual (sin tipos ocultos, modulos/tickets.md §3): un
@@ -58,6 +59,8 @@ export const tiposCrear = defineCapability({
       throw reglaDeNegocio("Falta el rol responsable por defecto.");
     if (input.responsableDefectoTipo === "usuario" && !input.responsableDefectoUsuarioId)
       throw reglaDeNegocio("Falta el usuario responsable por defecto.");
+    if (input.responsableDefectoUsuarioId)
+      await exigirMiembroActivo(ctx, input.responsableDefectoUsuarioId, "El responsable por defecto");
     if (input.requiereAprobacion && !input.aprobadorRol)
       throw reglaDeNegocio("Un tipo con aprobación necesita el rol que aprueba.");
     const data = {
@@ -72,7 +75,7 @@ export const tiposCrear = defineCapability({
       rolesPermitidos: input.rolesPermitidos,
     };
     if (dryRun) {
-      return vistaTipo({ id: "", activo: true, orden: 0, ...data });
+      return vistaTipo({ id: ID_VISTA_PREVIA, activo: true, orden: 0, ...data });
     }
     const creado = await ctx.transaccion(async (tx) => {
       const t = await sinDuplicado(

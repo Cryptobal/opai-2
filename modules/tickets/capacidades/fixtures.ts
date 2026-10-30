@@ -1,3 +1,5 @@
+import { TENANT_DE_PRUEBA } from "@opai/capabilities/testing";
+
 // Fixtures compartidos entre los tests de capacidades de Tickets.
 export const ACTIVOS = ["tickets"];
 export const OTRO_USUARIO = "0192f3a0-0000-7000-8000-0000000000b2";
@@ -43,7 +45,7 @@ export function semilla() {
     membership: [
       {
         id: "0192f3a0-0000-7000-8000-0000000000e1",
-        tenantId: "",
+        tenantId: TENANT_DE_PRUEBA,
         userId: OTRO_USUARIO,
         rol: "supervisor",
         estado: "activa",

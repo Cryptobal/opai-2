@@ -9,15 +9,30 @@ type Tipo = {
   responsableDefectoUsuarioId: string | null;
 };
 
+/** Id de relleno de las vistas previas (dry_run): no existe fila, pero cumple el esquema de salida. */
+export const ID_VISTA_PREVIA = "00000000-0000-0000-0000-000000000000";
+
+/**
+ * Exige que `userId` tenga una membresía ACTIVA en el tenant actual. Un usuario que existe en otra
+ * empresa, está suspendido o no existe da el mismo error, para no revelar a quién conoce otra empresa.
+ */
+export async function exigirMiembroActivo(ctx: Contexto, userId: string, quien: string): Promise<void> {
+  const miembro = await ctx.db.membership.findFirst({
+    where: { tenantId: ctx.tenantId, userId, estado: "activa" },
+  });
+  if (!miembro) throw reglaDeNegocio(`${quien} no es miembro activo de esta empresa.`);
+}
+
 /** Resuelve el responsable por defecto del tipo: un usuario fijo o el primer miembro con el rol. */
 export async function responsablePorDefecto(ctx: Contexto, tipo: Tipo): Promise<string> {
   if (tipo.responsableDefectoTipo === "usuario") {
     if (!tipo.responsableDefectoUsuarioId)
       throw reglaDeNegocio("El tipo no tiene un usuario responsable configurado.");
+    await exigirMiembroActivo(ctx, tipo.responsableDefectoUsuarioId, "El responsable por defecto del tipo");
     return tipo.responsableDefectoUsuarioId;
   }
   const miembro = await ctx.db.membership.findFirst({
-    where: { rol: tipo.responsableDefectoRol ?? "", estado: "activa" },
+    where: { tenantId: ctx.tenantId, rol: tipo.responsableDefectoRol ?? "", estado: "activa" },
     orderBy: { createdAt: "asc" },
   });
   if (!miembro)

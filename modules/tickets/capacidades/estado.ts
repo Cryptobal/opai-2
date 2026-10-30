@@ -5,7 +5,7 @@ import { conflicto, defineCapability, noEncontrado, prohibido, reglaDeNegocio } 
 import { esEstadoTerminal, puedeTransicionar, type EstadoTicket } from "../domain";
 import { uuidSchema } from "./esquemas";
 import { PERMISO_GESTIONAR, PERMISO_VER_TODOS } from "./permisos";
-import { ticketDe, vistaDeFila } from "./util";
+import { exigirMiembroActivo, ticketDe, vistaDeFila } from "./util";
 
 function puedeGestionar(ctx: { usuario: { id: string } | null; autorizar(p: string): boolean }, t: { responsableId: string }) {
   return ctx.autorizar(PERMISO_VER_TODOS) || t.responsableId === ctx.usuario?.id;
@@ -73,10 +73,7 @@ export const ticketsReasignar = defineCapability({
     if (!puedeGestionar(ctx, t)) throw prohibido("Solo el responsable del ticket lo reasigna.");
     if (esEstadoTerminal(t.estado as EstadoTicket))
       throw reglaDeNegocio("Un ticket cerrado o rechazado no se reasigna.");
-    const miembro = await ctx.db.membership.findFirst({
-      where: { userId: input.responsableId, estado: "activa" },
-    });
-    if (!miembro) throw reglaDeNegocio("El nuevo responsable no es miembro de esta empresa.");
+    await exigirMiembroActivo(ctx, input.responsableId, "El nuevo responsable");
     if (dryRun) return { id: input.id };
     await ctx.transaccion(async (tx) => {
       const r = await tx.ticket.updateMany({
