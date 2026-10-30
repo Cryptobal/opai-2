@@ -18,10 +18,27 @@ const diasSchema = z.array(z.number().int().min(0).max(6)).max(7);
 /** La plantilla es de la instalación indicada y del alcance del actor (sin enumeración). */
 async function plantillaDeInstalacion(ctx: Contexto, instalacionId: string, plantillaId: string) {
   const pl = await ctx.db.plantillaRonda.findFirst({
-    where: { id: plantillaId, instalacionId, estado: "activo", ...dondeInstalacionId(ctx) },
+    // `instalacionId` y el alcance van en `AND`: el spread de `dondeInstalacionId` pisaría el
+    // `instalacionId` pedido y dejaría usar una plantilla de otra instalación del alcance.
+    where: { id: plantillaId, estado: "activo", AND: [{ instalacionId }, dondeInstalacionId(ctx)] },
     select: { id: true },
   });
   if (!pl) throw noEncontrado("La plantilla");
+}
+
+/** Cada persona existe en el tenant y tiene un vínculo vigente en la instalación (sin enumeración). */
+async function personasDeInstalacion(
+  ctx: Contexto,
+  instalacionId: string,
+  personaIds: readonly string[],
+) {
+  if (personaIds.length === 0) return;
+  const unicos = [...new Set(personaIds)];
+  const filas = await ctx.db.persona.findMany({
+    where: { id: { in: unicos }, vinculos: { some: { estado: "vigente", instalacionId } } },
+    select: { id: true },
+  });
+  if (filas.length !== unicos.length) throw noEncontrado("La persona");
 }
 
 async function programacionDe(ctx: Contexto, id: string) {
@@ -54,6 +71,7 @@ export const programacionesFijar = defineCapability({
   async handler(ctx, input, { dryRun }) {
     await instalacionEnAlcance(ctx, input.instalacionId);
     await plantillaDeInstalacion(ctx, input.instalacionId, input.plantillaId);
+    await personasDeInstalacion(ctx, input.instalacionId, input.responsables.personaIds);
     if (input.id) {
       const actual = await programacionDe(ctx, input.id);
       if (actual.instalacionId !== input.instalacionId)

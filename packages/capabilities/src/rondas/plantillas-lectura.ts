@@ -52,8 +52,9 @@ export const plantillasListar = defineCapability({
     await instalacionEnAlcance(ctx, input.instalacionId);
     const plantillas = await ctx.db.plantillaRonda.findMany({
       where: {
-        instalacionId: input.instalacionId,
-        ...dondeInstalacionId(ctx),
+        // `instalacionId` y el alcance van en `AND`: el spread de `dondeInstalacionId` pisaría el
+        // `instalacionId` pedido y listaría plantillas de todas las instalaciones del alcance.
+        AND: [{ instalacionId: input.instalacionId }, dondeInstalacionId(ctx)],
         ...(input.incluirArchivadas ? {} : { estado: "activo" }),
       },
       orderBy: { nombre: "asc" },

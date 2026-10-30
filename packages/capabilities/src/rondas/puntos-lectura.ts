@@ -22,8 +22,9 @@ export const puntosListar = defineCapability({
     await instalacionEnAlcance(ctx, input.instalacionId);
     const puntos = await ctx.db.puntoControl.findMany({
       where: {
-        instalacionId: input.instalacionId,
-        ...dondeInstalacionId(ctx),
+        // `instalacionId` y el alcance van en `AND`: el spread de `dondeInstalacionId` pisaría el
+        // `instalacionId` pedido y listaría puntos de todas las instalaciones del alcance.
+        AND: [{ instalacionId: input.instalacionId }, dondeInstalacionId(ctx)],
         ...(input.incluirArchivados ? {} : { estado: "activo" }),
       },
       orderBy: { nombre: "asc" },

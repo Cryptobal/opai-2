@@ -18,7 +18,9 @@ export const programacionesListar = defineCapability({
   async handler(ctx, input) {
     await instalacionEnAlcance(ctx, input.instalacionId);
     const filas = await ctx.db.programacion.findMany({
-      where: { instalacionId: input.instalacionId, ...dondeInstalacionId(ctx) },
+      // `instalacionId` y el alcance van en `AND`: el spread de `dondeInstalacionId` pisaría el
+      // `instalacionId` pedido y listaría programaciones de todas las instalaciones del alcance.
+      where: { AND: [{ instalacionId: input.instalacionId }, dondeInstalacionId(ctx)] },
       orderBy: { nombre: "asc" },
     });
     return filas.map(vistaProgramacion);

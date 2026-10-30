@@ -37,7 +37,9 @@ const incluir = {
 /** Los puntos son activos, de la misma instalación y del alcance del actor (ADR-022, sin enumeración). */
 async function puntosDeInstalacion(ctx: Contexto, instalacionId: string, ids: readonly string[]) {
   const filas = await ctx.db.puntoControl.findMany({
-    where: { id: { in: [...ids] }, instalacionId, estado: "activo", ...dondeInstalacionId(ctx) },
+    // `instalacionId` y el alcance van en `AND`: el spread de `dondeInstalacionId` pisaría el
+    // `instalacionId` pedido y dejaría usar puntos de otra instalación del alcance.
+    where: { id: { in: [...ids] }, estado: "activo", AND: [{ instalacionId }, dondeInstalacionId(ctx)] },
     select: { id: true },
   });
   if (filas.length !== new Set(ids).size) throw noEncontrado("El punto de control");
@@ -130,17 +132,17 @@ export const plantillasActualizar = defineCapability({
   dryRun: true,
   async handler(ctx, { id, puntos, ...cambios }, { dryRun }) {
     const plantilla = await plantillaDe(ctx, id);
-    validarTramo(cambios.tiempoMaxMin ?? plantilla.tiempoMaxMin, cambios.tiempoMaxTramoMin);
+    // Compara contra lo que quedará guardado: el total y el tramo nuevos si vienen en el input, o los
+    // actuales si no. `undefined` = no se envía (usa el guardado); `null` = se borra el tramo.
+    const tramo =
+      cambios.tiempoMaxTramoMin !== undefined ? cambios.tiempoMaxTramoMin : plantilla.tiempoMaxTramoMin;
+    validarTramo(cambios.tiempoMaxMin ?? plantilla.tiempoMaxMin, tramo);
     if (puntos) await puntosDeInstalacion(ctx, plantilla.instalacionId, puntos.map((p) => p.puntoId));
     const data = definidos(cambios);
     if (dryRun) {
       const fila = await ctx.db.plantillaRonda.findUnique({ where: { id }, include: incluir });
       if (!fila) throw noEncontrado("La plantilla");
-      return vistaPlantilla({
-        ...fila,
-        ...data,
-        puntos: puntos ?? fila.puntos,
-      });
+      return vistaPlantilla({ ...fila, ...data, puntos: puntos ?? fila.puntos });
     }
     const actualizada = await ctx.transaccion(async (tx) => {
       await sinDuplicado(
