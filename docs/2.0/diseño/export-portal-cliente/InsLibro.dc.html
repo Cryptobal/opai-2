@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="portal-cliente.js"></script>
+</helmet>
+<div style="display:flex;flex-direction:column;gap:16px">
+<sc-if value="{{ showList }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ isOk }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="danger" titulo="1 novedad grave abierta" accion="{{ verGrave }}" hint-size="100%,56px">Intento de ingreso por cerco norte · 30-10-2026 06:12</x-import>
+</sc-if>
+<div style="display:grid;grid-template-columns:{{ filterCols }};gap:8px;align-items:center">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" icon="search" placeholder="Buscar en el libro" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" value="todas" options="{{ gravOpts }}" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" value="todas" options="{{ catOpts }}" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ estOpts }}" value="todas" label="Estado" hint-size="240px,36px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<div aria-busy="true" aria-label="Cargando libro de novedades" style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);overflow:hidden">
+<sc-for list="{{ skel }}" as="k" hint-placeholder-count="5">
+<div style="display:grid;grid-template-columns:56px minmax(0,1fr);gap:12px;padding:14px 16px;border-bottom:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="44px" hint-size="44px,14px"></x-import>
+<div style="display:flex;flex-direction:column;gap:8px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="140px" height="{{ 22 }}" radius="{{ 999 }}" hint-size="140px,22px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="70%" hint-size="70%,14px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="40%" height="{{ 12 }}" hint-size="40%,12px"></x-import></div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="flag" title="El libro está al día" description="No hay novedades registradas en esta instalación. Te avisamos por correo si se registra una grave." action="{{ emptyAction }}" hint-size="100%,340px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar el libro de novedades" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="PC-NOV-503" hint-size="100%,340px"></x-import>
+</sc-if>
+<sc-if value="{{ listOk }}" hint-placeholder-val="{{ true }}">
+<div style="{{ listBox }}">
+<sc-for list="{{ grupos }}" as="gr" hint-placeholder-count="2">
+<div class="t-overline t-numeric" style="padding:10px 16px 6px;background:var(--ds-bg);border-bottom:1px solid var(--ds-border)">{{ gr.dia }}</div>
+<sc-for list="{{ gr.items }}" as="n" hint-placeholder-count="2">
+<a href="#" style="display:grid;grid-template-columns:48px minmax(0,1fr);gap:12px;padding:14px 16px;border-bottom:1px solid var(--ds-border);text-decoration:none;color:var(--ds-fg)" style-hover="background:var(--ds-bg)">
+<span class="t-label t-numeric" style="padding-top:2px">{{ n.hh }}</span>
+<span style="display:flex;flex-direction:column;gap:6px;min-width:0">
+<span style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ n.tone }}" hint-size="70px,22px">{{ n.g }}</x-import>
+<span class="t-caption">{{ n.cat }} · {{ n.id }}</span>
+<span style="flex:1"></span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ n.eTone }}" dot="{{ false }}" hint-size="64px,22px">{{ n.estado }}</x-import>
+</span>
+<span class="t-label">{{ n.tit }}</span>
+<span class="t-body-sm muted" style="text-wrap:pretty">{{ n.txt }}</span>
+<span class="t-caption" style="display:flex;gap:12px;flex-wrap:wrap;align-items:center"><span>{{ n.quien }} · {{ n.puesto }}</span><sc-if value="{{ n.hasResp }}" hint-placeholder-val="{{ false }}"><span style="display:inline-flex;gap:4px;align-items:center"><span class="ic sm i-message" aria-hidden="true"></span>{{ n.respL }}</span></sc-if><sc-if value="{{ n.hasAdj }}" hint-placeholder-val="{{ false }}"><span style="display:inline-flex;gap:4px;align-items:center"><span class="ic sm i-paperclip" aria-hidden="true"></span>{{ n.adjL }}</span></sc-if></span>
+</span>
+</a>
+</sc-for>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ detailOk }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:16px;max-width:760px">
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}"><a href="#" class="t-label" style="display:inline-flex;align-items:center;gap:4px;min-height:44px;text-decoration:none;color:var(--ds-fg-muted)"><span class="ic sm i-chevron-left" aria-hidden="true"></span>Libro de novedades</a></sc-if>
+<div style="display:flex;flex-direction:column;gap:6px">
+<span style="display:flex;gap:6px;flex-wrap:wrap;align-items:center"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="danger" hint-size="60px,22px">Grave</x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="warning" dot="{{ false }}" hint-size="64px,22px">Abierta</x-import><span class="t-caption">Seguridad · NOV-0231</span></span>
+<h2 class="t-heading m0">Intento de ingreso por cerco norte</h2>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" rows="{{ meta }}" hint-size="100%,160px"></x-import>
+<p class="t-body m0" style="text-wrap:pretty">Dos personas intentaron saltar el cerco norte. Se dio aviso a Carabineros (parte 4471) y se retiraron antes de su llegada. Sin daños en el cerco ni ingreso a la bodega.</p>
+<section style="display:flex;flex-direction:column;gap:8px">
+<h3 class="t-label m0">Fotos y adjuntos</h3>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+<sc-for list="{{ fotos }}" as="f" hint-placeholder-count="2">
+<div role="img" aria-label="{{ f.alt }}" style="aspect-ratio:4/3;border-radius:var(--radius-md);border:1px solid var(--ds-border);background:var(--ds-fill);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--ds-fg-subtle)"><span class="ic i-camera" aria-hidden="true"></span><span class="t-caption t-numeric">{{ f.l }}</span></div>
+</sc-for>
+</div>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-md);overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" icon="paperclip" title="Parte Carabineros 4471.pdf" subtitle="Adjuntado por Luis Contreras Vega · 30-10-2026 07:02" trailing="{{ dlBtn }}" hint-size="100%,64px"></x-import>
+</div>
+</section>
+<section style="display:flex;flex-direction:column;gap:12px">
+<h3 class="t-label m0">Respuestas</h3>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Timeline" items="{{ respuestas }}" hint-size="100%,200px"></x-import>
+<sc-if value="{{ canComment }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="badge b-warning">Decide Carlos</span><span class="t-body-sm muted">El cliente comenta la novedad, o solo la lee.</span></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Tu comentario" rows="{{ 3 }}" placeholder="Escribe una respuesta para Atlas Seguridad SpA" hint-size="100%,110px"></x-import>
+<div style="display:flex;justify-content:flex-end"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="primary" size="lg" block="{{ isPhone }}" icon="message" hint-size="140px,48px">Responder</x-import></div>
+</sc-if>
+<sc-if value="{{ readOnly }}" hint-placeholder-val="{{ true }}">
+<span class="t-caption">Solo lectura. Responde Atlas Seguridad SpA; si necesitas pedir algo, crea una solicitud.</span>
+</sc-if>
+</section>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  componentDidMount() { if (!window.PC) { const t = setInterval(() => { if (window.PC) { clearInterval(t); this.forceUpdate(); } }, 50); } }
+  renderVals() {
+    const P = window.PC || {}; const h = React.createElement, NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = this.props.device ?? "desktop", estado = this.props.estado ?? "ok", vista = this.props.vista ?? "", variante = this.props.variante ?? "";
+    const isPhone = device === "phone", ok = estado === "ok", detalle = vista === "detalle";
+    const novs = (P.NOVEDADES || []).map((n) => ({ ...n, hasResp: n.resp > 0, hasAdj: n.adj > 0, respL: n.resp + (n.resp === 1 ? " respuesta" : " respuestas"), adjL: n.adj + (n.adj === 1 ? " adjunto" : " adjuntos") }));
+    const grupos = [];
+    novs.forEach((n) => { let g = grupos.find((x) => x.dia === n.f); if (!g) { g = { dia: n.f, items: [] }; grupos.push(g); } g.items.push(n); });
+    return {
+      isPhone, notPhone: !isPhone, isOk: ok, isLoading: estado === "cargando", isEmpty: estado === "vacio", isError: estado === "error",
+      showList: !detalle && (ok || estado === "cargando"), listOk: ok && !detalle, detailOk: ok && detalle,
+      filterCols: isPhone ? "minmax(0,1fr)" : device === "tablet" ? "minmax(0,1fr) minmax(0,1fr)" : "minmax(0,1.4fr) minmax(0,1fr) minmax(0,1fr) auto",
+      listBox: Object.assign({ border: "1px solid var(--ds-border)", borderRadius: "var(--radius-lg)", background: "var(--ds-surface)", overflow: "hidden" }, isPhone ? { margin: "0 -16px", borderRadius: 0, borderLeft: 0, borderRight: 0 } : {}),
+      verGrave: NS.Button ? h(NS.Button, { variant: "secondary" }, "Ver") : null,
+      gravOpts: [{ value: "todas", label: "Todas las gravedades" }, "Grave", "Moderada", "Leve"],
+      catOpts: [{ value: "todas", label: "Todas las categorías" }, "Seguridad", "Personal", "Infraestructura", "Proveedores", "Acceso"],
+      estOpts: [{ value: "todas", label: "Todas" }, { value: "ab", label: "Abiertas" }, { value: "ce", label: "Cerradas" }],
+      grupos,
+      meta: [{ label: "Fecha y hora", value: "30-10-2026 · 06:12", numeric: true }, { label: "Registró", value: "Luis Contreras Vega · Portería 1 · Noche" }, { label: "Categoría", value: "Seguridad" }],
+      fotos: [{ l: "06:14", alt: "Foto 1 del cerco norte, 06:14" }, { l: "06:15", alt: "Foto 2 del cerco norte, 06:15" }],
+      dlBtn: NS.IconButton ? h(NS.IconButton, { icon: "download", label: "Descargar parte de Carabineros" }) : null,
+      respuestas: [
+        { initials: "JM", who: "Jorge Muñoz", action: "· supervisor: reforzamos la ronda del cerco norte cada 2 horas hasta reparar la iluminación.", when: "30-10-2026 08:20" },
+        { initials: "LC", who: "Luis Contreras Vega", action: "registró la novedad y adjuntó el parte de Carabineros.", when: "30-10-2026 07:02" },
+      ],
+      canComment: variante === "comentar", readOnly: variante !== "comentar",
+      emptyAction: NS.Button ? h(NS.Button, { variant: "secondary", size: "lg" }, "Ver rondas") : null,
+      skel: [1, 2, 3, 4, 5],
+    };
+  }
+}
+</script>
+</body>
+</html>

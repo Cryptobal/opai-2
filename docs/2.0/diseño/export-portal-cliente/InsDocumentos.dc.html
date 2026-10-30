@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="portal-cliente.js"></script>
+</helmet>
+<div style="display:flex;flex-direction:column;gap:16px">
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<div aria-busy="true" aria-label="Cargando documentos" style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);overflow:hidden">
+<sc-for list="{{ skel }}" as="k" hint-placeholder-count="5"><div style="display:flex;gap:12px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--ds-border)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="20px" height="{{ 20 }}" hint-size="20px,20px"></x-import><div style="flex:1;display:flex;flex-direction:column;gap:6px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="50%" hint-size="50%,14px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="30%" height="{{ 12 }}" hint-size="30%,12px"></x-import></div></div></sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="file" title="Aún no hay protocolos vinculados" description="Atlas Seguridad SpA vincula aquí protocolos, procedimientos, planes de emergencia, contrato y anexos de esta instalación." action="{{ emptyAction }}" hint-size="100%,340px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar los documentos" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="PC-IDOC-503" hint-size="100%,340px"></x-import>
+</sc-if>
+<sc-if value="{{ isOk }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<sc-for list="{{ tipos }}" as="t" hint-placeholder-count="5"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="{{ t.l }}" contador="{{ t.n }}" hint-size="120px,32px"></x-import></sc-for>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ docs }}" cards="{{ isPhone }}" to-card="{{ card }}" style="{{ bleed }}" hint-size="100%,300px"></x-import>
+<span class="t-caption">Se muestra la versión vigente de cada documento. Viven en el módulo Documentos y están vinculados a Planta Quilicura.</span>
+<a href="#" class="t-label" style="display:inline-flex;align-items:center;gap:4px;min-height:44px;text-decoration:none">Documentos de los guardias y facturas<span class="ic sm i-chevron-right" aria-hidden="true"></span></a>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  componentDidMount() { if (!window.PC) { const t = setInterval(() => { if (window.PC) { clearInterval(t); this.forceUpdate(); } }, 50); } }
+  renderVals() {
+    const P = window.PC || {}; const h = React.createElement, NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = this.props.device ?? "desktop", estado = this.props.estado ?? "ok";
+    const isPhone = device === "phone";
+    const docs = (P.PROTOCOLOS || []).filter((d) => d.inst === "Planta Quilicura");
+    const tipos = (P.TIPOS_PROT || []).map((t) => ({ l: t, n: docs.filter((d) => d.tipo === t).length }));
+    return {
+      isPhone, isOk: estado === "ok", isLoading: estado === "cargando", isEmpty: estado === "vacio", isError: estado === "error",
+      bleed: isPhone ? { margin: "0 -16px" } : undefined, docs, tipos,
+      cols: [
+        { key: "nombre", label: "Documento", strong: true },
+        { key: "tipo", label: "Tipo", render: (r) => NS.Badge ? h(NS.Badge, { tone: "neutral", dot: false }, r.tipo) : r.tipo },
+        { key: "ver", label: "Versión vigente", render: (r) => h("span", { className: "t-numeric" }, r.ver + " · desde " + r.desde) },
+        { key: "dl", label: "", align: "right", render: (r) => NS.IconButton ? h(NS.IconButton, { icon: "download", label: "Descargar " + r.nombre }) : null }],
+      card: (r) => ({ icon: "file", title: r.nombre, subtitle: r.tipo + " · " + r.ver + " vigente desde " + r.desde, chevron: true }),
+      emptyAction: NS.Button ? h(NS.Button, { variant: "secondary", size: "lg" }, "Ver documentos de los guardias") : null,
+      skel: [1, 2, 3, 4, 5],
+    };
+  }
+}
+</script>
+</body>
+</html>
