@@ -25,9 +25,19 @@ export function identidadEnMemoria(tabla: (n: string) => Fila[]): Identidad {
     async enOtrasEmpresas(userId, tenantId) {
       return tabla("membership").some((m) => m["userId"] === userId && m["tenantId"] !== tenantId);
     },
-    async restablecerSegundoFactor(_tx, userId) {
+    async membresiaBloqueada(_tx, membershipId) {
+      const m = tabla("membership").find((f) => f["id"] === membershipId);
+      if (!m) return null;
+      return { tenantId: String(m["tenantId"]), userId: String(m["userId"]) };
+    },
+    async restablecerSegundoFactor(_tx, userId, reverificar) {
+      const u = tabla("user").find((f) => f["id"] === userId);
+      reverificar?.({
+        platformRole: (u?.["platformRole"] as string | null) ?? null,
+        twoFactorEnabled: Boolean(u?.["twoFactorEnabled"]),
+      });
       const enrolamientos = quitar("twoFactor", userId);
-      for (const u of tabla("user")) if (u["id"] === userId) u["twoFactorEnabled"] = false;
+      if (u) u["twoFactorEnabled"] = false;
       return { enrolamientos, sesiones: quitar("session", userId) };
     },
     async borrarUsuario(_tx, userId) {

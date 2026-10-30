@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { COMUNICABLES_NUCLEO, PERMISOS_CORE, renderizarCorreo } from "@opai/domain";
+import type { TenantTx } from "@opai/db";
 
 import { defineCapability } from "../define";
 import { noEncontrado, prohibido, reglaDeNegocio } from "../errores";
@@ -22,13 +23,26 @@ export const restablecimientoSchema = z.object({
  * Restablece el segundo factor en la transacción de la escritura (con su auditoría) y, después del
  * COMMIT, le avisa a la persona por correo. El aviso usa la marca de OPAI, como la recuperación de
  * contraseña: es un correo de identidad, no de la empresa. Nunca rompe la ejecución.
+ *
+ * `opciones.antes` corre primero en la misma transacción (bajo el rol normal, p. ej. para bloquear
+ * y recomprobar la membresía); `opciones.reverificar` recibe el estado de `core.users` recién
+ * bloqueado (`FOR UPDATE`) para repetir ahí las condiciones de autorización (CAR-54, carrera de la
+ * auditoría del Núcleo §I-15: entre la comprobación inicial y este punto, el rol de plataforma, el
+ * MFA o la membresía pudieron cambiar). Cualquiera de las dos puede lanzar para abortar con ROLLBACK.
  */
 export async function restablecerYAvisar(
   ctx: Contexto,
   u: { id: string; name: string; email: string },
   por: string,
+  opciones: {
+    antes?: (tx: TenantTx) => Promise<void>;
+    reverificar?: (u: { platformRole: string | null; twoFactorEnabled: boolean }) => void;
+  } = {},
 ) {
-  const r = await ctx.transaccion((tx) => ctx.identidad.restablecerSegundoFactor(tx, u.id));
+  const r = await ctx.transaccion(async (tx) => {
+    await opciones.antes?.(tx);
+    return ctx.identidad.restablecerSegundoFactor(tx, u.id, opciones.reverificar);
+  });
   const urlBase = ctx.servicios.urlBase;
   ctx.diferir(async () => {
     const e = COMUNICABLES_NUCLEO.find((x) => x.evento === "core.usuario.mfa_restablecido");
@@ -87,6 +101,31 @@ export const usersRestablecerMfa = defineCapability({
     }
     if (!u.twoFactorEnabled) throw reglaDeNegocio("Ese usuario no tiene el segundo factor activo.");
     if (dryRun) return { userId: u.id, nombre: u.name, email: u.email, sesionesCerradas: 0 };
-    return restablecerYAvisar(ctx, u, "Un owner de tu empresa");
+    return restablecerYAvisar(ctx, u, "Un owner de tu empresa", {
+      // Repite, ya bajo el lock de la membresía y del usuario, las condiciones que autorizaron la
+      // vista: entre esa comprobación y aquí pudo moverse de empresa, ganar rol de plataforma o
+      // perder el MFA (CAR-54, carrera §I-15).
+      antes: async (tx) => {
+        const vigente = await ctx.identidad.membresiaBloqueada(tx, input.membershipId);
+        if (!vigente || vigente.tenantId !== ctx.tenantId || vigente.userId !== u.id) {
+          throw noEncontrado("El usuario");
+        }
+        if (await ctx.identidad.enOtrasEmpresas(u.id, ctx.tenantId)) {
+          throw prohibido(
+            "Tiene acceso a otras empresas en OPAI: pídele a Plataforma que lo restablezca.",
+          );
+        }
+      },
+      reverificar: (fresco) => {
+        if (fresco.platformRole) {
+          throw prohibido(
+            "Es un usuario de Plataforma: solo Plataforma puede restablecer su segundo factor.",
+          );
+        }
+        if (!fresco.twoFactorEnabled) {
+          throw reglaDeNegocio("Ese usuario no tiene el segundo factor activo.");
+        }
+      },
+    });
   },
 });

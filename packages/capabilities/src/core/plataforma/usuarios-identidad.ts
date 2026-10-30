@@ -43,7 +43,15 @@ export const platformUsuariosRestablecerMfa = defineCapability({
     const u = await usuarioPorCorreo(ctx, input.email);
     if (!u.twoFactorEnabled) throw reglaDeNegocio("Ese usuario no tiene el segundo factor activo.");
     if (dryRun) return { userId: u.id, nombre: u.name, email: u.email, sesionesCerradas: 0 };
-    return restablecerYAvisar(ctx, u, "Plataforma OPAI");
+    return restablecerYAvisar(ctx, u, "Plataforma OPAI", {
+      // Repite la condición bajo el lock de `core.users` (CAR-54, carrera §I-15): pudo desactivar
+      // su MFA entre la vista previa y este punto.
+      reverificar: (fresco) => {
+        if (!fresco.twoFactorEnabled) {
+          throw reglaDeNegocio("Ese usuario no tiene el segundo factor activo.");
+        }
+      },
+    });
   },
 });
 
