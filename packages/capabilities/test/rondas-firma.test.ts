@@ -5,7 +5,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { generarEtiquetaFirmada, verificarEtiquetaFirmada } from "../src/rondas/firma";
 
-const SECRETO_VALIDO = "secreto-de-prueba-rondas-etiqueta-32-bytes-o-mas";
+const SECRETO_VALIDO = "secreto-de-prueba-de-al-menos-32-caracteres-rondas-etiqueta-qr";
 
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -58,7 +58,10 @@ describe("clave de firma de etiquetas QR (R7)", () => {
 
     it("rotar a un secreto distinto invalida los códigos firmados con el anterior", () => {
       const { codigo } = generarEtiquetaFirmada();
-      vi.stubEnv("RONDAS_ETIQUETA_SECRET", "otro-secreto-de-prueba-tambien-de-32-bytes-o-mas");
+      vi.stubEnv(
+        "RONDAS_ETIQUETA_SECRET",
+        "secreto-de-prueba-de-al-menos-32-caracteres-rondas-etiqueta-qr-rotado",
+      );
       expect(verificarEtiquetaFirmada(codigo).valida).toBe(false);
     });
   });

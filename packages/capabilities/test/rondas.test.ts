@@ -17,10 +17,11 @@ import { semillaTenant } from "./semilla";
 
 // Valor de prueba de RONDAS_ETIQUETA_SECRET (≥32 bytes), solo para este archivo de tests (R7,
 // corrección de la review 5713377140 del PR #145: nunca un valor fijo en el código de producción).
-vi.stubEnv("RONDAS_ETIQUETA_SECRET", "secreto-de-prueba-rondas-etiqueta-32-bytes-o-mas");
+const SECRETO_ETIQUETA_DE_PRUEBA = "secreto-de-prueba-de-al-menos-32-caracteres-rondas-etiqueta-qr";
+vi.stubEnv("RONDAS_ETIQUETA_SECRET", SECRETO_ETIQUETA_DE_PRUEBA);
 afterEach(() => {
   vi.unstubAllEnvs();
-  vi.stubEnv("RONDAS_ETIQUETA_SECRET", "secreto-de-prueba-rondas-etiqueta-32-bytes-o-mas");
+  vi.stubEnv("RONDAS_ETIQUETA_SECRET", SECRETO_ETIQUETA_DE_PRUEBA);
 });
 
 const INST = "0192f3a0-0000-7000-8000-00000000c101";
