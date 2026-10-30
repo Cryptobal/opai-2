@@ -2,6 +2,8 @@
 
 # ESTADO — OPAI 2.0
 
+- **Rondas PR 1b · estabilidad del e2e (PR #141).** El test esperaba 500 ms después de iniciar cada guardado y podía navegar antes de que terminara la acción de servidor. OpenCode / openai/gpt-6.1-terra reemplaza esa espera por la confirmación de éxito de cada acción; conserva la recarga y comprobación de persistencia. El fallo de CI no se reprodujo en local con el test original. Sin cambios de producto, permisos, RLS ni migraciones; los criterios pendientes del Brief 14 siguen pendientes.
+
 > **Desde el 28-oct-2026 (ADR-054, [`OPERACION-agentes.md`](OPERACION-agentes.md)), cada PR actualiza este archivo: qué entró, qué quedó pendiente y qué se decidió.** Sin esa actualización, el PR no está listo. Ya no es solo la foto técnica (versiones, infraestructura, riesgos aceptados y decisiones), que también sigue aquí. Linear (equipo CAR, `Fixes CAR-n`) queda como referencia de tareas y no reemplaza a este archivo. *(Antes, desde el 24-oct-2026 y el PR #22, el estado de las tareas vivía en Linear y este archivo era solo foto técnica.)*
 
 - **Núcleo · Feriados legales calculados por regla + corrección de datos del calendario (CAR-79/CAR-76/CAR-80; fix, 30-oct-2026).** Corrige el hallazgo de QA (ALTO, datos): el seed del #139 solo traía 10 feriados nacionales de fecha fija por año y 2027 repetía 2026; faltaban Viernes y Sábado Santo, Pueblos Indígenas, San Pedro y San Pablo, Encuentro de Dos Mundos e Iglesias Evangélicas.

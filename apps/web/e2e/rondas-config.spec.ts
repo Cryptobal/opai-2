@@ -41,7 +41,7 @@ test.describe("Rondas · configuración de la instalación", () => {
     await page.getByLabel("Nombre del punto").fill(punto);
     await page.getByRole("radio", { name: "QR", exact: true }).check();
     await page.getByRole("button", { name: "Guardar", exact: true }).click();
-    await page.waitForTimeout(500);
+    await expect(page.getByText("Punto creado", { exact: true })).toBeVisible();
     await page.goto(`${base}/rondas?sub=puntos`);
     await visible(punto);
 
@@ -51,7 +51,7 @@ test.describe("Rondas · configuración de la instalación", () => {
     await page.getByLabel("Nombre de la plantilla").fill(plantilla);
     await page.getByRole("checkbox", { name: punto }).check();
     await page.getByRole("button", { name: "Guardar plantilla" }).click();
-    await page.waitForTimeout(500);
+    await expect(page.getByText("Plantilla creada", { exact: true })).toBeVisible();
     await page.goto(`${base}/rondas?sub=plantillas`);
     await visible(plantilla);
 
@@ -60,7 +60,7 @@ test.describe("Rondas · configuración de la instalación", () => {
     await page.getByRole("link", { name: "Nueva programación" }).first().click();
     await page.getByLabel("Nombre", { exact: true }).fill(programacion);
     await page.getByRole("button", { name: "Guardar", exact: true }).click();
-    await page.waitForTimeout(500);
+    await expect(page.getByText("Programación creada", { exact: true })).toBeVisible();
     await page.goto(`${base}/rondas?sub=programacion`);
     await visible(programacion);
 
