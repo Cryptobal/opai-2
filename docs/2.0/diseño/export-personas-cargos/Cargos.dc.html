@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-accent)}</style>
+</helmet>
+<div data-theme="{{ theme }}" data-device="{{ device }}" style="position:relative;width:100%;height:100%;overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" rail-footer="{{ railFooter }}" active="{{ navActive }}" title="Cargos" count="{{ 8 }}" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<sc-if value="{{ forbidden }}" hint-placeholder-val="{{ false }}">
+<div style="padding:48px 0">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a Cargos" description="Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" hint-size="100%,280px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ showHeader }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:2px">
+<h1 class="t-title" style="margin:0">Cargos</h1>
+<span style="font:400 14px/20px var(--font-sans);color:var(--ds-fg-muted)">8 cargos · 7 vigentes</span>
+</div>
+</sc-if>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}"><div style="flex:1 1 100%;min-width:0">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" icon="search" placeholder="Buscar cargo" style="width:100%" hint-size="100%,44px"></x-import>
+</div></sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}"><div style="flex:1 1 240px;max-width:288px;min-width:0">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" icon="search" placeholder="Buscar cargo" style="width:100%" hint-size="100%,44px"></x-import>
+</div></sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<div style="margin-left:auto;flex:none">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="plus" on-click="{{ openNuevo }}" hint-size="140px,40px">Nuevo cargo</x-import>
+</div>
+</sc-if>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Vigentes" contador="{{ 7 }}" activo="{{ true }}" hint-size="110px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Sueldo sensible" contador="{{ 3 }}" hint-size="140px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipAgregar" hint-size="100px,32px">Clase</x-import>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ ok }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;align-items:flex-start;min-width:0">
+<sc-if value="{{ showListPane }}" hint-placeholder-val="{{ true }}">
+<div style="flex:0 1 440px;min-width:0;display:flex;flex-direction:column">
+<sc-if value="{{ listOk }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) 56px 52px 20px 76px;gap:8px;padding:0 12px 8px;border-bottom:1px solid var(--ds-border);font:500 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">
+<span>Cargo</span><span>Clase</span><span style="text-align:right">Personas</span><span style="text-align:right">Puestos</span><span title="Sueldo sensible" style="display:flex"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Icon" name="lock" size="sm" label="Sueldo sensible" hint-size="16px,16px"></x-import></span><span>Estado</span>
+</div>
+<sc-for list="{{ rows }}" as="r" hint-placeholder-count="8">
+<div onClick="{{ r.open }}" style="display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) 56px 52px 20px 76px;gap:8px;align-items:center;padding:10px 12px;min-height:56px;box-sizing:border-box;border-bottom:1px solid var(--ds-border);cursor:pointer;border-radius:8px;background:{{ r.bg }}" style-hover="background:var(--ds-fill)">
+<span style="font:500 14px/20px var(--font-sans);color:var(--ds-fg);overflow:hidden;text-overflow:ellipsis">{{ r.nombre }}</span>
+<span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted);overflow:hidden;text-overflow:ellipsis">{{ r.clase }}</span>
+<span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg);text-align:right;font-variant-numeric:tabular-nums">{{ r.personas }}</span>
+<span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg);text-align:right;font-variant-numeric:tabular-nums">{{ r.puestos }}</span>
+<span style="display:flex;color:var(--ds-fg-muted)"><sc-if value="{{ r.sensible }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Icon" name="lock" size="sm" label="Sueldo sensible" hint-size="16px,16px"></x-import></sc-if></span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ r.tone }}" hint-size="70px,22px">{{ r.estado }}</x-import>
+</div>
+</sc-for>
+</sc-if>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="margin:0 -16px;border-top:1px solid var(--ds-border)">
+<sc-for list="{{ rows }}" as="r" hint-placeholder-count="6">
+<div onClick="{{ r.open }}" style="display:flex;gap:12px;padding:14px 16px;border-bottom:1px solid var(--ds-border);cursor:pointer">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Avatar" initials="{{ r.ini }}" hint-size="40px,40px"></x-import>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+<div style="display:flex;justify-content:space-between;gap:8px;align-items:center">
+<span style="font:500 14px/20px var(--font-sans);color:var(--ds-fg);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.nombre }}</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ r.tone }}" hint-size="70px,22px">{{ r.estado }}</x-import>
+</div>
+<span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg)">{{ r.clase }}</span>
+<span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted);font-variant-numeric:tabular-nums">{{ r.conteo }}</span>
+<sc-if value="{{ r.sensible }}"><span style="display:flex;gap:4px;align-items:center;margin-top:2px;font:400 12px/16px var(--font-sans);color:var(--ds-fg-muted)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Icon" name="lock" size="sm" hint-size="16px,16px"></x-import>Sueldo sensible</span></sc-if>
+</div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+</sc-if>
+<sc-if value="{{ listLoading }}" hint-placeholder-val="{{ false }}">
+<sc-for list="{{ skel }}" as="k" hint-placeholder-count="6">
+<div style="display:flex;gap:12px;align-items:center;padding:14px 0;border-bottom:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" circle="{{ true }}" width="{{ 40 }}" height="{{ 40 }}" hint-size="40px,40px"></x-import>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="45%" height="{{ 14 }}" hint-size="45%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="30%" height="{{ 12 }}" hint-size="30%,12px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ 64 }}" height="{{ 22 }}" radius="{{ 999 }}" hint-size="64px,22px"></x-import>
+</div>
+</sc-for>
+</sc-if>
+<sc-if value="{{ listEmpty }}" hint-placeholder-val="{{ false }}">
+<div style="padding:40px 0">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="briefcase" title="Aún no hay cargos" description="Crea el primer cargo para asignarlo a puestos y personas." hint-size="100%,220px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ listError }}" hint-placeholder-val="{{ false }}">
+<div style="padding:40px 0">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar los cargos" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="CAR-503" on-retry="{{ noop }}" hint-size="100%,240px"></x-import>
+</div>
+</sc-if>
+</div>
+</sc-if>
+<sc-if value="{{ split }}" hint-placeholder-val="{{ true }}">
+<div style="width:1px;align-self:stretch;background:var(--ds-border);margin:0 24px;flex:none"></div>
+</sc-if>
+<sc-if value="{{ fichaArea }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:12px">
+<sc-if value="{{ noSel }}" hint-placeholder-val="{{ true }}">
+<div style="padding:64px 0">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="briefcase" title="Elige un cargo" description="Selecciona un cargo de la lista para ver dónde se usa." hint-size="100%,220px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ hasSel }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="margin:-8px 0 -4px -12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="chevron-left" on-click="{{ back }}" hint-size="150px,44px">Volver a Cargos</x-import>
+</div>
+</sc-if>
+<div style="display:flex;gap:12px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap">
+<div style="display:flex;flex-direction:column;gap:4px;min-width:0">
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+<h2 class="t-heading" style="margin:0">Guardia</h2>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="success" hint-size="64px,22px">Vigente</x-import>
+</div>
+<span style="font:400 14px/20px var(--font-sans);color:var(--ds-fg-muted)">Operativo · versión 3 desde 01-09-2026</span>
+</div>
+<sc-if value="{{ canManage }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" on-click="{{ openEditar }}" hint-size="80px,40px">Editar</x-import></sc-if>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,220px">
+<div style="display:flex;flex-direction:column">
+<div style="display:flex;gap:8px;align-items:center;min-height:32px;margin-bottom:4px"><span class="t-subheading">Datos</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" hint-size="64px,22px">Ya está</x-import></div>
+<sc-for list="{{ datos }}" as="r" hint-placeholder-count="3">
+<div style="display:flex;justify-content:space-between;gap:16px;padding:10px 0;border-top:1px solid var(--ds-border);font:400 14px/20px var(--font-sans)">
+<span style="color:var(--ds-fg-muted);flex:none">{{ r.l }}</span><span style="color:var(--ds-fg);text-align:right">{{ r.v }}</span>
+</div>
+</sc-for>
+<div style="border-top:1px solid var(--ds-border);padding-top:4px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" label="Sueldo sensible" description="Oculta los montos de este cargo en todas las fichas." checked="{{ sensible }}" disabled="{{ cantManage }}" hint-size="100%,60px"></x-import>
+</div>
+</div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Estructuras por cargo retiradas" hint-size="100%,72px">Desde el 26-10-2026 el cargo no define montos. Los sueldos viven en Instalación › Sueldo y en Persona › Sueldo. Las estructuras antiguas quedan archivadas.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,320px">
+<div style="display:flex;flex-direction:column">
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;min-height:32px"><span class="t-subheading">Sueldo por instalación</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" dot="{{ false }}" hint-size="90px,22px">Solo lectura</x-import></div>
+<span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted);margin-bottom:8px">Capa vigente en cada puesto donde se usa este cargo.</span>
+<sc-if value="{{ mSensible }}">
+<div style="display:flex;gap:8px;align-items:center;padding:12px;border-radius:10px;background:var(--ds-fill);margin-bottom:8px;font:500 14px/20px var(--font-sans);color:var(--ds-fg)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Icon" name="lock" size="sm" hint-size="16px,16px"></x-import>Sueldo sensible: montos ocultos
+</div>
+</sc-if>
+<sc-if value="{{ mSinPermiso }}">
+<div style="display:flex;gap:8px;align-items:flex-start;padding:12px;border-radius:10px;background:var(--ds-fill);margin-bottom:8px;font:400 13px/18px var(--font-sans);color:var(--ds-fg)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Icon" name="lock" size="sm" hint-size="16px,16px"></x-import><span>Para ver los montos necesitas el permiso de sueldos (<span class="t-mono" style="font-size:12px">estructuras.read_sensible</span>).</span>
+</div>
+</sc-if>
+<sc-for list="{{ capas }}" as="c" hint-placeholder-count="3">
+<div style="display:flex;flex-direction:column;gap:2px;padding:12px 0;border-top:1px solid var(--ds-border)">
+<div style="display:flex;justify-content:space-between;gap:8px;align-items:baseline;flex-wrap:wrap">
+<span style="font:500 14px/20px var(--font-sans);color:var(--ds-fg)">{{ c.inst }}</span>
+<span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">{{ c.puesto }}</span>
+</div>
+<span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">{{ c.capa }}</span>
+<sc-if value="{{ c.showAmounts }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(92px,1fr));gap:8px 12px;margin-top:8px">
+<sc-for list="{{ c.items }}" as="i" hint-placeholder-count="4">
+<div style="display:flex;flex-direction:column">
+<span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-muted)">{{ i.l }}</span>
+<sc-if value="{{ i.visible }}"><span style="font:500 14px/20px var(--font-sans);color:var(--ds-fg);font-variant-numeric:tabular-nums">{{ i.v }}</span></sc-if>
+<sc-if value="{{ i.masked }}"><span style="display:inline-flex;gap:4px;align-items:center;font:500 14px/20px var(--font-sans);color:var(--ds-fg-muted)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Icon" name="lock" size="sm" hint-size="16px,16px"></x-import>••••</span></sc-if>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<div style="margin-left:-4px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Enlace" href="#" hint-size="220px,44px">Editar en Instalación › Sueldo</x-import>
+</div>
+</div>
+</sc-for>
+</div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,280px">
+<div style="display:flex;flex-direction:column">
+<div style="display:flex;gap:8px;align-items:center;min-height:32px;margin-bottom:4px"><span class="t-subheading">Personas con este cargo</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">128 vínculos vigentes</span></div>
+<sc-for list="{{ vinculos }}" as="v" hint-placeholder-count="4">
+<div style="display:flex;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--ds-border);cursor:pointer;min-height:44px" style-hover="background:var(--ds-fill)">
+<div style="flex:1;min-width:0;display:flex;flex-direction:column">
+<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:baseline"><span style="font:500 14px/20px var(--font-sans);color:var(--ds-fg)">{{ v.nombre }}</span><span class="t-mono" style="font-size:12px;color:var(--ds-fg-muted)">{{ v.rut }}</span></div>
+<span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">{{ v.lugar }}</span>
+</div>
+<span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-muted);flex:none;text-align:right">Desde {{ v.desde }}</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Icon" name="chevron-right" size="sm" hint-size="16px,16px"></x-import>
+</div>
+</sc-for>
+<div style="border-top:1px solid var(--ds-border);padding-top:4px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Enlace" href="#" hint-size="200px,44px">Ver las 128 en Personas</x-import></div>
+</div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,180px">
+<div style="display:flex;flex-direction:column">
+<div style="display:flex;gap:8px;align-items:center;min-height:32px;margin-bottom:4px"><span class="t-subheading">Versiones</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" hint-size="64px,22px">Ya está</x-import></div>
+<sc-for list="{{ versiones }}" as="v" hint-placeholder-count="3">
+<div style="display:flex;justify-content:space-between;gap:12px;padding:10px 0;border-top:1px solid var(--ds-border);font:400 14px/20px var(--font-sans)">
+<span style="color:var(--ds-fg)">{{ v.t }}</span><span style="color:var(--ds-fg-muted);text-align:right">{{ v.m }}</span>
+</div>
+</sc-for>
+</div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,160px">
+<div style="display:flex;flex-direction:column">
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;min-height:32px;margin-bottom:4px"><span class="t-subheading">Estructuras antiguas</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" dot="{{ false }}" hint-size="130px,22px">Archivado · solo lectura</x-import></div>
+<sc-for list="{{ antiguas }}" as="v" hint-placeholder-count="2">
+<div style="display:flex;justify-content:space-between;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--ds-border);min-height:44px;box-sizing:border-box">
+<div style="display:flex;flex-direction:column;min-width:0"><span style="font:400 14px/20px var(--font-sans);color:var(--ds-fg)">{{ v.t }}</span><span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-muted)">{{ v.m }}</span></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Enlace" href="#" hint-size="60px,44px">Ver</x-import>
+</div>
+</sc-for>
+</div>
+</x-import>
+</sc-if>
+</div>
+</sc-if>
+</div>
+</sc-if>
+</x-import>
+</x-import>
+<sc-if value="{{ showFab }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;right:16px;bottom:calc(56px + max(env(safe-area-inset-bottom), 34px) + 16px);z-index:5;border-radius:999px;overflow:hidden;box-shadow:var(--ds-shadow-overlay)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" size="lg" icon="plus" on-click="{{ openNuevo }}" hint-size="160px,48px">Nuevo cargo</x-import>
+</div>
+</sc-if>
+<sc-if value="{{ sheetOpen }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Sheet" contained="{{ true }}" side="{{ sheetSide }}" title="{{ sheetTitle }}" description="El cargo no define montos: se fijan en Instalación › Sueldo." actions="{{ sheetActions }}" on-close="{{ closeAll }}" hint-size="100%,100%">
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Nombre" value="{{ fNombre }}" placeholder="Ej.: Guardia" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Clase" value="{{ fClase }}" options="{{ claseOpts }}" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Descripción" value="{{ fDesc }}" rows="{{ 3 }}" placeholder="Qué hace y dónde se usa" hint-size="100%,110px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" label="Sueldo sensible" description="Oculta los montos de este cargo en todas las fichas, incluso a quien tiene permiso de sueldos." checked="{{ fSens }}" hint-size="100%,60px"></x-import>
+</div>
+</x-import>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ok&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;ok&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;sel&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;montos&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;permiso&quot;,&quot;sinpermiso&quot;,&quot;sensible&quot;],&quot;default&quot;:&quot;permiso&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;sheet&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;&quot;,&quot;nuevo&quot;,&quot;editar&quot;],&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = {};
+  renderVals() {
+    const p = this.props, s = this.state, h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = p.device ?? "desktop";
+    const isPhone = device === "phone";
+    const estado = p.estado ?? "ok";
+    const sel = s.sel !== undefined ? s.sel : (p.sel || null);
+    const sheet = s.sheet !== undefined ? s.sheet : (p.sheet || "");
+    const forbidden = estado === "sinpermiso";
+    const rows = this.cargos().map((r) => ({ ...r, bg: sel === r.id && !isPhone ? "var(--ds-fill)" : "transparent", conteo: r.personas + " personas · " + r.puestos + " puestos", open: () => this.setState({ sel: r.id }) }));
+    const listState = ["vacio", "cargando", "error"].includes(estado) ? estado : "ok";
+    const close = () => this.setState({ sheet: "" });
+    const editing = sheet === "editar";
+    return {
+      ...this.fichaVals(sel, isPhone),
+      device, theme: p.theme ?? "light", isPhone, notPhone: !isPhone,
+      navActive: isPhone ? "mas" : device === "tablet" ? "mae" : "car",
+      forbidden, ok: !forbidden,
+      showHeader: !forbidden && !(isPhone && sel),
+      showListPane: !forbidden && (!isPhone || !sel),
+      split: !forbidden && !isPhone,
+      listOk: listState === "ok", listLoading: listState === "cargando", listEmpty: listState === "vacio", listError: listState === "error",
+      rows, skel: [1, 2, 3, 4, 5, 6],
+      showFab: isPhone && !forbidden && !sel,
+      openNuevo: () => this.setState({ sheet: "nuevo" }),
+      sheetOpen: !!sheet, sheetSide: isPhone ? "bottom" : "right", closeAll: close,
+      sheetTitle: editing ? "Editar cargo" : "Nuevo cargo",
+      fNombre: editing ? "Guardia" : "", fClase: editing ? "op" : "", fDesc: editing ? "Vigila accesos y rondas en la instalación según la pauta." : "", fSens: false,
+      claseOpts: [{ value: "op", label: "Operativo" }, { value: "jop", label: "Jefatura operativa" }, { value: "adm", label: "Administrativo" }, { value: "ger", label: "Gerencia" }],
+      sheetActions: NS.Button ? [h(NS.Button, { key: "a", variant: "secondary", onClick: close }, "Cancelar"), h(NS.Button, { key: "b", onClick: close }, editing ? "Guardar" : "Crear cargo")] : null,
+      noop: () => {},
+      tabs: isPhone
+        ? [{ id: "ini", label: "Inicio", icon: "home" }, { id: "per", label: "Personas", icon: "users" }, { id: "pau", label: "Pauta", icon: "calendar" }, { id: "tic", label: "Tickets", icon: "ticket" }, { id: "mas", label: "Más", icon: "more" }]
+        : [{ id: "ini", label: "Inicio", icon: "home" }, { id: "per", label: "Personas", icon: "users" }, { id: "pau", label: "Pauta", icon: "calendar" }, { id: "tic", label: "Tickets", icon: "ticket" }, { id: "mae", label: "Maestros", icon: "briefcase" }],
+      railFooter: [{ id: "cfg", label: "Ajustes", icon: "grid" }],
+      groups: [
+        { items: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "ban", label: "Bandeja", icon: "inbox", count: 5 }] },
+        { title: "Operaciones", items: [{ id: "ins", label: "Instalaciones", icon: "building" }, { id: "pau", label: "Pauta mensual", icon: "calendar" }, { id: "tic", label: "Tickets", icon: "ticket" }] },
+        { title: "Personas", items: [{ id: "per", label: "Personas", icon: "users", count: 42 }] },
+        { title: "Maestros", items: [{ id: "car", label: "Cargos", icon: "briefcase" }] },
+        { title: "Empresa", items: [{ id: "cfg", label: "Configuración", icon: "grid" }] },
+      ],
+    };
+  }
+  cargos() {
+    const V = { estado: "Vigente", tone: "success" };
+    return [
+      { id: "guardia", ini: "GU", nombre: "Guardia", clase: "Operativo", personas: 128, puestos: 46, sensible: false, ...V },
+      { id: "sup", ini: "SU", nombre: "Supervisor", clase: "Jefatura operativa", personas: 9, puestos: 6, sensible: false, ...V },
+      { id: "con", ini: "CO", nombre: "Conserje", clase: "Operativo", personas: 22, puestos: 14, sensible: false, ...V },
+      { id: "cctv", ini: "OC", nombre: "Operador CCTV", clase: "Operativo", personas: 11, puestos: 5, sensible: false, ...V },
+      { id: "jefe", ini: "JI", nombre: "Jefe de instalación", clase: "Jefatura operativa", personas: 4, puestos: 4, sensible: true, ...V },
+      { id: "rrhh", ini: "AR", nombre: "Analista RRHH", clase: "Administrativo", personas: 3, puestos: 0, sensible: true, ...V },
+      { id: "ger", ini: "GO", nombre: "Gerente de operaciones", clase: "Gerencia", personas: 1, puestos: 0, sensible: true, ...V },
+      { id: "bri", ini: "BR", nombre: "Brigadista", clase: "Operativo", personas: 0, puestos: 0, sensible: false, estado: "Archivado", tone: "neutral" },
+    ];
+  }
+  fichaVals(sel, isPhone) {
+    const p = this.props;
+    const montos = p.montos ?? "permiso";
+    const forbidden = (p.estado ?? "ok") === "sinpermiso";
+    const canManage = p.manage ?? true;
+    const sens = montos === "sensible";
+    const masked = montos === "sinpermiso";
+    const mk = (inst, puesto, capa, base, grat, bono) => ({
+      inst, puesto, capa, showAmounts: !sens,
+      items: [["Sueldo base", base], ["Gratificación", grat], ["Bono de turno", bono], ["Total haberes", base + grat + bono]].map(([l, v]) => ({ l, v: "$ " + v.toLocaleString("es-CL"), visible: !masked, masked })),
+    });
+    return {
+      fichaArea: !forbidden && (!isPhone || !!sel), noSel: !sel, hasSel: !!sel,
+      back: () => this.setState({ sel: null }),
+      openEditar: () => this.setState({ sheet: "editar" }),
+      canManage, cantManage: !canManage,
+      sensible: sens, mSensible: sens, mSinPermiso: masked,
+      datos: [{ l: "Nombre", v: "Guardia" }, { l: "Clase", v: "Operativo" }, { l: "Descripción", v: "Vigila accesos y rondas en la instalación según la pauta." }],
+      capas: [
+        mk("Planta Quilicura", "Portería norte · día", "Capa «Base 2026» · desde 01-01-2026", 560000, 140000, 45000),
+        mk("Bodega Lampa", "Acceso camiones · noche", "Capa «Nocturno Lampa» · desde 01-03-2026", 560000, 140000, 72000),
+        mk("Torre Apoquindo", "Recepción lobby · día", "Capa «Cliente Apoquindo» · desde 15-05-2026", 610000, 152500, 30000),
+      ],
+      vinculos: [
+        { nombre: "María Fernanda Soto", rut: "16.234.567-8", lugar: "Planta Quilicura · Portería norte", desde: "01-03-2024" },
+        { nombre: "Camila Herrera", rut: "12.345.678-9", lugar: "Planta Quilicura · Portería sur", desde: "14-07-2025" },
+        { nombre: "Luis Pérez", rut: "9.876.543-2", lugar: "Bodega Lampa · Acceso camiones", desde: "02-11-2023" },
+        { nombre: "Diego Silva", rut: "13.456.789-0", lugar: "Bodega Lampa · Ronda perimetral", desde: "20-01-2026" },
+      ],
+      versiones: [
+        { t: "Versión 3", m: "01-09-2026 · Carlos Irigoyen" },
+        { t: "Versión 2", m: "15-03-2025 · Paula Rojas" },
+        { t: "Versión 1", m: "02-01-2024 · Carlos Irigoyen" },
+      ],
+      antiguas: [
+        { t: "Estructura Guardia 2025", m: "Archivada el 26-10-2026" },
+        { t: "Estructura Guardia 2024", m: "Archivada el 26-10-2026" },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
