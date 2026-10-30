@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 253 pares pantalla→capacidad · 217 con herramienta · 36 excepciones justificadas · 0 faltantes.
+**Resumen:** 268 pares pantalla→capacidad · 232 con herramienta · 36 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -71,6 +71,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/_centro` | `core.config.set` | `core_config_set` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.modules.list` | `core_modules_list` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.resumen.contadores` | `core_resumen_contadores` | existe |
+| compartido | `app/(erp)/configuracion/_rondas` | `rondas.incidentes_tipo.actualizar` | `rondas_incidentes_tipo_actualizar` | existe |
+| compartido | `app/(erp)/configuracion/_rondas` | `rondas.incidentes_tipo.crear` | `rondas_incidentes_tipo_crear` | existe |
+| compartido | `app/(erp)/configuracion/_rondas` | `rondas.incidentes_tipo.listar` | `rondas_incidentes_tipo_listar` | existe |
 | compartido | `app/(erp)/configuracion/auditoria/_componentes` | `core.actividad.list` | `core_actividad_list` | existe |
 | compartido | `app/(erp)/configuracion/comunicaciones/_componentes` | `core.notificacion_reglas.set` | `core_notificacion_reglas_set` | existe |
 | compartido | `app/(erp)/configuracion/comunicaciones/_componentes` | `core.plantillas.enviar_prueba` | `core_plantillas_enviar_prueba` | existe |
@@ -110,6 +113,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/cuentas/_componentes` | `core.cuentas.set_estado` | `core_cuentas_set_estado` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `core.cuentas.set_representantes` | `core_cuentas_set_representantes` | existe |
 | compartido | `app/(erp)/cuentas/_componentes` | `core.cuentas.update` | `core_cuentas_update` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `core.config.get` | `core_config_get` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.cuentas.list` | `core_cuentas_list` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.instalaciones.archive` | `core_instalaciones_archive` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.instalaciones.get` | `core_instalaciones_get` | existe |
@@ -122,6 +126,17 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.supervisores.asignar` | `core_supervisores_asignar` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.supervisores.de_instalacion` | `core_supervisores_de_instalacion` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.supervisores.quitar` | `core_supervisores_quitar` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `rondas.etiquetas.pdf` | `rondas_etiquetas_pdf` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `rondas.plantillas.actualizar` | `rondas_plantillas_actualizar` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `rondas.plantillas.crear` | `rondas_plantillas_crear` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `rondas.plantillas.listar` | `rondas_plantillas_listar` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `rondas.programaciones.fijar` | `rondas_programaciones_fijar` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `rondas.programaciones.listar` | `rondas_programaciones_listar` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `rondas.programaciones.pausar` | `rondas_programaciones_pausar` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `rondas.puntos.actualizar` | `rondas_puntos_actualizar` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `rondas.puntos.archivar` | `rondas_puntos_archivar` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `rondas.puntos.crear` | `rondas_puntos_crear` | existe |
+| compartido | `app/(erp)/instalaciones/_componentes` | `rondas.puntos.listar` | `rondas_puntos_listar` | existe |
 | compartido | `app/(erp)/negocios/_componentes` | `comercial.config.get` | `comercial_config_get` | existe |
 | compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.archivar` | `comercial_negocios_archivar` | existe |
 | compartido | `app/(erp)/negocios/_componentes` | `comercial.negocios.create` | `comercial_negocios_create` | existe |
@@ -422,17 +437,3 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `platform.usage.summary`
 - `platform.users.list`
 - `platform.users.set_role`
-- `rondas.etiquetas.pdf`
-- `rondas.incidentes_tipo.actualizar`
-- `rondas.incidentes_tipo.crear`
-- `rondas.incidentes_tipo.listar`
-- `rondas.plantillas.actualizar`
-- `rondas.plantillas.crear`
-- `rondas.plantillas.listar`
-- `rondas.programaciones.fijar`
-- `rondas.programaciones.listar`
-- `rondas.programaciones.pausar`
-- `rondas.puntos.actualizar`
-- `rondas.puntos.archivar`
-- `rondas.puntos.crear`
-- `rondas.puntos.listar`

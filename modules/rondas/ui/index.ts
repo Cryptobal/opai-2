@@ -1,1 +1,1 @@
-export { RondasLista } from "./rondas-lista";
+export { type PuntoResumen, PuntosResumen } from "./rondas-lista";
