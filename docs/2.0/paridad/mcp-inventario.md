@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 272 pares pantalla→capacidad · 236 con herramienta · 36 excepciones justificadas · 0 faltantes.
+**Resumen:** 273 pares pantalla→capacidad · 237 con herramienta · 36 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -66,6 +66,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.list` | `core_cargos_list` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.cargos.update` | `core_cargos_update` | existe |
 | compartido | `app/(erp)/cargos/_componentes` | `core.estructuras.list` | `core_estructuras_list` | existe |
+| compartido | `app/(erp)/configuracion/_centro` | `core.config.buscar` | `core_config_buscar` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.config.get` | `core_config_get` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.config.schema` | `core_config_schema` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.config.set` | `core_config_set` | existe |
