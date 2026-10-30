@@ -1,6 +1,6 @@
-import { Plus } from "lucide-react";
+import { AlertTriangle, Plus } from "lucide-react";
 
-import { Estado, Segmentado } from "@opai/ds";
+import { Alerta, Estado, Segmentado } from "@opai/ds";
 import { PERMISOS_CORE } from "@opai/domain";
 
 import { LinkNext } from "@/app/_components/link-next";
@@ -13,7 +13,7 @@ import { ejecutarComoUsuario } from "@/lib/servidor";
 import { PaginaConfig } from "../_centro/pagina-config";
 import { HojaDia } from "./diferidas";
 import { TablaDias } from "./tabla-dias";
-import { ANIO_DEFECTO, ANIOS, type DiaVista } from "./tipos";
+import { ANIO_MAX, ANIO_MIN, ANIOS, type DiaVista, resolverAnio } from "./tipos";
 
 export const metadata = { title: "Calendario" };
 
@@ -29,9 +29,11 @@ export default function Calendario({ searchParams }: { searchParams: SearchParam
       titulo="Calendario"
       cargar={async () => {
         const p = await leerParametros(searchParams);
-        const anio = ANIOS.map(String).includes(p["anio"] ?? "") ? Number(p["anio"]) : ANIO_DEFECTO;
+        const { anio, fueraDeRango } = resolverAnio(p["anio"]);
+        // Un año fuera de rango avisa y no muestra el año por defecto en silencio: no se consulta.
+        if (fueraDeRango) return { anio, fueraDeRango, editar: p["editar"] } as const;
         const r = await ejecutarComoUsuario<DiaVista[]>("erp", "core.calendario.listar", { anio });
-        return { anio, r, editar: p["editar"] };
+        return { anio, fueraDeRango, r, editar: p["editar"] } as const;
       }}
       cabecera={(_, indice) => ({
         subtitulo: "Feriados y días hábiles del año",
@@ -42,9 +44,11 @@ export default function Calendario({ searchParams }: { searchParams: SearchParam
         ) : undefined,
       })}
     >
-      {({ anio, r, editar }, indice) => {
+      {({ anio, fueraDeRango, ...rest }, indice) => {
         const puede = construirPuede(indice.rol, indice.acceso)(PERMISOS_CORE.calendarioManage);
-        const dias = r.ok ? r.data : [];
+        const r = "r" in rest ? rest.r : undefined;
+        const editar = rest.editar;
+        const dias = r?.ok ? r.data : [];
         return (
           <div className="flex flex-col gap-4">
             <Segmentado
@@ -54,10 +58,18 @@ export default function Calendario({ searchParams }: { searchParams: SearchParam
               className="max-w-full self-start overflow-x-auto"
               opciones={ANIOS.map((a) => ({ id: String(a), etiqueta: String(a), href: `?anio=${a}` }))}
             />
-            <Estado state={estadoPantalla(r)} variante="lista">
-              <TablaDias dias={dias} puede={puede} />
-            </Estado>
-            {puede ? (
+            {fueraDeRango ? (
+              <Alerta
+                tono="warning"
+                icono={AlertTriangle}
+                titulo={`Año fuera de rango. Elige un año entre ${ANIO_MIN} y ${ANIO_MAX}.`}
+              />
+            ) : (
+              <Estado state={r ? estadoPantalla(r) : "error"} variante="lista">
+                <TablaDias dias={dias} puede={puede} />
+              </Estado>
+            )}
+            {!fueraDeRango && puede ? (
               <>
                 <HojaDia />
                 {dias

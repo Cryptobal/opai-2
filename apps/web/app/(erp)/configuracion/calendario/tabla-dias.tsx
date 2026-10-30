@@ -2,7 +2,7 @@ import { Badge, Empty, Enlace, Table, Td, Th, Tr } from "@opai/ds";
 
 import { LinkNext } from "@/app/_components/link-next";
 
-import { type DiaVista, ETIQUETA_FUENTE, fechaCl } from "./tipos";
+import { type DiaVista, etiquetaOrigen, fechaCl } from "./tipos";
 
 /** Calendario del año resuelto: fecha, nombre, origen (nacional/regional/empresa) e irrenunciable. */
 export function TablaDias({ dias, puede }: { dias: DiaVista[]; puede: boolean }) {
@@ -34,7 +34,7 @@ export function TablaDias({ dias, puede }: { dias: DiaVista[]; puede: boolean })
               )}
             </Td>
             <Td>
-              <Badge punto={false}>{ETIQUETA_FUENTE[d.fuente]}</Badge>
+              <Badge punto={false}>{etiquetaOrigen(d)}</Badge>
             </Td>
             <Td className="text-fg-muted">{d.irrenunciable ? "Sí" : "—"}</Td>
           </Tr>
