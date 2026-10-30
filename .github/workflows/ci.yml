@@ -149,6 +149,8 @@ jobs:
           pnpm --filter @opai/db seed:e2e
           pnpm --filter @opai/db seed:maestros-demo
           pnpm --filter @opai/db exec tsx scripts/fixture-vencimientos-e2e.ts
+          # Fixture de Pauta (CAR-81): instalación ficticia, dos puestos y dos personas; activa el módulo.
+          pnpm --filter @opai/db seed:pauta-e2e
           # Usuario con dos empresas para selector-riel.spec.ts (selector de portal y empresa en iPad).
           pnpm --filter @opai/auth seed:multiempresa-e2e
           # Admin y owner también requieren MFA; conservar los mismos roles de los fixtures.

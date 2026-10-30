@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 281 pares pantalla→capacidad · 241 con herramienta · 40 excepciones justificadas · 0 faltantes.
+**Resumen:** 289 pares pantalla→capacidad · 249 con herramienta · 40 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -167,6 +167,14 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/negocios/_configuracion` | `comercial.config.get` | `comercial_config_get` | existe |
 | compartido | `app/(erp)/negocios/_configuracion` | `comercial.config.guardar_catalogo` | `comercial_config_guardar_catalogo` | existe |
 | compartido | `app/(erp)/negocios/_configuracion` | `comercial.config.reordenar_etapas` | `comercial_config_reordenar_etapas` | existe |
+| compartido | `app/(erp)/pauta/_componentes` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
+| compartido | `app/(erp)/pauta/_componentes` | `pauta.excepciones.anular` | `pauta_excepciones_anular` | existe |
+| compartido | `app/(erp)/pauta/_componentes` | `pauta.excepciones.crear` | `pauta_excepciones_crear` | existe |
+| compartido | `app/(erp)/pauta/_componentes` | `pauta.historial.listar` | `pauta_historial_listar` | existe |
+| compartido | `app/(erp)/pauta/_componentes` | `pauta.mes.leer` | `pauta_mes_leer` | existe |
+| compartido | `app/(erp)/pauta/_componentes` | `pauta.ppc.listar` | `pauta_ppc_listar` | existe |
+| compartido | `app/(erp)/pauta/_componentes` | `pauta.resumen.leer` | `pauta_resumen_leer` | existe |
+| compartido | `app/(erp)/pauta/_componentes` | `pauta.series.fijar` | `pauta_series_fijar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.cargos.list` | `core_cargos_list` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.documentos.pedir_renovacion` | `core_documentos_pedir_renovacion` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.estructuras.efectiva` | `core_estructuras_efectiva` | existe |
@@ -459,13 +467,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.ping`
 - `core.puestos.get`
 - `core.usage.summary`
-- `pauta.excepciones.anular`
-- `pauta.excepciones.crear`
-- `pauta.historial.listar`
-- `pauta.mes.leer`
-- `pauta.ppc.listar`
-- `pauta.resumen.leer`
-- `pauta.series.fijar`
 - `platform.auditoria.estado`
 - `platform.auditoria.list`
 - `platform.bitacora.estado`
