@@ -20,7 +20,8 @@ model PuntoControl {
   radioM         Int?     @map("radio_m")
   precisionMinM  Int?     @map("precision_min_m")
   permanenciaS   Int      @default(0) @map("permanencia_s")
-  /// Identificador opaco impreso en la etiqueta (R7). La firma y la rotación llegan en el PR 2.
+  /// Código de la etiqueta vigente, denormalizado para lectura rápida y el PDF (R7). El historial
+  /// completo (firma, estado, reemplazos) vive en `EtiquetaQr`.
   etiquetaQr     String?  @map("etiqueta_qr")
   exigeFoto      Boolean  @default(false) @map("exige_foto")
   instrucciones  String?
@@ -31,9 +32,40 @@ model PuntoControl {
 
   plantillaPuntos PlantillaPunto[]
   novedades       Novedad[]
+  etiquetas       EtiquetaQr[]
 
   @@index([tenantId, instalacionId])
   @@map("puntos_control")
+  @@schema("rondas")
+}
+
+/// Etiqueta QR de un punto, con su firma y su historial (Brief 14 · PR 2, R7). Cada punto tiene a lo
+/// sumo una etiqueta `vigente`; reemplazarla deja la anterior como `reemplazada` y su lectura
+/// posterior dispara la anomalía «etiqueta reemplazada» (R7, la detecta el PR 3 al marcar). Las
+/// etiquetas de 1.0 importadas quedan con `firmada=false` y `origen=importada_1_0` (decisión p.20).
+model EtiquetaQr {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  tenantId       String    @map("tenant_id") @db.Uuid
+  puntoId        String    @map("punto_id") @db.Uuid
+  /// Contenido impreso en el QR: `R2.<kid>.<idOpaco>.<firma>` en 2.0, o el código físico de 1.0.
+  codigo         String
+  firmada        Boolean   @default(true)
+  /// "generada" | "importada_1_0".
+  origen         String    @default("generada")
+  /// "vigente" | "reemplazada".
+  estado         String    @default("vigente")
+  reemplazadaEn  DateTime? @map("reemplazada_en") @db.Timestamptz(6)
+  /// Usuario que la reemplazó (R34, acto irreversible con aprobación humana para agentes).
+  reemplazadaPor String?   @map("reemplazada_por") @db.Uuid
+  motivo         String?
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  punto PuntoControl @relation(fields: [puntoId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, codigo])
+  @@index([tenantId, puntoId])
+  @@map("etiquetas_qr")
   @@schema("rondas")
 }
 

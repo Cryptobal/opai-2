@@ -4,6 +4,7 @@
 // excepción de paridad `soloPersonas`.
 import type { Capacidad } from "../types";
 import { etiquetasPdf } from "./etiquetas";
+import { puntosReemplazarEtiqueta } from "./etiqueta-reemplazo";
 import { incidentesTipoActualizar, incidentesTipoCrear, incidentesTipoListar } from "./incidentes-tipo";
 import { plantillasActualizar, plantillasCrear } from "./plantillas-escritura";
 import { plantillasListar } from "./plantillas-lectura";
@@ -19,6 +20,7 @@ export const capacidadesRondas: readonly Capacidad[] = [
   puntosCrear,
   puntosActualizar,
   puntosArchivar,
+  puntosReemplazarEtiqueta,
   plantillasListar,
   plantillasCrear,
   plantillasActualizar,
