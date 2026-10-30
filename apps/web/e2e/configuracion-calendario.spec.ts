@@ -12,13 +12,25 @@ async function captura(page: Page, nombre: string, proyecto: string) {
 test.describe("configuración → calendario", () => {
   test.skip(!password, "Falta SEED_OWNER_PASSWORD o E2E_PASSWORD");
 
-  test("lista los feriados nacionales del año", async ({ page }, info) => {
+  test("lista los feriados legales calculados del año", async ({ page }, info) => {
     await entrar(page);
     await page.goto("/configuracion/calendario");
-    // El seed de plataforma trae los feriados nacionales de 2026 (año por defecto).
+    // Los feriados legales de 2026 (año por defecto) salen del cálculo por regla (CAR-79).
     await expect(page.getByText("Independencia Nacional").first()).toBeVisible();
     await expect(page.getByText("Navidad").first()).toBeVisible();
+    // Semana Santa, que el seed de fecha fija no tenía, ahora aparece.
+    await expect(page.getByText("Viernes Santo").first()).toBeVisible();
+    // Los calculados se distinguen como «Legal (automático)» y no se editan.
+    await expect(page.getByText("Legal (automático)").first()).toBeVisible();
     await captura(page, "config-calendario", info.project.name);
+  });
+
+  test("un año fuera de rango avisa y no muestra el año por defecto en silencio", async ({ page }, info) => {
+    test.skip(info.project.name !== "desktop", "Basta una vez (desktop)");
+    await entrar(page);
+    await page.goto("/configuracion/calendario?anio=1800");
+    await expect(page.getByText(/Año fuera de rango/)).toBeVisible();
+    await expect(page.getByText("Independencia Nacional")).toHaveCount(0);
   });
 
   test("agrega y archiva un día propio de la empresa", async ({ page }, info) => {
