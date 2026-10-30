@@ -120,9 +120,11 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       # Credenciales inventadas para esta ejecución; viven solo en el job y se enmascaran en el log.
+      # RONDAS_ETIQUETA_SECRET es obligatoria desde la corrección de la review 5713377140 del PR #145
+      # (sin respaldo a BETTER_AUTH_SECRET): sin ella, crear un punto QR en e2e fallaría cerrado.
       - name: Generar credenciales efímeras
         run: |
-          for var in OPAI_APP_DB_PASSWORD BETTER_AUTH_SECRET CRON_SECRET; do
+          for var in OPAI_APP_DB_PASSWORD BETTER_AUTH_SECRET CRON_SECRET RONDAS_ETIQUETA_SECRET; do
             valor=$(openssl rand -hex 24)
             echo "::add-mask::$valor"
             echo "$var=$valor" >> "$GITHUB_ENV"

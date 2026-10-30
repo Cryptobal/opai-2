@@ -3,7 +3,9 @@
 -- y su trigger de mismo tenant; nada destructivo sobre tablas existentes. Toda tabla con tenant_id
 -- lleva RLS `tenant_isolation` (ENABLE + FORCE) para opai_app, que es NOBYPASSRLS. No migra datos de
 -- negocio (no toca filas existentes): los puntos de 1.0 se importan aparte con el script en solo
--- lectura `packages/db/scripts/importar-etiquetas-rondas-1-0.ts`, nunca en esta migración.
+-- lectura `packages/db/scripts/importar-rondas-etiquetas/` (corrección de la review 5713377140 del
+-- PR #145: el nombre anterior de este comentario citaba un script que nunca existió), nunca en esta
+-- migración.
 
 BEGIN;
 SET LOCAL lock_timeout = '5s';
@@ -45,8 +47,13 @@ EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 DO $$ BEGIN
   ALTER TABLE "rondas"."etiquetas_qr"
     ADD CONSTRAINT "etiquetas_qr_punto_id_fkey"
-    FOREIGN KEY ("punto_id") REFERENCES "rondas"."puntos_control"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+    FOREIGN KEY ("punto_id") REFERENCES "rondas"."puntos_control"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+-- Permisos del rol de aplicación sobre la tabla nueva (los ALTER DEFAULT PRIVILEGES del schema
+-- rondas ya los darían; explícito como en las demás tablas del schema, corrección de la review
+-- 5713377140 del PR #145).
+GRANT SELECT, INSERT, UPDATE, DELETE ON "rondas"."etiquetas_qr" TO opai_app;
 
 -- Row-Level Security: una política `tenant_isolation` para opai_app (NOBYPASSRLS).
 ALTER TABLE "rondas"."etiquetas_qr" ENABLE ROW LEVEL SECURITY;

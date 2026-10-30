@@ -1,7 +1,7 @@
 // Brief 14 · Rondas PR 1: validación, autorización por rol y alcance (ADR-022), auditoría, dryRun e
 // idempotencia de las capacidades de configuración. El aislamiento entre dos tenants se prueba con
 // Postgres real en packages/db (rls-dos-empresas) y aquí se cubre el alcance por filas.
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   capacidadesDelNucleo,
@@ -14,6 +14,14 @@ import {
 import { TENANT_DE_PRUEBA, USUARIO_DE_PRUEBA, contextoDePrueba } from "../src/testing";
 import type { AgenteContexto } from "../src/types";
 import { semillaTenant } from "./semilla";
+
+// Valor de prueba de RONDAS_ETIQUETA_SECRET (≥32 bytes), solo para este archivo de tests (R7,
+// corrección de la review 5713377140 del PR #145: nunca un valor fijo en el código de producción).
+vi.stubEnv("RONDAS_ETIQUETA_SECRET", "secreto-de-prueba-rondas-etiqueta-32-bytes-o-mas");
+afterEach(() => {
+  vi.unstubAllEnvs();
+  vi.stubEnv("RONDAS_ETIQUETA_SECRET", "secreto-de-prueba-rondas-etiqueta-32-bytes-o-mas");
+});
 
 const INST = "0192f3a0-0000-7000-8000-00000000c101";
 const INST2 = "0192f3a0-0000-7000-8000-00000000c102";
@@ -106,6 +114,17 @@ describe("rondas.puntos.crear", () => {
     const b = await executeCapability(ctx, "rondas.puntos.crear", puntoQrGps, { idempotencyKey: "p1" });
     expect(a.ok && b.ok).toBe(true);
     expect(tabla("puntoControl")).toHaveLength(1);
+  });
+
+  // Corrección de la review 5713377140 del PR #145: sin RONDAS_ETIQUETA_SECRET no se crea ningún
+  // punto QR ni etiqueta (falla cerrado, nada queda a medias).
+  it("sin RONDAS_ETIQUETA_SECRET no crea el punto ni ninguna etiqueta (UNPROCESSABLE)", async () => {
+    vi.stubEnv("RONDAS_ETIQUETA_SECRET", undefined);
+    const { ctx, tabla } = owner();
+    const r = await executeCapability(ctx, "rondas.puntos.crear", puntoQrGps);
+    expect(r).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+    expect(tabla("puntoControl")).toHaveLength(0);
+    expect(tabla("etiquetaQr")).toHaveLength(0);
   });
 });
 

@@ -12,6 +12,10 @@ import type * as ModuloCapacidades from "../src";
 
 type Capacidades = typeof ModuloCapacidades;
 
+// Valor de prueba de RONDAS_ETIQUETA_SECRET (≥32 bytes): obligatorio desde la corrección de la
+// review 5713377140 del PR #145; nunca un valor fijo en el código de producción.
+process.env["RONDAS_ETIQUETA_SECRET"] ??= randomUUID() + randomUUID();
+
 describe.skipIf(!urlPropietario)("aislamiento entre tenants · Rondas (RLS)", () => {
   let e: Entorno;
   let mod: Capacidades;
