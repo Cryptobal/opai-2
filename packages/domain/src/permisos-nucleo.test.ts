@@ -16,6 +16,8 @@ const TABLA: Record<string, readonly [boolean, boolean, boolean, boolean, boolea
   [P.funcionesDesactivar]: [true, true, true, false, false],
   [P.personasRead]: [true, true, true, true, true],
   [P.personasManage]: [true, true, true, false, false],
+  // P1 "No recontratar" (Personas y Cargos PR 1): solo owner y admin ven y marcan por defecto.
+  [P.personasNoRecontratarManage]: [true, true, false, false, false],
   [P.documentosRead]: [true, true, true, true, true],
   [P.documentosManage]: [true, true, true, false, false],
   // Firma (firma.md §8). Enviar: owner/admin sí, gerente «según tipo», supervisor «actas», viewer no
