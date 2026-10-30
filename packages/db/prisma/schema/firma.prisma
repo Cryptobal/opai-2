@@ -1,0 +1,227 @@
+// Firma electrónica del núcleo (firma.md, ADR-019, ADR-023, ADR-039). Schema propio `core_firma`.
+// Toda tabla con tenant_id: RLS `tenant_isolation` para opai_app, IDs uuid(7), columnas snake_case
+// por @map. El tenant_id NO lleva @relation a Tenant (no se toca core.prisma): la FK a core.tenants
+// va en el SQL. Las evidencias son hechos inmutables (ADR-023): la migración revoca UPDATE/DELETE a
+// opai_app y cada una enlaza un eslabón de la bitácora encadenada del núcleo (`core.bitacora`, R17).
+
+/// Política de firma por clase de documento (R1, R2, §4). El tenant sube el nivel, nunca baja del
+/// mínimo legal; el mínimo vive en `@opai/domain`. Una por clase y tenant.
+model PoliticaFirma {
+  id                String   @id @default(uuid(7)) @db.Uuid
+  tenantId          String   @map("tenant_id") @db.Uuid
+  /// Clase de documento (firma.md §4): "contrato_trabajo" | "anexo_contrato" | "recepcion_laboral" | …
+  clase             String
+  nivelMinimo       String   @map("nivel_minimo")
+  nivelesPermitidos String[] @default([]) @map("niveles_permitidos")
+  /// "secuencial" | "paralelo" (R7).
+  orden             String   @default("secuencial")
+  plazoDias         Int      @default(7) @map("plazo_dias")
+  recordar          Boolean  @default(true)
+  actualizadoPorId  String?  @map("actualizado_por_id") @db.Uuid
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, clase])
+  @@index([tenantId])
+  @@map("politicas")
+  @@schema("core_firma")
+}
+
+/// Solicitud de firma: un documento congelado (versión exacta, con su huella H1) enviado a firmar
+/// (R4). El estado sigue la máquina de `@opai/domain`.
+model SolicitudFirma {
+  id                 String    @id @default(uuid(7)) @db.Uuid
+  tenantId           String    @map("tenant_id") @db.Uuid
+  /// Documento congelado en `core.documentos` (sin FK de Prisma: relación entre schemas por SQL).
+  documentoId        String    @map("documento_id") @db.Uuid
+  documentoVersion   Int       @map("documento_version")
+  /// H1: huella SHA-256 del PDF congelado que cada firmante firma (R6).
+  sha256             String
+  clase              String
+  nivel              String
+  orden              String    @default("secuencial")
+  /// "enviada" | "en_curso" | "completada" | "rechazada" | "vencida" | "cancelada" | "espera_prestador"
+  estado             String    @default("enviada")
+  mensaje            String?
+  plazoVence         DateTime  @map("plazo_vence") @db.Timestamptz(6)
+  enviadaPorTipo     String    @map("enviada_por_tipo")
+  enviadaPorId       String?   @map("enviada_por_id") @db.Uuid
+  viaUserId          String?   @map("via_user_id") @db.Uuid
+  /// Motivo del rechazo o la cancelación (R9, R4).
+  motivo             String?
+  /// Eslabón de `core.bitacora` del hecho "enviada" (R17).
+  bitacoraSeq        Int?      @map("bitacora_seq")
+  /// Versión firmada (PDF sellado) en `core.documentos`, cuando se completa (R6).
+  documentoFirmadoId String?   @map("documento_firmado_id") @db.Uuid
+  /// H2: huella del PDF firmado sellado (R6); null hasta que el proveedor de sello (P7) la aplique.
+  sha256Firmado      String?   @map("sha256_firmado")
+  /// Token del comprobante público `/verificar/<token>` (ADR-039). Único global: resuelve el tenant.
+  comprobanteToken   String?   @unique @map("comprobante_token")
+  completadaEn       DateTime? @map("completada_en") @db.Timestamptz(6)
+  canceladaEn        DateTime? @map("cancelada_en") @db.Timestamptz(6)
+  recordadaEn        DateTime? @map("recordada_en") @db.Timestamptz(6)
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  firmantes  Firmante[]
+  evidencias EvidenciaFirma[]
+
+  @@index([tenantId, estado])
+  @@index([tenantId, documentoId])
+  @@map("solicitudes")
+  @@schema("core_firma")
+}
+
+/// Persona que firma o recibe copia (R7). El enlace personal N1 y el código N2 son de un solo
+/// destinatario y vencen con la solicitud (R12, R13).
+model Firmante {
+  id              String    @id @default(uuid(7)) @db.Uuid
+  tenantId        String    @map("tenant_id") @db.Uuid
+  solicitudId     String    @map("solicitud_id") @db.Uuid
+  orden           Int       @default(0)
+  /// "firma" | "copia" | "aprueba".
+  rol             String    @default("firma")
+  /// "trabajador" | "contacto" | "usuario" | "externo".
+  tipo            String
+  personaId       String?   @map("persona_id") @db.Uuid
+  contactoId      String?   @map("contacto_id") @db.Uuid
+  usuarioId       String?   @map("usuario_id") @db.Uuid
+  /// Dato externo cuando el firmante es externo; se marca como tal en la capacidad.
+  nombre          String
+  /// RUN canónico del firmante para la evidencia (CA8); se enmascara en pantalla.
+  run             String?
+  email           String?
+  telefono        String?
+  /// "pendiente" | "firmado" | "rechazado".
+  estado          String    @default("pendiente")
+  /// Enlace personal N1 (R12); único; vence con la solicitud.
+  token           String?   @unique
+  tokenExpira     DateTime? @map("token_expira") @db.Timestamptz(6)
+  /// Firma automática del representante legal autorizada para esta clase (R16).
+  firmaAutomatica Boolean   @default(false) @map("firma_automatica")
+  vistoEn         DateTime? @map("visto_en") @db.Timestamptz(6)
+  firmadoEn       DateTime? @map("firmado_en") @db.Timestamptz(6)
+  motivoRechazo   String?   @map("motivo_rechazo")
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  solicitud  SolicitudFirma   @relation(fields: [solicitudId], references: [id], onDelete: Cascade)
+  evidencias EvidenciaFirma[]
+  codigos    CodigoOtp[]
+
+  @@index([tenantId, solicitudId])
+  @@map("firmantes")
+  @@schema("core_firma")
+}
+
+/// Evidencia de firma: hecho inmutable de cada evento del flujo (R17). La migración revoca
+/// UPDATE/DELETE a opai_app; cada fila enlaza un eslabón de `core.bitacora` (bitacora_seq/hash).
+model EvidenciaFirma {
+  id                String   @id @default(uuid(7)) @db.Uuid
+  tenantId          String   @map("tenant_id") @db.Uuid
+  solicitudId       String   @map("solicitud_id") @db.Uuid
+  firmanteId        String?  @map("firmante_id") @db.Uuid
+  /// "enviada" | "vista" | "codigo_enviado" | "identidad_verificada" | "firmada" | "rechazada" | …
+  tipo              String
+  nivel             String?
+  /// "trazo" | "nombre" | "prueba_vida" | "externa" | "automatica" (R12, R13, R16).
+  metodo            String?
+  ip                String?
+  /// Agente de usuario (dato externo); se guarda tal cual.
+  dispositivo       String?
+  /// Huella H1 del documento que se firmó (R6).
+  sha256            String?
+  /// Texto y versión de la casilla de aceptación que vieron (R12).
+  textoAceptacion   String?  @map("texto_aceptacion")
+  versionAceptacion String?  @map("version_aceptacion")
+  bitacoraSeq       Int      @map("bitacora_seq")
+  hash              String
+  createdAt         DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  solicitud SolicitudFirma @relation(fields: [solicitudId], references: [id], onDelete: Cascade)
+  firmante  Firmante?      @relation(fields: [firmanteId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, solicitudId])
+  @@map("evidencias")
+  @@schema("core_firma")
+}
+
+/// Aceptación expresa y revocable del medio electrónico de un trabajador (R10). Una por persona.
+model AceptacionMedioElectronico {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  tenantId   String    @map("tenant_id") @db.Uuid
+  personaId  String    @map("persona_id") @db.Uuid
+  aceptada   Boolean   @default(false)
+  version    String
+  ip         String?
+  aceptadaEn DateTime? @map("aceptada_en") @db.Timestamptz(6)
+  revocadaEn DateTime? @map("revocada_en") @db.Timestamptz(6)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, personaId])
+  @@map("aceptaciones_medio")
+  @@schema("core_firma")
+}
+
+/// Firmante de la empresa: representante legal u otro firmante autorizado del tenant (R16).
+model FirmanteEmpresa {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  usuarioId   String   @map("usuario_id") @db.Uuid
+  nombre      String
+  run         String?
+  cargo       String?
+  nivelMaximo String?  @map("nivel_maximo")
+  activo      Boolean  @default(true)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  autorizaciones AutorizacionFirmaAutomatica[]
+
+  @@unique([tenantId, usuarioId])
+  @@map("firmantes_empresa")
+  @@schema("core_firma")
+}
+
+/// Autorización expresa del representante para que su firma salga automática en una clase, con
+/// vigencia, revocable y auditada (R16, P5). Cada uso queda además en la evidencia.
+model AutorizacionFirmaAutomatica {
+  id                String    @id @default(uuid(7)) @db.Uuid
+  tenantId          String    @map("tenant_id") @db.Uuid
+  firmanteEmpresaId String    @map("firmante_empresa_id") @db.Uuid
+  clase             String
+  vigenciaDesde     DateTime  @default(now()) @map("vigencia_desde") @db.Timestamptz(6)
+  vigenciaHasta     DateTime? @map("vigencia_hasta") @db.Timestamptz(6)
+  revocadaEn        DateTime? @map("revocada_en") @db.Timestamptz(6)
+  autorizadaPorId   String    @map("autorizada_por_id") @db.Uuid
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  firmanteEmpresa FirmanteEmpresa @relation(fields: [firmanteEmpresaId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, firmanteEmpresaId])
+  @@map("autorizaciones_firma_automatica")
+  @@schema("core_firma")
+}
+
+/// Código de un solo uso (N2, R13). Nunca se guarda el código ni el destino en claro: solo su hash.
+model CodigoOtp {
+  id         String    @id @default(uuid(7)) @db.Uuid
+  tenantId   String    @map("tenant_id") @db.Uuid
+  firmanteId String    @map("firmante_id") @db.Uuid
+  /// HMAC-SHA256 del código; el código solo viaja al canal registrado del firmante.
+  codigoHash String    @map("codigo_hash")
+  /// "email" | "sms".
+  canal      String
+  expiraEn   DateTime  @map("expira_en") @db.Timestamptz(6)
+  intentos   Int       @default(0)
+  usadoEn    DateTime? @map("usado_en") @db.Timestamptz(6)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  firmante Firmante @relation(fields: [firmanteId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, firmanteId])
+  @@map("codigos_otp")
+  @@schema("core_firma")
+}
