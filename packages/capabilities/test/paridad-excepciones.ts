@@ -74,6 +74,12 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
   "core.roles.assign": "Solo personas: asignar un rol a un usuario gobierna su acceso (ADR-034).",
   "core.excepciones.set":
     "Solo personas: conceder o denegar permisos puntuales es gobierno de acceso (ADR-034).",
+  "core.firmas.firmante_empresa_set":
+    "Solo personas: define quién firma por la empresa (representante legal); gobierna la identidad de firma, no una key (firma.md §10, R16).",
+  "core.firmas.firma_automatica_autorizar":
+    "Solo personas: autorizar la firma automática del representante solo puede hacerlo él (firma.md §10, R16).",
+  "core.firmas.firma_automatica_revocar":
+    "Solo personas: revocar la firma automática del representante es un acto suyo (firma.md §10, R16).",
   "core.anexos.aprobar":
     "Solo personas: aprobar el anexo de contrato materializa un documento irreversible, un acto humano responsable (Brief 07b PR 4, ADR-032).",
   "core.anexos.rechazar":

@@ -18,6 +18,13 @@ const TABLA: Record<string, readonly [boolean, boolean, boolean, boolean, boolea
   [P.personasManage]: [true, true, true, false, false],
   [P.documentosRead]: [true, true, true, true, true],
   [P.documentosManage]: [true, true, true, false, false],
+  // Firma (firma.md §8). Enviar: owner/admin sí, gerente «según tipo», supervisor «actas», viewer no
+  // (el tipo y el alcance se aplican en la capacidad). Leer: todos «según tipo» (viewer por *:*.read).
+  // Configurar la política y registrar el finiquito: solo owner/admin.
+  [P.firmasEnviar]: [true, true, true, true, false],
+  [P.firmasRead]: [true, true, true, true, true],
+  [P.firmasConfig]: [true, true, false, false, false],
+  [P.finiquitosManage]: [true, true, false, false, false],
   [P.estructurasRead]: [true, true, true, false, true],
   [P.estructurasManage]: [true, true, false, false, false],
   [P.estructurasReadSensible]: [true, true, false, false, false],
