@@ -82,7 +82,7 @@ Monorepo de OPAI 2.0: SaaS modular, multi-tenant y agent-first para empresas int
 ## UI
 
 - Solo tokens y componentes de `@opai/ds`. Sin hex, sin estilos inline, sin componentes propios por módulo cuando el DS tiene uno. `grep -rn "#[0-9a-fA-F]\{6\}" apps packages modules --include=*.tsx --include=*.ts --include=*.css` debe devolver solo `tokens.css`.
-- Sin elementos interactivos crudos fuera de `packages/ds`: ESLint prohíbe `<button>`, `<input>`, `<select>`, `<textarea>`, `<dialog>` y `<a>` en `modules/**/ui` (error) y en `apps/web/app` (aviso hasta el Brief 02; luego error). Si falta un componente, se agrega al DS con diseño en Claude Design, nunca al módulo (ADR-017).
+- Sin elementos interactivos crudos fuera de `packages/ds`: ESLint prohíbe `<button>`, `<input>`, `<select>`, `<textarea>`, `<dialog>` y `<a>` en `modules/**/ui` y en `apps/web/app` y `apps/web/components` (error). Si falta un componente, se agrega al DS con diseño en Claude Design, nunca al módulo (ADR-017).
 - Controles complejos (menú, diálogo, select, combobox, popover, tooltip, switch, checkbox, toast, paleta ⌘K) se construyen sobre primitivas Radix/shadcn copiadas a `packages/ds` y re-estilizadas con tokens; nunca sobre `<select>`/`<dialog>` nativos ni desde cero (ADR-017).
 - Pulido obligatorio en toda pantalla: foco visible, skeleton con la forma del contenido, estado vacío con acción, transiciones de 150–200 ms con `prefers-reduced-motion`, contraste AA. Todo componente nuevo aparece en `/ds` con sus estados.
 - Patrones de pantalla: `ListScreen`, `DetailScreen`, `FormScreen`, `PlanillaScreen`, `DashboardScreen`, siempre con `state` y los estados loading, vacío, error y sin permisos. Tipografía solo con los estilos `t-*` o la escala del DS; nunca tamaños arbitrarios.
