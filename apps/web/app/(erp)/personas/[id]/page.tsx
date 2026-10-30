@@ -2,6 +2,7 @@ import { hoyIso } from "@/lib/fechas";
 import type { SearchParams } from "@/lib/parametros";
 
 import { HojaVincularUsuario } from "../_componentes/diferidas";
+import { MarcaNoRecontratar } from "../_componentes/marca-no-recontratar";
 import { PaginaPersona } from "../_componentes/pagina-persona";
 import { ResumenPersona } from "../_componentes/resumen-persona";
 
@@ -16,6 +17,7 @@ export default function Persona(props: Props) {
       {(p) => (
         <>
           <ResumenPersona p={p} hoy={hoyIso()} />
+          <MarcaNoRecontratar personaId={p.id} nombre={p.nombreCompleto} />
           {p.usuarioId ? null : (
             <HojaVincularUsuario personaId={p.id} email={p.emailLaboral ?? p.emailPersonal} />
           )}
