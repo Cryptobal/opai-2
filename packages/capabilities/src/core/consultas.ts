@@ -7,6 +7,7 @@ import { defineCapability } from "../define";
 import { prohibido } from "../errores";
 import { listarModulos } from "../module";
 import { auditarHistorialSensible, redactarSensibles } from "./panel/actividad-sensible";
+import { visibleSinNoRecontratar } from "./panel/actividad-no-recontratar";
 import { auditoriaSelect } from "./panel/auditoria-select";
 import { sinPlataformaAjena } from "../agentes/plataforma";
 
@@ -90,8 +91,9 @@ export const auditList = defineCapability({
     });
     const eventos = filas.slice(0, input.limite);
     await auditarHistorialSensible(ctx, eventos, "core.audit.list");
+    const visibleMarca = visibleSinNoRecontratar(ctx);
     return {
-      eventos: eventos.map((f) => {
+      eventos: eventos.filter(visibleMarca).map((f) => {
         const payload = (f.payload ?? {}) as Record<string, unknown>;
         const entrada = payload["input"];
         return {
