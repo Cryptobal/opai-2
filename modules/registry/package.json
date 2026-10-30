@@ -13,7 +13,8 @@
   "dependencies": {
     "@opai/capabilities": "workspace:*",
     "@opai/mod-agente": "workspace:*",
-    "@opai/mod-comercial": "workspace:*"
+    "@opai/mod-comercial": "workspace:*",
+    "@opai/mod-rondas": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.9.3"

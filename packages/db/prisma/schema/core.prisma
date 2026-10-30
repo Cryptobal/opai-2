@@ -10,9 +10,10 @@ datasource db {
   provider = "postgresql"
   // "comercial" es el schema del módulo Comercial (Brief 07 · PR 1). Prisma exige declarar aquí todo
   // schema usado por un @@schema; es el único cambio en core.prisma (no se tocan sus modelos). Las
-  // tablas de comercial viven en packages/db/prisma/schema/comercial.prisma. "core_firma" es la
-  // firma electrónica del núcleo (firma.md, PR 1); sus tablas viven en schema/firma.prisma.
-  schemas  = ["core", "comercial", "core_firma"]
+  // tablas de comercial viven en packages/db/prisma/schema/comercial.prisma; "rondas" es el módulo
+  // de rondas (CAR-72). "core_firma" es la firma electrónica del núcleo (firma.md, PR 1); sus tablas
+  // viven en schema/firma.prisma.
+  schemas  = ["core", "comercial", "rondas", "core_firma"]
 }
 
 /// Empresa cliente de OPAI. No lleva tenant_id: es el tenant. Se protege por permisos de aplicación.

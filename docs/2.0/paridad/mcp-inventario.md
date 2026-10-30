@@ -430,3 +430,17 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `platform.usage.summary`
 - `platform.users.list`
 - `platform.users.set_role`
+- `rondas.etiquetas.pdf`
+- `rondas.incidentes_tipo.actualizar`
+- `rondas.incidentes_tipo.crear`
+- `rondas.incidentes_tipo.listar`
+- `rondas.plantillas.actualizar`
+- `rondas.plantillas.crear`
+- `rondas.plantillas.listar`
+- `rondas.programaciones.fijar`
+- `rondas.programaciones.listar`
+- `rondas.programaciones.pausar`
+- `rondas.puntos.actualizar`
+- `rondas.puntos.archivar`
+- `rondas.puntos.crear`
+- `rondas.puntos.listar`
