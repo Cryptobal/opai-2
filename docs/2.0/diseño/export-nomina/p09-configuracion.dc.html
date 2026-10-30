@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><script src="./nomina-data.js"></script><style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style></helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="{{ active }}" title="{{ shellTitle }}" user="{{ user }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<sc-if value="{{ showHeader }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:4px">
+<sc-if value="{{ showBack }}" hint-placeholder-val="{{ false }}">
+<div style="margin-left:-12px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" aria-label="Volver a Módulos" hint-size="110px,44px">‹ Módulos</x-import></div>
+</sc-if>
+<sc-if value="{{ showMigas }}" hint-placeholder-val="{{ true }}">
+<nav aria-label="Migas" class="t-body-sm" style="display:flex;gap:6px;align-items:center;color:var(--ds-fg-muted)"><a href="#" style="color:var(--ds-fg-muted);text-decoration:none">Configuración</a><span aria-hidden="true">›</span><a href="#" style="color:var(--ds-fg-muted);text-decoration:none">Módulos</a></nav>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="{{ headEyebrow }}" title="{{ headTitle }}" subtitle="{{ headSub }}" badge="{{ roleBadge }}" hint-size="100%,80px"></x-import>
+</div>
+</sc-if>
+
+<sc-if value="{{ showPhoneList }}" hint-placeholder-val="{{ false }}">
+<div role="list" aria-label="Módulos" style="display:flex;flex-direction:column;border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+<sc-for list="{{ modulos }}" as="mo" hint-placeholder-count="6">
+<div role="listitem" style="display:flex;gap:12px;align-items:center;min-height:56px;padding:0 16px;border-bottom:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Icon" name="{{ mo.icon }}" hint-size="20px,20px"></x-import>
+<span class="t-body" style="flex:1;min-width:0">{{ mo.label }}</span>
+<sc-if value="{{ mo.comp }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" hint-size="100px,22px">Complemento</x-import></sc-if>
+<span style="display:flex;color:var(--ds-fg-subtle)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Icon" name="chevron-right" size="sm" hint-size="16px,16px"></x-import></span>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<div style="display:flex;gap:24px;align-items:flex-start">
+<sc-if value="{{ showModList }}" hint-placeholder-val="{{ true }}">
+<nav aria-label="Módulos" style="flex:none;width:208px;display:flex;flex-direction:column;gap:2px">
+<span class="t-caption" style="color:var(--ds-fg-muted);padding:0 12px 6px">Módulos</span>
+<sc-for list="{{ modulos }}" as="mo" hint-placeholder-count="6">
+<sc-if value="{{ mo.sel }}" hint-placeholder-val="{{ false }}">
+<div aria-current="page" class="t-label-sm" style="display:flex;gap:10px;align-items:center;min-height:40px;padding:0 12px;border-radius:var(--radius-md);background:var(--ds-fill);color:var(--ds-fg)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Icon" name="{{ mo.icon }}" size="sm" hint-size="16px,16px"></x-import><span style="flex:1">{{ mo.label }}</span></div>
+</sc-if>
+<sc-if value="{{ mo.notSel }}" hint-placeholder-val="{{ true }}">
+<div class="t-body-sm" style="display:flex;gap:10px;align-items:center;min-height:40px;padding:0 12px;border-radius:var(--radius-md);color:var(--ds-fg-muted)" style-hover="background:var(--ds-fill);color:var(--ds-fg)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Icon" name="{{ mo.icon }}" size="sm" hint-size="16px,16px"></x-import><span style="flex:1">{{ mo.label }}</span></div>
+</sc-if>
+</sc-for>
+</nav>
+</sc-if>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:16px">
+<sc-if value="{{ isOk }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:16px;max-width:880px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Conceptos de haberes y descuentos" description="El monto de cada concepto sale de la capa de instalación o de puesto. Aquí solo defines su tratamiento." hint-size="100%,320px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ conceptos }}" compact="{{ true }}" cards="{{ isPhone }}" to-card="{{ toCard }}" hint-size="100%,280px"></x-import>
+<div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipAgregar" hint-size="140px,32px">Agregar concepto</x-import></div>
+</x-import>
+
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Cierre y revisión" hint-size="100%,200px">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Día de cierre" value="Último día hábil" options="{{ diaOpts }}" hint-size="100%,68px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Umbral de diferencia contra el mes anterior" value="10" trailing="%" hint="Sobre este porcentaje la liquidación se marca en warning." inputmode="decimal" hint-size="100%,88px"></x-import>
+</div>
+</x-import>
+
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Archivo de pago" hint-size="100%,160px">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Banco" value="Banco de Chile" options="{{ bancoOpts }}" hint-size="100%,68px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Cuenta de cargo" value="00-123-45678-09" mono="{{ true }}" hint-size="100%,68px"></x-import>
+</div>
+<div style="display:flex;gap:8px;align-items:center"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" hint-size="140px,22px">Formato por verificar</x-import><span class="t-caption" style="color:var(--ds-fg-muted)">Formato de nómina masiva del banco</span></div>
+</x-import>
+
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Representante laboral electrónico" description="Es quien sube el LRE y registra contratos y finiquitos en Mi DT con su ClaveÚnica." hint-size="100%,160px">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Nombre" value="Marcela Rojas" hint-size="100%,68px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="RUT" value="10.456.789-2" mono="{{ true }}" hint-size="100%,68px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ avisar }}" on-change="{{ setAvisar }}" label="Avisarle 3 días antes de cada plazo" hint-size="100%,44px"></x-import>
+</x-import>
+
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Datos del empleador para Previred y SII" description="Qué parte del registro de contribuyentes cubre OPAI está por verificar." hint-size="100%,240px">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="RUT empleador" value="76.111.222-3" mono="{{ true }}" hint-size="100%,68px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Razón social" value="Atlas Seguridad SpA" hint-size="100%,68px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Actividad económica" value="Actividades de seguridad privada" hint-size="100%,68px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Mutual" value="Mutual de Seguridad CChC" options="{{ mutualOpts }}" hint-size="100%,68px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Caja de compensación" value="Sin caja" options="{{ cajaOpts }}" hint-size="100%,68px"></x-import>
+</div>
+<div style="display:flex;gap:8px;align-items:center"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" hint-size="140px,22px">Formato por verificar</x-import><span class="t-caption" style="color:var(--ds-fg-muted)">Campos oficiales de Previred y SII</span></div>
+</x-import>
+
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ActionBar" hint-size="100%,64px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" disabled="{{ readOnly }}" hint-size="100px,40px">Descartar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" disabled="{{ readOnly }}" hint-size="100px,40px">Guardar</x-import>
+</x-import>
+</div>
+</sc-if>
+
+<sc-if value="{{ isCargando }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:16px;max-width:880px" aria-busy="true">
+<sc-for list="{{ skel }}" as="s" hint-placeholder-count="5">
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px;display:flex;flex-direction:column;gap:12px;background:var(--ds-surface)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="220px" height="{{ 18 }}" hint-size="220px,18px"></x-import>
+<div style="display:flex;gap:16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="50%" height="{{ 44 }}" radius="{{ 10 }}" hint-size="50%,44px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="50%" height="{{ 44 }}" radius="{{ 10 }}" hint-size="50%,44px"></x-import></div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="grid" title="Aún no configuras Nómina" description="Parte por los datos del empleador; los conceptos legales se cargan solos." action="{{ emptyAction }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar la configuración" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="NOM-CFG-503" on-retry="{{ noop }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ isSinPermiso }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a la configuración de Nómina" description="Solo administración y RRHH con permiso de remuneraciones la cambian. Pídele acceso a Marcela Rojas, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,320px"></x-import>
+</sc-if>
+</div>
+</div>
+</x-import>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ok&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;ok&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;role&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;admin&quot;,&quot;rrhh&quot;,&quot;gerente&quot;,&quot;inspector&quot;,&quot;supervisor&quot;],&quot;default&quot;:&quot;admin&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;phoneView&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;detalle&quot;,&quot;lista&quot;],&quot;default&quot;:&quot;detalle&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { avisar: true };
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const ND = window.ND;
+    if (!ND) return {};
+    const b = ND.base(this.props, "cfg", "Configuración › Módulos");
+    if (b.isGerente && b.isOk) { b.isOk = false; b.isSinPermiso = true; b.showHeader = false; }
+    const lista = b.isPhone && (this.props.phoneView ?? "detalle") === "lista";
+    if (lista) { b.isOk = b.isCargando = b.isVacio = b.isError = false; }
+    const modulos = [["Personas", "users"], ["Asistencia", "clock"], ["Pautas y turnos", "calendar"], ["Nómina", "wallet"], ["Cumplimiento DT", "landmark", true], ["Facturación", "file"], ["Finanzas", "grid"]]
+      .map(([label, icon, comp]) => ({ label, icon, comp: !!comp, sel: label === "Nómina", notSel: label !== "Nómina" }));
+    const yes = (v) => h("span", { style: { color: v ? "var(--ds-fg)" : "var(--ds-fg-subtle)" } }, v ? "Sí" : "No");
+    const conceptos = [
+      { id: 1, c: "Sueldo base", t: "Haber", imp: true, trib: true, lre: "1101" },
+      { id: 2, c: "Gratificación legal", t: "Haber", imp: true, trib: true, lre: "1105" },
+      { id: 3, c: "Horas extra", t: "Haber", imp: true, trib: true, lre: "1108" },
+      { id: 4, c: "Bono nocturno", t: "Haber", imp: true, trib: true, lre: "—" },
+      { id: 5, c: "Colación", t: "Haber", imp: false, trib: false, lre: "2101" },
+      { id: 6, c: "Anticipo", t: "Descuento", imp: false, trib: false, lre: "3101" },
+      { id: 7, c: "Préstamo empresa", t: "Descuento", imp: false, trib: false, lre: "—" },
+    ];
+    return {
+      ...b,
+      roleBadge: b.isInspector && NS.Badge ? h(NS.Badge, { tone: "info" }, "Solo lectura") : null,
+      conceptos,
+      cols: [
+        { key: "c", label: "Concepto", strong: true },
+        { key: "t", label: "Tipo", muted: true },
+        { key: "imp", label: "Imponible", render: (r) => yes(r.imp) },
+        { key: "trib", label: "Tributable", render: (r) => yes(r.trib) },
+        { key: "lre", label: "Código LRE", render: (r) => h("span", { style: { display: "inline-flex", gap: 8, alignItems: "center" } }, h("span", { className: "t-mono" }, r.lre), NS.Badge ? h(NS.Badge, { tone: "neutral" }, "Por verificar") : null) },
+      ],
+      toCard: (r) => ({ title: r.c, subtitle: r.t + " · " + (r.imp ? "Imponible" : "No imponible") + " · " + (r.trib ? "Tributable" : "No tributable"), meta: "Código LRE " + r.lre, badge: { tone: "neutral", label: "Por verificar" }, chevron: true }),
+      diaOpts: ["Último día hábil", "Día 25", "Día 30"],
+      bancoOpts: ["Banco de Chile", "BancoEstado", "Santander", "BCI"],
+      mutualOpts: ["Mutual de Seguridad CChC", "ACHS", "IST", "ISL"],
+      cajaOpts: ["Sin caja", "Los Andes", "La Araucana", "18 de Septiembre", "Los Héroes"],
+      modulos,
+      showBack: b.isPhone && !lista && b.showHeader,
+      showMigas: !b.isPhone,
+      showModList: b.notPhone && b.showHeader,
+      showPhoneList: lista && b.showHeader,
+      headEyebrow: lista ? "Configuración" : undefined,
+      headTitle: lista ? "Módulos" : "Nómina",
+      headSub: lista ? undefined : "Se aplica a todos los períodos que abras desde ahora.",
+      avisar: this.state.avisar, setAvisar: (v) => this.setState({ avisar: v }),
+      emptyAction: NS.Button ? h(NS.Button, null, "Completar datos del empleador") : null,
+    };
+  }
+}
+</script>
+</body>
+</html>
