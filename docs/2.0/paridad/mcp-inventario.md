@@ -201,6 +201,10 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/aprobaciones` | `core.aprobaciones.rechazar` | — | excepción |
 | erp | `/configuracion/aprobaciones` | `platform.aprobaciones.aprobar` | — | excepción |
 | erp | `/configuracion/aprobaciones` | `platform.aprobaciones.rechazar` | — | excepción |
+| erp | `/configuracion/calendario` | `core.calendario.actualizar` | `core_calendario_actualizar` | existe |
+| erp | `/configuracion/calendario` | `core.calendario.archivar` | `core_calendario_archivar` | existe |
+| erp | `/configuracion/calendario` | `core.calendario.crear_feriado` | `core_calendario_crear_feriado` | existe |
+| erp | `/configuracion/calendario` | `core.calendario.listar` | `core_calendario_listar` | existe |
 | erp | `/configuracion/comunicaciones/[evento]` | `core.comunicaciones.eventos` | `core_comunicaciones_eventos` | existe |
 | erp | `/configuracion/comunicaciones/[evento]` | `core.plantillas.get` | `core_plantillas_get` | existe |
 | erp | `/configuracion/comunicaciones` | `core.comunicaciones.eventos` | `core_comunicaciones_eventos` | existe |

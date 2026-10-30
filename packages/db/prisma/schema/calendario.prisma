@@ -1,0 +1,31 @@
+// Calendario hábil y feriados del Núcleo (CAR-79, ADR-018). Un solo calendario para la pauta
+// mensual, Seguimiento comercial, Asistencia y Nómina. Las filas de plataforma (tenant_id nulo) las
+// mantiene OPAI por migración o seed y solo se leen desde el tenant; el tenant agrega sus propios
+// días y sobrescribe por fecha. RLS `tenant_isolation` + una política de lectura de plataforma.
+//
+// El índice único por (tenant_id, fecha, instalacion_id) no archivado se crea en la migración con
+// COALESCE (expresión que Prisma no modela): es el que traduce un duplicado a CONFLICT.
+
+model DiaCalendario {
+  id            String    @id @default(uuid(7)) @db.Uuid
+  /// Nulo cuando el feriado es de plataforma (nacional o regional); con valor cuando es del tenant.
+  tenantId      String?   @map("tenant_id") @db.Uuid
+  fecha         DateTime  @db.Date
+  /// En la v1 solo "feriado" (H/I son propuesta, ver ADR). CHECK en la migración.
+  tipo          String    @default("feriado")
+  nombre        String
+  irrenunciable Boolean   @default(false)
+  /// Código de región (ISO "CL-RM"…) cuando es regional/comunal; nulo si es nacional o del tenant global.
+  region        String?
+  instalacionId String?   @map("instalacion_id") @db.Uuid
+  /// "nacional" | "regional" | "tenant".
+  fuente        String    @default("nacional")
+  archivadaEn   DateTime? @map("archivada_en") @db.Timestamptz(6)
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@index([tenantId, fecha])
+  @@index([region, fecha])
+  @@map("dias_calendario")
+  @@schema("core")
+}
