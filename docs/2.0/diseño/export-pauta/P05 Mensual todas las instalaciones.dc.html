@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="pauta-tableros.js"></script>
+<style>body{margin:0;background:#e7e7ea}a{color:var(--ds-accent)}a:hover{color:var(--ds-accent)}</style>
+</helmet>
+<div data-theme="light" style="padding:48px;display:flex;flex-direction:column;gap:56px;min-width:max-content;background:var(--ds-n-200);color:var(--ds-fg);font-family:var(--font-sans)">
+  <header style="display:flex;flex-direction:column;gap:6px;max-width:880px">
+    <a href="Indice.dc.html" class="t-label-sm">← Índice de pantallas</a>
+    <div class="t-overline">OPAI 2.0 · Operaciones · Pauta · v2</div>
+    <h1 class="t-title m0">05 · Pauta · Mensual · todas las instalaciones</h1>
+    <p class="t-body-sm muted m0" style="text-wrap:pretty">Cobertura (%) y PPC del mes por instalación, con el próximo día sin cubrir. Tocar una fila abre su grilla. En 375, lista.</p>
+    <p class="t-body-sm m0"><strong>Roles:</strong> owner, admin y gerente: todas · supervisor: solo sus instalaciones · viewer: solo lectura.</p>
+  </header>
+  <sc-for list="{{ rows }}" as="row" hint-placeholder-count="2">
+    <section style="display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;flex-direction:column;gap:2px"><h2 class="t-subheading m0">{{ row.t }}</h2><sc-if value="{{ row.note }}"><p class="t-body-sm muted m0">{{ row.note }}</p></sc-if></div>
+      <div style="display:flex;gap:32px;align-items:flex-start">
+        <sc-for list="{{ row.b }}" as="ab" hint-placeholder-count="3">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div class="t-label-sm muted">{{ ab.label }}</div>
+            <div data-k="{{ ab.k }}" style="width:{{ ab.wpx }};height:{{ ab.hpx }};position:relative;overflow:hidden;border:1px solid var(--ds-border-strong);border-radius:var(--radius-lg);background:var(--ds-surface)">
+              <dc-import name="Tablero" cfg="{{ ab.cfg }}" delay="{{ ab.delay }}" style="position:absolute;inset:0" hint-size="100%,100%"></dc-import>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+  </sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const CFG={base:{tab:'mensual',vista:'todas'},extra:[{t:'Supervisor · solo sus instalaciones',b:[['desktop','light',{rol:'supervisor'},'supervisor'],['phone','light',{rol:'supervisor'},'supervisor']]}]};
+class Component extends DCLogic {
+  componentDidMount(){const go=()=>window.PautaTableros?this.forceUpdate():(this.t=setTimeout(go,40));go();}
+  componentWillUnmount(){clearTimeout(this.t);}
+  renderVals(){if(!this.rows&&window.PautaTableros){let n=0;this.rows=window.PautaTableros(CFG);this.rows.forEach(r=>r.b.forEach(ab=>{ab.delay=200+(n++)*450;}));}return{rows:this.rows||[]};}
+}
+</script>
+</body>
+</html>
