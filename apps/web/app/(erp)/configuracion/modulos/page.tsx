@@ -10,7 +10,7 @@ import { PaginaConfig } from "../_centro/pagina-config";
 import { BotonSolicitar } from "./boton-solicitar";
 import { TarjetaModulo } from "./tarjeta-modulo";
 
-export const metadata = { title: "Módulos" };
+export const metadata = { title: "Catálogo de módulos" };
 
 type Modulo = {
   id: string;
@@ -27,7 +27,7 @@ export default function Modulos() {
   return (
     <PaginaConfig
       seccion="modulos"
-      titulo="Módulos"
+      titulo="Catálogo de módulos"
       cargar={async () =>
         exigirDatos(await ejecutarComoUsuario<Modulo[]>("erp", "core.modules.list"))
       }
