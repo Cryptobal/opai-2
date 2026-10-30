@@ -56,7 +56,7 @@ Mientras un área no esté activa, su entrada cae a la siguiente disponible (hoy
 |---|---|---|---|
 | **Supervisor** | Supervisores en terreno | Barra inferior (sin barra lateral en celular) | Hoy (instalaciones del turno, alertas) · Instalaciones a cargo · Visitas y rondas · Novedades · Más (tickets, personas a cargo, perfil) |
 | **Trabajador** (portal de la persona) | Cada persona contratada | Barra inferior | Inicio (mi turno, avisos) · Marcar · Mis documentos (contrato, liquidaciones, comprobantes) · Solicitudes (tickets) · Más (perfil, horario, rondas asignadas) |
-| **Terreno** | Dispositivo fijo de una instalación (emparejado) | Pantalla de tarea única, sin menú | Marcar · Ronda · Novedad · Instrucciones del puesto |
+| **Terreno** | Dispositivo fijo de una instalación (emparejado) | Inicio con resumen del puesto; tareas a pantalla completa, sin barra lateral | Inicio (resumen) · Acceso · Rondas · Asistencia · Novedades (alineado con B2; el guardia entra eligiendo su nombre, sin PIN — decisión de Carlos del 29-oct-2026) |
 | **Cliente** | Contactos de la cuenta cliente | Barra lateral en escritorio, inferior en celular | Resumen · Instalaciones · Reportes (asistencia, rondas, novedades) · Documentos y facturas · Solicitudes (tickets) · Agentes (keys del cliente, ADR-033) |
 | **Plataforma** | Operadores de OPAI | Barra lateral | Empresas · Trabajos · Consumos · Precios · Ajustes |
 
