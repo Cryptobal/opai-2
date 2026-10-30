@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0} a{color:var(--ds-accent)} a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" portal="{{ portal }}" tabs="{{ tabs }}" groups="{{ groups }}" rail-footer="{{ railFooter }}" active="{{ active }}" title="Rendiciones" tenant="Atlas Seguridad SpA" tenant-initials="AS" user="{{ user }}" overlay="{{ overlay }}" hide-tab-bar="{{ hideTab }}" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" tab-bar="{{ showTab }}" hint-size="100%,600px">
+
+<sc-if value="{{ s_mis }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Atlas Seguridad SpA" title="Mis rendiciones" hint-size="100%,64px">
+<sc-if value="{{ ok }}" hint-placeholder-val="{{ true }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="plus" block="{{ isPhone }}" hint-size="170px,40px">Nueva rendición</x-import></sc-if>
+</x-import>
+<sc-if value="{{ ok }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:2px;padding:16px 0 20px;border-bottom:1px solid var(--ds-border);margin-bottom:8px">
+<span class="t-label-sm" style="color:var(--ds-fg-muted)">Por pagar</span>
+<span class="t-title t-numeric">{{ porPagar }}</span>
+<span class="t-caption" style="color:var(--ds-fg-muted)">Enviadas, aprobadas y en lote. Aún no te las pagan.</span>
+</div>
+<sc-for list="{{ misGroups }}" as="g" hint-placeholder-count="3">
+<div style="display:flex;flex-direction:column;margin-top:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowGroupHeader" hint-size="100%,32px">{{ g.label }}</x-import>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ true }}">
+<div style="margin:0 -16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ misCols }}" rows="{{ g.items }}" cards="{{ true }}" to-card="{{ misCard }}" on-row-click="{{ noop }}" hint-size="100%,160px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ misCols }}" rows="{{ g.items }}" on-row-click="{{ noop }}" hint-size="100%,160px"></x-import>
+</sc-if>
+</div>
+</sc-for>
+</sc-if>
+</sc-if>
+
+<sc-if value="{{ s_nueva }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;max-width:640px;width:100%">
+<div style="margin-left:-8px;margin-bottom:4px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="chevron-left" hint-size="160px,44px">Mis rendiciones</x-import></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" title="Nueva rendición" subtitle="Borrador · se guarda automáticamente" hint-size="100%,64px"></x-import>
+<sc-if value="{{ ok }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ tipos }}" value="{{ tipo }}" on-change="{{ setTipo }}" label="Tipo de rendición" hint-size="100%,44px"></x-import>
+
+<sc-if value="{{ tipoCompra }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Comprobante" description="Foto de la boleta o factura. Es obligatoria para enviar." hint-size="100%,260px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ docs }}" value="Boleta" label="Documento" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Uploader" tipos="JPG, PNG o PDF" tamano-maximo-mb="{{ 10 }}" accept="image/*,application/pdf" archivos-iniciales="{{ archivos }}" hint-size="100%,120px"></x-import>
+<sc-if value="{{ showErr }}" hint-placeholder-val="{{ false }}">
+<div role="alert" style="display:flex;gap:8px;align-items:flex-start;color:var(--ds-danger-fg)"><span class="ic sm i-alert" style="margin-top:2px"></span><span class="t-body-sm">Agrega la foto del comprobante para enviar la rendición.</span></div>
+</sc-if>
+<sc-if value="{{ ocr }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Leímos el comprobante" icono="scan" hint-size="100%,64px">Sugerimos monto y fecha desde la foto. Revísalos antes de enviar; puedes cambiarlos.</x-import>
+</sc-if>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Datos de la compra" hint-size="100%,420px">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Monto" prefix="$" value="{{ monto }}" on-change="{{ setMonto }}" input-mode="numeric" hint="{{ ocrHint }}" error="{{ montoErr }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DateInput" label="Fecha" value="{{ fechaCompra }}" today="30-10-2026" hint="{{ ocrHint }}" hint-size="100%,72px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Categoría" value="{{ catVal }}" options="{{ categorias }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Instalación o Administración" value="{{ ccVal }}" options="{{ centros }}" hint-size="100%,72px"></x-import>
+<sc-if value="{{ fin }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Cuenta contable" value="5110" options="{{ cuentas }}" hint="Viene de Finanzas según la categoría." hint-size="100%,72px"></x-import>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Nota (opcional)" value="{{ nota }}" placeholder="Ej.: carga para la ronda nocturna" rows="{{ 3 }}" hint-size="100%,110px"></x-import>
+</x-import>
+</sc-if>
+
+<sc-if value="{{ tipoKm }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Viaje" description="Desde dónde y hasta dónde fuiste en tu vehículo." hint-size="100%,360px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Origen" icon="pin" value="{{ origen }}" placeholder="Ej.: Planta Quilicura" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Destino" icon="pin" value="{{ destino }}" placeholder="Ej.: Bodega Lampa" hint-size="100%,72px"></x-import>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Kilómetros" value="{{ km }}" on-change="{{ setKm }}" input-mode="numeric" trailing="km" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DateInput" label="Fecha del viaje" value="{{ fechaKm }}" today="30-10-2026" hint-size="100%,72px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Instalación o Administración" value="{{ ccVal }}" options="{{ centros }}" hint-size="100%,72px"></x-import>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Monto" hint-size="100%,160px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" rows="{{ kmRows }}" hint-size="100%,120px"></x-import>
+<span class="t-caption" style="color:var(--ds-fg-muted)">La tarifa la define Atlas Seguridad SpA. El monto se calcula solo.</span>
+</x-import>
+</sc-if>
+
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ActionBar" summary="{{ nuevaSummary }}" hint-size="100%,64px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="150px,40px">Guardar borrador</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" hint-size="120px,40px">Enviar</x-import>
+</x-import>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ s_bandeja }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Finanzas" title="Por aprobar" subtitle="Rendiciones que te enviaron · 1.er nivel" hint-size="100%,64px"></x-import>
+<sc-if value="{{ ok }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:12px">
+<sc-if value="{{ importB }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Recordatorios activos" icono="bell" hint-size="100%,64px">Te avisaremos a los 5 y 10 días de tener una rendición pendiente.</x-import>
+</sc-if>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Requieren 2.º nivel" activo="{{ n2Only }}" on-cambiar="{{ toggleN2 }}" hint-size="170px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipAgregar" hint-size="140px,32px"></x-import>
+</div>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;margin:0 -16px;border-top:1px solid var(--ds-border)">
+<sc-for list="{{ pend }}" as="r" hint-placeholder-count="5">
+<div style="display:flex;gap:12px;align-items:flex-start;padding:12px 16px;border-bottom:1px solid var(--ds-border);background:{{ r.rowBg }}">
+<div style="margin:-12px -12px -12px -14px;padding:12px;flex:none"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ r.sel }}" on-change="{{ r.toggle }}" hint-size="20px,20px"></x-import></div>
+<div aria-hidden="true" style="width:48px;height:48px;flex:none;border-radius:var(--radius-sm);border:1px solid var(--ds-border);background:var(--ds-fill);display:flex;align-items:center;justify-content:center;color:var(--ds-fg-muted)"><span class="ic {{ r.thumbIc }}"></span></div>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+<div style="display:flex;justify-content:space-between;gap:8px"><span class="t-label" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.persona }}</span><span class="t-label t-numeric">{{ r.montoStr }}</span></div>
+<span class="t-body-sm" style="color:var(--ds-fg-muted)">{{ r.cat }} · {{ r.cc }}</span>
+<span class="t-caption t-numeric" style="color:var(--ds-fg-subtle)">{{ r.env }}</span>
+<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px"><sc-if value="{{ r.n2 }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="warning" hint-size="140px,22px">Requiere 2.º nivel</x-import></sc-if><sc-if value="{{ r.late }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="warning" dot="{{ false }}" hint-size="140px,22px">{{ r.lateLabel }}</x-import></sc-if></div>
+</div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ pendCols }}" rows="{{ pend }}" hint-size="100%,360px"></x-import>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.SelectionBar" label="{{ selLabel }}" on-clear="{{ clearSel }}" hint-size="100%,56px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="100px,40px">Rechazar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="check" hint-size="100px,40px">Aprobar</x-import>
+</x-import>
+</div>
+</sc-if>
+</sc-if>
+
+<sc-if value="{{ s_detalle }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:24px;align-items:flex-start;min-width:0">
+<sc-if value="{{ isTablet }}" hint-placeholder-val="{{ false }}">
+<div style="width:300px;flex:none;display:flex;flex-direction:column;border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);overflow:hidden">
+<div class="t-label" style="padding:12px 16px;border-bottom:1px solid var(--ds-border)">Mis rendiciones</div>
+<sc-for list="{{ splitList }}" as="r" hint-placeholder-count="5">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.SelectableRow" selected="{{ r.selected }}" title="{{ r.cat }}" subtitle="{{ r.subtitle }}" trailing="{{ r.montoStr }}" hint-size="100%,64px"></x-import>
+</sc-for>
+</div>
+</sc-if>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column">
+<sc-if value="{{ notTablet }}" hint-placeholder-val="{{ true }}"><div style="margin-left:-8px;margin-bottom:4px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="chevron-left" hint-size="160px,44px">Mis rendiciones</x-import></div></sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="R-0415 · Compra" title="Materiales de aseo" subtitle="$ 18.990 · 22-10-2026" badge="{{ detBadge }}" hint-size="100%,72px">
+<sc-if value="{{ okNotPhone }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="refresh" hint-size="190px,40px">Corregir y reenviar</x-import></sc-if>
+</x-import>
+<sc-if value="{{ ok }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:20px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="danger" titulo="Rechazada por Paula Rojas · 23-10-2026 10:12" hint-size="100%,72px">«La boleta no se lee completa. Sube una foto donde se vea el total y el RUT del comercio.»</x-import>
+<div style="display:grid;grid-template-columns:{{ detCols }};gap:24px;align-items:start">
+<figure style="margin:0;display:flex;flex-direction:column;gap:8px">
+<div role="img" aria-label="Foto del comprobante boleta-lider-22-10.jpg" style="aspect-ratio:3 / 4;max-height:{{ photoMax }};width:100%;border-radius:var(--radius-lg);border:1px solid var(--ds-border);background:var(--ds-fill);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--ds-fg-muted)"><span class="ic lg i-file"></span><span class="t-caption">Foto del comprobante</span></div>
+<figcaption style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span class="t-caption t-mono" style="color:var(--ds-fg-muted)">boleta-lider-22-10.jpg</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" size="sm" icon="eye" hint-size="110px,36px">Ampliar</x-import></figcaption>
+</figure>
+<div style="display:flex;flex-direction:column;gap:24px;min-width:0">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Datos" rows="{{ detRows }}" hint-size="100%,280px"></x-import>
+<div style="display:flex;flex-direction:column;gap:4px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Pago" rows="{{ pagoRows }}" hint-size="100%,100px"></x-import>
+<span class="t-caption" style="color:var(--ds-fg-muted)">Viene de la Ficha de persona de Camila Herrera. Se cambia en la ficha, no aquí.</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<h2 class="t-label" style="margin:0">Nota de quien rinde</h2>
+<p class="t-body-sm" style="margin:0;color:var(--ds-fg);white-space:pre-wrap">Compra de cloro y paños para el turno noche.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<h2 class="t-label" style="margin:0">Historial</h2>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Timeline" items="{{ timeline }}" hint-size="100%,260px"></x-import>
+</div>
+</div>
+</div>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ActionBar" hint-size="100%,64px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="refresh" hint-size="190px,40px">Corregir y reenviar</x-import>
+</x-import>
+</sc-if>
+</div>
+</sc-if>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ s_lotes }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Finanzas" title="Lotes de pago" subtitle="Aprobadas por pagar, agrupadas por persona" hint-size="100%,64px"></x-import>
+<sc-if value="{{ ok }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:12px">
+<sc-for list="{{ porPersona }}" as="g" hint-placeholder-count="4">
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);overflow:hidden">
+<div style="display:flex;align-items:center;gap:12px;padding:4px 16px 4px 4px;border-bottom:1px solid var(--ds-border)">
+<div style="flex:1;min-width:0;padding:8px 0 8px 8px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ g.sel }}" on-change="{{ g.toggle }}" disabled="{{ g.sinBanco }}" label="{{ g.persona }}" description="{{ g.desc }}" hint-size="100%,44px"></x-import></div>
+<span class="t-label t-numeric">{{ g.totalStr }}</span>
+</div>
+<sc-if value="{{ g.banco }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;align-items:flex-start;gap:8px;padding:10px 16px;border-bottom:1px solid var(--ds-border);color:var(--ds-fg-muted)"><span class="ic sm i-landmark" style="margin-top:2px;flex:none"></span><div style="display:flex;flex-direction:column;gap:2px;min-width:0"><span class="t-body-sm" style="color:var(--ds-fg)">{{ g.banco }}</span><span class="t-caption">Cuenta de destino · desde la Ficha de persona</span></div></div>
+</sc-if>
+<sc-if value="{{ g.sinBanco }}" hint-placeholder-val="{{ false }}">
+<div style="padding:12px 16px;border-bottom:1px solid var(--ds-border)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" titulo="Sin datos bancarios en la ficha" icono="alert" hint-size="100%,64px">No se puede incluir en el lote hasta que se completen en su Ficha de persona.</x-import></div>
+</sc-if>
+<sc-for list="{{ g.items }}" as="it" hint-placeholder-count="2">
+<div style="display:flex;align-items:center;gap:12px;padding:10px 16px;border-bottom:1px solid var(--ds-border)">
+<span class="t-mono t-caption" style="color:var(--ds-fg-subtle);flex:none">{{ it.id }}</span>
+<span class="t-body-sm" style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ it.cat }} · {{ it.fecha }}</span>
+<span class="t-body-sm t-numeric" style="color:var(--ds-fg-muted)">{{ it.montoStr }}</span>
+</div>
+</sc-for>
+</div>
+</sc-for>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ActionBar" summary="{{ loteSummary }}" hint-size="100%,64px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="plus" hint-size="130px,40px">Crear lote</x-import>
+</x-import>
+<h2 class="t-subheading" style="margin:24px 0 0">Lotes recientes</h2>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);overflow:hidden">
+<sc-for list="{{ lotes }}" as="l" hint-placeholder-count="2">
+<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px 16px;padding:12px 16px;border-bottom:1px solid var(--ds-border)">
+<div style="flex:1 1 220px;min-width:0;display:flex;flex-direction:column;gap:2px">
+<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span class="t-label t-mono">{{ l.id }}</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ l.tone }}" hint-size="120px,22px">{{ l.estado }}</x-import></div>
+<span class="t-body-sm" style="color:var(--ds-fg-muted)">{{ l.meta }}</span>
+<sc-if value="{{ l.comprobante }}" hint-placeholder-val="{{ false }}"><span class="t-caption t-mono" style="color:var(--ds-fg-subtle)">{{ l.comprobante }}</span></sc-if>
+</div>
+<span class="t-label t-numeric">{{ l.totalStr }}</span>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="download" hint-size="170px,40px">Descargar archivo</x-import>
+<sc-if value="{{ l.pagable }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="check" hint-size="150px,40px">Marcar pagado</x-import></sc-if>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+</sc-if>
+
+<sc-if value="{{ s_reporte }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Finanzas" title="Reporte de rendiciones" hint-size="100%,64px">
+<sc-if value="{{ okOrEmpty }}" hint-placeholder-val="{{ true }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="download" block="{{ isPhone }}" hint-size="160px,40px">Exportar Excel</x-import></sc-if>
+</x-import>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin-bottom:16px">
+<div style="flex:1 1 220px;max-width:288px;min-width:0"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Período" value="oct" options="{{ periodos }}" hint-size="100%,72px"></x-import></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ grupos }}" value="{{ grp }}" on-change="{{ setGrp }}" label="Agrupar por" hint-size="340px,44px"></x-import>
+</div>
+<sc-if value="{{ ok }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PatternGrid" cols="{{ 3 }}" phone="{{ 1 }}" hint-size="100%,96px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.KpiTile" label="Total rendido" value="$ 1.284.600" hint-size="100%,96px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.KpiTile" label="Pagado" value="$ 912.300" hint-size="100%,96px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.KpiTile" label="Por pagar" value="$ 372.300" hint-size="100%,96px"></x-import>
+</x-import>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ true }}">
+<div style="margin:0 -16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ repCols }}" rows="{{ repRows }}" cards="{{ true }}" to-card="{{ repCard }}" hint-size="100%,300px"></x-import></div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ repCols }}" rows="{{ repRows }}" footer="{{ repFooter }}" hint-size="100%,320px"></x-import>
+</sc-if>
+</div>
+</sc-if>
+</sc-if>
+
+<sc-if value="{{ s_config }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ cfgLista }}" hint-placeholder-val="{{ false }}">
+<div style="margin-left:-8px;margin-bottom:4px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="chevron-left" hint-size="160px,44px">Configuración</x-import></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" title="Módulos" subtitle="Ajustes de cada módulo de Atlas Seguridad SpA" hint-size="100%,64px"></x-import>
+<div style="margin:0 -16px;border-top:1px solid var(--ds-border)">
+<sc-for list="{{ modulos }}" as="m" hint-placeholder-count="6">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" icon="{{ m.icon }}" title="{{ m.label }}" chevron="{{ true }}" on-click="{{ noop }}" hint-size="100%,56px"></x-import>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ cfgEntrada }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;gap:24px;align-items:flex-start;min-width:0">
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ false }}">
+<nav aria-label="Módulos" style="width:{{ navW }};flex:none;display:flex;flex-direction:column;border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);overflow:hidden">
+<div class="t-label" style="padding:12px 16px;border-bottom:1px solid var(--ds-border)">Módulos</div>
+<sc-for list="{{ modulos }}" as="m" hint-placeholder-count="6">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.SelectableRow" selected="{{ m.selected }}" title="{{ m.label }}" on-click="{{ noop }}" hint-size="100%,56px"></x-import>
+</sc-for>
+</nav>
+</sc-if>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column">
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ false }}">
+<nav aria-label="Migas" class="t-body-sm" style="display:flex;gap:6px;align-items:center;margin-bottom:8px;color:var(--ds-fg-muted)"><a href="#">Configuración</a><span aria-hidden="true">›</span><a href="#">Módulos</a></nav>
+</sc-if>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ true }}">
+<div style="margin-left:-8px;margin-bottom:4px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="chevron-left" hint-size="120px,44px">Módulos</x-import></div>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" title="Rendiciones" subtitle="Reglas para todo Atlas Seguridad SpA" hint-size="100%,64px"></x-import>
+<div style="margin-bottom:16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ cfgTabs }}" value="aju" hint-size="100%,44px"></x-import></div>
+<sc-if value="{{ okOrEmpty }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:16px;max-width:760px;width:100%">
+<sc-if value="{{ propB }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Recordatorios" description="Propuesta, a confirmar por Carlos." hint-size="100%,100px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ true }}" label="Recordar a quien aprueba" description="A los 5 y 10 días de tener una rendición pendiente." hint-size="100%,56px"></x-import>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Importar desde OPAI 1.0" description="Propuesta, a confirmar por Carlos." hint-size="100%,160px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" titulo="38 rendiciones pendientes en 1.0" icono="alert" hint-size="100%,64px">Cifra tomada de 1.0, sin verificar al cierre. Revisa el listado antes de importar.</x-import>
+<div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="upload" hint-size="200px,40px">Revisar e importar</x-import></div>
+</x-import>
+</sc-if>
+<section style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;flex-direction:column;gap:2px"><h2 class="t-subheading" style="margin:0">Categorías</h2><span class="t-caption" style="color:var(--ds-fg-muted)">Lo que tu equipo puede rendir como compra y cómo se aprueba.</span></div>
+<sc-if value="{{ ok }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px">
+<sc-for list="{{ catCfg }}" as="c" hint-placeholder-count="6">
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);padding:12px 8px 16px 16px;display:flex;flex-direction:column;gap:8px;min-width:0">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><span class="t-label">{{ c.label }}</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="trash" label="{{ c.quitar }}" on-click="{{ noop }}" hint-size="44px,44px"></x-import></div>
+<div style="padding-right:8px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Aprobación" value="{{ c.nivel }}" options="{{ niveles }}" hint-size="100%,72px"></x-import></div>
+</div>
+</sc-for>
+</div>
+<div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="plus" block="{{ isPhone }}" hint-size="180px,44px">Agregar categoría</x-import></div>
+</sc-if>
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="clipboard" size="sm" title="Aún no hay categorías" description="Crea la primera para que tu equipo pueda rendir compras." action="{{ emptyAction }}" hint-size="100%,220px"></x-import></div>
+</sc-if>
+</section>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Kilometraje" hint-size="100%,120px">
+<div style="max-width:288px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Tarifa por km" prefix="$" value="300" input-mode="numeric" hint="Se usa para calcular el monto de cada viaje." hint-size="100%,72px"></x-import></div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Aprobación" description="1.er nivel: jefatura de la persona o de la instalación. 2.º nivel: owner, admin o rol con permiso." hint-size="100%,140px">
+<div style="max-width:288px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Monto que exige 2.º nivel" prefix="$" value="100.000" input-mode="numeric" hint="Desde este monto, inclusive." hint-size="100%,72px"></x-import></div>
+</x-import>
+<section style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;flex-direction:column;gap:2px"><h2 class="t-subheading" style="margin:0">Aprobadores por instalación</h2><span class="t-caption" style="color:var(--ds-fg-muted)">Instalaciones activas de Atlas Seguridad SpA y Administración / Oficina central. Aprueban el 1.er nivel cuando la persona no tiene jefatura definida.</span></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px">
+<sc-for list="{{ aprobadores }}" as="a" hint-placeholder-count="4">
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);padding:16px;display:flex;flex-direction:column;gap:8px;min-width:0">
+<div style="display:flex;flex-direction:column;gap:2px"><span class="t-label">{{ a.cc }}</span><span class="t-caption" style="color:var(--ds-fg-muted)">{{ a.tipo }}</span></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Aprueba" value="{{ a.val }}" options="{{ personas }}" hint-size="100%,72px"></x-import>
+</div>
+</sc-for>
+</div>
+</section>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Comprobante" hint-size="100%,100px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ fotoObl }}" on-change="{{ toggleFoto }}" label="Foto obligatoria" description="No se puede enviar una compra sin foto de la boleta o factura." hint-size="100%,56px"></x-import>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ActionBar" hint-size="100%,64px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" hint-size="150px,40px">Guardar cambios</x-import>
+</x-import>
+</div>
+</sc-if>
+<sc-if value="{{ cfgLoading }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:16px;width:100%">{{ loadingNode }}</div></sc-if>
+<sc-if value="{{ cfgError }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="{{ errTitle }}" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="{{ errCode }}" on-retry="{{ noop }}" hint-size="100%,320px"></x-import></sc-if>
+<sc-if value="{{ cfgForbidden }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="{{ forbTitle }}" description="{{ forbDesc }}" action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,320px"></x-import></sc-if>
+</div>
+</div>
+</sc-if>
+</sc-if>
+
+<sc-if value="{{ gLoading }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:16px;width:100%">{{ loadingNode }}</div></sc-if>
+<sc-if value="{{ gError }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="{{ errTitle }}" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="{{ errCode }}" on-retry="{{ noop }}" hint-size="100%,320px"></x-import></sc-if>
+<sc-if value="{{ showEmpty }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="{{ emptyIcon }}" title="{{ emptyTitle }}" description="{{ emptyDesc }}" action="{{ emptyAction }}" hint-size="100%,320px"></x-import></sc-if>
+<sc-if value="{{ gForbidden }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="{{ forbTitle }}" description="{{ forbDesc }}" action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,320px"></x-import></sc-if>
+</x-import>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;screen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;mis&quot;,&quot;compra&quot;,&quot;km&quot;,&quot;bandeja&quot;,&quot;detalle&quot;,&quot;lotes&quot;,&quot;reporte&quot;,&quot;config&quot;],&quot;default&quot;:&quot;mis&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;phone&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ok&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinPermiso&quot;],&quot;default&quot;:&quot;ok&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;overlay&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;none&quot;,&quot;validacion&quot;,&quot;rechazar&quot;,&quot;pagar&quot;,&quot;crear&quot;,&quot;lista&quot;],&quot;default&quot;:&quot;none&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;conFinanzas&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;propuesta&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state = { sel: { "R-0418": true, "R-0421": true, "R-0420": true }, km: null, grp: "Persona", n2Only: false, lotSel: { CH: true, LP: true, JM: true, HA: false }, tipo: null, monto: null, fotoObl: true };
+  renderVals() {
+    const h = React.createElement, NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const p = this.props;
+    const screen = p.screen ?? "mis", device = p.device ?? "phone", theme = p.theme ?? "light";
+    const estado = p.estado ?? "ok", propB = !!p.propuesta, fin = !!p.conFinanzas, ov = p.overlay ?? "none";
+    const isPhone = device === "phone", isTablet = device === "tablet";
+    const noop = () => {};
+    const fmt = (n) => "$ " + Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    const pct = (n, t) => (Math.round((n / t) * 1000) / 10).toString().replace(".", ",") + " %";
+    const ST = { borrador: ["Borrador", "neutral"], enviada: ["Enviada", "info"], nivel2: ["Esperando 2.º nivel", "warning"], aprobada: ["Aprobada", "success"], lote: ["En lote de pago", "accent"], pagada: ["Pagada", "neutral"], rechazada: ["Rechazada", "danger"] };
+    const badge = (k) => (NS.Badge ? h(NS.Badge, { tone: ST[k][1] }, ST[k][0]) : ST[k][0]);
+    const isNueva = screen === "compra" || screen === "km";
+    const trab = ["mis", "compra", "km", "detalle"].includes(screen);
+    const empty = estado === "vacio";
+    const ok = estado === "ok" || (empty && isNueva);
+
+    // Navegación
+    const tabsT = [{ id: "ini", label: "Inicio", icon: "home" }, { id: "tur", label: "Turnos", icon: "calendar" }, { id: "ren", label: "Rendiciones", icon: "wallet" }, { id: "doc", label: "Documentos", icon: "file" }, { id: "mas", label: "Más", icon: "more" }];
+    const groupsT = [{ items: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "tur", label: "Mi pauta", icon: "calendar" }, { id: "ren", label: "Mis rendiciones", icon: "wallet" }, { id: "liq", label: "Liquidaciones", icon: "landmark" }, { id: "doc", label: "Documentos", icon: "file" }] }];
+    const tabsE = [{ id: "ini", label: "Inicio", icon: "home" }, { id: "apr", label: "Por aprobar", icon: "inbox" }, { id: "lot", label: "Lotes", icon: "landmark" }, { id: "rep", label: "Reporte", icon: "chart" }, { id: "mas", label: "Más", icon: "more" }];
+    const groupsE = [
+      { items: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "ban", label: "Bandeja", icon: "inbox" }] },
+      { title: "Operaciones", items: [{ id: "ins", label: "Instalaciones", icon: "building" }, { id: "per", label: "Personas", icon: "users" }] },
+      { title: "Rendiciones", items: [{ id: "apr", label: "Por aprobar", icon: "inbox", count: 6 }, { id: "lot", label: "Lotes de pago", icon: "landmark" }, { id: "rep", label: "Reporte", icon: "chart" }] },
+      { title: "Administración", items: [{ id: "cfg", label: "Configuración", icon: "clipboard" }] },
+    ];
+    const activeMap = { mis: "ren", compra: "ren", km: "ren", detalle: "ren", bandeja: "apr", lotes: "lot", reporte: "rep", config: isPhone ? "mas" : "cfg" };
+    const user = trab ? { name: "Camila Herrera", initials: "CH", role: "Guardia" } : screen === "bandeja" ? { name: "Paula Rojas", initials: "PR", role: "Jefa de operaciones" } : { name: "Carlos Irigoyen", initials: "CI", role: "Administrador" };
+
+    // Mis rendiciones
+    const mias = [
+      { id: "R-0419", tipo: "km", cat: "Kilometraje", det: "Planta Quilicura → Bodega Lampa", monto: 11400, fecha: "28-10-2026", st: "borrador" },
+      { id: "R-0415", tipo: "compra", cat: "Materiales de aseo", det: "Boleta", monto: 18990, fecha: "22-10-2026", st: "rechazada" },
+      { id: "R-0418", tipo: "compra", cat: "Combustible", det: "Boleta", monto: 42300, fecha: "27-10-2026", st: "enviada" },
+      { id: "R-0416", tipo: "compra", cat: "Herramientas", det: "Factura", monto: 128500, fecha: "24-10-2026", st: "nivel2" },
+      { id: "R-0414", tipo: "km", cat: "Kilometraje", det: "Torre Apoquindo → Planta Quilicura", monto: 7500, fecha: "21-10-2026", st: "aprobada" },
+      { id: "R-0412", tipo: "compra", cat: "Alimentación", det: "Boleta", monto: 8500, fecha: "20-10-2026", st: "lote" },
+      { id: "R-0409", tipo: "compra", cat: "Estacionamiento", det: "Boleta", monto: 3200, fecha: "15-10-2026", st: "pagada" },
+      { id: "R-0405", tipo: "km", cat: "Kilometraje", det: "Bodega Lampa → Torre Apoquindo", monto: 12300, fecha: "09-10-2026", st: "pagada" },
+    ].map((r) => ({ ...r, montoStr: fmt(r.monto) }));
+    const G = [["Por corregir", ["borrador", "rechazada"]], ["En curso", ["enviada", "nivel2", "aprobada", "lote"]], ["Pagadas", ["pagada"]]];
+    const misGroups = G.map(([label, sts]) => ({ label, items: mias.filter((r) => sts.includes(r.st)) }));
+    const porPagar = fmt(mias.filter((r) => ["enviada", "nivel2", "aprobada", "lote"].includes(r.st)).reduce((a, r) => a + r.monto, 0));
+    const misCols = [
+      { key: "id", label: "Folio", mono: true, muted: true, width: 96 },
+      { key: "cat", label: "Categoría", strong: true },
+      ...(isTablet ? [] : [{ key: "det", label: "Detalle", muted: true }]),
+      { key: "fecha", label: "Fecha", width: 110 },
+      { key: "st", label: "Estado", width: 170, render: (r) => badge(r.st) },
+      { key: "montoStr", label: "Monto", align: "right", width: 110 },
+    ];
+    const misCard = (r) => ({ icon: r.tipo === "km" ? "route" : "file", title: r.cat, subtitle: r.fecha + " · " + r.det, trailing: h("span", { style: { display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 4 } }, h("span", { className: "t-label t-numeric" }, r.montoStr), badge(r.st)) });
+
+    // Nueva
+    const tipo = this.state.tipo ?? (screen === "km" ? "Kilometraje" : "Compra");
+    const blank = empty || ov === "validacion";
+    const kmStr = this.state.km ?? (empty ? "" : "38");
+    const kmN = parseInt(String(kmStr).replace(/\D/g, ""), 10) || 0;
+    const montoStr = this.state.monto ?? (empty ? "" : "42.300");
+    const montoN = parseInt(String(montoStr).replace(/\D/g, ""), 10) || 0;
+    const archivos = blank ? [] : [{ nombre: "boleta-copec-27-10.jpg", size: 1258291, estado: "listo" }];
+    const ocr = propB && !blank;
+
+    // Bandeja
+    const pendBase = [
+      { id: "R-0421", ini: "LP", persona: "Luis Pérez", tipo: "km", cat: "Kilometraje · 32 km", cc: "Bodega Lampa", monto: 9600, env: "29-10-2026 07:58", n2: false, dias: 1 },
+      { id: "R-0420", ini: "JM", persona: "Jorge Muñoz", tipo: "compra", cat: "Alimentación", cc: "Torre Apoquindo", monto: 15800, env: "28-10-2026 21:10", n2: false, dias: 2 },
+      { id: "R-0418", ini: "CH", persona: "Camila Herrera", tipo: "compra", cat: "Combustible", cc: "Planta Quilicura", monto: 42300, env: "27-10-2026 18:42", n2: false, dias: 3 },
+      { id: "R-0416", ini: "CH", persona: "Camila Herrera", tipo: "compra", cat: "Herramientas", cc: "Planta Quilicura", monto: 128500, env: "24-10-2026 09:15", n2: true, dias: 6 },
+      { id: "R-0413", ini: "MS", persona: "María F. Soto", tipo: "compra", cat: "Equipamiento", cc: "Planta Quilicura", monto: 89990, env: "21-10-2026 14:30", n2: true, dias: 9 },
+      { id: "R-0411", ini: "DS", persona: "Diego Silva", tipo: "compra", cat: "Estacionamiento", cc: "Torre Apoquindo", monto: 4500, env: "19-10-2026 11:05", n2: false, dias: 11 },
+    ];
+    const sel = this.state.sel;
+    const toggle = (id) => this.setState((s) => ({ sel: { ...s.sel, [id]: !s.sel[id] } }));
+    const pend = pendBase.filter((r) => !this.state.n2Only || r.n2).map((r) => ({
+      ...r, montoStr: fmt(r.monto), sel: !!sel[r.id], toggle: () => toggle(r.id), thumbIc: r.tipo === "km" ? "i-route" : "i-file",
+      late: propB && r.dias >= 5, lateLabel: "Pendiente hace " + r.dias + " días", rowBg: sel[r.id] ? "var(--ds-accent-muted)" : "transparent",
+    }));
+    const selRows = pendBase.filter((r) => sel[r.id]);
+    const thumb = (r) => h("div", { "aria-label": "Comprobante", style: { width: 40, height: 40, borderRadius: "var(--radius-sm)", border: "1px solid var(--ds-border)", background: "var(--ds-fill)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--ds-fg-muted)" } }, h("span", { className: "ic sm " + r.thumbIc }));
+    const pendCols = [
+      { key: "chk", label: "", width: 44, render: (r) => (NS.Checkbox ? h(NS.Checkbox, { checked: r.sel, onChange: r.toggle }) : null) },
+      { key: "foto", label: "Comprobante", width: 110, render: thumb },
+      { key: "persona", label: "Persona", render: (r) => h("span", { style: { display: "flex", gap: 10, alignItems: "center" } }, NS.Avatar ? h(NS.Avatar, { initials: r.ini, size: 24 }) : null, h("span", { style: { display: "flex", flexDirection: "column" } }, h("span", { style: { fontWeight: 500 } }, r.persona), isTablet ? h("span", { className: "t-caption t-numeric", style: { color: "var(--ds-fg-muted)" } }, r.env) : null)) },
+      { key: "cat", label: "Gasto", render: (r) => h("span", { style: { display: "flex", flexDirection: "column" } }, h("span", null, r.cat), h("span", { className: "t-caption", style: { color: "var(--ds-fg-muted)" } }, r.cc)) },
+      ...(isTablet ? [] : [{ key: "env", label: "Enviada", width: 150, render: (r) => h("span", { className: "t-numeric" }, r.env) }]),
+      { key: "niv", label: "Nivel", width: 190, render: (r) => h("span", { style: { display: "flex", gap: 6, flexWrap: "wrap" } }, r.n2 && NS.Badge ? h(NS.Badge, { tone: "warning" }, "Requiere 2.º nivel") : null, r.late && NS.Badge ? h(NS.Badge, { tone: "warning", dot: false }, r.lateLabel) : null) },
+      { key: "montoStr", label: "Monto", align: "right", width: 120 },
+    ];
+    const selLabel = selRows.length + (selRows.length === 1 ? " seleccionada · " : " seleccionadas · ") + fmt(selRows.reduce((a, r) => a + r.monto, 0));
+
+    // Lotes
+    const ls = this.state.lotSel;
+    const personas = [
+      { k: "CH", persona: "Camila Herrera", banco: "Banco de Chile · Cuenta corriente · •••• 4821", items: [{ id: "R-0414", cat: "Kilometraje", fecha: "21-10-2026", monto: 7500 }, { id: "R-0410", cat: "Combustible", fecha: "18-10-2026", monto: 36200 }] },
+      { k: "LP", persona: "Luis Pérez", banco: "BancoEstado · Cuenta vista · •••• 3452", items: [{ id: "R-0408", cat: "Kilometraje", fecha: "17-10-2026", monto: 14400 }, { id: "R-0406", cat: "Alimentación", fecha: "16-10-2026", monto: 12900 }] },
+      { k: "JM", persona: "Jorge Muñoz", banco: "Banco Santander · Cuenta corriente · •••• 9017", items: [{ id: "R-0407", cat: "Herramientas", fecha: "16-10-2026", monto: 112000 }] },
+      { k: "HA", persona: "Héctor Araya", banco: "", items: [{ id: "R-0403", cat: "Estacionamiento", fecha: "14-10-2026", monto: 6000 }] },
+    ].map((g) => { const t = g.items.reduce((a, i) => a + i.monto, 0); return { ...g, sinBanco: !g.banco, total: t, totalStr: fmt(t), desc: g.items.length + (g.items.length === 1 ? " rendición" : " rendiciones"), sel: !!g.banco && !!ls[g.k], toggle: () => g.banco && this.setState((s) => ({ lotSel: { ...s.lotSel, [g.k]: !s.lotSel[g.k] } })), items: g.items.map((i) => ({ ...i, montoStr: fmt(i.monto) })) }; });
+    const selP = personas.filter((g) => g.sel);
+    const loteSummary = [{ label: "Personas", value: String(selP.length) }, { label: "Rendiciones", value: String(selP.reduce((a, g) => a + g.items.length, 0)) }, { label: "Total del lote", value: fmt(selP.reduce((a, g) => a + g.total, 0)) }];
+    const lotes = [
+      fin ? { id: "L-0031", estado: "Esperando conciliación", tone: "info", meta: "Creado 24-10-2026 · 6 rendiciones · 3 personas · Banca lo concilia al recibir la cartola", totalStr: "$ 184.500", pagable: false, comprobante: "" }
+          : { id: "L-0031", estado: "Archivo generado", tone: "info", meta: "Creado 24-10-2026 · 6 rendiciones · 3 personas", totalStr: "$ 184.500", pagable: true, comprobante: "" },
+      { id: "L-0030", estado: "Pagado", tone: "success", meta: "Pagado 10-10-2026 · 9 rendiciones · 5 personas", totalStr: "$ 233.100", pagable: false, comprobante: fin ? "Conciliado con Banca · 11-10-2026" : "transferencia-10-10-2026.pdf" },
+    ];
+
+    // Reporte
+    const grp = this.state.grp;
+    const DATA = {
+      Persona: [["Camila Herrera", 11, 312400], ["Jorge Muñoz", 8, 268900], ["Luis Pérez", 9, 221700], ["María F. Soto", 6, 198300], ["Héctor Araya", 7, 154800], ["Diego Silva", 5, 128500]],
+      "Categoría": [["Combustible", 14, 402100], ["Herramientas", 5, 298500], ["Kilometraje", 12, 216900], ["Equipamiento", 2, 169990], ["Alimentación", 6, 118610], ["Materiales de aseo", 3, 52300], ["Estacionamiento", 4, 26200]],
+      "Instalación": [["Planta Quilicura", 19, 561300], ["Bodega Lampa", 13, 384700], ["Torre Apoquindo", 11, 291400], ["Administración / Oficina central", 3, 47200]],
+    };
+    const TOT = 1284600;
+    const repRows = DATA[grp].map(([n, c, m], i) => ({ id: i, nombre: n, cant: String(c), monto: fmt(m), pct: pct(m, TOT) }));
+    const repCols = [{ key: "nombre", label: grp, strong: true }, { key: "cant", label: "Rendiciones", align: "right", width: 140 }, { key: "monto", label: "Monto", align: "right", width: 160 }, { key: "pct", label: "% del total", align: "right", width: 130 }];
+    const repFooter = h("div", { style: { display: "flex", justifyContent: "space-between", padding: "12px 16px", font: "600 14px/20px var(--font-sans)", fontVariantNumeric: "tabular-nums" } }, h("span", null, "Total · 46 rendiciones"), h("span", null, fmt(TOT)));
+
+    // Detalle
+    const timeline = [
+      { initials: "CH", who: "Camila Herrera", action: "creó la rendición", when: "22-10-2026 19:04" },
+      { initials: "CH", who: "Camila Herrera", action: "la envió a aprobación", changes: [{ field: "Estado", from: "Borrador", to: "Enviada" }], when: "22-10-2026 19:06" },
+      { initials: "PR", who: "Paula Rojas", action: "la rechazó", changes: [{ field: "Estado", from: "Enviada", to: "Rechazada" }], when: "23-10-2026 10:12" },
+      { agent: true, who: "OPAI", action: "la devolvió a borrador para corregir", when: "23-10-2026 10:12" },
+    ];
+
+    // Estados
+    const C = {
+      mis: { e: ["wallet", "Aún no tienes rendiciones", "Rinde una compra o un viaje y síguela hasta que te paguen.", "Nueva rendición"], err: "No pudimos cargar tus rendiciones", f: ["No tienes rendiciones habilitadas", "Tu cuenta aún no puede rendir gastos. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA."], l: "rows" },
+      compra: { err: "No pudimos cargar el formulario", f: ["No puedes crear rendiciones", "Tu cuenta aún no puede rendir gastos. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA."], l: "form" },
+      km: { err: "No pudimos cargar la tarifa por km", f: ["No puedes crear rendiciones", "Tu cuenta aún no puede rendir gastos. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA."], l: "form" },
+      bandeja: { e: ["check-circle", "No tienes rendiciones por aprobar", "Te avisaremos cuando alguien te envíe una.", "Ver aprobadas"], err: "No pudimos cargar las rendiciones por aprobar", f: ["No apruebas rendiciones", "Solo las jefaturas y quienes tienen permiso de aprobación ven esta bandeja. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA."], l: "rows" },
+      detalle: { e: ["file", "Esta rendición ya no está disponible", "Puede que la hayan eliminado como borrador.", "Volver a Mis rendiciones"], err: "No pudimos cargar la rendición", f: ["Esta rendición no es tuya", "Solo ves tus rendiciones y las que te toca aprobar. Si necesitas verla, pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA."], l: "detail" },
+      lotes: { e: ["landmark", "No hay rendiciones por pagar", "Cuando se aprueben, aparecerán aquí agrupadas por persona.", "Ver lotes anteriores"], err: "No pudimos cargar las rendiciones por pagar", f: ["No tienes acceso a los lotes de pago", "Solo owner, admin y finanzas crean lotes. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA."], l: "rows" },
+      reporte: { e: ["chart", "Sin rendiciones en octubre 2026", "Cambia el período para ver otros meses.", "Cambiar período"], err: "No pudimos cargar el reporte", f: ["No tienes acceso al reporte", "Solo owner, admin y finanzas ven el gasto de todo el equipo. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA."], l: "report" },
+      config: { e: null, err: "No pudimos cargar la configuración", f: ["No puedes cambiar la configuración", "Solo owner, admin y finanzas configuran rendiciones. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA."], l: "form" },
+    }[screen];
+    const emptyActLabel = screen === "config" ? "Agregar categoría" : C.e ? C.e[3] : "";
+    const emptyAction = NS.Button ? h(NS.Button, { icon: screen === "mis" || screen === "config" ? "plus" : undefined, variant: screen === "mis" || screen === "config" ? "primary" : "secondary" }, emptyActLabel) : null;
+    const Sk = NS.Skeleton, Ld = NS.Loading;
+    let loadingNode = null;
+    if (Ld && Sk) {
+      if (C.l === "detail") loadingNode = h("div", { style: { display: "grid", gridTemplateColumns: isPhone ? "1fr" : "minmax(0,360px) minmax(0,1fr)", gap: 24 } }, h(Sk, { height: isPhone ? 260 : 420, radius: 16 }), h(Ld, { variant: "rows", count: 6 }));
+      else if (C.l === "report") loadingNode = h(React.Fragment, null, h(Ld, { variant: "kpis", count: 3 }), h(Ld, { variant: "rows", count: 6 }));
+      else loadingNode = h(Ld, { variant: C.l, count: C.l === "form" ? 5 : 6 });
+    }
+
+    // Overlays
+    let overlay = null;
+    const Dlg = isPhone ? NS.Sheet : NS.Dialog;
+    if (Dlg && ov === "rechazar") {
+      overlay = h(Dlg, { open: true, contained: true, title: "Rechazar 3 rendiciones", description: "Vuelven a borrador para que cada persona las corrija.", onClose: noop,
+        actions: h(React.Fragment, null, h(NS.Button, { variant: "secondary" }, "Cancelar"), h(NS.Button, { variant: "destructive" }, "Rechazar")) },
+        h(NS.Textarea, { label: "Motivo del rechazo", value: "La boleta no se lee completa. Sube una foto donde se vea el total y el RUT del comercio.", hint: "Lo verán Luis Pérez, Jorge Muñoz y Camila Herrera.", rows: 4 }));
+    }
+    if (Dlg && ov === "pagar") {
+      overlay = h(Dlg, { open: true, contained: true, title: "Marcar L-0031 como pagado", description: "6 rendiciones · 3 personas · $ 184.500", onClose: noop,
+        actions: h(React.Fragment, null, h(NS.Button, { variant: "secondary" }, "Cancelar"), h(NS.Button, { icon: "check" }, "Marcar pagado")) },
+        h("div", { style: { display: "flex", flexDirection: "column", gap: 16 } }, h(NS.DateInput, { label: "Fecha de pago", value: "30-10-2026", today: "30-10-2026" }), h(NS.Campo, { etiqueta: "Comprobante de pago" }, h(NS.Uploader, { tipos: "PDF, JPG o PNG", tamanoMaximoMb: 10, compacto: true }))));
+    }
+    if (Dlg && ov === "crear") {
+      overlay = h(Dlg, { open: true, contained: true, title: "Lote L-0032 creado", description: "3 personas · 5 rendiciones · $ 183.000", onClose: noop,
+        actions: h(React.Fragment, null, h(NS.Button, { variant: "secondary" }, "Cerrar"), h(NS.Button, { icon: "download" }, "Descargar archivo")) },
+        h("p", { className: "t-body-sm", style: { margin: 0, color: "var(--ds-fg-muted)" } }, fin ? "Enviamos la orden de pago a Banca. El lote se marcará pagado cuando se concilie con la cartola." : "Sube el archivo a tu banco. Cuando el banco pague, marca el lote como pagado y adjunta el comprobante."));
+    }
+
+    const s = (k) => (k === "nueva" ? isNueva : screen === k);
+    return {
+      device, theme, isPhone, notPhone: !isPhone, isTablet, notTablet: !isTablet,
+      portal: trab ? "Trabajador" : "ERP", tabs: trab ? tabsT : tabsE, groups: trab ? groupsT : groupsE,
+      railFooter: trab ? [] : [{ id: "cfg", label: "Ajustes", icon: "clipboard" }],
+      active: activeMap[screen], user, overlay,
+      hideTab: isPhone && (isNueva || screen === "detalle"), showTab: !(isPhone && (isNueva || screen === "detalle")),
+      s_mis: s("mis"), s_nueva: s("nueva"), s_bandeja: s("bandeja"), s_detalle: s("detalle"), s_lotes: s("lotes"), s_reporte: s("reporte"), s_config: s("config"),
+      ok, okNotPhone: ok && !isPhone, okOrEmpty: ok || empty, isEmpty: empty,
+      isLoading: estado === "cargando", isError: estado === "error", isForbidden: estado === "sinPermiso",
+      showEmpty: empty && !isNueva && screen !== "config",
+      emptyIcon: C.e ? C.e[0] : "users", emptyTitle: C.e ? C.e[1] : "", emptyDesc: C.e ? C.e[2] : "", emptyAction,
+      errTitle: C.err, errCode: "RND-" + ({ mis: 101, compra: 102, km: 103, bandeja: 201, detalle: 104, lotes: 301, reporte: 302, config: 401 }[screen]),
+      forbTitle: C.f[0], forbDesc: C.f[1], loadingNode, noop, fin, noFin: !fin, propB, importB: propB,
+      porPagar, misGroups, misCols, misCard,
+      tipos: ["Compra", "Kilometraje"], tipo, setTipo: (v) => this.setState({ tipo: v }), tipoCompra: tipo === "Compra", tipoKm: tipo === "Kilometraje",
+      docs: ["Boleta", "Factura"], archivos, showErr: ov === "validacion", ocr,
+      ocrHint: ocr ? "Sugerido desde la foto · puedes cambiarlo" : undefined, montoErr: undefined,
+      monto: montoStr, setMonto: (v) => { const n = parseInt(String(v).replace(/\D/g, ""), 10); this.setState({ monto: isNaN(n) ? "" : n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".") }); },
+      fechaCompra: empty ? "" : "27-10-2026", fechaKm: empty ? "" : "28-10-2026", nota: empty ? "" : "Carga para la ronda nocturna en Planta Quilicura.",
+      catVal: empty ? undefined : "comb", ccVal: empty ? undefined : "pq",
+      categorias: [{ value: "comb", label: "Combustible" }, { value: "ali", label: "Alimentación" }, { value: "est", label: "Estacionamiento" }, { value: "her", label: "Herramientas" }, { value: "mat", label: "Materiales de aseo" }, { value: "equ", label: "Equipamiento" }],
+      centros: [{ value: "pq", label: "Planta Quilicura" }, { value: "bl", label: "Bodega Lampa" }, { value: "ta", label: "Torre Apoquindo" }, { value: "adm", label: "Administración / Oficina central", description: "Gastos que no son de una instalación" }],
+      cuentas: [{ value: "5110", label: "5110 · Combustibles y lubricantes" }, { value: "5120", label: "5120 · Materiales de operación" }],
+      origen: empty ? "" : "Planta Quilicura", destino: empty ? "" : "Bodega Lampa", km: kmStr, setKm: (v) => this.setState({ km: String(v).replace(/\D/g, "") }),
+      kmRows: [{ label: "Kilómetros", value: kmN + " km", numeric: true }, { label: "Tarifa por km", value: "$ 300", numeric: true }, { label: "Monto calculado", value: fmt(kmN * 300), numeric: true }],
+      nuevaSummary: [{ label: "Monto", value: tipo === "Kilometraje" ? fmt(kmN * 300) : fmt(montoN) }],
+      pend, pendCols, selLabel, clearSel: () => this.setState({ sel: {} }), n2Only: this.state.n2Only, toggleN2: () => this.setState((s2) => ({ n2Only: !s2.n2Only })),
+      splitList: mias.slice(0, 6).map((r) => ({ ...r, selected: r.id === "R-0415", subtitle: ST[r.st][0] + " · " + r.fecha })),
+      detBadge: NS.Badge ? h(NS.Badge, { tone: "danger" }, "Rechazada") : null,
+      detCols: isPhone ? "minmax(0,1fr)" : isTablet ? "minmax(0,1fr)" : "minmax(0,360px) minmax(0,1fr)",
+      photoMax: isPhone ? "360px" : isTablet ? "320px" : "480px",
+      detRows: [{ label: "Folio", value: "R-0415", mono: true }, { label: "Monto", value: "$ 18.990", numeric: true }, { label: "Fecha de la compra", value: "22-10-2026", numeric: true }, { label: "Categoría", value: "Materiales de aseo" }, { label: "Instalación o Administración", value: "Planta Quilicura" }, { label: "Documento", value: "Boleta" }, { label: "Quien rinde", value: "Camila Herrera" }, { label: "RUT", value: "12.345.678-9", mono: true }],
+      timeline,
+      porPersona: personas, loteSummary, lotes,
+      periodos: [{ value: "oct", label: "Octubre 2026" }, { value: "sep", label: "Septiembre 2026" }, { value: "q3", label: "Últimos 3 meses" }],
+      grupos: ["Persona", "Categoría", "Instalación"], grp, setGrp: (v) => this.setState({ grp: v }),
+      repRows, repCols, repFooter, repCard: (r) => ({ title: r.nombre, subtitle: r.cant + " rendiciones · " + r.pct, trailing: r.monto }),
+      pagoRows: [{ label: "Cuenta de destino", value: "Banco de Chile · Cuenta corriente · •••• 4821" }],
+      cfgLista: screen === "config" && ov === "lista" && isPhone, cfgEntrada: screen === "config" && !(ov === "lista" && isPhone),
+      cfgLoading: screen === "config" && estado === "cargando", cfgError: screen === "config" && estado === "error", cfgForbidden: screen === "config" && estado === "sinPermiso",
+      gLoading: screen !== "config" && estado === "cargando", gError: screen !== "config" && estado === "error", gForbidden: screen !== "config" && estado === "sinPermiso",
+      navW: isTablet ? "240px" : "260px",
+      cfgTabs: [{ id: "res", label: "Resumen" }, { id: "aju", label: "Ajustes" }],
+      modulos: [["Asistencia", "clock"], ["Pauta y turnos", "calendar"], ["Rondas", "route"], ["Tickets", "ticket"], ["Cotizaciones", "file"], ["Rendiciones", "wallet"]].map(([label, icon]) => ({ label, icon, selected: label === "Rendiciones" })),
+      niveles: [{ value: "monto", label: "Según el monto" }, { value: "n2", label: "Siempre 2.º nivel" }],
+      catCfg: [["Combustible", "monto"], ["Alimentación", "monto"], ["Estacionamiento", "monto"], ["Herramientas", "monto"], ["Materiales de aseo", "monto"], ["Equipamiento", "n2"]].map(([label, nivel]) => ({ label, nivel, quitar: "Quitar " + label })),
+      aprobadores: [{ cc: "Planta Quilicura", tipo: "Instalación", val: "pr" }, { cc: "Bodega Lampa", tipo: "Instalación", val: "jm" }, { cc: "Torre Apoquindo", tipo: "Instalación", val: "pr" }, { cc: "Administración / Oficina central", tipo: "Centro fijo · gastos que no son de una instalación", val: "ci" }],
+      personas: [{ value: "pr", label: "Paula Rojas", description: "Jefa de operaciones" }, { value: "jm", label: "Jorge Muñoz", description: "Supervisor" }, { value: "ci", label: "Carlos Irigoyen", description: "Administrador" }],
+      fotoObl: this.state.fotoObl, toggleFoto: () => this.setState((s2) => ({ fotoObl: !s2.fotoObl })),
+    };
+  }
+}
+</script>
+</body>
+</html>
