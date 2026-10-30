@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><script src="./nomina-data.js"></script><style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style></helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="{{ active }}" title="{{ shellTitle }}" user="{{ user }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<sc-if value="{{ showHeader }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Cumplimiento DT · Finiquitos" title="Luis Pérez" subtitle="9.876.543-2 · Guardia · Bodega Lampa · Término el 28-10-2026" badge="{{ headBadge }}" size="heading" hint-size="100%,80px">
+<sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="paperclip" hint-size="230px,40px">Subir comprobante de pago</x-import>
+</sc-if>
+</x-import>
+</sc-if>
+
+<sc-if value="{{ isOk }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" titulo="Plazo de pago: quedan 2 días hábiles" hint-size="100%,88px">El finiquito debe pagarse a más tardar el 04-11-2026 (5 días hábiles desde el término). La firma se hace en Mi DT; el finiquito no se firma en OPAI.</x-import>
+
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,140px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<span class="t-label">Estado del trámite en Mi DT</span>
+<div role="list" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px">
+<sc-for list="{{ pasos }}" as="p" hint-placeholder-count="4">
+<div role="listitem" style="display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:var(--radius-md);background:var(--ds-bg)">
+<sc-if value="{{ p.done }}" hint-placeholder-val="{{ false }}"><span style="width:24px;height:24px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:var(--ds-success-muted);color:var(--ds-success-fg);flex:none"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Icon" name="check" size="sm" hint-size="16px,16px"></x-import></span></sc-if>
+<sc-if value="{{ p.current }}" hint-placeholder-val="{{ false }}"><span class="t-label-sm" style="width:24px;height:24px;border-radius:999px;display:flex;align-items:center;justify-content:center;border:2px solid var(--ds-accent);color:var(--ds-accent);flex:none">{{ p.n }}</span></sc-if>
+<sc-if value="{{ p.todo }}" hint-placeholder-val="{{ true }}"><span class="t-label-sm" style="width:24px;height:24px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:var(--ds-fill);color:var(--ds-fg-muted);flex:none">{{ p.n }}</span></sc-if>
+<div style="display:flex;flex-direction:column;gap:2px;min-width:0"><span class="t-label-sm">{{ p.t }}</span><span class="t-caption" style="color:var(--ds-fg-muted)">{{ p.d }}</span></div>
+</div>
+</sc-for>
+</div>
+<span class="t-caption" style="color:var(--ds-fg-muted)">Respuesta posible del trabajador: Aceptado · Aceptado con reserva · Rechazado. La marca el representante al ver Mi DT.</span>
+</div>
+</x-import>
+
+<div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
+<div style="flex:1 1 420px;min-width:0;display:flex;flex-direction:column;gap:16px">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px">
+<sc-for list="{{ contadores }}" as="k" hint-placeholder-count="2">
+<div style="display:flex;flex-direction:column;gap:4px;padding:16px;border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+<span class="t-caption" style="color:var(--ds-fg-muted)">{{ k.l }}</span>
+<span class="t-heading t-numeric">{{ k.v }}</span>
+<span class="t-caption" style="color:var(--ds-fg-muted)">{{ k.d }}</span>
+</div>
+</sc-for>
+</div>
+<span class="t-label">Cálculo del finiquito</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ calculo }}" compact="{{ true }}" cards="{{ isPhone }}" to-card="{{ toCard }}" footer="{{ totalFooter }}" hint-size="100%,280px"></x-import>
+</div>
+<div style="flex:1 1 300px;max-width:420px;min-width:0;display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,200px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between;gap:8px;align-items:center"><span class="t-label">Carta de término · Art. 162</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="success" dot="{{ true }}" hint-size="80px,22px">Generada</x-import></div>
+<span class="t-body-sm" style="color:var(--ds-fg-muted)">Generada desde Documentos el 28-10-2026 · causal Art. 161, necesidades de la empresa · aviso con copia a la Inspección del Trabajo.</span>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="eye" hint-size="90px,40px">Ver</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="download" hint-size="200px,40px">Descargar para Mi DT</x-import>
+</div>
+</div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,200px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<span class="t-label">Comprobantes subidos</span>
+<sc-for list="{{ comps }}" as="c" hint-placeholder-count="2">
+<div style="display:flex;gap:10px;align-items:center;min-height:44px;border-bottom:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Icon" name="paperclip" size="sm" hint-size="16px,16px"></x-import>
+<div style="display:flex;flex-direction:column;min-width:0;flex:1"><span class="t-body-sm">{{ c.n }}</span><span class="t-caption" style="color:var(--ds-fg-muted)">{{ c.d }}</span></div>
+</div>
+</sc-for>
+</div>
+</x-import>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isCargando }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:16px" aria-busy="true">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 72 }}" radius="{{ 10 }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 120 }}" radius="{{ 16 }}" hint-size="100%,120px"></x-import>
+<div style="display:flex;gap:12px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="50%" height="{{ 96 }}" radius="{{ 16 }}" hint-size="50%,96px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="50%" height="{{ 96 }}" radius="{{ 16 }}" hint-size="50%,96px"></x-import></div>
+<sc-for list="{{ skel }}" as="s" hint-placeholder-count="5"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 40 }}" radius="{{ 6 }}" hint-size="100%,40px"></x-import></sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="user-check" title="No hay finiquitos en curso" description="Prepara un finiquito desde la ficha de la persona cuando registres su término." action="{{ emptyAction }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar el finiquito" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="CDT-FIN-503" on-retry="{{ noop }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ isSinPermiso }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a Finiquitos" description="Solo RRHH y administración preparan finiquitos. Pídele acceso a Marcela Rojas, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,320px"></x-import>
+</sc-if>
+</x-import>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ok&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;ok&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;role&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;admin&quot;,&quot;rrhh&quot;,&quot;gerente&quot;,&quot;inspector&quot;,&quot;supervisor&quot;],&quot;default&quot;:&quot;admin&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const ND = window.ND;
+    if (!ND) return {};
+    const b = ND.base(this.props, "fin", "Finiquito");
+    const m = (v) => (b.isGerente ? ND.mask : ND.money(v));
+    const S = (n, t, d, s) => ({ n, t, d, done: s === "d", current: s === "c", todo: s === "t" });
+    const calculo = [
+      { id: 1, c: "Indemnización por años de servicio · 4 años", o: "Contador acumulado · Art. 163", v: 1862400 },
+      { id: 2, c: "Indemnización sustitutiva del aviso previo", o: "Art. 161 sin aviso de 30 días", v: 465600 },
+      { id: 3, c: "Feriado proporcional · 11,25 días hábiles", o: "Contador de vacaciones", v: 174600 },
+      { id: 4, c: "Remuneración días trabajados de octubre · 18 días", o: "Liquidación de octubre", v: 412180 },
+      { id: 5, c: "Descuento préstamo empresa · saldo", o: "Novedad · Préstamo", v: -90000 },
+    ];
+    return {
+      ...b,
+      headBadge: NS.Badge ? h(NS.Badge, { tone: "info", dot: true }, "Firmado por empleador") : null,
+      pasos: [
+        S(1, "Preparado", "28-10-2026 · 17:20", "d"),
+        S(2, "Firmado por empleador", "29-10-2026 · 10:05 en Mi DT", "d"),
+        S(3, "Respuesta del trabajador", "Esperando en Mi DT", "c"),
+        S(4, "Pagado", "Plazo 04-11-2026", "t"),
+      ],
+      contadores: [
+        { l: "Vacaciones acumuladas", v: "11,25 días", d: "Contador al 28-10-2026 · 4 años y 2 meses" },
+        { l: "Base indemnización", v: m(465600), d: "Última remuneración mensual · tope 90 UF" },
+      ],
+      calculo,
+      cols: [
+        { key: "c", label: "Concepto", strong: true },
+        { key: "o", label: "Origen", muted: true },
+        { key: "v", label: "Monto", align: "right", render: (r) => (r.v < 0 ? "– " + m(-r.v) : m(r.v)) },
+      ],
+      toCard: (r) => ({ title: r.c, subtitle: r.o, trailing: h("span", { className: "t-numeric t-label" }, r.v < 0 ? "– " + m(-r.v) : m(r.v)) }),
+      totalFooter: h("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "baseline", padding: "12px 16px" } }, h("span", { className: "t-label" }, "Total a pagar"), h("span", { className: "t-subheading t-numeric" }, m(2824780))),
+      comps: [
+        { n: "carta_termino_LP.pdf", d: "Generada desde Documentos · 28-10-2026" },
+        { n: "comprobante_firma_midt_LP.pdf", d: "Subido por Marcela Rojas · 29-10-2026 10:12" },
+      ],
+      emptyAction: NS.Button ? h(NS.Button, { variant: "secondary" }, "Ir a Personas") : null,
+    };
+  }
+}
+</script>
+</body>
+</html>

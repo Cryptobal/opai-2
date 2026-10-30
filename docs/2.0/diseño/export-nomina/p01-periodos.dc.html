@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><script src="./nomina-data.js"></script><style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style></helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="{{ active }}" title="{{ shellTitle }}" user="{{ user }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<sc-if value="{{ showHeader }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Nómina" title="Períodos de remuneraciones" subtitle="Atlas Seguridad SpA" hint-size="100%,80px">
+<sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="plus" hint-size="150px,40px">Abrir período</x-import>
+</sc-if>
+</x-import>
+</sc-if>
+
+<sc-if value="{{ isOk }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" style="border-color:var(--ds-accent)" hint-size="100%,160px">
+<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:flex-start;justify-content:space-between">
+<div style="display:flex;flex-direction:column;gap:4px;min-width:0">
+<span class="t-caption" style="color:var(--ds-fg-muted)">Período actual</span>
+<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+<span class="t-heading">Octubre 2026</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="warning" dot="{{ true }}" hint-size="100px,22px">En revisión</x-import>
+</div>
+<span class="t-body-sm" style="color:var(--ds-fg-muted)">01-10-2026 – 31-10-2026 · Cierre el 31-10-2026 · 148 personas</span>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon-right="chevron-right" hint-size="130px,40px">Ir al cierre</x-import>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-top:16px;padding-top:16px;border-top:1px solid var(--ds-border)">
+<div style="display:flex;flex-direction:column;gap:2px"><span class="t-caption" style="color:var(--ds-fg-muted)">Etapa</span><span class="t-label">Revisión · 4 de 6</span></div>
+<div style="display:flex;flex-direction:column;gap:2px"><span class="t-caption" style="color:var(--ds-fg-muted)">Bloqueos</span><span class="t-label" style="color:var(--ds-danger-fg)">12 personas sin AFP</span></div>
+<div style="display:flex;flex-direction:column;gap:2px"><span class="t-caption" style="color:var(--ds-fg-muted)">Líquido calculado</span><span class="t-label t-numeric">{{ liqActual }}</span></div>
+</div>
+</x-import>
+
+<span class="t-label" style="margin-top:8px">Períodos anteriores</span>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="margin:0 -16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" cards="{{ true }}" to-card="{{ toCard }}" on-row-click="{{ noop }}" hint-size="100%,300px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" on-row-click="{{ noop }}" hint-size="100%,300px"></x-import>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isCargando }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:16px" aria-busy="true">
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px;display:flex;flex-direction:column;gap:10px;background:var(--ds-surface)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="90px" height="{{ 12 }}" hint-size="90px,12px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="200px" height="{{ 22 }}" hint-size="200px,22px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="70%" height="{{ 14 }}" hint-size="70%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="100%" height="{{ 40 }}" hint-size="100%,40px"></x-import>
+</div>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+<sc-for list="{{ skel }}" as="s" hint-placeholder-count="5">
+<div style="display:flex;gap:16px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="120px" height="{{ 14 }}" hint-size="120px,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="70px" height="{{ 20 }}" radius="{{ 999 }}" hint-size="70px,20px"></x-import>
+<div style="flex:1"></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="90px" height="{{ 14 }}" hint-size="90px,14px"></x-import>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="wallet" title="Aún no hay períodos" description="Abre el primer período para calcular las remuneraciones de octubre." action="{{ emptyAction }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar los períodos" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="NOM-PER-503" on-retry="{{ noop }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ isSinPermiso }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a Nómina" description="Las remuneraciones solo las ven RRHH, gerencia y administración. Pídele acceso a Marcela Rojas, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,320px"></x-import>
+</sc-if>
+</x-import>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;\&quot;phone\&quot; | \&quot;tablet\&quot; | \&quot;desktop\&quot;&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;\&quot;light\&quot; | \&quot;dark\&quot;&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ok&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;ok&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;role&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;admin&quot;,&quot;rrhh&quot;,&quot;gerente&quot;,&quot;inspector&quot;,&quot;supervisor&quot;],&quot;default&quot;:&quot;admin&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const ND = window.ND;
+    if (!ND) return {};
+    const b = ND.base(this.props, "pdo", "Períodos de remuneraciones");
+    const m = ND.money;
+    const badge = (t, l) => (NS.Badge ? h(NS.Badge, { tone: t, dot: true }, l) : l);
+    const rows = [
+      { id: 9, per: "Septiembre 2026", estado: "Pagado", tone: "success", pers: 146, liq: 98412300, cerr: "30-09-2026", pag: "03-10-2026" },
+      { id: 8, per: "Agosto 2026", estado: "Pagado", tone: "success", pers: 144, liq: 97105800, cerr: "31-08-2026", pag: "03-09-2026" },
+      { id: 7, per: "Julio 2026", estado: "Cerrado", tone: "info", pers: 141, liq: 95870400, cerr: "31-07-2026", pag: "—" },
+      { id: 6, per: "Junio 2026", estado: "Pagado", tone: "success", pers: 139, liq: 94220100, cerr: "30-06-2026", pag: "03-07-2026" },
+      { id: 5, per: "Mayo 2026", estado: "Pagado", tone: "success", pers: 138, liq: 93780900, cerr: "29-05-2026", pag: "03-06-2026" },
+    ];
+    return {
+      ...b,
+      liqActual: ND.money(99204600),
+      rows,
+      cols: [
+        { key: "per", label: "Período", strong: true },
+        { key: "estado", label: "Estado", render: (r) => badge(r.tone, r.estado) },
+        { key: "pers", label: "Personas", align: "right" },
+        { key: "liq", label: "Líquido total", align: "right", render: (r) => m(r.liq) },
+        { key: "cerr", label: "Cerrado el", muted: true },
+        { key: "pag", label: "Pagado el", muted: true },
+      ],
+      toCard: (r) => ({ icon: "wallet", title: r.per, subtitle: r.pers + " personas · " + m(r.liq), meta: r.pag !== "—" ? "Pagado el " + r.pag : "Cerrado el " + r.cerr, badge: { tone: r.tone, label: r.estado }, chevron: true }),
+      emptyAction: NS.Button ? h(NS.Button, { icon: "plus" }, "Abrir período") : null,
+    };
+  }
+}
+</script>
+</body>
+</html>

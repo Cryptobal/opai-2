@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><script src="./nomina-data.js"></script><style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style></helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="{{ active }}" title="{{ shellTitle }}" user="{{ user }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<sc-if value="{{ showHeader }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Nómina · Octubre 2026" title="Archivos y declaraciones" subtitle="Período cerrado el 31-10-2026" badge="{{ roleBadge }}" hint-size="100%,80px">
+<sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="refresh" hint-size="160px,40px">Generar archivos</x-import>
+</sc-if>
+</x-import>
+</sc-if>
+
+<sc-if value="{{ isOk }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="OPAI prepara, valida y guarda el comprobante" hint-size="100%,88px">El LRE lo sube en Mi DT el representante laboral electrónico con ClaveÚnica. El pago en Previred y la declaración al SII los hace la persona responsable. Después, sube aquí el comprobante.</x-import>
+
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,360px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;gap:12px;align-items:flex-start">
+<span style="width:40px;height:40px;border-radius:var(--radius-md);background:var(--ds-fill);display:flex;align-items:center;justify-content:center;flex:none"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Icon" name="landmark" hint-size="20px,20px"></x-import></span>
+<div style="display:flex;flex-direction:column;gap:4px;flex:1;min-width:0">
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="t-subheading">Libro de Remuneraciones Electrónico (LRE)</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="danger" dot="{{ true }}" hint-size="90px,22px">Con errores</x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" hint-size="140px,22px">Formato por verificar</x-import></div>
+<span class="t-body-sm" style="color:var(--ds-fg-muted)">Carga mensual en Mi DT · separador «;» y encabezados fijos · columnas del suplemento por verificar</span>
+<span class="t-mono t-body-sm">76111222_202610.csv</span>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap"><span class="t-label">Validación · 13 errores en 148 filas</span><span class="t-caption" style="color:var(--ds-fg-muted)">Validado el 31-10-2026 a las 10:24</span></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ errCols }}" rows="{{ errores }}" compact="{{ true }}" cards="{{ isPhone }}" to-card="{{ errCard }}" footer="{{ errFooter }}" hint-size="100%,220px"></x-import>
+</div>
+<sc-if value="{{ notInspector }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="check" hint-size="140px,40px">Validar de nuevo</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="download" disabled="{{ true }}" hint-size="120px,40px">Descargar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="paperclip" disabled="{{ true }}" hint-size="220px,40px">Subir comprobante de carga</x-import>
+</div>
+</sc-if>
+</div>
+</x-import>
+
+<sc-for list="{{ archivos }}" as="a" hint-placeholder-count="4">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,140px">
+<div style="display:flex;gap:12px;align-items:flex-start;flex-wrap:wrap">
+<span style="width:40px;height:40px;border-radius:var(--radius-md);background:var(--ds-fill);display:flex;align-items:center;justify-content:center;flex:none"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Icon" name="{{ a.icon }}" hint-size="20px,20px"></x-import></span>
+<div style="display:flex;flex-direction:column;gap:4px;flex:1 1 260px;min-width:0">
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="t-subheading">{{ a.titulo }}</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ a.tone }}" dot="{{ true }}" hint-size="90px,22px">{{ a.estado }}</x-import><sc-if value="{{ a.pv }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" hint-size="140px,22px">Formato por verificar</x-import></sc-if></div>
+<span class="t-body-sm" style="color:var(--ds-fg-muted)">{{ a.desc }}</span>
+<sc-if value="{{ a.monto }}" hint-placeholder-val="{{ false }}"><span class="t-subheading t-numeric">{{ a.monto }}</span></sc-if>
+<span class="t-mono t-body-sm">{{ a.archivo }}</span>
+<sc-if value="{{ a.comp }}" hint-placeholder-val="{{ false }}"><span class="t-caption" style="display:flex;gap:6px;align-items:center;color:var(--ds-fg-muted)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Icon" name="paperclip" size="sm" hint-size="16px,16px"></x-import>{{ a.comp }}</span></sc-if>
+</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<sc-for list="{{ a.acts }}" as="b" hint-placeholder-count="2">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="{{ b.v }}" icon="{{ b.i }}" hint-size="120px,40px">{{ b.l }}</x-import>
+</sc-for>
+</div>
+</div>
+</x-import>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ isCargando }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:16px" aria-busy="true">
+<sc-for list="{{ skel }}" as="s" hint-placeholder-count="5">
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px;display:flex;gap:12px;background:var(--ds-surface)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ 40 }}" height="{{ 40 }}" radius="{{ 10 }}" hint-size="40px,40px"></x-import>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="240px" height="{{ 18 }}" hint-size="240px,18px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="70%" height="{{ 14 }}" hint-size="70%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="160px" height="{{ 14 }}" hint-size="160px,14px"></x-import>
+</div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="download" title="Aún no hay archivos de octubre" description="Los archivos se generan cuando cierras el período." action="{{ emptyAction }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar los archivos" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="NOM-ARC-503" on-retry="{{ noop }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ isSinPermiso }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a Nómina" description="Las remuneraciones solo las ven RRHH, gerencia y administración. Pídele acceso a Marcela Rojas, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,320px"></x-import>
+</sc-if>
+</x-import>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ok&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;ok&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;role&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;admin&quot;,&quot;rrhh&quot;,&quot;gerente&quot;,&quot;inspector&quot;,&quot;supervisor&quot;],&quot;default&quot;:&quot;admin&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const ND = window.ND;
+    if (!ND) return {};
+    const b = ND.base(this.props, "arc", "Archivos y declaraciones");
+    const ro = b.readOnly;
+    const A = (l, i, v = "secondary") => ({ l, i, v });
+    const dl = [A("Descargar", "download")];
+    const archivos = [
+      { icon: "landmark", titulo: "Previred · cotizaciones", estado: "Generado", tone: "info", pv: true, desc: "AFP, salud, AFC, APV y cargas de 148 personas", archivo: "previred_202610.txt", acts: ro ? dl : [A("Validar", "check"), A("Descargar", "download"), A("Subir comprobante de pago", "paperclip", "ghost")] },
+      { icon: "file", titulo: "Retención de impuesto único para el F29", estado: "Generado", tone: "info", pv: true, desc: "23 personas con retención · el F29 lo presenta el contador", monto: b.isGerente ? ND.money(1284300) : ND.money(1284300), archivo: "retencion_iu_202610.xlsx", acts: ro ? dl : [A("Ver detalle por persona", "eye"), A("Descargar", "download")] },
+      { icon: "wallet", titulo: "Archivo de pago al banco", estado: "Por generar", tone: "neutral", pv: true, desc: "Banco de Chile · cuenta corriente 00-123-45678-09", archivo: "Se genera con el período cerrado", acts: ro ? [] : [A("Generar", "refresh")] },
+      { icon: "clipboard", titulo: "Libro de remuneraciones", estado: "Generado", tone: "info", pv: false, desc: "PDF y Excel con las mismas cifras que el LRE", archivo: "libro_remuneraciones_202610.pdf", acts: [A("PDF", "download"), A("Excel", "download")] },
+      { icon: "check-circle", titulo: "Previred · septiembre 2026", estado: "Pagado con comprobante", tone: "success", pv: true, desc: "Pagado el 10-10-2026", archivo: "previred_202609.txt", comp: "comprobante_previred_sep.pdf", acts: dl },
+    ];
+    const errores = [
+      { id: 1, f: 14, col: "Código AFP", per: "Diego Silva", rut: "13.456.789-0", e: "Falta la AFP en la ficha" },
+      { id: 2, f: 27, col: "Código AFP", per: "Paula Rojas", rut: "17.654.321-5", e: "Falta la AFP en la ficha" },
+      { id: 3, f: 41, col: "Días de licencia", per: "Luis Pérez", rut: "9.876.543-2", e: "No coincide con la licencia cargada (12 vs 11)" },
+      { id: 4, f: 88, col: "RUT trabajador", per: "Ricardo Vega", rut: "14.111.222-3", e: "Dígito verificador inválido" },
+    ];
+    return {
+      ...b,
+      notInspector: !ro,
+      roleBadge: b.isInspector && NS.Badge ? h(NS.Badge, { tone: "info" }, "Solo lectura") : null,
+      archivos,
+      errores,
+      errCols: [
+        { key: "f", label: "Fila", align: "right", width: 56 },
+        { key: "col", label: "Columna", strong: true },
+        { key: "per", label: "Persona", render: (r) => h("span", { style: { display: "flex", flexDirection: "column" } }, h("span", null, r.per), h("span", { className: "t-mono", style: { fontSize: 12, color: "var(--ds-fg-muted)" } }, r.rut)) },
+        { key: "e", label: "Error", render: (r) => h("span", { style: { color: "var(--ds-danger-fg)" } }, r.e) },
+      ],
+      errCard: (r) => ({ icon: "alert", title: "Fila " + r.f + " · " + r.col, subtitle: r.e, meta: r.per + " · " + r.rut }),
+      errFooter: h("div", { className: "t-body-sm", style: { padding: "10px 16px", color: "var(--ds-fg-muted)" } }, "9 errores más · 8 de ellos son «Falta la AFP en la ficha»"),
+      emptyAction: NS.Button && b.canEdit ? h(NS.Button, { variant: "secondary" }, "Ir al cierre") : null,
+    };
+  }
+}
+</script>
+</body>
+</html>

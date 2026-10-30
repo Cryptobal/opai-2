@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><script src="./nomina-data.js"></script><style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style></helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="{{ active }}" title="{{ shellTitle }}" user="{{ user }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<sc-if value="{{ showHeader }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Nómina · Octubre 2026" title="Cierre de mes" subtitle="Cierre el 31-10-2026 · 148 personas" badge="{{ headBadge }}" hint-size="100%,80px">
+<sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon-right="chevron-right" hint-size="150px,40px">Ir a revisión</x-import>
+</sc-if>
+</x-import>
+</sc-if>
+
+<sc-if value="{{ isOk }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:16px">
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<div role="list" aria-label="Etapas del cierre" style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+<sc-for list="{{ etapas }}" as="e" hint-placeholder-count="6">
+<div role="listitem" style="display:flex;flex-direction:column;gap:8px;padding:14px 16px;border-right:1px solid var(--ds-border);min-width:0">
+<div style="display:flex;align-items:center;gap:8px">
+<sc-if value="{{ e.done }}" hint-placeholder-val="{{ false }}"><span style="width:24px;height:24px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:var(--ds-success-muted);color:var(--ds-success-fg);flex:none"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Icon" name="check" size="sm" hint-size="16px,16px"></x-import></span></sc-if>
+<sc-if value="{{ e.current }}" hint-placeholder-val="{{ false }}"><span class="t-label-sm" style="width:24px;height:24px;border-radius:999px;display:flex;align-items:center;justify-content:center;border:2px solid var(--ds-accent);color:var(--ds-accent);flex:none">{{ e.n }}</span></sc-if>
+<sc-if value="{{ e.locked }}" hint-placeholder-val="{{ true }}"><span style="width:24px;height:24px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:var(--ds-fill);color:var(--ds-fg-subtle);flex:none"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Icon" name="lock" size="sm" hint-size="16px,16px"></x-import></span></sc-if>
+<span class="t-caption" style="color:var(--ds-fg-muted)">Etapa {{ e.n }}</span>
+</div>
+<span class="t-label">{{ e.titulo }}</span>
+<span class="t-caption" style="color:var(--ds-fg-muted)">{{ e.estado }}</span>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="danger" titulo="No puedes cerrar el período" accion="{{ alertAccion }}" hint-size="100%,72px">12 personas sin AFP en su ficha. Complétalas en Personas para que el cálculo use su AFP real.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" titulo="Cuadratura contra OPAI 1.0 · 3 personas no cuadran al peso" hint-size="100%,72px">Corte de migración: las otras 145 coinciden en imponible, descuentos y líquido. <a href="B1 Cuadratura contra 1.0.dc.html">Ver cuadratura</a></x-import>
+
+<sc-for list="{{ etapas }}" as="e" hint-placeholder-count="6">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,96px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;gap:12px;align-items:flex-start;justify-content:space-between;flex-wrap:wrap">
+<div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+<span class="t-caption" style="color:var(--ds-fg-muted)">Etapa {{ e.n }} de 6</span>
+<span class="t-subheading">{{ e.titulo }}</span>
+<span class="t-body-sm" style="color:var(--ds-fg-muted)">{{ e.detalle }}</span>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ e.tone }}" dot="{{ true }}" hint-size="90px,22px">{{ e.estado }}</x-import>
+</div>
+<sc-if value="{{ e.hasItems }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;border-top:1px solid var(--ds-border)">
+<sc-for list="{{ e.items }}" as="it" hint-placeholder-count="2">
+<div style="display:flex;gap:10px;align-items:center;min-height:44px;border-bottom:1px solid var(--ds-border)">
+<span style="display:flex;color:var(--ds-fg-subtle)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Icon" name="{{ it.icon }}" size="sm" hint-size="16px,16px"></x-import></span>
+<span class="t-body-sm" style="flex:1;min-width:0">{{ it.texto }}</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ it.tone }}" hint-size="70px,22px">{{ it.tipo }}</x-import>
+</div>
+</sc-for>
+</div>
+</sc-if>
+</div>
+</x-import>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ isCargando }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:16px" aria-busy="true">
+<sc-for list="{{ skel }}" as="s" hint-placeholder-count="5">
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px;display:flex;flex-direction:column;gap:8px;background:var(--ds-surface)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="80px" height="{{ 12 }}" hint-size="80px,12px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="180px" height="{{ 18 }}" hint-size="180px,18px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="60%" height="{{ 14 }}" hint-size="60%,14px"></x-import>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="check-circle" title="No hay un período abierto" description="Abre el período de octubre para empezar el cierre." action="{{ emptyAction }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar el cierre" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="NOM-CIE-503" on-retry="{{ noop }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ isSinPermiso }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a Nómina" description="Las remuneraciones solo las ven RRHH, gerencia y administración. Pídele acceso a Marcela Rojas, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,320px"></x-import>
+</sc-if>
+</x-import>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ok&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;ok&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;role&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;admin&quot;,&quot;rrhh&quot;,&quot;gerente&quot;,&quot;inspector&quot;,&quot;supervisor&quot;],&quot;default&quot;:&quot;admin&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const ND = window.ND;
+    if (!ND) return {};
+    const b = ND.base(this.props, "cie", "Cierre de mes");
+    const P = (texto, icon = "clock") => ({ texto, icon, tipo: "Pendiente", tone: "warning" });
+    const X = (texto) => ({ texto, icon: "alert", tipo: "Bloqueo", tone: "danger" });
+    const etapas = [
+      { n: 1, titulo: "Asistencia consolidada", estado: "Lista", tone: "success", detalle: "Resumen de Asistencia recibido el 28-10-2026 a las 18:40 · 148 personas", items: [] },
+      { n: 2, titulo: "Novedades", estado: "Lista", tone: "success", detalle: "64 novedades aplicadas", items: [P("3 licencias sin documento adjunto", "paperclip")] },
+      { n: 3, titulo: "Cálculo", estado: "Lista", tone: "success", detalle: "Calculado el 29-10-2026 a las 09:12 con los indicadores de octubre", items: [] },
+      { n: 4, titulo: "Revisión", estado: "En curso", tone: "warning", detalle: "127 de 148 liquidaciones revisadas", items: [X("12 personas sin AFP en su ficha"), P("7 liquidaciones con diferencia sobre 10 % contra septiembre"), P("21 liquidaciones por revisar")] },
+      { n: 5, titulo: "Cierre", estado: "Bloqueada", tone: "neutral", detalle: "Requiere la revisión completa y sin bloqueos", items: [] },
+      { n: 6, titulo: "Archivos", estado: "Bloqueada", tone: "neutral", detalle: "LRE, Previred, retención para el F29, pago al banco y libro de remuneraciones", items: [] },
+    ].map((e) => ({ ...e, done: e.tone === "success", current: e.tone === "warning", locked: e.tone === "neutral", hasItems: e.items.length > 0 }));
+    return {
+      ...b,
+      etapas,
+      headBadge: NS.Badge ? h(NS.Badge, { tone: "warning", dot: true }, "En revisión") : null,
+      alertAccion: NS.Button && b.canEdit ? h(NS.Button, { variant: "secondary" }, "Ver personas") : null,
+      emptyAction: NS.Button ? h(NS.Button, { icon: "plus" }, "Abrir período") : null,
+    };
+  }
+}
+</script>
+</body>
+</html>
