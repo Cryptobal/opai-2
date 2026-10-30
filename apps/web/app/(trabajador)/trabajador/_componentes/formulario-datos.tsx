@@ -1,0 +1,139 @@
+"use client";
+
+import { type FormEvent, useState } from "react";
+
+import { avisar, Button, Campo, type Direccion, FormScreen, Input } from "@opai/ds";
+
+import { DireccionOpai } from "@/app/_components/maestros/direccion";
+import { useCapacidad } from "@/app/_components/use-capacidad";
+
+import type { MisDatos } from "./tipos";
+
+function direccionInicial(d: MisDatos): Direccion | null {
+  const texto = d.direccionFormateada ?? d.calle;
+  if (!texto) return null;
+  return {
+    calle: d.calle ?? texto,
+    comuna: d.comuna,
+    region: d.region,
+    direccionFormateada: d.direccionFormateada,
+    placeId: d.placeId,
+    lat: d.lat,
+    lng: d.lng,
+  };
+}
+
+/** Lo que la API exige: el texto formateado va siempre; sin él, calle y comuna. */
+function aEntrada(d: Direccion) {
+  const texto = d.direccionFormateada?.trim() || [d.calle, d.comuna].filter(Boolean).join(", ");
+  return {
+    direccionFormateada: texto,
+    calle: d.calle?.trim() || null,
+    comuna: d.comuna?.trim() || null,
+    region: d.region?.trim() || null,
+    placeId: d.placeId ?? null,
+    lat: d.lat ?? null,
+    lng: d.lng ?? null,
+  };
+}
+
+/** Pantalla 10 · Mis datos: contacto y dirección editables; nombre, RUT y correo laboral solo se ven. */
+export function FormularioDatos({ inicial }: { inicial: MisDatos }) {
+  const { ejecutar, pendiente, error } = useCapacidad("trabajador");
+  const [telefono, setTelefono] = useState(inicial.telefono ?? "");
+  const [email, setEmail] = useState(inicial.emailPersonal ?? "");
+  const [direccion, setDireccion] = useState<Direccion | null>(direccionInicial(inicial));
+
+  async function guardar(e: FormEvent) {
+    e.preventDefault();
+    const r = await ejecutar<MisDatos>("portal_trabajador.mis_datos.actualizar", {
+      telefono: telefono.trim() || null,
+      emailPersonal: email.trim() || null,
+      direccion: direccion ? aEntrada(direccion) : null,
+    });
+    if (r) avisar.exito("Tus datos quedaron guardados");
+    else avisar.error("No se pudo guardar. Revisa los datos e inténtalo de nuevo.");
+  }
+
+  return (
+    <FormScreen
+      state="ready"
+      titulo="Mis datos"
+      subtitulo="Mantén tu contacto y tu dirección al día."
+      formProps={{ onSubmit: guardar, noValidate: true }}
+      secciones={[
+        {
+          id: "identidad",
+          titulo: "Tu ficha",
+          descripcion: "Estos datos los gestiona Recursos Humanos. Si algo está mal, avísales.",
+          contenido: (
+            <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <Dato etiqueta="Nombre" valor={`${inicial.nombres} ${inicial.apellidos}`} />
+              <Dato etiqueta="RUT" valor={inicial.rut} mono />
+              <Dato etiqueta="Correo laboral" valor={inicial.emailLaboral ?? "—"} />
+            </dl>
+          ),
+        },
+        {
+          id: "contacto",
+          titulo: "Contacto",
+          contenido: (
+            <>
+              <Campo etiqueta="Teléfono" htmlFor="mis-datos-telefono" ayuda="Con código de país si no es chileno.">
+                <Input
+                  id="mis-datos-telefono"
+                  type="tel"
+                  inputMode="tel"
+                  autoComplete="tel"
+                  value={telefono}
+                  onChange={(e) => setTelefono(e.target.value)}
+                  placeholder="+56 9 1234 5678"
+                />
+              </Campo>
+              <Campo etiqueta="Correo personal" htmlFor="mis-datos-email">
+                <Input
+                  id="mis-datos-email"
+                  type="email"
+                  inputMode="email"
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="nombre@correo.cl"
+                />
+              </Campo>
+            </>
+          ),
+        },
+        {
+          id: "direccion",
+          titulo: "Dirección",
+          contenido: (
+            <Campo etiqueta="Dónde vives" htmlFor="mis-datos-direccion">
+              <DireccionOpai
+                portal="trabajador"
+                id="mis-datos-direccion"
+                valor={direccion}
+                onCambiar={setDireccion}
+              />
+            </Campo>
+          ),
+        },
+      ]}
+      resumen={error ? <span className="text-sm font-medium text-danger-fg">{error}</span> : null}
+      acciones={
+        <Button type="submit" disabled={pendiente}>
+          {pendiente ? "Guardando…" : "Guardar cambios"}
+        </Button>
+      }
+    />
+  );
+}
+
+function Dato({ etiqueta, valor, mono }: { etiqueta: string; valor: string; mono?: boolean }) {
+  return (
+    <div className="flex flex-col gap-0.5">
+      <dt className="t-caption">{etiqueta}</dt>
+      <dd className={mono ? "t-mono text-base text-fg" : "text-base text-fg"}>{valor}</dd>
+    </div>
+  );
+}

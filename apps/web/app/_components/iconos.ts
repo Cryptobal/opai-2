@@ -1,7 +1,9 @@
 import {
+  Bell,
   Briefcase,
   Building2,
   Clock,
+  Ellipsis,
   FileText,
   Gauge,
   Home,
@@ -24,9 +26,11 @@ import {
 
 /** Iconos nombrados en manifests y navegación. Un nombre desconocido usa LayoutGrid. */
 const ICONOS: Record<string, LucideIcon> = {
+  Bell,
   Briefcase,
   Building2,
   Clock,
+  Ellipsis,
   FileText,
   Gauge,
   Home,
