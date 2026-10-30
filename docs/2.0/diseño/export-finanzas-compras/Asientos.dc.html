@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="fin-shell.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ nav.tabs }}" groups="{{ nav.groups }}" active="{{ nav.active }}" title="{{ shellTitle }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<sc-if value="{{ notForbidden }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" tab-bar="{{ isPhone }}" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Contabilidad" title="Asientos y períodos" subtitle="Octubre 2026 · período abierto" hint-size="100%,80px">
+<sc-if value="{{ headActions }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="plus" hint-size="160px,40px">Asiento de ajuste</x-import>
+</sc-if>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ tabsItems }}" value="{{ tab }}" on-change="{{ setTab }}" hint-size="100%,44px" style="margin-bottom:16px"></x-import>
+<sc-if value="{{ showAsientos }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;gap:16px">
+<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+<div style="flex:1 1 240px;max-width:{{ searchMax }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" icon="search" placeholder="Buscar por número, glosa o documento" hint-size="100%,44px"></x-import></div>
+<div class="chip-row"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Manuales" contador="{{ 2 }}" hint-size="120px,32px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Descuadrados" contador="{{ 1 }}" hint-size="140px,32px"></x-import></div>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" dc-props="{{ tblProps }}" columns="{{ cols }}" rows="{{ asientos }}" cards="{{ isPhone }}" to-card="{{ toCard }}" on-row-click="{{ openSheet }}" hint-size="100%,340px"></x-import>
+<span class="t-caption">Los asientos automáticos nacen de documentos y movimientos clasificados. Los manuales son solo para ajustes.</span>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" block="{{ true }}" size="lg" icon="plus" hint-size="100%,48px">Asiento de ajuste</x-import></sc-if>
+</div>
+</sc-if>
+<sc-if value="{{ showPeriodos }}" hint-placeholder-val="{{ false }}">
+<div style="display:grid;grid-template-columns:{{ perCols }};gap:16px;align-items:start">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Salud contable · octubre 2026" description="Debe estar todo en verde para cerrar el período" hint-size="100%,380px">
+<div style="display:grid">
+<sc-for list="{{ salud }}" as="s" hint-placeholder-count="5">
+<div style="display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:12px;align-items:start;padding:12px 0;border-bottom:1px solid var(--ds-border)">
+<span style="color:{{ s.color }};padding-top:2px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Icon" name="{{ s.icon }}" hint-size="20px,20px"></x-import></span>
+<span style="display:grid;gap:2px"><span class="t-label">{{ s.titulo }}</span><span class="t-body-sm muted">{{ s.detalle }}</span></span>
+<sc-if value="{{ s.link }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" hint-size="70px,40px">{{ s.link }}</x-import></sc-if>
+</div>
+</sc-for>
+<div style="display:grid;gap:8px;padding-top:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" disabled="{{ true }}" icon="lock" block="{{ isPhone }}" hint-size="160px,40px">Cerrar octubre</x-import>
+<span class="t-caption">Resuelve los 3 puntos en rojo para cerrar. Un período cerrado no acepta asientos nuevos.</span>
+</div>
+</div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Períodos" padding="{{ 0 }}" hint-size="100%,300px">
+<div style="display:grid;margin:0 -16px -16px">
+<sc-for list="{{ periodos }}" as="p" hint-placeholder-count="5">
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:56px;padding:8px 16px;border-top:1px solid var(--ds-border)">
+<span style="display:grid"><span class="t-label">{{ p.mes }}</span><span class="t-caption">{{ p.det }}</span></span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ p.tone }}" hint-size="70px,22px">{{ p.estado }}</x-import>
+</div>
+</sc-for>
+</div>
+</x-import>
+</div>
+</sc-if>
+<sc-if value="{{ isCargando }}" hint-placeholder-val="{{ false }}">
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)" aria-busy="true" aria-label="Cargando asientos">
+<sc-for list="{{ sk }}" as="k" hint-placeholder-count="6"><div style="display:flex;gap:16px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--ds-border)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="80px" height="14px" hint-size="80px,14px"></x-import><div style="flex:1;display:grid;gap:6px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="55%" height="14px" hint-size="55%,14px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="30%" height="12px" hint-size="30%,12px"></x-import></div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="96px" height="14px" hint-size="96px,14px"></x-import></div></sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="clipboard" title="Aún no hay asientos en octubre" description="Se generan solos al recibir documentos y clasificar movimientos. Para un ajuste, crea un asiento manual." action="{{ emptyAction }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar los asientos" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="CON-ASI-500" on-retry="{{ noop }}" hint-size="100%,320px"></x-import>
+</sc-if>
+</x-import>
+</sc-if>
+<sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="{{ fb.title }}" description="{{ fb.description }}" action-label="Pedir acceso" hint-size="100%,100%"></x-import>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Sheet" open="{{ sheetOpen }}" contained="{{ true }}" side="{{ sheetSide }}" title="Asiento 2026-1038" description="Automático · 14-10-2026" on-close="{{ closeSheet }}" actions="{{ sheetActions }}" hint-size="0px,0px">
+<div style="display:grid;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" rows="{{ asRows }}" hint-size="100%,160px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" dc-props="{{ tblProps }}" columns="{{ lineCols }}" rows="{{ lineas }}" compact="{{ true }}" footer="{{ lineFoot }}" hint-size="100%,200px"></x-import>
+<span class="t-caption">Reversar crea un asiento inverso con fecha de hoy. El original queda visible y enlazado.</span>
+</div>
+</x-import>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;datos&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinPermiso&quot;],&quot;default&quot;:&quot;datos&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;abierto&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;variante&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;asientos&quot;,&quot;periodos&quot;],&quot;default&quot;:&quot;asientos&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { tab: null, sheet: null };
+  componentDidMount() { if (!window.FinShell) { const t = setInterval(() => { if (window.FinShell) { clearInterval(t); this.forceUpdate(); } }, 40); } }
+  renderVals() {
+    const F = window.FinShell;
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = this.props.device ?? "desktop";
+    const isPhone = device === "phone";
+    const st = F ? F.estado(this.props) : { isDatos: true, notForbidden: true };
+    const badge = (t, l) => (NS.Badge ? h(NS.Badge, { tone: t }, l) : l);
+    const num = (t) => h("span", { className: "t-numeric" }, t);
+    const tab = this.state.tab ?? (this.props.variante === "periodos" ? "per" : "asi");
+    const open = this.state.sheet ?? !!this.props.abierto;
+    const asientos = [
+      { id: 1, n: "2026-1041", fecha: "27-10-2026", glosa: "Ajuste provisión vacaciones", origen: ["Manual", "ajuste · C. Irigoyen"], monto: "$ 1.212.000", est: ["danger", "Descuadrado $ 12.000"] },
+      { id: 2, n: "2026-1040", fecha: "24-10-2026", glosa: "Abono Inmobiliaria Apoquindo", origen: ["Automático", "movimiento · regla «Clientes por RUT»"], monto: "$ 6.940.000", est: ["success", "Contabilizado"] },
+      { id: 3, n: "2026-1039", fecha: "21-10-2026", glosa: "Pago Seguridad Total Ltda", origen: ["Automático", "movimiento conciliado"], monto: "$ 8.920.000", est: ["success", "Contabilizado"] },
+      { id: 4, n: "2026-1038", fecha: "14-10-2026", glosa: "Compra Uniformes Pacífico Ltda", origen: ["Automático", "factura 33 · 18452"], monto: "$ 2.380.000", est: ["success", "Contabilizado"] },
+      { id: 5, n: "2026-1031", fecha: "10-10-2026", glosa: "Arriendo Bodega Lampa", origen: ["Automático", "factura 33 · 30418"], monto: "$ 4.200.000", est: ["neutral", "Reversado"] },
+      { id: 6, n: "2026-1032", fecha: "11-10-2026", glosa: "Reverso de 2026-1031", origen: ["Manual", "reverso · M. Soto"], monto: "$ 4.200.000", est: ["success", "Contabilizado"] },
+    ];
+    const B = NS.Button;
+    return {
+      tblProps: { style: { display: "block" } },
+      device, theme: this.props.theme ?? "light", isPhone, ...st,
+      nav: F ? F.shell("asi", device) : { tabs: [], groups: [] },
+      fb: F ? F.forbidden : {},
+      shellTitle: isPhone ? "" : "Contabilidad",
+      headActions: !isPhone && st.isDatos && tab === "asi",
+      searchMax: isPhone ? "100%" : "320px",
+      tab, setTab: (v) => this.setState({ tab: v }),
+      tabsItems: [{ id: "asi", label: "Asientos" }, { id: "per", label: "Períodos y salud contable" }],
+      showAsientos: st.isDatos && tab === "asi", showPeriodos: st.isDatos && tab === "per",
+      perCols: isPhone ? "minmax(0,1fr)" : "minmax(0,1.4fr) minmax(0,1fr)",
+      asientos, sk: [1, 2, 3, 4, 5, 6], noop: () => {},
+      emptyAction: B ? h(B, { variant: "secondary", icon: "plus" }, "Asiento de ajuste") : null,
+      openSheet: () => this.setState({ sheet: true }), closeSheet: () => this.setState({ sheet: false }),
+      sheetOpen: open && st.isDatos, sheetSide: isPhone ? "bottom" : "right",
+      cols: [
+        { key: "n", label: "N°", mono: true },
+        { key: "fecha", label: "Fecha", muted: true },
+        { key: "glosa", label: "Glosa", strong: true },
+        { key: "origen", label: "Origen", render: (r) => h("span", { style: { display: "flex", flexDirection: "column" } }, h("span", { className: "t-body-sm" }, r.origen[0]), h("span", { className: "t-caption" }, r.origen[1])) },
+        { key: "monto", label: "Debe = haber", align: "right", render: (r) => num(r.monto) },
+        { key: "est", label: "Estado", render: (r) => badge(r.est[0], r.est[1]) },
+      ],
+      toCard: (r) => ({ title: r.glosa, subtitle: r.n + " · " + r.fecha + " · " + r.origen[0].toLowerCase(), badge: { tone: r.est[0], label: r.est[1] }, trailing: h("span", { className: "t-numeric", style: { fontSize: 14 } }, r.monto) }),
+      salud: [
+        { icon: "check-circle", color: "var(--ds-success-fg)", titulo: "Debe y haber cuadran", detalle: "$ 412.880.300 en 214 asientos", link: "" },
+        { icon: "alert", color: "var(--ds-danger-fg)", titulo: "1 asiento descuadrado", detalle: "2026-1041 · diferencia $ 12.000", link: "Ver" },
+        { icon: "alert", color: "var(--ds-danger-fg)", titulo: "3 documentos sin asiento", detalle: "Facturas recibidas sin centro de costo; se contabilizan al asignarlo", link: "Ver" },
+        { icon: "alert", color: "var(--ds-danger-fg)", titulo: "2 cuentas en grupo incorrecto", detalle: "Deudores por venta e IVA débito fiscal", link: "Ver" },
+        { icon: "check-circle", color: "var(--ds-success-fg)", titulo: "Asiento de apertura cargado", detalle: "Corte al 01-07-2026, revisado por C. Irigoyen", link: "" },
+      ],
+      periodos: [
+        { mes: "Octubre 2026", det: "Abierto", estado: "Abierto", tone: "info" },
+        { mes: "Septiembre 2026", det: "Cerrado el 06-10-2026 por C. Irigoyen", estado: "Cerrado", tone: "neutral" },
+        { mes: "Agosto 2026", det: "Cerrado el 04-09-2026 por C. Irigoyen", estado: "Cerrado", tone: "neutral" },
+        { mes: "Julio 2026", det: "Cerrado el 05-08-2026 por M. Soto", estado: "Cerrado", tone: "neutral" },
+      ],
+      asRows: [
+        { label: "Glosa", value: "Compra Uniformes Pacífico Ltda" },
+        { label: "Origen", value: h("a", { href: "01 Libro de compras.dc.html" }, "Factura 33 · 18452") },
+        { label: "Centro de costo", value: "Planta Quilicura" },
+        { label: "Creado", value: "14-10-2026 09:12 · automático" },
+      ],
+      lineCols: [
+        { key: "cta", label: "Cuenta", render: (r) => h("span", null, h("span", { className: "t-mono" }, r.code), " ", r.cta) },
+        { key: "d", label: "Debe", align: "right", render: (r) => num(r.d) },
+        { key: "hb", label: "Haber", align: "right", render: (r) => num(r.hb) },
+      ],
+      lineas: [
+        { id: 1, code: "5.1.04", cta: "Uniformes y EPP", d: "$ 2.000.000", hb: "" },
+        { id: 2, code: "1.1.08", cta: "IVA crédito fiscal", d: "$ 380.000", hb: "" },
+        { id: 3, code: "2.1.01", cta: "Proveedores", d: "", hb: "$ 2.380.000" },
+      ],
+      lineFoot: h("div", { style: { display: "flex", justifyContent: "space-between", padding: "10px 16px" } }, h("span", { className: "t-label" }, "Totales"), h("span", { className: "t-numeric" }, "$ 2.380.000 = $ 2.380.000")),
+      sheetActions: h(React.Fragment, null, B ? h(B, { variant: "secondary", onClick: () => this.setState({ sheet: false }) }, "Cerrar") : null, B ? h(B, { variant: "destructive" }, "Reversar asiento") : null),
+    };
+  }
+}
+</script>
+</body>
+</html>

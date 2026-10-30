@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="fin-shell.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ nav.tabs }}" groups="{{ nav.groups }}" active="{{ nav.active }}" title="{{ shellTitle }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<sc-if value="{{ notForbidden }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" tab-bar="{{ isPhone }}" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Contabilidad" title="EERR y balance" subtitle="Atlas Seguridad SpA · en pesos" hint-size="100%,80px">
+<sc-if value="{{ headActions }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="download" hint-size="100px,40px">Excel</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="download" hint-size="90px,40px">PDF</x-import>
+</sc-if>
+</x-import>
+<div style="display:grid;gap:12px;margin-bottom:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ vistas }}" value="{{ vista }}" on-change="{{ setVista }}" label="Reporte" style="max-width:420px" hint-size="100%,40px"></x-import>
+<div class="chip-row">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Chip" etiqueta="Período" valor="Octubre 2026" hint-size="170px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Chip" etiqueta="Centro de costo" valor="Todos" hint-size="170px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Chip" etiqueta="Instalación" valor="Todas" hint-size="150px,32px"></x-import>
+</div>
+</div>
+<sc-if value="{{ isDatos }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;gap:16px">
+<div role="alert" style="display:flex;flex-wrap:wrap;align-items:center;gap:12px;padding:12px 16px;border:1px solid var(--ds-danger);border-radius:var(--radius-lg);background:var(--ds-danger-muted);color:var(--ds-danger-fg)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Icon" name="alert" hint-size="20px,20px"></x-import>
+<p class="t-body" style="margin:0;flex:1 1 240px;color:var(--ds-fg)"><strong style="font-weight:600">El balance no cuadra por $ 12.000.</strong> Causa: el asiento 2026-1041 «Ajuste provisión vacaciones» tiene debe $ 1.212.000 y haber $ 1.200.000.</p>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="110px,40px">Ver asiento</x-import>
+</div>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);overflow:hidden">
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<div class="t-caption" style="display:grid;grid-template-columns:minmax(0,1fr) 150px 150px 90px;gap:12px;padding:10px 16px;border-bottom:1px solid var(--ds-border);font-weight:500"><span>{{ colA }}</span><span style="text-align:right">{{ colB }}</span><span style="text-align:right">{{ colC }}</span><span style="text-align:right">{{ colD }}</span></div>
+</sc-if>
+<sc-for list="{{ lineas }}" as="l" hint-placeholder-count="12">
+<div role="button" tabindex="0" onClick="{{ l.onClick }}" style="display:grid;grid-template-columns:{{ rowCols }};gap:12px;align-items:center;min-height:{{ l.h }};padding:6px 16px 6px {{ l.pad }};border-bottom:1px solid var(--ds-border);background:{{ l.bg }};cursor:pointer" style-hover="background:var(--ds-fill)">
+<span style="display:flex;align-items:center;gap:8px;min-width:0"><sc-if value="{{ l.chev }}" hint-placeholder-val="{{ false }}"><span style="display:flex;color:var(--ds-fg-subtle)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Icon" name="{{ l.chev }}" size="sm" hint-size="16px,16px"></x-import></span></sc-if><span class="{{ l.cls }}" style="overflow:hidden;text-overflow:ellipsis">{{ l.name }}</span></span>
+<span class="t-numeric" style="text-align:right;color:{{ l.color }}">{{ l.a }}</span>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}"><span class="t-numeric" style="text-align:right;color:var(--ds-fg-muted)">{{ l.b }}</span><span class="t-numeric" style="text-align:right;color:var(--ds-fg-muted)">{{ l.c }}</span></sc-if>
+</div>
+</sc-for>
+</div>
+<span class="t-caption">Toca una línea para ver sus asientos y documentos de origen.</span>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}"><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="download" block="{{ true }}" hint-size="100%,44px">Excel</x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="download" block="{{ true }}" hint-size="100%,44px">PDF</x-import></div></sc-if>
+</div>
+</sc-if>
+<sc-if value="{{ isCargando }}" hint-placeholder-val="{{ false }}">
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)" aria-busy="true" aria-label="Cargando reporte">
+<sc-for list="{{ sk }}" as="k" hint-placeholder-count="10"><div style="display:flex;justify-content:space-between;gap:16px;padding:14px 16px 14px {{ k.pad }};border-bottom:1px solid var(--ds-border)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ k.w }}" height="14px" hint-size="40%,14px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="96px" height="14px" hint-size="96px,14px"></x-import></div></sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="chart" title="Aún no hay asientos para este período" description="El reporte se arma con los asientos contabilizados. Prueba otro período o quita filtros." action="{{ emptyAction }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos armar el reporte" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="CON-REP-500" on-retry="{{ noop }}" hint-size="100%,320px"></x-import>
+</sc-if>
+</x-import>
+</sc-if>
+<sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="{{ fb.title }}" description="{{ fb.description }}" action-label="Pedir acceso" hint-size="100%,100%"></x-import>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Sheet" open="{{ sheetOpen }}" contained="{{ true }}" side="{{ sheetSide }}" title="Uniformes y EPP · octubre 2026" description="5.1.04 · $ 4.150.000 en 3 asientos" on-close="{{ closeSheet }}" hint-size="0px,0px">
+<div style="display:grid;gap:12px">
+<sc-for list="{{ desglose }}" as="d" hint-placeholder-count="3">
+<div style="display:grid;gap:4px;padding:12px;border:1px solid var(--ds-border);border-radius:var(--radius-md)">
+<div style="display:flex;justify-content:space-between;gap:12px"><span class="t-label">{{ d.doc }}</span><span class="t-numeric">{{ d.monto }}</span></div>
+<span class="t-caption">Asiento <span class="t-mono">{{ d.n }}</span> · {{ d.fecha }} · {{ d.cc }}</span>
+<a href="01 Libro de compras.dc.html" class="t-body-sm">Ver documento</a>
+</div>
+</sc-for>
+<div style="display:flex;justify-content:space-between;padding-top:8px;border-top:1px solid var(--ds-border)"><span class="t-label">Total</span><span class="t-numeric">$ 4.150.000</span></div>
+</div>
+</x-import>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;datos&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinPermiso&quot;],&quot;default&quot;:&quot;datos&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;abierto&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;variante&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;eerr&quot;,&quot;balance&quot;,&quot;mayor&quot;],&quot;default&quot;:&quot;eerr&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { vista: null, sheet: null, open: { ing: true, cos: true } };
+  componentDidMount() { if (!window.FinShell) { const t = setInterval(() => { if (window.FinShell) { clearInterval(t); this.forceUpdate(); } }, 40); } }
+  renderVals() {
+    const F = window.FinShell;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const h = React.createElement;
+    const device = this.props.device ?? "desktop";
+    const isPhone = device === "phone";
+    const st = F ? F.estado(this.props) : { isDatos: true, notForbidden: true };
+    const vista = this.state.vista ?? (["balance", "mayor"].includes(this.props.variante) ? this.props.variante : "eerr");
+    const openSheet = () => this.setState({ sheet: true });
+    const tg = (k) => () => this.setState((s) => ({ open: { ...s.open, [k]: !s.open[k] } }));
+    const op = this.state.open;
+    const L = (lv, name, a, b, c, extra = {}) => ({ lv, name, a, b, c, ...extra });
+    let data;
+    if (vista === "eerr") data = [
+      L(0, "Ingresos de explotación", "$ 186.420.000", "$ 1.702.300.000", "100,0 %", { g: "ing" }),
+      L(1, "Servicios de guardias", "$ 172.300.000", "$ 1.580.100.000", "92,4 %", { p: "ing" }), L(1, "Servicios de aseo", "$ 14.120.000", "$ 122.200.000", "7,6 %", { p: "ing" }),
+      L(0, "Costo de explotación", "−$ 128.910.000", "−$ 1.190.600.000", "69,2 %", { g: "cos" }),
+      L(1, "Remuneraciones", "−$ 104.200.000", "−$ 968.400.000", "55,9 %", { p: "cos" }), L(1, "Servicios de guardias externos", "−$ 15.360.000", "−$ 131.900.000", "8,2 %", { p: "cos" }),
+      L(1, "Uniformes y EPP", "−$ 4.150.000", "−$ 38.700.000", "2,2 %", { p: "cos" }), L(1, "Arriendos", "−$ 5.200.000", "−$ 51.600.000", "2,8 %", { p: "cos" }),
+      L(0, "Margen bruto", "$ 57.510.000", "$ 511.700.000", "30,8 %", { total: true }),
+      L(0, "Gastos de administración", "−$ 22.840.000", "−$ 204.100.000", "12,3 %", { g: "adm" }),
+      L(0, "Resultado operacional", "$ 34.670.000", "$ 307.600.000", "18,6 %", { total: true }),
+      L(0, "Gastos financieros", "−$ 1.120.300", "−$ 9.880.000", "0,6 %", { g: "fin" }),
+      L(0, "Resultado antes de impuesto", "$ 33.549.700", "$ 297.720.000", "18,0 %", { total: true }),
+    ];
+    else if (vista === "balance") data = [
+      L(0, "Activo", "$ 318.400.000", "$ 301.250.000", "", { g: "ing" }),
+      L(1, "Activo corriente", "$ 246.900.000", "$ 229.300.000", "", { p: "ing" }), L(1, "Activo no corriente", "$ 71.500.000", "$ 71.950.000", "", { p: "ing" }),
+      L(0, "Pasivo", "$ 141.188.000", "$ 133.860.000", "", { g: "cos" }),
+      L(1, "Pasivo corriente", "$ 118.988.000", "$ 110.960.000", "", { p: "cos" }), L(1, "Pasivo no corriente", "$ 22.200.000", "$ 22.900.000", "", { p: "cos" }),
+      L(0, "Patrimonio", "$ 177.200.000", "$ 167.390.000", "", { g: "pat" }),
+      L(0, "Pasivo + patrimonio", "$ 318.388.000", "$ 301.250.000", "", { total: true }),
+      L(0, "Diferencia", "$ 12.000", "$ 0", "", { total: true, danger: true }),
+    ];
+    else data = [
+      L(0, "Saldo inicial al 01-10-2026", "$ 34.550.000", "", ""),
+      L(1, "14-10 · 2026-1038 · Factura 33 · 18452", "$ 2.000.000", "", "", { p: "x" }), L(1, "17-10 · 2026-1012 · Factura 33 · 5120", "$ 1.430.000", "", "", { p: "x" }), L(1, "22-10 · 2026-1036 · Factura 33 · 18460", "$ 720.000", "", "", { p: "x" }),
+      L(0, "Saldo final al 31-10-2026", "$ 38.700.000", "", "", { total: true }),
+    ];
+    const lineas = data.filter((l) => !l.p || l.p === "x" || op[l.p]).map((l) => ({
+      name: l.name, a: l.a, b: l.b, c: isPhone ? "" : l.c,
+      chev: l.g ? (op[l.g] === undefined ? "chevron-right" : op[l.g] ? "chevron-down" : "chevron-right") : "",
+      cls: l.total ? "t-label" : l.lv === 0 ? "t-label" : "t-body-sm",
+      h: l.lv === 0 ? "48px" : "44px", pad: (l.lv === 0 ? 16 : isPhone ? 40 : 44) + "px",
+      bg: l.danger ? "var(--ds-danger-muted)" : l.total ? "var(--ds-bg)" : "transparent",
+      color: l.danger ? "var(--ds-danger-fg)" : "var(--ds-fg)",
+      onClick: l.g && op[l.g] !== undefined ? tg(l.g) : openSheet,
+    }));
+    const B = NS.Button;
+    const cols = { eerr: ["Línea", "Octubre", "Acumulado 2026", "% ingresos"], balance: ["Cuenta", "31-10-2026", "30-09-2026", ""], mayor: ["5.1.04 Uniformes y EPP", "Debe", "", ""] }[vista];
+    return {
+      device, theme: this.props.theme ?? "light", isPhone, notPhone: !isPhone, ...st,
+      nav: F ? F.shell("eer", device) : { tabs: [], groups: [] },
+      fb: F ? F.forbidden : {},
+      shellTitle: isPhone ? "" : "Contabilidad",
+      headActions: !isPhone && st.isDatos,
+      vistas: [{ value: "eerr", label: "EERR" }, { value: "balance", label: "Balance" }, { value: "mayor", label: "Mayor" }],
+      vista, setVista: (v) => this.setState({ vista: v }),
+      colA: cols[0], colB: cols[1], colC: cols[2], colD: cols[3],
+      rowCols: isPhone ? "minmax(0,1fr) auto" : "minmax(0,1fr) 150px 150px 90px",
+      lineas, noop: () => {},
+      sk: [0, 1, 1, 0, 1, 1, 1, 0, 0, 0].map((l, i) => ({ pad: 16 + l * 28 + "px", w: [40, 30, 35, 45, 25][i % 5] + "%" })),
+      sheetOpen: (this.state.sheet ?? !!this.props.abierto) && st.isDatos, sheetSide: isPhone ? "bottom" : "right",
+      closeSheet: () => this.setState({ sheet: false }),
+      desglose: [
+        { doc: "Factura 33 · 18452 · Uniformes Pacífico Ltda", monto: "$ 2.000.000", n: "2026-1038", fecha: "14-10-2026", cc: "Planta Quilicura" },
+        { doc: "Factura 33 · 5120 · Distribuidora Andes SpA", monto: "$ 1.430.000", n: "2026-1012", fecha: "17-10-2026", cc: "Torre Apoquindo" },
+        { doc: "Factura 33 · 18460 · Uniformes Pacífico Ltda", monto: "$ 720.000", n: "2026-1036", fecha: "22-10-2026", cc: "Bodega Lampa" },
+      ],
+      emptyAction: B ? h(B, { variant: "secondary" }, "Quitar filtros") : null,
+    };
+  }
+}
+</script>
+</body>
+</html>
