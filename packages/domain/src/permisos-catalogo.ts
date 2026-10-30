@@ -49,6 +49,10 @@ export const PERMISOS_CORE = {
   cumplimientoRead: "core:cumplimiento.read",
   cumplimientoManage: "core:cumplimiento.manage",
   cumplimientoDpaAceptar: "core:cumplimiento.dpa_aceptar",
+  // Calendario hábil y feriados del Núcleo (CAR-79). Ver lo tienen todos los roles internos (viewer
+  // por el comodín `*:*.read`); gestionar (agregar, editar, archivar días) es de owner y admin.
+  calendarioRead: "core:calendario.read",
+  calendarioManage: "core:calendario.manage",
 } as const;
 
 export const PERMISOS_PLATAFORMA = {

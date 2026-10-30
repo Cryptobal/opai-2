@@ -1,14 +1,9 @@
 import {
-  Blocks,
   Building2,
   CalendarClock,
-  FileText,
-  Gauge,
-  History,
+  CalendarDays,
   KeyRound,
-  MessageSquare,
   Palette,
-  Plug,
   ShieldCheck,
   UserCheck,
   UserRound,
@@ -18,6 +13,7 @@ import {
 import { PERMISOS_CORE } from "@opai/domain";
 
 import { type Seccion, seccion as s } from "./seccion-tipo";
+import { SECCIONES_PLATAFORMA } from "./secciones-plataforma";
 
 export type { Seccion };
 
@@ -69,6 +65,15 @@ export const SECCIONES: readonly Seccion[] = [
     permiso: PERMISOS_CORE.patronesRead,
   }),
   s({
+    id: "calendario",
+    titulo: "Calendario",
+    descripcion: "Feriados nacionales y días propios de la empresa",
+    corta: "Feriados y días de la empresa",
+    icono: CalendarDays,
+    grupo: "Operaciones",
+    permiso: PERMISOS_CORE.calendarioRead,
+  }),
+  s({
     id: "usuarios",
     titulo: "Usuarios y permisos",
     descripcion: "Quién entra, con qué rol y a qué portales",
@@ -95,58 +100,5 @@ export const SECCIONES: readonly Seccion[] = [
     grupo: "Acceso",
     permiso: PERMISOS_CORE.aprobacionesManage,
   }),
-  s({
-    id: "modulos",
-    titulo: "Módulos",
-    descripcion: "Contratados, en trial y disponibles",
-    corta: "Contratados y disponibles",
-    icono: Blocks,
-    grupo: "Plataforma",
-    permiso: PERMISOS_CORE.tenantRead,
-  }),
-  s({
-    id: "integraciones",
-    titulo: "Integraciones",
-    descripcion: "Correo, IA, WhatsApp, banco y más",
-    corta: "Correo, IA y más",
-    icono: Plug,
-    grupo: "Plataforma",
-    permiso: PERMISOS_CORE.integracionesManage,
-  }),
-  s({
-    id: "comunicaciones",
-    titulo: "Comunicaciones",
-    descripcion: "Qué se avisa, por qué canal y a quién",
-    corta: "Avisos, canales y destinatarios",
-    icono: MessageSquare,
-    grupo: "Plataforma",
-    permiso: PERMISOS_CORE.comunicacionesManage,
-  }),
-  s({
-    id: "documentos",
-    titulo: "Documentos",
-    descripcion: "Tipos de documento, vencimientos y alertas",
-    corta: "Tipos y vencimientos",
-    icono: FileText,
-    grupo: "Plataforma",
-    permiso: PERMISOS_CORE.documentosManage,
-  }),
-  s({
-    id: "consumos",
-    titulo: "Consumos",
-    descripcion: "IA, correos, mapas y llamadas del mes",
-    corta: "IA, correos y llamadas",
-    icono: Gauge,
-    grupo: "Plataforma",
-    permiso: PERMISOS_CORE.consumosRead,
-  }),
-  s({
-    id: "auditoria",
-    titulo: "Auditoría",
-    descripcion: "Registro de cada escritura, humana o de agente",
-    corta: "Cada escritura, humana o de agente",
-    icono: History,
-    grupo: "Plataforma",
-    permiso: PERMISOS_CORE.auditRead,
-  }),
+  ...SECCIONES_PLATAFORMA,
 ];
