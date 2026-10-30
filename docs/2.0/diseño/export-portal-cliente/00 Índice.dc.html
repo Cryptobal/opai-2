@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<title>Índice · Portal Cliente</title>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<div class="ds" style="min-height:100vh;background:var(--ds-bg);color:var(--ds-fg)">
+<div style="max-width:960px;margin:0 auto;padding:48px 24px;display:flex;flex-direction:column;gap:32px">
+<header style="display:flex;flex-direction:column;gap:8px">
+<span class="t-overline">OPAI 2.0 · DS 2.0 V2</span>
+<h1 class="t-display m0">Portal Cliente · v3</h1>
+<p class="t-body muted m0" style="text-wrap:pretty">Cada archivo es una pantalla con sus artboards 375, 1024 y 1280 en claro y oscuro, y sus estados vacío, cargando, error y sin permiso. Lo marcado «propuesta, a confirmar por Carlos» va como variante B al final de cada archivo.</p>
+</header>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);overflow:hidden">
+<div style="display:grid;grid-template-columns:56px minmax(0,1.3fr) minmax(0,1.5fr) minmax(0,1fr);gap:12px;padding:10px 16px;border-bottom:1px solid var(--ds-border)" class="t-overline"><span>N.º</span><span>Pantalla</span><span>Quién la ve</span><span>Variante B</span></div>
+<sc-for list="{{ items }}" as="it" hint-placeholder-count="8">
+<a href="{{ it.href }}" style="display:grid;grid-template-columns:56px minmax(0,1.3fr) minmax(0,1.5fr) minmax(0,1fr);gap:12px;padding:14px 16px;border-bottom:1px solid var(--ds-border);text-decoration:none;color:var(--ds-fg);min-height:44px" style-hover="background:var(--ds-fill)">
+<span class="t-mono subtle">{{ it.n }}</span>
+<span style="display:flex;flex-direction:column;gap:2px"><span class="t-label">{{ it.title }}</span><span class="t-caption">{{ it.sub }}</span></span>
+<span class="t-body-sm muted">{{ it.rol }}</span>
+<span class="t-body-sm muted">{{ it.b }}</span>
+</a>
+</sc-for>
+</div>
+<section style="display:flex;flex-direction:column;gap:12px">
+<h2 class="t-heading m0">Roles</h2>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+<div class="card" style="padding:16px;display:flex;flex-direction:column;gap:4px"><span class="t-label">Contacto total</span><span class="t-body-sm muted">Andrea Rojas. Ve todas las instalaciones de Logística Andina SpA.</span></div>
+<div class="card" style="padding:16px;display:flex;flex-direction:column;gap:4px"><span class="t-label">Contacto limitado</span><span class="t-body-sm muted">Felipe Soto. Solo Planta Quilicura y Bodega Lampa; aviso con a quién pedir acceso.</span></div>
+<div class="card" style="padding:16px;display:flex;flex-direction:column;gap:4px"><span class="t-label">Prospecto</span><span class="t-body-sm muted">Paula Ortiz, Frigorífico del Maipo SpA. Sin instalaciones: solo Cotizaciones y Mi cuenta.</span></div>
+<div class="card" style="padding:16px;display:flex;flex-direction:column;gap:4px"><span class="t-label">Sin permiso</span><span class="t-body-sm muted">Forbidden con a quién pedir acceso, en cada pantalla.</span></div>
+<div class="card" style="padding:16px;display:flex;flex-direction:column;gap:4px"><span class="t-label">ERP owner o admin</span><span class="t-body-sm muted">Carlos Irigoyen, Atlas Seguridad SpA. Solo la configuración.</span></div>
+</div>
+</section>
+<section style="display:flex;flex-direction:column;gap:8px">
+<h2 class="t-heading m0">Reutilizado, no redibujado</h2>
+<ul class="t-body-sm muted m0" style="padding-left:20px;display:flex;flex-direction:column;gap:4px">
+<li>Login cliente: export-acceso 08 y 09.</li>
+<li>Rondas · v3: detalle d16f de export-rondas con «Mapa Rondas» importado (variante recorrido), desde Cryptobal/opai-2.</li>
+<li>Accesos · v3: según DESIGN-PROMPT-control-acceso-y-firma (vista Cliente) y los resultados de ResultadoAcceso de Terreno.</li>
+<li>Agentes (ADR-033): solo la entrada del menú.</li>
+</ul>
+</section>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const C = "Contacto total y limitado", I = "Contacto con acceso a la instalación";
+    const V3 = { "01": "Badge «Decide Carlos» en pantalla", "03": "Detalle d16f con Mapa Rondas", "04": "Badge «Decide Carlos» en pantalla", "05": "Badge «Decide Carlos» en pantalla", "06": "En sitio, registros con resultado, prerregistro", "08": "Badge «Decide Carlos» · tarjetas a 375", "09": "RUT fuera de los Excel · tarjetas a 375", "12": "Datos de los guardias (Ley 21.719)", "—": "Selector oficial · ResultadoAcceso" };
+    return { items: [
+      { n: "01", href: "01 Resumen del mes.dc.html", title: "Resumen del mes = informe mensual", sub: "Vista por defecto del cliente con servicio activo", rol: C, b: "Selector de empresa cliente" },
+      { n: "02", href: "02 Instalación · Cobertura y marcaciones.dc.html", title: "Instalación · Cobertura y marcaciones", sub: "Guardias con nombre, foto y RUT · entradas y salidas programadas y reales", rol: I, b: "—" },
+      { n: "03", href: "03 Instalación · Rondas.dc.html", title: "Instalación · Rondas", sub: "Programadas contra realizadas, puntos, incidencias y detalle", rol: I, b: "—" },
+      { n: "04", href: "04 Instalación · Libro de novedades.dc.html", title: "Instalación · Libro de novedades", sub: "Libro cronológico, filtros, aviso de graves y novedad abierta", rol: I, b: "El cliente comenta" },
+      { n: "05", href: "05 Instalación · Supervisión.dc.html", title: "Instalación · Supervisión", sub: "KPI contra meta con tendencia de 6 meses y visitas", rol: I, b: "Visitas sin fotos" },
+      { n: "06", href: "06 Instalación · Control de accesos.dc.html", title: "Instalación · Control de accesos", sub: "Listas, registro y visitas · solo si lo contrata", rol: I + " con Accesos contratado", b: "—" },
+      { n: "07", href: "07 Instalación · Documentos.dc.html", title: "Instalación · Documentos", sub: "Protocolos, procedimientos, planes, contrato y anexos vinculados", rol: I, b: "—" },
+      { n: "08", href: "08 Cotizaciones.dc.html", title: "Cotizaciones", sub: "Lista y detalle; solo precio cotizado", rol: "Contacto del cliente y prospecto", b: "Aceptar en línea" },
+      { n: "09", href: "09 Reportes.dc.html", title: "Reportes", sub: "Informe mensual, reportes por rango en PDF y Excel, suscripción", rol: "Contacto del cliente", b: "PDF adjunto (B14)" },
+      { n: "10", href: "10 Documentos y protocolos.dc.html", title: "Documentos y protocolos", sub: "Guardias (tipos visibles), protocolos por instalación y tipo, facturas", rol: C, b: "—" },
+      { n: "11", href: "11 Solicitudes.dc.html", title: "Solicitudes", sub: "Servicio fuera de pauta con precio de la cotización vigente", rol: "Contacto del cliente", b: "—" },
+      { n: "12", href: "12 Configuración Portal Cliente.dc.html", title: "Configuración → Portal Cliente", sub: "ERP · solo 1024 y 1280", rol: "Owner o admin del tenant", b: "—" },
+      { n: "13", href: "13 Cliente prospecto.dc.html", title: "Cliente prospecto", sub: "Entra a Cotizaciones; resto del menú oculto · 375 y 1280", rol: "Prospecto sin instalaciones", b: "—" },
+      { n: "—", href: "Hoja de componentes.dc.html", title: "Hoja de componentes", sub: "Variantes y estados; nuevos para el DS marcados (v1 y v2)", rol: "Diseño y desarrollo", b: "—" },
+      { n: "v2", href: "v2/00 Índice.dc.html", title: "Versión 2 (archivada)", sub: "Entrega anterior, sin cambios", rol: "Referencia", b: "—" },
+      { n: "v1", href: "v1/00 Índice.dc.html", title: "Versión 1 (archivada)", sub: "Entrega anterior, sin cambios", rol: "Referencia", b: "—" },
+    ].map((it) => V3[it.n] && !it.href.startsWith("v") ? { ...it, title: it.title + " · v3", sub: "v3: " + V3[it.n] + " · " + it.sub } : it) };
+  }
+}
+</script>
+</body>
+</html>
