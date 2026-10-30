@@ -23,6 +23,7 @@
     "/(erp)/instalaciones/[id]/sueldo": 166,
     "/(erp)/personas/[id]/actividad": 166,
     "/(erp)/instalaciones/[id]/documentos": 166,
+    "/(erp)/instalaciones/[id]/rondas": 168,
     "/(platform)/platform/tenants/[id]/*": 168,
     "/(terreno)/terreno*": 162,
     "/(trabajador)/trabajador*": 162,

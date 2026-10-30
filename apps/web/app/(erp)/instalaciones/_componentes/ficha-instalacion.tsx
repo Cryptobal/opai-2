@@ -14,7 +14,7 @@ import type { InstalacionDetalle } from "@/lib/tipos-maestros";
 import { conFiltrosInstalaciones } from "./filtros-instalaciones";
 
 export type TabInstalacion =
-  "resumen" | "puestos" | "sueldo" | "negocios" | "documentos" | "actividad";
+  "resumen" | "puestos" | "sueldo" | "negocios" | "rondas" | "documentos" | "actividad";
 
 function acciones(i: InstalacionDetalle): AccionEntidad[] {
   const otro = i.estado === "activa" ? "inactiva" : "activa";
@@ -58,6 +58,8 @@ export function FichaInstalacion(p: {
   parametros: Parametros;
   /** Pestaña aportada por Comercial (ADR-041.5): solo con el módulo activo y permiso. */
   negocios?: boolean;
+  /** Pestaña aportada por Rondas (Brief 14): solo con el módulo activo y permiso de lectura. */
+  rondas?: boolean;
   children: ReactNode;
 }) {
   const i = p.instalacion;
@@ -116,6 +118,15 @@ export function FichaInstalacion(p: {
                   id: "negocios",
                   etiqueta: "Negocios",
                   href: conFiltrosInstalaciones(`${base}/negocios`, p.parametros),
+                },
+              ]
+            : []),
+          ...(p.rondas
+            ? [
+                {
+                  id: "rondas",
+                  etiqueta: "Rondas",
+                  href: conFiltrosInstalaciones(`${base}/rondas`, p.parametros),
                 },
               ]
             : []),

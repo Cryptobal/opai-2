@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { GRAVEDADES, MODOS_PUNTO, ORDENES_PLANTILLA } from "@opai/domain";
+import { GRAVEDADES, MODOS_PUNTO, ORDENES_PLANTILLA, RADIO_GEOCERCA_M } from "@opai/domain";
 
 // Ajustes del módulo Rondas (ADR-018, ADR-021). Viven junto a las capacidades para que el manifest y
 // `ajuste()` lean el mismo esquema. Son los defectos del tenant que heredan los puntos y plantillas
@@ -35,7 +35,13 @@ export const ajustesRondas = z.object({
     permiso: PERMISO_CONFIG,
     control: "seleccion",
   }),
-  radio_defecto_m: z.number().int().min(5).max(20).default(15).meta({
+  radio_defecto_m: z
+    .number()
+    .int()
+    .min(RADIO_GEOCERCA_M.min)
+    .max(RADIO_GEOCERCA_M.max)
+    .default(RADIO_GEOCERCA_M.defecto)
+    .meta({
     etiqueta: "Radio de geocerca por defecto (m)",
     ayuda: "15 m por defecto, techo 20 m (decisión de Carlos). Pendiente calibrar con marcas reales de 1.0 (R3).",
     grupo: "Defectos de punto",

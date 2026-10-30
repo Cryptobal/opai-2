@@ -18,12 +18,14 @@ async function main(): Promise<void> {
   await sembrarCatalogo(db.$extends({}), tenant.id, tenant.vertical);
   await sembrarFuncionesBase(db.$extends({}), tenant.id, tenant.vertical);
   await sembrarComercial(db.$extends({}), tenant.id);
-  // Activa el módulo Comercial para el tenant de desarrollo (navegación, configuración y capacidades).
-  await db.tenantModule.upsert({
-    where: { tenantId_moduloId: { tenantId: tenant.id, moduloId: "comercial" } },
-    update: {},
-    create: { tenantId: tenant.id, moduloId: "comercial", estado: "activo" },
-  });
+  // Activa los módulos del tenant de desarrollo (navegación, configuración y capacidades).
+  for (const moduloId of ["comercial", "rondas"]) {
+    await db.tenantModule.upsert({
+      where: { tenantId_moduloId: { tenantId: tenant.id, moduloId } },
+      update: {},
+      create: { tenantId: tenant.id, moduloId, estado: "activo" },
+    });
+  }
   await sembrarPrecios(db);
   console.log(`Tenant ${tenant.slug} listo con catálogo base. DEV_TENANT_ID=${tenant.id}`);
 }

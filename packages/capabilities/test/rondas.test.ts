@@ -166,6 +166,128 @@ describe("rondas.plantillas.crear", () => {
   });
 });
 
+// El tiempo por tramo se valida contra lo que QUEDARÁ guardado: el total y el tramo nuevos si vienen
+// en el input, o los actuales si no. `null` borra el tramo (deja de validarse). Cubre el camino de
+// `actualizar`, que el caso de `crear` de arriba no toca.
+describe("rondas.plantillas.actualizar · validación de tramo", () => {
+  async function conPlantilla(tiempoMaxMin: number, tiempoMaxTramoMin: number | null) {
+    const h = owner();
+    const p = await executeCapability(h.ctx, "rondas.puntos.crear", puntoQrGps);
+    const puntoId = p.ok ? (p.data as { id: string }).id : "";
+    const pl = await executeCapability(h.ctx, "rondas.plantillas.crear", {
+      instalacionId: INST,
+      nombre: "Plantilla base",
+      tiempoMaxMin,
+      ...(tiempoMaxTramoMin != null ? { tiempoMaxTramoMin } : {}),
+      puntos: [{ puntoId, orden: 0, obligatorio: true }],
+    });
+    return { ...h, plantillaId: pl.ok ? (pl.data as { id: string }).id : "" };
+  }
+
+  it("un tramo nuevo mayor o igual que el total guardado se rechaza", async () => {
+    const { ctx, plantillaId } = await conPlantilla(60, null);
+    const r = await executeCapability(ctx, "rondas.plantillas.actualizar", {
+      id: plantillaId,
+      tiempoMaxTramoMin: 60,
+    });
+    expect(r).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+  });
+
+  it("un total nuevo menor o igual que el tramo guardado se rechaza", async () => {
+    const { ctx, plantillaId } = await conPlantilla(60, 30);
+    const r = await executeCapability(ctx, "rondas.plantillas.actualizar", {
+      id: plantillaId,
+      tiempoMaxMin: 20,
+    });
+    expect(r).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+  });
+
+  it("borrar el tramo (null) no valida contra el total y pasa", async () => {
+    const { ctx, plantillaId } = await conPlantilla(60, 30);
+    const r = await executeCapability(ctx, "rondas.plantillas.actualizar", {
+      id: plantillaId,
+      tiempoMaxTramoMin: null,
+    });
+    expect(r.ok).toBe(true);
+    expect(r.ok && (r.data as { tiempoMaxTramoMin: number | null }).tiempoMaxTramoMin).toBeNull();
+  });
+
+  it("total y tramo nuevos coherentes (tramo < total) pasan", async () => {
+    const { ctx, plantillaId } = await conPlantilla(60, 30);
+    const r = await executeCapability(ctx, "rondas.plantillas.actualizar", {
+      id: plantillaId,
+      tiempoMaxMin: 120,
+      tiempoMaxTramoMin: 90,
+    });
+    expect(r.ok).toBe(true);
+  });
+});
+
+// Corrección del #141 (revisión 5707863593, bloqueo por datos): al reescribir la secuencia de una
+// plantilla, un punto que ya estaba en ella y se archivó debe conservarse (archivar no lo saca de las
+// plantillas). Solo los puntos NUEVOS deben estar activos; los ya presentes se aceptan aunque estén
+// archivados. Un punto archivado que NO estaba en la secuencia sí se rechaza.
+describe("rondas.plantillas.actualizar · conserva puntos archivados de la secuencia (#141)", () => {
+  const idDe = (r: { ok: boolean; data?: unknown }) => (r.ok ? (r.data as { id: string }).id : "");
+  async function base() {
+    const h = owner();
+    const p1 = idDe(await executeCapability(h.ctx, "rondas.puntos.crear", puntoQrGps));
+    const pl = idDe(
+      await executeCapability(h.ctx, "rondas.plantillas.crear", {
+        instalacionId: INST,
+        nombre: "Ronda con archivado",
+        tiempoMaxMin: 60,
+        puntos: [{ puntoId: p1, orden: 0, obligatorio: true }],
+      }),
+    );
+    return { ...h, p1, pl };
+  }
+
+  it("acepta re-guardar la secuencia con un punto ya presente que se archivó", async () => {
+    const { ctx, p1, pl } = await base();
+    await executeCapability(ctx, "rondas.puntos.archivar", { id: p1 });
+    const r = await executeCapability(ctx, "rondas.plantillas.actualizar", {
+      id: pl,
+      puntos: [{ puntoId: p1, orden: 0, obligatorio: true }],
+    });
+    expect(r.ok).toBe(true);
+    expect(r.ok && (r.data as { puntos: { puntoId: string }[] }).puntos.map((x) => x.puntoId)).toContain(p1);
+  });
+
+  it("rechaza agregar un punto archivado que NO estaba en la secuencia (NOT_FOUND)", async () => {
+    const { ctx, p1, pl } = await base();
+    const p2 = idDe(
+      await executeCapability(ctx, "rondas.puntos.crear", { ...puntoQrGps, nombre: "Otro punto" }),
+    );
+    await executeCapability(ctx, "rondas.puntos.archivar", { id: p2 });
+    const r = await executeCapability(ctx, "rondas.plantillas.actualizar", {
+      id: pl,
+      puntos: [
+        { puntoId: p1, orden: 0, obligatorio: true },
+        { puntoId: p2, orden: 1, obligatorio: true },
+      ],
+    });
+    expect(r).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+  });
+});
+
+// Corrección del #141 (decisión de Carlos: radio menor a 20 m): el radio de geocerca va de 5 a 20 m.
+describe("rondas.puntos: radio de geocerca 5–20 m (#141)", () => {
+  it("acepta el techo de 20 m", async () => {
+    const { ctx } = owner();
+    const r = await executeCapability(ctx, "rondas.puntos.crear", { ...puntoQrGps, radioM: 20 });
+    expect(r.ok).toBe(true);
+  });
+
+  it("rechaza un radio mayor que 20 m (antes el tope era 200)", async () => {
+    const { ctx } = owner();
+    const r = await executeCapability(ctx, "rondas.puntos.crear", { ...puntoQrGps, radioM: 21 });
+    expect(r).toMatchObject({ ok: false, error: { code: "INVALID_INPUT" } });
+    const r200 = await executeCapability(ctx, "rondas.puntos.crear", { ...puntoQrGps, radioM: 200 });
+    expect(r200).toMatchObject({ ok: false, error: { code: "INVALID_INPUT" } });
+  });
+});
+
 describe("rondas.incidentes_tipo", () => {
   it("crea un tipo con gravedad y lo lista", async () => {
     const { ctx } = owner();

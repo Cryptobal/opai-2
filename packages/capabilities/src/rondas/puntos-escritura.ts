@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 
 import { z } from "zod";
 
-import { permanenciaDefecto } from "@opai/domain";
+import { permanenciaDefecto, RADIO_GEOCERCA_M } from "@opai/domain";
 
 import { defineCapability } from "../define";
 import { reglaDeNegocio } from "../errores";
@@ -22,7 +22,14 @@ const camposPunto = {
   estricto: z.boolean().optional().describe("Modo estricto: QR fuera de la geocerca es anomalía (R2)."),
   latitud: z.number().min(-90).max(90).nullable().optional(),
   longitud: z.number().min(-180).max(180).nullable().optional(),
-  radioM: z.number().int().min(5).max(200).nullable().optional().describe("Radio de la geocerca (R3)."),
+  radioM: z
+    .number()
+    .int()
+    .min(RADIO_GEOCERCA_M.min)
+    .max(RADIO_GEOCERCA_M.max)
+    .nullable()
+    .optional()
+    .describe("Radio de la geocerca (R3): entre 5 y 20 m, 15 m por defecto."),
   precisionMinM: z.number().int().min(5).max(100).nullable().optional(),
   permanenciaS: z.number().int().min(0).max(300).optional(),
   exigeFoto: z.boolean().optional(),

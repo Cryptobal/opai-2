@@ -21,6 +21,8 @@ describe.skipIf(!urlPropietario)("aislamiento entre tenants · Rondas (RLS)", ()
   let instB = "";
   let puntoB = "";
   let plantillaB = "";
+  let plantillaA = "";
+  let personaB = "";
   const medidor = { registrar: async () => undefined };
 
   const ctxOwner = (tenantId: string) =>
@@ -65,6 +67,30 @@ describe.skipIf(!urlPropietario)("aislamiento entre tenants · Rondas (RLS)", ()
     await e.admin.plantillaPunto.create({
       data: { tenantId: tenantB, plantillaId: plantillaB, puntoId: puntoB, orden: 0 },
     });
+    // Una plantilla válida en A, para fijar programaciones de A en los casos de abajo.
+    const puntoA = (
+      await e.admin.puntoControl.create({
+        data: { tenantId: tenantA, instalacionId: instA, nombre: "Portón A", modo: "qr_gps", latitud: -33.4, longitud: -70.6 },
+      })
+    ).id;
+    plantillaA = (
+      await e.admin.plantillaRonda.create({
+        data: { tenantId: tenantA, instalacionId: instA, nombre: "Plantilla A", tiempoMaxMin: 60 },
+      })
+    ).id;
+    await e.admin.plantillaPunto.create({
+      data: { tenantId: tenantA, plantillaId: plantillaA, puntoId: puntoA, orden: 0 },
+    });
+    // Una persona de B con vínculo vigente en B, para probar que A no la puede asignar (5c).
+    const cargoB = (await e.admin.cargo.create({ data: { tenantId: tenantB, nombre: "Guardia" } })).id;
+    personaB = (
+      await e.admin.persona.create({
+        data: { tenantId: tenantB, nombres: "Persona", apellidos: "B", rut: "22.222.222-2", estado: "activa" },
+      })
+    ).id;
+    await e.admin.vinculoLaboral.create({
+      data: { tenantId: tenantB, personaId: personaB, cargoId: cargoB, instalacionId: instB, tipo: "indefinido", inicio: new Date("2026-01-01"), estado: "vigente" },
+    });
   });
 
   afterAll(async () => {
@@ -104,5 +130,44 @@ describe.skipIf(!urlPropietario)("aislamiento entre tenants · Rondas (RLS)", ()
       horarios: ["08:00"],
     });
     expect(r).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+  });
+
+  // 5c: una persona de otro tenant no puede quedar como responsable en la programación de A. La RLS
+  // impide leer la persona de B y el vínculo exige la instalación de A, así que responde NOT_FOUND
+  // sin revelar que la persona existe en B (sin enumeración).
+  it("el owner de A no puede asignar como responsable a una persona de B", async () => {
+    const r = await mod.executeCapability(ctxOwner(tenantA), "rondas.programaciones.fijar", {
+      instalacionId: instA,
+      plantillaId: plantillaA,
+      nombre: "Programación con persona ajena",
+      horarios: ["08:00"],
+      responsables: { modo: "personas", personaIds: [personaB] },
+    });
+    expect(r).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+  });
+
+  // 5a: dos ediciones concurrentes de la misma programación se serializan por el FOR UPDATE del
+  // handler (chequeo y escritura en una sola transacción): ambas terminan sin error y la fila queda
+  // con uno de los dos nombres, sin pérdida ni mezcla.
+  it("dos fijar concurrentes sobre la misma programación se serializan sin perderse", async () => {
+    const creada = await mod.executeCapability(ctxOwner(tenantA), "rondas.programaciones.fijar", {
+      instalacionId: instA,
+      plantillaId: plantillaA,
+      nombre: "Programación A",
+      horarios: ["08:00"],
+    });
+    const id = creada.ok ? (creada.data as { id: string }).id : "";
+    const editar = (nombre: string) =>
+      mod.executeCapability(ctxOwner(tenantA), "rondas.programaciones.fijar", {
+        id,
+        instalacionId: instA,
+        plantillaId: plantillaA,
+        nombre,
+        horarios: ["09:00"],
+      });
+    const [a, b] = await Promise.all([editar("Edición uno"), editar("Edición dos")]);
+    expect(a.ok && b.ok).toBe(true);
+    const fin = await e.admin.programacion.findUnique({ where: { id }, select: { nombre: true } });
+    expect(["Edición uno", "Edición dos"]).toContain(fin?.nombre);
   });
 });
