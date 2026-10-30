@@ -2,7 +2,9 @@ import { Prisma, type TenantTx } from "@opai/db";
 
 import { definidos } from "../core/maestros/comun";
 import { noEncontrado, reglaDeNegocio } from "../errores";
+import type { Contexto } from "../types";
 import type { Operacion } from "./ajustar-ops";
+import { dondeSeccion } from "./comun";
 
 // Validaciones y datos de las líneas de `cpq.cotizaciones.ajustar` (§4, R21).
 
@@ -22,15 +24,24 @@ export async function referenciasLinea(tx: TenantTx, op: Linea) {
     throw reglaDeNegocio("Sobrescribir las personas por posición exige un motivo (R21).");
 }
 
-export async function seccionDe(tx: TenantTx, versionId: string, id: string) {
-  const s = await tx.seccionCotizacion.findFirst({ where: { id, versionId } });
+/** Sección de la versión en el alcance del actor (ADR-022), o NOT_FOUND. */
+export async function seccionDe(ctx: Contexto, tx: TenantTx, versionId: string, id: string) {
+  const s = await tx.seccionCotizacion.findFirst({
+    where: { AND: [{ id, versionId }, dondeSeccion(ctx)] },
+  });
   if (!s) throw noEncontrado("La sección");
   return s;
 }
 
-export async function lineaDe(tx: TenantTx, versionId: string, id: string) {
+/** Línea de la versión cuya sección está en el alcance del actor, o NOT_FOUND (sin enumeración). */
+export async function lineaDe(ctx: Contexto, tx: TenantTx, versionId: string, id: string) {
   const l = await tx.lineaCotizacion.findFirst({ where: { id, versionId } });
-  if (!l) throw noEncontrado("La línea");
+  const visible =
+    l &&
+    (await tx.seccionCotizacion.count({
+      where: { AND: [{ id: l.seccionId }, dondeSeccion(ctx)] },
+    }));
+  if (!l || !visible) throw noEncontrado("La línea");
   return l;
 }
 

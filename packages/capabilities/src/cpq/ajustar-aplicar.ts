@@ -87,7 +87,7 @@ export async function aplicar(
       return "Sección Común agregada";
     }
     case "quitar_seccion": {
-      const s = await seccionDe(tx, v.id, op.seccionId);
+      const s = await seccionDe(ctx, tx, v.id, op.seccionId);
       if (escribir) {
         await tx.lineaCotizacion.deleteMany({ where: { seccionId: s.id } });
         await tx.seccionCotizacion.delete({ where: { id: s.id } });
@@ -95,7 +95,7 @@ export async function aplicar(
       return `Sección quitada: ${s.nombre}`;
     }
     case "agregar_linea": {
-      await seccionDe(tx, v.id, op.seccionId);
+      await seccionDe(ctx, tx, v.id, op.seccionId);
       if (op.tipo === "puesto" && !op.cargoId)
         throw reglaDeNegocio("Una línea de puesto necesita su cargo (§4).");
       await referenciasLinea(tx, op);
@@ -116,7 +116,7 @@ export async function aplicar(
       return `Línea agregada: ${op.nombre}`;
     }
     case "actualizar_linea": {
-      const l = await lineaDe(tx, v.id, op.lineaId);
+      const l = await lineaDe(ctx, tx, v.id, op.lineaId);
       if (l.tipo === "puesto" && op.cargoId === null)
         throw reglaDeNegocio("Una línea de puesto necesita su cargo (§4).");
       await referenciasLinea(tx, { ...op, motivoPersonas: op.motivoPersonas ?? l.motivoPersonas });
@@ -124,7 +124,7 @@ export async function aplicar(
       return `Línea actualizada: ${op.nombre ?? l.nombre}`;
     }
     case "quitar_linea": {
-      const l = await lineaDe(tx, v.id, op.lineaId);
+      const l = await lineaDe(ctx, tx, v.id, op.lineaId);
       if (escribir) await tx.lineaCotizacion.delete({ where: { id: l.id } });
       return `Línea quitada: ${l.nombre}`;
     }

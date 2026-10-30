@@ -11,6 +11,7 @@ import {
   monedaSchema,
   modoMargenSchema,
   pctSchema,
+  revalidarCostos,
   sumarDias,
   tituloSchema,
   veCostos,
@@ -48,6 +49,7 @@ export const cotizacionesCreate = defineCapability({
   }),
   efecto: "escritura",
   dryRun: true,
+  autorizarRepeticion: revalidarCostos,
   async handler(ctx, input, { dryRun }) {
     exigirCostos(ctx, [
       ...(input.margenObjetivo !== undefined ? ["el margen"] : []),

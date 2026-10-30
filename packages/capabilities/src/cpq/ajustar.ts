@@ -5,7 +5,14 @@ import { estadoTrasEditar } from "@opai/domain";
 import { defineCapability } from "../define";
 import { conflicto, noEncontrado } from "../errores";
 import { uuidSchema } from "../core/esquemas";
-import { PERMISO_MANAGE, cotizacionDe, exigirEditable, ultimaVersion, veCostos } from "./comun";
+import {
+  PERMISO_MANAGE,
+  cotizacionDe,
+  exigirEditable,
+  revalidarCostos,
+  ultimaVersion,
+  veCostos,
+} from "./comun";
 import { aplicar } from "./ajustar-aplicar";
 import { camposDeCosto, operacionSchema } from "./ajustar-ops";
 import { renombrada } from "./renombrada";
@@ -40,6 +47,7 @@ export const cotizacionesAjustar = defineCapability({
   }),
   efecto: "escritura",
   dryRun: true,
+  autorizarRepeticion: revalidarCostos,
   async handler(ctx, input, { dryRun }) {
     const costo = [...new Set(input.operaciones.flatMap(camposDeCosto))];
     // R59: sin `cpq:costos.ver` no se escribe costo, sueldo ni margen (prohibido, no oculto).
@@ -52,20 +60,23 @@ export const cotizacionesAjustar = defineCapability({
     const nuevoEstado = estadoTrasEditar(estado);
     const escribir = !dryRun;
     return ctx.transaccion(async (tx) => {
-      const cambios: string[] = [];
-      for (const op of input.operaciones)
-        cambios.push(await aplicar(ctx, tx, v, op, escribir, c.negocioId));
-      if (estado !== nuevoEstado) cambios.push(`Estado: ${estado} → ${nuevoEstado} (R41)`);
       if (escribir) {
-        // Control optimista: solo gana quien sube la revisión que leyó (§12, sin TOCTOU).
+        // Control optimista PRIMERO: subir la revisión leída toma el lock de la fila de la versión,
+        // así las ediciones concurrentes se serializan aquí y solo gana una (§12, sin TOCTOU).
         const r = await tx.versionCotizacion.updateMany({
-          where: { id: v.id, revision: v.revision },
+          where: { id: v.id, revision: v.revision, estado: v.estado },
           data: { revision: v.revision + 1, estado: nuevoEstado },
         });
         if (r.count !== 1)
           throw conflicto(
             "La cotización cambió mientras la editabas. Recarga e inténtalo de nuevo.",
           );
+      }
+      const cambios: string[] = [];
+      for (const op of input.operaciones)
+        cambios.push(await aplicar(ctx, tx, v, op, escribir, c.negocioId));
+      if (estado !== nuevoEstado) cambios.push(`Estado: ${estado} → ${nuevoEstado} (R41)`);
+      if (escribir) {
         await tx.cotizacion.update({ where: { id: c.id }, data: { estado: nuevoEstado } });
         await renombrada(ctx, tx, c, input.operaciones);
       }

@@ -4,7 +4,7 @@ import { ESTADOS_COTIZACION } from "@opai/domain";
 
 import { defineCapability } from "../define";
 import { uuidSchema } from "../core/esquemas";
-import { PERMISO_READ, cotizacionDe, estadoSchema, veCostos } from "./comun";
+import { PERMISO_READ, cotizacionDe, dondeSeccion, estadoSchema, veCostos } from "./comun";
 import { resumenSchema, versionSchema, vistaResumen, vistaVersion } from "./vistas";
 import {
   aprobacionSchema,
@@ -86,13 +86,10 @@ export const cotizacionesGet = defineCapability({
     });
     const ultima = versiones[0];
     if (!ultima) throw new Error("Cotización sin versión.");
-    const [secciones, lineas, aprobaciones] = await Promise.all([
+    // Alcance (ADR-022): solo las secciones de instalaciones que el actor ve (y la Común), y sus líneas.
+    const [secciones, aprobaciones] = await Promise.all([
       ctx.db.seccionCotizacion.findMany({
-        where: { versionId: ultima.id },
-        orderBy: { orden: "asc" },
-      }),
-      ctx.db.lineaCotizacion.findMany({
-        where: { versionId: ultima.id },
+        where: { AND: [{ versionId: ultima.id }, dondeSeccion(ctx)] },
         orderBy: { orden: "asc" },
       }),
       ctx.db.aprobacionCotizacion.findMany({
@@ -100,6 +97,10 @@ export const cotizacionesGet = defineCapability({
         orderBy: { createdAt: "desc" },
       }),
     ]);
+    const lineas = await ctx.db.lineaCotizacion.findMany({
+      where: { versionId: ultima.id, seccionId: { in: secciones.map((x) => x.id) } },
+      orderBy: { orden: "asc" },
+    });
     const costos = veCostos(ctx);
     return {
       ...vistaResumen(c, ultima, costos),

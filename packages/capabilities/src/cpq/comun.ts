@@ -2,7 +2,8 @@ import { z } from "zod";
 
 import { ESTADOS_COTIZACION, type EstadoCotizacion, PCT_ESCALA, esEditable } from "@opai/domain";
 
-import { noEncontrado, reglaDeNegocio } from "../errores";
+import { instalacionesEnAlcance } from "../core/maestros/alcance";
+import { noEncontrado, prohibido, reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 
 export const PERMISO_READ = "cpq:cotizaciones.read";
@@ -37,6 +38,29 @@ export const tituloSchema = z.string().trim().min(3).max(160);
 
 /** Si el actor ve costos, margen y sueldos (R59). Sin el permiso, las vistas omiten esos campos. */
 export const veCostos = (ctx: Contexto): boolean => ctx.autorizar(PERMISO_COSTOS);
+
+/**
+ * Secciones que el actor ve (ADR-022): las de instalaciones en su alcance y la Común. Una sección o
+ * línea de otra instalación responde NOT_FOUND, igual que inexistente, como en la ficha del negocio.
+ */
+export function dondeSeccion(ctx: Contexto) {
+  const ids = instalacionesEnAlcance(ctx);
+  return ids ? { OR: [{ instalacionId: { in: [...ids] } }, { tipo: "comun" }] } : {};
+}
+
+/**
+ * Repetición idempotente (R59): una salida guardada con campos de costo no se entrega a quien ya no
+ * tiene `cpq:costos.ver`.
+ */
+export async function revalidarCostos(ctx: Contexto, _input: unknown, salida: unknown) {
+  if (
+    !veCostos(ctx) &&
+    /"(margenObjetivo|costoMensual|margenEfectivo|sueldoBruto)"/.test(
+      JSON.stringify(salida ?? null),
+    )
+  )
+    throw prohibido(`Ver esta respuesta exige el permiso «${PERMISO_COSTOS}».`);
+}
 
 /**
  * Cotización del tenant o NOT_FOUND. La RLS ya acota al tenant: una de otra empresa responde igual
