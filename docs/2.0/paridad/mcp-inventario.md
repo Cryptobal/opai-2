@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 253 pares pantalla→capacidad · 217 con herramienta · 36 excepciones justificadas · 0 faltantes.
+**Resumen:** 257 pares pantalla→capacidad · 221 con herramienta · 36 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -186,6 +186,10 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/configuracion/aprobaciones` | `core.aprobaciones.rechazar` | — | excepción |
 | erp | `/configuracion/aprobaciones` | `platform.aprobaciones.aprobar` | — | excepción |
 | erp | `/configuracion/aprobaciones` | `platform.aprobaciones.rechazar` | — | excepción |
+| erp | `/configuracion/calendario` | `core.calendario.actualizar` | `core_calendario_actualizar` | existe |
+| erp | `/configuracion/calendario` | `core.calendario.archivar` | `core_calendario_archivar` | existe |
+| erp | `/configuracion/calendario` | `core.calendario.crear_feriado` | `core_calendario_crear_feriado` | existe |
+| erp | `/configuracion/calendario` | `core.calendario.listar` | `core_calendario_listar` | existe |
 | erp | `/configuracion/comunicaciones/[evento]` | `core.comunicaciones.eventos` | `core_comunicaciones_eventos` | existe |
 | erp | `/configuracion/comunicaciones/[evento]` | `core.plantillas.get` | `core_plantillas_get` | existe |
 | erp | `/configuracion/comunicaciones` | `core.comunicaciones.eventos` | `core_comunicaciones_eventos` | existe |

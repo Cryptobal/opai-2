@@ -60,10 +60,13 @@ describe.skipIf(!urlPropietario)("políticas y referencias del núcleo", () => {
       )
       .map((f) => f.tabla);
     expect(malas).toEqual([]);
+    // `plataforma_lectura` (core.dias_calendario, CAR-79): política extra permitida, de solo lectura
+    // de las filas de plataforma (tenant_id nulo); opai_app no puede escribirlas (ver calendario-db).
     const extra = await e.admin.$queryRaw<{ n: bigint }[]>`
       SELECT count(*) AS n FROM pg_policies
       WHERE schemaname NOT IN ('pg_catalog', 'information_schema')
-        AND policyname <> 'tenant_isolation' AND policyname <> 'user_self'`;
+        AND policyname <> 'tenant_isolation' AND policyname <> 'user_self'
+        AND NOT (tablename = 'dias_calendario' AND policyname = 'plataforma_lectura')`;
     expect(Number(extra[0]?.n)).toBe(0);
   });
 

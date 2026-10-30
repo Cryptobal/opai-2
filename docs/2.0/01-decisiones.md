@@ -899,11 +899,16 @@ No se encontró: render estático roto, falta de prefetch, layouts que recarguen
 
 **Nota del 25-oct-2026 sobre el punto 6 (CAR-10).** La regla de la pauta por series y excepciones ya está en `extraccion/operaciones.md` (§3, esqueleto, solo la regla general) y en `modulos/operaciones.md` (R11, borrador), donde además está el trato del día de hoy que respondió Carlos (respuesta 4 de arriba).
 
+**Nota del 29-oct-2026 (CAR-80, catálogo del Núcleo 17:36–17:39 CLT; C8 y C9).** Dos precisiones de dependencias:
+
+- **C8 · Acceso → Terreno con dispositivos del Núcleo.** El Control de acceso físico y el portal Terreno no dependen uno del otro: el **emparejamiento y la gestión de dispositivos fijos** (quiosco) vive en el **Núcleo** (`core.dispositivos`), y tanto Acceso como Terreno, Asistencia y Rondas usan ese servicio común. El shell del portal Terreno lo construye **CAR-78**; los dispositivos entran antes del PR de Rondas que los necesita (`ROADMAP.md`).
+- **C9 · Nómina exige solo `core.puestos`.** La dependencia dura de Nómina es la **tabla de puestos del Núcleo (`core.puestos`)** para resolver la capa de sueldo (ADR-036), **no el módulo Operaciones completo** (pauta, asignaciones ni asistencia). Precisa la respuesta 1 del 25-oct («Nómina exige Puestos»): basta el puesto del núcleo; la pauta y la asistencia siguen siendo fuentes opcionales.
+
 ---
 
 ## ADR-049 · Agente interno de OPAI
 
-**Fecha:** 26-oct-2026 · **Estado:** Propuesto (PR #38). Fuentes: Decisión de Carlos, 26-oct-2026 10:08 CLT, chat con OPAI 2.0 (registrada por el bot OPAI 2.0): «ok» a la recomendación del bot de las 10:07; «El agente interno debe pedir confirmación y debe tener niveles de confirmación, que apruebe todo o que confirme, como lo hacen los agentes de IA. […] cada tenant pone sus key para poder usar el modelo de lenguaje que ellos quieran. Entonces, en el agente ellos pueden cambiar el modelo de lenguaje según los que tengan conectado. […] se vende como un módulo aparte, por supuesto. Sí o sí es un módulo aparte del agente interno.» — Carlos, 26-oct-2026 10:51 CLT, chat con el Revisor OPAI 2.0 (t117u; dictado por voz); «Ok, después del CPQ» — Carlos, 26-oct-2026 10:53 CLT, chat con el Revisor OPAI 2.0 (t120u); «o el consumo por IA lo cobro yo como opai? no sera mejor asi? / sin tope y a mano» — Carlos, 26-oct-2026 11:12 CLT, chat con el Revisor OPAI 2.0 (t122u); «ok, así» — Carlos, 26-oct-2026 11:17 CLT, chat con el Revisor OPAI 2.0, aprobando la propuesta de cobros del bot OPAI 2.0. · Modifica ADR-032 (nota del 26-oct-2026) y ADR-030 (el asistente IA sale del backlog) · Completa ADR-004, ADR-031, ADR-033 y ADR-048.
+**Fecha:** 26-oct-2026 · **Estado:** Aceptado (CAR-80, 29-oct-2026; propuesto en PR #38). Fuentes: Decisión de Carlos, 26-oct-2026 10:08 CLT, chat con OPAI 2.0 (registrada por el bot OPAI 2.0): «ok» a la recomendación del bot de las 10:07; «El agente interno debe pedir confirmación y debe tener niveles de confirmación, que apruebe todo o que confirme, como lo hacen los agentes de IA. […] cada tenant pone sus key para poder usar el modelo de lenguaje que ellos quieran. Entonces, en el agente ellos pueden cambiar el modelo de lenguaje según los que tengan conectado. […] se vende como un módulo aparte, por supuesto. Sí o sí es un módulo aparte del agente interno.» — Carlos, 26-oct-2026 10:51 CLT, chat con el Revisor OPAI 2.0 (t117u; dictado por voz); «Ok, después del CPQ» — Carlos, 26-oct-2026 10:53 CLT, chat con el Revisor OPAI 2.0 (t120u); «o el consumo por IA lo cobro yo como opai? no sera mejor asi? / sin tope y a mano» — Carlos, 26-oct-2026 11:12 CLT, chat con el Revisor OPAI 2.0 (t122u); «ok, así» — Carlos, 26-oct-2026 11:17 CLT, chat con el Revisor OPAI 2.0, aprobando la propuesta de cobros del bot OPAI 2.0. · Modifica ADR-032 (nota del 26-oct-2026) y ADR-030 (el asistente IA sale del backlog) · Completa ADR-004, ADR-031, ADR-033 y ADR-048.
 
 **Contexto.** ADR-032 dejaba fuera los chats y copilotos propios, y el «chat o asistente IA» de 1.0 quedó en el backlog (ADR-030; brecha N8 de `paridad/nucleo.md`). A las 10:07 Carlos pidió incorporar un agente dentro de OPAI, en el celular y en el escritorio, que conviva con los agentes externos conectados por MCP; el bot recomendó cómo hacerlo y Carlos respondió «ok» a las 10:08. A las 10:51 y 10:53 precisó la confirmación, las keys de IA, la venta y el orden.
 
@@ -954,7 +959,7 @@ existente. El historial nuevo devuelve solo metadatos de acciones propias.
    - **Con el modelo de OPAI:** se cobra la licencia más el consumo a costo con margen, a mes vencido. El margen no está decidido.
    - **Sin tope de consumo por defecto** («sin tope y a mano» — Carlos, 26-oct-2026 11:12 CLT, chat con el Revisor OPAI 2.0, t122u). El tenant puede fijar un presupuesto opcional, con aviso al 80 %, sobre el presupuesto de ADR-031 (0 o nulo = sin límite), controlado en el servidor.
    - **Los demás consumos variables** (WhatsApp, SMS, biometría, firmas, mapas) se cobran a costo más margen sobre lo medido.
-   - **Las licencias por módulo y todos los montos** (incluido el margen) van a un ADR futuro de planes y precios, cuando exista Opai SpA; no se fijan aquí.
+   - **Las licencias por módulo y todos los montos** (incluido el margen) viven en **ADR-058** (planes y precios por capas): el agente interno es un módulo con licencia por empresa. Los montos no se fijan hasta que exista Opai SpA.
 
 **Consecuencias.** El agente interno no crea un segundo camino a los datos: si una acción no existe como capacidad, tampoco existe para él. Sigue sin haber copilotos por módulo ni chats entre personas (Tickets sigue sin chat, ADR-025). El número del brief y el mecanismo de la identidad delegada se fijan al planificarlo.
 
@@ -1104,7 +1109,7 @@ identidad de servicio en main.
 
 **Contexto.** La investigación encontró que la Dirección del Trabajo **no publica una API abierta y documentada para empleadores ni para software de remuneraciones**: su propia FAQ del LRE (última modificación 31-05-2023) dice que la carga es por archivo CSV/TXT o por formulario en Mi DT, y que la API es una «próxima evolución» (fuente: FAQ del LRE, https://www.dt.gob.cl/portal/1628/w3-article-120083.html). El resto de los trámites (contratos y anexos, finiquito, cartas de término) se hacen en el portal Mi DT, siempre con una persona natural autenticada con su ClaveÚnica (el representante laboral electrónico del tenant; además el trabajador, en el finiquito). Ningún proveedor chileno revisado (Nubox, Rex+, Talana) publica cómo automatiza el envío a Mi DT.
 
-**Decisión.** Se crea el complemento vendible **«Cumplimiento DT»** del módulo **Nómina**, cobrado por trabajador activo al mes o con un fijo mensual por tenant (el monto va al ADR de precios). En la v1 el complemento:
+**Decisión.** Se crea el complemento vendible **«Cumplimiento DT»** del módulo **Nómina**, cobrado **por trabajador con un mínimo mensual** por tenant (C5, catálogo del 29-oct-2026; los montos van al ADR-058 de planes y precios). En la v1 el complemento:
 
 1. Genera y valida el archivo del **Libro de Remuneraciones Electrónico (LRE)** en el formato oficial (CSV/TXT separado por «;», nombre `rutempleador_aaaamm`).
 2. Prepara los datos para registrar **contratos, anexos, altas y bajas** en Mi DT.
@@ -1114,4 +1119,27 @@ identidad de servicio en main.
 6. La **asistencia certificada** (Resolución Exenta N°38 de 2024, ADR-023) se evalúa aparte, con su costo y su plazo; no forma parte de este complemento.
 
 **Consecuencias.** Resuelve P10 de `modulos/firma.md` §15: la especificación de Firma queda **aprobada sin preguntas abiertas**; el complemento vive en Nómina, no en Firma (§11 de `firma.md`). `ROADMAP.md` (fase 6) anota el complemento como parte del alcance de Nómina y dependencia de su brief (Briefs 25/26). Sin código ni migraciones en esta decisión.
+
+---
+
+## ADR-058 · Planes y precios por capas, sin montos
+
+**Fecha:** 29-oct-2026 · **Estado:** vigente · **Origen:** CAR-76, catálogo del Núcleo revisado con Carlos el 29-oct-2026 (17:36–17:39 CLT). · Completa ADR-003 (módulos de primera clase y entitlements) y ADR-048 (módulos vendibles por separado); recoge el cobro del agente interno (ADR-049 §9) y del complemento Cumplimiento DT (ADR-057).
+
+**Contexto.** Varios ADR aplazaban «los montos y el margen» a «un ADR futuro de planes y precios, cuando exista Opai SpA» (ADR-049 §9, ADR-031, ADR-057). Falta la **estructura** de cobro —qué se cobra y por qué unidad— para que cada brief sepa a qué capa pertenece lo que construye, aunque los montos sigan sin fijarse.
+
+**Decisión.** Se fija la estructura de planes y precios, **sin montos ni margen** (los números se deciden «cuando exista Opai SpA»):
+
+1. **Capa por módulo.** Cada módulo vendible declara a qué **capa** pertenece: base, de personas, de terreno, comercial/administrativa o complemento. La capa determina la unidad de cobro del punto 2.
+2. **Unidad de cobro.**
+   - **Por trabajador activo** en los módulos de **personas** (Nómina y sus complementos, Asistencia).
+   - **Por instalación activa** en los módulos de **terreno** (Operaciones, Rondas, Control de acceso).
+   - **Licencia por empresa** en los módulos **comerciales y administrativos** (Comercial, CPQ, Licitaciones, Finanzas, Tickets, agente interno).
+3. **Plan base.** Incluye, con sus cuotas: identidad y accesos, permisos, maestros, **motor de sueldos** (ADR-056), documentos y **firma N1/N2** (ADR-019), configuración, comunicaciones (ADR-020), **MCP/API** y **Tickets** (ADR-025). Es el piso sobre el que se activan los módulos de pago.
+4. **Portales incluidos.** Los portales (ERP, Supervisor, Trabajador, Terreno, Cliente) van **incluidos**; no se cobran aparte. Cada portal muestra solo lo que los módulos contratados habilitan (`NAVEGACION.md` §4).
+5. **Cumplimiento DT.** Se cobra **por trabajador con un mínimo mensual** (C5, ADR-057).
+6. **Firma.** El uso de firma se cobra **por uso, a costo más margen** (sobre lo medido en `core.consumos`, ADR-031); los niveles N1/N2 van en el plan base, el uso de firma avanzada se tarifa aparte.
+7. **Sin montos ni margen.** Este ADR **no fija ningún monto ni margen**. Reemplaza, como destino de los números, las remisiones a «un ADR futuro de precios» de ADR-031, ADR-049 §9 y ADR-057.
+
+**Consecuencias.** ADR-049 §9 y ADR-057 apuntan a este ADR para la estructura de cobro. Cada especificación de módulo (ADR-047) declara su capa y su unidad. Sin código ni migraciones; los montos entran cuando Opai SpA exista y se registrarán como una enmienda a este ADR.
 

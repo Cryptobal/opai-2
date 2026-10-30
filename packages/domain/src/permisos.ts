@@ -58,6 +58,8 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
       // Cumplimiento (DPA/DPO, Ley 21.719): fijar el DPO es de owner/admin; aceptar el DPA, solo owner.
       PERMISOS_CORE.cumplimientoManage,
       PERMISOS_CORE.cumplimientoDpaAceptar,
+      // Calendario (CAR-79): gestionar los feriados del tenant es de owner y admin; gerente solo ve.
+      PERMISOS_CORE.calendarioManage,
     ],
   },
   supervisor: {
@@ -82,6 +84,8 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
       PERMISOS_CORE.firmasEnviar,
       PERMISOS_CORE.firmasRead,
       PERMISOS_CORE.configRead,
+      // Calendario (CAR-79): el supervisor ve los feriados para planificar, pero no los gestiona.
+      PERMISOS_CORE.calendarioRead,
     ],
     denegar: [...FINANCIERO, "comercial:*", "cpq:*"],
   },
