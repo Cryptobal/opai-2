@@ -7,6 +7,21 @@
 --
 -- Fecha posterior a la última migración de main (20261029180000_rondas_schema): cada tabla nueva se
 -- crea después de force_rls (20261028170000), así que lleva ENABLE + FORCE ROW LEVEL SECURITY.
+--
+-- Idempotente a propósito (CREATE TABLE/INDEX IF NOT EXISTS, ADD COLUMN IF NOT EXISTS, FKs con
+-- DROP CONSTRAINT IF EXISTS + ADD, DROP TRIGGER/POLICY IF EXISTS antes de recrearlos): esta carpeta
+-- se renombró de 20261029120000_firma_nucleo a este nombre (correcciones del Revisor, commit
+-- bc36f1b5). Si una rama Neon de preview reutilizada entre pushes (no recreada, `preview/pr-*`) ya
+-- aplicó con éxito el contenido viejo bajo el nombre viejo, Prisma trata este nombre como una
+-- migración nunca vista y el `CREATE TABLE` sin guarda chocaría contra el esquema ya creado; el
+-- error real («relation … already exists») no aparece en el log de `prisma migrate deploy`, que
+-- solo muestra el «current transaction is aborted» del siguiente statement (mismo mecanismo que
+-- el PR #109, ver 20261028235000_plataforma_aprobaciones_auditoria). Verificado reproduciendo el
+-- contenido viejo (20261029120000) sobre una base limpia y reaplicando este archivo encima: sin la
+-- guarda, «relation "politicas" already exists»; con `CREATE TABLE IF NOT EXISTS` sola, el error
+-- pasa a la columna renombrada `comprobante_token` → `comprobante_token_hash` (de ahí el `ADD
+-- COLUMN IF NOT EXISTS`); y sin `DROP CONSTRAINT IF EXISTS` antes del `ADD`, el FK de evidencias
+-- se habría quedado en el `CASCADE` viejo en vez del `RESTRICT` que exige R17.
 BEGIN;
 SET LOCAL lock_timeout = '5s';
 
@@ -14,7 +29,7 @@ SET LOCAL lock_timeout = '5s';
 CREATE SCHEMA IF NOT EXISTS "core_firma";
 
 -- CreateTable
-CREATE TABLE "core_firma"."politicas" (
+CREATE TABLE IF NOT EXISTS "core_firma"."politicas" (
     "id" UUID NOT NULL,
     "tenant_id" UUID NOT NULL,
     "clase" TEXT NOT NULL,
@@ -31,7 +46,7 @@ CREATE TABLE "core_firma"."politicas" (
 );
 
 -- CreateTable
-CREATE TABLE "core_firma"."solicitudes" (
+CREATE TABLE IF NOT EXISTS "core_firma"."solicitudes" (
     "id" UUID NOT NULL,
     "tenant_id" UUID NOT NULL,
     "documento_id" UUID NOT NULL,
@@ -59,9 +74,13 @@ CREATE TABLE "core_firma"."solicitudes" (
 
     CONSTRAINT "solicitudes_pkey" PRIMARY KEY ("id")
 );
+-- Columna renombrada en la corrección del Revisor (antes "comprobante_token", en claro): si la
+-- tabla ya existía de una corrida anterior bajo el nombre viejo de esta carpeta (ver nota de
+-- cabecera), la agrega ahora.
+ALTER TABLE "core_firma"."solicitudes" ADD COLUMN IF NOT EXISTS "comprobante_token_hash" TEXT;
 
 -- CreateTable
-CREATE TABLE "core_firma"."firmantes" (
+CREATE TABLE IF NOT EXISTS "core_firma"."firmantes" (
     "id" UUID NOT NULL,
     "tenant_id" UUID NOT NULL,
     "solicitud_id" UUID NOT NULL,
@@ -87,9 +106,12 @@ CREATE TABLE "core_firma"."firmantes" (
 
     CONSTRAINT "firmantes_pkey" PRIMARY KEY ("id")
 );
+-- Columna renombrada en la corrección del Revisor (antes "token", en claro): ver nota de la
+-- columna equivalente en "solicitudes".
+ALTER TABLE "core_firma"."firmantes" ADD COLUMN IF NOT EXISTS "token_hash" TEXT;
 
 -- CreateTable (hecho inmutable, R17; sin updated_at)
-CREATE TABLE "core_firma"."evidencias" (
+CREATE TABLE IF NOT EXISTS "core_firma"."evidencias" (
     "id" UUID NOT NULL,
     "tenant_id" UUID NOT NULL,
     "solicitud_id" UUID NOT NULL,
@@ -110,7 +132,7 @@ CREATE TABLE "core_firma"."evidencias" (
 );
 
 -- CreateTable
-CREATE TABLE "core_firma"."aceptaciones_medio" (
+CREATE TABLE IF NOT EXISTS "core_firma"."aceptaciones_medio" (
     "id" UUID NOT NULL,
     "tenant_id" UUID NOT NULL,
     "persona_id" UUID NOT NULL,
@@ -126,7 +148,7 @@ CREATE TABLE "core_firma"."aceptaciones_medio" (
 );
 
 -- CreateTable
-CREATE TABLE "core_firma"."firmantes_empresa" (
+CREATE TABLE IF NOT EXISTS "core_firma"."firmantes_empresa" (
     "id" UUID NOT NULL,
     "tenant_id" UUID NOT NULL,
     "usuario_id" UUID NOT NULL,
@@ -142,7 +164,7 @@ CREATE TABLE "core_firma"."firmantes_empresa" (
 );
 
 -- CreateTable
-CREATE TABLE "core_firma"."autorizaciones_firma_automatica" (
+CREATE TABLE IF NOT EXISTS "core_firma"."autorizaciones_firma_automatica" (
     "id" UUID NOT NULL,
     "tenant_id" UUID NOT NULL,
     "firmante_empresa_id" UUID NOT NULL,
@@ -158,7 +180,7 @@ CREATE TABLE "core_firma"."autorizaciones_firma_automatica" (
 );
 
 -- CreateTable (append + update de intentos/usado_en; sin updated_at)
-CREATE TABLE "core_firma"."codigos_otp" (
+CREATE TABLE IF NOT EXISTS "core_firma"."codigos_otp" (
     "id" UUID NOT NULL,
     "tenant_id" UUID NOT NULL,
     "firmante_id" UUID NOT NULL,
@@ -173,58 +195,86 @@ CREATE TABLE "core_firma"."codigos_otp" (
 );
 
 -- CreateIndex
-CREATE INDEX "politicas_tenant_id_idx" ON "core_firma"."politicas"("tenant_id");
-CREATE UNIQUE INDEX "politicas_tenant_id_clase_key" ON "core_firma"."politicas"("tenant_id", "clase");
+CREATE INDEX IF NOT EXISTS "politicas_tenant_id_idx" ON "core_firma"."politicas"("tenant_id");
+CREATE UNIQUE INDEX IF NOT EXISTS "politicas_tenant_id_clase_key" ON "core_firma"."politicas"("tenant_id", "clase");
 
 -- CreateIndex
-CREATE INDEX "solicitudes_tenant_id_estado_idx" ON "core_firma"."solicitudes"("tenant_id", "estado");
-CREATE INDEX "solicitudes_tenant_id_documento_id_idx" ON "core_firma"."solicitudes"("tenant_id", "documento_id");
-CREATE UNIQUE INDEX "solicitudes_comprobante_token_hash_key" ON "core_firma"."solicitudes"("comprobante_token_hash");
+CREATE INDEX IF NOT EXISTS "solicitudes_tenant_id_estado_idx" ON "core_firma"."solicitudes"("tenant_id", "estado");
+CREATE INDEX IF NOT EXISTS "solicitudes_tenant_id_documento_id_idx" ON "core_firma"."solicitudes"("tenant_id", "documento_id");
+CREATE UNIQUE INDEX IF NOT EXISTS "solicitudes_comprobante_token_hash_key" ON "core_firma"."solicitudes"("comprobante_token_hash");
 
 -- CreateIndex
-CREATE INDEX "firmantes_tenant_id_solicitud_id_idx" ON "core_firma"."firmantes"("tenant_id", "solicitud_id");
-CREATE UNIQUE INDEX "firmantes_token_hash_key" ON "core_firma"."firmantes"("token_hash");
+CREATE INDEX IF NOT EXISTS "firmantes_tenant_id_solicitud_id_idx" ON "core_firma"."firmantes"("tenant_id", "solicitud_id");
+CREATE UNIQUE INDEX IF NOT EXISTS "firmantes_token_hash_key" ON "core_firma"."firmantes"("token_hash");
 
 -- CreateIndex
-CREATE INDEX "evidencias_tenant_id_solicitud_id_idx" ON "core_firma"."evidencias"("tenant_id", "solicitud_id");
+CREATE INDEX IF NOT EXISTS "evidencias_tenant_id_solicitud_id_idx" ON "core_firma"."evidencias"("tenant_id", "solicitud_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "aceptaciones_medio_tenant_id_persona_id_key" ON "core_firma"."aceptaciones_medio"("tenant_id", "persona_id");
+CREATE UNIQUE INDEX IF NOT EXISTS "aceptaciones_medio_tenant_id_persona_id_key" ON "core_firma"."aceptaciones_medio"("tenant_id", "persona_id");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "firmantes_empresa_tenant_id_usuario_id_key" ON "core_firma"."firmantes_empresa"("tenant_id", "usuario_id");
+CREATE UNIQUE INDEX IF NOT EXISTS "firmantes_empresa_tenant_id_usuario_id_key" ON "core_firma"."firmantes_empresa"("tenant_id", "usuario_id");
 
 -- CreateIndex
-CREATE INDEX "autorizaciones_firma_automatica_tenant_id_firmante_empresa_id_idx" ON "core_firma"."autorizaciones_firma_automatica"("tenant_id", "firmante_empresa_id");
+CREATE INDEX IF NOT EXISTS "autorizaciones_firma_automatica_tenant_id_firmante_empresa_id_idx" ON "core_firma"."autorizaciones_firma_automatica"("tenant_id", "firmante_empresa_id");
 
 -- CreateIndex
-CREATE INDEX "codigos_otp_tenant_id_firmante_id_idx" ON "core_firma"."codigos_otp"("tenant_id", "firmante_id");
+CREATE INDEX IF NOT EXISTS "codigos_otp_tenant_id_firmante_id_idx" ON "core_firma"."codigos_otp"("tenant_id", "firmante_id");
 
--- AddForeignKey (tenant_id -> core.tenants; la relación a Tenant no está en el schema Prisma, ADR-040)
+-- AddForeignKey (tenant_id -> core.tenants; la relación a Tenant no está en el schema Prisma, ADR-040).
+-- DROP ... IF EXISTS + ADD (idempotente, mismo patrón que triggers/políticas más abajo): si una
+-- corrida anterior de esta migración bajo el nombre viejo de la carpeta ya dejó la FK con otra
+-- definición (por ejemplo CASCADE en vez del RESTRICT que exigió el Revisor en evidencias, R17;
+-- ver nota de cabecera), queda reemplazada por la definición actual, nunca mezclada.
+ALTER TABLE "core_firma"."politicas" DROP CONSTRAINT IF EXISTS "politicas_tenant_id_fkey";
 ALTER TABLE "core_firma"."politicas" ADD CONSTRAINT "politicas_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "core"."tenants"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "core_firma"."politicas" DROP CONSTRAINT IF EXISTS "politicas_actualizado_por_id_fkey";
 ALTER TABLE "core_firma"."politicas" ADD CONSTRAINT "politicas_actualizado_por_id_fkey" FOREIGN KEY ("actualizado_por_id") REFERENCES "core"."users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "core_firma"."solicitudes" DROP CONSTRAINT IF EXISTS "solicitudes_tenant_id_fkey";
 ALTER TABLE "core_firma"."solicitudes" ADD CONSTRAINT "solicitudes_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "core"."tenants"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "core_firma"."solicitudes" DROP CONSTRAINT IF EXISTS "solicitudes_documento_id_fkey";
 ALTER TABLE "core_firma"."solicitudes" ADD CONSTRAINT "solicitudes_documento_id_fkey" FOREIGN KEY ("documento_id") REFERENCES "core"."documentos"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "core_firma"."solicitudes" DROP CONSTRAINT IF EXISTS "solicitudes_documento_firmado_id_fkey";
 ALTER TABLE "core_firma"."solicitudes" ADD CONSTRAINT "solicitudes_documento_firmado_id_fkey" FOREIGN KEY ("documento_firmado_id") REFERENCES "core"."documentos"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "core_firma"."solicitudes" DROP CONSTRAINT IF EXISTS "solicitudes_enviada_por_id_fkey";
 ALTER TABLE "core_firma"."solicitudes" ADD CONSTRAINT "solicitudes_enviada_por_id_fkey" FOREIGN KEY ("enviada_por_id") REFERENCES "core"."users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "core_firma"."solicitudes" DROP CONSTRAINT IF EXISTS "solicitudes_via_user_id_fkey";
 ALTER TABLE "core_firma"."solicitudes" ADD CONSTRAINT "solicitudes_via_user_id_fkey" FOREIGN KEY ("via_user_id") REFERENCES "core"."users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "core_firma"."firmantes" DROP CONSTRAINT IF EXISTS "firmantes_tenant_id_fkey";
 ALTER TABLE "core_firma"."firmantes" ADD CONSTRAINT "firmantes_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "core"."tenants"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "core_firma"."firmantes" DROP CONSTRAINT IF EXISTS "firmantes_solicitud_id_fkey";
 ALTER TABLE "core_firma"."firmantes" ADD CONSTRAINT "firmantes_solicitud_id_fkey" FOREIGN KEY ("solicitud_id") REFERENCES "core_firma"."solicitudes"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "core_firma"."firmantes" DROP CONSTRAINT IF EXISTS "firmantes_persona_id_fkey";
 ALTER TABLE "core_firma"."firmantes" ADD CONSTRAINT "firmantes_persona_id_fkey" FOREIGN KEY ("persona_id") REFERENCES "core"."personas"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "core_firma"."firmantes" DROP CONSTRAINT IF EXISTS "firmantes_contacto_id_fkey";
 ALTER TABLE "core_firma"."firmantes" ADD CONSTRAINT "firmantes_contacto_id_fkey" FOREIGN KEY ("contacto_id") REFERENCES "core"."contactos"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "core_firma"."firmantes" DROP CONSTRAINT IF EXISTS "firmantes_usuario_id_fkey";
 ALTER TABLE "core_firma"."firmantes" ADD CONSTRAINT "firmantes_usuario_id_fkey" FOREIGN KEY ("usuario_id") REFERENCES "core"."users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "core_firma"."evidencias" DROP CONSTRAINT IF EXISTS "evidencias_tenant_id_fkey";
 ALTER TABLE "core_firma"."evidencias" ADD CONSTRAINT "evidencias_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "core"."tenants"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 -- La evidencia es inmutable (R17): borrar su solicitud o firmante no la arrastra en cascada (RESTRICT).
+ALTER TABLE "core_firma"."evidencias" DROP CONSTRAINT IF EXISTS "evidencias_solicitud_id_fkey";
 ALTER TABLE "core_firma"."evidencias" ADD CONSTRAINT "evidencias_solicitud_id_fkey" FOREIGN KEY ("solicitud_id") REFERENCES "core_firma"."solicitudes"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "core_firma"."evidencias" DROP CONSTRAINT IF EXISTS "evidencias_firmante_id_fkey";
 ALTER TABLE "core_firma"."evidencias" ADD CONSTRAINT "evidencias_firmante_id_fkey" FOREIGN KEY ("firmante_id") REFERENCES "core_firma"."firmantes"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "core_firma"."aceptaciones_medio" DROP CONSTRAINT IF EXISTS "aceptaciones_medio_tenant_id_fkey";
 ALTER TABLE "core_firma"."aceptaciones_medio" ADD CONSTRAINT "aceptaciones_medio_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "core"."tenants"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "core_firma"."aceptaciones_medio" DROP CONSTRAINT IF EXISTS "aceptaciones_medio_persona_id_fkey";
 ALTER TABLE "core_firma"."aceptaciones_medio" ADD CONSTRAINT "aceptaciones_medio_persona_id_fkey" FOREIGN KEY ("persona_id") REFERENCES "core"."personas"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "core_firma"."firmantes_empresa" DROP CONSTRAINT IF EXISTS "firmantes_empresa_tenant_id_fkey";
 ALTER TABLE "core_firma"."firmantes_empresa" ADD CONSTRAINT "firmantes_empresa_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "core"."tenants"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "core_firma"."firmantes_empresa" DROP CONSTRAINT IF EXISTS "firmantes_empresa_usuario_id_fkey";
 ALTER TABLE "core_firma"."firmantes_empresa" ADD CONSTRAINT "firmantes_empresa_usuario_id_fkey" FOREIGN KEY ("usuario_id") REFERENCES "core"."users"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "core_firma"."autorizaciones_firma_automatica" DROP CONSTRAINT IF EXISTS "autorizaciones_firma_automatica_tenant_id_fkey";
 ALTER TABLE "core_firma"."autorizaciones_firma_automatica" ADD CONSTRAINT "autorizaciones_firma_automatica_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "core"."tenants"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "core_firma"."autorizaciones_firma_automatica" DROP CONSTRAINT IF EXISTS "autorizaciones_firma_automatica_firmante_empresa_id_fkey";
 ALTER TABLE "core_firma"."autorizaciones_firma_automatica" ADD CONSTRAINT "autorizaciones_firma_automatica_firmante_empresa_id_fkey" FOREIGN KEY ("firmante_empresa_id") REFERENCES "core_firma"."firmantes_empresa"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "core_firma"."autorizaciones_firma_automatica" DROP CONSTRAINT IF EXISTS "autorizaciones_firma_automatica_autorizada_por_id_fkey";
 ALTER TABLE "core_firma"."autorizaciones_firma_automatica" ADD CONSTRAINT "autorizaciones_firma_automatica_autorizada_por_id_fkey" FOREIGN KEY ("autorizada_por_id") REFERENCES "core"."users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "core_firma"."codigos_otp" DROP CONSTRAINT IF EXISTS "codigos_otp_tenant_id_fkey";
 ALTER TABLE "core_firma"."codigos_otp" ADD CONSTRAINT "codigos_otp_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "core"."tenants"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "core_firma"."codigos_otp" DROP CONSTRAINT IF EXISTS "codigos_otp_firmante_id_fkey";
 ALTER TABLE "core_firma"."codigos_otp" ADD CONSTRAINT "codigos_otp_firmante_id_fkey" FOREIGN KEY ("firmante_id") REFERENCES "core_firma"."firmantes"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- ---------------------------------------------------------------------------
@@ -241,48 +291,56 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA "core_firma" GRANT USAGE, SELECT ON SEQUENCES
 -- ---------------------------------------------------------------------------
 ALTER TABLE "core_firma"."politicas" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "core_firma"."politicas" FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS tenant_isolation ON "core_firma"."politicas";
 CREATE POLICY tenant_isolation ON "core_firma"."politicas" AS PERMISSIVE FOR ALL TO opai_app
   USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
   WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
 
 ALTER TABLE "core_firma"."solicitudes" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "core_firma"."solicitudes" FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS tenant_isolation ON "core_firma"."solicitudes";
 CREATE POLICY tenant_isolation ON "core_firma"."solicitudes" AS PERMISSIVE FOR ALL TO opai_app
   USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
   WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
 
 ALTER TABLE "core_firma"."firmantes" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "core_firma"."firmantes" FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS tenant_isolation ON "core_firma"."firmantes";
 CREATE POLICY tenant_isolation ON "core_firma"."firmantes" AS PERMISSIVE FOR ALL TO opai_app
   USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
   WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
 
 ALTER TABLE "core_firma"."evidencias" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "core_firma"."evidencias" FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS tenant_isolation ON "core_firma"."evidencias";
 CREATE POLICY tenant_isolation ON "core_firma"."evidencias" AS PERMISSIVE FOR ALL TO opai_app
   USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
   WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
 
 ALTER TABLE "core_firma"."aceptaciones_medio" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "core_firma"."aceptaciones_medio" FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS tenant_isolation ON "core_firma"."aceptaciones_medio";
 CREATE POLICY tenant_isolation ON "core_firma"."aceptaciones_medio" AS PERMISSIVE FOR ALL TO opai_app
   USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
   WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
 
 ALTER TABLE "core_firma"."firmantes_empresa" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "core_firma"."firmantes_empresa" FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS tenant_isolation ON "core_firma"."firmantes_empresa";
 CREATE POLICY tenant_isolation ON "core_firma"."firmantes_empresa" AS PERMISSIVE FOR ALL TO opai_app
   USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
   WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
 
 ALTER TABLE "core_firma"."autorizaciones_firma_automatica" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "core_firma"."autorizaciones_firma_automatica" FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS tenant_isolation ON "core_firma"."autorizaciones_firma_automatica";
 CREATE POLICY tenant_isolation ON "core_firma"."autorizaciones_firma_automatica" AS PERMISSIVE FOR ALL TO opai_app
   USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
   WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
 
 ALTER TABLE "core_firma"."codigos_otp" ENABLE ROW LEVEL SECURITY;
 ALTER TABLE "core_firma"."codigos_otp" FORCE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS tenant_isolation ON "core_firma"."codigos_otp";
 CREATE POLICY tenant_isolation ON "core_firma"."codigos_otp" AS PERMISSIVE FOR ALL TO opai_app
   USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
   WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
@@ -292,21 +350,27 @@ CREATE POLICY tenant_isolation ON "core_firma"."codigos_otp" AS PERMISSIVE FOR A
 -- del núcleo (core.verificar_mismo_tenant): pares (columna, tabla referida). Salta las columnas NULL
 -- (CONTINUE WHEN ref IS NULL). Solo tablas con tenant_id; core.users es global y no se verifica.
 -- ---------------------------------------------------------------------------
+DROP TRIGGER IF EXISTS mismo_tenant ON "core_firma"."solicitudes";
 CREATE TRIGGER mismo_tenant BEFORE INSERT OR UPDATE ON "core_firma"."solicitudes"
   FOR EACH ROW EXECUTE FUNCTION "core"."verificar_mismo_tenant"(
     'documento_id', 'core.documentos', 'documento_firmado_id', 'core.documentos');
+DROP TRIGGER IF EXISTS mismo_tenant ON "core_firma"."firmantes";
 CREATE TRIGGER mismo_tenant BEFORE INSERT OR UPDATE ON "core_firma"."firmantes"
   FOR EACH ROW EXECUTE FUNCTION "core"."verificar_mismo_tenant"(
     'solicitud_id', 'core_firma.solicitudes', 'persona_id', 'core.personas',
     'contacto_id', 'core.contactos');
+DROP TRIGGER IF EXISTS mismo_tenant ON "core_firma"."evidencias";
 CREATE TRIGGER mismo_tenant BEFORE INSERT OR UPDATE ON "core_firma"."evidencias"
   FOR EACH ROW EXECUTE FUNCTION "core"."verificar_mismo_tenant"(
     'solicitud_id', 'core_firma.solicitudes', 'firmante_id', 'core_firma.firmantes');
+DROP TRIGGER IF EXISTS mismo_tenant ON "core_firma"."aceptaciones_medio";
 CREATE TRIGGER mismo_tenant BEFORE INSERT OR UPDATE ON "core_firma"."aceptaciones_medio"
   FOR EACH ROW EXECUTE FUNCTION "core"."verificar_mismo_tenant"('persona_id', 'core.personas');
+DROP TRIGGER IF EXISTS mismo_tenant ON "core_firma"."autorizaciones_firma_automatica";
 CREATE TRIGGER mismo_tenant BEFORE INSERT OR UPDATE ON "core_firma"."autorizaciones_firma_automatica"
   FOR EACH ROW EXECUTE FUNCTION "core"."verificar_mismo_tenant"(
     'firmante_empresa_id', 'core_firma.firmantes_empresa');
+DROP TRIGGER IF EXISTS mismo_tenant ON "core_firma"."codigos_otp";
 CREATE TRIGGER mismo_tenant BEFORE INSERT OR UPDATE ON "core_firma"."codigos_otp"
   FOR EACH ROW EXECUTE FUNCTION "core"."verificar_mismo_tenant"('firmante_id', 'core_firma.firmantes');
 
@@ -315,14 +379,19 @@ CREATE TRIGGER mismo_tenant BEFORE INSERT OR UPDATE ON "core_firma"."codigos_otp
 -- es global). Reutiliza core.verificar_usuario_miembro (20261028234500). Salta las columnas NULL. En
 -- firma todos son usuarios de la empresa (sin ':plataforma'): representante, emisor y configurador.
 -- ---------------------------------------------------------------------------
+DROP TRIGGER IF EXISTS usuario_miembro ON "core_firma"."politicas";
 CREATE TRIGGER usuario_miembro BEFORE INSERT OR UPDATE OF "actualizado_por_id", "tenant_id" ON "core_firma"."politicas"
   FOR EACH ROW EXECUTE FUNCTION "core"."verificar_usuario_miembro"('actualizado_por_id');
+DROP TRIGGER IF EXISTS usuario_miembro ON "core_firma"."solicitudes";
 CREATE TRIGGER usuario_miembro BEFORE INSERT OR UPDATE OF "enviada_por_id", "via_user_id", "tenant_id" ON "core_firma"."solicitudes"
   FOR EACH ROW EXECUTE FUNCTION "core"."verificar_usuario_miembro"('enviada_por_id', 'via_user_id');
+DROP TRIGGER IF EXISTS usuario_miembro ON "core_firma"."firmantes";
 CREATE TRIGGER usuario_miembro BEFORE INSERT OR UPDATE OF "usuario_id", "tenant_id" ON "core_firma"."firmantes"
   FOR EACH ROW EXECUTE FUNCTION "core"."verificar_usuario_miembro"('usuario_id');
+DROP TRIGGER IF EXISTS usuario_miembro ON "core_firma"."firmantes_empresa";
 CREATE TRIGGER usuario_miembro BEFORE INSERT OR UPDATE OF "usuario_id", "tenant_id" ON "core_firma"."firmantes_empresa"
   FOR EACH ROW EXECUTE FUNCTION "core"."verificar_usuario_miembro"('usuario_id');
+DROP TRIGGER IF EXISTS usuario_miembro ON "core_firma"."autorizaciones_firma_automatica";
 CREATE TRIGGER usuario_miembro BEFORE INSERT OR UPDATE OF "autorizada_por_id", "tenant_id" ON "core_firma"."autorizaciones_firma_automatica"
   FOR EACH ROW EXECUTE FUNCTION "core"."verificar_usuario_miembro"('autorizada_por_id');
 
@@ -337,8 +406,10 @@ BEGIN
   RAISE EXCEPTION 'core_firma.evidencias es append-only: % no permitido', TG_OP;
 END
 $$;
+DROP TRIGGER IF EXISTS inmutable ON "core_firma"."evidencias";
 CREATE TRIGGER inmutable BEFORE UPDATE OR DELETE ON "core_firma"."evidencias"
   FOR EACH ROW EXECUTE FUNCTION "core_firma"."evidencia_inmutable"();
+DROP TRIGGER IF EXISTS inmutable_statement ON "core_firma"."evidencias";
 CREATE TRIGGER inmutable_statement BEFORE TRUNCATE ON "core_firma"."evidencias"
   FOR EACH STATEMENT EXECUTE FUNCTION "core_firma"."evidencia_inmutable"();
 
