@@ -1,15 +1,10 @@
 "use client";
 
 import { Lock } from "lucide-react";
-import { useSyncExternalStore } from "react";
 
 import { Alerta, Badge, RadioGroup, SeccionTarjeta, Switch } from "@opai/ds";
 
 import { type Valores, usePreferencias } from "./use-preferencias";
-
-const suscribirHidratacion = () => () => {};
-const yaHidratado = () => true;
-const aunNoHidratado = () => false;
 
 const TEMAS = [
   { valor: "sistema", etiqueta: "Sistema", descripcion: "Sigue tu dispositivo" },
@@ -19,12 +14,13 @@ const TEMAS = [
 
 /** Preferencias propias (35): tema, idioma y avisos personales; cada cambio se guarda solo. */
 export function PreferenciasForm({ inicial }: { inicial: Valores }) {
-  const hidratado = useSyncExternalStore(suscribirHidratacion, yaHidratado, aunNoHidratado);
   const { v, error, guardar } = usePreferencias(inicial);
-  // Solo se deshabilita hasta hidratar (el controlador vive en el cliente); NO durante el guardado:
-  // la cola serial de `usePreferencias` ya ordena los clics (último gana) y confirma con un aviso de
-  // éxito. Deshabilitar mientras guarda atenuaba los controles sin explicación (H4) y bloqueaba la
-  // ráfaga, de modo que clics seguidos no llegaban a registrarse (parte de H2 del #135).
+  // Los controles NUNCA se deshabilitan: ni al cargar (antes se atenuaban ~2 s hasta hidratar, un
+  // clic en ese lapso se perdía sin aviso, H4 del QA en vivo del #136) ni durante el guardado (la cola
+  // serial de `usePreferencias` ordena los clics —último gana— y confirma con un aviso de éxito;
+  // deshabilitar bloquearía la ráfaga y clics seguidos no llegarían a registrarse, parte de H2 del
+  // #135). El valor inicial viene del servidor, así que el control muestra el estado correcto desde el
+  // primer pintado (B1, 5.º ajuste).
   return (
     <div className="flex flex-col gap-4">
       {error ? <Alerta tono="danger" titulo={error} /> : null}
@@ -32,7 +28,7 @@ export function PreferenciasForm({ inicial }: { inicial: Valores }) {
         <RadioGroup
           etiqueta="Tema"
           valor={v.tema}
-          opciones={TEMAS.map((opcion) => ({ ...opcion, disabled: !hidratado }))}
+          opciones={TEMAS}
           onCambiar={(t) => guardar("tema", t, "preferencias_tema")}
         />
       </SeccionTarjeta>
@@ -50,14 +46,12 @@ export function PreferenciasForm({ inicial }: { inicial: Valores }) {
             etiqueta="Silenciar avisos por correo"
             descripcion="Los avisos transaccionales (invitaciones, recuperación) siguen llegando"
             activo={v.silencio}
-            disabled={!hidratado}
             onCambiar={(a) => guardar("silencio", a, "preferencias_silencio")}
           />
           <Switch
             etiqueta="Resumen diario"
             descripcion="Un correo al día con tus avisos pendientes"
             activo={v.resumen === "diario"}
-            disabled={!hidratado}
             onCambiar={(a) => guardar("resumen", a ? "diario" : "nunca", "preferencias_resumen")}
           />
         </div>

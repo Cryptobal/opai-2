@@ -70,18 +70,38 @@ function render(prisma: PrismaClient, f: Forma) {
   return Promise.allSettled(tareas);
 }
 
-async function rafagaRenders(prisma: PrismaClient, nRenders: number, f: Forma) {
-  const resultados = (await Promise.all(Array.from({ length: nRenders }, () => render(prisma, f)))).flat();
-  const esP2028 = (r: PromiseSettledResult<unknown>) =>
-    r.status === "rejected" &&
-    ((r.reason as { code?: string })?.code === "P2028" ||
-      /start a transaction|expired transaction/i.test(
-        String((r.reason as { message?: string })?.message ?? ""),
-      ));
+const esP2028 = (r: PromiseSettledResult<unknown>) =>
+  r.status === "rejected" &&
+  ((r.reason as { code?: string })?.code === "P2028" ||
+    /start a transaction|expired transaction/i.test(
+      String((r.reason as { message?: string })?.message ?? ""),
+    ));
+
+function contar(resultados: PromiseSettledResult<unknown>[]) {
   return {
     p2028: resultados.filter(esP2028).length,
     rechazos: resultados.filter((r) => r.status === "rejected").length,
   };
+}
+
+async function rafagaRenders(prisma: PrismaClient, nRenders: number, f: Forma) {
+  const resultados = (await Promise.all(Array.from({ length: nRenders }, () => render(prisma, f)))).flat();
+  return contar(resultados);
+}
+
+/** Ráfaga mixta: `nConfig` renders de `/configuracion` más los que agrega la precarga del riel. */
+async function rafagaConRiel(
+  prisma: PrismaClient,
+  nConfig: number,
+  fConfig: Forma,
+  rielHrefs: readonly string[],
+  fMenu: Forma,
+) {
+  const tareas = [
+    ...Array.from({ length: nConfig }, () => render(prisma, fConfig)),
+    ...rielHrefs.map(() => render(prisma, fMenu)),
+  ];
+  return contar((await Promise.all(tareas)).flat());
 }
 
 describe("carga de /configuracion: P2028 bajo ráfaga de renders (B1, 4.º ajuste)", () => {
@@ -106,6 +126,48 @@ describe("carga de /configuracion: P2028 bajo ráfaga de renders (B1, 4.º ajust
       interactivas: 3,
       segundos: 0.03,
     });
+    expect(p2028).toBe(0);
+    expect(rechazos).toBe(0);
+  });
+});
+
+// B1, 5.º ajuste: el QA en vivo del #136 vio P2028 en `/negocios` (14), `/personas` (6) y `/cuentas`
+// (2) sin abrirlas: eran la precarga del riel. `LinkMenu` forzaba `prefetch` completo por intención, y
+// con Cache Components ese prefetch SÍ renderiza el hueco dinámico del layout (sesión de Better Auth +
+// membresías + acceso/módulos + la capacidad de lista de la página), que la precarga por defecto no
+// toca. Cada página de menú se modela como un render de ~4 lecturas en array (Better Auth sesión +
+// usuario, `forUser` membresías, `forTenant` acceso/módulos) más 2 interactivas (su lista). Nunca usa
+// SET/SET LOCAL: el tenant va con `set_config('app.tenant_id', …, true)`.
+const RIEL = ["/negocios", "/personas", "/cuentas"] as const;
+
+describe("carga con el riel: P2028 por la precarga del menú (B1, 5.º ajuste)", () => {
+  it("reproduce P2028 cuando el riel precarga /negocios, /personas y /cuentas (ANTES)", async () => {
+    // `prefetch` completo del riel: pasar el cursor por el menú renderiza 3 páginas que nadie abrió,
+    // encima de los 20 renders de `/configuracion`. Con el pool saturado y el maxWait corto, esos
+    // renders extra bastan para que las transacciones no consigan conexión a tiempo.
+    const { p2028 } = await rafagaConRiel(
+      cliente(2, 100),
+      20,
+      { arrays: 4, interactivas: 5, segundos: 0.08 },
+      RIEL,
+      { arrays: 4, interactivas: 2, segundos: 0.08 },
+    );
+    expect(p2028).toBeGreaterThan(0);
+  });
+
+  it("con el maxWait real, 20 de /configuracion + la precarga del riel terminan sin P2028 (DESPUÉS)", async () => {
+    const { maxWait } = configTransaccion(process.env);
+    expect(maxWait).toBeGreaterThanOrEqual(10_000);
+    // La precarga por defecto del riel ya no renderiza esas páginas (solo el shell estático, sin tocar
+    // la base); aun modelando el peor caso en que SÍ se rendericen, el maxWait real y la forma reducida
+    // drenan toda la ráfaga —`/configuracion` más el riel— sin P2028.
+    const { p2028, rechazos } = await rafagaConRiel(
+      cliente(5, maxWait),
+      20,
+      { arrays: 4, interactivas: 3, segundos: 0.03 },
+      RIEL,
+      { arrays: 4, interactivas: 2, segundos: 0.03 },
+    );
     expect(p2028).toBe(0);
     expect(rechazos).toBe(0);
   });
