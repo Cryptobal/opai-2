@@ -26,7 +26,7 @@ import { capacidadesConfig } from "./config";
 import { capacidadesCumplimiento, trabajosCumplimiento } from "./cumplimiento";
 import { capacidadesDocumentos, trabajosDocumentos } from "./documentos";
 import { capacidadesEmpresa } from "./empresa";
-import { capacidadesFirmas } from "./firmas";
+import { capacidadesFirmas, consumidorFirmaDocumento } from "./firmas";
 import { capacidadesMaestros } from "./maestros";
 import { capacidadesPanel } from "./panel";
 import { capacidadesPermisos } from "./permisos";
@@ -116,7 +116,11 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
 ];
 
 /** Consumidores de eventos del núcleo que registra el borde. */
-export const consumidoresDelNucleo = [consumidorComunicaciones, consumidorAnexos];
+export const consumidoresDelNucleo = [
+  consumidorComunicaciones,
+  consumidorAnexos,
+  consumidorFirmaDocumento,
+];
 
 /** Trabajos del núcleo que registra el borde (`apps/web/lib/registro.ts`). */
 export const trabajosDelNucleo = [
