@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<title>Resumen · Portal Cliente</title>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="portal-cliente.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<div data-pc-brand="{{ brand }}" style="width:100%;height:100%"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" top-bar="{{ pcTopBar }}" device="{{ device }}" theme="{{ theme }}" portal="{{ portalName }}" tenant="{{ tenantCaption }}" tenant-initials="AS" user="{{ user }}" tabs="{{ tabs }}" rail-footer="{{ railFooter }}" groups="{{ groups }}" active="res" title="Resumen" overlay="{{ overlay }}" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<sc-if value="{{ forbidden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso al Portal Cliente" description="Tu usuario no tiene un perfil de contacto activo. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" hint-size="100%,400px"></x-import>
+</sc-if>
+<sc-if value="{{ allowed }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Logística Andina SpA" title="Resumen del mes" subtitle="Este resumen es tu informe mensual: la descarga trae el mismo contenido." hint-size="100%,80px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="primary" icon="download" block="{{ isPhone }}" disabled="{{ noData }}" hint-size="180px,40px">Descargar informe</x-import>
+</x-import>
+<div style="display:flex;flex-direction:column;gap:16px">
+<sc-if value="{{ isSel }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="badge b-warning">Decide Carlos</span><span class="t-body-sm muted">Selector de empresa cliente, solo si el contacto tiene más de una.</span></div></sc-if>
+<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+<div role="group" aria-label="Mes del informe" style="display:flex;align-items:center;gap:4px;border:1px solid var(--ds-border);border-radius:var(--radius-md);background:var(--ds-surface)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="chevron-left" label="Mes anterior" hint-size="44px,44px"></x-import>
+<span class="t-label t-numeric" style="min-width:120px;text-align:center">Octubre 2026</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="chevron-right" label="Mes siguiente (no disponible)" style="opacity:.45;cursor:not-allowed" hint-size="44px,44px"></x-import>
+</div>
+<span class="t-caption t-numeric">Mes en curso · datos al 30-10-2026 08:00 · meta de cobertura 95 %</span>
+</div>
+<sc-if value="{{ limited }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="neutral" titulo="Tu acceso incluye 2 instalaciones" hint-size="100%,56px">Planta Quilicura y Bodega Lampa. Si necesitas ver otra, pídele acceso a Andrea Rojas, contacto principal de Logística Andina SpA.</x-import>
+</sc-if>
+<sc-if value="{{ isOk }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px">
+<sc-for list="{{ insts }}" as="i" hint-placeholder-count="3">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" padding="{{ 0 }}" hint-size="100%,260px">
+<div style="display:flex;flex-direction:column">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:16px 16px 0">
+<div style="display:flex;flex-direction:column;gap:2px;min-width:0"><span class="t-subheading">{{ i.name }}</span><span class="t-caption">{{ i.dir }}</span></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ i.tone }}" hint-size="80px,22px">{{ i.estado }}</x-import>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;padding:16px">
+<span class="t-caption">Cobertura</span>
+<span class="t-title t-numeric">{{ i.cob }}</span>
+<div role="progressbar" aria-label="Cobertura" aria-valuenow="{{ i.cobN }}" aria-valuemin="0" aria-valuemax="100" style="height:6px;border-radius:var(--radius-full);background:var(--ds-fill);overflow:hidden"><div style="height:100%;width:{{ i.cobW }};background:{{ i.barColor }};border-radius:var(--radius-full)"></div></div>
+<span class="t-body-sm muted t-numeric">Turnos cubiertos {{ i.turnos }}</span>
+</div>
+<div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);border-top:1px solid var(--ds-border)">
+<div style="display:flex;flex-direction:column;gap:4px;padding:12px 16px;border-right:1px solid var(--ds-border)"><span class="t-caption">Rondas realizadas</span><span class="t-label t-numeric">{{ i.rondas }}</span><span class="t-caption t-numeric">{{ i.rondasPct }}</span></div>
+<div style="display:flex;flex-direction:column;gap:6px;padding:12px 16px"><span class="t-caption">Novedades por gravedad</span>
+<div style="display:flex;flex-wrap:wrap;gap:4px">
+<sc-for list="{{ i.nov }}" as="n" hint-placeholder-count="2"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ n.tone }}" hint-size="70px,22px">{{ n.label }}</x-import></sc-for>
+</div>
+</div>
+</div>
+<a href="#" style="display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:44px;padding:0 16px;border-top:1px solid var(--ds-border);text-decoration:none;color:var(--ds-fg)" class="t-label">Ver instalación<span class="ic sm i-chevron-right subtle" aria-hidden="true"></span></a>
+</div>
+</x-import>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<div aria-busy="true" aria-label="Cargando resumen" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px">
+<sc-for list="{{ skel }}" as="s" hint-placeholder-count="3">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,260px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="140px" height="{{ 20 }}" hint-size="140px,20px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="64px" height="{{ 22 }}" radius="{{ 999 }}" hint-size="64px,22px"></x-import></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="96px" height="{{ 34 }}" hint-size="96px,34px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 6 }}" radius="{{ 999 }}" hint-size="100%,6px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="60%" hint-size="60%,14px"></x-import>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;padding-top:8px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 40 }}" hint-size="100%,40px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 40 }}" hint-size="100%,40px"></x-import></div>
+</div>
+</x-import>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="calendar" title="Aún no hay datos de octubre" description="El informe se arma con los turnos del mes. Tu servicio parte el 01-11-2026; mientras tanto puedes revisar tus instalaciones." action="{{ emptyAction }}" hint-size="100%,360px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar el resumen" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="PC-RES-503" hint-size="100%,360px"></x-import>
+</sc-if>
+</div>
+</sc-if>
+</x-import>
+</x-import></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ok&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;ok&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;rol&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;total&quot;,&quot;limitado&quot;],&quot;default&quot;:&quot;total&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  componentDidMount() { if (!window.PC) { const t = setInterval(() => { if (window.PC) { clearInterval(t); this.forceUpdate(); } }, 50); } }
+  renderVals() {
+    const P = window.PC || {};
+    const h = React.createElement, NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = this.props.device ?? "desktop", estado = this.props.estado ?? "ok", rol = this.props.rol ?? "total";
+    const limited = rol === "limitado" && estado === "ok";
+    const all = (P.INST || []).filter((i) => rol !== "limitado" || P.limitadas.includes(i.id));
+    const insts = all.map((i) => ({ ...i, cobW: i.cobN + "%", barColor: "var(--ds-" + i.tone + ")",
+      nov: [i.graves ? { tone: "danger", label: i.graves + (i.graves === 1 ? " grave" : " graves") } : null,
+        i.moderadas ? { tone: "warning", label: i.moderadas + (i.moderadas === 1 ? " moderada" : " moderadas") } : null,
+        i.leves ? { tone: "neutral", label: i.leves + (i.leves === 1 ? " leve" : " leves") } : null,
+        !i.graves && !i.moderadas && !i.leves ? { tone: "neutral", label: "Sin novedades" } : null].filter(Boolean) }));
+    const sel = this.props.marca === "selector";
+    const rowsEmp = [{ n: "Logística Andina SpA", c: "3 instalaciones", on: true }, { n: "Inmobiliaria Apoquindo SpA", c: "1 instalación", on: false }];
+    const overlay = sel && this.props.sheet && device === "phone" && NS.Sheet ? h(NS.Sheet, { contained: true, title: "Cambiar de empresa", description: "Servicio de Atlas Seguridad SpA", onClose: () => {} },
+      h("div", { style: { display: "flex", flexDirection: "column", gap: 4 } }, rowsEmp.map((e) => h("button", { key: e.n, type: "button", className: "menu-item", style: { height: 60, padding: "0 8px", background: e.on ? "var(--ds-accent-muted)" : undefined } },
+        NS.TenantMark ? h(NS.TenantMark, { initials: e.n.split(" ").slice(0, 2).map((w) => w[0]).join(""), size: 32 }) : null,
+        h("span", { style: { flex: 1, display: "flex", flexDirection: "column" } }, h("span", { className: "t-label" }, e.n), h("span", { className: "t-caption" }, e.c)),
+        e.on && NS.Icon ? h(NS.Icon, { name: "check", label: "Empresa actual", style: { color: "var(--ds-accent)" } }) : null)))) : null;
+    return {
+      pcTopBar: P.topBar ? P.topBar(device, this.props.rol, this.props.marca === "selector") : undefined,
+      isSel: sel, brand: sel ? "selector" : "fijo", portalName: "Logística Andina SpA", tenantCaption: sel ? "2 empresas · cambiar" : "Portal Cliente de Atlas Seguridad SpA", overlay,
+      device, theme: this.props.theme ?? "light", isPhone: device === "phone",
+      user: P.USERS ? P.USERS[rol === "limitado" ? "limitado" : "total"] : undefined,
+      tabs: device === "tablet" ? P.NAV_RAIL : P.NAV_PHONE, railFooter: [{ id: "age", label: "Agentes", icon: "bot" }], groups: P.GROUPS,
+      forbidden: estado === "sinpermiso", allowed: estado !== "sinpermiso",
+      isOk: estado === "ok", isLoading: estado === "cargando", isEmpty: estado === "vacio", isError: estado === "error",
+      noData: estado !== "ok", limited, insts, skel: [1, 2, 3],
+      emptyAction: NS.Button ? h(NS.Button, { variant: "secondary", size: "lg" }, "Ver instalaciones") : null,
+    };
+  }
+}
+</script>
+</body>
+</html>
