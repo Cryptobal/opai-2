@@ -3,10 +3,11 @@ import { z } from "zod";
 import { esEtiquetaFirmada } from "@opai/domain";
 
 import { defineCapability } from "../define";
-import { conflicto, prohibido, reglaDeNegocio } from "../errores";
+import { prohibido, reglaDeNegocio } from "../errores";
 import { uuidSchema } from "../core/esquemas";
 import { sinDuplicado } from "../core/maestros/comun";
 import { PERMISO_CONFIG, puntoDe } from "./comun";
+import { crearEtiquetaVigente } from "./etiqueta-escritura";
 import { generarEtiquetaFirmada } from "./firma";
 
 const incluyeQr = (modo: string) => modo === "qr" || modo === "qr_gps";
@@ -44,9 +45,9 @@ export const puntosReemplazarEtiqueta = defineCapability({
     if (punto.estado !== "activo")
       throw reglaDeNegocio("No se reemplaza la etiqueta de un punto archivado.");
 
-    const { codigo } = generarEtiquetaFirmada();
     const anterior = punto.etiquetaQr;
     if (dryRun) {
+      const { codigo } = generarEtiquetaFirmada();
       return { puntoId: punto.id, etiquetaAnterior: anterior, etiquetaNueva: codigo, firmada: true };
     }
     return ctx.transaccion(async (tx) => {
@@ -81,17 +82,8 @@ export const puntosReemplazarEtiqueta = defineCapability({
           },
         });
       }
-      await sinDuplicado(
-        tx.etiquetaQr.create({
-          data: {
-            tenantId: ctx.tenantId,
-            puntoId: punto.id,
-            codigo,
-            firmada: true,
-            origen: "generada",
-            estado: "vigente",
-          },
-        }),
+      const codigo = await sinDuplicado(
+        crearEtiquetaVigente(tx, ctx.tenantId, punto.id),
         "Otra operación reemplazó la etiqueta al mismo tiempo; vuelve a intentar.",
       );
       await tx.puntoControl.update({ where: { id: punto.id }, data: { etiquetaQr: codigo } });

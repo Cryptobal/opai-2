@@ -13,7 +13,7 @@ import {
   modoSchema,
   puntoDe,
 } from "./comun";
-import { generarEtiquetaFirmada } from "./firma";
+import { crearEtiquetaVigente } from "./etiqueta-escritura";
 import { puntoSchema, vistaPunto } from "./vistas";
 
 const camposPunto = {
@@ -89,19 +89,9 @@ export const puntosCrear = defineCapability({
       "Ya existe un punto con ese nombre en la instalación.",
     );
     if (!incluyeQr(modo)) return vistaPunto(creado);
-    // Etiqueta opaca y firmada (R7): el historial en `etiquetas_qr` (vigente) y el código
-    // denormalizado en el punto, en la misma transacción de la escritura (ADR-052).
-    const { codigo } = generarEtiquetaFirmada();
-    await ctx.db.etiquetaQr.create({
-      data: {
-        tenantId: ctx.tenantId,
-        puntoId: creado.id,
-        codigo,
-        firmada: true,
-        origen: "generada",
-        estado: "vigente",
-      },
-    });
+    // Etiqueta opaca y firmada (R7): su fila vigente y el código denormalizado en el punto, en la
+    // misma transacción de la escritura (ADR-052).
+    const codigo = await crearEtiquetaVigente(ctx.db, ctx.tenantId, creado.id);
     const conEtiqueta = await ctx.db.puntoControl.update({
       where: { id: creado.id },
       data: { etiquetaQr: codigo },
