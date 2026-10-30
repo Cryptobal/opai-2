@@ -44,25 +44,27 @@ type Props = {
  */
 export function BuscadorConfig({ entradas, grupos, inicial, children }: Props) {
   const [texto, setTexto] = useState(inicial ?? "");
-  const [ajustes, setAjustes] = useState<Ajuste[]>([]);
+  // Resultados de ajustes junto a la consulta a la que pertenecen: así se muestran solo si siguen
+  // vigentes (sin un `setState` síncrono en el efecto al borrar o bajar de 2 letras).
+  const [res, setRes] = useState<{ q: string; items: Ajuste[] }>({ q: "", items: [] });
   const filtro = sinTildes(texto.trim());
 
   useEffect(() => {
-    if (filtro.length < 2) {
-      setAjustes([]);
-      return;
-    }
+    const q = texto.trim();
+    if (q.length < 2) return;
     let vivo = true;
     const t = setTimeout(async () => {
-      const r = await ejecutarCapacidad("erp", "core.config.buscar", { q: texto.trim() });
+      const r = await ejecutarCapacidad("erp", "core.config.buscar", { q });
       // Si `core.config.buscar` falla, se muestran solo las entradas (sin romper la portada).
-      if (vivo) setAjustes(r.ok ? (r.data as Ajuste[]) : []);
+      if (vivo) setRes({ q, items: r.ok ? (r.data as Ajuste[]) : [] });
     }, 180);
     return () => {
       vivo = false;
       clearTimeout(t);
     };
-  }, [filtro, texto]);
+  }, [texto]);
+
+  const ajustes = filtro.length >= 2 && res.q === texto.trim() ? res.items : [];
 
   const porGrupo = useMemo(() => {
     const visibles = entradas.filter(

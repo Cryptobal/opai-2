@@ -1,4 +1,4 @@
-import { Card, FilaSeleccionable } from "@opai/ds";
+import { FilaSeleccionable } from "@opai/ds";
 
 import { LinkIndice } from "@/app/_components/link-indice";
 
@@ -31,22 +31,21 @@ export function TarjetaGrupo({ grupo, entradas }: GrupoConEntradas) {
         titulo={grupo.etiqueta}
         secundario={grupo.corta}
       />
-      {/* iPad/escritorio: tarjeta con enlace a la primera entrada visible. */}
-      <Card className="relative hidden min-h-[132px] flex-col p-4 transition-colors duration-150 hover:border-fg-subtle md:flex">
-        {primera ? (
-          <LinkIndice
-            href={primera.href}
-            aria-label={`${grupo.etiqueta}: ${grupo.corta}`}
-            className="absolute inset-0 rounded-lg outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus"
-          />
-        ) : null}
-        <span className="mb-2 flex size-10 items-center justify-center rounded-md bg-fill text-fg-muted">
-          <Icono aria-hidden className="size-5" />
-        </span>
-        <h3 className="t-subheading text-fg">{grupo.etiqueta}</h3>
-        <p className="mt-0.5 text-sm text-fg-muted">{grupo.corta}</p>
-        {previas ? <p className="mt-2 t-caption truncate">{previas}</p> : null}
-      </Card>
+      {/* iPad/escritorio: la tarjeta entera es un enlace a la primera entrada visible. */}
+      {primera ? (
+        <LinkIndice
+          href={primera.href}
+          aria-label={`${grupo.etiqueta}: ${grupo.corta}`}
+          className="hidden min-h-[132px] flex-col rounded-lg border border-border bg-surface p-4 text-fg outline-none transition-colors duration-150 hover:border-fg-subtle focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus md:flex"
+        >
+          <span className="mb-2 flex size-10 items-center justify-center rounded-md bg-fill text-fg-muted">
+            <Icono aria-hidden className="size-5" />
+          </span>
+          <span className="t-subheading text-fg">{grupo.etiqueta}</span>
+          <span className="mt-0.5 text-sm text-fg-muted">{grupo.corta}</span>
+          {previas ? <span className="mt-2 t-caption truncate">{previas}</span> : null}
+        </LinkIndice>
+      ) : null}
     </>
   );
 }

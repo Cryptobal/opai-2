@@ -9,7 +9,7 @@ const SECCIONES = [
   ["marca", "Marca"],
   ["preferencias", "Preferencias"],
   ["documentos", "Documentos"],
-  ["modulos", "Módulos"],
+  ["modulos", "Catálogo de módulos"],
 ] as const;
 
 test.describe("configuración: empresa y plataforma del tenant", () => {
