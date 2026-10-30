@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="ds-propuestas.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0;background:var(--ds-fill)}a{color:var(--ds-accent)}a:hover{color:var(--ds-accent)}</style>
+</helmet>
+<div data-theme="light" data-screen-label="Hoja de componentes" style="display:flex;flex-direction:column;gap:32px;padding:48px;width:max-content;color:var(--ds-fg)">
+<header style="display:flex;flex-direction:column;gap:8px;max-width:880px">
+<a href="00 Índice.dc.html" class="t-label-sm">← Índice</a>
+<span class="t-overline">OPAI 2.0 · Comercial · Leads</span>
+<h1 class="t-display m0">Hoja de componentes</h1>
+<p class="t-body m0 muted" style="text-wrap:pretty">Todo lo usado en las pantallas 01–09, en claro y oscuro. Las piezas marcadas «Nuevo para el DS» no existen hoy en DS 2.0 y se proponen como parte del DS, no del módulo. Hover y foco se muestran fijos para poder revisarlos.</p>
+</header>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<sc-for list="{{ temas }}" as="th" hint-placeholder-count="2">
+<div data-theme="{{ th.t }}" style="width:760px;display:flex;flex-direction:column;gap:24px;padding:32px;border-radius:var(--radius-lg);background:var(--ds-bg);color:var(--ds-fg);border:1px solid var(--ds-border)">
+<h2 class="t-heading m0">{{ th.label }}</h2>
+
+<span class="t-overline">Del DS 2.0 · acciones</span>
+<div style="display:flex;flex-direction:column;gap:12px">
+<span class="t-label">Button</span>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" hint-size="120px,40px">Principal</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" style="background:color-mix(in srgb,var(--ds-accent) 90%,var(--ds-fg))" hint-size="120px,40px">Hover</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" style="outline:2px solid var(--ds-focus);outline-offset:2px" hint-size="120px,40px">Foco</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" disabled="{{ true }}" hint-size="140px,40px">Deshabilitado</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" loading="{{ true }}" hint-size="120px,40px">Cargando</x-import>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="copy" hint-size="120px,40px">Secundario</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="key" hint-size="120px,40px">Ghost</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" style="background:var(--ds-fill)" hint-size="120px,40px">Ghost hover</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="destructive" hint-size="180px,40px">Generar nueva clave</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="more" label="Más acciones" hint-size="44px,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Enlace" href="#" hint-size="120px,20px">solicitud #1047</x-import>
+</div>
+</div>
+
+<span class="t-overline">Del DS 2.0 · estado y selección</span>
+<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="info" hint-size="70px,22px">Nueva</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="warning" hint-size="100px,22px">En revisión</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="success" hint-size="100px,22px">Convertida</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" hint-size="100px,22px">Descartada</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="danger" hint-size="100px,22px">Sin conectar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" hint-size="150px,22px">Registrada por OPAI</x-import>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Correo" hint-size="90px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Web" activo="{{ true }}" hint-size="80px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Agente" disabled="{{ true }}" hint-size="90px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Chip" etiqueta="noreply@*" on-quitar="{{ noop }}" hint-size="120px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipAgregar" hint-size="120px,32px"></x-import>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:16px;align-items:center">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ segOpts }}" value="abiertas" hint-size="280px,40px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ tabItems }}" value="res" style="width:360px" hint-size="360px,44px"></x-import>
+</div>
+
+<span class="t-overline">Del DS 2.0 · formularios</span>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Empresa" default-value="Frigorífico Del Maipo" hint-size="100%,68px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="RUT" mono="{{ true }}" default-value="76.412.893" error="Falta el dígito verificador" hint-size="100%,88px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Dominio autorizado" placeholder="tusitio.cl" disabled="{{ true }}" hint-size="100%,68px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Responsable" options="{{ personas }}" value="mr" hint-size="100%,68px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Plantilla" options="{{ personas }}" value="mr" disabled="{{ true }}" hint-size="100%,68px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Mensaje pegado" rows="{{ 2 }}" default-value="Necesitamos 2 guardias nocturnos para una obra en Lampa." hint-size="100%,100px"></x-import>
+</div>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px 12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" label="Acuse de recibo" description="Apagado" hint-size="100%,56px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ true }}" label="Asignar por reglas" description="Encendido" hint-size="100%,56px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ true }}" label="Crear instalación" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" disabled="{{ true }}" label="Deshabilitado" hint-size="100%,44px"></x-import>
+</div>
+
+<span class="t-overline">Del DS 2.0 · datos</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Card · Origen" hint-size="100%,160px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" rows="{{ pares }}" hint-size="100%,120px"></x-import>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ filas }}" compact="{{ true }}" on-row-click="{{ noop }}" hint-size="100%,120px"></x-import>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);overflow:hidden;background:var(--ds-surface)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowGroupHeader" hint-size="100%,32px">Posibles duplicadas</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" icon="mail" title="Paula Contreras · Frigorífico Del Maipo" subtitle="Correo · Guardias 24/7" meta="30-10-2026 09:12" badge="{{ badgeNueva }}" chevron="{{ true }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.SelectableRow" selected="{{ true }}" title="Javiera Núñez" subtitle="Inmobiliaria Los Robles · Agente" meta="29-10 18:05" badge="{{ badgeRev }}" hint-size="100%,64px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Timeline" items="{{ historial }}" hint-size="100%,100px"></x-import>
+
+<span class="t-overline">Del DS 2.0 · feedback</span>
+<div style="display:flex;flex-direction:column;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Usaremos la cuenta que ya existe" hint-size="100%,64px">El RUT ya está en Frigorífico Del Maipo.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" icono="flag" titulo="Propuesta, a confirmar por Carlos" hint-size="100%,64px">Uso para variantes B.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="danger" titulo="La clave del formulario fue revocada" hint-size="100%,64px">Genera una nueva clave.</x-import>
+</div>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+<div style="height:260px;display:flex;border:1px solid var(--ds-border);border-radius:var(--radius-lg)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="inbox" size="sm" title="Aún no hay solicitudes" description="Una línea y una acción." action="{{ emptyAction }}" hint-size="100%,240px"></x-import></div>
+<div style="height:260px;display:flex;border:1px solid var(--ds-border);border-radius:var(--radius-lg)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar" description="Revisa tu conexión." code="COM-SOL-503" on-retry="{{ noop }}" hint-size="100%,240px"></x-import></div>
+<div style="height:260px;display:flex;border:1px solid var(--ds-border);border-radius:var(--radius-lg)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso" description="Pídele acceso a Carlos Irigoyen." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,240px"></x-import></div>
+<div style="height:260px;display:flex;flex-direction:column;gap:10px;padding:16px;border:1px solid var(--ds-border);border-radius:var(--radius-lg)">
+<span class="t-caption">Skeleton · con la forma de la pantalla</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="60%" height="{{ 14 }}" hint-size="60%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="35%" height="{{ 12 }}" hint-size="35%,12px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 44 }}" radius="{{ 10 }}" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ 72 }}" height="{{ 22 }}" radius="{{ 999 }}" hint-size="72px,22px"></x-import>
+</div>
+</div>
+
+<span class="t-overline">Del DS 2.0 · overlays</span>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+<div style="position:relative;height:300px;border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Sheet" contained="{{ true }}" title="Sheet" description="Inferior en teléfono" on-close="{{ noop }}" hint-size="100%,200px"><span class="t-body-sm">Contenido del Sheet.</span></x-import>
+</div>
+<div style="position:relative;height:300px;border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Dialog" contained="{{ true }}" title="Dialog" description="Confirmación destructiva." actions="{{ dialogActions }}" on-close="{{ noop }}" hint-size="100%,200px"></x-import>
+</div>
+</div>
+<p class="t-body-sm muted m0">Shell y patrones usados en todas las pantallas: AppShell, Page, PageHeader, FormSection, ActionBar, Campo, Icon.</p>
+
+<div style="display:flex;align-items:center;gap:8px;margin-top:8px;padding-top:24px;border-top:1px solid var(--ds-border)"><span class="t-overline">Nuevos para el DS</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="info" hint-size="60px,22px">Nuevo</x-import></div>
+
+<div style="display:flex;flex-direction:column;gap:8px">
+<span class="t-label">ChipCanal · etiqueta fija con icono, sin acción</span>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<sc-for list="{{ canales }}" as="c" hint-placeholder-count="4">
+<span class="t-label-sm" style="display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;border:1px solid var(--ds-border-strong)"><span class="{{ c.icon }}"></span>{{ c.label }}</span>
+</sc-for>
+</div>
+<span class="t-caption">Neutro siempre: el canal no es un estado. Radio píldora, borde border-strong, t-label-sm.</span>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:8px">
+<span class="t-label">BloqueExterno · texto que viene de afuera</span>
+<div style="border:1px dashed var(--ds-border-strong);border-radius:var(--radius-md);background:var(--ds-bg)">
+<div class="t-caption" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border-bottom:1px dashed var(--ds-border-strong)"><span class="ic sm i-lock"></span>Contenido externo · texto original, sin formato</div>
+<p class="t-body-sm" style="margin:0;padding:12px;white-space:pre-wrap">Visita www.ejemplo-externo.cl o escríbeme a contacto@ejemplo.cl — se muestra como texto, sin enlaces.</p>
+</div>
+<span class="t-caption">Borde punteado y fondo bg; nunca convierte URLs ni correos en enlaces o botones.</span>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<span class="t-label">AdjuntoCard</span>
+<div style="display:flex;gap:12px;align-items:center;padding:12px;border:1px solid var(--ds-border);border-radius:var(--radius-md)"><span class="ic i-file-text muted"></span><div style="display:flex;flex-direction:column;min-width:0"><span class="t-label-sm">Bases_servicio_guardias.pdf</span><span class="t-caption">PDF · 1,2 MB</span></div></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<span class="t-label">Marca «Generado» en Input</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" default-value="Javiera Núñez" trailing="{{ genMark }}" hint-size="100%,44px"></x-import>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<span class="t-label">ValorCopiable</span>
+<div style="display:flex;gap:8px;align-items:center"><span class="t-mono" style="flex:1;min-height:44px;display:flex;align-items:center;padding:0 12px;border-radius:var(--radius-md);background:var(--ds-fill)">solicitudes@atlas.opai.cl</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="copy" hint-size="100px,40px">Copiar</x-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<span class="t-label">ClaveOculta</span>
+<div class="pg-kv" style="border:1px solid var(--ds-border);border-radius:var(--radius-md);padding:8px 12px"><span class="l">Clave</span><span class="t-mono">opk_live_••••••••3f9a</span></div>
+<span class="t-caption">Solo los últimos 4 caracteres. Nunca se muestra completa.</span>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:8px">
+<span class="t-label">FilaConversion · qué se reutiliza y qué se crea</span>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg)">
+<sc-for list="{{ conversion }}" as="c" hint-placeholder-count="3">
+<div style="display:flex;gap:12px;align-items:flex-start;padding:12px;border-bottom:1px solid var(--ds-border)">
+<span class="{{ c.icon }}" style="color:var(--ds-fg-muted);margin-top:2px"></span>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column"><span class="t-label-sm">{{ c.titulo }}</span><span class="t-body-sm muted">{{ c.sub }}</span></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ c.tone }}" hint-size="96px,22px">{{ c.accion }}</x-import>
+</div>
+</sc-for>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:8px">
+<span class="t-label">FilaRechazada · atenuada con motivo</span>
+<div style="display:flex;gap:12px;align-items:flex-start;padding:12px;border:1px solid var(--ds-border);border-radius:var(--radius-lg);color:var(--ds-fg-muted)">
+<span class="ic sm i-ban" style="margin-top:2px"></span>
+<div style="flex:1;display:flex;flex-direction:column;gap:2px"><span class="t-body-sm">jperez@constructoravalle.cl</span><span class="t-caption">Rechazado: supera 25 MB (38 MB en adjuntos)</span></div>
+<span class="t-caption">29-10-2026 15:47</span>
+</div>
+<span class="t-caption">Atenuar con fg-muted, no con opacidad (la opacidad 45 % queda para deshabilitado).</span>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:6px">
+<span class="t-label">AjustesForm · Sheet pantalla completa · Banda</span>
+<span class="t-body-sm muted">AjustesForm: subnavegación de Configuración (232) + FormSection apiladas + ActionBar (ver 07). Sheet pantalla completa: variante de Sheet en teléfono, sin grabber ni scrim, con safe-area (ver 04 y 06). Banda: hoy se resuelve con Alerta warning + icono flag para marcar propuestas (ver 09).</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<span class="t-label">Iconos Lucide que faltan en el set</span>
+<div style="display:flex;flex-wrap:wrap;gap:16px">
+<sc-for list="{{ iconos }}" as="i" hint-placeholder-count="13">
+<span style="display:flex;flex-direction:column;align-items:center;gap:6px;width:64px"><span class="{{ i.cls }}"></span><span class="t-caption">{{ i.n }}</span></span>
+</sc-for>
+</div>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  componentDidMount() {
+    if (window.OPAI20DesignSystem_44e4d7 && window.OPAI20DesignSystem_44e4d7.Button) return;
+    this._t = setInterval(() => { if (window.OPAI20DesignSystem_44e4d7 && window.OPAI20DesignSystem_44e4d7.Button) { clearInterval(this._t); this.forceUpdate(); } }, 100);
+  }
+  componentWillUnmount() { clearInterval(this._t); }
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const btn = (l, i, v) => (NS.Button ? h(NS.Button, { icon: i, variant: v }, l) : null);
+    return {
+      temas: [{ t: "light", label: "Claro" }, { t: "dark", label: "Oscuro" }],
+      noop: () => {},
+      segOpts: [{ value: "nuevas", label: "Nuevas" }, { value: "abiertas", label: "Abiertas" }, { value: "todas", label: "Todas" }],
+      tabItems: [{ id: "res", label: "Resumen" }, { id: "cot", label: "Cotizaciones" }, { id: "doc", label: "Documentos" }],
+      personas: [{ value: "mr", label: "Matías Rojas" }, { value: "vs", label: "Valentina Soto" }],
+      pares: [{ label: "Canal", value: "Correo" }, { label: "Recibida", value: "30-10-2026 09:12", numeric: true }, { label: "RUT", value: "76.412.893-5", mono: true }],
+      cols: [{ key: "n", label: "Solicitud", strong: true }, { key: "s", label: "Servicio" }, { key: "f", label: "Recibida", muted: true }],
+      filas: [{ id: 1, n: "Paula Contreras", s: "Guardias 24/7", f: "30-10-2026 09:12" }, { id: 2, n: "Andrés Vidal", s: "Guardia nocturno", f: "30-10-2026 08:41" }],
+      badgeNueva: { tone: "info", label: "Nueva" }, badgeRev: { tone: "warning", label: "En revisión" },
+      historial: [{ agent: true, who: "OPAI", action: "creó la solicitud desde un correo", when: "30-10-2026 09:12" }, { initials: "MR", who: "Matías Rojas", action: "la derivó", when: "30-10-2026 09:40" }],
+      emptyAction: btn("Registrar solicitud", "plus"),
+      dialogActions: h(React.Fragment, null, btn("Cancelar", null, "ghost"), btn("Confirmar", null, "destructive")),
+      genMark: NS.Icon ? h(NS.Icon, { name: "sparkles", size: "sm", label: "Generado por OPAI", className: "muted" }) : null,
+      canales: [{ icon: "ic sm i-globe", label: "Web" }, { icon: "ic sm i-mail", label: "Correo" }, { icon: "ic sm i-bot", label: "Agente" }, { icon: "ic sm i-pencil", label: "Manual" }],
+      conversion: [
+        { icon: "ic i-building", titulo: "Cuenta «Frigorífico Del Maipo»", sub: "Ya existe con el RUT 76.412.893-5", accion: "Se reutiliza", tone: "info" },
+        { icon: "ic i-user", titulo: "Contacto «Paula Contreras»", sub: "pcontreras@frigorificodelmaipo.cl", accion: "Se crea", tone: "neutral" },
+        { icon: "ic i-paperclip", titulo: "2 adjuntos del correo", sub: "Quedan en Documentos del negocio", accion: "Se guardan", tone: "neutral" },
+      ],
+      iconos: ["mail", "globe", "pencil", "copy", "key", "link", "sparkles", "ban", "merge", "arrow-right", "file-text", "image", "settings"].map((n) => ({ n, cls: "ic i-" + n })),
+    };
+  }
+}
+</script>
+</body>
+</html>
