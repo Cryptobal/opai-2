@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="ds-propuestas.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-accent)}</style>
+</helmet>
+<div data-theme="{{ theme }}" data-sheet="{{ sheetMode }}" data-screen-label="Detalle de solicitud" style="position:relative;width:100%;height:100%;overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="sol" title="{{ shellTitle }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<div style="display:flex;flex:1;min-height:0">
+<sc-if value="{{ isTablet }}" hint-placeholder-val="{{ false }}">
+<div style="width:320px;flex:none;border-right:1px solid var(--ds-border);background:var(--ds-surface);overflow:auto">
+<sc-for list="{{ lista }}" as="s" hint-placeholder-count="5">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.SelectableRow" selected="{{ s.selected }}" title="{{ s.title }}" subtitle="{{ s.sub }}" meta="{{ s.meta }}" badge="{{ s.badge }}" hint-size="100%,64px"></x-import>
+</sc-for>
+</div>
+</sc-if>
+<div style="flex:1;min-width:0;overflow:auto">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+
+<sc-if value="{{ showHeader }}" hint-placeholder-val="{{ true }}">
+<div style="margin:0 0 8px -8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="chevron-left" hint-size="130px,40px">Solicitudes</x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" size="heading" eyebrow="{{ d.eyebrow }}" title="{{ d.titulo }}" badge="{{ estadoBadge }}" hint-size="100%,72px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="user-check" hint-size="100px,40px">Derivar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="more" label="Más acciones: descartar o marcar duplicada" hint-size="44px,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="arrow-right" on-click="{{ openConvertir }}" hint-size="190px,40px">Procesar y convertir</x-import>
+</x-import>
+<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:-4px 0 16px">
+<span class="t-label-sm" style="display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;border:1px solid var(--ds-border-strong)"><span class="{{ d.canalIcon }}"></span>{{ d.canalLabel }}</span>
+<sc-if value="{{ isAgente }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" hint-size="150px,22px">Registrada por OPAI</x-import>
+<span class="t-body-sm muted">a pedido de Matías Rojas</span>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isVariantB }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" titulo="Propuesta, a confirmar por Carlos" icono="flag" style="margin-bottom:16px" hint-size="100%,64px">El agente podría convertir solicitudes, siempre con tu confirmación. Hoy solo las registra.</x-import>
+</sc-if>
+
+<sc-if value="{{ mainOk }}" hint-placeholder-val="{{ true }}">
+<div style="{{ gridStyle }}">
+<div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+
+<sc-if value="{{ isCorreo }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Mensaje recibido" hint-size="100%,360px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" rows="{{ correoMeta }}" hint-size="100%,160px"></x-import>
+<div style="margin-top:12px;border:1px dashed var(--ds-border-strong);border-radius:var(--radius-md);background:var(--ds-bg)">
+<div class="t-caption" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border-bottom:1px dashed var(--ds-border-strong)"><span class="ic sm i-lock"></span>Contenido externo · texto original, sin formato</div>
+<p class="t-body-sm" style="margin:0;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere">{{ correoCuerpo }}</p>
+</div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Adjuntos del correo" description="Se guardan en Documentos del negocio al convertir." hint-size="100%,160px">
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:8px">
+<sc-for list="{{ adjuntos }}" as="a" hint-placeholder-count="2">
+<div style="display:flex;gap:12px;align-items:center;padding:12px;border:1px solid var(--ds-border);border-radius:var(--radius-md);min-width:0">
+<span class="{{ a.icon }}" style="color:var(--ds-fg-muted)"></span>
+<div style="display:flex;flex-direction:column;min-width:0">
+<span class="t-label-sm" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ a.nombre }}</span>
+<span class="t-caption t-numeric" style="font-weight:400">{{ a.meta }}</span>
+</div>
+</div>
+</sc-for>
+</div>
+</x-import>
+</sc-if>
+
+<sc-if value="{{ isAgente }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Conversación de origen" hint-size="100%,120px">
+<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+<span class="ic i-message" style="color:var(--ds-fg-muted)"></span>
+<div style="flex:1;min-width:180px;display:flex;flex-direction:column">
+<span class="t-label">Matías Rojas con OPAI</span>
+<span class="t-body-sm muted t-numeric" style="font-weight:400">29-10-2026 · 17:58–18:05</span>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Enlace" href="#" hint-size="140px,20px">Abrir conversación</x-import>
+</div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Texto original" description="Lo que Matías le contó al agente, guardado tal cual." hint-size="100%,200px">
+<div style="border:1px dashed var(--ds-border-strong);border-radius:var(--radius-md);background:var(--ds-bg)">
+<div class="t-caption" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border-bottom:1px dashed var(--ds-border-strong)"><span class="ic sm i-lock"></span>Contenido externo · texto original, sin formato</div>
+<p class="t-body-sm" style="margin:0;padding:12px;white-space:pre-wrap;overflow-wrap:anywhere">{{ agenteTexto }}</p>
+</div>
+</x-import>
+</sc-if>
+
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Historial" hint-size="100%,140px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Timeline" items="{{ historial }}" hint-size="100%,100px"></x-import>
+</x-import>
+</div>
+
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="{{ d.datosTitulo }}" description="{{ d.datosDesc }}" hint-size="100%,520px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Nombre" default-value="{{ d.nombre }}" trailing="{{ genMark }}" hint-size="100%,68px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Empresa" default-value="{{ d.empresa }}" trailing="{{ genMark }}" hint-size="100%,68px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="RUT" mono="{{ true }}" default-value="{{ d.rut }}" trailing="{{ genMark }}" hint-size="100%,68px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Teléfono" input-mode="tel" default-value="{{ d.telefono }}" trailing="{{ genMark }}" hint-size="100%,68px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Comuna" default-value="{{ d.comuna }}" trailing="{{ genMark }}" hint-size="100%,68px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Servicio" options="{{ servicios }}" value="{{ d.servicio }}" hint-size="100%,68px"></x-import>
+</div>
+</x-import>
+</div>
+</sc-if>
+
+<sc-if value="{{ mainVacio }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:400px;display:flex;border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="{{ d.vacioIcon }}" title="{{ d.vacioTitulo }}" description="No encontramos nombre, empresa ni servicio. Complétalos a mano para poder convertir." action="{{ completarAction }}" hint-size="100%,360px"></x-import>
+</div>
+</sc-if>
+
+<sc-if value="{{ mainCargando }}" hint-placeholder-val="{{ false }}">
+<div aria-busy="true" style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ 120 }}" height="{{ 14 }}" hint-size="120px,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="70%" height="{{ 28 }}" radius="{{ 6 }}" hint-size="70%,28px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ 96 }}" height="{{ 24 }}" radius="{{ 999 }}" hint-size="96px,24px"></x-import>
+<div style="{{ gridStyle }}">
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px;display:flex;flex-direction:column;gap:12px;background:var(--ds-surface)">
+<sc-for list="{{ sk4 }}" as="s" hint-placeholder-count="4">
+<div style="display:flex;justify-content:space-between;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ 72 }}" height="{{ 14 }}" hint-size="72px,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="45%" height="{{ 14 }}" hint-size="45%,14px"></x-import>
+</div>
+</sc-for>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 140 }}" radius="{{ 10 }}" hint-size="100%,140px"></x-import>
+</div>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px;display:flex;flex-direction:column;gap:16px;background:var(--ds-surface)">
+<sc-for list="{{ sk5 }}" as="s" hint-placeholder-count="5">
+<div style="display:flex;flex-direction:column;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ 80 }}" height="{{ 12 }}" hint-size="80px,12px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 44 }}" radius="{{ 10 }}" hint-size="100%,44px"></x-import>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ mainError }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:480px;display:flex">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar la solicitud" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="COM-SOL-504" on-retry="{{ noop }}" hint-size="100%,360px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ mainForbidden }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:480px;display:flex">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a esta solicitud" description="Tu rol (Supervisor) no incluye Comercial. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,360px"></x-import>
+</div>
+</sc-if>
+</x-import>
+</div>
+</div>
+</x-import>
+
+<sc-if value="{{ hasSheet }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Sheet" contained="{{ true }}" side="{{ sheetSide }}" title="Procesar y convertir" description="{{ d.sheetDesc }}" on-close="{{ closeSheet }}" hint-size="420px,100%">
+
+<sc-if value="{{ sheetOk }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:20px;min-height:100%">
+<div style="display:flex;flex-direction:column;gap:4px">
+<div style="display:flex;justify-content:space-between;align-items:center">
+<span class="t-label">Datos revisados</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Enlace" href="#" hint-size="90px,20px">Editar datos</x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" rows="{{ revisados }}" hint-size="100%,240px"></x-import>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<span class="t-label">Qué pasa al convertir</span>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg)">
+<sc-for list="{{ conversion }}" as="c" hint-placeholder-count="4">
+<div style="display:flex;gap:12px;align-items:flex-start;padding:12px;border-bottom:1px solid var(--ds-border)">
+<span class="{{ c.icon }}" style="color:var(--ds-fg-muted);margin-top:2px"></span>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column">
+<span class="t-label-sm">{{ c.titulo }}</span>
+<span class="t-body-sm muted">{{ c.sub }}</span>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ c.tone }}" hint-size="96px,22px">{{ c.accion }}</x-import>
+</div>
+</sc-for>
+<div style="padding:4px 12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ conInstalacion }}" on-change="{{ toggleInstalacion }}" label="Crear también la instalación «Planta Quilicura»" description="Opcional. Puedes agregarla después desde el negocio." hint-size="100%,56px"></x-import>
+</div>
+</div>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Usaremos la cuenta que ya existe" accion="{{ crearCuentaAction }}" hint-size="100%,72px">El RUT 76.412.893-5 ya está en Frigorífico Del Maipo. Si es otra empresa, crea una cuenta nueva.</x-import>
+<div style="flex:1"></div>
+<div style="position:sticky;bottom:-16px;margin:0 -16px -16px;padding:12px 16px calc(16px + env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px;background:var(--ds-surface-raised);border-top:1px solid var(--ds-border)">
+<span class="t-caption">«Pasar a cotización» crea todo y abre la Cotización rápida con cliente, instalación y servicio precargados.</span>
+<div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" block="{{ isPhone }}" on-click="{{ toExito }}" hint-size="150px,44px">Pasar a negocio</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon-right="arrow-right" block="{{ isPhone }}" on-click="{{ toExito }}" hint-size="190px,44px">Pasar a cotización</x-import>
+</div>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ sheetExito }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,320px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;gap:12px;align-items:flex-start">
+<span style="width:40px;height:40px;flex:none;border-radius:999px;background:var(--ds-success-muted);color:var(--ds-success-fg);display:flex;align-items:center;justify-content:center"><span class="ic i-check-circle"></span></span>
+<div style="display:flex;flex-direction:column;gap:2px">
+<span class="t-subheading">Solicitud #1047 convertida</span>
+<span class="t-body-sm muted">Creamos el contacto y el negocio, y reutilizamos la cuenta Frigorífico Del Maipo.</span>
+</div>
+</div>
+<div style="border-top:1px solid var(--ds-border)">
+<div class="pg-kv"><span class="l">Negocio</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Enlace" href="#" hint-size="200px,20px">Guardias 24/7 · Planta Quilicura</x-import></div>
+<div class="pg-kv"><span class="l">Cotización</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Enlace" href="#" hint-size="160px,20px">COT-2026-0318 · Borrador</x-import></div>
+<div class="pg-kv"><span class="l">Documentos</span><span>2 adjuntos guardados</span></div>
+</div>
+</div>
+</x-import>
+<div style="display:flex;flex-direction:column;gap:8px">
+<span class="t-label">Así se ve en la Cotización rápida</span>
+<div style="border:1px dashed var(--ds-border-strong);border-radius:var(--radius-lg);padding:12px;display:flex;flex-direction:column;gap:6px">
+<span class="t-caption">Cabecera de CPQ · sin rediseñar</span>
+<span class="t-label">COT-2026-0318 · Frigorífico Del Maipo</span>
+<span class="t-body-sm muted">Planta Quilicura · Guardias 24/7</span>
+<span class="t-body-sm" style="display:inline-flex;gap:6px;align-items:center"><span class="ic sm i-link muted"></span>Origen: <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Enlace" href="#" hint-size="100px,20px">solicitud #1047</x-import></span>
+</div>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" block="{{ true }}" icon-right="arrow-right" hint-size="100%,44px">Abrir cotización</x-import>
+</div>
+</sc-if>
+
+<sc-if value="{{ sheetVacio }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:420px;display:flex">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="clipboard" size="sm" title="Faltan datos para convertir" description="Completa nombre, empresa y servicio en los datos de la solicitud." action="{{ completarAction }}" hint-size="100%,320px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ sheetCargando }}" hint-placeholder-val="{{ false }}">
+<div aria-busy="true" style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ 120 }}" height="{{ 14 }}" hint-size="120px,14px"></x-import>
+<sc-for list="{{ sk5 }}" as="s" hint-placeholder-count="5">
+<div style="display:flex;justify-content:space-between;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ 80 }}" height="{{ 14 }}" hint-size="80px,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="50%" height="{{ 14 }}" hint-size="50%,14px"></x-import>
+</div>
+</sc-for>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 220 }}" radius="{{ 16 }}" hint-size="100%,220px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ sheetError }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:420px;display:flex">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos preparar la conversión" description="No se creó nada. Revisa tu conexión e inténtalo de nuevo." code="COM-CNV-502" on-retry="{{ noop }}" hint-size="100%,320px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ sheetForbidden }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:420px;display:flex">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No puedes convertir solicitudes" description="Tu rol (Viewer) solo permite ver. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,320px"></x-import>
+</div>
+</sc-if>
+</x-import>
+</sc-if>
+
+<sc-if value="{{ isVariantB }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Dialog" contained="{{ true }}" title="OPAI quiere convertir la solicitud #1045" description="Propuesta, a confirmar por Carlos. Nada se crea hasta que confirmes." actions="{{ dialogActions }}" on-close="{{ noop }}" hint-size="480px,320px">
+<div style="display:flex;flex-direction:column">
+<div class="pg-kv"><span class="l">Cuenta</span><span>Inmobiliaria Los Robles · se crea</span></div>
+<div class="pg-kv"><span class="l">Contacto</span><span>Javiera Núñez · se crea</span></div>
+<div class="pg-kv"><span class="l">Negocio</span><span>Conserjería · Torre Apoquindo · se crea</span></div>
+</div>
+</x-import>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ok&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;ok&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;origen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;correo&quot;,&quot;agente&quot;],&quot;default&quot;:&quot;correo&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;hoja&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ninguna&quot;,&quot;convertir&quot;,&quot;exito&quot;],&quot;default&quot;:&quot;ninguna&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;variante&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;a&quot;,&quot;b&quot;],&quot;default&quot;:&quot;a&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { hoja: null, conInstalacion: true };
+  componentDidMount() {
+    if (window.OPAI20DesignSystem_44e4d7 && window.OPAI20DesignSystem_44e4d7.Button) return;
+    this._t = setInterval(() => { if (window.OPAI20DesignSystem_44e4d7 && window.OPAI20DesignSystem_44e4d7.Button) { clearInterval(this._t); this.forceUpdate(); } }, 100);
+  }
+  componentWillUnmount() { clearInterval(this._t); }
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = this.props.device ?? "desktop";
+    const isPhone = device === "phone";
+    const origen = this.props.origen ?? "correo";
+    const isAgente = origen === "agente";
+    const variante = this.props.variante ?? "a";
+    const estado = this.props.estado ?? "ok";
+    const hoja = this.state.hoja ?? this.props.hoja ?? "ninguna";
+    const hasSheet = hoja === "convertir" || hoja === "exito";
+    const main = hasSheet ? "ok" : estado;
+    const sh = hoja === "exito" ? "exito" : hasSheet ? estado : "none";
+    const D = {
+      correo: { eyebrow: "Solicitud #1047 · recibida 30-10-2026 09:12", titulo: "Paula Contreras · Frigorífico Del Maipo", canalIcon: "ic sm i-mail", canalLabel: "Correo", datosTitulo: "Datos detectados", datosDesc: "Los encontramos en el correo. Revísalos antes de convertir.", nombre: "Paula Contreras", empresa: "Frigorífico Del Maipo", rut: "76.412.893-5", telefono: "+56 9 7712 3340", comuna: "Quilicura", servicio: "g24", vacioIcon: "inbox", vacioTitulo: "El correo llegó sin texto", sheetDesc: "Solicitud #1047 · Paula Contreras", badge: ["info", "Nueva"] },
+      agente: { eyebrow: "Solicitud #1045 · registrada 29-10-2026 18:05", titulo: "Javiera Núñez · Inmobiliaria Los Robles", canalIcon: "ic sm i-bot", canalLabel: "Agente", datosTitulo: "Datos propuestos", datosDesc: "Generados por OPAI desde la conversación. Revísalos antes de convertir.", nombre: "Javiera Núñez", empresa: "Inmobiliaria Los Robles", rut: "77.120.554-1", telefono: "+56 9 5540 2218", comuna: "Las Condes", servicio: "con", vacioIcon: "bot", vacioTitulo: "OPAI no propuso datos", sheetDesc: "Solicitud #1045 · Javiera Núñez", badge: ["warning", "En revisión"] },
+    }[origen];
+    const btn = (label, icon, variant, onClick) => (NS.Button ? h(NS.Button, { icon, variant, onClick }, label) : null);
+    const conv = [
+      { icon: "ic i-building", titulo: isAgente ? "Cuenta «Inmobiliaria Los Robles»" : "Cuenta «Frigorífico Del Maipo»", sub: isAgente ? "No existe una con ese RUT" : "Ya existe con el RUT 76.412.893-5", accion: isAgente ? "Se crea" : "Se reutiliza", tone: isAgente ? "neutral" : "info" },
+      { icon: "ic i-user", titulo: "Contacto «" + D.nombre + "»", sub: isAgente ? "jnunez@losrobles.cl" : "pcontreras@frigorificodelmaipo.cl", accion: "Se crea", tone: "neutral" },
+      { icon: "ic i-briefcase", titulo: isAgente ? "Negocio «Conserjería · Torre Apoquindo»" : "Negocio «Guardias 24/7 · Planta Quilicura»", sub: "Responsable: Matías Rojas", accion: "Se crea", tone: "neutral" },
+    ];
+    if (!isAgente) conv.push({ icon: "ic i-paperclip", titulo: "2 adjuntos del correo", sub: "Quedan en Documentos del negocio", accion: "Se guardan", tone: "neutral" });
+    return {
+      device, theme: this.props.theme ?? "light", isPhone, isTablet: device === "tablet",
+      shellTitle: isPhone ? "" : "Solicitudes",
+      sheetMode: isPhone ? "full" : "side", sheetSide: isPhone ? "bottom" : "right",
+      gridStyle: device === "desktop" ? "display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:16px;align-items:start" : "display:flex;flex-direction:column;gap:16px",
+      d: D, isAgente, isCorreo: !isAgente, isVariantB: variante === "b" && isAgente,
+      showHeader: main === "ok" || main === "vacio",
+      mainOk: main === "ok", mainVacio: main === "vacio", mainCargando: main === "cargando", mainError: main === "error", mainForbidden: main === "sinpermiso",
+      hasSheet, sheetOk: sh === "ok", sheetExito: sh === "exito", sheetVacio: sh === "vacio", sheetCargando: sh === "cargando", sheetError: sh === "error", sheetForbidden: sh === "sinpermiso",
+      estadoBadge: NS.Badge ? h(NS.Badge, { tone: D.badge[0] }, D.badge[1]) : null,
+      genMark: isAgente && NS.Icon ? h(NS.Icon, { name: "sparkles", size: "sm", label: "Generado por OPAI", className: "muted" }) : null,
+      openConvertir: () => this.setState({ hoja: "convertir" }), closeSheet: () => this.setState({ hoja: "ninguna" }), toExito: () => this.setState({ hoja: "exito" }), noop: () => {},
+      conInstalacion: this.state.conInstalacion, toggleInstalacion: () => this.setState({ conInstalacion: !this.state.conInstalacion }),
+      correoMeta: [
+        { label: "De", value: "Paula Contreras · pcontreras@frigorificodelmaipo.cl" },
+        { label: "Para", value: "solicitudes@atlas.opai.cl" },
+        { label: "Asunto", value: "Cotización guardias planta Quilicura" },
+        { label: "Recibido", value: "30-10-2026 09:12", numeric: true },
+      ],
+      correoCuerpo: "Estimados:\n\nSomos Frigorífico Del Maipo (RUT 76.412.893-5). Necesitamos cotizar servicio de guardias 24/7 para nuestra Planta Quilicura a partir de diciembre: 2 puestos de día y 1 de noche.\n\nAdjunto las bases y el plano de la planta. Pueden llamarme al +56 9 7712 3340.\n\nSaludos,\nPaula Contreras\nJefa de Administración",
+      agenteTexto: "Me llamó Javiera Núñez de Inmobiliaria Los Robles. Quieren conserjería 24 h para la Torre Apoquindo desde enero, 3 turnos. Su fono es +56 9 5540 2218.",
+      adjuntos: [
+        { icon: "ic i-file-text", nombre: "Bases_servicio_guardias.pdf", meta: "PDF · 1,2 MB" },
+        { icon: "ic i-image", nombre: "Plano_planta_quilicura.jpg", meta: "JPG · 840 KB" },
+      ],
+      historial: isAgente
+        ? [{ agent: true, who: "OPAI", action: "registró la solicitud; Matías Rojas aprobó la vista previa", when: "29-10-2026 18:05" }, { initials: "MR", who: "Matías Rojas", action: "la tomó y quedó en revisión", when: "29-10-2026 18:06" }]
+        : [{ agent: true, who: "OPAI", action: "creó la solicitud desde un correo a solicitudes@atlas.opai.cl", when: "30-10-2026 09:12" }],
+      servicios: [{ value: "g24", label: "Guardias 24/7" }, { value: "gn", label: "Guardia nocturno" }, { value: "con", label: "Conserjería" }, { value: "ron", label: "Rondas" }],
+      revisados: [
+        { label: "Contacto", value: D.nombre },
+        { label: "Empresa", value: D.empresa },
+        { label: "RUT", value: D.rut, mono: true },
+        { label: "Teléfono", value: D.telefono, numeric: true },
+        { label: "Servicio", value: isAgente ? "Conserjería" : "Guardias 24/7" },
+        { label: "Comuna", value: D.comuna },
+      ],
+      conversion: conv,
+      crearCuentaAction: NS.Enlace ? h(NS.Enlace, { href: "#" }, "Crear cuenta nueva") : null,
+      completarAction: btn("Completar datos", "pencil"),
+      dialogActions: h(React.Fragment, null, btn("Cancelar", null, "ghost"), btn("Confirmar y convertir")),
+      sk4: [1, 2, 3, 4], sk5: [1, 2, 3, 4, 5],
+      lista: [
+        { title: "Paula Contreras", sub: "Frigorífico Del Maipo · Correo", meta: "30-10 09:12", badge: { tone: "info", label: "Nueva" }, selected: !isAgente },
+        { title: "Andrés Vidal", sub: "Logística Austral SpA · Web", meta: "30-10 08:41", badge: { tone: "info", label: "Nueva" }, selected: false },
+        { title: "Javiera Núñez", sub: "Inmobiliaria Los Robles · Agente", meta: "29-10 18:05", badge: { tone: "warning", label: "En revisión" }, selected: isAgente },
+        { title: "Ignacio Pardo", sub: "Colegio San Esteban · Manual", meta: "29-10 11:30", badge: { tone: "warning", label: "En revisión" }, selected: false },
+      ],
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "sol", label: "Solicitudes", icon: "inbox" }, { id: "neg", label: "Negocios", icon: "briefcase" }, { id: "cot", label: "Cotizaciones", icon: "file" }, { id: "mas", label: "Más", icon: "more" }],
+      groups: [
+        { items: [{ id: "ini", label: "Inicio", icon: "home" }] },
+        { title: "Comercial", items: [{ id: "sol", label: "Solicitudes", icon: "inbox" }, { id: "neg", label: "Negocios", icon: "briefcase" }, { id: "cot", label: "Cotizaciones", icon: "file" }, { id: "con", label: "Contactos", icon: "users" }] },
+        { title: "Operaciones", items: [{ id: "ins", label: "Instalaciones", icon: "building" }, { id: "pau", label: "Pauta mensual", icon: "calendar" }] },
+        { title: "Configuración", items: [{ id: "aju", label: "Configuración", icon: "settings" }] },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

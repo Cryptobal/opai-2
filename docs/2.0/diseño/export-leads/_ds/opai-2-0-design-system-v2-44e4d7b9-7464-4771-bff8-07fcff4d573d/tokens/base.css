@@ -1,0 +1,39 @@
+/* DS 2.0 — Base (packages/ds/src/styles.css @layer base) */
+html {
+  font-family: var(--font-sans);
+  font-feature-settings: "cv11", "ss01";
+  -webkit-font-smoothing: antialiased;
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  margin: 0;
+  background: var(--ds-bg);
+  color: var(--ds-fg);
+  min-height: 100dvh;
+  font-size: var(--text-md);
+  line-height: var(--text-md--line-height);
+}
+*, *::before, *::after { box-sizing: border-box; border-color: var(--ds-border); }
+button, input, select, textarea { font: inherit; }
+fieldset { min-inline-size: 0; }
+a { color: var(--ds-accent); text-decoration: none; }
+a:hover { color: var(--ds-accent); }
+:focus-visible { outline: 2px solid var(--ds-focus); outline-offset: 2px; }
+
+/* Contenedor tematizable (equivale a .ds del export): aplica fondo y color del tema */
+.ds { font-family: var(--font-sans); font-feature-settings: "cv11", "ss01"; color: var(--ds-fg); background: var(--ds-bg); font-size: 16px; line-height: 24px; -webkit-font-smoothing: antialiased; }
+
+/* Safe-area iOS */
+.pb-safe { padding-bottom: env(safe-area-inset-bottom); }
+.pt-safe { padding-top: env(safe-area-inset-top); }
+
+/* Entrada de overlays */
+@keyframes ds-entrar { from { opacity: 0; transform: scale(0.98); } }
+@keyframes ds-aparecer { from { opacity: 0; } }
+@keyframes ds-subir { from { transform: translateY(24px); opacity: 0; } }
+@keyframes ds-lateral { from { transform: translateX(24px); opacity: 0; } }
+@keyframes ds-shimmer { to { transform: translateX(100%); } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; }
+}
