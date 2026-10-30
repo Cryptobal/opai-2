@@ -30,6 +30,8 @@ export type DatosEvidencia = {
   sha256?: string | null;
   textoAceptacion?: string | null;
   versionAceptacion?: string | null;
+  /** Nombre que el firmante escribió al firmar (B3): nunca sobrescribe `firmante.nombre`. */
+  nombreFirma?: string | null;
 };
 
 /**
@@ -54,6 +56,7 @@ export async function registrarEvidencia(
       nivel: datos.nivel ?? null,
       metodo: datos.metodo ?? null,
       sha256,
+      nombreFirma: datos.nombreFirma ?? null,
     },
   });
   await tx.evidenciaFirma.create({

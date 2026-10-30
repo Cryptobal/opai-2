@@ -1,7 +1,8 @@
 import { createHash, randomBytes } from "node:crypto";
 
-import { claveDocumento, enmascararRun, nombreSeguro } from "@opai/domain";
+import { claveDocumento, enmascararRun, ESTADOS_SOLICITUD_VIVOS, nombreSeguro } from "@opai/domain";
 
+import { conflicto } from "../../errores";
 import { selloDe } from "../../integraciones/sello";
 import type { Contexto } from "../../types";
 import { uuid7 } from "../documentos/uuid7";
@@ -119,8 +120,11 @@ export async function completarSolicitud(ctx: Contexto, s: Solicitud): Promise<v
         bitacoraSeq: hecho.seq,
       },
     });
-    await tx.solicitudFirma.update({
-      where: { id: s.id },
+    // B2: condicionado a que la solicitud siga viva DENTRO de esta transacción; si alguien la
+    // canceló o rechazó mientras el sello y la subida corrían fuera de la transacción, esto falla
+    // (y revierte todo lo creado arriba) en vez de revivir una solicitud terminal.
+    const { count: viva } = await tx.solicitudFirma.updateMany({
+      where: { id: s.id, estado: { in: [...ESTADOS_SOLICITUD_VIVOS] } },
       data: {
         estado: "completada",
         documentoFirmadoId: firmado.id,
@@ -129,6 +133,7 @@ export async function completarSolicitud(ctx: Contexto, s: Solicitud): Promise<v
         completadaEn: new Date(),
       },
     });
+    if (viva !== 1) throw conflicto("La solicitud ya no admite completarse.");
     await ctx.eventos.emitir(tx, {
       tipo: "documentos.firma.completada",
       entidadTipo: "solicitud_firma",

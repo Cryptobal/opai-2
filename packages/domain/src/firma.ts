@@ -105,6 +105,10 @@ export const esEstadoTerminal = (e: EstadoSolicitudFirma): boolean => TRANSICION
 export const estadoVivo = (e: EstadoSolicitudFirma): boolean =>
   e === "enviada" || e === "en_curso" || e === "espera_prestador";
 
+/** Los mismos estados vivos, listos para condicionar un `updateMany` sin TOCTOU (B2, PR 2). */
+export const ESTADOS_SOLICITUD_VIVOS: readonly EstadoSolicitudFirma[] =
+  ESTADOS_SOLICITUD_FIRMA.filter(estadoVivo);
+
 /** Código de un solo uso para N2 (R13): 6 dígitos, 10 minutos, 3 intentos. */
 export const OTP_DIGITOS = 6;
 export const OTP_VIGENCIA_MS = 10 * 60_000;

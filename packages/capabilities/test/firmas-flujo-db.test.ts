@@ -337,6 +337,113 @@ describe.skipIf(!urlPropietario)("firma · envío, firma, rechazo y verificació
     expect(vFalla.coincide).toBe(false);
   });
 
+  it("B2: cancelar concurrente con firmar no revive una solicitud terminal (carrera)", async () => {
+    const doc = await documento();
+    const s = await dato<{ id: string }>(owner("a"), "core.firmas.enviar", {
+      documentoId: doc.id,
+      clase: "acta",
+      nivel: "N1",
+      firmantes: [{ tipo: "usuario", usuarioId: t.a.userId, nombre: "Ana" }],
+    });
+    const firmarInput = {
+      solicitudId: s.id,
+      metodo: "nombre",
+      nombreFirma: "Ana Admin",
+      aceptaMedio: true,
+      textoAceptacion: "Acepto firmar electrónicamente este documento.",
+      versionAceptacion: "2026-10",
+    };
+    const [cancelar, firmar] = await Promise.all([
+      resultado(owner("a"), "core.firmas.cancelar", { id: s.id, motivo: "carrera de prueba" }),
+      resultado(owner("a"), "core.firmas.firmar", firmarInput),
+    ]);
+    // El row lock de Postgres decide un único ganador: nunca pueden quedar las dos en ok:true.
+    expect(cancelar.ok === true && firmar.ok === true).toBe(false);
+    expect(cancelar.ok === false && firmar.ok === false).toBe(false);
+    const fin = await dato<{
+      estado: string;
+      documentoFirmadoId: string | null;
+      firmantes: { estado: string }[];
+    }>(owner("a"), "core.firmas.estado", { id: s.id });
+    if (cancelar.ok) {
+      expect(fin).toMatchObject({ estado: "cancelada", documentoFirmadoId: null });
+      expect(fin.firmantes[0]?.estado).toBe("pendiente");
+      expect(firmar).toMatchObject({ ok: false, error: { code: "CONFLICT" } });
+    } else {
+      expect(fin.estado).toBe("completada");
+      expect(fin.documentoFirmadoId).not.toBeNull();
+      expect(fin.firmantes[0]?.estado).toBe("firmado");
+      expect(cancelar).toMatchObject({ ok: false, error: { code: "CONFLICT" } });
+    }
+  });
+
+  it("B2: rechazar concurrente con firmar del mismo firmante termina en un solo estado (carrera)", async () => {
+    const doc = await documento();
+    const s = await dato<{ id: string }>(owner("a"), "core.firmas.enviar", {
+      documentoId: doc.id,
+      clase: "acta_reunion",
+      nivel: "N1",
+      firmantes: [{ tipo: "usuario", usuarioId: t.a.userId, nombre: "Ana" }],
+    });
+    const [rechazar, firmar] = await Promise.all([
+      resultado(owner("a"), "core.firmas.rechazar", {
+        solicitudId: s.id,
+        motivo: "carrera de prueba",
+      }),
+      resultado(owner("a"), "core.firmas.firmar", {
+        solicitudId: s.id,
+        metodo: "nombre",
+        nombreFirma: "Ana Admin",
+        aceptaMedio: true,
+        textoAceptacion: "Acepto firmar electrónicamente este documento.",
+        versionAceptacion: "2026-10",
+      }),
+    ]);
+    expect(rechazar.ok === true && firmar.ok === true).toBe(false);
+    expect(rechazar.ok === false && firmar.ok === false).toBe(false);
+    const fin = await dato<{
+      estado: string;
+      documentoFirmadoId: string | null;
+      firmantes: { estado: string }[];
+    }>(owner("a"), "core.firmas.estado", { id: s.id });
+    if (rechazar.ok) {
+      expect(fin).toMatchObject({ estado: "rechazada", documentoFirmadoId: null });
+      expect(fin.firmantes[0]?.estado).toBe("rechazado");
+    } else {
+      expect(fin.estado).toBe("completada");
+      expect(fin.documentoFirmadoId).not.toBeNull();
+      expect(fin.firmantes[0]?.estado).toBe("firmado");
+    }
+  });
+
+  it("B3: el nombre escrito al firmar queda en la evidencia, nunca sobrescribe al firmante", async () => {
+    const doc = await documento();
+    const s = await dato<{ id: string }>(owner("a"), "core.firmas.enviar", {
+      documentoId: doc.id,
+      clase: "acta",
+      nivel: "N1",
+      firmantes: [{ tipo: "usuario", usuarioId: t.a.userId, nombre: "Ana Invitada" }],
+    });
+    await dato(owner("a"), "core.firmas.firmar", {
+      solicitudId: s.id,
+      metodo: "nombre",
+      nombreFirma: "Otra Firma Distinta",
+      aceptaMedio: true,
+      textoAceptacion: "Acepto firmar electrónicamente este documento.",
+      versionAceptacion: "2026-10",
+    });
+    const firmante = await e.forTenant(t.a.tenantId).firmante.findFirstOrThrow({
+      where: { solicitudId: s.id },
+    });
+    expect(firmante.nombre).toBe("Ana Invitada");
+    const eslabon = await e.forTenant(t.a.tenantId).bitacora.findFirstOrThrow({
+      where: { entidadId: s.id, tipo: "documentos.firma.firmada" },
+    });
+    expect(JSON.parse(eslabon.payloadCanon)).toMatchObject({
+      payload: { nombreFirma: "Otra Firma Distinta" },
+    });
+  });
+
   it("aislamiento: el tenant B no ve ni gestiona la solicitud del A", async () => {
     const doc = await documento("a");
     const s = await dato<{ id: string }>(owner("a"), "core.firmas.enviar", {
@@ -375,5 +482,34 @@ describe.skipIf(!urlPropietario)("firma · envío, firma, rechazo y verificació
       { token },
     );
     expect(v).toMatchObject({ nombre: "Dana", estadoFirmante: "pendiente", clase: "acta_reunion" });
+  });
+
+  it("A2: core.firmas.documento_url entrega la URL del documento por el enlace, sin enumeración", async () => {
+    const doc = await documento();
+    const s = await dato<{ id: string }>(owner("a"), "core.firmas.enviar", {
+      documentoId: doc.id,
+      clase: "acta_reunion",
+      nivel: "N1",
+      firmantes: [{ tipo: "externo", nombre: "Elena", email: "elena@x.cl" }],
+    });
+    const token = `token-de-prueba-documento-url-${randomUUID()}`;
+    const tokenHash = createHash("sha256").update(token).digest("hex");
+    await e.forTenant(t.a.tenantId).firmante.updateMany({
+      where: { solicitudId: s.id },
+      data: { tokenHash, tokenExpira: new Date(Date.now() + 3_600_000) },
+    });
+    const sinSesion = mod.crearContexto({ tenantId: t.a.tenantId, actor: { tipo: "system" }, medidor });
+    sinSesion.servicios.almacenamiento.urlDescarga = async () =>
+      "https://archivo.example.test/congelado";
+    const v = await dato<{ url: string; nombre: string; mime: string }>(
+      sinSesion,
+      "core.firmas.documento_url",
+      { token },
+    );
+    expect(v).toMatchObject({ url: "https://archivo.example.test/congelado", nombre: doc.nombre });
+    const noValido = await resultado(sinSesion, "core.firmas.documento_url", {
+      token: "token-que-no-existe-0123456789",
+    });
+    expect(noValido).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
   });
 });

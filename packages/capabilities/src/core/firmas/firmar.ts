@@ -1,6 +1,11 @@
 import { z } from "zod";
 
-import { estadoVivo, METODOS_FIRMA_N1, type EstadoSolicitudFirma } from "@opai/domain";
+import {
+  ESTADOS_SOLICITUD_VIVOS,
+  estadoVivo,
+  METODOS_FIRMA_N1,
+  type EstadoSolicitudFirma,
+} from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import { conflicto, noEncontrado, reglaDeNegocio } from "../../errores";
@@ -67,14 +72,22 @@ export const firmasFirmar = defineCapability({
         estadoSolicitud: s.estado,
       };
     const ultima = await ctx.transaccion(async (tx) => {
-      // R11: una sola firma por firmante; la transición va condicionada al estado pendiente.
+      // R11: una sola firma por firmante; la transición va condicionada al estado pendiente. Va
+      // primero (mismo orden de bloqueo que rechazar.ts: firmante y luego solicitud) para no
+      // bloquearse en cruz con un rechazo concurrente del mismo firmante.
       const { count } = await tx.firmante.updateMany({
         where: { id: firmante.id, estado: "pendiente" },
-        data: { estado: "firmado", firmadoEn: new Date(), vistoEn: new Date(), nombre: input.nombreFirma },
+        data: { estado: "firmado", firmadoEn: new Date(), vistoEn: new Date() },
       });
       if (count !== 1) throw conflicto("Ya firmaste o rechazaste (R11).");
-      if (s.estado === "enviada")
-        await tx.solicitudFirma.update({ where: { id: s.id }, data: { estado: "en_curso" } });
+      // B2: fija la solicitud como viva DENTRO de esta transacción; si alguien la canceló o
+      // rechazó mientras tanto (fuera de la foto leída arriba), esto revierte también la firma de
+      // arriba, en vez de revivir una solicitud terminal.
+      const { count: viva } = await tx.solicitudFirma.updateMany({
+        where: { id: s.id, estado: { in: [...ESTADOS_SOLICITUD_VIVOS] } },
+        data: { estado: "en_curso" },
+      });
+      if (viva !== 1) throw conflicto("La solicitud ya no admite firmas.");
       await registrarEvidencia(ctx, tx, s, {
         tipo: "firmada",
         firmanteId: firmante.id,
@@ -82,6 +95,8 @@ export const firmasFirmar = defineCapability({
         metodo: input.metodo,
         textoAceptacion: input.textoAceptacion,
         versionAceptacion: input.versionAceptacion,
+        // B3: el nombre escrito al firmar queda en la evidencia, nunca sobrescribe firmante.nombre.
+        nombreFirma: input.nombreFirma,
       });
       const pendientes = await tx.firmante.count({
         where: { solicitudId: s.id, rol: "firma", estado: "pendiente" },
