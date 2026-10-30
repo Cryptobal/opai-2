@@ -53,6 +53,15 @@ export function entradasNucleo(voc: Vocabulario): EntradaArea[] {
       permiso: PERMISOS_CORE.estructurasRead,
       orden: 2,
     },
+    {
+      area: "documentos",
+      href: "/documentos/firmas",
+      etiqueta: "Firmas",
+      icono: "PenLine",
+      modulo: "core",
+      permiso: PERMISOS_CORE.firmasRead,
+      orden: 1,
+    },
   ];
 }
 

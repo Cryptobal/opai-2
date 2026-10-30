@@ -27,7 +27,12 @@ async function aprobacion(
       ? { apiKeyId: null, nombre: "Agente interno", autonomia: {} as Record<string, string> }
       : null);
   const nivel = a?.autonomia[c.id];
-  const exige = nivel === "aprobacion" || (c.efecto === "irreversible" && nivel !== "directo");
+  // `exigeAprobacion` (R19) condiciona la aprobación al input y reemplaza al efecto como disparador;
+  // sin él, manda el efecto irreversible como siempre. La autonomía "aprobacion"/"directo" gana.
+  const porInput = c.exigeAprobacion
+    ? c.exigeAprobacion(entrada)
+    : c.efecto === "irreversible";
+  const exige = nivel === "aprobacion" || (porInput && nivel !== "directo");
   if (!a || !exige) return null;
   if (ctx.actor.tipo !== "agent") return null;
   const venceEn = new Date(Date.now() + VIGENCIA_APROBACION_MS);
