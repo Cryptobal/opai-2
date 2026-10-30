@@ -57,6 +57,13 @@ export async function anonimizarPersona(
       lng: null,
       usuarioId: null,
       bloqueoMotivo: null,
+      // Marca P1 "No recontratar": al anonimizar al titular no queda ni la marca ni su motivo
+      // (corrección del Revisor, 30-oct 15:33 CLT). El motivo nunca llegó en claro a `audit_events`
+      // (la capacidad lo marca `sensibles`), así que no hace falta tocar la auditoría.
+      noRecontratar: false,
+      noRecontratarMotivo: null,
+      noRecontratarEn: null,
+      noRecontratarVenceEn: null,
       estado: "inactiva",
       anonimizadaEn: ahora,
     },

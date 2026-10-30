@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<style>body{margin:0;background:#e4e4e7;font-family:Inter,system-ui,sans-serif} a{color:#4a3fd8} a:hover{color:#111113}</style>
+</helmet>
+<div style="display:flex;flex-direction:column;gap:56px;padding:48px;width:max-content">
+<header style="display:flex;flex-direction:column;gap:4px;max-width:900px">
+<span style="font:500 13px/18px Inter,sans-serif;color:#52525b">OPAI 2.0 · Rendiciones · <a href="Índice.dc.html">Índice</a></span>
+<h1 style="margin:0;font:600 28px/34px Inter,sans-serif;letter-spacing:-0.02em;color:#111113">Variante B · Propuesta, a confirmar por Carlos</h1>
+<p style="margin:0;font:400 15px/22px Inter,sans-serif;color:#52525b">Nada de esta hoja está en las pantallas 01–08. Si Carlos confirma, cada punto se integra a la pantalla indicada.</p>
+</header>
+
+<section style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-direction:column;gap:2px"><h2 style="margin:0;font:600 18px/26px Inter,sans-serif;color:#111113">B1 · Recordatorio a quien aprueba a los 5 y 10 días</h2><span style="font:400 14px/20px Inter,sans-serif;color:#52525b">Afecta a 04 Bandeja (marca «Pendiente hace N días») y 08 Configuración (Switch «Recordar a quien aprueba»).</span></div>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px Inter,sans-serif;color:#3f3f46">Bandeja · 375 claro</span><div style="width:375px;height:812px;border-radius:12px;overflow:hidden;position:relative;transform:translateZ(0)"><dc-import name="Rendiciones" screen="bandeja" device="phone" theme="light" propuesta="{{ true }}" hint-size="375px,812px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px Inter,sans-serif;color:#3f3f46">Bandeja · 375 oscuro</span><div style="width:375px;height:812px;border-radius:12px;overflow:hidden;position:relative;transform:translateZ(0)"><dc-import name="Rendiciones" screen="bandeja" device="phone" theme="dark" propuesta="{{ true }}" hint-size="375px,812px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px Inter,sans-serif;color:#3f3f46">Bandeja · 1280 claro</span><div style="width:1280px;height:800px;border-radius:12px;overflow:hidden;position:relative;transform:translateZ(0)"><dc-import name="Rendiciones" screen="bandeja" device="desktop" theme="light" propuesta="{{ true }}" hint-size="1280px,800px"></dc-import></div></div>
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-direction:column;gap:2px"><h2 style="margin:0;font:600 18px/26px Inter,sans-serif;color:#111113">B2 · Lectura del comprobante (monto y fecha) desde la foto</h2><span style="font:400 14px/20px Inter,sans-serif;color:#52525b">Afecta a 02 Nueva rendición · compra. Siempre como sugerencia editable: el campo queda editable y lo indica la ayuda.</span></div>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px Inter,sans-serif;color:#3f3f46">375 claro</span><div style="width:375px;height:812px;border-radius:12px;overflow:hidden;position:relative;transform:translateZ(0)"><dc-import name="Rendiciones" screen="compra" device="phone" theme="light" propuesta="{{ true }}" hint-size="375px,812px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px Inter,sans-serif;color:#3f3f46">375 oscuro</span><div style="width:375px;height:812px;border-radius:12px;overflow:hidden;position:relative;transform:translateZ(0)"><dc-import name="Rendiciones" screen="compra" device="phone" theme="dark" propuesta="{{ true }}" hint-size="375px,812px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px Inter,sans-serif;color:#3f3f46">1024 claro</span><div style="width:1024px;height:768px;border-radius:12px;overflow:hidden;position:relative;transform:translateZ(0)"><dc-import name="Rendiciones" screen="compra" device="tablet" theme="light" propuesta="{{ true }}" hint-size="1024px,768px"></dc-import></div></div>
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-direction:column;gap:2px"><h2 style="margin:0;font:600 18px/26px Inter,sans-serif;color:#111113">B3 · Importar las 38 rendiciones pendientes de 1.0 en el corte</h2><span style="font:400 14px/20px Inter,sans-serif;color:#52525b">Afecta a 08 Configuración. La cifra 38 es dato de 1.0 sin verificar al cierre; se muestra como tal. Aquí se muestra arriba del formulario, junto al Switch de B1, para revisarlo.</span></div>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px Inter,sans-serif;color:#3f3f46">375 claro</span><div style="width:375px;height:812px;border-radius:12px;overflow:hidden;position:relative;transform:translateZ(0)"><dc-import name="Rendiciones" screen="config" device="phone" theme="light" propuesta="{{ true }}" hint-size="375px,812px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px Inter,sans-serif;color:#3f3f46">1280 oscuro</span><div style="width:1280px;height:800px;border-radius:12px;overflow:hidden;position:relative;transform:translateZ(0)"><dc-import name="Rendiciones" screen="config" device="desktop" theme="dark" propuesta="{{ true }}" hint-size="1280px,800px"></dc-import></div></div>
+</div>
+</section>
+</div>
+</x-dc>
+</body>
+</html>
