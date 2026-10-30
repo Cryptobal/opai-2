@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 
+import { hidratado } from "./hidratacion";
 import { E2E_PASSWORD, entrar } from "./sesion";
 
 // Brief 23 · Finanzas compras PR 1 — flujo de las tres pantallas nuevas: plan de cuentas (06),
@@ -34,9 +35,23 @@ test.describe("Finanzas · Compras", () => {
       const respuesta = page.waitForResponse(
         (r) => r.request().method() === "POST" && (r.request().postData() ?? "").includes(capacidad),
       );
-      await page.getByRole("button", typeof boton === "string" ? { name: boton, exact: true } : { name: boton }).click();
+      const control = page.getByRole("button", typeof boton === "string" ? { name: boton, exact: true } : { name: boton });
+      await hidratado(control);
+      await control.click();
       expect((await respuesta).ok()).toBe(true);
       await expect(page.getByRole("dialog")).toBeHidden({ timeout: 30_000 });
+    };
+    // En `pnpm dev` el campo se pinta antes de hidratarse y un fill en esa ventana se pierde.
+    const llenar = async (etiqueta: string, valor: string) => {
+      const campo = page.getByLabel(etiqueta, { exact: true });
+      await hidratado(campo);
+      await campo.fill(valor);
+    };
+    const elegir = async (etiqueta: string, opcion: string) => {
+      const select = page.getByLabel(etiqueta, { exact: true });
+      await hidratado(select);
+      await select.click();
+      await page.getByRole("option", { name: opcion }).click();
     };
     const sinScrollHorizontal = async () =>
       expect(await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth)).toBe(true);
@@ -44,7 +59,12 @@ test.describe("Finanzas · Compras", () => {
     // 06 · Plan de cuentas: carga la plantilla si el tenant aún no la tiene.
     await page.goto("/finanzas/plan-de-cuentas");
     const cargar = page.getByRole("button", { name: "Cargar plantilla chilena" });
-    if (await cargar.isVisible({ timeout: 10_000 }).catch(() => false)) await cargar.click();
+    // La página carga bajo Suspense: espera el botón o el plan ya cargado antes de decidir.
+    await cargar.or(page.getByText("Deudores por venta").first()).first().waitFor({ timeout: 30_000 });
+    if (await cargar.isVisible()) {
+      await hidratado(cargar);
+      await cargar.click();
+    }
     await expect(page.getByText("Deudores por venta").first()).toBeVisible({ timeout: 30_000 });
     await expect(page.getByText("Grupo incorrecto")).toHaveCount(0);
     await sinScrollHorizontal();
@@ -53,8 +73,8 @@ test.describe("Finanzas · Compras", () => {
     // 02 · Proveedor: crear y abrir su ficha.
     await page.goto("/finanzas/compras/proveedores");
     await page.getByRole("link", { name: "Nuevo proveedor" }).first().click();
-    await page.getByLabel("RUT").fill(rutDeCorrida());
-    await page.getByLabel("Razón social").fill(proveedor);
+    await llenar("RUT", rutDeCorrida());
+    await llenar("Razón social", proveedor);
     await guardar("Crear proveedor", "finanzas.proveedores.crear");
     await expect(page.getByRole("heading", { name: proveedor }).first()).toBeVisible({ timeout: 30_000 });
     await expect(page.getByText("Compras vinculadas")).toBeVisible();
@@ -64,25 +84,25 @@ test.describe("Finanzas · Compras", () => {
     // 01 · Libro de compras: registrar un documento, verlo «sin centro de costo» y asignarlo en lote.
     await page.goto("/finanzas/compras");
     await page.getByRole("link", { name: "Registrar documento" }).first().click();
-    await page.getByLabel("Proveedor").click();
-    await page.getByRole("option", { name: proveedor }).click();
-    await page.getByLabel("Folio").fill(folio);
-    await page.getByLabel("Neto").fill("100000");
+    await elegir("Proveedor", proveedor);
+    await llenar("Folio", folio);
+    await llenar("Neto", "100000");
     await guardar("Registrar", "finanzas.compras.registrar");
     await page.goto("/finanzas/compras");
-    await expect(page.getByText("Sin centro de costo").first()).toBeVisible({ timeout: 30_000 });
-    await expect(page.getByText("Sin conciliar").first()).toBeVisible();
+    await expect(page.getByText("Sin centro de costo").filter({ visible: true }).first()).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText("Sin conciliar").filter({ visible: true }).first()).toBeVisible();
     await sinScrollHorizontal();
     await page.screenshot({ path: info.outputPath("libro-compras.png"), fullPage: true });
 
     await page.getByRole("link", { name: "Asignar en lote" }).first().click();
-    await page.getByLabel("Centro de costo").click();
-    await page.getByRole("option", { name: "Administración / Oficina central" }).click();
-    await page.getByRole("button", { name: "Ver vista previa" }).click();
+    await elegir("Centro de costo", "Administración / Oficina central");
+    const previa = page.getByRole("button", { name: "Ver vista previa" });
+    await hidratado(previa);
+    await previa.click();
     await expect(page.getByText(/Se asignará «Administración \/ Oficina central»/)).toBeVisible({ timeout: 30_000 });
     await page.screenshot({ path: info.outputPath("libro-compras-lote.png"), fullPage: true });
     await guardar(/^Aplicar a \d+$/, "finanzas.compras.asignar_centro");
     await page.goto(`/finanzas/compras?q=${folio}`);
-    await expect(page.getByText("Administración / Oficina central").first()).toBeVisible({ timeout: 30_000 });
+    await expect(page.getByText("Administración / Oficina central").filter({ visible: true }).first()).toBeVisible({ timeout: 30_000 });
   });
 });
