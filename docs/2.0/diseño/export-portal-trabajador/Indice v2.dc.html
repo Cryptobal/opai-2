@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<title>Índice v2 · Portal Trabajador</title>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0;background:var(--ds-bg)} a{color:var(--ds-accent);text-decoration:none} a:hover{color:var(--ds-accent);text-decoration:underline}</style>
+</helmet>
+<div class="ds" style="max-width:1080px;margin:0 auto;padding:48px 24px 64px;display:flex;flex-direction:column;gap:32px;background:var(--ds-bg);color:var(--ds-fg)">
+<div style="display:flex;flex-direction:column;gap:4px">
+<span class="t-label-sm muted">OPAI 2.0 · Atlas Seguridad SpA</span>
+<h1 class="t-display m0">Portal Trabajador · índice v2</h1>
+<span class="t-body muted">Decidido por Carlos el 30-10-2026. Cada tablero trae 375 / 1024 / 1280 en claro y oscuro, y los estados vacío, cargando, error y sin permiso. Lo de la v1 no se redibuja: se llega desde Más. <a href="Indice.dc.html">Índice v1</a></span>
+</div>
+<section style="display:flex;flex-direction:column;gap:12px">
+<h2 class="t-heading m0">Roles</h2>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:12px">
+<sc-for list="{{ roles }}" as="r" hint-placeholder-count="3">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,110px">
+<div style="display:flex;flex-direction:column;gap:4px"><span class="t-subheading">{{ r.name }}</span><span class="t-body-sm muted">{{ r.desc }}</span></div>
+</x-import>
+</sc-for>
+</div>
+</section>
+<section style="display:flex;flex-direction:column;gap:12px">
+<h2 class="t-heading m0">Pantallas</h2>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" padding="{{ 0 }}" style="overflow:hidden" hint-size="100%,700px">
+<sc-for list="{{ screens }}" as="s" hint-placeholder-count="10">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:4px 16px;padding:14px 16px;border-bottom:1px solid var(--ds-border)">
+<div style="display:flex;flex-direction:column;gap:2px">
+<sc-if value="{{ s.href }}" hint-placeholder-val="{{ true }}"><a class="t-label" href="{{ s.href }}">{{ s.name }}</a></sc-if>
+<sc-if value="{{ s.noHref }}" hint-placeholder-val="{{ false }}"><span class="t-label">{{ s.name }}</span></sc-if>
+<span class="t-caption">{{ s.file }}</span>
+</div>
+<span class="t-body-sm muted">{{ s.roles }}</span>
+<div style="display:flex;flex-direction:column;gap:4px;align-items:flex-start">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ s.tone }}" hint-size="120px,22px">{{ s.status }}</x-import>
+<sc-if value="{{ s.b }}" hint-placeholder-val="{{ false }}"><span class="t-caption">Variante B: {{ s.b }}</span></sc-if>
+</div>
+</div>
+</sc-for>
+</x-import>
+</section>
+<section style="display:flex;flex-direction:column;gap:12px">
+<h2 class="t-heading m0">Propuesta, a confirmar por Carlos</h2>
+<span class="t-body-sm muted">Dibujada como variante B, separada de lo decidido.</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" padding="{{ 0 }}" style="overflow:hidden" hint-size="100%,220px">
+<sc-for list="{{ propuestas }}" as="p" hint-placeholder-count="3">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" icon="flag" title="{{ p.t }}" subtitle="{{ p.d }}" hint-size="100%,72px"></x-import>
+</sc-for>
+</x-import>
+</section>
+<section style="display:flex;flex-direction:column;gap:12px">
+<h2 class="t-heading m0">Menú v2</h2>
+<span class="t-body-sm muted">Barra (5 como máximo): Inicio · Marcar (solo con Asistencia) · Rondas (si tiene rondas asignadas) · Central · Más. En Más: Mi horario, Mis documentos, Solicitudes, Turnos extra, Accesos (si la instalación tiene control de accesos), Mis datos, Privacidad, Notificaciones y Cerrar sesión. Variantes de barra en v2 · 01 Inicio.</span>
+</section>
+<section style="display:flex;flex-direction:column;gap:12px">
+<h2 class="t-heading m0">Fuera de alcance</h2>
+<span class="t-body-sm muted">Marcar asistencia (Briefs 18–19), prueba de vida y firma N2 real, bandeja de tickets del ERP y configuración de tipos, liquidaciones detalladas (Nómina) y Portal Terreno: fuente de Rondas y Accesos.</span>
+</section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const T = "Trabajador · sin Asistencia · sin Rondas ni Accesos";
+    const S = (name, file, roles, status, tone, b) => ({ name, file, href: file && file.endsWith(".dc.html") ? file : null, noHref: !(file && file.endsWith(".dc.html")), roles, status, tone, b: b || null });
+    return {
+      roles: [
+        { name: "Trabajador", desc: "Solo sus datos. Barra: Inicio · Marcar · Rondas · Central · Más." },
+        { name: "Sin Asistencia", desc: "Sin «Marcar» en la barra." },
+        { name: "Sin Rondas ni Accesos asignados", desc: "Sin «Rondas» en la barra y sin «Accesos» en Más. Rondas y Accesos se ven bloqueados fuera de su turno o de su instalación." },
+        { name: "Sin permiso / cuenta suspendida", desc: "Forbidden con contacto de RRHH en cada tablero." },
+      ],
+      screens: [
+        S("v2 · 01 · Inicio", "v2 01 Inicio.dc.html", T, "Actualizado", "info"),
+        S("v2 · 07 · Central (bandeja, aviso, mensaje)", "v2 07 Central.dc.html", T, "Nuevo", "accent"),
+        S("v2 · 07b · Avisar a la central", "v2 07b Avisar a la central.dc.html", T, "Nuevo", "accent", "botón de pánico aparte"),
+        S("v2 · 08 · Rondas: reutiliza export-rondas g2–g7", "v2 08 Rondas.dc.html", "Trabajador con rondas asignadas, en su turno e instalación", "Ajuste v3 · Decide Carlos 1–4", "warning"),
+        S("v2 · 09 · Accesos: pendiente mockup Terreno", "v2 09 Accesos.dc.html", "Trabajador en instalación con control de accesos, en su turno", "Ajuste v3 · Decide Carlos 5", "warning"),
+        S("v2 · 10 · Mis datos", "v2 10 Mis datos.dc.html", T, "Nuevo", "accent", "banco pendiente hasta validación de RRHH"),
+        S("v2 · 11 · Privacidad y mis datos", "v2 11 Privacidad.dc.html", T, "Nuevo", "accent"),
+        S("v2 · 12 · Notificaciones", "v2 12 Notificaciones.dc.html", T, "Nuevo", "accent", "WhatsApp como canal"),
+        S("v2 · 06 · Más", "v2 06 Mas.dc.html", T, "Actualizado", "info"),
+        S("Mi horario · Solicitudes · Turnos extra · Mis documentos · Firmar", "Indice.dc.html", T + " · desde Más", "v1 · sin cambios", "neutral"),
+        S("Rondas Guardia (g2–g7) y Mapa Rondas", "Rondas Guardia.dc.html", "Importadas sin cambios desde export-rondas (mockup v3, 29-10-2026)", "Aprobado · se importa", "neutral"),
+        S("Portería, EscanerDocumento, ResultadoAcceso, FilaEnSitio, autorizados, IndicadorConexion", "Mockup de Terreno · design-prompt-terreno-v1", "Se importarán en v2 · 09 Accesos", "Pendiente · no existe aún", "warning"),
+        S("Hoja de componentes", "Componentes.dc.html", "Equipo de diseño y desarrollo", "Con sección v2", "info"),
+      ],
+      propuestas: [
+        { t: "Decide Carlos 1 · GPS en toda la ronda o solo al marcar", d: "A: traza continua (recomendado) · v2 08 Rondas" },
+        { t: "Decide Carlos 2 · Sin QR legible, marcar solo por GPS", d: "A: sí, g4gps (recomendado) · v2 08 Rondas" },
+        { t: "Decide Carlos 3 · Barra del portal durante la ronda", d: "A: se oculta (recomendado) · v2 08 Rondas" },
+        { t: "Decide Carlos 4 · Teléfono compartido y portal conviven", d: "A: ambas valen · v2 08 Rondas" },
+        { t: "Decide Carlos 5 · Accesos desde celular personal o solo emparejado", d: "A: ambos · v2 09 Accesos" },
+        { t: "Datos bancarios pendientes hasta validación de RRHH", d: "Con aviso al trabajador y a RRHH · v2 10 Mis datos" },
+        { t: "Botón de pánico aparte o basta con el tipo Urgencia", d: "B: botón de pánico arriba del formulario · v2 07b Avisar a la central" },
+        { t: "Avisos también por WhatsApp", d: "B: tercera columna de canal · v2 12 Notificaciones" },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

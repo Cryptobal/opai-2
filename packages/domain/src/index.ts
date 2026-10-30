@@ -25,6 +25,7 @@ export * from "./cumplimiento";
 export * from "./incidentes";
 export * from "./documento-subida";
 export * from "./firma";
+export * from "./firma-flujo";
 export * from "./retencion";
 export * from "./etiquetas-datos-personales";
 export * from "./actividades-tratamiento";

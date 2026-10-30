@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="pauta-datos.js"></script>
+<style>html,body{margin:0;height:100%}a{color:var(--ds-accent)}a:hover{color:var(--ds-accent)}</style>
+</helmet>
+<div ref="{{ rootRef }}" data-theme="{{ theme }}" data-device="{{ device }}" style="position:relative;width:100%;height:100%;min-height:640px;overflow:hidden;background:var(--ds-bg);color:var(--ds-fg);font-family:var(--font-sans)">
+<sc-if value="{{ ready }}">
+<sc-if value="{{ phone }}" hint-placeholder-val="{{ false }}">
+<div class="screen" style="height:100%">
+  <div class="safe-top"></div>
+  <div class="topbar">
+    <button class="portal-btn" aria-label="Cambiar de portal o empresa"><span class="tenant">AS</span>{{ portal }}<span class="ic sm i-updown" style="color:var(--ds-fg-subtle)"></span></button>
+    <div style="flex:1"></div>
+    <button class="icon-btn" aria-label="Buscar"><span class="ic i-search"></span></button>
+    <button class="icon-btn" aria-label="Notificaciones"><span class="ic i-bell"></span></button>
+  </div>
+  <div style="flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column">
+    <div class="pagehead">
+      <div style="display:flex;flex-direction:column;min-width:0">
+        <span class="t-overline">Operaciones</span>
+        <h1 class="t-title m0">Pauta</h1>
+      </div>
+      <sc-if value="{{ showActs }}">
+        <div style="display:flex;gap:4px;align-items:center">
+          <sc-if value="{{ histBtn }}"><button class="icon-btn" aria-label="Historial de cambios" onClick="{{ openHist }}"><span class="ic i-clock"></span></button></sc-if>
+          <button class="icon-btn" aria-label="Exportar a PDF o Excel" onClick="{{ openExport }}" style="border:1px solid var(--ds-border-strong)"><span class="ic i-download"></span></button>
+          <sc-if value="{{ refBtnD }}"><button class="btn btn-secondary" onClick="{{ addRef }}"><span class="ic sm i-plus"></span>Agregar refuerzo</button></sc-if>
+          <sc-if value="{{ pintarBtn }}"><button class="btn btn-primary" onClick="{{ pintar }}">Pintar serie</button></sc-if>
+        </div>
+      </sc-if>
+    </div>
+    <sc-if value="{{ readOnly }}"><div style="padding:0 16px 8px"><span class="badge b-neutral nodot">Solo lectura</span></div></sc-if>
+    <sc-if value="{{ varB }}"><div style="padding:0 16px 8px"><span class="badge b-warning nodot" style="white-space:normal;height:auto;padding:2px 8px">{{ varBTxt }}</span></div></sc-if>
+    <sc-if value="{{ showTabs }}">
+      <div class="tabs" style="padding:0 16px;flex:none">
+        <sc-for list="{{ tabs }}" as="t" hint-placeholder-count="2"><button class="{{ t.cls }}" onClick="{{ t.onClick }}" style="flex:1;justify-content:center">{{ t.l }}</button></sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ showMToolbar }}">
+      <div style="padding:12px 16px 4px;display:flex;flex-direction:column;gap:8px">
+        <sc-if value="{{ showMInst }}"><button class="input" onClick="{{ cycleInst }}"><span class="ic i-building" style="color:var(--ds-fg-muted)"></span><span class="grow">{{ instName }}</span><span class="ic sm i-chevron-down" style="color:var(--ds-fg-muted)"></span></button></sc-if>
+        <div style="display:flex;align-items:center;gap:4px">
+          <button class="icon-btn" aria-label="Mes anterior"><span class="ic i-chevron-left"></span></button>
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center">
+            <span class="t-label">Octubre 2026</span>
+            <sc-if value="{{ showMInst }}"><span class="t-caption t-numeric">{{ sumA }} · <span style="color:var(--ds-danger-fg)">{{ sumB }}</span></span></sc-if>
+          </div>
+          <button class="icon-btn" aria-label="Mes siguiente"><span class="ic i-chevron-right"></span></button>
+        </div>
+        <div class="chip-row">
+          <div class="seg" style="flex:none"><sc-for list="{{ vistas }}" as="v" hint-placeholder-count="2"><button class="{{ v.cls }}" onClick="{{ v.onClick }}" style="height:40px">{{ v.l }}</button></sc-for></div>
+          <sc-if value="{{ chipSoloShow }}"><button class="{{ chipSolo }}" onClick="{{ toggleSolo }}">Solo sin cubrir</button></sc-if>
+          <sc-if value="{{ showSelChip }}"><button class="{{ chipSel }}" onClick="{{ toggleSel }}"><span class="ic sm i-check"></span>Seleccionar días</button></sc-if>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ showD }}">
+      <div style="padding:12px 16px 4px;display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+          <div style="display:flex;flex-direction:column;min-width:0"><span class="t-label t-numeric">{{ diaFull }}</span><span class="t-caption">{{ diaSub }}</span></div>
+          <div style="display:flex">
+            <button class="icon-btn" aria-label="Día anterior" onClick="{{ prevDia }}"><span class="ic i-chevron-left"></span></button>
+            <button class="icon-btn" aria-label="Día siguiente" onClick="{{ nextDia }}"><span class="ic i-chevron-right"></span></button>
+          </div>
+        </div>
+        <button class="input" onClick="{{ cycleDInst }}"><span class="ic i-building" style="color:var(--ds-fg-muted)"></span><span class="grow">{{ dInstName }}</span><span class="ic sm i-chevron-down" style="color:var(--ds-fg-muted)"></span></button>
+        <div style="display:grid;grid-template-columns:{{ sumCols }};border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+          <sc-for list="{{ sums }}" as="s" hint-placeholder-count="4">
+            <button onClick="{{ s.onClick }}" style="all:unset;cursor:pointer;padding:10px 10px 8px;display:flex;flex-direction:column;gap:2px;border-right:{{ s.br }};min-width:0">
+              <span class="t-subheading t-numeric" style="color:{{ s.c }}">{{ s.v }}</span>
+              <span class="t-caption" style="overflow-wrap:anywhere">{{ s.k }}</span>
+            </button>
+          </sc-for>
+        </div>
+        <div class="chip-row">
+          <div class="seg" style="flex:none"><sc-for list="{{ turnos }}" as="v" hint-placeholder-count="3"><button class="{{ v.cls }}" onClick="{{ v.onClick }}" style="height:40px">{{ v.l }}</button></sc-for></div>
+          <button class="{{ chipSolo }}" onClick="{{ toggleSolo }}">Solo sin cubrir</button>
+        </div>
+        <sc-if value="{{ live }}"><span class="live">Asistencia en vivo · cruza la pauta con las marcas</span></sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ hasAlerts }}">
+      <div style="padding:12px 16px 0;display:flex;flex-direction:column;gap:8px">
+        <sc-for list="{{ alerts }}" as="a" hint-placeholder-count="2">
+          <div class="alerta" style="background:{{ a.bg }};color:{{ a.fg }}"><span class="ic sm {{ a.ic }}"></span><div class="txt"><span class="tit">{{ a.tit }}</span><span>{{ a.d }}</span><a href="#" class="t-label-sm" style="color:inherit;text-decoration:underline;align-self:flex-start;min-height:24px;display:inline-flex;align-items:center">{{ a.link }}</a></div></div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ hint }}"><div style="padding:12px 16px 0"><div class="alerta" style="background:var(--ds-info-muted);color:var(--ds-info-fg);align-items:center"><span class="ic sm i-info"></span><div class="txt"><span>{{ hintTxt }}</span></div><button class="icon-btn" aria-label="Cerrar ayuda" onClick="{{ closeHint }}" style="color:inherit;margin:-10px -8px -10px 0"><span class="ic sm i-x"></span></button></div></div></sc-if>
+    <sc-if value="{{ showMInst }}">
+      <div style="padding-top:12px">
+        <sc-for list="{{ dayGroups }}" as="g" hint-placeholder-count="3">
+          <div>
+            <div class="row-group">{{ g.t }}</div>
+            <div class="rows" style="border-top:0">
+              <sc-for list="{{ g.items }}" as="it" hint-placeholder-count="4">
+                <button class="rowcard" onClick="{{ it.onTap }}" onPointerDown="{{ it.onDown }}" onPointerUp="{{ it.onUp }}" onPointerLeave="{{ it.onUp }}" onContextMenu="{{ noCtx }}" style="border-left:0;border-right:0;border-top:0;align-items:center;cursor:pointer;user-select:none;-webkit-user-select:none;background:{{ it.bgc }}">
+                  <sc-if value="{{ it.selMode }}"><span class="{{ it.check }}" style="flex:none"><sc-if value="{{ it.pk }}"><span class="ic sm i-check"></span></sc-if></span></sc-if>
+                  <span class="{{ it.cellCls }}" style="width:32px;height:32px;flex:none;position:relative">{{ it.code }}<sc-if value="{{ it.dot }}"><span style="position:absolute;top:3px;right:3px;width:5px;height:5px;border-radius:999px;background:currentColor"></span></sc-if></span>
+                  <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+                    <span class="t-label">{{ it.n }}</span>
+                    <span class="t-caption t-numeric">{{ it.h }}</span>
+                    <span class="t-body-sm muted">{{ it.person }}</span>
+                  </span>
+                  <span class="{{ it.badgeCls }}">{{ it.badge }}</span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+        </sc-for>
+        <div class="t-caption" style="padding:12px 16px 24px;text-wrap:pretty">{{ feriados }}</div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ showTodas }}">
+      <div class="rows" style="margin-top:12px">
+        <sc-for list="{{ instRows }}" as="i" hint-placeholder-count="3">
+          <button class="rowcard" onClick="{{ i.open }}" style="border-left:0;border-right:0;border-top:0;align-items:center;cursor:pointer">
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px">
+              <span class="t-label">{{ i.n }}</span>
+              <span class="t-caption">{{ i.cli }} · {{ i.puestos }} puestos</span>
+              <span style="display:flex;align-items:center;gap:8px"><span style="flex:1;height:6px;border-radius:999px;background:var(--ds-fill);overflow:hidden"><span style="display:block;height:100%;width:{{ i.pctW }};background:var(--ds-fg);border-radius:999px"></span></span><span class="t-label-sm t-numeric">{{ i.pct }}</span></span>
+            </span>
+            <span style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;min-width:56px"><span class="t-subheading t-numeric" style="color:{{ i.ppcColor }}">{{ i.ppc }}</span><span class="t-caption">PPC</span></span>
+            <span class="ic sm i-chevron-right" style="color:var(--ds-fg-subtle)"></span>
+          </button>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ showCob }}">
+      <div style="padding:12px 0 24px;display:flex;flex-direction:column;gap:8px">
+        <span class="t-label-sm muted" style="padding:0 16px">{{ cobSum }}</span>
+        <div class="rows">
+          <sc-for list="{{ ppcRows }}" as="x" hint-placeholder-count="4">
+            <div class="rowcard" style="align-items:center">
+              <span class="shift sh-X" style="width:32px;height:32px;flex:none">X</span>
+              <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+                <span class="t-label t-numeric">{{ x.fecha }}</span>
+                <span class="t-caption">{{ x.puesto }} · {{ x.inst }}</span>
+                <span class="t-caption" style="color:var(--ds-danger-fg)">{{ x.motivo }} · {{ x.tit }}</span>
+              </span>
+              <sc-if value="{{ x.canCubrir }}"><button class="btn btn-secondary" onClick="{{ x.onCubrir }}">Cubrir</button></sc-if>
+              <sc-if value="{{ x.pasado }}"><span class="t-caption">Día pasado</span></sc-if>
+            </div>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ showD }}">
+      <div style="padding:12px 16px 24px;display:flex;flex-direction:column;gap:16px">
+        <sc-if value="{{ hasAccion }}">
+          <section style="display:flex;flex-direction:column;gap:8px">
+            <h2 class="t-label m0" style="color:var(--ds-danger-fg)">Requiere acción</h2>
+            <div class="card" style="overflow:hidden">
+              <sc-for list="{{ accion }}" as="r" hint-placeholder-count="2">
+                <div class="rowcard" style="align-items:flex-start">
+                  <span class="shift sh-X" style="width:32px;height:32px;flex:none">X</span>
+                  <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+                    <span class="t-label">{{ r.puesto }}</span>
+                    <span class="t-caption t-numeric">{{ r.sub }}</span>
+                    <span class="t-caption" style="color:var(--ds-danger-fg)">{{ r.motivo }}</span>
+                    <sc-if value="{{ r.canCubrir }}"><button class="btn btn-secondary" onClick="{{ r.onCubrir }}" style="align-self:flex-start;margin-top:8px">{{ r.actL }}</button></sc-if>
+                  </span>
+                </div>
+              </sc-for>
+            </div>
+          </section>
+        </sc-if>
+        <sc-for list="{{ dGroups }}" as="g" hint-placeholder-count="2">
+          <section style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline"><h2 class="t-label muted m0">{{ g.n }}</h2><span class="t-caption t-numeric">{{ g.cnt }}</span></div>
+            <div class="card" style="overflow:hidden">
+              <sc-for list="{{ g.items }}" as="r" hint-placeholder-count="3">
+                <div class="rowcard" style="align-items:flex-start;padding-top:12px;padding-bottom:12px">
+                  <span class="avatar">{{ r.ini }}</span>
+                  <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+                    <span class="t-label">{{ r.person }}</span>
+                    <span class="t-caption t-numeric">{{ r.sub2 }}</span>
+                    <sc-if value="{{ r.mk }}"><span class="t-caption t-numeric" style="color:{{ r.mkC }};display:flex;gap:6px;align-items:center;flex-wrap:wrap">{{ r.mk }}<sc-if value="{{ r.isFace }}"><span style="display:inline-flex;gap:4px;align-items:center;color:var(--ds-fg-muted)"><span class="ic sm i-scan"></span>Face ID</span></sc-if><sc-if value="{{ r.man }}"><span class="badge b-neutral nodot" style="border:1px solid var(--ds-border-strong)"><span class="ic sm i-user-check"></span>Manual</span><span class="t-caption">por {{ r.by }}</span></sc-if></span></sc-if>
+                    <span style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+                      <sc-if value="{{ r.confBtn }}"><button class="btn btn-secondary" onClick="{{ r.onConf }}"><span class="ic sm i-check"></span>Confirmar cobertura</button></sc-if>
+                      <sc-if value="{{ r.act }}"><button class="btn btn-secondary" onClick="{{ r.actOn }}">{{ r.act }}</button></sc-if>
+                      <sc-if value="{{ r.act2 }}"><button class="btn btn-ghost" onClick="{{ r.act2On }}" style="padding:0 12px">{{ r.act2 }}</button></sc-if>
+                    </span>
+                  </span>
+                  <sc-if value="{{ r.notRef }}"><span class="{{ r.badgeCls }}">{{ r.badge }}</span></sc-if><sc-if value="{{ r.isRef }}"><span class="badge b-neutral nodot" style="border:1px dashed var(--ds-fg-muted)"><span class="ic sm i-plus"></span>Refuerzo</span></sc-if>
+                </div>
+              </sc-for>
+            </div>
+          </section>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ pLoading }}">
+      <div style="padding:12px 16px;display:flex;flex-direction:column;gap:12px" aria-busy="true">
+        <div class="skel" style="height:44px;border-radius:var(--radius-md)"></div>
+        <div class="skel" style="height:44px;width:70%;align-self:center"></div>
+        <div class="skel" style="height:16px;width:40%;margin-top:8px"></div>
+        <div class="skel" style="height:72px;border-radius:var(--radius-md)"></div>
+        <div class="skel" style="height:72px;border-radius:var(--radius-md)"></div>
+        <div class="skel" style="height:72px;border-radius:var(--radius-md)"></div>
+        <div class="skel" style="height:72px;border-radius:var(--radius-md)"></div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ hasPanel }}">
+      <div style="padding:12px 16px">
+        <div class="state-panel"><span class="state-ic" style="color:{{ pPanel.icc }}"><span class="ic {{ pPanel.ic }}"></span></span><span class="t">{{ pPanel.t }}</span><span class="d">{{ pPanel.d }}</span><sc-if value="{{ pPanel.b }}"><button class="btn btn-primary" onClick="{{ pPanel.on }}">{{ pPanel.b }}</button></sc-if></div>
+      </div>
+    </sc-if>
+  </div>
+  <sc-if value="{{ selBar }}"><div class="selbar float" style="bottom:calc(98px + env(safe-area-inset-bottom))"><span class="t-label" style="flex:1">{{ selCount }}</span><button class="btn btn-ghost icon" aria-label="Cancelar selección" onClick="{{ selCancel }}"><span class="ic sm i-x"></span></button><button class="btn btn-primary" disabled="{{ selDis }}" onClick="{{ selExc }}">Registrar excepción</button></div></sc-if>
+  <nav class="tabbar" aria-label="Navegación principal">
+    <sc-for list="{{ tabbar }}" as="n" hint-placeholder-count="5"><a href="#" class="{{ n.cls }}"><span class="{{ n.ic }}"></span>{{ n.l }}</a></sc-for>
+  </nav>
+</div>
+</sc-if>
+<sc-if value="{{ big }}" hint-placeholder-val="{{ true }}">
+<div class="screen" style="height:100%;flex-direction:row">
+  <sc-if value="{{ desktop }}">
+    <aside class="sidebar">
+      <div class="sidebar-head"><span class="wordmark">OPAI</span><span class="t-caption">2.0</span></div>
+      <button class="sidebar-portal"><span class="tenant">AS</span><span style="flex:1;display:flex;flex-direction:column;min-width:0"><span class="t-label-sm">{{ portal }}</span><span class="t-caption">Atlas Seguridad SpA</span></span><span class="ic sm i-updown" style="color:var(--ds-fg-subtle)"></span></button>
+      <nav class="nav-group">
+        <div class="h">Operaciones</div>
+        <a class="nav-item" href="#"><span class="ic i-building"></span>Instalaciones</a>
+        <a class="nav-item" href="#"><span class="ic i-briefcase"></span>Puestos</a>
+        <a class="nav-item on" href="#" aria-current="page"><span class="ic i-calendar"></span>Pauta</a>
+        <a class="nav-item" href="#"><span class="ic i-route"></span>Rondas</a>
+      </nav>
+      <nav class="nav-group">
+        <div class="h">Personas</div>
+        <a class="nav-item" href="#"><span class="ic i-users"></span>Personas</a>
+      </nav>
+      <div style="margin-top:auto;padding:12px 20px;border-top:1px solid var(--ds-border);display:flex;gap:10px;align-items:center">
+        <span class="avatar">{{ user.ini }}</span>
+        <div style="display:flex;flex-direction:column;min-width:0"><span class="t-label-sm">{{ user.n }}</span><span class="t-caption">{{ user.r }}</span></div>
+      </div>
+    </aside>
+  </sc-if>
+  <sc-if value="{{ tablet }}">
+    <nav class="rail" aria-label="Navegación principal">
+      <button class="rail-portal"><span class="ic i-grid"></span>{{ portal }}</button>
+      <a href="#"><span class="ic i-home"></span>Inicio</a>
+      <a href="#"><span class="ic i-building"></span>Sitios</a>
+      <a href="#" class="on" aria-current="page"><span class="ic i-calendar"></span>Pauta</a>
+      <a href="#"><span class="ic i-route"></span>Rondas</a>
+      <a href="#"><span class="ic i-users"></span>Personas</a>
+    </nav>
+  </sc-if>
+  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+    <div class="appbar">
+      <span class="t-body-sm muted">Operaciones</span><span class="ic sm i-chevron-right" style="color:var(--ds-fg-subtle)"></span><span class="t-label">Pauta</span>
+      <div style="flex:1"></div>
+      <sc-if value="{{ desktop }}"><div class="searchbox" style="width:200px"><span class="ic sm i-search"></span><span style="flex:1">Buscar</span><span class="kbd">⌘K</span></div></sc-if>
+      <sc-if value="{{ tablet }}"><button class="icon-btn" aria-label="Buscar"><span class="ic i-search"></span></button></sc-if>
+      <button class="icon-btn" aria-label="Notificaciones"><span class="ic i-bell"></span></button>
+    </div>
+    <div style="flex:1;min-height:0;overflow:auto">
+      <div class="pg-page" style="gap:16px">
+        <div class="pg-head" style="margin:0">
+          <div class="txt">
+            <span class="eb">Operaciones · Atlas Seguridad SpA</span>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+              <h1 class="t-title m0">Pauta</h1>
+              <sc-if value="{{ readOnly }}"><span class="badge b-neutral nodot">Solo lectura</span></sc-if>
+              <sc-if value="{{ varB }}"><span class="badge b-warning nodot">{{ varBTxt }}</span></sc-if>
+            </div>
+          </div>
+          <sc-if value="{{ showActs }}">
+            <div class="acts">
+              <sc-if value="{{ histBtn }}"><button class="btn btn-ghost" onClick="{{ openHist }}"><span class="ic sm i-clock"></span>Historial</button></sc-if>
+              <button class="btn btn-secondary" onClick="{{ openExport }}"><span class="ic sm i-download"></span>Exportar<span class="ic sm i-chevron-down" style="color:var(--ds-fg-muted)"></span></button>
+              <sc-if value="{{ refBtnD }}"><button class="btn btn-secondary" onClick="{{ addRef }}"><span class="ic sm i-plus"></span>Agregar refuerzo</button></sc-if>
+              <sc-if value="{{ pintarBtn }}"><button class="btn btn-primary" onClick="{{ pintar }}">Pintar serie</button></sc-if>
+              <sc-if value="{{ repBtn }}"><button class="btn btn-primary" onClick="{{ openRepFirst }}"><span class="ic sm i-user-check"></span>Asignar reemplazo</button></sc-if>
+            </div>
+          </sc-if>
+        </div>
+        <sc-if value="{{ showTabs }}">
+          <div class="tabs"><sc-for list="{{ tabs }}" as="t" hint-placeholder-count="2"><button class="{{ t.cls }}" onClick="{{ t.onClick }}">{{ t.l }}</button></sc-for></div>
+        </sc-if>
+        <sc-if value="{{ showMToolbar }}">
+  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+    <sc-if value="{{ showMInst }}"><button class="input compact" style="width:240px" onClick="{{ cycleInst }}"><span class="ic sm i-building" style="color:var(--ds-fg-muted)"></span><span class="grow">{{ instName }}</span><span class="ic sm i-chevron-down" style="color:var(--ds-fg-muted)"></span></button></sc-if>
+    <div style="display:flex;align-items:center;gap:2px">
+      <button class="btn btn-ghost icon" style="width:36px;height:36px" aria-label="Mes anterior"><span class="ic sm i-chevron-left"></span></button>
+      <span class="t-label" style="min-width:104px;text-align:center">Octubre 2026</span>
+      <button class="btn btn-ghost icon" style="width:36px;height:36px" aria-label="Mes siguiente"><span class="ic sm i-chevron-right"></span></button>
+    </div>
+    <div class="seg"><sc-for list="{{ vistas }}" as="v" hint-placeholder-count="2"><button class="{{ v.cls }}" onClick="{{ v.onClick }}">{{ v.l }}</button></sc-for></div>
+    <sc-if value="{{ chipSoloShow }}"><button class="{{ chipSolo }}" onClick="{{ toggleSolo }}">Solo sin cubrir</button></sc-if>
+    <div style="flex:1"></div>
+    <sc-if value="{{ showMInst }}"><span class="t-body-sm muted t-numeric">{{ sumA }} · <span style="color:var(--ds-danger-fg)">{{ sumB }}</span></span></sc-if>
+    <sc-if value="{{ showCob }}"><span class="t-body-sm muted t-numeric">{{ cobSum }}</span></sc-if>
+  </div>
+</sc-if>
+<sc-if value="{{ showD }}">
+  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:2px">
+      <button class="btn btn-ghost icon" style="width:36px;height:36px" aria-label="Día anterior" onClick="{{ prevDia }}"><span class="ic sm i-chevron-left"></span></button>
+      <button class="btn btn-secondary" style="height:36px;padding:0 10px;font-weight:400"><span class="t-numeric">{{ diaFull }}</span><span class="ic sm i-calendar" style="color:var(--ds-fg-muted)"></span></button>
+      <button class="btn btn-ghost icon" style="width:36px;height:36px" aria-label="Día siguiente" onClick="{{ nextDia }}"><span class="ic sm i-chevron-right"></span></button>
+    </div>
+    <button class="input compact" style="width:220px" onClick="{{ cycleDInst }}"><span class="ic sm i-building" style="color:var(--ds-fg-muted)"></span><span class="grow">{{ dInstName }}</span><span class="ic sm i-chevron-down" style="color:var(--ds-fg-muted)"></span></button>
+    <div class="seg"><sc-for list="{{ turnos }}" as="v" hint-placeholder-count="3"><button class="{{ v.cls }}" onClick="{{ v.onClick }}">{{ v.l }}</button></sc-for></div>
+    <button class="{{ chipSolo }}" onClick="{{ toggleSolo }}">Solo sin cubrir</button>
+    <div style="flex:1"></div>
+    <sc-if value="{{ diaFer }}"><span class="badge b-neutral nodot">{{ diaFer }}</span></sc-if>
+    <sc-if value="{{ live }}"><span class="live">Asistencia en vivo · 10:24</span></sc-if>
+  </div>
+  <div style="display:grid;grid-template-columns:{{ sumCols }};border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+    <sc-for list="{{ sums }}" as="s" hint-placeholder-count="4">
+      <button onClick="{{ s.onClick }}" style="all:unset;cursor:pointer;padding:14px 16px;display:flex;flex-direction:column;gap:2px;border-right:{{ s.br }}">
+        <span class="t-caption">{{ s.k }}</span>
+        <span class="t-heading t-numeric" style="color:{{ s.c }}">{{ s.v }}</span>
+      </button>
+    </sc-for>
+  </div>
+</sc-if>
+<sc-if value="{{ hasAlerts }}">
+  <div style="display:flex;flex-direction:column;gap:8px">
+    <sc-for list="{{ alerts }}" as="a" hint-placeholder-count="2">
+      <div class="alerta" style="background:{{ a.bg }};color:{{ a.fg }}"><span class="ic sm {{ a.ic }}"></span><div class="txt"><span class="tit">{{ a.tit }}</span><span>{{ a.d }}</span></div><a href="#" class="acc t-label-sm" style="color:inherit;text-decoration:underline">{{ a.link }}</a></div>
+    </sc-for>
+  </div>
+</sc-if>
+<sc-if value="{{ hint }}"><div class="alerta" style="background:var(--ds-info-muted);color:var(--ds-info-fg);align-items:center;padding:6px 6px 6px 12px"><span class="ic sm i-info"></span><div class="txt"><span>{{ hintTxt }}</span></div><button class="icon-btn" aria-label="Cerrar ayuda" onClick="{{ closeHint }}" style="color:inherit;width:32px;height:32px"><span class="ic sm i-x"></span></button></div></sc-if>
+<sc-if value="{{ showMInst }}">
+  <div class="pl-wrap" data-grid="1" style="max-height:none;overflow:auto">
+    <div style="width:max-content;min-width:100%">
+      <div style="display:grid;grid-template-columns:{{ gridCols }};position:sticky;top:0;z-index:3;background:var(--ds-surface);border-bottom:1px solid var(--ds-border)">
+        <div class="t-caption" style="position:sticky;left:0;z-index:1;background:var(--ds-surface);border-right:1px solid var(--ds-border);padding:8px 12px;display:flex;align-items:flex-end">Puesto · patrón · titular</div>
+        <sc-for list="{{ days }}" as="d" hint-placeholder-count="31">
+          <div title="{{ d.title }}" style="padding:4px 0 6px;display:flex;flex-direction:column;align-items:center;background:{{ d.bg }};color:{{ d.color }}">
+            <span class="t-caption" style="color:inherit;font-weight:600;height:16px">{{ d.tag }}</span>
+            <span class="t-label-sm t-numeric">{{ d.n }}</span>
+            <span class="t-caption" style="color:inherit">{{ d.w }}</span>
+          </div>
+        </sc-for>
+      </div>
+      <sc-for list="{{ grid }}" as="r" hint-placeholder-count="8">
+        <div style="display:grid;grid-template-columns:{{ gridCols }};border-bottom:1px solid var(--ds-border)">
+          <button onClick="{{ r.onOpen }}" onContextMenu="{{ r.onCtx }}" onPointerDown="{{ r.onDown }}" onPointerUp="{{ r.onUp }}" onPointerLeave="{{ r.onUp }}" title="{{ r.title }}" style="all:unset;user-select:none;-webkit-user-select:none;box-sizing:border-box;position:sticky;left:0;z-index:1;background:var(--ds-surface);border-right:1px solid var(--ds-border);padding:6px 12px;display:flex;flex-direction:column;justify-content:center;min-width:0;cursor:{{ r.cur }}">
+            <span class="t-label" style="display:flex;gap:6px;align-items:center;white-space:nowrap;overflow:hidden"><sc-if value="{{ r.isRef }}"><span class="badge b-neutral nodot" style="border:1px dashed var(--ds-fg-muted)"><span class="ic sm i-plus"></span>Refuerzo</span></sc-if>{{ r.n }}<sc-if value="{{ r.alert }}"><span class="ic sm i-alert" title="{{ r.alertT }}" style="color:var(--ds-warning-fg)"></span></sc-if></span>
+            <span class="t-caption" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:{{ r.subColor }}">{{ r.sub }}</span>
+          </button>
+          <sc-for list="{{ r.cells }}" as="x" hint-placeholder-count="31">
+            <div style="padding:4px 2px;display:flex;align-items:center;background:{{ x.bg }}">
+              <button class="{{ x.cls }}" title="{{ x.title }}" onClick="{{ x.onClick }}" onContextMenu="{{ x.onCtx }}" onPointerDown="{{ x.onDown }}" onPointerEnter="{{ x.onEnter }}" onPointerUp="{{ x.onUp }}" onPointerLeave="{{ x.onUp }}" style="position:relative;cursor:pointer;height:28px;user-select:none;-webkit-user-select:none;border:{{ x.bd }};box-shadow:{{ x.ring }}">{{ x.code }}<sc-if value="{{ x.dot }}"><span style="position:absolute;top:3px;right:3px;width:5px;height:5px;border-radius:999px;background:currentColor"></span></sc-if></button>
+            </div>
+          </sc-for>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+  <div class="t-caption" style="text-wrap:pretty">{{ feriados }} El punto en la esquina marca un día con excepción a la serie.</div>
+  <div class="pl-detail">
+    <sc-if value="{{ sel.notRef }}"><span class="{{ sel.badgeCls }}">{{ sel.badge }}</span></sc-if><sc-if value="{{ sel.isRef }}"><span class="badge b-neutral nodot" style="border:1px dashed var(--ds-fg-muted)"><span class="ic sm i-plus"></span>Refuerzo</span></sc-if>
+    <div style="flex:1;min-width:0;display:flex;flex-direction:column"><span class="t-label t-numeric">{{ sel.title }}</span><span class="t-caption">{{ sel.sub }}</span></div>
+    <sc-if value="{{ sel.secondary }}"><button class="btn btn-ghost" onClick="{{ sel.onSecondary }}">{{ sel.secondary }}</button></sc-if>
+    <sc-if value="{{ sel.primary }}"><button class="btn btn-secondary" onClick="{{ sel.onPrimary }}">{{ sel.primary }}</button></sc-if>
+  </div>
+</sc-if>
+<sc-if value="{{ showTodas }}">
+  <div class="tbl-wrap">
+    <table class="tbl hover">
+      <thead><tr><th>Instalación</th><th class="num">Puestos</th><th>Cobertura del mes</th><th class="num">PPC del mes</th><th>Próximo PPC</th><th></th></tr></thead>
+      <tbody>
+        <sc-for list="{{ instRows }}" as="i" hint-placeholder-count="3">
+          <tr onClick="{{ i.open }}">
+            <td style="height:56px"><div style="display:flex;flex-direction:column"><span class="t-label">{{ i.n }}</span><span class="t-caption">{{ i.cli }}</span></div></td>
+            <td class="num">{{ i.puestos }}</td>
+            <td><div style="display:flex;align-items:center;gap:10px"><div style="width:120px;height:6px;border-radius:999px;background:var(--ds-fill);overflow:hidden"><div style="height:100%;width:{{ i.pctW }};background:var(--ds-fg);border-radius:999px"></div></div><span class="t-label-sm t-numeric">{{ i.pct }}</span></div></td>
+            <td class="num t-label" style="color:{{ i.ppcColor }}">{{ i.ppc }}</td>
+            <td class="t-body-sm muted t-numeric">{{ i.next }}</td>
+            <td style="text-align:right"><span class="ic sm i-chevron-right" style="color:var(--ds-fg-subtle)"></span></td>
+          </tr>
+        </sc-for>
+      </tbody>
+    </table>
+  </div>
+</sc-if>
+<sc-if value="{{ showCob }}">
+  <div class="tbl-wrap">
+    <table class="tbl">
+      <thead><tr><th>Fecha</th><th>Puesto</th><th>Titular</th><th>Motivo</th><th></th></tr></thead>
+      <tbody>
+        <sc-for list="{{ ppcRows }}" as="x" hint-placeholder-count="6">
+          <tr>
+            <td class="t-numeric">{{ x.fecha }}</td>
+            <td style="white-space:normal"><div style="display:flex;flex-direction:column;padding:6px 0"><span class="t-label">{{ x.puesto }}</span><span class="t-caption t-numeric">{{ x.sub }}</span></div></td>
+            <td>{{ x.tit }}</td>
+            <td><span class="badge b-danger">{{ x.motivo }}</span></td>
+            <td style="text-align:right"><sc-if value="{{ x.canCubrir }}"><button class="btn btn-secondary" style="height:32px;padding:0 12px" onClick="{{ x.onCubrir }}">Cubrir</button></sc-if><sc-if value="{{ x.pasado }}"><span class="t-caption">Día pasado</span></sc-if></td>
+          </tr>
+        </sc-for>
+      </tbody>
+    </table>
+  </div>
+</sc-if>
+<sc-if value="{{ showD }}">
+  <div class="tbl-wrap">
+    <table class="tbl">
+      <thead><tr><th>Estado</th><th>Puesto</th><th>Titular</th><th>Detalle</th><th>{{ mkHead }}</th><th></th></tr></thead>
+      <tbody>
+        <sc-for list="{{ dRows }}" as="r" hint-placeholder-count="8">
+          <tr>
+            <td><sc-if value="{{ r.notRef }}"><span class="{{ r.badgeCls }}">{{ r.badge }}</span></sc-if><sc-if value="{{ r.isRef }}"><span class="badge b-neutral nodot" style="border:1px dashed var(--ds-fg-muted)"><span class="ic sm i-plus"></span>Refuerzo</span></sc-if></td>
+            <td style="white-space:normal;min-width:180px"><div style="display:flex;flex-direction:column;padding:6px 0"><span class="t-label">{{ r.puesto }}</span><span class="t-caption t-numeric">{{ r.sub }}</span></div></td>
+            <td>{{ r.tit }}</td>
+            <td class="t-body-sm" style="white-space:normal;min-width:150px;color:{{ r.detC }}">{{ r.det }}</td>
+            <td class="t-body-sm t-numeric" style="white-space:normal;color:{{ r.mkC }}"><sc-if value="{{ r.confBtn }}"><button class="btn btn-secondary" style="height:32px;padding:0 12px" onClick="{{ r.onConf }}"><span class="ic sm i-check"></span>Confirmar cobertura</button></sc-if><span style="display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap">{{ r.mk }}<sc-if value="{{ r.isFace }}"><span style="display:inline-flex;gap:4px;align-items:center;color:var(--ds-fg-muted)"><span class="ic sm i-scan"></span>Face ID</span></sc-if><sc-if value="{{ r.man }}"><span class="badge b-neutral nodot" style="border:1px solid var(--ds-border-strong)"><span class="ic sm i-user-check"></span>Manual</span><span class="t-caption">por {{ r.by }}</span></sc-if></span></td>
+            <td style="text-align:right"><div style="display:flex;gap:4px;justify-content:flex-end"><sc-if value="{{ r.act2 }}"><button class="btn btn-ghost" style="height:32px;padding:0 10px" onClick="{{ r.act2On }}">{{ r.act2 }}</button></sc-if><sc-if value="{{ r.act }}"><button class="btn btn-secondary" style="height:32px;padding:0 12px" onClick="{{ r.actOn }}">{{ r.act }}</button></sc-if></div></td>
+          </tr>
+        </sc-for>
+      </tbody>
+    </table>
+  </div>
+</sc-if>
+<sc-if value="{{ pLoading }}">
+  <div style="display:flex;flex-direction:column;gap:12px" aria-busy="true">
+    <div style="display:flex;gap:8px"><div class="skel" style="height:36px;width:240px;border-radius:var(--radius-md)"></div><div class="skel" style="height:36px;width:160px;border-radius:var(--radius-md)"></div><div class="skel" style="height:36px;width:120px;border-radius:999px"></div></div>
+    <div class="skel" style="height:72px;border-radius:var(--radius-lg)"></div>
+    <div class="card" style="padding:12px;display:flex;flex-direction:column;gap:8px">
+      <div style="display:flex;gap:8px"><div class="skel" style="height:32px;width:200px"></div><div class="skel" style="height:32px;flex:1"></div></div>
+      <div style="display:flex;gap:8px"><div class="skel" style="height:32px;width:200px"></div><div class="skel" style="height:32px;flex:1"></div></div>
+      <div style="display:flex;gap:8px"><div class="skel" style="height:32px;width:200px"></div><div class="skel" style="height:32px;flex:1"></div></div>
+      <div style="display:flex;gap:8px"><div class="skel" style="height:32px;width:200px"></div><div class="skel" style="height:32px;flex:1"></div></div>
+      <div style="display:flex;gap:8px"><div class="skel" style="height:32px;width:200px"></div><div class="skel" style="height:32px;flex:1"></div></div>
+      <div style="display:flex;gap:8px"><div class="skel" style="height:32px;width:200px"></div><div class="skel" style="height:32px;flex:1"></div></div>
+    </div>
+    <div class="skel" style="height:64px;border-radius:var(--radius-lg)"></div>
+  </div>
+</sc-if>
+<sc-if value="{{ hasPanel }}">
+  <div class="state-panel" style="padding:96px 24px"><span class="state-ic" style="color:{{ pPanel.icc }}"><span class="ic {{ pPanel.ic }}"></span></span><span class="t">{{ pPanel.t }}</span><span class="d">{{ pPanel.d }}</span><sc-if value="{{ pPanel.b }}"><button class="btn btn-primary" onClick="{{ pPanel.on }}">{{ pPanel.b }}</button></sc-if></div>
+</sc-if>
+      </div>
+    </div>
+  </div>
+</div>
+</sc-if>
+<sc-if value="{{ sheetOpen }}">
+<div style="position:absolute;inset:0;z-index:10">
+  <div class="scrim" onClick="{{ close }}"></div>
+  <div class="{{ sheetCls }}" style="max-height:92%" role="dialog" aria-label="{{ sh.t }}">
+    <sc-if value="{{ phone }}"><div class="grabber"></div></sc-if>
+    <div style="display:flex;align-items:flex-start;gap:12px;padding:16px 8px 0 16px;flex:none">
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span class="t-subheading">{{ sh.t }}</span><span class="t-body-sm muted t-numeric" style="font-weight:400">{{ sh.sub }}</span></div>
+      <button class="icon-btn" aria-label="Cerrar" onClick="{{ close }}"><span class="ic i-x"></span></button>
+    </div>
+
+    <sc-if value="{{ sLoading }}"><div class="sheet-body" aria-busy="true" style="display:flex;flex-direction:column;gap:16px"><div class="skel" style="height:44px;border-radius:var(--radius-md)"></div><div class="skel" style="height:16px;width:40%"></div><div class="skel" style="height:64px;border-radius:var(--radius-md)"></div><div class="skel" style="height:64px;border-radius:var(--radius-md)"></div><div class="skel" style="height:64px;border-radius:var(--radius-md)"></div><div class="skel" style="height:56px;border-radius:var(--radius-md)"></div></div></sc-if>
+    <sc-if value="{{ hasSPanel }}"><div class="sheet-body"><div class="state-panel"><span class="state-ic" style="color:{{ sPanel.icc }}"><span class="ic {{ sPanel.ic }}"></span></span><span class="t">{{ sPanel.t }}</span><span class="d">{{ sPanel.d }}</span><button class="btn btn-primary" onClick="{{ close }}">{{ sPanel.b }}</button></div></div></sc-if>
+
+    <sc-if value="{{ sOk }}">
+      <sc-if value="{{ isSerie }}">
+        <div class="sheet-body" style="display:flex;flex-direction:column;gap:20px">
+          <div class="field"><span class="lbl">Titular</span><button class="input"><span class="avatar sm">{{ serie.ini }}</span><span class="grow">{{ serie.tit }}</span><span class="t-mono muted">{{ serie.rut }}</span><span class="ic sm i-chevron-down" style="color:var(--ds-fg-muted)"></span></button></div>
+          <div class="field"><span class="lbl">Patrón</span><div class="chip-row" style="flex-wrap:wrap"><sc-for list="{{ pats }}" as="pt" hint-placeholder-count="6"><button class="{{ pt.cls }}" onClick="{{ pt.onClick }}">{{ pt.k }}</button></sc-for></div><span class="hint">{{ serie.hint }}</span></div>
+          <div class="field"><span class="lbl">Turno</span><div class="seg" style="align-self:flex-start"><sc-for list="{{ sTurnos }}" as="tu" hint-placeholder-count="2"><button class="{{ tu.cls }}" onClick="{{ tu.onClick }}">{{ tu.k }}</button></sc-for></div></div>
+          <div class="field"><span class="lbl">Inicio del ciclo</span><button class="input"><span class="ic i-calendar" style="color:var(--ds-fg-muted)"></span><span class="grow t-numeric">{{ serie.inicio }}</span></button><span class="hint">El ciclo cuenta desde este día y se replica solo mes a mes.</span></div>
+          <div class="field"><span class="lbl">Vista previa · desde hoy</span>
+            <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px">
+              <sc-for list="{{ preview }}" as="pv" hint-placeholder-count="14"><div style="display:flex;flex-direction:column;gap:2px"><span class="t-caption t-numeric" style="text-align:center">{{ pv.lbl }}</span><span class="{{ pv.cls }}">{{ pv.code }}</span></div></sc-for>
+            </div>
+          </div>
+          <div class="alerta" style="background:var(--ds-info-muted);color:var(--ds-info-fg)"><span class="ic sm i-info"></span><div class="txt"><span class="tit">No modifica días pasados</span><span>Se aplica desde hoy, 30-10-2026. Los días anteriores y las excepciones ya registradas no cambian. El cambio queda en el historial.</span></div></div>
+        </div>
+        <div class="sheet-actions" style="flex-wrap:wrap;align-items:center">
+          <span class="t-caption" style="display:flex;gap:6px;align-items:center;flex-basis:100%"><span class="ic sm i-bell"></span>{{ serie.aviso }}</span>
+          <button class="btn btn-secondary" onClick="{{ close }}">Cancelar</button><button class="btn btn-primary" onClick="{{ saveSerie }}">Guardar serie</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isExc }}">
+        <div class="sheet-body" style="display:flex;flex-direction:column;gap:20px">
+          <div style="display:flex;align-items:center;gap:12px"><span class="avatar lg">{{ exc.ini }}</span><div style="display:flex;flex-direction:column"><span class="t-label">{{ exc.n }}</span><span class="t-mono muted">{{ exc.rut }}</span></div></div>
+          <div class="field"><span class="lbl">Tipo</span>
+            <div class="radio-group">
+              <sc-for list="{{ tipos }}" as="et" hint-placeholder-count="4"><div class="radio-row"><button class="radio-hit" onClick="{{ et.onClick }}" aria-label="{{ et.k }}"><span class="{{ et.cls }}"></span></button><div class="txt"><label>{{ et.k }}</label><span class="t-caption">{{ et.d }}</span></div></div></sc-for>
+            </div>
+          </div>
+          <sc-if value="{{ rango }}"><div class="field"><span class="lbl">Desde – hasta</span><button class="input"><span class="ic i-calendar" style="color:var(--ds-fg-muted)"></span><span class="grow t-numeric">{{ exc.rango }}</span></button></div></sc-if>
+          <div class="field"><label>Motivo</label><textarea class="input textarea" placeholder="Describe el motivo"></textarea><span class="hint">Obligatorio. Queda en el historial junto al PPC.</span></div>
+          <div class="alerta" style="background:var(--ds-warning-muted);color:var(--ds-warning-fg)"><span class="ic sm i-alert"></span><div class="txt"><span class="tit">Quedará como PPC con motivo «{{ tipo }}»</span><span>Hasta que alguien con permiso cargue un reemplazo desde la pauta diaria.</span></div></div>
+        </div>
+        <div class="sheet-actions" style="flex-wrap:wrap;align-items:center">
+          <span class="t-caption" style="display:flex;gap:6px;align-items:center;flex-basis:100%"><span class="ic sm i-bell"></span>Se avisará a {{ exc.n }}</span>
+          <button class="btn btn-secondary" onClick="{{ close }}">Cancelar</button><button class="btn btn-primary" onClick="{{ saveExc }}">Guardar excepción</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isHist }}">
+        <div class="sheet-body">
+          <div class="tl">
+            <sc-for list="{{ hist }}" as="h" hint-placeholder-count="5">
+              <div class="tl-item"><span class="{{ h.dot }}">{{ h.ini }}</span><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span class="t-label">{{ h.t }}</span><span class="t-body-sm muted">{{ h.d }}</span><span class="t-caption t-numeric">{{ h.when }}</span></div></div>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isMarca }}">
+        <div class="sheet-body" style="display:flex;flex-direction:column;gap:20px">
+          <div style="display:flex;align-items:center;gap:12px"><span class="avatar lg">{{ marca.ini }}</span><div style="display:flex;flex-direction:column"><span class="t-label">{{ marca.n }}</span><span class="t-mono muted">{{ marca.rut }}</span></div></div>
+          <div class="field"><span class="lbl">Marca</span><div class="seg" style="align-self:flex-start"><sc-for list="{{ mTipos }}" as="m" hint-placeholder-count="2"><button class="{{ m.cls }}" onClick="{{ m.onClick }}" style="min-width:104px;height:40px">{{ m.l }}</button></sc-for></div></div>
+          <div class="field"><span class="lbl">Hora</span><button class="input"><span class="ic i-clock" style="color:var(--ds-fg-muted)"></span><span class="grow t-numeric">{{ marca.hora }}</span><span class="t-caption">Ahora</span></button><span class="hint">Por defecto, la hora actual. Cámbiala si la entrada o salida fue antes.</span></div>
+          <div class="field"><span class="lbl">Motivo</span>
+            <div class="radio-group"><sc-for list="{{ mMots }}" as="mo" hint-placeholder-count="4"><div class="radio-row"><button class="radio-hit" onClick="{{ mo.onClick }}" aria-label="{{ mo.k }}"><span class="{{ mo.cls }}"></span></button><div class="txt"><label>{{ mo.k }}</label></div></div></sc-for></div>
+            <span class="hint">Obligatorio.</span>
+          </div>
+          <sc-if value="{{ marca.otro }}"><div class="field"><label>Detalle del motivo</label><textarea class="input textarea" placeholder="Describe qué pasó"></textarea></div></sc-if>
+        </div>
+        <div class="sheet-actions" style="flex-wrap:wrap;align-items:center">
+          <span class="t-caption" style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;flex-basis:100%"><span class="badge b-neutral nodot" style="border:1px solid var(--ds-border-strong)"><span class="ic sm i-user-check"></span>Manual</span>Queda con tu nombre, {{ marca.by }}, y entra al historial.</span>
+          <button class="btn btn-secondary" onClick="{{ close }}">Cancelar</button><button class="btn btn-primary" onClick="{{ saveMarca }}">Guardar marca</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isRefz }}">
+        <div class="sheet-body" style="display:flex;flex-direction:column;gap:20px">
+          <sc-if value="{{ rfv.cli }}"><div class="alerta" style="background:var(--ds-info-muted);color:var(--ds-info-fg)"><span class="ic sm i-inbox"></span><div class="txt"><span class="tit">Pedido por el cliente · Solicitud {{ rfv.sol }}</span><span>Logística Andes SpA lo pidió desde el Portal Cliente el 28-10-2026, fuera de la pauta.</span><a href="#" class="t-label-sm" style="color:inherit;text-decoration:underline;align-self:flex-start">Ver solicitud</a></div></div></sc-if>
+          <div class="field"><span class="lbl">Instalación</span><button class="input" onClick="{{ cycleRfInst }}"><span class="ic i-building" style="color:var(--ds-fg-muted)"></span><span class="grow">{{ rfv.instName }}</span><span class="ic sm i-chevron-down" style="color:var(--ds-fg-muted)"></span></button></div>
+          <div class="field"><span class="lbl">Puesto o función</span><button class="input"><span class="ic i-briefcase" style="color:var(--ds-fg-muted)"></span><span class="grow">{{ rfv.fn }}</span><span class="ic sm i-chevron-down" style="color:var(--ds-fg-muted)"></span></button></div>
+          <div class="field"><span class="lbl">Fecha</span><button class="input"><span class="ic i-calendar" style="color:var(--ds-fg-muted)"></span><span class="grow t-numeric">{{ rfv.fecha }}</span></button></div>
+          <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+            <div class="field"><span class="lbl">Inicio</span><button class="input"><span class="ic i-clock" style="color:var(--ds-fg-muted)"></span><span class="grow t-numeric">{{ rfv.hi }}</span></button></div>
+            <div class="field"><span class="lbl">Término</span><button class="input"><span class="ic i-clock" style="color:var(--ds-fg-muted)"></span><span class="grow t-numeric">{{ rfv.hf }}</span></button></div>
+          </div>
+          <div class="field"><span class="lbl">Cantidad de guardias</span><div style="display:flex;align-items:center;gap:8px"><button class="btn btn-secondary icon" aria-label="Uno menos" onClick="{{ rfDec }}"><span class="t-subheading">−</span></button><span class="t-subheading t-numeric" style="min-width:40px;text-align:center">{{ rfv.n }}</span><button class="btn btn-secondary icon" aria-label="Uno más" onClick="{{ rfInc }}"><span class="ic sm i-plus"></span></button></div></div>
+          <div class="field"><span class="lbl">Motivo</span><div class="chip-row" style="flex-wrap:wrap"><sc-for list="{{ rfMots }}" as="m" hint-placeholder-count="4"><button class="{{ m.cls }}" onClick="{{ m.onClick }}">{{ m.k }}</button></sc-for></div></div>
+          <div class="field"><span class="lbl">Quién lo cubre</span><span class="hint">{{ rfv.pickTxt }} · sugeridos por el sistema</span>
+            <div class="card" style="overflow:hidden">
+              <sc-for list="{{ rfCands }}" as="cd" hint-placeholder-count="4">
+                <button class="{{ cd.cls }}" onClick="{{ cd.pick }}" style="align-items:flex-start">
+                  <span class="{{ cd.check }}" style="margin-top:6px;flex:none"><sc-if value="{{ cd.on }}"><span class="ic sm i-check"></span></sc-if></span>
+                  <span class="avatar">{{ cd.ini }}</span>
+                  <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;text-align:left">
+                    <span style="display:flex;flex-direction:column"><span class="t-label">{{ cd.n }}</span><span class="t-mono muted">{{ cd.rut }}</span></span>
+                    <span style="display:flex;gap:4px;flex-wrap:wrap"><sc-for list="{{ cd.why }}" as="w" hint-placeholder-count="2"><span class="badge b-neutral nodot">{{ w }}</span></sc-for><sc-if value="{{ cd.warn }}"><span class="badge b-warning">{{ cd.warn }}</span></sc-if><sc-if value="{{ cd.block }}"><span class="badge b-danger">{{ cd.block }}</span></sc-if></span>
+                  </span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+          <sc-if value="{{ hasRfAlert }}"><div class="alerta" style="background:{{ rfAlert.bg }};color:{{ rfAlert.fg }}"><span class="ic sm {{ rfAlert.ic }}"></span><div class="txt"><span class="tit">{{ rfAlert.tit }}</span><span>{{ rfAlert.d }}</span><a href="#" class="t-label-sm" style="color:inherit;text-decoration:underline;align-self:flex-start">{{ rfAlert.link }}</a></div></div></sc-if>
+        </div>
+        <div class="sheet-actions" style="flex-wrap:wrap;align-items:center">
+          <span class="t-caption" style="display:flex;flex-direction:column;gap:2px;flex-basis:100%"><span>Fuera de la serie. Quedará como turno extra por aprobar.</span><span style="display:flex;gap:6px;align-items:center"><span class="ic sm i-bell"></span>{{ rfv.aviso }}</span></span>
+          <button class="btn btn-secondary" onClick="{{ close }}">Cancelar</button><button class="btn btn-primary" disabled="{{ rfBlocked }}" onClick="{{ saveRef }}">{{ rfv.btn }}</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isRep }}">
+        <div class="sheet-body" style="display:flex;flex-direction:column;gap:16px">
+          <div class="alerta" style="background:var(--ds-danger-muted);color:var(--ds-danger-fg)"><span class="ic sm i-alert"></span><div class="txt"><span class="tit">{{ tgt.motivo }}</span><span>{{ tgt.sub }}</span></div></div>
+          <div class="input"><span class="ic i-search" style="color:var(--ds-fg-muted)"></span><span class="ph grow">Buscar por nombre o RUT</span></div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <span class="t-label-sm muted">Sugeridos por el sistema</span>
+            <div class="card" style="overflow:hidden">
+              <sc-for list="{{ cands }}" as="cd" hint-placeholder-count="4">
+                <button class="{{ cd.cls }}" onClick="{{ cd.pick }}" style="align-items:flex-start">
+                  <span class="{{ cd.radio }}" style="margin-top:6px;flex:none"></span>
+                  <span class="avatar">{{ cd.ini }}</span>
+                  <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;text-align:left">
+                    <span style="display:flex;flex-direction:column"><span class="t-label">{{ cd.n }}</span><span class="t-mono muted">{{ cd.rut }}</span></span>
+                    <span style="display:flex;gap:4px;flex-wrap:wrap">
+                      <sc-for list="{{ cd.why }}" as="w" hint-placeholder-count="2"><span class="badge b-neutral nodot">{{ w }}</span></sc-for>
+                      <sc-if value="{{ cd.warn }}"><span class="badge b-warning">{{ cd.warn }}</span></sc-if>
+                      <sc-if value="{{ cd.block }}"><span class="badge b-danger">{{ cd.block }}</span></sc-if>
+                    </span>
+                  </span>
+                </button>
+              </sc-for>
+            </div>
+          </div>
+          <sc-if value="{{ hasCandAlert }}">
+            <div class="alerta" style="background:{{ candAlert.bg }};color:{{ candAlert.fg }}"><span class="ic sm {{ candAlert.ic }}"></span><div class="txt"><span class="tit">{{ candAlert.tit }}</span><span>{{ candAlert.d }}</span><a href="#" class="t-label-sm" style="color:inherit;text-decoration:underline;align-self:flex-start">{{ candAlert.link }}</a></div></div>
+          </sc-if>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <span class="t-label-sm muted">No disponibles</span>
+            <div class="card" style="overflow:hidden">
+              <sc-for list="{{ nodisp }}" as="nd" hint-placeholder-count="3">
+                <div class="rowcard" style="align-items:center;opacity:.45"><span class="avatar">—</span><span style="flex:1;min-width:0;display:flex;flex-direction:column"><span class="t-label">{{ nd.n }}</span><span class="t-caption">{{ nd.m }}</span></span></div>
+              </sc-for>
+            </div>
+          </div>
+        </div>
+        <div class="sheet-actions" style="flex-wrap:wrap;align-items:center">
+          <span class="t-caption" style="display:flex;flex-direction:column;gap:2px;flex-basis:100%"><span>Quedará como turno extra por aprobar. Lo asume la empresa; no se cobra al cliente.</span><span style="display:flex;gap:6px;align-items:center"><span class="ic sm i-bell"></span>Se avisará a {{ selName }}</span></span>
+          <button class="btn btn-secondary" onClick="{{ close }}">Cancelar</button><button class="btn btn-primary" disabled="{{ assignDisabled }}" onClick="{{ doAssign }}">Asignar</button>
+        </div>
+      </sc-if>
+    </sc-if>
+  </div>
+</div>
+</sc-if>
+
+<sc-if value="{{ ctxOpen }}">
+  <div style="position:absolute;inset:0;z-index:12" onContextMenu="{{ noCtx }}">
+    <sc-if value="{{ ctxBig }}">
+      <div onClick="{{ closeCtx }}" style="position:absolute;inset:0"></div>
+      <div class="overlay menu" role="menu" style="position:absolute;left:{{ ctx.left }};top:{{ ctx.top }};width:280px"><div style="padding:6px 12px 8px;display:flex;flex-direction:column;border-bottom:1px solid var(--ds-border);margin-bottom:4px"><span class="t-label-sm t-numeric">{{ ctx.head }}</span><span class="t-caption">{{ ctx.sub }}</span><sc-if value="{{ ctx.note }}"><span class="t-caption">{{ ctx.note }}</span></sc-if></div><sc-for list="{{ ctx.items }}" as="m" hint-placeholder-count="4"><button class="menu-item" role="menuitem" disabled="{{ m.dis }}" onClick="{{ m.on }}" style="opacity:{{ m.op }};height:40px"><span class="{{ m.ic }}"></span>{{ m.l }}</button></sc-for></div>
+    </sc-if>
+    <sc-if value="{{ ctxTouch }}">
+      <div class="scrim" onClick="{{ closeCtx }}"></div>
+      <div class="sheet" role="menu" style="max-height:92%"><div class="grabber"></div>
+        <div style="padding:12px 16px 4px"><div style="padding:0 0 8px;display:flex;flex-direction:column;border-bottom:1px solid var(--ds-border);margin-bottom:4px"><span class="t-label-sm t-numeric">{{ ctx.head }}</span><span class="t-caption">{{ ctx.sub }}</span><sc-if value="{{ ctx.note }}"><span class="t-caption">{{ ctx.note }}</span></sc-if></div></div>
+        <div class="menu" style="padding:0 8px calc(16px + env(safe-area-inset-bottom))"><sc-for list="{{ ctx.items }}" as="m" hint-placeholder-count="4"><button class="menu-item" role="menuitem" disabled="{{ m.dis }}" onClick="{{ m.on }}" style="opacity:{{ m.op }};min-height:56px"><span class="{{ m.ic }}"></span>{{ m.l }}</button></sc-for></div>
+      </div>
+    </sc-if>
+  </div>
+</sc-if>
+
+<sc-if value="{{ expOpen }}">
+  <div style="position:absolute;inset:0;z-index:10">
+    <sc-if value="{{ phone }}">
+      <div class="scrim" onClick="{{ close }}"></div>
+      <div class="sheet" style="max-height:92%"><div class="grabber"></div>
+        <div style="padding:12px 16px 4px" class="t-label-sm muted">{{ expTitle }}</div>
+        <div class="menu" style="padding:4px 8px calc(16px + env(safe-area-inset-bottom))"><sc-for list="{{ expItems }}" as="m" hint-placeholder-count="4"><button class="menu-item" onClick="{{ m.onClick }}" style="height:auto;min-height:56px;padding:8px 12px"><span class="{{ m.ic }}"></span><span style="display:flex;flex-direction:column"><span class="t-label">{{ m.l }}</span><span class="t-caption">{{ m.d }}</span></span></button></sc-for></div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ big }}">
+      <div onClick="{{ close }}" style="position:absolute;inset:0"></div>
+      <div class="overlay menu" style="position:absolute;top:150px;right:{{ expRight }};width:300px">
+        <div class="t-caption" style="padding:6px 12px 4px">{{ expTitle }}</div>
+        <sc-for list="{{ expItems }}" as="m" hint-placeholder-count="4"><button class="menu-item" onClick="{{ m.onClick }}" style="height:auto;min-height:44px;padding:6px 12px"><span class="{{ m.ic }}"></span><span style="display:flex;flex-direction:column"><span class="t-label">{{ m.l }}</span><span class="t-caption">{{ m.d }}</span></span></button></sc-for>
+      </div>
+    </sc-if>
+  </div>
+</sc-if>
+
+<sc-if value="{{ toast }}">
+  <div style="position:absolute;left:16px;right:16px;bottom:{{ toastBottom }};display:flex;justify-content:center;z-index:20;pointer-events:none">
+    <div class="toast" style="max-width:440px;pointer-events:auto" role="status"><span class="ic sm i-check-circle"></span><span style="flex:1;min-width:0">{{ toast }}</span><sc-if value="{{ hasUndo }}"><button class="act" onClick="{{ undo }}">Deshacer</button></sc-if><button class="act" aria-label="Cerrar aviso" onClick="{{ closeToast }}"><span class="ic sm i-x"></span></button></div>
+  </div>
+</sc-if>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;desktop&quot;,&quot;tablet&quot;,&quot;phone&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;tab&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;mensual&quot;,&quot;diaria&quot;,&quot;cobertura&quot;],&quot;default&quot;:&quot;mensual&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;vista&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;instalacion&quot;,&quot;todas&quot;],&quot;default&quot;:&quot;instalacion&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ok&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;ok&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;rol&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;owner&quot;,&quot;admin&quot;,&quot;gerente&quot;,&quot;supervisor&quot;,&quot;viewer&quot;],&quot;default&quot;:&quot;admin&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;hoja&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;&quot;,&quot;serie&quot;,&quot;excepcion&quot;,&quot;historial&quot;,&quot;reemplazo&quot;,&quot;alerta&quot;,&quot;bloqueo&quot;,&quot;confirmado&quot;,&quot;exportar&quot;],&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;asistencia&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;soloPPC&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;varianteB&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;umbralB&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;cfg&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;}}">
+class Component extends DCLogic {
+  constructor(p){super(p);this.state={};}
+  componentDidMount(){const go=()=>{if(window.PD){this.setState(this.init(this.cfg()));}else this.t=setTimeout(go,40);};go();}
+  componentWillUnmount(){clearTimeout(this.t);}
+  shouldComponentUpdate(np,ns){if(ns!==this.state)return true;const A=this.props||{},B=np||{},ka=Object.keys(A),kb=Object.keys(B);if(ka.length!==kb.length)return true;for(const k of kb){if(k==='children')continue;if(A[k]!==B[k])return true;}return false;}
+  cfg(p){p=p||this.props;const d={device:'desktop',theme:'light',tab:'mensual',vista:'instalacion',estado:'ok',rol:'admin',hoja:'',asistencia:false,soloPPC:false,varianteB:false,umbralB:false};const o={};Object.keys(d).forEach(k=>{o[k]=p[k]!==undefined&&p[k]!==null?p[k]:d[k];});return Object.assign(o,p.cfg||{});}
+  init(c){const D=window.PD,h=c.hoja,conf=h==='confirmado',ph=c.device==='phone';
+    const SHEETS={alerta:'reemplazo',bloqueo:'reemplazo',nollegoRep:'reemplazo',serie:'serie',excepcion:'excepcion',historial:'historial',reemplazo:'reemplazo',marca:'marca',refuerzo:'refuerzo',refuerzoCliente:'refuerzo',refuerzoBloqueo:'refuerzo',refuerzoMensual:'refuerzo'};
+    const rf=Object.assign({inst:'q',fn:'Control de acceso',d:D.HOY,hi:'18:00',hf:'23:00',n:1,mot:'Contingencia',sol:'',pick:['c1'],last:'c1'},h==='refuerzoCliente'?{fn:'Control de acceso evento',d:31,hi:'20:00',hf:'02:00',n:2,mot:'Pedido del cliente',sol:'SOL-0142'}:h==='refuerzoBloqueo'?{pick:['c4'],last:'c4',hi:'20:00',hf:'02:00'}:h==='refuerzoMensual'?{d:31,fn:'Andén de carga',hi:'08:00',hf:'20:00'}:{});
+    const nl=(h==='nollego'||h==='nollegoRep')?{q5:true}:{};
+    const cx=h==='menuDia'?{k:'dia',p:'q2',d:30}:h==='menuPuesto'?{k:'puesto',p:'q3'}:null;
+    return{ready:true,tab:c.tab,vista:c.vista,solo:!!c.soloPPC,hoja:SHEETS[h]||'',exp:h==='exportar',cand:h==='alerta'?'c2':h==='bloqueo'?'c4':'c1',tgt:h==='nollegoRep'?'q5':'q2',sel:cx&&cx.d?{p:cx.p,d:cx.d}:{p:'q2',d:30},ex:{p:'q3',d:31},serie:'q2',pat:null,turno:null,tipo:'Permiso',
+      reps:conf?{q2:'Cristián Bravo Leiva'}:{},conf:Object.assign({},D.CONF0),toast:conf?'Reemplazo asignado · Cristián Bravo Leiva cubre Portería principal · Noche. Queda como turno extra por aprobar.':h==='nollego'?'Marcela Vidal Núñez quedó como «No llegó». Asigna un reemplazo.':'',undo:conf||h==='nollego',inst:'q',dInst:'all',turnoF:'Todos',dia:D.HOY,
+      nl,mk:JSON.parse(JSON.stringify(D.MK0)),refs:D.REFS0.map(r=>Object.assign({},r,{cubre:r.cubre.slice()})),rf,hx:[],hint:true,ctx:cx,selRef:h==='refuerzoSel'?'r1':null,
+      range:h==='seleccion'&&!ph?{p:'q3',a:30,b:31}:null,selMode:h==='seleccion'&&ph,picks:h==='seleccion'?['q3-30','q3-31']:[],
+      mf:{pid:'q5',tipo:'entrada',hora:D.AHORA,mot:'Falla del equipo'}};}
+  rootRef=React.createRef();
+  cellEv(pid,d,touch){return{
+    onClick:e=>{if(this.lpF){this.lpF=false;return;}if(this.dragMoved){this.dragMoved=false;return;}
+      if(e.shiftKey&&this.state.sel.p===pid){this.setState({range:{p:pid,a:this.state.sel.d,b:d},selRef:null});return;}
+      this.setState({sel:{p:pid,d},range:null,ctx:null,selRef:null});},
+    onCtx:e=>{e.preventDefault();this.openCtx(e,{k:'dia',p:pid,d});},
+    onDown:e=>{this.lpF=false;clearTimeout(this.lp);if(touch){const ev={clientX:e.clientX,clientY:e.clientY};this.lp=setTimeout(()=>{this.lpF=true;this.openCtx(ev,{k:'dia',p:pid,d});},500);}else if(e.button===0&&!e.shiftKey){this.drag={p:pid,a:d};this.dragMoved=false;}},
+    onEnter:e=>{if(e.buttons!==1||!this.drag||this.drag.p!==pid||d===this.drag.a)return;this.dragMoved=true;this.setState({range:{p:pid,a:this.drag.a,b:d},sel:{p:pid,d:this.drag.a},selRef:null});},
+    onUp:()=>{clearTimeout(this.lp);}};}
+  rowEv(pid,touch,open){return{
+    onOpen:()=>{if(this.lpF){this.lpF=false;return;}open();},
+    onCtx:e=>{e.preventDefault();this.openCtx(e,{k:'puesto',p:pid});},
+    onDown:e=>{this.lpF=false;clearTimeout(this.lp);if(touch){const ev={clientX:e.clientX,clientY:e.clientY};this.lp=setTimeout(()=>{this.lpF=true;this.openCtx(ev,{k:'puesto',p:pid});},500);}},
+    onUp:()=>clearTimeout(this.lp)};}
+  openCtx(e,o){const r=this.rootRef.current;if(r){const b=r.getBoundingClientRect(),sc=r.offsetWidth/(b.width||1);o.x=(e.clientX-b.left)*sc;o.y=(e.clientY-b.top)*sc;o.W=r.offsetWidth;o.H=r.offsetHeight;}this.setState({ctx:o,sel:o.d?{p:o.p,d:o.d}:this.state.sel,hint:false});}
+  noLlego(p,person,U){this.act({nl:Object.assign({},this.state.nl,{[p.id]:true}),hx:[{dot:'tl-dot person',ini:U.ini,t:U.n+' marcó «No llegó»',d:person+' · '+p.n+' · '+p.t+' · 30-10-2026. El turno quedó como PPC con motivo «No llegó».',when:'30-10-2026 '+window.PD.AHORA}].concat(this.state.hx)},person+' quedó como «No llegó». Asigna un reemplazo.',true);}
+  openRefEdit(r){this.setState({hoja:'refuerzo',exp:false,ctx:null,rf:{inst:r.inst,fn:r.fn,d:r.d,hi:r.h.slice(0,5),hf:r.h.slice(-5),n:r.n,mot:r.mot,sol:r.sol||'',pick:[],last:'',edit:r.id}});}
+  scrollGrid(){const r=this.rootRef.current;if(!r)return;const w=r.querySelector('[data-grid]');if(w&&w.scrollWidth>w.clientWidth+4&&w.dataset.sc!=='1'){w.scrollLeft=w.scrollWidth;w.dataset.sc='1';}}
+  componentDidUpdate(){clearTimeout(this.sg);this.sg=setTimeout(()=>this.scrollGrid(),120);if(!window.PD||!this.state.ready)return;const k=JSON.stringify(this.cfg());if(this._k===undefined){this._k=k;return;}if(k!==this._k){this._k=k;this.setState(this.init(this.cfg()));}}
+  act(o,toast,undo){this.snap=Object.assign({},this.state);this.setState(Object.assign({toast:toast||'',undo:!!undo},o));}
+  renderVals(){
+    const D=window.PD,S=this.state,c=this.cfg();
+    if(!D||!S.ready)return{ready:false,theme:c.theme,device:c.device,rootRef:this.rootRef};
+    const set=o=>this.setState(o),H=D.HOY;
+    const phone=c.device==='phone',tablet=c.device==='tablet',desktop=c.device==='desktop';
+    const canEdit=c.rol!=='viewer',sup=c.rol==='supervisor',U=D.USERS[c.rol]||D.USERS.admin;
+    const insts=D.INST.filter(i=>!sup||i.sup),inst=insts.find(i=>i.id===S.inst)||insts[0];
+    const reps=S.reps,cellF=(p,d)=>D.cell(p,d,reps,S.nl),noop=()=>{},touch=!desktop,horasTxt=c.umbralB?'supera las 42 h semanales':'supera la jornada legal semanal';
+    const tab=S.tab,isM=tab==='mensual',isD=tab==='diaria',isC=tab==='cobertura';
+    const showCob=(isM&&S.solo)||isC,showMInst=isM&&!S.solo&&S.vista==='instalacion',showTodas=isM&&!S.solo&&S.vista==='todas';
+    const sheet=S.hoja,pState=sheet?'ok':c.estado,sState=sheet?c.estado:'ok',ok=pState==='ok';
+    const close=()=>set({hoja:'',exp:false});
+    const openRep=(pid,d)=>set({tab:'diaria',hoja:'reemplazo',tgt:pid,cand:'c1',dia:d||H,exp:false,ctx:null});
+    const openSerie=pid=>set({hoja:'serie',serie:pid,pat:null,turno:null,exp:false,ctx:null});
+    const openExc=(pid,d,b)=>set({hoja:'excepcion',ex:{p:pid,d,b:b||0},exp:false,ctx:null});
+    const openRef=o=>set({hoja:'refuerzo',ctx:null,exp:false,rf:Object.assign({inst:inst.id,fn:'Control de acceso',d:H,hi:'18:00',hf:'23:00',n:1,mot:'Contingencia',sol:'',pick:['c1'],last:'c1'},o||{})});
+    const cycle=(list,cur,key)=>{const i=list.findIndex(x=>x.id===cur);set({[key]:list[(i+1)%list.length].id});};
+    // ----- estadísticas por instalación
+    const stat=i=>{let tot=0,x=0,nx=0;D.PU[i.id].forEach(p=>D.DAYS.forEach(d=>{const k=cellF(p,d);if(k.st==='L')return;tot++;if(k.st==='X'){x++;if(d>=H&&(!nx||d<nx))nx=d;}}));return{tot,x,cov:(tot-x)/tot,nx};};
+    const st=stat(inst);
+    const sumA='Cobertura '+D.pct(st.cov),sumB=st.x+' PPC';
+    // ----- grilla
+    const days=D.DAYS.map(d=>({n:D.pad(d),w:D.DL[D.dow(d)],tag:d===H?'Hoy':D.FER[d]?'F':'',color:d===H?'var(--ds-accent)':D.FER[d]?'var(--ds-fg)':'var(--ds-fg-subtle)',bg:D.FER[d]?'var(--ds-fill)':'var(--ds-surface)',title:D.FER[d]?'Feriado · '+D.FER[d]+' (calendario del núcleo)':D.fl(d)}));
+    const grid=D.PU[inst.id].map(p=>{const vac=p.vac;return{n:p.n+' · '+p.t,sub:p.pat+' · '+(vac?'Sin titular desde '+D.pad(vac)+'-10':p.tit),subColor:vac?'var(--ds-danger-fg)':'var(--ds-fg-subtle)',alert:p.alert==='horas',alertT:p.tit+' '+horasTxt,title:canEdit?'Abrir la serie de '+p.n+' · '+p.t+' · clic derecho para más opciones':p.n,cur:canEdit?'pointer':'default',noEdit:!canEdit,isRef:false,...this.rowEv(p.id,touch,()=>canEdit&&openSerie(p.id)),
+      cells:D.DAYS.map(d=>{const k=cellF(p,d),cd=D.code(p,k),on=S.sel.p===p.id&&S.sel.d===d;const lab=k.st==='OK'?'Cubierto · '+D.titOf(p,d):k.st==='X'?'PPC · '+k.m:k.st==='R'?'Reemplazado por '+k.rep+' ('+k.m+')':'Libre';
+        const rg=S.range,inR=rg&&rg.p===p.id&&d>=Math.min(rg.a,rg.b)&&d<=Math.max(rg.a,rg.b);
+        return Object.assign({code:cd,cls:'shift cell sh-'+cd+(d===H?' today':''),dot:!!k.exc,bd:'0',bg:inR?'var(--ds-accent-muted)':D.FER[d]?'var(--ds-fill)':'transparent',ring:inR?'0 0 0 2px var(--ds-accent)':(on&&!S.range&&!S.selRef)?'0 0 0 2px var(--ds-fg)':'none',title:D.fl(d)+' · '+lab+(k.exc?' · excepción':'')},this.cellEv(p.id,d,touch));})};});
+    const nc={onClick:noop,onCtx:e=>e.preventDefault(),onDown:noop,onEnter:noop,onUp:noop};
+    S.refs.filter(r=>r.inst===inst.id).forEach(r=>{const asg=r.cubre.filter(Boolean).length;grid.push({n:r.fn,sub:D.pad(r.d)+'-10 · '+r.h+' · '+asg+' de '+r.n+' asignados'+(r.sol?' · '+r.sol:''),subColor:asg<r.n?'var(--ds-danger-fg)':'var(--ds-fg-subtle)',alert:false,alertT:'',isRef:true,title:'Refuerzo · '+r.mot,cur:'pointer',noEdit:false,onOpen:()=>set({selRef:r.id,range:null}),onCtx:e=>e.preventDefault(),onDown:noop,onUp:noop,
+      cells:D.DAYS.map(d=>d===r.d?Object.assign({},nc,{code:'+'+r.n,cls:'shift cell',dot:false,bd:'1px dashed var(--ds-fg-muted)',bg:D.FER[d]?'var(--ds-fill)':'transparent',ring:S.selRef===r.id?'0 0 0 2px var(--ds-fg)':'none',title:'Refuerzo · '+D.fl(d)+' · '+r.h+' · '+r.mot,onClick:()=>set({selRef:r.id,range:null})}):Object.assign({},nc,{code:'',cls:'shift cell sh-L',dot:false,bd:'0',bg:D.FER[d]?'var(--ds-fill)':'transparent',ring:'none',title:''}))});});
+    const sp=D.puesto(S.sel.p),sk=cellF(sp,S.sel.d),[sbc,sbt]=D.badge(sk);
+    let prim='',onPrim=null;
+    if(canEdit&&sk.st==='X'&&S.sel.d>=H){prim='Cubrir en la diaria';onPrim=()=>openRep(sp.id,S.sel.d);}
+    else if(canEdit&&(sk.st==='OK')&&S.sel.d>=H){prim='Registrar excepción';onPrim=()=>openExc(sp.id,S.sel.d);}
+    const sel={badgeCls:sbc,badge:sbt,title:D.fl(S.sel.d)+' · '+sp.n+' · '+sp.t+' '+sp.h,sub:(sk.st==='R'?'Cubre '+sk.rep+' · titular '+sp.tit:sk.st==='X'?(D.titOf(sp,S.sel.d)||'Sin titular')+(sk.exc?' · excepción del día':' · de la serie'):sk.st==='L'?'Día libre en la serie '+sp.pat:sp.tit+' · según la serie '+sp.pat)+(D.FER[S.sel.d]?' · feriado':'')+(S.sel.d<H?' · día pasado':''),primary:prim,onPrimary:onPrim,secondary:canEdit?'Cambiar serie':'',onSecondary:()=>openSerie(sp.id),isRef:false,notRef:true};
+    if(S.selRef){const r=S.refs.find(x=>x.id===S.selRef);if(r){const asg=r.cubre.filter(Boolean);Object.assign(sel,{isRef:true,notRef:false,title:D.fl(r.d)+' · '+r.fn+' · '+r.h,sub:r.mot+(r.sol?' · Solicitud '+r.sol+' del Portal Cliente':'')+' · '+asg.length+' de '+r.n+' asignados'+(asg.length?' ('+asg.join(', ')+')':'')+' · turno extra por aprobar',primary:canEdit&&asg.length<r.n?'Asignar':'',onPrimary:()=>this.openRefEdit(r),secondary:''});}}
+    else if(S.range){const a=Math.min(S.range.a,S.range.b),b=Math.max(S.range.a,S.range.b),rp=D.puesto(S.range.p);Object.assign(sel,{badgeCls:'badge b-accent nodot',badge:(b-a+1)+' días',title:rp.n+' · '+rp.t+' · del '+D.fch(a)+' al '+D.fch(b),sub:(D.titOf(rp,a)||'Sin titular')+' · la misma excepción se registra en los días con turno',primary:canEdit&&a>=H?'Registrar excepción':'',onPrimary:()=>openExc(rp.id,a,b),secondary:'Limpiar selección',onSecondary:()=>set({range:null})});}
+    // ----- todas las instalaciones
+    const instRows=insts.map(i=>{const s=stat(i);return{n:i.n,cli:i.cli,puestos:D.PU[i.id].length,pct:D.pct(s.cov),pctW:(s.cov*100).toFixed(1)+'%',ppc:s.x,ppcColor:s.x?'var(--ds-danger-fg)':'var(--ds-fg)',next:s.nx?D.fl(s.nx):'—',open:()=>set({vista:'instalacion',inst:i.id})};});
+    // ----- cobertura (PPC del período)
+    const scope=(isC||S.vista==='todas')?insts:[inst];const pl=[];
+    scope.forEach(i=>D.PU[i.id].forEach(p=>D.DAYS.forEach(d=>{const k=cellF(p,d);if(k.st==='X')pl.push({d,i,p,k});})));
+    pl.sort((a,b)=>(a.d>=H)!==(b.d>=H)?(a.d>=H?-1:1):a.d>=H?a.d-b.d:b.d-a.d);
+    const ppcRows=pl.map(x=>({fecha:D.fl(x.d)+(x.d===H?' · hoy':''),inst:x.i.n,puesto:x.p.n+' · '+x.p.t,sub:x.i.n+' · '+x.p.h,tit:D.titOf(x.p,x.d)||'Sin titular',motivo:'PPC · '+x.k.m,canCubrir:canEdit&&x.d>=H,pasado:x.d<H,onCubrir:()=>openRep(x.p.id,x.d)}));
+    const nFut=pl.filter(x=>x.d>=H).length;
+    const cobSum=pl.length+' PPC en octubre · '+nFut+' desde hoy';
+    // ----- diaria
+    const dia=S.dia,dInsts=S.dInst==='all'?insts:insts.filter(i=>i.id===S.dInst);const dRows=[];
+    const openMarca=(pid,tipo)=>set({hoja:'marca',mf:{pid,tipo,hora:D.AHORA,mot:'Falla del equipo'},exp:false,ctx:null});
+    dInsts.forEach(i=>D.PU[i.id].forEach(p=>{const k=cellF(p,dia);if(k.st==='L')return;if(S.turnoF!=='Todos'&&p.t!==S.turnoF)return;
+      const start=p.h.slice(0,5),pend=dia===H&&start>D.AHORA,a=D.ASIS[p.id],m=S.mk[p.id]||{},person=k.st==='R'?k.rep:(D.titOf(p,dia)||'');
+      const ent=m.e?{h:m.e.h,src:'Manual',by:m.e.by}:(a&&a.m?{h:a.m,src:'Face ID',at:a.at}:null),sal=m.s?{h:m.s.h,src:'Manual',by:m.s.by}:null;
+      let det='—',detC='var(--ds-fg-subtle)';if(k.st==='X'){det=k.m+(D.titOf(p,dia)?' · '+p.tit:'');detC='var(--ds-danger-fg)';}if(k.st==='R'){det='Cubre '+k.rep+' · '+k.m+(k.extra?' · turno extra por aprobar':'');detC='var(--ds-info-fg)';}
+      let mk='',mkC='var(--ds-fg-subtle)',confBtn=false,src='',by='',act='',actOn=noop,act2='',act2On=noop;
+      if(k.st==='X'){mk='—';if(dia>=H){act='Asignar reemplazo';actOn=()=>openRep(p.id,dia);}}
+      else if(dia>H)mk='Programado';else if(dia<H)mk='—';else if(pend)mk='Inicia '+start;
+      else if(c.asistencia){if(ent){mk='Entrada '+ent.h+(ent.at?' · '+ent.at+' min de atraso':'')+(sal?' · Salida '+sal.h:'');mkC=ent.at?'var(--ds-warning-fg)':'var(--ds-fg-muted)';src=(sal&&sal.src==='Manual')?'Manual':ent.src;by=src==='Manual'?(sal&&sal.by||ent.by):'';if(!sal){act2='Marcar salida';act2On=()=>openMarca(p.id,'salida');}}
+        else{mk='Sin marca desde '+start;mkC='var(--ds-warning-fg)';act='No llegó';actOn=()=>this.noLlego(p,person,U);act2='Marcar entrada';act2On=()=>openMarca(p.id,'entrada');}}
+      else{if(S.conf[p.id]){mk='Confirmada '+S.conf[p.id];mkC='var(--ds-fg-muted)';}else if(canEdit){confBtn=true;act2='No llegó';act2On=()=>this.noLlego(p,person,U);}else mk='Por confirmar';}
+      const [bc,bt]=D.badge(k);
+      dRows.push({k:k.st,needs:k.st==='X',ord:k.st==='X'?0:k.st==='R'?1:3,badgeCls:bc,badge:bt,isRef:false,notRef:true,puesto:p.n+' · '+p.t,sub:i.n+' · '+p.h,inst:i,tit:D.titOf(p,dia)||'Sin titular',person:person||'Sin cubrir',ini:D.ini(person),sub2:p.n+' · '+p.h,det,detC,motivo:k.st==='X'?'PPC · '+k.m:'',mk,mkC,src,isFace:src==='Face ID',man:src==='Manual',by,confBtn,at:!!(ent&&ent.at),
+        act:canEdit?act:'',actOn,act2:canEdit?act2:'',act2On,actL:'Asignar reemplazo',canCubrir:canEdit&&k.st==='X'&&dia>=H,onCubrir:()=>openRep(p.id,dia),onConf:()=>this.act({conf:Object.assign({},S.conf,{[p.id]:D.AHORA+' · '+U.n})},'Cobertura confirmada · '+person+' en '+p.n+' · '+p.t,true)});}));
+    S.refs.forEach(r=>{if(r.d!==dia)return;const i=dInsts.find(x=>x.id===r.inst);if(!i)return;for(let q=0;q<r.n;q++){const who=r.cubre[q]||'';
+      dRows.push({k:'REF',needs:!who,ord:who?2:0,badgeCls:'',badge:'Refuerzo',isRef:true,notRef:false,puesto:r.fn,sub:i.n+' · '+r.h,inst:i,tit:'—',person:who||'Por asignar',ini:D.ini(who),sub2:r.fn+' · '+r.h,det:r.mot+(r.sol?' · Solicitud '+r.sol:'')+' · turno extra por aprobar',detC:'var(--ds-fg-muted)',motivo:who?'':'Refuerzo · '+r.mot+(r.sol?' · '+r.sol:''),mk:who?(dia===H&&r.h.slice(0,5)>D.AHORA?'Inicia '+r.h.slice(0,5):'Programado'):'—',mkC:'var(--ds-fg-subtle)',src:'',isFace:false,man:false,by:'',confBtn:false,at:false,
+        act:canEdit&&!who?'Asignar':'',actOn:()=>this.openRefEdit(r),act2:'',act2On:noop,actL:'Asignar',canCubrir:canEdit&&!who,onCubrir:()=>this.openRefEdit(r),onConf:noop});}});
+    dRows.sort((a,b)=>a.ord-b.ord);
+    const cnt=t=>dRows.filter(r=>r.k===t).length;
+    const dX=cnt('X');
+    const sums=[{k:'Programados',v:dRows.length,c:'var(--ds-fg)'},{k:'Cubiertos',v:cnt('OK'),c:'var(--ds-fg)'},{k:'Reemplazados',v:cnt('R'),c:'var(--ds-info-fg)'},{k:'Sin cubrir',v:dX,c:dX?'var(--ds-danger-fg)':'var(--ds-fg)',onClick:()=>set({solo:!S.solo})}].concat(c.asistencia&&dia===H?[{k:'Atrasos',v:dRows.filter(r=>r.at).length,c:'var(--ds-warning-fg)'}]:[]);
+    if(phone&&sums.length>4)sums.shift();
+    sums.forEach((s,i)=>{s.br=i<sums.length-1?'1px solid var(--ds-border)':'0';if(!s.onClick)s.onClick=()=>{};});
+    const dShown=S.solo?dRows.filter(r=>r.needs):dRows;
+    const accion=dRows.filter(r=>r.needs);
+    const dGroups=dInsts.map(i=>{const items=dShown.filter(r=>r.inst===i&&!r.needs);return{n:i.n,cnt:items.length?items.length+' en turno':'',items};}).filter(g=>g.items.length);
+    // ----- alertas
+    const AL={warning:['var(--ds-warning-muted)','var(--ds-warning-fg)','i-alert'],info:['var(--ds-info-muted)','var(--ds-info-fg)','i-info']};
+    const mkA=(tone,tit,d)=>({bg:AL[tone][0],fg:AL[tone][1],ic:AL[tone][2],tit,d,link:'Ver persona'});
+    const alQ=[mkA('warning','Javiera Morales Pinto '+horasTxt,'Semana del 26-10-2026 · Andén de carga · Día · Planta Quilicura'),mkA('info','Luis Muñoz Vera con licencia médica hasta el 31-10-2026',(reps.q2?'1 turno':'2 turnos')+' de Portería principal · Noche quedan sin cubrir')];
+    const alT=[mkA('info','Rosa Castillo Mella de vacaciones del 30-10 al 06-11-2026','Control de acceso · Día · Torre Apoquindo queda sin cubrir')];
+    const alL=[mkA('info','Luis Alberto Pérez con ausencia hoy','Felipe Cortés Silva cubre Portería · Día · Bodega Lampa')];
+    let alerts=[];
+    if(showMInst)alerts=inst.id==='q'?alQ:inst.id==='t'?alT:alL;
+    if(isD&&dia===H){alerts=[];if(dInsts.some(i=>i.id==='q'))alerts=alerts.concat(alQ);if(dInsts.some(i=>i.id==='t'))alerts=alerts.concat(alT);}
+    if(phone)alerts=alerts.slice(0,2);
+    // ----- estados de página
+    const forb={ic:'i-lock',icc:'var(--ds-fg-muted)',t:'No tienes acceso a la pauta',d:'Ver la pauta requiere el permiso «Ver pauta». Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA.',b:'Pedir acceso',bic:''};
+    const err=n=>({ic:'i-alert',icc:'var(--ds-danger-fg)',t:'No pudimos cargar '+n,d:'Revisa tu conexión. Si el problema sigue, avísale a soporte con el código OPS-5021.',b:'Reintentar',bic:'i-refresh'});
+    let vac;
+    if(isD)vac={t:'No hay turnos programados para el '+D.fch(dia),d:'Ninguna serie tiene turnos ese día en tus instalaciones.',b:'Ir a Mensual',on:()=>set({tab:'mensual'})};
+    else if(showCob)vac={t:'Todo cubierto en octubre',d:'No quedan turnos sin cubrir en este período.',b:'Ver la pauta completa',on:()=>set({tab:'mensual',solo:false})};
+    else if(showTodas)vac={t:'Aún no hay instalaciones con pauta',d:'Agrega puestos a una instalación para armar su pauta.',b:'Ir a Instalaciones',on:()=>{}};
+    else vac={t:'Aún no hay series en '+inst.n,d:'Crea la serie del primer puesto y se replicará sola cada mes según su ciclo.',b:canEdit?'Crear serie':'',on:()=>openSerie('q2')};
+    vac=Object.assign({ic:'i-calendar',icc:'var(--ds-fg-muted)',bic:''},vac);
+    const pName=isD?'la pauta diaria':showTodas?'las instalaciones':showCob?'la cobertura':'la pauta';
+    const pPanel=pState==='vacio'?vac:pState==='error'?err(pName):pState==='sinpermiso'?forb:null;
+    // ----- hojas
+    const tgtP=D.puesto(S.tgt),tgtI=D.instOf(S.tgt),tgtK=cellF(tgtP,S.dia);
+    const cand=D.CANDS.find(x=>x.id===S.cand)||D.CANDS[0];
+    const cands=D.CANDS.map(x=>({n:x.n,rut:x.rut,ini:D.ini(x.n),why:x.why,warn:x.warn==='horas'?'Horas legales':x.warn==='descanso'?'Descanso corto':'',block:x.block?'Doblaría turno':'',cls:'selrow'+(x.id===S.cand?' on':''),radio:'radio'+(x.id===S.cand?' on':''),pick:()=>set({cand:x.id})}));
+    const alertFor=cand=>{if(!cand)return null;
+      if(cand.warn==='horas')return{bg:AL.warning[0],fg:AL.warning[1],ic:'i-alert',tit:cand.n+' '+horasTxt,d:'Con este turno suma 4 turnos de 12 h en la semana del 26-10-2026. Puedes asignarlo igual; quedará en el historial.',link:'Ver persona'};
+      if(cand.warn==='descanso')return{bg:AL.warning[0],fg:AL.warning[1],ic:'i-alert',tit:'No cumple el descanso mínimo entre turnos',d:cand.n+' termina hoy un turno a las 16:00 en Torre Apoquindo; entre turnos quedarían 4 h.',link:'Ver persona'};
+      if(cand.block)return{bg:'var(--ds-danger-muted)',fg:'var(--ds-danger-fg)',ic:'i-lock',tit:'No puede tomar este turno: doblaría',d:cand.n+' tiene turno normal hoy de 08:00 a 20:00 en Bodega Lampa. No se permite encadenar un turno normal con uno extra, ni dos extras seguidos.',link:'Ver persona'};
+      return null;};
+    const candAlert=alertFor(cand);
+    const doAssign=()=>{if(cand.block)return;this.act({reps:Object.assign({},reps,{[S.tgt]:cand.n}),hoja:'',tab:'diaria'},'Reemplazo asignado · '+cand.n+' cubre '+tgtP.n+' · '+tgtP.t+'. Queda como turno extra por aprobar.',true);};
+    const seP=D.puesto(S.serie),pat=S.pat||seP.pat,tur=S.turno||seP.t,P=D.PATS[pat];
+    let d0='—';if(D.PATS[seP.pat]){const L=D.PATS[seP.pat][0]+D.PATS[seP.pat][1];d0=D.fch(((L-((seP.o||0)%L))%L)+1);}else d0='05-10-2026';
+    const preview=Array.from({length:14},(_,k)=>{const i=H-1+k,dd=k<2?H+k:k-1,w=(D.dow(H)+k)%7;const work=P?((i+(seP.o||0))%(P[0]+P[1]))<P[0]:(w>=1&&w<=5);const cd=work?(tur==='Noche'?'N':'D'):'L';return{lbl:D.DL[w]+' '+dd,code:cd,cls:'shift cell sh-'+cd};});
+    const exP=D.puesto(S.ex.p),exName=D.titOf(exP,S.ex.d)||'Sin titular';
+    const tipos=[['Ausencia','Un día, con o sin aviso'],['Licencia médica','Uno o más días, con fecha de término'],['Vacaciones','Uno o más días, según el saldo de la persona'],['Permiso','Con o sin goce de sueldo']].map(([k,d])=>({k,d,cls:'radio'+(k===S.tipo?' on':''),onClick:()=>set({tipo:k})}));
+    const mfP=D.puesto(S.mf.pid),mfName=(S.reps[mfP.id])||D.titOf(mfP,H)||'—';
+    const marca={n:mfName,ini:D.ini(mfName),rut:mfP.rut,sub:mfP.n+' · '+mfP.t+' '+mfP.h+' · '+D.instOf(mfP.id).n,hora:S.mf.hora,tipoL:S.mf.tipo==='entrada'?'Entrada':'Salida',otro:S.mf.mot==='Otro',by:U.n};
+    const mTipos=[['entrada','Entrada'],['salida','Salida']].map(([k,l])=>({l,cls:S.mf.tipo===k?'on':'',onClick:()=>set({mf:Object.assign({},S.mf,{tipo:k})})}));
+    const mMots=['Falla del equipo','Sin señal','El guardia no tiene celular','Otro'].map(k=>({k,cls:'radio'+(S.mf.mot===k?' on':''),onClick:()=>set({mf:Object.assign({},S.mf,{mot:k})})}));
+    const saveMarca=()=>{const cur=Object.assign({},S.mk[S.mf.pid]||{});cur[S.mf.tipo==='entrada'?'e':'s']={h:S.mf.hora,by:U.n,mot:S.mf.mot};this.act({mk:Object.assign({},S.mk,{[S.mf.pid]:cur}),hoja:'',hx:[{dot:'tl-dot person',ini:U.ini,t:U.n+' registró una marca manual',d:mfName+' · '+marca.tipoL+' '+S.mf.hora+' · '+S.mf.mot+'. Origen «Manual».',when:'30-10-2026 '+D.AHORA}].concat(S.hx)},marca.tipoL+' manual registrada · '+mfName+' a las '+S.mf.hora,true);};
+    const rf=S.rf,rfI=D.INST.find(i=>i.id===rf.inst)||D.INST[0],setRf=o=>set({rf:Object.assign({},rf,o)});
+    const rfMots=['Evento','Pedido del cliente','Contingencia','Otro'].map(k=>({k,cls:'chip toggle'+(rf.mot===k?' on':''),onClick:()=>setRf({mot:k})}));
+    const rfCands=D.CANDS.map(x=>{const on=rf.pick.includes(x.id);return{n:x.n,rut:x.rut,ini:D.ini(x.n),why:x.why,warn:x.warn==='horas'?'Horas legales':x.warn==='descanso'?'Descanso corto':'',block:x.block?'Doblaría turno':'',cls:'selrow'+(on?' on':''),check:'check'+(on?' on':''),on,pick:()=>{let p=rf.pick.slice();if(on)p=p.filter(y=>y!==x.id);else{p.push(x.id);if(p.length>rf.n)p.shift();}setRf({pick:p,last:x.id});}};});
+    const rfLast=D.CANDS.find(x=>x.id===rf.last&&rf.pick.includes(x.id)),rfAlert=alertFor(rfLast&&(rfLast.warn||rfLast.block)?rfLast:D.CANDS.find(x=>rf.pick.includes(x.id)&&(x.block||x.warn)));
+    const rfNames=rf.pick.map(id=>D.CANDS.find(x=>x.id===id).n),rfBlocked=rf.pick.some(id=>D.CANDS.find(x=>x.id===id).block);
+    const saveRef=()=>{if(rfBlocked)return;const cub=rfNames.slice();while(cub.length<rf.n)cub.push('');const nr={id:rf.edit||('r'+(S.refs.length+1)),inst:rf.inst,fn:rf.fn,d:rf.d,h:rf.hi+'–'+rf.hf,n:rf.n,cubre:cub,mot:rf.mot,sol:rf.sol};const refs=rf.edit?S.refs.map(x=>x.id===rf.edit?Object.assign({},x,{cubre:x.cubre.map((v,q)=>v||cub.shift()||'')}):x):S.refs.concat(nr);
+      this.act({refs,hoja:'',hx:[{dot:'tl-dot person',ini:U.ini,t:U.n+(rf.edit?' asignó un refuerzo':' agregó un refuerzo'),d:rf.fn+' · '+rfI.n+' · '+D.fch(rf.d)+' '+rf.hi+'–'+rf.hf+' · '+rf.mot+(rf.sol?' · Solicitud '+rf.sol:'')+'. Turno extra por aprobar.',when:'30-10-2026 '+D.AHORA}].concat(S.hx)},(rf.edit?'Refuerzo asignado':'Refuerzo agregado')+' · '+rf.fn+' · '+D.fch(rf.d)+' '+rf.hi+'–'+rf.hf+'. Queda como turno extra por aprobar.',true);};
+    const rfv={instName:rfI.n,fn:rf.fn,fecha:D.fl(rf.d),hi:rf.hi,hf:rf.hf,n:rf.n,nTxt:rf.n===1?'1 guardia':rf.n+' guardias',sol:rf.sol,cli:!!rf.sol,pickTxt:'Elige '+(rf.n===1?'1 persona':rf.n+' personas')+' · '+rf.pick.length+' de '+rf.n,aviso:rfNames.length?'Se avisará a '+rfNames.join(' y '):'Puedes dejarlo sin asignar y cubrirlo después desde la Diaria',btn:rf.edit?'Asignar':'Agregar refuerzo'};
+    const SH={serie:{t:'Serie del puesto',sub:seP.n+' · '+seP.t+' '+seP.h+' · '+D.instOf(seP.id).n},excepcion:{t:S.ex.b?'Excepción de varios días':'Excepción de un día',sub:(S.ex.b?'Del '+D.fch(S.ex.d)+' al '+D.fch(S.ex.b):D.fl(S.ex.d))+' · '+exP.n+' · '+exP.t+' '+exP.h},historial:{t:'Historial de cambios',sub:inst.n+' · todo cambio en la pauta queda aquí'},marca:{t:'Marca manual',sub:marca.sub},refuerzo:{t:rf.edit?'Asignar refuerzo':'Agregar refuerzo',sub:'Turno fuera de la serie · '+rfI.n},reemplazo:{t:'Asignar reemplazo',sub:tgtP.n+' · '+tgtP.t+' '+tgtP.h+' · '+D.fl(S.dia)+' · '+tgtI.n}}[sheet]||{t:'',sub:''};
+    const sVac={serie:{t:'Este puesto aún no tiene titular',d:'Elige a la persona titular para crear la serie.',b:'Elegir titular'},excepcion:{t:'Este día es libre en la serie',d:'No hay turno que exceptuar. Elige un día con turno en la pauta.',b:'Volver a la pauta'},historial:{t:'Aún no hay cambios en esta pauta',d:'Cada cambio de serie, excepción o reemplazo quedará registrado aquí.',b:'Volver a la pauta'},marca:{t:'Este guardia no tiene turno hoy',d:'Solo se marca la entrada o la salida de turnos del día.',b:'Volver a la Diaria'},refuerzo:{t:'No hay sugerencias para este refuerzo',d:'Nadie libre cumple las condiciones en ese horario. Busca a otra persona por nombre o RUT.',b:'Buscar persona'},reemplazo:{t:'No hay sugerencias para este turno',d:'Nadie libre cumple las condiciones. Busca a otra persona por nombre o RUT.',b:'Buscar persona'}}[sheet];
+    const sForb={ic:'i-lock',icc:'var(--ds-fg-muted)',t:sheet==='marca'?'No puedes marcar asistencia':sheet==='refuerzo'?'No puedes agregar refuerzos':sheet==='historial'?'No puedes ver el historial':sheet==='reemplazo'?'No puedes asignar reemplazos':'No puedes editar la pauta',d:(sheet==='marca'?'Marcar en forma manual requiere el permiso «Marcar asistencia».':sheet==='refuerzo'?'Agregar refuerzos requiere el permiso «Asignar reemplazos».':sheet==='reemplazo'?'Asignar reemplazos requiere el permiso «Asignar reemplazos».':sheet==='historial'?'Ver el historial requiere el permiso «Ver pauta».':'Cambiar series y registrar excepciones requiere el permiso «Editar pauta».')+' Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA.',b:'Pedir acceso',bic:''};
+    const sPanel=sState==='vacio'&&sVac?Object.assign({ic:sheet==='historial'?'i-clock':'i-user',icc:'var(--ds-fg-muted)',bic:''},sVac):sState==='error'?err(sheet==='historial'?'el historial':sheet==='reemplazo'?'las sugerencias':'la serie'):sState==='sinpermiso'?sForb:null;
+    // ----- exportar
+    const scopeName=isD?(S.dInst==='all'?(sup?'Mis instalaciones':'Todas las instalaciones'):dInsts[0].n):(showTodas||isC?'Todas las instalaciones':inst.n);
+    const per=isD?D.fch(dia):'octubre 2026';
+    const expItems=[['i-file','PDF','Por instalación · '+scopeName],['i-grid','Excel','Por instalación · '+scopeName],['i-file','PDF','Por cliente · Logística Andes SpA'],['i-grid','Excel','Por cliente · Logística Andes SpA']].map(([ic,l,d])=>({ic:'ic sm '+ic,l,d,onClick:()=>this.act({exp:false},'Preparando el '+l+' · '+d.split(' · ')[1]+' · '+per,false)}));
+    let ctx=null;if(S.ctx){const x=S.ctx,p=D.puesto(x.p),past=!!(x.d&&x.d<H);const it=(ic,l,on,dis)=>({ic:'ic sm '+ic,l,on:dis?noop:on,dis:!!dis,op:dis?'.45':'1'});
+      const items=x.k==='puesto'?[it('i-calendar','Editar serie del puesto',()=>openSerie(p.id),!canEdit),it('i-user','Cambiar titular',()=>openSerie(p.id),!canEdit),it('i-plus','Agregar refuerzo',()=>openRef({inst:D.instOf(p.id).id,fn:p.n,d:H}),!canEdit),it('i-clock','Historial del puesto',()=>set({hoja:'historial',ctx:null}))]
+        :[it('i-flag','Registrar excepción',()=>openExc(p.id,x.d),!canEdit||past),it('i-user-check','Asignar reemplazo',()=>openRep(p.id,x.d),!canEdit||past),it('i-plus','Agregar refuerzo',()=>openRef({inst:D.instOf(p.id).id,fn:p.n,d:x.d}),!canEdit||past),it('i-eye','Ver el día',()=>x.d>=H-1&&x.d<=H+1?set({tab:'diaria',dia:x.d,ctx:null,hoja:''}):set({sel:{p:p.id,d:x.d},ctx:null}))];
+      const W=x.W||(desktop?1280:1024),Hh=x.H||800,mx=x.x!==undefined?x.x:(x.k==='puesto'?300:896),my=x.y!==undefined?x.y:(x.k==='puesto'?520:500);
+      ctx={head:x.k==='puesto'?p.n+' · '+p.t:D.fl(x.d)+(x.d===H?' · hoy':''),sub:x.k==='puesto'?p.pat+' · '+(p.vac?'Sin titular':p.tit):p.n+' · '+p.t+' · '+(D.titOf(p,x.d)||'Sin titular'),note:past?'Día pasado: solo se puede ver.':'',items,left:Math.max(8,Math.min(mx,W-288))+'px',top:Math.max(8,Math.min(my,Hh-290))+'px'};}
+    const picks=S.picks.map(k=>({p:k.split('-')[0],d:+k.split('-')[1]}));
+    const tabs=[['mensual','Mensual'],['diaria','Diaria']].concat(c.varianteB?[['cobertura','Cobertura']]:[]).map(([k,l])=>({l,cls:'tab'+(tab===k?' on':''),onClick:()=>set({tab:k,solo:false,hoja:'',exp:false})}));
+    const vistas=[['instalacion','Por instalación'],['todas','Todas']].map(([k,l])=>({l:phone&&k==='instalacion'?'Instalación':l,cls:S.vista===k?'on':'',onClick:()=>set({vista:k})}));
+    const turnos=['Día','Noche','Todos'].map(k=>({l:k,cls:S.turnoF===k?'on':'',onClick:()=>set({turnoF:k})}));
+    const dayGroups=[H-1,H,H+1].map(d=>({t:(d===H?'Hoy · ':'')+D.fl(d)+(D.FER[d]?' · feriado':''),items:D.PU[inst.id].map(p=>{const k=cellF(p,d);if(k.st==='L')return null;const [bc,bt]=D.badge(k),cd=D.code(p,k);return{n:p.n+' · '+p.t,h:p.h+' · '+p.pat+(k.exc?' · excepción':''),person:k.st==='R'?k.rep+' (reemplazo)':(D.titOf(p,d)||'Sin titular'),badgeCls:bc,badge:k.st==='X'?'PPC':bt,cellCls:'shift sh-'+cd,code:cd,dot:!!k.exc,selMode:S.selMode,check:'check'+(S.picks.includes(p.id+'-'+d)?' on':''),pk:S.picks.includes(p.id+'-'+d),bgc:S.picks.includes(p.id+'-'+d)?'var(--ds-accent-muted)':'transparent',
+      onTap:()=>{if(this.lpF){this.lpF=false;return;}const key=p.id+'-'+d;if(S.selMode){if(d<H||k.st!=='OK')return;set({picks:S.picks.includes(key)?S.picks.filter(x=>x!==key):S.picks.concat(key)});return;}if(!canEdit||d<H)return;if(k.st==='X')openRep(p.id,d);else if(k.st==='OK')openExc(p.id,d);},
+      onDown:e=>{this.lpF=false;clearTimeout(this.lp);const ev={clientX:e.clientX,clientY:e.clientY};this.lp=setTimeout(()=>{this.lpF=true;this.openCtx(ev,{k:'dia',p:p.id,d});},500);},onUp:()=>clearTimeout(this.lp)};}).filter(Boolean)}));
+    const tabbar=(sup?[['i-home','Hoy'],['i-calendar','Pauta'],['i-route','Rondas'],['i-ticket','Tickets'],['i-menu','Más']]:[['i-home','Inicio'],['i-calendar','Pauta'],['i-users','Personas'],['i-route','Rondas'],['i-menu','Más']]).map(([ic,l])=>({ic:'ic '+ic,l,cls:l==='Pauta'?'on':''}));
+    const diaFull=D.DOWL[D.dow(dia)]+' '+D.fch(dia);
+    return{ready:true,theme:c.theme,device:c.device,phone,big:!phone,tablet,desktop,
+      portal:sup?'Supervisor':'ERP',user:U,readOnly:!canEdit,varB:c.varianteB||c.umbralB,varBTxt:c.varianteB?'Variante B · Cobertura como tercera pestaña · a confirmar por Carlos':'Variante B · umbral de horas legales · a confirmar por Carlos',
+      tabs,tabbar,pOk:ok&&!(pState==='sinpermiso'),showTabs:pState!=='sinpermiso',pLoading:pState==='cargando',pPanel,hasPanel:!!pPanel,
+      showActs:ok,histBtn:ok&&(isM||isC),openHist:()=>set({hoja:'historial',exp:false}),openExport:()=>set({exp:!S.exp}),repBtn:ok&&isD&&canEdit&&accion.length>0,openRepFirst:()=>accion.length&&set({hoja:'reemplazo',tgt:D.ALL.find(p=>dRows[0]&&dRows[0].puesto===p.n+' · '+p.t).id,cand:'c1'}),
+      showMInst:ok&&showMInst,showTodas:ok&&showTodas,showCob:ok&&showCob,showD:ok&&isD,showMToolbar:ok&&isM,
+      instName:inst.n,instMulti:insts.length>1,cycleInst:()=>cycle(insts,inst.id,'inst'),
+      dInstName:S.dInst==='all'?(sup?'Mis instalaciones':'Todas las instalaciones'):dInsts[0].n,cycleDInst:()=>{const l=[{id:'all'}].concat(insts);cycle(l,S.dInst,'dInst');},
+      vistas,turnos,chipSolo:'chip toggle'+(S.solo?' on':''),toggleSolo:()=>set({solo:!S.solo}),chipSoloShow:!c.varianteB||isD,ppcN:isD?dX:st.x,
+      sumA,sumB,alerts,hasAlerts:alerts.length>0,days,grid,gridCols:'208px repeat(31,32px)',sel,
+      feriados:'Feriados del calendario del núcleo: 12-10 Encuentro de Dos Mundos · 31-10 Día de las Iglesias Evangélicas y Protestantes.',
+      instRows,ppcRows,hasPpc:ppcRows.length>0,cobSum,cobInst:S.vista==='todas'||isC,
+      dRows:dShown,sums,sumCols:'repeat('+sums.length+',minmax(0,1fr))',accion,hasAccion:accion.length>0,dGroups,diaFull,diaSub:(dia===H?'Hoy · '+D.AHORA:dia<H?'Día pasado':'Próximo día')+(D.FER[dia]?' · feriado':''),diaFer:D.FER[dia]?'Feriado · '+D.FER[dia]:'',
+      prevDia:()=>set({dia:Math.max(H-1,dia-1)}),nextDia:()=>set({dia:Math.min(H+1,dia+1)}),
+      live:c.asistencia&&dia===H,noAsisTxt:'Sin Asistencia · confirma la cobertura a mano',mkHead:c.asistencia?'Marca':'Confirmación',canEdit,
+      sheetOpen:!!sheet,sheetCls:phone?'sheet':'sheet side',sh:SH,close,sOk:!!sheet&&sState==='ok',sLoading:sState==='cargando',sPanel,hasSPanel:!!sPanel,
+      isSerie:sheet==='serie',isExc:sheet==='excepcion',isHist:sheet==='historial',isRep:sheet==='reemplazo',
+      serie:{tit:seP.vac?'Sin titular':seP.tit,ini:D.ini(seP.vac?'':seP.tit),rut:seP.vac?'':seP.rut,inicio:d0,hint:D.PAT_HINT[pat],aviso:seP.vac?'Se avisará a la persona titular cuando la asignes':'Se avisará a '+seP.tit},
+      pats:Object.keys(D.PATS).map(k=>({k,cls:'chip toggle'+(k===pat?' on':''),onClick:()=>set({pat:k})})),
+      sTurnos:['Día','Noche'].map(k=>({k,cls:k===tur?'on':'',onClick:()=>set({turno:k})})),preview,
+      saveSerie:()=>this.act({hoja:''},'Serie guardada · '+seP.n+' · '+seP.t+' desde el '+D.fch(H)+'. Los días pasados no cambiaron.',true),
+      exc:{n:exName,ini:D.ini(exName),rut:exP.rut,rango:D.fch(S.ex.d)+' – '+D.fch(S.ex.b||S.ex.d)},tipos,tipo:S.tipo,rango:S.tipo!=='Ausencia'||!!S.ex.b,
+      saveExc:()=>this.act({hoja:''},'Excepción guardada · '+S.tipo+' de '+exName+' el '+D.fch(S.ex.d)+'. Queda como PPC.',true),
+      hist:S.hx.concat(D.HIST),
+      tgt:{motivo:'PPC · '+(tgtK.m||'Sin cubrir'),sub:(D.titOf(tgtP,S.dia)?'Titular '+tgtP.tit+' · ':'')+tgtI.n},
+      cands,nodisp:D.NODISP,candAlert,hasCandAlert:!!candAlert,assignDisabled:!!cand.block,doAssign,selName:cand.n,
+      expOpen:S.exp,expItems,expTitle:'Exportar · '+per,expRight:tablet?'24px':'32px',
+      rootRef:this.rootRef,
+      pintarBtn:ok&&isM&&!S.solo&&canEdit,pintar:()=>openSerie(S.sel.p),refBtnD:ok&&isD&&canEdit,addRef:()=>openRef({inst:(dInsts[0]||inst).id,d:dia}),
+      hint:S.hint&&showMInst&&ok&&canEdit,hintTxt:desktop?'Clic derecho o mantén presionado para más opciones · Shift+clic o arrastra para elegir varios días':phone?'Mantén presionado un día para más opciones · «Seleccionar días» para elegir varios':'Mantén presionado para más opciones · arrastra para elegir varios días',closeHint:()=>set({hint:false}),
+      chipSel:'chip toggle'+(S.selMode?' on':''),toggleSel:()=>set({selMode:!S.selMode,picks:[]}),showSelChip:canEdit&&showMInst&&ok,
+      selBar:phone&&S.selMode&&ok&&showMInst,selCount:picks.length===1?'1 día':picks.length+' días',selDis:!picks.length,selExc:()=>{if(!picks.length)return;const ds=picks.map(x=>x.d);set({selMode:false,picks:[],hoja:'excepcion',ex:{p:picks[0].p,d:Math.min(...ds),b:ds.length>1?Math.max(...ds):0}});},selCancel:()=>set({selMode:false,picks:[]}),
+      ctx,ctxOpen:!!ctx,ctxBig:!!ctx&&desktop,ctxTouch:!!ctx&&!desktop,closeCtx:()=>set({ctx:null}),noCtx:e=>e.preventDefault(),
+      isMarca:sheet==='marca',marca,mTipos,mMots,saveMarca,
+      isRefz:sheet==='refuerzo',rfv,rfMots,rfCands,rfAlert,hasRfAlert:!!rfAlert,rfBlocked,saveRef,rfDec:()=>setRf({n:Math.max(1,rf.n-1),pick:rf.pick.slice(0,Math.max(1,rf.n-1))}),rfInc:()=>setRf({n:Math.min(6,rf.n+1)}),cycleRfInst:()=>{const l=insts;const i=l.findIndex(x=>x.id===rf.inst);setRf({inst:l[(i+1)%l.length].id});},
+      toast:S.toast,hasUndo:S.undo,undo:()=>this.snap?this.setState(Object.assign({},this.snap,{toast:''})):set({toast:'',reps:{}}),closeToast:()=>set({toast:''}),toastBottom:phone?'106px':'24px'};
+  }
+}
+</script>
+</body>
+</html>
