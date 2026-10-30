@@ -36,6 +36,21 @@ describe("sello de firma (R6, P7)", () => {
     expect(sello.disponible).toBe(false);
     await expect(sello.sellar(evidencia)).rejects.toBeInstanceOf(SelloNoConfigurado);
   });
+
+  it("selloDelEntorno usa el falso solo en test y desarrollo; fuera de ahí falla cerrado (B1)", async () => {
+    expect(selloDelEntorno({ NODE_ENV: "test" }).nombre).toBe("falso");
+    expect(selloDelEntorno({ NODE_ENV: "development" }).nombre).toBe("falso");
+    for (const env of [
+      { NODE_ENV: "production" },
+      { VERCEL_ENV: "preview" },
+      { VERCEL_ENV: "production", NODE_ENV: "production" },
+      {},
+    ]) {
+      const sello = selloDelEntorno(env);
+      expect(sello.disponible).toBe(false);
+      await expect(sello.sellar(evidencia)).rejects.toBeInstanceOf(SelloNoConfigurado);
+    }
+  });
 });
 
 describe("verificación de identidad N2 (R13, diferida)", () => {
