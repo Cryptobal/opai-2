@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<style>body{margin:0;background:#e4e4e7;font-family:Inter,system-ui,sans-serif} a{color:#4a3fd8} a:hover{color:#111113}</style>
+</helmet>
+<div style="display:flex;flex-direction:column;gap:48px;padding:48px;width:max-content">
+<header style="display:flex;flex-direction:column;gap:4px;max-width:900px">
+<span style="font:500 13px/18px Inter,sans-serif;color:#52525b">OPAI 2.0 · Rendiciones · <a href="Índice.dc.html">Índice</a></span>
+<h1 style="margin:0;font:600 28px/34px Inter,sans-serif;letter-spacing:-0.02em;color:#111113">05 · Detalle de rendición</h1>
+<p style="margin:0;font:400 15px/22px Inter,sans-serif;color:#52525b">Rol: quien rinde (sus rendiciones) y quien aprueba · Portal Trabajador o ERP. Foto ampliada, datos, cuenta de destino desde la Ficha de persona, historial de estados con quién y cuándo, motivo de rechazo. En 1024, lista y detalle.</p>
+</header>
+<section style="display:flex;flex-direction:column;gap:16px">
+<h2 style="margin:0;font:600 18px/26px Inter,sans-serif;color:#111113">Claro</h2>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px Inter,sans-serif;color:#3f3f46">375</span><div style="width:375px;height:812px;border-radius:12px;overflow:hidden;position:relative;transform:translateZ(0)"><dc-import name="Rendiciones" screen="detalle" device="phone" theme="light" hint-size="375px,812px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px Inter,sans-serif;color:#3f3f46">1024</span><div style="width:1024px;height:768px;border-radius:12px;overflow:hidden;position:relative;transform:translateZ(0)"><dc-import name="Rendiciones" screen="detalle" device="tablet" theme="light" hint-size="1024px,768px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px Inter,sans-serif;color:#3f3f46">1280</span><div style="width:1280px;height:800px;border-radius:12px;overflow:hidden;position:relative;transform:translateZ(0)"><dc-import name="Rendiciones" screen="detalle" device="desktop" theme="light" hint-size="1280px,800px"></dc-import></div></div>
+</div>
+</section>
+<section style="display:flex;flex-direction:column;gap:16px">
+<h2 style="margin:0;font:600 18px/26px Inter,sans-serif;color:#111113">Oscuro</h2>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px Inter,sans-serif;color:#3f3f46">375</span><div style="width:375px;height:812px;border-radius:12px;overflow:hidden;position:relative;transform:translateZ(0)"><dc-import name="Rendiciones" screen="detalle" device="phone" theme="dark" hint-size="375px,812px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px Inter,sans-serif;color:#3f3f46">1024</span><div style="width:1024px;height:768px;border-radius:12px;overflow:hidden;position:relative;transform:translateZ(0)"><dc-import name="Rendiciones" screen="detalle" device="tablet" theme="dark" hint-size="1024px,768px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px Inter,sans-serif;color:#3f3f46">1280</span><div style="width:1280px;height:800px;border-radius:12px;overflow:hidden;position:relative;transform:translateZ(0)"><dc-import name="Rendiciones" screen="detalle" device="desktop" theme="dark" hint-size="1280px,800px"></dc-import></div></div>
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:16px">
+<h2 style="margin:0;font:600 18px/26px Inter,sans-serif;color:#111113">Estados · 375</h2>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px Inter,sans-serif;color:#3f3f46">Vacío · claro</span><div style="width:375px;height:812px;border-radius:12px;overflow:hidden;position:relative;transform:translateZ(0)"><dc-import name="Rendiciones" screen="detalle" device="phone" theme="light" estado="vacio" hint-size="375px,812px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px Inter,sans-serif;color:#3f3f46">Cargando · claro</span><div style="width:375px;height:812px;border-radius:12px;overflow:hidden;position:relative;transform:translateZ(0)"><dc-import name="Rendiciones" screen="detalle" device="phone" theme="light" estado="cargando" hint-size="375px,812px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px Inter,sans-serif;color:#3f3f46">Error · claro</span><div style="width:375px;height:812px;border-radius:12px;overflow:hidden;position:relative;transform:translateZ(0)"><dc-import name="Rendiciones" screen="detalle" device="phone" theme="light" estado="error" hint-size="375px,812px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px Inter,sans-serif;color:#3f3f46">Sin permiso · claro</span><div style="width:375px;height:812px;border-radius:12px;overflow:hidden;position:relative;transform:translateZ(0)"><dc-import name="Rendiciones" screen="detalle" device="phone" theme="light" estado="sinPermiso" hint-size="375px,812px"></dc-import></div></div>
+</div>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px Inter,sans-serif;color:#3f3f46">Vacío · oscuro</span><div style="width:375px;height:812px;border-radius:12px;overflow:hidden;position:relative;transform:translateZ(0)"><dc-import name="Rendiciones" screen="detalle" device="phone" theme="dark" estado="vacio" hint-size="375px,812px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px Inter,sans-serif;color:#3f3f46">Cargando · oscuro</span><div style="width:375px;height:812px;border-radius:12px;overflow:hidden;position:relative;transform:translateZ(0)"><dc-import name="Rendiciones" screen="detalle" device="phone" theme="dark" estado="cargando" hint-size="375px,812px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px Inter,sans-serif;color:#3f3f46">Error · oscuro</span><div style="width:375px;height:812px;border-radius:12px;overflow:hidden;position:relative;transform:translateZ(0)"><dc-import name="Rendiciones" screen="detalle" device="phone" theme="dark" estado="error" hint-size="375px,812px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px Inter,sans-serif;color:#3f3f46">Sin permiso · oscuro</span><div style="width:375px;height:812px;border-radius:12px;overflow:hidden;position:relative;transform:translateZ(0)"><dc-import name="Rendiciones" screen="detalle" device="phone" theme="dark" estado="sinPermiso" hint-size="375px,812px"></dc-import></div></div>
+</div>
+</section>
+<section style="display:flex;flex-direction:column;gap:16px">
+<h2 style="margin:0;font:600 18px/26px Inter,sans-serif;color:#111113">Estados · 1280</h2>
+<div style="display:grid;grid-template-columns:repeat(2,1280px);gap:32px">
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px Inter,sans-serif;color:#3f3f46">Vacío · claro</span><div style="width:1280px;height:800px;border-radius:12px;overflow:hidden;position:relative;transform:translateZ(0)"><dc-import name="Rendiciones" screen="detalle" device="desktop" theme="light" estado="vacio" hint-size="1280px,800px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px Inter,sans-serif;color:#3f3f46">Cargando · oscuro</span><div style="width:1280px;height:800px;border-radius:12px;overflow:hidden;position:relative;transform:translateZ(0)"><dc-import name="Rendiciones" screen="detalle" device="desktop" theme="dark" estado="cargando" hint-size="1280px,800px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px Inter,sans-serif;color:#3f3f46">Error · claro</span><div style="width:1280px;height:800px;border-radius:12px;overflow:hidden;position:relative;transform:translateZ(0)"><dc-import name="Rendiciones" screen="detalle" device="desktop" theme="light" estado="error" hint-size="1280px,800px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span style="font:500 13px/18px Inter,sans-serif;color:#3f3f46">Sin permiso · oscuro</span><div style="width:1280px;height:800px;border-radius:12px;overflow:hidden;position:relative;transform:translateZ(0)"><dc-import name="Rendiciones" screen="detalle" device="desktop" theme="dark" estado="sinPermiso" hint-size="1280px,800px"></dc-import></div></div>
+</div>
+</section>
+</div>
+</x-dc>
+</body>
+</html>
