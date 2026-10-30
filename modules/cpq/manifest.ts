@@ -19,7 +19,10 @@ export const manifest = defineModule({
       id: "cpq:cotizaciones.manage",
       descripcion: "Crear, editar, versionar, pedir aprobación y enviar cotizaciones",
     },
-    { id: "cpq:costos.ver", descripcion: "Ver costos, sueldos, margen y semáforo de las cotizaciones" },
+    {
+      id: "cpq:costos.ver",
+      descripcion: "Ver costos, sueldos, margen y semáforo de las cotizaciones",
+    },
     { id: "cpq:aprobar", descripcion: "Aprobar o rechazar cotizaciones bajo el margen mínimo" },
     {
       id: "cpq:modelo.manage",

@@ -18,7 +18,11 @@ describe("permisos de CPQ por rol (cpq.md §7)", () => {
   });
 
   it("gerente ve costos pero no aprueba ni cambia el modelo (ADR-042 (5) y (8))", () => {
-    expect(de("gerente")).toEqual(["cpq:cotizaciones.read", "cpq:cotizaciones.manage", "cpq:costos.ver"]);
+    expect(de("gerente")).toEqual([
+      "cpq:cotizaciones.read",
+      "cpq:cotizaciones.manage",
+      "cpq:costos.ver",
+    ]);
     expect(tienePermiso("gerente", "core:estructuras.read_sensible")).toBe(false);
   });
 

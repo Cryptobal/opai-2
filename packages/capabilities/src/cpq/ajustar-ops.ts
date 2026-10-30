@@ -11,7 +11,10 @@ import { clpSchema, modoMargenSchema, monedaSchema, pctSchema, tituloSchema } fr
 const tramoSchema = z.object({
   dias: z.array(z.number().int().min(0).max(6)).min(1).max(7).describe("0 = domingo … 6 = sábado."),
   inicio: z.string().regex(/^\d{2}:\d{2}$/),
-  fin: z.string().regex(/^\d{2}:\d{2}$/).describe("Fin exclusivo; si es ≤ inicio, cruza la medianoche."),
+  fin: z
+    .string()
+    .regex(/^\d{2}:\d{2}$/)
+    .describe("Fin exclusivo; si es ≤ inicio, cruza la medianoche."),
 });
 
 /** Campos de una línea. Sueldo, costo unitario y margen propio son de costos (R59). */
@@ -52,7 +55,9 @@ export const operacionSchema = z.discriminatedUnion("op", [
   }),
   z.object({
     op: z.literal("fijar_precio"),
-    precioManual: clpSchema.nullable().describe("Venta mensual en CLP; null vuelve al margen (R36)."),
+    precioManual: clpSchema
+      .nullable()
+      .describe("Venta mensual en CLP; null vuelve al margen (R36)."),
   }),
   z.object({ op: z.literal("agregar_seccion"), instalacionId: uuidSchema }),
   z.object({ op: z.literal("agregar_comun") }),

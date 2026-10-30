@@ -23,24 +23,32 @@ export async function aplicar(
   const ver = { where: { id: v.id } };
   switch (op.op) {
     case "renombrar":
-      if (escribir) await tx.cotizacion.update({ where: { id: v.cotizacionId }, data: { titulo: op.titulo } });
+      if (escribir)
+        await tx.cotizacion.update({ where: { id: v.cotizacionId }, data: { titulo: op.titulo } });
       return `Título: «${op.titulo}»`;
     case "cambiar_moneda":
       if (escribir) await tx.versionCotizacion.update({ ...ver, data: { moneda: op.moneda } });
       return `Moneda de presentación: ${op.moneda}`;
     case "cambiar_validez":
       if (escribir)
-        await tx.versionCotizacion.update({ ...ver, data: { validaHasta: new Date(`${op.validaHasta}T00:00:00Z`) } });
+        await tx.versionCotizacion.update({
+          ...ver,
+          data: { validaHasta: new Date(`${op.validaHasta}T00:00:00Z`) },
+        });
       return `Válida hasta: ${op.validaHasta}`;
     case "fijar_margen":
       if (escribir)
         await tx.versionCotizacion.update({
           ...ver,
-          data: { margenObjetivo: op.margenObjetivo, ...(op.modoMargen ? { modoMargen: op.modoMargen } : {}) },
+          data: {
+            margenObjetivo: op.margenObjetivo,
+            ...(op.modoMargen ? { modoMargen: op.modoMargen } : {}),
+          },
         });
       return "Margen objetivo actualizado";
     case "fijar_precio":
-      if (escribir) await tx.versionCotizacion.update({ ...ver, data: { precioManual: op.precioManual } });
+      if (escribir)
+        await tx.versionCotizacion.update({ ...ver, data: { precioManual: op.precioManual } });
       return op.precioManual == null ? "Precio manual quitado" : "Precio manual fijado";
     case "agregar_seccion": {
       const [inst] = await instalacionesCotizables(ctx, negocioId, [op.instalacionId]);
@@ -50,7 +58,14 @@ export async function aplicar(
       const orden = await tx.seccionCotizacion.count({ where: { versionId: v.id } });
       if (escribir)
         await tx.seccionCotizacion.create({
-          data: { tenantId: ctx.tenantId, versionId: v.id, tipo: "instalacion", instalacionId: inst.id, nombre: inst.nombre, orden },
+          data: {
+            tenantId: ctx.tenantId,
+            versionId: v.id,
+            tipo: "instalacion",
+            instalacionId: inst.id,
+            nombre: inst.nombre,
+            orden,
+          },
         });
       return `Sección agregada: ${inst.nombre}`;
     }
@@ -60,7 +75,14 @@ export async function aplicar(
       const orden = await tx.seccionCotizacion.count({ where: { versionId: v.id } });
       if (escribir)
         await tx.seccionCotizacion.create({
-          data: { tenantId: ctx.tenantId, versionId: v.id, tipo: "comun", instalacionId: null, nombre: "Común", orden },
+          data: {
+            tenantId: ctx.tenantId,
+            versionId: v.id,
+            tipo: "comun",
+            instalacionId: null,
+            nombre: "Común",
+            orden,
+          },
         });
       return "Sección Común agregada";
     }

@@ -87,8 +87,14 @@ export const cotizacionesGet = defineCapability({
     const ultima = versiones[0];
     if (!ultima) throw new Error("Cotización sin versión.");
     const [secciones, lineas, aprobaciones] = await Promise.all([
-      ctx.db.seccionCotizacion.findMany({ where: { versionId: ultima.id }, orderBy: { orden: "asc" } }),
-      ctx.db.lineaCotizacion.findMany({ where: { versionId: ultima.id }, orderBy: { orden: "asc" } }),
+      ctx.db.seccionCotizacion.findMany({
+        where: { versionId: ultima.id },
+        orderBy: { orden: "asc" },
+      }),
+      ctx.db.lineaCotizacion.findMany({
+        where: { versionId: ultima.id },
+        orderBy: { orden: "asc" },
+      }),
       ctx.db.aprobacionCotizacion.findMany({
         where: { versionId: ultima.id },
         orderBy: { createdAt: "desc" },

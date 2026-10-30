@@ -16,19 +16,42 @@ describe("cpq.cotizaciones.create", () => {
     const r = await executeCapability(ctx, "cpq.cotizaciones.create", crear({ comun: true }));
     expect(r.ok).toBe(true);
     if (!r.ok) return;
-    const d = r.data as { codigo: string; estado: string; version: number; vigente: boolean; secciones: { tipo: string; instalacionId: string | null }[] };
+    const d = r.data as {
+      codigo: string;
+      estado: string;
+      version: number;
+      vigente: boolean;
+      secciones: { tipo: string; instalacionId: string | null }[];
+    };
     expect(d.codigo).toMatch(/^CPQ-\d{4}-001$/);
     expect(d).toMatchObject({ estado: "borrador", version: 1, vigente: true });
-    expect(d.secciones.map((s) => [s.tipo, s.instalacionId])).toEqual([["instalacion", I1], ["comun", null]]);
+    expect(d.secciones.map((s) => [s.tipo, s.instalacionId])).toEqual([
+      ["instalacion", I1],
+      ["comun", null],
+    ]);
     expect(tabla("versionCotizacion")).toHaveLength(1);
     expect(eventos.some((e) => e.capability === "cpq.cotizaciones.create")).toBe(true);
-    expect(tabla("evento").some((e) => (e as { tipo: string }).tipo === "cpq.cotizacion.creada")).toBe(true);
+    expect(
+      tabla("evento").some((e) => (e as { tipo: string }).tipo === "cpq.cotizacion.creada"),
+    ).toBe(true);
   });
 
   it("el correlativo sigue desde el último del año, también el importado de 1.0, e ignora los con sufijo (R54)", async () => {
-    const anio = Number(new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santiago" }).format(new Date()).slice(0, 4));
+    const anio = Number(
+      new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santiago" })
+        .format(new Date())
+        .slice(0, 4),
+    );
     const fila = (id: string, codigo: string, numero: number | null) => ({
-      id, tenantId: TENANT_DE_PRUEBA, negocioId: N1, codigo, anio, numero, titulo: "1.0", estado: "enviada", vigente: false,
+      id,
+      tenantId: TENANT_DE_PRUEBA,
+      negocioId: N1,
+      codigo,
+      anio,
+      numero,
+      titulo: "1.0",
+      estado: "enviada",
+      vigente: false,
     });
     const semilla = {
       ...semillaCpq(),
@@ -41,7 +64,10 @@ describe("cpq.cotizaciones.create", () => {
     const a = await executeCapability(ctx, "cpq.cotizaciones.create", crear());
     const b = await executeCapability(ctx, "cpq.cotizaciones.create", crear());
     expect(a.ok && (a.data as { codigo: string }).codigo).toBe(`CPQ-${anio}-341`);
-    expect(b.ok && (b.data as { codigo: string; vigente: boolean })).toMatchObject({ codigo: `CPQ-${anio}-342`, vigente: false });
+    expect(b.ok && (b.data as { codigo: string; vigente: boolean })).toMatchObject({
+      codigo: `CPQ-${anio}-342`,
+      vigente: false,
+    });
   });
 
   it("dryRun no persiste nada", async () => {
@@ -63,7 +89,11 @@ describe("cpq.cotizaciones.create", () => {
 
   it("un negocio que no es del tenant (o no existe) responde NOT_FOUND", async () => {
     const { ctx } = ctxCpq();
-    const r = await executeCapability(ctx, "cpq.cotizaciones.create", crear({ negocioId: "0192f3a0-0000-7000-8000-00000000ffff" }));
+    const r = await executeCapability(
+      ctx,
+      "cpq.cotizaciones.create",
+      crear({ negocioId: "0192f3a0-0000-7000-8000-00000000ffff" }),
+    );
     expect(r).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
   });
 
@@ -75,7 +105,11 @@ describe("cpq.cotizaciones.create", () => {
   });
 
   it("validaHasta no puede ser anterior a hoy", async () => {
-    const r = await executeCapability(ctxCpq().ctx, "cpq.cotizaciones.create", crear({ validaHasta: "2020-01-01" }));
+    const r = await executeCapability(
+      ctxCpq().ctx,
+      "cpq.cotizaciones.create",
+      crear({ validaHasta: "2020-01-01" }),
+    );
     expect(r).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
   });
 });
@@ -88,11 +122,19 @@ describe("cpq.cotizaciones.list y get", () => {
     const l = await executeCapability(ctx, "cpq.cotizaciones.list", {});
     expect(l.ok && (l.data as { items: { id: string }[] }).items.map((i) => i.id)).toEqual([id]);
     const g = await executeCapability(ctx, "cpq.cotizaciones.get", { id });
-    expect(g.ok && (g.data as { versiones: unknown[]; secciones: unknown[] })).toMatchObject({ versiones: [{ numero: 1 }], secciones: [{ instalacionId: I1 }] });
+    expect(g.ok && (g.data as { versiones: unknown[]; secciones: unknown[] })).toMatchObject({
+      versiones: [{ numero: 1 }],
+      secciones: [{ instalacionId: I1 }],
+    });
   });
 
   it("una cotización inexistente o de otro tenant responde NOT_FOUND, igual que inexistente", async () => {
-    const r = await executeCapability(ctxCpq().ctx, "cpq.cotizaciones.get", { id: "0192f3a0-0000-7000-8000-00000000eeee" });
-    expect(r).toMatchObject({ ok: false, error: { code: "NOT_FOUND", message: "La cotización no existe." } });
+    const r = await executeCapability(ctxCpq().ctx, "cpq.cotizaciones.get", {
+      id: "0192f3a0-0000-7000-8000-00000000eeee",
+    });
+    expect(r).toMatchObject({
+      ok: false,
+      error: { code: "NOT_FOUND", message: "La cotización no existe." },
+    });
   });
 });

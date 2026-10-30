@@ -46,7 +46,13 @@ export const aprobacionSchema = z.object({
   margenEfectivo: z.number().nullable().optional(),
 });
 
-type FilaSeccion = { id: string; tipo: string; instalacionId: string | null; nombre: string; orden: number };
+type FilaSeccion = {
+  id: string;
+  tipo: string;
+  instalacionId: string | null;
+  nombre: string;
+  orden: number;
+};
 type FilaLinea = {
   id: string;
   seccionId: string;

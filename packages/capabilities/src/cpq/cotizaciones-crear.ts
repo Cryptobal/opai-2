@@ -42,7 +42,10 @@ export const cotizacionesCreate = defineCapability({
     modoMargen: modoMargenSchema.optional(),
     margenObjetivo: pctSchema.optional().describe("Escalado por PCT_ESCALA; exige ver costos."),
   }),
-  output: resumenSchema.extend({ versionDetalle: versionSchema, secciones: z.array(seccionSchema) }),
+  output: resumenSchema.extend({
+    versionDetalle: versionSchema,
+    secciones: z.array(seccionSchema),
+  }),
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
@@ -116,7 +119,11 @@ export const cotizacionesCreate = defineCapability({
       });
       const s = [];
       for (const sec of secciones)
-        s.push(await tx.seccionCotizacion.create({ data: { ...sec, tenantId: ctx.tenantId, versionId: v.id } }));
+        s.push(
+          await tx.seccionCotizacion.create({
+            data: { ...sec, tenantId: ctx.tenantId, versionId: v.id },
+          }),
+        );
       await ctx.eventos.emitir(tx, {
         tipo: "cpq.cotizacion.creada",
         entidadTipo: "cotizacion",

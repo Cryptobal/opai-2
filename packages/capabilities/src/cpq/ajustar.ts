@@ -63,7 +63,9 @@ export const cotizacionesAjustar = defineCapability({
           data: { revision: v.revision + 1, estado: nuevoEstado },
         });
         if (r.count !== 1)
-          throw conflicto("La cotización cambió mientras la editabas. Recarga e inténtalo de nuevo.");
+          throw conflicto(
+            "La cotización cambió mientras la editabas. Recarga e inténtalo de nuevo.",
+          );
         await tx.cotizacion.update({ where: { id: c.id }, data: { estado: nuevoEstado } });
         await renombrada(ctx, tx, c, input.operaciones);
       }

@@ -23,7 +23,11 @@ export const ESTADOS_ABIERTOS: readonly EstadoCotizacion[] = [
 ];
 
 /** Estados en que la versión se puede editar; editar una aprobada o lista vuelve a borrador (R41). */
-export const ESTADOS_EDITABLES: readonly EstadoCotizacion[] = ["borrador", "en_aprobacion", "lista"];
+export const ESTADOS_EDITABLES: readonly EstadoCotizacion[] = [
+  "borrador",
+  "en_aprobacion",
+  "lista",
+];
 
 /** Transiciones permitidas de §6. `enviada → (v+1) borrador` crea otra versión, no cambia esta. */
 const TRANSICIONES: Readonly<Record<EstadoCotizacion, readonly EstadoCotizacion[]>> = {

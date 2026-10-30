@@ -10,6 +10,7 @@ import {
   limpiarRegistro,
   registrarCapacidades,
 } from "../src";
+import { executeCapability } from "../src";
 import { TENANT_DE_PRUEBA, contextoDePrueba } from "../src/testing";
 import type { Alcance } from "../src/types";
 import { CU, I1, N1, semillaComercial } from "./comercial-ayuda";
@@ -49,3 +50,22 @@ export function ctxCpq(o: Opciones = {}) {
     semilla: o.semilla ?? semillaCpq(),
   });
 }
+
+export type Ficha = { id: string; codigo: string; secciones: { id: string; tipo: string }[] };
+
+export async function nueva(ctx: ReturnType<typeof ctxCpq>["ctx"]): Promise<Ficha> {
+  const r = await executeCapability(ctx, "cpq.cotizaciones.create", { negocioId: N1 });
+  if (!r.ok) throw new Error(JSON.stringify(r.error));
+  return r.data as Ficha;
+}
+
+export const puesto = (seccionId: string, extra: Record<string, unknown> = {}) => ({
+  op: "agregar_linea",
+  seccionId,
+  tipo: "puesto",
+  nombre: "Guardia 24/7",
+  cargoId: CARGO,
+  cantidad: 2,
+  horario: [{ dias: [0, 1, 2, 3, 4, 5, 6], inicio: "08:00", fin: "08:00" }],
+  ...extra,
+});
