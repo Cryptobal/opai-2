@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="pauta-tableros.js"></script>
+<style>body{margin:0;background:#e7e7ea}a{color:var(--ds-accent)}a:hover{color:var(--ds-accent)}</style>
+</helmet>
+<div data-theme="light" style="padding:48px;display:flex;flex-direction:column;gap:56px;min-width:max-content;background:var(--ds-n-200);color:var(--ds-fg);font-family:var(--font-sans)">
+  <header style="display:flex;flex-direction:column;gap:6px;max-width:880px">
+    <a href="Indice.dc.html" class="t-label-sm">← Índice de pantallas</a>
+    <div class="t-overline">OPAI 2.0 · Operaciones · Pauta · v2</div>
+    <h1 class="t-title m0">10 · Hoja «Agregar refuerzo»</h1>
+    <p class="t-body-sm muted m0" style="text-wrap:pretty">Turno que no es parte de la serie del puesto. Pide instalación, puesto o función, fecha, horario (inicio y término), cantidad de guardias, quién lo cubre (mismas sugerencias de P08) y motivo (evento, pedido del cliente, contingencia u otro). Si lo pidió el cliente desde el Portal Cliente, muestra su Solicitud. Queda como turno extra por aprobar y se bloquea si dobla. Se abre desde «Agregar refuerzo» en la Diaria o desde el menú de un día en la Mensual.</p>
+    <p class="t-body-sm m0"><strong>Roles:</strong> owner, admin, gerente y supervisor (sus instalaciones) · viewer: Forbidden.</p>
+  </header>
+  <sc-for list="{{ rows }}" as="row" hint-placeholder-count="2">
+    <section style="display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;flex-direction:column;gap:2px"><h2 class="t-subheading m0">{{ row.t }}</h2><sc-if value="{{ row.note }}"><p class="t-body-sm muted m0">{{ row.note }}</p></sc-if></div>
+      <div style="display:flex;gap:32px;align-items:flex-start">
+        <sc-for list="{{ row.b }}" as="ab" hint-placeholder-count="3">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div class="t-label-sm muted">{{ ab.label }}</div>
+            <div data-k="{{ ab.k }}" style="width:{{ ab.wpx }};height:{{ ab.hpx }};position:relative;overflow:hidden;border:1px solid var(--ds-border-strong);border-radius:var(--radius-lg);background:var(--ds-surface)">
+              <dc-import name="Tablero" cfg="{{ ab.cfg }}" delay="{{ ab.delay }}" style="position:absolute;inset:0" hint-size="100%,100%"></dc-import>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+  </sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const CFG={phoneFirst:true,base:{tab:'diaria',hoja:'refuerzo',rol:'supervisor',asistencia:true},stateDevices:[['phone','light'],['desktop','dark']],extra:[
+ {t:'Pedido por el cliente · Portal Cliente',note:'Fuera de pauta, con vínculo a la Solicitud.',b:[['phone','light',{hoja:'refuerzoCliente'},'solicitud del cliente'],['desktop','light',{hoja:'refuerzoCliente',rol:'admin'},'solicitud del cliente'],['desktop','dark',{hoja:'refuerzoCliente',rol:'admin'},'solicitud del cliente']]},
+ {t:'Bloqueo · dobla turno',b:[['phone','light',{hoja:'refuerzoBloqueo'},'bloqueo'],['desktop','light',{hoja:'refuerzoBloqueo'},'bloqueo']]},
+ {t:'Desde la Mensual, sobre un día',b:[['desktop','light',{tab:'mensual',hoja:'refuerzoMensual',rol:'admin'},'desde la Mensual'],['tablet','light',{tab:'mensual',hoja:'refuerzoMensual',rol:'admin'},'desde la Mensual']]},
+ {t:'Así se ve el refuerzo',note:'Badge «Refuerzo» en la grilla y en la Diaria.',b:[['desktop','light',{tab:'mensual',hoja:'refuerzoSel',rol:'admin'},'en la Mensual'],['desktop','light',{rol:'admin'},'en la Diaria · Bodega Lampa'],['phone','light',{},'en la Diaria']]}]};
+class Component extends DCLogic {
+  componentDidMount(){const go=()=>window.PautaTableros?this.forceUpdate():(this.t=setTimeout(go,40));go();}
+  componentWillUnmount(){clearTimeout(this.t);}
+  renderVals(){if(!this.rows&&window.PautaTableros){let n=0;this.rows=window.PautaTableros(CFG);this.rows.forEach(r=>r.b.forEach(ab=>{ab.delay=200+(n++)*450;}));}return{rows:this.rows||[]};}
+}
+</script>
+</body>
+</html>
