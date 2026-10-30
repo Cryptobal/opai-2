@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><script src="./nomina-data.js"></script><style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style></helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="{{ active }}" title="{{ shellTitle }}" user="{{ user }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<sc-if value="{{ showHeader }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Nómina · Octubre 2026" title="Liquidaciones del período" subtitle="148 personas · 127 revisadas" badge="{{ roleBadge }}" hint-size="100%,80px">
+<sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="check" hint-size="170px,40px">Marcar revisadas</x-import>
+</sc-if>
+</x-import>
+</sc-if>
+
+<sc-if value="{{ isOk }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:16px">
+<sc-if value="{{ isGerente }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="neutral" icono="eye" hint-size="100%,56px">Por tu rol ves el resumen y el costo del período. Los montos de cada persona están enmascarados.</x-import>
+</sc-if>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">
+<sc-for list="{{ resumen }}" as="k" hint-placeholder-count="3">
+<div style="display:flex;flex-direction:column;gap:2px;padding:12px 16px;border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+<span class="t-caption" style="color:var(--ds-fg-muted)">{{ k.l }}</span>
+<span class="t-subheading t-numeric">{{ k.v }}</span>
+</div>
+</sc-for>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+<div style="flex:1 1 240px;max-width:320px;min-width:0">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" icon="search" placeholder="Buscar por nombre o RUT" value="{{ q }}" on-change="{{ setQ }}" style="width:100%" hint-size="100%,44px"></x-import>
+</div>
+<div style="flex:1 1 200px;max-width:240px;min-width:0">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" value="{{ inst }}" options="{{ instOpts }}" on-change="{{ setInst }}" hint-size="100%,44px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Sobre el umbral de 10 %" activo="{{ soloUmbral }}" on-cambiar="{{ toggleUmbral }}" hint-size="190px,32px"></x-import>
+</div>
+<sc-if value="{{ hasRows }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="margin:0 -16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" cards="{{ true }}" to-card="{{ toCard }}" on-row-click="{{ noop }}" hint-size="100%,300px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" on-row-click="{{ noop }}" footer="{{ footer }}" hint-size="100%,300px"></x-import>
+</sc-if>
+</sc-if>
+<sc-if value="{{ noRows }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" size="sm" icon="search" title="{{ noRowsTitle }}" description="Prueba con otra instalación o quita el filtro de umbral." action="{{ clearAction }}" hint-size="100%,240px"></x-import>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isCargando }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:16px" aria-busy="true">
+<div style="display:flex;gap:12px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="33%" height="{{ 64 }}" radius="{{ 16 }}" hint-size="33%,64px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="33%" height="{{ 64 }}" radius="{{ 16 }}" hint-size="33%,64px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="33%" height="{{ 64 }}" radius="{{ 16 }}" hint-size="33%,64px"></x-import></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="320px" height="{{ 44 }}" radius="{{ 10 }}" hint-size="320px,44px"></x-import>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+<sc-for list="{{ skel }}" as="s" hint-placeholder-count="5">
+<div style="display:flex;gap:16px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" circle="{{ true }}" width="{{ 24 }}" height="{{ 24 }}" hint-size="24px,24px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="140px" height="{{ 14 }}" hint-size="140px,14px"></x-import>
+<div style="flex:1"></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="90px" height="{{ 14 }}" hint-size="90px,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="70px" height="{{ 20 }}" radius="{{ 999 }}" hint-size="70px,20px"></x-import>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="file" title="Aún no hay liquidaciones" description="Calcula el período cuando la asistencia y las novedades estén listas." action="{{ emptyAction }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar las liquidaciones" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="NOM-LIQ-503" on-retry="{{ noop }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ isSinPermiso }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a Nómina" description="Las remuneraciones solo las ven RRHH, gerencia y administración. Pídele acceso a Marcela Rojas, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,320px"></x-import>
+</sc-if>
+</x-import>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ok&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;ok&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;role&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;admin&quot;,&quot;rrhh&quot;,&quot;gerente&quot;,&quot;inspector&quot;,&quot;supervisor&quot;],&quot;default&quot;:&quot;admin&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { q: "", inst: "Todas las instalaciones", soloUmbral: false };
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const ND = window.ND;
+    if (!ND) return {};
+    const b = ND.base(this.props, "liq", "Liquidaciones");
+    const m = (v) => (b.isGerente ? ND.mask : ND.money(v));
+    const umbral = 10;
+    const q = this.state.q.toLowerCase();
+    const rows = ND.personas.filter((r) =>
+      (!q || r.nombre.toLowerCase().includes(q) || r.rut.includes(q)) &&
+      (this.state.inst === "Todas las instalaciones" || r.inst === this.state.inst) &&
+      (!this.state.soloUmbral || Math.abs(r.dif) > umbral));
+    const pct = (d) => (d > 0 ? "+" : "") + d.toLocaleString("es-CL", { maximumFractionDigits: 1 }) + " %";
+    const difEl = (r) => Math.abs(r.dif) > umbral ? (NS.Badge ? h(NS.Badge, { tone: "warning" }, pct(r.dif)) : pct(r.dif)) : h("span", { className: "t-numeric", style: { color: "var(--ds-fg-muted)" } }, pct(r.dif));
+    const persona = (r) => h("span", { style: { display: "flex", gap: 10, alignItems: "center" } }, NS.Avatar ? h(NS.Avatar, { initials: r.ini, size: 24 }) : null, h("span", { style: { display: "flex", flexDirection: "column" } }, h("span", { style: { fontWeight: 500 } }, r.nombre), h("span", { className: "t-mono", style: { fontSize: 12, color: "var(--ds-fg-muted)" } }, r.rut)));
+    const tot = (k) => ND.personas.reduce((s, r) => s + r[k], 0);
+    return {
+      ...b,
+      q: this.state.q, setQ: (v) => this.setState({ q: v }),
+      inst: this.state.inst, setInst: (v) => this.setState({ inst: v }),
+      instOpts: ["Todas las instalaciones", "Planta Quilicura", "Bodega Lampa", "Torre Apoquindo"],
+      soloUmbral: this.state.soloUmbral, toggleUmbral: () => this.setState({ soloUmbral: !this.state.soloUmbral }),
+      rows, hasRows: rows.length > 0, noRows: rows.length === 0,
+      noRowsTitle: this.state.q ? "Sin resultados para «" + this.state.q + "»" : "Sin liquidaciones con estos filtros",
+      clearAction: NS.Button ? h(NS.Button, { variant: "secondary", onClick: () => this.setState({ q: "", inst: "Todas las instalaciones", soloUmbral: false }) }, "Limpiar filtros") : null,
+      resumen: [
+        { l: "Imponible total", v: ND.money(118420300) },
+        { l: "Líquido total", v: ND.money(99204600) },
+        { l: "Sobre el umbral", v: "7 personas" },
+      ],
+      roleBadge: b.isInspector && NS.Badge ? h(NS.Badge, { tone: "info" }, "Solo lectura") : null,
+      cols: [
+        { key: "nombre", label: "Persona", render: persona },
+        { key: "inst", label: "Instalación", muted: true },
+        { key: "dias", label: "Días", align: "right" },
+        { key: "imp", label: "Imponible", align: "right", render: (r) => m(r.imp) },
+        { key: "desc", label: "Descuentos", align: "right", render: (r) => m(r.desc) },
+        { key: "liq", label: "Líquido", align: "right", strong: true, render: (r) => m(r.liq) },
+        { key: "dif", label: "Dif. vs sep.", align: "right", render: difEl },
+        { key: "estado", label: "Estado", render: (r) => (NS.Badge ? h(NS.Badge, { tone: r.tone, dot: true }, r.estado) : r.estado) },
+      ],
+      footer: h("div", { className: "t-body-sm", style: { display: "flex", justifyContent: "space-between", padding: "12px 16px", color: "var(--ds-fg-muted)" } }, h("span", null, "8 de 148 personas"), h("span", { className: "t-numeric" }, "Total visible · líquido ", h("b", { style: { color: "var(--ds-fg)" } }, b.isGerente ? ND.mask : ND.money(tot("liq"))))),
+      toCard: (r) => ({ initials: r.ini, title: r.nombre, subtitle: r.inst + " · " + r.dias + " días · Dif. " + pct(r.dif), meta: "Líquido " + m(r.liq), badge: Math.abs(r.dif) > umbral ? { tone: "warning", label: "Sobre umbral" } : { tone: r.tone, label: r.estado }, chevron: true }),
+      emptyAction: NS.Button && b.canEdit ? h(NS.Button, null, "Ir al cierre") : null,
+    };
+  }
+}
+</script>
+</body>
+</html>
