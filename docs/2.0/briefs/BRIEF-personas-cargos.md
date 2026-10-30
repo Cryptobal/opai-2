@@ -16,9 +16,10 @@
 
 ### Pasa de 1.0 a 2.0 (en este PR 1)
 
-- **P1 «No recontratar» (lista negra, `isBlacklisted` de 1.0):** marca con motivo y fecha, visible y
-  editable solo para RRHH y administradores; el resto no ve ni que la sección existe. Base de interés
-  legítimo (Ley 21.719, §21).
+- **P1 «No recontratar» (marca P1, `isBlacklisted` de 1.0):** marca con motivo, fecha de marca y
+  vencimiento obligatorio, visible y editable solo para RRHH y administradores; el resto no ve ni que
+  la sección existe. Base de interés legítimo (art. 13 d) de la Ley 19.628, modificada por la Ley
+  21.719, vigente desde el 01-12-2026; §21). Apagada en producción hasta esa fecha.
 
 ### Pasa de 1.0 a 2.0 (queda para PR 2, ver §3)
 
@@ -108,13 +109,41 @@
    auditoría; falta el campo explícito «base legal» y la integración con las solicitudes ARCO de
    `core.cumplimiento.*` (no estaba en el alcance de los 60 min; se deja para PR 2/3 y se anota en
    `ESTADO.md`).
-4. Motivo de lista cerrada — **Parcial**: implementado como texto libre (ver §4); la lista cerrada
-   necesita que Carlos la defina.
+4. Motivo de lista cerrada — **Parcial**: implementado como texto libre con `TODO(decisión Carlos)`
+   (ver §4); la lista cerrada necesita que Carlos la defina. No se inventa.
 5. Alerta al crear/contratar el mismo RUT — **No implementado en este PR** (requiere cruzar el alta de
    persona o vínculo con el historial de marcas por RUT, incluidas personas archivadas/anonimizadas;
-   queda para PR 2/3).
-6. Plazo de retención configurable en Configuración › Cumplimiento › Retención — **No implementado**:
-   la pantalla de Configuración › Módulos › Personas (D-D) es PR 3.
+   queda para PR 2/3). Confirmado con test que, mientras no exista esa alerta, ningún alta, vínculo ni
+   asignación se bloquea por la marca (art. 8° bis: la alerta nunca puede bloquear sola).
+6. Vencimiento obligatorio y limpieza automática — **OK** (corrección del 30-oct 15:35, §8): «Vence
+   el» es obligatorio al marcar; un trabajo diario limpia la marca, el motivo y las fechas al vencer.
+   El plazo MÁXIMO de vigencia (tope de negocio) queda como ajuste en Configuración › Módulos ›
+   Personas, sin valor decidido (`TODO(decisión Carlos)`).
+
+## 8. Correcciones del Revisor y del abogado (30-oct 15:33 CLT, misma rama)
+
+Encargo de Carlos: «corrige ya lo técnico (textos, vencimiento obligatorio, borrado del motivo,
+apagado hasta el 01-12) y espera mis decisiones». Resumen (detalle en `docs/2.0/ESTADO.md`):
+
+1. **Motivo nunca en claro en la auditoría:** `sensibles: ["motivo"]` en las capacidades de marcar y
+   quitar; `core.actividad.list` y `core.audit.list` ocultan la fila completa a quien no tiene el
+   permiso. Al quitar, el motivo anterior no sobrevive en ningún lado.
+2. **Anonimización:** `retencion-anonimizar.ts` limpia las 4 columnas `no_recontratar*` del titular.
+   No se borra nada de `core.audit_events` (cadena inmutable por contrato); como el motivo nunca se
+   escribió en claro, no queda nada que borrar ahí.
+3. **Vencimiento obligatorio:** columna `no_recontratar_vence_en` (agregada dentro de la misma
+   migración `20261030170000`, todavía no aplicada); al vencer, `core.personas.no_recontratar_vencer`
+   (trabajo diario) limpia las 4 columnas. Plazo máximo: ajuste sin valor decidido (`TODO(decisión
+   Carlos)`), Configuración › Módulos › Personas.
+4. **Apagada hasta el 01-12-2026 en producción:** un solo punto de decisión
+   (`noRecontratarHabilitadaAhora`), con override exclusivo de tests/e2e.
+5. **Textos exactos** del abogado en el diálogo de marcar, el de quitar, la alerta, la etiqueta y el
+   placeholder del motivo; «lista negra» → «marca P1» en descripciones MCP y en este brief; el ejemplo
+   de motivo pasa a un hecho no penal.
+
+**Pendientes de decisión de Carlos (no implementados, por instrucción expresa):** la lista cerrada de
+motivos, la integración con ARCO (vista del trabajador y oposición), la declaración en la política de
+privacidad y el RAT, y el plazo máximo de vigencia de la marca.
 
 ## 6. Decisiones registradas en este PR
 

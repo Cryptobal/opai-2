@@ -41,6 +41,7 @@ import {
   personasDesbloquear,
   personasVincularUsuario,
 } from "./personas-estado";
+import { trabajoPersonasNoRecontratarVencer } from "./personas-no-recontratar-limpieza";
 import {
   personasMarcarNoRecontratar,
   personasNoRecontratarVer,
@@ -115,3 +116,6 @@ export const capacidadesMaestros: readonly Capacidad[] = [
   estructurasEfectiva,
   buscar,
 ];
+
+/** Trabajos diarios de los maestros, registrados por el borde (`apps/web/lib/registro.ts`). */
+export const trabajosMaestros = [trabajoPersonasNoRecontratarVencer];
