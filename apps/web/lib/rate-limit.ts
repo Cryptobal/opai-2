@@ -20,6 +20,8 @@ export const LIMITES = {
   recuperar: { maximo: 10, ventanaMs: 15 * 60_000 },
   /** Invitación (ver/aceptar/pedir otra), por IP: 30 cada 15 minutos. */
   invitacion: { maximo: 30, ventanaMs: 15 * 60_000 },
+  /** Firma por enlace personal (ver/firmar/rechazar), por IP: 30 cada 15 minutos (firma.md R12). */
+  firma: { maximo: 30, ventanaMs: 15 * 60_000 },
   /** Verificación pública de comprobantes, por IP: 30 por minuto. */
   verificar: { maximo: 30, ventanaMs: 60_000 },
   /** /api/existe (proxy interno), por usuario de la sesión: 120 por minuto. */

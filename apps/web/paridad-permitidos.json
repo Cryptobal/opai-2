@@ -16,6 +16,10 @@
     {
       "archivo": "app/verificar/[token]/page.tsx",
       "motivo": "Verificación pública de un documento por su token (sin sesión). DEUDA: debería ser una capacidad pública de lectura; queda permitida hasta ese brief."
+    },
+    {
+      "archivo": "app/firmar/[slug]/[token]/acciones.ts",
+      "motivo": "Firmar por enlace personal ocurre antes de existir sesión (firma.md §5, §10): resuelve el tenant por slug con tenantPorSlug() y luego ejecuta capacidades internas con el enlace como credencial."
     }
   ],
   "internasPermitidas": [
@@ -26,6 +30,10 @@
     {
       "archivo": "app/(auth)/invitacion/[slug]/[token]/acciones.ts",
       "motivo": "Flujo de invitación pre-sesión: peek, accept y request_new son internas por diseño."
+    },
+    {
+      "archivo": "app/firmar/[slug]/[token]/acciones.ts",
+      "motivo": "Flujo de firma pre-sesión (firma.md R19, §10): ver_firmante, firmar y rechazar son internas; el enlace personal es la credencial."
     }
   ],
   "infraestructuraLibConDb": [

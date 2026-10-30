@@ -80,6 +80,14 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
     "Solo personas: autorizar la firma automática del representante solo puede hacerlo él (firma.md §10, R16).",
   "core.firmas.firma_automatica_revocar":
     "Solo personas: revocar la firma automática del representante es un acto suyo (firma.md §10, R16).",
+  "core.firmas.firmar":
+    "Interna y solo personas: el enlace personal es la credencial (como al aceptar una invitación) y un agente nunca firma por una persona (firma.md R19, §10).",
+  "core.firmas.rechazar":
+    "Interna y solo personas: rechazar es un acto personal del firmante con su enlace como credencial; un agente nunca rechaza por nadie (firma.md R9, R19, §10).",
+  "core.firmas.ver_firmante":
+    "Interna: se mira antes de existir sesión con el enlace personal como credencial, igual que core.invitations.peek (firma.md §5).",
+  "core.firmas.documento_url":
+    "Interna: igual que ver_firmante, el enlace personal es la credencial antes de existir sesión (firma.md R5, A2 de la corrección PR 2).",
   "core.anexos.aprobar":
     "Solo personas: aprobar el anexo de contrato materializa un documento irreversible, un acto humano responsable (Brief 07b PR 4, ADR-032).",
   "core.anexos.rechazar":

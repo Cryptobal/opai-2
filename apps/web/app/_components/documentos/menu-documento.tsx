@@ -1,6 +1,6 @@
 "use client";
 
-import { Archive, Download, Eye, MoreHorizontal, Upload } from "lucide-react";
+import { Archive, Download, Eye, MoreHorizontal, PenLine, Upload } from "lucide-react";
 import { useState } from "react";
 
 import { avisar, Menu } from "@opai/ds";
@@ -43,6 +43,12 @@ export function MenuDocumento({ documento: d }: { documento: Documento }) {
             icono: Upload,
             onSelect: () =>
               fijar({ subir: "1", reemplaza: d.id, ...(d.tipoId ? { tipo: d.tipoId } : {}) }),
+          },
+          {
+            id: "firmar",
+            etiqueta: "Enviar a firma",
+            icono: PenLine,
+            onSelect: () => fijar({ firmar: d.id }),
           },
           {
             id: "archivar",
