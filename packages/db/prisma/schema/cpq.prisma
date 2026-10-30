@@ -1,0 +1,170 @@
+// Módulo CPQ (Brief 10 · PR 10.1): cotizaciones, versiones, secciones, líneas y aprobaciones
+// (cpq.md §2, §4). Schema propio `cpq`. Toda tabla con tenant_id, RLS `tenant_isolation`, IDs
+// uuid(7), columnas snake_case por @map. Las referencias a otros schemas (negocio, instalación,
+// cargo, patrón, usuarios) no llevan @relation: sus FK y el trigger `mismo_tenant` van en el SQL de
+// la migración, sin tocar core.prisma ni comercial.prisma. El modelo de costeo, el catálogo y la
+// línea base llegan con el motor (Brief 08) y los PR 10.3 y 10.6.
+
+/// Cotización: oferta a un cliente con código CPQ-AAAA-NNN; cuelga siempre de un negocio (R18).
+model Cotizacion {
+  id              String   @id @default(uuid(7)) @db.Uuid
+  tenantId        String   @map("tenant_id") @db.Uuid
+  negocioId       String   @map("negocio_id") @db.Uuid
+  /// "CPQ-AAAA-NNN" (R54); los importados de 1.0 con sufijo se guardan tal cual.
+  codigo          String
+  anio            Int
+  /// Correlativo del año; null en los códigos de 1.0 con sufijo, que no cuentan (R54).
+  numero          Int?
+  titulo          String
+  /// Estado de la última versión (R40), denormalizado para listar y filtrar.
+  estado          String   @default("borrador")
+  vigente         Boolean  @default(false)
+  alternativaDeId String?  @map("alternativa_de_id") @db.Uuid
+  creadaPor       String?  @map("creada_por") @db.Uuid
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  versiones VersionCotizacion[]
+
+  @@unique([tenantId, codigo])
+  @@index([tenantId, negocioId])
+  @@index([tenantId, estado])
+  @@map("cotizaciones")
+  @@schema("cpq")
+}
+
+/// Versión: foto de la cotización; solo una editable por código y enviar la congela (R43).
+model VersionCotizacion {
+  id              String    @id @default(uuid(7)) @db.Uuid
+  tenantId        String    @map("tenant_id") @db.Uuid
+  cotizacionId    String    @map("cotizacion_id") @db.Uuid
+  numero          Int
+  /// Ver ESTADOS_COTIZACION de @opai/domain (R40).
+  estado          String    @default("borrador")
+  /// "CLP" | "UF": solo la presentación; el cálculo es siempre en CLP (R25, R62).
+  moneda          String    @default("UF")
+  validaHasta     DateTime  @map("valida_hasta") @db.Date
+  /// "margen_sobre_venta" | "markup" | "margen_sobre_mano_de_obra" (R31).
+  modoMargen      String    @default("margen_sobre_venta") @map("modo_margen")
+  /// Porcentaje escalado por PCT_ESCALA; 0 ≤ m < 100 % (§4).
+  margenObjetivo  Int       @map("margen_objetivo")
+  /// Precio manual mensual en CLP entero (R36).
+  precioManual    Int?      @map("precio_manual")
+  /// Totales calculados por el motor (Brief 08), CLP enteros; nunca se editan.
+  ventaMensual    Int?      @map("venta_mensual")
+  pagosUnicos     Int?      @map("pagos_unicos")
+  costoMensual    Int?      @map("costo_mensual")
+  /// Margen efectivo escalado por PCT_ESCALA (R35).
+  margenEfectivo  Int?      @map("margen_efectivo")
+  /// UF usada, escalada por UF_ESCALA; se congela al enviar (R30).
+  ufValor         Int?      @map("uf_valor")
+  ufFecha         DateTime? @map("uf_fecha") @db.Date
+  modeloVersionId String?   @map("modelo_version_id") @db.Uuid
+  /// Control optimista de la edición concurrente (§12): sube en cada ajuste.
+  revision        Int       @default(0)
+  enviadaEn       DateTime? @map("enviada_en") @db.Timestamptz(6)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  cotizacion   Cotizacion             @relation(fields: [cotizacionId], references: [id], onDelete: Restrict)
+  secciones    SeccionCotizacion[]
+  lineas       LineaCotizacion[]
+  aprobaciones AprobacionCotizacion[]
+
+  @@unique([tenantId, cotizacionId, numero])
+  @@index([tenantId, cotizacionId])
+  @@map("versiones")
+  @@schema("cpq")
+}
+
+/// Sección: una por instalación del negocio, más una Común opcional (R18, R22).
+model SeccionCotizacion {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  versionId     String   @map("version_id") @db.Uuid
+  /// "instalacion" | "comun"
+  tipo          String
+  instalacionId String?  @map("instalacion_id") @db.Uuid
+  nombre        String
+  orden         Int      @default(0)
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  version VersionCotizacion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  lineas  LineaCotizacion[]
+
+  @@index([tenantId, versionId])
+  @@map("secciones")
+  @@schema("cpq")
+}
+
+/// Línea: puesto (posición de servicio), ítem o adicional con margen propio (§4).
+model LineaCotizacion {
+  id                  String   @id @default(uuid(7)) @db.Uuid
+  tenantId            String   @map("tenant_id") @db.Uuid
+  versionId           String   @map("version_id") @db.Uuid
+  seccionId           String   @map("seccion_id") @db.Uuid
+  /// "puesto" | "item" | "adicional"
+  tipo                String
+  grupo               String?
+  nombre              String
+  orden               Int      @default(0)
+  habilitada          Boolean  @default(true)
+  visibleCliente      Boolean  @default(true) @map("visible_cliente")
+  /// Posiciones (puesto) o cantidad (ítem, adicional); entero ≥ 1.
+  cantidad            Int      @default(1)
+  cargoId             String?  @map("cargo_id") @db.Uuid
+  patronId            String?  @map("patron_id") @db.Uuid
+  /// Días y tramos [inicio, fin) del puesto (§4).
+  horario             Json?
+  /// Personas por posición × 100 (R21); sobrescribirlas exige motivo.
+  personasPorPosicion Int?     @map("personas_por_posicion")
+  motivoPersonas      String?  @map("motivo_personas")
+  /// Sueldo bruto cotizado, CLP entero (R20). Sensible: solo con cpq:costos.ver (R59).
+  sueldoBruto         Int?     @map("sueldo_bruto")
+  /// Costo unitario CLP entero (ítem o adicional). Sensible (R59).
+  costoUnitario       Int?     @map("costo_unitario")
+  /// "mensual" | "unico"
+  recurrencia         String   @default("mensual")
+  /// Margen propio del adicional, escalado por PCT_ESCALA (R32). Sensible (R59).
+  margenPropio        Int?     @map("margen_propio")
+  /// Copia del ítem de catálogo que usó (R15); el catálogo llega con el Brief 08.
+  itemCopia           Json?    @map("item_copia")
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  version VersionCotizacion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+  seccion SeccionCotizacion @relation(fields: [seccionId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, versionId])
+  @@index([tenantId, seccionId])
+  @@map("lineas")
+  @@schema("cpq")
+}
+
+/// Aprobación: pedido y decisión sobre una versión bajo el mínimo o subvalorada (R34, R35, R42).
+model AprobacionCotizacion {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  tenantId       String    @map("tenant_id") @db.Uuid
+  versionId      String    @map("version_id") @db.Uuid
+  /// "pendiente" | "aprobada" | "rechazada" | "retirada"
+  estado         String    @default("pendiente")
+  /// "margen_bajo" | "subvalorada"
+  motivo         String
+  solicitadaPor  String?   @map("solicitada_por") @db.Uuid
+  comentario     String?
+  decididaPor    String?   @map("decidida_por") @db.Uuid
+  motivoDecision String?   @map("motivo_decision")
+  /// Venta y margen sobre los que se pidió: la aprobación vale para esa versión y venta (R41).
+  ventaMensual   Int?      @map("venta_mensual")
+  margenEfectivo Int?      @map("margen_efectivo")
+  decididaEn     DateTime? @map("decidida_en") @db.Timestamptz(6)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  version VersionCotizacion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, versionId])
+  @@map("aprobaciones")
+  @@schema("cpq")
+}
