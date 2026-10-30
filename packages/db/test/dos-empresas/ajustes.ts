@@ -42,4 +42,8 @@ export const AJUSTES: Record<string, Ajuste> = {
   "core.retencion_ejecuciones": { valores: () => ({ modo: "simulacion", filas: 0 }) },
   // Fila con tenant_id: fuente "tenant", sin región (CHECK dias_calendario_coherencia_check).
   "core.dias_calendario": { valores: () => ({ fuente: "tenant", region: null }) },
+  // CPQ (Brief 10 · PR 10.1): valores que cumplen los CHECK de tipo y motivo del schema `cpq`.
+  "cpq.secciones": { valores: () => ({ tipo: "comun", instalacion_id: null }) },
+  "cpq.lineas": { valores: () => ({ tipo: "item" }) },
+  "cpq.aprobaciones": { valores: () => ({ motivo: "margen_bajo" }) },
 };
