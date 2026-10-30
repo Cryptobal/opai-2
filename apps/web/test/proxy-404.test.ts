@@ -11,40 +11,52 @@ const pedir = (ruta: string, extra: Record<string, string> = {}) =>
     headers: { cookie: "opai.session_token=x", accept: "text/html", ...extra },
   });
 
+/**
+ * `/api/existe` responde `{ existe }`; cualquier otra URL es el `fetch` interno de `respuesta404`
+ * para obtener el cuerpo (y el estado real) de la página de destino.
+ */
+const mockFetch = (existe: boolean) =>
+  vi.fn().mockImplementation(async (entrada: string | URL) => {
+    const url = String(entrada);
+    if (url.includes("/api/existe")) return Response.json({ existe });
+    return new Response(`<html data-ruta="${new URL(url).pathname}"></html>`, {
+      status: 200,
+      headers: { "content-type": "text/html; charset=utf-8" },
+    });
+  });
+
 afterEach(() => vi.unstubAllGlobals());
 
 describe("proxy: 404 real antes de enviar el HTML", () => {
-  it("UUID válido inexistente: reescribe con estado 404", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({ existe: false })));
+  it("UUID válido inexistente: 404 real con el cuerpo de la página de destino", async () => {
+    vi.stubGlobal("fetch", mockFetch(false));
     const r = await proxy(pedir(`/personas/${CERO}`));
-    expect(reescribe(r)).toContain("/no-encontrado");
-    // Sin `status` forzado: la página de 404 del portal responde 404 con su shell (no la genérica de Next).
-    expect(r.status).toBe(200);
+    expect(r.status).toBe(404);
+    expect(await r.text()).toContain("/no-encontrado");
   });
 
   it("ficha de supervisor inexistente: 404 con la página del portal, no la del ERP", async () => {
-    vi.stubGlobal(
-      "fetch",
-      vi.fn().mockImplementation(async () => Response.json({ existe: false })),
-    );
+    vi.stubGlobal("fetch", mockFetch(false));
     const r = await proxy(pedir(`/supervisor/personas/${CERO}`));
-    expect(reescribe(r)).toContain("/supervisor/no-encontrado");
+    expect(r.status).toBe(404);
+    expect(await r.text()).toContain("/supervisor/no-encontrado");
     const a = await proxy(pedir(`/configuracion/agentes/${CERO}`));
-    expect(reescribe(a)).toContain("/no-encontrado");
+    expect(a.status).toBe(404);
+    expect(await a.text()).toContain("/no-encontrado");
   });
 
   it("slug inexistente de integraciones: 404", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({ existe: false })));
-    expect(reescribe(await proxy(pedir("/configuracion/integraciones/zzz")))).toContain(
-      "/no-encontrado",
-    );
+    vi.stubGlobal("fetch", mockFetch(false));
+    const r = await proxy(pedir("/configuracion/integraciones/zzz"));
+    expect(r.status).toBe(404);
+    expect(await r.text()).toContain("/no-encontrado");
   });
 
   it("grupo de configuración inexistente: 404 con la página del ERP", async () => {
-    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({ existe: false })));
-    expect(reescribe(await proxy(pedir("/configuracion/grupo/inventado")))).toContain(
-      "/no-encontrado",
-    );
+    vi.stubGlobal("fetch", mockFetch(false));
+    const r = await proxy(pedir("/configuracion/grupo/inventado"));
+    expect(r.status).toBe(404);
+    expect(await r.text()).toContain("/no-encontrado");
   });
 
   it("existe, o la consulta falla: sigue a la página", async () => {
@@ -73,11 +85,18 @@ describe("proxy: 404 real antes de enviar el HTML", () => {
     expect(f).not.toHaveBeenCalled();
   });
 
-  it("id sin forma de UUID: 404 sin consultar la base", async () => {
-    const f = vi.fn();
+  it("id sin forma de UUID: 404 real sin consultar /api/existe", async () => {
+    const f = mockFetch(false);
     vi.stubGlobal("fetch", f);
-    expect(reescribe(await proxy(pedir("/personas/abc")))).toContain("/no-encontrado");
-    expect(f).not.toHaveBeenCalled();
+    const r = await proxy(pedir("/personas/abc"));
+    expect(r.status).toBe(404);
+    expect(f.mock.calls.every(([url]) => !String(url).includes("/api/existe"))).toBe(true);
+  });
+
+  it("si la página de destino no responde, cae al rewrite simple (nunca rompe la navegación)", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("caído")));
+    const r = await proxy(pedir("/personas/abc"));
+    expect(reescribe(r)).toContain("/no-encontrado");
   });
 
   it("la consulta responde 401/HTML (preview protegido): sigue a la página", async () => {
@@ -90,5 +109,13 @@ describe("proxy: 404 real antes de enviar el HTML", () => {
     vi.stubGlobal("fetch", vi.fn());
     const r = await proxy(pedir("/configuracion/integraciones/%E0%A4%A"));
     expect(r.headers.get("x-middleware-next")).toBe("1");
+  });
+
+  it("navegación RSC a un id inválido: sigue con el rewrite simple (no pide el cuerpo)", async () => {
+    const f = vi.fn();
+    vi.stubGlobal("fetch", f);
+    const r = await proxy(pedir("/personas/abc", { rsc: "1" }));
+    expect(reescribe(r)).toContain("/no-encontrado");
+    expect(f).not.toHaveBeenCalled();
   });
 });

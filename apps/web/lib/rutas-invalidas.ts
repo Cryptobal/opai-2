@@ -1,17 +1,21 @@
-import { fichaDe } from "./existencia-ruta";
+import { GRUPOS_IDS } from "@/app/(erp)/configuracion/_centro/grupos";
+
+import { consultaDeRuta, fichaDe } from "./existencia-ruta";
 import { esUuid } from "./ids";
 
 /** Portales con su propio 404 (ADR-044): cada uno tiene su catch-all bajo su prefijo. */
 const PORTALES = ["trabajador", "cliente", "terreno", "supervisor", "platform"];
 
 /**
- * `/personas/abc`: el id no tiene forma de UUID, así que no puede existir. Se detecta en el proxy
- * para responder HTTP 404; dentro de la página el `notFound()` llega con el HTML ya en camino (el
- * shell se envía antes de leer `params`) y el estado quedaría en 200. Lo que depende de la base
- * (UUID válido, slugs) lo consulta el proxy a `/api/existe` (`existencia-ruta.ts`). Las fichas
- * están en el registro `FICHAS`.
+ * `/personas/abc`: el id no tiene forma de UUID, así que no puede existir; `/configuracion/grupo/xyz`
+ * fuera de la lista cerrada, igual. Se detecta en el proxy sin tocar la base (brief §4.2, §5). Lo que
+ * sí depende de la base (UUID válido, slugs de evento/integración) lo consulta el proxy a
+ * `/api/existe` (`existencia-ruta.ts`). Las fichas están en el registro `FICHAS`.
  */
 export function esIdInvalido(pathname: string): boolean {
+  const consulta = consultaDeRuta(pathname);
+  if (consulta?.tipo === "grupo")
+    return !(GRUPOS_IDS as readonly string[]).includes(consulta.grupo);
   const f = fichaDe(pathname);
   return f !== null && !esUuid(f.id);
 }
