@@ -8,6 +8,24 @@
 export type SinPantalla = { encargo: string; desde: string; motivo: string };
 
 export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> = {
+  "core.firmas.firmante_empresa_set": {
+    encargo: "CAR-82",
+    desde: "2026-10-29",
+    motivo:
+      "Registrar al firmante de la empresa: su pantalla (Configuración → Documentos → Firma) va en el PR 2 de firma; en el PR 1 entra la capa de datos y gobernanza.",
+  },
+  "core.firmas.firma_automatica_autorizar": {
+    encargo: "CAR-82",
+    desde: "2026-10-29",
+    motivo:
+      "Autorizar la firma automática del representante (R16, P5): su pantalla de configuración va en el PR 2 de firma; aquí entra la capacidad de gobernanza.",
+  },
+  "core.firmas.firma_automatica_revocar": {
+    encargo: "CAR-82",
+    desde: "2026-10-29",
+    motivo:
+      "Revocar la firma automática del representante (R16): su pantalla de configuración va en el PR 2 de firma; aquí entra la capacidad de gobernanza.",
+  },
   "core.users.restablecer_mfa": {
     encargo: "CAR-54",
     desde: "2026-10-29",
