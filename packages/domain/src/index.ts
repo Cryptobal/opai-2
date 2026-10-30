@@ -30,6 +30,7 @@ export * from "./retencion";
 export * from "./etiquetas-datos-personales";
 export * from "./actividades-tratamiento";
 export * from "./navegacion";
+export * from "./no-recontratar";
 
 export * from "./capas-sueldo";
 

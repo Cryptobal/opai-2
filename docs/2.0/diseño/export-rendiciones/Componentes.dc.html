@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0;background:#e4e4e7} a{color:#4a3fd8} a:hover{color:#111113}</style>
+</helmet>
+<div style="display:flex;flex-direction:column;gap:40px;padding:48px;width:max-content;font-family:Inter,system-ui,sans-serif">
+<header style="display:flex;flex-direction:column;gap:4px;max-width:900px">
+<span style="font:500 13px/18px Inter,sans-serif;color:#52525b">OPAI 2.0 · Rendiciones · <a href="Índice.dc.html">Índice</a></span>
+<h1 style="margin:0;font:600 28px/34px Inter,sans-serif;letter-spacing:-0.02em;color:#111113">Hoja de componentes</h1>
+<p style="margin:0;font:400 15px/22px Inter,sans-serif;color:#52525b">Todos los componentes que usa el módulo, con variantes y estados, en claro y oscuro. Hover y foco se muestran fijos para revisarlos; en la interfaz los aplica el DS. Las piezas marcadas «Nueva para el DS» se proponen al DS, no al módulo.</p>
+</header>
+
+<section style="display:flex;flex-direction:column;gap:12px;max-width:1312px">
+<h2 style="margin:0;font:600 18px/26px Inter,sans-serif;color:#111113">Nombres del pedido → DS 2.0</h2>
+<div class="ds" data-theme="light" style="background:var(--ds-bg);border-radius:16px;padding:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ mapCols }}" rows="{{ mapRows }}" compact="{{ true }}" hint-size="100%,600px"></x-import>
+</div>
+</section>
+
+<div style="display:flex;gap:32px;align-items:flex-start">
+<sc-for list="{{ themes }}" as="t" hint-placeholder-count="2">
+<div class="ds" data-theme="{{ t.id }}" style="width:640px;background:var(--ds-bg);color:var(--ds-fg);border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:40px;box-sizing:border-box">
+<span class="t-heading">{{ t.label }}</span>
+
+<div style="display:flex;flex-direction:column;gap:16px">
+<span class="t-subheading">Button</span>
+<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="plus" hint-size="150px,40px">Primario</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="110px,40px">Secundario</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="chevron-left" hint-size="110px,40px">Ghost</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="destructive" hint-size="110px,40px">Rechazar</x-import>
+</div>
+<div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px">
+<div style="display:flex;flex-direction:column;gap:6px"><span class="t-caption" style="color:var(--ds-fg-muted)">Hover (ghost → fill)</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" style="{{ hoverStyle }}" hint-size="100px,40px">Ghost</x-import></div>
+<div style="display:flex;flex-direction:column;gap:6px"><span class="t-caption" style="color:var(--ds-fg-muted)">Foco</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" style="{{ focusStyle }}" hint-size="100px,40px">Aprobar</x-import></div>
+<div style="display:flex;flex-direction:column;gap:6px"><span class="t-caption" style="color:var(--ds-fg-muted)">Deshabilitado</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" disabled="{{ true }}" hint-size="100px,40px">Enviar</x-import></div>
+<div style="display:flex;flex-direction:column;gap:6px"><span class="t-caption" style="color:var(--ds-fg-muted)">Cargando</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" loading="{{ true }}" loading-label="Enviando" hint-size="100px,40px">Enviar</x-import></div>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px">
+<span class="t-subheading">Badge · estados de la rendición</span>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" hint-size="80px,22px">Borrador</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="info" hint-size="80px,22px">Enviada</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="warning" hint-size="150px,22px">Esperando 2.º nivel</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="success" hint-size="90px,22px">Aprobada</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="accent" hint-size="130px,22px">En lote de pago</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" hint-size="80px,22px">Pagada</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="danger" hint-size="90px,22px">Rechazada</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="warning" hint-size="140px,22px">Requiere 2.º nivel</x-import>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:16px">
+<span class="t-subheading">Input · Select · DateInput · Textarea</span>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Monto" prefix="$" value="42.300" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Foco" prefix="$" value="42.300" input-style="{{ inputFocus }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Monto" prefix="$" value="" error="Ingresa el monto de la compra." hint-size="100%,92px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Tarifa por km" prefix="$" value="300" disabled="{{ true }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Categoría" value="comb" options="{{ cats }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DateInput" label="Fecha" value="27-10-2026" today="30-10-2026" hint-size="100%,72px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Motivo del rechazo" value="La boleta no se lee completa." rows="{{ 2 }}" hint-size="100%,100px"></x-import>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:16px">
+<span class="t-subheading">Segmentado · Checkbox · Switch</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ seg }}" value="Compra" label="Tipo" hint-size="100%,44px"></x-import>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ true }}" label="Marcada" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" label="Sin marcar" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ true }}" disabled="{{ true }}" label="Deshabilitada" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ true }}" label="Activo" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" label="Apagado" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ true }}" disabled="{{ true }}" label="Deshabilitado" hint-size="100%,44px"></x-import>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px">
+<span class="t-subheading">Chip · ChipToggle · ChipAgregar</span>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Requieren 2.º nivel" activo="{{ true }}" hint-size="160px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Requieren 2.º nivel" hint-size="160px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Chip" valor="Combustible" on-quitar="{{ noop }}" hint-size="130px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipAgregar" hint-size="150px,32px">Agregar categoría</x-import>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px">
+<span class="t-subheading">Uploader · vacío, listo, error</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Uploader" tipos="JPG, PNG o PDF" tamano-maximo-mb="{{ 10 }}" archivos-iniciales="{{ files }}" hint-size="100%,260px"></x-import>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px">
+<span class="t-subheading">RowCard · RowGroupHeader · SelectableRow</span>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);overflow:hidden;background:var(--ds-surface)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowGroupHeader" hint-size="100%,32px">En curso</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" icon="file" title="Combustible" subtitle="27-10-2026 · Boleta" trailing="$ 42.300" hint-size="100%,64px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.SelectableRow" selected="{{ true }}" title="Materiales de aseo" subtitle="Rechazada · 22-10-2026" trailing="$ 18.990" hint-size="100%,64px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.SelectableRow" title="Kilometraje" subtitle="Borrador · 28-10-2026" trailing="$ 11.400" hint-size="100%,64px"></x-import>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px">
+<span class="t-subheading">Table · fila hover (bg)</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ tCols }}" rows="{{ tRows }}" on-row-click="{{ noop }}" selected-key="b" hint-size="100%,160px"></x-import>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px">
+<div style="display:flex;flex-direction:column;gap:12px"><span class="t-subheading">DetailSection (Pares)</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" rows="{{ pares }}" hint-size="100%,160px"></x-import></div>
+<div style="display:flex;flex-direction:column;gap:12px"><span class="t-subheading">KpiTile · Avatar</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.KpiTile" label="Por pagar" value="$ 372.300" hint-size="100%,96px"></x-import><div style="display:flex;gap:8px;align-items:center"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Avatar" initials="CH" size="{{ 24 }}" hint-size="24px,24px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Avatar" initials="PR" hint-size="32px,32px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Avatar" initials="CI" size="{{ 40 }}" hint-size="40px,40px"></x-import></div></div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px">
+<span class="t-subheading">Timeline</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Timeline" items="{{ tl }}" hint-size="100%,200px"></x-import>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px">
+<span class="t-subheading">Alerta · SelectionBar</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="danger" titulo="Rechazada por Paula Rojas" hint-size="100%,64px">«La boleta no se lee completa.»</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" titulo="Sin datos bancarios en la ficha" icono="alert" hint-size="100%,64px">No se puede incluir en el lote hasta que se completen en su Ficha de persona.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" titulo="38 rendiciones pendientes en 1.0" icono="alert" hint-size="100%,64px">Cifra sin verificar al cierre. (Variante B)</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.SelectionBar" label="3 seleccionadas · $ 67.700" placement="inline" on-clear="{{ noop }}" hint-size="100%,56px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="100px,40px">Rechazar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="check" hint-size="100px,40px">Aprobar</x-import>
+</x-import>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px">
+<span class="t-subheading">Empty · ErrorState · Forbidden · Loading</span>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px">
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="wallet" size="sm" title="Aún no tienes rendiciones" description="Rinde una compra o un viaje." action="{{ emptyAct }}" hint-size="100%,240px"></x-import></div>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar tus rendiciones" description="Revisa tu conexión." code="RND-101" on-retry="{{ noop }}" hint-size="100%,240px"></x-import></div>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No apruebas rendiciones" description="Pídele acceso a Carlos Irigoyen." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,240px"></x-import></div>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Loading" variant="rows" count="{{ 3 }}" hint-size="100%,200px"></x-import></div>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px">
+<span class="t-subheading">Dialog (≥ 768) · Sheet (375)</span>
+<div style="display:grid;grid-template-columns:minmax(0,1fr);gap:16px">
+<div style="position:relative;height:340px;border:1px solid var(--ds-border);border-radius:var(--radius-lg);overflow:hidden;transform:translateZ(0)">{{ dialogNode }}</div>
+<div style="position:relative;height:340px;width:375px;border:1px solid var(--ds-border);border-radius:var(--radius-lg);overflow:hidden;transform:translateZ(0)">{{ sheetNode }}</div>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:16px;padding-top:24px;border-top:1px solid var(--ds-border)">
+<div style="display:flex;flex-direction:column;gap:2px"><span class="t-heading">Nuevas para el DS</span><span class="t-body-sm" style="color:var(--ds-fg-muted)">Hoy se dibujan con tokens dentro del módulo. Se proponen como piezas del DS.</span></div>
+
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;gap:8px;align-items:center"><span class="t-subheading">MiniaturaComprobante</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" dot="{{ false }}" hint-size="120px,22px">Nueva para el DS</x-import></div>
+<span class="t-caption" style="color:var(--ds-fg-muted)">40 (tabla) y 48 (teléfono) · radio sm · borde border · fondo fill · icono del tipo (file = compra, route = kilometraje). Con foto real, la imagen en object-fit cover.</span>
+<div style="display:flex;gap:12px;align-items:center">
+<div style="width:40px;height:40px;border-radius:var(--radius-sm);border:1px solid var(--ds-border);background:var(--ds-fill);display:flex;align-items:center;justify-content:center;color:var(--ds-fg-muted)"><span class="ic sm i-file"></span></div>
+<div style="width:48px;height:48px;border-radius:var(--radius-sm);border:1px solid var(--ds-border);background:var(--ds-fill);display:flex;align-items:center;justify-content:center;color:var(--ds-fg-muted)"><span class="ic i-file"></span></div>
+<div style="width:48px;height:48px;border-radius:var(--radius-sm);border:1px solid var(--ds-border);background:var(--ds-fill);display:flex;align-items:center;justify-content:center;color:var(--ds-fg-muted)"><span class="ic i-route"></span></div>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;gap:8px;align-items:center"><span class="t-subheading">VisorComprobante</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" dot="{{ false }}" hint-size="120px,22px">Nueva para el DS</x-import></div>
+<span class="t-caption" style="color:var(--ds-fg-muted)">Foto 3:4 · radio lg · nombre del archivo en mono como texto plano · «Ampliar» abre la foto a pantalla completa.</span>
+<div style="width:200px;display:flex;flex-direction:column;gap:8px">
+<div style="aspect-ratio:3 / 4;border-radius:var(--radius-lg);border:1px solid var(--ds-border);background:var(--ds-fill);display:flex;align-items:center;justify-content:center;color:var(--ds-fg-muted)"><span class="ic lg i-file"></span></div>
+<span class="t-caption t-mono" style="color:var(--ds-fg-muted)">boleta-lider-22-10.jpg</span>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;gap:8px;align-items:center"><span class="t-subheading">GrupoSeleccionable</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" dot="{{ false }}" hint-size="120px,22px">Nueva para el DS</x-import></div>
+<span class="t-caption" style="color:var(--ds-fg-muted)">RowGroupHeader con Checkbox y total, para seleccionar un grupo completo (Lotes de pago).</span>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);overflow:hidden">
+<div style="display:flex;align-items:center;gap:12px;padding:4px 16px 4px 4px;border-bottom:1px solid var(--ds-border)"><div style="flex:1;padding:8px 0 8px 8px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ true }}" label="Luis Pérez" description="2 rendiciones" hint-size="100%,44px"></x-import></div><span class="t-label t-numeric">$ 27.300</span></div>
+<div style="display:flex;align-items:center;gap:12px;padding:10px 16px"><span class="t-mono t-caption" style="color:var(--ds-fg-subtle)">R-0408</span><span class="t-body-sm" style="flex:1">Kilometraje · 17-10-2026</span><span class="t-body-sm t-numeric" style="color:var(--ds-fg-muted)">$ 14.400</span></div>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;gap:8px;align-items:center"><span class="t-subheading">Migas</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" dot="{{ false }}" hint-size="120px,22px">Nueva para el DS</x-import></div>
+<span class="t-caption" style="color:var(--ds-fg-muted)">t-body-sm fg-muted, enlaces en accent, separador «›». Solo desde 768; en 375 se reemplaza por «‹ Módulos».</span>
+<nav aria-label="Migas" class="t-body-sm" style="display:flex;gap:6px;align-items:center;color:var(--ds-fg-muted)"><a href="#">Configuración</a><span aria-hidden="true">›</span><a href="#">Módulos</a></nav>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;gap:8px;align-items:center"><span class="t-subheading">CuentaDestino</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" dot="{{ false }}" hint-size="120px,22px">Nueva para el DS</x-import></div>
+<span class="t-caption" style="color:var(--ds-fg-muted)">Solo lectura, desde la Ficha de persona: banco · tipo · número enmascarado. Sin datos: Alerta warning que bloquea la selección.</span>
+<div style="display:flex;align-items:flex-start;gap:8px;padding:10px 16px;border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);color:var(--ds-fg-muted)"><span class="ic sm i-landmark" style="margin-top:2px;flex:none"></span><div style="display:flex;flex-direction:column;gap:2px"><span class="t-body-sm" style="color:var(--ds-fg)">Banco de Chile · Cuenta corriente · •••• 4821</span><span class="t-caption">Cuenta de destino · desde la Ficha de persona</span></div></div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;gap:8px;align-items:center"><span class="t-subheading">AjustesForm · SplitScreen</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" dot="{{ false }}" hint-size="120px,22px">Nuevos patrones para el DS</x-import></div>
+<span class="t-caption" style="color:var(--ds-fg-muted)">AjustesForm = lista del grupo (240–260) + migas + PageHeader + Tabs + FormSection y listas de tarjetas (máx. 760) + ActionBar «Guardar cambios»; en 375, lista → entrada. SplitScreen = columna de SelectableRow (300) + detalle, solo en 1024. Ver 08 y 05.</span>
+</div>
+</div>
+
+</div>
+</sc-for>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const h = React.createElement, NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const noop = () => {};
+    const map = [
+      ["AppShell", "AppShell (TopBar, TabBar, Rail, Sidebar)", "Shell aprobado. Portal Trabajador (01, 02, 03, 05) y ERP (04, 06, 07, 08)."],
+      ["ListScreen", "Page + PageHeader + Table (cards en 375)", "01, 04, 07. Tabla → RowCard en 375; scroll dentro del contenedor en 1024/1280."],
+      ["SplitScreen", "SelectableRow + detalle (nuevo patrón)", "05 en 1024."],
+      ["DetailScreen", "Page + PageHeader + DetailSection + Timeline", "05."],
+      ["FormScreen", "Page + PageHeader + FormSection + ActionBar", "02, 03. ActionBar sticky en 375."],
+      ["AjustesForm", "Lista del grupo + migas + Tabs + FormSection y tarjetas + ActionBar (nuevo patrón)", "08, a la par con el Centro de Configuración 2.0."],
+      ["Card", "Card", "No se usa: listas y fieldsets ya llevan su borde (sin tarjetas en tarjetas)."],
+      ["Table", "Table", "01, 04, 07."],
+      ["Pares", "DetailSection", "03 (monto calculado), 05."],
+      ["Badge", "Badge", "Estados de la rendición y del lote."],
+      ["Chip", "ChipToggle · ChipAgregar", "04 filtro 2.º nivel."],
+      ["Segmentado", "Segmentado", "02/03 tipo y documento; 07 agrupar por."],
+      ["Tabs", "Tabs", "08 pestaña Ajustes."],
+      ["Timeline", "Timeline", "05 historial con quién y cuándo."],
+      ["Sheet · Dialog", "Sheet (375) · Dialog (≥ 768)", "04 rechazar con motivo; 06 lote creado y marcar pagado."],
+      ["Alerta", "Alerta", "05 motivo de rechazo; 06 «Sin datos bancarios en la ficha»."],
+      ["Banda", "— (no existe en el DS)", "No se necesitó. Si se requiere una franja de aviso de página, proponerla al DS."],
+      ["Campo · Input · Select · Textarea", "Campo · Input · Select · Textarea", "Formularios 02, 03, 08."],
+      ["InputFecha", "DateInput", "02, 03, 06."],
+      ["Switch · Checkbox", "Switch · Checkbox", "08 foto obligatoria; 04 y 06 selección (deshabilitada sin datos bancarios)."],
+      ["Uploader", "Uploader", "02 comprobante; 06 comprobante de pago."],
+      ["Button · Avatar", "Button · Avatar", "Una acción principal por pantalla."],
+      ["Empty · Loading · ErrorState · Forbidden", "Empty · Loading/Skeleton · ErrorState · Forbidden", "Los 4 estados de cada pantalla."],
+      ["—", "RowCard · RowGroupHeader · SelectableRow · SelectionBar · KpiTile · ActionBar", "Piezas del DS usadas que el pedido no nombra."],
+    ].map(([a, b, c], i) => ({ id: i, a, b, c }));
+    const mk = (theme) => {
+      const dialog = NS.Dialog ? h(NS.Dialog, { open: true, contained: true, title: "Rechazar 3 rendiciones", description: "Vuelven a borrador.", onClose: noop, actions: h(React.Fragment, null, h(NS.Button, { variant: "secondary" }, "Cancelar"), h(NS.Button, { variant: "destructive" }, "Rechazar")) }) : null;
+      return dialog;
+    };
+    return {
+      noop,
+      themes: [{ id: "light", label: "Claro" }, { id: "dark", label: "Oscuro" }],
+      mapCols: [{ key: "a", label: "En el pedido", strong: true, width: 260 }, { key: "b", label: "Componente DS 2.0", width: 420 }, { key: "c", label: "Dónde", muted: true }],
+      mapRows: map,
+      hoverStyle: { background: "var(--ds-fill)" },
+      focusStyle: { outline: "2px solid var(--ds-focus)", outlineOffset: 2 },
+      inputFocus: { borderColor: "var(--ds-accent)", boxShadow: "0 0 0 3px var(--ds-accent-muted)" },
+      cats: [{ value: "comb", label: "Combustible" }, { value: "ali", label: "Alimentación" }],
+      seg: ["Compra", "Kilometraje"],
+      files: [{ nombre: "boleta-copec-27-10.jpg", size: 1258291, estado: "listo" }, { nombre: "factura-sodimac.pdf", size: 15728640, estado: "error", mensaje: "El archivo supera 10 MB" }],
+      tCols: [{ key: "p", label: "Persona", strong: true }, { key: "c", label: "Gasto" }, { key: "m", label: "Monto", align: "right" }],
+      tRows: [{ id: "a", p: "Luis Pérez", c: "Kilometraje · 32 km", m: "$ 9.600" }, { id: "b", p: "Jorge Muñoz", c: "Alimentación", m: "$ 15.800" }],
+      pares: [{ label: "Folio", value: "R-0415", mono: true }, { label: "Monto", value: "$ 18.990", numeric: true }, { label: "RUT", value: "12.345.678-9", mono: true }],
+      tl: [{ initials: "CH", who: "Camila Herrera", action: "la envió a aprobación", when: "22-10-2026 19:06" }, { initials: "PR", who: "Paula Rojas", action: "la rechazó", changes: [{ field: "Estado", from: "Enviada", to: "Rechazada" }], when: "23-10-2026 10:12" }, { agent: true, who: "OPAI", action: "la devolvió a borrador", when: "23-10-2026 10:12" }],
+      emptyAct: NS.Button ? h(NS.Button, { icon: "plus" }, "Nueva rendición") : null,
+      dialogNode: mk(),
+      sheetNode: NS.Sheet ? h(NS.Sheet, { open: true, contained: true, title: "Rechazar 3 rendiciones", description: "Vuelven a borrador.", onClose: noop, actions: h(NS.Button, { variant: "destructive", block: true }, "Rechazar") }) : null,
+    };
+  }
+}
+</script>
+</body>
+</html>
