@@ -8,7 +8,9 @@ import { uuidSchema } from "../esquemas";
 import { definidos, escribirConEvento, sinDuplicado } from "../maestros/comun";
 import {
   diaVistaSchema,
+  dondeInstalacionId,
   fechaCivilSchema,
+  instalacionEnAlcance,
   nombreFeriadoSchema,
   uuidOpcional,
   vista,
@@ -31,13 +33,8 @@ export const calendarioCrearFeriado = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    if (input.instalacionId) {
-      const inst = await ctx.db.instalacion.findUnique({
-        where: { id: input.instalacionId },
-        select: { id: true },
-      });
-      if (!inst) throw noEncontrado("La instalación");
-    }
+    // La instalación es del tenant y está en el alcance del actor (ADR-022), o «no encontrada».
+    if (input.instalacionId) await instalacionEnAlcance(ctx, input.instalacionId);
     const data = {
       tenantId: ctx.tenantId,
       fecha: new Date(`${input.fecha}T00:00:00.000Z`),
@@ -78,7 +75,7 @@ export const calendarioActualizar = defineCapability({
         await ctx.db
           .$executeRaw`SELECT id FROM core.dias_calendario WHERE id = ${id}::uuid AND tenant_id = ${ctx.tenantId}::uuid FOR UPDATE`;
       const actual = await ctx.db.diaCalendario.findFirst({
-        where: { id, tenantId: ctx.tenantId, archivadaEn: null },
+        where: { id, tenantId: ctx.tenantId, archivadaEn: null, ...dondeInstalacionId(ctx) },
       });
       if (!actual) throw noEncontrado("El feriado");
       const data = definidos({ nombre: cambios.nombre, irrenunciable: cambios.irrenunciable });
@@ -109,7 +106,7 @@ export const calendarioArchivar = defineCapability({
         await ctx.db
           .$executeRaw`SELECT id FROM core.dias_calendario WHERE id = ${id}::uuid AND tenant_id = ${ctx.tenantId}::uuid FOR UPDATE`;
       const actual = await ctx.db.diaCalendario.findFirst({
-        where: { id, tenantId: ctx.tenantId, archivadaEn: null },
+        where: { id, tenantId: ctx.tenantId, archivadaEn: null, ...dondeInstalacionId(ctx) },
       });
       if (!actual) throw noEncontrado("El feriado");
       if (dryRun) return vista(actual);
