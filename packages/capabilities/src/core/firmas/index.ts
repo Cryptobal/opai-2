@@ -7,6 +7,7 @@ import { firmasEstado, firmasList } from "./lecturas";
 import { firmasPoliticaGet, firmasPoliticaSet } from "./politica";
 import { firmasCancelar, firmasRecordar } from "./recordar-cancelar";
 import { firmasRechazar } from "./rechazar";
+import { firmasVerFirmante } from "./ver-firmante";
 import { firmasVerificar } from "./verificar";
 
 export { consumidorFirmaDocumento } from "./consumidor-documento";
@@ -31,5 +32,6 @@ export const capacidadesFirmas: readonly Capacidad[] = [
   firmasCancelar,
   firmasFirmar,
   firmasRechazar,
+  firmasVerFirmante,
   firmasVerificar,
 ];

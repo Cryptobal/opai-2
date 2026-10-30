@@ -8,6 +8,7 @@ type FirmanteFila = {
   orden: number;
   rol: string;
   tipo: string;
+  nombre: string;
   usuarioId: string | null;
   estado: string;
   tokenExpira: Date | null;

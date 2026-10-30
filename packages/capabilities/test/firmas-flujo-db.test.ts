@@ -1,6 +1,6 @@
 // Firma electrónica del núcleo (CAR-82 · PR 2): envío, firma, rechazo, verificación y completado
 // N1 contra Postgres real (firma.md CA1, CA3, CA5, CA6; R4, R7, R9, R11, R17, R19/P12).
-import { randomUUID } from "node:crypto";
+import { createHash, randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 import { type Entorno, prepararEntorno, urlPropietario } from "../../db/test/entorno";
@@ -352,5 +352,28 @@ describe.skipIf(!urlPropietario)("firma · envío, firma, rechazo y verificació
     expect(
       await resultado(owner("b"), "core.firmas.cancelar", { id: s.id, motivo: "ajeno" }),
     ).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
+  });
+
+  it("core.firmas.ver_firmante: la página pública lee por el enlace, sin sesión", async () => {
+    const doc = await documento();
+    const s = await dato<{ id: string }>(owner("a"), "core.firmas.enviar", {
+      documentoId: doc.id,
+      clase: "acta_reunion",
+      nivel: "N1",
+      firmantes: [{ tipo: "externo", nombre: "Dana", email: "dana@x.cl" }],
+    });
+    const token = `token-de-prueba-ver-firmante-${randomUUID()}`;
+    const tokenHash = createHash("sha256").update(token).digest("hex");
+    await e.forTenant(t.a.tenantId).firmante.updateMany({
+      where: { solicitudId: s.id },
+      data: { tokenHash, tokenExpira: new Date(Date.now() + 3_600_000) },
+    });
+    const sinSesion = mod.crearContexto({ tenantId: t.a.tenantId, actor: { tipo: "system" }, medidor });
+    const v = await dato<{ nombre: string; estadoFirmante: string; clase: string }>(
+      sinSesion,
+      "core.firmas.ver_firmante",
+      { token },
+    );
+    expect(v).toMatchObject({ nombre: "Dana", estadoFirmante: "pendiente", clase: "acta_reunion" });
   });
 });

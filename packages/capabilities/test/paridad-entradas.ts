@@ -52,6 +52,12 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Identidad: crea la cuenta propia y acepta la invitación.",
   "app/(auth)/invitacion/[slug]/[token]/acciones.ts#pedirNuevaInvitacion":
     "Identidad: core.invitations.request_new (interna con motivo), sin sesión.",
+  "app/firmar/[slug]/[token]/acciones.ts#verFirma":
+    "Firma: core.firmas.ver_firmante (interna con motivo): el enlace personal es la credencial (firma.md §5).",
+  "app/firmar/[slug]/[token]/acciones.ts#firmarPorEnlace":
+    "Firma: core.firmas.firmar (interna con motivo): nadie firma por otro con su enlace (firma.md R19).",
+  "app/firmar/[slug]/[token]/acciones.ts#rechazarPorEnlace":
+    "Firma: core.firmas.rechazar (interna con motivo): nadie rechaza por otro con su enlace (firma.md R9).",
   // Infraestructura: sin datos de negocio.
   "app/api/auth/[...all]/route.ts": "Better Auth (sesión, OAuth y verificación de correo).",
   "app/api/cron/programador/route.ts":
