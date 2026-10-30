@@ -20,6 +20,7 @@ import {
   integracionesSetSecreto,
 } from "./integraciones";
 import { capacidadesAgentes, trabajosAgentes } from "./agentes";
+import { capacidadesCalendario } from "./calendario";
 import { capacidadesComunicaciones, consumidorComunicaciones } from "./comunicaciones";
 import { capacidadesConfig } from "./config";
 import { capacidadesCumplimiento, trabajosCumplimiento } from "./cumplimiento";
@@ -99,6 +100,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   iaProbar,
   platformIntegracionesEstado,
   ...capacidadesMaestros,
+  ...capacidadesCalendario,
   ...capacidadesAnexos,
   ...capacidadesPanel,
   ...capacidadesPermisos,

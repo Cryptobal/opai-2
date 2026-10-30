@@ -91,6 +91,9 @@ Las **bases transversales** (rendimiento, PWA, navegación) aplican a todo brief
 - **Criterio de término:** «Las pautas, turnos extra, supervisión, rondas y novedades de Gard se operan en 2.0 durante un mes completo; supervisores y guardias usan los portales de 2.0 instalados en su celular, y **1.0 deja de usarse para Operaciones, Supervisión, Rondas y portales**»; las apps están publicadas en App Store y Google Play.
 - **Dependencias:** fase 2 cerrada, salvo el Brief 11 (Operaciones I · Puestos), adelantado para después del cierre del Núcleo (nota del 25-oct en ADR-030); extracciones de Operaciones y Portales; cuentas de desarrollador y D-U-N-S (en curso); base PWA (Brief 04).
 - **Deja de usarse en 1.0:** Operaciones (puestos, pautas, turnos extra), Supervisión, Rondas, Portal Guardia, Portal Terreno, Portal Cliente y Portal Supervisor.
+- **Alineación CAR-80 (catálogo del Núcleo, 29-oct-2026 17:36–17:39 CLT):**
+  - **C7 · Libro de novedades en el Núcleo.** El **libro de novedades** es un servicio del **Núcleo** (hechos encadenados por instalación y turno, ADR-023), no exclusivo de Operaciones II (Brief 12): lo consumen Supervisor, Terreno, Central (CAR-70) y Operaciones. El Brief 12 y `extraccion/operaciones.md` lo leen del Núcleo en vez de definirlo.
+  - **C8 · Dispositivos antes de Rondas.** El emparejamiento y la gestión de **dispositivos fijos** (quiosco Terreno, `core.dispositivos`, ADR-029.10) entra en el **Núcleo antes del PR 3 de Rondas** (Brief 14), porque Rondas, Asistencia y Control de acceso lo necesitan; el **shell del portal Terreno lo construye CAR-78**. Deja de estar atado al Brief 16 (ADR-048, nota C8).
 
 ### Fase 4 — Asistencia y DT · pendiente · semanas por recalcular (antes 18–21)
 
