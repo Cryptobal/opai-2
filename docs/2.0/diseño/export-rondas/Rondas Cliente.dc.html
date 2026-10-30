@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-accent)}</style>
+</helmet>
+<div class="ds screen" data-theme="{{ theme }}" data-device="{{ device }}" data-screen-label="{{ label }}" style="width:100%;height:100%;flex-direction:row">
+<sc-if value="{{ isDesk }}" hint-placeholder-val="{{ false }}">
+  <nav class="sidebar" aria-label="Portal Cliente">
+    <div style="padding:14px 12px 4px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:0 8px"><span class="wordmark">OPAI</span><span class="tenant">AS</span></div>
+      <button style="display:flex;align-items:center;gap:10px;height:44px;padding:0 10px;border:1px solid var(--ds-border);border-radius:10px;background:var(--ds-bg);color:var(--ds-fg);text-align:left"><span style="flex:1;display:flex;flex-direction:column"><span class="t-label-sm">Cliente</span><span class="t-caption">Inmobiliaria Quilicura Ltda.</span></span><span class="ic sm i-updown subtle" aria-hidden="true"></span></button>
+    </div>
+    <div style="flex:1;padding:8px 12px;display:flex;flex-direction:column;gap:2px">
+      <a class="nav-item" href="#"><span class="ic i-home" aria-hidden="true"></span>Inicio</a>
+      <a class="nav-item on" href="#"><span class="ic i-chart" aria-hidden="true"></span>Reportes</a>
+      <a class="nav-item" href="#"><span class="ic i-file" aria-hidden="true"></span>Documentos</a>
+      <a class="nav-item" href="#"><span class="ic i-message" aria-hidden="true"></span>Solicitudes</a>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 20px;border-top:1px solid var(--ds-border)"><span class="avatar">PG</span><span style="flex:1;display:flex;flex-direction:column"><span class="t-label-sm">Paula González</span><span class="t-caption">Jefa de administración</span></span></div>
+  </nav>
+</sc-if>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column">
+  <sc-if value="{{ isPhone }}" hint-placeholder-val="{{ true }}">
+    <div class="safe-top"></div>
+    <div class="topbar">
+      <sc-if value="{{ phoneBack }}"><button class="btn btn-ghost" style="height:44px;padding:0 8px 0 4px;gap:2px;color:var(--ds-fg-muted)"><span class="ic i-chevron-left" aria-hidden="true"></span>Rondas</button></sc-if>
+      <sc-if value="{{ phoneHome }}"><button class="portal-btn"><span class="tenant">AS</span>Cliente<span class="ic sm i-updown subtle" aria-hidden="true"></span></button></sc-if>
+      <span style="flex:1"></span>
+      <button class="icon-btn" aria-label="Descargar informe"><span class="ic i-download" aria-hidden="true"></span></button>
+    </div>
+  </sc-if>
+  <sc-if value="{{ isDesk }}">
+    <header class="appbar" style="padding:0 32px"><span style="flex:1;display:flex;flex-direction:column"><span class="t-caption">Reportes</span><h1 class="t-heading m0">Rondas</h1></span><button class="btn btn-secondary"><span class="t-numeric">Octubre 2026</span><span class="ic sm i-chevron-down muted" aria-hidden="true"></span></button><button class="btn btn-secondary"><span class="ic sm i-download" aria-hidden="true"></span>Descargar PDF</button></header>
+  </sc-if>
+
+  <sc-if value="{{ nonOk }}">
+    <sc-if value="{{ isLoad }}">
+      <div aria-busy="true" aria-label="Cargando" style="flex:1;padding:16px {{ g }};display:flex;flex-direction:column;gap:14px">
+        <div class="skel" style="height:28px;width:40%"></div>
+        <div style="display:grid;grid-template-columns:{{ kcols }};gap:12px"><sc-for list="{{ sk }}" as="k" hint-placeholder-count="4"><div class="kpi" style="gap:10px"><div class="skel" style="height:12px;width:60%"></div><div class="skel" style="height:24px;width:40%"></div></div></sc-for></div>
+        <sc-for list="{{ sk }}" as="r" hint-placeholder-count="4"><div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--ds-border)"><div class="skel" style="height:14px;width:30%"></div><div class="skel" style="height:14px;flex:1"></div></div></sc-for>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isMsg }}">
+      <div class="state" role="status" style="flex:1">
+        <span class="state-ic" style="background:var(--ds-fill)"><span class="ic lg i-{{ msg.ic }}" aria-hidden="true"></span></span>
+        <div class="txt"><span class="t-subheading">{{ msg.t }}</span><span class="t-body-sm muted" style="text-wrap:pretty">{{ msg.d }}</span></div>
+        <button class="btn btn-primary"><span class="ic sm i-{{ msg.aic }}" aria-hidden="true"></span>{{ msg.a }}</button>
+      </div>
+    </sc-if>
+  </sc-if>
+
+  <sc-if value="{{ ok }}">
+  <div style="flex:1;min-height:0;display:flex">
+    <sc-if value="{{ showList }}">
+      <div style="flex:1;min-width:0;overflow:auto;padding:16px {{ g }} 24px;display:flex;flex-direction:column;gap:16px">
+        <sc-if value="{{ isPhone }}"><div style="display:flex;flex-direction:column"><h1 class="t-title m0">Rondas</h1><span class="t-body-sm muted">Octubre 2026</span></div></sc-if>
+        <div class="chip-row"><button class="chip toggle on">Todas las instalaciones</button><button class="chip toggle">Planta Quilicura</button><button class="chip toggle">Bodega Lampa</button></div>
+        <div style="display:grid;grid-template-columns:{{ kcols }};gap:12px">
+          <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="4"><div class="kpi"><span class="k">{{ k.k }}</span><span class="v">{{ k.v }}</span><span class="t-caption">{{ k.d }}</span></div></sc-for>
+        </div>
+        <section class="card" style="overflow:hidden">
+          <div class="card-h"><span class="txt"><span class="t-label">Cumplimiento por instalación</span></span></div>
+          <div class="card-c" style="display:flex;flex-direction:column;gap:12px"><sc-for list="{{ inst }}" as="c" hint-placeholder-count="2"><div style="display:flex;flex-direction:column;gap:4px"><div class="t-body-sm" style="display:flex;justify-content:space-between"><span>{{ c.n }}</span><span class="t-numeric">{{ c.v }}</span></div><div class="progress"><span style="width:{{ c.w }};background:var(--ds-success)"></span></div></div></sc-for></div>
+        </section>
+        <section class="card" style="overflow:hidden">
+          <div class="card-h"><span class="txt"><span class="t-label">Rondas realizadas</span><span class="t-caption">Más recientes primero</span></span></div>
+          <sc-for list="{{ rondas }}" as="r" hint-placeholder-count="6">
+            <div class="rowcard" style="align-items:center;background:{{ r.bg }}">
+              <span style="width:84px;flex:none;display:flex;flex-direction:column"><span class="t-label t-numeric">{{ r.h }}</span><span class="t-caption t-numeric">{{ r.f }}</span></span>
+              <span style="flex:1;min-width:0;display:flex;flex-direction:column"><span class="t-label">{{ r.pl }}</span><span class="t-caption">{{ r.i }} · {{ r.pts }} puntos</span></span>
+              <span style="display:{{ bandD }}" aria-label="Banda {{ r.b }}"><span class="badge b-{{ r.bt }} nodot" style="width:10px;height:10px;padding:0"></span></span>
+              <span class="badge b-{{ r.t }}">{{ r.e }}</span>
+            </div>
+          </sc-for>
+        </section>
+      </div>
+    </sc-if>
+    <sc-if value="{{ showFicha }}">
+      <section aria-label="Detalle de la ronda" style="width:{{ fichaW }};flex:none;min-width:0;display:flex;flex-direction:column;border-left:1px solid var(--ds-border);overflow:auto">
+        <div style="padding:16px;display:flex;flex-direction:column;gap:4px">
+          <span class="badge b-accent" style="align-self:flex-start">En curso</span>
+          <span class="t-heading">Ronda perimetral</span>
+          <span class="t-body-sm muted">Planta Quilicura · <span class="t-numeric">29-10-2026 · desde 10:02</span></span>
+          <sc-if value="{{ bandas }}"><span class="t-caption" style="display:flex;align-items:center;gap:6px">Banda de confianza <span class="badge b-success">Verde</span></span></sc-if>
+        </div>
+        <div style="height:200px;flex:none;margin:0 16px;border:1px solid var(--ds-border);border-radius:16px;overflow:hidden"><dc-import name="Mapa Rondas" variant="recorrido" incidente="{{ vis }}" hint-size="100%,200px" style="display:block;width:100%;height:100%"></dc-import></div>
+        <div style="padding:16px;display:flex;flex-direction:column;gap:10px">
+          <span class="t-overline">Puntos · 4 de 6</span>
+          <div class="tl"><sc-for list="{{ tl }}" as="m" hint-placeholder-count="6"><div class="tl-item" style="padding-bottom:14px"><span class="tl-dot" style="border:2px solid {{ m.bd }};background:{{ m.bg }};color:{{ m.fg }}"><span class="t-caption" style="color:inherit;font-weight:600">{{ m.n }}</span></span><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><div style="display:flex;justify-content:space-between;gap:8px"><span class="t-label">{{ m.nom }}</span><span class="t-caption t-numeric">{{ m.h }}</span></div><a href="#" style="display:{{ m.nd }};flex-direction:column;gap:4px;margin-top:4px;padding:8px 12px;border:1px solid var(--ds-border);border-radius:10px;text-decoration:none;color:var(--ds-fg)"><span style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span class="ic sm i-flag" aria-hidden="true"></span><span class="t-label-sm t-mono">NOV-0418</span><span class="badge b-danger nodot">Incidente</span><span class="badge b-warning">En atención</span></span><span class="t-body-sm">Intrusión · Puerta lateral de Bodega A forzada, candado en el suelo.</span><span class="t-caption">3 fotos · reportado 10:15</span></a></div></div></sc-for></div>
+        </div>
+      </section>
+    </sc-if>
+  </div>
+  </sc-if>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:375,&quot;height&quot;:812},&quot;screen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;d16&quot;,&quot;options&quot;:[&quot;d16&quot;,&quot;d16f&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;phone&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;desktop&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;contenido&quot;,&quot;options&quot;:[&quot;contenido&quot;,&quot;cargando&quot;,&quot;vacio&quot;,&quot;error&quot;,&quot;permisos&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;light&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;bandas&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Tenant&quot;}}">
+class Component extends DCLogic{
+  renderVals(){
+    const p=this.props;const scr=p.screen??'d16';const dev=p.device??'phone';const st=p.state??'contenido';const ok=st==='contenido';
+    const isPhone=dev==='phone',isDesk=!isPhone;const bandas=p.bandas??false;
+    const msgs={vacio:{t:'Sin rondas en el período',d:'No hay rondas registradas en octubre de 2026 para tus instalaciones. Prueba con otro mes.',a:'Cambiar período',aic:'calendar',ic:'inbox'},
+      error:{t:'No pudimos cargar el reporte',d:'Revisa tu conexión. Si el problema sigue, escríbenos desde Solicitudes con el código RND-503.',a:'Reintentar',aic:'refresh',ic:'alert'},
+      permisos:{t:'Este reporte no está en tu cuenta',d:'Pídele acceso a Paula González, administradora de Inmobiliaria Quilicura Ltda. en OPAI.',a:'Pedir acceso',aic:'lock',ic:'lock'}};
+    const bt={Verde:'success',Amarilla:'warning',Roja:'danger'};
+    const R=(h,f,pl,i,pts,e,t,b,sel)=>({h,f,pl,i,pts,e,t,b,bt:bt[b],bg:sel?'var(--ds-accent-muted)':'transparent'});
+    return {theme:p.theme??'light',device:dev,label:'Cliente · Rondas',isPhone,isDesk,ok,nonOk:!ok,isLoad:st==='cargando',isMsg:!ok&&st!=='cargando',msg:msgs[st]||msgs.error,
+      showList:ok&&(isDesk||scr==='d16'),showFicha:ok&&(isDesk?scr==='d16f':scr==='d16f'),phoneBack:isPhone&&scr==='d16f',phoneHome:isPhone&&scr==='d16',
+      fichaW:isDesk?'400px':'100%',g:isPhone?'16px':'32px',kcols:isPhone?'repeat(2,minmax(0,1fr))':'repeat(4,minmax(0,1fr))',sk:[1,2,3,4],bandas,bandD:bandas?'inline-flex':'none',
+      kpis:[{k:'Cumplimiento',v:'96,2 %',d:'412 de 428 rondas'},{k:'Puntos marcados',v:'98,1 %',d:'2.472 de 2.520'},{k:'Novedades',v:'6',d:'2 con seguimiento'},{k:'Duración media',v:'33 min',d:'límite 40 min'}],
+      inst:[{n:'Planta Quilicura',v:'97,4 %',w:'97%'},{n:'Bodega Lampa',v:'94,0 %',w:'94%'}],
+      rondas:[R('10:00','29-10-2026','Ronda perimetral','Planta Quilicura',6,'En curso','accent','Verde',scr==='d16f'&&isDesk),R('22:00','28-10-2026','Ronda perimetral','Planta Quilicura',6,'Completa','success','Verde'),R('18:00','28-10-2026','Cierre de bodegas','Planta Quilicura',4,'Completa','success','Verde'),R('14:00','28-10-2026','Ronda perimetral','Planta Quilicura',6,'Incompleta','warning','Amarilla'),R('12:00','28-10-2026','Patio de contenedores','Bodega Lampa',5,'Completa','success','Verde'),R('10:00','28-10-2026','Ronda perimetral','Planta Quilicura',6,'Completa','success','Verde'),R('08:00','28-10-2026','Cerco perimetral','Bodega Lampa',6,'Omitida','danger','Roja')],
+      vis:p.visibleCliente??true,tl:[{n:1,nom:'Portería principal',h:'10:02'},{n:2,nom:'Estacionamiento visitas',h:'10:09'},{n:3,nom:'Bodega A',h:'10:15',nov:p.visibleCliente??true},{n:4,nom:'Andén norte',h:'10:21'},{n:5,nom:'Cerco poniente',h:'Pendiente',om:true},{n:6,nom:'Sala de bombas',h:'Pendiente',om:true}].map(m=>Object.assign(m,{nd:m.nov?'flex':'none',bd:m.om?'var(--ds-border-strong)':'var(--ds-fg)',bg:m.om?'var(--ds-surface)':'var(--ds-fg)',fg:m.om?'var(--ds-fg-subtle)':'var(--ds-bg)'}))
+    };
+  }
+}
+</script>
+</body>
+</html>

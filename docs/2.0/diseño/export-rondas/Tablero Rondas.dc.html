@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0;background:var(--ds-fill)}a{color:var(--ds-accent)}a:hover{color:var(--ds-accent)}</style>
+</helmet>
+<div class="ds" data-theme="light" style="background:var(--ds-fill);padding:64px;display:flex;flex-direction:column;gap:64px;min-width:1200px">
+  <header style="display:flex;flex-direction:column;gap:12px;max-width:880px">
+    <span class="t-overline">OPAI 2.0 · DS 2.0 · Operaciones</span>
+    <h1 class="t-display m0">Módulo Rondas</h1>
+    <p class="t-body muted m0" style="text-wrap:pretty">Puntos de control por QR y GPS para Atlas Seguridad SpA. Cada fila es una pantalla a sus anchos de entrega. El estado (contenido, cargando, vacío, error, sin permisos) y el tema se cambian para todo el tablero desde Tweaks.</p>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;padding-top:4px">
+      <span class="badge b-neutral">Por iniciar · pendiente</span><span class="badge b-accent">En curso · en_curso</span><span class="badge b-warning">Atrasada · en_curso fuera de plazo</span><span class="badge b-success">Completa · completada</span><span class="badge b-warning">Incompleta · incompleta</span><span class="badge b-danger">Omitida · no_realizada</span><span class="badge b-neutral">Cerrada automáticamente · cerrada_auto</span><span class="badge b-neutral">Cerrada por administrador · cerrada_admin</span>
+    </div>
+    <span class="t-caption">«Con alerta» es un filtro (anomalías abiertas o atrasadas), no un estado. Sin QR dinámico ni NFC en ninguna pantalla.</span>
+    <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding-top:8px"><div class="seg" role="radiogroup" aria-label="Sección del tablero"><sc-for list="{{ secs }}" as="s" hint-placeholder-count="5"><button class="{{ s.on }}" role="radio" aria-checked="{{ s.p }}" onClick="{{ s.go }}">{{ s.t }}</button></sc-for></div><a class="chip plain" href="#DS">Piezas propuestas al DS</a></div><span class="t-caption">Se muestra una sección a la vez para que el tablero cargue rápido.</span>
+  </header>
+
+  <sc-if value="{{ showA }}"><section id="A" style="display:flex;flex-direction:column;gap:40px">
+    <div style="display:flex;flex-direction:column;gap:4px;border-top:1px solid var(--ds-border-strong);padding-top:24px"><h2 class="t-title m0">A · Teléfono e iPad · Guardia</h2><span class="t-body-sm muted">App Terreno: cabecera con instalación · turno · guardia y barra Inicio · Rondas · Control de acceso · Novedades · Asistencia. 375 y 1024.</span></div>
+    <sc-for list="{{ rowsA }}" as="r" hint-placeholder-count="3">
+      <div id="{{ r.id }}" style="display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:center;gap:10px"><span class="badge b-accent nodot t-numeric">{{ r.id }}</span><span class="t-subheading">{{ r.t }}</span><span class="t-body-sm muted">{{ r.d }}</span></div>
+        <div style="display:flex;gap:24px;align-items:flex-start">
+          <sc-for list="{{ r.frames }}" as="f" hint-placeholder-count="2">
+            <figure style="margin:0;display:flex;flex-direction:column;gap:6px"><figcaption class="t-caption">{{ f.cap }}</figcaption>
+              <div style="width:{{ f.w }};height:{{ f.h }};border:1px solid var(--ds-border-strong);border-radius:{{ f.rad }};overflow:hidden;background:var(--ds-bg)"><dc-import name="Rondas Guardia" screen="{{ f.screen }}" theme="{{ f.theme }}" state="{{ state }}" hint-size="100%,100%" style="display:block;width:100%;height:100%"></dc-import></div>
+            </figure>
+          </sc-for>
+        </div>
+      </div>
+    </sc-for>
+  </section></sc-if>
+
+  <sc-if value="{{ showB }}"><section id="B" style="display:flex;flex-direction:column;gap:40px">
+    <div style="display:flex;flex-direction:column;gap:4px;border-top:1px solid var(--ds-border-strong);padding-top:24px"><h2 class="t-title m0">B · Teléfono e iPad · Supervisor</h2><span class="t-body-sm muted">Portal Supervisor, barra inferior «Visitas y rondas». En iPad, SplitScreen lista + ficha.</span></div>
+    <sc-for list="{{ rowsB }}" as="r" hint-placeholder-count="2">
+      <div id="{{ r.id }}" style="display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:center;gap:10px"><span class="badge b-accent nodot t-numeric">{{ r.id }}</span><span class="t-subheading">{{ r.t }}</span><span class="t-body-sm muted">{{ r.d }}</span></div>
+        <div style="display:flex;gap:24px;align-items:flex-start">
+          <sc-for list="{{ r.frames }}" as="f" hint-placeholder-count="2">
+            <figure style="margin:0;display:flex;flex-direction:column;gap:6px"><figcaption class="t-caption">{{ f.cap }}</figcaption>
+              <div style="width:{{ f.w }};height:{{ f.h }};border:1px solid var(--ds-border-strong);border-radius:{{ f.rad }};overflow:hidden;background:var(--ds-bg)"><dc-import name="Rondas Supervisor" screen="{{ f.screen }}" device="{{ f.device }}" theme="{{ f.theme }}" state="{{ state }}" hint-size="100%,100%" style="display:block;width:100%;height:100%"></dc-import></div>
+            </figure>
+          </sc-for>
+        </div>
+      </div>
+    </sc-for>
+  </section></sc-if>
+
+  <sc-if value="{{ showC }}"><section id="C" style="display:flex;flex-direction:column;gap:40px">
+    <div style="display:flex;flex-direction:column;gap:4px;border-top:1px solid var(--ds-border-strong);padding-top:24px"><h2 class="t-title m0">C · Escritorio e iPad · ERP</h2><span class="t-body-sm muted">Área Operaciones → Rondas. 1280, 1024 y 375.</span></div>
+    <sc-for list="{{ rowsC }}" as="r" hint-placeholder-count="2">
+      <div id="{{ r.id }}" style="display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:center;gap:10px"><span class="badge b-accent nodot t-numeric">{{ r.id }}</span><span class="t-subheading">{{ r.t }}</span><span class="t-body-sm muted">{{ r.d }}</span></div>
+        <div style="display:flex;gap:24px;align-items:flex-start">
+          <sc-for list="{{ r.frames }}" as="f" hint-placeholder-count="3">
+            <figure style="margin:0;display:flex;flex-direction:column;gap:6px"><figcaption class="t-caption">{{ f.cap }}</figcaption>
+              <div style="width:{{ f.w }};height:{{ f.h }};border:1px solid var(--ds-border-strong);border-radius:{{ f.rad }};overflow:hidden;background:var(--ds-bg)"><dc-import name="Rondas ERP" screen="{{ f.screen }}" device="{{ f.device }}" theme="{{ f.theme }}" state="{{ state }}" hint-size="100%,100%" style="display:block;width:100%;height:100%"></dc-import></div>
+            </figure>
+          </sc-for>
+        </div>
+      </div>
+    </sc-for>
+  </section></sc-if>
+
+  <sc-if value="{{ showD }}"><section id="D" style="display:flex;flex-direction:column;gap:40px">
+    <div style="display:flex;flex-direction:column;gap:4px;border-top:1px solid var(--ds-border-strong);padding-top:24px"><h2 class="t-title m0">D · Teléfono y escritorio · Cliente</h2><span class="t-body-sm muted">Portal Cliente → Reportes → Rondas. Sin anomalías internas ni desglose de confianza; la banda verde/amarillo/rojo aparece solo si el tenant la activa (Tweaks).</span></div>
+    <sc-for list="{{ rowsD }}" as="r" hint-placeholder-count="2">
+      <div id="{{ r.id }}" style="display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:center;gap:10px"><span class="badge b-accent nodot t-numeric">{{ r.id }}</span><span class="t-subheading">{{ r.t }}</span><span class="t-body-sm muted">{{ r.d }}</span></div>
+        <div style="display:flex;gap:24px;align-items:flex-start">
+          <sc-for list="{{ r.frames }}" as="f" hint-placeholder-count="3">
+            <figure style="margin:0;display:flex;flex-direction:column;gap:6px"><figcaption class="t-caption">{{ f.cap }}</figcaption>
+              <div style="width:{{ f.w }};height:{{ f.h }};border:1px solid var(--ds-border-strong);border-radius:{{ f.rad }};overflow:hidden;background:var(--ds-bg)"><dc-import name="Rondas Cliente" screen="{{ f.screen }}" device="{{ f.device }}" theme="{{ f.theme }}" state="{{ state }}" bandas="{{ bandas }}" hint-size="100%,100%" style="display:block;width:100%;height:100%"></dc-import></div>
+            </figure>
+          </sc-for>
+        </div>
+      </div>
+    </sc-for>
+  </section></sc-if>
+
+  <section id="DS" style="display:flex;flex-direction:column;gap:20px;max-width:1200px">
+    <div style="display:flex;flex-direction:column;gap:4px;border-top:1px solid var(--ds-border-strong);padding-top:24px"><h2 class="t-title m0">Piezas propuestas al DS 2.0</h2><span class="t-body-sm muted">Se proponen como componentes del DS, no del módulo. Los gráficos y el mapa de calor se cargan en diferido, nunca en el JS inicial de Terreno (ADR-044.6).</span></div>
+    <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px">
+      <sc-for list="{{ piezas }}" as="p" hint-placeholder-count="6">
+        <div class="card" style="padding:16px;display:flex;flex-direction:column;gap:6px"><span class="t-label">{{ p.n }}</span><span class="t-body-sm muted" style="text-wrap:pretty">{{ p.d }}</span><a class="t-caption" href="#{{ p.ref }}" style="color:var(--ds-accent)">Ver en {{ p.ref }}</a></div>
+      </sc-for>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;seccion&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;A&quot;,&quot;options&quot;:[&quot;A&quot;,&quot;B&quot;,&quot;C&quot;,&quot;D&quot;,&quot;T&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;contenido&quot;,&quot;options&quot;:[&quot;contenido&quot;,&quot;cargando&quot;,&quot;vacio&quot;,&quot;error&quot;,&quot;permisos&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;tema&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;claro&quot;,&quot;options&quot;:[&quot;claro&quot;,&quot;oscuro&quot;,&quot;ambos&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;bandasCliente&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+const PH={w:'375px',h:'812px',rad:'28px'},TB={w:'1024px',h:'768px',rad:'16px'},DK={w:'1280px',h:'800px',rad:'8px'};
+class Component extends DCLogic{
+  state={};
+  renderVals(){
+    const p=this.props;const tm=p.tema??'claro';const themes=tm==='ambos'?['light','dark']:[tm==='oscuro'?'dark':'light'];
+    const lbl={light:'claro',dark:'oscuro'};
+    const fr=(screen,devs)=>{const out=[];devs.forEach(([d,sz,w])=>themes.forEach(t=>out.push({screen,device:d,theme:t,cap:w+' · '+lbl[t],w:sz.w,h:sz.h,rad:sz.rad})));return out;};
+    const G=[['phone',PH,'375'],['tablet',TB,'1024']];const P=[['phone',PH,'375']];const T=[['tablet',TB,'1024']];
+    const E3=[['desktop',DK,'1280'],['tablet',TB,'1024'],['phone',PH,'375']];const E2=[['desktop',DK,'1280'],['tablet',TB,'1024']];
+    const row=(id,t,d,screen,devs)=>({id,t,d,frames:fr(screen,devs)});
+    const sec=this.state.sec??p.seccion??'A';const SL=[['A','A · Guardia'],['B','B · Supervisor'],['C','C · ERP'],['D','D · Cliente'],['T','Todas']];
+    return {secs:SL.map(([k,tt])=>({t:tt,on:k===sec?'on':'',p:String(k===sec),go:()=>this.setState({sec:k})})),showA:sec==='A'||sec==='T',showB:sec==='B'||sec==='T',showC:sec==='C'||sec==='T',showD:sec==='D'||sec==='T',state:p.estado??'contenido',bandas:p.bandasCliente??false,
+      rowsA:[row('A0','Inicio de Terreno','Cabecera con instalación, turno y guardia; próxima ronda e incidentes abiertos','g0',G),
+        row('A1','¿Quién eres?','Solo si el turno o el dispositivo tiene más de un guardia','g1',G),
+        row('A2','Mis rondas de hoy','Lista por hora, estado e indicador fijo de conexión y cola','g2',G),
+        row('A3','Ronda en curso','Avance, siguiente punto, marcas con confianza, Emergencia aparte','g3',G),
+        row('A3b','Emergencia · confirmación','Evita toques accidentales; avisa aunque el tenant no haya configurado nada','g3e',P),
+        row('A4a','Marcar punto · QR','Visor de cámara con marco y linterna; la etiqueta siempre es física','g4qr',G),
+        row('A4b','Marcar punto · GPS dentro','Permanencia con cuenta regresiva','g4gps',G),
+        row('A4c','Marcar punto · precisión insuficiente','','g4gpsP',P),
+        row('A4d','Marcar punto · fuera del punto','','g4gpsF',P),
+        row('A3c','Novedad desde la ronda','Chips de tipo según la lista del tenant (C15b)','g9',G),
+        row('A4e','Resultado de la marca','Checklist sí/no del punto (1 a 3 ítems), foto y confirmación «Realizado» o «Hay un problema»','g4res',G),
+        row('A4f','Hay un problema','Un «No» en el checklist abre la novedad con el punto ya enlazado; la marca no se retrasa','g4nov',G),
+        row('A5','Cierre de ronda','Marcados, omitidos, duración, banda, novedades y envío','g5',G),
+        row('A6','Cola sin conexión','Hechos pendientes con hora del dispositivo','g6',G),
+        row('A7','Primera vez · permisos','Ubicación, cámara y movimiento (iOS) en contexto','g7',G),
+        row('A8','Novedad enviada','Estado de envío y atención','g10',G),
+        row('A9','Libro de novedades','Mi turno e instalación','g11',G),
+        row('A10','Relevo de turno','Incidentes abiertos al recibir el turno','g12',G),
+        row('A11','Zona de riesgo','Temporizador con «Estoy bien»','g13',G)],
+      rowsB:[row('B8','Rondas de hoy','Chips con contadores: Con alerta · En curso · Atrasadas · Omitidas · Todas','s8',P),
+        row('B9','Ficha de la ronda','Resumen con confianza, mapa con tramos sin rastro y marcas. En iPad, lista + ficha','s9',G),
+        row('B10','Revisión de anomalía','La marca original no cambia; comentario obligatorio','s10',G),
+        row('B11','Crear punto en el lugar','Medición de 20 s y sugerencia de QR con precisión mala','s11',G)],
+      rowsC:[row('C12','Control de rondas','En vivo, con KPI «Con anomalías» y ficha lateral. Sin botón de llamar','c12',E3),
+        row('C12b','Ficha de la ronda','Página completa desde «Abrir ficha», con las mismas pestañas que B9','c18',E3),
+        row('C13a','Instalación · Rondas · Puntos','Tabla y mapa con radios; etiquetas de 1.0 reutilizadas','c13p',E3),
+        row('C13b','Puntos · drawer de edición','Herencia visible, checklist de la tarea (1 a 3 ítems) y acciones de etiqueta','c13pd',E2),
+        row('C13c','Puntos · reemplazar etiqueta','Dialog de confirmación','c13pr',E2),
+        row('C13d','Instalación · Rondas · Plantillas','Lista ordenable, orden y tiempos','c13t',E3),
+        row('C13e','Instalación · Rondas · Programación','Horarios, ventana, responsables y switches','c13s',E3),
+        row('C13f','Instalación · Rondas · Historial','Rondas, marcas, confirmaciones, checklists e incidentes con su estado; filtros y Exportar','c13h',E3),
+        row('C14','Informes de rondas','Cumplimiento, omisiones, bandas, anomalías y mapa de calor','c14',E3),
+        row('C15','Configuración → Rondas','Defectos, modelo de confianza con versiones y umbrales','c15',E3),
+        row('C15b','Configuración → Rondas · Tipos de incidente','Nombre, ícono, gravedad por defecto y activo por tenant; alimenta los chips de la novedad','c15t',E3),
+        row('C16','Incidente','Estado, novedad original no editable y actividad','c16',E3),
+        row('C17','Central · Alertas','Alertas enlazadas a la novedad original','c17',E3)],
+      rowsD:[row('D16a','Resumen y lista','Cumplimiento por instalación y rondas del período','d16',[['phone',PH,'375'],['desktop',{w:'1024px',h:'768px',rad:'16px'},'1024']]),
+        row('D16b','Ficha de la ronda','Recorrido en mapa y novedades visibles','d16f',[['phone',PH,'375'],['desktop',DK,'1280']])],
+      piezas:[{n:'Lector de QR con cámara',d:'Visor a pantalla completa con marco, linterna y ayuda. Solo lee etiquetas impresas.',ref:'A4a'},
+        {n:'Indicador de permanencia GPS',d:'Anillo con cuenta regresiva y tres tonos: dentro, precisión insuficiente y fuera del punto.',ref:'A4b'},
+        {n:'Indicador fijo de conexión y cola',d:'Banda bajo la barra superior con hechos por enviar; abre la hoja de cola.',ref:'A2'},
+        {n:'Lista ordenable',d:'Filas de 52 px con asa de 44 px, orden por teclado y anuncio para lectores de pantalla.',ref:'C13d'},
+        {n:'MapaEstatico con recorrido',d:'Extensión de ds-mapa: puntos numerados, rastro, tramos sin rastro, radios y mapa de calor.',ref:'B9'},
+        {n:'Gráficos de informes',d:'Barras de cumplimiento y barra apilada de bandas, cargados en diferido.',ref:'C14'},
+        {n:'RadioGroup',d:'El DS no tiene Radio. Círculo de 20 px con borde border-control y área táctil de 44 px.',ref:'B10'}]
+    };
+  }
+}
+</script>
+</body>
+</html>
