@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="ds/styles.css">
+<style>body{margin:0;background:#e9e9ec}a{color:var(--ds-accent)}a:hover{color:var(--ds-accent)}</style>
+</helmet>
+<div class="ds" data-theme="light" style="background:#e9e9ec;padding:48px;display:flex;flex-direction:column;gap:56px;min-width:max-content">
+  <header style="display:flex;flex-direction:column;gap:4px;max-width:880px">
+    <div class="t-overline">Operaciones I · CAR-81 · Atlas Seguridad SpA</div>
+    <h1 class="t-title m0">Pauta mensual de la instalación</h1>
+    <p class="t-body-sm muted m0">ERP en teléfono, iPad y escritorio. Grilla puestos × días con el patrón pintado, feriados del calendario del núcleo (CAR-79) y PPC con motivo (R6). Toca un puesto para cambiar su serie y una celda para ver el día o registrar una excepción.</p>
+  </header>
+  <sc-for list="{{ rows }}" as="row" hint-placeholder-count="2">
+    <section style="display:flex;flex-direction:column;gap:16px">
+      <h2 class="t-subheading m0">{{ row.t }}</h2>
+      <div style="display:flex;gap:32px;align-items:flex-start">
+        <sc-for list="{{ row.b }}" as="ab" hint-placeholder-count="3">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div class="t-label-sm muted">{{ ab.label }}</div>
+            <div data-theme="{{ ab.theme }}" data-device="{{ ab.dev }}" class="ds" style="width:{{ ab.w }}px;height:{{ ab.h }}px;position:relative;overflow:hidden;border:1px solid var(--ds-border);border-radius:12px">
+
+              <sc-if value="{{ ab.phone }}" hint-placeholder-val="{{ true }}">
+                <div class="screen" style="height:100%">
+                  <div class="safe-top"></div>
+                  <div class="topbar">
+                    <button class="portal-btn"><span class="tenant">AS</span>ERP<span class="ic sm i-chevron-down" style="color:var(--ds-fg-subtle)"></span></button>
+                    <div style="flex:1"></div>
+                    <button class="icon-btn" aria-label="Buscar"><span class="ic i-search"></span></button>
+                    <button class="icon-btn" aria-label="Avisos"><span class="ic i-bell"></span></button>
+                  </div>
+                  <div style="flex:1;min-height:0;overflow:auto">
+                    <div class="pagehead">
+                      <div style="display:flex;flex-direction:column">
+                        <span class="t-overline">Operaciones</span>
+                        <h1 class="t-heading m0">Pauta mensual</h1>
+                      </div>
+                      <sc-if value="{{ ab.ok }}">
+                        <div style="display:flex;gap:4px;align-items:center">
+                          <button class="icon-btn" aria-label="Historial" onClick="{{ ab.openHist }}"><span class="ic i-clock"></span></button>
+                          <button class="btn btn-primary" onClick="{{ ab.openSerie }}">Pintar serie</button>
+                        </div>
+                      </sc-if>
+                    </div>
+                    <sc-if value="{{ ab.ok }}">
+                      <div style="padding:0 16px 12px;display:flex;flex-direction:column;gap:8px">
+                        <button class="input"><span class="ic i-building" style="color:var(--ds-fg-muted)"></span><span class="grow">Centro Logístico Quilicura</span><span class="ic sm i-chevron-down" style="color:var(--ds-fg-muted)"></span></button>
+                        <div style="display:flex;align-items:center;gap:4px">
+                          <button class="icon-btn" aria-label="Mes anterior"><span class="ic i-chevron-left"></span></button>
+                          <div style="flex:1;display:flex;flex-direction:column;align-items:center">
+                            <span class="t-label">Octubre 2026</span>
+                            <span class="t-caption t-numeric" style="font-weight:400">Cobertura {{ cobertura }} · {{ ppcCount }} PPC</span>
+                          </div>
+                          <button class="icon-btn" aria-label="Mes siguiente"><span class="ic i-chevron-right"></span></button>
+                        </div>
+                      </div>
+                      <sc-for list="{{ ab.groups }}" as="g">
+                        <div>
+                          <div class="row-group" style="display:flex;justify-content:space-between;gap:8px"><span>{{ g.t }}</span><span style="font-weight:400">{{ g.libres }}</span></div>
+                          <div class="rows" style="border-top:0">
+                            <sc-for list="{{ g.items }}" as="it">
+                              <button class="rowcard" onClick="{{ it.onTap }}" style="border-left:0;border-right:0;border-top:0;cursor:pointer;align-items:center">
+                                <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+                                  <span class="t-label">{{ it.n }}</span>
+                                  <span class="t-caption t-numeric" style="font-weight:400">{{ it.h }} · {{ it.pat }}</span>
+                                  <span class="t-body-sm muted">{{ it.person }}</span>
+                                </div>
+                                <span class="{{ it.badgeCls }}">{{ it.badge }}</span>
+                              </button>
+                            </sc-for>
+                          </div>
+                        </div>
+                      </sc-for>
+                      <div style="padding:12px 16px 24px" class="t-caption">Feriados del mes: 12-10 Encuentro de Dos Mundos · 31-10 Día de las Iglesias Evangélicas y Protestantes.</div>
+                    </sc-if>
+                    <sc-if value="{{ ab.loading }}">
+                      <div style="padding:0 16px;display:flex;flex-direction:column;gap:12px" aria-busy="true">
+                        <div class="skel" style="height:44px;border-radius:10px"></div>
+                        <div class="skel" style="height:36px;width:60%;align-self:center"></div>
+                        <div class="skel" style="height:16px;width:40%;margin-top:8px"></div>
+                        <div class="skel" style="height:72px;border-radius:10px"></div>
+                        <div class="skel" style="height:72px;border-radius:10px"></div>
+                        <div class="skel" style="height:72px;border-radius:10px"></div>
+                        <div class="skel" style="height:72px;border-radius:10px"></div>
+                      </div>
+                    </sc-if>
+                    <sc-if value="{{ ab.empty }}">
+                      <div style="padding:8px 16px"><div class="state-panel"><span class="state-ic"><span class="ic i-calendar"></span></span><span class="t">Aún no hay series en esta instalación</span><span class="d">Pinta la serie de un puesto y se replicará sola cada mes según su ciclo.</span><button class="btn btn-primary">Pintar serie</button></div></div>
+                    </sc-if>
+                    <sc-if value="{{ ab.error }}">
+                      <div style="padding:8px 16px"><div class="state-panel"><span class="state-ic" style="color:var(--ds-danger-fg)"><span class="ic i-alert"></span></span><span class="t">No pudimos cargar la pauta</span><span class="d">Revisa tu conexión. Si el problema sigue, avísale a soporte con el código <span class="t-mono">OPS-5021</span>.</span><button class="btn btn-primary"><span class="ic sm i-refresh"></span>Reintentar</button></div></div>
+                    </sc-if>
+                    <sc-if value="{{ ab.forbidden }}">
+                      <div style="padding:8px 16px"><div class="state-panel"><span class="state-ic"><span class="ic i-lock"></span></span><span class="t">No tienes acceso a esta pauta</span><span class="d">Armar la pauta requiere el permiso «Editar pauta». Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA.</span><button class="btn btn-primary">Pedir acceso</button></div></div>
+                    </sc-if>
+                  </div>
+                  <nav class="tabbar">
+                    <a href="#"><span class="ic i-home"></span>Inicio</a>
+                    <a href="#" class="on"><span class="ic i-calendar"></span>Pauta</a>
+                    <a href="#"><span class="ic i-users"></span>Personas</a>
+                    <a href="#"><span class="ic i-route"></span>Rondas</a>
+                    <a href="#"><span class="ic i-menu"></span>Más</a>
+                  </nav>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ ab.big }}" hint-placeholder-val="{{ false }}">
+                <div class="screen" style="height:100%;flex-direction:row">
+                  <sc-if value="{{ ab.desktop }}">
+                    <aside class="sidebar">
+                      <div class="sidebar-head"><span class="wordmark">OPAI</span><span class="tenant">AS</span></div>
+                      <button class="sidebar-portal"><span class="ic sm i-grid"></span><span style="flex:1;display:flex;flex-direction:column"><span class="t-caption">Portal</span><span class="t-label">ERP</span></span><span class="ic sm i-updown" style="color:var(--ds-fg-subtle)"></span></button>
+                      <nav class="nav-group">
+                        <div class="h">Operaciones</div>
+                        <a class="nav-item" href="#"><span class="ic i-building"></span>Instalaciones</a>
+                        <a class="nav-item" href="#"><span class="ic i-briefcase"></span>Puestos</a>
+                        <a class="nav-item on" href="#"><span class="ic i-calendar"></span>Pauta mensual</a>
+                        <a class="nav-item" href="Pauta%20diaria.dc.html"><span class="ic i-clipboard"></span>Pauta diaria</a>
+                        <a class="nav-item" href="#"><span class="ic i-route"></span>Rondas</a>
+                      </nav>
+                      <nav class="nav-group">
+                        <div class="h">Personas</div>
+                        <a class="nav-item" href="#"><span class="ic i-users"></span>Personas</a>
+                      </nav>
+                      <div style="margin-top:auto;padding:12px 20px;border-top:1px solid var(--ds-border);display:flex;gap:10px;align-items:center">
+                        <span class="avatar">ML</span>
+                        <div style="display:flex;flex-direction:column"><span class="t-label">Marcos Leiva</span><span class="t-caption">Supervisor</span></div>
+                      </div>
+                    </aside>
+                  </sc-if>
+                  <sc-if value="{{ ab.tablet }}">
+                    <nav class="rail">
+                      <button class="rail-portal"><span class="ic i-grid"></span>ERP</button>
+                      <a href="#"><span class="ic i-home"></span>Inicio</a>
+                      <a href="#"><span class="ic i-building"></span>Sitios</a>
+                      <a href="#" class="on"><span class="ic i-calendar"></span>Pauta</a>
+                      <a href="Pauta%20diaria.dc.html"><span class="ic i-clipboard"></span>Hoy</a>
+                      <a href="#"><span class="ic i-users"></span>Personas</a>
+                    </nav>
+                  </sc-if>
+                  <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+                    <div class="appbar">
+                      <span class="t-body-sm muted">Operaciones</span><span class="ic sm i-chevron-right" style="color:var(--ds-fg-subtle)"></span><span class="t-label">Pauta mensual</span>
+                      <div style="flex:1"></div>
+                      <sc-if value="{{ ab.desktop }}"><div class="searchbox"><span class="ic sm i-search"></span><span style="flex:1">Buscar</span><span class="kbd">⌘K</span></div></sc-if>
+                      <sc-if value="{{ ab.tablet }}"><button class="icon-btn" aria-label="Buscar"><span class="ic i-search"></span></button></sc-if>
+                      <button class="icon-btn" aria-label="Avisos"><span class="ic i-bell"></span></button>
+                    </div>
+                    <div style="flex:1;min-height:0;overflow:auto">
+                      <div class="pg-page">
+                        <div class="pg-head">
+                          <div class="txt">
+                            <span class="eb">Centro Logístico Quilicura</span>
+                            <h1 class="t-title m0">Pauta mensual</h1>
+                          </div>
+                          <sc-if value="{{ ab.ok }}">
+                            <div class="acts">
+                              <button class="btn btn-ghost" onClick="{{ ab.openHist }}"><span class="ic sm i-clock"></span>Historial</button>
+                              <button class="btn btn-primary" onClick="{{ ab.openSerie }}">Pintar serie</button>
+                            </div>
+                          </sc-if>
+                        </div>
+                        <sc-if value="{{ ab.ok }}">
+                          <div style="display:flex;flex-direction:column;gap:12px">
+                            <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+                              <button class="input compact" style="width:280px"><span class="ic sm i-building" style="color:var(--ds-fg-muted)"></span><span class="grow">Centro Logístico Quilicura</span><span class="ic sm i-chevron-down" style="color:var(--ds-fg-muted)"></span></button>
+                              <div style="display:flex;align-items:center;gap:2px">
+                                <button class="btn btn-ghost icon" aria-label="Mes anterior"><span class="ic sm i-chevron-left"></span></button>
+                                <span class="t-label" style="min-width:104px;text-align:center">Octubre 2026</span>
+                                <button class="btn btn-ghost icon" aria-label="Mes siguiente"><span class="ic sm i-chevron-right"></span></button>
+                              </div>
+                              <div style="flex:1"></div>
+                              <span class="t-body-sm muted t-numeric" style="font-weight:400">{{ puestosCount }} puestos · cobertura {{ cobertura }} · {{ ppcCount }} PPC</span>
+                            </div>
+                            <div class="pl-wrap" style="max-height:none">
+                              <div style="display:grid;grid-template-columns:200px repeat(31,minmax(0,1fr));border-bottom:1px solid var(--ds-border)">
+                                <div style="padding:8px 12px;border-right:1px solid var(--ds-border);font:500 12px/16px var(--font-sans);color:var(--ds-fg-subtle);display:flex;align-items:flex-end">Puesto</div>
+                                <sc-for list="{{ days }}" as="d">
+                                  <div title="{{ d.title }}" style="padding:6px 0;display:flex;flex-direction:column;align-items:center;font:500 12px/16px var(--font-sans);font-variant-numeric:tabular-nums;color:{{ d.color }};background:{{ d.bg }}"><span>{{ d.n }}</span><span style="font-weight:400;font-size:11px">{{ d.w }}</span></div>
+                                </sc-for>
+                              </div>
+                              <sc-for list="{{ ab.grid }}" as="r">
+                                <div style="display:grid;grid-template-columns:200px repeat(31,minmax(0,1fr));border-bottom:1px solid var(--ds-border)">
+                                  <button onClick="{{ r.onOpen }}" title="Cambiar serie" style="all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;min-width:0;padding:6px 12px;border-right:1px solid var(--ds-border)">
+                                    <span class="t-label" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.n }} · {{ r.t }}</span>
+                                    <span class="t-caption" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--ds-fg-muted)">{{ r.pat }} · {{ r.tit }}</span>
+                                  </button>
+                                  <sc-for list="{{ r.cells }}" as="c">
+                                    <div style="padding:2px 1px;display:flex;align-items:center;background:{{ c.bg }}">
+                                      <button class="{{ c.cls }}" title="{{ c.title }}" onClick="{{ c.onClick }}" style="position:relative;cursor:pointer;box-shadow:{{ c.ring }}">{{ c.code }}<span style="position:absolute;top:3px;right:3px;width:4px;height:4px;border-radius:999px;background:{{ c.dot }}"></span></button>
+                                    </div>
+                                  </sc-for>
+                                </div>
+                              </sc-for>
+                            </div>
+                            <div class="t-caption">Feriados: 12-10 Encuentro de Dos Mundos · 31-10 Día de las Iglesias Evangélicas y Protestantes.</div>
+                            <div class="pl-detail">
+                              <span class="{{ sel.badgeCls }}">{{ sel.badge }}</span>
+                              <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+                                <span class="t-label">{{ sel.title }}</span>
+                                <span class="t-caption">{{ sel.sub }}</span>
+                              </div>
+                              <button class="btn btn-secondary" onClick="{{ ab.openExc }}">Registrar excepción</button>
+                            </div>
+                            <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+                              <h2 class="t-subheading m0">PPC de octubre</h2>
+                              <div class="tbl-wrap">
+                                <div style="display:grid;grid-template-columns:140px minmax(0,1.4fr) minmax(0,1fr) minmax(0,1fr);gap:12px;padding:10px 16px;border-bottom:1px solid var(--ds-border);font:500 12px/16px var(--font-sans);color:var(--ds-fg-subtle)"><span>Fecha</span><span>Puesto</span><span>Titular</span><span>Motivo</span></div>
+                                <sc-for list="{{ ppcList }}" as="x">
+                                  <div style="display:grid;grid-template-columns:140px minmax(0,1.4fr) minmax(0,1fr) minmax(0,1fr);gap:12px;align-items:center;height:40px;padding:0 16px;border-bottom:1px solid var(--ds-border);font:400 14px/20px var(--font-sans)"><span class="t-numeric" style="font-weight:400">{{ x.fecha }}</span><span>{{ x.puesto }}</span><span>{{ x.tit }}</span><span><span class="badge b-danger">{{ x.m }}</span></span></div>
+                                </sc-for>
+                              </div>
+                            </div>
+                          </div>
+                        </sc-if>
+                        <sc-if value="{{ ab.loading }}">
+                          <div style="display:flex;flex-direction:column;gap:12px" aria-busy="true">
+                            <div style="display:flex;gap:12px"><div class="skel" style="height:36px;width:280px;border-radius:10px"></div><div class="skel" style="height:36px;width:160px;border-radius:10px"></div></div>
+                            <div class="card" style="padding:12px;display:flex;flex-direction:column;gap:10px">
+                              <div class="skel" style="height:28px"></div>
+                              <div class="skel" style="height:36px"></div>
+                              <div class="skel" style="height:36px"></div>
+                              <div class="skel" style="height:36px"></div>
+                              <div class="skel" style="height:36px"></div>
+                              <div class="skel" style="height:36px"></div>
+                              <div class="skel" style="height:36px"></div>
+                            </div>
+                            <div class="skel" style="height:64px;border-radius:16px"></div>
+                          </div>
+                        </sc-if>
+                        <sc-if value="{{ ab.empty }}">
+                          <div class="state-panel" style="padding:96px 24px"><span class="state-ic"><span class="ic i-calendar"></span></span><span class="t">Aún no hay series en esta instalación</span><span class="d">Pinta la serie de un puesto y se replicará sola cada mes según su ciclo.</span><button class="btn btn-primary">Pintar serie</button></div>
+                        </sc-if>
+                        <sc-if value="{{ ab.error }}">
+                          <div class="state-panel" style="padding:96px 24px"><span class="state-ic" style="color:var(--ds-danger-fg)"><span class="ic i-alert"></span></span><span class="t">No pudimos cargar la pauta</span><span class="d">Revisa tu conexión. Si el problema sigue, avísale a soporte con el código <span class="t-mono">OPS-5021</span>.</span><button class="btn btn-primary"><span class="ic sm i-refresh"></span>Reintentar</button></div>
+                        </sc-if>
+                        <sc-if value="{{ ab.forbidden }}">
+                          <div class="state-panel" style="padding:96px 24px"><span class="state-ic"><span class="ic i-lock"></span></span><span class="t">No tienes acceso a esta pauta</span><span class="d">Armar la pauta requiere el permiso «Editar pauta». Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA.</span><button class="btn btn-primary">Pedir acceso</button></div>
+                        </sc-if>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ ab.anySheet }}">
+                <div style="position:absolute;inset:0;z-index:10">
+                  <div class="scrim" onClick="{{ ab.close }}"></div>
+                  <div class="{{ ab.sheetCls }}" style="max-height:92%">
+                    <sc-if value="{{ ab.phone }}"><div class="grabber"></div></sc-if>
+                    <sc-if value="{{ ab.sSerie }}">
+                      <div style="display:flex;align-items:flex-start;gap:12px;padding:16px 8px 0 16px">
+                        <div style="flex:1;display:flex;flex-direction:column;gap:2px"><span class="t-subheading">Cambiar serie</span><span class="t-body-sm muted">{{ serieP.n }} · {{ serieP.t }} {{ serieP.h }}</span></div>
+                        <button class="icon-btn" aria-label="Cerrar" onClick="{{ ab.close }}"><span class="ic i-x"></span></button>
+                      </div>
+                      <div class="sheet-body" style="display:flex;flex-direction:column;gap:20px">
+                        <div class="field">
+                          <span class="lbl">Patrón</span>
+                          <div class="chip-row" style="flex-wrap:wrap">
+                            <sc-for list="{{ pats }}" as="pt"><button class="{{ pt.cls }}" onClick="{{ pt.onClick }}">{{ pt.k }}</button></sc-for>
+                          </div>
+                          <span class="hint">{{ patHint }}</span>
+                        </div>
+                        <div class="field">
+                          <span class="lbl">Turno</span>
+                          <div class="seg" style="align-self:flex-start">
+                            <sc-for list="{{ turnos }}" as="tu"><button class="{{ tu.cls }}" onClick="{{ tu.onClick }}">{{ tu.k }}</button></sc-for>
+                          </div>
+                        </div>
+                        <div class="field">
+                          <span class="lbl">Inicio del ciclo</span>
+                          <button class="input"><span class="ic i-calendar" style="color:var(--ds-fg-muted)"></span><span class="grow t-numeric">02-11-2026</span></button>
+                          <span class="hint">El ciclo cuenta desde este día.</span>
+                        </div>
+                        <div class="field">
+                          <span class="lbl">Vista previa · próximos 14 días</span>
+                          <div style="display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px">
+                            <sc-for list="{{ preview }}" as="pv">
+                              <div style="display:flex;flex-direction:column;gap:2px;align-items:stretch">
+                                <span class="t-caption t-numeric" style="text-align:center;font-weight:400">{{ pv.lbl }}</span>
+                                <span class="{{ pv.cls }}">{{ pv.code }}</span>
+                              </div>
+                            </sc-for>
+                          </div>
+                        </div>
+                        <div class="alerta" style="background:var(--ds-info-muted);color:var(--ds-info-fg)">
+                          <span class="ic sm i-info"></span>
+                          <div class="txt"><span class="tit">No modifica días pasados</span><span>Se aplica desde el 02-11-2026 y se replica sola cada mes según el ciclo. El cambio queda en el historial y a la persona se le avisa.</span></div>
+                        </div>
+                      </div>
+                      <div class="sheet-actions"><button class="btn btn-secondary" onClick="{{ ab.close }}">Cancelar</button><button class="btn btn-primary" onClick="{{ ab.close }}">Guardar serie</button></div>
+                    </sc-if>
+                    <sc-if value="{{ ab.sExc }}">
+                      <div style="display:flex;align-items:flex-start;gap:12px;padding:16px 8px 0 16px">
+                        <div style="flex:1;display:flex;flex-direction:column;gap:2px"><span class="t-subheading">Excepción del día</span><span class="t-body-sm muted t-numeric" style="font-weight:400">vie 30-10-2026 · Portería principal · Noche 20:00–08:00</span></div>
+                        <button class="icon-btn" aria-label="Cerrar" onClick="{{ ab.close }}"><span class="ic i-x"></span></button>
+                      </div>
+                      <div class="sheet-body" style="display:flex;flex-direction:column;gap:20px">
+                        <div style="display:flex;align-items:center;gap:12px">
+                          <span class="avatar lg">LM</span>
+                          <div style="display:flex;flex-direction:column"><span class="t-label">Luis Muñoz Vera</span><span class="t-mono muted">••.•••.567-8</span></div>
+                        </div>
+                        <div class="field">
+                          <span class="lbl">Tipo</span>
+                          <div class="radio-group">
+                            <sc-for list="{{ excTipos }}" as="et">
+                              <div class="radio-row"><button class="radio-hit" onClick="{{ et.onClick }}" aria-label="{{ et.k }}"><span class="{{ et.cls }}"></span></button><div class="txt"><label>{{ et.k }}</label><span class="t-caption">{{ et.d }}</span></div></div>
+                            </sc-for>
+                          </div>
+                        </div>
+                        <sc-if value="{{ excLicencia }}">
+                          <div class="field">
+                            <span class="lbl">Desde – hasta</span>
+                            <button class="input"><span class="ic i-calendar" style="color:var(--ds-fg-muted)"></span><span class="grow t-numeric">26-10-2026 – 31-10-2026</span></button>
+                          </div>
+                        </sc-if>
+                        <div class="field">
+                          <label>Nota</label>
+                          <textarea class="input" placeholder="Opcional" style="min-height:80px"></textarea>
+                        </div>
+                        <div class="alerta" style="background:var(--ds-warning-muted);color:var(--ds-warning-fg)">
+                          <span class="ic sm i-alert"></span>
+                          <div class="txt"><span class="tit">Quedará como PPC con motivo «{{ excTipo }}»</span><span>Hasta que alguien con permiso cargue un reemplazo en la pauta diaria. A Luis se le avisa el cambio.</span></div>
+                        </div>
+                      </div>
+                      <div class="sheet-actions"><button class="btn btn-secondary" onClick="{{ ab.close }}">Cancelar</button><button class="btn btn-primary" onClick="{{ ab.close }}">Guardar excepción</button></div>
+                    </sc-if>
+                    <sc-if value="{{ ab.sHist }}">
+                      <div style="display:flex;align-items:flex-start;gap:12px;padding:16px 8px 0 16px">
+                        <div style="flex:1;display:flex;flex-direction:column;gap:2px"><span class="t-subheading">Historial de cambios</span><span class="t-body-sm muted">Centro Logístico Quilicura · todo cambio en la pauta queda aquí</span></div>
+                        <button class="icon-btn" aria-label="Cerrar" onClick="{{ ab.close }}"><span class="ic i-x"></span></button>
+                      </div>
+                      <div class="sheet-body">
+                        <div class="tl">
+                          <sc-for list="{{ hist }}" as="h">
+                            <div class="tl-item">
+                              <span class="{{ h.dot }}">{{ h.ini }}</span>
+                              <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+                                <span class="t-label">{{ h.t }}</span>
+                                <span class="t-body-sm muted">{{ h.d }}</span>
+                                <span class="t-caption t-numeric">{{ h.when }}</span>
+                              </div>
+                            </div>
+                          </sc-for>
+                        </div>
+                      </div>
+                    </sc-if>
+                  </div>
+                </div>
+              </sc-if>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+  </sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const DOW=['dom','lun','mar','mié','jue','vie','sáb'];
+const DL=['D','L','M','M','J','V','S'];
+const FER={12:'Encuentro de Dos Mundos',31:'Día de las Iglesias Evangélicas y Protestantes'};
+const HOY=30;
+const P=[
+ {id:'p1',n:'Portería principal',t:'Día',h:'08:00–20:00',pat:'4x4',on:4,off:4,o:0,code:'D',tit:'Juan Pérez Soto',exc:{17:{m:'Ausencia sin aviso'}}},
+ {id:'p2',n:'Portería principal',t:'Noche',h:'20:00–08:00',pat:'4x4',on:4,off:4,o:4,code:'N',tit:'Luis Muñoz Vera',exc:{29:{m:'Licencia médica',rep:'Pedro Rojas Díaz'},30:{m:'Licencia médica'},31:{m:'Licencia médica'}}},
+ {id:'p3',n:'Ronda perímetro',t:'Día',h:'08:00–20:00',pat:'7x7',on:7,off:7,o:2,code:'D',tit:'Camila Herrera Lagos'},
+ {id:'p4',n:'Ronda perímetro',t:'Noche',h:'20:00–08:00',pat:'7x7',on:7,off:7,o:2,code:'N',tit:'Rodrigo Tapia Fuentes',exc:{13:{m:'Ausencia',rep:'Jorge Díaz Ortiz'}}},
+ {id:'p5',n:'Control de camiones',t:'Día',h:'08:00–18:00',pat:'5x2',on:5,off:2,o:3,code:'D',tit:'Marcela Vidal Núñez'},
+ {id:'p6',n:'Sala de monitoreo',t:'Día',h:'08:00–20:00',pat:'3x4',on:3,off:4,o:0,code:'D',tit:'Sin titular desde 20-10',vac:20}
+];
+const PATS=[['4x4',4,4],['7x7',7,7],['14x14',14,14],['5x2',5,2],['2x5',2,5],['3x4',3,4]];
+const dow=d=>(d+3)%7;
+const pad=n=>String(n).padStart(2,'0');
+const fecha=d=>`${DOW[dow(d)]} ${pad(d)}-10-2026`;
+function cell(p,d){const i=d-1;if((i+p.o)%(p.on+p.off)>=p.on)return{st:'libre'};let e=p.exc&&p.exc[d];if(p.vac&&d>=p.vac)e={m:'Sin titular'};if(e&&e.rep)return{st:'rep',m:e.m,rep:e.rep};if(e)return{st:'ppc',m:e.m};return{st:'ok'};}
+function badge(c){return c.st==='ok'?['badge b-success','Cubierto']:c.st==='ppc'?['badge b-danger','PPC · '+c.m]:c.st==='rep'?['badge b-info','Reemplazado']:['badge b-neutral','Libre'];}
+const DIMS={phone:[375,812],tablet:[1024,768],desktop:[1280,800]};
+const B=(id,dev,theme,state,sheet)=>({id,dev,theme,state:state||'ok',sheet:sheet||null});
+const ROWS=[
+ {t:'Claro',b:[B('c1','phone','light'),B('c2','tablet','light'),B('c3','desktop','light')]},
+ {t:'Oscuro',b:[B('d1','phone','dark'),B('d2','tablet','dark'),B('d3','desktop','dark')]},
+ {t:'Hojas',b:[B('h1','desktop','light','ok','serie'),B('h2','phone','light','ok','serie'),B('h3','tablet','light','ok','exc'),B('h4','desktop','dark','ok','hist'),B('h5','phone','dark','ok','exc')]},
+ {t:'Estados · 375 claro',b:['loading','empty','error','forbidden'].map((s,i)=>B('sp'+i,'phone','light',s))},
+ {t:'Estados · 1280 oscuro',b:['loading','empty','error','forbidden'].map((s,i)=>B('sd'+i,'desktop','dark',s))}
+];
+const SNAME={ok:'',loading:' · cargando',empty:' · vacío',error:' · error',forbidden:' · sin permisos'};
+const SHNAME={serie:' · hoja Cambiar serie',exc:' · hoja Excepción del día',hist:' · hoja Historial'};
+const HIST=[
+ {dot:'tl-dot person',ini:'ML',t:'Marcos Leiva cargó un reemplazo',d:'Pedro Rojas Díaz cubre Portería principal · Noche el 29-10-2026. Quedó como turno extra por aprobar.',when:'29-10-2026 17:42'},
+ {dot:'tl-dot person',ini:'ML',t:'Marcos Leiva registró una licencia médica',d:'Luis Muñoz Vera · del 26-10-2026 al 31-10-2026. Sus turnos quedaron como PPC.',when:'26-10-2026 09:15'},
+ {dot:'tl-dot agent',ini:'OP',t:'Sala de monitoreo quedó sin titular',d:'Andrés Soto Pinto dejó el puesto. Los turnos desde el 20-10-2026 son PPC con motivo «Sin titular».',when:'20-10-2026 08:00'},
+ {dot:'tl-dot person',ini:'DP',t:'Daniela Paz cambió la serie de Control de camiones',d:'De 4x4 a 5x2 desde el 05-10-2026. Los días anteriores no cambiaron.',when:'02-10-2026 11:30'},
+ {dot:'tl-dot agent',ini:'OP',t:'La pauta de octubre se replicó sola',d:'6 puestos según el ciclo de cada serie.',when:'01-10-2026 00:00'}
+];
+class Component extends DCLogic {
+  state={open:{},sel:{p:'p2',d:30},serieP:'p2',pat:'4x4',turno:'Noche',exc:'Licencia médica'};
+  open(id,k,extra){this.setState(s=>({...extra,open:{...s.open,[id]:k}}));}
+  renderVals(){
+    const S=this.state;
+    let total=0,cov=0;const ppcList=[];
+    const gridBase=P.map(p=>({p,cells:Array.from({length:31},(_,i)=>{const d=i+1,c=cell(p,d);
+      if(c.st!=='libre'){total++;if(c.st!=='ppc')cov++;else ppcList.push({fecha:fecha(d),puesto:p.n+' · '+p.t,tit:p.vac&&d>=p.vac?'—':p.tit,m:c.m});}
+      const sel=S.sel.p===p.id&&S.sel.d===d;
+      const st=c.st==='ok'?'Cubierto':c.st==='ppc'?'PPC · '+c.m:c.st==='rep'?'Reemplazado por '+c.rep+' ('+c.m+')':'Libre';
+      return{code:c.st==='libre'?'L':c.st==='ppc'?'X':p.code,cls:'shift cell sh-'+(c.st==='libre'?'L':c.st==='ppc'?'X':p.code)+(d===HOY?' today':''),dot:c.st==='rep'?'currentColor':'transparent',bg:FER[d]?'var(--ds-fill)':'var(--ds-surface)',ring:sel?'0 0 0 2px var(--ds-fg)':'none',title:fecha(d)+' · '+p.n+' '+p.t+' · '+st,onClick:()=>this.setState({sel:{p:p.id,d}})};
+    })}));
+    const days=Array.from({length:31},(_,i)=>{const d=i+1;return{n:d,w:DL[dow(d)],color:d===HOY?'var(--ds-accent)':'var(--ds-fg-subtle)',bg:FER[d]?'var(--ds-fill)':'var(--ds-surface)',title:FER[d]?'Feriado · '+FER[d]:fecha(d)};});
+    const sp=P.find(p=>p.id===S.sel.p),sc=cell(sp,S.sel.d),[sbc,sbt]=badge(sc);
+    const sel={badgeCls:sbc,badge:sbt,title:fecha(S.sel.d)+' · '+sp.n+' · '+sp.t+' '+sp.h,sub:sc.st==='rep'?'Reemplaza '+sc.rep+' · titular '+sp.tit:sc.st==='ppc'?'Sin cubrir · '+sc.m+(FER[S.sel.d]?' · feriado':''):(sp.tit+(FER[S.sel.d]?' · feriado':''))};
+    const groups=[30,31].map(d=>{const items=[];let lib=0;P.forEach(p=>{const c=cell(p,d);if(c.st==='libre'){lib++;return;}const[bc,bt]=badge(c);items.push({n:p.n+' · '+p.t,h:p.h,pat:p.pat,person:c.st==='rep'?c.rep:p.vac&&d>=p.vac?'Sin titular':p.tit,badgeCls:bc,badge:c.st==='ppc'?'PPC · '+c.m:bt,pid:p.id,d});});return{t:d===HOY?'Hoy · '+fecha(d):fecha(d)+' · feriado',libres:lib?lib+(lib===1?' puesto libre':' puestos libres'):'',items};});
+    const rows=ROWS.map(r=>({t:r.t,b:r.b.map(b=>{
+      const sh=b.id in S.open?S.open[b.id]:b.sheet;const ok=b.state==='ok';
+      return{...b,w:DIMS[b.dev][0],h:DIMS[b.dev][1],label:DIMS[b.dev][0]+' · '+(b.theme==='dark'?'oscuro':'claro')+SNAME[b.state]+(b.sheet?SHNAME[b.sheet]:''),
+        phone:b.dev==='phone',tablet:b.dev==='tablet',desktop:b.dev==='desktop',big:b.dev!=='phone',
+        ok,loading:b.state==='loading',empty:b.state==='empty',error:b.state==='error',forbidden:b.state==='forbidden',
+        anySheet:!!sh,sSerie:sh==='serie',sExc:sh==='exc',sHist:sh==='hist',sheetCls:b.dev==='phone'?'sheet':'sheet side',
+        close:()=>this.open(b.id,false),openSerie:()=>this.open(b.id,'serie'),openHist:()=>this.open(b.id,'hist'),openExc:()=>this.open(b.id,'exc'),
+        grid:ok&&b.dev!=='phone'?gridBase.map(g=>({n:g.p.n,t:g.p.t,pat:g.p.pat,tit:g.p.tit,cells:g.cells,onOpen:()=>this.open(b.id,'serie',{serieP:g.p.id,pat:g.p.pat,turno:g.p.t})})):[],
+        groups:ok&&b.dev==='phone'?groups.map(g=>({...g,items:g.items.map(it=>({...it,onTap:()=>this.open(b.id,'exc',{sel:{p:it.pid,d:it.d}})}))})):[]};
+    })}));
+    const serieP=P.find(p=>p.id===S.serieP);
+    const pd=PATS.find(x=>x[0]===S.pat);const code=S.turno==='Noche'?'N':'D';
+    const preview=Array.from({length:14},(_,i)=>{const w=(1+i)%7;const work=i%(pd[1]+pd[2])<pd[1];return{lbl:DL[w]+' '+(2+i),code:work?code:'L',cls:'shift cell sh-'+(work?code:'L')};});
+    return{rows,days,sel,ppcList,ppcCount:ppcList.length,puestosCount:P.length,cobertura:(cov/total*100).toFixed(1).replace('.',',')+' %',
+      serieP,patHint:pd[1]+' días de turno y '+pd[2]+' libres.',
+      pats:PATS.map(x=>({k:x[0],cls:'chip toggle'+(x[0]===S.pat?' on':''),onClick:()=>this.setState({pat:x[0]})})),
+      turnos:['Día','Noche'].map(k=>({k,cls:k===S.turno?'on':'',onClick:()=>this.setState({turno:k})})),
+      preview,
+      excTipos:[{k:'Ausencia',d:'Un día, con o sin aviso'},{k:'Licencia médica',d:'Uno o más días con fecha de término'}].map(x=>({...x,cls:'radio'+(x.k===S.exc?' on':''),onClick:()=>this.setState({exc:x.k})})),
+      excTipo:S.exc,excLicencia:S.exc==='Licencia médica',hist:HIST};
+  }
+}
+</script>
+</body>
+</html>

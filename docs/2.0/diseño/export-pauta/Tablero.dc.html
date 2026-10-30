@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<div style="position:absolute;inset:0">
+<sc-if value="{{ on }}"><dc-import name="Pauta" cfg="{{ cfg }}" style="position:absolute;inset:0" hint-size="100%,100%"></dc-import></sc-if>
+<sc-if value="{{ off }}"><button onClick="{{ show }}" style="all:unset;cursor:pointer;position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font:500 13px/18px var(--font-sans);color:var(--ds-fg-subtle)">Cargando artboard…</button></sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;cfg&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;object&quot;},&quot;delay&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:0,&quot;tsType&quot;:&quot;number&quot;}}">
+class Component extends DCLogic {
+  state={on:false};
+  componentDidMount(){this.t=setTimeout(()=>this.setState({on:true}),this.props.delay||0);}
+  componentWillUnmount(){clearTimeout(this.t);}
+  shouldComponentUpdate(np,ns){return ns.on!==this.state.on||np.cfg!==this.props.cfg;}
+  renderVals(){return{on:this.state.on,off:!this.state.on,cfg:this.props.cfg,show:()=>this.setState({on:true})};}
+}
+</script>
+</body>
+</html>
