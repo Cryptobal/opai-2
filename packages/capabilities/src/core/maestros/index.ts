@@ -41,6 +41,11 @@ import {
   personasDesbloquear,
   personasVincularUsuario,
 } from "./personas-estado";
+import {
+  personasMarcarNoRecontratar,
+  personasNoRecontratarVer,
+  personasQuitarNoRecontratar,
+} from "./personas-no-recontratar";
 import { puestosCreate, puestosUpdate } from "./puestos-escritura";
 import { puestosSetEstado } from "./puestos-estado";
 import { puestosGet, puestosList } from "./puestos";
@@ -89,6 +94,9 @@ export const capacidadesMaestros: readonly Capacidad[] = [
   personasDesbloquear,
   personasArchive,
   personasVincularUsuario,
+  personasNoRecontratarVer,
+  personasMarcarNoRecontratar,
+  personasQuitarNoRecontratar,
   vinculosPrevisualizar,
   vinculosList,
   vinculosCreate,
