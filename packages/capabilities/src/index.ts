@@ -1,5 +1,6 @@
 export { capacidadesDelNucleo, consumidoresDelNucleo, trabajosDelNucleo } from "./core";
 export { ajustesComercial, capacidadesComercial } from "./comercial";
+export { ajustesRondas, capacidadesRondas } from "./rondas";
 export { ajuste, defineAjustes, type CampoAjuste, type MetaAjuste } from "./core/config";
 export {
   cifradoDeCampos,
