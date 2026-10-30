@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-accent)}</style>
+</helmet>
+<div data-theme="{{ theme }}" data-device="{{ device }}" style="position:relative;width:100%;height:100%;overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" rail-footer="{{ railFooter }}" active="{{ navActive }}" title="Configuración" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<div style="max-width:760px;display:flex;flex-direction:column;gap:16px">
+<sc-if value="{{ forbidden }}" hint-placeholder-val="{{ false }}">
+<div style="padding:48px 0">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No puedes cambiar los ajustes de Personas" description="Solo quien administra la empresa entra aquí. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" hint-size="100%,280px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ isModulos }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:4px">
+<h1 class="t-title" style="margin:0">Módulos</h1>
+<span style="font:400 14px/20px var(--font-sans);color:var(--ds-fg-muted)">Los módulos de núcleo siempre están activos.</span>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" padding="{{ 0 }}" hint-size="100%,240px">
+<div style="display:flex;gap:8px;align-items:center;padding:16px 16px 8px"><span class="t-subheading">Núcleo</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" hint-size="64px,22px">Ya está</x-import></div>
+<sc-for list="{{ nucleo }}" as="m" hint-placeholder-count="3">
+<div onClick="{{ m.open }}" style="display:flex;gap:12px;align-items:center;padding:12px 16px;border-top:1px solid var(--ds-border);min-height:56px;box-sizing:border-box;cursor:{{ m.cursor }}" style-hover="background:var(--ds-fill)">
+<span style="color:var(--ds-fg-muted);display:flex"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Icon" name="{{ m.icon }}" hint-size="20px,20px"></x-import></span>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column">
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span style="font:500 14px/20px var(--font-sans);color:var(--ds-fg)">{{ m.l }}</span><sc-if value="{{ m.nuevo }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="info" hint-size="60px,22px">Nuevo</x-import></sc-if></div>
+<span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">{{ m.d }}</span>
+</div>
+<sc-if value="{{ m.nuevo }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Icon" name="chevron-right" size="sm" hint-size="16px,16px"></x-import></sc-if>
+</div>
+</sc-for>
+</x-import>
+</sc-if>
+<sc-if value="{{ isPersonas }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:4px">
+<div style="margin-left:-12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="chevron-left" on-click="{{ toModulos }}" hint-size="190px,44px">Configuración › Módulos</x-import>
+</div>
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+<h1 class="t-title" style="margin:0">Personas</h1>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" dot="{{ false }}" hint-size="60px,22px">Núcleo</x-import>
+</div>
+<span style="font:400 14px/20px var(--font-sans);color:var(--ds-fg-muted)">Ajustes del módulo. Lo que ya existe en otra pantalla se abre desde Accesos directos.</span>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ tabItems }}" value="{{ tab }}" on-change="{{ setTab }}" hint-size="100%,44px"></x-import>
+<sc-if value="{{ loading }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="100%" height="{{ 320 }}" radius="{{ 16 }}" hint-size="100%,320px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="100%" height="{{ 160 }}" radius="{{ 16 }}" hint-size="100%,160px"></x-import>
+</sc-if>
+<sc-if value="{{ error }}" hint-placeholder-val="{{ false }}">
+<div style="padding:32px 0">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar los ajustes" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="CFG-PER-500" on-retry="{{ noop }}" hint-size="100%,240px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ tAjustes }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,480px">
+<div style="display:flex;flex-direction:column">
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;min-height:32px"><span class="t-subheading">Campos obligatorios al crear una persona</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="info" hint-size="60px,22px">Nuevo</x-import></div>
+<span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted);margin-bottom:8px">Los que exige la ley o el sistema no se pueden quitar.</span>
+<sc-for list="{{ fijos }}" as="f" hint-placeholder-count="5">
+<div style="display:flex;gap:12px;align-items:center;min-height:44px;border-top:1px solid var(--ds-border)">
+<span style="display:flex;width:44px;justify-content:center;color:var(--ds-fg-muted);flex:none"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Icon" name="lock" size="sm" label="Bloqueado" hint-size="16px,16px"></x-import></span>
+<span style="flex:1;min-width:0;font:400 14px/20px var(--font-sans);color:var(--ds-fg)">{{ f.l }}</span>
+<span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-muted);text-align:right">Exigido por ley/sistema</span>
+</div>
+</sc-for>
+<sc-for list="{{ opcionales }}" as="f" hint-placeholder-count="8">
+<div style="border-top:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" label="{{ f.l }}" checked="{{ f.on }}" on-change="{{ f.toggle }}" hint-size="100%,44px"></x-import>
+</div>
+</sc-for>
+</div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,220px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;min-height:32px"><span class="t-subheading">Días de aviso de vencimientos</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="info" hint-size="60px,22px">Nuevo</x-import></div>
+<div style="max-width:240px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Contrato a plazo fijo" value="30" trailing="días antes" input-mode="numeric" hint-size="100%,70px"></x-import>
+</div>
+<div style="display:flex;flex-direction:column;gap:2px;padding-top:12px;border-top:1px solid var(--ds-border)">
+<span style="font:500 14px/20px var(--font-sans);color:var(--ds-fg)">OS-10</span>
+<span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Usa los días de alerta de su tipo de documento: 30 días antes.</span>
+<div style="margin-left:-4px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Enlace" href="#" hint-size="260px,44px">Cambiar en Configuración › Documentos</x-import></div>
+</div>
+</div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,200px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;min-height:32px"><span class="t-subheading">Validación bancaria</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="info" hint-size="60px,22px">Nuevo</x-import></div>
+<span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Quién aprueba los cambios de cuenta hechos desde el Portal o el ERP. Mientras tanto sigue vigente la cuenta anterior.</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RadioGroup" etiqueta="Quién valida" valor="{{ valida }}" on-cambiar="{{ setValida }}" opciones="{{ validaOpts }}" hint-size="100%,120px"></x-import>
+</div>
+</x-import>
+<div style="display:flex;justify-content:flex-end">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" hint-size="160px,40px">Guardar cambios</x-import>
+</div>
+</sc-if>
+<sc-if value="{{ tCatalogos }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;justify-content:space-between">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ catOpts }}" value="{{ cat }}" on-change="{{ setCat }}" label="Catálogo" hint-size="300px,40px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="plus" hint-size="110px,40px">Agregar</x-import>
+</div>
+<sc-if value="{{ catEmpty }}">
+<div style="padding:32px 0">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="grid" title="Aún no hay tallas" description="Agrega las tallas que entregas para que aparezcan en la ficha." hint-size="100%,220px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ catHas }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" padding="{{ 0 }}" hint-size="100%,320px">
+<sc-for list="{{ catRows }}" as="c" hint-placeholder-count="6">
+<div style="display:flex;gap:12px;align-items:center;padding:4px 16px;border-bottom:1px solid var(--ds-border)">
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;padding:6px 0">
+<span style="font:500 14px/20px var(--font-sans);color:var(--ds-fg)">{{ c.l }}</span>
+<span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-muted)">{{ c.m }}</span>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" label="{{ c.aria }}" checked="{{ c.on }}" hint-size="48px,44px"></x-import>
+</div>
+</sc-for>
+</x-import>
+<span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-muted)">Desactivar no borra el dato de quien ya lo tiene; solo deja de ofrecerse.</span>
+</sc-if>
+</sc-if>
+<sc-if value="{{ tAccesos }}" hint-placeholder-val="{{ false }}">
+<sc-for list="{{ accesos }}" as="a" hint-placeholder-count="3">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,140px">
+<div style="display:flex;flex-direction:column;gap:4px">
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;min-height:32px"><span class="t-subheading">{{ a.t }}</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" hint-size="64px,22px">Ya está</x-import></div>
+<span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">{{ a.d }}</span>
+<div style="margin-left:-4px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Enlace" href="#" hint-size="260px,44px">{{ a.link }}</x-import></div>
+</div>
+</x-import>
+</sc-for>
+</sc-if>
+</sc-if>
+</div>
+</x-import>
+</x-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;vista&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;personas&quot;,&quot;modulos&quot;],&quot;default&quot;:&quot;personas&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;tab&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ajustes&quot;,&quot;catalogos&quot;,&quot;accesos&quot;],&quot;default&quot;:&quot;ajustes&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ok&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;ok&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = {};
+  renderVals() {
+    const p = this.props, s = this.state;
+    const device = p.device ?? "desktop";
+    const isPhone = device === "phone";
+    const estado = p.estado ?? "ok";
+    const vista = s.vista ?? p.vista ?? "personas";
+    const tab = s.tab ?? p.tab ?? "ajustes";
+    const forbidden = estado === "sinpermiso";
+    const ok = estado === "ok" || estado === "vacio";
+    const req = s.req ?? { tel: true, nac: true, nacio: false, dir: false, prev: false, banco: false, tallas: false, emerg: true };
+    const opc = [["tel", "Teléfono"], ["nac", "Fecha de nacimiento"], ["nacio", "Nacionalidad"], ["dir", "Dirección"], ["prev", "AFP y salud"], ["banco", "Cuenta bancaria"], ["tallas", "Tallas de uniforme"], ["emerg", "Contacto de emergencia"]];
+    return {
+      ...this.extraVals(vista, tab, estado, isPhone),
+      device, theme: p.theme ?? "light", isPhone,
+      navActive: isPhone ? "mas" : "cfg",
+      forbidden, isModulos: !forbidden && vista === "modulos", isPersonas: !forbidden && vista === "personas",
+      toModulos: () => this.setState({ vista: "modulos" }),
+      tab, setTab: (t) => this.setState({ tab: t }),
+      tabItems: [{ id: "ajustes", label: "Ajustes" }, { id: "catalogos", label: "Catálogos" }, { id: "accesos", label: "Accesos directos" }],
+      loading: estado === "cargando", error: estado === "error",
+      tAjustes: ok && tab === "ajustes",
+      fijos: [{ l: "Nombre completo" }, { l: "RUT" }, { l: "Correo personal" }, { l: "Instalación (en el vínculo)" }, { l: "Jornada (en el vínculo)" }],
+      opcionales: opc.map(([k, l]) => ({ l, on: !!req[k], toggle: () => this.setState({ req: { ...req, [k]: !req[k] } }) })),
+      valida: s.valida ?? "rrhh", setValida: (v) => this.setState({ valida: v }),
+      validaOpts: [{ valor: "rrhh", etiqueta: "RRHH", descripcion: "Por defecto. Aprueba o rechaza con motivo." }, { valor: "admin", etiqueta: "Administrador", descripcion: "Solo quien administra la empresa." }],
+      noop: () => {},
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "per", label: "Personas", icon: "users" }, { id: "pau", label: "Pauta", icon: "calendar" }, { id: "tic", label: "Tickets", icon: "ticket" }, isPhone ? { id: "mas", label: "Más", icon: "more" } : { id: "mae", label: "Maestros", icon: "briefcase" }],
+      railFooter: [{ id: "cfg", label: "Ajustes", icon: "grid" }],
+      groups: [
+        { items: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "ban", label: "Bandeja", icon: "inbox", count: 5 }] },
+        { title: "Operaciones", items: [{ id: "ins", label: "Instalaciones", icon: "building" }, { id: "pau", label: "Pauta mensual", icon: "calendar" }, { id: "tic", label: "Tickets", icon: "ticket" }] },
+        { title: "Personas", items: [{ id: "per", label: "Personas", icon: "users", count: 42 }] },
+        { title: "Maestros", items: [{ id: "car", label: "Cargos", icon: "briefcase" }] },
+        { title: "Empresa", items: [{ id: "cfg", label: "Configuración", icon: "grid" }] },
+      ],
+    };
+  }
+  extraVals(vista, tab, estado) {
+    const ok = estado === "ok" || estado === "vacio";
+    const cat = this.state.cat ?? (estado === "vacio" ? "tallas" : "afp");
+    const C = {
+      afp: [["Capital", 41], ["Cuprum", 18], ["Habitat", 66], ["Modelo", 102], ["PlanVital", 37], ["ProVida", 55], ["Uno", 12]],
+      isapres: [["Banmédica", 9], ["Colmena", 14], ["Consalud", 21], ["Cruz Blanca", 11], ["Nueva Masvida", 6], ["Vida Tres", 3]],
+      bancos: [["BancoEstado", 188], ["Banco de Chile", 41], ["Santander", 33], ["BCI", 27], ["Scotiabank", 9], ["Itaú", 4]],
+      tallas: estado === "vacio" ? [] : [["Camisa · S a XXL", 271], ["Pantalón · 38 a 54", 271], ["Chaqueta · S a XXL", 240], ["Calzado · 35 a 46", 271]],
+    };
+    const rows = C[cat] || [];
+    return {
+      tCatalogos: ok && tab === "catalogos", tAccesos: ok && tab === "accesos",
+      cat, setCat: (v) => this.setState({ cat: v }),
+      catOpts: [{ value: "afp", label: "AFP" }, { value: "isapres", label: "Isapres" }, { value: "bancos", label: "Bancos" }, { value: "tallas", label: "Tallas" }],
+      catRows: rows.map(([l, n]) => ({ l, m: "En uso por " + n + " personas", on: true, aria: "Ofrecer " + l })),
+      catEmpty: rows.length === 0, catHas: rows.length > 0,
+      accesos: [
+        { t: "Documentos de la persona", d: "Se editan en la capa «persona»: tipo, obligatorio, vence, días de alerta (30 por defecto) y si se ve en el Portal.", link: "Abrir Configuración › Documentos" },
+        { t: "Retención de datos de personas", d: "Plazos de conservación y borrado según la Ley 21.719.", link: "Abrir Cumplimiento › Retención" },
+        { t: "Roles y permisos de Personas", d: "Quién ve y edita fichas, previsión, banco y sueldos.", link: "Abrir Usuarios › Roles" },
+      ],
+      nucleo: [
+        { l: "Personas", icon: "users", nuevo: true, d: "Campos obligatorios, avisos, validación bancaria y catálogos.", cursor: "pointer", open: () => this.setState({ vista: "personas" }) },
+        { l: "Instalaciones", icon: "building", d: "Sin ajustes propios.", cursor: "default", open: () => {} },
+        { l: "Cuentas", icon: "landmark", d: "Sin ajustes propios.", cursor: "default", open: () => {} },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

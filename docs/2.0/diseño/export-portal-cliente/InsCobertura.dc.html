@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="portal-cliente.js"></script>
+</helmet>
+<div style="display:flex;flex-direction:column;gap:24px">
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<div aria-busy="true" aria-label="Cargando marcaciones" style="display:flex;flex-direction:column;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="200px" height="{{ 20 }}" hint-size="200px,20px"></x-import>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);overflow:hidden">
+<sc-for list="{{ skel }}" as="k" hint-placeholder-count="5">
+<div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="40px" height="40px" circle="{{ true }}" hint-size="40px,40px"></x-import>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="45%" hint-size="45%,14px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="30%" height="{{ 12 }}" hint-size="30%,12px"></x-import></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="80px" height="{{ 22 }}" radius="{{ 999 }}" hint-size="80px,22px"></x-import>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="user-check" title="Aún no hay marcaciones" description="Las entradas y salidas aparecen aquí desde el primer turno del servicio." action="{{ emptyAction }}" hint-size="100%,340px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar las marcaciones" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="PC-MAR-503" hint-size="100%,340px"></x-import>
+</sc-if>
+<sc-if value="{{ isOk }}" hint-placeholder-val="{{ true }}">
+<section style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap"><h2 class="t-subheading m0">Guardias asignados</h2><span class="t-caption t-numeric">6 asignados · 2 en turno ahora</span></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ gCols }}" rows="{{ guards }}" cards="{{ isPhone }}" to-card="{{ gCard }}" style="{{ bleed }}" hint-size="100%,300px"></x-import>
+</section>
+<section style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap"><h2 class="t-subheading m0">Cobertura del mes</h2><span class="t-caption t-numeric">Octubre 2026 · 296 de 300 turnos cubiertos</span></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cCols }}" rows="{{ cob }}" cards="{{ isPhone }}" to-card="{{ cCard }}" style="{{ bleed }}" hint-size="100%,240px"></x-import>
+</section>
+<section style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:8px;flex-wrap:wrap"><h2 class="t-subheading m0">Marcaciones</h2><span class="t-caption">En cada marcación: programada en gris, real al lado</span></div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:8px;max-width:560px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DateInput" value="29-10-2026" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" value="todos" options="{{ gOpts }}" hint-size="100%,44px"></x-import>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<sc-for list="{{ estados }}" as="e" hint-placeholder-count="4"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="{{ e.l }}" contador="{{ e.n }}" activo="{{ e.on }}" hint-size="110px,32px"></x-import></sc-for>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ mCols }}" rows="{{ marcas }}" cards="{{ isPhone }}" to-card="{{ mCard }}" style="{{ bleed }}" hint-size="100%,360px"></x-import>
+<span class="t-caption">Solo se muestran nombre, foto y RUT. No se guardan ni muestran coordenadas del marcaje.</span>
+</section>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  componentDidMount() { if (!window.PC) { const t = setInterval(() => { if (window.PC) { clearInterval(t); this.forceUpdate(); } }, 50); } }
+  renderVals() {
+    const P = window.PC || {}; const h = React.createElement, NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const B = (tone, l) => NS.Badge ? h(NS.Badge, { tone }, l) : l;
+    const device = this.props.device ?? "desktop", estado = this.props.estado ?? "ok";
+    const isPhone = device === "phone", narrow = device === "tablet";
+    const foto = (g, s) => NS.Avatar ? h(NS.Avatar, { initials: NS.Icon ? h(NS.Icon, { name: "camera", size: "sm" }) : g.ini, size: s || 40, label: "Foto de " + (g.name || g.guardia) }) : null;
+    const cam = NS.Icon ? h(NS.Icon, { name: "camera", size: "sm" }) : "·";
+    const col = (a, b) => h("span", { style: { display: "flex", flexDirection: "column" } }, a, h("span", { className: "t-caption", style: { fontWeight: 400 } }, b));
+    const who = (g) => h("span", { style: { display: "flex", alignItems: "center", gap: 10 } }, foto(g, 32), g.name || g.guardia);
+    const gCols = narrow
+      ? [{ key: "name", label: "Guardia", strong: true, render: (g) => h("span", { style: { display: "flex", alignItems: "center", gap: 10 } }, foto(g, 32), col(g.name, g.puesto)) }, { key: "rut", label: "RUT", mono: true }, { key: "t", label: "Ahora", render: (g) => g.turno ? B("success", "En turno") : null }]
+      : [{ key: "name", label: "Guardia", strong: true, render: who }, { key: "rut", label: "RUT", mono: true }, { key: "puesto", label: "Puesto", muted: true }, { key: "t", label: "Ahora", render: (g) => g.turno ? B("success", "En turno") : null }];
+    const cob = [
+      { id: 1, puesto: "Portería 1 · Día", hor: "08:00–20:00", prog: 75, cub: 75, pct: "100 %", tone: "success" },
+      { id: 2, puesto: "Portería 1 · Noche", hor: "20:00–08:00", prog: 75, cub: 74, pct: "98,7 %", tone: "success" },
+      { id: 3, puesto: "Patio · Día", hor: "08:00–20:00", prog: 75, cub: 75, pct: "100 %", tone: "success" },
+      { id: 4, puesto: "Patio · Noche", hor: "20:00–08:00", prog: 75, cub: 72, pct: "96 %", tone: "warning" },
+    ];
+    const num = (t) => h("span", { className: "t-numeric" }, t);
+    const pr = (p, r) => h("span", { className: "t-numeric", style: { display: "inline-flex", gap: 6, alignItems: "baseline" } }, h("span", { className: "subtle" }, p), h("span", { style: { fontWeight: 500 } }, r));
+    const mCols = narrow
+      ? [{ key: "g", label: "Guardia", render: (r) => h("span", { style: { display: "flex", alignItems: "center", gap: 10 } }, foto(r, 32), col(h("span", { style: { fontWeight: 500 } }, r.guardia), r.puesto)) },
+        { key: "e", label: "Entrada", render: (r) => pr(r.pe, r.re) }, { key: "s", label: "Salida", render: (r) => pr(r.ps, r.rs) },
+        { key: "st", label: "Estado", render: (r) => B(r.tone, r.estado) }]
+      : [{ key: "g", label: "Guardia", render: (r) => h("span", { style: { display: "flex", alignItems: "center", gap: 10 } }, foto(r, 32), col(h("span", { style: { fontWeight: 500 } }, r.guardia), h("span", { className: "t-mono" }, r.rut))) },
+        { key: "p", label: "Puesto", render: (r) => col(h("span", { className: "muted" }, r.puesto), r.dia) },
+        { key: "e", label: "Entrada", render: (r) => pr(r.pe, r.re) }, { key: "s", label: "Salida", render: (r) => pr(r.ps, r.rs) },
+        { key: "st", label: "Estado", render: (r) => r.nota ? col(B(r.tone, r.estado), r.nota) : B(r.tone, r.estado) }];
+    const all = P.MARCACIONES || [];
+    return {
+      isPhone, isOk: estado === "ok", isLoading: estado === "cargando", isEmpty: estado === "vacio", isError: estado === "error",
+      bleed: isPhone ? { margin: "0 -16px" } : undefined,
+      guards: P.GUARDIAS || [], gCols, gCard: (g) => ({ title: g.name, subtitle: g.puesto, meta: g.rut, badge: g.turno ? { tone: "success", label: "En turno" } : null, initials: cam }),
+      cCols: [{ key: "puesto", label: "Puesto", strong: true, render: (r) => narrow ? col(r.puesto, r.hor) : r.puesto }, ...(narrow ? [] : [{ key: "hor", label: "Horario", muted: true }]), { key: "cub", label: "Cubiertos", align: "right", render: (r) => num(r.cub + " de " + r.prog) }, { key: "pct", label: "Cobertura", align: "right", render: (r) => B(r.tone, r.pct) }],
+      cob, cCard: (r) => ({ title: r.puesto, subtitle: r.hor + " · " + r.cub + " de " + r.prog + " turnos", badge: { tone: r.tone, label: r.pct } }),
+      gOpts: [{ value: "todos", label: "Todos los guardias" }, ...(P.GUARDIAS || []).map((g) => ({ value: String(g.id), label: g.name }))],
+      estados: [{ l: "A tiempo", n: 3, on: false }, { l: "Atraso", n: 1, on: false }, { l: "Ausente", n: 1, on: false }, { l: "Reemplazo", n: 1, on: false }],
+      marcas: all, mCols,
+      mCard: (r) => ({ initials: cam, title: r.guardia, subtitle: r.puesto + " · entrada " + r.pe + " → " + r.re + " · salida " + r.ps + " → " + r.rs + (r.nota ? " · " + r.nota : ""), meta: r.rut, badge: { tone: r.tone, label: r.estado } }),
+      emptyAction: NS.Button ? h(NS.Button, { variant: "secondary", size: "lg" }, "Ver resumen del mes") : null,
+      skel: [1, 2, 3, 4, 5],
+    };
+  }
+}
+</script>
+</body>
+</html>

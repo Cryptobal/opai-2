@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<title>Hoja de componentes · Portal Cliente</title>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0;background:#e7e7ea}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<div class="ds" data-theme="light" style="display:flex;flex-direction:column;gap:32px;padding:48px;width:max-content;background:var(--ds-n-200)">
+<header style="display:flex;flex-direction:column;gap:8px;max-width:960px">
+<a href="00 Índice.dc.html" class="t-label-sm" style="text-decoration:none">← Índice · Portal Cliente</a>
+<h1 class="t-display m0">Hoja de componentes</h1>
+<span class="badge b-info nodot" style="align-self:flex-start">v2 · 30-10-2026</span>
+<span class="t-body muted">Todo lo que usan las pantallas del Portal Cliente, con variantes y estados, en claro y oscuro. Las piezas marcadas «Nuevo para el DS» son propuestas; el resto ya existe en DS 2.0.</span>
+</header>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+<div class="ds" data-theme="{{ th.id }}" style="width:900px;display:flex;flex-direction:column;gap:24px;padding:32px;background:var(--ds-bg);border-radius:var(--radius-lg);color:var(--ds-fg)">
+<h2 class="t-title m0">{{ th.label }}</h2>
+
+<section style="display:flex;flex-direction:column;gap:12px">
+<span class="t-overline">Button · primary, secondary, ghost, destructive</span>
+<div style="display:grid;grid-template-columns:110px repeat(4,minmax(0,1fr));gap:12px;align-items:center">
+<span class="t-caption">Reposo</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="primary" icon="download" hint-size="160px,40px">Descargar informe</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="100px,40px">Agregar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" hint-size="100px,40px">Cancelar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="destructive" hint-size="100px,40px">Quitar</x-import>
+<span class="t-caption">Hover (puntero)</span>
+<span class="t-caption">Sin cambio de opacidad</span>
+<span class="t-caption">Sin cambio de opacidad</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" style="background:var(--ds-fill)" hint-size="100px,40px">Cancelar</x-import>
+<span class="t-caption">Sin cambio de opacidad</span>
+<span class="t-caption">Foco</span>
+<span style="display:inline-flex;justify-self:start;border-radius:var(--radius-md);outline:2px solid var(--ds-focus);outline-offset:2px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="primary" icon="download" hint-size="160px,40px">Descargar informe</x-import></span>
+<span style="display:inline-flex;justify-self:start;border-radius:var(--radius-md);outline:2px solid var(--ds-focus);outline-offset:2px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="100px,40px">Agregar</x-import></span>
+<span style="display:inline-flex;justify-self:start;border-radius:var(--radius-md);outline:2px solid var(--ds-focus);outline-offset:2px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" hint-size="100px,40px">Cancelar</x-import></span>
+<span style="display:inline-flex;justify-self:start;border-radius:var(--radius-md);outline:2px solid var(--ds-focus);outline-offset:2px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="destructive" hint-size="100px,40px">Quitar</x-import></span>
+<span class="t-caption">Deshabilitado</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="primary" icon="download" disabled="{{ true }}" hint-size="160px,40px">Descargar informe</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" disabled="{{ true }}" hint-size="100px,40px">Agregar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" disabled="{{ true }}" hint-size="100px,40px">Cancelar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="destructive" disabled="{{ true }}" hint-size="100px,40px">Quitar</x-import>
+<span class="t-caption">Cargando</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="primary" loading="{{ true }}" hint-size="160px,40px">Enviar solicitud</x-import>
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:12px">
+<span class="t-overline">IconButton · reposo, activo, foco · Badge · tonos de estado</span>
+<div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="download" label="Descargar" hint-size="44px,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="chevron-left" label="Mes anterior" active="{{ true }}" hint-size="44px,44px"></x-import>
+<span style="display:inline-flex;border-radius:var(--radius-md);outline:2px solid var(--ds-focus);outline-offset:2px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="x" label="Quitar" hint-size="44px,44px"></x-import></span>
+<span style="width:24px"></span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="success" hint-size="70px,22px">Cumple</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="warning" hint-size="90px,22px">Bajo la meta</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="danger" hint-size="70px,22px">1 grave</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="info" hint-size="90px,22px">En revisión</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" hint-size="70px,22px">4 leves</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="success" hint-size="70px,22px">En turno</x-import>
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:12px">
+<span class="t-overline">Tabs · activa, reposo · Segmentado</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ tabItems }}" value="cob" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ segOpts }}" value="doc" label="Vista" hint-size="260px,36px"></x-import>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:12px">
+<span class="t-overline">Campo · Input, Select, DateInput · reposo, error, deshabilitado</span>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Agregar destinatario" placeholder="nombre@empresa.cl" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Agregar destinatario" value="andrea.rojas@" error="Escribe un correo completo." hint-size="100%,90px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Guardias" value="1" disabled="{{ true }}" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Instalación" value="pq" options="{{ instOpts }}" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DateInput" label="Fecha" value="05-11-2026" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DateInput" label="Desde" type="time" value="08:00" hint-size="100%,70px"></x-import>
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:12px">
+<span class="t-overline">Switch · Checkbox · ChipToggle · encendido, apagado, deshabilitado</span>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px 16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ true }}" label="Recibir por correo" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ false }}" label="Recibir por correo" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ true }}" disabled="{{ true }}" label="Recibir por correo" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ true }}" label="Credencial OS-10" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ false }}" label="Contrato de trabajo" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ false }}" disabled="{{ true }}" label="Exámenes de salud" description="Nunca visible para clientes" hint-size="100%,44px"></x-import>
+<div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Credencial OS-10" activo="{{ true }}" hint-size="150px,32px"></x-import></div>
+<div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Curso OS-10" hint-size="120px,32px"></x-import></div>
+<div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Antecedentes" disabled="{{ true }}" hint-size="120px,32px"></x-import></div>
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:12px">
+<span class="t-overline">Table (desde 768) · RowCard (teléfono) · SelectableRow (lista iPad) · Avatar</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ gCols }}" rows="{{ guards }}" hint-size="100%,150px"></x-import>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px">
+<div class="rows" style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" initials="JP" title="Juan Pérez Soto" subtitle="Portería 1 · Día" meta="16.234.567-8" badge="{{ enTurno }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" icon="file" title="Septiembre 2026" subtitle="Enviado el 01-10-2026 08:00" chevron="{{ true }}" hint-size="100%,64px"></x-import>
+</div>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);overflow:hidden;background:var(--ds-surface)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.SelectableRow" selected="{{ true }}" title="Planta Quilicura" subtitle="Av. Lo Echevers 550" meta="98,6 %" badge="{{ cumple }}" hint-size="100%,64px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.SelectableRow" title="Bodega Lampa" subtitle="Camino Lo Echevers 12.300" meta="91,2 %" badge="{{ bajo }}" hint-size="100%,64px"></x-import>
+</div>
+</div>
+<div style="display:flex;gap:12px;align-items:center">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Avatar" initials="JP" size="sm" hint-size="24px,24px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Avatar" initials="JP" hint-size="32px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Avatar" initials="JP" size="lg" hint-size="40px,40px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Avatar" initials="{{ camIcon }}" size="{{ 48 }}" label="Foto del guardia" hint-size="48px,48px"></x-import>
+<span class="t-caption">24 · 32 · 40 · 48 · foto del guardia (decidido en v2; el icono marca la foto mientras carga)</span>
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:12px">
+<span class="t-overline">Alerta · neutral, info, warning, danger, success · Timeline</span>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" hint-size="100%,44px">Solo ves documentos que la empresa de seguridad marcó como visibles.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="neutral" titulo="Fuera de pauta" hint-size="100%,56px">Se cobra aparte.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" titulo="Documento por vencer" hint-size="100%,56px">Curso OS-10 de Marcela Díaz vence el 22-11-2026.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="danger" titulo="Documento vencido" hint-size="100%,56px">Credencial OS-10 de Camila Reyes venció el 28-10-2026.</x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Timeline" items="{{ timeline }}" hint-size="100%,160px"></x-import>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:12px">
+<span class="t-overline">Estados · Empty, ErrorState, Forbidden, Skeleton, StatePanel (pieza reutilizada)</span>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px">
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="file" size="sm" title="Aún no hay informes" description="El primero se genera al cierre del mes." hint-size="100%,240px"></x-import></div>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar" description="Revisa tu conexión." code="PC-RES-503" hint-size="100%,280px"></x-import></div>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="Sin acceso" description="Pídele acceso a Andrea Rojas." action-label="Pedir acceso" hint-size="100%,280px"></x-import></div>
+</div>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:8px;padding:16px;border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="40%" height="{{ 20 }}" hint-size="40%,20px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="30%" height="{{ 34 }}" hint-size="30%,34px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 6 }}" radius="{{ 999 }}" hint-size="100%,6px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.StatePanel" icon="route" title="Pieza reutilizada" description="Marca dónde se monta una pantalla aprobada (d16, ClienteAccesos) sin redibujarla." hint-size="100%,200px"></x-import>
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:16px;padding:20px;border:1px dashed var(--ds-border-strong);border-radius:var(--radius-lg)">
+<div style="display:flex;gap:8px;align-items:center"><span class="badge b-accent nodot">Nuevo para el DS</span><span class="t-body-sm muted">Propuestas para packages/ds, no piezas del módulo.</span></div>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px">
+<div style="display:flex;flex-direction:column;gap:10px">
+<span class="t-label">SelectorMes</span>
+<span class="t-caption">IconButton anterior y siguiente + mes en t-label tabular; borde border, radio md, alto 44. Siguiente deshabilitado en el mes en curso.</span>
+<div style="display:flex;gap:12px;flex-wrap:wrap">
+<div style="display:inline-flex;align-items:center;gap:4px;border:1px solid var(--ds-border);border-radius:var(--radius-md);background:var(--ds-surface)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="chevron-left" label="Mes anterior" hint-size="44px,44px"></x-import><span class="t-label t-numeric" style="min-width:120px;text-align:center">Octubre 2026</span><span style="opacity:.45;display:inline-flex"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="chevron-right" label="Mes siguiente (no disponible)" hint-size="44px,44px"></x-import></span></div>
+<div style="display:inline-flex;align-items:center;gap:4px;border:1px solid var(--ds-border);border-radius:var(--radius-md);background:var(--ds-surface)"><span style="display:inline-flex;border-radius:var(--radius-md);outline:2px solid var(--ds-focus);outline-offset:-2px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="chevron-left" label="Mes anterior" hint-size="44px,44px"></x-import></span><span class="t-label t-numeric" style="min-width:120px;text-align:center">Septiembre 2026</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="chevron-right" label="Mes siguiente" hint-size="44px,44px"></x-import></div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<span class="t-label">Progreso</span>
+<span class="t-caption">Barra de 6 px, radio píldora, pista fill. Color solo por estado: success sobre la meta, warning bajo la meta, danger bajo el mínimo. role="progressbar".</span>
+<sc-for list="{{ bars }}" as="b" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;gap:12px"><div role="progressbar" aria-valuenow="{{ b.n }}" aria-valuemin="0" aria-valuemax="100" style="flex:1;height:6px;border-radius:var(--radius-full);background:var(--ds-fill);overflow:hidden"><div style="height:100%;width:{{ b.w }};background:{{ b.c }};border-radius:var(--radius-full)"></div></div><span class="t-label-sm t-numeric" style="width:56px;text-align:right">{{ b.l }}</span></div>
+</sc-for>
+</div>
+</div>
+<div style="display:flex;gap:8px;align-items:center;padding-top:8px;border-top:1px solid var(--ds-border)"><span class="badge b-accent nodot">Nuevo para el DS · v2</span></div>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px">
+<div style="display:flex;flex-direction:column;gap:10px;grid-column:1 / -1">
+<span class="t-label">EntradaLibro (libro de novedades)</span>
+<span class="t-caption">Fila cronológica: hora 48 a la izquierda; gravedad (Badge), categoría y folio; estado sin punto a la derecha; título t-label, texto t-body-sm, autor y conteos de respuestas y adjuntos en caption. Agrupada por día con overline. Hover: bg. Variantes: abierta, cerrada, grave con aviso fijo (Alerta danger) arriba del libro.</span>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);overflow:hidden">
+<div class="t-overline t-numeric" style="padding:10px 16px 6px;background:var(--ds-bg);border-bottom:1px solid var(--ds-border)">30-10-2026</div>
+<sc-for list="{{ libro }}" as="n" hint-placeholder-count="2">
+<div style="display:grid;grid-template-columns:48px minmax(0,1fr);gap:12px;padding:14px 16px;border-bottom:1px solid var(--ds-border);background:{{ n.bg }}">
+<span class="t-label t-numeric">{{ n.hh }}</span>
+<span style="display:flex;flex-direction:column;gap:6px;min-width:0">
+<span style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ n.tone }}" hint-size="60px,22px">{{ n.g }}</x-import><span class="t-caption">{{ n.cat }}</span><span style="flex:1"></span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ n.eTone }}" dot="{{ false }}" hint-size="60px,22px">{{ n.estado }}</x-import></span>
+<span class="t-label">{{ n.tit }}</span>
+<span class="t-caption" style="display:flex;gap:12px;align-items:center"><span>{{ n.quien }}</span><span style="display:inline-flex;gap:4px;align-items:center"><span class="ic sm i-message" aria-hidden="true"></span>{{ n.resp }}</span><span style="display:inline-flex;gap:4px;align-items:center"><span class="ic sm i-paperclip" aria-hidden="true"></span>{{ n.adj }}</span></span>
+</span>
+</div>
+</sc-for>
+</div>
+<span class="t-caption">Segunda fila en estado hover (fondo bg).</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<span class="t-label">KpiMeta (tarjeta de KPI)</span>
+<span class="t-caption">Card con etiqueta, valor t-heading tabular, meta en caption, Badge de estado y Tendencia de 6 meses. Solo el mes actual se colorea por estado.</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,180px">
+<div style="display:flex;flex-direction:column;gap:10px">
+<div style="display:flex;justify-content:space-between;gap:8px"><span class="t-label-sm muted">Puntualidad</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="warning" hint-size="90px,22px">Bajo la meta</x-import></div>
+<div style="display:flex;align-items:baseline;gap:8px"><span class="t-heading t-numeric">94,1 %</span><span class="t-caption">Meta 95 %</span></div>
+<div role="img" aria-label="Tendencia de puntualidad" style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px;align-items:end;height:40px">
+<sc-for list="{{ trend }}" as="b" hint-placeholder-count="6"><div style="height:{{ b.h }};background:{{ b.c }};border-radius:3px 3px 0 0"></div></sc-for>
+</div>
+<div style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px"><sc-for list="{{ meses }}" as="m" hint-placeholder-count="6"><span class="t-caption" style="text-align:center;font-size:11px">{{ m }}</span></sc-for></div>
+</div>
+</x-import>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px">
+<span class="t-label">HoraProgReal · PuntoRonda · FotoTile</span>
+<span class="t-caption">Par de horas: programada en fg-subtle, real en 500 al lado. Punto de ronda: círculo 24 en fg con check (marcado) o danger-muted con × (sin marcar), incidencia en caption de estado. Foto: tile 4:3 en fill con icono cámara mientras carga o sin miniatura.</span>
+<span class="t-numeric t-body-sm" style="display:inline-flex;gap:6px"><span class="subtle">08:00</span><span style="font-weight:500">08:14</span></span>
+<div style="display:flex;flex-direction:column;border:1px solid var(--ds-border);border-radius:var(--radius-md);overflow:hidden">
+<div style="display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:12px;padding:10px 12px;border-bottom:1px solid var(--ds-border)"><span style="width:24px;height:24px;border-radius:var(--radius-full);background:var(--ds-fg);color:var(--ds-bg);display:flex;align-items:center;justify-content:center"><span class="ic sm i-check"></span></span><span class="t-label">Andén 2</span><span class="t-numeric t-body-sm">12:13</span></div>
+<div style="display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:12px;padding:10px 12px"><span style="width:24px;height:24px;border-radius:var(--radius-full);background:var(--ds-danger-muted);color:var(--ds-danger-fg);display:flex;align-items:center;justify-content:center"><span class="ic sm i-x"></span></span><span style="display:flex;flex-direction:column"><span class="t-label">Andén 3</span><span class="t-caption" style="color:var(--ds-danger-fg)">Sin marcar: acceso bloqueado</span></span><span class="t-numeric t-body-sm subtle">—</span></div>
+</div>
+<div role="img" aria-label="Foto de ejemplo" style="width:120px;aspect-ratio:4/3;border-radius:var(--radius-md);border:1px solid var(--ds-border);background:var(--ds-fill);display:flex;align-items:center;justify-content:center;color:var(--ds-fg-subtle)"><span class="ic i-camera" aria-hidden="true"></span></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;grid-column:1 / -1">
+<span style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="badge b-accent nodot">Nuevo para el DS · v3 · oficial</span><span class="t-label">Sidebar, Rail y TopBar · selector={false}</span></span>
+<span class="t-caption">Variante del componente, no un parche: con selector={false} el bloque de portal deja de ser botón y muestra, en texto visible, la empresa del cliente y «Portal Cliente de» el tenant, con el monograma del tenant. Con selector (true, por defecto) vuelve el botón con el icono de cambio. Componente de referencia: MarcaCliente (superficie sidebar · rail · topbar).</span>
+<span class="t-caption">Estado en las pantallas: a 375 ya se usa la vía limpia (TopBar con left = marca del cliente). Sidebar (1280) y Rail (1024) todavía la emulan sobre el selector, porque AppShell no permite reemplazarlos; queda resuelto cuando el DS publique la prop selector.</span>
+<div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:6px"><span class="t-caption">1280 · Sidebar</span><div style="width:248px;border:1px solid var(--ds-border);border-radius:var(--radius-md);background:var(--ds-surface);overflow:hidden"><div class="sidebar-head"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Wordmark" hint-size="50px,24px"></x-import><span class="t-caption">2.0</span></div><dc-import name="MarcaCliente" superficie="sidebar" hint-size="100%,60px"></dc-import><div class="nav-group" style="padding-bottom:8px"><span class="nav-item on"><span class="ic sm i-home" aria-hidden="true"></span>Resumen</span><span class="nav-item"><span class="ic sm i-building" aria-hidden="true"></span>Instalaciones</span></div></div></div>
+<div style="display:flex;flex-direction:column;gap:6px"><span class="t-caption">1024 · Rail</span><div style="width:80px;border:1px solid var(--ds-border);border-radius:var(--radius-md);background:var(--ds-surface);display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:4px"><dc-import name="MarcaCliente" superficie="rail" hint-size="72px,120px"></dc-import><span class="rail-item on"><span class="ic i-home" aria-hidden="true"></span>Resumen</span></div></div>
+<div style="display:flex;flex-direction:column;gap:6px"><span class="t-caption">375 · TopBar</span><div class="topbar" style="width:375px;border:1px solid var(--ds-border);border-radius:var(--radius-md)"><dc-import name="MarcaCliente" superficie="topbar" hint-size="220px,44px"></dc-import><span style="flex:1"></span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="search" label="Buscar" hint-size="44px,44px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="bell" label="Notificaciones" hint-size="44px,44px"></x-import></div></div>
+</div>
+<div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">
+<span class="badge b-warning">Decide Carlos</span><span class="t-caption">selector (por defecto): solo si el contacto tiene más de una empresa cliente.</span>
+<div style="width:248px;border:1px solid var(--ds-border);border-radius:var(--radius-md);background:var(--ds-surface);padding-top:8px"><dc-import name="MarcaCliente" superficie="sidebar" selector="{{ true }}" hint-size="100%,60px"></dc-import></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;padding-top:8px;border-top:1px solid var(--ds-border)">
+<span style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="badge b-accent nodot">Nuevo para el DS · v3</span><span class="t-label">ResultadoAcceso y FilaEnSitio</span></span>
+<span class="t-caption">De DESIGN-PROMPT-control-acceso-y-firma §3. Mismos nombres y colores que ve el guardia en Terreno; icono y texto, nunca solo color. Forma compacta en tablas del Portal Cliente y bloque grande en el detalle.</span>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<span class="badge b-success nodot"><span class="ic sm i-check-circle" aria-hidden="true" style="width:14px;height:14px"></span>Autorizado</span>
+<span class="badge b-neutral nodot"><span class="ic sm i-info" aria-hidden="true" style="width:14px;height:14px"></span>Sin lista</span>
+<span class="badge b-info nodot"><span class="ic sm i-info" aria-hidden="true" style="width:14px;height:14px"></span>Fuera de lista, permitido</span>
+<span class="badge b-danger nodot"><span class="ic sm i-lock" aria-hidden="true" style="width:14px;height:14px"></span>No autorizado</span>
+<span class="badge b-warning nodot"><span class="ic sm i-clock" aria-hidden="true" style="width:14px;height:14px"></span>Fuera de horario</span>
+</div>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+<div role="status" style="display:flex;gap:12px;align-items:center;padding:16px;border-radius:var(--radius-lg);background:var(--ds-success-muted);color:var(--ds-success-fg)"><span style="width:40px;height:40px;border-radius:var(--radius-full);background:var(--ds-surface);display:flex;align-items:center;justify-content:center;flex:none"><span class="ic lg i-check-circle" aria-hidden="true"></span></span><span style="display:flex;flex-direction:column;gap:2px"><span class="t-subheading">Autorizado</span><span class="t-body-sm">Prerregistrado por Andrea Rojas</span></span></div>
+<div role="alert" style="display:flex;gap:12px;align-items:center;padding:16px;border-radius:var(--radius-lg);background:var(--ds-danger-muted);color:var(--ds-danger-fg)"><span style="width:40px;height:40px;border-radius:var(--radius-full);background:var(--ds-surface);display:flex;align-items:center;justify-content:center;flex:none"><span class="ic lg i-lock" aria-hidden="true"></span></span><span style="display:flex;flex-direction:column;gap:2px"><span class="t-subheading">No autorizado</span><span class="t-body-sm">Sin motivo visible para el cliente</span></span></div>
+</div>
+<div style="display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)"><span class="ic i-user muted" aria-hidden="true"></span><span style="flex:1;display:flex;flex-direction:column;gap:4px"><span style="display:flex;gap:8px;align-items:center"><span class="t-label">Jaime Rivas Toledo</span><span class="chip" style="height:22px;padding:0 8px;font-size:12px">Contratista</span></span><span class="t-body-sm muted">Clima Norte Ltda. · desde <span class="t-numeric">07:05</span></span><span class="t-mono subtle">LKJH·22</span></span><span class="badge b-warning">Por vencer</span></div>
+<span class="t-caption">FilaEnSitio en el Portal Cliente: sin la acción «Salida» (la registra el guardia). Permanencia: Normal · Por vencer · Excedida.</span>
+</div>
+<span class="t-caption">Patrones nombrados en el encargo sin componente propio en DS 2.0: ListScreen, SplitScreen, DetailScreen y FormScreen se arman con Page + PageHeader (+ SelectableRow en lista/detalle). Se proponen como envoltorios con nombre. Keypad no se usa aquí (login reutilizado).</span>
+</section>
+</div>
+</sc-for>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const h = React.createElement, NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const B = (tone, l) => NS.Badge ? h(NS.Badge, { tone }, l) : l;
+    return {
+      themes: [{ id: "light", label: "Claro" }, { id: "dark", label: "Oscuro" }],
+      tabItems: [{ id: "cob", label: "Cobertura" }, { id: "ron", label: "Rondas" }, { id: "nov", label: "Novedades" }, { id: "acc", label: "Accesos" }, { id: "doc", label: "Documentos de los guardias" }],
+      segOpts: [{ value: "doc", label: "Documentos" }, { value: "fac", label: "Facturas" }],
+      instOpts: [{ value: "pq", label: "Planta Quilicura" }, { value: "bl", label: "Bodega Lampa" }, { value: "ta", label: "Torre Apoquindo" }],
+      gCols: [{ key: "name", label: "Guardia", strong: true }, { key: "rut", label: "RUT", mono: true }, { key: "puesto", label: "Puesto", muted: true }, { key: "t", label: "Ahora", render: (r) => r.t ? B("success", "En turno") : null }],
+      guards: [{ id: 1, name: "Juan Pérez Soto", rut: "16.234.567-8", puesto: "Portería 1 · Día", t: true }, { id: 2, name: "Marcela Díaz Rojas", rut: "17.845.120-3", puesto: "Portería 1 · Día", t: false }],
+      enTurno: { tone: "success", label: "En turno" }, cumple: { tone: "success", label: "Cumple" }, bajo: { tone: "warning", label: "Bajo la meta" },
+      camIcon: NS.Icon ? h(NS.Icon, { name: "camera", size: "sm" }) : "",
+      timeline: [{ initials: "CI", who: "Carlos Irigoyen", action: "está revisando la dotación", when: "28-10-2026 11:40" }, { initials: "AR", who: "Andrea Rojas", action: "creó la solicitud", when: "28-10-2026 10:12" }],
+      libro: [
+        { hh: "06:12", g: "Grave", tone: "danger", cat: "Seguridad · NOV-0231", estado: "Abierta", eTone: "warning", tit: "Intento de ingreso por cerco norte", quien: "Luis Contreras Vega", resp: "2", adj: "3", bg: "transparent" },
+        { hh: "03:40", g: "Moderada", tone: "warning", cat: "Infraestructura · NOV-0226", estado: "Cerrada", eTone: "neutral", tit: "Portón de patio sin cierre", quien: "Rosa Fuentes Araya", resp: "1", adj: "2", bg: "var(--ds-bg)" },
+      ],
+      trend: [96.0, 95.2, 93.8, 95.5, 94.9, 94.1].map((v, i) => ({ h: Math.round(((v - 90) / 6.2) * 90 + 10) + "%", c: i === 5 ? "var(--ds-warning)" : "var(--ds-border-strong)" })),
+      meses: ["May", "Jun", "Jul", "Ago", "Sep", "Oct"],
+      bars: [{ n: 98.6, w: "98.6%", c: "var(--ds-success)", l: "98,6 %" }, { n: 91.2, w: "91.2%", c: "var(--ds-warning)", l: "91,2 %" }, { n: 78, w: "78%", c: "var(--ds-danger)", l: "78 %" }],
+    };
+  }
+}
+</script>
+</body>
+</html>
