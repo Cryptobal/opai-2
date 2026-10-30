@@ -19,10 +19,22 @@ import { renombrada } from "./renombrada";
 import { exigirCostos } from "./validaciones";
 import { resumenSchema, versionSchema, vistaResumen, vistaVersion } from "./vistas";
 
+/** Señal para revertir la transacción de la vista previa (no es un error de negocio). */
+const REVERTIR = new Error("cpq.cotizaciones.ajustar: vista previa revertida");
+
+type FilaC = Parameters<typeof vistaResumen>[0];
+type FilaV = Parameters<typeof vistaResumen>[1];
+const salida = (costos: boolean, c: FilaC, v: FilaV, cambios: string[]) => ({
+  cotizacion: vistaResumen(c, v, costos),
+  version: vistaVersion(v, costos),
+  cambios,
+});
+
 /**
  * Lote de cambios tipados sobre la versión editable (cpq.md §9): todo o nada, en una transacción.
  * Editar una versión en aprobación o lista la devuelve a borrador (R41). Control optimista: si otro
- * guardó antes, responde CONFLICT y nada se aplica (§12). Renombrar deja antes/después en la
+ * guardó antes, responde CONFLICT y nada se aplica (§12). La vista previa
+ * aplica el lote igual que la ejecución y revierte. Renombrar deja antes/después en la
  * auditoría y emite `cpq.cotizacion.renombrada` (R67); el código no cambia.
  */
 export const cotizacionesAjustar = defineCapability({
@@ -58,9 +70,11 @@ export const cotizacionesAjustar = defineCapability({
     if (input.revisionEsperada !== undefined && input.revisionEsperada !== v.revision)
       throw conflicto("La cotización cambió mientras la editabas. Recarga e inténtalo de nuevo.");
     const nuevoEstado = estadoTrasEditar(estado);
-    const escribir = !dryRun;
-    return ctx.transaccion(async (tx) => {
-      if (escribir) {
+    // La vista previa ES la ejecución real dentro de una transacción que se revierte: aplica el lote
+    // en el mismo orden (cada operación ve lo que dejó la anterior) y nada queda escrito ni auditado.
+    let previa: ReturnType<typeof salida> | undefined;
+    try {
+      return await ctx.transaccion(async (tx) => {
         // Control optimista PRIMERO: subir la revisión leída toma el lock de la fila de la versión,
         // así las ediciones concurrentes se serializan aquí y solo gana una (§12, sin TOCTOU).
         const r = await tx.versionCotizacion.updateMany({
@@ -71,24 +85,23 @@ export const cotizacionesAjustar = defineCapability({
           throw conflicto(
             "La cotización cambió mientras la editabas. Recarga e inténtalo de nuevo.",
           );
-      }
-      const cambios: string[] = [];
-      for (const op of input.operaciones)
-        cambios.push(await aplicar(ctx, tx, v, op, escribir, c.negocioId));
-      if (estado !== nuevoEstado) cambios.push(`Estado: ${estado} → ${nuevoEstado} (R41)`);
-      if (escribir) {
+        const cambios: string[] = [];
+        for (const op of input.operaciones)
+          cambios.push(await aplicar(ctx, tx, v, op, c.negocioId));
+        if (estado !== nuevoEstado) cambios.push(`Estado: ${estado} → ${nuevoEstado} (R41)`);
         await tx.cotizacion.update({ where: { id: c.id }, data: { estado: nuevoEstado } });
-        await renombrada(ctx, tx, c, input.operaciones);
-      }
-      const c2 = escribir ? await tx.cotizacion.findUnique({ where: { id: c.id } }) : c;
-      const v2 = escribir ? await tx.versionCotizacion.findUnique({ where: { id: v.id } }) : v;
-      if (!c2 || !v2) throw noEncontrado("La cotización");
-      const costos = veCostos(ctx);
-      return {
-        cotizacion: vistaResumen(c2, v2, costos),
-        version: vistaVersion(v2, costos),
-        cambios,
-      };
-    });
+        if (!dryRun) await renombrada(ctx, tx, c, input.operaciones);
+        const c2 = await tx.cotizacion.findUnique({ where: { id: c.id } });
+        const v2 = await tx.versionCotizacion.findUnique({ where: { id: v.id } });
+        if (!c2 || !v2) throw noEncontrado("La cotización");
+        const resultado = salida(veCostos(ctx), c2, v2, cambios);
+        if (!dryRun) return resultado;
+        previa = resultado;
+        throw REVERTIR;
+      });
+    } catch (e) {
+      if (e === REVERTIR && previa) return previa;
+      throw e;
+    }
   },
 });
