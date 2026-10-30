@@ -27,6 +27,10 @@ export const PERMISOS_CORE = {
   vinculosRead: "core:vinculos.read",
   vinculosManage: "core:vinculos.manage",
   personasManage: "core:personas.manage",
+  // P1 "No recontratar" (Personas y Cargos PR 1): marcar y ver la marca es de RRHH y administradores;
+  // el resto no ve ni que la sección existe (denegado explícito a gerente, fuera del allowlist de
+  // supervisor y viewer).
+  personasNoRecontratarManage: "core:personas.no_recontratar.manage",
   estructurasRead: "core:estructuras.read",
   estructurasManage: "core:estructuras.manage",
   estructurasReadSensible: "core:estructuras.read_sensible",
