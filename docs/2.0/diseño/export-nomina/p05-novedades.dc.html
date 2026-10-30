@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><script src="./nomina-data.js"></script><style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style></helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="{{ active }}" title="{{ shellTitle }}" user="{{ user }}" overlay="{{ overlay }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<sc-if value="{{ showHeader }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Nómina · Octubre 2026" title="Novedades del período" subtitle="Licencias, ausencias y horas extra llegan desde Asistencia; el resto se carga aquí." hint-size="100%,80px">
+<sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="download" on-click="{{ openSheet }}" hint-size="150px,40px">Carga masiva</x-import>
+</sc-if>
+</x-import>
+</sc-if>
+
+<sc-if value="{{ isOk }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" titulo="3 licencias sin documento" hint-size="100%,72px">Adjunta la licencia médica para que quede respaldada en el libro de remuneraciones.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Anticipo quincenal automático" hint-size="100%,88px">El 15-11-2026 se generan 42 anticipos para quienes lo tienen en su ficha. Los préstamos descuentan su cuota según su plan. <a href="B2 Anticipo quincenal automatico.dc.html">Revisar anticipos del 15-11</a> · <a href="B3 Prestamos con plan de cuotas.dc.html">Ver planes de cuotas</a></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ tabItems }}" value="{{ tab }}" on-change="{{ setTab }}" hint-size="100%,44px"></x-import>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="margin:0 -16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" cards="{{ true }}" to-card="{{ toCard }}" on-row-click="{{ noop }}" hint-size="100%,300px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" on-row-click="{{ noop }}" hint-size="100%,300px"></x-import>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isCargando }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:16px" aria-busy="true">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 64 }}" radius="{{ 10 }}" hint-size="100%,64px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="60%" height="{{ 32 }}" hint-size="60%,32px"></x-import>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+<sc-for list="{{ skel }}" as="s" hint-placeholder-count="5">
+<div style="display:flex;gap:16px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="90px" height="{{ 14 }}" hint-size="90px,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="140px" height="{{ 14 }}" hint-size="140px,14px"></x-import>
+<div style="flex:1"></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="80px" height="{{ 14 }}" hint-size="80px,14px"></x-import>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="clipboard" title="Aún no hay novedades en octubre" description="Carga anticipos, préstamos o descuentos con una planilla, o espera el resumen de Asistencia." action="{{ emptyAction }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar las novedades" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="NOM-NOV-503" on-retry="{{ noop }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ isSinPermiso }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a Nómina" description="Las remuneraciones solo las ven RRHH, gerencia y administración. Pídele acceso a Marcela Rojas, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,320px"></x-import>
+</sc-if>
+</x-import>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ok&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;ok&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;role&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;admin&quot;,&quot;rrhh&quot;,&quot;gerente&quot;,&quot;inspector&quot;,&quot;supervisor&quot;],&quot;default&quot;:&quot;admin&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { tab: "todas", sheet: false };
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const ND = window.ND;
+    if (!ND) return {};
+    const b = ND.base(this.props, "nov", "Novedades");
+    const m = (v) => (v == null ? "—" : b.isGerente ? ND.mask : ND.money(v));
+    const all = [
+      { id: 1, t: "lic", tipo: "Licencia", ico: "file", per: "Luis Pérez", rut: "9.876.543-2", det: "05-10-2026 – 16-10-2026 · 12 días", v: null, ori: "Asistencia", doc: "licencia_4471.pdf", est: "Aplicada", tone: "success" },
+      { id: 2, t: "lic", tipo: "Licencia", ico: "file", per: "Diego Silva", rut: "13.456.789-0", det: "20-10-2026 – 27-10-2026 · 8 días", v: null, ori: "Asistencia", doc: null, est: "Sin documento", tone: "warning" },
+      { id: 3, t: "aus", tipo: "Ausencia", ico: "clock", per: "Diego Silva", rut: "13.456.789-0", det: "02-10-2026 · injustificada", v: null, ori: "Asistencia", doc: null, est: "Aplicada", tone: "success" },
+      { id: 4, t: "hex", tipo: "Horas extra", ico: "clock", per: "Camila Herrera", rut: "12.345.678-9", det: "8 h al 50 %", v: 41230, ori: "Asistencia", doc: null, est: "Aplicada", tone: "success" },
+      { id: 5, t: "ant", tipo: "Anticipo", ico: "wallet", per: "Camila Herrera", rut: "12.345.678-9", det: "Quincenal · pagado el 15-10-2026", v: 100000, ori: "Automático", doc: null, est: "Aplicada", tone: "success" },
+      { id: 6, t: "pre", tipo: "Préstamo", ico: "landmark", per: "Camila Herrera", rut: "12.345.678-9", det: "Cuota 7 de 12", v: 30000, ori: "Plan de cuotas", doc: "pagare_CH_2026.pdf", est: "Aplicada", tone: "success" },
+      { id: 7, t: "des", tipo: "Descuento", ico: "wallet", per: "María F. Soto", rut: "16.234.567-8", det: "Uniforme extraviado", v: 18000, ori: "Manual", doc: null, est: "Por revisar", tone: "warning" },
+    ];
+    const tab = this.state.tab;
+    const rows = all.filter((r) => tab === "todas" || r.t === tab);
+    const docEl = (r) => r.doc ? h("span", { style: { display: "inline-flex", gap: 6, alignItems: "center" } }, NS.Icon ? h(NS.Icon, { name: "paperclip", size: "sm" }) : null, h("span", { className: "t-body-sm" }, r.doc)) : h("span", { style: { color: "var(--ds-fg-subtle)" } }, "—");
+    const close = () => this.setState({ sheet: false });
+    return {
+      ...b,
+      tab, setTab: (v) => this.setState({ tab: v }),
+      tabItems: [{ id: "todas", label: "Todas" }, { id: "lic", label: "Licencias" }, { id: "aus", label: "Ausencias" }, { id: "hex", label: "Horas extra" }, { id: "ant", label: "Anticipos" }, { id: "pre", label: "Préstamos" }, { id: "des", label: "Descuentos" }],
+      rows,
+      cols: [
+        { key: "tipo", label: "Tipo", strong: true },
+        { key: "per", label: "Persona", render: (r) => h("span", { style: { display: "flex", flexDirection: "column" } }, h("span", null, r.per), h("span", { className: "t-mono", style: { fontSize: 12, color: "var(--ds-fg-muted)" } }, r.rut)) },
+        { key: "det", label: "Detalle", muted: true },
+        { key: "v", label: "Monto", align: "right", render: (r) => m(r.v) },
+        { key: "ori", label: "Origen", muted: true },
+        { key: "doc", label: "Documento", render: docEl },
+        { key: "est", label: "Estado", render: (r) => (NS.Badge ? h(NS.Badge, { tone: r.tone, dot: true }, r.est) : r.est) },
+      ],
+      toCard: (r) => ({ icon: r.ico, title: r.tipo + " · " + r.per, subtitle: r.det, meta: (r.v != null ? m(r.v) + " · " : "") + r.ori + (r.doc ? " · " + r.doc : ""), badge: { tone: r.tone, label: r.est } }),
+      openSheet: () => this.setState({ sheet: true }),
+      overlay: NS.Sheet && this.state.sheet ? h(NS.Sheet, { open: true, contained: true, side: b.isPhone ? "bottom" : "right", title: "Carga masiva de novedades", description: "Sube la planilla con anticipos, préstamos o descuentos. Revisamos cada fila antes de aplicarla.", onClose: close, actions: [h(NS.Button, { key: "c", variant: "secondary", onClick: close }, "Cancelar"), h(NS.Button, { key: "a", onClick: close }, "Aplicar 24 filas")] }, h(NS.Uploader, { tipos: "XLSX o CSV", accept: ".xlsx,.csv", tamanoMaximoMb: 10, archivosIniciales: [{ nombre: "anticipos_noviembre.xlsx", size: 48200, estado: "listo" }] })) : null,
+      emptyAction: NS.Button && b.canEdit ? h(NS.Button, { icon: "download", onClick: () => this.setState({ sheet: true }) }, "Carga masiva") : null,
+    };
+  }
+}
+</script>
+</body>
+</html>
