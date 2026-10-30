@@ -7,6 +7,7 @@ import {
   desactivarSegundoFactor,
   iniciarSegundoFactor,
   requireSession,
+  regenerarCodigosRespaldo,
   verificarCodigoRespaldo,
   verificarSegundoFactor,
 } from "@opai/auth";
@@ -108,4 +109,19 @@ export async function accionDesactivarMfa(
   const password = String(form.get("password") ?? "");
   const r = await desactivarSegundoFactor(password);
   return r.ok ? { ok: true } : { ok: false, error: r.mensaje };
+}
+
+export type EstadoCodigos = { ok: true; codigos: string[] } | { ok: false; error: string };
+
+/** Regenera los códigos de la cuenta con sesión y segundo factor verificado. */
+export async function accionRegenerarCodigos(
+  _previo: EstadoCodigos | null,
+  form: FormData,
+): Promise<EstadoCodigos> {
+  await requireSession();
+  const identidad = await identidadActual();
+  if (!identidad || !identidad.mfaActiva || (await verificarMfaDe(identidad)))
+    return { ok: false, error: "Falta verificar el segundo factor de la sesión." };
+  const r = await regenerarCodigosRespaldo(String(form.get("password") ?? ""));
+  return r.ok ? r : { ok: false, error: r.mensaje };
 }

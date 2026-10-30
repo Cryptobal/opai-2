@@ -7,6 +7,7 @@ import { PaginaPortal } from "@/app/_components/pagina-portal";
 import { mfaObligatoriaPara } from "@/lib/mfa";
 import { requerirIdentidad } from "@/lib/servidor";
 
+import { RegenerarCodigos } from "./regenerar-codigos";
 import { DesactivarMfa } from "./desactivar-mfa";
 
 export const metadata = { title: "Mi cuenta" };
@@ -39,6 +40,7 @@ export default function MiCuenta() {
                 >
                   Al entrar te pediremos un código de tu app de autenticación.
                 </Alerta>
+                <RegenerarCodigos />
                 {obligatoria ? (
                   <p className="text-sm text-fg-muted">Tu rol requiere el segundo factor.</p>
                 ) : (

@@ -156,3 +156,19 @@ export async function desactivarSegundoFactor(password: string): Promise<Resulta
     throw error;
   }
 }
+
+/** Regenera los códigos de respaldo tras verificar la contraseña. */
+export async function regenerarCodigosRespaldo(
+  password: string,
+): Promise<{ ok: true; codigos: string[] } | { ok: false; mensaje: string }> {
+  try {
+    const r = await auth.api.generateBackupCodes({ body: { password }, headers: await headers() });
+    return { ok: true, codigos: r.backupCodes };
+  } catch (error) {
+    if (codigoDe(error) === "INVALID_PASSWORD")
+      return { ok: false, mensaje: "La contraseña no es correcta." };
+    if (error instanceof APIError)
+      return { ok: false, mensaje: "No se pudieron regenerar los códigos." };
+    throw error;
+  }
+}
