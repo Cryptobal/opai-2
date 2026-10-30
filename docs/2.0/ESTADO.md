@@ -16,6 +16,15 @@
 - **Decisiones y diseños pendientes:** motor de sueldos: fuentes oficiales, validación contable y diseño (especificación #126); formatos de salida: aprobación de especificación y diseño (#127). P10 de firma está resuelta en [firma.md §15](modulos/firma.md): complemento Cumplimiento DT de Nómina, no integración automática de Firma (#128, #139). No se crean decisiones de negocio en CAR-59.
 - **Operación por confirmar:** no hay evidencia en esta revisión de la revocación de la key `*` de Gard (I-17/CAR-56) ni del resultado del seguimiento de e2e señalado en I-21/CAR-60; no asumir resueltos ni afirmar que siguen fallando sin verificación externa.
 
+## Decisiones y riesgos vigentes
+
+Contrastados con `main` el 30-oct-2026; el detalle sigue en el archivo.
+
+- **BYPASSRLS de `neondb_owner`:** el dueño de las tablas en Neon (y rol de `prisma migrate deploy`) tiene BYPASSRLS, así que FORCE no le afecta; la garantía es `opai_app` sin BYPASSRLS con `tenant_isolation`. Consta en ADR-002 y en [NUCLEO-G2](briefs/NUCLEO-G2-force-rls.md) por una consulta del 27-oct; no se volvió a consultar Neon. Las migraciones de datos verifican filas afectadas ([REGLAS-codigo](REGLAS-codigo.md)). [archivo :820](ESTADO-archivo.md?plain=1#L820).
+- **Inspector DT:** solo lectura, ve sueldos y auditoría (`core:estructuras.read` y `core:audit.read`) y, desde la decisión t479u del 26-oct, también los montos sensibles (`core:estructuras.read_sensible`); así está en `packages/db/scripts/roles-base-plantillas.ts`. [archivo :858](ESTADO-archivo.md?plain=1#L858) y [:504](ESTADO-archivo.md?plain=1#L504).
+- **`IF NOT EXISTS` en `20261028235000_plataforma_aprobaciones_auditoria` (CAR-36):** no valida el esquema de lo que ya existe; lo cubre `packages/db/test/plataforma-migracion-reintento.test.ts`. Regla vigente: una migración nueva no depende de `IF NOT EXISTS` para reintentos sin un test equivalente. [archivo :867](ESTADO-archivo.md?plain=1#L867).
+- **Tope de JS de la ficha de cuenta (CAR-74):** `/(erp)/cuentas/[id]` y sus pestañas siguen en 166 KB en `apps/web/presupuesto-js.json` (excepción a CAR-50 confirmada por Carlos). Sigue pendiente medir en bytes qué creció y volver a 165 KB si se puede; `scripts/presupuesto-js.ts` aún muestra KB con un decimal. [archivo :127](ESTADO-archivo.md?plain=1#L127).
+
 ## Trazabilidad de I-20
 
 Las líneas refieren a la auditoría sobre `f60a88d`; se conservan como evidencia histórica, no como estado actual.
