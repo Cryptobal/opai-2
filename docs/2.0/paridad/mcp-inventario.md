@@ -449,3 +449,4 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `platform.usage.summary`
 - `platform.users.list`
 - `platform.users.set_role`
+- `rondas.puntos.reemplazar_etiqueta`
