@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#4a3fd8"/><text x="50" y="62" font-size="30" font-family="sans-serif" text-anchor="middle" fill="#ffffff">N</text></svg></template>
+<x-dc>
+<helmet><meta name="design_doc_mode" content="canvas"><script src="./ds-base.js"></script><style>body{margin:0;background:var(--ds-n-200)}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style></helmet>
+<div data-theme="light" style="display:flex;flex-direction:column;gap:32px;padding:40px;width:max-content;background:var(--ds-n-200);color:var(--ds-fg)">
+<div style="display:flex;flex-direction:column;gap:4px;max-width:900px">
+<a href="Indice.dc.html" class="t-label-sm" style="text-decoration:none">← Índice · OPAI 2.0 Nómina v2</a>
+<span class="t-title">Hoja de componentes · Nómina · v2</span>
+<span class="t-body-sm" style="color:var(--ds-fg-muted)">Todos los componentes usados en las pantallas 01–10 y B1–B3, con sus variantes y estados. Hover y foco se muestran como estado forzado.</span>
+</div>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+<div data-theme="{{ th.id }}" style="width:760px;background:var(--ds-bg);color:var(--ds-fg);border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:28px;border:1px solid var(--ds-border-strong)">
+<span class="t-heading">{{ th.label }}</span>
+
+<div style="display:flex;flex-direction:column;gap:12px"><span class="t-label">Button · primary, secondary, ghost, destructive</span>
+<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="plus" hint-size="140px,40px">Abrir período</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="download" hint-size="120px,40px">Descargar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="paperclip" hint-size="170px,40px">Subir comprobante</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="destructive" hint-size="120px,40px">Anular</x-import>
+</div>
+<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" style="outline:2px solid var(--ds-focus);outline-offset:2px" hint-size="100px,40px">Foco</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" style="background:var(--ds-fill)" hint-size="100px,40px">Hover</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" disabled="{{ true }}" hint-size="140px,40px">Deshabilitado</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" loading="{{ true }}" loading-label="Generando" hint-size="130px,40px">Generar</x-import>
+</div></div>
+
+<div style="display:flex;flex-direction:column;gap:12px"><span class="t-label">Badge · estados de período y archivo</span>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" dot="{{ true }}" hint-size="80px,22px">Abierto</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="warning" dot="{{ true }}" hint-size="90px,22px">En revisión</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="info" dot="{{ true }}" hint-size="80px,22px">Cerrado</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="success" dot="{{ true }}" hint-size="80px,22px">Pagado</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="danger" dot="{{ true }}" hint-size="90px,22px">Con errores</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="danger" dot="{{ true }}" hint-size="90px,22px">Queda 1 día</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="warning" hint-size="70px,22px">+14,6 %</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" hint-size="140px,22px">Formato por verificar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" hint-size="130px,22px">Plazo por verificar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="info" hint-size="90px,22px">Solo lectura</x-import>
+</div></div>
+
+<div style="display:flex;flex-direction:column;gap:12px"><span class="t-label">Input · Select · Switch · Checkbox · ChipToggle · Segmentado</span>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Umbral de diferencia" value="10" trailing="%" hint-size="100%,68px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="RUT empleador" value="76.111.222-K" mono="{{ true }}" error="Dígito verificador inválido" hint-size="100%,88px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Banco" value="Banco de Chile" options="{{ bancos }}" hint-size="100%,68px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Deshabilitado" value="Atlas Seguridad SpA" disabled="{{ true }}" hint-size="100%,68px"></x-import>
+</div>
+<div style="display:flex;gap:24px;flex-wrap:wrap;align-items:center">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ true }}" label="Avisar 3 días antes" hint-size="200px,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ false }}" disabled="{{ true }}" label="Deshabilitado" hint-size="160px,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ true }}" label="Imponible" hint-size="120px,44px"></x-import>
+</div>
+<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Sobre el umbral" activo="{{ true }}" hint-size="140px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Planta Quilicura" hint-size="140px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipAgregar" hint-size="140px,32px">Agregar concepto</x-import>
+<div style="width:280px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ seg }}" value="pen" label="Estado" hint-size="100%,40px"></x-import></div>
+</div></div>
+
+<div style="display:flex;flex-direction:column;gap:12px"><span class="t-label">Tabs · Alerta</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ tabs }}" value="lic" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="danger" titulo="No puedes cerrar el período" hint-size="100%,72px">12 personas sin AFP en su ficha.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" titulo="Plazo de pago: quedan 2 días hábiles" hint-size="100%,72px">El finiquito no se firma en OPAI.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="OPAI prepara, valida y guarda el comprobante" hint-size="100%,72px">El LRE lo sube el representante en Mi DT.</x-import>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px"><span class="t-label">Table · y su equivalente en 375 (RowCard)</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" compact="{{ true }}" hint-size="100%,160px"></x-import>
+<div style="width:375px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" cards="{{ true }}" to-card="{{ toCard }}" hint-size="100%,160px"></x-import></div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px"><span class="t-label">Uploader · comprobantes</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Uploader" tipos="PDF, JPG o PNG" accept=".pdf" tamano-maximo-mb="{{ 10 }}" archivos-iniciales="{{ files }}" hint-size="100%,200px"></x-import>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px"><span class="t-label">Estados · Skeleton, Empty, ErrorState, Forbidden</span>
+<div style="display:flex;flex-direction:column;gap:8px;padding:16px;border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="200px" height="{{ 18 }}" hint-size="200px,18px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="70%" height="{{ 14 }}" hint-size="70%,14px"></x-import>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" size="sm" icon="wallet" title="Aún no hay períodos" description="Abre el primer período." hint-size="100%,220px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar" description="Revisa tu conexión." code="NOM-503" hint-size="100%,220px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="Sin acceso" description="Pídele acceso a Marcela Rojas." action-label="Pedir acceso" hint-size="100%,220px"></x-import>
+</div></div>
+
+<div style="display:flex;flex-direction:column;gap:12px"><span class="t-label">Patrones · AppShell, Page, PageHeader, Card, FormSection, DetailSection, ActionBar, Sheet</span>
+<span class="t-body-sm" style="color:var(--ds-fg-muted)">Se ven completos en cada pantalla. Sheet aparece en «Carga masiva» (05) y «Marcar registrado» (07).</span>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px;padding-top:20px;border-top:1px solid var(--ds-border)"><span class="t-label">Propuestos como piezas nuevas del DS</span>
+<sc-for list="{{ nuevos }}" as="n" hint-placeholder-count="4">
+<div style="display:flex;gap:12px;align-items:flex-start">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="accent" hint-size="60px,22px">Nuevo</x-import>
+<div style="display:flex;flex-direction:column;gap:2px"><span class="t-label-sm">{{ n.t }}</span><span class="t-body-sm" style="color:var(--ds-fg-muted)">{{ n.d }}</span></div>
+</div>
+</sc-for>
+<span class="t-label-sm" style="margin-top:8px">Stepper · referencia</span>
+<div style="display:flex;gap:8px">
+<sc-for list="{{ steps }}" as="p" hint-placeholder-count="3">
+<div style="flex:1;display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:var(--radius-md);background:var(--ds-surface);border:1px solid var(--ds-border)">
+<sc-if value="{{ p.done }}" hint-placeholder-val="{{ false }}"><span style="width:24px;height:24px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:var(--ds-success-muted);color:var(--ds-success-fg)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Icon" name="check" size="sm" hint-size="16px,16px"></x-import></span></sc-if>
+<sc-if value="{{ p.current }}" hint-placeholder-val="{{ false }}"><span class="t-label-sm" style="width:24px;height:24px;border-radius:999px;display:flex;align-items:center;justify-content:center;border:2px solid var(--ds-accent);color:var(--ds-accent)">2</span></sc-if>
+<sc-if value="{{ p.todo }}" hint-placeholder-val="{{ false }}"><span style="width:24px;height:24px;border-radius:999px;display:flex;align-items:center;justify-content:center;background:var(--ds-fill);color:var(--ds-fg-subtle)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Icon" name="lock" size="sm" hint-size="16px,16px"></x-import></span></sc-if>
+<span class="t-label-sm">{{ p.t }}</span>
+</div>
+</sc-for>
+</div>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    return {
+      themes: [{ id: "light", label: "Claro" }, { id: "dark", label: "Oscuro" }],
+      bancos: ["Banco de Chile", "BancoEstado", "Santander"],
+      seg: [{ value: "pen", label: "Por registrar" }, { value: "reg", label: "Registrados" }],
+      tabs: [{ id: "todas", label: "Todas" }, { id: "lic", label: "Licencias" }, { id: "hex", label: "Horas extra" }, { id: "ant", label: "Anticipos" }],
+      cols: [
+        { key: "per", label: "Persona", strong: true },
+        { key: "rut", label: "RUT", mono: true, muted: true },
+        { key: "liq", label: "Líquido", align: "right" },
+        { key: "e", label: "Estado", render: (r) => (NS.Badge ? h(NS.Badge, { tone: r.t, dot: true }, r.e) : r.e) },
+      ],
+      rows: [
+        { id: 1, per: "Camila Herrera", rut: "12.345.678-9", liq: "$ 590.112", e: "Revisada", t: "success" },
+        { id: 2, per: "Luis Pérez", rut: "9.876.543-2", liq: "$ 412.180", e: "Con observación", t: "warning" },
+      ],
+      toCard: (r) => ({ initials: r.per.split(" ").map((x) => x[0]).join(""), title: r.per, subtitle: r.rut + " · " + r.liq, badge: { tone: r.t, label: r.e }, chevron: true }),
+      files: [{ nombre: "comprobante_previred_oct.pdf", size: 182000, estado: "listo" }, { nombre: "comprobante_midt.pdf", size: 96000, estado: "error", error: "El archivo supera 10 MB" }],
+      nuevos: [
+        { t: "Stepper (etapas)", d: "Etapas numeradas con hecha / en curso / bloqueada. Lo usan Cierre de mes (02) y el trámite de Finiquito (08). Hoy está armado con tokens; se propone como pieza del DS." },
+        { t: "Plazo (Badge de días restantes)", d: "Variante semántica de Badge: danger ≤ 1 día o vencido, warning ≤ 7, neutral el resto. Contratos (07) y Finiquito (08)." },
+        { t: "Fila de archivo / obligación", d: "Card con ícono, nombre de archivo en mono, estado, Badge «Formato por verificar» y acciones. Archivos (06) y Calendario (10)." },
+        { t: "Lista de módulos (navegación secundaria)", d: "Columna de módulos en Configuración › Módulos: ítem activo con fill y fg, como el sidebar. A 375 pasa a lista con chevron y «‹ Módulos» para volver. Pantalla 09." },
+        { t: "Vista previa de documento", d: "Hoja con los tokens --ds-paper* para la liquidación en PDF (04). Misma base que el AnexoContrato pendiente en el DS." },
+      ],
+      steps: [{ t: "Hecha", done: true }, { t: "En curso", current: true }, { t: "Bloqueada", todo: true }],
+    };
+  }
+}
+</script>
+</body>
+</html>

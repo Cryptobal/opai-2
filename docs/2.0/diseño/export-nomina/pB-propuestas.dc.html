@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><script src="./nomina-data.js"></script><style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style></helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="{{ active }}" title="{{ shellTitle }}" user="{{ user }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<sc-if value="{{ showHeader }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="{{ eyebrow }}" title="{{ titulo }}" subtitle="{{ subtitulo }}" badge="{{ propBadge }}" hint-size="100%,80px">
+<sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="{{ ctaIcon }}" hint-size="170px,40px">{{ cta }}</x-import>
+</sc-if>
+</x-import>
+</sc-if>
+
+<sc-if value="{{ isOk }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:16px">
+<sc-if value="{{ isCuadratura }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" titulo="3 personas no cuadran al peso" hint-size="100%,72px">Revisa cada diferencia antes de dejar OPAI 1.0. Las demás 145 coinciden en imponible, descuentos y líquido.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cCols }}" rows="{{ cRows }}" cards="{{ isPhone }}" to-card="{{ cCard }}" hint-size="100%,260px"></x-import>
+</sc-if>
+<sc-if value="{{ isAnticipo }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,160px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ true }}" label="Generar el anticipo quincenal automáticamente" description="El 15 de cada mes, para quienes lo tienen en su ficha. Se descuenta en la liquidación del mes." hint-size="100%,64px"></x-import>
+</div>
+</x-import>
+<span class="t-label">Anticipo del 15-11-2026 · 42 personas</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ aCols }}" rows="{{ aRows }}" cards="{{ isPhone }}" to-card="{{ aCard }}" hint-size="100%,220px"></x-import>
+</sc-if>
+<sc-if value="{{ isPrestamo }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,120px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Camila Herrera · préstamo empresa" rows="{{ pPares }}" hint-size="100%,120px"></x-import>
+</x-import>
+<span class="t-label">Plan de cuotas</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ pCols }}" rows="{{ pRows }}" compact="{{ true }}" cards="{{ isPhone }}" to-card="{{ pCard }}" hint-size="100%,260px"></x-import>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isCargando }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:12px" aria-busy="true">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 72 }}" radius="{{ 10 }}" hint-size="100%,72px"></x-import>
+<sc-for list="{{ skel }}" as="s" hint-placeholder-count="5"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 44 }}" radius="{{ 6 }}" hint-size="100%,44px"></x-import></sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="{{ emptyIcon }}" title="{{ emptyTitle }}" description="{{ emptyDesc }}" action="{{ emptyAction }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar esta vista" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="NOM-B-503" on-retry="{{ noop }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ isSinPermiso }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a Nómina" description="Las remuneraciones solo las ven RRHH, gerencia y administración. Pídele acceso a Marcela Rojas, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,320px"></x-import>
+</sc-if>
+</x-import>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;variante&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;cuadratura&quot;,&quot;anticipo&quot;,&quot;prestamo&quot;],&quot;default&quot;:&quot;cuadratura&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ok&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;ok&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;role&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;admin&quot;,&quot;rrhh&quot;,&quot;gerente&quot;,&quot;inspector&quot;,&quot;supervisor&quot;],&quot;default&quot;:&quot;admin&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const ND = window.ND;
+    if (!ND) return {};
+    const v = this.props.variante ?? "cuadratura";
+    const b = ND.base(this.props, v === "cuadratura" ? "per" : "nov", "Variante B");
+    const m = (x) => (b.isGerente ? ND.mask : ND.money(x));
+    const per = (r) => h("span", { style: { display: "flex", flexDirection: "column" } }, h("span", null, r.per), h("span", { className: "t-mono", style: { fontSize: 12, color: "var(--ds-fg-muted)" } }, r.rut));
+    const badge = (t, l) => (NS.Badge ? h(NS.Badge, { tone: t, dot: true }, l) : l);
+    const cfg = {
+      cuadratura: { eyebrow: "Cierre de mes · corte de migración", titulo: "Cuadratura contra OPAI 1.0", subtitulo: "Octubre 2026 · corte de migración · 148 personas", cta: "Aprobar cuadratura", ctaIcon: "check", emptyIcon: "refresh", emptyTitle: "Aún no hay datos de OPAI 1.0", emptyDesc: "Importa la nómina de septiembre desde OPAI 1.0 para compararla.", emptyCta: "Importar nómina 1.0" },
+      anticipo: { eyebrow: "Novedades · anticipos", titulo: "Anticipo quincenal automático", subtitulo: "Para quienes lo tienen en su ficha", cta: "Revisar y aprobar", ctaIcon: "check", emptyIcon: "wallet", emptyTitle: "Nadie tiene anticipo en su ficha", emptyDesc: "Actívalo en la ficha de cada persona que lo pida.", emptyCta: "Ir a Personas" },
+      prestamo: { eyebrow: "Novedades · préstamos", titulo: "Préstamo con plan de cuotas", subtitulo: "Las cuotas se descuentan solas en cada liquidación", cta: "Nuevo préstamo", ctaIcon: "plus", emptyIcon: "landmark", emptyTitle: "Aún no hay préstamos", emptyDesc: "Registra un préstamo y define sus cuotas.", emptyCta: "Nuevo préstamo" },
+    }[v];
+    return {
+      ...b, ...cfg,
+      isCuadratura: v === "cuadratura", isAnticipo: v === "anticipo", isPrestamo: v === "prestamo",
+      propBadge: null,
+      cCols: [
+        { key: "per", label: "Persona", render: per },
+        { key: "c", label: "Concepto", strong: true },
+        { key: "a", label: "OPAI 1.0", align: "right", render: (r) => m(r.a) },
+        { key: "n", label: "OPAI 2.0", align: "right", render: (r) => m(r.n) },
+        { key: "d", label: "Diferencia", align: "right", render: (r) => (NS.Badge ? h(NS.Badge, { tone: "warning" }, m(Math.abs(r.n - r.a))) : "") },
+      ],
+      cRows: [
+        { id: 1, per: "Diego Silva", rut: "13.456.789-0", c: "Líquido", a: 494600, n: 494599 },
+        { id: 2, per: "María F. Soto", rut: "16.234.567-8", c: "Impuesto único", a: 12400, n: 12873 },
+        { id: 3, per: "Ricardo Vega", rut: "14.111.222-3", c: "Seguro de cesantía", a: 4188, n: 4190 },
+      ],
+      cCard: (r) => ({ title: r.per + " · " + r.c, subtitle: "1.0 " + m(r.a) + " · 2.0 " + m(r.n), badge: { tone: "warning", label: "Dif. " + m(Math.abs(r.n - r.a)) } }),
+      aCols: [
+        { key: "per", label: "Persona", render: per },
+        { key: "inst", label: "Instalación", muted: true },
+        { key: "v", label: "Anticipo", align: "right", render: (r) => m(r.v) },
+        { key: "e", label: "Estado", render: (r) => badge(r.t, r.e) },
+      ],
+      aRows: [
+        { id: 1, per: "Camila Herrera", rut: "12.345.678-9", inst: "Planta Quilicura", v: 100000, e: "Listo", t: "success" },
+        { id: 2, per: "Héctor Araya", rut: "15.009.332-7", inst: "Torre Apoquindo", v: 120000, e: "Listo", t: "success" },
+        { id: 3, per: "Diego Silva", rut: "13.456.789-0", inst: "Planta Quilicura", v: 100000, e: "Supera 50 % del líquido estimado", t: "warning" },
+      ],
+      aCard: (r) => ({ initials: r.per.split(" ").map((x) => x[0]).join("").slice(0, 2), title: r.per, subtitle: r.inst + " · " + m(r.v), badge: { tone: r.t, label: r.e } }),
+      pPares: [
+        { label: "Monto", value: m(360000), numeric: true },
+        { label: "Cuotas", value: "12 de " + m(30000), numeric: true },
+        { label: "Primera cuota", value: "Abril 2026" },
+        { label: "Saldo", value: m(180000), numeric: true },
+      ],
+      pCols: [
+        { key: "n", label: "Cuota", align: "right", width: 64 },
+        { key: "p", label: "Período", strong: true },
+        { key: "v", label: "Monto", align: "right", render: (r) => m(r.v) },
+        { key: "e", label: "Estado", render: (r) => badge(r.t, r.e) },
+      ],
+      pRows: [
+        { id: 6, n: 6, p: "Septiembre 2026", v: 30000, e: "Descontada", t: "success" },
+        { id: 7, n: 7, p: "Octubre 2026", v: 30000, e: "En liquidación", t: "info" },
+        { id: 8, n: 8, p: "Noviembre 2026", v: 30000, e: "Programada", t: "neutral" },
+        { id: 9, n: 9, p: "Diciembre 2026", v: 30000, e: "Programada", t: "neutral" },
+      ],
+      pCard: (r) => ({ title: "Cuota " + r.n + " · " + r.p, subtitle: m(r.v), badge: { tone: r.t, label: r.e } }),
+      emptyAction: NS.Button && b.canEdit ? h(NS.Button, null, cfg.emptyCta) : null,
+    };
+  }
+}
+</script>
+</body>
+</html>
