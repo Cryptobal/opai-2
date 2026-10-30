@@ -4054,7 +4054,7 @@ function InicioDesk({
     }
   }, /*#__PURE__*/React.createElement("span", {
     className: "t-title"
-  }, "Buenos d\xEDas, Carlos"), /*#__PURE__*/React.createElement("span", {
+  }, "Buenos d\xEDas, Andr\xE9s"), /*#__PURE__*/React.createElement("span", {
     className: "t-body-sm muted"
   }, "Viernes 23-10-2026 \xB7 Atlas Seguridad SpA")), /*#__PURE__*/React.createElement("div", {
     style: {
@@ -5434,7 +5434,7 @@ function CotizacionPhone({
     label: "Raz\xF3n social",
     value: cliente,
     onChange: setCliente,
-    hint: cliente === "la" ? "76.543.210-K" : "76.543.210-3",
+    hint: cliente === "la" ? "76.543.210-K" : "76.543.210-K",
     options: [{
       value: "la",
       label: "Logística Andina SpA",
@@ -5442,7 +5442,7 @@ function CotizacionPhone({
     }, {
       value: "rs",
       label: "Retail Sur SpA",
-      meta: "76.543.210-3"
+      meta: "76.543.210-K"
     }]
   }), /*#__PURE__*/React.createElement(PInput, {
     label: "Correo para enviar la cotizaci\xF3n",
@@ -5803,7 +5803,7 @@ function InicioPhone({
     }
   }, /*#__PURE__*/React.createElement("h1", {
     className: "t-title m0"
-  }, "Buenos d\xEDas, Carlos"), /*#__PURE__*/React.createElement("span", {
+  }, "Buenos d\xEDas, Andr\xE9s"), /*#__PURE__*/React.createElement("span", {
     className: "t-body-sm muted"
   }, "Viernes 23-10-2026")), /*#__PURE__*/React.createElement("div", {
     style: {

@@ -55,7 +55,6 @@ B1–B3 fueron decididas por Carlos el 30-oct-2026.
 ## Pendientes menores (no bloquean)
 
 - El bundle `_ds` aún trae una descripción por defecto de Forbidden con «Pídele acceso a Andrés Molina» (ficticio, no genérico).
-- El RUT de ejemplo 76.543.210-3 del bundle tiene DV válido (confirmar que no es real).
-- El encabezado de Privacidad en la ficha aún dice «Consentimientos y derechos del titular».
 - Historial de DPA/bases con fecha 03-03-2026.
+- 30-oct-2026 ~15:25 CLT: correcciones de texto del Abogado (encabezado Bases de tratamiento, Registrar oposición, saludo y RUT de ejemplo).
 - Hex sueltos #4a3fd8/#fff en los envoltorios de miniaturas.

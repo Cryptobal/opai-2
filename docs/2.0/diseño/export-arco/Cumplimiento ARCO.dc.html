@@ -205,7 +205,9 @@
 <sc-for list="{{ consents }}" as="c" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:12px;min-height:56px;border-top:1px solid var(--ds-border)">
 <div style="flex:1;min-width:0"><div class="t-body-sm" style="font-weight:500">{{ c.name }}</div><div class="t-caption" style="color:var(--ds-fg-muted)">{{ c.meta }}</div></div>
 <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ c.tone }}" hint-size="90px,22px">{{ c.state }}</x-import>
-<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" disabled="{{ c.off }}" hint-size="90px,40px">{{ c.act }}</x-import></div></sc-for></div></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" disabled="{{ c.off }}" hint-size="90px,40px">{{ c.act }}</x-import></div></sc-for>
+<span class="t-caption" style="color:var(--ds-fg-muted);text-wrap:pretty;padding:8px 0 0">Al registrarla dejamos de usar este dato para esa finalidad, salvo que acreditemos motivos legítimos imperiosos que prevalezcan o lo necesitemos para una reclamación (art. 8° a).</span>
+</div></x-import>
 <div style="display:flex;flex-direction:column;gap:16px">
 <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Solicitudes del titular" hint-size="100%,100px"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><div><div class="t-body-sm" style="font-weight:500">Acceso · 02-12-2026</div><div class="t-caption" style="color:var(--ds-fg-muted)">Responsable: Valentina Rojas</div></div>
 <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="success" hint-size="110px,22px">14 de 30 días</x-import></div></x-import>
@@ -303,7 +305,7 @@ class Component extends DCLogic {
       dpa: ["Cumplimiento", "DPA y delegado de protección de datos", "Acuerdo de tratamiento y contacto de privacidad"],
       rat: ["Cumplimiento", "Registro de actividades (RAT)", "8 actividades de tratamiento"],
       retencion: ["Cumplimiento", "Retención y anonimización", "Plazos por categoría de dato"],
-      privacidad: ["Personas · María F. Soto", "Privacidad", "Consentimientos y derechos del titular"],
+      privacidad: ["Personas · María F. Soto", "Privacidad", "Bases de tratamiento y derechos del titular"],
     }[base] || ["", "", ""];
     const act = { bandeja: ["Registrar solicitud", "plus", "primary"], detalle: null, responder: ["Enviar respuesta", "check", "primary"], incidentes: ["Registrar incidente", "plus", "primary"], rat: ["Exportar PDF", "download", "secondary"], retencion: ["Anonimizar persona", "lock", "primary"], privacidad: ["Exportar datos del titular", "download", "primary"], dpa: ["Descargar DPA", "download", "secondary"] }[base] || null;
     const detalleAct = base === "detalle";
@@ -443,8 +445,8 @@ class Component extends DCLogic {
       retCols: [{ key: "cat", label: "Categoría" }, { key: "plazo", label: "Retención" }, { key: "fund", label: "Fundamento" }, { key: "anon", label: "Anonimización" }],
       retCard: (r) => ({ initials: "RE", title: r.cat, subtitle: r.plazo, meta: r.fund }),
       consents: [
-        { name: "Uso de geolocalización en rondas", meta: "Con derecho de oposición (art. 8° a)", state: "Interés legítimo", tone: "neutral", off: false, act: "Oponerse" },
-        { name: "Envío de comunicaciones internas", meta: "Con derecho de oposición (art. 8° a)", state: "Interés legítimo", tone: "neutral", off: false, act: "Oponerse" },
+        { name: "Uso de geolocalización en rondas", meta: "Con derecho de oposición (art. 8° a)", state: "Interés legítimo", tone: "neutral", off: false, act: "Registrar oposición" },
+        { name: "Envío de comunicaciones internas", meta: "Con derecho de oposición (art. 8° a)", state: "Interés legítimo", tone: "neutral", off: false, act: "Registrar oposición" },
         { name: "Uso de imagen en credencial", meta: "Revocado 11-12-2026", state: "Revocado", tone: "neutral", off: true, act: "Revocar" },
       ],
       privTl: [{ initials: "MS", who: "María F. Soto", action: "revocó «uso de imagen en credencial»", when: "11-12-2026 16:40" }, { initials: "AM", who: "Andrés Molina", action: "registró las bases de tratamiento", when: "03-03-2026 10:02" }],
