@@ -36,6 +36,13 @@ export const PERMISOS_CORE = {
   anexosManage: "core:anexos.manage",
   documentosRead: "core:documentos.read",
   documentosManage: "core:documentos.manage",
+  // Firma electrónica del núcleo (firma.md §8, CAR-82). Enviar y leer solicitudes; configurar la
+  // política por tipo de documento (solo owner/admin); registrar el estado del finiquito en la DT.
+  // Firmar y rechazar como firmante son actos personales sin permiso de rol (soloPersonas).
+  firmasEnviar: "core:firmas.enviar",
+  firmasRead: "core:firmas.read",
+  firmasConfig: "core:firmas.config",
+  finiquitosManage: "core:finiquitos.manage",
   configRead: "core:config.read",
   configManage: "core:config.manage",
   marcaManage: "core:marca.manage",
