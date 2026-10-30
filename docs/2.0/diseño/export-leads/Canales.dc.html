@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="ds-propuestas.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-accent)}</style>
+</helmet>
+<div data-theme="{{ theme }}" data-screen-label="Canales de entrada" style="position:relative;width:100%;height:100%;overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="aju" title="{{ shellTitle }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<div style="display:flex;flex:1;min-height:0">
+<sc-if value="{{ showSubnav }}" hint-placeholder-val="{{ true }}">
+<nav aria-label="Módulos" style="width:232px;flex:none;border-right:1px solid var(--ds-border);padding:24px 12px;display:flex;flex-direction:column;gap:2px;overflow:auto">
+<span class="t-overline" style="padding:0 12px 8px">Módulos</span>
+<sc-for list="{{ subnav }}" as="n" hint-placeholder-count="6">
+<span class="{{ n.cls }}" style="{{ n.style }}">{{ n.label }}</span>
+</sc-for>
+</nav>
+</sc-if>
+<div style="flex:1;min-width:0;overflow:auto;display:flex;flex-direction:column">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" style="flex:1;max-width:880px;margin:0" hint-size="100%,600px">
+<sc-if value="{{ isPhoneLista }}" hint-placeholder-val="{{ false }}">
+<div style="margin:0 0 8px -8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="chevron-left" hint-size="140px,40px">Configuración</x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" size="heading" title="Módulos" hint-size="100%,40px"></x-import>
+<div style="margin:0 -16px;border-top:1px solid var(--ds-border);border-bottom:1px solid var(--ds-border);background:var(--ds-surface)">
+<sc-for list="{{ modulos }}" as="m" hint-placeholder-count="6">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" title="{{ m.label }}" subtitle="{{ m.sub }}" chevron="{{ true }}" on-click="{{ noop }}" hint-size="100%,64px"></x-import>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ showEntrada }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="margin:0 0 8px -8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="chevron-left" hint-size="110px,40px">Módulos</x-import>
+</div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<nav aria-label="Migas" class="t-body-sm muted" style="display:flex;gap:6px;align-items:center;margin-bottom:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Enlace" href="#" hint-size="100px,20px">Configuración</x-import>
+<span aria-hidden="true">›</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Enlace" href="#" hint-size="70px,20px">Módulos</x-import>
+</nav>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" size="heading" title="Leads" subtitle="Solicitudes de clientes: canales, responsables y acuse." hint-size="100%,64px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ modTabs }}" value="aju" style="margin-bottom:16px" hint-size="100%,44px"></x-import>
+<div style="display:flex;flex-direction:column;gap:2px;margin-bottom:16px">
+<h2 class="t-subheading m0">Canales de entrada</h2>
+<span class="t-body-sm muted">Cómo llegan las solicitudes a la bandeja.</span>
+</div>
+
+<sc-if value="{{ isVariantB }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" icono="flag" titulo="Variante B · Propuesta, a confirmar por Carlos" style="margin-bottom:16px" hint-size="100%,64px">Agrega asignación automática por reglas y un formulario alojado por OPAI. Lo decidido está en la variante A.</x-import>
+</sc-if>
+
+<sc-if value="{{ isOk }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:16px">
+
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Formulario web" description="Recibe solicitudes desde el formulario de tu sitio. Usa un endpoint propio con su clave." hint-size="100%,360px">
+<sc-if value="{{ claveRevocada }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="danger" titulo="La clave del formulario fue revocada" accion="{{ generarAction }}" hint-size="100%,88px">Tu sitio dejó de enviar solicitudes el 28-10-2026 16:40. Genera una nueva clave y actualiza el código en tu sitio.</x-import>
+</sc-if>
+<div style="display:flex;flex-direction:column">
+<div class="pg-kv"><span class="l">Estado</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ webTone }}" hint-size="100px,22px">{{ webEstado }}</x-import></div>
+<div class="pg-kv"><span class="l">Endpoint</span><span class="t-mono" style="overflow-wrap:anywhere;text-align:right">api.opai.cl/t/atlas/solicitudes</span></div>
+<div class="pg-kv"><span class="l">Clave</span><span class="t-mono">{{ claveMask }}</span></div>
+<div class="pg-kv"><span class="l">Última solicitud</span><span class="t-numeric" style="font-weight:400">{{ ultimaWeb }}</span></div>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Dominio autorizado" hint="Solo se aceptan envíos desde este dominio." default-value="atlasseguridad.cl" hint-size="100%,88px"></x-import>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="copy" hint-size="150px,40px">Copiar código</x-import>
+<sc-if value="{{ claveActiva }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="key" on-click="{{ openDialog }}" hint-size="180px,40px">Generar nueva clave</x-import>
+</sc-if>
+</div>
+</x-import>
+
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Correo de entrada" description="Cada mensaje que llega a esta dirección crea una solicitud nueva, con sus adjuntos." hint-size="100%,300px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Campo" etiqueta="Dirección" hint-size="100%,72px">
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+<span class="t-mono" style="flex:1;min-width:200px;min-height:44px;display:flex;align-items:center;padding:0 12px;border-radius:var(--radius-md);background:var(--ds-fill)">solicitudes@atlas.opai.cl</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="copy" hint-size="100px,40px">Copiar</x-import>
+</div>
+</x-import>
+<sc-if value="{{ sinMensajes }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.StatePanel" kind="empty" icon="mail" title="Aún no llegan mensajes" description="Envía un correo de prueba a esta dirección para revisar que todo funcione." action="{{ copiarDirAction }}" hint-size="100%,200px"></x-import>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Campo" etiqueta="Remitentes ignorados" ayuda="No crean solicitudes. Acepta direcciones o dominios completos." hint-size="100%,90px">
+<div class="chip-row" style="flex-wrap:wrap">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Chip" etiqueta="noreply@*" on-quitar="{{ noop }}" hint-size="120px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Chip" etiqueta="@mailchimp.com" on-quitar="{{ noop }}" hint-size="150px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipAgregar" hint-size="120px,32px"></x-import>
+</div>
+</x-import>
+<sc-if value="{{ conRechazados }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:8px">
+<span class="t-label">Mensajes rechazados</span>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg)">
+<sc-for list="{{ rechazados }}" as="r" hint-placeholder-count="2">
+<div style="display:flex;gap:12px;align-items:flex-start;padding:12px;border-bottom:1px solid var(--ds-border);color:var(--ds-fg-muted)">
+<span class="ic sm i-ban" style="margin-top:2px"></span>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+<span class="t-body-sm" style="overflow-wrap:anywhere">{{ r.de }}</span>
+<span class="t-body-sm" style="overflow-wrap:anywhere">{{ r.asunto }}</span>
+<span class="t-caption">{{ r.motivo }}</span>
+</div>
+<span class="t-caption t-numeric" style="font-weight:400;white-space:nowrap">{{ r.fecha }}</span>
+</div>
+</sc-for>
+</div>
+<span class="t-caption">No crean solicitudes. El remitente no recibe aviso.</span>
+</div>
+</sc-if>
+</x-import>
+
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Responsable por defecto" description="Quién recibe cada solicitud nueva, según su canal." hint-size="100%,260px">
+<div style="{{ respGrid }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Formulario web" options="{{ personas }}" value="mr" hint-size="100%,68px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Correo de entrada" options="{{ personas }}" value="mr" hint-size="100%,68px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Agente" options="{{ personasAgente }}" value="quien" hint-size="100%,68px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Registro manual" options="{{ personasManual }}" value="quien" hint-size="100%,68px"></x-import>
+</div>
+</x-import>
+
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Acuse de recibo" description="Respuesta automática al lead. Sale por Comunicaciones del núcleo." hint-size="100%,200px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ acuse }}" on-change="{{ toggleAcuse }}" label="Enviar acuse de recibo" description="Apagado por defecto." hint-size="100%,56px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Plantilla de Comunicaciones" options="{{ plantillas }}" value="acuse" disabled="{{ acuseOff }}" hint-size="100%,68px"></x-import>
+</x-import>
+
+<sc-if value="{{ isVariantB }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Asignación automática · Propuesta" description="Las reglas se revisan en orden. Si ninguna aplica, se usa el responsable por defecto." hint-size="100%,320px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ true }}" label="Asignar por reglas" description="Por comuna, servicio o monto estimado." hint-size="100%,56px"></x-import>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ reglaCols }}" rows="{{ reglas }}" compact="{{ true }}" hint-size="100%,160px"></x-import>
+</sc-if>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg)">
+<sc-for list="{{ reglas }}" as="r" hint-placeholder-count="3">
+<div style="display:flex;flex-direction:column;gap:2px;padding:12px;border-bottom:1px solid var(--ds-border)">
+<span class="t-body-sm">{{ r.cond }}</span>
+<span class="t-body-sm muted">Asigna a {{ r.asig }}</span>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="plus" hint-size="150px,40px">Agregar regla</x-import></div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Formulario alojado por OPAI · Propuesta" description="Una página pública del tenant, además del código para pegar en tu sitio." hint-size="100%,200px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ false }}" label="Publicar página de contacto" description="Usa la misma clave y el mismo responsable del formulario web." hint-size="100%,56px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Campo" etiqueta="Dirección pública" hint-size="100%,72px">
+<span class="t-mono" style="min-height:44px;display:flex;align-items:center;padding:0 12px;border-radius:var(--radius-md);background:var(--ds-fill)">atlas.opai.cl/contacto</span>
+</x-import>
+</x-import>
+</sc-if>
+
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ActionBar" hint-size="100%,72px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" block="{{ isPhone }}" hint-size="150px,44px">Guardar cambios</x-import>
+</x-import>
+</div>
+</sc-if>
+
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;min-height:420px;display:flex">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="inbox" title="Aún no conectas ningún canal" description="Activa el correo de entrada o conecta el formulario de tu sitio para recibir solicitudes." action="{{ activarAction }}" hint-size="100%,360px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ isCargando }}" hint-placeholder-val="{{ false }}">
+<div aria-busy="true" style="display:flex;flex-direction:column;gap:16px">
+<sc-for list="{{ sk3 }}" as="s" hint-placeholder-count="3">
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px;display:flex;flex-direction:column;gap:12px;background:var(--ds-surface)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ 160 }}" height="{{ 18 }}" hint-size="160px,18px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="70%" height="{{ 12 }}" hint-size="70%,12px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 44 }}" radius="{{ 10 }}" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ 140 }}" height="{{ 40 }}" radius="{{ 10 }}" hint-size="140px,40px"></x-import>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;min-height:420px;display:flex">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar los canales" description="Tus canales siguen recibiendo solicitudes. Revisa tu conexión e inténtalo de nuevo." code="COM-CAN-503" on-retry="{{ noop }}" hint-size="100%,360px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;min-height:420px;display:flex">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="Solo owner y admin configuran los canales" description="Tu rol (Gerente) puede ver y convertir solicitudes, pero no cambiar los canales. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,360px"></x-import>
+</div>
+</sc-if>
+</sc-if>
+</x-import>
+</div>
+</div>
+</x-import>
+
+<sc-if value="{{ hasDialog }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Dialog" contained="{{ true }}" title="¿Generar una nueva clave?" description="La clave actual deja de funcionar de inmediato. Tendrás que pegar el código nuevo en tu sitio." actions="{{ dialogActions }}" on-close="{{ closeDialog }}" hint-size="480px,240px"></x-import>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ok&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;ok&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;escenario&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;estados&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;variante&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;a&quot;,&quot;b&quot;],&quot;default&quot;:&quot;a&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;dialogo&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ninguno&quot;,&quot;clave&quot;],&quot;default&quot;:&quot;ninguno&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { acuse: false, dialogo: null };
+  componentDidMount() {
+    if (window.OPAI20DesignSystem_44e4d7 && window.OPAI20DesignSystem_44e4d7.Button) return;
+    this._t = setInterval(() => { if (window.OPAI20DesignSystem_44e4d7 && window.OPAI20DesignSystem_44e4d7.Button) { clearInterval(this._t); this.forceUpdate(); } }, 100);
+  }
+  componentWillUnmount() { clearInterval(this._t); }
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = this.props.device ?? "desktop";
+    const isPhone = device === "phone";
+    const e = this.props.estado ?? "ok";
+    const estados = (this.props.escenario ?? "normal") === "estados";
+    const dialogo = this.state.dialogo ?? this.props.dialogo ?? "ninguno";
+    const btn = (label, icon, variant, onClick) => (NS.Button ? h(NS.Button, { icon, variant, onClick }, label) : null);
+    const openDialog = () => this.setState({ dialogo: "clave" });
+    const closeDialog = () => this.setState({ dialogo: "ninguno" });
+    const navItem = (label, on) => ({ label, cls: on ? "t-label-sm" : "t-body-sm", style: "display:flex;align-items:center;min-height:40px;padding:0 12px;border-radius:var(--radius-md);" + (on ? "background:var(--ds-fill);color:var(--ds-fg)" : "color:var(--ds-fg-muted)") });
+    return {
+      device, theme: this.props.theme ?? "light", isPhone,
+      shellTitle: isPhone ? "" : "Configuración",
+      showSubnav: device !== "phone", notPhone: !isPhone,
+      isPhoneLista: isPhone && (this.props.vista ?? "entrada") === "lista",
+      showEntrada: !(isPhone && (this.props.vista ?? "entrada") === "lista"),
+      subnav: ["Leads", "Cotizaciones", "Pauta", "Rondas", "Tickets", "Finanzas"].map((m) => navItem(m, m === "Leads")),
+      modulos: [
+        { label: "Leads", sub: "Canales de entrada, responsables y acuse" },
+        { label: "Cotizaciones", sub: "Cotización rápida y formatos" },
+        { label: "Pauta", sub: "Turnos y planillas" },
+        { label: "Rondas", sub: "Puntos y frecuencias" },
+        { label: "Tickets", sub: "Categorías y prioridades" },
+        { label: "Finanzas", sub: "Facturación y cobranza" },
+      ],
+      modTabs: [{ id: "res", label: "Resumen" }, { id: "aju", label: "Ajustes" }],
+      isVariantB: (this.props.variante ?? "a") === "b",
+      isOk: e === "ok", isVacio: e === "vacio", isCargando: e === "cargando", isError: e === "error", isForbidden: e === "sinpermiso",
+      claveRevocada: estados, claveActiva: !estados, sinMensajes: estados, conRechazados: estados,
+      webTone: estados ? "danger" : "success", webEstado: estados ? "Sin conectar" : "Conectado",
+      claveMask: estados ? "Revocada el 28-10-2026" : "opk_live_••••••••3f9a",
+      ultimaWeb: estados ? "28-10-2026 16:12" : "30-10-2026 08:41",
+      rechazados: [
+        { de: "ventas@ofertas-flash.cl", asunto: "«Últimos cupos: oferta exclusiva para su empresa»", motivo: "Rechazado: posible spam", fecha: "29-10-2026 22:14" },
+        { de: "jperez@constructoravalle.cl", asunto: "«Planos licitación obra Lampa»", motivo: "Rechazado: supera 25 MB (38 MB en adjuntos)", fecha: "29-10-2026 15:47" },
+      ],
+      respGrid: isPhone ? "display:flex;flex-direction:column;gap:12px" : "display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px",
+      personas: [{ value: "mr", label: "Matías Rojas" }, { value: "vs", label: "Valentina Soto" }, { value: "ci", label: "Carlos Irigoyen" }],
+      personasAgente: [{ value: "quien", label: "Quien conversa con OPAI" }, { value: "mr", label: "Matías Rojas" }, { value: "vs", label: "Valentina Soto" }],
+      personasManual: [{ value: "quien", label: "Quien la registra" }, { value: "mr", label: "Matías Rojas" }, { value: "vs", label: "Valentina Soto" }],
+      plantillas: [{ value: "acuse", label: "Acuse de solicitud recibida" }],
+      acuse: this.state.acuse, acuseOff: !this.state.acuse, toggleAcuse: () => this.setState({ acuse: !this.state.acuse }),
+      reglaCols: [{ key: "cond", label: "Si" }, { key: "asig", label: "Asigna a" }],
+      reglas: [
+        { id: 1, cond: "Comuna es Quilicura o Lampa", asig: "Matías Rojas" },
+        { id: 2, cond: "Servicio es Conserjería", asig: "Valentina Soto" },
+        { id: 3, cond: "Monto estimado sobre $ 5.000.000", asig: "Carlos Irigoyen" },
+      ],
+      generarAction: btn("Generar nueva clave", "key", "secondary", openDialog),
+      copiarDirAction: btn("Copiar dirección", "copy", "secondary"),
+      activarAction: btn("Activar correo de entrada", "mail"),
+      hasDialog: dialogo === "clave", openDialog, closeDialog,
+      dialogActions: h(React.Fragment, null, btn("Cancelar", null, "ghost", closeDialog), btn("Generar nueva clave", null, "destructive")),
+      noop: () => {}, sk3: [1, 2, 3],
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "sol", label: "Solicitudes", icon: "inbox" }, { id: "neg", label: "Negocios", icon: "briefcase" }, { id: "aju", label: "Configuración", icon: "settings" }, { id: "mas", label: "Más", icon: "more" }],
+      groups: [
+        { items: [{ id: "ini", label: "Inicio", icon: "home" }] },
+        { title: "Comercial", items: [{ id: "sol", label: "Solicitudes", icon: "inbox" }, { id: "neg", label: "Negocios", icon: "briefcase" }, { id: "cot", label: "Cotizaciones", icon: "file" }, { id: "con", label: "Contactos", icon: "users" }] },
+        { title: "Operaciones", items: [{ id: "ins", label: "Instalaciones", icon: "building" }, { id: "pau", label: "Pauta mensual", icon: "calendar" }] },
+        { title: "Configuración", items: [{ id: "aju", label: "Configuración", icon: "settings" }] },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

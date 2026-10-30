@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="ds-propuestas.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-accent)}</style>
+</helmet>
+<div data-theme="{{ theme }}" data-sheet="{{ sheetMode }}" data-screen-label="Bandeja" style="position:relative;width:100%;height:100%;overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="sol" title="{{ shellTitle }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" style="flex:1" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Comercial" title="Solicitudes" subtitle="Atlas Seguridad SpA" hint-size="100%,80px">
+<sc-if value="{{ showHeaderAction }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="plus" on-click="{{ openSheet }}" hint-size="190px,40px">Registrar solicitud</x-import>
+</sc-if>
+</x-import>
+
+<sc-if value="{{ mainOk }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px">
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+<div style="{{ searchStyle }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" icon="search" placeholder="Buscar por nombre o empresa" value="{{ q }}" on-change="{{ setQ }}" style="width:100%" hint-size="100%,44px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" label="Estado" options="{{ estadoOpts }}" value="{{ estadoFiltro }}" on-change="{{ setEstadoFiltro }}" hint-size="280px,40px"></x-import>
+</div>
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+<span class="t-label-sm muted">Canal</span>
+<div class="chip-row" style="flex:1;min-width:0">
+<sc-for list="{{ canalChips }}" as="c" hint-placeholder-count="4">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="{{ c.label }}" activo="{{ c.on }}" on-cambiar="{{ c.toggle }}" hint-size="90px,32px"></x-import>
+</sc-for>
+</div>
+</div>
+</div>
+
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="margin:0 -16px;border-top:1px solid var(--ds-border);border-bottom:1px solid var(--ds-border);background:var(--ds-surface)">
+<sc-for list="{{ rows }}" as="r" hint-placeholder-count="5">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" icon="{{ r.icono }}" title="{{ r.titulo }}" subtitle="{{ r.subPhone }}" meta="{{ r.recibida }}" badge="{{ r.badge }}" chevron="{{ true }}" on-click="{{ noop }}" hint-size="100%,72px"></x-import>
+</sc-for>
+</div>
+<div style="margin:24px -16px 0">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowGroupHeader" hint-size="100%,32px">Posibles duplicadas</x-import>
+<div style="border-top:1px solid var(--ds-border);border-bottom:1px solid var(--ds-border);background:var(--ds-surface)">
+<sc-for list="{{ dups }}" as="r" hint-placeholder-count="1">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" icon="{{ r.icono }}" title="{{ r.titulo }}" subtitle="{{ r.dupPhone }}" meta="{{ r.recibida }}" badge="{{ r.badge }}" chevron="{{ true }}" on-click="{{ noop }}" hint-size="100%,72px"></x-import>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" on-row-click="{{ noop }}" hint-size="100%,320px"></x-import>
+<div style="display:flex;flex-direction:column;gap:8px;margin-top:24px">
+<div style="display:flex;flex-direction:column;gap:2px">
+<span class="t-label">Posibles duplicadas</span>
+<span class="t-body-sm muted">Llegaron con el mismo correo o RUT que una solicitud abierta. Cada una queda enlazada a su original.</span>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ dupCols }}" rows="{{ dups }}" compact="{{ true }}" on-row-click="{{ noop }}" hint-size="100%,96px"></x-import>
+</div>
+</sc-if>
+</sc-if>
+
+<sc-if value="{{ mainVacio }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;min-height:420px;display:flex">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="inbox" title="Aún no hay solicitudes" description="Llegarán desde tu formulario web, el correo de entrada o el agente. También puedes registrar una a mano." action="{{ emptyAction }}" hint-size="100%,360px"></x-import>
+</div>
+</sc-if>
+
+<sc-if value="{{ mainCargando }}" hint-placeholder-val="{{ false }}">
+<div aria-busy="true" style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;gap:12px;flex-wrap:wrap">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ skSearchW }}" height="{{ 44 }}" radius="{{ 10 }}" hint-size="288px,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ 280 }}" height="{{ 40 }}" radius="{{ 10 }}" hint-size="280px,40px"></x-import>
+</div>
+<div style="display:flex;gap:8px">
+<sc-for list="{{ sk4 }}" as="s" hint-placeholder-count="4">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ 76 }}" height="{{ 32 }}" radius="{{ 999 }}" hint-size="76px,32px"></x-import>
+</sc-for>
+</div>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+<sc-for list="{{ sk6 }}" as="s" hint-placeholder-count="6">
+<div style="display:flex;gap:16px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ 20 }}" height="{{ 20 }}" radius="{{ 6 }}" hint-size="20px,20px"></x-import>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="60%" height="{{ 14 }}" hint-size="60%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="35%" height="{{ 12 }}" hint-size="35%,12px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ 72 }}" height="{{ 22 }}" radius="{{ 999 }}" hint-size="72px,22px"></x-import>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ mainError }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;min-height:420px;display:flex">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar las solicitudes" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="COM-SOL-503" on-retry="{{ noop }}" hint-size="100%,360px"></x-import>
+</div>
+</sc-if>
+
+<sc-if value="{{ mainForbidden }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;min-height:420px;display:flex">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a Comercial" description="Tu rol (Supervisor) no incluye las solicitudes. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,360px"></x-import>
+</div>
+</sc-if>
+</x-import>
+</x-import>
+
+<sc-if value="{{ hasSheet }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Sheet" contained="{{ true }}" side="{{ sheetSide }}" title="Registrar solicitud" description="Entra a la bandeja como nueva." on-close="{{ closeSheet }}" hint-size="420px,100%">
+<sc-if value="{{ sheetOk }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:16px;min-height:100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Campo" etiqueta="Canal" hint-size="100%,64px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" label="Canal" options="{{ canalRegOpts }}" value="{{ canalReg }}" on-change="{{ setCanalReg }}" style="width:100%" hint-size="100%,40px"></x-import>
+</x-import>
+<sc-if value="{{ isWhatsapp }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="OPAI no lee WhatsApp automáticamente" hint-size="100%,64px">Copia el mensaje desde WhatsApp y pégalo abajo.</x-import>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Nombre" default-value="Tomás Barrera" hint-size="100%,68px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Empresa" default-value="Constructora Valle Central" hint-size="100%,68px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Correo o teléfono" default-value="+56 9 6123 4587" input-mode="tel" hint-size="100%,68px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Mensaje pegado" hint="Se guarda tal cual y se muestra como contenido externo." rows="{{ 5 }}" default-value="{{ textoPegado }}" hint-size="100%,160px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Responsable" options="{{ responsables }}" value="mr" hint-size="100%,68px"></x-import>
+<div style="flex:1"></div>
+<div style="position:sticky;bottom:-16px;margin:0 -16px -16px;padding:12px 16px calc(16px + env(safe-area-inset-bottom));display:flex;gap:8px;justify-content:flex-end;background:var(--ds-surface-raised);border-top:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" on-click="{{ closeSheet }}" hint-size="100px,44px">Cancelar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" hint-size="190px,44px">Registrar solicitud</x-import>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ sheetVacio }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:420px;display:flex">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="users" size="sm" title="Aún no hay responsables" description="Para registrar solicitudes, alguien del equipo necesita permiso de Comercial." action="{{ invitarAction }}" hint-size="100%,320px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ sheetCargando }}" hint-placeholder-val="{{ false }}">
+<div aria-busy="true" style="display:flex;flex-direction:column;gap:20px">
+<sc-for list="{{ sk5 }}" as="s" hint-placeholder-count="5">
+<div style="display:flex;flex-direction:column;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ 96 }}" height="{{ 12 }}" hint-size="96px,12px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 44 }}" radius="{{ 10 }}" hint-size="100%,44px"></x-import>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ sheetError }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:420px;display:flex">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos abrir el registro" description="Revisa tu conexión e inténtalo de nuevo." code="COM-REG-500" on-retry="{{ noop }}" hint-size="100%,320px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ sheetForbidden }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:420px;display:flex">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No puedes registrar solicitudes" description="Tu rol (Viewer) solo permite ver. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,320px"></x-import>
+</div>
+</sc-if>
+</x-import>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;\&quot;phone\&quot; | \&quot;tablet\&quot; | \&quot;desktop\&quot;&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;\&quot;light\&quot; | \&quot;dark\&quot;&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ok&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;ok&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;hoja&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ninguna&quot;,&quot;registrar&quot;],&quot;default&quot;:&quot;ninguna&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { q: "", estadoFiltro: "abiertas", canales: [], canalReg: null, hoja: null };
+  componentDidMount() {
+    if (window.OPAI20DesignSystem_44e4d7 && window.OPAI20DesignSystem_44e4d7.Button) return;
+    this._t = setInterval(() => { if (window.OPAI20DesignSystem_44e4d7 && window.OPAI20DesignSystem_44e4d7.Button) { clearInterval(this._t); this.forceUpdate(); } }, 100);
+  }
+  componentWillUnmount() { clearInterval(this._t); }
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = this.props.device ?? "desktop";
+    const isPhone = device === "phone";
+    const estado = this.props.estado ?? "ok";
+    const hoja = this.state.hoja ?? this.props.hoja ?? "ninguna";
+    const hasSheet = hoja === "registrar";
+    const main = hasSheet ? "ok" : estado;
+    const sh = hasSheet ? estado : "ok";
+    const CANAL = { web: ["globe", "Web"], correo: ["mail", "Correo"], agente: ["bot", "Agente"], manual: ["pencil", "Manual"] };
+    const TONE = { nueva: ["info", "Nueva"], revision: ["warning", "En revisión"], convertida: ["success", "Convertida"], descartada: ["neutral", "Descartada"] };
+    const chipCanal = (k) => h("span", { className: "t-label-sm", style: { display: "inline-flex", alignItems: "center", gap: 6, height: 24, padding: "0 10px", borderRadius: 999, border: "1px solid var(--ds-border-strong)", color: "var(--ds-fg)", whiteSpace: "nowrap" } }, NS.Icon ? h(NS.Icon, { name: CANAL[k][0], size: "sm" }) : null, CANAL[k][1]);
+    const base = [
+      { id: 1047, nombre: "Paula Contreras", empresa: "Frigorífico Del Maipo", canal: "correo", servicio: "Guardias 24/7 · Planta Quilicura", recibida: "30-10-2026 09:12", resp: "Sin asignar", est: "nueva" },
+      { id: 1046, nombre: "Andrés Vidal", empresa: "Logística Austral SpA", canal: "web", servicio: "Guardia nocturno · Bodega Lampa", recibida: "30-10-2026 08:41", resp: "Sin asignar", est: "nueva" },
+      { id: 1045, nombre: "Javiera Núñez", empresa: "Inmobiliaria Los Robles", canal: "agente", servicio: "Conserjería · Torre Apoquindo", recibida: "29-10-2026 18:05", resp: "Matías Rojas", est: "revision" },
+      { id: 1044, nombre: "Ignacio Pardo", empresa: "Colegio San Esteban", canal: "manual", servicio: "Rondas nocturnas", recibida: "29-10-2026 11:30", resp: "Valentina Soto", est: "revision" },
+      { id: 1043, nombre: "Rocío Henríquez", empresa: "Centro Médico Vitacura", canal: "web", servicio: "Guardia diurno", recibida: "28-10-2026 16:02", resp: "Matías Rojas", est: "convertida" },
+    ];
+    const deco = (r) => ({ ...r, icono: CANAL[r.canal][0], titulo: r.nombre + " · " + r.empresa, subPhone: CANAL[r.canal][1] + " · " + r.servicio, badge: { tone: TONE[r.est][0], label: TONE[r.est][1] } });
+    const q = this.state.q.toLowerCase();
+    const f = this.state.estadoFiltro;
+    const cs = this.state.canales;
+    const rows = base.filter((r) => (!q || (r.nombre + r.empresa).toLowerCase().includes(q)) && (f === "todas" || (f === "nuevas" ? r.est === "nueva" : r.est === "nueva" || r.est === "revision")) && (!cs.length || cs.includes(r.canal))).map(deco);
+    const dups = [{ id: 1048, nombre: "Paula Contreras", empresa: "Frigorífico Del Maipo", canal: "web", servicio: "Guardias 24/7", recibida: "30-10-2026 09:20", resp: "Sin asignar", est: "nueva", orig: "#1047 · Paula Contreras" }].map((r) => ({ ...deco(r), dupPhone: CANAL[r.canal][1] + " · Duplicada de " + r.orig }));
+    const sol = (r) => h("span", { style: { display: "flex", flexDirection: "column" } }, h("span", { className: "t-label" }, r.nombre), h("span", { className: "t-body-sm muted" }, r.empresa + " · #" + r.id));
+    const badge = (r) => (NS.Badge ? h(NS.Badge, { tone: TONE[r.est][0] }, TONE[r.est][1]) : null);
+    const btn = (label, icon, variant) => (NS.Button ? h(NS.Button, { icon, variant }, label) : null);
+    const openSheet = () => this.setState({ hoja: "registrar" });
+    return {
+      device, theme: this.props.theme ?? "light", isPhone, notPhone: !isPhone,
+      shellTitle: isPhone ? "" : "Solicitudes",
+      sheetMode: isPhone ? "full" : "side", sheetSide: isPhone ? "bottom" : "right",
+      showHeaderAction: main === "ok",
+      mainOk: main === "ok", mainVacio: main === "vacio", mainCargando: main === "cargando", mainError: main === "error", mainForbidden: main === "sinpermiso",
+      hasSheet, sheetOk: sh === "ok", sheetVacio: sh === "vacio", sheetCargando: sh === "cargando", sheetError: sh === "error", sheetForbidden: sh === "sinpermiso",
+      openSheet, closeSheet: () => this.setState({ hoja: "ninguna" }), noop: () => {},
+      searchStyle: isPhone ? "width:100%" : "width:288px;max-width:100%;flex:none",
+      skSearchW: isPhone ? "100%" : 288,
+      q: this.state.q, setQ: (v) => this.setState({ q: typeof v === "string" ? v : v && v.target ? v.target.value : "" }),
+      estadoOpts: [{ value: "nuevas", label: "Nuevas" }, { value: "abiertas", label: "Abiertas" }, { value: "todas", label: "Todas" }],
+      estadoFiltro: f, setEstadoFiltro: (v) => this.setState({ estadoFiltro: v }),
+      canalChips: Object.keys(CANAL).map((k) => ({ label: CANAL[k][1], on: cs.includes(k), toggle: () => this.setState({ canales: cs.includes(k) ? cs.filter((x) => x !== k) : [...cs, k] }) })),
+      rows, dups,
+      cols: [
+        { key: "nombre", label: "Solicitud", render: sol },
+        { key: "canal", label: "Canal", render: (r) => chipCanal(r.canal) },
+        { key: "servicio", label: "Servicio" },
+        { key: "recibida", label: "Recibida", render: (r) => h("span", { className: "t-numeric", style: { fontWeight: 400 } }, r.recibida) },
+        { key: "resp", label: "Responsable", muted: true },
+        { key: "est", label: "Estado", render: badge },
+      ],
+      dupCols: [
+        { key: "nombre", label: "Solicitud", render: sol },
+        { key: "canal", label: "Canal", render: (r) => chipCanal(r.canal) },
+        { key: "recibida", label: "Recibida", render: (r) => h("span", { className: "t-numeric", style: { fontWeight: 400 } }, r.recibida) },
+        { key: "orig", label: "Original", render: (r) => h("span", { style: { display: "inline-flex", alignItems: "center", gap: 6 } }, NS.Icon ? h(NS.Icon, { name: "merge", size: "sm", className: "muted" }) : null, NS.Enlace ? h(NS.Enlace, { href: "#" }, r.orig) : r.orig) },
+        { key: "est", label: "Estado", render: badge },
+      ],
+      emptyAction: btn("Registrar solicitud", "plus"),
+      invitarAction: btn("Invitar persona", "plus", "secondary"),
+      sk4: [1, 2, 3, 4], sk5: [1, 2, 3, 4, 5], sk6: [1, 2, 3, 4, 5, 6],
+      canalRegOpts: [{ value: "manual", label: "Registro manual" }, { value: "whatsapp", label: "WhatsApp" }],
+      canalReg: this.state.canalReg ?? "whatsapp", setCanalReg: (v) => this.setState({ canalReg: v }),
+      isWhatsapp: (this.state.canalReg ?? "whatsapp") === "whatsapp",
+      textoPegado: "Hola, buenas tardes. Somos Constructora Valle Central, necesitamos 2 guardias nocturnos para una obra en Lampa desde el 15-11. ¿Me pueden cotizar? Gracias, Tomás",
+      responsables: [{ value: "mr", label: "Matías Rojas" }, { value: "vs", label: "Valentina Soto" }, { value: "ci", label: "Carlos Irigoyen" }],
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "sol", label: "Solicitudes", icon: "inbox" }, { id: "neg", label: "Negocios", icon: "briefcase" }, { id: "cot", label: "Cotizaciones", icon: "file" }, { id: "mas", label: "Más", icon: "more" }],
+      groups: [
+        { items: [{ id: "ini", label: "Inicio", icon: "home" }] },
+        { title: "Comercial", items: [{ id: "sol", label: "Solicitudes", icon: "inbox" }, { id: "neg", label: "Negocios", icon: "briefcase" }, { id: "cot", label: "Cotizaciones", icon: "file" }, { id: "con", label: "Contactos", icon: "users" }] },
+        { title: "Operaciones", items: [{ id: "ins", label: "Instalaciones", icon: "building" }, { id: "pau", label: "Pauta mensual", icon: "calendar" }] },
+        { title: "Configuración", items: [{ id: "aju", label: "Configuración", icon: "settings" }] },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
