@@ -56,6 +56,32 @@ async function main(): Promise<void> {
   });
   console.log("bloqueo-e2e@opai.cl listo para el e2e de bloqueo de login.");
 
+  // Teammate con MFA activo para el e2e de «Restablecer MFA» en Configuración · Usuarios (CAR-54):
+  // ni platformRole ni en otra empresa, para que el owner de gard pueda restablecerle el segundo
+  // factor. No inicia sesión en los e2e: el secreto guardado no se usa para nada más.
+  const RESTABLECER_MFA_EMAIL = "mfa-restablecer-e2e@opai.cl";
+  const conMfa = await db.user.upsert({
+    where: { email: RESTABLECER_MFA_EMAIL },
+    update: { twoFactorEnabled: true },
+    create: {
+      name: "Restablecer MFA E2E",
+      email: RESTABLECER_MFA_EMAIL,
+      emailVerified: true,
+      twoFactorEnabled: true,
+    },
+  });
+  await db.twoFactor.upsert({
+    where: { userId: conMfa.id },
+    update: {},
+    create: { userId: conMfa.id, secret: "sin-uso-e2e", backupCodes: "sin-uso-e2e" },
+  });
+  await db.membership.upsert({
+    where: { tenantId_userId: { tenantId: tenant.id, userId: conMfa.id } },
+    update: { rol: "viewer", portales: ["erp"], estado: "activa" },
+    create: { tenantId: tenant.id, userId: conMfa.id, rol: "viewer", portales: ["erp"], estado: "activa" },
+  });
+  console.log(`${RESTABLECER_MFA_EMAIL} es viewer de ${tenant.slug} con MFA activo (e2e CAR-54).`);
+
   const multi = await db.user.findUnique({ where: { email: "e2e-multiempresa@opai.cl" } });
   if (multi) {
     for (const t of [tenant, otra]) {

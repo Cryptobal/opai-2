@@ -54,4 +54,19 @@ test.describe("configuración · acceso", () => {
     await page.waitForURL(/\/configuracion\/agentes$/, { timeout: 60_000 });
     await expect(page.getByText("Revocada").first()).toBeVisible();
   });
+
+  // CAR-54: el owner restablece el MFA de un miembro de su empresa (irreversible, con aviso por
+  // correo). Usa el teammate sembrado con MFA activo (`seed:e2e`): nadie más depende de su estado.
+  test("restablecer el MFA de un miembro con el segundo factor activo", async ({ page }, info) => {
+    test.skip(info.project.name !== "ipad", "La escritura se prueba una vez (iPad)");
+    await entrar(page);
+    await page.goto("/configuracion/usuarios");
+    await page.getByRole("link", { name: "Restablecer MFA E2E" }).click();
+    await page.waitForURL(/\?editar=/);
+    await page.getByRole("button", { name: "Restablecer MFA" }).click();
+    const dialogo = page.getByRole("dialog", { name: "¿Restablecer MFA de Restablecer MFA E2E?" });
+    await expect(dialogo.getByText("Esta acción es irreversible")).toBeVisible();
+    await dialogo.getByRole("button", { name: "Restablecer MFA" }).click();
+    await expect(page.getByText("Segundo factor restablecido")).toBeVisible();
+  });
 });
