@@ -3,7 +3,7 @@ import type { Contadores } from "@/lib/navegacion";
 import { puedeDeIdentidad } from "@/lib/permisos-ui";
 import { ejecutarComoUsuario, requerirIdentidad } from "@/lib/servidor";
 
-import { type Grupo, GRUPOS } from "./grupos";
+import { type Grupo, GRUPOS, grupoPorId } from "./grupos";
 import { seccionModulo } from "./seccion-modulo";
 import { SECCIONES, type Seccion } from "./secciones";
 
@@ -21,6 +21,16 @@ export function agruparVisibles(secciones: readonly Seccion[]): GrupoConEntradas
     grupo,
     entradas: secciones.filter((s) => s.grupo === grupo.id),
   })).filter((g) => g.entradas.length > 0);
+}
+
+/**
+ * Grupo al que pertenece una sección (para las migas «Configuración › <Grupo>» y el «atrás» de
+ * teléfono de cada entrada). Los módulos con ajustes (`modulo-<id>`) viven en el grupo `modulos`.
+ */
+export function grupoDeSeccion(id: string): Grupo | undefined {
+  if (id.startsWith("modulo-")) return grupoPorId("modulos");
+  const s = SECCIONES.find((x) => x.id === id);
+  return s ? grupoPorId(s.grupo) : undefined;
 }
 
 /** Índice visible para el usuario: ámbitos según sus permisos efectivos y módulos con ajustes propios. */

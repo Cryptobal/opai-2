@@ -40,6 +40,13 @@ describe("proxy: 404 real antes de enviar el HTML", () => {
     );
   });
 
+  it("grupo de configuración inexistente: 404 con la página del ERP", async () => {
+    vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({ existe: false })));
+    expect(reescribe(await proxy(pedir("/configuracion/grupo/inventado")))).toContain(
+      "/no-encontrado",
+    );
+  });
+
   it("existe, o la consulta falla: sigue a la página", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue(Response.json({ existe: true })));
     expect((await proxy(pedir(`/personas/${CERO}`))).headers.get("x-middleware-next")).toBe("1");

@@ -24,6 +24,14 @@ describe("qué rutas dependen de la base para ser 404", () => {
       tipo: "integracion",
       proveedor: "zzz",
     });
+    expect(consultaDeRuta("/configuracion/grupo/empresa")).toEqual({
+      tipo: "grupo",
+      grupo: "empresa",
+    });
+    expect(consultaDeRuta("/configuracion/grupo/inventado")).toEqual({
+      tipo: "grupo",
+      grupo: "inventado",
+    });
   });
 
   it("reconoce las fichas de agentes y de supervisor", () => {
@@ -99,6 +107,14 @@ describe("existeRuta", () => {
     ejecutar.mockResolvedValue(noEncontrado);
     expect(await existeRuta("/configuracion/integraciones/zzz")).toBe(false);
     expect(await existeRuta("/configuracion/integraciones/ia")).toBe(true);
+  });
+
+  it("grupo de configuración: válido true, desconocido false, sin tocar la base", async () => {
+    const { existeRuta } = await import("@/lib/existe-ruta");
+    expect(await existeRuta("/configuracion/grupo/empresa")).toBe(true);
+    expect(await existeRuta("/configuracion/grupo/uso-registros")).toBe(true);
+    expect(await existeRuta("/configuracion/grupo/inventado")).toBe(false);
+    expect(ejecutar).not.toHaveBeenCalled();
   });
 
   it("evento de comunicación fuera del catálogo responde false", async () => {

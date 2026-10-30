@@ -7,6 +7,7 @@ import { useCallback } from "react";
 import { CommandPalette, type GrupoPaleta } from "@opai/ds";
 
 import { ejecutarCapacidad } from "@/app/_acciones/capacidad";
+import { destinoAjuste } from "@/lib/ajuste-destino";
 import type { AccionCmdK } from "@/lib/navegacion-entradas";
 import type { ItemNav } from "@/lib/navegacion";
 
@@ -16,20 +17,6 @@ import { useRecientesPaleta } from "./use-recientes-paleta";
 type Resultado = { id: string; titulo: string; detalle: string | null; href: string };
 type Busqueda = Record<"cuentas" | "instalaciones" | "personas" | "contactos", Resultado[]>;
 type Ajuste = { modulo: string; clave: string; etiqueta: string; grupo: string | null };
-
-/** Sección del centro de Configuración donde vive un ajuste. */
-function seccionDe(a: Ajuste): string {
-  if (a.modulo !== "core") return `/configuracion/modulo/${a.modulo}`;
-  if (a.clave.startsWith("documentos")) return "/configuracion/documentos";
-  if (
-    a.clave.startsWith("navegacion") ||
-    a.clave.startsWith("preferencias") ||
-    a.clave.startsWith("usuario")
-  )
-    return "/configuracion/preferencias";
-  if (a.clave.startsWith("comunicaciones")) return "/configuracion/comunicaciones";
-  return "/configuracion/empresa";
-}
 
 /** Paleta ⌘K del ERP: `core.buscar` y `core.config.buscar` (ajustes). Se carga al primer uso. */
 export function Paleta({
@@ -130,7 +117,7 @@ export function Paleta({
             etiqueta: x.etiqueta,
             detalle: `Configuración${x.grupo ? ` › ${x.grupo}` : ""}`,
             icono: Settings,
-            href: seccionDe(x),
+            href: destinoAjuste(x),
           })),
         },
       ];
