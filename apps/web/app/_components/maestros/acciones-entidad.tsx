@@ -41,11 +41,13 @@ export function AccionesEntidad({
   const [confirmando, setConfirmando] = useState<AccionEntidad | null>(null);
   const pin = usePinFicha();
   const bajoLg = useBajoLg();
-  async function correr(a: AccionEntidad, motivo?: string) {
+  async function correr(a: AccionEntidad, motivo?: string, fecha?: string) {
     if (!a.capacidad) return;
+    const claveFecha = a.confirmar?.fecha?.clave;
     const r = await ejecutar(a.capacidad.id, {
       ...a.capacidad.input,
       ...(motivo ? { motivo } : {}),
+      ...(fecha && claveFecha ? { [claveFecha]: fecha } : {}),
     });
     if (r) {
       avisar.exito(a.capacidad.exito);
@@ -88,7 +90,7 @@ export function AccionesEntidad({
           pendiente={pendiente}
           error={error}
           onCerrar={() => setConfirmando(null)}
-          onConfirmar={(motivo) => void correr(confirmando, motivo)}
+          onConfirmar={(motivo, fecha) => void correr(confirmando, motivo, fecha)}
         />
       ) : null}
     </>
