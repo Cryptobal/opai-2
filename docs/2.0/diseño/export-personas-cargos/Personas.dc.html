@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-accent)}</style>
+</helmet>
+<div data-theme="{{ theme }}" data-device="{{ device }}" style="position:relative;width:100%;height:100%;overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" rail-footer="{{ railFooter }}" active="per" title="Personas" count="{{ 42 }}" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<sc-if value="{{ forbidden }}" hint-placeholder-val="{{ false }}">
+<div style="padding:48px 0">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a Personas" description="Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" hint-size="100%,280px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ showHeader }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:12px;margin-bottom:16px">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:2px">
+<h1 class="t-title" style="margin:0">Personas</h1>
+<span style="font:400 14px/20px var(--font-sans);color:var(--ds-fg-muted)">42 personas · 38 activas</span>
+</div>
+</sc-if>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ segOpts }}" value="{{ vista }}" on-change="{{ setVista }}" label="Vista de Personas" hint-size="240px,40px"></x-import>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}"><div style="flex:1 1 100%;min-width:0">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" icon="search" placeholder="Buscar por nombre o RUT" style="width:100%" hint-size="100%,44px"></x-import>
+</div></sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}"><div style="flex:1 1 240px;max-width:288px;min-width:0">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" icon="search" placeholder="Buscar por nombre o RUT" style="width:100%" hint-size="100%,44px"></x-import>
+</div></sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<div style="margin-left:auto;flex:none">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="plus" on-click="{{ openNueva }}" hint-size="150px,40px">Nueva persona</x-import>
+</div>
+</sc-if>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Activas" contador="{{ 38 }}" activo="{{ true }}" hint-size="100px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Por vencer" contador="{{ 6 }}" hint-size="110px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Chip" etiqueta="Cargo" valor="Guardia" hint-size="140px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipAgregar" hint-size="130px,32px">Instalación</x-import>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ isPersonas }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;align-items:flex-start;min-width:0">
+<sc-if value="{{ showListPane }}" hint-placeholder-val="{{ true }}">
+<div style="flex:0 1 440px;min-width:0;display:flex;flex-direction:column">
+<sc-if value="{{ listOk }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,0.9fr) minmax(0,1.1fr) 96px;gap:12px;padding:0 12px 8px;border-bottom:1px solid var(--ds-border);font:500 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">
+<span>Persona</span><span>Cargo</span><span>Instalación</span><span>Estado</span>
+</div>
+<sc-for list="{{ rows }}" as="r" hint-placeholder-count="6">
+<div onClick="{{ r.open }}" style="display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,0.9fr) minmax(0,1.1fr) 96px;gap:12px;align-items:center;padding:10px 12px;min-height:56px;box-sizing:border-box;border-bottom:1px solid var(--ds-border);cursor:pointer;background:{{ r.bg }};border-radius:{{ r.radius }}" style-hover="background:var(--ds-fill)">
+<div style="display:flex;flex-direction:column;min-width:0">
+<span style="font:500 14px/20px var(--font-sans);color:var(--ds-fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.nombre }}</span>
+<span class="t-mono" style="font-size:12px;line-height:16px;color:var(--ds-fg-muted)">{{ r.rut }}</span>
+</div>
+<span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg);overflow:hidden;text-overflow:ellipsis">{{ r.cargo }}</span>
+<span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted);overflow:hidden;text-overflow:ellipsis">{{ r.inst }}</span>
+<div style="display:flex;flex-direction:column;gap:4px;align-items:flex-start">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ r.tone }}" hint-size="70px,22px">{{ r.estado }}</x-import>
+<span style="display:inline-flex;gap:4px;align-items:center;font:400 12px/16px var(--font-sans);color:{{ r.docColor }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Icon" name="{{ r.docIcon }}" size="sm" hint-size="16px,16px"></x-import>{{ r.docs }}</span>
+</div>
+</div>
+</sc-for>
+</sc-if>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="margin:0 -16px;border-top:1px solid var(--ds-border)">
+<sc-for list="{{ rows }}" as="r" hint-placeholder-count="6">
+<div onClick="{{ r.open }}" style="display:flex;gap:12px;padding:14px 16px;border-bottom:1px solid var(--ds-border);cursor:pointer;min-height:44px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Avatar" initials="{{ r.ini }}" hint-size="40px,40px"></x-import>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+<div style="display:flex;justify-content:space-between;gap:8px;align-items:center">
+<span style="font:500 14px/20px var(--font-sans);color:var(--ds-fg);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.nombre }}</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ r.tone }}" hint-size="70px,22px">{{ r.estado }}</x-import>
+</div>
+<span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg)">{{ r.cargo }}</span>
+<span style="display:flex;gap:6px;align-items:center;font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Icon" name="building" size="sm" hint-size="16px,16px"></x-import>{{ r.inst }}</span>
+<div style="display:flex;flex-wrap:wrap;gap:4px 12px;align-items:center;margin-top:2px">
+<span class="t-mono" style="font-size:12px;line-height:16px;color:var(--ds-fg-muted)">{{ r.rut }}</span>
+<span style="display:inline-flex;gap:4px;align-items:center;font:400 12px/16px var(--font-sans);color:{{ r.docColor }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Icon" name="{{ r.docIcon }}" size="sm" hint-size="16px,16px"></x-import>{{ r.docs }}</span>
+</div>
+</div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-top:12px;font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">
+<span>1–8 de 42</span>
+<div style="display:flex;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" disabled="{{ true }}" hint-size="90px,40px">Anterior</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="90px,40px">Siguiente</x-import>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ listLoading }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column">
+<sc-for list="{{ skel }}" as="k" hint-placeholder-count="6">
+<div style="display:flex;gap:12px;align-items:center;padding:14px 0;border-bottom:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" circle="{{ true }}" width="{{ 40 }}" height="{{ 40 }}" hint-size="40px,40px"></x-import>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="55%" height="{{ 14 }}" hint-size="55%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="35%" height="{{ 12 }}" hint-size="35%,12px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="45%" height="{{ 12 }}" hint-size="45%,12px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ 64 }}" height="{{ 22 }}" radius="{{ 999 }}" hint-size="64px,22px"></x-import>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ listEmpty }}" hint-placeholder-val="{{ false }}">
+<div style="padding:40px 0;display:flex;flex-direction:column;align-items:center;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="users" title="Aún no hay personas" description="Agrega a la primera persona o importa una planilla." hint-size="100%,220px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="upload" hint-size="160px,40px">Importar planilla</x-import>
+</div>
+</sc-if>
+<sc-if value="{{ listError }}" hint-placeholder-val="{{ false }}">
+<div style="padding:40px 0">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar las personas" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="PER-503" on-retry="{{ noop }}" hint-size="100%,240px"></x-import>
+</div>
+</sc-if>
+</div>
+</sc-if>
+<sc-if value="{{ split }}" hint-placeholder-val="{{ true }}">
+<div style="width:1px;align-self:stretch;background:var(--ds-border);margin:0 24px;flex:none"></div>
+</sc-if>
+<sc-if value="{{ fichaArea }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1 1 0;min-width:0;display:flex;flex-direction:column">
+<sc-if value="{{ noSel }}" hint-placeholder-val="{{ true }}">
+<div style="padding:64px 0">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="user" title="Elige una persona" description="Selecciona a alguien de la lista para ver su ficha." hint-size="100%,220px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ fichaLoading }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;gap:16px;align-items:center">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" circle="{{ true }}" width="{{ 48 }}" height="{{ 48 }}" hint-size="48px,48px"></x-import>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="50%" height="{{ 20 }}" hint-size="50%,20px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="30%" height="{{ 14 }}" hint-size="30%,14px"></x-import>
+</div>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="100%" height="{{ 44 }}" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="100%" height="{{ 200 }}" radius="{{ 16 }}" hint-size="100%,200px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="100%" height="{{ 140 }}" radius="{{ 16 }}" hint-size="100%,140px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ fichaReady }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="margin:-8px 0 4px -12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="chevron-left" on-click="{{ back }}" hint-size="170px,44px">Volver a Personas</x-import>
+</div>
+</sc-if>
+<div style="display:flex;gap:16px;align-items:center;margin-bottom:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Avatar" initials="MS" size="xl" hint-size="48px,48px"></x-import>
+<div style="display:flex;flex-direction:column;gap:4px;min-width:0">
+<h2 class="t-heading" style="margin:0">María Fernanda Soto</h2>
+<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+<span class="t-mono" style="font-size:13px;color:var(--ds-fg-muted)">16.234.567-8</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="success" hint-size="60px,22px">Activa</x-import>
+<sc-if value="{{ showP1 }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="danger" hint-size="120px,22px">No recontratar</x-import>
+</sc-if>
+</div>
+<span style="font:400 14px/20px var(--font-sans);color:var(--ds-fg-muted)">Guardia · Planta Quilicura</span>
+</div>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ fichaTabs }}" value="{{ tab }}" on-change="{{ setTab }}" hint-size="100%,44px"></x-import>
+<div style="display:flex;flex-direction:column;gap:12px;padding-top:16px">
+<sc-if value="{{ otherTab }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:16px 0;font:400 14px/20px var(--font-sans);color:var(--ds-fg-muted)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" hint-size="64px,22px">Ya está</x-import>
+<span>Se mantiene como en main. Este diseño no cambia esta pestaña.</span>
+</div>
+</sc-if>
+<sc-for list="{{ cards }}" as="c" hint-placeholder-count="3">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,180px">
+<div style="display:flex;flex-direction:column">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:40px">
+<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0">
+<span class="t-subheading">{{ c.title }}</span>
+<sc-if value="{{ c.yaEsta }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" hint-size="64px,22px">Ya está</x-import></sc-if>
+</div>
+<sc-if value="{{ c.canEdit }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" on-click="{{ c.edit }}" hint-size="70px,40px">Editar</x-import></sc-if>
+</div>
+<sc-if value="{{ c.decide }}">
+<div style="margin:4px 0 8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" titulo="Decide Carlos · P1 · Propuesta" hint-size="100%,72px">Recomendado: marca visible solo para RRHH y admin. Alternativas anotadas: (b) no registrar la marca y llevarlo fuera del sistema; (c) visible también para gerencia.</x-import>
+</div>
+</sc-if>
+<sc-if value="{{ c.locked }}">
+<div style="display:flex;gap:8px;align-items:center;padding:12px 0;border-top:1px solid var(--ds-border);font:400 14px/20px var(--font-sans);color:var(--ds-fg-muted)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Icon" name="lock" size="sm" hint-size="16px,16px"></x-import><span>{{ c.lockText }}</span>
+</div>
+</sc-if>
+<sc-for list="{{ c.rows }}" as="r" hint-placeholder-count="3">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;padding:10px 0;border-top:1px solid var(--ds-border)">
+<span style="font:400 14px/20px var(--font-sans);color:var(--ds-fg-muted);flex:0 1 45%">{{ r.l }}</span>
+<div style="display:flex;flex-direction:column;align-items:flex-end;gap:4px;min-width:0;text-align:right">
+<sc-if value="{{ r.plain }}"><span style="font:400 14px/20px var(--font-sans);color:var(--ds-fg);font-variant-numeric:tabular-nums">{{ r.v }}</span></sc-if>
+<sc-if value="{{ r.mono }}"><span class="t-mono" style="font-size:13px;line-height:20px;color:var(--ds-fg)">{{ r.v }}</span></sc-if>
+<sc-if value="{{ r.masked }}"><span style="display:inline-flex;gap:6px;align-items:center;font:400 14px/20px var(--font-sans);color:var(--ds-fg-muted)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Icon" name="lock" size="sm" hint-size="16px,16px"></x-import>••••</span></sc-if>
+<sc-if value="{{ r.badge }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ r.bt }}" hint-size="90px,22px">{{ r.badge }}</x-import></sc-if>
+<sc-if value="{{ r.flag }}"><span style="font:400 12px/16px var(--font-sans);color:var(--ds-info-fg)">Campo por verificar contra LRE / Previred</span></sc-if>
+</div>
+</div>
+</sc-for>
+<sc-if value="{{ c.pending }}">
+<div style="display:flex;flex-direction:column;gap:8px;padding:12px 0 0;border-top:1px solid var(--ds-border)">
+<div style="display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap">
+<span style="font:500 14px/20px var(--font-sans);color:var(--ds-fg)">Cambio solicitado</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="warning" hint-size="150px,22px">Pendiente de validación</x-import>
+</div>
+<span style="font:400 14px/20px var(--font-sans);color:var(--ds-fg)">Banco de Chile · Cuenta corriente · <span class="t-mono" style="font-size:13px">••••0921</span></span>
+<span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Desde el Portal Trabajador · 28-10-2026 14:32. La cuenta anterior sigue vigente hasta que RRHH valide el cambio.</span>
+<sc-if value="{{ c.canValidate }}">
+<div style="display:flex;gap:8px;flex-wrap:wrap;padding-top:4px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" on-click="{{ openRechazar }}" style="flex:1 1 120px" hint-size="120px,40px">Rechazar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="check" style="flex:1 1 120px" hint-size="120px,40px">Aprobar</x-import>
+</div>
+</sc-if>
+</div>
+</sc-if>
+<sc-if value="{{ c.link }}">
+<div style="padding-top:4px;border-top:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Enlace" href="#" hint-size="200px,44px">{{ c.link }}</x-import>
+</div>
+</sc-if>
+<sc-if value="{{ c.note }}">
+<span style="font:400 12px/16px var(--font-sans);color:var(--ds-fg-muted);padding-top:8px">{{ c.note }}</span>
+</sc-if>
+</div>
+</x-import>
+</sc-for>
+</div>
+</sc-if>
+</div>
+</sc-if>
+</div>
+</sc-if>
+<sc-if value="{{ isVenc }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;margin-bottom:12px;font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">
+<span>Aviso con 30 días de anticipación</span>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="danger" hint-size="70px,22px">Vencido</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="warning" hint-size="80px,22px">Por vencer</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" hint-size="70px,22px">Vigente</x-import>
+</div>
+</div>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<div style="border:1px solid var(--ds-border);border-radius:16px;overflow:hidden;background:var(--ds-surface)">
+<div style="display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,0.8fr) minmax(0,1fr) repeat(4,minmax(0,1fr));gap:12px;padding:12px 16px;border-bottom:1px solid var(--ds-border);font:500 12px/16px var(--font-sans);color:var(--ds-fg-subtle)">
+<span>Persona</span><span>Cargo</span><span>Instalación</span><span>OS-10</span><span>Plazo fijo</span><span>Examen preocupacional</span><span>Licencia de conducir</span>
+</div>
+<sc-for list="{{ vencRows }}" as="r" hint-placeholder-count="6">
+<div style="display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,0.8fr) minmax(0,1fr) repeat(4,minmax(0,1fr));gap:12px;align-items:center;padding:10px 16px;min-height:56px;box-sizing:border-box;border-bottom:1px solid var(--ds-border)" style-hover="background:var(--ds-bg)">
+<div style="display:flex;flex-direction:column;min-width:0">
+<span style="font:500 14px/20px var(--font-sans);color:var(--ds-fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ r.nombre }}</span>
+<span class="t-mono" style="font-size:12px;line-height:16px;color:var(--ds-fg-muted)">{{ r.rut }}</span>
+</div>
+<span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg)">{{ r.cargo }}</span>
+<span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">{{ r.inst }}</span>
+<sc-for list="{{ r.cells }}" as="c" hint-placeholder-count="4">
+<div>
+<sc-if value="{{ c.has }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ c.tone }}" hint-size="90px,22px">{{ c.label }}</x-import></sc-if>
+<sc-if value="{{ c.none }}"><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-subtle)">—</span></sc-if>
+</div>
+</sc-for>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="margin:0 -16px;border-top:1px solid var(--ds-border)">
+<sc-for list="{{ vencStack }}" as="r" hint-placeholder-count="5">
+<div style="display:flex;gap:12px;padding:14px 16px;border-bottom:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Avatar" initials="{{ r.ini }}" hint-size="40px,40px"></x-import>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+<div style="display:flex;justify-content:space-between;gap:8px;align-items:center">
+<span style="font:500 14px/20px var(--font-sans);color:var(--ds-fg);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.nombre }}</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ r.tone }}" hint-size="70px,22px">{{ r.estado }}</x-import>
+</div>
+<span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg)">{{ r.cargo }}</span>
+<span style="display:flex;gap:6px;align-items:center;font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Icon" name="building" size="sm" hint-size="16px,16px"></x-import>{{ r.inst }}</span>
+<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px">
+<sc-for list="{{ r.blocks }}" as="b" hint-placeholder-count="2">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ b.tone }}" hint-size="180px,22px">{{ b.label }}</x-import>
+</sc-for>
+</div>
+</div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+</sc-if>
+</x-import>
+</x-import>
+<sc-if value="{{ showFab }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;right:16px;bottom:calc(56px + max(env(safe-area-inset-bottom), 34px) + 16px);z-index:5;border-radius:999px;overflow:hidden;box-shadow:var(--ds-shadow-overlay)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" size="lg" icon="plus" on-click="{{ openNueva }}" hint-size="170px,48px">Nueva persona</x-import>
+</div>
+</sc-if>
+<sc-if value="{{ sheetNueva }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Sheet" contained="{{ true }}" side="{{ sheetSide }}" title="Nueva persona" description="Los datos laborales se completan en la ficha." actions="{{ nuevaActions }}" on-close="{{ closeAll }}" hint-size="100%,100%">
+<div style="display:flex;flex-direction:column;gap:16px">
+<sc-if value="{{ showP1New }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" titulo="Decide Carlos · P1 · Propuesta" hint-size="100%,64px">Aviso al crear o contratar un RUT con marca «No recontratar». Solo lo ven RRHH y admin.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="danger" titulo="Este RUT tiene una marca «No recontratar»" hint-size="100%,72px">Registrada el 12-03-2025 por RRHH · Abandono de funciones. Puedes continuar; queda en Actividad.</x-import>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Nombre completo" value="{{ nNombre }}" placeholder="Nombre y apellidos" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="RUT" mono="{{ true }}" value="{{ nRut }}" placeholder="12.345.678-9" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Correo personal" type="email" placeholder="nombre@correo.cl" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Instalación" value="pq" options="{{ instOpts }}" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Jornada" value="4x4" options="{{ jorOpts }}" hint-size="100%,70px"></x-import>
+</div>
+</x-import>
+</sc-if>
+<sc-if value="{{ sheetEditar }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Sheet" contained="{{ true }}" side="{{ sheetSide }}" title="Editar previsión" description="María Fernanda Soto · 16.234.567-8" actions="{{ editActions }}" on-close="{{ closeAll }}" hint-size="100%,100%">
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="AFP" value="modelo" options="{{ afpOpts }}" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Salud" value="fonasa" options="{{ saludOpts }}" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="APV mensual" prefix="$" value="30.000" hint="Régimen B" hint-size="100%,90px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Cargas familiares" value="2" inputMode="numeric" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" label="Persona con discapacidad o pensión de invalidez" description="Campo por verificar contra LRE / Previred" hint-size="100%,44px"></x-import>
+</div>
+</x-import>
+</sc-if>
+<sc-if value="{{ dialogRechazar }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Dialog" contained="{{ true }}" title="Rechazar cambio de cuenta" description="La cuenta BancoEstado ••••5678 sigue vigente. María verá el motivo en el Portal." actions="{{ rechazoActions }}" on-close="{{ closeAll }}" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Motivo (obligatorio)" value="El titular de la cuenta no coincide con el RUT de la persona." rows="{{ 3 }}" hint-size="100%,120px"></x-import>
+</x-import>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;vista&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;personas&quot;,&quot;vencimientos&quot;],&quot;default&quot;:&quot;personas&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ok&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;,&quot;cargando-ficha&quot;],&quot;default&quot;:&quot;ok&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;sel&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;tab&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;resumen&quot;,&quot;laboral&quot;,&quot;sueldo&quot;,&quot;anexos&quot;,&quot;documentos&quot;,&quot;privacidad&quot;,&quot;actividad&quot;],&quot;default&quot;:&quot;resumen&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;rol&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;rrhh&quot;,&quot;admin&quot;,&quot;gerente&quot;,&quot;supervisor&quot;,&quot;inspector&quot;,&quot;viewer&quot;],&quot;default&quot;:&quot;rrhh&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;sheet&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;&quot;,&quot;nueva&quot;,&quot;editar&quot;],&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;dialog&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;&quot;,&quot;rechazar&quot;],&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;p1&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state = {};
+  renderVals() {
+    const p = this.props, s = this.state;
+    const device = p.device ?? "desktop";
+    const isPhone = device === "phone";
+    const vista = s.vista ?? p.vista ?? "personas";
+    const estado = p.estado ?? "ok";
+    const sel = s.sel !== undefined ? s.sel : (p.sel || null);
+    const forbidden = estado === "sinpermiso";
+    const isPersonas = !forbidden && vista === "personas";
+    const tone = { success: "var(--ds-success-fg)", warning: "var(--ds-warning-fg)", danger: "var(--ds-danger-fg)" };
+    const icon = { success: "check-circle", warning: "clock", danger: "alert" };
+    const data = this.people();
+    const rows = data.map((r) => ({
+      ...r,
+      docColor: tone[r.dt], docIcon: icon[r.dt],
+      bg: sel === r.id && !isPhone ? "var(--ds-fill)" : "transparent",
+      radius: "8px",
+      open: () => this.setState({ sel: r.id, vista: "personas" }),
+    }));
+    const listState = ["vacio", "cargando", "error"].includes(estado) ? estado : "ok";
+    return {
+      ...this.fichaVals(sel, isPhone),
+      ...this.vencVals(isPhone, vista, forbidden, tone),
+      device, theme: p.theme ?? "light", isPhone, notPhone: !isPhone,
+      vista, setVista: (v) => this.setState({ vista: v, sel: isPhone ? null : sel }),
+      segOpts: [{ value: "personas", label: "Personas" }, { value: "vencimientos", label: "Vencimientos" }],
+      forbidden, isPersonas,
+      showHeader: !forbidden && !(isPhone && sel && vista === "personas"),
+      showListPane: isPersonas && (!isPhone || !sel),
+      split: isPersonas && !isPhone,
+      listOk: listState === "ok", listLoading: listState === "cargando", listEmpty: listState === "vacio", listError: listState === "error",
+      rows, skel: [1, 2, 3, 4, 5, 6],
+      showFab: isPhone && !forbidden && !(sel && vista === "personas"),
+      openNueva: () => this.setState({ sheet: "nueva" }),
+      noop: () => {},
+      ...this.overlayVals(isPhone),
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "per", label: "Personas", icon: "users" }, { id: "pau", label: "Pauta", icon: "calendar" }, { id: "tic", label: "Tickets", icon: "ticket" }, { id: "mas", label: "Más", icon: "more" }],
+      railFooter: [{ id: "cfg", label: "Ajustes", icon: "grid" }],
+      groups: [
+        { items: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "ban", label: "Bandeja", icon: "inbox", count: 5 }] },
+        { title: "Operaciones", items: [{ id: "ins", label: "Instalaciones", icon: "building" }, { id: "pau", label: "Pauta mensual", icon: "calendar" }, { id: "tic", label: "Tickets", icon: "ticket" }] },
+        { title: "Personas", items: [{ id: "per", label: "Personas", icon: "users", count: 42 }] },
+        { title: "Maestros", items: [{ id: "car", label: "Cargos", icon: "briefcase" }] },
+        { title: "Empresa", items: [{ id: "cfg", label: "Configuración", icon: "grid" }] },
+      ],
+    };
+  }
+  overlayVals(isPhone) {
+    const p = this.props, s = this.state, h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const sheet = s.sheet !== undefined ? s.sheet : (p.sheet || "");
+    const dialog = s.dialog !== undefined ? s.dialog : (p.dialog || "");
+    const close = () => this.setState({ sheet: "", dialog: "" });
+    const btns = (a, b, v) => NS.Button ? [h(NS.Button, { key: "a", variant: "secondary", onClick: close }, a), h(NS.Button, { key: "b", variant: v || "primary", onClick: close }, b)] : null;
+    const p1 = !!p.p1;
+    return {
+      sheetNueva: sheet === "nueva", sheetEditar: sheet === "editar", dialogRechazar: dialog === "rechazar",
+      sheetSide: isPhone ? "bottom" : "right", closeAll: close,
+      showP1New: p1, nNombre: p1 ? "Ricardo Fuentes Lagos" : "", nRut: p1 ? "15.432.876-1" : "",
+      nuevaActions: btns("Cancelar", "Crear persona"), editActions: btns("Cancelar", "Guardar"),
+      rechazoActions: btns("Cancelar", "Rechazar cambio", "destructive"),
+      instOpts: [{ value: "pq", label: "Planta Quilicura" }, { value: "bl", label: "Bodega Lampa" }, { value: "ta", label: "Torre Apoquindo" }],
+      jorOpts: [{ value: "4x4", label: "4x4 · 42 h semanales" }, { value: "5x2", label: "5x2 · 42 h semanales" }],
+      afpOpts: ["Capital", "Cuprum", "Habitat", "Modelo", "PlanVital", "ProVida", "Uno"].map((l) => ({ value: l.toLowerCase(), label: l })),
+      saludOpts: [{ value: "fonasa", label: "Fonasa" }, { value: "isapre", label: "Isapre" }],
+    };
+  }
+  people() {
+    return [
+      { id: "ms", ini: "MS", nombre: "María Fernanda Soto", rut: "16.234.567-8", cargo: "Guardia", inst: "Planta Quilicura", estado: "Activa", tone: "success", dt: "warning", docs: "1 por vencer" },
+      { id: "ch", ini: "CH", nombre: "Camila Herrera", rut: "12.345.678-9", cargo: "Guardia", inst: "Planta Quilicura", estado: "Activa", tone: "success", dt: "success", docs: "Al día" },
+      { id: "jm", ini: "JM", nombre: "Jorge Muñoz", rut: "11.222.333-K", cargo: "Supervisor", inst: "Torre Apoquindo", estado: "Activa", tone: "success", dt: "success", docs: "Al día" },
+      { id: "lp", ini: "LP", nombre: "Luis Pérez", rut: "9.876.543-2", cargo: "Guardia", inst: "Bodega Lampa", estado: "Licencia", tone: "warning", dt: "danger", docs: "1 vencido" },
+      { id: "ha", ini: "HA", nombre: "Héctor Araya", rut: "15.009.332-7", cargo: "Conserje", inst: "Torre Apoquindo", estado: "Activa", tone: "success", dt: "success", docs: "Al día" },
+      { id: "ds", ini: "DS", nombre: "Diego Silva", rut: "13.456.789-0", cargo: "Guardia", inst: "Bodega Lampa", estado: "Vacaciones", tone: "info", dt: "warning", docs: "2 por vencer" },
+      { id: "rv", ini: "RV", nombre: "Rocío Vidal", rut: "17.654.321-4", cargo: "Operadora CCTV", inst: "Planta Quilicura", estado: "Activa", tone: "success", dt: "success", docs: "Al día" },
+      { id: "pt", ini: "PT", nombre: "Pablo Tapia", rut: "18.112.903-5", cargo: "Guardia", inst: "Bodega Lampa", estado: "Activa", tone: "success", dt: "danger", docs: "1 vencido" },
+    ];
+  }
+  fichaVals(sel, isPhone) {
+    const p = this.props, s = this.state;
+    const estado = p.estado ?? "ok";
+    const tab = s.tab ?? p.tab ?? "resumen";
+    const rol = p.rol ?? "rrhh";
+    const vista = s.vista ?? p.vista ?? "personas";
+    const forbidden = estado === "sinpermiso";
+    const isPersonas = !forbidden && vista === "personas";
+    const canEdit = ["rrhh", "admin", "owner"].includes(rol);
+    const seesP1 = !!p.p1 && ["rrhh", "admin", "owner"].includes(rol);
+    const edit = () => this.setState({ sheet: "editar" });
+    const R = (l, v, o = {}) => ({ l, v, plain: !o.mono && !o.masked && !o.badge, mono: !!o.mono && !o.masked, masked: !!o.masked, badge: o.masked ? null : o.badge || null, bt: o.bt || "neutral", flag: !!o.flag && !o.masked });
+    const maskPrev = rol === "supervisor" || rol === "viewer";
+    const noSalud = rol === "gerente" || rol === "viewer";
+    const noBanco = rol === "gerente" || rol === "viewer";
+    const maskBanco = rol === "supervisor";
+    const resumen = [
+      ...(seesP1 ? [{ title: "No recontratar", decide: true, canEdit, edit, rows: [
+        R("Motivo", "Abandono de funciones"),
+        R("Nota", "Tres inasistencias sin aviso entre el 03-03-2025 y el 10-03-2025."),
+        R("Registrada", "12-03-2025 · Paula Rojas, RRHH"),
+        R("Base legal", "Interés legítimo · Ley 21.719"),
+        R("Retención", "Hasta 12-03-2030"),
+        R("Derechos ARCO", "Incluida en solicitudes de acceso y oposición"),
+      ], link: "Configurar plazo en Cumplimiento › Retención", note: "Solo RRHH y administradores ven esta marca. Motivo de una lista cerrada, sin texto libre en el motivo." }] : []),
+      { title: "Vínculo vigente", yaEsta: true, rows: [R("Cargo", "Guardia"), R("Instalación", "Planta Quilicura"), R("Puesto", "Portería norte · turno día"), R("Jornada", "4x4 · 42 h semanales"), R("Desde", "01-03-2024")] },
+      { title: "Documentos y vencimientos", rows: [R("OS-10", "", { badge: "Vence 14-11-2026", bt: "warning" }), R("Contrato plazo fijo", "", { badge: "Vence 28-02-2027", bt: "neutral" }), R("Examen preocupacional", "", { badge: "Vigente", bt: "success" })], link: "Ver Documentos" },
+      { title: "Contacto", rows: [R("Teléfono", "+56 9 6123 4455"), R("Correo personal", "mf.soto@correo.cl"), R("Emergencia", "Pedro Soto · hermano")] },
+    ];
+    const laboral = [
+      { title: "Previsión", canEdit, edit, rows: [
+        R("AFP", "Modelo", { masked: maskPrev }),
+        noSalud ? R("Salud", "", { masked: true }) : R("Salud", "Fonasa · tramo B", { masked: maskPrev }),
+        R("APV", "Régimen B · $ 30.000 mensual", { masked: maskPrev }),
+        R("Cargas familiares", "2 · tramo B", { masked: maskPrev }),
+        R("Discapacidad", "No", { masked: maskPrev, flag: true }),
+      ] },
+      noBanco
+        ? { title: "Pago y cuentas bancarias", locked: true, lockText: "Sin acceso a datos bancarios con tu rol.", rows: [] }
+        : { title: "Pago y cuentas bancarias", canEdit, edit, pending: !maskBanco, canValidate: canEdit, rows: [
+            R("Forma de pago", "Transferencia"),
+            R("Cuenta vigente", "BancoEstado · Cuenta RUT ••••5678", { masked: maskBanco }),
+          ] },
+      { title: "Jornada DT y plazo fijo", canEdit, edit, rows: [R("Jornada", "42 h semanales · Ley 21.561"), R("Distribución", "4x4 · turnos de 12 h"), R("Contrato", "Plazo fijo"), R("Término", "28-02-2027"), R("Aviso de término", "30 días antes · 29-01-2027")] },
+      { title: "OS-10 y acreditaciones", canEdit, edit, rows: [R("Curso OS-10", "", { badge: "Vence 14-11-2026", bt: "warning" }), R("Credencial", "4.512.889", { mono: true }), R("Autoridad", "Prefectura OS-10 Santiago"), R("Acreditación cliente", "Planta Quilicura · 02-03-2024", { flag: true })] },
+      { title: "Uniforme y tallas", canEdit, edit, rows: [R("Camisa", "M"), R("Pantalón", "44"), R("Chaqueta", "L"), R("Calzado", "39", { flag: true })] },
+      { title: "Contacto", canEdit, edit, rows: [R("Estado civil", "Casada"), R("Contacto de emergencia", "Pedro Soto Ríos · hermano"), R("Teléfono de emergencia", "+56 9 8765 4321", { flag: true })] },
+    ];
+    const ready = !!sel && estado !== "cargando-ficha";
+    return {
+      fichaArea: isPersonas && (!isPhone || !!sel),
+      noSel: !sel, fichaLoading: !!sel && estado === "cargando-ficha", fichaReady: ready,
+      back: () => this.setState({ sel: null }),
+      showP1: seesP1, tab, setTab: (t) => this.setState({ tab: t }),
+      fichaTabs: ["Resumen", "Laboral", "Sueldo", "Anexos", "Documentos", "Privacidad", "Actividad"].map((l) => ({ id: l.toLowerCase(), label: l })),
+      otherTab: tab !== "resumen" && tab !== "laboral",
+      cards: tab === "resumen" ? resumen : tab === "laboral" ? laboral : [],
+      openRechazar: () => this.setState({ dialog: "rechazar" }),
+    };
+  }
+  vencVals(isPhone, vista, forbidden) {
+    const M = {
+      ms: [["warning", "14-11-2026"], ["neutral", "28-02-2027"], ["neutral", "02-03-2027"], null],
+      ch: [["neutral", "20-06-2027"], null, ["neutral", "15-01-2027"], null],
+      jm: [["neutral", "11-09-2027"], null, ["neutral", "03-04-2027"], ["neutral", "18-08-2029"]],
+      lp: [["danger", "22-10-2026"], ["neutral", "31-03-2027"], ["warning", "19-11-2026"], null],
+      ha: [null, null, ["neutral", "30-05-2027"], null],
+      ds: [["warning", "05-11-2026"], ["warning", "25-11-2026"], ["neutral", "12-02-2027"], null],
+      rv: [null, null, ["neutral", "08-07-2027"], null],
+      pt: [["neutral", "17-04-2027"], ["danger", "27-10-2026"], ["neutral", "21-01-2027"], ["neutral", "02-12-2028"]],
+    };
+    const names = ["OS-10", "Plazo fijo", "Examen preocupacional", "Licencia de conducir"];
+    const people = this.people();
+    const vencRows = people.map((r) => ({ ...r, cells: M[r.id].map((c) => ({ has: !!c, none: !c, tone: c ? c[0] : "neutral", label: c ? c[1] : "" })) }));
+    const vencStack = people
+      .map((r) => ({ ...r, blocks: M[r.id].map((c, i) => (c && c[0] !== "neutral" ? { tone: c[0], label: names[i] + " · " + (c[0] === "danger" ? "vencido " : "vence ") + c[1] } : null)).filter(Boolean) }))
+      .filter((r) => r.blocks.length);
+    return { isVenc: !forbidden && vista === "vencimientos", vencRows, vencStack };
+  }
+}
+</script>
+</body>
+</html>
