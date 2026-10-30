@@ -9,3 +9,6 @@ export const HojaSubir = hojaDiferida(["subir"], () =>
 export const VistaPrevia = hojaDiferida(["ver"], () =>
   import("./vista-previa").then((m) => m.VistaPrevia),
 );
+export const HojaEnviarFirma = hojaDiferida(["firmar"], () =>
+  import("./hoja-enviar-firma").then((m) => m.HojaEnviarFirma),
+);
