@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<style>body{margin:0;background:var(--ds-bg)}a{color:var(--ds-accent)}a:hover{color:var(--ds-accent)}</style>
+</helmet>
+<main data-screen-label="Índice" style="max-width:960px;margin:0 auto;padding:48px 24px 64px;display:flex;flex-direction:column;gap:32px;color:var(--ds-fg)">
+<header style="display:flex;flex-direction:column;gap:8px">
+<span class="t-overline">OPAI 2.0 · Comercial · CRM v3</span>
+<h1 class="t-display m0">Leads: canales y paso a CPQ · v2</h1>
+<p class="t-body muted m0" style="text-wrap:pretty">Las solicitudes se reciben, se ven, se procesan y se pasan a negocio o a cotización. Se suma a la Bandeja y al Detalle del PR 2. Cada pantalla trae 375, 1024 y 1280 en claro y oscuro, y sus estados vacío, cargando, error y sin permiso. DS 2.0 de OPAI.</p>
+</header>
+
+<section style="display:flex;flex-direction:column;gap:8px">
+<h2 class="t-subheading m0">Pantallas</h2>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+<sc-for list="{{ pantallas }}" as="p" hint-placeholder-count="9">
+<div style="display:grid;grid-template-columns:40px minmax(0,1fr) minmax(0,1fr);gap:4px 16px;padding:14px 16px;border-bottom:1px solid var(--ds-border);align-items:baseline">
+<span class="t-mono muted">{{ p.n }}</span>
+<div style="display:flex;flex-direction:column;gap:2px;min-width:0">
+<a href="{{ p.href }}" class="t-label">{{ p.titulo }}</a>
+<span class="t-body-sm muted" style="text-wrap:pretty">{{ p.desc }}</span>
+</div>
+<span class="t-body-sm" style="text-wrap:pretty">{{ p.rol }}</span>
+</div>
+</sc-for>
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:8px">
+<h2 class="t-subheading m0">Roles</h2>
+<div style="display:flex;flex-direction:column">
+<div class="pg-kv"><span class="l">Owner, admin, gerente, vendedor con Comercial</span><span>Ven, derivan, convierten y descartan</span></div>
+<div class="pg-kv"><span class="l">Supervisor, viewer</span><span>Sin permiso (Forbidden)</span></div>
+<div class="pg-kv"><span class="l">Configuración › Módulos › Leads</span><span>Solo owner y admin</span></div>
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:8px">
+<h2 class="t-subheading m0">Decidido y fuera de alcance</h2>
+<ul class="t-body-sm" style="margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px">
+<li>Toda solicitud entra como nueva; nueva → en revisión → convertida o descartada (con motivo, reversible). Una duplicada se enlaza a su original.</li>
+<li>Sin SLA ni cuentas regresivas. Acuse de recibo apagado por defecto; los correos salen por Comunicaciones.</li>
+<li>WhatsApp no se lee automáticamente: se pega en «Registrar solicitud».</li>
+<li>El cotizador no se rediseña: solo los puntos de entrada y el vínculo «Origen: solicitud #…».</li>
+<li>Fuera: Bandeja y Detalle base, Contactos, Actividad, Mis tareas, Etiquetas, reportes, fusionar, CPQ y Formatos de salida, chat en vivo.</li>
+</ul>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:8px">
+<h2 class="t-subheading m0">Componentes</h2>
+<p class="t-body-sm m0"><a href="10 Hoja de componentes.dc.html">Hoja de componentes</a>: piezas del DS usadas, sus variantes y estados en claro y oscuro, y las nuevas propuestas para el DS (ChipCanal, BloqueExterno, AdjuntoCard, marca «Generado», FilaConversion, FilaRechazada, ValorCopiable, ClaveOculta, AjustesForm, Sheet pantalla completa e iconos extra).</p>
+</section>
+</main>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const all = "Owner, admin, gerente y vendedor con Comercial";
+    return {
+      pantallas: [
+        { n: "01", titulo: "Bandeja con canal visible", href: "01 Bandeja con canal.dc.html", desc: "Chip de canal por fila, filtro por canal y grupo «Posibles duplicadas».", rol: all },
+        { n: "02", titulo: "Detalle · llegada por correo", href: "02 Detalle solicitud correo.dc.html", desc: "Remitente, asunto, cuerpo externo, adjuntos y datos detectados editables.", rol: all },
+        { n: "03", titulo: "Detalle · registrada por el agente", href: "03 Detalle solicitud agente.dc.html", desc: "«Registrada por OPAI», conversación de origen y datos generados.", rol: all },
+        { n: "04", titulo: "Procesar y convertir", href: "04 Procesar y convertir.dc.html", desc: "Sheet: qué se reutiliza y qué se crea; «Pasar a cotización» y «Pasar a negocio»; éxito.", rol: all },
+        { n: "05", titulo: "Ficha del negocio con su origen", href: "05 Ficha del negocio.dc.html", desc: "Bloque «Origen» y cotizaciones vacías con «Nueva cotización».", rol: all },
+        { n: "06", titulo: "Registrar solicitud", href: "06 Registrar solicitud.dc.html", desc: "Registro manual o WhatsApp pegado, con responsable.", rol: all },
+        { n: "07", titulo: "Canales de entrada", href: "07 Canales de entrada.dc.html", desc: "Configuración › Módulos › Leads › Ajustes: formulario web, correo de entrada, responsables y acuse de recibo.", rol: "Owner y admin" },
+        { n: "08", titulo: "Estados del canal", href: "08 Estados del canal.dc.html", desc: "Módulos › Leads › Ajustes: clave revocada, correo sin mensajes y mensajes rechazados.", rol: "Owner y admin" },
+        { n: "09", titulo: "Propuesta B, a confirmar por Carlos", href: "09 Propuesta B.dc.html", desc: "Asignación por reglas, formulario alojado por OPAI y conversión por el agente.", rol: "Owner y admin; conversión: " + all.toLowerCase() },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
