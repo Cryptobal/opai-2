@@ -26,6 +26,9 @@ export function defineCapability<I extends z.ZodType, O extends z.ZodType>(
   if (def.auditarLectura && (def.efecto !== "lectura" || def.sinTenant || def.tenantObjetivo)) {
     throw new Error(`La auditoría de lectura de "${def.id}" requiere lectura con tenant actual.`);
   }
+  if (def.sinDb && (def.efecto !== "lectura" || def.auditarLectura)) {
+    throw new Error(`"${def.id}" marca sinDb pero no es una lectura sin base ni auditoría.`);
+  }
   // Excepciones cerradas del encargo ADR-045 de #76; no extender a fichas ni documentos.
   if (
     def.auditarLectura === false &&

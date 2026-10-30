@@ -6,6 +6,7 @@ exports[`declaración de auditoría del registro completo > ninguna lectura nuev
   "agente.modelos.list",
   "comercial.config.get",
   "core.bitacora.verificar",
+  "core.calendario.listar",
   "core.cargos.get",
   "core.cargos.list",
   "core.comunicaciones.eventos",
@@ -42,6 +43,7 @@ exports[`declaración de auditoría del registro completo > ninguna lectura nuev
   "core.usage.summary",
   "platform.ajustes.get",
   "platform.auditoria.estado",
+  "platform.auditoria.list",
   "platform.bitacora.estado",
   "platform.consumos.summary",
   "platform.eventos.list",
@@ -53,5 +55,9 @@ exports[`declaración de auditoría del registro completo > ninguna lectura nuev
   "platform.trabajos.list",
   "platform.usage.summary",
   "platform.users.list",
+  "rondas.incidentes_tipo.listar",
+  "rondas.plantillas.listar",
+  "rondas.programaciones.listar",
+  "rondas.puntos.listar",
 ]
 `;

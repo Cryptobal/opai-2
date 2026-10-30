@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-accent)}</style>
+</helmet>
+<div class="ds screen" data-theme="{{ theme }}" data-device="{{ device }}" data-screen-label="{{ label }}" style="width:100%;height:100%;flex-direction:row">
+<sc-if value="{{ isDesk }}" hint-placeholder-val="{{ true }}">
+  <nav class="sidebar" aria-label="Módulos">
+    <div style="padding:14px 12px 4px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:0 8px"><span class="wordmark">OPAI</span><span class="t-caption">2.0</span></div>
+      <button aria-label="Portal ERP de Atlas Seguridad · cambiar" style="display:flex;align-items:center;gap:10px;height:44px;padding:0 10px;border:1px solid var(--ds-border);border-radius:10px;background:var(--ds-bg);color:var(--ds-fg);text-align:left">
+        <span class="tenant">AS</span><span style="flex:1;min-width:0;display:flex;flex-direction:column"><span class="t-label-sm">ERP</span><span class="t-caption">Atlas Seguridad SpA</span></span><span class="ic sm i-updown subtle" aria-hidden="true"></span>
+      </button>
+    </div>
+    <div style="flex:1;min-height:0;overflow:hidden;padding:0 12px">
+      <div class="nav-group"><a class="nav-item" href="#"><span class="ic i-home" aria-hidden="true"></span>Inicio</a><a class="nav-item" href="#"><span class="ic i-inbox" aria-hidden="true"></span>Bandeja</a><a class="nav-item" href="#"><span class="ic i-ticket" aria-hidden="true"></span>Tickets</a></div>
+      <div class="nav-group"><span class="h">Operaciones</span>
+        <a class="nav-item {{ nav.inst }}" href="#"><span class="ic i-building" aria-hidden="true"></span>Instalaciones</a>
+        <a class="nav-item" href="#"><span class="ic i-user-check" aria-hidden="true"></span>Pauta diaria</a>
+        <a class="nav-item" href="#"><span class="ic i-calendar" aria-hidden="true"></span>Pauta mensual</a>
+        <a class="nav-item {{ nav.ctl }}" href="#"><span class="ic i-route" aria-hidden="true"></span>Rondas</a>
+        <a class="nav-item {{ nav.inf }}" href="#"><span class="ic i-chart" aria-hidden="true"></span>Informes de rondas</a>
+        <a class="nav-item {{ nav.cen }}" href="#"><span class="ic i-bell" aria-hidden="true"></span>Central</a>
+      </div>
+      <div class="nav-group"><span class="h">Personas</span><a class="nav-item" href="#"><span class="ic i-users" aria-hidden="true"></span>Personas</a></div>
+      <div class="nav-group"><span class="h">Sistema</span><a class="nav-item {{ nav.cfg }}" href="#"><span class="ic i-grid" aria-hidden="true"></span>Configuración</a></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 20px;border-top:1px solid var(--ds-border)"><span class="avatar">CI</span><span style="flex:1;display:flex;flex-direction:column"><span class="t-label-sm">Carlos Irigoyen</span><span class="t-caption">Administrador</span></span></div>
+  </nav>
+</sc-if>
+<sc-if value="{{ isTab }}">
+  <nav class="rail" aria-label="Módulos">
+    <button class="rail-portal" aria-label="Portal ERP · cambiar"><span class="tenant">AS</span>ERP</button>
+    <a href="#"><span class="ic i-home" aria-hidden="true"></span>Inicio</a>
+    <a class="{{ nav.inst }}" href="#"><span class="ic i-building" aria-hidden="true"></span>Instalac.</a>
+    <a class="{{ nav.ctl }}" href="#"><span class="ic i-route" aria-hidden="true"></span>Rondas</a>
+    <a class="{{ nav.inf }}" href="#"><span class="ic i-chart" aria-hidden="true"></span>Informes</a>
+    <a class="{{ nav.cen }}" href="#"><span class="ic i-bell" aria-hidden="true"></span>Central</a>
+    <a class="{{ nav.cfg }}" href="#"><span class="ic i-grid" aria-hidden="true"></span>Config.</a>
+  </nav>
+</sc-if>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;position:relative">
+  <sc-if value="{{ isPhone }}">
+    <div class="safe-top"></div>
+    <div class="topbar"><button class="portal-btn"><span class="tenant">AS</span>ERP<span class="ic sm i-updown subtle" aria-hidden="true"></span></button><span style="flex:1"></span><button class="icon-btn" aria-label="Buscar"><span class="ic i-search" aria-hidden="true"></span></button></div>
+  </sc-if>
+  <header class="appbar" style="padding:0 {{ gutter }};height:{{ headH }}">
+    <div style="flex:1;min-width:0;display:flex;align-items:center;gap:12px"><h1 class="t-heading m0">{{ title }}</h1><sc-if value="{{ showLive }}"><span class="live">En vivo · 10:24</span></sc-if></div>
+    <sc-if value="{{ S.c12 }}"><button class="btn btn-secondary"><span class="t-numeric">Hoy · 29-10-2026</span><span class="ic sm i-chevron-down muted" aria-hidden="true"></span></button><sc-if value="{{ notPhone }}"><button class="btn btn-primary"><span class="ic sm i-plus" aria-hidden="true"></span>Programar ronda</button></sc-if></sc-if>
+    <sc-if value="{{ S.c18 }}"><sc-if value="{{ notPhone }}"><button class="btn btn-secondary"><span class="ic sm i-ticket" aria-hidden="true"></span>Crear ticket</button><button class="btn btn-secondary"><span class="ic sm i-eye" aria-hidden="true"></span>Ver en la central</button></sc-if></sc-if>
+    <sc-if value="{{ S.c14 }}"><sc-if value="{{ notPhone }}"><button class="btn btn-secondary"><span class="t-numeric">Octubre 2026</span><span class="ic sm i-chevron-down muted" aria-hidden="true"></span></button></sc-if><sc-if value="{{ notPhone }}"><button class="btn btn-primary"><span class="ic sm i-calendar" aria-hidden="true"></span>Programar informe al cliente</button></sc-if></sc-if>
+  </header>
+
+  <sc-if value="{{ nonOk }}">
+    <sc-if value="{{ isLoad }}">
+      <div aria-busy="true" aria-label="Cargando" style="flex:1;padding:24px {{ gutter }};display:flex;flex-direction:column;gap:16px">
+        <div style="display:grid;grid-template-columns:{{ kpiCols }};gap:12px"><sc-for list="{{ skelK }}" as="k" hint-placeholder-count="4"><div class="kpi" style="gap:10px"><div class="skel" style="height:12px;width:60%"></div><div class="skel" style="height:24px;width:40%"></div></div></sc-for></div>
+        <div class="card" style="flex:1;padding:16px;display:flex;flex-direction:column;gap:14px"><sc-for list="{{ skelR }}" as="r" hint-placeholder-count="6"><div style="display:flex;gap:16px;align-items:center"><div class="skel" style="height:20px;width:80px;border-radius:999px"></div><div class="skel" style="height:14px;flex:1"></div><div class="skel" style="height:14px;width:64px"></div></div></sc-for></div>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isMsg }}">
+      <div class="state" role="status" style="flex:1">
+        <span class="state-ic" style="background:var(--ds-fill)"><span class="ic lg i-{{ msg.ic }}" aria-hidden="true"></span></span>
+        <div class="txt"><span class="t-subheading">{{ msg.t }}</span><span class="t-body-sm muted" style="text-wrap:pretty">{{ msg.d }}</span></div>
+        <button class="btn btn-primary"><span class="ic sm i-{{ msg.aic }}" aria-hidden="true"></span>{{ msg.a }}</button>
+      </div>
+    </sc-if>
+  </sc-if>
+
+  <sc-if value="{{ S.c12 }}">
+    <div style="flex:1;min-height:0;padding:{{ pad }};display:flex;flex-direction:column;gap:16px;overflow:auto">
+      <div style="display:grid;grid-template-columns:{{ kpiCols }};gap:12px">
+        <sc-for list="{{ kpis }}" as="k" hint-placeholder-count="7"><div class="kpi" style="padding:12px 14px;gap:2px"><span class="k">{{ k.k }}</span><span class="v" style="color:{{ k.c }}">{{ k.v }}</span><span class="t-caption">{{ k.d }}</span></div></sc-for>
+      </div>
+      <div style="{{ splitFlex }}display:grid;grid-template-columns:{{ splitCols }};gap:16px">
+        <section class="card" style="overflow:{{ listOv }};display:flex;flex-direction:column;min-width:0">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--ds-border)">
+            <button class="input" aria-haspopup="listbox" aria-label="Instalación" style="width:auto;flex:1 1 200px;max-width:260px;cursor:pointer;text-align:left"><span class="ic sm i-building muted" aria-hidden="true"></span><span class="grow t-body-sm">Todas las instalaciones</span><span class="ic sm i-chevron-down muted" aria-hidden="true"></span></button>
+            <label class="input" style="width:auto;flex:1 1 180px;cursor:text"><span class="ic sm i-search muted" aria-hidden="true"></span><input class="bare t-body-sm" placeholder="Buscar ronda, guardia o punto" aria-label="Buscar ronda, guardia o punto"></label>
+            <div class="seg" role="group" aria-label="Filtro"><button class="on">Con alerta · 8</button><button>En curso · 6</button><button>Todas · 48</button></div>
+          </div>
+          <sc-if value="{{ notPhone }}">
+            <table class="tbl compact hover" style="table-layout:fixed;width:100%">
+              <colgroup><col style="width:112px"><col><col style="width:72px"><col style="width:96px"><col style="width:148px"></colgroup>
+              <thead><tr><th>Estado · inicio</th><th>Instalación · ronda · responsable</th><th>Avance</th><th>Confianza</th><th style="white-space:normal">Incidentes y anomalías</th></tr></thead>
+              <tbody><sc-for list="{{ ctl }}" as="r" hint-placeholder-count="8"><tr class="{{ r.sel }}">
+                <td><span style="display:flex;flex-direction:column;gap:4px;align-items:flex-start"><span class="badge b-{{ r.tone }}">{{ r.est }}</span><span class="t-caption t-numeric">{{ r.h }}</span></span></td>
+                <td style="white-space:normal"><span style="display:flex;flex-direction:column;min-width:0"><span class="t-label">{{ r.inst }}</span><span class="t-caption">{{ r.pl }} · {{ r.g }}</span></span></td>
+                <td><span style="display:flex;flex-direction:column;gap:6px"><span class="t-caption t-numeric">{{ r.av }}</span><span class="progress" style="width:48px"><span style="width:{{ r.pct }};background:{{ r.pc }}"></span></span></span></td>
+                <td><span class="badge b-{{ r.bt }}">{{ r.band }}</span></td>
+                <td style="white-space:normal"><span class="t-caption" style="display:flex;align-items:flex-start;gap:6px;color:{{ r.icc }}"><span class="ic sm i-{{ r.ii }}" aria-hidden="true" style="flex:none;margin-top:1px;display:{{ r.ivis }}"></span>{{ r.inc }}</span></td>
+              </tr></sc-for></tbody>
+            </table>
+          </sc-if>
+          <sc-if value="{{ isPhone }}">
+            <div><sc-for list="{{ ctl }}" as="r" hint-placeholder-count="6"><div class="rowcard"><span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px"><span class="badge b-{{ r.tone }}" style="align-self:flex-start">{{ r.est }}</span><span class="t-label">{{ r.inst }}</span><span class="t-caption">{{ r.pl }} · {{ r.g }}</span><span style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><span class="badge b-{{ r.bt }}">{{ r.band }}</span><span class="t-caption" style="color:{{ r.icc }}">{{ r.inc }}</span></span></span><span style="display:flex;flex-direction:column;align-items:flex-end;gap:4px"><span class="t-caption t-numeric">{{ r.h }}</span><span class="t-label-sm t-numeric">{{ r.av }}</span></span></div></sc-for></div>
+          </sc-if>
+        </section>
+        <sc-if value="{{ notPhone }}">
+          <aside class="card" aria-label="Detalle de la ronda" style="display:flex;flex-direction:column;overflow:hidden;min-width:0">
+            <div style="padding:16px;display:flex;flex-direction:column;gap:6px;border-bottom:1px solid var(--ds-border)">
+              <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="badge b-accent">En curso</span><span class="badge b-danger nodot">1 incidente abierto</span><span class="badge b-neutral nodot">1 anomalía</span></div>
+              <span class="t-subheading">Ronda perimetral</span>
+              <span class="t-body-sm muted">Planta Quilicura · María Fernanda Soto</span>
+              <div class="t-caption t-numeric" style="display:flex;justify-content:space-between;padding-top:6px"><span>4 de 6 puntos</span><span>Inició 10:02 · límite 40 min</span></div>
+              <div class="progress"><span style="width:67%"></span></div>
+            </div>
+            <div style="height:{{ asideMapH }};flex:none;border-bottom:1px solid var(--ds-border)"><dc-import name="Mapa Rondas" variant="recorrido" legend="{{ false }}" incidente="{{ true }}" hint-size="100%,150px" style="display:block;width:100%;height:100%"></dc-import></div>
+            <div style="flex:1;min-height:0;overflow:auto;padding:16px"><div class="tl">
+              <sc-for list="{{ asideTl }}" as="m" hint-placeholder-count="5"><div class="tl-item" style="padding-bottom:12px"><span class="tl-dot" style="border:2px solid {{ m.bd }};background:{{ m.bg }};color:{{ m.fg }}"><span class="t-caption" style="color:inherit;font-weight:600">{{ m.n }}</span></span><div style="flex:1;display:flex;justify-content:space-between;gap:8px"><span style="display:flex;flex-direction:column"><span class="t-label-sm">{{ m.nom }}</span><span class="t-caption" style="color:{{ m.dc }}">{{ m.d }}</span><a href="#" class="t-caption" style="display:{{ m.ld }};color:var(--ds-accent)">Abrir NOV-0418</a></span><span class="t-caption t-numeric">{{ m.h }}</span></div></div></sc-for>
+            </div></div>
+            <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:12px 16px 16px;border-top:1px solid var(--ds-border)">
+              <button class="btn btn-secondary" style="grid-column:1 / -1">Abrir ficha<span class="ic sm i-chevron-right" aria-hidden="true"></span></button>
+              <button class="btn btn-secondary"><span class="ic sm i-ticket" aria-hidden="true"></span>Crear ticket</button>
+              <button class="btn btn-secondary"><span class="ic sm i-eye" aria-hidden="true"></span>Ver en la central</button>
+            </div>
+          </aside>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ S.c18 }}">
+    <div style="flex:1;min-height:0;overflow:auto">
+      <div style="padding:16px {{ gutter }} 0;display:flex;flex-direction:column;gap:6px">
+        <a href="#" class="t-label-sm" style="display:flex;align-items:center;gap:4px;color:var(--ds-fg-muted);align-self:flex-start;min-height:32px"><span class="ic sm i-chevron-left" aria-hidden="true"></span>Control de rondas</a>
+        <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="badge b-accent">En curso</span><span class="badge b-danger nodot">1 incidente abierto</span><span class="badge b-neutral nodot">1 anomalía</span></div>
+        <span class="t-title">Ronda perimetral</span>
+        <span class="t-body-sm muted">Planta Quilicura · María Fernanda Soto · inició <span class="t-numeric">10:02</span> · plantilla de 6 puntos</span>
+      </div>
+      <div class="tabs-wrap" style="padding:8px {{ gutter }} 0"><div class="tabs" role="tablist">
+        <button class="tab on" role="tab" aria-selected="true">Resumen</button><button class="tab" role="tab">Marcas<span class="n">4</span></button><button class="tab" role="tab">Rastro</button><button class="tab" role="tab">Anomalías y revisión<span class="n">1</span></button><button class="tab" role="tab">Documentos</button><button class="tab" role="tab">Actividad</button>
+      </div></div>
+      <div style="padding:16px {{ gutter }} 24px;display:grid;grid-template-columns:{{ fichaCols }};gap:16px;align-items:start">
+        <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+          <section class="card" style="padding:16px;display:flex;flex-direction:column;gap:6px">
+            <div class="t-label-sm" style="display:flex;justify-content:space-between"><span class="t-numeric">4 de 6 puntos</span><span class="t-numeric muted">22 min · límite 40 min</span></div>
+            <div class="progress" role="progressbar" aria-valuenow="4" aria-valuemin="0" aria-valuemax="6" aria-label="Avance"><span style="width:67%"></span></div>
+          </section>
+          <section class="card" style="overflow:hidden">
+            <div class="card-h"><span class="txt"><span class="t-label">Confianza de la ronda</span><span class="t-caption">Modelo de confianza v1 · 75 de 75 aplicables</span></span><span class="badge b-success">Alta</span></div>
+            <div style="padding:0 16px 8px"><sc-for list="{{ trust }}" as="t" hint-placeholder-count="6"><div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid var(--ds-border)"><span class="t-body-sm">{{ t.k }}</span><span class="t-body-sm t-numeric" style="color:{{ t.c }};text-align:right">{{ t.v }}</span></div></sc-for></div>
+          </section>
+          <sc-if value="{{ isPhone }}"><div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px"><button class="btn btn-secondary"><span class="ic sm i-ticket" aria-hidden="true"></span>Crear ticket</button><button class="btn btn-secondary"><span class="ic sm i-eye" aria-hidden="true"></span>Ver en la central</button></div></sc-if>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+          <section class="card" style="overflow:hidden;height:{{ fichaMapH }}"><dc-import name="Mapa Rondas" variant="recorrido" incidente="{{ true }}" hint-size="100%,240px" style="display:block;width:100%;height:100%"></dc-import></section>
+          <section class="card" style="padding:16px;display:flex;flex-direction:column;gap:10px">
+            <span class="t-overline">Marcas</span>
+            <div class="tl"><sc-for list="{{ fichaTl }}" as="m" hint-placeholder-count="6"><div class="tl-item" style="padding-bottom:14px"><span class="tl-dot" style="border:2px solid {{ m.bd }};background:{{ m.bg }};color:{{ m.fg }}"><span class="t-caption" style="color:inherit;font-weight:600">{{ m.n }}</span></span><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><div style="display:flex;justify-content:space-between;gap:8px"><span class="t-label">{{ m.nom }}</span><span class="t-caption t-numeric">{{ m.h }}</span></div><span class="t-caption" style="color:{{ m.dc }}">{{ m.d }}</span><a href="#" class="t-caption" style="display:{{ m.ld }};color:var(--ds-accent)">Abrir NOV-0418 en el libro de novedades</a></div></div></sc-for></div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ S.c13 }}">
+    <div style="flex:1;min-height:0;overflow:auto">
+      <div style="padding:16px {{ gutter }} 0;display:flex;flex-direction:column;gap:4px">
+        <span class="t-caption">Instalaciones · Inmobiliaria Quilicura Ltda.</span>
+        <div style="display:flex;align-items:center;gap:8px"><span class="t-title">Planta Quilicura</span><span class="badge b-success">Activa</span></div>
+        <span class="t-body-sm muted">Av. Américo Vespucio 1501, Quilicura</span>
+      </div>
+      <div class="tabs-wrap" style="padding:8px {{ gutter }} 0"><div class="tabs" role="tablist"><button class="tab" role="tab">Resumen</button><button class="tab" role="tab">Puestos</button><button class="tab" role="tab">Pauta</button><button class="tab on" role="tab" aria-selected="true">Rondas</button><button class="tab" role="tab">Documentos</button></div></div>
+      <div style="padding:16px {{ gutter }} 24px;display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <div class="seg" role="radiogroup" aria-label="Sección"><button class="{{ seg.p }}" role="radio">Puntos</button><button class="{{ seg.t }}" role="radio">Plantillas</button><button class="{{ seg.s }}" role="radio">Programación</button><button class="{{ seg.h }}" role="radio">Historial</button></div>
+          <span style="flex:1"></span>
+          <sc-if value="{{ segP }}"><button class="btn btn-secondary"><span class="ic sm i-download" aria-hidden="true"></span>Imprimir etiquetas</button><button class="btn btn-primary"><span class="ic sm i-plus" aria-hidden="true"></span>Nuevo punto</button></sc-if>
+          <sc-if value="{{ segT }}"><button class="btn btn-primary"><span class="ic sm i-plus" aria-hidden="true"></span>Nueva plantilla</button></sc-if>
+          <sc-if value="{{ segS }}"><button class="btn btn-primary"><span class="ic sm i-plus" aria-hidden="true"></span>Nueva programación</button></sc-if>
+          <sc-if value="{{ segH }}"><button class="btn btn-secondary"><span class="ic sm i-download" aria-hidden="true"></span>Exportar</button></sc-if>
+        </div>
+
+        <sc-if value="{{ segP }}">
+          <div class="card" style="height:220px;overflow:hidden"><dc-import name="Mapa Rondas" variant="radios" hint-size="100%,220px" style="display:block;width:100%;height:100%"></dc-import></div>
+          <sc-if value="{{ notPhone }}">
+            <div class="tbl-wrap"><table class="tbl hover">
+              <thead><tr><th>Punto</th><th>Modo</th><th class="num">Radio</th><th class="num">Precisión mín.</th><th class="num">Permanencia</th><th>Foto</th><th>Estado</th></tr></thead>
+              <tbody><sc-for list="{{ ptos }}" as="p" hint-placeholder-count="6"><tr class="{{ p.sel }}">
+                <td><span style="display:flex;flex-direction:column"><span class="t-label">{{ p.n }}. {{ p.nom }}</span><span class="t-caption" style="display:{{ p.ld }}">Etiqueta de 1.0 · reutilizada</span></span></td>
+                <td>{{ p.modo }}</td><td class="num">{{ p.r }}</td><td class="num">{{ p.pr }}</td><td class="num">{{ p.pe }}</td><td>{{ p.foto }}</td>
+                <td><span class="badge b-{{ p.et }}">{{ p.est }}</span></td>
+              </tr></sc-for></tbody>
+            </table></div>
+          </sc-if>
+          <sc-if value="{{ isPhone }}">
+            <div class="card" style="overflow:hidden"><sc-for list="{{ ptos }}" as="p" hint-placeholder-count="6"><div class="rowcard"><span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span class="t-label">{{ p.n }}. {{ p.nom }}</span><span class="t-caption">{{ p.modo }} · radio {{ p.r }} · {{ p.pe }}</span><span class="t-caption" style="display:{{ p.ld }}">Etiqueta de 1.0 · reutilizada</span></span><span class="badge b-{{ p.et }}">{{ p.est }}</span></div></sc-for></div>
+          </sc-if>
+        </sc-if>
+
+        <sc-if value="{{ segT }}">
+          <div style="display:grid;grid-template-columns:{{ tplCols }};gap:16px;align-items:start">
+            <div class="card" style="overflow:hidden"><sc-for list="{{ plantillas }}" as="t" hint-placeholder-count="4"><div class="rowcard" style="background:{{ t.bg }}"><span style="flex:1;display:flex;flex-direction:column"><span class="t-label">{{ t.n }}</span><span class="t-caption">{{ t.d }}</span></span></div></sc-for></div>
+            <section class="card" style="padding:16px;display:flex;flex-direction:column;gap:16px;min-width:0">
+              <div class="field"><label class="lbl" for="tp-n">Nombre</label><input id="tp-n" class="input" value="Ronda perimetral"></div>
+              <div class="field"><span class="lbl">Puntos y orden</span>
+                <div style="border:1px solid var(--ds-border);border-radius:10px;overflow:hidden" role="list" aria-label="Lista ordenable de puntos">
+                  <sc-for list="{{ tplPts }}" as="p" hint-placeholder-count="6"><div role="listitem" style="display:flex;align-items:center;gap:8px;min-height:52px;padding:0 8px 0 4px;border-bottom:1px solid var(--ds-border);background:var(--ds-surface)">
+                    <button class="icon-btn" aria-label="Mover {{ p.nom }}" style="cursor:grab;color:var(--ds-fg-subtle)"><span class="ic i-menu" aria-hidden="true"></span></button>
+                    <span class="t-label-sm t-numeric subtle" style="width:16px">{{ p.n }}</span>
+                    <span class="t-label" style="flex:1;min-width:0">{{ p.nom }}</span>
+                    <div class="seg" role="radiogroup" aria-label="Tipo"><button class="{{ p.ob }}" role="radio">Obligatorio</button><button class="{{ p.op }}" role="radio">Opcional</button></div>
+                  </div></sc-for>
+                </div>
+                <span class="hint">Arrastra para cambiar el orden. También con teclado: espacio para tomar, flechas para mover.</span>
+              </div>
+              <div class="field"><span class="lbl">Orden de recorrido</span><div class="seg" role="radiogroup" style="align-self:flex-start"><button role="radio">Sugerido</button><button class="on" role="radio">Estricto</button><button role="radio">Aleatorio por ejecución</button></div></div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px">
+                <div class="field"><label class="lbl">Tiempo máximo total</label><div class="input"><input class="bare" value="40"><span class="trail t-body-sm">min</span></div></div>
+                <div class="field"><label class="lbl">Máximo por tramo</label><div class="input"><input class="bare" value="10"><span class="trail t-body-sm">min</span></div></div>
+                <div class="field"><label class="lbl">Umbral de incompleta</label><div class="input"><input class="bare" value="80"><span class="trail t-body-sm">% obligatorios</span></div></div>
+              </div>
+              <div style="display:flex;justify-content:flex-end;gap:8px"><button class="btn btn-secondary">Descartar</button><button class="btn btn-primary">Guardar plantilla</button></div>
+            </section>
+          </div>
+        </sc-if>
+
+        <sc-if value="{{ segH }}">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+            <button class="btn btn-secondary"><span class="ic sm i-calendar" aria-hidden="true"></span><span class="t-numeric">22-10-2026 – 29-10-2026</span></button>
+            <button class="chip toggle">Guardia: todos<span class="ic sm i-chevron-down" aria-hidden="true"></span></button>
+            <button class="chip toggle on">Tipo: Intrusión, Daño<span class="ic sm i-chevron-down" aria-hidden="true"></span></button>
+            <button class="chip toggle">Gravedad: todas<span class="ic sm i-chevron-down" aria-hidden="true"></span></button>
+            <button class="chip toggle">Solo con incidentes</button>
+          </div>
+          <sc-if value="{{ notPhone }}">
+            <div class="tbl-wrap"><table class="tbl compact">
+              <thead><tr><th class="num" style="width:72px">Hora</th><th>Punto · marca</th><th>Confirmación</th><th>Checklist</th><th>Incidentes</th></tr></thead>
+              <tbody><sc-for list="{{ hist }}" as="r" hint-placeholder-count="2">
+                <tr><td colspan="5" style="background:var(--ds-fill)"><span style="display:flex;align-items:center;gap:10px;flex-wrap:wrap"><span class="t-label t-numeric">{{ r.f }}</span><span class="t-label">{{ r.pl }}</span><span class="t-caption">{{ r.g }} · {{ r.res }}</span><span class="badge b-{{ r.tone }}">{{ r.est }}</span><span style="flex:1"></span><span class="t-caption t-numeric">{{ r.inc }}</span></span></td></tr>
+                <sc-for list="{{ r.rows }}" as="m" hint-placeholder-count="3"><tr>
+                  <td class="num muted">{{ m.h }}</td>
+                  <td><span style="display:flex;flex-direction:column"><span class="t-label-sm">{{ m.p }}</span><span class="t-caption">{{ m.mk }}</span></span></td>
+                  <td><span class="badge b-{{ m.ct }}">{{ m.c }}</span></td>
+                  <td class="t-caption">{{ m.ck }}</td>
+                  <td><a href="#" class="t-label-sm" style="display:{{ m.id }};align-items:center;gap:6px;color:var(--ds-fg);text-decoration:none"><span class="t-mono">{{ m.ii }}</span><span class="badge b-{{ m.it }} nodot">{{ m.ig }}</span><span class="t-caption">{{ m.ie }}</span></a><span class="t-caption" style="display:{{ m.nod }}">—</span></td>
+                </tr></sc-for>
+              </sc-for></tbody>
+            </table></div>
+          </sc-if>
+          <sc-if value="{{ isPhone }}">
+            <sc-for list="{{ hist }}" as="r" hint-placeholder-count="2">
+              <div class="card" style="overflow:hidden">
+                <div style="padding:12px 16px;background:var(--ds-fill);display:flex;flex-direction:column;gap:4px"><span style="display:flex;justify-content:space-between;gap:8px"><span class="t-label">{{ r.pl }}</span><span class="badge b-{{ r.tone }}">{{ r.est }}</span></span><span class="t-caption t-numeric">{{ r.f }} · {{ r.g }} · {{ r.inc }}</span></div>
+                <sc-for list="{{ r.rows }}" as="m" hint-placeholder-count="3"><div class="rowcard" style="align-items:flex-start"><span class="t-caption t-numeric" style="width:40px;flex:none">{{ m.h }}</span><span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px"><span class="t-label-sm">{{ m.p }}</span><span class="t-caption">{{ m.mk }} · checklist {{ m.ck }}</span><span class="badge b-{{ m.ct }}" style="align-self:flex-start">{{ m.c }}</span><a href="#" class="t-caption" style="display:{{ m.id }};gap:6px;color:var(--ds-fg)"><span class="t-mono">{{ m.ii }}</span>· {{ m.ig }} · {{ m.ie }}</a></span></div></sc-for>
+              </div>
+            </sc-for>
+          </sc-if>
+        </sc-if>
+
+        <sc-if value="{{ segS }}">
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <sc-for list="{{ progs }}" as="g" hint-placeholder-count="3">
+              <section class="card" style="padding:16px;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px 16px">
+                <div style="display:flex;flex-direction:column"><span class="t-caption">Plantilla</span><span class="t-label">{{ g.pl }}</span></div>
+                <div style="display:flex;flex-direction:column"><span class="t-caption">Horarios · días</span><span class="t-label t-numeric">{{ g.h }}</span><span class="t-caption">{{ g.d }}</span></div>
+                <div style="display:flex;flex-direction:column"><span class="t-caption">Ventana de tolerancia</span><span class="t-label t-numeric">{{ g.v }}</span></div>
+                <div style="display:flex;flex-direction:column"><span class="t-caption">Responsables</span><span class="t-label">{{ g.r }}</span></div>
+              </section>
+            </sc-for>
+            <section class="card" style="padding:4px 16px">
+              <div class="switch-row" style="padding:8px 0;border-bottom:1px solid var(--ds-border)"><span style="display:flex;flex-direction:column"><span class="t-label">Permitir rondas ad hoc</span><span class="t-caption">El guardia puede iniciar una ronda fuera de horario con cualquier plantilla activa.</span></span><button class="switch-area" role="switch" aria-checked="true" aria-label="Permitir rondas ad hoc"><span class="switch on"></span></button></div>
+              <div class="switch-row" style="padding:8px 0"><span style="display:flex;flex-direction:column"><span class="t-label">Exigir app OPAI nativa</span><span class="t-caption">Solo se aceptan marcas desde la app publicada en la tienda para esta instalación. Mejora el rastro en segundo plano.</span></span><button class="switch-area" role="switch" aria-checked="false" aria-label="Exigir app OPAI nativa"><span class="switch"></span></button></div>
+            </section>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ S.c14 }}">
+    <div style="flex:1;min-height:0;overflow:auto;padding:{{ pad }};display:flex;flex-direction:column;gap:16px">
+      <sc-if value="{{ isPhone }}"><button class="btn btn-primary block"><span class="ic sm i-calendar" aria-hidden="true"></span>Programar informe al cliente</button></sc-if><div class="chip-row"><button class="chip toggle on">Todas las instalaciones</button><button class="chip toggle">Planta Quilicura</button><button class="chip toggle">Bodega Lampa</button><button class="chip toggle">Torre Apoquindo</button></div>
+      <div class="chip-row" style="margin-top:-8px"><button class="chip toggle">Tipo de incidente: todos<span class="ic sm i-chevron-down" aria-hidden="true"></span></button><button class="chip toggle on">Gravedad: alta<span class="ic sm i-chevron-down" aria-hidden="true"></span></button></div>
+      <div style="display:grid;grid-template-columns:{{ kpi4 }};gap:12px">
+        <sc-for list="{{ infK }}" as="k" hint-placeholder-count="4"><div class="kpi"><span class="k">{{ k.k }}</span><span class="v">{{ k.v }}</span><span class="d" style="color:{{ k.c }}">{{ k.d }}</span></div></sc-for>
+      </div>
+      <div style="display:grid;grid-template-columns:{{ panelCols }};gap:16px">
+        <section class="card"><div class="card-h"><span class="txt"><span class="t-label">Cumplimiento por instalación</span><span class="t-caption">Octubre 2026 · rondas completas sobre vencidas</span></span></div>
+          <div class="card-c" style="display:flex;flex-direction:column;gap:12px"><sc-for list="{{ cumpl }}" as="c" hint-placeholder-count="5"><div style="display:flex;flex-direction:column;gap:4px"><div style="display:flex;justify-content:space-between" class="t-body-sm"><span>{{ c.n }}</span><span class="t-numeric">{{ c.v }}</span></div><div class="progress"><span style="width:{{ c.w }};background:{{ c.c }}"></span></div></div></sc-for></div></section>
+        <section class="card"><div class="card-h"><span class="txt"><span class="t-label">Puntos más omitidos</span><span class="t-caption">Veces omitido en el período</span></span></div>
+          <div class="card-c" style="padding-top:0"><sc-for list="{{ omit }}" as="o" hint-placeholder-count="5"><div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--ds-border)"><span style="flex:1;display:flex;flex-direction:column"><span class="t-label">{{ o.n }}</span><span class="t-caption">{{ o.i }}</span></span><span class="t-label t-numeric">{{ o.v }}</span></div></sc-for></div></section>
+        <section class="card"><div class="card-h"><span class="txt"><span class="t-label">Bandas de confianza</span><span class="t-caption">1.284 rondas · modelo OPAI 1.0</span></span></div>
+          <div class="card-c" style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;height:12px;border-radius:999px;overflow:hidden;gap:2px" role="img" aria-label="Alta 82 %, media 14 %, baja 4 %"><span style="width:82%;background:var(--ds-success)"></span><span style="width:14%;background:var(--ds-warning)"></span><span style="width:4%;background:var(--ds-danger)"></span></div>
+            <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+              <div style="display:flex;flex-direction:column"><span class="badge b-success" style="align-self:flex-start">Alta</span><span class="t-heading t-numeric">82 %</span><span class="t-caption">1.053 rondas</span></div>
+              <div style="display:flex;flex-direction:column"><span class="badge b-warning" style="align-self:flex-start">Media</span><span class="t-heading t-numeric">14 %</span><span class="t-caption">180 rondas</span></div>
+              <div style="display:flex;flex-direction:column"><span class="badge b-danger" style="align-self:flex-start">Baja</span><span class="t-heading t-numeric">4 %</span><span class="t-caption">51 rondas</span></div>
+            </div></div></section>
+        <section class="card" style="overflow:hidden"><div class="card-h"><span class="txt"><span class="t-label">Anomalías por tipo y revisión</span><span class="t-caption">37 en el período</span></span></div>
+          <sc-if value="{{ isPhone }}"><div><sc-for list="{{ anoms }}" as="a" hint-placeholder-count="4"><div class="rowcard" style="flex-direction:column;gap:4px"><span class="t-label">{{ a.t }}</span><span class="t-caption t-numeric">Abiertas <span style="color:{{ a.oc }}">{{ a.o }}</span> · justificadas {{ a.j }} · confirmadas {{ a.c }} · sin conclusión {{ a.s }}</span></div></sc-for></div></sc-if><sc-if value="{{ notPhone }}"><div style="overflow:hidden"><table class="tbl compact"><thead><tr><th>Tipo</th><th class="num">Abiertas</th><th class="num">Justif.</th><th class="num">Confirm.</th><th class="num">Sin concl.</th></tr></thead>
+            <tbody><sc-for list="{{ anoms }}" as="a" hint-placeholder-count="4"><tr><td style="white-space:normal">{{ a.t }}</td><td class="num" style="color:{{ a.oc }}">{{ a.o }}</td><td class="num">{{ a.j }}</td><td class="num">{{ a.c }}</td><td class="num">{{ a.s }}</td></tr></sc-for></tbody></table></div></sc-if></section>
+        <section class="card" style="overflow:hidden;grid-column:1 / -1"><div class="card-h"><span class="txt"><span class="t-label">Rondas con incidentes</span><span class="t-caption">Gravedad alta · 5 rondas en el período</span></span></div>
+          <sc-if value="{{ notPhone }}"><table class="tbl compact"><thead><tr><th>Fecha</th><th>Instalación · ronda</th><th>Guardia</th><th class="num">Puntos</th><th class="num">Incidentes</th><th>Detalle</th></tr></thead>
+            <tbody><sc-for list="{{ infR }}" as="r" hint-placeholder-count="5"><tr><td class="t-numeric">{{ r.f }}</td><td><span style="display:flex;flex-direction:column"><span class="t-label-sm">{{ r.i }}</span><span class="t-caption">{{ r.pl }}</span></span></td><td>{{ r.g }}</td><td class="num">{{ r.p }}</td><td class="num">{{ r.n }}</td><td class="t-caption" style="white-space:normal">{{ r.d }}</td></tr></sc-for></tbody></table></sc-if>
+          <sc-if value="{{ isPhone }}"><sc-for list="{{ infR }}" as="r" hint-placeholder-count="5"><div class="rowcard"><span style="flex:1;min-width:0;display:flex;flex-direction:column"><span class="t-label-sm">{{ r.i }} · {{ r.pl }}</span><span class="t-caption">{{ r.f }} · {{ r.g }}</span><span class="t-caption">{{ r.d }}</span></span><span class="t-label t-numeric">{{ r.n }}</span></div></sc-for></sc-if>
+        </section>
+        <section class="card" style="overflow:hidden;grid-column:1 / -1"><div class="card-h"><span class="txt"><span class="t-label">Mapa de calor de puntos</span><span class="t-caption">Planta Quilicura · omisiones y marcas de confianza baja</span></span></div>
+          <div style="height:240px;border-top:1px solid var(--ds-border)"><dc-import name="Mapa Rondas" variant="calor" hint-size="100%,240px" style="display:block;width:100%;height:100%"></dc-import></div></section>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ S.c15 }}">
+    <div style="flex:1;min-height:0;display:flex">
+      <sc-if value="{{ isDesk }}">
+        <nav aria-label="Configuración" style="width:200px;flex:none;padding:16px 12px;border-right:1px solid var(--ds-border);display:flex;flex-direction:column;gap:2px">
+          <a class="nav-item" href="#" style="height:40px">General</a><a class="nav-item" href="#" style="height:40px">Usuarios y roles</a><a class="nav-item" href="#" style="height:40px">Operaciones</a><a class="nav-item on" href="#" style="height:40px">Rondas</a><a class="nav-item" href="#" style="height:40px">Facturación</a>
+        </nav>
+      </sc-if>
+      <div style="flex:1;min-width:0;display:flex;flex-direction:column">
+        <div style="flex:1;min-height:0;overflow:auto;padding:{{ pad }}">
+          <div class="tabs-wrap" style="margin:-8px 0 16px"><div class="tabs" role="tablist"><button class="tab {{ c15tabA }}" role="tab">Ajustes</button><button class="tab {{ c15tabT }}" role="tab">Tipos de incidente</button></div></div>
+          <sc-if value="{{ c15a }}"><div style="max-width:760px;display:flex;flex-direction:column;gap:16px">
+            <fieldset class="card" style="padding:16px;margin:0;display:flex;flex-direction:column;gap:12px"><legend class="t-label" style="padding:0 4px">Valores por defecto</legend>
+              <div class="field"><span class="lbl">Modo</span><div class="seg" role="radiogroup" style="align-self:flex-start"><button role="radio">QR</button><button role="radio">GPS</button><button class="on" role="radio">QR + GPS</button></div><span class="hint">Las instalaciones y los puntos heredan estos valores si no los cambian.</span></div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">
+                <div class="field"><label class="lbl">Radio</label><div class="input"><input class="bare" value="15"><span class="trail t-body-sm">m</span></div><span class="hint">Máximo 19 m</span></div>
+                <div class="field"><label class="lbl">Precisión mínima</label><div class="input"><input class="bare" value="20"><span class="trail t-body-sm">m</span></div></div>
+                <div class="field"><label class="lbl">Permanencia</label><div class="input"><input class="bare" value="10"><span class="trail t-body-sm">s</span></div></div>
+              </div>
+            </fieldset>
+            <fieldset class="card" style="padding:16px;margin:0;display:flex;flex-direction:column;gap:12px"><legend class="t-label" style="padding:0 4px">Modelo de confianza</legend>
+              <div class="seg" role="radiogroup" aria-label="Versión" style="align-self:flex-start"><button role="radio">OPAI 1.0 · vigente</button><button class="on" role="radio">Seguridad 2026 · borrador</button></div>
+              <div style="border:1px solid var(--ds-border);border-radius:10px;overflow:hidden">
+                <sc-for list="{{ pesos }}" as="w" hint-placeholder-count="6"><div style="display:flex;align-items:center;gap:12px;padding:6px 6px 6px 12px;border-bottom:1px solid var(--ds-border)"><span class="t-body-sm" style="flex:1">{{ w.k }}</span><span class="t-caption">{{ w.was }}</span><div class="input compact" style="width:88px"><input class="bare t-numeric" value="{{ w.v }}" aria-label="Peso {{ w.k }}"></div></div></sc-for>
+                <div style="display:flex;align-items:center;gap:12px;padding:10px 12px;background:var(--ds-fill)"><span class="t-label" style="flex:1">Suma</span><span class="badge b-success">100 de 100</span></div>
+              </div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">
+                <div class="field"><label class="lbl"><span class="badge b-success">Alta</span> desde</label><div class="input"><input class="bare" value="80"><span class="trail t-body-sm">pts</span></div></div>
+                <div class="field"><label class="lbl"><span class="badge b-warning">Media</span> desde</label><div class="input"><input class="bare" value="50"><span class="trail t-body-sm">pts</span></div></div>
+                <div class="field"><label class="lbl"><span class="badge b-danger">Baja</span></label><div class="input disabled"><span class="grow t-body-sm">Bajo 50 pts</span></div></div>
+              </div>
+            </fieldset>
+            <fieldset class="card" style="padding:16px;margin:0;display:flex;flex-direction:column;gap:12px"><legend class="t-label" style="padding:0 4px">Umbrales de anomalía</legend>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px">
+                <div class="field"><label class="lbl">QR leído lejos de su punto</label><div class="input"><input class="bare" value="50"><span class="trail t-body-sm">m fuera del radio</span></div></div>
+                <div class="field"><label class="lbl">Velocidad imposible</label><div class="input"><input class="bare" value="25"><span class="trail t-body-sm">km/h</span></div></div>
+                <div class="field"><label class="lbl">Reloj alterado</label><div class="input"><input class="bare" value="2"><span class="trail t-body-sm">min de diferencia</span></div></div>
+                <div class="field"><label class="lbl">Ubicación simulada</label><div class="input disabled"><span class="grow t-body-sm">Siempre se marca</span></div></div>
+              </div>
+            </fieldset>
+          </div></sc-if>
+          <sc-if value="{{ c15t }}">
+            <div style="max-width:880px;display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><span class="t-body-sm muted" style="flex:1;min-width:240px;text-wrap:pretty">Estos tipos salen como chips en «Reportar novedad» de Terreno, en este orden. Los inactivos no se ofrecen, pero se conservan en las novedades ya enviadas.</span><button class="btn btn-primary"><span class="ic sm i-plus" aria-hidden="true"></span>Nuevo tipo</button></div>
+              <sc-if value="{{ notPhone }}">
+                <div class="tbl-wrap"><table class="tbl">
+                  <thead><tr><th style="width:56px">Ícono</th><th>Nombre</th><th>Gravedad por defecto</th><th class="num">Usos · 30 días</th><th>Activo</th></tr></thead>
+                  <tbody><sc-for list="{{ tipos }}" as="t" hint-placeholder-count="7"><tr>
+                    <td><span class="state-tile" style="width:32px;height:32px;border-radius:6px;background:var(--ds-fill)"><span class="ic sm i-{{ t.ic }}" aria-hidden="true"></span></span></td>
+                    <td><span style="display:flex;flex-direction:column"><span class="t-label">{{ t.n }}</span><span class="t-caption">{{ t.o }}</span></span></td>
+                    <td><div class="seg" role="radiogroup" aria-label="Gravedad de {{ t.n }}"><button class="{{ t.lv }}" role="radio">Leve</button><button class="{{ t.al }}" role="radio">Alta · incidente</button></div></td>
+                    <td class="num">{{ t.u }}</td>
+                    <td><button class="switch-area" role="switch" aria-checked="{{ t.ap }}" aria-label="{{ t.n }} activo"><span class="switch {{ t.on }}"></span></button></td>
+                  </tr></sc-for></tbody>
+                </table></div>
+              </sc-if>
+              <sc-if value="{{ isPhone }}">
+                <div class="card" style="overflow:hidden"><sc-for list="{{ tipos }}" as="t" hint-placeholder-count="7"><div class="rowcard" style="align-items:center"><span class="state-tile" style="width:36px;height:36px;border-radius:6px;background:var(--ds-fill)"><span class="ic sm i-{{ t.ic }}" aria-hidden="true"></span></span><span style="flex:1;min-width:0;display:flex;flex-direction:column"><span class="t-label">{{ t.n }}</span><span class="t-caption">Por defecto: {{ t.gd }}</span></span><button class="switch-area" role="switch" aria-checked="{{ t.ap }}" aria-label="{{ t.n }} activo"><span class="switch {{ t.on }}"></span></button></div></sc-for></div>
+              </sc-if>
+              <span class="t-caption">La gravedad por defecto se puede cambiar al reportar. «Alta · incidente» avisa a la central.</span>
+            </div>
+          </sc-if>
+        </div>
+        <sc-if value="{{ c15a }}"><div style="flex:none;display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px {{ gutter }};border-top:1px solid var(--ds-border);background:var(--ds-surface)">
+          <span class="t-body-sm muted" style="flex:1;min-width:220px;display:flex;gap:8px;align-items:flex-start"><span class="ic sm i-info" aria-hidden="true" style="margin-top:2px;flex:none"></span>Publicar requiere la aprobación de otro administrador. OPAI 1.0 sigue vigente hasta entonces.</span>
+          <button class="btn btn-secondary">Guardar borrador</button><button class="btn btn-primary">Publicar versión</button>
+        </div></sc-if>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ S.c16 }}">
+    <div style="flex:1;min-height:0;overflow:auto;padding:{{ pad }}">
+      <div style="display:grid;grid-template-columns:{{ incCols }};gap:16px;align-items:start;max-width:1200px">
+        <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <span class="t-caption"><span class="t-mono">NOV-0418</span> · Libro de novedades · Planta Quilicura</span>
+            <h2 class="t-title m0">Intrusión</h2>
+            <div style="display:flex;gap:6px;flex-wrap:wrap"><span class="badge b-danger">Alta · incidente</span><span class="badge b-{{ inc.tone }}">{{ inc.est }}</span><span class="badge b-neutral nodot"><span class="ic sm i-eye" aria-hidden="true"></span>Visible al cliente</span></div>
+          </div>
+          <div class="card" style="padding:12px 16px;display:flex;flex-direction:column;gap:10px">
+            <div role="list" aria-label="Estado del incidente" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px">
+              <sc-for list="{{ incSteps }}" as="s" hint-placeholder-count="4"><div role="listitem" aria-current="{{ s.cur }}" style="display:flex;flex-direction:column;gap:6px"><span style="height:4px;border-radius:999px;background:{{ s.bar }}"></span><span class="t-label-sm" style="color:{{ s.c }}">{{ s.t }}</span></div></sc-for>
+            </div>
+            <span class="t-caption">{{ inc.note }}</span>
+          </div>
+          <section class="card" style="overflow:hidden">
+            <div class="card-h"><span class="txt"><span class="t-label">Novedad original</span><span class="t-caption">María Fernanda Soto · Terreno · <span class="t-numeric">29-10-2026 10:15:40</span></span></span><span class="badge b-neutral nodot"><span class="ic sm i-lock" aria-hidden="true"></span>No editable</span></div>
+            <div class="card-c" style="display:flex;flex-direction:column;gap:12px;padding-top:0">
+              <p class="t-body m0" style="text-wrap:pretty">Puerta lateral de Bodega A forzada, candado en el suelo. No se ve a nadie adentro. Me quedo afuera mirando el acceso.</p>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><span style="width:72px;height:72px;border-radius:6px;background:var(--ds-fill);display:flex;align-items:center;justify-content:center" aria-label="Foto"><span class="ic i-camera subtle" aria-hidden="true"></span></span><span style="width:72px;height:72px;border-radius:6px;background:var(--ds-fill);display:flex;align-items:center;justify-content:center" aria-label="Foto"><span class="ic i-camera subtle" aria-hidden="true"></span></span><span style="width:72px;height:72px;border-radius:6px;background:var(--ds-fill);display:flex;align-items:center;justify-content:center" aria-label="Foto"><span class="ic i-camera subtle" aria-hidden="true"></span></span><span style="display:flex;align-items:center;gap:4px;height:44px;padding:0 12px 0 4px;border:1px solid var(--ds-border-strong);border-radius:999px"><button class="icon-btn" aria-label="Reproducir nota de voz"><span class="ic sm" aria-hidden="true" style="-webkit-mask:url(https://unpkg.com/lucide-static@0.454.0/icons/play.svg) center/contain no-repeat;mask:url(https://unpkg.com/lucide-static@0.454.0/icons/play.svg) center/contain no-repeat;background-color:currentColor"></span></button><span class="t-label-sm t-numeric">Nota de voz · 0:18</span></span></div>
+              <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px 16px;padding-top:4px;border-top:1px solid var(--ds-border)">
+                <div style="display:flex;flex-direction:column;padding-top:10px"><span class="t-caption">Ronda</span><a href="#" class="t-label-sm">Ronda perimetral · 29-10-2026 10:02</a></div>
+                <div style="display:flex;flex-direction:column;padding-top:10px"><span class="t-caption">Punto</span><span class="t-label-sm">3 · Bodega A · marca 10:15:02 · QR + GPS</span></div>
+                <div style="display:flex;flex-direction:column"><span class="t-caption">Ubicación al reportar</span><span class="t-label-sm t-numeric">a 4 m del punto · precisión 6 m</span></div>
+                <div style="display:flex;flex-direction:column"><span class="t-caption">Envío</span><span class="t-label-sm t-numeric">Enviada 10:15:58 · recibida por la central 10:16:02</span></div>
+              </div>
+            </div>
+          </section>
+          <div class="card" style="height:180px;overflow:hidden;flex:none"><dc-import name="Mapa Rondas" variant="recorrido" incidente="{{ true }}" hint-size="100%,180px" style="display:block;width:100%;height:100%"></dc-import></div>
+        </div>
+        <aside class="card" aria-label="Actividad" style="display:flex;flex-direction:column;overflow:hidden;min-width:0">
+          <div class="card-h"><span class="txt"><span class="t-label">Actividad</span><span class="t-caption">Cada cambio queda con autor y hora</span></span></div>
+          <div style="padding:0 16px 8px"><div class="tl">
+            <sc-for list="{{ incTl }}" as="a" hint-placeholder-count="6"><div class="tl-item" style="padding-bottom:14px"><span class="avatar sm" style="width:24px;height:24px;font-size:10px;flex:none">{{ a.ini }}</span><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span style="display:flex;justify-content:space-between;gap:8px"><span class="t-label-sm">{{ a.who }}</span><span class="t-caption t-numeric">{{ a.h }}</span></span><span class="t-body-sm muted" style="text-wrap:pretty">{{ a.t }}</span></div></div></sc-for>
+          </div></div>
+          <div style="padding:12px 16px;border-top:1px solid var(--ds-border)"><div class="field"><label class="lbl" for="inc-c">Comentario</label><textarea id="inc-c" class="input" placeholder="Escribe un comentario interno" style="min-height:64px"></textarea></div></div>
+          <div class="switch-row" style="padding:8px 16px;border-top:1px solid var(--ds-border)"><span style="display:flex;flex-direction:column"><span class="t-label">Visible al cliente</span><span class="t-caption">Ve tipo, hora, punto, fotos y estado. No ve comentarios internos.</span></span><button class="switch-area" role="switch" aria-checked="true" aria-label="Visible al cliente"><span class="switch on"></span></button></div>
+          <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;padding:12px 16px 16px;border-top:1px solid var(--ds-border)">
+            <button class="btn btn-secondary" style="display:{{ inc.secD }}"><span class="ic sm i-ticket" aria-hidden="true"></span>{{ inc.sec }}</button>
+            <button class="btn btn-primary" style="grid-column:{{ inc.priCol }}">{{ inc.pri }}</button>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ S.c17 }}">
+    <div style="flex:1;min-height:0;display:grid;grid-template-columns:{{ cenCols }}">
+      <section aria-label="Alertas" style="min-width:0;overflow:auto;border-right:1px solid var(--ds-border)">
+        <div style="padding:12px 16px;border-bottom:1px solid var(--ds-border)"><div class="seg" role="radiogroup" aria-label="Filtro"><button class="on" role="radio">Abiertas · 3</button><button role="radio">Todas · 14</button></div></div>
+        <sc-for list="{{ alertas }}" as="a" hint-placeholder-count="3">
+          <div class="rowcard" style="align-items:flex-start;background:{{ a.bg }};border-left:0;border-right:0;border-top:0">
+            <span class="state-tile" style="width:36px;height:36px;border-radius:10px;background:var(--ds-{{ a.tone }}-muted);color:var(--ds-{{ a.tone }}-fg);flex:none"><span class="ic sm i-{{ a.ic }}" aria-hidden="true"></span></span>
+            <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span class="t-label">{{ a.t }}</span><span class="t-caption">{{ a.d }}</span><span class="badge b-{{ a.et }}" style="align-self:flex-start;margin-top:4px">{{ a.e }}</span></span>
+            <span class="t-caption t-numeric">{{ a.h }}</span>
+          </div>
+        </sc-for>
+      </section>
+      <sc-if value="{{ notPhone }}">
+        <aside aria-label="Detalle de la alerta" style="min-width:0;overflow:auto;padding:24px {{ gutter }};display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;flex-direction:column;gap:4px"><span class="t-overline">Alerta · <span class="t-numeric">10:16</span></span><h2 class="t-heading m0">Incidente alto en Planta Quilicura</h2><span class="t-body-sm muted" style="text-wrap:pretty">Esta alerta enlaza a la novedad NOV-0418. La central no guarda una copia: lo que ves es la novedad original.</span></div>
+          <a href="#" class="card" style="padding:16px;display:flex;flex-direction:column;gap:10px;text-decoration:none;color:var(--ds-fg)">
+            <span style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span class="ic sm i-flag" aria-hidden="true"></span><span class="t-label-sm t-mono">NOV-0418</span><span class="t-label">Intrusión</span><span class="badge b-danger nodot">Alta · incidente</span><span class="badge b-warning">En atención · Rodrigo Tapia</span></span>
+            <span class="t-body" style="text-wrap:pretty">Puerta lateral de Bodega A forzada, candado en el suelo. No se ve a nadie adentro. Me quedo afuera mirando el acceso.</span>
+            <span class="t-caption">María Fernanda Soto · Ronda perimetral · punto 3 Bodega A · <span class="t-numeric">10:15</span> · 3 fotos · nota de voz</span>
+          </a>
+          <div class="card" style="height:200px;overflow:hidden;flex:none"><dc-import name="Mapa Rondas" variant="recorrido" incidente="{{ true }}" hint-size="100%,200px" style="display:block;width:100%;height:100%"></dc-import></div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary"><span class="ic sm i-eye" aria-hidden="true"></span>Abrir novedad NOV-0418</button><button class="btn btn-secondary">Marcar alerta atendida</button></div>
+        </aside>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isPhone }}">
+    <nav class="tabbar" aria-label="Navegación principal"><a href="#"><span class="ic i-home" aria-hidden="true"></span>Inicio</a><a href="#"><span class="ic i-inbox" aria-hidden="true"></span>Bandeja</a><a class="on" href="#"><span class="ic i-route" aria-hidden="true"></span>Operaciones</a><a href="#"><span class="ic i-users" aria-hidden="true"></span>Personas</a><a href="#"><span class="ic i-menu" aria-hidden="true"></span>Más</a></nav>
+  </sc-if>
+</div>
+
+<sc-if value="{{ drawer }}">
+  <div class="scrim"></div>
+  <div class="sheet {{ sheetCls }}" role="dialog" aria-labelledby="pt-t">
+    <div style="display:flex;align-items:center;gap:8px;padding:12px 8px 12px 16px;border-bottom:1px solid var(--ds-border)"><span id="pt-t" class="t-subheading" style="flex:1">Editar punto · Andén norte</span><button class="icon-btn" aria-label="Cerrar"><span class="ic i-x" aria-hidden="true"></span></button></div>
+    <div class="sheet-body" style="display:flex;flex-direction:column;gap:14px">
+      <div class="field"><label class="lbl">Nombre</label><input class="input" value="Andén norte"></div>
+      <div class="field"><label class="lbl">Instrucción para el guardia</label><textarea class="input" style="min-height:72px">Etiqueta junto a la cortina 3. Revisa candado y sello de la cortina.</textarea></div>
+      <div class="field"><span class="lbl">Modo</span><div class="seg" role="radiogroup" style="display:flex"><button role="radio">QR</button><button role="radio">GPS</button><button class="on" role="radio">QR + GPS</button></div><span class="hint" style="display:flex;gap:6px">Hereda de la instalación: QR + GPS · <a href="#">Cambiar</a></span></div>
+      <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px">
+        <div class="field"><label class="lbl">Radio</label><div class="input"><input class="bare" value="18"><span class="trail t-body-sm">m</span></div><span class="hint">Propio · máx. 19 m</span></div>
+        <div class="field"><label class="lbl">Precisión</label><div class="input"><input class="bare" value="20"><span class="trail t-body-sm">m</span></div><span class="hint">Hereda</span></div>
+        <div class="field"><label class="lbl">Permanencia</label><div class="input"><input class="bare" value="10"><span class="trail t-body-sm">s</span></div><span class="hint">Hereda</span></div>
+      </div>
+      <div class="switch-row"><span class="t-body">Pedir foto al marcar</span><button class="switch-area" role="switch" aria-checked="true" aria-label="Pedir foto"><span class="switch on"></span></button></div>
+      <section style="display:flex;flex-direction:column;gap:10px;padding:12px;border:1px solid var(--ds-border);border-radius:10px">
+        <div class="switch-row"><span style="display:flex;flex-direction:column"><span class="t-label">Tarea con checklist</span><span class="t-caption">El guardia responde sí o no antes de confirmar «Realizado» o «Hay un problema».</span></span><button class="switch-area" role="switch" aria-checked="true" aria-label="Tarea con checklist"><span class="switch on"></span></button></div>
+        <div role="list" aria-label="Ítems del checklist" style="display:flex;flex-direction:column;gap:8px">
+          <div role="listitem" style="display:flex;gap:4px;align-items:center"><span class="t-label-sm t-numeric subtle" style="width:16px">1</span><input class="input" value="Candado puesto y cerrado" aria-label="Ítem 1"><button class="icon-btn" aria-label="Quitar ítem 1"><span class="ic sm i-x" aria-hidden="true"></span></button></div>
+          <div role="listitem" style="display:flex;gap:4px;align-items:center"><span class="t-label-sm t-numeric subtle" style="width:16px">2</span><input class="input" value="Sello de la cortina intacto" aria-label="Ítem 2"><button class="icon-btn" aria-label="Quitar ítem 2"><span class="ic sm i-x" aria-hidden="true"></span></button></div>
+          <div role="listitem" style="display:flex;gap:4px;align-items:center"><span class="t-label-sm t-numeric subtle" style="width:16px">3</span><input class="input" value="Sin bultos frente al andén" aria-label="Ítem 3"><button class="icon-btn" aria-label="Quitar ítem 3"><span class="ic sm i-x" aria-hidden="true"></span></button></div>
+        </div>
+        <span class="hint">Máximo 3 ítems. Un «No» sugiere reportar «Hay un problema».</span>
+      </section>
+      <section style="display:flex;flex-direction:column;gap:8px;padding:12px;border:1px solid var(--ds-border);border-radius:10px">
+        <div style="display:flex;align-items:center;gap:8px"><span class="ic i-scan muted" aria-hidden="true"></span><span style="flex:1;display:flex;flex-direction:column"><span class="t-label">Etiqueta de 1.0 · reutilizada</span><span class="t-caption">Folio <span class="t-mono">QL-0412</span> · instalada 14-03-2024</span></span></div>
+        <span class="t-caption">Sigue funcionando. Reemplázala por la etiqueta mejorada cuando puedas.</span>
+        <div style="display:flex;gap:8px"><button class="btn btn-secondary"><span class="ic sm i-download" aria-hidden="true"></span>Imprimir etiqueta</button><button class="btn btn-ghost">Reemplazar etiqueta</button></div>
+      </section>
+    </div>
+    <div class="sheet-actions"><button class="btn btn-secondary">Cancelar</button><button class="btn btn-primary">Guardar</button></div>
+  </div>
+</sc-if>
+<sc-if value="{{ dlg }}">
+  <div class="scrim" style="z-index:5"></div>
+  <div style="position:absolute;inset:0;z-index:6;display:flex;align-items:center;justify-content:center">
+    <div class="overlay dialog" role="alertdialog" aria-labelledby="rl-t">
+      <div class="dh"><span id="rl-t" class="t-subheading">¿Reemplazar la etiqueta de Andén norte?</span><span class="t-body-sm muted">La etiqueta de 1.0 (<span class="t-mono">QL-0412</span>) dejará de leerse al confirmar. Imprime y pega la nueva antes de la próxima ronda, a las <span class="t-numeric">12:00</span>.</span></div>
+      <div class="actions"><button class="btn btn-secondary">Cancelar</button><button class="btn btn-destructive">Reemplazar etiqueta</button></div>
+    </div>
+  </div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;screen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;c12&quot;,&quot;options&quot;:[&quot;c12&quot;,&quot;c13p&quot;,&quot;c13pd&quot;,&quot;c13pr&quot;,&quot;c13t&quot;,&quot;c13s&quot;,&quot;c13h&quot;,&quot;c14&quot;,&quot;c15&quot;,&quot;c15t&quot;,&quot;c16&quot;,&quot;c17&quot;,&quot;c18&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;desktop&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;contenido&quot;,&quot;options&quot;:[&quot;contenido&quot;,&quot;cargando&quot;,&quot;vacio&quot;,&quot;error&quot;,&quot;permisos&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;light&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic{
+  renderVals(){
+    const p=this.props;const scr=p.screen??'c12';const dev=p.device??'desktop';const st=p.state??'contenido';const ok=st==='contenido';
+    const isDesk=dev==='desktop',isTab=dev==='tablet',isPhone=dev==='phone';
+    const base=scr.startsWith('c13')?'c13':scr.startsWith('c15')?'c15':scr;
+    const S={c12:ok&&base==='c12',c13:ok&&base==='c13',c14:ok&&base==='c14',c15:ok&&base==='c15',c16:ok&&base==='c16',c17:ok&&base==='c17',c18:ok&&base==='c18'};
+    const segK=scr==='c13t'?'t':scr==='c13s'?'s':scr==='c13h'?'h':'p';
+    const titles={c12:'Control de rondas',c13:'Instalación',c14:'Informes de rondas',c15:'Configuración · Rondas',c16:'Incidente NOV-0418',c17:'Central · Alertas',c18:'Ficha de la ronda'};
+    const noun={c12:'las rondas de hoy',c13:'los puntos de la instalación',c14:'los informes',c15:'la configuración',c16:'el incidente',c17:'las alertas',c18:'la ronda'}[base];
+    const msgs={vacio:{c12:['No hay rondas programadas hoy','Programa la primera ronda para tus instalaciones.','Programar ronda','plus'],c13:['Esta instalación no tiene puntos','Crea el primero desde aquí o en terreno con el teléfono del supervisor.','Nuevo punto','plus'],c14:['Sin datos en el período','Aún no hay rondas cerradas en octubre de 2026. Cambia el período.','Cambiar período','calendar'],c15:['Sin modelo de confianza','Crea la primera versión del modelo para calcular bandas.','Crear versión','plus'],c16:['Este incidente no existe','Puede que el enlace esté mal. Búscalo en el libro de novedades.','Ir al libro','inbox'],c17:['Sin alertas abiertas','La central no tiene alertas pendientes.','Ver todas','bell'],c18:['Esta ronda no tiene marcas','Aún no se registran puntos. Vuelve cuando el guardia inicie la ronda.','Volver a Control de rondas','chevron-left']}[base],
+      error:['No pudimos cargar '+noun,'Revisa tu conexión. Si el problema sigue, avísale a soporte con el código RND-503.','Reintentar','refresh'],
+      permisos:['No tienes acceso a esta sección','Tu rol no incluye Rondas. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA.','Pedir acceso','lock']};
+    const m=msgs[st]||msgs.error;
+    const cfg={desktop:{g:'32px',k:'repeat(7,minmax(0,1fr))',k4:'repeat(4,minmax(0,1fr))',sp:'minmax(0,1fr) 300px',pc:'repeat(2,minmax(0,1fr))',tc:'280px minmax(0,1fr)'},tablet:{g:'24px',k:'repeat(4,minmax(0,1fr))',k4:'repeat(4,minmax(0,1fr))',sp:'minmax(0,1fr) 320px',pc:'repeat(2,minmax(0,1fr))',tc:'220px minmax(0,1fr)'},phone:{g:'16px',k:'repeat(2,minmax(0,1fr))',k4:'repeat(2,minmax(0,1fr))',sp:'minmax(0,1fr)',pc:'minmax(0,1fr)',tc:'minmax(0,1fr)'}}[dev];
+    const tone={Atrasada:'warning',Omitida:'danger','En curso':'accent',Completa:'success',Incompleta:'warning','Cerrada automáticamente':'neutral'};
+    const pcol={warning:'var(--ds-warning)',danger:'var(--ds-danger)',accent:'var(--ds-fg)',success:'var(--ds-success)',neutral:'var(--ds-fg-subtle)'};
+    const R=(est,inst,pl,g,av,pct,h,band,inc,kind,sel)=>{const t=tone[est];return {est,tone:t,inst,pl,g,av,pct,h,band:band==='—'?'Sin datos':band,bt:{Alta:'success',Media:'warning',Baja:'danger'}[band]||'neutral',inc,ii:kind==='inc'?'flag':'alert',ivis:kind?'inline-block':'none',icc:kind==='inc'?'var(--ds-danger-fg)':kind==='an'?'var(--ds-warning-fg)':'var(--ds-fg-muted)',sel:sel?'sel':'',pc:pcol[t]};};
+    const A='var(--ds-danger-fg)',W='var(--ds-warning-fg)',N='var(--ds-fg-muted)';
+    return {theme:p.theme??'light',device:dev,label:'ERP · '+titles[base],isDesk,isTab,isPhone,notPhone:!isPhone,nonOk:!ok,isLoad:st==='cargando',isMsg:!ok&&st!=='cargando',
+      msg:{t:m[0],d:m[1],a:m[2],aic:m[3],ic:st==='error'?'alert':st==='permisos'?'lock':'inbox'},S,title:titles[base],
+      nav:{inst:base==='c13'?'on':'',ctl:base==='c12'||base==='c16'||base==='c18'?'on':'',inf:base==='c14'?'on':'',cfg:base==='c15'?'on':'',cen:base==='c17'?'on':''},showLive:S.c12||S.c17,
+      c15a:scr!=='c15t',c15t:scr==='c15t',c15tabA:scr!=='c15t'?'on':'',c15tabT:scr==='c15t'?'on':'',
+      incCols:isPhone?'minmax(0,1fr)':isTab?'minmax(0,1fr) 320px':'minmax(0,1fr) 360px',cenCols:isPhone?'minmax(0,1fr)':isTab?'340px minmax(0,1fr)':'400px minmax(0,1fr)',
+      ...(()=>{const st=p.incEstado??'atencion';
+        const ORD=['abierto','atencion','resuelto','cerrado'];const ix=st==='derivado'?1:ORD.indexOf(st);
+        const incSteps=['Abierto','En atención','Resuelto','Cerrado'].map((t,i)=>({t,cur:String(i===ix),bar:i<ix?'var(--ds-fg)':i===ix?'var(--ds-accent)':'var(--ds-border)',c:i<=ix?'var(--ds-fg)':'var(--ds-fg-muted)'}));
+        const INC={abierto:{est:'Abierto',tone:'danger',note:'Recibido por la central. Nadie lo ha tomado todavía.',sec:'Derivar a ticket',secD:'inline-flex',pri:'Tomar incidente',priCol:'auto'},
+          atencion:{est:'En atención · Rodrigo Tapia',tone:'warning',note:'Desde En atención también puede pasar a «Derivado a ticket».',sec:'Derivar a ticket',secD:'inline-flex',pri:'Marcar resuelto',priCol:'auto'},
+          resuelto:{est:'Resuelto',tone:'success',note:'Queda abierto a comentarios hasta que un administrador lo cierre.',sec:'',secD:'none',pri:'Cerrar incidente',priCol:'1 / -1'},
+          cerrado:{est:'Cerrado',tone:'neutral',note:'Cerrado. La novedad y su actividad quedan como registro.',sec:'',secD:'none',pri:'Reabrir',priCol:'1 / -1'},
+          derivado:{est:'Derivado a ticket TCK-2290',tone:'info',note:'El seguimiento sigue en el ticket TCK-2290 «Reparar puerta lateral de Bodega A».',sec:'',secD:'none',pri:'Abrir ticket TCK-2290',priCol:'1 / -1'}}[st];
+        const T=[['MS','María Fernanda Soto','10:15:40','Reportó la novedad desde Terreno · Ronda perimetral · Bodega A'],['OP','Sistema','10:15:58','Enviada desde el teléfono tras 18 s en cola'],['AM','Andrés Molina · Central','10:16:02','Recibió la alerta']];
+        if(st!=='abierto')T.push(['RT','Rodrigo Tapia · Supervisor','10:18','Tomó el incidente: En atención'],['RT','Rodrigo Tapia · Supervisor','10:19','«Voy en camino, llego en 8 min. Avisé a Carabineros.»'],['RT','Rodrigo Tapia · Supervisor','10:24','Marcó la novedad visible al cliente']);
+        if(st==='derivado')T.push(['RT','Rodrigo Tapia · Supervisor','10:40','Derivó a ticket TCK-2290 «Reparar puerta lateral de Bodega A»']);
+        if(st==='resuelto'||st==='cerrado')T.push(['RT','Rodrigo Tapia · Supervisor','10:52','Resuelto: «Sin personas dentro. Faltan 2 cajas de herramientas. Puerta asegurada con cadena.»']);
+        if(st==='cerrado')T.push(['CI','Carlos Irigoyen · Administrador','11:30','Cerró el incidente']);
+        return {inc:INC,incSteps,incTl:T.map(([ini,who,h,t])=>({ini,who,h,t}))};})(),
+      alertas:[{ic:'flag',tone:'danger',t:'Incidente alto · NOV-0418',d:'Intrusión · Planta Quilicura · Bodega A · María Fernanda Soto',e:'En atención · Rodrigo Tapia',et:'warning',h:'10:16',bg:isPhone?'transparent':'var(--ds-accent-muted)'},
+        {ic:'clock',tone:'danger',t:'Zona de riesgo vencida',d:'Matías Contreras · Bodega Lampa · Patio de contenedores',e:'Sin confirmar «Estoy bien»',et:'danger',h:'10:58',bg:'transparent'},
+        {ic:'route',tone:'warning',t:'Ronda atrasada',d:'Torre Apoquindo · Pisos 10 a 20 · Daniela Reyes',e:'Abierta',et:'neutral',h:'09:45',bg:'transparent'}],
+      tipos:[['Robo','briefcase','alta',4,1,'Predefinido'],['Intrusión','lock','alta',3,1,'Predefinido'],['Daño','alert','leve',11,1,'Predefinido'],['Persona sospechosa','eye','alta',6,1,'Predefinido'],['Falla técnica','refresh','leve',17,1,'Predefinido'],['Fuga de agua','info','leve',2,1,'Creado por Atlas Seguridad SpA'],['Animal suelto','pin','leve',0,0,'Creado por Atlas Seguridad SpA'],['Otro','more','leve',5,1,'Predefinido']].map(([n,ic,g,u,a,o])=>({n,ic,u,o,lv:g==='leve'?'on':'',al:g==='alta'?'on':'',gd:g==='alta'?'Alta · incidente':'Leve',on:a?'on':'',ap:String(!!a)})),
+      hist:[{f:'29-10-2026 · 10:02',pl:'Ronda perimetral',g:'María Fernanda Soto',res:'4 de 6 puntos',est:'En curso',tone:'accent',inc:'2 incidentes',rows:[
+          {h:'10:02',p:'1 · Portería principal',mk:'QR + GPS · confianza alta',c:'Realizado',ct:'success',ck:'—'},
+          {h:'10:09',p:'2 · Estacionamiento visitas',mk:'QR · QR leído lejos de su punto',c:'Realizado',ct:'success',ck:'—'},
+          {h:'10:15',p:'3 · Bodega A',mk:'QR + GPS · confianza alta',c:'Hay un problema',ct:'warning',ck:'—',ii:'NOV-0418',ig:'Alta',it:'danger',ie:'Intrusión · En atención'},
+          {h:'10:21',p:'4 · Andén norte',mk:'QR + GPS · foto',c:'Hay un problema',ct:'warning',ck:'2 de 3 sí',ii:'NOV-0419',ig:'Leve',it:'neutral',ie:'Daño · Enviada'}]},
+        {f:'28-10-2026 · 22:00',pl:'Ronda perimetral',g:'Jorge Pizarro',res:'5 de 6 puntos',est:'Completa',tone:'success',inc:'1 incidente',rows:[
+          {h:'22:14',p:'3 · Bodega A',mk:'QR + GPS · confianza alta',c:'Realizado',ct:'success',ck:'—'},
+          {h:'22:21',p:'4 · Andén norte',mk:'QR + GPS · foto',c:'Hay un problema',ct:'warning',ck:'2 de 3 sí',ii:'NOV-0411',ig:'Leve',it:'neutral',ie:'Daño · Cerrado'}]}].map(r=>Object.assign(r,{rows:r.rows.map(m=>Object.assign(m,{id:m.ii?'inline-flex':'none',nod:m.ii?'none':'inline'}))})),
+      infR:[{f:'29-10-2026',i:'Planta Quilicura',pl:'Ronda perimetral',g:'María Fernanda Soto',p:'4/6',n:'1',d:'NOV-0418 Intrusión · En atención'},{f:'27-10-2026',i:'Bodega Lampa',pl:'Cerco perimetral',g:'Felipe Cortés',p:'6/6',n:'2',d:'NOV-0389 Persona sospechosa · Cerrado · NOV-0390 Robo · Derivado a ticket'},{f:'24-10-2026',i:'Torre Apoquindo',pl:'Subterráneos',g:'Ignacio Muñoz',p:'5/5',n:'1',d:'NOV-0371 Intrusión · Cerrado'},{f:'19-10-2026',i:'Bodega Lampa',pl:'Patio de contenedores',g:'Matías Contreras',p:'4/5',n:'1',d:'NOV-0344 Robo · Cerrado'},{f:'12-10-2026',i:'Edificio Costanera Center',pl:'Estacionamientos −1 a −4',g:'Cristián Bravo',p:'7/7',n:'1',d:'NOV-0310 Persona sospechosa · Cerrado'}],
+      splitFlex:isPhone?'':'flex:1;min-height:0;',listOv:isPhone?'visible':'hidden',asideMapH:isDesk?'150px':'96px',gutter:cfg.g,pad:(isPhone?'16px ':'24px ')+cfg.g,headH:isPhone?'52px':'60px',kpiCols:cfg.k,kpi4:cfg.k4,splitCols:cfg.sp,panelCols:cfg.pc,tplCols:cfg.tc,skelK:[1,2,3,4],skelR:[1,2,3,4,5,6],
+      seg:{p:segK==='p'?'on':'',t:segK==='t'?'on':'',s:segK==='s'?'on':'',h:segK==='h'?'on':''},segP:segK==='p',segT:segK==='t',segS:segK==='s',segH:segK==='h',
+      drawer:ok&&(scr==='c13pd'||scr==='c13pr'),dlg:ok&&scr==='c13pr',sheetCls:isPhone?'':'side',
+      kpis:[{k:'Programadas',v:'48',d:'6 por iniciar',c:'var(--ds-fg)'},{k:'Completadas',v:'31',d:'a tiempo',c:'var(--ds-fg)'},{k:'En curso',v:'6',d:'3 en plazo',c:'var(--ds-fg)'},{k:'Atrasadas',v:'3',d:'fuera de plazo',c:W},{k:'Omitidas',v:'2',d:'sin iniciar',c:A},{k:'Cumplimiento',v:'86,1 %',d:'31 de 36 vencidas',c:'var(--ds-fg)'},{k:'Con anomalías',v:'5',d:'4 sin revisar',c:A}],
+      fichaCols:isPhone?'minmax(0,1fr)':'minmax(0,1fr) minmax(0,1.3fr)',fichaMapH:isPhone?'220px':'280px',
+      trust:[{k:'Geocerca',v:'30/30',c:'var(--ds-fg)'},{k:'Velocidad',v:'20/20',c:'var(--ds-fg)'},{k:'Movimiento',v:'15/15',c:'var(--ds-fg)'},{k:'Foto',v:'No pedida',c:'var(--ds-fg-subtle)'},{k:'Mismo dispositivo',v:'10/10',c:'var(--ds-fg)'},{k:'Batería',v:'No disponible en este teléfono',c:'var(--ds-fg-subtle)'}],
+      fichaTl:[{n:1,nom:'Portería principal',h:'10:02',d:'Realizado · QR + GPS · confianza alta',dc:N,ld:'none',bd:'var(--ds-fg)',bg:'var(--ds-fg)',fg:'var(--ds-bg)'},
+        {n:2,nom:'Estacionamiento visitas',h:'10:09',d:'QR leído lejos de su punto · sin revisar',dc:A,ld:'none',bd:'var(--ds-danger)',bg:'var(--ds-danger-muted)',fg:'var(--ds-danger-fg)'},
+        {n:3,nom:'Bodega A',h:'10:15',d:'Realizado · NOV-0418 Intrusión · alta · En atención por Rodrigo Tapia',dc:A,ld:'inline',bd:'var(--ds-fg)',bg:'var(--ds-fg)',fg:'var(--ds-bg)'},
+        {n:4,nom:'Andén norte',h:'10:21',d:'Hay un problema · checklist 2 de 3 · NOV-0419 leve',dc:W,ld:'none',bd:'var(--ds-fg)',bg:'var(--ds-fg)',fg:'var(--ds-bg)'},
+        {n:5,nom:'Cerco poniente',h:'—',d:'Pendiente',dc:N,ld:'none',bd:'var(--ds-border-strong)',bg:'var(--ds-surface)',fg:'var(--ds-fg-subtle)'},
+        {n:6,nom:'Sala de bombas',h:'—',d:'Pendiente · opcional',dc:N,ld:'none',bd:'var(--ds-border-strong)',bg:'var(--ds-surface)',fg:'var(--ds-fg-subtle)'}],
+      ctl:[R('En curso','Planta Quilicura','Ronda perimetral','María Fernanda Soto','4/6','67%','10:02','Alta','NOV-0418 Intrusión · 1 anomalía','inc',true),
+        R('Atrasada','Torre Apoquindo','Pisos 10 a 20','Daniela Reyes','5/8','62%','09:05','Media','QR leído lejos de su punto','an'),
+        R('Atrasada','Bodega Lampa','Patio de contenedores','Matías Contreras','2/5','40%','09:30','Media','—',''),
+        R('Omitida','Bodega Lampa','Cerco perimetral','Felipe Cortés','0/6','0%','08:00','—','—',''),
+        R('Completa','Planta Quilicura','Apertura de bodegas','Camila Herrera','4/4','100%','08:00','Media','Velocidad imposible','an'),
+        R('Atrasada','Edificio Costanera Center','Estacionamientos −1 a −4','Cristián Bravo','4/7','57%','09:45','Alta','—',''),
+        R('Completa','Condominio Los Robles','Calles interiores','Francisca Vera','6/6','100%','08:30','Baja','Reloj alterado','an'),
+        R('Omitida','Torre Apoquindo','Subterráneos','Ignacio Muñoz','0/5','0%','07:00','—','—','')],
+      asideTl:[{n:1,nom:'Portería principal',d:'Realizado · confianza alta',h:'10:02',dc:N,ld:'none',bd:'var(--ds-fg)',bg:'var(--ds-fg)',fg:'var(--ds-bg)'},{n:2,nom:'Estacionamiento visitas',d:'QR leído lejos de su punto',h:'10:09',dc:A,ld:'none',bd:'var(--ds-danger)',bg:'var(--ds-danger-muted)',fg:'var(--ds-danger-fg)'},{n:3,nom:'Bodega A',d:'Incidente · Intrusión · En atención',h:'10:15',dc:A,ld:'inline',bd:'var(--ds-fg)',bg:'var(--ds-fg)',fg:'var(--ds-bg)'},{n:4,nom:'Andén norte',d:'Hay un problema · NOV-0419 leve',h:'10:21',dc:W,ld:'none',bd:'var(--ds-fg)',bg:'var(--ds-fg)',fg:'var(--ds-bg)'},{n:5,nom:'Cerco poniente',d:'Pendiente',h:'—',dc:N,ld:'none',bd:'var(--ds-border-strong)',bg:'var(--ds-surface)',fg:'var(--ds-fg-subtle)'}],
+      ptos:[{n:1,nom:'Portería principal',modo:'QR + GPS',r:'15 m',pr:'20 m',pe:'10 s',foto:'No',est:'Activo',et:'success',ld:'block'},{n:2,nom:'Estacionamiento visitas',modo:'GPS',r:'18 m',pr:'15 m',pe:'15 s',foto:'No',est:'Activo',et:'success',ld:'none'},{n:3,nom:'Bodega A',modo:'QR',r:'—',pr:'—',pe:'—',foto:'No',est:'Activo',et:'success',ld:'block'},{n:4,nom:'Andén norte',modo:'QR + GPS',r:'18 m',pr:'20 m',pe:'10 s',foto:'Sí',est:'Activo',et:'success',ld:'block',sel:scr==='c13pd'||scr==='c13pr'?'sel':''},{n:5,nom:'Cerco poniente',modo:'GPS',r:'15 m',pr:'15 m',pe:'15 s',foto:'No',est:'Activo',et:'success',ld:'none'},{n:6,nom:'Sala de bombas',modo:'QR + GPS',r:'15 m',pr:'20 m',pe:'10 s',foto:'No',est:'Inactivo',et:'neutral',ld:'none'}],
+      plantillas:[{n:'Ronda perimetral',d:'6 puntos · 40 min',bg:'var(--ds-accent-muted)'},{n:'Apertura de bodegas',d:'4 puntos · 25 min',bg:'transparent'},{n:'Andenes y patio',d:'5 puntos · 30 min',bg:'transparent'},{n:'Cierre de bodegas',d:'4 puntos · 25 min',bg:'transparent'}],
+      tplPts:['Portería principal','Estacionamiento visitas','Bodega A','Andén norte','Cerco poniente','Sala de bombas'].map((nom,i)=>({n:i+1,nom,ob:i===5?'':'on',op:i===5?'on':''})),
+      progs:[{pl:'Ronda perimetral',h:'10:00 · 14:00 · 22:00',d:'Lunes a domingo',v:'± 15 min',r:'Quien esté de turno en Portería principal'},{pl:'Apertura de bodegas',h:'08:00',d:'Lunes a sábado',v:'± 15 min',r:'Camila Herrera, Jorge Pizarro'},{pl:'Cierre de bodegas',h:'18:00',d:'Lunes a sábado',v:'± 20 min',r:'Quien esté de turno en Bodegas'}],
+      infK:[{k:'Cumplimiento',v:'91,4 %',d:'+2,1 pts vs. septiembre',c:'var(--ds-success-fg)'},{k:'Rondas cerradas',v:'1.284',d:'de 1.405 programadas',c:N},{k:'Puntos omitidos',v:'3,2 %',d:'−0,6 pts',c:'var(--ds-success-fg)'},{k:'Anomalías',v:'37',d:'9 sin revisar',c:A}],
+      cumpl:[{n:'Planta Quilicura',v:'96,2 %',w:'96%',c:'var(--ds-success)'},{n:'Edificio Costanera Center',v:'93,8 %',w:'94%',c:'var(--ds-success)'},{n:'Condominio Los Robles',v:'90,1 %',w:'90%',c:'var(--ds-success)'},{n:'Torre Apoquindo',v:'84,5 %',w:'85%',c:'var(--ds-warning)'},{n:'Bodega Lampa',v:'78,3 %',w:'78%',c:'var(--ds-warning)'}],
+      omit:[{n:'Cerco perimetral oriente',i:'Bodega Lampa',v:'14'},{n:'Sala eléctrica piso 18',i:'Torre Apoquindo',v:'11'},{n:'Sala de bombas',i:'Planta Quilicura',v:'8'},{n:'Subterráneo −3',i:'Torre Apoquindo',v:'6'},{n:'Patio de contenedores B',i:'Bodega Lampa',v:'5'}],
+      anoms:[{t:'QR leído lejos de su punto',o:4,j:9,c:2,s:1,oc:A},{t:'Velocidad imposible',o:2,j:5,c:1,s:2,oc:A},{t:'Reloj alterado',o:2,j:3,c:2,s:0,oc:A},{t:'Ubicación simulada',o:1,j:0,c:3,s:0,oc:A}],
+      pesos:[{k:'Geocerca',v:'35',was:'1.0: 30'},{k:'Velocidad',v:'20',was:'1.0: 20'},{k:'Movimiento',v:'15',was:'1.0: 15'},{k:'Foto',v:'10',was:'1.0: 15'},{k:'Mismo dispositivo',v:'10',was:'1.0: 10'},{k:'Batería',v:'10',was:'1.0: 10'}]
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="./cpq-data.js"></script>
+<style>body{margin:0;height:100dvh}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<div class="ds" data-theme="{{ theme }}" style="position:relative;width:100%;height:100%;overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="cot" title="Configuración del CPQ" subtitle="Cotizaciones" tenant="Atlas Seguridad SpA" tenant-initials="AS" notifications="{{ 3 }}" hide-top-bar="{{ isPhone }}" width="100%" height="100%" hint-size="100%,100%">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div class="topbar" style="padding-left:4px;position:sticky;top:0">
+<a href="#" class="btn btn-ghost" style="height:44px;padding:0 8px 0 4px;gap:2px;color:var(--ds-fg-muted)"><span class="ic i-chevron-left" aria-hidden="true"></span>Cotizaciones</a>
+</div>
+</sc-if>
+<div style="display:flex;flex-direction:column;gap:16px;padding:{{ pad }};min-height:100%;box-sizing:border-box">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<h1 class="t-heading m0">Configuración del CPQ</h1>
+</sc-if>
+<p class="t-body-sm muted m0" style="text-wrap:pretty;max-width:640px">Valores por defecto para las cotizaciones nuevas. Todo lo demás se decide en cada cotización, y ahí también se pueden cambiar estos valores.</p>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ tabItems }}" value="{{ tab }}" on-change="{{ setTab }}" hint-size="100%,44px"></x-import>
+
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<div class="card" style="min-height:380px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar la configuración del CPQ" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="CPQ-CFG-503 · 4b81e0" hint-size="100%,380px"></x-import>
+</div>
+</sc-if>
+
+<sc-if value="{{ showCat }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmented" options="{{ catViews }}" value="{{ catView }}" on-change="{{ setCatView }}" label="Ver" hint-size="220px,36px"></x-import>
+<sc-if value="{{ showAddItemTop }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="plus" on-click="{{ openNew }}" hint-size="140px,40px">Agregar ítem</x-import>
+</sc-if>
+<sc-if value="{{ showAddCatTop }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="plus" on-click="{{ addCat }}" hint-size="170px,40px">Agregar categoría</x-import>
+</sc-if>
+</div>
+
+<sc-if value="{{ viewItems }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ catEmpty }}" hint-placeholder-val="{{ false }}">
+<div class="card" style="min-height:360px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.EmptyState" icon="clipboard" title="Aún no hay ítems en el catálogo" description="Agrega equipos, uniformes, exámenes y lo que cotices con su costo y rateo, o copia los de la plantilla de seguridad." action="{{ emptyAction }}" hint-size="100%,360px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ catData }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;gap:8px;overflow-x:auto;max-width:100%;padding:2px">
+<sc-for list="{{ chips }}" as="c" hint-placeholder-count="5">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FilterChip" variant="toggle" selected="{{ c.on }}" count="{{ c.n }}" on-click="{{ c.pick }}" hint-size="100px,32px">{{ c.label }}</x-import>
+</sc-for>
+</div>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" on-row-click="{{ openRow }}" hint-size="100%,420px"></x-import>
+</sc-if>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div class="card" style="overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" cards="{{ true }}" to-card="{{ toCard }}" on-row-click="{{ openRow }}" hint-size="100%,420px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" size="lg" icon="plus" block="{{ true }}" on-click="{{ openNew }}" hint-size="100%,48px">Agregar ítem</x-import>
+</sc-if>
+<span class="t-caption">Cambiar un valor por defecto no modifica las cotizaciones existentes. Los ítems se archivan, no se borran.</span>
+</sc-if>
+</sc-if>
+
+<sc-if value="{{ viewCats }}" hint-placeholder-val="{{ false }}">
+<div class="card" style="overflow:hidden">
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<div class="t-caption" style="display:grid;grid-template-columns:minmax(0,1fr) 200px 80px 64px;gap:16px;align-items:center;padding:10px 16px;border-bottom:1px solid var(--ds-border);font-weight:500">
+<span>Categoría</span><span>Tipo de costo</span><span style="text-align:right">Ítems</span><span style="text-align:right">Activa</span>
+</div>
+</sc-if>
+<sc-for list="{{ catRows }}" as="c" hint-placeholder-count="8">
+<div style="display:grid;grid-template-columns:{{ catCols }};gap:8px 16px;align-items:center;padding:8px 16px;border-bottom:1px solid var(--ds-border);min-height:56px">
+<div style="display:flex;flex-direction:column;min-width:0;opacity:{{ c.op }};grid-column:{{ c.nameSpan }}">
+<sc-if value="{{ c.editing }}" hint-placeholder-val="{{ false }}">
+<input ref="{{ nameRef }}" aria-label="Nombre de la categoría" defaultValue="{{ c.label }}" onKeyDown="{{ c.onKey }}" onBlur="{{ c.onBlur }}" placeholder="Nombre de la categoría" style="height:36px;box-sizing:border-box;padding:0 10px;font:500 14px/20px var(--font-sans);color:var(--ds-fg);background:var(--ds-surface);border:1px solid var(--ds-accent);border-radius:var(--radius-md);box-shadow:0 0 0 3px var(--ds-accent-muted);outline:none;width:100%;max-width:320px">
+</sc-if>
+<sc-if value="{{ c.notEditing }}" hint-placeholder-val="{{ true }}">
+<button type="button" onClick="{{ c.onRename }}" disabled="{{ c.locked }}" title="{{ c.renameTitle }}" style="all:unset;box-sizing:border-box;cursor:{{ c.cursor }};display:inline-flex;align-items:center;gap:6px;min-height:36px;padding:0 8px;margin-left:-8px;border-radius:var(--radius-sm);align-self:flex-start" style-hover="background:var(--ds-fill)">
+<span class="t-label">{{ c.label }}</span>
+<sc-if value="{{ c.locked }}" hint-placeholder-val="{{ false }}"><span class="ic sm i-lock subtle" aria-hidden="true"></span></sc-if>
+</button>
+</sc-if>
+<span class="t-caption" style="text-wrap:pretty">{{ c.note }}</span>
+</div>
+<div style="opacity:{{ c.op }}">
+<sc-if value="{{ c.notLocked }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmented" options="{{ tipoOpts }}" value="{{ c.tipo }}" on-change="{{ c.setTipo }}" label="Tipo de costo" hint-size="190px,36px"></x-import>
+</sc-if>
+<sc-if value="{{ c.locked }}" hint-placeholder-val="{{ false }}">
+<span class="t-body-sm muted">Directo · fijo</span>
+</sc-if>
+</div>
+<span class="t-body-sm muted t-numeric" style="text-align:right;opacity:{{ c.op }}">{{ c.countTxt }}</span>
+<div style="display:flex;justify-content:flex-end">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ c.activa }}" on-change="{{ c.setActiva }}" disabled="{{ c.locked }}" hint-size="48px,44px"></x-import>
+</div>
+</div>
+</sc-for>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="padding:12px 16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" size="lg" variant="secondary" icon="plus" block="{{ true }}" on-click="{{ addCat }}" hint-size="100%,48px">Agregar categoría</x-import>
+</div>
+</sc-if>
+</div>
+<span class="t-caption" style="text-wrap:pretty">El «Resumen por categoría» de cada cotización usa estas categorías, agrupadas en directos e indirectos. Una categoría inactiva no se ofrece en ítems nuevos; las cotizaciones que ya la usan la siguen mostrando.</span>
+</sc-if>
+</sc-if>
+
+<sc-if value="{{ showPol }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:10px;padding:12px;border-radius:var(--radius-md);background:var(--ds-fill);font-size:14px;line-height:20px"><span class="ic sm i-info" aria-hidden="true" style="flex:none;margin-top:2px"></span><span style="text-wrap:pretty">Sin valores por defecto. Cada cotización los pedirá al activar el instrumento.</span></div>
+</sc-if>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px;align-items:start">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Costo financiero" description="Costo de financiar los días entre el pago de sueldos y el pago del cliente." hint-size="100%,300px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ f.cfOn }}" on-change="{{ on.cfOn }}" label="Activado por defecto" description="En cotizaciones nuevas." hint-size="100%,44px"></x-import>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Días de pago" value="{{ f.dias }}" placeholder="30" on-change="{{ on.dias }}" trailing="días" mono="{{ true }}" input-mode="numeric" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Tasa mensual" value="{{ f.tasa }}" placeholder="1,0" on-change="{{ on.tasa }}" trailing="%" mono="{{ true }}" input-mode="decimal" hint-size="100%,70px"></x-import>
+</div>
+<span class="t-body-sm t-numeric" style="padding-top:12px;border-top:1px solid var(--ds-border);text-wrap:pretty">{{ ex.cf }}</span>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Póliza de garantía · fiel cumplimiento" description="Garantiza el cumplimiento del contrato ante el cliente." hint-size="100%,300px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ f.pgOn }}" on-change="{{ on.pgOn }}" label="Activado por defecto" description="En cotizaciones nuevas." hint-size="100%,44px"></x-import>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="% del contrato" value="{{ f.pct }}" placeholder="5" on-change="{{ on.pct }}" trailing="%" mono="{{ true }}" input-mode="decimal" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Prima anual" value="{{ f.primaG }}" placeholder="2,0" on-change="{{ on.primaG }}" trailing="%" mono="{{ true }}" input-mode="decimal" hint-size="100%,70px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Plazo" value="{{ f.plazoG }}" placeholder="27" on-change="{{ on.plazoG }}" trailing="meses" mono="{{ true }}" input-mode="numeric" hint="Lo habitual es la duración del contrato más 3 meses." hint-size="100%,90px"></x-import>
+<span class="t-body-sm t-numeric" style="padding-top:12px;border-top:1px solid var(--ds-border);text-wrap:pretty">{{ ex.pg }}</span>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Responsabilidad civil" description="Cubre daños a terceros durante el servicio." hint-size="100%,300px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ f.rcOn }}" on-change="{{ on.rcOn }}" label="Activado por defecto" description="En cotizaciones nuevas." hint-size="100%,44px"></x-import>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Monto" value="{{ f.uf }}" placeholder="5.000" on-change="{{ on.uf }}" trailing="UF" mono="{{ true }}" input-mode="numeric" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Prima anual" value="{{ f.primaR }}" placeholder="0,35" on-change="{{ on.primaR }}" trailing="%" mono="{{ true }}" input-mode="decimal" hint-size="100%,70px"></x-import>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Plazo" value="{{ f.plazoR }}" options="{{ plazoOpts }}" on-change="{{ on.plazoR }}" placeholder="Elige un plazo" hint-size="100%,70px"></x-import>
+<sc-if value="{{ rcIsN }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Meses" value="{{ f.plazoRN }}" placeholder="18" on-change="{{ on.plazoRN }}" trailing="meses" mono="{{ true }}" input-mode="numeric" hint-size="100%,70px"></x-import>
+</sc-if>
+</div>
+<span class="t-body-sm t-numeric" style="padding-top:12px;border-top:1px solid var(--ds-border);text-wrap:pretty">{{ ex.rc }}</span>
+</x-import>
+</div>
+</sc-if>
+
+<sc-if value="{{ showMar }}" hint-placeholder-val="{{ false }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:16px;align-items:start">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Margen" description="Se mide sobre la venta mensual de cada cotización." hint-size="100%,240px">
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Mínimo" value="{{ f.min }}" placeholder="10" on-change="{{ on.min }}" trailing="%" mono="{{ true }}" input-mode="decimal" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Alerta sobre el mínimo" value="{{ f.alerta }}" placeholder="3" on-change="{{ on.alerta }}" trailing="pts" mono="{{ true }}" input-mode="decimal" hint-size="100%,70px"></x-import>
+</div>
+<span class="t-caption" style="text-wrap:pretty">{{ marNote }}</span>
+</x-import>
+<section class="card pad" aria-label="Vista previa del semáforo" style="display:flex;flex-direction:column;gap:16px">
+<span class="t-label">Así se verá el semáforo</span>
+<sc-if value="{{ hasMin }}" hint-placeholder-val="{{ true }}">
+<sc-for list="{{ samples }}" as="s" hint-placeholder-count="3">
+<div style="display:flex;flex-direction:column;gap:4px;padding-top:12px;border-top:1px solid var(--ds-border)">
+<dc-import name="SemaforoMargen" margen="{{ s.m }}" minimo="{{ minV }}" alerta="{{ alertaV }}" size="sm" label="{{ s.label }}" hint-size="100%,84px"></dc-import>
+<span class="t-body-sm muted">{{ s.effect }}</span>
+</div>
+</sc-for>
+</sc-if>
+<sc-if value="{{ noMin }}" hint-placeholder-val="{{ false }}">
+<span class="t-body-sm muted" style="text-wrap:pretty">Sin margen mínimo, ninguna cotización pide aprobación y el semáforo no se muestra.</span>
+</sc-if>
+</section>
+</div>
+</sc-if>
+
+<sc-if value="{{ showBar }}" hint-placeholder-val="{{ false }}">
+<div style="margin-top:auto">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ActionBar" summary="{{ barSummary }}" hint-size="100%,64px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" disabled="{{ clean }}" on-click="{{ discard }}" hint-size="110px,40px">Descartar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" disabled="{{ clean }}" on-click="{{ save }}" hint-size="150px,40px">Guardar cambios</x-import>
+</x-import>
+</div>
+</sc-if>
+</div>
+</x-import>
+
+<sc-if value="{{ sheetOpen }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Sheet" contained="{{ true }}" side="{{ sheetSide }}" title="{{ ed.title }}" description="{{ ed.desc }}" actions="{{ sheetActions }}" on-close="{{ closeSheet }}" hint-size="420px,100%">
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Nombre" value="{{ ed.name }}" on-change="{{ edOn.name }}" placeholder="Ej.: Kit Starlink" error="{{ ed.nameErr }}" hint-size="100%,70px"></x-import>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Categoría" value="{{ ed.cat }}" options="{{ catOpts }}" on-change="{{ edOn.cat }}" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Unidad" value="{{ ed.unidad }}" options="{{ unidadOpts }}" on-change="{{ edOn.unidad }}" hint-size="100%,70px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Costo unitario" value="{{ ed.costo }}" on-change="{{ edOn.costo }}" prefix="$" mono="{{ true }}" input-mode="numeric" hint="Neto, sin IVA." hint-size="100%,90px"></x-import>
+<sc-if value="{{ ed.hasRateo }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Rateo por defecto" value="{{ ed.rateo }}" options="{{ rateoOpts }}" on-change="{{ edOn.rateo }}" hint="En cada cotización se puede cambiar." hint-size="100%,90px"></x-import>
+<sc-if value="{{ ed.isN }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Meses" value="{{ ed.n }}" on-change="{{ edOn.n }}" trailing="meses" mono="{{ true }}" input-mode="numeric" hint-size="100%,70px"></x-import>
+</sc-if>
+</sc-if>
+<div style="display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:12px;border-radius:var(--radius-md);background:var(--ds-fill)">
+<span class="t-body-sm muted">{{ ed.cuotaLbl }}</span>
+<span class="t-mono" style="font-weight:600">{{ ed.cuota }}</span>
+</div>
+</div>
+</x-import>
+</sc-if>
+
+<sc-if value="{{ toast }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:50%;bottom:{{ toastBottom }};transform:translateX(-50%);z-index:60;width:min(356px,calc(100% - 32px))">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Toast" icon="check" tone="success" message="{{ toastMsg }}" hint-size="100%,48px"></x-import>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:820},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;datos&quot;,&quot;vacio&quot;,&quot;error&quot;],&quot;default&quot;:&quot;datos&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;tab&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;catalogo&quot;,&quot;polizas&quot;,&quot;margenes&quot;],&quot;default&quot;:&quot;catalogo&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;vistaCatalogo&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;items&quot;,&quot;cats&quot;],&quot;default&quot;:&quot;items&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = {};
+  nameRef = (el) => { if (el && this._nf !== this.state.editCat) { this._nf = this.state.editCat; el.focus(); el.select(); } };
+  componentDidMount() { this._t = setInterval(() => { if (window.CPQ && window.OPAI20DesignSystem_44e4d7 && window.OPAI20DesignSystem_44e4d7.Table) { clearInterval(this._t); this.forceUpdate(); } }, 60); }
+  componentWillUnmount() { clearInterval(this._t); clearTimeout(this._to); }
+  flash(msg) { clearTimeout(this._to); this.setState({ toast: msg }); this._to = setTimeout(() => this.setState({ toast: null }), 2600); }
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const P = window.CPQ;
+    const device = this.props.device ?? "desktop";
+    const theme = this.props.theme ?? "light";
+    const estado = this.props.estado ?? "datos";
+    const isPhone = device === "phone";
+    const base = { device, theme, isPhone, notPhone: !isPhone, nameRef: this.nameRef, pad: isPhone ? "4px 16px 24px" : device === "tablet" ? "20px 24px 32px" : "24px 32px 32px" };
+    if (!P || !NS.Table) return base;
+    const S = this.state;
+    const cfg = P.getConfig();
+    const tab = S.tab ?? this.props.tab ?? "catalogo";
+    const isError = estado === "error", isEmpty = estado === "vacio";
+    const cats = S.cats ?? cfg.categorias;
+    const catalog = S.items ?? (isEmpty ? [] : P.CATALOGO);
+    const filter = S.filter ?? "todas";
+    const rows = catalog.filter((c) => filter === "todas" || c.cat === filter);
+    const rlabel = (c) => P.rateoLabel(c.rateo, c.rateoN ?? c.n);
+    const cuotaOf = (c) => { const m = P.rateoMeses(c.rateo, c.rateoN ?? c.n); return m ? P.fmt(c.costo / m) + "/mes" : "se cobra una vez"; };
+    const n = (v) => P.parseNum(v == null ? 0 : v);
+    const pv = (x) => { const v = Math.round(x * 10000) / 100; return P.num(v, Math.round(v * 10) === v * 10 ? 1 : 2); };
+
+    const saveCats = (list, msg) => { P.saveConfig({ categorias: list }); this.setState({ cats: list, editCat: null }); if (msg) this.flash(msg); };
+    const count = (id) => catalog.filter((c) => c.cat === id).length;
+    const editCat = S.editCat;
+    const allCats = [...cats, P.FERIADOS];
+    const catRows = allCats.map((c) => {
+      const locked = !!c.sistema, editing = editCat === c.id;
+      const commit = (val) => { const v = String(val || "").trim(); if (!v) { if (c.nuevo) saveCats(cats.filter((x) => x.id !== c.id)); else this.setState({ editCat: null }); return; } saveCats(cats.map((x) => (x.id === c.id ? { ...x, label: v, nuevo: false } : x)), c.nuevo ? "Categoría agregada" : v !== c.label ? "Categoría renombrada" : null); };
+      return {
+        id: c.id, label: c.label, tipo: c.tipo, activa: c.activa !== false, locked, notLocked: !locked, editing, notEditing: !editing,
+        op: c.activa === false ? 0.45 : 1, cursor: locked ? "default" : "text", renameTitle: locked ? "Calculado desde los puestos" : "Renombrar",
+        nameSpan: isPhone ? "1 / -1" : "auto",
+        note: locked ? "Calculado desde los puestos que trabajan en feriados" : c.activa === false ? "Inactiva · no se ofrece en ítems nuevos" : c.tipo === "directo" ? "Costo directo" : "Costo indirecto",
+        countTxt: locked ? "—" : count(c.id) === 1 ? "1 ítem" : count(c.id) + " ítems",
+        onRename: () => !locked && this.setState({ editCat: c.id }),
+        onKey: (e) => { if (e.key === "Enter") { e.preventDefault(); commit(e.target.value); } else if (e.key === "Escape") { if (c.nuevo) saveCats(cats.filter((x) => x.id !== c.id)); else this.setState({ editCat: null }); } },
+        onBlur: (e) => { if (this.state.editCat === c.id) commit(e.target.value); },
+        setTipo: (v) => saveCats(cats.map((x) => (x.id === c.id ? { ...x, tipo: v } : x)), "Ahora es costo " + v),
+        setActiva: (v) => saveCats(cats.map((x) => (x.id === c.id ? { ...x, activa: v } : x)), v ? "Categoría activada" : "Categoría desactivada"),
+      };
+    });
+    const addCat = () => { const id = "cat" + Date.now(); const list = [...cats, { id, label: "", tipo: "indirecto", activa: true, nuevo: true }]; this.setState({ cats: list, editCat: id, catView: "cats" }); };
+
+    const fromCfg = (c) => ({
+      cfOn: !!c.fin.cf.on, dias: String(c.fin.cf.dias), tasa: pv(c.fin.cf.tasa),
+      pgOn: !!c.fin.pg.on, pct: pv(c.fin.pg.pct), primaG: pv(c.fin.pg.prima), plazoG: String(c.fin.pg.plazo),
+      rcOn: !!c.fin.rc.on, uf: P.num(c.fin.rc.uf), primaR: pv(c.fin.rc.prima), plazoR: c.fin.rc.plazo, plazoRN: String(c.fin.rc.plazoN),
+      min: pv(c.margen.min), alerta: pv(c.margen.alerta),
+    });
+    const blank = { cfOn: false, dias: "", tasa: "", pgOn: false, pct: "", primaG: "", plazoG: "", rcOn: false, uf: "", primaR: "", plazoR: null, plazoRN: "", min: "", alerta: "" };
+    const saved = S.saved ?? (isEmpty ? blank : fromCfg(cfg));
+    const f = { ...saved, ...(S.form || {}) };
+    const on = {}; Object.keys(blank).forEach((k) => (on[k] = (v) => this.setState((s) => ({ form: { ...(s.form || {}), [k]: v } }))));
+    const keysPol = ["cfOn", "dias", "tasa", "pgOn", "pct", "primaG", "plazoG", "rcOn", "uf", "primaR", "plazoR", "plazoRN"], keysMar = ["min", "alerta"];
+    const changed = (tab === "polizas" ? keysPol : keysMar).filter((k) => S.form && S.form[k] !== undefined && S.form[k] !== saved[k]).length;
+    const venta = 18000000, dur = P.MODEL.duracion;
+    const rcM = f.plazoR === "12" ? 12 : f.plazoR === "n" ? n(f.plazoRN) : dur;
+    const cfM = venta * 0.88 * (n(f.dias) / 30) * (n(f.tasa) / 100);
+    const pgM = (venta * dur * (n(f.pct) / 100) * (n(f.primaG) / 100) * (n(f.plazoG) / 12)) / dur;
+    const rcMo = (n(f.uf) * P.UF.valor * (n(f.primaR) / 100) * (Math.min(rcM, dur) / 12)) / dur;
+    const exTxt = (m, onF) => (m > 0 ? "Ejemplo · contrato de $ 18.000.000 al mes por " + dur + " meses: " + P.fmt(m) + " al mes" + (onF ? "" : " si se activa en la cotización") : "Completa los valores para ver un ejemplo.");
+    const minV = n(f.min) / 100, alertaV = n(f.alerta) / 100;
+    const save = () => {
+      if (tab === "polizas") P.saveConfig({ fin: { cf: { on: !!f.cfOn, dias: n(f.dias), tasa: n(f.tasa) / 100 }, pg: { on: !!f.pgOn, pct: n(f.pct) / 100, prima: n(f.primaG) / 100, plazo: n(f.plazoG) }, rc: { on: !!f.rcOn, uf: n(f.uf), prima: n(f.primaR) / 100, plazo: f.plazoR || "anual", plazoN: n(f.plazoRN) || 18 } } });
+      else P.saveConfig({ margen: { min: minV, alerta: alertaV } });
+      this.setState({ saved: f, form: null }); this.flash("Guardado · aplica a las cotizaciones nuevas");
+    };
+
+    const activeCats = cats.filter((c) => c.activa !== false && !c.nuevo);
+    const ed = S.edit;
+    let edV = {}, edOn = {}, sheetActions = null;
+    if (ed) {
+      const sv = (k) => (v) => this.setState((s) => ({ edit: { ...s.edit, [k]: v } }));
+      ["name", "cat", "unidad", "costo", "rateo", "n"].forEach((k) => (edOn[k] = sv(k)));
+      const costo = n(ed.costo);
+      const hasRateo = true;
+      const m = ed.rateo === "n" ? n(ed.n) : P.rateoMeses(ed.rateo);
+      edV = {
+        ...ed, hasRateo, isN: hasRateo && ed.rateo === "n", title: ed.id ? "Editar ítem" : "Agregar ítem", desc: ed.id ? ed.code + " · catálogo del tenant" : "Catálogo del tenant",
+        nameErr: ed.tried && !String(ed.name || "").trim() ? "Escribe un nombre." : undefined,
+        cuotaLbl: ed.rateo === "mensual" ? "Precio mensual" : m ? "Cuota mensual " + (ed.unidad || "") : "Pago único " + (ed.unidad || ""),
+        cuota: costo ? P.fmt(m ? costo / m : costo) : "—",
+      };
+      const close = () => this.setState({ edit: null });
+      const saveIt = () => {
+        if (!String(ed.name || "").trim()) return this.setState({ edit: { ...ed, tried: true } });
+        const item = { id: ed.id || "new" + Date.now(), code: ed.code || "NUE-" + String(catalog.length + 1).padStart(3, "0"), name: ed.name, cat: ed.cat, unidad: ed.unidad, costo, rateo: ed.rateo, rateoN: ed.rateo === "n" ? n(ed.n) : null };
+        this.setState({ items: ed.id ? catalog.map((c) => (c.id === ed.id ? item : c)) : [...catalog, item], edit: null }); this.flash(ed.id ? "Ítem guardado" : "Ítem agregado al catálogo");
+      };
+      sheetActions = [
+        ed.id ? h(NS.Button, { key: "a", variant: "ghost", icon: "inbox", onClick: () => { this.setState({ items: catalog.filter((c) => c.id !== ed.id), edit: null }); this.flash("Ítem archivado"); }, style: { marginRight: "auto" } }, "Archivar") : null,
+        h(NS.Button, { key: "c", variant: "secondary", onClick: close }, "Cancelar"),
+        h(NS.Button, { key: "s", onClick: saveIt }, ed.id ? "Guardar" : "Agregar"),
+      ];
+    }
+    const openRow = (r) => this.setState({ edit: { id: r.id, code: r.code, name: r.name, cat: r.cat, unidad: r.unidad, costo: P.num(r.costo), rateo: r.rateo, n: String(r.rateoN ?? r.n ?? 12) } });
+    const openNew = () => this.setState({ edit: { name: "", cat: filter === "todas" ? (activeCats[0] || {}).id : filter, unidad: "por equipo", costo: "", rateo: "n", n: "12" } });
+    const catView = S.catView ?? this.props.vistaCatalogo ?? "items";
+    const chipCats = cats.filter((c) => !c.nuevo && (c.activa !== false || count(c.id)) && count(c.id));
+    return {
+      ...base,
+      tabs: P.tabs, groups: P.groups,
+      tabItems: [{ id: "catalogo", label: "Catálogo", count: catalog.length }, { id: "polizas", label: "Pólizas y finanzas" }, { id: "margenes", label: "Márgenes" }],
+      tab, setTab: (t) => this.setState({ tab: t, form: null }),
+      isError, isEmpty,
+      showCat: !isError && tab === "catalogo",
+      catViews: [{ value: "items", label: "Ítems" }, { value: "cats", label: "Categorías" }], catView, setCatView: (v) => this.setState({ catView: v, editCat: null }),
+      viewItems: catView === "items", viewCats: catView === "cats",
+      showAddItemTop: !isPhone && catView === "items" && catalog.length > 0, showAddCatTop: !isPhone && catView === "cats",
+      catEmpty: catalog.length === 0, catData: catalog.length > 0,
+      catRows, catCols: isPhone ? "minmax(0,1fr) auto auto" : "minmax(0,1fr) 200px 80px 64px", addCat,
+      tipoOpts: [{ value: "directo", label: "Directo" }, { value: "indirecto", label: "Indirecto" }],
+      showPol: !isError && tab === "polizas", showMar: !isError && tab === "margenes",
+      emptyAction: h("div", { style: { display: "flex", flexWrap: "wrap", gap: 8, justifyContent: "center" } },
+        h(NS.Button, { variant: "secondary", onClick: () => { this.setState({ items: P.CATALOGO }); this.flash("Se copiaron " + P.CATALOGO.length + " ítems de la plantilla"); } }, "Copiar de la plantilla"),
+        h(NS.Button, { icon: "plus", onClick: openNew }, "Agregar ítem")),
+      chips: [{ id: "todas", label: "Todas", n: catalog.length }, ...chipCats.map((c) => ({ id: c.id, label: c.label, n: count(c.id) }))].map((c) => ({ ...c, on: filter === c.id, pick: () => this.setState({ filter: c.id }) })),
+      cols: [
+        { key: "name", label: "Ítem", render: (r) => h("span", { style: { display: "flex", flexDirection: "column" } }, h("span", { style: { fontWeight: 500 } }, r.name), h("span", { className: "t-mono subtle", style: { fontSize: 12, lineHeight: "16px" } }, r.code)) },
+        { key: "cat", label: "Categoría", render: (r) => h("span", { style: { display: "flex", flexDirection: "column" } }, h("span", null, P.catLabel(r.cat, cats)), h("span", { className: "t-caption" }, P.catTipo(r.cat, cats))) },
+        { key: "unidad", label: "Unidad", muted: true },
+        { key: "costo", label: "Costo unitario", align: "right", render: (r) => h("span", { className: "t-mono" }, P.fmt(r.costo)) },
+        { key: "rateo", label: "Rateo por defecto", render: (r) => h("span", { style: { display: "flex", flexDirection: "column" } }, h("span", null, rlabel(r)), h("span", { className: "t-caption t-numeric" }, cuotaOf(r))) },
+      ],
+      rows, openRow, openNew,
+      toCard: (r) => ({ title: r.name, subtitle: P.catLabel(r.cat, cats) + " · " + r.unidad + " · " + rlabel(r), meta: P.fmt(r.costo) }),
+      f, on, ex: { cf: exTxt(cfM, f.cfOn), pg: exTxt(pgM, f.pgOn), rc: exTxt(rcMo, f.rcOn) },
+      plazoOpts: P.RC_PLAZOS, rcIsN: f.plazoR === "n",
+      minV, alertaV, hasMin: minV > 0, noMin: !(minV > 0),
+      samples: [
+        { m: Math.max(0.001, minV - 0.013), label: "Ejemplo bajo el mínimo", effect: "Necesita aprobación para enviarse." },
+        { m: minV + alertaV / 2, label: "Ejemplo cerca del mínimo", effect: "Se envía; el semáforo avisa." },
+        { m: minV + alertaV + 0.02, label: "Ejemplo sobre la alerta", effect: "Se envía sin avisos." },
+      ],
+      marNote: minV > 0 ? "Bajo " + pv(minV) + " % la cotización pide aprobación. Entre " + pv(minV) + " % y " + pv(minV + alertaV) + " % el semáforo queda en alerta." : "Sin mínimo, ninguna cotización pide aprobación por margen.",
+      showBar: !isError && (tab === "polizas" || tab === "margenes"),
+      barSummary: [{ label: "Cambios sin guardar", value: String(changed) }],
+      clean: changed === 0,
+      discard: () => this.setState({ form: null }), save,
+      sheetOpen: !!ed, sheetSide: isPhone ? "bottom" : "right", ed: edV, edOn, sheetActions, closeSheet: () => this.setState({ edit: null }),
+      catOpts: activeCats.map((c) => ({ value: c.id, label: c.label, description: c.tipo === "directo" ? "Directo" : "Indirecto" })),
+      unidadOpts: ["por persona", "por equipo", "por servicio", "por mes"].map((x) => ({ value: x, label: x })),
+      rateoOpts: P.RATEOS.map((o) => ({ value: o.id, label: o.id === "contrato" ? "Plazo del contrato · " + P.MODEL.duracion + " meses" : o.label })),
+      toast: !!S.toast, toastMsg: S.toast || "", toastBottom: isPhone ? "104px" : "32px",
+    };
+  }
+}
+</script>
+</body>
+</html>

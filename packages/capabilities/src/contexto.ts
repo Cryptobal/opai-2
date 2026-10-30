@@ -8,10 +8,12 @@ import {
   tienePermisoEfectivo,
   tienePermisoPlataforma,
 } from "@opai/domain";
-import { accesoPlataforma, enTransaccion, forTenant } from "@opai/db";
+import { accesoPlataforma, forTenant } from "@opai/db";
 import { almacenamientoDelEntorno, mailerDelEntorno } from "@opai/integrations";
 
+import { identidadEnDb } from "./identidad-db";
 import { idempotenciaSobre } from "./idempotencia";
+import { plataformaEnDb } from "./plataforma-db";
 import {
   auditoriaEnDb,
   bitacoraEnDb,
@@ -184,16 +186,13 @@ export function crearContexto(params: ParametrosContexto): Contexto {
       urlBase:
         params.servicios?.urlBase ?? process.env["BETTER_AUTH_URL"] ?? "http://localhost:3000",
     },
+    identidad: identidadEnDb,
     // Para un agente, solo con una key de plataforma (ADR-055; antes nunca, H15/H del Revisor): una
     // key común no obtiene el acceso de plataforma del responsable aunque este tenga `platformRole`
     // (el permiso ya lo bloquea `autorizador`, y `requierePlataforma` depende de este objeto, no
     // del permiso, como defensa en profundidad). El agente interno (ADR-049) nunca lo obtiene.
     plataforma: conAccesoPlataforma(usuario, params.actor, params.claveApi)
-      ? {
-          globales: accesoPlataforma(),
-          paraTenant: (id: string) => forTenant(id),
-          transaccionPara: (id, fn) => enTransaccion(id, fn),
-        }
+      ? plataformaEnDb(accesoPlataforma)
       : null,
     // `ctx.rol` conserva el rol base (jerarquía y etiquetas). La autorización usa el rol
     // personalizado cuando existe: si hay `permisosRol`, el rol base cede a esa lista (ADR-022).

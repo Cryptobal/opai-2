@@ -19,6 +19,7 @@ export * from "./rut";
 export * from "./telefono";
 export * from "./turnos";
 export * from "./vigencia";
+export * from "./calendario";
 export * from "./datos-personales";
 export * from "./cumplimiento";
 export * from "./incidentes";
@@ -29,3 +30,5 @@ export * from "./actividades-tratamiento";
 export * from "./navegacion";
 
 export * from "./capas-sueldo";
+
+export * from "./rondas";

@@ -34,7 +34,7 @@ describe("platform.users.* (ADR-055)", () => {
     });
   });
 
-  it("set_role: preview no guarda; la real asigna, audita en la misma transacción y quita con null", async () => {
+  it("set_role: preview no guarda; la real asigna, audita en plataforma y quita con null", async () => {
     const { ctx, tabla, eventos } = contexto();
     const input = { email: "beto@prueba.cl", platformRole: "support" };
     const vista = await executeCapability(ctx, "platform.users.set_role", input, { dryRun: true });
@@ -44,7 +44,11 @@ describe("platform.users.* (ADR-055)", () => {
       ok: true,
     });
     expect(rolDe(tabla, U2)).toBe("support");
-    expect(eventos).toMatchObject([{ capability: "platform.users.set_role" }]);
+    // CAR-36: en la auditoría de plataforma, nunca en la cadena de la empresa de la sesión.
+    expect(eventos).toEqual([]);
+    expect(tabla("auditoriaGlobal")).toMatchObject([
+      { capability: "platform.users.set_role", tenantObjetivoId: null },
+    ]);
     const quitar = { email: "beto@prueba.cl", platformRole: null };
     expect(await executeCapability(ctx, "platform.users.set_role", quitar)).toMatchObject({
       ok: true,

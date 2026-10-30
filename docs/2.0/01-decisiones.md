@@ -261,6 +261,8 @@ decisiones atribuidas a Carlos.
 
 **Consecuencias.** El Brief 02 construye el servicio (modelo, subida, vínculos, descarga segura) y la ficha de documentos en cuentas/instalaciones/personas; el módulo Documentos (explorador, editor, plantillas, firma simple) va justo después de Comercial, porque CPQ ya necesita plantillas y PDF.
 
+**Nota (CAR-73, 29-oct-2026, 15:17 CLT, decisión de Carlos).** El Brief 09 (Documentos) suma una **dependencia nueva**: la plantilla o cláusula reutilizable con los términos de tratamiento de datos de los visitantes, asociada a la cuenta, al cliente y al negocio, para incorporarla a los contratos de servicio de prestación con el cliente (cada tenant tiene varios contratos tipo, distintos según su operación). Viene de `modulos/control-acceso.md` §14 P1 y §16: el tenant sigue siendo el responsable de esos datos y OPAI su encargado (Brief 07d §4.1); el matiz del cliente como responsable de sus propios visitantes se resuelve con esa cláusula, no con una excepción al modelo del 07d.
+
 ---
 
 ## ADR-020 · Comunicaciones: plantillas de correo y notificaciones por tenant
@@ -313,6 +315,12 @@ decisiones atribuidas a Carlos.
 
 **Decisión.** Rondas depende solo del núcleo (instalaciones, personas, dispositivos, documentos, geolocalización, comunicaciones) y se vende solo. Conserva de 1.0: puntos de control con QR/NFC/GPS y geocerca por punto, plantillas y programación, estados y cierres automáticos, tracking con precisión y batería, trust score con pesos configurables, detección de anomalías, offline-first con cola idempotente, informes con recorrido y heatmap, vista del cliente. Integra el libro de novedades y los incidentes de terreno. El Portal Terreno y el Portal Trabajador ejecutan rondas con la misma lógica (`packages/domain`).
 
+**Nota del 29-oct-2026 (CAR-70, Central de monitoreo).** Decisión de Carlos, 29-oct-2026, transmitida en la sesión de Claude de CAR-70 (PR #122), ajuste al encargo de Central: el **libro de novedades de 1.0 pasa a 2.0 en la app Terreno** (no en Rondas como pantalla propia) y **recibe las novedades que deja una ronda**; el módulo Central lo **muestra** (no lo duplica) en la pestaña «Central» de la ficha de la instalación, junto a su propia bitácora. Detalle en `modulos/central.md` §2 y §3.
+
+**Decisiones de Carlos (29-oct-2026, CAR-72, pedido de las 08:18 CLT).** Precisan este ADR al responder las 21 preguntas de `modulos/rondas.md` §14 (detalle completo en ese archivo, sección «Decisiones de Carlos (29-oct-2026)»): **se retira NFC** — modifica el párrafo de arriba: ya no se conservan «QR/NFC/GPS», quedan solo `QR`, `GPS` y `QR + GPS`, y las etiquetas NFC de 1.0 no se migran; el **QR es siempre físico**, sin QR dinámico; el radio de geocerca por defecto queda **bajo 20 m**, el mínimo que no dé falsos «fuera», calibrado con las marcas reales de 1.0; la **foto sigue opcional por punto** y, además, cada punto admite reportar una novedad o un incidente hacia el libro electrónico de novedades; el **trust score nunca bloquea**; y las etiquetas QR físicas de 1.0 **se reutilizan y se mejoran** durante la migración, en vez de exigir reimpresión inmediata.
+
+**Aprobación de Carlos (29-oct-2026, 14:58 CLT, mismo pedido CAR-72).** Carlos aprueba `modulos/rondas.md` completo (pasa de «borrador» a «aprobado», ADR-047): queda disponible para copiar el Design Prompt en Claude Design. Confirma además que la publicación en Play Store (decisión 5 de arriba: app web dentro de la app Terreno) **queda como opción del Brief 14** (Rondas), disponible desde ese brief y sin esperar al empaquetado nativo del Brief 17.
+
 ---
 
 ## ADR-025 · Tickets transversal y simple; sin chat
@@ -320,6 +328,8 @@ decisiones atribuidas a Carlos.
 **Fecha:** 23-oct-2026 · **Estado:** vigente · Ver `docs/2.0/extraccion/rondas-y-tickets.md`.
 
 **Decisión.** Tickets es un módulo transversal: tipos con responsable por defecto y SLA opcional, estados `abierto → en_curso → resuelto → cerrado` (+ `rechazado`), un responsable obligatorio desde la creación, resolución devuelta al solicitante en su portal y por correo, vínculo a cualquier entidad, adjuntos vía documentos. Las solicitudes de trabajadores son tipos de ticket con aprobación de un paso dirigidos al supervisor. Nada crea tickets sin dueño; los hallazgos de supervisión no crean tickets. El chat interno no se construye.
+
+**Nota del 29-oct-2026 (CAR-70, Central de monitoreo).** Decisión de Carlos, 29-oct-2026, transmitida en la sesión de Claude de CAR-70 (PR #122): aprobó las 15 preguntas de `modulos/central.md` §14 tal como venían recomendadas (pregunta 9). El chat interno sigue sin construirse. Los hilos de «Mensaje a la central» **no son chat**: los abre siempre el terreno con un tipo (novedad, consulta, urgencia) o la central desde una alerta; quedan ligados a la instalación y al turno; el guardia escribe libre solo dentro de un hilo abierto; no hay hilos entre guardias ni sin tipo, y el hilo se cierra al resolverse. Los «Avisos de la central» van en un solo sentido, con acuse de recibo. Una alerta de la central no es un ticket: solo puede derivar a uno con responsable. Reglas R16 y R17 de `modulos/central.md`.
 
 ---
 
@@ -336,6 +346,10 @@ decisiones atribuidas a Carlos.
 **Fecha:** 23-oct-2026 · **Estado:** vigente · Ver `docs/2.0/extraccion/integraciones-y-configuracion-por-tenant.md`.
 
 **Decisión.** El núcleo tiene un **catálogo de integraciones** (proveedor DTE, banco, factoring, correo, WhatsApp, mapas y geocodificación, biometría, IA, Slack, webhooks propios) con estado por tenant, prueba de conexión y registro de uso. Cada módulo declara en su manifest las integraciones que requiere; el núcleo provee el adaptador configurado. Las credenciales del tenant se guardan en un **almacén de secretos cifrado** (AES-256-GCM con clave de plataforma rotable, envelope encryption), se muestran una sola vez y nunca salen por API ni MCP. Hay dos modalidades por integración: **de plataforma** (OPAI pone la credencial y la cobra en el plan: mapas, biometría, correo, IA) y **propia del tenant** (DTE, banco, factoring, Slack, dominio de correo, Maps con cuota propia). La geolocalización (autocompletado de direcciones, geocodificación, mapas, distancias) es un servicio del núcleo con proveedor Google Maps por defecto y key de plataforma restringida por dominio; el tenant puede aportar la suya.
+
+**Nota (CAR-73, 29-oct-2026, 15:17 CLT, decisión de Carlos).** La verificación de identidad de firmantes **externos** en N2 (`modulos/firma.md` R13; quien firma sin estar enrolado: representante del cliente, proveedor, postulante) es **de plataforma**: el proveedor de cédula, selfie y prueba de vida lo contrata **OPAI**, nunca el tenant, y su costo se cobra al tenant como consumo dentro del módulo Documentos (ADR-031). Es una excepción puntual al patrón general de esta decisión (que deja biometría como «de plataforma» pero el resto de verificaciones de identidad como elegibles por el tenant); aquí no hay modalidad «propia del tenant» para esta verificación.
+
+**Nota del 29-oct-2026 (CAR-70, Central de monitoreo).** Decisión de Carlos, 29-oct-2026, transmitida en la sesión de Claude de CAR-70 (PR #122), ajuste a la pregunta 8 (telefonía) de `modulos/central.md` §14: WhatsApp/telefonía para la Central sigue el mismo patrón de plataforma-o-propia de este ADR, con Twilio como proveedor. Por defecto los avisos salen con la cuenta de Twilio **de plataforma** de OPAI y sus plantillas de WhatsApp ya aprobadas; como opción, cada tenant conecta **su propia cuenta de Twilio** en el catálogo de integraciones. Un tenant con número de WhatsApp propio necesita la aprobación de Meta **por número y por plantilla** antes de poder enviarlas; mientras no la tenga, sigue con el Twilio y las plantillas de OPAI. Detalle en `modulos/central.md` §10.
 
 ---
 
@@ -441,6 +455,14 @@ como contra `portalesDe(c)`. No une membresías de otros tenants ni consulta por
 Sin portal se rechaza por defecto: `null` o vacío **no** equivale a `erp`; las rutas ERP
 lo derivan en servidor. La API genérica con sesión sin portal no acepta uno del cliente.
 Plataforma, procesos del sistema y API keys conservan sus reglas.
+
+**`/api/v1` con sesión: origen en escrituras (CAR-38, 28-oct-2026).** La API genérica con sesión
+mantiene la lista explícita de CAR-37 (`apps/web/lib/api-v1-sesion.ts`): solo esas capacidades
+corren en el portal ERP fijado en servidor; el resto sigue con portal `null` y se rechaza. Además,
+como la cookie viaja sola, toda escritura con sesión (cualquier capacidad, también de plataforma o
+sin tenant) exige `Origin` igual al propio origen, para que una página ajena no escriba a nombre del
+usuario. Las lecturas siguen el criterio de la lista. Las API keys no cambian. Ampliar la lista (por
+ejemplo, a `core.supervisores.*`) queda para un PR aparte que decide Carlos.
 
 **Excepción explícita (adenda del encargo; autonomía de fase 1 dada por Carlos en t500u).**
 Solo `core.invitations.accept` queda fuera de la comprobación de portales de membresía,
@@ -556,6 +578,8 @@ revisados en `briefs/ENCARGO-portal-sesion.md`.
 
 **Consecuencias.** Ninguna pantalla de configuración se escribe a mano por módulo; un agente puede leer y cambiar ajustes con las mismas reglas que una persona.
 
+
+**Nota del 29-oct-2026 (CAR-70, Central de monitoreo).** Decisión de Carlos, 29-oct-2026, transmitida en la sesión de Claude de CAR-70 (PR #122): aprobó las 15 preguntas de `modulos/central.md` §14 tal como venían recomendadas (pregunta 15). Se agrega el ámbito **Instalación** al centro de Configuración, con resolución defecto → plataforma → tenant → instalación → usuario, para los ajustes que un módulo declare con `ambito: "instalacion"` (los umbrales de la central primero; Rondas después). Lo construye el núcleo antes del Brief 15b, por capacidad (`core.config.get/set`) con alcance de filas (ADR-022) y sin migraciones fuera de un PR.
 ---
 
 ## ADR-039 · Documentos con subida directa, verificación y bitácora
@@ -748,7 +772,14 @@ Reglas:
 - **6 (presupuesto de terreno).** El tope de ≤ 150 KB se aplica cuando los portales de terreno tengan **pantallas reales**. Hoy son placeholders y su primera carga es el **shell compartido** del ERP (paleta ⌘K, menús, selector de portal), ~159 KB gzip, que no es alcance de la base PWA sino de los arreglos de rendimiento del shell (Brief 03, PR 2). Entretanto el tope por ruta de terreno (`/terreno`, `/trabajador`, `/supervisor`) queda en **162 KB** en `presupuesto-js.json` —más estricto que el 165 por defecto— para rastrear y evitar regresiones; baja a 150 KB cuando lleguen esos arreglos y el primer módulo de terreno su contenido real.
 - **7 (prueba en CI).** El equivalente obligatorio es **(a)** Playwright (manifest válido, SW que registra y controla la página, shell de terreno sin red con `context.setOffline(true)`) más **(c)** el presupuesto de JS; se ejecuta hoy. **(b) Lighthouse CI queda como informe, no como gate**, hasta que el primer módulo de terreno tenga pantallas reales (decisión D3 (b) del Brief 04, resuelta por Carlos el 26-oct-2026 13:45 CLT, t332u). El informe se genera contra el build local con `next start` y se guarda en `docs/2.0/informes/`; pasa a gate (≥ 90 rendimiento y accesibilidad en emulación móvil sobre rutas de terreno, ADR-029.14) con Rondas o Asistencia. La categoría PWA de Lighthouse ya no existe (la quitó la versión 12), así que la instalabilidad la cubre Playwright (a).
 
+**Enmienda (CAR-73, 29-oct-2026, 15:17 CLT, decisión de Carlos).** El punto 3 se amplía: el modo sin conexión suma el **control de acceso físico** (`modulos/control-acceso.md` R20–R23, §14 P13), no solo marcación, rondas y novedades. El dispositivo de portería emparejado registra entradas y salidas sin red con la lista bloqueada aplicada sin red y revalidación al sincronizar; detalle completo en esas reglas, que esta enmienda no repite.
+
 **Decisiones de Carlos (24-oct).** (12) Empaquetado para tiendas con **Capacitor**. (13) **Una sola app «OPAI»** en App Store y Google Play para todos: personal de la empresa (ERP y Supervisor), trabajadores, dispositivos de terreno emparejados con código y clientes; al ingresar, la app abre a cada persona su portal según su membresía (con selector si tiene varios). La marca del tenant dentro de la app sigue ADR-028; apps con marca propia por tenant quedan en backlog. (14) **Se puede marcar sin señal** como marca diferida (`origen_marca = offline_queue`): queda identificada como tal en los reportes a la DT y es visible para el trabajador (en su comprobante) y para su supervisor; no es la carga manual de contingencia.
+
+
+**Nota del 29-oct-2026 sobre el punto 3 (CAR-70, Central de monitoreo).** Decisión de Carlos, 29-oct-2026, transmitida en la sesión de Claude de CAR-70 (PR #122): aprobó las 15 preguntas de `modulos/central.md` §14 tal como venían recomendadas (pregunta 9). La cola local sin conexión del punto 3 se amplía a los **mensajes a la central** (novedad, consulta y urgencia, con texto y fotos) y a los **acuses de recibo** de los avisos de la central: mismas reglas (IndexedDB, `idempotencyKey`, hora del dispositivo y sello de servidor al sincronizar, estado «pendiente de envío» visible). Una urgencia encolada muestra además «Llamar a la central» con el número del tenant. Detalle en `modulos/central.md` (R16, R17 y casos borde).
+
+**Decisiones de Carlos (29-oct-2026, CAR-72).** Para Rondas (`modulos/rondas.md`, decisión 5 de la sección «Decisiones de Carlos (29-oct-2026)»): la app web vive **dentro de la app Terreno** (la misma app «OPAI» de este ADR, punto 1) y la publicación en Play Store (empaquetado de este ADR, punto 8) queda como **opción** para ese módulo, no obligatoria desde el día uno ni reservada a un hito posterior. No cambia el resto de este ADR; el momento exacto en que se ejecuta ese empaquetado para Rondas se resuelve al planificar el brief.
 
 ---
 
@@ -868,11 +899,16 @@ No se encontró: render estático roto, falta de prefetch, layouts que recarguen
 
 **Nota del 25-oct-2026 sobre el punto 6 (CAR-10).** La regla de la pauta por series y excepciones ya está en `extraccion/operaciones.md` (§3, esqueleto, solo la regla general) y en `modulos/operaciones.md` (R11, borrador), donde además está el trato del día de hoy que respondió Carlos (respuesta 4 de arriba).
 
+**Nota del 29-oct-2026 (CAR-80, catálogo del Núcleo 17:36–17:39 CLT; C8 y C9).** Dos precisiones de dependencias:
+
+- **C8 · Acceso → Terreno con dispositivos del Núcleo.** El Control de acceso físico y el portal Terreno no dependen uno del otro: el **emparejamiento y la gestión de dispositivos fijos** (quiosco) vive en el **Núcleo** (`core.dispositivos`), y tanto Acceso como Terreno, Asistencia y Rondas usan ese servicio común. El shell del portal Terreno lo construye **CAR-78**; los dispositivos entran antes del PR de Rondas que los necesita (`ROADMAP.md`).
+- **C9 · Nómina exige solo `core.puestos`.** La dependencia dura de Nómina es la **tabla de puestos del Núcleo (`core.puestos`)** para resolver la capa de sueldo (ADR-036), **no el módulo Operaciones completo** (pauta, asignaciones ni asistencia). Precisa la respuesta 1 del 25-oct («Nómina exige Puestos»): basta el puesto del núcleo; la pauta y la asistencia siguen siendo fuentes opcionales.
+
 ---
 
 ## ADR-049 · Agente interno de OPAI
 
-**Fecha:** 26-oct-2026 · **Estado:** Propuesto (PR #38). Fuentes: Decisión de Carlos, 26-oct-2026 10:08 CLT, chat con OPAI 2.0 (registrada por el bot OPAI 2.0): «ok» a la recomendación del bot de las 10:07; «El agente interno debe pedir confirmación y debe tener niveles de confirmación, que apruebe todo o que confirme, como lo hacen los agentes de IA. […] cada tenant pone sus key para poder usar el modelo de lenguaje que ellos quieran. Entonces, en el agente ellos pueden cambiar el modelo de lenguaje según los que tengan conectado. […] se vende como un módulo aparte, por supuesto. Sí o sí es un módulo aparte del agente interno.» — Carlos, 26-oct-2026 10:51 CLT, chat con el Revisor OPAI 2.0 (t117u; dictado por voz); «Ok, después del CPQ» — Carlos, 26-oct-2026 10:53 CLT, chat con el Revisor OPAI 2.0 (t120u); «o el consumo por IA lo cobro yo como opai? no sera mejor asi? / sin tope y a mano» — Carlos, 26-oct-2026 11:12 CLT, chat con el Revisor OPAI 2.0 (t122u); «ok, así» — Carlos, 26-oct-2026 11:17 CLT, chat con el Revisor OPAI 2.0, aprobando la propuesta de cobros del bot OPAI 2.0. · Modifica ADR-032 (nota del 26-oct-2026) y ADR-030 (el asistente IA sale del backlog) · Completa ADR-004, ADR-031, ADR-033 y ADR-048.
+**Fecha:** 26-oct-2026 · **Estado:** Aceptado (CAR-80, 29-oct-2026; propuesto en PR #38). Fuentes: Decisión de Carlos, 26-oct-2026 10:08 CLT, chat con OPAI 2.0 (registrada por el bot OPAI 2.0): «ok» a la recomendación del bot de las 10:07; «El agente interno debe pedir confirmación y debe tener niveles de confirmación, que apruebe todo o que confirme, como lo hacen los agentes de IA. […] cada tenant pone sus key para poder usar el modelo de lenguaje que ellos quieran. Entonces, en el agente ellos pueden cambiar el modelo de lenguaje según los que tengan conectado. […] se vende como un módulo aparte, por supuesto. Sí o sí es un módulo aparte del agente interno.» — Carlos, 26-oct-2026 10:51 CLT, chat con el Revisor OPAI 2.0 (t117u; dictado por voz); «Ok, después del CPQ» — Carlos, 26-oct-2026 10:53 CLT, chat con el Revisor OPAI 2.0 (t120u); «o el consumo por IA lo cobro yo como opai? no sera mejor asi? / sin tope y a mano» — Carlos, 26-oct-2026 11:12 CLT, chat con el Revisor OPAI 2.0 (t122u); «ok, así» — Carlos, 26-oct-2026 11:17 CLT, chat con el Revisor OPAI 2.0, aprobando la propuesta de cobros del bot OPAI 2.0. · Modifica ADR-032 (nota del 26-oct-2026) y ADR-030 (el asistente IA sale del backlog) · Completa ADR-004, ADR-031, ADR-033 y ADR-048.
 
 **Contexto.** ADR-032 dejaba fuera los chats y copilotos propios, y el «chat o asistente IA» de 1.0 quedó en el backlog (ADR-030; brecha N8 de `paridad/nucleo.md`). A las 10:07 Carlos pidió incorporar un agente dentro de OPAI, en el celular y en el escritorio, que conviva con los agentes externos conectados por MCP; el bot recomendó cómo hacerlo y Carlos respondió «ok» a las 10:08. A las 10:51 y 10:53 precisó la confirmación, las keys de IA, la venta y el orden.
 
@@ -923,7 +959,7 @@ existente. El historial nuevo devuelve solo metadatos de acciones propias.
    - **Con el modelo de OPAI:** se cobra la licencia más el consumo a costo con margen, a mes vencido. El margen no está decidido.
    - **Sin tope de consumo por defecto** («sin tope y a mano» — Carlos, 26-oct-2026 11:12 CLT, chat con el Revisor OPAI 2.0, t122u). El tenant puede fijar un presupuesto opcional, con aviso al 80 %, sobre el presupuesto de ADR-031 (0 o nulo = sin límite), controlado en el servidor.
    - **Los demás consumos variables** (WhatsApp, SMS, biometría, firmas, mapas) se cobran a costo más margen sobre lo medido.
-   - **Las licencias por módulo y todos los montos** (incluido el margen) van a un ADR futuro de planes y precios, cuando exista Opai SpA; no se fijan aquí.
+   - **Las licencias por módulo y todos los montos** (incluido el margen) viven en **ADR-058** (planes y precios por capas): el agente interno es un módulo con licencia por empresa. Los montos no se fijan hasta que exista Opai SpA.
 
 **Consecuencias.** El agente interno no crea un segundo camino a los datos: si una acción no existe como capacidad, tampoco existe para él. Sigue sin haber copilotos por módulo ni chats entre personas (Tickets sigue sin chat, ADR-025). El número del brief y el mecanismo de la identidad delegada se fijan al planificarlo.
 
@@ -954,7 +990,7 @@ existente. El historial nuevo devuelve solo metadatos de acciones propias.
 
 **Decisión.**
 
-1. **Atómica.** Para toda capacidad con efecto distinto de lectura y tenant actual, `executeCapability` abre una única transacción: el handler corre dentro (su `ctx.db`/`ctx.transaccion` apuntan a esa misma transacción, así que un `ctx.transaccion` interno la reusa en vez de abrir otra) y el insert de `audit_events` va antes del commit. Un fallo del insert revierte la escritura; un fallo del handler nunca llega a auditar. Se audita también cuando el output no valida (antes esa escritura quedaba sin rastro). Para `platform.*` sin tenant actual (`tenantObjetivo` resuelve el tenant objetivo), no existe una transacción común posible porque el handler escribe con `ctx.plataforma.paraTenant` fuera de `ctx.transaccion`: se audita aparte, en una transacción propia del tenant objetivo (`ctx.plataforma.transaccionPara`), atómica respecto del insert de auditoría pero no respecto del handler (brecha conocida, documentada, no resuelta por este ADR).
+1. **Atómica.** Para toda capacidad con efecto distinto de lectura y tenant actual, `executeCapability` abre una única transacción: el handler corre dentro (su `ctx.db`/`ctx.transaccion` apuntan a esa misma transacción, así que un `ctx.transaccion` interno la reusa en vez de abrir otra) y el insert de `audit_events` va antes del commit. Un fallo del insert revierte la escritura; un fallo del handler nunca llega a auditar. Se audita también cuando el output no valida (antes esa escritura quedaba sin rastro). Para `platform.*` sin tenant actual (`tenantObjetivo` resuelve el tenant objetivo), no existe una transacción común posible porque el handler escribe con `ctx.plataforma.paraTenant` fuera de `ctx.transaccion`: se audita aparte, en una transacción propia del tenant objetivo (`ctx.plataforma.transaccionPara`), atómica respecto del insert de auditoría pero no respecto del handler (brecha conocida, documentada, no resuelta por este ADR). *Nota CAR-36/40/41 (28-oct-2026): lo `platform.*` se audita además (y, sin objetivo, solo) en la auditoría global `core.auditoria_global`; `transaccionPara` se reemplaza por `auditarEnObjetivo` (global antes que empresa) y `paraTenant` por `empresa(id)`.*
 2. **Encadenada.** `core.audit_events` suma `seq` (entero por tenant), `hashAnterior`, `hash` y `hashCanon`, con el mismo algoritmo de `@opai/domain` que ya usaba `core.bitacora` (ADR-023): `hash = sha256(hashAnterior + "\n" + hashCanon)`. `hashCanon` congela la forma canónica del evento (tenant, seq, actor, capability, entidad, `createdAt` y un **digest** SHA-256 del payload, no el payload crudo) para que una futura anonimización del payload (Ley 21.719) no invalide hashes ya emitidos: la verificación nunca vuelve a leer el payload en vivo, solo compara `hashAnterior`/`hashCanon`/`hash` almacenados. La concurrencia del mismo tenant se serializa con `pg_advisory_xact_lock` (mismo patrón que `bloqueo-login.ts` e `incidentes-comun.ts`), dentro de la transacción de la escritura: sin TOCTOU entre escrituras simultáneas. Las filas previas a esta migración se completan con un backfill determinista (orden `created_at, id`, por tenant) en la misma migración.
 3. **Inmutable.** La migración repite (idempotente) el `REVOKE UPDATE, DELETE` sobre `audit_events` para `opai_app` que ya aplicó el PR #56; el dueño de la base conserva el acceso (scripts, migraciones y la prueba de alteración de `verificarAuditoria`).
 4. **Verificable.** `core.auditoria.verificar` (lectura), `platform.auditoria.estado` (plataforma, solo lectura) y un trabajo diario que recorre la cadena por lotes y emite `core.auditoria.rota` si se rompe, igual que el patrón ya existente de `core.bitacora.verificar`/`core.bitacora.rota`. El estado de la última verificación se guarda en `core.auditoria_cabezas` (una fila por tenant), como `core.bitacora_cabezas` para la bitácora de hechos regulados.
@@ -1036,10 +1072,74 @@ identidad de servicio en main.
 
 1. **Ninguna funcionalidad nueva se integra sin su herramienta MCP.** Toda capacidad, incluida `platform.*`, produce herramienta MCP (y `preview_` si escribe), salvo las `interna` o `soloPersonas` de `paridad-excepciones.ts`, cada una con motivo. Toda acción de servidor y ruta de `apps/web` está declarada en `paridad-entradas.ts` (pasarela a capacidades, identidad o infraestructura) con motivo.
 2. **Key de plataforma.** Una API key ve y ejecuta `platform.*` solo si: tiene el scope explícito `platform` (el `*` nunca lo cubre), es de tipo `usuario`, hereda los permisos de su responsable y ese responsable tiene **hoy** `platformRole` (se cruza en cada llamada: si lo pierde, la key también). Solo un usuario de plataforma, con MFA, puede crearla. El agente interno (ADR-049) y las keys de servicio nunca obtienen plataforma. `support` solo ve lecturas.
-3. **Mismo camino que la pantalla.** La herramienta llama a la misma capacidad (`executeCapability`): mismos permisos, `ctx.plataforma.paraTenant` con RLS del tenant objetivo, idempotencia, aprobación humana de lo irreversible y auditoría en el tenant objetivo (o en el de la key, si la capacidad no tiene objetivo).
+3. **Mismo camino que la pantalla.** La herramienta llama a la misma capacidad (`executeCapability`): mismos permisos, `ctx.plataforma.paraTenant` con RLS del tenant objetivo, idempotencia, aprobación humana de lo irreversible y auditoría en el tenant objetivo (o en el de la key, si la capacidad no tiene objetivo). *Nota CAR-36/40 (28-oct-2026): `paraTenant` pasa a operaciones con nombre (`empresa(id)`), la auditoría y la cola de aprobaciones de plataforma salen de la empresa de la key (`core.auditoria_global`, `core.aprobaciones_plataforma`), lo `platform.*` no reserva idempotencia en la empresa y las keys `platform` vencen en ≤ 7 días.*
 4. **Rol de plataforma.** Nuevas capacidades `platform.users.list` y `platform.users.set_role` (permiso `platform:roles.manage`, solo owner de plataforma). `set_role` es irreversible (un agente queda en aprobación humana), no cambia el propio rol, conserva al menos un owner y audita en la misma transacción que la escritura. Su pantalla espera diseño; hoy está en API y MCP.
 5. **Gobierno de la key de plataforma.** La autonomía «directo» sobre una capacidad `platform.*` solo la da quien tiene ese permiso de plataforma (un owner o admin del tenant no). `platform.admins.invite` y `platform.tenants.create` (que también invita un owner al adoptar una empresa existente) pasan a irreversibles: invitar un owner abre los datos de la empresa, así que un agente queda en aprobación humana. Quitar el rol a un owner toma antes el bloqueo de fila de todos los owners, así dos bajas cruzadas se serializan y la segunda falla en vez de dejar cero owners.
 6. **Gate.** `packages/capabilities/test/paridad-inventario.test.ts` falla si una pantalla invoca una capacidad sin herramienta, si aparece una entrada de servidor sin declarar o si `docs/2.0/paridad/mcp-inventario.md` no coincide con lo generado.
 
 **Consecuencias.** Sin migraciones (`opai_app` ya tiene `UPDATE` en `core.users`). La instantánea `herramientas-mcp.txt` (key `*`) no cambia; la nueva `herramientas-mcp-plataforma.txt` lista las `platform_*`.
+
+
+## ADR-056 · Motor de sueldos del Núcleo, con valores por empresa
+
+**Fecha:** 29-oct-2026 · **Estado:** vigente. **Origen:** decisiones de Carlos del 29-oct-2026 a las 18 preguntas de [`modulos/motor-sueldos.md`](modulos/motor-sueldos.md) §16 (CAR-71). Con ellas Carlos aprueba esa especificación. Modifica ADR-042, punto 4: los parámetros legales del costo empleador salen del motor, no del CPQ. Modifica la fase 6 de `ROADMAP.md`: el costo empresa deja de ser parte de Nómina. Completa ADR-036 y ADR-048.
+
+**Decisión.**
+
+1. **Servicio del Núcleo** (Brief 07e). Va después de Puestos (Brief 11) y antes del Motor CPQ (Brief 08), en paralelo con Comercial. Es un solo cálculo, puro y determinista: parte de la capa de sueldo y llega al costo empresa por persona, puesto, día y hora. Lo usan CPQ, Nómina, Finanzas y los agentes.
+2. **Valores por empresa, versionados por vigencia.** OPAI lee las fuentes oficiales todos los días y publica los valores (captura compartida, sin `tenant_id`). Cada empresa tiene sus propios valores vigentes, con `tenant_id` y RLS. Por defecto «siguen la fuente».
+3. **Una sola persona confirma, sin segunda firma.** Puede hacerlo el owner, un administrador o alguien en quien deleguen (`core:remuneraciones.manage`). Lo que no se lee por máquina (IMM, tasas por ley) y lo que llega anómalo se publica como propuesto o retenido, y esa persona lo confirma.
+4. **Todos los valores en una sola página** (Configuración → Remuneraciones): UF, UTM, IMM, tasas, topes y variables propias. Un valor cambiado a mano pasa a ser propio de la empresa, con vigencia, motivo y auditoría, hasta que alguien vuelve a seguir la fuente.
+5. **Agentes según la autonomía de su key.** Un agente o el MCP puede cambiar, confirmar o rechazar cualquier valor, con vista previa y auditoría. Por defecto todo pasa por la cola de aprobaciones del Núcleo. El cambio retroactivo siempre pide aprobación humana. Plataforma solo vigila las fuentes.
+6. **Reglas de cálculo:**
+   - Las provisiones de vacaciones y de indemnización por años de servicio se calculan como lo hacen finanzas y contabilidad, sin colación, movilización ni aportes en la base. Para el costo, el CPQ suma el promedio mensual de los días de feriado del año.
+   - Las horas extra usan la fórmula legal con la jornada pactada.
+   - El CPQ costea con la colación y la movilización de la capa cuando la cotización las incluye.
+   - Una capa puede atar su sueldo base al IMM.
+7. **Cotizaciones.** Las abiertas avisan y se recalculan con un clic. Las emitidas quedan congeladas con su juego de valores.
+8. **Nómina** conserva la liquidación real, el impuesto, el libro, Previred y los finiquitos. Además lleva un contador acumulado de vacaciones y de indemnización por trabajador.
+
+**Consecuencias.** Antes del brief se verifican en las fuentes oficiales el SIS y la reforma, el IMM, los topes y las tasas. Carlos habilita los dominios en la red del entorno. Este ADR no agrega código ni migraciones.
+
+---
+
+## ADR-057 · Complemento «Cumplimiento DT» de Nómina (LRE, Mi DT, finiquito)
+
+**Fecha:** 29-oct-2026 · **Estado:** vigente · **Origen:** decisión de Carlos del 29-oct-2026 a las 15:23 CLT sobre la pregunta P10 de [`modulos/firma.md`](modulos/firma.md) §15, que había quedado «en investigación» en la decisión de las 15:17 CLT (§17 del mismo documento, CAR-73). Investigación completa en [`referencias/dt-integracion.md`](referencias/dt-integracion.md) (solo fuentes públicas, nada escrito en ningún sistema ni contacto con la DT).
+
+**Contexto.** La investigación encontró que la Dirección del Trabajo **no publica una API abierta y documentada para empleadores ni para software de remuneraciones**: su propia FAQ del LRE (última modificación 31-05-2023) dice que la carga es por archivo CSV/TXT o por formulario en Mi DT, y que la API es una «próxima evolución» (fuente: FAQ del LRE, https://www.dt.gob.cl/portal/1628/w3-article-120083.html). El resto de los trámites (contratos y anexos, finiquito, cartas de término) se hacen en el portal Mi DT, siempre con una persona natural autenticada con su ClaveÚnica (el representante laboral electrónico del tenant; además el trabajador, en el finiquito). Ningún proveedor chileno revisado (Nubox, Rex+, Talana) publica cómo automatiza el envío a Mi DT.
+
+**Decisión.** Se crea el complemento vendible **«Cumplimiento DT»** del módulo **Nómina**, cobrado **por trabajador con un mínimo mensual** por tenant (C5, catálogo del 29-oct-2026; los montos van al ADR-058 de planes y precios). En la v1 el complemento:
+
+1. Genera y valida el archivo del **Libro de Remuneraciones Electrónico (LRE)** en el formato oficial (CSV/TXT separado por «;», nombre `rutempleador_aaaamm`).
+2. Prepara los datos para registrar **contratos, anexos, altas y bajas** en Mi DT.
+3. Prepara la **propuesta de finiquito** y la **carta de aviso de término** (art. 162 del Código del Trabajo), con seguimiento de plazos.
+4. Deja el **envío y la firma en manos del representante laboral del tenant**, con su ClaveÚnica en Mi DT. **OPAI nunca guarda ni usa la ClaveÚnica de una persona ni opera el portal con un robot.**
+5. Si la DT abre una API o firma un convenio, el envío directo entra como un **nivel superior** del complemento.
+6. La **asistencia certificada** (Resolución Exenta N°38 de 2024, ADR-023) se evalúa aparte, con su costo y su plazo; no forma parte de este complemento.
+
+**Consecuencias.** Resuelve P10 de `modulos/firma.md` §15: la especificación de Firma queda **aprobada sin preguntas abiertas**; el complemento vive en Nómina, no en Firma (§11 de `firma.md`). `ROADMAP.md` (fase 6) anota el complemento como parte del alcance de Nómina y dependencia de su brief (Briefs 25/26). Sin código ni migraciones en esta decisión.
+
+---
+
+## ADR-058 · Planes y precios por capas, sin montos
+
+**Fecha:** 29-oct-2026 · **Estado:** vigente · **Origen:** CAR-76, catálogo del Núcleo revisado con Carlos el 29-oct-2026 (17:36–17:39 CLT). · Completa ADR-003 (módulos de primera clase y entitlements) y ADR-048 (módulos vendibles por separado); recoge el cobro del agente interno (ADR-049 §9) y del complemento Cumplimiento DT (ADR-057).
+
+**Contexto.** Varios ADR aplazaban «los montos y el margen» a «un ADR futuro de planes y precios, cuando exista Opai SpA» (ADR-049 §9, ADR-031, ADR-057). Falta la **estructura** de cobro —qué se cobra y por qué unidad— para que cada brief sepa a qué capa pertenece lo que construye, aunque los montos sigan sin fijarse.
+
+**Decisión.** Se fija la estructura de planes y precios, **sin montos ni margen** (los números se deciden «cuando exista Opai SpA»):
+
+1. **Capa por módulo.** Cada módulo vendible declara a qué **capa** pertenece: base, de personas, de terreno, comercial/administrativa o complemento. La capa determina la unidad de cobro del punto 2.
+2. **Unidad de cobro.**
+   - **Por trabajador activo** en los módulos de **personas** (Nómina y sus complementos, Asistencia).
+   - **Por instalación activa** en los módulos de **terreno** (Operaciones, Rondas, Control de acceso).
+   - **Licencia por empresa** en los módulos **comerciales y administrativos** (Comercial, CPQ, Licitaciones, Finanzas, Tickets, agente interno).
+3. **Plan base.** Incluye, con sus cuotas: identidad y accesos, permisos, maestros, **motor de sueldos** (ADR-056), documentos y **firma N1/N2** (ADR-019), configuración, comunicaciones (ADR-020), **MCP/API** y **Tickets** (ADR-025). Es el piso sobre el que se activan los módulos de pago.
+4. **Portales incluidos.** Los portales (ERP, Supervisor, Trabajador, Terreno, Cliente) van **incluidos**; no se cobran aparte. Cada portal muestra solo lo que los módulos contratados habilitan (`NAVEGACION.md` §4).
+5. **Cumplimiento DT.** Se cobra **por trabajador con un mínimo mensual** (C5, ADR-057).
+6. **Firma.** El uso de firma se cobra **por uso, a costo más margen** (sobre lo medido en `core.consumos`, ADR-031); los niveles N1/N2 van en el plan base, el uso de firma avanzada se tarifa aparte.
+7. **Sin montos ni margen.** Este ADR **no fija ningún monto ni margen**. Reemplaza, como destino de los números, las remisiones a «un ADR futuro de precios» de ADR-031, ADR-049 §9 y ADR-057.
+
+**Consecuencias.** ADR-049 §9 y ADR-057 apuntan a este ADR para la estructura de cobro. Cada especificación de módulo (ADR-047) declara su capa y su unidad. Sin código ni migraciones; los montos entran cuando Opai SpA exista y se registrarán como una enmienda a este ADR.
 

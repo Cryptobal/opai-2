@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><style>body{margin:0;background:var(--ds-bg)}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}html,body{height:100%}</style></helmet>
+<div style="position:absolute;inset:0;overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" user="{{ appUser }}" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="cfg" title="Cotización adicional mutual" subtitle="Remuneraciones · Accidentes del trabajo" notifications="{{ 3 }}" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,900px">
+<div style="display:flex;flex-direction:column;gap:20px">
+<a href="Valores.dc.html" class="t-label-sm" style="display:inline-flex;align-items:center;gap:4px;text-decoration:none;color:var(--ds-fg-muted);min-height:44px"><span class="ic sm i-chevron-left"></span>Remuneraciones</a>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}"><h1 class="t-title" style="margin:0">Cotización adicional mutual</h1></sc-if>
+
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:16px">
+<div class="card" style="padding:16px;display:flex;flex-direction:column;gap:10px"><div class="skel" style="width:30%;height:14px"></div><div class="skel" style="width:30%;height:40px"></div><div class="skel" style="width:45%;height:12px"></div></div>
+<div class="card" style="overflow:hidden"><sc-for list="{{ skRows }}" as="k" hint-placeholder-count="5"><div style="display:flex;gap:16px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--ds-border)"><div class="skel" style="flex:2;height:14px"></div><div class="skel" style="flex:1;height:14px"></div><div class="skel" style="width:80px;height:22px;border-radius:999px"></div></div></sc-for></div>
+</div>
+</sc-if>
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<div class="card" style="min-height:380px;display:flex"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.EmptyState" icon="clock" title="Aún no hay historial de este valor" description="Es una variable nueva: registra su primer valor con su vigencia." action="{{ emptyAction }}" hint-size="100%,340px"></x-import></div>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:420px;display:flex"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar el indicador" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="REM-503-8C1D" on-retry="{{ noop }}" hint-size="100%,400px"></x-import></div>
+</sc-if>
+<sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:420px;display:flex"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a este indicador" description="Para ver el historial y las capturas necesitas ser owner, administrador o tener la delegación. Pídele acceso a Tomás Fuentes, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" hint-size="100%,400px"></x-import></div>
+</sc-if>
+<sc-if value="{{ isReady }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:{{ cols }};gap:24px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:24px;min-width:0">
+<div class="card" style="padding:16px;display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+<div style="display:flex;flex-direction:column;gap:4px"><span class="t-label-sm muted">Valor vigente</span><span class="t-numeric" style="font-size:36px;line-height:40px;font-weight:600;letter-spacing:-0.022em">0,55 %</span><span class="t-caption">Desde 14-10-2026 · porcentaje del sueldo imponible · anual</span></div>
+<span class="badge b-accent">Propio de la empresa</span>
+</div>
+<div style="display:flex;gap:12px;align-items:center;justify-content:space-between;padding:12px;border-radius:var(--radius-md);background:var(--ds-fill);flex-wrap:wrap">
+<span style="display:flex;flex-direction:column;gap:2px"><span class="t-label-sm muted">Publicado por la fuente</span><span style="display:inline-flex;align-items:center;gap:8px"><span class="t-numeric" style="font-size:14px;color:var(--ds-fg-subtle);text-decoration:line-through;font-weight:400">0,55 %</span><span class="ic sm i-chevron-right" style="color:var(--ds-fg-subtle)"></span><span class="t-numeric" style="font-size:14px">0,34 %</span><span class="t-numeric" style="font-size:13px;color:var(--ds-fg-muted)">−38,2 %</span></span></span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="refresh" hint-size="190px,40px">Volver a seguir la fuente</x-import>
+</div>
+<sc-if value="{{ isWide }}" hint-placeholder-val="{{ true }}">
+<div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" hint-size="130px,40px">Cambiar valor</x-import></div>
+</sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px">
+<span class="t-subheading">Historial por vigencia</span>
+<sc-if value="{{ isTable }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols2 }}" rows="{{ hist }}" row-key="id" hint-size="100%,220px"></x-import>
+</sc-if>
+<sc-if value="{{ isStacked }}" hint-placeholder-val="{{ false }}">
+<div class="card" style="overflow:hidden">
+<sc-for list="{{ hist }}" as="hh" hint-placeholder-count="3">
+<div style="display:flex;flex-direction:column;gap:4px;padding:12px 16px;border-bottom:1px solid var(--ds-border)">
+<div style="display:flex;justify-content:space-between;gap:8px"><span class="t-numeric" style="font-size:16px">{{ hh.valor }}</span><span class="t-numeric" style="font-size:13px;color:var(--ds-fg-muted)">{{ hh.cambio }}</span></div>
+<span class="t-caption">{{ hh.desde }} – {{ hh.hasta }} · {{ hh.origen }}</span>
+<span class="t-caption">{{ hh.quien }}</span>
+</div>
+</sc-for>
+</div>
+</sc-if>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px">
+<span class="t-subheading">Registro de capturas</span>
+<div class="card" style="padding:16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Timeline" items="{{ capturas }}" hint-size="100%,320px"></x-import></div>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+<div class="card" style="padding:16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Fuente" rows="{{ fuente }}" hint-size="100%,200px"></x-import></div>
+<div class="card" style="padding:16px;display:flex;flex-direction:column;gap:4px">
+<span class="t-label" style="padding-bottom:4px">Qué usa este valor</span>
+<sc-for list="{{ usos }}" as="u" hint-placeholder-count="3">
+<a href="#" style="display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:44px;text-decoration:none;color:var(--ds-fg);border-top:1px solid var(--ds-border)"><span class="t-body-sm">{{ u.l }}</span><span style="display:inline-flex;align-items:center;gap:4px;color:var(--ds-fg-muted)"><span class="t-numeric" style="font-size:14px">{{ u.n }}</span><span class="ic sm i-chevron-right"></span></span></a>
+</sc-for>
+</div>
+</div>
+</div>
+</sc-if>
+</div>
+</x-import>
+</x-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;loading&quot;,&quot;vacio&quot;,&quot;error&quot;,&quot;forbidden&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const device = this.props.device ?? "desktop";
+    const isPhone = device === "phone";
+    const h = React.createElement;
+    const st = this.props.state ?? "normal";
+    const NSx = window.OPAI20DesignSystem_44e4d7 || {};
+    const stv = { isReady: st === "normal", isLoading: st === "loading", isVacio: st === "vacio", isError: st === "error", isForbidden: st === "forbidden", skRows: [1, 2, 3, 4, 5], noop: () => {},
+      emptyAction: NSx.Button ? React.createElement(NSx.Button, { variant: "secondary" }, "Registrar primer valor") : null };
+    return { ...stv, isTable: device === "desktop", isStacked: device !== "desktop", appUser: { name: "Tomás Fuentes", initials: "TF", role: "Administrador" },
+      device, theme: this.props.theme ?? "light", isPhone, isWide: !isPhone,
+      cols: device === "desktop" ? "minmax(0,1fr) 340px" : "minmax(0,1fr)",
+      cols2: [{ key: "desde", label: "Vigente desde", mono: false }, { key: "hasta", label: "Hasta", muted: true }, { key: "valor", label: "Valor", align: "right", strong: true }, { key: "cambio", label: "Cambio", align: "right", muted: true }, { key: "origen", label: "Origen" }, { key: "quien", label: "Quién", muted: true }],
+      hist: [
+        { id: 1, desde: "14-10-2026", hasta: "hoy", valor: "0,55 %", cambio: "+61,8 %", origen: "Propio", quien: "Tomás Fuentes" },
+        { id: 2, desde: "01-01-2026", hasta: "13-10-2026", valor: "0,34 %", cambio: "−10,5 %", origen: "Sigue la fuente", quien: "OPAI · actualización automática" },
+        { id: 3, desde: "01-01-2025", hasta: "31-12-2025", valor: "0,38 %", cambio: "—", origen: "Sigue la fuente", quien: "Ana Rojas, vía su agente" },
+      ],
+      capturas: [
+        { agent: true, who: "OPAI · actualización automática", action: "capturó el mismo valor publicado (0,34 %)", when: "29-10-2026 07:00" },
+        { agent: true, who: "OPAI · actualización automática", action: "fuente sin respuesta; reintento en 1 h", when: "28-10-2026 07:00", detail: "GET mutual.cl/tasas · timeout 30 s" },
+        { agent: false, initials: "TF", who: "Tomás Fuentes", action: "cambió el valor a mano", when: "14-10-2026 16:42", changes: [{ field: "Tasa adicional", from: "0,34 %", to: "0,55 %" }] },
+        { agent: true, who: "OPAI · actualización automática", action: "capturó un valor nuevo", when: "02-01-2026 07:00", changes: [{ field: "Tasa adicional", from: "0,38 %", to: "0,34 %" }] },
+      ],
+      fuente: [
+        { label: "Fuente oficial", value: h("a", { href: "#", style: { display: "inline-flex", alignItems: "center", minHeight: 44 } }, "Mutual de Seguridad CChC") },
+        { label: "Contraste", value: h("a", { href: "#", style: { display: "inline-flex", alignItems: "center", minHeight: 44 } }, "Superintendencia de Seguridad Social") },
+        { label: "Resolución", value: "14-03-2026", numeric: true },
+        { label: "Periodicidad", value: "Anual" },
+        { label: "Última captura", value: "29-10-2026 07:00", numeric: true },
+      ],
+      usos: [{ l: "Cotizaciones abiertas", n: "3" }, { l: "Capas de sueldo", n: "7" }, { l: "Simulaciones guardadas", n: "12" }],
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "ban", label: "Bandeja", icon: "inbox" }, { id: "per", label: "Personas", icon: "users" }, { id: "cot", label: "Cotizaciones", icon: "file" }, { id: "cfg", label: "Más", icon: "more" }],
+      groups: [
+        { items: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "ban", label: "Bandeja", icon: "inbox", count: 3 }] },
+        { title: "Comercial", items: [{ id: "cot", label: "Cotizaciones", icon: "file" }] },
+        { title: "Personas", items: [{ id: "per", label: "Personas", icon: "users" }, { id: "car", label: "Cargos y sueldos", icon: "briefcase" }] },
+        { title: "Configuración", items: [{ id: "cfg", label: "Remuneraciones", icon: "wallet" }] },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

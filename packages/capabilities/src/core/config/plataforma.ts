@@ -58,9 +58,15 @@ export const platformAjustesSet = defineCapability({
     clave: z.string(),
     valor: z.unknown(),
     version: z.number(),
+    anterior: z
+      .object({ valor: z.unknown(), version: z.number() })
+      .nullable()
+      .describe("El ajuste guardado antes del cambio (null: regía el de fábrica)."),
   }),
   efecto: "escritura",
   dryRun: true,
+  // Afecta a todas las empresas: la auditoría de plataforma guarda antes y después (CAR-41).
+  cambio: (s) => ({ antes: s.anterior, despues: { valor: s.valor, version: s.version } }),
   async handler(ctx, input, { dryRun }) {
     const p = requierePlataforma(ctx);
     const c = deAmbitoPlataforma().find(
@@ -74,18 +80,22 @@ export const platformAjustesSet = defineCapability({
     const previo = await p.globales.ajustePorClave(where);
     const version = (previo?.version ?? 0) + 1;
     const valor = r ? r.data : valorPorDefecto(c);
-    if (dryRun) return { modulo: c.modulo, clave: c.clave, valor, version };
+    const anterior = previo ? { valor: previo.valor, version: previo.version } : null;
+    if (dryRun) return { modulo: c.modulo, clave: c.clave, valor, version, anterior };
     const json = JSON.parse(JSON.stringify(valor));
-    await p.globales.guardarAjuste({
-      where,
-      create: {
-        modulo: c.modulo,
-        clave: c.clave,
-        valor: json,
-        actualizadoPor: ctx.usuario?.id ?? null,
+    await p.globales.guardarAjuste(
+      {
+        where,
+        create: {
+          modulo: c.modulo,
+          clave: c.clave,
+          valor: json,
+          actualizadoPor: ctx.usuario?.id ?? null,
+        },
+        update: { valor: json, version, actualizadoPor: ctx.usuario?.id ?? null },
       },
-      update: { valor: json, version, actualizadoPor: ctx.usuario?.id ?? null },
-    });
-    return { modulo: c.modulo, clave: c.clave, valor, version };
+      ctx.db,
+    ); // En la transacción de su auditoría global: falla cerrado (CAR-41).
+    return { modulo: c.modulo, clave: c.clave, valor, version, anterior };
   },
 });

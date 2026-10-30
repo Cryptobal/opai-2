@@ -20,6 +20,7 @@ import {
   integracionesSetSecreto,
 } from "./integraciones";
 import { capacidadesAgentes, trabajosAgentes } from "./agentes";
+import { capacidadesCalendario } from "./calendario";
 import { capacidadesComunicaciones, consumidorComunicaciones } from "./comunicaciones";
 import { capacidadesConfig } from "./config";
 import { capacidadesCumplimiento, trabajosCumplimiento } from "./cumplimiento";
@@ -41,6 +42,7 @@ import { platformTenantsGet, platformUsageSummary } from "./platform-tenants";
 import { capacidadesPlataforma, platformTenantsList, platformTrabajosList } from "./plataforma";
 import { tenantGet, tenantUpdate } from "./tenant";
 import { usersList, usersRemove, usersUpdate } from "./users";
+import { usersRestablecerMfa } from "./users-mfa";
 
 /** Capacidades del núcleo (`core.*`) y de plataforma (`platform.*`), Brief 01 sección 7. */
 export const capacidadesDelNucleo: readonly Capacidad[] = [
@@ -53,6 +55,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   usersInvite,
   usersUpdate,
   usersRemove,
+  usersRestablecerMfa,
   invitationsList,
   invitationsRevoke,
   invitationsPeek,
@@ -97,6 +100,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   iaProbar,
   platformIntegracionesEstado,
   ...capacidadesMaestros,
+  ...capacidadesCalendario,
   ...capacidadesAnexos,
   ...capacidadesPanel,
   ...capacidadesPermisos,

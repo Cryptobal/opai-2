@@ -178,6 +178,7 @@ Ningún campo de esta sección es visible para el cliente ni para el trabajador 
 - **R27.** Desde el corte de Comercial, **cuentas, contactos e instalaciones se editan solo en 2.0**. OPAI copia a 1.0 los cambios (altas, ediciones, vínculos, activaciones por negocio ganado) en un solo sentido, sin tocar el código de 1.0. Un control diario compara ambos y reporta diferencias.
 - **R28.** La importación desde 1.0 se puede ejecutar en simulación antes de hacerla. Deduplica cuentas por RUT y une los contactos con el mismo correo en una sola persona. Las cuentas duplicadas por nombre se proponen para fusión, nunca se fusionan solas. Nunca crea una instalación a partir del texto de un negocio. Todo lo que no puede resolver va a un reporte.
 - **R29.** **Cadencia de seguimiento configurable por paso.** Cada empresa define su cadencia de seguimiento de negocios como una secuencia de pasos; en cada paso elige quién lo ejecuta: una **persona**, **OPAI automático** o un **agente de IA**. Es parte del módulo Comercial, no del backlog (fuente: chat de Carlos con el bot Paridad, 24-oct-2026 12:37, confirmado por Carlos el 26-oct-2026 9:20 CLT; cadencia de 1.0 en `extraccion/comercial-y-cpq.md` §3.6, que es la referencia de partida).
+  *Nota del 29-oct-2026 (CAR-67): la especificación de esta regla está en [`modulos/seguimiento-comercial.md`](seguimiento-comercial.md) (planes por tenant, respuesta del cliente, cierre, salida del envío, negocios detenidos, vista de pendientes y herramientas MCP), con las 18 preguntas decididas por Carlos el 29-oct-2026 (entre ellas, no se porta el cierre automático bajo un monto). El código vivo de 1.0 (`40d19a5`) usa días hábiles 3, 7, 14 y 15, no 3/7/3.*
 
 ## 6. Estados y transiciones
 
@@ -390,3 +391,4 @@ El agente se detiene antes de ganar, fusionar o transferir. Se documenta en `doc
 | 25-oct-2026 23:10 | R18 y pregunta 8: al ganar se ofrecen los puestos de las líneas de guardias y RRHH los confirma (respuesta 3 de ADR-048; CAR-10) | — (nota; decisión de Carlos 23:08–23:10) |
 | 26-oct-2026 | R29: cadencia de seguimiento configurable por paso, fuera del backlog (chat con Paridad del 24-oct-2026 12:37, confirmado el 26-oct-2026 9:20 CLT) | Carlos |
 | 26-oct-2026 | §14 cerrada según la Page «Comercial OPAI 2.0: decisiones» del 25-oct (SLA fuera, ganado = adjudicado, acuse configurable, campos personalizados al backlog) y la aprobación de Carlos del 26-oct 15:12 CLT (Brief 07 · PR 1, CAR-20) | Carlos |
+| 29-oct-2026 | R29: nota con el enlace a `seguimiento-comercial.md` (CAR-67) | — (borrador) |

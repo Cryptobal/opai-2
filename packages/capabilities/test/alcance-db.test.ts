@@ -365,12 +365,51 @@ describe.skipIf(!urlPropietario)("alcance del supervisor en base real (B3)", () 
     expect((await dato<{ items: unknown[] }>(ctx, "core.personas.list", {})).items).toHaveLength(0);
   });
 
-  it("una API key no puede fijar el alcance de un supervisor (soloPersonas)", async () => {
-    const r = await mod.executeCapability(ctxKeySup(await alcanceDesdeDb()), "core.supervisores.asignar", {
-      membershipId: membershipSup,
-      instalacionIds: [instA],
-    });
+  it("una key de supervisor no fija alcance; la de un owner queda en aprobación humana (CAR-38)", async () => {
+    const entrada = { membershipId: membershipSup, instalacionIds: [instB] };
+    const r = await mod.executeCapability(ctxKeySup(await alcanceDesdeDb()), "core.supervisores.asignar", entrada);
     expect(r).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+    const antes = await e.admin.supervisorInstalacion.count({ where: { membershipId: membershipSup } });
+    const ownerId = randomUUID();
+    await e.admin.user.create({ data: { id: ownerId, name: "Owner", email: `own-${ownerId.slice(0, 8)}@prueba.cl` } });
+    const sufijo = randomUUID().slice(0, 8);
+    const apiKeyId = (
+      await e.admin.apiKey.create({
+        data: { tenantId, userId: ownerId, nombre: "Agente", prefijo: `opai_alc_${sufijo}`, hash: sufijo, scopes: ["*"] },
+      })
+    ).id;
+    const key = mod.crearContexto({
+      tenantId,
+      actor: { tipo: "agent", id: apiKeyId, viaUserId: ownerId },
+      usuario: { id: ownerId, nombre: "Owner", email: "own@prueba.cl", platformRole: null },
+      rol: "owner",
+      principal: { tipo: "usuario", id: ownerId },
+      agente: { apiKeyId, nombre: "Agente", presupuestoMensualMicro: null, autonomia: {} },
+      medidor,
+    });
+    const pendiente = await mod.executeCapability(key, "core.supervisores.asignar", entrada);
+    expect(pendiente).toMatchObject({ ok: false, error: { code: "APPROVAL_REQUIRED" } });
+    expect(await e.admin.supervisorInstalacion.count({ where: { membershipId: membershipSup } })).toBe(antes);
+  });
+
+  it("de_instalacion: supervisores a cargo y candidatos; un supervisor no la lee (CAR-38)", async () => {
+    const o = ctxOwner();
+    await dato(o, "core.supervisores.asignar", { membershipId: membershipSup, instalacionIds: [instA] });
+    const conA = await dato<{ asignados: { membershipId: string }[]; candidatos: { membershipId: string }[] }>(
+      o,
+      "core.supervisores.de_instalacion",
+      { instalacionId: instA },
+    );
+    expect(conA.asignados.map((s) => s.membershipId)).toContain(membershipSup);
+    expect(conA.candidatos.map((s) => s.membershipId)).not.toContain(membershipSup);
+    const conA2 = await dato<{ candidatos: { membershipId: string }[] }>(o, "core.supervisores.de_instalacion", {
+      instalacionId: instA2,
+    });
+    expect(conA2.candidatos.map((s) => s.membershipId)).toContain(membershipSup);
+    const sup = await mod.executeCapability(ctxSup(await alcanceDesdeDb()), "core.supervisores.de_instalacion", {
+      instalacionId: instA,
+    });
+    expect(sup).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
   });
 
   it("la lectura de un documento no se fuga por id: solo los de su alcance (url y actividad)", async () => {

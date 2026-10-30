@@ -1,24 +1,15 @@
 import { microAUsd } from "@opai/domain";
 
-import type { TenantDb } from "@opai/db";
+import type { OperacionesEmpresa } from "@opai/db";
 
 export const inicioDeMes = (d = new Date()) =>
   new Date(Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), 1));
 
 /** Consumo del mes de una empresa: IA (USD), correos, llamadas y última actividad. */
-export async function metricasDelMes(db: TenantDb) {
-  const [g, ultimo] = await Promise.all([
-    db.consumo.groupBy({
-      by: ["recurso"],
-      where: { createdAt: { gte: inicioDeMes() } },
-      _sum: { cantidad: true, costoTotalMicro: true },
-    }),
-    db.consumo.findFirst({
-      where: { recurso: "capacidad.ejecucion" },
-      orderBy: { createdAt: "desc" },
-      select: { createdAt: true },
-    }),
-  ]);
+export async function metricasDelMes(
+  e: Pick<OperacionesEmpresa, "consumosPorRecurso" | "ultimaEjecucion">,
+) {
+  const [g, ultimo] = await Promise.all([e.consumosPorRecurso(inicioDeMes()), e.ultimaEjecucion()]);
   const suma = (pref: string, k: "cantidad" | "costoTotalMicro") =>
     g.filter((x) => x.recurso.startsWith(pref)).reduce((s, x) => s + (x._sum[k] ?? 0), 0);
   return {

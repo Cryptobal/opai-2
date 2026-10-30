@@ -90,9 +90,10 @@ type Sesionador = (
 
 /**
  * Resuelve el actor de un request a la API: API key (`Authorization: Bearer`) o sesión
- * (cookie de Better Auth). Sin ninguna de las dos responde 401. Con sesión, `/api/v1` siempre
- * pasa `portal: null` (no acepta uno del cliente): solo ejecuta capacidades sin tenant o de
- * plataforma; las de un portal con tenant las deniega `restriccion` (encargo portal-sesión).
+ * (cookie de Better Auth). Sin ninguna de las dos responde 401. Con sesión devuelve siempre
+ * `portal: null` (no acepta uno del cliente); `/api/v1` fija después `erp` en servidor solo para las
+ * capacidades de su lista (`lib/api-v1-sesion.ts`, CAR-37) y el resto lo deniega `restriccion`;
+ * toda escritura con sesión exige además el propio `Origin` (CAR-38).
  */
 export async function resolverActor(
   req: Request,

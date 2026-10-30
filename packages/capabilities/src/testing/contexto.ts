@@ -2,6 +2,7 @@ import type { Acceso, Excepcion, Rol } from "@opai/domain";
 
 import { autorizador, conAccesoPlataforma, type ClaveApi } from "../contexto";
 import { idempotenciaSobre } from "../idempotencia";
+import { empresaDePlataforma } from "../plataforma-empresa";
 import type { AgenteContexto, Alcance, ConsumoNuevo, Principal } from "../types";
 import { almacenamientoEnMemoria } from "./almacenamiento-memoria";
 import { dbEnMemoria } from "./db-memoria";
@@ -11,6 +12,7 @@ import {
   eventosEnMemoria,
   trabajosEnMemoria,
 } from "./servicios-memoria";
+import { identidadEnMemoria } from "./identidad-memoria";
 import { medidorEnMemoria } from "./medidor-memoria";
 import type { Actor, Contexto, Correo, EventoAuditoria, UsuarioContexto } from "./tipos";
 
@@ -114,8 +116,17 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
       almacenamiento: almacen.almacenamiento,
       urlBase: "https://test.opai.cl",
     },
+    identidad: identidadEnMemoria(tabla),
     plataforma: conAccesoPlataforma(usuario, actor, o.claveApi)
-      ? { globales, paraTenant: () => db, transaccionPara: (_id, fn) => ctx.transaccion(fn) }
+      ? {
+          globales,
+          empresa: (id) => empresaDePlataforma(db, id),
+          auditarEnObjetivo: (_id, hecho, evento) =>
+            ctx.transaccion(async (tx) => {
+              await globales.auditarPlataforma(hecho, tx);
+              await ctx.auditoria.registrar(tx, evento);
+            }),
+        }
       : null,
     autorizar: o.permisos
       ? (p) => (o.permisos ?? []).includes(p)
@@ -131,5 +142,14 @@ export function contextoDePrueba(o: OpcionesPrueba = {}) {
         ),
   };
   const esperar = () => Promise.all(diferidos.splice(0));
-  return { ctx, eventos, usos, correos, tabla, esperar, almacen, despachos: () => despachos };
+  return {
+    ctx,
+    eventos,
+    usos,
+    correos,
+    tabla,
+    esperar,
+    almacen,
+    despachos: () => despachos,
+  };
 }

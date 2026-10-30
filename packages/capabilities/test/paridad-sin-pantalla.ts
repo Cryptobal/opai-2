@@ -7,9 +7,23 @@
  */
 export type SinPantalla = { encargo: string; desde: string; motivo: string };
 
-const B3 = "Alcance del supervisor (B3): la pantalla de instalaciones a cargo es el bloque 9 del Brief 07c.";
-
 export const SOLO_PERSONAS_SIN_PANTALLA: Readonly<Record<string, SinPantalla>> = {
-  "core.supervisores.asignar": { encargo: "CAR-38", desde: "2026-10-28", motivo: B3 },
-  "core.supervisores.quitar": { encargo: "CAR-38", desde: "2026-10-28", motivo: B3 },
+  "core.users.restablecer_mfa": {
+    encargo: "CAR-54",
+    desde: "2026-10-29",
+    motivo:
+      "Restablecer el MFA de un usuario desde su ficha (owner): las pantallas de MFA no tienen diseño aprobado en Claude Design (export-acceso/README.md).",
+  },
+  "platform.usuarios.restablecer_mfa": {
+    encargo: "CAR-54",
+    desde: "2026-10-29",
+    motivo:
+      "Restablecer el MFA desde Plataforma: los usuarios de plataforma aún no tienen pantalla y las de MFA no tienen diseño aprobado.",
+  },
+  "platform.usuarios.borrar": {
+    encargo: "CAR-45",
+    desde: "2026-10-29",
+    motivo:
+      "Borrar la cuenta de un usuario sin empresas desde Plataforma: los usuarios de plataforma aún no tienen pantalla con diseño aprobado.",
+  },
 };

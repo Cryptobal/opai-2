@@ -20,7 +20,7 @@
 | **Inicio** | Inicio, entrada suelta (pendientes, alertas, accesos y la **Bandeja** dentro: aprobaciones, avisos y, desde la fase 2, tareas asignadas) | Núcleo | 1 |
 | **Comercial** | Solicitudes · Negocios (embudo y lista) · Cotizaciones · Licitaciones | Comercial, CPQ, Licitaciones | 2 (Licitaciones: 6) |
 | **Clientes** | Cuentas · Contactos · Instalaciones | Núcleo | 1 (Contactos: 2) |
-| **Operaciones** | Pauta (planificación de turnos) · Turnos extra · Supervisión · Rondas · Novedades · Tickets | Operaciones, Rondas, Tickets | 3 |
+| **Operaciones** | Pauta (planificación de turnos) · Turnos extra · Supervisión · Rondas · Novedades · Tickets · Central *(CAR-70, decidido por Carlos el 29-oct-2026; deja el área en 7, el máximo)* | Operaciones, Rondas, Tickets, Central | 3 |
 | **Personas** | Personas (con la vista Vencimientos dentro) · Asistencia · Nómina · Cargos y sueldos | Núcleo, Asistencia, Nómina | 1 (Asistencia: 4, Nómina: 6) |
 | **Finanzas** | Flujo de caja · Banca y conciliación · Ventas (DTE) · Compras · Rendiciones · Contabilidad · Informes | Finanzas (sub-módulos activables) | 5 |
 | **Documentos** | Documentos (explorador, plantillas, firmas pendientes) | Documentos | 2 |
@@ -56,7 +56,7 @@ Mientras un área no esté activa, su entrada cae a la siguiente disponible (hoy
 |---|---|---|---|
 | **Supervisor** | Supervisores en terreno | Barra inferior (sin barra lateral en celular) | Hoy (instalaciones del turno, alertas) · Instalaciones a cargo · Visitas y rondas · Novedades · Más (tickets, personas a cargo, perfil) |
 | **Trabajador** (portal de la persona) | Cada persona contratada | Barra inferior | Inicio (mi turno, avisos) · Marcar · Mis documentos (contrato, liquidaciones, comprobantes) · Solicitudes (tickets) · Más (perfil, horario, rondas asignadas) |
-| **Terreno** | Dispositivo fijo de una instalación (emparejado) | Pantalla de tarea única, sin menú | Marcar · Ronda · Novedad · Instrucciones del puesto |
+| **Terreno** | Dispositivo fijo de una instalación (emparejado) | Inicio con resumen del puesto; tareas a pantalla completa, sin barra lateral | Inicio (resumen) · Acceso · Rondas · Asistencia · Novedades (alineado con B2; el guardia entra eligiendo su nombre, sin PIN — decisión de Carlos del 29-oct-2026) |
 | **Cliente** | Contactos de la cuenta cliente | Barra lateral en escritorio, inferior en celular | Resumen · Instalaciones · Reportes (asistencia, rondas, novedades) · Documentos y facturas · Solicitudes (tickets) · Agentes (keys del cliente, ADR-033) |
 | **Plataforma** | Operadores de OPAI | Barra lateral | Empresas · Trabajos · Consumos · Precios · Ajustes |
 

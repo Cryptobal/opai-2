@@ -31,6 +31,16 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
   "core.aprobaciones.aprobar": "Solo personas: lo irreversible lo aprueba un humano (ADR-032).",
   "core.aprobaciones.rechazar":
     "Solo personas: la decisión sobre lo irreversible es humana (ADR-032).",
+  "platform.aprobaciones.aprobar":
+    "Solo personas: lo irreversible de plataforma lo aprueba un humano (ADR-032, CAR-36).",
+  "platform.aprobaciones.rechazar":
+    "Solo personas: la decisión sobre lo irreversible de plataforma es humana (ADR-032, CAR-36).",
+  "core.users.restablecer_mfa":
+    "Solo personas: quitar el segundo factor de otra cuenta lo decide un owner con sesión (CAR-54).",
+  "platform.usuarios.restablecer_mfa":
+    "Solo personas: quitar el segundo factor de una cuenta lo decide Plataforma con sesión (CAR-54).",
+  "platform.usuarios.borrar":
+    "Solo personas: borrar una identidad es irreversible y lo decide Plataforma con sesión (CAR-45).",
   "core.cumplimiento.dpa_aceptar":
     "Solo personas: aceptar el DPA por la empresa es un acto humano responsable (Ley 21.719, ADR-034).",
   "core.cumplimiento.dpo_set":
@@ -64,10 +74,6 @@ export const EXCEPCIONES_PARIDAD: Readonly<Record<string, string>> = {
   "core.roles.assign": "Solo personas: asignar un rol a un usuario gobierna su acceso (ADR-034).",
   "core.excepciones.set":
     "Solo personas: conceder o denegar permisos puntuales es gobierno de acceso (ADR-034).",
-  "core.supervisores.asignar":
-    "Solo personas: fijar el alcance de un supervisor gobierna su acceso; un agente no lo hace (ADR-034).",
-  "core.supervisores.quitar":
-    "Solo personas: quitar instalaciones del alcance de un supervisor gobierna su acceso (ADR-034).",
   "core.anexos.aprobar":
     "Solo personas: aprobar el anexo de contrato materializa un documento irreversible, un acto humano responsable (Brief 07b PR 4, ADR-032).",
   "core.anexos.rechazar":

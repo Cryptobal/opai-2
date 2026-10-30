@@ -1,5 +1,7 @@
 import type { EstadoMfa, Rol, RolPlataforma } from "@opai/domain";
-import type { Globales, TenantDb, TenantTx, VerificacionAuditoria } from "@opai/db";
+import type { Globales, HechoPlataforma, TenantTx, VerificacionAuditoria } from "@opai/db";
+
+import type { EmpresaPlataforma } from "./plataforma-empresa";
 import type { Almacenamiento, Mailer } from "@opai/integrations";
 import type { z } from "zod";
 
@@ -8,6 +10,7 @@ import type {
   AgenteContexto,
   BitacoraServicio,
   Eventos,
+  Identidad,
   Medidor,
   Principal,
   Trabajos,
@@ -75,14 +78,22 @@ export type Alcance = {
 /** Acceso de plataforma: solo existe si el usuario tiene `platformRole` (ADR-016). */
 export type Plataforma = {
   globales: Globales;
-  /** Cliente acotado al tenant objetivo. Nunca consultas cross-tenant en una sola query. */
-  paraTenant(tenantId: string): TenantDb;
   /**
-   * Transacción atómica sobre un tenant objetivo distinto del actual (capacidades `platform.*`
-   * sin tenant propio). La usa `executeCapability` para auditar en la misma transacción las
-   * escrituras de plataforma que afectan a un tenant resuelto por `tenantObjetivo`.
+   * Operaciones con nombre dentro de una empresa (CAR-40), con la RLS de esa empresa: nunca un
+   * delegado libre, ni payloads de trabajos, hashes de keys o secretos de integraciones.
    */
-  transaccionPara<T>(tenantId: string, fn: (tx: TenantTx) => Promise<T>): Promise<T>;
+  empresa(tenantId: string): EmpresaPlataforma;
+  /**
+   * Audita una escritura `platform.*` con `tenantObjetivo` en la auditoría de plataforma y en la
+   * cadena de esa empresa, en una transacción del objetivo y siempre en ese orden (la cadena global
+   * antes que la de la empresa, como al aprobar: un solo orden de locks). Lo usa solo
+   * `executeCapability`; no entrega una transacción libre sobre la empresa (CAR-40).
+   */
+  auditarEnObjetivo(
+    tenantId: string,
+    hecho: HechoPlataforma,
+    evento: EventoAuditoria,
+  ): Promise<void>;
 };
 
 /** Contexto de ejecución. Lo construye el borde (ruta HTTP, acción de UI, MCP), nunca el módulo. */
@@ -135,6 +146,7 @@ export interface Contexto {
   /** Pide despachar el outbox tras una escritura (el borde lo difiere). */
   despacharEventos(): void;
   servicios: Servicios;
+  identidad: Identidad;
   plataforma: Plataforma | null;
   /** Decide si el actor tiene el permiso (rol de la membresía y rol de plataforma). */
   autorizar(permiso: string): boolean;
@@ -171,6 +183,14 @@ export interface Capacidad<I extends z.ZodType = z.ZodType, O extends z.ZodType 
   interna?: boolean;
   /** No exige tenant actual (`core.me`, plataforma, flujos de invitación). */
   sinTenant?: boolean;
+  /**
+   * Lectura que no consulta la base (catálogo en memoria, p. ej. `core.config.schema`): el handler
+   * corre sin abrir la transacción de tenant de `enLectura`, para no pedir ni retener una conexión
+   * del pool sin motivo (B1, P2028). Si pese a todo tocara `ctx.db`, cada operación abriría su propia
+   * transacción con el tenant fijado (misma RLS); por eso solo se marca en lecturas sin base. Solo
+   * aplica a `efecto: "lectura"` sin `auditarLectura`.
+   */
+  sinDb?: boolean;
   /** Campos del input que nunca se guardan en auditoría ni en aprobaciones (secretos). */
   sensibles?: readonly string[];
   /** Identificadores revelados por una lectura; nunca contenido personal ni input sin validar. */
@@ -181,6 +201,12 @@ export interface Capacidad<I extends z.ZodType = z.ZodType, O extends z.ZodType 
   soloPersonas?: boolean;
   /** Portales donde está disponible (ADR-033). Por defecto ["erp"] (plataforma: ["platform"]). */
   portales?: readonly string[];
+  /**
+   * Cambio global (CAR-41): estado anterior y nuevo, a partir de la salida, para la auditoría de
+   * plataforma (`antes`/`despues`). Lo declaran las escrituras `platform.*` que cambian algo de todas
+   * las empresas (ajustes, precios).
+   */
+  cambio?: (salida: z.output<O>, entrada: z.output<I>) => { antes: unknown; despues: unknown };
   /** Tenant donde auditar y medir (plataforma: el tenant objetivo). Por defecto, el actual. */
   tenantObjetivo?: (input: z.output<I>, output: z.output<O> | undefined) => string | undefined;
   handler: (ctx: Contexto, input: z.output<I>, modo: ModoEjecucion) => Promise<z.input<O>>;

@@ -32,15 +32,13 @@ export const platformTenantsList = defineCapability({
     const tenants = await p.globales.listarTenants();
     // Una consulta por tenant: nunca cross-tenant en una sola query.
     return porLotes(tenants, async (t) => {
-      const db = p.paraTenant(t.id);
-      const [modulos, usuarios, m] = await Promise.all([
-        db.tenantModule.findMany({
-          where: { estado: { in: ACTIVOS }, moduloId: { not: "core" } },
-          select: { estado: true },
-        }),
-        db.membership.count({ where: { estado: "activa" } }),
-        metricasDelMes(db),
+      const e = p.empresa(t.id);
+      const [todos, usuarios, m] = await Promise.all([
+        e.modulos(),
+        e.contarMiembrosActivos(),
+        metricasDelMes(e),
       ]);
+      const modulos = todos.filter((x) => x.moduloId !== "core" && ACTIVOS.includes(x.estado));
       return {
         ...t,
         modulosActivos: modulos.length,

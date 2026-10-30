@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+</helmet>
+<div role="meter" aria-label="{{ aria }}" style="display:flex;flex-direction:column;gap:8px;min-width:0;width:100%">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+<span class="t-label-sm muted">{{ label }}</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ tone }}" hint-size="110px,22px">{{ toneLabel }}</x-import>
+</div>
+<sc-if value="{{ big }}" hint-placeholder-val="{{ true }}">
+<span class="t-numeric" style="font-size:22px;line-height:28px;font-weight:600;letter-spacing:-0.012em">{{ valueText }}</span>
+</sc-if>
+<sc-if value="{{ small }}" hint-placeholder-val="{{ false }}">
+<span class="t-numeric" style="font-size:16px;line-height:24px;font-weight:600">{{ valueText }}</span>
+</sc-if>
+<div style="position:relative;height:6px;border-radius:999px;background:var(--ds-fill);margin:4px 0">
+<span style="position:absolute;left:0;top:0;bottom:0;border-radius:999px;width:{{ w }};background:{{ color }};transition:width 200ms var(--ds-ease),background 200ms var(--ds-ease)"></span>
+<span aria-hidden="true" style="position:absolute;top:-4px;bottom:-4px;width:2px;border-radius:1px;background:var(--ds-fg);left:{{ minX }}"></span>
+<span aria-hidden="true" style="position:absolute;top:-2px;bottom:-2px;width:1px;background:var(--ds-border-control);left:{{ alertX }}"></span>
+</div>
+<span class="t-caption t-numeric" style="font-weight:400">{{ caption }}</span>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:300,&quot;height&quot;:120},&quot;margen&quot;:{&quot;editor&quot;:&quot;float&quot;,&quot;default&quot;:0.104,&quot;min&quot;:0,&quot;max&quot;:0.3,&quot;step&quot;:0.001,&quot;tsType&quot;:&quot;number&quot;},&quot;minimo&quot;:{&quot;editor&quot;:&quot;float&quot;,&quot;default&quot;:0.1,&quot;tsType&quot;:&quot;number&quot;},&quot;alerta&quot;:{&quot;editor&quot;:&quot;float&quot;,&quot;default&quot;:0.03,&quot;tsType&quot;:&quot;number&quot;},&quot;size&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;lg&quot;,&quot;sm&quot;],&quot;default&quot;:&quot;lg&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;label&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Margen efectivo&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const m = this.props.margen ?? 0.104;
+    const min = this.props.minimo ?? 0.1;
+    const al = this.props.alerta ?? 0.03;
+    const scale = 0.25;
+    const f = (x, d = 1) => (x * 100).toLocaleString("es-CL", { minimumFractionDigits: d, maximumFractionDigits: d }) + " %";
+    const t = m < min ? ["danger", "Bajo el mínimo", "var(--ds-danger)"] : m < min + al ? ["warning", "Cerca del mínimo", "var(--ds-warning)"] : ["success", "Sobre el mínimo", "var(--ds-success)"];
+    const big = (this.props.size ?? "lg") === "lg";
+    return {
+      label: this.props.label ?? "Margen efectivo",
+      tone: t[0], toneLabel: t[1], color: t[2],
+      valueText: f(m), big, small: !big,
+      w: Math.max(2, Math.min(100, (m / scale) * 100)) + "%",
+      minX: (min / scale) * 100 + "%", alertX: ((min + al) / scale) * 100 + "%",
+      caption: "Mínimo " + f(min, 0) + " · alerta bajo " + f(min + al, 0),
+      aria: "Margen " + f(m) + ", " + t[1].toLowerCase(),
+    };
+  }
+}
+</script>
+</body>
+</html>

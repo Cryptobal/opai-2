@@ -4,6 +4,7 @@ import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import { dondeCuenta, dondeInstalacion, dondePersona } from "../maestros/alcance";
+import { SIN_PLATAFORMA } from "../../agentes/plataforma";
 
 const n = z.number().nullable();
 
@@ -55,7 +56,9 @@ export const resumenContadores = defineCapability({
           ctx.db.persona.count({ where: { archivadaEn: null, AND: [dondePersona(ctx)] } }),
         ),
         si("aprobacionesPendientes", PERMISOS_CORE.aprobacionesManage, () =>
-          ctx.db.aprobacion.count({ where: { estado: "pendiente", venceEn: { gt: new Date() } } }),
+          ctx.db.aprobacion.count({
+            where: { estado: "pendiente", venceEn: { gt: new Date() }, ...SIN_PLATAFORMA },
+          }),
         ),
         usuario
           ? si("notificacionesNoLeidas", null, () =>
