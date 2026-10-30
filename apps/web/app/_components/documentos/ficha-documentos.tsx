@@ -7,7 +7,7 @@ import { estadoPantalla } from "@/lib/formato";
 import { ejecutarComoUsuario } from "@/lib/servidor";
 
 import { EnlaceBotonHoja } from "../maestros/enlace-boton-hoja";
-import { HojaSubir, VistaPrevia } from "./diferidas";
+import { HojaEnviarFirma, HojaSubir, VistaPrevia } from "./diferidas";
 import { MenuDocumento } from "./menu-documento-diferido";
 import { diasHasta, type Documento, type EntidadDocumento, type TipoDocumento } from "./tipos";
 
@@ -151,6 +151,7 @@ export async function FichaDocumentos({
       </Estado>
       <HojaSubir entidad={entidad} tipos={tipos} />
       <VistaPrevia />
+      <HojaEnviarFirma />
     </div>
   );
 }
