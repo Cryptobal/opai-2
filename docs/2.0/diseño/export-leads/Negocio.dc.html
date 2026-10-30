@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="ds-propuestas.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-accent)}</style>
+</helmet>
+<div data-theme="{{ theme }}" data-screen-label="Ficha del negocio" style="position:relative;width:100%;height:100%;overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="neg" title="{{ shellTitle }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" style="flex:1" hint-size="100%,600px">
+
+<sc-if value="{{ isOk }}" hint-placeholder-val="{{ true }}">
+<div style="margin:0 0 8px -8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="chevron-left" hint-size="120px,40px">Negocios</x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" size="heading" eyebrow="Negocio · Frigorífico Del Maipo" title="Guardias 24/7 · Planta Quilicura" badge="{{ etapaBadge }}" hint-size="100%,72px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="pencil" hint-size="100px,40px">Editar</x-import>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ tabItems }}" value="{{ tab }}" on-change="{{ setTab }}" hint-size="100%,44px"></x-import>
+<div style="{{ gridStyle }}">
+<div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Cotizaciones" hint-size="100%,300px">
+<div style="min-height:240px;display:flex">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="file" size="sm" title="Aún no hay cotizaciones" description="Crea la primera con la cuenta, la instalación y el servicio de este negocio." action="{{ nuevaCotAction }}" hint-size="100%,240px"></x-import>
+</div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Negocio" hint-size="100%,280px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" rows="{{ negocio }}" hint-size="100%,240px"></x-import>
+</x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Origen" hint-size="100%,240px">
+<div style="display:flex;flex-direction:column">
+<div class="pg-kv"><span class="l">Canal</span><span class="t-label-sm" style="display:inline-flex;align-items:center;gap:6px;height:24px;padding:0 10px;border-radius:999px;border:1px solid var(--ds-border-strong)"><span class="ic sm i-mail"></span>Correo</span></div>
+<div class="pg-kv"><span class="l">Recibida</span><span class="t-numeric" style="font-weight:400">30-10-2026 09:12</span></div>
+<div class="pg-kv"><span class="l">Convertida</span><span class="t-numeric" style="font-weight:400">30-10-2026 10:04 · Matías Rojas</span></div>
+<div class="pg-kv"><span class="l">Solicitud</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Enlace" href="#" hint-size="110px,20px">#1047</x-import></div>
+<div class="pg-kv"><span class="l">Documentos</span><span>2 adjuntos del correo</span></div>
+</div>
+</x-import>
+</div>
+</sc-if>
+
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Comercial" title="Negocios" hint-size="100%,72px"></x-import>
+<div style="flex:1;min-height:420px;display:flex">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="briefcase" title="Aún no hay negocios" description="Se crean al convertir una solicitud. Revisa la bandeja para empezar." action="{{ irSolicitudesAction }}" hint-size="100%,360px"></x-import>
+</div>
+</sc-if>
+
+<sc-if value="{{ isCargando }}" hint-placeholder-val="{{ false }}">
+<div aria-busy="true" style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ 180 }}" height="{{ 14 }}" hint-size="180px,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="60%" height="{{ 28 }}" radius="{{ 6 }}" hint-size="60%,28px"></x-import>
+<div style="display:flex;gap:24px;border-bottom:1px solid var(--ds-border);padding-bottom:12px">
+<sc-for list="{{ sk4 }}" as="s" hint-placeholder-count="4">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ 72 }}" height="{{ 14 }}" hint-size="72px,14px"></x-import>
+</sc-for>
+</div>
+<div style="{{ gridStyle }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 280 }}" radius="{{ 16 }}" hint-size="100%,280px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 220 }}" radius="{{ 16 }}" hint-size="100%,220px"></x-import>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;min-height:420px;display:flex">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar el negocio" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="COM-NEG-503" on-retry="{{ noop }}" hint-size="100%,360px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;min-height:420px;display:flex">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a este negocio" description="Tu rol (Supervisor) no incluye Comercial. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,360px"></x-import>
+</div>
+</sc-if>
+</x-import>
+</x-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ok&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;ok&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { tab: "res" };
+  componentDidMount() {
+    if (window.OPAI20DesignSystem_44e4d7 && window.OPAI20DesignSystem_44e4d7.Button) return;
+    this._t = setInterval(() => { if (window.OPAI20DesignSystem_44e4d7 && window.OPAI20DesignSystem_44e4d7.Button) { clearInterval(this._t); this.forceUpdate(); } }, 100);
+  }
+  componentWillUnmount() { clearInterval(this._t); }
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = this.props.device ?? "desktop";
+    const isPhone = device === "phone";
+    const e = this.props.estado ?? "ok";
+    return {
+      device, theme: this.props.theme ?? "light",
+      shellTitle: isPhone ? "" : "Negocios",
+      isOk: e === "ok", isVacio: e === "vacio", isCargando: e === "cargando", isError: e === "error", isForbidden: e === "sinpermiso",
+      gridStyle: device === "desktop" ? "display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:16px;align-items:start;margin-top:16px" : "display:flex;flex-direction:column;gap:16px;margin-top:16px",
+      etapaBadge: NS.Badge ? h(NS.Badge, { tone: "neutral" }, "Por cotizar") : null,
+      tab: this.state.tab, setTab: (tab) => this.setState({ tab }),
+      tabItems: [{ id: "res", label: "Resumen" }, { id: "cot", label: "Cotizaciones" }, { id: "doc", label: "Documentos" }, { id: "act", label: "Actividad" }],
+      negocio: [
+        { label: "Cuenta", value: "Frigorífico Del Maipo" },
+        { label: "RUT", value: "76.412.893-5", mono: true },
+        { label: "Contacto", value: "Paula Contreras" },
+        { label: "Instalación", value: "Planta Quilicura" },
+        { label: "Servicio", value: "Guardias 24/7" },
+        { label: "Responsable", value: "Matías Rojas" },
+      ],
+      nuevaCotAction: NS.Button ? h(NS.Button, { icon: "plus" }, "Nueva cotización") : null,
+      irSolicitudesAction: NS.Button ? h(NS.Button, { icon: "inbox" }, "Ir a Solicitudes") : null,
+      noop: () => {}, sk4: [1, 2, 3, 4],
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "sol", label: "Solicitudes", icon: "inbox" }, { id: "neg", label: "Negocios", icon: "briefcase" }, { id: "cot", label: "Cotizaciones", icon: "file" }, { id: "mas", label: "Más", icon: "more" }],
+      groups: [
+        { items: [{ id: "ini", label: "Inicio", icon: "home" }] },
+        { title: "Comercial", items: [{ id: "sol", label: "Solicitudes", icon: "inbox" }, { id: "neg", label: "Negocios", icon: "briefcase" }, { id: "cot", label: "Cotizaciones", icon: "file" }, { id: "con", label: "Contactos", icon: "users" }] },
+        { title: "Operaciones", items: [{ id: "ins", label: "Instalaciones", icon: "building" }, { id: "pau", label: "Pauta mensual", icon: "calendar" }] },
+        { title: "Configuración", items: [{ id: "aju", label: "Configuración", icon: "settings" }] },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
