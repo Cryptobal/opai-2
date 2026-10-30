@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0;background:var(--ds-n-300)} a{color:var(--ds-accent)} a:hover{color:var(--ds-accent)}</style>
+</helmet>
+<div style="display:flex;flex-direction:column;gap:48px;padding:40px;width:max-content;font-family:var(--font-sans);color:var(--ds-n-900)">
+<div style="display:flex;flex-direction:column;gap:4px">
+<span class="t-label-sm" style="color:var(--ds-n-700)">OPAI 2.0 · Portal Trabajador v2 · <a href="Indice v2.dc.html">Índice v2</a></span>
+<h1 class="t-display m0">{{ title }}</h1>
+<span class="t-body" style="color:var(--ds-n-700)">{{ desc }}</span>
+</div>
+<sc-for list="{{ sections }}" as="s" hint-placeholder-count="2">
+<section style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-direction:column;gap:2px;max-width:960px">
+<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><h2 class="t-heading m0">{{ s.title }}</h2><sc-if value="{{ s.decide }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="warning" hint-size="110px,22px">Decide Carlos</x-import></sc-if></div>
+<span class="t-body-sm" style="color:var(--ds-n-700)">{{ s.note }}</span>
+</div>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<sc-for list="{{ s.items }}" as="a" hint-placeholder-count="3">
+<div style="display:flex;flex-direction:column;gap:8px">
+<span class="t-label-sm" style="color:var(--ds-n-700)">{{ a.label }}</span>
+<div style="width:{{ a.w }}px;height:{{ a.h }}px;box-shadow:0 0 0 1px var(--ds-n-400);overflow:hidden;position:relative">
+<dc-import name="PortalV2" rg="{{ a.rg }}" barra="{{ a.barra }}" rg-mapa="{{ a.rgMapa }}" rondas="{{ a.rondas }}" accesos="{{ a.accesos }}" acuse="{{ a.acuse }}" tipo-msg="{{ a.tipoMsg }}" confirmar="{{ a.confirmar }}" guardado="{{ a.guardado }}" cen-tab="{{ a.cenTab }}" motivo="{{ a.motivo }}" style="position:absolute;inset:0;width:{{ a.w }}px;height:{{ a.h }}px" screen="{{ a.screen }}" device="{{ a.device }}" theme="{{ a.theme }}" estado="{{ a.estado }}" asistencia="{{ a.asistencia }}" variante="{{ a.variante }}" tipo="{{ a.tipo }}" doc="{{ a.doc }}" doc-tab="{{ a.docTab }}" firmado="{{ a.firmado }}" hint-size="100%,100%"></dc-import>
+</div>
+</div>
+</sc-for>
+</div>
+</section>
+</sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;screen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;inicio&quot;,&quot;pauta&quot;,&quot;solicitudes&quot;,&quot;nueva&quot;,&quot;extra&quot;,&quot;documentos&quot;,&quot;firmar&quot;,&quot;mas&quot;],&quot;default&quot;:&quot;inicio&quot;,&quot;tsType&quot;:&quot;string&quot;}}">class Component extends DCLogic {
+  renderVals() {
+    const screen = this.props.screen ?? "inicio";
+    const SZ = { phone: [375, 812], tablet: [1024, 768], desktop: [1280, 800] };
+    const NAME = { phone: "375", tablet: "1024", desktop: "1280" };
+    const T = { light: "Claro", dark: "Oscuro" };
+    const ab = (base, o, label) => {
+      const q = { rg: "g2", barra: "oculta", rgMapa: "abierto", rondas: true, accesos: true, acuse: false, tipoMsg: "novedad", confirmar: false, guardado: false, cenTab: "avi", motivo: "turno", estado: "ok", asistencia: true, variante: "A", tipo: "permiso", doc: "n1", docTab: "por", firmado: false, theme: "light", device: "phone", ...base, ...o };
+      return { ...q, w: SZ[q.device][0], h: SZ[q.device][1], label: label || (T[q.theme] + " · " + NAME[q.device]) };
+    };
+    const cfg = {
+      inicio: { title: "v2 · 01 · Inicio", desc: "Nueva barra (Inicio · Marcar · Rondas · Central · Más). Arriba, el aviso de la central sin confirmar y el acceso a Central.", base: { screen: "inicio" },
+        extra: [
+          { title: "Aviso confirmado", note: "Tras «Recibido» el aviso deja de estar arriba.", items: [{ acuse: true, l: "Claro · 375 · aviso confirmado" }] },
+          { title: "Variantes de barra", note: "Sin Marcar (sin Asistencia) · sin Rondas ni Accesos asignados · ambas.", items: [{ asistencia: false, l: "375 · sin Marcar" }, { rondas: false, accesos: false, l: "375 · sin Rondas ni Accesos" }, { asistencia: false, rondas: false, accesos: false, theme: "dark", l: "Oscuro · 375 · sin Marcar, Rondas ni Accesos" }, { rondas: false, accesos: false, device: "desktop", l: "1280 · sin Rondas ni Accesos" }] }] },
+      central: { title: "v2 · 07 · Central", desc: "Bandeja con avisos recibidos (acuse «Recibido») y mensajes enviados (estado y respuesta en Timeline). Sin chat libre (ADR-025).", base: { screen: "central" },
+        extra: [
+          { title: "Mensajes enviados", note: "Enviado · Recibido por la central · Respondido. La urgencia se marca en danger.", items: [{ cenTab: "env", l: "Claro · 375 · mensajes" }, { cenTab: "env", theme: "dark", l: "Oscuro · 375 · mensajes" }, { cenTab: "env", device: "desktop", l: "Claro · 1280 · mensajes" }] },
+          { title: "Detalle en teléfono", note: "Aviso con «Recibido» y mensaje con historial.", items: [{ screen: "aviso", l: "375 · aviso sin confirmar" }, { screen: "aviso", acuse: true, l: "375 · aviso confirmado" }, { screen: "mensaje", l: "375 · mensaje respondido" }, { screen: "mensaje", theme: "dark", l: "Oscuro · 375 · mensaje" }] }] },
+      avisar: { title: "v2 · 07b · Avisar a la central", desc: "Tipo (Novedad, Consulta, Urgencia), texto corto, foto opcional; instalación y turno según la asignación.", base: { screen: "avisar" },
+        extra: [{ title: "Urgencia", note: "Tono danger y confirmación antes de enviar.", items: [{ tipoMsg: "urgencia", l: "375 · urgencia" }, { tipoMsg: "urgencia", confirmar: true, l: "375 · confirmación" }, { tipoMsg: "urgencia", confirmar: true, theme: "dark", l: "Oscuro · 375 · confirmación" }, { tipoMsg: "urgencia", confirmar: true, device: "desktop", l: "1280 · confirmación" }] }],
+        b: [{ variante: "B", l: "375 · botón de pánico aparte" }, { variante: "B", theme: "dark", l: "Oscuro · 375 · botón de pánico" }] },
+      rondas: { title: "v2 · 08 · Rondas", desc: "Rondas son las pantallas de Terreno tal cual (export-rondas, mockup v3, aprobado el 29-10-2026), importadas con dc-import. Cambia solo lo que obliga el portal: sin «¿Quién eres?» (g1), barra del portal en g2 y oculta de g3 a g5, y alcance por asignación y turno.", base: { screen: "rondas" },
+        extra: [
+          { title: "Ronda en curso · g3 a g7", note: "Pantallas de export-rondas sin cambios de layout. Barra del portal oculta (como en Terreno); al cerrar se vuelve a g2.", items: [{ rg: "g3", l: "375 · g3 Ronda en curso · mapa" }, { rg: "g3", rgMapa: "plegado", l: "375 · g3 · mapa plegado" }, { rg: "g3e", l: "375 · g3 · Emergencia" }, { rg: "g4qr", l: "375 · g4qr Marcar por QR" }, { rg: "g4gps", l: "375 · g4gps Marcar por GPS" }, { rg: "g4gpsP", l: "375 · g4gps · precisión" }, { rg: "g4gpsF", l: "375 · g4gps · fuera del punto" }, { rg: "g4res", l: "375 · g4res Resultado" }, { rg: "g4nov", l: "375 · g4nov Novedad" }, { rg: "g10", l: "375 · g10 Novedad" }, { rg: "g5", l: "375 · g5 Cierre" }, { rg: "g7", l: "375 · g7 Permisos" }] },
+          { title: "Ronda en curso · oscuro", note: "", items: [{ rg: "g3", theme: "dark", l: "Oscuro · 375 · g3" }, { rg: "g4gps", theme: "dark", l: "Oscuro · 375 · g4gps" }, { rg: "g5", theme: "dark", l: "Oscuro · 375 · g5" }, { rg: "g3", device: "tablet", l: "1024 · g3" }, { rg: "g3", device: "desktop", theme: "dark", l: "Oscuro · 1280 · g3" }] },
+          { title: "Bloqueado y sin conexión", note: "Bloqueado con el encabezado de g2: fuera de turno y otra instalación. Sin conexión: g2 con la cola y g6.", items: [{ estado: "bloqueado", l: "375 · fuera de turno" }, { estado: "bloqueado", motivo: "instalacion", l: "375 · otra instalación" }, { estado: "bloqueado", theme: "dark", l: "Oscuro · 375 · fuera de turno" }, { estado: "sinconexion", l: "375 · sin conexión · g2" }, { rg: "g6", l: "375 · g6 Cola sin conexión" }, { rg: "g6", theme: "dark", l: "Oscuro · 375 · g6" }] },
+          { decide: true, title: "Decisión 1 · ¿GPS sigue toda la ronda o solo al marcar?", note: "A (recomendado): traza continua, igual que Terreno (g3 con mapa). B: solo se toma la posición al marcar cada punto; el mapa de g3 queda plegado y sin traza.", items: [{ rg: "g3", l: "A · traza continua" }, { rg: "g3", rgMapa: "plegado", l: "B · solo al marcar" }] },
+          { decide: true, title: "Decisión 2 · ¿Sin QR legible se marca solo por GPS?", note: "A (recomendado): sí, con g4gps (radio, permanencia y precisión). B: no; solo QR (g4qr).", items: [{ rg: "g4gps", l: "A · marca por GPS" }, { rg: "g4qr", l: "B · solo QR" }] },
+          { decide: true, title: "Decisión 3 · ¿Se oculta la barra del portal durante la ronda?", note: "A (recomendado): se oculta, como en Terreno. B: queda visible.", items: [{ rg: "g3", l: "A · barra oculta" }, { rg: "g3", barra: "visible", l: "B · barra visible" }, { rg: "g3", barra: "visible", theme: "dark", l: "B · oscuro" }] },
+          { decide: true, title: "Decisión 4 · ¿Conviven rondas del teléfono compartido y del portal?", note: "A (recomendado): sí, ambas valen. B: solo una vía por instalación; si la instalación usa el teléfono compartido, el portal la bloquea.", items: [{ l: "A · ambas vías" }, { estado: "bloqueado", motivo: "via", l: "B · solo teléfono compartido" }] }] },
+      accesos: { title: "v2 · 09 · Control de accesos", desc: "Contenedor pendiente: importará tal cual las pantallas de Portería del mockup de Terreno cuando existan. Solo si la instalación tiene control de accesos.", base: { screen: "accesos" },
+        extra: [
+          { title: "Bloqueado, sin conexión y sin accesos", note: "Fuera de turno, otra instalación, sin conexión, y Más sin «Accesos» cuando la instalación no lo tiene.", items: [{ estado: "bloqueado", l: "375 · fuera de turno" }, { estado: "bloqueado", motivo: "instalacion", l: "375 · otra instalación" }, { estado: "sinconexion", l: "375 · sin conexión" }, { estado: "sinconexion", theme: "dark", l: "Oscuro · 375 · sin conexión" }, { screen: "mas", accesos: false, l: "375 · Más sin Accesos" }] },
+          { decide: true, title: "Decisión 5 · ¿Accesos desde el celular personal o solo desde el emparejado?", note: "A: ambos. B: solo el dispositivo emparejado de la portería; en el celular personal se ve bloqueado.", items: [{ l: "A · celular personal y emparejado" }, { estado: "bloqueado", motivo: "dispositivo", l: "B · solo emparejado" }] }] },
+      datos: { title: "v2 · 10 · Mis datos", desc: "Personales, dirección con autocompletado y mapa, banco, previsión (solo ver) y tallas. Al guardar se actualiza la ficha.", base: { screen: "datos" },
+        extra: [{ title: "Guardado", note: "Estado del cambio tras guardar.", items: [{ guardado: true, l: "375 · guardado" }, { guardado: true, theme: "dark", l: "Oscuro · 375 · guardado" }] }],
+        b: [{ variante: "B", l: "375 · banco pendiente de RRHH" }, { variante: "B", device: "desktop", l: "1280 · banco pendiente de RRHH" }] },
+      privacidad: { title: "v2 · 11 · Privacidad y mis datos", desc: "Ley 21.719: qué datos, para qué, quién los ve, consentimientos, descarga, derechos como solicitudes y política.", base: { screen: "privacidad" } },
+      notificaciones: { title: "v2 · 12 · Notificaciones", desc: "Qué avisos y por qué canal. Cambios de pauta y avisos de la central, fijos y explicados.", base: { screen: "notificaciones" },
+        b: [{ variante: "B", l: "375 · con WhatsApp" }, { variante: "B", device: "desktop", l: "1280 · con WhatsApp" }] },
+      mas: { title: "v2 · 06 · Más", desc: "Mi horario, Mis documentos, Solicitudes, Turnos extra, Accesos (si corresponde), Mis datos, Privacidad, Notificaciones y Cerrar sesión.", base: { screen: "mas" },
+        extra: [{ title: "Sin Accesos", note: "Guardia sin Rondas ni Accesos asignados.", items: [{ rondas: false, accesos: false, l: "375 · sin Rondas ni Accesos" }] }] },
+    };
+    const c = cfg[screen] || cfg.inicio;
+    const it = (list) => list.map((o) => { const { l, ...rest } = o; return ab(c.base, rest, l); });
+    const sections = [
+      { title: "Claro", note: "375 · 1024 · 1280", items: it([{}, { device: "tablet" }, { device: "desktop" }]) },
+      { title: "Oscuro", note: "375 · 1024 · 1280", items: it([{ theme: "dark" }, { device: "tablet", theme: "dark" }, { device: "desktop", theme: "dark" }]) },
+      { title: "Estados · claro", note: "Vacío (con acción) · Cargando (skeleton con la forma) · Error (con Reintentar) · Sin permiso (cuenta suspendida, contacto de RRHH).", items: it([{ estado: "vacio", l: "375 · Vacío" }, { estado: "cargando", l: "375 · Cargando" }, { estado: "error", l: "375 · Error" }, { estado: "sinpermiso", l: "375 · Sin permiso" }, { estado: "cargando", device: "desktop", l: "1280 · Cargando" }]) },
+      { title: "Estados · oscuro", note: "Los mismos cuatro estados en modo oscuro.", items: it([{ estado: "vacio", theme: "dark", l: "375 · Vacío" }, { estado: "cargando", theme: "dark", l: "375 · Cargando" }, { estado: "error", theme: "dark", l: "375 · Error" }, { estado: "sinpermiso", theme: "dark", l: "375 · Sin permiso" }, { estado: "vacio", device: "tablet", theme: "dark", l: "1024 · Vacío" }]) },
+      ...(c.extra || []).map((s) => ({ title: s.title, note: s.note, decide: !!s.decide, items: it(s.items) })),
+    ];
+    if (c.b) sections.push({ title: "Variante B · propuesta, a confirmar por Carlos", note: "Separada de lo decidido. No se implementa hasta que Carlos la confirme.", items: it(c.b) });
+    return { title: c.title, desc: c.desc, sections };
+  }
+}</script>
+</body>
+</html>
