@@ -58,8 +58,9 @@ export async function instalacionEnAlcance(ctx: Contexto, instalacionId: string)
 
 /** Un punto del tenant dentro del alcance del actor, o NOT_FOUND. */
 export async function puntoDe(ctx: Contexto, id: string) {
+  const ids = instalacionesEnAlcance(ctx);
   const p = await ctx.db.puntoControl.findFirst({
-    where: { id, ...dondeInstalacionId(ctx) },
+    where: ids ? { id, AND: [{ instalacionId: { in: [...ids] } }] } : { id },
   });
   if (!p) throw noEncontrado("El punto de control");
   return p;
