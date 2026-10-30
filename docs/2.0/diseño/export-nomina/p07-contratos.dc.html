@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><script src="./nomina-data.js"></script><style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style></helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="{{ active }}" title="{{ shellTitle }}" user="{{ user }}" overlay="{{ overlay }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<sc-if value="{{ showHeader }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Cumplimiento DT" title="Contratos y anexos" subtitle="Altas, bajas y anexos por registrar en Mi DT" badge="{{ roleBadge }}" hint-size="100%,80px">
+<sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="download" hint-size="190px,40px">Descargar pendientes</x-import>
+</sc-if>
+</x-import>
+</sc-if>
+
+<sc-if value="{{ isOk }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Plazo de 15 días desde el hecho · Ley 21.327" hint-size="100%,88px">El registro en Mi DT lo hace el representante laboral electrónico. OPAI prepara los datos, sigue el plazo y guarda el comprobante que subas.</x-import>
+<div style="max-width:360px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ segOpts }}" value="{{ seg }}" on-change="{{ setSeg }}" label="Estado del registro" hint-size="100%,40px"></x-import>
+</div>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="margin:0 -16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" cards="{{ true }}" to-card="{{ toCard }}" on-row-click="{{ openRow }}" hint-size="100%,300px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" on-row-click="{{ openRow }}" hint-size="100%,300px"></x-import>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isCargando }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:16px" aria-busy="true">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 72 }}" radius="{{ 10 }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="320px" height="{{ 40 }}" radius="{{ 10 }}" hint-size="320px,40px"></x-import>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+<sc-for list="{{ skel }}" as="s" hint-placeholder-count="5">
+<div style="display:flex;gap:16px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="60px" height="{{ 14 }}" hint-size="60px,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="140px" height="{{ 14 }}" hint-size="140px,14px"></x-import>
+<div style="flex:1"></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="100px" height="{{ 20 }}" radius="{{ 999 }}" hint-size="100px,20px"></x-import>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="landmark" title="No hay movimientos por registrar" description="Cuando contrates, desvincules o firmes un anexo, aparecerá aquí con su plazo." action="{{ emptyAction }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar los contratos" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="CDT-CON-503" on-retry="{{ noop }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ isSinPermiso }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a Cumplimiento DT" description="Solo RRHH y administración registran contratos. Pídele acceso a Marcela Rojas, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,320px"></x-import>
+</sc-if>
+</x-import>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ok&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;ok&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;role&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;admin&quot;,&quot;rrhh&quot;,&quot;gerente&quot;,&quot;inspector&quot;,&quot;supervisor&quot;],&quot;default&quot;:&quot;admin&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { seg: "pen", sel: null };
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const ND = window.ND;
+    if (!ND) return {};
+    const b = ND.base(this.props, "con", "Contratos y anexos");
+    const pen = [
+      { id: 1, mov: "Alta", per: "Ignacio Contreras", rut: "19.234.876-1", hecho: "Ingreso el 12-10-2026", plazo: "Vencido hace 3 días", tone: "danger" },
+      { id: 2, mov: "Alta", per: "Tomás Reyes", rut: "18.765.432-0", hecho: "Ingreso el 16-10-2026", plazo: "Queda 1 día", tone: "danger" },
+      { id: 3, mov: "Anexo", per: "Camila Herrera", rut: "12.345.678-9", hecho: "Cambio de jornada · firmado el 21-10-2026", plazo: "Quedan 6 días", tone: "warning" },
+      { id: 4, mov: "Alta", per: "Valentina Núñez", rut: "20.111.333-4", hecho: "Ingreso el 22-10-2026", plazo: "Quedan 7 días", tone: "warning" },
+      { id: 5, mov: "Baja", per: "Luis Pérez", rut: "9.876.543-2", hecho: "Término el 28-10-2026 · Art. 161", plazo: "Quedan 13 días", tone: "neutral" },
+    ];
+    const reg = [
+      { id: 6, mov: "Alta", per: "Paula Rojas", rut: "17.654.321-5", hecho: "Ingreso el 01-10-2026", plazo: "Registrado el 08-10-2026", tone: "success", comp: "comprobante_midt_PR.pdf" },
+      { id: 7, mov: "Anexo", per: "Héctor Araya", rut: "15.009.332-7", hecho: "Cambio de instalación · 05-10-2026", plazo: "Registrado el 12-10-2026", tone: "success", comp: "comprobante_midt_HA.pdf" },
+    ];
+    const seg = this.state.seg;
+    const rows = seg === "pen" ? pen : reg;
+    const close = () => this.setState({ sel: null });
+    const sel = this.state.sel;
+    const canMark = b.canEdit;
+    return {
+      ...b,
+      roleBadge: b.isInspector && NS.Badge ? h(NS.Badge, { tone: "info" }, "Solo lectura") : null,
+      seg, setSeg: (v) => this.setState({ seg: v }),
+      segOpts: [{ value: "pen", label: "Por registrar · 5" }, { value: "reg", label: "Registrados" }],
+      rows,
+      cols: [
+        { key: "mov", label: "Movimiento", strong: true },
+        { key: "per", label: "Persona", render: (r) => h("span", { style: { display: "flex", flexDirection: "column" } }, h("span", null, r.per), h("span", { className: "t-mono", style: { fontSize: 12, color: "var(--ds-fg-muted)" } }, r.rut)) },
+        { key: "hecho", label: "Hecho", muted: true },
+        { key: "plazo", label: seg === "pen" ? "Plazo Mi DT" : "Registro", render: (r) => (NS.Badge ? h(NS.Badge, { tone: r.tone, dot: true }, r.plazo) : r.plazo) },
+        { key: "acc", label: "", align: "right", render: (r) => NS.Button ? h("span", { style: { display: "inline-flex", gap: 4 } }, h(NS.Button, { variant: "ghost", icon: "download", "aria-label": "Descargar datos" }, "Datos"), seg === "pen" && canMark ? h(NS.Button, { variant: "secondary", onClick: (e) => { e.stopPropagation && e.stopPropagation(); this.setState({ sel: r }); } }, "Marcar registrado") : null) : null },
+      ],
+      toCard: (r) => ({ icon: r.mov === "Baja" ? "user-check" : "file", title: r.mov + " · " + r.per, subtitle: r.hecho, meta: r.rut, badge: { tone: r.tone, label: r.plazo }, chevron: true }),
+      openRow: (r) => { if (seg === "pen" && canMark) this.setState({ sel: r }); },
+      overlay: NS.Sheet && sel ? h(NS.Sheet, { open: true, contained: true, side: b.isPhone ? "bottom" : "right", title: "Marcar «" + sel.mov.toLowerCase() + "» como registrado en Mi DT", description: sel.per + " · " + sel.hecho, onClose: close, actions: [h(NS.Button, { key: "c", variant: "secondary", onClick: close }, "Cancelar"), h(NS.Button, { key: "a", onClick: close }, "Marcar registrado")] },
+        h("div", { style: { display: "flex", flexDirection: "column", gap: 16 } },
+          h(NS.DateInput || "div", { label: "Fecha de registro en Mi DT", value: "30-10-2026" }),
+          h(NS.Campo, { etiqueta: "Comprobante de Mi DT", ayuda: "PDF o imagen del comprobante que entrega Mi DT." }, h(NS.Uploader, { tipos: "PDF, JPG o PNG", accept: ".pdf,.jpg,.png", tamanoMaximoMb: 10 })))) : null,
+      emptyAction: NS.Button ? h(NS.Button, { variant: "secondary" }, "Ir a Personas") : null,
+    };
+  }
+}
+</script>
+</body>
+</html>
