@@ -26,6 +26,12 @@ describe.skipIf(!urlPropietario)("Pauta · series, excepciones y aislamiento (Po
   let juan = "";
   let ana = "";
   let personaB = "";
+  let puestoExtra = "";
+  let puestoX1 = "";
+  let puestoX2 = "";
+  let puestoX3 = "";
+  let luis = "";
+  let rosa = "";
   const userSup = randomUUID();
   const medidor = { registrar: async () => undefined };
   const manana = new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
@@ -85,6 +91,10 @@ describe.skipIf(!urlPropietario)("Pauta · series, excepciones y aislamiento (Po
     puestoNoche = await puesto(tenantA, instA, a.cargo, "Portería · Noche", "20:00", "08:00");
     puestoOtraInst = await puesto(tenantA, instA2, a.cargo, "Acceso · Día", "08:00", "20:00");
     puestoB = await puesto(tenantB, instB, b.cargo, "Puesto B", "08:00", "20:00");
+    puestoExtra = await puesto(tenantA, instA, a.cargo, "Extra · Día", "08:00", "20:00");
+    puestoX1 = await puesto(tenantA, instA, a.cargo, "X1 · Día", "08:00", "20:00");
+    puestoX2 = await puesto(tenantA, instA, a.cargo, "X2 · Día", "08:00", "20:00");
+    puestoX3 = await puesto(tenantA, instA, a.cargo, "X3 · Día", "08:00", "20:00");
     const persona = async (tenantId: string, cargoId: string, instalacionId: string, nombres: string, rut: string) => {
       const id = (await e.admin.persona.create({ data: { tenantId, nombres, apellidos: "Prueba", rut, estado: "activa" } })).id;
       await e.admin.vinculoLaboral.create({ data: { tenantId, personaId: id, cargoId, instalacionId, tipo: "indefinido", inicio: new Date("2026-01-01"), estado: "vigente" } });
@@ -93,6 +103,8 @@ describe.skipIf(!urlPropietario)("Pauta · series, excepciones y aislamiento (Po
     juan = await persona(tenantA, a.cargo, instA, "Juan", "11.111.111-1");
     ana = await persona(tenantA, a.cargo, instA, "Ana", "12.121.212-1");
     personaB = await persona(tenantB, b.cargo, instB, "Persona", "22.222.222-2");
+    luis = await persona(tenantA, a.cargo, instA, "Luis", "13.131.313-1");
+    rosa = await persona(tenantA, a.cargo, instA, "Rosa", "14.141.414-1");
   });
 
   afterAll(async () => {
@@ -138,6 +150,37 @@ describe.skipIf(!urlPropietario)("Pauta · series, excepciones y aislamiento (Po
     expect(r).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
   });
 
+  const sumar = (n: number) => new Date(new Date(`${manana}T00:00:00Z`).getTime() + n * 86_400_000).toISOString().slice(0, 10);
+
+  it("no doblar mira también el turno de noche que empezó el día anterior a la serie nueva", async () => {
+    // Ana cubre la noche m..m+3 (20:00–08:00): el turno de m+3 termina a las 08:00 de m+4. Un turno
+    // diurno que parte en m+4 lo toca, aunque «desde» sea m+4 y el cruce nazca el día anterior.
+    const r = await fijar(puestoExtra, { titularPersonaId: ana, inicioCiclo: sumar(4), desde: sumar(4) });
+    expect(r).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+  });
+
+  it("dos cambios simultáneos con el mismo titular no lo doblan: uno pasa y el otro se rechaza", async () => {
+    const [a, b] = await Promise.all([fijar(puestoX1, { titularPersonaId: luis }), fijar(puestoX2, { titularPersonaId: luis })]);
+    expect([a.ok, b.ok].filter(Boolean)).toHaveLength(1);
+  });
+
+  it("el mensaje de «no doblar» no nombra un puesto fuera del alcance del supervisor", async () => {
+    // Rosa figura como titular de un puesto de otra instalación (dato heredado, sembrado como propietario).
+    const ajena = await e.admin.seriePauta.create({
+      data: { tenantId: tenantA, puestoId: puestoOtraInst, patronId: patron4x4, inicioCiclo: new Date(`${manana}T00:00:00Z`), titularPersonaId: rosa, vigenteDesde: new Date(`${manana}T00:00:00Z`) },
+    });
+    const r = await ejecutar(ctxSup({ instalaciones: [instA] }), "pauta.series.fijar", { puestoId: puestoX3, patronId: patron4x4, inicioCiclo: manana, titularPersonaId: rosa, desde: manana });
+    expect(r).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+    expect(JSON.stringify(r)).not.toContain("Acceso");
+    await e.admin.seriePauta.delete({ where: { id: ajena.id } });
+  });
+
+  it("rechaza fechas inexistentes y rangos desmesurados antes de expandirlos", async () => {
+    expect(await fijar(puestoX3, { inicioCiclo: "2026-02-30" })).toMatchObject({ ok: false });
+    const r = await ejecutar(ctxOwner(tenantA), "pauta.excepciones.crear", { puestoId: puestoNoche, tipo: "permiso", motivo: "Permiso", desde: manana, hasta: "9999-12-31" });
+    expect(r).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+  });
+
   it("cambiar la serie cierra la anterior el día antes y deja una sola abierta", async () => {
     const dentro = new Date(new Date(`${manana}T00:00:00Z`).getTime() + 10 * 86_400_000).toISOString().slice(0, 10);
     const r = await fijar(puestoDia, { patronId: patron5x2, desde: dentro, titularPersonaId: juan });
@@ -159,6 +202,14 @@ describe.skipIf(!urlPropietario)("Pauta · series, excepciones y aislamiento (Po
     const anular = await ejecutar(ctxOwner(tenantA), "pauta.excepciones.anular", { puestoId: puestoNoche, desde: manana, hasta: manana });
     expect(anular).toMatchObject({ ok: true, data: { anuladas: 1 } });
     expect((await crear()).ok).toBe(true); // anulada la anterior, el día queda libre para otra
+  });
+
+  it("una excepción solo cuenta los días de turno del rango; un rango solo de días libres se rechaza", async () => {
+    const crear = (desde: string, hasta: string) =>
+      ejecutar(ctxOwner(tenantA), "pauta.excepciones.crear", { puestoId: puestoNoche, tipo: "vacaciones", motivo: "Vacaciones de prueba", desde, hasta });
+    // 4×4 desde `manana`: turno los días 0–3 y 8–11, libre 4–7 y 12–15.
+    expect(await crear(sumar(4), sumar(7))).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+    expect(await crear(sumar(6), sumar(13))).toMatchObject({ ok: true, data: { dias: 4 } });
   });
 
   it("el historial lista los cambios y es append-only para la app", async () => {

@@ -33,7 +33,7 @@ function item(l: LineaHistorial): ItemTimeline {
     l.accion === "serie_fijada"
       ? `Patrón ${String(l.detalle["patron"] ?? "")} desde ${rango}. Los días anteriores no cambiaron.`
       : l.accion === "excepcion_creada"
-        ? `${rango} · ${String(l.detalle["motivo"] ?? "")}`
+        ? `${rango} · ${String(l.detalle["dias"] ?? "")} días de turno`
         : rango;
   const agente = l.actorTipo === "agent";
   return {

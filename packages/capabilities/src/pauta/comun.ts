@@ -1,7 +1,9 @@
 import { z } from "zod";
 
-import { diaSchema } from "../core/maestros/comun";
-import { noEncontrado } from "../errores";
+import { diaNumero, rangoDias } from "@opai/domain";
+
+import { fechaCivilSchema } from "../core/calendario/comun";
+import { noEncontrado, reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 import { dondePuesto } from "../core/maestros/alcance";
 
@@ -21,12 +23,23 @@ export const mesSchema = z.object({
   mes: z.number().int().min(1).max(12),
 });
 
+/** Fecha civil real: rechaza «2026-02-30», que `Date.parse` normalizaría en silencio. */
+export const diaSchema = fechaCivilSchema;
+
 export const rangoSchema = z
   .object({ desde: diaSchema, hasta: diaSchema.optional() })
   .refine((r) => !r.hasta || r.hasta >= r.desde, "«hasta» no puede ser anterior a «desde».");
 
 /** Máximo de días que una sola excepción puede cubrir (vacaciones largas caben). */
 export const MAX_DIAS_EXCEPCION = 62;
+
+/** Días de un rango; el tope se valida antes de expandir para no generar millones de fechas. */
+export function diasDelRango(desde: string, hasta: string | undefined): string[] {
+  const fin = hasta ?? desde;
+  if (diaNumero(fin) - diaNumero(desde) + 1 > MAX_DIAS_EXCEPCION)
+    throw reglaDeNegocio(`Una excepción cubre como máximo ${MAX_DIAS_EXCEPCION} días seguidos.`);
+  return rangoDias(desde, fin);
+}
 
 /** Un puesto activo del tenant dentro del alcance del actor (ADR-022), o NOT_FOUND sin enumerar. */
 export async function puestoParaPauta(ctx: Contexto, id: string) {

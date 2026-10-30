@@ -5,6 +5,7 @@ import {
   type PatronPauta,
 } from "@opai/domain";
 
+import { dondePuesto } from "../core/maestros/alcance";
 import { reglaDeNegocio } from "../errores";
 import type { Contexto } from "../types";
 import { aFechaDb, fechaIso } from "./comun";
@@ -30,12 +31,14 @@ export type Candidata = {
  */
 export async function validarNoDoblar(ctx: Contexto, c: Candidata): Promise<void> {
   const fin = sumarDias(c.desde, VENTANA_DIAS - 1);
+  // Un día antes: el turno de noche que empezó ayer termina hoy y puede tocar el primero de la serie.
+  const ini = sumarDias(c.desde, -1);
   const otras = await ctx.db.seriePauta.findMany({
     where: {
       titularPersonaId: c.titularPersonaId,
       puestoId: { not: c.puestoId },
       vigenteDesde: { lte: aFechaDb(fin) },
-      OR: [{ vigenteHasta: null }, { vigenteHasta: { gte: aFechaDb(c.desde) } }],
+      OR: [{ vigenteHasta: null }, { vigenteHasta: { gte: aFechaDb(ini) } }],
     },
   });
   if (otras.length === 0) return;
@@ -49,11 +52,20 @@ export async function validarNoDoblar(ctx: Contexto, c: Candidata): Promise<void
       where: {
         puestoId: { in: otras.map((s) => s.puestoId) },
         estado: "activa",
-        fecha: { gte: aFechaDb(c.desde), lte: aFechaDb(fin) },
+        fecha: { gte: aFechaDb(ini), lte: aFechaDb(fin) },
       },
       select: { puestoId: true, fecha: true },
     }),
   ]);
+  // El nombre de un puesto fuera del alcance del actor no se revela (ADR-022).
+  const visibles = new Set(
+    (
+      await ctx.db.puesto.findMany({
+        where: { id: { in: puestos.map((p) => p.id) }, AND: [dondePuesto(ctx)] },
+        select: { id: true },
+      })
+    ).map((p) => p.id),
+  );
   const propios = turnosDeSerie(
     { etiqueta: "esta serie", patron: c.patron, inicioCiclo: c.inicioCiclo, horaInicio: c.horaInicio, horaFin: c.horaFin },
     c.desde,
@@ -63,7 +75,7 @@ export async function validarNoDoblar(ctx: Contexto, c: Candidata): Promise<void
     const puesto = puestos.find((p) => p.id === s.puestoId);
     const patron = patrones.find((p) => p.id === s.patronId);
     if (!puesto || !patron) continue;
-    const desde = fechaIso(s.vigenteDesde) > c.desde ? fechaIso(s.vigenteDesde) : c.desde;
+    const desde = fechaIso(s.vigenteDesde) > ini ? fechaIso(s.vigenteDesde) : ini;
     const hasta = s.vigenteHasta && fechaIso(s.vigenteHasta) < fin ? fechaIso(s.vigenteHasta) : fin;
     const ajenos = turnosDeSerie(
       {
@@ -87,7 +99,9 @@ export async function validarNoDoblar(ctx: Contexto, c: Candidata): Promise<void
     const cruce = detectarDoblaje(propios, ajenos);
     if (cruce)
       throw reglaDeNegocio(
-        `No se puede doblar: esa persona ya cubre «${cruce.con}» el ${cruce.fecha} y los turnos se solapan o quedan seguidos. Elige otro titular o cambia el inicio de ciclo.`,
+        visibles.has(puesto.id)
+          ? `No se puede doblar: esa persona ya cubre «${cruce.con}» el ${cruce.fecha} y los turnos se solapan o quedan seguidos. Elige otro titular o cambia el inicio de ciclo.`
+          : "No se puede doblar: esa persona ya cubre otro puesto con turnos que se solapan o quedan seguidos. Elige otro titular o cambia el inicio de ciclo.",
       );
   }
 }

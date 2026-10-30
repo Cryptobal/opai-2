@@ -54,8 +54,8 @@ export function ListaDias({ mes }: { mes: MesPauta }) {
         const feriado = mes.puestos[0]?.celdas[i]?.feriado;
         return (
           <section key={fecha} aria-label={fechaCl(fecha)} className="rounded-lg border border-border bg-surface">
-            <header className={cn("flex items-center justify-between px-4 py-2", fecha === mes.hoy && "text-accent")}>
-              <h3 className="t-label capitalize">
+            <header className={cn("flex flex-wrap items-center justify-between gap-x-3 gap-y-1 px-4 py-2", fecha === mes.hoy && "text-accent")}>
+              <h3 className="t-label whitespace-nowrap capitalize">
                 {diaSemana(fecha)} {fechaCl(fecha)}
               </h3>
               {feriado ? <Badge tono="warning">{feriado}</Badge> : null}

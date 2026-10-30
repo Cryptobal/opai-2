@@ -40,7 +40,9 @@ Este brief es el PR 2 del Brief 11 (el PR 1, Puestos, ya está en `main`).
 - **Titular:** vive en la serie (con su vigencia) y debe tener un vínculo laboral vigente en la instalación del puesto. Sin titular, el turno es PPC «sin titular».
 - **Jornada rotativa:** el «no doblar» usa el tramo principal del puesto (`hora_inicio`–`hora_fin`); el tramo de noche de las jornadas rotativas no se evalúa todavía.
 - **Zona horaria:** «hoy» se resuelve en `America/Santiago` hasta que el tenant fije la suya.
-- **Datos personales:** las lecturas devuelven nombre del titular, nunca RUT; se auditan por ID (NÚCLEO-H). El historial guarda IDs y el nombre de quien actuó.
+- **Datos personales:** las lecturas devuelven nombre del titular, nunca RUT; se auditan por ID (NÚCLEO-H). El historial guarda solo datos de la serie o de la excepción (tipo, patrón, días) y el nombre de quien actuó: no copia el motivo (texto libre que puede ser de salud) ni la persona; el motivo vive en la excepción.
+- **Concurrencia:** fijar una serie bloquea primero a la persona (`pg_advisory_xact_lock`) y luego el puesto, para que dos cambios con el mismo titular no lo doblen; registrar una excepción bloquea el puesto y revalida dentro de la transacción.
+- **Alcance en los errores:** si «no doblar» choca con un puesto fuera del alcance del actor, el mensaje no lo nombra.
 - **Eventos:** `pauta.serie.fijada`, `pauta.excepcion.creada`, `pauta.excepcion.anulada` por outbox, en la misma transacción.
 
 ## Criterios de aceptación

@@ -2,13 +2,12 @@ import { z } from "zod";
 
 import { uuidSchema } from "../core/esquemas";
 import { dondePersona } from "../core/maestros/alcance";
-import { diaSchema } from "../core/maestros/comun";
 import { defineCapability } from "../define";
 import { noEncontrado, reglaDeNegocio } from "../errores";
 import { sumarDias } from "@opai/domain";
 import type { Contexto } from "../types";
 import { anotar } from "./anotar";
-import { aFechaDb, fechaIso, hoy, puestoParaPauta, PERMISO_WRITE } from "./comun";
+import { aFechaDb, diaSchema, hoy, puestoParaPauta, PERMISO_WRITE } from "./comun";
 import { validarNoDoblar } from "./doblaje";
 import { nombresDePersonas } from "./nombres";
 import { serieVistaSchema } from "./vistas";
@@ -98,14 +97,19 @@ export const seriesFijar = defineCapability({
       hasta: null,
     });
     const anteriorHasta = sumarDias(input.desde, -1);
-    const aviso = { avisarA: titular };
-    if (dryRun) return { serie: vista(""), serieAnteriorHasta: anteriorHasta, ...aviso };
+    if (dryRun) return { serie: vista(""), serieAnteriorHasta: anteriorHasta, avisarA: titular };
     const fila = await ctx.transaccion(async (tx) => {
-      // Un solo cambio de serie a la vez por puesto: bloquea el puesto y revalida dentro.
+      // Un solo cambio de serie a la vez: primero la persona y luego el puesto (siempre en ese orden, sin ciclos): dos cambios que
+      // quieran al mismo titular en puestos distintos se serializan y «no doblar» ve el otro cambio.
+      if (input.titularPersonaId)
+        await tx.$queryRaw`SELECT pg_advisory_xact_lock(hashtextextended(${`pauta:${ctx.tenantId}:${input.titularPersonaId}`}, 0))::text`;
       await tx.$queryRaw`SELECT id FROM core.puestos WHERE id = ${puesto.id}::uuid AND tenant_id = ${ctx.tenantId}::uuid FOR UPDATE`;
       await planear({ ...ctx, db: tx }, input);
       const desde = aFechaDb(input.desde);
-      await tx.seriePauta.deleteMany({ where: { puestoId: puesto.id, vigenteDesde: { gte: desde } } });
+      // Las series futuras que esta reemplaza se descartan; el historial deja constancia de cuántas.
+      const { count: descartadas } = await tx.seriePauta.deleteMany({
+        where: { puestoId: puesto.id, vigenteDesde: { gte: desde } },
+      });
       await tx.seriePauta.updateMany({
         where: { puestoId: puesto.id, OR: [{ vigenteHasta: null }, { vigenteHasta: { gte: desde } }] },
         data: { vigenteHasta: aFechaDb(anteriorHasta) },
@@ -127,7 +131,13 @@ export const seriesFijar = defineCapability({
         accion: "serie_fijada",
         desde: input.desde,
         hasta: input.desde,
-        detalle: { patron: patron.nombre, inicioCiclo: input.inicioCiclo, titularId: input.titularPersonaId },
+        // Solo datos de la serie: sin persona (el historial lo ve quien tiene `pauta:read`).
+        detalle: {
+          patron: patron.nombre,
+          inicioCiclo: input.inicioCiclo,
+          conTitular: input.titularPersonaId ? "si" : "no",
+          descartadas,
+        },
       });
       await ctx.eventos.emitir(tx, {
         tipo: "pauta.serie.fijada",
@@ -137,6 +147,6 @@ export const seriesFijar = defineCapability({
       });
       return nueva;
     });
-    return { serie: { ...vista(fila.id), desde: fechaIso(fila.vigenteDesde) }, serieAnteriorHasta: anteriorHasta, ...aviso };
+    return { serie: vista(fila.id), serieAnteriorHasta: anteriorHasta, avisarA: titular };
   },
 });

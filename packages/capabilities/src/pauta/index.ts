@@ -2,7 +2,8 @@
 // y MCP (ADR-004, ADR-055). El manifest de modules/pauta las lista; el registro las da de alta al
 // arrancar. La Diaria, los reemplazos, los refuerzos y el cruce con marcas llegan en el PR 2.
 import type { Capacidad } from "../types";
-import { excepcionesAnular, excepcionesCrear } from "./excepciones";
+import { excepcionesAnular } from "./excepciones-anular";
+import { excepcionesCrear } from "./excepciones-crear";
 import { historialListar } from "./historial";
 import { mesLeer } from "./lectura-mes";
 import { ppcListar, resumenLeer } from "./lectura-resumen";

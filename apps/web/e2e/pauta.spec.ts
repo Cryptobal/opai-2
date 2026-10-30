@@ -5,7 +5,7 @@ import { E2E_PASSWORD as password, entrar } from "./sesion";
 
 // Pauta · Mensual (CAR-81): instalación ficticia sembrada por `seed:pauta-e2e` (Planta Pauta E2E, dos
 // puestos y dos personas). Lectura a 375/1024/1280; la escritura (serie, excepción, historial) una
-// sola vez, en iPad, para no repetirla por proyecto.
+// sola vez, en iPad, para no repetirla por proyecto. Para repetir la corrida en local: `pnpm --filter @opai/db seed:pauta-e2e`.
 const INST = "00000000-0000-7000-8000-0000000b0001";
 const PUESTO_DIA = "00000000-0000-7000-8000-0000000b0002";
 const HOY = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santiago" }).format(new Date());
