@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}body{margin:0}</style>
+</helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="{{ shellActive }}" title="{{ shellTitle }}" user="{{ user }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<div style="position:relative;min-height:760px">
+
+<sc-if value="{{ isDecide }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Mi cuenta" title="Decide Carlos" subtitle="Siete decisiones abiertas. La opción recomendada ya está dibujada en cada pantalla." hint-size="100%,80px"></x-import>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px">
+<sc-for list="{{ decisiones }}" as="d" hint-placeholder-count="7">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,150px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;align-items:center;gap:8px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="warning" hint-size="40px,22px">{{ d.id }}</x-import><span class="t-label">{{ d.t }}</span></div>
+<span class="t-body-sm" style="color:var(--ds-fg-muted)">{{ d.o }}</span>
+<span class="t-body-sm"><b>Recomendado:</b> {{ d.r }}</span>
+</div>
+</x-import>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ isModulo }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Configuración › Módulos" title="Mi cuenta" subtitle="Reglas de la cuenta para toda la empresa." hint-size="100%,80px"></x-import>
+<div style="display:flex;flex-direction:column;gap:16px;max-width:760px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Seguridad" description="Aplica a todas las personas de Atlas Seguridad SpA." hint-size="100%,300px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Segundo factor obligatorio para" value="adm" options="{{ rolesMfa }}" hint-size="100%,72px"></x-import>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Largo mínimo de clave" value="12" input-mode="numeric" hint="Entre 8 y 64 caracteres" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Ventana de reautenticación" value="10" options="{{ ventanas }}" hint-size="100%,72px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" titulo="Decide Carlos · P4" hint-size="100%,60px">Ventana de reautenticación: 10 min recomendada. Otras: 5 min, 30 min.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Retención del historial de accesos" value="12" options="{{ retenciones }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" titulo="Decide Carlos · P5" hint-size="100%,60px">Retención: 12 meses recomendada. Otras: 6 y 24 meses.</x-import>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Notificaciones y perfil" hint-size="100%,300px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ true }}" label="Canal App" description="Siempre disponible" hint-size="100%,56px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ true }}" label="Canal Correo" hint-size="100%,56px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ true }}" label="Canal WhatsApp" hint-size="100%,56px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ false }}" label="Canal Push" description="Requiere la app instalada" hint-size="100%,56px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ true }}" label="Permitir foto de perfil" description="Si se apaga, se muestran iniciales en toda la app" hint-size="100%,56px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" titulo="Decide Carlos · P3" hint-size="100%,60px">Quién apaga la foto: administrador de la empresa (recomendado), solo OPAI o cada persona.</x-import>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ActionBar" hint-size="100%,64px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="120px,40px">Descartar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" hint-size="120px,40px">Guardar</x-import>
+</x-import>
+</div>
+</sc-if>
+
+<sc-if value="{{ isFoto }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Mi cuenta" title="Uso de foto y nombre en la app" subtitle="Dónde se ven tu foto y el nombre que prefieres." hint-size="100%,80px"></x-import>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;max-width:980px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Barra superior" description="Foto y «Vale»" hint-size="100%,100px">
+<div style="display:flex;align-items:center;justify-content:space-between;border:1px solid var(--ds-border);border-radius:10px;padding:8px 12px;min-height:44px"><span class="t-label">OPAI</span><span style="display:flex;align-items:center;gap:8px"><span class="t-body-sm">Vale</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Avatar" initials="VR" size="sm" label="Valentina Rojas Soto" hint-size="32px,32px"></x-import></span></div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Comentario" description="Ticket 1043 · Planta Quilicura" hint-size="100%,120px">
+<div style="display:flex;gap:12px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Avatar" initials="VR" size="sm" hint-size="32px,32px"></x-import><div><span class="t-label">Vale</span> <span class="t-caption" style="color:var(--ds-fg-subtle)">30-10-2026 · 14:12</span><div class="t-body-sm">Cambio de turno confirmado con el guardia de portería.</div></div></div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Fila de auditoría" description="Aquí va el nombre completo, no el preferido" hint-size="100%,100px">
+<div style="display:flex;align-items:center;gap:12px;min-height:44px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Avatar" initials="VR" size="sm" hint-size="32px,32px"></x-import><div style="flex:1"><div class="t-label">Valentina Rojas Soto</div><div class="t-caption" style="color:var(--ds-fg-muted)">Aprobó la pauta · 30-10-2026 · 13:40</div></div></div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Portal Trabajador" description="Saludo con el nombre preferido" hint-size="100%,100px">
+<div style="display:flex;align-items:center;gap:12px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Avatar" initials="VR" size="md" hint-size="40px,40px"></x-import><div><div class="t-heading">Hola, Vale</div><div class="t-body-sm" style="color:var(--ds-fg-muted)">Tu turno hoy: 08:00–20:00</div></div></div>
+</x-import>
+</div>
+</sc-if>
+
+<sc-if value="{{ isIndice }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" title="Mi cuenta" subtitle="vale.rojas@atlasseguridad.cl" hint-size="100%,70px"></x-import>
+<div style="display:flex;flex-direction:column;gap:8px">
+<sc-for list="{{ secciones }}" as="s" hint-placeholder-count="5">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" icon="{{ s.icon }}" title="{{ s.label }}" subtitle="{{ s.sub }}" chevron="{{ true }}" hint-size="100%,64px"></x-import>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ isCuenta }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:{{ cols }};gap:24px;align-items:start">
+<sc-if value="{{ isWide }}" hint-placeholder-val="{{ true }}">
+<nav aria-label="Secciones de Mi cuenta" style="display:flex;flex-direction:column;gap:4px;position:sticky;top:0">
+<span class="t-overline" style="color:var(--ds-fg-muted);padding:0 12px 8px">Mi cuenta</span>
+<sc-for list="{{ secciones }}" as="s" hint-placeholder-count="5">
+<a href="#{{ s.id }}" style="display:flex;align-items:center;gap:10px;min-height:44px;padding:0 12px;border-radius:10px;text-decoration:none;color:var(--ds-fg);background:{{ s.bg }}"><span class="ic i-{{ s.icon }}"></span><span class="t-label">{{ s.label }}</span></a>
+</sc-for>
+</nav>
+</sc-if>
+<div style="display:flex;flex-direction:column;gap:16px;min-width:0;max-width:760px">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}"><a href="#indice" style="display:flex;align-items:center;gap:4px;min-height:44px;text-decoration:none"><span class="ic i-chevron-left"></span><span class="t-label">Volver a Mi cuenta</span></a></sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Mi cuenta" title="{{ titulo }}" subtitle="{{ subtitulo }}" hint-size="100%,80px"></x-import>
+
+<sc-if value="{{ hayEstado }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ eVacio }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="inbox" title="Aún no hay datos en esta sección" description="Agrega el primer elemento para empezar." action="Agregar" hint-size="100%,240px"></x-import></sc-if>
+<sc-if value="{{ eCarga }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,260px"><div style="display:flex;flex-direction:column;gap:14px"><div style="display:flex;gap:12px;align-items:center"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" circle="{{ true }}" width="64" height="64" hint-size="64px,64px"></x-import><div style="flex:1;display:flex;flex-direction:column;gap:8px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="50%" height="16" hint-size="50%,16px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="30%" height="12" hint-size="30%,12px"></x-import></div></div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="44" radius="10" hint-size="100%,44px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="44" radius="10" hint-size="100%,44px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="44" radius="10" hint-size="100%,44px"></x-import></div></x-import></sc-if>
+<sc-if value="{{ eError }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar tu cuenta" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="MC-503" hint-size="100%,260px"></x-import></sc-if>
+<sc-if value="{{ eForbidden }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes permiso para ver esta sección" description="Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA." hint-size="100%,260px"></x-import></sc-if>
+</sc-if>
+
+<sc-if value="{{ eNormal }}" hint-placeholder-val="{{ true }}">
+
+<sc-if value="{{ isPerfil }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Foto" hint-size="100%,140px">
+<div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Avatar" initials="VR" size="lg" label="Valentina Rojas Soto" hint-size="64px,64px"></x-import>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="upload" hint-size="130px,44px">Subir foto</x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="trash" hint-size="110px,44px">Quitar</x-import></div></div>
+<div class="t-caption" style="color:var(--ds-fg-muted);margin-top:8px">Sin foto se muestran tus iniciales. JPG o PNG, hasta 5 MB.</div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Datos personales" hint-size="100%,300px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Nombre" value="Valentina" hint-size="100%,72px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Apellido" value="Rojas Soto" hint-size="100%,72px"></x-import></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Cómo prefieres que te llamen" value="Vale" hint="Se muestra en saludos y comentarios. En auditoría va tu nombre completo." hint-size="100%,90px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="RUT" value="12.345.678-0" mono="{{ true }}" error="El dígito verificador no es válido." hint-size="100%,90px"></x-import>
+<div style="display:flex;justify-content:flex-end"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" hint-size="110px,44px">Guardar</x-import></div>
+</div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Contacto" hint-size="100%,260px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap"><div style="flex:1;min-width:200px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Celular" value="+56 9 8765 4321" read-only="{{ true }}" hint-size="100%,72px"></x-import></div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="warning" hint-size="100px,24px">Sin verificar</x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="100px,44px">Verificar</x-import></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" titulo="Decide Carlos · P1" hint-size="100%,60px">Verificación por WhatsApp primero y SMS como alternativa (recomendado). Otras: solo SMS, solo WhatsApp.</x-import>
+<div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap"><div style="flex:1;min-width:200px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Correo" value="vale.rojas@atlasseguridad.cl" read-only="{{ true }}" hint-size="100%,72px"></x-import></div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="success" hint-size="90px,24px">Verificado</x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="100px,44px">Cambiar</x-import></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" titulo="Decide Carlos · P7" hint-size="100%,60px">El usuario cambia su correo con verificación (recomendado). Otra: solo administrador.</x-import>
+</div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Cargo e instalación" hint-size="100%,200px">
+<div style="display:flex;flex-direction:column;gap:16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Cargo" value="Supervisora de turno" read-only="{{ true }}" icon="lock" hint-size="100%,72px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Instalación" value="Planta Quilicura" read-only="{{ true }}" icon="lock" hint="Se cambia en Personas." hint-size="100%,90px"></x-import></div>
+</x-import>
+</sc-if>
+
+<sc-if value="{{ isSeguridad }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Cambiar clave" description="Te pediremos tu clave o un código antes de guardar." hint-size="100%,380px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Clave actual" type="password" value="••••••••••" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Clave nueva" type="password" value="••••••••••" hint-size="100%,72px"></x-import>
+<div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:4px"><span style="height:6px;border-radius:3px;background:var(--ds-warning)"></span><span style="height:6px;border-radius:3px;background:var(--ds-warning)"></span><span style="height:6px;border-radius:3px;background:var(--ds-warning)"></span><span style="height:6px;border-radius:3px;background:var(--ds-fill)"></span></div>
+<div class="t-caption" style="margin-top:6px;color:var(--ds-warning-fg)">Fortaleza: media (3 de 4)</div>
+<ul class="t-body-sm" style="margin:8px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:4px;color:var(--ds-fg-muted)"><li>✓ Al menos 12 caracteres</li><li>✓ Mayúscula y minúscula</li><li>✓ Un número</li><li>○ Un símbolo</li></ul></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Confirmar clave nueva" type="password" hint-size="100%,72px"></x-import>
+<div style="display:flex;justify-content:flex-end"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" hint-size="140px,44px">Cambiar clave</x-import></div>
+</div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Segundo factor (TOTP)" hint-size="100%,150px">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><div style="display:flex;align-items:center;gap:8px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" hint-size="70px,24px">Ya está</x-import><span class="t-body-sm" style="color:var(--ds-fg-muted)">Activo · app autenticadora</span></div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" disabled="{{ true }}" hint-size="130px,44px">Desactivar</x-import></div>
+<div class="t-caption" style="color:var(--ds-fg-muted);margin-top:8px">Tu rol requiere el segundo factor.</div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Passkeys" actions="{{ passkeyAdd }}" hint-size="100%,260px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<sc-for list="{{ passkeys }}" as="p" hint-placeholder-count="2"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" icon="lock" title="{{ p.n }}" subtitle="{{ p.s }}" trailing="{{ p.t }}" hint-size="100%,64px"></x-import></sc-for>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="plus" hint-size="170px,44px">Agregar passkey</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" titulo="Decide Carlos · P2" hint-size="100%,60px">La passkey sirve para entrar sin clave y como segundo factor (recomendado). Otra: solo segundo factor.</x-import>
+</div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Códigos de recuperación" hint-size="100%,150px">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap"><span class="t-body">Quedan <b>7 de 10</b></span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="refresh" hint-size="150px,44px">Regenerar</x-import></div>
+<div class="t-caption" style="color:var(--ds-fg-muted);margin-top:8px">Los códigos nuevos se muestran una sola vez. Podrás copiarlos o descargarlos.</div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Sesiones y dispositivos" hint-size="100%,340px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<sc-for list="{{ sesiones }}" as="s" hint-placeholder-count="3"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" icon="phone" title="{{ s.n }}" badge="{{ s.b }}" subtitle="{{ s.s }}" trailing="{{ s.t }}" hint-size="100%,72px"></x-import></sc-for>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="100%,44px">Cerrar todas las demás</x-import>
+</div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Historial de inicios de sesión" description="Se conserva 12 meses." hint-size="100%,380px">
+<div style="display:flex;flex-direction:column;gap:8px">
+<sc-for list="{{ historial }}" as="h" hint-placeholder-count="4"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" icon="clock" title="{{ h.f }}" subtitle="{{ h.s }}" trailing="{{ h.t }}" hint-size="100%,64px"></x-import></sc-for>
+</div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Correo de aviso de seguridad" description="Plantilla que recibes cuando cambia algo en tu cuenta." hint-size="100%,300px">
+<div style="border:1px solid var(--ds-border);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:10px;background:var(--ds-bg)">
+<div class="t-caption" style="color:var(--ds-fg-muted)">De: OPAI · Para: vale.rojas@atlasseguridad.cl</div>
+<div class="t-heading">Cambiamos tu clave</div>
+<div class="t-body-sm">Hola Vale, el 30-10-2026 a las 15:33 se cambió la clave de tu cuenta desde Chrome en Windows, Santiago (Chile). Si fuiste tú, no necesitas hacer nada.</div>
+<div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="destructive" hint-size="120px,44px">No fui yo</x-import></div></div>
+</x-import>
+</sc-if>
+
+<sc-if value="{{ isPrefs }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Idioma y región" hint-size="100%,360px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Idioma" value="es" options="{{ idiomas }}" hint="Solo español en esta versión." hint-size="100%,90px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" titulo="Decide Carlos · P6" hint-size="100%,60px">Inglés en v1: solo español con selector listo (recomendado).</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Zona horaria" value="scl" options="{{ zonas }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Formato de fecha" value="dmy" options="{{ fechas }}" hint-size="100%,72px"></x-import>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Tema" hint-size="100%,220px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ temas }}" value="Claro" label="Tema" hint-size="260px,44px"></x-import>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px"><div data-theme="light" style="background:var(--ds-bg);color:var(--ds-fg);border:1px solid var(--ds-border);border-radius:10px;padding:12px"><div class="t-label">Claro</div><div style="height:6px;border-radius:3px;background:var(--ds-accent);width:40%;margin-top:8px"></div></div><div data-theme="dark" style="background:var(--ds-bg);color:var(--ds-fg);border:1px solid var(--ds-border);border-radius:10px;padding:12px"><div class="t-label">Oscuro</div><div style="height:6px;border-radius:3px;background:var(--ds-accent);width:40%;margin-top:8px"></div></div></div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Página de inicio" hint-size="100%,120px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Al entrar, abrir" value="pauta" options="{{ modulos }}" hint="Solo módulos activos en tu empresa." hint-size="100%,90px"></x-import>
+</x-import>
+</sc-if>
+
+<sc-if value="{{ isNotif }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ isWide }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" padding="0" hint-size="100%,330px">
+<div style="display:grid;grid-template-columns:1fr repeat(4,88px);align-items:center;padding:12px 16px;border-bottom:1px solid var(--ds-border)" class="t-label-sm"><span style="color:var(--ds-fg-muted)">Aviso</span><span style="text-align:center">App</span><span style="text-align:center">Correo</span><span style="text-align:center">WhatsApp</span><span style="text-align:center">Push</span></div>
+<sc-for list="{{ avisos }}" as="a" hint-placeholder-count="5">
+<div style="display:grid;grid-template-columns:1fr repeat(4,88px);align-items:center;padding:4px 16px;min-height:56px;border-bottom:1px solid var(--ds-border)"><div><div class="t-label">{{ a.n }}</div><div class="t-caption" style="color:var(--ds-fg-muted)">{{ a.d }}</div></div>
+<sc-for list="{{ a.c }}" as="c" hint-placeholder-count="4"><div style="display:flex;flex-direction:column;align-items:center;gap:2px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ c.on }}" disabled="{{ c.lock }}" label="{{ c.l }}" hint-size="44px,44px"></x-import><span class="t-caption" style="color:var(--ds-fg-muted)">{{ c.note }}</span></div></sc-for></div>
+</sc-for>
+</x-import>
+</sc-if>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<sc-for list="{{ avisos }}" as="a" hint-placeholder-count="5">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="{{ a.n }}" description="{{ a.d }}" hint-size="100%,260px">
+<div style="display:flex;flex-direction:column;gap:4px"><sc-for list="{{ a.c }}" as="c" hint-placeholder-count="4"><div style="display:flex;align-items:center;justify-content:space-between;min-height:44px"><span class="t-body-sm">{{ c.l }} <span style="color:var(--ds-fg-muted)">{{ c.note }}</span></span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ c.on }}" disabled="{{ c.lock }}" label="{{ c.l }}" hint-size="44px,44px"></x-import></div></sc-for></div>
+</x-import>
+</sc-for>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="No molestar" description="Zona horaria America/Santiago" hint-size="100%,260px">
+<div style="display:flex;flex-direction:column;gap:16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ true }}" label="Activar horario" hint-size="100%,44px"></x-import>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><sc-for list="{{ dias }}" as="d" hint-placeholder-count="7"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" selected="{{ d.on }}" hint-size="52px,44px">{{ d.l }}</x-import></sc-for></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Desde" value="22:00" hint-size="100%,72px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Hasta" value="07:00" hint-size="100%,72px"></x-import></div>
+<div class="t-caption" style="color:var(--ds-fg-muted)">Los avisos de seguridad siempre se envían.</div></div>
+</x-import>
+</sc-if>
+
+<sc-if value="{{ isPriv }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" hint-size="100%,60px">Tus datos se tratan según la Ley 21.719 sobre protección de datos personales.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Mis datos personales" hint-size="100%,300px">
+<div style="display:flex;flex-direction:column"><sc-for list="{{ categorias }}" as="c" hint-placeholder-count="5"><div style="display:flex;justify-content:space-between;gap:12px;min-height:44px;align-items:center;border-bottom:1px solid var(--ds-border)"><span class="t-label">{{ c.n }}</span><span class="t-body-sm" style="color:var(--ds-fg-muted);text-align:right">{{ c.d }}</span></div></sc-for></div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Descargar mis datos" hint-size="100%,260px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Timeline" items="{{ descarga }}" hint-size="100%,140px"></x-import>
+<div style="display:flex;gap:8px;flex-wrap:wrap"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="download" hint-size="180px,44px">Descargar mis datos</x-import></div>
+<div class="t-caption" style="color:var(--ds-fg-muted)">Listo para descargar hasta 06-11-2026.</div></div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Derechos ARCO" description="Acceso, rectificación, cancelación y oposición." hint-size="100%,130px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="220px,44px">Ejercer derechos ARCO</x-import>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Consentimientos vigentes" hint-size="100%,220px">
+<div style="display:flex;flex-direction:column"><sc-for list="{{ consent }}" as="c" hint-placeholder-count="3"><div style="display:flex;justify-content:space-between;gap:12px;min-height:56px;align-items:center;border-bottom:1px solid var(--ds-border)"><div><div class="t-label">{{ c.n }}</div><div class="t-caption" style="color:var(--ds-fg-muted)">Desde {{ c.f }}</div></div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="success" hint-size="70px,24px">Vigente</x-import></div></sc-for></div>
+</x-import>
+</sc-if>
+
+</sc-if>
+</div>
+</div>
+</sc-if>
+
+<div style="margin-top:32px;padding:16px 0;border-top:1px solid var(--ds-border)" class="t-caption"><span style="color:var(--ds-fg-muted)">OPAI v2.4.1 · </span><a href="#novedades">Ver novedades</a></div>
+
+<sc-if value="{{ ovRecorte }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Dialog" contained="{{ true }}" title="Recortar foto" actions="{{ accionesRecorte }}" hint-size="100%,100%">
+<div style="display:flex;flex-direction:column;align-items:center;gap:16px"><div style="width:200px;height:200px;border-radius:50%;background:var(--ds-fill);border:2px solid var(--ds-accent);display:flex;align-items:center;justify-content:center"><span class="t-display" style="color:var(--ds-fg-muted)">VR</span></div><div style="width:100%;display:flex;align-items:center;gap:12px"><span class="ic i-search"></span><input type="range" aria-label="Zoom" min="1" max="3" step="0.1" value="1.4" style="flex:1;height:44px;accent-color:var(--ds-accent)"></div></div>
+</x-import>
+</sc-if>
+<sc-if value="{{ ovVerificar }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Dialog" contained="{{ true }}" title="Verifica tu celular" description="Enviamos un código a +56 9 ••• 4321." actions="{{ accionesVerificar }}" hint-size="100%,100%">
+<div style="display:flex;flex-direction:column;gap:16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ canales }}" value="WhatsApp" label="Canal" hint-size="240px,44px"></x-import>
+<div style="display:flex;gap:8px"><sc-for list="{{ digitos }}" as="d" hint-placeholder-count="6"><span style="flex:1;max-width:48px;height:52px;border:1px solid var(--ds-border-control);border-radius:10px;display:flex;align-items:center;justify-content:center" class="t-heading">{{ d }}</span></sc-for></div>
+<span class="t-caption" style="color:var(--ds-fg-muted)">Reenviar código en 00:42</span></div>
+</x-import>
+</sc-if>
+<sc-if value="{{ ovReauth }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Dialog" contained="{{ true }}" title="Confirma que eres tú" description="Esta acción es sensible. Ingresa tu clave o un código." actions="{{ accionesReauth }}" hint-size="100%,100%">
+<div style="display:flex;flex-direction:column;gap:16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Clave" type="password" hint-size="100%,72px"></x-import><span class="t-caption" style="color:var(--ds-fg-muted)">O usa el código de tu app autenticadora. La confirmación dura 10 minutos.</span></div>
+</x-import>
+</sc-if>
+<sc-if value="{{ ovToast }}" hint-placeholder-val="{{ false }}">
+<div style="position:absolute;left:0;right:0;bottom:16px;display:flex;justify-content:center"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Toast" icon="check-circle" tone="success" message="Cambios guardados" duration="0" hint-size="280px,48px"></x-import></div>
+</sc-if>
+</div>
+</x-import>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Marco&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Marco&quot;},&quot;section&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;indice&quot;,&quot;perfil&quot;,&quot;seguridad&quot;,&quot;preferencias&quot;,&quot;notificaciones&quot;,&quot;privacidad&quot;,&quot;foto&quot;,&quot;modulo&quot;,&quot;decide&quot;],&quot;default&quot;:&quot;perfil&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Pantalla&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;forbidden&quot;,&quot;exito&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Pantalla&quot;},&quot;overlay&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ninguno&quot;,&quot;recorte&quot;,&quot;verificar&quot;,&quot;reauth&quot;,&quot;toast&quot;],&quot;default&quot;:&quot;ninguno&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Pantalla&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const p = this.props;
+    const device = p.device ?? "desktop";
+    const section = p.section ?? "perfil";
+    const estado = p.estado ?? "normal";
+    const ov = p.overlay ?? "ninguno";
+    const isPhone = device === "phone";
+    const isWide = !isPhone;
+    const secs = [
+      ["perfil", "Perfil", "user", "Foto, nombre, contacto"],
+      ["seguridad", "Seguridad", "lock", "Clave, segundo factor, sesiones"],
+      ["preferencias", "Preferencias", "grid", "Idioma, zona horaria, tema"],
+      ["notificaciones", "Notificaciones", "bell", "Avisos y canales"],
+      ["privacidad", "Privacidad y datos", "eye", "Mis datos y ARCO"],
+    ];
+    const cur = section;
+    const secciones = secs.map(([id, label, icon, sub]) => ({ id, label, icon, sub, bg: id === cur ? "var(--ds-fill)" : "transparent" }));
+    const titles = { perfil: ["Perfil", "Cómo te ve tu equipo."], seguridad: ["Seguridad", "Acceso, dispositivos y avisos."], preferencias: ["Preferencias", "Cómo se ve y se comporta OPAI para ti."], notificaciones: ["Notificaciones", "Elige qué avisos recibes y por dónde."], privacidad: ["Privacidad y datos", "Tus datos personales y tus derechos."] };
+    const t = titles[cur] || ["", ""];
+    const isCuenta = !!titles[cur] && !(isPhone && false);
+    const sw = (l, on, lock, note) => ({ l, on, lock: !!lock, note: note || "" });
+    const row = (n, d, c) => ({ n, d, c });
+    const std = (a, b, c, dd) => [sw("App", a), sw("Correo", b), sw("WhatsApp", c), sw("Push", dd)];
+    const btn = (label, variant) => React.createElement(window.OPAI20DesignSystem_44e4d7.Button, { variant, size: "md" }, label);
+    return {
+      device, theme: p.theme ?? "light", isPhone, isWide, secciones, titulo: t[0], subtitulo: t[1],
+      isIndice: section === "indice", isDecide: section === "decide", isModulo: section === "modulo", isFoto: section === "foto",
+      isCuenta, isPerfil: cur === "perfil", isSeguridad: cur === "seguridad", isPrefs: cur === "preferencias", isNotif: cur === "notificaciones", isPriv: cur === "privacidad",
+      cols: isPhone ? "minmax(0,1fr)" : "220px minmax(0,1fr)",
+      hayEstado: estado !== "normal" && estado !== "exito", eNormal: estado === "normal" || estado === "exito",
+      eVacio: estado === "vacio", eCarga: estado === "cargando", eError: estado === "error", eForbidden: estado === "forbidden",
+      ovRecorte: ov === "recorte", ovVerificar: ov === "verificar", ovReauth: ov === "reauth", ovToast: ov === "toast" || estado === "exito",
+      accionesRecorte: [btn("Cancelar", "secondary"), btn("Guardar foto")],
+      accionesVerificar: [btn("Cancelar", "secondary"), btn("Verificar")],
+      accionesReauth: [btn("Cancelar", "secondary"), btn("Continuar")],
+      digitos: ["4", "8", "1", "", "", ""],
+      canales: ["WhatsApp", "SMS"],
+      shellActive: "mc", shellTitle: section === "modulo" ? "Configuración" : "Mi cuenta",
+      user: { name: "Valentina Rojas Soto", initials: "VR", role: "Supervisora de turno" },
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "pau", label: "Pauta", icon: "calendar" }, { id: "per", label: "Personas", icon: "users" }, { id: "mc", label: "Mi cuenta", icon: "user" }],
+      groups: [
+        { items: [{ id: "ini", label: "Inicio", icon: "home" }] },
+        { title: "Operaciones", items: [{ id: "ins", label: "Instalaciones", icon: "building" }, { id: "pau", label: "Pauta mensual", icon: "calendar" }] },
+        { title: "Cuenta", items: [{ id: "mc", label: "Mi cuenta", icon: "user" }] },
+      ],
+      decisiones: [
+        { id: "P1", t: "Verificación de celular", o: "SMS · WhatsApp · ambos", r: "ambos, WhatsApp primero" },
+        { id: "P2", t: "Passkey", o: "Sin clave y segundo factor · solo segundo factor", r: "ambos" },
+        { id: "P3", t: "Quién apaga la foto", o: "Administrador de la empresa · solo OPAI · cada persona", r: "administrador de la empresa" },
+        { id: "P4", t: "Ventana de reautenticación", o: "5 min · 10 min · 30 min", r: "10 min" },
+        { id: "P5", t: "Retención del historial", o: "6 · 12 · 24 meses", r: "12 meses" },
+        { id: "P6", t: "Inglés en v1", o: "Solo español con selector listo · español e inglés", r: "solo español, selector listo" },
+        { id: "P7", t: "Cambio de correo", o: "Usuario con verificación · solo administrador", r: "usuario, con verificación" },
+      ],
+      rolesMfa: [{ value: "adm", label: "Administradores y supervisores" }, { value: "todos", label: "Todos los roles" }, { value: "ninguno", label: "Ningún rol" }],
+      ventanas: [{ value: "5", label: "5 minutos" }, { value: "10", label: "10 minutos (recomendado)" }, { value: "30", label: "30 minutos" }],
+      retenciones: [{ value: "6", label: "6 meses" }, { value: "12", label: "12 meses (recomendado)" }, { value: "24", label: "24 meses" }],
+      passkeyAdd: null,
+      passkeys: [
+        { n: "iPhone de Vale", s: "Creada 02-09-2026 · último uso 30-10-2026", t: "Renombrar · Quitar" },
+        { n: "Notebook Planta Quilicura", s: "Creada 14-05-2026 · último uso 28-10-2026", t: "Renombrar · Quitar" },
+      ],
+      sesiones: [
+        { n: "Este dispositivo", b: "Actual", s: "Chrome · Windows 11 · Santiago, Chile · ahora", t: "" },
+        { n: "Safari · iOS 19", b: "", s: "Santiago, Chile · hace 3 h", t: "Cerrar" },
+        { n: "Firefox · Ubuntu", b: "", s: "Quilicura, Chile · hace 2 días", t: "Cerrar" },
+      ],
+      historial: [
+        { f: "30-10-2026 · 15:02", s: "Passkey · Santiago, Chile", t: "Éxito" },
+        { f: "29-10-2026 · 08:11", s: "Clave + TOTP · Santiago, Chile", t: "Éxito" },
+        { f: "27-10-2026 · 03:47", s: "Clave · Lima, Perú · No fui yo", t: "Bloqueado" },
+        { f: "26-10-2026 · 19:20", s: "Clave · Santiago, Chile", t: "Fallido" },
+      ],
+      idiomas: [{ value: "es", label: "Español (Chile)" }],
+      zonas: [{ value: "scl", label: "America/Santiago (UTC−03:00)" }, { value: "pas", label: "Pacific/Easter" }],
+      fechas: [{ value: "dmy", label: "dd-mm-aaaa · 30-10-2026" }],
+      temas: ["Claro", "Oscuro", "Sistema"],
+      modulos: [{ value: "ini", label: "Inicio" }, { value: "pauta", label: "Pauta mensual" }, { value: "per", label: "Personas" }, { value: "ron", label: "Rondas" }],
+      avisos: [
+        row("Cambios de seguridad", "Clave, correo, dispositivos nuevos", [sw("App", true, true, "Obligatorio"), sw("Correo", true, true, "Obligatorio"), sw("WhatsApp", true), sw("Push", true)]),
+        row("Cambios en la pauta", "Turnos asignados o movidos", std(true, true, true, true)),
+        row("Rondas y marcajes", "Atrasos y rondas sin cerrar", std(true, false, true, true)),
+        row("Tickets", "Respuestas y cambios de estado", std(true, true, false, false)),
+        row("Cotizaciones", "Aprobaciones pendientes", std(true, true, false, false)),
+      ],
+      dias: ["L", "M", "X", "J", "V", "S", "D"].map((l, i) => ({ l, on: i < 5 })),
+      categorias: [
+        { n: "Identificación", d: "Nombre, RUT, foto" },
+        { n: "Contacto", d: "Correo, celular" },
+        { n: "Laboral", d: "Cargo, instalación, empresa" },
+        { n: "Seguridad", d: "Dispositivos, historial de accesos" },
+        { n: "Uso de la app", d: "Preferencias, notificaciones" },
+      ],
+      descarga: [{ title: "Solicitado", time: "30-10-2026 · 15:10" }, { title: "Preparando", time: "30-10-2026 · 15:12" }, { title: "Listo para descargar", time: "hasta 06-11-2026" }],
+      consent: [{ n: "Tratamiento de datos laborales", f: "12-03-2025" }, { n: "Notificaciones por WhatsApp", f: "02-09-2026" }, { n: "Uso de foto de perfil", f: "02-09-2026" }],
+    };
+  }
+}
+</script>
+</body>
+</html>
