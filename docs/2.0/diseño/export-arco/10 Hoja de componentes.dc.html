@@ -63,7 +63,7 @@
 
 <div style="display:flex;flex-direction:column;gap:12px">
 <div style="display:flex;gap:8px;align-items:center"><span class="t-subheading" style="font-weight:600">PlazoBadge</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="info" dot="{{ false }}" hint-size="120px,22px">Nuevo para el DS</x-import></div>
-<span class="t-body-sm" style="color:var(--ds-fg-muted)">Días restantes sobre 30 (o 60 con prórroga): success, warning desde 7 días, danger al vencer.</span>
+<span class="t-body-sm" style="color:var(--ds-fg-muted)">Días restantes sobre 30, o sobre 30 más los días prorrogados (máximo 60): success, warning desde 7 días, danger al vencer.</span>
 <div style="display:flex;flex-wrap:wrap;gap:8px">
 <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="success" hint-size="100px,22px">14 de 30 días</x-import>
 <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="warning" hint-size="100px,22px">3 de 30 días</x-import>
@@ -90,14 +90,13 @@
 <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ true }}" label="Geolocalización" hint-size="100%,44px"></x-import>
 <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" disabled="{{ true }}" label="Imagen (revocado)" hint-size="100%,44px"></x-import>
 <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ true }}" label="Declaro que los datos son verdaderos" hint-size="100%,44px"></x-import>
-<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" invalid="{{ true }}" label="Acepto el tratamiento" error="Obligatorio" hint-size="100%,44px"></x-import>
 </div>
 </div>
 
 <div style="display:flex;flex-direction:column;gap:12px">
 <span class="t-subheading" style="font-weight:600">Alerta</span>
 <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Plazo de respuesta" hint-size="100%,60px">30 días corridos desde el ingreso, con acuse de recibo (art. 11 inc. 2°). Una sola prórroga, hasta 30 días corridos.</x-import>
-<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" titulo="Bloqueo vigente" hint-size="100%,60px">Rige desde el ingreso de la solicitud. Responde antes del 21-12-2026.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" titulo="Bloqueo vigente" hint-size="100%,60px">Rige desde el ingreso de la solicitud. Responder a más tardar el 21-12-2026.</x-import>
 <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="danger" titulo="No procede" hint-size="100%,60px">Vínculo vigente.</x-import>
 </div>
 
@@ -172,7 +171,7 @@
 <div style="border:1px solid var(--ds-border);border-radius:16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="lock" title="Aún no hay solicitudes" description="Registra una solicitud recibida por otro canal." size="sm" hint-size="100%,220px"></x-import></div>
 <div style="border:1px solid var(--ds-border);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 20 }}" width="60%" hint-size="60%,20px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 48 }}" hint-size="100%,48px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 48 }}" hint-size="100%,48px"></x-import></div>
 <div style="border:1px solid var(--ds-border);border-radius:16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar las solicitudes" description="Revisa tu conexión." code="CUM-503" hint-size="100%,240px"></x-import></div>
-<div style="border:1px solid var(--ds-border);border-radius:16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso" description="Pídele acceso a Andrés Molina." action-label="Pedir acceso" hint-size="100%,240px"></x-import></div>
+<div style="border:1px solid var(--ds-border);border-radius:16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso" description="Pídele acceso a un administrador." action-label="Pedir acceso" hint-size="100%,240px"></x-import></div>
 </div>
 </div>
 

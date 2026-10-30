@@ -3782,7 +3782,7 @@ function AppShell({
   tenant = "Atlas Seguridad SpA",
   tenantInitials = "AS",
   user = {
-    name: "Carlos Irigoyen",
+    name: "Andrés Molina",
     initials: "CI",
     role: "Administrador"
   },
@@ -5096,7 +5096,7 @@ function PersonasPhone({
     }
   }, /*#__PURE__*/React.createElement(PForbidden, {
     title: "No tienes acceso a Personas",
-    description: "Tu rol de Supervisor no incluye este m\xF3dulo. P\xEDdele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA.",
+    description: "Tu rol de Supervisor no incluye este m\xF3dulo. P\xEDdele acceso a Andrés Molina, administrador de Atlas Seguridad SpA.",
     actionLabel: "Pedir acceso"
   })));
   const empty = state === "vacio";
@@ -5434,7 +5434,7 @@ function CotizacionPhone({
     label: "Raz\xF3n social",
     value: cliente,
     onChange: setCliente,
-    hint: cliente === "la" ? "76.543.210-K" : "77.120.884-3",
+    hint: cliente === "la" ? "76.543.210-K" : "76.543.210-3",
     options: [{
       value: "la",
       label: "Logística Andina SpA",
@@ -5442,7 +5442,7 @@ function CotizacionPhone({
     }, {
       value: "rs",
       label: "Retail Sur SpA",
-      meta: "77.120.884-3"
+      meta: "76.543.210-3"
     }]
   }), /*#__PURE__*/React.createElement(PInput, {
     label: "Correo para enviar la cotizaci\xF3n",
@@ -5945,7 +5945,7 @@ window.OPAI_DATA = {
     nombre: "María Fernanda Soto",
     rut: "16.234.567-8",
     cargo: "Guardia",
-    inst: "Edificio Costanera Center",
+    inst: "Edificio Mirador Poniente",
     estado: "Activa",
     tone: "success",
     ingreso: "03-03-2025"
@@ -5985,7 +5985,7 @@ window.OPAI_DATA = {
     nombre: "Valentina Rojas Díaz",
     rut: "19.876.120-3",
     cargo: "Recepcionista",
-    inst: "Edificio Costanera Center",
+    inst: "Edificio Mirador Poniente",
     estado: "Activa",
     tone: "success",
     ingreso: "09-09-2025"
