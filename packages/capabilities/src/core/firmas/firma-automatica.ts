@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 import { defineCapability } from "../../define";
-import { conflicto, noEncontrado, reglaDeNegocio } from "../../errores";
+import { conflicto, noEncontrado, prohibido, reglaDeNegocio } from "../../errores";
 import { uuidSchema } from "../esquemas";
 import { claseSchema, PERMISO_FIRMAS_CONFIG } from "./comun";
 import { autorizacionSchema, iso } from "./firmante-empresa";
@@ -25,6 +25,11 @@ export const firmasFirmaAutomaticaAutorizar = defineCapability({
   async handler(ctx, input, { dryRun }) {
     const fe = await ctx.db.firmanteEmpresa.findUnique({ where: { id: input.firmanteEmpresaId } });
     if (!fe) throw noEncontrado("El firmante de la empresa");
+    // R16: solo el propio representante autoriza su firma automática; ni owner ni admin por él.
+    const actorId = ctx.actor.id;
+    if (!actorId || actorId !== fe.usuarioId) {
+      throw prohibido("Solo el propio firmante autoriza su firma automática (R16).");
+    }
     if (!fe.activo) throw reglaDeNegocio("El firmante de la empresa está inactivo.");
     const hasta = input.vigenciaHasta ? new Date(input.vigenciaHasta) : null;
     if (hasta && hasta.getTime() <= Date.now()) {
@@ -53,7 +58,8 @@ export const firmasFirmaAutomaticaAutorizar = defineCapability({
           firmanteEmpresaId: fe.id,
           clase: input.clase,
           vigenciaHasta: hasta,
-          autorizadaPorId: ctx.actor.id ?? ctx.usuario?.id ?? fe.usuarioId,
+          // El actor ya fue validado como el propio representante (R16): nunca un tercero.
+          autorizadaPorId: actorId,
         },
       });
     });
@@ -84,6 +90,12 @@ export const firmasFirmaAutomaticaRevocar = defineCapability({
       where: { id: input.autorizacionId },
     });
     if (!a) throw noEncontrado("La autorización");
+    // R16: revocar la firma automática también es del propio representante, no de un tercero.
+    const fe = await ctx.db.firmanteEmpresa.findUnique({ where: { id: a.firmanteEmpresaId } });
+    if (!fe) throw noEncontrado("La autorización");
+    if (!ctx.actor.id || ctx.actor.id !== fe.usuarioId) {
+      throw prohibido("Solo el propio firmante revoca su firma automática (R16).");
+    }
     if (a.revocadaEn) throw conflicto("La autorización ya está revocada.");
     const base = {
       id: a.id,

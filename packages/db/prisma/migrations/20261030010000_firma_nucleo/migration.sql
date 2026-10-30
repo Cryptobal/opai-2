@@ -5,8 +5,8 @@
 -- core.verificar_mismo_tenant). La evidencia es un hecho inmutable (R17): opai_app no puede
 -- UPDATE/DELETE sobre ella y cada fila enlaza un eslabón de la bitácora encadenada (core.bitacora).
 --
--- Fecha posterior a la última migración de main (20261029010000): cada tabla nueva se crea después
--- de force_rls, así que lleva ENABLE + FORCE ROW LEVEL SECURITY.
+-- Fecha posterior a la última migración de main (20261029180000_rondas_schema): cada tabla nueva se
+-- crea después de force_rls (20261028170000), así que lleva ENABLE + FORCE ROW LEVEL SECURITY.
 BEGIN;
 SET LOCAL lock_timeout = '5s';
 
@@ -50,7 +50,7 @@ CREATE TABLE "core_firma"."solicitudes" (
     "bitacora_seq" INTEGER,
     "documento_firmado_id" UUID,
     "sha256_firmado" TEXT,
-    "comprobante_token" TEXT,
+    "comprobante_token_hash" TEXT,
     "completada_en" TIMESTAMPTZ(6),
     "cancelada_en" TIMESTAMPTZ(6),
     "recordada_en" TIMESTAMPTZ(6),
@@ -76,7 +76,7 @@ CREATE TABLE "core_firma"."firmantes" (
     "email" TEXT,
     "telefono" TEXT,
     "estado" TEXT NOT NULL DEFAULT 'pendiente',
-    "token" TEXT,
+    "token_hash" TEXT,
     "token_expira" TIMESTAMPTZ(6),
     "firma_automatica" BOOLEAN NOT NULL DEFAULT false,
     "visto_en" TIMESTAMPTZ(6),
@@ -179,11 +179,11 @@ CREATE UNIQUE INDEX "politicas_tenant_id_clase_key" ON "core_firma"."politicas"(
 -- CreateIndex
 CREATE INDEX "solicitudes_tenant_id_estado_idx" ON "core_firma"."solicitudes"("tenant_id", "estado");
 CREATE INDEX "solicitudes_tenant_id_documento_id_idx" ON "core_firma"."solicitudes"("tenant_id", "documento_id");
-CREATE UNIQUE INDEX "solicitudes_comprobante_token_key" ON "core_firma"."solicitudes"("comprobante_token");
+CREATE UNIQUE INDEX "solicitudes_comprobante_token_hash_key" ON "core_firma"."solicitudes"("comprobante_token_hash");
 
 -- CreateIndex
 CREATE INDEX "firmantes_tenant_id_solicitud_id_idx" ON "core_firma"."firmantes"("tenant_id", "solicitud_id");
-CREATE UNIQUE INDEX "firmantes_token_key" ON "core_firma"."firmantes"("token");
+CREATE UNIQUE INDEX "firmantes_token_hash_key" ON "core_firma"."firmantes"("token_hash");
 
 -- CreateIndex
 CREATE INDEX "evidencias_tenant_id_solicitud_id_idx" ON "core_firma"."evidencias"("tenant_id", "solicitud_id");
@@ -214,8 +214,9 @@ ALTER TABLE "core_firma"."firmantes" ADD CONSTRAINT "firmantes_persona_id_fkey" 
 ALTER TABLE "core_firma"."firmantes" ADD CONSTRAINT "firmantes_contacto_id_fkey" FOREIGN KEY ("contacto_id") REFERENCES "core"."contactos"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 ALTER TABLE "core_firma"."firmantes" ADD CONSTRAINT "firmantes_usuario_id_fkey" FOREIGN KEY ("usuario_id") REFERENCES "core"."users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 ALTER TABLE "core_firma"."evidencias" ADD CONSTRAINT "evidencias_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "core"."tenants"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
-ALTER TABLE "core_firma"."evidencias" ADD CONSTRAINT "evidencias_solicitud_id_fkey" FOREIGN KEY ("solicitud_id") REFERENCES "core_firma"."solicitudes"("id") ON DELETE CASCADE ON UPDATE CASCADE;
-ALTER TABLE "core_firma"."evidencias" ADD CONSTRAINT "evidencias_firmante_id_fkey" FOREIGN KEY ("firmante_id") REFERENCES "core_firma"."firmantes"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+-- La evidencia es inmutable (R17): borrar su solicitud o firmante no la arrastra en cascada (RESTRICT).
+ALTER TABLE "core_firma"."evidencias" ADD CONSTRAINT "evidencias_solicitud_id_fkey" FOREIGN KEY ("solicitud_id") REFERENCES "core_firma"."solicitudes"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "core_firma"."evidencias" ADD CONSTRAINT "evidencias_firmante_id_fkey" FOREIGN KEY ("firmante_id") REFERENCES "core_firma"."firmantes"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 ALTER TABLE "core_firma"."aceptaciones_medio" ADD CONSTRAINT "aceptaciones_medio_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "core"."tenants"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 ALTER TABLE "core_firma"."aceptaciones_medio" ADD CONSTRAINT "aceptaciones_medio_persona_id_fkey" FOREIGN KEY ("persona_id") REFERENCES "core"."personas"("id") ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE "core_firma"."firmantes_empresa" ADD CONSTRAINT "firmantes_empresa_tenant_id_fkey" FOREIGN KEY ("tenant_id") REFERENCES "core"."tenants"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -310,12 +311,28 @@ CREATE TRIGGER mismo_tenant BEFORE INSERT OR UPDATE ON "core_firma"."codigos_otp
   FOR EACH ROW EXECUTE FUNCTION "core"."verificar_mismo_tenant"('firmante_id', 'core_firma.firmantes');
 
 -- ---------------------------------------------------------------------------
+-- Toda referencia a core.users debe ser de un miembro del tenant (las FK no pasan por RLS; core.users
+-- es global). Reutiliza core.verificar_usuario_miembro (20261028234500). Salta las columnas NULL. En
+-- firma todos son usuarios de la empresa (sin ':plataforma'): representante, emisor y configurador.
+-- ---------------------------------------------------------------------------
+CREATE TRIGGER usuario_miembro BEFORE INSERT OR UPDATE OF "actualizado_por_id", "tenant_id" ON "core_firma"."politicas"
+  FOR EACH ROW EXECUTE FUNCTION "core"."verificar_usuario_miembro"('actualizado_por_id');
+CREATE TRIGGER usuario_miembro BEFORE INSERT OR UPDATE OF "enviada_por_id", "via_user_id", "tenant_id" ON "core_firma"."solicitudes"
+  FOR EACH ROW EXECUTE FUNCTION "core"."verificar_usuario_miembro"('enviada_por_id', 'via_user_id');
+CREATE TRIGGER usuario_miembro BEFORE INSERT OR UPDATE OF "usuario_id", "tenant_id" ON "core_firma"."firmantes"
+  FOR EACH ROW EXECUTE FUNCTION "core"."verificar_usuario_miembro"('usuario_id');
+CREATE TRIGGER usuario_miembro BEFORE INSERT OR UPDATE OF "usuario_id", "tenant_id" ON "core_firma"."firmantes_empresa"
+  FOR EACH ROW EXECUTE FUNCTION "core"."verificar_usuario_miembro"('usuario_id');
+CREATE TRIGGER usuario_miembro BEFORE INSERT OR UPDATE OF "autorizada_por_id", "tenant_id" ON "core_firma"."autorizaciones_firma_automatica"
+  FOR EACH ROW EXECUTE FUNCTION "core"."verificar_usuario_miembro"('autorizada_por_id');
+
+-- ---------------------------------------------------------------------------
 -- La evidencia de firma es un hecho inmutable (R17, ADR-023): opai_app no la actualiza ni la borra,
 -- y un trigger lo refuerza también contra el dueño. Las correcciones son evidencias nuevas.
 -- ---------------------------------------------------------------------------
 REVOKE UPDATE, DELETE ON "core_firma"."evidencias" FROM opai_app;
 CREATE OR REPLACE FUNCTION "core_firma"."evidencia_inmutable"() RETURNS trigger
-LANGUAGE plpgsql AS $$
+LANGUAGE plpgsql SET search_path = pg_catalog, pg_temp AS $$
 BEGIN
   RAISE EXCEPTION 'core_firma.evidencias es append-only: % no permitido', TG_OP;
 END

@@ -162,6 +162,97 @@ describe.skipIf(!urlPropietario)("firma · política y firmante de empresa en ba
     ).toBe("FORBIDDEN");
   });
 
+  it("R16: un tercero (otro owner) no autoriza la firma automática del representante → FORBIDDEN", async () => {
+    // Segundo miembro de A, distinto del representante: aunque sea owner con core:firmas.config.
+    const s = randomUUID().slice(0, 8);
+    const otroId = (
+      await e.admin.user.create({
+        data: { name: "Otro", email: `otro-${s}@prueba.cl`, emailVerified: true },
+      })
+    ).id;
+    await e.admin.membership.create({
+      data: { tenantId: t.a.tenantId, userId: otroId, rol: "owner", portales: ["erp"] },
+    });
+    const otro = mod.crearContexto({
+      tenantId: t.a.tenantId,
+      actor: { tipo: "user", id: otroId },
+      rol: "owner",
+      portal: "erp",
+      portalesMembresia: ["erp"],
+      usuario: { id: otroId, nombre: "Otro", email: `otro-${s}@prueba.cl`, platformRole: null },
+      medidor,
+    });
+    const fe = await dato<{ id: string }>(owner("a"), "core.firmas.firmante_empresa_set", {
+      usuarioId: t.a.userId,
+      nombre: "Carla Rep",
+    });
+    // El representante autoriza (OK), el tercero no puede autorizar ni revocar por él.
+    expect(
+      await codigo(otro, "core.firmas.firma_automatica_autorizar", {
+        firmanteEmpresaId: fe.id,
+        clase: "acta_reunion",
+      }),
+    ).toBe("FORBIDDEN");
+    const a = await dato<{ id: string }>(owner("a"), "core.firmas.firma_automatica_autorizar", {
+      firmanteEmpresaId: fe.id,
+      clase: "acta_reunion",
+    });
+    expect(
+      await codigo(otro, "core.firmas.firma_automatica_revocar", { autorizacionId: a.id }),
+    ).toBe("FORBIDDEN");
+  });
+
+  it("trigger usuario_miembro: un usuario de otro tenant no puede ser firmante de la empresa", async () => {
+    const db = e.forTenant(t.a.tenantId);
+    // t.b.userId es miembro de B, no de A: el trigger core.verificar_usuario_miembro lo rechaza.
+    await expect(
+      db.firmanteEmpresa.create({
+        data: { tenantId: t.a.tenantId, usuarioId: t.b.userId, nombre: "Ajeno" },
+      }),
+    ).rejects.toThrow();
+  });
+
+  it("R17: la evidencia es inmutable — UPDATE y DELETE fallan", async () => {
+    const db = e.forTenant(t.a.tenantId);
+    const doc = await db.documento.create({
+      data: {
+        tenantId: t.a.tenantId,
+        nombre: "contrato.pdf",
+        mime: "application/pdf",
+        tamano: 1000,
+        sha256: "a".repeat(64),
+        storageKey: randomUUID(),
+        estado: "disponible",
+        creadoPorTipo: "system",
+      },
+    });
+    const sol = await db.solicitudFirma.create({
+      data: {
+        tenantId: t.a.tenantId,
+        documentoId: doc.id,
+        documentoVersion: 1,
+        sha256: "b".repeat(64),
+        clase: "acta_reunion",
+        nivel: "N1",
+        plazoVence: new Date(Date.now() + 86_400_000),
+        enviadaPorTipo: "system",
+      },
+    });
+    const ev = await db.evidenciaFirma.create({
+      data: {
+        tenantId: t.a.tenantId,
+        solicitudId: sol.id,
+        tipo: "enviada",
+        bitacoraSeq: 1,
+        hash: "c".repeat(64),
+      },
+    });
+    await expect(
+      db.evidenciaFirma.update({ where: { id: ev.id }, data: { tipo: "vista" } }),
+    ).rejects.toThrow();
+    await expect(db.evidenciaFirma.delete({ where: { id: ev.id } })).rejects.toThrow();
+  });
+
   it("aislamiento: el tenant B no ve la política del A ni revoca su autorización", async () => {
     const r = await dato<{ politicas: Pol[] }>(owner("b"), "core.firmas.politica_get", {
       clase: "recepcion_laboral",

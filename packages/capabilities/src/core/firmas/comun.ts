@@ -3,6 +3,7 @@ import { z } from "zod";
 import {
   CLASES_FIRMA,
   minimoDeClase,
+  nivelAlMenos,
   NIVELES_FIRMA,
   nivelValido,
   ORDENES_FIRMA,
@@ -87,6 +88,10 @@ export function validarPolitica(
   for (const n of nivelesPermitidos) {
     if (!nivelValido(clase, n)) {
       return `El nivel ${n} no es válido para esta clase (mínimo legal ${min}).`;
+    }
+    // Ningún nivel permitido puede quedar por debajo del mínimo exigido por el tenant (R2, R3).
+    if (!nivelAlMenos(n, nivelMinimo)) {
+      return `El nivel ${n} no puede estar por debajo del mínimo exigido ${nivelMinimo}.`;
     }
   }
   if (!nivelesPermitidos.includes(nivelMinimo)) {
