@@ -1,0 +1,23 @@
+// Módulo Portal Trabajador (Brief 15 · PR 1). Schema propio `portal_trabajador`. Toda tabla con
+// tenant_id, RLS `tenant_isolation`, IDs uuid(7), columnas snake_case por @map. El tenant_id y la
+// persona NO llevan @relation (no se tocan core.prisma ni maestros.prisma): las FK a core.tenants y
+// core.personas van en el SQL de la migración.
+
+/// Preferencias de notificación de UNA persona (la vinculada a su usuario). Silencio por defecto
+/// (ADR-020): sin fila, la persona recibe solo los avisos de la app y ningún canal externo.
+model PreferenciaNotificacion {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  personaId     String   @map("persona_id") @db.Uuid
+  /// { [categoria]: { push: boolean, correo: boolean } }; las categorías las fija el dominio.
+  preferencias  Json
+  /// Horario de silencio "HH:mm" (hora de Chile); ambos nulos = sin silencio.
+  silencioDesde String?  @map("silencio_desde")
+  silencioHasta String?  @map("silencio_hasta")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, personaId])
+  @@map("preferencias_notificacion")
+  @@schema("portal_trabajador")
+}

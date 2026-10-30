@@ -14,6 +14,7 @@
     "@opai/capabilities": "workspace:*",
     "@opai/mod-agente": "workspace:*",
     "@opai/mod-comercial": "workspace:*",
+    "@opai/mod-portal_trabajador": "workspace:*",
     "@opai/mod-rondas": "workspace:*"
   },
   "devDependencies": {

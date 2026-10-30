@@ -1,5 +1,7 @@
 import type { ModuleManifest } from "@opai/capabilities";
 
+import { manifest as PortalTrabajador } from "@opai/mod-portal_trabajador";
+
 import { manifest as Rondas } from "@opai/mod-rondas";
 import { manifest as agente } from "@opai/mod-agente";
 
@@ -14,5 +16,6 @@ export const modulos: readonly ModuleManifest[] = [
   agente,
   Comercial,
   Rondas,
+  PortalTrabajador,
   // scaffold:module — las entradas se agregan sobre esta línea
 ];
