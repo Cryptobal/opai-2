@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="portal-cliente.js"></script>
+</helmet>
+<div style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ subTabs }}" value="{{ sub }}" on-change="{{ setSub }}" style="flex:1;min-width:0" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="primary" icon="plus" block="{{ isPhone }}" disabled="{{ noData }}" hint-size="190px,40px">Prerregistrar visita</x-import>
+</div>
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<div aria-busy="true" aria-label="Cargando accesos" style="display:flex;flex-direction:column;gap:12px">
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px"><sc-for list="{{ sk3 }}" as="k" hint-placeholder-count="3"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 84 }}" radius="{{ 16 }}" hint-size="100%,84px"></x-import></sc-for></div>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);overflow:hidden">
+<sc-for list="{{ skel }}" as="k" hint-placeholder-count="4"><div style="display:flex;gap:12px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--ds-border)"><div style="flex:1;display:flex;flex-direction:column;gap:6px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="45%" hint-size="45%,14px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="30%" height="{{ 12 }}" hint-size="30%,12px"></x-import></div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="96px" height="{{ 22 }}" radius="{{ 999 }}" hint-size="96px,22px"></x-import></div></sc-for>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="scan" title="{{ emptyT }}" description="{{ emptyD }}" action="{{ emptyAction }}" hint-size="100%,340px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar los accesos" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="PC-ACC-503" hint-size="100%,340px"></x-import>
+</sc-if>
+
+<sc-if value="{{ okSitio }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.KpiTile" label="En sitio" value="5" hint-size="100%,80px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.KpiTile" label="Esperados hoy" value="3" hint-size="100%,80px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.KpiTile" label="Denegados hoy" value="1" hint-size="100%,80px"></x-import>
+</div>
+<div style="{{ sitioBox }}">
+<sc-for list="{{ enSitio }}" as="p" hint-placeholder-count="5">
+<div style="display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-bottom:1px solid var(--ds-border);min-height:56px">
+<span class="ic i-user muted" aria-hidden="true" style="margin-top:2px"></span>
+<span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
+<span style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="t-label">{{ p.nombre }}</span><span class="chip" style="height:22px;padding:0 8px;font-size:12px">{{ p.tipo }}</span></span>
+<span class="t-body-sm muted">{{ p.empresa }} · desde <span class="t-numeric">{{ p.desde }}</span></span>
+<sc-if value="{{ p.hasPat }}" hint-placeholder-val="{{ false }}"><span class="t-mono subtle">{{ p.patente }}</span></sc-if>
+</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ p.pTone }}" hint-size="90px,22px">{{ p.perm }}</x-import>
+</div>
+</sc-for>
+</div>
+<span class="t-caption">Solo lectura. La salida la registra el guardia en portería.</span>
+</sc-if>
+
+<sc-if value="{{ okReg }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ rutFull }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="badge b-warning">Decide Carlos</span><span class="t-body-sm muted">RUT completo de las visitas en el registro, porque el cliente administra sus listas.</span></div>
+</sc-if>
+<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+<div style="width:180px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DateInput" value="30-10-2026" hint-size="100%,44px"></x-import></div>
+<sc-for list="{{ resFiltros }}" as="f" hint-placeholder-count="5"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="{{ f.l }}" contador="{{ f.n }}" hint-size="120px,32px"></x-import></sc-for>
+</div>
+<div style="display:grid;grid-template-columns:{{ regCols }};gap:16px;align-items:start">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ rCols }}" rows="{{ registros }}" cards="{{ isPhone }}" to-card="{{ rCard }}" selected-key="{{ selReg }}" style="{{ bleed }}" hint-size="100%,300px"></x-import>
+<sc-if value="{{ showRegDet }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" padding="{{ 0 }}" hint-size="100%,380px">
+<div style="display:flex;flex-direction:column;gap:12px;padding:16px">
+<div role="status" style="display:flex;gap:12px;align-items:center;padding:16px;border-radius:var(--radius-lg);background:var(--ds-info-muted);color:var(--ds-info-fg)"><span style="width:40px;height:40px;border-radius:var(--radius-full);background:var(--ds-surface);display:flex;align-items:center;justify-content:center;flex:none"><span class="ic lg i-info" aria-hidden="true"></span></span><span style="display:flex;flex-direction:column;gap:2px"><span class="t-subheading">Fuera de lista, permitido</span><span class="t-body-sm">Se admitió y quedó marcado. La instalación permite ingresos fuera de lista.</span></span></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" rows="{{ regDet }}" hint-size="100%,200px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Timeline" items="{{ regTl }}" hint-size="100%,120px"></x-import>
+</div>
+</x-import>
+</sc-if>
+</div>
+<span class="t-caption">Mismos resultados y colores que ve el guardia en Terreno. Solo lectura.</span>
+</sc-if>
+
+<sc-if value="{{ okEsp }}" hint-placeholder-val="{{ false }}">
+<section style="display:flex;flex-direction:column;gap:8px">
+<h2 class="t-subheading m0">Por aprobar</h2>
+<sc-for list="{{ porAprobar }}" as="v" hint-placeholder-count="2">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,120px">
+<div style="display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;align-items:center">
+<span style="display:flex;flex-direction:column;gap:2px;min-width:0"><span class="t-label">{{ v.nombre }} · {{ v.empresa }}</span><span class="t-body-sm muted t-numeric">{{ v.cuando }} · {{ v.motivo }}</span><span class="t-caption">Anfitrión: {{ v.anfitrion }}</span></span>
+<span style="display:flex;gap:8px;flex:{{ btnFlex }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" size="lg" style="flex:1" hint-size="100px,48px">Rechazar</x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" size="lg" icon="check" style="flex:1" hint-size="110px,48px">Aprobar</x-import></span>
+</div>
+</x-import>
+</sc-for>
+</section>
+<section style="display:flex;flex-direction:column;gap:8px">
+<h2 class="t-subheading m0">Prerregistrados</h2>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ eCols }}" rows="{{ esperados }}" cards="{{ isPhone }}" to-card="{{ eCard }}" style="{{ bleed }}" hint-size="100%,220px"></x-import>
+</section>
+</sc-if>
+
+<sc-if value="{{ okLista }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="neutral" hint-size="100%,44px">La empresa de seguridad también aplica su propia lista bloqueada.</x-import>
+<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h2 class="t-subheading m0">Autorizadas por Logística Andina SpA</h2><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="plus" block="{{ isPhone }}" hint-size="170px,40px">Agregar a mi lista</x-import></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ lCols }}" rows="{{ lista }}" cards="{{ isPhone }}" to-card="{{ lCard }}" style="{{ bleed }}" hint-size="100%,260px"></x-import>
+</sc-if>
+<span class="t-caption">Según DESIGN-PROMPT-control-acceso-y-firma, vista Cliente. Solo en instalaciones con control de accesos contratado.</span>
+<sc-if value="{{ preSheet }}" hint-placeholder-val="{{ false }}">{{ overlayEl }}</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {};
+  componentDidMount() { if (!window.PC) { const t = setInterval(() => { if (window.PC) { clearInterval(t); this.forceUpdate(); } }, 50); } }
+  renderVals() {
+    const h = React.createElement, NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = this.props.device ?? "desktop", estado = this.props.estado ?? "ok", variante = this.props.variante ?? "";
+    const isPhone = device === "phone", narrow = device === "tablet", ok = estado === "ok";
+    let sub = this.state.sub || this.props.vista || "ensitio";
+    const preSheet = sub === "prerregistro"; if (preSheet) sub = "esperados";
+    const RES = { aut: ["success", "check-circle", "Autorizado"], sin: ["neutral", "info", "Sin lista"], fue: ["info", "info", "Fuera de lista, permitido"], no: ["danger", "lock", "No autorizado"], hor: ["warning", "clock", "Fuera de horario"] };
+    const RA = (k) => { const r = RES[k]; return NS.Badge ? h(NS.Badge, { tone: r[0], dot: false }, NS.Icon ? h(NS.Icon, { name: r[1], size: "sm", style: { width: 14, height: 14 } }) : null, r[2]) : r[2]; };
+    const B = (tone, l) => NS.Badge ? h(NS.Badge, { tone }, l) : l;
+    const col = (a, b, mono) => h("span", { style: { display: "flex", flexDirection: "column" } }, h("span", { style: { fontWeight: 500 } }, a), h("span", { className: mono ? "t-mono subtle" : "t-caption" }, b));
+    const num = (t) => h("span", { className: "t-numeric" }, t);
+    const rutFull = variante === "rutcompleto";
+    const R = (id, hh, nombre, rut, rutM, tipo, empresa, mov, res, nota) => ({ id, hh, nombre, rut: rutFull ? rut : rutM, tipo, empresa, mov, res, nota });
+    const registros = [
+      R("a1", "09:42", "Carolina Vera Soto", "15.678.234-1", "15.6••.•••-1", "Proveedor", "Transportes Maipo", "Entrada", "aut", "Prerregistrado por Andrea Rojas"),
+      R("a2", "09:31", "Sofía Castro Ibáñez", "17.002.118-4", "17.0••.•••-4", "Visita", "Auditores Pacífico", "Entrada", "fue", "Admitida fuera de lista"),
+      R("a3", "09:10", "Ricardo Lagos Peña", "12.345.678-5", "12.3••.•••-5", "Visita frecuente", "Logística Andina SpA", "Salida", "aut", ""),
+      R("a4", "08:55", "Despacho Chilexpress", "—", "—", "Despacho", "Chilexpress", "Entrada", "sin", "Sin lista para despachos"),
+      R("a5", "07:20", "Mauricio Toro Díaz", "13.902.115-K", "13.9••.•••-K", "Contratista", "Clima Norte Ltda.", "Rechazado", "no", "Vigencia vencida"),
+      R("a6", "06:48", "Hernán Bravo Leiva", "14.211.903-2", "14.2••.•••-2", "Contratista", "Fumigaciones Sur", "Rechazado", "hor", "Horario permitido 08:00–18:00"),
+    ];
+    const rCols = narrow
+      ? [{ key: "hh", label: "Hora", render: (r) => num(r.hh) }, { key: "n", label: "Persona", render: (r) => col(r.nombre, r.rut, true) }, { key: "r", label: "Resultado", render: (r) => RA(r.res) }]
+      : [{ key: "hh", label: "Hora", render: (r) => num(r.hh) }, { key: "n", label: "Persona", render: (r) => col(r.nombre, r.rut, true) }, { key: "t", label: "Tipo", render: (r) => col(r.tipo, r.empresa) }, { key: "m", label: "Movimiento", muted: true, render: (r) => r.mov }, { key: "r", label: "Resultado", render: (r) => RA(r.res) }];
+    const P = (nombre, tipo, empresa, desde, perm, pTone, patente) => ({ nombre, tipo, empresa, desde, perm, pTone, patente, hasPat: !!patente });
+    const enSitio = [P("Carolina Vera Soto", "Proveedor", "Transportes Maipo", "09:42", "Normal", "success", "PRTZ·41"), P("Sofía Castro Ibáñez", "Visita", "Auditores Pacífico", "09:31", "Normal", "success", ""), P("Jaime Rivas Toledo", "Contratista", "Clima Norte Ltda.", "07:05", "Por vencer", "warning", "LKJH·22"), P("Patricio Lillo Vera", "Contratista", "Eléctrica Central", "06:30", "Excedida", "danger", ""), P("Valentina Núñez Paz", "Visita", "Logística Andina SpA", "08:15", "Normal", "success", "")];
+    const esperados = [
+      { id: 1, cuando: "30-10-2026 · 11:00", nombre: "Tomás Fuentes Ruiz", empresa: "Banco Estado", estado: "Pendiente", tone: "info" },
+      { id: 2, cuando: "30-10-2026 · 09:30", nombre: "Carolina Vera Soto", empresa: "Transportes Maipo", estado: "Ingresó", tone: "success" },
+      { id: 3, cuando: "29-10-2026 · 15:00", nombre: "Rodrigo Saavedra", empresa: "Seguros Andes", estado: "No llegó", tone: "warning" },
+      { id: 4, cuando: "28-10-2026 · 10:00", nombre: "Isabel Mora Díaz", empresa: "Auditores Pacífico", estado: "Cancelado", tone: "neutral" },
+    ];
+    const lista = [
+      { id: 1, nombre: "Ricardo Lagos Peña", doc: "12.345.678-5", tipos: "Visita frecuente", vig: "hasta 31-12-2026", hor: "Lun–vie · 08:00–19:00", unico: "No", tone: "success", est: "Vigente" },
+      { id: 2, nombre: "Carolina Vera Soto", doc: "15.678.234-1", tipos: "Proveedor", vig: "hasta 15-11-2026", hor: "Lun–sáb · 07:00–14:00", unico: "No", tone: "warning", est: "Vence pronto" },
+      { id: 3, nombre: "PRTZ·41 · Camión Volvo FH", doc: "PRTZ·41", tipos: "Vehículo", vig: "hasta 31-12-2026", hor: "Todos los días", unico: "No", tone: "success", est: "Vigente" },
+      { id: 4, nombre: "Isabel Mora Díaz", doc: "16.554.230-9", tipos: "Visita", vig: "02-11-2026", hor: "10:00–12:00", unico: "Sí", tone: "info", est: "Uso único" },
+    ];
+    const baja = (n) => NS.IconButton ? h(NS.IconButton, { icon: "trash", label: "Quitar de mi lista a " + n }) : null;
+    const emptyMap = { ensitio: ["No hay nadie en el recinto", "Cuando el guardia registre una entrada aparece aquí."], registros: ["Aún no hay registros hoy", "Los ingresos y salidas aparecen apenas los registra el guardia."], esperados: ["No tienes visitas prerregistradas", "Prerregistra una visita para que el guardia la espere."], lista: ["Tu lista está vacía", "Agrega a quienes pueden entrar sin aviso previo."] };
+    const overlay = preSheet && NS.Sheet ? h(NS.Sheet, { contained: true, side: isPhone ? "bottom" : "right", title: "Prerregistrar visita", description: "Planta Quilicura · Portería 1", onClose: () => {},
+      actions: h(React.Fragment, null, NS.Button ? h(NS.Button, { variant: "secondary", size: "lg" }, "Cancelar") : null, NS.Button ? h(NS.Button, { variant: "primary", size: "lg", icon: "check" }, "Prerregistrar") : null) },
+      h("div", { style: { display: "flex", flexDirection: "column", gap: 14 } },
+        h("span", { className: "t-label" }, "Visitante 1"),
+        NS.Input ? h(NS.Input, { label: "Nombre", value: "Tomás Fuentes Ruiz" }) : null,
+        h("div", { style: { display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 12 } }, NS.Input ? h(NS.Input, { label: "RUN o pasaporte", value: "16.870.552-3", mono: true }) : null, NS.Input ? h(NS.Input, { label: "Patente", placeholder: "Opcional", mono: true }) : null),
+        NS.Input ? h(NS.Input, { label: "Empresa", value: "Banco Estado" }) : null,
+        NS.Button ? h(NS.Button, { variant: "ghost", icon: "plus", style: { alignSelf: "flex-start", height: 44 } }, "Agregar visitante") : null,
+        h("div", { style: { display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 12 } }, NS.DateInput ? h(NS.DateInput, { label: "Desde", value: "30-10-2026" }) : null, NS.DateInput ? h(NS.DateInput, { label: "Hasta", value: "30-10-2026", hint: "Máximo 30 días" }) : null),
+        h("div", { style: { display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 12 } }, NS.DateInput ? h(NS.DateInput, { label: "Llega desde", type: "time", value: "10:30" }) : null, NS.DateInput ? h(NS.DateInput, { label: "Hasta", type: "time", value: "12:00" }) : null),
+        NS.Select ? h(NS.Select, { label: "Anfitrión", value: "ar", options: [{ value: "ar", label: "Andrea Rojas" }, { value: "rl", label: "Ricardo Lagos Peña" }] }) : null,
+        NS.Input ? h(NS.Input, { label: "Motivo", value: "Reunión de cuenta" }) : null,
+        NS.Textarea ? h(NS.Textarea, { label: "Nota para el guardia", rows: 2, placeholder: "Opcional" }) : null,
+        NS.Switch ? h(NS.Switch, { checked: true, label: "Avisarme cuando llegue" }) : null,
+        NS.Switch ? h(NS.Switch, { checked: true, label: "Enviar invitación con QR", description: "Por correo a tomas.fuentes@bancoestado.cl" }) : null,
+        h("span", { className: "t-body-sm muted" }, "Se enviará 1 invitación · válida el 30-10-2026 de 10:30 a 12:00."))) : null;
+    return {
+      isPhone, noData: !ok, isLoading: estado === "cargando", isEmpty: estado === "vacio", isError: estado === "error",
+      sub, setSub: (s) => this.setState({ sub: s }),
+      subTabs: [{ id: "ensitio", label: "En sitio ahora", count: 5 }, { id: "registros", label: "Registros" }, { id: "esperados", label: "Esperados", count: 2 }, { id: "lista", label: "Mi lista" }],
+      okSitio: ok && sub === "ensitio", okReg: ok && sub === "registros", okEsp: ok && sub === "esperados", okLista: ok && sub === "lista",
+      bleed: isPhone ? { margin: "0 -16px" } : undefined, sitioBox: Object.assign({ display: "flex", flexDirection: "column", border: "1px solid var(--ds-border)", borderRadius: "var(--radius-lg)", background: "var(--ds-surface)", overflow: "hidden" }, isPhone ? { margin: "0 -16px", borderRadius: 0, borderLeft: 0, borderRight: 0 } : {}),
+      enSitio, registros, rCols, rutFull,
+      rCard: (r) => ({ icon: "scan", title: r.nombre, subtitle: r.hh + " · " + r.mov + " · " + r.tipo + (r.nota ? " · " + r.nota : ""), meta: r.rut, trailing: RA(r.res) }),
+      resFiltros: [{ l: "Autorizado", n: 2 }, { l: "Sin lista", n: 1 }, { l: "Fuera de lista, permitido", n: 1 }, { l: "No autorizado", n: 1 }, { l: "Fuera de horario", n: 1 }],
+      regCols: !isPhone && !narrow ? "minmax(0,1fr) 380px" : "minmax(0,1fr)", showRegDet: !isPhone && !narrow, selReg: isPhone || narrow ? undefined : "a2",
+      regDet: [{ label: "Persona", value: "Sofía Castro Ibáñez" }, { label: "RUN", value: rutFull ? "17.002.118-4" : "17.0••.•••-4", mono: true }, { label: "Tipo", value: "Visita · Auditores Pacífico" }, { label: "Anfitrión", value: "Ricardo Lagos Peña" }, { label: "Punto", value: "Portería 1" }],
+      regTl: [{ initials: "JP", who: "Juan Pérez Soto", action: "registró la entrada en Portería 1", when: "30-10-2026 09:31" }],
+      porAprobar: (window.PC && window.PC.VISITAS_PEND) || [], btnFlex: isPhone ? "1 1 100%" : "none",
+      esperados, eCols: [{ key: "cuando", label: "Fecha y hora", render: (r) => num(r.cuando) }, { key: "nombre", label: "Visita", render: (r) => col(r.nombre, r.empresa) }, { key: "estado", label: "Estado", render: (r) => B(r.tone, r.estado) }],
+      eCard: (r) => ({ icon: "calendar", title: r.nombre, subtitle: r.cuando + " · " + r.empresa, badge: { tone: r.tone, label: r.estado } }),
+      lista, lCols: narrow
+        ? [{ key: "n", label: "Persona o vehículo", render: (r) => col(r.nombre, r.doc, true) }, { key: "v", label: "Vigencia", render: (r) => col(r.vig, r.hor) }, { key: "e", label: "Estado", render: (r) => B(r.tone, r.est) }, { key: "x", label: "", align: "right", render: (r) => baja(r.nombre) }]
+        : [{ key: "n", label: "Persona o vehículo", render: (r) => col(r.nombre, r.doc, true) }, { key: "t", label: "Tipo", render: (r) => r.tipos }, { key: "v", label: "Vigencia", render: (r) => col(r.vig, r.hor) }, { key: "u", label: "Uso único", muted: true, render: (r) => r.unico }, { key: "e", label: "Estado", render: (r) => B(r.tone, r.est) }, { key: "x", label: "", align: "right", render: (r) => baja(r.nombre) }],
+      lCard: (r) => ({ icon: r.tipos === "Vehículo" ? "scan" : "user", title: r.nombre, subtitle: r.tipos + " · " + r.vig + " · " + r.hor, meta: r.doc, badge: { tone: r.tone, label: r.est }, trailing: baja(r.nombre) }),
+      emptyT: (emptyMap[sub] || emptyMap.ensitio)[0], emptyD: (emptyMap[sub] || emptyMap.ensitio)[1],
+      emptyAction: NS.Button ? h(NS.Button, { variant: "secondary", size: "lg" }, "Ver registros") : null,
+      overlayEl: overlay, preSheet,
+      skel: [1, 2, 3, 4], sk3: [1, 2, 3],
+    };
+  }
+}
+</script>
+</body>
+</html>

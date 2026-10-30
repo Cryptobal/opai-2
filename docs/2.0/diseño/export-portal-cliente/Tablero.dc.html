@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="portal-cliente.js"></script>
+<style>body{margin:0;background:var(--ds-n-200)}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<div class="ds" data-theme="light" style="display:flex;flex-direction:column;gap:48px;padding:48px;width:max-content;background:var(--ds-n-200)">
+<header style="display:flex;flex-direction:column;gap:8px;max-width:960px">
+<a href="00 Índice.dc.html" class="t-label-sm" style="text-decoration:none">← Índice · Portal Cliente v3</a>
+<h1 class="t-display m0">{{ titulo }}</h1>
+<span class="t-body muted">{{ roles }}</span>
+<span class="t-body-sm muted">{{ nota }}</span>
+</header>
+<sc-for list="{{ rows }}" as="r" hint-placeholder-count="2">
+<section style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+<h2 class="t-heading m0">{{ r.title }}</h2>
+<sc-if value="{{ r.isB }}" hint-placeholder-val="{{ false }}"><span class="badge b-warning">Decide Carlos</span></sc-if>
+<span class="t-body-sm muted">{{ r.note }}</span>
+</div>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<sc-for list="{{ r.items }}" as="a" hint-placeholder-count="6">
+<div style="display:flex;flex-direction:column;gap:8px">
+<span class="t-label-sm muted">{{ a.label }}</span>
+<div style="width:{{ a.w }};height:{{ a.h }};border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--ds-border-strong);position:relative">
+<sc-if value="{{ c.resumen }}" hint-placeholder-val="{{ false }}"><dc-import name="PcResumen" device="{{ a.device }}" theme="{{ a.theme }}" estado="{{ a.estado }}" rol="{{ a.rol }}" marca="{{ a.marca }}" sheet="{{ a.sheet }}" hint-size="100%,100%"></dc-import></sc-if>
+<sc-if value="{{ c.instalacion }}" hint-placeholder-val="{{ false }}"><dc-import name="PcInstalacion" device="{{ a.device }}" theme="{{ a.theme }}" estado="{{ a.estado }}" rol="{{ a.rol }}" variante="{{ a.variante }}" tab="{{ a.tab }}" vista="{{ a.vista }}" inst="{{ a.inst }}" hint-size="100%,100%"></dc-import></sc-if>
+<sc-if value="{{ c.documentos }}" hint-placeholder-val="{{ false }}"><dc-import name="PcDocumentos" device="{{ a.device }}" theme="{{ a.theme }}" estado="{{ a.estado }}" rol="{{ a.rol }}" tab="{{ a.tab }}" hint-size="100%,100%"></dc-import></sc-if>
+<sc-if value="{{ c.reportes }}" hint-placeholder-val="{{ false }}"><dc-import name="PcReportes" device="{{ a.device }}" theme="{{ a.theme }}" estado="{{ a.estado }}" variante="{{ a.variante }}" hint-size="100%,100%"></dc-import></sc-if>
+<sc-if value="{{ c.solicitudes }}" hint-placeholder-val="{{ false }}"><dc-import name="PcSolicitudes" device="{{ a.device }}" theme="{{ a.theme }}" estado="{{ a.estado }}" variante="{{ a.variante }}" vista="{{ a.vista }}" hint-size="100%,100%"></dc-import></sc-if>
+<sc-if value="{{ c.config }}" hint-placeholder-val="{{ false }}"><dc-import name="PcConfiguracion" device="{{ a.device }}" theme="{{ a.theme }}" estado="{{ a.estado }}" hint-size="100%,100%"></dc-import></sc-if>
+<sc-if value="{{ c.cotizaciones }}" hint-placeholder-val="{{ false }}"><dc-import name="PcCotizaciones" device="{{ a.device }}" theme="{{ a.theme }}" estado="{{ a.estado }}" vista="{{ a.vista }}" variante="{{ a.variante }}" rol="{{ a.rol }}" hint-size="100%,100%"></dc-import></sc-if>
+</div>
+</div>
+</sc-for>
+</div>
+</section>
+</sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;pantalla&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;resumen&quot;,&quot;ins-cob&quot;,&quot;ins-ron&quot;,&quot;ins-nov&quot;,&quot;ins-sup&quot;,&quot;ins-acc&quot;,&quot;ins-doc&quot;,&quot;cotizaciones&quot;,&quot;reportes&quot;,&quot;documentos&quot;,&quot;solicitudes&quot;,&quot;config&quot;,&quot;prospecto&quot;],&quot;default&quot;:&quot;resumen&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  componentDidMount() { if (!window.PC) { const t = setInterval(() => { if (window.PC) { clearInterval(t); this.forceUpdate(); } }, 50); } }
+  renderVals() {
+    const P = window.PC; const p = this.props.pantalla ?? "resumen";
+    const E = (extra, devices) => [["Vacío", "vacio"], ["Cargando", "cargando"], ["Error", "error"], ["Sin permiso", "sinpermiso"]].map(([t, e]) => ({ title: t, devices, props: { estado: e, ...extra } }));
+    const PD = ["phone", "desktop"];
+    const ins = (tab, titulo, nota, rows) => ({ comp: "instalacion", titulo, roles: "Lo ve: contacto del cliente con acceso a la instalación. Sin permiso: Forbidden.", nota, rows: [...rows, ...E({ tab })] });
+    const R = {
+      resumen: { comp: "resumen", titulo: "01 · Resumen del mes = informe mensual", roles: "Lo ve: contacto del cliente (todas o algunas instalaciones). Sin permiso: Forbidden.", nota: "Arriba a la izquierda va la empresa del cliente con la marca de Atlas Seguridad SpA, sin selector. Pestaña: «Resumen · Portal Cliente».",
+        rows: [{ title: "Contacto con todas las instalaciones", props: { estado: "ok", rol: "total" } },
+          { title: "Contacto limitado a 2 instalaciones", props: { estado: "ok", rol: "limitado" } }, ...E({}),
+          { title: "Selector de empresa cliente", isB: true, note: "Solo si el contacto tiene más de una empresa cliente.", devices: PD, props: { estado: "ok", marca: "selector", sheet: true } }] },
+      "ins-cob": ins("cob", "02 · Instalación · Cobertura y marcaciones", "Guardias con nombre, foto y RUT; marcaciones con hora programada al lado de la real, atrasos, ausencias y reemplazos. Sin coordenadas.", [
+        { title: "Cobertura y marcaciones", props: { estado: "ok", tab: "cob" } },
+        { title: "Contacto limitado", note: "La lista de iPad muestra solo sus 2 instalaciones.", devices: ["tablet"], props: { estado: "ok", rol: "limitado", tab: "cob" } }]),
+      "ins-ron": ins("ron", "03 · Instalación · Rondas · v3", "Lista del día y detalle d16f de export-rondas tal cual, con «Mapa Rondas» (variante recorrido) importado: puntos en orden con su hora e incidencia resaltada. Solo lectura, sin anomalías internas ni desglose de confianza.", [
+        { title: "Rondas del día y detalle d16f", props: { estado: "ok", tab: "ron" } },
+        { title: "Detalle en teléfono · mapa plegable arriba de los puntos", devices: ["phone"], props: { estado: "ok", tab: "ron", vista: "detalle" } }]),
+      "ins-nov": ins("nov", "04 · Instalación · Libro de novedades", "Libro cronológico con gravedad, categoría, adjuntos, quién registró, estado y respuestas. Aviso fijo de graves abiertas.", [
+        { title: "Libro", props: { estado: "ok", tab: "nov" } },
+        { title: "Novedad abierta · solo lectura", props: { estado: "ok", tab: "nov", vista: "detalle" } },
+        { title: "Novedad abierta · el cliente comenta", isB: true, devices: PD, props: { estado: "ok", tab: "nov", vista: "detalle", variante: "comentar" } }]),
+      "ins-sup": ins("sup", "05 · Instalación · Supervisión", "KPI del mes contra meta con tendencia de 6 meses, y visitas del supervisor con hallazgos y fotos.", [
+        { title: "Indicadores y visitas", props: { estado: "ok", tab: "sup" } },
+        { title: "Visitas solo con resumen, sin fotos", isB: true, devices: PD, props: { estado: "ok", tab: "sup", variante: "resumen" } }]),
+      "ins-acc": ins("acc", "06 · Instalación · Control de accesos · v3", "Fuente: DESIGN-PROMPT-control-acceso-y-firma, vista Cliente. Resultados con los nombres y colores de Terreno. Solo lectura salvo su lista, las aprobaciones y el prerregistro.", [
+        { title: "En sitio ahora", props: { estado: "ok", tab: "acc", vista: "ensitio" } },
+        { title: "Registros con su resultado", props: { estado: "ok", tab: "acc", vista: "registros" } },
+        { title: "Esperados y aprobaciones", devices: PD, props: { estado: "ok", tab: "acc", vista: "esperados" } },
+        { title: "Prerregistrar una visita", props: { estado: "ok", tab: "acc", vista: "prerregistro" } },
+        { title: "Mi lista", devices: PD, props: { estado: "ok", tab: "acc", vista: "lista" } },
+        { title: "RUT completo de las visitas en el registro", isB: true, note: "A: enmascarado (12.3••.•••-K).", devices: PD, props: { estado: "ok", tab: "acc", vista: "registros", variante: "rutcompleto" } },
+        { title: "Instalación sin Accesos contratado", note: "Bodega Lampa: la pestaña no aparece.", devices: ["desktop"], themes: ["light"], props: { estado: "ok", tab: "cob", inst: "bl" } }]),
+      "ins-doc": ins("doc", "07 · Instalación · Documentos", "Protocolos, procedimientos, planes de emergencia, contrato y anexos vinculados desde el módulo Documentos, con versión vigente y fecha.", [
+        { title: "Documentos de la instalación", props: { estado: "ok", tab: "doc" } }]),
+      cotizaciones: { comp: "cotizaciones", titulo: "08 · Cotizaciones", roles: "Lo ve: contacto del cliente y prospecto. Sin permiso: Forbidden.", nota: "Número CPQ-AAAA-NNN, fecha, instalación o servicio, estado, total y PDF. Solo el precio cotizado; nunca costos ni márgenes.",
+        rows: [{ title: "Lista", props: { estado: "ok", vista: "lista" } }, { title: "Detalle", props: { estado: "ok", vista: "detalle" } }, ...E({ vista: "lista" }),
+          { title: "Aceptar en línea", isB: true, devices: PD, props: { estado: "ok", vista: "detalle", variante: "aceptar" } },
+          { title: "Confirmación de aceptación", isB: true, devices: PD, props: { estado: "ok", vista: "confirmar", variante: "aceptar" } }] },
+      reportes: { comp: "reportes", titulo: "09 · Reportes · v3", roles: "Lo ve: contacto del cliente. Sin permiso: Forbidden.", nota: "Informe mensual (historial y descarga) y reportes de asistencia, rondas, novedades, supervisión y accesos por rango de fechas, en PDF y Excel. Suscripción por correo.",
+        rows: [{ title: "Centro de reportes", props: { estado: "ok" } }, ...E({}), { title: "PDF adjunto en el correo (B14)", isB: true, devices: PD, props: { estado: "ok", variante: "pdf" } }, { title: "RUT de los guardias en los reportes descargables", isB: true, note: "A: omitido.", devices: PD, props: { estado: "ok", variante: "rut" } }] },
+      documentos: { comp: "documentos", titulo: "10 · Documentos y protocolos", roles: "Lo ve: contacto del cliente. Documentos de guardias solo de tipos visibles (Ley 21.719). Sin permiso: Forbidden.", nota: "Documentos de los guardias, protocolos e instalaciones (filtro por instalación y tipo, versión vigente) y facturas.",
+        rows: [{ title: "Documentos de los guardias", props: { estado: "ok", tab: "doc" } }, { title: "Protocolos e instalaciones", props: { estado: "ok", tab: "pro" } }, { title: "Facturas", devices: PD, props: { estado: "ok", tab: "fac" } },
+          { title: "Contacto limitado", devices: PD, props: { estado: "ok", rol: "limitado", tab: "doc" } }, ...E({ tab: "pro" })] },
+      solicitudes: { comp: "solicitudes", titulo: "11 · Solicitudes", roles: "Lo ve: contacto del cliente. Sin permiso: Forbidden.", nota: "Servicio adicional fuera de pauta como tipo de ticket, con el precio de la cotización vigente.",
+        rows: [{ title: "Lista y estado del pedido", props: { estado: "ok", vista: "lista" } }, { title: "Nueva solicitud con precio vigente", props: { estado: "ok", vista: "form" } }, ...E({ vista: "lista" })] },
+      config: { comp: "config", titulo: "12 · Configuración → Portal Cliente (ERP) · v3", roles: "Lo ve: owner o admin del tenant en el ERP. Resto: Forbidden.", nota: "Solo 1280 y 1024. El ERP mantiene su selector de portal y empresa.", defDev: ["tablet", "desktop"],
+        rows: [{ title: "Configuración", props: { estado: "ok" } }, ...E({})] },
+      prospecto: { comp: "cotizaciones", titulo: "13 · Cliente prospecto", roles: "Lo ve: prospecto sin instalaciones (Paula Ortiz, Frigorífico del Maipo SpA).", nota: "Entra a Cotizaciones. Solo ve Cotizaciones y Mi cuenta; el resto del menú queda oculto. Si llega a otra sección por un enlace, ve un vacío que explica cuándo se activa.", defDev: PD,
+        rows: [{ title: "Entrada por defecto: Cotizaciones", props: { estado: "ok", vista: "lista", rol: "prospecto" } },
+          { title: "Sección aún no activa", note: "Por ejemplo, un enlace al Resumen.", props: { estado: "ok", vista: "bloqueado", rol: "prospecto" } },
+          { title: "Sin cotizaciones todavía", props: { estado: "vacio", vista: "lista", rol: "prospecto" } }] },
+    };
+    const cfg = R[p] || R.resumen;
+    const c = {}; ["resumen", "instalacion", "documentos", "reportes", "solicitudes", "config", "cotizaciones"].forEach((k) => (c[k] = cfg.comp === k));
+    return { titulo: cfg.titulo, roles: cfg.roles, nota: cfg.nota, rows: P ? P.board(cfg.rows, cfg.defDev) : [], c };
+  }
+}
+</script>
+</body>
+</html>
