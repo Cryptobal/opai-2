@@ -33,7 +33,8 @@ export const monedaSchema = z.enum(MONEDAS);
 export const modoMargenSchema = z.enum(MODOS_MARGEN);
 /** Porcentaje escalado por PCT_ESCALA: 0 ≤ m < 100 % en pantalla, API y MCP (§4). */
 export const pctSchema = z.number().int().min(0).lt(PCT_ESCALA);
-export const clpSchema = z.number().int().min(0).max(10_000_000_000);
+/** CLP entero dentro del rango de las columnas INTEGER de `cpq` (un monto mayor fallaría al escribir). */
+export const clpSchema = z.number().int().min(0).max(2_147_483_647);
 export const tituloSchema = z.string().trim().min(3).max(160);
 
 /** Si el actor ve costos, margen y sueldos (R59). Sin el permiso, las vistas omiten esos campos. */

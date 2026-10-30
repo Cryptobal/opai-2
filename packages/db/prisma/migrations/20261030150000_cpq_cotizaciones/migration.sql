@@ -220,6 +220,23 @@ DO $$ BEGIN
   END IF;
 END $$;
 
+-- Referencias a core.users (global, sin RLS): FK para que no queden UUID inexistentes.
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'cotizaciones_creada_por_fkey' AND conrelid = '"cpq"."cotizaciones"'::regclass) THEN
+    ALTER TABLE "cpq"."cotizaciones" ADD CONSTRAINT "cotizaciones_creada_por_fkey" FOREIGN KEY ("creada_por") REFERENCES "core"."users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+  END IF;
+END $$;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'aprobaciones_solicitada_por_fkey' AND conrelid = '"cpq"."aprobaciones"'::regclass) THEN
+    ALTER TABLE "cpq"."aprobaciones" ADD CONSTRAINT "aprobaciones_solicitada_por_fkey" FOREIGN KEY ("solicitada_por") REFERENCES "core"."users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+  END IF;
+END $$;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'aprobaciones_decidida_por_fkey' AND conrelid = '"cpq"."aprobaciones"'::regclass) THEN
+    ALTER TABLE "cpq"."aprobaciones" ADD CONSTRAINT "aprobaciones_decidida_por_fkey" FOREIGN KEY ("decidida_por") REFERENCES "core"."users"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+  END IF;
+END $$;
+
 -- Reglas de forma (estados de R40, moneda, modos de margen y montos no negativos)
 DO $$ BEGIN
   IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname = 'cotizaciones_estado_check' AND conrelid = '"cpq"."cotizaciones"'::regclass) THEN
@@ -387,12 +404,28 @@ DO $$ BEGIN
   END IF;
 END $$;
 
+-- Toda referencia a core.users debe ser de un miembro de la empresa (las FK no pasan por RLS y
+-- core.users es global). Reutiliza core.verificar_usuario_miembro (20261028234500), como firma_nucleo;
+-- salta las columnas NULL.
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'usuario_miembro' AND tgrelid = '"cpq"."cotizaciones"'::regclass) THEN
+    CREATE TRIGGER usuario_miembro BEFORE INSERT OR UPDATE OF "creada_por", "tenant_id" ON "cpq"."cotizaciones"
+      FOR EACH ROW EXECUTE FUNCTION "core"."verificar_usuario_miembro"('creada_por');
+  END IF;
+END $$;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'usuario_miembro' AND tgrelid = '"cpq"."aprobaciones"'::regclass) THEN
+    CREATE TRIGGER usuario_miembro BEFORE INSERT OR UPDATE OF "solicitada_por", "decidida_por", "tenant_id" ON "cpq"."aprobaciones"
+      FOR EACH ROW EXECUTE FUNCTION "core"."verificar_usuario_miembro"('solicitada_por', 'decidida_por');
+  END IF;
+END $$;
+
 COMMIT;
 
 -- Reversión (manual, con el rol propietario, en una transacción): sin datos de negocio previos (el
 -- schema es nuevo), basta con:
 --   DROP SCHEMA "cpq" CASCADE;
--- Elimina las 5 tablas, sus índices, FKs, checks, triggers y la política tenant_isolation de cada una,
+-- Elimina las 5 tablas, sus índices, FKs (también las de core.users), checks, triggers (mismo_tenant y usuario_miembro) y la política tenant_isolation de cada una,
 -- y los GRANT/ALTER DEFAULT PRIVILEGES sobre el schema. Exige revertir antes el código del módulo
 -- (manifest y capacidades `cpq.*`) para que nada siga escribiendo ahí. Si ya hubiera cotizaciones
 -- reales, se restaura desde el snapshot de Neon previo (OPERACION-agentes.md A.5).

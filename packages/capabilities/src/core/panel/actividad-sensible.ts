@@ -4,6 +4,35 @@ import type { Contexto } from "../../types";
 
 const MONTOS = ["sueldoBase", "colacion", "movilizacion", "gratificacionMonto"] as const;
 const OCULTO = "••••";
+/** Campos de costo de CPQ (R59): en el input de `cpq.*` y en cada `operaciones[]` de ajustar. */
+const COSTOS_CPQ = [
+  "margenObjetivo",
+  "modoMargen",
+  "sueldoBruto",
+  "costoUnitario",
+  "margenPropio",
+] as const;
+const PERMISO_COSTOS_CPQ = "cpq:costos.ver";
+
+function sinCostosCpq(o: Record<string, unknown>): Record<string, unknown> {
+  const copia: Record<string, unknown> = { ...o };
+  for (const k of COSTOS_CPQ) if (copia[k] != null) copia[k] = OCULTO;
+  return copia;
+}
+
+/**
+ * Costos del input auditado de `cpq.*` (R59): sin `cpq:costos.ver` se reemplazan, también dentro
+ * del lote de `cpq.cotizaciones.ajustar`. El historial no puede ser una vía lateral para ver costos.
+ */
+function redactarCostosCpq(ctx: Contexto, entrada: Record<string, unknown>) {
+  if (ctx.autorizar(PERMISO_COSTOS_CPQ)) return entrada;
+  const copia = sinCostosCpq(entrada);
+  if (Array.isArray(copia["operaciones"]))
+    copia["operaciones"] = copia["operaciones"].map((o: unknown) =>
+      o && typeof o === "object" ? sinCostosCpq({ ...o }) : o,
+    );
+  return copia;
+}
 
 /**
  * Montos de sueldo en el input auditado de `core.estructuras.*`: sin el permiso de sueldos
@@ -15,6 +44,7 @@ export function redactarSensibles(
   capability: string,
   entrada: Record<string, unknown>,
 ): Record<string, unknown> {
+  if (capability.startsWith("cpq.")) return redactarCostosCpq(ctx, entrada);
   if (!capability.startsWith("core.estructuras.")) return entrada;
   if (ctx.autorizar(PERMISOS_CORE.estructurasReadSensible)) return entrada;
   const copia: Record<string, unknown> = { ...entrada };
