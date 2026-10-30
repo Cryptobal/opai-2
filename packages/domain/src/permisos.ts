@@ -49,6 +49,10 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
       PERMISOS_CORE.finiquitosManage,
       // Embudo y catálogos de Comercial (comercial.md §7): owner y admin.
       "comercial:config.manage",
+      // CPQ (cpq.md §7, ADR-042 (5) y (8)): aprobar márgenes y cambiar el modelo de costeo son de
+      // owner y admin. `cpq:costos.ver` sí lo tiene, sin abrirle las estructuras sensibles (R20).
+      "cpq:aprobar",
+      "cpq:modelo.manage",
       PERMISOS_CORE.marcaManage,
       PERMISOS_CORE.integracionesManage,
       PERMISOS_CORE.comunicacionesManage,
