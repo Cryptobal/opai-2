@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<title>Instalación · Portal Cliente</title>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="portal-cliente.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<div data-pc-brand="fijo" style="width:100%;height:100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" top-bar="{{ pcTopBar }}" device="{{ device }}" theme="{{ theme }}" portal="Logística Andina SpA" tenant="Portal Cliente de Atlas Seguridad SpA" tenant-initials="AS" user="{{ user }}" tabs="{{ tabs }}" rail-footer="{{ railFooter }}" groups="{{ groups }}" active="ins" title="Instalaciones" width="100%" height="100%" hint-size="100%,100%">
+<div style="display:flex;flex:1;min-height:0">
+<sc-if value="{{ showList }}" hint-placeholder-val="{{ false }}">
+<div style="width:280px;flex:none;border-right:1px solid var(--ds-border);background:var(--ds-surface);overflow:auto">
+<sc-for list="{{ sites }}" as="s" hint-placeholder-count="3">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.SelectableRow" selected="{{ s.selected }}" title="{{ s.name }}" subtitle="{{ s.dir }}" meta="{{ s.cob }}" badge="{{ s.badge }}" hint-size="100%,64px"></x-import>
+</sc-for>
+</div>
+</sc-if>
+<div style="flex:1;min-width:0;overflow:auto">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<sc-if value="{{ forbidden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a esta instalación" description="{{ forbDesc }}" action-label="Pedir acceso" hint-size="100%,400px"></x-import>
+</sc-if>
+<sc-if value="{{ allowed }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}"><a href="#" class="t-label" style="display:inline-flex;align-items:center;gap:4px;min-height:44px;text-decoration:none;color:var(--ds-fg-muted)"><span class="ic sm i-chevron-left" aria-hidden="true"></span>{{ backLabel }}</a></sc-if>
+<sc-if value="{{ showHeader }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" size="heading" eyebrow="Logística Andina SpA" title="{{ instName }}" subtitle="{{ instDir }}" badge="{{ headBadge }}" hint-size="100%,80px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="plus" block="{{ isPhone }}" hint-size="220px,40px">Pedir servicio adicional</x-import>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ tabItems }}" value="{{ tab }}" on-change="{{ setTab }}" style="margin-bottom:16px" hint-size="100%,44px"></x-import>
+</sc-if>
+<sc-if value="{{ tCob }}" hint-placeholder-val="{{ false }}"><dc-import name="InsCobertura" device="{{ device }}" estado="{{ estado }}" variante="{{ variante }}" vista="{{ vista }}" hint-size="100%,600px"></dc-import></sc-if>
+<sc-if value="{{ tRon }}" hint-placeholder-val="{{ false }}"><dc-import name="InsRondas" device="{{ device }}" estado="{{ estado }}" variante="{{ variante }}" vista="{{ vista }}" hint-size="100%,600px"></dc-import></sc-if>
+<sc-if value="{{ tNov }}" hint-placeholder-val="{{ false }}"><dc-import name="InsLibro" device="{{ device }}" estado="{{ estado }}" variante="{{ variante }}" vista="{{ vista }}" hint-size="100%,600px"></dc-import></sc-if>
+<sc-if value="{{ tSup }}" hint-placeholder-val="{{ false }}"><dc-import name="InsSupervision" device="{{ device }}" estado="{{ estado }}" variante="{{ variante }}" vista="{{ vista }}" hint-size="100%,600px"></dc-import></sc-if>
+<sc-if value="{{ tAcc }}" hint-placeholder-val="{{ false }}"><dc-import name="InsAccesos" device="{{ device }}" estado="{{ estado }}" variante="{{ variante }}" vista="{{ vista }}" hint-size="100%,600px"></dc-import></sc-if>
+<sc-if value="{{ tDoc }}" hint-placeholder-val="{{ false }}"><dc-import name="InsDocumentos" device="{{ device }}" estado="{{ estado }}" variante="{{ variante }}" vista="{{ vista }}" hint-size="100%,600px"></dc-import></sc-if>
+</sc-if>
+</x-import>
+</div>
+</div>
+</x-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ok&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;ok&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;rol&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;total&quot;,&quot;limitado&quot;],&quot;default&quot;:&quot;total&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;tab&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;cob&quot;,&quot;ron&quot;,&quot;nov&quot;,&quot;sup&quot;,&quot;acc&quot;,&quot;doc&quot;],&quot;default&quot;:&quot;cob&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;inst&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;pq&quot;,&quot;bl&quot;,&quot;ta&quot;],&quot;default&quot;:&quot;pq&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;vista&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;variante&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = {};
+  componentDidMount() { if (!window.PC) { const t = setInterval(() => { if (window.PC) { clearInterval(t); this.forceUpdate(); } }, 50); } }
+  renderVals() {
+    const P = window.PC || {}; const h = React.createElement, NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = this.props.device ?? "desktop", estado = this.props.estado ?? "ok", rol = this.props.rol ?? "total";
+    const vista = this.props.vista ?? "", instId = this.props.inst ?? "pq";
+    const isPhone = device === "phone";
+    const inst = (P.INST || []).find((i) => i.id === instId) || { name: "Planta Quilicura", dir: "", accesos: true, tone: "success", estado: "Cumple", cob: "" };
+    let tab = this.state.tab || this.props.tab || "cob";
+    if (tab === "acc" && !inst.accesos) tab = "cob";
+    const items = [{ id: "cob", label: "Cobertura y marcaciones" }, { id: "ron", label: "Rondas" }, { id: "nov", label: "Libro de novedades" }, { id: "sup", label: "Supervisión" }];
+    if (inst.accesos) items.push({ id: "acc", label: "Accesos" });
+    items.push({ id: "doc", label: "Documentos" });
+    const detail = !!vista && vista !== "lista";
+    const sites = (P.INST || []).filter((i) => rol !== "limitado" || P.limitadas.includes(i.id)).map((i) => ({ ...i, selected: i.id === inst.id, badge: { tone: i.tone, label: i.estado } }));
+    const label = items.find((t) => t.id === tab);
+    return {
+      pcTopBar: P.topBar ? P.topBar(device, this.props.rol, false) : undefined,
+      device, estado, variante: this.props.variante ?? "", vista, theme: this.props.theme ?? "light", isPhone,
+      showList: device === "tablet", sites,
+      user: P.USERS ? P.USERS[rol === "limitado" ? "limitado" : "total"] : undefined,
+      tabs: device === "tablet" ? P.NAV_RAIL : P.NAV_PHONE, railFooter: [{ id: "age", label: "Agentes", icon: "bot" }], groups: P.GROUPS,
+      forbidden: estado === "sinpermiso", allowed: estado !== "sinpermiso",
+      forbDesc: "Tu acceso no incluye " + inst.name + ". Pídele acceso a Andrea Rojas, contacto principal de Logística Andina SpA.",
+      instName: inst.name, instDir: inst.dir,
+      headBadge: estado === "ok" && NS.Badge ? h(NS.Badge, { tone: inst.tone }, inst.estado + " · " + inst.cob) : null,
+      showHeader: !(isPhone && detail),
+      backLabel: isPhone && detail ? (label ? label.label : "Volver") : "Instalaciones",
+      tab, setTab: (t) => this.setState({ tab: t }), tabItems: items,
+      tCob: tab === "cob", tRon: tab === "ron", tNov: tab === "nov", tSup: tab === "sup", tAcc: tab === "acc", tDoc: tab === "doc",
+    };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<title>Portal Cliente · Configuración · OPAI</title>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="portal-cliente.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" portal="ERP" tenant="Atlas Seguridad SpA" tenant-initials="AS" user="{{ user }}" tabs="{{ tabs }}" groups="{{ groups }}" active="cfg" title="Configuración" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<sc-if value="{{ forbidden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="Solo owner o admin configuran el Portal Cliente" description="Tu rol no permite cambiar qué ve el cliente. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" hint-size="100%,400px"></x-import>
+</sc-if>
+<sc-if value="{{ allowed }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Configuración" title="Portal Cliente" subtitle="Qué ve cada cliente en su portal. Los cambios aplican a todos sus contactos." hint-size="100%,80px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="primary" disabled="{{ noData }}" hint-size="150px,40px">Guardar cambios</x-import>
+</x-import>
+<div style="display:flex;flex-direction:column;gap:16px">
+<div style="max-width:360px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Cliente" value="la" options="{{ clientes }}" disabled="{{ noData }}" hint-size="100%,70px"></x-import></div>
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<div aria-busy="true" aria-label="Cargando configuración" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:16px;align-items:start">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,360px"><div style="display:flex;flex-direction:column;gap:14px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="60%" height="{{ 20 }}" hint-size="60%,20px"></x-import><sc-for list="{{ skel }}" as="k" hint-placeholder-count="5"><div style="display:flex;gap:12px;align-items:center"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="20px" height="{{ 20 }}" hint-size="20px,20px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="55%" hint-size="55%,14px"></x-import></div></sc-for></div></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,260px"><div style="display:flex;flex-direction:column;gap:14px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="50%" height="{{ 20 }}" hint-size="50%,20px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 44 }}" hint-size="100%,44px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 132 }}" hint-size="100%,132px"></x-import></div></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="building" title="Aún no hay clientes con portal" description="Activa el Portal Cliente desde la ficha del cliente para configurar qué ve." action="{{ emptyAction }}" hint-size="100%,340px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar la configuración" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="ERP-PCL-503" hint-size="100%,340px"></x-import>
+</sc-if>
+<sc-if value="{{ isOk }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(380px,1fr));gap:16px;align-items:start">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Documentos visibles para el cliente" description="Ve solo los tipos marcados, de los guardias asignados a sus instalaciones." hint-size="100%,420px">
+<div style="display:flex;flex-direction:column;gap:4px">
+<sc-for list="{{ tipos }}" as="t" hint-placeholder-count="6">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ t.on }}" disabled="{{ t.off }}" label="{{ t.label }}" description="{{ t.desc }}" hint-size="100%,44px"></x-import>
+</sc-for>
+<span class="t-caption" style="padding-top:4px">Los documentos visibles siguen las mismas reglas de datos de los guardias.</span>
+</div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Datos de los guardias · Ley 21.719" description="Lo que el cliente ve de cada guardia asignado a sus instalaciones." hint-size="100%,380px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" rows="{{ leyRows }}" hint-size="100%,170px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Sin descarga ni exportación" hint-size="100%,56px">El cliente ve estos datos solo dentro del portal. No puede descargarlos ni exportarlos: los Excel de reportes van sin la columna de RUT.</x-import>
+<div style="display:flex;flex-direction:column;gap:8px;padding:12px;border:1px dashed var(--ds-border-strong);border-radius:var(--radius-md)">
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="badge b-warning">Decide Carlos</span><span class="t-label">RUT de los guardias en los reportes descargables</span></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ rutOpts }}" value="omitido" label="RUT en reportes" hint-size="220px,36px"></x-import>
+<span class="t-caption">Por defecto se omite. Incluirlo permitiría que el RUT salga del portal.</span>
+</div>
+<span class="t-caption">Nunca se muestran coordenadas, teléfono, dirección, salud ni remuneraciones.</span>
+</div>
+</x-import>
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Listas de acceso" hint-size="100%,120px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ true }}" label="El cliente gestiona sus listas" description="Agrega y quita personas autorizadas. Solo en instalaciones con Accesos contratado: Planta Quilicura y Torre Apoquindo." hint-size="100%,60px"></x-import>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Destinatarios del informe mensual" description="Lo reciben el día 1 de cada mes. El cliente también puede editarlos desde Reportes." hint-size="100%,300px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-md);overflow:hidden">
+<sc-for list="{{ dest }}" as="d" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;gap:8px;padding:0 4px 0 12px;min-height:44px;border-bottom:1px solid var(--ds-border)"><span class="t-body-sm" style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ d.mail }}</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="x" label="{{ d.quitar }}" hint-size="44px,44px"></x-import></div>
+</sc-for>
+</div>
+<div style="display:flex;gap:8px;align-items:flex-end">
+<div style="flex:1;min-width:0"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Agregar destinatario" type="email" placeholder="nombre@empresa.cl" hint-size="100%,70px"></x-import></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" style="height:44px" hint-size="90px,44px">Agregar</x-import>
+</div>
+</div>
+</x-import>
+</div>
+</div>
+</sc-if>
+</div>
+</sc-if>
+</x-import>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ok&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;ok&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  componentDidMount() { if (!window.PC) { const t = setInterval(() => { if (window.PC) { clearInterval(t); this.forceUpdate(); } }, 50); } }
+  renderVals() {
+    const P = window.PC || {}; const h = React.createElement, NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = this.props.device ?? "desktop", estado = this.props.estado ?? "ok";
+    return {
+      device: device === "phone" ? "tablet" : device, theme: this.props.theme ?? "light",
+      user: P.USERS ? P.USERS.erp : undefined, tabs: P.ERP_TABS, groups: P.ERP_GROUPS,
+      forbidden: estado === "sinpermiso", allowed: estado !== "sinpermiso",
+      isOk: estado === "ok", isLoading: estado === "cargando", isEmpty: estado === "vacio", isError: estado === "error", noData: estado !== "ok",
+      clientes: [{ value: "la", label: "Logística Andina SpA" }, { value: "ia", label: "Inmobiliaria Apoquindo" }],
+      tipos: [
+        { label: "Credencial OS-10", desc: "Vigencia y número de credencial", on: true, off: false },
+        { label: "Curso OS-10", desc: "Certificado de capacitación", on: true, off: false },
+        { label: "Certificado de antecedentes", desc: "Para fines especiales", on: true, off: false },
+        { label: "Contrato de trabajo", desc: "Sin remuneraciones", on: false, off: false },
+        { label: "Liquidaciones de sueldo", desc: "Nunca visible para clientes", on: false, off: true },
+        { label: "Exámenes de salud", desc: "Nunca visible para clientes", on: false, off: true },
+      ],
+      leyRows: [{ label: "Qué ve", value: "Nombre, foto y RUT" }, { label: "Finalidad", value: "Identificar a quien presta el servicio en tu instalación" }, { label: "Base", value: "La ejecución del contrato de servicio" }, { label: "De quiénes", value: "Solo guardias asignados a sus instalaciones" }],
+      rutOpts: [{ value: "omitido", label: "Omitido" }, { value: "incluido", label: "Incluido" }],
+      dest: (P.DESTINATARIOS || []).map((m) => ({ mail: m, quitar: "Quitar " + m })),
+      emptyAction: NS.Button ? h(NS.Button, { variant: "secondary", size: "lg" }, "Ir a clientes") : null,
+      skel: [1, 2, 3, 4, 5],
+    };
+  }
+}
+</script>
+</body>
+</html>
