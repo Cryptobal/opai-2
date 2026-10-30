@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="pauta-tableros.js"></script>
+<style>body{margin:0;background:#e7e7ea}a{color:var(--ds-accent)}a:hover{color:var(--ds-accent)}</style>
+</helmet>
+<div data-theme="light" style="padding:48px;display:flex;flex-direction:column;gap:56px;min-width:max-content;background:var(--ds-n-200);color:var(--ds-fg);font-family:var(--font-sans)">
+  <header style="display:flex;flex-direction:column;gap:6px;max-width:880px">
+    <a href="Indice.dc.html" class="t-label-sm">← Índice de pantallas</a>
+    <div class="t-overline">OPAI 2.0 · Operaciones · Pauta · v2</div>
+    <h1 class="t-title m0">01 · Pauta · Mensual · por instalación</h1>
+    <p class="t-body-sm muted m0" style="text-wrap:pretty">Grilla puestos × días con el patrón de cada serie, feriados, PPC con motivo, punto en los días con excepción y filas de refuerzo con su Badge. Clic izquierdo: en el puesto abre su serie, en la celda muestra el día. Clic derecho (o pulsación larga en iPad y teléfono) abre el menú contextual. Shift+clic o arrastrar elige varios días; en teléfono, «Seleccionar días». «Pintar serie» queda en la cabecera como atajo.</p>
+    <p class="t-body-sm m0"><strong>Roles:</strong> owner, admin y gerente ven y editan todo · supervisor, solo sus instalaciones · viewer, solo lectura (menú con opciones deshabilitadas).</p>
+  </header>
+  <sc-for list="{{ rows }}" as="row" hint-placeholder-count="2">
+    <section style="display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;flex-direction:column;gap:2px"><h2 class="t-subheading m0">{{ row.t }}</h2><sc-if value="{{ row.note }}"><p class="t-body-sm muted m0">{{ row.note }}</p></sc-if></div>
+      <div style="display:flex;gap:32px;align-items:flex-start">
+        <sc-for list="{{ row.b }}" as="ab" hint-placeholder-count="3">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div class="t-label-sm muted">{{ ab.label }}</div>
+            <div data-k="{{ ab.k }}" style="width:{{ ab.wpx }};height:{{ ab.hpx }};position:relative;overflow:hidden;border:1px solid var(--ds-border-strong);border-radius:var(--radius-lg);background:var(--ds-surface)">
+              <dc-import name="Tablero" cfg="{{ ab.cfg }}" delay="{{ ab.delay }}" style="position:absolute;inset:0" hint-size="100%,100%"></dc-import>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+  </sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+const CFG={base:{tab:'mensual',vista:'instalacion'},extra:[
+ {t:'Menú contextual · clic derecho (1280)',note:'Sobre un día: Registrar excepción, Asignar reemplazo, Agregar refuerzo y Ver el día. Sobre el puesto: Editar serie, Cambiar titular, Agregar refuerzo e Historial del puesto.',b:[['desktop','light',{hoja:'menuDia'},'menú del día'],['desktop','light',{hoja:'menuPuesto'},'menú del puesto'],['desktop','dark',{hoja:'menuDia'},'menú del día']]},
+ {t:'Menú como Sheet · pulsación larga (1024 y 375)',b:[['tablet','light',{hoja:'menuDia'},'menú del día'],['tablet','dark',{hoja:'menuPuesto'},'menú del puesto'],['phone','light',{hoja:'menuDia'},'menú del día'],['phone','dark',{hoja:'menuDia'},'menú del día']]},
+ {t:'Varios días seguidos',note:'Arrastrar o Shift+clic en escritorio; «Seleccionar días» en teléfono. Se registra la misma excepción en todos.',b:[['desktop','light',{hoja:'seleccion'},'selección'],['tablet','light',{hoja:'seleccion'},'selección'],['phone','light',{hoja:'seleccion'},'selección']]},
+ {t:'Refuerzo en la grilla',note:'Fila propia con Badge «Refuerzo», distinta de la serie, de una excepción y de un reemplazo.',b:[['desktop','light',{hoja:'refuerzoSel'},'refuerzo seleccionado'],['desktop','dark',{hoja:'refuerzoSel'},'refuerzo seleccionado']]},
+ {t:'Viewer · solo lectura',b:[['desktop','light',{rol:'viewer'},'viewer'],['phone','light',{rol:'viewer'},'viewer']]},
+ {t:'Exportar (PDF / Excel)',b:[['desktop','light',{hoja:'exportar'},'menú abierto'],['phone','dark',{hoja:'exportar'},'menú abierto']]}]};
+class Component extends DCLogic {
+  componentDidMount(){const go=()=>window.PautaTableros?this.forceUpdate():(this.t=setTimeout(go,40));go();}
+  componentWillUnmount(){clearTimeout(this.t);}
+  renderVals(){if(!this.rows&&window.PautaTableros){let n=0;this.rows=window.PautaTableros(CFG);this.rows.forEach(r=>r.b.forEach(ab=>{ab.delay=200+(n++)*450;}));}return{rows:this.rows||[]};}
+}
+</script>
+</body>
+</html>
