@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="fin-shell.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ nav.tabs }}" groups="{{ nav.groups }}" active="{{ nav.active }}" title="{{ shellTitle }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<sc-if value="{{ notForbidden }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" tab-bar="{{ isPhone }}" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Conciliación" title="{{ headTitle }}" subtitle="{{ headSub }}" hint-size="100%,80px"></x-import>
+<sc-if value="{{ showList }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ tabsItems }}" value="reglas" hint-size="100%,44px" style="margin-bottom:16px"></x-import>
+</sc-if>
+<sc-if value="{{ isDatos }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:{{ cols }};gap:16px;align-items:start">
+<sc-if value="{{ showList }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;gap:8px">
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);overflow:hidden" role="list" aria-label="Reglas por prioridad">
+<sc-for list="{{ reglas }}" as="r" hint-placeholder-count="8">
+<div role="listitem" style="display:grid;grid-template-columns:44px 24px minmax(0,1fr) auto;align-items:center;gap:4px;min-height:56px;padding-right:12px;border-bottom:1px solid var(--ds-border);background:{{ r.bg }}">
+<span title="Arrastrar para ordenar" aria-label="Arrastrar para ordenar" style="display:flex;align-items:center;justify-content:center;width:44px;height:44px;color:var(--ds-fg-subtle);cursor:grab"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Icon" name="menu" size="sm" hint-size="16px,16px"></x-import></span>
+<span class="t-mono" style="color:var(--ds-fg-subtle)">{{ r.n }}</span>
+<span style="display:grid;min-width:0;padding:8px 0"><span class="t-label" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.nombre }}</span><span class="t-caption">{{ r.alcance }} · {{ r.accion }}</span></span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ r.tone }}" hint-size="64px,22px">{{ r.estado }}</x-import>
+</div>
+</sc-for>
+</div>
+<span class="t-caption">Se aplica la primera regla que calce, de arriba hacia abajo. Arrastra para cambiar la prioridad.</span>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" block="{{ true }}" size="lg" icon="plus" on-click="{{ openForm }}" hint-size="100%,48px">Nueva regla</x-import>
+</sc-if>
+</div>
+</sc-if>
+<sc-if value="{{ showForm }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Regla" hint-size="100%,200px">
+<div style="display:grid;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Nombre" value="Proveedores de guardias" hint-size="100%,72px"></x-import>
+<div style="display:grid;gap:6px"><span class="t-label">Alcance</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ alcances }}" value="cargos" label="Alcance" hint-size="100%,40px"></x-import></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" label="Activa" description="Desactivarla no deshace lo que ya concilió." checked="{{ true }}" hint-size="100%,44px"></x-import>
+</div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Condiciones" description="RUT, monto, glosa o referencia del movimiento" hint-size="100%,260px">
+<div style="display:grid;gap:12px">
+<div style="display:grid;gap:6px"><span class="t-label">El movimiento cumple</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ modos }}" value="all" label="Modo" hint-size="100%,40px"></x-import></div>
+<sc-for list="{{ conds }}" as="c" hint-placeholder-count="3">
+<div style="display:grid;grid-template-columns:{{ condCols }};grid-template-areas:{{ condAreas }};gap:8px;align-items:end;padding:{{ condPad }};border:{{ condBorder }};border-radius:var(--radius-md)">
+<x-import style="grid-area:c" component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" value="{{ c.campo }}" options="{{ campos }}" hint-size="100%,44px"></x-import>
+<x-import style="grid-area:o" component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" value="{{ c.op }}" options="{{ c.ops }}" hint-size="100%,44px"></x-import>
+<x-import style="grid-area:v" component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" value="{{ c.valor }}" mono="{{ c.mono }}" hint-size="100%,44px"></x-import>
+<x-import style="grid-area:x" component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="x" label="Quitar condición" hint-size="44px,44px"></x-import>
+</div>
+</sc-for>
+<div class="chip-row"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipAgregar" hint-size="170px,32px">Agregar condición</x-import></div>
+</div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Acción" description="Qué hace la regla cuando calza" hint-size="100%,260px">
+<div style="display:grid;grid-template-columns:{{ accCols }};gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Cuenta" value="a" options="{{ cuentaOpts }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Proveedor o contraparte" value="a" options="{{ provOpts }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Fila del flujo" value="a" options="{{ flujoOpts }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" label="Dejar en «requiere revisión»" description="Clasifica, pero alguien confirma cada movimiento" checked="{{ false }}" hint-size="100%,44px"></x-import>
+</div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.FormSection" title="Vista previa" description="Contra el histórico, antes de guardar" hint-size="100%,300px">
+<div style="display:grid;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Aplicaría a 42 movimientos de los últimos 90 días" accion="{{ refreshBtn }}" hint-size="100%,72px">38 sin clasificar hoy · 4 hoy los clasifica «Pago proveedores por RUT», de menor prioridad.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" dc-props="{{ tblProps }}" columns="{{ exCols }}" rows="{{ ejemplos }}" cards="{{ isPhone }}" to-card="{{ exCard }}" compact="{{ true }}" hint-size="100%,200px"></x-import>
+</div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ActionBar" hint-size="100%,64px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="150px,40px">Descartar cambios</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" hint-size="130px,40px">Guardar regla</x-import>
+</x-import>
+</div>
+</sc-if>
+</div>
+</sc-if>
+<sc-if value="{{ isCargando }}" hint-placeholder-val="{{ false }}">
+<div style="display:grid;grid-template-columns:{{ cols }};gap:16px" aria-busy="true" aria-label="Cargando reglas">
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+<sc-for list="{{ sk }}" as="s" hint-placeholder-count="6"><div style="display:flex;gap:12px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--ds-border)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="16px" height="16px" hint-size="16px,16px"></x-import><div style="flex:1;display:grid;gap:6px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="70%" height="14px" hint-size="70%,14px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="40%" height="12px" hint-size="40%,12px"></x-import></div></div></sc-for>
+</div>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}"><div style="display:grid;gap:16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="100%" height="200px" radius="{{ 16 }}" hint-size="100%,200px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="100%" height="260px" radius="{{ 16 }}" hint-size="100%,260px"></x-import></div></sc-if>
+</div>
+</sc-if>
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="filter" title="Aún no hay reglas de conciliación" description="Crea la primera para clasificar movimientos por RUT, monto, glosa o referencia." action="{{ emptyAction }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar las reglas" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="FIN-REG-500" on-retry="{{ noop }}" hint-size="100%,320px"></x-import>
+</sc-if>
+</x-import>
+</sc-if>
+<sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="{{ fb.title }}" description="{{ fb.description }}" action-label="Pedir acceso" hint-size="100%,100%"></x-import>
+</sc-if>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;datos&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinPermiso&quot;],&quot;default&quot;:&quot;datos&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;abierto&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state = { form: null };
+  componentDidMount() { if (!window.FinShell) { const t = setInterval(() => { if (window.FinShell) { clearInterval(t); this.forceUpdate(); } }, 40); } }
+  renderVals() {
+    const F = window.FinShell;
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = this.props.device ?? "desktop";
+    const isPhone = device === "phone";
+    const st = F ? F.estado(this.props) : { isDatos: true, notForbidden: true };
+    const badge = (t, l) => (NS.Badge ? h(NS.Badge, { tone: t }, l) : l);
+    const form = this.state.form ?? !!this.props.abierto;
+    const phoneForm = isPhone && form;
+    const R = [
+      ["Clientes por RUT", "Abonos", "Contraparte"], ["Proveedores de guardias", "Cargos", "Cuenta y proveedor"], ["Pago proveedores por RUT", "Cargos", "Proveedor"], ["Arriendo Lampa", "Cargos", "Cuenta"],
+      ["Comisiones bancarias", "Cargos", "Cuenta"], ["Remuneraciones", "Cargos", "Fila del flujo"], ["Depósitos en efectivo", "Abonos", "Requiere revisión"], ["Intereses depósito a plazo", "Abonos", "Cuenta"],
+    ];
+    const reglas = R.map((r, i) => ({ n: String(i + 1).padStart(2, "0"), nombre: r[0], alcance: r[1], accion: r[2], estado: i === 7 ? "Inactiva" : "Activa", tone: i === 7 ? "neutral" : "success", bg: !isPhone && i === 1 ? "var(--ds-fill)" : "transparent" }));
+    const B = NS.Button;
+    return {
+      tblProps: { style: { display: "block" } },
+      device, theme: this.props.theme ?? "light", isPhone, notPhone: !isPhone, ...st,
+      nav: F ? F.shell("reg", device) : { tabs: [], groups: [] },
+      fb: F ? F.forbidden : {},
+      shellTitle: isPhone ? "" : "Finanzas",
+      headTitle: phoneForm ? "Proveedores de guardias" : "Reglas de conciliación",
+      headSub: phoneForm ? "Prioridad 2 de 8 · cargos" : "8 reglas · Atlas Seguridad SpA",
+      tabsItems: [{ id: "reglas", label: "Reglas" }, { id: "sug", label: "Sugeridas", count: 3 }],
+      showList: !phoneForm, showForm: !isPhone || form,
+      cols: isPhone ? "minmax(0,1fr)" : (device === "tablet" ? "300px minmax(0,1fr)" : "340px minmax(0,1fr)"),
+      reglas, sk: [1, 2, 3, 4, 5, 6], noop: () => {},
+      openForm: () => this.setState({ form: true }),
+      alcances: [{ value: "abonos", label: "Abonos" }, { value: "cargos", label: "Cargos" }, { value: "ambos", label: "Ambos" }],
+      modos: [{ value: "all", label: "Todas las condiciones" }, { value: "any", label: "Alguna" }],
+      campos: [{ value: "rut", label: "RUT" }, { value: "glosa", label: "Glosa" }, { value: "monto", label: "Monto" }, { value: "ref", label: "Referencia" }],
+      condAreas: isPhone ? '"c o x" "v v v"' : '"c o v x"', condCols: isPhone ? "minmax(0,1fr) minmax(0,1fr) 44px" : "minmax(0,1fr) minmax(0,1fr) minmax(0,1.3fr) 44px",
+      condPad: isPhone ? "12px" : "0", condBorder: isPhone ? "1px solid var(--ds-border)" : "0",
+      conds: [
+        { campo: "rut", op: "eq", ops: [{ value: "eq", label: "es igual a" }], valor: "76.112.334-5", mono: true },
+        { campo: "glosa", op: "c", ops: [{ value: "c", label: "contiene" }, { value: "s", label: "empieza con" }], valor: "SEG TOTAL", mono: true },
+        { campo: "monto", op: "r", ops: [{ value: "e", label: "exacto" }, { value: "r", label: "entre" }, { value: "t", label: "con tolerancia" }], valor: "$ 5.000.000 – $ 12.000.000", mono: false },
+      ],
+      accCols: isPhone ? "minmax(0,1fr)" : "repeat(2,minmax(0,1fr))",
+      cuentaOpts: [{ value: "a", label: "5.1.02 Servicios de guardias externos" }],
+      provOpts: [{ value: "a", label: "Seguridad Total Ltda" }],
+      flujoOpts: [{ value: "a", label: "Pago a proveedores" }],
+      refreshBtn: B ? h(B, { variant: "secondary", icon: "refresh" }, "Actualizar") : null,
+      exCols: [
+        { key: "fecha", label: "Fecha", muted: true },
+        { key: "glosa", label: "Glosa del banco", render: (r) => h("span", { className: "t-mono" }, r.glosa) },
+        { key: "monto", label: "Monto", align: "right", render: (r) => h("span", { className: "t-numeric" }, r.monto) },
+        { key: "hoy", label: "Hoy", render: (r) => badge(r.hoy[0], r.hoy[1]) },
+      ],
+      ejemplos: [
+        { id: 1, fecha: "21-10-2026", glosa: "TRANSF A 76112334-5 SEG TOTAL", monto: "−$ 8.920.000", hoy: ["neutral", "Sin clasificar"] },
+        { id: 2, fecha: "22-09-2026", glosa: "TRANSF A 76112334-5 SEG TOTAL", monto: "−$ 7.410.000", hoy: ["neutral", "Sin clasificar"] },
+        { id: 3, fecha: "25-08-2026", glosa: "PAGO 76112334 SEG TOTAL FACT 77102", monto: "−$ 6.980.000", hoy: ["info", "Pago proveedores por RUT"] },
+      ],
+      exCard: (r) => ({ title: r.monto, subtitle: r.fecha + " · hoy: " + r.hoy[1].toLowerCase(), meta: r.glosa }),
+      emptyAction: B ? h(B, { icon: "plus" }, "Nueva regla") : null,
+    };
+  }
+}
+</script>
+</body>
+</html>

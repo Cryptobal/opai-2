@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="fin-shell.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ nav.tabs }}" groups="{{ nav.groups }}" active="{{ nav.active }}" title="{{ shellTitle }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<sc-if value="{{ notForbidden }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" tab-bar="{{ isPhone }}" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Contabilidad" title="Plan de cuentas" subtitle="Plantilla chilena base · 64 cuentas · Atlas Seguridad SpA" hint-size="100%,80px">
+<sc-if value="{{ headActions }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="download" hint-size="120px,40px">Exportar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="plus" hint-size="140px,40px">Nueva cuenta</x-import>
+</sc-if>
+</x-import>
+<sc-if value="{{ isDatos }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="danger" titulo="2 cuentas en grupo o naturaleza incorrecta" accion="{{ revisarBtn }}" hint-size="100%,80px">Deudores por venta debe ser activo corriente e IVA débito fiscal debe tener naturaleza acreedora. Mientras no se corrijan, no se puede cerrar el período.</x-import>
+<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+<div style="flex:1 1 240px;max-width:{{ searchMax }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" icon="search" placeholder="Buscar por código o nombre" hint-size="100%,44px"></x-import></div>
+<div class="chip-row"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Con problemas" contador="{{ 2 }}" hint-size="150px,32px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Exigen centro de costo" hint-size="180px,32px"></x-import></div>
+</div>
+<div role="tree" aria-label="Plan de cuentas" style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);overflow:hidden">
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<div class="t-caption" style="display:grid;grid-template-columns:minmax(0,1fr) 130px 110px 150px;gap:12px;padding:10px 16px;border-bottom:1px solid var(--ds-border);font-weight:500">
+<span>Cuenta</span><span>Grupo</span><span>Naturaleza</span><span>Centro de costo</span>
+</div>
+</sc-if>
+<sc-for list="{{ rows }}" as="r" hint-placeholder-count="14">
+<div role="treeitem" aria-level="{{ r.level }}" style="display:grid;grid-template-columns:{{ rowCols }};gap:12px;align-items:center;min-height:{{ r.h }};padding:4px 16px 4px {{ r.pad }};border-bottom:1px solid var(--ds-border);background:{{ r.bg }}">
+<span style="display:flex;align-items:center;gap:8px;min-width:0">
+<span style="display:flex;width:20px;flex:none;color:var(--ds-fg-subtle)"><sc-if value="{{ r.hasKids }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Icon" name="{{ r.chev }}" size="sm" hint-size="16px,16px"></x-import></sc-if></span>
+<span class="t-mono" style="color:var(--ds-fg-muted);flex:none">{{ r.code }}</span>
+<span style="display:grid;min-width:0"><span class="{{ r.cls }}" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ r.name }}</span><sc-if value="{{ r.showMeta }}" hint-placeholder-val="{{ false }}"><span class="t-caption">{{ r.meta }}</span></sc-if></span>
+</span>
+<sc-if value="{{ r.showCols }}" hint-placeholder-val="{{ false }}">
+<span class="t-body-sm">{{ r.grupo }}</span><span class="t-body-sm">{{ r.nat }}</span><span class="t-body-sm muted">{{ r.cc }}</span>
+</sc-if>
+<sc-if value="{{ r.err }}" hint-placeholder-val="{{ false }}">
+<span style="grid-column:1 / -1;padding:0 0 6px 28px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="danger" hint-size="200px,22px">{{ r.err }}</x-import></span>
+</sc-if>
+</div>
+</sc-for>
+</div>
+<span class="t-caption">Se valida que deudores por venta e IVA estén en el grupo y la naturaleza que exige el balance. Las cuentas con movimientos no se borran; se archivan.</span>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" block="{{ true }}" size="lg" icon="plus" hint-size="100%,48px">Nueva cuenta</x-import></sc-if>
+</div>
+</sc-if>
+<sc-if value="{{ isCargando }}" hint-placeholder-val="{{ false }}">
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)" aria-busy="true" aria-label="Cargando plan de cuentas">
+<sc-for list="{{ sk }}" as="k" hint-placeholder-count="10"><div style="display:flex;gap:12px;align-items:center;padding:14px 16px 14px {{ k.pad }};border-bottom:1px solid var(--ds-border)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="56px" height="14px" hint-size="56px,14px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ k.w }}" height="14px" hint-size="40%,14px"></x-import></div></sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="grid" title="Aún no hay plan de cuentas" description="Parte desde la plantilla chilena base y ajústala a tu empresa." action="{{ emptyAction }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar el plan de cuentas" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="CON-PLA-500" on-retry="{{ noop }}" hint-size="100%,320px"></x-import>
+</sc-if>
+</x-import>
+</sc-if>
+<sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="{{ fb.title }}" description="{{ fb.description }}" action-label="Pedir acceso" hint-size="100%,100%"></x-import>
+</sc-if>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;datos&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinPermiso&quot;],&quot;default&quot;:&quot;datos&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  componentDidMount() { if (!window.FinShell) { const t = setInterval(() => { if (window.FinShell) { clearInterval(t); this.forceUpdate(); } }, 40); } }
+  renderVals() {
+    const F = window.FinShell;
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = this.props.device ?? "desktop";
+    const isPhone = device === "phone";
+    const st = F ? F.estado(this.props) : { isDatos: true, notForbidden: true };
+    const C = "Corriente", NC = "No corriente", D = "Deudora", A = "Acreedora";
+    const raw = [
+      [0, "1", "Activo", 1], [1, "1.1", "Activo corriente", 1],
+      [2, "1.1.01", "Caja", 0, C, D, "—"], [2, "1.1.02", "Banco de Chile", 0, C, D, "—"], [2, "1.1.03", "Banco Estado", 0, C, D, "—"],
+      [2, "1.1.05", "Deudores por venta", 0, NC, D, "—", "Debe estar en activo corriente"], [2, "1.1.08", "IVA crédito fiscal", 0, C, D, "—"],
+      [1, "1.2", "Activo no corriente", 2],
+      [0, "2", "Pasivo", 1], [1, "2.1", "Pasivo corriente", 1],
+      [2, "2.1.01", "Proveedores", 0, C, A, "—"], [2, "2.1.04", "IVA débito fiscal", 0, C, D, "—", "Debe tener naturaleza acreedora"], [2, "2.1.06", "Remuneraciones por pagar", 0, C, A, "—"],
+      [0, "3", "Patrimonio", 2], [0, "4", "Ingresos", 2],
+      [0, "5", "Gastos", 1], [1, "5.1", "Gastos de operación", 1],
+      [2, "5.1.02", "Servicios de guardias externos", 0, "Resultado", D, "Exige"], [2, "5.1.04", "Uniformes y EPP", 0, "Resultado", D, "Exige"], [2, "5.1.08", "Arriendos", 0, "Resultado", D, "Exige"],
+    ];
+    const rows = raw.map(([lv, code, name, kids, g, n, cc, err]) => ({
+      level: lv + 1, code, name, hasKids: kids > 0, chev: kids === 1 ? "chevron-down" : "chevron-right",
+      cls: lv < 2 ? "t-label" : "t-body-sm", h: lv === 0 ? "48px" : "44px",
+      pad: (isPhone ? 8 + lv * 12 : 12 + lv * 20) + "px",
+      bg: err ? "var(--ds-danger-muted)" : lv === 0 ? "var(--ds-bg)" : "transparent",
+      showCols: !isPhone && !kids, grupo: g || "", nat: n || "", cc: cc === "Exige" ? "Exige centro de costo" : cc || "",
+      showMeta: isPhone && !kids, meta: [g, n, cc === "Exige" ? "exige centro de costo" : null].filter(Boolean).join(" · "),
+      err: err || "",
+    }));
+    const B = NS.Button;
+    return {
+      device, theme: this.props.theme ?? "light", isPhone, notPhone: !isPhone, ...st,
+      nav: F ? F.shell("pla", device) : { tabs: [], groups: [] },
+      fb: F ? F.forbidden : {},
+      shellTitle: isPhone ? "" : "Contabilidad",
+      headActions: !isPhone && st.isDatos,
+      searchMax: isPhone ? "100%" : "288px",
+      rowCols: isPhone ? "minmax(0,1fr)" : "minmax(0,1fr) 130px 110px 150px",
+      rows, noop: () => {},
+      sk: [0, 1, 2, 2, 2, 1, 0, 1, 2, 2].map((l, i) => ({ pad: 16 + l * 20 + "px", w: [40, 30, 50, 35, 45][i % 5] + "%" })),
+      revisarBtn: B ? h(B, { variant: "secondary" }, "Revisar") : null,
+      emptyAction: B ? h(B, null, "Usar plantilla chilena base") : null,
+    };
+  }
+}
+</script>
+</body>
+</html>
