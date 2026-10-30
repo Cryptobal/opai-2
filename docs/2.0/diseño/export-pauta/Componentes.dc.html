@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0;background:#e7e7ea}a{color:var(--ds-accent)}a:hover{color:var(--ds-accent)}</style>
+</helmet>
+<div data-theme="light" style="padding:48px;display:flex;flex-direction:column;gap:32px;min-width:max-content;background:var(--ds-n-200);color:var(--ds-fg);font-family:var(--font-sans)">
+  <header style="display:flex;flex-direction:column;gap:6px;max-width:880px">
+    <a href="Indice.dc.html" class="t-label-sm">← Índice de pantallas</a>
+    <div class="t-overline">OPAI 2.0 · Operaciones · Pauta · v2</div>
+    <h1 class="t-title m0">Hoja de componentes</h1>
+    <p class="t-body-sm muted m0" style="text-wrap:pretty">Todos los componentes que usa la sección Pauta, con sus variantes y estados (reposo, hover, foco, deshabilitado) en claro y oscuro. Los marcados «Nuevo para el DS» se proponen como pieza del design system, no del módulo.</p>
+  </header>
+  <div style="display:flex;gap:32px;align-items:flex-start">
+    <sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+      <div data-theme="{{ th.id }}" style="width:760px;background:var(--ds-bg);color:var(--ds-fg);border:1px solid var(--ds-border-strong);border-radius:var(--radius-lg);padding:32px;display:flex;flex-direction:column;gap:32px">
+        <h2 class="t-heading m0">{{ th.l }}</h2>
+        <section style="display:flex;flex-direction:column;gap:12px">
+  <div class="t-overline">Button · IconButton</div>
+  <div style="display:grid;grid-template-columns:96px repeat(4,minmax(0,1fr));gap:12px;align-items:center">
+    <span></span><span class="t-caption">Reposo</span><span class="t-caption">Hover</span><span class="t-caption">Foco</span><span class="t-caption">Deshabilitado</span>
+    <span class="t-label-sm">Primario</span>
+    <button class="btn btn-primary">Asignar</button>
+    <button class="btn btn-primary" style="background:color-mix(in srgb,var(--ds-accent) 90%,var(--ds-fg))">Asignar</button>
+    <button class="btn btn-primary" style="outline:2px solid var(--ds-focus);outline-offset:2px">Asignar</button>
+    <button class="btn btn-primary" disabled="{{ true }}">Asignar</button>
+    <span class="t-label-sm">Secundario</span>
+    <button class="btn btn-secondary"><span class="ic sm i-download"></span>Exportar</button>
+    <button class="btn btn-secondary" style="background:var(--ds-fill)"><span class="ic sm i-download"></span>Exportar</button>
+    <button class="btn btn-secondary" style="outline:2px solid var(--ds-focus);outline-offset:2px"><span class="ic sm i-download"></span>Exportar</button>
+    <button class="btn btn-secondary" disabled="{{ true }}"><span class="ic sm i-download"></span>Exportar</button>
+    <span class="t-label-sm">Ghost</span>
+    <button class="btn btn-ghost"><span class="ic sm i-clock"></span>Historial</button>
+    <button class="btn btn-ghost" style="background:var(--ds-fill)"><span class="ic sm i-clock"></span>Historial</button>
+    <button class="btn btn-ghost" style="outline:2px solid var(--ds-focus);outline-offset:2px"><span class="ic sm i-clock"></span>Historial</button>
+    <button class="btn btn-ghost" disabled="{{ true }}"><span class="ic sm i-clock"></span>Historial</button>
+    <span class="t-label-sm">IconButton</span>
+    <button class="icon-btn" aria-label="Exportar"><span class="ic i-download"></span></button>
+    <button class="icon-btn" aria-label="Exportar" style="background:var(--ds-fill)"><span class="ic i-download"></span></button>
+    <button class="icon-btn" aria-label="Exportar" style="outline:2px solid var(--ds-focus);outline-offset:2px"><span class="ic i-download"></span></button>
+    <button class="icon-btn" aria-label="Exportar" disabled="{{ true }}" style="opacity:.45"><span class="ic i-download"></span></button>
+  </div>
+</section>
+<section style="display:flex;flex-direction:column;gap:12px">
+  <div class="t-overline">Tabs · Segmentado · Chip (ChipToggle)</div>
+  <div class="tabs"><button class="tab on">Mensual</button><button class="tab">Diaria</button><button class="tab" style="color:var(--ds-fg)">Hover</button><button class="tab" style="outline:2px solid var(--ds-focus);outline-offset:-2px">Foco</button><button class="tab" disabled="{{ true }}">Deshabilitada</button></div>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+    <div class="seg"><button class="on">Por instalación</button><button>Todas</button></div>
+    <div class="seg"><button class="on">Día</button><button>Noche</button><button>Todos</button></div>
+    <button class="chip toggle">Solo sin cubrir</button>
+    <button class="chip toggle on">Solo sin cubrir</button>
+    <button class="chip toggle" style="background:var(--ds-fill)">Hover</button>
+    <button class="chip toggle" style="outline:2px solid var(--ds-focus);outline-offset:2px">Foco</button>
+    <button class="chip toggle" style="opacity:.45">Deshabilitado</button>
+  </div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="chip toggle on">4x4</button><button class="chip toggle">7x7</button><button class="chip toggle">14x14</button><button class="chip toggle">5x2</button><button class="chip toggle">2x5</button><button class="chip toggle">3x4</button></div>
+</section>
+<section style="display:flex;flex-direction:column;gap:12px">
+  <div class="t-overline">Badge</div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap"><span class="badge b-success">Cubierto</span><span class="badge b-danger">PPC · Licencia médica</span><span class="badge b-info">Reemplazado</span><span class="badge b-warning">Horas legales</span><span class="badge b-danger">Doblaría turno</span><span class="badge b-neutral nodot">Libre hoy</span><span class="badge b-neutral nodot">Solo lectura</span><span class="badge b-warning nodot">Variante B · a confirmar</span></div>
+</section>
+<section style="display:flex;flex-direction:column;gap:12px">
+  <div style="display:flex;gap:8px;align-items:center"><span class="t-overline">ShiftCell</span><span class="badge b-accent nodot">Nuevo para el DS · marca de excepción</span></div>
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    <span class="shift cell sh-D" style="width:32px">D</span><span class="shift cell sh-N" style="width:32px">N</span><span class="shift cell sh-L" style="width:32px">L</span><span class="shift cell sh-V" style="width:32px">V</span><span class="shift cell sh-X" style="width:32px">X</span>
+    <span class="shift cell sh-D today" style="width:32px">D</span>
+    <span class="shift cell sh-N" style="width:32px;position:relative">N<span style="position:absolute;top:3px;right:3px;width:5px;height:5px;border-radius:999px;background:currentColor"></span></span>
+    <span class="shift cell sh-X" style="width:32px;position:relative">X<span style="position:absolute;top:3px;right:3px;width:5px;height:5px;border-radius:999px;background:currentColor"></span></span>
+    <span class="shift cell sh-D" style="width:32px;box-shadow:0 0 0 2px var(--ds-fg)">D</span>
+    <span class="shift cell sh-D" style="width:32px;outline:2px solid var(--ds-focus);outline-offset:2px">D</span>
+    <span class="shift cell sh-L" style="width:32px;background:var(--ds-fill)">L</span>
+  </div>
+  <span class="t-caption" style="text-wrap:pretty">Día · Noche · Libre · Vacaciones · PPC · Hoy · Reemplazado (excepción) · PPC por excepción · Seleccionada · Foco · Feriado (columna en fill). El punto distingue un día con excepción del patrón de la serie.</span>
+</section>
+        <section style="display:flex;flex-direction:column;gap:12px">
+  <div class="t-overline">Alerta</div>
+  <div class="alerta" style="background:var(--ds-warning-muted);color:var(--ds-warning-fg)"><span class="ic sm i-alert"></span><div class="txt"><span class="tit">Javiera Morales Pinto supera la jornada legal semanal</span><span>Semana del 26-10-2026 · Andén de carga · Día</span></div><a href="#" class="acc t-label-sm" style="color:inherit;text-decoration:underline">Ver persona</a></div>
+  <div class="alerta" style="background:var(--ds-info-muted);color:var(--ds-info-fg)"><span class="ic sm i-info"></span><div class="txt"><span class="tit">No modifica días pasados</span><span>Se aplica desde hoy, 30-10-2026.</span></div></div>
+  <div class="alerta" style="background:var(--ds-danger-muted);color:var(--ds-danger-fg)"><span class="ic sm i-lock"></span><div class="txt"><span class="tit">No puede tomar este turno: doblaría</span><span>Turno normal + extra seguidos no se permite.</span></div></div>
+</section>
+<section style="display:flex;flex-direction:column;gap:12px">
+  <div class="t-overline">Campo · Input · Select · Textarea · RadioGroup</div>
+  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px">
+    <div class="field"><span class="lbl">Instalación · reposo</span><button class="input"><span class="ic i-building" style="color:var(--ds-fg-muted)"></span><span class="grow">Planta Quilicura</span><span class="ic sm i-chevron-down" style="color:var(--ds-fg-muted)"></span></button></div>
+    <div class="field"><span class="lbl">Hover</span><button class="input" style="border-color:var(--ds-fg-subtle)"><span class="ic i-building" style="color:var(--ds-fg-muted)"></span><span class="grow">Bodega Lampa</span><span class="ic sm i-chevron-down" style="color:var(--ds-fg-muted)"></span></button></div>
+    <div class="field"><span class="lbl">Inicio del ciclo · foco</span><button class="input focus"><span class="ic i-calendar" style="color:var(--ds-fg-muted)"></span><span class="grow t-numeric">05-10-2026</span></button></div>
+    <div class="field"><span class="lbl">Deshabilitado</span><button class="input disabled"><span class="ic i-calendar" style="color:var(--ds-fg-muted)"></span><span class="grow t-numeric">05-10-2026</span></button></div>
+    <div class="field"><label>Motivo · error</label><textarea class="input textarea invalid" placeholder="Describe el motivo"></textarea><span class="err"><span class="ic sm i-alert"></span>Escribe el motivo de la excepción.</span></div>
+    <div class="field"><span class="lbl">Tipo</span><div class="radio-group"><div class="radio-row"><button class="radio-hit" aria-label="Permiso"><span class="radio on"></span></button><div class="txt"><label>Permiso</label><span class="t-caption">Con o sin goce de sueldo</span></div></div><div class="radio-row"><button class="radio-hit" aria-label="Ausencia"><span class="radio"></span></button><div class="txt"><label>Ausencia</label></div></div><div class="radio-row disabled"><button class="radio-hit" disabled="{{ true }}" aria-label="Vacaciones"><span class="radio"></span></button><div class="txt"><label>Vacaciones · sin saldo</label></div></div></div></div>
+  </div>
+</section>
+<section style="display:flex;flex-direction:column;gap:12px">
+  <div style="display:flex;gap:8px;align-items:center"><span class="t-overline">SelectableRow · sugerencia de reemplazo</span><span class="badge b-accent nodot">Nuevo para el DS · motivos visibles</span></div>
+  <div class="card" style="overflow:hidden">
+    <button class="selrow on" style="align-items:flex-start"><span class="radio on" style="margin-top:6px;flex:none"></span><span class="avatar">CB</span><span style="flex:1;display:flex;flex-direction:column;gap:6px;text-align:left"><span style="display:flex;flex-direction:column"><span class="t-label">Cristián Bravo Leiva · seleccionada</span><span class="t-mono muted">17.902.334-6</span></span><span style="display:flex;gap:4px;flex-wrap:wrap"><span class="badge b-neutral nodot">Libre hoy</span><span class="badge b-neutral nodot">A 3 km</span><span class="badge b-neutral nodot">Conoce la instalación</span></span></span></button>
+    <button class="selrow" style="align-items:flex-start;background:var(--ds-fill)"><span class="radio" style="margin-top:6px;flex:none"></span><span class="avatar">JD</span><span style="flex:1;display:flex;flex-direction:column;gap:6px;text-align:left"><span style="display:flex;flex-direction:column"><span class="t-label">Jorge Díaz Ortiz · hover</span><span class="t-mono muted">16.554.210-3</span></span><span style="display:flex;gap:4px;flex-wrap:wrap"><span class="badge b-neutral nodot">Libre hoy</span><span class="badge b-warning">Horas legales</span></span></span></button>
+    <button class="selrow" style="align-items:flex-start;outline:2px solid var(--ds-focus);outline-offset:-2px"><span class="radio" style="margin-top:6px;flex:none"></span><span class="avatar">PR</span><span style="flex:1;display:flex;flex-direction:column;gap:6px;text-align:left"><span style="display:flex;flex-direction:column"><span class="t-label">Pedro Rojas Díaz · foco</span><span class="t-mono muted">15.320.887-K</span></span><span style="display:flex;gap:4px;flex-wrap:wrap"><span class="badge b-danger">Doblaría turno</span></span></span></button>
+    <div class="rowcard" style="align-items:center;opacity:.45"><span class="avatar">—</span><span style="flex:1;display:flex;flex-direction:column"><span class="t-label">Valentina Rojas Díaz · no disponible</span><span class="t-caption">Permiso administrativo hoy</span></span></div>
+  </div>
+</section>
+<section style="display:flex;flex-direction:column;gap:12px">
+  <div style="display:flex;gap:8px;align-items:center"><span class="t-overline">Resumen de cobertura (tira de cifras)</span><span class="badge b-accent nodot">Nuevo para el DS · del export Pauta diaria</span></div>
+  <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+    <div style="padding:14px 16px;border-right:1px solid var(--ds-border);display:flex;flex-direction:column;gap:2px"><span class="t-caption">Programados</span><span class="t-heading t-numeric">8</span></div>
+    <div style="padding:14px 16px;border-right:1px solid var(--ds-border);display:flex;flex-direction:column;gap:2px"><span class="t-caption">Cubiertos</span><span class="t-heading t-numeric">5</span></div>
+    <div style="padding:14px 16px;border-right:1px solid var(--ds-border);display:flex;flex-direction:column;gap:2px;background:var(--ds-fill)"><span class="t-caption">Reemplazados · hover</span><span class="t-heading t-numeric" style="color:var(--ds-info-fg)">1</span></div>
+    <div style="padding:14px 16px;display:flex;flex-direction:column;gap:2px;outline:2px solid var(--ds-focus);outline-offset:-2px;border-radius:0 var(--radius-lg) var(--radius-lg) 0"><span class="t-caption">Sin cubrir · foco</span><span class="t-heading t-numeric" style="color:var(--ds-danger-fg)">2</span></div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px"><span class="t-label-sm">Barra de cobertura</span><span class="badge b-accent nodot">Nuevo para el DS</span><div style="width:160px;height:6px;border-radius:999px;background:var(--ds-fill);overflow:hidden"><div style="height:100%;width:91%;background:var(--ds-fg);border-radius:999px"></div></div><span class="t-label-sm t-numeric">91,1 %</span></div>
+</section>
+        <section style="display:flex;flex-direction:column;gap:12px">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="t-overline">Menú contextual</span><span class="badge b-accent nodot">Nuevo para el DS</span></div>
+  <span class="t-caption" style="text-wrap:pretty">Clic derecho en escritorio (Menu en Popover, 280 px); pulsación larga en iPad y teléfono (Menu dentro de un Sheet, ítems de 56 px). Cabecera con el día o el puesto; ítems deshabilitados al 45 % en días pasados o sin permiso.</span>
+  <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
+    <div class="overlay menu" style="width:280px">
+      <div style="padding:6px 12px 8px;display:flex;flex-direction:column;border-bottom:1px solid var(--ds-border);margin-bottom:4px"><span class="t-label-sm t-numeric">vie 30-10-2026 · hoy</span><span class="t-caption">Portería principal · Noche · Luis Muñoz Vera</span></div>
+      <button class="menu-item" style="height:40px"><span class="ic sm i-flag"></span>Registrar excepción</button>
+      <button class="menu-item on" style="height:40px"><span class="ic sm i-user-check"></span>Asignar reemplazo · hover</button>
+      <button class="menu-item" style="height:40px;outline:2px solid var(--ds-focus);outline-offset:-2px"><span class="ic sm i-plus"></span>Agregar refuerzo · foco</button>
+      <button class="menu-item" style="height:40px;opacity:.45" disabled="{{ true }}"><span class="ic sm i-eye"></span>Deshabilitado</button>
+    </div>
+    <div class="overlay menu" style="width:280px">
+      <div style="padding:6px 12px 8px;display:flex;flex-direction:column;border-bottom:1px solid var(--ds-border);margin-bottom:4px"><span class="t-label-sm">Andén de carga · Día</span><span class="t-caption">7x7 · Javiera Morales Pinto</span></div>
+      <button class="menu-item" style="height:40px"><span class="ic sm i-calendar"></span>Editar serie del puesto</button>
+      <button class="menu-item" style="height:40px"><span class="ic sm i-user"></span>Cambiar titular</button>
+      <button class="menu-item" style="height:40px"><span class="ic sm i-plus"></span>Agregar refuerzo</button>
+      <button class="menu-item" style="height:40px"><span class="ic sm i-clock"></span>Historial del puesto</button>
+    </div>
+  </div>
+  <div class="alerta" style="background:var(--ds-info-muted);color:var(--ds-info-fg);align-items:center;padding:6px 6px 6px 12px"><span class="ic sm i-info"></span><div class="txt"><span>Clic derecho o mantén presionado para más opciones · Shift+clic o arrastra para elegir varios días</span></div><button class="icon-btn" aria-label="Cerrar ayuda" style="color:inherit;width:32px;height:32px"><span class="ic sm i-x"></span></button></div>
+</section>
+<section style="display:flex;flex-direction:column;gap:12px">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="t-overline">Badge «Refuerzo» · marca «Manual» · origen Face ID</span><span class="badge b-accent nodot">Nuevos para el DS</span></div>
+  <div style="display:grid;grid-template-columns:120px repeat(3,minmax(0,1fr));gap:12px;align-items:center">
+    <span></span><span class="t-caption">Reposo</span><span class="t-caption">Foco (en fila)</span><span class="t-caption">En celda de grilla</span>
+    <span class="t-label-sm">Refuerzo</span>
+    <span><span class="badge b-neutral nodot" style="border:1px dashed var(--ds-fg-muted)"><span class="ic sm i-plus"></span>Refuerzo</span></span>
+    <span><span class="badge b-neutral nodot" style="border:1px dashed var(--ds-fg-muted);outline:2px solid var(--ds-focus);outline-offset:2px"><span class="ic sm i-plus"></span>Refuerzo</span></span>
+    <span><span class="shift cell" style="width:32px;border:1px dashed var(--ds-fg-muted)">+2</span></span>
+    <span class="t-label-sm">Marca manual</span>
+    <span style="display:flex;gap:6px;align-items:center;flex-wrap:wrap"><span class="t-caption t-numeric">Entrada 08:02</span><span class="badge b-neutral nodot" style="border:1px solid var(--ds-border-strong)"><span class="ic sm i-user-check"></span>Manual</span></span>
+    <span><span class="badge b-neutral nodot" style="border:1px solid var(--ds-border-strong);outline:2px solid var(--ds-focus);outline-offset:2px"><span class="ic sm i-user-check"></span>Manual</span></span>
+    <span class="t-caption">por Marcos Leiva · motivo en el historial</span>
+    <span class="t-label-sm">Face ID</span>
+    <span style="display:flex;gap:6px;align-items:center"><span class="t-caption t-numeric">Entrada 07:52</span><span class="t-caption" style="display:inline-flex;gap:4px;align-items:center;color:var(--ds-fg-muted)"><span class="ic sm i-scan"></span>Face ID</span></span>
+    <span></span><span class="t-caption">Automática, sin Badge</span>
+  </div>
+  <span class="t-caption" style="text-wrap:pretty">Refuerzo: borde punteado para separarlo de la serie (D/N), de la excepción (punto) y del reemplazo (info). Manual: borde sólido y el nombre de quien marcó.</span>
+</section>
+<section style="display:flex;flex-direction:column;gap:12px">
+  <div class="t-overline">SelectionBar · Seleccionar días (teléfono)</div>
+  <div class="selbar"><span class="t-label" style="flex:1">2 días</span><button class="btn btn-ghost icon" aria-label="Cancelar selección"><span class="ic sm i-x"></span></button><button class="btn btn-primary">Registrar excepción</button></div>
+  <div class="selbar"><span class="t-label" style="flex:1">Sin días · deshabilitado</span><button class="btn btn-primary" disabled="{{ true }}">Registrar excepción</button></div>
+</section>
+<section style="display:flex;flex-direction:column;gap:12px">
+  <div class="t-overline">Table · RowCard · RowGroupHeader · Avatar</div>
+  <div class="tbl-wrap"><table class="tbl hover"><thead><tr><th>Estado</th><th>Puesto</th><th>Titular</th><th></th></tr></thead><tbody>
+    <tr><td><span class="badge b-danger">PPC · Sin titular</span></td><td>Sala de monitoreo · Día</td><td>Sin titular</td><td style="text-align:right"><button class="btn btn-secondary" style="height:32px;padding:0 12px">Cubrir</button></td></tr>
+    <tr><td style="background:var(--ds-fill)"><span class="badge b-success">Cubierto</span></td><td style="background:var(--ds-fill)">Andén de carga · Día · hover</td><td style="background:var(--ds-fill)">Javiera Morales Pinto</td><td style="background:var(--ds-fill)"></td></tr>
+  </tbody></table></div>
+  <div class="card" style="overflow:hidden">
+    <div class="row-group">Hoy · vie 30-10-2026</div>
+    <div class="rowcard" style="align-items:center"><span class="shift sh-N" style="width:32px;height:32px;flex:none">N</span><span style="flex:1;display:flex;flex-direction:column;gap:2px"><span class="t-label">Ronda perímetro · Noche</span><span class="t-caption t-numeric">20:00–08:00 · 14x14</span><span class="t-body-sm muted">Camila Herrera Lagos</span></span><span class="badge b-success">Cubierto</span></div>
+  </div>
+  <div style="display:flex;gap:8px;align-items:center"><span class="avatar sm">LM</span><span class="avatar">LM</span><span class="avatar lg">LM</span><span class="t-mono muted">15.876.234-1</span></div>
+</section>
+<section style="display:flex;flex-direction:column;gap:12px">
+  <div class="t-overline">Timeline · Menu · Toast</div>
+  <div class="tl">
+    <div class="tl-item"><span class="tl-dot person">ML</span><div style="display:flex;flex-direction:column;gap:2px"><span class="t-label">Marcos Leiva cargó un reemplazo</span><span class="t-caption t-numeric">29-10-2026 17:42</span></div></div>
+    <div class="tl-item"><span class="tl-dot agent">OP</span><div style="display:flex;flex-direction:column;gap:2px"><span class="t-label">La pauta de octubre se replicó sola</span><span class="t-caption t-numeric">01-10-2026 00:00</span></div></div>
+  </div>
+  <div style="display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap">
+    <div class="overlay menu" style="width:280px"><button class="menu-item" style="height:auto;min-height:44px;padding:6px 12px"><span class="ic sm i-file"></span><span style="display:flex;flex-direction:column"><span class="t-label">PDF</span><span class="t-caption">Por instalación</span></span></button><button class="menu-item on" style="height:auto;min-height:44px;padding:6px 12px"><span class="ic sm i-grid"></span><span style="display:flex;flex-direction:column"><span class="t-label">Excel · hover</span><span class="t-caption">Por cliente</span></span></button></div>
+    <div class="toast" style="width:360px"><span class="ic sm i-check-circle"></span><span style="flex:1">Reemplazo asignado · queda como turno extra por aprobar.</span><button class="act">Deshacer</button></div>
+  </div>
+</section>
+<section style="display:flex;flex-direction:column;gap:12px">
+  <div class="t-overline">Sheet · Skeleton · StatePanel (Empty · ErrorState · Forbidden)</div>
+  <div style="display:flex;gap:12px;align-items:stretch">
+    <div style="flex:1;border:1px solid var(--ds-border);border-radius:var(--radius-xl) var(--radius-xl) 0 0;background:var(--ds-surface-raised);display:flex;flex-direction:column"><div class="grabber"></div><div style="padding:12px 16px;display:flex;flex-direction:column;gap:2px"><span class="t-subheading">Asignar reemplazo</span><span class="t-body-sm muted">Hoja inferior en 375 · lateral 420 en 1024 y 1280</span></div></div>
+    <div style="flex:1;display:flex;flex-direction:column;gap:8px" aria-busy="true"><div class="skel" style="height:44px;border-radius:var(--radius-md)"></div><div class="skel" style="height:16px;width:50%"></div><div class="skel" style="height:56px;border-radius:var(--radius-md)"></div></div>
+  </div>
+  <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px">
+    <div class="state-panel" style="padding:24px 12px"><span class="state-ic"><span class="ic i-calendar"></span></span><span class="t">Aún no hay series</span><button class="btn btn-primary">Crear serie</button></div>
+    <div class="state-panel" style="padding:24px 12px"><span class="state-ic" style="color:var(--ds-danger-fg)"><span class="ic i-alert"></span></span><span class="t">No pudimos cargar la pauta</span><button class="btn btn-primary"><span class="ic sm i-refresh"></span>Reintentar</button></div>
+    <div class="state-panel" style="padding:24px 12px"><span class="state-ic"><span class="ic i-lock"></span></span><span class="t">No tienes acceso</span><button class="btn btn-primary">Pedir acceso</button></div>
+  </div>
+</section>
+<section style="display:flex;flex-direction:column;gap:12px">
+  <div class="t-overline">AppShell · TopBar · TabBar · Rail · Sidebar · AppBar</div>
+  <span class="t-body-sm muted" style="text-wrap:pretty">Sin cambios respecto del DS. En las tres navegaciones la entrada se llama «Pauta» (una sola sección, Operaciones); las pestañas Mensual y Diaria van dentro de la página.</span>
+  <nav class="tabbar" style="padding-bottom:0;border:1px solid var(--ds-border);border-radius:var(--radius-md)"><a href="#"><span class="ic i-home"></span>Hoy</a><a href="#" class="on"><span class="ic i-calendar"></span>Pauta</a><a href="#"><span class="ic i-route"></span>Rondas</a><a href="#"><span class="ic i-ticket"></span>Tickets</a><a href="#"><span class="ic i-menu"></span>Más</a></nav>
+</section>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals(){return{themes:[{id:'light',l:'Claro'},{id:'dark',l:'Oscuro'}]};}
+}
+</script>
+</body>
+</html>
