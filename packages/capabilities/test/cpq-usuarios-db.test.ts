@@ -85,8 +85,13 @@ describe.skipIf(!urlPropietario)("CPQ: referencias a usuarios (FK y membresía)"
       });
     await expect(aprob({ solicitadaPor: soloDeB })).rejects.toThrow(NO_MIEMBRO);
     await expect(aprob({ decididaPor: soloDeB })).rejects.toThrow(NO_MIEMBRO);
-    await expect(aprob({ solicitadaPor: miembroA })).resolves.toMatchObject({
-      solicitadaPor: miembroA,
-    });
+    const ok = await aprob({ solicitadaPor: miembroA });
+    expect(ok).toMatchObject({ solicitadaPor: miembroA });
+    // También al actualizar (el trigger es BEFORE INSERT OR UPDATE OF las columnas de usuario).
+    const decidir = (decididaPor: string) =>
+      e.admin.aprobacionCotizacion.update({ where: { id: ok.id }, data: { decididaPor } });
+    await expect(decidir(soloDeB)).rejects.toThrow(NO_MIEMBRO);
+    await expect(decidir(randomUUID())).rejects.toThrow(NO_MIEMBRO);
+    await expect(decidir(miembroA)).resolves.toMatchObject({ decididaPor: miembroA });
   });
 });
