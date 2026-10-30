@@ -18,6 +18,12 @@ export function lecturasLocksMemoria(tabla: (nombre: string) => Fila[]) {
       texto === "SELECT id FROM core.puestos WHERE id = ?::uuid AND tenant_id = ?::uuid FOR UPDATE"
     )
       return [];
+    // Rondas vuelve a leer con Prisma tras este lock; la serialización se prueba en Postgres.
+    if (
+      texto ===
+      "SELECT id FROM rondas.programaciones WHERE id = ?::uuid AND tenant_id = ?::uuid FOR UPDATE"
+    )
+      return [];
     if (texto.includes("/* nucleo-h:lista-instalaciones */"))
       return instalacionesListaMemoria(tabla, valores);
     if (texto.includes("/* nucleo-h:inbox */")) {

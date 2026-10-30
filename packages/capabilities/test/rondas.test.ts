@@ -166,6 +166,63 @@ describe("rondas.plantillas.crear", () => {
   });
 });
 
+// El tiempo por tramo se valida contra lo que QUEDARÁ guardado: el total y el tramo nuevos si vienen
+// en el input, o los actuales si no. `null` borra el tramo (deja de validarse). Cubre el camino de
+// `actualizar`, que el caso de `crear` de arriba no toca.
+describe("rondas.plantillas.actualizar · validación de tramo", () => {
+  async function conPlantilla(tiempoMaxMin: number, tiempoMaxTramoMin: number | null) {
+    const h = owner();
+    const p = await executeCapability(h.ctx, "rondas.puntos.crear", puntoQrGps);
+    const puntoId = p.ok ? (p.data as { id: string }).id : "";
+    const pl = await executeCapability(h.ctx, "rondas.plantillas.crear", {
+      instalacionId: INST,
+      nombre: "Plantilla base",
+      tiempoMaxMin,
+      ...(tiempoMaxTramoMin != null ? { tiempoMaxTramoMin } : {}),
+      puntos: [{ puntoId, orden: 0, obligatorio: true }],
+    });
+    return { ...h, plantillaId: pl.ok ? (pl.data as { id: string }).id : "" };
+  }
+
+  it("un tramo nuevo mayor o igual que el total guardado se rechaza", async () => {
+    const { ctx, plantillaId } = await conPlantilla(60, null);
+    const r = await executeCapability(ctx, "rondas.plantillas.actualizar", {
+      id: plantillaId,
+      tiempoMaxTramoMin: 60,
+    });
+    expect(r).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+  });
+
+  it("un total nuevo menor o igual que el tramo guardado se rechaza", async () => {
+    const { ctx, plantillaId } = await conPlantilla(60, 30);
+    const r = await executeCapability(ctx, "rondas.plantillas.actualizar", {
+      id: plantillaId,
+      tiempoMaxMin: 20,
+    });
+    expect(r).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+  });
+
+  it("borrar el tramo (null) no valida contra el total y pasa", async () => {
+    const { ctx, plantillaId } = await conPlantilla(60, 30);
+    const r = await executeCapability(ctx, "rondas.plantillas.actualizar", {
+      id: plantillaId,
+      tiempoMaxTramoMin: null,
+    });
+    expect(r.ok).toBe(true);
+    expect(r.ok && (r.data as { tiempoMaxTramoMin: number | null }).tiempoMaxTramoMin).toBeNull();
+  });
+
+  it("total y tramo nuevos coherentes (tramo < total) pasan", async () => {
+    const { ctx, plantillaId } = await conPlantilla(60, 30);
+    const r = await executeCapability(ctx, "rondas.plantillas.actualizar", {
+      id: plantillaId,
+      tiempoMaxMin: 120,
+      tiempoMaxTramoMin: 90,
+    });
+    expect(r.ok).toBe(true);
+  });
+});
+
 describe("rondas.incidentes_tipo", () => {
   it("crea un tipo con gravedad y lo lista", async () => {
     const { ctx } = owner();

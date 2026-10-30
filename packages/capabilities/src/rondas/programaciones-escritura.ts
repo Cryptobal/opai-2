@@ -69,14 +69,6 @@ export const programacionesFijar = defineCapability({
   efecto: "escritura",
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
-    await instalacionEnAlcance(ctx, input.instalacionId);
-    await plantillaDeInstalacion(ctx, input.instalacionId, input.plantillaId);
-    await personasDeInstalacion(ctx, input.instalacionId, input.responsables.personaIds);
-    if (input.id) {
-      const actual = await programacionDe(ctx, input.id);
-      if (actual.instalacionId !== input.instalacionId)
-        throw reglaDeNegocio("La programación es de otra instalación.");
-    }
     const data = {
       instalacionId: input.instalacionId,
       plantillaId: input.plantillaId,
@@ -89,13 +81,34 @@ export const programacionesFijar = defineCapability({
       responsables: input.responsables,
     };
     if (dryRun) {
+      await instalacionEnAlcance(ctx, input.instalacionId);
+      await plantillaDeInstalacion(ctx, input.instalacionId, input.plantillaId);
+      await personasDeInstalacion(ctx, input.instalacionId, input.responsables.personaIds);
+      if (input.id) {
+        const actual = await programacionDe(ctx, input.id);
+        if (actual.instalacionId !== input.instalacionId)
+          throw reglaDeNegocio("La programación es de otra instalación.");
+      }
       return vistaProgramacion({ id: input.id ?? "", estado: "activa", ...data });
     }
-    const fila = input.id
-      ? await ctx.db.programacion.update({ where: { id: input.id }, data })
-      : await ctx.db.programacion.create({
-          data: { ...data, estado: "activa", tenantId: ctx.tenantId },
-        });
+    // Chequeos y escritura en la misma transacción (sin TOCTOU): al actualizar se bloquea la fila
+    // existente antes de validarla y escribir; al crear, las validaciones y el insert quedan juntos.
+    // Las referencias (instalación, plantilla, personas) se verifican dentro de la tx.
+    const fila = await ctx.transaccion(async (tx) => {
+      const dentro = { ...ctx, db: tx };
+      if (input.id)
+        await tx.$queryRaw`SELECT id FROM rondas.programaciones WHERE id = ${input.id}::uuid AND tenant_id = ${ctx.tenantId}::uuid FOR UPDATE`;
+      await instalacionEnAlcance(dentro, input.instalacionId);
+      await plantillaDeInstalacion(dentro, input.instalacionId, input.plantillaId);
+      await personasDeInstalacion(dentro, input.instalacionId, input.responsables.personaIds);
+      if (input.id) {
+        const actual = await programacionDe(dentro, input.id);
+        if (actual.instalacionId !== input.instalacionId)
+          throw reglaDeNegocio("La programación es de otra instalación.");
+        return tx.programacion.update({ where: { id: input.id }, data });
+      }
+      return tx.programacion.create({ data: { ...data, estado: "activa", tenantId: ctx.tenantId } });
+    });
     return vistaProgramacion(fila);
   },
 });
