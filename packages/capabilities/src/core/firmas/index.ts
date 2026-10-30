@@ -1,17 +1,22 @@
 import type { Capacidad } from "../../types";
-import {
-  firmasFirmaAutomaticaAutorizar,
-  firmasFirmaAutomaticaRevocar,
-} from "./firma-automatica";
+import { firmasFirmaAutomaticaAutorizar, firmasFirmaAutomaticaRevocar } from "./firma-automatica";
 import { firmasFirmanteEmpresaSet } from "./firmante-empresa";
+import { firmasEnviar } from "./enviar";
+import { firmasFirmar } from "./firmar";
+import { firmasEstado, firmasList } from "./lecturas";
 import { firmasPoliticaGet, firmasPoliticaSet } from "./politica";
+import { firmasCancelar, firmasRecordar } from "./recordar-cancelar";
+import { firmasRechazar } from "./rechazar";
+import { firmasVerificar } from "./verificar";
+
+export { consumidorFirmaDocumento } from "./consumidor-documento";
 
 /**
- * Firma electrónica del núcleo (firma.md, CAR-82 · PR 1). Capa de datos + gobernanza y configuración:
- * política por tipo de documento (R1/R2, CA4), firmante de la empresa y autorización de firma
- * automática del representante (R16, P5). El flujo de envío/firma/verificación (enviar, firmar,
- * rechazar, verificar) va en el PR 2 con sus pantallas y los adaptadores de sello (P7), OTP y
- * biometría; la firma N2 de trabajadores espera la prueba de vida (decisión de Carlos 29-oct-2026).
+ * Firma electrónica del núcleo (firma.md, CAR-82). PR 1: datos, permisos, política y gobernanza del
+ * representante. PR 2: el flujo N1 de envío, firma y verificación (enviar con aprobación condicional
+ * R19, estado/list, recordar, cancelar, firmar y rechazar como actos del firmante, verificar), con
+ * los adaptadores de sello (P7) y la evidencia encadenada (R17). La firma N2 (prueba de vida) y la
+ * aceptación del medio electrónico (R10) quedan diferidas (decisión de Carlos 29-oct-2026, 22:27).
  */
 export const capacidadesFirmas: readonly Capacidad[] = [
   firmasPoliticaGet,
@@ -19,4 +24,12 @@ export const capacidadesFirmas: readonly Capacidad[] = [
   firmasFirmanteEmpresaSet,
   firmasFirmaAutomaticaAutorizar,
   firmasFirmaAutomaticaRevocar,
+  firmasEnviar,
+  firmasEstado,
+  firmasList,
+  firmasRecordar,
+  firmasCancelar,
+  firmasFirmar,
+  firmasRechazar,
+  firmasVerificar,
 ];
