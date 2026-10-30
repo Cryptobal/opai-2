@@ -57,6 +57,8 @@ exports[`declaración de auditoría del registro completo > ninguna lectura nuev
   "platform.trabajos.list",
   "platform.usage.summary",
   "platform.users.list",
+  "portal_cliente.mi_acceso",
+  "portal_cliente.resumen.leer",
   "rondas.incidentes_tipo.listar",
   "rondas.plantillas.listar",
   "rondas.programaciones.listar",

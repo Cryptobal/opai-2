@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import { SeccionCatalogos } from "@/app/(erp)/negocios/_configuracion/seccion-catalogos";
 import { SeccionEmbudo } from "@/app/(erp)/negocios/_configuracion/seccion-embudo";
+import { SeccionPortalCliente } from "@/app/(erp)/configuracion/_portal_cliente/seccion-portal-cliente";
 import { SeccionTiposIncidente } from "@/app/(erp)/configuracion/_rondas/seccion-tipos-incidente";
 
 /**
@@ -34,6 +35,15 @@ export const SECCIONES_MODULO: Readonly<Record<string, readonly SeccionModulo[]>
       etiqueta: "Catálogos",
       permiso: "comercial:config.manage",
       Contenido: SeccionCatalogos,
+    },
+  ],
+  portal_cliente: [
+    {
+      id: "portal",
+      etiqueta: "Portal Cliente",
+      // Permiso copiado del manifest de Portal Cliente (CAR-88): qué ve cada cliente y quién entra.
+      permiso: "portal_cliente:config.read",
+      Contenido: SeccionPortalCliente,
     },
   ],
   rondas: [

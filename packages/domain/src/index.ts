@@ -34,3 +34,4 @@ export * from "./navegacion";
 export * from "./capas-sueldo";
 
 export * from "./rondas";
+export * from "./portal-cliente";
