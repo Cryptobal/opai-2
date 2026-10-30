@@ -1,4 +1,5 @@
 import type { Capacidad } from "../../types";
+import { firmasDocumentoUrl } from "./documento-url";
 import { firmasFirmaAutomaticaAutorizar, firmasFirmaAutomaticaRevocar } from "./firma-automatica";
 import { firmasFirmanteEmpresaSet } from "./firmante-empresa";
 import { firmasEnviar } from "./enviar";
@@ -33,5 +34,6 @@ export const capacidadesFirmas: readonly Capacidad[] = [
   firmasFirmar,
   firmasRechazar,
   firmasVerFirmante,
+  firmasDocumentoUrl,
   firmasVerificar,
 ];

@@ -58,6 +58,8 @@ export const ENTRADAS_SERVIDOR: Readonly<Record<string, string>> = {
     "Firma: core.firmas.firmar (interna con motivo): nadie firma por otro con su enlace (firma.md R19).",
   "app/firmar/[slug]/[token]/acciones.ts#rechazarPorEnlace":
     "Firma: core.firmas.rechazar (interna con motivo): nadie rechaza por otro con su enlace (firma.md R9).",
+  "app/firmar/[slug]/[token]/acciones.ts#urlDocumentoPorEnlace":
+    "Firma: core.firmas.documento_url (interna con motivo): el enlace personal es la credencial, igual que ver_firmante (firma.md R5).",
   // Infraestructura: sin datos de negocio.
   "app/api/auth/[...all]/route.ts": "Better Auth (sesión, OAuth y verificación de correo).",
   "app/api/cron/programador/route.ts":

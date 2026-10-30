@@ -4,7 +4,12 @@ import { useState } from "react";
 
 import { Alerta, AuthCard, Button, Campo, Checkbox, Input } from "@opai/ds";
 
-import { type DatosFirma, firmarPorEnlace, rechazarPorEnlace } from "./acciones";
+import {
+  type DatosFirma,
+  firmarPorEnlace,
+  rechazarPorEnlace,
+  urlDocumentoPorEnlace,
+} from "./acciones";
 
 const TEXTO_ACEPTACION =
   "Acepto firmar este documento electrónicamente y declaro que la información que entrego es mía.";
@@ -30,6 +35,18 @@ export function FirmarFlujo({ slug, token, datos }: { slug: string; token: strin
   const [error, setError] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
   const [listo, setListo] = useState<"firmado" | "rechazado" | null>(null);
+  const [verificandoDocumento, setVerificandoDocumento] = useState(false);
+
+  async function verDocumento() {
+    setVerificandoDocumento(true);
+    const r = await urlDocumentoPorEnlace(slug, token);
+    setVerificandoDocumento(false);
+    if (!r) {
+      setError("No se pudo abrir el documento. Inténtalo de nuevo.");
+      return;
+    }
+    window.open(r.url, "_blank", "noopener,noreferrer");
+  }
 
   if (datos.rol !== "firma") {
     return (
@@ -64,16 +81,15 @@ export function FirmarFlujo({ slug, token, datos }: { slug: string; token: strin
               disabled={enviando || !acepta || nombre.trim().length < 2}
               onClick={async () => {
                 setEnviando(true);
-                setError(
-                  await firmarPorEnlace(slug, token, {
-                    metodo: "nombre",
-                    nombreFirma: nombre.trim(),
-                    textoAceptacion: TEXTO_ACEPTACION,
-                    versionAceptacion: VERSION_ACEPTACION,
-                  }),
-                );
+                const err = await firmarPorEnlace(slug, token, {
+                  metodo: "nombre",
+                  nombreFirma: nombre.trim(),
+                  textoAceptacion: TEXTO_ACEPTACION,
+                  versionAceptacion: VERSION_ACEPTACION,
+                });
                 setEnviando(false);
-                setListo("firmado");
+                if (err) setError(err);
+                else setListo("firmado");
               }}
             >
               {enviando ? "Firmando…" : "Firmar"}
@@ -101,9 +117,10 @@ export function FirmarFlujo({ slug, token, datos }: { slug: string; token: strin
               disabled={enviando || motivo.trim().length < 3}
               onClick={async () => {
                 setEnviando(true);
-                setError(await rechazarPorEnlace(slug, token, motivo.trim()));
+                const err = await rechazarPorEnlace(slug, token, motivo.trim());
                 setEnviando(false);
-                setListo("rechazado");
+                if (err) setError(err);
+                else setListo("rechazado");
               }}
             >
               {enviando ? "Rechazando…" : "Confirmar rechazo"}
@@ -113,10 +130,12 @@ export function FirmarFlujo({ slug, token, datos }: { slug: string; token: strin
       ) : (
         <>
           <p className="t-caption">
-            Revisa el documento antes de firmar. La huella del documento congelado se compara con
-            la que recibiste; cambiarlo cancela esta solicitud (R4). Ver el documento completo en
-            línea llega con el diseño de esta pantalla (a confirmar).
+            Revisa el documento completo antes de firmar. La huella del documento congelado se
+            compara con la que recibiste; cambiarlo cancela esta solicitud (R4).
           </p>
+          <Button variant="secondary" disabled={verificandoDocumento} onClick={() => void verDocumento()}>
+            {verificandoDocumento ? "Abriendo…" : "Ver documento"}
+          </Button>
           <Campo etiqueta="Tu nombre" htmlFor="firma-nombre">
             <Input id="firma-nombre" value={nombre} onChange={(e) => setNombre(e.target.value)} />
           </Campo>

@@ -69,3 +69,18 @@ export async function rechazarPorEnlace(slug: string, token: string, motivo: str
   const r = await executeCapability(ctx, "core.firmas.rechazar", { token, motivo });
   return r.ok ? null : r.error.message;
 }
+
+/**
+ * URL firmada del documento congelado para revisarlo antes de firmar (firma.md R5). Sin filtrar
+ * existencia a terceros: un token inválido devuelve `null`, igual que un enlace vencido.
+ */
+export async function urlDocumentoPorEnlace(
+  slug: string,
+  token: string,
+): Promise<{ url: string; nombre: string; mime: string } | null> {
+  if (!(await firmaPermitida(token))) return null;
+  const ctx = await contexto(slug);
+  if (!ctx) return null;
+  const r = await executeCapability(ctx, "core.firmas.documento_url", { token });
+  return r.ok ? (r.data as { url: string; nombre: string; mime: string }) : null;
+}
