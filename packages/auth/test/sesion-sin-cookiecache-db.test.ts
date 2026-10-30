@@ -55,7 +55,9 @@ describe.skipIf(!urlPropietario)("getSession por función y sin caché de sesió
   }
 
   it("no activa session.cookieCache (la sesión se valida contra la base en cada petición)", () => {
-    expect(auth.options.session?.cookieCache?.enabled).not.toBe(true);
+    const session = auth.options.session as Record<string, unknown> | undefined;
+    // cookieCache es opt-in en Better Auth: sin configurarlo, la sesión se lee de la base siempre.
+    expect(session?.["cookieCache"]).toBeUndefined();
   });
 
   it("getSession devuelve la sesión y el usuario leídos por la función", async () => {
