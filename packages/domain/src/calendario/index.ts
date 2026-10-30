@@ -3,3 +3,6 @@
 export * from "./fechas";
 export * from "./dias";
 export * from "./habiles";
+export * from "./pascua";
+export * from "./solsticio";
+export * from "./feriados";
