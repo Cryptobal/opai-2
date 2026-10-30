@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<title>Reportes · Portal Cliente</title>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="portal-cliente.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<div data-pc-brand="fijo" style="width:100%;height:100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" top-bar="{{ pcTopBar }}" device="{{ device }}" theme="{{ theme }}" portal="Logística Andina SpA" tenant="Portal Cliente de Atlas Seguridad SpA" tenant-initials="AS" user="{{ user }}" tabs="{{ tabs }}" rail-footer="{{ railFooter }}" groups="{{ groups }}" active="rep" title="Reportes" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<sc-if value="{{ forbidden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a Reportes" description="Tu perfil de contacto no incluye reportes. Pídele acceso a Andrea Rojas, contacto principal de Logística Andina SpA." action-label="Pedir acceso" hint-size="100%,400px"></x-import>
+</sc-if>
+<sc-if value="{{ allowed }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Logística Andina SpA" title="Reportes" subtitle="Informe mensual y reportes por rango de fechas, en PDF y Excel." hint-size="100%,80px"></x-import>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar los reportes" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="PC-REP-503" hint-size="100%,340px"></x-import>
+</sc-if>
+<sc-if value="{{ notError }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:{{ cols }};gap:16px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Reporte por rango de fechas" hint-size="100%,520px">
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:12px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 44 }}" hint-size="100%,44px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 200 }}" hint-size="100%,200px"></x-import></div></sc-if>
+<sc-if value="{{ notLoading }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:16px">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DateInput" label="Desde" value="01-10-2026" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DateInput" label="Hasta" value="30-10-2026" hint-size="100%,70px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Instalación" value="todas" options="{{ instOpts }}" hint-size="100%,70px"></x-import>
+</div>
+<div style="display:flex;flex-direction:column;gap:4px">
+<span class="t-label">Qué incluir</span>
+<sc-for list="{{ reportes }}" as="r" hint-placeholder-count="5">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ r.on }}" disabled="{{ noData }}" label="{{ r.nombre }}" description="{{ r.desc }}" hint-size="100%,56px"></x-import>
+</sc-for>
+</div>
+<div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ fmtOpts }}" value="pdf" label="Formato" hint-size="160px,36px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="primary" size="lg" icon="download" block="{{ isPhone }}" disabled="{{ noData }}" hint-size="190px,48px">Descargar reporte</x-import>
+</div>
+<sc-if value="{{ rutOmit }}" hint-placeholder-val="{{ true }}"><span class="t-caption">Los PDF y Excel no incluyen el RUT de los guardias: ese dato se ve solo en el portal.</span></sc-if>
+<sc-if value="{{ rutIncl }}" hint-placeholder-val="{{ false }}"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="badge b-warning">Decide Carlos</span><span class="t-body-sm muted">El Excel incluye una columna con el RUT de los guardias.</span></div></sc-if>
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}"><span class="t-caption">Disponible desde el primer turno del servicio.</span></sc-if>
+</div>
+</sc-if>
+</x-import>
+<section style="display:flex;flex-direction:column;gap:8px">
+<h2 class="t-subheading m0">Informe mensual</h2>
+<sc-if value="{{ isOk }}" hint-placeholder-val="{{ true }}">
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);overflow:hidden">
+<sc-for list="{{ informes }}" as="r" hint-placeholder-count="4">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" icon="file" title="{{ r.mes }}" subtitle="{{ r.detalle }}" badge="{{ r.badge }}" trailing="{{ r.dl }}" hint-size="100%,64px"></x-import>
+</sc-for>
+</div>
+<span class="t-caption">Mismo contenido que el resumen del mes en pantalla. PDF o Excel.</span>
+</sc-if>
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<div aria-busy="true" style="display:flex;flex-direction:column;gap:8px"><sc-for list="{{ skel }}" as="k" hint-placeholder-count="4"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 56 }}" hint-size="100%,56px"></x-import></sc-for></div>
+</sc-if>
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="file" size="sm" title="Aún no hay informes" description="El primero se genera al cierre de tu primer mes de servicio." action="{{ emptyAction }}" hint-size="100%,260px"></x-import>
+</sc-if>
+</section>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Suscripción por correo" description="El día 1 de cada mes enviamos el informe del mes anterior." hint-size="100%,420px">
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:12px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 44 }}" hint-size="100%,44px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 132 }}" hint-size="100%,132px"></x-import></div></sc-if>
+<sc-if value="{{ notLoading }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ true }}" label="Recibir el informe mensual" description="{{ mailDesc }}" hint-size="100%,56px"></x-import>
+<sc-if value="{{ isPdf }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ true }}" label="Adjuntar el informe en PDF" description="Como se hace hoy (B14). Mismo contenido que el portal." hint-size="100%,56px"></x-import></sc-if>
+<div style="display:flex;flex-direction:column;gap:6px">
+<span class="t-label">Destinatarios</span>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-md);overflow:hidden">
+<sc-for list="{{ dest }}" as="d" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:8px;padding:0 4px 0 12px;min-height:44px;border-bottom:1px solid var(--ds-border)"><span class="t-body-sm" style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ d.mail }}</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="x" label="{{ d.quitar }}" hint-size="44px,44px"></x-import></div></sc-for>
+</div>
+</div>
+<div style="display:flex;gap:8px;align-items:flex-end"><div style="flex:1;min-width:0"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Agregar destinatario" type="email" placeholder="nombre@empresa.cl" hint-size="100%,70px"></x-import></div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" style="height:44px" hint-size="90px,44px">Agregar</x-import></div>
+<div style="display:flex;justify-content:flex-end"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" block="{{ isPhone }}" hint-size="100px,40px">Guardar</x-import></div>
+</div>
+</sc-if>
+</x-import>
+</div>
+</sc-if>
+</sc-if>
+</x-import>
+</x-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ok&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;ok&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;variante&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;&quot;,&quot;pdf&quot;],&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  componentDidMount() { if (!window.PC) { const t = setInterval(() => { if (window.PC) { clearInterval(t); this.forceUpdate(); } }, 50); } }
+  renderVals() {
+    const P = window.PC || {}; const h = React.createElement, NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = this.props.device ?? "desktop", estado = this.props.estado ?? "ok", variante = this.props.variante ?? "";
+    const ok = estado === "ok";
+    const fmt = (m) => device === "phone"
+      ? (NS.IconButton ? h(NS.IconButton, { icon: "download", label: "Descargar informe de " + m + " en PDF o Excel" }) : null)
+      : h("span", { style: { display: "flex", gap: 4 } }, NS.Button ? h(NS.Button, { variant: "ghost", style: { height: 44 }, "aria-label": "Descargar " + m + " en PDF" }, "PDF") : null, NS.Button ? h(NS.Button, { variant: "ghost", style: { height: 44 }, "aria-label": "Descargar " + m + " en Excel" }, "Excel") : null);
+    return {
+      pcTopBar: P.topBar ? P.topBar(device, this.props.rol, false) : undefined,
+      device, theme: this.props.theme ?? "light", isPhone: device === "phone",
+      user: P.USERS ? P.USERS.total : undefined,
+      tabs: device === "tablet" ? P.NAV_RAIL : P.NAV_PHONE, railFooter: [{ id: "age", label: "Agentes", icon: "bot" }], groups: P.GROUPS,
+      forbidden: estado === "sinpermiso", allowed: estado !== "sinpermiso",
+      isOk: ok, isLoading: estado === "cargando", notLoading: estado !== "cargando", isEmpty: estado === "vacio", isError: estado === "error", notError: estado !== "error", noData: !ok,
+      cols: device === "desktop" ? "minmax(0,1.5fr) minmax(0,1fr)" : "minmax(0,1fr)",
+      instOpts: [{ value: "todas", label: "Todas" }, ...(P.INST || []).map((i) => ({ value: i.id, label: i.name }))],
+      reportes: (P.REPORTES || []).map((r, i) => ({ ...r, on: i < 3 })),
+      fmtOpts: [{ value: "pdf", label: "PDF" }, { value: "xls", label: "Excel" }],
+      informes: (P.INFORMES || []).map((r) => ({ ...r, badge: device === "phone" ? null : { tone: r.tone, label: r.estado }, dl: fmt(r.mes) })),
+      isPdf: variante === "pdf", rutIncl: variante === "rut", rutOmit: variante !== "rut",
+      mailDesc: variante === "pdf" ? "El correo trae el PDF adjunto y un enlace al portal." : "El correo trae un enlace al informe en el portal.",
+      dest: (P.DESTINATARIOS || []).map((m) => ({ mail: m, quitar: "Quitar " + m })),
+      emptyAction: NS.Button ? h(NS.Button, { variant: "secondary" }, "Ver resumen del mes") : null,
+      skel: [1, 2, 3, 4],
+    };
+  }
+}
+</script>
+</body>
+</html>
