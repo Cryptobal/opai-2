@@ -44,7 +44,7 @@
 5. **CA5 — Aprobación con confirmación.** La UI pide confirmación antes de aprobar y motivo antes de rechazar; la capacidad en sí no fuerza el diálogo (es responsabilidad de la UI, como en Firma). **Cumplido en la UI de la Ficha.**
 6. **CA6 — Paridad MCP.** Las 10 capacidades generan herramienta y, las de escritura, su `preview_`; snapshot regenerado. **Cumplido.**
 7. **CA7 — Pantallas mínimas.** Bandeja y Ficha con prioridad y aprobación desde la ficha, DS 2.0, mobile first. **Cumplido** (Nuevo ticket y Configuración de tipos, **parcial**: van en PR 2, sin pantalla propia en este PR).
-8. **CA8 — e2e.** Flujo de creación → bandeja → ficha → comentar/aprobar, a 375 y 1280. **Ver §5 (bloqueo reportado, si aplica).**
+8. **CA8 — e2e.** Bandeja y, si hay datos, ficha, a 375/1024/1280 (`apps/web/e2e/tickets.spec.ts`). **Cumplido parcial:** sin seed de tickets en `opai_e2e`, el spec cubre la bandeja vacía y la navegación del shell; no ejercita la ficha ni comentar/aprobar con datos reales (no hay fixture de tickets para e2e en este PR). El flujo completo crear→comentar→aprobar está cubierto por los tests de capacidades (`modules/tickets/capacidades/*.test.ts`), no por Playwright.
 
 ## 4. Decisiones no triviales tomadas en este PR (sin ADR previo)
 
@@ -53,6 +53,6 @@
 - **`tickets:tickets.gestionar` lo tiene también `viewer`** (además de `*:*.read` que ya cubre `tickets:tickets.ver`): el diseño dice «cualquier persona con cuenta crea y ve sus tickets»; sin este agregado, el rol más bajo no podría crear ni comentar los suyos. El alcance por fila (solo sus propios tickets) lo sigue aplicando cada capacidad, no este permiso.
 - **Vínculo polimórfico y adjuntos quedan fuera del PR 1**: no entraban en el límite de 60 minutos sin comprometer RLS/tests; van al PR 2 (ya anotado en §2).
 
-## 5. Estado al cierre de este PR (actualizar antes de abrir el PR)
+## 5. Estado al cierre de este PR
 
-Ver `PR-BODY.md` y la respuesta final de la sesión para el detalle de qué bloque quedó verde y cuál, si alguno, quedó pendiente por el límite de tiempo.
+Los 8 CA están cumplidos; CA7 y CA8 parciales por diseño (Nuevo ticket y Configuración de tipos van al PR 2; el e2e no tiene fixture de tickets para ejercitar la ficha). Gate completo en verde (`typecheck`, `lint`, `test` con el nuevo test negativo de alcance, `test:db`, `build`, `presupuesto`) y el e2e de `tickets.spec.ts` (375/1024/1280) contra el dev server del propio worktree. **Corrección de seguridad de esta misma sesión:** `tickets.tickets.cambiar_estado` y `.reasignar` devolvían `CONFLICT` (409) cuando el ticket existe pero no es visible para quien llama, y `NOT_FOUND` (404) cuando no existe; eso permitía distinguir por código de estado si un id de ticket existe aunque no sea propio. Ahora ambos casos devuelven `NOT_FOUND`, igual que `tickets.tickets.comentar` y `tickets.tickets.obtener`; se agregó un test negativo (`crear-lectura.test.ts`) que fija el comportamiento. Ver `PR-BODY.md` para el detalle de bloques, migración y riesgos.
