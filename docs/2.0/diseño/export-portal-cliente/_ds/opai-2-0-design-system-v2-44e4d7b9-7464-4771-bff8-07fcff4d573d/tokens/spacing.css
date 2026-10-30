@@ -1,0 +1,24 @@
+/* DS 2.0 — Espaciado, forma, sombra y movimiento. */
+:root {
+  /* Espaciado (base 4) — nombres del export aprobado */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-6: 24px;
+  --s-8: 32px;
+  --s-12: 48px;
+  --s-16: 64px;
+
+  /* Radios (bordes siempre de 1 px) */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 20px; /* esquina superior del sheet inferior */
+  --radius-full: 999px;
+
+  /* Movimiento */
+  --ds-ease: cubic-bezier(0.2, 0, 0, 1); /* @kind other */
+  --ds-dur-fast: 150ms; /* @kind other */
+  --ds-dur: 200ms; /* @kind other */
+}

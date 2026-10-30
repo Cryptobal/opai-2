@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="portal-cliente.js"></script>
+</helmet>
+<div style="display:flex;flex-direction:column;gap:16px">
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<div aria-busy="true" aria-label="Cargando rondas" style="display:flex;flex-direction:column;gap:12px">
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 84 }}" radius="{{ 16 }}" hint-size="100%,84px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 84 }}" radius="{{ 16 }}" hint-size="100%,84px"></x-import></div>
+<sc-for list="{{ skel }}" as="k" hint-placeholder-count="5"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 56 }}" hint-size="100%,56px"></x-import></sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="route" title="Sin rondas en el período" description="No hay rondas registradas el 29-10-2026 en Planta Quilicura. Prueba con otro día." action="{{ emptyAction }}" hint-size="100%,340px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar las rondas" description="Revisa tu conexión. Si el problema sigue, escríbenos desde Solicitudes con el código." code="RND-503" hint-size="100%,340px"></x-import>
+</sc-if>
+<sc-if value="{{ isOk }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:{{ gridCols }};gap:16px;align-items:start">
+<sc-if value="{{ showList }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.KpiTile" label="29-10-2026" value="2 de 6" delta="1 en curso · 3 programadas" tone="success" hint-size="100%,96px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.KpiTile" label="Octubre · realizadas" value="412 de 420" delta="98 % · meta 95 %" tone="success" hint-size="100%,96px"></x-import>
+</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+<div style="width:180px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DateInput" value="29-10-2026" hint-size="100%,44px"></x-import></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Con incidencias" contador="1" hint-size="150px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Incompletas" contador="0" hint-size="130px,32px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ rCols }}" rows="{{ rondas }}" cards="{{ isPhone }}" to-card="{{ rCard }}" selected-key="{{ selKey }}" style="{{ bleed }}" hint-size="100%,340px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ showFicha }}" hint-placeholder-val="{{ false }}">
+<section aria-label="Detalle de la ronda" style="{{ fichaStyle }}">
+<div style="padding:16px;display:flex;flex-direction:column;gap:4px">
+<span class="badge b-accent" style="align-self:flex-start">En curso</span>
+<span class="t-heading">Ronda perimetral</span>
+<span class="t-body-sm muted">Planta Quilicura · <span class="t-numeric">29-10-2026 · desde 10:02</span></span>
+</div>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<button type="button" aria-expanded="{{ mapaOpen }}" aria-controls="mapa-recorrido" onClick="{{ toggleMapa }}" style="display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:44px;margin:0 16px;padding:0 4px;border:0;background:transparent;color:var(--ds-fg);font:inherit;cursor:pointer"><span class="t-label">Mapa del recorrido</span><span class="{{ chevron }}" aria-hidden="true"></span></button>
+</sc-if>
+<sc-if value="{{ mapaVisible }}" hint-placeholder-val="{{ true }}">
+<div id="mapa-recorrido" style="height:200px;flex:none;margin:0 16px;border:1px solid var(--ds-border);border-radius:16px;overflow:hidden"><dc-import name="Mapa Rondas" variant="recorrido" incidente="{{ true }}" hint-size="100%,200px" style="display:block;width:100%;height:100%"></dc-import></div>
+</sc-if>
+<div style="padding:16px;display:flex;flex-direction:column;gap:10px">
+<span class="t-overline">Puntos · 4 de 6</span>
+<div class="tl"><sc-for list="{{ tl }}" as="m" hint-placeholder-count="6"><div class="tl-item" style="padding-bottom:14px"><span class="tl-dot" style="border:2px solid {{ m.bd }};background:{{ m.bg }};color:{{ m.fg }}"><span class="t-caption" style="color:inherit;font-weight:600">{{ m.n }}</span></span><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><div style="display:flex;justify-content:space-between;gap:8px"><span class="t-label">{{ m.nom }}</span><span class="t-caption t-numeric">{{ m.h }}</span></div><a href="#" style="display:{{ m.nd }};flex-direction:column;gap:4px;margin-top:4px;padding:8px 12px;min-height:44px;border:1px solid var(--ds-border);border-radius:10px;text-decoration:none;color:var(--ds-fg)"><span style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span class="ic sm i-flag" aria-hidden="true"></span><span class="t-label-sm t-mono">NOV-0418</span><span class="badge b-danger nodot">Incidente</span><span class="badge b-warning">En atención</span></span><span class="t-body-sm">Intrusión · Puerta lateral de Bodega A forzada, candado en el suelo.</span><span class="t-caption">3 fotos · reportado 10:15</span></a></div></div></sc-for></div>
+<span class="t-caption">d16f · export-rondas. Solo lectura, sin anomalías internas ni desglose de confianza.</span>
+</div>
+</section>
+</sc-if>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { mapa: true };
+  componentDidMount() { if (!window.PC) { const t = setInterval(() => { if (window.PC) { clearInterval(t); this.forceUpdate(); } }, 50); } }
+  renderVals() {
+    const h = React.createElement, NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const B = (tone, l) => NS.Badge ? h(NS.Badge, { tone }, l) : l;
+    const device = this.props.device ?? "desktop", estado = this.props.estado ?? "ok", vista = this.props.vista ?? "";
+    const isPhone = device === "phone", narrow = device === "tablet", ok = estado === "ok";
+    const detalle = vista === "detalle";
+    const num = (t) => h("span", { className: "t-numeric" }, t);
+    const col = (a, b) => h("span", { style: { display: "flex", flexDirection: "column" } }, a, h("span", { className: "t-caption" }, b));
+    const rondas = [
+      { id: "r1", hora: "08:00", nombre: "Ronda perimetral", real: "08:03–08:36", puntos: "6 de 6", inc: 0, tone: "success", estado: "Completa" },
+      { id: "r2", hora: "10:00", nombre: "Ronda perimetral", real: "desde 10:02", puntos: "4 de 6", inc: 1, tone: "accent", estado: "En curso" },
+      { id: "r3", hora: "12:00", nombre: "Cierre de bodegas", real: "—", puntos: "0 de 4", inc: 0, tone: "neutral", estado: "Programada" },
+      { id: "r4", hora: "14:00", nombre: "Ronda perimetral", real: "—", puntos: "0 de 6", inc: 0, tone: "neutral", estado: "Programada" },
+      { id: "r5", hora: "18:00", nombre: "Cierre de bodegas", real: "—", puntos: "0 de 4", inc: 0, tone: "neutral", estado: "Programada" },
+      { id: "r6", hora: "22:00", nombre: "Ronda perimetral", real: "—", puntos: "0 de 6", inc: 0, tone: "neutral", estado: "Programada" },
+    ];
+    const rCols = [
+      { key: "hora", label: "Hora", render: (r) => num(r.hora) },
+      { key: "nombre", label: "Ronda", render: (r) => col(h("span", { style: { fontWeight: 500 } }, r.nombre), r.real === "—" ? "Por hacer" : "Realizada " + r.real) },
+      { key: "puntos", label: "Puntos", align: "right", render: (r) => num(r.puntos) },
+      { key: "inc", label: "Incid.", align: "right", render: (r) => num(r.inc ? String(r.inc) : "—") },
+      { key: "estado", label: "Estado", render: (r) => B(r.tone, r.estado) },
+    ];
+    const tl = [{ n: 1, nom: "Portería principal", h: "10:02" }, { n: 2, nom: "Estacionamiento visitas", h: "10:09" }, { n: 3, nom: "Bodega A", h: "10:15", nov: true }, { n: 4, nom: "Andén norte", h: "10:21" }, { n: 5, nom: "Cerco poniente", h: "Pendiente", om: true }, { n: 6, nom: "Sala de bombas", h: "Pendiente", om: true }]
+      .map((m) => Object.assign(m, { nd: m.nov ? "flex" : "none", bd: m.om ? "var(--ds-border-strong)" : "var(--ds-fg)", bg: m.om ? "var(--ds-surface)" : "var(--ds-fg)", fg: m.om ? "var(--ds-fg-subtle)" : "var(--ds-bg)" }));
+    const split = !isPhone && !narrow;
+    const mapaOpen = this.state.mapa;
+    return {
+      isPhone, isOk: ok, isLoading: estado === "cargando", isEmpty: estado === "vacio", isError: estado === "error",
+      showList: !(isPhone && detalle), showFicha: isPhone ? detalle : true,
+      gridCols: split ? "minmax(0,1fr) 400px" : "minmax(0,1fr)",
+      fichaStyle: Object.assign({ minWidth: 0, display: "flex", flexDirection: "column", background: "var(--ds-surface)", border: "1px solid var(--ds-border)", borderRadius: "var(--radius-lg)", overflow: "hidden" }, isPhone ? { margin: "0 -16px", border: 0, borderRadius: 0, background: "transparent" } : {}),
+      bleed: isPhone ? { margin: "0 -16px" } : undefined,
+      rondas, rCols, selKey: isPhone ? undefined : "r2",
+      rCard: (r) => ({ title: r.hora + " · " + r.nombre, subtitle: r.puntos + (r.real === "—" ? " · por hacer" : " · " + r.real.replace("desde ", "desde ")) + (r.inc ? " · 1 incid." : ""), badge: { tone: r.tone, label: r.estado }, chevron: true }),
+      tl, mapaOpen, mapaVisible: !isPhone || mapaOpen,
+      toggleMapa: () => this.setState((s) => ({ mapa: !s.mapa })),
+      chevron: mapaOpen ? "ic sm i-chevron-down subtle" : "ic sm i-chevron-right subtle",
+      emptyAction: NS.Button ? h(NS.Button, { variant: "secondary", size: "lg", icon: "calendar" }, "Cambiar día") : null,
+      skel: [1, 2, 3, 4, 5],
+    };
+  }
+}
+</script>
+</body>
+</html>
