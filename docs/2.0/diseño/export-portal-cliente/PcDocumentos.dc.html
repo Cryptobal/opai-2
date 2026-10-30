@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<title>Documentos y facturas · Portal Cliente</title>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="portal-cliente.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<div data-pc-brand="fijo" style="width:100%;height:100%"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" top-bar="{{ pcTopBar }}" device="{{ device }}" theme="{{ theme }}" portal="{{ portalName }}" tenant="{{ tenantCaption }}" tenant-initials="AS" user="{{ user }}" tabs="{{ tabs }}" rail-footer="{{ railFooter }}" groups="{{ groups }}" active="{{ active }}" title="Documentos y facturas" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<sc-if value="{{ forbidden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a Documentos" description="Tu perfil de contacto no incluye documentos ni facturas. Pídele acceso a Andrea Rojas, contacto principal de Logística Andina SpA." action-label="Pedir acceso" hint-size="100%,400px"></x-import>
+</sc-if>
+<sc-if value="{{ allowed }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Logística Andina SpA" title="Documentos y facturas" hint-size="100%,60px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="primary" icon="download" block="{{ isPhone }}" disabled="{{ noData }}" hint-size="200px,40px">{{ primaryLabel }}</x-import>
+</x-import>
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ tabItems }}" value="{{ tab }}" on-change="{{ setTab }}" hint-size="100%,44px"></x-import>
+<sc-if value="{{ tabDoc }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" hint-size="100%,44px">Solo ves documentos que la empresa de seguridad marcó como visibles.</x-import>
+</sc-if>
+<sc-if value="{{ showFilters }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+<div style="flex:1 1 220px;max-width:280px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" value="todas" options="{{ instOpts }}" hint-size="100%,44px"></x-import></div>
+<sc-for list="{{ tipos }}" as="t" hint-placeholder-count="3">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="{{ t.label }}" activo="{{ t.on }}" hint-size="140px,32px"></x-import>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ showProFilters }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+<div style="flex:1 1 220px;max-width:280px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" value="pq" options="{{ instOpts }}" hint-size="100%,44px"></x-import></div>
+<sc-for list="{{ tiposProt }}" as="t" hint-placeholder-count="5">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="{{ t.label }}" activo="{{ t.on }}" hint-size="120px,32px"></x-import>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<div aria-busy="true" aria-label="Cargando documentos" style="display:flex;flex-direction:column;border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);overflow:hidden">
+<sc-for list="{{ skel }}" as="k" hint-placeholder-count="5">
+<div style="display:flex;align-items:center;gap:16px;padding:14px 16px;border-bottom:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="20px" height="{{ 20 }}" hint-size="20px,20px"></x-import>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="45%" hint-size="45%,14px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="30%" height="{{ 12 }}" hint-size="30%,12px"></x-import></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="72px" height="{{ 22 }}" radius="{{ 999 }}" hint-size="72px,22px"></x-import>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="file" title="{{ emptyTitle }}" description="{{ emptyDesc }}" action="{{ emptyAction }}" hint-size="100%,340px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar los documentos" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="PC-DOC-503" hint-size="100%,340px"></x-import>
+</sc-if>
+<sc-if value="{{ okDoc }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ dCols }}" rows="{{ docs }}" cards="{{ isPhone }}" to-card="{{ dCard }}" hint-size="100%,200px"></x-import>
+</sc-if>
+<sc-if value="{{ okPro }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ pCols }}" rows="{{ prots }}" cards="{{ isPhone }}" to-card="{{ pCard }}" hint-size="100%,240px"></x-import>
+<span class="t-caption">Se muestra la versión vigente. Atlas Seguridad SpA publica las nuevas versiones y te avisamos por correo.</span>
+</sc-if>
+<sc-if value="{{ okFac }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ fCols }}" rows="{{ facs }}" cards="{{ isPhone }}" to-card="{{ fCard }}" hint-size="100%,200px"></x-import>
+<span class="t-caption">El detalle de cada cobro está en el PDF de la factura. Los servicios pedidos fuera de pauta se facturan aparte.</span>
+</sc-if>
+</div>
+</sc-if>
+</x-import>
+</x-import></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ok&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;ok&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;rol&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;total&quot;,&quot;limitado&quot;],&quot;default&quot;:&quot;total&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;tab&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;doc&quot;,&quot;fac&quot;],&quot;default&quot;:&quot;doc&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = {};
+  componentDidMount() { if (!window.PC) { const t = setInterval(() => { if (window.PC) { clearInterval(t); this.forceUpdate(); } }, 50); } }
+  renderVals() {
+    const P = window.PC || {}; const h = React.createElement, NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const B = (tone, l) => NS.Badge ? h(NS.Badge, { tone }, l) : l;
+    const DL = (l) => NS.IconButton ? h(NS.IconButton, { icon: "download", label: l }) : null;
+    const device = this.props.device ?? "desktop", estado = this.props.estado ?? "ok", rol = this.props.rol ?? "total";
+    const isPhone = device === "phone"; const tab = this.state.tab || this.props.tab || "doc";
+    const insts = (P.INST || []).filter((i) => rol !== "limitado" || P.limitadas.includes(i.id));
+    const names = insts.map((i) => i.name);
+    const docs = (P.DOCS || []).filter((d) => names.includes(d.inst));
+    const ok = estado === "ok";
+    return {
+      pcTopBar: P.topBar ? P.topBar(device, this.props.rol, false) : undefined,
+      portalName: "Logística Andina SpA", tenantCaption: "Portal Cliente de Atlas Seguridad SpA", active: P.activeFor ? P.activeFor(device, "doc") : "doc",
+      device, theme: this.props.theme ?? "light", isPhone,
+      user: P.USERS ? P.USERS[rol === "limitado" ? "limitado" : "total"] : undefined,
+      tabs: device === "tablet" ? P.NAV_RAIL : P.NAV_PHONE, railFooter: [{ id: "age", label: "Agentes", icon: "bot" }], groups: P.GROUPS,
+      forbidden: estado === "sinpermiso", allowed: estado !== "sinpermiso",
+      isLoading: estado === "cargando", isEmpty: estado === "vacio", isError: estado === "error", noData: !ok,
+      tab, setTab: (t) => this.setState({ tab: t }), tabDoc: tab === "doc",
+      tabItems: [{ id: "doc", label: "Documentos de los guardias" }, { id: "pro", label: "Protocolos e instalaciones" }, { id: "fac", label: "Facturas" }],
+      primaryLabel: tab === "doc" ? "Descargar documentos" : tab === "pro" ? "Descargar seleccionados" : "Descargar facturas",
+      showProFilters: tab === "pro" && (ok || estado === "cargando"), okPro: ok && tab === "pro",
+      tiposProt: (P.TIPOS_PROT || []).map((t) => ({ label: t, on: false })),
+      prots: (P.PROTOCOLOS || []).filter((d) => d.inst === "Planta Quilicura"),
+      pCols: [
+        { key: "nombre", label: "Documento", strong: true, render: (r) => h("span", { style: { display: "flex", flexDirection: "column" } }, r.nombre, h("span", { className: "t-caption", style: { fontWeight: 400 } }, r.inst)) },
+        { key: "tipo", label: "Tipo", render: (r) => B("neutral", r.tipo) },
+        { key: "ver", label: "Versión vigente", render: (r) => h("span", { className: "t-numeric" }, r.ver + " · desde " + r.desde) },
+        { key: "dl", label: "", align: "right", render: (r) => DL("Descargar " + r.nombre) }],
+      pCard: (r) => ({ icon: "file", title: r.nombre, subtitle: r.tipo + " · " + r.ver + " vigente desde " + r.desde, chevron: true }),
+      showFilters: tab === "doc" && (ok || estado === "cargando"),
+      instOpts: [{ value: "todas", label: rol === "limitado" ? "Mis 2 instalaciones" : "Todas las instalaciones" }, ...insts.map((i) => ({ value: i.id, label: i.name }))],
+      selectStyle: { width: isPhone ? "100%" : 240 },
+      tipos: (P.TIPOS_VISIBLES || []).map((t, i) => ({ label: t, on: false })),
+      okDoc: ok && tab === "doc", okFac: ok && tab === "fac",
+      docs, dCols: [
+        { key: "guardia", label: "Guardia", strong: true, render: (r) => h("span", { style: { display: "flex", flexDirection: "column" } }, r.guardia, h("span", { className: "t-caption", style: { fontWeight: 400 } }, r.inst)) }, { key: "rut", label: "RUT", mono: true }, { key: "tipo", label: "Tipo" },
+        { key: "vence", label: "Vence", render: (r) => h("span", { className: "t-numeric" }, r.vence) },
+        { key: "estado", label: "Estado", render: (r) => B(r.tone, r.estado) }, { key: "dl", label: "", align: "right", render: (r) => DL("Descargar " + r.tipo + " de " + r.guardia) }],
+      dCard: (r) => ({ icon: "file", title: r.tipo + " · " + r.guardia, subtitle: r.inst + " · vence " + r.vence, meta: r.rut, badge: { tone: r.tone, label: r.estado } }),
+      facs: P.FACTURAS || [], fCols: [
+        { key: "folio", label: "Folio", mono: true }, { key: "periodo", label: "Período", strong: true },
+        { key: "emision", label: "Emisión", render: (r) => h("span", { className: "t-numeric" }, r.emision) }, { key: "vence", label: "Vence", render: (r) => h("span", { className: "t-numeric" }, r.vence) },
+        { key: "estado", label: "Estado", render: (r) => B(r.tone, r.estado) }, { key: "dl", label: "", align: "right", render: (r) => DL("Descargar factura " + r.folio) }],
+      fCard: (r) => ({ icon: "file", title: r.periodo, subtitle: "Emitida " + r.emision + " · vence " + r.vence, meta: r.folio, badge: { tone: r.tone, label: r.estado } }),
+      emptyTitle: tab === "doc" ? "Aún no hay documentos visibles" : tab === "pro" ? "Aún no hay protocolos" : "Aún no hay facturas",
+      emptyDesc: tab === "pro" ? "Atlas Seguridad SpA aún no vincula protocolos ni planes a esta instalación." : tab === "doc" ? "Atlas Seguridad SpA todavía no comparte documentos de los guardias asignados a tus instalaciones." : "La primera factura llega al cierre de tu primer mes de servicio.",
+      emptyAction: NS.Button ? h(NS.Button, { variant: "secondary", size: "lg" }, tab === "doc" ? "Pedir documentos" : "Ver resumen del mes") : null,
+      skel: [1, 2, 3, 4, 5],
+    };
+  }
+}
+</script>
+</body>
+</html>
