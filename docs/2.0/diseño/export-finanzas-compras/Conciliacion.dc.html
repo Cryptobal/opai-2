@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="fin-shell.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ nav.tabs }}" groups="{{ nav.groups }}" active="{{ nav.active }}" title="{{ shellTitle }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<sc-if value="{{ notForbidden }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" tab-bar="{{ isPhone }}" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Conciliación" title="Octubre 2026" subtitle="Banco de Chile · cuenta corriente 0012-3456-78" hint-size="100%,80px">
+<sc-if value="{{ showHeadClose }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" disabled="{{ true }}" icon="lock" hint-size="130px,40px">Cerrar mes</x-import>
+</sc-if>
+</x-import>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin-bottom:16px">
+<div style="flex:1 1 240px;max-width:{{ selMax }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Cuenta" value="bch" options="{{ cuentas }}" hint-size="100%,72px"></x-import>
+</div>
+<div class="chip-row">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Chip" etiqueta="Mes" valor="Octubre 2026" hint-size="160px,32px"></x-import>
+</div>
+</div>
+<sc-if value="{{ isDatos }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:minmax(0,1fr);gap:16px">
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PatternGrid" cols="{{ 3 }}" phone="{{ 1 }}" gap="{{ 12 }}" hint-size="100%,104px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.KpiTile" label="Saldo banco al 31-10-2026" value="$ 48.300.000" delta="cartola del 31-10 · 23:59" hint-size="100%,104px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.KpiTile" label="Saldo libro al 31-10-2026" value="$ 47.915.400" delta="cuenta 1.1.02 Banco de Chile" hint-size="100%,104px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.KpiTile" label="Diferencia" value="$ 384.600" delta="4 partidas abiertas" direction="up" tone="warning" hint-size="100%,104px"></x-import>
+</x-import>
+</sc-if>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,140px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" rows="{{ cuadreRows }}" hint-size="100%,120px"></x-import>
+</x-import>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ tabsItems }}" value="{{ tab }}" on-change="{{ setTab }}" hint-size="100%,44px"></x-import>
+<sc-if value="{{ isAbiertas }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" dc-props="{{ tblProps }}" columns="{{ cols }}" rows="{{ abiertas }}" cards="{{ isPhone }}" to-card="{{ toCard }}" on-row-click="{{ openSheet }}" hint-size="100%,260px"></x-import>
+</sc-if>
+<sc-if value="{{ isConciliados }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" dc-props="{{ tblProps }}" columns="{{ cols }}" rows="{{ conciliados }}" cards="{{ isPhone }}" to-card="{{ toCard }}" hint-size="100%,260px"></x-import>
+</sc-if>
+<p class="t-caption" style="margin:0">Las glosas se muestran tal como las envía el banco. Desactivar una regla no deshace lo que ya concilió.</p>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="display:grid;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" block="{{ true }}" size="lg" disabled="{{ true }}" icon="lock" hint-size="100%,48px">Cerrar mes</x-import>
+<span class="t-caption" style="text-align:center">Calza las 4 partidas abiertas para cerrar octubre.</span>
+</div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<span class="t-caption">«Cerrar mes» se habilita cuando banco y libro cuadran: calza las 4 partidas abiertas.</span>
+</sc-if>
+</div>
+</sc-if>
+<sc-if value="{{ isCargando }}" hint-placeholder-val="{{ false }}">
+<div style="display:grid;gap:16px" aria-busy="true" aria-label="Cargando conciliación">
+<div style="display:grid;grid-template-columns:repeat({{ skCols }},minmax(0,1fr));gap:12px">
+<sc-for list="{{ sk3 }}" as="s" hint-placeholder-count="3"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="100%" height="{{ skKpiH }}" radius="{{ 16 }}" hint-size="100%,104px"></x-import></sc-for>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="260px" height="32px" hint-size="260px,32px"></x-import>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+<sc-for list="{{ sk5 }}" as="s" hint-placeholder-count="5">
+<div style="display:flex;gap:16px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="72px" height="14px" hint-size="72px,14px"></x-import>
+<div style="flex:1"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="70%" height="14px" hint-size="70%,14px"></x-import></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="96px" height="14px" hint-size="96px,14px"></x-import>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="landmark" title="Aún no hay movimientos de octubre" description="Importa la cartola del banco para conciliar esta cuenta." action="{{ emptyAction }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar la conciliación" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="FIN-CON-500" on-retry="{{ noop }}" hint-size="100%,320px"></x-import>
+</sc-if>
+</x-import>
+</sc-if>
+<sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="{{ fb.title }}" description="{{ fb.description }}" action-label="Pedir acceso" hint-size="100%,100%"></x-import>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Sheet" open="{{ sheetOpen }}" contained="{{ true }}" side="{{ sheetSide }}" title="Calzar movimiento" description="Cargo del 21-10-2026 · $ 8.920.000" on-close="{{ closeSheet }}" actions="{{ sheetActions }}" hint-size="0px,0px">
+<div style="display:grid;gap:16px">
+<div style="display:grid;gap:4px;padding:12px;border-radius:var(--radius-md);background:var(--ds-fill)">
+<span class="t-caption">Glosa del banco</span>
+<span class="t-mono">TRANSF A 76112334-5 SEG TOTAL</span>
+<span class="t-caption">Clasificó: regla «Proveedores de guardias» · desde 02-09-2026</span>
+</div>
+<div style="display:grid;gap:8px">
+<span class="t-label">Facturas abiertas de Seguridad Total Ltda</span>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg)">
+<sc-for list="{{ calces }}" as="c" hint-placeholder-count="3">
+<div style="display:grid;grid-template-columns:44px minmax(0,1fr) 128px;gap:8px;align-items:center;padding:8px 12px 8px 4px;border-bottom:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ c.on }}" label="" hint-size="44px,44px"></x-import>
+<div style="display:grid;gap:2px;min-width:0"><span class="t-mono">{{ c.folio }}</span><span class="t-caption">Saldo {{ c.saldo }} · vence {{ c.vence }}</span></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" value="{{ c.asig }}" prefix="$" mono="{{ true }}" compact="{{ true }}" disabled="{{ c.off }}" input-style="{{ alignRight }}" hint-size="128px,40px"></x-import>
+</div>
+</sc-for>
+</div>
+</div>
+<div style="display:grid;gap:8px;padding:12px 0;border-top:1px solid var(--ds-border)">
+<div style="display:flex;justify-content:space-between"><span class="t-body-sm muted">Movimiento</span><span class="t-numeric">$ 8.920.000</span></div>
+<div style="display:flex;justify-content:space-between"><span class="t-body-sm muted">Asignado a 2 facturas</span><span class="t-numeric">$ 8.920.000</span></div>
+<div style="display:flex;justify-content:space-between;align-items:center"><span class="t-label">Restante</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="success" hint-size="60px,22px">$ 0</x-import></div>
+</div>
+<span class="t-caption">La 33 · 77602 queda con saldo $ 720.000 y estado «Pago parcial».</span>
+</div>
+</x-import>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;datos&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinPermiso&quot;],&quot;default&quot;:&quot;datos&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;abierto&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state = { tab: "abiertas", sheet: null };
+  componentDidMount() { if (!window.FinShell) { const t = setInterval(() => { if (window.FinShell) { clearInterval(t); this.forceUpdate(); } }, 40); } }
+  renderVals() {
+    const F = window.FinShell;
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = this.props.device ?? "desktop";
+    const isPhone = device === "phone";
+    const st = F ? F.estado(this.props) : { isDatos: true, notForbidden: true };
+    const badge = (t, l) => (NS.Badge ? h(NS.Badge, { tone: t }, l) : l);
+    const abiertas = [
+      { id: 1, fecha: "21-10-2026", glosa: "TRANSF A 76112334-5 SEG TOTAL", tipo: "Cargo", monto: "−$ 8.920.000", clas: "Regla «Proveedores de guardias»", desde: "desde 02-09-2026", calce: ["info", "3 facturas posibles"] },
+      { id: 2, fecha: "24-10-2026", glosa: "ABONO TEF 96.712.400-3 INMOB APOQ", tipo: "Abono", monto: "$ 6.940.000", clas: "Regla «Clientes por RUT»", desde: "desde 15-08-2026", calce: ["info", "1 factura posible"] },
+      { id: 3, fecha: "27-10-2026", glosa: "COM MANT CTA CTE OCT", tipo: "Cargo", monto: "−$ 18.400", clas: "Sin clasificar", desde: "", calce: ["warning", "Requiere revisión"] },
+      { id: 4, fecha: "29-10-2026", glosa: "DEP EFECT SUC LAMPA 0042", tipo: "Abono", monto: "$ 2.383.000", clas: "Sin clasificar", desde: "", calce: ["warning", "Requiere revisión"] },
+    ];
+    const conciliados = [
+      { id: 5, fecha: "13-10-2026", glosa: "TRANSF A 78234567-1 UNIFORMES PACIF", tipo: "Cargo", monto: "−$ 1.940.000", clas: "Regla «Pago proveedores por RUT»", desde: "desde 02-09-2026", calce: ["success", "Calzado · 1 factura"] },
+      { id: 6, fecha: "10-10-2026", glosa: "ARRIENDO BODEGA LAMPA OCT", tipo: "Cargo", monto: "−$ 3.000.000", clas: "Regla «Arriendo Lampa»", desde: "desde 01-07-2026", calce: ["success", "Calzado parcial · 1 factura"] },
+      { id: 7, fecha: "05-10-2026", glosa: "ABONO TEF 76.334.120-8 LOG ANDINA", tipo: "Abono", monto: "$ 8.325.000", clas: "Manual · C. Irigoyen", desde: "05-10-2026 10:42", calce: ["success", "Calzado · 2 facturas"] },
+    ];
+    const open = this.state.sheet ?? !!this.props.abierto;
+    const B = NS.Button;
+    return {
+      tblProps: { style: { display: "block" } }, device, theme: this.props.theme ?? "light", isPhone, notPhone: !isPhone, ...st,
+      nav: F ? F.shell("con", device) : { tabs: [], groups: [] },
+      fb: F ? F.forbidden : {},
+      shellTitle: isPhone ? "" : "Finanzas",
+      showHeadClose: !isPhone && st.isDatos,
+      selMax: isPhone ? "100%" : "320px",
+      cuentas: [{ value: "bch", label: "Banco de Chile · 0012-3456-78" }, { value: "bst", label: "Banco Estado · 0123-4567-89" }],
+      cuadreRows: [{ label: "Saldo banco al 31-10", value: "$ 48.300.000", numeric: true }, { label: "Saldo libro al 31-10", value: "$ 47.915.400", numeric: true }, { label: "Diferencia", value: badge("warning", "$ 384.600 · 4 abiertas") }],
+      tab: this.state.tab, setTab: (v) => this.setState({ tab: v }),
+      isAbiertas: this.state.tab === "abiertas", isConciliados: this.state.tab === "conc",
+      tabsItems: [{ id: "abiertas", label: "Partidas abiertas", count: 4 }, { id: "conc", label: "Conciliados", count: 128 }],
+      abiertas, conciliados,
+      sk3: [1, 2, 3], sk5: [1, 2, 3, 4, 5], skCols: isPhone ? 1 : 3, skKpiH: isPhone ? "64px" : "104px",
+      noop: () => {},
+      openSheet: () => this.setState({ sheet: true }), closeSheet: () => this.setState({ sheet: false }),
+      sheetOpen: open && st.isDatos, sheetSide: isPhone ? "bottom" : "right",
+      alignRight: { textAlign: "right" },
+      calces: [
+        { folio: "33 · 77810", saldo: "$ 6.540.000", vence: "20-11-2026", asig: "6.540.000", on: true, off: false },
+        { folio: "33 · 77602", saldo: "$ 3.100.000", vence: "05-11-2026", asig: "2.380.000", on: true, off: false },
+        { folio: "33 · 77455", saldo: "$ 1.250.000", vence: "28-10-2026", asig: "", on: false, off: true },
+      ],
+      sheetActions: h(React.Fragment, null, B ? h(B, { variant: "secondary", onClick: () => this.setState({ sheet: false }) }, "Cancelar") : null, B ? h(B, null, "Calzar con 2 facturas") : null),
+      emptyAction: B ? h(B, { icon: "download" }, "Importar cartola") : null,
+      cols: [
+        { key: "fecha", label: "Fecha", muted: true },
+        { key: "glosa", label: "Glosa del banco", render: (r) => h("span", { className: "t-mono" }, r.glosa) },
+        { key: "monto", label: "Monto", align: "right", render: (r) => h("span", { className: "t-numeric" }, r.monto) },
+        { key: "clas", label: "Clasificó", render: (r) => h("span", { style: { display: "flex", flexDirection: "column" } }, h("span", { className: "t-body-sm" }, r.clas), r.desde ? h("span", { className: "t-caption" }, r.desde) : null) },
+        { key: "calce", label: "Calce", render: (r) => badge(r.calce[0], r.calce[1]) },
+      ],
+      toCard: (r) => ({ title: r.monto, subtitle: r.fecha + " · " + r.clas, meta: r.glosa, badge: { tone: r.calce[0], label: r.calce[1] } }),
+    };
+  }
+}
+</script>
+</body>
+</html>
