@@ -12,6 +12,10 @@ import type * as ModuloCapacidades from "../src";
 
 type Capacidades = typeof ModuloCapacidades;
 
+// Valor de prueba de RONDAS_ETIQUETA_SECRET (≥32 bytes): obligatorio desde la corrección de la
+// review 5713377140 del PR #145; nunca un valor fijo en el código de producción.
+process.env["RONDAS_ETIQUETA_SECRET"] ??= randomUUID() + randomUUID();
+
 describe.skipIf(!urlPropietario)("aislamiento entre tenants · Rondas (RLS)", () => {
   let e: Entorno;
   let mod: Capacidades;
@@ -169,5 +173,48 @@ describe.skipIf(!urlPropietario)("aislamiento entre tenants · Rondas (RLS)", ()
     expect(a.ok && b.ok).toBe(true);
     const fin = await e.admin.programacion.findUnique({ where: { id }, select: { nombre: true } });
     expect(["Edición uno", "Edición dos"]).toContain(fin?.nombre);
+  });
+
+  // Etiquetas QR (PR 2, R7): crear genera la etiqueta firmada y su fila vigente; reemplazar deja la
+  // anterior «reemplazada» y una nueva vigente; la RLS aísla el historial entre tenants.
+  it("crear y reemplazar deja una sola etiqueta vigente firmada y el historial aislado por tenant", async () => {
+    const creado = await mod.executeCapability(ctxOwner(tenantA), "rondas.puntos.crear", {
+      instalacionId: instA,
+      nombre: "Punto con etiqueta",
+      modo: "qr_gps",
+      latitud: -33.45,
+      longitud: -70.66,
+    });
+    expect(creado.ok).toBe(true);
+    const punto = (creado as { data: { id: string; etiquetaQr: string } }).data;
+    expect(punto.etiquetaQr).toMatch(/^R2\./);
+
+    const r = await mod.executeCapability(ctxOwner(tenantA), "rondas.puntos.reemplazar_etiqueta", {
+      id: punto.id,
+      motivo: "sospecha de fotocopia",
+    });
+    expect(r.ok).toBe(true);
+    const nueva = (r as { data: { etiquetaNueva: string; etiquetaAnterior: string } }).data;
+    expect(nueva.etiquetaAnterior).toBe(punto.etiquetaQr);
+    expect(nueva.etiquetaNueva).not.toBe(punto.etiquetaQr);
+
+    const filasA = await e.forTenant(tenantA).etiquetaQr.findMany({ where: { puntoId: punto.id } });
+    expect(filasA).toHaveLength(2);
+    expect(filasA.filter((f) => f.estado === "vigente")).toHaveLength(1);
+    expect(filasA.find((f) => f.estado === "vigente")?.codigo).toBe(nueva.etiquetaNueva);
+    expect(filasA.find((f) => f.estado === "reemplazada")?.codigo).toBe(punto.etiquetaQr);
+
+    // RLS: el tenant B no ve ninguna etiqueta del punto de A.
+    const filasB = await e.forTenant(tenantB).etiquetaQr.findMany({ where: { puntoId: punto.id } });
+    expect(filasB).toHaveLength(0);
+  });
+
+  it("el owner de B no puede reemplazar la etiqueta de un punto de A (NOT_FOUND, sin enumeración)", async () => {
+    const puntoA = await e.forTenant(tenantA).puntoControl.findFirst({ where: { instalacionId: instA } });
+    const cruce = await mod.executeCapability(ctxOwner(tenantB), "rondas.puntos.reemplazar_etiqueta", {
+      id: puntoA?.id ?? "0192f3a0-0000-7000-8000-0000000000aa",
+      motivo: "intento entre tenants",
+    });
+    expect(cruce).toMatchObject({ ok: false, error: { code: "NOT_FOUND" } });
   });
 });

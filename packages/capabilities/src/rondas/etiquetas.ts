@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { esEtiquetaFirmada } from "@opai/domain";
+
 import { defineCapability } from "../define";
 import { uuidSchema } from "../core/esquemas";
 import { PERMISO_CONFIG, instalacionEnAlcance } from "./comun";
@@ -20,7 +22,13 @@ export const etiquetasPdf = defineCapability({
     instalacionId: z.string(),
     total: z.number(),
     etiquetas: z.array(
-      z.object({ puntoId: z.string(), nombre: z.string(), codigo: z.string() }),
+      z.object({
+        puntoId: z.string(),
+        nombre: z.string(),
+        codigo: z.string(),
+        /** `true` si el código ya tiene el formato firmado de 2.0; `false` si es una etiqueta de 1.0. */
+        firmada: z.boolean(),
+      }),
     ),
   }),
   efecto: "escritura",
@@ -38,7 +46,12 @@ export const etiquetasPdf = defineCapability({
     });
     const etiquetas = puntos
       .filter((p): p is { id: string; nombre: string; etiquetaQr: string } => p.etiquetaQr !== null)
-      .map((p) => ({ puntoId: p.id, nombre: p.nombre, codigo: p.etiquetaQr }));
+      .map((p) => ({
+        puntoId: p.id,
+        nombre: p.nombre,
+        codigo: p.etiquetaQr,
+        firmada: esEtiquetaFirmada(p.etiquetaQr),
+      }));
     return { instalacionId: input.instalacionId, total: etiquetas.length, etiquetas };
   },
 });
