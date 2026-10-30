@@ -4,9 +4,10 @@ import { PERMISOS_CORE } from "@opai/domain";
 
 import { defineCapability } from "../../define";
 import { prohibido } from "../../errores";
-import type { Contexto } from "../../types";
 import { entidadEnAlcance } from "../maestros/alcance";
+import { nombres } from "./actividad-actores";
 import { visibleSinAnexos } from "./actividad-anexos";
+import { visibleSinNoRecontratar } from "./actividad-no-recontratar";
 import { auditarHistorialSensible, redactarSensibles } from "./actividad-sensible";
 import { cambios, frase } from "./actividad-texto";
 import { auditoriaSelect } from "./auditoria-select";
@@ -35,26 +36,6 @@ const itemSchema = z.object({
 });
 
 const dia = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Formato aaaa-mm-dd.");
-
-async function nombres(ctx: Contexto, usuarios: string[], keys: string[]) {
-  const [m, k] = await Promise.all([
-    ctx.db.membership.findMany({ where: { userId: { in: usuarios } }, include: { user: true } }),
-    ctx.db.apiKey.findMany({
-      where: { id: { in: keys.filter((id) => !id.startsWith("agente-interno:")) } },
-      select: { id: true, nombre: true, principalTipo: true },
-    }),
-  ]);
-  return new Map([
-    ...keys
-      .filter((id) => id.startsWith("agente-interno:"))
-      .map((id) => [id, "Agente interno"] as const),
-    ...m.map((x) => [x.userId, x.user.name] as const),
-    // Un agente de servicio se distingue en la auditoría: "agente <nombre> (servicio)" (t457u).
-    ...k.map(
-      (x) => [x.id, x.principalTipo === "servicio" ? `${x.nombre} (servicio)` : x.nombre] as const,
-    ),
-  ]);
-}
 
 export const actividadList = defineCapability({
   auditarLectura: (s) => s.items.map((e) => e.id),
@@ -116,8 +97,9 @@ export const actividadList = defineCapability({
       ...(input.cursor ? { cursor: { id: input.cursor }, skip: 1 } : {}),
     });
     const leidas = filas.slice(0, input.limite);
-    const visible = await visibleSinAnexos(ctx, leidas);
-    const pagina = leidas.filter(visible);
+    const visibleAnexos = await visibleSinAnexos(ctx, leidas);
+    const visibleMarca = visibleSinNoRecontratar(ctx);
+    const pagina = leidas.filter((f) => visibleAnexos(f) && visibleMarca(f));
     await auditarHistorialSensible(ctx, pagina, "core.actividad.list");
     const quien = await nombres(
       ctx,
