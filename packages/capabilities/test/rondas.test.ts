@@ -1,7 +1,7 @@
 // Brief 14 · Rondas PR 1: validación, autorización por rol y alcance (ADR-022), auditoría, dryRun e
 // idempotencia de las capacidades de configuración. El aislamiento entre dos tenants se prueba con
 // Postgres real en packages/db (rls-dos-empresas) y aquí se cubre el alcance por filas.
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   capacidadesDelNucleo,
@@ -11,8 +11,18 @@ import {
   limpiarRegistro,
   registrarCapacidades,
 } from "../src";
-import { TENANT_DE_PRUEBA, contextoDePrueba } from "../src/testing";
+import { TENANT_DE_PRUEBA, USUARIO_DE_PRUEBA, contextoDePrueba } from "../src/testing";
+import type { AgenteContexto } from "../src/types";
 import { semillaTenant } from "./semilla";
+
+// Valor de prueba de RONDAS_ETIQUETA_SECRET (≥32 bytes), solo para este archivo de tests (R7,
+// corrección de la review 5713377140 del PR #145: nunca un valor fijo en el código de producción).
+const SECRETO_ETIQUETA_DE_PRUEBA = "secreto-de-prueba-de-al-menos-32-caracteres-rondas-etiqueta-qr";
+vi.stubEnv("RONDAS_ETIQUETA_SECRET", SECRETO_ETIQUETA_DE_PRUEBA);
+afterEach(() => {
+  vi.unstubAllEnvs();
+  vi.stubEnv("RONDAS_ETIQUETA_SECRET", SECRETO_ETIQUETA_DE_PRUEBA);
+});
 
 const INST = "0192f3a0-0000-7000-8000-00000000c101";
 const INST2 = "0192f3a0-0000-7000-8000-00000000c102";
@@ -50,14 +60,25 @@ beforeEach(() => {
 });
 
 describe("rondas.puntos.crear", () => {
-  it("crea un punto QR + GPS, genera su etiqueta opaca y lo audita", async () => {
+  it("crea un punto QR + GPS, genera su etiqueta opaca y firmada y la registra en el historial", async () => {
     const { ctx, tabla, eventos } = owner();
     const r = await executeCapability(ctx, "rondas.puntos.crear", puntoQrGps);
     expect(r.ok).toBe(true);
     expect(tabla("puntoControl")).toHaveLength(1);
-    const fila = tabla("puntoControl")[0] as { etiquetaQr: string; modo: string };
-    expect(fila.etiquetaQr).toMatch(/^RQR-/);
+    const fila = tabla("puntoControl")[0] as { id: string; etiquetaQr: string; modo: string };
+    expect(fila.etiquetaQr).toMatch(/^R2\./);
+    const etiquetas = tabla("etiquetaQr") as { puntoId: string; estado: string; codigo: string; firmada: boolean }[];
+    expect(etiquetas).toHaveLength(1);
+    expect(etiquetas[0]).toMatchObject({ puntoId: fila.id, estado: "vigente", codigo: fila.etiquetaQr, firmada: true });
     expect(eventos.some((e) => e.capability === "rondas.puntos.crear")).toBe(true);
+  });
+
+  it("un punto solo GPS no genera etiqueta QR", async () => {
+    const { ctx, tabla } = owner();
+    const r = await executeCapability(ctx, "rondas.puntos.crear", { ...puntoQrGps, modo: "gps" });
+    expect(r.ok).toBe(true);
+    expect((tabla("puntoControl")[0] as { etiquetaQr: string | null }).etiquetaQr).toBeNull();
+    expect(tabla("etiquetaQr")).toHaveLength(0);
   });
 
   it("dryRun no persiste", async () => {
@@ -94,6 +115,17 @@ describe("rondas.puntos.crear", () => {
     const b = await executeCapability(ctx, "rondas.puntos.crear", puntoQrGps, { idempotencyKey: "p1" });
     expect(a.ok && b.ok).toBe(true);
     expect(tabla("puntoControl")).toHaveLength(1);
+  });
+
+  // Corrección de la review 5713377140 del PR #145: sin RONDAS_ETIQUETA_SECRET no se crea ningún
+  // punto QR ni etiqueta (falla cerrado, nada queda a medias).
+  it("sin RONDAS_ETIQUETA_SECRET no crea el punto ni ninguna etiqueta (UNPROCESSABLE)", async () => {
+    vi.stubEnv("RONDAS_ETIQUETA_SECRET", undefined);
+    const { ctx, tabla } = owner();
+    const r = await executeCapability(ctx, "rondas.puntos.crear", puntoQrGps);
+    expect(r).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+    expect(tabla("puntoControl")).toHaveLength(0);
+    expect(tabla("etiquetaQr")).toHaveLength(0);
   });
 });
 
@@ -418,10 +450,108 @@ describe("sin permiso de configurar: las escrituras dan FORBIDDEN", () => {
     ["rondas.incidentes_tipo.crear", { nombre: "Robo", gravedadDefecto: "alta" }],
     ["rondas.incidentes_tipo.actualizar", { id: ID, activo: false }],
     ["rondas.etiquetas.pdf", { instalacionId: INST }],
+    ["rondas.puntos.reemplazar_etiqueta", { id: ID, motivo: "sospecha de fotocopia" }],
   ];
   it.each(casos)("%s sin rondas:configurar devuelve FORBIDDEN", async (cap, input) => {
     const { ctx } = lector();
     const r = await executeCapability(ctx, cap, input);
     expect(r).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+  });
+});
+
+describe("rondas.puntos.reemplazar_etiqueta (R7, R34)", () => {
+  async function conPunto(modo = "qr_gps") {
+    const o = owner();
+    const r = await executeCapability(o.ctx, "rondas.puntos.crear", { ...puntoQrGps, modo });
+    if (!r.ok) throw new Error("no se pudo crear el punto");
+    const punto = r.data as { id: string; etiquetaQr: string | null };
+    return { ...o, punto };
+  }
+
+  it("invalida la etiqueta vigente, genera una firmada nueva y emite el evento", async () => {
+    const { ctx, tabla, punto } = await conPunto();
+    const original = punto.etiquetaQr as string;
+    const r = await executeCapability(ctx, "rondas.puntos.reemplazar_etiqueta", {
+      id: punto.id,
+      motivo: "sospecha de fotocopia",
+    });
+    expect(r.ok).toBe(true);
+    const data = (r as { data: { etiquetaAnterior: string; etiquetaNueva: string } }).data;
+    expect(data.etiquetaAnterior).toBe(original);
+    expect(data.etiquetaNueva).toMatch(/^R2\./);
+    expect(data.etiquetaNueva).not.toBe(original);
+    const etiquetas = tabla("etiquetaQr") as { codigo: string; estado: string }[];
+    expect(etiquetas.find((e) => e.codigo === original)?.estado).toBe("reemplazada");
+    expect(etiquetas.find((e) => e.codigo === data.etiquetaNueva)?.estado).toBe("vigente");
+    const p = tabla("puntoControl")[0] as { etiquetaQr: string };
+    expect(p.etiquetaQr).toBe(data.etiquetaNueva);
+    expect(tabla("evento").some((e) => (e as { tipo: string }).tipo === "rondas.etiqueta.reemplazada")).toBe(true);
+  });
+
+  it("dryRun no persiste ni cambia la etiqueta del punto", async () => {
+    const { ctx, tabla, punto } = await conPunto();
+    const original = punto.etiquetaQr as string;
+    const r = await executeCapability(
+      ctx,
+      "rondas.puntos.reemplazar_etiqueta",
+      { id: punto.id, motivo: "solo vista previa" },
+      { dryRun: true },
+    );
+    expect(r.ok).toBe(true);
+    expect((tabla("puntoControl")[0] as { etiquetaQr: string }).etiquetaQr).toBe(original);
+    expect(tabla("etiquetaQr")).toHaveLength(1);
+    expect((tabla("etiquetaQr")[0] as { estado: string }).estado).toBe("vigente");
+  });
+
+  it("un punto solo GPS no tiene etiqueta que reemplazar (UNPROCESSABLE)", async () => {
+    const { ctx, punto } = await conPunto("gps");
+    const r = await executeCapability(ctx, "rondas.puntos.reemplazar_etiqueta", {
+      id: punto.id,
+      motivo: "no debería dejar",
+    });
+    expect(r).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+  });
+
+  it("un supervisor no puede reemplazar una etiqueta, aunque tenga rondas:configurar (rondas.md §7)", async () => {
+    const { punto } = await conPunto();
+    const sup = contextoDePrueba({
+      rol: "supervisor",
+      portal: "erp",
+      modulosActivos: ["rondas"],
+      alcance: { instalaciones: [INST] },
+      semilla: semilla(),
+    });
+    const r = await executeCapability(sup.ctx, "rondas.puntos.reemplazar_etiqueta", {
+      id: punto.id,
+      motivo: "fuera de su alcance de acción",
+    });
+    expect(r).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+  });
+
+  it("un agente recibe APPROVAL_REQUIRED por ser irreversible (R34)", async () => {
+    const { punto } = await conPunto();
+    const KEY = "0192f3a0-0000-7000-8000-00000000cafe";
+    const agente: AgenteContexto = {
+      apiKeyId: KEY,
+      nombre: "Agente Rondas",
+      presupuestoMensualMicro: null,
+      autonomia: {},
+    };
+    const ag = contextoDePrueba({
+      portal: "erp",
+      modulosActivos: ["rondas"],
+      actor: { tipo: "agent", id: KEY, viaUserId: USUARIO_DE_PRUEBA.id },
+      agente,
+      scopes: ["rondas"],
+      semilla: {
+        ...semilla(),
+        apiKey: [{ id: KEY, nombre: "Agente Rondas", userId: USUARIO_DE_PRUEBA.id, scopes: ["rondas"] }],
+      },
+    });
+    const r = await executeCapability(ag.ctx, "rondas.puntos.reemplazar_etiqueta", {
+      id: punto.id,
+      motivo: "el agente propone reemplazar",
+    });
+    expect(r).toMatchObject({ ok: false, error: { code: "APPROVAL_REQUIRED" } });
   });
 });
