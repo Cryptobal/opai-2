@@ -9,6 +9,9 @@ export const CLASES_FIRMA = [
   "contrato_trabajo",
   "anexo_contrato",
   "recepcion_laboral",
+  // Carta al trabajador (amonestación, término): N1 de toma de conocimiento, pero es una decisión
+  // del empleador que lo compromete, así que un agente la envía solo con aprobación (R19, §4).
+  "carta_trabajador",
   "propuesta_comercial",
   "contrato_servicio",
   "acta",
@@ -42,6 +45,7 @@ export const REGLAS_CLASE_FIRMA: Readonly<Record<ClaseFirma, ReglaClase>> = {
   contrato_trabajo: { minimo: "N2", permitidos: ["N2", "N3"], requiereAceptacionMedio: true },
   anexo_contrato: { minimo: "N2", permitidos: ["N2", "N3"], requiereAceptacionMedio: true },
   recepcion_laboral: { minimo: "N1", permitidos: ["N1", "N2"], requiereAceptacionMedio: false },
+  carta_trabajador: { minimo: "N1", permitidos: ["N1", "N2"], requiereAceptacionMedio: false },
   propuesta_comercial: {
     minimo: "N1",
     permitidos: ["N1", "N2", "N3"],
