@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script><script src="./nomina-data.js"></script><style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style></helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="{{ active }}" title="{{ shellTitle }}" user="{{ user }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<sc-if value="{{ showHeader }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Liquidaciones · Octubre 2026" title="Camila Herrera" subtitle="{{ sub }}" badge="{{ headBadge }}" size="heading" hint-size="100%,80px">
+<sc-if value="{{ canEdit }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="file" hint-size="200px,40px">Publicar al trabajador</x-import>
+</sc-if>
+</x-import>
+</sc-if>
+
+<sc-if value="{{ isOk }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:16px">
+<sc-if value="{{ isGerente }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="neutral" icono="eye" hint-size="100%,56px">Por tu rol los montos de esta liquidación están enmascarados.</x-import>
+</sc-if>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ segOpts }}" value="{{ vista }}" on-change="{{ setVista }}" label="Vista" hint-size="100%,40px"></x-import>
+</sc-if>
+<div style="display:flex;gap:24px;align-items:flex-start;flex-wrap:wrap">
+<sc-if value="{{ showDetalle }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1 1 420px;min-width:0;display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,200px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Resumen del período · desde Asistencia" rows="{{ pares }}" hint-size="100%,200px"></x-import>
+</x-import>
+<span class="t-label">Haberes</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ haberes }}" cards="{{ isPhone }}" to-card="{{ toCard }}" compact="{{ true }}" hint-size="100%,260px"></x-import>
+<span class="t-label">Descuentos</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ descuentos }}" cards="{{ isPhone }}" to-card="{{ toCard }}" compact="{{ true }}" hint-size="100%,260px"></x-import>
+<a href="B3 Prestamos con plan de cuotas.dc.html" class="t-body-sm" style="display:inline-flex;align-items:center;min-height:44px">Ver plan de cuotas del préstamo</a>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,180px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Totales" rows="{{ totales }}" hint-size="100%,140px"></x-import>
+<div style="display:flex;justify-content:space-between;align-items:baseline;padding-top:12px;margin-top:4px;border-top:1px solid var(--ds-border)">
+<span class="t-label">Líquido a pagar</span>
+<span class="t-heading t-numeric">{{ liquido }}</span>
+</div>
+</x-import>
+<span class="t-caption" style="color:var(--ds-fg-muted)">Al publicar, la liquidación queda en Mis documentos del Portal Trabajador y se envía a su correo personal: camila.herrera.p@correo.cl</span>
+</div>
+</sc-if>
+<sc-if value="{{ showPdf }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1 1 340px;max-width:440px;min-width:0;display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;justify-content:space-between;align-items:center"><span class="t-label">Vista previa del PDF</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="download" hint-size="110px,40px">Descargar</x-import></div>
+<div aria-label="Vista previa de la liquidación" style="background:var(--ds-paper);color:var(--ds-paper-fg);border:1px solid var(--ds-border);border-radius:var(--radius-md);padding:28px 24px;display:flex;flex-direction:column;gap:14px;aspect-ratio:8.5/11">
+<div style="display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid var(--ds-paper-rule);padding-bottom:10px">
+<div style="display:flex;flex-direction:column;gap:2px"><span class="t-label-sm">Atlas Seguridad SpA</span><span class="t-caption t-mono">76.111.222-3</span></div>
+<div style="display:flex;flex-direction:column;gap:2px;text-align:right"><span class="t-label-sm">Liquidación de sueldo</span><span class="t-caption">Octubre 2026</span></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:2px"><span class="t-caption">Camila Herrera · <span class="t-mono">12.345.678-9</span></span><span class="t-caption">Guardia · Planta Quilicura · 30 días</span></div>
+<div style="display:flex;flex-direction:column">
+<sc-for list="{{ pdfRows }}" as="r" hint-placeholder-count="10">
+<div class="t-caption" style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid var(--ds-paper-rule-subtle)"><span>{{ r.c }}</span><span class="t-numeric">{{ r.v }}</span></div>
+</sc-for>
+</div>
+<div class="t-label-sm" style="display:flex;justify-content:space-between;border-top:1px solid var(--ds-paper-rule);padding-top:8px;margin-top:auto"><span>Líquido a pagar</span><span class="t-numeric">{{ liquido }}</span></div>
+</div>
+</div>
+</sc-if>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isCargando }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:24px;flex-wrap:wrap" aria-busy="true">
+<div style="flex:1 1 420px;display:flex;flex-direction:column;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 180 }}" radius="{{ 16 }}" hint-size="100%,180px"></x-import>
+<sc-for list="{{ skel }}" as="s" hint-placeholder-count="5"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 40 }}" radius="{{ 6 }}" hint-size="100%,40px"></x-import></sc-for>
+</div>
+<div style="flex:1 1 340px;max-width:440px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 520 }}" radius="{{ 10 }}" hint-size="100%,520px"></x-import></div>
+</div>
+</sc-if>
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="file" title="Esta persona no tiene liquidación en octubre" description="Revisa que tenga asistencia en el período y vuelve a calcular." action="{{ emptyAction }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar la liquidación" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="NOM-LQP-503" on-retry="{{ noop }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ isSinPermiso }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a esta liquidación" description="Las liquidaciones solo las ven RRHH, gerencia y administración. Pídele acceso a Marcela Rojas, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,320px"></x-import>
+</sc-if>
+</x-import>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ok&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;ok&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;role&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;admin&quot;,&quot;rrhh&quot;,&quot;gerente&quot;,&quot;inspector&quot;,&quot;supervisor&quot;],&quot;default&quot;:&quot;admin&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { vista: "det" };
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const ND = window.ND;
+    if (!ND) return {};
+    const b = ND.base(this.props, "liq", "Liquidación");
+    const m = (v) => (b.isGerente ? ND.mask : ND.money(v));
+    const haberes = [
+      { id: 1, c: "Sueldo base", o: "Capa de puesto · Guardia Planta Quilicura", v: 560000 },
+      { id: 2, c: "Gratificación legal", o: "Indicador · motor de sueldos", v: 140000 },
+      { id: 3, c: "Horas extra · 8 h", o: "Novedad · Asistencia", v: 41230 },
+      { id: 4, c: "Bono nocturno", o: "Capa de instalación · Planta Quilicura", v: 35000 },
+      { id: 5, c: "Colación (no imponible)", o: "Capa de puesto", v: 45000 },
+      { id: 6, c: "Movilización (no imponible)", o: "Capa de puesto", v: 40000 },
+    ];
+    const descuentos = [
+      { id: 1, c: "AFP Modelo · 10,58 %", o: "Indicador · ficha de persona", v: 82125 },
+      { id: 2, c: "Salud Fonasa · 7 %", o: "Indicador · ficha de persona", v: 54336 },
+      { id: 3, c: "Seguro de cesantía · 0,6 %", o: "Indicador", v: 4657 },
+      { id: 4, c: "Impuesto único", o: "Tabla de impuesto · exento", v: 0 },
+      { id: 5, c: "Anticipo quincenal 15-10-2026", o: "Automático · ficha de persona", v: 100000 },
+      { id: 6, c: "Préstamo empresa · cuota 7 de 12", o: "Plan de cuotas · saldo " + m(180000), v: 30000 },
+    ];
+    const isPhone = b.isPhone;
+    const vista = this.state.vista;
+    return {
+      ...b,
+      sub: "12.345.678-9 · Guardia · Planta Quilicura",
+      headBadge: NS.Badge ? h(NS.Badge, { tone: "success", dot: true }, "Revisada") : null,
+      segOpts: [{ value: "det", label: "Detalle" }, { value: "pdf", label: "PDF" }],
+      vista, setVista: (v) => this.setState({ vista: v }),
+      showDetalle: !isPhone || vista === "det",
+      showPdf: !isPhone || vista === "pdf",
+      pares: [
+        { label: "Días trabajados", value: "30", numeric: true },
+        { label: "Ausencias", value: "0", numeric: true },
+        { label: "Licencias", value: "0", numeric: true },
+        { label: "Horas extra", value: "8 h", numeric: true },
+        { label: "AFP · Salud", value: "Modelo · Fonasa" },
+        { label: "Cargas familiares", value: "1", numeric: true },
+        { label: "APV", value: "No tiene" },
+      ],
+      haberes, descuentos,
+      cols: [
+        { key: "c", label: "Concepto", strong: true },
+        { key: "o", label: "Origen", muted: true },
+        { key: "v", label: "Monto", align: "right", render: (r) => m(r.v) },
+      ],
+      toCard: (r) => ({ title: r.c, subtitle: r.o, trailing: h("span", { className: "t-numeric t-label" }, m(r.v)) }),
+      totales: [
+        { label: "Total imponible", value: m(776230), numeric: true },
+        { label: "Total haberes", value: m(861230), numeric: true },
+        { label: "Total descuentos", value: m(271118), numeric: true },
+      ],
+      liquido: m(590112),
+      pdfRows: [...haberes, ...descuentos].map((r, i) => ({ c: r.c, v: (i >= haberes.length ? "– " : "") + m(r.v) })),
+      emptyAction: NS.Button && b.canEdit ? h(NS.Button, { variant: "secondary" }, "Ir al cierre") : null,
+    };
+  }
+}
+</script>
+</body>
+</html>
