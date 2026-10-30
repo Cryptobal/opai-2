@@ -74,4 +74,20 @@ describe.skipIf(!urlPropietario)("getSession por función y sin caché de sesió
     await e.admin.session.deleteMany({ where: { userId } });
     expect(await auth.api.getSession({ headers })).toBeNull();
   });
+
+  it("un token inválido (cookie falsa) no autentica", async () => {
+    const headers = new Headers({ cookie: `better-auth.session_token=tok_${randomUUID()}.firma-falsa` });
+    expect(await auth.api.getSession({ headers })).toBeNull();
+  });
+
+  it("una sesión expirada no autentica (el vencimiento lo valida Better Auth)", async () => {
+    const headers = await entrar();
+    expect((await auth.api.getSession({ headers }))?.user.id).toBe(userId);
+    await e.admin.session.updateMany({
+      where: { userId },
+      data: { expiresAt: new Date(Date.now() - 3_600_000) },
+    });
+    expect(await auth.api.getSession({ headers })).toBeNull();
+    await e.admin.session.deleteMany({ where: { userId } });
+  });
 });

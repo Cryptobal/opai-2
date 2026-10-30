@@ -9,7 +9,9 @@ import { notificarConsulta } from "./metricas";
  * ahora por funciones SECURITY DEFINER (`core.auth_sesion_por_token`, `core.auth_usuario_por_id`,
  * dueñas de opai_auth) invocadas como UNA sola sentencia autocommit: no abren transacción, así que
  * no pueden quedar «idle in transaction». El resto de operaciones de auth (escrituras, lecturas por
- * otros campos, groupBy) siguen por la transacción corta, ya acotada por idle=5s.
+ * otros campos, groupBy) siguen por la transacción corta, acotada por el idle_in_transaction del rol
+ * (30 s; no se baja a 5 s en este PR porque hay escrituras que esperan a R2 dentro de la transacción,
+ * decisión del Revisor, review 5707965033).
  */
 
 type FilaSesion = {
@@ -96,8 +98,17 @@ export async function leerSesionPorToken(base: ClienteApp, token: string, inclui
   return incluirUser ? { ...sesion, user: usuario(f) } : sesion;
 }
 
-/** Usuario por id, como sentencia autocommit. `users` no tiene credenciales (CAR-43). */
+/** Un uuid canónico (8-4-4-4-12 hex); evita que un id no-uuid reviente el cast `::uuid` de la función. */
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+/**
+ * Usuario por id, como sentencia autocommit. `users` no tiene credenciales (CAR-43) y es identidad
+ * global (sin tenant_id ni RLS): no se filtra por membresía porque el id viene de la sesión ya
+ * validada y al leerla no hay tenant activo (igual que `globales.usuarioPorId`). Un id que no sea uuid
+ * no corresponde a ningún usuario: devuelve null sin consultar, en vez de fallar con el cast `::uuid`.
+ */
 export async function leerUsuarioPorId(base: ClienteApp, id: string) {
+  if (!UUID_RE.test(id)) return null;
   notificarConsulta();
   const filas = await base.$queryRaw<FilaUsuario[]>`
     SELECT * FROM core.auth_usuario_por_id(${id}::uuid)`;
@@ -120,7 +131,7 @@ export async function leerUsuarioPorId(base: ClienteApp, id: string) {
  * Si la operación es una lectura del hot path (sesión por token o usuario por id) la resuelve por
  * función y devuelve `{ manejada: true, valor }`; si no, `{ manejada: false }` y el llamador usa la
  * vía transaccional. Solo `findFirst` con una igualdad simple: cualquier otra forma (findMany, count,
- * groupBy, where compuesto, por email) cae a la vía transaccional, que sigue acotada por idle=5s.
+ * groupBy, where compuesto, por email) cae a la vía transaccional, acotada por idle=30s del rol.
  */
 export async function lecturaAuthPorFuncion(
   base: ClienteApp,

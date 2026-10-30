@@ -1,10 +1,13 @@
 // B1 · causa raíz: las funciones SECURITY DEFINER de lectura de sesión (fuera de transacción) no
-// abren hoyos de RLS ni se dejan secuestrar, y el idle_in_transaction de 5 s corta las transacciones
-// abandonadas. Solo `pnpm test:db` (Postgres real).
+// abren hoyos de RLS ni se dejan secuestrar, y la migración mantiene el idle_in_transaction del rol
+// opai_app en 30 s (no se baja a 5 s en este PR, decisión del Revisor, review 5707965033). Solo
+// `pnpm test:db` (Postgres real).
 import { randomUUID } from "node:crypto";
 import { Client } from "pg";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
+import { leerUsuarioPorId } from "../src/auth-lecturas";
+import { clienteApp } from "../src/client";
 import { type Entorno, prepararEntorno, urlPropietario } from "./entorno";
 
 describe.skipIf(!urlPropietario)("Auth · lectura de sesión fuera de transacción (B1)", () => {
@@ -94,24 +97,49 @@ describe.skipIf(!urlPropietario)("Auth · lectura de sesión fuera de transacci�
     await owner.query(`DROP SCHEMA "${sch}" CASCADE`);
   });
 
-  it("el ALTER ROLE de la migración deja idle_in_transaction_session_timeout=5s en opai_app", async () => {
-    // El ajuste del rol es global del cluster (setdatabase=0) y, en el Postgres local compartido entre
-    // worktrees, otra rama puede reaplicar el 30 s de CAR-35; en CI (base efímera, migraciones en
-    // orden) opai_app ya queda en 5 s. Reaplicamos la sentencia de la migración (idempotente) para que
-    // la verificación sea determinista aquí y comprobamos que produce el valor y el formato esperados.
-    await owner.query("ALTER ROLE opai_app SET idle_in_transaction_session_timeout = '5s'");
+  it("la migración aplicada deja idle_in_transaction_session_timeout=30s en opai_app", async () => {
+    // El valor lo dejan las migraciones ya aplicadas (CAR-35 20261028220000 lo fijó en 30 s y esta
+    // migración lo reafirma), NO el test: solo lo leemos. En CI (base efímera, migraciones en orden)
+    // opai_app queda en 30 s. No se baja a 5 s en este PR (decisión del Revisor, review 5707965033):
+    // hay escrituras que esperan a R2 dentro de la transacción y un idle corto cortaría la transacción
+    // con el archivo ya en R2 pero sin su fila ni su auditoría.
     const r = await owner.query(
       "SELECT setconfig FROM pg_db_role_setting s JOIN pg_roles r ON r.oid=s.setrole" +
         " WHERE rolname='opai_app' AND s.setdatabase=0",
     );
     expect((r.rows[0]?.setconfig ?? []) as string[]).toContain(
-      "idle_in_transaction_session_timeout=5s",
+      "idle_in_transaction_session_timeout=30s",
     );
   });
 
+  it("token inválido: la función no devuelve fila (no revela si el token existe)", async () => {
+    const r = await app.query("SELECT * FROM core.auth_sesion_por_token($1)", [`tok_${randomUUID()}`]);
+    expect(r.rowCount).toBe(0);
+  });
+
+  it("sesión expirada: la función SÍ la devuelve; el vencimiento lo valida Better Auth, no la función", async () => {
+    const expirado = `tok_${randomUUID()}`;
+    await e.admin.session.create({
+      data: { token: expirado, userId: uid, expiresAt: new Date(Date.now() - 3_600_000) },
+    });
+    const r = await app.query("SELECT s_expires_at FROM core.auth_sesion_por_token($1)", [expirado]);
+    expect(r.rowCount).toBe(1); // la función solo filtra por token; getSession compara expires_at
+    expect(new Date(r.rows[0].s_expires_at).getTime()).toBeLessThan(Date.now());
+    await e.admin.session.deleteMany({ where: { token: expirado } });
+  });
+
+  it("leerUsuarioPorId con un id que no es uuid devuelve null (no revienta el cast ::uuid)", async () => {
+    const base = clienteApp();
+    expect(await leerUsuarioPorId(base, "no-es-uuid")).toBeNull();
+    expect(await leerUsuarioPorId(base, "")).toBeNull();
+    expect(await leerUsuarioPorId(base, randomUUID())).toBeNull(); // uuid válido pero inexistente
+    const u = await leerUsuarioPorId(base, uid);
+    expect(u?.id).toBe(uid); // uuid válido y existente: lo devuelve
+  });
+
   it("una conexión idle in transaction se corta a ~5 s y la siguiente obtiene conexión", async () => {
-    // Los ALTER ROLE ... SET no se heredan por membresía; se aplican al rol efímero para reproducir
-    // lo que en producción rige sobre opai_app (que sí conecta como sí mismo).
+    // Mecanismo: opai_app usa idle=30s en producción; aquí se fija 5 s en el rol efímero solo para
+    // comprobar el corte sin esperar 30 s. Los ALTER ROLE ... SET no se heredan por membresía.
     await owner.query(`ALTER ROLE "${rolApp}" SET idle_in_transaction_session_timeout = '5s'`);
     const victima = new Client({ connectionString: process.env["DATABASE_URL"] });
     victima.on("error", () => undefined);

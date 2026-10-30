@@ -100,20 +100,19 @@ describe("lock de auditoría: sin esperas largas ni transacciones que pidan al p
   });
 
   it("el rol opai_app tiene lock_timeout, statement_timeout e idle_in_transaction_session_timeout", async () => {
-    // El idle de opai_app es global del cluster (setdatabase=0); en el Postgres local compartido entre
-    // worktrees otra rama puede reaplicar el 30 s de CAR-35. Reaplicamos la sentencia (idempotente) de
-    // la migración 20261029200000 de B1 para que la verificación sea determinista aquí; en CI (base
-    // efímera, migraciones en orden) opai_app ya queda en 5 s.
-    await entorno.admin.$executeRaw`ALTER ROLE opai_app SET idle_in_transaction_session_timeout = '5s'`;
+    // Solo leemos el valor que dejan las migraciones aplicadas, sin fijarlo aquí: CAR-35
+    // (20261028220000) lo puso en 30 s y la migración 20261030020000 de B1 lo reafirma. En CI (base
+    // efímera, migraciones en orden) opai_app queda en 30 s. B1 · causa raíz NO baja el tope a 5 s en
+    // este PR (decisión del Revisor, review 5707965033): hay escrituras que esperan a R2 dentro de la
+    // transacción y un idle corto cortaría la transacción con el archivo ya en R2 pero sin su fila ni
+    // su auditoría; el fondo de B1 se ataca sacando las lecturas de sesión de la transacción.
     const [rol] = await entorno.admin.$queryRaw<{ config: string[] | null }[]>`
       SELECT rolconfig AS config FROM pg_roles WHERE rolname = 'opai_app'`;
     expect(rol?.config).toEqual(
       expect.arrayContaining([
         "lock_timeout=5s",
         "statement_timeout=20s",
-        // B1 · causa raíz: la migración 20261029200000 bajó el tope de 30 s (CAR-35) a 5 s para
-        // cortar las transacciones de sesión abandonadas que quedaban «idle in transaction».
-        "idle_in_transaction_session_timeout=5s",
+        "idle_in_transaction_session_timeout=30s",
       ]),
     );
     const [funcion] = await entorno.admin.$queryRaw<{ config: string[] | null }[]>`

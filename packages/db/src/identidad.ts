@@ -13,7 +13,7 @@ import type { TenantTx } from "./transaccion";
  * y no pueden quedar «idle in transaction». El resto de operaciones de esos modelos (escrituras,
  * lecturas por otros campos, groupBy) corre en una transacción corta que asume `opai_auth` con
  * `SET LOCAL ROLE`; es por transacción (funciona con el pooler de Neon) y queda acotada por el
- * idle_in_transaction de 5 s del rol. `opai_app` es NOINHERIT: sin el SET ROLE no tiene esos privilegios.
+ * idle_in_transaction del rol (30 s). `opai_app` es NOINHERIT: sin el SET ROLE no tiene esos privilegios.
  */
 /** Transacción interactiva del cliente base, con los modelos de identidad (rol ya asumido). */
 type TxAuth = Omit<
@@ -51,7 +51,7 @@ function extender(base: ClienteApp) {
           // Hot path (sesión por token, usuario por id): una sentencia autocommit sin transacción.
           const porFuncion = await lecturaAuthPorFuncion(base, model, operation, args);
           if (porFuncion.manejada) return porFuncion.valor;
-          // El resto asume el rol dentro de una transacción corta (acotada por idle=5s del rol).
+          // El resto asume el rol dentro de una transacción corta (acotada por idle=30s del rol).
           const [, resultado] = await base.$transaction([
             base.$executeRaw`SET LOCAL ROLE opai_auth`,
             query(args),
