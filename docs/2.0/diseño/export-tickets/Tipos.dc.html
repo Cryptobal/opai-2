@@ -13,14 +13,14 @@
 <script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
 <style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
 </helmet>
-<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="{{ activeNav }}" title="{{ shellTitle }}" user="{{ user }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="{{ activeNav }}" title="{{ shellTitle }}" subtitle="{{ shellSub }}" user="{{ user }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
 <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
 <sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
 <div style="margin:-8px 0 8px -8px">
 <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="chevron-left" hint-size="100px,44px">Tipos</x-import>
 </div>
 </sc-if>
-<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Configuración · Tickets" title="{{ pageTitle }}" size="{{ headerSize }}" hint-size="100%,72px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Configuración › Módulos › Tickets" title="{{ pageTitle }}" size="{{ headerSize }}" hint-size="100%,72px">
 <sc-if value="{{ showNewType }}" hint-placeholder-val="{{ true }}">
 <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="plus" hint-size="120px,40px">Nuevo tipo</x-import>
 </sc-if>
@@ -124,7 +124,7 @@ class Component extends DCLogic {
     return {
       device, theme: this.props.theme ?? "light", isPhone, notPhone: !isPhone,
       user: estado === "sin_permiso" ? { name: "Paula Contreras", initials: "PC", role: "Jefa de operaciones" } : { name: "Carlos Irigoyen", initials: "CI", role: "Administrador" },
-      shellTitle: isPhone ? "" : "Configuración", activeNav: isPhone ? "mas" : "cfg",
+      shellTitle: isPhone ? "" : "Configuración", shellSub: "Módulos › Tickets", activeNav: isPhone ? "mas" : "cfg",
       pageTitle: isPhone && ok ? t.name : "Tipos de ticket", headerSize: isPhone && ok ? "heading" : "title",
       showNewType: ok && !isPhone, listW: device === "tablet" ? "260px" : "320px",
       showForm: ok,
