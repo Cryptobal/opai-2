@@ -95,3 +95,8 @@ Detalles menores que el export v3 dejó para resolver al implementar, con el DS 
 ## 11. Entregables de documentación por PR
 
 Cada PR actualiza `docs/2.0/ESTADO.md` (qué entró, qué quedó pendiente, qué se decidió), deja `ROADMAP.md`/`PLAN-desarrollo.md` al día si cambia el plan, y trae el resumen ejecutivo para Carlos. El escenario del agente va en `docs/2.0/agentes/operar-cpq.md` con su prueba en `pnpm test` (ADR-034).
+
+## Historial
+
+- **30-oct-2026 · PR 10.1 en construcción** (rama `feat/cpq-pr1-datos`, encargo de Carlos para construir solo el PR 10.1): schema `cpq` con `cotizaciones`, `versiones`, `secciones`, `lineas` y `aprobaciones` (RLS `tenant_isolation` ENABLE + FORCE, migración aditiva e idempotente `20261030150000_cpq_cotizaciones`, pendiente de aplicar por el bot «OPAI 2.0» con respaldo); capacidades `cpq.cotizaciones.list`, `get`, `create` y `ajustar` (lote tipado con control optimista) con sus `preview_`; estados de R40 en `@opai/domain`; correlativo `CPQ-AAAA-NNN` bajo advisory lock por tenant y año (R54); permisos de §5 con el gerente sin `cpq:aprobar` ni `cpq:modelo.manage`; `cpq:costos.ver` aplicado en el servidor (R59) con tests negativos por capacidad, `/api/v1` y MCP. Diferencias con §4: `cpq:costos.ver` entra aquí y no en el PR 10.2, como pidió el encargo; sin el motor del Brief 08 los totales (venta, costo, margen) quedan en null y `ajustar` devuelve la lista de cambios en vez del antes/después de venta y margen; las fórmulas de pólizas no se implementan (R66).
+
