@@ -26,6 +26,7 @@ import { capacidadesConfig } from "./config";
 import { capacidadesCumplimiento, trabajosCumplimiento } from "./cumplimiento";
 import { capacidadesDocumentos, trabajosDocumentos } from "./documentos";
 import { capacidadesEmpresa } from "./empresa";
+import { capacidadesFirmas } from "./firmas";
 import { capacidadesMaestros } from "./maestros";
 import { capacidadesPanel } from "./panel";
 import { capacidadesPermisos } from "./permisos";
@@ -105,6 +106,7 @@ export const capacidadesDelNucleo: readonly Capacidad[] = [
   ...capacidadesPanel,
   ...capacidadesPermisos,
   ...capacidadesDocumentos,
+  ...capacidadesFirmas,
   ...capacidadesConfig,
   ...capacidadesCumplimiento,
   ...capacidadesEmpresa,

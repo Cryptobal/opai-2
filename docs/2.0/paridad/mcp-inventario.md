@@ -333,6 +333,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | `core.cumplimiento.solicitud_resolver` | Solo personas: resolver o rechazar una solicitud del titular es una decisión humana responsable (Ley 21.719). |
 | `core.cumplimiento.titular_anonimizar` | Solo personas: anonimizar a un titular es irreversible y es la única purga forzada; la decide una persona responsable (Ley 21.719, §16.4). |
 | `core.excepciones.set` | Solo personas: conceder o denegar permisos puntuales es gobierno de acceso (ADR-034). |
+| `core.firmas.firma_automatica_autorizar` | Solo personas: autorizar la firma automática del representante solo puede hacerlo él (firma.md §10, R16). |
+| `core.firmas.firma_automatica_revocar` | Solo personas: revocar la firma automática del representante es un acto suyo (firma.md §10, R16). |
+| `core.firmas.firmante_empresa_set` | Solo personas: define quién firma por la empresa (representante legal); gobierna la identidad de firma, no una key (firma.md §10, R16). |
 | `core.geo.mapa` | Interna: entrega la imagen del mapa al proxy `/api/geo/mapa` con la clave del tenant; una imagen no sirve a un agente y la clave nunca sale. |
 | `core.integraciones.configurar` | Solo personas: credenciales del tenant; nunca salen ni se cambian por API ni MCP (ADR-027). |
 | `core.integraciones.set_secreto` | Solo personas: secretos cifrados del tenant; nunca salen ni se cambian por API ni MCP (ADR-027). |
@@ -381,6 +384,9 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 | `core.cumplimiento.solicitud_resolver` | `app/(erp)/configuracion/cumplimiento/_componentes` | no | reservada a personas |
 | `core.cumplimiento.titular_anonimizar` | `app/(erp)/configuracion/cumplimiento/_componentes` | no | reservada a personas |
 | `core.excepciones.set` | `/configuracion/usuarios` | sí (portal ERP) | reservada a personas |
+| `core.firmas.firma_automatica_autorizar` | sin pantalla todavía · CAR-82 · desde 2026-10-29 | no | reservada a personas |
+| `core.firmas.firma_automatica_revocar` | sin pantalla todavía · CAR-82 · desde 2026-10-29 | no | reservada a personas |
+| `core.firmas.firmante_empresa_set` | sin pantalla todavía · CAR-82 · desde 2026-10-29 | no | reservada a personas |
 | `core.integraciones.configurar` | `app/(erp)/configuracion/integraciones/_componentes` | no | reservada a personas |
 | `core.integraciones.set_secreto` | `app/(erp)/configuracion/integraciones/_componentes` | no | reservada a personas |
 | `core.roles.archive` | `/configuracion/usuarios/roles` | sí (portal ERP) | reservada a personas |
@@ -408,6 +414,8 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.documentos.vencimientos`
 - `core.documentos.vincular`
 - `core.estructuras.get`
+- `core.firmas.politica_get`
+- `core.firmas.politica_set`
 - `core.funciones.get`
 - `core.geo.geocodificar`
 - `core.ia.probar`

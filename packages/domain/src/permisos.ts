@@ -43,6 +43,10 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
       PERMISOS_CORE.anexosRead,
       PERMISOS_CORE.anexosManage,
       PERMISOS_CORE.configManage,
+      // Firma (firma.md §8): configurar la política y registrar el finiquito son de owner/admin.
+      // Enviar a firma «según tipo» lo conserva (el bloqueo de sueldos corta contratos y anexos).
+      PERMISOS_CORE.firmasConfig,
+      PERMISOS_CORE.finiquitosManage,
       // Embudo y catálogos de Comercial (comercial.md §7): owner y admin.
       "comercial:config.manage",
       PERMISOS_CORE.marcaManage,
@@ -75,6 +79,10 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
       PERMISOS_CORE.vinculosRead,
       PERMISOS_CORE.personasRead,
       PERMISOS_CORE.documentosRead,
+      // Firma (firma.md §8): el supervisor envía actas en terreno y lee el estado en su alcance; la
+      // clase (solo actas) y el alcance por instalación se aplican en la consulta de la capacidad.
+      PERMISOS_CORE.firmasEnviar,
+      PERMISOS_CORE.firmasRead,
       PERMISOS_CORE.configRead,
       // Calendario (CAR-79): el supervisor ve los feriados para planificar, pero no los gestiona.
       PERMISOS_CORE.calendarioRead,
