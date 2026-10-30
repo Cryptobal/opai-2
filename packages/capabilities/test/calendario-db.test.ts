@@ -4,8 +4,9 @@
 // días propios del tenant. Prueba que el tenant ve los 16 legales calculados de cualquier año, que un
 // feriado del tenant sobrescribe al legal solo en A (CA2), que B no ve nada de A, que las 20 filas de
 // plataforma de fecha fija 2026–2027 ya no existen (migración 20261030130000), que opai_app no puede
-// escribir/editar/borrar filas de plataforma, y que una escritura con un id —o una instalación— de
-// otro tenant cae en «no encontrado» (alcance por tenant, nunca por id).
+// escribir/editar/borrar filas de plataforma, que una escritura con un id —o una instalación— de
+// otro tenant cae en «no encontrado» (alcance por tenant, nunca por id), y que un supervisor con
+// alcance a una sola instalación ve sus días y no los de otra (ADR-022).
 import { randomUUID } from "node:crypto";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
@@ -28,6 +29,9 @@ describe.skipIf(!urlPropietario)("calendario en base real: feriados calculados y
   let mod: Capacidades;
   const t = { a: "", b: "" };
   let instB = "";
+  // Dos instalaciones del tenant A para probar el alcance parcial de un supervisor (ADR-022).
+  let instA1 = "";
+  let instA2 = "";
   // Fila de plataforma del test de RLS: fecha lejana (fuera de los años que lista el test) y se borra
   // en afterAll para no dejar residuo en la base compartida (unique por fecha/región de plataforma).
   let filaPlataforma: string | undefined;
@@ -43,6 +47,9 @@ describe.skipIf(!urlPropietario)("calendario en base real: feriados calculados y
     t.b = await nuevo("cal-b");
     const cuentaB = await e.admin.cuenta.create({ data: { tenantId: t.b, nombre: "B" } });
     instB = (await e.admin.instalacion.create({ data: { tenantId: t.b, cuentaId: cuentaB.id, nombre: "Inst B" } })).id;
+    const cuentaA = await e.admin.cuenta.create({ data: { tenantId: t.a, nombre: "A" } });
+    instA1 = (await e.admin.instalacion.create({ data: { tenantId: t.a, cuentaId: cuentaA.id, nombre: "Inst A1" } })).id;
+    instA2 = (await e.admin.instalacion.create({ data: { tenantId: t.a, cuentaId: cuentaA.id, nombre: "Inst A2" } })).id;
   });
 
   afterAll(async () => {
@@ -126,6 +133,38 @@ describe.skipIf(!urlPropietario)("calendario en base real: feriados calculados y
         instalacionId: instB,
       }),
     ).toBe("NOT_FOUND");
+  });
+
+  it("un supervisor con alcance a una sola instalación ve sus días y no los de otra (ADR-022)", async () => {
+    // El owner crea un feriado propio en cada instalación de A.
+    await dato<DiaVista>(t.a, "core.calendario.crear_feriado", {
+      fecha: "2026-04-20",
+      nombre: "Aniversario Inst A1",
+      instalacionId: instA1,
+    });
+    await dato<DiaVista>(t.a, "core.calendario.crear_feriado", {
+      fecha: "2026-04-21",
+      nombre: "Aniversario Inst A2",
+      instalacionId: instA2,
+    });
+    // Supervisor acotado a instA1: el alcance va en la consulta, nunca en la UI.
+    const ctxSup = mod.crearContexto({
+      tenantId: t.a,
+      actor: { tipo: "user", id: randomUUID() },
+      rol: "supervisor",
+      portal: "erp",
+      portalesMembresia: ["erp"],
+      alcance: { instalaciones: [instA1] },
+      medidor: { registrar: async () => undefined },
+    });
+    const enA1 = await mod.executeCapability(ctxSup, "core.calendario.listar", { anio: 2026, instalacionId: instA1 }, {});
+    if (!enA1.ok) throw new Error(JSON.stringify(enA1.error));
+    const dias = enA1.data as DiaVista[];
+    expect(dias.some((d) => d.nombre === "Aniversario Inst A1")).toBe(true);
+    expect(dias.some((d) => d.nombre === "Aniversario Inst A2")).toBe(false);
+    // Pedir la otra instalación, fuera de su alcance, responde «no encontrada» (sin enumeración).
+    const enA2 = await mod.executeCapability(ctxSup, "core.calendario.listar", { anio: 2026, instalacionId: instA2 }, {});
+    expect(enA2.ok ? "OK" : enA2.error.code).toBe("NOT_FOUND");
   });
 
   it("opai_app no puede INSERT/UPDATE/DELETE una fila de plataforma (tenant_id nulo): RLS", async () => {

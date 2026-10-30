@@ -7,8 +7,9 @@ import { solsticioJunio } from "./solsticio";
 const fechas = (anio: number) => feriadosLegales(anio).map((f) => `${f.fecha} ${f.nombre}`);
 
 // Feriados nacionales legales de Chile, fecha por fecha, calculados por regla (CAR-79). Las fechas de
-// 2017, 2018 y 2024 se contrastaron con los feriados realmente observados (traslados de la Ley 19.668,
-// 20.215 y 20.299/20.983). 2026–2028 son los años del encargo.
+// 2017, 2018, 2021 y 2024 se contrastaron con los feriados realmente observados (traslados de la Ley
+// 19.668, adicionales de la 20.215 y la 20.983, traslado de la 20.299). 2026–2028 son los años del
+// encargo.
 describe("feriadosLegales · fecha por fecha", () => {
   it("2026 trae los 16 feriados nacionales con sus fechas", () => {
     expect(fechas(2026)).toEqual([
@@ -31,7 +32,7 @@ describe("feriadosLegales · fecha por fecha", () => {
     ]);
   });
 
-  it("2027 no repite las fechas de 2026 (Semana Santa y traslados cambian)", () => {
+  it("2027 no repite las fechas de 2026 (Semana Santa y traslados cambian; 18-sep sábado suma el 17)", () => {
     expect(fechas(2027)).toEqual([
       "2027-01-01 Año Nuevo",
       "2027-03-26 Viernes Santo",
@@ -42,6 +43,7 @@ describe("feriadosLegales · fecha por fecha", () => {
       "2027-06-28 San Pedro y San Pablo",
       "2027-07-16 Día de la Virgen del Carmen",
       "2027-08-15 Asunción de la Virgen",
+      "2027-09-17 Feriado adicional Fiestas Patrias",
       "2027-09-18 Independencia Nacional",
       "2027-09-19 Día de las Glorias del Ejército",
       "2027-10-11 Encuentro de Dos Mundos",
@@ -92,15 +94,47 @@ describe("feriadosLegales · fecha por fecha", () => {
   });
 });
 
-describe("Ley 20.215 · feriados adicionales de Fiestas Patrias", () => {
-  it("agrega el lunes 17-sep cuando el 18 cae martes (2018)", () => {
+describe("Leyes 20.215 y 20.983 · feriados adicionales de Fiestas Patrias", () => {
+  it("agrega el lunes 17-sep cuando el 18 cae martes (2018, Ley 20.215)", () => {
     expect(fechas(2018)).toContain("2018-09-17 Feriado adicional Fiestas Patrias");
   });
-  it("agrega el viernes 20-sep cuando el 19 cae jueves (2024)", () => {
+  it("agrega el viernes 20-sep cuando el 19 cae jueves (2024, Ley 20.215)", () => {
     expect(fechas(2024)).toContain("2024-09-20 Feriado adicional Fiestas Patrias");
   });
-  it("no agrega nada cuando el 18 y 19 caen en fin de semana (2026)", () => {
+  it("agrega el viernes 17-sep cuando el 18 cae sábado (2027, Ley 20.983)", () => {
+    expect(fechas(2027)).toContain("2027-09-17 Feriado adicional Fiestas Patrias");
+    const f17 = feriadosLegales(2027).find((f) => f.fecha === "2027-09-17");
+    expect(f17).toMatchObject({ ley: "Ley 20.983", irrenunciable: false, porVerificar: false });
+  });
+  it("también suma el 17-sep el año 2021 (18-sep-2021 fue sábado, Ley 20.983)", () => {
+    expect(fechas(2021)).toContain("2021-09-17 Feriado adicional Fiestas Patrias");
+  });
+  it("no agrega el 17-sep antes de la Ley 20.983 (2016)", () => {
+    expect(fechas(2016).some((f) => f.endsWith("Feriado adicional Fiestas Patrias"))).toBe(false);
+  });
+  it("no agrega nada cuando el 18 y 19 no caen martes, jueves ni sábado (2026)", () => {
     expect(fechas(2026).some((f) => f.includes("Feriado adicional"))).toBe(false);
+  });
+});
+
+describe("Ley 20.983 · feriado adicional de Año Nuevo (lunes 2-ene si el 1 cae domingo)", () => {
+  it.each([2017, 2023, 2034])("suma el 2-ene el año %i (1-ene cae domingo)", (anio) => {
+    expect(fechas(anio)).toContain(`${anio}-01-02 Feriado adicional Año Nuevo`);
+    const f = feriadosLegales(anio).find((x) => x.fecha === `${anio}-01-02`);
+    expect(f).toMatchObject({ ley: "Ley 20.983", irrenunciable: false, porVerificar: false });
+  });
+  it.each([2026, 2028])("no suma el 2-ene el año %i (1-ene no cae domingo)", (anio) => {
+    expect(fechas(anio).some((f) => f.includes("Feriado adicional Año Nuevo"))).toBe(false);
+  });
+});
+
+describe("Ley 21.357 · Día Nacional de los Pueblos Indígenas (solsticio de invierno, desde 2021)", () => {
+  it("en 2021 usa el 21-jun del artículo transitorio, no el cálculo astronómico", () => {
+    expect(fechas(2021)).toContain("2021-06-21 Día Nacional de los Pueblos Indígenas");
+    expect(feriadosLegales(2021).find((f) => f.nombre.includes("Pueblos Indígenas"))?.porVerificar).toBe(false);
+  });
+  it("no existe antes de la Ley 21.357 (2020)", () => {
+    expect(fechas(2020).some((f) => f.includes("Pueblos Indígenas"))).toBe(false);
   });
 });
 

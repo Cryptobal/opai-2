@@ -44,10 +44,32 @@ COMMIT;
 
 -- Reversión (manual, solo referencia; Prisma no aplica down): vuelve a sembrar las 20 filas con el rol
 -- propietario y FORCE apagado, igual que 20261030000000_core_calendario (o se restaura del snapshot de
--- Neon previo, OPERACION-agentes.md A.5). SQL:
+-- Neon previo, OPERACION-agentes.md A.5). Las 20 filas (fecha, nombre, irrenunciable) son idénticas a
+-- las del seed original 20261030000000 y a las que borra el DELETE de arriba. SQL:
 --   ALTER TABLE "core"."dias_calendario" NO FORCE ROW LEVEL SECURITY;
 --   INSERT INTO "core"."dias_calendario" ("id","tenant_id","fecha","tipo","nombre","irrenunciable","region","instalacion_id","fuente")
 --   SELECT gen_random_uuid(), NULL, v.fecha::date, 'feriado', v.nombre, v.irr, NULL, NULL, 'nacional'
---   FROM (VALUES ('2026-01-01','Año Nuevo',true), … las 20 filas del seed original …) AS v(fecha,nombre,irr)
+--   FROM (VALUES
+--     ('2026-01-01','Año Nuevo',true),
+--     ('2026-05-01','Día Nacional del Trabajo',true),
+--     ('2026-05-21','Día de las Glorias Navales',false),
+--     ('2026-07-16','Día de la Virgen del Carmen',false),
+--     ('2026-08-15','Asunción de la Virgen',false),
+--     ('2026-09-18','Independencia Nacional',true),
+--     ('2026-09-19','Día de las Glorias del Ejército',true),
+--     ('2026-11-01','Día de Todos los Santos',false),
+--     ('2026-12-08','Inmaculada Concepción',false),
+--     ('2026-12-25','Navidad',true),
+--     ('2027-01-01','Año Nuevo',true),
+--     ('2027-05-01','Día Nacional del Trabajo',true),
+--     ('2027-05-21','Día de las Glorias Navales',false),
+--     ('2027-07-16','Día de la Virgen del Carmen',false),
+--     ('2027-08-15','Asunción de la Virgen',false),
+--     ('2027-09-18','Independencia Nacional',true),
+--     ('2027-09-19','Día de las Glorias del Ejército',true),
+--     ('2027-11-01','Día de Todos los Santos',false),
+--     ('2027-12-08','Inmaculada Concepción',false),
+--     ('2027-12-25','Navidad',true)
+--   ) AS v(fecha,nombre,irr)
 --   WHERE NOT EXISTS (SELECT 1 FROM "core"."dias_calendario" d WHERE d.tenant_id IS NULL AND d.region IS NULL AND d.fecha = v.fecha::date);
 --   ALTER TABLE "core"."dias_calendario" FORCE ROW LEVEL SECURITY;
