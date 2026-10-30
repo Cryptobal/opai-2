@@ -13,8 +13,8 @@ regexes = [
   '''Clave-de-prueba-123''',
   # Token ficticio del test de la consola de correo (CAR-51): comprueba que se oculta en el log.
   '''Zx9aQ2bW7cE4dR1fT6gY3hU8''',
-  # Valores ficticios de RONDAS_ETIQUETA_SECRET en los tests de la firma de etiquetas QR (rondas PR 2,
-  # rondas.test.ts y rondas-firma.test.ts): CI escanea todas las ramas, también la de ese PR.
-  '''otro\-secreto\-de\-prueba\-tambien\-de\-32\-bytes\-o\-mas''',
-  '''secreto\-de\-prueba\-rondas\-etiqueta\-32\-bytes\-o\-mas''',
+  # Valores ficticios de tests de Rondas PR 2 (#145): RONDAS_ETIQUETA_SECRET de prueba ya reemplazados
+  # en el código vigente, pero siguen en el historial del commit ee401d40.
+  '''secreto-de-prueba-rondas-etiqueta-32-bytes-o-mas''',
+  '''otro-secreto-de-prueba-tambien-de-32-bytes-o-mas''',
 ]

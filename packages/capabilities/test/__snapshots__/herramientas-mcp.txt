@@ -262,6 +262,7 @@ preview_rondas_programaciones_pausar
 preview_rondas_puntos_actualizar
 preview_rondas_puntos_archivar
 preview_rondas_puntos_crear
+preview_rondas_puntos_reemplazar_etiqueta
 rondas_etiquetas_pdf
 rondas_incidentes_tipo_actualizar
 rondas_incidentes_tipo_crear
@@ -276,3 +277,4 @@ rondas_puntos_actualizar
 rondas_puntos_archivar
 rondas_puntos_crear
 rondas_puntos_listar
+rondas_puntos_reemplazar_etiqueta
