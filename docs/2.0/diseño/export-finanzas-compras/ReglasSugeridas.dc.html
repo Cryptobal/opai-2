@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="fin-shell.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ nav.tabs }}" groups="{{ nav.groups }}" active="{{ nav.active }}" title="{{ shellTitle }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<sc-if value="{{ notForbidden }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" tab-bar="{{ isPhone }}" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Conciliación" title="Reglas de conciliación" subtitle="OPAI propone reglas cuando repites la misma clasificación a mano. Ninguna se activa sola." hint-size="100%,80px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ tabsItems }}" value="sug" hint-size="100%,44px" style="margin-bottom:16px"></x-import>
+<sc-if value="{{ isB }}" hint-placeholder-val="{{ false }}">
+<div style="display:grid;gap:12px;padding:16px;margin-bottom:16px;border:1px dashed var(--ds-border-strong);border-radius:var(--radius-lg)">
+<div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="accent" hint-size="200px,22px">Variante B · Propuesta, a confirmar por Carlos</x-import></div>
+<div style="display:flex;gap:16px;align-items:flex-end;flex-wrap:wrap">
+<div style="width:160px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Sugerir desde" value="3" trailing="casos" input-mode="numeric" hint-size="160px,72px"></x-import></div>
+<span class="t-body-sm muted" style="flex:1 1 220px;padding-bottom:12px">iguales, clasificados a mano por alguien de Atlas Seguridad SpA. Se configura por empresa.</span>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ isDatos }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:{{ cols }};gap:16px;align-items:start">
+<sc-for list="{{ sugs }}" as="s" hint-placeholder-count="3">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,360px">
+<div style="display:grid;gap:16px">
+<div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start">
+<div style="display:grid;gap:2px;min-width:0"><span class="t-overline">Patrón detectado · {{ s.alcance }}</span><span class="t-subheading">{{ s.titulo }}</span></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" hint-size="64px,22px">{{ s.casosN }}</x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" rows="{{ s.rows }}" hint-size="100%,120px"></x-import>
+<div style="display:grid;gap:8px">
+<span class="t-label">Casos que la originan</span>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-md)">
+<sc-for list="{{ s.casos }}" as="c" hint-placeholder-count="3">
+<div style="display:grid;gap:2px;padding:8px 12px;border-bottom:1px solid var(--ds-border)">
+<div style="display:flex;justify-content:space-between;gap:12px"><span class="t-mono" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ c.glosa }}</span><span class="t-numeric t-body-sm">{{ c.monto }}</span></div>
+<span class="t-caption">{{ c.fecha }} · clasificó {{ c.quien }}</span>
+</div>
+</sc-for>
+</div>
+</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="check" hint-size="110px,40px">Aceptar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" hint-size="90px,40px">Editar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" hint-size="110px,40px">Descartar</x-import>
+</div>
+</div>
+</x-import>
+</sc-for>
+</div>
+<p class="t-caption" style="margin:16px 0 0">«Aceptar» crea la regla activa al final de la lista y muestra su vista previa. «Editar» abre el editor con la regla armada.</p>
+</sc-if>
+<sc-if value="{{ isCargando }}" hint-placeholder-val="{{ false }}">
+<div style="display:grid;grid-template-columns:{{ cols }};gap:16px" aria-busy="true" aria-label="Cargando sugerencias">
+<sc-for list="{{ sk }}" as="k" hint-placeholder-count="3">
+<div style="display:grid;gap:12px;padding:16px;border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="40%" height="12px" hint-size="40%,12px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="80%" height="20px" hint-size="80%,20px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="100%" height="80px" hint-size="100%,80px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="100%" height="120px" hint-size="100%,120px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="60%" height="40px" radius="{{ 10 }}" hint-size="60%,40px"></x-import>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="filter" title="No hay reglas sugeridas" description="Cuando clasifiques a mano movimientos iguales, aquí verás la regla armada para revisarla." action="{{ emptyAction }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar las reglas sugeridas" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="FIN-SUG-500" on-retry="{{ noop }}" hint-size="100%,320px"></x-import>
+</sc-if>
+</x-import>
+</sc-if>
+<sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="{{ fb.title }}" description="{{ fb.description }}" action-label="Pedir acceso" hint-size="100%,100%"></x-import>
+</sc-if>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;datos&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinPermiso&quot;],&quot;default&quot;:&quot;datos&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;variante&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;A&quot;,&quot;B&quot;],&quot;default&quot;:&quot;A&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  componentDidMount() { if (!window.FinShell) { const t = setInterval(() => { if (window.FinShell) { clearInterval(t); this.forceUpdate(); } }, 40); } }
+  renderVals() {
+    const F = window.FinShell;
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = this.props.device ?? "desktop";
+    const isPhone = device === "phone";
+    const st = F ? F.estado(this.props) : { isDatos: true, notForbidden: true };
+    const mono = (t) => h("span", { className: "t-mono" }, t);
+    return {
+      device, theme: this.props.theme ?? "light", isPhone, ...st,
+      nav: F ? F.shell("reg", device) : { tabs: [], groups: [] },
+      fb: F ? F.forbidden : {},
+      shellTitle: isPhone ? "" : "Finanzas",
+      tabsItems: [{ id: "reglas", label: "Reglas" }, { id: "sug", label: "Sugeridas", count: 3 }],
+      cols: isPhone ? "minmax(0,1fr)" : device === "tablet" ? "repeat(2,minmax(0,1fr))" : "repeat(3,minmax(0,1fr))",
+      sk: [1, 2, 3], noop: () => {},
+      emptyAction: NS.Button ? h(NS.Button, { variant: "secondary" }, "Ir a conciliación") : null,
+      sugs: [
+        { titulo: "Glosa que empieza con «COM MANT CTA»", alcance: "cargos", casosN: "4 casos",
+          rows: [{ label: "Condición", value: h("span", null, "Glosa empieza con ", mono("COM MANT CTA")) }, { label: "Cuenta", value: h("span", null, mono("5.4.01"), " Gastos bancarios") }, { label: "Fila del flujo", value: "Gastos financieros" }],
+          casos: [{ glosa: "COM MANT CTA CTE SEP", monto: "−$ 18.400", fecha: "28-09-2026", quien: "M. Soto" }, { glosa: "COM MANT CTA CTE AGO", monto: "−$ 18.400", fecha: "29-08-2026", quien: "M. Soto" }, { glosa: "COM MANT CTA CTE JUL", monto: "−$ 18.100", fecha: "30-07-2026", quien: "C. Irigoyen" }] },
+        { titulo: "Abonos del RUT 96.712.400-3", alcance: "abonos", casosN: "5 casos",
+          rows: [{ label: "Condición", value: h("span", null, "RUT es ", mono("96.712.400-3")) }, { label: "Contraparte", value: "Inmobiliaria Apoquindo S.A." }, { label: "Cuenta", value: h("span", null, mono("1.1.05"), " Deudores por venta") }],
+          casos: [{ glosa: "ABONO TEF 96.712.400-3 INMOB APOQ", monto: "$ 6.940.000", fecha: "24-09-2026", quien: "M. Soto" }, { glosa: "ABONO TEF 96.712.400-3 INMOB APOQ", monto: "$ 6.940.000", fecha: "25-08-2026", quien: "M. Soto" }, { glosa: "ABONO TEF 96.712.400-3", monto: "$ 3.470.000", fecha: "06-08-2026", quien: "C. Irigoyen" }] },
+        { titulo: "$ 3.000.000 con glosa que empieza con «ARRIENDO»", alcance: "cargos", casosN: "3 casos",
+          rows: [{ label: "Condición", value: "Monto exacto $ 3.000.000 y glosa empieza con «ARRIENDO»" }, { label: "Cuenta", value: h("span", null, mono("5.1.08"), " Arriendos") }, { label: "Centro de costo", value: "Bodega Lampa" }],
+          casos: [{ glosa: "ARRIENDO BODEGA LAMPA SEP", monto: "−$ 3.000.000", fecha: "10-09-2026", quien: "M. Soto" }, { glosa: "ARRIENDO BODEGA LAMPA AGO", monto: "−$ 3.000.000", fecha: "10-08-2026", quien: "M. Soto" }, { glosa: "ARRIENDO BODEGA LAMPA JUL", monto: "−$ 3.000.000", fecha: "10-07-2026", quien: "M. Soto" }] },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

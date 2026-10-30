@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0;background:var(--ds-n-200)}a{color:var(--ds-accent)}a:hover{color:var(--ds-n-900)}</style>
+</helmet>
+<div style="display:flex;flex-direction:column;gap:56px;padding:48px;width:max-content;font-family:var(--font-sans);color:var(--ds-n-900)">
+<header style="display:flex;flex-direction:column;gap:8px;max-width:960px">
+<span class="t-overline" style="color:var(--ds-n-600)">OPAI 2.0 · Finanzas · Compras, conciliación y contabilidad · CAR-98</span>
+<h1 class="t-display" style="margin:0">{{ titulo }}</h1>
+<p class="t-body" style="margin:0;color:var(--ds-n-700)">{{ resumen }}</p>
+<p class="t-body-sm" style="margin:0;color:var(--ds-n-700)">Ve: owner, admin · gerente, supervisor y viewer ven «Sin permiso». <a href="00 Indice.dc.html">Índice</a> · <a href="00 Componentes.dc.html">Hoja de componentes</a></p>
+</header>
+<sc-for list="{{ filas }}" as="f" hint-placeholder-count="5">
+<section style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;align-items:baseline;gap:12px"><h2 class="t-heading" style="margin:0">{{ f.titulo }}</h2><span class="t-body-sm" style="color:var(--ds-n-600)">{{ f.nota }}</span></div>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<div style="display:flex;flex-direction:column;gap:8px"><span class="t-label-sm" style="color:var(--ds-n-700)">Claro · 375</span><div style="width:375px;height:812px;border-radius:24px;overflow:hidden;box-shadow:0 0 0 1px var(--ds-n-300)"><dc-import name="FichaProveedor" device="phone" theme="light" estado="{{ f.estado }}" abierto="{{ f.abierto }}" variante="{{ f.variante }}" hint-size="375px,812px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span class="t-label-sm" style="color:var(--ds-n-700)">Oscuro · 375</span><div style="width:375px;height:812px;border-radius:24px;overflow:hidden;box-shadow:0 0 0 1px var(--ds-n-300)"><dc-import name="FichaProveedor" device="phone" theme="dark" estado="{{ f.estado }}" abierto="{{ f.abierto }}" variante="{{ f.variante }}" hint-size="375px,812px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span class="t-label-sm" style="color:var(--ds-n-700)">Claro · 1024</span><div style="width:1024px;height:768px;border-radius:12px;overflow:hidden;box-shadow:0 0 0 1px var(--ds-n-300)"><dc-import name="FichaProveedor" device="tablet" theme="light" estado="{{ f.estado }}" abierto="{{ f.abierto }}" variante="{{ f.variante }}" hint-size="1024px,768px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span class="t-label-sm" style="color:var(--ds-n-700)">Oscuro · 1024</span><div style="width:1024px;height:768px;border-radius:12px;overflow:hidden;box-shadow:0 0 0 1px var(--ds-n-300)"><dc-import name="FichaProveedor" device="tablet" theme="dark" estado="{{ f.estado }}" abierto="{{ f.abierto }}" variante="{{ f.variante }}" hint-size="1024px,768px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span class="t-label-sm" style="color:var(--ds-n-700)">Claro · 1280</span><div style="width:1280px;height:800px;border-radius:12px;overflow:hidden;box-shadow:0 0 0 1px var(--ds-n-300)"><dc-import name="FichaProveedor" device="desktop" theme="light" estado="{{ f.estado }}" abierto="{{ f.abierto }}" variante="{{ f.variante }}" hint-size="1280px,800px"></dc-import></div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span class="t-label-sm" style="color:var(--ds-n-700)">Oscuro · 1280</span><div style="width:1280px;height:800px;border-radius:12px;overflow:hidden;box-shadow:0 0 0 1px var(--ds-n-300)"><dc-import name="FichaProveedor" device="desktop" theme="dark" estado="{{ f.estado }}" abierto="{{ f.abierto }}" variante="{{ f.variante }}" hint-size="1280px,800px"></dc-import></div></div>
+</div>
+</section>
+</sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      titulo: "02 · Ficha de proveedor",
+      resumen: "Datos, plazo de pago, cuenta y centro de costo por defecto, compras y pagos vinculados. En teléfono, pestañas Datos · Compras · Pagos.",
+      filas: [{"titulo":"Datos","nota":"","estado":"datos","abierto":false},{"titulo":"Vacío","nota":"Con acción","estado":"vacio"},{"titulo":"Cargando","nota":"Skeleton con la forma","estado":"cargando"},{"titulo":"Error","nota":"Con «Reintentar» y código","estado":"error"},{"titulo":"Sin permiso","nota":"gerente, supervisor, viewer","estado":"sinPermiso"}],
+    };
+  }
+}
+</script>
+</body>
+</html>

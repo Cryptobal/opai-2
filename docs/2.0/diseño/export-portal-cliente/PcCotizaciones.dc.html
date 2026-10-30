@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<title>Cotizaciones · Portal Cliente</title>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="portal-cliente.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<div data-pc-brand="fijo" style="width:100%;height:100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" top-bar="{{ pcTopBar }}" device="{{ device }}" theme="{{ theme }}" portal="{{ empresa }}" tenant="Portal Cliente de Atlas Seguridad SpA" tenant-initials="AS" user="{{ user }}" tabs="{{ tabs }}" rail-footer="{{ railFooter }}" groups="{{ groups }}" active="{{ active }}" hide-tab-bar="{{ prospecto }}" title="{{ appTitle }}" overlay="{{ overlay }}" width="100%" height="100%" hint-size="100%,100%">
+<div style="display:flex;flex:1;min-height:0">
+<sc-if value="{{ showSplit }}" hint-placeholder-val="{{ false }}">
+<div style="width:340px;flex:none;border-right:1px solid var(--ds-border);background:var(--ds-surface);overflow:auto">
+<div class="t-subheading" style="padding:16px">Cotizaciones</div>
+<sc-for list="{{ cots }}" as="c" hint-placeholder-count="4">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.SelectableRow" selected="{{ c.selected }}" title="{{ c.serv }}" subtitle="{{ c.sub }}" meta="{{ c.total }}" badge="{{ c.badge }}" hint-size="100%,64px"></x-import>
+</sc-for>
+</div>
+</sc-if>
+<div style="flex:1;min-width:0;overflow:auto">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" tab-bar="{{ hasTabBar }}" hint-size="100%,600px">
+<sc-if value="{{ forbidden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a Cotizaciones" description="Tu perfil de contacto no incluye cotizaciones. Pídele acceso a Andrea Rojas, contacto principal de Logística Andina SpA." action-label="Pedir acceso" hint-size="100%,400px"></x-import>
+</sc-if>
+<sc-if value="{{ bloqueado }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="home" title="El resumen se activa cuando parte tu servicio" description="Mientras tanto puedes revisar y descargar las cotizaciones que te envió Atlas Seguridad SpA." action="{{ verCot }}" hint-size="100%,400px"></x-import>
+</sc-if>
+<sc-if value="{{ showList }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ prospectoOk }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="neutral" titulo="Bienvenida, Paula" style="margin-bottom:16px" hint-size="100%,56px">Aquí ves las cotizaciones de Atlas Seguridad SpA. Cuando parta el servicio se activan el resumen, tus instalaciones y los reportes.</x-import>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="{{ empresa }}" title="Cotizaciones" subtitle="Enviadas por Atlas Seguridad SpA" hint-size="100%,70px"></x-import>
+<sc-if value="{{ isOk }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ cots }}" cards="{{ isPhone }}" to-card="{{ card }}" style="{{ bleed }}" hint-size="100%,320px"></x-import>
+<span class="t-caption" style="display:block;margin-top:8px">Totales netos, sin IVA. Ves solo los valores cotizados.</span>
+</sc-if>
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<div aria-busy="true" aria-label="Cargando cotizaciones" style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);overflow:hidden">
+<sc-for list="{{ skel }}" as="k" hint-placeholder-count="4"><div style="display:flex;gap:16px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--ds-border)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="110px" hint-size="110px,14px"></x-import><div style="flex:1"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="60%" hint-size="60%,14px"></x-import></div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="72px" height="{{ 22 }}" radius="{{ 999 }}" hint-size="72px,22px"></x-import></div></sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="briefcase" title="Aún no tienes cotizaciones" description="Cuando Atlas Seguridad SpA te envíe una, te avisamos por correo y aparece aquí." action="{{ emptyAction }}" hint-size="100%,340px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar las cotizaciones" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="PC-COT-503" hint-size="100%,340px"></x-import>
+</sc-if>
+</sc-if>
+<sc-if value="{{ showDetail }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:16px;max-width:760px">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}"><a href="#" class="t-label" style="display:inline-flex;align-items:center;gap:4px;min-height:44px;text-decoration:none;color:var(--ds-fg-muted)"><span class="ic sm i-chevron-left" aria-hidden="true"></span>Cotizaciones</a></sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" size="heading" eyebrow="{{ sel.id }}" title="{{ sel.serv }}" badge="{{ selBadge }}" hint-size="100%,70px">
+<sc-if value="{{ canAccept }}" hint-placeholder-val="{{ false }}"><span class="badge b-warning">Decide Carlos</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="download" block="{{ isPhone }}" hint-size="150px,40px">Descargar PDF</x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="primary" icon="check" block="{{ isPhone }}" hint-size="110px,40px">Aceptar</x-import></sc-if>
+<sc-if value="{{ onlyDownload }}" hint-placeholder-val="{{ true }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="primary" icon="download" block="{{ isPhone }}" hint-size="150px,40px">Descargar PDF</x-import></sc-if>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" rows="{{ meta }}" hint-size="100%,170px"></x-import>
+<section style="display:flex;flex-direction:column;gap:8px">
+<h2 class="t-label m0">Detalle cotizado</h2>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ lCols }}" rows="{{ lineas }}" cards="{{ isPhone }}" to-card="{{ lCard }}" style="{{ bleed }}" hint-size="100%,200px"></x-import>
+<div style="display:flex;flex-direction:column;align-self:flex-end;min-width:min(100%,280px)">
+<sc-for list="{{ totales }}" as="t" hint-placeholder-count="3"><div style="display:flex;justify-content:space-between;gap:24px;min-height:36px;align-items:center;border-bottom:1px solid var(--ds-border)"><span class="{{ t.lc }}">{{ t.l }}</span><span class="{{ t.vc }}">{{ t.v }}</span></div></sc-for>
+</div>
+<span class="t-caption">Valores cotizados por Atlas Seguridad SpA. No incluyen costos internos.</span>
+</section>
+<sc-if value="{{ onlyDownload }}" hint-placeholder-val="{{ true }}"><span class="t-body-sm muted">Para aceptarla, responde el correo de la cotización o escríbele a Carlos Irigoyen.</span></sc-if>
+</div>
+</sc-if>
+</x-import>
+</div>
+</div>
+</x-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ok&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;ok&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;vista&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;lista&quot;,&quot;detalle&quot;,&quot;confirmar&quot;,&quot;bloqueado&quot;],&quot;default&quot;:&quot;lista&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;variante&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;&quot;,&quot;aceptar&quot;],&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;rol&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;total&quot;,&quot;prospecto&quot;],&quot;default&quot;:&quot;total&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  componentDidMount() { if (!window.PC) { const t = setInterval(() => { if (window.PC) { clearInterval(t); this.forceUpdate(); } }, 50); } }
+  renderVals() {
+    const P = window.PC || {}; const h = React.createElement, NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const B = (tone, l) => NS.Badge ? h(NS.Badge, { tone }, l) : l;
+    const device = this.props.device ?? "desktop", estado = this.props.estado ?? "ok", vista = this.props.vista ?? "lista", variante = this.props.variante ?? "", rol = this.props.rol ?? "total";
+    const isPhone = device === "phone", ok = estado === "ok", pros = rol === "prospecto";
+    const bloqueado = vista === "bloqueado";
+    const detalle = (vista === "detalle" || vista === "confirmar") && ok;
+    const list = pros ? (P.COT_PROSPECTO || []) : (P.COTIZACIONES || []);
+    const cots = list.map((c, i) => ({ ...c, selected: i === 0, sub: c.id + " · " + c.fecha, badge: { tone: c.tone, label: c.estado } }));
+    const sel = cots[0] || {};
+    const accept = variante === "aceptar";
+    const overlay = accept && vista === "confirmar" && NS.Dialog ? h(NS.Dialog, { contained: true, title: "¿Aceptar la cotización " + sel.id + "?", description: "Atlas Seguridad SpA coordinará contigo la fecha de inicio. Queda registrado que la aceptaste tú, " + (pros ? "Paula Ortiz" : "Andrea Rojas") + ", el 30-10-2026.",
+      actions: h(React.Fragment, null, NS.Button ? h(NS.Button, { variant: "secondary" }, "Cancelar") : null, NS.Button ? h(NS.Button, { variant: "primary", icon: "check" }, "Aceptar cotización") : null) }) : null;
+    return {
+      pcTopBar: P.topBar ? P.topBar(device, this.props.rol, false) : undefined,
+      device, theme: this.props.theme ?? "light", isPhone, prospecto: pros, hasTabBar: !pros,
+      empresa: pros ? "Frigorífico del Maipo SpA" : "Logística Andina SpA",
+      user: P.USERS ? P.USERS[pros ? "prospecto" : "total"] : undefined,
+      tabs: pros ? [] : device === "tablet" ? P.NAV_RAIL : P.NAV_PHONE, railFooter: pros ? [] : [{ id: "age", label: "Agentes", icon: "bot" }],
+      groups: pros ? P.PROSPECT_GROUPS : P.GROUPS, active: "cot", appTitle: bloqueado ? "Resumen" : "Cotizaciones",
+      forbidden: estado === "sinpermiso", bloqueado,
+      showList: !bloqueado && estado !== "sinpermiso" && !(detalle && (isPhone || true)) ,
+      showSplit: detalle && !isPhone, showDetail: detalle,
+      prospectoOk: pros && ok,
+      isOk: ok, isLoading: estado === "cargando", isEmpty: estado === "vacio", isError: estado === "error",
+      bleed: isPhone ? { margin: "0 -16px" } : undefined,
+      cots, sel, selBadge: B(sel.tone, sel.estado),
+      cols: [
+        { key: "id", label: "Número", mono: true },
+        { key: "fecha", label: "Fecha", render: (r) => h("span", { className: "t-numeric" }, r.fecha) },
+        { key: "serv", label: "Instalación o servicio", strong: true },
+        { key: "estado", label: "Estado", render: (r) => B(r.tone, r.estado) },
+        { key: "total", label: "Total neto", align: "right", render: (r) => h("span", { className: "t-numeric", style: { fontWeight: 500 } }, r.total) },
+        { key: "pdf", label: "", align: "right", render: (r) => NS.IconButton ? h(NS.IconButton, { icon: "download", label: "Descargar PDF de " + r.id }) : null }],
+      card: (r) => ({ icon: "briefcase", title: r.serv, subtitle: r.fecha + " · " + r.total + " neto", meta: r.id, badge: { tone: r.tone, label: r.estado }, chevron: true }),
+      canAccept: accept, onlyDownload: !accept,
+      meta: [{ label: "Fecha de envío", value: sel.fecha, numeric: true }, { label: "Válida hasta", value: sel.vence, numeric: true }, { label: "Preparada por", value: "Carlos Irigoyen · Atlas Seguridad SpA" }, { label: "Vigencia del servicio", value: "Mensual, desde la fecha de inicio" }],
+      lineas: P.COT_LINEAS || [],
+      lCols: [{ key: "item", label: "Servicio", strong: true }, { key: "cant", label: "Cantidad", muted: true }, { key: "unit", label: "Valor unitario", align: "right" }, { key: "sub", label: "Subtotal", align: "right" }],
+      lCard: (r) => ({ title: r.item, subtitle: r.cant + " · " + r.unit, trailing: h("span", { className: "t-numeric", style: { fontWeight: 500 } }, r.sub) }),
+      totales: [{ l: "Neto", v: "$ 2.940.000", lc: "t-body-sm muted", vc: "t-body-sm t-numeric" }, { l: "IVA 19 %", v: "$ 558.600", lc: "t-body-sm muted", vc: "t-body-sm t-numeric" }, { l: "Total", v: "$ 3.498.600", lc: "t-label", vc: "t-subheading t-numeric" }],
+      overlay,
+      verCot: NS.Button ? h(NS.Button, { variant: "secondary", size: "lg" }, "Ver cotizaciones") : null,
+      emptyAction: NS.Button ? h(NS.Button, { variant: "secondary", size: "lg" }, "Ir a solicitudes") : null,
+      skel: [1, 2, 3, 4],
+    };
+  }
+}
+</script>
+</body>
+</html>

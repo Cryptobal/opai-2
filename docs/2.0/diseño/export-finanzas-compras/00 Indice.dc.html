@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0;background:var(--ds-bg)}a{color:var(--ds-accent);text-decoration:none}a:hover{color:var(--ds-fg);text-decoration:underline}</style>
+</helmet>
+<main class="ds" style="max-width:880px;margin:0 auto;padding:48px 24px;display:flex;flex-direction:column;gap:32px;font-family:var(--font-sans);color:var(--ds-fg)">
+<header style="display:flex;flex-direction:column;gap:8px">
+<span class="t-overline">OPAI 2.0 · Finanzas v1 · CAR-98</span>
+<h1 class="t-display" style="margin:0">Compras, conciliación y contabilidad</h1>
+<p class="t-body muted" style="margin:0">Cada pantalla tiene sus artboards en 375, 1024 y 1280, en claro y oscuro, con los estados vacío, cargando, error y sin permiso.</p>
+</header>
+<section style="display:grid;gap:8px">
+<span class="t-label">Roles</span>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="success" hint-size="160px,22px">owner, admin · todo</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" hint-size="260px,22px">gerente, supervisor, viewer · sin permiso</x-import>
+</div>
+</section>
+<section style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);overflow:hidden">
+<sc-for list="{{ pantallas }}" as="p" hint-placeholder-count="10">
+<a href="{{ p.href }}" style="display:grid;grid-template-columns:48px minmax(0,1fr) auto;gap:12px;align-items:center;min-height:64px;padding:12px 16px;border-bottom:1px solid var(--ds-border);color:var(--ds-fg);text-decoration:none" style-hover="background:var(--ds-fill)">
+<span class="t-mono" style="color:var(--ds-fg-subtle)">{{ p.n }}</span>
+<span style="display:grid;gap:2px;min-width:0"><span class="t-label">{{ p.titulo }}</span><span class="t-body-sm muted">{{ p.desc }}</span></span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ p.tone }}" hint-size="120px,22px">{{ p.rol }}</x-import>
+</a>
+</sc-for>
+</section>
+<p class="t-caption" style="margin:0">Fuera de alcance: Flujo, Ventas, triage de Banca, Factoring y Rendiciones. La variante B se dibuja aparte de lo decidido.</p>
+</main>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const P = (n, titulo, href, desc, rol = "owner, admin", tone = "neutral") => ({ n, titulo, href, desc, rol, tone });
+    return {
+      pantallas: [
+        P("00", "Hoja de componentes", "00 Componentes.dc.html", "Variantes y estados en claro y oscuro; piezas nuevas para el DS", "Equipo", "info"),
+        P("01", "Libro de compras", "01 Libro de compras.dc.html", "Recibidos por RCV, centro de costo, estado de pago derivado, plazo SII, asignación en lote"),
+        P("02", "Ficha de proveedor", "02 Ficha de proveedor.dc.html", "Datos, plazo de pago, cuenta y centro de costo por defecto, compras y pagos"),
+        P("03", "Conciliación mensual", "03 Conciliacion mensual.dc.html", "Banco vs libro, partidas abiertas, calce N:N con montos parciales, «Cerrar mes»"),
+        P("04", "Editor de reglas", "04 Editor de reglas.dc.html", "Prioridad por arrastre, condiciones Todas/Alguna, acción y vista previa"),
+        P("05", "Reglas sugeridas", "05 Reglas sugeridas.dc.html", "Patrón, casos y Aceptar / Editar / Descartar · incluye variante B"),
+        P("06", "Plan de cuentas", "06 Plan de cuentas.dc.html", "Árbol con grupo, naturaleza y centro de costo; alerta de grupo incorrecto"),
+        P("07", "Asientos y períodos", "07 Asientos y periodos.dc.html", "Asientos, detalle debe/haber, reverso, períodos y salud contable"),
+        P("07B", "Asiento de apertura", "07B Asiento de apertura.dc.html", "Variante B · propuesta, a confirmar por Carlos", "Variante B", "accent"),
+        P("08", "EERR y balance", "08 EERR y balance.dc.html", "EERR · Balance · Mayor, desglose hasta el origen, Banda si no cuadra, export"),
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
