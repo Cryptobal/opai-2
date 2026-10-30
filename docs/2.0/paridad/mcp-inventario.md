@@ -398,6 +398,10 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.aprobaciones.get`
 - `core.audit.list`
 - `core.bitacora.verificar`
+- `core.calendario.actualizar`
+- `core.calendario.archivar`
+- `core.calendario.crear_feriado`
+- `core.calendario.listar`
 - `core.consumos.por_recurso`
 - `core.contactos.archive`
 - `core.documentos.desvincular`

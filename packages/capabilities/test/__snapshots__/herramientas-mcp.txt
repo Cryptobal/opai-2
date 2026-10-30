@@ -30,6 +30,10 @@ core_aprobaciones_list
 core_audit_list
 core_bitacora_verificar
 core_buscar
+core_calendario_actualizar
+core_calendario_archivar
+core_calendario_crear_feriado
+core_calendario_listar
 core_cargos_create
 core_cargos_get
 core_cargos_list
@@ -175,6 +179,9 @@ preview_comercial_negocios_set_contactos
 preview_comercial_negocios_update
 preview_comercial_negocios_vincular_instalacion
 preview_core_anexos_generar
+preview_core_calendario_actualizar
+preview_core_calendario_archivar
+preview_core_calendario_crear_feriado
 preview_core_cargos_create
 preview_core_cargos_set_activo
 preview_core_cargos_update
