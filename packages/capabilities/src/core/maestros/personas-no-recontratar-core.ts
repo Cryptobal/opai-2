@@ -80,8 +80,9 @@ export async function cambiar(
     ctx,
     // El motivo queda marcado `sensibles` en la capacidad (ver `eventoAuditoria`): nunca en claro en
     // Actividad ni en `core.audit.list`, ni para quien tiene el permiso (así el motivo anterior no
-    // sobrevive a un "Quitar", correcciones del Revisor y del abogado del 30-oct 15:33 CLT).
-    { tipo, entidadTipo: "persona", payload: () => ({ motivo: motivoTexto }) },
+    // sobrevive a un "Quitar", correcciones del Revisor y del abogado del 30-oct 15:33 CLT). El evento va
+    // sin payload: core.eventos lo guarda en claro y sobrevive a Quitar, al vencimiento y a la anonimización.
+    { tipo, entidadTipo: "persona", payload: () => ({}) },
     async (tx) => {
       await bloquearNoAnonimizado(tx, "persona", id);
       return tx.persona.update({ where: { id }, data, select: SELECT_MARCA });
