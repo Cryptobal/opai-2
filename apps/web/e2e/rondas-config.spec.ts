@@ -46,6 +46,8 @@ test.describe("Rondas · configuración de la instalación", () => {
       );
       await page.getByRole("button", { name: boton, exact: true }).click();
       const recibida = await respuesta;
+      // 200 solo dice que la acción respondió: un error de la capacidad viaja en el cuerpo. El éxito lo
+      // prueban el cierre del diálogo, el aviso exacto y la recarga que sigue.
       expect(recibida.ok()).toBe(true);
       // El cierre ocurre solo cuando la acción devuelve éxito, tras procesar su respuesta.
       await expect(page.getByRole("dialog")).toBeHidden({ timeout: 30_000 });
