@@ -1,54 +1,20 @@
 import { z } from "zod";
 
 import { defineCapability } from "../define";
-import { noEncontrado, reglaDeNegocio } from "../errores";
+import { noEncontrado } from "../errores";
 import { uuidSchema } from "../core/esquemas";
 import { definidos, sinDuplicado } from "../core/maestros/comun";
-import type { Contexto } from "../types";
-import { PERMISO_CONFIG, dondeInstalacionId, instalacionEnAlcance, ordenSchema, plantillaDe } from "./comun";
+import { PERMISO_CONFIG, instalacionEnAlcance, ordenSchema, plantillaDe } from "./comun";
+import {
+  camposPlantilla,
+  incluir,
+  nuevos,
+  puntosDeInstalacion,
+  puntosSchema,
+  validarTramo,
+} from "./plantillas-comun";
 import { plantillaSchema } from "./vistas";
 import { vistaPlantilla } from "./plantillas-lectura";
-
-const puntoLineaSchema = z.object({
-  puntoId: uuidSchema,
-  orden: z.number().int().min(0).max(200),
-  obligatorio: z.boolean().default(true),
-});
-
-const puntosSchema = z
-  .array(puntoLineaSchema)
-  .min(1)
-  .max(200)
-  .refine((ps) => new Set(ps.map((p) => p.puntoId)).size === ps.length, "No repitas un punto")
-  .refine((ps) => new Set(ps.map((p) => p.orden)).size === ps.length, "No repitas un orden");
-
-const camposPlantilla = {
-  ordenModo: ordenSchema.default("sugerido"),
-  tiempoMaxMin: z.number().int().min(5).max(480),
-  tiempoMaxTramoMin: z.number().int().min(1).max(480).nullable().optional(),
-  umbralIncompletaPct: z.number().int().min(0).max(100).default(20),
-  permiteAdhoc: z.boolean().default(true),
-};
-
-const incluir = {
-  puntos: { orderBy: { orden: "asc" }, select: { puntoId: true, orden: true, obligatorio: true } },
-} as const;
-
-/** Los puntos son activos, de la misma instalación y del alcance del actor (ADR-022, sin enumeración). */
-async function puntosDeInstalacion(ctx: Contexto, instalacionId: string, ids: readonly string[]) {
-  const filas = await ctx.db.puntoControl.findMany({
-    // `instalacionId` y el alcance van en `AND`: el spread de `dondeInstalacionId` pisaría el
-    // `instalacionId` pedido y dejaría usar puntos de otra instalación del alcance.
-    where: { id: { in: [...ids] }, estado: "activo", AND: [{ instalacionId }, dondeInstalacionId(ctx)] },
-    select: { id: true },
-  });
-  if (filas.length !== new Set(ids).size) throw noEncontrado("El punto de control");
-}
-
-function validarTramo(total: number, tramo: number | null | undefined) {
-  if (tramo != null && tramo >= total)
-    throw reglaDeNegocio("El tiempo por tramo debe ser menor que el total.");
-}
 
 /** Crea una plantilla de ronda con su secuencia de puntos, orden y tiempos. */
 export const plantillasCrear = defineCapability({
@@ -137,14 +103,30 @@ export const plantillasActualizar = defineCapability({
     const tramo =
       cambios.tiempoMaxTramoMin !== undefined ? cambios.tiempoMaxTramoMin : plantilla.tiempoMaxTramoMin;
     validarTramo(cambios.tiempoMaxMin ?? plantilla.tiempoMaxMin, tramo);
-    if (puntos) await puntosDeInstalacion(ctx, plantilla.instalacionId, puntos.map((p) => p.puntoId));
     const data = definidos(cambios);
     if (dryRun) {
       const fila = await ctx.db.plantillaRonda.findUnique({ where: { id }, include: incluir });
       if (!fila) throw noEncontrado("La plantilla");
+      if (puntos) {
+        const existentes = new Set(fila.puntos.map((p) => p.puntoId));
+        await puntosDeInstalacion(ctx, plantilla.instalacionId, nuevos(puntos, existentes));
+      }
       return vistaPlantilla({ ...fila, ...data, puntos: puntos ?? fila.puntos });
     }
     const actualizada = await ctx.transaccion(async (tx) => {
+      const dentro = { ...ctx, db: tx };
+      // Bloquea la fila: la validación de puntos y la reescritura de la secuencia no deben sufrir TOCTOU.
+      await tx.$queryRaw`SELECT id FROM rondas.plantillas WHERE id = ${id}::uuid AND tenant_id = ${ctx.tenantId}::uuid FOR UPDATE`;
+      if (puntos) {
+        const previos = await tx.plantillaPunto.findMany({
+          where: { plantillaId: id },
+          select: { puntoId: true },
+        });
+        const existentes = new Set(previos.map((p) => p.puntoId));
+        // Solo los puntos NUEVOS deben estar activos y en alcance; los que ya estaban en la secuencia se
+        // conservan aunque se hayan archivado (archivar no los saca de las plantillas; evita perder datos).
+        await puntosDeInstalacion(dentro, plantilla.instalacionId, nuevos(puntos, existentes));
+      }
       await sinDuplicado(
         tx.plantillaRonda.update({ where: { id }, data }),
         "Ya existe una plantilla con ese nombre en la instalación.",

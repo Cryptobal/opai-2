@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { GRAVEDADES, MODOS_PUNTO, ORDENES_PLANTILLA } from "@opai/domain";
+import { GRAVEDADES, MODOS_PUNTO, ORDENES_PLANTILLA, RADIO_GEOCERCA_M } from "@opai/domain";
 
 import { ajuste } from "../core/config";
 import { instalacionesEnAlcance } from "../core/maestros/alcance";
@@ -17,7 +17,7 @@ export const gravedadSchema = z.enum(GRAVEDADES);
 
 /** Defectos de fábrica, iguales a los `.default()` de los ajustes del módulo (ADR-021). */
 export const DEFECTOS = {
-  radio_defecto_m: 15,
+  radio_defecto_m: RADIO_GEOCERCA_M.defecto,
   precision_min_defecto_m: 25,
   permanencia_gps_defecto_s: 15,
   modo_defecto: "qr_gps",

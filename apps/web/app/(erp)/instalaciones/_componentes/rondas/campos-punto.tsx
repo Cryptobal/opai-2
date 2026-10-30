@@ -3,7 +3,7 @@
 import type { Dispatch, SetStateAction } from "react";
 
 import { Campo, Input, MapaEstatico, RadioGroup, Switch, Textarea } from "@opai/ds";
-import { type ModoPunto, MODOS_PUNTO } from "@opai/domain";
+import { type ModoPunto, MODOS_PUNTO, RADIO_GEOCERCA_M } from "@opai/domain";
 
 import { MODO_PUNTO } from "./etiquetas";
 import type { DatosPunto } from "./hoja-punto-datos";
@@ -79,7 +79,7 @@ export function CamposPunto({
             <MapaEstatico lat={lat} lng={lng} geocercaM={Number(d.radioM) || defectos.radioM} pie="Geocerca del punto" />
           ) : null}
           <div className="grid grid-cols-2 gap-3">
-            <Campo etiqueta="Radio (m)" htmlFor="pt-radio" ayuda={`Hereda ${defectos.radioM} m si lo dejas en blanco`}>
+            <Campo etiqueta="Radio (m)" htmlFor="pt-radio" ayuda={`Hereda ${defectos.radioM} m si lo dejas en blanco · máx. ${RADIO_GEOCERCA_M.max} m`}>
               <Input id="pt-radio" value={d.radioM} inputMode="numeric" placeholder={String(defectos.radioM)} onChange={(e) => set("radioM", e.target.value)} />
             </Campo>
             <Campo etiqueta="Precisión mín. (m)" htmlFor="pt-prec" ayuda={`Hereda ${defectos.precisionMinM} m`}>

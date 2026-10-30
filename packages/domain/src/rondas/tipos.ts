@@ -9,6 +9,9 @@ export type ModoPunto = (typeof MODOS_PUNTO)[number];
 export const ESTADOS_GEOCERCA = ["dentro", "dudosa", "fuera"] as const;
 export type EstadoGeocerca = (typeof ESTADOS_GEOCERCA)[number];
 
+/** Radio de la geocerca en metros (R3): defecto 15 m, techo 20 m (decisión de Carlos). */
+export const RADIO_GEOCERCA_M = { min: 5, defecto: 15, max: 20 } as const;
+
 export const ORDENES_PLANTILLA = ["sugerido", "estricto", "aleatorio"] as const;
 export type OrdenPlantilla = (typeof ORDENES_PLANTILLA)[number];
 

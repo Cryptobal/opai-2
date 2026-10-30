@@ -1,5 +1,7 @@
 import type { Programacion } from "./tipos";
 
+type Responsables = Programacion["responsables"];
+
 /** Estado del formulario de programación. En el PR 1b los horarios son horas fijas "HH:MM". */
 export type DatosProgramacion = {
   nombre: string;
@@ -9,6 +11,8 @@ export type DatosProgramacion = {
   vigenciaDesde: string;
   vigenciaHasta: string;
   toleranciaMin: string;
+  // El PR 1b no edita los responsables; se arrastran para no pisar los que se fijaron por API o MCP.
+  responsables: Responsables;
 };
 
 /** Datos iniciales desde una programación existente o una nueva con una hora por defecto. */
@@ -22,6 +26,10 @@ export function inicialProgramacion(p: Programacion | null, plantillaId: string)
     vigenciaDesde: p?.vigenciaDesde ?? "",
     vigenciaHasta: p?.vigenciaHasta ?? "",
     toleranciaMin: p ? String(p.toleranciaMin) : "15",
+    // Al crear, «quien esté de turno»; al editar, se conservan los responsables existentes.
+    responsables: p
+      ? { modo: p.responsables.modo, personaIds: [...p.responsables.personaIds] }
+      : { modo: "por_turno", personaIds: [] },
   };
 }
 
@@ -36,8 +44,8 @@ export function programacionAInput(d: DatosProgramacion, instalacionId: string, 
     vigenciaDesde: d.vigenciaDesde || null,
     vigenciaHasta: d.vigenciaHasta || null,
     toleranciaMin: Number.parseInt(d.toleranciaMin, 10) || 0,
-    // El PR 1b fija responsables «quien esté de turno»; la asignación nominal llega después.
-    responsables: { modo: "por_turno" as const, personaIds: [] as string[] },
+    // Se preservan modo y personaIds existentes; la pantalla del PR 1b no los edita.
+    responsables: { modo: d.responsables.modo, personaIds: [...d.responsables.personaIds] },
   };
   return id ? { id, ...base } : base;
 }
