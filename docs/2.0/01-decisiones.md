@@ -1143,3 +1143,35 @@ identidad de servicio en main.
 
 **Consecuencias.** ADR-049 §9 y ADR-057 apuntan a este ADR para la estructura de cobro. Cada especificación de módulo (ADR-047) declara su capa y su unidad. Sin código ni migraciones; los montos entran cuando Opai SpA exista y se registrarán como una enmienda a este ADR.
 
+
+---
+
+## ADR-059 · Feriados legales de Chile calculados por regla
+
+**Fecha:** 30-oct-2026 · **Estado:** vigente · **Origen:** decisión de Carlos del 30-oct-2026 a las 00:51 CLT (chat con el operador) tras el hallazgo de QA (ALTO, datos) sobre el calendario del Núcleo del #139 (CAR-79): cada año traía solo 10 feriados nacionales de fecha fija y 2027 repetía 2026. Refs CAR-79/CAR-76/CAR-80.
+
+**Contexto.** El #139 sembró los feriados nacionales de fecha fija de 2026–2027 como filas de plataforma (`tenant_id` nulo) de `core.dias_calendario` y dejó **fuera del seed los de fecha movible** (Semana Santa, San Pedro y San Pablo, Pueblos Indígenas, Encuentro de Dos Mundos, Iglesias Evangélicas) «hasta confirmar su fecha observada». Resultado: faltaban feriados y el seed no escalaba a años nuevos. Este calendario alimenta el cálculo de días hábiles (pauta, comercial, asistencia, nómina), así que había que corregirlo antes de que algo lo usara.
+
+**Decisión (Carlos, 30-oct-2026, 00:51 CLT).**
+
+1. Los **feriados legales de Chile se calculan por regla** en el código (`packages/domain/src/calendario/feriados.ts`, `feriadosLegales(anio)`), para **cualquier año**, sin tabla por año.
+2. La tabla `core.dias_calendario` queda **solo** para feriados por **ley puntual** (p. ej. elecciones o leyes especiales, como filas de plataforma) y para los **días propios de cada empresa** (filas del tenant).
+3. **Revisión anual en noviembre del año siguiente** contra la fuente oficial, a cargo del operador, **fuera del código** (no hay API externa en la v1).
+
+**Reglas implementadas (cada feriado lleva su ley en el código).**
+
+- **Fijos:** Año Nuevo (1-ene), Día del Trabajo (1-may), Glorias Navales (21-may), Virgen del Carmen (16-jul, Ley 20.148), Asunción (15-ago), Independencia (18-sep), Glorias del Ejército (19-sep), Todos los Santos (1-nov), Inmaculada Concepción (8-dic), Navidad (25-dic).
+- **Semana Santa:** Viernes Santo (Pascua − 2) y Sábado Santo (Pascua − 1), con la Pascua por el **computus gregoriano** (Meeus).
+- **Pueblos Indígenas (Ley 21.357):** el día del **solsticio de invierno** del hemisferio sur, calculado con el método de **Meeus** y pasado a hora de Chile continental (UTC−4). **[Por verificar]** cada año contra el decreto oficial.
+- **Trasladables (Ley 19.668):** San Pedro y San Pablo (29-jun) y Encuentro de Dos Mundos (12-oct): si caen martes, miércoles o jueves se corren al lunes de esa semana; si caen viernes, al lunes de la semana siguiente; el fin de semana y el lunes no se mueven.
+- **Iglesias Evangélicas (Leyes 20.299 y 20.983):** 31-oct, salvo que caiga martes (→ viernes de la semana anterior, 27-oct) o miércoles (→ viernes de esa semana, 2-nov). **[Por verificar]** el año en que se traslada.
+- **Adicionales de Fiestas Patrias (Ley 20.215):** lunes 17-sep si el 18 cae martes; viernes 20-sep si el 19 cae jueves.
+- **Irrenunciables (Ley 19.973):** 1-ene, 1-may, 18 y 19-sep y 25-dic.
+
+**Lectura y días hábiles.** `core.calendario.listar` y el cálculo de días hábiles usan la **unión** de los feriados calculados con las filas de la tabla, resueltos por precedencia (tenant por instalación > tenant global > regional > nacional/legal). Los calculados se muestran como **«Legal (automático)»** y **no se editan ni archivan**; un feriado del tenant sobrescribe al legal solo en ese tenant. Cualquier año válido (2000–2100) muestra sus feriados legales aunque no haya ninguna fila en la tabla.
+
+**Corrección de datos.** La migración `20261030130000_core_feriados_calculados` **borra de forma idempotente** las 20 filas de plataforma de fecha fija 2026–2027 que sembró `20261030000000_core_calendario` (ahora salen del cálculo). Como la tabla nace con `FORCE ROW LEVEL SECURITY` y opai_app no puede borrar filas de plataforma, el **dueño de la tabla** quita `FORCE` dentro de la transacción, borra, verifica con `GET DIAGNOSTICS` y vuelve a poner `FORCE`; no toca filas de tenants ni la migración ya aplicada.
+
+**CASCADE de `instalacion_id`.** La FK `dias_calendario_instalacion_id_fkey` es `ON DELETE CASCADE` (migración `20261030000000`): al borrar una instalación del tenant se borran también sus feriados propios acotados a esa instalación, que no tienen sentido sin ella. Los feriados globales del tenant (`instalacion_id` nulo) y los de plataforma no se ven afectados. El trigger `mismo_tenant` garantiza que la instalación de una fila del tenant es del mismo tenant.
+
+**Consecuencias.** Reemplaza el «[dato a confirmar]» del #139 sobre la fuente de feriados movibles por este cálculo con revisión anual. Sin impacto en otros ADR. Las fechas marcadas **[por verificar]** se listan en el PR y en `ESTADO.md` para el primer contraste oficial.

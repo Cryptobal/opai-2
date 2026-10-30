@@ -6,7 +6,9 @@ import {
   feriadosDelMes,
   resolverFeriados,
 } from "./dias";
+import { feriadosLegalesComoEntradas } from "./feriados";
 import { diaUtc } from "./fechas";
+import { diasHabilesEntre } from "./habiles";
 
 const nacional = (fecha: string, nombre: string, irr = false): DiaCalendarioEntrada => ({
   fecha,
@@ -79,6 +81,57 @@ describe("conjuntoFeriados", () => {
   it("devuelve el set de fechas", () => {
     const s = conjuntoFeriados(resolverFeriados([nacional("2026-09-18", "Independencia", true)]));
     expect(s.has("2026-09-18")).toBe(true);
+  });
+});
+
+describe("unión de feriados legales calculados con filas de la tabla", () => {
+  it("une los calculados con una fila puntual de plataforma y una propia del tenant, sin duplicar", () => {
+    const legales = feriadosLegalesComoEntradas(2026);
+    const eleccion: DiaCalendarioEntrada = {
+      fecha: "2026-11-29",
+      nombre: "Elecciones (ley puntual)",
+      irrenunciable: true,
+      fuente: "nacional",
+      region: null,
+      esTenant: false,
+    };
+    const propio: DiaCalendarioEntrada = {
+      fecha: "2026-03-10",
+      nombre: "Aniversario de la empresa",
+      irrenunciable: false,
+      fuente: "tenant",
+      region: null,
+      esTenant: true,
+    };
+    const resuelto = resolverFeriados([...legales, eleccion, propio]);
+    // 16 legales + 1 puntual + 1 propio = 18 fechas distintas, sin duplicados.
+    expect(resuelto).toHaveLength(18);
+    expect(new Set(resuelto.map((f) => f.fecha)).size).toBe(18);
+    expect(resuelto.some((f) => f.fecha === "2026-11-29")).toBe(true);
+    expect(resuelto.some((f) => f.fecha === "2026-03-10")).toBe(true);
+  });
+
+  it("una fila del tenant en la misma fecha que un feriado legal lo sobrescribe, sin duplicar", () => {
+    const legales = feriadosLegalesComoEntradas(2026); // incluye 2026-09-18 Independencia
+    const propio: DiaCalendarioEntrada = {
+      fecha: "2026-09-18",
+      nombre: "Día propio de la empresa",
+      irrenunciable: false,
+      fuente: "tenant",
+      region: null,
+      esTenant: true,
+    };
+    const resuelto = resolverFeriados([...legales, propio]);
+    expect(resuelto).toHaveLength(16); // el propio reemplaza al legal en esa fecha
+    expect(resuelto.find((f) => f.fecha === "2026-09-18")?.nombre).toBe("Día propio de la empresa");
+  });
+
+  it("los días hábiles usan los feriados calculados (Viernes Santo 2026 no es hábil)", () => {
+    const ambito = conjuntoFeriados(resolverFeriados([...feriadosLegalesComoEntradas(2026)]));
+    // Semana Santa 2026: Viernes Santo 3-abr y Sábado Santo 4-abr. Lun 30-mar … vie 3-abr → 4 hábiles.
+    expect(diasHabilesEntre("2026-03-30", "2026-04-03", ambito)).toBe(4);
+    // Sin los calculados, los 5 días serían hábiles.
+    expect(diasHabilesEntre("2026-03-30", "2026-04-03", new Set())).toBe(5);
   });
 });
 
