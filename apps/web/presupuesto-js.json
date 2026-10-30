@@ -24,6 +24,8 @@
     "/(erp)/personas/[id]/actividad": 166,
     "/(erp)/instalaciones/[id]/documentos": 166,
     "/(erp)/instalaciones/[id]/rondas": 168,
+    "/(erp)/nomina/calendario": 171,
+    "/(erp)/nomina/novedades": 170,
     "/(platform)/platform/tenants/[id]/*": 168,
     "/(terreno)/terreno*": 162,
     "/(trabajador)/trabajador*": 162,
