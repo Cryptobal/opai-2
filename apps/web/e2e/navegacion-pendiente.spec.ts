@@ -58,12 +58,15 @@ test("la cabecera y el riel marcan el destino durante una navegación lenta", as
   await expect(page.getByRole("region", { name: "Lista de personas" })).toBeVisible();
 });
 
-// PENDIENTE (ADR-045 decisiones 1 y 3, precarga activa). Con la precarga por intención (cursor, toque
-// o foco) de las entradas del menú (restaurada por mandato de Carlos t365u/t366u, 26-oct-2026) un clic
-// durante la hidratación entra en carrera con el prefetch en vuelo de Cache Components y la navegación
-// se cuelga (el riel y el título marcan el destino, pero el contenido se queda en la página anterior).
-// El `cache()` de `marcaGenerado` no lo resuelve. La navegación en estado estable sí cumple (test
-// anterior). Queda como pendiente en PR-BODY.md con los datos; no se vuelve a desactivar la precarga.
+// PENDIENTE (ADR-045 decisión 1, precarga activa). Historial: con la precarga por intención (cursor,
+// toque o foco) de las entradas del menú un clic durante la hidratación entraba en carrera con el
+// prefetch completo en vuelo de Cache Components y la navegación se colgaba (el riel y el título
+// marcaban el destino, pero el contenido se quedaba en la página anterior). El `cache()` de
+// `marcaGenerado` no lo resolvía. En el B1 5.º ajuste `LinkMenu` dejó de forzar `prefetch` completo por
+// intención (renderizaba en el servidor el hueco dinámico —sesión de Better Auth— de páginas del menú
+// que nadie abría, los P2028 del QA en vivo del #136): queda la precarga POR DEFECTO de Next (solo el
+// shell estático del Suspense), así que la precarga NO se desactiva. La navegación en estado estable
+// cumple (test anterior); el clic durante la hidratación queda pendiente, sin verificar aquí.
 test.fixme("un clic apenas carga la página (durante la hidratación) navega igual", async ({ page }) => {
   await entrar(page);
   await page.goto("/cuentas", { waitUntil: "load" });
