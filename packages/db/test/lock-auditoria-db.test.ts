@@ -100,6 +100,12 @@ describe("lock de auditoría: sin esperas largas ni transacciones que pidan al p
   });
 
   it("el rol opai_app tiene lock_timeout, statement_timeout e idle_in_transaction_session_timeout", async () => {
+    // Solo leemos el valor que dejan las migraciones aplicadas, sin fijarlo aquí: CAR-35
+    // (20261028220000) lo puso en 30 s y la migración 20261030020000 de B1 lo reafirma. En CI (base
+    // efímera, migraciones en orden) opai_app queda en 30 s. B1 · causa raíz NO baja el tope a 5 s en
+    // este PR (decisión del Revisor, review 5707965033): hay escrituras que esperan a R2 dentro de la
+    // transacción y un idle corto cortaría la transacción con el archivo ya en R2 pero sin su fila ni
+    // su auditoría; el fondo de B1 se ataca sacando las lecturas de sesión de la transacción.
     const [rol] = await entorno.admin.$queryRaw<{ config: string[] | null }[]>`
       SELECT rolconfig AS config FROM pg_roles WHERE rolname = 'opai_app'`;
     expect(rol?.config).toEqual(

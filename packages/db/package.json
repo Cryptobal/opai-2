@@ -21,6 +21,7 @@
     "seed:roles-base": "tsx scripts/seed-roles-base.ts",
     "seed:e2e": "tsx scripts/seed-e2e.ts && pnpm --filter @opai/auth seed:e2e-mfa",
     "diagnostico:portales": "tsx scripts/diagnostico-portales.ts",
+    "diagnostico:b1": "tsx scripts/diagnostico-b1-sesiones.ts",
     "importar:opai1": "tsx scripts/importar-opai1/cli.ts"
   },
   "dependencies": {
