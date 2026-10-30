@@ -19,6 +19,7 @@ exports[`declaración de auditoría del registro completo > ninguna lectura nuev
   "core.cumplimiento.rat",
   "core.cumplimiento.retencion_politica",
   "core.documento_tipos.list",
+  "core.firmas.politica_get",
   "core.geo.autocompletar",
   "core.geo.detalle",
   "core.geo.geocodificar",

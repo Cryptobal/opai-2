@@ -87,6 +87,8 @@ core_estructuras_get
 core_estructuras_list
 core_estructuras_panel
 core_excepciones_list
+core_firmas_politica_get
+core_firmas_politica_set
 core_funciones_create
 core_funciones_get
 core_funciones_list
@@ -199,6 +201,7 @@ preview_core_documentos_vincular
 preview_core_empresa_update
 preview_core_estructuras_anular
 preview_core_estructuras_create
+preview_core_firmas_politica_set
 preview_core_funciones_create
 preview_core_funciones_set_activo
 preview_core_funciones_update
