@@ -93,6 +93,8 @@ No se verificó (fuera del repositorio): qué migraciones están aplicadas en Ne
 | I-21 | El e2e está en rojo en main desde hace al menos 8 commits (en `f60a88d`, shards 2 a 6), incluidas pruebas de alcance del supervisor y de cambio de empresa | `e2e/navegacion-permisos.spec.ts:42`; `e2e/cache-sesion.spec.ts:152`; `portales-riel.spec.ts:73`; `platform-superadmin.spec.ts:13`; `portal-inicio.spec.ts:44,90`; `maestros.spec.ts:45`; `maestros-ficha-lista.spec.ts:60` (timeouts de 3 min); otros de fichas y DS | No se sabe si son fallas reales o del entorno de CI; mientras sigan en rojo, una regresión de aislamiento en el navegador pasa sin aviso (el e2e no es obligatorio) | Triage inmediato de las dos de aislamiento; luego el resto; con main en verde, promover un subconjunto crítico a obligatorio | [CAR-60](https://linear.app/carlos-irigoyen/issue/CAR-60) |
 
 **Entradas obsoletas de `ESTADO.md` (I-20, líneas en `f60a88d`):**
+
+**Seguimiento CAR-59:** la resolución individual y la foto verificada están en [ESTADO.md](ESTADO.md#trazabilidad-de-i-20); esta lista conserva los hallazgos tal como se levantaron, no describe el estado actual.
 - :18 Brief 07b PR 1 «no listo» (#80 integrado).
 - :20 cargos sensibles «pendiente» (#83, #84 y #86 integrados).
 - :22 foto `3199b00`.
