@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<title>Componentes · Portal Trabajador</title>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0;background:var(--ds-n-300)} a{color:var(--ds-accent)} a:hover{color:var(--ds-accent)}</style>
+</helmet>
+<div ref="{{ rootRef }}" style="display:flex;flex-direction:column;gap:32px;padding:40px;width:max-content;font-family:var(--font-sans);color:var(--ds-n-900)">
+<div style="display:flex;flex-direction:column;gap:4px;max-width:960px">
+<span class="t-label-sm" style="color:var(--ds-n-700)">OPAI 2.0 · Portal Trabajador · <a href="Indice.dc.html">Índice</a></span>
+<h1 class="t-display m0">Hoja de componentes</h1>
+<span class="t-body" style="color:var(--ds-n-700)">Todo lo que usan las pantallas del portal, con variantes y estados (reposo, hover, foco, deshabilitado) en claro y oscuro. Las piezas marcadas «Nuevo para el DS» se proponen al DS 2.0, no al módulo.</span>
+</div>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+<div class="ds" data-theme="{{ th.id }}" style="width:860px;background:var(--ds-bg);color:var(--ds-fg);border-radius:var(--radius-lg);padding:32px;display:flex;flex-direction:column;gap:40px">
+<h2 class="t-title m0">{{ th.label }}</h2>
+<section style="display:flex;flex-direction:column;gap:12px">
+<h3 class="t-subheading m0">Navegación · TabBar</h3>
+<span class="t-caption">Con Asistencia (5 ítems) y sin Asistencia (4 ítems, sin «Marcar»). Activo: icono en accent, etiqueta en fg.</span>
+<div style="display:flex;gap:16px">
+<div style="width:375px;border:1px solid var(--ds-border);border-radius:var(--radius-md);overflow:hidden"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.TabBar" items="{{ tabsA }}" value="ini" hint-size="375px,90px"></x-import></div>
+<div style="width:375px;border:1px solid var(--ds-border);border-radius:var(--radius-md);overflow:hidden"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.TabBar" items="{{ tabsB }}" value="doc" hint-size="375px,90px"></x-import></div>
+</div>
+</section>
+<section style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;gap:8px;align-items:center"><h3 class="t-subheading m0">Sidebar · «Trabajador» bajo «OPAI»</h3><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="accent" dot="{{ false }}" hint-size="120px,22px">Nuevo para el DS</x-import></div>
+<span class="t-caption">Propuesta: prop portalLabel en Sidebar que reemplaza «2.0» bajo el wordmark. Hoy el texto se cambia sobre el Sidebar existente.</span>
+<div style="height:420px;width:248px;display:flex;border:1px solid var(--ds-border);border-radius:var(--radius-md);overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Sidebar" portal="Trabajador" tenant="Atlas Seguridad SpA" tenant-initials="AS" groups="{{ groups }}" value="ini" user="{{ user }}" hint-size="248px,420px"></x-import>
+</div>
+</section>
+<section style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;gap:8px;align-items:center"><h3 class="t-subheading m0">v2 · TabBar</h3><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="info" dot="{{ false }}" hint-size="60px,22px">v2</x-import></div>
+<span class="t-caption">Completa · sin Marcar · sin Rondas ni Accesos.</span>
+<div style="display:flex;gap:16px;flex-wrap:wrap">
+<sc-for list="{{ tabsV2 }}" as="tb" hint-placeholder-count="3">
+<div style="width:260px;border:1px solid var(--ds-border);border-radius:var(--radius-md);overflow:hidden"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.TabBar" items="{{ tb }}" value="cen" hint-size="260px,90px"></x-import></div>
+</sc-for>
+</div>
+</section>
+<section style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;gap:8px;align-items:center"><h3 class="t-subheading m0">v2 · Central, urgencia y switches</h3><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="info" dot="{{ false }}" hint-size="60px,22px">v2</x-import></div>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" hint-size="80px,22px">Enviado</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="info" hint-size="160px,22px">Recibido por la central</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="success" hint-size="100px,22px">Respondido</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="danger" hint-size="90px,22px">Urgencia</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="warning" hint-size="110px,22px">Sin confirmar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="success" hint-size="90px,22px">Recibido</x-import>
+</div>
+<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="check" hint-size="120px,40px">Recibido</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="destructive" icon="message" hint-size="170px,40px">Enviar urgencia</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="destructive" icon="message" style="{{ focusStyle }}" hint-size="170px,40px">Enviar urgencia</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="destructive" disabled="{{ true }}" hint-size="170px,40px">Enviar urgencia</x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="danger" titulo="Urgencia: la central te llama de inmediato" hint-size="100%,56px">Tono danger solo para Urgencia.</x-import>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ true }}" label="Encendido" description="Revocable" hint-size="100%,56px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" label="Apagado" description="Revocable" hint-size="100%,56px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ true }}" disabled="{{ true }}" label="Obligatorio" description="Fijo, con explicación" hint-size="100%,56px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Combobox" label="Dirección" value="a" options="{{ dirOpts }}" hint="Sugerencias de Google Maps." hint-size="100%,90px"></x-import>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;gap:8px;align-items:center"><span class="t-label-sm">MapaConfirmacion · ds-mapa + pin</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="accent" dot="{{ false }}" hint-size="120px,22px">Nuevo para el DS</x-import></div>
+<div class="ds-mapa" style="height:120px;border:1px solid var(--ds-border);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;color:var(--ds-accent)"><span class="ic lg i-pin" aria-hidden="true"></span></div>
+<div style="display:flex;gap:8px;align-items:center"><span class="t-label-sm">FilaCanales · aviso × canal con Switch</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="accent" dot="{{ false }}" hint-size="120px,22px">Nuevo para el DS</x-import></div>
+<span class="t-caption">Ver v2 · 12 Notificaciones. Los avisos obligatorios llevan candado y Switch deshabilitado.</span>
+</div>
+</section>
+<section style="display:flex;flex-direction:column;gap:12px">
+<h3 class="t-subheading m0">Button · IconButton · Enlace</h3>
+<div style="display:grid;grid-template-columns:120px repeat(4,minmax(0,1fr));gap:12px;align-items:center">
+<span></span><span class="t-caption">Reposo</span><span class="t-caption">Hover</span><span class="t-caption">Foco</span><span class="t-caption">Deshabilitado</span>
+<span class="t-label-sm">Primario</span>
+<div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" hint-size="100px,40px">Firmar</x-import></div>
+<span class="t-caption">Sin cambio (solo puntero)</span>
+<div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" style="{{ focusStyle }}" hint-size="100px,40px">Firmar</x-import></div>
+<div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" disabled="{{ true }}" icon="lock" hint-size="150px,40px">Próximamente</x-import></div>
+<span class="t-label-sm">Secundario</span>
+<div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="110px,40px">Me ofrezco</x-import></div>
+<div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" style="{{ hoverStyle }}" hint-size="110px,40px">Me ofrezco</x-import></div>
+<div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" style="{{ focusStyle }}" hint-size="110px,40px">Me ofrezco</x-import></div>
+<div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" disabled="{{ true }}" hint-size="110px,40px">Me ofrezco</x-import></div>
+<span class="t-label-sm">Ghost</span>
+<div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="chevron-left" hint-size="120px,40px">Solicitudes</x-import></div>
+<div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="chevron-left" style="{{ hoverStyle }}" hint-size="120px,40px">Solicitudes</x-import></div>
+<div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="chevron-left" style="{{ focusStyle }}" hint-size="120px,40px">Solicitudes</x-import></div>
+<div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" disabled="{{ true }}" hint-size="120px,40px">Retirar oferta</x-import></div>
+<span class="t-label-sm">IconButton</span>
+<div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="download" label="Descargar" hint-size="44px,44px"></x-import></div>
+<div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="download" label="Descargar" active="{{ true }}" hint-size="44px,44px"></x-import></div>
+<div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="download" label="Descargar" style="{{ focusStyle }}" hint-size="44px,44px"></x-import></div>
+<span class="t-caption">—</span>
+</div>
+</section>
+<section style="display:flex;flex-direction:column;gap:12px">
+<h3 class="t-subheading m0">Badge · estados</h3>
+<span class="t-caption">Solicitudes: Abierto · En atención · Esperando al solicitante · Resuelto · Cerrado. Documentos y turnos: el resto.</span>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<sc-for list="{{ badges }}" as="b" hint-placeholder-count="10">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ b.tone }}" hint-size="100px,22px">{{ b.label }}</x-import>
+</sc-for>
+</div>
+</section>
+<section style="display:flex;flex-direction:column;gap:12px">
+<h3 class="t-subheading m0">Tabs · RowCard</h3>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ tabItems }}" value="por" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" padding="{{ 0 }}" style="overflow:hidden" hint-size="100%,300px">
+<sc-for list="{{ rows }}" as="r" hint-placeholder-count="4">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" icon="{{ r.icon }}" title="{{ r.title }}" subtitle="{{ r.subtitle }}" meta="{{ r.meta }}" badge="{{ r.badge }}" chevron="{{ r.chevron }}" trailing="{{ r.trailing }}" style="{{ r.style }}" hint-size="100%,72px"></x-import>
+</sc-for>
+</x-import>
+<span class="t-caption">Reposo · seleccionada (accent-muted, iPad y escritorio) · con descarga · con chevron. Hover: fill.</span>
+</section>
+<section style="display:flex;flex-direction:column;gap:12px">
+<h3 class="t-subheading m0">Formularios · Campo, Input, Select, DateRangeInput, Textarea, RadioGroup, Checkbox</h3>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;align-items:start">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Monto · reposo" prefix="$" default-value="100.000" hint="Tope: $ 200.000 este mes" hint-size="100%,90px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Monto · error" prefix="$" default-value="250.000" error="Supera el tope de $ 200.000" hint-size="100%,90px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Monto · deshabilitado" prefix="$" default-value="100.000" disabled="{{ true }}" hint-size="100%,90px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Tipo de certificado" value="ant" options="{{ certOpts }}" hint-size="100%,90px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DateRangeInput" label="Fechas" dc-props="{{ fechas }}" hint-size="100%,90px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Motivo" default-value="Control médico de mi hijo." rows="{{ 2 }}" hint-size="100%,90px"></x-import>
+</div>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RadioGroup" etiqueta="Tipo" valor="vacaciones" opciones="{{ tipos }}" hint-size="100%,180px"></x-import>
+<div style="display:flex;flex-direction:column;gap:4px">
+<span class="t-label-sm">AceptarMedioElectronico (reutilizado del mockup v2 de acceso y firma)</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" label="Acepto firmar por medio electrónico" description="Sin marcar" hint-size="100%,56px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ true }}" label="Acepto firmar por medio electrónico" description="Marcado" hint-size="100%,56px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" disabled="{{ true }}" label="Acepto firmar por medio electrónico" description="Deshabilitado" hint-size="100%,56px"></x-import>
+</div>
+</div>
+</section>
+<section style="display:flex;flex-direction:column;gap:12px">
+<h3 class="t-subheading m0">Alerta · Timeline · DetailSection · ShiftCell · Avatar</h3>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Tu pauta cambió el 28-10-2026" icono="bell" hint-size="100%,56px">Aviso del sistema. No se confirma.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" titulo="No puedes ofrecerte a este turno" icono="alert" hint-size="100%,56px">Quedarías doblando.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="success" titulo="Firmaste el documento" hint-size="100%,56px">La copia quedó en Mis documentos.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="neutral" titulo="La firma avanzada estará disponible pronto" icono="lock" hint-size="100%,56px">Requiere prueba de vida.</x-import>
+</div>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px;align-items:start">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Timeline" items="{{ timeline }}" hint-size="100%,160px"></x-import>
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" rows="{{ kv }}" hint-size="100%,90px"></x-import>
+<div style="display:flex;gap:8px;align-items:center">
+<div style="width:40px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ShiftCell" code="D" label="Día" hint-size="40px,28px"></x-import></div>
+<div style="width:40px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ShiftCell" code="N" label="Noche" hint-size="40px,28px"></x-import></div>
+<div style="width:40px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ShiftCell" code="L" label="Libre" hint-size="40px,28px"></x-import></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Avatar" initials="MS" size="{{ 48 }}" hint-size="48px,48px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Avatar" initials="MS" size="{{ 64 }}" hint-size="64px,64px"></x-import>
+</div>
+</div>
+</div>
+</section>
+<section style="display:flex;flex-direction:column;gap:12px">
+<h3 class="t-subheading m0">Estados · Empty · ErrorState · Forbidden · Skeleton</h3>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px">
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);height:300px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="ticket" title="Aún no tienes solicitudes" description="Pide permisos, vacaciones, anticipos o certificados." hint-size="100%,100%"></x-import></div>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);height:300px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar tu horario" code="PT-504" hint-size="100%,100%"></x-import></div>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);height:300px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="Tu cuenta está suspendida" description="Habla con Paula Rojas, RRHH." action-label="Llamar a RRHH" hint-size="100%,100%"></x-import></div>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;max-width:360px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="40%" height="{{ 12 }}" hint-size="40%,12px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="70%" height="{{ 28 }}" hint-size="70%,28px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 64 }}" radius="{{ 10 }}" hint-size="100%,64px"></x-import>
+</div>
+</section>
+<section style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;gap:8px;align-items:center"><h3 class="t-subheading m0">Piezas nuevas para el DS</h3><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="accent" dot="{{ false }}" hint-size="120px,22px">Nuevo para el DS</x-import></div>
+<span class="t-caption">Composiciones con primitivas del DS que se repiten en el portal y en Terreno. Se proponen como piezas del DS 2.0.</span>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:8px">
+<span class="t-label-sm">TarjetaTurno · próximo turno</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,220px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;justify-content:space-between;gap:12px"><div style="display:flex;flex-direction:column;gap:2px"><span class="t-caption">Tu próximo turno</span><span class="t-heading">Planta Quilicura</span><span class="t-body-sm muted">Portería 1 · Guardia · Patrón 4x4 día</span></div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="info" hint-size="70px,22px">Mañana</x-import></div>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border:1px solid var(--ds-border);border-radius:var(--radius-md)"><div style="padding:10px 12px;border-right:1px solid var(--ds-border);display:flex;flex-direction:column"><span class="t-caption">Entrada</span><span class="t-heading t-numeric">08:00</span></div><div style="padding:10px 12px;display:flex;flex-direction:column"><span class="t-caption">Salida</span><span class="t-heading t-numeric">20:00</span></div></div>
+</div>
+</x-import>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<span class="t-label-sm">FilaDia · horario (normal · con cambio · libre)</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" padding="{{ 0 }}" style="overflow:hidden" hint-size="100%,220px">
+<sc-for list="{{ dias }}" as="d" hint-placeholder-count="3">
+<div style="display:grid;grid-template-columns:44px minmax(0,1fr) 40px;gap:12px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--ds-border);min-height:64px">
+<div style="display:flex;flex-direction:column;align-items:center"><span class="t-caption">{{ d.dow }}</span><span class="t-subheading t-numeric">{{ d.d }}</span></div>
+<div style="display:flex;flex-direction:column;gap:2px;min-width:0"><div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap"><span class="t-label">{{ d.inst }}</span><sc-if value="{{ d.hasCambio }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="info" hint-size="64px,22px">Cambió</x-import></sc-if></div><span class="t-body-sm muted t-numeric">{{ d.hor }}</span><sc-if value="{{ d.hasCambio }}" hint-placeholder-val="{{ false }}"><span class="t-caption" style="text-decoration:line-through">{{ d.cambio }}</span></sc-if></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ShiftCell" code="{{ d.code }}" hint-size="40px,28px"></x-import>
+</div>
+</sc-for>
+</x-import>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<span class="t-label-sm">TarjetaTurnoExtra · disponible / ofrecido / bloqueado por doblar</span>
+<span class="t-caption">Ver estados en <a href="04 Turnos extra.dc.html">04 · Turnos extra</a>. Acción secundaria por tarjeta; bloqueo con Alerta warning + botón deshabilitado.</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<span class="t-label-sm">PasoBloqueado · «Próximamente»</span>
+<span class="t-caption">RowCard con Badge neutral + Alerta neutral + Button deshabilitado (45 %) con candado. Explica por qué y qué viene después. Ver <a href="05b Firmar documento.dc.html">05b · Firmar documento</a>.</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<span class="t-label-sm">VistaDocumento · papel</span>
+<div style="background:var(--ds-paper);color:var(--ds-paper-fg);border:1px solid var(--ds-paper-rule);border-radius:var(--radius-md);padding:20px;display:flex;flex-direction:column;gap:8px"><span class="t-label">Reglamento interno de orden, higiene y seguridad</span><span class="t-caption" style="color:var(--ds-paper-fg)">Atlas Seguridad SpA · vigente desde 01-11-2026</span><div style="height:1px;background:var(--ds-paper-rule-subtle)"></div><p class="t-body-sm m0">Título I. Disposiciones generales.</p></div>
+<span class="t-caption">Usa los tokens fijos --ds-paper*: el papel queda blanco también en oscuro.</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px">
+<span class="t-label-sm">Keypad · teclado PIN (≥ 56 px)</span>
+<span class="t-caption">Aprobado en export-acceso/07_Keypad_Teclado_num_rico. Se reutiliza en el login; no se redibuja aquí. Falta como componente con nombre en este DS.</span>
+</div>
+</div>
+</section>
+</div>
+</sc-for>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  rootRef = React.createRef();
+  componentDidMount() {
+    const patch = () => {
+      const r = this.rootRef.current; if (!r) return;
+      r.querySelectorAll(".sidebar-head").forEach((h) => {
+        if (h.dataset.pt === "1") return;
+        const cap = h.querySelector(".t-caption");
+        if (cap) { cap.textContent = "Trabajador"; Object.assign(h.style, { flexDirection: "column", alignItems: "flex-start", justifyContent: "center", gap: "0" }); h.dataset.pt = "1"; }
+      });
+    };
+    this.mo = new MutationObserver(patch);
+    if (this.rootRef.current) this.mo.observe(this.rootRef.current, { childList: true, subtree: true });
+    patch();
+  }
+  componentWillUnmount() { this.mo && this.mo.disconnect(); }
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const tabsA = [{ id: "ini", label: "Inicio", icon: "home" }, { id: "mar", label: "Marcar", icon: "clock" }, { id: "doc", label: "Mis documentos", icon: "file" }, { id: "sol", label: "Solicitudes", icon: "ticket" }, { id: "mas", label: "Más", icon: "more" }];
+    const tabsB = tabsA.filter((t) => t.id !== "mar");
+    return {
+      rootRef: this.rootRef,
+      themes: [{ id: "light", label: "Claro" }, { id: "dark", label: "Oscuro" }],
+      tabsA, tabsB,
+      groups: [{ items: tabsA.filter((t) => t.id !== "mas") }, { title: "Más", items: [{ id: "hor", label: "Mi horario", icon: "calendar" }, { id: "ext", label: "Turnos extra", icon: "briefcase" }, { id: "ron", label: "Rondas asignadas", icon: "route" }, { id: "per", label: "Mi perfil", icon: "user" }] }],
+      user: { name: "María F. Soto", initials: "MS", role: "Guardia" },
+      focusStyle: { outline: "2px solid var(--ds-focus)", outlineOffset: 2 },
+      hoverStyle: { background: "var(--ds-fill)" },
+      badges: [
+        { tone: "accent", label: "Abierto" }, { tone: "info", label: "En atención" }, { tone: "warning", label: "Esperando al solicitante" }, { tone: "success", label: "Resuelto" }, { tone: "neutral", label: "Cerrado" },
+        { tone: "accent", label: "Listo para firmar" }, { tone: "warning", label: "Esperando aprobación de RRHH" }, { tone: "neutral", label: "Próximamente" }, { tone: "info", label: "Te ofreciste" }, { tone: "info", label: "Cambió" },
+      ],
+      tabsV2: (() => { const I = { id: "ini", label: "Inicio", icon: "home" }, Ma = { id: "mar", label: "Marcar", icon: "clock" }, Ro = { id: "ron", label: "Rondas", icon: "route" }, Ce = { id: "cen", label: "Central", icon: "message" }, Mo = { id: "mas", label: "Más", icon: "more" }; return [[I, Ma, Ro, Ce, Mo], [I, Ro, Ce, Mo], [I, Ma, Ce, Mo]]; })(),
+      dirOpts: [{ value: "a", label: "Av. Las Torres 1450, Quilicura", description: "Región Metropolitana, Chile" }],
+      certOpts: [{ value: "ant", label: "Antigüedad" }, { value: "rem", label: "Remuneraciones (últimos 3 meses)" }],
+      fechas: { from: "16-12-2026", to: "27-12-2026", today: "30-10-2026" },
+      tipos: [{ valor: "permiso", etiqueta: "Permiso" }, { valor: "vacaciones", etiqueta: "Vacaciones" }, { valor: "anticipo", etiqueta: "Anticipo", disabled: true, descripcion: "Deshabilitado" }],
+      timeline: [{ initials: "MS", who: "Tú", action: "creaste la solicitud", when: "28-10-2026 10:14" }, { initials: "PR", who: "Paula Rojas", action: "tomó la solicitud", when: "28-10-2026 11:02", changes: [{ field: "Estado", from: "Abierto", to: "En atención" }] }],
+      kv: [{ label: "Monto", value: "$ 100.000", numeric: true }, { label: "Atiende", value: "Paula Rojas · RRHH" }],
+      dias: [
+        { dow: "Lun", d: "02", code: "D", inst: "Planta Quilicura · Portería 1", hor: "08:00–20:00" },
+        { dow: "Mar", d: "03", code: "N", inst: "Bodega Lampa", hor: "20:00–08:00", hasCambio: true, cambio: "Antes: Planta Quilicura · 08:00–20:00" },
+        { dow: "Mié", d: "04", code: "L", inst: "Libre", hor: "" },
+      ],
+      tabItems: [{ id: "por", label: "Por firmar", count: 4 }, { id: "fir", label: "Firmados" }],
+      rows: [
+        { icon: "file", title: "Reglamento interno 2026", subtitle: "Firma simple · enviado 29-10-2026", badge: { tone: "accent", label: "Listo para firmar" } },
+        { title: "Anticipo de sueldo", subtitle: "$ 100.000 · 28-10-2026", meta: "SOL-0148", badge: { tone: "warning", label: "Esperando al solicitante" }, style: { background: "var(--ds-accent-muted)" } },
+        { icon: "wallet", title: "Septiembre 2026", subtitle: "Líquido $ 684.320 · pagada 30-09-2026", trailing: NS.IconButton ? h(NS.IconButton, { icon: "download", label: "Descargar" }) : null },
+        { icon: "route", title: "Rondas asignadas", subtitle: "Planta Quilicura · abre Rondas", chevron: true },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
