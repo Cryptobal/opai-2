@@ -64,6 +64,43 @@ DROP TRIGGER IF EXISTS mismo_tenant ON "core"."dias_calendario";
 CREATE TRIGGER mismo_tenant BEFORE INSERT OR UPDATE ON "core"."dias_calendario"
   FOR EACH ROW EXECUTE FUNCTION "core"."verificar_mismo_tenant"('instalacion_id', 'core.instalaciones');
 
+-- Seed de feriados nacionales de fecha fija de Chile 2026–2027 (filas de plataforma, tenant_id nulo).
+-- Se cargan AQUÍ, antes de activar RLS, para que la inserción no dependa de que el rol de deploy sea
+-- BYPASSRLS (en Neon puede no serlo). Idempotente (WHERE NOT EXISTS por fecha). Solo las fechas fijas
+-- por estatuto; irrenunciable según la Ley 19.973 (1-ene, 1-may, 18 y 19-sep, 25-dic). Los feriados
+-- de fecha movible (Semana Santa, San Pedro y San Pablo, Pueblos Indígenas, Encuentro de Dos Mundos,
+-- Iglesias Evangélicas) quedan fuera hasta confirmar la fecha observada de cada año con la ley
+-- publicada (ver «[dato a confirmar]» del brief CAR-79): los agrega la plataforma por este mismo
+-- camino. La lista se revisa cada año; no hay API externa en la v1.
+INSERT INTO "core"."dias_calendario" ("id", "tenant_id", "fecha", "tipo", "nombre", "irrenunciable", "region", "instalacion_id", "fuente")
+SELECT gen_random_uuid(), NULL, v.fecha::date, 'feriado', v.nombre, v.irr, NULL, NULL, 'nacional'
+FROM (VALUES
+  ('2026-01-01', 'Año Nuevo', true),
+  ('2026-05-01', 'Día Nacional del Trabajo', true),
+  ('2026-05-21', 'Día de las Glorias Navales', false),
+  ('2026-07-16', 'Día de la Virgen del Carmen', false),
+  ('2026-08-15', 'Asunción de la Virgen', false),
+  ('2026-09-18', 'Independencia Nacional', true),
+  ('2026-09-19', 'Día de las Glorias del Ejército', true),
+  ('2026-11-01', 'Día de Todos los Santos', false),
+  ('2026-12-08', 'Inmaculada Concepción', false),
+  ('2026-12-25', 'Navidad', true),
+  ('2027-01-01', 'Año Nuevo', true),
+  ('2027-05-01', 'Día Nacional del Trabajo', true),
+  ('2027-05-21', 'Día de las Glorias Navales', false),
+  ('2027-07-16', 'Día de la Virgen del Carmen', false),
+  ('2027-08-15', 'Asunción de la Virgen', false),
+  ('2027-09-18', 'Independencia Nacional', true),
+  ('2027-09-19', 'Día de las Glorias del Ejército', true),
+  ('2027-11-01', 'Día de Todos los Santos', false),
+  ('2027-12-08', 'Inmaculada Concepción', false),
+  ('2027-12-25', 'Navidad', true)
+) AS v(fecha, nombre, irr)
+WHERE NOT EXISTS (
+  SELECT 1 FROM "core"."dias_calendario" d
+  WHERE d.tenant_id IS NULL AND d.region IS NULL AND d.fecha = v.fecha::date
+);
+
 -- Permisos del rol de aplicación sobre la tabla nueva (los ALTER DEFAULT PRIVILEGES del schema core
 -- ya los darían; explícito como en las migraciones de core que crean tablas).
 GRANT SELECT, INSERT, UPDATE, DELETE ON "core"."dias_calendario" TO opai_app;
