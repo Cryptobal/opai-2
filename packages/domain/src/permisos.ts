@@ -39,6 +39,8 @@ export const PATRONES_POR_ROL: Readonly<Record<Rol, Patrones>> = {
       PERMISOS_CORE.vinculosManage,
       PERMISOS_CORE.estructurasManage,
       PERMISOS_CORE.estructurasReadSensible,
+      // P1 "No recontratar": solo owner y admin (RRHH la obtiene si se la agregan a su rol).
+      PERMISOS_CORE.personasNoRecontratarManage,
       // Anexo de contrato (Brief 07b PR 4, D8): sus snapshots traen datos de sueldo.
       PERMISOS_CORE.anexosRead,
       PERMISOS_CORE.anexosManage,
