@@ -33,6 +33,19 @@ test.describe("Rondas · configuración de la instalación", () => {
     const visible = (texto: string) =>
       expect(page.getByText(texto).filter({ visible: true }).first()).toBeVisible();
 
+    // La acción de servidor puede tardar más que el plazo de una aserción mientras revalida el layout.
+    // Esperamos su respuesta concreta antes de comprobar el aviso y la persistencia.
+    const guardar = async (boton: string, capacidad: string) => {
+      const respuesta = page.waitForResponse((r) =>
+        r.request().method() === "POST" && (r.request().postData() ?? "").includes(capacidad),
+      );
+      await page.getByRole("button", { name: boton, exact: true }).click();
+      const recibida = await respuesta;
+      expect(recibida.ok()).toBe(true);
+      // El cierre ocurre solo cuando la acción devuelve éxito, tras procesar su respuesta.
+      await expect(page.getByRole("dialog")).toBeHidden({ timeout: 30_000 });
+    };
+
     // Puntos (c13p)
     await page.goto(`${base}/rondas?sub=puntos`);
     await expect(page.getByRole("group", { name: "Sección de rondas" })).toBeVisible();
@@ -40,7 +53,7 @@ test.describe("Rondas · configuración de la instalación", () => {
     await page.getByRole("link", { name: "Nuevo punto" }).first().click();
     await page.getByLabel("Nombre del punto").fill(punto);
     await page.getByRole("radio", { name: "QR", exact: true }).check();
-    await page.getByRole("button", { name: "Guardar", exact: true }).click();
+    await guardar("Guardar", "rondas.puntos.crear");
     await expect(page.getByText("Punto creado", { exact: true })).toBeVisible();
     await page.goto(`${base}/rondas?sub=puntos`);
     await visible(punto);
@@ -50,7 +63,7 @@ test.describe("Rondas · configuración de la instalación", () => {
     await page.getByRole("link", { name: "Nueva plantilla" }).first().click();
     await page.getByLabel("Nombre de la plantilla").fill(plantilla);
     await page.getByRole("checkbox", { name: punto }).check();
-    await page.getByRole("button", { name: "Guardar plantilla" }).click();
+    await guardar("Guardar plantilla", "rondas.plantillas.crear");
     await expect(page.getByText("Plantilla creada", { exact: true })).toBeVisible();
     await page.goto(`${base}/rondas?sub=plantillas`);
     await visible(plantilla);
@@ -59,7 +72,7 @@ test.describe("Rondas · configuración de la instalación", () => {
     await page.goto(`${base}/rondas?sub=programacion`);
     await page.getByRole("link", { name: "Nueva programación" }).first().click();
     await page.getByLabel("Nombre", { exact: true }).fill(programacion);
-    await page.getByRole("button", { name: "Guardar", exact: true }).click();
+    await guardar("Guardar", "rondas.programaciones.fijar");
     await expect(page.getByText("Programación creada", { exact: true })).toBeVisible();
     await page.goto(`${base}/rondas?sub=programacion`);
     await visible(programacion);

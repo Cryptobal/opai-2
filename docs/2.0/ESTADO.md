@@ -2,6 +2,7 @@
 
 # ESTADO — OPAI 2.0
 
+- **Rondas PR 1b · espera de acciones (PR #141).** Codex ajusta el e2e para esperar la respuesta de cada acción de guardado antes del aviso y de la recarga que verifica persistencia. Las capturas del CI muestran el formulario completo y el botón deshabilitado mientras la acción seguía pendiente al vencer la espera del aviso; sin cambios de producto, permisos, RLS ni migraciones. Los pendientes del Brief 14 se mantienen.
 - **Rondas PR 1b · estabilidad del e2e (PR #141).** El test esperaba 500 ms después de iniciar cada guardado y podía navegar antes de que terminara la acción de servidor. OpenCode / openai/gpt-6.1-terra reemplaza esa espera por la confirmación de éxito de cada acción; conserva la recarga y comprobación de persistencia. El fallo de CI no se reprodujo en local con el test original. Sin cambios de producto, permisos, RLS ni migraciones; los criterios pendientes del Brief 14 siguen pendientes.
 
 > **Desde el 28-oct-2026 (ADR-054, [`OPERACION-agentes.md`](OPERACION-agentes.md)), cada PR actualiza este archivo: qué entró, qué quedó pendiente y qué se decidió.** Sin esa actualización, el PR no está listo. Ya no es solo la foto técnica (versiones, infraestructura, riesgos aceptados y decisiones), que también sigue aquí. Linear (equipo CAR, `Fixes CAR-n`) queda como referencia de tareas y no reemplaza a este archivo. *(Antes, desde el 24-oct-2026 y el PR #22, el estado de las tareas vivía en Linear y este archivo era solo foto técnica.)*
