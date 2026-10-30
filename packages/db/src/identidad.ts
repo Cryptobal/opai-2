@@ -1,3 +1,4 @@
+import { lecturaAuthPorFuncion } from "./auth-lecturas";
 import { type ClienteApp, clienteApp } from "./client";
 import { forUser } from "./for-user";
 import { exigirSinLockAuditoria } from "./lock-auditoria";
@@ -6,10 +7,13 @@ import type { TenantTx } from "./transaccion";
 
 /**
  * Identidad con un rol propio (CAR-43, auditoría del Núcleo §I-04). `core.sessions`, `accounts`,
- * `verifications` y `two_factor` ya no se leen ni escriben como `opai_app`: cada operación de esos
- * modelos (y de `users`, que opai_app solo lee) corre en una transacción que primero asume
- * `opai_auth` con `SET LOCAL ROLE`. Es por transacción, así que no cambia la conexión del pool y
- * funciona con el pooler de Neon. `opai_app` es NOINHERIT: sin el SET ROLE no tiene esos privilegios.
+ * `verifications` y `two_factor` ya no se leen ni escriben como `opai_app`. El hot path de la sesión
+ * (sesión por token en cada petición y usuario por id) pasa por funciones SECURITY DEFINER
+ * (`auth-lecturas.ts`, B1 · causa raíz) invocadas como UNA sentencia autocommit: no abren transacción
+ * y no pueden quedar «idle in transaction». El resto de operaciones de esos modelos (escrituras,
+ * lecturas por otros campos, groupBy) corre en una transacción corta que asume `opai_auth` con
+ * `SET LOCAL ROLE`; es por transacción (funciona con el pooler de Neon) y queda acotada por el
+ * idle_in_transaction de 5 s del rol. `opai_app` es NOINHERIT: sin el SET ROLE no tiene esos privilegios.
  */
 /** Transacción interactiva del cliente base, con los modelos de identidad (rol ya asumido). */
 type TxAuth = Omit<
@@ -42,8 +46,12 @@ function extender(base: ClienteApp) {
     },
     query: {
       $allModels: {
-        async $allOperations({ model, args, query }) {
+        async $allOperations({ model, operation, args, query }) {
           if (!MODELOS_AUTH.has(model)) return query(args);
+          // Hot path (sesión por token, usuario por id): una sentencia autocommit sin transacción.
+          const porFuncion = await lecturaAuthPorFuncion(base, model, operation, args);
+          if (porFuncion.manejada) return porFuncion.valor;
+          // El resto asume el rol dentro de una transacción corta (acotada por idle=5s del rol).
           const [, resultado] = await base.$transaction([
             base.$executeRaw`SET LOCAL ROLE opai_auth`,
             query(args),

@@ -114,8 +114,38 @@ async function escenarioFuncion(obs: Client) {
   await c.end();
 }
 
+async function escenarioDespues(obs: Client) {
+  console.log("\n== Escenario 5 · DESPUÉS: ráfaga de 20 lecturas de sesión por función ==");
+  const existe = await obs.query(
+    "SELECT 1 FROM pg_proc WHERE proname = 'auth_sesion_por_token' AND pronamespace = 'core'::regnamespace",
+  );
+  if (existe.rowCount === 0) {
+    console.log("  (la función aún no existe; se mide tras aplicar la migración)");
+    return;
+  }
+  const pool = new Pool({ ...configPool(process.env, url, false), max: 5 });
+  const prisma = new PrismaClient({
+    adapter: new PrismaPg(pool, { disposeExternalPool: true }),
+    transactionOptions: { maxWait: 1000, timeout: 15_000 },
+  });
+  // 20 lecturas hot path concurrentes como las de getSession: una sentencia autocommit cada una.
+  const lecturas = Array.from({ length: 20 }, () =>
+    prisma
+      .$queryRaw`SELECT * FROM core.auth_sesion_por_token(${"token-inexistente"})`.then(() => null)
+      .catch((e: { code?: string; message?: string }) =>
+        e.code === "P2028" || /start a transaction/i.test(String(e.message)) ? "P2028" : "otro",
+      ),
+  );
+  const res = await Promise.all(lecturas);
+  const p2028 = res.filter((r) => r === "P2028").length;
+  const m = await medir(obs);
+  console.log(`  20 lecturas por función concurrentes: P2028=${p2028}, idle_in_transaction=${m.conexiones}`);
+  console.log("  → las lecturas no abren transacción: no saturan el pool ni dejan idle-in-tx.");
+  await prisma.$disconnect();
+}
+
 async function escenarioP2028(obs: Client) {
-  console.log("\n== Escenario 4 · P2028 de Prisma cuando las conexiones pegadas saturan el pool ==");
+  console.log("\n== Escenario 4 · ANTES: P2028 de Prisma cuando las conexiones pegadas saturan el pool ==");
   const pool = new Pool({ ...configPool(process.env, url, false), max: 3 });
   const prisma = new PrismaClient({
     adapter: new PrismaPg(pool, { disposeExternalPool: true }),
@@ -168,6 +198,7 @@ async function main() {
   await escenario5s(obs, 3);
   await escenarioFuncion(obs);
   await escenarioP2028(obs);
+  await escenarioDespues(obs);
 
   await obs.end();
   console.log("\nListo.");
