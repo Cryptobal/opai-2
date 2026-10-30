@@ -9,6 +9,9 @@ export const CLASES_FIRMA = [
   "contrato_trabajo",
   "anexo_contrato",
   "recepcion_laboral",
+  // Carta al trabajador (amonestación, término): N1 de toma de conocimiento, pero es una decisión
+  // del empleador que lo compromete, así que un agente la envía solo con aprobación (R19, §4).
+  "carta_trabajador",
   "propuesta_comercial",
   "contrato_servicio",
   "acta",
@@ -42,6 +45,7 @@ export const REGLAS_CLASE_FIRMA: Readonly<Record<ClaseFirma, ReglaClase>> = {
   contrato_trabajo: { minimo: "N2", permitidos: ["N2", "N3"], requiereAceptacionMedio: true },
   anexo_contrato: { minimo: "N2", permitidos: ["N2", "N3"], requiereAceptacionMedio: true },
   recepcion_laboral: { minimo: "N1", permitidos: ["N1", "N2"], requiereAceptacionMedio: false },
+  carta_trabajador: { minimo: "N1", permitidos: ["N1", "N2"], requiereAceptacionMedio: false },
   propuesta_comercial: {
     minimo: "N1",
     permitidos: ["N1", "N2", "N3"],
@@ -100,6 +104,10 @@ export const esEstadoTerminal = (e: EstadoSolicitudFirma): boolean => TRANSICION
 /** Solo las solicitudes vivas aceptan firmas, recordatorios o cancelación. */
 export const estadoVivo = (e: EstadoSolicitudFirma): boolean =>
   e === "enviada" || e === "en_curso" || e === "espera_prestador";
+
+/** Los mismos estados vivos, listos para condicionar un `updateMany` sin TOCTOU (B2, PR 2). */
+export const ESTADOS_SOLICITUD_VIVOS: readonly EstadoSolicitudFirma[] =
+  ESTADOS_SOLICITUD_FIRMA.filter(estadoVivo);
 
 /** Código de un solo uso para N2 (R13): 6 dígitos, 10 minutos, 3 intentos. */
 export const OTP_DIGITOS = 6;
