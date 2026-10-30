@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#4a3fd8"/><text x="50" y="60" text-anchor="middle" font-family="Inter,Arial" font-size="28" font-weight="700" fill="#fff">10</text></svg></template>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0;background:var(--ds-fill)} a{color:var(--ds-accent)} a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<div style="padding:48px;display:flex;flex-direction:column;gap:32px;font-family:var(--font-sans);color:var(--ds-fg);width:max-content">
+<div style="display:flex;flex-direction:column;gap:6px;max-width:900px">
+<a href="00 Indice.dc.html" class="t-body-sm" style="text-decoration:none">← Índice</a>
+<h1 class="t-title" style="margin:0">Hoja de componentes · Cumplimiento</h1>
+<span class="t-body-sm" style="color:var(--ds-fg-muted);text-wrap:pretty">Componentes usados en las pantallas, con variantes y estados. Hover y foco se muestran fijos para revisión. Los marcados «Nuevo para el DS» se proponen como piezas del DS, no del módulo. Dialog y Sheet se revisan en 03, 05 y 08.</span>
+</div>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<sc-for list="{{ themes }}" as="th" hint-placeholder-count="2">
+<div data-theme="{{ th.id }}" style="width:640px;background:var(--ds-bg);color:var(--ds-fg);border:1px solid var(--ds-border);border-radius:16px;padding:32px;display:flex;flex-direction:column;gap:32px">
+<span class="t-heading" style="font-weight:600">{{ th.label }}</span>
+
+<div style="display:flex;flex-direction:column;gap:12px">
+<span class="t-subheading" style="font-weight:600">Button</span>
+<div style="display:grid;grid-template-columns:96px repeat(4,minmax(0,1fr));gap:12px;align-items:center">
+<span></span><span class="t-caption" style="color:var(--ds-fg-muted)">Reposo</span><span class="t-caption" style="color:var(--ds-fg-muted)">Hover</span><span class="t-caption" style="color:var(--ds-fg-muted)">Foco</span><span class="t-caption" style="color:var(--ds-fg-muted)">Deshabilitado</span>
+<sc-for list="{{ btns }}" as="b" hint-placeholder-count="4">
+<span class="t-caption" style="color:var(--ds-fg-muted)">{{ b.variant }}</span>
+<sc-for list="{{ b.states }}" as="s" hint-placeholder-count="4"><div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="{{ b.variant }}" dc-props="{{ s }}" hint-size="100px,40px">{{ b.text }}</x-import></div></sc-for>
+</sc-for>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px">
+<span class="t-subheading" style="font-weight:600">Input · Select · Textarea</span>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px">
+<div class="field"><span class="lbl">Reposo</span><div class="input"><span class="ph">dd-mm-aaaa</span></div></div>
+<div class="field"><span class="lbl">Foco</span><div class="input focus">18-12-2026</div></div>
+<div class="field"><span class="lbl">Error</span><div class="input invalid"><span class="ph">Escribe el fundamento</span></div><span class="err">El fundamento es obligatorio.</span></div>
+<div class="field"><span class="lbl">Deshabilitado</span><div class="input disabled">30 días corridos</div></div>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Derecho" options="{{ derechos }}" value="acceso" hint-size="100%,66px"></x-import>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px">
+<span class="t-subheading" style="font-weight:600">Badge · estados de solicitud</span>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<sc-for list="{{ estados }}" as="e" hint-placeholder-count="6"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ e.tone }}" hint-size="100px,22px">{{ e.label }}</x-import></sc-for>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;gap:8px;align-items:center"><span class="t-subheading" style="font-weight:600">PlazoBadge</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="info" dot="{{ false }}" hint-size="120px,22px">Nuevo para el DS</x-import></div>
+<span class="t-body-sm" style="color:var(--ds-fg-muted)">Días restantes sobre 30 (o 60 con prórroga): success, warning desde 7 días, danger al vencer.</span>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="success" hint-size="100px,22px">14 de 30 días</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="warning" hint-size="100px,22px">3 de 30 días</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="danger" hint-size="140px,22px">Vencida hace 8 días</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="success" hint-size="100px,22px">37 de 60 días</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="info" hint-size="100px,22px">Prorrogada</x-import>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px">
+<span class="t-subheading" style="font-weight:600">ChipToggle · ChipAgregar</span>
+<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Abiertas" contador="{{ 5 }}" activo="{{ true }}" hint-size="110px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Vencen en 7 días" contador="{{ 2 }}" hint-size="150px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Prorrogadas" disabled="{{ true }}" hint-size="120px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipAgregar" hint-size="140px,32px"></x-import>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px">
+<span class="t-subheading" style="font-weight:600">Segmentado · Switch · Checkbox</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ segOpts }}" value="abiertas" hint-size="300px,40px"></x-import>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ true }}" label="Geolocalización" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" disabled="{{ true }}" label="Imagen (revocado)" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ true }}" label="Declaro que los datos son verdaderos" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" invalid="{{ true }}" label="Acepto el tratamiento" error="Obligatorio" hint-size="100%,44px"></x-import>
+</div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px">
+<span class="t-subheading" style="font-weight:600">Alerta</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Plazo de respuesta" hint-size="100%,60px">30 días corridos, prorrogables una vez.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" titulo="Plazo por validar con el Abogado" hint-size="100%,60px">Aplica a todo plazo distinto del art. 11.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="danger" titulo="No procede" hint-size="100%,60px">Vínculo vigente.</x-import>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;gap:8px;align-items:center"><span class="t-subheading" style="font-weight:600">Constancia de envío</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="info" dot="{{ false }}" hint-size="120px,22px">Nuevo para el DS</x-import></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="success" titulo="Acuse de recibo enviado" hint-size="100%,60px">02-12-2026 09:15 a c.herrera@correo.cl · Constancia C-8841.</x-import>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;gap:8px;align-items:center"><span class="t-subheading" style="font-weight:600">Rótulo de propuesta</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="info" dot="{{ false }}" hint-size="120px,22px">Nuevo para el DS</x-import></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" titulo="Propuesta B, a confirmar por Carlos" hint-size="100%,60px">Marca toda variante no decidida.</x-import>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;gap:8px;align-items:center"><span class="t-subheading" style="font-weight:600">Cabecera pública del tenant</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="info" dot="{{ false }}" hint-size="120px,22px">Nuevo para el DS</x-import></div>
+<div style="display:flex;align-items:center;gap:10px;height:60px;padding:0 16px;border:1px solid var(--ds-border);border-radius:16px;background:var(--ds-surface)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.TenantMark" initials="AS" size="{{ 32 }}" hint-size="32px,32px"></x-import><span class="t-body" style="font-weight:600">Atlas Seguridad SpA</span></div>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px">
+<span class="t-subheading" style="font-weight:600">Card · DetailSection (Pares) · Timeline</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,200px"><div style="display:flex;flex-direction:column;gap:20px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Plazo" rows="{{ pares }}" hint-size="100%,120px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Timeline" items="{{ tl }}" hint-size="100%,120px"></x-import></div></x-import>
+</div>
+
+<div style="display:flex;flex-direction:column;gap:12px">
+<span class="t-subheading" style="font-weight:600">Estados</span>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px">
+<div style="border:1px solid var(--ds-border);border-radius:16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="lock" title="Aún no hay solicitudes" description="Registra una solicitud recibida por otro canal." size="sm" hint-size="100%,220px"></x-import></div>
+<div style="border:1px solid var(--ds-border);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 20 }}" width="60%" hint-size="60%,20px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 48 }}" hint-size="100%,48px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 48 }}" hint-size="100%,48px"></x-import></div>
+<div style="border:1px solid var(--ds-border);border-radius:16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar las solicitudes" description="Revisa tu conexión." code="CUM-503" hint-size="100%,240px"></x-import></div>
+<div style="border:1px solid var(--ds-border);border-radius:16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso" description="Pídele acceso a Andrés Molina." action-label="Pedir acceso" hint-size="100%,240px"></x-import></div>
+</div>
+</div>
+
+</div>
+</sc-for>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const focus = { style: { outline: "2px solid var(--ds-focus)", outlineOffset: 2 } };
+    const hov = { primary: { background: "color-mix(in srgb,var(--ds-accent) 90%,var(--ds-fg))" }, secondary: { background: "var(--ds-fill)" }, ghost: { background: "var(--ds-fill)" }, destructive: { background: "color-mix(in srgb,var(--ds-destructive-bg) 90%,var(--ds-fg))" } };
+    const btn = (variant, text) => ({ variant, text, states: [{}, { style: hov[variant] }, focus, { disabled: true }] });
+    return {
+      themes: [{ id: "light", label: "Claro" }, { id: "dark", label: "Oscuro" }],
+      btns: [btn("primary", "Responder"), btn("secondary", "Prorrogar"), btn("ghost", "Revocar"), btn("destructive", "Denegar")],
+      derechos: ["Acceso", "Rectificación", "Supresión", "Oposición", "Portabilidad", "Bloqueo"].map((l) => ({ value: l.toLowerCase(), label: l })),
+      estados: [["neutral", "Recibida"], ["warning", "Identidad por verificar"], ["info", "En atención"], ["success", "Respondida"], ["danger", "Denegada"], ["neutral", "Cerrada"]].map(([tone, label]) => ({ tone, label })),
+      segOpts: [{ value: "abiertas", label: "Abiertas" }, { value: "cerradas", label: "Cerradas" }, { value: "todas", label: "Todas" }],
+      pares: [{ label: "Plazo", value: "30 días corridos" }, { label: "Fecha límite", value: "01-01-2027" }],
+      tl: [{ initials: "VR", who: "Valentina Rojas", action: "verificó la identidad", when: "03-12-2026 11:20" }, { agent: true, who: "OPAI", action: "envió el acuse de recibo", when: "02-12-2026 09:15" }],
+    };
+  }
+}
+</script>
+</body>
+</html>
