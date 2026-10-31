@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<style>body{margin:0;background:var(--ds-fill)}</style>
+</helmet>
+<dc-import name="Lamina" prefijo="1" titulo="1 · Portada /configuracion" nota="Título, buscador de ancho completo con la pista del atajo «/» en escritorio, Alerta de aprobaciones pendientes y grilla de tarjetas de grupo sin contadores: 3 columnas a 1280, 2 a 1024 y FilaSeleccionable a 375." secciones="{{ secciones }}" hint-size="100%,100%"></dc-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return { secciones: [
+      { id: "portada", titulo: "Portada", nota: "Owner/Administrador con 3 aprobaciones pendientes.", bases: [{ n: "Portada", s: "Con aviso de aprobaciones", x3: true, o: { vista: "portada" } }] },
+      { id: "sin-aviso", titulo: "Portada sin aprobaciones", nota: "Sin aprobaciones pendientes no aparece la Alerta.", bases: [{ n: "Portada_sin_aviso", s: "Sin aviso", x3: true, o: { vista: "portada", aprob: 0 } }] },
+    ] };
+  }
+}
+</script>
+</body>
+</html>
