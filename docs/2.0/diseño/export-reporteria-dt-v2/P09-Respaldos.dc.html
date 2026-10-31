@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="adt.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="{{ active }}" title="{{ shellTitle }}" user="{{ user }}" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Asistencia" title="Respaldos y retención" subtitle="Exportaciones periódicas con manifiesto y SHA-256. Retención mínima de 5 años." hint-size="100%,80px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="download" hint-size="160px,40px">Generar respaldo</x-import>
+</x-import>
+<sc-if value="{{ isCargando }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 56 }}" radius="10px" hint-size="100%,56px"></x-import>
+<div style="display:flex;flex-direction:column;border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+<sc-for list="{{ skel }}" as="s" hint-placeholder-count="6">
+<div style="display:flex;gap:16px;align-items:center;min-height:52px;padding:0 16px;border-bottom:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="16%" hint-size="16%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="26%" hint-size="26%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="22%" hint-size="22%,14px"></x-import>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:400px;display:flex;flex-direction:column"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="download" title="Aún no hay respaldos" description="El primero se genera automáticamente el domingo a las 03:00. Puedes generarlo ahora." action="{{ emptyAction }}" hint-size="100%,320px"></x-import></div>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:400px;display:flex;flex-direction:column"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar los respaldos" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="ASI-RSP-500 · 30-10-2026 14:32" on-retry="{{ noop }}" hint-size="100%,320px"></x-import></div>
+</sc-if>
+<sc-if value="{{ isSinPermiso }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:400px;display:flex;flex-direction:column"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a los respaldos" description="Los ven el dueño y administración. Pídele acceso a un administrador." action-label="Pedir acceso" hint-size="100%,320px"></x-import></div>
+</sc-if>
+<sc-if value="{{ isDatos }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:16px">
+<sc-if value="{{ v_fallo }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="danger" titulo="La verificación de la cadena falló · hoy 03:00" accion="{{ failAction }}" hint-size="100%,72px">El eslabón 184.233 (marca del 29-10-2026 22:14) no coincide con su hash. Avisamos a administración y a soporte. No se borró ni editó nada.</x-import>
+</sc-if>
+<sc-if value="{{ okCadena }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="success" titulo="Cadena verificada · hoy 03:00" hint-size="100%,56px">412.906 eslabones revisados, sin diferencias. Próxima verificación: mañana 03:00.</x-import>
+</sc-if>
+<x-import component-from-global-scope="ADT.SyncHora" alto="{{ v_desfase }}" hint-size="100%,260px"></x-import>
+<div class="pg-kv" style="border:0"><span class="l">Retención</span><span class="v">5 años desde cada marca · el respaldo más antiguo se conserva hasta 01-03-2029</span></div>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="margin:0 -16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" cards="{{ true }}" to-card="{{ toCard }}" hint-size="100%,400px"></x-import></div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" hint-size="100%,360px"></x-import>
+</sc-if>
+</div>
+</sc-if>
+</x-import>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;datos&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;datos&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;vista&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;&quot;,&quot;fallo&quot;,&quot;desfase&quot;],&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  componentDidMount() { if (!window.ADT) { this.t = setInterval(() => { if (window.ADT) { clearInterval(this.t); this.forceUpdate(); } }, 50); } }
+  componentWillUnmount() { clearInterval(this.t); }
+  renderVals() {
+    const A = window.ADT;
+    if (!A) return { isDatos: false };
+    const b = A.base(this.props, "res", "Respaldos");
+    const h = A.h;
+    const fallo = b.v_fallo;
+    const rows = [
+      { id: 1, f: "26-10-2026 03:00", per: "Hasta 25-10-2026", man: "manifiesto_20261026.json", hash: "3c7a90d1e4b2f68a5c01e9d7b3a4f2c8e6d1b09a7f3e5c2d8b4a6f1e0c9d7b3a", tam: "1,8 GB", ret: "26-10-2031", ver: ["success", "Verificado"] },
+      { id: 2, f: "19-10-2026 03:00", per: "Hasta 18-10-2026", man: "manifiesto_20261019.json", hash: "a81f2e6c09d4b73e5a1c8f0d2b6e4a9c7f3d1e5b8a0c2f4d6e8b1a3c5e7f9d0b", tam: "1,8 GB", ret: "19-10-2031", ver: ["success", "Verificado"] },
+      { id: 3, f: "12-10-2026 03:00", per: "Hasta 11-10-2026", man: "manifiesto_20261012.json", hash: "e02b7d4f9a1c6e3b8d5f0a2c4e6b8d1f3a5c7e9b0d2f4a6c8e1b3d5f7a9c0e2b", tam: "1,7 GB", ret: "12-10-2031", ver: ["success", "Verificado"] },
+      { id: 4, f: "05-10-2026 03:00", per: "Hasta 04-10-2026", man: "manifiesto_20261005.json", hash: "5d9c1e7a3f0b6d2e8c4a1f7b3e9d5c0a6f2b8e4d1c7a3f9b5e0d6c2a8f4b1e7d", tam: "1,7 GB", ret: "05-10-2031", ver: fallo ? ["warning", "Revisar"] : ["success", "Verificado"] },
+    ];
+    return {
+      ...b, rows, okCadena: !fallo,
+      failAction: A.btn("Ver detalle"),
+      cols: [
+        { key: "f", label: "Fecha", render: (r) => h("span", { className: "t-numeric", style: { whiteSpace: "nowrap" } }, r.f) },
+        { key: "per", label: "Contenido", muted: true },
+        { key: "man", label: "Manifiesto", render: (r) => h("span", { style: { display: "inline-flex", gap: 6, alignItems: "center" } }, h("span", { className: "ic sm i-file muted" }), r.man) },
+        { key: "hash", label: "SHA-256", render: (r) => h(A.Hash, { valor: r.hash }) },
+        { key: "tam", label: "Tamaño", align: "right" },
+        { key: "ret", label: "Retener hasta", render: (r) => h("span", { className: "t-numeric muted" }, r.ret) },
+        { key: "ver", label: "Estado", render: (r) => A.badge(r.ver[0], r.ver[1]) },
+        { key: "acc", label: "", align: "right", render: () => A.btn("", { variant: "ghost", icon: "download", iconOnly: true, "aria-label": "Descargar respaldo" }) },
+      ],
+      toCard: (r) => ({ icon: "file", title: r.f + " · " + r.tam, subtitle: r.man + " · hasta " + r.ret, meta: r.hash.slice(0, 10) + "…" + r.hash.slice(-8), badge: { tone: r.ver[0], label: r.ver[1] } }),
+      emptyAction: A.prim("Generar respaldo", { size: "lg", icon: "download" }),
+    };
+  }
+}
+</script>
+</body>
+</html>
