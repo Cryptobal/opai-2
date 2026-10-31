@@ -1,10 +1,14 @@
 import { z } from "zod";
 
-import { etiquetaPeriodo, planDeCuotas } from "@opai/domain";
+import { planDeCuotas } from "@opai/domain";
+
+import type { TenantTx } from "@opai/db";
 
 import { defineCapability } from "../define";
 import { noEncontrado, reglaDeNegocio } from "../errores";
 import { uuidSchema } from "../core/esquemas";
+import type { Contexto } from "../types";
+import { bloquearPeriodo, bloquearPrestamo, cambioConcurrente, exigirSinPeriodosCerrados } from "./bloqueos";
 import { PERMISO_PRESTAMOS, documentoExiste, personaDe } from "./comun";
 import { nombresDe } from "./novedades-vista";
 import { prestamoSchema, vistaPrestamo } from "./prestamos-vista";
@@ -83,26 +87,29 @@ export const prestamosCancelar = defineCapability({
     const nombres = await nombresDe(ctx.db, [p.personaId]);
     const nombre = nombres.get(p.personaId) ?? "";
     const condonadas = plan.map((c) => (c.estado === "pendiente" ? { ...c, estado: "condonada" } : c));
+    // La vista previa también rechaza lo que la ejecución rechazaría (períodos ya cerrados).
+    const previas = await novedadesDeCuotas(ctx.db, plan);
+    exigirSinPeriodosCerrados(previas.periodos);
     if (dryRun) return vistaPrestamo({ ...p, estado: "cancelado" }, condonadas, nombre);
     return ctx.transaccion(async (tx) => {
-      const pendientes = plan.filter((c) => c.estado === "pendiente").map((c) => c.id);
-      const abiertas = await tx.nominaNovedad.findMany({
-        where: { prestamoCuotaId: { in: pendientes }, estado: "vigente" },
-        select: { id: true, periodoId: true },
-      });
-      for (const n of abiertas) {
-        const per = await tx.nominaPeriodo.findUnique({ where: { id: n.periodoId } });
-        if (per && (per.estado === "cerrado" || per.estado === "pagado"))
-          throw reglaDeNegocio(`${etiquetaPeriodo(per.anio, per.mes)} ya está cerrado: reábrelo antes de cancelar el préstamo.`);
-      }
+      // Orden único de bloqueo: períodos (por id) y después el préstamo. Con todo bloqueado se vuelve
+      // a leer: un cierre o una aplicación de cuotas concurrentes no pueden quedar a medias.
+      for (const periodoId of previas.periodoIds) await bloquearPeriodo(tx, ctx.tenantId, periodoId);
+      const actual = await bloquearPrestamo(tx, ctx.tenantId, id);
+      if (actual.estado !== "activo") throw reglaDeNegocio("Solo se cancela un préstamo activo.");
+      const planActual = await tx.nominaCuota.findMany({ where: { prestamoId: id } });
+      const hoy = await novedadesDeCuotas(tx, planActual);
+      if (hoy.periodoIds.some((pid) => !previas.periodoIds.includes(pid))) throw cambioConcurrente();
+      exigirSinPeriodosCerrados(hoy.periodos);
+      const pendientes = planActual.filter((c) => c.estado === "pendiente").map((c) => c.id);
       await tx.nominaNovedad.updateMany({
-        where: { id: { in: abiertas.map((n) => n.id) } },
+        where: { id: { in: hoy.novedades.map((n) => n.id) }, estado: "vigente" },
         data: { estado: "anulada", anuladaEn: new Date(), motivoAnulacion: `Préstamo cancelado: ${motivo}` },
       });
-      await tx.nominaCuota.updateMany({ where: { id: { in: pendientes } }, data: { estado: "condonada" } });
+      await tx.nominaCuota.updateMany({ where: { id: { in: pendientes }, estado: "pendiente" }, data: { estado: "condonada" } });
       const nuevo = await tx.nominaPrestamo.update({
         where: { id },
-        data: { estado: "cancelado", canceladoEn: new Date(), motivo: `${p.motivo ?? ""} · Cancelado: ${motivo}`.replace(/^ · /, "") },
+        data: { estado: "cancelado", canceladoEn: new Date(), motivo: `${actual.motivo ?? ""} · Cancelado: ${motivo}`.replace(/^ · /, "") },
       });
       await ctx.eventos.emitir(tx, {
         tipo: "nomina.prestamo.cancelado",
@@ -110,7 +117,21 @@ export const prestamosCancelar = defineCapability({
         entidadId: id,
         payload: { cuotasCondonadas: pendientes.length },
       });
-      return vistaPrestamo(nuevo, condonadas, nombre);
+      return vistaPrestamo(nuevo, planActual.map((c) => (c.estado === "pendiente" ? { ...c, estado: "condonada" } : c)), nombre);
     });
   },
 });
+
+type Db = Contexto["db"] | TenantTx;
+
+/** Novedades vigentes de las cuotas aún pendientes y los períodos (ordenados por id) que tocan. */
+async function novedadesDeCuotas(db: Db, plan: { id: string; estado: string }[]) {
+  const pendientes = plan.filter((c) => c.estado === "pendiente").map((c) => c.id);
+  const novedades = await db.nominaNovedad.findMany({
+    where: { prestamoCuotaId: { in: pendientes }, estado: "vigente" },
+    select: { id: true, periodoId: true },
+  });
+  const periodoIds = [...new Set(novedades.map((n) => n.periodoId))].sort();
+  const periodos = await db.nominaPeriodo.findMany({ where: { id: { in: periodoIds } } });
+  return { novedades, periodoIds, periodos };
+}

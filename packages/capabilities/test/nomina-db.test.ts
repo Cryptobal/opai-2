@@ -135,4 +135,99 @@ describe.skipIf(!urlPropietario)("aislamiento entre tenants · Nómina (RLS)", (
     const lista = await run(tenantA, "nomina.prestamos.listar", {});
     expect(lista.ok && (lista.data as { estado: string; saldo: number }[])[0]).toMatchObject({ estado: "pagado", saldo: 0 });
   });
+
+  // Pendientes del Revisor de #183: las escrituras se serializan con bloqueos de fila y revalidan el
+  // estado ya bloqueado. Una transacción externa retiene el `FOR UPDATE`, la capacidad espera, y al
+  // soltarlo ve el estado nuevo.
+  const retener = async (tabla: "periodos" | "prestamos", id: string, cambio: (tx: typeof e.admin) => Promise<void>) => {
+    let liberar!: () => void;
+    let tomado!: () => void;
+    const espera = new Promise<void>((r) => (liberar = r));
+    const listo = new Promise<void>((r) => (tomado = r));
+    const sql = tabla === "periodos" ? "SELECT id FROM nomina.periodos WHERE id = $1::uuid FOR UPDATE" : "SELECT id FROM nomina.prestamos WHERE id = $1::uuid FOR UPDATE";
+    const tx = e.admin.$transaction(
+      async (t) => {
+        await t.$queryRawUnsafe(sql, id);
+        tomado();
+        await espera;
+        await cambio(t as unknown as typeof e.admin);
+      },
+      { timeout: 30_000 },
+    );
+    await listo;
+    return { liberar, tx };
+  };
+  const pausa = (ms: number) => new Promise((r) => setTimeout(r, ms));
+  const periodoNuevo = async (mes: number, anio = 2027) =>
+    (
+      await e.admin.nominaPeriodo.create({
+        data: {
+          tenantId: tenantA, anio, mes,
+          inicio: new Date(Date.UTC(anio, mes - 1, 1)), fin: new Date(Date.UTC(anio, mes, 0)),
+          cierrePrevisto: new Date(Date.UTC(anio, mes, 0)),
+        },
+      })
+    ).id;
+
+  it("crear una novedad espera el bloqueo del período y se rechaza si entre tanto se cerró", async () => {
+    const id = await periodoNuevo(1);
+    const { liberar, tx } = await retener("periodos", id, async (t) => {
+      await t.nominaPeriodo.update({ where: { id }, data: { estado: "cerrado" } });
+    });
+    let resuelta = false;
+    const crear = run(tenantA, "nomina.novedades.crear", {
+      periodoId: id, personaId: personaA, tipo: "horas_extra", fechaDesde: "2027-01-05", cantidad: 2,
+    }).then((r) => ((resuelta = true), r));
+    await pausa(700);
+    expect(resuelta, "debe esperar el bloqueo del período").toBe(false);
+    liberar();
+    await tx;
+    expect(await crear).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+    expect(await e.admin.nominaNovedad.count({ where: { periodoId: id } })).toBe(0);
+  });
+
+  it("cancelar un préstamo espera su bloqueo y revalida que siga activo", async () => {
+    const periodo = await periodoNuevo(2);
+    const pr = await run(tenantA, "nomina.prestamos.crear", {
+      personaId: personaA, montoTotal: 40_000, cuotas: 2, primeraCuotaAnio: 2027, primeraCuotaMes: 2,
+    });
+    const id = pr.ok ? (pr.data as { id: string }).id : "";
+    expect(id).not.toBe("");
+    expect((await run(tenantA, "nomina.prestamos.aplicar_cuotas", { periodoId: periodo })).ok).toBe(true);
+    const { liberar, tx } = await retener("prestamos", id, async (t) => {
+      await t.nominaPrestamo.update({ where: { id }, data: { estado: "cancelado" } });
+    });
+    let resuelta = false;
+    const cancelar = run(tenantA, "nomina.prestamos.cancelar", { id, motivo: "Acuerdo con el trabajador" }).then(
+      (r) => ((resuelta = true), r),
+    );
+    await pausa(700);
+    expect(resuelta, "debe esperar el bloqueo del préstamo").toBe(false);
+    liberar();
+    await tx;
+    expect(await cancelar).toMatchObject({ ok: false, error: { code: "UNPROCESSABLE" } });
+  });
+
+  it("aplicar cuotas no convierte en novedad una cuota condonada mientras esperaba el bloqueo", async () => {
+    const periodo = await periodoNuevo(3);
+    const pr = await run(tenantA, "nomina.prestamos.crear", {
+      personaId: personaA, montoTotal: 30_000, cuotas: 1, primeraCuotaAnio: 2027, primeraCuotaMes: 3,
+    });
+    const id = pr.ok ? (pr.data as { id: string }).id : "";
+    const { liberar, tx } = await retener("prestamos", id, async (t) => {
+      await t.nominaCuota.updateMany({ where: { prestamoId: id }, data: { estado: "condonada" } });
+      await t.nominaPrestamo.update({ where: { id }, data: { estado: "cancelado" } });
+    });
+    let resuelta = false;
+    const aplicar = run(tenantA, "nomina.prestamos.aplicar_cuotas", { periodoId: periodo }).then(
+      (r) => ((resuelta = true), r),
+    );
+    await pausa(700);
+    expect(resuelta, "debe esperar el bloqueo del préstamo").toBe(false);
+    liberar();
+    await tx;
+    const r = await aplicar;
+    expect(r.ok && (r.data as { generadas: number }).generadas).toBe(0);
+    expect(await e.admin.nominaNovedad.count({ where: { periodoId: periodo } })).toBe(0);
+  });
 });
