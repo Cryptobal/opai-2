@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script></helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="ins" title="{{ shellTitle }}" tenant="Bodegas del Sur S.A." tenant-initials="BS" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Portal Cliente · Planta Quilicura" title="Accesos" subtitle="Quién está en tu recinto y los registros del día" hint-size="100%,80px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="110px,40px">Mi lista</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="plus" hint-size="150px,40px">Prerregistrar</x-import>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ tabItems }}" value="{{ tab }}" on-change="{{ setTab }}" hint-size="100%,44px"></x-import>
+<div style="margin-top:16px;display:flex;flex-direction:column;gap:16px">
+<dc-import name="EstadoPanel" estado="{{ estado }}" empty-title="Nadie en sitio ahora" empty-desc="Prerregistra una visita para que el guardia la reciba." empty-action="Prerregistrar" hint-size="100%,260px"></dc-import>
+<sc-if value="{{ isMiLista }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Mi lista" hint-size="100%,72px">La empresa de seguridad también aplica su propia lista de bloqueados.</x-import>
+</sc-if>
+<sc-if value="{{ isNormal }}" hint-placeholder-val="{{ true }}">
+<div style="margin:{{ tableMargin }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" cards="{{ isPhone }}" to-card="{{ toCard }}" on-row-click="{{ noop }}" hint-size="100%,300px"></x-import>
+</div>
+</sc-if>
+</div>
+</x-import>
+</x-import>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;cargando&quot;,&quot;vacio&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;tab&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;sit&quot;,&quot;reg&quot;,&quot;lis&quot;],&quot;default&quot;:&quot;sit&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { tab: null };
+  renderVals() {
+    const h = React.createElement; const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = this.props.device ?? "desktop"; const estado = this.props.estado ?? "normal"; const ph = device === "phone";
+    const tab = this.state.tab ?? this.props.tab ?? "sit";
+    const b = (r) => NS.Badge ? h(NS.Badge, { tone: r.tone }, r.estado) : r.estado;
+    const sit = [{ nombre: "Diego Fuentes", tipo: "Proveedor", run: "12.3••.•••-K", hora: "08:42", estado: "En sitio", tone: "success" }, { nombre: "Camila Herrera Soto", tipo: "Visita", run: "16.2••.•••-8", hora: "08:15", estado: "En sitio", tone: "success" }];
+    const reg = [...sit, { nombre: "Luis Pérez", tipo: "Contratista", run: "9.8••.•••-2", hora: "07:50", estado: "Salió 09:10", tone: "neutral" }];
+    const lis = [{ nombre: "Camila Herrera Soto", tipo: "Visita", run: "16.2••.•••-8", hora: "30-11-2026", estado: "Autorizada", tone: "success" }];
+    const rows = tab === "reg" ? reg : tab === "lis" ? lis : sit;
+    return {
+      device, theme: this.props.theme ?? "light", isPhone: ph, shellTitle: ph ? "" : "Accesos", estado, tab,
+      isNormal: estado === "normal" && tab !== "lis" || estado === "normal", isMiLista: tab === "lis", tableMargin: ph ? "0 -16px" : "0", noop: () => {},
+      tabItems: [{ id: "sit", label: "En sitio", count: 2 }, { id: "reg", label: "Registros" }, { id: "lis", label: "Mi lista" }], setTab: (v) => this.setState({ tab: v }),
+      cols: [{ key: "nombre", label: "Nombre", render: (r) => h("span", { style: { fontWeight: 500 } }, r.nombre) }, { key: "tipo", label: "Tipo" }, { key: "run", label: "RUN", mono: true }, { key: "hora", label: "Entrada", mono: true }, { key: "estado", label: "Estado", render: b }],
+      rows, toCard: (r) => ({ initials: r.nombre.slice(0, 2).toUpperCase(), title: r.nombre, subtitle: r.tipo + " · " + r.run, meta: r.hora, badge: { tone: r.tone, label: r.estado } }),
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "ins", label: "Instalación", icon: "building" }, { id: "tic", label: "Tickets", icon: "ticket" }, { id: "mas", label: "Más", icon: "more" }],
+      groups: [{ items: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "ins", label: "Instalación", icon: "building" }, { id: "tic", label: "Tickets", icon: "ticket" }] }],
+    };
+  }
+}
+</script>
+</body>
+</html>
