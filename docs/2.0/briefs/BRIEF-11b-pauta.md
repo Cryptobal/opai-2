@@ -55,3 +55,9 @@ Este brief es el PR 2 del Brief 11 (el PR 1, Puestos, ya está en `main`).
 4. Una excepción vuelve PPC los días de trabajo con su motivo, no se repite el mismo día y se anula.
 5. Un supervisor ve y edita solo sus instalaciones; el viewer solo lee; una empresa nunca ve la pauta de otra.
 6. `tools/list` incluye las 7 herramientas y `preview_` de las 3 escrituras.
+
+## Verificación del merge de main 328281bb (CAR-81, PR #180)
+
+Encargo de actualización de rama, sin cambios funcionales. CA1–5 conservan la implementación y sus tests de base; CA6 se comprueba con paridad e inventario MCP. La verificación visual/e2e depende del servidor local y se reporta en PR-BODY.md con el gate.
+
+**Criterio parcial del encargo:** el diff de migraciones al schema no está vacío. La comparación contra main confirma diferencias heredadas de claves foráneas, índices y defaults; Pauta añade diferencias de FK en series, excepciones e historial, cuyo schema y SQL son idénticos a los anteriores al merge. No se alteran modelos ni SQL por la restricción expresa del encargo. No es una decisión nueva de producto. La migración sigue después de 20261031131000_finanzas_flujo_caja.

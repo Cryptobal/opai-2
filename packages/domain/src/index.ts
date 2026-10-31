@@ -42,3 +42,5 @@ export { diasDelMes } from "./nomina";
 export { diasDelMes as fechasDelMesPauta } from "./pauta";
 export * from "./pauta";
 export * from "./portal-cliente";
+
+export * from "./finanzas";

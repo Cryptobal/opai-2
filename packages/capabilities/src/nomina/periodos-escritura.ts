@@ -10,6 +10,7 @@ import {
 import { defineCapability } from "../define";
 import { conflicto, reglaDeNegocio } from "../errores";
 import { uuidSchema } from "../core/esquemas";
+import { bloquearPeriodo } from "./bloqueos";
 import { PERMISO_PAGAR, PERMISO_PERIODOS, fechasPeriodo, periodoDe, periodoSchema } from "./comun";
 import { aplicarCuotasDelPeriodo } from "./prestamos-util";
 import { vistaPeriodo } from "./vistas";
@@ -93,10 +94,11 @@ export const periodosCambiarEstado = defineCapability({
     const cuenta = await ctx.db.nominaNovedad.count({ where: { periodoId: id, estado: "vigente" } });
     if (dryRun) return vistaPeriodo({ ...p, ...datos }, cuenta);
     return ctx.transaccion(async (tx) => {
+      await bloquearPeriodo(tx, ctx.tenantId, id);
+      if (a === "cerrado") await aplicarCuotasDelPeriodo(tx, ctx.tenantId, id, true);
+      if (de === "cerrado") await aplicarCuotasDelPeriodo(tx, ctx.tenantId, id, false);
       const r = await tx.nominaPeriodo.updateMany({ where: { id, estado: de }, data: datos });
       if (r.count === 0) throw conflicto("El período cambió de estado mientras lo editabas; vuelve a intentar.");
-      if (a === "cerrado") await aplicarCuotasDelPeriodo(tx, id, true);
-      if (de === "cerrado") await aplicarCuotasDelPeriodo(tx, id, false);
       await ctx.eventos.emitir(tx, {
         tipo: retroceso ? EVENTO_ESTADO.abierto : EVENTO_ESTADO[a],
         entidadTipo: "periodo",
