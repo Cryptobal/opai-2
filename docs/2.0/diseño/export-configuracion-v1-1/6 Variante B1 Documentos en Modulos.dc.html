@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<style>body{margin:0;background:var(--ds-fill)}</style>
+</helmet>
+<dc-import name="Lamina" prefijo="6" propuesta="{{ true }}" titulo="6 · Variante B1 · Documentos en Módulos" nota="Documentos sale de Operación y pasa a Módulos › Documentos (/configuracion/modulo/documentos), con su pestaña «Tipos de documento». Sigue la regla de que la configuración de cada módulo vive en Módulos. En la versión decidida, Documentos sigue en Operación (página 3)." secciones="{{ secciones }}" hint-size="100%,100%"></dc-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const g = { vista: "grupo", grupo: "modulos", b1: true };
+    return { secciones: [
+      { id: "documentos", titulo: "Módulos › Documentos", nota: "Documentos aparece en la lista de módulos, que pasa a 10 entradas.", bases: [
+        { n: "B1_Modulos_Documentos", s: "Tipos de documento", o: { ...g, entrada: "documentos" } },
+        { n: "B1_Modulos_Documentos", s: "Tipos de documento", o: { ...g, entrada: "documentos", device: "tablet" } },
+        { n: "B1_Modulos_lista", s: "Lista de módulos", o: { ...g, device: "phone" } },
+        { n: "B1_Documentos", s: "Entrada con «‹ Módulos»", o: { vista: "entrada", grupo: "modulos", entrada: "documentos", b1: true, device: "phone" } },
+      ] },
+      { id: "operacion", titulo: "Operación sin Documentos", nota: "El grupo queda con Patrones y funciones y Calendario.", bases: [{ n: "B1_Operacion", s: "Sin Documentos", x3: true, o: { vista: "grupo", grupo: "operacion", b1: true } }] },
+    ] };
+  }
+}
+</script>
+</body>
+</html>
