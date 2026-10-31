@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="adt.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="{{ active }}" title="{{ shellTitle }}" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Asistencia · Res. Ex. N.º 38 DT" title="Checklist de certificación" subtitle="Titular: OPAI (OPAI SpA o Gard SpA, por confirmar) · Requiere tercero certificador y luego autorización de la DT." badge="{{ statusBadge }}" hint-size="100%,80px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="download" hint-size="170px,40px">Exportar checklist</x-import>
+</x-import>
+<sc-if value="{{ isCargando }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="320px" height="{{ 40 }}" radius="10px" hint-size="320px,40px"></x-import>
+<div style="display:flex;flex-direction:column;border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+<sc-for list="{{ skel }}" as="s" hint-placeholder-count="6">
+<div style="display:flex;gap:16px;align-items:center;min-height:56px;padding:0 16px;border-bottom:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="40px" hint-size="40px,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="40%" hint-size="40%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="90px" height="{{ 22 }}" radius="999px" hint-size="90px,22px"></x-import>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:400px;display:flex;flex-direction:column"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="clipboard" title="No hay requisitos con este filtro" description="Ningún requisito está en «No cumple». Quita el filtro para ver los 33." action="{{ emptyAction }}" hint-size="100%,320px"></x-import></div>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:400px;display:flex;flex-direction:column"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar el checklist" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="ASI-CER-500 · 30-10-2026 14:32" on-retry="{{ noop }}" hint-size="100%,320px"></x-import></div>
+</sc-if>
+<sc-if value="{{ isSinPermiso }}" hint-placeholder-val="{{ false }}">
+<div style="min-height:400px;display:flex;flex-direction:column"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="Solo el dueño ve el checklist de certificación" description="Contiene brechas técnicas del sistema. Si lo necesitas, pídeselo a Carlos Irigoyen." action-label="Pedir acceso" hint-size="100%,320px"></x-import></div>
+</sc-if>
+<sc-if value="{{ isDatos }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ filtros }}" value="{{ filtro }}" on-change="{{ setFiltro }}" label="Filtrar por estado" hint-size="340px,40px"></x-import>
+<span class="t-body-sm muted t-numeric">33 requisitos · 19 cumple · 8 parcial · 6 no cumple</span>
+</div>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="margin:0 -16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" cards="{{ true }}" to-card="{{ toCard }}" hint-size="100%,400px"></x-import></div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" hint-size="100%,420px"></x-import>
+</sc-if>
+</div>
+</sc-if>
+</x-import>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;datos&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;datos&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { filtro: "todos" };
+  componentDidMount() { if (!window.ADT) { this.t = setInterval(() => { if (window.ADT) { clearInterval(this.t); this.forceUpdate(); } }, 50); } }
+  componentWillUnmount() { clearInterval(this.t); }
+  renderVals() {
+    const A = window.ADT;
+    if (!A) return { isDatos: false };
+    const b = A.base(this.props, "cer", "Certificación");
+    const h = A.h;
+    const T = { c: ["success", "Cumple"], p: ["warning", "Parcial"], n: ["danger", "No cumple"] };
+    const all = [
+      { id: 1, n: "R-04", req: "Hora de la marca puesta por el servidor", est: "c", ev: "Sello de servidor en cada marca", br: "—" },
+      { id: 2, n: "R-07", req: "Hash de cada marca y de sus correcciones", est: "p", ev: "Marcas con SHA-256", br: "Las correcciones aún no se encadenan con hash" },
+      { id: 3, n: "R-09", req: "Registros inalterables (append-only)", est: "n", ev: "Bitácora encadenada en diseño", br: "Columnas mutables en la tabla de marcas de 1.0" },
+      { id: 4, n: "R-12", req: "Identificación biométrica con prueba de vida", est: "n", ev: "—", br: "Face ID sin prueba de vida" },
+      { id: 5, n: "R-13", req: "Bloqueo tras intentos fallidos", est: "n", ev: "—", br: "PIN sin bloqueo" },
+      { id: 6, n: "R-15", req: "Hora oficial de Chile", est: "p", ev: "NTP del proveedor de nube", br: "Sin sincronización con SHOA" },
+      { id: 7, n: "R-18", req: "Retención de 5 años", est: "p", ev: "Respaldos semanales con manifiesto", br: "Retención configurada en 2 años en 1.0" },
+      { id: 8, n: "R-21", req: "Contingencia sin conexión", est: "n", ev: "Carga manual con autor y motivo", br: "No hay marca sin conexión en el dispositivo" },
+      { id: 9, n: "R-24", req: "Acceso del trabajador a 5 años de registros", est: "c", ev: "Portal Trabajador · Mis registros", br: "—" },
+      { id: 10, n: "R-27", req: "Portal de fiscalización @dt.gob.cl", est: "c", ev: "Ruta propia, solo lectura", br: "—" },
+      { id: 11, n: "R-28", req: "Auditoría de accesos del fiscalizador", est: "c", ev: "Fecha, correo, RUT e IP", br: "—" },
+    ];
+    const f = this.state.filtro;
+    const rows = all.filter((r) => f === "todos" || r.est === f);
+    return {
+      ...b, rows,
+      statusBadge: A.badge("warning", "No certificado"),
+      filtros: [{ value: "todos", label: "Todos" }, { value: "c", label: "Cumple" }, { value: "p", label: "Parcial" }, { value: "n", label: "No cumple" }],
+      filtro: f, setFiltro: (v) => this.setState({ filtro: v }),
+      cols: [
+        { key: "n", label: "N.º", mono: true, muted: true, width: 64 },
+        { key: "req", label: "Requisito", strong: true },
+        { key: "est", label: "Estado", render: (r) => A.badge(T[r.est][0], T[r.est][1]) },
+        { key: "ev", label: "Evidencia", muted: true },
+        { key: "br", label: "Brecha" },
+      ],
+      toCard: (r) => ({ title: r.req, subtitle: r.br !== "—" ? r.br : r.ev, meta: r.n, badge: { tone: T[r.est][0], label: T[r.est][1] } }),
+      emptyAction: A.btn("Quitar filtro", { size: "lg" }),
+    };
+  }
+}
+</script>
+</body>
+</html>
