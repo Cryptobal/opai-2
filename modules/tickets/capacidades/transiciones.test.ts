@@ -87,6 +87,28 @@ describe("transiciones y aprobación", () => {
       expect(t).toMatchObject({ estado: "abierto", motivoRechazo: null });
     });
 
+    it.each([
+      ["aprobar", { id: SOLICITUD_1 }],
+      ["rechazar", { id: SOLICITUD_1, motivo: "Sin cupo en enero" }],
+    ])("%s: un supervisor con ver_todos no resuelve una solicitud que aprueba admin, ni en dry_run", async (accion, input) => {
+      const base = solicitud();
+      const semillaAdmin = {
+        ...base,
+        tipoTicket: base.tipoTicket.map((t) => (t.id === TIPO_SOLICITUD_ID ? { ...t, aprobadorRol: "admin" } : t)),
+      };
+      const { ctx } = contextoDePrueba({
+        semilla: semillaAdmin,
+        modulosActivos: ACTIVOS,
+        rol: "supervisor",
+        permisos: PERMISOS,
+      });
+      for (const dryRun of [false, true]) {
+        const r = await executeCapability(ctx, `tickets.tickets.${accion}`, input, { dryRun });
+        expect(r).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+      }
+      expect(await ctx.db.ticket.findFirst({ where: { id: SOLICITUD_1 } })).toMatchObject({ estado: "abierto" });
+    });
+
     it("el rol aprobador sí aprueba, aunque no vea todos los tickets", async () => {
       const { ctx } = contextoDePrueba({
         semilla: solicitud(),
