@@ -32,7 +32,6 @@ const BASE = [
   "core:cuentas.read",
 ];
 const DUENO_ID = USUARIO_DE_PRUEBA.id;
-const OTRO = "0192f3a0-0000-7000-8000-0000000000ca";
 
 const id = (n: number) => `0192f3a0-0000-7000-8000-00000000${String(n).padStart(4, "0")}`;
 const A_NEG = id(1); // nota ligada a un negocio y a CU, creada por el dueño
