@@ -24,4 +24,4 @@ Las pantallas (`.dc.html`) referencian el DS **«OPAI 2.0 Design System V2»**; 
 
 ## Pendientes para la construcción
 
-1. El «Carlos Irigoyen» de `ConfigScreen.dc.html` (usuario de ejemplo del rol Administrador) pasa a un nombre ficticio: ya corregido en este export a «Ignacio Soto» (initials «IS», correo `ignacio.soto@atlasseguridad.cl`), siguiendo el resto de datos de ejemplo ficticios del archivo (Atlas Seguridad SpA, Paola Contreras, Jorge Muñoz, Andrea Rojas).
+1. El nombre real del usuario de ejemplo de `ConfigScreen.dc.html` (usuario de ejemplo del rol Administrador) pasa a un nombre ficticio: ya corregido en este export a «Ignacio Soto» (initials «IS», correo `ignacio.soto@atlasseguridad.cl`), siguiendo el resto de datos de ejemplo ficticios del archivo (Atlas Seguridad SpA, Paola Contreras, Jorge Muñoz, Andrea Rojas).
