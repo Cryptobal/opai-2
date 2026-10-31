@@ -7,28 +7,28 @@
 
 /// Punto de control: lugar físico de una instalación que el guardia debe visitar (rondas.md §2, §4).
 model PuntoControl {
-  id            String   @id @default(uuid(7)) @db.Uuid
-  tenantId      String   @map("tenant_id") @db.Uuid
-  instalacionId String   @map("instalacion_id") @db.Uuid
-  nombre        String
+  id             String   @id @default(uuid(7)) @db.Uuid
+  tenantId       String   @map("tenant_id") @db.Uuid
+  instalacionId  String   @map("instalacion_id") @db.Uuid
+  nombre         String
   /// "qr" | "gps" | "qr_gps" (sin NFC, decisión de Carlos p.9). R1.
-  modo          String   @default("qr_gps")
+  modo           String   @default("qr_gps")
   /// Modo estricto: una lectura de QR fuera de la geocerca es anomalía (R2).
-  estricto      Boolean  @default(false)
-  latitud       Decimal? @db.Decimal(9, 6)
-  longitud      Decimal? @db.Decimal(9, 6)
-  radioM        Int?     @map("radio_m")
-  precisionMinM Int?     @map("precision_min_m")
-  permanenciaS  Int      @default(0) @map("permanencia_s")
+  estricto       Boolean  @default(false)
+  latitud        Decimal? @db.Decimal(9, 6)
+  longitud       Decimal? @db.Decimal(9, 6)
+  radioM         Int?     @map("radio_m")
+  precisionMinM  Int?     @map("precision_min_m")
+  permanenciaS   Int      @default(0) @map("permanencia_s")
   /// Código de la etiqueta vigente, denormalizado para lectura rápida y el PDF (R7). El historial
   /// completo (firma, estado, reemplazos) vive en `EtiquetaQr`.
-  etiquetaQr    String?  @map("etiqueta_qr")
-  exigeFoto     Boolean  @default(false) @map("exige_foto")
-  instrucciones String?
+  etiquetaQr     String?  @map("etiqueta_qr")
+  exigeFoto      Boolean  @default(false) @map("exige_foto")
+  instrucciones  String?
   /// "activo" | "archivado" (un punto con marcas nunca se borra, se archiva).
-  estado        String   @default("activo")
-  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  estado         String   @default("activo")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   plantillaPuntos PlantillaPunto[]
   novedades       Novedad[]
@@ -71,19 +71,19 @@ model EtiquetaQr {
 
 /// Plantilla de ronda: secuencia de puntos con orden y tiempos (rondas.md §4).
 model PlantillaRonda {
-  id                  String   @id @default(uuid(7)) @db.Uuid
-  tenantId            String   @map("tenant_id") @db.Uuid
-  instalacionId       String   @map("instalacion_id") @db.Uuid
-  nombre              String
+  id                   String   @id @default(uuid(7)) @db.Uuid
+  tenantId             String   @map("tenant_id") @db.Uuid
+  instalacionId        String   @map("instalacion_id") @db.Uuid
+  nombre               String
   /// "sugerido" | "estricto" | "aleatorio" (R12).
-  ordenModo           String   @default("sugerido") @map("orden_modo")
-  tiempoMaxMin        Int      @map("tiempo_max_min")
-  tiempoMaxTramoMin   Int?     @map("tiempo_max_tramo_min")
-  umbralIncompletaPct Int      @default(20) @map("umbral_incompleta_pct")
-  permiteAdhoc        Boolean  @default(true) @map("permite_adhoc")
-  estado              String   @default("activo")
-  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  ordenModo            String   @default("sugerido") @map("orden_modo")
+  tiempoMaxMin         Int      @map("tiempo_max_min")
+  tiempoMaxTramoMin    Int?     @map("tiempo_max_tramo_min")
+  umbralIncompletaPct  Int      @default(20) @map("umbral_incompleta_pct")
+  permiteAdhoc         Boolean  @default(true) @map("permite_adhoc")
+  estado               String   @default("activo")
+  createdAt            DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   puntos         PlantillaPunto[]
   programaciones Programacion[]
@@ -116,24 +116,24 @@ model PlantillaPunto {
 
 /// Programación: cuándo hacer una plantilla y a quién se asigna (rondas.md §4).
 model Programacion {
-  id            String    @id @default(uuid(7)) @db.Uuid
-  tenantId      String    @map("tenant_id") @db.Uuid
-  instalacionId String    @map("instalacion_id") @db.Uuid
-  plantillaId   String    @map("plantilla_id") @db.Uuid
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  instalacionId String   @map("instalacion_id") @db.Uuid
+  plantillaId   String   @map("plantilla_id") @db.Uuid
   nombre        String
   /// Horarios: lista de horas "HH:MM" o { cadaMin, desde, hasta } (jsonb).
-  horarios      Json      @default("[]")
+  horarios      Json     @default("[]")
   /// Días de la semana 0–6 (domingo = 0).
-  diasSemana    Int[]     @default([]) @map("dias_semana")
+  diasSemana    Int[]    @default([]) @map("dias_semana")
   vigenciaDesde DateTime? @map("vigencia_desde") @db.Date
   vigenciaHasta DateTime? @map("vigencia_hasta") @db.Date
-  toleranciaMin Int       @default(15) @map("tolerancia_min")
+  toleranciaMin Int      @default(15) @map("tolerancia_min")
   /// Responsables: { modo: "personas" | "por_turno", personaIds: string[] } (R27, decisión 18).
-  responsables  Json      @default("{\"modo\":\"personas\",\"personaIds\":[]}")
+  responsables  Json     @default("{\"modo\":\"personas\",\"personaIds\":[]}")
   /// "activa" | "pausada".
-  estado        String    @default("activa")
-  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  estado        String   @default("activa")
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   plantilla PlantillaRonda @relation(fields: [plantillaId], references: [id], onDelete: Restrict)
 

@@ -56,23 +56,23 @@ model AccesoInstalacion {
 /// datos de los guardias, qué tipos de documento y a quién se envía el informe mensual. Una fila por
 /// cuenta; sin fila rigen los defectos de `@opai/domain` (fail-closed en datos personales).
 model ConfigPortalCuenta {
-  id                     String   @id @default(uuid(7)) @db.Uuid
-  tenantId               String   @map("tenant_id") @db.Uuid
-  cuentaId               String   @map("cuenta_id") @db.Uuid
+  id                    String   @id @default(uuid(7)) @db.Uuid
+  tenantId              String   @map("tenant_id") @db.Uuid
+  cuentaId              String   @map("cuenta_id") @db.Uuid
   /// Tipos de documento de los guardias que el cliente puede ver (nunca liquidaciones ni salud).
   tiposDocumentoVisibles String[] @default([]) @map("tipos_documento_visibles")
   /// Secciones por instalación visibles: cobertura, rondas, novedades, supervision, accesos, documentos.
-  seccionesVisibles      String[] @default([]) @map("secciones_visibles")
-  muestraFotoGuardias    Boolean  @default(true) @map("muestra_foto_guardias")
-  muestraRutGuardias     Boolean  @default(true) @map("muestra_rut_guardias")
+  seccionesVisibles     String[] @default([]) @map("secciones_visibles")
+  muestraFotoGuardias   Boolean  @default(true) @map("muestra_foto_guardias")
+  muestraRutGuardias    Boolean  @default(true) @map("muestra_rut_guardias")
   /// "omitido" (defecto) | "incluido": si el RUT sale en los reportes descargables (decide Carlos).
-  rutEnReportes          String   @default("omitido") @map("rut_en_reportes")
+  rutEnReportes         String   @default("omitido") @map("rut_en_reportes")
   /// El cliente gestiona sus listas de acceso (solo donde tiene Accesos contratado).
-  gestionaListas         Boolean  @default(true) @map("gestiona_listas")
-  destinatariosInforme   String[] @default([]) @map("destinatarios_informe")
-  actualizadoPor         String?  @map("actualizado_por") @db.Uuid
-  createdAt              DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt              DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  gestionaListas        Boolean  @default(true) @map("gestiona_listas")
+  destinatariosInforme  String[] @default([]) @map("destinatarios_informe")
+  actualizadoPor        String?  @map("actualizado_por") @db.Uuid
+  createdAt             DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@unique([tenantId, cuentaId])
   @@map("config_cuentas")

@@ -2,28 +2,28 @@
 // Todas llevan tenant_id y RLS `tenant_isolation`; `memberships` además `user_self`.
 
 model Membership {
-  id           String   @id @default(uuid(7)) @db.Uuid
-  tenantId     String   @map("tenant_id") @db.Uuid
-  userId       String   @map("user_id") @db.Uuid
+  id        String   @id @default(uuid(7)) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
   /// "owner" | "admin" | "gerente" | "supervisor" | "viewer" (ADR-016)
-  rol          String
+  rol       String
   /// Rol personalizado del tenant (ADR-022). null = el rol base de `rol`. Define los permisos.
-  roleId       String?  @map("role_id") @db.Uuid
+  roleId    String?  @map("role_id") @db.Uuid
   /// Portales a los que accede: "erp" | "supervisor" | "trabajador" | "terreno" | "cliente".
-  portales     String[]
+  portales  String[]
   /// Portal donde empezar tras el login o al cambiar de empresa (NÚCLEO-D1). null = el primero de
   /// `portales`. Si deja de estar en `portales`, el destino cae al primero permitido.
-  portalInicio String?  @map("portal_inicio")
+  portalInicio String? @map("portal_inicio")
   /// "activa" | "suspendida"
-  estado       String   @default("activa")
-  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  estado    String   @default("activa")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  tenant              Tenant                  @relation(fields: [tenantId], references: [id])
+  tenant      Tenant             @relation(fields: [tenantId], references: [id])
   /// Restrict (CAR-45): borrar un usuario no arrastra sus membresías; la baja es por `estado`.
-  user                User                    @relation(fields: [userId], references: [id], onDelete: Restrict)
-  rolTenant           Rol?                    @relation(fields: [roleId], references: [id])
-  excepciones         PermisoExcepcion[]
+  user        User               @relation(fields: [userId], references: [id], onDelete: Restrict)
+  rolTenant   Rol?               @relation(fields: [roleId], references: [id])
+  excepciones PermisoExcepcion[]
   /// Instalaciones a cargo si el rol acota por filas (supervisor, ADR-022 · Brief 07c B3).
   instalacionesACargo SupervisorInstalacion[]
 

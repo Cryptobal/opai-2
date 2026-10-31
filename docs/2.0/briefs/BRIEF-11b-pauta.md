@@ -26,7 +26,7 @@ Este brief es el PR 2 del Brief 11 (el PR 1, Puestos, ya está en `main`).
 ## Plan
 
 **PR 1 (este):**
-1. Esquema `pauta` + migración `20261030211000_pauta_series_excepciones` (aditiva, FORCE RLS, historial append-only) + test de aislamiento.
+1. Esquema `pauta` + migración `20261031020000_pauta_series_excepciones` (aditiva, FORCE RLS, historial append-only) + test de aislamiento.
 2. Dominio puro (`packages/domain/src/pauta`): expansión de series y excepciones a la grilla con feriados, cobertura, no doblar.
 3. Capacidades (`packages/capabilities/src/pauta`): `pauta.mes.leer`, `pauta.resumen.leer`, `pauta.ppc.listar`, `pauta.historial.listar`, `pauta.series.fijar`, `pauta.excepciones.crear`, `pauta.excepciones.anular`.
 4. Pantallas P01–P05 y la vista de PPC (P06 como filtro) en `/pauta`.
