@@ -12,7 +12,7 @@
     total: { name: "Andrea Rojas", initials: "AR", role: "Logística Andina SpA" },
     limitado: { name: "Felipe Soto", initials: "FS", role: "Logística Andina SpA · 2 instalaciones" },
     prospecto: { name: "Paula Ortiz", initials: "PO", role: "Frigorífico del Maipo SpA" },
-    erp: { name: "Carlos Irigoyen", initials: "CI", role: "Administrador" },
+    erp: { name: "Andrés Molina", initials: "AM", role: "Administrador" },
   };
   const ERP_TABS = [I("ini", "Inicio", "home"), I("ins", "Instalac.", "building"), I("pau", "Pauta", "calendar"), I("per", "Personas", "users"), I("cfg", "Config.", "grid")];
   const ERP_GROUPS = [
@@ -223,5 +223,5 @@
   window.PC = { topBar, NAV_PHONE, NAV_RAIL, GROUPS, PROSPECT_GROUPS, activeFor, USERS, ERP_TABS, ERP_GROUPS, INST, GUARDIAS, MARCACIONES, RONDAS, PUNTOS, NOVEDADES, VISITAS_SUP, KPIS, MESES6,
     PERSONAS_AUT, VEHICULOS_AUT, REGISTRO_ACC, VISITAS_PEND, DOCS, TIPOS_VISIBLES, PROTOCOLOS, TIPOS_PROT, FACTURAS, INFORMES, REPORTES, DESTINATARIOS, SOLICITUDES,
     COTIZACIONES, COT_PROSPECTO, COT_LINEAS, board, fixBrand,
-    TENANT: "Atlas Seguridad SpA", CLIENTE: "Logística Andina SpA", ADMIN: "Carlos Irigoyen", limitadas: ["pq", "bl"] };
+    TENANT: "Atlas Seguridad SpA", CLIENTE: "Logística Andina SpA", ADMIN: "Andrés Molina", limitadas: ["pq", "bl"] };
 })();

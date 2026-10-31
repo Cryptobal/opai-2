@@ -198,7 +198,7 @@
 </sc-if>
 <sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
 <div style="flex:1;min-height:420px;display:flex">
-<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="Solo owner y admin configuran los canales" description="Tu rol (Gerente) puede ver y convertir solicitudes, pero no cambiar los canales. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,360px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="Solo owner y admin configuran los canales" description="Tu rol (Gerente) puede ver y convertir solicitudes, pero no cambiar los canales. Pídele acceso a Andrés Molina, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,360px"></x-import>
 </div>
 </sc-if>
 </sc-if>
@@ -259,7 +259,7 @@ class Component extends DCLogic {
         { de: "jperez@constructoravalle.cl", asunto: "«Planos licitación obra Lampa»", motivo: "Rechazado: supera 25 MB (38 MB en adjuntos)", fecha: "29-10-2026 15:47" },
       ],
       respGrid: isPhone ? "display:flex;flex-direction:column;gap:12px" : "display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px",
-      personas: [{ value: "mr", label: "Matías Rojas" }, { value: "vs", label: "Valentina Soto" }, { value: "ci", label: "Carlos Irigoyen" }],
+      personas: [{ value: "mr", label: "Matías Rojas" }, { value: "vs", label: "Valentina Soto" }, { value: "am", label: "Andrés Molina" }],
       personasAgente: [{ value: "quien", label: "Quien conversa con OPAI" }, { value: "mr", label: "Matías Rojas" }, { value: "vs", label: "Valentina Soto" }],
       personasManual: [{ value: "quien", label: "Quien la registra" }, { value: "mr", label: "Matías Rojas" }, { value: "vs", label: "Valentina Soto" }],
       plantillas: [{ value: "acuse", label: "Acuse de solicitud recibida" }],
@@ -268,7 +268,7 @@ class Component extends DCLogic {
       reglas: [
         { id: 1, cond: "Comuna es Quilicura o Lampa", asig: "Matías Rojas" },
         { id: 2, cond: "Servicio es Conserjería", asig: "Valentina Soto" },
-        { id: 3, cond: "Monto estimado sobre $ 5.000.000", asig: "Carlos Irigoyen" },
+        { id: 3, cond: "Monto estimado sobre $ 5.000.000", asig: "Andrés Molina" },
       ],
       generarAction: btn("Generar nueva clave", "key", "secondary", openDialog),
       copiarDirAction: btn("Copiar dirección", "copy", "secondary"),
