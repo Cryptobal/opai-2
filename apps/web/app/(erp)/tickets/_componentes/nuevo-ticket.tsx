@@ -7,9 +7,15 @@ import { avisar, Button, Campo, Input, Select, Sheet, Textarea } from "@opai/ds"
 
 import { useCapacidad } from "@/app/_components/use-capacidad";
 
-import { ETIQUETA_PRIORIDAD, type TipoTicket } from "./datos";
+import type { TipoTicket } from "./datos";
 
-const PRIORIDADES = Object.entries(ETIQUETA_PRIORIDAD).map(([valor, etiqueta]) => ({ valor, etiqueta }));
+// Solo el tipo viene de datos.ts: sus valores arrastran código de servidor al navegador.
+const PRIORIDADES = [
+  { valor: "p1", etiqueta: "P1 · Urgente" },
+  { valor: "p2", etiqueta: "P2 · Alta" },
+  { valor: "p3", etiqueta: "P3 · Media" },
+  { valor: "p4", etiqueta: "P4 · Baja" },
+];
 
 /**
  * Nuevo ticket (Sheet de la bandeja). Un ticket nace solo cuando una persona lo crea aquí o por
