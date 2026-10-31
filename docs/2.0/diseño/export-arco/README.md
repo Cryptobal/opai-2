@@ -47,7 +47,7 @@ B1–B3 fueron decididas por Carlos el 30-oct-2026.
 - B3 con aviso de extensión única de hasta 30 días corridos y campo opcional «Actúo como representante de…».
 - Retención: Control de asistencia «5 años desde el término» y Salud ocupacional «Plazo por confirmar».
 - Se quitó el checkbox «Acepto el tratamiento».
-- Sin «Carlos Irigoyen» ni el RUT 77.120.884-3 (tampoco en el bundle `_ds`).
+- Sin nombre real ni RUT real en los datos de ejemplo (tampoco en el bundle `_ds`).
 - «Edificio Costanera Center» → «Edificio Mirador Poniente».
 - «Pídele acceso a un administrador».
 - Fechas de solicitudes de ejemplo desde el 01-12-2026.
