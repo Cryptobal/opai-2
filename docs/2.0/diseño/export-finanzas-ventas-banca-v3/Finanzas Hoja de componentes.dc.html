@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<div class="ds" data-theme="light" style="display:flex;flex-direction:column;gap:40px;padding:40px;max-width:1100px;margin:0 auto;background:var(--ds-bg);min-height:100%">
+<div style="display:flex;flex-direction:column;gap:4px">
+<span class="t-caption muted">Finanzas · Ventas, cobranza y banca</span>
+<h1 style="margin:0;font:600 28px/34px var(--font-sans)">Hoja de componentes</h1>
+<span class="t-body-sm muted">Componentes del DS 2.0 usados en las pantallas 1 a 9, con variantes y estados. Los marcados «Nuevo» se proponen como piezas del DS.</span>
+</div>
+
+<sc-for list="{{ groups }}" as="g" hint-placeholder-count="2">
+<div style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;align-items:center;gap:12px"><h2 style="margin:0;font:600 18px/26px var(--font-sans)">{{ g.title }}</h2>
+<sc-if value="{{ g.isNew }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="accent" hint-size="64px,22px">Nuevo</x-import></sc-if></div>
+<span class="t-body-sm muted">{{ g.note }}</span>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px">
+<sc-for list="{{ g.cells }}" as="c" hint-placeholder-count="2">
+<div style="display:flex;flex-direction:column;gap:8px">
+<span class="t-caption muted">{{ c.label }}</span>
+<div style="border:1px solid var(--ds-border);border-radius:12px;background:var(--ds-surface);padding:16px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+<sc-for list="{{ c.items }}" as="i" hint-placeholder-count="1">
+<sc-if value="{{ i.isBadge }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ i.tone }}" hint-size="64px,22px">{{ i.text }}</x-import></sc-if>
+<sc-if value="{{ i.isButton }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="{{ i.variant }}" disabled="{{ i.disabled }}" loading="{{ i.loading }}" hint-size="100px,40px">{{ i.text }}</x-import></sc-if>
+<sc-if value="{{ i.isAlerta }}" hint-placeholder-val="{{ false }}"><div style="width:100%"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="{{ i.tone }}" titulo="{{ i.titulo }}" hint-size="100%,56px">{{ i.text }}</x-import></div></sc-if>
+<sc-if value="{{ i.isInput }}" hint-placeholder-val="{{ false }}"><div style="width:100%"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="{{ i.titulo }}" defaultValue="{{ i.text }}" mono="{{ i.mono }}" readOnly="{{ i.ro }}" disabled="{{ i.disabled }}" error="{{ i.error }}" hint="{{ i.hint }}" hint-size="100%,72px"></x-import></div></sc-if>
+<sc-if value="{{ i.isSeg }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ i.options }}" value="{{ i.text }}" hint-size="240px,44px"></x-import></sc-if>
+<sc-if value="{{ i.isSelect }}" hint-placeholder-val="{{ false }}"><div style="width:100%"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="{{ i.titulo }}" value="{{ i.text }}" options="{{ i.options }}" hint-size="100%,88px"></x-import></div></sc-if>
+<sc-if value="{{ i.isSwitch }}" hint-placeholder-val="{{ false }}"><div style="width:100%"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ i.checked }}" label="{{ i.titulo }}" description="{{ i.text }}" hint-size="100%,56px"></x-import></div></sc-if>
+<sc-if value="{{ i.isEnlace }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Enlace" href="#" hint-size="240px,44px">{{ i.text }}</x-import></sc-if>
+<sc-if value="{{ i.isTabs }}" hint-placeholder-val="{{ false }}"><div style="width:100%"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ i.options }}" value="{{ i.text }}" hint-size="100%,44px"></x-import></div></sc-if>
+<sc-if value="{{ i.isSecret }}" hint-placeholder-val="{{ false }}"><div style="width:100%;display:flex;flex-direction:column;gap:8px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="{{ i.titulo }}" defaultValue="{{ i.text }}" mono="{{ true }}" readOnly="{{ true }}" hint="{{ i.hint }}" hint-size="100%,88px"></x-import><div style="display:flex;gap:8px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="100px,40px">{{ i.btn1 }}</x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" hint-size="100px,40px">{{ i.btn2 }}</x-import></div></div></sc-if>
+<sc-if value="{{ i.isPreview }}" hint-placeholder-val="{{ false }}"><div style="width:100%;border:1px solid var(--ds-border);border-radius:12px;background:var(--ds-surface);padding:16px;display:flex;flex-direction:column;gap:8px"><span style="font:600 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Factura electrónica 33 · borrador</span><div style="display:flex;justify-content:space-between;font:400 14px/20px var(--font-sans)"><span>Servicio de guardias</span><span class="t-numeric">$ 6.400.000</span></div><div style="display:flex;justify-content:space-between;border-top:1px solid var(--ds-border);padding-top:8px;font:600 16px/24px var(--font-sans)"><span>Total</span><span class="t-numeric">$ 6.940.000</span></div></div></sc-if>
+<sc-if value="{{ i.isStage }}" hint-placeholder-val="{{ false }}"><div style="width:100%;display:flex;flex-direction:column;gap:6px"><div style="display:flex;gap:6px"><span style="flex:1;height:6px;border-radius:3px;background:var(--ds-accent)"></span><span style="flex:1;height:6px;border-radius:3px;background:var(--ds-accent)"></span><span style="flex:1;height:6px;border-radius:3px;background:var(--ds-accent)"></span><span style="flex:1;height:6px;border-radius:3px;background:var(--ds-border-strong)"></span><span style="flex:1;height:6px;border-radius:3px;background:var(--ds-border-strong)"></span><span style="flex:1;height:6px;border-radius:3px;background:var(--ds-border-strong)"></span></div><span class="t-caption muted">Falta OC/HES · Observado · Por enviar · <b>Esperando OK</b> · Listo · Emitido</span></div></sc-if>
+</sc-for>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const bd = (tone, text) => ({ isBadge: true, tone, text });
+    const bt = (variant, text, o = {}) => Object.assign({ isButton: true, variant, text }, o);
+    const al = (tone, titulo, text) => ({ isAlerta: true, tone, titulo, text });
+    const inp = (titulo, text, o = {}) => Object.assign({ isInput: true, titulo, text }, o);
+    const cell = (label, ...items) => ({ label, items });
+    const groups = [
+      { title: 'Badge · estados de documentos', note: 'Estado SII, correo y cobro. El texto siempre acompaña al color.', cells: [
+        cell('SII', bd('success', 'Aceptado'), bd('info', 'Enviado'), bd('danger', 'Rechazado'), bd('neutral', 'Borrador')),
+        cell('Correo', bd('success', 'Correo enviado'), bd('warning', 'Correo pendiente'), bd('danger', 'Correo rechazado')),
+        cell('Cobro / tramo', bd('success', 'Pagada'), bd('neutral', '0-30 días'), bd('warning', '31-60 días'), bd('danger', '60+ días')),
+      ] },
+      { title: 'Button', note: 'Una acción principal por pantalla; las filas usan secundario.', cells: [
+        cell('Variantes', bt('primary', 'Emitir'), bt('secondary', 'Recordar'), bt('ghost', 'Cancelar')),
+        cell('Estados', bt('primary', 'Deshabilitado', { disabled: true }), bt('primary', 'Cargando', { loading: true })),
+      ] },
+      { title: 'Alerta', note: 'Avisos de vida útil, correo y propuestas.', cells: [
+        cell('Warning · vida útil', al('warning', 'CAF por vencer', 'El CAF de nota de débito 56 vence el 20-11-2026.')),
+        cell('Danger · error de conector', al('danger', 'No pudimos autenticar', 'El proveedor rechazó la credencial.')),
+        cell('Info · propuesta', al('info', 'Propuesta, a confirmar por Andrés', 'Se muestra solo en la variante B.')),
+      ] },
+      { title: 'Input · Segmentado · Tabs', note: 'Campos de los Sheet y navegación de triage.', cells: [
+        cell('Input normal', inp('N° de OC', '4500012871', { mono: true })),
+        cell('Input con error', inp('N° de HES', '99', { mono: true, error: 'La HES debe tener 7 dígitos' })),
+        cell('Input deshabilitado', inp('Cliente', 'Alimentos del Maipo SA', { disabled: true })),
+        cell('Segmentado', { isSeg: true, options: ['Correo', 'WhatsApp'], text: 'Correo' }),
+        cell('Tabs de triage', { isTabs: true, options: ['Sin reconocer', 'Por autorizar', 'Conciliados'], text: 'Sin reconocer' }),
+      ] },
+      { title: 'Select · Switch · Enlace', note: 'Centro de costo en los Sheet, arrastre del flujo de caja y traza a la plantilla.', cells: [
+        cell('Select · centro de costo', { isSelect: true, titulo: 'Centro de costo', text: 'Administración / Oficina central', options: ['Torre Apoquindo', 'Planta Quilicura', 'Bodega Lampa', 'Administración / Oficina central'] }),
+        cell('Switch · arrastre activo', { isSwitch: true, titulo: 'Arrastrar lo no facturado a la semana siguiente', text: 'Por empresa; cada fila puede desactivarlo.', checked: true }),
+        cell('Switch · arrastre desactivado', { isSwitch: true, titulo: 'Arrastrar lo no facturado a la semana siguiente', text: 'Esta fila no se arrastra.', checked: false }),
+        cell('Enlace · traza', { isEnlace: true, text: 'Viene de la plantilla Alimentos del Maipo SA' }),
+      ] },
+      { title: 'CampoSecreto', isNew: true, note: 'Credenciales, certificado y CAF viven en el almacén de secretos (ADR-027). Valor enmascarado, solo lectura y se muestra una sola vez al crearlo.', cells: [
+        cell('Enmascarado', { isSecret: true, titulo: 'Clave de API', text: '••••••••••••a81c', hint: 'Vence el 15-12-2026.', btn1: 'Probar conexión', btn2: 'Reemplazar' }),
+        cell('Recién creado · se muestra una vez', { isSecret: true, titulo: 'Clave de API', text: 'dte_EJEMPLO_••••', hint: 'Cópiala ahora. No volverá a mostrarse.', btn1: 'Copiar', btn2: 'Listo' }),
+      ] },
+      { title: 'PreviewDocumento', isNew: true, note: 'Vista previa de factura, nota de crédito o correo antes de confirmar. Se usa en los Sheet de Emitir, Nota de crédito y recordatorios y en la landing /cobro.', cells: [cell('Factura 33 · borrador', { isPreview: true })] },
+      { title: 'EtapasCierre', isNew: true, note: 'Avance del cierre de mes: falta OC/HES, observado, por enviar, esperando OK, listo, emitido.', cells: [cell('Etapa actual: Esperando OK', { isStage: true })] },
+    ];
+    return { groups };
+  }
+}
+</script>
+</body>
+</html>
