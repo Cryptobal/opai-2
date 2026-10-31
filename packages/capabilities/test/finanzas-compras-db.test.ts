@@ -125,11 +125,40 @@ describe.skipIf(!urlPropietario)("Finanzas · libro de compras (PR 1)", () => {
     expect(otra).toMatchObject({ nuevos: 0, duplicados: 3 });
   });
 
+  it("importar con crearProveedores exige también el permiso de proveedores (vista previa y real)", async () => {
+    const soloCompras = mod.crearContexto({
+      tenantId,
+      actor: { tipo: "user", id: usuarioId },
+      usuario: { id: usuarioId, nombre: "Contador", email: "contador@prueba.cl", platformRole: null },
+      portal: "erp",
+      portalesMembresia: ["erp"],
+      rol: "viewer",
+      excepciones: [
+        { permiso: "finanzas:read", conceder: true },
+        { permiso: "finanzas:compras.manage", conceder: true },
+      ],
+      modulosActivos: ["finanzas"],
+      medidor,
+    });
+    const entrada = {
+      documentos: [{ proveedorRut: "78.000.000-7", proveedorRazonSocial: "Nuevo Ltda.", ...doc(4001), proveedorId: undefined }],
+      crearProveedores: true,
+    };
+    for (const dryRun of [true, false]) {
+      const r = await mod.executeCapability(soloCompras, "finanzas.compras.importar", entrada, { dryRun });
+      expect(r, String(dryRun)).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+    }
+    expect(await e.admin.proveedor.count({ where: { tenantId, rut: "78000000-7" } })).toBe(0);
+    // Sin crear proveedores, con uno existente, quien solo tiene compras sí importa.
+    const existente = { documentos: [{ proveedorRut: "76.543.210-3", ...doc(4002), proveedorId: undefined }] };
+    expect(await mod.executeCapability(soloCompras, "finanzas.compras.importar", existente)).toMatchObject({ ok: true });
+  });
+
   it("los totales del libro restan las notas de crédito", async () => {
     await dato("finanzas.compras.registrar", doc(3001, { tipoDte: 61, montoNeto: 10_000, montoIva: 1_900 }));
     const l = await libro();
-    const brutos = 5 * 100_000;
-    expect(l.resumen.documentos).toBe(6);
+    const brutos = 6 * 100_000;
+    expect(l.resumen.documentos).toBe(7);
     expect(l.resumen.neto).toBe(brutos - 10_000);
   });
 
