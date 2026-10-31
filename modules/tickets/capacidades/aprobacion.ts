@@ -72,6 +72,8 @@ export const ticketsRechazar = defineCapability({
   input: z.object({ id: uuidSchema, motivo: z.string().trim().min(5).max(500) }),
   output: z.object({ id: uuidSchema }),
   efecto: "escritura",
+  // Rechazar es terminal (R6): un agente lo deja en la cola de aprobación humana.
+  exigeAprobacion: () => true,
   dryRun: true,
   async handler(ctx, input, { dryRun }) {
     const t = await solicitudDe(ctx, input.id);
