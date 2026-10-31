@@ -1,6 +1,7 @@
 // Piezas comunes de CRM PR 2a (CAR-26): vínculo contacto–cuenta, actividad unificada y etiquetas.
 import { z } from "zod";
 
+import { enScope } from "../../autorizacion";
 import { noEncontrado, prohibido } from "../../errores";
 import type { Contexto } from "../../types";
 import { dondeContacto, dondeCuenta, dondeInstalacion } from "../maestros/alcance";
@@ -47,7 +48,12 @@ export const refDe = (tipo: EntidadActividad, id: string) => ({
  */
 export async function exigirEntidad(ctx: Contexto, tipo: EntidadActividad, id: string) {
   // Un negocio es información de Comercial: sin su permiso de lectura no se acepta ni se devuelve.
-  if (tipo === "negocio" && !ctx.autorizar("comercial:negocios.read"))
+  if (
+    tipo === "negocio" &&
+    (!enScope(ctx, "comercial") ||
+      !ctx.modulosActivos.includes("comercial") ||
+      !ctx.autorizar("comercial:negocios.read"))
+  )
     throw prohibido("Sin permiso para ver negocios.");
   const dondeId = { id };
   const n =

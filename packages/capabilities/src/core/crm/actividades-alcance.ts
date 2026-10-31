@@ -2,6 +2,7 @@
 // las instalaciones a cargo del actor) y «propias» (las que creó o tiene asignadas). Un negocio solo
 // se ve con el permiso de lectura de Comercial. Fuera de la visibilidad, la actividad responde igual
 // que una inexistente.
+import { enScope } from "../../autorizacion";
 import type { Contexto } from "../../types";
 import { dondeContacto, dondeCuenta } from "../maestros/alcance";
 import { ENTIDADES_ACTIVIDAD, type EntidadActividad } from "./comun";
@@ -15,7 +16,10 @@ export type Visibilidad = {
 };
 
 export async function visibilidad(ctx: Contexto): Promise<Visibilidad> {
-  const negocios = ctx.autorizar(PERMISO_NEGOCIOS);
+  const negocios =
+    enScope(ctx, "comercial") &&
+    ctx.modulosActivos.includes("comercial") &&
+    ctx.autorizar(PERMISO_NEGOCIOS);
   if (!ctx.alcance) return { entidades: null, negocios };
   const [cuentas, contactos] = await Promise.all([
     ctx.db.cuenta.findMany({ where: dondeCuenta(ctx), select: { id: true } }),
