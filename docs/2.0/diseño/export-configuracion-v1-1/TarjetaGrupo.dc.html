@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>
+.i-settings{-webkit-mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>');mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>')}
+.i-bot{-webkit-mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>');mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>')}
+</style>
+</helmet>
+<sc-if value="{{ esFila }}" hint-placeholder-val="{{ false }}">
+<button type="button" onClick="{{ onClick }}" aria-label="{{ nombre }}" style="{{ filaStyle }}" style-hover="background:var(--ds-bg)" style-active="background:var(--ds-fill)" style-focus="outline:2px solid var(--ds-focus);outline-offset:-2px">
+<span style="width:36px;height:36px;border-radius:10px;background:var(--ds-fill);display:flex;align-items:center;justify-content:center;flex:none"><span class="{{ iconClass }}"></span></span>
+<span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+<span style="font:500 16px/22px var(--font-sans);color:var(--ds-fg)">{{ nombre }}</span>
+<span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ linea }}</span>
+</span>
+<span class="ic sm i-chevron-right" style="color:var(--ds-fg-subtle);flex:none"></span>
+</button>
+</sc-if>
+<sc-if value="{{ esTarjeta }}" hint-placeholder-val="{{ true }}">
+<button type="button" onClick="{{ onClick }}" style="{{ cardStyle }}" style-hover="border-color:var(--ds-border-strong)" style-active="background:var(--ds-fill)" style-focus="outline:2px solid var(--ds-focus);outline-offset:2px">
+<span style="width:40px;height:40px;border-radius:10px;background:var(--ds-fill);display:flex;align-items:center;justify-content:center;flex:none"><span class="{{ iconClass }}"></span></span>
+<span style="display:flex;flex-direction:column;gap:4px">
+<span style="font:600 16px/24px var(--font-sans);letter-spacing:-0.008em;color:var(--ds-fg)">{{ nombre }}</span>
+<span class="t-body-sm muted">{{ linea }}</span>
+</span>
+<span style="display:flex;align-items:center;gap:8px;margin-top:auto;padding-top:12px;border-top:1px solid var(--ds-border)">
+<span class="t-caption" style="flex:1;min-width:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">{{ vista }}</span>
+<span class="ic sm i-chevron-right" style="color:var(--ds-fg-subtle);flex:none"></span>
+</span>
+</button>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:360,&quot;height&quot;:200},&quot;icono&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;clipboard&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;nombre&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Operación&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;linea&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Feriados, patrones y documentos&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;vista&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Patrones y funciones · Calendario · Documentos&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;reposo&quot;,&quot;hover&quot;,&quot;foco&quot;,&quot;presionado&quot;,&quot;deshabilitado&quot;],&quot;default&quot;:&quot;reposo&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;variante&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;tarjeta&quot;,&quot;fila&quot;],&quot;default&quot;:&quot;tarjeta&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;onClick&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const p = this.props;
+    const e = p.estado ?? "reposo";
+    const fila = p.variante === "fila";
+    const card = {
+      display: "flex", flexDirection: "column", gap: 12, width: "100%", height: "100%", minHeight: 176, boxSizing: "border-box", padding: 20, textAlign: "left",
+      background: "var(--ds-surface)", border: "1px solid var(--ds-border)", borderRadius: 16, cursor: "pointer",
+      font: "inherit", color: "var(--ds-fg)", transition: "border-color 150ms cubic-bezier(0.2,0,0,1), background 150ms cubic-bezier(0.2,0,0,1)",
+    };
+    const row = {
+      display: "flex", alignItems: "center", gap: 12, width: "100%", minHeight: 64, padding: "12px 16px", textAlign: "left",
+      background: "var(--ds-surface)", border: 0, borderBottom: "1px solid var(--ds-border)", cursor: "pointer", font: "inherit", color: "var(--ds-fg)",
+    };
+    const force = (base, inset) => {
+      if (e === "deshabilitado") return { ...base, opacity: 0.45, pointerEvents: "none" };
+      if (e === "hover") return fila ? { ...base, background: "var(--ds-bg)" } : { ...base, borderColor: "var(--ds-border-strong)" };
+      if (e === "foco") return { ...base, outline: "2px solid var(--ds-focus)", outlineOffset: inset ? -2 : 2 };
+      if (e === "presionado") return fila ? { ...base, background: "var(--ds-fill)" } : { ...base, background: "var(--ds-fill)", borderColor: "var(--ds-border-strong)" };
+      return base;
+    };
+    return {
+      esFila: fila, esTarjeta: !fila,
+      cardStyle: force(card, false), filaStyle: force(row, true),
+      iconClass: "ic i-" + (p.icono ?? "grid"),
+      nombre: p.nombre ?? "Operación", linea: p.linea ?? "Feriados, patrones y documentos",
+      vista: p.vista ?? "Patrones y funciones · Calendario · Documentos",
+      onClick: p.onClick,
+    };
+  }
+}
+</script>
+</body>
+</html>
