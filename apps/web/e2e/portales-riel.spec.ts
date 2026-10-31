@@ -41,7 +41,11 @@ test.describe("acceso a portales", () => {
 
       for (const p of PORTALES) {
         const paginas = [
-          { ruta: `/${p.id}`, titulo: `Inicio · Portal ${p.nombre} · OPAI` },
+          // El Portal Cliente abre en «Resumen» (diseño 01, CAR-88); los demás portales, en «Inicio».
+          {
+            ruta: `/${p.id}`,
+            titulo: `${p.id === "cliente" ? "Resumen" : "Inicio"} · Portal ${p.nombre} · OPAI`,
+          },
           { ruta: `/${p.id}/esto-no-existe`, titulo: `No encontrado · Portal ${p.nombre} · OPAI` },
         ];
         for (const { ruta, titulo } of paginas) {

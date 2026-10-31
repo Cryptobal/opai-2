@@ -1,12 +1,20 @@
 import { beforeEach, expect, it, vi } from "vitest";
 
-const mocks = vi.hoisted(() => ({ membership: vi.fn(), instalaciones: vi.fn(), tenant: vi.fn() }));
+const mocks = vi.hoisted(() => ({
+  membership: vi.fn(),
+  instalaciones: vi.fn(),
+  tenant: vi.fn(),
+  acceso: vi.fn(),
+  instalacion: vi.fn(),
+}));
 vi.mock("@opai/db", () => ({
   forTenant: (id: string) => {
     mocks.tenant(id);
     return {
       membership: { findUnique: mocks.membership },
       supervisorInstalacion: { findMany: mocks.instalaciones },
+      accesoCliente: { findUnique: mocks.acceso },
+      instalacion: { findMany: mocks.instalacion },
     };
   },
   forUser: vi.fn(),
@@ -20,7 +28,9 @@ beforeEach(() => {
 });
 it("carga módulos y acceso del tenant/usuario elegido con una sola consulta", async () => {
   mocks.membership.mockResolvedValue({
+    id: "membresia",
     rol: "viewer",
+    portales: ["erp"],
     rolTenant: { archivadoEn: null, permisos: ["core:cuentas.read"] },
     excepciones: [{ permiso: "core:personas.read", conceder: false }],
     tenant: { modules: [{ moduloId: "comercial" }] },
@@ -68,4 +78,40 @@ it("un rol archivado no hereda permisos; un supervisor sin asignaciones conserva
     where: { membershipId: "m" },
     select: { instalacionId: true },
   });
+});
+
+const contacto = {
+  id: "m-cliente",
+  rol: "viewer",
+  portales: ["cliente"],
+  rolTenant: { archivadoEn: null, permisos: ["portal_cliente:read"] },
+  excepciones: [],
+  tenant: { modules: [{ moduloId: "portal_cliente" }] },
+};
+const instalaciones = [
+  { id: "i1", cuentaId: "c1", estado: "activa", archivadaEn: null },
+  { id: "i2", cuentaId: "c1", estado: "activa", archivadaEn: null },
+  { id: "i3", cuentaId: "c2", estado: "activa", archivadaEn: null },
+];
+
+it("el contacto de un cliente solo alcanza las instalaciones que su acceso habilita (CAR-88)", async () => {
+  mocks.membership.mockResolvedValue(contacto);
+  mocks.acceso.mockResolvedValue({
+    estado: "activo",
+    cuentaId: "c1",
+    todasInstalaciones: false,
+    instalaciones: [{ instalacionId: "i2" }, { instalacionId: "i3" }],
+  });
+  mocks.instalacion.mockResolvedValue(instalaciones);
+  const r = await fuentesReales.accesoConModulos!("tenant", "usuario");
+  // i3 es de otra cuenta: se ignora aunque esté en su lista.
+  expect(r.acceso.instalaciones).toEqual(["i2"]);
+});
+
+it("un contacto de cliente sin acceso activo no alcanza nada (fail-closed)", async () => {
+  mocks.membership.mockResolvedValue(contacto);
+  mocks.acceso.mockResolvedValue(null);
+  expect((await fuentesReales.accesoConModulos!("tenant", "usuario")).acceso.instalaciones).toEqual([]);
+  mocks.acceso.mockResolvedValue({ estado: "suspendido", cuentaId: "c1", todasInstalaciones: true, instalaciones: [] });
+  expect((await fuentesReales.accesoConModulos!("tenant", "usuario")).acceso.instalaciones).toEqual([]);
 });

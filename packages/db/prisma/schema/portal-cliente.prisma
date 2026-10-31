@@ -1,0 +1,80 @@
+// Módulo Portal Cliente (Brief 16 · PR 1, CAR-88). Schema propio `portal_cliente`: el acceso de los
+// contactos de una cuenta cliente a su portal y la configuración del portal por cuenta. Toda tabla
+// con tenant_id, RLS `tenant_isolation` (ENABLE + FORCE), IDs uuid(7), columnas snake_case por @map.
+// Sin `@relation` hacia el núcleo (no se tocan tenancy.prisma ni maestros.prisma): las FK a
+// core.tenants, core.memberships, core.cuentas, core.contactos y core.instalaciones van en el SQL de
+// la migración, con el trigger `mismo_tenant` para que ninguna referencia cruce de empresa.
+//
+// El alcance es FAIL-CLOSED: un usuario sin fila `activo` en `accesos` no ve nada del portal, y uno
+// con fila ve solo su cuenta y las instalaciones habilitadas (ADR-022).
+
+/// Vínculo de una membresía (usuario de la empresa de seguridad con portal «cliente») con UNA cuenta
+/// cliente. Sin fila `activo` no hay acceso. `todasInstalaciones` concede todas las instalaciones
+/// vigentes de la cuenta (también las que se creen después); si es false solo valen las filas de
+/// `AccesoInstalacion`. Un contacto limitado a algunas instalaciones es el caso normal (brief §3).
+model AccesoCliente {
+  id                 String   @id @default(uuid(7)) @db.Uuid
+  tenantId           String   @map("tenant_id") @db.Uuid
+  membershipId       String   @map("membership_id") @db.Uuid
+  cuentaId           String   @map("cuenta_id") @db.Uuid
+  /// Contacto de la cuenta que representa (opcional: ficha de contactos de maestros).
+  contactoId         String?  @map("contacto_id") @db.Uuid
+  /// "activo" | "suspendido" (reversible) | "revocado" (cierre definitivo del vínculo).
+  estado             String   @default("activo")
+  todasInstalaciones Boolean  @default(false) @map("todas_instalaciones")
+  /// Usuario que concedió el acceso (trazabilidad; la auditoría detallada vive en core.audit_events).
+  creadoPor          String?  @map("creado_por") @db.Uuid
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt          DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  instalaciones AccesoInstalacion[]
+
+  @@unique([tenantId, membershipId])
+  @@index([tenantId, cuentaId])
+  @@map("accesos")
+  @@schema("portal_cliente")
+}
+
+/// Instalación habilitada para un acceso (cuando `todasInstalaciones` es false).
+model AccesoInstalacion {
+  id            String   @id @default(uuid(7)) @db.Uuid
+  tenantId      String   @map("tenant_id") @db.Uuid
+  accesoId      String   @map("acceso_id") @db.Uuid
+  instalacionId String   @map("instalacion_id") @db.Uuid
+  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  acceso AccesoCliente @relation(fields: [accesoId], references: [id], onDelete: Cascade)
+
+  @@unique([accesoId, instalacionId])
+  @@index([tenantId, instalacionId])
+  @@map("acceso_instalaciones")
+  @@schema("portal_cliente")
+}
+
+/// Configuración del portal por cuenta (pantalla 12, Ley 21.719): qué ve el cliente por defecto, qué
+/// datos de los guardias, qué tipos de documento y a quién se envía el informe mensual. Una fila por
+/// cuenta; sin fila rigen los defectos de `@opai/domain` (fail-closed en datos personales).
+model ConfigPortalCuenta {
+  id                    String   @id @default(uuid(7)) @db.Uuid
+  tenantId              String   @map("tenant_id") @db.Uuid
+  cuentaId              String   @map("cuenta_id") @db.Uuid
+  /// Tipos de documento de los guardias que el cliente puede ver (nunca liquidaciones ni salud).
+  tiposDocumentoVisibles String[] @default([]) @map("tipos_documento_visibles")
+  /// Secciones por instalación visibles: cobertura, rondas, novedades, supervision, accesos, documentos.
+  seccionesVisibles     String[] @default([]) @map("secciones_visibles")
+  muestraFotoGuardias   Boolean  @default(true) @map("muestra_foto_guardias")
+  muestraRutGuardias    Boolean  @default(true) @map("muestra_rut_guardias")
+  /// "omitido" (defecto) | "incluido": si el RUT sale en los reportes descargables (decide Carlos).
+  rutEnReportes         String   @default("omitido") @map("rut_en_reportes")
+  /// El cliente gestiona sus listas de acceso (solo donde tiene Accesos contratado).
+  gestionaListas        Boolean  @default(true) @map("gestiona_listas")
+  destinatariosInforme  String[] @default([]) @map("destinatarios_informe")
+  actualizadoPor        String?  @map("actualizado_por") @db.Uuid
+  createdAt             DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, cuentaId])
+  @@map("config_cuentas")
+  @@schema("portal_cliente")
+}
