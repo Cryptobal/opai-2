@@ -1,0 +1,88 @@
+// Módulo Finanzas · Flujo de caja (CAR-91, Brief 20, ADR-026). Schema propio `finanzas`.
+// Toda tabla con tenant_id, RLS `tenant_isolation`, IDs uuid(7), columnas snake_case por @map. Como en
+// Tickets, tenant_id no lleva @relation a Tenant (no se toca core.prisma): la FK a core.tenants va en
+// el SQL de la migración. Montos en CLP enteros. Aquí solo viven la capa Plan editable, los cierres y
+// los ajustes; las capas Real y Comprometido se derivan de hechos (DTE, banco, nómina) cuando esos
+// módulos existan, nunca se copian (ADR-026).
+
+/// Fila de la planilla (ingreso o egreso). `vinculo` es el texto con el origen de la cifra (cuenta,
+/// instalación o centro de costo); `arrastre` activa el arrastre en cadena al reprogramar.
+model FlujoFila {
+  id        String   @id @default(uuid(7)) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
+  /// "ingreso" | "egreso".
+  seccion   String
+  etiqueta  String
+  vinculo   String?
+  arrastre  Boolean  @default(false)
+  orden     Int      @default(0)
+  activa    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  celdas FlujoCelda[]
+
+  @@unique([tenantId, etiqueta])
+  @@index([tenantId, seccion, orden])
+  @@map("flujo_filas")
+  @@schema("finanzas")
+}
+
+/// Cifra de una fila en una semana (lunes ISO). `capa`: "plan" (editable), "comprometido" o "real"
+/// ("real" = dada por cumplida a mano, con su fecha). Una celda por (fila, semana).
+model FlujoCelda {
+  id          String    @id @default(uuid(7)) @db.Uuid
+  tenantId    String    @map("tenant_id") @db.Uuid
+  filaId      String    @map("fila_id") @db.Uuid
+  semana      DateTime  @db.Date
+  capa        String    @default("plan")
+  monto       Int
+  nota        String?
+  cumplidaEn  DateTime? @map("cumplida_en") @db.Timestamptz(6)
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  fila FlujoFila @relation(fields: [filaId], references: [id], onDelete: Restrict)
+
+  @@unique([tenantId, filaId, semana])
+  @@index([tenantId, semana])
+  @@map("flujo_celdas")
+  @@schema("finanzas")
+}
+
+/// Cierre semanal: saldo sugerido contra el saldo del banco, motivo y sello. Una semana sellada no
+/// admite cambios en sus celdas; reabrirla exige motivo (queda en la auditoría).
+model FlujoCierre {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  tenantId       String    @map("tenant_id") @db.Uuid
+  semana         DateTime  @db.Date
+  saldoSugerido  Int       @map("saldo_sugerido")
+  saldoBanco     Int       @map("saldo_banco")
+  motivo         String?
+  sellada        Boolean   @default(true)
+  selladaEn      DateTime? @map("sellada_en") @db.Timestamptz(6)
+  selladaPorId   String?   @map("sellada_por_id") @db.Uuid
+  motivoReapertura String?  @map("motivo_reapertura")
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, semana])
+  @@map("flujo_cierres")
+  @@schema("finanzas")
+}
+
+/// Ajustes del flujo por empresa (una fila por tenant): saldo inicial del horizonte y umbral de alerta.
+model FlujoAjustes {
+  id           String   @id @default(uuid(7)) @db.Uuid
+  tenantId     String   @unique @map("tenant_id") @db.Uuid
+  saldoInicial Int      @default(0) @map("saldo_inicial")
+  /// Saldo bajo el cual la planilla marca la semana (0 = solo alerta bajo cero).
+  umbral       Int      @default(0)
+  /// Semana (lunes) desde la que parte el saldo inicial.
+  desde        DateTime @db.Date
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("flujo_ajustes")
+  @@schema("finanzas")
+}

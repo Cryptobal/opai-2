@@ -42,4 +42,9 @@ export const AJUSTES: Record<string, Ajuste> = {
   "core.retencion_ejecuciones": { valores: () => ({ modo: "simulacion", filas: 0 }) },
   // Fila con tenant_id: fuente "tenant", sin región (CHECK dias_calendario_coherencia_check).
   "core.dias_calendario": { valores: () => ({ fuente: "tenant", region: null }) },
+  // Finanzas · Flujo de caja (CAR-91): sección válida y semanas en lunes (CHECK de cada tabla).
+  "finanzas.flujo_filas": { valores: () => ({ seccion: "ingreso" }) },
+  "finanzas.flujo_celdas": { valores: () => ({ semana: "2026-01-05", monto: 1 }) },
+  "finanzas.flujo_cierres": { valores: () => ({ semana: "2026-01-05" }) },
+  "finanzas.flujo_ajustes": { valores: () => ({ desde: "2026-01-05" }) },
 };
