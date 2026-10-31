@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 311 pares pantalla→capacidad · 271 con herramienta · 40 excepciones justificadas · 0 faltantes.
+**Resumen:** 322 pares pantalla→capacidad · 282 con herramienta · 40 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -76,6 +76,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/_centro` | `core.config.set` | `core_config_set` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.modules.list` | `core_modules_list` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.resumen.contadores` | `core_resumen_contadores` | existe |
+| compartido | `app/(erp)/configuracion/_leads` | `comercial.canales.get` | `comercial_canales_get` | existe |
+| compartido | `app/(erp)/configuracion/_leads` | `comercial.canales.update` | `comercial_canales_update` | existe |
 | compartido | `app/(erp)/configuracion/_nomina` | `nomina.conceptos.actualizar` | `nomina_conceptos_actualizar` | existe |
 | compartido | `app/(erp)/configuracion/_nomina` | `nomina.conceptos.crear` | `nomina_conceptos_crear` | existe |
 | compartido | `app/(erp)/configuracion/_nomina` | `nomina.conceptos.listar` | `nomina_conceptos_listar` | existe |
@@ -206,6 +208,15 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.previsualizar` | `core_vinculos_previsualizar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.terminar` | `core_vinculos_terminar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.update` | `core_vinculos_update` | existe |
+| compartido | `app/(erp)/solicitudes/_componentes` | `comercial.solicitudes.convertir` | `comercial_solicitudes_convertir` | existe |
+| compartido | `app/(erp)/solicitudes/_componentes` | `comercial.solicitudes.create` | `comercial_solicitudes_create` | existe |
+| compartido | `app/(erp)/solicitudes/_componentes` | `comercial.solicitudes.derivar` | `comercial_solicitudes_derivar` | existe |
+| compartido | `app/(erp)/solicitudes/_componentes` | `comercial.solicitudes.descartar` | `comercial_solicitudes_descartar` | existe |
+| compartido | `app/(erp)/solicitudes/_componentes` | `comercial.solicitudes.get` | `comercial_solicitudes_get` | existe |
+| compartido | `app/(erp)/solicitudes/_componentes` | `comercial.solicitudes.list` | `comercial_solicitudes_list` | existe |
+| compartido | `app/(erp)/solicitudes/_componentes` | `comercial.solicitudes.marcar_duplicada` | `comercial_solicitudes_marcar_duplicada` | existe |
+| compartido | `app/(erp)/solicitudes/_componentes` | `comercial.solicitudes.reabrir` | `comercial_solicitudes_reabrir` | existe |
+| compartido | `app/(erp)/solicitudes/_componentes` | `core.users.list` | `core_users_list` | existe |
 | compartido | `app/(erp)/tickets/_componentes` | `tickets.tickets.listar` | `tickets_tickets_listar` | existe |
 | compartido | `app/(erp)/tickets/_componentes` | `tickets.tickets.obtener` | `tickets_tickets_obtener` | existe |
 | compartido | `app/(erp)/tickets/[id]/_componentes` | `tickets.tickets.aprobar` | `tickets_tickets_aprobar` | existe |

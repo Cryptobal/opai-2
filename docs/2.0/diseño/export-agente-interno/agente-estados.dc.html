@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<div data-theme="{{ theme }}" style="background:var(--ds-fill);color:var(--ds-fg);min-height:100vh;padding:32px;font-family:var(--font-sans);display:flex;flex-direction:column;gap:24px">
+<header style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap"><div><div class="t-caption" style="color:var(--ds-fg-muted)">OPAI 2.0 · Agente interno · v1</div><h1 class="t-title" style="margin:4px 0 0">Estados</h1></div>
+<div style="display:flex;gap:8px"><button class="chip toggle {{ lightCls }}" onClick="{{ setLight }}">Claro</button><button class="chip toggle {{ darkCls }}" onClick="{{ setDark }}">Oscuro</button></div></header>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;align-items:start">
+<sc-for list="{{ estados }}" as="e" hint-placeholder-count="6">
+  <div style="display:flex;flex-direction:column;gap:8px"><div class="t-label">{{ e.name }}</div>
+    <div style="background:{{ e.bg }};color:var(--ds-fg);border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px;display:flex;flex-direction:column;gap:8px"><div class="t-body" style="font-weight:500">{{ e.title }}</div><div class="t-body-sm" style="color:var(--ds-fg-muted)">{{ e.text }}</div><div style="display:{{ e.ctaDisplay }}"><button class="btn btn-secondary">{{ e.cta }}</button></div></div></div>
+</sc-for>
+  <div style="display:flex;flex-direction:column;gap:8px"><div class="t-label">Cargando · hilo</div><div style="background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px;display:flex;flex-direction:column;gap:8px"><div style="align-self:flex-end;width:55%;height:36px;border-radius:var(--radius-md);background:var(--ds-fill)"></div><div style="width:90%;height:14px;border-radius:var(--radius-sm);background:var(--ds-fill)"></div><div style="width:70%;height:14px;border-radius:var(--radius-sm);background:var(--ds-fill)"></div></div></div>
+  <div style="display:flex;flex-direction:column;gap:8px"><div class="t-label">Presupuesto agotado · compositor desactivado</div><div style="background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px;display:flex;flex-direction:column;gap:8px"><div class="t-body-sm" style="background:var(--ds-warning-muted);color:var(--ds-warning-fg);padding:10px 12px;border-radius:var(--radius-md)">Se agotó el presupuesto mensual.</div><div style="display:flex;gap:8px;opacity:.45"><button class="icon-btn" disabled><span class="ic i-paperclip"></span></button><div class="input" style="flex:1"><span class="ph">Pregunta</span></div><button class="btn btn-primary icon" disabled><span class="ic i-arrow-up"></span></button></div></div></div>
+  <div style="display:flex;flex-direction:column;gap:8px"><div class="t-label">Lanzador · tooltip ⌘J</div><div style="background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px;display:flex;gap:8px;align-items:center;justify-content:flex-end"><button class="icon-btn" aria-label="Buscar"><span class="ic i-search"></span></button><span style="position:relative"><button class="icon-btn" style="background:var(--ds-fill)" aria-label="Preguntar a OPAI"><span class="ic i-bot"></span></button><span class="t-caption" style="position:absolute;top:48px;right:0;white-space:nowrap;background:var(--ds-fg);color:var(--ds-bg);padding:4px 8px;border-radius:var(--radius-sm)">Preguntar a OPAI · ⌘J</span></span><button class="icon-btn" aria-label="Notificaciones"><span class="ic i-bell"></span></button></div></div>
+  <div style="display:flex;flex-direction:column;gap:8px"><div class="t-label">Menú ⋯ de la ficha</div><div style="width:280px;background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:var(--radius-md);box-shadow:0 12px 32px -8px rgba(17,17,19,.18);padding:4px" role="menu"><div style="height:44px;display:flex;align-items:center;gap:12px;padding:0 12px;background:var(--ds-fill);border-radius:var(--radius-sm)" class="t-body-sm"><span class="ic sm i-bot"></span>Preguntar a OPAI sobre esta cuenta</div><div style="height:44px;display:flex;align-items:center;gap:12px;padding:0 12px" class="t-body-sm"><span class="ic sm i-pin"></span>Fijar</div></div></div>
+  <div style="display:flex;flex-direction:column;gap:8px"><div class="t-label">Select de modelo · sin key propia</div><div style="background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:var(--radius-md);padding:4px" class="t-body-sm"><div style="padding:6px 12px;color:var(--ds-fg-muted)" class="t-caption">Anthropic</div><div style="min-height:44px;display:flex;align-items:center;gap:8px;padding:0 12px">Claude Haiku<span class="badge b-neutral nodot">Económico</span></div><div style="min-height:44px;display:flex;align-items:center;gap:8px;padding:0 12px;background:var(--ds-fill)">Claude Sonnet<span class="badge b-neutral nodot">Estándar</span></div><div style="min-height:44px;display:flex;align-items:center;gap:8px;padding:0 12px">Claude Opus<span class="badge b-neutral nodot">Potente</span></div><div style="min-height:44px;display:flex;align-items:center;padding:0 12px;border-top:1px solid var(--ds-border)">Modelo de OPAI · se cobra por uso</div></div></div>
+  <div style="display:flex;flex-direction:column;gap:8px"><div class="t-label">Select de modelo · con key propia</div><div style="background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:var(--radius-md);padding:4px" class="t-body-sm"><div style="padding:6px 12px;color:var(--ds-fg-muted)" class="t-caption">Anthropic</div><div style="min-height:44px;display:flex;align-items:center;gap:8px;padding:0 12px;background:var(--ds-fill)">Claude Sonnet<span class="badge b-neutral nodot">Estándar</span></div><div style="min-height:44px;display:flex;align-items:center;gap:8px;padding:0 12px">Claude Opus<span class="badge b-neutral nodot">Potente</span></div></div></div>
+  <div style="display:flex;flex-direction:column;gap:8px"><div class="t-label">Adjuntos rechazados</div><div style="display:flex;flex-direction:column;gap:6px"><div style="border:1px solid var(--ds-danger-fg);background:var(--ds-danger-muted);border-radius:var(--radius-md);padding:10px" class="t-body-sm">a.exe · <span style="color:var(--ds-danger-fg)">Formato no admitido</span></div><div style="border:1px solid var(--ds-danger-fg);background:var(--ds-danger-muted);border-radius:var(--radius-md);padding:10px" class="t-body-sm">6.º archivo · <span style="color:var(--ds-danger-fg)">Máximo 5 archivos por mensaje</span></div><div style="border:1px solid var(--ds-danger-fg);background:var(--ds-danger-muted);border-radius:var(--radius-md);padding:10px" class="t-body-sm">acta.pdf · <span style="color:var(--ds-danger-fg)">Protegido con contraseña</span></div></div></div>
+</div></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { dark: false };
+  renderVals() {
+    const d = this.state.dark;
+    const w = 'var(--ds-warning-muted)', r = 'var(--ds-danger-muted)', s = 'var(--ds-surface)', f = 'var(--ds-fill)';
+    const E = (name, title, text, cta, bg) => ({ name, title, text, cta: cta || '', ctaDisplay: cta ? 'block' : 'none', bg });
+    return {
+      theme: d ? 'dark' : 'light', lightCls: d ? '' : 'on', darkCls: d ? 'on' : '',
+      setLight: () => this.setState({ dark: false }), setDark: () => this.setState({ dark: true }),
+      estados: [
+        E('Pensando', 'Preparando vista previa', 'Buscando la cuenta Bodegas del Sur S.A.', 'Detener', s),
+        E('Sin key propia funcionando · administrador', 'La key de tu empresa no responde', 'OPAI no usa su propia key en su lugar.', 'Revisar integraciones', r),
+        E('Sin key propia funcionando · persona', 'El agente no está disponible', 'La key de tu empresa no responde.', 'Avísale a un administrador', r),
+        E('Límite de frecuencia', 'Hiciste muchas consultas seguidas', 'Podrás volver a preguntar en 0:42.', '', f),
+        E('Solicitud demasiado grande', 'Tu mensaje es demasiado largo', 'Acórtalo o divídelo en dos mensajes.', '', f),
+        E('Presupuesto al 80 % · solo administradores', 'Usaste el 80 % del presupuesto mensual', '$ 120.000 de $ 150.000.', '', w),
+        E('Sin conexión', 'Sin conexión', 'Tu borrador se conserva.', 'Reintentar', f),
+        E('Corte de red durante la ejecución', 'Se cortó la conexión mientras se ejecutaba el plan', 'Revisa el historial antes de volver a pedirlo.', 'Ver historial', r),
+        E('Plan vencido', 'Este plan venció', 'Pídelo de nuevo para ver los datos actuales.', 'Pedir de nuevo', f),
+        E('No leído', 'No pude leer contrato.pdf', 'Respondí con el resto.', '', w),
+        E('Error del proveedor', 'El proveedor de IA de tu empresa no responde.', 'No se hizo ningún cambio.', 'Reintentar', r),
+        E('Vacío', '¿En qué te ayudo?', 'Elige una sugerencia o escribe tu pregunta.', 'Resume el negocio Renovación 2027', s),
+        E('Sin permiso', 'Sin permiso', 'Tu rol no permite cambiar supervisores. Pídeselo a alguien con ese permiso o a un administrador.', 'Pídele acceso a un administrador', f)
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

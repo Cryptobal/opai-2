@@ -76,7 +76,7 @@
 </div>
 <span class="t-caption">Valores cotizados por Atlas Seguridad SpA. No incluyen costos internos.</span>
 </section>
-<sc-if value="{{ onlyDownload }}" hint-placeholder-val="{{ true }}"><span class="t-body-sm muted">Para aceptarla, responde el correo de la cotización o escríbele a Carlos Irigoyen.</span></sc-if>
+<sc-if value="{{ onlyDownload }}" hint-placeholder-val="{{ true }}"><span class="t-body-sm muted">Para aceptarla, responde el correo de la cotización o escríbele a Andrés Molina.</span></sc-if>
 </div>
 </sc-if>
 </x-import>
@@ -124,7 +124,7 @@ class Component extends DCLogic {
         { key: "pdf", label: "", align: "right", render: (r) => NS.IconButton ? h(NS.IconButton, { icon: "download", label: "Descargar PDF de " + r.id }) : null }],
       card: (r) => ({ icon: "briefcase", title: r.serv, subtitle: r.fecha + " · " + r.total + " neto", meta: r.id, badge: { tone: r.tone, label: r.estado }, chevron: true }),
       canAccept: accept, onlyDownload: !accept,
-      meta: [{ label: "Fecha de envío", value: sel.fecha, numeric: true }, { label: "Válida hasta", value: sel.vence, numeric: true }, { label: "Preparada por", value: "Carlos Irigoyen · Atlas Seguridad SpA" }, { label: "Vigencia del servicio", value: "Mensual, desde la fecha de inicio" }],
+      meta: [{ label: "Fecha de envío", value: sel.fecha, numeric: true }, { label: "Válida hasta", value: sel.vence, numeric: true }, { label: "Preparada por", value: "Andrés Molina · Atlas Seguridad SpA" }, { label: "Vigencia del servicio", value: "Mensual, desde la fecha de inicio" }],
       lineas: P.COT_LINEAS || [],
       lCols: [{ key: "item", label: "Servicio", strong: true }, { key: "cant", label: "Cantidad", muted: true }, { key: "unit", label: "Valor unitario", align: "right" }, { key: "sub", label: "Subtotal", align: "right" }],
       lCard: (r) => ({ title: r.item, subtitle: r.cant + " · " + r.unit, trailing: h("span", { className: "t-numeric", style: { fontWeight: 500 } }, r.sub) }),

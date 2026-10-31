@@ -49,4 +49,7 @@ export const AJUSTES: Record<string, Ajuste> = {
   "nomina.conceptos": { valores: () => ({ tipo: "haber" }) },
   "nomina.periodos": { fijas: ["mes"], valores: () => ({ mes: 1 }) },
   "nomina.obligaciones": { fijas: ["mes", "tipo"], valores: () => ({ tipo: "lre", mes: 1 }) },
+  // Leads: canal y estado dentro de sus listas (CHECK *_canal_check y *_estado_check).
+  "comercial.solicitudes": { valores: () => ({ canal: "manual", estado: "nueva" }) },
+  "comercial.canales_solicitud": { valores: () => ({ canal: "manual", estado: "sin_conectar" }) },
 };
