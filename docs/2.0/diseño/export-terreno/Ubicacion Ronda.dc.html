@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-accent)}</style>
+</helmet>
+<div class="ds screen" data-theme="{{ theme }}" data-device="{{ device }}" data-screen-label="{{ label }}" style="width:100%;height:100%">
+  <div class="safe-top"></div>
+  <div class="topbar" style="height:60px;padding-left:16px"><span class="wordmark">OPAI</span><span style="flex:1"></span><span class="t-caption" style="padding-right:8px">Terreno</span></div>
+  <div class="scroll" style="overflow:auto">
+    <div style="padding:8px 16px 24px;display:flex;flex-direction:column;gap:20px;max-width:560px;margin:0 auto">
+      <div style="display:flex;flex-direction:column;gap:4px"><h1 class="t-title m0">Tu ubicación en la ronda</h1><span class="t-body-sm muted" style="text-wrap:pretty">{{ v.lead }}</span></div>
+      <section class="card" style="overflow:hidden" aria-label="Ejemplo de lo que se registra">
+        <div style="position:relative;height:200px">
+          <dc-import name="Mapa Rondas" variant="{{ v.map }}" next="{{ 4 }}" acc="{{ 20 }}" dist="Tú" legend="{{ true }}" hint-size="100%,200px" style="display:block;width:100%;height:100%"></dc-import>
+        </div>
+      </section>
+      <div class="card" style="overflow:hidden">
+        <sc-for list="{{ v.rows }}" as="r" hint-placeholder-count="3">
+          <div class="rowcard" style="align-items:flex-start"><span class="ic i-{{ r.ic }} muted" aria-hidden="true" style="margin-top:2px"></span><span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span class="t-label">{{ r.t }}</span><span class="t-caption" style="text-wrap:pretty">{{ r.d }}</span></span></div>
+        </sc-for>
+      </div>
+      <div style="display:flex;gap:12px;padding:12px 16px;border-radius:10px;background:var(--ds-info-muted);color:var(--ds-info-fg)"><span class="ic i-lock" aria-hidden="true" style="flex:none"></span><span class="t-body-sm">Fuera de la ronda no se guarda nada. <a href="#" style="color:inherit;text-decoration:underline">Cómo tratamos tus datos</a></span></div>
+    </div>
+  </div>
+  <div style="flex:none;padding:12px 16px 46px;border-top:1px solid var(--ds-border);background:var(--ds-bg)"><div style="max-width:560px;margin:0 auto"><button class="btn btn-primary block" style="height:56px;font-size:16px">Entendido</button></div></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:375,&quot;height&quot;:812},&quot;gps&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;traza&quot;,&quot;options&quot;:[&quot;traza&quot;,&quot;marca&quot;],&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;Decide Carlos&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;light&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;phone&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;tsType&quot;:&quot;string&quot;}}">
+const V={
+  traza:{map:'guardia',lead:'Mientras haces una ronda, guardamos tu posición cada 10 segundos. Al terminarla, dejamos de registrarla.',
+    rows:[{ic:'route',t:'Se registra el recorrido completo',d:'Tu supervisor ve por dónde caminaste entre un punto y otro, y los tramos sin señal.'},{ic:'clock',t:'Solo entre «Iniciar ronda» y «Terminar ronda»',d:'Si pausas la ronda, la traza se detiene.'},{ic:'alert',t:'Usa más batería',d:'Unos 4 % por ronda de 40 minutos. Te avisamos bajo 15 %.'}]},
+  marca:{map:'radios',lead:'Guardamos tu posición solo en el momento en que marcas cada punto. Entre un punto y otro no se registra nada.',
+    rows:[{ic:'pin',t:'Una posición por punto',d:'Tu supervisor ve dónde estabas al marcar, la distancia al punto y la precisión del GPS.'},{ic:'clock',t:'Solo al marcar',d:'Entre puntos el GPS está apagado.'},{ic:'check',t:'Casi no usa batería',d:'Unos segundos de GPS por punto.'}]}
+};
+class Component extends DCLogic{
+  renderVals(){const p=this.props;const k=p.gps??'traza';return {theme:p.theme??'light',device:p.device??'phone',label:'Ubicación en la ronda · '+k,v:V[k]||V.traza};}
+}
+</script>
+</body>
+</html>
