@@ -4,8 +4,8 @@ import { normalizarRut } from "@opai/domain";
 
 import { defineCapability } from "../define";
 import { aFecha, hoy, textoOpcional } from "../core/maestros/comun";
-import { reglaDeNegocio } from "../errores";
-import { PERMISO_COMPRAS, montoSchema, plazoPagoDefecto, tipoDteSchema } from "./comun";
+import { prohibido, reglaDeNegocio } from "../errores";
+import { PERMISO_COMPRAS, PERMISO_PROVEEDORES, montoSchema, plazoPagoDefecto, tipoDteSchema } from "./comun";
 import { camposDocumento, totalYError } from "./compras-escritura";
 
 const MAX_FILAS = 200;
@@ -53,6 +53,16 @@ export const comprasImportar = defineCapability({
     const proveedores = new Map(
       (await ctx.db.proveedor.findMany({ where: { rut: { in: ruts } } })).map((p) => [p.rut, p]),
     );
+    // La importación crea proveedores nuevos sin permiso propio (L37): exigir proveedores.manage
+    // antes de escribir nada si al menos una fila lo requiere, igual en dryRun que en real.
+    const crearaProveedores =
+      input.crearProveedores &&
+      input.documentos.some((d) => {
+        const rut = normalizarRut(d.proveedorRut);
+        return !!rut && !proveedores.has(rut) && !!d.proveedorRazonSocial;
+      });
+    if (crearaProveedores && !ctx.autorizar(PERMISO_PROVEEDORES))
+      throw prohibido("No tienes permiso para crear proveedores nuevos durante la importación.");
     const plazo = await plazoPagoDefecto(ctx);
     const filas: z.infer<typeof resultadoFila>[] = [];
     const vistos = new Set<string>();

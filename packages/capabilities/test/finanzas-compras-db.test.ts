@@ -31,6 +31,15 @@ describe.skipIf(!urlPropietario)("Finanzas · libro de compras (PR 1)", () => {
       medidor,
     });
   const ejecutar = (id: string, input: Datos, opts?: { dryRun?: boolean }) => mod.executeCapability(ctx(), id, input, opts);
+  // Mismo acceso que `ctx()` salvo que niega `finanzas:proveedores.manage` (review 5720654705 del
+  // Revisor, CAR-98): sirve para probar que `finanzas.compras.importar` exige ese permiso además de
+  // `finanzas:compras.manage` cuando va a crear un proveedor nuevo.
+  const ctxSinProveedores = () => {
+    const base = ctx();
+    return { ...base, autorizar: (p: string) => p !== "finanzas:proveedores.manage" && base.autorizar(p) };
+  };
+  const ejecutarSinProveedores = (id: string, input: Datos, opts?: { dryRun?: boolean }) =>
+    mod.executeCapability(ctxSinProveedores(), id, input, opts);
   const dato = async <T>(id: string, input: Datos, opts?: { dryRun?: boolean }): Promise<T> => {
     const r = await ejecutar(id, input, opts);
     if (!r.ok) throw new Error(`${id}: ${r.error.code} ${r.error.message}`);
@@ -122,5 +131,28 @@ describe.skipIf(!urlPropietario)("Finanzas · libro de compras (PR 1)", () => {
     const brutos = 5 * 100_000;
     expect(l.resumen.documentos).toBe(6);
     expect(l.resumen.neto).toBe(brutos - 10_000);
+  });
+
+  it("sin proveedores.manage, importar un proveedor nuevo falla prohibido en dryRun y en real, sin escribir nada", async () => {
+    const filas = [{ proveedorRut: "19.876.543-0", proveedorRazonSocial: "Suministros Ficticios SpA", ...doc(5001), proveedorId: undefined }];
+    const prev = await ejecutarSinProveedores("finanzas.compras.importar", { documentos: filas, crearProveedores: true }, { dryRun: true });
+    expect(prev).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+    const real = await ejecutarSinProveedores("finanzas.compras.importar", { documentos: filas, crearProveedores: true });
+    expect(real).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+    expect(await e.admin.proveedor.count({ where: { tenantId, rut: "19876543-0" } })).toBe(0);
+    expect(await e.admin.documentoRecibido.count({ where: { tenantId, folio: 5001 } })).toBe(0);
+  });
+
+  it("con proveedores.manage, importar un proveedor nuevo crea el proveedor y el documento", async () => {
+    const filas = [{ proveedorRut: "19.876.543-0", proveedorRazonSocial: "Suministros Ficticios SpA", ...doc(5002), proveedorId: undefined }];
+    const real = await dato<{ nuevos: number; proveedoresCreados: number }>("finanzas.compras.importar", { documentos: filas, crearProveedores: true });
+    expect(real).toMatchObject({ nuevos: 1, proveedoresCreados: 1 });
+    expect(await e.admin.proveedor.count({ where: { tenantId, rut: "19876543-0" } })).toBe(1);
+  });
+
+  it("sin proveedores.manage pero sin proveedores nuevos, la importación pasa igual", async () => {
+    const filas = [{ proveedorRut: "76.543.210-3", ...doc(5003), proveedorId: undefined }];
+    const real = await ejecutarSinProveedores("finanzas.compras.importar", { documentos: filas, crearProveedores: true });
+    expect(real).toMatchObject({ ok: true, data: { nuevos: 1, proveedoresCreados: 0 } });
   });
 });
