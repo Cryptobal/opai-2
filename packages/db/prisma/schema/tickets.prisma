@@ -1,0 +1,94 @@
+// Módulo Tickets (CAR-84, Brief 13 · PR 1, ADR-025): tickets internos sin chat libre, con
+// responsable (dueño) obligatorio, y solicitudes con aprobación de un paso. Schema propio `tickets`.
+// Toda tabla con tenant_id, RLS `tenant_isolation`, IDs uuid(7), columnas snake_case por @map. El
+// tenant_id NO lleva @relation a Tenant (no se toca core.prisma): la FK a core.tenants va en el SQL
+// de la migración. Las referencias a usuarios del núcleo (solicitante, responsable, actor) también
+// van en el SQL, sin relación Prisma cruzada. El vínculo polimórfico a otras entidades y los
+// adjuntos vía `core.documentos` quedan para el PR 2 (ver BRIEF-13 §Plan).
+
+/// Tipo de ticket configurable por tenant (modulos/tickets.md §3). `rolesPermitidos` vacío = sin
+/// tipos ocultos: todos los roles con acceso al módulo lo ven y lo pueden usar al crear.
+model TipoTicket {
+  id                        String   @id @default(uuid(7)) @db.Uuid
+  tenantId                  String   @map("tenant_id") @db.Uuid
+  nombre                    String
+  descripcion               String?
+  /// Responsable por defecto al crear: "rol" (usa responsableDefectoRol) o "usuario".
+  responsableDefectoTipo    String   @default("rol") @map("responsable_defecto_tipo")
+  responsableDefectoRol     String?  @map("responsable_defecto_rol")
+  responsableDefectoUsuarioId String? @map("responsable_defecto_usuario_id") @db.Uuid
+  requiereAprobacion        Boolean  @default(false) @map("requiere_aprobacion")
+  /// Rol que aprueba las solicitudes de este tipo; obligatorio si requiereAprobacion.
+  aprobadorRol              String?  @map("aprobador_rol")
+  /// SLA opcional, apagado por defecto (decisión de Carlos, 30-oct-2026 11:46 CLT).
+  slaHoras                  Int?     @map("sla_horas")
+  /// Roles que pueden crear este tipo; vacío = todos los roles con acceso al módulo.
+  rolesPermitidos           String[] @default([]) @map("roles_permitidos")
+  activo                    Boolean  @default(true)
+  orden                     Int      @default(0)
+  createdAt                 DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                 DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tickets Ticket[]
+
+  @@unique([tenantId, nombre])
+  @@index([tenantId])
+  @@map("tipos_ticket")
+  @@schema("tickets")
+}
+
+/// Ticket (modulos/tickets.md §4): estados ADR-025 (abierto → en_curso → resuelto → cerrado, más
+/// rechazado). Siempre tiene responsable desde que se crea: no se guarda sin responsableId.
+model Ticket {
+  id             String    @id @default(uuid(7)) @db.Uuid
+  tenantId       String    @map("tenant_id") @db.Uuid
+  tipoId         String    @map("tipo_id") @db.Uuid
+  titulo         String
+  descripcion    String
+  /// "p1" (más urgente) a "p4" (extracción 1.0, rondas-y-tickets.md §2).
+  prioridad      String    @default("p3")
+  /// "abierto" | "en_curso" | "resuelto" | "cerrado" | "rechazado" (ADR-025).
+  estado         String    @default("abierto")
+  solicitanteId  String    @map("solicitante_id") @db.Uuid
+  responsableId  String    @map("responsable_id") @db.Uuid
+  motivoRechazo  String?   @map("motivo_rechazo")
+  /// Datos propios de una solicitud con aprobación (fechas, tipo de permiso); texto plano, sin
+  /// interpretarse como acción (regla del diseño: el texto externo nunca es botón ni enlace).
+  datosSolicitud Json      @default("{}") @map("datos_solicitud")
+  slaVenceEn     DateTime? @map("sla_vence_en") @db.Timestamptz(6)
+  resueltoEn     DateTime? @map("resuelto_en") @db.Timestamptz(6)
+  cerradoEn      DateTime? @map("cerrado_en") @db.Timestamptz(6)
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  tipo    TipoTicket     @relation(fields: [tipoId], references: [id], onDelete: Restrict)
+  eventos TicketEvento[]
+
+  @@index([tenantId, estado])
+  @@index([tenantId, responsableId])
+  @@index([tenantId, solicitanteId])
+  @@index([tenantId, tipoId])
+  @@map("tickets")
+  @@schema("tickets")
+}
+
+/// Línea de tiempo del ticket: comentarios y cambios de estado/responsable/aprobación, append-only
+/// (las correcciones son hechos nuevos, igual que el resto de hechos registrados en el núcleo).
+model TicketEvento {
+  id          String   @id @default(uuid(7)) @db.Uuid
+  tenantId    String   @map("tenant_id") @db.Uuid
+  ticketId    String   @map("ticket_id") @db.Uuid
+  /// "creado" | "comentario" | "cambio_estado" | "reasignado" | "aprobado" | "rechazado".
+  tipo        String
+  actorId     String   @map("actor_id") @db.Uuid
+  comentario  String?
+  estadoDesde String?  @map("estado_desde")
+  estadoHasta String?  @map("estado_hasta")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  ticket Ticket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId, ticketId])
+  @@map("ticket_eventos")
+  @@schema("tickets")
+}
