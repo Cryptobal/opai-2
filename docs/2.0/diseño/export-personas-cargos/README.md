@@ -27,7 +27,7 @@ Fuentes de las pantallas numeradas: `Personas.dc.html`, `Cargos.dc.html`, `Confi
 ## Pendientes para la próxima vuelta
 
 - P1 «No recontratar» sigue como propuesta (pantalla 04); no se construye hasta que Carlos la apruebe.
-- Reemplazar «Carlos Irigoyen» en los textos de los estados Forbidden (`Personas.dc.html`, `Cargos.dc.html`, `Config Personas.dc.html`) por un administrador inventado.
+- (resuelto 30-oct-2026) Se reemplazó el nombre real en los textos de los estados Forbidden (`Personas.dc.html`, `Cargos.dc.html`, `Config Personas.dc.html`) por uno ficticio.
 - Falta una Hoja de componentes propia del módulo.
 
 ## Qué es REFERENCIA VISUAL, no código

@@ -104,7 +104,7 @@
 <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Asunto · reposo" value="Cámara del andén norte sin señal" hint-size="100%,72px"></x-import>
 <div style="display:flex;flex-direction:column;gap:6px"><span class="t-label">Asunto · foco</span><div class="input focus"><span class="t-body" style="flex:1">Cámara del andén norte|</span></div></div>
 <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Dueño · error" value="" placeholder="Elige un dueño" options="{{ owners }}" error="Asesoría legal no tiene dueño por defecto. Elige uno para poder crear el ticket." hint-size="100%,96px"></x-import>
-<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Dueño · deshabilitado" value="Carlos Irigoyen" options="{{ owners }}" disabled="{{ true }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Dueño · deshabilitado" value="Andrés Molina" options="{{ owners }}" disabled="{{ true }}" hint-size="100%,72px"></x-import>
 <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Motivo" hint="Obligatorio. Lo ven el solicitante y ambos dueños." rows="{{ 2 }}" value="Jorge supervisa Planta Quilicura." hint-size="100%,120px"></x-import>
 <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Responder · deshabilitado" rows="{{ 2 }}" disabled="{{ true }}" placeholder="El ticket está cerrado" hint-size="100%,120px"></x-import>
 </div>
@@ -128,12 +128,12 @@
 <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" row-key="folio" hint-size="100%,140px"></x-import>
 <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;align-items:start">
 <div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);overflow:hidden">
-<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" title="Cámara del andén norte sin señal" subtitle="TK-1052 · Mantención · Carlos Irigoyen" meta="Vence en 2 h 10 min" badge="{{ bEnCurso }}" hint-size="100%,80px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" title="Cámara del andén norte sin señal" subtitle="TK-1052 · Mantención · Andrés Molina" meta="Vence en 2 h 10 min" badge="{{ bEnCurso }}" hint-size="100%,80px"></x-import>
 <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" initials="CH" title="Camila Herrera" subtitle="Permiso administrativo · 06-11-2026" meta="Planta Quilicura · hoy 07:42" badge="{{ bAbierto }}" chevron="{{ true }}" align="start" hint-size="100%,88px"></x-import>
 </div>
 <div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);overflow:hidden">
 <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.SelectableRow" selected="{{ true }}" title="Permiso" subtitle="Aprueba: supervisor directo" meta="Sin SLA" hint-size="100%,64px"></x-import>
-<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.SelectableRow" selected="{{ false }}" title="Mantención" subtitle="Dueño: Carlos Irigoyen" meta="SLA 24 h" hint-size="100%,64px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.SelectableRow" selected="{{ false }}" title="Mantención" subtitle="Dueño: Andrés Molina" meta="SLA 24 h" hint-size="100%,64px"></x-import>
 </div>
 </div>
 <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Solicitud" rows="{{ pairs }}" hint-size="100%,160px"></x-import>
@@ -143,7 +143,7 @@
 <div style="display:flex;gap:8px;align-items:center"><span class="t-subheading">Alerta</span><span class="badge b-neutral nodot">DS 2.0</span></div>
 <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Si apruebas" hint-size="100%,72px">Se registra el permiso en Asistencia para el 06-11-2026.</x-import>
 <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="success" titulo="Resuelto · esperando que lo cierres" hint-size="100%,72px">Si quedó bien, ciérralo; si no, reábrelo.</x-import>
-<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="danger" titulo="Rechazado por Carlos Irigoyen · 30-10-2026 09:12" hint-size="100%,72px">Motivo: «La cámara 4 está en garantía y la cambia el proveedor.»</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="danger" titulo="Rechazado por Andrés Molina · 30-10-2026 09:12" hint-size="100%,72px">Motivo: «La cámara 4 está en garantía y la cambia el proveedor.»</x-import>
 </div>
 
 <div style="display:flex;flex-direction:column;gap:12px;padding:24px 0;border-top:1px solid var(--ds-border)">
@@ -152,7 +152,7 @@
 <div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" size="sm" icon="ticket" title="No tienes tickets asignados" description="Cuando seas dueño de un ticket aparecerá aquí." hint-size="100%,200px"></x-import></div>
 <div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Loading" variant="rows" count="{{ 3 }}" label="Cargando tickets" hint-size="100%,200px"></x-import></div>
 <div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar los tickets" description="Revisa tu conexión." code="TK-503-7F2A" on-retry="{{ noop }}" hint-size="100%,240px"></x-import></div>
-<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No puedes ver todos los tickets" description="Pídele acceso a Carlos Irigoyen." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,240px"></x-import></div>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No puedes ver todos los tickets" description="Pídele acceso a Andrés Molina." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,240px"></x-import></div>
 </div>
 </div>
 
@@ -181,8 +181,8 @@
 <div style="display:flex;gap:8px;align-items:center"><span class="t-subheading">Timeline con nota</span><span class="badge b-accent">Nuevo para el DS</span></div>
 <span class="t-body-sm muted">Extiende Timeline con «nota»: el texto de una respuesta o motivo, en texto plano sobre fill, radio md, padding 12. Sin enlaces ni botones dentro.</span>
 <ol class="tl" style="list-style:none;margin:0;padding:0">
-<li class="tl-item"><span class="tl-dot agent" aria-hidden="true"><span class="ic sm i-bot" style="width:14px;height:14px"></span></span><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;padding-top:2px"><span class="t-body-sm"><span style="font-weight:500">OPAI</span> asignó el dueño por defecto del tipo Mantención</span><span class="t-body-sm" style="display:flex;flex-wrap:wrap;gap:6px;align-items:baseline"><span class="muted">Dueño</span><span class="tl-was">Sin dueño</span><span class="subtle">→</span><span>Carlos Irigoyen</span></span><span class="t-caption t-numeric muted">29-10-2026 22:14</span></div></li>
-<li class="tl-item"><span class="tl-dot person" aria-hidden="true">CI</span><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;padding-top:2px"><span class="t-body-sm"><span style="font-weight:500">Carlos Irigoyen</span> respondió</span><p class="t-body" style="margin:4px 0 0;padding:12px;background:var(--ds-fill);border-radius:var(--radius-md);white-space:pre-wrap">Coordiné con el técnico para hoy entre 14:00 y 16:00.</p><span class="t-caption t-numeric muted">30-10-2026 08:12</span></div></li>
+<li class="tl-item"><span class="tl-dot agent" aria-hidden="true"><span class="ic sm i-bot" style="width:14px;height:14px"></span></span><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;padding-top:2px"><span class="t-body-sm"><span style="font-weight:500">OPAI</span> asignó el dueño por defecto del tipo Mantención</span><span class="t-body-sm" style="display:flex;flex-wrap:wrap;gap:6px;align-items:baseline"><span class="muted">Dueño</span><span class="tl-was">Sin dueño</span><span class="subtle">→</span><span>Andrés Molina</span></span><span class="t-caption t-numeric muted">29-10-2026 22:14</span></div></li>
+<li class="tl-item"><span class="tl-dot person" aria-hidden="true">AM</span><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;padding-top:2px"><span class="t-body-sm"><span style="font-weight:500">Andrés Molina</span> respondió</span><p class="t-body" style="margin:4px 0 0;padding:12px;background:var(--ds-fill);border-radius:var(--radius-md);white-space:pre-wrap">Coordiné con el técnico para hoy entre 14:00 y 16:00.</p><span class="t-caption t-numeric muted">30-10-2026 08:12</span></div></li>
 </ol>
 </div>
 
@@ -234,7 +234,7 @@ class Component extends DCLogic {
       tabItems: [{ id: "mios", label: "Míos" }, { id: "asignados", label: "Asignados a mí" }, { id: "todos", label: "Todos", disabled: true }],
       segVista: [{ value: "pendientes", label: "Por aprobar" }, { value: "historial", label: "Historial" }],
       segSla: [{ value: "off", label: "Apagado" }, { value: "on", label: "Con plazo" }],
-      owners: ["Carlos Irigoyen", "Paula Contreras", "Jorge Muñoz"],
+      owners: ["Andrés Molina", "Paula Contreras", "Jorge Muñoz"],
       tipos: ["Mantención", "Insumos", "Permiso"],
       files: [{ nombre: "anden-norte-cam4.jpg", size: 1240000, estado: "listo" }, { nombre: "libro-novedades.pdf", size: 340000, estado: "subiendo", subido: 150000 }, { nombre: "video-andén.mov", size: 48000000, estado: "error", mensaje: "Supera 10 MB." }],
       cols: [
@@ -245,7 +245,7 @@ class Component extends DCLogic {
         { key: "sla", label: "SLA", render: (r) => (r.sla ? badge(r.sla[0], r.sla[1]) : null) },
       ],
       rows: [
-        { folio: "TK-1052", asunto: "Cámara del andén norte sin señal", dueno: "Carlos Irigoyen", t: "accent", l: "En curso", sla: ["warning", "Vence en 2 h 10 min"] },
+        { folio: "TK-1052", asunto: "Cámara del andén norte sin señal", dueno: "Andrés Molina", t: "accent", l: "En curso", sla: ["warning", "Vence en 2 h 10 min"] },
         { folio: "TK-1051", asunto: "Permiso administrativo 06-11-2026", dueno: "Jorge Muñoz", t: "info", l: "Abierto" },
       ],
       bEnCurso: { tone: "accent", label: "En curso" }, bAbierto: { tone: "info", label: "Abierto" },
