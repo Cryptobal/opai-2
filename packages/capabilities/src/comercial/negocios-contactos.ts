@@ -51,7 +51,19 @@ export const negociosSetContactos = defineCapability({
     }
     // Fuera del alcance responde igual que inexistente: no confirma que el contacto exista.
     const dela = await visibles(ctx, ids);
-    if (dela.length !== ids.length || dela.some((c) => c.cuentaId !== negocio.cuentaId)) {
+    // Contacto N–N (CAR-26): sirve el contacto de la cuenta del negocio o vinculado a ella.
+    const vinculados = new Set(
+      (
+        await ctx.db.contactoCuenta.findMany({
+          where: { contactoId: { in: ids }, cuentaId: negocio.cuentaId },
+          select: { contactoId: true },
+        })
+      ).map((v) => v.contactoId),
+    );
+    if (
+      dela.length !== ids.length ||
+      dela.some((c) => c.cuentaId !== negocio.cuentaId && !vinculados.has(c.id))
+    ) {
       throw reglaDeNegocio("Todos los contactos deben ser de la cuenta del negocio.");
     }
     // El reemplazo solo toca los vínculos que el actor ve; los ocultos se conservan intactos.

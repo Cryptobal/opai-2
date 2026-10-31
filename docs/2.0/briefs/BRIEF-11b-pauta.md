@@ -26,7 +26,7 @@ Este brief es el PR 2 del Brief 11 (el PR 1, Puestos, ya está en `main`).
 ## Plan
 
 **PR 1 (este):**
-1. Esquema `pauta` + migración `20261031020000_pauta_series_excepciones` (aditiva, FORCE RLS, historial append-only) + test de aislamiento.
+1. Esquema `pauta` + migración `20261031140000_pauta_series_excepciones` (aditiva, FORCE RLS, historial append-only) + test de aislamiento.
 2. Dominio puro (`packages/domain/src/pauta`): expansión de series y excepciones a la grilla con feriados, cobertura, no doblar.
 3. Capacidades (`packages/capabilities/src/pauta`): `pauta.mes.leer`, `pauta.resumen.leer`, `pauta.ppc.listar`, `pauta.historial.listar`, `pauta.series.fijar`, `pauta.excepciones.crear`, `pauta.excepciones.anular`.
 4. Pantallas P01–P05 y la vista de PPC (P06 como filtro) en `/pauta`.
@@ -35,6 +35,8 @@ Este brief es el PR 2 del Brief 11 (el PR 1, Puestos, ya está en `main`).
 **PR 2 (CAR-86):** Diaria, reemplazos, refuerzos, marcas, alertas, exportación y notificación al guardia, cuando existan Asistencia (CAR-89), Turnos extra (CAR-96) y Portal Supervisor.
 
 ## Reglas y decisiones aplicadas
+
+- **Orden de migraciones (encargo de Carlos para el PR #180):** renombrar la migración no aplicada a `20261031140000_pauta_series_excepciones`, después de CRM (#190) y de las migraciones `20261031130000`/`20261031131000` del #186. El SQL se conserva byte a byte; no se aplica ninguna migración en este encargo.
 
 - **R11:** la pauta guarda series y excepciones y calcula el resto. Repintar no toca el pasado. El día de hoy: sin marcas ni cobertura confirmada (todavía no existen), el cambio rige desde hoy.
 - **Titular:** vive en la serie (con su vigencia) y debe tener un vínculo laboral vigente en la instalación del puesto. Sin titular, el turno es PPC «sin titular».
