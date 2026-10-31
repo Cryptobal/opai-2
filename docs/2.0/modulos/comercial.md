@@ -9,7 +9,7 @@
 Que Gard (y cualquier empresa de servicios con personal) reciba, ordene y cierre sus oportunidades de venta en un solo lugar, sin copiar datos entre pantallas: cada solicitud que llega queda atendida a tiempo, cada negocio sabe qué cuenta, qué instalaciones y qué personas involucra, y al ganarlo las instalaciones quedan listas para operar. Un agente puede hacer todo lo que hace una persona, con vista previa y aprobación para lo irreversible.
 
 **Cómo se nota que funciona:**
-- 100 % de las solicitudes con primera respuesta dentro del plazo (SLA) del tenant.
+- Toda solicitud queda en la bandeja y termina convertida o descartada con motivo (sin SLA de primera respuesta, decisión de Carlos del 30-oct-2026).
 - Durante dos semanas seguidas Gard gestiona todos sus negocios en 2.0 y deja de usar 1.0 para leads, cuentas, contactos y negocios (criterio de la fase 2 en `ROADMAP.md`).
 - La conciliación diaria 1.0 ↔ 2.0 no reporta diferencias.
 
@@ -116,7 +116,7 @@ Ningún campo de esta sección es visible para el cliente ni para el trabajador 
 
 **Solicitudes**
 - **R1.** Toda solicitud entra a la bandeja en estado `nueva`, nunca directo como cuenta. Su texto original se guarda tal cual y se muestra marcado como contenido externo.
-- **R2.** Toda solicitud tiene un plazo de primera respuesta (SLA, ajuste del tenant). La primera respuesta es una actividad de contacto registrada desde la solicitud o desde el negocio que nació de ella. Al vencer el plazo, se avisa al responsable y, si sigue sin respuesta al doble del plazo, al owner (si el tenant activó esos avisos).
+- **R2.** Sin SLA de primera respuesta: el plazo no existe en Comercial (decisión de Carlos, Page del 25-oct y 30-oct-2026, módulo liviano). El acuse de recibo al solicitante es configurable y viene apagado por defecto (ADR-020). Ver [BRIEF-07-leads](../briefs/BRIEF-07-leads.md).
 - **R3.** Derivar asigna un responsable y pasa la solicitud a `en_revision`.
 - **R4.** Convertir crea o reutiliza, en un solo paso:
   - la cuenta: si el RUT o el nombre canónico ya existen, se propone la existente;
