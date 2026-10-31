@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ shellDevice }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" user="{{ user }}" active="{{ navActive }}" title="" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a los vencimientos" description="Los vencimientos de cuentas e instalaciones son para owner, admin y gerente. Pídele acceso a un administrador." action-label="Pedir acceso" hint-size="100%,400px"></x-import>
+</sc-if>
+<sc-if value="{{ notForbidden }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" title="Documentos" subtitle="Vencimientos de cuentas e instalaciones · los de personas están en Personas" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ docTabs }}" value="ven" hint-size="100%,44px"></x-import>
+<div style="display:flex;flex-wrap:wrap;gap:8px;margin:16px 0" class="chip-row">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Cuentas" activo="{{ true }}" hint-size="100px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Instalaciones" activo="{{ true }}" hint-size="130px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipAgregar" hint-size="80px,32px">Tipo</x-import>
+</div>
+<span class="t-caption" style="display:block;margin-bottom:12px">Avisos a los 30 y 60 días por defecto · editables por tipo en Configuración › Módulos › Documentos</span>
+<sc-if value="{{ isNormal }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:{{ groupGap }}">
+<sc-for list="{{ grupos }}" as="g" hint-placeholder-count="3">
+<div style="display:flex;flex-direction:column;gap:8px">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="margin:0 -16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowGroupHeader" count="{{ g.count }}" hint-size="100%,32px">{{ g.titulo }}</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" rows="{{ g.rows }}" columns="{{ cols }}" cards="{{ true }}" to-card="{{ toCard }}" hint-size="100%,200px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<span style="display:flex;gap:8px;align-items:baseline"><span class="t-label">{{ g.titulo }}</span><span class="t-caption t-numeric">{{ g.count }}</span></span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" rows="{{ g.rows }}" columns="{{ cols }}" hint-size="100%,160px"></x-import>
+</sc-if>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<div aria-busy="true" style="display:flex;flex-direction:column;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="120px" height="{{ 14 }}" hint-size="120px,14px"></x-import>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);overflow:hidden">
+<sc-for list="{{ skel }}" as="s" hint-placeholder-count="5">
+<div style="display:flex;gap:12px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--ds-border)">
+<div style="flex:1;display:flex;flex-direction:column;gap:6px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ s.w }}" height="{{ 14 }}" hint-size="40%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="28%" height="{{ 12 }}" hint-size="28%,12px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="132px" height="{{ 32 }}" radius="{{ 10 }}" hint-size="132px,32px"></x-import>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="check-circle" title="Nada vence en los próximos 60 días" description="Las pólizas, planes OS-10 y contratos de cuentas e instalaciones están vigentes." action="{{ emptyAction }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar los vencimientos" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="DOC-VEN-503 · 30-10-2026 12:57" hint-size="100%,320px"></x-import>
+</sc-if>
+</sc-if>
+</x-import>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = this.props.device ?? "desktop";
+    const estado = this.props.estado ?? "normal";
+    const isPhone = device === "phone", isTablet = device === "tablet";
+    const B = (tone, t) => (NS.Badge ? h(NS.Badge, { tone }, t) : t);
+    const ren = () => (NS.Button ? h(NS.Button, { variant: "secondary", size: "sm", icon: "upload" }, "Subir renovación") : null);
+    const g = [
+      { titulo: "Vencidos", count: 2, rows: [
+        { id: 1, doc: "Póliza de responsabilidad civil", ent: "Bodega Lampa", tent: "Instalación", fecha: "12-10-2026", rel: "Venció hace 18 días", tone: "danger" },
+        { id: 2, doc: "Certificado de seguro de vida guardias", ent: "Logística Andina SpA", tent: "Cuenta", fecha: "25-10-2026", rel: "Venció hace 5 días", tone: "danger" },
+      ] },
+      { titulo: "Vencen en 30 días", count: 2, rows: [
+        { id: 3, doc: "Plan de seguridad OS-10", ent: "Planta Quilicura", tent: "Instalación", fecha: "21-11-2026", rel: "En 22 días", tone: "warning" },
+        { id: 4, doc: "Garantía de fiel cumplimiento", ent: "Inmobiliaria Apoquindo", tent: "Cuenta", fecha: "28-11-2026", rel: "En 29 días", tone: "warning" },
+      ] },
+      { titulo: "Vencen en 60 días", count: 2, rows: [
+        { id: 5, doc: "Contrato de servicios", ent: "Torre Apoquindo", tent: "Instalación", fecha: "15-12-2026", rel: "En 46 días", tone: "info" },
+        { id: 6, doc: "Certificado de adhesión a mutualidad", ent: "Logística Andina SpA", tent: "Cuenta", fecha: "31-12-2026", rel: "En 62 días", tone: "info" },
+      ] },
+    ];
+    g[2].rows[1].rel = "En 60 días"; g[2].rows[1].fecha = "29-12-2026";
+    const entCell = (r) => h("span", { style: { display: "flex", flexDirection: "column" } }, NS.Enlace ? h(NS.Enlace, { variante: "fila", href: "#", style: { minHeight: 0 } }, r.ent) : r.ent, h("span", { className: "t-caption" }, r.tent));
+    const cols = [
+      { key: "doc", label: "Documento", strong: true, width: isTablet ? undefined : "36%" },
+      { key: "ent", label: "Cuenta o instalación", render: entCell },
+      { key: "fecha", label: "Vence", render: (r) => h("span", { style: { display: "flex", flexDirection: "column", gap: 2, alignItems: "flex-start" } }, h("span", { className: "t-numeric" }, r.fecha), B(r.tone, r.rel)) },
+      { key: "a", label: "", align: "right", render: ren },
+    ];
+    return {
+      user: { name: "Paula Ibáñez", initials: "PI", role: "Administradora" },
+      theme: this.props.theme ?? "light",
+      shellDevice: isPhone ? "phone" : "desktop",
+      navActive: isPhone ? "mas" : "doc",
+      isPhone, notPhone: !isPhone,
+      groupGap: isPhone ? "8px" : "24px",
+      grupos: g, cols,
+      toCard: (r) => ({ icon: "file", title: r.doc, subtitle: r.ent + " · " + r.fecha, badge: { tone: r.tone, label: r.rel }, trailing: NS.IconButton ? h(NS.IconButton, { icon: "upload", label: "Subir renovación de " + r.doc }) : null }),
+      isNormal: estado === "normal", isLoading: estado === "cargando", isEmpty: estado === "vacio", isError: estado === "error",
+      isForbidden: estado === "sinpermiso", notForbidden: estado !== "sinpermiso",
+      emptyAction: NS.Button ? h(NS.Button, { variant: "secondary", size: "lg" }, "Ver explorador") : null,
+      skel: [{ w: "46%" }, { w: "38%" }, { w: "52%" }, { w: "34%" }, { w: "44%" }],
+      docTabs: [{ id: "exp", label: "Explorador" }, { id: "ven", label: "Vencimientos" }, { id: "pla", label: "Plantillas" }, { id: "fir", label: "Firmas pendientes" }],
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "neg", label: "Negocios", icon: "briefcase" }, { id: "pau", label: "Pauta", icon: "calendar" }, { id: "mas", label: "Más", icon: "more" }],
+      groups: [
+        { items: [{ id: "ini", label: "Inicio", icon: "home" }] },
+        { title: "Comercial", items: [] }, { title: "Clientes", items: [] }, { title: "Operaciones", items: [] }, { title: "Personas", items: [] },
+        { items: [{ id: "doc", label: "Documentos", icon: "file" }] },
+        { items: [{ id: "cfg", label: "Configuración", icon: "grid" }] },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
