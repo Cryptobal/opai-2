@@ -1,0 +1,75 @@
+// Módulo Comercial — Leads / Solicitudes (Brief 07 · BRIEF-07-leads, PR 1). Mismo schema de Postgres
+// `comercial` que Negocios. Toda tabla con tenant_id, RLS `tenant_isolation`, IDs uuid(7), columnas
+// snake_case por @map. El tenant_id NO lleva @relation a Tenant (la FK a core.tenants va en el SQL).
+// La verificación de mismo tenant de las referencias (negocio, cuenta, contacto, solicitud original)
+// va por trigger en el SQL.
+
+/// Solicitud entrante (lead). Entra siempre en estado `nueva` (R1); el texto original se guarda tal
+/// cual en `texto_original` y se muestra como contenido externo (texto plano). Nunca habilita acciones.
+model Solicitud {
+  id                String    @id @default(uuid(7)) @db.Uuid
+  tenantId          String    @map("tenant_id") @db.Uuid
+  /// "formulario_web" | "correo" | "agente" | "manual"
+  canal             String
+  /// "nueva" | "en_revision" | "convertida" | "descartada"
+  estado            String    @default("nueva")
+  /// Texto original de quien escribe, sin tocar. Contenido externo: texto plano, nunca enlace ni botón.
+  textoOriginal     String    @map("texto_original")
+  asunto            String?
+  /// Datos propuestos/detectados (editables antes de convertir).
+  nombre            String?
+  empresa           String?
+  email             String?
+  /// E.164.
+  telefono          String?
+  /// RUT canónico.
+  rut               String?
+  comuna            String?
+  servicio          String?
+  responsableId     String?   @map("responsable_id") @db.Uuid
+  /// Quién la registró: "usuario" | "agente" | "sistema" (canales automáticos del PR 2).
+  registradaPorTipo String    @map("registrada_por_tipo")
+  registradaPorId   String?   @map("registrada_por_id") @db.Uuid
+  motivoDescarte    String?   @map("motivo_descarte")
+  descartadaEn      DateTime? @map("descartada_en") @db.Timestamptz(6)
+  convertidaEn      DateTime? @map("convertida_en") @db.Timestamptz(6)
+  /// Si es duplicada, la solicitud original a la que se enlaza.
+  duplicadaDeId     String?   @map("duplicada_de_id") @db.Uuid
+  negocioId         String?   @map("negocio_id") @db.Uuid
+  cuentaId          String?   @map("cuenta_id") @db.Uuid
+  contactoId        String?   @map("contacto_id") @db.Uuid
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  duplicadaDe Solicitud?  @relation("duplicadas", fields: [duplicadaDeId], references: [id], onDelete: SetNull)
+  duplicadas  Solicitud[] @relation("duplicadas")
+  negocio     Negocio?    @relation(fields: [negocioId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, estado, createdAt])
+  @@index([tenantId, canal])
+  @@index([tenantId, responsableId])
+  @@index([tenantId, negocioId])
+  @@map("solicitudes")
+  @@schema("comercial")
+}
+
+/// Canal de entrada configurado por tenant (una fila por canal). En el PR 1 solo guarda su estado
+/// visible y el responsable por defecto: sin credenciales ni claves (el correo de entrada y el
+/// endpoint del formulario quedan para el PR 2).
+model CanalSolicitud {
+  id                  String   @id @default(uuid(7)) @db.Uuid
+  tenantId            String   @map("tenant_id") @db.Uuid
+  /// "formulario_web" | "correo" | "agente" | "manual"
+  canal               String
+  /// "sin_conectar" | "conectado" | "revocado". Agente y manual no se conectan: nacen `conectado`.
+  estado              String   @default("sin_conectar")
+  dominioAutorizado   String?  @map("dominio_autorizado")
+  remitentesIgnorados String[] @default([]) @map("remitentes_ignorados")
+  responsableId       String?  @map("responsable_id") @db.Uuid
+  createdAt           DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@unique([tenantId, canal])
+  @@map("canales_solicitud")
+  @@schema("comercial")
+}
