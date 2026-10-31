@@ -25,6 +25,8 @@ describe("core · contacto N–N, actividad y etiquetas contra Postgres real", (
       rol: "owner",
       actor: { tipo: "user", id: userId },
       usuario: { id: userId, nombre: "Ana", email: `ana-${sufijo}@prueba.cl`, platformRole: null },
+      portal: "erp",
+      portalesMembresia: ["erp"],
       modulosActivos: ["comercial"],
     });
 
