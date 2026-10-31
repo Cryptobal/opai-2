@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-accent)}</style>
+</helmet>
+<div class="ds screen" data-theme="{{ theme }}" data-device="{{ device }}" data-screen-label="{{ label }}" style="width:100%;height:100%;flex-direction:row">
+<sc-if value="{{ isTab }}" hint-placeholder-val="{{ false }}">
+  <nav class="rail" aria-label="Navegación principal">
+    <button class="rail-portal" aria-label="Portal Supervisor · cambiar"><span class="tenant">AS</span>Superv.</button>
+    <a href="#"><span class="ic i-home" aria-hidden="true"></span>Inicio</a>
+    <a class="on" href="#" aria-current="page"><span class="ic i-route" aria-hidden="true"></span>Visitas y rondas</a>
+    <a href="#"><span class="ic i-ticket" aria-hidden="true"></span>Tickets</a>
+    <a href="#"><span class="ic i-user" aria-hidden="true"></span>Perfil</a>
+  </nav>
+</sc-if>
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;position:relative">
+  <sc-if value="{{ isPhone }}" hint-placeholder-val="{{ true }}">
+    <div class="safe-top"></div>
+    <div class="topbar">
+      <sc-if value="{{ phoneBack }}"><button class="btn btn-ghost" style="height:44px;padding:0 8px 0 4px;gap:2px;color:var(--ds-fg-muted)"><span class="ic i-chevron-left" aria-hidden="true"></span>Rondas</button></sc-if>
+      <sc-if value="{{ phoneHome }}"><button class="portal-btn"><span class="tenant">AS</span>Supervisor<span class="ic sm i-updown subtle" aria-hidden="true"></span></button></sc-if>
+      <span style="flex:1"></span>
+      <button class="icon-btn" aria-label="Buscar"><span class="ic i-search" aria-hidden="true"></span></button>
+      <button class="icon-btn" aria-label="Más acciones"><span class="ic i-more" aria-hidden="true"></span></button>
+    </div>
+  </sc-if>
+  <sc-if value="{{ isTab }}">
+    <header class="appbar"><h1 class="t-heading m0" style="flex:1">Visitas y rondas</h1><span class="live">En vivo · 10:24</span><button class="btn btn-secondary"><span class="ic sm i-plus" aria-hidden="true"></span>Crear punto</button></header>
+  </sc-if>
+
+  <sc-if value="{{ nonOk }}">
+    <sc-if value="{{ isLoad }}">
+      <div aria-busy="true" aria-label="Cargando" style="flex:1;padding:16px;display:flex;flex-direction:column;gap:14px">
+        <div class="skel" style="height:28px;width:50%"></div>
+        <div style="display:flex;gap:8px"><div class="skel" style="height:32px;width:96px;border-radius:999px"></div><div class="skel" style="height:32px;width:88px;border-radius:999px"></div><div class="skel" style="height:32px;width:88px;border-radius:999px"></div></div>
+        <sc-for list="{{ skelRows }}" as="r" hint-placeholder-count="5"><div style="display:flex;flex-direction:column;gap:8px;padding:12px 0;border-bottom:1px solid var(--ds-border)"><div class="skel" style="height:20px;width:80px;border-radius:999px"></div><div class="skel" style="height:14px;width:70%"></div><div class="skel" style="height:12px;width:40%"></div></div></sc-for>
+      </div>
+    </sc-if>
+    <sc-if value="{{ isMsg }}">
+      <div class="state" role="status" style="flex:1">
+        <span class="state-ic" style="background:var(--ds-fill)"><span class="ic lg i-{{ msg.ic }}" aria-hidden="true"></span></span>
+        <div class="txt"><span class="t-subheading">{{ msg.t }}</span><span class="t-body-sm muted" style="text-wrap:pretty">{{ msg.d }}</span></div>
+        <button class="btn btn-primary"><span class="ic sm i-{{ msg.aic }}" aria-hidden="true"></span>{{ msg.a }}</button>
+      </div>
+    </sc-if>
+  </sc-if>
+
+  <sc-if value="{{ showSplit }}">
+  <div style="flex:1;min-height:0;display:flex">
+    <sc-if value="{{ showList }}">
+      <section aria-label="Rondas de hoy" style="width:{{ listW }};flex:none;display:flex;flex-direction:column;border-right:1px solid var(--ds-border);min-width:0">
+        <div style="padding:12px 16px 8px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;flex-direction:column"><span class="t-heading">Rondas de hoy</span><span class="t-caption">Mis instalaciones · <span class="t-numeric">29-10-2026</span></span></div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <button class="input" aria-haspopup="listbox" aria-label="Instalación" style="cursor:pointer;text-align:left"><span class="ic sm i-building muted" aria-hidden="true"></span><span class="grow t-body">Todas las instalaciones</span><span class="ic sm i-chevron-down muted" aria-hidden="true"></span></button>
+            <label class="input" style="cursor:text"><span class="ic sm i-search muted" aria-hidden="true"></span><input class="bare" placeholder="Buscar ronda, guardia o punto" aria-label="Buscar ronda, guardia o punto"></label>
+          </div>
+          <div class="chip-row" role="group" aria-label="Filtrar rondas">
+            <sc-for list="{{ filtros }}" as="f" hint-placeholder-count="5"><button class="chip toggle {{ f.on }}" aria-pressed="{{ f.p }}">{{ f.t }}<span class="cnt t-numeric">{{ f.n }}</span></button></sc-for>
+          </div>
+        </div>
+        <div style="flex:1;min-height:0;overflow:auto;border-top:1px solid var(--ds-border)">
+          <sc-for list="{{ rondas }}" as="r" hint-placeholder-count="6">
+            <button class="rowcard" style="border-left:0;border-right:0;border-top:0;cursor:pointer;background:{{ r.bg }}">
+              <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px">
+                <span style="display:flex;align-items:center;gap:6px"><span class="badge b-{{ r.tone }}">{{ r.est }}</span><span class="t-caption" style="display:{{ r.ad }};align-items:center;gap:4px;color:var(--ds-danger-fg)"><span class="ic sm i-alert" aria-hidden="true"></span>{{ r.an }}</span></span>
+                <span class="t-label">{{ r.inst }}</span>
+                <span class="t-caption">{{ r.pl }} · {{ r.g }}</span>
+              </span>
+              <span style="display:flex;flex-direction:column;align-items:flex-end;gap:6px"><span class="t-caption t-numeric">{{ r.h }}</span><span class="t-label-sm t-numeric">{{ r.av }}</span></span>
+            </button>
+          </sc-for>
+        </div>
+      </section>
+    </sc-if>
+    <sc-if value="{{ showFicha }}">
+      <section aria-label="Ficha de la ronda" style="flex:1;min-width:0;display:flex;flex-direction:column">
+        <div style="padding:12px 16px 0;display:flex;flex-direction:column;gap:4px">
+          <div style="display:flex;align-items:center;gap:8px"><span class="badge b-accent">En curso</span><span class="badge b-danger nodot"><span class="ic sm i-flag" aria-hidden="true"></span>1 incidente abierto</span><span class="badge b-neutral nodot"><span class="ic sm i-alert" aria-hidden="true"></span>1 anomalía</span></div>
+          <span class="t-heading">Ronda perimetral</span>
+          <span class="t-body-sm muted">Planta Quilicura · María Fernanda Soto · inició <span class="t-numeric">10:02</span></span>
+        </div>
+        <div class="tabs-wrap" style="padding:8px 4px 0"><div class="tabs" role="tablist">
+          <button class="tab on" role="tab" aria-selected="true">Resumen</button><button class="tab" role="tab">Marcas<span class="n">4</span></button><button class="tab" role="tab">Rastro</button><button class="tab" role="tab">Anomalías y revisión<span class="n">1</span></button><button class="tab" role="tab">Documentos</button><button class="tab" role="tab">Actividad</button>
+        </div></div>
+        <div style="flex:1;min-height:0;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div class="t-label-sm" style="display:flex;justify-content:space-between"><span class="t-numeric">4 de 6 puntos</span><span class="t-numeric muted">22 min · límite 40 min</span></div>
+            <div class="progress"><span style="width:67%"></span></div>
+          </div>
+          <section class="card" style="overflow:hidden">
+            <div class="card-h"><span class="txt"><span class="t-label">Confianza de la ronda</span><span class="t-caption">Modelo de confianza v1 · 75 de 75 aplicables</span></span><span class="badge b-success">Alta</span></div>
+            <div style="padding:0 16px 8px">
+              <sc-for list="{{ trust }}" as="t" hint-placeholder-count="6">
+                <div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid var(--ds-border)"><span class="t-body-sm">{{ t.k }}</span><span class="t-body-sm t-numeric" style="color:{{ t.c }}">{{ t.v }}</span></div>
+              </sc-for>
+            </div>
+          </section>
+          <section class="card" style="overflow:hidden;height:200px;flex:none">
+            <dc-import name="Mapa Rondas" variant="recorrido" incidente="{{ true }}" hint-size="100%,200px" style="display:block;width:100%;height:100%"></dc-import>
+          </section>
+          <section style="display:flex;flex-direction:column;gap:10px">
+            <span class="t-overline">Marcas</span>
+            <div class="tl">
+              <sc-for list="{{ marcas }}" as="m" hint-placeholder-count="6">
+                <div class="tl-item">
+                  <span class="tl-dot" style="border:2px solid {{ m.bd }};background:{{ m.bg }};color:{{ m.fg }}"><span class="t-caption" style="color:inherit;font-weight:600">{{ m.n }}</span></span>
+                  <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+                    <div style="display:flex;justify-content:space-between;gap:8px"><span class="t-label">{{ m.nom }}</span><span class="t-caption t-numeric">{{ m.h }}</span></div>
+                    <span class="t-caption" style="color:{{ m.dc }}">{{ m.d }}</span>
+                    <a href="#" style="display:{{ m.nd }};flex-direction:column;gap:4px;margin-top:4px;padding:8px 12px;border:1px solid var(--ds-border);border-radius:10px;text-decoration:none;color:var(--ds-fg)"><span style="display:flex;align-items:center;gap:6px;flex-wrap:wrap"><span class="ic sm i-flag" aria-hidden="true"></span><span class="t-label-sm t-mono">{{ m.novId }}</span><span class="badge b-{{ m.novGt }} nodot">{{ m.novG }}</span><span class="badge b-{{ m.novEt }}">{{ m.novE }}</span></span><span class="t-body-sm">{{ m.nov }}</span><span class="t-caption" style="color:var(--ds-accent)">Abrir en el libro de novedades</span></a>
+                  </div>
+                </div>
+              </sc-for>
+            </div>
+          </section>
+        </div>
+      </section>
+    </sc-if>
+  </div>
+  </sc-if>
+
+  <sc-if value="{{ S.s11 }}">
+    <div style="flex:1;min-height:0;overflow:auto">
+      <div style="padding:8px 16px 16px;display:flex;flex-direction:column;gap:16px;max-width:560px;margin:0 auto">
+        <div style="display:flex;flex-direction:column;gap:2px"><h1 class="t-title m0">Nuevo punto</h1><span class="t-body-sm muted">Planta Quilicura · se crea en tu ubicación</span></div>
+        <div class="field"><label class="lbl" for="np-n">Nombre</label><input id="np-n" class="input" value="Cerco sur"></div>
+        <section class="card" style="padding:16px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px"><span class="t-label">Usar mi ubicación actual</span><span class="t-caption t-numeric">20 s</span></div>
+          <div style="display:flex;flex-direction:column;gap:6px"><div class="t-label-sm" style="display:flex;justify-content:space-between"><span>Medición completa</span><span class="t-numeric">20 de 20 s</span></div><div class="progress"><span style="width:100%"></span></div></div>
+          <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));border:1px solid var(--ds-border);border-radius:10px">
+            <div style="padding:10px 12px;border-right:1px solid var(--ds-border);display:flex;flex-direction:column"><span class="t-caption">Precisión resultante</span><span class="t-subheading t-numeric" style="color:var(--ds-warning-fg)">28 m</span></div>
+            <div style="padding:10px 12px;display:flex;flex-direction:column"><span class="t-caption">Lecturas</span><span class="t-subheading t-numeric">18</span></div>
+          </div>
+          <div role="alert" style="display:flex;gap:10px;padding:12px;border-radius:10px;background:var(--ds-warning-muted);color:var(--ds-warning-fg)"><span class="ic i-alert" aria-hidden="true" style="flex:none"></span><span style="display:flex;flex-direction:column;gap:2px"><span class="t-label">La precisión es baja para marcar solo por GPS</span><span class="t-body-sm">Te sugerimos QR + GPS e imprimir una etiqueta para este punto.</span></span></div>
+          <button class="btn btn-secondary" style="align-self:flex-start"><span class="ic sm i-refresh" aria-hidden="true"></span>Volver a medir</button>
+        </section>
+        <div class="field"><span class="lbl">Modo de marca</span><div class="seg" role="radiogroup" style="display:flex"><button role="radio" aria-checked="false" style="height:40px">QR</button><button role="radio" aria-checked="false" style="height:40px">GPS</button><button class="on" role="radio" aria-checked="true" style="height:40px">QR + GPS</button></div><span class="hint">Hereda de la instalación: QR + GPS</span></div>
+        <div class="field"><label class="lbl" for="np-r">Radio</label><div class="input"><input id="np-r" class="bare" value="15"><span class="trail t-body-sm">m</span></div><span class="hint">Por defecto 15 m · máximo 19 m</span></div>
+      </div>
+    </div>
+    <div style="flex:none;padding:12px 16px;border-top:1px solid var(--ds-border)"><div style="max-width:560px;margin:0 auto"><button class="btn btn-primary lg block">Guardar punto</button></div></div>
+  </sc-if>
+
+  <sc-if value="{{ isPhone }}" hint-placeholder-val="{{ true }}">
+    <nav class="tabbar" aria-label="Navegación principal">
+      <a href="#"><span class="ic i-home" aria-hidden="true"></span>Inicio</a>
+      <a class="on" href="#" aria-current="page"><span class="ic i-route" aria-hidden="true"></span>Visitas y rondas</a>
+      <a href="#"><span class="ic i-ticket" aria-hidden="true"></span>Tickets</a>
+      <a href="#"><span class="ic i-user" aria-hidden="true"></span>Perfil</a>
+    </nav>
+  </sc-if>
+</div>
+
+<sc-if value="{{ S.s10 }}">
+  <div class="scrim"></div>
+  <div class="sheet {{ sheetCls }}" role="dialog" aria-labelledby="an-t">
+    <div class="sheet-body" style="display:flex;flex-direction:column;gap:16px;padding-top:20px">
+      <div style="display:flex;flex-direction:column;gap:4px"><span class="badge b-danger" style="align-self:flex-start">Anomalía abierta</span><span id="an-t" class="t-subheading">{{ an.t }}</span><span class="t-body-sm muted">{{ an.where }}</span></div>
+      <section style="display:flex;flex-direction:column;gap:8px"><span class="t-overline">Evidencia</span>
+        <div class="card" style="overflow:hidden">
+          <sc-for list="{{ an.ev }}" as="e" hint-placeholder-count="3"><div style="display:flex;justify-content:space-between;gap:12px;padding:10px 16px;border-bottom:1px solid var(--ds-border)"><span class="t-body-sm muted">{{ e.k }}</span><span class="t-body-sm t-numeric" style="text-align:right">{{ e.v }}</span></div></sc-for>
+          <div style="height:120px"><dc-import name="Mapa Rondas" variant="radios" legend="{{ false }}" hint-size="100%,120px" style="display:block;width:100%;height:100%"></dc-import></div>
+        </div>
+      </section>
+      <div style="display:flex;gap:10px;padding:12px;border-radius:10px;background:var(--ds-info-muted);color:var(--ds-info-fg)"><span class="ic i-lock" aria-hidden="true" style="flex:none"></span><span class="t-body-sm">La marca original no cambia. Tu conclusión queda registrada junto a ella, con tu nombre y la hora.</span></div>
+      <fieldset style="border:0;padding:0;margin:0;display:flex;flex-direction:column;gap:4px"><legend class="t-label" style="padding:0 0 4px">Conclusión</legend>
+        <sc-for list="{{ concl }}" as="c" hint-placeholder-count="3">
+          <label style="display:flex;align-items:flex-start;gap:12px;min-height:44px;padding:10px 0;cursor:pointer">
+            <span role="radio" aria-checked="{{ c.p }}" style="width:20px;height:20px;border-radius:999px;border:{{ c.bw }} solid {{ c.bc }};flex:none;margin-top:2px;background:var(--ds-surface)"></span>
+            <span style="display:flex;flex-direction:column"><span class="t-body">{{ c.t }}</span><span class="t-caption">{{ c.d }}</span></span>
+          </label>
+        </sc-for>
+      </fieldset>
+      <div class="field"><label class="lbl" for="an-c">Comentario <span class="subtle" style="font-weight:400">· obligatorio</span></label><textarea id="an-c" class="input" style="min-height:80px">El QR del estacionamiento se movió a la caseta por la remodelación del 20-10-2026. Pendiente reemplazar etiqueta.</textarea></div>
+    </div>
+    <div class="sheet-actions"><button class="btn btn-secondary">Cancelar</button><button class="btn btn-primary">Guardar revisión</button></div>
+  </div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:375,&quot;height&quot;:812},&quot;screen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;s9&quot;,&quot;options&quot;:[&quot;s8&quot;,&quot;s9&quot;,&quot;s10&quot;,&quot;s11&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;phone&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;contenido&quot;,&quot;options&quot;:[&quot;contenido&quot;,&quot;cargando&quot;,&quot;vacio&quot;,&quot;error&quot;,&quot;permisos&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;light&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;anomalia&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;lejos&quot;,&quot;options&quot;:[&quot;lejos&quot;,&quot;velocidad&quot;,&quot;reloj&quot;,&quot;simulada&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;conclusion&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;Justificada&quot;,&quot;options&quot;:[&quot;Justificada&quot;,&quot;Confirmada&quot;,&quot;Sin conclusión&quot;],&quot;tsType&quot;:&quot;string&quot;}}">
+const ANOM={
+  lejos:{t:'QR leído lejos de su punto',ev:[{k:'Distancia de la lectura',v:'140 m (radio 15 m)'},{k:'Precisión GPS',v:'9 m'},{k:'Hora del dispositivo',v:'09:41:12'}]},
+  velocidad:{t:'Velocidad imposible',ev:[{k:'Tramo',v:'Punto 3 → punto 4'},{k:'Distancia',v:'420 m en 18 s'},{k:'Velocidad',v:'84 km/h'}]},
+  reloj:{t:'Reloj alterado',ev:[{k:'Hora del dispositivo',v:'09:41:12'},{k:'Hora del servidor al recibir',v:'09:58:40'},{k:'Diferencia',v:'17 min 28 s'}]},
+  simulada:{t:'Ubicación simulada',ev:[{k:'Señal',v:'Ubicación de prueba activa'},{k:'Proveedor',v:'App externa'},{k:'Marcas afectadas',v:'2'}]}
+};
+class Component extends DCLogic{
+  renderVals(){
+    const p=this.props;const scr=p.screen??'s9';const dev=p.device??'phone';const st=p.state??'contenido';const ok=st==='contenido';
+    const isTab=dev==='tablet',isPhone=!isTab;
+    const S={s8:ok&&scr==='s8',s9:ok&&scr==='s9',s10:ok&&scr==='s10',s11:ok&&scr==='s11'};
+    const listScr=['s8','s9','s10'].includes(scr);
+    const showList=ok&&(isTab?listScr:scr==='s8');const showFicha=ok&&(isTab?listScr:(scr==='s9'||scr==='s10'));
+    const an=ANOM[p.anomalia??'lejos'];an.where='Planta Quilicura · punto 2 · Estacionamiento visitas · María Fernanda Soto';
+    const noun={s8:'las rondas',s9:'la ronda',s10:'la anomalía',s11:'el punto'}[scr];
+    const msgs={vacio:{t:scr==='s8'?'Sin rondas con alerta':'Aún no hay marcas',d:scr==='s8'?'Ninguna ronda de tus instalaciones tiene anomalías abiertas ni atrasos.':'La ronda no ha registrado puntos todavía.',a:'Ver todas',aic:'route',ic:'inbox'},
+      error:{t:'No pudimos cargar '+noun,d:'Revisa tu conexión. Si el problema sigue, avísale a soporte con el código RND-503.',a:'Reintentar',aic:'refresh',ic:'alert'},
+      permisos:{t:'No tienes acceso a estas rondas',d:'Solo ves rondas de tus instalaciones asignadas. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA.',a:'Pedir acceso',aic:'lock',ic:'lock'}};
+    const sel=(r)=>Object.assign(r,{bg:r.sel?'var(--ds-accent-muted)':'transparent',ad:r.an?'inline-flex':'none'});
+    const conclSel=p.conclusion??'Justificada';
+    return {theme:p.theme??'light',device:dev,label:'Supervisor · '+scr,isTab,isPhone,nonOk:!ok,isLoad:st==='cargando',isMsg:!ok&&st!=='cargando',msg:msgs[st]||msgs.error,S,
+      showSplit:showList||showFicha,showList,showFicha,listW:isTab?'360px':'100%',phoneBack:isPhone&&scr!=='s8',phoneHome:isPhone&&scr==='s8',sheetCls:isTab?'side':'',skelRows:[1,2,3,4,5],an,
+      filtros:[{t:'Con alerta',n:4,on:'on',p:'true'},{t:'En curso',n:3,on:'',p:'false'},{t:'Atrasadas',n:2,on:'',p:'false'},{t:'Omitidas',n:1,on:'',p:'false'},{t:'Todas',n:18,on:'',p:'false'}],
+      rondas:[sel({est:'En curso',tone:'accent',inst:'Planta Quilicura',pl:'Ronda perimetral',g:'María Fernanda Soto',h:'10:02',av:'4/6',an:'1 incidente · 1 anomalía',sel:isTab}),
+        sel({est:'Atrasada',tone:'warning',inst:'Torre Apoquindo',pl:'Pisos 10 a 20',g:'Daniela Reyes',h:'09:05',av:'5/8',an:'1 anomalía'}),
+        sel({est:'Atrasada',tone:'warning',inst:'Bodega Lampa',pl:'Patio de contenedores',g:'Matías Contreras',h:'09:30',av:'2/5'}),
+        sel({est:'Omitida',tone:'danger',inst:'Bodega Lampa',pl:'Cerco perimetral',g:'Felipe Cortés',h:'08:00',av:'0/6'}),
+        sel({est:'Completa',tone:'success',inst:'Planta Quilicura',pl:'Apertura de bodegas',g:'Camila Herrera',h:'08:00',av:'4/4',an:'Velocidad imposible'})],
+      trust:[{k:'Geocerca',v:'30/30',c:'var(--ds-fg)'},{k:'Velocidad',v:'20/20',c:'var(--ds-fg)'},{k:'Movimiento',v:'15/15',c:'var(--ds-fg)'},{k:'Foto',v:'No pedida',c:'var(--ds-fg-subtle)'},{k:'Mismo dispositivo',v:'10/10',c:'var(--ds-fg)'},{k:'Batería',v:'No disponible en este teléfono',c:'var(--ds-fg-subtle)'}],
+      marcas:(()=>{const D={bd:'var(--ds-fg)',bg:'var(--ds-fg)',fg:'var(--ds-bg)',dc:'var(--ds-fg-muted)',nd:'none'},P={bd:'var(--ds-border-strong)',bg:'var(--ds-surface)',fg:'var(--ds-fg-subtle)',dc:'var(--ds-fg-subtle)',nd:'none'};return [
+        Object.assign({},D,{n:1,nom:'Portería principal',h:'10:02',d:'QR + GPS · confianza alta · Realizado'}),
+        Object.assign({},D,{n:2,nom:'Estacionamiento visitas',h:'10:09',d:'QR leído lejos de su punto · sin revisar',dc:'var(--ds-danger-fg)',bd:'var(--ds-danger)',bg:'var(--ds-danger-muted)',fg:'var(--ds-danger-fg)'}),
+        Object.assign({},D,{n:3,nom:'Bodega A',h:'10:15',d:'QR + GPS · confianza alta · Hay un problema',nd:'flex',novId:'NOV-0418',novG:'Alta · incidente',novGt:'danger',novE:'En atención · Rodrigo Tapia',novEt:'warning',nov:'Intrusión · Puerta lateral de Bodega A forzada, candado en el suelo.'}),
+        Object.assign({},D,{n:4,nom:'Andén norte',h:'10:21',d:'QR + GPS · tramo sin rastro · checklist 2 de 3',dc:'var(--ds-warning-fg)',nd:'flex',novId:'NOV-0419',novG:'Leve',novGt:'neutral',novE:'Enviada',novEt:'info',nov:'Daño · Sello de la cortina 3 roto. Candado puesto y cerrado.'}),
+        Object.assign({},P,{n:5,nom:'Cerco poniente',h:'—',d:'Pendiente'}),
+        Object.assign({},P,{n:6,nom:'Sala de bombas',h:'—',d:'Pendiente · opcional'})];})(),
+      concl:['Justificada','Confirmada','Sin conclusión'].map((t,i)=>({t,d:['Hay una explicación válida; la marca se mantiene.','La anomalía es real; se abre seguimiento.','No hay evidencia suficiente para decidir.'][i],p:String(t===conclSel),bw:t===conclSel?'6px':'1px',bc:t===conclSel?'var(--ds-accent)':'var(--ds-border-control)'}))
+    };
+  }
+}
+</script>
+</body>
+</html>
