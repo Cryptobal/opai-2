@@ -22,4 +22,13 @@ export const ajustesComercial = z.object({
     permiso: "comercial:config.manage",
     control: "switch",
   }),
+  solicitudes_acuse_recibo: z.boolean().default(false).meta({
+    etiqueta: "Enviar acuse de recibo al recibir una solicitud",
+    ayuda:
+      "Apagado por defecto (decisión de Carlos, 25-oct-2026). El correo sale por Comunicaciones; en el PR 1 aún no hay canal de entrada que lo dispare.",
+    grupo: "Leads",
+    ambito: "tenant",
+    permiso: "comercial:canales.manage",
+    control: "switch",
+  }),
 });

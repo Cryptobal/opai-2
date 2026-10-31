@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 291 pares pantalla→capacidad · 251 con herramienta · 40 excepciones justificadas · 0 faltantes.
+**Resumen:** 301 pares pantalla→capacidad · 261 con herramienta · 40 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -76,6 +76,8 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/_centro` | `core.config.set` | `core_config_set` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.modules.list` | `core_modules_list` | existe |
 | compartido | `app/(erp)/configuracion/_centro` | `core.resumen.contadores` | `core_resumen_contadores` | existe |
+| compartido | `app/(erp)/configuracion/_leads` | `comercial.canales.get` | `comercial_canales_get` | existe |
+| compartido | `app/(erp)/configuracion/_leads` | `comercial.canales.update` | `comercial_canales_update` | existe |
 | compartido | `app/(erp)/configuracion/_rondas` | `rondas.incidentes_tipo.actualizar` | `rondas_incidentes_tipo_actualizar` | existe |
 | compartido | `app/(erp)/configuracion/_rondas` | `rondas.incidentes_tipo.crear` | `rondas_incidentes_tipo_crear` | existe |
 | compartido | `app/(erp)/configuracion/_rondas` | `rondas.incidentes_tipo.listar` | `rondas_incidentes_tipo_listar` | existe |
@@ -121,7 +123,6 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/documentos/firmas/_componentes` | `core.firmas.list` | `core_firmas_list` | existe |
 | compartido | `app/(erp)/documentos/firmas/[id]/_componentes` | `core.firmas.cancelar` | `core_firmas_cancelar` | existe |
 | compartido | `app/(erp)/documentos/firmas/[id]/_componentes` | `core.firmas.recordar` | `core_firmas_recordar` | existe |
-| compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.planilla.obtener` | `finanzas_planilla_obtener` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.config.get` | `core_config_get` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.cuentas.list` | `core_cuentas_list` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.instalaciones.archive` | `core_instalaciones_archive` | existe |
@@ -190,6 +191,15 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.previsualizar` | `core_vinculos_previsualizar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.terminar` | `core_vinculos_terminar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.update` | `core_vinculos_update` | existe |
+| compartido | `app/(erp)/solicitudes/_componentes` | `comercial.solicitudes.convertir` | `comercial_solicitudes_convertir` | existe |
+| compartido | `app/(erp)/solicitudes/_componentes` | `comercial.solicitudes.create` | `comercial_solicitudes_create` | existe |
+| compartido | `app/(erp)/solicitudes/_componentes` | `comercial.solicitudes.derivar` | `comercial_solicitudes_derivar` | existe |
+| compartido | `app/(erp)/solicitudes/_componentes` | `comercial.solicitudes.descartar` | `comercial_solicitudes_descartar` | existe |
+| compartido | `app/(erp)/solicitudes/_componentes` | `comercial.solicitudes.get` | `comercial_solicitudes_get` | existe |
+| compartido | `app/(erp)/solicitudes/_componentes` | `comercial.solicitudes.list` | `comercial_solicitudes_list` | existe |
+| compartido | `app/(erp)/solicitudes/_componentes` | `comercial.solicitudes.marcar_duplicada` | `comercial_solicitudes_marcar_duplicada` | existe |
+| compartido | `app/(erp)/solicitudes/_componentes` | `comercial.solicitudes.reabrir` | `comercial_solicitudes_reabrir` | existe |
+| compartido | `app/(erp)/solicitudes/_componentes` | `core.users.list` | `core_users_list` | existe |
 | compartido | `app/(erp)/tickets/_componentes` | `tickets.tickets.listar` | `tickets_tickets_listar` | existe |
 | compartido | `app/(erp)/tickets/_componentes` | `tickets.tickets.obtener` | `tickets_tickets_obtener` | existe |
 | compartido | `app/(erp)/tickets/[id]/_componentes` | `tickets.tickets.aprobar` | `tickets_tickets_aprobar` | existe |
@@ -469,17 +479,6 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.ping`
 - `core.puestos.get`
 - `core.usage.summary`
-- `finanzas.ajustes.actualizar`
-- `finanzas.ajustes.obtener`
-- `finanzas.celdas.cumplir`
-- `finanzas.celdas.fijar`
-- `finanzas.celdas.mover`
-- `finanzas.cierres.listar`
-- `finanzas.cierres.reabrir`
-- `finanzas.cierres.sellar`
-- `finanzas.filas.actualizar`
-- `finanzas.filas.crear`
-- `finanzas.filas.listar`
 - `platform.auditoria.estado`
 - `platform.auditoria.list`
 - `platform.bitacora.estado`

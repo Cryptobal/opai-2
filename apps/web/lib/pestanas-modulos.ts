@@ -32,3 +32,9 @@ export async function puedeConfigurarRondas(): Promise<boolean> {
   const identidad = await identidadActual();
   return identidad ? puedeDeIdentidad(identidad)("rondas:configurar") : false;
 }
+
+/** ¿Puede registrar, derivar, descartar y convertir solicitudes (Leads)? Oculta esas acciones a quien solo lee. */
+export async function puedeGestionarSolicitudes(): Promise<boolean> {
+  const identidad = await identidadActual();
+  return identidad ? puedeDeIdentidad(identidad)("comercial:solicitudes.manage") : false;
+}
