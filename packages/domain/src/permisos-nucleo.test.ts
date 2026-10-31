@@ -6,6 +6,13 @@ import { PERMISOS_CORE as P, type Rol, ROLES, tienePermiso } from "./permisos";
 const TABLA: Record<string, readonly [boolean, boolean, boolean, boolean, boolean]> = {
   [P.cuentasRead]: [true, true, true, true, true],
   [P.cuentasManage]: [true, true, true, false, false],
+  // CRM PR 2a: el supervisor no entra a Comercial; el catálogo de etiquetas es de owner y admin.
+  [P.actividadesRead]: [true, true, true, false, true],
+  [P.actividadesManage]: [true, true, true, false, false],
+  [P.actividadesAdmin]: [true, true, false, false, false],
+  [P.etiquetasRead]: [true, true, true, false, true],
+  [P.etiquetasManage]: [true, true, true, false, false],
+  [P.etiquetasConfig]: [true, true, false, false, false],
   [P.instalacionesRead]: [true, true, true, true, true],
   // Puestos (Brief 11): el supervisor lee los catálogos pero no los edita ni los desactiva.
   [P.patronesRead]: [true, true, true, true, true],
