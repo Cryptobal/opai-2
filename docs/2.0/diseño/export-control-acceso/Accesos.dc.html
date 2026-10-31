@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script></helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="acc" title="{{ shellTitle }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Operaciones" title="Accesos" subtitle="Atlas Seguridad SpA · 3 instalaciones a tu cargo" hint-size="100%,80px"></x-import>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:16px">
+<div style="width:{{ searchW }};max-width:100%;flex:none">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" icon="search" placeholder="Buscar por nombre, empresa o patente" style="width:100%" hint-size="100%,44px"></x-import>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Chip" etiqueta="Instalación" valor="Planta Quilicura" on-quitar="{{ noop }}" hint-size="220px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Chip" etiqueta="Fecha" valor="30-10-2026" on-quitar="{{ noop }}" hint-size="170px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="En sitio" contador="{{ 4 }}" activo="{{ true }}" on-cambiar="{{ noop }}" hint-size="110px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Salió" contador="{{ 18 }}" activo="{{ false }}" on-cambiar="{{ noop }}" hint-size="100px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Diferido" contador="{{ 2 }}" activo="{{ false }}" on-cambiar="{{ noop }}" hint-size="110px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Anulado" contador="{{ 1 }}" activo="{{ false }}" on-cambiar="{{ noop }}" hint-size="110px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipAgregar" hint-size="140px,32px"></x-import>
+</div>
+</div>
+<sc-if value="{{ isCargando }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:12px">
+<sc-for list="{{ sk }}" as="s" hint-placeholder-count="5">
+<div style="display:flex;gap:12px;align-items:center;padding:12px;border:1px solid var(--ds-border);border-radius:16px;background:var(--ds-surface)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" circle="{{ true }}" width="{{ 40 }}" height="{{ 40 }}" hint-size="40px,40px"></x-import>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="55%" height="14" hint-size="55%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="35%" height="12" hint-size="35%,12px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="72" height="24" radius="12" hint-size="72px,24px"></x-import>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="user-check" title="Aún no hay registros hoy" description="Prerregistra una visita o cambia los filtros." action="{{ vacioAccion }}" hint-size="100%,300px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar los accesos" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="ACC-503" on-retry="{{ noop }}" retry-label="Reintentar" hint-size="100%,300px"></x-import>
+</sc-if>
+<sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes permiso para ver los accesos" description="Pídele acceso a un administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,300px"></x-import>
+</sc-if>
+<sc-if value="{{ isNormal }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:{{ gridCols }};gap:16px;align-items:start">
+<div style="min-width:0;margin:{{ tableMargin }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" cards="{{ isPhone }}" to-card="{{ toCard }}" on-row-click="{{ noop }}" hint-size="100%,300px"></x-import>
+</div>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" padding="{{ 20 }}" hint-size="100%,600px">
+<dc-import name="AccesoDetalle" hint-size="100%,600px"></dc-import>
+</x-import>
+</sc-if>
+</div>
+</sc-if>
+<sc-if value="{{ showFicha }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Sheet" open="{{ true }}" contained="{{ true }}" title="Registro de acceso" on-close="{{ noop }}" hint-size="100%,100%">
+<dc-import name="AccesoDetalle" hint-size="100%,600px"></dc-import>
+</x-import>
+</sc-if>
+</x-import>
+</x-import>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;ficha&quot;,&quot;cargando&quot;,&quot;vacio&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = this.props.device ?? "desktop";
+    const estado = this.props.estado ?? "normal";
+    const isPhone = device === "phone";
+    const all = [
+      { ini: "DF", nombre: "Diego Fuentes", tipo: "Proveedor", emp: "Distribuidora Andes Ltda.", inst: "Planta Quilicura", hora: "08:42", estado: "En sitio", tone: "success" },
+      { ini: "CH", nombre: "Camila Herrera Soto", tipo: "Visita", emp: "Bodegas del Sur S.A.", inst: "Planta Quilicura", hora: "08:15", estado: "Salió 09:30", tone: "neutral" },
+      { ini: "LP", nombre: "Luis Pérez", tipo: "Contratista", emp: "Mantención Norte SpA", inst: "Bodega Lampa", hora: "07:50", estado: "En sitio", tone: "success" },
+      { ini: "MR", nombre: "Marcela Rojas", tipo: "Despacho", emp: "Transportes Lago", inst: "Torre Apoquindo", hora: "07:30", estado: "Diferido", tone: "info" },
+      { ini: "JM", nombre: "Jorge Muñoz", tipo: "Visita", emp: "Bodegas del Sur S.A.", inst: "Planta Quilicura", hora: "07:05", estado: "Anulado", tone: "danger" },
+    ];
+    const badge = (r) => NS.Badge ? h(NS.Badge, { tone: r.tone }, r.estado) : r.estado;
+    const cols = [{ key: "nombre", label: "Nombre", render: (r) => h("span", { style: { fontWeight: 500 } }, r.nombre) }, { key: "tipo", label: "Tipo" }, { key: "emp", label: "Empresa" }, { key: "hora", label: "Entrada", mono: true }, { key: "estado", label: "Estado", render: badge }];
+    const colsT = device === "tablet" ? cols.filter((c) => c.key !== "emp" && c.key !== "tipo") : cols.filter((c) => c.key !== "tipo");
+    return {
+      device, theme: this.props.theme ?? "light", isPhone, notPhone: !isPhone,
+      shellTitle: isPhone ? "" : "Accesos",
+      isNormal: estado === "normal" || estado === "ficha", showFicha: isPhone && estado === "ficha",
+      isCargando: estado === "cargando", isVacio: estado === "vacio", isError: estado === "error", isForbidden: estado === "sinpermiso",
+      sk: [1, 2, 3, 4, 5], noop: () => {},
+      vacioAccion: NS.Button ? h(NS.Button, { icon: "plus" }, "Prerregistrar visita") : null,
+      searchW: isPhone ? "100%" : "288px",
+      gridCols: isPhone ? "minmax(0,1fr)" : device === "tablet" ? "minmax(0,1fr) 340px" : "minmax(0,1fr) 360px",
+      tableMargin: isPhone ? "0 -16px" : "0",
+      cols: colsT, rows: all,
+      toCard: (r) => ({ initials: r.ini, title: r.nombre, subtitle: r.tipo + " · " + r.emp, meta: r.inst + " · " + r.hora, badge: { tone: r.tone, label: r.estado } }),
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "acc", label: "Accesos", icon: "user-check" }, { id: "per", label: "Personas", icon: "users" }, { id: "tic", label: "Tickets", icon: "ticket" }, { id: "mas", label: "Más", icon: "more" }],
+      groups: [
+        { items: [{ id: "ini", label: "Inicio", icon: "home" }] },
+        { title: "Operaciones", items: [{ id: "ins", label: "Instalaciones", icon: "building" }, { id: "acc", label: "Accesos", icon: "user-check" }] },
+        { title: "Personas", items: [{ id: "per", label: "Personas", icon: "users" }] },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
