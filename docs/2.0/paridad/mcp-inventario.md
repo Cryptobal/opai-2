@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 311 pares pantalla→capacidad · 271 con herramienta · 40 excepciones justificadas · 0 faltantes.
+**Resumen:** 332 pares pantalla→capacidad · 292 con herramienta · 40 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -79,6 +79,9 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/_centro` | `core.resumen.contadores` | `core_resumen_contadores` | existe |
 | compartido | `app/(erp)/configuracion/_leads` | `comercial.canales.get` | `comercial_canales_get` | existe |
 | compartido | `app/(erp)/configuracion/_leads` | `comercial.canales.update` | `comercial_canales_update` | existe |
+| compartido | `app/(erp)/configuracion/_nomina` | `nomina.conceptos.actualizar` | `nomina_conceptos_actualizar` | existe |
+| compartido | `app/(erp)/configuracion/_nomina` | `nomina.conceptos.crear` | `nomina_conceptos_crear` | existe |
+| compartido | `app/(erp)/configuracion/_nomina` | `nomina.conceptos.listar` | `nomina_conceptos_listar` | existe |
 | compartido | `app/(erp)/configuracion/_portal_cliente` | `core.cuentas.list` | `core_cuentas_list` | existe |
 | compartido | `app/(erp)/configuracion/_portal_cliente` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
 | compartido | `app/(erp)/configuracion/_portal_cliente` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
@@ -179,6 +182,20 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/negocios/_configuracion` | `comercial.config.get` | `comercial_config_get` | existe |
 | compartido | `app/(erp)/negocios/_configuracion` | `comercial.config.guardar_catalogo` | `comercial_config_guardar_catalogo` | existe |
 | compartido | `app/(erp)/negocios/_configuracion` | `comercial.config.reordenar_etapas` | `comercial_config_reordenar_etapas` | existe |
+| compartido | `app/(erp)/nomina/_componentes` | `core.personas.list` | `core_personas_list` | existe |
+| compartido | `app/(erp)/nomina/_componentes` | `nomina.anticipos.fijar_regla` | `nomina_anticipos_fijar_regla` | existe |
+| compartido | `app/(erp)/nomina/_componentes` | `nomina.anticipos.generar` | `nomina_anticipos_generar` | existe |
+| compartido | `app/(erp)/nomina/_componentes` | `nomina.novedades.anular` | `nomina_novedades_anular` | existe |
+| compartido | `app/(erp)/nomina/_componentes` | `nomina.novedades.crear` | `nomina_novedades_crear` | existe |
+| compartido | `app/(erp)/nomina/_componentes` | `nomina.obligaciones.actualizar` | `nomina_obligaciones_actualizar` | existe |
+| compartido | `app/(erp)/nomina/_componentes` | `nomina.obligaciones.generar_calendario` | `nomina_obligaciones_generar_calendario` | existe |
+| compartido | `app/(erp)/nomina/_componentes` | `nomina.periodos.abrir` | `nomina_periodos_abrir` | existe |
+| compartido | `app/(erp)/nomina/_componentes` | `nomina.periodos.cambiar_estado` | `nomina_periodos_cambiar_estado` | existe |
+| compartido | `app/(erp)/nomina/_componentes` | `nomina.periodos.listar` | `nomina_periodos_listar` | existe |
+| compartido | `app/(erp)/nomina/_componentes` | `nomina.periodos.marcar_pagado` | `nomina_periodos_marcar_pagado` | existe |
+| compartido | `app/(erp)/nomina/_componentes` | `nomina.prestamos.aplicar_cuotas` | `nomina_prestamos_aplicar_cuotas` | existe |
+| compartido | `app/(erp)/nomina/_componentes` | `nomina.prestamos.cancelar` | `nomina_prestamos_cancelar` | existe |
+| compartido | `app/(erp)/nomina/_componentes` | `nomina.prestamos.crear` | `nomina_prestamos_crear` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.cargos.list` | `core_cargos_list` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.documentos.pedir_renovacion` | `core_documentos_pedir_renovacion` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.estructuras.efectiva` | `core_estructuras_efectiva` | existe |
@@ -298,6 +315,10 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | erp | `/instalaciones/nueva` | `core.instalaciones.get` | `core_instalaciones_get` | existe |
 | erp | `/instalaciones/nueva` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
 | erp | `/instalaciones/nueva` | `core.puestos.create` | `core_puestos_create` | existe |
+| erp | `/nomina/calendario` | `nomina.obligaciones.listar` | `nomina_obligaciones_listar` | existe |
+| erp | `/nomina/novedades` | `nomina.anticipos.reglas_listar` | `nomina_anticipos_reglas_listar` | existe |
+| erp | `/nomina/novedades` | `nomina.novedades.listar` | `nomina_novedades_listar` | existe |
+| erp | `/nomina/novedades` | `nomina.prestamos.listar` | `nomina_prestamos_listar` | existe |
 | erp | `/personas/vencimientos` | `core.documentos.matriz` | `core_documentos_matriz` | existe |
 | platform | `/platform/ajustes` | `platform.ajustes.get` | `platform_ajustes_get` | existe |
 | platform | `/platform/ajustes` | `platform.precios.list` | `platform_precios_list` | existe |
@@ -468,16 +489,34 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 
 - `agente.historial.list`
 - `agente.modelos.list`
+- `core.actividades.completar`
+- `core.actividades.create`
+- `core.actividades.delete`
+- `core.actividades.tareas`
+- `core.actividades.timeline`
+- `core.actividades.update`
 - `core.anexos.generar`
 - `core.aprobaciones.get`
 - `core.audit.list`
 - `core.bitacora.verificar`
 - `core.consumos.por_recurso`
 - `core.contactos.archive`
+- `core.contactos.cuentas`
+- `core.contactos.desvincular`
+- `core.contactos.set_roles`
+- `core.contactos.vincular`
+- `core.cuentas.contactos`
 - `core.documentos.desvincular`
 - `core.documentos.vencimientos`
 - `core.documentos.vincular`
 - `core.estructuras.get`
+- `core.etiquetas.asignar`
+- `core.etiquetas.create`
+- `core.etiquetas.de_entidad`
+- `core.etiquetas.delete`
+- `core.etiquetas.list`
+- `core.etiquetas.quitar`
+- `core.etiquetas.update`
 - `core.firmas.politica_get`
 - `core.firmas.politica_set`
 - `core.firmas.verificar`
@@ -489,6 +528,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.ping`
 - `core.puestos.get`
 - `core.usage.summary`
+- `nomina.novedades.cargar`
 - `platform.auditoria.estado`
 - `platform.auditoria.list`
 - `platform.bitacora.estado`

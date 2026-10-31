@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="finanzas-data.js"></script>
+</helmet>
+<div class="ds" data-theme="{{ theme }}" data-device="{{ device }}" style="position:absolute;inset:0;z-index:50;background:transparent">
+<div class="scrim"></div>
+<div class="{{ cls }}" role="dialog" aria-modal="true">
+<sc-if value="{{ isBottom }}" hint-placeholder-val="{{ true }}"><div class="grabber"></div></sc-if>
+<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;padding:12px 8px 12px 16px;flex:none">
+<span style="display:flex;flex-direction:column;gap:2px;padding-top:10px;min-width:0"><span class="t-subheading">{{ title }}</span><span class="t-body-sm muted">{{ desc }}</span></span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="x" label="Cerrar" hint-size="44px,44px"></x-import>
+</div>
+<div class="sheet-body">
+<dc-import name="Finanzas Bloques" blocks="{{ blocks }}" cols="{{ 1 }}" hint-size="100%,300px"></dc-import>
+</div>
+<div class="sheet-actions">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" size="lg" hint-size="100%,48px">{{ primary }}</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" size="lg" hint-size="100%,48px">{{ secondary }}</x-import>
+</div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;pantalla&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;ventas&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;sheet&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;phone&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  fallback() { return { blocks: [], groups: [], tabs: [], user: {}, skel: [], theme: "light", device: "phone", cls: "sheet", isData: false, isBottom: false, hasShell: false, hasSheet: false, bare: false }; }
+  renderVals() {
+    const p = this.props, FIN = window.FIN;
+    if (!FIN) { this._t = this._t || setTimeout(() => this.forceUpdate(), 50); return this.fallback(); }
+    const pan = FIN.pantallas[p.pantalla || 'ventas'];
+    const s = pan.sheets[p.sheet] || Object.values(pan.sheets)[0];
+    const device = p.device || 'phone';
+    const bottom = device === 'phone';
+    return { theme: p.theme || 'light', device, cls: 'sheet' + (bottom ? '' : ' side'), isBottom: bottom, title: s.title, desc: s.desc, blocks: s.blocks, primary: s.primary, secondary: s.secondary };
+  }
+}
+</script>
+</body>
+</html>

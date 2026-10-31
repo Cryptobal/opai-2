@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 
 import { SeccionCatalogos } from "@/app/(erp)/negocios/_configuracion/seccion-catalogos";
 import { SeccionEmbudo } from "@/app/(erp)/negocios/_configuracion/seccion-embudo";
+import { SeccionConceptos } from "@/app/(erp)/configuracion/_nomina/seccion-conceptos";
 import { SeccionPortalCliente } from "@/app/(erp)/configuracion/_portal_cliente/seccion-portal-cliente";
 import { SeccionCanales } from "@/app/(erp)/configuracion/_leads/seccion-canales";
 import { SeccionTiposIncidente } from "@/app/(erp)/configuracion/_rondas/seccion-tipos-incidente";
@@ -42,6 +43,14 @@ export const SECCIONES_MODULO: Readonly<Record<string, readonly SeccionModulo[]>
       etiqueta: "Canales de entrada",
       permiso: "comercial:canales.manage",
       Contenido: SeccionCanales,
+    },
+  ],
+  nomina: [
+    {
+      id: "conceptos",
+      etiqueta: "Conceptos",
+      permiso: "nomina:config.manage",
+      Contenido: SeccionConceptos,
     },
   ],
   portal_cliente: [

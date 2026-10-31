@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+</helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="per" title="Personas" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<div style="flex:1;min-width:0;overflow:auto">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" size="heading" eyebrow="{{ s.eyebrow }}" title="{{ s.title }}" subtitle="{{ s.sub }}" badge="{{ s.badge }}" hint-size="100%,80px"></x-import>
+<div style="display:flex;flex-direction:column;gap:16px">
+<sc-if value="{{ s.alert }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="{{ s.alert }}" hint-size="100%,56px">{{ s.alertBody }}</x-import>
+</sc-if>
+<div style="display:grid;grid-template-columns:repeat({{ cols }},minmax(0,1fr));gap:16px">
+<sc-for list="{{ s.cards }}" as="c" hint-placeholder-count="3">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="{{ c.title }}" actions="{{ c.badge }}" hint-size="100%,200px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" rows="{{ c.rows }}" hint-size="100%,160px"></x-import>
+<sc-if value="{{ c.actions }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;gap:8px;margin-top:8px">{{ c.actions }}</div>
+</sc-if>
+</x-import>
+</sc-for>
+</div>
+</div>
+</x-import>
+</div>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:900},&quot;lamina&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;b1&quot;,&quot;b2&quot;,&quot;roles&quot;,&quot;comparacion&quot;,&quot;indice&quot;],&quot;default&quot;:&quot;b1&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const B = (tone, l, icon) => NS.Badge ? h(NS.Badge, { tone, icon }, l) : null;
+    const btn = (variant, l) => NS.Button ? h(NS.Button, { variant }, l) : null;
+    const lamina = this.props.lamina ?? "b1";
+    const mask = "•••• con candado";
+    const rol = (r, ve, edita, masked) => ({ title: r, badge: B(edita ? "success" : "neutral", edita ? "Edita" : "Solo lectura"), rows: [{ label: "Ve", value: ve }, { label: "Enmascarado", value: masked }] });
+    const nuevo = (t) => ({ title: t, badge: B("accent", "Nueva pieza del DS"), rows: [] });
+    const S = {
+      b1: { eyebrow: "Propuesta B1 · A confirmar por Carlos", title: "Cuenta pendiente de validación", sub: "Diego Fuentes Araya · Pago", badge: B("warning", "Pendiente de validación", "alert"),
+        alert: "Decide Carlos · Propuesta B1: validar cambios de cuenta", alertBody: "Una cuenta nueva del Portal Trabajador queda pendiente hasta que RRHH la valide.",
+        cards: [
+          { title: "Cuenta vigente", badge: B("accent", "Se sigue pagando aquí"), rows: [{ label: "Banco", value: "Banco Estado · Cuenta RUT" }, { label: "Número", value: "•••• •••• 4821", numeric: true }] },
+          { title: "Cuenta nueva", badge: B("warning", "Pendiente de validación", "alert"), rows: [{ label: "Origen", value: "Portal Trabajador" }, { label: "Banco", value: "Banco de Chile · Cuenta corriente" }, { label: "Número", value: "•••• •••• 0937", numeric: true }, { label: "Solicitada", value: "28-10-2026", numeric: true }], actions: [btn("primary", "Validar"), btn("secondary", "Rechazar")] }] },
+      b2: { eyebrow: "Propuesta B2 · A confirmar por Carlos", title: "Diego Fuentes Araya", sub: "15.234.567-4", badge: B("danger", "En lista negra", "alert"),
+        alert: "Decide Carlos · Propuesta B2: lista negra", alertBody: "Por confirmar: si esta lista es la misma lista de bloqueados de Control de acceso.",
+        cards: [
+          { title: "Motivo (solo RRHH)", badge: B("danger", "Visible con permiso"), rows: [{ label: "Motivo", value: "Abandono de puesto" }, { label: "Registrado por", value: "Marcela Rojas · 22-10-2026" }] },
+          { title: "Otros roles", rows: [{ label: "Badge «En lista negra»", value: "Solo RRHH" }, { label: "Motivo", value: mask }] }] },
+      roles: { eyebrow: "Vista por rol · Pestaña Resumen", title: "Roles", sub: "Qué ve y qué edita cada rol", cards: [
+        rol("Owner, Administrador y RRHH", "Todo", true, "Nada"), rol("Gerente", "Todo menos banco y salud", false, "Banco y salud"),
+        rol("Supervisor", "Solo sus personas: tallas, OS-10, jornada, teléfono", false, "Previsión y banco"),
+        rol("Visualizador", "Lectura sin datos sensibles", false, "Previsión, salud y banco"), { title: "Sin permiso", badge: B("danger", "Forbidden"), rows: [{ label: "Vista", value: "Pídele acceso a un administrador" }] }] },
+      comparacion: { eyebrow: "Solo admin · Temporal para el corte", title: "Comparación con OPAI 1.0", sub: "Diego Fuentes Araya", cards: [
+        { title: "Importados", badge: B("success", "11 campos", "check"), rows: [{ label: "AFP, salud, isapre", value: "Importados" }, { label: "Tallas", value: "Importadas" }, { label: "Jornada DT", value: "Importada" }] },
+        { title: "Vacíos", badge: B("warning", "2 campos", "alert"), rows: [{ label: "Anticipo", value: "Sin dato en 1.0" }, { label: "Código interno", value: "Sin dato en 1.0" }] },
+        { title: "En conflicto", badge: B("danger", "1 campo", "alert"), rows: [{ label: "Cuenta bancaria", value: "1.0: Banco Estado · 2.0: Banco de Chile" }] }] },
+      indice: { eyebrow: "Ficha persona v1", title: "Índice", sub: "Cada pantalla con el rol que la ve", cards: [
+        { title: "1 · Resumen ampliado", rows: [{ label: "Archivo", value: "Resumen" }, { label: "Roles", value: "Todos con permiso" }] },
+        { title: "2 · Previsión", rows: [{ label: "Archivo", value: "Previsión" }, { label: "Roles", value: "Owner, Admin, RRHH; Gerente en lectura" }] },
+        { title: "3 · Pago", rows: [{ label: "Archivo", value: "Pago" }, { label: "Roles", value: "Owner, Admin, RRHH" }] },
+        { title: "4 a 7 · Uniforme, Jornada DT, OS-10, Contacto", rows: [{ label: "Archivo", value: "Secciones (prop seccion)" }, { label: "Roles", value: "Supervisor ve 4, 5, 6 y teléfono" }] },
+        { title: "8 · Ficha a 375", rows: [{ label: "Archivo", value: "Resumen con device=phone" }, { label: "Roles", value: "Todos" }] },
+        { title: "9 · Comparación con 1.0", rows: [{ label: "Archivo", value: "Láminas · comparacion" }, { label: "Roles", value: "Solo admin" }] },
+        { title: "10 · Vista por rol, B1, B2", rows: [{ label: "Archivo", value: "Láminas · roles, b1, b2" }, { label: "Roles", value: "B1 y B2: RRHH" }] },
+        { title: "11 · Hoja de componentes", rows: [{ label: "Nuevas piezas propuestas", value: "Ninguna" }, { label: "Faltan", value: "Estados cargando, vacío y error" }] }] },
+    };
+    return {
+      device: this.props.device ?? "desktop",
+      theme: this.props.theme ?? "light",
+      s: S[lamina], cols: (this.props.device ?? "desktop") === "phone" ? 1 : 2,
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "ins", label: "Instalaciones", icon: "building" }, { id: "pau", label: "Pauta", icon: "calendar" }, { id: "per", label: "Personas", icon: "users" }, { id: "mas", label: "Más", icon: "more" }],
+      groups: [{ items: [{ id: "ini", label: "Inicio", icon: "home" }] }, { title: "Operaciones", items: [{ id: "ins", label: "Instalaciones", icon: "building" }, { id: "pau", label: "Pauta mensual", icon: "calendar" }] }, { title: "Personas", items: [{ id: "per", label: "Personas", icon: "users" }] }],
+    };
+  }
+}
+</script>
+</body>
+</html>

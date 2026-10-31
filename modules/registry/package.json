@@ -14,6 +14,7 @@
     "@opai/capabilities": "workspace:*",
     "@opai/mod-agente": "workspace:*",
     "@opai/mod-comercial": "workspace:*",
+    "@opai/mod-nomina": "workspace:*",
     "@opai/mod-portal_cliente": "workspace:*",
     "@opai/mod-rondas": "workspace:*",
     "@opai/mod-tickets": "workspace:*"
