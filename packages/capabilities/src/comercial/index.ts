@@ -12,6 +12,16 @@ import { negociosGet } from "./negocios-ficha";
 import { negociosEmbudo, negociosList } from "./negocios-lectura";
 import { negociosGanar, negociosMover } from "./negocios-mover";
 import { negociosSetContactos } from "./negocios-contactos";
+import { canalesGet, canalesUpdate } from "./solicitudes-canales";
+import { solicitudesConvertir } from "./solicitudes-convertir";
+import { solicitudesCreate } from "./solicitudes-crear";
+import {
+  solicitudesDerivar,
+  solicitudesDescartar,
+  solicitudesMarcarDuplicada,
+  solicitudesReabrir,
+} from "./solicitudes-estado";
+import { solicitudesGet, solicitudesList } from "./solicitudes-lectura";
 import { negociosDesvincularInstalacion, negociosVincularInstalacion } from "./negocios-vinculos";
 
 export { ajustesComercial } from "./ajustes";
@@ -36,4 +46,14 @@ export const capacidadesComercial: readonly Capacidad[] = [
   configGuardarCatalogo,
   configCrearEtapa,
   configReordenarEtapas,
+  solicitudesList,
+  solicitudesGet,
+  solicitudesCreate,
+  solicitudesDerivar,
+  solicitudesDescartar,
+  solicitudesReabrir,
+  solicitudesMarcarDuplicada,
+  solicitudesConvertir,
+  canalesGet,
+  canalesUpdate,
 ];

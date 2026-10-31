@@ -45,4 +45,7 @@ export const AJUSTES: Record<string, Ajuste> = {
   "core.retencion_ejecuciones": { valores: () => ({ modo: "simulacion", filas: 0 }) },
   // Fila con tenant_id: fuente "tenant", sin región (CHECK dias_calendario_coherencia_check).
   "core.dias_calendario": { valores: () => ({ fuente: "tenant", region: null }) },
+  // Leads: canal y estado dentro de sus listas (CHECK *_canal_check y *_estado_check).
+  "comercial.solicitudes": { valores: () => ({ canal: "manual", estado: "nueva" }) },
+  "comercial.canales_solicitud": { valores: () => ({ canal: "manual", estado: "sin_conectar" }) },
 };
