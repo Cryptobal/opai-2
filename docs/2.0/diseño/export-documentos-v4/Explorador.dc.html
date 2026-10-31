@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ shellDevice }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" user="{{ user }}" active="{{ navActive }}" title="" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a Documentos" description="Tu rol no incluye el área Documentos. Pídele acceso a un administrador." action-label="Pedir acceso" hint-size="100%,400px"></x-import>
+</sc-if>
+<sc-if value="{{ notForbidden }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" title="Documentos" hint-size="100%,56px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="upload" hint-size="170px,40px">Subir documento</x-import>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ docTabs }}" value="exp" hint-size="100%,44px"></x-import>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:16px 0">
+<div style="flex:1 1 288px;max-width:{{ searchMax }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" icon="search" placeholder="Buscar por nombre, RUT o texto" style="width:100%" hint-size="100%,44px"></x-import>
+</div>
+<div class="chip-row">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Chip" etiqueta="Estado" valor="Por vencer" hint-size="170px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipAgregar" hint-size="80px,32px">Tipo</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipAgregar" hint-size="90px,32px">Entidad</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipAgregar" hint-size="80px,32px">Firma</x-import>
+</div>
+</div>
+<sc-if value="{{ isNormal }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="margin:0 -16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" cards="{{ true }}" to-card="{{ toCard }}" hint-size="100%,400px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" on-row-click="{{ noop }}" hint-size="100%,400px"></x-import>
+</sc-if>
+<span class="t-caption" style="margin-top:12px">{{ countLabel }}</span>
+</sc-if>
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<div aria-busy="true" style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);overflow:hidden">
+<sc-for list="{{ skel }}" as="s" hint-placeholder-count="6">
+<div style="display:flex;gap:12px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="20px" height="{{ 20 }}" hint-size="20px,20px"></x-import>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ s.w }}" height="{{ 14 }}" hint-size="40%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="30%" height="{{ 12 }}" hint-size="30%,12px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="72px" height="{{ 22 }}" radius="{{ 999 }}" hint-size="72px,22px"></x-import>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="file" title="Aún no hay documentos" description="Sube el primero o genera uno desde una plantilla en la ficha de una persona." action="{{ emptyAction }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar los documentos" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="DOC-EXP-503 · 30-10-2026 12:57" hint-size="100%,320px"></x-import>
+</sc-if>
+</sc-if>
+</x-import>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;\&quot;phone\&quot; | \&quot;tablet\&quot; | \&quot;desktop\&quot;&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;\&quot;light\&quot; | \&quot;dark\&quot;&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = this.props.device ?? "desktop";
+    const estado = this.props.estado ?? "normal";
+    const isPhone = device === "phone", isTablet = device === "tablet";
+    const B = (tone, t) => (NS.Badge ? h(NS.Badge, { tone }, t) : t);
+    const vig = { vig: ["success", "Vigente"], por: ["warning", "Por vencer"], ven: ["danger", "Vencido"], sin: ["neutral", "Sin vigencia"] };
+    const fir = { no: ["neutral", "Sin firma"], pen: ["info", "Pendiente"], ok: ["success", "Firmado"] };
+    const rows = [
+      { id: 1, nombre: "Póliza de responsabilidad civil", vinc: "Bodega Lampa", ent: "Instalación", tipo: "Póliza", vence: "12-10-2026", v: "ven", f: "no", por: "María José Rivas", fecha: "03-01-2026" },
+      { id: 2, nombre: "Plan de seguridad OS-10", vinc: "Planta Quilicura", ent: "Instalación", tipo: "Plan OS-10", vence: "21-11-2026", v: "por", f: "no", por: "Jorge Muñoz", fecha: "15-05-2026" },
+      { id: 3, nombre: "Contrato de servicios", vinc: "Torre Apoquindo", ent: "Instalación", tipo: "Contrato comercial", vence: "15-12-2026", v: "por", f: "ok", por: "Paula Ibáñez", fecha: "02-01-2026" },
+      { id: 4, nombre: "Anexo de contrato · jornada 4×4", vinc: "Camila Herrera", ent: "Persona", tipo: "Anexo de contrato", vence: "", v: "sin", f: "pen", por: "Paula Ibáñez", fecha: "28-10-2026" },
+      { id: 5, restr: true, nombre: "Documento restringido", vinc: "Luis Pérez", ent: "Persona", tipo: "Contrato de trabajo", vence: "", v: "sin", f: "ok", por: "—", fecha: "—" },
+      { id: 6, nombre: "Credencial OS-10", vinc: "Héctor Araya", ent: "Persona", tipo: "Credencial OS-10", vence: "30-06-2027", v: "vig", f: "no", por: "Jorge Muñoz", fecha: "30-06-2025" },
+      { id: 7, nombre: "Recepción de uniforme y EPP", vinc: "Diego Silva", ent: "Persona", tipo: "Recepción", vence: "", v: "sin", f: "ok", por: "Jorge Muñoz", fecha: "20-10-2026" },
+      { id: 8, nombre: "Certificado de adhesión a mutualidad", vinc: "Logística Andina SpA", ent: "Cuenta", tipo: "Certificado", vence: "31-12-2026", v: "vig", f: "no", por: "María José Rivas", fecha: "05-02-2026" },
+    ];
+    const docCell = (r) => h("span", { style: { display: "flex", gap: 10, alignItems: "center", color: r.restr ? "var(--ds-fg-muted)" : undefined } },
+      NS.Icon ? h(NS.Icon, { name: r.restr ? "lock" : "file", size: "sm", className: "muted" }) : null,
+      h("span", { style: { fontWeight: 500 } }, r.nombre));
+    const vincCell = (r) => h("span", { style: { display: "flex", flexDirection: "column" } },
+      NS.Enlace ? h(NS.Enlace, { variante: "fila", href: "#", style: { minHeight: 0 } }, r.vinc) : r.vinc,
+      h("span", { className: "t-caption" }, r.ent));
+    const vigCell = (r) => h("span", { style: { display: "flex", flexDirection: "column", gap: 2, alignItems: "flex-start" } }, B(vig[r.v][0], vig[r.v][1]), r.vence ? h("span", { className: "t-caption t-numeric" }, r.vence) : null);
+    let cols = [
+      { key: "nombre", label: "Documento", render: docCell },
+      { key: "vinc", label: "Vinculado a", render: vincCell },
+      { key: "tipo", label: "Tipo", muted: true },
+      { key: "v", label: "Vigencia", render: vigCell },
+      { key: "f", label: "Firma", render: (r) => B(fir[r.f][0], fir[r.f][1]) },
+      { key: "por", label: "Subido por", muted: true },
+      { key: "fecha", label: "Fecha", muted: true, render: (r) => h("span", { className: "t-numeric" }, r.fecha) },
+    ];
+    if (isTablet) cols = cols.filter((c) => c.key !== "por" && c.key !== "tipo" && c.key !== "fecha");
+    const firTxt = { no: "", pen: " · Firma pendiente", ok: " · Firmado" };
+    return {
+      user: { name: "Paula Ibáñez", initials: "PI", role: "Administradora" },
+      theme: this.props.theme ?? "light",
+      shellDevice: isPhone ? "phone" : "desktop",
+      navActive: isPhone ? "mas" : "doc",
+      isPhone, notPhone: !isPhone,
+      searchMax: isPhone ? "100%" : "320px",
+      isNormal: estado === "normal", isLoading: estado === "cargando", isEmpty: estado === "vacio", isError: estado === "error",
+      isForbidden: estado === "sinpermiso", notForbidden: estado !== "sinpermiso",
+      rows, cols, noop: () => {},
+      countLabel: "8 de 214 documentos",
+      skel: [{ w: "46%" }, { w: "38%" }, { w: "52%" }, { w: "34%" }, { w: "44%" }, { w: "40%" }],
+      emptyAction: NS.Button ? h(NS.Button, { icon: "upload", size: "lg" }, "Subir documento") : null,
+      toCard: (r) => ({ icon: r.restr ? "lock" : "file", title: r.nombre, subtitle: r.vinc + " · " + r.tipo + firTxt[r.f], badge: { tone: vig[r.v][0], label: r.v === "sin" ? "Sin vigencia" : (r.v === "vig" ? "Vigente" : vig[r.v][1]) + (r.vence ? " " + r.vence.slice(0, 5) : "") }, chevron: true }),
+      docTabs: [{ id: "exp", label: "Explorador" }, { id: "ven", label: "Vencimientos" }, { id: "pla", label: "Plantillas" }, { id: "fir", label: "Firmas pendientes" }],
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "neg", label: "Negocios", icon: "briefcase" }, { id: "pau", label: "Pauta", icon: "calendar" }, { id: "mas", label: "Más", icon: "more" }],
+      groups: [
+        { items: [{ id: "ini", label: "Inicio", icon: "home" }] },
+        { title: "Comercial", items: [] }, { title: "Clientes", items: [] }, { title: "Operaciones", items: [] }, { title: "Personas", items: [] },
+        { items: [{ id: "doc", label: "Documentos", icon: "file" }] },
+        { items: [{ id: "cfg", label: "Configuración", icon: "grid" }] },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

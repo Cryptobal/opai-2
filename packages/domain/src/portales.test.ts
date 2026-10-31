@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import { ROLES } from "./permisos";
 import type { Rol } from "./permisos";
 import {
+  esMembresiaDeCliente,
   esPortalCoherente,
   PORTALES_TENANT,
   portalesAdmitidos,
@@ -23,6 +24,17 @@ describe("coherencia rol-portal (NÚCLEO-D1)", () => {
       expect(portalesIncoherentes(rol, sinCliente)).toEqual([]);
       expect(esPortalCoherente(rol, sinCliente)).toBe(true);
     }
+  });
+
+  it("el contacto de un cliente es viewer con «cliente» como único portal (CAR-88)", () => {
+    expect(portalesIncoherentes("viewer", ["cliente"])).toEqual([]);
+    expect(esMembresiaDeCliente("viewer", ["cliente"])).toBe(true);
+    for (const rol of ROLES.filter((r) => r !== "viewer")) {
+      expect(portalesIncoherentes(rol, ["cliente"])).toEqual(["cliente"]);
+      expect(esMembresiaDeCliente(rol, ["cliente"])).toBe(false);
+    }
+    expect(esMembresiaDeCliente("viewer", ["cliente", "erp"])).toBe(false);
+    expect(esMembresiaDeCliente("viewer", [])).toBe(false);
   });
 
   it("lista solo los incoherentes, no vacía la selección entera", () => {
