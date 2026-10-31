@@ -13,7 +13,7 @@ datasource db {
   // tablas de comercial viven en packages/db/prisma/schema/comercial.prisma; "rondas" es el módulo
   // de rondas (CAR-72). "core_firma" es la firma electrónica del núcleo (firma.md, PR 1); sus tablas
   // viven en schema/firma.prisma.
-  schemas  = ["core", "comercial", "rondas", "core_firma", "tickets", "pauta"]
+  schemas  = ["core", "comercial", "rondas", "core_firma", "tickets", "pauta", "portal_cliente"]
 }
 
 /// Empresa cliente de OPAI. No lleva tenant_id: es el tenant. Se protege por permisos de aplicación.
@@ -29,63 +29,63 @@ model Tenant {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  auditEvents AuditEvent[]
-  auditoriaCabeza AuditoriaCabeza?
-  memberships Membership[]
-  roles       Rol[]
+  auditEvents        AuditEvent[]
+  auditoriaCabeza    AuditoriaCabeza?
+  memberships        Membership[]
+  roles              Rol[]
   permisoExcepciones PermisoExcepcion[]
-  modules     TenantModule[]
-  apiKeys     ApiKey[]
-  invitations Invitation[]
-  usage       UsageEvent[]
+  modules            TenantModule[]
+  apiKeys            ApiKey[]
+  invitations        Invitation[]
+  usage              UsageEvent[]
 
   // Brief 02: maestros, documentos y servicios del núcleo.
-  cuentas               Cuenta[]
-  cuentasRepresentantes CuentaRepresentante[]
-  contactos             Contacto[]
-  instalaciones         Instalacion[]
-  cargos                Cargo[]
-  puestos               Puesto[]
-  personas              Persona[]
-  vinculos              VinculoLaboral[]
-  estructuras           EstructuraSueldo[]
-  estructurasItems      EstructuraItem[]
-  idsExternos           IdExterno[]
-  documentoTipos        DocumentoTipo[]
-  documentos            Documento[]
-  documentoVinculos     DocumentoVinculo[]
-  perfil                PerfilEmpresa?
-  ajustes               Ajuste[]
-  eventos               Evento[]
-  eventosEntregas       EventoEntrega[]
-  trabajos              Trabajo[]
-  plantillas            Plantilla[]
-  notificacionReglas    NotificacionRegla[]
-  notificaciones        Notificacion[]
-  envios                Envio[]
-  integraciones         Integracion[]
-  secretos              Secreto[]
-  clave                 ClaveTenant?
-  consumos              Consumo[]
-  consumosDiarios       ConsumoDiario[]
-  idempotencias         Idempotencia[]
-  aprobaciones          Aprobacion[]
-  apiKeysAutonomia      ApiKeyAutonomia[]
-  gastosAgenteMes       GastoAgenteMes[]
-  bitacora              Bitacora[]
-  bitacoraCabeza        BitacoraCabeza?
-  comprobantes          Comprobante[]
+  cuentas                 Cuenta[]
+  cuentasRepresentantes   CuentaRepresentante[]
+  contactos               Contacto[]
+  instalaciones           Instalacion[]
+  cargos                  Cargo[]
+  puestos                 Puesto[]
+  personas                Persona[]
+  vinculos                VinculoLaboral[]
+  estructuras             EstructuraSueldo[]
+  estructurasItems        EstructuraItem[]
+  idsExternos             IdExterno[]
+  documentoTipos          DocumentoTipo[]
+  documentos              Documento[]
+  documentoVinculos       DocumentoVinculo[]
+  perfil                  PerfilEmpresa?
+  ajustes                 Ajuste[]
+  eventos                 Evento[]
+  eventosEntregas         EventoEntrega[]
+  trabajos                Trabajo[]
+  plantillas              Plantilla[]
+  notificacionReglas      NotificacionRegla[]
+  notificaciones          Notificacion[]
+  envios                  Envio[]
+  integraciones           Integracion[]
+  secretos                Secreto[]
+  clave                   ClaveTenant?
+  consumos                Consumo[]
+  consumosDiarios         ConsumoDiario[]
+  idempotencias           Idempotencia[]
+  aprobaciones            Aprobacion[]
+  apiKeysAutonomia        ApiKeyAutonomia[]
+  gastosAgenteMes         GastoAgenteMes[]
+  bitacora                Bitacora[]
+  bitacoraCabeza          BitacoraCabeza?
+  comprobantes            Comprobante[]
   supervisorInstalaciones SupervisorInstalacion[]
 
   // Brief 07d · Ley 21.719 (cumplimiento por diseño).
-  dpaAceptaciones       DpaAceptacion[]
-  consentimientos       Consentimiento[]
-  solicitudesArco       SolicitudArco[]
-  incidentes            Incidente[]
-  retencionEjecuciones  RetencionEjecucion[]
+  dpaAceptaciones      DpaAceptacion[]
+  consentimientos      Consentimiento[]
+  solicitudesArco      SolicitudArco[]
+  incidentes           Incidente[]
+  retencionEjecuciones RetencionEjecucion[]
 
   // Brief 07b · PR 4 (anexo de contrato en borrador).
-  anexosContrato        AnexoContrato[]
+  anexosContrato AnexoContrato[]
 
   @@map("tenants")
   @@schema("core")
@@ -117,29 +117,29 @@ model RateLimitVentana {
 /// **digest** SHA-256 del payload, no el payload crudo). Verificar recalcula el canon desde la fila;
 /// una anonimización futura necesita un protocolo explícito de integridad (fuera de este PR).
 model AuditEvent {
-  id         String   @id @default(uuid(7)) @db.Uuid
-  tenantId   String   @map("tenant_id") @db.Uuid
+  id           String   @id @default(uuid(7)) @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
   /// "user" | "agent" | "system"
-  actorType  String   @map("actor_type")
-  actorId    String?  @map("actor_id")
+  actorType    String   @map("actor_type")
+  actorId      String?  @map("actor_id")
   /// Usuario responsable cuando el actor es un agente ("agente vía usuario").
-  viaUserId  String?  @map("via_user_id")
+  viaUserId    String?  @map("via_user_id")
   /// Id de la capacidad, por ejemplo "crm.lead.create".
-  capability String
-  entityType String?  @map("entity_type")
-  entityId   String?  @map("entity_id")
-  payload    Json?
-  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  capability   String
+  entityType   String?  @map("entity_type")
+  entityId     String?  @map("entity_id")
+  payload      Json?
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   /// Secuencia por tenant (1, 2, 3…). `Int`, no `BigInt`: igual que `Bitacora.seq` y a propósito,
   /// para que las filas sigan siendo `JSON.stringify`-ables sin un reemplazador de BigInt (2.1 mil
   /// millones de escrituras por tenant alcanza de sobra). ADR-052.
-  seq          Int    @map("seq")
+  seq          Int      @map("seq")
   /// Hash del eslabón anterior del mismo tenant (génesis = 64 ceros).
-  hashAnterior String @map("hash_anterior")
+  hashAnterior String   @map("hash_anterior")
   /// sha256(hashAnterior + "\n" + hashCanon). Columna que verifica la cadena.
   hash         String
   /// Forma canónica del eslabón; la verificación la contrasta con el contenido actual de la fila.
-  hashCanon    String @map("hash_canon")
+  hashCanon    String   @map("hash_canon")
 
   tenant Tenant @relation(fields: [tenantId], references: [id])
 
@@ -174,20 +174,20 @@ model AuditoriaCabeza {
 /// aceptó el tenant y cuándo. La migración revoca UPDATE/DELETE a opai_app (§6); corregir es
 /// una fila nueva. El estado «vigente aceptado» se deriva de la última fila por tenant.
 model DpaAceptacion {
-  id            String   @id @default(uuid(7)) @db.Uuid
-  tenantId      String   @map("tenant_id") @db.Uuid
+  id             String   @id @default(uuid(7)) @db.Uuid
+  tenantId       String   @map("tenant_id") @db.Uuid
   /// Versión del DPA de plataforma aceptada (ajuste `core.cumplimiento_dpa_version`, ADR-038).
-  version       String
+  version        String
   /// Usuario que aceptó (id del actor, sin FK, igual que `audit_events.actor_id`).
-  aceptadoPorId String?  @map("aceptado_por_id") @db.Uuid
+  aceptadoPorId  String?  @map("aceptado_por_id") @db.Uuid
   /// Nombre y correo del aceptante al momento de aceptar, como prueba legible.
-  aceptadoPor   String?  @map("aceptado_por")
+  aceptadoPor    String?  @map("aceptado_por")
   /// Referencia estable al texto aceptado: `<version>:sha256:<hash>` del texto vigente al aceptar.
-  documentoRef  String?  @map("documento_ref")
+  documentoRef   String?  @map("documento_ref")
   /// Texto exacto del DPA aceptado, guardado por fila. Como la tabla es append-only (sin UPDATE ni
   /// DELETE para opai_app), queda recuperable e inmutable: prueba a qué texto aceptó el tenant.
-  documentoTexto String? @map("documento_texto")
-  createdAt     DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  documentoTexto String?  @map("documento_texto")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
 
   tenant Tenant @relation(fields: [tenantId], references: [id])
 

@@ -37,3 +37,4 @@ export * from "./capas-sueldo";
 export * from "./rondas";
 
 export * from "./pauta";
+export * from "./portal-cliente";

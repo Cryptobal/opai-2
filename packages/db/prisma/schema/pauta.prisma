@@ -32,22 +32,22 @@ model SeriePauta {
 /// Excepción de un día sobre la serie de un puesto: el turno queda PPC con motivo. Se anula, no se
 /// borra (queda en el historial). A lo sumo una activa por puesto y día (índice parcial).
 model ExcepcionPauta {
-  id            String    @id @default(uuid(7)) @db.Uuid
-  tenantId      String    @map("tenant_id") @db.Uuid
-  puestoId      String    @map("puesto_id") @db.Uuid
-  fecha         DateTime  @db.Date
+  id         String    @id @default(uuid(7)) @db.Uuid
+  tenantId   String    @map("tenant_id") @db.Uuid
+  puestoId   String    @map("puesto_id") @db.Uuid
+  fecha      DateTime  @db.Date
   /// "ausencia" | "licencia" | "vacaciones" | "permiso" (CHECK en la migración).
-  tipo          String
-  motivo        String
+  tipo       String
+  motivo     String
   /// Titular que faltó ese día (para alertas y trazabilidad); no cambia aunque cambie la serie.
-  personaId     String?   @map("persona_id") @db.Uuid
+  personaId  String?   @map("persona_id") @db.Uuid
   /// "activa" | "anulada".
-  estado        String    @default("activa")
-  creadaPor     String?   @map("creada_por") @db.Uuid
-  anuladaPor    String?   @map("anulada_por") @db.Uuid
-  anuladaEn     DateTime? @map("anulada_en") @db.Timestamptz(6)
-  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  estado     String    @default("activa")
+  creadaPor  String?   @map("creada_por") @db.Uuid
+  anuladaPor String?   @map("anulada_por") @db.Uuid
+  anuladaEn  DateTime? @map("anulada_en") @db.Timestamptz(6)
+  createdAt  DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@index([tenantId, puestoId, fecha])
   @@map("excepciones")

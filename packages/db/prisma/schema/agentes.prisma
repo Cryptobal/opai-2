@@ -140,24 +140,24 @@ model PrecioRecurso {
 
 /// Cola de aprobaciones de agentes (ADR-032): lo irreversible espera a un humano.
 model Aprobacion {
-  id             String    @id @default(uuid(7)) @db.Uuid
-  tenantId       String    @map("tenant_id") @db.Uuid
-  apiKeyId       String?   @map("api_key_id") @db.Uuid
-  agenteInternoId String?  @map("agente_interno_id")
-  viaUserId      String    @map("via_user_id") @db.Uuid
-  capability     String
-  input          Json
-  idempotencyKey String?   @map("idempotency_key")
-  resumen        String
+  id              String    @id @default(uuid(7)) @db.Uuid
+  tenantId        String    @map("tenant_id") @db.Uuid
+  apiKeyId        String?   @map("api_key_id") @db.Uuid
+  agenteInternoId String?   @map("agente_interno_id")
+  viaUserId       String    @map("via_user_id") @db.Uuid
+  capability      String
+  input           Json
+  idempotencyKey  String?   @map("idempotency_key")
+  resumen         String
   /// "pendiente" | "aprobada" | "rechazada" | "vencida"
-  estado         String    @default("pendiente")
-  venceEn        DateTime  @map("vence_en") @db.Timestamptz(6)
-  resueltaPor    String?   @map("resuelta_por") @db.Uuid
-  resueltaEn     DateTime? @map("resuelta_en") @db.Timestamptz(6)
-  motivo         String?
-  resultado      Json?
-  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  estado          String    @default("pendiente")
+  venceEn         DateTime  @map("vence_en") @db.Timestamptz(6)
+  resueltaPor     String?   @map("resuelta_por") @db.Uuid
+  resueltaEn      DateTime? @map("resuelta_en") @db.Timestamptz(6)
+  motivo          String?
+  resultado       Json?
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   tenant Tenant @relation(fields: [tenantId], references: [id])
 
@@ -169,23 +169,23 @@ model Aprobacion {
 /// Presupuesto mensual por API key (Identidad de servicio t457u, ADR-031/ADR-032). Contador atómico:
 /// el chequeo y el consumo van en una transacción con guarda (gastado + costo <= tope), sin TOCTOU.
 model GastoAgenteMes {
-  id           String    @id @default(uuid(7)) @db.Uuid
-  tenantId     String    @map("tenant_id") @db.Uuid
-  apiKeyId     String?   @map("api_key_id") @db.Uuid
-  agenteInternoId String? @map("agente_interno_id")
+  id              String    @id @default(uuid(7)) @db.Uuid
+  tenantId        String    @map("tenant_id") @db.Uuid
+  apiKeyId        String?   @map("api_key_id") @db.Uuid
+  agenteInternoId String?   @map("agente_interno_id")
   /// Primer día del mes en UTC.
-  periodo      DateTime  @db.Date
+  periodo         DateTime  @db.Date
   /// Micro-USD gastados en el mes; nunca supera `topeMicro`.
-  gastadoMicro BigInt    @default(0) @map("gastado_micro")
+  gastadoMicro    BigInt    @default(0) @map("gastado_micro")
   /// Instantánea del tope de la key (micro-USD); se refresca si la key cambia su presupuesto.
-  topeMicro    BigInt    @map("tope_micro")
+  topeMicro       BigInt    @map("tope_micro")
   /// Marcas idempotentes de los avisos del mes (ADR-031): se emiten una sola vez.
-  aviso80En    DateTime? @map("aviso_80_en") @db.Timestamptz(6)
-  aviso100En   DateTime? @map("aviso_100_en") @db.Timestamptz(6)
-  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  aviso80En       DateTime? @map("aviso_80_en") @db.Timestamptz(6)
+  aviso100En      DateTime? @map("aviso_100_en") @db.Timestamptz(6)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  tenant Tenant @relation(fields: [tenantId], references: [id])
+  tenant Tenant  @relation(fields: [tenantId], references: [id])
   apiKey ApiKey? @relation(fields: [apiKeyId], references: [id], onDelete: Cascade)
 
   @@unique([tenantId, apiKeyId, periodo])
@@ -298,27 +298,27 @@ model Idempotencia {
 /// `platformRole`. `origenTenantId` es la empresa donde vive la key (para leer su nombre), no un
 /// alcance: los owners y admins de esa empresa nunca ven estas filas.
 model AprobacionPlataforma {
-  id             String    @id @default(uuid(7)) @db.Uuid
-  origenTenantId String?   @map("origen_tenant_id") @db.Uuid
-  apiKeyId       String?   @map("api_key_id") @db.Uuid
+  id              String    @id @default(uuid(7)) @db.Uuid
+  origenTenantId  String?   @map("origen_tenant_id") @db.Uuid
+  apiKeyId        String?   @map("api_key_id") @db.Uuid
   /// Nombre de la key al pedir (la key vive en otra empresa; no se consulta en cada lectura).
-  agente         String
+  agente          String
   /// Agente interno que la pidió (ADR-049), si la pidió uno; texto, como en `core.aprobaciones`.
-  agenteInternoId String?  @map("agente_interno_id")
-  viaUserId      String    @map("via_user_id") @db.Uuid
-  capability     String
-  input          Json
-  idempotencyKey String?   @map("idempotency_key")
-  resumen        String
+  agenteInternoId String?   @map("agente_interno_id")
+  viaUserId       String    @map("via_user_id") @db.Uuid
+  capability      String
+  input           Json
+  idempotencyKey  String?   @map("idempotency_key")
+  resumen         String
   /// "pendiente" | "aprobada" | "rechazada" | "vencida"
-  estado         String    @default("pendiente")
-  venceEn        DateTime  @map("vence_en") @db.Timestamptz(6)
-  resueltaPor    String?   @map("resuelta_por") @db.Uuid
-  resueltaEn     DateTime? @map("resuelta_en") @db.Timestamptz(6)
-  motivo         String?
-  resultado      Json?
-  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  estado          String    @default("pendiente")
+  venceEn         DateTime  @map("vence_en") @db.Timestamptz(6)
+  resueltaPor     String?   @map("resuelta_por") @db.Uuid
+  resueltaEn      DateTime? @map("resuelta_en") @db.Timestamptz(6)
+  motivo          String?
+  resultado       Json?
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   @@index([estado, createdAt])
   @@index([apiKeyId, capability, idempotencyKey])

@@ -4,43 +4,43 @@
 // en `core.documentos` (ADR-039). Funciona aunque el tenant no tenga Nómina (ADR-048 punto 5).
 
 model AnexoContrato {
-  id       String @id @default(uuid(7)) @db.Uuid
-  tenantId String @map("tenant_id") @db.Uuid
-  personaId String @map("persona_id") @db.Uuid
-  vinculoId String @map("vinculo_id") @db.Uuid
+  id              String    @id @default(uuid(7)) @db.Uuid
+  tenantId        String    @map("tenant_id") @db.Uuid
+  personaId       String    @map("persona_id") @db.Uuid
+  vinculoId       String    @map("vinculo_id") @db.Uuid
   /// "capa" | "monto" | "instalacion" | "rol" (R11).
-  motivoCambio String @map("motivo_cambio")
+  motivoCambio    String    @map("motivo_cambio")
   /// Estado del contrato antes del cambio; null cuando se generó sin comparación (alta manual).
-  snapshotAntes Json? @map("snapshot_antes")
+  snapshotAntes   Json?     @map("snapshot_antes")
   /// Estado del contrato que el anexo propone.
-  snapshotDespues Json @map("snapshot_despues")
+  snapshotDespues Json      @map("snapshot_despues")
   /// "evento" | "usuario" | "agente": quién/qué disparó el borrador (outbox o manual).
-  generadoPorTipo String  @map("generado_por_tipo")
-  generadoPorId   String? @map("generado_por_id")
+  generadoPorTipo String    @map("generado_por_tipo")
+  generadoPorId   String?   @map("generado_por_id")
   /// Id del evento de outbox que lo originó, para idempotencia del consumidor; null si fue manual.
-  origenEventoId String? @map("origen_evento_id") @db.Uuid
+  origenEventoId  String?   @map("origen_evento_id") @db.Uuid
   /// "borrador" | "aprobado" | "rechazado".
-  estado         String    @default("borrador")
-  aprobadoPorId  String?   @map("aprobado_por_id")
-  aprobadoEn     DateTime? @map("aprobado_en") @db.Timestamptz(6)
-  rechazadoPorId String?   @map("rechazado_por_id")
-  rechazadoEn    DateTime? @map("rechazado_en") @db.Timestamptz(6)
-  motivoRechazo  String?   @map("motivo_rechazo")
+  estado          String    @default("borrador")
+  aprobadoPorId   String?   @map("aprobado_por_id")
+  aprobadoEn      DateTime? @map("aprobado_en") @db.Timestamptz(6)
+  rechazadoPorId  String?   @map("rechazado_por_id")
+  rechazadoEn     DateTime? @map("rechazado_en") @db.Timestamptz(6)
+  motivoRechazo   String?   @map("motivo_rechazo")
   /// Documento final en `core.documentos`, solo tras aprobar (R15).
-  documentoId String?  @map("documento_id") @db.Uuid
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  documentoId     String?   @map("documento_id") @db.Uuid
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   tenant    Tenant         @relation(fields: [tenantId], references: [id])
   persona   Persona        @relation(fields: [personaId], references: [id])
   vinculo   VinculoLaboral @relation(fields: [vinculoId], references: [id])
   documento Documento?     @relation(fields: [documentoId], references: [id])
 
-  @@index([tenantId, personaId, estado])
-  @@index([tenantId, estado, createdAt])
   // Un mismo evento de outbox no crea dos borradores para la misma persona (idempotencia del
   // consumidor); varias filas con `origenEventoId` null (altas manuales) no colisionan entre sí.
   @@unique([tenantId, origenEventoId, personaId])
+  @@index([tenantId, personaId, estado])
+  @@index([tenantId, estado, createdAt])
   @@map("anexos_contrato")
   @@schema("core")
 }

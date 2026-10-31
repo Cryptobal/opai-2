@@ -59,29 +59,29 @@ model CuentaRepresentante {
 }
 
 model Contacto {
-  id          String    @id @default(uuid(7)) @db.Uuid
-  tenantId    String    @map("tenant_id") @db.Uuid
-  cuentaId    String    @map("cuenta_id") @db.Uuid
-  nombres     String
-  apellidos   String
-  email       String?
+  id            String    @id @default(uuid(7)) @db.Uuid
+  tenantId      String    @map("tenant_id") @db.Uuid
+  cuentaId      String    @map("cuenta_id") @db.Uuid
+  nombres       String
+  apellidos     String
+  email         String?
   /// E.164 ("+56987654321").
-  telefono    String?
-  cargo       String?
-  esPrincipal Boolean   @default(false) @map("es_principal")
+  telefono      String?
+  cargo         String?
+  esPrincipal   Boolean   @default(false) @map("es_principal")
   /// "comercial" | "operacional" | "facturacion" | "cobranza"
-  roles       String[]  @default([])
+  roles         String[]  @default([])
   /// "activo" | "inactivo"
-  estado      String    @default("activo")
-  notas       String?
-  archivadoEn DateTime? @map("archivado_en") @db.Timestamptz(6)
+  estado        String    @default("activo")
+  notas         String?
+  archivadoEn   DateTime? @map("archivado_en") @db.Timestamptz(6)
   /// Anonimizado por la política de retención o a pedido del titular (Ley 21.719, 07d PR 3).
   anonimizadoEn DateTime? @map("anonimizado_en") @db.Timestamptz(6)
-  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  tenant Tenant @relation(fields: [tenantId], references: [id])
-  cuenta Cuenta @relation(fields: [cuentaId], references: [id])
+  tenant           Tenant            @relation(fields: [tenantId], references: [id])
+  cuenta           Cuenta            @relation(fields: [cuentaId], references: [id])
   // Relación inversa del módulo Comercial (Brief 07 · PR 1). Virtual: la FK vive en comercial.negocio_contactos.
   negocioContactos NegocioContacto[]
 
@@ -91,36 +91,36 @@ model Contacto {
 }
 
 model Instalacion {
-  vinculos VinculoLaboral[]
-  id                  String    @id @default(uuid(7)) @db.Uuid
-  tenantId            String    @map("tenant_id") @db.Uuid
-  cuentaId            String    @map("cuenta_id") @db.Uuid
+  vinculos            VinculoLaboral[]
+  id                  String           @id @default(uuid(7)) @db.Uuid
+  tenantId            String           @map("tenant_id") @db.Uuid
+  cuentaId            String           @map("cuenta_id") @db.Uuid
   nombre              String
   /// "prospecto" | "activa" | "inactiva"
-  estado              String    @default("prospecto")
+  estado              String           @default("prospecto")
   calle               String?
   comuna              String?
   region              String?
-  pais                String    @default("CL")
-  direccionFormateada String?   @map("direccion_formateada")
-  placeId             String?   @map("place_id")
-  lat                 Decimal?  @db.Decimal(10, 7)
-  lng                 Decimal?  @db.Decimal(10, 7)
+  pais                String           @default("CL")
+  direccionFormateada String?          @map("direccion_formateada")
+  placeId             String?          @map("place_id")
+  lat                 Decimal?         @db.Decimal(10, 7)
+  lng                 Decimal?         @db.Decimal(10, 7)
   /// Tolerancia de ubicación en metros (evidencia, nunca bloqueante).
-  geocercaM           Int       @default(1000) @map("geocerca_m")
-  vigenteDesde        DateTime? @map("vigente_desde") @db.Date
-  vigenteHasta        DateTime? @map("vigente_hasta") @db.Date
+  geocercaM           Int              @default(1000) @map("geocerca_m")
+  vigenteDesde        DateTime?        @map("vigente_desde") @db.Date
+  vigenteHasta        DateTime?        @map("vigente_hasta") @db.Date
   notas               String?
-  archivadaEn         DateTime? @map("archivada_en") @db.Timestamptz(6)
-  createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt           DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  archivadaEn         DateTime?        @map("archivada_en") @db.Timestamptz(6)
+  createdAt           DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  tenant  Tenant   @relation(fields: [tenantId], references: [id])
-  cuenta  Cuenta   @relation(fields: [cuentaId], references: [id])
-  puestos Puesto[]
-  estructuras EstructuraSueldo[]
+  tenant               Tenant                  @relation(fields: [tenantId], references: [id])
+  cuenta               Cuenta                  @relation(fields: [cuentaId], references: [id])
+  puestos              Puesto[]
+  estructuras          EstructuraSueldo[]
   /// Supervisores a cargo de esta instalación (alcance por filas, ADR-022 · Brief 07c B3).
-  supervisores SupervisorInstalacion[]
+  supervisores         SupervisorInstalacion[]
   // Relación inversa del módulo Comercial (Brief 07 · PR 1). Virtual: la FK vive en comercial.negocio_instalaciones.
   negocioInstalaciones NegocioInstalacion[]
 
@@ -159,44 +159,44 @@ model Cargo {
 /// ciclo salen del catálogo de patrones (`patronId`) y la función operativa de `funcionId`. El horario
 /// va por tramos (día y, si rota, noche), con horas semanales y colación en el puesto, y nace en PPC.
 model Puesto {
-  vinculos VinculoLaboral[]
-  id              String    @id @default(uuid(7)) @db.Uuid
-  tenantId        String    @map("tenant_id") @db.Uuid
-  instalacionId   String    @map("instalacion_id") @db.Uuid
-  cargoId         String    @map("cargo_id") @db.Uuid
+  vinculos        VinculoLaboral[]
+  id              String           @id @default(uuid(7)) @db.Uuid
+  tenantId        String           @map("tenant_id") @db.Uuid
+  instalacionId   String           @map("instalacion_id") @db.Uuid
+  cargoId         String           @map("cargo_id") @db.Uuid
   /// Función operativa del catálogo del tenant (guardia, supervisor…); null hasta que se elige.
-  funcionId       String?   @map("funcion_id") @db.Uuid
+  funcionId       String?          @map("funcion_id") @db.Uuid
   /// Patrón de turno del catálogo del tenant (4×4, 5×2…); null hasta que se elige.
-  patronId        String?   @map("patron_id") @db.Uuid
+  patronId        String?          @map("patron_id") @db.Uuid
   nombre          String
-  diasTrabajo     Int       @map("dias_trabajo")
-  diasDescanso    Int       @map("dias_descanso")
+  diasTrabajo     Int              @map("dias_trabajo")
+  diasDescanso    Int              @map("dias_descanso")
   /// "HH:mm". Si horaFin <= horaInicio el turno cruza medianoche.
-  horaInicio      String    @map("hora_inicio")
-  horaFin         String    @map("hora_fin")
+  horaInicio      String           @map("hora_inicio")
+  horaFin         String           @map("hora_fin")
   /// Tramo de noche de la rotación día/noche (opcional), "HH:mm".
-  horaInicioNoche String?   @map("hora_inicio_noche")
-  horaFinNoche    String?   @map("hora_fin_noche")
+  horaInicioNoche String?          @map("hora_inicio_noche")
+  horaFinNoche    String?          @map("hora_fin_noche")
   /// "dia" | "noche" | "rotativa"
-  jornada         String    @default("dia")
+  jornada         String           @default("dia")
   /// Horas semanales del puesto (sugeridas por el patrón y el horario, editables).
-  horasSemanales  Decimal?  @map("horas_semanales") @db.Decimal(5, 2)
+  horasSemanales  Decimal?         @map("horas_semanales") @db.Decimal(5, 2)
   /// Colación en minutos y si va fuera de la jornada (no se descuenta del tiempo trabajado).
-  colacionMin     Int       @default(0) @map("colacion_min")
-  colacionFuera   Boolean   @default(false) @map("colacion_fuera")
+  colacionMin     Int              @default(0) @map("colacion_min")
+  colacionFuera   Boolean          @default(false) @map("colacion_fuera")
   /// DEPRECADA (Brief 11 PR 1): la dotación se arma con N puestos. Se conserva por compatibilidad.
-  dotacion        Int       @default(1)
+  dotacion        Int              @default(1)
   /// Cobertura de la posición: "ppc" (sin asignar) | "cubierto". Nace en PPC.
-  cobertura       String    @default("ppc")
+  cobertura       String           @default("ppc")
   /// Motivo del PPC: por ahora solo "sin_asignar" (más motivos en PR 3).
-  coberturaMotivo String?   @default("sin_asignar") @map("cobertura_motivo")
+  coberturaMotivo String?          @default("sin_asignar") @map("cobertura_motivo")
   /// "activo" | "inactivo"
-  estado          String    @default("activo")
-  vigenteDesde    DateTime? @map("vigente_desde") @db.Date
-  vigenteHasta    DateTime? @map("vigente_hasta") @db.Date
+  estado          String           @default("activo")
+  vigenteDesde    DateTime?        @map("vigente_desde") @db.Date
+  vigenteHasta    DateTime?        @map("vigente_hasta") @db.Date
   notas           String?
-  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  createdAt       DateTime         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime         @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   tenant      Tenant             @relation(fields: [tenantId], references: [id])
   instalacion Instalacion        @relation(fields: [instalacionId], references: [id])
@@ -213,37 +213,37 @@ model Puesto {
 }
 
 model Persona {
-  id                  String    @id @default(uuid(7)) @db.Uuid
-  tenantId            String    @map("tenant_id") @db.Uuid
-  nombres             String
-  apellidos           String
+  id                   String    @id @default(uuid(7)) @db.Uuid
+  tenantId             String    @map("tenant_id") @db.Uuid
+  nombres              String
+  apellidos            String
   /// RUT canónico, obligatorio y único por tenant.
-  rut                 String
-  emailPersonal       String?   @map("email_personal")
-  emailLaboral        String?   @map("email_laboral")
-  telefono            String?
-  fechaNacimiento     DateTime? @map("fecha_nacimiento") @db.Date
+  rut                  String
+  emailPersonal        String?   @map("email_personal")
+  emailLaboral         String?   @map("email_laboral")
+  telefono             String?
+  fechaNacimiento      DateTime? @map("fecha_nacimiento") @db.Date
   /// "femenino" | "masculino" | "otro" | "no_declara"
-  sexo                String?
-  nacionalidad        String    @default("CL")
-  calle               String?
-  comuna              String?
-  region              String?
-  pais                String    @default("CL")
-  direccionFormateada String?   @map("direccion_formateada")
-  placeId             String?   @map("place_id")
-  lat                 Decimal?  @db.Decimal(10, 7)
-  lng                 Decimal?  @db.Decimal(10, 7)
+  sexo                 String?
+  nacionalidad         String    @default("CL")
+  calle                String?
+  comuna               String?
+  region               String?
+  pais                 String    @default("CL")
+  direccionFormateada  String?   @map("direccion_formateada")
+  placeId              String?   @map("place_id")
+  lat                  Decimal?  @db.Decimal(10, 7)
+  lng                  Decimal?  @db.Decimal(10, 7)
   /// "activa" | "inactiva"
-  estado              String    @default("activa")
-  bloqueada           Boolean   @default(false)
-  bloqueoMotivo       String?   @map("bloqueo_motivo")
-  bloqueadaEn         DateTime? @map("bloqueada_en") @db.Timestamptz(6)
+  estado               String    @default("activa")
+  bloqueada            Boolean   @default(false)
+  bloqueoMotivo        String?   @map("bloqueo_motivo")
+  bloqueadaEn          DateTime? @map("bloqueada_en") @db.Timestamptz(6)
   /// Usuario de OPAI vinculado (1:1), si la persona entra al sistema.
-  usuarioId           String?   @map("usuario_id") @db.Uuid
-  archivadaEn         DateTime? @map("archivada_en") @db.Timestamptz(6)
+  usuarioId            String?   @map("usuario_id") @db.Uuid
+  archivadaEn          DateTime? @map("archivada_en") @db.Timestamptz(6)
   /// Anonimizada por la política de retención o a pedido del titular (Ley 21.719, 07d PR 3).
-  anonimizadaEn       DateTime? @map("anonimizada_en") @db.Timestamptz(6)
+  anonimizadaEn        DateTime? @map("anonimizada_en") @db.Timestamptz(6)
   /// Marca P1 "No recontratar" (design-prompt-personas-cargos.md): visible solo con
   /// core:personas.no_recontratar.manage (RRHH/admin). Base de interés legítimo (art. 13 d) de la Ley
   /// 19.628, modificada por la 21.719); el motivo es texto libre (lista cerrada pendiente de Carlos,
@@ -253,8 +253,8 @@ model Persona {
   noRecontratarMotivo  String?   @map("no_recontratar_motivo")
   noRecontratarEn      DateTime? @map("no_recontratar_en") @db.Timestamptz(6)
   noRecontratarVenceEn DateTime? @map("no_recontratar_vence_en") @db.Timestamptz(6)
-  createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt           DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   tenant      Tenant             @relation(fields: [tenantId], references: [id])
   vinculos    VinculoLaboral[]
@@ -269,29 +269,29 @@ model Persona {
 }
 
 model VinculoLaboral {
-  instalacionId String? @map("instalacion_id") @db.Uuid
-  puestoId String? @map("puesto_id") @db.Uuid
-  horasSemanales Int? @map("horas_semanales")
-  distribucion String?
-  instalacion Instalacion? @relation(fields: [instalacionId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "vinculos_instalacion_fkey")
-  puesto Puesto? @relation(fields: [puestoId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "vinculos_puesto_fkey")
-  id            String    @id @default(uuid(7)) @db.Uuid
-  tenantId      String    @map("tenant_id") @db.Uuid
-  personaId     String    @map("persona_id") @db.Uuid
-  cargoId       String    @map("cargo_id") @db.Uuid
+  instalacionId  String?      @map("instalacion_id") @db.Uuid
+  puestoId       String?      @map("puesto_id") @db.Uuid
+  horasSemanales Int?         @map("horas_semanales")
+  distribucion   String?
+  instalacion    Instalacion? @relation(fields: [instalacionId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "vinculos_instalacion_fkey")
+  puesto         Puesto?      @relation(fields: [puestoId], references: [id], onDelete: Restrict, onUpdate: NoAction, map: "vinculos_puesto_fkey")
+  id             String       @id @default(uuid(7)) @db.Uuid
+  tenantId       String       @map("tenant_id") @db.Uuid
+  personaId      String       @map("persona_id") @db.Uuid
+  cargoId        String       @map("cargo_id") @db.Uuid
   /// "indefinido" | "plazo_fijo" | "por_obra" | "honorarios"
-  tipo          String
-  inicio        DateTime  @db.Date
-  termino       DateTime? @db.Date
-  motivoTermino String?   @map("motivo_termino")
+  tipo           String
+  inicio         DateTime     @db.Date
+  termino        DateTime?    @db.Date
+  motivoTermino  String?      @map("motivo_termino")
   /// "vigente" | "terminado". Un solo vigente por persona (índice parcial en la migración).
-  estado        String    @default("vigente")
-  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  estado         String       @default("vigente")
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  tenant  Tenant  @relation(fields: [tenantId], references: [id])
-  persona Persona @relation(fields: [personaId], references: [id])
-  cargo   Cargo   @relation(fields: [cargoId], references: [id])
+  tenant  Tenant          @relation(fields: [tenantId], references: [id])
+  persona Persona         @relation(fields: [personaId], references: [id])
+  cargo   Cargo           @relation(fields: [cargoId], references: [id])
   anexos  AnexoContrato[]
 
   @@index([tenantId, personaId])
@@ -327,12 +327,12 @@ model EstructuraSueldo {
   createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  tenant  Tenant           @relation(fields: [tenantId], references: [id])
-  cargo   Cargo?           @relation(fields: [cargoId], references: [id])
-  puesto  Puesto?          @relation(fields: [puestoId], references: [id])
-  persona Persona?         @relation(fields: [personaId], references: [id])
-  instalacion Instalacion? @relation(fields: [instalacionId], references: [id])
-  items   EstructuraItem[]
+  tenant      Tenant           @relation(fields: [tenantId], references: [id])
+  cargo       Cargo?           @relation(fields: [cargoId], references: [id])
+  puesto      Puesto?          @relation(fields: [puestoId], references: [id])
+  persona     Persona?         @relation(fields: [personaId], references: [id])
+  instalacion Instalacion?     @relation(fields: [instalacionId], references: [id])
+  items       EstructuraItem[]
 
   @@index([tenantId, nivel, cargoId])
   @@index([tenantId, nivel, puestoId])

@@ -6,13 +6,13 @@
 
 /// Embudo comercial configurable por tenant. Exactamente uno por_defecto por tenant.
 model Embudo {
-  id        String   @id @default(uuid(7)) @db.Uuid
-  tenantId  String   @map("tenant_id") @db.Uuid
-  nombre    String
-  porDefecto Boolean @default(false) @map("por_defecto")
-  activo    Boolean  @default(true)
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  id         String   @id @default(uuid(7)) @db.Uuid
+  tenantId   String   @map("tenant_id") @db.Uuid
+  nombre     String
+  porDefecto Boolean  @default(false) @map("por_defecto")
+  activo     Boolean  @default(true)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   etapas   Etapa[]
   negocios Negocio[]
@@ -42,10 +42,10 @@ model Etapa {
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  embudo          Embudo           @relation(fields: [embudoId], references: [id], onDelete: Cascade)
-  negocios        Negocio[]
-  historialDesde  HistorialEtapa[] @relation("historial_de")
-  historialHacia  HistorialEtapa[] @relation("historial_a")
+  embudo         Embudo           @relation(fields: [embudoId], references: [id], onDelete: Cascade)
+  negocios       Negocio[]
+  historialDesde HistorialEtapa[] @relation("historial_de")
+  historialHacia HistorialEtapa[] @relation("historial_a")
 
   @@unique([tenantId, embudoId, orden])
   @@index([tenantId, embudoId])
@@ -55,34 +55,34 @@ model Etapa {
 
 /// Oportunidad de venta de una cuenta. El estado se deriva por trigger del tipo de la etapa (R8).
 model Negocio {
-  id                      String    @id @default(uuid(7)) @db.Uuid
-  tenantId                String    @map("tenant_id") @db.Uuid
-  cuentaId                String    @map("cuenta_id") @db.Uuid
-  embudoId                String    @map("embudo_id") @db.Uuid
-  etapaId                 String    @map("etapa_id") @db.Uuid
+  id                     String    @id @default(uuid(7)) @db.Uuid
+  tenantId               String    @map("tenant_id") @db.Uuid
+  cuentaId               String    @map("cuenta_id") @db.Uuid
+  embudoId               String    @map("embudo_id") @db.Uuid
+  etapaId                String    @map("etapa_id") @db.Uuid
   /// "abierto" | "ganado" | "perdido" (derivado por trigger del tipo de la etapa; nadie lo edita).
-  estado                  String    @default("abierto")
-  titulo                  String
-  tipoId                  String?   @map("tipo_id") @db.Uuid
-  origenId                String?   @map("origen_id") @db.Uuid
-  responsableId           String?   @map("responsable_id") @db.Uuid
-  probabilidad            Int       @default(0)
+  estado                 String    @default("abierto")
+  titulo                 String
+  tipoId                 String?   @map("tipo_id") @db.Uuid
+  origenId               String?   @map("origen_id") @db.Uuid
+  responsableId          String?   @map("responsable_id") @db.Uuid
+  probabilidad           Int       @default(0)
   /// CLP entero. Editable mientras no hay cotización vigente (R12).
-  montoEstimadoMensual    Int?      @map("monto_estimado_mensual")
+  montoEstimadoMensual   Int?      @map("monto_estimado_mensual")
   /// CLP entero. Lo escribe CPQ desde la cotización vigente; solo lectura aquí.
-  valorMensual            Int?      @map("valor_mensual")
-  cotizacionEnviadaEn     DateTime? @map("cotizacion_enviada_en") @db.Timestamptz(6)
-  cierreEstimado          DateTime? @map("cierre_estimado") @db.Date
-  inicioServicioEstimado  DateTime? @map("inicio_servicio_estimado") @db.Date
-  motivoPerdidaId         String?   @map("motivo_perdida_id") @db.Uuid
-  motivoPerdidaDetalle    String?   @map("motivo_perdida_detalle")
-  competidor              String?
-  ganadoEn                DateTime? @map("ganado_en") @db.Timestamptz(6)
-  perdidoEn               DateTime? @map("perdido_en") @db.Timestamptz(6)
-  reabiertoEn             DateTime? @map("reabierto_en") @db.Timestamptz(6)
-  archivadoEn             DateTime? @map("archivado_en") @db.Timestamptz(6)
-  createdAt               DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt               DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  valorMensual           Int?      @map("valor_mensual")
+  cotizacionEnviadaEn    DateTime? @map("cotizacion_enviada_en") @db.Timestamptz(6)
+  cierreEstimado         DateTime? @map("cierre_estimado") @db.Date
+  inicioServicioEstimado DateTime? @map("inicio_servicio_estimado") @db.Date
+  motivoPerdidaId        String?   @map("motivo_perdida_id") @db.Uuid
+  motivoPerdidaDetalle   String?   @map("motivo_perdida_detalle")
+  competidor             String?
+  ganadoEn               DateTime? @map("ganado_en") @db.Timestamptz(6)
+  perdidoEn              DateTime? @map("perdido_en") @db.Timestamptz(6)
+  reabiertoEn            DateTime? @map("reabierto_en") @db.Timestamptz(6)
+  archivadoEn            DateTime? @map("archivado_en") @db.Timestamptz(6)
+  createdAt              DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt              DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   cuenta        Cuenta               @relation(fields: [cuentaId], references: [id])
   embudo        Embudo               @relation(fields: [embudoId], references: [id])
@@ -171,13 +171,13 @@ model HistorialEtapa {
 
 /// Catálogo por tenant de tipos de negocio (nuevo cliente, ampliación, renovación…).
 model TipoNegocio {
-  id        String    @id @default(uuid(7)) @db.Uuid
-  tenantId  String    @map("tenant_id") @db.Uuid
+  id        String   @id @default(uuid(7)) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
   nombre    String
-  orden     Int       @default(0)
-  activo    Boolean   @default(true)
-  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  orden     Int      @default(0)
+  activo    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   negocios Negocio[]
 
@@ -188,13 +188,13 @@ model TipoNegocio {
 
 /// Catálogo por tenant de orígenes de negocio (web, referido, cliente actual…).
 model OrigenNegocio {
-  id        String    @id @default(uuid(7)) @db.Uuid
-  tenantId  String    @map("tenant_id") @db.Uuid
+  id        String   @id @default(uuid(7)) @db.Uuid
+  tenantId  String   @map("tenant_id") @db.Uuid
   nombre    String
-  orden     Int       @default(0)
-  activo    Boolean   @default(true)
-  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  orden     Int      @default(0)
+  activo    Boolean  @default(true)
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   negocios Negocio[]
 
@@ -205,15 +205,15 @@ model OrigenNegocio {
 
 /// Catálogo por tenant de motivos de pérdida (precio, cobertura, plazo…). `exigeDetalle` en "otro".
 model MotivoPerdida {
-  id           String    @id @default(uuid(7)) @db.Uuid
-  tenantId     String    @map("tenant_id") @db.Uuid
+  id           String   @id @default(uuid(7)) @db.Uuid
+  tenantId     String   @map("tenant_id") @db.Uuid
   codigo       String
   nombre       String
-  orden        Int       @default(0)
-  activo       Boolean   @default(true)
-  exigeDetalle Boolean   @default(false) @map("exige_detalle")
-  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt    DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  orden        Int      @default(0)
+  activo       Boolean  @default(true)
+  exigeDetalle Boolean  @default(false) @map("exige_detalle")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   negocios Negocio[]
 

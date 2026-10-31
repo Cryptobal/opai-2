@@ -30,39 +30,39 @@ model PoliticaFirma {
 /// Solicitud de firma: un documento congelado (versión exacta, con su huella H1) enviado a firmar
 /// (R4). El estado sigue la máquina de `@opai/domain`.
 model SolicitudFirma {
-  id                 String    @id @default(uuid(7)) @db.Uuid
-  tenantId           String    @map("tenant_id") @db.Uuid
+  id                   String    @id @default(uuid(7)) @db.Uuid
+  tenantId             String    @map("tenant_id") @db.Uuid
   /// Documento congelado en `core.documentos` (sin FK de Prisma: relación entre schemas por SQL).
-  documentoId        String    @map("documento_id") @db.Uuid
-  documentoVersion   Int       @map("documento_version")
+  documentoId          String    @map("documento_id") @db.Uuid
+  documentoVersion     Int       @map("documento_version")
   /// H1: huella SHA-256 del PDF congelado que cada firmante firma (R6).
-  sha256             String
-  clase              String
-  nivel              String
-  orden              String    @default("secuencial")
+  sha256               String
+  clase                String
+  nivel                String
+  orden                String    @default("secuencial")
   /// "enviada" | "en_curso" | "completada" | "rechazada" | "vencida" | "cancelada" | "espera_prestador"
-  estado             String    @default("enviada")
-  mensaje            String?
-  plazoVence         DateTime  @map("plazo_vence") @db.Timestamptz(6)
-  enviadaPorTipo     String    @map("enviada_por_tipo")
-  enviadaPorId       String?   @map("enviada_por_id") @db.Uuid
-  viaUserId          String?   @map("via_user_id") @db.Uuid
+  estado               String    @default("enviada")
+  mensaje              String?
+  plazoVence           DateTime  @map("plazo_vence") @db.Timestamptz(6)
+  enviadaPorTipo       String    @map("enviada_por_tipo")
+  enviadaPorId         String?   @map("enviada_por_id") @db.Uuid
+  viaUserId            String?   @map("via_user_id") @db.Uuid
   /// Motivo del rechazo o la cancelación (R9, R4).
-  motivo             String?
+  motivo               String?
   /// Eslabón de `core.bitacora` del hecho "enviada" (R17).
-  bitacoraSeq        Int?      @map("bitacora_seq")
+  bitacoraSeq          Int?      @map("bitacora_seq")
   /// Versión firmada (PDF sellado) en `core.documentos`, cuando se completa (R6).
-  documentoFirmadoId String?   @map("documento_firmado_id") @db.Uuid
+  documentoFirmadoId   String?   @map("documento_firmado_id") @db.Uuid
   /// H2: huella del PDF firmado sellado (R6); null hasta que el proveedor de sello (P7) la aplique.
-  sha256Firmado      String?   @map("sha256_firmado")
+  sha256Firmado        String?   @map("sha256_firmado")
   /// Hash SHA-256 del token del comprobante público `/verificar/<token>` (ADR-039). Nunca se guarda
   /// el token en claro: viaja una sola vez; la verificación recibe el token y compara su hash. Único.
-  comprobanteTokenHash String? @unique @map("comprobante_token_hash")
-  completadaEn       DateTime? @map("completada_en") @db.Timestamptz(6)
-  canceladaEn        DateTime? @map("cancelada_en") @db.Timestamptz(6)
-  recordadaEn        DateTime? @map("recordada_en") @db.Timestamptz(6)
-  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt          DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  comprobanteTokenHash String?   @unique @map("comprobante_token_hash")
+  completadaEn         DateTime? @map("completada_en") @db.Timestamptz(6)
+  canceladaEn          DateTime? @map("cancelada_en") @db.Timestamptz(6)
+  recordadaEn          DateTime? @map("recordada_en") @db.Timestamptz(6)
+  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   firmantes  Firmante[]
   evidencias EvidenciaFirma[]

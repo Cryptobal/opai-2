@@ -9,25 +9,25 @@
 /// Tipo de ticket configurable por tenant (modulos/tickets.md §3). `rolesPermitidos` vacío = sin
 /// tipos ocultos: todos los roles con acceso al módulo lo ven y lo pueden usar al crear.
 model TipoTicket {
-  id                        String   @id @default(uuid(7)) @db.Uuid
-  tenantId                  String   @map("tenant_id") @db.Uuid
-  nombre                    String
-  descripcion               String?
+  id                          String   @id @default(uuid(7)) @db.Uuid
+  tenantId                    String   @map("tenant_id") @db.Uuid
+  nombre                      String
+  descripcion                 String?
   /// Responsable por defecto al crear: "rol" (usa responsableDefectoRol) o "usuario".
-  responsableDefectoTipo    String   @default("rol") @map("responsable_defecto_tipo")
-  responsableDefectoRol     String?  @map("responsable_defecto_rol")
-  responsableDefectoUsuarioId String? @map("responsable_defecto_usuario_id") @db.Uuid
-  requiereAprobacion        Boolean  @default(false) @map("requiere_aprobacion")
+  responsableDefectoTipo      String   @default("rol") @map("responsable_defecto_tipo")
+  responsableDefectoRol       String?  @map("responsable_defecto_rol")
+  responsableDefectoUsuarioId String?  @map("responsable_defecto_usuario_id") @db.Uuid
+  requiereAprobacion          Boolean  @default(false) @map("requiere_aprobacion")
   /// Rol que aprueba las solicitudes de este tipo; obligatorio si requiereAprobacion.
-  aprobadorRol              String?  @map("aprobador_rol")
+  aprobadorRol                String?  @map("aprobador_rol")
   /// SLA opcional, apagado por defecto (decisión de Carlos, 30-oct-2026 11:46 CLT).
-  slaHoras                  Int?     @map("sla_horas")
+  slaHoras                    Int?     @map("sla_horas")
   /// Roles que pueden crear este tipo; vacío = todos los roles con acceso al módulo.
-  rolesPermitidos           String[] @default([]) @map("roles_permitidos")
-  activo                    Boolean  @default(true)
-  orden                     Int      @default(0)
-  createdAt                 DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt                 DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  rolesPermitidos             String[] @default([]) @map("roles_permitidos")
+  activo                      Boolean  @default(true)
+  orden                       Int      @default(0)
+  createdAt                   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
   tickets Ticket[]
 

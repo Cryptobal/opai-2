@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<style>body{margin:0;background:var(--ds-bg)}a{color:var(--ds-fg);text-decoration:none}a:hover{color:var(--ds-accent)}</style>
+</helmet>
+<div class="ds" data-theme="light" style="max-width:960px;margin:0 auto;padding:48px 24px;display:flex;flex-direction:column;gap:24px;color:var(--ds-fg);font-family:var(--font-sans)">
+<div style="display:flex;flex-direction:column;gap:4px">
+<span class="t-caption">OPAI 2.0 · ADR-019 · 30-10-2026</span>
+<h1 class="t-title m0">Documentos v4</h1>
+<span class="t-body-sm muted" style="text-wrap:pretty">Explorador, vencimientos y editor global de plantillas. Cada pantalla trae 375, 1024 y 1280 en claro y oscuro, y los estados vacío, cargando, error y sin permiso en 375 claro y 1280 oscuro. Desde 1024 se usa la barra lateral (NAVEGACION D9).</span>
+</div>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);overflow:hidden">
+<sc-for list="{{ items }}" as="it" hint-placeholder-count="11">
+<a href="{{ it.href }}" style="display:grid;grid-template-columns:40px minmax(0,1fr) minmax(0,1.2fr);gap:16px;padding:14px 16px;border-bottom:1px solid var(--ds-border);align-items:baseline">
+<span class="t-mono subtle">{{ it.n }}</span>
+<span style="display:flex;flex-direction:column;gap:2px"><span class="t-body-sm" style="font-weight:500">{{ it.titulo }}</span><span class="t-caption">{{ it.ruta }}</span></span>
+<span class="t-body-sm muted" style="text-wrap:pretty">{{ it.roles }}</span>
+</a>
+</sc-for>
+</div>
+<span class="t-label">Propuestas decididas por Carlos · 30-10-2026</span>
+<div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);overflow:hidden">
+<sc-for list="{{ propuestas }}" as="p" hint-placeholder-count="5">
+<div style="display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:16px;padding:12px 16px;border-bottom:1px solid var(--ds-border);align-items:baseline"><span class="t-mono subtle">{{ p.id }}</span><span class="t-body-sm">{{ p.titulo }}</span><span class="t-body-sm muted">{{ p.res }}</span></div>
+</sc-for>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      propuestas: [
+        { id: "B1", titulo: "Carpetas manuales en 01 Explorador", res: "Descartada por Carlos" },
+        { id: "B2", titulo: "Avisos a 30 y 60 días por defecto · en 04 y 10", res: "Incluida" },
+        { id: "B3", titulo: "Contratos en lote · en 07", res: "Incluida" },
+        { id: "B4", titulo: "Lectura OCR de la fecha de vencimiento · en 02", res: "Descartada por Carlos" },
+        { id: "B5", titulo: "Plantillas de correo en el editor global · en 06", res: "Descartada por Carlos" },
+      ],
+      items: [
+        { n: "01", titulo: "Explorador", ruta: "/documentos", href: "01 Explorador.dc.html", roles: "owner, admin, gerente: todo · supervisor: sus instalaciones y personas a cargo · viewer: lectura · sensibles: «Documento restringido»" },
+        { n: "02", titulo: "Subir documento", ruta: "Hoja sobre el Explorador", href: "02 Subir documento.dc.html", roles: "owner, admin, gerente · supervisor (su alcance) · viewer: sin permiso" },
+        { n: "03", titulo: "Vista del documento", ruta: "/documentos/:id", href: "03 Vista del documento.dc.html", roles: "Quien ve el documento · acciones según permiso · sensibles solo con lectura sensible" },
+        { n: "04", titulo: "Vencimientos de cuentas e instalaciones", ruta: "/documentos/vencimientos", href: "04 Vencimientos.dc.html", roles: "owner, admin, gerente · supervisor: sus instalaciones · viewer: lectura" },
+        { n: "05", titulo: "Plantillas", ruta: "/documentos/plantillas", href: "05 Plantillas.dc.html", roles: "owner, admin · gerente, supervisor, viewer: sin permiso" },
+        { n: "06", titulo: "Editor global de plantillas", ruta: "/documentos/plantillas/:id", href: "06 Editor de plantillas.dc.html", roles: "owner, admin · en 375 solo lectura" },
+        { n: "07", titulo: "Generar documento desde plantilla", ruta: "Ficha de persona → Documentos → Generar", href: "07 Generar documento.dc.html", roles: "owner, admin con lectura sensible" },
+        { n: "08", titulo: "Firmas pendientes", ruta: "/documentos/firmas", href: "08 Firmas pendientes.dc.html", roles: "Según la Bandeja de firmas aprobada" },
+        { n: "09", titulo: "Importar Word o PDF", ruta: "/documentos/plantillas/importar", href: "09 Importar Word o PDF.dc.html", roles: "owner, admin" },
+        { n: "10", titulo: "Configuración › Módulos › Documentos", ruta: "/configuracion/modulo/documentos", href: "10 Configuracion Modulos Documentos.dc.html", roles: "owner, admin · gerente: consulta" },
+        { n: "—", titulo: "Hoja de componentes", ruta: "Claro y oscuro · nuevos marcados", href: "Hoja de componentes.dc.html", roles: "ChipVariable, Pasos, VisorDocumento y Fila restringida se proponen al DS" },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
