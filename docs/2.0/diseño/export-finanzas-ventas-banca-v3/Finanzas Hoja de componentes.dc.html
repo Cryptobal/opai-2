@@ -95,7 +95,7 @@ class Component extends DCLogic {
       ] },
       { title: 'CampoSecreto', isNew: true, note: 'Credenciales, certificado y CAF viven en el almacén de secretos (ADR-027). Valor enmascarado, solo lectura y se muestra una sola vez al crearlo.', cells: [
         cell('Enmascarado', { isSecret: true, titulo: 'Clave de API', text: '••••••••••••a81c', hint: 'Vence el 15-12-2026.', btn1: 'Probar conexión', btn2: 'Reemplazar' }),
-        cell('Recién creado · se muestra una vez', { isSecret: true, titulo: 'Clave de API', text: 'sk_live_7Hq2xN9aVd4tR8mB', hint: 'Cópiala ahora. No volverá a mostrarse.', btn1: 'Copiar', btn2: 'Listo' }),
+        cell('Recién creado · se muestra una vez', { isSecret: true, titulo: 'Clave de API', text: 'dte_EJEMPLO_••••', hint: 'Cópiala ahora. No volverá a mostrarse.', btn1: 'Copiar', btn2: 'Listo' }),
       ] },
       { title: 'PreviewDocumento', isNew: true, note: 'Vista previa de factura, nota de crédito o correo antes de confirmar. Se usa en los Sheet de Emitir, Nota de crédito y recordatorios y en la landing /cobro.', cells: [cell('Factura 33 · borrador', { isPreview: true })] },
       { title: 'EtapasCierre', isNew: true, note: 'Avance del cierre de mes: falta OC/HES, observado, por enviar, esperando OK, listo, emitido.', cells: [cell('Etapa actual: Esperando OK', { isStage: true })] },

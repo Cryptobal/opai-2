@@ -207,7 +207,7 @@
             C({ title: 'Cesión', provider: 'Octava', estado: 'Error', tone: 'danger', secretLabel: 'Clave de API', secret: '••••••••••••77d2', hint: 'Cupo del proveedor al 92%.', alert: ['danger', 'No pudimos autenticar', 'El proveedor rechazó la credencial.'], primary: 'Probar conexión', secondary: 'Reemplazar' }),
           ] },
         },
-        sheets: { secreto: { title: 'Nueva credencial · DTE', desc: 'Se muestra una sola vez.', blocks: [A('warning', 'Cópiala ahora', 'No volverá a mostrarse. Queda en el almacén de secretos.', { wide: false }), F('Clave de API', 'sk_live_7Hq2xN9aVd4tR8mB', { mono: true, readonly: true })], ...act('Guardar credencial') } },
+        sheets: { secreto: { title: 'Nueva credencial · DTE', desc: 'Se muestra una sola vez.', blocks: [A('warning', 'Cópiala ahora', 'No volverá a mostrarse. Queda en el almacén de secretos.', { wide: false }), F('Clave de API', 'dte_EJEMPLO_••••', { mono: true, readonly: true })], ...act('Guardar credencial') } },
       },
       configdte: {
         nav: 'cfg', tab: 'mas', code: 'FIN-DTE-503', empty: ['file', 'DTE sin configurar', 'Sube el certificado y un CAF para emitir.', 'Subir CAF'],
