@@ -115,7 +115,7 @@
 
 <sc-if value="{{ mainForbidden }}" hint-placeholder-val="{{ false }}">
 <div style="flex:1;min-height:420px;display:flex">
-<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a Comercial" description="Tu rol (Supervisor) no incluye las solicitudes. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,360px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a Comercial" description="Tu rol (Supervisor) no incluye las solicitudes. Pídele acceso a Andrés Molina, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,360px"></x-import>
 </div>
 </sc-if>
 </x-import>
@@ -165,7 +165,7 @@
 </sc-if>
 <sc-if value="{{ sheetForbidden }}" hint-placeholder-val="{{ false }}">
 <div style="min-height:420px;display:flex">
-<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No puedes registrar solicitudes" description="Tu rol (Viewer) solo permite ver. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,320px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No puedes registrar solicitudes" description="Tu rol (Viewer) solo permite ver. Pídele acceso a Andrés Molina, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,320px"></x-import>
 </div>
 </sc-if>
 </x-import>
@@ -247,7 +247,7 @@ class Component extends DCLogic {
       canalReg: this.state.canalReg ?? "whatsapp", setCanalReg: (v) => this.setState({ canalReg: v }),
       isWhatsapp: (this.state.canalReg ?? "whatsapp") === "whatsapp",
       textoPegado: "Hola, buenas tardes. Somos Constructora Valle Central, necesitamos 2 guardias nocturnos para una obra en Lampa desde el 15-11. ¿Me pueden cotizar? Gracias, Tomás",
-      responsables: [{ value: "mr", label: "Matías Rojas" }, { value: "vs", label: "Valentina Soto" }, { value: "ci", label: "Carlos Irigoyen" }],
+      responsables: [{ value: "mr", label: "Matías Rojas" }, { value: "vs", label: "Valentina Soto" }, { value: "am", label: "Andrés Molina" }],
       tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "sol", label: "Solicitudes", icon: "inbox" }, { id: "neg", label: "Negocios", icon: "briefcase" }, { id: "cot", label: "Cotizaciones", icon: "file" }, { id: "mas", label: "Más", icon: "more" }],
       groups: [
         { items: [{ id: "ini", label: "Inicio", icon: "home" }] },

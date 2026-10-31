@@ -59,7 +59,7 @@
 <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar los tickets" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="TK-503-7F2A" on-retry="{{ noop }}" hint-size="100%,280px"></x-import>
 </sc-if>
 <sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
-<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No puedes ver todos los tickets" description="Solo owner y admin ven los tickets de toda la empresa. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,280px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No puedes ver todos los tickets" description="Solo owner y admin ven los tickets de toda la empresa. Pídele acceso a Andrés Molina, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,280px"></x-import>
 </sc-if>
 </x-import>
 </x-import>
@@ -75,16 +75,16 @@ class Component extends DCLogic {
     const isPhone = device === "phone";
     const forbidden = estado === "sin_permiso";
     const tab = this.state.tab ?? (forbidden ? "todos" : (this.props.tab ?? "todos"));
-    const ME = forbidden ? "Héctor Araya" : "Carlos Irigoyen";
+    const ME = forbidden ? "Héctor Araya" : "Andrés Molina";
     const EST = { abierto: ["info", "Abierto"], en_curso: ["accent", "En curso"], resuelto: ["success", "Resuelto"], cerrado: ["neutral", "Cerrado"], rechazado: ["danger", "Rechazado"] };
     const all = [
-      { folio: "TK-1052", asunto: "Cámara del andén norte sin señal", tipo: "Mantención", sol: "Paula Contreras", dueno: "Carlos Irigoyen", est: "en_curso", sla: ["warning", "Vence en 2 h 10 min"], act: "Hoy 08:05" },
-      { folio: "TK-1051", asunto: "Permiso administrativo 06-11-2026", tipo: "Permiso", sol: "Camila Herrera", dueno: "Carlos Irigoyen", est: "abierto", act: "Hoy 07:42" },
-      { folio: "TK-1049", asunto: "Faltan chalecos reflectantes", tipo: "Insumos", sol: "Héctor Araya", dueno: "Carlos Irigoyen", est: "abierto", sla: ["danger", "Vencido hace 25 min"], act: "Ayer 21:10" },
+      { folio: "TK-1052", asunto: "Cámara del andén norte sin señal", tipo: "Mantención", sol: "Paula Contreras", dueno: "Andrés Molina", est: "en_curso", sla: ["warning", "Vence en 2 h 10 min"], act: "Hoy 08:05" },
+      { folio: "TK-1051", asunto: "Permiso administrativo 06-11-2026", tipo: "Permiso", sol: "Camila Herrera", dueno: "Andrés Molina", est: "abierto", act: "Hoy 07:42" },
+      { folio: "TK-1049", asunto: "Faltan chalecos reflectantes", tipo: "Insumos", sol: "Héctor Araya", dueno: "Andrés Molina", est: "abierto", sla: ["danger", "Vencido hace 25 min"], act: "Ayer 21:10" },
       { folio: "TK-1047", asunto: "Certificado de antigüedad", tipo: "Certificado", sol: "Diego Silva", dueno: "Paula Contreras", est: "resuelto", act: "Ayer 17:40" },
-      { folio: "TK-1045", asunto: "Actualizar contacto de Bodega Lampa", tipo: "Administración", sol: "Carlos Irigoyen", dueno: "Paula Contreras", est: "en_curso", act: "Ayer 12:15" },
+      { folio: "TK-1045", asunto: "Actualizar contacto de Bodega Lampa", tipo: "Administración", sol: "Andrés Molina", dueno: "Paula Contreras", est: "en_curso", act: "Ayer 12:15" },
       { folio: "TK-1044", asunto: "Cambio de turno 08-11-2026 con Luis Pérez", tipo: "Cambio de turno", sol: "María F. Soto", dueno: "Jorge Muñoz", est: "rechazado", act: "28-10-2026" },
-      { folio: "TK-1040", asunto: "Descuento duplicado en liquidación de septiembre", tipo: "Consulta RR. HH.", sol: "Carlos Irigoyen", dueno: "Paula Contreras", est: "cerrado", act: "24-10-2026" },
+      { folio: "TK-1040", asunto: "Descuento duplicado en liquidación de septiembre", tipo: "Consulta RR. HH.", sol: "Andrés Molina", dueno: "Paula Contreras", est: "cerrado", act: "24-10-2026" },
     ];
     const s = this.state;
     const q = s.q.toLowerCase();
@@ -98,7 +98,7 @@ class Component extends DCLogic {
     const ok = estado === "contenido";
     return {
       device, theme: this.props.theme ?? "light",
-      user: forbidden ? { name: "Héctor Araya", initials: "HA", role: "Guardia" } : { name: "Carlos Irigoyen", initials: "CI", role: "Administrador" },
+      user: forbidden ? { name: "Héctor Araya", initials: "HA", role: "Guardia" } : { name: "Andrés Molina", initials: "AM", role: "Administrador" },
       notPhone: !isPhone, shellTitle: isPhone ? "" : "Tickets",
       showHeaderAction: estado !== "vacio",
       tab, setTab: (t) => this.setState({ tab: t }),
@@ -109,7 +109,7 @@ class Component extends DCLogic {
       chips: [
         chip("fTipo", "Tipo", (v) => v, "Mantención"),
         chip("fEstado", "Estado", (v) => EST[v][1], "abierto"),
-        chip("fDueno", "Dueño", (v) => v, "Carlos Irigoyen"),
+        chip("fDueno", "Dueño", (v) => v, "Andrés Molina"),
       ],
       rows,
       showPhoneList: ok && isPhone && rows.length > 0,
