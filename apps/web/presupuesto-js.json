@@ -6,7 +6,7 @@
     "/(auth)/*": 153,
     "/(auth)/activar-mfa": 160,
     "/(erp)/configuracion*": 176,
-    "/(erp)/configuracion/modulo/[id]": 180,
+    "/(erp)/configuracion/modulo/[id]": 181,
     "/(erp)/instalaciones/nueva": 178,
     "/(erp)/personas/vencimientos": 175,
     "/(erp)/personas/[id]": 166,

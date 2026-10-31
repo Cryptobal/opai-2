@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<div data-theme="{{ theme }}" style="background:var(--ds-fill);color:var(--ds-fg);min-height:100vh;padding:32px;font-family:var(--font-sans);display:flex;flex-direction:column;gap:32px;overflow-x:auto">
+<header style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
+  <div><div class="t-caption" style="color:var(--ds-fg-muted)">OPAI 2.0 · Agente interno · v1</div><h1 class="t-title" style="margin:4px 0 0">Escritorio 1280</h1></div>
+  <div style="display:flex;gap:8px"><button class="chip toggle {{ lightCls }}" onClick="{{ setLight }}">Claro</button><button class="chip toggle {{ darkCls }}" onClick="{{ setDark }}">Oscuro</button></div>
+</header>
+
+<!-- 14 / 19 -->
+<sc-for list="{{ fichas }}" as="f" hint-placeholder-count="2">
+<div style="display:flex;flex-direction:column;gap:8px;width:1280px"><div class="t-label">{{ f.label }}</div>
+<div data-theme="{{ f.theme }}" style="width:1280px;height:760px;background:var(--ds-bg);color:var(--ds-fg);border:1px solid var(--ds-border);display:flex;overflow:hidden">
+  <div style="width:248px;border-right:1px solid var(--ds-border);background:var(--ds-surface);padding:16px 12px;display:flex;flex-direction:column;gap:4px"><span class="t-heading" style="font-weight:700;padding:0 12px 12px">OPAI</span>
+    <div style="height:40px;padding:0 12px;display:flex;align-items:center;gap:12px;border-radius:var(--radius-md)" class="t-body-sm"><span class="ic i-home"></span>Inicio</div>
+    <div style="height:40px;padding:0 12px;display:flex;align-items:center;gap:12px;border-radius:var(--radius-md);background:var(--ds-fill)" class="t-body-sm"><span class="ic i-building"></span>Instalaciones</div>
+    <div style="height:40px;padding:0 12px;display:flex;align-items:center;gap:12px;border-radius:var(--radius-md)" class="t-body-sm"><span class="ic i-users"></span>Personas</div>
+    <div style="flex:1"></div><div style="display:flex;align-items:center;gap:8px;padding:8px 12px" class="t-body-sm"><span class="badge b-accent nodot" style="width:32px;height:32px;justify-content:center;border-radius:999px">MR</span>Marcela Rojas</div></div>
+  <div style="flex:1;display:flex;flex-direction:column;min-width:0">
+    <div style="height:60px;border-bottom:1px solid var(--ds-border);background:var(--ds-surface);display:flex;align-items:center;padding:0 24px;gap:8px"><span class="t-body-sm" style="flex:1;color:var(--ds-fg-muted)">Instalaciones › Torre Apoquindo</span><button class="icon-btn" aria-label="Buscar"><span class="ic i-search"></span></button><button class="icon-btn" style="background:var(--ds-fill)" aria-label="Preguntar a OPAI (⌘J)"><span class="ic i-bot"></span></button><button class="icon-btn" aria-label="Notificaciones"><span class="ic i-bell"></span></button></div>
+    <div style="flex:1;display:flex;min-height:0">
+      <div style="flex:1;padding:24px;display:flex;flex-direction:column;gap:16px;min-width:0"><div style="display:flex;align-items:center;gap:12px"><h2 class="t-title" style="margin:0">Torre Apoquindo</h2><span class="badge b-success">Activa</span></div><div class="t-body-sm" style="color:var(--ds-fg-muted)">Bodegas del Sur S.A. · Av. Apoquindo 4500</div>
+        <div style="background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px;display:grid;grid-template-columns:140px 1fr;gap:8px" class="t-body-sm"><span style="color:var(--ds-fg-muted)">Supervisor</span><span>Diego Fuentes</span><span style="color:var(--ds-fg-muted)">Turnos</span><span>4x4 · 08:00–20:00</span><span style="color:var(--ds-fg-muted)">Puestos por cubrir</span><span class="t-mono">2</span></div></div>
+      <div style="width:400px;border-left:1px solid var(--ds-border);background:var(--ds-surface);display:flex;flex-direction:column;position:relative"><div style="position:absolute;left:-3px;top:0;bottom:0;width:6px;cursor:col-resize" title="Tirador"></div>
+        <div style="height:56px;display:flex;align-items:center;gap:8px;padding:0 8px 0 16px;border-bottom:1px solid var(--ds-border)"><span class="t-heading" style="flex:1">OPAI</span><span class="badge b-neutral nodot">Estándar</span><button class="icon-btn" aria-label="Más"><span class="ic i-more"></span></button><button class="icon-btn" aria-label="Cerrar"><span class="ic i-x"></span></button></div>
+        <div style="padding:8px 16px"><span class="chip on"><span class="ic sm i-building"></span>Instalación · Torre Apoquindo<button class="x" aria-label="Quitar"><span class="ic sm i-x"></span></button></span></div>
+        <div style="flex:1;padding:16px;display:flex;flex-direction:column;gap:12px"><div style="align-self:flex-end;max-width:80%;background:var(--ds-accent-muted);padding:10px 14px;border-radius:var(--radius-md)" class="t-body">¿Quién supervisa Torre Apoquindo?</div>
+          <div style="border:1px solid var(--ds-border);border-radius:var(--radius-md);padding:12px 14px;display:flex;flex-direction:column;gap:8px" class="t-body"><span>Diego Fuentes supervisa Torre Apoquindo desde el 01-03-2026.</span><div class="t-caption" style="color:var(--ds-fg-muted)">Fuentes</div><div class="chip-row"><a class="chip plain" href="#"><span class="ic sm i-building"></span>Torre Apoquindo</a><a class="chip plain" href="#"><span class="ic sm i-user"></span>Diego Fuentes</a></div></div></div>
+        <div style="padding:12px 16px;border-top:1px solid var(--ds-border);display:flex;flex-direction:column;gap:8px"><div style="display:flex;gap:8px"><button class="icon-btn" aria-label="Adjuntar"><span class="ic i-paperclip"></span></button><div class="input" style="flex:1"><span class="ph">Pregunta o pide un cambio</span></div><button class="btn btn-primary icon" disabled aria-label="Enviar"><span class="ic i-up"></span></button></div><div class="t-caption" style="color:var(--ds-fg-subtle);text-align:center">OPAI usa Claude Sonnet · Revisa el plan antes de confirmar</div></div></div>
+    </div></div>
+</div></div>
+</sc-for>
+
+<!-- panel frames 15, 15b, 15c -->
+<sc-for list="{{ panels }}" as="q" hint-placeholder-count="3">
+<div style="display:flex;flex-direction:column;gap:8px;width:1280px"><div class="t-label">{{ q.label }}</div>
+<div style="width:1280px;height:760px;background:var(--ds-bg);border:1px solid var(--ds-border);display:flex;overflow:hidden">
+  <div style="width:248px;border-right:1px solid var(--ds-border);background:var(--ds-surface)"></div>
+  <div style="flex:1;display:flex;flex-direction:column"><div style="height:60px;border-bottom:1px solid var(--ds-border);background:var(--ds-surface)"></div><div style="flex:1;padding:24px"><h2 class="t-title" style="margin:0">Torre Apoquindo</h2></div></div>
+  <div style="width:400px;border-left:1px solid var(--ds-border);background:var(--ds-surface);display:flex;flex-direction:column;position:relative">
+    <div style="height:56px;display:flex;align-items:center;gap:8px;padding:0 8px 0 16px;border-bottom:1px solid var(--ds-border)"><span class="t-heading" style="flex:1">OPAI</span><button class="icon-btn" aria-label="Cerrar"><span class="ic i-x"></span></button></div>
+    <div style="flex:1;padding:16px;display:flex;flex-direction:column;gap:12px">
+      <div style="align-self:flex-end;max-width:85%;background:var(--ds-accent-muted);padding:10px 14px;border-radius:var(--radius-md);display:flex;flex-direction:column;gap:8px" class="t-body"><span>{{ q.ask }}</span><div style="display:{{ q.filesDisplay }};gap:8px;flex-wrap:wrap"><span style="display:inline-flex;align-items:center;gap:6px;background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:var(--radius-md);padding:6px 10px" class="t-caption"><span class="ic sm i-file"></span>contrato.pdf · 2,4 MB</span><span style="display:inline-flex;align-items:center;gap:6px;background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:var(--radius-md);padding:6px 10px" class="t-caption"><span class="ic sm i-file"></span>dotacion.xlsx · 180 KB</span></div></div>
+      <div style="border:1px solid var(--ds-border);border-radius:var(--radius-md);padding:12px 14px;display:{{ q.replyDisplay }};flex-direction:column;gap:8px" class="t-body"><span>La dotación de la planilla tiene 12 guardias para 14 puestos de Torre Apoquindo.</span><div class="t-body-sm" style="background:var(--ds-warning-muted);color:var(--ds-warning-fg);padding:8px 12px;border-radius:var(--radius-md)">No pude leer contrato.pdf; respondí con el resto.</div></div>
+      <div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px;display:{{ q.planDisplay }};flex-direction:column;gap:12px"><div class="t-heading">Plan · 3 cambios</div>
+        <div style="display:flex;justify-content:space-between;align-items:center" class="t-body"><span>1. Cambiar el supervisor</span><span class="badge b-success">Hecho</span></div>
+        <div style="display:flex;justify-content:space-between;align-items:center" class="t-body"><span>2. Asignar el contrato</span><span class="badge b-danger">Falló</span></div>
+        <div class="t-body-sm" style="background:var(--ds-danger-muted);color:var(--ds-danger-fg);padding:8px 12px;border-radius:var(--radius-md)">No pudimos asignar el contrato: la instalación ya tiene uno vigente.</div><a class="t-body-sm" href="#">Ver en auditoría</a>
+        <div style="display:flex;justify-content:space-between;align-items:center;opacity:.45" class="t-body"><span>3. Dar de baja Bodega Lampa</span><span class="badge b-neutral nodot">No se ejecutó</span></div>
+        <div class="t-caption" style="color:var(--ds-fg-muted)">El paso 1 ya se hizo y no se deshace.</div></div>
+    </div>
+    <div style="padding:12px 16px;border-top:1px solid var(--ds-border);display:flex;gap:8px"><button class="icon-btn" aria-label="Adjuntar"><span class="ic i-paperclip"></span></button><div class="input" style="flex:1"><span class="ph">Pregunta o pide un cambio</span></div><button class="btn btn-primary icon" disabled aria-label="Enviar"><span class="ic i-up"></span></button></div>
+    <div style="display:{{ q.dropDisplay }};position:absolute;inset:56px 8px 8px 8px;background:var(--ds-accent-muted);border:2px dashed var(--ds-accent);border-radius:var(--radius-lg);align-items:center;justify-content:center;flex-direction:column;gap:8px;text-align:center;padding:24px"><span class="ic lg i-upload" style="color:var(--ds-accent)"></span><span class="t-body" style="color:var(--ds-fg)">Suelta para adjuntar · hasta 5 archivos de 10 MB</span></div>
+  </div>
+</div></div>
+</sc-for>
+
+<!-- 16 -->
+<div style="display:flex;flex-direction:column;gap:8px;width:1280px"><div class="t-label">16 · ⌘K con «Preguntar a OPAI»</div>
+<div style="width:1280px;height:760px;background:var(--ds-bg);border:1px solid var(--ds-border);position:relative;overflow:hidden"><div style="position:absolute;inset:0;background:var(--ds-scrim)"></div>
+  <div style="position:absolute;left:50%;top:96px;transform:translateX(-50%);width:560px;background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:var(--radius-lg);box-shadow:0 12px 32px -8px rgba(17,17,19,.18);overflow:hidden" role="dialog">
+    <div style="height:56px;display:flex;align-items:center;gap:12px;padding:0 16px;border-bottom:1px solid var(--ds-border)"><span class="ic i-search"></span><span class="t-body" style="flex:1">torre apoq</span><span class="t-caption" style="color:var(--ds-fg-subtle)">esc</span></div>
+    <div style="padding:8px;display:flex;flex-direction:column;gap:2px">
+      <div style="min-height:48px;display:flex;align-items:center;gap:12px;padding:0 12px;border-radius:var(--radius-md);background:var(--ds-fill)" class="t-body"><span class="ic i-bot" style="color:var(--ds-accent)"></span><span style="flex:1">Preguntar a OPAI: «torre apoq»</span><span class="t-caption" style="color:var(--ds-fg-subtle)">↵</span></div>
+      <div class="t-caption" style="color:var(--ds-fg-muted);padding:8px 12px 4px">Instalaciones</div>
+      <div style="min-height:44px;display:flex;align-items:center;gap:12px;padding:0 12px" class="t-body"><span class="ic i-building"></span>Torre Apoquindo<span class="t-caption" style="color:var(--ds-fg-muted)">· Bodegas del Sur S.A.</span></div>
+      <div class="t-caption" style="color:var(--ds-fg-muted);padding:8px 12px 4px">Personas</div>
+      <div style="min-height:44px;display:flex;align-items:center;gap:12px;padding:0 12px" class="t-body"><span class="ic i-user"></span>Camila Herrera Soto<span class="t-caption" style="color:var(--ds-fg-muted)">· Supervisora</span></div></div></div></div></div>
+
+<!-- 17 -->
+<div style="display:flex;flex-direction:column;gap:8px;width:1280px"><div class="t-label">17 · Historial (/agente/historial)</div>
+<div style="width:1280px;height:760px;background:var(--ds-bg);border:1px solid var(--ds-border);display:flex;overflow:hidden">
+  <div style="width:248px;border-right:1px solid var(--ds-border);background:var(--ds-surface)"></div>
+  <div style="flex:1;padding:24px;display:flex;flex-direction:column;gap:16px;min-width:0"><h2 class="t-title" style="margin:0">Historial</h2>
+    <div style="display:flex;gap:24px;border-bottom:1px solid var(--ds-border)" class="t-body-sm"><span style="padding:10px 0;color:var(--ds-fg-muted)">Conversaciones</span><span style="padding:10px 0;border-bottom:2px solid var(--ds-fg);font-weight:500">Acciones</span></div>
+    <div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);overflow:hidden" class="t-body-sm">
+      <div style="display:grid;grid-template-columns:140px 1fr 1fr 160px 140px;gap:12px;padding:12px 16px;color:var(--ds-fg-muted);border-bottom:1px solid var(--ds-border)"><span>Fecha</span><span>Acción</span><span>Entidad</span><span>Resultado</span><span></span></div>
+      <div style="display:grid;grid-template-columns:140px 1fr 1fr 160px 140px;gap:12px;padding:12px 16px;align-items:center;border-bottom:1px solid var(--ds-border)"><span class="t-mono">30-10-2026 09:14</span><span>Cambiar supervisor</span><span>Instalación · Torre Apoquindo</span><span><span class="badge b-success">Hecho</span></span><a href="#">Ver en auditoría</a></div>
+      <div style="display:grid;grid-template-columns:140px 1fr 1fr 160px 140px;gap:12px;padding:12px 16px;align-items:center;border-bottom:1px solid var(--ds-border)"><span class="t-mono">30-10-2026 09:15</span><span>Asignar contrato</span><span>Negocio · Renovación 2027</span><span><span class="badge b-danger">Falló</span></span><a href="#">Ver en auditoría</a></div>
+      <div style="display:grid;grid-template-columns:140px 1fr 1fr 160px 140px;gap:12px;padding:12px 16px;align-items:center"><span class="t-mono">29-10-2026 17:40</span><span>Dar de baja instalación</span><span>Instalación · Bodega Lampa</span><span><span class="badge b-warning">En aprobación</span></span><a href="#">Ver en auditoría</a></div></div></div>
+</div></div>
+
+<!-- 18 -->
+<div style="display:flex;flex-direction:column;gap:8px;width:1280px"><div class="t-label">18 · Configuración › Agentes › Agente interno</div>
+<div style="width:1280px;height:820px;background:var(--ds-bg);border:1px solid var(--ds-border);display:flex;overflow:hidden">
+  <div style="width:248px;border-right:1px solid var(--ds-border);background:var(--ds-surface)"></div>
+  <div style="width:280px;border-right:1px solid var(--ds-border);padding:24px 16px;display:flex;flex-direction:column;gap:4px"><div class="t-caption" style="color:var(--ds-fg-muted);padding:0 12px 8px">Configuración › Agentes</div>
+    <div style="height:44px;padding:0 12px;display:flex;align-items:center" class="t-body-sm">Agentes y API keys</div><div style="height:44px;padding:0 12px;display:flex;align-items:center" class="t-body-sm">Aprobaciones pendientes</div><div style="height:44px;padding:0 12px;display:flex;align-items:center;background:var(--ds-fill);border-radius:var(--radius-md);font-weight:500" class="t-body-sm">Agente interno</div></div>
+  <div style="flex:1;padding:24px 32px;display:flex;flex-direction:column;gap:16px;overflow:hidden;min-width:0"><h2 class="t-title" style="margin:0">Agente interno</h2>
+    <div style="max-width:640px;display:flex;flex-direction:column;gap:16px">
+      <div class="field"><label class="t-label">Modelo predeterminado</label><div class="input"><span style="flex:1">Claude Sonnet</span><span class="badge b-neutral nodot">Estándar</span><span class="ic sm i-chevron-down"></span></div></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:16px"><div><div class="t-body">Obligar paso a paso</div><div class="t-caption" style="color:var(--ds-fg-muted)">Cada cambio se confirma por separado.</div></div><span style="width:44px;height:24px;border-radius:999px;background:var(--ds-accent);display:inline-block;position:relative"><span style="position:absolute;right:2px;top:2px;width:20px;height:20px;border-radius:999px;background:var(--ds-accent-fg)"></span></span></div>
+      <div class="field"><label class="t-label">Presupuesto mensual</label><div class="input"><span class="t-mono" style="flex:1">$ 150.000</span></div><span class="hint">Avisamos a los administradores al llegar al 80 %.</span></div>
+      <div class="field"><label class="t-label">Retención de conversaciones</label><div class="input"><span style="flex:1">90 días</span><span class="ic sm i-chevron-down"></span></div></div>
+      <div class="field"><label class="t-label">Nombre visible</label><div class="input"><span>OPAI</span></div></div>
+      <div class="field"><label class="t-label">Sugerencias de inicio</label><div class="chip-row"><span class="chip">Resume el negocio Renovación 2027<button class="x" aria-label="Quitar"><span class="ic sm i-x"></span></button></span><span class="chip">¿Quién supervisa Torre Apoquindo?<button class="x" aria-label="Quitar"><span class="ic sm i-x"></span></button></span><span class="chip add">Agregar</span></div></div>
+      <div class="field"><label class="t-label">Adjuntos</label><div class="t-body-sm" style="color:var(--ds-fg-muted)">Hasta 5 archivos de 10 MB · PDF, DOCX, XLSX, CSV, TXT e imágenes</div></div>
+      <div style="display:flex;gap:8px"><button class="btn btn-primary">Guardar</button><button class="btn btn-ghost">Cancelar</button></div></div></div>
+</div></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { dark: false };
+  renderVals() {
+    const d = this.state.dark;
+    const th = d ? 'dark' : 'light';
+    return {
+      theme: th, lightCls: d ? '' : 'on', darkCls: d ? 'on' : '',
+      setLight: () => this.setState({ dark: false }), setDark: () => this.setState({ dark: true }),
+      fichas: [{ label: '14 · Ficha de instalación con panel acoplado y chip de contexto', theme: th }, { label: '19 · Oscuro de (14)', theme: 'dark' }],
+      panels: [
+        { label: '15 · Plan con error en el paso 2', ask: 'Ejecuta el plan', filesDisplay: 'none', replyDisplay: 'none', planDisplay: 'flex', dropDisplay: 'none' },
+        { label: '15b · Arrastrando dos archivos sobre el panel', ask: 'Revisa la dotación', filesDisplay: 'none', replyDisplay: 'none', planDisplay: 'none', dropDisplay: 'flex' },
+        { label: '15c · Mensaje con PDF y planilla, respuesta con aviso', ask: 'Compara el contrato con la dotación', filesDisplay: 'flex', replyDisplay: 'flex', planDisplay: 'none', dropDisplay: 'none' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>
