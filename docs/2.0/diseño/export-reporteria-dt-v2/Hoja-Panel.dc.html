@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="adt.js"></script>
+</helmet>
+<div class="ds" data-theme="{{ theme }}" data-device="desktop" style="background:var(--ds-bg);color:var(--ds-fg);padding:32px;display:flex;flex-direction:column;gap:40px;width:720px;box-sizing:border-box;border-radius:16px">
+<span class="t-heading">{{ themeLabel }}</span>
+
+<section style="display:flex;flex-direction:column;gap:12px">
+<span class="t-overline">Nuevos para el DS</span>
+<div style="display:flex;flex-direction:column;gap:20px;padding:16px;border:1px dashed var(--ds-border-strong);border-radius:var(--radius-lg)">
+<div style="display:flex;flex-direction:column;gap:8px"><span class="t-label">CuentaRegresiva · plazo de oposición 48 h</span>
+<div style="display:flex;gap:16px;flex-wrap:wrap;align-items:flex-start">
+<x-import component-from-global-scope="ADT.CuentaRegresiva" horas="{{ 31 }}" minutos="{{ 12 }}" estado="pendiente" hint-size="160px,32px"></x-import>
+<x-import component-from-global-scope="ADT.CuentaRegresiva" horas="{{ 2 }}" minutos="{{ 5 }}" estado="pendiente" hint-size="160px,32px"></x-import>
+<x-import component-from-global-scope="ADT.CuentaRegresiva" estado="aceptada" hint-size="100px,22px"></x-import>
+<x-import component-from-global-scope="ADT.CuentaRegresiva" estado="objetada" hint-size="100px,22px"></x-import>
+<x-import component-from-global-scope="ADT.CuentaRegresiva" estado="vencida" hint-size="200px,22px"></x-import>
+</div></div>
+<div style="display:flex;flex-direction:column;gap:8px"><span class="t-label">Hash · SHA-256 cortado, con copiar</span>
+<x-import component-from-global-scope="ADT.Hash" valor="9f2c4e71a0b8d35c6e19f4a2b07d8c3e51fa96d2047b8e3c1a5d90f6e2b4c873" hint-size="260px,44px"></x-import>
+<x-import component-from-global-scope="ADT.Hash" corto="{{ false }}" copiar="{{ false }}" valor="9f2c4e71a0b8d35c6e19f4a2b07d8c3e51fa96d2047b8e3c1a5d90f6e2b4c873" hint-size="100%,40px"></x-import>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px"><span class="t-label">CabeceraOficial · reportes DT</span>
+<x-import component-from-global-scope="ADT.CabeceraOficial" cols="{{ 2 }}" periodo="01-10-2026 – 31-10-2026" hint-size="100%,180px"></x-import>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px"><span class="t-label">LeyendaSiglas y Sigla · con Tooltip de la glosa al pasar el puntero</span>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<sc-for list="{{ siglas }}" as="s" hint-placeholder-count="14"><span class="t-mono t-caption" style="font-weight:500;padding:1px 6px;border-radius:var(--radius-sm);background:var(--ds-fill)">{{ s }}</span></sc-for>
+</div>
+<x-import component-from-global-scope="ADT.LeyendaSiglas" hint-size="100%,100px"></x-import>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px"><span class="t-label">Titular · proveedor del sistema, con alerta por confirmar</span>
+<x-import component-from-global-scope="ADT.Titular" hint-size="100%,120px"></x-import>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px"><span class="t-label">SyncHora · sincronización con la hora oficial (OK y desfase alto)</span>
+<x-import component-from-global-scope="ADT.SyncHora" hint-size="100%,260px"></x-import>
+<x-import component-from-global-scope="ADT.SyncHora" alto="{{ true }}" hint-size="100%,320px"></x-import>
+</div>
+</div>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:12px">
+<span class="t-overline">Acciones · Button, IconButton</span>
+<div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="download" hint-size="110px,40px">Exportar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="110px,40px">Objetar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon-right="chevron-right" hint-size="150px,40px">Abrir en Nómina</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="destructive" hint-size="140px,40px">Enviar objeción</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" disabled="{{ true }}" hint-size="110px,40px">Deshabilitado</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" loading="{{ true }}" hint-size="110px,40px">Verificar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.IconButton" icon="bell" label="Notificaciones" count="{{ 3 }}" hint-size="44px,44px"></x-import>
+</div>
+<span class="t-caption">Hover y foco son interactivos: pasa el puntero o navega con Tab.</span>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:12px">
+<span class="t-overline">Formularios</span>
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Nueva hora" value="07:58" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Correo institucional" value="mlopez@gmail.com" error="Usa tu correo @dt.gob.cl." hint-size="100%,96px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="RUT del empleador" mono="{{ true }}" value="76.543.210-K" disabled="{{ true }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Trabajador" value="ch" options="{{ selOpts }}" hint-size="100%,72px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Motivo" hint="Obligatorio." value="El reloj del acceso norte quedó sin conexión." rows="{{ 2 }}" hint-size="100%,110px"></x-import>
+<div style="display:flex;gap:16px;flex-wrap:wrap;align-items:center">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ formatos }}" value="pdf" label="Formato" hint-size="200px,40px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ true }}" hint-size="48px,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ false }}" hint-size="48px,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ true }}" label="Torre Apoquindo" hint-size="180px,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ false }}" label="Bodega Lampa" hint-size="160px,44px"></x-import>
+</div>
+<div class="chip-row">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Chip" etiqueta="Período" valor="Octubre 2026" hint-size="170px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Pendientes" contador="{{ 2 }}" activo="{{ true }}" hint-size="130px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Objetadas" contador="{{ 1 }}" hint-size="120px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipAgregar" hint-size="140px,32px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Uploader" archivos-iniciales="{{ files }}" hint-size="100%,180px"></x-import>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:12px">
+<span class="t-overline">Datos · Badge, Table, RowCard, Timeline, DetailSection</span>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="success" hint-size="80px,22px">Cumple</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="warning" hint-size="80px,22px">Parcial</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="danger" hint-size="90px,22px">No cumple</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="info" hint-size="90px,22px">Corregida</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" hint-size="110px,22px">Contingencia</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="accent" hint-size="80px,22px">Activo</x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ tCols }}" rows="{{ tRows }}" on-row-click="{{ noop }}" hint-size="100%,150px"></x-import>
+<div class="rows" style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);overflow:hidden">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowCard" initials="CH" title="Camila Herrera Soto" subtitle="Entrada 08:14 → 07:58" meta="12.345.678-9" badge="{{ rcBadge }}" hint-size="100%,72px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Timeline" items="{{ hist }}" hint-size="100%,140px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Marca" rows="{{ kv }}" hint-size="100%,140px"></x-import>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:12px">
+<span class="t-overline">Navegación · Tabs</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ tabItems }}" value="pen" hint-size="100%,44px"></x-import>
+</section>
+
+<section style="display:flex;flex-direction:column;gap:12px">
+<span class="t-overline">Feedback · Alerta, Skeleton, StatePanel, Empty, ErrorState, Forbidden</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="success" titulo="Cadena verificada" hint-size="100%,44px">Sin diferencias.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" titulo="1 corrección pendiente" hint-size="100%,44px">Vence el 16-10-2026 a las 10:22.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="danger" titulo="La verificación falló" hint-size="100%,44px">El eslabón 184.233 no coincide.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Tu acceso queda registrado" hint-size="100%,44px">Fecha, correo, RUT e IP.</x-import>
+<div style="display:flex;flex-direction:column;gap:8px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="60%" hint-size="60%,14px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="40%" hint-size="40%,14px"></x-import></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.StatePanel" kind="empty" icon="scan" title="Aún no has ingresado un hash" description="Copia el hash del comprobante o escanea su QR." hint-size="100%,180px"></x-import>
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px">
+<div style="height:300px;border:1px solid var(--ds-border);border-radius:var(--radius-lg)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" size="sm" icon="clock" title="Aún no hay marcas" description="Cambia el período." hint-size="100%,300px"></x-import></div>
+<div style="height:300px;border:1px solid var(--ds-border);border-radius:var(--radius-lg)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar" description="Revisa tu conexión." on-retry="{{ noop }}" hint-size="100%,300px"></x-import></div>
+<div style="height:300px;border:1px solid var(--ds-border);border-radius:var(--radius-lg)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="Sin acceso" description="Pídele acceso a un administrador." action-label="Pedir acceso" hint-size="100%,300px"></x-import></div>
+</div>
+</section>
+<span class="t-caption">También se usan: AppShell, Page, PageHeader, Sheet (lateral 420 desde iPad, inferior en teléfono) y Wordmark. Se ven en contexto en cada pantalla.</span>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:720,&quot;height&quot;:1200},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  componentDidMount() { if (!window.ADT) { this.t = setInterval(() => { if (window.ADT) { clearInterval(this.t); this.forceUpdate(); } }, 50); } }
+  componentWillUnmount() { clearInterval(this.t); }
+  renderVals() {
+    const A = window.ADT;
+    const theme = this.props.theme || "light";
+    if (!A) return { theme, themeLabel: "" };
+    const h = A.h;
+    return {
+      theme, themeLabel: theme === "dark" ? "Oscuro" : "Claro", noop: () => {},
+      siglas: A.siglas.map((s) => s[0]),
+      selOpts: [{ value: "ch", label: "Camila Herrera Soto" }],
+      formatos: [{ value: "xlsx", label: "Excel" }, { value: "pdf", label: "PDF" }, { value: "docx", label: "Word" }],
+      files: [{ nombre: "libro_novedades_30-10.jpg", size: 1300000, estado: "listo" }],
+      tCols: [
+        { key: "f", label: "Fecha", render: (r) => h("span", { className: "t-numeric" }, r.f) },
+        { key: "e", label: "Entrada" },
+        { key: "s", label: "Sigla", render: (r) => A.sigla(r.s) },
+        { key: "b", label: "Estado", render: (r) => r.b ? A.badge("info", "Corregida") : null },
+      ],
+      tRows: [{ id: 1, f: "01-10-2026", e: "07:58", s: "J.O." }, { id: 2, f: "04-10-2026", e: "08:05", s: "J.O.", b: true }],
+      rcBadge: { tone: "warning", label: "Pendiente" },
+      hist: [{ who: "Marcela Rojas", initials: "MR", action: "corrigió la entrada", changes: [{ field: "Hora", from: "08:14", to: "07:58" }], when: "14-10-2026 10:22" }],
+      kv: [{ label: "Fecha y hora (servidor)", value: "14-10-2026 07:58:12", numeric: true }, { label: "RUT empleador", value: "76.543.210-K", mono: true }],
+      tabItems: [{ id: "pen", label: "Pendientes", count: 2 }, { id: "obj", label: "Objetadas" }, { id: "ace", label: "Aceptadas" }, { id: "x", label: "Bloqueada", disabled: true }],
+    };
+  }
+}
+</script>
+</body>
+</html>
