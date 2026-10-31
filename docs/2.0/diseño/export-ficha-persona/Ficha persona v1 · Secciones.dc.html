@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+</helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="per" title="Personas" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<div style="flex:1;min-width:0;overflow:auto">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" size="heading" eyebrow="Diego Fuentes Araya · Planta Quilicura" title="{{ s.title }}" subtitle="{{ s.sub }}" hint-size="100%,80px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="edit" hint-size="100px,40px">Editar</x-import>
+</x-import>
+<sc-if value="{{ st.cargando }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Loading" variant="form" hint-size="100%,300px"></x-import></sc-if>
+<sc-if value="{{ st.vacio }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" title="Aún no hay datos" description="Agrega los datos de esta sección." action="{{ st.addBtn }}" hint-size="100%,300px"></x-import></sc-if>
+<sc-if value="{{ st.error }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar esta sección" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." hint-size="100%,300px"></x-import></sc-if>
+<sc-if value="{{ st.forbidden }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a esta sección" description="Pídele acceso a un administrador." hint-size="100%,300px"></x-import></sc-if>
+<div style="display:{{ st.display }};flex-direction:column;gap:16px">
+<sc-if value="{{ s.alert }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="{{ s.alertTono }}" titulo="{{ s.alert }}" hint-size="100%,56px">{{ s.alertBody }}</x-import>
+</sc-if>
+<sc-for list="{{ s.cards }}" as="c" hint-placeholder-count="2">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="{{ c.title }}" actions="{{ c.badge }}" hint-size="100%,200px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" rows="{{ c.rows }}" hint-size="100%,160px"></x-import>
+</x-import>
+</sc-for>
+<sc-if value="{{ s.timeline }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Plazo fijo · 3 períodos" actions="{{ s.tlBadge }}" hint-size="100%,260px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Timeline" items="{{ s.timeline }}" hint-size="100%,200px"></x-import>
+</x-import>
+</sc-if>
+</div>
+</x-import>
+</div>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:900},&quot;seccion&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;uniforme&quot;,&quot;jornada&quot;,&quot;os10&quot;,&quot;contacto&quot;],&quot;default&quot;:&quot;uniforme&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;cargando&quot;,&quot;vacio&quot;,&quot;error&quot;,&quot;sin-permiso&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const B = (tone, l, icon) => NS.Badge ? h(NS.Badge, { tone, icon }, l) : null;
+    const nv = "Campo por verificar contra LRE / Previred";
+    const S = {
+      uniforme: { title: "Uniforme y tallas", sub: "Tallas, entregas y prendas faltantes", alert: "Faltan 2 prendas por entregar", alertTono: "warning", alertBody: "Camisa y polar sin recepción firmada.", cards: [
+        { title: "Tallas", rows: [{ label: "Calzado", value: "42", numeric: true }, { label: "Pantalón", value: "44", numeric: true }, { label: "Polera", value: "L" }, { label: "Camisa", value: "L" }, { label: "Geólogo", value: "L" }, { label: "Polar", value: "L" }, { label: "Chaqueta", value: "L" }, { label: "Estatura", value: "1,76 m", numeric: true }, { label: "Peso", value: "82 kg", numeric: true }] },
+        { title: "Entregadas", badge: B("success", "Firmada", "check"), rows: [{ label: "Polera · Pantalón · Calzado", value: "04-03-2026", numeric: true }, { label: "Recepción firmada", value: "Ver en Documentos" }] },
+        { title: "Faltantes", badge: B("warning", "2 prendas", "alert"), rows: [{ label: "Camisa", value: "Pendiente" }, { label: "Polar", value: "Pendiente" }] }] },
+      jornada: { title: "Jornada DT y contrato", sub: "Vínculo con el puesto «Portería principal»", alert: "Plazo fijo vence en 15 días", alertTono: "warning", alertBody: "El 1.er período termina el 14-11-2026.", cards: [
+        { title: "Jornada", rows: [{ label: "Tipo de jornada", value: "4×4 · 12 h" }, { label: "Máximo semanal", value: "42 h (desde 26-04-2026)", numeric: true }, { label: "Resolución DT", value: "N.° 4411 · vigente hasta 31-12-2026", numeric: true }, { label: "Puesto", value: "Portería principal · Planta Quilicura" }] },
+        { title: "Art. 22", badge: B("neutral", "Excluido de limitación de jornada"), rows: [{ label: "Excluido", value: "No" }, { label: "Implica", value: "Sin límite de jornada ni pago de horas extra" }] }],
+        tlBadge: B("warning", "Vence en 15 días", "alert"),
+        timeline: [{ initials: "1", who: "1.er período", action: "termina", when: "14-11-2026" }, { initials: "2", who: "2.º período", action: "termina", when: "14-02-2027" }, { initials: "3", who: "3.er período", action: "termina", when: "14-05-2027" }] },
+      os10: { title: "OS-10 y acreditaciones", sub: "Vienen de Documentos", alert: "OS-10 vencido", alertTono: "danger", alertBody: "Venció el 12-09-2026. Sube la renovación.", cards: [
+        { title: "Curso OS-10", badge: B("danger", "Vencido", "alert"), rows: [{ label: "Número", value: "118452", numeric: true }, { label: "Vencimiento", value: "12-09-2026", numeric: true }, { label: "Acción", value: "Subir renovación" }] },
+        { title: "Credencial de guardia", badge: B("success", "Vigente", "check"), rows: [{ label: "Vencimiento", value: "30-06-2027", numeric: true }] },
+        { title: "Examen preocupacional", badge: B("success", "Vigente", "check"), rows: [{ label: "Vencimiento", value: "15-03-2027", numeric: true }] }] },
+      contacto: { title: "Contacto y datos personales", sub: "Último cambio: Portal Trabajador · 21-10-2026", cards: [
+        { title: "Datos personales", badge: B("neutral", nv), rows: [{ label: "Estado civil", value: "Casado" }, { label: "Segundo teléfono", value: "+56 9 5555 0142", numeric: true }, { label: "Código interno", value: "AS-0231", mono: true }, { label: "Movilización", value: "Sí" }] },
+        { title: "Contacto de emergencia", badge: B("neutral", nv), rows: [{ label: "Nombre", value: "Paula Araya" }, { label: "Relación", value: "Madre" }, { label: "Teléfono", value: "+56 9 4444 0187", numeric: true }] },
+        { title: "Origen del último cambio", rows: [{ label: "Origen", value: "Portal Trabajador" }, { label: "Fecha", value: "21-10-2026", numeric: true }] }] },
+    };
+    return {
+      device: this.props.device ?? "desktop",
+      theme: this.props.theme ?? "light",
+      s: S[this.props.seccion ?? "uniforme"],
+      st: (() => { const e = this.props.estado ?? "normal"; return { cargando: e === "cargando", vacio: e === "vacio", error: e === "error", forbidden: e === "sin-permiso", display: e === "normal" ? "flex" : "none", addBtn: NS.Button ? h(NS.Button, {}, "Agregar") : null }; })(),
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "ins", label: "Instalaciones", icon: "building" }, { id: "pau", label: "Pauta", icon: "calendar" }, { id: "per", label: "Personas", icon: "users" }, { id: "mas", label: "Más", icon: "more" }],
+      groups: [{ items: [{ id: "ini", label: "Inicio", icon: "home" }] }, { title: "Operaciones", items: [{ id: "ins", label: "Instalaciones", icon: "building" }, { id: "pau", label: "Pauta mensual", icon: "calendar" }] }, { title: "Personas", items: [{ id: "per", label: "Personas", icon: "users" }] }],
+    };
+  }
+}
+</script>
+</body>
+</html>
