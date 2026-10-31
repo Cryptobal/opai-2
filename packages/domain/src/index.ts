@@ -35,4 +35,5 @@ export * from "./no-recontratar";
 export * from "./capas-sueldo";
 
 export * from "./rondas";
+export * from "./nomina";
 export * from "./portal-cliente";
