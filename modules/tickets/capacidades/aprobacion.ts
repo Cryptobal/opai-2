@@ -5,7 +5,7 @@ import { conflicto, defineCapability, noEncontrado, prohibido, reglaDeNegocio } 
 
 import { puedeAprobarse, type EstadoTicket } from "../domain";
 import { uuidSchema } from "./esquemas";
-import { PERMISO_GESTIONAR, PERMISO_VER_TODOS } from "./permisos";
+import { PERMISO_GESTIONAR } from "./permisos";
 
 async function solicitudDe(ctx: Contexto, id: string) {
   const t = await ctx.db.ticket.findFirst({ where: { id } });
@@ -16,17 +16,18 @@ async function solicitudDe(ctx: Contexto, id: string) {
   return { ...t, tipo };
 }
 
-function puedeResolver(
-  ctx: { rol: string | null; autorizar(p: string): boolean },
-  t: { tipo: { aprobadorRol: string | null } },
-) {
-  return ctx.autorizar(PERMISO_VER_TODOS) || (ctx.rol && ctx.rol === t.tipo.aprobadorRol);
+/**
+ * Solo el rol aprobador del tipo decide (R-TCK-006). `ver_todos` es de lectura y alcance: no
+ * reemplaza al aprobador, así que un rol con `tickets:*` que no es el aprobador no aprueba ni rechaza.
+ */
+function puedeResolver(ctx: { rol: string | null }, t: { tipo: { aprobadorRol: string | null } }) {
+  return ctx.rol != null && ctx.rol === t.tipo.aprobadorRol;
 }
 
 export const ticketsAprobar = defineCapability({
   id: "tickets.tickets.aprobar",
   descripcion:
-    "Aprueba una solicitud con aprobación: la marca resuelta. Solo el rol aprobador del tipo o quien ve todos los tickets; la UI pide confirmación antes de llamarla (decisión de Carlos).",
+    "Aprueba una solicitud con aprobación: la marca resuelta. Solo el rol aprobador del tipo (R-TCK-006); la UI pide confirmación antes de llamarla (decisión de Carlos).",
   permiso: PERMISO_GESTIONAR,
   input: z.object({ id: uuidSchema }),
   output: z.object({ id: uuidSchema }),
@@ -67,7 +68,7 @@ export const ticketsAprobar = defineCapability({
 export const ticketsRechazar = defineCapability({
   id: "tickets.tickets.rechazar",
   descripcion:
-    "Rechaza una solicitud con aprobación con un motivo obligatorio. Solo el rol aprobador del tipo o quien ve todos los tickets.",
+    "Rechaza una solicitud con aprobación con un motivo obligatorio. Solo el rol aprobador del tipo (R-TCK-006).",
   permiso: PERMISO_GESTIONAR,
   input: z.object({ id: uuidSchema, motivo: z.string().trim().min(5).max(500) }),
   output: z.object({ id: uuidSchema }),

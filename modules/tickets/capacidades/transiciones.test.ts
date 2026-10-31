@@ -28,7 +28,7 @@ describe("transiciones y aprobación", () => {
     expect(ok).toMatchObject({ ok: true });
   });
 
-  it("solo el aprobador del tipo (o quien ve todos) aprueba una solicitud", async () => {
+  it("solo el aprobador del tipo aprueba una solicitud (un viewer no)", async () => {
     const { ctx } = contextoDePrueba({
       semilla: {
         ...semilla(),
@@ -52,7 +52,8 @@ describe("transiciones y aprobación", () => {
     const { ctx } = contextoDePrueba({
       semilla: { ...semilla(), ticket: [ticketFila({ id: SOLICITUD_1, tipoId: TIPO_SOLICITUD_ID })] },
       modulosActivos: ACTIVOS,
-      permisos: ["tickets:tickets.ver", "tickets:tickets.ver_todos", "tickets:tickets.gestionar"],
+      rol: "supervisor",
+      permisos: ["tickets:tickets.ver", "tickets:tickets.gestionar"],
     });
     const r = await executeCapability(ctx, "tickets.tickets.rechazar", {
       id: SOLICITUD_1,
@@ -61,5 +62,41 @@ describe("transiciones y aprobación", () => {
     expect(r).toMatchObject({ ok: true });
     const t = await ctx.db.ticket.findFirst({ where: { id: SOLICITUD_1 } });
     expect(t).toMatchObject({ estado: "rechazado", motivoRechazo: "Sin cupo en enero" });
+  });
+
+  describe("R-TCK-006: ver_todos no reemplaza al aprobador", () => {
+    const solicitud = () => ({ ...semilla(), ticket: [ticketFila({ id: SOLICITUD_1, tipoId: TIPO_SOLICITUD_ID })] });
+    const PERMISOS = ["tickets:tickets.ver", "tickets:tickets.ver_todos", "tickets:tickets.gestionar"];
+
+    it.each([
+      ["aprobar", { id: SOLICITUD_1 }],
+      ["rechazar", { id: SOLICITUD_1, motivo: "Sin cupo en enero" }],
+    ])("%s: ver_todos + gestionar con otro rol da FORBIDDEN, también en dry_run, y no cambia nada", async (accion, input) => {
+      // El tipo de solicitud lo aprueba "supervisor"; el actor es "admin" con ver_todos.
+      const { ctx } = contextoDePrueba({
+        semilla: solicitud(),
+        modulosActivos: ACTIVOS,
+        rol: "admin",
+        permisos: PERMISOS,
+      });
+      for (const dryRun of [false, true]) {
+        const r = await executeCapability(ctx, `tickets.tickets.${accion}`, input, { dryRun });
+        expect(r).toMatchObject({ ok: false, error: { code: "FORBIDDEN" } });
+      }
+      const t = await ctx.db.ticket.findFirst({ where: { id: SOLICITUD_1 } });
+      expect(t).toMatchObject({ estado: "abierto", motivoRechazo: null });
+    });
+
+    it("el rol aprobador sí aprueba, aunque no vea todos los tickets", async () => {
+      const { ctx } = contextoDePrueba({
+        semilla: solicitud(),
+        modulosActivos: ACTIVOS,
+        rol: "supervisor",
+        permisos: ["tickets:tickets.ver", "tickets:tickets.gestionar"],
+      });
+      const r = await executeCapability(ctx, "tickets.tickets.aprobar", { id: SOLICITUD_1 });
+      expect(r).toMatchObject({ ok: true });
+      expect(await ctx.db.ticket.findFirst({ where: { id: SOLICITUD_1 } })).toMatchObject({ estado: "resuelto" });
+    });
   });
 });
