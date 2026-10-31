@@ -4,7 +4,7 @@ Encargo CAR-91 (Ola 5), «ENCARGO DE CONSTRUCCIÓN · flujo-caja» del 31-oct-20
 
 ## Qué entra en el PR 1
 
-- **Datos:** schema `finanzas` (`flujo_filas`, `flujo_celdas`, `flujo_cierres`, `flujo_ajustes`), migración aditiva `20261031010000_finanzas_flujo_caja` (RLS ENABLE+FORCE y política `tenant_isolation`, trigger `mismo_tenant` en celdas, CHECK de lunes y capas). **Sin aplicar** (la aplica el bot «OPAI 2.0» con respaldo).
+- **Datos:** schema `finanzas` (`flujo_filas`, `flujo_celdas`, `flujo_cierres`, `flujo_ajustes`), migración aditiva `20261031131000_finanzas_flujo_caja` (RLS ENABLE+FORCE y política `tenant_isolation`, trigger `mismo_tenant` en celdas, CHECK de lunes y capas). **Sin aplicar** (la aplica el bot «OPAI 2.0» con respaldo).
 - **Dominio puro** con tests: semanas ISO, saldo acumulado, tono (bajo 0 / bajo el umbral), reprogramación con regla de arrastre, tolerancia de cierre.
 - **12 capacidades** (`finanzas.planilla.obtener`, `finanzas.filas.*`, `finanzas.celdas.{fijar,mover,cumplir}`, `finanzas.cierres.*`, `finanzas.ajustes.*`) con `dryRun`/`preview_…`, auditoría en la misma transacción y eventos de dominio; permisos `finanzas:flujo.{ver,gestionar,cerrar,configurar}` (owner y admin; el bloqueo financiero `finanzas:*` ya excluye a los demás roles).
 - **Pantalla** `/finanzas/flujo`: planilla de 12 semanas (patrón `PlanillaScreen`) con capas por celda, totales, saldo y tono, semanas selladas.

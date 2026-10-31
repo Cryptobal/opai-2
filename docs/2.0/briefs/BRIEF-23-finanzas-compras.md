@@ -42,7 +42,7 @@
 
 ## 4. Plan de PR
 
-- **PR 1 (este):** spec, brief; schema `finanzas` (plan de cuentas, centros de costo, proveedores, documentos recibidos); capacidades `finanzas.*` con `/api/v1`, MCP, `dryRun` y `preview_`; migración `20261030215000`; pantallas 06 Plan de cuentas, 02 Ficha de proveedor (+ lista) y 01 Libro de compras; sección de Configuración; tests de dominio, RLS, snapshot MCP/paridad y e2e.
+- **PR 1 (este):** spec, brief; schema `finanzas` (plan de cuentas, centros de costo, proveedores, documentos recibidos); capacidades `finanzas.*` con `/api/v1`, MCP, `dryRun` y `preview_`; migración `20261031130000`; pantallas 06 Plan de cuentas, 02 Ficha de proveedor (+ lista) y 01 Libro de compras; sección de Configuración; tests de dominio, RLS, snapshot MCP/paridad y e2e.
 - **PR 2 — Conciliación (depende de Banca y Flujo):** pantallas 03, 04 y 05 (sin la variante B); reglas con prioridad y vista previa; vínculos N:N; estado de pago derivado; pagos a proveedores.
 - **PR 3 — Contabilidad:** períodos, asientos automáticos, salud contable (07), EERR y balance (08); asiento de apertura revisado (07B solo si Carlos aprueba la variante).
 - **PR aparte — Adaptador RCV/SII** cuando Carlos entregue las credenciales del tenant.
