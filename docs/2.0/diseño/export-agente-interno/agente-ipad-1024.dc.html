@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<div data-theme="{{ theme }}" style="background:var(--ds-fill);color:var(--ds-fg);min-height:100vh;padding:32px;font-family:var(--font-sans);display:flex;flex-direction:column;gap:32px;overflow-x:auto">
+<header style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
+  <div><div class="t-caption" style="color:var(--ds-fg-muted)">OPAI 2.0 · Agente interno · v1</div><h1 class="t-title" style="margin:4px 0 0">iPad 1024</h1></div>
+  <div style="display:flex;gap:8px"><button class="chip toggle {{ lightCls }}" onClick="{{ setLight }}">Claro</button><button class="chip toggle {{ darkCls }}" onClick="{{ setDark }}">Oscuro</button></div>
+</header>
+
+<sc-for list="{{ plans }}" as="p" hint-placeholder-count="2">
+<div style="display:flex;flex-direction:column;gap:8px;width:1024px"><div class="t-label">{{ p.label }}</div>
+<div data-theme="{{ p.theme }}" style="width:1024px;height:700px;background:var(--ds-bg);color:var(--ds-fg);border:1px solid var(--ds-border);display:flex;position:relative;overflow:hidden">
+  <div style="width:80px;border-right:1px solid var(--ds-border);background:var(--ds-surface);display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 0"><span class="badge b-neutral nodot">AS</span><span class="ic i-home"></span><span class="ic i-building" style="color:var(--ds-accent)"></span><span class="ic i-users"></span><span class="ic i-menu"></span></div>
+  <div style="flex:1;display:flex;flex-direction:column">
+    <div style="height:60px;border-bottom:1px solid var(--ds-border);background:var(--ds-surface);display:flex;align-items:center;padding:0 16px;gap:8px"><span class="t-body-sm" style="flex:1;color:var(--ds-fg-muted)">Cuentas › Bodegas del Sur S.A.</span><button class="icon-btn" aria-label="Buscar"><span class="ic i-search"></span></button><button class="icon-btn" style="background:var(--ds-fill)" aria-label="Preguntar a OPAI (⌘J)"><span class="ic i-bot"></span></button><button class="icon-btn" aria-label="Notificaciones"><span class="ic i-bell"></span></button><span class="badge b-accent nodot" style="width:32px;height:32px;justify-content:center;border-radius:999px">MR</span></div>
+    <div style="padding:24px;display:flex;flex-direction:column;gap:16px">
+      <div style="display:flex;align-items:center;gap:12px"><h2 class="t-title" style="margin:0">Bodegas del Sur S.A.</h2><span class="badge b-success">Activa</span></div>
+      <div class="t-body-sm" style="color:var(--ds-fg-muted)">RUT <span class="t-mono">76.222.333-4</span> · 3 instalaciones</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px"><div style="background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px"><div class="t-caption" style="color:var(--ds-fg-muted)">Torre Apoquindo</div><div class="t-body">Supervisor · Diego Fuentes</div></div><div style="background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px"><div class="t-caption" style="color:var(--ds-fg-muted)">Planta Quilicura</div><div class="t-body">Supervisor · Marcela Rojas</div></div></div>
+    </div>
+  </div>
+  <div style="position:absolute;left:80px;right:0;top:60px;bottom:0;background:var(--ds-scrim)"></div>
+  <div style="position:absolute;right:0;top:60px;bottom:0;width:400px;background:var(--ds-surface);border-left:1px solid var(--ds-border);box-shadow:0 12px 32px -8px rgba(17,17,19,.18);display:flex;flex-direction:column">
+    <div style="height:56px;display:flex;align-items:center;gap:8px;padding:0 8px 0 16px;border-bottom:1px solid var(--ds-border)"><span class="t-heading" style="flex:1">OPAI</span><span class="badge b-neutral nodot">Estándar</span><button class="icon-btn" aria-label="Más"><span class="ic i-more"></span></button><button class="icon-btn" aria-label="Cerrar"><span class="ic i-x"></span></button></div>
+    <div style="padding:8px 16px"><span class="chip on"><span class="ic sm i-building"></span>Cuenta · Bodegas del Sur S.A.<button class="x" aria-label="Quitar"><span class="ic sm i-x"></span></button></span></div>
+    <div style="flex:1;padding:16px;display:flex;flex-direction:column;gap:12px;overflow:hidden">
+      <div style="align-self:flex-end;max-width:80%;background:var(--ds-accent-muted);padding:10px 14px;border-radius:var(--radius-md)" class="t-body">Cambia el supervisor de Torre Apoquindo a Camila Herrera Soto y da de baja Bodega Lampa</div>
+      <div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px;display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;align-items:center;gap:8px"><span class="t-heading" style="flex:1">Plan · 2 cambios</span><span class="badge b-neutral nodot">Aprobar todo</span></div><div class="t-caption" style="color:var(--ds-fg-muted)">Vence en 58 min</div>
+        <div style="display:flex;flex-direction:column;gap:4px"><div class="t-body" style="font-weight:500">1. Cambiar el supervisor de Torre Apoquindo</div><div class="t-body-sm"><span style="color:var(--ds-fg-subtle);text-decoration:line-through">Diego Fuentes</span> → Camila Herrera Soto</div><span class="badge b-info nodot" style="align-self:flex-start">Reversible</span></div>
+        <div style="display:flex;flex-direction:column;gap:4px"><div class="t-body" style="font-weight:500">2. Dar de baja Bodega Lampa</div><div class="t-body-sm"><span style="color:var(--ds-fg-subtle);text-decoration:line-through">Activa</span> → Baja</div><span class="badge b-warning nodot" style="align-self:flex-start">Irreversible · va a aprobación</span></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary">Confirmar plan</button><button class="btn btn-secondary">Pedir cambios</button><button class="btn btn-ghost">Descartar</button></div></div></div>
+    <div style="padding:12px 16px;border-top:1px solid var(--ds-border);display:flex;flex-direction:column;gap:8px"><div style="display:flex;gap:8px"><button class="icon-btn" aria-label="Adjuntar"><span class="ic i-paperclip"></span></button><div class="input" style="flex:1"><span class="ph">Pide cambios al plan</span></div><button class="btn btn-primary icon" disabled aria-label="Enviar"><span class="ic i-up"></span></button></div><div class="t-caption" style="color:var(--ds-fg-subtle);text-align:center">OPAI usa Claude Sonnet · Revisa el plan antes de confirmar</div></div>
+  </div>
+</div></div>
+</sc-for>
+
+<sc-for list="{{ panels }}" as="q" hint-placeholder-count="3">
+<div style="display:flex;flex-direction:column;gap:8px;width:1024px"><div class="t-label">{{ q.label }}</div>
+<div style="width:1024px;height:700px;background:var(--ds-bg);border:1px solid var(--ds-border);display:flex;position:relative;overflow:hidden">
+  <div style="width:80px;border-right:1px solid var(--ds-border);background:var(--ds-surface)"></div>
+  <div style="flex:1"><div style="height:60px;border-bottom:1px solid var(--ds-border);background:var(--ds-surface)"></div></div>
+  <div style="position:absolute;left:80px;right:0;top:60px;bottom:0;background:var(--ds-scrim)"></div>
+  <div style="position:absolute;right:0;top:60px;bottom:0;width:400px;background:var(--ds-surface);border-left:1px solid var(--ds-border);box-shadow:0 12px 32px -8px rgba(17,17,19,.18);display:flex;flex-direction:column">
+    <div style="height:56px;display:flex;align-items:center;gap:8px;padding:0 8px 0 16px;border-bottom:1px solid var(--ds-border)"><span class="t-heading" style="flex:1">OPAI</span><button class="icon-btn" aria-label="Más"><span class="ic i-more"></span></button><button class="icon-btn" aria-label="Cerrar"><span class="ic i-x"></span></button></div>
+    <div style="flex:1;padding:16px;display:flex;flex-direction:column;gap:12px">
+      <div style="align-self:flex-end;max-width:80%;background:var(--ds-accent-muted);padding:10px 14px;border-radius:var(--radius-md)" class="t-body">{{ q.ask }}</div>
+      <div style="border-radius:var(--radius-md);padding:12px 14px;display:flex;flex-direction:column;gap:8px;background:{{ q.bg }};color:var(--ds-fg)" class="t-body"><span style="font-weight:500">{{ q.title }}</span><span class="t-body-sm">{{ q.text }}</span><div><button class="btn btn-secondary">{{ q.cta }}</button></div></div>
+    </div>
+    <div style="padding:12px 16px;border-top:1px solid var(--ds-border);display:flex;gap:8px"><button class="icon-btn" aria-label="Adjuntar"><span class="ic i-paperclip"></span></button><div class="input" style="flex:1"><span class="ph">Pregunta o pide un cambio</span></div><button class="btn btn-primary icon" disabled aria-label="Enviar"><span class="ic i-up"></span></button></div>
+  </div>
+</div></div>
+</sc-for>
+
+<div style="display:flex;flex-direction:column;gap:8px;width:1024px"><div class="t-label">12b · Buscador «Documento de OPAI» filtrado por la cuenta</div>
+<div style="width:1024px;height:700px;background:var(--ds-bg);border:1px solid var(--ds-border);display:flex;position:relative;overflow:hidden">
+  <div style="width:80px;border-right:1px solid var(--ds-border);background:var(--ds-surface)"></div>
+  <div style="flex:1"><div style="height:60px;border-bottom:1px solid var(--ds-border);background:var(--ds-surface)"></div></div>
+  <div style="position:absolute;inset:0;background:var(--ds-scrim)"></div>
+  <div style="position:absolute;left:50%;top:80px;transform:translateX(-50%);width:520px;background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:var(--radius-lg);box-shadow:0 12px 32px -8px rgba(17,17,19,.18);padding:16px;display:flex;flex-direction:column;gap:12px" role="dialog">
+    <div style="display:flex;align-items:center"><span class="t-heading" style="flex:1">Documento de OPAI</span><button class="icon-btn" aria-label="Cerrar"><span class="ic i-x"></span></button></div>
+    <div class="input"><span class="ic sm i-search"></span><span class="ph">Buscar documentos</span></div>
+    <span class="chip on" style="align-self:flex-start"><span class="ic sm i-building"></span>Cuenta · Bodegas del Sur S.A.<button class="x" aria-label="Quitar filtro"><span class="ic sm i-x"></span></button></span>
+    <div style="display:flex;flex-direction:column">
+      <div style="min-height:56px;display:flex;align-items:center;gap:12px;border-top:1px solid var(--ds-border)"><span class="ic i-file"></span><div style="flex:1" class="t-body-sm"><div class="t-body">Contrato Renovación 2027.pdf</div><div style="color:var(--ds-fg-muted)">12 páginas · 23-10-2026</div></div></div>
+      <div style="min-height:56px;display:flex;align-items:center;gap:12px;border-top:1px solid var(--ds-border)"><span class="ic i-file"></span><div style="flex:1" class="t-body-sm"><div class="t-body">Anexo Torre Apoquindo.pdf</div><div style="color:var(--ds-fg-muted)">4 páginas · 02-09-2026</div></div></div>
+      <div style="min-height:56px;display:flex;align-items:center;gap:12px;border-top:1px solid var(--ds-border)"><span class="ic i-file"></span><div style="flex:1" class="t-body-sm"><div class="t-body">Propuesta económica.docx</div><div style="color:var(--ds-fg-muted)">8 páginas · 14-08-2026</div></div></div>
+    </div>
+  </div>
+</div></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { dark: false };
+  renderVals() {
+    const d = this.state.dark;
+    const th = d ? 'dark' : 'light';
+    return {
+      theme: th, lightCls: d ? '' : 'on', darkCls: d ? 'on' : '',
+      setLight: () => this.setState({ dark: false }), setDark: () => this.setState({ dark: true }),
+      plans: [{ label: '10 · Ficha de cuenta con panel superpuesto y plan «Aprobar todo»', theme: th }, { label: '13 · Oscuro de (10)', theme: 'dark' }],
+      panels: [
+        { label: '11 · Error del proveedor de IA', ask: '¿Quién supervisa Torre Apoquindo?', bg: 'var(--ds-danger-muted)', title: 'El proveedor de IA de tu empresa no responde.', text: 'No se hizo ningún cambio.', cta: 'Reintentar' },
+        { label: '12 · Sin permiso en el hilo', ask: 'Cambia el supervisor de Planta Quilicura a Camila Herrera Soto', bg: 'var(--ds-fill)', title: 'Sin permiso para este cambio', text: 'Tu rol no permite cambiar supervisores. Pídeselo a alguien con ese permiso o a un administrador.', cta: 'Pedir acceso' }
+      ]
+    };
+  }
+}
+</script>
+</body>
+</html>

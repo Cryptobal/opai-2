@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<div data-theme="{{ theme }}" style="background:var(--ds-bg);color:var(--ds-fg);min-height:100vh;padding:32px;font-family:var(--font-sans);display:flex;flex-direction:column;gap:40px">
+  <header style="display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap">
+    <div>
+      <div class="t-caption" style="color:var(--ds-fg-muted)">OPAI 2.0 · Agente interno · v1</div>
+      <h1 class="t-title" style="margin:4px 0 0">Hoja de componentes</h1>
+      <p class="t-body-sm" style="color:var(--ds-fg-muted);margin:8px 0 0">Piezas nuevas para el DS marcadas con <span class="badge b-accent nodot">Nuevo</span></p>
+    </div>
+    <div style="display:flex;gap:8px">
+      <button class="chip toggle {{ lightCls }}" onClick="{{ setLight }}">Claro</button>
+      <button class="chip toggle {{ darkCls }}" onClick="{{ setDark }}">Oscuro</button>
+    </div>
+  </header>
+
+  <section style="display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;gap:12px;align-items:center"><h2 class="t-heading" style="margin:0">Panel lateral</h2><span class="badge b-accent nodot">Nuevo</span></div>
+    <div style="display:flex;gap:24px;flex-wrap:wrap;align-items:flex-start">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="t-label">Acoplado · escritorio · 400 (360–560)</div>
+        <div style="width:400px;height:520px;background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:var(--radius-md);display:flex;position:relative;overflow:hidden">
+          <div title="Tirador" style="position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--ds-fill);cursor:col-resize"></div>
+          <div style="flex:1;display:flex;flex-direction:column;padding-left:6px">
+            <div style="height:60px;display:flex;align-items:center;gap:8px;padding:0 8px 0 16px;border-bottom:1px solid var(--ds-border)"><span class="t-heading" style="flex:1">OPAI</span><span class="badge b-neutral nodot">Estándar</span><button class="icon-btn" aria-label="Más"><span class="ic i-more"></span></button><button class="icon-btn" aria-label="Cerrar"><span class="ic i-x"></span></button></div>
+            <div style="padding:8px 16px"><span class="chip on"><span class="ic sm i-building"></span>Cuenta · Bodegas del Sur S.A.<button class="x" aria-label="Quitar"><span class="ic sm i-x"></span></button></span></div>
+            <div style="flex:1;padding:16px;display:flex;flex-direction:column;gap:12px;justify-content:center;align-items:center;text-align:center"><div class="t-heading">¿En qué te ayudo?</div><div class="chip-row" style="justify-content:center"><span class="chip plain">Resume el negocio Renovación 2027</span></div></div>
+            <div style="padding:12px 16px;border-top:1px solid var(--ds-border);display:flex;flex-direction:column;gap:8px"><div style="display:flex;gap:8px;align-items:flex-end"><button class="icon-btn" aria-label="Adjuntar"><span class="ic i-paperclip"></span></button><div class="input" style="flex:1"><span class="ph">Pregunta o pide un cambio</span></div><button class="btn btn-primary icon" aria-label="Enviar"><span class="ic i-up"></span></button></div><div class="t-caption" style="color:var(--ds-fg-subtle);text-align:center">OPAI usa Claude Sonnet · Revisa el plan antes de confirmar</div></div>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="t-label">Superpuesto · iPad · 400 + scrim</div>
+        <div style="width:400px;height:520px;background:var(--ds-bg);border:1px solid var(--ds-border);border-radius:var(--radius-md);position:relative;overflow:hidden">
+          <div style="position:absolute;inset:0;background:var(--ds-scrim)"></div>
+          <div style="position:absolute;right:0;top:0;bottom:0;width:260px;background:var(--ds-surface);border-left:1px solid var(--ds-border);box-shadow:var(--ds-shadow-overlay,0 12px 32px -8px rgba(17,17,19,.18));padding:16px;display:flex;flex-direction:column;gap:8px"><span class="t-heading">OPAI</span><span class="t-body-sm" style="color:var(--ds-fg-muted)">Sombra de overlay solo aquí. Tocar fuera no cierra si hay un plan pendiente.</span></div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="t-label">Pantalla completa · teléfono 375</div>
+        <div data-device="phone" style="width:375px;height:520px;background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:var(--radius-md);display:flex;flex-direction:column;overflow:hidden">
+          <div style="height:52px;display:flex;align-items:center;gap:4px;padding:0 4px;border-bottom:1px solid var(--ds-border)"><button class="icon-btn" aria-label="Cerrar"><span class="ic i-x"></span></button><span class="t-heading" style="flex:1">OPAI</span><button class="icon-btn" aria-label="Más"><span class="ic i-more"></span></button></div>
+          <div style="flex:1;padding:16px" class="t-body-sm"><span style="color:var(--ds-fg-muted)">Modelo y nivel viven en el menú ⋯. Oculta la barra inferior.</span></div>
+          <div style="padding:8px 8px calc(8px + env(safe-area-inset-bottom));border-top:1px solid var(--ds-border);display:flex;gap:4px;align-items:flex-end"><button class="icon-btn" aria-label="Adjuntar"><span class="ic i-paperclip"></span></button><div class="input" style="flex:1"><span class="ph">Pregunta</span></div><button class="btn btn-primary icon" aria-label="Enviar"><span class="ic i-up"></span></button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;gap:12px;align-items:center"><h2 class="t-heading" style="margin:0">Tarjeta de plan</h2><span class="badge b-accent nodot">Nuevo</span></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;align-items:start">
+
+      <div style="display:flex;flex-direction:column;gap:8px"><div class="t-label">Aprobar todo</div>
+        <div style="background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;gap:8px"><span class="t-heading" style="flex:1">Plan · 3 cambios</span><span class="badge b-neutral nodot">Aprobar todo</span></div>
+          <div class="t-caption" style="color:var(--ds-fg-muted)">Vence en 58 min</div>
+          <div style="display:flex;flex-direction:column;gap:12px">
+            <div style="display:flex;flex-direction:column;gap:4px"><div class="t-body" style="font-weight:500">1. Cambiar el supervisor de Torre Apoquindo</div><div class="t-body-sm"><span style="color:var(--ds-fg-subtle);text-decoration:line-through">Diego Fuentes</span> → Camila Herrera Soto</div><span class="badge b-info nodot" style="align-self:flex-start">Reversible</span></div>
+            <div style="display:flex;flex-direction:column;gap:4px"><div class="t-body" style="font-weight:500">2. Asignar a Planta Quilicura el contrato</div><div class="t-body-sm"><span style="color:var(--ds-fg-subtle);text-decoration:line-through">Sin contrato</span> → Renovación 2027</div><span class="badge b-info nodot" style="align-self:flex-start">Reversible</span></div>
+            <div style="display:flex;flex-direction:column;gap:4px"><div class="t-body" style="font-weight:500">3. Dar de baja la instalación Bodega Lampa</div><div class="t-body-sm"><span style="color:var(--ds-fg-subtle);text-decoration:line-through">Activa</span> → Baja</div><span class="badge b-warning nodot" style="align-self:flex-start">Irreversible · va a aprobación</span></div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-primary">Confirmar plan</button><button class="btn btn-secondary">Pedir cambios</button><button class="btn btn-ghost">Descartar</button></div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:8px"><div class="t-label">Paso a paso</div>
+        <div style="background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px;display:flex;flex-direction:column;gap:12px">
+          <div style="display:flex;align-items:center;gap:8px"><span class="t-heading" style="flex:1">Plan · 3 cambios</span><span class="badge b-neutral nodot">Paso a paso</span></div>
+          <div style="display:flex;flex-direction:column;gap:4px"><div class="t-body" style="font-weight:500">1. Cambiar el supervisor de Torre Apoquindo</div><div class="t-body-sm"><span style="color:var(--ds-fg-subtle);text-decoration:line-through">Diego Fuentes</span> → Camila Herrera Soto</div><div><button class="btn btn-primary" style="margin-top:8px">Confirmar este paso</button></div></div>
+          <div style="opacity:.45;display:flex;justify-content:space-between;gap:8px" class="t-body"><span>2. Asignar el contrato</span><span class="badge b-neutral nodot">Pendiente</span></div>
+          <div style="opacity:.45;display:flex;justify-content:space-between;gap:8px" class="t-body"><span>3. Dar de baja Bodega Lampa</span><span class="badge b-neutral nodot">Pendiente</span></div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:8px"><div class="t-label">Ejecución</div>
+        <div style="background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px;display:flex;flex-direction:column;gap:12px">
+          <div class="t-heading">Plan · 3 cambios</div>
+          <div style="display:flex;justify-content:space-between;gap:8px;align-items:center" class="t-body"><span>1. Cambiar el supervisor</span><span class="badge b-success">Hecho</span></div>
+          <a class="t-body-sm" href="#" style="margin-top:-8px">Ver en la ficha</a>
+          <div style="display:flex;justify-content:space-between;gap:8px;align-items:center" class="t-body"><span>2. Asignar el contrato</span><span class="badge b-info">Ejecutando…</span></div>
+          <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;opacity:.45" class="t-body"><span>3. Dar de baja Bodega Lampa</span><span class="badge b-neutral nodot">En espera</span></div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:8px"><div class="t-label">Error en el paso 2</div>
+        <div style="background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px;display:flex;flex-direction:column;gap:12px">
+          <div class="t-heading">Plan · 3 cambios</div>
+          <div style="display:flex;justify-content:space-between;gap:8px;align-items:center" class="t-body"><span>1. Cambiar el supervisor</span><span class="badge b-success">Hecho</span></div>
+          <div style="display:flex;justify-content:space-between;gap:8px;align-items:center" class="t-body"><span>2. Asignar el contrato</span><span class="badge b-danger">Falló</span></div>
+          <div class="t-body-sm" style="background:var(--ds-danger-muted);color:var(--ds-danger-fg);padding:8px 12px;border-radius:var(--radius-md)">No pudimos asignar el contrato: la instalación ya tiene uno vigente.</div>
+          <a class="t-body-sm" href="#">Ver en auditoría</a>
+          <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;opacity:.45" class="t-body"><span>3. Dar de baja Bodega Lampa</span><span class="badge b-neutral nodot">No se ejecutó</span></div>
+          <div class="t-caption" style="color:var(--ds-fg-muted)">El paso 1 ya se hizo y no se deshace.</div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:8px"><div class="t-label">Irreversible en aprobación</div>
+        <div style="background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px;display:flex;flex-direction:column;gap:12px">
+          <div class="t-heading">Plan · 3 cambios</div>
+          <div style="display:flex;justify-content:space-between;gap:8px;align-items:center" class="t-body"><span>1. Cambiar el supervisor</span><span class="badge b-success">Hecho</span></div>
+          <div style="display:flex;flex-direction:column;gap:4px" class="t-body"><span>2. Dar de baja Bodega Lampa</span><span class="badge b-warning nodot" style="align-self:flex-start">Enviado a aprobación · lo resuelve un administrador</span><a class="t-body-sm" href="#">Ver en la Bandeja</a></div>
+          <div class="t-body-sm" style="opacity:.6;color:var(--ds-fg-muted)">3. No se ejecutó · pídelo de nuevo después de la aprobación</div>
+        </div>
+      </div>
+
+      <div style="display:flex;flex-direction:column;gap:8px"><div class="t-label">Vencido</div>
+        <div style="background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px;display:flex;flex-direction:column;gap:12px;opacity:.7">
+          <div class="t-heading">Plan · 3 cambios</div>
+          <div class="t-body-sm">Este plan venció. Pídelo de nuevo para ver los datos actuales.</div>
+          <div><button class="btn btn-secondary">Pedir de nuevo</button></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;gap:12px;align-items:center"><h2 class="t-heading" style="margin:0">Tarjetas de adjunto</h2><span class="badge b-accent nodot">Nuevo</span></div>
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start">
+      <div style="width:220px;border:1px solid var(--ds-border-strong);border-radius:var(--radius-md);padding:10px;display:flex;flex-direction:column;gap:6px;background:var(--ds-surface)"><div style="display:flex;gap:8px;align-items:center"><span class="ic i-file"></span><span class="t-body-sm" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">foto-puesto.jpg</span></div><div style="height:4px;background:var(--ds-fill);border-radius:999px"><div style="width:60%;height:100%;background:var(--ds-accent);border-radius:999px"></div></div><div style="display:flex;justify-content:space-between" class="t-caption"><span style="color:var(--ds-fg-muted)">Subiendo · 60 %</span><a href="#">Cancelar</a></div></div>
+      <div style="width:220px;border:1px solid var(--ds-border-strong);border-radius:var(--radius-md);padding:10px;display:flex;flex-direction:column;gap:4px;background:var(--ds-surface)"><div style="display:flex;gap:8px;align-items:center"><span class="ic i-file"></span><span class="t-body-sm" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">contrato.pdf</span><button class="x chip" style="all:unset;cursor:pointer" aria-label="Quitar"><span class="ic sm i-x"></span></button></div><div class="t-caption" style="color:var(--ds-fg-muted)">2,4 MB · 12 páginas · Listo</div></div>
+      <div style="width:220px;border:1px solid var(--ds-danger-fg);background:var(--ds-danger-muted);border-radius:var(--radius-md);padding:10px;display:flex;flex-direction:column;gap:4px"><div class="t-body-sm" style="color:var(--ds-danger-fg)">plano.xlsx</div><div class="t-caption" style="color:var(--ds-danger-fg)">Supera los 10 MB</div></div>
+      <div style="width:220px;border:1px solid var(--ds-danger-fg);background:var(--ds-danger-muted);border-radius:var(--radius-md);padding:10px;display:flex;flex-direction:column;gap:4px"><div class="t-body-sm" style="color:var(--ds-danger-fg)">acta.docx</div><div class="t-caption" style="color:var(--ds-danger-fg)">No se pudo subir · <a href="#" style="color:inherit;text-decoration:underline">Reintentar</a></div></div>
+      <div style="width:220px;border:1px solid var(--ds-border-strong);border-radius:var(--radius-md);padding:10px;display:flex;flex-direction:column;gap:4px;background:var(--ds-fill)"><div class="t-body-sm">dotacion.csv</div><div class="t-caption" style="color:var(--ds-fg-muted)">Sin conexión · <a href="#">Reintentar</a></div></div>
+    </div>
+  </section>
+
+  <section style="display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;gap:12px;align-items:center"><h2 class="t-heading" style="margin:0">Loading «hilo», Banda y BarraProgreso</h2><span class="badge b-accent nodot">Nuevo</span></div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;align-items:start">
+      <div style="display:flex;flex-direction:column;gap:8px;background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px">
+        <div style="align-self:flex-end;width:55%;height:36px;border-radius:var(--radius-md);background:var(--ds-fill)"></div>
+        <div style="width:90%;height:14px;border-radius:var(--radius-sm);background:var(--ds-fill)"></div><div style="width:75%;height:14px;border-radius:var(--radius-sm);background:var(--ds-fill)"></div><div style="width:40%;height:14px;border-radius:var(--radius-sm);background:var(--ds-fill)"></div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div class="t-body-sm" style="background:var(--ds-warning-muted);color:var(--ds-warning-fg);padding:10px 16px;border-radius:var(--radius-md)">Usaste el 80 % del presupuesto mensual. Solo lo ven los administradores.</div>
+        <div class="t-body-sm" style="background:var(--ds-fill);color:var(--ds-fg-muted);padding:10px 16px;border-radius:var(--radius-md)">Sin conexión · Tu borrador se conserva.</div>
+        <div style="height:4px;background:var(--ds-fill);border-radius:999px" role="progressbar" aria-valuenow="40"><div style="width:40%;height:100%;background:var(--ds-accent);border-radius:999px"></div></div>
+      </div>
+    </div>
+  </section>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { dark: false };
+  renderVals() {
+    const d = this.state.dark;
+    return {
+      theme: d ? 'dark' : 'light',
+      lightCls: d ? '' : 'on',
+      darkCls: d ? 'on' : '',
+      setLight: () => this.setState({ dark: false }),
+      setDark: () => this.setState({ dark: true })
+    };
+  }
+}
+</script>
+</body>
+</html>
