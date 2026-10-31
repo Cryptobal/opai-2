@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<style>body{margin:0;background:var(--ds-bg)}a{color:var(--ds-accent);text-decoration:none}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<div style="max-width:960px;margin:0 auto;padding:48px 24px;display:flex;flex-direction:column;gap:32px;font-family:var(--font-sans);color:var(--ds-fg)">
+<div style="display:flex;flex-direction:column;gap:4px">
+<span style="font:500 13px/18px var(--font-sans);color:var(--ds-fg-muted)">OPAI 2.0 · Finanzas v1 · CAR-97, CAR-102</span>
+<h1 style="margin:0;font:600 28px/34px var(--font-sans)">Ventas, cobranza y banca</h1>
+<span style="font:400 14px/20px var(--font-sans);color:var(--ds-fg-muted)">9 pantallas, el flujo de caja que recibe la programación y la hoja de componentes. Cada archivo trae 375, 1024 y 1280 en claro y oscuro, los 4 estados, sheets y variantes B.</span>
+</div>
+<div style="display:flex;flex-direction:column;border:1px solid var(--ds-border);border-radius:16px;overflow:hidden;background:var(--ds-surface)">
+<sc-for list="{{ rows }}" as="r" hint-placeholder-count="9">
+<a href="{{ r.href }}" style="display:flex;align-items:center;gap:16px;padding:16px 20px;border-top:1px solid var(--ds-border);min-height:44px">
+<span class="t-numeric" style="font:600 14px/20px var(--font-sans);color:var(--ds-fg-subtle);width:20px">{{ r.n }}</span>
+<span style="flex:1;display:flex;flex-direction:column;gap:2px;min-width:0"><span style="font:500 15px/22px var(--font-sans);color:var(--ds-fg)">{{ r.name }}</span><span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">{{ r.desc }}</span></span>
+<span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted);text-align:right">{{ r.roles }}</span>
+</a>
+</sc-for>
+</div>
+<div style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Roles: owner y admin ven todo, incluidas integraciones. Gerente, supervisor y viewer ven Forbidden. El cliente externo solo accede a /cobro/[token], sin login.</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const r = (n, name, desc, roles, href) => ({ n, name, desc, roles, href });
+    const oa = 'owner, admin';
+    return { rows: [
+      r(1, 'Hoy en Finanzas', 'Bandeja única con grupos y acción directa por fila', oa, 'Pantalla 1 Hoy en Finanzas Artboards.dc.html'),
+      r(2, 'Ventas (DTE)', 'Lista, detalle, Emitir y Nota de crédito', oa, 'Pantalla 2 Ventas Artboards.dc.html'),
+      r(3, 'Programación y cierre de mes', 'Plantillas, tablero del mes y cómo se ve en el flujo de caja', oa, 'Pantalla 3 Programacion y cierre Artboards.dc.html'),
+      r(4, 'Landing /cobro/[token]', 'Aprobar, Observar o Ingresar OC/HES; enlace vencido y ya respondido', 'Cliente externo, sin login', 'Pantalla 4 Landing cobro Artboards.dc.html'),
+      r(5, 'Cobranza', 'Tramos, ficha de deudor, correo y WhatsApp (variante B)', oa, 'Pantalla 5 Cobranza Artboards.dc.html'),
+      r(6, 'Banca', 'Triage en 3 pestañas, reconocer, regla por RUT y cuadratura', oa, 'Pantalla 6 Banca Artboards.dc.html'),
+      r(7, 'Factoring', 'Operaciones, Ceder, conciliar giros; ceder desde el flujo (variante B)', oa, 'Pantalla 7 Factoring Artboards.dc.html'),
+      r(8, 'Integraciones de Finanzas', 'Conectores Banca, DTE y Cesión con CampoSecreto', oa, 'Pantalla 8 Integraciones Artboards.dc.html'),
+      r(9, 'Configuración › Módulos › Finanzas › DTE', 'Certificado, CAF, folios por tipo y enlace a Comunicaciones', oa, 'Pantalla 9 Configuracion DTE Artboards.dc.html'),
+      r(10, 'Flujo de caja semanal', 'Recibe lo programado como comprometido; arrastre, mover ± semanas y bitácora', oa, 'Pantalla 10 Flujo de caja Artboards.dc.html'),
+      r('', 'Hoja de componentes', 'Componentes usados, variantes y estados; nuevos para el DS', '', 'Finanzas Hoja de componentes.dc.html'),
+    ] };
+  }
+}
+</script>
+</body>
+</html>

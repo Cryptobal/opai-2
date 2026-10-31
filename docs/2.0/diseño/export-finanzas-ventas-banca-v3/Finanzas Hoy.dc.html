@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="{{ active }}" title="Finanzas" tenant="Atlas Seguridad SpA" tenant-initials="AS" user="{{ user }}" notifications="{{ 3 }}" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Finanzas" title="Hoy en Finanzas" subtitle="Atlas Seguridad SpA · viernes 30-10-2026" hint-size="100%,80px"></x-import>
+
+<sc-if value="{{ isData }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:{{ cols }};gap:16px;align-items:start">
+<sc-for list="{{ columns }}" as="col" hint-placeholder-count="2">
+<div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+<sc-for list="{{ col }}" as="g" hint-placeholder-count="3">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" padding="{{ 0 }}" hint-size="100%,220px">
+<div style="display:flex;flex-direction:column;gap:2px;padding:16px 16px 12px">
+<div style="display:flex;align-items:baseline;justify-content:space-between;gap:12px">
+<span class="t-subheading">{{ g.title }}</span>
+<span class="t-numeric" style="font:600 14px/20px var(--font-sans);color:var(--ds-fg-muted)">{{ g.count }}</span>
+</div>
+<sc-if value="{{ g.hasSummary }}" hint-placeholder-val="{{ false }}">
+<span class="t-body-sm" style="color:var(--ds-fg-muted)">{{ g.summary }}</span>
+</sc-if>
+</div>
+<sc-for list="{{ g.items }}" as="it" hint-placeholder-count="2">
+<div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-top:1px solid var(--ds-border)">
+<div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px">
+<span style="font:500 14px/20px var(--font-sans);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ it.title }}</span>
+<span style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">{{ it.sub }}</span>
+<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:2px">
+<span class="t-numeric" style="font:500 14px/20px var(--font-sans);color:var(--ds-fg)">{{ it.monto }}</span>
+<sc-if value="{{ it.hasRut }}" hint-placeholder-val="{{ false }}">
+<span class="t-mono" style="font-size:13px;line-height:18px;color:var(--ds-fg-subtle)">{{ it.rut }}</span>
+</sc-if>
+<sc-if value="{{ it.hasBadge }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ it.badgeTone }}" hint-size="64px,22px">{{ it.badgeLabel }}</x-import>
+</sc-if>
+</div>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="100px,40px">{{ it.action }}</x-import>
+</div>
+</sc-for>
+<sc-if value="{{ g.hasMore }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;padding:4px 8px 8px;border-top:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon-right="chevron-right" hint-size="200px,40px">{{ g.more }}</x-import>
+</div>
+</sc-if>
+</x-import>
+</sc-for>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<div style="display:grid;grid-template-columns:{{ cols }};gap:16px;align-items:start" aria-busy="true" aria-label="Cargando bandeja">
+<sc-for list="{{ skelCols }}" as="sc" hint-placeholder-count="1">
+<div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+<sc-for list="{{ sc }}" as="sg" hint-placeholder-count="2">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" padding="{{ 0 }}" hint-size="100%,200px">
+<div style="display:flex;justify-content:space-between;padding:16px 16px 12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="45%" height="{{ 16 }}" hint-size="45%,16px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="20px" height="{{ 16 }}" hint-size="20px,16px"></x-import>
+</div>
+<sc-for list="{{ sg }}" as="r" hint-placeholder-count="2">
+<div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-top:1px solid var(--ds-border)">
+<div style="flex:1;display:flex;flex-direction:column;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="70%" height="{{ 14 }}" hint-size="70%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="50%" height="{{ 12 }}" hint-size="50%,12px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="30%" height="{{ 14 }}" hint-size="30%,14px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="96px" height="{{ 40 }}" radius="{{ 10 }}" hint-size="96px,40px"></x-import>
+</div>
+</sc-for>
+</x-import>
+</sc-for>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;align-items:center;gap:16px;padding:48px 0">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="check-circle" title="Todo al día" description="No hay pendientes en Finanzas hoy. Los nuevos borradores, vencimientos y movimientos aparecen aquí." hint-size="100%,200px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" size="lg" hint-size="140px,48px">Ver ventas</x-import>
+</div>
+</sc-if>
+
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<div style="padding:48px 0">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar tu bandeja" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="FIN-HOY-503 · 30-10-2026 08:42" hint-size="100%,260px"></x-import>
+</div>
+</sc-if>
+
+<sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
+<div style="padding:48px 0">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a Finanzas" description="Finanzas está disponible para owner y admin. Pídele acceso a Andrés Valdivia, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" hint-size="100%,240px"></x-import>
+</div>
+</sc-if>
+</x-import>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:375,&quot;height&quot;:812},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;phone&quot;,&quot;tsType&quot;:&quot;\&quot;phone\&quot; | \&quot;tablet\&quot; | \&quot;desktop\&quot;&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;\&quot;light\&quot; | \&quot;dark\&quot;&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;datos&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sin-permiso&quot;],&quot;default&quot;:&quot;datos&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const device = this.props.device ?? "phone";
+    const estado = this.props.estado ?? "datos";
+    const isPhone = device === "phone";
+    const it = (title, sub, monto, action, o = {}) => ({ title, sub, monto, action, rut: o.rut || "", hasRut: !!o.rut, hasBadge: !!o.badge, badgeTone: o.badge ? o.badge[0] : "", badgeLabel: o.badge ? o.badge[1] : "" });
+    const grp = (title, items, o = {}) => ({ title, items, count: o.count ?? items.length, summary: o.summary || "", hasSummary: !!o.summary, more: o.more || "", hasMore: !!o.more });
+    const ventas = [
+      grp("Borradores sin OC/HES", [
+        it("Inmobiliaria Apoquindo SpA", "Torre Apoquindo · octubre 2026 · falta OC", "$ 6.940.000", "Ingresar OC"),
+        it("Logística Norte SpA", "Bodega Lampa · octubre 2026 · falta HES", "$ 4.215.000", "Ingresar HES"),
+        it("Alimentos del Maipo SA", "Planta Quilicura · octubre 2026 · falta OC y HES", "$ 8.325.000", "Ingresar OC"),
+      ]),
+      grp("Esperando OK del cliente", [
+        it("Constructora Andes Ltda", "Proforma enviada 27-10-2026 · recordatorio 03-11-2026", "$ 3.480.000", "Recordar"),
+        it("Retail Sur SpA", "EP enviado 22-10-2026 · recordado 27-10-2026", "$ 5.120.000", "Recordar"),
+      ]),
+      grp("Listos para emitir", [
+        it("Alimentos del Maipo SA", "Factura 33 · septiembre 2026 · OK 29-10-2026", "$ 7.910.000", "Emitir"),
+        it("Inmobiliaria Apoquindo SpA", "Factura 33 · septiembre 2026 · OK 28-10-2026", "$ 2.350.000", "Emitir"),
+        it("Logística Norte SpA", "Nota de crédito 61 · ref. folio 20402", "−$ 420.000", "Emitir"),
+      ]),
+      grp("Facturas vencidas", [
+        it("Retail Sur SpA", "Folio 20377 · venció 28-08-2026", "$ 2.140.000", "Recordar", { badge: ["danger", "60+ días"] }),
+        it("Constructora Andes Ltda", "Folio 20351 · venció 15-09-2026", "$ 6.940.000", "Recordar", { badge: ["warning", "31-60 días"] }),
+        it("Logística Norte SpA", "Folio 20418 · venció 12-10-2026", "$ 4.115.000", "Recordar", { badge: ["neutral", "0-30 días"] }),
+      ], { count: 8, summary: "0-30 $ 12.300.000 · 31-60 $ 6.940.000 · 60+ $ 2.140.000", more: "Ver las 8 en Cobranza" }),
+    ];
+    const banca = [
+      grp("Movimientos sin reconocer", [
+        it("Transferencia recibida", "Banco de Chile · 29-10-2026 · sugerencia: folio 20418", "$ 4.115.000", "Reconocer", { rut: "76.412.890-3" }),
+        it("Transferencia recibida", "Banco de Chile · 29-10-2026 · sin sugerencia", "$ 1.980.000", "Reconocer", { rut: "77.105.334-K" }),
+        it("Comisión mantención", "Banco de Chile · 28-10-2026 · Administración / Oficina central", "−$ 18.450", "Reconocer"),
+      ]),
+      grp("Movimientos por autorizar", [
+        it("Seguridad Integral Ltda", "Pago a proveedor · 30-10-2026", "−$ 2.760.000", "Autorizar", { rut: "78.220.115-6" }),
+        it("Abono asociado a folio 20390", "Banco de Chile · 28-10-2026", "$ 3.300.000", "Autorizar", { rut: "76.880.451-2" }),
+      ]),
+      grp("Compras por aceptar o reclamar", [
+        it("Seguridad Integral Ltda", "Factura 33 · folio 88120 · plazo 04-11-2026", "$ 2.760.000", "Revisar", { rut: "78.220.115-6" }),
+        it("Uniformes Pacífico SpA", "Factura 33 · folio 4512 · plazo 06-11-2026", "$ 1.284.000", "Revisar", { rut: "76.993.207-1" }),
+      ]),
+    ];
+    const s2 = [[1, 2], [1, 2, 3]];
+    return {
+      device,
+      theme: this.props.theme ?? "light",
+      active: isPhone ? "fin" : "hoy",
+      user: estado === "sin-permiso" ? { name: "Paula Rojas", initials: "PR", role: "Supervisor" } : { name: "Andrés Valdivia", initials: "AV", role: "Administrador" },
+      isData: estado === "datos", isLoading: estado === "cargando", isEmpty: estado === "vacio", isError: estado === "error", isForbidden: estado === "sin-permiso",
+      cols: isPhone ? "minmax(0,1fr)" : "minmax(0,1fr) minmax(0,1fr)",
+      columns: isPhone ? [ventas.concat(banca)] : [ventas, banca],
+      skelCols: isPhone ? [s2] : [s2, s2],
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "per", label: "Personas", icon: "users" }, { id: "pau", label: "Pauta", icon: "calendar" }, { id: "fin", label: "Finanzas", icon: "wallet" }, { id: "mas", label: "Más", icon: "more" }],
+      groups: [
+        { items: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "ban", label: "Bandeja", icon: "check" }] },
+        { title: "Operaciones", items: [{ id: "ins", label: "Instalaciones", icon: "building" }, { id: "pau", label: "Pauta mensual", icon: "calendar" }, { id: "per", label: "Personas", icon: "users" }] },
+        { title: "Finanzas", items: [{ id: "hoy", label: "Hoy en Finanzas", icon: "check", count: estado === "datos" ? 18 : undefined }, { id: "ven", label: "Ventas", icon: "file" }, { id: "cob", label: "Cobranza", icon: "wallet" }, { id: "bco", label: "Banca", icon: "building" }, { id: "fct", label: "Factoring", icon: "refresh" }, { id: "flu", label: "Flujo de caja", icon: "wallet" }] },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
