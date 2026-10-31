@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>
+.i-settings{-webkit-mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>');mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>')}
+.i-bot{-webkit-mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>');mask-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>')}
+</style>
+</helmet>
+<div ref="{{ rootRef }}" onMouseEnter="{{ enter }}" onMouseLeave="{{ leave }}" data-theme="{{ theme }}" style="position:relative;width:100%;height:100%;overflow:hidden;background:var(--ds-bg);color:var(--ds-fg)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ shellDevice }}" theme="{{ theme }}" width="100%" height="100%" tabs="{{ tabs }}" groups="{{ navGroups }}" active="{{ activeNav }}" user="{{ user }}" app-bar="{{ appBar }}" top-bar="{{ topBar }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" hint-size="100%,100%">
+<div style="display:flex;flex-direction:column;flex:1;min-height:0">
+
+<sc-if value="{{ showPortada }}" hint-placeholder-val="{{ true }}">
+<div style="{{ pageStyle }}">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}"><h1 class="t-title" style="margin:0">Configuración</h1></sc-if>
+<div style="display:flex;align-items:center;gap:8px">
+<div style="flex:1;min-width:0"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" icon="search" placeholder="Busca un ajuste: feriados, logo, API key…" value="{{ q }}" on-change="{{ setQ }}" trailing="{{ kbd }}" aria-label="Buscar ajustes" hint-size="100%,44px"></x-import></div>
+<sc-if value="{{ showCancelar }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" on-click="{{ cancelar }}" hint-size="90px,44px">Cancelar</x-import></sc-if>
+</div>
+<sc-if value="{{ showBuscando }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:16px;padding:8px;display:flex;flex-direction:column;gap:4px" aria-busy="true">
+<sc-for list="{{ skel3 }}" as="k" hint-placeholder-count="3">
+<div style="display:flex;align-items:center;gap:12px;min-height:52px;padding:8px 12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ 32 }}" height="{{ 32 }}" radius="{{ 8 }}" hint-size="32px,32px"></x-import>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="40%" height="{{ 14 }}" hint-size="40%,14px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="60%" height="{{ 12 }}" hint-size="60%,12px"></x-import></div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ showErrB }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;justify-content:center;padding:32px 16px;background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos buscar" description="Revisa tu conexión e inténtalo de nuevo." on-retry="{{ noop }}" hint-size="100%,220px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ showAlerta }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="{{ alertaTitulo }}" accion="{{ alertaAccion }}" hint-size="100%,56px"></x-import>
+</sc-if>
+<sc-if value="{{ showGrid }}" hint-placeholder-val="{{ true }}">
+<div style="{{ gridStyle }}">
+<sc-for list="{{ cards }}" as="c" hint-placeholder-count="6">
+<dc-import name="TarjetaGrupo" variante="{{ cardVariante }}" icono="{{ c.icono }}" nombre="{{ c.nombre }}" linea="{{ c.linea }}" vista="{{ c.vista }}" on-click="{{ c.onClick }}" hint-size="100%,176px"></dc-import>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ showResults }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:8px">
+<span class="t-caption">{{ resumenRes }}</span>
+<div style="background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:16px;padding:8px;display:flex;flex-direction:column">
+<sc-for list="{{ results }}" as="g" hint-placeholder-count="2">
+<div style="display:flex;flex-direction:column;padding-bottom:4px">
+<span class="t-overline" style="padding:8px 12px 4px">{{ g.nombre }}</span>
+<sc-for list="{{ g.items }}" as="r" hint-placeholder-count="1">
+<dc-import name="ResultadoAjuste" q="{{ r.q }}" campo="{{ r.campo }}" nombre="{{ r.nombre }}" ruta="{{ r.ruta }}" icono="{{ r.icono }}" estado="{{ r.estado }}" sin-atajo="{{ isPhone }}" on-click="{{ r.onClick }}" hint-size="100%,52px"></dc-import>
+</sc-for>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ showSinRes }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:32px 16px;background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="search" title="{{ sinResTitulo }}" description="Prueba con otra palabra" size="sm" hint-size="100%,160px"></x-import>
+<div style="display:flex;flex-wrap:wrap;justify-content:center;column-gap:16px;row-gap:0">
+<sc-for list="{{ cards }}" as="c" hint-placeholder-count="6">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Enlace" on-click="{{ c.onClick }}" hint-size="80px,44px">{{ c.nombre }}</x-import>
+</sc-for>
+</div>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ showGrupo }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;flex:1;min-height:0">
+<sc-if value="{{ showHeader }}" hint-placeholder-val="{{ true }}">
+<div style="{{ headStyle }}">
+<sc-if value="{{ showMigas }}" hint-placeholder-val="{{ true }}">
+<nav aria-label="Migas" style="display:flex;align-items:center;gap:4px" class="t-body-sm">
+<button type="button" onClick="{{ goHome }}" style="background:none;border:0;padding:0;font:inherit;color:var(--ds-fg-muted);cursor:pointer" style-hover="color:var(--ds-fg)">Configuración</button>
+<span class="ic sm i-chevron-right" style="color:var(--ds-fg-subtle)"></span>
+<span style="color:var(--ds-fg)">{{ grupoNombre }}</span>
+</nav>
+</sc-if>
+<div style="display:flex;flex-direction:column;gap:2px">
+<h1 class="{{ grupoTituloClass }}" style="margin:0">{{ grupoNombre }}</h1>
+<p class="t-body-sm muted" style="margin:0">{{ grupoLinea }}</p>
+</div>
+<sc-if value="{{ showB1 }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Decide Carlos · Propuesta B1: Documentos pasa a Módulos" accion="{{ b1Accion }}" hint-size="100%,56px"></x-import>
+</sc-if>
+</div>
+</sc-if>
+<div style="display:flex;flex:1;min-height:0;border-top:1px solid var(--ds-border)">
+<sc-if value="{{ showList }}" hint-placeholder-val="{{ true }}">
+<div style="{{ listStyle }}">
+<sc-if value="{{ showListSearch }}" hint-placeholder-val="{{ false }}">
+<div style="padding:12px;border-bottom:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" icon="search" compact="{{ true }}" placeholder="Busca un módulo" value="{{ modQ }}" on-change="{{ setModQ }}" hint-size="100%,36px"></x-import>
+</div>
+</sc-if>
+<sc-for list="{{ listaItems }}" as="it" hint-placeholder-count="3">
+<sc-if value="{{ it.isHeader }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.RowGroupHeader" count="{{ it.count }}" hint-size="100%,32px">{{ it.label }}</x-import>
+</sc-if>
+<sc-if value="{{ it.isRow }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.SelectableRow" selected="{{ it.selected }}" title="{{ it.title }}" subtitle="{{ it.subtitle }}" trailing="{{ it.trailing }}" on-click="{{ it.onClick }}" hint-size="100%,64px"></x-import>
+</sc-if>
+</sc-for>
+<sc-if value="{{ showSinModsLista }}" hint-placeholder-val="{{ false }}">
+<div style="padding:24px 16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="grid" title="Aún no tienes módulos con ajustes" size="sm" hint-size="100%,140px"></x-import>
+</div>
+</sc-if>
+</div>
+</sc-if>
+<sc-if value="{{ showPanel }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1;min-width:0;overflow:auto;background:var(--ds-bg)">
+<div style="{{ panelStyle }}">
+<sc-if value="{{ panelVacio }}" hint-placeholder-val="{{ false }}">
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:48px 0">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="grid" title="Aún no tienes módulos con ajustes" hint-size="100%,180px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" on-click="{{ verCatalogo }}" hint-size="130px,40px">Ver catálogo</x-import>
+</div>
+</sc-if>
+<sc-if value="{{ panelHeader }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap">
+<div style="flex:1 1 240px;min-width:0;display:flex;flex-direction:column;gap:2px">
+<div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><h2 class="{{ entradaTituloClass }}" style="margin:0">{{ entradaNombre }}</h2><sc-if value="{{ soloLectura }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" hint-size="90px,22px">Solo lectura</x-import></sc-if></div>
+<p class="t-body-sm muted" style="margin:0">{{ entradaDesc }}</p>
+</div>
+<sc-if value="{{ showPrimary }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="primary" icon="plus" hint-size="150px,40px">{{ primaryLabel }}</x-import>
+</sc-if>
+</div>
+</sc-if>
+<sc-if value="{{ showTabs }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ entradaTabs }}" value="{{ tab }}" on-change="{{ setTab }}" hint-size="100%,44px"></x-import>
+</sc-if>
+
+<sc-if value="{{ pCal }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ anios }}" value="{{ anio }}" on-change="{{ setAnio }}" label="Año" hint-size="140px,36px"></x-import>
+<span class="t-caption t-numeric">{{ calResumen }}</span>
+</div>
+<sc-if value="{{ showCalTable }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ calCols }}" rows="{{ feriados }}" row-key="fecha" compact="{{ true }}" hint-size="100%,560px"></x-import>
+</sc-if>
+<sc-if value="{{ showCalRows }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--ds-surface);border:1px solid var(--ds-border);border-bottom:0;border-radius:16px;overflow:hidden">
+<sc-for list="{{ feriados }}" as="f" hint-placeholder-count="6">
+<div style="display:flex;align-items:center;gap:12px;min-height:56px;padding:8px 16px;border-bottom:1px solid var(--ds-border)">
+<span style="width:56px;flex:none;display:flex;flex-direction:column"><span class="t-mono" style="color:var(--ds-fg)">{{ f.corto }}</span><span class="t-caption">{{ f.dia }}</span></span>
+<span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span class="t-label" style="color:var(--ds-fg)">{{ f.nombre }}</span><span class="t-caption">{{ f.tipo }}</span></span>
+<sc-if value="{{ f.proximo }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="accent" hint-size="70px,22px">Próximo</x-import></sc-if>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ showCalVacio }}" hint-placeholder-val="{{ false }}">
+<div style="padding:32px 0">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="calendar" title="Aún no hay feriados para 2027" description="Cárgalos cuando se publique el calendario oficial." size="sm" hint-size="100%,160px"></x-import>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ pRondasTipos }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ tiposCols }}" rows="{{ tipos }}" row-key="id" compact="{{ true }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ pRondasAjustes }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:16px;padding:8px 16px;display:flex;flex-direction:column">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ swFoto }}" on-change="{{ setSwFoto }}" label="Exigir foto en cada incidente" description="El guardia no puede cerrar el incidente sin adjuntar una foto." hint-size="100%,64px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ swGrave }}" on-change="{{ setSwGrave }}" label="Avisar al supervisor por incidentes de gravedad alta" description="Envía un aviso al supervisor de la instalación apenas se registra." hint-size="100%,64px"></x-import>
+</div>
+</sc-if>
+
+<sc-if value="{{ pCat }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:20px">
+<sc-for list="{{ catalogo }}" as="sec" hint-placeholder-count="3">
+<div style="display:flex;flex-direction:column;gap:8px">
+<span class="t-overline">{{ sec.titulo }}</span>
+<div style="background:var(--ds-surface);border:1px solid var(--ds-border);border-bottom:0;border-radius:16px;overflow:hidden">
+<sc-for list="{{ sec.items }}" as="m" hint-placeholder-count="2">
+<div style="display:flex;align-items:center;gap:12px;min-height:56px;padding:8px 16px;border-bottom:1px solid var(--ds-border)">
+<span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span class="t-label" style="color:var(--ds-fg)">{{ m.nombre }}</span><span class="t-caption">{{ m.desc }}</span></span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ m.tono }}" hint-size="80px,22px">{{ m.estado }}</x-import>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+
+<sc-if value="{{ pDoc }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:12px">
+<sc-if value="{{ showDocTable }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ docCols }}" rows="{{ docRows }}" row-key="id" compact="{{ true }}" hint-size="100%,260px"></x-import></sc-if>
+<sc-if value="{{ showDocRows }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--ds-surface);border:1px solid var(--ds-border);border-bottom:0;border-radius:16px;overflow:hidden">
+<sc-for list="{{ docRows }}" as="d" hint-placeholder-count="4">
+<div style="display:flex;align-items:center;gap:12px;min-height:56px;padding:8px 16px;border-bottom:1px solid var(--ds-border)">
+<span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span class="t-label" style="color:var(--ds-fg)">{{ d.nombre }}</span><span class="t-caption">{{ d.uso }}</span></span>
+<span class="t-caption">{{ d.estado }}</span>
+</div>
+</sc-for>
+</div>
+</sc-if>
+</div>
+</sc-if>
+<sc-if value="{{ pAgente }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:16px">
+<div style="background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:16px">
+<span class="t-overline">Comportamiento</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Modelo predeterminado" options="{{ modelos }}" value="{{ ag_modelo }}" on-change="{{ setAg_modelo }}" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ ag_paso }}" on-change="{{ setAg_paso }}" label="Obligar paso a paso" description="El agente muestra cada paso y espera tu confirmación antes de actuar." hint-size="100%,64px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Campo" etiqueta="Nombre visible" ayuda="Así se presenta el asistente a las personas de tu empresa." hint-size="100%,96px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" value="{{ ag_nombre }}" on-change="{{ setAg_nombre }}" hint-size="100%,44px"></x-import></x-import>
+</div>
+<div style="background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:16px">
+<span class="t-overline">Presupuesto y retención</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Campo" etiqueta="Presupuesto mensual" hint-size="100%,72px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" value="{{ ag_presup }}" on-change="{{ setAg_presup }}" hint-size="100%,44px"></x-import></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ ag_aviso }}" on-change="{{ setAg_aviso }}" label="Avisar al llegar al 80 %" description="Te avisamos por correo cuando el consumo del mes llegue al 80 % del presupuesto." hint-size="100%,64px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Campo" etiqueta="Retención de conversaciones" ayuda="Pasado este plazo, las conversaciones se eliminan." hint-size="100%,96px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ retOpts }}" value="{{ ag_ret }}" on-change="{{ setAg_ret }}" label="Retención" hint-size="100%,40px"></x-import></x-import>
+</div>
+<div style="background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:16px">
+<span class="t-overline">Sugerencias de inicio</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" value="{{ ag_s1 }}" on-change="{{ setAg_s1 }}" aria-label="Sugerencia 1" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" value="{{ ag_s2 }}" on-change="{{ setAg_s2 }}" aria-label="Sugerencia 2" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" value="{{ ag_s3 }}" on-change="{{ setAg_s3 }}" aria-label="Sugerencia 3" hint-size="100%,44px"></x-import>
+</div>
+<div style="background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:16px">
+<span class="t-overline">Adjuntos</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Campo" etiqueta="Límite de tamaño" hint-size="100%,72px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" value="{{ ag_lim }}" on-change="{{ setAg_lim }}" hint-size="100%,44px"></x-import></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Campo" etiqueta="Tipos permitidos" hint-size="100%,72px">
+<div class="chip-row">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="PDF" activo="{{ ag_pdf }}" on-cambiar="{{ setAg_pdf }}" hint-size="64px,36px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="PNG" activo="{{ ag_png }}" on-cambiar="{{ setAg_png }}" hint-size="64px,36px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="JPG" activo="{{ ag_jpg }}" on-cambiar="{{ setAg_jpg }}" hint-size="64px,36px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="XLSX" activo="{{ ag_xlsx }}" on-cambiar="{{ setAg_xlsx }}" hint-size="64px,36px"></x-import>
+</div>
+</x-import>
+</div>
+<div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="primary" hint-size="170px,44px">Guardar cambios</x-import></div>
+</div>
+</sc-if>
+<sc-if value="{{ pGen }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.StatePanel" kind="empty" icon="file" title="Pantalla actual, sin cambios" description="{{ entradaRuta }}" hint-size="100%,200px"></x-import>
+</sc-if>
+</div>
+</div>
+</sc-if>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ showPrefs }}" hint-placeholder-val="{{ false }}">
+<div style="{{ pageStyle }}">
+<div style="display:flex;flex-direction:column;gap:2px"><span class="t-caption">Mi cuenta</span><h1 class="{{ prefTitleClass }}" style="margin:0">Preferencias</h1></div>
+<div style="background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:16px;max-width:640px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Campo" etiqueta="Tema" ayuda="Sistema sigue el modo de tu dispositivo." hint-size="100%,96px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ prefOpts }}" value="{{ pref }}" on-change="{{ setPref }}" label="Tema" hint-size="100%,40px"></x-import></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ prefMail }}" on-change="{{ setPrefMail }}" label="Avisos por correo" description="Resumen diario de lo que espera tu revisión." hint-size="100%,64px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" checked="{{ prefApp }}" on-change="{{ setPrefApp }}" label="Avisos en OPAI" description="Notificaciones dentro de la aplicación." hint-size="100%,64px"></x-import>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ isGrupoCarga }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;flex:1;min-height:0" aria-busy="true">
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<div style="{{ headStyle }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="30%" height="{{ 14 }}" hint-size="30%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="22%" height="{{ 28 }}" hint-size="22%,28px"></x-import>
+</div>
+</sc-if>
+<div style="display:flex;flex:1;min-height:0;border-top:1px solid var(--ds-border)">
+<div style="{{ listStyle }}">
+<sc-for list="{{ skel }}" as="k" hint-placeholder-count="5">
+<div style="display:flex;align-items:center;gap:12px;min-height:64px;padding:12px 16px;border-bottom:1px solid var(--ds-border)">
+<div style="flex:1;display:flex;flex-direction:column;gap:6px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="55%" height="{{ 14 }}" hint-size="55%,14px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="80%" height="{{ 12 }}" hint-size="80%,12px"></x-import></div>
+</div>
+</sc-for>
+</div>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<div style="flex:1;min-width:0;padding:32px;display:flex;flex-direction:column;gap:16px;background:var(--ds-bg)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="35%" height="{{ 22 }}" hint-size="35%,22px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="100%" height="{{ 56 }}" radius="{{ 16 }}" hint-size="100%,56px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="100%" height="{{ 56 }}" radius="{{ 16 }}" hint-size="100%,56px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="100%" height="{{ 56 }}" radius="{{ 16 }}" hint-size="100%,56px"></x-import>
+</div>
+</sc-if>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ isCarga }}" hint-placeholder-val="{{ false }}">
+<div style="{{ pageStyle }}" aria-busy="true">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}"><h1 class="t-title" style="margin:0">Configuración</h1></sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="100%" height="{{ 44 }}" radius="{{ 10 }}" hint-size="100%,44px"></x-import>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="background:var(--ds-surface);border:1px solid var(--ds-border);border-bottom:0;border-radius:16px;overflow:hidden">
+<sc-for list="{{ skel }}" as="k" hint-placeholder-count="6">
+<div style="display:flex;align-items:center;gap:12px;min-height:64px;padding:12px 16px;border-bottom:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ 36 }}" height="{{ 36 }}" radius="{{ 10 }}" hint-size="36px,36px"></x-import>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="45%" height="{{ 14 }}" hint-size="45%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="75%" height="{{ 12 }}" hint-size="75%,12px"></x-import>
+</div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<div style="{{ gridStyle }}">
+<sc-for list="{{ skel }}" as="k" hint-placeholder-count="6">
+<div style="display:flex;flex-direction:column;gap:12px;min-height:176px;padding:20px;background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ 40 }}" height="{{ 40 }}" radius="{{ 10 }}" hint-size="40px,40px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="40%" height="{{ 16 }}" hint-size="40%,16px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="75%" height="{{ 14 }}" hint-size="75%,14px"></x-import>
+<div style="margin-top:auto;padding-top:12px;border-top:1px solid var(--ds-border)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="85%" height="{{ 12 }}" hint-size="85%,12px"></x-import></div>
+</div>
+</sc-for>
+</div>
+</sc-if>
+</div>
+</sc-if>
+
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<div style="{{ pageStyle }}">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}"><h1 class="t-title" style="margin:0">Configuración</h1></sc-if>
+<div style="flex:1;display:flex;align-items:center;justify-content:center;padding:48px 0">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar la configuración" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="CFG-503-7F2A" on-retry="{{ noop }}" hint-size="100%,240px"></x-import>
+</div>
+</div>
+</sc-if>
+
+<sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
+<div style="{{ pageStyle }}">
+<div style="flex:1;display:flex;align-items:center;justify-content:center;padding:48px 0">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a este grupo de Configuración" description="Tu rol no ve ningún ajuste de Agentes. Pídele acceso a un administrador." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,240px"></x-import>
+</div>
+</div>
+</sc-if>
+<sc-if value="{{ is404 }}" hint-placeholder-val="{{ false }}">
+<div style="{{ pageStyle }}">
+<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding:48px 0">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="search" title="Este ajuste no existe" description="Revisa la dirección /configuracion/grupo/facturacion o vuelve a Configuración." hint-size="100%,200px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="primary" hint-size="200px,40px">Volver a Configuración</x-import>
+</div>
+</div>
+</sc-if>
+
+</div>
+</x-import>
+
+<sc-if value="{{ showHotspot }}" hint-placeholder-val="{{ false }}">
+<button type="button" aria-label="Abrir menú de usuario" onClick="{{ toggleMenu }}" style="position:absolute;left:0;bottom:0;width:248px;height:62px;background:transparent;border:0;cursor:pointer;z-index:5" style-focus="outline:2px solid var(--ds-focus);outline-offset:-2px"></button>
+</sc-if>
+<sc-if value="{{ menuOpen }}" hint-placeholder-val="{{ false }}">
+<div onClick="{{ closeMenu }}" style="position:absolute;inset:0;z-index:9"></div>
+<div role="dialog" aria-label="Menú de usuario" style="{{ menuStyle }}">
+<div style="display:flex;align-items:center;gap:10px;padding:8px 8px 12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Avatar" initials="{{ user.initials }}" hint-size="32px,32px"></x-import>
+<span style="flex:1;min-width:0;display:flex;flex-direction:column"><span class="t-label" style="color:var(--ds-fg)">{{ user.name }}</span><span class="t-caption" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ user.email }}</span></span>
+</div>
+<hr class="divider" style="margin:0 0 4px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Menu" overlay="{{ false }}" items="{{ menuItems }}" on-select="{{ onMenu }}" hint-size="100%,150px"></x-import>
+</div>
+</sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;desktop&quot;,&quot;tablet&quot;,&quot;phone&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;rol&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;admin&quot;,&quot;gerente&quot;,&quot;supervisor&quot;,&quot;viewer&quot;],&quot;default&quot;:&quot;admin&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;vista&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;portada&quot;,&quot;grupo&quot;,&quot;entrada&quot;,&quot;preferencias&quot;],&quot;default&quot;:&quot;portada&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;grupo&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;operacion&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;entrada&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;tab&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;0&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;q&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ok&quot;,&quot;carga&quot;,&quot;grupocarga&quot;,&quot;error&quot;,&quot;sinpermiso&quot;,&quot;404&quot;],&quot;default&quot;:&quot;ok&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;aprobaciones&quot;:{&quot;editor&quot;:&quot;int&quot;,&quot;default&quot;:3,&quot;tsType&quot;:&quot;number&quot;},&quot;sinModulos&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;b1&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;alertaB1&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;},&quot;buscando&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;errorBusqueda&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;menu&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  static ROLES = {
+    admin: { perms: "*", user: { name: "Ignacio Soto", initials: "IS", role: "Administrador", email: "ignacio.soto@atlasseguridad.cl" } },
+    gerente: { perms: ["tenantRead", "cumplimientoRead", "comunicacionesManage", "patronesRead", "calendarioRead", "documentosManage", "usersRead", "catalogoRead", "comercialRead", "rondasRead", "modulosRead", "consumosRead", "auditRead"], user: { name: "Paola Contreras", initials: "PC", role: "Gerente", email: "paola.contreras@atlasseguridad.cl" } },
+    supervisor: { perms: ["tenantRead", "patronesRead", "calendarioRead", "catalogoRead", "rondasRead"], user: { name: "Jorge Muñoz", initials: "JM", role: "Supervisor", email: "jorge.munoz@atlasseguridad.cl" } },
+    viewer: { perms: ["tenantRead", "patronesRead", "calendarioRead", "usersRead", "catalogoRead", "comercialRead", "rondasRead", "modulosRead"], user: { name: "Andrea Rojas", initials: "AR", role: "Visualizador", email: "andrea.rojas@atlasseguridad.cl" } },
+  };
+  static G = [
+    { id: "empresa", nombre: "Empresa", icono: "building", linea: "Datos, marca, privacidad y comunicaciones", entradas: [
+      { id: "empresa", nombre: "Datos de la empresa", desc: "Razón social, RUT, giro y dirección", perm: "tenantRead", ruta: "/configuracion/empresa", kw: "rut razon social giro direccion" },
+      { id: "marca", nombre: "Marca", desc: "Logo y monograma de la empresa", perm: "tenantRead", ruta: "/configuracion/marca", kw: "logo monograma colores imagen" },
+      { id: "cumplimiento", nombre: "Datos personales", desc: "Solicitudes, incidentes y retención", perm: "cumplimientoRead", ruta: "/configuracion/cumplimiento", tabs: ["Resumen", "Solicitudes", "Incidentes", "Retención"], kw: "privacidad ley proteccion solicitudes retencion incidentes" },
+      { id: "comunicaciones", nombre: "Comunicaciones", desc: "Correos y avisos por evento", perm: "comunicacionesManage", ruta: "/configuracion/comunicaciones", kw: "correo email aviso plantilla evento notificacion" },
+    ] },
+    { id: "operacion", nombre: "Operación", icono: "clipboard", linea: "Feriados, patrones y documentos", entradas: [
+      { id: "operaciones", nombre: "Patrones y funciones", desc: "Patrones de turno y funciones de cada puesto", perm: "patronesRead", ruta: "/configuracion/operaciones", tabs: ["Patrones", "Funciones"], kw: "turnos 4x4 5x2 patron funcion cargo puesto" },
+      { id: "calendario", nombre: "Calendario", desc: "Feriados que se aplican a la pauta y a los recargos", perm: "calendarioRead", ruta: "/configuracion/calendario", kw: "feriados festivos irrenunciable dias" },
+      { id: "documentos", nombre: "Documentos", desc: "Plantillas de contratos y anexos", perm: "documentosManage", b1out: true, ruta: "/configuracion/documentos", kw: "plantilla contrato anexo pdf firma" },
+    ] },
+    { id: "acceso", nombre: "Personas y acceso", icono: "users", linea: "Usuarios, roles y permisos", entradas: [
+      { id: "usuarios", nombre: "Usuarios y permisos", desc: "Quién entra a OPAI y qué puede hacer", perm: "usersRead", ruta: "/configuracion/usuarios", tabs: ["Usuarios", "Roles"], kw: "roles invitar contrasena acceso administrador" },
+    ] },
+    { id: "agentes", nombre: "Agentes", icono: "bot", linea: "Tu IA conectada, API keys y aprobaciones", entradas: [
+      { id: "agentes", nombre: "Agentes y API keys", desc: "Incluye «Conectar tu IA»", perm: "apikeysManage", ruta: "/configuracion/agentes", tabs: ["Agentes", "API keys"], kw: "api key ia claude mcp conectar token agente" },
+      { id: "aprobaciones", nombre: "Aprobaciones pendientes", desc: "Acciones de agentes que esperan tu revisión", perm: "aprobacionesManage", ruta: "/configuracion/aprobaciones", kw: "aprobar revisar pendientes" },
+      { id: "agente", nombre: "Agente interno", desc: "El asistente de OPAI dentro del ERP: modelo, límites y sugerencias", perm: "agenteManage", ruta: "/configuracion/agentes/interno", kw: "asistente ia modelo presupuesto sugerencias adjuntos paso a paso" },
+    ] },
+    { id: "modulos", nombre: "Módulos", icono: "grid", linea: "Catálogo y ajustes de cada módulo", entradas: [] },
+    { id: "uso", nombre: "Uso y registros", icono: "chart", linea: "Integraciones, consumos y auditoría", entradas: [
+      { id: "integraciones", nombre: "Integraciones", desc: "Conexiones con otros sistemas", perm: "integracionesManage", ruta: "/configuracion/integraciones", kw: "conectar proveedor erp banco sii" },
+      { id: "consumos", nombre: "Consumos", desc: "Uso del plan en el período", perm: "consumosRead", ruta: "/configuracion/consumos", kw: "uso plan cobro limite" },
+      { id: "auditoria", nombre: "Auditoría", desc: "Quién cambió qué y cuándo", perm: "auditRead", ruta: "/configuracion/auditoria", kw: "registro historial cambios log" },
+    ] },
+  ];
+  static CATALOGO = { id: "catalogo", nombre: "Catálogo de módulos", desc: "Contratados, en trial y disponibles", perm: "catalogoRead", ruta: "/configuracion/modulos", kw: "contratar trial plan modulos" };
+  static MODS = [
+    { id: "comercial", nombre: "Comercial", desc: "Embudo, catálogos y ajustes", perm: "comercialRead", ruta: "/configuracion/modulo/comercial", tabs: ["Embudo", "Catálogos", "Ajustes"], kw: "embudo ventas cotizacion catalogo" },
+    { id: "rondas", nombre: "Rondas", desc: "Tipos de incidente y ajustes", perm: "rondasRead", ruta: "/configuracion/modulo/rondas", tabs: ["Tipos de incidente", "Ajustes"], kw: "incidente ronda punto marcaje" },
+    { id: "tickets", nombre: "Tickets", desc: "Categorías y tiempos de respuesta", perm: "modulosRead", ruta: "/configuracion/modulo/tickets", kw: "solicitud categoria respuesta" },
+    { id: "nomina", nombre: "Nómina", desc: "Haberes, descuentos y período de pago", perm: "modulosRead", ruta: "/configuracion/modulo/nomina", kw: "sueldo haberes descuentos liquidacion pago" },
+    { id: "rendiciones", nombre: "Rendiciones", desc: "Categorías de gasto y topes", perm: "modulosRead", ruta: "/configuracion/modulo/rendiciones", kw: "gastos boleta tope reembolso" },
+    { id: "flujo", nombre: "Flujo de caja", desc: "Cuentas, categorías y proyección", perm: "modulosRead", ruta: "/configuracion/modulo/flujo", kw: "caja cuentas proyeccion banco" },
+    { id: "asistencia", nombre: "Asistencia", desc: "Marcaje, tolerancias y justificaciones", perm: "modulosRead", ruta: "/configuracion/modulo/asistencia", kw: "marcaje atraso tolerancia justificacion" },
+    { id: "control", nombre: "Control de acceso", desc: "Zonas, credenciales y horarios", perm: "modulosRead", ruta: "/configuracion/modulo/control", kw: "zonas credencial tarjeta horario acceso" },
+  ];
+  static DOC_MOD = { id: "documentos", nombre: "Documentos", desc: "Tipos de documento y plantillas", perm: "documentosManage", ruta: "/configuracion/modulo/documentos", tabs: ["Tipos de documento"], kw: "plantilla contrato anexo pdf firma" };
+  static FERIADOS = [
+    ["01-01", "jueves", "Año Nuevo", "Irrenunciable"], ["03-04", "viernes", "Viernes Santo", "Nacional"], ["04-04", "sábado", "Sábado Santo", "Nacional"],
+    ["01-05", "viernes", "Día del Trabajo", "Irrenunciable"], ["21-05", "jueves", "Día de las Glorias Navales", "Nacional"], ["07-06", "domingo", "Asalto y Toma del Morro de Arica", "Regional · Arica y Parinacota"],
+    ["21-06", "domingo", "Día Nacional de los Pueblos Indígenas", "Nacional"], ["29-06", "lunes", "San Pedro y San Pablo", "Nacional"], ["16-07", "jueves", "Día de la Virgen del Carmen", "Nacional"],
+    ["15-08", "sábado", "Asunción de la Virgen", "Nacional"], ["18-09", "viernes", "Independencia Nacional", "Irrenunciable"], ["19-09", "sábado", "Día de las Glorias del Ejército", "Irrenunciable"],
+    ["12-10", "lunes", "Encuentro de Dos Mundos", "Nacional"], ["31-10", "sábado", "Día de las Iglesias Evangélicas y Protestantes", "Nacional"], ["01-11", "domingo", "Día de Todos los Santos", "Nacional"],
+    ["08-12", "martes", "Inmaculada Concepción", "Nacional"], ["25-12", "viernes", "Navidad", "Irrenunciable"],
+  ];
+  state = {
+    vista: this.props.vista ?? "portada", grupo: this.props.grupo ?? "operacion", entrada: this.props.entrada ?? null,
+    q: this.props.q ?? "", modQ: "", menu: !!this.props.menu, tab: this.props.tab ?? "0", anio: "2026",
+    swFoto: true, swGrave: true, pref: "Sistema", prefMail: true, prefApp: true, ag: { modelo: "Claude Sonnet", paso: true, aviso: true, presup: "$ 250.000", ret: "90 días", nombre: "Asistente OPAI", s1: "Resume la pauta de esta semana", s2: "Qué instalaciones tienen turnos sin cubrir", s3: "Prepara una cotización para Planta Quilicura", lim: "10 MB por archivo", pdf: true, png: true, jpg: true, xlsx: false }, activos: { int: true, acc: true, sos: true, dan: true, ilu: true, pue: false },
+  };
+  norm(s) { return (s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase(); }
+  isPhone() { return (this.props.device ?? "desktop") === "phone"; }
+  openGroup(id) { this.setState({ vista: "grupo", grupo: id, entrada: null, q: "", tab: "0", modQ: "" }); }
+  openEntry(gid, eid) { this.setState({ vista: this.isPhone() ? "entrada" : "grupo", grupo: gid, entrada: eid, q: "", tab: "0" }); }
+  campo(e, q) {
+    const n = this.norm(q);
+    if (this.norm(e.nombre).includes(n)) return "";
+    if (this.norm(e.desc).includes(n)) return "Descripción: " + e.desc;
+    const t = (e.kw || "").split(" ").find((w) => this.norm(w).includes(n));
+    return t ? "Palabra clave: " + t : "";
+  }
+  componentDidMount() {
+    this.onKey = (ev) => {
+      if (ev.key !== "/" || !this.hot || !this.root) return;
+      const t = ev.target, tag = t && t.tagName;
+      if (tag === "INPUT" || tag === "TEXTAREA") return;
+      const inp = this.root.querySelector('input[aria-label="Buscar ajustes"]');
+      if (inp) { ev.preventDefault(); inp.focus(); }
+    };
+    window.addEventListener("keydown", this.onKey);
+  }
+  componentWillUnmount() { window.removeEventListener("keydown", this.onKey); }
+  renderVals() {
+    const h = React.createElement, NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const p = this.props, s = this.state, C = Component;
+    const device = p.device ?? "desktop", phone = device === "phone", tablet = device === "tablet";
+    const theme = p.theme ?? "light", role = C.ROLES[p.rol ?? "admin"] ? (p.rol ?? "admin") : "admin";
+    const R = C.ROLES[role], admin = role === "admin";
+    const SOLO_ADMIN = ["apikeysManage", "aprobacionesManage", "agenteManage"];
+    const NO_SUP = ["integracionesManage", "consumosRead"];
+    const can = (k) => admin || (role === "gerente" && !SOLO_ADMIN.includes(k) && R.perms.includes(k)) || ((role === "supervisor" || role === "viewer") && !SOLO_ADMIN.includes(k) && !NO_SUP.includes(k) && R.perms.includes(k));
+    const mods = p.sinModulos ? [] : [...C.MODS, ...(p.b1 ? [C.DOC_MOD] : [])];
+    const groups = C.G.map((g) => {
+      const base = g.id === "modulos" ? [C.CATALOGO, ...mods] : g.entradas.filter((e) => !(p.b1 && e.b1out));
+      const ents = base.filter((e) => can(e.perm));
+      let linea = g.linea;
+      if (g.id === "operacion" && p.b1) linea = "Patrones, funciones y calendario";
+      if (ents.length < base.length) {
+        const ns = ents.map((e) => e.nombre.toLowerCase());
+        linea = ents.length === 1 ? ents[0].desc : ns.slice(0, -1).join(", ") + " y " + ns[ns.length - 1];
+        linea = linea.charAt(0).toUpperCase() + linea.slice(1);
+      }
+      return { ...g, linea, entradas: ents };
+    }).filter((g) => g.entradas.length);
+    const estado = p.estado ?? "ok", ok = estado === "ok", v = s.vista;
+    const aprob = p.aprobaciones ?? 2;
+    const q = s.q.trim();
+
+    const cards = groups.map((g) => {
+      const n = g.entradas.length;
+      return { id: g.id, icono: g.icono, nombre: g.nombre, linea: g.linea, vista: g.entradas.slice(0, 3).map((e) => e.nombre).join(" · "), onClick: () => this.openGroup(g.id) };
+    });
+    let first = true;
+    const results = q ? groups.map((g) => ({
+      nombre: g.nombre,
+      items: g.entradas.filter((e) => this.norm([e.nombre, e.desc, e.kw].join(" ")).includes(this.norm(q))).map((e) => {
+        const r = { nombre: e.nombre, q, campo: this.campo(e, q), ruta: g.nombre + " › " + e.nombre, icono: g.icono, estado: first && !phone ? "activo" : "reposo", onClick: () => this.openEntry(g.id, e.id) };
+        first = false; return r;
+      }),
+    })).filter((g) => g.items.length) : [];
+    const nRes = results.reduce((a, g) => a + g.items.length, 0);
+
+    const showPortada = ok && v === "portada", showPrefs = ok && v === "preferencias";
+    const buscando = !!p.buscando, errB = !!p.errorBusqueda;
+    const showGrupo = ok && (v === "grupo" || v === "entrada");
+    const cg = groups.find((g) => g.id === s.grupo) || groups[0];
+    const gm = cg.id === "modulos";
+    const gMods = gm ? cg.entradas.filter((e) => e.id !== "catalogo") : [];
+    let ce = cg.entradas.find((e) => e.id === s.entrada) || null;
+    if (!ce && !phone && s.entrada !== "vacio") ce = cg.entradas[0];
+    const row = (e) => ({ isRow: true, isHeader: false, title: e.nombre, subtitle: e.desc, selected: !phone && !!ce && ce.id === e.id, onClick: () => this.openEntry(cg.id, e.id), trailing: phone ? h(NS.Icon, { name: "chevron-right", size: "sm", className: "subtle" }) : null });
+    let listaItems;
+    if (gm) {
+      const mq = this.norm(s.modQ.trim());
+      const vis = gMods.filter((e) => !mq || this.norm(e.nombre).includes(mq));
+      listaItems = [...cg.entradas.filter((e) => e.id === "catalogo").map(row), ...(gMods.length ? [{ isHeader: true, isRow: false, label: "Módulos activos", count: gMods.length }] : []), ...vis.map(row)];
+    } else listaItems = cg.entradas.map(row);
+
+    const pad = phone ? 16 : tablet ? 24 : 32;
+    const tabsOf = ce && ce.tabs ? ce.tabs.map((t, i) => ({ id: String(i), label: t })) : null;
+    const pCal = !!ce && ce.id === "calendario", pR = !!ce && ce.id === "rondas", pCat = !!ce && ce.id === "catalogo", pAgente = !!ce && ce.id === "agente", pDoc = !!ce && ce.id === "documentos";
+    const anio = s.anio;
+    const feriados = C.FERIADOS.map(([d, dia, nombre, tipo]) => ({ fecha: d + "-2026", corto: d, dia, nombre, tipo, proximo: d === "31-10" }));
+    const tipos = [
+      { id: "int", nombre: "Intrusión", g: "Alta" }, { id: "acc", nombre: "Acceso no autorizado", g: "Alta" }, { id: "sos", nombre: "Persona sospechosa", g: "Media" },
+      { id: "dan", nombre: "Daño a la propiedad", g: "Media" }, { id: "ilu", nombre: "Falla de iluminación", g: "Baja" }, { id: "pue", nombre: "Puerta o portón abierto", g: "Baja" },
+    ];
+    const tone = { Alta: "danger", Media: "warning", Baja: "neutral" };
+    let primaryLabel = null;
+    if (admin && pCal && anio === "2026") primaryLabel = "Agregar feriado";
+    if (admin && pR && s.tab === "0") primaryLabel = "Nuevo tipo";
+
+    const back = (label, fn) => h("button", { type: "button", className: "portal-btn", onClick: fn, "aria-label": "Volver a " + label }, h(NS.Icon, { name: "chevron-left", size: "sm" }), h("span", null, label));
+    const toggleMenu = () => this.setState({ menu: !s.menu });
+    let topBar = null;
+    if (phone && NS.TopBar) {
+      const left = showGrupo && v === "entrada" ? back(cg.nombre, () => this.setState({ vista: "grupo", entrada: null })) : showGrupo || v === "preferencias" ? back("Configuración", () => this.setState({ vista: "portada", q: "" })) : undefined;
+      topBar = h(NS.TopBar, { portal: "ERP", tenantInitials: "AS", userInitials: R.user.initials, notifications: 3, onProfile: toggleMenu, left });
+    }
+    const appBar = !phone && NS.AppBar ? h(NS.AppBar, { title: v === "preferencias" ? "Preferencias" : "Configuración", padding: pad }, role === "viewer" ? h(NS.Badge, { tone: "neutral" }, "Solo lectura") : null, h(NS.IconButton, { icon: "bell", label: "Notificaciones", count: 3 })) : null;
+
+    const agS = s.ag, agK = ["modelo", "paso", "aviso", "presup", "ret", "nombre", "s1", "s2", "s3", "lim", "pdf", "png", "jpg", "xlsx"];
+    const agV = {}; agK.forEach((k) => { agV["ag_" + k] = agS[k]; agV["setAg_" + k] = (val) => this.setState((st) => ({ ag: { ...st.ag, [k]: val } })); });
+    const menuItemsArr = [{ label: "Mi cuenta", icon: "user" }, { label: "Preferencias", icon: "sun", meta: "Claro, oscuro o sistema" }, { divider: true }, { label: "Cerrar sesión" }];
+    return {
+      ...agV, pAgente, pDoc, showPrefs, prefTitleClass: phone ? "t-title" : "t-heading",
+      rootRef: (el) => { this.root = el; }, enter: () => { this.hot = true; }, leave: () => { this.hot = false; },
+      pref: s.pref, prefOpts: ["Claro", "Oscuro", "Sistema"], setPref: (val) => this.setState({ pref: val }),
+      prefMail: s.prefMail, setPrefMail: (val) => this.setState({ prefMail: val }), prefApp: s.prefApp, setPrefApp: (val) => this.setState({ prefApp: val }),
+      onMenu: (a) => { const it = typeof a === "number" ? menuItemsArr[a] : a; const l = it && typeof it === "object" ? it.label : it; this.setState(l === "Preferencias" ? { vista: "preferencias", menu: false, q: "" } : { menu: false }); },
+      modelos: ["Claude Sonnet", "Claude Haiku", "Claude Opus"], retOpts: ["30 días", "90 días", "365 días"],
+      docCols: [{ key: "nombre", label: "Tipo de documento", strong: true }, { key: "uso", label: "Se usa en", muted: true }, { key: "estado", label: "Estado", width: 120, render: (r) => h(NS.Badge, { tone: r.estado === "Activo" ? "success" : "neutral" }, r.estado) }],
+      docRows: [{ id: 1, nombre: "Contrato de trabajo", uso: "Personas", estado: "Activo" }, { id: 2, nombre: "Anexo de contrato", uso: "Personas", estado: "Activo" }, { id: 3, nombre: "Finiquito", uso: "Personas", estado: "Activo" }, { id: 4, nombre: "Carta de amonestación", uso: "Personas", estado: "Borrador" }],
+      showDocTable: pDoc && !phone, showDocRows: pDoc && phone,
+      showB1: showGrupo && cg.id === "operacion" && (p.alertaB1 ?? !p.b1),
+      b1Accion: h("a", { href: encodeURI("6 Variante B1 Documentos en Modulos.dc.html") }, "Ver propuesta"),
+      theme, isPhone: phone, notPhone: !phone,
+      shellDevice: phone ? "phone" : "desktop",
+      activeNav: phone ? "mas" : "cfg",
+      user: R.user, appBar, topBar,
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "pau", label: "Pauta", icon: "calendar" }, { id: "per", label: "Personas", icon: "users" }, { id: "ban", label: "Bandeja", icon: "inbox" }, { id: "mas", label: "Más", icon: "more" }],
+      navGroups: [
+        { items: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "ban", label: "Bandeja", icon: "inbox", count: 5 }] },
+        { title: "Operaciones", items: [{ id: "ins", label: "Instalaciones", icon: "building" }, { id: "pau", label: "Pauta", icon: "calendar" }, { id: "ron", label: "Rondas", icon: "route" }] },
+        { title: "Personas", items: [{ id: "per", label: "Personas", icon: "users" }] },
+        { title: "Finanzas", items: [{ id: "fin", label: "Resumen", icon: "chart" }] },
+        { items: [{ id: "cfg", label: "Configuración", icon: "settings" }] },
+      ],
+      pageStyle: { padding: phone ? "16px 16px 24px" : pad, display: "flex", flexDirection: "column", gap: phone ? 16 : 20, flex: 1 },
+      gridStyle: phone ? { background: "var(--ds-surface)", border: "1px solid var(--ds-border)", borderBottom: 0, borderRadius: 16, overflow: "hidden", display: "flex", flexDirection: "column" } : { display: "grid", gridTemplateColumns: tablet ? "repeat(2, minmax(0,1fr))" : "repeat(3, minmax(0,1fr))", gap: 16 },
+      cardVariante: phone ? "fila" : "tarjeta",
+      q: s.q, setQ: (val) => this.setState({ q: val }),
+      kbd: !phone && !tablet && NS.Kbd ? h(NS.Kbd, null, "/") : null,
+      showPortada, showGrid: showPortada && !q, showResults: showPortada && !!q && nRes > 0 && !buscando && !errB, showSinRes: showPortada && !!q && nRes === 0 && !buscando && !errB, showBuscando: showPortada && !!q && buscando, showErrB: showPortada && !!q && errB && !buscando, showCancelar: showPortada && phone && !!q, cancelar: () => this.setState({ q: "" }),
+      showAlerta: showPortada && !q && can("aprobacionesManage") && aprob > 0,
+      alertaTitulo: aprob + (aprob === 1 ? " aprobación de agentes espera tu revisión" : " aprobaciones de agentes esperan tu revisión"),
+      alertaAccion: NS.Enlace ? h(NS.Enlace, { onClick: () => this.openEntry("agentes", "aprobaciones") }, "Revisar") : null,
+      cards, results, resumenRes: nRes + (nRes === 1 ? " resultado" : " resultados") + " para «" + q + "»",
+      sinResTitulo: "No encontramos “" + q + "”",
+      showGrupo, showHeader: showGrupo && !(phone && v === "entrada"), showMigas: !phone,
+      headStyle: { padding: phone ? "16px 16px 16px" : pad + "px " + pad + "px 20px", display: "flex", flexDirection: "column", gap: 8 },
+      grupoTituloClass: phone ? "t-title" : "t-heading", grupoNombre: cg.nombre, grupoLinea: cg.linea, goHome: () => this.setState({ vista: "portada", q: "" }),
+      showList: showGrupo && (!phone || v === "grupo"),
+      listStyle: phone ? { flex: 1, overflow: "auto", background: "var(--ds-surface)" } : { width: tablet ? 280 : 320, flex: "none", borderRight: "1px solid var(--ds-border)", background: "var(--ds-surface)", overflow: "auto" },
+      showListSearch: gm && gMods.length > 7, modQ: s.modQ, setModQ: (val) => this.setState({ modQ: val }),
+      listaItems, showSinModsLista: gm && gMods.length === 0 && phone,
+      showPanel: showGrupo && (!phone || v === "entrada"),
+      panelStyle: { padding: pad, display: "flex", flexDirection: "column", gap: 16, maxWidth: 880, minHeight: "100%", boxSizing: "border-box" },
+      panelVacio: !ce && gm && gMods.length === 0,
+      verCatalogo: () => this.openEntry("modulos", "catalogo"),
+      panelHeader: !!ce, entradaNombre: ce ? ce.nombre : "", entradaDesc: ce ? ce.desc : "", entradaRuta: ce ? ce.ruta || "" : "",
+      entradaTituloClass: phone ? "t-title" : "t-subheading",
+      soloLectura: role === "viewer" && !!ce,
+      showPrimary: !!primaryLabel, primaryLabel,
+      showTabs: !!tabsOf, entradaTabs: tabsOf || [], tab: s.tab, setTab: (id) => this.setState({ tab: id }),
+      pCal, anios: ["2026", "2027"], anio, setAnio: (a) => this.setState({ anio: a }),
+      calResumen: anio === "2026" ? "17 feriados · próximo: sábado 31-10-2026" : "0 feriados",
+      showCalTable: pCal && !phone && anio === "2026", showCalRows: pCal && phone && anio === "2026", showCalVacio: pCal && anio === "2027",
+      feriados,
+      calCols: [
+        { key: "fecha", label: "Fecha", mono: true, width: 120 },
+        { key: "dia", label: "Día", muted: true, width: 100 },
+        { key: "nombre", label: "Feriado", strong: true, render: (r) => r.proximo ? h("span", { style: { display: "inline-flex", gap: 8, alignItems: "center" } }, r.nombre, h(NS.Badge, { tone: "accent" }, "Próximo")) : r.nombre },
+        { key: "tipo", label: "Tipo", render: (r) => h(NS.Badge, { tone: r.tipo === "Irrenunciable" ? "info" : "neutral" }, r.tipo) },
+      ],
+      pRondasTipos: pR && s.tab === "0", pRondasAjustes: pR && s.tab === "1",
+      tipos,
+      tiposCols: [
+        { key: "nombre", label: "Tipo de incidente", strong: true },
+        { key: "g", label: "Gravedad", width: 120, render: (r) => h(NS.Badge, { tone: tone[r.g] }, r.g) },
+        { key: "act", label: "Activo", width: 90, align: "right", render: (r) => h(NS.Switch, { checked: s.activos[r.id], disabled: !admin, onChange: (c) => this.setState({ activos: { ...s.activos, [r.id]: c } }) }) },
+      ],
+      swFoto: s.swFoto, swGrave: s.swGrave, setSwFoto: (c) => this.setState({ swFoto: c }), setSwGrave: (c) => this.setState({ swGrave: c }),
+      pCat,
+      catalogo: [
+        { titulo: "Contratados", items: [{ nombre: "Comercial", desc: "Embudo, cotizaciones y catálogos", estado: "Contratado", tono: "success" }, { nombre: "Rondas", desc: "Rondas, puntos de marcaje e incidentes", estado: "Contratado", tono: "success" }, { nombre: "Pauta", desc: "Pauta mensual y diaria", estado: "Contratado", tono: "success" }] },
+        { titulo: "En trial", items: [{ nombre: "Firma", desc: "Firma electrónica de contratos y anexos", estado: "Trial hasta 15-11-2026", tono: "info" }] },
+        { titulo: "Disponibles", items: [{ nombre: "Facturación", desc: "Emisión de facturas y notas de crédito", estado: "Disponible", tono: "neutral" }, { nombre: "Tickets", desc: "Solicitudes de clientes y seguimiento", estado: "Disponible", tono: "neutral" }] },
+      ],
+      pGen: !!ce && !pCal && !pR && !pCat && !pAgente && !pDoc,
+      isCarga: estado === "carga", isGrupoCarga: estado === "grupocarga", isError: estado === "error", is404: estado === "404", isForbidden: estado === "sinpermiso",
+      skel: [1, 2, 3, 4, 5, 6], skel3: [1, 2, 3], noop: () => {},
+      showHotspot: !phone, menuOpen: s.menu, toggleMenu, closeMenu: () => this.setState({ menu: false }),
+      menuStyle: { position: "absolute", zIndex: 10, width: 272, padding: 6, background: "var(--ds-surface-raised)", border: "1px solid var(--ds-border)", borderRadius: 12, boxShadow: "var(--ds-shadow-overlay)", ...(phone ? { top: 100, right: 8 } : { left: 12, bottom: 68 }) },
+      menuItems: [
+        { label: "Mi cuenta", icon: "user" },
+        { label: "Preferencias", icon: "sun", meta: "Claro, oscuro o sistema" },
+        { divider: true },
+        { label: "Cerrar sesión" },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

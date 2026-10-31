@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+</helmet>
+<button type="button" onClick="{{ onClick }}" style="{{ rowStyle }}" style-hover="background:var(--ds-fill)" style-active="background:var(--ds-fill)" style-focus="outline:2px solid var(--ds-focus);outline-offset:-2px">
+<span style="width:32px;height:32px;border-radius:8px;border:1px solid var(--ds-border);display:flex;align-items:center;justify-content:center;flex:none;color:var(--ds-fg-muted)"><span class="{{ iconClass }}"></span></span>
+<span style="flex:1;min-width:0;display:flex;flex-direction:column">
+<span class="t-label" style="color:var(--ds-fg)"><sc-for list="{{ partes }}" as="t" hint-placeholder-count="1"><span style="{{ t.style }}">{{ t.t }}</span></sc-for></span>
+<span class="t-caption" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ ruta }}</span>
+<sc-if value="{{ campo }}" hint-placeholder-val="{{ false }}"><span class="t-caption" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ campo }}</span></sc-if>
+</span>
+<sc-if value="{{ showEnter }}" hint-placeholder-val="{{ false }}"><span class="kbd" aria-hidden="true">↵</span></sc-if>
+</button>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:360,&quot;height&quot;:60},&quot;nombre&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Calendario&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;ruta&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;Operación › Calendario&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;q&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;campo&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;icono&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;clipboard&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;reposo&quot;,&quot;activo&quot;,&quot;hover&quot;,&quot;foco&quot;,&quot;presionado&quot;,&quot;deshabilitado&quot;],&quot;default&quot;:&quot;reposo&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;sinAtajo&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;onClick&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;() =&gt; void&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const p = this.props;
+    const e = p.estado ?? "reposo";
+    let s = {
+      display: "flex", alignItems: "center", gap: 12, width: "100%", minHeight: 52, padding: "8px 12px", textAlign: "left",
+      background: "transparent", border: 0, borderRadius: 10, cursor: "pointer", font: "inherit", color: "var(--ds-fg)",
+      transition: "background 150ms cubic-bezier(0.2,0,0,1)",
+    };
+    if (e === "hover" || e === "activo") s = { ...s, background: "var(--ds-fill)" };
+    if (e === "foco") s = { ...s, outline: "2px solid var(--ds-focus)", outlineOffset: -2 };
+    if (e === "presionado") s = { ...s, background: "var(--ds-accent-muted)" };
+    if (e === "deshabilitado") s = { ...s, opacity: 0.45, pointerEvents: "none" };
+    const nombre = p.nombre ?? "Calendario", q = p.q ?? (p.estado === undefined ? "" : "");
+    const nf = (x) => x.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+    const i = q ? nf(nombre).indexOf(nf(q)) : -1;
+    const hit = { background: "var(--ds-accent-muted)", color: "var(--ds-fg)", borderRadius: 3 };
+    const partes = i < 0 ? [{ t: nombre, style: {} }] : [{ t: nombre.slice(0, i), style: {} }, { t: nombre.slice(i, i + q.length), style: hit }, { t: nombre.slice(i + q.length), style: {} }].filter((x) => x.t);
+    return {
+      partes, campo: p.campo ?? "",
+      rowStyle: s, iconClass: "ic sm i-" + (p.icono ?? "calendar"),
+      nombre, ruta: p.ruta ?? "Operación › Calendario",
+      showEnter: e === "activo" && !p.sinAtajo, onClick: p.onClick,
+    };
+  }
+}
+</script>
+</body>
+</html>
