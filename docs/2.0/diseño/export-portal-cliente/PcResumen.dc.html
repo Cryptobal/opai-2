@@ -23,7 +23,7 @@
 <div data-pc-brand="{{ brand }}" style="width:100%;height:100%"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" top-bar="{{ pcTopBar }}" device="{{ device }}" theme="{{ theme }}" portal="{{ portalName }}" tenant="{{ tenantCaption }}" tenant-initials="AS" user="{{ user }}" tabs="{{ tabs }}" rail-footer="{{ railFooter }}" groups="{{ groups }}" active="res" title="Resumen" overlay="{{ overlay }}" width="100%" height="100%" hint-size="100%,100%">
 <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
 <sc-if value="{{ forbidden }}" hint-placeholder-val="{{ false }}">
-<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso al Portal Cliente" description="Tu usuario no tiene un perfil de contacto activo. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" hint-size="100%,400px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso al Portal Cliente" description="Tu usuario no tiene un perfil de contacto activo. Pídele acceso a Andrés Molina, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" hint-size="100%,400px"></x-import>
 </sc-if>
 <sc-if value="{{ allowed }}" hint-placeholder-val="{{ true }}">
 <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Logística Andina SpA" title="Resumen del mes" subtitle="Este resumen es tu informe mensual: la descarga trae el mismo contenido." hint-size="100%,80px">

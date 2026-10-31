@@ -675,14 +675,14 @@ class Component extends DCLogic {
     if (estado === "desactualizada") A("info", "refresh", "Hay un modelo de costeo nuevo", "Modelo " + P.MODEL.nuevo + ". Esta cotización usa la v7.", ["Ver diferencia", "Actualizar"]);
     if (under && showCost && !cliente && isReady) A("danger", "alert", "Precio subvalorado: requiere aprobación", "El margen de " + P.pct(margin) + " está bajo el mínimo de " + P.pct(min, 0) + ". Pide aprobación antes de enviar.");
     if (estado === "faltaUF") A("warning", "alert", "Falta el valor UF de hoy", "Se usa UF 40.198,12 del " + P.UF.ayer + ". Al enviar se fija el valor del día.", ["Reintentar"]);
-    if (estado === "sinCostos") A("neutral", "lock", "Sin permiso para ver costos ni margen", "Ves solo la venta. Pídele el permiso cpq:costos.ver a Carlos Irigoyen, administrador de Atlas Seguridad SpA.");
+    if (estado === "sinCostos") A("neutral", "lock", "Sin permiso para ver costos ni margen", "Ves solo la venta. Pídele el permiso cpq:costos.ver a Andrés Molina, administrador de Atlas Seguridad SpA.");
 
     if (empty && isReady && interna) A("info", "info", "Cotización nueva", "Agrega puestos, ítems o paquetes en cada instalación. Los instrumentos financieros vienen como están en la Configuración del CPQ.");
     if (preset && isReady && interna) A("neutral", "info", "Valores sobrescritos", "Esta cotización cambia el rateo del Kit Starlink, un sueldo, el costo financiero, la RC y desactiva la póliza de garantía. Cada cambio queda marcado.");
     let primary = null;
     if (!cliente && !frozen && isReady) {
       if (empty) primary = { label: "Dejar lista", icon: "check", disabled: true, note: "Agrega al menos un puesto o un ítem." };
-      else if (under && showCost) primary = { label: "Pedir aprobación", icon: "user-check", note: "Margen bajo el mínimo: lo aprueba Carlos Irigoyen." };
+      else if (under && showCost) primary = { label: "Pedir aprobación", icon: "user-check", note: "Margen bajo el mínimo: lo aprueba Andrés Molina." };
       else if (estado === "lista") primary = { label: "Enviar", icon: "file", note: "Enviar congela esta versión y fija la UF del día." };
       else primary = { label: "Dejar lista", icon: "check", note: "Valida la planilla y la deja lista para enviar." };
     }

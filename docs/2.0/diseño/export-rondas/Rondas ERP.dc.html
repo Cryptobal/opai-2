@@ -35,7 +35,7 @@
       <div class="nav-group"><span class="h">Personas</span><a class="nav-item" href="#"><span class="ic i-users" aria-hidden="true"></span>Personas</a></div>
       <div class="nav-group"><span class="h">Sistema</span><a class="nav-item {{ nav.cfg }}" href="#"><span class="ic i-grid" aria-hidden="true"></span>Configuración</a></div>
     </div>
-    <div style="display:flex;align-items:center;gap:10px;padding:12px 20px;border-top:1px solid var(--ds-border)"><span class="avatar">CI</span><span style="flex:1;display:flex;flex-direction:column"><span class="t-label-sm">Carlos Irigoyen</span><span class="t-caption">Administrador</span></span></div>
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 20px;border-top:1px solid var(--ds-border)"><span class="avatar">AM</span><span style="flex:1;display:flex;flex-direction:column"><span class="t-label-sm">Andrés Molina</span><span class="t-caption">Administrador</span></span></div>
   </nav>
 </sc-if>
 <sc-if value="{{ isTab }}">
@@ -516,7 +516,7 @@ class Component extends DCLogic{
     const noun={c12:'las rondas de hoy',c13:'los puntos de la instalación',c14:'los informes',c15:'la configuración',c16:'el incidente',c17:'las alertas',c18:'la ronda'}[base];
     const msgs={vacio:{c12:['No hay rondas programadas hoy','Programa la primera ronda para tus instalaciones.','Programar ronda','plus'],c13:['Esta instalación no tiene puntos','Crea el primero desde aquí o en terreno con el teléfono del supervisor.','Nuevo punto','plus'],c14:['Sin datos en el período','Aún no hay rondas cerradas en octubre de 2026. Cambia el período.','Cambiar período','calendar'],c15:['Sin modelo de confianza','Crea la primera versión del modelo para calcular bandas.','Crear versión','plus'],c16:['Este incidente no existe','Puede que el enlace esté mal. Búscalo en el libro de novedades.','Ir al libro','inbox'],c17:['Sin alertas abiertas','La central no tiene alertas pendientes.','Ver todas','bell'],c18:['Esta ronda no tiene marcas','Aún no se registran puntos. Vuelve cuando el guardia inicie la ronda.','Volver a Control de rondas','chevron-left']}[base],
       error:['No pudimos cargar '+noun,'Revisa tu conexión. Si el problema sigue, avísale a soporte con el código RND-503.','Reintentar','refresh'],
-      permisos:['No tienes acceso a esta sección','Tu rol no incluye Rondas. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA.','Pedir acceso','lock']};
+      permisos:['No tienes acceso a esta sección','Tu rol no incluye Rondas. Pídele acceso a Andrés Molina, administrador de Atlas Seguridad SpA.','Pedir acceso','lock']};
     const m=msgs[st]||msgs.error;
     const cfg={desktop:{g:'32px',k:'repeat(7,minmax(0,1fr))',k4:'repeat(4,minmax(0,1fr))',sp:'minmax(0,1fr) 300px',pc:'repeat(2,minmax(0,1fr))',tc:'280px minmax(0,1fr)'},tablet:{g:'24px',k:'repeat(4,minmax(0,1fr))',k4:'repeat(4,minmax(0,1fr))',sp:'minmax(0,1fr) 320px',pc:'repeat(2,minmax(0,1fr))',tc:'220px minmax(0,1fr)'},phone:{g:'16px',k:'repeat(2,minmax(0,1fr))',k4:'repeat(2,minmax(0,1fr))',sp:'minmax(0,1fr)',pc:'minmax(0,1fr)',tc:'minmax(0,1fr)'}}[dev];
     const tone={Atrasada:'warning',Omitida:'danger','En curso':'accent',Completa:'success',Incompleta:'warning','Cerrada automáticamente':'neutral'};
@@ -540,7 +540,7 @@ class Component extends DCLogic{
         if(st!=='abierto')T.push(['RT','Rodrigo Tapia · Supervisor','10:18','Tomó el incidente: En atención'],['RT','Rodrigo Tapia · Supervisor','10:19','«Voy en camino, llego en 8 min. Avisé a Carabineros.»'],['RT','Rodrigo Tapia · Supervisor','10:24','Marcó la novedad visible al cliente']);
         if(st==='derivado')T.push(['RT','Rodrigo Tapia · Supervisor','10:40','Derivó a ticket TCK-2290 «Reparar puerta lateral de Bodega A»']);
         if(st==='resuelto'||st==='cerrado')T.push(['RT','Rodrigo Tapia · Supervisor','10:52','Resuelto: «Sin personas dentro. Faltan 2 cajas de herramientas. Puerta asegurada con cadena.»']);
-        if(st==='cerrado')T.push(['CI','Carlos Irigoyen · Administrador','11:30','Cerró el incidente']);
+        if(st==='cerrado')T.push(['AM','Andrés Molina · Administrador','11:30','Cerró el incidente']);
         return {inc:INC,incSteps,incTl:T.map(([ini,who,h,t])=>({ini,who,h,t}))};})(),
       alertas:[{ic:'flag',tone:'danger',t:'Incidente alto · NOV-0418',d:'Intrusión · Planta Quilicura · Bodega A · María Fernanda Soto',e:'En atención · Rodrigo Tapia',et:'warning',h:'10:16',bg:isPhone?'transparent':'var(--ds-accent-muted)'},
         {ic:'clock',tone:'danger',t:'Zona de riesgo vencida',d:'Matías Contreras · Bodega Lampa · Patio de contenedores',e:'Sin confirmar «Estoy bien»',et:'danger',h:'10:58',bg:'transparent'},
