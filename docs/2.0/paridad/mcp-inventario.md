@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 301 pares pantalla→capacidad · 261 con herramienta · 40 excepciones justificadas · 0 faltantes.
+**Resumen:** 311 pares pantalla→capacidad · 271 con herramienta · 40 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -23,6 +23,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.accept` | — | excepción |
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.peek` | — | excepción |
 | auth | `/invitacion/[slug]/[token]` | `core.invitations.request_new` | — | excepción |
+| cliente | `/cliente` | `portal_cliente.resumen.leer` | `portal_cliente_resumen_leer` | existe |
 | compartido | `app/_acciones` | `core.cargos.get` | `core_cargos_get` | existe |
 | compartido | `app/_acciones` | `core.cuentas.get` | `core_cuentas_get` | existe |
 | compartido | `app/_acciones` | `core.instalaciones.get` | `core_instalaciones_get` | existe |
@@ -78,6 +79,15 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/configuracion/_centro` | `core.resumen.contadores` | `core_resumen_contadores` | existe |
 | compartido | `app/(erp)/configuracion/_leads` | `comercial.canales.get` | `comercial_canales_get` | existe |
 | compartido | `app/(erp)/configuracion/_leads` | `comercial.canales.update` | `comercial_canales_update` | existe |
+| compartido | `app/(erp)/configuracion/_portal_cliente` | `core.cuentas.list` | `core_cuentas_list` | existe |
+| compartido | `app/(erp)/configuracion/_portal_cliente` | `core.documento_tipos.list` | `core_documento_tipos_list` | existe |
+| compartido | `app/(erp)/configuracion/_portal_cliente` | `core.instalaciones.list` | `core_instalaciones_list` | existe |
+| compartido | `app/(erp)/configuracion/_portal_cliente` | `portal_cliente.accesos.actualizar` | `portal_cliente_accesos_actualizar` | existe |
+| compartido | `app/(erp)/configuracion/_portal_cliente` | `portal_cliente.accesos.candidatos` | `portal_cliente_accesos_candidatos` | existe |
+| compartido | `app/(erp)/configuracion/_portal_cliente` | `portal_cliente.accesos.listar` | `portal_cliente_accesos_listar` | existe |
+| compartido | `app/(erp)/configuracion/_portal_cliente` | `portal_cliente.accesos.vincular` | `portal_cliente_accesos_vincular` | existe |
+| compartido | `app/(erp)/configuracion/_portal_cliente` | `portal_cliente.config.actualizar` | `portal_cliente_config_actualizar` | existe |
+| compartido | `app/(erp)/configuracion/_portal_cliente` | `portal_cliente.config.leer` | `portal_cliente_config_leer` | existe |
 | compartido | `app/(erp)/configuracion/_rondas` | `rondas.incidentes_tipo.actualizar` | `rondas_incidentes_tipo_actualizar` | existe |
 | compartido | `app/(erp)/configuracion/_rondas` | `rondas.incidentes_tipo.crear` | `rondas_incidentes_tipo_crear` | existe |
 | compartido | `app/(erp)/configuracion/_rondas` | `rondas.incidentes_tipo.listar` | `rondas_incidentes_tipo_listar` | existe |
@@ -489,6 +499,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `platform.usage.summary`
 - `platform.users.list`
 - `platform.users.set_role`
+- `portal_cliente.mi_acceso`
 - `rondas.puntos.reemplazar_etiqueta`
 - `tickets.tickets.crear`
 - `tickets.tickets.reasignar`
