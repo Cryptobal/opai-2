@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script></helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="ins" title="{{ shellTitle }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Bodegas del Sur S.A." title="Planta Quilicura" subtitle="Instalación › Accesos" hint-size="100%,80px"></x-import>
+<div style="display:grid;grid-template-columns:{{ devCols }};gap:12px;margin-bottom:16px">
+<sc-for list="{{ puntos }}" as="p" hint-placeholder-count="2">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" padding="{{ 16 }}" hint-size="100%,96px">
+<div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start">
+<div><div style="font:600 16px/24px var(--font-sans);color:var(--ds-fg)">{{ p.nombre }}</div>
+<div style="font:400 14px/20px var(--font-sans);color:var(--ds-fg-muted)">{{ p.disp }}</div>
+<div style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Última conexión {{ p.ultima }}</div></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ p.tone }}" hint-size="90px,24px">{{ p.estado }}</x-import>
+</div>
+</x-import>
+</sc-for>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ tabItems }}" value="{{ tab }}" on-change="{{ setTab }}" hint-size="100%,44px"></x-import>
+<div style="margin-top:16px">
+<dc-import name="EstadoPanel" estado="{{ estado }}" empty-title="Aún no hay registros hoy" empty-desc="Prerregistra una visita o cambia los filtros." empty-action="Prerregistrar visita" hint-size="100%,260px"></dc-import>
+<sc-if value="{{ isNormal }}" hint-placeholder-val="{{ true }}">
+<div style="margin:{{ tableMargin }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" cards="{{ isPhone }}" to-card="{{ toCard }}" on-row-click="{{ noop }}" hint-size="100%,300px"></x-import>
+</div>
+</sc-if>
+</div>
+</x-import>
+</x-import>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;cargando&quot;,&quot;vacio&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;tab&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;reg&quot;,&quot;sit&quot;,&quot;esp&quot;,&quot;lis&quot;,&quot;den&quot;],&quot;default&quot;:&quot;reg&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  state = { tab: null };
+  renderVals() {
+    const h = React.createElement; const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = this.props.device ?? "desktop"; const estado = this.props.estado ?? "normal"; const ph = device === "phone";
+    const tab = this.state.tab ?? this.props.tab ?? "reg";
+    const b = (t, l) => NS.Badge ? h(NS.Badge, { tone: t }, l) : l;
+    const data = {
+      reg: { cols: [["nombre","Nombre"],["tipo","Tipo"],["emp","Empresa"],["hora","Entrada",1],["estado","Estado",2]], rows: [
+        { nombre: "Diego Fuentes", tipo: "Proveedor", emp: "Distribuidora Andes Ltda.", hora: "08:42", estado: "En sitio", tone: "success" },
+        { nombre: "Camila Herrera Soto", tipo: "Visita", emp: "Bodegas del Sur S.A.", hora: "08:15", estado: "Salió 09:30", tone: "neutral" }] },
+      sit: { cols: [["nombre","Nombre"],["tipo","Tipo"],["emp","Empresa"],["hora","Desde",1],["estado","Permanencia",2]], rows: [
+        { nombre: "Diego Fuentes", tipo: "Proveedor", emp: "Distribuidora Andes Ltda.", hora: "08:42", estado: "Normal", tone: "success" },
+        { nombre: "Luis Pérez", tipo: "Contratista", emp: "Mantención Norte SpA", hora: "07:50", estado: "Excedida", tone: "warning" }] },
+      esp: { cols: [["nombre","Visitante"],["tipo","Anfitrión"],["emp","Empresa"],["hora","Hora",1],["estado","Estado",2]], rows: [
+        { nombre: "Camila Herrera Soto", tipo: "Marcela Rojas", emp: "Bodegas del Sur S.A.", hora: "10:00", estado: "Pendiente", tone: "info" },
+        { nombre: "Diego Fuentes", tipo: "Marcela Rojas", emp: "Distribuidora Andes Ltda.", hora: "08:30", estado: "Ingresó", tone: "success" },
+        { nombre: "Jorge Muñoz", tipo: "Marcela Rojas", emp: "Bodegas del Sur S.A.", hora: "09:00", estado: "No llegó", tone: "warning" },
+        { nombre: "Luis Pérez", tipo: "Marcela Rojas", emp: "Mantención Norte SpA", hora: "11:00", estado: "Cancelado", tone: "neutral" }] },
+      lis: { cols: [["nombre","Nombre"],["tipo","Tipo"],["emp","Alcance"],["hora","Vigencia",1],["estado","Lista",2]], rows: [
+        { nombre: "Camila Herrera Soto", tipo: "Visita", emp: "Instalación", hora: "30-11-2026", estado: "Autorizada", tone: "success" },
+        { nombre: "Héctor Araya", tipo: "Todos", emp: "Empresa", hora: "—", estado: "Bloqueada", tone: "danger" }] },
+      den: { cols: [["nombre","Documento",1],["tipo","Motivo"],["emp","Punto"],["hora","Hora",1],["estado","Resultado",2]], rows: [
+        { nombre: "15.0••.•••-7", tipo: "Bloqueado", emp: "Portería 1", hora: "08:03", estado: "Bloqueado", tone: "danger" },
+        { nombre: "9.1••.•••-4", tipo: "No autorizado", emp: "Portería 1", hora: "08:21", estado: "No autorizado", tone: "warning" },
+        { nombre: "ABCD·12", tipo: "Fuera de horario", emp: "Portería 2", hora: "22:40", estado: "Fuera de horario", tone: "warning" }] },
+    }[tab];
+    const cols = data.cols.map(([key, label, k]) => ({ key, label, mono: k === 1 || undefined, render: k === 2 ? (r) => b(r.tone, r.estado) : undefined }));
+    return {
+      device, theme: this.props.theme ?? "light", isPhone: ph, shellTitle: ph ? "" : "Planta Quilicura", estado, isNormal: estado === "normal", tab,
+      devCols: ph ? "minmax(0,1fr)" : "repeat(2,minmax(0,1fr))", tableMargin: ph ? "0 -16px" : "0", noop: () => {},
+      puntos: [{ nombre: "Portería 1", disp: "Tablet mesón · emparejada", ultima: "hace 2 min", estado: "En línea", tone: "success" }, { nombre: "Portería 2", disp: "Celular guardia · emparejado", ultima: "hace 3 h", estado: "Sin conexión", tone: "warning" }],
+      tabItems: [{ id: "reg", label: "Registros" }, { id: "sit", label: "En sitio", count: 4 }, { id: "esp", label: "Esperados", count: 4 }, { id: "lis", label: "Listas" }, { id: "den", label: "Intentos denegados", count: 3 }],
+      setTab: (v) => this.setState({ tab: v }), cols, rows: data.rows,
+      toCard: (r) => ({ initials: String(r.nombre).slice(0, 2).toUpperCase(), title: r.nombre, subtitle: r.tipo + " · " + r.emp, meta: r.hora, badge: { tone: r.tone, label: r.estado } }),
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "ins", label: "Instalaciones", icon: "building" }, { id: "per", label: "Personas", icon: "users" }, { id: "tic", label: "Tickets", icon: "ticket" }, { id: "mas", label: "Más", icon: "more" }],
+      groups: [{ items: [{ id: "ini", label: "Inicio", icon: "home" }] }, { title: "Operaciones", items: [{ id: "ins", label: "Instalaciones", icon: "building" }, { id: "acc", label: "Accesos", icon: "user-check" }] }],
+    };
+  }
+}
+</script>
+</body>
+</html>

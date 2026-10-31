@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script></helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="acc" title="{{ shellTitle }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="Operaciones › Accesos" title="Prerregistrar visita" subtitle="El guardia verá a tus visitantes como autorizados" hint-size="100%,80px"></x-import>
+<sc-if value="{{ isExito }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" padding="{{ 24 }}" hint-size="100%,260px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="success" titulo="Visita prerregistrada" hint-size="100%,72px">Enviamos 2 invitaciones con QR, válidas del 30-10-2026 al 30-10-2026.</x-import>
+<div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" hint-size="140px,44px">Ver invitación</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="180px,44px">Prerregistrar otra</x-import>
+</div>
+</x-import>
+</sc-if>
+<sc-if value="{{ isForm }}" hint-placeholder-val="{{ true }}">
+<div style="display:grid;grid-template-columns:{{ cols }};gap:16px;align-items:start;padding-bottom:{{ padBottom }}">
+<div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+<sc-if value="{{ isErrorRegla }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="danger" titulo="No pudimos prerregistrar" hint-size="100%,72px">El rango no puede superar 30 días. Elige una fecha de término anterior al 29-11-2026.</x-import>
+</sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Lugar y fecha" padding="{{ 16 }}" hint-size="100%,260px">
+<div style="display:grid;grid-template-columns:{{ cols2 }};gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Campo" etiqueta="Instalación" hint-size="100%,72px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" value="Planta Quilicura" style="width:100%" hint-size="100%,44px"></x-import></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Campo" etiqueta="Punto de acceso" hint-size="100%,72px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" value="Portería 1" style="width:100%" hint-size="100%,44px"></x-import></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Campo" etiqueta="Fecha o rango (máx. 30 días)" error="{{ errFecha }}" hint-size="100%,72px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" value="{{ fecha }}" style="width:100%" hint-size="100%,44px"></x-import></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Campo" etiqueta="Horario esperado" hint-size="100%,72px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" value="09:00 – 13:00" style="width:100%" hint-size="100%,44px"></x-import></x-import>
+</div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Visitantes" padding="{{ 16 }}" hint-size="100%,300px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<sc-for list="{{ visitantes }}" as="v" hint-placeholder-count="2">
+<div style="display:grid;grid-template-columns:{{ cols2 }};gap:12px;padding-bottom:16px;border-bottom:1px solid var(--ds-border)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Campo" etiqueta="Nombre" hint-size="100%,72px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" value="{{ v.nombre }}" style="width:100%" hint-size="100%,44px"></x-import></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Campo" etiqueta="RUN o pasaporte" hint-size="100%,72px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" value="{{ v.run }}" style="width:100%;font-family:var(--font-mono)" hint-size="100%,44px"></x-import></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Campo" etiqueta="Empresa" hint-size="100%,72px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" value="{{ v.empresa }}" style="width:100%" hint-size="100%,44px"></x-import></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Campo" etiqueta="Patente (opcional)" hint-size="100%,72px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" value="{{ v.patente }}" style="width:100%;font-family:var(--font-mono)" hint-size="100%,44px"></x-import></x-import>
+</div>
+</sc-for>
+<div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="plus" hint-size="180px,44px">Agregar visitante</x-import></div>
+</div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Detalle" padding="{{ 16 }}" hint-size="100%,300px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Campo" etiqueta="Anfitrión" hint-size="100%,72px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" value="Marcela Rojas" style="width:100%" hint-size="100%,44px"></x-import></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Campo" etiqueta="Motivo" hint-size="100%,72px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" value="Reunión de coordinación" style="width:100%" hint-size="100%,44px"></x-import></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Campo" etiqueta="Nota para el guardia" hint-size="100%,120px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" style="width:100%" hint-size="100%,88px"></x-import></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" label="Avisarme cuando llegue" checked="{{ true }}" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" label="Enviar invitación con QR" description="Por correo o WhatsApp" checked="{{ true }}" hint-size="100%,64px"></x-import>
+</div>
+</x-import>
+</div>
+<div style="position:{{ barPos }};bottom:0;left:0;right:0;padding:12px 16px calc(12px + env(safe-area-inset-bottom));background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:{{ barRadius }};display:flex;flex-direction:column;gap:12px">
+<div style="font:600 14px/20px var(--font-sans);color:var(--ds-fg)">Se enviarán 2 invitaciones · válidas del 30-10-2026 al 30-10-2026</div>
+<div style="display:flex;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="110px,44px">Cancelar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="check" hint-size="150px,44px">{{ confirmLabel }}</x-import>
+</div>
+</div>
+</div>
+</sc-if>
+</x-import>
+</x-import>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;form&quot;,&quot;confirmando&quot;,&quot;exito&quot;,&quot;error&quot;],&quot;default&quot;:&quot;form&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const device = this.props.device ?? "desktop"; const e = this.props.estado ?? "form"; const ph = device === "phone";
+    return {
+      device, theme: this.props.theme ?? "light", shellTitle: ph ? "" : "Prerregistrar",
+      isExito: e === "exito", isForm: e !== "exito", isErrorRegla: e === "error",
+      errFecha: e === "error" ? "Máximo 30 días" : "", fecha: e === "error" ? "30-10-2026 al 05-12-2026" : "30-10-2026",
+      cols: ph ? "minmax(0,1fr)" : "minmax(0,1fr) 320px", cols2: ph ? "minmax(0,1fr)" : "repeat(2,minmax(0,1fr))",
+      padBottom: ph ? "96px" : "0", barPos: ph ? "sticky" : "sticky", barRadius: ph ? "16px 16px 0 0" : "16px",
+      confirmLabel: e === "confirmando" ? "Enviando…" : "Prerregistrar",
+      visitantes: [{ nombre: "Camila Herrera Soto", run: "16.234.567-8", empresa: "Bodegas del Sur S.A.", patente: "ABCD·12" }, { nombre: "Diego Fuentes", run: "12.345.678-K", empresa: "Distribuidora Andes Ltda.", patente: "" }],
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "acc", label: "Accesos", icon: "user-check" }, { id: "per", label: "Personas", icon: "users" }, { id: "tic", label: "Tickets", icon: "ticket" }, { id: "mas", label: "Más", icon: "more" }],
+      groups: [{ items: [{ id: "ini", label: "Inicio", icon: "home" }] }, { title: "Operaciones", items: [{ id: "ins", label: "Instalaciones", icon: "building" }, { id: "acc", label: "Accesos", icon: "user-check" }] }],
+    };
+  }
+}
+</script>
+</body>
+</html>
