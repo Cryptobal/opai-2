@@ -35,11 +35,8 @@ test.describe("Nómina", () => {
   test("períodos: abre un mes y muestra su estado", async ({ page }, info) => {
     test.skip(info.project.name !== "ipad", "La escritura se prueba una vez (iPad)");
     await entrar(page);
-    await page.goto("/nomina");
-    await expect(page.getByRole("button", { name: "Abrir período" })).toBeVisible();
-    await page.getByRole("button", { name: "Abrir período" }).click();
-    const abrir = page.getByRole("dialog").getByRole("button", { name: "Abrir", exact: true });
-    await abrir.click();
+    // En una base nueva abre el primer período por el estado vacío; si ya hay uno, solo lo verifica.
+    await conPeriodo(page);
     await expect(page.getByText("Abierto").first()).toBeVisible({ timeout: 30_000 });
     await expect(page.getByRole("button", { name: "Pasar a revisión" }).first()).toBeVisible();
     await captura(page, "nomina-periodos", info.project.name);
