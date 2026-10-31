@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<div data-theme="{{ theme }}" style="background:var(--ds-fill);color:var(--ds-fg);min-height:100vh;padding:32px;font-family:var(--font-sans);display:flex;flex-direction:column;gap:32px">
+<header style="display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap">
+  <div><div class="t-caption" style="color:var(--ds-fg-muted)">OPAI 2.0 · Agente interno · v1</div><h1 class="t-title" style="margin:4px 0 0">Teléfono 375</h1></div>
+  <div style="display:flex;gap:8px"><button class="chip toggle {{ lightCls }}" onClick="{{ setLight }}">Claro</button><button class="chip toggle {{ darkCls }}" onClick="{{ setDark }}">Oscuro</button></div>
+</header>
+<div style="display:flex;flex-wrap:wrap;gap:32px;align-items:flex-start">
+
+<!-- 1 Inicio -->
+<div style="display:flex;flex-direction:column;gap:8px"><div class="t-label">1 · Inicio con barra inferior</div>
+<div data-device="phone" style="width:375px;height:720px;background:var(--ds-bg);border:1px solid var(--ds-border);display:flex;flex-direction:column;overflow:hidden">
+  <div style="height:52px;display:flex;align-items:center;padding:0 4px 0 16px;border-bottom:1px solid var(--ds-border)"><span class="t-heading" style="flex:1;font-weight:700">OPAI</span><button class="icon-btn" aria-label="Buscar"><span class="ic i-search"></span></button><button class="icon-btn" aria-label="Notificaciones"><span class="ic i-bell"></span></button></div>
+  <div style="flex:1;padding:16px;display:flex;flex-direction:column;gap:12px"><div class="t-title">Inicio</div>
+    <div style="background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px"><div class="t-caption" style="color:var(--ds-fg-muted)">Aprobaciones pendientes</div><div class="t-title">3</div></div>
+    <div style="background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px"><div class="t-caption" style="color:var(--ds-fg-muted)">Puestos por cubrir hoy</div><div class="t-title">5</div></div></div>
+  <div style="height:56px;display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--ds-border);background:var(--ds-surface);text-align:center" class="t-caption">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--ds-accent)"><span class="ic i-home"></span><span style="color:var(--ds-fg)">Inicio</span></div>
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--ds-fg-muted)"><span class="ic i-building"></span><span>Cuentas</span></div>
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--ds-fg-muted)"><span class="ic i-users"></span><span>Personas</span></div>
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--ds-fg-muted)"><span class="ic i-bot"></span><span>OPAI</span></div>
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--ds-fg-muted)"><span class="ic i-menu"></span><span>Más</span></div>
+  </div></div></div>
+
+<!-- 2 Vacío -->
+<div style="display:flex;flex-direction:column;gap:8px"><div class="t-label">2 · Panel vacío con sugerencias</div>
+<div data-device="phone" style="width:375px;height:720px;background:var(--ds-surface);border:1px solid var(--ds-border);display:flex;flex-direction:column;overflow:hidden">
+  <div style="height:52px;display:flex;align-items:center;padding:0 4px;border-bottom:1px solid var(--ds-border)"><button class="icon-btn" aria-label="Cerrar"><span class="ic i-x"></span></button><span class="t-heading" style="flex:1">OPAI</span><button class="icon-btn" aria-label="Más"><span class="ic i-more"></span></button></div>
+  <div style="padding:8px 16px"><span class="chip on"><span class="ic sm i-building"></span>Cuenta · Bodegas del Sur S.A.<button class="x" aria-label="Quitar"><span class="ic sm i-x"></span></button></span></div>
+  <div style="flex:1;padding:24px 16px;display:flex;flex-direction:column;gap:16px;justify-content:center">
+    <div class="t-title" style="text-align:center">¿En qué te ayudo?</div>
+    <div style="display:flex;flex-direction:column;gap:8px"><button class="btn btn-secondary" style="height:auto;min-height:44px;padding:10px 16px;text-align:left;justify-content:flex-start;font-weight:400">¿Qué instalaciones de Bodegas del Sur S.A. tienen puestos por cubrir?</button><button class="btn btn-secondary" style="justify-content:flex-start;font-weight:400">Resume el negocio Renovación 2027</button><button class="btn btn-secondary" style="justify-content:flex-start;font-weight:400">¿Quién supervisa Torre Apoquindo?</button></div></div>
+  <div style="padding:8px 8px calc(8px + env(safe-area-inset-bottom));border-top:1px solid var(--ds-border)"><div style="display:flex;gap:4px;align-items:flex-end"><button class="icon-btn" aria-label="Adjuntar"><span class="ic i-paperclip"></span></button><div class="input" style="flex:1"><span class="ph">Pregunta o pide un cambio</span></div><button class="btn btn-primary icon" disabled aria-label="Enviar"><span class="ic i-up"></span></button></div><div class="t-caption" style="color:var(--ds-fg-subtle);text-align:center;padding-top:6px">OPAI usa Claude Sonnet · Revisa el plan antes de confirmar</div></div>
+</div></div>
+
+<!-- 3 Conversación -->
+<div style="display:flex;flex-direction:column;gap:8px"><div class="t-label">3 · Conversación con respuesta y fuentes</div>
+<div data-device="phone" style="width:375px;height:720px;background:var(--ds-surface);border:1px solid var(--ds-border);display:flex;flex-direction:column;overflow:hidden">
+  <div style="height:52px;display:flex;align-items:center;padding:0 4px;border-bottom:1px solid var(--ds-border)"><button class="icon-btn" aria-label="Cerrar"><span class="ic i-x"></span></button><span class="t-heading" style="flex:1">OPAI</span><button class="icon-btn" aria-label="Más"><span class="ic i-more"></span></button></div>
+  <div style="flex:1;padding:16px;display:flex;flex-direction:column;gap:12px;overflow:hidden">
+    <div style="align-self:flex-end;max-width:80%;background:var(--ds-accent-muted);padding:10px 14px;border-radius:var(--radius-md)" class="t-body">¿Qué instalaciones de Bodegas del Sur S.A. tienen puestos por cubrir?</div>
+    <div style="max-width:92%;background:var(--ds-surface);border:1px solid var(--ds-border);padding:12px 14px;border-radius:var(--radius-md);display:flex;flex-direction:column;gap:8px" class="t-body">
+      <div>Dos de las 3 instalaciones tienen puestos sin cubrir hoy:</div>
+      <div style="border:1px solid var(--ds-border);border-radius:var(--radius-md);overflow:hidden" class="t-body-sm">
+        <div style="display:grid;grid-template-columns:1fr auto;padding:8px 12px;border-bottom:1px solid var(--ds-border)"><span>Torre Apoquindo</span><span class="t-mono">2 puestos</span></div>
+        <div style="display:grid;grid-template-columns:1fr auto;padding:8px 12px"><span>Planta Quilicura</span><span class="t-mono">1 puesto</span></div></div>
+      <div class="t-caption" style="color:var(--ds-fg-muted)">Fuentes</div>
+      <div class="chip-row"><a class="chip plain" href="#"><span class="ic sm i-building"></span>Torre Apoquindo</a><a class="chip plain" href="#"><span class="ic sm i-building"></span>Planta Quilicura</a></div></div></div>
+  <div style="padding:8px 8px calc(8px + env(safe-area-inset-bottom));border-top:1px solid var(--ds-border);display:flex;gap:4px;align-items:flex-end"><button class="icon-btn" aria-label="Adjuntar"><span class="ic i-paperclip"></span></button><div class="input" style="flex:1"><span class="ph">Pregunta o pide un cambio</span></div><button class="btn btn-primary icon" disabled aria-label="Enviar"><span class="ic i-up"></span></button></div>
+</div></div>
+
+<!-- 3b Adjuntar -->
+<div style="display:flex;flex-direction:column;gap:8px"><div class="t-label">3b · Menú Adjuntar</div>
+<div data-device="phone" style="width:375px;height:720px;background:var(--ds-surface);border:1px solid var(--ds-border);display:flex;flex-direction:column;overflow:hidden;position:relative">
+  <div style="height:52px;display:flex;align-items:center;padding:0 4px;border-bottom:1px solid var(--ds-border)"><button class="icon-btn" aria-label="Cerrar"><span class="ic i-x"></span></button><span class="t-heading" style="flex:1">OPAI</span><button class="icon-btn" aria-label="Más"><span class="ic i-more"></span></button></div>
+  <div style="flex:1"></div>
+  <div style="position:absolute;left:8px;bottom:84px;width:240px;background:var(--ds-surface-raised,var(--ds-surface));border:1px solid var(--ds-border);border-radius:var(--radius-md);box-shadow:0 12px 32px -8px rgba(17,17,19,.18);padding:4px;display:flex;flex-direction:column" role="menu">
+    <div style="height:44px;display:flex;align-items:center;gap:12px;padding:0 12px" class="t-body"><span class="ic i-camera"></span>Tomar foto</div>
+    <div style="height:44px;display:flex;align-items:center;gap:12px;padding:0 12px" class="t-body"><span class="ic i-paperclip"></span>Elegir archivo</div>
+    <div style="height:44px;display:flex;align-items:center;gap:12px;padding:0 12px" class="t-body"><span class="ic i-file"></span>Documento de OPAI</div></div>
+  <div style="padding:8px 8px calc(8px + env(safe-area-inset-bottom));border-top:1px solid var(--ds-border);display:flex;gap:4px;align-items:flex-end"><button class="icon-btn" style="background:var(--ds-fill)" aria-label="Adjuntar"><span class="ic i-paperclip"></span></button><div class="input" style="flex:1"><span class="ph">Pregunta o pide un cambio</span></div><button class="btn btn-primary icon" disabled aria-label="Enviar"><span class="ic i-up"></span></button></div>
+</div></div>
+
+<!-- 3c -->
+<div style="display:flex;flex-direction:column;gap:8px"><div class="t-label">3c · Foto subiendo y PDF listo</div>
+<div data-device="phone" style="width:375px;height:720px;background:var(--ds-surface);border:1px solid var(--ds-border);display:flex;flex-direction:column;overflow:hidden">
+  <div style="height:52px;display:flex;align-items:center;padding:0 4px;border-bottom:1px solid var(--ds-border)"><button class="icon-btn" aria-label="Cerrar"><span class="ic i-x"></span></button><span class="t-heading" style="flex:1">OPAI</span><button class="icon-btn" aria-label="Más"><span class="ic i-more"></span></button></div>
+  <div style="flex:1"></div>
+  <div style="padding:8px 8px calc(8px + env(safe-area-inset-bottom));border-top:1px solid var(--ds-border);display:flex;flex-direction:column;gap:8px">
+    <div style="display:flex;gap:8px;overflow-x:auto;padding:0 4px">
+      <div style="flex:none;width:180px;border:1px solid var(--ds-border-strong);border-radius:var(--radius-md);padding:10px;display:flex;flex-direction:column;gap:6px"><div style="display:flex;gap:8px;align-items:center"><div style="width:32px;height:32px;border-radius:var(--radius-sm);background:var(--ds-fill)"></div><span class="t-body-sm" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">foto-puesto.jpg</span></div><div style="height:4px;background:var(--ds-fill);border-radius:999px"><div style="width:60%;height:100%;background:var(--ds-accent);border-radius:999px"></div></div><div style="display:flex;justify-content:space-between" class="t-caption"><span style="color:var(--ds-fg-muted)">60 %</span><a href="#">Cancelar</a></div></div>
+      <div style="flex:none;width:180px;border:1px solid var(--ds-border-strong);border-radius:var(--radius-md);padding:10px;display:flex;flex-direction:column;gap:4px"><div style="display:flex;gap:8px;align-items:center"><span class="ic i-file"></span><span class="t-body-sm" style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">contrato.pdf</span><span class="ic sm i-x"></span></div><div class="t-caption" style="color:var(--ds-fg-muted)">2,4 MB · 12 páginas · Listo</div></div></div>
+    <div style="display:flex;gap:4px;align-items:flex-end"><button class="icon-btn" aria-label="Adjuntar"><span class="ic i-paperclip"></span></button><div class="input" style="flex:1"><span>Revisa estos dos archivos</span></div><button class="btn btn-primary icon" disabled aria-label="Enviar"><span class="ic i-up"></span></button></div>
+    <div class="t-caption" style="color:var(--ds-fg-subtle);text-align:center">Enviar se activa cuando termine la subida</div></div>
+</div></div>
+
+<!-- 3d -->
+<div style="display:flex;flex-direction:column;gap:8px"><div class="t-label">3d · Adjunto rechazado por tamaño</div>
+<div data-device="phone" style="width:375px;height:720px;background:var(--ds-surface);border:1px solid var(--ds-border);display:flex;flex-direction:column;overflow:hidden">
+  <div style="height:52px;display:flex;align-items:center;padding:0 4px;border-bottom:1px solid var(--ds-border)"><button class="icon-btn" aria-label="Cerrar"><span class="ic i-x"></span></button><span class="t-heading" style="flex:1">OPAI</span><button class="icon-btn" aria-label="Más"><span class="ic i-more"></span></button></div>
+  <div style="flex:1"></div>
+  <div style="padding:8px 8px calc(8px + env(safe-area-inset-bottom));border-top:1px solid var(--ds-border);display:flex;flex-direction:column;gap:8px">
+    <div style="margin:0 4px;border:1px solid var(--ds-danger-fg);background:var(--ds-danger-muted);border-radius:var(--radius-md);padding:10px;display:flex;gap:8px;align-items:center"><span class="ic i-file" style="color:var(--ds-danger-fg)"></span><div style="flex:1" class="t-body-sm"><div style="color:var(--ds-fg)">dotacion-2026.xlsx</div><div style="color:var(--ds-danger-fg)">Supera los 10 MB</div></div><button class="icon-btn" aria-label="Quitar"><span class="ic i-x"></span></button></div>
+    <div style="display:flex;gap:4px;align-items:flex-end"><button class="icon-btn" aria-label="Adjuntar"><span class="ic i-paperclip"></span></button><div class="input" style="flex:1"><span class="ph">Pregunta o pide un cambio</span></div><button class="btn btn-primary icon" disabled aria-label="Enviar"><span class="ic i-up"></span></button></div></div>
+</div></div>
+
+<!-- 4 Pasos en vivo -->
+<div style="display:flex;flex-direction:column;gap:8px"><div class="t-label">4 · Pasos de trabajo en vivo</div>
+<div data-device="phone" style="width:375px;height:720px;background:var(--ds-surface);border:1px solid var(--ds-border);display:flex;flex-direction:column;overflow:hidden">
+  <div style="height:52px;display:flex;align-items:center;padding:0 4px;border-bottom:1px solid var(--ds-border)"><button class="icon-btn" aria-label="Cerrar"><span class="ic i-x"></span></button><span class="t-heading" style="flex:1">OPAI</span><button class="icon-btn" aria-label="Más"><span class="ic i-more"></span></button></div>
+  <div style="flex:1;padding:16px;display:flex;flex-direction:column;gap:12px">
+    <div style="align-self:flex-end;max-width:80%;background:var(--ds-accent-muted);padding:10px 14px;border-radius:var(--radius-md)" class="t-body">Cambia el supervisor de Torre Apoquindo a Camila Herrera Soto</div>
+    <div style="display:flex;flex-direction:column;gap:8px" class="t-body-sm">
+      <div style="display:flex;gap:8px;align-items:center"><span class="ic sm i-check" style="color:var(--ds-success-fg)"></span>Buscando la cuenta Bodegas del Sur S.A.</div>
+      <div style="display:flex;gap:8px;align-items:center"><span class="ic sm i-check" style="color:var(--ds-success-fg)"></span>Leyendo 3 instalaciones</div>
+      <div style="display:flex;gap:8px;align-items:center;color:var(--ds-fg-muted)"><span style="width:14px;height:14px;border-radius:999px;border:2px solid currentColor;border-right-color:transparent;animation:ds-spin .7s linear infinite;display:inline-block"></span>Preparando vista previa</div></div></div>
+  <div style="padding:8px 8px calc(8px + env(safe-area-inset-bottom));border-top:1px solid var(--ds-border);display:flex;gap:4px;align-items:flex-end"><button class="icon-btn" aria-label="Adjuntar"><span class="ic i-paperclip"></span></button><div class="input" style="flex:1"><span class="ph">Pregunta o pide un cambio</span></div><button class="btn btn-secondary" style="padding:0 12px">Detener</button></div>
+</div></div>
+
+<!-- 5 / 9 plan paso a paso -->
+<div style="display:flex;flex-direction:column;gap:8px"><div class="t-label">5 · Plan «Paso a paso»</div>
+<div data-device="phone" style="width:375px;height:720px;background:var(--ds-surface);border:1px solid var(--ds-border);display:flex;flex-direction:column;overflow:hidden">
+  <div style="height:52px;display:flex;align-items:center;padding:0 4px;border-bottom:1px solid var(--ds-border)"><button class="icon-btn" aria-label="Cerrar"><span class="ic i-x"></span></button><span class="t-heading" style="flex:1">OPAI</span><button class="icon-btn" aria-label="Más"><span class="ic i-more"></span></button></div>
+  <div style="flex:1;padding:16px;display:flex;flex-direction:column;gap:12px">
+    <div style="background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:8px"><span class="t-heading" style="flex:1">Plan · 3 cambios</span><span class="badge b-neutral nodot">Paso a paso</span></div>
+      <div class="t-caption" style="color:var(--ds-fg-muted)">Vence en 58 min</div>
+      <div style="display:flex;flex-direction:column;gap:4px"><div class="t-body" style="font-weight:500">1. Cambiar el supervisor de Torre Apoquindo</div><div class="t-body-sm"><span style="color:var(--ds-fg-subtle);text-decoration:line-through">Diego Fuentes</span> → Camila Herrera Soto</div><span class="badge b-info nodot" style="align-self:flex-start">Reversible</span><button class="btn btn-primary block" style="margin-top:8px">Confirmar este paso</button></div>
+      <div style="opacity:.45;display:flex;justify-content:space-between;gap:8px" class="t-body"><span>2. Asignar el contrato</span><span class="badge b-neutral nodot">Pendiente</span></div>
+      <div style="opacity:.45;display:flex;justify-content:space-between;gap:8px" class="t-body"><span>3. Dar de baja Bodega Lampa</span><span class="badge b-neutral nodot">Pendiente</span></div>
+      <button class="btn btn-ghost block">Descartar</button></div></div>
+  <div style="padding:8px 8px calc(8px + env(safe-area-inset-bottom));border-top:1px solid var(--ds-border);display:flex;gap:4px;align-items:flex-end"><button class="icon-btn" aria-label="Adjuntar"><span class="ic i-paperclip"></span></button><div class="input" style="flex:1"><span class="ph">Pide cambios al plan</span></div><button class="btn btn-primary icon" disabled aria-label="Enviar"><span class="ic i-up"></span></button></div>
+</div></div>
+
+<!-- 6 -->
+<div style="display:flex;flex-direction:column;gap:8px"><div class="t-label">6 · Plan en ejecución</div>
+<div data-device="phone" style="width:375px;height:720px;background:var(--ds-surface);border:1px solid var(--ds-border);display:flex;flex-direction:column;overflow:hidden">
+  <div style="height:52px;display:flex;align-items:center;padding:0 4px;border-bottom:1px solid var(--ds-border)"><button class="icon-btn" aria-label="Cerrar"><span class="ic i-x"></span></button><span class="t-heading" style="flex:1">OPAI</span><button class="icon-btn" aria-label="Más"><span class="ic i-more"></span></button></div>
+  <div style="flex:1;padding:16px"><div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px;display:flex;flex-direction:column;gap:12px">
+    <div class="t-heading">Plan · 3 cambios</div>
+    <div style="display:flex;justify-content:space-between;gap:8px;align-items:center" class="t-body"><span>1. Cambiar el supervisor</span><span class="badge b-success">Hecho</span></div>
+    <a class="t-body-sm" href="#" style="margin-top:-8px">Ver en la ficha</a>
+    <div style="display:flex;justify-content:space-between;gap:8px;align-items:center" class="t-body"><span>2. Asignar el contrato</span><span class="badge b-info">Ejecutando…</span></div>
+    <div style="display:flex;justify-content:space-between;gap:8px;align-items:center;opacity:.45" class="t-body"><span>3. Dar de baja Bodega Lampa</span><span class="badge b-neutral nodot">En espera</span></div></div></div>
+  <div style="padding:8px 8px calc(8px + env(safe-area-inset-bottom));border-top:1px solid var(--ds-border);display:flex;gap:4px;align-items:flex-end"><button class="icon-btn" aria-label="Adjuntar"><span class="ic i-paperclip"></span></button><div class="input" style="flex:1"><span class="ph">Pregunta o pide un cambio</span></div><button class="btn btn-secondary" style="padding:0 12px">Detener</button></div>
+</div></div>
+
+<!-- 7 -->
+<div style="display:flex;flex-direction:column;gap:8px"><div class="t-label">7 · Paso irreversible en aprobación</div>
+<div data-device="phone" style="width:375px;height:720px;background:var(--ds-surface);border:1px solid var(--ds-border);display:flex;flex-direction:column;overflow:hidden">
+  <div style="height:52px;display:flex;align-items:center;padding:0 4px;border-bottom:1px solid var(--ds-border)"><button class="icon-btn" aria-label="Cerrar"><span class="ic i-x"></span></button><span class="t-heading" style="flex:1">OPAI</span><button class="icon-btn" aria-label="Más"><span class="ic i-more"></span></button></div>
+  <div style="flex:1;padding:16px"><div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px;display:flex;flex-direction:column;gap:12px">
+    <div class="t-heading">Plan · 3 cambios</div>
+    <div style="display:flex;justify-content:space-between;gap:8px;align-items:center" class="t-body"><span>1. Cambiar el supervisor</span><span class="badge b-success">Hecho</span></div>
+    <div style="display:flex;flex-direction:column;gap:4px" class="t-body"><span>2. Dar de baja Bodega Lampa</span><span class="badge b-warning nodot" style="align-self:flex-start;height:auto;padding:4px 8px;white-space:normal">Enviado a aprobación · lo resuelve un administrador</span><a class="t-body-sm" href="#">Ver en la Bandeja</a></div>
+    <div class="t-body-sm" style="opacity:.6;color:var(--ds-fg-muted)">3. No se ejecutó · pídelo de nuevo después de la aprobación</div></div></div>
+  <div style="padding:8px 8px calc(8px + env(safe-area-inset-bottom));border-top:1px solid var(--ds-border);display:flex;gap:4px;align-items:flex-end"><button class="icon-btn" aria-label="Adjuntar"><span class="ic i-paperclip"></span></button><div class="input" style="flex:1"><span class="ph">Pregunta o pide un cambio</span></div><button class="btn btn-primary icon" disabled aria-label="Enviar"><span class="ic i-up"></span></button></div>
+</div></div>
+
+<!-- 8 -->
+<div style="display:flex;flex-direction:column;gap:8px"><div class="t-label">8 · Sin conexión con borrador</div>
+<div data-device="phone" style="width:375px;height:720px;background:var(--ds-surface);border:1px solid var(--ds-border);display:flex;flex-direction:column;overflow:hidden">
+  <div style="height:52px;display:flex;align-items:center;padding:0 4px;border-bottom:1px solid var(--ds-border)"><button class="icon-btn" aria-label="Cerrar"><span class="ic i-x"></span></button><span class="t-heading" style="flex:1">OPAI</span><button class="icon-btn" aria-label="Más"><span class="ic i-more"></span></button></div>
+  <div style="background:var(--ds-fill);color:var(--ds-fg-muted);padding:10px 16px;display:flex;gap:8px;align-items:center" class="t-body-sm"><span class="ic sm i-wifi-off"></span>Sin conexión · Tu borrador se conserva.</div>
+  <div style="flex:1"></div>
+  <div style="padding:8px 8px calc(8px + env(safe-area-inset-bottom));border-top:1px solid var(--ds-border);display:flex;gap:4px;align-items:flex-end"><button class="icon-btn" aria-label="Adjuntar"><span class="ic i-paperclip"></span></button><div class="input" style="flex:1"><span>¿Quién supervisa Torre Apoquindo?</span></div><button class="btn btn-primary icon" disabled aria-label="Enviar"><span class="ic i-up"></span></button></div>
+</div></div>
+
+<!-- 9 oscuro de 5 -->
+<div style="display:flex;flex-direction:column;gap:8px"><div class="t-label">9 · Oscuro de (5)</div>
+<div data-theme="dark" data-device="phone" style="width:375px;height:720px;background:var(--ds-surface);color:var(--ds-fg);border:1px solid var(--ds-border);display:flex;flex-direction:column;overflow:hidden">
+  <div style="height:52px;display:flex;align-items:center;padding:0 4px;border-bottom:1px solid var(--ds-border)"><button class="icon-btn" aria-label="Cerrar"><span class="ic i-x"></span></button><span class="t-heading" style="flex:1">OPAI</span><button class="icon-btn" aria-label="Más"><span class="ic i-more"></span></button></div>
+  <div style="flex:1;padding:16px;display:flex;flex-direction:column;gap:12px">
+    <div style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);padding:16px;display:flex;flex-direction:column;gap:12px">
+      <div style="display:flex;align-items:center;gap:8px"><span class="t-heading" style="flex:1">Plan · 3 cambios</span><span class="badge b-neutral nodot">Paso a paso</span></div>
+      <div class="t-caption" style="color:var(--ds-fg-muted)">Vence en 58 min</div>
+      <div style="display:flex;flex-direction:column;gap:4px"><div class="t-body" style="font-weight:500">1. Cambiar el supervisor de Torre Apoquindo</div><div class="t-body-sm"><span style="color:var(--ds-fg-subtle);text-decoration:line-through">Diego Fuentes</span> → Camila Herrera Soto</div><span class="badge b-info nodot" style="align-self:flex-start">Reversible</span><button class="btn btn-primary block" style="margin-top:8px">Confirmar este paso</button></div>
+      <div style="opacity:.45;display:flex;justify-content:space-between;gap:8px" class="t-body"><span>2. Asignar el contrato</span><span class="badge b-neutral nodot">Pendiente</span></div>
+      <div style="opacity:.45;display:flex;justify-content:space-between;gap:8px" class="t-body"><span>3. Dar de baja Bodega Lampa</span><span class="badge b-neutral nodot">Pendiente</span></div>
+      <button class="btn btn-ghost block">Descartar</button></div></div>
+  <div style="padding:8px 8px calc(8px + env(safe-area-inset-bottom));border-top:1px solid var(--ds-border);display:flex;gap:4px;align-items:flex-end"><button class="icon-btn" aria-label="Adjuntar"><span class="ic i-paperclip"></span></button><div class="input" style="flex:1"><span class="ph">Pide cambios al plan</span></div><button class="btn btn-primary icon" disabled aria-label="Enviar"><span class="ic i-up"></span></button></div>
+</div></div>
+
+</div></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { dark: false };
+  renderVals() {
+    const d = this.state.dark;
+    return { theme: d ? 'dark' : 'light', lightCls: d ? '' : 'on', darkCls: d ? 'on' : '', setLight: () => this.setState({ dark: false }), setDark: () => this.setState({ dark: true }) };
+  }
+}
+</script>
+</body>
+</html>
