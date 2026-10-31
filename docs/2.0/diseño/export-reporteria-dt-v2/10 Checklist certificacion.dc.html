@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="adt.js"></script>
+<style>body{margin:0;background:var(--ds-fill);color:var(--ds-fg)}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<div style="display:flex;flex-direction:column;gap:56px;padding:48px;width:max-content;font-family:var(--font-sans);color:var(--ds-fg)">
+<header style="display:flex;flex-direction:column;gap:8px;max-width:960px">
+<a class="t-body-sm" href="Indice.dc.html">← Índice · {{ version }}</a>
+<h1 class="t-display m0">{{ num }} · {{ title }}</h1>
+<span class="t-body muted">Ve: {{ roles }}</span>
+<span style="display:flex;gap:8px;align-items:center"><span class="badge b-success">Decidido el 30-10-2026</span><span class="t-caption">Sin propuestas pendientes</span></span>
+</header>
+<sc-for list="{{ rows }}" as="row" hint-placeholder-count="2">
+<section style="display:flex;flex-direction:column;gap:16px">
+<h2 class="t-heading m0">{{ row.label }}</h2>
+<div style="display:flex;gap:32px;align-items:flex-start">
+<sc-for list="{{ row.boards }}" as="b" hint-placeholder-count="6">
+<div style="display:flex;flex-direction:column;gap:8px">
+<span class="t-label">{{ b.label }}</span>
+<sc-if value="{{ b.isPhone }}" hint-placeholder-val="{{ false }}"><div style="width:375px;height:812px;border-radius:var(--radius-lg);overflow:hidden;outline:1px solid var(--ds-border-strong)"><dc-import name="P10-Certificacion" device="{{ b.device }}" theme="{{ b.theme }}" estado="{{ b.estado }}" vista="{{ b.vista }}" hint-size="375px,812px"></dc-import></div></sc-if>
+<sc-if value="{{ b.isTablet }}" hint-placeholder-val="{{ false }}"><div style="width:1024px;height:768px;border-radius:var(--radius-lg);overflow:hidden;outline:1px solid var(--ds-border-strong)"><dc-import name="P10-Certificacion" device="{{ b.device }}" theme="{{ b.theme }}" estado="{{ b.estado }}" vista="{{ b.vista }}" hint-size="1024px,768px"></dc-import></div></sc-if>
+<sc-if value="{{ b.isDesktop }}" hint-placeholder-val="{{ false }}"><div style="width:1280px;height:800px;border-radius:var(--radius-lg);overflow:hidden;outline:1px solid var(--ds-border-strong)"><dc-import name="P10-Certificacion" device="{{ b.device }}" theme="{{ b.theme }}" estado="{{ b.estado }}" vista="{{ b.vista }}" hint-size="1280px,800px"></dc-import></div></sc-if>
+</div>
+</sc-for>
+</div>
+</section>
+</sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  componentDidMount() { if (!window.ADT) { this.t = setInterval(() => { if (window.ADT) { clearInterval(this.t); this.forceUpdate(); } }, 50); } }
+  componentWillUnmount() { clearInterval(this.t); }
+  renderVals() {
+    const A = window.ADT;
+    if (!A) return { rows: [] };
+    const s = A.screens.find((x) => x.n === "10");
+    return { version: A.version, num: s.n, title: s.title, roles: s.roles, rows: s.rows.map((r, i) => ({ ...r, key: i, boards: A.boardsFor(r) })) };
+  }
+}
+</script>
+</body>
+</html>
