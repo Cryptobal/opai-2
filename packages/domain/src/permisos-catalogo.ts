@@ -64,6 +64,13 @@ export const PERMISOS_CORE = {
   // por el comodín `*:*.read`); gestionar (agregar, editar, archivar días) es de owner y admin.
   calendarioRead: "core:calendario.read",
   calendarioManage: "core:calendario.manage",
+  // CRM PR 2a (CAR-26): actividad unificada y etiquetas del tenant. Registrar y asignar es de quien
+  // gestiona Comercial; el catálogo de etiquetas (crear, renombrar, borrar) es de owner y admin.
+  actividadesRead: "core:actividades.read",
+  actividadesManage: "core:actividades.manage",
+  etiquetasRead: "core:etiquetas.read",
+  etiquetasManage: "core:etiquetas.manage",
+  etiquetasConfig: "core:etiquetas.config",
 } as const;
 
 export const PERMISOS_PLATAFORMA = {
