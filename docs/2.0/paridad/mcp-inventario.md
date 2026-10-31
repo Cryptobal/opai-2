@@ -468,6 +468,9 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.ping`
 - `core.puestos.get`
 - `core.usage.summary`
+- `cpq.cotizaciones.create`
+- `cpq.cotizaciones.get`
+- `cpq.cotizaciones.list`
 - `platform.auditoria.estado`
 - `platform.auditoria.list`
 - `platform.bitacora.estado`

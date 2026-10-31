@@ -1,5 +1,7 @@
 import type { ModuleManifest } from "@opai/capabilities";
 
+import { manifest as Cpq } from "@opai/mod-cpq";
+
 import { manifest as Tickets } from "@opai/mod-tickets";
 
 import { manifest as Rondas } from "@opai/mod-rondas";
@@ -17,5 +19,6 @@ export const modulos: readonly ModuleManifest[] = [
   Comercial,
   Rondas,
   Tickets,
+  Cpq,
   // scaffold:module — las entradas se agregan sobre esta línea
 ];
