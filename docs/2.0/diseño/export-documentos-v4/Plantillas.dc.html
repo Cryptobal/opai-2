@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ shellDevice }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" user="{{ user }}" active="{{ navActive }}" title="" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a las plantillas" description="Solo owner y admin ven y editan plantillas. Pídele acceso a un administrador." action-label="Pedir acceso" hint-size="100%,400px"></x-import>
+</sc-if>
+<sc-if value="{{ notForbidden }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" title="Documentos" hint-size="100%,56px">
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="upload" hint-size="190px,40px">Importar Word o PDF</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="plus" hint-size="160px,40px">Nueva plantilla</x-import>
+</div>
+</sc-if>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Tabs" items="{{ docTabs }}" value="pla" hint-size="100%,44px"></x-import>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin:16px 0">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" label="Grupo" options="{{ grupos }}" value="lab" hint-size="380px,40px"></x-import>
+<div class="chip-row">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Creada en OPAI" hint-size="140px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Importada de Word" hint-size="160px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Importada de PDF" hint-size="150px,32px"></x-import>
+</div>
+</div>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<sc-if value="{{ notEmptyish }}" hint-placeholder-val="{{ true }}">
+<div style="margin-bottom:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Edita en un computador" hint-size="100%,60px">En el teléfono puedes revisar las plantillas, pero no editarlas.</x-import>
+</div>
+</sc-if>
+</sc-if>
+<sc-if value="{{ isNormal }}" hint-placeholder-val="{{ true }}">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}">
+<div style="margin:0 -16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" cards="{{ true }}" to-card="{{ toCard }}" hint-size="100%,400px"></x-import>
+</div>
+</sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ cols }}" rows="{{ rows }}" on-row-click="{{ noop }}" hint-size="100%,400px"></x-import>
+</sc-if>
+</sc-if>
+<sc-if value="{{ isLoading }}" hint-placeholder-val="{{ false }}">
+<div aria-busy="true" style="border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface);overflow:hidden">
+<sc-for list="{{ skel }}" as="s" hint-placeholder-count="7">
+<div style="display:flex;gap:16px;align-items:center;padding:14px 16px;border-bottom:1px solid var(--ds-border)">
+<div style="flex:1;display:flex;flex-direction:column;gap:6px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="{{ s.w }}" height="{{ 14 }}" hint-size="40%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="24%" height="{{ 12 }}" hint-size="24%,12px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="40px" height="{{ 22 }}" radius="{{ 999 }}" hint-size="40px,22px"></x-import>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isEmpty }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="file" title="Aún no hay plantillas laborales" description="Crea la primera o importa un Word o PDF que ya uses." action="{{ emptyAction }}" hint-size="100%,320px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar las plantillas" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="DOC-PLA-503 · 30-10-2026 12:57" hint-size="100%,320px"></x-import>
+</sc-if>
+</sc-if>
+</x-import>
+</x-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1280,&quot;height&quot;:800},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const device = this.props.device ?? "desktop";
+    const estado = this.props.estado ?? "normal";
+    const isPhone = device === "phone", isTablet = device === "tablet";
+    const B = (tone, t) => (NS.Badge ? h(NS.Badge, { tone, dot: false }, t) : t);
+    const rows = [
+      { id: 1, nombre: "Contrato indefinido", tipo: "Contrato de trabajo", origen: "Importada de Word", n: "N2", ver: "v4", ed: "Paula Ibáñez · 22-10-2026" },
+      { id: 2, nombre: "Contrato a plazo fijo", tipo: "Contrato de trabajo", origen: "Importada de Word", n: "N2", ver: "v3", ed: "Paula Ibáñez · 22-10-2026" },
+      { id: 3, nombre: "Anexo de contrato", tipo: "Anexo", origen: "Creada en OPAI", n: "N2", ver: "v3", ed: "María José Rivas · 10-10-2026" },
+      { id: 4, nombre: "Reglamento interno (recepción)", tipo: "Recepción de reglamento", origen: "Importada de PDF", n: "N1", ver: "v2", ed: "Paula Ibáñez · 01-09-2026" },
+      { id: 5, nombre: "Carta de amonestación", tipo: "Carta", origen: "Creada en OPAI", n: "N1", ver: "v1", ed: "María José Rivas · 18-08-2026" },
+      { id: 6, nombre: "Carta de aviso de término (Art. 162)", tipo: "Carta", origen: "Importada de Word", n: "N1", ver: "v2", ed: "Paula Ibáñez · 05-08-2026" },
+      { id: 7, nombre: "Recepción de uniforme y EPP", tipo: "Recepción", origen: "Creada en OPAI", n: "N1", ver: "v5", ed: "Jorge Muñoz · 29-10-2026" },
+    ];
+    let cols = [
+      { key: "nombre", label: "Nombre", render: (r) => h("span", { style: { display: "flex", flexDirection: "column" } }, h("span", { style: { fontWeight: 500 } }, r.nombre), h("span", { className: "t-caption" }, r.origen)) },
+      { key: "tipo", label: "Tipo", muted: true },
+      { key: "n", label: "Firma por defecto", render: (r) => B(r.n === "N2" ? "accent" : "neutral", r.n) },
+      { key: "ver", label: "Versión vigente", render: (r) => h("span", { className: "t-numeric" }, r.ver) },
+      { key: "ed", label: "Última edición", muted: true },
+    ];
+    if (isTablet) cols = cols.filter((c) => c.key !== "tipo");
+    const nonEmpty = estado === "normal" || estado === "cargando";
+    return {
+      user: { name: "Paula Ibáñez", initials: "PI", role: "Administradora" },
+      theme: this.props.theme ?? "light",
+      shellDevice: isPhone ? "phone" : "desktop",
+      navActive: isPhone ? "mas" : "doc",
+      isPhone, notPhone: !isPhone, notEmptyish: nonEmpty,
+      grupos: [{ value: "all", label: "Todas" }, { value: "com", label: "Comerciales" }, { value: "lab", label: "Laborales" }, { value: "ope", label: "Operativas" }],
+      rows, cols, noop: () => {},
+      toCard: (r) => ({ icon: "file", title: r.nombre, subtitle: r.ver + " · " + r.ed.split(" · ")[1] + " · " + r.origen, badge: { tone: r.n === "N2" ? "accent" : "neutral", label: r.n } }),
+      isNormal: estado === "normal", isLoading: estado === "cargando", isEmpty: estado === "vacio", isError: estado === "error",
+      isForbidden: estado === "sinpermiso", notForbidden: estado !== "sinpermiso",
+      emptyAction: NS.Button ? (isPhone ? null : h("div", { style: { display: "flex", gap: 8 } }, h(NS.Button, { variant: "secondary", icon: "upload", size: "lg" }, "Importar Word o PDF"), h(NS.Button, { icon: "plus", size: "lg" }, "Nueva plantilla"))) : null,
+      skel: [{ w: "40%" }, { w: "34%" }, { w: "46%" }, { w: "30%" }, { w: "44%" }, { w: "38%" }, { w: "36%" }],
+      docTabs: [{ id: "exp", label: "Explorador" }, { id: "ven", label: "Vencimientos" }, { id: "pla", label: "Plantillas" }, { id: "fir", label: "Firmas pendientes" }],
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "neg", label: "Negocios", icon: "briefcase" }, { id: "pau", label: "Pauta", icon: "calendar" }, { id: "mas", label: "Más", icon: "more" }],
+      groups: [
+        { items: [{ id: "ini", label: "Inicio", icon: "home" }] },
+        { title: "Comercial", items: [] }, { title: "Clientes", items: [] }, { title: "Operaciones", items: [] }, { title: "Personas", items: [] },
+        { items: [{ id: "doc", label: "Documentos", icon: "file" }] },
+        { items: [{ id: "cfg", label: "Configuración", icon: "grid" }] },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
