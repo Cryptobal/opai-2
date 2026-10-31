@@ -3,6 +3,7 @@ import { z } from "zod";
 
 import { noEncontrado } from "../../errores";
 import type { Contexto } from "../../types";
+import { entidadVisible, filtrarVisibles, visibilidad } from "./actividades-alcance";
 import { ENTIDADES_ACTIVIDAD, TIPOS_ACTIVIDAD, columnaDe, iso } from "./comun";
 
 export const PERMISO_READ = "core:actividades.read";
@@ -76,6 +77,7 @@ export const vistaActividad = (
 export async function conRelaciones(ctx: Contexto, filas: Fila[]) {
   const ids = filas.map((f) => f.id);
   if (!ids.length) return [];
+  const vis = await visibilidad(ctx);
   const [resp, vinc] = await Promise.all([
     ctx.db.actividadResponsable.findMany({ where: { actividadId: { in: ids } } }),
     ctx.db.actividadVinculo.findMany({ where: { actividadId: { in: ids } } }),
@@ -89,7 +91,7 @@ export async function conRelaciones(ctx: Contexto, filas: Fila[]) {
         .flatMap((v) =>
           ENTIDADES_ACTIVIDAD.flatMap((tipo) => {
             const id = v[columnaDe(tipo)];
-            return id ? [{ tipo, id }] : [];
+            return id && entidadVisible(vis, tipo, id) ? [{ tipo, id }] : [];
           }),
         ),
     ),
@@ -98,6 +100,7 @@ export async function conRelaciones(ctx: Contexto, filas: Fila[]) {
 
 export async function actividadDe(ctx: Contexto, id: string) {
   const a = await ctx.db.actividad.findFirst({ where: { id } });
-  if (!a) throw noEncontrado("La actividad");
+  // Fuera de la visibilidad del actor responde igual que inexistente (ADR-022).
+  if (!a || !(await filtrarVisibles(ctx, [id])).length) throw noEncontrado("La actividad");
   return a;
 }

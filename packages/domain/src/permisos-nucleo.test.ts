@@ -9,6 +9,7 @@ const TABLA: Record<string, readonly [boolean, boolean, boolean, boolean, boolea
   // CRM PR 2a: el supervisor no entra a Comercial; el catálogo de etiquetas es de owner y admin.
   [P.actividadesRead]: [true, true, true, false, true],
   [P.actividadesManage]: [true, true, true, false, false],
+  [P.actividadesAdmin]: [true, true, false, false, false],
   [P.etiquetasRead]: [true, true, true, false, true],
   [P.etiquetasManage]: [true, true, true, false, false],
   [P.etiquetasConfig]: [true, true, false, false, false],

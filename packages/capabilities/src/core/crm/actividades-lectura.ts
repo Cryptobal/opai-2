@@ -3,6 +3,7 @@ import { z } from "zod";
 import { defineCapability } from "../../define";
 import { uuidSchema } from "../esquemas";
 import { cursorDe, pagina } from "../maestros/comun";
+import { filtrarVisibles } from "./actividades-alcance";
 import { PERMISO_READ, actividadSchema, conRelaciones } from "./actividades-comun";
 import { ENTIDADES_ACTIVIDAD, TIPOS_ACTIVIDAD, exigirEntidad, refDe } from "./comun";
 
@@ -39,7 +40,12 @@ export const actividadesTimeline = defineCapability({
     });
     const filas = await ctx.db.actividad.findMany({
       where: {
-        id: { in: vinculos.map((v) => v.actividadId) },
+        id: {
+          in: await filtrarVisibles(
+            ctx,
+            vinculos.map((v) => v.actividadId),
+          ),
+        },
         ...(input.tipos ? { tipo: { in: input.tipos } } : {}),
       },
       orderBy: [{ ocurrioEn: "desc" }, { id: "desc" }],
@@ -76,7 +82,13 @@ export const actividadesTareas = defineCapability({
       : [];
     const filas = await ctx.db.actividad.findMany({
       where: {
-        id: { in: asignadas.map((r) => r.actividadId) },
+        // Propias / equipo / todas (ADR-022): solo las tareas que el actor puede ver.
+        id: {
+          in: await filtrarVisibles(
+            ctx,
+            asignadas.map((r) => r.actividadId),
+          ),
+        },
         tipo: "tarea",
         estado: input.estado,
       },

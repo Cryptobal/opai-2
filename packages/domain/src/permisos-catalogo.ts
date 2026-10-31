@@ -68,6 +68,8 @@ export const PERMISOS_CORE = {
   // gestiona Comercial; el catálogo de etiquetas (crear, renombrar, borrar) es de owner y admin.
   actividadesRead: "core:actividades.read",
   actividadesManage: "core:actividades.manage",
+  // Eliminar actividades de otras personas (la propia siempre se puede): owner y admin.
+  actividadesAdmin: "core:actividades.admin",
   etiquetasRead: "core:etiquetas.read",
   etiquetasManage: "core:etiquetas.manage",
   etiquetasConfig: "core:etiquetas.config",
