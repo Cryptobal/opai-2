@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 290 pares pantalla→capacidad · 250 con herramienta · 40 excepciones justificadas · 0 faltantes.
+**Resumen:** 291 pares pantalla→capacidad · 251 con herramienta · 40 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -121,6 +121,7 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/documentos/firmas/_componentes` | `core.firmas.list` | `core_firmas_list` | existe |
 | compartido | `app/(erp)/documentos/firmas/[id]/_componentes` | `core.firmas.cancelar` | `core_firmas_cancelar` | existe |
 | compartido | `app/(erp)/documentos/firmas/[id]/_componentes` | `core.firmas.recordar` | `core_firmas_recordar` | existe |
+| compartido | `app/(erp)/finanzas/flujo/_componentes` | `finanzas.planilla.obtener` | `finanzas_planilla_obtener` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.config.get` | `core_config_get` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.cuentas.list` | `core_cuentas_list` | existe |
 | compartido | `app/(erp)/instalaciones/_componentes` | `core.instalaciones.archive` | `core_instalaciones_archive` | existe |
@@ -468,6 +469,17 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `core.ping`
 - `core.puestos.get`
 - `core.usage.summary`
+- `finanzas.ajustes.actualizar`
+- `finanzas.ajustes.obtener`
+- `finanzas.celdas.cumplir`
+- `finanzas.celdas.fijar`
+- `finanzas.celdas.mover`
+- `finanzas.cierres.listar`
+- `finanzas.cierres.reabrir`
+- `finanzas.cierres.sellar`
+- `finanzas.filas.actualizar`
+- `finanzas.filas.crear`
+- `finanzas.filas.listar`
 - `platform.auditoria.estado`
 - `platform.auditoria.list`
 - `platform.bitacora.estado`
