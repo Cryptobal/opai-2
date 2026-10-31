@@ -44,7 +44,7 @@ Cada una está marcada en su pantalla con la opción recomendada ya dibujada.
 
 ## Pendientes menores (no bloquean, próxima vuelta)
 
-- **(ALTO)** El `Forbidden` del módulo dice «Pídele acceso a Carlos Irigoyen…» y el bundle `_ds` trae «Carlos Irigoyen» (usuario por defecto y Forbidden por defecto) y el RUT `77.120.884-3` en ejemplos: se reemplazan por datos inventados (el bundle se corrige una sola vez, en el DS).
+- **(resuelto 30-oct-2026)** El `Forbidden` del módulo y el bundle `_ds` (usuario por defecto y Forbidden por defecto) traían un nombre y un RUT reales en los ejemplos: se reemplazaron por datos inventados en este archivo y en el bundle `_ds`.
 - Entrega en un solo archivo con Tweaks en vez de un HTML por pantalla y ancho.
 - En Configuración › Módulos › Mi cuenta falta la lista de módulos a la izquierda en 1024/1280 y el paso «‹ Módulos» a 375.
 - Los estados solo están en las 5 secciones de cuenta; el vacío es genérico.

@@ -93,6 +93,7 @@ model Negocio {
   instalaciones NegocioInstalacion[]
   contactos     NegocioContacto[]
   historial     HistorialEtapa[]
+  solicitudes   Solicitud[]
 
   @@index([tenantId, estado])
   @@index([tenantId, etapaId])

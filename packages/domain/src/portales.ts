@@ -38,7 +38,16 @@ export function portalesAdmitidos(
  * base de la membresía, nunca el id del rol a medida.
  */
 export function portalesIncoherentes(rolBase: Rol, portales: readonly string[]): string[] {
+  // Contacto de un cliente (Portal Cliente, CAR-88): única excepción a «cliente nunca es de una
+  // membresía». Solo el rol viewer (que además se reduce a un rol sistema sin permisos del ERP) y
+  // SOLO con ese portal: mezclarlo con un portal interno sigue siendo incoherente.
+  if (esMembresiaDeCliente(rolBase, portales)) return [];
   return portales.filter((p) => !portalesAdmitidos(rolBase).includes(p));
+}
+
+/** Membresía de un contacto de cliente: rol viewer con el portal «cliente» como único portal. */
+export function esMembresiaDeCliente(rolBase: Rol, portales: readonly string[]): boolean {
+  return rolBase === "viewer" && portales.length === 1 && portales[0] === "cliente";
 }
 
 export function esPortalCoherente(rolBase: Rol, portales: readonly string[]): boolean {

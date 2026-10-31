@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script></helmet>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="cfg" title="{{ shellTitle }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<div style="font:400 14px/20px var(--font-sans);color:var(--ds-fg-muted);margin-bottom:8px">Configuración › Módulos{{ crumb }}</div>
+<div style="display:grid;grid-template-columns:{{ cols }};gap:24px;align-items:start">
+<sc-if value="{{ showList }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" padding="{{ 8 }}" hint-size="100%,320px">
+<div style="display:flex;flex-direction:column">
+<sc-for list="{{ modulos }}" as="m" hint-placeholder-count="5">
+<div style="display:flex;justify-content:space-between;align-items:center;min-height:44px;padding:0 12px;border-radius:10px;background:{{ m.bg }};font:500 14px/20px var(--font-sans);color:var(--ds-fg)">{{ m.nombre }}<span class="ic i-chevron-right"></span></div>
+</sc-for>
+</div>
+</x-import>
+</sc-if>
+<sc-if value="{{ showEntrada }}" hint-placeholder-val="{{ true }}">
+<div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}"><div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" icon="chevron-left" hint-size="110px,44px">Módulos</x-import></div></sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" title="Control de acceso" subtitle="Registro de entradas y salidas en portería" hint-size="100%,72px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ ambitos }}" value="Empresa" label="Ámbito" hint-size="100%,40px"></x-import>
+<dc-import name="EstadoPanel" estado="{{ estado }}" hint-size="100%,260px"></dc-import>
+<sc-if value="{{ isNormal }}" hint-placeholder-val="{{ true }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Tipos de registro" padding="{{ 16 }}" hint-size="100%,420px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;flex-wrap:wrap;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Visita" activo="{{ true }}" hint-size="90px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Contratista" activo="{{ true }}" hint-size="110px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Proveedor" activo="{{ true }}" hint-size="100px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Vehículo" activo="{{ true }}" hint-size="100px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Despacho" activo="{{ false }}" hint-size="100px,32px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Campo" etiqueta="Campos del formulario" ayuda="Elige cuáles se piden y cuáles son obligatorios." hint-size="100%,80px"><div style="display:flex;flex-wrap:wrap;gap:8px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Nombre · obligatorio" activo="{{ true }}" hint-size="170px,32px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Empresa" activo="{{ true }}" hint-size="100px,32px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Anfitrión" activo="{{ false }}" hint-size="110px,32px"></x-import></div></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Campo" etiqueta="Modo de lista" hint-size="100%,72px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" options="{{ modos }}" value="Solo listas" hint-size="100%,40px"></x-import></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" label="Permitir ingresos fuera de lista" description="Apagado por defecto. Al activarlo queda auditado y cada ingreso se marca «Fuera de lista, permitido»." hint-size="100%,80px"></x-import>
+</div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Captura" padding="{{ 16 }}" hint-size="100%,260px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" label="Cédula (QR o PDF417)" checked="{{ true }}" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" label="Pasaporte (MRZ)" checked="{{ true }}" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" label="Patente por cámara" description="Consume créditos de lectura." checked="{{ true }}" hint-size="100%,64px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" label="Guardar foto del documento" description="Apagado. Al activarlo debes justificarlo." hint-size="100%,64px"></x-import>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Permanencia, cierre y sin conexión" padding="{{ 16 }}" hint-size="100%,260px">
+<div style="display:grid;grid-template-columns:{{ cols2 }};gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Campo" etiqueta="Permanencia máxima" hint-size="100%,72px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" value="8 horas" style="width:100%" hint-size="100%,44px"></x-import></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Campo" etiqueta="Hora de cierre" hint-size="100%,72px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" value="23:59" style="width:100%" hint-size="100%,44px"></x-import></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Campo" etiqueta="Antigüedad máxima de listas sin conexión" hint-size="100%,72px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" value="24 horas" style="width:100%" hint-size="100%,44px"></x-import></x-import>
+</div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Cliente" padding="{{ 16 }}" hint-size="100%,160px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" label="El cliente gestiona su lista" checked="{{ true }}" hint-size="100%,44px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Switch" label="El cliente autoriza excepciones" hint-size="100%,44px"></x-import>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Datos personales" padding="{{ 16 }}" hint-size="100%,300px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<div style="display:grid;grid-template-columns:{{ cols2 }};gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Campo" etiqueta="Retención de registros" hint-size="100%,72px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" value="12 meses" style="width:100%" hint-size="100%,44px"></x-import></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Campo" etiqueta="Retención de intentos denegados" hint-size="100%,72px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" value="6 meses" style="width:100%" hint-size="100%,44px"></x-import></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Campo" etiqueta="Texto del aviso" hint-size="100%,120px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" style="width:100%" hint-size="100%,88px"></x-import></x-import>
+<div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="download" hint-size="240px,44px">Descargar cartel de privacidad</x-import></div>
+</div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Reportes" padding="{{ 16 }}" hint-size="100%,200px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<div style="display:grid;grid-template-columns:{{ cols2 }};gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Campo" etiqueta="Frecuencia" hint-size="100%,72px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" value="Semanal · lunes 08:00" style="width:100%" hint-size="100%,44px"></x-import></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Campo" etiqueta="Destinatarios" hint-size="100%,72px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" value="marcela.rojas@atlas.example" style="width:100%" hint-size="100%,44px"></x-import></x-import>
+</div>
+<div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="send" hint-size="140px,44px">Enviar prueba</x-import></div>
+</div>
+</x-import>
+</sc-if>
+</div>
+</sc-if>
+</div>
+</x-import>
+</x-import>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;estado&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;sinpermiso&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;vista&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;lista&quot;,&quot;entrada&quot;],&quot;default&quot;:&quot;entrada&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const device = this.props.device ?? "desktop"; const ph = device === "phone"; const estado = this.props.estado ?? "normal";
+    const vista = this.props.vista ?? "entrada";
+    const mods = ["Personas", "Instalaciones", "Control de acceso", "Pauta", "Rondas", "Tickets"];
+    return {
+      device, theme: this.props.theme ?? "light", isPhone: ph, estado, isNormal: estado === "normal", shellTitle: ph ? "" : "Configuración",
+      showList: !ph || vista === "lista", showEntrada: !ph || vista === "entrada",
+      crumb: ph && vista === "entrada" ? " › Control de acceso" : "", cols: ph ? "minmax(0,1fr)" : "240px minmax(0,1fr)", cols2: ph ? "minmax(0,1fr)" : "repeat(2,minmax(0,1fr))",
+      modulos: mods.map((n) => ({ nombre: n, bg: n === "Control de acceso" && !ph ? "var(--ds-fill)" : "transparent" })),
+      ambitos: ["Empresa", "Planta Quilicura", "Bodega Lampa", "Torre Apoquindo"], modos: ["Solo listas", "Registro manual"],
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "acc", label: "Accesos", icon: "user-check" }, { id: "per", label: "Personas", icon: "users" }, { id: "tic", label: "Tickets", icon: "ticket" }, { id: "mas", label: "Más", icon: "more" }],
+      groups: [{ items: [{ id: "ini", label: "Inicio", icon: "home" }] }, { title: "Operaciones", items: [{ id: "acc", label: "Accesos", icon: "user-check" }] }, { title: "Administración", items: [{ id: "cfg", label: "Configuración", icon: "settings" }] }],
+    };
+  }
+}
+</script>
+</body>
+</html>

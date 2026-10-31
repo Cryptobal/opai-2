@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script></helmet>
+<sc-if value="{{ isCargando }}" hint-placeholder-val="{{ false }}">
+<div style="display:flex;flex-direction:column;gap:12px">
+<sc-for list="{{ sk }}" as="s" hint-placeholder-count="4">
+<div style="display:flex;gap:12px;align-items:center;padding:12px;border:1px solid var(--ds-border);border-radius:16px;background:var(--ds-surface)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" circle="{{ true }}" width="{{ 40 }}" height="{{ 40 }}" hint-size="40px,40px"></x-import>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="50%" height="14" hint-size="50%,14px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="30%" height="12" hint-size="30%,12px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="72" height="24" radius="12" hint-size="72px,24px"></x-import>
+</div>
+</sc-for>
+</div>
+</sc-if>
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="users" title="{{ emptyTitle }}" description="{{ emptyDesc }}" action="{{ emptyBtn }}" hint-size="100%,260px"></x-import>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar los datos" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="ACC-503" on-retry="{{ noop }}" retry-label="Reintentar" hint-size="100%,260px"></x-import>
+</sc-if>
+<sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes permiso para ver esto" description="Pídele acceso a un administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,260px"></x-import>
+</sc-if>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const h = React.createElement; const NS = window.OPAI20DesignSystem_44e4d7 || {}; const p = this.props; const e = p.estado;
+    return { isCargando: e === "cargando", isVacio: e === "vacio", isError: e === "error", isForbidden: e === "sinpermiso", sk: [1,2,3,4], noop: () => {},
+      emptyTitle: p.emptyTitle ?? "Aún no hay registros", emptyDesc: p.emptyDesc ?? "Prerregistra una visita o cambia los filtros.",
+      emptyBtn: NS.Button && p.emptyAction ? h(NS.Button, { icon: "plus" }, p.emptyAction) : null };
+  }
+}
+</script>
+</body>
+</html>
