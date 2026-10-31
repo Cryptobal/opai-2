@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import { type Client } from "pg";
 
 import { type Tabla } from "./catalogo";
+import { AJUSTES } from "./ajustes";
 import { type Fila } from "./siembra";
 
 export type Resultado = { filas: number; codigo?: string; mensaje?: string };
@@ -59,7 +60,11 @@ export function copia(t: Tabla, fila: Fila, cambios: Fila = {}): Fila {
   for (const c of t.columnas) {
     if (c.generada || !(c.nombre in fila)) continue;
     const valor = fila[c.nombre];
-    const regenerar = t.unicas.has(c.nombre) && c.nombre !== "tenant_id" && !refs.has(c.nombre);
+    const regenerar =
+      t.unicas.has(c.nombre) &&
+      c.nombre !== "tenant_id" &&
+      !refs.has(c.nombre) &&
+      !(AJUSTES[t.nombre]?.fijas ?? []).includes(c.nombre);
     if (c.tipo === "json" || c.tipo === "jsonb")
       nueva[c.nombre] = valor === null ? null : JSON.stringify(valor);
     else if (!regenerar || valor === null) nueva[c.nombre] = valor;
