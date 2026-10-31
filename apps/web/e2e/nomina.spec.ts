@@ -13,6 +13,16 @@ async function captura(page: Page, nombre: string, proyecto: string) {
   await page.screenshot({ path: `e2e/__screenshots__/${nombre}-${proyecto}.png`, fullPage: true });
 }
 
+/** Cada shard de CI usa su propia base: el test crea el período si aún no hay (no depende de otro test). */
+async function conPeriodo(page: Page) {
+  await page.goto("/nomina");
+  if (await page.getByText("Aún no hay períodos").isVisible()) {
+    await page.getByRole("button", { name: "Abrir período" }).first().click();
+    await page.getByRole("dialog").getByRole("button", { name: "Abrir", exact: true }).click();
+    await expect(page.getByText("Abierto").first()).toBeVisible({ timeout: 30_000 });
+  }
+}
+
 test.describe("Nómina", () => {
   test.skip(!E2E_PASSWORD, "Falta SEED_OWNER_PASSWORD o E2E_PASSWORD");
 
@@ -23,10 +33,8 @@ test.describe("Nómina", () => {
     await expect(page.getByRole("button", { name: "Abrir período" })).toBeVisible();
     await page.getByRole("button", { name: "Abrir período" }).click();
     const abrir = page.getByRole("dialog").getByRole("button", { name: "Abrir", exact: true });
-    const respuesta = page.waitForResponse((r) => r.request().method() === "POST" && (r.request().postData() ?? "").includes("nomina.periodos.abrir"));
     await abrir.click();
-    await respuesta;
-    await expect(page.getByText("Abierto").first()).toBeVisible();
+    await expect(page.getByText("Abierto").first()).toBeVisible({ timeout: 30_000 });
     await expect(page.getByRole("button", { name: "Pasar a revisión" }).first()).toBeVisible();
     await captura(page, "nomina-periodos", info.project.name);
   });
@@ -42,6 +50,7 @@ test.describe("Nómina", () => {
 
   test("novedades: anticipos y préstamos enlazados desde el período", async ({ page }, info) => {
     await entrar(page);
+    await conPeriodo(page);
     await page.goto("/nomina/novedades");
     await expect(page.getByRole("group", { name: "Vista" })).toBeVisible();
     await page.getByRole("link", { name: "Anticipos" }).click();
@@ -56,13 +65,9 @@ test.describe("Nómina", () => {
     await page.goto("/nomina/calendario");
     const generar = page.getByRole("button", { name: /Generar calendario|Completar calendario/ }).first();
     await expect(generar).toBeVisible();
-    if (info.project.name === "ipad") {
-      const respuesta = page.waitForResponse((r) => r.request().method() === "POST" && (r.request().postData() ?? "").includes("nomina.obligaciones.generar_calendario"));
-      await generar.click();
-      await respuesta;
-    }
-    await page.reload();
-    await expect(page.getByText("Formato por verificar").first()).toBeVisible();
+    // Idempotente: completa el calendario del año en cualquier proyecto (cada shard tiene su base).
+    await generar.click();
+    await expect(page.getByText("Formato por verificar").first()).toBeVisible({ timeout: 30_000 });
     await expect(page.getByText("Plazo por verificar").first()).toBeVisible();
     await captura(page, "nomina-calendario", info.project.name);
   });
