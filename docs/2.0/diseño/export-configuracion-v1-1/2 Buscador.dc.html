@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<style>body{margin:0;background:var(--ds-fill)}</style>
+</helmet>
+<dc-import name="Lamina" prefijo="2" titulo="2 · Buscador de ajustes" nota="Resultados agrupados por grupo con la ruta («Operación › Calendario»), el campo encontrado y el texto buscado resaltado. A 375 ocupan la pantalla completa, con «Cancelar»." secciones="{{ secciones }}" hint-size="100%,100%"></dc-import>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    return { secciones: [
+      { id: "resultados", titulo: "Con resultados", nota: "En escritorio el primer resultado queda activo para abrirlo con ↵.", bases: [{ n: "Buscador_feriados", s: "«feriados» · coincide en palabra clave", x3: true, o: { q: "feriados" } }, { n: "Buscador_api", s: "«api» · coincide en nombre", x3: true, o: { q: "api" } }] },
+      { id: "buscando", titulo: "Buscando", nota: "Esqueleto de 3 resultados.", bases: [{ n: "Buscando", s: "«feriados»", x3: true, o: { q: "feriados", buscando: true } }] },
+      { id: "sin-resultados", titulo: "Sin resultados", nota: "«No encontramos “xyz”. Prueba con otra palabra», con los grupos como enlaces.", bases: [{ n: "Sin_resultados", s: "«xyz»", x3: true, o: { q: "xyz" } }] },
+      { id: "error", titulo: "Error del buscador", nota: "«No pudimos buscar» con «Reintentar».", bases: [{ n: "Error_busqueda", s: "«feriados»", x3: true, o: { q: "feriados", errorBusqueda: true } }] },
+    ] };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="design_doc_mode" content="canvas">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<style>body{margin:0;background:var(--ds-fill);color:var(--ds-fg);font-family:var(--font-sans)}a{color:var(--ds-accent)}a:hover{color:var(--ds-fg)}</style>
+</helmet>
+<div style="padding:64px;display:flex;flex-direction:column;gap:32px;max-width:960px">
+<header style="display:flex;flex-direction:column;gap:12px">
+<span class="t-overline" style="color:var(--ds-fg-muted)">v1.1 · OPAI 2.0 · DS 2.0 · 30-10-2026</span>
+<h1 class="t-display" style="margin:0">Centro de Configuración · v1.1</h1>
+<p class="t-body" style="margin:0;color:var(--ds-fg-muted);text-wrap:pretty">Portada con buscador, Alerta de aprobaciones y tarjetas de grupo sin contadores; subpágina de grupo y grupo Módulos. Cada pantalla va a 375, 1024 y 1280, en claro y en oscuro, y es navegable.</p>
+</header>
+<div style="display:flex;flex-direction:column;background:var(--ds-surface);border:1px solid var(--ds-border);border-radius:16px;overflow:hidden">
+<sc-for list="{{ filas }}" as="f" hint-placeholder-count="11">
+<a href="{{ f.href }}" style="display:flex;align-items:center;gap:16px;min-height:56px;padding:12px 20px;border-bottom:1px solid var(--ds-border);text-decoration:none;color:var(--ds-fg)">
+<span style="font:600 12px/16px var(--font-mono);color:var(--ds-fg-muted);width:24px">{{ f.n }}</span>
+<span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span class="t-label">{{ f.titulo }}</span><span class="t-caption" style="color:var(--ds-fg-muted)">{{ f.nota }}</span></span>
+<span class="t-caption" style="color:var(--ds-fg-muted)">{{ f.estado }}</span>
+</a>
+</sc-for>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const F = (n, titulo, nota, href, estado) => ({ n, titulo, nota, href: encodeURI(href), estado });
+    return { filas: [
+      F("1", "Portada", "Buscador, aprobaciones y tarjetas de grupo", "1 Portada.dc.html", "Decidido"),
+      F("2", "Buscador", "Resultados, buscando, sin resultados y error", "2 Buscador.dc.html", "Decidido"),
+      F("3", "Grupo Operación › Calendario", "Lista y detalle con migas", "3 Grupo Operacion Calendario.dc.html", "Decidido"),
+      F("4", "Grupo Módulos", "Catálogo, 9 módulos con buscador y Rondas abierto", "4 Grupo Modulos.dc.html", "Decidido"),
+      F("5", "Agentes", "Incluye el Agente interno", "5 Agentes.dc.html", "Decidido"),
+      F("6", "Variante B1 · Documentos en Módulos", "Documentos sale de Operación y pasa a Módulos", "6 Variante B1 Documentos en Modulos.dc.html", "Propuesta, a confirmar por Carlos"),
+      F("7", "Vista por rol", "Owner/Administrador, Gerente, Supervisor y Visualizador", "7 Vista por rol.dc.html", "Decidido"),
+      F("8", "Menú de usuario", "Mi cuenta, Preferencias y Cerrar sesión", "8 Menu de usuario.dc.html", "Decidido"),
+      F("9", "Estados especiales", "Cargando, error, sin permiso y 404", "9 Estados especiales.dc.html", "Decidido"),
+      F("", "Hoja de componentes", "TarjetaGrupo y ResultadoAjuste, piezas nuevas del DS", "Hoja de componentes.dc.html", "Nuevo para el DS"),
+    ] };
+  }
+}
+</script>
+</body>
+</html>

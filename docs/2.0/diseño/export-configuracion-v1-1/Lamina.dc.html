@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+</helmet>
+<div style="padding:64px;display:flex;flex-direction:column;gap:64px;background:var(--ds-fill);color:var(--ds-fg);font-family:var(--font-sans);min-width:max-content">
+<header style="display:flex;flex-direction:column;gap:12px;max-width:960px">
+<span class="t-overline" style="color:var(--ds-fg-muted)">{{ cabecera }}</span>
+<h1 class="t-display" style="margin:0">{{ titulo }}</h1>
+<p class="t-body" style="margin:0;color:var(--ds-fg-muted);text-wrap:pretty">{{ nota }}</p>
+<sc-if value="{{ propuesta }}" hint-placeholder-val="{{ false }}"><span class="t-label" style="color:var(--ds-info-fg)">Propuesta, a confirmar por Carlos</span></sc-if>
+<nav class="t-label" style="display:flex;flex-wrap:wrap;gap:16px;padding-top:4px"><a href="Indice.dc.html" style="color:var(--ds-accent)">Índice</a><sc-for list="{{ secciones }}" as="s" hint-placeholder-count="3"><a href="{{ s.href }}" style="color:var(--ds-accent)">{{ s.titulo }}</a></sc-for></nav>
+</header>
+<sc-for list="{{ secciones }}" as="sec" hint-placeholder-count="2">
+<section id="{{ sec.id }}" style="display:flex;flex-direction:column;gap:24px">
+<div style="display:flex;flex-direction:column;gap:4px;max-width:960px">
+<h2 class="t-title" style="margin:0">{{ sec.titulo }}</h2>
+<p class="t-body-sm" style="margin:0;color:var(--ds-fg-muted);text-wrap:pretty">{{ sec.nota }}</p>
+</div>
+<sc-for list="{{ sec.filas }}" as="fila" hint-placeholder-count="2">
+<div style="display:flex;flex-direction:column;gap:16px">
+<span class="t-overline" style="color:var(--ds-fg-muted)">{{ fila.label }}</span>
+<div style="display:flex;flex-wrap:wrap;gap:48px;align-items:flex-start">
+<sc-for list="{{ fila.items }}" as="a" hint-placeholder-count="3">
+<div id="{{ a.id }}" style="display:flex;flex-direction:column;gap:12px">
+<div style="display:flex;align-items:center;gap:10px">
+<span style="font:600 12px/16px var(--font-mono);background:var(--ds-fg);color:var(--ds-bg);border-radius:999px;padding:3px 9px">{{ a.id }}</span>
+<span class="t-label" style="font-family:var(--font-mono)">{{ a.nombre }}</span>
+<span class="t-caption" style="color:var(--ds-fg-muted)">{{ a.sub }}</span>
+</div>
+<div data-theme="{{ a.theme }}" data-ab="{{ a.id }}" style="{{ a.frame }}">
+<sc-if value="{{ a.on }}" hint-placeholder-val="{{ false }}">
+<dc-import name="ConfigScreen" device="{{ a.device }}" theme="{{ a.theme }}" rol="{{ a.rol }}" vista="{{ a.vista }}" grupo="{{ a.grupo }}" entrada="{{ a.entrada }}" tab="{{ a.tab }}" q="{{ a.q }}" estado="{{ a.estado }}" aprobaciones="{{ a.aprob }}" sin-modulos="{{ a.sinModulos }}" b1="{{ a.b1 }}" alerta-b1="{{ a.alertaB1 }}" buscando="{{ a.buscando }}" error-busqueda="{{ a.errorBusqueda }}" menu="{{ a.menu }}" style="width:100%;height:100%" hint-size="100%,100%"></dc-import>
+</sc-if>
+</div>
+</div>
+</sc-for>
+</div>
+</div>
+</sc-for>
+</section>
+</sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;titulo&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;nota&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;prefijo&quot;:{&quot;editor&quot;:&quot;text&quot;,&quot;default&quot;:&quot;1&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;propuesta&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;secciones&quot;:{&quot;editor&quot;:null,&quot;tsType&quot;:&quot;any[]&quot;}}">
+class Component extends DCLogic {
+  state = { on: {} };
+  componentDidMount() {
+    this.io = new IntersectionObserver((ents) => {
+      const add = {};
+      ents.forEach((e) => { if (e.isIntersecting) { add[e.target.dataset.ab] = true; this.io.unobserve(e.target); } });
+      if (Object.keys(add).length) this.setState((s) => ({ on: { ...s.on, ...add } }));
+    }, { rootMargin: "400px" });
+    this.seen = new Set();
+    this.scan = () => document.querySelectorAll("[data-ab]").forEach((el) => { if (!this.seen.has(el)) { this.seen.add(el); this.io.observe(el); } });
+    this.t = setInterval(this.scan, 500); this.scan();
+  }
+  componentWillUnmount() { clearInterval(this.t); this.io && this.io.disconnect(); }
+  renderVals() {
+    const p = this.props, on = this.state.on, pre = p.prefijo ?? "1";
+    const SZ = { desktop: [1280, 800], tablet: [1024, 768], phone: [375, 812] };
+    const W = { desktop: "1280", tablet: "1024", phone: "375" };
+    let n = 0;
+    const expand = (b) => (b.x3 ? ["desktop", "tablet", "phone"].map((d) => ({ ...b, o: { ...b.o, device: d } })) : [b]);
+    const secciones = (p.secciones || []).map((s) => ({
+      id: s.id, href: "#" + s.id, titulo: s.titulo, nota: s.nota,
+      filas: ["light", "dark"].map((th) => ({
+        label: th === "light" ? "Claro" : "Oscuro",
+        items: s.bases.flatMap(expand).map((b) => {
+          n += 1;
+          const id = pre + "." + String(n).padStart(2, "0"), o = b.o || {}, d = o.device || "desktop", [w, h] = SZ[d];
+          return { id, nombre: id.replace(".", "_") + "_" + b.n + "_" + W[d] + (th === "dark" ? "_oscuro" : ""), sub: b.s, aprob: 3, ...o, theme: th, on: !!on[id], device: d,
+            frame: { width: w, height: h, borderRadius: d === "phone" ? 28 : 12, overflow: "hidden", border: "1px solid var(--ds-border)", background: "var(--ds-bg)", flex: "none" } };
+        }),
+      })),
+    }));
+    return { secciones, cabecera: "v1.1 · OPAI 2.0 · DS 2.0 · Configuración · 30-10-2026", titulo: p.titulo ?? "", nota: p.nota ?? "", propuesta: !!p.propuesta };
+  }
+}
+</script>
+</body>
+</html>
