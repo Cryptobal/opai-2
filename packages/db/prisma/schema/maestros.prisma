@@ -244,6 +244,15 @@ model Persona {
   archivadaEn         DateTime? @map("archivada_en") @db.Timestamptz(6)
   /// Anonimizada por la política de retención o a pedido del titular (Ley 21.719, 07d PR 3).
   anonimizadaEn       DateTime? @map("anonimizada_en") @db.Timestamptz(6)
+  /// Marca P1 "No recontratar" (design-prompt-personas-cargos.md): visible solo con
+  /// core:personas.no_recontratar.manage (RRHH/admin). Base de interés legítimo (art. 13 d) de la Ley
+  /// 19.628, modificada por la 21.719); el motivo es texto libre (lista cerrada pendiente de Carlos,
+  /// ver brief). Vence siempre (noRecontratarVenceEn obligatorio al marcar); al vencer, las 4 columnas
+  /// se limpian (core.personas.no_recontratar_vencer).
+  noRecontratar        Boolean   @default(false) @map("no_recontratar")
+  noRecontratarMotivo  String?   @map("no_recontratar_motivo")
+  noRecontratarEn      DateTime? @map("no_recontratar_en") @db.Timestamptz(6)
+  noRecontratarVenceEn DateTime? @map("no_recontratar_vence_en") @db.Timestamptz(6)
   createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt           DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
 
