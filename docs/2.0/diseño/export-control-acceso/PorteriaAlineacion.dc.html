@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script></helmet>
+<div data-theme="{{ theme }}" style="min-height:100%;background:var(--ds-bg);padding:24px 16px;box-sizing:border-box">
+<div style="max-width:900px;margin:0 auto;display:flex;flex-direction:column;gap:16px">
+<div><div style="font:500 12px/16px var(--font-sans);color:var(--ds-fg-muted)">Terreno v1 · Portería (PR #150)</div>
+<div style="font:600 28px/34px var(--font-sans);color:var(--ds-fg)">Alineación de la portería</div>
+<div style="font:400 14px/20px var(--font-sans);color:var(--ds-fg-muted);margin-top:4px">Solo se corrige lo que no coincide con la Hoja de componentes. No se redibuja lo aprobado.</div></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Decide Carlos · Por confirmar D1" hint-size="100%,72px">Falta definir si la portería es un dispositivo emparejado de la instalación o la sesión de cada guardia. Se dibuja con un dispositivo emparejado.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="1 · Componentes compartidos" description="Portería, Registrar entrada, Registrar salida, En sitio, Evacuación y Cola sin conexión usan EscanerDocumento, ResultadoAcceso, IndicadorConexion y FilaEnSitio." padding="{{ 16 }}" hint-size="100%,120px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="2 · Bloqueado y No autorizado" padding="{{ 16 }}" hint-size="100%,360px">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="danger" titulo="Acceso no autorizado" icono="lock" hint-size="100%,80px">No se muestra el motivo. No hay excepción posible.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="phone" style="min-height:56px" hint-size="100%,56px">Avisar a mi supervisor</x-import>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" titulo="No autorizado" icono="alert-triangle" hint-size="100%,80px">No está en la lista ni prerregistrado.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" icon="user-check" style="min-height:56px" hint-size="100%,56px">Pedir excepción</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="phone" style="min-height:56px" hint-size="100%,56px">Avisar a mi supervisor</x-import>
+<div style="font:400 13px/18px var(--font-sans);color:var(--ds-fg-muted)">Después de pedirla: «Esperando autorización de Marcela Rojas», luego aprobada o rechazada.</div>
+</div>
+</div>
+</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="3 · Dispositivo revocado (nuevo estado)" description="Pantalla completa, sin datos." padding="{{ 16 }}" hint-size="100%,360px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="Dispositivo revocado" description="Pide a tu supervisor que vuelva a emparejar este equipo." action-label="{{ null }}" hint-size="100%,300px"></x-import>
+</x-import>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;}}">
+class Component extends DCLogic {
+  renderVals() { return { theme: this.props.theme ?? "light" }; }
+}
+</script>
+</body>
+</html>
