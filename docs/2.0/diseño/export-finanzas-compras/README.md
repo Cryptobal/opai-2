@@ -37,5 +37,5 @@ Cada pantalla trae sus variantes a 375, 1024 y 1280 px, en claro y oscuro, con s
 
 - El centro de costo general se llama «Administración» y debe llamarse «Administración / Oficina central».
 - Falta dibujar los ajustes del módulo en Configuración › Módulos › Finanzas (por ejemplo, el umbral de reglas sugeridas).
-- Quitar «C. Irigoyen» / «Carlos Irigoyen» de los datos de ejemplo (`Asientos.dc.html`, `Conciliacion.dc.html`, `fin-shell.js`) y del bundle `_ds`.
+- (resuelto 30-oct-2026) Se reemplazó el nombre real de los datos de ejemplo (`Asientos.dc.html`, `Conciliacion.dc.html`, `fin-shell.js`) y del bundle `_ds` por uno ficticio.
 - El Índice dice «Finanzas v1 · CAR-98».

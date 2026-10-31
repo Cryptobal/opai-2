@@ -579,7 +579,7 @@ class Component extends DCLogic{
     const S={};Object.keys(META).forEach(k=>S[k]=ok&&base===k);S.emg=ok&&scr==='g3e';S.nov=ok&&(scr==='g4nov'||scr==='g9');
     const msgs={vacio:{t:meta.e[0],d:meta.e[1],a:meta.e[2],aic:meta.e[3],ic:'inbox'},
       error:{t:'No pudimos cargar '+meta.noun,d:'Revisa tu conexión. Si el problema sigue, avísale a soporte con el código RND-503.',a:'Reintentar',aic:'refresh',ic:'alert'},
-      permisos:{t:'No tienes acceso a Rondas',d:'Tu perfil no incluye rondas en Planta Quilicura. Pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA.',a:'Pedir acceso',aic:'lock',ic:'lock'}};
+      permisos:{t:'No tienes acceso a Rondas',d:'Tu perfil no incluye rondas en Planta Quilicura. Pídele acceso a un administrador de Atlas Seguridad SpA.',a:'Pedir acceso',aic:'lock',ic:'lock'}};
     const gv={
       g4gps:{tone:'success',badge:'Dentro del punto',t:'Mantente 12 s',d:'Quédate quieto cerca del cerco. Marcaremos solos al terminar la cuenta.',big:'12',unit:'segundos',off:'184',stroke:'var(--ds-success)',dist:'6 m',prec:'8 m',pc:'var(--ds-fg)'},
       g4gpsP:{tone:'warning',badge:'Precisión insuficiente',t:'Acércate a un lugar abierto',d:'La precisión es de 42 m y este punto pide 15 m o menos. Aléjate de muros y techos.',big:'42',unit:'m de precisión',off:'553',stroke:'var(--ds-warning)',dist:'—',prec:'42 m',pc:'var(--ds-warning-fg)'},

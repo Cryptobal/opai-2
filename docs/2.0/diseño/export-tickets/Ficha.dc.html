@@ -133,7 +133,7 @@
 <x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="{{ d.errorTitle }}" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="TK-503-91C0" on-retry="{{ noop }}" hint-size="100%,280px"></x-import>
 </sc-if>
 <sc-if value="{{ isForbidden }}" hint-placeholder-val="{{ false }}">
-<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="{{ d.forbiddenTitle }}" description="Lo ven quien lo pidió, su dueño, el aprobador del tipo y la administración. Si lo necesitas, pídele acceso a Carlos Irigoyen, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,280px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="{{ d.forbiddenTitle }}" description="Lo ven quien lo pidió, su dueño, el aprobador del tipo y la administración. Si lo necesitas, pídele acceso a Andrés Molina, administrador de Atlas Seguridad SpA." action-label="Pedir acceso" on-action="{{ noop }}" hint-size="100%,280px"></x-import>
 </sc-if>
 </x-import>
 <sc-if value="{{ phoneBar }}" hint-placeholder-val="{{ false }}">
@@ -184,7 +184,7 @@ class Component extends DCLogic {
     const badge = (t, l) => (NS.Badge ? h(NS.Badge, { tone: t }, l) : l);
     const P = (ini, who, action, when, extra) => ({ ini, who, action, when, person: true, agent: false, changes: [], hasNota: false, nota: "", ...extra });
     const A = (action, when, extra) => ({ ...P("", "OPAI", action, when, extra), person: false, agent: true });
-    let d, est, alerta = null, prim = null, sec = null, user = { name: "Carlos Irigoyen", initials: "CI", role: "Administrador" };
+    let d, est, alerta = null, prim = null, sec = null, user = { name: "Andrés Molina", initials: "AM", role: "Administrador" };
     if (!sol) {
       d = {
         eyebrow: "TK-1052 · Mantención", title: "Cámara del andén norte sin señal", pairsTitle: "Datos",
@@ -197,11 +197,11 @@ class Component extends DCLogic {
       };
       const base = [
         P("PC", "Paula Contreras", "creó el ticket", "29-10-2026 22:14"),
-        A("asignó el dueño por defecto del tipo Mantención", "29-10-2026 22:14", { changes: [{ field: "Dueño", from: "Sin dueño", to: "Carlos Irigoyen" }] }),
+        A("asignó el dueño por defecto del tipo Mantención", "29-10-2026 22:14", { changes: [{ field: "Dueño", from: "Sin dueño", to: "Andrés Molina" }] }),
       ];
       const work = [
-        P("CI", "Carlos Irigoyen", "tomó el ticket", "30-10-2026 08:05", { changes: [{ field: "Estado", from: "Abierto", to: "En curso" }] }),
-        P("CI", "Carlos Irigoyen", "respondió", "30-10-2026 08:12", { hasNota: true, nota: "Coordiné con el técnico para hoy entre 14:00 y 16:00. Mientras, el guardia del andén hace ronda cada 30 min." }),
+        P("AM", "Andrés Molina", "tomó el ticket", "30-10-2026 08:05", { changes: [{ field: "Estado", from: "Abierto", to: "En curso" }] }),
+        P("AM", "Andrés Molina", "respondió", "30-10-2026 08:12", { hasNota: true, nota: "Coordiné con el técnico para hoy entre 14:00 y 16:00. Mientras, el guardia del andén hace ronda cada 30 min." }),
         P("PC", "Paula Contreras", "respondió", "30-10-2026 08:30", { hasNota: true, nota: "Ok. El técnico debe registrarse en portería con su RUT." }),
       ];
       let tl = vacio ? base : base.concat(work);
@@ -210,14 +210,14 @@ class Component extends DCLogic {
       if (caso === "resuelto_espera") {
         user = { name: "Paula Contreras", initials: "PC", role: "Jefa de operaciones" };
         est = ["success", "Resuelto"];
-        tl = base.concat(work, [P("CI", "Carlos Irigoyen", "lo marcó como resuelto", "30-10-2026 16:20", { changes: [{ field: "Estado", from: "En curso", to: "Resuelto" }], hasNota: true, nota: "El técnico cambió la fuente de poder de la cámara 4. Quedó grabando desde las 16:05; lo revisamos en la central." }), A("te avisó la resolución en tu portal y por correo", "30-10-2026 16:20")]);
-        alerta = { tono: "success", titulo: "Resuelto · esperando que lo cierres", body: "Revisa la respuesta de Carlos. Si quedó bien, ciérralo; si no, reábrelo y cuéntale qué falta." };
+        tl = base.concat(work, [P("AM", "Andrés Molina", "lo marcó como resuelto", "30-10-2026 16:20", { changes: [{ field: "Estado", from: "En curso", to: "Resuelto" }], hasNota: true, nota: "El técnico cambió la fuente de poder de la cámara 4. Quedó grabando desde las 16:05; lo revisamos en la central." }), A("te avisó la resolución en tu portal y por correo", "30-10-2026 16:20")]);
+        alerta = { tono: "success", titulo: "Resuelto · esperando que lo cierres", body: "Revisa la respuesta de Andrés. Si quedó bien, ciérralo; si no, reábrelo y cuéntale qué falta." };
         prim = ["Cerrar ticket", "check"]; sec = ["Reabrir", null];
       }
       if (caso === "rechazado") {
         est = ["danger", "Rechazado"];
-        tl = base.concat([P("CI", "Carlos Irigoyen", "rechazó el ticket", "30-10-2026 09:12", { changes: [{ field: "Estado", from: "Abierto", to: "Rechazado" }], hasNota: true, nota: "La cámara 4 está en garantía y la cambia el proveedor. Ya está agendado para el lunes 03-11-2026." }), A("avisó el rechazo a Paula en su portal y por correo", "30-10-2026 09:12")]);
-        alerta = { tono: "danger", titulo: "Rechazado por Carlos Irigoyen · 30-10-2026 09:12", body: "Motivo: «La cámara 4 está en garantía y la cambia el proveedor. Ya está agendado para el lunes 03-11-2026.» Paula lo recibió en su portal y por correo." };
+        tl = base.concat([P("AM", "Andrés Molina", "rechazó el ticket", "30-10-2026 09:12", { changes: [{ field: "Estado", from: "Abierto", to: "Rechazado" }], hasNota: true, nota: "La cámara 4 está en garantía y la cambia el proveedor. Ya está agendado para el lunes 03-11-2026." }), A("avisó el rechazo a Paula en su portal y por correo", "30-10-2026 09:12")]);
+        alerta = { tono: "danger", titulo: "Rechazado por Andrés Molina · 30-10-2026 09:12", body: "Motivo: «La cámara 4 está en garantía y la cambia el proveedor. Ya está agendado para el lunes 03-11-2026.» Paula lo recibió en su portal y por correo." };
         prim = null;
       }
       d.tl = tl;
@@ -225,7 +225,7 @@ class Component extends DCLogic {
         { label: "Estado", value: badge(est[0], est[1]) },
         { label: "Solicitante", value: "Paula Contreras · Jefa de operaciones" },
         { label: "Tipo", value: "Mantención" },
-        { label: "Dueño", value: "Carlos Irigoyen" },
+        { label: "Dueño", value: "Andrés Molina" },
         { label: "Creado", value: "29-10-2026 22:14", numeric: true },
         { label: "SLA", value: caso === "normal" ? badge("warning", "Vence en 2 h 10 min") : "24 h · " + (caso === "rechazado" ? "detenido" : "cumplido") },
       ];
@@ -308,7 +308,7 @@ class Component extends DCLogic {
       dlgOwner: dlg === "cambiar_dueno", dlgReject: dlg === "rechazar", closeDlg,
       motivo, setMotivo: (v) => this.setState({ motivo: v }),
       newOwner: this.state.newOwner, setNewOwner: (v) => this.setState({ newOwner: v }),
-      ownerOptions: [{ value: "Jorge Muñoz", label: "Jorge Muñoz", description: "Supervisor · Planta Quilicura" }, { value: "Paula Contreras", label: "Paula Contreras", description: "Jefa de operaciones" }, { value: "Carlos Irigoyen", label: "Carlos Irigoyen", description: "Administrador · dueño actual" }],
+      ownerOptions: [{ value: "Jorge Muñoz", label: "Jorge Muñoz", description: "Supervisor · Planta Quilicura" }, { value: "Paula Contreras", label: "Paula Contreras", description: "Jefa de operaciones" }, { value: "Andrés Molina", label: "Andrés Molina", description: "Administrador · dueño actual" }],
       ownerActions: B ? h(React.Fragment, null, h(B, { variant: "ghost", onClick: closeDlg }, "Cancelar"), h(B, { disabled: !motivo.trim(), onClick: closeDlg }, "Cambiar dueño")) : null,
       rejectActions: B ? h(React.Fragment, null, h(B, { variant: "ghost", onClick: closeDlg }, "Cancelar"), h(B, { variant: "destructive", disabled: !motivo.trim(), onClick: closeDlg }, "Rechazar")) : null,
       tabs: sol ? [{ id: "hoy", label: "Hoy", icon: "home" }, { id: "pau", label: "Pauta", icon: "calendar" }, { id: "ron", label: "Rondas", icon: "route" }, { id: "tic", label: "Tickets", icon: "ticket" }, { id: "mas", label: "Más", icon: "menu" }] : [{ id: "ini", label: "Inicio", icon: "home" }, { id: "tic", label: "Tickets", icon: "ticket" }, { id: "pau", label: "Pauta", icon: "calendar" }, { id: "per", label: "Personas", icon: "users" }, { id: "mas", label: "Más", icon: "more" }],
