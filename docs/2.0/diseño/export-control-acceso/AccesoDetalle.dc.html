@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><script src="./ds-base.js"></script></helmet>
+<div style="display:flex;flex-direction:column;gap:16px;min-width:0">
+<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px">
+<div style="min-width:0">
+<div style="font:600 18px/26px var(--font-sans);color:var(--ds-fg)">Diego Fuentes</div>
+<div style="font:400 14px/20px var(--font-sans);color:var(--ds-fg-muted)">Proveedor · Distribuidora Andes Ltda.</div>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="success" hint-size="80px,24px">En sitio</x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Registro" rows="{{ rows }}" hint-size="100%,240px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Esta lectura queda registrada" accion="{{ verDoc }}" hint-size="100%,72px">Ver el documento completo requiere permiso.</x-import>
+<div>
+<div style="font:500 12px/16px var(--font-sans);color:var(--ds-fg-muted);margin-bottom:8px">Historial</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Timeline" items="{{ items }}" hint-size="100%,200px"></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="x" hint-size="100%,44px">Anular registro</x-import>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  renderVals() {
+    const h = React.createElement;
+    const NS = window.OPAI20DesignSystem_44e4d7 || {};
+    return {
+      verDoc: NS.Button ? h(NS.Button, { variant: "secondary", size: "sm" }, "Ver documento") : null,
+      rows: [
+        { label: "RUN", value: "12.3••.•••-K", mono: true },
+        { label: "Instalación", value: "Planta Quilicura · Portería 1" },
+        { label: "Patente", value: "ABCD·12", mono: true },
+        { label: "Entrada", value: "30-10-2026 · 08:42" },
+        { label: "Anfitrión", value: "Marcela Rojas" },
+        { label: "Lista", value: "Autorizado · prerregistrado" },
+      ],
+      items: [
+        { initials: "JP", who: "Guardia · Portería 1", action: "registró la entrada", when: "08:42" },
+        { initials: "MR", who: "Marcela Rojas", action: "prerregistró la visita", when: "29-10 16:10" },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
