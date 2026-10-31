@@ -37,7 +37,7 @@ Datos de ejemplo ficticios: Atlas Seguridad SpA, RUT 76.111.222-3, Marcela Rojas
 
 ## Pendientes menores (no bloquean)
 
-- El bundle `_ds` compartido aún trae «Pídele acceso a Carlos Irigoyen» en la descripción por defecto de Forbidden y en su readme; se corrige una sola vez en el DS.
+- (resuelto 30-oct-2026) El bundle `_ds` compartido traía un nombre real en la descripción por defecto de Forbidden y en su readme; se corrigió una sola vez en el DS.
 - Miniatura SVG de los envoltorios con `#4a3fd8`/`#ffffff`.
 - Los códigos LRE de 09 (1101, 1105…) van marcados «Por verificar»; hay que validarlos al construir.
 - Los formatos de Previred, suplemento LRE, SII y archivo de pago del banco siguen «por verificar».

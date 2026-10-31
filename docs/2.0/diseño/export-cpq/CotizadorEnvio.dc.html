@@ -523,10 +523,10 @@ class Component extends DCLogic {
     }[st] || ["Vence en " + cond.validez + " días · 28-11-2026", "var(--ds-fg-muted)", 0];
     const banners = [];
     const B = (tone, icon, title, text, act, note) => banners.push({ note: note || "", hasNote: !!note, bg: tone === "neutral" ? "var(--ds-fill)" : "var(--ds-" + tone + "-muted)", fg: tone === "neutral" ? "var(--ds-fg)" : "var(--ds-" + tone + "-fg)", icon: "i-" + icon, title, text, act: act || "", hasAct: !!act });
-    if (!showCost) B("neutral", "lock", "Sin permiso para ver costos ni margen", "Ves solo la venta. Pídele el permiso cpq:costos.ver a Carlos Irigoyen, administrador de Atlas Seguridad SpA.");
-    if (st === "bajoMargen" && showCost) B("danger", "alert", "Margen " + P.pct(margin) + " bajo el mínimo de " + P.pct(min, 0), "Necesita aprobación para enviarse. Lo aprueba Carlos Irigoyen.");
-    if (st === "bajoMargen" && !showCost) B("danger", "alert", "Precio bajo el mínimo del tenant", "Necesita aprobación para enviarse. Lo aprueba Carlos Irigoyen.");
-    if (st === "porAprobar") B("warning", "clock", "Esperando aprobación de Carlos Irigoyen", "Pedida por Ana Rojas el 29-10-2026 a las 10:42. Para editar, retira el pedido.", "Retirar pedido");
+    if (!showCost) B("neutral", "lock", "Sin permiso para ver costos ni margen", "Ves solo la venta. Pídele el permiso cpq:costos.ver a Andrés Molina, administrador de Atlas Seguridad SpA.");
+    if (st === "bajoMargen" && showCost) B("danger", "alert", "Margen " + P.pct(margin) + " bajo el mínimo de " + P.pct(min, 0), "Necesita aprobación para enviarse. Lo aprueba Andrés Molina.");
+    if (st === "bajoMargen" && !showCost) B("danger", "alert", "Precio bajo el mínimo del tenant", "Necesita aprobación para enviarse. Lo aprueba Andrés Molina.");
+    if (st === "porAprobar") B("warning", "clock", "Esperando aprobación de Andrés Molina", "Pedida por Ana Rojas el 29-10-2026 a las 10:42. Para editar, retira el pedido.", "Retirar pedido");
     if (st === "enviada") B("info", "lock", S.sent ? "Enviada recién a " + S.sent : "Enviada el 29-10-2026 a 2 contactos", "Esta versión es de solo lectura y quedó con UF " + ufStr + ". Para cambiarla, crea una nueva versión.");
     if (st === "aceptada") B("success", "check-circle", "Aceptada por Gonzalo Cárdenas, Jefe de mantención", "28-10-2026 a las 15:04, con código enviado a su correo. El negocio NEG-0137 pasó a «Firma de contrato».", "Ver negocio", "Línea base de rentabilidad guardada por instalación: venta, costo y margen cotizados.");
     if (st === "rechazada") B("danger", "x", "Rechazada por Gonzalo Cárdenas el 28-10-2026", "Motivo: Precio · «Necesitamos bajar el valor mensual en un 5 %».");
@@ -535,7 +535,7 @@ class Component extends DCLogic {
     const openSend = () => this.setState({ panel: "enviar", menu: false, pdf: false });
     const PR = {
       borrador: { label: "Enviar", icon: "file", go: openSend },
-      bajoMargen: { label: "Pedir aprobación", icon: "user-check", go: () => { this.setState({ st: "porAprobar" }); this.flash("Pedido enviado a Carlos Irigoyen"); } },
+      bajoMargen: { label: "Pedir aprobación", icon: "user-check", go: () => { this.setState({ st: "porAprobar" }); this.flash("Pedido enviado a Andrés Molina"); } },
       enviada: { label: "Crear nueva versión", icon: "plus", go: () => { this.setState({ st: "borrador", sent: null }); this.flash("Se creó la v4 como borrador"); } },
       rechazada: { label: "Crear nueva versión", icon: "plus", go: () => { this.setState({ st: "borrador" }); this.flash("Se creó la v4 como borrador"); } },
       vencida: { label: "Renovar", icon: "refresh", go: () => { this.setState({ st: "borrador" }); this.flash("Se creó la v4 con la UF del día"); } },
@@ -615,7 +615,7 @@ class Component extends DCLogic {
             { initials: "AR", who: "Ana Rojas", action: "editó la v3", changes: [{ field: "Rateo Kit Starlink", from: "6 meses", to: "12 meses" }, { field: "Días de pago", from: "30", to: "45" }], when: "29-10-2026 · 10:20" },
             { agent: true, who: "OPAI", action: "creó la v3 desde la v2 a pedido de Ana Rojas", when: "28-10-2026 · 17:05" },
             { initials: "AR", who: "Ana Rojas", action: "envió la v2 a 2 contactos · vista 2 veces", when: "22-10-2026 · 11:40" },
-            { initials: "CI", who: "Carlos Irigoyen", action: showCost ? "aprobó el margen de 9,8 % de la v2" : "aprobó el precio de la v2", when: "22-10-2026 · 09:15" },
+            { initials: "AM", who: "Andrés Molina", action: showCost ? "aprobó el margen de 9,8 % de la v2" : "aprobó el precio de la v2", when: "22-10-2026 · 09:15" },
             { initials: "AR", who: "Ana Rojas", action: "envió la v1 · reemplazada por la v2", when: "12-10-2026 · 16:02" },
           ],
           onMenu: (it) => { this.setState({ menu: false }); if (it.label === "Comparar") this.setState({ view: "comparar" }); if (it.label === "Historial") this.setState({ hist: true }); },

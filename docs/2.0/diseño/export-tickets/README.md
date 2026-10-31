@@ -32,7 +32,7 @@
 
 ## Pendientes menores (no bloquean, próxima vuelta)
 
-- **(ALTO)** «Carlos Irigoyen» sigue como dato de ejemplo (dueño, usuario actual, administrador) en Bandeja, Ficha, Componentes, Tipos, NuevoTicket, Supervisor y ResumenDiario, y en el bundle `_ds`: se reemplaza por un nombre inventado.
+- **(resuelto 30-oct-2026)** Se reemplazó el nombre real de ejemplo (dueño, usuario actual, administrador) en Bandeja, Ficha, Componentes, Tipos, NuevoTicket, Supervisor y ResumenDiario, y en el bundle `_ds`, por uno ficticio.
 - Falta la alerta «Decide Carlos» en 1 Bandeja y 6 Tipos que enlace a la variante B.
 - En 6 Tipos falta la lista de módulos a la izquierda en 1024/1280 y el paso «‹ Módulos» a 375.
 - 7 Estados especiales solo trae oscuro a 375.
