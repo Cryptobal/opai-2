@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<style>body{margin:0}a{color:var(--ds-accent)}a:hover{color:var(--ds-accent)}button{transition:background-color 150ms cubic-bezier(.2,0,0,1),border-color 150ms cubic-bezier(.2,0,0,1)}</style>
+</helmet>
+<div class="ds screen" data-theme="{{ theme }}" data-device="{{ device }}" data-screen-label="{{ label }}" style="width:100%;height:100%">
+  <div class="safe-top"></div>
+  <div class="topbar" style="gap:8px;padding-left:4px;padding-right:12px;height:60px">
+    <button class="icon-btn" style="width:56px;height:56px" aria-label="Volver al inicio"><span class="ic i-chevron-left" aria-hidden="true"></span></button>
+    <span style="flex:1;min-width:0;display:flex;flex-direction:column"><span class="t-label" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Planta Quilicura</span><span class="t-caption t-numeric" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Portería principal · turno día 08:00–20:00</span></span>
+    <button class="badge b-{{ cx.tone }}" style="height:44px;padding:0 14px;border:0;cursor:pointer;font:500 13px/18px var(--font-sans)" aria-label="Conexión: {{ cx.t }}. Ver cola">{{ cx.t }}</button>
+  </div>
+  <sc-if value="{{ cx.banner }}" hint-placeholder-val="{{ false }}">
+    <button class="banner" style="border:0;border-bottom:1px solid var(--ds-border);width:100%;cursor:pointer;min-height:44px;text-align:left"><span class="ic sm i-wifi-off" aria-hidden="true"></span><span style="flex:1">{{ cx.banner }}</span><span>Ver cola</span><span class="ic sm i-chevron-right" aria-hidden="true"></span></button>
+  </sc-if>
+
+  <sc-if value="{{ isLista }}" hint-placeholder-val="{{ true }}">
+    <div class="scroll" style="overflow:auto">
+      <div style="padding:16px 16px 24px;display:flex;flex-direction:column;gap:16px;max-width:1040px;margin:0 auto">
+        <div style="display:flex;align-items:flex-end;gap:12px;flex-wrap:wrap">
+          <span style="flex:1;min-width:180px;display:flex;flex-direction:column;gap:2px"><h1 class="t-title m0">Libro de novedades</h1><span class="t-body-sm muted t-numeric">Planta Quilicura · 29-10-2026</span></span>
+          <button class="btn btn-secondary" style="height:56px"><span class="ic sm i-clipboard" aria-hidden="true"></span>Entregar turno</button>
+        </div>
+        <div class="seg" role="radiogroup" aria-label="Alcance" style="display:flex;max-width:420px"><button class="{{ alc.t }}" role="radio" style="height:52px;font-size:15px">Mi turno · 3</button><button class="{{ alc.i }}" role="radio" style="height:52px;font-size:15px">Instalación · 7</button></div>
+        <div class="card" style="overflow:hidden;display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,440px),1fr))">
+          <sc-for list="{{ libro }}" as="n" hint-placeholder-count="3">
+            <button class="rowcard" style="align-items:flex-start;min-height:88px;border-left:0;border-right:0;border-top:0;border-bottom:1px solid var(--ds-border);cursor:pointer;font:inherit">
+              <span class="ic i-{{ n.ic }} muted" aria-hidden="true" style="margin-top:2px"></span>
+              <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px;text-align:left">
+                <span class="t-caption"><span class="t-mono">{{ n.id }}</span> · <span class="t-numeric">{{ n.h }}</span> · {{ n.quien }}</span>
+                <span class="t-label">{{ n.t }}</span>
+                <span class="t-caption">{{ n.d }}</span>
+                <span style="display:flex;gap:6px;flex-wrap:wrap"><span class="badge b-{{ n.gt }} nodot">{{ n.g }}</span><span class="badge b-{{ n.et }}">{{ n.e }}</span></span>
+              </span>
+              <span class="ic i-chevron-right subtle" aria-hidden="true" style="align-self:center"></span>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+    </div>
+    <div style="flex:none;padding:12px 16px 46px;border-top:1px solid var(--ds-border);background:var(--ds-bg)"><div style="max-width:720px;margin:0 auto"><button class="btn btn-primary block" style="height:56px;font-size:16px"><span class="ic i-flag" aria-hidden="true"></span>Nueva novedad</button></div></div>
+  </sc-if>
+
+  <sc-if value="{{ isEntrega }}" hint-placeholder-val="{{ false }}">
+    <div class="scroll" style="overflow:auto">
+      <div style="padding:16px 16px 24px;display:flex;flex-direction:column;gap:20px;max-width:1040px;margin:0 auto">
+        <sc-if value="{{ ok }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;padding:16px 0 4px">
+            <span class="state-tile" style="background:var(--ds-success-muted);color:var(--ds-success-fg)"><span class="ic lg i-check" aria-hidden="true"></span></span>
+            <span class="t-heading">Turno entregado</span>
+            <span class="t-body-sm muted t-numeric">Jorge Pizarro lo recibió a las 20:04. Tu entrada y salida siguen en Marcar.</span>
+          </div>
+        </sc-if>
+        <sc-if value="{{ notOk }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;flex-direction:column;gap:2px"><h1 class="t-title m0">Entrega de turno</h1><span class="t-body-sm muted t-numeric">Turno día 08:00–20:00 → turno noche 20:00–08:00</span></div>
+        </sc-if>
+        <div class="card" style="padding:12px 16px;display:flex;align-items:center;gap:12px"><span class="avatar lg">JP</span><span style="flex:1;min-width:0;display:flex;flex-direction:column"><span class="t-caption">Recibe</span><span class="t-label">Jorge Pizarro · guardia</span></span><sc-if value="{{ notOk }}"><button class="btn btn-ghost" style="height:56px">Cambiar</button></sc-if></div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,400px),1fr));gap:20px 24px;align-items:start">
+          <section style="display:flex;flex-direction:column;gap:8px">
+            <span class="t-overline">Quedan abiertas · 2</span>
+            <div class="card" style="overflow:hidden">
+              <sc-for list="{{ abiertos }}" as="a" hint-placeholder-count="2">
+                <div class="rowcard" style="align-items:flex-start">
+                  <span class="ic i-{{ a.ic }} muted" aria-hidden="true" style="margin-top:2px"></span>
+                  <span style="flex:1;min-width:0;display:flex;flex-direction:column;gap:4px"><span class="t-label"><span class="t-mono">{{ a.id }}</span> · {{ a.t }}</span><span class="t-caption">{{ a.d }}</span><span class="badge b-{{ a.tone }}" style="align-self:flex-start">{{ a.est }}</span></span>
+                </div>
+              </sc-for>
+            </div>
+          </section>
+          <section style="display:flex;flex-direction:column;gap:8px">
+            <span class="t-overline">Resumen del turno</span>
+            <div class="card" style="overflow:hidden">
+              <sc-for list="{{ resumen }}" as="r" hint-placeholder-count="3">
+                <div class="rowcard" style="align-items:center"><span class="ic i-{{ r.ic }} muted" aria-hidden="true"></span><span style="flex:1;min-width:0;display:flex;flex-direction:column"><span class="t-label">{{ r.t }}</span><span class="t-caption t-numeric">{{ r.d }}</span></span></div>
+              </sc-for>
+            </div>
+          </section>
+        </div>
+        <div class="field"><label class="lbl" for="en-n">Nota para el turno noche</label><textarea id="en-n" class="input" style="min-height:96px" defaultValue="{{ nota }}" disabled="{{ ok }}"></textarea></div>
+      </div>
+    </div>
+    <div style="flex:none;padding:12px 16px 46px;border-top:1px solid var(--ds-border);background:var(--ds-bg)"><div style="max-width:720px;margin:0 auto"><button class="btn btn-primary block" style="height:56px;font-size:16px">{{ cta }}</button></div></div>
+  </sc-if>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:375,&quot;height&quot;:812},&quot;screen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;lista&quot;,&quot;options&quot;:[&quot;lista&quot;,&quot;entrega&quot;,&quot;entregado&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;alcance&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;turno&quot;,&quot;options&quot;:[&quot;turno&quot;,&quot;instalacion&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;conexion&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;linea&quot;,&quot;options&quot;:[&quot;linea&quot;,&quot;sin&quot;,&quot;sinc&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;light&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;tsType&quot;:&quot;string&quot;},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;default&quot;:&quot;phone&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;tsType&quot;:&quot;string&quot;}}">
+const CX={linea:{t:'En línea',tone:'success',banner:''},sin:{t:'Sin conexión · 1',tone:'warning',banner:'Sin conexión · 1 novedad por enviar'},sinc:{t:'Sincronizando',tone:'info',banner:''},desact:{t:'Listas de hace 26 h',tone:'warning',banner:''}};
+class Component extends DCLogic{
+  renderVals(){
+    const p=this.props;const scr=p.screen??'lista';const ok=scr==='entregado';const inst=(p.alcance??'turno')==='instalacion';
+    const MIAS=[
+      {id:'NOV-0419',ic:'alert',h:'10:23',quien:'María Fernanda Soto',t:'Daño · Andén norte',d:'Sello de la cortina 3 roto. Candado puesto y cerrado.',g:'Leve',gt:'neutral',e:'Enviada',et:'info'},
+      {id:'NOV-0418',ic:'lock',h:'10:15',quien:'María Fernanda Soto',t:'Intrusión · Bodega A',d:'Puerta lateral de Bodega A forzada, candado en el suelo.',g:'Alta · incidente',gt:'danger',e:'En atención · Rodrigo Tapia',et:'warning'},
+      {id:'NOV-0412',ic:'refresh',h:'08:41',quien:'María Fernanda Soto',t:'Falla técnica · Portería principal',d:'Barrera vehicular no baja sola.',g:'Leve',gt:'neutral',e:'Resuelto',et:'success'}];
+    const OTRAS=[
+      {id:'NOV-0410',ic:'eye',h:'07:12',quien:'Jorge Pizarro',t:'Persona sospechosa · Cerco poniente',d:'Persona mirando hacia el patio desde la calle. Se retiró.',g:'Leve',gt:'neutral',e:'Cerrada',et:'success'},
+      {id:'NOV-0397',ic:'alert',h:'27-10',quien:'Camila Herrera',t:'Daño · Cámara 4',d:'Cámara 4 sin imagen.',g:'Leve',gt:'neutral',e:'Derivado a ticket TCK-2281',et:'info'}];
+    return {
+      theme:p.theme??'light',device:p.device??'phone',label:'Libro de novedades · '+scr,cx:CX[p.conexion??'linea']||CX.linea,
+      isLista:scr==='lista',isEntrega:scr!=='lista',ok,notOk:!ok,
+      alc:{t:inst?'':'on',i:inst?'on':''},libro:inst?MIAS.concat(OTRAS):MIAS,
+      abiertos:[{id:'NOV-0418',ic:'lock',t:'Intrusión · alta',d:'Bodega A · hoy 10:15',est:'En atención · Rodrigo Tapia',tone:'warning'},{id:'NOV-0397',ic:'alert',t:'Daño · leve',d:'Cámara 4 sin imagen · 27-10-2026',est:'Derivado a ticket TCK-2281',tone:'info'}],
+      resumen:[{ic:'route',t:'Rondas · 4 de 5',d:'1 incompleta: Ronda perimetral 10:00 · 5 de 6 puntos'},{ic:'lock',t:'Portería · 42 entradas',d:'3 quedan en sitio · 1 intento denegado'},{ic:'flag',t:'Novedades · 3',d:'1 alta en atención · 1 enviada · 1 resuelta'}],
+      nota:'Barrera vehicular revisada por mantención; si vuelve a fallar, abrir a mano y avisar. Transportes Andes sigue en el andén 2.',
+      cta:ok?'Volver al inicio':'Entregar turno a Jorge Pizarro'
+    };
+  }
+}
+</script>
+</body>
+</html>

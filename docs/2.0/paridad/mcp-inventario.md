@@ -7,7 +7,7 @@ Regla (Carlos, 28-oct-2026): el MCP expone **todas** las acciones de pantalla, i
 La herramienta es la que ve una key con los scopes `*` y `platform` cuyo responsable es owner de
 plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tiene además su `preview_`.
 
-**Resumen:** 292 pares pantalla→capacidad · 252 con herramienta · 40 excepciones justificadas · 0 faltantes.
+**Resumen:** 298 pares pantalla→capacidad · 258 con herramienta · 40 excepciones justificadas · 0 faltantes.
 
 ## Pantalla → herramienta MCP
 
@@ -197,6 +197,12 @@ plataforma; una key solo con `*` ve todo salvo `platform_*`. Cada escritura tien
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.previsualizar` | `core_vinculos_previsualizar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.terminar` | `core_vinculos_terminar` | existe |
 | compartido | `app/(erp)/personas/_componentes` | `core.vinculos.update` | `core_vinculos_update` | existe |
+| compartido | `app/(erp)/tickets/_componentes` | `tickets.tickets.listar` | `tickets_tickets_listar` | existe |
+| compartido | `app/(erp)/tickets/_componentes` | `tickets.tickets.obtener` | `tickets_tickets_obtener` | existe |
+| compartido | `app/(erp)/tickets/[id]/_componentes` | `tickets.tickets.aprobar` | `tickets_tickets_aprobar` | existe |
+| compartido | `app/(erp)/tickets/[id]/_componentes` | `tickets.tickets.cambiar_estado` | `tickets_tickets_cambiar_estado` | existe |
+| compartido | `app/(erp)/tickets/[id]/_componentes` | `tickets.tickets.comentar` | `tickets_tickets_comentar` | existe |
+| compartido | `app/(erp)/tickets/[id]/_componentes` | `tickets.tickets.rechazar` | `tickets_tickets_rechazar` | existe |
 | compartido | `app/(platform)/platform/ajustes/_componentes` | `platform.ajustes.set` | `platform_ajustes_set` | existe |
 | compartido | `app/(platform)/platform/ajustes/_componentes` | `platform.precios.set` | `platform_precios_set` | existe |
 | compartido | `app/(supervisor)/supervisor/_componentes` | `core.contactos.list` | `core_contactos_list` | existe |
@@ -481,3 +487,7 @@ Cada una tiene una pantalla que la invoca o un encargo con fecha. «API v1 con s
 - `platform.users.list`
 - `platform.users.set_role`
 - `rondas.puntos.reemplazar_etiqueta`
+- `tickets.tickets.crear`
+- `tickets.tickets.reasignar`
+- `tickets.tipos.crear`
+- `tickets.tipos.listar`
