@@ -9,6 +9,8 @@ export type Contexto = {
 
 type Ajuste = {
   dependencias?: string[];
+  /** La fila ya existe (la crea un trigger): la siembra la lee con estas columnas en vez de insertarla. */
+  existente?: (ctx: Contexto) => Record<string, unknown>;
   /** Columnas de un índice único que `copia` no debe regenerar (tienen un CHECK de rango). */
   fijas?: string[];
   valores: (ctx: Contexto) => Record<string, unknown>;
@@ -49,7 +51,35 @@ export const AJUSTES: Record<string, Ajuste> = {
   "nomina.conceptos": { valores: () => ({ tipo: "haber" }) },
   "nomina.periodos": { fijas: ["mes"], valores: () => ({ mes: 1 }) },
   "nomina.obligaciones": { fijas: ["mes", "tipo"], valores: () => ({ tipo: "lre", mes: 1 }) },
+  // Finanzas · Flujo de caja (CAR-91): sección válida y semanas en lunes (CHECK de cada tabla).
+  "finanzas.flujo_filas": { valores: () => ({ seccion: "ingreso" }) },
+  "finanzas.flujo_celdas": { valores: () => ({ semana: "2026-01-05", monto: 1 }) },
+  "finanzas.flujo_cierres": { valores: () => ({ semana: "2026-01-05" }) },
+  "finanzas.flujo_ajustes": { valores: () => ({ desde: "2026-01-05" }) },
   // Leads: canal y estado dentro de sus listas (CHECK *_canal_check y *_estado_check).
   "comercial.solicitudes": { valores: () => ({ canal: "manual", estado: "nueva" }) },
   "comercial.canales_solicitud": { valores: () => ({ canal: "manual", estado: "sin_conectar" }) },
+  // Finanzas · Compras: vocabularios cerrados y total = suma de los montos (CHECK de la migración).
+  "finanzas.cuentas_contables": { valores: () => ({ tipo: "activo", naturaleza: "deudora" }) },
+  "finanzas.centros_costo": { valores: () => ({ tipo: "general" }) },
+  "finanzas.documentos_recibidos": { valores: () => ({ tipo_dte: 33, monto_total: 0 }) },
+  // CRM PR 2a: el trigger de core.contactos crea el vínculo inicial contacto–cuenta.
+  "core.contacto_cuentas": {
+    dependencias: ["core.contactos", "core.cuentas"],
+    existente: (ctx) => ({
+      contacto_id: id(ctx, "core.contactos"),
+      cuenta_id: id(ctx, "core.cuentas"),
+    }),
+    valores: () => ({}),
+  },
+  // Actividad: tipo dentro de su lista. Vínculos y asignaciones: exactamente una entidad (CHECK).
+  "core.actividades": { valores: () => ({ tipo: "nota" }) },
+  "core.actividad_vinculos": {
+    dependencias: ["core.actividades", "core.cuentas"],
+    valores: (ctx) => ({ cuenta_id: id(ctx, "core.cuentas") }),
+  },
+  "core.etiqueta_asignaciones": {
+    dependencias: ["core.etiquetas", "core.cuentas"],
+    valores: (ctx) => ({ cuenta_id: id(ctx, "core.cuentas") }),
+  },
 };

@@ -7,6 +7,8 @@ import { SeccionConceptos } from "@/app/(erp)/configuracion/_nomina/seccion-conc
 import { SeccionPortalCliente } from "@/app/(erp)/configuracion/_portal_cliente/seccion-portal-cliente";
 import { SeccionCanales } from "@/app/(erp)/configuracion/_leads/seccion-canales";
 import { SeccionTiposIncidente } from "@/app/(erp)/configuracion/_rondas/seccion-tipos-incidente";
+import { SeccionCentrosCosto } from "@/app/(erp)/configuracion/_finanzas/seccion-centros-costo";
+import { SeccionPlanCuentas } from "@/app/(erp)/configuracion/_finanzas/seccion-plan-cuentas";
 
 /**
  * Pestaña que un módulo aporta a su página de Configuración → Módulos → <módulo> (ADR-018): el
@@ -78,6 +80,20 @@ export const SECCIONES_MODULO: Readonly<Record<string, readonly SeccionModulo[]>
       etiqueta: "Tipos",
       permiso: "tickets:tipos.manage",
       Contenido: SeccionTiposTicket,
+    },
+  ],
+  finanzas: [
+    {
+      id: "plan-cuentas",
+      etiqueta: "Plan de cuentas",
+      permiso: "finanzas:plan.manage",
+      Contenido: SeccionPlanCuentas,
+    },
+    {
+      id: "centros-costo",
+      etiqueta: "Centros de costo",
+      permiso: "finanzas:read",
+      Contenido: SeccionCentrosCosto,
     },
   ],
 };
