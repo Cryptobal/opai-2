@@ -39,6 +39,8 @@ export const AJUSTES: Record<string, Ajuste> = {
       gratificacion: "legal",
     }),
   },
+  // CPQ (CAR-119): CHECK de tipo de línea (lineas_tipo_check).
+  "cpq.lineas": { valores: () => ({ tipo: "item" }) },
   "core.retencion_ejecuciones": { valores: () => ({ modo: "simulacion", filas: 0 }) },
   // Fila con tenant_id: fuente "tenant", sin región (CHECK dias_calendario_coherencia_check).
   "core.dias_calendario": { valores: () => ({ fuente: "tenant", region: null }) },
