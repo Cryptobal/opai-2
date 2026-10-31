@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+</helmet>
+<div style="background:var(--ds-fill);padding:{{ outerPad }};display:flex;flex-direction:column;gap:20px;align-items:flex-start;font-family:var(--font-sans);color:var(--ds-fg)">
+<sc-if value="{{ showControls }}" hint-placeholder-val="{{ true }}"><div style="display:flex;flex-wrap:wrap;gap:12px 20px;align-items:flex-end;max-width:100%">
+<div style="width:300px;max-width:100%"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Pantalla" value="{{ screen }}" options="{{ screenOptions }}" on-change="{{ setScreen }}" hint-size="300px,66px"></x-import></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" label="Viewport" options="{{ deviceOptions }}" value="{{ device }}" on-change="{{ setDevice }}" hint-size="260px,40px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" label="Tema" options="{{ themeOptions }}" value="{{ theme }}" on-change="{{ setTheme }}" hint-size="160px,40px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Segmentado" label="Estado" options="{{ stateOptions }}" value="{{ st }}" on-change="{{ setSt }}" hint-size="420px,40px"></x-import>
+</div></sc-if>
+<div style="width:{{ fw }}px;height:{{ fh }}px;max-width:none;flex:none;position:relative;overflow:hidden;border:1px solid var(--ds-border-strong);border-radius:12px">
+<sc-if value="{{ notPublic }}" hint-placeholder-val="{{ true }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.AppShell" user="{{ user }}" device="{{ device }}" theme="{{ theme }}" tabs="{{ tabs }}" groups="{{ groups }}" active="cum" title="{{ shellTitle }}" tenant="Atlas Seguridad SpA" tenant-initials="AS" width="100%" height="100%" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Page" hint-size="100%,600px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.PageHeader" eyebrow="{{ eyebrow }}" title="{{ title }}" subtitle="{{ subtitle }}" hint-size="100%,80px">
+<sc-if value="{{ hasAction }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="{{ actionVariant }}" icon="{{ actionIcon }}" on-click="{{ goAction }}" hint-size="160px,40px">{{ actionLabel }}</x-import></sc-if>
+</x-import>
+
+<sc-if value="{{ showEmpty }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="lock" title="{{ emptyTitle }}" description="{{ emptyDesc }}" hint-size="100%,300px"></x-import></sc-if>
+<sc-if value="{{ showLoading }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 40 }}" hint-size="100%,40px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 64 }}" hint-size="100%,64px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 64 }}" hint-size="100%,64px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 64 }}" hint-size="100%,64px"></x-import>
+</div></sc-if>
+<sc-if value="{{ showError }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos cargar esta pantalla" description="Revisa tu conexión. Si el problema sigue, avísale a soporte con el código." code="CUM-503" on-retry="{{ retry }}" hint-size="100%,300px"></x-import></sc-if>
+<sc-if value="{{ showForbidden }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="No tienes acceso a Cumplimiento" description="Pídele acceso a un administrador." action-label="Pedir acceso" hint-size="100%,300px"></x-import></sc-if>
+
+<sc-if value="{{ s_resumen }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:16px">
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Acuerdo de tratamiento (DPA)" hint-size="100%,160px"><div style="display:flex;flex-direction:column;gap:12px;align-items:flex-start">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="success" hint-size="160px,22px">Versión 1.2 aceptada</x-import>
+<span class="t-body-sm" style="color:var(--ds-fg-muted)">Andrés Molina · 12-12-2026 09:42</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Enlace" on-click="{{ toDpa }}" hint-size="120px,44px">Ver registro</x-import></div></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Delegado de protección de datos (opcional)" hint-size="100%,160px"><div style="display:flex;flex-direction:column;gap:4px">
+<sc-if value="{{ hasDpo }}" hint-placeholder-val="{{ true }}"><span class="t-body" style="font-weight:500">Valentina Rojas Pino</span>
+<span class="t-body-sm" style="color:var(--ds-fg-muted)">dpo@atlasseguridad.cl</span></sc-if>
+<sc-if value="{{ noDpo }}" hint-placeholder-val="{{ false }}"><span class="t-body-sm" style="color:var(--ds-fg-muted)">Sin delegado designado. Es opcional.</span></sc-if>
+<div style="margin-top:8px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Enlace" on-click="{{ toDpa }}" hint-size="120px,44px">Ver delegado</x-import></div></div></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Solicitudes abiertas" hint-size="100%,160px"><div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start">
+<span class="t-display t-numeric" style="font-size:36px;line-height:40px;font-weight:600">5</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="warning" hint-size="160px,22px">2 vencen en 7 días</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Enlace" on-click="{{ toBandeja }}" hint-size="120px,44px">Abrir bandeja</x-import></div></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Incidentes abiertos" hint-size="100%,160px"><div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start">
+<span class="t-numeric" style="font-size:36px;line-height:40px;font-weight:600">1</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="danger" hint-size="200px,22px">Aviso a la Agencia pendiente</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Enlace" on-click="{{ toIncidentes }}" hint-size="120px,44px">Ver incidentes</x-import></div></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Registro de actividades (RAT)" hint-size="100%,160px"><div style="display:flex;flex-direction:column;gap:8px;align-items:flex-start">
+<span class="t-body">8 actividades de tratamiento</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Enlace" on-click="{{ toRat }}" hint-size="120px,44px">Ver RAT</x-import></div></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Plazo de respuesta" hint-size="100%,60px">30 días corridos desde el ingreso de la solicitud, con acuse de recibo (art. 11 inc. 2°). Se puede prorrogar una sola vez, hasta por 30 días corridos.</x-import>
+</div></sc-if>
+
+<sc-if value="{{ s_bandeja }}" hint-placeholder-val="{{ false }}"><div>
+<div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:16px">
+<div style="width:{{ searchW }};max-width:100%;flex:none"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" icon="search" placeholder="Buscar por titular o RUT" hint-size="100%,44px"></x-import></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Abiertas" contador="{{ 5 }}" activo="{{ true }}" hint-size="110px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipToggle" etiqueta="Vencen en 7 días" contador="{{ 2 }}" hint-size="150px,32px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ChipAgregar" hint-size="140px,32px"></x-import>
+</div>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}"><div style="margin:0 -16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ solCols }}" rows="{{ solRows }}" cards="{{ true }}" to-card="{{ solCard }}" on-row-click="{{ toDetalle }}" hint-size="100%,300px"></x-import></div></sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}"><div style="overflow-x:auto"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ solCols }}" rows="{{ solRows }}" on-row-click="{{ toDetalle }}" hint-size="100%,300px"></x-import></div></sc-if>
+</div></sc-if>
+
+<sc-if value="{{ s_detalle }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:16px">
+<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ detEstTone }}" hint-size="100px,22px">{{ detEst }}</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ detPlazoTone }}" hint-size="100px,22px">{{ detPlazoTxt }}</x-import>
+<div style="flex:1"></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="download" hint-size="150px,40px">Exportar datos</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" on-click="{{ openProrrogar }}" hint-size="110px,40px">Prorrogar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" on-click="{{ openDenegar }}" hint-size="100px,40px">Denegar</x-import>
+</div>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;align-items:start">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,300px"><div style="display:flex;flex-direction:column;gap:20px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Solicitud" rows="{{ detSol }}" hint-size="100%,200px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Plazo" rows="{{ detPlazo }}" hint-size="100%,160px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Verificación de identidad" rows="{{ detIdent }}" hint-size="100%,120px"></x-import>
+</div></x-import>
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="success" titulo="Acuse de recibo enviado" hint-size="100%,70px">{{ acuseTxt }}</x-import>
+<sc-if value="{{ propB }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Bloqueo temporal" hint-size="100%,420px"><div style="display:flex;flex-direction:column;gap:12px;align-items:flex-start">
+<div style="display:flex;flex-wrap:wrap;gap:8px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="warning" hint-size="120px,22px">Bloqueo vigente</x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="info" hint-size="220px,22px">Responder a más tardar el 21-12-2026</x-import></div>
+<span class="t-body-sm" style="text-wrap:pretty">Luis Pérez pidió bloquear sus datos mientras resolvemos la rectificación. El bloqueo rige desde que llegó la solicitud.</span>
+<div style="width:100%"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" rows="{{ bloqRows }}" hint-size="100%,160px"></x-import></div>
+<div style="width:100%;box-sizing:border-box;background:var(--ds-fill);border-radius:10px;padding:12px;display:flex;flex-direction:column;gap:4px"><span class="t-caption" style="color:var(--ds-fg-muted)">Fundamento del titular</span><span class="t-body-sm">«Mi domicilio registrado es antiguo y siguen llegando documentos a esa dirección.»</span></div>
+<span class="t-caption" style="color:var(--ds-fg-muted);text-wrap:pretty">El bloqueo no borra datos: suspende su tratamiento mientras dure. Procede en rectificación, supresión u oposición, y como alternativa a la supresión. Si se rechaza, el rechazo va fundado y se comunica por vía electrónica a la Agencia.</span>
+<div style="display:flex;flex-wrap:wrap;gap:8px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="check" hint-size="170px,40px">Confirmar bloqueo</x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" on-click="{{ openRechazar }}" hint-size="200px,40px">Rechazar con fundamento</x-import></div>
+</div></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Aviso a cesionarios" hint-size="100%,200px"><div style="display:flex;flex-direction:column">
+<span class="t-body-sm" style="color:var(--ds-fg-muted);padding-bottom:8px;text-wrap:pretty">Cuando hay rectificación, supresión u oposición avisamos a quienes recibieron estos datos.</span>
+<sc-for list="{{ cesionarios }}" as="c" hint-placeholder-count="2"><div style="display:flex;align-items:center;gap:12px;min-height:56px;border-top:1px solid var(--ds-border)"><div style="flex:1;min-width:0"><div class="t-body-sm" style="font-weight:500">{{ c.name }}</div><div class="t-caption" style="color:var(--ds-fg-muted)">{{ c.meta }}</div></div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ c.tone }}" hint-size="90px,22px">{{ c.state }}</x-import></div></sc-for>
+</div></x-import></sc-if>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Respaldo de respuestas" hint-size="100%,200px"><div style="display:flex;flex-direction:column">
+<span class="t-body-sm" style="color:var(--ds-fg-muted);padding-bottom:8px;text-wrap:pretty">Guardamos el envío, la fecha y el contenido de cada respuesta. Toda denegación va fundada.</span>
+<sc-for list="{{ respaldo }}" as="r" hint-placeholder-count="2"><div style="display:flex;gap:12px;padding:12px 0;border-top:1px solid var(--ds-border);align-items:flex-start"><span class="ic i-file" style="margin-top:2px"></span><div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:2px"><span class="t-body-sm" style="font-weight:500">{{ r.title }}</span><span class="t-caption" style="color:var(--ds-fg-muted)">{{ r.meta }}</span><span class="t-caption">{{ r.content }}</span></div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Enlace" hint-size="100px,44px">Ver contenido</x-import></div></sc-for>
+</div></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Historial" hint-size="100%,300px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Timeline" items="{{ tlItems }}" hint-size="100%,260px"></x-import></x-import>
+</div>
+</div></div></sc-if>
+
+<sc-if value="{{ s_responder }}" hint-placeholder-val="{{ false }}"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:16px;align-items:start">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Respuesta" hint-size="100%,500px"><div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Plantilla" value="acceso" options="{{ plantillas }}" hint-size="100%,66px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Asunto" value="Respuesta a tu solicitud de acceso a datos personales" hint-size="100%,66px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Mensaje" rows="{{ 5 }}" value="Hola Camila: adjuntamos los datos personales que Atlas Seguridad SpA trata sobre ti, en respuesta a tu solicitud recibida el 02-12-2026." hint-size="100%,150px"></x-import>
+<div style="display:flex;align-items:center;gap:12px;border:1px solid var(--ds-border);border-radius:10px;padding:12px">
+<span class="ic i-file"></span><div style="flex:1;min-width:0"><div class="t-body-sm" style="font-weight:500">export-camila-herrera-acceso.zip</div><div class="t-caption" style="color:var(--ds-fg-muted)">2,4 MB · generado 18-12-2026 10:02</div></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="success" hint-size="90px,22px">Adjunto</x-import></div>
+</div></x-import>
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Vista previa del correo" hint-size="100%,260px"><div style="background:var(--ds-bg);border:1px solid var(--ds-border);border-radius:10px;padding:16px;display:flex;flex-direction:column;gap:8px">
+<span class="t-caption" style="color:var(--ds-fg-muted)">De: privacidad@atlasseguridad.cl · Para: c.herrera@correo.cl</span>
+<span class="t-body" style="font-weight:600">Respuesta a tu solicitud de acceso a datos personales</span>
+<span class="t-body-sm">Hola Camila: adjuntamos los datos personales que Atlas Seguridad SpA trata sobre ti, en respuesta a tu solicitud recibida el 02-12-2026.</span>
+<span class="t-caption" style="color:var(--ds-fg-muted)">Enviado por Comunicaciones</span></div></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Constancia del envío" hint-size="100%,70px">Al enviar guardamos la fecha, la hora, el destinatario y el contenido íntegro de esta respuesta.</x-import>
+</div></div></sc-if>
+
+<sc-if value="{{ s_incidentes }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Aviso a la Agencia" hint-size="100%,60px">Por los medios más expeditos posibles y sin dilaciones indebidas, cuando la brecha genere un riesgo razonable para los titulares (art. 14 sexies).</x-import>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}"><div style="margin:0 -16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ incCols }}" rows="{{ incRows }}" cards="{{ true }}" to-card="{{ incCard }}" hint-size="100%,200px"></x-import></div></sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}"><div style="overflow-x:auto"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ incCols }}" rows="{{ incRows }}" hint-size="100%,200px"></x-import></div></sc-if>
+<sc-if value="{{ notPropB }}" hint-placeholder-val="{{ true }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="INC-0004 · Planilla enviada a correo equivocado" hint-size="100%,300px"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Qué pasó" rows="{{ incFicha }}" hint-size="100%,240px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Avisos" rows="{{ incAvisos }}" hint-size="100%,160px"></x-import>
+</div></x-import></sc-if>
+<sc-if value="{{ propB }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="INC-0005 · Acceso no autorizado a liquidaciones" hint-size="100%,300px"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:24px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Qué pasó" rows="{{ incFichaB }}" hint-size="100%,240px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Evaluación" rows="{{ evalRows }}" hint-size="100%,200px"></x-import>
+</div></x-import>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;align-items:start">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Aviso a la Agencia" hint-size="100%,260px"><div style="display:flex;flex-direction:column;gap:12px;align-items:flex-start">
+<div style="display:flex;flex-wrap:wrap;gap:8px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="success" hint-size="160px,22px">Enviado 17-12-2026 10:40</x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" hint-size="130px,22px">Meta interna: 72 h</x-import></div>
+<span class="t-body-sm" style="text-wrap:pretty">Requerido porque hay riesgo razonable para los titulares. Se envía por los medios más expeditos posibles y sin dilaciones indebidas.</span>
+<div style="width:100%"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" rows="{{ agRows }}" hint-size="100%,120px"></x-import></div>
+<span class="t-caption" style="color:var(--ds-fg-muted)">Las 72 horas son una meta interna de Atlas Seguridad SpA, no un plazo legal.</span>
+</div></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Aviso a titulares" hint-size="100%,260px"><div style="display:flex;flex-direction:column;gap:12px;align-items:flex-start">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="warning" hint-size="200px,22px">Requerido · datos económicos</x-import>
+<span class="t-body-sm" style="text-wrap:pretty">Solo se avisa si la brecha afecta datos sensibles, de menores de 14 años o económicos, financieros, bancarios o comerciales. El aviso va en lenguaje claro y, si no se puede hacer de forma individual, en un medio masivo de alcance nacional.</span>
+<div style="width:100%"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" rows="{{ tiRows }}" hint-size="100%,120px"></x-import></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="150px,40px">Redactar aviso</x-import>
+</div></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Registro de comunicaciones" hint-size="100%,300px"><div style="display:flex;flex-direction:column;gap:16px">
+<sc-for list="{{ comms }}" as="c" hint-placeholder-count="2"><div style="display:flex;flex-direction:column;gap:8px;padding-top:16px;border-top:1px solid var(--ds-border)">
+<div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center"><span class="t-body-sm" style="font-weight:600">{{ c.to }}</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ c.tone }}" hint-size="90px,22px">{{ c.state }}</x-import><span class="t-caption" style="color:var(--ds-fg-muted)">{{ c.meta }}</span></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" rows="{{ c.rows }}" hint-size="100%,200px"></x-import>
+</div></sc-for>
+</div></x-import>
+</div></sc-if>
+</div></sc-if>
+
+<sc-if value="{{ s_rat }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Plazos de retención" hint-size="100%,60px">Los plazos de datos laborales y de remuneraciones siguen la normativa laboral, previsional y tributaria.</x-import>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}"><div style="margin:0 -16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ ratCols }}" rows="{{ ratRows }}" cards="{{ true }}" to-card="{{ ratCard }}" hint-size="100%,300px"></x-import></div></sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}"><div style="overflow-x:auto"><div style="min-width:880px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ ratCols }}" rows="{{ ratRows }}" hint-size="100%,300px"></x-import></div></div></sc-if>
+</div></sc-if>
+
+<sc-if value="{{ s_retencion }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Origen de los plazos" hint-size="100%,60px">La conservación de contratos y liquidaciones (p. ej. 5 años) se rige por la normativa laboral, previsional y tributaria, no por la Ley 21.719.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" hint-size="100%,100px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Solicitudes ARCO+" rows="{{ plazoRows }}" hint-size="100%,100px"></x-import></x-import>
+<sc-if value="{{ isPhone }}" hint-placeholder-val="{{ false }}"><div style="margin:0 -16px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ retCols }}" rows="{{ retRows }}" cards="{{ true }}" to-card="{{ retCard }}" hint-size="100%,300px"></x-import></div></sc-if>
+<sc-if value="{{ notPhone }}" hint-placeholder-val="{{ true }}"><div style="overflow-x:auto"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Table" columns="{{ retCols }}" rows="{{ retRows }}" hint-size="100%,300px"></x-import></div></sc-if>
+</div></sc-if>
+
+<sc-if value="{{ s_dpa }}" hint-placeholder-val="{{ false }}"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;align-items:start">
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Acuerdo de tratamiento de datos (DPA)" hint-size="100%,300px"><div style="display:flex;flex-direction:column;gap:12px;align-items:flex-start">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="success" hint-size="160px,22px">Versión 1.2 aceptada</x-import>
+<span class="t-body-sm" style="color:var(--ds-fg-muted);text-wrap:pretty">Regula cómo OPAI trata los datos de Atlas Seguridad SpA como encargado. Solo el owner puede aceptar una nueva versión.</span>
+<div style="width:100%"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" rows="{{ dpaRows }}" hint-size="100%,160px"></x-import></div>
+</div></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Versiones" hint-size="100%,160px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Timeline" items="{{ dpaTl }}" hint-size="100%,120px"></x-import></x-import>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Delegado de protección de datos (opcional)" hint-size="100%,300px"><div style="display:flex;flex-direction:column;gap:12px;align-items:flex-start">
+<sc-if value="{{ hasDpo }}" hint-placeholder-val="{{ true }}"><div style="width:100%"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" rows="{{ dpoRows }}" hint-size="100%,200px"></x-import></div></sc-if>
+<sc-if value="{{ noDpo }}" hint-placeholder-val="{{ false }}"><span class="t-body-sm" style="color:var(--ds-fg-muted)">Sin delegado designado. Es opcional.</span></sc-if>
+<span class="t-caption" style="color:var(--ds-fg-muted);text-wrap:pretty">Designarlo es voluntario (arts. 49 y 50). Si existe, se informa en la política de tratamiento (art. 14 ter b).</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="170px,40px">Cambiar delegado</x-import>
+</div></x-import>
+</div></sc-if>
+
+<sc-if value="{{ s_privacidad }}" hint-placeholder-val="{{ false }}"><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;align-items:start">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Bases de tratamiento" hint-size="100%,260px"><div style="display:flex;flex-direction:column">
+<sc-for list="{{ consents }}" as="c" hint-placeholder-count="3"><div style="display:flex;align-items:center;gap:12px;min-height:56px;border-top:1px solid var(--ds-border)">
+<div style="flex:1;min-width:0"><div class="t-body-sm" style="font-weight:500">{{ c.name }}</div><div class="t-caption" style="color:var(--ds-fg-muted)">{{ c.meta }}</div></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="{{ c.tone }}" hint-size="90px,22px">{{ c.state }}</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="ghost" disabled="{{ c.off }}" hint-size="90px,40px">{{ c.act }}</x-import></div></sc-for>
+<span class="t-caption" style="color:var(--ds-fg-muted);text-wrap:pretty;padding:8px 0 0">Al registrarla dejamos de usar este dato para esa finalidad, salvo que acreditemos motivos legítimos imperiosos que prevalezcan o lo necesitemos para una reclamación (art. 8° a).</span>
+</div></x-import>
+<div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Solicitudes del titular" hint-size="100%,100px"><div style="display:flex;justify-content:space-between;align-items:center;gap:12px"><div><div class="t-body-sm" style="font-weight:500">Acceso · 02-12-2026</div><div class="t-caption" style="color:var(--ds-fg-muted)">Responsable: Valentina Rojas</div></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="success" hint-size="110px,22px">14 de 30 días</x-import></div></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Datos sensibles cifrados" hint-size="100%,100px"><div style="display:flex;flex-wrap:wrap;gap:8px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" hint-size="110px,22px">Datos de salud</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" hint-size="110px,22px">Cuenta bancaria</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="neutral" hint-size="110px,22px">Previsión</x-import></div></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Card" title="Historial" hint-size="100%,200px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Timeline" items="{{ privTl }}" hint-size="100%,160px"></x-import></x-import>
+</div></div></sc-if>
+
+</x-import>
+</x-import></sc-if>
+<sc-if value="{{ isPublic }}" hint-placeholder-val="{{ false }}"><div data-theme="{{ theme }}" data-device="{{ device }}" style="position:absolute;inset:0;overflow:auto;background:var(--ds-bg);color:var(--ds-fg);font-family:var(--font-sans)">
+<div style="display:flex;align-items:center;gap:10px;height:60px;padding:0 {{ pubPad }};border-bottom:1px solid var(--ds-border);background:var(--ds-surface)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.TenantMark" initials="AS" size="{{ 32 }}" hint-size="32px,32px"></x-import>
+<span class="t-body" style="font-weight:600">Atlas Seguridad SpA</span></div>
+<div style="max-width:560px;margin:0 auto;padding:24px {{ pubPad }} 48px;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;flex-direction:column;gap:6px"><span class="t-caption" style="color:var(--ds-fg-muted)">Protección de datos personales</span><h1 class="t-title" style="margin:0">Ejercer tus derechos</h1><span class="t-body-sm" style="color:var(--ds-fg-muted);text-wrap:pretty">Pide acceso, rectificación, supresión, oposición, portabilidad o bloqueo de tus datos personales. Te responderemos por escrito dentro de 30 días corridos desde que la recibimos. Si necesitamos más tiempo, podemos extenderlo una sola vez, hasta por 30 días corridos, y te avisaremos.</span></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Trámite gratuito" hint-size="100%,70px">Rectificación, supresión y oposición son siempre gratuitas. El acceso es gratuito al menos una vez por trimestre.</x-import>
+<sc-if value="{{ showLoading }}" hint-placeholder-val="{{ false }}"><div style="display:flex;flex-direction:column;gap:12px"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 66 }}" hint-size="100%,66px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 66 }}" hint-size="100%,66px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" height="{{ 120 }}" hint-size="100%,120px"></x-import></div></sc-if>
+<sc-if value="{{ showError }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.ErrorState" title="No pudimos enviar tu solicitud" description="Revisa tu conexión e inténtalo de nuevo. Tus datos no se perdieron." code="PUB-503" on-retry="{{ retry }}" hint-size="100%,300px"></x-import></sc-if>
+<sc-if value="{{ pubSent }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Empty" icon="check-circle" title="Recibimos tu solicitud" description="Folio S-0051 · Te enviamos el acuse de recibo a tu correo. Responderemos dentro de 30 días corridos." hint-size="100%,300px"></x-import></sc-if>
+<sc-if value="{{ showForbidden }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Forbidden" title="Formulario no disponible" description="Atlas Seguridad SpA no tiene activo este formulario. Escribe a dpo@atlasseguridad.cl." action-label="Copiar correo" hint-size="100%,300px"></x-import></sc-if>
+<sc-if value="{{ pubForm }}" hint-placeholder-val="{{ true }}"><div role="form" aria-label="Solicitud de derechos sobre datos personales" style="display:flex;flex-direction:column;gap:16px">
+<span class="t-caption" style="color:var(--ds-fg-muted)">Los campos con * son obligatorios.</span>
+<sc-if value="{{ pubHasErr }}" hint-placeholder-val="{{ false }}"><div role="alert"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="danger" titulo="{{ pubErrTitle }}" hint-size="100%,60px">Corrige los campos marcados para enviar tu solicitud.</x-import></div></sc-if>
+<div class="field"><label for="pub-nombre">Nombre completo <span aria-hidden="true" style="color:var(--ds-danger-fg)">*</span></label><div class="{{ pf.nombre.cls }}"><input id="pub-nombre" class="bare" value="{{ pf.nombre.v }}" onChange="{{ pf.nombre.on }}" onBlur="{{ pf.nombre.blur }}" placeholder="Como aparece en tu cédula" autoComplete="name" required="{{ true }}" aria-required="true" aria-invalid="{{ pf.nombre.inv }}" aria-describedby="pub-nombre-msg"></div><span id="pub-nombre-msg" class="{{ pf.nombre.mc }}">{{ pf.nombre.msg }}</span></div>
+<div class="field"><label for="pub-rut">RUT <span aria-hidden="true" style="color:var(--ds-danger-fg)">*</span></label><div class="{{ pf.rut.cls }}"><input id="pub-rut" class="bare t-mono" value="{{ pf.rut.v }}" onChange="{{ pf.rut.on }}" onBlur="{{ pf.rut.blur }}" placeholder="12.345.678-5" autoComplete="off" required="{{ true }}" aria-required="true" aria-invalid="{{ pf.rut.inv }}" aria-describedby="pub-rut-msg"></div><span id="pub-rut-msg" class="{{ pf.rut.mc }}">{{ pf.rut.msg }}</span></div>
+<div class="field"><label for="pub-correo">Correo <span aria-hidden="true" style="color:var(--ds-danger-fg)">*</span></label><div class="{{ pf.correo.cls }}"><input id="pub-correo" class="bare" value="{{ pf.correo.v }}" onChange="{{ pf.correo.on }}" onBlur="{{ pf.correo.blur }}" type="email" inputMode="email" placeholder="nombre@correo.cl" autoComplete="email" required="{{ true }}" aria-required="true" aria-invalid="{{ pf.correo.inv }}" aria-describedby="pub-correo-msg"></div><span id="pub-correo-msg" class="{{ pf.correo.mc }}">{{ pf.correo.msg }}</span></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" id="pub-repr" label="Actúo como representante de… (opcional)" placeholder="Nombre y RUT de la persona representada" hint-size="100%,66px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Qué derecho quieres ejercer *" options="{{ derechos }}" value="{{ pf.derecho.v }}" on-change="{{ pf.derecho.on }}" error="{{ pf.derecho.err }}" hint-size="100%,66px"></x-import>
+<div class="field"><label for="pub-peticion">{{ pubPetLabel }} <span aria-hidden="true" style="color:var(--ds-danger-fg)">*</span></label><div class="{{ pf.peticion.cls }}" style="height:auto;align-items:flex-start;padding-top:10px;padding-bottom:10px"><textarea id="pub-peticion" class="bare" rows="4" style="resize:vertical;width:100%;font:inherit;color:inherit;background:transparent;border:0;outline:0" value="{{ pf.peticion.v }}" onChange="{{ pf.peticion.on }}" onBlur="{{ pf.peticion.blur }}" placeholder="{{ pubPetPh }}" aria-required="true" aria-invalid="{{ pf.peticion.inv }}" aria-describedby="pub-peticion-msg"></textarea></div><span id="pub-peticion-msg" class="{{ pf.peticion.mc }}">{{ pf.peticion.msg }}</span></div>
+<div class="field"><span id="pub-ced-lbl" class="t-body-sm" style="font-weight:500">Copia de tu cédula <span aria-hidden="true" style="color:var(--ds-danger-fg)">*</span></span><div role="group" aria-labelledby="pub-ced-lbl" aria-describedby="pub-ced-msg" aria-invalid="{{ pf.ced.inv }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Uploader" tipos="PDF, JPG o PNG" tamano-maximo-mb="{{ 10 }}" accept="application/pdf,image/jpeg,image/png" procesar="{{ procesarCed }}" archivos-iniciales="{{ cedIni }}" hint-size="100%,120px"></x-import></div><span id="pub-ced-msg" class="{{ pf.ced.mc }}">{{ pf.ced.msg }}</span></div>
+<div style="border:1px solid var(--ds-border);border-radius:10px;padding:12px 16px;display:flex;flex-direction:column;gap:4px;align-items:flex-start"><span class="t-body-sm" style="font-weight:500">Cómo usamos estos datos</span><span class="t-body-sm" style="color:var(--ds-fg-muted);text-wrap:pretty">Atlas Seguridad SpA los usa solo para atender tu solicitud. La copia de tu cédula sirve para verificar tu identidad y la eliminamos 30 días después de verificarla.</span><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Enlace" href="#" hint-size="260px,44px">Política de tratamiento de datos</x-import></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" block="{{ true }}" size="lg" loading="{{ pubSending }}" loading-label="Enviando" on-click="{{ pubSubmit }}" hint-size="100%,48px">Enviar solicitud</x-import>
+</div></sc-if>
+</div></div></sc-if>
+
+<sc-if value="{{ dlgProrrogar }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Dialog" contained="{{ true }}" title="Prorrogar plazo" description="Solicitud S-0043 · Camila Herrera. Puedes prorrogar una sola vez, hasta por 30 días corridos." actions="{{ prorrogarActions }}" on-close="{{ closeDlg }}" hint-size="100%,100%"><div style="display:flex;flex-direction:column;gap:16px">
+<div class="field"><label for="pr-dias">Días de prórroga <span aria-hidden="true" style="color:var(--ds-danger-fg)">*</span></label><div class="{{ pr.cls }}"><input id="pr-dias" class="bare t-numeric" type="number" min="1" max="30" inputMode="numeric" value="{{ pr.v }}" onChange="{{ pr.on }}" aria-required="true" aria-invalid="{{ pr.inv }}" aria-describedby="pr-dias-msg"><span class="subtle">días corridos</span></div><span id="pr-dias-msg" class="{{ pr.mc }}">{{ pr.msg }}</span></div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" rows="{{ prRows }}" hint-size="100%,80px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Motivo (opcional)" hint="Recomendado. Queda en el historial de la solicitud." rows="{{ 3 }}" placeholder="Por qué se necesita más tiempo" hint-size="100%,130px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ prAvisar }}" on-change="{{ togAvisar }}" label="Avisar al titular por correo" description="Opcional. Recomendado como buena práctica." hint-size="100%,44px"></x-import>
+</div></x-import></sc-if>
+<sc-if value="{{ dlgProrrogar2 }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Dialog" contained="{{ true }}" title="Prorrogar plazo" description="Solicitud S-0045 · Héctor Araya" actions="{{ prorrogar2Actions }}" on-close="{{ closeDlg }}" hint-size="100%,100%">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="warning" titulo="Esta solicitud ya tiene su prórroga" hint-size="100%,90px">El 15-12-2026 se prorrogó 30 días. La ley permite prorrogar una sola vez, así que la fecha límite final es el 30-01-2027.</x-import></x-import></sc-if>
+<sc-if value="{{ dlgDenegar }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Dialog" contained="{{ true }}" title="Denegar solicitud" description="La denegación siempre debe ser fundada." actions="{{ denegarActions }}" on-close="{{ closeDlg }}" hint-size="100%,100%"><div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Fundamento *" hint="Obligatorio. Se envía al titular y queda en el respaldo." rows="{{ 4 }}" placeholder="Indica la causa legal de la denegación" hint-size="100%,160px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Texto fijo del aviso" hint-size="100%,90px">Tienes 30 días hábiles para reclamar ante la Agencia de Protección de Datos Personales.</x-import></div></x-import></sc-if>
+<sc-if value="{{ dlgRechazar }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Dialog" contained="{{ true }}" title="Rechazar bloqueo" description="Solicitud S-0047 · Luis Pérez. El rechazo siempre debe ser fundado." actions="{{ rechazarActions }}" on-close="{{ closeDlg }}" hint-size="100%,100%"><div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Textarea" label="Fundamento del rechazo *" hint="Obligatorio. Se envía al titular y queda en el respaldo." rows="{{ 4 }}" placeholder="Indica por qué no procede el bloqueo" hint-size="100%,160px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Comunicación a la Agencia" hint-size="100%,80px">Al rechazar, enviamos el rechazo fundado al titular y lo comunicamos por vía electrónica a la Agencia de Protección de Datos Personales.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Texto fijo del aviso al titular" hint-size="100%,80px">Tienes 30 días hábiles para reclamar ante la Agencia de Protección de Datos Personales.</x-import></div></x-import></sc-if>
+<sc-if value="{{ dlgAnonimizar }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Dialog" contained="{{ true }}" title="Anonimizar a Luis Pérez" description="Vista previa antes de aplicar." actions="{{ anonActions }}" on-close="{{ closeDlg }}" hint-size="100%,100%"><div style="display:flex;flex-direction:column;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="danger" titulo="No procede" hint-size="100%,80px">Vínculo vigente: contrato indefinido en Bodega Lampa.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="info" titulo="Conservación" hint-size="100%,80px">Liquidaciones de sueldo: 5 años desde el término, según normativa laboral, previsional y tributaria.</x-import></div></x-import></sc-if>
+<sc-if value="{{ dlgAnonOk }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Dialog" contained="{{ true }}" title="Anonimizar a Jorge Muñoz" description="Vista previa antes de aplicar." actions="{{ anonOkActions }}" on-close="{{ closeDlg }}" hint-size="100%,100%"><div style="display:flex;flex-direction:column;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="success" titulo="Procede" hint-size="100%,80px">Sin vínculo vigente desde el 30-06-2020. La conservación de 5 años, según normativa laboral, previsional y tributaria, venció el 30-06-2025.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" title="Qué cambia" rows="{{ anonPreview }}" hint-size="100%,180px"></x-import>
+<span class="t-body-sm" style="color:var(--ds-fg-muted);text-wrap:pretty">No guardamos ningún código ni tabla que permita volver a identificarlo.</span>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Alerta" tono="danger" titulo="Acción irreversible" hint-size="100%,80px">Después de anonimizar no podremos recuperar estos datos ni volver a asociarlos a Jorge Muñoz.</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Checkbox" checked="{{ anonChk }}" on-change="{{ togAnon }}" label="Entiendo que esta acción no se puede deshacer" hint-size="100%,44px"></x-import></div></x-import></sc-if>
+<sc-if value="{{ sheetRegistrar }}" hint-placeholder-val="{{ false }}"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Sheet" contained="{{ true }}" side="{{ sheetSide }}" title="Registrar solicitud" description="Recibida por otro canal. Los 30 días corridos se cuentan desde el ingreso." actions="{{ regActions }}" on-close="{{ closeDlg }}" hint-size="100%,100%"><div style="display:flex;flex-direction:column;gap:16px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Titular" icon="search" placeholder="Buscar persona o correo externo" hint-size="100%,66px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Derecho" options="{{ derechos }}" value="acceso" hint-size="100%,66px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Select" label="Canal" options="{{ canales }}" value="correo" hint-size="100%,66px"></x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Fecha de ingreso" value="18-12-2026" hint="dd-mm-aaaa" hint-size="100%,66px"></x-import>
+<div style="border:1px dashed var(--ds-border-control);border-radius:10px;min-height:64px;display:flex;align-items:center;justify-content:center;gap:8px;color:var(--ds-fg-muted)"><span class="ic i-upload"></span><span class="t-body-sm">Adjuntar documento</span></div></div></x-import></sc-if>
+</x-import>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;screen&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;resumen&quot;,&quot;bandeja&quot;,&quot;detalle&quot;,&quot;prorrogar&quot;,&quot;denegar&quot;,&quot;responder&quot;,&quot;registrar&quot;,&quot;incidentes&quot;,&quot;rat&quot;,&quot;retencion&quot;,&quot;anonimizar&quot;,&quot;privacidad&quot;,&quot;b_detalle&quot;,&quot;b_incidentes&quot;,&quot;b_publico&quot;,&quot;b_publico_err&quot;,&quot;b_publico_env&quot;,&quot;b_rechazar&quot;,&quot;prorrogar2&quot;,&quot;anonimizar_ok&quot;,&quot;dpa&quot;],&quot;default&quot;:&quot;resumen&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;device&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;phone&quot;,&quot;tablet&quot;,&quot;desktop&quot;],&quot;default&quot;:&quot;desktop&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;light&quot;,&quot;dark&quot;],&quot;default&quot;:&quot;light&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;st&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;vacio&quot;,&quot;cargando&quot;,&quot;error&quot;,&quot;forbidden&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;controls&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  state = { screen: null, device: null, theme: null, st: null, dlg: null, pub: null, touched: {}, tried: false, ced: null, sending: false, sent: false, prDias: "30", prAvisar: true, anonChk: false };
+  renderVals() {
+    const h = React.createElement, NS = window.OPAI20DesignSystem_44e4d7 || {};
+    const p = this.props, S = this.state;
+    const screen = S.screen ?? p.screen ?? "resumen";
+    const device = S.device ?? p.device ?? "desktop";
+    const theme = S.theme ?? p.theme ?? "light";
+    const st = S.st ?? p.st ?? "normal";
+    const propB = screen.startsWith("b_");
+    const isPublic = screen.startsWith("b_publico");
+    const showControls = p.controls ?? true;
+    const set = (o) => this.setState(o);
+    const isPhone = device === "phone";
+    const base = screen === "b_detalle" || screen === "b_rechazar" || screen === "prorrogar2" ? "detalle" : screen === "anonimizar_ok" ? "retencion" : screen === "b_incidentes" ? "incidentes" : screen === "registrar" ? "bandeja" : screen === "prorrogar" || screen === "denegar" ? "detalle" : screen === "anonimizar" ? "retencion" : screen;
+    const meta = {
+      resumen: ["Configuración", "Cumplimiento", "Ley 21.719 · Atlas Seguridad SpA"],
+      bandeja: ["Cumplimiento", "Solicitudes ARCO+", "5 abiertas · 30 días corridos para responder"],
+      detalle: propB ? ["Solicitud S-0047 · Rectificación", "Luis Pérez", "Recibida el 01-12-2026 por carta"] : ["Solicitud S-0043 · Acceso", "Camila Herrera", "Recibida el 02-12-2026 por correo"],
+      responder: ["Solicitud S-0043 · Acceso", "Responder", "Para Camila Herrera"],
+      incidentes: ["Cumplimiento", "Incidentes y brechas", propB ? "2 abiertos" : "1 abierto"],
+      dpa: ["Cumplimiento", "DPA y delegado de protección de datos", "Acuerdo de tratamiento y contacto de privacidad"],
+      rat: ["Cumplimiento", "Registro de actividades (RAT)", "8 actividades de tratamiento"],
+      retencion: ["Cumplimiento", "Retención y anonimización", "Plazos por categoría de dato"],
+      privacidad: ["Personas · María F. Soto", "Privacidad", "Bases de tratamiento y derechos del titular"],
+    }[base] || ["", "", ""];
+    const act = { bandeja: ["Registrar solicitud", "plus", "primary"], detalle: null, responder: ["Enviar respuesta", "check", "primary"], incidentes: ["Registrar incidente", "plus", "primary"], rat: ["Exportar PDF", "download", "secondary"], retencion: ["Anonimizar persona", "lock", "primary"], privacidad: ["Exportar datos del titular", "download", "primary"], dpa: ["Descargar DPA", "download", "secondary"] }[base] || null;
+    const detalleAct = base === "detalle";
+    const normal = st === "normal";
+    const flag = (n) => (normal || (n === "dpa" && st === "vacio")) && base === n;
+    const badge = (tone, t) => NS.Badge ? h(NS.Badge, { tone }, t) : t;
+    const dias = (n, tot) => badge(n < 0 ? "danger" : n <= 7 ? "warning" : "success", n < 0 ? "Vencida hace " + -n + " días" : n + " de " + tot + " días");
+    const mask = (rut) => { const p = rut.split("."); return p.map((x, i) => (i < p.length - 1 ? x.replace(/\d/g, "•") : x)).join("."); };
+    const titular = (r) => h("span", { style: { display: "flex", flexDirection: "column" } }, h("span", { style: { fontWeight: 500 } }, r.nombre), h("span", { className: "t-mono t-caption", style: { color: "var(--ds-fg-muted)" } }, mask(r.rut)));
+    const sol = [
+      { id: 1, nombre: "Camila Herrera", rut: "12.345.678-9", der: "Acceso", rec: "02-12-2026", d: 14, tot: 30, pro: false, resp: "Valentina Rojas", est: "En atención", tone: "info" },
+      { id: 2, nombre: "Luis Pérez", rut: "9.876.543-2", der: "Rectificación", rec: "01-12-2026", d: 13, tot: 30, pro: false, resp: "Valentina Rojas", est: "Identidad por verificar", tone: "warning" },
+      { id: 3, nombre: "Jorge Muñoz", rut: "11.222.333-K", der: "Supresión", rec: "03-12-2026", d: 15, tot: 30, pro: false, resp: "Sin asignar", est: "En atención", tone: "info" },
+      { id: 4, nombre: "María F. Soto", rut: "16.234.567-8", der: "Portabilidad", rec: "05-12-2026", d: 17, tot: 30, pro: false, resp: "Andrés Molina", est: "Recibida", tone: "neutral" },
+      { id: 5, nombre: "Héctor Araya", rut: "15.009.332-7", der: "Oposición", rec: "01-12-2026", d: 43, tot: 60, pro: true, resp: "Valentina Rojas", est: "En atención", tone: "info" },
+      { id: 6, nombre: "Diego Silva", rut: "13.456.789-0", der: "Acceso", rec: "04-12-2026", d: null, pro: false, resp: "Valentina Rojas", est: "Respondida", tone: "success" },
+    ];
+    const T = (label, tone, t) => badge(tone, t);
+    const incs = [
+      ...(propB ? [{ id: 0, inc: "INC-0005 · Acceso no autorizado a liquidaciones", det: "16-12-2026", tit: "38", ag: "Enviado", ti: "Pendiente", est: "Abierto", tone: "danger" }] : []),
+      { id: 1, inc: "INC-0004 · Planilla enviada a correo equivocado", det: "16-12-2026", tit: "12", ag: "Por evaluar", ti: "No requerido", est: "Abierto", tone: "danger" },
+      { id: 2, inc: "INC-0003 · Pérdida de teléfono de supervisor", det: "04-12-2026", tit: "0", ag: "No aplica", ti: "No aplica", est: "Cerrado", tone: "neutral" },
+    ];
+    const rat = [
+      { id: 1, act: "Gestión de personal", fin: "Contratación y remuneraciones", cat: "Identificación, contacto, bancarios", base: "Ejecución de contrato", ret: "5 años desde el término", lab: true, dest: "Previred, Servicio de Impuestos Internos" },
+      { id: 2, act: "Control de asistencia", fin: "Turnos y marcaje", cat: "Identificación, ubicación", base: "Ejecución de contrato", ret: "5 años desde el término", lab: true, dest: "Dirección del Trabajo" },
+      { id: 3, act: "Rondas con geolocalización", fin: "Verificar presencia en instalación", cat: "Ubicación", base: "Interés legítimo", ret: "12 meses", dest: "Cliente de la instalación" },
+      { id: 4, act: "Salud ocupacional", fin: "Licencias y exámenes", cat: "Datos de salud (sensibles)", base: "Obligación legal", ret: "Plazo por confirmar", lab: false, dest: "Mutualidad" },
+    ];
+    const ret = [
+      { id: 1, cat: "Datos de contrato y remuneración", plazo: "5 años desde el término", fund: "Normativa laboral, previsional y tributaria", anon: "Al vencer el plazo" },
+      { id: 2, cat: "Geolocalización de rondas", plazo: "12 meses", fund: "Interés legítimo", anon: "Automática" },
+      { id: 3, cat: "Postulantes no contratados", plazo: "6 meses", fund: "Consentimiento", anon: "Automática" },
+    ];
+    const rowsOf = (a) => a.map(([label, value, mono]) => ({ label, value, mono }));
+    const nodeBtn = (variant, label, on) => h(NS.Button, { variant, onClick: on }, label);
+    const close = () => set({ dlg: null });
+    const sc = base === "bandeja" && S.dlg === "registrar" || screen === "registrar";
+    const dl = S.dlg || (["prorrogar", "prorrogar2", "denegar", "anonimizar", "anonimizar_ok"].includes(screen) ? screen : screen === "b_rechazar" ? "rechazar" : null);
+    const back = screen.startsWith("b_") ? "b_detalle" : base;
+    // formulario público
+    const demoErr = screen === "b_publico_err", demoEnv = screen === "b_publico_env";
+    const pv = S.pub || (demoErr ? { nombre: "Rosa Inostroza", rut: "12.345.678-0", correo: "rosa.inostroza@correo", derecho: "rectificación", peticion: "" } : demoEnv ? { nombre: "Rosa Inostroza", rut: "12.345.678-5", correo: "rosa.inostroza@correo.cl", derecho: "rectificación", peticion: "Mi domicilio registrado es antiguo. El correcto es Av. Grecia 1450, Ñuñoa." } : { nombre: "", rut: "", correo: "", derecho: "", peticion: "" });
+    const rutOk = (r) => { const c = (r || "").replace(/[^0-9kK]/g, "").toUpperCase(); if (c.length < 2) return false; const b = c.slice(0, -1), dv = c.slice(-1); let sum = 0, m = 2; for (let i = b.length - 1; i >= 0; i--) { sum += +b[i] * m; m = m === 7 ? 2 : m + 1; } const r2 = 11 - (sum % 11); return dv === (r2 === 11 ? "0" : r2 === 10 ? "K" : String(r2)); };
+    const fund = ["rectificación", "supresión", "oposición", "bloqueo"].includes(pv.derecho);
+    const ced = S.ced ?? (demoEnv ? "cedula.pdf" : null);
+    const errs = {
+      nombre: pv.nombre.trim().length < 3 ? "Escribe tu nombre completo." : null,
+      rut: !pv.rut.trim() ? "Escribe tu RUT." : !rutOk(pv.rut) ? "El RUT no es válido. Revisa el dígito verificador." : null,
+      correo: !pv.correo.trim() ? "Escribe tu correo." : !/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(pv.correo) ? "Escribe un correo válido, como nombre@correo.cl." : null,
+      derecho: !pv.derecho ? "Elige qué derecho quieres ejercer." : null,
+      peticion: !pv.peticion.trim() ? (fund ? "Indica el fundamento de tu solicitud." : "Cuéntanos qué datos necesitas.") : null,
+      ced: !ced ? (demoErr ? "Adjunta tu cédula en PDF, JPG o PNG de hasta 10 MB." : "Adjunta una copia de tu cédula.") : null,
+    };
+    const tried = S.tried || demoErr;
+    const show = (k) => (tried || S.touched[k]) && errs[k];
+    const hints = { correo: "Aquí te enviaremos el acuse de recibo y la respuesta.", rut: "Con guion y dígito verificador.", ced: "Solo para verificar tu identidad." };
+    const upd = (k) => (v) => this.setState((st0) => ({ pub: { ...(st0.pub || pv), [k]: v && v.target ? v.target.value : v } }));
+    const pf = {};
+    ["nombre", "rut", "correo", "derecho", "peticion", "ced"].forEach((k) => { const e = show(k); pf[k] = { v: pv[k], on: upd(k), blur: () => this.setState((st0) => ({ touched: { ...st0.touched, [k]: true }, pub: st0.pub || pv })), cls: "input" + (e ? " invalid" : ""), inv: e ? "true" : "false", msg: e || hints[k] || "", mc: e ? "err" : "hint", err: e || undefined }; });
+    const nErr = Object.keys(errs).filter((k) => errs[k]).length;
+    const sent = S.sent;
+    // prórroga
+    const prN = Number(S.prDias), prBad = !/^\d+$/.test(String(S.prDias)) || prN < 1 || prN > 30;
+    const addDays = (d, n) => { const [dd, mm, yy] = d.split("-").map(Number); const x = new Date(yy, mm - 1, dd + n); return String(x.getDate()).padStart(2, "0") + "-" + String(x.getMonth() + 1).padStart(2, "0") + "-" + x.getFullYear(); };
+    return {
+      showControls, outerPad: showControls ? "24px" : "0", isPublic, notPublic: !isPublic, propB: propB && !isPublic, notPropB: !propB, pubPad: isPhone ? "16px" : "32px",
+      pubForm: normal && !sent, pubSent: (st === "vacio" && isPublic) || (normal && sent), pf, pubHasErr: tried && nErr > 0, pubErrTitle: nErr === 1 ? "Revisa 1 campo" : "Revisa " + nErr + " campos",
+      pubSending: S.sending || demoEnv, pubPetLabel: fund ? "Fundamento de tu solicitud" : "Qué datos y qué necesitas", pubPetPh: pv.derecho === "rectificación" ? "Indica el dato actual, el correcto y por qué" : fund ? "Explica por qué lo pides" : "Cuéntanos qué datos necesitas",
+      cedIni: demoErr ? [{ nombre: "cedula-frente.heic", size: 2400000, estado: "error", mensaje: "Formato no admitido. Usa PDF, JPG o PNG." }] : demoEnv ? [{ nombre: "cedula.pdf", size: 820000, estado: "listo" }] : [],
+      procesarCed: (file, { onProgreso }) => new Promise((res, rej) => { if (!/(pdf|jpe?g|png)$/i.test(file.name)) { setTimeout(() => rej(new Error("Formato no admitido. Usa PDF, JPG o PNG.")), 300); return; } let b = 0; const t = setInterval(() => { b = Math.min(file.size, b + file.size / 5); onProgreso(b); if (b >= file.size) { clearInterval(t); this.setState({ ced: file.name }); res(); } }, 150); }),
+      pubSubmit: () => { if (nErr) { this.setState({ tried: true, pub: S.pub || pv }); return; } this.setState({ sending: true }); setTimeout(() => this.setState({ sending: false, sent: true }), 1400); },
+      user: { name: "Andrés Molina", initials: "AM", role: "Administrador" },
+      user: { name: "Andrés Molina", initials: "AM", role: "Administrador" },
+            detEst: propB ? "En atención" : "En atención", detEstTone: "info", detPlazoTxt: propB ? "13 de 30 días" : "14 de 30 días", detPlazoTone: "success",
+      acuseTxt: propB ? "01-12-2026 16:02 a l.p•••@correo.cl · Constancia C-8790." : "02-12-2026 09:15 a c.h•••@correo.cl · Constancia C-8841.",
+      bloqRows: [{ label: "Solicitud de bloqueo", value: "17-12-2026 10:20" }, { label: "Bloqueo vigente desde", value: "17-12-2026 10:20 (al ingreso)" }, { label: "Plazo para responder", value: "2 días hábiles · 21-12-2026" }, { label: "Datos bloqueados", value: "Contacto y domicilio" }],
+      cesionarios: [{ name: "Previred", meta: "Recibe datos de identificación y domicilio", state: "Pendiente", tone: "neutral" }, { name: "Cliente · Edificio Mirador Poniente", meta: "Recibe nombre y contacto del guardia asignado", state: "Pendiente", tone: "neutral" }],
+      respaldo: propB ? [{ title: "Acuse de recibo · rectificación", meta: "Correo a l.p•••@correo.cl · 01-12-2026 16:02 · Constancia C-8790", content: "Asunto: Recibimos tu solicitud de rectificación (S-0047)" }, { title: "Acuse de recibo · bloqueo", meta: "Correo a l.p•••@correo.cl · 17-12-2026 10:25 · Constancia C-8862", content: "Asunto: Recibimos tu solicitud de bloqueo (S-0047)" }] : [{ title: "Acuse de recibo", meta: "Correo a c.h•••@correo.cl · 02-12-2026 09:15 · Constancia C-8841", content: "Asunto: Recibimos tu solicitud de acceso (S-0043)" }],
+      openProrrogar: () => set({ dlg: "prorrogar" }), openDenegar: () => set({ dlg: "denegar" }), openRechazar: () => set({ dlg: "rechazar" }), toDpa: () => set({ screen: "dpa" }),
+      screen, device, theme, st, isPhone, notPhone: !isPhone,
+      fw: { phone: 375, tablet: 1024, desktop: 1280 }[device], fh: { phone: 780, tablet: 820, desktop: 860 }[device],
+      screenOptions: [["resumen", "1 · Resumen"], ["bandeja", "2 · Bandeja de solicitudes"], ["detalle", "3 · Detalle de solicitud"], ["prorrogar", "3a · Prorrogar (Dialog)"], ["denegar", "3b · Denegar (Dialog)"], ["responder", "4 · Responder"], ["registrar", "5 · Registrar solicitud (Sheet)"], ["incidentes", "6 · Incidentes y brechas"], ["rat", "7 · RAT"], ["retencion", "8 · Retención"], ["anonimizar", "8a · Anonimizar (Dialog)"], ["privacidad", "9 · Privacidad en la ficha"], ["dpa", "11 · DPA y delegado de protección de datos"], ["prorrogar2", "3c · Segunda prórroga bloqueada"], ["anonimizar_ok", "8b · Anonimizar (procede)"], ["b_detalle", "B1 · Bloqueo temporal"], ["b_rechazar", "B1a · Rechazar bloqueo"], ["b_incidentes", "B2 · Brechas"], ["b_publico", "B3 · Formulario público"], ["b_publico_err", "B3a · Con errores"], ["b_publico_env", "B3b · Enviando"]].map(([value, label]) => ({ value, label })),
+      deviceOptions: [{ value: "phone", label: "375" }, { value: "tablet", label: "1024" }, { value: "desktop", label: "1280" }],
+      themeOptions: [{ value: "light", label: "Claro" }, { value: "dark", label: "Oscuro" }],
+      stateOptions: [["normal", "Normal"], ["vacio", "Vacío"], ["cargando", "Cargando"], ["error", "Error"], ["forbidden", "Sin permiso"]].map(([value, label]) => ({ value, label })),
+      setScreen: (v) => set({ screen: v, dlg: null, pub: null, touched: {}, tried: false, ced: null, sent: false, sending: false }), setDevice: (v) => set({ device: v }), setTheme: (v) => set({ theme: v }), setSt: (v) => set({ st: v }),
+      eyebrow: meta[0], title: meta[1], subtitle: meta[2], shellTitle: isPhone ? "" : "Cumplimiento",
+      hasAction: !!act && normal, actionLabel: act ? act[0] : "", actionIcon: act ? act[1] : "", actionVariant: act ? act[2] : "primary",
+      goAction: () => base === "bandeja" ? set({ screen: "registrar" }) : base === "retencion" ? set({ screen: "anonimizar" }) : null,
+      showEmpty: st === "vacio" && base !== "dpa", hasDpo: st !== "vacio", noDpo: st === "vacio", showLoading: st === "cargando", showError: st === "error", showForbidden: st === "forbidden",
+      emptyTitle: { bandeja: "Aún no hay solicitudes", incidentes: "Aún no hay incidentes", rat: "Aún no hay actividades" }[base] || "Aún no hay registros",
+      emptyDesc: base === "bandeja" ? "Registra una solicitud recibida por correo, carta o presencial." : "Cuando haya registros aparecerán aquí.",
+      s_resumen: flag("resumen"), s_bandeja: flag("bandeja"), s_detalle: flag("detalle"), s_responder: flag("responder"), s_incidentes: flag("incidentes"), s_rat: flag("rat"), s_retencion: flag("retencion"), s_privacidad: flag("privacidad"), s_dpa: flag("dpa"),
+      toBandeja: () => set({ screen: "bandeja" }), toIncidentes: () => set({ screen: "incidentes" }), toRat: () => set({ screen: "rat" }), toDetalle: () => set({ screen: "detalle" }),
+      searchW: isPhone ? "100%" : "288px",
+      solRows: sol,
+      solCols: [
+        { key: "nombre", label: "Titular", render: titular },
+        { key: "der", label: "Derecho", render: (r) => badge("neutral", r.der) },
+        { key: "rec", label: "Recepción", mono: true },
+        { key: "d", label: "Plazo", render: (r) => (r.d == null ? badge("neutral", "Respondida") : h("span", { style: { display: "flex", gap: 6, alignItems: "center" } }, dias(r.d, r.tot), r.pro ? badge("info", "Prorrogada") : null)) },
+        { key: "resp", label: "Responsable" },
+        { key: "est", label: "Estado", render: (r) => badge(r.tone, r.est) },
+      ],
+      solCard: (r) => ({ initials: r.nombre.split(" ").map((x) => x[0]).slice(0, 2).join(""), title: r.nombre, subtitle: r.der + " · " + r.rec, meta: r.est, badge: { tone: r.d == null ? "neutral" : r.d < 0 ? "danger" : r.d <= 7 ? "warning" : "success", label: r.d == null ? "Respondida" : r.d < 0 ? "Vencida" : r.d + " días" } }),
+      detSol: propB ? rowsOf([["Titular", "Luis Pérez"], ["RUT", mask("9.876.543-2"), true], ["Canal", "Carta"], ["Derecho", "Rectificación"], ["Recepción", "01-12-2026"], ["Responsable", "Valentina Rojas"]]) : rowsOf([["Titular", "Camila Herrera"], ["RUT", mask("12.345.678-9"), true], ["Canal", "Correo"], ["Derecho", "Acceso"], ["Recepción", "02-12-2026"], ["Responsable", "Valentina Rojas"]]),
+      detPlazo: rowsOf([["Plazo", "30 días corridos desde el ingreso"], ["Ingreso", propB ? "01-12-2026 16:00" : "02-12-2026 09:10"], ["Acuse de recibo", propB ? "01-12-2026 16:02" : "02-12-2026 09:15"], ["Fecha límite", propB ? "31-12-2026" : "01-01-2027"], ["Prórroga", "Disponible · una vez, hasta 30 días"]]),
+      detIdent: rowsOf([["Estado", "Verificada"], ["Cómo", "Cédula enviada y cotejada"], ["Por", "Valentina Rojas · 03-12-2026"]]),
+      tlItems: [
+        { initials: "VR", who: "Valentina Rojas", action: "verificó la identidad", when: "03-12-2026 11:20" },
+        { agent: true, who: "OPAI", action: "envió el acuse de recibo", when: "02-12-2026 09:15" },
+        { initials: "AM", who: "Andrés Molina", action: "registró la solicitud", when: "02-12-2026 09:10" },
+      ],
+      plantillas: [{ value: "acceso", label: "Acceso" }, { value: "rect", label: "Rectificación" }, { value: "sup", label: "Supresión" }],
+      incRows: incs,
+      incCols: [{ key: "inc", label: "Incidente" }, { key: "det", label: "Detectado", mono: true }, { key: "tit", label: "Titulares", numeric: true }, { key: "ag", label: "Aviso Agencia" }, { key: "ti", label: "Aviso titulares" }, { key: "est", label: "Estado", render: (r) => badge(r.tone, r.est) }],
+      incCard: (r) => ({ initials: "IN", title: r.inc, subtitle: "Detectado " + r.det, meta: "Aviso a la Agencia: " + r.ag, badge: { tone: r.tone, label: r.est } }),
+      incFicha: rowsOf([["Detectado", "16-12-2026 14:30"], ["Qué pasó", "Planilla de pauta enviada a un correo externo"], ["Datos afectados", "Nombre y RUT"], ["Titulares", "12"], ["Acciones", "Correo recuperado · en revisión"]]),
+      incAvisos: rowsOf([["Agencia", "Por evaluar: ¿hay riesgo razonable?"], ["Titulares", "No requerido: no hay datos sensibles, de menores de 14 ni económicos."]]),
+      incFichaB: rowsOf([["Detectado", "16-12-2026 08:15"], ["Qué pasó", "Una cuenta de supervisor descargó liquidaciones fuera de su alcance"], ["Datos afectados", "Nombre, RUT, remuneración y cuenta bancaria"], ["Titulares", "38 (aprox.)"], ["Medidas", "Cuenta suspendida · descarga revocada"]]),
+      evalRows: rowsOf([["Riesgo razonable para los titulares", "Sí"], ["Datos sensibles", "No"], ["Menores de 14 años", "No"], ["Económicos, financieros, bancarios o comerciales", "Sí"]]),
+      agRows: rowsOf([["Medio", "Formulario electrónico de la Agencia"], ["Meta interna", "19-12-2026 08:15 (72 h)"], ["Enviado por", "Valentina Rojas"]]),
+      tiRows: rowsOf([["Titulares", "38 (aprox.)"], ["Medio", "Correo individual a 36 · medio masivo nacional para 2 sin contacto"], ["Estado", "Borrador"]]),
+      comms: [
+        { to: "Agencia de Protección de Datos Personales", state: "Enviada", tone: "success", meta: "17-12-2026 10:40 · Formulario electrónico", rows: rowsOf([["Naturaleza", "Acceso no autorizado por cuenta interna"], ["Efectos", "Exposición de remuneraciones y cuentas bancarias"], ["Categorías de datos", "Identificación, remuneración, bancarios"], ["N.º aprox. de titulares", "38"], ["Medidas tomadas", "Cuenta suspendida, descarga revocada, revisión de permisos"]]) },
+        { to: "Titulares afectados", state: "Borrador", tone: "neutral", meta: "Correo individual y medio masivo nacional", rows: rowsOf([["Naturaleza", "Una persona sin autorización vio tu liquidación de sueldo"], ["Efectos", "Pudo conocer tu sueldo y tu cuenta bancaria"], ["Categorías de datos", "Identificación, remuneración, bancarios"], ["N.º aprox. de titulares", "38"], ["Medidas tomadas", "Bloqueamos la cuenta y revisamos los permisos"]]) },
+      ],
+      dpaRows: rowsOf([["Responsable", "Atlas Seguridad SpA"], ["Encargado", "OPAI"], ["Aceptado por", "Andrés Molina · owner"], ["Fecha", "12-12-2026 09:42"]]),
+      dpaTl: [{ initials: "AM", who: "Andrés Molina", action: "aceptó la versión 1.2", when: "12-12-2026 09:42" }, { initials: "AM", who: "Andrés Molina", action: "aceptó la versión 1.1", when: "03-03-2026 10:00" }],
+      dpoRows: rowsOf([["Nombre", "Valentina Rojas Pino"], ["Cargo", "Jefa de cumplimiento"], ["Correo de contacto", "dpo@atlasseguridad.cl"], ["Teléfono", "+56 2 2345 6789"], ["Desde", "03-03-2026"]]),
+      ratRows: rat,
+      ratCols: [{ key: "act", label: "Actividad" }, { key: "fin", label: "Finalidad" }, { key: "cat", label: "Categorías" }, { key: "base", label: "Base de licitud" }, { key: "ret", label: "Retención", render: (r) => h("span", { style: { display: "flex", flexDirection: "column" } }, r.ret, r.lab ? h("span", { className: "t-caption", style: { color: "var(--ds-fg-muted)" } }, "Según normativa laboral, previsional y tributaria") : null) }, { key: "dest", label: "Destinatarios" }],
+      ratCard: (r) => ({ initials: "RA", title: r.act, subtitle: r.fin, meta: r.base + " · " + r.ret + (r.lab ? " (normativa laboral, previsional y tributaria)" : "") }),
+      plazoRows: [{ label: "Plazo de respuesta", value: "30 días corridos desde el ingreso" }, { label: "Prórroga", value: "Una vez, hasta 30 días" }, { label: "Origen", value: badge("info", "Valor del sistema") }],
+      retRows: ret,
+      retCols: [{ key: "cat", label: "Categoría" }, { key: "plazo", label: "Retención" }, { key: "fund", label: "Fundamento" }, { key: "anon", label: "Anonimización" }],
+      retCard: (r) => ({ initials: "RE", title: r.cat, subtitle: r.plazo, meta: r.fund }),
+      consents: [
+        { name: "Uso de geolocalización en rondas", meta: "Con derecho de oposición (art. 8° a)", state: "Interés legítimo", tone: "neutral", off: false, act: "Registrar oposición" },
+        { name: "Envío de comunicaciones internas", meta: "Con derecho de oposición (art. 8° a)", state: "Interés legítimo", tone: "neutral", off: false, act: "Registrar oposición" },
+        { name: "Uso de imagen en credencial", meta: "Revocado 11-12-2026", state: "Revocado", tone: "neutral", off: true, act: "Revocar" },
+      ],
+      privTl: [{ initials: "MS", who: "María F. Soto", action: "revocó «uso de imagen en credencial»", when: "11-12-2026 16:40" }, { initials: "AM", who: "Andrés Molina", action: "registró las bases de tratamiento", when: "03-03-2026 10:02" }],
+      dlgProrrogar: dl === "prorrogar", dlgProrrogar2: dl === "prorrogar2", dlgDenegar: dl === "denegar", dlgRechazar: dl === "rechazar", dlgAnonimizar: dl === "anonimizar", dlgAnonOk: dl === "anonimizar_ok",
+      pr: { v: S.prDias, on: (e) => set({ prDias: e && e.target ? e.target.value : e }), cls: "input" + (prBad ? " invalid" : ""), inv: prBad ? "true" : "false", mc: prBad ? "err" : "hint", msg: prBad ? "Elige entre 1 y 30 días." : "Máximo 30 días corridos." },
+      prRows: rowsOf([["Fecha límite actual", "01-01-2027"], ["Nueva fecha límite", prBad ? "—" : addDays("01-01-2027", prN)]]),
+      prAvisar: S.prAvisar, togAvisar: () => set({ prAvisar: !S.prAvisar }), anonChk: S.anonChk, togAnon: () => set({ anonChk: !S.anonChk }),
+      anonPreview: rowsOf([["Nombre", "Se elimina"], ["RUT", "Se elimina"], ["Contacto y domicilio", "Se eliminan"], ["Turnos y rondas", "Se conservan sin ningún dato que identifique a la persona"]]), sheetRegistrar: dl === "registrar" || screen === "registrar",
+      sheetSide: isPhone ? "bottom" : "right", closeDlg: () => set({ screen: back, dlg: null }),
+      prorrogarActions: [nodeBtn("secondary", "Cancelar", () => set({ screen: "detalle", dlg: null })), h(NS.Button, { disabled: prBad, onClick: () => set({ screen: "detalle", dlg: null }) }, prBad ? "Prorrogar" : "Prorrogar " + prN + " días")],
+      prorrogar2Actions: [nodeBtn("secondary", "Cerrar", () => set({ screen: "detalle", dlg: null })), h(NS.Button, { disabled: true }, "Prorrogar")],
+      rechazarActions: [nodeBtn("secondary", "Cancelar", () => set({ screen: "b_detalle", dlg: null })), nodeBtn("destructive", "Rechazar bloqueo", () => set({ screen: "b_detalle", dlg: null }))],
+      anonOkActions: [nodeBtn("secondary", "Cancelar", () => set({ screen: "retencion", dlg: null, anonChk: false })), h(NS.Button, { variant: "destructive", disabled: !S.anonChk, onClick: () => set({ screen: "retencion", dlg: null, anonChk: false }) }, "Anonimizar")],
+      denegarActions: [nodeBtn("secondary", "Cancelar", () => set({ screen: "detalle", dlg: null })), nodeBtn("destructive", "Denegar solicitud", () => set({ screen: "detalle", dlg: null }))],
+      anonActions: [nodeBtn("secondary", "Cerrar", () => set({ screen: "retencion", dlg: null })), h(NS.Button, { disabled: true }, "Anonimizar")],
+      regActions: [nodeBtn("secondary", "Cancelar", () => set({ screen: "bandeja", dlg: null })), nodeBtn("primary", "Registrar", () => set({ screen: "bandeja", dlg: null }))],
+      derechos: ["Acceso", "Rectificación", "Supresión", "Oposición", "Portabilidad", "Bloqueo"].map((l) => ({ value: l.toLowerCase(), label: l })),
+      retry: () => set({ st: "normal" }),
+      canales: [["correo", "Correo"], ["presencial", "Presencial"], ["carta", "Carta"], ["portal", "Portal"]].map(([value, label]) => ({ value, label })),
+      tabs: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "per", label: "Personas", icon: "users" }, { id: "pau", label: "Pauta", icon: "calendar" }, { id: "tic", label: "Tickets", icon: "ticket" }, { id: "mas", label: "Más", icon: "more" }],
+      groups: [
+        { items: [{ id: "ini", label: "Inicio", icon: "home" }, { id: "ban", label: "Bandeja", icon: "inbox" }] },
+        { title: "Personas", items: [{ id: "per", label: "Personas", icon: "users" }] },
+        { title: "Configuración", items: [{ id: "cum", label: "Cumplimiento", icon: "lock" }] },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>
