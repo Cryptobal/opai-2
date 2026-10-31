@@ -30,6 +30,7 @@ export default function Nomina() {
             {d.r.ok ? (
               <ListaPeriodos
                 periodos={d.r.data}
+                sugerido={mesSugerido(d.r.data)}
                 gestiona={d.p.periodos}
                 puedePagar={d.p.pagar}
                 puedeVerNovedades={d.p.novedadesRead}

@@ -39,7 +39,6 @@ export default function Novedades({ searchParams }: Props) {
         ]);
         return { per, permisos, periodos, periodo, vista, nov, reglas, prestamos };
       }}
-      opciones={(d) => (d.periodo && d.permisos.novedades && d.periodo.estado !== "cerrado" && d.periodo.estado !== "pagado" ? { acciones: <FormNovedad periodo={d.periodo} /> } : {})}
     >
       {(d) => {
         const base = d.periodo ? `/nomina/novedades?periodo=${d.periodo.id}` : "/nomina/novedades";
@@ -73,6 +72,7 @@ export default function Novedades({ searchParams }: Props) {
                 <Empty titulo="Aún no hay períodos" descripcion="Abre un período en la pestaña Períodos para cargar novedades." />
               ) : (
                 <>
+                  {abierto && d.permisos.novedades ? <div><FormNovedad periodo={d.periodo} /></div> : null}
                   {abierto && (d.permisos.anticipos || d.permisos.prestamos) ? (
                     <PanelAutomaticas periodoId={d.periodo.id} anticipos={d.permisos.anticipos} prestamos={d.permisos.prestamos} />
                   ) : null}

@@ -2,20 +2,28 @@ import { Badge, Empty, SeccionTarjeta } from "@opai/ds";
 
 import { fechaCorta } from "@/lib/formato";
 
+import { AbrirPeriodo } from "./abrir-periodo";
 import { AccionesPeriodo } from "./acciones-periodo";
 import { ESTADO_PERIODO } from "./etiquetas";
 import type { Periodo } from "./tipos";
 import { EnlaceBoton } from "@/app/_components/maestros/enlace-boton";
 
 /** Períodos de remuneraciones: el actual destacado arriba y los anteriores debajo (diseño 01). */
-export function ListaPeriodos({ periodos, gestiona, puedePagar, puedeVerNovedades }: {
+export function ListaPeriodos({ periodos, sugerido, gestiona, puedePagar, puedeVerNovedades }: {
   periodos: Periodo[];
+  sugerido: { anio: number; mes: number };
   gestiona: boolean;
   puedePagar: boolean;
   puedeVerNovedades: boolean;
 }) {
   if (periodos.length === 0)
-    return <Empty titulo="Aún no hay períodos" descripcion="Abre el primer período para empezar a cargar novedades del mes." />;
+    return (
+      <Empty
+        titulo="Aún no hay períodos"
+        descripcion="Abre el primer período para empezar a cargar novedades del mes."
+        {...(gestiona ? { accion: <AbrirPeriodo sugerido={sugerido} /> } : {})}
+      />
+    );
   const actual = periodos.find((p) => p.estado !== "pagado") ?? periodos[0];
   return (
     <div className="flex flex-col gap-4">

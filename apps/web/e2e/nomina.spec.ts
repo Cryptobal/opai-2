@@ -1,5 +1,6 @@
 import { expect, type Page, test } from "@playwright/test";
 
+import { hidratado } from "./hidratacion";
 import { E2E_PASSWORD, entrar } from "./sesion";
 
 // Brief 25 · Nómina PR 1: pantallas Períodos (01), Novedades (05), Calendario (10) y la pestaña
@@ -16,8 +17,13 @@ async function captura(page: Page, nombre: string, proyecto: string) {
 /** Cada shard de CI usa su propia base: el test crea el período si aún no hay (no depende de otro test). */
 async function conPeriodo(page: Page) {
   await page.goto("/nomina");
+  // `isVisible` no espera: se aguarda a que la pantalla pinte el contenido (lista o vacío) antes de decidir.
+  await expect(page.getByRole("group", { name: "Secciones de Nómina" })).toBeVisible();
+  await expect(page.getByText("Aún no hay períodos").or(page.getByText("período actual").first())).toBeVisible();
   if (await page.getByText("Aún no hay períodos").isVisible()) {
-    await page.getByRole("button", { name: "Abrir período" }).first().click();
+    const abrir = page.getByRole("button", { name: "Abrir período" }).first();
+    await hidratado(abrir);
+    await abrir.click();
     await page.getByRole("dialog").getByRole("button", { name: "Abrir", exact: true }).click();
     await expect(page.getByText("Abierto").first()).toBeVisible({ timeout: 30_000 });
   }
@@ -66,6 +72,7 @@ test.describe("Nómina", () => {
     const generar = page.getByRole("button", { name: /Generar calendario|Completar calendario/ }).first();
     await expect(generar).toBeVisible();
     // Idempotente: completa el calendario del año en cualquier proyecto (cada shard tiene su base).
+    await hidratado(generar);
     await generar.click();
     await expect(page.getByText("Formato por verificar").first()).toBeVisible({ timeout: 30_000 });
     await expect(page.getByText("Plazo por verificar").first()).toBeVisible();
