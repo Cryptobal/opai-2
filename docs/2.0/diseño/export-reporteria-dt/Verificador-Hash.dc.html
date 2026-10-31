@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/fonts.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/colors.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/typography.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/spacing.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/base.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/tokens/icons.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/components/components.css">
+<link rel="stylesheet" href="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/styles.css">
+<script src="_ds/opai-2-0-design-system-v2-44e4d7b9-7464-4771-bff8-07fcff4d573d/_ds_bundle.js"></script>
+<script src="adt.js"></script>
+</helmet>
+<div style="display:flex;flex-direction:column;gap:20px;width:100%;max-width:600px">
+<div style="display:flex;flex-direction:column;gap:4px">
+<h1 class="t-title m0">Verificar una marca</h1>
+<span class="t-body-sm muted">Pega el hash del comprobante que llegó a tu correo o escanea su código QR. Te diremos si la marca existe y no fue alterada.</span>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Input" label="Hash del comprobante (SHA-256)" hint="Está al pie del comprobante de marca." mono="{{ true }}" value="{{ hash }}" placeholder="64 caracteres, p. ej. 9f2c4e…" hint-size="100%,96px"></x-import>
+<div style="display:flex;gap:8px;flex-wrap:wrap">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" loading="{{ isCargando }}" size="{{ btnSize }}" style="{{ btnStyle }}" hint-size="120px,44px">Verificar</x-import>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" icon="scan" size="{{ btnSize }}" style="{{ btnStyle }}" hint-size="150px,44px">Escanear QR</x-import>
+</div>
+</div>
+
+<sc-if value="{{ isFound }}" hint-placeholder-val="{{ true }}">
+<section style="display:flex;flex-direction:column;gap:12px;padding:16px;border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+<div style="display:flex;flex-direction:column;gap:6px;align-items:flex-start">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="success" hint-size="140px,22px">Marca encontrada</x-import>
+<span class="t-body-sm">La marca existe en el registro y su contenido coincide con el hash. No ha sido alterada.</span>
+</div>
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.DetailSection" rows="{{ kv }}" hint-size="100%,320px"></x-import>
+<div style="display:flex;flex-direction:column;gap:4px;padding-top:8px;border-top:1px solid var(--ds-border)">
+<span class="t-caption">Hash completo</span>
+<span class="t-mono" style="font-size:13px;line-height:20px;word-break:break-all;color:var(--ds-fg-muted)">{{ hashFull }}</span>
+</div>
+</section>
+</sc-if>
+<sc-if value="{{ isNoFound }}" hint-placeholder-val="{{ false }}">
+<section style="display:flex;flex-direction:column;gap:12px;padding:16px;border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+<div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Badge" tone="danger" hint-size="140px,22px">No encontrada</x-import></div>
+<span class="t-body-sm">No hay ninguna marca con ese hash. Revisa que lo hayas copiado completo, sin espacios. Si lo escaneaste, vuelve a intentarlo con más luz.</span>
+<div><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Button" variant="secondary" hint-size="140px,40px">Limpiar</x-import></div>
+</section>
+</sc-if>
+<sc-if value="{{ isVacio }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.StatePanel" kind="empty" icon="scan" title="Aún no has ingresado un hash" description="El comprobante llega a tu correo cada vez que marcas. Copia el hash o escanea su QR." hint-size="100%,200px"></x-import>
+</sc-if>
+<sc-if value="{{ isCargando }}" hint-placeholder-val="{{ false }}">
+<section style="display:flex;flex-direction:column;gap:12px;padding:16px;border:1px solid var(--ds-border);border-radius:var(--radius-lg);background:var(--ds-surface)">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="140px" height="{{ 22 }}" radius="999px" hint-size="140px,22px"></x-import>
+<sc-for list="{{ skel }}" as="s" hint-placeholder-count="6"><div style="display:flex;justify-content:space-between;gap:16px;min-height:40px;align-items:center;border-bottom:1px solid var(--ds-border)"><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="30%" hint-size="30%,14px"></x-import><x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.Skeleton" width="40%" hint-size="40%,14px"></x-import></div></sc-for>
+</section>
+</sc-if>
+<sc-if value="{{ isError }}" hint-placeholder-val="{{ false }}">
+<x-import component-from-global-scope="OPAI20DesignSystem_44e4d7.StatePanel" kind="error" title="No pudimos verificar el hash" description="Revisa tu conexión y vuelve a intentarlo. Código ASI-HSH-503." action="{{ retry }}" hint-size="100%,220px"></x-import>
+</sc-if>
+<span class="t-caption">Titular: OPAI (razón social por confirmar). Solo mostramos los datos necesarios para comprobar la marca.</span>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  componentDidMount() { if (!window.ADT) { this.t = setInterval(() => { if (window.ADT) { clearInterval(this.t); this.forceUpdate(); } }, 50); } }
+  componentWillUnmount() { clearInterval(this.t); }
+  renderVals() {
+    const A = window.ADT;
+    if (!A) return { isFound: false };
+    const e = this.props.estado || "datos", v = this.props.vista || "";
+    const phone = this.props.device === "phone";
+    const full = "9f2c4e71a0b8d35c6e19f4a2b07d8c3e51fa96d2047b8e3c1a5d90f6e2b4c873";
+    const isDatos = e === "datos";
+    return {
+      isFound: isDatos && v !== "nofound", isNoFound: isDatos && v === "nofound",
+      isVacio: e === "vacio", isCargando: e === "cargando", isError: e === "error",
+      hash: e === "vacio" ? "" : v === "nofound" ? "9f2c4e71a0b8d35c6e19f4a2b07d8c3e51fa96d2047b8e3c1a5d90f6e2b4c87" : full,
+      hashFull: full,
+      btnSize: phone ? "lg" : "md", btnStyle: phone ? { flex: 1 } : null,
+      skel: [1, 2, 3, 4, 5, 6],
+      kv: [
+        { label: "Tipo", value: "Entrada" },
+        { label: "Fecha y hora (servidor)", value: "14-10-2026 07:58:12", numeric: true },
+        { label: "Lugar", value: "Planta Quilicura" },
+        { label: "Método", value: "App Terreno · GPS como evidencia" },
+        { label: "Empleador", value: "Atlas Seguridad SpA" },
+        { label: "RUT empleador", value: "76.543.210-K", mono: true },
+        { label: "Trabajador", value: "C. H. S. · 12.•••.678-9" },
+      ],
+      retry: A.btn("Reintentar", { icon: "refresh" }),
+    };
+  }
+}
+</script>
+</body>
+</html>
