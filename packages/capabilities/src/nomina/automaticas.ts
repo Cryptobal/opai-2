@@ -7,7 +7,7 @@ import { anticiposDelPeriodo, type ReglaAnticipo } from "@opai/domain";
 import { defineCapability } from "../define";
 import { uuidSchema } from "../core/esquemas";
 import { aFecha } from "../core/maestros/comun";
-import { bloquearPeriodoAbierto, bloquearPrestamo } from "./bloqueos";
+import { bloquearPeriodoAbierto, bloquearPrestamo, cambioConcurrente } from "./bloqueos";
 import type { Contexto } from "../types";
 import { PERMISO_ANTICIPOS, PERMISO_PRESTAMOS, periodoDe } from "./comun";
 import { exigirPeriodoAbierto } from "./novedades-util";
@@ -104,10 +104,12 @@ export const prestamosAplicarCuotas = defineCapability({
     if (dryRun || pendientes.length === 0) return salida;
     return ctx.transaccion(async (tx) => {
       await bloquearPeriodoAbierto(tx, ctx.tenantId, periodoId);
-      for (const id of [...new Set(pendientes.map((c) => c.prestamoId))].sort()) await bloquearPrestamo(tx, ctx.tenantId, id);
+      const bloqueados = new Set(pendientes.map((c) => c.prestamoId));
+      for (const id of [...bloqueados].sort()) await bloquearPrestamo(tx, ctx.tenantId, id);
       // Con período y préstamos bloqueados, se recalcula: una cancelación o un cierre concurrentes
       // ya no pueden dejar una cuota condonada convertida en novedad.
       const { pendientes: vigentes, prestamos: activos, salida: resultado } = await cuotasAplicables(tx, periodo);
+      if (vigentes.some((c) => !bloqueados.has(c.prestamoId))) throw cambioConcurrente();
       for (const c of vigentes)
         await tx.nominaNovedad.create({
           data: {
