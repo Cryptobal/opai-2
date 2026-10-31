@@ -65,3 +65,21 @@ B1, B2 y B3 van las tres · la configuración vive en Configuración › Módulo
 ## Historial
 
 - 30-oct-2026: brief y PR 1 por Claude, autorizado por Carlos.
+
+## Corrección del PR #192 · CAR-92
+
+Encargo de corrección del review `5723351550`, implementado por Codex: abortar con
+`cambioConcurrente()` si aplicar cuotas descubre un préstamo que no bloqueó;
+serializar cierre y reapertura con el orden período → préstamos por id, antes de
+actualizar cuotas y período. Sin nuevas decisiones de negocio ni migraciones.
+
+Criterios de este delta:
+
+- Recálculo con préstamo nuevo: conflicto y rollback sin novedades parciales;
+  prueba concurrente nueva en `nomina-db.test.ts`.
+- Dos cierres de meses del mismo préstamo: esperan su bloqueo antes de cambiar
+  cuotas y dejan el préstamo pagado; la reapertura lo reactiva. Prueba concurrente nueva.
+- Se conservan permisos, RLS, vista previa, auditoría y paridad MCP existentes.
+- Bloques A/B/E: documentación, corrección interna y regresiones de este encargo.
+  C/D: sin cambios. Cálculo, archivos oficiales y restantes entregas del PR 2
+  conservan las dependencias y limitaciones de las secciones 2–4.

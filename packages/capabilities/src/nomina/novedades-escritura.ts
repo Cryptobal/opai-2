@@ -3,6 +3,7 @@ import { z } from "zod";
 import { defineCapability } from "../define";
 import { noEncontrado, reglaDeNegocio } from "../errores";
 import { uuidSchema } from "../core/esquemas";
+import { bloquearPeriodoAbierto } from "./bloqueos";
 import { PERMISO_NOVEDADES, periodoDe } from "./comun";
 import { datosNovedad, exigirPeriodoAbierto, novedadEntradaSchema } from "./novedades-util";
 import { nombresDe, novedadSchema, vistaNovedad } from "./novedades-vista";
@@ -24,6 +25,7 @@ export const novedadesCrear = defineCapability({
     const nombres = await nombresDe(ctx.db, [entrada.personaId]);
     if (dryRun) return vistaNovedad({ ...data, id: "" }, nombres);
     return ctx.transaccion(async (tx) => {
+      await bloquearPeriodoAbierto(tx, ctx.tenantId, periodoId);
       const creada = await tx.nominaNovedad.create({ data });
       await ctx.eventos.emitir(tx, {
         tipo: "nomina.novedad.registrada",
@@ -68,6 +70,7 @@ export const novedadesCargar = defineCapability({
     if (dryRun)
       return { creadas: datos.length, novedades: datos.map((d, i) => vistaNovedad({ ...d, id: `${i}` }, nombres)) };
     return ctx.transaccion(async (tx) => {
+      await bloquearPeriodoAbierto(tx, ctx.tenantId, periodoId);
       const creadas = [];
       for (const d of datos) creadas.push(await tx.nominaNovedad.create({ data: d }));
       await ctx.eventos.emitir(tx, {
@@ -101,6 +104,9 @@ export const novedadesAnular = defineCapability({
     const nombres = await nombresDe(ctx.db, [n.personaId]);
     if (dryRun) return vistaNovedad({ ...n, estado: "anulada", motivoAnulacion: motivo }, nombres);
     return ctx.transaccion(async (tx) => {
+      await bloquearPeriodoAbierto(tx, ctx.tenantId, n.periodoId);
+      const vigente = await tx.nominaNovedad.findUnique({ where: { id } });
+      if (!vigente || vigente.estado === "anulada") throw reglaDeNegocio("La novedad ya está anulada.");
       const nueva = await tx.nominaNovedad.update({
         where: { id },
         data: { estado: "anulada", anuladaEn: new Date(), motivoAnulacion: motivo },

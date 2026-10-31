@@ -11,11 +11,18 @@ import { Toaster as Sonner } from "sonner";
  * (`AppShell` deja `pb-[calc(96px+safe-area)]`): la barra mide ~56 px + safe-area, así que a 96 px el
  * aviso queda claramente sobre ella incluso durante la animación de entrada. Antes iba a 72 px y el
  * aviso rozaba la barra y su texto se mezclaba con «Cuentas»/«Personas» (H6 del QA en vivo del #136).
+ *
+ * sonner aplica `mobileOffset` solo hasta 600 px, pero la barra se ve hasta `md` (768 px): entre 601 y
+ * 767 px el aviso caía a 24 px del borde y la tapaba. La clase fija el mismo margen sobre la barra en
+ * todo el rango en que aparece; desde `md` manda el `offset` de escritorio.
  */
+const SOBRE_BARRA = "max-md:bottom-[calc(96px+env(safe-area-inset-bottom))]!";
+
 export function Toaster() {
   return (
     <Sonner
       position="bottom-right"
+      className={SOBRE_BARRA}
       duration={4000}
       offset={{ bottom: 24, right: 24 }}
       mobileOffset={{ bottom: "calc(96px + env(safe-area-inset-bottom))", left: 16, right: 16 }}

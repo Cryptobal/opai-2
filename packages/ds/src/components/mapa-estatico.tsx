@@ -2,6 +2,7 @@ import { MapPin } from "lucide-react";
 
 import { cn } from "../cn";
 import { diametroGeocercaPct, zoomParaGeocerca } from "../lib/mapa";
+import { Empty } from "../states";
 import { MapaImagen } from "./mapa-imagen";
 import { Skeleton } from "./skeleton";
 
@@ -38,16 +39,15 @@ export function MapaEstatico({ lat, lng, geocercaM, fuente, pie, cargando, class
       </div>
     );
   }
+  // Sin coordenadas: el estado vacío del DS (no una caja gris que parezca un mapa sin cargar), con el
+  // mismo 16:9 para que la tarjeta no salte cuando llega la ubicación.
   if (lat == null || lng == null) {
     return (
-      <div
-        role="img"
-        aria-label="Sin ubicación"
-        className={cn(base, "flex flex-col items-center justify-center gap-1.5 bg-fill", className)}
-      >
-        <MapPin className="size-5 text-fg-subtle" aria-hidden />
-        <span className="text-sm font-medium text-fg-subtle">Sin ubicación</span>
-      </div>
+      <Empty
+        icono={<MapPin className="size-6" aria-hidden />}
+        titulo="Sin ubicación"
+        className={cn("aspect-video gap-2 rounded-md px-4 py-4", className)}
+      />
     );
   }
   const zoom = zoomParaGeocerca(lat, geocercaM);

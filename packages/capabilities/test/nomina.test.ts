@@ -201,6 +201,25 @@ describe("préstamos con plan de cuotas (B3)", () => {
     expect(r).toMatchObject({ estado: "cancelado", saldo: 0 });
     expect((c.tabla("nominaNovedad") as { estado: string }[])[0]?.estado).toBe("anulada");
   });
+
+  it("cancelar rechaza también en vista previa si una cuota ya está en un período cerrado", async () => {
+    const c = como();
+    const { id } = await abrir(c);
+    const p = data<{ id: string }>(await run(c, "nomina.prestamos.crear", prestamo));
+    data(await run(c, "nomina.prestamos.aplicar_cuotas", { periodoId: id }));
+    data(await run(c, "nomina.periodos.cambiar_estado", { id, a: "en_revision" }));
+    data(await run(c, "nomina.periodos.cambiar_estado", { id, a: "cerrado" }));
+    // Estado que dejaría una carrera: cuota pendiente con su novedad vigente en un período cerrado.
+    for (const cuota of c.tabla("nominaCuota") as { estado: string }[]) cuota.estado = "pendiente";
+    const entrada = { id: p.id, motivo: "Acuerdo con el trabajador" };
+    for (const dryRun of [true, false])
+      expect(await run(c, "nomina.prestamos.cancelar", entrada, { dryRun })).toMatchObject({
+        ok: false,
+        error: { code: "UNPROCESSABLE" },
+      });
+    expect((c.tabla("nominaPrestamo") as { estado: string }[])[0]?.estado).not.toBe("cancelado");
+    expect((c.tabla("nominaNovedad") as { estado: string }[])[0]?.estado).toBe("vigente");
+  });
 });
 
 describe("anticipo quincenal (B2)", () => {
